@@ -148,5 +148,5 @@ add_dependencies(AppendFiles AwCoreLib AwProcessLib AwReadWriteLib)
 add_subdirectory(src/plugins/SST)
 add_dependencies(SST AwCoreLib AwProcessLib AwMathLib)
 add_subdirectory(src/plugins/Correlation)
-add_dependencies(Correlation AwCoreLib AwProcessLib AwMathLib AwMatlabLib)
+add_dependencies(Correlation AwCoreLib AwProcessLib AwMathLib)
 
