@@ -1,6 +1,4 @@
 AnyWave:on-schedule
-    only:
-        - schedules
     script:
         - mkdir build
         - cd build
