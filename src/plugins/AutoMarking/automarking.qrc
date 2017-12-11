@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+      <file>images/marker_pre_post.png</file>
+      <file>images/marker_around.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,124 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// 
+//                 Université d’Aix Marseille (AMU) - 
+//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
+//                 Copyright © 2013 AMU, INSERM
+// 
+//  This software is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 3 of the License, or (at your option) any later version.
+//
+//  This software is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with This software; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//
+//
+//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+#include <widget/AwInputMarkerWidget.h>
+#include "ui_AwInputMarkerWidget.h"
+#include "InputMarkerModel.h"
+#include <widget/AwMessageBox.h>
+
+AwInputMarkerWidget::AwInputMarkerWidget(QWidget *parent)
+	: QDialog(parent)
+{
+	m_ui = new Ui::AwInputMarkerWidgetUi();
+	m_ui->setupUi(this);
+	// Default flags => show all marker properties and allow multi selection
+	InputMarkerModel *model = new InputMarkerModel(this);
+	m_ui->tableView->setModel(model);
+	m_ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	setFlags(ShowAllProperties | MultiSelection);
+	m_ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	m_post = m_pre = 0.;
+}
+
+AwInputMarkerWidget::~AwInputMarkerWidget()
+{
+	delete m_ui;
+}
+
+void AwInputMarkerWidget::setMarkers(const AwMarkerList& markers)
+{
+	InputMarkerModel *m = qobject_cast<InputMarkerModel *>(m_ui->tableView->model());
+	m_displayedMarkers = m_allMarkers = markers;
+		
+	// build a private list depending on flags
+	if (m_flags & AwInputMarkerWidget::UniqueMarkerLabel) {
+		AwMarkerList temp;
+		QStringList labels;
+		foreach(AwMarker *m, markers) {
+			if (!labels.contains(m->label())) {
+				temp << m;
+				labels << m->label();
+			}
+		}
+		m_displayedMarkers = temp;
+	}
+
+	if (m_flags & AwInputMarkerWidget::OnlySelectionMarkers) {
+		foreach(AwMarker *m, m_displayedMarkers) {
+			if (m->duration() == 0) {
+				m_displayedMarkers.removeAll(m);
+			}
+		}
+	}
+
+	if (m_flags & AwInputMarkerWidget::OnlySingleMarkers) {
+		foreach(AwMarker *m, m_displayedMarkers) {
+			if (m->duration()) {
+				m_displayedMarkers.removeAll(m);
+			}
+		}
+	}
+
+	m->setMarkers(m_displayedMarkers);
+}
+
+void AwInputMarkerWidget::setFlags(int flags)
+{
+	m_flags = flags;
+	if (m_flags & AwInputMarkerWidget::MultiSelection)
+		m_ui->tableView->setSelectionMode(QAbstractItemView::MultiSelection);
+	else
+		m_ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+	m_ui->tableView->setColumnHidden(MARKER_MODEL_COLUMN_LABEL, !(m_flags & AwInputMarkerWidget::ShowLabel));
+	m_ui->tableView->setColumnHidden(MARKER_MODEL_COLUMN_DUR, !(m_flags & AwInputMarkerWidget::ShowDuration));
+	m_ui->tableView->setColumnHidden(MARKER_MODEL_COLUMN_VALUE, !(m_flags & AwInputMarkerWidget::ShowValue));
+	m_ui->tableView->setColumnHidden(MARKER_MODEL_COLUMN_COLOR, !(m_flags & AwInputMarkerWidget::ShowColor));
+	m_ui->tableView->setColumnHidden(MARKER_MODEL_COLUMN_START, !(m_flags & AwInputMarkerWidget::ShowPosition));
+	m_ui->tableView->setColumnHidden(MARKER_MODEL_COLUMN_TARGETS, !(m_flags & AwInputMarkerWidget::ShowTargets));
+}
+
+
+
+void AwInputMarkerWidget::accept()
+{
+	QModelIndexList indexList = m_ui->tableView->selectionModel()->selectedIndexes();
+	if (indexList.isEmpty())	{
+		AwMessageBox::critical(this, "Invalid Selection", "Select at least one marker");
+		return;
+	}
+	InputMarkerModel *m = qobject_cast<InputMarkerModel *>(m_ui->tableView->model());
+	AwMarkerList markers = m->getList();
+
+	foreach(QModelIndex index, indexList) {
+		if (index.column() == 0) 
+			m_selectedMarkers << markers.at(index.row());
+	}
+
+	m_pre = (float)m_ui->sbPre->value() / 1000;
+	m_post = (float)m_ui->sbPost->value() / 1000;
+
+	QDialog::accept();
+}

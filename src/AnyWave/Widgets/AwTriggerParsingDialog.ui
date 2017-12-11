@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AwTriggerParsingDialogUi</class>
+ <widget class="QDialog" name="AwTriggerParsingDialogUi">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>435</width>
+    <height>100</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>MS Shell Dlg 2</family>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Trigger Channels Detected</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../../resources/AnyWave.qrc">
+    <normaloff>:/images/AnyWave_logo.jpg</normaloff>:/images/AnyWave_logo.jpg</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Would you like to extract events/markers?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkDontAsk">
+         <property name="text">
+          <string>Don't Ask Again</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="buttonOK">
+         <property name="text">
+          <string>Yes</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="buttonClose">
+         <property name="text">
+          <string>No</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="../../../resources/AnyWave.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonOK</sender>
+   <signal>clicked()</signal>
+   <receiver>AwTriggerParsingDialogUi</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>188</x>
+     <y>91</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>76</x>
+     <y>88</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonClose</sender>
+   <signal>clicked()</signal>
+   <receiver>AwTriggerParsingDialogUi</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>261</x>
+     <y>94</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>241</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
