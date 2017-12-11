@@ -1,0 +1,223 @@
+<!DOCTYPE AnyWaveMontage>
+<Montage>
+   <Channel name="A49">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A50">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A51">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A75">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A76">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A77">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A78">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A105">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A106">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A107">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A108">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A109">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A137">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A138">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A139">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A140">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A141">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A165">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A166">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A167">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A168">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A169">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A186">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A187">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A188">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A189">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A190">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A191">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A204">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A205">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A206">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A207">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A208">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A220">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A221">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A222">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A223">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A224">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A225">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A239">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A240">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A241">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A242">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+   <Channel name="A243">
+      <type>MEG</type>
+      <reference></reference>
+      <color>red</color>
+   </Channel>
+</Montage>

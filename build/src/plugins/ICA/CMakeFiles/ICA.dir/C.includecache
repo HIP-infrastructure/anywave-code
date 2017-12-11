@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/bruno/dev/aw-gitlab/src/plugins/ICA/r250.c
+limits.h
+-
+r250.h
+/home/bruno/dev/aw-gitlab/src/plugins/ICA/r250.h
+randlcg.h
+/home/bruno/dev/aw-gitlab/src/plugins/ICA/randlcg.h
+stdio.h
+-
+
+/home/bruno/dev/aw-gitlab/src/plugins/ICA/r250.h
+
+/home/bruno/dev/aw-gitlab/src/plugins/ICA/randlcg.c
+math.h
+-
+limits.h
+-
+
+/home/bruno/dev/aw-gitlab/src/plugins/ICA/randlcg.h
+

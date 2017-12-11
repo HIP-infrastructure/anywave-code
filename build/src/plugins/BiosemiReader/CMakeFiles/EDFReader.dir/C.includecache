@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/bruno/dev/aw-gitlab/src/plugins/BiosemiReader/edflib.c
+edflib.h
+/home/bruno/dev/aw-gitlab/src/plugins/BiosemiReader/edflib.h
+
+/home/bruno/dev/aw-gitlab/src/plugins/BiosemiReader/edflib.h
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+malloc.h
+-
+time.h
+-
+

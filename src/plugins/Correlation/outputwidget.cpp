@@ -97,7 +97,7 @@ void OutputWidget::applyThreshold(double value)
 
 	for (arma::uword i = 0; i < copy.n_rows; i++) 
 		for (arma::uword j = 0; j < copy.n_cols; j++) {
-			if (abs(copy(i, j)) <= value)
+			if (std::abs(copy(i, j)) <= value)
 				copy(i, j) = 0.;
 		}
 	mat data = copy.t();

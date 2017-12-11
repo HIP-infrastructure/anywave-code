@@ -573,8 +573,9 @@ void AwDisplay::setChannels(AwChannelList &montage)
 	//	v->setChannels(montage);
 
 	// duplicate channel objects for each views.
+        AwChannelList tmp = AwChannel::duplicateChannels(montage);
 	for (auto v : m_signalViews) {
-		v->setChannels(AwChannel::duplicateChannels(montage));
+		v->setChannels(tmp);
 	}
 
 	// get channel list back from scenes
