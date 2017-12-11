@@ -1,4 +1,6 @@
-AnyWave:
+AnyWave:on-schedule
+    onyl:
+        - schedules
     script:
         - mkdir build
         - cd build
