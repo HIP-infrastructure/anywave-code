@@ -1,5 +1,5 @@
 AnyWave:on-schedule
-    onyl:
+    only:
         - schedules
     script:
         - mkdir build
