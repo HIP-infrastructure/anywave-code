@@ -1,4 +1,5 @@
 AnyWave:
+    image: debian:stretch
     script:
         - apt-get install qt5-default libqt5-dev libvtk6-dev libopenblas-base libopenblas-dev
         - apt-get install tcsh libfftw3-dev qtbase5-dev libqwt-qt5-dev qttools5-dev-tools libqt5script5
