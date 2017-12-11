@@ -1,3 +1,5 @@
+stages:
+    build
 AnyWave:
     image: debian:stretch
     script:
