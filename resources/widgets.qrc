@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/images">
-        <file>images/back32x32.png</file>
-        <file>images/end32x32.png</file>
-        <file>images/fwd32x32.png</file>
-        <file>images/ox_eye_32.png</file>
-        <file>images/start32x32.png</file>
-    </qresource>
-</RCC>
