@@ -26,10 +26,10 @@
 #pragma once
 
 #include <AwGlobal.h>
-#include <armadillo>
+#include <aw_armadillo.h>
 #include "matio.h"
 #include <AwChannel.h>
-using namespace arma;
+
 
 namespace AwMATLAB {
 	/** MATLAB file output **/

@@ -25,33 +25,17 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef PROCESS_INTERFACE_H_
 #define PROCESS_INTERFACE_H_
-#include <AwGlobal.h>
+#include <AwProcess.h>
 #include <AwProcessLib.h>
 #include <AwDataClient.h>
 #include <QMetaType>
 #include <graphics/AwGraphicInterface.h>
+#include <process/AwProcessGUIWidget.h>
 #include <QTranslator>
+#include <AwGlobal.h>
 class AwProcessPlugin;
 
-namespace Aw
-{
-	namespace ProcessFlags {
-		enum AwProcessFlags {
-			ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02, ProcessHasOutputUi = 0x04,
-			ProcessDontRequireData = 0x08, ProcessIsScriptable = 0x10, ProcessRequiresChannelSelection = 0x20,
-			ProcessSkipInputCheck = 0x40, PluginIsHidden = 0x80
-		};
-	}
-	namespace ProcessInput {
-		enum AwProcessInputs {
-			ProcessIgnoresChannelSelection = 0x01, GetAllMarkers = 0x02, GetReaderPlugins = 0x04,
-			GetWriterPlugins = 0x08, AnyChannels = 0x10, EEGChannels = 0x20, MEGChannels = 0x40,
-			ECGChannels = 0x80, EMGChannels = 0x100, SEEGChannels = 0x200,
-			GetAsRecordedChannels = 0x400, GetCurrentMontage = 0x800, TriggerChannels = 0x1000, SourceChannels = 0x2000,
-			GetProcessPluginNames = 0x4000
-		};
-	}
-}
+
 
 
 /*!
@@ -182,6 +166,10 @@ class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess
 	Q_OBJECT
 public:
 	AwGUIProcess() : AwBaseProcess() {}
+
+	/** Register a new AwProcessGUIWidget that will close/kill the process when the user closes the widget **/
+	void registerGUIWidget(AwProcessGUIWidget *widget);
+
 public slots:
 	void stop() { emit aboutToBeDestroyed(); m_plugin->deleteInstance(this); }
 	/** Set new markers as input for the plugin **/

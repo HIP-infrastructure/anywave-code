@@ -48,7 +48,7 @@
  * Their data are not coming from the data file but are computed.
  * 
  */
-class AW_CORE_EXPORT AwChannel 
+class AW_CORE_EXPORT AwChannel
 {
 public:
 	enum ChannelType {EEG = 0, SEEG = 0x01, MEG = 0x02, EMG = 0x03, ECG = 0x04, Reference = 0x05, Trigger = 0x06, Other = 0x07, 

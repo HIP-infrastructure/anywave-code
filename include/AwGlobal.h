@@ -29,152 +29,102 @@
 #include <QtCore/QtGlobal>
 // for now, shared libs will only be built on Windows
 
+ // CORE
+ #ifdef AW_BUILD_CORE_LIB
+ #define AW_CORE_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_CORE_EXPORT Q_DECL_IMPORT
+ #endif
 
-// CORE
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-// Core Lib MACRO
-#ifdef AW_BUILD_CORE_LIB
-#define AW_CORE_EXPORT Q_DECL_EXPORT
-#else
-#define AW_CORE_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_CORE_EXPORT
-#endif
+ // EPOCH Lib MACRO
+ #ifdef AW_BUILD_EPOCH_LIB
+ #define AW_EPOCH_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_EPOCH_EXPORT Q_DECL_IMPORT
+ #endif
 
-// EPOCH
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-// Core Lib MACRO
-#ifdef AW_BUILD_EPOCH_LIB
-#define AW_EPOCH_EXPORT Q_DECL_EXPORT
-#else
-#define AW_EPOCH_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_EPOCH_EXPORT
-#endif
-
-// FILTER
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-// Filter Lib MACRO
-#ifdef AW_BUILD_FILTER_LIB
-#define AW_FILTER_EXPORT Q_DECL_EXPORT
-#else
-#define AW_FILTER_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_FILTER_EXPORT
-#endif
+ // FILTER
+ #ifdef AW_BUILD_FILTER_LIB
+ #define AW_FILTER_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_FILTER_EXPORT Q_DECL_IMPORT
+ #endif
 
 
-// GRAPHICS
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_GRAPHICS_LIB
-#define AW_GRAPHICS_EXPORT Q_DECL_EXPORT
-#else
-#define AW_GRAPHICS_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_GRAPHICS_EXPORT
-#endif
 
-// MATH
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_MATH_LIB
-#define AW_MATH_EXPORT Q_DECL_EXPORT
-#else
-#define AW_MATH_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_MATH_EXPORT
-#endif
+ // GRAPHICS
+ #ifdef AW_BUILD_GRAPHICS_LIB
+ #define AW_GRAPHICS_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_GRAPHICS_EXPORT Q_DECL_IMPORT
+ #endif
 
-// MAPPING
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_MAPPING_LIB
-#define AW_MAPPING_EXPORT Q_DECL_EXPORT
-#else
-#define AW_MAPPING_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_MAPPING_EXPORT
-#endif
 
-// HDF5
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_HDF5_LIB
-#define AW_HDF5_EXPORT Q_DECL_EXPORT
-#else
-#define AW_HDF5_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_HDF5_EXPORT
-#endif
+ // MATH
+ #ifdef AW_BUILD_MATH_LIB
+ #define AW_MATH_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_MATH_EXPORT Q_DECL_IMPORT
+ #endif
 
-// LAYOUT
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_LAYOUT_LIB
-#define AW_LAYOUT_EXPORT Q_DECL_EXPORT
-#else
-#define AW_LAYOUT_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_LAYOUT_EXPORT
-#endif
 
-// PROCESS
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_PROCESS_LIB
-#define AW_PROCESS_EXPORT Q_DECL_EXPORT
-#else
-#define AW_PROCESS_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_PROCESS_EXPORT
-#endif
+ // MAPPING
+ #ifdef AW_BUILD_MAPPING_LIB
+ #define AW_MAPPING_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_MAPPING_EXPORT Q_DECL_IMPORT
+ #endif
 
-// RW
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_RW_LIB
-#define AW_RW_EXPORT Q_DECL_EXPORT
-#else
-#define AW_RW_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_RW_EXPORT
-#endif
+ // HDF5
+ #ifdef AW_BUILD_HDF5_LIB
+ #define AW_HDF5_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_HDF5_EXPORT Q_DECL_IMPORT
+ #endif
 
-// UTILITIES
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_UTILITIES_LIB
-#define AW_UTILITIES_EXPORT Q_DECL_EXPORT
-#else
-#define AW_UTILITIES_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_UTILITIES_EXPORT
-#endif
+ // LAYOUT
+ #ifdef AW_BUILD_LAYOUT_LIB
+ #define AW_LAYOUT_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_LAYOUT_EXPORT Q_DECL_IMPORT
+ #endif
 
-// WIDGETS
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_WIDGETS_LIB
-#define AW_WIDGETS_EXPORT Q_DECL_EXPORT
-#else
-#define AW_WIDGETS_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_WIDGETS_EXPORT
-#endif
+ // PROCESS
+ #ifdef AW_BUILD_PROCESS_LIB
+ #define AW_PROCESS_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_PROCESS_EXPORT Q_DECL_IMPORT
+ #endif
 
-// MATLAB
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-#ifdef AW_BUILD_MATLAB_LIB
-#define AW_MATLAB_EXPORT Q_DECL_EXPORT
-#else
-#define AW_MATLAB_EXPORT Q_DECL_IMPORT
-#endif
-#else
-#define AW_MATLAB_EXPORT
-#endif
+ // RW
+ #ifdef AW_BUILD_RW_LIB
+ #define AW_RW_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_RW_EXPORT Q_DECL_IMPORT
+ #endif
+
+
+ // UTILITIES
+ #ifdef AW_BUILD_UTILITIES_LIB
+ #define AW_UTILITIES_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_UTILITIES_EXPORT Q_DECL_IMPORT
+ #endif
+
+
+ // WIDGETS
+ #ifdef AW_BUILD_WIDGETS_LIB
+ #define AW_WIDGETS_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_WIDGETS_EXPORT Q_DECL_IMPORT
+ #endif
+
+ // MATLAB
+ #ifdef AW_BUILD_MATLAB_LIB
+ #define AW_MATLAB_EXPORT Q_DECL_EXPORT
+ #else
+ #define AW_MATLAB_EXPORT Q_DECL_IMPORT
+ #endif
+
 
 #endif

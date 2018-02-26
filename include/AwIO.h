@@ -23,30 +23,10 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#ifndef AWFILTERINGOPTIONS_H
-#define AWFILTERINGOPTIONS_H
-#include <AwChannel.h>
+#pragma once
 
-/*!
- * \brief
- * This class defines the filtering options for the different types of channels that AnyWave can filter.
- * 
- * Note that only MEG, EEG/SEEG and EMG/ECG channels are managed by this class.
- * EEG filtering options are also applied to SEEG channels.
- * EMG filtering options are also applied to ECG channels.
- *
- * \remarks
- * This object is used when a process plug-in is requesting data to AnyWave.
- */
-class AW_CORE_EXPORT AwFilteringOptions
-{
-public:
-	AwFilteringOptions(); 
-	AwFilteringOptions& operator=(const AwFilteringOptions& other);
-
-	void setFilters(const AwChannelList& channels);
-
-	float eegLP, eegHP, megLP, megHP, emgLP, emgHP;
-	float eegNotch, megNotch, emgNotch;
-};
+#ifdef AW_BUILD_RW_LIB
+#define AW_RW_EXPORT Q_DECL_EXPORT
+#else
+#define AW_RW_EXPORT Q_DECL_IMPORT
 #endif

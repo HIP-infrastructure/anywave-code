@@ -28,7 +28,7 @@
 #include <QSemaphore>
 #include <AwDataClient.h>
 #include <AwChannel.h>
-#include <AwGlobal.h>
+
 
 /// This class is designed to be used as a memory data server for AwDataClient objects.
 /// The purpose is to share channels data with several clients (could be AwBaseSignalView clients)

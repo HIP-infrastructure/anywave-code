@@ -23,39 +23,14 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include "common.h"
-#include <process/AwTcpProcessRequest.h>
+#pragma once
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{      
-    if (nlhs == 0) {
-         mexErrMsgTxt("output parameter is required (See help).");
-         return;
-    }
-    
-    QTcpSocket *socket = connect();
-    mxArray *output = NULL;
-    if (socket == NULL)  {
-        mexErrMsgTxt("Could not connect to AnyWave.");
-    }
-    int request = AwRequest::GetScreenCapture;
-    QByteArray data;
-    QDataStream stream_data(&data, QIODevice::WriteOnly);
-	stream_data.setVersion(QDataStream::Qt_4_4);
-    stream_data << request;
-    
-    writeToHost(socket, getPid(), data);
-    // waiting for response
-	int dataSize = waitForResponse(socket);  
-   	if (dataSize == -1)	{
-		mexErrMsgTxt("Bad status received from AnyWave.");
-		delete socket;
-	}
-    // Get response
-	QDataStream in(socket);
-	in.setVersion(QDataStream::Qt_4_4);
-    QString file;
-    in >> file;
-    plhs[0] = mxCreateString(file.toStdString().c_str());
-    delete socket;
-}
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+#ifdef AW_BUILD_EPOCH_LIB
+#define AW_EPOCH_EXPORT Q_DECL_EXPORT
+#else
+#define AW_EPOCH_EXPORT Q_DECL_IMPORT
+#endif
+#else
+#define AW_EPOCH_EXPORT
+#endif

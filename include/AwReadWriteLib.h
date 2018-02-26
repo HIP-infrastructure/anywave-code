@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AWREADWRITELIB_H
 #define AWREADWRITELIB_H
-#include <AwGlobal.h>
+#include <AwIO.h>
 #include <QtGlobal>
 #include <QList>
 #include <AwChannel.h>
@@ -147,7 +147,7 @@ public:
 	inline void setDate(const QString& date) { m_date = date; }
 	/** Sets the patient's name. **/
 	inline void setPatientName(const QString& name) { m_patientName = name; }
-	inline void setChannels(AwChannelList& channels) { m_channels = channels; }
+	inline void setChannels(const AwChannelList& channels) { m_channels = channels; }
 	virtual void clear();
 
 	/** Returns the index of a channel in the file base on the channel's name.

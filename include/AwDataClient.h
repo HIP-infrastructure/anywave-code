@@ -27,10 +27,10 @@
 #ifndef AWDATACLIENT_H
 #define AWDATACLIENT_H
 
-#include <AwGlobal.h>
 #include <QObject>
 #include <QWaitCondition>
 #include <QMutex>
+#include <AwGlobal.h>
 #include <AwChannel.h>
 
 class AwFilteringOptions;
@@ -59,20 +59,14 @@ public:
 	virtual ~AwDataClient() { }
 
 	inline bool endOfData() { return m_endOfData; }
-	//void requestData(AwChannelList *channels, AwMarker *marker, float downSampling = 0., AwFilteringOptions *foptions = NULL);
 	void requestData(AwChannelList *channels, AwMarker *marker, bool rowData = false);
-	//void requestData(AwChannelList *channels, float start, float duration, float downSampling = 0., AwFilteringOptions *foptions = NULL);
 	void requestData(AwChannelList *channels, float start, float duration, bool rawData = false);
-//	void requestFiltering(AwChannelList *channels);
 	void setConnected(bool flag = true) { m_isConnected = flag; }
 	inline bool isConnected() { return m_isConnected;  }
 	QWaitCondition& waitForData() { return m_wcDataAvailable; }
 signals:
-	//void needData(AwChannelList *channels, float start, float duration, float downSampling = 0., AwFilteringOptions *foptions = NULL);
 	void needData(AwChannelList *channels, float start, float duration, bool rawData = false);
-	//void needData(AwChannelList *channels, AwMarker *marker, float downSampling = 0., AwFilteringOptions *foptions = NULL);
 	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false);
-//	void filteringNeeded(AwChannelList *channels);
 protected:
 	QWaitCondition m_wcDataAvailable;
 	QMutex m_mutexDataAvailable;

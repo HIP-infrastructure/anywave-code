@@ -23,11 +23,12 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include <AwGlobal.h>
+#include <AwProcess.h>
 #include <AwChannel.h>
 #include <AwMarker.h>
 #include <AwFileIO.h>
 #include <QMutex>
+
 
 /** AwProcessIO defines object used as input or output by AwProcess **/
 class AW_PROCESS_EXPORT AwProcessIO

@@ -23,41 +23,14 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include "common.h"
-#include <process/AwTcpProcessRequest.h>
+#pragma once
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{      
-    if (nlhs == 0) {
-         mexErrMsgTxt("output parameter is required (See help).");
-         return;
-    }
-    
-    QTcpSocket *socket = connect();
-    mxArray *output = NULL;
-    if (socket == NULL)  {
-        mexErrMsgTxt("Could not connect to AnyWave.");
-    }
-    int request = AwRequest::GetICAPanelCapture;
-    QByteArray data;
-    QDataStream stream_data(&data, QIODevice::WriteOnly);
-	stream_data.setVersion(QDataStream::Qt_4_4);
-    stream_data << request;
-    
-    writeToHost(socket, getPid(), data);
-    // waiting for response
-	int dataSize = waitForResponse(socket);  
-   	if (dataSize == -1)	{
-		mexErrMsgTxt("Bad status received from AnyWave.");
-		delete socket;
-	}
-    // Get response
-	QDataStream in(socket);
-	in.setVersion(QDataStream::Qt_4_4);
-    QString eegPNG, megPNG;
-    in >> megPNG >> eegPNG;
-    plhs[0] = mxCreateString(megPNG.toStdString().c_str());
-    if (nlhs == 2)
-        plhs[1] = mxCreateString(eegPNG.toStdString().c_str());
-    delete socket;
-}
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+#ifdef AW_BUILD_LAYOUT_LIB
+#define AW_LAYOUT_EXPORT Q_DECL_EXPORT
+#else
+#define AW_LAYOUT_EXPORT Q_DECL_IMPORT
+#endif
+#else
+#define AW_LAYOUT_EXPORT
+#endif

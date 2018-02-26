@@ -62,6 +62,8 @@ public:
 	static QStringList markersTypeList();
 	/** Gets a unique instance of marker labels from a list **/
 	static QStringList getUniqueLabels(const QList<AwMarker *>& markers);
+	/** Count the number of markers with a specified label **/
+	static QList<QPair<QString, int> > count(const QList<AwMarker *>& markers);
 	/** Gets all markers labels **/
 	static QStringList getAllLabels(const QList<AwMarker *>& markers);
 	/** Load a marker file and returns the markers */

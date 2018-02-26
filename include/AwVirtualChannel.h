@@ -25,7 +25,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AWVIRTUALCHANNEL_H
 #define AWVIRTUALCHANNEL_H
-#include <AwGlobal.h>
 #include <AwChannel.h>
 
 class AW_CORE_EXPORT AwVirtualChannel : public AwChannel

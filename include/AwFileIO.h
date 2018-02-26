@@ -84,10 +84,10 @@ public slots:
 	A markers list must be specified.**/
     virtual int writeTriggerChannel(const QString& name, const AwMarkerList& list) { return 0; }
 	/** Override this method to clear the Trigger channel. **/
-	virtual int clearTriggerChannel(const QString& name) { return 0; }
+	virtual int clearTriggerChannels(const QStringList& labels) { return 0; }
 protected:
 	int m_flags;
-	QString m_error;
+	QString m_error;	// used by methods returning a status after an operation.
 	AwFileIOPlugin *m_plugin;
 };
 

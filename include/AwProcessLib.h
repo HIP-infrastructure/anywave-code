@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AWPROCESSLIB_H
 #define AWPROCESSLIB_H
-#include <AwGlobal.h>
+#include <AwProcess.h>
 #include <QElapsedTimer>
 #include <QDate>
 #include <QWaitCondition>
@@ -91,13 +91,6 @@ protected:
 	QMap<int, QVariant> m_inputParameters;
 	QMap<int, QVariant> m_outputParameters;
 };
-
-
-namespace AwProcessCommand
-{
-	enum Commands { AddHighlightedSection, RemoveLastHighlightedSection, ShowOnlySelectedChannels, 
-		SelectChannels, ShowAllChannels, LaunchProcess, CenterOnPos, LoadICA, UpdateMarkers };
-}
 
 
 
