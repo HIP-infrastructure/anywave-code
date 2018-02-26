@@ -1,0 +1,39 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/AddToMontage48x48.png</file>
+        <file>images/back32x32.png</file>
+        <file>images/carto_32x32.png</file>
+        <file>images/cursor_mode.png</file>
+        <file>images/display-settings.png</file>
+        <file>images/edit-24x24.png</file>
+        <file>images/end32x32.png</file>
+        <file>images/fileopen-32.png</file>
+        <file>images/fwd32x32.png</file>
+        <file>images/AnyWave.png</file>
+        <file>images/start32x32.png</file>
+        <file>images/logo_Inserm.png</file>
+        <file>images/Qt_logo.png</file>
+        <file>images/logo_amu.png</file>
+        <file>images/VTK_logo.png</file>
+        <file>images/AnyWave_icon.png</file>
+        <file>images/matlablogo.jpg</file>
+        <file>images/ox_eye_48.png</file>
+        <file>images/ox_eye_32.png</file>
+        <file>images/ox_arrow_down_32.png</file>
+        <file>images/ox_arrow_up_32.png</file>
+        <file>images/ox_document_save_as_32.png</file>
+        <file>images/ox_application_exit_32.png</file>
+        <file>images/ox_plugin_32.png</file>
+        <file>images/ox_view_filter_32.png</file>
+        <file>images/import_file_32.png</file>
+        <file>images/system_run_32.png</file>
+        <file>images/AnyWave_logo.png</file>
+        <file>amplitudes.txt</file>
+    </qresource>
+    <qresource prefix="/language">
+        <file>anywave_fr.qm</file>
+        <file>awreadwritelib_fr.qm</file>
+        <file>awwidgetlib_fr.qm</file>
+        <file>AwCoreLib_fr.qm</file>
+    </qresource>
+</RCC>

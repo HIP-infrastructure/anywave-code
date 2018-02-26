@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>layouts/layouts.txt</file>
+        <file>layouts/4D248.lay</file>
+        <file>layouts/elec1010.lay</file>
+        <file>layouts/EEG1005.lay</file>
+        <file>layouts/EEG1020.lay</file>
+        <file>layouts/biosemi16.lay</file>
+        <file>layouts/biosemi32.lay</file>
+        <file>layouts/biosemi160.lay</file>
+        <file>layouts/4D248_.lay</file>
+        <file>layouts/biosemi64.lay</file>
+        <file>layouts/elekta102.lay</file>
+    </qresource>
+</RCC>
