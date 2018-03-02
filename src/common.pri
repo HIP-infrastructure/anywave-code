@@ -5,37 +5,65 @@
 #-------------------------------------------------
 
 include(config.pri)
-INCLUDEPATH += $$AWSDK/include $$ARMA_INCLUDE_PATH $$VTK_INCLUDE_PATH $$H5_INCLUDE_PATH $$MATIO_INCLUDE_PATH
-INCLUDEPATH += /usr/local/include
+CONFIG += debug_and_release
+INCLUDEPATH += $$INCLUDEDIR
+
+!isEmpty(ARMA_INCLUDE_PATH) {
+    INCLUDEPATH += $$ARMA_INCLUDE_PATH
+}
+!isEmpty(VTK_INCLUDE_PATH) {
+    INCLUDEPATH += $$VTK_INCLUDE_PATH
+}
+!isEmpty(H5_INCLUDE_PATH) {
+    INCLUDEPATH += $$H5_INCLUDE_PATH
+}
+!isEmpty(MATIO_INCLUDE_PATH) {
+    INCLUDEPATH += $$MATIO_INCLUDE_PATH
+}
+!isEmpty(QWT_INCLUDE_PATH) {
+    INCLUDEPATH += $$QWT_INCLUDE_PATH
+}
+
+DESTDIR = $$OUTDIR
 
 CONFIG(debug, debug|release) {
-    AW_OUT_DIR = $$AW_OUT_DIR/debug
+    DESTDIR = $$DESTDIR/debug
 }
 CONFIG(release, debug|release) {
-    AW_OUT_DIR = $$AW_OUT_DIR/release
+    DESTDIR = $$DESTDIR/release
 }
 
-LIB_DIR = $$AW_OUT_DIR/lib
+LIB_DIR = $$DESTDIR/lib
 
 macx {
   LIBS += -F$$LIB_DIR
 }
 
+!isEmpty(H5_LIB_PATH) {
+    LIBS += -L$$H5_LIB_PATH
+}
+!isEmpty(VTK_LIB_PATH) {
+     LIBS += -L$$VTK_LIB_PATH
+}
+!isEmpty(MATIO_LIB_PATH) {
+     LIBS += -L$$MATIO_LIB_PATH
+}
+!isEmpty(QWT_LIB_PATH) {
+     LIBS += -L$$QWT_LIB_PATH
+}
 
-LIBS += -L$$LIB_DIR -L/usr/local/lib -L$$H5_LIB_PATH -L$$VTK_LIB_PATH -L$$MATIO_LIB_PATH
 
+LIBS += -L$$LIB_DIR
 
 DEFINES += ARMA_DONT_USE_WRAPPER NDEBUG
 macx {
-INSTALL_LIB_PATH = $$AW_OUT_DIR/bin/AnyWave.app/Contents/dylibs
-INSTALL_APP_PATH = $$AW_OUT_DIR/bin/AnyWave.app/Contents/MacOS
-PLUGIN_DIR = $$AW_OUT_DIR/bin/Anywave_Plugins
+INSTALL_LIB_PATH = $$DESTDIR/AnyWave.app/Contents/dylibs
+INSTALL_APP_PATH = $$DESTDIR/AnyWave.app/Contents/MacOS
+PLUGIN_DIR = $$DESTDIR/Anywave_Plugins
 }
 
 unix:!macx {
-    INSTALL_LIB_PATH = $$AW_OUT_DIR/bin/lib
-    INSTALL_APP_PATH = $$AW_OUT_DIR/bin
-    PLUGIN_DIR = $$AW_OUT_DIR/bin/Plugins
+    PLUGIN_DIR = $$DESTDIR/Plugins
 }
 
 CONFIG += release warn_off c++11

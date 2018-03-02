@@ -23,10 +23,7 @@ CONFIG -= app_bundle
 DEFINES += AW_DISABLE_EPOCHING
 
 macx {
-    DESTDIR = $$AW_OUT_DIR/bin/AnyWave.app/Contents/MacOS
-}
-unix:!macx {
-    DESTDIR = $$AW_OUT_DIR/bin
+    DESTDIR = $$DESTIR/AnyWave.app/Contents/MacOS
 }
 
 macx {
@@ -38,17 +35,23 @@ unix:!macx{
 }
 
 LIBS += -lAwUtilities -lAwMath -lAwFilter -lAwLayout -lAwMapping -lAwGraphics -lAwHDF5 -lAwMATLAB -lAwWidgets -lAwEpoch
-LIBS += -lAwRW -lAwProcess -lhdf5 -lhdf5_hl
-LIBS += -lvtkCommonCore-8.1 -lvtkCommonDataModel-$$VTK_VERSION -lvtkCommonExecutionModel-$$VTK_VERSION -lvtkCommonMisc-$$VTK_VERSION \
--lvtkFiltersCore-$$VTK_VERSION -lvtkGUISupportQt-$$VTK_VERSION -lvtkFiltersGeometry-$$VTK_VERSION -lvtkIOGeometry-$$VTK_VERSION \
--lvtkRenderingCore-$$VTK_VERSION -lvtkInteractionStyle-$$VTK_VERSION -lvtkCommonExecutionModel-$$VTK_VERSION \
--lvtkFiltersSources-$$VTK_VERSION -lvtkRenderingOpenGL2-$$VTK_VERSION -lvtkRenderingFreeType-$$VTK_VERSION -lvtkRenderingAnnotation-$$VTK_VERSION  \
--lvtkIOCore-$$VTK_VERSION -lvtkIOXML-$$VTK_VERSION -lvtkIOXMLParser-$$VTK_VERSION -lvtksys-$$VTK_VERSION -lvtkglew-$$VTK_VERSION -lvtkzlib-$$VTK_VERSION \
--lvtkfreetype-$$VTK_VERSION -lvtkCommonTransforms-$$VTK_VERSION -lvtkCommonColor-$$VTK_VERSION -lvtkexpat-$$VTK_VERSION -lvtklz4-$$VTK_VERSION \
--lvtkCommonSystem-$$VTK_VERSION -lvtkCommonMath-$$VTK_VERSION -lvtkCommonComputationalGeometry-$$VTK_VERSION -lvtkFiltersGeneral-$$VTK_VERSION \
--lvtkFiltersModeling-$$VTK_VERSION -lvtkFiltersExtraction-$$VTK_VERSION -lvtkFiltersStatistics-$$VTK_VERSION -lvtkImagingFourier-$$VTK_VERSION \
--lvtkImagingCore-$$VTK_VERSION -lvtkalglib-$$VTK_VERSION
+LIBS += -lAwRW -lAwProcess -lhdf5 -lhdf5_hl -lqwt
+LIBS += -lvtkCommonCore$$VTK_VERSION_SUFFIX -lvtkCommonDataModel$$VTK_VERSION_SUFFIX -lvtkCommonExecutionModel$$VTK_VERSION_SUFFIX \ 
+-lvtkCommonMisc$$VTK_VERSION_SUFFIX -lvtkFiltersCore$$VTK_VERSION_SUFFIX -lvtkGUISupportQt$$VTK_VERSION_SUFFIX \
+-lvtkFiltersGeometry$$VTK_VERSION_SUFFIX -lvtkIOGeometry$$VTK_VERSION_SUFFIX \
+-lvtkRenderingCore$$VTK_VERSION_SUFFIX -lvtkInteractionStyle$$VTK_VERSION_SUFFIX -lvtkCommonExecutionModel$$VTK_VERSION_SUFFIX \
+-lvtkFiltersSources$$VTK_VERSION_SUFFIX -lvtkRenderingOpenGL2$$VTK_VERSION_SUFFIX -lvtkRenderingFreeType$$VTK_VERSION_SUFFIX \ 
+-lvtkRenderingAnnotation$$VTK_VERSION_SUFFIX -lvtkIOCore$$VTK_VERSION_SUFFIX -lvtkIOXML$$VTK_VERSION_SUFFIX \ 
+-lvtkIOXMLParser$$VTK_VERSION_SUFFIX -lvtksys$$VTK_VERSION_SUFFIX -lvtkglew$$VTK_VERSION_SUFFIX \
+-lvtkCommonTransforms$$VTK_VERSION_SUFFIX -lvtkCommonColor$$VTK_VERSION_SUFFIX \
+-lvtkCommonSystem$$VTK_VERSION_SUFFIX -lvtkCommonMath$$VTK_VERSION_SUFFIX -lvtkCommonComputationalGeometry$$VTK_VERSION_SUFFIX \
+-lvtkFiltersGeneral$$VTK_VERSION_SUFFIX -lvtkFiltersModeling$$VTK_VERSION_SUFFIX -lvtkFiltersExtraction$$VTK_VERSION_SUFFIX \
+-lvtkFiltersStatistics$$VTK_VERSION_SUFFIX -lvtkImagingFourier$$VTK_VERSION_SUFFIX \
+-lvtkImagingCore$$VTK_VERSION_SUFFIX -lvtkalglib$$VTK_VERSION_SUFFIX
 
+install_sh.path = $$DESTDIR
+install_sh.files += ../../resources/anywave.sh
+INSTALLS += install_sh
 
 
 DISTFILES += \
