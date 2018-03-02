@@ -1,0 +1,39 @@
+Qt5
+
+AnyWave uses Qt5 so the first requirement will be that you have Qt5 on your system. The QtCharts module is required.
+
+Other dependencies 
+VTK Qwt MATIO Armadillo
+
+Example on Fedora 27 :
+
+dnf install gcc-c++ cmake qt-devel vtk-devel qwt-devel matio-devel qt5-qtcharts-devel vtk-qt armadillo-devel
+
+Ubundu Debian:
+
+apt-get install -y cmake qt-dev libvtk-dev 
+
+- INSTALL using cmake:
+
+mkdir build
+cd build
+cmake ..
+
+Install path:
+
+CMAKE_INSTALL_PREFIX is by default set to /usr/local/AnyWave.
+Change it with :
+cmake -DCMAKE_INSTALL_PREFIX=/my/path ..
+
+
+
+Build with qmake
+You can also build the application using qmake (you will also build the MATLAB mex files)
+
+cd src
+qmake AnyWaveSolution.pro
+make 
+
+config.pri  must be modified in order to correclty set the paths to VTK, Armadillo, Matio, Qwt.
+
+
