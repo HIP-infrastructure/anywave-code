@@ -33,15 +33,15 @@ AppendFilesPlugin::AppendFilesPlugin()
 	name = "Append Files";
 	description = tr("Append compatible files into one.");
 	category = "Process:File Operation:Append Files";
-	setFlags(Aw::ProcessDontRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDontRequireData);
 }
 
 AppendFiles::AppendFiles()
 {
-	setFlags(Aw::ProcessHasInputUi|Aw::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::GetReaderPlugins, "1-n");
-	pdi.addInputParameter(Aw::GetWriterPlugins, "1-n");
-	pdi.addInputParameter(Aw::GetAllMarkers, "0-n");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::ProcessIsScriptable);
+	pdi.addInputParameter(Aw::ProcessInput::GetReaderPlugins, "1-n");
+	pdi.addInputParameter(Aw::ProcessInput::GetWriterPlugins, "1-n");
+	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "0-n");
 }
 
 AppendFiles::~AppendFiles()
