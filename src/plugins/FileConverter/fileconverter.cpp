@@ -33,14 +33,14 @@ FileConverterPlugin::FileConverterPlugin()
 	name = "File Convert";
 	description = tr("Converts files to another format.");
 	category = "Process:File Operation:Convert Files";
-	setFlags(Aw::ProcessDontRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDontRequireData);
 }
 
 FileConverter::FileConverter()
 {
-	setFlags(Aw::ProcessHasInputUi|Aw::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::GetReaderPlugins, "1-n");
-	pdi.addInputParameter(Aw::GetWriterPlugins, "1-n");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::ProcessIsScriptable);
+	pdi.addInputParameter(Aw::ProcessInput::GetReaderPlugins, "1-n");
+	pdi.addInputParameter(Aw::ProcessInput::GetWriterPlugins, "1-n");
 }
 
 FileConverter::~FileConverter()
@@ -62,8 +62,6 @@ bool FileConverter::showUi()
 			file.close();
 		}
 	}
-	
-
 	if (m_ui->exec() == QDialog::Accepted) {
 		QFile file(settingsFile);
 		if (file.open(QIODevice::ReadWrite|QIODevice::Text)) {
@@ -98,6 +96,8 @@ void FileConverter::run()
 		AwBlock *block = writer->infos.newBlock();
 		block->setDuration(fr->infos.totalDuration());
 		block->setSamples(fr->infos.totalSamples());
+		writer->infos.setDate(fr->infos.recordingDate());
+		writer->infos.setTime(fr->infos.recordingTime());
 
 		// if a .mrk is attached to the file use it, otherwise use markers which come from the data file
 

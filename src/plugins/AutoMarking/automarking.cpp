@@ -37,8 +37,8 @@ AutoMarkingPlugin::AutoMarkingPlugin()
 
 AutoMarking::AutoMarking()
 {
-	setFlags(Aw::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::GetAllMarkers, "1-n");
+	setFlags(Aw::ProcessFlags::ProcessIsScriptable);
+	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "1-n");
 }
 
 AutoMarking::~AutoMarking()

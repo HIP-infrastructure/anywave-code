@@ -26,6 +26,7 @@
 #include "correlation.h"
 #include <math/AwMath.h>
 #include "outputwidget.h"
+#include "maingui.h"
 
 CorrelationPlugin::CorrelationPlugin()
 {
@@ -33,14 +34,14 @@ CorrelationPlugin::CorrelationPlugin()
 	name = "Channels Correlation";
 	description = tr("Compute the correlation matrix between channels.");
 	category = "Process:Correlation:Channels Correlation";
-	setFlags(Aw::PluginAcceptsTimeSelections);
+	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
 }
 
 Correlation::Correlation()
 {
-	setFlags(Aw::ProcessHasInputUi);
-	pdi.addInputParameter(Aw::AnyChannels, "2-n");
-	pdi.addInputParameter(Aw::GetAllMarkers, "1-n");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	pdi.addInputParameter(Aw::ProcessInput::AnyChannels, "2-n");
+	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "1-n");
 	m_ui = NULL;
 }
 
@@ -101,8 +102,13 @@ corr_result *Correlation::computeCorrelation(float start, float duration)
 
 void Correlation::prepareOutputUi()
 {
-	foreach (corr_result *r, m_results) {
-		pdi.output.widgets << new OutputWidget(r);
+	if (m_results.size() > 2)
+		pdi.output.widgets << new maingui(m_results);
+
+	if (m_results.size() < 3) {
+		for (auto r : m_results) {
+			pdi.output.widgets << new OutputWidget(r);
+		}
 	}
 }
 
@@ -126,7 +132,7 @@ void Correlation::run()
 		}
 	}
 	if (!m_results.isEmpty()) {
-		setFlags(flags() | Aw::ProcessHasOutputUi);
+		setFlags(flags() | Aw::ProcessFlags::ProcessHasOutputUi);
 	}
 }
 
