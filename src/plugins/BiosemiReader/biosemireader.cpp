@@ -195,6 +195,7 @@ qint64 BiosemiFileReader::readDataFromChannels(float start, float duration, AwCh
 		data = chan->newData(samples);
 
 		edfseek(m_hdr->handle, edf_channel, start_sample , SEEK_SET);
+
 		
 		if ((nSamplesRead = edfread_physical_samples(m_hdr->handle, edf_channel, samples, buf)) == -1) {
 			delete[] buf;
