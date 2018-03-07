@@ -58,7 +58,8 @@ MESSAGE(STATUS "Qt version is ${Qt5Core_VERSION}")
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
-find_package(Armadillo REQUIRED)
+SET(ARMADILLO_INCLUDE ${CMAKE_SOURCE_DIR}/armadillo/include)
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 find_package(Qwt REQUIRED)
 INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
 LINK_DIRECTORIES(${QWT_LIBRARY})
@@ -113,8 +114,8 @@ add_subdirectory(src/AnyWave)
 # plugins
 add_subdirectory(src/plugins/4DNI_Reader)
 add_dependencies(4DNIReader AwCore AwReadWrite)
-add_subdirectory(src/plugins/BiosemiReader)
-add_dependencies(EDFReader AwCore AwReadWrite)
+add_subdirectory(src/plugins/EDFIO)
+add_dependencies(EDFIO AwCore AwReadWrite)
 add_subdirectory(src/plugins/BrainVisionIO)
 add_dependencies(BrainVisionIO AwCore AwReadWrite)
 add_subdirectory(src/plugins/CTF_Reader)
@@ -139,6 +140,16 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/bin/AnyWaveLinux PERMISSIONS OWNER_EXECUTE O
 #License files
 INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTINATION
 	${CMAKE_INSTALL_PREFIX})
+#AnyWave
+IF(APPLE)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/AnyWaveMac DESTINATION
+	${CMAKE_INSTALL_PREFIX})
+INSTALL(FILES ${AW_RES_DIR}/macx/Anywave.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+ELSE()
+INSTALL(FILES ${PROJECT_BINARY_DIR}/AnyWaveLinux DESTINATION
+	${CMAKE_INSTALL_PREFIX})
+INSTALL(FILES ${AW_RES_DIR}/linux/anywave.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+ENDIF()
 
 #lib
 INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/lib  DESTINATION ${CMAKE_INSTALL_PREFIX})
