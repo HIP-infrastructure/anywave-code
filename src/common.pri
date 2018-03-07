@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 include(config.pri)
-CONFIG += debug_and_release
+CONFIG += release
 INCLUDEPATH += $$INCLUDEDIR
 
 !isEmpty(ARMA_INCLUDE_PATH) {
@@ -42,12 +42,26 @@ macx {
 !isEmpty(H5_LIB_PATH) {
     LIBS += -L$$H5_LIB_PATH
 }
+
+# extract all .so files present in VTK_LIB_PATH and format them as flags for the linker.
 !isEmpty(VTK_LIB_PATH) {
-     LIBS += -L$$VTK_LIB_PATH
+     VTK_LIBRARIES += -L$$VTK_LIB_PATH
+     unix:!macx {
+        LIST = $$files($$VTK_LIB_PATH/*.so)
+        for(f, LIST) {
+    # remove first lib and last .so
+          base = $$basename(f)
+	  noso = $$section(base, .so, 0 , 0)   
+	  nolib = $$section(noso, lib, 1, 3)    
+          VTK_LIBRARIES += -l$$nolib
+        }
+      }
 }
+
 !isEmpty(MATIO_LIB_PATH) {
      LIBS += -L$$MATIO_LIB_PATH
 }
+
 !isEmpty(QWT_LIB_PATH) {
      LIBS += -L$$QWT_LIB_PATH
 }
