@@ -18,10 +18,10 @@ CONFIG += plugin no_plugin_name_prefix
 QMAKE_EXTENSION_SHLIB = so
 
 macx {
-    DESTDIR = $$AW_OUT_DIR/bin/AnyWave.app/Contents/Python
+    DESTDIR = $$DESTDIR/AnyWave.app/Contents/Python
 }
 unix:!macx {
-    DESTDIR = $$AW_OUT_DIR/bin/Python
+    DESTDIR = $$DESTDIR/Python
 }
 
 # The following define makes your compiler emit warnings if you use
