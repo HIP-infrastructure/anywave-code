@@ -6,7 +6,7 @@
 
 QT       -= gui
 include(../../common.pri)
-TARGET = EDFREader
+TARGET = EDFIO
 TEMPLATE = lib
 CONFIG += plugin
 DESTDIR = $$PLUGIN_DIR
@@ -34,11 +34,10 @@ LIBS += -lAwCore
 LIBS += -lAwRW
 
 HEADERS += \
-    biosemireader.h
+    EDFIO.h \
+	edflib.h
 
 SOURCES += \
-    biosemireader.cpp \
-    edflib.c
-
+    EDFIO.cpp
 
 

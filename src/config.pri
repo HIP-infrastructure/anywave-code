@@ -4,26 +4,22 @@
 #
 #-------------------------------------------------
 
-# AWSDK Path to the source directory
-AWSDK = $$PWD
-# AW_OUT_DIR path to put binaries (Create the AnyWave.app in that folder : use the zip in resources dir)
-AW_OUT_DIR = $$PWD/qmake_build
 # specify the VTK version used
 VTK_VERSION_SUFFIX = 
 # VTK_INCLUDE_PATH  Path where to find headers for vtk
-VTK_INCLUDE_PATH = /usr/include/vtk
+VTK_INCLUDE_PATH = /home/bruno/vtk8.1/include/vtk-8.1
 # VTK_LIB_DIR Path where to find vtk libraries
-VTK_LIB_PATH = /usr/lib64/vtk
+VTK_LIB_PATH = /home/bruno/vtk8.1/lib
 
 # ARMA_INCLUDE_PATH  Path to find armadillo C++ include files
-ARMA_INCLUDE_PATH = 
+ARMA_INCLUDE_PATH = $$PWD/../armadillo/include
 # H5_INCLUDE_PATH Path to HDF5 headers
-H5_INCLUDE_PATH = 
+H5_INCLUDE_PATH = /home/bruno/hdf5/include
 # H5_LIB_PATH
-H5_LIB_PATH = 
+H5_LIB_PATH = /home/bruno/hdf5/lib
 # MATIO PATHS
-MATIO_INCLUDE_PATH = 
-MATIO_LIB_PATH = 
+MATIO_INCLUDE_PATH = /home/bruno/matio/include
+MATIO_LIB_PATH = /home/bruno/matio/lib
 # QWT
 QWT_INCLUDE_PATH=/usr/include/qwt
 QWT_LIB_PATH=
@@ -43,7 +39,7 @@ PYTHON_ROOT = /Users/bruno/anaconda2
 }
 
 unix:!macx{
-PYTHON_ROOT = 
+PYTHON_ROOT = /home/bruno/anaconda2
 }
 
 macx {
