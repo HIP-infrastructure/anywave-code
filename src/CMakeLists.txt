@@ -1,0 +1,161 @@
+cmake_minimum_required(VERSION 3.3)
+project(AnyWave)
+# detecting compiler
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+   MESSAGE(STATUS "Apple clang compiler detected")
+   add_definitions("-w -fPIC -O4 -fpermissive") # clang flags
+   SET(CLANG ON)
+# apple clang
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+# gcc
+   MESSAGE(STATUS "GCC compiler detected")
+   add_definitions("-w -fPIC -O3 -fpermissive -fopenmp") # g++ flags
+   SET(GCC ON)
+endif()
+
+SET(CMAKE_BUILD_TYPE "Release") # build in release mode
+SET(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# default install path
+SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
+
+LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+# PATH to resources
+SET(AW_RES_DIR ${CMAKE_SOURCE_DIR}/resources)
+
+
+IF(APPLE)
+  SET(PLUGIN_OUT ${PROJECT_BINARY_DIR}/Anywave_Plugins)
+ELSE()
+   SET(PLUGIN_OUT ${PROJECT_BINARY_DIR}/Plugins)
+ENDIF()
+
+MESSAGE(STATUS "Building with Qt5")
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Xml REQUIRED)
+find_package(Qt5Network REQUIRED)
+find_package(Qt5PrintSupport REQUIRED)
+find_package(Qt5LinguistTools REQUIRED)
+find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5Svg REQUIRED)
+find_package(Qt5Charts REQUIRED)
+find_package(Qt5Qml REQUIRED)
+
+MESSAGE(STATUS "Qt version is ${Qt5Core_VERSION}")
+
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+
+SET(ARMADILLO_INCLUDE ${CMAKE_SOURCE_DIR}/armadillo/include)
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+find_package(Qwt REQUIRED)
+INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+LINK_DIRECTORIES(${QWT_LIBRARY})
+include_directories(${ARMADILLO_INCLUDE_DIRS})
+FIND_PACKAGE(HDF5 REQUIRED COMPONENTS HL)
+INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+LINK_DIRECTORIES(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+find_package(OpenBLAS REQUIRED)
+find_package(MATIO REQUIRED)
+
+# Add build flags
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_BLAS -DARMA_USE_LAPACK")
+
+# AnyWave SDK libraries
+add_subdirectory(src/Core)
+add_subdirectory(src/AwEpochLib)
+add_subdirectory(src/Filtering)
+add_subdirectory(src/Utilities)
+add_subdirectory(src/Graphics)
+add_subdirectory(src/Process)
+add_subdirectory(src/Widgets)
+add_subdirectory(src/ReadWrite)
+add_subdirectory(src/HDF5)
+add_subdirectory(src/Layouts)
+add_subdirectory(src/Math)
+add_subdirectory(src/MappingLib)
+add_subdirectory(src/MatlabLib)
+# dependencies
+add_dependencies(AwGraphics AwCore)
+add_dependencies(AwFiltering AwCore)
+add_dependencies(AwProcess AwCore)
+add_dependencies(AwReadWrite AwCore)
+add_dependencies(AwWidget AwGraphics AwCore AwMath)
+add_dependencies(AwLayout AwCore)
+
+# header files
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION ${PROJECT_BINARY_DIR}/include)
+
+find_package(Matlab QUIET)
+
+# MATLAB SUPPORT
+if (Matlab_FOUND)
+  message(STATUS "MATLAB Support added.")
+  add_subdirectory(src/MatlabSupport)
+endif()
+# END OF MATLAB SUPPORT
+
+# AnyWave
+add_subdirectory(src/AnyWave)
+
+
+# plugins
+add_subdirectory(src/plugins/4DNI_Reader)
+add_dependencies(4DNIReader AwCore AwReadWrite)
+add_subdirectory(src/plugins/EDFIO)
+add_dependencies(EDFIO AwCore AwReadWrite)
+add_subdirectory(src/plugins/BrainVisionIO)
+add_dependencies(BrainVisionIO AwCore AwReadWrite)
+add_subdirectory(src/plugins/CTF_Reader)
+add_dependencies(CTFReader AwCore AwReadWrite)
+add_subdirectory(src/plugins/Micromed_Reader)
+add_dependencies(MicromedReader AwCore AwReadWrite)
+add_subdirectory(src/plugins/ICA)
+add_dependencies(ICA AwCore AwProcess)
+add_subdirectory(src/plugins/FileConverter)
+add_dependencies(FileConverter AwCore AwProcess AwFiltering)
+add_subdirectory(src/plugins/ANT_Reader)
+add_dependencies(ANTReader AwCore AwReadWrite)
+add_subdirectory(src/plugins/AutoMarking)
+add_dependencies(AutoMarking AwCore AwProcess)
+add_subdirectory(src/plugins/AppendFiles)
+add_dependencies(AppendFiles AwCore AwProcess AwReadWrite)
+
+# Install
+INSTALL(FILES ${AW_RES_DIR}/linux/anywave.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+INSTALL(FILES ${PROJECT_BINARY_DIR}/bin/AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+#License files
+INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTINATION
+	${CMAKE_INSTALL_PREFIX})
+#AnyWave
+IF(APPLE)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/AnyWaveMac DESTINATION
+	${CMAKE_INSTALL_PREFIX})
+INSTALL(FILES ${AW_RES_DIR}/macx/Anywave.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+ELSE()
+INSTALL(FILES ${PROJECT_BINARY_DIR}/AnyWaveLinux DESTINATION
+	${CMAKE_INSTALL_PREFIX})
+INSTALL(FILES ${AW_RES_DIR}/linux/anywave.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+ENDIF()
+
+#lib
+INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/lib  DESTINATION ${CMAKE_INSTALL_PREFIX})
+#Plugins
+INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/Plugins  DESTINATION ${CMAKE_INSTALL_PREFIX})
+# cmake
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
+# include 
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
