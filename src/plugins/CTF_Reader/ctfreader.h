@@ -42,6 +42,20 @@ typedef struct
 	double oz;
 } coil;
 
+#define MAX_COILS 8
+#define SENSOR_LABEL 31
+#define MAX_NUM_COEFS 50
+#define MAX_AVERAGE_BINS 8
+#define MAX_BALANCING MAX_NUM_COEFS
+#define GENERALRESID 30000
+#define G1BRINDEX 1 /* Define index for the coefficients. */
+#define G2BRINDEX 2
+#define G3BRINDEX 3
+#define G2OIINDEX 4
+#define G3OIINDEX 5
+#define EDDYINDEX 6
+#define G1OIINDEX 7 
+
 typedef struct
 {
 	quint16 index;
@@ -51,8 +65,8 @@ typedef struct
 	double io_offset;
 	qint16 numCoils;
 	qint16 grad_order_no;
-	coil coils[8];
-	coil hcoils[8];
+	coil coils[MAX_COILS];
+	coil hcoils[MAX_COILS];
 } sensor_info;
 
 class CTFREADER_EXPORT CTFFileReader : public AwFileIO

@@ -42,7 +42,7 @@ void AwUpdater::checkForUpdate()
 #endif
 #ifdef Q_OS_WIN
 	platform = "Win";
-	version = "1802";
+	version = "1803";
 	minor = "0";
 #endif
 #ifdef Q_OS_LINUX
