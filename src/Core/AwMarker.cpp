@@ -244,6 +244,27 @@ AwMarkerList AwMarker::invertMarkerSelection(const AwMarkerList& markers, float 
 	return res;
 }
 
+AwMarkerList AwMarker::getMarkersWithLabels(const AwMarkerList& markers, const QStringList& labels)
+{
+	AwMarkerList list;
+	for (auto m : markers) {
+		if (labels.contains(m->label()))
+			list << m; 
+	}
+	return list;
+}
+
+
+AwMarkerList AwMarker::getMarkersWithLabel(const AwMarkerList& markers, const QString& label)
+{
+	AwMarkerList list;
+	for (auto m : markers) {
+		if (m->label() == label)
+			list << m;
+	}
+	return list;
+}
+
 AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cutMarkers)
 {
 	AwMarkerList all_markers = AwMarker::duplicate(AwMarker::sort(markers));

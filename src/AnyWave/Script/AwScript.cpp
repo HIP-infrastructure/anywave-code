@@ -93,11 +93,11 @@ void AwScript::run()
 		}
 #else
 		QJSValue result = m_engine->evaluate(script);
-		if (result.isError()) 
+		if (result.isError()) {
 			emit error(QString("error in %1 at line %2 : %3").arg(m_scriptPath).arg(result.property("lineNumber").toInt()).arg(result.toString()));
+			emit finished();
+		}
 #endif
-//		else
-//			emit error(tr("Syntax error in script."));
 	}
 	emit finished();
 }
@@ -137,14 +137,14 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 		AwFileIO *reader = NULL;
 		connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(processMessage(const QString&)));
 
-		foreach (AwPFIElement *ifelem, inputs) {
+		foreach(AwPFIElement *ifelem, inputs) {
 			QString filePath = ifelem->dataPath();
 			reader = pm->getReaderToOpenFile(filePath);
 			if (!reader) {
 				emit error(QString("No reader found to open the file %1.").arg(filePath));
 				continue;
 			}
-			if (reader->openFile(filePath)  != AwFileIO::NoError)	{
+			if (reader->openFile(filePath) != AwFileIO::NoError) {
 				emit error(QString("Failed to open the file %1").arg(filePath));
 				pm->deleteReaderInstance(reader);
 				return;
@@ -162,7 +162,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 
 
 			// apply filters
-			foreach (AwChannel *c, process->pdi.input.channels) 	{
+			foreach(AwChannel *c, process->pdi.input.channels) {
 				switch (c->type())
 				{
 				case AwChannel::EEG:
@@ -192,8 +192,31 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			// apply markers (if any)
 			if (!ifelem->markerPath().isEmpty()) {
 				emit message("Using marker file " + ifelem->markerPath());
-				//AwMarkerList markers = marker_m->loadMarkers(ifelem->markerPath());
 				AwMarkerList markers = AwMarker::load(ifelem->markerPath());
+
+				// Always add a global marker which includes all the data
+				markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
+
+				// Filter input markers 
+				// Remove skipped markers by cutting around
+				AwMarkerList skipped = AwMarker::getMarkersWithLabels(markers, finput->getSkippedMarkers());
+				QStringList used = finput->getUsedMarkers();
+
+				// check special case : we got markers to cut around but no markers to use.
+
+				AwMarkerList filtered;
+				if (!skipped.isEmpty()) {
+					filtered = AwMarker::cutAroundMarkers(markers, skipped);
+					// delete old markers and replace them (cutAroundMarkers duplicates the markers)
+					while (!markers.isEmpty())
+						delete markers.takeFirst();
+					markers = filtered;
+				}
+				// keep only the used markers if some are specified
+
+				if (!used.isEmpty()) 
+					markers = AwMarker::getMarkersWithLabels(markers, used);
+				
 				if (!markers.isEmpty())
 					process->pdi.input.markers = markers;
 				else
@@ -203,6 +226,8 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 				emit warning("No marker file specified.");
 
 			process->pdi.input.dataPath = filePath;
+			QFileInfo fi(filePath);
+			process->pdi.input.dataFolder = fi.absolutePath();
 			process->pdi.input.setReader(reader);
 			process->pdi.input.fileDuration = reader->infos.totalDuration();
 			// Add the scripted flags before execution
@@ -210,7 +235,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			process->init();
 			// redirect process output to this object's output.
 			connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(message(const QString&)));
-			
+
 			// connect the process as a client of a DataServer thread.
 			AwDataServer::getInstance()->openConnection(process, reader);
 
@@ -220,7 +245,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			timer.restart();
 			m_runningProcesses.append(process);
 			process->run();
-			
+
 			tmp = "Process " + process->plugin()->name + " finished in " + AwUtilities::hmsTime(timer.elapsed());
 			emit message(tmp);
 			// process finished
@@ -232,6 +257,8 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 #endif
 		} // end foreach (AwInputFile *ifile, inputs)
 	} // end if (p && m_taskFileInput)
-	else 
+	else
 		emit error(tr("Invalid parameters in function run(process, fileInput)"));
+
+	emit finished();
 }
