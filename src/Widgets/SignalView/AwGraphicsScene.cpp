@@ -792,7 +792,7 @@ void AwGraphicsScene::updateMarkers()
 			prev = item;
 		}
 		else { // marker with target channel(s)
-			foreach (QString target, m_markers.at(i)->targetChannels())	{
+			for (auto target : m_markers.at(i)->targetChannels())	{
 				QString dest = target.trimmed(), ref;
 				AwMarker *m = NULL;
 				// check for monopolar target
@@ -807,7 +807,7 @@ void AwGraphicsScene::updateMarkers()
 				if (items.isEmpty())
 					continue;
 
-				foreach (AwGraphicsSignalItem *item, items) {
+				for (auto item : items) {
 					if (item->channel()->referenceName() == ref) {
 						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, m_markers.at(i), item, this);
 						addItem(amci);

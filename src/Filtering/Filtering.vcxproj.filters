@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="DspFilters">
+      <UniqueIdentifier>{a38a2a61-b4e3-40a2-93c4-ee1ee6f288c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AwFiltering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Bessel.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Biquad.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Butterworth.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Cascade.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\ChebyshevI.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\ChebyshevII.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Custom.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Design.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Documentation.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Elliptic.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Filter.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Legendre.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\Param.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\PoleFilter.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\RBJ.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\RootFinder.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="DspFilters\State.cpp">
+      <Filter>DspFilters</Filter>
+    </ClCompile>
+    <ClCompile Include="AwButterWorth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DspFilters\Bessel.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Biquad.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Butterworth.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Cascade.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\ChebyshevI.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\ChebyshevII.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Common.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Custom.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Design.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Dsp.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Elliptic.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Filter.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Layout.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Legendre.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\MathSupplement.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Params.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\PoleFilter.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\RBJ.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\RootFinder.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\SmoothedFilter.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\State.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Types.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="DspFilters\Utilities.h">
+      <Filter>DspFilters</Filter>
+    </ClInclude>
+    <ClInclude Include="AwButterWorth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\AwFiltering.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

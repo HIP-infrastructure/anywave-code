@@ -160,9 +160,8 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 				process->pdi.input.channels = mm->loadAndApplyMontage(reader->infos.channels(), ifelem->montagePath());
 			}
 
-
 			// apply filters
-			foreach(AwChannel *c, process->pdi.input.channels) {
+			for (auto c : process->pdi.input.channels) {
 				switch (c->type())
 				{
 				case AwChannel::EEG:
@@ -193,32 +192,20 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			if (!ifelem->markerPath().isEmpty()) {
 				emit message("Using marker file " + ifelem->markerPath());
 				AwMarkerList markers = AwMarker::load(ifelem->markerPath());
-
-				// Always add a global marker which includes all the data
-				markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
-
-				// Filter input markers 
-				// Remove skipped markers by cutting around
-				AwMarkerList skipped = AwMarker::getMarkersWithLabels(markers, finput->getSkippedMarkers());
-				QStringList used = finput->getUsedMarkers();
-
-				// check special case : we got markers to cut around but no markers to use.
-
-				AwMarkerList filtered;
-				if (!skipped.isEmpty()) {
-					filtered = AwMarker::cutAroundMarkers(markers, skipped);
-					// delete old markers and replace them (cutAroundMarkers duplicates the markers)
-					while (!markers.isEmpty())
-						delete markers.takeFirst();
-					markers = filtered;
+				if (!markers.isEmpty()) {
+					// Always add a global marker which includes all the data
+					markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
+					// Filter input markers 
+					AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers());
+					if (filtered.isEmpty()) {
+						emit warning("No input markers were set after applying selection parameters.");
+					}
+					else {
+						process->pdi.input.markers = filtered;
+						while (!markers.isEmpty())
+							delete markers.takeFirst();
+					}		
 				}
-				// keep only the used markers if some are specified
-
-				if (!used.isEmpty()) 
-					markers = AwMarker::getMarkersWithLabels(markers, used);
-				
-				if (!markers.isEmpty())
-					process->pdi.input.markers = markers;
 				else
 					emit warning("No markers could be loaded from the marker file.");
 			}

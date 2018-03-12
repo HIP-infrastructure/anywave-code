@@ -70,7 +70,7 @@ public:
 	static QList<AwMarker *> getMarkersWithLabel(const QList<AwMarker *>& markers, const QString& label);
 	/* Get alls markers with specified labels, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabels(const QList<AwMarker *>& markers, const QStringList& labels); 
-	/** Load a marker file and returns the markers */
+	/** Load a marker file and returns the markers */ 
 	static QList<AwMarker *> load(const QString& file);
 	/** Save markers to a file **/
 	static void save(const QString& file, const QList<AwMarker *>& markers);
@@ -85,7 +85,9 @@ public:
 	/** Get markers from a list which intersect a time selection **/
 	static QList<AwMarker *> intersect(const QList<AwMarker *>& markers, float start, float end);
 	/** Create an inverter marker list that skip the markers set as input **/
-	static QList<AwMarker *> invertMarkerSelection(const QList<AwMarker *>& markers, float end);
+	static QList<AwMarker *> invertMarkerSelection(const QList<AwMarker *>& markers, const QString& label, float end);
+	/** Filters markers: markers can either be specified to be removed or used. **/
+	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
 	/** Returns the marker's type. AwMarker::Single or AwMarker::Selection. **/
