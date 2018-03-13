@@ -53,13 +53,11 @@ AwBlock::~AwBlock()
 AwMarker *AwBlock::addMarker(AwMarker& marker)
 {
 	AwMarker *mark = new AwMarker;
-
 	mark->setStart(marker.start());
 	mark->setDuration(marker.duration());
 	mark->setLabel(marker.label());
 	mark->setValue(marker.value());
 	mark->setTargetChannels(marker.targetChannels());
-
 	m_markers.append(mark);
 	return mark;
 }

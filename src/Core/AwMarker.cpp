@@ -168,6 +168,11 @@ AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 	return markers;
 }
 
+///
+/// merge()
+/// Check if selection markers overlap. If so, merge them.
+/// Note : single marker are not processed.
+/// The return list contains duplicated markers.
 AwMarkerList AwMarker::merge(AwMarkerList& markers)
 {
 	if (markers.isEmpty()) 
@@ -175,90 +180,120 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 
 	AwMarkerList sorted = AwMarker::sort(markers);
 	AwMarkerList res;
-	AwMarker *next = sorted.first();
-	int pos = 0, last = sorted.size() - 1;
-	do {
-		AwMarker *new_marker = new AwMarker(next);
-		res << new_marker;
-		pos++;
-		if (pos > last)
-			break;
-		next = sorted.at(pos);
-		while (1) {
-			if (next->start() <= new_marker->end()) {// merge them
-				if (next->end() > new_marker->end())
-					new_marker->setEnd(next->end());
-				pos++;
-				if (pos > last) 
-					break;
-				next = sorted.at(pos);
-			}
-			else { // the markers do not overlap
-				break;
-			}
+
+	// do not process single markers => copy them
+	for (int i = 0; i < sorted.size(); i++) {
+		AwMarker *m = sorted.at(i);
+		if (m->duration() == 0.) {
+			res << new AwMarker(m);
+			sorted.removeAll(m);
+			i--;
 		}
-	} while (pos <= last);
+	}
+
+	if (sorted.size() == 1) {
+		res << new AwMarker(sorted.first());
+		return res;
+	}
+
+	// At least two selection markers remaining.
+	do {
+		AwMarker *first = sorted.first();
+		AwMarker *m = sorted.at(1);
+		bool startAfter = m->start() > first->end();
+		bool startInsideEndAfter = m->start() <= first->end() && m->end() > first->end();
+		bool isWithin = m->start() >= first->start() && m->end() <= first->end();
+		if (startAfter) { // just copy the previous marker to the result list.
+			res << new AwMarker(first);
+			sorted.removeAll(first);
+		}
+		else if (startInsideEndAfter) { // merge the two markers.
+			float end = m->end();
+			m->setStart(first->start());
+			m->setEnd(end);
+			sorted.removeAll(first);
+		}
+		else if (isWithin) {
+			sorted.removeAll(m);
+		}
+	} while (sorted.size() > 1);
+
+	for (auto m : sorted)
+		res << new AwMarker(m);
 
 	return res;
+
+	//AwMarker *next = sorted.first();
+	//int pos = 0, last = sorted.size() - 1;
+	//do {
+	//	AwMarker *new_marker = new AwMarker(next);
+	//	res << new_marker;
+	//	pos++;
+	//	if (pos > last)
+	//		break;
+	//	next = sorted.at(pos);
+	//	while (1) {
+	//		if (next->start() <= new_marker->end()) {// merge them
+	//			if (next->end() > new_marker->end())
+	//				new_marker->setEnd(next->end());
+	//			pos++;
+	//			if (pos > last) 
+	//				break;
+	//			next = sorted.at(pos);
+	//		}
+	//		else { // the markers do not overlap
+	//			break;
+	//		}
+	//	}
+	//} while (pos <= last);
+
+	//return res;
 }
 
+///
+/// intersect()
+/// Browse a marker list and return only markers that are contained in the specified time interval.
+/// Input list must be time sorted.
+/// The return list does NOT contain duplicated markers.
 AwMarkerList AwMarker::intersect(const AwMarkerList& markers, float start, float end)
 {
 	AwMarkerList res;
 	// We assume markers are sorted before processing
-	foreach(AwMarker *m, markers) {
-		float m_start = m->start();
-		float m_end = m->end();
-		if (m_end < start) 
+	for (auto m : markers) {
+		if (m->end() < start)
 			continue;
-		if (m_start > end) // ENDS if marker are after the end of the selection
+		if (m->start() > end)
 			break;
-		if (m_start <= end && start < m_end)
-			res << m;
-		else if (m_start >= start && m_start <= end)
-			res << m;
-		else if (m_end >= start && m_end <= end)
+		bool startBeforeEndAfter = m->start() < start && m->end() > end;
+		bool startBeforeEndWithin = m->start() < start && m->end() <= end;
+		bool startWithinEndAfter = m->start() >= start && m->end() > end;
+		bool isWithin = m->start() >= start && m->end() <= end;
+
+		if (isWithin || startWithinEndAfter || startBeforeEndWithin || startBeforeEndAfter)
 			res << m;
 	}
 	return res;
+
+	//foreach(AwMarker *m, markers) {
+	//	float m_start = m->start();
+	//	float m_end = m->end();
+	//	if (m_end < start) 
+	//		continue;
+	//	if (m_start > end) // ENDS if marker are after the end of the selection
+	//		break;
+	//	if (m_start <= end && start < m_end)
+	//		res << m;
+	//	else if (m_start >= start && m_start <= end)
+	//		res << m;
+	//	else if (m_end >= start && m_end <= end)
+	//		res << m;
+	//}
+	//return res;
 }
 
 
 AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cutMarkers)
 {
-	//AwMarkerList all_markers = AwMarker::duplicate(AwMarker::sort(markers));
-	//AwMarkerList cut_markers = AwMarker::merge(cutMarkers);
-
-	//foreach(AwMarker *cut, cut_markers) {
-	//	foreach(AwMarker *m, all_markers) {
-	//		if (m->end() < cut->start()) { // skip the markers which are before the current first cut marker
-	//			continue;
-	//		}
-	//		if (m->start() >= cut->start() && m->start() <= cut->end()) { // marker starts inside the cut marker
-	//																	  // if the marker is a selection which is included inside the cut marker => then set the marker as single (the selection is removed by the cut marker)
-	//			if (m->duration()) {
-	//				if (m->end() <= cut->end())
-	//					m->setDuration(0.);
-	//				else if (m->end() > cut->end()) // if the marker is a selection which starts inside the cut marker => compute the new duration after data will be cut.
-	//					m->setDuration(m->end() - cut->end());
-	//			}
-	//			// reposition the marker where data will be cut.
-	//			m->setStart(cut->start());
-	//		}
-	//		else if (m->end() >= cut->start() && m->end() <= cut->end()) { // marker finished inside the cut marker
-	//			m->setEnd(cut->start());
-	//		}
-	//		else if (m->start() > cut->end()) {
-	//			m->setStart(m->start() - cut->duration());
-	//		}
-	//	}
-	//}
-
-	//while (!cut_markers.isEmpty())
-	//	delete cut_markers.takeFirst();
-
-	//return all_markers;
-
 	if (cutMarkers.isEmpty() || markers.isEmpty())
 		return markers;
 	AwMarkerList copiedList = AwMarker::sort(markers);

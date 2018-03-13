@@ -65,6 +65,8 @@ void AwFiltering::downSample(AwChannel *chan, float freq)
 		return;
 
 	int decim_factor = (int)floor(sr / freq);
+	// recompute target Sampling rate with new decim factor.
+	float new_sr = sr / (float)decim_factor;
 	// check if current low filter is lower than anti aliasing filter required
 	float aa = freq / 3;
 	if (aa > chan->lowFilter()) { // need to apply anti aliasing filter
@@ -72,7 +74,7 @@ void AwFiltering::downSample(AwChannel *chan, float freq)
 	}
 	chan->decimate(decim_factor);
 	filterChannel(chan); // apply filters.
-	chan->setSamplingRate(freq);
+	chan->setSamplingRate(new_sr);
 }
 
 void AwFiltering::downSample(const AwChannelList& channels, float freq)
@@ -101,11 +103,13 @@ AwChannel *downSamplingChannel(down_sampling *ds)
 		return ds->c;
 
 	int decim_factor = (int)floor(sr / freq);
+	// recompute target Sampling rate with new decim factor.
+	float new_sr = sr / (float)decim_factor;
 
 	float aa = sr / 3;
 	filterButterWorthAA(ds->c);
 	ds->c->decimate(decim_factor);
-	ds->c->setSamplingRate(freq);
+	ds->c->setSamplingRate(new_sr);
 
 	return ds->c;
 }

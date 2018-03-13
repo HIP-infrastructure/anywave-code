@@ -71,7 +71,7 @@ public:
 	QStringList getUsedMarkers() { return m_usedMarkers; }
 	QStringList getSkippedMarkers() { return m_skippedMarkers; }
 	void setUsedMarkers(const QStringList& markers) { m_usedMarkers = markers; }
-	void setSkippedMarkers(const QStringList& markers) { m_usedMarkers = markers; }
+	void setSkippedMarkers(const QStringList& markers) { m_skippedMarkers = markers; }
 	inline AwPIElements& inputElements() { return m_inputElements; }
 	inline AwFilteringOptions& filters() { return m_filters; }
 	void parseFiles();	// build the internal data structure based on added files.
