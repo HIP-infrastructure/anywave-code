@@ -47,7 +47,7 @@ public:
 	AwChannelList icaChannels;
 	AwChannelList selectedICA;	
 	AwMarkerList markers, selectedMarkers;
-	QString filePath;
+	QString filePath, initialPath;
 	AwFilteringOptions foptions;
 	bool useCurrentMontage;
 	bool exportICA;
@@ -60,6 +60,7 @@ protected slots:
 	void selectChannels();
 	void selectICAChannels();
 	void selectMarkers();
+	void updateOutputFileExtension(int);
 private:
 	Ui::AwExporterSettingsUi *m_ui;
 };

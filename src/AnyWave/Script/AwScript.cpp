@@ -109,7 +109,7 @@ QSVALUE AwScript::getFileInput()
 
 	return m_engine->newQObject(m_processFileInput);
 }
-
+  
 
 
 void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
@@ -118,7 +118,6 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 	QObject *fi = fileInput.toQObject();
 	AwPluginManager *pm = AwPluginManager::getInstance();
 	AwMontageManager *mm = AwMontageManager::instance();
-	QString tmp;
 	QElapsedTimer timer;
 
 	if (p && fi) {
@@ -153,7 +152,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			// apply montage
 			if (ifelem->montagePath().isEmpty()) { // No Montage Defined => default montage
 				emit warning("No montage file specified. Using default montage.");
-				process->pdi.input.channels = reader->infos.channels();
+				process->pdi.input.channels = AwChannel::duplicateChannels(reader->infos.channels());
 			}
 			else {
 				emit message("Applying montage file " + ifelem->montagePath());
@@ -193,18 +192,20 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 				emit message("Using marker file " + ifelem->markerPath());
 				AwMarkerList markers = AwMarker::load(ifelem->markerPath());
 				if (!markers.isEmpty()) {
-					// Always add a global marker which includes all the data
-					markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
-					// Filter input markers 
-					AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers());
-					if (filtered.isEmpty()) {
-						emit warning("No input markers were set after applying selection parameters.");
-					}
-					else {
+					process->pdi.input.markers = markers;
+					bool skipMarkers = !finput->skippedMarkers().isEmpty();
+					bool useMarkers = !finput->usedMarkers().isEmpty();
+					if (skipMarkers) 
+						markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
+					if (skipMarkers || useMarkers) {
+						AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers());
+						if (filtered.isEmpty()) 
+							emit warning("no markers were kept after applying usedMarkers or skippedMarkers filters");
 						process->pdi.input.markers = filtered;
+						// Destroy loaded markers as applySelection duplicates them.
 						while (!markers.isEmpty())
 							delete markers.takeFirst();
-					}		
+					}
 				}
 				else
 					emit warning("No markers could be loaded from the marker file.");
@@ -233,15 +234,17 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			m_runningProcesses.append(process);
 			process->run();
 
-			tmp = "Process " + process->plugin()->name + " finished in " + AwUtilities::hmsTime(timer.elapsed());
-			emit message(tmp);
+			emit message(QString("Process %1 finished in %2").arg(process->plugin()->name).arg(AwUtilities::hmsTime(timer.elapsed())));
 			// process finished
 			AwDataServer::getInstance()->closeConnection(process);
 			m_runningProcesses.removeAll(process);
-#ifndef NDEBUG
-			qDebug() << "Process " << process->plugin()->name << " has finished." << endl;
-			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(processMessage(const QString&)));
-#endif
+			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(message(const QString&)));
+
+			// clean pdi.input for another usage
+			while (!process->pdi.input.channels.isEmpty())
+				delete process->pdi.input.channels.takeFirst();
+			while (!process->pdi.input.markers.isEmpty())
+				delete process->pdi.input.markers.takeFirst();
 		} // end foreach (AwInputFile *ifile, inputs)
 	} // end if (p && m_taskFileInput)
 	else

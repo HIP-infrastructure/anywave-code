@@ -153,7 +153,8 @@ void AwExporter::run()
 	AwBlock *block = writer->infos.newBlock();
 	block->setSamples(m_channels.first()->dataSize());
 	block->setDuration((float)m_channels.first()->dataSize() / m_channels.first()->samplingRate());
-	block->setMarkers(output_markers);
+	if (!output_markers.isEmpty())
+		block->setMarkers(output_markers);
 	if (writer->createFile(m_path) != AwFileIO::NoError) {
 		sendMessage(tr("Error creating output file."));
 		m_plugin->deleteInstance(writer);
@@ -171,15 +172,16 @@ void AwExporter::run()
 bool AwExporter::showUi()
 {
 	AwExporterSettings ui;
+	ui.initialPath = QString("%1/NewFile").arg(pdi.input.dataFolder);
 	QHash<QString, AwFileIOPlugin *> writers;
-	foreach (AwFileIOPlugin *p, pdi.input.writers) {
+	for (auto p : pdi.input.writers) {
 		writers.insert(p->name, p);
 		ui.extensions << p->fileExtension;
 		ui.writers << p->name;
 	}
 
 	// separate ICA channels from others, if any
-	foreach(AwChannel *c, pdi.input.channels) {
+	for (auto c : pdi.input.channels) {
 		if (c->isICA())
 			m_ICAChannels << c;
 		else 
