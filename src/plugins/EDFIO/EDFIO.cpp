@@ -971,77 +971,72 @@ qint64 EDFIO::writeData(QList<AwChannel *> *channels)
 	// The order of channels must match the one define in the header!
 	if (channels->size() != infos.channelsCount())
 		return 0;
-	double *buf;
 
-	typedef struct {
-		AwChannel *channel;
-		qint64 samples;
-		qint64 samplesWritten;
-		qint64 smp_per_record;
-	} channel_info;
+	AwChannel *firstChannel = channels->first();
+	qint64 smp_per_record = (qint64)std::ceil(firstChannel->samplingRate());
+	qint64 samplesLeft = firstChannel->dataSize();
+	double *buf = new double[smp_per_record];
+	qint64 samplesWritten = 0;
+	qint64 samplesToWrite = 0;
+	while (samplesLeft) {
+		memset(buf, 0, smp_per_record * sizeof(double));
+		samplesToWrite = std::min(smp_per_record, samplesLeft);
+		for (auto c : *channels) {
+			for (qint64 i = 0; i < samplesToWrite; i++)
+				buf[i] = c->data()[samplesWritten + i];
+			edfwrite_physical_samples(m_handle, buf);
+		}
+		samplesWritten += samplesToWrite;
+		samplesLeft -= samplesToWrite;
+	}
+	delete[] buf;
 
-	QList<channel_info *> infos;
-	for (auto c : *channels) {
-		channel_info *info = new channel_info;
-		info->samples = c->dataSize();
-		info->samplesWritten = 0;
-		info->smp_per_record = (int)c->samplingRate();
-		info->channel = c;
-		infos << info;
-	}
-	for (auto ci : infos) {
-		qint64 samplesLeft = ci->samples - ci->samplesWritten;
-		qint64 samplesToWrite = std::min(ci->smp_per_record, samplesLeft);
-		buf = new double[ci->smp_per_record];
-		memset(buf, 0, ci->smp_per_record * sizeof(double));
-		for (qint64 i = 0; i < samplesToWrite; i++) 
-			buf[i] = ci->channel->data()[ci->samplesWritten++];
-		edfwrite_physical_samples(m_handle, buf);
-		delete[] buf;
-	}
-	return channels->first()->dataSize();
+	return samplesWritten;
 }
 
 AwFileIO::FileStatus EDFIO::createFile(const QString& path, int flags)
 {
-	m_handle = edfopen_file_writeonly(path.toStdString().c_str(), EDFLIB_FILETYPE_EDFPLUS, infos.channels().size());
+	// add writer extension
+	QString fullPath = QString("%1%2").arg(path).arg(plugin()->fileExtension);
+
+	m_handle = edfopen_file_writeonly(fullPath.toStdString().c_str(), EDFLIB_FILETYPE_EDFPLUS, infos.channels().size());
 
 	if (m_handle < 0) {
 		m_error = QString("Error opening %1 for writing.").arg(path);
 		return AwFileIO::FileAccess;
 	}
-	//// check for int sampling rate
-	//float res = std::fmod(infos.channels().first()->samplingRate(), 1.0);
-	//if (res) {
-	//	m_error = "Sampling rate with decimals are not compatible.";
-	//	return AwFileIO::WrongFormat;
-	//}
-
 	// Max accepted datarecord duration is 6000000 
-	int duration = 6000000;
-	// compute estimated number of sample for the sampling rate.
-	int smp_per_record = (int)floor( 0.06 * infos.channels().first()->samplingRate());
-	float recalculated_duration = smp_per_record / infos.channels().first()->samplingRate();
-	recalculated_duration *= EDFLIB_TIME_DIMENSION;
-	
-	edf_set_datarecord_duration(m_handle, (int)recalculated_duration);  // data record duration
+    // we'll make data record of 1s samples rounded if sampling rate is not integer.
+	float sr = infos.channels().first()->samplingRate();
+	int nsamples = (int)std::ceil(sr);
 
-
-	edf_set_number_of_annotation_signals(m_handle, 1);
+	// duration must be expressed in unit of 100 micro seconds
+	int duration = (int)std::floor(((double)nsamples / (double)sr) * 1E5);
 	
+	edf_set_datarecord_duration(m_handle, duration);  // data record duration
 	for (int i = 0; i < infos.channels().size(); i++) {
 		AwChannel *channel = infos.channels().at(i);
 		edf_set_label(m_handle, i, channel->name().toStdString().c_str());
 		edf_set_digital_maximum(m_handle, i, 32767);
 		edf_set_digital_minimum(m_handle, i, -32768);
-		if (channel->isEEG() || channel->isECG() || channel->isECG() || channel->isSEEG())
+		if (channel->isEEG() || channel->isECG() || channel->isECG() || channel->isSEEG()) {
+			edf_set_physical_minimum(m_handle, i, -8000.0);
+			edf_set_physical_maximum(m_handle, i, 8000.0);
 			edf_set_physical_dimension(m_handle, i, "uV");
-		else
+		}
+		else if (channel->isMEG() || channel->isGRAD() || channel->isReference()) {
+			edf_set_physical_minimum(m_handle, i, -1e-10);
+			edf_set_physical_maximum(m_handle, i, 1e-10);
+			edf_set_physical_dimension(m_handle, i, "T");
+		}
+		else {
+			edf_set_physical_minimum(m_handle, i, -10000);
+			edf_set_physical_maximum(m_handle, i, 10000);
 			edf_set_physical_dimension(m_handle, i, "?");
-		edf_set_physical_minimum(m_handle, i, -1.);
-		edf_set_physical_maximum(m_handle, i, 1.);
+		}
+
 		// very misnamed function, the samplefrequency is in fact the number of sample per data record.
-		edf_set_samplefrequency(m_handle, i, (int)channel->samplingRate());
+		edf_set_samplefrequency(m_handle, i, nsamples);
 	}
 
 	edf_set_equipment(m_handle, "AnyWave EDF+ exporter");
@@ -1057,8 +1052,10 @@ void EDFIO::cleanUpAndClose()
 	m_file.close();
 	if (annotationslist[0])
 		free(annotationslist[0]);
-	if (m_handle != -1) // the file is open for writing
+	if (m_handle != -1) { // the file is open for writing 
 		edfclose_file(m_handle);
+		m_handle = -1;
+	}
 }
 
 int EDFIO::edf_get_annotation(int n, struct edf_annotation_struct *annot)

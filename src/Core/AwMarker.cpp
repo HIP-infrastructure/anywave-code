@@ -191,6 +191,9 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 		}
 	}
 
+	if (sorted.isEmpty())
+		return res;
+
 	if (sorted.size() == 1) {
 		res << new AwMarker(sorted.first());
 		return res;
@@ -222,32 +225,6 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 		res << new AwMarker(m);
 
 	return res;
-
-	//AwMarker *next = sorted.first();
-	//int pos = 0, last = sorted.size() - 1;
-	//do {
-	//	AwMarker *new_marker = new AwMarker(next);
-	//	res << new_marker;
-	//	pos++;
-	//	if (pos > last)
-	//		break;
-	//	next = sorted.at(pos);
-	//	while (1) {
-	//		if (next->start() <= new_marker->end()) {// merge them
-	//			if (next->end() > new_marker->end())
-	//				new_marker->setEnd(next->end());
-	//			pos++;
-	//			if (pos > last) 
-	//				break;
-	//			next = sorted.at(pos);
-	//		}
-	//		else { // the markers do not overlap
-	//			break;
-	//		}
-	//	}
-	//} while (pos <= last);
-
-	//return res;
 }
 
 ///
