@@ -3,6 +3,8 @@
 
 #define CHECK_OPEN_FILE if (m_fileptr == NULL) { m_error = "No file is open."; return -1;	} 
 
+#include <AwException.h>
+
 AwMATLABFile::AwMATLABFile()
 {
 	m_fileptr = NULL;
@@ -22,9 +24,10 @@ int AwMATLABFile::open(const QString& file)
 {
 	close();
 	QString fileName = QDir::toNativeSeparators(file);
-	m_fileptr = Mat_Open(fileName.toStdString().c_str(), MAT_ACC_RDONLY);
+	m_fileptr = Mat_Open(fileName.toUtf8().data(), MAT_ACC_RDONLY);
 	if (m_fileptr == NULL) {
 		m_error = "Could not open file for reading.";
+		throw AwException(m_error, "AwMATLABFile::open");
 		return -1;
 	}
 	m_isOpen = true;
@@ -37,9 +40,10 @@ int AwMATLABFile::create(const QString& file)
 {
 	close();
 	QString fileName = QDir::toNativeSeparators(file);
-	m_fileptr = Mat_CreateVer(fileName.toStdString().c_str(), NULL, MAT_FT_MAT5);
+	m_fileptr = Mat_CreateVer(fileName.toUtf8().data(), NULL, MAT_FT_MAT5);
 	if (m_fileptr == NULL) {
 		m_error = "Could not create the file.";
+		throw AwException(m_error, "AwMATLABFile::create");
 		return -1;
 	}
 	m_isOpen = true;
@@ -77,6 +81,7 @@ int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, mat
 	matvar_t *var = Mat_VarCreate(NULL, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable for field %1").arg(QString::fromLatin1(fieldName));
+		throw AwException(m_error, "AwMATLABFile::setStructField");
 		return -1;
 	}
 	Mat_VarSetStructFieldByName(structure, fieldName, 0, var);
@@ -93,6 +98,7 @@ int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, dou
 	matvar_t *var = Mat_VarCreate(NULL, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable for field %1").arg(QString::fromLatin1(fieldName));
+		throw AwException(m_error, "AwMATLABFile::setStructField");
 		return -1;
 	}
 	Mat_VarSetStructFieldByName(structure, fieldName, 0, var);
@@ -108,6 +114,7 @@ int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, con
 	matvar_t *var = Mat_VarCreate(NULL, MAT_C_CELL, MAT_T_CELL, 2, dims, NULL, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable for field %1").arg(QString::fromLatin1(fieldName));
+		throw AwException(m_error, "AwMATLABFile::setStructField");
 		return -1;
 	}
 	size_t stringDims[2];
@@ -123,6 +130,7 @@ int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, con
 		if (string == NULL) {
 			m_error = QString("Error creating string for cell array.");
 			Mat_VarFree(var);
+			throw AwException(m_error, "AwMATLABFile::setStructField");
 			return -1;
 		}
 		Mat_VarSetCell(var, i, string);
@@ -143,6 +151,7 @@ int AwMATLABFile::writeScalar(const QString& name, double value)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeScalar");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -157,6 +166,7 @@ int AwMATLABFile::writeScalar(const QString& name, float value)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeScalar");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -171,6 +181,7 @@ int AwMATLABFile::writeScalar(const QString& name, qint32 value)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT32, MAT_T_INT32, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeScalar");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -185,6 +196,7 @@ int AwMATLABFile::writeScalar(const QString& name, qint64 value)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT64, MAT_T_INT64, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeScalar");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -199,6 +211,7 @@ int AwMATLABFile::writeScalar(const QString& name, qint16 value)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT16, MAT_T_INT16, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeScalar");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -219,6 +232,7 @@ int AwMATLABFile::writeString(const QString& name, const QString& value)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CHAR, MAT_T_UINT8, 2, dims, dummy, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeString");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -233,6 +247,7 @@ int AwMATLABFile::writeStringCellArray(const QString& name, const QStringList& v
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CELL, MAT_T_CELL, 2, dims, NULL, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeStringCellArray");
 		return -1;
 	}
 	size_t stringDims[2];
@@ -248,6 +263,7 @@ int AwMATLABFile::writeStringCellArray(const QString& name, const QStringList& v
 		if (string == NULL) {
 			m_error = QString("Error creating string for cell array %1").arg(name);
 			Mat_VarFree(var);
+			throw AwException(m_error, "AwMATLABFile::writeStringCellArray");
 			return -1;
 		}
 		Mat_VarSetCell(var, i, string);
@@ -264,6 +280,7 @@ int AwMATLABFile::writeMatrix(const QString& name, fmat& matrix)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeMatrix");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -278,6 +295,7 @@ int AwMATLABFile::writeMatrix(const QString& name, cube& matrix)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 3, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeMatrix");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -292,6 +310,7 @@ int AwMATLABFile::writeMatrix(const QString& name, fcube& matrix)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 3, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile::writeMatrix");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -306,6 +325,7 @@ int AwMATLABFile::writeMatrix(const QString& name, mat& matrix)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeMatrix");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -321,6 +341,7 @@ int AwMATLABFile::writeVec(const QString& name, QVector<float>& vec)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeVec");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -336,6 +357,7 @@ int AwMATLABFile::writeVec(const QString& name, QVector<qint32>& vec)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT32, MAT_T_INT32, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeVec");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -351,6 +373,7 @@ int AwMATLABFile::writeVec(const QString& name, QVector<qint16>& vec)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT16, MAT_T_INT16, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeVec");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -366,6 +389,7 @@ int AwMATLABFile::writeVec(const QString& name, QVector<double>& vec)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeVec");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -390,6 +414,7 @@ int AwMATLABFile::writeVec(const QString& name, fvec& vec)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, vec.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeVec");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -412,6 +437,7 @@ int AwMATLABFile::writeVec(const QString& name, rowvec& vec)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, vec.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeVec");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -434,6 +460,7 @@ int AwMATLABFile::writeVec(const QString& name, vec& vec)
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, vec.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
+		throw AwException(m_error, "AwMATLABFile:writeVec");
 		return -1;
 	}
 	Mat_VarWrite(m_fileptr, var, MAT_COMPRESSION_NONE);
@@ -450,21 +477,25 @@ int AwMATLABFile::readScalar(const QString& name, double* value)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->rank != 2 || var->dims[0] > 1 || var->dims[1] > 1) {
 		m_error = QString("Variable is not a scalar.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->class_type != MAT_C_DOUBLE) {
 		m_error = QString("Variable is not a double.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -479,21 +510,25 @@ int AwMATLABFile::readScalar(const QString& name, float* value)
 		matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->rank != 2 || var->dims[0] > 1 || var->dims[1] > 1) {
 		m_error = QString("Variable is not a scalar.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->class_type != MAT_C_SINGLE) {
 		m_error = QString("Variable is not a single.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -508,21 +543,25 @@ int AwMATLABFile::readScalar(const QString& name, qint32* value)
 		matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->rank != 2 || var->dims[0] > 1 || var->dims[1] > 1) {
 		m_error = QString("Variable is not a scalar.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->class_type != MAT_C_INT32) {
 		m_error = QString("Variable is not an integer.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -537,21 +576,25 @@ int AwMATLABFile::readScalar(const QString& name, qint16 *value)
 		matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->rank != 2 || var->dims[0] > 1 || var->dims[1] > 1) {
 		m_error = QString("Variable is not a scalar.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	if (var->class_type != MAT_C_INT16) {
 		m_error = QString("Variable is not a short integer.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readScalar");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -566,11 +609,13 @@ int AwMATLABFile::readString(const QString& name, QString& string)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile:readString");
 		return -1;
 	}
 	if (var->class_type != MAT_C_CHAR) {
 		m_error = QString("Variable is not a string.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readString");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -590,11 +635,13 @@ int AwMATLABFile::readStrings(const QString& name, QStringList& strings)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile:readStrings");
 		return -1;
 	}
 	if (var->class_type != MAT_C_CELL) {
 		m_error = QString("Variable is not a cell array.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile:readStrings");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -620,21 +667,25 @@ int AwMATLABFile::readMatrix(const QString& name, fmat& matrix)
 		matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->rank != 2) {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->class_type != MAT_C_SINGLE) {
 		m_error = QString("Variable is not a matrix of single.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -649,21 +700,25 @@ int AwMATLABFile::readMatrix(const QString& name, cube& matrix)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->rank != 3) {
 		m_error = QString("Variable is not a 3D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->class_type != MAT_C_DOUBLE) {
 		m_error = QString("Variable is not a matrix of double.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -678,21 +733,25 @@ int AwMATLABFile::readMatrix(const QString& name, fcube& matrix)
 		matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->rank != 3) {
 		m_error = QString("Variable is not a 3D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->class_type != MAT_C_SINGLE) {
 		m_error = QString("Variable is not a matrix of single.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -707,21 +766,25 @@ int AwMATLABFile::readMatrix(const QString& name, mat& matrix)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->rank != 2)  {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	if (var->class_type != MAT_C_DOUBLE) {
 		m_error = QString("Variable is not a matrix of double.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readMatrix");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -736,26 +799,31 @@ int AwMATLABFile::readVec(const QString& name, vec& vector)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->rank != 2) {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->class_type != MAT_C_DOUBLE) {
 		m_error = QString("Variable is not a vector of double.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->dims[0] != 1 && var->dims[1] != 1) {
 		m_error = QString("Variable is not a vector.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -770,26 +838,31 @@ int AwMATLABFile::readVec(const QString& name, QVector<float>& vector)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->rank != 2) {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->class_type != MAT_C_SINGLE) {
 		m_error = QString("Variable is not a vector of single.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->dims[0] != 1 && var->dims[1] != 1) {
 		m_error = QString("Variable is not a vector.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -805,26 +878,31 @@ int AwMATLABFile::readVec(const QString& name, QVector<qint16>& vector)
 		matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->rank != 2) {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->class_type != MAT_C_INT16) {
 		m_error = QString("Variable is not a vector of short integers.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->dims[0] != 1 && var->dims[1] != 1) {
 		m_error = QString("Variable is not a vector.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -840,26 +918,31 @@ int AwMATLABFile::readVec(const QString& name, QVector<qint32>& vector)
 		matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->rank != 2) {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->class_type != MAT_C_INT32) {
 		m_error = QString("Variable is not a vector of integers.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->dims[0] != 1 && var->dims[1] != 1) {
 		m_error = QString("Variable is not a vector.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -880,21 +963,25 @@ int AwMATLABFile::readVec(const QString& name, QVector<double>& vector)
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->rank != 2) {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->class_type != MAT_C_DOUBLE) {
 		m_error = QString("Variable is not a vector of single.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->dims[0] != 1 && var->dims[1] != 1) {
 		m_error = QString("Variable is not a vector.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);
@@ -910,26 +997,31 @@ int AwMATLABFile::readVec(const QString& name, fvec& vector)
 	matvar_t *var = Mat_VarReadInfo(m_fileptr, name.toStdString().c_str());
 	if (var == NULL) {
 		m_error = QString("Variable %1 not found.").arg(name);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->isComplex) {
 		m_error = QString("Variable is complex.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->rank != 2) {
 		m_error = QString("Variable is not a 2D matrix.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->class_type != MAT_C_SINGLE) {
 		m_error = QString("Variable is not a vector of single.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	if (var->dims[0] != 1 && var->dims[1] != 1) {
 		m_error = QString("Variable is not a vector.");
 		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readVec");
 		return -1;
 	}
 	Mat_VarReadDataAll(m_fileptr, var);

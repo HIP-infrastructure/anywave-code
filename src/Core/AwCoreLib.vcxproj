@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\AwChannel.h" />
+    <ClInclude Include="..\..\include\AwException.h" />
     <ClInclude Include="..\..\include\AwFilteringOptions.h" />
     <ClInclude Include="..\..\include\AwMarker.h" />
     <ClInclude Include="..\..\include\AwSensor.h" />

@@ -29,7 +29,7 @@
 #include <aw_armadillo.h>
 #include "matio.h"
 #include <AwChannel.h>
-
+#include <AwException.h>
 
 namespace AwMATLAB {
 	/** MATLAB file output **/
