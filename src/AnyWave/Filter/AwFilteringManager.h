@@ -27,7 +27,7 @@
 #ifndef AWFILTERINGMANAGER_H
 #define AWFILTERINGMANAGER_H
 #include <AwChannel.h>
-
+#include <AwFilteringOptions.h>
 #include <QObject>
 class AwFilteringManager : public QObject
 {
@@ -45,7 +45,8 @@ public:
 	void setFilename(const QString& path);
 	void load();
 	void save();
-
+	// get a filteringOptions object containing current filters settings
+	AwFilteringOptions filteringOptions();
 public slots:
 	void setFilter(int type, float LP, float HP);
 	/** Set the filters used when computing the ICA. the type specifies MEG, EEG or EMG **/

@@ -43,6 +43,7 @@
 #include <QApplication>
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
+#include "Filter/AwFilteringManager.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -83,7 +84,7 @@ void AwProcessManager::quit()
 void AwProcessManager::closeFile()
 {
 	// clean active display processes
-	foreach (AwProcess *p, m_activeDisplayProcess)
+	for (auto p : m_activeDisplayProcess)
 		stopProcess(p);
 	
 	// clean currently running processes
@@ -106,7 +107,7 @@ void AwProcessManager::closeFile()
 		m_processesWidget->clear();
 
 	// GUI processess
-	foreach (AwGUIProcess *gp, m_GUIProcesses)
+	for (auto gp : m_GUIProcesses)
 		gp->stop();
 }
 
@@ -352,6 +353,7 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	process->pdi.input.setReader(settings->currentReader());
 	process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
 	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(AwSettings::getInstance()->currentFileName());
+	process->pdi.input.filteringOptions = AwFilteringManager::instance()->filteringOptions();
 	return process;
 }
 
