@@ -147,7 +147,7 @@ void AwProcessFromMarkersDial::accept()
 	// set markers to compute data on
 	process->pdi.input.markers = m_processMarkers;
 	// start process
-	process_manager->startProcess(process);
+	process_manager->runProcess(process);
 	QDialog::accept();
 }
 

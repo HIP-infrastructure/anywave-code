@@ -158,6 +158,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFWavelet2", "D:\Dev\aw-tfw
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEGInto4D", "D:\Dev\aw-eeginto4D\EEGInto4D.vcxproj", "{7A80BFFA-5097-495D-897A-A956654B2E71}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2Graphs", "D:\Dev\h2-graphs\H2Graphs.vcxproj", "{438D0D9F-7136-4A67-8E06-08929888BE72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -428,12 +430,18 @@ Global
 		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|Win32.Build.0 = Release|Win32
 		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.ActiveCfg = Release|x64
 		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.Build.0 = Release|x64
+		{438D0D9F-7136-4A67-8E06-08929888BE72}.Debug|Win32.ActiveCfg = Debug|x64
+		{438D0D9F-7136-4A67-8E06-08929888BE72}.Debug|x64.ActiveCfg = Debug|x64
+		{438D0D9F-7136-4A67-8E06-08929888BE72}.Debug|x64.Build.0 = Debug|x64
+		{438D0D9F-7136-4A67-8E06-08929888BE72}.Release|Win32.ActiveCfg = Release|x64
+		{438D0D9F-7136-4A67-8E06-08929888BE72}.Release|x64.ActiveCfg = Release|x64
+		{438D0D9F-7136-4A67-8E06-08929888BE72}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

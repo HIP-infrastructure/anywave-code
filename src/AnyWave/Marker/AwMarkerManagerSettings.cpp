@@ -518,7 +518,7 @@ void AwMarkerManagerSettings::exportWizard()
 		exporter->pdi.input.channels = dlg.channels();
 		exporter->concatenate = dlg.concatenate();
 		exporter->matlabFormat = dlg.isMatlabFormat();
-		AwProcessManager::instance()->startProcess(exporter);
+		AwProcessManager::instance()->runProcess(exporter);
 	}
 }
 
@@ -681,7 +681,7 @@ void AwMarkerManagerSettings::writeTrigger()
 			return;
 		}
 		process->pdi.input.markers = AwMarker::duplicate(markers);
-		AwProcessManager::instance()->startProcess(process);
+		AwProcessManager::instance()->runProcess(process);
 	}
 	else 
 		AwMessageBox::information(0, "TRIGGER Writing", "The file does not support writing to TRIGGER channels");
@@ -702,7 +702,7 @@ void AwMarkerManagerSettings::clearTrigger()
 			AwMessageBox::critical(0, "Missing Plugin", "The Trigger Eraser plugin is not loaded.");
 			return;
 		}
-		AwProcessManager::instance()->startProcess(process);
+		AwProcessManager::instance()->runProcess(process);
 	}
 	else
 		AwMessageBox::information(0, "TRIGGER Channel", "The file does not support writing to TRIGGER channels");
