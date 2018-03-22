@@ -104,9 +104,9 @@ void OutputWidget::saveToMat()
 	}
 
 	// create cell array of strings for the electrode's labels
-	size_t cellDimsXLabels[2] = { 1, m_result->xLabels.size() };
+    size_t cellDimsXLabels[2] = { 1, size_t(m_result->xLabels.size()) };
 	matvar_t *mat_xlabels = Mat_VarCreate("xLabels", MAT_C_CELL, MAT_T_CELL, 2, cellDimsXLabels, NULL, 0);
-	size_t cellDimsYLabels[2] = { 1, m_result->yLabels.size() };
+    size_t cellDimsYLabels[2] = { 1, size_t(m_result->yLabels.size()) };
 	matvar_t *mat_ylabels = Mat_VarCreate("yLabels", MAT_C_CELL, MAT_T_CELL, 2, cellDimsYLabels, NULL, 0);
 	if (!mat_xlabels) {
 		AwMessageBox::information(this, "File Error",  "Failed to create variable xLabels");

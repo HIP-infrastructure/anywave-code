@@ -23,7 +23,7 @@ CONFIG -= app_bundle
 DEFINES += AW_DISABLE_EPOCHING
 
 macx {
-    DESTDIR = $$DESTIR/AnyWave.app/Contents/MacOS
+    DESTDIR = $$DESTDIR/AnyWave.app/Contents/MacOS
 }
 
 macx {
@@ -31,11 +31,11 @@ macx {
 }
 
 unix:!macx{
- LIBS += -lAwCore -lopenblas -lgomp
+ LIBS += -lAwCore -lopenblas -lgomp -lqwt
 }
 
 LIBS += -lAwUtilities -lAwMath -lAwFilter -lAwLayout -lAwMapping -lAwGraphics -lAwHDF5 -lAwMATLAB -lAwWidgets -lAwEpoch
-LIBS += -lAwRW -lAwProcess -lhdf5 -lhdf5_hl -lqwt $$VTK_LIBRARIES -lmatio
+LIBS += -lAwRW -lAwProcess -lhdf5 -lhdf5_hl  $$VTK_LIBRARIES -lmatio
 
 install_extra.path = $$DESTDIR
 macx{

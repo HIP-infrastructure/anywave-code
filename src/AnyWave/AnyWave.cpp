@@ -1357,7 +1357,7 @@ bool AnyWave::searchForMatlab()
 		if (settings.value("matlab/user_changed_folder", false).toBool())
 		{
 			// User changed the path, so recreate the script and reset flags for a relaunch.
-			createMatlabShellScript(settings.value("matlab/path").toString());
+            AwSettings::getInstance()->createMatlabShellScript(settings.value("matlab/path").toString());
 			settings.setValue("matlab/require_restart", true);
 			settings.setValue("matlab/user_changed_folder", false);
 		}

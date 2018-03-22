@@ -358,14 +358,16 @@ AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cut
 
 AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const QStringList& skipped, const QStringList& used)
 {
-	AwMarkerList list = markers, skipList;
+        AwMarkerList list = markers, skipList, tmpList;
 
 	if (!skipped.isEmpty() && used.isEmpty()) {
-		skipList = AwMarker::sort(AwMarker::getMarkersWithLabels(markers, skipped));
+                tmpList = AwMarker::getMarkersWithLabels(markers, skipped);
+                skipList = AwMarker::sort(tmpList);
 		return AwMarker::cutAroundMarkers(list, skipList);
 	}
 	if (!skipped.isEmpty() && !used.isEmpty()) {
-		skipList = AwMarker::sort(AwMarker::getMarkersWithLabels(markers, skipped));
+                tmpList = AwMarker::getMarkersWithLabels(markers, skipped);
+                skipList = AwMarker::sort(tmpList);
 		list = AwMarker::cutAroundMarkers(list, skipList);
 		return AwMarker::getMarkersWithLabels(list, used);
 	}

@@ -51,8 +51,18 @@ macx {
         for(f, LIST) {
     # remove first lib and last .so
           base = $$basename(f)
-	  noso = $$section(base, .so, 0 , 0)   
-	  nolib = $$section(noso, lib, 1, 3)    
+          noso = $$section(base, .so, 0 , 0)
+          nolib = $$section(noso, lib, 1, 3)
+          VTK_LIBRARIES += -l$$nolib
+        }
+      }
+      macx {
+        LIST = $$files($$VTK_LIB_PATH/*.dylib)
+        for(f, LIST) {
+    # remove first lib and last .dylib
+          base = $$basename(f)
+          noso = $$section(base, .dylib, 0 , 0)
+          nolib = $$section(noso, lib, 1, 3)
           VTK_LIBRARIES += -l$$nolib
         }
       }
@@ -82,7 +92,7 @@ unix:!macx {
 
 CONFIG += release warn_off c++11
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -O3
+QMAKE_CXXFLAGS_RELEASE += -O3 -Wc++11-narrowing
 unix:!macx{
 QMAKE_CXXFLAGS_RELEASE += -fopenmp
 }
