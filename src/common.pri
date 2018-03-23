@@ -27,7 +27,7 @@ INCLUDEPATH += $$INCLUDEDIR
 DESTDIR = $$OUTDIR
 
 CONFIG(debug, debug|release) {
-    DESTDIR = $$DESTDIR/debug
+    DESTDIR = $$DESTDIR/debug/
 }
 CONFIG(release, debug|release) {
     DESTDIR = $$DESTDIR/release
@@ -45,7 +45,8 @@ macx {
 
 # extract all .so files present in VTK_LIB_PATH and format them as flags for the linker.
 !isEmpty(VTK_LIB_PATH) {
-     VTK_LIBRARIES += -L$$VTK_LIB_PATH
+     LIBS += -L$$VTK_LIB_PATH
+ #    VTK_LIBRARIES += -L$$VTK_LIB_PATH
      unix:!macx {
         LIST = $$files($$VTK_LIB_PATH/*.so)
         for(f, LIST) {
@@ -81,9 +82,9 @@ LIBS += -L$$LIB_DIR
 
 DEFINES += ARMA_DONT_USE_WRAPPER NDEBUG
 macx {
-INSTALL_LIB_PATH = $$DESTDIR/AnyWave.app/Contents/dylibs
-INSTALL_APP_PATH = $$DESTDIR/AnyWave.app/Contents/MacOS
-PLUGIN_DIR = $$DESTDIR/Anywave_Plugins
+INSTALL_LIB_PATH = $$DESTDIR/bin/AnyWave.app/Contents/dylibs
+INSTALL_APP_PATH = $$DESTDIR/bin/AnyWave.app/Contents/MacOS
+PLUGIN_DIR = $$DESTDIR/bin/Anywave_Plugins
 }
 
 unix:!macx {
