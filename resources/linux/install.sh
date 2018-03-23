@@ -12,7 +12,9 @@ install() {
     cp AnyWaveLinux $1
     cp -r lib $1
     cp -r Plugins $1
-    cp -r Python $1
+    cp -r Python $1  
+    cp -r include $1
+    cp -r armadillo $1
 }
 
 
