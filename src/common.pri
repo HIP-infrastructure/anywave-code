@@ -94,7 +94,7 @@ unix:!macx {
 
 CONFIG += release warn_off c++11
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -O3 -Wc++11-narrowing
+QMAKE_CXXFLAGS_RELEASE += -O3
 unix:!macx{
 QMAKE_CXXFLAGS_RELEASE += -fopenmp
 }
