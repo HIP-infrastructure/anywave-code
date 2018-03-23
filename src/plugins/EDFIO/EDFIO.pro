@@ -38,6 +38,6 @@ HEADERS += \
 	edflib.h
 
 SOURCES += \
-    EDFIO.cpp
+    EDFIO.cpp edflib.c
 
 
