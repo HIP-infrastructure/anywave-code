@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{fa2e50c0-95c9-4418-93a8-a9652bb7cc1f}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{d71e5720-ee60-4d99-b6d5-a714d8df5f9c}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="SignalItem">
+      <UniqueIdentifier>{6bcaabac-6605-4993-aa34-16fb60b0fa21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mark">
+      <UniqueIdentifier>{9ee5b33d-e6f3-4640-9761-e4b3d9dd390e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MarkerItem">
+      <UniqueIdentifier>{340f8a7a-c98f-44f9-850b-b534fd2a8e13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AwColorMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwGraphicsObjects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSignalItem.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSignalItemSettings.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSignalItemSettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSignalItemSettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwGraphicsObjects.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwGraphicsObjects.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSIAmpButton.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSIAmpButton.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSIAmpButton.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwHighLightPositionMarker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwHighLightPositionMarker.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Mark\AwHighLightPositionMarker.cpp">
+      <Filter>Mark</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerItem.cpp">
+      <Filter>MarkerItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerLabelButton.cpp">
+      <Filter>MarkerItem</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerLabelButton.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerLabelButton.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerValueButton.cpp">
+      <Filter>MarkerItem</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerValueButton.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerValueButton.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMappingCursorItem.cpp">
+      <Filter>MarkerItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerChannelItem.cpp">
+      <Filter>MarkerItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwCursorItem.cpp">
+      <Filter>MarkerItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwHighLightMarker.cpp">
+      <Filter>MarkerItem</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSignalItem.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSignalItem.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwAmplitudeManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwAmplitudeManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwAmplitudeManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_amplitudes.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwLabelItem.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="AwQwtColorMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSignalLabelItem.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeneratedFiles\ui_AwSignalItemSettings.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwColorMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwGraphicInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwGraphicsDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwMappingCursorItem.h">
+      <Filter>MarkerItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwMarkerChannelItem.h">
+      <Filter>MarkerItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwCursorItem.h">
+      <Filter>MarkerItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwHighLightMarker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwLabelItem.h">
+      <Filter>SignalItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwQwtColorMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwSignalLabelItem.h">
+      <Filter>SignalItem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\graphics\AwMarkerItem.h">
+      <Filter>MarkerItem</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="SignalItem\AwSignalItemSettings.h">
+      <Filter>SignalItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalItem\AwSignalItemSettings.ui">
+      <Filter>SignalItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\graphics\AwGraphicsObjects.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalItem\AwSIAmpButton.h">
+      <Filter>SignalItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\graphics\AwHighLightPositionMarker.h">
+      <Filter>Mark</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MarkerItem\AwMarkerLabelButton.h">
+      <Filter>MarkerItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MarkerItem\AwMarkerValueButton.h">
+      <Filter>MarkerItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\graphics\AwSignalItem.h">
+      <Filter>SignalItem</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\AwAmplitudeManager.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\resources\amplitudes.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\resources\amplitudes.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="awgraphicslib_fr.ts">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="awgraphicslib_en.ts">
+      <Filter>Translation Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

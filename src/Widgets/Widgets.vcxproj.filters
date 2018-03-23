@@ -1,0 +1,708 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{3890e1a5-a69f-4dbc-813d-d9f2398de366}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{1e835157-3704-4b1b-b2a1-4ecf23291bc7}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="SignalView">
+      <UniqueIdentifier>{3a310313-058c-40ce-83ae-f18361b403c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SEEGViewer">
+      <UniqueIdentifier>{2d0d5d6a-b0b9-475d-86d6-8a12e0c319df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
+      <Extensions>ts</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="InputMarker">
+      <UniqueIdentifier>{1c04f334-272e-4398-9fed-447b3a2e7d63}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AwAmplitudeButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwAmplitudeWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMapWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwTimeScaleCombo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwTimeScaleCombo.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwTimeScaleCombo.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMapWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMapWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwAmplitudeButton.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwAmplitudeButton.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwAmplitudeWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwAmplitudeWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Aw2DGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwTopoWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwTopoWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwTopoWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwTopoBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwViewSettings.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwGoToLatencyDial.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwGoToLatencyDial.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwGoToLatencyDial.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwGraphicsScene.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwGraphicsScene.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwGraphicsScene.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwGraphicsView.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwGraphicsView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwGraphicsView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwNavigationBar.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwNavigationBar.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwNavigationBar.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwViewSettingsUi.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwViewSettingsUi.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwViewSettingsUi.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwViewSettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwViewSettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwBaseMarkerBar.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBaseMarkerBar.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBaseMarkerBar.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMarkerInspector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerInspector.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerInspector.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwAddPredefinedMarker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwAddPredefinedMarker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwAddPredefinedMarker.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwAddTargetChannels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwAddTargetChannels.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwAddTargetChannels.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkingSettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkingSettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMarkingSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwTopoBuilder.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwTopoBuilder.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwTopoWidgetSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwTopoWidgetSettings.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwTopoWidgetSettings.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwWaitWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwWaitWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwWaitWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwComboCMap.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwComboCMap.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwComboCMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwTopoLabelImage.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwTopoLabelImage.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwTopoLabelImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SEEGViewer\AwSEEGViewer.cpp">
+      <Filter>SEEGViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSEEGViewer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSEEGViewer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp">
+      <Filter>SEEGViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSEEGWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSEEGWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMarkAroundWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkAroundWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkAroundWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMessageBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwGTCMenu.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwGTCMenu.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwGTCMenu.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwComboColor.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwComboColor.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwComboColor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwDownSamplingWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwDownSamplingWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwDownSamplingWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="InputMarker\AwInputMarkerTableView.cpp">
+      <Filter>InputMarker</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwInputMarkerTableView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwInputMarkerTableView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="InputMarker\InputMarkerModel.cpp">
+      <Filter>InputMarker</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_InputMarkerModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_InputMarkerModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="InputMarker\AwInputMarkerWidget.cpp">
+      <Filter>InputMarker</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwInputMarkerWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwInputMarkerWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwComboMarker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="AwComboMarker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwComboMarker.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSpectroWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="AwSpectroWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSpectroWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwBaseSignalView.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBaseSignalView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBaseSignalView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="AwAmplitudeWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwTimeScaleCombo.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwMapWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwAmplitudeButton.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwAmplitudeWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwTopoWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalView\AwGoToLatencyDial.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalView\AwGoToLatencyDial.ui">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\SignalView\AwGraphicsScene.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\SignalView\AwGraphicsView.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalView\AwNavigationBarv2.ui">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\SignalView\AwNavigationBar.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalView\AwViewSettingsUi.ui">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalView\AwViewSettingsUi.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\resources\AnyWave.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\SignalView\AwViewSettings.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\SignalView\AwBaseMarkerBar.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwMarkerInspector.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwMarkerInspector.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwAddPredefinedMarker.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwAddPredefinedMarker.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwAddTargetChannels.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwAddTargetChannels.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\AwMarkingSettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwTopoBuilder.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwTopoWidgetSettings.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwTopoWidgetSettings.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwWaitWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwWaitWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwComboCMap.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwTopoLabelImage.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwTopoWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwSEEGViewer.h">
+      <Filter>SEEGViewer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SEEGViewer\AwSEEGWidget.h">
+      <Filter>SEEGViewer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SEEGViewer\AwSEEGWidget.ui">
+      <Filter>SEEGViewer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwMarkAroundWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwMarkAroundWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SignalView\AwGTCMenu.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwComboColor.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwDownSamplingWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwDownSamplingWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwInputMarkerTableView.h">
+      <Filter>InputMarker</Filter>
+    </CustomBuild>
+    <CustomBuild Include="InputMarker\InputMarkerModel.h">
+      <Filter>InputMarker</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwInputMarkerWidget.h">
+      <Filter>InputMarker</Filter>
+    </CustomBuild>
+    <CustomBuild Include="InputMarker\AwInputMarkerWidget.ui">
+      <Filter>InputMarker</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwComboMarker.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwSpectroWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwSignalSplitterWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\SignalView\AwBaseSignalView.h">
+      <Filter>SignalView</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeneratedFiles\ui_AwAmplitudeWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Aw2DGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwGoToLatencyDial.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwNavigationBarv2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwViewSettingsUi.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwMarkerInspector.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwAddPredefinedMarker.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwAddTargetChannels.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwTopoWidgetSettings.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwWaitWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwTopoWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwWait.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwSEEGWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwMarkAroundWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwMessageBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwDownSamplingWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwInputMarkerWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\resources\Resources\images\ox_arrow_down_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\Resources\images\ox_arrow_up_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\Resources\images\back32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\Resources\images\end32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\Resources\images\fwd32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\Resources\images\ox_eye_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\Resources\images\start32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\pw.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\AddToMontage48x48.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\back32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\carto_32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\cursor_mode.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\display-settings.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\edit-24x24.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\end32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\fileopen-32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\fwd32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\AnyWave.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\start32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\logo_Inserm.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\Qt_logo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\logo_amu.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\VTK_logo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\AnyWave_icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\matlablogo.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\ox_eye_48.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\ox_eye_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\plus_sign_24x24.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\minus_sign_24x24.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\ox_document_save_as_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\ox_application_exit_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\ox_plugin_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\ox_view_filter_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\import_file_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\system_run_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\AnyWave_logo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\list-icon_32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\importICA32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\resources\amplitudes.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\resources\eeg_sensors_locations.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\..\resources\eeg_sensors_2D.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\resources\anywave_fr.qm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\resources\awreadwritelib_fr.qm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\resources\awwidgetlib_fr.qm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\resources\AwCoreLib_fr.qm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="awwidgetslib_fr.ts">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="awwidgetslib_en.ts">
+      <Filter>Translation Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -95,6 +95,9 @@ protected slots:
 	void nextValue();
 	void goToValue();
 	void showColumn(bool flag);
+#ifndef NDEBUG
+	void cutAround();
+#endif
 	
 protected:
 	void updateStats();

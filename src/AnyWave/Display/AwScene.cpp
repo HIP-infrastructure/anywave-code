@@ -94,7 +94,7 @@ void AwScene::launchProcess()
 	process->pdi.input.markers = inputList;
 	// do not delete markers after computation
 	// start process
-	process_manager->startProcess(process);
+	process_manager->runProcess(process);
 }
 
 //

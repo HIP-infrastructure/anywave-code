@@ -43,6 +43,7 @@
 #include <QApplication>
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
+#include "Filter/AwFilteringManager.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -83,7 +84,7 @@ void AwProcessManager::quit()
 void AwProcessManager::closeFile()
 {
 	// clean active display processes
-	foreach (AwProcess *p, m_activeDisplayProcess)
+	for (auto p : m_activeDisplayProcess)
 		stopProcess(p);
 	
 	// clean currently running processes
@@ -106,7 +107,7 @@ void AwProcessManager::closeFile()
 		m_processesWidget->clear();
 
 	// GUI processess
-	foreach (AwGUIProcess *gp, m_GUIProcesses)
+	for (auto gp : m_GUIProcesses)
 		gp->stop();
 }
 
@@ -352,6 +353,7 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	process->pdi.input.setReader(settings->currentReader());
 	process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
 	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(AwSettings::getInstance()->currentFileName());
+	process->pdi.input.filteringOptions = AwFilteringManager::instance()->filteringOptions();
 	return process;
 }
 
@@ -465,7 +467,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 process->pdi.input.markers = markers;
 	 // set flag to skip buildPDI checking
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
-	 startProcess(process);
+	 runProcess(process);
  }
 
  bool AwProcessManager::buildPDIForProcess(AwBaseProcess *p)
@@ -699,6 +701,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
  * \param process
  * Pointer to the process to start.
  * 
+ * Optional: list of arguments for the process (only applicable to GUIProcess
  * 
  * Init process input/output. Manage UI of the process if any. 
  * Make connections to DataServer and finally launch the process.
@@ -707,7 +710,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
  * \see
  * AwProcess
  */
-void AwProcessManager::startProcess(AwBaseProcess *process)
+void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& args)
 {
 	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDontRequireData;
 	if (skipDataFile)
@@ -771,6 +774,7 @@ void AwProcessManager::startProcess(AwBaseProcess *process)
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
 			ds->openConnection(p);
+			connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)));
 			connect(p, SIGNAL(sendMarker(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 			connect(p, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
 			connect(p, SIGNAL(closed()), p, SLOT(stop()));
@@ -784,7 +788,7 @@ void AwProcessManager::startProcess(AwBaseProcess *process)
 			p->setMarkers(mm->getMarkers());
 		}
 		p->init();
-		p->run();
+		p->run(args);
 	}
 	else { // AwProcess
 		AwProcess *p = static_cast<AwProcess *>(process);
@@ -837,7 +841,6 @@ void AwProcessManager::startProcess(AwBaseProcess *process)
 			m_runningProcesses << p;
 
 		p->init();
-		//	QMetaObject::invokeMethod(process, "init", Qt::QueuedConnection);
 
 		if (!skipDataFile)
 			if (!p->pdi.output.channels.isEmpty())
@@ -945,16 +948,24 @@ void AwProcessManager::startProcessFromMenu()
 		return;
 
 	// Instantiate process and launch it
-	startProcess(newProcess(p));
+	runProcess(newProcess(p));
 }
 
-void AwProcessManager::startProcess(const QString &name)
+void AwProcessManager::startProcess(const QString& name, const QStringList& args)
 {
 	AwProcessPlugin *p = AwPluginManager::getInstance()->getProcessPluginByName(name);
 
 	if (p)
-		startProcess(newProcess(p));
+		runProcess(newProcess(p), args);
 }
+
+//void AwProcessManager::startProcess(const QString &name)
+//{
+//	AwProcessPlugin *p = AwPluginManager::getInstance()->getProcessPluginByName(name);
+//
+//	if (p)
+//		runProcess(newProcess(p));
+//}
 
 
 
@@ -1117,7 +1128,19 @@ void AwProcessManager::executeCommand(int command, QVariantList args)
 	switch (command)
 	{
 	case AwProcessCommand::LaunchProcess:
-		startProcess(args.first().toString());
+		if (nargs == 1)
+			startProcess(args.first().toString());
+		else if (nargs > 1) {
+			// consider all arguments are QString 
+			QString processName = args.first().toString();
+			QVariantList tmp = args;
+			tmp.removeAll(args.first());
+			QStringList processArgs;
+			for (auto a : tmp)
+				processArgs << a.toString();
+			startProcess(processName, processArgs);
+
+		}
 		break;
 	case AwProcessCommand::AddHighlightedSection:
 		if (nargs > 3)

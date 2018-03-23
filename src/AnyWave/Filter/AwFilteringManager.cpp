@@ -56,6 +56,21 @@ void AwFilteringManager::reset()
 	emit filtersChanged();
 }
 
+AwFilteringOptions AwFilteringManager::filteringOptions()
+{
+	AwFilteringOptions fo;
+	fo.eegHP = m_hp[AwChannel::EEG];
+	fo.eegLP = m_lp[AwChannel::EEG];
+	fo.eegNotch = m_notch[AwChannel::EEG];
+	fo.megHP = m_hp[AwChannel::MEG];
+	fo.megLP = m_lp[AwChannel::MEG];
+	fo.megNotch = m_notch[AwChannel::MEG];
+	fo.emgHP = m_hp[AwChannel::EMG];
+	fo.emgLP = m_lp[AwChannel::EMG];
+	fo.emgNotch = m_notch[AwChannel::EMG];
+	return fo;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
 

@@ -93,11 +93,11 @@ void AwScript::run()
 		}
 #else
 		QJSValue result = m_engine->evaluate(script);
-		if (result.isError()) 
+		if (result.isError()) {
 			emit error(QString("error in %1 at line %2 : %3").arg(m_scriptPath).arg(result.property("lineNumber").toInt()).arg(result.toString()));
+			emit finished();
+		}
 #endif
-//		else
-//			emit error(tr("Syntax error in script."));
 	}
 	emit finished();
 }
@@ -109,7 +109,7 @@ QSVALUE AwScript::getFileInput()
 
 	return m_engine->newQObject(m_processFileInput);
 }
-
+  
 
 
 void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
@@ -118,7 +118,6 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 	QObject *fi = fileInput.toQObject();
 	AwPluginManager *pm = AwPluginManager::getInstance();
 	AwMontageManager *mm = AwMontageManager::instance();
-	QString tmp;
 	QElapsedTimer timer;
 
 	if (p && fi) {
@@ -137,14 +136,14 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 		AwFileIO *reader = NULL;
 		connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(processMessage(const QString&)));
 
-		foreach (AwPFIElement *ifelem, inputs) {
+		foreach(AwPFIElement *ifelem, inputs) {
 			QString filePath = ifelem->dataPath();
 			reader = pm->getReaderToOpenFile(filePath);
 			if (!reader) {
 				emit error(QString("No reader found to open the file %1.").arg(filePath));
 				continue;
 			}
-			if (reader->openFile(filePath)  != AwFileIO::NoError)	{
+			if (reader->openFile(filePath) != AwFileIO::NoError) {
 				emit error(QString("Failed to open the file %1").arg(filePath));
 				pm->deleteReaderInstance(reader);
 				return;
@@ -153,16 +152,15 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			// apply montage
 			if (ifelem->montagePath().isEmpty()) { // No Montage Defined => default montage
 				emit warning("No montage file specified. Using default montage.");
-				process->pdi.input.channels = reader->infos.channels();
+				process->pdi.input.channels = AwChannel::duplicateChannels(reader->infos.channels());
 			}
 			else {
 				emit message("Applying montage file " + ifelem->montagePath());
 				process->pdi.input.channels = mm->loadAndApplyMontage(reader->infos.channels(), ifelem->montagePath());
 			}
 
-
 			// apply filters
-			foreach (AwChannel *c, process->pdi.input.channels) 	{
+			for (auto c : process->pdi.input.channels) {
 				switch (c->type())
 				{
 				case AwChannel::EEG:
@@ -192,10 +190,23 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			// apply markers (if any)
 			if (!ifelem->markerPath().isEmpty()) {
 				emit message("Using marker file " + ifelem->markerPath());
-				//AwMarkerList markers = marker_m->loadMarkers(ifelem->markerPath());
 				AwMarkerList markers = AwMarker::load(ifelem->markerPath());
-				if (!markers.isEmpty())
+				if (!markers.isEmpty()) {
 					process->pdi.input.markers = markers;
+					bool skipMarkers = !finput->skippedMarkers().isEmpty();
+					bool useMarkers = !finput->usedMarkers().isEmpty();
+					if (skipMarkers) 
+						markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
+					if (skipMarkers || useMarkers) {
+						AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers());
+						if (filtered.isEmpty()) 
+							emit warning("no markers were kept after applying usedMarkers or skippedMarkers filters");
+						process->pdi.input.markers = filtered;
+						// Destroy loaded markers as applySelection duplicates them.
+						while (!markers.isEmpty())
+							delete markers.takeFirst();
+					}
+				}
 				else
 					emit warning("No markers could be loaded from the marker file.");
 			}
@@ -203,6 +214,8 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 				emit warning("No marker file specified.");
 
 			process->pdi.input.dataPath = filePath;
+			QFileInfo fi(filePath);
+			process->pdi.input.dataFolder = fi.absolutePath();
 			process->pdi.input.setReader(reader);
 			process->pdi.input.fileDuration = reader->infos.totalDuration();
 			// Add the scripted flags before execution
@@ -210,7 +223,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			process->init();
 			// redirect process output to this object's output.
 			connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(message(const QString&)));
-			
+
 			// connect the process as a client of a DataServer thread.
 			AwDataServer::getInstance()->openConnection(process, reader);
 
@@ -220,18 +233,22 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			timer.restart();
 			m_runningProcesses.append(process);
 			process->run();
-			
-			tmp = "Process " + process->plugin()->name + " finished in " + AwUtilities::hmsTime(timer.elapsed());
-			emit message(tmp);
+
+			emit message(QString("Process %1 finished in %2").arg(process->plugin()->name).arg(AwUtilities::hmsTime(timer.elapsed())));
 			// process finished
 			AwDataServer::getInstance()->closeConnection(process);
 			m_runningProcesses.removeAll(process);
-#ifndef NDEBUG
-			qDebug() << "Process " << process->plugin()->name << " has finished." << endl;
-			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(processMessage(const QString&)));
-#endif
+			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(message(const QString&)));
+
+			// clean pdi.input for another usage
+			while (!process->pdi.input.channels.isEmpty())
+				delete process->pdi.input.channels.takeFirst();
+			while (!process->pdi.input.markers.isEmpty())
+				delete process->pdi.input.markers.takeFirst();
 		} // end foreach (AwInputFile *ifile, inputs)
 	} // end if (p && m_taskFileInput)
-	else 
+	else
 		emit error(tr("Invalid parameters in function run(process, fileInput)"));
+
+	emit finished();
 }

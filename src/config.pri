@@ -5,23 +5,24 @@
 #-------------------------------------------------
 
 # specify the VTK version used
-VTK_VERSION_SUFFIX = 
+VTK_VERSION_SUFFIX = 8.1
 # VTK_INCLUDE_PATH  Path where to find headers for vtk
-VTK_INCLUDE_PATH = /home/bruno/vtk8.1/include/vtk-8.1
+VTK_INCLUDE_PATH = /Users/bruno/VTK810/include/vtk-$$VTK_VERSION_SUFFIX
 # VTK_LIB_DIR Path where to find vtk libraries
-VTK_LIB_PATH = /home/bruno/vtk8.1/lib
+VTK_LIB_PATH = /Users/bruno/VTK810/lib
 
 # ARMA_INCLUDE_PATH  Path to find armadillo C++ include files
 ARMA_INCLUDE_PATH = $$PWD/../armadillo/include
+
 # H5_INCLUDE_PATH Path to HDF5 headers
-H5_INCLUDE_PATH = /home/bruno/hdf5/include
+H5_INCLUDE_PATH = /Users/bruno/HDF5/include
 # H5_LIB_PATH
-H5_LIB_PATH = /home/bruno/hdf5/lib
+H5_LIB_PATH = /Users/bruno/HDF5/lib
 # MATIO PATHS
-MATIO_INCLUDE_PATH = /home/bruno/matio/include
-MATIO_LIB_PATH = /home/bruno/matio/lib
+MATIO_INCLUDE_PATH = /Users/bruno/matio/include
+MATIO_LIB_PATH = /Users/bruno/matio/lib
 # QWT
-QWT_INCLUDE_PATH=/usr/include/qwt
+QWT_INCLUDE_PATH=
 QWT_LIB_PATH=
 
 # MATLAB_ROOT  Path to the installation of MATLAB
@@ -50,3 +51,4 @@ QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.10
 OBJECTS_DIR = ./tmp
 MOC_DIR = ./moc
 UI_DIR = ./ui
+

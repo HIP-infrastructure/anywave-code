@@ -18,7 +18,7 @@ CONFIG += plugin no_plugin_name_prefix
 QMAKE_EXTENSION_SHLIB = so
 
 macx {
-    DESTDIR = $$DESTDIR/AnyWave.app/Contents/Python
+    DESTDIR = $$DESTDIR/bin/AnyWave.app/Contents/Python
 }
 unix:!macx {
     DESTDIR = $$DESTDIR/Python

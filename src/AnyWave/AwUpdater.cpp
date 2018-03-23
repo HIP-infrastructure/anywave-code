@@ -37,18 +37,18 @@ void AwUpdater::checkForUpdate()
 
 #ifdef Q_OS_MAC
 	platform = "Mac";
-	version = "1802";
-	minor = "0";
+	version = "1803";
+	minor = "1";
 #endif
 #ifdef Q_OS_WIN
 	platform = "Win";
-	version = "1802";
-	minor = "0";
+	version = "1803";
+	minor = "1";
 #endif
 #ifdef Q_OS_LINUX
 	platform = "Linux";
-	version = "1802";
-	minor = "0";
+	version = "1803";
+	minor = "1";
 #endif 
 
 	QUrl url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));

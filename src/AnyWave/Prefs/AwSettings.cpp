@@ -148,13 +148,13 @@ void AwSettings::createMatlabShellScript(const QString& path)
 
 	if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
-		stream << "#!/bin/sh" << endl;
+        stream << "#!/bin/bash" << endl;
 		stream << "MATLAB=" + path << endl;
 #ifdef Q_OS_MAC
-		stream << "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:$MATLAB/bin/maci64" << endl;
+        stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
 #elif defined(Q_OS_LINUX)
-        stream << "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$MATLAB/bin/glnxa64:$MATLAB/sys/os/glnxa64" << endl;
+        stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MATLAB/bin/glnxa64:$MATLAB/sys/os/glnxa64" << endl;
 		stream << "export LD_LIBRARY_PATH" << endl;
 #endif
 		scriptFile.close();

@@ -1049,6 +1049,8 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 	// reimplementing loading of montage files to only apply on asRecorded channels
 	// removing all procedures related to AnyWave UI
 	QFile file(path);
+
+
 	QHash<QString, AwChannel *> asRecordedH;
 
 	if (!file.open(QIODevice::ReadOnly))

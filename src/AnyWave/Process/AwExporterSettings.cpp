@@ -40,11 +40,17 @@ AwExporterSettings::AwExporterSettings(QWidget *parent)
 	connect(m_ui->buttonSelectChannels, SIGNAL(clicked()), this, SLOT(selectChannels()));
 	connect(m_ui->buttonSelectICA, SIGNAL(clicked()), this, SLOT(selectICAChannels()));
 	connect(m_ui->buttonMarkers, SIGNAL(clicked()), this, SLOT(selectMarkers()));
+	connect(m_ui->comboWriters, SIGNAL(currentIndexChanged(int)), this, SLOT(updateOutputFileExtension(int)));
 }
 
 AwExporterSettings::~AwExporterSettings()
 {
 	delete m_ui;
+}
+
+void AwExporterSettings::updateOutputFileExtension(int index)
+{
+	m_ui->lineEditFile->setText(QString("%1%2").arg(initialPath).arg(extensions.at(index)));
 }
 
 void AwExporterSettings::selectMarkers()
@@ -81,12 +87,14 @@ void AwExporterSettings::selectChannels()
 void AwExporterSettings::pickupFile()
 {
 	QString ext = extensions.at(m_ui->comboWriters->currentIndex());
-	filePath = QFileDialog::getSaveFileName(this, tr("Output file"), "/", ext);
+	QFileInfo fi(initialPath);
+	filePath = QFileDialog::getSaveFileName(this, tr("Output file"), fi.absolutePath(), ext);
 	m_ui->lineEditFile->setText(filePath);
 }
 
 int AwExporterSettings::exec()
 {
+	updateOutputFileExtension(0);
 	m_ui->comboWriters->addItems(writers);
 	m_ui->spinMEGLP->setValue(foptions.megLP);
 	m_ui->spinMEGHP->setValue(foptions.megHP);

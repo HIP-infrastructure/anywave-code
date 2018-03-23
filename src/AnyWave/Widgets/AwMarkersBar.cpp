@@ -87,11 +87,6 @@ void AwMarkersBar::launchProcess()
 		// set markers to compute data on
 		process->pdi.input.markers << new AwMarker(m_markerUnderMouse);
 		// start process
-		process_manager->startProcess(process);
+		process_manager->runProcess(process);
 	}
 }
-
-//void AwMarkersBar::newMarkers(AwMarkerList& markers)
-//{
-//	updateBar();
-//}

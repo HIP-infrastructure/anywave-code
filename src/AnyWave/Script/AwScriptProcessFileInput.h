@@ -55,6 +55,8 @@ class AwScriptProcessFileInput : public QObject
 	Q_PROPERTY(bool useMarkerFile READ useMarkerFile WRITE setMarkerFile)
 	Q_PROPERTY(bool useMontageFile READ useMontageFile WRITE setMontageFile)
 	Q_PROPERTY(QStringList fileExtensions READ fileExtensions)
+	Q_PROPERTY(QStringList useMarkers READ getUsedMarkers WRITE setUsedMarkers)
+	Q_PROPERTY(QStringList skipMarkers READ getSkippedMarkers WRITE setSkippedMarkers)
 public:
 	AwScriptProcessFileInput(QObject *parent);
 	~AwScriptProcessFileInput();
@@ -66,9 +68,15 @@ public:
 	void setMontageFile(bool f) { m_useMontageFile = f; }
 
 	QStringList fileExtensions() { return m_fileExtensions; }
+	QStringList getUsedMarkers() { return m_usedMarkers; }
+	QStringList getSkippedMarkers() { return m_skippedMarkers; }
+	void setUsedMarkers(const QStringList& markers) { m_usedMarkers = markers; }
+	void setSkippedMarkers(const QStringList& markers) { m_skippedMarkers = markers; }
 	inline AwPIElements& inputElements() { return m_inputElements; }
 	inline AwFilteringOptions& filters() { return m_filters; }
 	void parseFiles();	// build the internal data structure based on added files.
+	inline QStringList& usedMarkers() { return m_usedMarkers; }
+	inline QStringList& skippedMarkers() { return m_skippedMarkers; }
 public slots:
 	void addFileExtension(QString ext) { m_fileExtensions << ext; }
 	void setRootDir(QString root);
@@ -91,6 +99,7 @@ private:
 	QString m_globalMontage;	// path to a montage file to use for all the input data files. (If empty, other options will be used (useMontageFile)
 	QString m_markerFile;	// name of the marker file to use (not a path)
 	QStringList m_files, m_markerFiles, m_montageFiles;	// collection of data files set as input along with optional marker and montage files.
+	QStringList m_usedMarkers, m_skippedMarkers;
 };
 
 

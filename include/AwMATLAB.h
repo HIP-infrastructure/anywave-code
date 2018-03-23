@@ -27,14 +27,15 @@
 
 #include <AwGlobal.h>
 #include <aw_armadillo.h>
-#include "matio.h"
 #include <AwChannel.h>
-
+#include <AwException.h>
 
 namespace AwMATLAB {
 	/** MATLAB file output **/
 	int AW_MATLAB_EXPORT saveToMatlab(const QString& fileName, const AwChannelList& channels);
 }
+
+class Matio;
 
 class AW_MATLAB_EXPORT AwMATLABFile
 {
@@ -47,7 +48,6 @@ public:
 	int open(const QString& file);
 
 	QString& error() { return m_error; }
-	mat_t *filePtr() { return m_fileptr; }
 	QString& fileName() { return m_fileName; }
 	// WRITE
 	int writeScalar(const QString& name, double value);
@@ -69,10 +69,12 @@ public:
 	int writeVec(const QString& name, QVector<qint32>& vector);
 	int writeVec(const QString& name, QVector<qint16>& vector);
 	// Structures 
-	matvar_t *createStruct(const QString& name, const char **fields, int nFields);
-	int setStructField(matvar_t *structrure, const char *fieldName, mat& matrix);
-	int setStructField(matvar_t *structrure, const char *fieldName, double scalar);
-	int setStructField(matvar_t *structrure, const char *fieldName, const QStringList& strings);
+	/* Create a struct and return a handle. -1 if error. */
+	int createStruct(const QString& name, const char **fields, int nFields);
+
+	int setStructField(int handle, const char *fieldName, mat& matrix);
+	int setStructField(int handle, const char *fieldName, double scalar);
+	int setStructField(int handle, const char *fieldName, const QStringList& strings);
 	// READ
 	int readScalar(const QString& name, double *value);
 	int readScalar(const QString& name, float *value);
@@ -91,7 +93,7 @@ public:
 	int readVec(const QString& name, QVector<qint32>& vector);
 	int readVec(const QString& name, QVector<qint16>& vector);
 protected:
-	mat_t *m_fileptr;
+    Matio *m_matio;
 	QString m_error, m_fileName;
 	bool m_isOpen;
 	size_t m_scalarDims[2];

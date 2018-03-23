@@ -75,8 +75,9 @@ public:
 	inline QMenu *fileMenu() { return m_fileMenu; }
 	inline QMenu *viewMenu() { return m_viewMenu; }
 	QList<QAction *>& icaActions() { return m_icaActions; }
-	void startProcess(AwBaseProcess *process);
+	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList());
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
+	void startProcess(const QString& name, const QStringList& args = QStringList());
 	void closeFile();
 	void quit();
 	QList<AwProcessPlugin *> processPluginsWithFeatures(int flags);
@@ -92,12 +93,12 @@ public:
 	inline void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline QWidget *processesWidget() { return (QWidget *)m_processesWidget; }
 	inline QDockWidget *dock() { return m_dock; }
+
 public slots:
 	void startProcessFromMenu();
 	void setDisplayedChannels(AwChannelList& list) { m_displayedChannels = list; }
 	void setSelectedChannels(AwChannelList& list) { m_selectedChannels = list; }
 	void setMontageChannels(AwChannelList& list) { m_montageChannels = list; }
-	void startProcess(const QString& name);
 	void handleProcessTermination();
 	void startDisplayProcesses(AwChannelList& channels);
 	void stopProcess(AwProcess *process);

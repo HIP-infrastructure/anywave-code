@@ -34,6 +34,7 @@ CONFIG(release, debug|release) {
 }
 
 LIB_DIR = $$DESTDIR/lib
+HEADER_DIR = $$DESTDIR
 
 macx {
   LIBS += -F$$LIB_DIR
@@ -45,14 +46,25 @@ macx {
 
 # extract all .so files present in VTK_LIB_PATH and format them as flags for the linker.
 !isEmpty(VTK_LIB_PATH) {
-     VTK_LIBRARIES += -L$$VTK_LIB_PATH
+     LIBS += -L$$VTK_LIB_PATH
+ #    VTK_LIBRARIES += -L$$VTK_LIB_PATH
      unix:!macx {
         LIST = $$files($$VTK_LIB_PATH/*.so)
         for(f, LIST) {
     # remove first lib and last .so
           base = $$basename(f)
-	  noso = $$section(base, .so, 0 , 0)   
-	  nolib = $$section(noso, lib, 1, 3)    
+          noso = $$section(base, .so, 0 , 0)
+          nolib = $$section(noso, lib, 1, 3)
+          VTK_LIBRARIES += -l$$nolib
+        }
+      }
+      macx {
+        LIST = $$files($$VTK_LIB_PATH/*.dylib)
+        for(f, LIST) {
+    # remove first lib and last .dylib
+          base = $$basename(f)
+          noso = $$section(base, .dylib, 0 , 0)
+          nolib = $$section(noso, lib, 1, 3)
           VTK_LIBRARIES += -l$$nolib
         }
       }
@@ -71,9 +83,9 @@ LIBS += -L$$LIB_DIR
 
 DEFINES += ARMA_DONT_USE_WRAPPER NDEBUG
 macx {
-INSTALL_LIB_PATH = $$DESTDIR/AnyWave.app/Contents/dylibs
-INSTALL_APP_PATH = $$DESTDIR/AnyWave.app/Contents/MacOS
-PLUGIN_DIR = $$DESTDIR/Anywave_Plugins
+INSTALL_LIB_PATH = $$DESTDIR/bin/AnyWave.app/Contents/dylibs
+INSTALL_APP_PATH = $$DESTDIR/bin/AnyWave.app/Contents/MacOS
+PLUGIN_DIR = $$DESTDIR/bin/Anywave_Plugins
 }
 
 unix:!macx {
@@ -82,7 +94,7 @@ unix:!macx {
 
 CONFIG += release warn_off c++11
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -O3
+QMAKE_CXXFLAGS_RELEASE += -O3 -Wc++11-narrowing
 unix:!macx{
 QMAKE_CXXFLAGS_RELEASE += -fopenmp
 }
