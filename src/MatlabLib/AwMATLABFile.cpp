@@ -9,8 +9,24 @@
 class Matio
 {
 public:
-    Matio() : fileptr(NULL) {}
+    Matio() : fileptr(NULL), m_handles(-1) {}
+	~Matio() {
+		for (auto s : struct_handles.values()) {
+			Mat_VarFree(s);
+		}
+	}
     mat_t *fileptr;
+
+	int addStruct(matvar_t *s) {
+		struct_handles.insert(++m_handles, s);
+		return m_handles;
+	}
+	matvar_t* getStruct(int handle) {
+		return struct_handles.value(handle);
+	}
+protected:
+	int m_handles;
+	QMap<int, matvar_t *> struct_handles;
 };
 
 AwMATLABFile::AwMATLABFile()
@@ -75,18 +91,26 @@ void AwMATLABFile::close()
 /// Structures
 
 
-matvar_t *AwMATLABFile::createStruct(const QString& name, const char **fields, int nFields)
+int AwMATLABFile::createStruct(const QString& name, const char **fields, int nFields)
 {
     if (FILEPTR == NULL)
 		return NULL;
 	size_t dims[2] = { 1, 1 };
-	return Mat_VarCreateStruct(name.toStdString().c_str(), 2, dims, fields, nFields);
+	matvar_t *s = Mat_VarCreateStruct(name.toStdString().c_str(), 2, dims, fields, nFields);
+	if (s)
+		return m_matio->addStruct(s);
+	else
+		return -1;
 }
 
-int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, mat& matrix)
+int AwMATLABFile::setStructField(int handle, const char *fieldName, mat& matrix)
 {
-	if (structure == NULL)
+	if (handle < 0)
 		return -1;
+	matvar_t *s = m_matio->getStruct(handle);
+	if (s == NULL)
+		return -1;
+
 	size_t matrixDims[2] = { size_t(matrix.n_rows), size_t(matrix.n_cols) };
 	matvar_t *var = Mat_VarCreate(NULL, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
@@ -94,14 +118,18 @@ int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, mat
 		throw AwException(m_error, "AwMATLABFile::setStructField");
 		return -1;
 	}
-	Mat_VarSetStructFieldByName(structure, fieldName, 0, var);
+
+	Mat_VarSetStructFieldByName(s, fieldName, 0, var);
 
 	return 0;
 }
 
-int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, double scalar)
+int AwMATLABFile::setStructField(int handle, const char *fieldName, double scalar)
 {
-	if (structure == NULL)
+	if (handle < 0)
+		return -1;
+	matvar_t *s = m_matio->getStruct(handle);
+	if (s == NULL)
 		return -1;
 	size_t dims[2] = { 1, 1 };
 	double tmp = scalar;
@@ -111,14 +139,17 @@ int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, dou
 		throw AwException(m_error, "AwMATLABFile::setStructField");
 		return -1;
 	}
-	Mat_VarSetStructFieldByName(structure, fieldName, 0, var);
+	Mat_VarSetStructFieldByName(s, fieldName, 0, var);
 
 	return 0;
 }
 
-int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, const QStringList& strings)
+int AwMATLABFile::setStructField(int handle, const char *fieldName, const QStringList& strings)
 {
-	if (structure == NULL)
+	if (handle < 0)
+		return -1;
+	matvar_t *s = m_matio->getStruct(handle);
+	if (s == NULL)
 		return -1;
 	size_t dims[2] = { 1, (size_t)strings.size() };
 	matvar_t *var = Mat_VarCreate(NULL, MAT_C_CELL, MAT_T_CELL, 2, dims, NULL, 0);
@@ -145,7 +176,7 @@ int AwMATLABFile::setStructField(matvar_t *structure, const char *fieldName, con
 		}
 		Mat_VarSetCell(var, i, string);
 	}
-	Mat_VarSetStructFieldByName(structure, fieldName, 0, var);
+	Mat_VarSetStructFieldByName(s, fieldName, 0, var);
 	return 0;
 }
 
