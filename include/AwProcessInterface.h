@@ -169,7 +169,8 @@ public:
 
 	/** Register a new AwProcessGUIWidget that will close/kill the process when the user closes the widget **/
 	void registerGUIWidget(AwProcessGUIWidget *widget);
-	virtual void run(const QStringList& args = QStringList()) { run();  }
+	/* Implement this method in the derived object. */
+	virtual void run(const QStringList& args = QStringList()) {  }
 
 public slots:
 	void stop() { emit aboutToBeDestroyed(); m_plugin->deleteInstance(this); }

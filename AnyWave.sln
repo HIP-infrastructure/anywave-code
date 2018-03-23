@@ -144,8 +144,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwMatlabLib", "src\MatlabLi
 		{3F983FD6-1DCF-4DD8-B12E-0E18D8A2D8EF} = {3F983FD6-1DCF-4DD8-B12E-0E18D8A2D8EF}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rewrite4DNI", "..\Rewrite4D\AwRewrite4DNI.vcxproj", "{211CE931-E804-42F4-86EB-A9E8923C1984}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwCoreLib", "src\Core\AwCoreLib.vcxproj", "{71DBCBBD-3E14-446C-9275-576E2934BC5B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EDFIO", "src\plugins\EDFIO\EDFIO.vcxproj", "{EF8515CD-5D71-42BC-AF68-A8E91F401953}"
@@ -159,6 +157,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEGInto4D", "D:\Dev\aw-eeginto4D\EEGInto4D.vcxproj", "{7A80BFFA-5097-495D-897A-A956654B2E71}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2Graphs", "D:\Dev\h2-graphs\H2Graphs.vcxproj", "{438D0D9F-7136-4A67-8E06-08929888BE72}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rewrite4DNI", "D:\Dev\aw-rewrite4D\AwRewrite4DNI.vcxproj", "{211CE931-E804-42F4-86EB-A9E8923C1984}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -378,14 +378,6 @@ Global
 		{2588F5AD-FC20-4628-A249-6C0557DC2BC7}.Release|Win32.ActiveCfg = Release|x64
 		{2588F5AD-FC20-4628-A249-6C0557DC2BC7}.Release|x64.ActiveCfg = Release|x64
 		{2588F5AD-FC20-4628-A249-6C0557DC2BC7}.Release|x64.Build.0 = Release|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.ActiveCfg = Debug|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.Build.0 = Debug|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.ActiveCfg = Debug|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.Build.0 = Debug|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.ActiveCfg = Release|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.Build.0 = Release|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.ActiveCfg = Release|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.Build.0 = Release|x64
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B}.Debug|Win32.ActiveCfg = Debug|Win32
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B}.Debug|Win32.Build.0 = Debug|Win32
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B}.Debug|x64.ActiveCfg = Debug|x64
@@ -436,12 +428,20 @@ Global
 		{438D0D9F-7136-4A67-8E06-08929888BE72}.Release|Win32.ActiveCfg = Release|x64
 		{438D0D9F-7136-4A67-8E06-08929888BE72}.Release|x64.ActiveCfg = Release|x64
 		{438D0D9F-7136-4A67-8E06-08929888BE72}.Release|x64.Build.0 = Release|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.ActiveCfg = Debug|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.Build.0 = Debug|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.ActiveCfg = Debug|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.Build.0 = Debug|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.ActiveCfg = Release|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.Build.0 = Release|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.ActiveCfg = Release|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal
