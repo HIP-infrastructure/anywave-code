@@ -34,6 +34,7 @@ CONFIG(release, debug|release) {
 }
 
 LIB_DIR = $$DESTDIR/lib
+HEADER_DIR = $$DESTDIR
 
 macx {
   LIBS += -F$$LIB_DIR

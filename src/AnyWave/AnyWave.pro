@@ -26,7 +26,7 @@ macx {
     DESTDIR = $$DESTDIR/bin/AnyWave.app/Contents/MacOS
 }
 unix:!macx {
-    DESTDIR = $$DESTDIR/bin
+    DESTDIR = $$DESTDIR
 }
 
 macx {
@@ -46,6 +46,7 @@ LIBS += -lAwUtilities -lAwMath -lAwFilter -lAwLayout -lAwMapping -lAwGraphics -l
 LIBS += -lAwRW -lAwProcess -lhdf5 -lhdf5_hl -lmatio
 
 install_extra.path = $$DESTDIR
+
 macx{
 install_extra.files += ../../resources/macx/Anywave.sh 
 }
@@ -55,6 +56,15 @@ install_extra.files += ../../resources/linux/anywave.sh
 
 INSTALLS += install_extra
 
+install_headers.path = $$HEADER_DIR
+install_headers.files += $$PWD/../../include
+
+INSTALLS += install_headers
+
+install_arma.path = $$HEADER_DIR
+install_arma.files += $$PWD/../../armadillo
+
+INSTALLS += install_arma
 
 DISTFILES += \
     anywave_en.qm \
