@@ -26,9 +26,6 @@ fi
 if [[ -d /Library/Frameworks/QtPrintSupport.framework ]]; then
     rm -rf /Library/Frameworks/QtPrintSupport.framework
 fi
-if [[ -d /Library/Frameworks/QtScript.framework ]]; then
-    rm -rf /Library/Frameworks/QtScript.framework
-fi
 if [[ -d /Library/Frameworks/QtQml.framework ]]; then
 rm -rf /Library/Frameworks/QtQml.framework
 fi
