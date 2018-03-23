@@ -27,7 +27,7 @@ INCLUDEPATH += $$INCLUDEDIR
 DESTDIR = $$OUTDIR
 
 CONFIG(debug, debug|release) {
-    DESTDIR = $$DESTDIR/debug/
+    DESTDIR = $$DESTDIR/debug
 }
 CONFIG(release, debug|release) {
     DESTDIR = $$DESTDIR/release

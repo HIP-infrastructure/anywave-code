@@ -27,7 +27,6 @@
 
 #include <AwGlobal.h>
 #include <aw_armadillo.h>
-//#include "matio.h"
 #include <AwChannel.h>
 #include <AwException.h>
 
@@ -49,7 +48,6 @@ public:
 	int open(const QString& file);
 
 	QString& error() { return m_error; }
-//	mat_t *filePtr() { return m_fileptr; }
 	QString& fileName() { return m_fileName; }
 	// WRITE
 	int writeScalar(const QString& name, double value);
@@ -95,7 +93,6 @@ public:
 	int readVec(const QString& name, QVector<qint32>& vector);
 	int readVec(const QString& name, QVector<qint16>& vector);
 protected:
-    // mat_t *m_fileptr;
     Matio *m_matio;
 	QString m_error, m_fileName;
 	bool m_isOpen;
