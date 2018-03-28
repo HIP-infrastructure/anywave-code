@@ -37,6 +37,7 @@ Source: ".\bin\x64\Release\Plugins\Correlation.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CTF_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\FileConverter.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\H2.dll"; DestDir: "{app}\Plugins";
+Source: ".\bin\x64\Release\Plugins\H2Graphs.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\Micromed_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\MultiICA.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\TFWavelet2.dll"; DestDir: "{app}\Plugins";
