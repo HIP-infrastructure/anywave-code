@@ -45,6 +45,7 @@ void maingui::saveToMatlab()
 
 	AwMATLABFile file;
 	try {
+
 		file.create(fileName);
 		file.writeStringCellArray("xLabels", m_mean.xLabels);
 		file.writeStringCellArray("yLabels", m_mean.yLabels);
