@@ -6,11 +6,17 @@
 
 QT       -= gui
 include(../../common.pri)
+include(../plugins.pri)
 TARGET = MicromedReader
 TEMPLATE = lib
 CONFIG += plugin
 DESTDIR = $$PLUGIN_DIR
 QMAKE_CXXFLAGS_RELEASE += -Wno-c++11-narrowing
+
+macx {
+QMAKE_POST_LINK = \
+  install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $${DESTDIR}/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -23,13 +29,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-macx {
-LIBS += -framework AwCore
-}
-
-unix:!macx{
-LIBS += -lAwCore
-}
+extras.commands = install_name_tool -change libAwRW.dylib @rpath/libAwRW.dylib $$DESTDIR/lib$$TARGET.dylib
+QMAKE_EXTRA_TARGETS += extras
 
 LIBS += -lAwRW
 

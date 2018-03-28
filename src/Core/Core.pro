@@ -17,6 +17,7 @@ CONFIG += plugin
 DEFINES += AW_BUILD_CORE_LIB
 DESTDIR = $$LIB_DIR
 
+
 macx{
 FRAMEWORK_HEADERS.version = Versions
 FRAMEWORK_HEADERS.files =     ../../include/AwChannel.h  \

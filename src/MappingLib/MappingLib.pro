@@ -39,8 +39,7 @@ macx {
     -lvtkIOXMLParser-$$VTK_VERSION_SUFFIX -lvtkexpat-$$VTK_VERSION_SUFFIX -lvtkImagingCore-$$VTK_VERSION_SUFFIX -lvtkCommonSystem-$$VTK_VERSION_SUFFIX \
    -lvtkCommonMath-$$VTK_VERSION_SUFFIX -lvtkCommonTransforms-$$VTK_VERSION_SUFFIX -lvtkCommonColor-$$VTK_VERSION_SUFFIX -lvtkFiltersGeneral-$$VTK_VERSION_SUFFIX
 
-    QMAKE_RPATHDIR += @executable_path/../Frameworks
-   QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@executable_path/../Frameworks/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 }
 
 unix:!macx{
@@ -57,4 +56,10 @@ SOURCES += \
 HEADERS += \
     ../../include/mapping/AwMap.h \
     ../../include/mapping/AwMeshManager.h
+
+unix {
+    target.path = $$INSTALL_LIB_PATH
+    INSTALLS += target
+}
+
 

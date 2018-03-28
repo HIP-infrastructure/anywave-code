@@ -4,13 +4,15 @@
 #
 #-------------------------------------------------
 
-include(../../common.pri)
+include(../plugins.pri)
 TARGET = 4DNIReader
 TEMPLATE = lib
 CONFIG += plugin
 DESTDIR = $$PLUGIN_DIR
-
-
+macx {
+QMAKE_POST_LINK = \
+  install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $${DESTDIR}/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+}
 #FRAMEWORK_HEADERS.version = Versions
 #FRAMEWORK_HEADERS.files =    ../../include/AwUtilities.h ../../include/AwGlobal.h
 #FRAMEWORK_HEADERS.path = Headers
@@ -36,13 +38,5 @@ HEADERS += \
 
 SOURCES += \
     meg4dreader.cpp
-
-macx {
-LIBS += -framework AwCore
-}
-
-unix:!macx{
-LIBS += -lAwCore
-}
 
 LIBS += -lAwRW

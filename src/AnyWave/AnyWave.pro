@@ -31,7 +31,7 @@ unix:!macx {
 
 macx {
     LIBS += -framework AwCore -framework Accelerate
-    LIBS += -lAwLayout -lvtkCommonCore-$$VTK_VERSION_SUFFIX -lvtkCommonDataModel-$$VTK_VERSION_SUFFIX -lvtkCommonMisc-$$VTK_VERSION_SUFFIX \
+    LIBS += -lvtkCommonCore-$$VTK_VERSION_SUFFIX -lvtkCommonDataModel-$$VTK_VERSION_SUFFIX -lvtkCommonMisc-$$VTK_VERSION_SUFFIX \
     -lvtkFiltersCore-$$VTK_VERSION_SUFFIX -lvtkGUISupportQt-$$VTK_VERSION_SUFFIX -lvtkFiltersGeometry-$$VTK_VERSION_SUFFIX \
     -lvtkFiltersModeling-$$VTK_VERSION_SUFFIX -lvtkRenderingCore-$$VTK_VERSION_SUFFIX -lvtkInteractionStyle-$$VTK_VERSION_SUFFIX -lvtkCommonExecutionModel-$$VTK_VERSION_SUFFIX \
     -lvtkFiltersSources-$$VTK_VERSION_SUFFIX -lvtkRenderingOpenGL2-$$VTK_VERSION_SUFFIX -lvtkRenderingFreeType-$$VTK_VERSION_SUFFIX -lvtkRenderingAnnotation-$$VTK_VERSION_SUFFIX  \
@@ -68,7 +68,7 @@ macx {
   #  QMAKE_LFLAGS_SONAME += -Wl,-install_name,@executable_path/../Frameworks/AwHDF5.$${QMAKE_EXTENSION_SHLIB}
 
 #QMAKE_LFLAGS_SONAME = -Wl,-rpath @executable_path/../Frameworks/
-QMAKE_RPATHDIR += @executable_path/../Frameworks/
+QMAKE_RPATHDIR += @executable_path/../../../Anywave_plugins
 }
 
 unix:!macx{

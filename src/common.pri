@@ -37,7 +37,7 @@ LIB_DIR = $$DESTDIR/lib
 HEADER_DIR = $$DESTDIR
 
 macx {
-  LIBS += -F$$LIB_DIR
+  LIBS += -F$$LIB_DIR -F/Library/Frameworks
 }
 
 !isEmpty(H5_LIB_PATH) {
@@ -95,6 +95,11 @@ unix:!macx {
 CONFIG += release warn_off c++11
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
+
 unix:!macx{
 QMAKE_CXXFLAGS_RELEASE += -fopenmp
+}
+
+macx {
+  QMAKE_CXXFLAGS += -framework qwt
 }
