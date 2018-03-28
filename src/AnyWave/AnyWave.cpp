@@ -1450,7 +1450,7 @@ void AnyWave::initMatlab()
 			QString modulePath;
 #ifdef Q_OS_MAC
 			moduleName = "libAwMatlabSupport.dylib";
-			modulePath = qApp->applicationDirPath() + "/../dylibs/" + moduleName;
+            modulePath = qApp->applicationDirPath() + "/../Frameworks/" + moduleName;
 #endif
 #ifdef Q_OS_LINUX
 			moduleName = "libAwMatlabSupport.so";

@@ -31,7 +31,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 unix:!macx{
 LIBS += -lopenblas
 }
-
+macx{
+LIBS += -framework Accelerate
+}
 LIBS += -lAwProcess -lAwWidgets -lAwFilter -lAwMath -lAwMATLAB
 
 FORMS += \

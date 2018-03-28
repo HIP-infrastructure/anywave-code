@@ -22,14 +22,6 @@ macx {
     -lvtkRenderingFreeType-$$VTK_VERSION_SUFFIX -lvtkFiltersSources-$$VTK_VERSION_SUFFIX -lvtkRenderingAnnotation-$$VTK_VERSION_SUFFIX \
     -lvtkCommonCore-$$VTK_VERSION_SUFFIX -lvtkCommonDataModel-$$VTK_VERSION_SUFFIX -lvtkIOCore-$$VTK_VERSION_SUFFIX \
     -lvtkRenderingOpenGL2-$$VTK_VERSION_SUFFIX
-
-   QMAKE_POST_LINK = \
-    install_name_tool -change libAwGraphics.dylib  @rpath/libAwGraphics.dylib $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB} \
-    install_name_tool -change libAwUtilities.dylib  @rpath/libAwUtilities.dylib $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB} \
-    install_name_tool -change libAwMath.dylib  @rpath/libAwMath.dylib $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB} \
-    install_name_tool -change libAwLayout.dylib  @rpath/libAwLayout.dylib $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB} \
-    install_name_tool -change libAwMapping.dylib  @rpath/libAwMapping.dylib $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB} \
-    install_name_tool -change AwCore.framework/Versions/1/AwCore  @rpath/AwCore.framework/Versions/1/AwCore $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 }
 
 
