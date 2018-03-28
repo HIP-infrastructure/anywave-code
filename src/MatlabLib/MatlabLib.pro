@@ -36,8 +36,16 @@ unix {
     INSTALLS += target
 }
 
+macx{
+    QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+    LIBS += -lmatio
+}
+
+unix:!macx {
+    LIBS += -lmatio
+}
 
 SOURCES += \
     AwMATLABFile.cpp
 
-LIBS += -lmatio
+

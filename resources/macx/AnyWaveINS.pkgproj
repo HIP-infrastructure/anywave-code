@@ -2532,7 +2532,326 @@
 									<array>
 										<dict>
 											<key>CHILDREN</key>
-											<array/>
+											<array>
+												<dict>
+													<key>CHILDREN</key>
+													<array/>
+													<key>GID</key>
+													<integer>0</integer>
+													<key>PATH</key>
+													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/AwCore</string>
+													<key>PATH_TYPE</key>
+													<integer>0</integer>
+													<key>PERMISSIONS</key>
+													<integer>493</integer>
+													<key>TYPE</key>
+													<integer>3</integer>
+													<key>UID</key>
+													<integer>0</integer>
+												</dict>
+												<dict>
+													<key>CHILDREN</key>
+													<array/>
+													<key>GID</key>
+													<integer>0</integer>
+													<key>PATH</key>
+													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Headers</string>
+													<key>PATH_TYPE</key>
+													<integer>0</integer>
+													<key>PERMISSIONS</key>
+													<integer>493</integer>
+													<key>TYPE</key>
+													<integer>3</integer>
+													<key>UID</key>
+													<integer>0</integer>
+												</dict>
+												<dict>
+													<key>CHILDREN</key>
+													<array/>
+													<key>GID</key>
+													<integer>0</integer>
+													<key>PATH</key>
+													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Resources</string>
+													<key>PATH_TYPE</key>
+													<integer>0</integer>
+													<key>PERMISSIONS</key>
+													<integer>493</integer>
+													<key>TYPE</key>
+													<integer>3</integer>
+													<key>UID</key>
+													<integer>0</integer>
+												</dict>
+												<dict>
+													<key>CHILDREN</key>
+													<array>
+														<dict>
+															<key>CHILDREN</key>
+															<array>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>0</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/AwCore</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwChannel.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwDataBuffer.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwDataClient.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwFilteringOptions.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwGlobal.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwMarker.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwMEGSensorManager.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwSensor.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers/AwVirtualChannel.h</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																	</array>
+																	<key>EXPANDED</key>
+																	<true/>
+																	<key>GID</key>
+																	<integer>0</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Headers</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array>
+																		<dict>
+																			<key>CHILDREN</key>
+																			<array/>
+																			<key>GID</key>
+																			<integer>0</integer>
+																			<key>PATH</key>
+																			<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Resources/Info.plist</string>
+																			<key>PATH_TYPE</key>
+																			<integer>0</integer>
+																			<key>PERMISSIONS</key>
+																			<integer>420</integer>
+																			<key>TYPE</key>
+																			<integer>3</integer>
+																			<key>UID</key>
+																			<integer>0</integer>
+																		</dict>
+																	</array>
+																	<key>EXPANDED</key>
+																	<true/>
+																	<key>GID</key>
+																	<integer>0</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1/Resources</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+															</array>
+															<key>EXPANDED</key>
+															<true/>
+															<key>GID</key>
+															<integer>0</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/1</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array/>
+															<key>GID</key>
+															<integer>0</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions/Current</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+													</array>
+													<key>EXPANDED</key>
+													<true/>
+													<key>GID</key>
+													<integer>0</integer>
+													<key>PATH</key>
+													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/lib/AwCore.framework/Versions</string>
+													<key>PATH_TYPE</key>
+													<integer>0</integer>
+													<key>PERMISSIONS</key>
+													<integer>493</integer>
+													<key>TYPE</key>
+													<integer>3</integer>
+													<key>UID</key>
+													<integer>0</integer>
+												</dict>
+											</array>
+											<key>EXPANDED</key>
+											<true/>
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
@@ -3066,7 +3385,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtCharts.framework</string>
+											<string>/Library/Frameworks/QtCharts.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3082,7 +3401,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtConcurrent.framework</string>
+											<string>/Library/Frameworks/QtConcurrent.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3098,7 +3417,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtCore.framework</string>
+											<string>/Library/Frameworks/QtCore.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3114,7 +3433,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtDBus.framework</string>
+											<string>/Library/Frameworks/QtGui.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3130,7 +3449,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtGui.framework</string>
+											<string>/Library/Frameworks/QtNetwork.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3146,7 +3465,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtNetwork.framework</string>
+											<string>/Library/Frameworks/QtOpenGL.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3162,7 +3481,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtOpenGL.framework</string>
+											<string>/Library/Frameworks/QtPrintSupport.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3178,7 +3497,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtPrintSupport.framework</string>
+											<string>/Library/Frameworks/QtQml.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3194,7 +3513,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtQml.framework</string>
+											<string>/Library/Frameworks/QtSvg.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3210,7 +3529,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtSql.framework</string>
+											<string>/Library/Frameworks/QtWidgets.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -3226,39 +3545,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtSvg.framework</string>
-											<key>PATH_TYPE</key>
-											<integer>0</integer>
-											<key>PERMISSIONS</key>
-											<integer>493</integer>
-											<key>TYPE</key>
-											<integer>3</integer>
-											<key>UID</key>
-											<integer>0</integer>
-										</dict>
-										<dict>
-											<key>CHILDREN</key>
-											<array/>
-											<key>GID</key>
-											<integer>0</integer>
-											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtWidgets.framework</string>
-											<key>PATH_TYPE</key>
-											<integer>0</integer>
-											<key>PERMISSIONS</key>
-											<integer>493</integer>
-											<key>TYPE</key>
-											<integer>3</integer>
-											<key>UID</key>
-											<integer>0</integer>
-										</dict>
-										<dict>
-											<key>CHILDREN</key>
-											<array/>
-											<key>GID</key>
-											<integer>0</integer>
-											<key>PATH</key>
-											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtXml.framework</string>
+											<string>/Library/Frameworks/QtXml.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>

@@ -30,6 +30,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 INCLUDEPATH += $$MATLAB_ROOT/extern/include
 macx{
 LIBS += -L$$MATLAB_ROOT/bin/maci64 -lmex -lmx -lmat
+QMAKE_RPATHDIR += /Library/Frameworks
+
 }
 unix:!macx{
 LIBS += -L$$MATLAB_ROOT/bin/glnxa64 -lmex -lmx -lmat
