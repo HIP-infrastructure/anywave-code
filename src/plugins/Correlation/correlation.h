@@ -30,7 +30,7 @@
 #include <AwProcessInterface.h>
 #include "settings.h"
 #include <QtCore>
-#include <armadillo>
+#include <aw_armadillo.h>
 using namespace arma;
 
 struct corr_result {
