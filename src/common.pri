@@ -83,7 +83,7 @@ LIBS += -L$$LIB_DIR
 
 DEFINES += ARMA_DONT_USE_WRAPPER NDEBUG
 macx {
-INSTALL_LIB_PATH = $$DESTDIR/bin/AnyWave.app/Contents/dylibs
+INSTALL_LIB_PATH = $$DESTDIR/bin/AnyWave.app/Contents/Frameworks
 INSTALL_APP_PATH = $$DESTDIR/bin/AnyWave.app/Contents/MacOS
 PLUGIN_DIR = $$DESTDIR/bin/Anywave_Plugins
 }
@@ -94,7 +94,7 @@ unix:!macx {
 
 CONFIG += release warn_off c++11
 QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -O3 -Wc++11-narrowing
+QMAKE_CXXFLAGS_RELEASE += -O3
 unix:!macx{
 QMAKE_CXXFLAGS_RELEASE += -fopenmp
 }

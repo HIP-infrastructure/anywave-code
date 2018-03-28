@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 macx {
     LIBS += -framework AwCore
+    QMAKE_LFLAGS_SONAME += -Wl,-install_name,@rpath/libAwEpoch.$${QMAKE_EXTENSION_SHLIB}
 }
 
 unix:!macx{

@@ -36,6 +36,10 @@ HEADERS += ../../include/layout/AwLayout.h  ../../include/layout/AwLayoutManager
 macx {
     LIBS += -framework AwCore
 }
+ macx{
+    QMAKE_RPATHDIR += @executable_path/../Frameworks
+   QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@executable_path/../Frameworks/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+}
 
 unix:!macx{
  LIBS += -lAwCore
