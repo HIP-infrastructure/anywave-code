@@ -25,6 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "meg4dreader.h"
 #include <AwMEGSensorManager.h>
+#include <AwException.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -534,12 +535,6 @@ NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 	QDir dir = fi.absoluteDir();
 	QStringList filters;	
 
-
-	//// check that the file has no extension
-	//QStringList t = path.split(".");
-	//if (t.size() > 1)
-	//	return AwFileIO::WrongFormat;
-
 	filters << "*";
 	dir.setFilter(QDir::Files);
 	dir.setNameFilters(filters);
@@ -572,8 +567,10 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	// number of samples to read
 	qint64 nSamplesTotal = (qint64)floor(duration * m_sampleRate);
 	
-	if (nSamplesTotal == 0)
+	if (nSamplesTotal == 0) {
+		throw AwException("duration is zero", "4DNIReader", AwException::warning);
 		return 0;
+	}
 
 	m_file.seek(startSample * m_dataSize);
 	qint64 pos = m_file.pos();
@@ -707,7 +704,6 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	case Long:
 		{
 		qint32 *buffer = new qint32[bufferSize];
-		//read = m_stream.readRawData((char *)buffer, bufferSize);
 		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
@@ -735,7 +731,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 					float val = (float)buffer[index + i * nChannelsTotal] * channel_data->units_per_bit * channel_data->scale / channel_data->gain;
 					if (c->isEEG() || c->isECG() || c->isECG() || c->isSEEG())
 						val *= 1E6;
-					else if (c->isMEG())
+					else if (c->isMEG() || c->isReference())
 						val *= 1e12;
 					*data++ = val;
 				}

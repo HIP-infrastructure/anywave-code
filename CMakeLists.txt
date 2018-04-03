@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.3) 
 project(AnyWave)
 # detecting compiler
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
