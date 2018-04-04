@@ -31,7 +31,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwEpoch.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwEpoch.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -47,7 +47,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwFilter.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwFilter.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -63,7 +63,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwGraphics.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwGraphics.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -79,7 +79,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwHDF5.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwHDF5.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -95,7 +95,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwLayout.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwLayout.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -111,7 +111,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwMapping.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwMapping.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -127,7 +127,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwMath.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwMath.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -143,7 +143,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwMATLAB.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwMATLAB.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -159,7 +159,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwMatlabSupport.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwMatlabSupport.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -175,7 +175,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwProcess.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwProcess.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -191,7 +191,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwRW.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwRW.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -207,7 +207,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwUtilities.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwUtilities.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -223,7 +223,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libAwWidgets.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libAwWidgets.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -239,7 +239,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libfftw3.3.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libc++.1.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -255,7 +255,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libfftw3.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libc++abi.1.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -271,7 +271,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libfftw3.la</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libicudata.58.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -287,7 +287,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libmatio.4.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libicui18n.58.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -303,7 +303,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libmatio.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libicuuc.58.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -319,7 +319,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkalglib-8.1.1.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libmatio.4.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -335,7 +335,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkalglib-8.1.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libpng16.16.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -351,1191 +351,7 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonColor-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonColor-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonComputationalGeometry-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonComputationalGeometry-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonCore-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonCore-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonDataModel-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonDataModel-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonExecutionModel-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonExecutionModel-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonMath-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonMath-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonMisc-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonMisc-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonSystem-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonSystem-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonTransforms-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkCommonTransforms-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkDICOMParser-8.1 2.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkDICOMParser-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkDICOMParser-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkexpat-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkexpat-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersCore-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersCore-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersExtraction-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersExtraction-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersGeneral-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersGeneral-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersGeometry-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersGeometry-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersModeling-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersModeling-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersSources-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersSources-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersStatistics-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkFiltersStatistics-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkfreetype-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkfreetype-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkglew-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkglew-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkGUISupportQt-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkGUISupportQt-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkImagingColor-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkImagingColor-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkImagingCore-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkImagingCore-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkImagingFourier-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkImagingFourier-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkInteractionStyle-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkInteractionStyle-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOCore-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOCore-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOGeometry-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOGeometry-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOLegacy-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOLegacy-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOXML-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOXML-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOXMLParser-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkIOXMLParser-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtklz4-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtklz4-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingAnnotation-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingAnnotation-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingCore-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingCore-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingFreeType-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingFreeType-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingOpenGL2-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkRenderingOpenGL2-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtksys-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtksys-8.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkzlib-8.1.1.dylib</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>493</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs/libvtkzlib-8.1.dylib</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks/libz.1.dylib</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -1551,7 +367,7 @@
 													<key>GID</key>
 													<integer>80</integer>
 													<key>PATH</key>
-													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/dylibs</string>
+													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Frameworks</string>
 													<key>PATH_TYPE</key>
 													<integer>0</integer>
 													<key>PERMISSIONS</key>
@@ -1644,6 +460,25 @@
 															<key>UID</key>
 															<integer>0</integer>
 														</dict>
+													</array>
+													<key>EXPANDED</key>
+													<true/>
+													<key>GID</key>
+													<integer>80</integer>
+													<key>PATH</key>
+													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/MacOS</string>
+													<key>PATH_TYPE</key>
+													<integer>0</integer>
+													<key>PERMISSIONS</key>
+													<integer>509</integer>
+													<key>TYPE</key>
+													<integer>3</integer>
+													<key>UID</key>
+													<integer>0</integer>
+												</dict>
+												<dict>
+													<key>CHILDREN</key>
+													<array>
 														<dict>
 															<key>CHILDREN</key>
 															<array>
@@ -1653,39 +488,7 @@
 																	<key>GID</key>
 																	<integer>80</integer>
 																	<key>PATH</key>
-																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/MacOS/platforms/libqcocoa.dylib</string>
-																	<key>PATH_TYPE</key>
-																	<integer>0</integer>
-																	<key>PERMISSIONS</key>
-																	<integer>493</integer>
-																	<key>TYPE</key>
-																	<integer>3</integer>
-																	<key>UID</key>
-																	<integer>0</integer>
-																</dict>
-																<dict>
-																	<key>CHILDREN</key>
-																	<array/>
-																	<key>GID</key>
-																	<integer>80</integer>
-																	<key>PATH</key>
-																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/MacOS/platforms/libqminimal.dylib</string>
-																	<key>PATH_TYPE</key>
-																	<integer>0</integer>
-																	<key>PERMISSIONS</key>
-																	<integer>493</integer>
-																	<key>TYPE</key>
-																	<integer>3</integer>
-																	<key>UID</key>
-																	<integer>0</integer>
-																</dict>
-																<dict>
-																	<key>CHILDREN</key>
-																	<array/>
-																	<key>GID</key>
-																	<integer>80</integer>
-																	<key>PATH</key>
-																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/MacOS/platforms/libqoffscreen.dylib</string>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/iconengines/libqsvgicon.dylib</string>
 																	<key>PATH_TYPE</key>
 																	<integer>0</integer>
 																	<key>PERMISSIONS</key>
@@ -1701,7 +504,291 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/MacOS/platforms</string>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/iconengines</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqgif.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqicns.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqico.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqjpeg.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqmacjp2.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqsvg.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqtga.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqtiff.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqwbmp.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats/libqwebp.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+															</array>
+															<key>EXPANDED</key>
+															<true/>
+															<key>GID</key>
+															<integer>80</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/imageformats</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/platforms/libqcocoa.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+															</array>
+															<key>EXPANDED</key>
+															<true/>
+															<key>GID</key>
+															<integer>80</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/platforms</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/printsupport/libcocoaprintersupport.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+															</array>
+															<key>EXPANDED</key>
+															<true/>
+															<key>GID</key>
+															<integer>80</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/printsupport</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array>
+																<dict>
+																	<key>CHILDREN</key>
+																	<array/>
+																	<key>GID</key>
+																	<integer>80</integer>
+																	<key>PATH</key>
+																	<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/styles/libqmacstyle.dylib</string>
+																	<key>PATH_TYPE</key>
+																	<integer>0</integer>
+																	<key>PERMISSIONS</key>
+																	<integer>493</integer>
+																	<key>TYPE</key>
+																	<integer>3</integer>
+																	<key>UID</key>
+																	<integer>0</integer>
+																</dict>
+															</array>
+															<key>EXPANDED</key>
+															<true/>
+															<key>GID</key>
+															<integer>80</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns/styles</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -1717,11 +804,11 @@
 													<key>GID</key>
 													<integer>80</integer>
 													<key>PATH</key>
-													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/MacOS</string>
+													<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/PlugIns</string>
 													<key>PATH_TYPE</key>
 													<integer>0</integer>
 													<key>PERMISSIONS</key>
-													<integer>509</integer>
+													<integer>493</integer>
 													<key>TYPE</key>
 													<integer>3</integer>
 													<key>UID</key>
@@ -1788,6 +875,22 @@
 															<integer>80</integer>
 															<key>PATH</key>
 															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Resources/AnyWave.icns</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>420</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array/>
+															<key>GID</key>
+															<integer>80</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/AnyWave.app/Contents/Resources/qt.conf</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>
@@ -1983,22 +1086,6 @@
 											<integer>80</integer>
 											<key>PATH</key>
 											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libEDFIO.dylib</string>
-											<key>PATH_TYPE</key>
-											<integer>0</integer>
-											<key>PERMISSIONS</key>
-											<integer>493</integer>
-											<key>TYPE</key>
-											<integer>3</integer>
-											<key>UID</key>
-											<integer>0</integer>
-										</dict>
-										<dict>
-											<key>CHILDREN</key>
-											<array/>
-											<key>GID</key>
-											<integer>80</integer>
-											<key>PATH</key>
-											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libEDFREader.dylib</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>

@@ -681,10 +681,24 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		{
 		qint16 *buffer = new qint16[data_size];
 		//qint16 *buffer = new qint16[bufferSize];
-		read = m_file.read((char *)buffer, bufferSize);
+		//read = m_file.read((char *)buffer, bufferSize);
+            // Read the buffer using chunk (Failed when reading more than 2GiBytes at once on Mac
+            qint64 samplesRead = 0;
+            qint64 chunkSize = 500 * 1024 *  1024;
+            qint64 toRead = std::min(chunkSize, bufferSize);
+            
+            while (toRead > 0) {
+                read = m_file.read((char *)&buffer[samplesRead], toRead);
+                if (read == -1) {
+                    m_error = QString("Failed to read data (Short). Number of bytes : %1").arg(toRead);
+                    break;
+                }
+                samplesRead += read;
+                toRead -= read;
+            }
 		if (read <= 0) {
 			delete[] buffer;
-			m_error = QString("Failed to read data (Short)");
+            m_error = QString("Failed to read data (Short). Number of bytes : %1").arg(bufferSize);
 			return 0;
 		}
 		read /= nChannelsTotal;
