@@ -587,7 +587,8 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	qint64 read = 0;
 	qint64 bufferSize = nSamplesTotal * nChannelsTotal * m_dataSize;
 	qint64 data_size = nSamplesTotal * nChannelsTotal;
-
+	// Read data by chunk of 500Mbytes (Reading huge files failed on Mac).
+	qint64 chunkSize = 500 * 1024 * 1024;
 #ifndef NDEBUG
 	qDebug() << "4D Reading data..." << endl;
 #endif
@@ -681,26 +682,32 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		{
 		qint16 *buffer = new qint16[data_size];
 		//qint16 *buffer = new qint16[bufferSize];
-		//read = m_file.read((char *)buffer, bufferSize);
-            // Read the buffer using chunk (Failed when reading more than 2GiBytes at once on Mac
-            qint64 samplesRead = 0;
-            qint64 chunkSize = 500 * 1024 *  1024;
-            qint64 toRead = std::min(chunkSize, bufferSize);
-            
-            while (toRead > 0) {
-                read = m_file.read((char *)&buffer[samplesRead], toRead);
-                if (read == -1) {
-                    m_error = QString("Failed to read data (Short). Number of bytes : %1").arg(toRead);
-                    break;
-                }
-                samplesRead += read;
-                toRead -= read;
-            }
+#ifdef Q_OS_WIN
+		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
             m_error = QString("Failed to read data (Short). Number of bytes : %1").arg(bufferSize);
 			return 0;
 		}
+#else
+		qint64 toRead = std::min(chunkSize, bufferSize);
+		qint64 bytesRead = 0;
+		while (toRead > 0) {
+			read = m_file.read((char *)&buffer[bytesRead / m_dataSize], toRead);
+			if (read == -1) {
+				m_error = QString("Failed to read data (Short)");
+				break;
+			}
+			bytesRead += read;
+			toRead -= read;
+		}
+		if (read <= 0) {
+			delete[] buffer;
+			m_error = QString("Failed to read data (Short)");
+			return 0;
+		}
+#endif
+
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
