@@ -580,13 +580,13 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 
 	m_file.seek(startSample * m_dataSize);
 	qint64 pos = m_file.pos();
-	size_t nSamplesAvailable = (m_headerPos - pos) / (nChannelsTotal * m_dataSize);
+	qint64 nSamplesAvailable = (m_headerPos - pos) / (nChannelsTotal * m_dataSize);
 	if (nSamplesAvailable < nSamplesTotal)
 		nSamplesTotal = nSamplesAvailable;
 
 	qint64 read = 0;
-	size_t bufferSize = nSamplesTotal * nChannelsTotal * m_dataSize;
-	size_t data_size = nSamplesTotal * nChannelsTotal;
+	qint64 bufferSize = nSamplesTotal * nChannelsTotal * m_dataSize;
+	qint64 data_size = nSamplesTotal * nChannelsTotal;
 
 #ifndef NDEBUG
 	qDebug() << "4D Reading data..." << endl;
@@ -605,7 +605,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 		for (i = 0; i < bufferSize / m_dataSize; i++) {
@@ -619,7 +619,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 				for (i = 0; i < c->dataSize(); i++) {
@@ -638,7 +638,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		break;
 	case Double:
 		{
-		double *buffer = new double[bufferSize];
+		double *buffer = new double[data_size];
 		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
@@ -647,7 +647,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 		for (qint64 i = 0; i < bufferSize / m_dataSize; i++) {
@@ -660,7 +660,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 
 			if (index != -1) {
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 				for (qint64 i = 0; i < c->dataSize(); i++) {
@@ -690,7 +690,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 		for (i = 0; i < bufferSize / m_dataSize; i++) {
@@ -704,7 +704,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 				for (i = 0; i < c->dataSize(); i++) {
@@ -723,7 +723,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		break;
 	case Long:
 		{
-		qint32 *buffer = new qint32[bufferSize];
+		qint32 *buffer = new qint32[data_size];
 		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
@@ -733,7 +733,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 		for (i = 0; i < bufferSize / m_dataSize; i++){
@@ -748,7 +748,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1)  {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
 				for (i = 0; i < c->dataSize(); i++)	{
