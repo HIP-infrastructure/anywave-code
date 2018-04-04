@@ -29,13 +29,16 @@
 AwDataClient::AwDataClient(QObject *parent)
 	: QObject(parent)
 {
-	m_endOfData = m_isConnected = false;
+	m_endOfData = m_isConnected = m_errorOccured = false;
 }
 
 void AwDataClient::requestData(AwChannelList *channels, AwMarker *marker, bool rawData)
 {
-	if (!m_isConnected)
+	if (!m_isConnected) {
+		m_errorOccured = true;
+		m_errorString = QString("Trying to request data but not connected to the data server.");
 		return;
+	}
 	emit needData(channels, marker, rawData);
 	m_mutexDataAvailable.lock();
  	m_wcDataAvailable.wait(&m_mutexDataAvailable);
@@ -44,8 +47,11 @@ void AwDataClient::requestData(AwChannelList *channels, AwMarker *marker, bool r
 
 void AwDataClient::requestData(AwChannelList *channels, float start, float duration, bool rawData)
 {
-	if (!m_isConnected)
+	if (!m_isConnected) {
+		m_errorOccured = true;
+		m_errorString = QString("Trying to request data but not connected to the data server.");
 		return;
+	}
 	//emit needData(channels, start, duration, downSampling, foptions);
 	emit needData(channels, start, duration, rawData);
 	m_mutexDataAvailable.lock();

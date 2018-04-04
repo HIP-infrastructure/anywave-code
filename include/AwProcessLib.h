@@ -81,7 +81,6 @@ public:
 	void addOutputParameter(int parameter, QVariant value)
 		{ m_outputParameters.insert(parameter, value); }
 
-
 	inline bool hasOutput() { return !output.isEmpty(); }
 	inline bool hasOutputWidgets() { return !output.widgets.isEmpty(); }
 	inline AwMatlabInterface *MATLAB() { return m_mi; }

@@ -93,11 +93,8 @@ void AwDataServer::openConnection(AwDataClient *client)
 	QThread *t = new QThread();
 	dc->moveToThread(t);
 
-	//connect(client, SIGNAL(needData(AwChannelList *, float, float, float, AwFilteringOptions *)), dc, SLOT(loadData(AwChannelList *, float, float, float, AwFilteringOptions *)));
-	//connect(client, SIGNAL(needData(AwChannelList *, AwMarker *, float, AwFilteringOptions *)), dc, SLOT(loadData(AwChannelList *, AwMarker *, float, AwFilteringOptions *)));
 	connect(client, SIGNAL(needData(AwChannelList *, float, float, bool)), dc, SLOT(loadData(AwChannelList *, float, float, bool)));
 	connect(client, SIGNAL(needData(AwChannelList *, AwMarker *,bool)), dc, SLOT(loadData(AwChannelList *, AwMarker *, bool)));
-//	connect(client, SIGNAL(filteringNeeded(AwChannelList *)), dc, SLOT(filterData(AwChannelList *)));
 	connect(dc, SIGNAL(outOfMemory()), this, SLOT(manageOutOfMemory()));
 
 	m_clientToConnection.insert(client, dc);
@@ -121,7 +118,6 @@ void AwDataServer::openConnection(AwDataClient *client, AwFileIO *reader)
 	AwDataConnection *dc = new AwDataConnection(this, client, reader);
 	connect(client, SIGNAL(needData(AwChannelList *, float, float, bool)), dc, SLOT(loadData(AwChannelList *, float, float, bool)));
 	connect(client, SIGNAL(needData(AwChannelList *, AwMarker *, bool)), dc, SLOT(loadData(AwChannelList *, AwMarker *, bool)));
-//	connect(client, SIGNAL(filteringNeeded(AwChannelList *)), dc, SLOT(filterData(AwChannelList *)));
 	connect(dc, SIGNAL(outOfMemory()), this, SLOT(manageOutOfMemory()));
 	QThread *t = new QThread();
 	dc->moveToThread(t);
@@ -165,10 +161,6 @@ void AwDataServer::closeAllConnections()
 
 	m_clientToConnection.clear();
 	m_dataConnections.clear();
-	//QList<AwDataClient *> clients = m_clientToConnection.keys();
-
-	//foreach (AwDataClient *c, clients)
-	//	closeConnection(c);
 }
 
 

@@ -379,6 +379,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 #endif
 	if (channelsToLoad->isEmpty())	{
 		setEndOfData();
+		m_client->setError(QString("Channel list is empty."));
 		return;
 	}
 	// check start position
@@ -387,6 +388,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	qDebug() << Q_FUNC_INFO << " in thread " << thread() << " start position beyong total duration." << endl;
 #endif
 		setEndOfData();
+		m_client->setError(QString("start position beyond total duration."));
 		return;
 	}
 
@@ -406,8 +408,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	}
 	m_positionInFile = start;
 	// clear data before loading
-	//foreach (AwChannel *c, *channelsToLoad)
-	//	c->clearData();
 	AwChannel::clearData(*channelsToLoad);
 	parseChannels(*channelsToLoad);
 	qint64 read = -1;
@@ -432,6 +432,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	catch (const std::bad_alloc &)	{
 		emit outOfMemory();
 		setEndOfData();
+		m_client->setError(QString("Error allocating memory to load data."));
 		return;
 	}
 
@@ -439,7 +440,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	try	{
 		if (!m_loadingList.isEmpty()) {
 			fileLock();  // get access to the file for reading
-			foreach(AwChannel *c, m_loadingList)
+			for (auto c : m_loadingList)
 				c->clearData();
 			read = m_reader->readDataFromChannels(m_positionInFile, m_duration, m_loadingList);
 			fileUnlock();
@@ -449,7 +450,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 #ifndef NDEBUG
 	qDebug() << Q_FUNC_INFO << "Out of memory!!!" << endl;
 #endif 
-		foreach(AwChannel *c, m_loadingList)
+		for (auto c : m_loadingList)
 			c->clearData();
 		fileUnlock();
 
@@ -457,25 +458,21 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			m_ICASourcesLoaded[i] = false;
 		emit outOfMemory();
 		setEndOfData();
+		m_client->setError(QString("Error allocating memory to load data."));
 		return;
 	}
 
 	if (read == 0) { // NO DATA READ
-		foreach(AwChannel *c, m_loadingList)
+		for (auto c: m_loadingList)
 			c->clearData();
 		setEndOfData();
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 			m_ICASourcesLoaded[i] = false;
 		emit endOfData();
+		m_client->setError(QString("No data read from plugin."));
 		return;
 	}
 	else {  // READING WAS OK
-
-		//// down sampling if required
-		//if (downSampling) {
-		//	AwFiltering::downSample(m_loadingList, downSampling);
-		//}
-
 		// reject or add ICA Components
 		AwICAManager *ica_man = AwICAManager::instance();
 		try{
@@ -485,19 +482,20 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			}
 		}
 		catch (const std::bad_alloc &)	{
-			foreach(AwChannel *c, m_loadingList)
+			for(auto c : m_loadingList)
 				c->clearData();
 			setEndOfData();
 			for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 				m_ICASourcesLoaded[i] = false;
 			emit endOfData();
+			m_client->setError(QString("Error allocating memory to apply ICA filters."));
 			return;
 		}
 
 		computeVirtualChannels();
 
 		// check for channels that need montaging
-		foreach(AwChannel *channel, m_loadingList) {
+		for(auto channel :  m_loadingList) {
 			if (channel->hasReferences())
 				montageChannels << channel;
 		}
@@ -508,47 +506,20 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			applyReferences(montageChannels);
 
 		// free references channels from loading list and destroy them
-		foreach(AwChannel *channel, m_refList) {
+		for (auto channel : m_refList) {
 			m_loadingList.removeAll(channel);
 		}
 		while (!m_refList.isEmpty())
 			delete m_refList.takeLast();
 
-		//// check for filtering options
-		//if (foptions) { // apply specific filtering options
-		//	foreach (AwChannel *channel, m_loadingList + m_virtualChannels) {
-		//		switch (channel->type())
-		//		{
-		//		case AwChannel::EEG:
-		//		case AwChannel::SEEG:
-		//			channel->setHighFilter(foptions->eegHP);
-		//			channel->setLowFilter(foptions->eegLP);
-		//			channel->setNotch(foptions->eegNotch);
-		//			break;
-		//		case AwChannel::MEG:
-		//		case AwChannel::GRAD:
-		//			channel->setHighFilter(foptions->megHP);
-		//			channel->setLowFilter(foptions->megLP);
-		//			channel->setNotch(foptions->megNotch);
-		//			break;
-		//		case AwChannel::EMG:
-		//		case AwChannel::ECG:
-		//			channel->setHighFilter(foptions->emgHP);
-		//			channel->setLowFilter(foptions->emgLP);
-		//			channel->setNotch(foptions->emgNotch);
-		//			break;
-		//		}
-		//	}
-		//}
-
 		if (!rawData) {
 
 			// Filtering
-			foreach(AwChannel *c, m_loadingList + m_virtualChannels) {
+			for (auto c : m_loadingList + m_virtualChannels) {
 				if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
 					channelsToFilter << c;
 			}
-			foreach(AwChannel *c, m_sourceEEGChannels + m_sourceMEGChannels) {
+			for (auto c : m_sourceEEGChannels + m_sourceMEGChannels) {
 				if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
 					channelsToFilter << c;
 			}
@@ -556,11 +527,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			AwFiltering::notch(channelsToFilter);
 			// end of filtering
 		}
-
-		//// down sampling if required
-		//if (downSampling) {
-		//	AwFiltering::downSample(m_loadingList, downSampling);
-		//}
 
 		// check for internal processes
 		QList<AwProcess *> internals = AwProcessManager::instance()->activeInternalProcesses();
@@ -580,7 +546,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		}
 
 		// mark data for channels as ready
-		foreach (AwChannel *c, m_loadingList + m_virtualChannels)
+		for (auto c : m_loadingList + m_virtualChannels)
 			c->setDataReady();
 
 	}
