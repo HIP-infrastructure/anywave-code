@@ -25,7 +25,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "meg4dreader.h"
 #include <AwMEGSensorManager.h>
-#include <AwException.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -133,8 +132,10 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 
 	m_file.setFileName(path);
 
-	if (!m_file.open(QIODevice::ReadOnly))
+	if (!m_file.open(QIODevice::ReadOnly)) {
+		m_error = QString("Could not open the file for reading.");
 		return AwFileIO::FileAccess;
+	}
 
 	m_stream.setDevice(&m_file);
 
@@ -169,6 +170,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 
 	if (sampling_rate > 5000 || sampling_rate <= 0)	{
 		cleanUpAndClose();
+		m_error = QString("Samlping rate is incorrect.");
 		return AwFileIO::BadHeader;
 	}
 
@@ -520,7 +522,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 	m_file.open(QIODevice::ReadOnly);
 
 	// Get trigger channels.
-	foreach (AwChannel *chan, infos.channels())	{
+	for (auto chan : infos.channels())	{
 		if (chan->isTrigger())
 			m_triggers << chan;
 	}
@@ -550,11 +552,15 @@ NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 
 qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList)
 {
-	if (channelList.isEmpty())
+	if (channelList.isEmpty()) {
+		m_error = QString("Empty channel list");
 		return 0;
+	}
 
-	if (start >= infos.blocks().at(0)->duration())
+	if (start >= infos.blocks().at(0)->duration()) {
+		m_error = QString("Start position is after the end of data.");
 		return 0;
+	}
 
 	quint32 nChannels = channelList.size();
 
@@ -568,7 +574,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	qint64 nSamplesTotal = (qint64)floor(duration * m_sampleRate);
 	
 	if (nSamplesTotal == 0) {
-		throw AwException("duration is zero", "4DNIReader", AwException::warning);
+		m_error = QString("The number of samples to read is ZERO.");
 		return 0;
 	}
 
@@ -593,12 +599,15 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Float).");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#pragma omp parallel for 
+#ifndef Q_OS_MAC
+#pragma omp parallel for
+#endif
 		for (i = 0; i < bufferSize / m_dataSize; i++) {
 			quint32 val = fromBigEndian((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
@@ -610,7 +619,9 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
+#ifndef Q_OS_MAC
 #pragma omp parallel for
+#endif
 				for (i = 0; i < c->dataSize(); i++) {
 					// copy to channel
 					float val = float(buffer[index + i * nChannelsTotal]);
@@ -628,26 +639,30 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	case Double:
 		{
 		double *buffer = new double[bufferSize];
-		//read = m_stream.readRawData((char *)buffer, bufferSize);
 		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Double)");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
-#pragma omp  for
+#ifndef Q_OS_MAC
+#pragma omp parallel for
+#endif
 		for (qint64 i = 0; i < bufferSize / m_dataSize; i++) {
 			quint64 val = fromBigEndian64((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 		// copy data to channels
-		foreach (AwChannel *c, channelList)	{
+		for (auto c : channelList)	{
 			int index = infos.indexOfChannel(c->name());
 
 			if (index != -1) {
 				float *data = c->newData(nSamplesTotal);
-#pragma omp  for
+#ifndef Q_OS_MAC
+#pragma omp parallel for
+#endif
 				for (qint64 i = 0; i < c->dataSize(); i++) {
 					// copy to channel
 					float val = (float)buffer[index + i * nChannelsTotal];
@@ -669,12 +684,15 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Short)");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#pragma omp for 
+#ifndef Q_OS_MAC
+#pragma omp parallel for
+#endif
 		for (i = 0; i < bufferSize / m_dataSize; i++) {
 			quint16 val = fromBigEndian16((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
@@ -686,7 +704,9 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#pragma omp for
+#ifndef Q_OS_MAC
+#pragma omp parallel for
+#endif
 				for (i = 0; i < c->dataSize(); i++) {
 					// copy to channel
 					float val = float(buffer[index + i * nChannelsTotal]) * channel_data->units_per_bit * channel_data->scale / channel_data->gain;
@@ -707,25 +727,30 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Long).");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#pragma omp for
+#ifndef Q_OS_MAC
+#pragma omp parallel for
+#endif
 		for (i = 0; i < bufferSize / m_dataSize; i++){
 			quint32 val = fromBigEndian((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 
 		// copy data to channels
-		foreach (AwChannel *c, channelList)	{
+		for (auto c : channelList)	{
 			int index = infos.indexOfChannel(c->name());
 
 			if (index != -1)  {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#pragma omp  for
+#ifndef Q_OS_MAC
+#pragma omp parallel for
+#endif
 				for (i = 0; i < c->dataSize(); i++)	{
 					// copy to channel
 					float val = (float)buffer[index + i * nChannelsTotal] * channel_data->units_per_bit * channel_data->scale / channel_data->gain;

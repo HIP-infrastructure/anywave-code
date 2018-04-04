@@ -469,7 +469,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 			m_ICASourcesLoaded[i] = false;
 		emit endOfData();
-		m_client->setError(QString("No data read from plugin."));
+		m_client->setError(QString("No data read from %1: %2").arg(m_reader->plugin()->name).arg(m_reader->errorMessage()));
 		return;
 	}
 	else {  // READING WAS OK
