@@ -558,24 +558,23 @@ qint64 NI4DFileReader::readBuffer(char *buffer, qint64 bufferSize)
 	qint64 read = 0;
 #ifdef BUFFER_CHUNK_READ  // Read data by chunk to avoid bugs when reading huge file (macOS)
 	// Read data by chunk of 500Mbytes (Reading huge files failed on Mac).
-	qint64 chunkSize = 500 * 1024 * 1024;
-	qint64 toRead = std::min(chunkSize, bufferSize), bytesRead = 0, samplesRead = 0;
-	while (toRead > 0) {
-		read = m_file.read((char *)&buffer[samplesRead], toRead);
+    qint64 bytesToRead = bufferSize;
+    qint64 chunkSize = std::min(qint64(500 * 1024 * 1024), bytesToRead);
+    char *dest = buffer;
+    while (bytesToRead) {
+		read = m_file.read(dest, chunkSize);
 		if (read == -1) 
 			break;
-		bytesRead += read;
-		samplesRead = read / m_dataSize;
-		toRead -= read;
+		bytesToRead -= read;
+        dest += read;
+		chunkSize = std::min(qint64(500 * 1024 * 1024), bytesToRead);
 	}
 	if (read <= 0) {
-		delete[] buffer;
 		return -1;
 	}
 #else // Read all the data at once
 	read = m_file.read((char *)buffer, bufferSize);
 	if (read <= 0) {
-		delete[] buffer;
 		return -1;
 	} 
 #endif
