@@ -26,6 +26,10 @@
 #include "meg4dreader.h"
 #include <AwMEGSensorManager.h>
 
+#ifdef Q_OS_MACOS
+#define BUFFER_CHUNK_READ
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Fonctions de conversion BigEndian LitleEndian
@@ -549,6 +553,37 @@ NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 	return AwFileIO::WrongFormat;
 }
 
+qint64 NI4DFileReader::readBuffer(char *buffer, qint64 bufferSize)
+{
+	qint64 read = 0;
+#ifdef BUFFER_CHUNK_READ  // Read data by chunk to avoid bugs when reading huge file (macOS)
+	// Read data by chunk of 500Mbytes (Reading huge files failed on Mac).
+	qint64 chunkSize = 500 * 1024 * 1024;
+	qint64 toRead = 0, bytesRead = 0, samplesRead = 0;
+	qint64 toRead = std::min(chunkSize, bufferSize);
+	qint64 bytesRead = 0;
+	while (toRead > 0) {
+		read = m_file.read((char *)&buffer[samplesRead], toRead);
+		if (read == -1) 
+			break;
+		bytesRead += read;
+		samplesRead = read / m_dataSize;
+		toRead -= read;
+	}
+	if (read <= 0) {
+		delete[] buffer;
+		return -1;
+	}
+#else // Read all the data at once
+	read = m_file.read((char *)buffer, bufferSize);
+	if (read <= 0) {
+		delete[] buffer;
+		return -1;
+	}
+#endif
+	return read;
+}
+
 
 qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList)
 {
@@ -587,8 +622,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	qint64 read = 0;
 	qint64 bufferSize = nSamplesTotal * nChannelsTotal * m_dataSize;
 	qint64 data_size = nSamplesTotal * nChannelsTotal;
-	// Read data by chunk of 500Mbytes (Reading huge files failed on Mac).
-	qint64 chunkSize = 500 * 1024 * 1024;
+
 #ifndef NDEBUG
 	qDebug() << "4D Reading data..." << endl;
 #endif
@@ -597,7 +631,8 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	case Float:
 	{
 		float *buffer = new float[data_size];
-		read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
+	//	read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
 			m_error = QString("Failed to read data (Float).");
@@ -640,7 +675,8 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	case Double:
 		{
 		double *buffer = new double[data_size];
-		read = m_file.read((char *)buffer, bufferSize);
+		//read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
 			m_error = QString("Failed to read data (Double)");
@@ -682,32 +718,12 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		{
 		qint16 *buffer = new qint16[data_size];
 		//qint16 *buffer = new qint16[bufferSize];
-#ifdef Q_OS_WIN
-		read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
 			m_error = QString("Failed to read data (Short)");
 			return 0;
 		}
-#else
-		qint64 toRead = std::min(chunkSize, bufferSize);
-		qint64 bytesRead = 0;
-		while (toRead > 0) {
-			read = m_file.read((char *)&buffer[bytesRead / m_dataSize], toRead);
-			if (read == -1) {
-				m_error = QString("Failed to read data (Short)");
-				break;
-			}
-			bytesRead += read;
-			toRead -= read;
-		}
-		if (read <= 0) {
-			delete[] buffer;
-			m_error = QString("Failed to read data (Short)");
-			return 0;
-		}
-#endif
-
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
@@ -719,7 +735,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 		// copy data to channels
-		foreach (AwChannel *c, channelList) {
+		for (auto c : channelList) {
 			int index = infos.indexOfChannel(c->name());
 
 			if (index != -1) {
@@ -745,7 +761,8 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	case Long:
 		{
 		qint32 *buffer = new qint32[data_size];
-		read = m_file.read((char *)buffer, bufferSize);
+		//read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
 			m_error = QString("Failed to read data (Long).");
