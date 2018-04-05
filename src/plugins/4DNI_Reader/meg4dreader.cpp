@@ -559,9 +559,7 @@ qint64 NI4DFileReader::readBuffer(char *buffer, qint64 bufferSize)
 #ifdef BUFFER_CHUNK_READ  // Read data by chunk to avoid bugs when reading huge file (macOS)
 	// Read data by chunk of 500Mbytes (Reading huge files failed on Mac).
 	qint64 chunkSize = 500 * 1024 * 1024;
-	qint64 toRead = 0, bytesRead = 0, samplesRead = 0;
-	qint64 toRead = std::min(chunkSize, bufferSize);
-	qint64 bytesRead = 0;
+	qint64 toRead = std::min(chunkSize, bufferSize), bytesRead = 0, samplesRead = 0;
 	while (toRead > 0) {
 		read = m_file.read((char *)&buffer[samplesRead], toRead);
 		if (read == -1) 
@@ -718,29 +716,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		{
 		qint16 *buffer = new qint16[data_size];
 		//qint16 *buffer = new qint16[bufferSize];
-<<<<<<< HEAD
-#ifdef Q_OS_WIN
-		read = m_file.read((char *)buffer, bufferSize);
-		if (read <= 0) {
-			delete[] buffer;
-            m_error = QString("Failed to read data (Short). Number of bytes : %1").arg(bufferSize);
-			return 0;
-		}
-#else
-		qint64 toRead = std::min(chunkSize, bufferSize);
-		qint64 bytesRead = 0;
-		while (toRead > 0) {
-			read = m_file.read((char *)&buffer[bytesRead / m_dataSize], toRead);
-			if (read == -1) {
-				m_error = QString("Failed to read data (Short)");
-				break;
-			}
-			bytesRead += read;
-			toRead -= read;
-		}
-=======
 		read = readBuffer((char *)buffer, bufferSize);
->>>>>>> e55178d61d109a336f5e28281306f216986ef664
 		if (read <= 0) {
 			delete[] buffer;
 			m_error = QString("Failed to read data (Short)");
@@ -752,7 +728,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 #ifndef Q_OS_MACOS
 #pragma omp parallel for
 #endif
-		for (i = 0; i < bufferSize / m_dataSize; i++) {
+		for (i = 0; i < data_size; i++) {
 			quint16 val = fromBigEndian16((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
