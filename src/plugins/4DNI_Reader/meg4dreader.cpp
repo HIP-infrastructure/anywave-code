@@ -579,7 +579,7 @@ qint64 NI4DFileReader::readBuffer(char *buffer, qint64 bufferSize)
 	if (read <= 0) {
 		delete[] buffer;
 		return -1;
-	}
+	} 
 #endif
 	return read;
 }
