@@ -26,6 +26,8 @@ install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.frame
 install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/libAwRW.dylib
 # Utilities
 install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/libAwUtilities.dylib
+# MAtlab
+install_name_tool -change /Users/bruno/matio/lib/libmatio.4.dylib @rpath/libmatio.4.dylib $1/libAwMATLAB.dylib
 # Widgets
 install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/libAwWidgets.dylib
 install_name_tool -change qwt.framework/Versions/6/qwt @rpath/qwt.framework/Versions/6/qwt $1/libAwWidgets.dylib

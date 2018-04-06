@@ -21,7 +21,7 @@ int AwMATLAB::saveToMatlab(const QString& fileName, const AwChannelList& channel
 	arma::fmat matrix = AwMath::channelsToFMat(channels).t();
 	status = file.writeMatrix(QString("data"), matrix);
 	if (status != 0) {
-		file.close();
+		file.close(); 
 		return status;
 	}
 	file.close();
