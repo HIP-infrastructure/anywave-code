@@ -34,3 +34,6 @@ install_name_tool -change libAwMapping.dylib @rpath/libAwMapping.dylib $1/libAwW
 install_name_tool -change libAwGraphics.dylib @rpath/libAwGraphics.dylib $1/libAwWidgets.dylib
 install_name_tool -change libAwMath.dylib @rpath/libAwMath.dylib $1/libAwWidgets.dylib
 install_name_tool -change libAwUtilities.dylib @rpath/libAwUtilities.dylib $1/libAwWidgets.dylib
+# AnyWave app
+install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/../MacOS/AnyWaveMac
+install_name_tool -change qwt.framework/Versions/6/qwt @rpath/qwt.framework/Versions/6/qwt $1/../MacOS/AnyWaveMac
