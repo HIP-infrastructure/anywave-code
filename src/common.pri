@@ -98,6 +98,7 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 
 unix:!macx{
 QMAKE_CXXFLAGS_RELEASE += -fopenmp
+QMAKE_CXXFLAGS_RELEASE += -fPIC
 }
 
 macx {

@@ -48,8 +48,8 @@ MATIO_LIB_PATH = /Users/bruno/matio/lib
 
 # QWT
 unix:!mac{
-QWT_INCLUDE_PATH=
-QWT_LIB_PATH=
+QWT_INCLUDE_PATH=/home/bruno/qwt-6.1.4/include
+QWT_LIB_PATH=/home/bruno/qwt-6.1.4/lib
 }
 macx {
 QWT_INCLUDE_PATH=
@@ -79,6 +79,10 @@ QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.10
 # add rpath to frameworks for all targets
 QMAKE_RPATHDIR += /Library/Frameworks
 QMAKE_RPATHDIR += @executable_path/../Frameworks
+}
+
+unix:!macx{
+QMAKE_RPATHDIR += '$ORIGIN/lib'
 }
 
 # build moc and objects file in a directory

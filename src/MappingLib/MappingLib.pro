@@ -12,11 +12,6 @@ CONFIG += plugin
 DEFINES += AW_BUILD_MAPPING_LIB
 DESTDIR = $$LIB_DIR
 
-#FRAMEWORK_HEADERS.version = Versions
-#FRAMEWORK_HEADERS.files =     ../../include/layout/AwLayout.h  ../../include/layout/AwLayoutManager.h ../../include/AwGlobal.h
-#FRAMEWORK_HEADERS.path = Headers
-#QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
-
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -43,11 +38,8 @@ QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION
 }
 
 unix:!macx{
- LIBS += -lAwCore $$VTK_LIBRARIES
+    LIBS += -lAwCore -lAwLayout $$VTK_LIBRARIES
 }
-
-LIBS += -lAwLayout
-
 
 SOURCES += \
     AwMap.cpp \
@@ -57,7 +49,7 @@ HEADERS += \
     ../../include/mapping/AwMap.h \
     ../../include/mapping/AwMeshManager.h
 
-unix {
+macx {
     target.path = $$INSTALL_LIB_PATH
     INSTALLS += target
 }
