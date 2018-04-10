@@ -23,6 +23,7 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 QMAKE_CXXFLAGS_RELEASE += -fopenmp
 
 INCLUDEPATH += $$_AWROOT/include $$_AWROOT/armadillo/include
+QMAKE_RPATHDIR += $ORIGIN/lib
 
 LIBS += -L$$_AWROOT/lib
 # build moc and objects file in a directory
