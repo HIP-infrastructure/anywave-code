@@ -99,6 +99,12 @@ install_arma.files += $$PWD/../../armadillo
 
 INSTALLS += install_arma
 
+# qmake config files to build external plugins
+install_qmake.path = $$HEADER_DIR
+install_qmake.files += $$PWD/../../resources/qmake
+
+INSTALLS += install_qmake
+
 DISTFILES += \
     anywave_en.qm \
     anywave_fr.qm \
