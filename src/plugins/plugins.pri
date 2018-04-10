@@ -12,4 +12,5 @@ macx {
 
 unix:!macx{
     LIBS += -lAwCore
+    QMAKE_RPATHDIR += $ORIGIN/lib
 }
