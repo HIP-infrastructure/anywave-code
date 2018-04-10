@@ -35,6 +35,7 @@ QMAKE_RPATHDIR += /Library/Frameworks
 }
 unix:!macx{
 LIBS += -L$$MATLAB_ROOT/bin/glnxa64 -lmex -lmx -lmat
+QMAKE_RPATHDIR += /usr/local/AnyWave/lib
 }
 DEFINES += MATLAB_MEX_FILE
 DEF_FILE = configure.def
