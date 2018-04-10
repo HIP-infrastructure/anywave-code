@@ -52,6 +52,7 @@ public:
 	AwNavigationBar(QWidget *parent = 0, int flags = 0);
 	~AwNavigationBar();
 
+	void setFlags(int flags);
 	inline void setTotalDuration(float dur) { m_totalDuration = dur; }
 	AwAmplitudeWidget *amplitudeWidget();
 public slots:

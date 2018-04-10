@@ -46,7 +46,7 @@ Source: ".\setup\vcredist.exe"; DestDir: "{app}"; Flags: deleteafterinstall
 Source: ".\setup\vc_redist_2015.x64.exe"; DestDir: "{app}"; Flags: deleteafterinstall
 Source: ".\setup\vc_redist_2017.x64.exe"; DestDir: "{app}"; Flags: deleteafterinstall
 Source: ".\bin\x64\Release\Python\*.*"; DestDir: "{app}\Python\"; Flags: recursesubdirs
-Source: ".\bin\x64\Release\platforms\*.*"; DestDir: "{app}\platforms\"; Flags: recursesubdirs
+Source: ".\bin\x64\Release\QtPlugins\*.*"; DestDir: "{app}\QtPlugins\"; Flags: recursesubdirs
 
 [Icons]
 Name: "{commondesktop}\AnyWave"; Filename: "{app}\Anywave.exe"; Tasks: desktopicon

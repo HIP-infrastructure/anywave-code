@@ -35,7 +35,6 @@ namespace AwMath {
 	mat AW_MATH_EXPORT channelsToMat(const AwChannelList& channels);
 	fvec AW_MATH_EXPORT channelToVec(AwChannel *channel);
 	bool AW_MATH_EXPORT isNanInChannels(const AwChannelList& channels);
-
 	/** Spectogram MATLAB port. **/
 	void AW_MATH_EXPORT spectrogram(fvec& X, vec& window, int noverlap, mat& s);
 	void AW_MATH_EXPORT spectrogram(vec& X, vec& window, int noverlap, mat& s);

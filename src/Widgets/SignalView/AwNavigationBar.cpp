@@ -53,6 +53,27 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 	connect(ui->buttonPrevious, SIGNAL(clicked()), this, SIGNAL(pageBackwardClicked()));
 	connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SIGNAL(positionChanged(int)));
 	connect(ui->buttonMarker, SIGNAL(clicked()), this, SIGNAL(markingStarted()));
+	setFlags(flags);
+	// create horizontal scale
+	for (int i = 0; i < ui->comboSecsPerCm->count(); i++)
+		m_timeScale.append(ui->comboSecsPerCm->itemText(i).toDouble());
+}
+
+void AwNavigationBar::setFlags(int flags)
+{
+	// reset default state before applying new flags
+	ui->buttonMarker->hide();
+	ui->buttonViewSettings->show();
+	ui->horizontalScrollBar->show();
+	ui->widgetGains->show();
+	ui->buttonStart->show();
+	ui->buttonEnd->show();
+	ui->buttonPrevious->show();
+	ui->buttonForward->show();
+	ui->labelTime->show();
+	ui->labelnChannels->show();
+	ui->labelnSelectedChannels->show();
+
 	if (flags & AwBaseSignalView::NoSettingsButton)
 		ui->buttonViewSettings->hide();
 	if (flags & AwBaseSignalView::NoHScrollBar)
@@ -60,7 +81,7 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 	if (flags & AwBaseSignalView::EnableMarking)
 		ui->buttonMarker->show();
 	if (flags & AwBaseSignalView::NoGainLevels)
-		ui->widgetGains->hide();
+		ui->widgetGains->hide(); 
 	if (flags & AwBaseSignalView::NoNavButtons) {
 		ui->buttonStart->hide();
 		ui->buttonEnd->hide();
@@ -73,9 +94,6 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 		ui->labelnSelectedChannels->hide();
 	}
 	m_flags = flags;
-	// create horizontal scale
-	for (int i = 0; i < ui->comboSecsPerCm->count(); i++)
-		m_timeScale.append(ui->comboSecsPerCm->itemText(i).toDouble());
 }
 
 AwNavigationBar::~AwNavigationBar()
