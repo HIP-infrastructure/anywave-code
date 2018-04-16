@@ -14,3 +14,7 @@ LIBS += -lcommon
 
 
 
+macx {
+QMAKE_POST_LINK = \
+  install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $${DESTDIR}/$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+}

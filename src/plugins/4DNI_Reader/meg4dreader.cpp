@@ -26,6 +26,10 @@
 #include "meg4dreader.h"
 #include <AwMEGSensorManager.h>
 
+#ifdef Q_OS_MACOS
+#define BUFFER_CHUNK_READ
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Fonctions de conversion BigEndian LitleEndian
@@ -132,8 +136,10 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 
 	m_file.setFileName(path);
 
-	if (!m_file.open(QIODevice::ReadOnly))
+	if (!m_file.open(QIODevice::ReadOnly)) {
+		m_error = QString("Could not open the file for reading.");
 		return AwFileIO::FileAccess;
+	}
 
 	m_stream.setDevice(&m_file);
 
@@ -168,6 +174,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 
 	if (sampling_rate > 5000 || sampling_rate <= 0)	{
 		cleanUpAndClose();
+		m_error = QString("Samlping rate is incorrect.");
 		return AwFileIO::BadHeader;
 	}
 
@@ -519,7 +526,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 	m_file.open(QIODevice::ReadOnly);
 
 	// Get trigger channels.
-	foreach (AwChannel *chan, infos.channels())	{
+	for (auto chan : infos.channels())	{
 		if (chan->isTrigger())
 			m_triggers << chan;
 	}
@@ -534,12 +541,6 @@ NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 	QDir dir = fi.absoluteDir();
 	QStringList filters;	
 
-
-	//// check that the file has no extension
-	//QStringList t = path.split(".");
-	//if (t.size() > 1)
-	//	return AwFileIO::WrongFormat;
-
 	filters << "*";
 	dir.setFilter(QDir::Files);
 	dir.setNameFilters(filters);
@@ -552,14 +553,46 @@ NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 	return AwFileIO::WrongFormat;
 }
 
+qint64 NI4DFileReader::readBuffer(char *buffer, qint64 bufferSize)
+{
+	qint64 read = 0;
+#ifdef BUFFER_CHUNK_READ  // Read data by chunk to avoid bugs when reading huge file (macOS)
+	// Read data by chunk of 500Mbytes (Reading huge files failed on Mac).
+    qint64 bytesToRead = bufferSize;
+    qint64 chunkSize = std::min(qint64(500 * 1024 * 1024), bytesToRead);
+    char *dest = buffer;
+    while (bytesToRead) {
+		read = m_file.read(dest, chunkSize);
+		if (read == -1) 
+			break;
+		bytesToRead -= read;
+        dest += read;
+		chunkSize = std::min(qint64(500 * 1024 * 1024), bytesToRead);
+	}
+	if (read <= 0) {
+		return -1;
+	}
+#else // Read all the data at once
+	read = m_file.read((char *)buffer, bufferSize);
+	if (read <= 0) {
+		return -1;
+	} 
+#endif
+	return read;
+}
+
 
 qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList)
 {
-	if (channelList.isEmpty())
+	if (channelList.isEmpty()) {
+		m_error = QString("Empty channel list");
 		return 0;
+	}
 
-	if (start >= infos.blocks().at(0)->duration())
+	if (start >= infos.blocks().at(0)->duration()) {
+		m_error = QString("Start position is after the end of data.");
 		return 0;
+	}
 
 	quint32 nChannels = channelList.size();
 
@@ -572,18 +605,20 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	// number of samples to read
 	qint64 nSamplesTotal = (qint64)floor(duration * m_sampleRate);
 	
-	if (nSamplesTotal == 0)
+	if (nSamplesTotal == 0) {
+		m_error = QString("The number of samples to read is ZERO.");
 		return 0;
+	}
 
 	m_file.seek(startSample * m_dataSize);
 	qint64 pos = m_file.pos();
-	size_t nSamplesAvailable = (m_headerPos - pos) / (nChannelsTotal * m_dataSize);
+	qint64 nSamplesAvailable = (m_headerPos - pos) / (nChannelsTotal * m_dataSize);
 	if (nSamplesAvailable < nSamplesTotal)
 		nSamplesTotal = nSamplesAvailable;
 
 	qint64 read = 0;
-	size_t bufferSize = nSamplesTotal * nChannelsTotal * m_dataSize;
-	size_t data_size = nSamplesTotal * nChannelsTotal;
+	qint64 bufferSize = nSamplesTotal * nChannelsTotal * m_dataSize;
+	qint64 data_size = nSamplesTotal * nChannelsTotal;
 
 #ifndef NDEBUG
 	qDebug() << "4D Reading data..." << endl;
@@ -593,15 +628,19 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	case Float:
 	{
 		float *buffer = new float[data_size];
-		read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
+	//	read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Float).");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#pragma omp parallel for 
+#ifndef Q_OS_MACOS
+#pragma omp parallel for
+#endif
 		for (i = 0; i < bufferSize / m_dataSize; i++) {
 			quint32 val = fromBigEndian((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
@@ -613,7 +652,9 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
+#ifndef Q_OS_MACOS
 #pragma omp parallel for
+#endif
 				for (i = 0; i < c->dataSize(); i++) {
 					// copy to channel
 					float val = float(buffer[index + i * nChannelsTotal]);
@@ -630,27 +671,32 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		break;
 	case Double:
 		{
-		double *buffer = new double[bufferSize];
-		//read = m_stream.readRawData((char *)buffer, bufferSize);
-		read = m_file.read((char *)buffer, bufferSize);
+		double *buffer = new double[data_size];
+		//read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Double)");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
-#pragma omp  for
+#ifndef Q_OS_MACOS
+#pragma omp parallel for
+#endif
 		for (qint64 i = 0; i < bufferSize / m_dataSize; i++) {
 			quint64 val = fromBigEndian64((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 		// copy data to channels
-		foreach (AwChannel *c, channelList)	{
+		for (auto c : channelList)	{
 			int index = infos.indexOfChannel(c->name());
 
 			if (index != -1) {
 				float *data = c->newData(nSamplesTotal);
-#pragma omp  for
+#ifndef Q_OS_MACOS
+#pragma omp parallel for
+#endif
 				for (qint64 i = 0; i < c->dataSize(); i++) {
 					// copy to channel
 					float val = (float)buffer[index + i * nChannelsTotal];
@@ -669,27 +715,32 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		{
 		qint16 *buffer = new qint16[data_size];
 		//qint16 *buffer = new qint16[bufferSize];
-		read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Short)");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#pragma omp for 
-		for (i = 0; i < bufferSize / m_dataSize; i++) {
+#ifndef Q_OS_MACOS
+#pragma omp parallel for
+#endif
+		for (i = 0; i < data_size; i++) {
 			quint16 val = fromBigEndian16((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 		// copy data to channels
-		foreach (AwChannel *c, channelList) {
+		for (auto c : channelList) {
 			int index = infos.indexOfChannel(c->name());
 
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#pragma omp for
+#ifndef Q_OS_MACOS
+#pragma omp parallel for
+#endif
 				for (i = 0; i < c->dataSize(); i++) {
 					// copy to channel
 					float val = float(buffer[index + i * nChannelsTotal]) * channel_data->units_per_bit * channel_data->scale / channel_data->gain;
@@ -706,36 +757,41 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		break;
 	case Long:
 		{
-		qint32 *buffer = new qint32[bufferSize];
-		//read = m_stream.readRawData((char *)buffer, bufferSize);
-		read = m_file.read((char *)buffer, bufferSize);
+		qint32 *buffer = new qint32[data_size];
+		//read = m_file.read((char *)buffer, bufferSize);
+		read = readBuffer((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
+			m_error = QString("Failed to read data (Long).");
 			return 0;
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#pragma omp for
+#ifndef Q_OS_MACOS
+#pragma omp parallel for
+#endif
 		for (i = 0; i < bufferSize / m_dataSize; i++){
 			quint32 val = fromBigEndian((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 
 		// copy data to channels
-		foreach (AwChannel *c, channelList)	{
+		for (auto c : channelList)	{
 			int index = infos.indexOfChannel(c->name());
 
 			if (index != -1)  {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#pragma omp  for
+#ifndef Q_OS_MACOS
+#pragma omp parallel for
+#endif
 				for (i = 0; i < c->dataSize(); i++)	{
 					// copy to channel
 					float val = (float)buffer[index + i * nChannelsTotal] * channel_data->units_per_bit * channel_data->scale / channel_data->gain;
 					if (c->isEEG() || c->isECG() || c->isECG() || c->isSEEG())
 						val *= 1E6;
-					else if (c->isMEG())
+					else if (c->isMEG() || c->isReference())
 						val *= 1e12;
 					*data++ = val;
 				}

@@ -23,8 +23,7 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#ifndef AUTOMARKING_H
-#define AUTOMARKING_H
+#pragma once
 
 #include "automarking_global.h"
 #include <AwProcessInterface.h>
@@ -38,7 +37,7 @@ public:
 	AutoMarking();
 	~AutoMarking();
 	
-	void run();
+	void run(const QStringList& args) override;	// main execution entry point of the plugin
 public slots:
 	void newMarkers(const AwMarkerList& markers);
 private:
@@ -47,10 +46,8 @@ private:
 
 class AUTOMARKING_EXPORT AutoMarkingPlugin : public AwProcessPlugin
 {
-Q_OBJECT
-	#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	Q_OBJECT
 	Q_PLUGIN_METADATA(IID AwProcessPlugin_IID)
-#endif
 	Q_INTERFACES(AwProcessPlugin)
 public:
 	AutoMarkingPlugin();
@@ -59,5 +56,3 @@ public:
 
 };
 
-
-#endif // AUTOMARKING_H

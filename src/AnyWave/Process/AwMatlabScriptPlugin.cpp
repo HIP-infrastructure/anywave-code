@@ -91,7 +91,7 @@ void AwMatlabScriptProcess::run()
 #endif
 #ifdef Q_OS_MAC	// insert DYLD path to mex files
 		QString application = QCoreApplication::applicationDirPath();
-		application += "/../dylibs";
+        application += "/../Frameworks";
 		env.insert("AW_LIBPATH", application);  // this environment variable must be used in run script on the plugin side.
 #endif
 		plugin.setProcessEnvironment(env);

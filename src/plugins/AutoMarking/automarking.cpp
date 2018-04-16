@@ -31,14 +31,14 @@ AutoMarkingPlugin::AutoMarkingPlugin()
 	type = AwProcessPlugin::GUI;
 	name = "Mark around an event";
 	description = tr("Automatically add markers around an existing marker.");
-	category = "Process:Markers:Mark around position";
+	category = "Process:Markers:Mark around markers";
 }
 
 
 AutoMarking::AutoMarking()
 {
-	setFlags(Aw::ProcessFlags::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "1-n");
+//	setFlags(Aw::ProcessFlags::ProcessIsScriptable);
+	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "0-n");
 }
 
 AutoMarking::~AutoMarking()
@@ -47,7 +47,7 @@ AutoMarking::~AutoMarking()
 		delete m_widget;
 }
 
-void AutoMarking::run()
+void AutoMarking::run(const QStringList& args)
 {
 	if (m_markers.isEmpty()) {
 		QMessageBox::critical(0, tr("No Markers"), tr("At least one marker should be present."));

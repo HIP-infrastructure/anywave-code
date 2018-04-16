@@ -64,13 +64,17 @@ public:
 	void setConnected(bool flag = true) { m_isConnected = flag; }
 	inline bool isConnected() { return m_isConnected;  }
 	QWaitCondition& waitForData() { return m_wcDataAvailable; }
+	inline bool hasErrorOccured() { return m_errorOccured; }
+	inline QString& errorString() { return m_errorString; }
+	inline void setError(const QString& error) { m_errorString = error; m_errorOccured = true; }
 signals:
 	void needData(AwChannelList *channels, float start, float duration, bool rawData = false);
 	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false);
 protected:
 	QWaitCondition m_wcDataAvailable;
 	QMutex m_mutexDataAvailable;
-	bool m_endOfData, m_isConnected;
+	bool m_endOfData, m_isConnected, m_errorOccured;
+	QString m_errorString;	// hold a string containing a message describing the error
 };
 
 #endif // AWDATACLIENT_H

@@ -57,6 +57,7 @@ HEADERS += \
 
 macx {
     LIBS += -framework AwCore
+    QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 }
 
 unix:!macx{

@@ -92,5 +92,6 @@ void settings::accept()
 {
 	if (ui.lineEditOutputFile->text().isEmpty())
 		return;
+	outputFile = QDir::toNativeSeparators(ui.lineEditOutputFile->text());
 	QDialog::accept();
 }

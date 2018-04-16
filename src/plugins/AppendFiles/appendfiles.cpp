@@ -74,100 +74,123 @@ void AppendFiles::run()
 	m_writer = m_ui->selectedWriter->newInstance();
 	m_writer->setPlugin(m_ui->selectedWriter);
 
-	int count = 1;
-	QStringList labels;
-	AwMarkerList markers;
-	float sr;	// sampling rate
-	AwFileIOPlugin *plugin = m_ui->inputs.first().first;
-	AwFileIO *fr = plugin->newInstance();
-	QString file = m_ui->inputs.first().second;
-	fr->setPlugin(plugin);
-	emit progressChanged("Getting information of file " + file);
-	m_readers << fr;
-	
-	if (fr->openFile(file) != AwFileIO::NoError) {
-		error(QString("Failed to open %1").arg(file));
+	// check all input file for consistency
+	bool error = false;
+	for (auto item : m_ui->inputs)	{
+		AwFileIOPlugin *plugin = item.first;
+		AwFileIO *fr = plugin->newInstance();
+		fr->setPlugin(plugin);
+		QString file = item.second;
+		sendMessage(QString("Checking file %1").arg(file));
+		if (fr->openFile(file) != AwFileIO::NoError) {
+			error = true;
+			fr->plugin()->deleteInstance(fr);
+			break;
+		}
+		sendMessage(QString("Ok"));
+		m_readers << fr;
+	}
+	if (error) {
+		sendMessage("Some input files cannot be open for reading. Aborted.");
+		while (!m_readers.isEmpty()) {
+			AwFileIO *r = m_readers.takeFirst();
+			r->plugin()->deleteInstance(r);
+		}
 		return;
 	}
 
-	sr = fr->infos.channels().first()->samplingRate();
-	markers = AwMarker::duplicate(fr->infos.blocks().first()->markers());
-	labels = AwChannel::getLabels(fr->infos.channels());
+	// check for consistency through input files (sampling rate, channel names)
+	float sr = m_readers.first()->infos.channels().first()->samplingRate();
+	QStringList labels = AwChannel::getLabels(m_readers.first()->infos.channels());
+	int count = m_readers.first()->infos.channels().size();
 
-	for (int i = 1; i < m_ui->inputs.size(); i++) {
-		plugin = m_ui->inputs.at(i).first;
-		fr = plugin->newInstance();
-		fr->setPlugin(plugin);
-		file =  m_ui->inputs.at(i).second;
-		m_readers << fr;
-		if (fr->openFile(file) != AwFileIO::NoError) {
-			error(QString("Failed to open %1").arg(file));
-			return;
+	for (auto r : m_readers) {
+		float tmp = r->infos.channels().first()->samplingRate();
+		// check number of channels
+		if (r->infos.channels().size() != count) {
+			error = true;
+			sendMessage(QString("The number of channels is different between files."));
+			break;
 		}
-
-		QStringList temp = AwChannel::getLabels(fr->infos.channels());
-		if (temp.size() != labels.size()) { // files do not contain the same channels
-			error(QString("File %1 is not compatible with the previous files: The number of channels differ.").arg(file));
-			return;
+ 		if (sr != tmp) {
+			error = true;
+			sendMessage(QString("Sampling rates are not consistent between files"));
+			break;
 		}
-		else {
-			foreach (QString s, temp) {
-				if (!labels.contains(s)) {
-					error(QString("File %1 is not compatible with the previous files: The channels' names differ.").arg(file));
-					return;
-				}
+		QStringList tmpLabels = AwChannel::getLabels(r->infos.channels());
+		for (auto l : tmpLabels) {
+			if (!labels.contains(l)) {
+				error = true;
+				sendMessage(QString("Electrode names do not match."));
+				break;
 			}
 		}
-		if (sr != fr->infos.channels().first()->samplingRate()) {
-			error(QString("File %1 is not compatible with the previous files: The sampling rate differ.").arg(file));
-			return;
+	}
+
+	if (error) {
+		while (!m_readers.isEmpty()) {
+			AwFileIO *r = m_readers.takeFirst();
+			r->plugin()->deleteInstance(r);
 		}
+		return;
 	}
 
 	// compute the total duration
 	float duration = 0.;
-	foreach(AwFileIO *r, m_readers) {
+	for (auto r : m_readers) 
 		duration += r->infos.totalDuration();
-	}
-	float time_offset = 0.;
-	for (int i = 1; i < m_readers.size(); i++) {
-		AwFileIO *r = m_readers.at(i);
-		time_offset +=  m_readers.at(i - 1)->infos.totalDuration();
-		AwMarkerList temp = AwMarker::duplicate(r->infos.blocks().first()->markers());
-		// Insert a marker here at first position to mark the file jointure
-		AwMarker *joint = new AwMarker();
-		joint->setLabel("File junction");
-		joint->setStart(time_offset);
-		foreach (AwMarker *m, temp)  {
-			m->setStart(m->start() + time_offset);
-		}
-		temp.insert(0, joint);
-		markers += temp;
-	}
 
+	// gather all markers from the input files and reorder them for the expected appended one.
+	AwMarkerList outputMarkers = AwMarker::duplicate(m_readers.first()->infos.blocks().first()->markers());
+	float time_offset = m_readers.first()->infos.totalDuration();
+	
+	for (int i = 1; i < m_readers.size(); i++) {
+		outputMarkers << new AwMarker("File Junction", time_offset);
+		AwFileIO *r = m_readers.at(i);
+		AwMarkerList temp = AwMarker::duplicate(r->infos.blocks().first()->markers());
+		for (auto m : temp) 
+			m->setStart(m->start() + time_offset);
+		time_offset += r->infos.totalDuration();
+		outputMarkers += temp;
+	}
+	
+	// prepare channels for the writer
 	AwChannelList sourceChannels = AwChannel::duplicateChannels(m_readers.first()->infos.channels());
 	m_writer->infos.setChannels(sourceChannels);
-	AwMarker::sort(markers);
 	AwBlock *block = m_writer->infos.newBlock();
 	block->setDuration(duration);
 	block->setSamples((qint64)floor(duration * sr));
-	block->setMarkers(markers);
-	emit progressChanged(tr("Creating output file..."));
+	block->setMarkers(outputMarkers);
+
 	if (m_writer->createFile(m_ui->outputFile) != AwFileIO::NoError) {
-		error("Could not create the output file!");
+		sendMessage(m_writer->errorMessage());
+		while (!m_readers.isEmpty()) {
+			AwFileIO *r = m_readers.takeFirst();
+			r->plugin()->deleteInstance(r);
+		}
 		return;
 	}
-	foreach (AwFileIO *r, m_readers) {
-		emit progressChanged(QString("Appending data of file %1...").arg(r->infos.fileName()));
-		r->readDataFromChannels(0, fr->infos.totalDuration(), sourceChannels);
-		m_writer->writeData(&sourceChannels);
+
+	// read input files using chunks of 5 minutes 
+	const float chunkDuration = 300.;
+	count = 0;
+	for (auto r : m_readers) {
+		float left = r->infos.totalDuration();
+		float duration = std::min(r->infos.totalDuration(), chunkDuration);
+		QString file = m_ui->inputs.at(count++).second;
+		while (left > 0) {
+			sendMessage(QString("Reading data from file %1...").arg(file));
+			r->readDataFromChannels(0, duration, sourceChannels);
+			sendMessage("Done.");
+			left -= duration;
+			sendMessage(QString("Writing data to %1...").arg(m_ui->outputFile));
+			m_writer->writeData(&sourceChannels);
+			sendMessage("Done.");
+		}
 	}
+
 	m_writer->cleanUpAndClose();
-	// destroy source channels
-	while (!sourceChannels.isEmpty())
-		delete sourceChannels.takeFirst();
-	while (!markers.isEmpty())
-		delete markers.takeFirst();
+
 	while (!m_readers.isEmpty()) {
 		AwFileIO *r = m_readers.takeFirst();
 		r->plugin()->deleteInstance(r);

@@ -12,11 +12,6 @@ CONFIG += plugin
 DEFINES += AW_BUILD_MAPPING_LIB
 DESTDIR = $$LIB_DIR
 
-#FRAMEWORK_HEADERS.version = Versions
-#FRAMEWORK_HEADERS.files =     ../../include/layout/AwLayout.h  ../../include/layout/AwLayoutManager.h ../../include/AwGlobal.h
-#FRAMEWORK_HEADERS.path = Headers
-#QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
-
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -29,20 +24,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 macx {
-    LIBS += -framework AwCore
+    LIBS += -framework AwCore  -framework OpenGL -framework ApplicationServices -framework AppKit
     LIBS += -lAwLayout -lvtkCommonCore-$$VTK_VERSION_SUFFIX -lvtkCommonDataModel-$$VTK_VERSION_SUFFIX -lvtkCommonMisc-$$VTK_VERSION_SUFFIX \
     -lvtkFiltersCore-$$VTK_VERSION_SUFFIX -lvtkGUISupportQt-$$VTK_VERSION_SUFFIX -lvtkFiltersGeometry-$$VTK_VERSION_SUFFIX \
     -lvtkFiltersModeling-$$VTK_VERSION_SUFFIX -lvtkRenderingCore-$$VTK_VERSION_SUFFIX -lvtkInteractionStyle-$$VTK_VERSION_SUFFIX -lvtkCommonExecutionModel-$$VTK_VERSION_SUFFIX \
     -lvtkFiltersSources-$$VTK_VERSION_SUFFIX -lvtkRenderingOpenGL2-$$VTK_VERSION_SUFFIX -lvtkRenderingFreeType-$$VTK_VERSION_SUFFIX -lvtkRenderingAnnotation-$$VTK_VERSION_SUFFIX  \
-    -lvtkIOCore-$$VTK_VERSION_SUFFIX -lvtkIOXML-$$VTK_VERSION_SUFFIX
+    -lvtkIOCore-$$VTK_VERSION_SUFFIX -lvtkIOXML-$$VTK_VERSION_SUFFIX -lvtkzlib-$$VTK_VERSION_SUFFIX -lvtksys-$$VTK_VERSION_SUFFIX -lvtkFreeType-$$VTK_VERSION_SUFFIX \
+    -lvtklz4-$$VTK_VERSION_SUFFIX -lvtkglew-$$VTK_VERSION_SUFFIX  \
+    -lvtkIOXMLParser-$$VTK_VERSION_SUFFIX -lvtkexpat-$$VTK_VERSION_SUFFIX -lvtkImagingCore-$$VTK_VERSION_SUFFIX -lvtkCommonSystem-$$VTK_VERSION_SUFFIX \
+   -lvtkCommonMath-$$VTK_VERSION_SUFFIX -lvtkCommonTransforms-$$VTK_VERSION_SUFFIX -lvtkCommonColor-$$VTK_VERSION_SUFFIX -lvtkFiltersGeneral-$$VTK_VERSION_SUFFIX
+
+QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 }
 
 unix:!macx{
- LIBS += -lAwCore $$VTK_LIBRARIES
+    LIBS += -lAwCore -lAwLayout $$VTK_LIBRARIES
 }
-
-LIBS += -lAwLayout
-
 
 SOURCES += \
     AwMap.cpp \
@@ -51,4 +48,10 @@ SOURCES += \
 HEADERS += \
     ../../include/mapping/AwMap.h \
     ../../include/mapping/AwMeshManager.h
+
+macx {
+    target.path = $$INSTALL_LIB_PATH
+    INSTALLS += target
+}
+
 

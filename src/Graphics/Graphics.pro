@@ -8,7 +8,7 @@ include(../common.pri)
 QT += widgets
 TARGET = AwGraphics
 TEMPLATE = lib
-CONFIG += qwt plugin
+CONFIG += plugin
 DEFINES += AW_BUILD_GRAPHICS_LIB
 DESTDIR = $$LIB_DIR
 
@@ -83,7 +83,14 @@ HEADERS += ../../include/AwAmplitudeManager.h \
     ../../include/graphics/AwSignalLabelItem.h
 
 macx {
-    LIBS += -framework AwCore
+    LIBS += -framework AwCore -framework qwt
+}
+
+macx{
+   QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+    QMAKE_POST_LINK = \
+        install_name_tool -change libAwUtilities.dylib  @rpath/libAwUtilities.dylib $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB} \
+install_name_tool -change AwCore.framework/Versions/1/AwCore  @rpath/AwCore.framework/Versions/1/AwCore $$DESTDIR/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 }
 
 unix:!macx{

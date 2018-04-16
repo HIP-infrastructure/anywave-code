@@ -114,7 +114,7 @@ void AwPythonScriptProcess::run()
 	env.insert("PATH", qApp->applicationDirPath());
 #ifdef Q_OS_MAC
 	QString application = QCoreApplication::applicationDirPath();
-	application += "/../dylibs";
+    application += "/../Frameworks";
 	env.insert("DYLD_LIBRARY_PATH", application);
 #endif
 #ifdef Q_OS_LINUX

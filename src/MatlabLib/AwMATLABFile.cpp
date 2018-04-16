@@ -18,7 +18,7 @@ public:
     mat_t *fileptr;
 
 	int addStruct(matvar_t *s) {
-		struct_handles.insert(++m_handles, s);
+		struct_handles.insert(++m_handles, s); 
 		return m_handles;
 	}
 	matvar_t* getStruct(int handle) {

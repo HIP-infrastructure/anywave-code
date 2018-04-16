@@ -96,6 +96,7 @@ void AwBaseSignalView::setFlags(int flags)
 		m_settings->filters << AwChannel::EEG << AwChannel::MEG << AwChannel::SEEG << AwChannel::ICA << AwChannel::Source
 			<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
 	}
+	m_navBar->setFlags(flags);
 	if (m_flags & AwBaseSignalView::NoNavBar)
 		m_navBar->setVisible(false);
 }
