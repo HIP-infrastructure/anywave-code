@@ -173,12 +173,13 @@ void AppendFiles::run()
 
 	// read input files using chunks of 5 minutes 
 	const float chunkDuration = 300.;
-	count = 1;
+	count = 0;
 	for (auto r : m_readers) {
 		float left = r->infos.totalDuration();
 		float duration = std::min(r->infos.totalDuration(), chunkDuration);
+		QString file = m_ui->inputs.at(count++).second;
 		while (left > 0) {
-			sendMessage(QString("Reading data from file %1...").arg(count));
+			sendMessage(QString("Reading data from file %1...").arg(file));
 			r->readDataFromChannels(0, duration, sourceChannels);
 			sendMessage("Done.");
 			left -= duration;
@@ -186,7 +187,6 @@ void AppendFiles::run()
 			m_writer->writeData(&sourceChannels);
 			sendMessage("Done.");
 		}
-		count++;
 	}
 
 	m_writer->cleanUpAndClose();
