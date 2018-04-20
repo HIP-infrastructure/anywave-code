@@ -98,6 +98,9 @@
     <Filter Include="IO\MATLAB">
       <UniqueIdentifier>{affe80c4-bee8-4d1e-81df-156092db3e82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IO\BIDS">
+      <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1243,6 +1246,27 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwTriggerEraser.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSManager.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSSubject.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSSubject.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSSubject.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwNoGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1761,6 +1785,12 @@
     <CustomBuild Include="Widgets\AwSelectTriggerChannelDialog.ui">
       <Filter>Widgets</Filter>
     </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSManager.h">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSSubject.h">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -1951,6 +1981,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwSelectTriggerChannelDialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\BIDS\AwBIDSTools.h">
+      <Filter>IO\BIDS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

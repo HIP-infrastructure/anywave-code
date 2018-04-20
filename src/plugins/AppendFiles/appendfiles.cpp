@@ -178,13 +178,15 @@ void AppendFiles::run()
 		float left = r->infos.totalDuration();
 		float duration = std::min(r->infos.totalDuration(), chunkDuration);
 		QString file = m_ui->inputs.at(count++).second;
+		float position = 0;
 		while (left > 0) {
 			sendMessage(QString("Reading data from file %1...").arg(file));
-			r->readDataFromChannels(0, duration, sourceChannels);
+			r->readDataFromChannels(position, duration, sourceChannels);
 			sendMessage("Done.");
 			left -= duration;
 			sendMessage(QString("Writing data to %1...").arg(m_ui->outputFile));
 			m_writer->writeData(&sourceChannels);
+			position += duration;
 			sendMessage("Done.");
 		}
 	}

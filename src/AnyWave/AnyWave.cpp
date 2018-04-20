@@ -83,11 +83,10 @@
 #include "Epoch/AwEpochManager.h"
 #endif
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-AnyWave::AnyWave(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags)
-#else
+// command line function
+
+
 AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
-#endif
 {
 	setupUi(this);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)

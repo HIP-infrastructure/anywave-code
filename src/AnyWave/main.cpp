@@ -44,10 +44,11 @@
 #endif
 
 //#include <qstylefactory.h>
+#include <qcommandlineparser.h>
 
 int main(int argc, char *argv[])
 {
-#if VTK_MAJOR_VERSION >= 8
+#if VTK_MAJOR_VERSION >= 7
 	// init surface map for further use in VTK 8.1
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
 #endif
@@ -83,9 +84,46 @@ int main(int argc, char *argv[])
 	bool res = SetDllDirectory((LPCWSTR)dllDir);
 #endif
 	
+	QCommandLineParser parser;
+	parser.setApplicationDescription("AnyWave");
+	parser.addVersionOption();
+	parser.addHelpOption();
+	parser.addPositionalArgument("file", "The file to open.");
+	QCommandLineOption seegBIDSOpt("seegBIDS", "SEEG file to BIDSify.\nRequires task and sub options.", "file", QString());
+	QCommandLineOption BIDSTaskOpt("bids_task", "BIDS task", "task", QString());
+	QCommandLineOption BIDSSubjectOpt("bids_sub", "BIDS subject", "subject", QString());
+	QCommandLineOption BIDSSessionOpt("bids_ses", "BIDS session", "session", QString());
+	parser.addOption(seegBIDSOpt);
+	parser.addOption(BIDSTaskOpt);
+	parser.addOption(BIDSSubjectOpt);
+	parser.addOption(BIDSSessionOpt);
+	parser.process(QCoreApplication::arguments());
+	QStringList args = parser.positionalArguments();
+
 	AnyWave window;
-	if (argc > 1)
-		window.openFile(QString(argv[1]));
+	if (parser.isSet(seegBIDSOpt)) {
+		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt)) {
+			parser.showHelp();
+			exit(-1);
+		}
+		// Session option is not required
+		QString file = parser.value(seegBIDSOpt);
+		QString subj = parser.value(BIDSSubjectOpt);
+		QString task = parser.value(BIDSTaskOpt);
+		QString session = parser.value(BIDSSessionOpt);
+		if (file.isEmpty() || subj.isEmpty() || task.isEmpty()) {
+			parser.showHelp();
+			exit(-1);
+		}
+		window.doSEEGToBIDS(file, subj, task, session);
+		exit(0);
+	}
+
+	if (args.count() == 1)
+		window.openFile(args.at(0));
+		
+	//if (argc > 1)
+	//	window.openFile(QString(argv[1]));
 	window.showMaximized();
 	return app.exec();
 }

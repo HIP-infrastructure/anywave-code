@@ -66,16 +66,14 @@ class AnyWave : public QMainWindow, private Ui::AnyWaveClass
 
 public:
 	/** Constructeur **/
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
-	AnyWave(QWidget *parent = 0, Qt::WFlags flags = 0);
-#else
 	AnyWave(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-#endif
+
 	/** Destructeur **/
 	~AnyWave();
 
 	inline AwDisplay *displayManager() { return m_display; }
-
+    // command line arguments functions
+	void doSEEGToBIDS(const QString& file, const QString& subject, const QString& task, const QString& session = QString());
 protected:
 	void closeEvent(QCloseEvent *e);
 	void dragMoveEvent(QDragMoveEvent *e);
@@ -107,10 +105,8 @@ private:
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
-//	AwEpochManager *m_epochManager;
 
 	// DockWidgets
-//	AwDockFilter *m_dockWidgetFilters;
 	QDockWidget *m_dockFilters, *m_addMarkerDock;
 	QDockWidget *m_dockMarkers;
 	AwDockAddMarker *m_dockAddMarker;

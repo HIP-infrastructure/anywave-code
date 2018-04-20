@@ -219,7 +219,7 @@ int edflib_is_duration_number(char *str)
 
 EDFIOPlugin::EDFIOPlugin() : AwFileIOPlugin()
 {
-	name = QString("EDF/BDF Input/Output");
+	name = QString("EDF/BDF IO");
 	description = QString(tr("read/write EDF/BDF/EDF+/BDF+ files"));
 	manufacturer = QString::fromLatin1("EDF Group");
 	version = QString::fromLatin1("1.0");
@@ -997,7 +997,9 @@ qint64 EDFIO::writeData(QList<AwChannel *> *channels)
 AwFileIO::FileStatus EDFIO::createFile(const QString& path, int flags)
 {
 	// add writer extension
-	QString fullPath = QString("%1%2").arg(path).arg(plugin()->fileExtension);
+	QString fullPath = path;
+	if (!path.endsWith(".edf"))
+		fullPath = QString("%1%2").arg(path).arg(plugin()->fileExtension);
 
 	m_handle = edfopen_file_writeonly(fullPath.toStdString().c_str(), EDFLIB_FILETYPE_EDFPLUS, infos.channels().size());
 
