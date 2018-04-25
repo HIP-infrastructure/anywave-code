@@ -44,6 +44,7 @@
 AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 {
 	AwMatlabScriptProcess *p = new AwMatlabScriptProcess;
+	p->setPlugin(this);
 	initProcess(p);
 	// connect the process to the matlab server
 	AwMATPyServer *server = AwMATPyServer::instance(); // instantiate MATPYServer 
@@ -70,6 +71,7 @@ void AwMatlabScriptProcess::run()
 	AwMatlabInterface *mi = NULL;
 	if (m_isCompiled) { // this is a MATLAB compiled standalone plugin.
 		QStringList arguments;
+		emit log(QString("System PATH for %1 is %2").arg(this->plugin()->name).arg(m_systemPath));
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 		QSettings settings;
 

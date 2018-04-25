@@ -10,11 +10,14 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\AwSendMessage.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{878F8923-3071-43EF-9AEA-2AF5F5C312F2}</ProjectGuid>
+    <ProjectGuid>{AEBA7D82-38BE-45F4-88D8-DC3D989E1B2A}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>MexGetPluginInfo</ProjectName>
+    <ProjectName>MexIsProcessTerminated</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -83,12 +86,11 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>$(OutDir)\aw_getplugininfo.mexw64</OutputFile>
+      <OutputFile>$(OutDir)\AwSendMessage.mexw64</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2015a\extern\lib\win64\microsoft;$(QTDIR)\lib;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Network.lib;MexCommon.lib;libmx.lib;libmat.lib;libmex.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Network.lib;MexCommon.lib;libmx.lib;libmat.lib;libmex.lib;AwCoreLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>../configure.def</ModuleDefinitionFile>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <QtMoc>
@@ -96,15 +98,6 @@
       <IncludePath>C:\Program Files\MATLAB\R2015a\extern\include;.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;$(AWROOT)\include;..;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\aw_getplugininfo.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="MexGetPluginInfo.rc" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

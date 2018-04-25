@@ -1267,6 +1267,15 @@
     <ClCompile Include="AwNoGUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUI.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSGUI.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1791,6 +1800,12 @@
     <CustomBuild Include="IO\BIDS\AwBIDSSubject.h">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSGUI.h">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSGUI.ui">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -1984,6 +1999,9 @@
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSTools.h">
       <Filter>IO\BIDS</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBIDSGUI.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

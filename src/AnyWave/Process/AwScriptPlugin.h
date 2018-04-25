@@ -32,7 +32,7 @@ class AwScriptProcess : public AwProcess
 {
 	Q_OBJECT
 public:
-	AwScriptProcess() : AwProcess() { m_isCompiled = false; /* pdi.addInputParameter(Aw::GetAllMarkers, "n"); */ } // scripted process will get all markers as input by default.
+	AwScriptProcess() : AwProcess() { m_isCompiled = false;  } 
 	
 	void setScriptPath(const QString& path) { m_path = path; }
 	inline void setPid(int pid) { m_pid = pid; }

@@ -73,7 +73,7 @@ public:
 
 	inline AwDisplay *displayManager() { return m_display; }
     // command line arguments functions
-	void doSEEGToBIDS(const QString& file, const QString& subject, const QString& task, const QString& session = QString());
+	int doSEEGToBIDS(const QString& file, const QString& subject, const QString& task, const QString& session = QString());
 protected:
 	void closeEvent(QCloseEvent *e);
 	void dragMoveEvent(QDragMoveEvent *e);

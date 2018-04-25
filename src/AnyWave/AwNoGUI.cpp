@@ -4,7 +4,7 @@
 #include "AwException.h"
 /// Methods to do NOGUI operations
 
-void AnyWave::doSEEGToBIDS(const QString& file, const QString& subj, const QString& task, const QString& session)
+int AnyWave::doSEEGToBIDS(const QString& file, const QString& subj, const QString& task, const QString& session)
 {
 	AwBIDSManager *bm = AwBIDSManager::instance();
 
@@ -13,6 +13,7 @@ void AnyWave::doSEEGToBIDS(const QString& file, const QString& subj, const QStri
 	}
 	catch (const AwException& e) {
 		QTextStream(stdout) << QString("Error: %1 in %2").arg(e.errorString()).arg(e.origin()) << endl;
-		return;
+		return -1;
 	}
+	return 0;
 }

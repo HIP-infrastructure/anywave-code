@@ -61,7 +61,7 @@
 
 #define MIN_LRATE              0.000001
 #define MAX_LRATE              0.1
-#define DEFAULT_LRATE(chans)   0.015/log((double)chans)
+#define DEFAULT_LRATE(chans)   0.015/std::log((double)chans)
 
 #define DEFAULT_BLOCK(length)  (int)sqrt((double)length/3.0)
 

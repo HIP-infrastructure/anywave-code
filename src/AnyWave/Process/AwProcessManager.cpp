@@ -44,6 +44,7 @@
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
 #include "Filter/AwFilteringManager.h"
+#include "Debug/AwDebugLog.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -761,6 +762,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 	plm->connectProcess(process);
+
+	// connect process to debug log system
+	AwDebugLog::instance()->connectComponent(process->plugin()->name, process);
 
 	AwDataServer *ds = 	AwDataServer::getInstance();
 

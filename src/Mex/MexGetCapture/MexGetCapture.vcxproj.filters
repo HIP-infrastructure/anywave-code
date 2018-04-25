@@ -26,7 +26,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\aw_getplugininfo.cpp">
+    <ClCompile Include="..\aw_getcapture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

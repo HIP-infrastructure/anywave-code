@@ -21,7 +21,7 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 		throw AwException(QString("Could not open the file %1").arg(file), "AwBIDSManager::convertToBIDS");
 		return -1;
 	}
-
+	std::exception_ptr exceptionPtr;
 	// Get the directory
 	QFileInfo fi(file);
 	QString dir = fi.absolutePath();
@@ -46,7 +46,8 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 			converToEDF(fileName, reader);
 		}
 		catch (const AwException& e) {
-			throw(e);
+			exceptionPtr = std::current_exception();
+			std::rethrow_exception(exceptionPtr);
 			reader->plugin()->deleteInstance(reader);
 			return -1;
 		}
@@ -141,7 +142,7 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 		return -1;
 	}
 	reader->cleanUpAndClose();
-	reader->plugin()->deleteInstance(reader);
+//	reader->plugin()->deleteInstance(reader);
 	return 0;
 }
 

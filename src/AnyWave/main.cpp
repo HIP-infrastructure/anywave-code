@@ -115,7 +115,8 @@ int main(int argc, char *argv[])
 			parser.showHelp();
 			exit(-1);
 		}
-		window.doSEEGToBIDS(file, subj, task, session);
+		if (window.doSEEGToBIDS(file, subj, task, session) == -1)
+			exit(-1);
 		exit(0);
 	}
 

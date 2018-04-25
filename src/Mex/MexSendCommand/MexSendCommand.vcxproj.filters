@@ -26,7 +26,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\AwIsProcessTerminated.cpp">
+    <ClCompile Include="..\aw_sendcommand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

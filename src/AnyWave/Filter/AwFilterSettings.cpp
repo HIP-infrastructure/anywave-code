@@ -241,10 +241,14 @@ void AwFilterSettings::apply()
 	if (lp != m_lp[AwChannel::MEG] || hp != m_hp[AwChannel::MEG]) {
 		 m_lp[AwChannel::MEG] = lp;
 		 m_hp[AwChannel::MEG] = hp;
+		 m_lp[AwChannel::GRAD] = lp;
+		 m_hp[AwChannel::GRAD] = hp;
 		 fm->setFilter(AwChannel::MEG, lp, hp);
+		 fm->setFilter(AwChannel::GRAD, lp, hp);
 	}
 	if (notch > 0) {
 		fm->setNotch(AwChannel::MEG, notch);
+		fm->setNotch(AwChannel::GRAD, notch);
 	}
 
 	if (ica_over) {
