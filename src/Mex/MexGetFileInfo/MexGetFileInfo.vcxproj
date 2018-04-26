@@ -11,13 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\AwIsProcessTerminated.cpp" />
+    <ClCompile Include="..\aw_getfileinfo.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{AEBA7D82-38BE-45F4-88D8-DC3D989E1B2A}</ProjectGuid>
+    <ProjectGuid>{D4B90137-308B-4693-909A-651003ACE77B}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>MexIsProcessTerminated</ProjectName>
+    <ProjectName>MexGetFileInfo</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -86,12 +86,11 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>$(OutDir)\AwIsProcessTerminated.mexw64</OutputFile>
+      <OutputFile>$(OutDir)\aw_getfileinfo.mexw64</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2015a\extern\lib\win64\microsoft;$(QTDIR)\lib;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Network.lib;MexCommon.lib;libmx.lib;libmat.lib;libmex.lib;AwCoreLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>../configure.def</ModuleDefinitionFile>
-      <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <QtMoc>
       <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_NETWORK_LIB;MEWGETPLUGININFO_LIB;MATLAB_MEX_FILE;_SCL_SECURE_NO_DEPRECATE;_SECURE_SCL=0;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</Define>

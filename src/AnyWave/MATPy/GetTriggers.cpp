@@ -77,7 +77,7 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *p)
 					triggerChannels.removeAll(c);
 			}
 		}
-		reader->readDataFromChannels(0, -1, triggerChannels);
+		reader->readDataFromChannels(0, reader->infos.totalDuration(), triggerChannels);
 		emit log("Extracting values from trigger channels...");
 		AwExtractTriggers extractT;
 		extractT._channels = triggerChannels;

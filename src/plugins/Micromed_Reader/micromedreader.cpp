@@ -31,6 +31,7 @@ MicromedReaderPlugin::MicromedReaderPlugin() : AwFileIOPlugin()
 	description = QString(tr("Open .trc files"));
 	version = QString("1.0");
 	fileExtensions << "*.trc";
+	manufacturer = "Micromed";
 	m_flags |=  Aw::HasExtension|Aw::CanRead;
 }
 

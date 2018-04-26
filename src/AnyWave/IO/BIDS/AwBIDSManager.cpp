@@ -27,16 +27,18 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 	QString dir = fi.absolutePath();
 
 	// shape the BIDS file names
-	QString fileName, json, tsv;
+	QString fileName, json, channels_tsv, events_tsv;
 	if (session.isEmpty()) {
 		fileName = QString("%1/sub-%2_task-%3_ieeg.edf").arg(dir).arg(subj).arg(task);
 		json = QString("%1/sub-%2_task-%3_ieeg.json").arg(dir).arg(subj).arg(task);
-		tsv = QString("%1/sub-%2_task-%3_channels.tsv").arg(dir).arg(subj).arg(task);
+		channels_tsv = QString("%1/sub-%2_task-%3_channels.tsv").arg(dir).arg(subj).arg(task);
+		events_tsv = QString("%1/sub-%2_task-%3_events.tsv").arg(dir).arg(subj).arg(task);
 	}
 	else {
 		fileName = QString("%1/sub-%2_ses-%3_task-%4_ieeg.edf").arg(dir).arg(subj).arg(session).arg(task);
 		json = QString("%1/sub-%2_ses-%3_task-%4_ieeg.json").arg(dir).arg(subj).arg(session).arg(task);
-		tsv = QString("%1/sub-%3_ses-%3_task-%4_channels.tsv").arg(dir).arg(subj).arg(session).arg(task);
+		channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_channels.tsv").arg(dir).arg(subj).arg(session).arg(task);
+		events_tsv = QString("%1/sub-%3_ses-%3_task-%4_events.tsv").arg(dir).arg(subj).arg(session).arg(task);
 	}
 
 	// rename file to match BIDS recommandation
@@ -53,19 +55,42 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 		}
 	}
 
+	// generate events.tsv only if we have markers
+	if (!reader->infos.blocks().first()->markers().isEmpty()) {
+		// create events.tsv (not fixed by the draft at this time)
+		QStringList events_headers = { "onset", "duration", "trial_type" };
+		QFile eventFile(events_tsv);
+		QTextStream stream_events(&eventFile);
+		if (eventFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			for (int i = 0; i < events_headers.size(); i++) {
+				stream_events << events_headers.at(i);
+				if (i < events_headers.size() - 1)
+					stream_events << "\t";
+			}
+			stream_events << endl;
+			for (auto m : reader->infos.blocks().first()->markers()) 
+				stream_events << m->start() << "\t" << m->duration() << "\t" << m->label() << endl;
+			eventFile.close();
+		}
+	}
+
+
 	// Create channels.tsv
 	QStringList headers = { "name", "type", "units", "sampling_frequency", "low_cutoff", "high_cutoff", "notch", "group", "reference",
 	"description", "status", "status_description" };
 
-	QFile channel(tsv);
+	QFile channel(channels_tsv);
 	QTextStream stream(&channel);
 	// to get the group from electrode
 	QRegularExpression re("\\d+$");
 	QRegularExpressionMatch match;
 	int countSEEG = 0, countECG = 0, countTRIG = 0;
 	if (channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		for (auto h : headers) 
-			stream << h << "\t";
+		for (int i = 0; i < headers.size(); i++) {
+			stream << headers.at(i);
+			if (i < headers.size() - 1)
+				stream << "\t";
+		}
 		stream << endl;
 		for (auto c : reader->infos.channels()) { // raw file contains EEG or eventually trigger channels. There is no id to specify that is SEEG.
 			// name
@@ -79,7 +104,7 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 				stream << "ECG" << "\t" << "microV" << "\t";
 				countECG++;
 			}
-			else if (c->type() == AwChannel::SEEG) {
+			else if (c->type() == AwChannel::SEEG || c->type() == AwChannel::EEG) {
 				stream << "SEEG" << "\t" << "microV" << "\t";
 				countSEEG++;
 			}	

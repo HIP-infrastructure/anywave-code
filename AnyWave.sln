@@ -180,6 +180,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexSendCommand", "src\Mex\M
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexSendMessage", "src\Mex\MexSendMessage\MexSendMessage.vcxproj", "{C03E9340-C4D2-427D-A34D-098A703CDD1A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetFileInfo", "src\Mex\MexGetFileInfo\MexGetFileInfo.vcxproj", "{D4B90137-308B-4693-909A-651003ACE77B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -516,6 +518,12 @@ Global
 		{C03E9340-C4D2-427D-A34D-098A703CDD1A}.Release|Win32.ActiveCfg = Release|x64
 		{C03E9340-C4D2-427D-A34D-098A703CDD1A}.Release|x64.ActiveCfg = Release|x64
 		{C03E9340-C4D2-427D-A34D-098A703CDD1A}.Release|x64.Build.0 = Release|x64
+		{D4B90137-308B-4693-909A-651003ACE77B}.Debug|Win32.ActiveCfg = Debug|x64
+		{D4B90137-308B-4693-909A-651003ACE77B}.Debug|x64.ActiveCfg = Debug|x64
+		{D4B90137-308B-4693-909A-651003ACE77B}.Debug|x64.Build.0 = Debug|x64
+		{D4B90137-308B-4693-909A-651003ACE77B}.Release|Win32.ActiveCfg = Release|x64
+		{D4B90137-308B-4693-909A-651003ACE77B}.Release|x64.ActiveCfg = Release|x64
+		{D4B90137-308B-4693-909A-651003ACE77B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
