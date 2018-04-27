@@ -82,8 +82,9 @@
 #ifdef AW_EPOCHING
 #include "Epoch/AwEpochManager.h"
 #endif
+// BIDS
+#include "IO/BIDS/AwBIDSManager.h"
 
-// command line function
 
 
 AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
@@ -96,8 +97,9 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	setAcceptDrops(true);
 
 	m_debugLogWidget = NULL;
-	// instantiate recent files sub menu.
+	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
+	m_recentBIDSMenu = menuRecent_BIDS;
 
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
@@ -127,9 +129,17 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	QStringList recentFiles = aws->recentFiles();
 	if (!recentFiles.isEmpty())	{
 		QStringList shortenFiles;
-		foreach (QString s, recentFiles)
+		for (auto s : recentFiles)
 			shortenFiles << aws->shortenFilePath(s);
 		updateRecentFiles(shortenFiles);
+	}
+
+	QStringList recentBIDS = aws->recentBIDS();
+	if (!recentBIDS.isEmpty()) {
+		QStringList shortenFiles;
+		for (auto  s : recentBIDS)
+			shortenFiles << aws->shortenFilePath(s);
+		updateRecentBIDS(shortenFiles);
 	}
 
 	QSettings settings;
@@ -171,6 +181,9 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 
 
 	// instantiate Dock Widgets
+	// BIDS 
+	// BIDS dock is null by default and will be instantiated when needed.
+	m_dockBIDS = NULL;
 	// Markers
 	m_dockMarkers = new QDockWidget(tr("Markers"), this);
 	//m_dockMarkers->setObjectName("dockMarkers");
@@ -259,7 +272,8 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(marker_manager, SIGNAL(modificationsDone()), this, SLOT(setModified()));
 	// Montage Manager and AnyWave
 	// Settings and AnyWave
-	connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList& )));
+	connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList&)));
+	connect(aws, SIGNAL(recentBIDSUpdated(const QStringList&)), this, SLOT(updateRecentBIDS(const QStringList&)));
 	// Settings and Display
 	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
 
@@ -436,13 +450,6 @@ void AnyWave::quit()
 		AwEpochManager::destroy();
 	}
 #endif
-	//// Epoch Manager (destroy the object when closing the file)
-	//if (m_epochManager) {
-	//	m_epochManager->closeFile();
-	//	delete m_epochManager;
-	//	m_epochManager = NULL;
-	//}
-
 	AwScriptManager::destroy();
 }
 
@@ -495,11 +502,6 @@ void AnyWave::closeFile()
 		AwEpochManager::destroy();
 	}
 #endif
-	//if (m_epochManager) {
-	//	m_epochManager->closeFile();
-	//	delete m_epochManager;
-	//	m_epochManager = NULL;
-	//}
 	emit closingFile();
 }
 
@@ -700,6 +702,11 @@ void AnyWave::initToolBarsAndMenu()
 	connect(actionVisualiseEpoch, &QAction::triggered, this, &AnyWave::visualiseEpoch);
 	connect(actionAveraging, &QAction::triggered, this, &AnyWave::averageEpoch);
 #endif
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	//// BIDS
+	/////////////////////////////////////////////////////////////////////////////////////
+	connect(actionOpen_BIDS, SIGNAL(triggered()), this, SLOT(openBIDS()));
 }
 
 
@@ -751,6 +758,29 @@ bool AnyWave::checkForRunningProcesses()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AnyWave::openBIDS()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, "/");
+	if (dir.isEmpty())
+		return;
+	openBIDS(dir);
+}
+
+void AnyWave::openBIDS(const QString& path)
+{
+	AwBIDSManager::instance(path);
+	// instantiate dock widget if needed
+	if (m_dockBIDS == NULL)
+		m_dockBIDS = new QDockWidget(tr("BIDS"), this);
+	//m_dockMarkers->setObjectName("dockMarkers");
+	addDockWidget(Qt::RightDockWidgetArea, m_dockBIDS);
+	m_dockBIDS->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	m_dockBIDS->setWidget(AwBIDSManager::instance()->ui());
+
+
+	AwSettings::getInstance()->addRecentBIDS(path);
+}
 
 void AnyWave::openFile(const QString &path)
 {
@@ -955,11 +985,6 @@ void AnyWave::reviewComponentsMaps()
 
 void AnyWave::doEpoch()
 {
-	//if (m_epochManager == NULL) {
-	//	m_epochManager = AwEpochManager::instance();
-	//	m_epochManager->setParent(this);
-	//}
-	//m_epochManager->create();
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->create();
 #endif
@@ -967,11 +992,6 @@ void AnyWave::doEpoch()
 
 void AnyWave::visualiseEpoch()
 {
-	//if (m_epochManager == NULL) {
-	//	m_epochManager = AwEpochManager::instance();
-	//	m_epochManager->setParent(this);
-	//}
-	//m_epochManager->visualise();
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->visualise();
 #endif
@@ -979,11 +999,6 @@ void AnyWave::visualiseEpoch()
 
 void AnyWave::averageEpoch()
 {
-	//if (m_epochManager == NULL) {
-	//	m_epochManager = AwEpochManager::instance();
-	//	m_epochManager->setParent(this);
-	//}
-	//m_epochManager->average();
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->average();
 #endif
@@ -1010,12 +1025,28 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 	m_recentFilesMenu->clear();
 
 	qint32 count = 1;
-	foreach (QString s, files)	{
+	for (auto s : files)	{
 		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentFilesMenu);
 		m_recentFilesMenu->addAction(action);
 		// add index number in data()
 		action->setData(count - 1);
-		connect(action, SIGNAL(triggered()), this, SLOT(openRecentFile()));
+		connect(action, &QAction::triggered, this, &AnyWave::openRecentFile);
+		count++;
+	}
+}
+
+void AnyWave::updateRecentBIDS(const QStringList &files)
+{
+	// reset recent files sub menu
+	m_recentFilesMenu->clear();
+
+	qint32 count = 1;
+	for (auto s : files) {
+		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentBIDSMenu);
+		m_recentBIDSMenu->addAction(action);
+		// add index number in data()
+		action->setData(count - 1);
+		connect(action, &QAction::triggered, this, &AnyWave::openRecentBIDS);
 		count++;
 	}
 }
@@ -1026,13 +1057,29 @@ void AnyWave::openRecentFile()
 	AwSettings *aws = AwSettings::getInstance();
 	
 	qint32 index = action->data().toInt();
-	QStringList files = aws->recentFiles();
+	QString file = aws->recentFiles().at(index);
 	// Open the file
-	if (QFile::exists(files.at(index)))
-		openFile(files.at(index));
+	if (QFile::exists(file))
+		openFile(file);
 	else	{
 		AwMessageBox::information(this, tr("File error"), tr("The path to this file is not valid anymore."));
-		aws->removeRecentFilePath(files.at(index));
+		aws->removeRecentFilePath(file);
+	}
+}
+
+void AnyWave::openRecentBIDS()
+{
+	QAction *action = qobject_cast<QAction *>(QObject::sender());
+	AwSettings *aws = AwSettings::getInstance();
+
+	qint32 index = action->data().toInt();
+	QString dir = aws->recentBIDS().at(index);
+
+	if (QDir(dir).exists())
+		openBIDS(dir);
+	else {
+		AwMessageBox::information(this, tr("File error"), tr("The path to this BIDS structure is not valid anymore."));
+		aws->removeRecentBIDS(dir);
 	}
 }
 

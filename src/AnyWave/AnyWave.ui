@@ -72,7 +72,13 @@
       <string>Recent files...</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuRecent_BIDS">
+     <property name="title">
+      <string>Recent BIDS directories</string>
+     </property>
+    </widget>
     <addaction name="actionOpen"/>
+    <addaction name="actionOpen_BIDS"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
@@ -89,6 +95,7 @@
     <addaction name="actionFileProperties"/>
     <addaction name="separator"/>
     <addaction name="menuRecent_files"/>
+    <addaction name="menuRecent_BIDS"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -394,6 +401,16 @@
   <action name="actionAveraging">
    <property name="text">
     <string>Averaging</string>
+   </property>
+  </action>
+  <action name="actionOpen_BIDS">
+   <property name="text">
+    <string>Open BIDS</string>
+   </property>
+  </action>
+  <action name="actiondrerz">
+   <property name="text">
+    <string>drerz</string>
    </property>
   </action>
  </widget>

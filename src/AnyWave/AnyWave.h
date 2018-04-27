@@ -87,7 +87,7 @@ private:
 	QString m_openFileName;				// Full path to current open file.
 	QString m_lastDirOpen;				// Keep path to last directory used when opening a file
 	QString m_saveFileName;
-	QMenu *m_recentFilesMenu;
+	QMenu *m_recentFilesMenu, *m_recentBIDSMenu;
 	// widgets
 	QList<QWidget *> m_toolBarWidgets;
 	QList<QAction *> m_actions;
@@ -108,7 +108,7 @@ private:
 
 	// DockWidgets
 	QDockWidget *m_dockFilters, *m_addMarkerDock;
-	QDockWidget *m_dockMarkers;
+	QDockWidget *m_dockMarkers, *m_dockBIDS;
 	AwDockAddMarker *m_dockAddMarker;
 	// Mapping
 	AwDockMapping *m_dockMEG;
@@ -156,8 +156,11 @@ public slots:
 	void stopMapping();
 	void displayReaderTriggerStatus(bool ok, int number);
 	void openFile(const QString& path = QString());
+	void openBIDS(const QString& path);
 	void updateRecentFiles(const QStringList& files);
+	void updateRecentBIDS(const QStringList& files);
 	void openRecentFile();
+	void openRecentBIDS();
 	/** Menu View->Processes **/
 	void showProcessDock();
 	/** Export to SVG **/
@@ -185,4 +188,5 @@ private slots:
 	void doEpoch();
 	void visualiseEpoch();
 	void averageEpoch();
+	void openBIDS();
 };
