@@ -231,34 +231,71 @@ void AwBIDSManager::setRootDir(const QString& path)
 	m_rootDir = path;
 	// instantiate UI if needed
 	if (m_ui == NULL)
-		m_ui = new AwBIDSGUI(path);
+		m_ui = new AwBIDSGUI(this, path);
 	// check that the root dir contains subjects
 	getSubjects();
-	m_ui->setSubjects(m_subjects);
+	// check for source_data dir
+	bool found = false;
+	QDirIterator it(m_rootDir, QDir::Dirs);
+	while (it.hasNext()) {
+		it.next();
+		QString name = it.fileName();
+		if (name == "sourcedata") {
+			found = true;
+			break;
+		}
+	}
+	if (found) 
+		getSubjects(AwBIDSManager::source);
+	
+	m_ui->refresh();
+}
+
+AwBIDSSubjectList& AwBIDSManager::getSubjectsFromSourceDir(int sourceDir)
+{
+	return m_subjects[sourceDir];
 }
 
 /// Parse root dir to get all the subjects present in the structure.
 /// Create subject objects
 /// Can result in an empty list if no subject is found.
-void AwBIDSManager::getSubjects()
+void AwBIDSManager::getSubjects(int sourceDir)
 {
-	clearSubjects();
-	QDirIterator it(m_rootDir, QDirIterator::Subdirectories);
-	QRegularExpression re("^(sub-)\\w+$");
+	QString directory;
+	if (sourceDir == AwBIDSManager::raw) {
+		directory = m_rootDir;
+	}
+	else { // sourcedata
+		directory = QString("%1/sourcedata").arg(m_rootDir);
+	}
+	clearSubjects(sourceDir);
+	
+	QDirIterator it(directory, QDir::Dirs);
+	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
 	QRegularExpressionMatch match;
 	while (it.hasNext()) {
-		QString dir = it.next();
-		match = re.match(dir);
+		it.next();
+		QString name = it.fileName();
+		match = re.match(name);
 		if (match.hasMatch()) {
-			m_subjects.append(new AwBIDSSubject(m_rootDir, match.captured(1)));
+			name = match.captured("ID");
+			m_subjects[sourceDir].append(new AwBIDSSubject(directory, name));
 		}
 	}
 }
 
-void AwBIDSManager::clearSubjects()
+void AwBIDSManager::clearSubjects(int sourceDir)
 {
-	while (!m_subjects.isEmpty())
-		delete m_subjects.takeFirst();
+	while (!m_subjects[sourceDir].isEmpty())
+		delete m_subjects[sourceDir].takeFirst();
+	m_subjectsIDs[sourceDir].clear();
+}
+
+AwBIDSSubject *AwBIDSManager::getSubject(const QString& ID, int sourceDir)
+{
+	if (m_subjectsIDs[sourceDir].contains(ID))
+		return m_subjectsIDs[sourceDir].value(ID);
+	return Q_NULLPTR;
 }
 
 int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file)

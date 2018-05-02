@@ -4,6 +4,7 @@
 #include "AwBIDSGUI.h"
 #include <AwFileIO.h>
 
+#define AWBIDS_SOURCE_DIRS	2
 
 class AwBIDSManager : public QObject
 {
@@ -11,6 +12,7 @@ class AwBIDSManager : public QObject
 public:
 	AwBIDSManager(const QString& rootDir);
 	enum itemTypes { iEEG, MEG };
+	enum dataSources { raw = 0, source = 1 }; // indicates the type of data ordering (source data are place in a source_data folder).
 	// utilities static methods
 	static AwBIDSManager *instance(const QString& rootDir = QString());
 
@@ -20,14 +22,18 @@ public:
 	int seegToBIDS(const QString& file, const QString& subject, const QString& task, const QString &session = QString());
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
+	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
+	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
+	AwBIDSSubjectList& getSubjectsFromSourceDir(int sourceDir = raw);
 protected:
 	static AwBIDSManager *m_instance;
 
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
-	void getSubjects();
-	void clearSubjects();
+	void getSubjects(int sourceDir = raw);
+	void clearSubjects(int sourceDir = raw);
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
-	AwBIDSSubjectList m_subjects;
+	AwBIDSSubjectList m_subjects[AWBIDS_SOURCE_DIRS];
+	QMap<QString, AwBIDSSubject *> m_subjectsIDs[AWBIDS_SOURCE_DIRS];
 };
