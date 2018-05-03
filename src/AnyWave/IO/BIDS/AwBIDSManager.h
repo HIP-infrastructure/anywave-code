@@ -3,6 +3,7 @@
 #include "AwBIDSSubject.h"
 #include "AwBIDSGUI.h"
 #include <AwFileIO.h>
+class AwFileItem;
 
 #define AWBIDS_SOURCE_DIRS	2
 
@@ -32,6 +33,8 @@ protected:
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 	void getSubjects(int sourceDir = raw);
 	void clearSubjects(int sourceDir = raw);
+	AwFileItem *parseDir(const QString& fullPath, const QString& path);
+	void parseSubject(AwBIDSSubject *subject);
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
 	AwBIDSSubjectList m_subjects[AWBIDS_SOURCE_DIRS];

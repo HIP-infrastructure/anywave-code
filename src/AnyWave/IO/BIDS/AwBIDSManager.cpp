@@ -7,6 +7,8 @@
 #include <qjsonobject.h>
 #include <QDirIterator>
 #include <qregularexpression.h>
+#include "AwBIDSTools.h"
+#include "AwFileItem.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
@@ -256,6 +258,56 @@ AwBIDSSubjectList& AwBIDSManager::getSubjectsFromSourceDir(int sourceDir)
 	return m_subjects[sourceDir];
 }
 
+
+AwFileItem *AwBIDSManager::parseDir(const QString& fullPath, const QString& dir)
+{
+	QStringList items = { "ieeg", "eeg", "meg" };
+	QVector<int> types = { AwFileItem::ieeg, AwFileItem::eeg, AwFileItem::meg };
+	int index = items.indexOf(dir);
+	if (index == -1)
+		return NULL;
+	// parse files
+
+}
+
+void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
+{
+	// check for subdirs that AnyWave could handle (iEEG, MEG, SES-)
+
+	QDir dir(subject->fullPath());
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	if (dirs.isEmpty())
+		return;
+
+	// check for session directory (optional)
+	bool isSession = false;
+	AwBIDSSession *session = NULL;
+	for (auto d : dirs) {
+		if (d.startsWith("ses-")) {
+			// get session label
+			auto label = AwBIDSTools::getSessionLabel(d);
+			session = subject->addSession(label);
+			isSession = true;
+			break;
+		}
+	}
+	if (isSession) {
+		dir = QDir(session->fullPath());
+		dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	}
+	// search for iEEG or meg dirs
+
+	for (auto d : dirs) {
+		auto item = parseDir(dir.absolutePath(), d);
+		if (item) {
+			if (isSession)
+				session->addItem(item);
+			else
+				subject->addItem(item);
+		}
+	}
+}
+
 /// Parse root dir to get all the subjects present in the structure.
 /// Create subject objects
 /// Can result in an empty list if no subject is found.
@@ -281,6 +333,10 @@ void AwBIDSManager::getSubjects(int sourceDir)
 			name = match.captured("ID");
 			m_subjects[sourceDir].append(new AwBIDSSubject(directory, name));
 		}
+	}
+
+	for (auto s : m_subjects[sourceDir]) {
+		parseSubject(s);
 	}
 }
 

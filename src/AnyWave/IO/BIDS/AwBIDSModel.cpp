@@ -122,8 +122,8 @@ void AwBIDSModel::parseSubDirs(const QString& path, AwBIDSTreeItem *rootItem)
 		}
 		if (name == "iEEG") {
 			data = { "iEEG", "intracranial EEG" };
-			AwBIDSTreeItem *iEEGItem = new AwBIDSTreeItem(data, subjectItem);
-			subjectItem->appendChild(iEEGItem);
+			AwBIDSTreeItem *iEEGItem = new AwBIDSTreeItem(data, rootItem);
+			rootItem->appendChild(iEEGItem);
 
 		}
 	}

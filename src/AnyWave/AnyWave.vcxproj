@@ -1074,9 +1074,11 @@
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSModel.cpp" />
+    <ClCompile Include="IO\BIDS\AwBIDSSession.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSSubject.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSTools.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSTreeItem.cpp" />
+    <ClCompile Include="IO\BIDS\AwFileItem.cpp" />
     <ClCompile Include="IO\HDF5\HDF5IO.cpp" />
     <ClCompile Include="IO\HDF5\structs.cpp" />
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp" />
@@ -1642,6 +1644,7 @@
     <ClInclude Include="IO\BIDS\AwBIDSSession.h" />
     <ClInclude Include="IO\BIDS\AwBIDSTools.h" />
     <ClInclude Include="IO\BIDS\AwBIDSTreeItem.h" />
+    <ClInclude Include="IO\BIDS\AwFileItem.h" />
     <ClInclude Include="Marker\AwExtractTriggers.h" />
     <CustomBuild Include="Marker\AwMarkersExportWidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
