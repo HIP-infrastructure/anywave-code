@@ -1297,6 +1297,9 @@
     <ClCompile Include="IO\BIDS\AwFileItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSFileItem.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -2034,6 +2037,9 @@
       <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwFileItem.h">
+      <Filter>IO\BIDS</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\BIDS\AwBIDSFileItem.h">
       <Filter>IO\BIDS</Filter>
     </ClInclude>
   </ItemGroup>

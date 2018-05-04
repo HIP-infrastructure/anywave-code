@@ -9,10 +9,12 @@
 #include <qregularexpression.h>
 #include "AwBIDSTools.h"
 #include "AwFileItem.h"
+#include "Plugin/AwPluginManager.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
-int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QString& task, const QString& session)
+int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subj, const QString& task, const QString& session, 
+	const QString& run)
 {
 	// get the reader plugin
 	AwPluginManager *pm = AwPluginManager::getInstance();
@@ -26,30 +28,63 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 		return -1;
 	}
 	std::exception_ptr exceptionPtr;
-	// Get the directory
-	QFileInfo fi(file);
-	QString dir = fi.absolutePath();
+	QString dir = destDir;
+	if (destDir.isEmpty()) {
+		// Get the directory where the file is located.
+		QFileInfo fi(file);
+		dir = fi.absolutePath();
+	}
+	QString ext;
+	if (format == "EDF")
+		ext = "edf";
+	else if (format == "VHDR")
+		ext = "vhdr";
 
 	// shape the BIDS file names
 	QString fileName, json, channels_tsv, events_tsv;
 	if (session.isEmpty()) {
-		fileName = QString("%1/sub-%2_task-%3_ieeg.vhdr").arg(dir).arg(subj).arg(task);
-		json = QString("%1/sub-%2_task-%3_ieeg.json").arg(dir).arg(subj).arg(task);
-		channels_tsv = QString("%1/sub-%2_task-%3_channels.tsv").arg(dir).arg(subj).arg(task);
-		events_tsv = QString("%1/sub-%2_task-%3_events.tsv").arg(dir).arg(subj).arg(task);
+		if (run.isEmpty()) {
+			fileName = QString("%1/sub-%2_task-%3_ieeg.%4").arg(dir).arg(subj).arg(task).arg(ext);
+			json = QString("%1/sub-%2_task-%3_ieeg.json").arg(dir).arg(subj).arg(task);
+			channels_tsv = QString("%1/sub-%2_task-%3_channels.tsv").arg(dir).arg(subj).arg(task);
+			events_tsv = QString("%1/sub-%2_task-%3_events.tsv").arg(dir).arg(subj).arg(task);
+		}
+		else {
+			fileName = QString("%1/sub-%2_task-%3_run-%4_ieeg.%5").arg(dir).arg(subj).arg(task).arg(run).arg(ext);
+			json = QString("%1/sub-%2_task-%3_run-%4_ieeg.json").arg(dir).arg(subj).arg(task).arg(run);
+			channels_tsv = QString("%1/sub-%2_task-%3_run-%4_channels.tsv").arg(dir).arg(subj).arg(task).arg(run);
+			events_tsv = QString("%1/sub-%2_task-%3_run-%4_events.tsv").arg(dir).arg(subj).arg(task).arg(run);
+		}
 	}
 	else {
-		fileName = QString("%1/sub-%2_ses-%3_task-%4_ieeg.edf").arg(dir).arg(subj).arg(session).arg(task);
-		json = QString("%1/sub-%2_ses-%3_task-%4_ieeg.json").arg(dir).arg(subj).arg(session).arg(task);
-		channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_channels.tsv").arg(dir).arg(subj).arg(session).arg(task);
-		events_tsv = QString("%1/sub-%3_ses-%3_task-%4_events.tsv").arg(dir).arg(subj).arg(session).arg(task);
+		if (run.isEmpty()) {
+			fileName = QString("%1/sub-%2_ses-%3_task-%4_ieeg.%5").arg(dir).arg(subj).arg(session).arg(task).arg(ext);
+			json = QString("%1/sub-%2_ses-%3_task-%4_ieeg.json").arg(dir).arg(subj).arg(session).arg(task);
+			channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_channels.tsv").arg(dir).arg(subj).arg(session).arg(task);
+			events_tsv = QString("%1/sub-%3_ses-%3_task-%4_events.tsv").arg(dir).arg(subj).arg(session).arg(task);
+		}
+		else {
+			fileName = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.%6").arg(dir).arg(subj).arg(session).arg(task).arg(run).arg(ext);
+			json = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.json").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+			channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_run-%5_channels.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+			events_tsv = QString("%1/sub-%3_ses-%3_task-%4_run-%5_events.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+		}
 	}
 
 	// rename file to match BIDS recommandation
+	QString pluginName;
+	if (format == "EDF")
+		pluginName = "EDF/BDF IO";
+	else if (format == "VHDR")
+		pluginName = "Brainvision Analyser Format";
+
 	//  TODO : convert to EDF if not alread an edf file
-	if (reader->plugin()->name != "Brainvision Analyser Format") {
+	if (reader->plugin()->name != pluginName) {
 		try {
-			convertToVHDR(fileName, reader);
+			if (format == "VHDR")
+				convertToVHDR(fileName, reader);
+			if (format == "EDF")
+				convertToEDF(fileName, reader);
 		}
 		catch (const AwException& e) {
 			exceptionPtr = std::current_exception();
@@ -77,7 +112,6 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& subj, const QS
 			eventFile.close();
 		}
 	}
-
 
 	// Create channels.tsv
 	QStringList headers = { "name", "type", "units", "sampling_frequency", "low_cutoff", "high_cutoff", "notch", "group", "reference",
@@ -216,6 +250,11 @@ AwBIDSManager *AwBIDSManager::instance(const QString& rootDir)
 AwBIDSManager::AwBIDSManager(const QString& rootDir)
 {
 	m_ui = NULL;
+	// Get extensions readers can handle.
+	auto pm = AwPluginManager::getInstance();
+	for (auto r : pm->readers()) 
+		m_fileExtensions += r->fileExtensions;
+	
 	setRootDir(rootDir);
 
 }
@@ -267,7 +306,15 @@ AwFileItem *AwBIDSManager::parseDir(const QString& fullPath, const QString& dir)
 	if (index == -1)
 		return NULL;
 	// parse files
-
+	QString fullPathItem = QString("%1/%2").arg(fullPath).arg(dir);
+	QDir directory(fullPathItem);
+	QStringList files = directory.entryList(m_fileExtensions, QDir::Files);
+	if (files.isEmpty())
+		return NULL;
+	AwFileItem *item = new AwFileItem(types.value(index));
+	item->setFullPath(fullPathItem);
+	item->setFiles(files);
+	return item;
 }
 
 void AwBIDSManager::parseSubject(AwBIDSSubject *subject)

@@ -2,6 +2,7 @@
 
 #include <QList>
 #include <QVariant>
+
 class AwBIDSTreeItem
 {
 public:
@@ -16,7 +17,7 @@ public:
 	int row() const;
 	inline AwBIDSTreeItem *parentItem() { return m_parentItem; }
 
-private:
+protected:
 	QList<AwBIDSTreeItem *> m_childItems;
 	QList<QVariant> m_itemData;
 	AwBIDSTreeItem *m_parentItem;

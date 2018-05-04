@@ -20,7 +20,8 @@ public:
 	void setRootDir(const QString& path);
 
 	// generate a JSON for a file (iEEG, MEG)
-	int seegToBIDS(const QString& file, const QString& subject, const QString& task, const QString &session = QString());
+	int seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subject, const QString& task, const QString &session = QString(),
+		const QString& run = QString());
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
 	// BIDS GUI Specific
@@ -35,8 +36,10 @@ protected:
 	void clearSubjects(int sourceDir = raw);
 	AwFileItem *parseDir(const QString& fullPath, const QString& path);
 	void parseSubject(AwBIDSSubject *subject);
+
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
 	AwBIDSSubjectList m_subjects[AWBIDS_SOURCE_DIRS];
 	QMap<QString, AwBIDSSubject *> m_subjectsIDs[AWBIDS_SOURCE_DIRS];
+	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
 };

@@ -7,9 +7,7 @@ AwBIDSModel::AwBIDSModel(const AwBIDSSubjectList& subjects, QObject *parent) : Q
 	QList<QVariant> rootData = { "Directory", "Information" };
 	m_rootItem = new AwBIDSTreeItem(rootData);
 
-	for (auto s : subjects) {
-		fillModelFromSubject(s, m_rootItem);
-	}
+	initModel(subjects);
 }
 
 AwBIDSModel::~AwBIDSModel()
@@ -127,6 +125,38 @@ void AwBIDSModel::parseSubDirs(const QString& path, AwBIDSTreeItem *rootItem)
 
 		}
 	}
+}
+
+void AwBIDSModel::initModel(const AwBIDSSubjectList& subjects)
+{
+	for (auto s : subjects) {
+		QVariantList data = { s->ID(), "subject" };
+		auto subItem = new AwBIDSTreeItem(data, m_rootItem);
+		m_rootItem->appendChild(subItem);
+		if (s->hasSessions()) {
+			for (auto session : s->sessions()) {
+				data = { session->label(), "session" };
+				auto sessionItem = new AwBIDSTreeItem(data, subItem);
+				subItem->appendChild(sessionItem);
+				for (auto fileItem : session->fileItems()) {
+					switch (fileItem->type()) {
+					case AwFileItem::eeg:
+						break;
+					case AwFileItem::ieeg:
+					{
+						data = { "ieeg", "intracranial EEG" };
+						auto item = new AwBIDSTreeItem(data, sessionItem);
+						sessionItem->appendChild(item);
+					}
+						break;
+					case AwFileItem::meg:
+						break;
+					}
+				}
+			}
+		}
+	}
+
 }
 
 void AwBIDSModel::fillModelFromSubject(AwBIDSSubject *subject, AwBIDSTreeItem *rootItem)

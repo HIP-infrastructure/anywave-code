@@ -18,6 +18,8 @@ public:
 	QModelIndex parent(const QModelIndex& index) const override;
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+
+	void initModel(const AwBIDSSubjectList& subject);
 private:
 	void fillModelFromSubject(AwBIDSSubject *sub, AwBIDSTreeItem *rootItem);
 	void parseSubDirs(const QString& path, AwBIDSTreeItem *rootItem);

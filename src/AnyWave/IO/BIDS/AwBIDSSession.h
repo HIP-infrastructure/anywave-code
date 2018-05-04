@@ -13,11 +13,12 @@ public:
 	inline QString& label() { return m_label; }
 	inline AwBIDSSubject *subject() { return m_sub; }
 	AwFileItem *addItem(AwFileItem *item);
+	AwFileItemList& fileItems() { return m_items; }
 protected:
 	QString m_label;
 	QString m_fullPath;
 	AwBIDSSubject *m_sub;
-	QList<AwFileItem *> m_items;
+	AwFileItemList m_items;
 };
 
-typedef QList<AwBIDSSession *> AwBIDSSessionList;
+using AwBIDSSessionList = QList<AwBIDSSession *>;

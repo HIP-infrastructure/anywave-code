@@ -15,6 +15,7 @@ public:
 	inline bool hasSessions() { return !m_sessions.isEmpty(); }
 	AwBIDSSession *addSession(const QString& label);
 	AwFileItem *addItem(AwFileItem *item);
+	AwBIDSSessionList& sessions() { return m_sessions; }
 protected:
 	QString m_ID;
 	QString m_fullPath;
@@ -22,4 +23,4 @@ protected:
 	QList<AwFileItem *> m_items;
 };
 
-typedef QList<AwBIDSSubject *> AwBIDSSubjectList;
+using AwBIDSSubjectList = QList<AwBIDSSubject *>;
