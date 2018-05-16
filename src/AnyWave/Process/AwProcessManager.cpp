@@ -963,16 +963,6 @@ void AwProcessManager::startProcess(const QString& name, const QStringList& args
 		runProcess(newProcess(p), args);
 }
 
-//void AwProcessManager::startProcess(const QString &name)
-//{
-//	AwProcessPlugin *p = AwPluginManager::getInstance()->getProcessPluginByName(name);
-//
-//	if (p)
-//		runProcess(newProcess(p));
-//}
-
-
-
 void AwProcessManager::stopProcess(AwProcess *process)
 {
 #ifndef NDEBUG

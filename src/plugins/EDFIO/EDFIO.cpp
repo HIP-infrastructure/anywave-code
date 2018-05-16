@@ -280,8 +280,8 @@ AwFileIO::FileStatus EDFIO::canRead(const QString &path)
 
 	if (file.read(edf_hdr, 256) == -1) {
 		m_error = QString("Error reading header.");
-		return AwFileIO::BadHeader;
 		file.close();
+		return AwFileIO::BadHeader;
 	}
 	file.close();
 
@@ -469,10 +469,36 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 	// continue reading the header (extract date and time)
 	strncpy(scratchpad, edf_hdr + 168, 8);
 	scratchpad[8] = 0;
-	infos.setDate(QString::fromLatin1(scratchpad));
+	QString sDate = QString::fromLatin1(scratchpad);
+	QStringList tokens = sDate.split(".");
+	infos.setDate(sDate);
+	QDate date;
+	QTime time;
+	if (tokens.size() == 3) {
+		int d = tokens.at(0).toInt();
+		int m = tokens.at(1).toInt();
+		int y = tokens.at(2).toInt();
+		if (y > 84)
+			y += 1900;
+		else
+			y += 2000;
+		date = QDate(d, m, y);
+		infos.setDate(date.toString("dd.MM.yy"));
+	}
+
 	strncpy(scratchpad, edf_hdr + 176, 8);
 	scratchpad[8] = 0;
-	infos.setTime(QString::fromLatin1(scratchpad));
+	QString sTime = QString::fromLatin1(scratchpad);
+	infos.setTime(sTime);
+	tokens = sTime.split(".");
+	if (tokens.size() == 3) {
+		int h = tokens.at(0).toInt();
+		int m = tokens.at(1).toInt();
+		int s = tokens.at(2).toInt();
+		time = QTime(h, m, s);
+		infos.setTime(time.toString("hh:mm:ss"));
+	}
+	infos.setISODate(QDateTime(date, time).toString(Qt::ISODate));
 
 	/***************** NUMBER OF SIGNALS IN HEADER *******************************/
 
@@ -1011,6 +1037,12 @@ AwFileIO::FileStatus EDFIO::createFile(const QString& path, int flags)
     // we'll make data record of 1s samples rounded if sampling rate is not integer.
 	float sr = infos.channels().first()->samplingRate();
 	int nsamples = (int)std::ceil(sr);
+
+	QDate date = QDate::fromString(infos.recordingDate(), "dd.MM.yy");
+	QTime time = QTime::fromString(infos.recordingTime(), "hh:mm:ss");
+	
+	edf_set_startdatetime(m_handle, date.year(), date.month(), date.day(),
+		time.hour(), time.minute(), time.second());
 
 	// duration must be expressed in unit of 100 micro seconds
 	int duration = (int)std::floor(((double)nsamples / (double)sr) * 1E5);

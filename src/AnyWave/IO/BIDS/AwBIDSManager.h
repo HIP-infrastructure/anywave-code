@@ -19,9 +19,10 @@ public:
 
 	void setRootDir(const QString& path);
 
-	// generate a JSON for a file (iEEG, MEG)
-	int seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subject, const QString& task, const QString &session = QString(),
-		const QString& run = QString());
+	/** Convert a SEEG file to BIDS. If option sideCars is set, only generates the json and tsv files. **/
+	int seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subject, const QString& task, 
+		const QString& sideCars, const QString &session = QString(), const QString& run = QString());
+
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
 	// BIDS GUI Specific

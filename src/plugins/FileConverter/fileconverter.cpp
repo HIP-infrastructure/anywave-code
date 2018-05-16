@@ -98,6 +98,7 @@ void FileConverter::run()
 		block->setSamples(fr->infos.totalSamples());
 		writer->infos.setDate(fr->infos.recordingDate());
 		writer->infos.setTime(fr->infos.recordingTime());
+		writer->infos.setISODate(fr->infos.isoDate());
 
 		// if a .mrk is attached to the file use it, otherwise use markers which come from the data file
 

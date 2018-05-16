@@ -120,6 +120,8 @@ public:
 	inline QString& recordingDate() { return m_date; }
 	/** Gets the recording time. It could be an empty string. **/
 	inline QString& recordingTime() { return m_time; }
+	/** Get the date and time in ISO format **/
+	inline QString& isoDate() { return m_isoDate; }
 	/** Get the name of the manufacturer. It could be an empty string. **/
 	inline QString& manufacturer() { return m_manufacturer; }
 
@@ -162,12 +164,15 @@ public:
 	/** Allows to change the name of a previously inserted channel.
 	This will do nothing if the channel does not exist. **/
 	void changeChannelName(const QString& oldName, const QString& newName);
+	/** set the date and time in ISO format **/
+	void setISODate(const QString& dateTime) { m_isoDate = dateTime; }
 protected:
 	AwBlockList m_blocks;
 	AwChannelList m_channels;
 	QString m_patientName;
-	QString m_date;	
-	QString m_time;	
+	QString m_date;	 // recording date
+	QString m_time;	 // recording time
+	QString m_isoDate;	// new iso date/time string (must be set by the plugin).
 	QString m_manufacturer;
 	QString m_fileName;	
 	quint32 m_channelsCount;

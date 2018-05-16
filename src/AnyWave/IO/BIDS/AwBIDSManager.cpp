@@ -13,8 +13,9 @@
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
-int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subj, const QString& task, const QString& session, 
-	const QString& run)
+
+int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subj, const QString& task, 
+	const QString& sideCars, const QString& session, const QString& run)
 {
 	// get the reader plugin
 	AwPluginManager *pm = AwPluginManager::getInstance();
@@ -68,29 +69,6 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 			json = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.json").arg(dir).arg(subj).arg(session).arg(task).arg(run);
 			channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_run-%5_channels.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
 			events_tsv = QString("%1/sub-%3_ses-%3_task-%4_run-%5_events.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-		}
-	}
-
-	// rename file to match BIDS recommandation
-	QString pluginName;
-	if (format == "EDF")
-		pluginName = "EDF/BDF IO";
-	else if (format == "VHDR")
-		pluginName = "Brainvision Analyser Format";
-
-	//  TODO : convert to EDF if not alread an edf file
-	if (reader->plugin()->name != pluginName) {
-		try {
-			if (format == "VHDR")
-				convertToVHDR(fileName, reader);
-			if (format == "EDF")
-				convertToEDF(fileName, reader);
-		}
-		catch (const AwException& e) {
-			exceptionPtr = std::current_exception();
-			std::rethrow_exception(exceptionPtr);
-			reader->plugin()->deleteInstance(reader);
-			return -1;
 		}
 	}
 
@@ -193,6 +171,10 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 		jObject.insert("TriggerChannelCount", QJsonValue::fromVariant(countTRIG));
 	jObject.insert("RecordingDuration", QJsonValue::fromVariant(reader->infos.totalDuration()));
 	jObject.insert("RecordingType", QJsonValue::fromVariant("continuous"));
+	// add  recording date and time
+	jObject.insert("RecordingTime", QJsonValue::fromVariant(reader->infos.recordingTime()));
+	jObject.insert("RecordingDate", QJsonValue::fromVariant(reader->infos.recordingDate()));
+	jObject.insert("RecordingISODate", QJsonValue::fromVariant(reader->infos.isoDate()));
 	QJsonDocument doc(jObject);
 	QFile jsonFile(json);
 	if (jsonFile.open(QIODevice::WriteOnly)) {
@@ -204,6 +186,36 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 		reader->plugin()->deleteInstance(reader);
 		return -1;
 	}
+
+	// Only do the file conversion if option sidecars is not set.
+	if (sideCars.isEmpty()) {
+		// rename file to match BIDS recommandation
+		QString pluginName;
+		if (format == "EDF")
+			pluginName = "EDF/BDF IO";
+		else if (format == "VHDR")
+			pluginName = "Brainvision Analyser Format";
+
+		//  TODO : convert to EDF if not alread an edf file
+		if (reader->plugin()->name != pluginName) {
+			try {
+				if (format == "VHDR")
+					convertToVHDR(fileName, reader);
+				if (format == "EDF")
+					convertToEDF(fileName, reader);
+			}
+			catch (const AwException& e) {
+				exceptionPtr = std::current_exception();
+				std::rethrow_exception(exceptionPtr);
+				reader->plugin()->deleteInstance(reader);
+				return -1;
+			}
+		}
+		else { // just rename 
+			QFile::copy(file, fileName);
+		}
+	}
+
 	reader->cleanUpAndClose();
 //	reader->plugin()->deleteInstance(reader);
 	return 0;

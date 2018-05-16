@@ -1530,11 +1530,21 @@ MicromedReader::FileStatus MicromedReader::openFile(const QString& path)
 		return AwFileIO::WrongFormat;
 	}
 
-	QStringList months;
-	months  << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun" << "Jul" << "Aug" << "Sep" << "Oct" << "Nov" << "Dec";
-	QString Date = QString::number((int)m_Head.Date.Day);
-	Date += " " + months.at((int)m_Head.Date.Month - 1) + " " + QString::number((int)1900 + (int)m_Head.Date.Year);
-	infos.setDate(Date);
+	// set date and time correctly 
+
+	QDate date((int)m_Head.Date.Year + 1900, (int)m_Head.Date.Month, (int)m_Head.Date.Day);
+	QTime time((int)m_Head.Time.Hour, (int)m_Head.Time.Min, (int)m_Head.Time.Sec);
+
+	infos.setTime(time.toString("hh:mm:ss"));
+	infos.setDate(date.toString("dd.MM.yy"));
+	infos.setISODate(QDateTime(date, time).toString(Qt::ISODate));
+
+	//QStringList months;
+	//months  << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun" << "Jul" << "Aug" << "Sep" << "Oct" << "Nov" << "Dec";
+	//QString Date = QString::number((int)m_Head.Date.Day);
+	//Date += " " + months.at((int)m_Head.Date.Month - 1) + " " + QString::number((int)1900 + (int)m_Head.Date.Year);
+	//infos.setDate(Date);
+
 	infos.setPatientName(QString(m_Head.Patient_Data.Surname).trimmed() + " " +  QString(m_Head.Patient_Data.Name).trimmed());
 
 	// add a block

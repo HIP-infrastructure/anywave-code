@@ -150,6 +150,8 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		switch (pair.second)
 		{
 		case AwChannel::EEG:
+		case AwChannel::ECG:
+		case AwChannel::EMG:
 			inserted->setGain(150);
 			inserted->setUnit(QString::fromLatin1("µV"));
 			break;
@@ -160,6 +162,14 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		case AwChannel::MEG:
 			inserted->setGain(4);
 			inserted->setUnit("pT");
+			break;
+		case AwChannel::GRAD:
+			inserted->setGain(15);
+			inserted->setUnit("pT/m");
+			break;
+		case AwChannel::Trigger:
+			inserted->setGain(1000);
+			inserted->setUnit("n/a");
 			break;
 		}
 	}
@@ -278,14 +288,8 @@ ADESIO::FileStatus ADESIO::createFile(const QString &path, int flags)
 	if (!infos.recordingDate().isEmpty())
 		stream << "time = " << infos.recordingTime() << endl;
 
-	foreach(AwChannel *c, infos.channels()) {
-		QString name;
-		if (c->hasReferences())
-			name = QString("%1-%2").arg(c->name()).arg(c->referenceName());
-		else
-			name = c->name();
-		stream << name << " = " << AwChannel::typeToString(c->type()) << endl;
-	}
+	for (auto c : infos.channels()) 
+		stream << c->fullName() << " = " << AwChannel::typeToString(c->type()) << endl;
 	hdr.close();
 
 	QString binPath = fullPath.replace(QString(".ades"), QString(".dat"));

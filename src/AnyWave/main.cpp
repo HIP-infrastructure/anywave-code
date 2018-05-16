@@ -90,13 +90,16 @@ int main(int argc, char *argv[])
 	parser.addHelpOption();
 	parser.addPositionalArgument("file", "The file to open.");
 	QCommandLineOption seegBIDSOpt("seegBIDS", "SEEG file to BIDSify.\nRequires task and sub options.", "file", QString());
+	QCommandLineOption BIDSSidecarsOpt("bids_output", "sidecars : Only generates sidecar files. all : full conversion", "sidecars", QString());
 	QCommandLineOption BIDSTaskOpt("bids_task", "BIDS task", "task", QString());
 	QCommandLineOption BIDSSubjectOpt("bids_sub", "BIDS subject", "subject", QString());
 	QCommandLineOption BIDSSessionOpt("bids_ses", "BIDS session", "session", QString());
 	QCommandLineOption BIDSRunOpt("bids_run", "BIDS run", "run", QString());
 	QCommandLineOption BIDSDestOpt("bids_dir", "BIDS destination folder", "dir", QString());
 	QCommandLineOption BIDSFormatOpt("bids_format", "data format for output EDF (default) or VHDR", "format", QString());
+
 	parser.addOption(seegBIDSOpt);
+	parser.addOption(BIDSSidecarsOpt);
 	parser.addOption(BIDSTaskOpt);
 	parser.addOption(BIDSSubjectOpt);
 	parser.addOption(BIDSSessionOpt);
@@ -120,18 +123,24 @@ int main(int argc, char *argv[])
 		QString run = parser.value(BIDSRunOpt);
 		QString dir = parser.value(BIDSDestOpt);
 		QString format = parser.value(BIDSFormatOpt);
-		if (format.isEmpty())
-			format = "EDF";
-		bool formatOK = format.toUpper() == "EDF" || format.toUpper() == "VHDR";
-		if (!formatOK) {
-			parser.showHelp();
-			exit(-1);
-		}
+		QString output = parser.value(BIDSSidecarsOpt);
+
 		if (file.isEmpty() || subj.isEmpty() || task.isEmpty()) {
 			parser.showHelp();
 			exit(-1);
 		}
-		if (window.doSEEGToBIDS(file, dir, format.toUpper(), subj, task, session, run) == -1)
+
+		if (output.toUpper() != "SIDECARS") {
+			if (format.isEmpty())
+				format = "EDF";
+			bool formatOK = format.toUpper() == "EDF" || format.toUpper() == "VHDR";
+			if (!formatOK) {
+				parser.showHelp();
+				exit(-1);
+			}
+		}
+
+		if (window.doSEEGToBIDS(file, dir, format.toUpper(), subj, task, output, session, run) == -1)
 			exit(-1);
 		exit(0);
 	}
