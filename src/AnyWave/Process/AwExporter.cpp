@@ -79,11 +79,14 @@ void AwExporter::run()
 				sendMessage("Done.");
 				AwChannel::clearFilters(m_channels);
 				m_foptions.setFilters(m_channels);
+				sendMessage(QString("Filtering..."));
 				AwFiltering::filter(m_channels);
+				sendMessage("Done.");
 			}
 			else {
 				AwChannel::clearFilters(m_channels);
 				m_foptions.setFilters(m_channels);
+				sendMessage(QString("Reading and filtering..."));
 				requestData(&m_channels, m);
 				if (endOfData()) {
 					sendMessage("Error reading data.");
@@ -91,13 +94,13 @@ void AwExporter::run()
 						delete channelVectors.takeFirst();
 					return;
 				}
+				sendMessage("Done.");
 			}
 			for (int i = 0; i < m_channels.size(); i++) {
 				AwChannel *c = m_channels.at(i);
 				QVector<float> vector = c->toVector();
 				channelVectors.at(i)->append(vector);
 			}
-			sendMessage("Done.");
 		}
 		// Concatenate all data chunks into one piece for each channels
 		for (int i = 0; i < m_channels.size(); i++) {
@@ -124,6 +127,7 @@ void AwExporter::run()
 		sendMessage("Reading data...");
 		if (m_downSample) {
 			requestData(&m_channels, 0., -1.0, true);
+			sendMessage("Done.");
 			if (endOfData()) {
 				sendMessage("Error reading data.");
 				return;
@@ -153,6 +157,10 @@ void AwExporter::run()
 	AwBlock *block = writer->infos.newBlock();
 	block->setSamples(m_channels.first()->dataSize());
 	block->setDuration((float)m_channels.first()->dataSize() / m_channels.first()->samplingRate());
+	writer->infos.setDate(pdi.input.reader()->infos.recordingDate());
+	writer->infos.setTime(pdi.input.reader()->infos.recordingTime());
+	writer->infos.setISODate(pdi.input.reader()->infos.isoDate());
+
 	if (!output_markers.isEmpty())
 		block->setMarkers(output_markers);
 	if (writer->createFile(m_path) != AwFileIO::NoError) {

@@ -33,24 +33,23 @@
 AwExporterSettings::AwExporterSettings(QWidget *parent)
 	: QDialog(parent)
 {
-	m_ui = new Ui::AwExporterSettingsUi();
-	m_ui->setupUi(this);
+	setupUi(this);
 	downSample = 0.;
-	connect(m_ui->buttonFile, SIGNAL(clicked()), this, SLOT(pickupFile()));
-	connect(m_ui->buttonSelectChannels, SIGNAL(clicked()), this, SLOT(selectChannels()));
-	connect(m_ui->buttonSelectICA, SIGNAL(clicked()), this, SLOT(selectICAChannels()));
-	connect(m_ui->buttonMarkers, SIGNAL(clicked()), this, SLOT(selectMarkers()));
-	connect(m_ui->comboWriters, SIGNAL(currentIndexChanged(int)), this, SLOT(updateOutputFileExtension(int)));
+	connect(buttonFile, SIGNAL(clicked()), this, SLOT(pickupFile()));
+	connect(buttonSelectChannels, SIGNAL(clicked()), this, SLOT(selectChannels()));
+	connect(buttonSelectICA, SIGNAL(clicked()), this, SLOT(selectICAChannels()));
+	connect(buttonMarkers, SIGNAL(clicked()), this, SLOT(selectMarkers()));
+	connect(comboWriters, SIGNAL(currentIndexChanged(int)), this, SLOT(updateOutputFileExtension(int)));
 }
 
 AwExporterSettings::~AwExporterSettings()
 {
-	delete m_ui;
+
 }
 
 void AwExporterSettings::updateOutputFileExtension(int index)
 {
-	m_ui->lineEditFile->setText(QString("%1%2").arg(initialPath).arg(extensions.at(index)));
+	lineEditFile->setText(QString("%1%2").arg(initialPath).arg(extensions.at(index)));
 }
 
 void AwExporterSettings::selectMarkers()
@@ -69,7 +68,7 @@ void AwExporterSettings::selectICAChannels()
 	if (ui.exec() == QDialog::Accepted) {
 		selectedICA = ui.selectedChannels;
 		if (!selectedICA.isEmpty())
-			m_ui->checkBoxICA->setChecked(false);
+			checkBoxICA->setChecked(false);
 	}
 }
 
@@ -80,37 +79,41 @@ void AwExporterSettings::selectChannels()
 	if (ui.exec() == QDialog::Accepted) {
 		selectedChannels = ui.selectedChannels;
 		if (!selectedChannels.isEmpty())
-			m_ui->checkBoxCurrentMontage->setChecked(false);
+			checkBoxCurrentMontage->setChecked(false);
 	}
 }
 
 void AwExporterSettings::pickupFile()
 {
-	QString ext = extensions.at(m_ui->comboWriters->currentIndex());
+	QString ext = extensions.at(comboWriters->currentIndex());
 	QFileInfo fi(initialPath);
 	filePath = QFileDialog::getSaveFileName(this, tr("Output file"), fi.absolutePath(), ext);
-	m_ui->lineEditFile->setText(filePath);
+	lineEditFile->setText(filePath);
 }
 
 int AwExporterSettings::exec()
 {
 	updateOutputFileExtension(0);
-	m_ui->comboWriters->addItems(writers);
-	m_ui->spinMEGLP->setValue(foptions.megLP);
-	m_ui->spinMEGHP->setValue(foptions.megHP);
-	m_ui->spinEEGLP->setValue(foptions.eegLP);
-	m_ui->spinEEGHP->setValue(foptions.eegHP);
-	m_ui->spinEMGLP->setValue(foptions.emgLP);
-	m_ui->spinEMGHP->setValue(foptions.emgHP);
-	m_ui->spinEEGNotch->setValue(foptions.eegNotch);
-	m_ui->spinMEGNotch->setValue(foptions.megNotch);
-	m_ui->spinEMGNotch->setValue(foptions.emgNotch);
+	comboWriters->addItems(writers);
+	spinMEGLP->setValue(foptions.megLP);
+	spinMEGHP->setValue(foptions.megHP);
+	spinEEGLP->setValue(foptions.eegLP);
+	spinEEGHP->setValue(foptions.eegHP);
+	spinEMGLP->setValue(foptions.emgLP);
+	spinEMGHP->setValue(foptions.emgHP);
+	spinEEGNotch->setValue(foptions.eegNotch);
+	spinMEGNotch->setValue(foptions.megNotch);
+	spinEMGNotch->setValue(foptions.emgNotch);
+
+	comboDS->setSamplingRate(channels.first()->samplingRate());
+
+
 	return QDialog::exec();
 }
 
 void AwExporterSettings::accept()
 {
-	filePath = m_ui->lineEditFile->text();
+	filePath = lineEditFile->text();
 	if (filePath.isEmpty()) {
 		AwMessageBox::information(this, tr("Output File"), tr("Select a file"));
 		return;
@@ -119,19 +122,20 @@ void AwExporterSettings::accept()
 	QFileInfo fi(filePath);
 	filePath = fi.absolutePath() + "/" + fi.baseName();
 
-	writer = m_ui->comboWriters->currentText();
-	useCurrentMontage = m_ui->checkBoxCurrentMontage->isChecked();
-	exportICA = m_ui->checkBoxICA->isChecked();
-	foptions.eegHP = (float)m_ui->spinEEGHP->value();
-	foptions.eegLP = (float)m_ui->spinEEGLP->value();
-	foptions.megHP = (float)m_ui->spinMEGHP->value();
-	foptions.megLP = (float)m_ui->spinMEGLP->value();
-	foptions.emgHP = (float)m_ui->spinEMGHP->value();
-	foptions.emgLP = (float)m_ui->spinEMGLP->value();
-	foptions.eegNotch = (float)m_ui->spinEEGNotch->value();
-	foptions.megNotch = (float)m_ui->spinMEGNotch->value();
-	foptions.emgNotch = (float)m_ui->spinEMGNotch->value();
+	writer = comboWriters->currentText();
+	useCurrentMontage = checkBoxCurrentMontage->isChecked();
+	exportICA = checkBoxICA->isChecked();
+	foptions.eegHP = (float)spinEEGHP->value();
+	foptions.eegLP = (float)spinEEGLP->value();
+	foptions.megHP = (float)spinMEGHP->value();
+	foptions.megLP = (float)spinMEGLP->value();
+	foptions.emgHP = (float)spinEMGHP->value();
+	foptions.emgLP = (float)spinEMGLP->value();
+	foptions.eegNotch = (float)spinEEGNotch->value();
+	foptions.megNotch = (float)spinMEGNotch->value();
+	foptions.emgNotch = (float)spinEMGNotch->value();
+	downSample = comboDS->getSamplingRate();
 
-	downSample = (float)m_ui->sbDownSample->value();
+
 	QDialog::accept();
 }

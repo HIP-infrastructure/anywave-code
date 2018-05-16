@@ -1038,7 +1038,7 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 void AnyWave::updateRecentBIDS(const QStringList &files)
 {
 	// reset recent files sub menu
-	m_recentFilesMenu->clear();
+	m_recentBIDSMenu->clear();
 
 	qint32 count = 1;
 	for (auto s : files) {

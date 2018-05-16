@@ -355,6 +355,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwBaseSignalView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwComboDS.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="AwComboDS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwComboDS.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AwAmplitudeWidget.ui">
@@ -503,6 +512,9 @@
     </CustomBuild>
     <CustomBuild Include="..\..\include\widget\SignalView\AwBaseSignalView.h">
       <Filter>SignalView</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwComboDS.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

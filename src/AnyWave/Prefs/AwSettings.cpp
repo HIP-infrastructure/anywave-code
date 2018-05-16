@@ -64,15 +64,14 @@ AwSettings::AwSettings(QObject *parent)
 	settings.endArray();
 
 	m_isMatlabPresent = false;
-
-	// get Inverse Polarity flag
 	m_isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
 
 	//// languages
 	loadLanguage();
+	// Cpu cores
 	totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
-
-    maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
+	maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
+	
 	m_matlabInterface = NULL;
 	m_pdfMarkerFile = "marker_tool.mrk";
 }
@@ -268,7 +267,7 @@ void AwSettings::removeRecentBIDS(const QString& path)
 
 	m_recentBIDS.removeAll(path);
 	QStringList result;
-	for (auto s : m_recentFiles)
+	for (auto s : m_recentBIDS)
 		result << shortenFilePath(s);
 	emit recentBIDSUpdated(result);
 }
