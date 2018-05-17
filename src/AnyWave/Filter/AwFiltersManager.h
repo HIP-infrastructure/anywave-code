@@ -1,0 +1,34 @@
+#pragma once
+#include <QObject>
+#include <AwFilteringOptions.h>
+
+class AwFilterSettings;
+
+class AwFiltersManager : public QObject
+{
+	Q_OBJECT
+public:
+	static AwFiltersManager * instance();
+	void closeFile();
+	void quit();
+
+	inline AwFilteringOptions& fo() { return m_fo; }
+	void update() { emit filtersChanged(&m_fo); }
+	void showUi();
+	AwFilterSettings *ui() { return m_ui; }
+public slots:
+	/* called each time a new file is open */
+	void setFilename(const QString& path); 
+signals:
+	void filtersChanged(AwFilteringOptions *fo);
+protected:
+	void load();
+	void save();
+	void reset();
+
+	AwFilterSettings *m_ui;
+	AwFilteringOptions m_fo;
+	QString m_filePath;	// path to .flt file.
+	static AwFiltersManager *m_instance;
+	AwFiltersManager(QObject *parent = 0);
+};

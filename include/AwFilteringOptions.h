@@ -45,6 +45,8 @@ public:
 	AwFilteringOptions& operator=(const AwFilteringOptions& other);
 
 	void setFilters(const AwChannelList& channels);
+	void setFilters(AwChannel *channel);
+	void clear();
 
 	float eegLP, eegHP, megLP, megHP, emgLP, emgHP;
 	float eegNotch, megNotch, emgNotch;

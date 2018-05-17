@@ -45,7 +45,8 @@
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Filter/AwFilterToolBar.h"
 #include "Filter/AwFilterSettings.h"
-#include "Filter/AwFilteringManager.h"
+//#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
 #include "Prefs/AwSettings.h"
 #include "Prefs/AwPreferences.h"
 #include "Prefs/AwPrefsDial.h"
@@ -230,8 +231,10 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	m_display->setParent(this);
 	m_display->setAddMarkerDock(m_addMarkerDock);
 
-	// create Filtering Manager
-	AwFilteringManager *fm = AwFilteringManager::instance();
+//	// create Filtering Manager
+//	AwFilteringManager *fm = AwFilteringManager::instance();
+//	fm->setParent(this);
+	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->setParent(this);
 
 	// AwSourceManager
@@ -278,10 +281,12 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
 
 	// Filtering Manager and Montage Manager
-	connect(fm, SIGNAL(filtersChanged()), montage_manager, SLOT(newFilters()));
+//	connect(fm, SIGNAL(filtersChanged()), montage_manager, SLOT(newFilters()));
+	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), montage_manager, SLOT(newFilters(AwFilteringOptions *)));
 
 	// Fitlering Manager and AnyWave
-	connect(fm, SIGNAL(filtersChanged()), this, SLOT(newFilters()));
+//	connect(fm, SIGNAL(filtersChanged()), this, SLOT(newFilters()));
+	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
 
 	/// MAPPING
 	m_dockEEG = m_dockMEG = NULL;
@@ -418,7 +423,8 @@ void AnyWave::quit()
 
 	AwMontageManager::instance()->quit();
 	AwAmplitudeManager::instance()->quit();
-	AwFilteringManager::instance()->quit();
+//	AwFilteringManager::instance()->quit();
+	AwFiltersManager::instance()->quit();
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
 
@@ -457,7 +463,8 @@ void AnyWave::closeFile()
 {
 	AwMontageManager::instance()->closeFile();
 	AwAmplitudeManager::instance()->closeFile();
-	AwFilteringManager::instance()->closeFile();
+//	AwFilteringManager::instance()->closeFile();
+	AwFiltersManager::instance()->closeFile();
 	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
 	
@@ -625,7 +632,7 @@ void AnyWave::initToolBarsAndMenu()
 	// Toolbar Filtering
 	AwFilterToolBar *filter_tb = new AwFilterToolBar(this);
 	addToolBar(Qt::TopToolBarArea, filter_tb->toolBar());
-	AwFilteringManager *fm = AwFilteringManager::instance();
+//	AwFilteringManager *fm = AwFilteringManager::instance();
 	AwICAManager *im = AwICAManager::instance();
 	connect(filter_tb, SIGNAL(ICASwitchChanged(bool)), im, SLOT(setICAFiletring(bool)));
 	connect(this, SIGNAL(closingFile()), filter_tb, SLOT(closeFile()));
@@ -637,7 +644,8 @@ void AnyWave::initToolBarsAndMenu()
 	m_dockFilters = new QDockWidget(tr("Filtering"), this);
 	m_dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	m_dockFilters->setFloating(true);
-	AwFilterSettings *widget = new AwFilterSettings(this);
+//	AwFilterSettings *widget = new AwFilterSettings(this);
+	AwFilterSettings *widget = AwFiltersManager::instance()->ui();
 	connect(widget, &AwFilterSettings::filtersApplied, filter_tb, &AwFilterToolBar::applyFilters);
 	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, m_dockFilters, &QDockWidget::show);
 	m_dockFilters->setWidget(widget);
@@ -712,11 +720,15 @@ void AnyWave::initToolBarsAndMenu()
 
 void AnyWave::newFilters()
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	//AwFilteringManager *fm = AwFilteringManager::instance();
 
-	// change SEEG filters in SEEGViewer
-	if (m_SEEGViewer) 
-		m_SEEGViewer->setFilters(fm->lowPass(AwChannel::EEG), fm->highPass(AwChannel::EEG));
+	//// change SEEG filters in SEEGViewer
+	//if (m_SEEGViewer) 
+	//	m_SEEGViewer->setFilters(fm->lowPass(AwChannel::EEG), fm->highPass(AwChannel::EEG));
+
+	AwFiltersManager *fm = AwFiltersManager::instance();
+	if (m_SEEGViewer)
+		m_SEEGViewer->setFilters(fm->fo().eegLP, fm->fo().eegHP);
 }
 
 ///
@@ -905,16 +917,17 @@ void AnyWave::openFile(const QString &path)
 	ds->setParent(this);
 
 	// read flt file before loading the montage.
-	AwFilteringManager::instance()->setFilename(m_openFileName);
+//	AwFilteringManager::instance()->setFilename(m_openFileName);
+	AwFiltersManager::instance()->setFilename(m_openFileName);
 
 	AwMontageManager::instance()->newMontage(m_currentReader);
 
 	// Activer les QWidgets des toolbars.
-	foreach(QWidget *widget, m_toolBarWidgets)
+	for (auto widget : m_toolBarWidgets)
 		widget->setEnabled(true);
 
 	// Activer les menus desactives
-	foreach(QAction *action, m_actions)
+	for (auto action : m_actions)
 		action->setEnabled(true);
 
 	if (!m_currentReader->triggerChannels().isEmpty())	{

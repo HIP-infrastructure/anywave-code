@@ -30,6 +30,7 @@
 #include "ui_AwFilterSettings.h"
 #include <AwChannel.h>
 using namespace Ui;
+#include "AwFiltersManager.h"			
 
 class AwFilterSettings : public QWidget, public FilterSettingsClass
 {
@@ -50,8 +51,10 @@ signals:
 	// Sent when the user clicks on the apply button.
 	void filtersApplied();
 protected:
-	float m_lp[AW_CHANNEL_TYPES], m_hp[AW_CHANNEL_TYPES];
-	float m_notch[AW_CHANNEL_TYPES];
+	//float m_lp[AW_CHANNEL_TYPES], m_hp[AW_CHANNEL_TYPES];
+	//float m_notch[AW_CHANNEL_TYPES];
+
+	AwFiltersManager *m_fm;
 };
 
 #endif // FILTERSETTINGS_H

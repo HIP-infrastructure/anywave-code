@@ -1300,6 +1300,15 @@
     <ClCompile Include="IO\BIDS\AwBIDSFileItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwFiltersManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Filter\AwFiltersManager.cpp">
+      <Filter>Filter</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwFiltersManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1832,6 +1841,9 @@
     </CustomBuild>
     <CustomBuild Include="IO\BIDS\AwBIDSModel.h">
       <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Filter\AwFiltersManager.h">
+      <Filter>Filter</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

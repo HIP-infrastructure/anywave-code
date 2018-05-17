@@ -35,8 +35,8 @@ public:
     static void filter(const AwChannelList& channels);
 	static void filter(AwChannelList* channels);
 	static void filter(AwChannelList* channels, AwFilteringOptions *fo);
-	static void notch(const AwChannelList& channels);
-	static void notch(AwChannelList *channels);
+//	static void notch(const AwChannelList& channels);
+//	static void notch(AwChannelList *channels);
 	static void downSample(AwChannel *channel, float newSamplingRate);
 	static void downSample(const AwChannelList& channels, float newSamplingRate);
 	static void decimate(const AwChannelList& channels, int factor);

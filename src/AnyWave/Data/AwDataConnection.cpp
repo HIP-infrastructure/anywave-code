@@ -524,7 +524,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 					channelsToFilter << c;
 			}
 			AwFiltering::filter(channelsToFilter);
-			AwFiltering::notch(channelsToFilter);
+			//AwFiltering::notch(channelsToFilter);
 			// end of filtering
 		}
 

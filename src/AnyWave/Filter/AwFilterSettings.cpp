@@ -28,6 +28,7 @@
 #include <AwChannel.h>
 #include <widget/AwMessageBox.h>
 
+
 AwFilterSettings::AwFilterSettings(QWidget *parent)
 	: QWidget(parent)
 {
@@ -43,13 +44,15 @@ AwFilterSettings::AwFilterSettings(QWidget *parent)
 	groupICA->hide();
 	groupSource->hide();
 	updateFilters();
+
+	m_fm = AwFiltersManager::instance();
 }
 
 void AwFilterSettings::reset()
 {
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		m_lp[i] = m_hp[i] = m_notch[i] = 0.;
-	}
+	//for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+	//	m_lp[i] = m_hp[i] = m_notch[i] = 0.;
+	//}
 }
 
 void AwFilterSettings::closeFile()
@@ -134,52 +137,60 @@ void AwFilterSettings::setICASettings(int type, float lp, float hp)
 
 void AwFilterSettings::updateFilters()
 {
-	reset();
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	//reset();
+	//AwFilteringManager *fm = AwFilteringManager::instance();
 
-	// LP
-	if (fm->lowPass(AwChannel::EEG) > 0)
-		spEegLP->setValue(fm->lowPass(AwChannel::EEG));
-	if (fm->lowPass(AwChannel::MEG) > 0)
-		spMegLP->setValue(fm->lowPass(AwChannel::MEG));
-	if (fm->lowPass(AwChannel::EMG) > 0)
-		spEmgLP->setValue(fm->lowPass(AwChannel::EMG));
-	// HP
-	if (fm->highPass(AwChannel::EEG) > 0)
-		spEegHP->setValue(fm->highPass(AwChannel::EEG));
-	if (fm->highPass(AwChannel::MEG) > 0)
-		spMegHP->setValue(fm->highPass(AwChannel::MEG));
-	if (fm->highPass(AwChannel::EMG) > 0)
-		spEmgHP->setValue(fm->highPass(AwChannel::EMG));
+	//// LP
+	//if (fm->lowPass(AwChannel::EEG) > 0)
+	//	spEegLP->setValue(fm->lowPass(AwChannel::EEG));
+	//if (fm->lowPass(AwChannel::MEG) > 0)
+	//	spMegLP->setValue(fm->lowPass(AwChannel::MEG));
+	//if (fm->lowPass(AwChannel::EMG) > 0)
+	//	spEmgLP->setValue(fm->lowPass(AwChannel::EMG));
+	//// HP
+	//if (fm->highPass(AwChannel::EEG) > 0)
+	//	spEegHP->setValue(fm->highPass(AwChannel::EEG));
+	//if (fm->highPass(AwChannel::MEG) > 0)
+	//	spMegHP->setValue(fm->highPass(AwChannel::MEG));
+	//if (fm->highPass(AwChannel::EMG) > 0)
+	//	spEmgHP->setValue(fm->highPass(AwChannel::EMG));
 
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		m_lp[i] = fm->lowPass(i);
-		m_hp[i] = fm->highPass(i);
-	}
+	//for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+	//	m_lp[i] = fm->lowPass(i);
+	//	m_hp[i] = fm->highPass(i);
+	//}
 
-	checkEegHigh->setChecked(fm->highPass(AwChannel::EEG) > 0.);
-	checkEmgHigh->setChecked(fm->highPass(AwChannel::EMG) > 0.);
-	checkMegHigh->setChecked(fm->highPass(AwChannel::MEG) > 0.);
-	checkEegLow->setChecked(fm->lowPass(AwChannel::EEG) > 0.);
-	checkEmgLow->setChecked(fm->lowPass(AwChannel::EMG) > 0.);
-	checkMegLow->setChecked(fm->lowPass(AwChannel::MEG) > 0.);
+	//checkEegHigh->setChecked(fm->highPass(AwChannel::EEG) > 0.);
+	//checkEmgHigh->setChecked(fm->highPass(AwChannel::EMG) > 0.);
+	//checkMegHigh->setChecked(fm->highPass(AwChannel::MEG) > 0.);
+	//checkEegLow->setChecked(fm->lowPass(AwChannel::EEG) > 0.);
+	//checkEmgLow->setChecked(fm->lowPass(AwChannel::EMG) > 0.);
+	//checkMegLow->setChecked(fm->lowPass(AwChannel::MEG) > 0.);
+
+
+	checkEegHigh->setChecked(m_fm->fo().eegHP > 0.);
+	checkEmgHigh->setChecked(m_fm->fo().emgHP > 0.);
+	checkMegHigh->setChecked(m_fm->fo().megHP > 0.);
+	checkEegLow->setChecked(m_fm->fo().eegLP > 0.);
+	checkEmgLow->setChecked(m_fm->fo().emgLP > 0.);
+	checkMegLow->setChecked(m_fm->fo().megLP > 0.);
 }
 
 void AwFilterSettings::show()
 {
-
 	setVisible(true);
 }
 
 void AwFilterSettings::apply()
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	//AwFilteringManager *fm = AwFilteringManager::instance();
 	float lp, hp, notch;
 	bool ica_over = false, source_over = false;
 	// EEG/SEEG
     hp = checkEegHigh->isChecked() ? spEegHP->value() : -1;
 	lp = checkEegLow->isChecked() ? spEegLP->value() : -1;
 	notch = cbNotchEEG->isChecked() ? spNotch->value() : -1;
+
 	if (groupICA->isVisible()) {
 		if (lp > 0 && spICAEEGLP->value() < lp) 
 			ica_over = true;
@@ -192,16 +203,22 @@ void AwFilterSettings::apply()
 		if (hp > 0 && spSourceEEGHP->value() > hp)
 			source_over = true;
 	}
-	if (lp != m_lp[AwChannel::EEG] || hp != m_hp[AwChannel::EEG]) {
-		 m_lp[AwChannel::EEG] = lp;
-		 m_hp[AwChannel::EEG] = hp;
-		 fm->setFilter(AwChannel::EEG, lp, hp);
-		 fm->setFilter(AwChannel::SEEG, lp, hp);
-	}
-	if (notch > 0) {
-		fm->setNotch(AwChannel::EEG, notch);
-		fm->setNotch(AwChannel::SEEG, notch);
-	}
+
+	m_fm->fo().eegHP = hp;
+	m_fm->fo().eegLP = lp;
+	m_fm->fo().eegNotch = notch;
+
+	//if (lp != m_lp[AwChannel::EEG] || hp != m_hp[AwChannel::EEG]) {
+	//	 m_lp[AwChannel::EEG] = lp;
+	//	 m_hp[AwChannel::EEG] = hp;
+	//	 fm->setFilter(AwChannel::EEG, lp, hp);
+	//	 fm->setFilter(AwChannel::SEEG, lp, hp);
+	//}
+	//if (notch > 0) {
+	//	fm->setNotch(AwChannel::EEG, notch);
+	//	fm->setNotch(AwChannel::SEEG, notch);
+	//}
+
 	// EMG/ECG
     hp = checkEmgHigh->isChecked() ? spEmgHP->value() : -1;
 	lp = checkEmgLow->isChecked() ? spEmgLP->value() : -1;
@@ -212,16 +229,20 @@ void AwFilterSettings::apply()
 		if (hp > 0 && spICAEMGHP->value() > hp)
 			ica_over = true;
 	}
-	if (lp != m_lp[AwChannel::EMG] || hp != m_hp[AwChannel::EMG]) {
-		 m_lp[AwChannel::EMG] = lp;
-		 m_hp[AwChannel::EMG] = hp;
-		 fm->setFilter(AwChannel::EMG, lp, hp);
-		 fm->setFilter(AwChannel::ECG, lp, hp);
-	}
-	if (notch > 0) {
-		fm->setNotch(AwChannel::EMG, notch);
-		fm->setNotch(AwChannel::ECG, notch);
-	}
+	m_fm->fo().emgHP = hp;
+	m_fm->fo().emgLP = lp;
+	m_fm->fo().emgNotch = notch;
+
+	//if (lp != m_lp[AwChannel::EMG] || hp != m_hp[AwChannel::EMG]) {
+	//	 m_lp[AwChannel::EMG] = lp;
+	//	 m_hp[AwChannel::EMG] = hp;
+	//	 fm->setFilter(AwChannel::EMG, lp, hp);
+	//	 fm->setFilter(AwChannel::ECG, lp, hp);
+	//}
+	//if (notch > 0) {
+	//	fm->setNotch(AwChannel::EMG, notch);
+	//	fm->setNotch(AwChannel::ECG, notch);
+	//}
 	//MEG
 	hp = checkMegHigh->isChecked() ? spMegHP->value() : -1;
 	lp = checkMegLow->isChecked() ? spMegLP->value() : -1;
@@ -238,18 +259,22 @@ void AwFilterSettings::apply()
 		if (hp > 0 && spSourceMEGHP->value() > hp)
 			source_over = true;
 	}
-	if (lp != m_lp[AwChannel::MEG] || hp != m_hp[AwChannel::MEG]) {
-		 m_lp[AwChannel::MEG] = lp;
-		 m_hp[AwChannel::MEG] = hp;
-		 m_lp[AwChannel::GRAD] = lp;
-		 m_hp[AwChannel::GRAD] = hp;
-		 fm->setFilter(AwChannel::MEG, lp, hp);
-		 fm->setFilter(AwChannel::GRAD, lp, hp);
-	}
-	if (notch > 0) {
-		fm->setNotch(AwChannel::MEG, notch);
-		fm->setNotch(AwChannel::GRAD, notch);
-	}
+	m_fm->fo().megHP = hp;
+	m_fm->fo().megLP = lp;
+	m_fm->fo().megNotch = notch;
+
+	//if (lp != m_lp[AwChannel::MEG] || hp != m_hp[AwChannel::MEG]) {
+	//	 m_lp[AwChannel::MEG] = lp;
+	//	 m_hp[AwChannel::MEG] = hp;
+	//	 m_lp[AwChannel::GRAD] = lp;
+	//	 m_hp[AwChannel::GRAD] = hp;
+	//	 fm->setFilter(AwChannel::MEG, lp, hp);
+	//	 fm->setFilter(AwChannel::GRAD, lp, hp);
+	//}
+	//if (notch > 0) {
+	//	fm->setNotch(AwChannel::MEG, notch);
+	//	fm->setNotch(AwChannel::GRAD, notch);
+	//}
 
 	if (ica_over) {
 		AwMessageBox::information(this, "ICA Warning", "The filters applied on signals differ from the settings applied when the ICA was computed.");
@@ -258,5 +283,7 @@ void AwFilterSettings::apply()
 		AwMessageBox::information(this, "Source Warning", "The filters applied on signals differ from the settings applied when the Source channels were computed.");
 	}
 
-	emit filtersApplied();
+//	emit filtersApplied();
+
+	m_fm->update();
 }
