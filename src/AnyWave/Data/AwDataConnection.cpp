@@ -38,7 +38,8 @@
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
 #include "Source/AwSourceManager.h"
-#include "Filter/AwFilteringManager.h"
+//#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
 #include <QtCore>
 #include <AwFiltering.h>
 
@@ -263,11 +264,13 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 {
 	int type = channels.first()->subType();
 	AwSourceManager *sm = AwSourceManager::instance();
-	AwFilteringManager *fm = AwFilteringManager::instance();
-	foreach(AwChannel *c, sm->realChannels(type)) {
-		c->setHighFilter(fm->highPass(c->type()));
-		c->setLowFilter(fm->lowPass(c->type()));
-	}
+	//AwFilteringManager *fm = AwFilteringManager::instance();
+	AwFiltersManager *fm = AwFiltersManager::instance();
+	fm->fo().setFilters(sm->realChannels(type));
+	//foreach(AwChannel *c, sm->realChannels(type)) {
+	//	c->setHighFilter(fm->highPass(c->type()));
+	//	c->setLowFilter(fm->lowPass(c->type()));
+	//}
 	m_reader->readDataFromChannels(m_positionInFile, m_duration, sm->realChannels(type));
 	AwFiltering::filter(sm->realChannels(type));
 	sm->computeSources(channels);
@@ -277,13 +280,15 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels)
 {
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	//AwFilteringManager *fm = AwFilteringManager::instance();
+	AwFiltersManager *fm = AwFiltersManager::instance();
 	if (comps)	{
 		// load source channels
-		foreach(AwChannel *c, comps->sources()) {
-			c->setHighFilter(fm->highPass(c->type()));
-			c->setLowFilter(fm->lowPass(c->type()));
-		}
+		fm->fo().setFilters(comps->sources());
+		//foreach(AwChannel *c, comps->sources()) {
+		//	c->setHighFilter(fm->highPass(c->type()));
+		//	c->setLowFilter(fm->lowPass(c->type()));
+		//}
 		m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
 //		AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
 		AwFiltering::filter(&comps->sources());

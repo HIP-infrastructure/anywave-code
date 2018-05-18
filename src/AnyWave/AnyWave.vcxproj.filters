@@ -229,15 +229,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwSignalView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Filter\AwFilteringManager.cpp">
-      <Filter>Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilteringManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilteringManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Filter\AwFilterSettings.cpp">
       <Filter>Filter</Filter>
     </ClCompile>
@@ -245,15 +236,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwFilterSettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Filter\AwFilterSwitchButton.cpp">
-      <Filter>Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterSwitchButton.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterSwitchButton.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
@@ -629,15 +611,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwDisplayToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Widgets\AwDockFilter.cpp">
-      <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDockFilter.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDockFilter.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwFilePropertiesDialog.cpp">
@@ -1368,16 +1341,10 @@
     <CustomBuild Include="Display\AwSignalView.h">
       <Filter>Display</Filter>
     </CustomBuild>
-    <CustomBuild Include="Filter\AwFilteringManager.h">
-      <Filter>Filter</Filter>
-    </CustomBuild>
     <CustomBuild Include="Filter\AwFilterSettings.h">
       <Filter>Filter</Filter>
     </CustomBuild>
     <CustomBuild Include="Filter\AwFilterSettings.ui">
-      <Filter>Filter</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Filter\AwFilterSwitchButton.h">
       <Filter>Filter</Filter>
     </CustomBuild>
     <CustomBuild Include="Filter\AwFilterToolBar.h">
@@ -1552,9 +1519,6 @@
       <Filter>Widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Widgets\AwDisplayToolBarv2.ui">
-      <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwDockFilter.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Widgets\AwFilePropertiesDialog.h">

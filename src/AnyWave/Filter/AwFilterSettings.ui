@@ -153,7 +153,7 @@
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QDoubleSpinBox" name="spNotch">
+           <widget class="QDoubleSpinBox" name="spNotchEEG">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -1158,7 +1158,7 @@
   <connection>
    <sender>cbNotchEEG</sender>
    <signal>toggled(bool)</signal>
-   <receiver>spNotch</receiver>
+   <receiver>spNotchEEG</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

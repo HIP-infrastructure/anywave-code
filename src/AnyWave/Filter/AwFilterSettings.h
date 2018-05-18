@@ -44,8 +44,8 @@ public slots:
 	void show();
 	void updateFilters();
 	void closeFile();
-	void setICASettings(int type, float lp, float hp);
-	void setSourceSettings(int type, float lp, float hp);
+	void setICASettings(int type, float hp, float lp);
+	void setSourceSettings(int type, float hp, float lp);
 	void reset();
 signals:
 	// Sent when the user clicks on the apply button.
@@ -53,8 +53,6 @@ signals:
 protected:
 	//float m_lp[AW_CHANNEL_TYPES], m_hp[AW_CHANNEL_TYPES];
 	//float m_notch[AW_CHANNEL_TYPES];
-
-	AwFiltersManager *m_fm;
 };
 
 #endif // FILTERSETTINGS_H

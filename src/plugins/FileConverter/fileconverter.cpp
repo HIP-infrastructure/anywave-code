@@ -120,30 +120,42 @@ void FileConverter::run()
 		emit progressChanged(tr("Done."));
 		// check for filtering
 		if (m_ui->filters) {
-			foreach (AwChannel *c, sourceChannels) {
-				switch (c->type()) {
-				case AwChannel::EEG:
-				case AwChannel::SEEG:
-					c->setLowFilter(m_ui->eegLP);
-					c->setHighFilter(m_ui->eegHP);
-					c->setNotch(m_ui->eegNotch);
-					break;
-				case AwChannel::MEG:
-					c->setLowFilter(m_ui->megLP);
-					c->setHighFilter(m_ui->megHP);
-					c->setNotch(m_ui->megNotch);
-					break;
-				case AwChannel::ECG:
-				case AwChannel::EMG:
-					c->setLowFilter(m_ui->emgLP);
-					c->setHighFilter(m_ui->emgHP);
-					c->setNotch(m_ui->emgNotch);
-					break;
-				}
-			}
+			AwFilteringOptions fo;
+			fo.eegLP = m_ui->eegLP;
+			fo.eegHP = m_ui->eegHP;
+			fo.eegNotch = m_ui->eegNotch;
+			fo.megHP = m_ui->megHP;
+			fo.megLP = m_ui->megLP;
+			fo.megNotch = m_ui->megNotch;
+			fo.emgHP = m_ui->emgHP;
+			fo.emgLP = m_ui->emgLP;
+			fo.emgNotch = m_ui->emgNotch;
+			fo.setFilters(sourceChannels);
+
+			//foreach (AwChannel *c, sourceChannels) {
+			//	switch (c->type()) {
+			//	case AwChannel::EEG:
+			//	case AwChannel::SEEG:
+			//		c->setLowFilter(m_ui->eegLP);
+			//		c->setHighFilter(m_ui->eegHP);
+			//		c->setNotch(m_ui->eegNotch);
+			//		break;
+			//	case AwChannel::MEG:
+			//		c->setLowFilter(m_ui->megLP);
+			//		c->setHighFilter(m_ui->megHP);
+			//		c->setNotch(m_ui->megNotch);
+			//		break;
+			//	case AwChannel::ECG:
+			//	case AwChannel::EMG:
+			//		c->setLowFilter(m_ui->emgLP);
+			//		c->setHighFilter(m_ui->emgHP);
+			//		c->setNotch(m_ui->emgNotch);
+			//		break;
+			//	}
+			//}
 			emit progressChanged(tr("Filtering data..."));
 			AwFiltering::filter(&sourceChannels);
-			AwFiltering::notch(&sourceChannels);
+			//AwFiltering::notch(&sourceChannels);
 			emit progressChanged(tr("Done..."));
 		}
 

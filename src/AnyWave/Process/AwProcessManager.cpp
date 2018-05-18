@@ -43,7 +43,8 @@
 #include <QApplication>
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
-#include "Filter/AwFilteringManager.h"
+//#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
 #include "Debug/AwDebugLog.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
@@ -354,7 +355,8 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	process->pdi.input.setReader(settings->currentReader());
 	process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
 	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(AwSettings::getInstance()->currentFileName());
-	process->pdi.input.filteringOptions = AwFilteringManager::instance()->filteringOptions();
+	//process->pdi.input.filteringOptions = AwFilteringManager::instance()->filteringOptions();
+	process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
 	return process;
 }
 

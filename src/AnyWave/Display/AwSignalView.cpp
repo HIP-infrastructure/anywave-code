@@ -29,7 +29,8 @@
 #include <widget/SignalView/AwNavigationBar.h>
 #include "Widgets/AwMarkersBar.h"
 #include <AwReadWriteLib.h>
-#include "Filter/AwFilteringManager.h"
+//#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Data/AwDataServer.h"
 #include <AwAmplitudeManager.h>
@@ -64,7 +65,8 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
 
 	// filters
-	connect(AwFilteringManager::instance(), SIGNAL(filtersChanged()), this, SLOT(newFilters()));
+	//connect(AwFilteringManager::instance(), SIGNAL(filtersChanged()), this, SLOT(newFilters()));
+	connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
 	m_flags = UpdateProcess;	// by default a view will inform process manager that its contents changed.
@@ -222,13 +224,14 @@ void AwSignalView::enableView(AwFileIO *reader)
 
 void AwSignalView::newFilters()
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	//AwFilteringManager *fm = AwFilteringManager::instance();
 
-	foreach (AwChannel *c, m_channels)	{
-		c->setLowFilter(fm->lowPass(c->type()));
-		c->setHighFilter(fm->highPass(c->type()));
-		c->setNotch(fm->notch(c->type()));
-	}
+	AwFiltersManager::instance()->fo().setFilters(m_channels);
+	//foreach (AwChannel *c, m_channels)	{
+	//	c->setLowFilter(fm->lowPass(c->type()));
+	//	c->setHighFilter(fm->highPass(c->type()));
+	//	c->setNotch(fm->notch(c->type()));
+	//}
 	reloadData();
 }
 

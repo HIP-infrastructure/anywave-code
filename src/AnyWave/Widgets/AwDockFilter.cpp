@@ -32,9 +32,9 @@ AwDockFilter::AwDockFilter(const QString& title, QWidget *parent, Qt::WindowFlag
 	setFeatures(QDockWidget::AllDockWidgetFeatures);
 	setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	setFloating(true);
-	AwFilterSettings *widget = new AwFilterSettings(this);
-	connect(widget, SIGNAL(filtersApplied()), this, SIGNAL(filtersApplied()));
-	setWidget(widget);
+	//AwFilterSettings *widget = new AwFilterSettings(this);
+	//connect(widget, SIGNAL(filtersApplied()), this, SIGNAL(filtersApplied()));
+	//setWidget(widget);
 #ifndef Q_OS_LINUX
 	setVisible(false);
 #endif

@@ -205,7 +205,7 @@ void AwMontageManager::clearSource(int type)
 	}
 
 	// remove Source channels of type 'type' from current montage
-	foreach(AwChannel *c, m_channels)
+	foreach (AwChannel *c, m_channels)
 		if (c->isSource() && c->type() == type)	{
 			m_channels.removeAll(c);
 			delete c;
@@ -217,7 +217,7 @@ void AwMontageManager::addNewSources(int type)
 	AwSourceManager *sm = AwSourceManager::instance();
 	clearSource(type);
 	AwSourceChannelList channels = sm->sources(type);
-	foreach (AwSourceChannel *c, channels) {
+	for (auto c : channels) {
 		AwSourceChannel *source = new AwSourceChannel(c);
 		source->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::Source));
 		m_sourceAsRecorded << c;
@@ -230,7 +230,7 @@ void AwMontageManager::addNewSources(int type)
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
 //	AwFilteringManager *fm = AwFilteringManager::instance();
 	AwFiltersManager *fm = AwFiltersManager::instance();
-	fm->setSourceSettings(type, sm->lp(type), sm->hp(type));
+	fm->setSourceSettings(type, sm->hp(type), sm->lp(type));
 }
 
 int AwMontageManager::loadICA()
@@ -276,65 +276,8 @@ int AwMontageManager::loadICA(const QString& path)
 				m_channelHashTable.insert(newChan->name(), newChan);
 				m_icaHashTable.insert(channel->name(), channel);
 			}
-			fm->setICASettings(comps[i]->type(), comps[i]->lpFilter(), comps[i]->hpFilter());
+			fm->setICASettings(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
 		}
-
-		//AwICAComponents *c = ica_man->icaComponents(AwChannel::EEG);
-		//if (c)	{
-		//	count += c->components().size();
-		//	foreach (AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
-		//c = ica_man->icaComponents(AwChannel::MEG);
-		//if (c)	{
-		//	count += c->components().size();
-		//	foreach (AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
-		//c = ica_man->icaComponents(AwChannel::EMG);
-		//if (c)	{
-		//	count += c->components().size();
-		//	foreach (AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
-		//c = ica_man->icaComponents(AwChannel::Source);
-		//if (c) {
-		//	count += c->components().size();
-		//	foreach(AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
 
 		emit montageChanged(m_channels);
 		AwMessageBox::information(0, tr("ICA Components"), QString::number(count) + tr(" ICA components added to the current montage."));

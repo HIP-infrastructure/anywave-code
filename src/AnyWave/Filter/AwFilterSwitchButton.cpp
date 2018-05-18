@@ -24,16 +24,17 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwFilterSwitchButton.h"
-#include "AwFilteringManager.h"
+//#include "AwFilteringManager.h"
+#include "AwFiltersManager.h"
 
 AwFilterSwitchButton::AwFilterSwitchButton(QWidget *parent)
 	: QPushButton(parent)
 {
 	setText(tr("No Filters"));
 	m_state = AwFilterSwitchButton::NoFilters;
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	//AwFilteringManager *fm = AwFilteringManager::instance();
 
-	connect(fm, SIGNAL(filtersChanged()), this, SLOT(updateStatus()));
+	//connect(fm, SIGNAL(filtersChanged()), this, SLOT(updateStatus()));
 	connect(this, SIGNAL(clicked()), this, SLOT(handleClick()));
 
 	updateStatus();

@@ -3,6 +3,7 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include "AwFilterSettings.h"
+#include <widget/AwMessageBox.h>
 
 // statics
 AwFiltersManager *AwFiltersManager::m_instance = NULL;
@@ -20,6 +21,7 @@ AwFiltersManager::AwFiltersManager(QObject *parent) : QObject(parent)
 
 void AwFiltersManager::quit()
 {
+	closeFile();
 	m_ui->close();
 	delete m_ui;
 }
@@ -29,6 +31,10 @@ void AwFiltersManager::closeFile()
 	if (!m_filePath.isEmpty())
 		save();
 	m_filePath.clear();
+	m_sourceSettings.clear();
+	m_icaSettings.clear();
+	m_ui->closeFile();
+	m_fo.clear();
 }
 
 void AwFiltersManager::showUi()
@@ -69,6 +75,7 @@ void AwFiltersManager::load()
 	m_fo.emgLP = emg["LP"].toDouble();
 	m_fo.emgNotch = emg["Notch"].toDouble();
 
+	m_ui->updateFilters();
 	emit filtersChanged(&m_fo);
 }
 
@@ -76,7 +83,104 @@ void AwFiltersManager::load()
 void AwFiltersManager::reset()
 {
 	m_fo.clear();
+	m_ui->reset();
 }
+
+
+void AwFiltersManager::update()
+{
+	// check for ica or source settings
+	bool sourceWarning = false, icaWarning = false;
+	for (auto t : m_sourceSettings.keys()) {
+		QPair<float, float> values = m_sourceSettings.value(t);
+		switch (t) {
+		case AwChannel::EEG:
+		case AwChannel::SEEG:
+			if (m_fo.eegHP < values.first) {
+				sourceWarning = true;
+				break;
+			}
+			if (m_fo.eegLP > values.second) {
+				sourceWarning = true;
+				break;
+			}
+			break;
+		case AwChannel::MEG:
+		case AwChannel::GRAD:
+			if (m_fo.eegHP < values.first) {
+				sourceWarning = true;
+				break;
+			}
+			if (m_fo.eegLP > values.second) {
+				sourceWarning = true;
+				break;
+			}
+			break;
+		case AwChannel::EMG:
+		case AwChannel::ECG:
+			if (m_fo.emgHP < values.first) {
+				sourceWarning = true;
+				break;
+			}
+			if (m_fo.emgLP > values.second) {
+				sourceWarning = true;
+				break;
+			}
+			break;
+		}
+		if (sourceWarning)
+			break;
+	}
+	if (sourceWarning) {
+		AwMessageBox::information(0, "Source Warning", "The filters applied on signals differ from the settings applied when the Source channels were computed.");
+	}
+	for (auto t : m_icaSettings.keys()) {
+		QPair<float, float> values = m_icaSettings.value(t);
+		switch (t) {
+		case AwChannel::EEG:
+		case AwChannel::SEEG:
+			if (m_fo.eegHP < values.first) {
+				icaWarning = true;
+				break;
+			}
+			if (m_fo.eegLP > values.second) {
+				icaWarning = true;
+				break;
+			}
+			break;
+		case AwChannel::MEG:
+		case AwChannel::GRAD:
+			if (m_fo.megHP < values.first) {
+				icaWarning = true;
+				break;
+			}
+			if (m_fo.megLP > values.second) {
+				icaWarning = true;
+				break;
+			}
+			break;
+		case AwChannel::EMG:
+		case AwChannel::ECG:
+			if (m_fo.emgHP < values.first) {
+				icaWarning = true;
+				break;
+			}
+			if (m_fo.emgLP > values.second) {
+				icaWarning = true;
+				break;
+			}
+			break;
+		}
+		if (icaWarning)
+			break;
+	}
+	if (icaWarning) {
+		AwMessageBox::information(0, "ICA Warning", "The filters applied on signals differ from the settings applied when the ICA channels were computed.");
+	}
+
+	emit filtersChanged(&m_fo);
+}
+
 
 void AwFiltersManager::save()
 {
@@ -116,4 +220,55 @@ void AwFiltersManager::setFilename(const QString& filename)
 		load();
 	else
 		reset();
+}
+
+
+void AwFiltersManager::setSourceSettings(int type, float hp, float lp)
+{
+	if (m_sourceSettings.contains(type))
+		m_sourceSettings.remove(type);
+	m_sourceSettings.insert(type, QPair<float, float>(hp, lp));
+	// force current filter to suit Source settings
+	switch (type) {
+	case AwChannel::EEG:
+		m_fo.eegHP = hp;
+		m_fo.eegLP = lp;
+		break;
+	case AwChannel::MEG:
+		m_fo.megHP = hp;
+		m_fo.megLP = lp;
+		break;
+	case AwChannel::EMG:
+		m_fo.emgHP = hp;
+		m_fo.emgLP = lp;
+		break;
+	}
+	m_ui->setSourceSettings(type, hp, lp);
+	m_ui->updateFilters();
+	emit filtersChanged(&m_fo);
+}
+
+void AwFiltersManager::setICASettings(int type, float hp, float lp)
+{
+	if (m_icaSettings.contains(type))
+		m_icaSettings.remove(type);
+	m_icaSettings.insert(type, QPair<float, float>(hp, lp));
+	// force current filter to suit ICA settings
+	switch (type) {
+	case AwChannel::EEG:
+		m_fo.eegHP = hp;
+		m_fo.eegLP = lp;
+		break;
+	case AwChannel::MEG:
+		m_fo.megHP = hp;
+		m_fo.megLP = lp;
+		break;
+	case AwChannel::EMG:
+		m_fo.emgHP = hp;
+		m_fo.emgLP = lp;
+		break;
+	}
+	m_ui->setICASettings(type, hp, lp);
+	m_ui->updateFilters();
+	emit filtersChanged(&m_fo);
 }

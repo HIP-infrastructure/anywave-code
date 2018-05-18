@@ -39,7 +39,6 @@
 
 //class AwDockFilter;
 class AwDockAddMarker;
-class AwFilteringManager;
 class AwFileIOPlugin;
 class AwFileIO;
 class AwDisplay;
