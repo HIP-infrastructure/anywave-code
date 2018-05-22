@@ -38,7 +38,7 @@ class AwFilterSettings : public QWidget, public FilterSettingsClass
 
 public:
 	AwFilterSettings(QWidget *parent = 0);
-
+	enum SwitchStatus { Off, On, Disabled };
 public slots:
 	void apply();
 	void show();
@@ -47,12 +47,16 @@ public slots:
 	void setICASettings(int type, float hp, float lp);
 	void setSourceSettings(int type, float hp, float lp);
 	void reset();
+	void disableFilters();
+	void switchFilters(bool toggle);
 signals:
 	// Sent when the user clicks on the apply button.
 	void filtersApplied();
 protected:
 	//float m_lp[AW_CHANNEL_TYPES], m_hp[AW_CHANNEL_TYPES];
 	//float m_notch[AW_CHANNEL_TYPES];
+	int m_switchStatus;
+	QList<QCheckBox *> m_checkBoxes;
 };
 
 #endif // FILTERSETTINGS_H

@@ -18,6 +18,8 @@ public:
 	AwFilterSettings *ui() { return m_ui; }
 	void setSourceSettings(int type, float hp, float lp);
 	void setICASettings(int type, float hp, float lp);
+	/** Turn on/off filters **/
+	void switchFilters(bool flag); 
 public slots:
 	/* called each time a new file is open */
 	void setFilename(const QString& path); 
@@ -29,7 +31,7 @@ protected:
 	void reset();
 
 	AwFilterSettings *m_ui;
-	AwFilteringOptions m_fo;
+	AwFilteringOptions m_fo, m_copiedFo;
 	QString m_filePath;	// path to .flt file.
 	// store source or ICA filter settings to warn the user when current filters are over these settings
 	QMap<int, QPair<float, float> > m_sourceSettings;

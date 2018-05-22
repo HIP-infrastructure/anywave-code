@@ -67,8 +67,8 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 		else {
 			fileName = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.%6").arg(dir).arg(subj).arg(session).arg(task).arg(run).arg(ext);
 			json = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.json").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-			channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_run-%5_channels.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-			events_tsv = QString("%1/sub-%3_ses-%3_task-%4_run-%5_events.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+			channels_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_channels.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+			events_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_events.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
 		}
 	}
 

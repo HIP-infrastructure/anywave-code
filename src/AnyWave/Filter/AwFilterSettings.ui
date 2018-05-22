@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>703</width>
-    <height>552</height>
+    <width>879</width>
+    <height>721</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -35,7 +35,7 @@
    <iconset>
     <normaloff>:/images/AnyWave_logo.jpg</normaloff>:/images/AnyWave_logo.jpg</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_6">
+  <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
@@ -518,6 +518,36 @@
        </layout>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="buttonSwitch">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../resources/AnyWave.qrc">
+         <normaloff>:/images/filters-256.png</normaloff>
+         <normalon>:/images/no-filter128.png</normalon>:/images/filters-256.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -867,7 +897,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>286</width>
+          <width>414</width>
           <height>20</height>
          </size>
         </property>
@@ -1045,7 +1075,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>286</width>
+          <width>462</width>
           <height>20</height>
          </size>
         </property>
@@ -1062,7 +1092,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>29</height>
+       <height>160</height>
       </size>
      </property>
     </spacer>

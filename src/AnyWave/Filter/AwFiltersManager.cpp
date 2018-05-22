@@ -86,6 +86,21 @@ void AwFiltersManager::reset()
 	m_ui->reset();
 }
 
+///
+/// switch filter on or off (if flag is true = on)
+void AwFiltersManager::switchFilters(bool flag)
+{
+	if (flag) {
+		m_fo = m_copiedFo;
+		m_ui->updateFilters();
+	}
+	else {
+		m_copiedFo = m_fo;
+		m_fo.clear();
+		//m_ui->disableFilters();
+	}
+	emit filtersChanged(&m_fo);
+}
 
 void AwFiltersManager::update()
 {
