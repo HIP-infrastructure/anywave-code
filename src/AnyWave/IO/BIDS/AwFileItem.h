@@ -10,6 +10,8 @@ public:
 	void setFullPath(const QString& path) { m_fullPath = path; }
 	void setFiles(const QStringList& files) { m_files = files; }
 	inline int type() { return m_type; }
+	inline QStringList& files() { return m_files; }
+	inline QString& fullPath() { return m_fullPath; }
 protected:
 	int m_type;
 	QStringList m_files;	// files present in the iEEG directory

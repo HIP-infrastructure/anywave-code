@@ -1252,15 +1252,6 @@
     <ClCompile Include="IO\BIDS\AwBIDSTreeItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSModel.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSTools.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
@@ -1801,9 +1792,6 @@
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
     <CustomBuild Include="IO\BIDS\AwBIDSGUI.ui">
-      <Filter>IO\BIDS</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSModel.h">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
     <CustomBuild Include="Filter\AwFiltersManager.h">

@@ -16,6 +16,7 @@ public:
 	AwBIDSSession *addSession(const QString& label);
 	AwFileItem *addItem(AwFileItem *item);
 	AwBIDSSessionList& sessions() { return m_sessions; }
+	AwFileItemList& fileItems() { return m_items; }
 protected:
 	QString m_ID;
 	QString m_fullPath;

@@ -782,6 +782,7 @@ void AnyWave::openBIDS()
 void AnyWave::openBIDS(const QString& path)
 {
 	AwBIDSManager::instance(path);
+	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
 	// instantiate dock widget if needed
 	if (m_dockBIDS == NULL)
 		m_dockBIDS = new QDockWidget(tr("BIDS"), this);
