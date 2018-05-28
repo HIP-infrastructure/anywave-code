@@ -2,7 +2,6 @@
 #include <layout/AwLayoutManager.h>
 #include "Montage/AwMontageManager.h"
 #include "Prefs/AwSettings.h"
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 #include <QtGlobal>
 #ifndef NDEBUG
@@ -22,7 +21,6 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
-	//connect(AwFilteringManager::instance(), SIGNAL(filtersChanged()), this, SLOT(updateFilters()));
 	connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(updateFilters()));
 }
 
@@ -38,12 +36,7 @@ AwICAComponents::~AwICAComponents()
 
 void AwICAComponents::updateFilters()
 {
-	//AwFilteringManager *fm = AwFilteringManager::instance();
 	AwFiltersManager::instance()->fo().setFilters(m_sources);
-	//foreach(AwChannel *c, m_sources) {
-	//	c->setLowFilter(fm->lowPass(c->type()));
-	//	c->setHighFilter(fm->highPass(c->type()));
-	//}
 }
 
 //
@@ -230,10 +223,6 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 		if (asRecorded) {
 			AwChannel *source = new AwChannel(asRecorded);
 			AwFiltersManager::instance()->fo().setFilters(source);
-			//			source->setHighFilter(m_hpFilter);
-			//			source->setLowFilter(m_lpFilter);
-			//source->setHighFilter(AwFilteringManager::instance()->highPass(asRecorded->type()));
-			//source->setLowFilter(AwFilteringManager::instance()->lowPass(asRecorded->type()));
 			m_sources << source;
 			m_labelToIndex.insert(source->name(), index++);
 		}
@@ -337,10 +326,6 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 		if (asRecorded)		{
 			AwChannel *source = new AwChannel(asRecorded);
 			AwFiltersManager::instance()->fo().setFilters(source);
-//			source->setHighFilter(m_hpFilter);
-//			source->setLowFilter(m_lpFilter);
-			//source->setHighFilter(AwFilteringManager::instance()->highPass(asRecorded->type()));
-			//source->setLowFilter(AwFilteringManager::instance()->lowPass(asRecorded->type()));
 			m_sources << source;	
 			m_labelToIndex.insert(source->name(), index++);
 		}

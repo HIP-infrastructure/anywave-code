@@ -29,7 +29,6 @@
 #include <QWidget>
 #include "ui_AwMappingWidget.h"
 #include <AwChannel.h>
-//class AwFilteringManager;
 class AwLayout;
 class AwMappingWidget : public QWidget
 {

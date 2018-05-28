@@ -6,7 +6,6 @@
 #include <QFile>
 #include <math/AwMath.h>
 #include <QFileDialog>
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 // statics init and definitions
 AwSourceManager *AwSourceManager::m_instance = 0;
@@ -163,7 +162,6 @@ void AwSourceManager::setBeamformer(int type, mat& matrix, const QStringList& aw
 	m_lpf[source_type] = lp;
 	m_hpf[source_type] = hp;
 	m_matrices[source_type] = matrix;
-	//AwFilteringManager::instance()->setFilter(AwChannel::Source, lp, hp);
 
 	// reset source channels
 	while (!m_channels[source_type].isEmpty())

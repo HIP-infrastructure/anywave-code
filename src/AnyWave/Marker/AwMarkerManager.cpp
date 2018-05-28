@@ -38,8 +38,7 @@
 #include "Widgets/AwDockMarker.h"
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
-//#include "Filter/AwFilteringManager.h"
-//#include "Filter/AwFilteringManager.h"
+
 
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;

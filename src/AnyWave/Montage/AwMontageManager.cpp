@@ -30,7 +30,6 @@
 #include <QDomElement> // For xml input/output
 #include <widget/AwMessageBox.h>
 #include <QtCore>
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 #include "Process/AwProcessManager.h"
 #include <QFileDialog>
@@ -228,7 +227,6 @@ void AwMontageManager::addNewSources(int type)
 	}
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
-//	AwFilteringManager *fm = AwFilteringManager::instance();
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->setSourceSettings(type, sm->hp(type), sm->lp(type));
 }
@@ -258,7 +256,6 @@ int AwMontageManager::loadICA(const QString& path)
 	clearICA();
 	AwICAManager *ica_man = AwICAManager::instance();
 	int count = 0;
-//	AwFilteringManager *fm = AwFilteringManager::instance();
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	if (AwICAManager::instance()->loadComponents(path) == 0) { // if components sucessfully loaded, get components and make them as recorded channels.
 		// add ICA components to asRecorded and current montage.
@@ -436,20 +433,6 @@ void AwMontageManager::applyGains()
 
 void AwMontageManager::newFilters()
 {
-	//AwFilteringManager *fm = AwFilteringManager::instance();
-
-	//foreach (AwChannel *c, m_channels)	{
-	//	c->setLowFilter(fm->lowPass(c->type()));
-	//	c->setHighFilter(fm->highPass(c->type()));
-	//	c->setNotch(fm->notch(c->type()));
-	//}
-
-	//foreach (AwChannel *c, m_channelsAsRecorded) {
-	//	c->setLowFilter(fm->lowPass(c->type()));
-	//	c->setHighFilter(fm->highPass(c->type()));
-	//	c->setNotch(fm->notch(c->type()));
-	//}
-
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->fo().setFilters(m_channels);
 }
@@ -978,11 +961,6 @@ bool AwMontageManager::apply(const QString& path)
 
 void AwMontageManager::applyGlobalFilter(AwChannel *channel)
 {
-	//AwFilteringManager *fm = AwFilteringManager::instance();
-	//channel->setLowFilter(fm->lowPass(channel->type()));
-	//channel->setHighFilter(fm->highPass(channel->type()));
-	//channel->setNotch(fm->notch(channel->type()));
-
 	AwFiltersManager::instance()->fo().setFilters(channel);
 }
 

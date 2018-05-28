@@ -31,7 +31,6 @@
 #include <QFileDialog>
 #include "Widgets/AwDisplayToolBar.h"
 #include "AwDisplaySetupManager.h"
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 #include "Widgets/AwMarkersBar.h"
 #include "AwScene.h"

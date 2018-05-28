@@ -28,7 +28,6 @@
 #define AW_MONTAGE_H
 
 #include <AwChannel.h>
-//class AwFilteringManager;
 class AwFileIO;
 class AwAVGChannel;
 #include <QMutex>

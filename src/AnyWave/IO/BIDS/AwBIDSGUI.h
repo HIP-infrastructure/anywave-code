@@ -3,7 +3,6 @@
 #include <QWidget>
 #include "ui_AwBIDSGUI.h"
 #include "AwBIDSSubject.h"
-//#include "AwBIDSModel.h"
 #include <qstandarditemmodel.h>
 class AwBIDSManager;
 
@@ -28,7 +27,6 @@ protected slots:
 protected:
 	AwBIDSManager * m_bids;
 	// keep a copy of models for the TreeView
-	//QMap<int, AwBIDSModel *> m_models;
 	QMap<int, QStandardItemModel *> m_models;
 
 	void initModel(QStandardItemModel *model, const AwBIDSSubjectList& subjects);

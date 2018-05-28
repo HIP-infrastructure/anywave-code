@@ -133,8 +133,9 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 			stream << "n/a" << "\t" << "n/a" << "\t" << "n/a" << "\t";
 			// group
 			match = re.match(c->name());
+			QString name = c->name();
 			if (match.hasMatch())
-				stream << c->name().remove(re) << "\t";
+				stream << name.remove(re) << "\t";
 			else
 				stream << "n/a" << "\t";
 			// reference
@@ -415,38 +416,33 @@ AwBIDSSubject *AwBIDSManager::getSubject(const QString& ID, int sourceDir)
 
 int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file)
 {
+	AwChannelList channels = AwChannel::duplicateChannels(reader->infos.channels());
+	float duration = reader->infos.totalDuration();
+	qint64 read = reader->readDataFromChannels(0, duration, channels);
+	if (!read) {
+		throw(AwException("Failed to read data from source file.", "BIDSManager::convertFile"));
+		return -1;
+	}
+
 	auto writer = plugin->newInstance();
 	writer->setPlugin(plugin);
-
-	// prepare channels for the writer
-	AwChannelList sourceChannels = AwChannel::duplicateChannels(reader->infos.channels());
-	writer->infos.setChannels(sourceChannels);
-	// gather all markers from the input files and reorder them for the expected appended one.
-	AwMarkerList outputMarkers = AwMarker::duplicate(reader->infos.blocks().first()->markers());
-	float sr = reader->infos.channels().first()->samplingRate();
-	float duration = reader->infos.totalDuration();
+	
+	writer->infos.setChannels(channels);
 	AwBlock *block = writer->infos.newBlock();
-	block->setDuration(duration);
-	block->setSamples((qint64)floor(duration * sr));
-	block->setMarkers(outputMarkers);
+	block->setSamples(channels.first()->dataSize());
+	block->setDuration((float)channels.first()->dataSize() / channels.first()->samplingRate());
+	block->setMarkers(AwMarker::duplicate(reader->infos.blocks().first()->markers()));
+	writer->infos.setDate(reader->infos.recordingDate());
+	writer->infos.setTime(reader->infos.recordingTime());
+	writer->infos.setISODate(reader->infos.isoDate());
 
-	// create the EDF file
 	if (writer->createFile(file) != AwFileIO::NoError) {
-		throw(AwException(writer->errorMessage(), "BIDSManager::convertToEDF"));
 		plugin->deleteInstance(writer);
+		throw(AwException(writer->errorMessage(), "BIDSManager::convertFile"));
 		return -1;
 	}
 
-	// read all the file at once (EDF Write do not support writting by chunk...)
-	qint64 read = reader->readDataFromChannels(0, duration, sourceChannels);
-	if (read)
-		writer->writeData(&sourceChannels);
-	else {
-		throw(AwException("Failed to read data from source file.", "BIDSManager::convertFile"));
-		writer->cleanUpAndClose();
-		plugin->deleteInstance(writer);
-		return -1;
-	}
+	writer->writeData(&channels);
 	writer->cleanUpAndClose();
 	plugin->deleteInstance(writer);
 	return 0;

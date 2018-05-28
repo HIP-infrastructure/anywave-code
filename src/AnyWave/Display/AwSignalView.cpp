@@ -29,7 +29,6 @@
 #include <widget/SignalView/AwNavigationBar.h>
 #include "Widgets/AwMarkersBar.h"
 #include <AwReadWriteLib.h>
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Data/AwDataServer.h"
@@ -65,7 +64,6 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
 
 	// filters
-	//connect(AwFilteringManager::instance(), SIGNAL(filtersChanged()), this, SLOT(newFilters()));
 	connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
@@ -224,14 +222,7 @@ void AwSignalView::enableView(AwFileIO *reader)
 
 void AwSignalView::newFilters()
 {
-	//AwFilteringManager *fm = AwFilteringManager::instance();
-
 	AwFiltersManager::instance()->fo().setFilters(m_channels);
-	//foreach (AwChannel *c, m_channels)	{
-	//	c->setLowFilter(fm->lowPass(c->type()));
-	//	c->setHighFilter(fm->highPass(c->type()));
-	//	c->setNotch(fm->notch(c->type()));
-	//}
 	reloadData();
 }
 

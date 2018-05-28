@@ -24,19 +24,12 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwFilterToolBar.h"
-//#include "AwFilteringManager.h"
 
 AwFilterToolBar::AwFilterToolBar(QWidget *parent)
 	: QWidget(parent)
 {
 	setupUi(this);
 	connect(buttonFilter, SIGNAL(clicked()), this, SIGNAL(filterButtonClicked()));
-	//m_buttonGroupICA.addButton(radioICA_ON, 0);
-	//m_buttonGroupICA.addButton(radioICA_OFF, 1);
-	//connect(&m_buttonGroupICA, SIGNAL(buttonToggled(int, bool)), this, SLOT(changeICAFiltering(int, bool)));
-	//radioICA_ON->hide();
-	//radioICA_OFF->hide();
-	//labelICA->hide();
 	m_toolBar = new QToolBar(tr("Filtering"));
 	m_toolBar->setObjectName("Filtering");
 	m_toolBar->addWidget(this);

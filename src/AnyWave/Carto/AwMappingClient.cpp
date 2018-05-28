@@ -26,7 +26,6 @@
 #include "AwMappingClient.h"
 #include "Prefs/AwSettings.h"
 #include "Data/AwDataServer.h"
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 #include <AwFileIO.h>
 #include <math.h>
@@ -60,7 +59,6 @@ void AwMappingClient::openConnection()
 	if (!m_isAConnectionActive)	{
 		AwDataServer::getInstance()->openConnection(this);
 		m_isAConnectionActive = true;
-		//connect(AwFilteringManager::instance(), SIGNAL(filtersChanged()), this,	SLOT(newFilters()));
 		connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
 	}
 }
@@ -69,31 +67,14 @@ void AwMappingClient::closeConnection()
 {
 	AwDataServer::getInstance()->closeConnection(this);
 	m_isAConnectionActive = false;
-	//disconnect(AwFilteringManager::instance(), SIGNAL(filtersChanged()), this,	SLOT(newFilters()));
 	disconnect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
 }
 
 
 void AwMappingClient::newFilters()
 {
-	//AwFilteringManager *fm = AwFilteringManager::instance();
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->fo().setFilters(m_channels);
-
-	//foreach (AwChannel *c, m_channels)	{
-	//	switch (c->type())	{
-	//	case AwChannel::EEG:
-	//		c->setHighFilter(fm->highPass(AwChannel::EEG));
-	//		c->setLowFilter(fm->lowPass(AwChannel::EEG));
-	//		c->setNotch(fm->notch(AwChannel::EEG));
-	//		break;
-	//	case AwChannel::MEG:
-	//		c->setHighFilter(fm->highPass(AwChannel::MEG));
-	//		c->setLowFilter(fm->lowPass(AwChannel::MEG));
-	//		c->setNotch(fm->notch(AwChannel::MEG));
-	//		break;
-	//	}
-	//}
 	m_cacheLoaded = false;	// force cache to be reloaded
 	requestDataAtLatency(m_latency);
 }

@@ -32,7 +32,6 @@
 #include <AwAmplitudeManager.h>
 #include "Process/AwProcessManager.h"
 #include <AwProcessInterface.h>
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 #include "Montage/AwMontageManager.h"
 #include <AwUtilities.h>

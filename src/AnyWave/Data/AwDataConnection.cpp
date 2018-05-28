@@ -38,7 +38,6 @@
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
 #include "Source/AwSourceManager.h"
-//#include "Filter/AwFilteringManager.h"
 #include "Filter/AwFiltersManager.h"
 #include <QtCore>
 #include <AwFiltering.h>
@@ -264,13 +263,9 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 {
 	int type = channels.first()->subType();
 	AwSourceManager *sm = AwSourceManager::instance();
-	//AwFilteringManager *fm = AwFilteringManager::instance();
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->fo().setFilters(sm->realChannels(type));
-	//foreach(AwChannel *c, sm->realChannels(type)) {
-	//	c->setHighFilter(fm->highPass(c->type()));
-	//	c->setLowFilter(fm->lowPass(c->type()));
-	//}
+
 	m_reader->readDataFromChannels(m_positionInFile, m_duration, sm->realChannels(type));
 	AwFiltering::filter(sm->realChannels(type));
 	sm->computeSources(channels);
@@ -280,17 +275,11 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels)
 {
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
-	//AwFilteringManager *fm = AwFilteringManager::instance();
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	if (comps)	{
 		// load source channels
 		fm->fo().setFilters(comps->sources());
-		//foreach(AwChannel *c, comps->sources()) {
-		//	c->setHighFilter(fm->highPass(c->type()));
-		//	c->setLowFilter(fm->lowPass(c->type()));
-		//}
 		m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-//		AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
 		AwFiltering::filter(&comps->sources());
 		comps->computeComponents(channels);
 	}
@@ -310,14 +299,6 @@ void AwDataConnection::computeVirtualChannels()
 }
 
 // SLOTS
-///// Filter data as requested by a process.
-///// Channels are already loaded with data.
-///// Use filtering parameters set to each channels.
-//void AwDataConnection::filterData(AwChannelList *channels)
-//{
-//	AwFiltering::filter(channels);
-//	setDataAvailable();
-//}
 
 //void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, quint64 duration, float downSampling, AwFilteringOptions *foptions)
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, quint64 duration, bool rawData)

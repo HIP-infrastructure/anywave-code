@@ -38,7 +38,6 @@
 
 class AwMarkerManager;
 class AwDisplaySetup;
-//class AwFilteringManager;
 class AwGainManager;
 class AwFileIO;
 class AwCentralWidget;

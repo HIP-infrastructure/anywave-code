@@ -32,13 +32,6 @@ AwFilterSettings::AwFilterSettings(QWidget *parent)
 	: QWidget(parent)
 {
     setupUi(this);
-	//AwFilteringManager *fm = AwFilteringManager::instance();
-	//connect(fm, SIGNAL(filtersChanged()), this, SLOT(updateFilters()));
-	//connect(fm,  SIGNAL(filtersReset()), this, SLOT(closeFile()));
-	//connect(this, SIGNAL(filtersApplied()), fm, SIGNAL(filtersChanged()));
-	//connect(fm, SIGNAL(newICASettings(int, float, float)), this, SLOT(setICASettings(int, float, float)));
-	//connect(fm, SIGNAL(newSourceSettings(int, float, float)), this, SLOT(setSourceSettings(int, float, float)));
-
 	// hide ICA and Source computation settings when starting
 	groupICA->hide();
 	groupSource->hide();
@@ -222,7 +215,6 @@ void AwFilterSettings::disableFilters()
 
 void AwFilterSettings::apply()
 {
-	//AwFilteringManager *fm = AwFilteringManager::instance();
 	float lp, hp, notch;
 	bool ica_over = false, source_over = false;
 	// EEG/SEEG
