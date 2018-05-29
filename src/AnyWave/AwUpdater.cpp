@@ -37,17 +37,17 @@ void AwUpdater::checkForUpdate()
 
 #ifdef Q_OS_MACOS
 	platform = "Mac";
-	version = "1804";
+	version = "1805";
 	minor = "0";
 #endif
 #ifdef Q_OS_WIN
 	platform = "Win";
-	version = "1804";
+	version = "1805";
 	minor = "0";
 #endif
 #ifdef Q_OS_LINUX
 	platform = "Linux";
-	version = "1804";
+	version = "1805";
 	minor = "0";
 #endif 
 

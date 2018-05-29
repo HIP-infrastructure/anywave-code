@@ -128,36 +128,36 @@ void ICA::run()
 
 	
 	if (decimate > 1) {
-		//sendMessage("Loading data...");
-		//requestData(&m_channels, 0.0f, -1.0f, true);
-		//sendMessage("Done.");
-		//AwChannel::clearFilters(m_channels);
-		//sendMessage("Decimating data...");
-		//AwFiltering::decimate(m_channels, decimate);
-		//sendMessage("Done.");
-		//// applying filtering options to channels
-		//foreach(AwChannel *c, m_channels) {
-		//	c->setLowFilter(m_lpf);
-		//	c->setHighFilter(m_hpf);
-		//}
-		//sendMessage("Filtering...");
-		//AwFiltering::filter(m_channels);
-		//sendMessage("Done.");
-		float sr = m_channels.first()->samplingRate();
-		sendMessage("Loading raw data...");
+		sendMessage("Loading data...");
 		requestData(&m_channels, 0.0f, -1.0f, true);
 		sendMessage("Done.");
-		sendMessage("Downsampling...");
-		AwFiltering::downSample(m_channels, sr / decimate);
-		sendMessage("Done.");
-		sendMessage("Filtering...");
 		AwChannel::clearFilters(m_channels);
-		for (auto c : m_channels) {
+		sendMessage("Decimating data...");
+		AwFiltering::decimate(m_channels, decimate);
+		sendMessage("Done.");
+		// applying filtering options to channels
+		foreach(AwChannel *c, m_channels) {
 			c->setLowFilter(m_lpf);
 			c->setHighFilter(m_hpf);
 		}
+		sendMessage("Filtering...");
 		AwFiltering::filter(m_channels);
 		sendMessage("Done.");
+		//float sr = m_channels.first()->samplingRate();
+		//sendMessage("Loading raw data...");
+		//requestData(&m_channels, 0.0f, -1.0f, true);
+		//sendMessage("Done.");
+		//sendMessage("Downsampling...");
+		//AwFiltering::downSample(m_channels, sr / decimate);
+		//sendMessage("Done.");
+		//sendMessage("Filtering...");
+		//AwChannel::clearFilters(m_channels);
+		//for (auto c : m_channels) {
+		//	c->setLowFilter(m_lpf);
+		//	c->setHighFilter(m_hpf);
+		//}
+		//AwFiltering::filter(m_channels);
+		//sendMessage("Done.");
 	}
 	else {
 		AwChannel::clearFilters(m_channels);
