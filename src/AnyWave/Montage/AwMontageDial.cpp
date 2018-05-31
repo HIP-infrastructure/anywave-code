@@ -363,11 +363,12 @@ void AwMontageDial::setAVGRefMontage()
 
 void AwMontageDial::computeSEEGMontageFromEEGChannels()
 {
-	int res = QMessageBox::question(this, tr("EEG as SEEG channels"), tr("Consider EEG channels as SEEG and make them as bipolar?"), 
+	int res = QMessageBox::question(this, tr("EEG as SEEG channels"), tr("Transform all EEG channels to SEEG and add them as bipolar?"), 
 		QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
 	if (res == QMessageBox::No)
 		return;
 
+	// Transform EEG into SEEG is As Recorded
 	for (auto c : m_channelsAsRecorded) {
 		if (c->isEEG())
 			c->setType(AwChannel::SEEG);
@@ -382,13 +383,11 @@ void AwMontageDial::computeSEEGMontageFromEEGChannels()
 		}
 	}
 	for (auto c : m_channelsAsRecorded) {
-		if (c->isEEG())
+		if (c->isSEEG())
 			channels.append(new AwChannel(c));
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
 	makeSEEGBipolar();
-	while (!channels.isEmpty())
-		delete channels.takeFirst();
 }
 
 
@@ -410,7 +409,14 @@ void AwMontageDial::makeSEEGBipolar()
 		if (match.hasMatch()) {
 			QString elec = match.captured(1);
 			QString number = match.captured(2);
-			QString ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
+			// WARNING 
+			// some electrodes may have plot numbers starting with a ZERO
+			bool startsWithZero = number.startsWith("0");
+			QString ref;
+			if (startsWithZero && number.toInt() < 9)
+				ref = elec + "0" + QString::number(number.toInt() + 1);
+			else
+				ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
 			// check that the ref electrode exists and is a SEEG electrode.
 			AwChannel *c = m_channelsMap.value(ref);
 			bool exist = c != NULL;

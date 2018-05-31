@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwFilterSettings.h"
 #include <AwChannel.h>
-
+#include "Montage/AwMontageManager.h"
 
 
 AwFilterSettings::AwFilterSettings(QWidget *parent)
@@ -43,10 +43,8 @@ AwFilterSettings::AwFilterSettings(QWidget *parent)
 
 void AwFilterSettings::reset()
 {
-	//for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-	//	m_lp[i] = m_hp[i] = m_notch[i] = 0.;
-	//}
 	groupICA->hide();
+	groupICAFile->hide();
 	spICAEEGHP->setValue(0.);
 	spICAEEGHP->setValue(0.);
 	spICAMEGHP->setValue(0.);
@@ -54,6 +52,7 @@ void AwFilterSettings::reset()
 	spICAEMGHP->setValue(0.);
 	spICAEMGLP->setValue(0.);
 	groupSource->hide();
+	groupSourceFile->hide();
 	spSourceEEGHP->setValue(0.);
 	spSourceEEGHP->setValue(0.);
 	spSourceMEGHP->setValue(0.);
@@ -73,12 +72,22 @@ void AwFilterSettings::reset()
 		w->setChecked(false);
 
 	m_switchStatus = Disabled;
-	buttonSwitch->setDisabled(true);	
+	buttonSwitch->setDisabled(true);		
 }
 
 void AwFilterSettings::closeFile()
 {
 	reset();
+}
+
+void AwFilterSettings::enableICAFiltering()
+{
+	groupICAFile->show();
+}
+
+void AwFilterSettings::enableSourceFiltering()
+{
+	groupSourceFile->show();
 }
 
 ///
@@ -263,6 +272,31 @@ void AwFilterSettings::apply()
 		m_switchStatus = Disabled;
 		buttonSwitch->setEnabled(false);
 	}
+
+	// special case for ICA or Source channels which are coming from the file
+	bool filtersICA = false, filtersSource = false;
+	float ica_hp = checkICAHP->isChecked() ? spICAHP->value() : -1;
+	float ica_lp = checkICALP->isChecked() ? spICALP->value() : -1;
+	float source_hp = checkSourceHP->isChecked() ? spSourceHP->value() : -1;
+	float source_lp = checkSourceLP->isChecked() ? spSourceLP->value() : -1;
+
+	// get current montage and set the filter for ICA and/or sources
+	// this may not used so well if the user changes the montage afterward. (Filters won't be applied automatically)
+	// This is because I used AwFilteringOptions object for filters settings everywhere in AnyWave, and this object
+	// does not handle ICA or Source filter settings...
+	// May be add those settings to the object in next versions...
+	AwChannelList channels = AwMontageManager::instance()->channels();
+	for (auto c : channels) {
+		if (c->isICA()) {
+			c->setLowFilter(ica_lp);
+			c->setHighFilter(ica_hp);
+		}
+		else if (c->isSource()) {
+			c->setLowFilter(source_lp);
+			c->setHighFilter(source_hp);
+		}
+	}
+
 
 	fm->update();
 }

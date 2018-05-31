@@ -222,21 +222,6 @@ void ICA::run()
 		createInputFile();
 		launchMatlabPlugin();
 		break;
-
-	////case ICA::BSSCCA:
-	////	bsscca(nc);
-	////	if (!isAborted())
-	////		saveToFile();
-	////	break;
-	//case ICA::FastICA:
-	//	if (fica(nc) != -1)
-	//		saveToFile();
-	//	break;
-	//case ICA::RADICAL:
-	//	radical(nc);
-	//	if (!isAborted())
-	//		saveToFile();
-	//	break;
 	}
 }
 
@@ -300,7 +285,6 @@ void ICA::saveToFile()
 		file.writeStringCellArray(QString("labels"), AwChannel::getLabels(m_channels));
 	}
 	catch (const AwException& e) {
-		//AwMessageBox::critical(this, "File Operation", e.errorString());
 		sendMessage(QString("Error saving to .mat : %1").arg(e.errorString()));
 		return;
 	}

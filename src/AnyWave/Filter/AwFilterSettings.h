@@ -49,12 +49,12 @@ public slots:
 	void reset();
 	void disableFilters();
 	void switchFilters(bool toggle);
+	void enableICAFiltering();
+	void enableSourceFiltering();
 signals:
 	// Sent when the user clicks on the apply button.
 	void filtersApplied();
 protected:
-	//float m_lp[AW_CHANNEL_TYPES], m_hp[AW_CHANNEL_TYPES];
-	//float m_notch[AW_CHANNEL_TYPES];
 	int m_switchStatus;
 	QList<QCheckBox *> m_checkBoxes;
 };

@@ -901,6 +901,13 @@ void AnyWave::openFile(const QString &path)
 
 	// read flt file before loading the montage.
 	AwFiltersManager::instance()->setFilename(m_openFileName);
+	// check if file contains source or ica channels
+	AwChannelList ica_channels = AwChannel::getChannelsOfType(m_currentReader->infos.channels(), AwChannel::ICA); 
+	AwChannelList source_channels = AwChannel::getChannelsOfType(m_currentReader->infos.channels(), AwChannel::Source);
+	if (!ica_channels.isEmpty())
+		AwFiltersManager::instance()->ui()->enableICAFiltering();
+	if (!source_channels.isEmpty())
+		AwFiltersManager::instance()->ui()->enableSourceFiltering();
 
 	AwMontageManager::instance()->newMontage(m_currentReader);
 

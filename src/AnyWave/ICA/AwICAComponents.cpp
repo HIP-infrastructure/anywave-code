@@ -197,27 +197,48 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 		m_panel = NULL;
 	}
 
-	double tmp;
-	if (file.readScalar("lpf", &tmp) != 0)
+	double lpf, hpf;
+	mat unmixingD, mixingD;
+	try {
+		file.readScalar("lpf", &lpf);
+		file.readScalar("hpf", &hpf);
+		file.readMatrix("unmixing", unmixingD);
+		file.readMatrix("mixing", mixingD);
+		file.readStrings("labels", m_labels);
+	}
+	catch (const AwException& e)
+	{
+		throw AwException(QString("Error importing ICA matrices: %1").arg(e.errorString()), "AwICAComponents::loadComponents");
 		return -1;
-	m_lpFilter = (float)tmp;
-	if (file.readScalar("hpf", &tmp) != 0)
-		return -1;
-	m_hpFilter = (float)tmp;
-	mat matrix;
-	if (file.readMatrix("unmixing", matrix) != 0)
-		return -1;
-	m_unmixing = conv_to<fmat>::from(matrix);
-	if (file.readMatrix("mixing", matrix) != 0)
-		return -1;
-	m_mixing = conv_to<fmat>::from(matrix);
-	if (file.readStrings("labels", m_labels) != 0)
-		return -1;
+	}
+
+	// convert matrices to float
+	m_unmixing = conv_to<fmat>::from(unmixingD);
+	m_mixing = conv_to<fmat>::from(mixingD);
+	m_hpFilter = (float)hpf;
+	m_lpFilter = (float)lpf;
+
+	//double tmp;
+	//if (file.readScalar("lpf", &tmp) != 0)
+	//	return -1;
+	//m_lpFilter = (float)tmp;
+	//if (file.readScalar("hpf", &tmp) != 0)
+	//	return -1;
+	//m_hpFilter = (float)tmp;
+	//mat matrix;
+	//if (file.readMatrix("unmixing", matrix) != 0)
+	//	return -1;
+	//m_unmixing = conv_to<fmat>::from(matrix);
+	//if (file.readMatrix("mixing", matrix) != 0)
+	//	return -1;
+	//m_mixing = conv_to<fmat>::from(matrix);
+	//if (file.readStrings("labels", m_labels) != 0)
+	//	return -1;
 	
 	AwMontageManager *mm = AwMontageManager::instance();
 	// build source channels list
 	int index = 0;
-	foreach(QString s, m_labels) {
+	for (auto s : m_labels) {
 		// get the corresponding as recorded channel
 		AwChannel *asRecorded = mm->asRecordedChannel(s);
 		if (asRecorded) {
