@@ -209,7 +209,7 @@ void AwDisplay::closeFile()
 	m_virtualChannels.clear();
 	AwDisplaySetupManager::instance()->resetToDefault();
 	addMarkerModeChanged(false);
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->closeFile();
 	m_allSelectedChannels.clear();
 }
@@ -223,7 +223,10 @@ void AwDisplay::quit()
 
 void AwDisplay::saveChannelSelections()
 {
-	QString path = AwSettings::getInstance()->filePath() + ".sel";
+	auto fi = AwSettings::getInstance()->fileInfo();
+	if (!fi)
+		return;
+	QString path = fi->filePath() + ".sel";
 	if (m_selectedLabels.isEmpty()) {
 		if (QFile::exists(path))
 			QFile::remove(path);
@@ -232,7 +235,7 @@ void AwDisplay::saveChannelSelections()
 	QFile file(path);
 	if (file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate)) {
 		QTextStream stream(&file);
-		foreach(QString label, m_selectedLabels)
+		for (auto label : m_selectedLabels)
 			stream << label << endl;
 		file.close();
 	}
@@ -240,7 +243,7 @@ void AwDisplay::saveChannelSelections()
 
 void AwDisplay::loadChannelSelections()
 {
-	QString path = AwSettings::getInstance()->filePath() + ".sel";
+	QString path = AwSettings::getInstance()->fileInfo()->filePath() + ".sel";
 	QFile file(path);
 	QStringList labels;
 	if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
@@ -303,7 +306,7 @@ void AwDisplay::captureViews()
 	// first, clear the lastCaptureFile set in Settings
 	aws->lastCaptureFile.clear();  // so in case of error when capturing, the file remains empty.
 
-	QString dir = aws->currentFileDir();
+	QString dir = aws->fileInfo()->dirPath();
 	int count = 1;
 	QString filename = QString("capture_%1.png").arg(count++);
 	QString file = QString("%1/%2").arg(dir).arg(filename);

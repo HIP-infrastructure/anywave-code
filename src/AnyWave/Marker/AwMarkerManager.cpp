@@ -133,7 +133,7 @@ void AwMarkerManager::loadMarkers()
 		import = true;
 
 	// Set the root directory to be the current data file directory
-	QFileInfo fi(AwSettings::getInstance()->filePath());
+	QFileInfo fi(AwSettings::getInstance()->fileInfo()->filePath());
 	QString filename = QFileDialog::getOpenFileName(0, tr("Load Markers"), fi.absolutePath(), "Markers (*.mrk)");
 
 	if (filename.isEmpty())

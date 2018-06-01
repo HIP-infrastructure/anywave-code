@@ -46,7 +46,7 @@ void AwRequestServer::handleGetICAPanelCapture(QTcpSocket *client, AwScriptProce
 	stream_data.setVersion(QDataStream::Qt_4_4);
 	// get MEG components
 	if (ica_man->containsComponents(AwChannel::MEG)) {
-		filePath = QString("%1/ica_panel_meg.png").arg(aws->currentFileDir());
+		filePath = QString("%1/ica_panel_meg.png").arg(aws->fileInfo()->dirPath());
 		message = QString("ICA Mappings saved to file %1").arg(filePath);
 		AwICAPanel *panel = ica_man->getComponents(AwChannel::MEG)->getPanelWidget();
 		if (panel != NULL) {
@@ -58,7 +58,7 @@ void AwRequestServer::handleGetICAPanelCapture(QTcpSocket *client, AwScriptProce
 	}
 	// get EEG components
 	if (ica_man->containsComponents(AwChannel::EEG)) {
-		filePath = QString("%1/ica_panel_eeg.png").arg(aws->currentFileDir());
+		filePath = QString("%1/ica_panel_eeg.png").arg(aws->fileInfo()->dirPath());
 		message = QString("ICA Mappings saved to file %1").arg(filePath);
 		AwICAPanel *panel = ica_man->getComponents(AwChannel::EEG)->getPanelWidget();
 		if (panel != NULL) {

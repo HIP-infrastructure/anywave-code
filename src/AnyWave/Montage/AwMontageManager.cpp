@@ -233,7 +233,7 @@ void AwMontageManager::addNewSources(int type)
 
 int AwMontageManager::loadICA()
 {
-	QString dir = AwSettings::getInstance()->currentFileDir();
+	QString dir = AwSettings::getInstance()->fileInfo()->dirPath();
 	QString filter("ICA matrices (*.mat *.h5)");
 	QString path;
 #ifdef Q_OS_MAC
@@ -374,10 +374,10 @@ AwChannelList AwMontageManager::channelsWithLabel(const QString& label)
 {
 	AwChannelList list;
 
-	foreach(AwChannel *c, m_channels) {
+	for (auto c : m_channels) {
 		if (c->name() == label) {
 			if (c->isICA()) {
-				foreach (AwICAChannel *ica_chan, m_icaAsRecorded) {
+				for (auto ica_chan : m_icaAsRecorded) {
 					if (ica_chan->name() == label) {
 						list << new AwICAChannel(ica_chan);
 						break;
@@ -398,7 +398,7 @@ AwChannelList AwMontageManager::channelsWithLabel(const QString& label)
 QStringList AwMontageManager::labels()
 {
 	QStringList list;
-	foreach (AwChannel *c, m_channels)
+	for (auto c : m_channels)
 		if (!list.contains(c->name()))
 			list << c->name();
 	return list;
@@ -414,7 +414,7 @@ AwChannel* AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
 	if (m_channelsAsRecorded.isEmpty())
 		return 0;
 
-	foreach (AwChannel *c, m_channelsAsRecorded)
+	for (auto c : m_channelsAsRecorded)
 		if (c->type() == t)
 			return c;
 	return 0;
@@ -435,6 +435,7 @@ void AwMontageManager::newFilters()
 {
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->fo().setFilters(m_channels);
+	fm->fo().setFilters(m_channelsAsRecorded);
 }
 
 void AwMontageManager::quit()
@@ -475,7 +476,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	AwChannelList channels = reader->infos.channels();
 
 	// init as recorded channels list
-	foreach (AwChannel *c, channels)  {
+	for (auto c : channels)  {
 		// insert in hash table
 		m_channelHashTable.insert(c->name(), c);
 		// insert the as recorded channel in asRecorded list
@@ -553,9 +554,9 @@ void AwMontageManager::loadBadChannels()
 		file.close();
 	}
 	// reset as recorded channels bad status
-	foreach(AwChannel *chan, m_channelsAsRecorded)
+	for (auto chan : m_channelsAsRecorded)
 		chan->setBad(false);
-	foreach (QString label, m_badChannelLabels) {
+	for (auto label : m_badChannelLabels) {
 		AwChannel *chan = m_channelHashTable.value(label);
 		if (chan)
 			chan->setBad(true);
@@ -580,7 +581,6 @@ void AwMontageManager::saveCurrentMontage()
 //
 void AwMontageManager::showInterface()
 {
-//	AwMontageDial *ui = new AwMontageDial(this);
 	AwMontageDial ui;
 
 	if (ui.exec() == QDialog::Accepted) {
@@ -616,32 +616,7 @@ void AwMontageManager::showInterface()
 		saveBadChannels();
 		emit montageChanged(m_channels);
 		emit badChannelsSet(m_badChannelLabels);
-
-		//while (!m_channels.isEmpty()) {
-		//	AwChannel *c = m_channels.takeFirst();
-
-		//	if (!c->isVirtual() || c->isICA() || c->isSource()) // destroy all channels except virtual ones which are not ICA
-		//		delete c;
-		//}
-		//m_channels = ui->channels();
-		//m_badChannelLabels = ui->badLabels();
-
-		//emit montageChanged(m_channels);
-		//emit badChannelsSet(m_badChannelLabels);
-		//save(m_montagePath);
-		//saveBadChannels();
 	}
-	else {// reject
-		//// restore bad status for as recorded Channels
-		//foreach (AwChannel *c, m_channelsAsRecorded)
-		//	c->setBad(false);
-		//foreach (QString label, m_badChannelLabels) {
-		//	AwChannel *asRecorded = m_channelHashTable.value(label);
-		//	if (asRecorded)
-		//		asRecorded->setBad(true);
-		//}
-	}
-//	delete ui;
 }
 
 bool AwMontageManager::save(const QString& filename, const AwChannelList& channels)

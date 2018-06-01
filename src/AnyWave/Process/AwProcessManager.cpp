@@ -350,10 +350,10 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 			process->pdi.input.workingDirPath = settings->workingDir +  plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	
-	process->pdi.input.setReader(settings->currentReader());
-	process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
-	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(AwSettings::getInstance()->currentFileName());
+	auto fi = AwSettings::getInstance()->fileInfo();
+	process->pdi.input.setReader(fi->currentReader());
+	process->pdi.input.dataFolder = fi->dirPath();
+	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(fi->fileName());
 	process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
 	return process;
 }
@@ -747,8 +747,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 	if (initProcessIO(process)) {
 		if (!skipDataFile) {
-			process->pdi.input.dataPath = AwSettings::getInstance()->filePath();
-			process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
+			process->pdi.input.dataPath = AwSettings::getInstance()->fileInfo()->filePath();
+			process->pdi.input.dataFolder = AwSettings::getInstance()->fileInfo()->dirPath();
 			process->pdi.input.setReader(m_currentReader);
 			process->pdi.input.fileDuration = m_currentReader->infos.totalDuration();
 			process->pdi.input.badLabels = AwMontageManager::instance()->badLabels();

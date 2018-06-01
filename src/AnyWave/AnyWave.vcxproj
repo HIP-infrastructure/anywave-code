@@ -1095,6 +1095,7 @@
     <ClCompile Include="Montage\AwMontageTableView.cpp" />
     <ClCompile Include="Plugin\AwPluginDial.cpp" />
     <ClCompile Include="Plugin\AwPluginManager.cpp" />
+    <ClCompile Include="Prefs\AwFileInfo.cpp" />
     <ClCompile Include="Prefs\AwPreferences.cpp" />
     <ClCompile Include="Prefs\AwPrefsDial.cpp" />
     <ClCompile Include="Prefs\AwSettings.cpp" />
@@ -1693,6 +1694,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_OPENGL_LIB -DQT_SVG_LIB -DQT_WIDGETS_LIB -DQT_XML_LIB -DQT_CONCURRENT_LIB -DMKL -DQT_PRINTSUPPORT_LIB -DQWT_DLL -DARMA_DONT_USE_WRAPPER -DH5_BUILT_AS_DYNAMIC_LIB -DAW_DISABLE_EPOCHING -DQT_QML_LIB  "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtSvg" "-I$(QTDIR)\include\QtWidgets" "-I$(AWROOT)\include" "-I$(DEV_ROOT)\win64\VS2015\HDF5\1.8.18\include" "-I$(QTDIR)\include\QtAngle" "-ID:\Dev\win64\VS2012\VTK630\include\vtk-6.3" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtConcurrent" "-I.\ICA" "-I.\Process" "-I$(DEV_ROOT)\win64\armadillo-7.800.2\include" "-I$(QTDIR)\include\QtPrintSupport" "-I.\Script" "-I.\Display" "-I.\Carto" "-I.\Epoch" "-ID:\Dev\win64\VS2015\Qwt-6.1.3\include" "-I$(QTDIR)\include\QtCharts" "-I.\Marker" "-ID:\Dev\win64\VS2015\matio\include" "-I$(QTDIR)\include\QtQml" "-I.\IO\BIDS"</Command>
     </CustomBuild>
+    <ClInclude Include="Prefs\AwFileInfo.h" />
     <ClInclude Include="Script\AwScriptDefines.h" />
     <ClInclude Include="Source\AwSourceChannel.h" />
     <CustomBuild Include="Source\AwSourceManager.h">

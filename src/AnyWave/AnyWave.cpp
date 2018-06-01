@@ -842,8 +842,7 @@ void AnyWave::openFile(const QString &path)
 	closeFile();
 
 	m_currentReader = newReader;
-	settings->setCurrentReader(m_currentReader);
-
+	//settings->setCurrentReader(m_currentReader);
 	int res = m_currentReader->openFile(filePath);
 
 	if (res != AwFileIO::NoError)	{
@@ -866,6 +865,8 @@ void AnyWave::openFile(const QString &path)
 		QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
 		return;
 	}
+	// set global settings with new current reader
+	settings->setReader(m_currentReader, filePath);
 
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
 	m_saveFileName.clear();
@@ -880,7 +881,7 @@ void AnyWave::openFile(const QString &path)
 	title += tr("Duration: ") + AwUtilities::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
-	settings->setFilePath(m_openFileName);
+//	settings->setFilePath(m_openFileName);
 	m_currentReader->infos.setFileName(m_openFileName);
 	data_server->setMainReader(m_currentReader);
 	actionMontage->setEnabled(true);
@@ -1253,15 +1254,20 @@ void AnyWave::runMapping()
 		}
 		m_SEEGViewer->setSEEGChannels(seegChannels);
 		
-		
-		if (!m_SEEGViewer->checkForMeshAndElectrodes(AwSettings::getInstance()->currentFileDir())) {
-			isSEEGOK = false;
+
+		// check for electrodes locations in current data file folder or check in file information if there is a external
+		// location for the electrode file.
+		isSEEGOK = m_SEEGViewer->checkForMeshAndElectrodes(AwSettings::getInstance()->fileInfo()->dirPath());
+		if (!isSEEGOK) {
+			auto fi = AwSettings::getInstance()->fileInfo();
+			if (fi->isExtraInfo("electrodes"))
+				isSEEGOK = m_SEEGViewer->checkForMeshAndElectrodes(fi->getExtraInfo("electrodes").toString());
+		}
+		if (!isSEEGOK) 
 			QMessageBox::critical(this, tr("Mapping"), tr("No mapping available considering electrodes locations or types!"));
-		}
-		else {
-			m_display->setMappingModeOn(true);
-			m_SEEGViewer->setMappingMode(true);
-		}
+
+		m_display->setMappingModeOn(true);
+		m_SEEGViewer->setMappingMode(true);
 	}
 
 	if (!isEEGOK && !isMEGOK && !isSEEGOK)	{
@@ -1642,7 +1648,7 @@ void AnyWave::on_actionQuit_triggered()
 
 void AnyWave::loadBeamformer()
 {
-	QString dir = AwSettings::getInstance()->currentFileDir();
+	QString dir = AwSettings::getInstance()->fileInfo()->dirPath();
 	QString file = QFileDialog::getOpenFileName(0, "Beamformer", dir, "beamformer matrices (*.bf)");
 	if (file.isEmpty())
 		return;

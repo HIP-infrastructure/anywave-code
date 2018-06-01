@@ -1273,6 +1273,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwFiltersManager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Prefs\AwFileInfo.cpp">
+      <Filter>Prefs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -2005,6 +2008,9 @@
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSFileItem.h">
       <Filter>IO\BIDS</Filter>
+    </ClInclude>
+    <ClInclude Include="Prefs\AwFileInfo.h">
+      <Filter>Prefs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
