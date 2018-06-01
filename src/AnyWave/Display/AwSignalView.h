@@ -30,7 +30,6 @@ class QWidget;
 class AwDisplaySetup;
 class AwViewSettings;
 class AwFileIO;
-class AwFilteringManager;
 class AwViewSetup;
 #include <widget/SignalView/AwBaseSignalView.h>
 

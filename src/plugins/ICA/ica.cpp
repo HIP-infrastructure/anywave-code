@@ -143,9 +143,25 @@ void ICA::run()
 		sendMessage("Filtering...");
 		AwFiltering::filter(m_channels);
 		sendMessage("Done.");
+		//float sr = m_channels.first()->samplingRate();
+		//sendMessage("Loading raw data...");
+		//requestData(&m_channels, 0.0f, -1.0f, true);
+		//sendMessage("Done.");
+		//sendMessage("Downsampling...");
+		//AwFiltering::downSample(m_channels, sr / decimate);
+		//sendMessage("Done.");
+		//sendMessage("Filtering...");
+		//AwChannel::clearFilters(m_channels);
+		//for (auto c : m_channels) {
+		//	c->setLowFilter(m_lpf);
+		//	c->setHighFilter(m_hpf);
+		//}
+		//AwFiltering::filter(m_channels);
+		//sendMessage("Done.");
 	}
 	else {
-		foreach(AwChannel *c, m_channels) {
+		AwChannel::clearFilters(m_channels);
+		for (auto c : m_channels) {
 			c->setLowFilter(m_lpf);
 			c->setHighFilter(m_hpf);
 		}
@@ -206,21 +222,6 @@ void ICA::run()
 		createInputFile();
 		launchMatlabPlugin();
 		break;
-
-	////case ICA::BSSCCA:
-	////	bsscca(nc);
-	////	if (!isAborted())
-	////		saveToFile();
-	////	break;
-	//case ICA::FastICA:
-	//	if (fica(nc) != -1)
-	//		saveToFile();
-	//	break;
-	//case ICA::RADICAL:
-	//	radical(nc);
-	//	if (!isAborted())
-	//		saveToFile();
-	//	break;
 	}
 }
 
@@ -272,41 +273,22 @@ void ICA::saveToFile()
 {
 	emit progressChanged("Saving to file...");
 	AwMATLABFile file;
-	if (file.create(m_fileName) != 0) {
-		sendMessage(file.error());
-		return;
-	}
 
-	if (file.writeString(QString("modality"), AwChannel::typeToString(m_modality)) != 0) {
-		sendMessage(file.error());
+	try {
+		file.create(m_fileName);
+		file.writeString("modality", AwChannel::typeToString(m_modality));
+		file.writeScalar("lpf", (double)m_lpf);
+		file.writeScalar("hpf", (double)m_hpf);
+		file.writeScalar("sr", (double)m_samplingRate);
+		file.writeMatrix("mixing", m_mixing);
+		file.writeMatrix("unmixing", m_unmixing);
+		file.writeStringCellArray(QString("labels"), AwChannel::getLabels(m_channels));
+	}
+	catch (const AwException& e) {
+		sendMessage(QString("Error saving to .mat : %1").arg(e.errorString()));
 		return;
 	}
-
-	if (file.writeScalar(QString("lpf"), (double)m_lpf) != 0) {
-		sendMessage(file.error());
-		return;
-	}
-	if (file.writeScalar(QString("hpf"), (double)m_hpf) != 0) {
-		sendMessage(file.error());
-		return;
-	}
-	if (file.writeScalar(QString("sr"), (double)m_samplingRate) != 0) {
-		sendMessage(file.error());
-		return;
-	}
-	if (file.writeMatrix(QString("mixing"), m_mixing) != 0) {
-		sendMessage(file.error());
-		return;
-	}
-	if (file.writeMatrix(QString("unmixing"), m_unmixing) != 0) {
-		sendMessage(file.error());
-		return;
-	}
-	if (file.writeStringCellArray(QString("labels"), AwChannel::getLabels(m_channels)) != 0) {
-		sendMessage(file.error());
-		return;
-	}
-	emit progressChanged(QString("saved results to %1.").arg(m_fileName));
+	sendMessage(QString("saved results to %1.").arg(m_fileName));
 	// tell AnyWave to load ICA components
 	QVariantList args;
 	args.append(m_fileName);

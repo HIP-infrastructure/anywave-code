@@ -30,7 +30,7 @@
 #include <QDomElement> // For xml input/output
 #include <widget/AwMessageBox.h>
 #include <QtCore>
-#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
 #include "Process/AwProcessManager.h"
 #include <QFileDialog>
 #include "ICA/AwICAManager.h"
@@ -204,7 +204,7 @@ void AwMontageManager::clearSource(int type)
 	}
 
 	// remove Source channels of type 'type' from current montage
-	foreach(AwChannel *c, m_channels)
+	foreach (AwChannel *c, m_channels)
 		if (c->isSource() && c->type() == type)	{
 			m_channels.removeAll(c);
 			delete c;
@@ -216,7 +216,7 @@ void AwMontageManager::addNewSources(int type)
 	AwSourceManager *sm = AwSourceManager::instance();
 	clearSource(type);
 	AwSourceChannelList channels = sm->sources(type);
-	foreach (AwSourceChannel *c, channels) {
+	for (auto c : channels) {
 		AwSourceChannel *source = new AwSourceChannel(c);
 		source->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::Source));
 		m_sourceAsRecorded << c;
@@ -227,8 +227,8 @@ void AwMontageManager::addNewSources(int type)
 	}
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
-	AwFilteringManager *fm = AwFilteringManager::instance();
-	fm->setSourceSettings(type, sm->lp(type), sm->hp(type));
+	AwFiltersManager *fm = AwFiltersManager::instance();
+	fm->setSourceSettings(type, sm->hp(type), sm->lp(type));
 }
 
 int AwMontageManager::loadICA()
@@ -256,7 +256,7 @@ int AwMontageManager::loadICA(const QString& path)
 	clearICA();
 	AwICAManager *ica_man = AwICAManager::instance();
 	int count = 0;
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	AwFiltersManager *fm = AwFiltersManager::instance();
 	if (AwICAManager::instance()->loadComponents(path) == 0) { // if components sucessfully loaded, get components and make them as recorded channels.
 		// add ICA components to asRecorded and current montage.
 		AwICAComponents **comps = ica_man->getAllComponents();
@@ -273,65 +273,8 @@ int AwMontageManager::loadICA(const QString& path)
 				m_channelHashTable.insert(newChan->name(), newChan);
 				m_icaHashTable.insert(channel->name(), channel);
 			}
-			fm->setICASettings(comps[i]->type(), comps[i]->lpFilter(), comps[i]->hpFilter());
+			fm->setICASettings(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
 		}
-
-		//AwICAComponents *c = ica_man->icaComponents(AwChannel::EEG);
-		//if (c)	{
-		//	count += c->components().size();
-		//	foreach (AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
-		//c = ica_man->icaComponents(AwChannel::MEG);
-		//if (c)	{
-		//	count += c->components().size();
-		//	foreach (AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
-		//c = ica_man->icaComponents(AwChannel::EMG);
-		//if (c)	{
-		//	count += c->components().size();
-		//	foreach (AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
-		//c = ica_man->icaComponents(AwChannel::Source);
-		//if (c) {
-		//	count += c->components().size();
-		//	foreach(AwICAChannel *channel, c->components()) {
-		//		m_icaAsRecorded << channel;
-		//		m_channelsAsRecorded << channel;
-		//		AwICAChannel *newChan = new AwICAChannel(channel);
-		//		newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-		//		m_channels << newChan;
-		//		m_channelHashTable.insert(newChan->name(), newChan);
-		//		m_icaHashTable.insert(channel->name(), channel);
-		//	}
-		//	fm->setICASettings(c->type(), c->lpFilter(), c->hpFilter());
-		//}
 
 		emit montageChanged(m_channels);
 		AwMessageBox::information(0, tr("ICA Components"), QString::number(count) + tr(" ICA components added to the current montage."));
@@ -490,19 +433,8 @@ void AwMontageManager::applyGains()
 
 void AwMontageManager::newFilters()
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
-
-	foreach (AwChannel *c, m_channels)	{
-		c->setLowFilter(fm->lowPass(c->type()));
-		c->setHighFilter(fm->highPass(c->type()));
-		c->setNotch(fm->notch(c->type()));
-	}
-
-	foreach (AwChannel *c, m_channelsAsRecorded) {
-		c->setLowFilter(fm->lowPass(c->type()));
-		c->setHighFilter(fm->highPass(c->type()));
-		c->setNotch(fm->notch(c->type()));
-	}
+	AwFiltersManager *fm = AwFiltersManager::instance();
+	fm->fo().setFilters(m_channels);
 }
 
 void AwMontageManager::quit()
@@ -1029,10 +961,7 @@ bool AwMontageManager::apply(const QString& path)
 
 void AwMontageManager::applyGlobalFilter(AwChannel *channel)
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
-	channel->setLowFilter(fm->lowPass(channel->type()));
-	channel->setHighFilter(fm->highPass(channel->type()));
-	channel->setNotch(fm->notch(channel->type()));
+	AwFiltersManager::instance()->fo().setFilters(channel);
 }
 
 

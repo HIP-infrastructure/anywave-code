@@ -115,19 +115,27 @@ int AwICAManager::loadComponents(const QString& icaFile)
 	}
 	int type = AwChannel::stringToType(modality);
 	AwICAComponents *comp = new AwICAComponents(type);
-	if (comp->loadComponents(file) == 0) {
+	try {
+		comp->loadComponents(file);
+	}
+	catch (const AwException& e) {
+		AwMessageBox::critical(0, tr("ICA Components"), e.errorString());
+		delete comp;
+		return -1;
+	}
+//	if (comp->loadComponents(file) == 0) {
 		// delete previous components if any
 		if (m_comps[type])
 			delete m_comps[type];
 		m_comps[type] = comp;
 		AwSettings::getInstance()->currentIcaFile = icaFile;
 		emit componentsFiltersLoaded(comp->lpFilter(), comp->hpFilter());
-	}
-	else {
-		AwMessageBox::critical(0, tr("ICA Components"), QString("Unable to load %1 components.").arg(modality));
-		delete comp;
-		return -1;
-	}
+//	}
+	//else {
+	//	AwMessageBox::critical(0, tr("ICA Components"), QString("Unable to load %1 components.").arg(modality));
+	//	delete comp;
+	//	return -1;
+	//}
 	emit componentsLoaded();
 	
 	return 0;

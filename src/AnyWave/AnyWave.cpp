@@ -45,7 +45,7 @@
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Filter/AwFilterToolBar.h"
 #include "Filter/AwFilterSettings.h"
-#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
 #include "Prefs/AwSettings.h"
 #include "Prefs/AwPreferences.h"
 #include "Prefs/AwPrefsDial.h"
@@ -82,12 +82,12 @@
 #ifdef AW_EPOCHING
 #include "Epoch/AwEpochManager.h"
 #endif
+// BIDS
+#include "IO/BIDS/AwBIDSManager.h"
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-AnyWave::AnyWave(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flags)
-#else
+
+
 AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
-#endif
 {
 	setupUi(this);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
@@ -97,8 +97,9 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	setAcceptDrops(true);
 
 	m_debugLogWidget = NULL;
-	// instantiate recent files sub menu.
+	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
+	m_recentBIDSMenu = menuRecent_BIDS;
 
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
@@ -128,9 +129,17 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	QStringList recentFiles = aws->recentFiles();
 	if (!recentFiles.isEmpty())	{
 		QStringList shortenFiles;
-		foreach (QString s, recentFiles)
+		for (auto s : recentFiles)
 			shortenFiles << aws->shortenFilePath(s);
 		updateRecentFiles(shortenFiles);
+	}
+
+	QStringList recentBIDS = aws->recentBIDS();
+	if (!recentBIDS.isEmpty()) {
+		QStringList shortenFiles;
+		for (auto  s : recentBIDS)
+			shortenFiles << aws->shortenFilePath(s);
+		updateRecentBIDS(shortenFiles);
 	}
 
 	QSettings settings;
@@ -172,6 +181,9 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 
 
 	// instantiate Dock Widgets
+	// BIDS 
+	// BIDS dock is null by default and will be instantiated when needed.
+	m_dockBIDS = NULL;
 	// Markers
 	m_dockMarkers = new QDockWidget(tr("Markers"), this);
 	//m_dockMarkers->setObjectName("dockMarkers");
@@ -219,7 +231,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	m_display->setAddMarkerDock(m_addMarkerDock);
 
 	// create Filtering Manager
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->setParent(this);
 
 	// AwSourceManager
@@ -260,15 +272,16 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(marker_manager, SIGNAL(modificationsDone()), this, SLOT(setModified()));
 	// Montage Manager and AnyWave
 	// Settings and AnyWave
-	connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList& )));
+	connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList&)));
+	connect(aws, SIGNAL(recentBIDSUpdated(const QStringList&)), this, SLOT(updateRecentBIDS(const QStringList&)));
 	// Settings and Display
 	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
 
 	// Filtering Manager and Montage Manager
-	connect(fm, SIGNAL(filtersChanged()), montage_manager, SLOT(newFilters()));
+	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), montage_manager, SLOT(newFilters(AwFilteringOptions *)));
 
 	// Fitlering Manager and AnyWave
-	connect(fm, SIGNAL(filtersChanged()), this, SLOT(newFilters()));
+	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
 
 	/// MAPPING
 	m_dockEEG = m_dockMEG = NULL;
@@ -405,7 +418,7 @@ void AnyWave::quit()
 
 	AwMontageManager::instance()->quit();
 	AwAmplitudeManager::instance()->quit();
-	AwFilteringManager::instance()->quit();
+	AwFiltersManager::instance()->quit();
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
 
@@ -437,13 +450,6 @@ void AnyWave::quit()
 		AwEpochManager::destroy();
 	}
 #endif
-	//// Epoch Manager (destroy the object when closing the file)
-	//if (m_epochManager) {
-	//	m_epochManager->closeFile();
-	//	delete m_epochManager;
-	//	m_epochManager = NULL;
-	//}
-
 	AwScriptManager::destroy();
 }
 
@@ -451,7 +457,7 @@ void AnyWave::closeFile()
 {
 	AwMontageManager::instance()->closeFile();
 	AwAmplitudeManager::instance()->closeFile();
-	AwFilteringManager::instance()->closeFile();
+	AwFiltersManager::instance()->closeFile();
 	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
 	
@@ -496,11 +502,6 @@ void AnyWave::closeFile()
 		AwEpochManager::destroy();
 	}
 #endif
-	//if (m_epochManager) {
-	//	m_epochManager->closeFile();
-	//	delete m_epochManager;
-	//	m_epochManager = NULL;
-	//}
 	emit closingFile();
 }
 
@@ -624,7 +625,6 @@ void AnyWave::initToolBarsAndMenu()
 	// Toolbar Filtering
 	AwFilterToolBar *filter_tb = new AwFilterToolBar(this);
 	addToolBar(Qt::TopToolBarArea, filter_tb->toolBar());
-	AwFilteringManager *fm = AwFilteringManager::instance();
 	AwICAManager *im = AwICAManager::instance();
 	connect(filter_tb, SIGNAL(ICASwitchChanged(bool)), im, SLOT(setICAFiletring(bool)));
 	connect(this, SIGNAL(closingFile()), filter_tb, SLOT(closeFile()));
@@ -636,7 +636,7 @@ void AnyWave::initToolBarsAndMenu()
 	m_dockFilters = new QDockWidget(tr("Filtering"), this);
 	m_dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	m_dockFilters->setFloating(true);
-	AwFilterSettings *widget = new AwFilterSettings(this);
+	AwFilterSettings *widget = AwFiltersManager::instance()->ui();
 	connect(widget, &AwFilterSettings::filtersApplied, filter_tb, &AwFilterToolBar::applyFilters);
 	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, m_dockFilters, &QDockWidget::show);
 	m_dockFilters->setWidget(widget);
@@ -701,16 +701,19 @@ void AnyWave::initToolBarsAndMenu()
 	connect(actionVisualiseEpoch, &QAction::triggered, this, &AnyWave::visualiseEpoch);
 	connect(actionAveraging, &QAction::triggered, this, &AnyWave::averageEpoch);
 #endif
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	//// BIDS
+	/////////////////////////////////////////////////////////////////////////////////////
+	connect(actionOpen_BIDS, SIGNAL(triggered()), this, SLOT(openBIDS()));
 }
 
 
 void AnyWave::newFilters()
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
-
-	// change SEEG filters in SEEGViewer
-	if (m_SEEGViewer) 
-		m_SEEGViewer->setFilters(fm->lowPass(AwChannel::EEG), fm->highPass(AwChannel::EEG));
+	AwFiltersManager *fm = AwFiltersManager::instance();
+	if (m_SEEGViewer)
+		m_SEEGViewer->setFilters(fm->fo().eegLP, fm->fo().eegHP);
 }
 
 ///
@@ -718,9 +721,6 @@ void AnyWave::newFilters()
 ///
 void AnyWave::changeFilterSettings()
 {
-	//if (m_dockWidgetFilters == NULL)
-	//		m_dockWidgetFilters = new AwDockFilter(tr("Filtering"), this);
-	//m_dockWidgetFilters->show();
 }
 
 
@@ -752,6 +752,30 @@ bool AnyWave::checkForRunningProcesses()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AnyWave::openBIDS()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, "/");
+	if (dir.isEmpty())
+		return;
+	openBIDS(dir);
+}
+
+void AnyWave::openBIDS(const QString& path)
+{
+	AwBIDSManager::instance(path);
+	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
+	// instantiate dock widget if needed
+	if (m_dockBIDS == NULL)
+		m_dockBIDS = new QDockWidget(tr("BIDS"), this);
+	//m_dockMarkers->setObjectName("dockMarkers");
+	addDockWidget(Qt::RightDockWidgetArea, m_dockBIDS);
+	m_dockBIDS->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	m_dockBIDS->setWidget(AwBIDSManager::instance()->ui());
+
+
+	AwSettings::getInstance()->addRecentBIDS(path);
+}
 
 void AnyWave::openFile(const QString &path)
 {
@@ -876,16 +900,23 @@ void AnyWave::openFile(const QString &path)
 	ds->setParent(this);
 
 	// read flt file before loading the montage.
-	AwFilteringManager::instance()->setFilename(m_openFileName);
+	AwFiltersManager::instance()->setFilename(m_openFileName);
+	// check if file contains source or ica channels
+	AwChannelList ica_channels = AwChannel::getChannelsOfType(m_currentReader->infos.channels(), AwChannel::ICA); 
+	AwChannelList source_channels = AwChannel::getChannelsOfType(m_currentReader->infos.channels(), AwChannel::Source);
+	if (!ica_channels.isEmpty())
+		AwFiltersManager::instance()->ui()->enableICAFiltering();
+	if (!source_channels.isEmpty())
+		AwFiltersManager::instance()->ui()->enableSourceFiltering();
 
 	AwMontageManager::instance()->newMontage(m_currentReader);
 
 	// Activer les QWidgets des toolbars.
-	foreach(QWidget *widget, m_toolBarWidgets)
+	for (auto widget : m_toolBarWidgets)
 		widget->setEnabled(true);
 
 	// Activer les menus desactives
-	foreach(QAction *action, m_actions)
+	for (auto action : m_actions)
 		action->setEnabled(true);
 
 	if (!m_currentReader->triggerChannels().isEmpty())	{
@@ -956,11 +987,6 @@ void AnyWave::reviewComponentsMaps()
 
 void AnyWave::doEpoch()
 {
-	//if (m_epochManager == NULL) {
-	//	m_epochManager = AwEpochManager::instance();
-	//	m_epochManager->setParent(this);
-	//}
-	//m_epochManager->create();
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->create();
 #endif
@@ -968,11 +994,6 @@ void AnyWave::doEpoch()
 
 void AnyWave::visualiseEpoch()
 {
-	//if (m_epochManager == NULL) {
-	//	m_epochManager = AwEpochManager::instance();
-	//	m_epochManager->setParent(this);
-	//}
-	//m_epochManager->visualise();
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->visualise();
 #endif
@@ -980,11 +1001,6 @@ void AnyWave::visualiseEpoch()
 
 void AnyWave::averageEpoch()
 {
-	//if (m_epochManager == NULL) {
-	//	m_epochManager = AwEpochManager::instance();
-	//	m_epochManager->setParent(this);
-	//}
-	//m_epochManager->average();
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->average();
 #endif
@@ -1011,12 +1027,28 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 	m_recentFilesMenu->clear();
 
 	qint32 count = 1;
-	foreach (QString s, files)	{
+	for (auto s : files)	{
 		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentFilesMenu);
 		m_recentFilesMenu->addAction(action);
 		// add index number in data()
 		action->setData(count - 1);
-		connect(action, SIGNAL(triggered()), this, SLOT(openRecentFile()));
+		connect(action, &QAction::triggered, this, &AnyWave::openRecentFile);
+		count++;
+	}
+}
+
+void AnyWave::updateRecentBIDS(const QStringList &files)
+{
+	// reset recent files sub menu
+	m_recentBIDSMenu->clear();
+
+	qint32 count = 1;
+	for (auto s : files) {
+		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentBIDSMenu);
+		m_recentBIDSMenu->addAction(action);
+		// add index number in data()
+		action->setData(count - 1);
+		connect(action, &QAction::triggered, this, &AnyWave::openRecentBIDS);
 		count++;
 	}
 }
@@ -1027,13 +1059,29 @@ void AnyWave::openRecentFile()
 	AwSettings *aws = AwSettings::getInstance();
 	
 	qint32 index = action->data().toInt();
-	QStringList files = aws->recentFiles();
+	QString file = aws->recentFiles().at(index);
 	// Open the file
-	if (QFile::exists(files.at(index)))
-		openFile(files.at(index));
+	if (QFile::exists(file))
+		openFile(file);
 	else	{
 		AwMessageBox::information(this, tr("File error"), tr("The path to this file is not valid anymore."));
-		aws->removeRecentFilePath(files.at(index));
+		aws->removeRecentFilePath(file);
+	}
+}
+
+void AnyWave::openRecentBIDS()
+{
+	QAction *action = qobject_cast<QAction *>(QObject::sender());
+	AwSettings *aws = AwSettings::getInstance();
+
+	qint32 index = action->data().toInt();
+	QString dir = aws->recentBIDS().at(index);
+
+	if (QDir(dir).exists())
+		openBIDS(dir);
+	else {
+		AwMessageBox::information(this, tr("File error"), tr("The path to this BIDS structure is not valid anymore."));
+		aws->removeRecentBIDS(dir);
 	}
 }
 

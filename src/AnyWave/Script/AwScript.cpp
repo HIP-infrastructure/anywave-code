@@ -169,6 +169,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 					c->setLowFilter(finput->filters().eegLP);
 					break;
 				case AwChannel::MEG:
+				case AwChannel::GRAD:
 					c->setHighFilter(finput->filters().megHP);
 					c->setLowFilter(finput->filters().megLP);
 					break;

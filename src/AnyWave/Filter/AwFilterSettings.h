@@ -30,6 +30,7 @@
 #include "ui_AwFilterSettings.h"
 #include <AwChannel.h>
 using namespace Ui;
+#include "AwFiltersManager.h"			
 
 class AwFilterSettings : public QWidget, public FilterSettingsClass
 {
@@ -37,21 +38,25 @@ class AwFilterSettings : public QWidget, public FilterSettingsClass
 
 public:
 	AwFilterSettings(QWidget *parent = 0);
-
+	enum SwitchStatus { Off, On, Disabled };
 public slots:
 	void apply();
 	void show();
 	void updateFilters();
 	void closeFile();
-	void setICASettings(int type, float lp, float hp);
-	void setSourceSettings(int type, float lp, float hp);
+	void setICASettings(int type, float hp, float lp);
+	void setSourceSettings(int type, float hp, float lp);
 	void reset();
+	void disableFilters();
+	void switchFilters(bool toggle);
+	void enableICAFiltering();
+	void enableSourceFiltering();
 signals:
 	// Sent when the user clicks on the apply button.
 	void filtersApplied();
 protected:
-	float m_lp[AW_CHANNEL_TYPES], m_hp[AW_CHANNEL_TYPES];
-	float m_notch[AW_CHANNEL_TYPES];
+	int m_switchStatus;
+	QList<QCheckBox *> m_checkBoxes;
 };
 
 #endif // FILTERSETTINGS_H

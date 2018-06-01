@@ -43,7 +43,8 @@
 #include <QApplication>
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
-#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
+#include "Debug/AwDebugLog.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -353,7 +354,7 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	process->pdi.input.setReader(settings->currentReader());
 	process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
 	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(AwSettings::getInstance()->currentFileName());
-	process->pdi.input.filteringOptions = AwFilteringManager::instance()->filteringOptions();
+	process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
 	return process;
 }
 
@@ -762,6 +763,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	plm->setParent(this);
 	plm->connectProcess(process);
 
+	// connect process to debug log system
+	AwDebugLog::instance()->connectComponent(process->plugin()->name, process);
+
 	AwDataServer *ds = 	AwDataServer::getInstance();
 
 	// set current language
@@ -958,16 +962,6 @@ void AwProcessManager::startProcess(const QString& name, const QStringList& args
 	if (p)
 		runProcess(newProcess(p), args);
 }
-
-//void AwProcessManager::startProcess(const QString &name)
-//{
-//	AwProcessPlugin *p = AwPluginManager::getInstance()->getProcessPluginByName(name);
-//
-//	if (p)
-//		runProcess(newProcess(p));
-//}
-
-
 
 void AwProcessManager::stopProcess(AwProcess *process)
 {

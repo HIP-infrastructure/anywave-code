@@ -121,8 +121,8 @@ void AwFiltering::filter(const AwChannelList& channels)
 
 	AwChannelList channelsToFilter;
 
-	foreach (AwChannel *chan, channels)	{
-		if (chan->lowFilter() > 0 || chan->highFilter() > 0) {
+	for (auto chan :  channels)	{
+		if (chan->lowFilter() > 0 || chan->highFilter() > 0 || chan->notch() > 0) {
 			channelsToFilter.append(chan);
 		}
 	}
@@ -149,29 +149,29 @@ void AwFiltering::filter(AwChannelList* channels, AwFilteringOptions *fo)
 }
 
 
-void AwFiltering::notch(const AwChannelList& channels)
-{
-	if (channels.isEmpty())
-		return;
+//void AwFiltering::notch(const AwChannelList& channels)
+//{
+//	if (channels.isEmpty())
+//		return;
+//
+//	AwChannelList channelsToFilter;
+//
+//	foreach (AwChannel *chan, channels)	{
+//		if (chan->notch() > 0)
+//			channelsToFilter.append(chan);
+//	}
+//
+//	if (channelsToFilter.isEmpty())
+//		return;
+//
+//	QFuture<void> res = QtConcurrent::mapped(channelsToFilter, notchFilterChannel);
+//	res.waitForFinished();
+//}
 
-	AwChannelList channelsToFilter;
-
-	foreach (AwChannel *chan, channels)	{
-		if (chan->notch() > 0)
-			channelsToFilter.append(chan);
-	}
-
-	if (channelsToFilter.isEmpty())
-		return;
-
-	QFuture<void> res = QtConcurrent::mapped(channelsToFilter, notchFilterChannel);
-	res.waitForFinished();
-}
-
-void AwFiltering::notch(AwChannelList *channels)
-{
-	AwFiltering::notch(*channels);
-}
+//void AwFiltering::notch(AwChannelList *channels)
+//{
+//	AwFiltering::notch(*channels);
+//}
 
 ///
 /// decimate channels
@@ -195,20 +195,20 @@ void AwFiltering::decimate(const AwChannelList& channels, int factor)
 		delete decims.takeLast();
 }
 
-AwChannel *notchFilterChannel(AwChannel *c)
-{
-	// check for data pointer. If null pointer => don't filter
-	// null data pointer can mean a virtual channel that is not computed yet.
-	if(c->data() == NULL)
-		return c;
-	Dsp::SimpleFilter <Dsp::ChebyshevI::BandStop <3>, 1> f;
-	f.setup(3, c->samplingRate(), c->notch(), 4, 1);	// 4Hz band width
-	float *data[1];
-	data[0] = c->data();
-	f.process(c->dataSize(), data);
-	c->setDataReady();
-	return c;
-}
+//AwChannel *notchFilterChannel(AwChannel *c)
+//{
+//	// check for data pointer. If null pointer => don't filter
+//	// null data pointer can mean a virtual channel that is not computed yet.
+//	if(c->data() == NULL)
+//		return c;
+//	Dsp::SimpleFilter <Dsp::ChebyshevI::BandStop <3>, 1> f;
+//	f.setup(3, c->samplingRate(), c->notch(), 4, 1);	// 4Hz band width
+//	float *data[1];
+//	data[0] = c->data();
+//	f.process(c->dataSize(), data);
+//	c->setDataReady();
+//	return c;
+//}
 
 QVector<float> AwFiltering::pad_left(AwChannel *channel)
 {
@@ -330,6 +330,14 @@ AwChannel *filterChannel(AwChannel *chan)
 	float *data[1];
 	data[0] = vdata.memptr();
 #endif
+
+	// apply notch first if set
+	if (chan->notch() > 0) {
+		Dsp::SimpleFilter <Dsp::ChebyshevI::BandStop <4>, 1> f;
+		f.setup(4, chan->samplingRate(), chan->notch(), 4, 1);	// 4Hz band width
+		f.process(vdata.size(), data);
+	}
+
 	if (chan->lowFilter() > 0)	{
 #ifndef OLD_FILTER
 			Dsp::SimpleFilter <Dsp::Butterworth::LowPass <2>, 1> f;

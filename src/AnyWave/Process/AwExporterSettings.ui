@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>998</width>
-    <height>387</height>
+    <width>996</width>
+    <height>286</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
      <item>
       <widget class="QComboBox" name="comboWriters">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -59,7 +59,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Choose File</string>
+        <string>Modify</string>
        </property>
       </widget>
      </item>
@@ -204,7 +204,7 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Filtering</string>
+        <string>Data processing</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -212,20 +212,17 @@
           <item>
            <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Down sample to :</string>
+             <string>Down sampling:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="sbDownSample">
-            <property name="suffix">
-             <string>Hz</string>
-            </property>
-            <property name="decimals">
-             <number>0</number>
-            </property>
-            <property name="maximum">
-             <double>99999999999.000000000000000</double>
+           <widget class="AwComboDS" name="comboDS">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
            </widget>
           </item>
@@ -246,14 +243,24 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="3">
+          <item row="1" column="4">
+           <widget class="QDoubleSpinBox" name="spinMEGNotch">
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
            <widget class="QLabel" name="label_9">
             <property name="text">
              <string>Notch</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="2">
            <widget class="QLabel" name="label_7">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -269,7 +276,14 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>EEG/SEEG:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
            <widget class="QDoubleSpinBox" name="spinMEGLP">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -285,39 +299,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>EEG/SEEG:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QDoubleSpinBox" name="spinMEGHP">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>1000000000000000.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_8">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>High Pass</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_3">
             <property name="text">
@@ -325,7 +306,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="3">
+          <item row="3" column="4">
            <widget class="QDoubleSpinBox" name="spinEEGNotch">
             <property name="decimals">
              <number>1</number>
@@ -335,27 +316,7 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QDoubleSpinBox" name="spinMEGNotch">
-            <property name="decimals">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <double>1000000000000000.000000000000000</double>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="2">
-           <widget class="QDoubleSpinBox" name="spinEMGHP">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>1000000000000000.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spinEMGLP">
             <property name="decimals">
              <number>3</number>
@@ -365,7 +326,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="3" column="2">
            <widget class="QDoubleSpinBox" name="spinEEGLP">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -381,17 +342,14 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QDoubleSpinBox" name="spinEEGHP">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>1000000000000000.000000000000000</double>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>ECG/EMG:</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="3">
+          <item row="5" column="4">
            <widget class="QDoubleSpinBox" name="spinEMGNotch">
             <property name="decimals">
              <number>1</number>
@@ -401,10 +359,49 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_5">
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinMEGHP">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_8">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>ECG/EMG:</string>
+             <string>High Pass</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spinEEGHP">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="spinEMGHP">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>1000000000000000.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -462,6 +459,13 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>AwComboDS</class>
+   <extends>QComboBox</extends>
+   <header location="global">widget/AwComboDS.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../resources/AnyWave.qrc"/>
  </resources>

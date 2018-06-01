@@ -48,24 +48,30 @@ AwSettings::AwSettings(QObject *parent)
 	// load previously saved recent files
 	QSettings settings;
 
+	// load recent files
 	int size = settings.beginReadArray("recentFiles");
-	
 	for (int i = 0; i < size; i++)	{
 		settings.setArrayIndex(i);
 		m_recentFiles << settings.value("filePath").toString();
 	}
 	settings.endArray();
+	// load recend BIDS
+	size = settings.beginReadArray("recentBIDS");
+	for (int i = 0; i < size; i++) {
+		settings.setArrayIndex(i);
+		m_recentBIDS << settings.value("BIDSPath").toString();
+	}
+	settings.endArray();
 
 	m_isMatlabPresent = false;
-
-	// get Inverse Polarity flag
 	m_isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
 
 	//// languages
 	loadLanguage();
+	// Cpu cores
 	totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
-
-    maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
+	maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
+	
 	m_matlabInterface = NULL;
 	m_pdfMarkerFile = "marker_tool.mrk";
 }
@@ -78,6 +84,13 @@ AwSettings::~AwSettings()
 	for (int i = 0; i < m_recentFiles.size(); i++)	{
 		settings.setArrayIndex(i);
 		settings.setValue("filePath", m_recentFiles.at(i));
+	}
+	settings.endArray();
+	// save recent BIDS
+	settings.beginWriteArray("recentBIDS");
+	for (int i = 0; i < m_recentBIDS.size(); i++) {
+		settings.setArrayIndex(i);
+		settings.setValue("BIDSPath", m_recentBIDS.at(i));
 	}
 	settings.endArray();
 }
@@ -214,10 +227,25 @@ void AwSettings::addRecentFilePath(const QString& path)
 
 	m_recentFiles.insert(0, path);
 	QStringList result;
-	foreach (QString s, m_recentFiles)
+	for (auto s : m_recentFiles)
 		result << shortenFilePath(s);
 
 	emit recentFilesUpdated(result);
+}
+
+void AwSettings::addRecentBIDS(const QString& path)
+{
+	if (m_recentBIDS.contains(path))
+		return;
+	if (m_recentBIDS.size() == m_recentFilesMax)
+		m_recentBIDS.removeLast();
+
+	m_recentBIDS.insert(0, path);
+	QStringList result;
+	for (auto s : m_recentBIDS)
+		result << shortenFilePath(s);
+
+	emit recentBIDSUpdated(result);
 }
 
 void AwSettings::removeRecentFilePath(const QString& path)
@@ -230,6 +258,18 @@ void AwSettings::removeRecentFilePath(const QString& path)
 	foreach (QString s, m_recentFiles)
 		result << shortenFilePath(s);
 	emit recentFilesUpdated(result);
+}
+
+void AwSettings::removeRecentBIDS(const QString& path)
+{
+	if (!m_recentBIDS.contains(path))
+		return;
+
+	m_recentBIDS.removeAll(path);
+	QStringList result;
+	for (auto s : m_recentBIDS)
+		result << shortenFilePath(s);
+	emit recentBIDSUpdated(result);
 }
 
 void AwSettings::setAutoTriggerParsingOn(bool onoff)

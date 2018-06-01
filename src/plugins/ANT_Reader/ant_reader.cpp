@@ -270,6 +270,7 @@ AwFileIO::FileStatus ANT_Reader::openFile(const QString& path)
 		return AwFileIO::WrongFormat;
 	}
 
+
 	// read channel scale
 	m_scales = (float *)malloc(sizeof(float) * eep_get_chanc());
 	for(int i= 0; i < eep_get_chanc(); i++) {

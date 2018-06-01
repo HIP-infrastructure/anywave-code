@@ -39,7 +39,6 @@
 
 //class AwDockFilter;
 class AwDockAddMarker;
-class AwFilteringManager;
 class AwFileIOPlugin;
 class AwFileIO;
 class AwDisplay;
@@ -66,16 +65,16 @@ class AnyWave : public QMainWindow, private Ui::AnyWaveClass
 
 public:
 	/** Constructeur **/
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
-	AnyWave(QWidget *parent = 0, Qt::WFlags flags = 0);
-#else
 	AnyWave(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-#endif
+
 	/** Destructeur **/
 	~AnyWave();
 
 	inline AwDisplay *displayManager() { return m_display; }
-
+    // command line arguments functions
+	int doSEEGToBIDS(const QString& file, const QString& destDir, const QString& format,
+		const QString& subject, const QString& task, const QString& doSidecars, const QString& session = QString(), 
+		const QString& run = QString());
 protected:
 	void closeEvent(QCloseEvent *e);
 	void dragMoveEvent(QDragMoveEvent *e);
@@ -89,7 +88,7 @@ private:
 	QString m_openFileName;				// Full path to current open file.
 	QString m_lastDirOpen;				// Keep path to last directory used when opening a file
 	QString m_saveFileName;
-	QMenu *m_recentFilesMenu;
+	QMenu *m_recentFilesMenu, *m_recentBIDSMenu;
 	// widgets
 	QList<QWidget *> m_toolBarWidgets;
 	QList<QAction *> m_actions;
@@ -107,12 +106,10 @@ private:
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
-//	AwEpochManager *m_epochManager;
 
 	// DockWidgets
-//	AwDockFilter *m_dockWidgetFilters;
 	QDockWidget *m_dockFilters, *m_addMarkerDock;
-	QDockWidget *m_dockMarkers;
+	QDockWidget *m_dockMarkers, *m_dockBIDS;
 	AwDockAddMarker *m_dockAddMarker;
 	// Mapping
 	AwDockMapping *m_dockMEG;
@@ -160,8 +157,11 @@ public slots:
 	void stopMapping();
 	void displayReaderTriggerStatus(bool ok, int number);
 	void openFile(const QString& path = QString());
+	void openBIDS(const QString& path);
 	void updateRecentFiles(const QStringList& files);
+	void updateRecentBIDS(const QStringList& files);
 	void openRecentFile();
+	void openRecentBIDS();
 	/** Menu View->Processes **/
 	void showProcessDock();
 	/** Export to SVG **/
@@ -189,4 +189,5 @@ private slots:
 	void doEpoch();
 	void visualiseEpoch();
 	void averageEpoch();
+	void openBIDS();
 };

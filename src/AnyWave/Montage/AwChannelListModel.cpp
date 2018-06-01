@@ -282,27 +282,6 @@ bool AwChannelListModel::dropMimeData(const QMimeData *data, Qt::DropAction acti
 	}
 
 	emit channelsDropped(items, beginRow);
-
-////	insertRows(beginRow, rows, QModelIndex());
-//	beginResetModel();
-//	foreach(QString name, items) {
-//		AwChannel *asRecorded = AwMontageManager::instance()->asRecordedChannel(name);
-//	
-//		if (asRecorded) {
-//			if (asRecorded->isBad())
-//				return false;
-//			else {
-//				AwChannel *channel = asRecorded->duplicate();
-//			//	m_channels.replace(beginRow, channel);
-//				m_channels.insert(beginRow, channel);
-//				channel->setName(name);
-//				beginRow++;
-//			}
-//		}
-////		else
-////			return false;
-//	}
-//	endResetModel();
 	return true;
 }
 
@@ -369,20 +348,6 @@ QVariant AwChannelListModel::data(const QModelIndex &index, int role) const
 			return QString(tr("channel's color."));
 		break;
 	}
-
-	//// General roles
-	//if (role == Qt::ForegroundRole)
-	//	if (chan->isVirtual())
-	//		return QColor(Qt::darkBlue);
-	//	else
-	//		return QColor(Qt::black);
-
-	//if (role == Qt::FontRole)
-	//	if (chan->isVirtual())	{
-	//		QFont font;
-	//		font.setBold(true);
-	//		return font;
-	//	}
 
 	if (role == Qt::TextAlignmentRole)
 		return int(Qt::AlignCenter);
@@ -544,7 +509,7 @@ QMimeData *AwChannelListModelAsRecorded::mimeData(const QModelIndexList &indexes
 	QByteArray encodedData;
 	QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
-	foreach (QModelIndex index, indexes)	{
+	for (auto index :  indexes)	{
 		if (index.isValid()) {
 			if (index.column() == AW_ASRECORDED_COLUMN_NAME) { // put only electrode's name (column 0)
 				stream << data(index, Qt::DisplayRole).toString();
@@ -631,8 +596,7 @@ bool AwChannelListModelAsRecorded::setData(const QModelIndex &index, const QVari
 		return true;
 	}
 	else if (index.column() == AW_ASRECORDED_COLUMN_TYPE && role == Qt::EditRole) {	
-		QString type = value.toString();
-		m_channels.at(index.row())->setType(AwChannel::stringToType(type));
+		m_channels.at(index.row())->setType(AwChannel::stringToType(value.toString()));
 	}
 	emit dataChanged(index, index);
 	

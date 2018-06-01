@@ -27,12 +27,12 @@
 #define AWEXPORTERSETTINGS_H
 
 #include <QDialog>
-namespace Ui {class AwExporterSettingsUi;};
+#include "ui_AwExporterSettings.h"
 #include <AwChannel.h>
 #include <AwMarker.h>
 #include <AwFilteringOptions.h>
-
-class AwExporterSettings : public QDialog
+using namespace Ui;
+class AwExporterSettings : public QDialog, public AwExporterSettingsUi
 {
 	Q_OBJECT
 
@@ -51,18 +51,16 @@ public:
 	AwFilteringOptions foptions;
 	bool useCurrentMontage;
 	bool exportICA;
-	float downSample;
+	float downSample, globalSamplingRate;
 public slots:
-	int exec();
-	void accept();
+	int exec() override;
+	void accept() override;
 protected slots:
 	void pickupFile();
 	void selectChannels();
 	void selectICAChannels();
 	void selectMarkers();
 	void updateOutputFileExtension(int);
-private:
-	Ui::AwExporterSettingsUi *m_ui;
 };
 
 #endif // AWEXPORTERSETTINGS_H

@@ -2,7 +2,7 @@
 #include <layout/AwLayoutManager.h>
 #include "Montage/AwMontageManager.h"
 #include "Prefs/AwSettings.h"
-#include "Filter/AwFilteringManager.h"
+#include "Filter/AwFiltersManager.h"
 #include <QtGlobal>
 #ifndef NDEBUG
 #include <QDebug>
@@ -21,7 +21,7 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
-	connect(AwFilteringManager::instance(), SIGNAL(filtersChanged()), this, SLOT(updateFilters()));
+	connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(updateFilters()));
 }
 
 AwICAComponents::~AwICAComponents()
@@ -36,11 +36,7 @@ AwICAComponents::~AwICAComponents()
 
 void AwICAComponents::updateFilters()
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
-	foreach(AwChannel *c, m_sources) {
-		c->setLowFilter(fm->lowPass(c->type()));
-		c->setHighFilter(fm->highPass(c->type()));
-	}
+	AwFiltersManager::instance()->fo().setFilters(m_sources);
 }
 
 //
@@ -133,7 +129,7 @@ void AwICAComponents::buildChannels(const AwChannelList& channels)
 	int nComps = m_icaChannels.size();
 	fmat diag(nComps, nComps, fill::eye);
 	////	 remove ICA components from diag
-	foreach (int index, m_rejectedComponents)
+	for (auto index : m_rejectedComponents)
 		diag(index, index) = 0.;
 
 	fmat data(m_sources.size(), m_sources.first()->dataSize());
@@ -201,35 +197,53 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 		m_panel = NULL;
 	}
 
-	double tmp;
-	if (file.readScalar("lpf", &tmp) != 0)
+	double lpf, hpf;
+	mat unmixingD, mixingD;
+	try {
+		file.readScalar("lpf", &lpf);
+		file.readScalar("hpf", &hpf);
+		file.readMatrix("unmixing", unmixingD);
+		file.readMatrix("mixing", mixingD);
+		file.readStrings("labels", m_labels);
+	}
+	catch (const AwException& e)
+	{
+		throw AwException(QString("Error importing ICA matrices: %1").arg(e.errorString()), "AwICAComponents::loadComponents");
 		return -1;
-	m_lpFilter = (float)tmp;
-	if (file.readScalar("hpf", &tmp) != 0)
-		return -1;
-	m_hpFilter = (float)tmp;
-	mat matrix;
-	if (file.readMatrix("unmixing", matrix) != 0)
-		return -1;
-	m_unmixing = conv_to<fmat>::from(matrix);
-	if (file.readMatrix("mixing", matrix) != 0)
-		return -1;
-	m_mixing = conv_to<fmat>::from(matrix);
-	if (file.readStrings("labels", m_labels) != 0)
-		return -1;
+	}
+
+	// convert matrices to float
+	m_unmixing = conv_to<fmat>::from(unmixingD);
+	m_mixing = conv_to<fmat>::from(mixingD);
+	m_hpFilter = (float)hpf;
+	m_lpFilter = (float)lpf;
+
+	//double tmp;
+	//if (file.readScalar("lpf", &tmp) != 0)
+	//	return -1;
+	//m_lpFilter = (float)tmp;
+	//if (file.readScalar("hpf", &tmp) != 0)
+	//	return -1;
+	//m_hpFilter = (float)tmp;
+	//mat matrix;
+	//if (file.readMatrix("unmixing", matrix) != 0)
+	//	return -1;
+	//m_unmixing = conv_to<fmat>::from(matrix);
+	//if (file.readMatrix("mixing", matrix) != 0)
+	//	return -1;
+	//m_mixing = conv_to<fmat>::from(matrix);
+	//if (file.readStrings("labels", m_labels) != 0)
+	//	return -1;
 	
 	AwMontageManager *mm = AwMontageManager::instance();
 	// build source channels list
 	int index = 0;
-	foreach(QString s, m_labels) {
+	for (auto s : m_labels) {
 		// get the corresponding as recorded channel
 		AwChannel *asRecorded = mm->asRecordedChannel(s);
 		if (asRecorded) {
 			AwChannel *source = new AwChannel(asRecorded);
-			//			source->setHighFilter(m_hpFilter);
-			//			source->setLowFilter(m_lpFilter);
-			source->setHighFilter(AwFilteringManager::instance()->highPass(asRecorded->type()));
-			source->setLowFilter(AwFilteringManager::instance()->lowPass(asRecorded->type()));
+			AwFiltersManager::instance()->fo().setFilters(source);
 			m_sources << source;
 			m_labelToIndex.insert(source->name(), index++);
 		}
@@ -332,10 +346,7 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 		AwChannel *asRecorded = mm->asRecordedChannel(s);
 		if (asRecorded)		{
 			AwChannel *source = new AwChannel(asRecorded);
-//			source->setHighFilter(m_hpFilter);
-//			source->setLowFilter(m_lpFilter);
-			source->setHighFilter(AwFilteringManager::instance()->highPass(asRecorded->type()));
-			source->setLowFilter(AwFilteringManager::instance()->lowPass(asRecorded->type()));
+			AwFiltersManager::instance()->fo().setFilters(source);
 			m_sources << source;	
 			m_labelToIndex.insert(source->name(), index++);
 		}

@@ -24,38 +24,27 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwFilterSettings.h"
-#include "AwFilteringManager.h"
 #include <AwChannel.h>
-#include <widget/AwMessageBox.h>
+#include "Montage/AwMontageManager.h"
+
 
 AwFilterSettings::AwFilterSettings(QWidget *parent)
 	: QWidget(parent)
 {
-	setupUi(this);
-	AwFilteringManager *fm = AwFilteringManager::instance();
-	connect(fm, SIGNAL(filtersChanged()), this, SLOT(updateFilters()));
-	connect(fm,  SIGNAL(filtersReset()), this, SLOT(closeFile()));
-	connect(this, SIGNAL(filtersApplied()), fm, SIGNAL(filtersChanged()));
-	connect(fm, SIGNAL(newICASettings(int, float, float)), this, SLOT(setICASettings(int, float, float)));
-	connect(fm, SIGNAL(newSourceSettings(int, float, float)), this, SLOT(setSourceSettings(int, float, float)));
-
+    setupUi(this);
 	// hide ICA and Source computation settings when starting
 	groupICA->hide();
 	groupSource->hide();
-	updateFilters();
+	connect(buttonSwitch, &QPushButton::toggled, this, &AwFilterSettings::switchFilters);
+	m_switchStatus = Disabled;
+	m_checkBoxes = { checkEegHigh, checkEmgHigh, checkMegHigh, 	checkEegLow,  checkEmgLow, checkMegLow, cbNotchEEG, cbNotchMEG,
+		cbNotchEMG };
 }
 
 void AwFilterSettings::reset()
 {
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		m_lp[i] = m_hp[i] = m_notch[i] = 0.;
-	}
-}
-
-void AwFilterSettings::closeFile()
-{
-	reset();
 	groupICA->hide();
+	groupICAFile->hide();
 	spICAEEGHP->setValue(0.);
 	spICAEEGHP->setValue(0.);
 	spICAMEGHP->setValue(0.);
@@ -63,10 +52,42 @@ void AwFilterSettings::closeFile()
 	spICAEMGHP->setValue(0.);
 	spICAEMGLP->setValue(0.);
 	groupSource->hide();
+	groupSourceFile->hide();
 	spSourceEEGHP->setValue(0.);
 	spSourceEEGHP->setValue(0.);
 	spSourceMEGHP->setValue(0.);
 	spSourceMEGLP->setValue(0.);
+
+	spEmgHP->setValue(0);
+	spEmgLP->setValue(0);
+	spEegHP->setValue(0);
+	spEegLP->setValue(0);
+	spMegHP->setValue(0);
+	spMegLP->setValue(0);
+	spNotchEMG->setValue(0);
+	spNotchEEG->setValue(0);
+	spNotchMEG->setValue(0);
+
+	for (auto w : m_checkBoxes)
+		w->setChecked(false);
+
+	m_switchStatus = Disabled;
+	buttonSwitch->setDisabled(true);		
+}
+
+void AwFilterSettings::closeFile()
+{
+	reset();
+}
+
+void AwFilterSettings::enableICAFiltering()
+{
+	groupICAFile->show();
+}
+
+void AwFilterSettings::enableSourceFiltering()
+{
+	groupSourceFile->show();
 }
 
 ///
@@ -101,7 +122,7 @@ void AwFilterSettings::setSourceSettings(int type, float lp, float hp)
 /// setICASettings()
 /// Set filters used when computing ICA.
 /// type is the type of channels on which ICA had been computed.
-void AwFilterSettings::setICASettings(int type, float lp, float hp) 
+void AwFilterSettings::setICASettings(int type, float hp, float lp) 
 {
 	// show group
 	labelMEGLP->setVisible(type == AwChannel::MEG);
@@ -134,125 +155,148 @@ void AwFilterSettings::setICASettings(int type, float lp, float hp)
 
 void AwFilterSettings::updateFilters()
 {
-	reset();
-	AwFilteringManager *fm = AwFilteringManager::instance();
+	AwFiltersManager *fm = AwFiltersManager::instance();
 
-	// LP
-	if (fm->lowPass(AwChannel::EEG) > 0)
-		spEegLP->setValue(fm->lowPass(AwChannel::EEG));
-	if (fm->lowPass(AwChannel::MEG) > 0)
-		spMegLP->setValue(fm->lowPass(AwChannel::MEG));
-	if (fm->lowPass(AwChannel::EMG) > 0)
-		spEmgLP->setValue(fm->lowPass(AwChannel::EMG));
-	// HP
-	if (fm->highPass(AwChannel::EEG) > 0)
-		spEegHP->setValue(fm->highPass(AwChannel::EEG));
-	if (fm->highPass(AwChannel::MEG) > 0)
-		spMegHP->setValue(fm->highPass(AwChannel::MEG));
-	if (fm->highPass(AwChannel::EMG) > 0)
-		spEmgHP->setValue(fm->highPass(AwChannel::EMG));
+	checkEegHigh->setChecked(fm->fo().eegHP > 0.);
+	checkEmgHigh->setChecked(fm->fo().emgHP > 0.);
+	checkMegHigh->setChecked(fm->fo().megHP > 0.);
+	checkEegLow->setChecked(fm->fo().eegLP > 0.);
+	checkEmgLow->setChecked(fm->fo().emgLP > 0.);
+	checkMegLow->setChecked(fm->fo().megLP > 0.);
+	cbNotchEEG->setChecked(fm->fo().eegNotch > 0.);
+	cbNotchMEG->setChecked(fm->fo().megNotch > 0.);
+	cbNotchEMG->setChecked(fm->fo().emgNotch > 0.);
 
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		m_lp[i] = fm->lowPass(i);
-		m_hp[i] = fm->highPass(i);
+	spEmgHP->setValue(fm->fo().emgHP);
+	spEmgLP->setValue(fm->fo().emgLP);
+	spEegHP->setValue(fm->fo().eegHP);
+	spEegLP->setValue(fm->fo().eegLP);
+	spMegHP->setValue(fm->fo().megHP);
+	spMegLP->setValue(fm->fo().megLP);
+	spNotchEMG->setValue(fm->fo().emgNotch);
+	spNotchEEG->setValue(fm->fo().eegNotch);
+	spNotchMEG->setValue(fm->fo().megNotch);
+
+	bool active = false;
+	for (auto w : m_checkBoxes) {
+		if (w->isChecked()) {
+			active = true;
+			break;
+		}
 	}
 
-	checkEegHigh->setChecked(fm->highPass(AwChannel::EEG) > 0.);
-	checkEmgHigh->setChecked(fm->highPass(AwChannel::EMG) > 0.);
-	checkMegHigh->setChecked(fm->highPass(AwChannel::MEG) > 0.);
-	checkEegLow->setChecked(fm->lowPass(AwChannel::EEG) > 0.);
-	checkEmgLow->setChecked(fm->lowPass(AwChannel::EMG) > 0.);
-	checkMegLow->setChecked(fm->lowPass(AwChannel::MEG) > 0.);
+	if (active) {
+		m_switchStatus = Disabled;
+		buttonSwitch->setEnabled(true);
+		buttonSwitch->setChecked(true);
+		m_switchStatus = On;
+	}
 }
+
 
 void AwFilterSettings::show()
 {
-
 	setVisible(true);
+}
+
+void AwFilterSettings::switchFilters(bool toggle)
+{
+	if (m_switchStatus == Disabled)
+		return;
+	if (m_switchStatus == On) {
+		m_switchStatus = Off;
+		buttonSwitch->setToolTip(tr("Click to restore filters."));
+		disableFilters();
+		AwFiltersManager::instance()->switchFilters(false);
+	}
+	else {
+		m_switchStatus = On;
+		AwFiltersManager::instance()->switchFilters(true);
+		buttonSwitch->setToolTip(tr("Click to cut off all filters."));
+	}
+}
+
+void AwFilterSettings::disableFilters()
+{
+	for (auto w : m_checkBoxes)
+		w->setChecked(false);
 }
 
 void AwFilterSettings::apply()
 {
-	AwFilteringManager *fm = AwFilteringManager::instance();
 	float lp, hp, notch;
 	bool ica_over = false, source_over = false;
 	// EEG/SEEG
     hp = checkEegHigh->isChecked() ? spEegHP->value() : -1;
 	lp = checkEegLow->isChecked() ? spEegLP->value() : -1;
-	notch = cbNotchEEG->isChecked() ? spNotch->value() : -1;
-	if (groupICA->isVisible()) {
-		if (lp > 0 && spICAEEGLP->value() < lp) 
-			ica_over = true;
-		if (hp > 0 && spICAEEGHP->value() > hp)
-			ica_over = true;
-	}
-	if (groupSource->isVisible()) {
-		if (lp > 0 && spSourceEEGLP->value() < lp) 
-			source_over = true;
-		if (hp > 0 && spSourceEEGHP->value() > hp)
-			source_over = true;
-	}
-	if (lp != m_lp[AwChannel::EEG] || hp != m_hp[AwChannel::EEG]) {
-		 m_lp[AwChannel::EEG] = lp;
-		 m_hp[AwChannel::EEG] = hp;
-		 fm->setFilter(AwChannel::EEG, lp, hp);
-		 fm->setFilter(AwChannel::SEEG, lp, hp);
-	}
-	if (notch > 0) {
-		fm->setNotch(AwChannel::EEG, notch);
-		fm->setNotch(AwChannel::SEEG, notch);
-	}
+	notch = cbNotchEEG->isChecked() ? spNotchEEG->value() : -1;
+	AwFiltersManager *fm = AwFiltersManager::instance();
+
+	fm->fo().eegHP = hp;
+	fm->fo().eegLP = lp;
+	fm->fo().eegNotch = notch;
+
 	// EMG/ECG
     hp = checkEmgHigh->isChecked() ? spEmgHP->value() : -1;
 	lp = checkEmgLow->isChecked() ? spEmgLP->value() : -1;
 	notch = cbNotchEMG->isChecked() ? spNotchEMG->value() : -1;
-	if (groupICA->isVisible()) {
-		if (lp > 0 && spICAEMGLP->value() < lp) 
-			ica_over = true;
-		if (hp > 0 && spICAEMGHP->value() > hp)
-			ica_over = true;
-	}
-	if (lp != m_lp[AwChannel::EMG] || hp != m_hp[AwChannel::EMG]) {
-		 m_lp[AwChannel::EMG] = lp;
-		 m_hp[AwChannel::EMG] = hp;
-		 fm->setFilter(AwChannel::EMG, lp, hp);
-		 fm->setFilter(AwChannel::ECG, lp, hp);
-	}
-	if (notch > 0) {
-		fm->setNotch(AwChannel::EMG, notch);
-		fm->setNotch(AwChannel::ECG, notch);
-	}
+
+	fm->fo().emgHP = hp;
+	fm->fo().emgLP = lp;
+	fm->fo().emgNotch = notch;
+
 	//MEG
 	hp = checkMegHigh->isChecked() ? spMegHP->value() : -1;
 	lp = checkMegLow->isChecked() ? spMegLP->value() : -1;
 	notch = cbNotchMEG->isChecked() ? spNotchMEG->value() : -1;
-	if (groupICA->isVisible()) {
-		if (lp > 0 && spICAMEGLP->value() < lp) 
-			ica_over = true;
-		if (hp > 0 && spICAMEGHP->value() > hp)
-			ica_over = true;
-	}
-	if (groupSource->isVisible()) {
-		if (lp > 0 && spSourceMEGLP->value() < lp) 
-			source_over = true;
-		if (hp > 0 && spSourceMEGHP->value() > hp)
-			source_over = true;
-	}
-	if (lp != m_lp[AwChannel::MEG] || hp != m_hp[AwChannel::MEG]) {
-		 m_lp[AwChannel::MEG] = lp;
-		 m_hp[AwChannel::MEG] = hp;
-		 fm->setFilter(AwChannel::MEG, lp, hp);
-	}
-	if (notch > 0) {
-		fm->setNotch(AwChannel::MEG, notch);
+
+	fm->fo().megHP = hp;
+	fm->fo().megLP = lp;
+	fm->fo().megNotch = notch;
+
+	bool active = false;
+	for (auto w : m_checkBoxes) {
+		if (w->isChecked()) {
+			active = true;
+			break;
+		}
 	}
 
-	if (ica_over) {
-		AwMessageBox::information(this, "ICA Warning", "The filters applied on signals differ from the settings applied when the ICA was computed.");
+	if (active) {
+		m_switchStatus = Disabled;
+		buttonSwitch->setEnabled(true);
+		buttonSwitch->setChecked(true);
+		m_switchStatus = On;
 	}
-	if (source_over) {
-		AwMessageBox::information(this, "Source Warning", "The filters applied on signals differ from the settings applied when the Source channels were computed.");
+	else {
+		m_switchStatus = Disabled;
+		buttonSwitch->setEnabled(false);
 	}
 
-	emit filtersApplied();
+	// special case for ICA or Source channels which are coming from the file
+	bool filtersICA = false, filtersSource = false;
+	float ica_hp = checkICAHP->isChecked() ? spICAHP->value() : -1;
+	float ica_lp = checkICALP->isChecked() ? spICALP->value() : -1;
+	float source_hp = checkSourceHP->isChecked() ? spSourceHP->value() : -1;
+	float source_lp = checkSourceLP->isChecked() ? spSourceLP->value() : -1;
+
+	// get current montage and set the filter for ICA and/or sources
+	// this may not used so well if the user changes the montage afterward. (Filters won't be applied automatically)
+	// This is because I used AwFilteringOptions object for filters settings everywhere in AnyWave, and this object
+	// does not handle ICA or Source filter settings...
+	// May be add those settings to the object in next versions...
+	AwChannelList channels = AwMontageManager::instance()->channels();
+	for (auto c : channels) {
+		if (c->isICA()) {
+			c->setLowFilter(ica_lp);
+			c->setHighFilter(ica_hp);
+		}
+		else if (c->isSource()) {
+			c->setLowFilter(source_lp);
+			c->setHighFilter(source_hp);
+		}
+	}
+
+
+	fm->update();
 }

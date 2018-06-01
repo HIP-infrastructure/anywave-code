@@ -83,9 +83,13 @@ signals:
 	// Adding markers to AnyWave
 	void sendMarkers(AwMarkerList *markers);
 	void sendMarker(AwMarker *marker);
+	// Send command
 	void sendCommand(int command, QVariantList args);
+
 	void dataConnectionRequested(AwDataClient *client);
 	void newDisplayPlugin(AwDisplayPlugin *plugin);
+	// log message for the debug log system
+	void log(const QString& log);
 public slots:
 	virtual void stop() {}
 	void abort();

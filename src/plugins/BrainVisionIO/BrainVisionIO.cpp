@@ -29,7 +29,7 @@ BrainVisionIOPlugin::BrainVisionIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("Brainvision Analyser Format");
 	description = QString(tr("read/write .vhdr files"));
-	manufacturer = QString::fromLatin1("Brain Products");
+	manufacturer = QString::fromLatin1("Brain Products GmbH");
 	version = QString::fromLatin1("1.0");
 	fileExtensions << QString::fromLatin1("*.vhdr");
 	m_flags = Aw::HasExtension | Aw::CanRead | Aw::CanWrite;
@@ -230,10 +230,11 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 	QString codePage = header.value("Codepage").toString();
 	if (format.toUpper() == "BINARY")
 		m_dataFormat = 0;
-	else if (format.isEmpty() || format.toUpper() == "ASCII")
+	else if (format.isEmpty() || format.toUpper() == "ASCII") {
 		m_dataFormat = 1;
-	else
+		m_error = QString("Data format is not supported by AnyWave (must be BINARY)");
 		return AwFileIO::BadHeader;
+	}
 
 	QString orientation = header.value("DataOrientation").toString();
 	if (orientation.toUpper() == "MULTIPLEXED")
@@ -534,7 +535,9 @@ AwFileIO::FileStatus BrainVisionIO::writeMarkers()
 
 AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 {
-	QString fullPath = path + plugin()->fileExtension;
+	QString fullPath = path;
+	if (!path.endsWith(".vhdr"))
+		fullPath += plugin()->fileExtension;
 	QFile hdr(fullPath);
 	QFileInfo info(fullPath);
 	QString fileName = info.fileName();

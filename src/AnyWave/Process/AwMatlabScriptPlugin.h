@@ -32,10 +32,11 @@
 /// An AwProcess in charge of launching matlab scrip as a process plugin
 class AwMatlabScriptProcess : public AwScriptProcess
 {
+	Q_OBJECT
 public:
 	AwMatlabScriptProcess() : AwScriptProcess() {}
 	void run();
-	void setSystemPath(const QString& path) { m_systemPath = path; }
+	void setSystemPath(const QString& path) { m_systemPath = path;   }
 protected:
 	QString m_systemPath;	// used only to set the environment before launchine Compiled plugins
 };

@@ -24,19 +24,12 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwFilterToolBar.h"
-#include "AwFilteringManager.h"
 
 AwFilterToolBar::AwFilterToolBar(QWidget *parent)
 	: QWidget(parent)
 {
 	setupUi(this);
 	connect(buttonFilter, SIGNAL(clicked()), this, SIGNAL(filterButtonClicked()));
-	m_buttonGroupICA.addButton(radioICA_ON, 0);
-	m_buttonGroupICA.addButton(radioICA_OFF, 1);
-	connect(&m_buttonGroupICA, SIGNAL(buttonToggled(int, bool)), this, SLOT(changeICAFiltering(int, bool)));
-	radioICA_ON->hide();
-	radioICA_OFF->hide();
-	labelICA->hide();
 	m_toolBar = new QToolBar(tr("Filtering"));
 	m_toolBar->setObjectName("Filtering");
 	m_toolBar->addWidget(this);
@@ -63,7 +56,7 @@ void AwFilterToolBar::changeEvent(QEvent *e)
 
 void AwFilterToolBar::applyFilters()
 {
-	buttonSwitch->update();
+//	buttonSwitch->update();
 }
 
 ////// SLOTS
@@ -74,51 +67,51 @@ void AwFilterToolBar::applyFilters()
 // and the button will be shown in the toolbar.
 void AwFilterToolBar::enableICAFiltering()
 {
-	m_blockICASwitch = true;
-	radioICA_ON->show();
-	radioICA_OFF->show();
-	labelICA->show();
-	radioICA_OFF->setChecked(true);
-	m_blockICASwitch = false;
+	//m_blockICASwitch = true;
+	//radioICA_ON->show();
+	//radioICA_OFF->show();
+	//labelICA->show();
+	//radioICA_OFF->setChecked(true);
+	//m_blockICASwitch = false;
 }
 
 
 void AwFilterToolBar::changeICAFiltering(int id, bool checked)
 {
-	if (m_blockICASwitch)
-		return;
+	//if (m_blockICASwitch)
+	//	return;
 
-	if (checked && id == 0) // ICA Filters ON
-		emit ICASwitchChanged(true);
-	else if (checked && id == 1)
-		emit ICASwitchChanged(false);
+	//if (checked && id == 0) // ICA Filters ON
+	//	emit ICASwitchChanged(true);
+	//else if (checked && id == 1)
+	//	emit ICASwitchChanged(false);
 }
 
 void AwFilterToolBar::setICAFiltering(bool on)
 {
-	if (on)
-		radioICA_ON->setChecked(true);
-	else
-		radioICA_OFF->setChecked(true);
+	//if (on)
+	//	radioICA_ON->setChecked(true);
+	//else
+	//	radioICA_OFF->setChecked(true);
 }
 
 // update radio buttons to match the current ICA filtering mode
 void AwFilterToolBar::setICAMode(bool filter)
 {
-	m_blockICASwitch = true;
-	if (filter)
-		radioICA_ON->setChecked(true);
-	else
-		radioICA_OFF->setChecked(true);
-	m_blockICASwitch = false;
+	//m_blockICASwitch = true;
+	//if (filter)
+	//	radioICA_ON->setChecked(true);
+	//else
+	//	radioICA_OFF->setChecked(true);
+	//m_blockICASwitch = false;
 }
 
 
 
 void AwFilterToolBar::closeFile()
 {
-	// reset toolbar to default mode
-	radioICA_ON->hide();
-	radioICA_OFF->hide();
-	labelICA->hide();
+	//// reset toolbar to default mode
+	//radioICA_ON->hide();
+	//radioICA_OFF->hide();
+	//labelICA->hide();
 }

@@ -52,37 +52,38 @@ AwFilteringOptions& AwFilteringOptions::operator=(const AwFilteringOptions& othe
 }
 
 
+void AwFilteringOptions::clear()
+{
+	eegLP = eegHP = megLP = megHP = emgLP = emgHP = 0.;
+	eegNotch = megNotch = emgNotch = 0.;
+}
+
+void AwFilteringOptions::setFilters(AwChannel *channel)
+{
+	switch (channel->type()) {
+	case AwChannel::EEG:
+	case AwChannel::SEEG:
+		channel->setHighFilter(eegHP);
+		channel->setLowFilter(eegLP);
+		channel->setNotch(eegNotch);
+		break;
+	case AwChannel::MEG:
+	case AwChannel::GRAD:
+		channel->setHighFilter(megHP);
+		channel->setLowFilter(megLP);
+		channel->setNotch(megNotch);
+		break;
+	case AwChannel::EMG:
+	case AwChannel::ECG:
+		channel->setHighFilter(emgHP);
+		channel->setLowFilter(emgLP);
+		channel->setNotch(emgNotch);
+		break;
+	}
+}
+
 void AwFilteringOptions::setFilters(const AwChannelList& channels)
 {
-	for (auto c : channels) {
-		switch (c->type()) {
-		case AwChannel::EEG:
-		case AwChannel::SEEG:
-			if (eegHP)
-				c->setHighFilter(eegHP);
-			if (eegLP)
-				c->setLowFilter(eegLP);
-			if (eegNotch)
-				c->setNotch(eegNotch);
-			break;
-		case AwChannel::MEG:
-		case AwChannel::GRAD:
-			if (megHP)
-				c->setHighFilter(megHP);
-			if (megLP)
-				c->setLowFilter(megLP);
-			if (megNotch)
-				c->setNotch(megNotch);
-			break;
-		case AwChannel::EMG:
-		case AwChannel::ECG:
-			if (emgHP)
-				c->setHighFilter(emgHP);
-			if (emgLP)
-				c->setLowFilter(emgLP);
-			if (emgNotch)
-				c->setNotch(emgNotch);
-			break;
-		}
-	}
+	for (auto c : channels) 
+		setFilters(c);
 }

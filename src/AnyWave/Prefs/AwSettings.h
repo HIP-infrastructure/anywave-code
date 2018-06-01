@@ -101,8 +101,11 @@ public:
 	// recent files specific
 	QString shortenFilePath(const QString& path);
 	void addRecentFilePath(const QString& path);
+	void addRecentBIDS(const QString& path);
+	void removeRecentBIDS(const QString& path);
 	void removeRecentFilePath(const QString& path);
 	inline QStringList& recentFiles() { return m_recentFiles; }
+	inline QStringList& recentBIDS() { return m_recentBIDS; }
 
 	// predefined markers (Marker Inspector Tool)
 	AwMarkerList loadPredefinedMarkers();
@@ -121,6 +124,7 @@ signals:
 	void markersColorChanged(const QStringList& colors);
 	void screenCalibrationChanged(float x, float y);
 	void recentFilesUpdated(const QStringList&);
+	void recentBIDSUpdated(const QStringList&);
 	void timeRepresentationChanged(bool HMS); // if HMS is true that means we go for HMS representation
 public slots:
 	void setAutoTriggerParsingOn(bool onoff);
@@ -140,7 +144,7 @@ protected:
 	AwFileIO *m_currentReader;
 	AwDisplaySetup *m_setup;
 	QSystemTrayIcon *m_sysTrayIcon;
-	QStringList m_recentFiles;
+	QStringList m_recentFiles, m_recentBIDS;
 	qint32 m_recentFilesMax;
 	QString m_currentFileDir;
 	QString m_currentFileName;
