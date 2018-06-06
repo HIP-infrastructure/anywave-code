@@ -935,9 +935,11 @@ void AnyWave::openFile(const QString &path)
 	m_display->newFile(m_currentReader);
 
 	// Are there events?
-	if (m_currentReader->infos.blocks().at(0)->markersCount())
+	if (m_currentReader->infos.blocks().at(0)->markersCount()) {
 		AwMarkerManager::instance()->addMarkers(m_currentReader->infos.blocks().at(0)->markers());
+	}
 	AwMarkerManager::instance()->setFilename(m_openFileName);
+	
 
 	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
 	AwAmplitudeManager::instance()->setFilename(m_openFileName);

@@ -95,6 +95,34 @@ void AwMarkerManager::showDockUI()
 		m_dock->show();
 }
 
+///
+/// remove doublons based on name, position and duration
+/// update the internal list m_markers.
+void AwMarkerManager::removeDuplicates()
+{
+	if (m_markers.isEmpty())
+		return;
+	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+
+	AwMarkerList sorted;
+	AwMarker *marker = m_markers.first();
+	sorted << marker;
+	for (int i = 1; i < m_markers.size(); i++) {
+		AwMarker *m = m_markers.at(i);
+		if (m->label() != marker->label() || m->start() != marker->start() || m->duration() != marker->duration()) {
+			sorted << m;
+			marker = m;
+		}
+		else {
+			m_markers.removeAll(m);
+			delete m;
+		}
+		
+	}
+	m_markers = sorted;
+	
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +178,7 @@ void AwMarkerManager::loadMarkers()
 		removeAllUserMarkers();
 
 	if (!markers.isEmpty())	{
-		foreach (AwMarker *m, markers)
+		for (auto m : markers)
 			m_markers << m;
 		qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 		m_needSorting = false;
@@ -278,6 +306,7 @@ void AwMarkerManager::setFilename(const QString& path)
 	if (QFile::exists(m_filePath))	{
 		m_markers = loadMarkers(m_filePath);
 		if (!m_markers.isEmpty()) {
+			removeDuplicates();
 			m_ui->setMarkers(m_markers);
 			showDockUI();
 		}

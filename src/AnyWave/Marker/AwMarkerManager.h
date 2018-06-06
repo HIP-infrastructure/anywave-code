@@ -59,6 +59,8 @@ public:
 	void quit();
 	/** setFilename will initizalize Markers Ui and try to import previously saved marker file. **/
 	void setFilename(const QString& path);
+
+	void removeDuplicates();
 public slots:
 	void showDockUI();
 	/** Rajoute un marqueur directement dans la liste **/

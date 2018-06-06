@@ -289,18 +289,22 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// check that the root dir contains subjects
 	getSubjects();
 	// check for source_data dir
-	bool found = false;
+	bool source = false, derivatives = false;
 	QDirIterator it(m_rootDir, QDir::Dirs);
 	while (it.hasNext()) {
 		it.next();
 		QString name = it.fileName();
-		if (name == "sourcedata") {
-			found = true;
+		if (name == "sourcedata")
+			source = true;
+		else if (name == derivatives)
+			derivatives = true;
+		if (source && derivatives)
 			break;
-		}
 	}
-	if (found) 
+	if (source)
 		getSubjects(AwBIDSManager::source);
+	if (derivatives) 
+		getSubjects(AwBIDSManager::derivatives);
 	
 	m_ui->refresh();
 }
@@ -446,4 +450,18 @@ int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const Q
 	writer->cleanUpAndClose();
 	plugin->deleteInstance(writer);
 	return 0;
+}
+
+
+QString AwBIDSManager::getDerivativesPath(int type, AwBIDSSubject *sub)
+{
+	switch (type) {
+	case AwBIDSManager::EPITOOLS:
+		break;
+	case AwBIDSManager::EI:
+		break;
+	case AwBIDSManager::ICA:
+		break;
+	}
+	return QString();
 }

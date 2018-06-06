@@ -1,6 +1,7 @@
 #include "AwBIDSGUI.h"
 #include "AwBIDSManager.h"
 #include <qfileiconprovider.h>
+#include "AwBIDSItem.h"
 
 AwBIDSGUI::AwBIDSGUI(AwBIDSManager *bids, const QString& rootDir, QWidget *parent)
 	: QWidget(parent)
@@ -26,6 +27,7 @@ void AwBIDSGUI::clear()
 	m_models.clear();
 }
 
+
 void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 {
 	// get the item
@@ -39,8 +41,27 @@ void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 
 	// get item type
 	int type = item->data(AwBIDSGUI::TypeRole).toInt();
-	if (type == AwBIDSGUI::DataFile)
+	if (type == AwBIDSGUI::DataFile) {
+		// open the file 
 		emit dataFileClicked(item->data(AwBIDSGUI::PathRole).toString());
+		// check for electrodes and meshes in derivatives for ieeg 
+		// get parent item to check if it is ieeg
+		auto parent = item->parent();
+		if (parent) {
+			if (parent->data(AwBIDSGUI::TypeRole).toInt() == AwBIDSGUI::ieeg) {
+				// get top parent and the subject object.
+				auto top = parent->parent();
+				if (!top)
+					top = parent;
+				else 
+					while (top)
+						top = parent->parent();
+				checkForElectrodeAndMesh(AwBIDSManager::instance()->getDerivativesPath(AwBIDSManager::EPITOOLS, static_cast<AwBIDSItem *>(top)->subject()));
+			}
+		}
+		
+		
+	}
 }
 
 
@@ -91,7 +112,8 @@ void AwBIDSGUI::initModel(QStandardItemModel *model, const AwBIDSSubjectList& su
 	QFileIconProvider fi;
 
 	for (auto s : subjects) {
-		auto subItem = new QStandardItem(s->ID());
+		// first item is a AwBIDSItem to hold the reference to the subject object.
+		auto subItem = new AwBIDSItem(s->ID(), s);
 		subItem->setToolTip(tr("subject"));
 		// set custom data
 		subItem->setData(s->fullPath(), AwBIDSGUI::PathRole);

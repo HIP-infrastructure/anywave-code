@@ -5,7 +5,7 @@
 #include <AwFileIO.h>
 class AwFileItem;
 
-#define AWBIDS_SOURCE_DIRS	2
+#define AWBIDS_SOURCE_DIRS 3
 
 class AwBIDSManager : public QObject
 {
@@ -13,7 +13,8 @@ class AwBIDSManager : public QObject
 public:
 	AwBIDSManager(const QString& rootDir);
 	enum itemTypes { iEEG, MEG };
-	enum dataSources { raw = 0, source = 1 }; // indicates the type of data ordering (source data are place in a source_data folder).
+	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
+	enum Derivatives { EPITOOLS, EI, ICA};
 	// utilities static methods
 	static AwBIDSManager *instance(const QString& rootDir = QString());
 
@@ -29,6 +30,7 @@ public:
 	QWidget *ui() { return m_ui; }
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
 	AwBIDSSubjectList& getSubjectsFromSourceDir(int sourceDir = raw);
+	QString getDerivativesPath(int type, AwBIDSSubject *subject);
 protected:
 	static AwBIDSManager *m_instance;
 
