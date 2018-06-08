@@ -39,13 +39,15 @@
 #endif
 
 #include <vtkVersion.h>
-#if VTK_MAJOR_VERSION >= 8
+#if VTK_MAJOR_VERSION >= 7
 #include <QVTKOpenGLWidget.h>
 #endif
 
 #include <qcommandlineparser.h>
 #include "AwException.h"
 #include "IO/BIDS/AwBIDSManager.h"
+#include <qstylefactory.h>
+#include <qtextstream.h>
 
 int main(int argc, char *argv[])
 {
@@ -59,8 +61,9 @@ int main(int argc, char *argv[])
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-//	QApplication::setStyle(QStyleFactory::create("Fusion"));
-
+#ifdef Q_OS_WIN
+	QApplication::setStyle(QStyleFactory::create("windowsvista"));
+#endif
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);
@@ -99,6 +102,7 @@ int main(int argc, char *argv[])
 	QCommandLineOption BIDSDestOpt("bids_dir", "BIDS destination folder", "dir", QString());
 	QCommandLineOption BIDSFormatOpt("bids_format", "data format for output EDF (default) or VHDR", "format", QString());
 	QCommandLineOption BIDSAcqOpt("bids_acq", "acquisition method", "acq", QString());
+	QCommandLineOption BIDSProcOpt("bids_proc", "proc", "proc", QString());
 
 	parser.addOption(seegBIDSOpt);
 	parser.addOption(BIDSSidecarsOpt);
@@ -109,6 +113,7 @@ int main(int argc, char *argv[])
 	parser.addOption(BIDSDestOpt);
 	parser.addOption(BIDSFormatOpt);
 	parser.addOption(BIDSAcqOpt);
+	parser.addOption(BIDSProcOpt);
 	parser.process(QCoreApplication::arguments());
 	QStringList args = parser.positionalArguments();
 
@@ -128,6 +133,7 @@ int main(int argc, char *argv[])
 		QString format = parser.value(BIDSFormatOpt);
 		QString output = parser.value(BIDSSidecarsOpt);
 		QString acq = parser.value(BIDSAcqOpt);
+		QString proc = parser.value(BIDSProcOpt);
 
 		if (file.isEmpty() || subj.isEmpty() || task.isEmpty()) {
 			parser.showHelp();
@@ -161,28 +167,25 @@ int main(int argc, char *argv[])
 			arguments << AwArgument("format", format);
 		if (!output.isEmpty())
 			arguments << AwArgument("output", output);
-
-		//if (window.doSEEGToBIDS(file, dir, format.toUpper(), subj, task, output, session, run) == -1)
-		//	exit(-1);
+		if (!acq.isEmpty())
+			arguments << AwArgument("acq", acq);
+		if (!proc.isEmpty())
+			arguments << AwArgument("proc", proc);
 
 		try {
-			//AwBIDSManager::instance()->toBIDS(arguments);
-			if (AwBIDSManager::instance()->seegToBIDS(file, dir, format.toUpper(), subj, task, output, session, run, acq) == -1)
-				exit(-1);
+			AwBIDSManager::instance()->toBIDS(arguments);
+
 		}
 		catch (const AwException& e)
 		{
-			
+			exit(-1);
 		}
-
 		exit(0);
 	}
 
 	if (args.count() == 1)
 		window.openFile(args.at(0));
 		
-	//if (argc > 1)
-	//	window.openFile(QString(argv[1]));
 	window.showMaximized();
 	return app.exec();
 }

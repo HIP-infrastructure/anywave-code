@@ -267,6 +267,7 @@ int AwBIDSManager::toBIDS(QList<AwArgument>& args)
 	auto fileType = first.first.toLower();
 	auto file = first.second;
 
+	// check here for file type to handle : for now, only SEEG
 	if (fileType != "seegfile") {
 		throw(AwException("Unknown file type", "AwBIDSManager::toBIDS"));
 		return -1;
@@ -291,25 +292,26 @@ int AwBIDSManager::toBIDS(QList<AwArgument>& args)
 	// default output dir if the directory where the file is located.
 	QFileInfo fi(file);
 	dir = fi.absolutePath();
-	QString subject, task, run, acq;
+	QString subj, task, run, acq, session, output, proc;
 	
+	// extract arguments from the command line
 	while (!args.isEmpty()) {
 		auto arg = args.takeFirst();
 		if (arg.first == "dir") {
 			dir = arg.second;
 		}
-		else if (arg.first == "format") {
+		else if (arg.first == "format" && fileType == "seegfile") {
 			if (arg.second.toLower() == "edf")
 				ext = "edf";
 			else if (arg.second.toLower() == "vhdr")
 				ext = "vhdr";
 			else {
-				throw AwException("Format option invalid.", "AwBIDSManager::toBIDS");
+				throw AwException("Format option is invalid. (EDF or VHDR)", "AwBIDSManager::toBIDS");
 				return -1;
 			}
 		}
 		else if (arg.first == "subject") {
-			subject = arg.second;
+			subj = arg.second;
 		}
 		else if (arg.first == "task")
 			task = arg.second;
@@ -317,12 +319,214 @@ int AwBIDSManager::toBIDS(QList<AwArgument>& args)
 			run = arg.second;
 		else if (arg.first == "acq")
 			acq = arg.second;
+		else if (arg.first == "session")
+			session = arg.second;
+		else if (arg.first == "output")
+			output = arg.second;
+		else if (arg.first == "proc")
+			proc = arg.second;
 		else {
 			throw AwException(QString("Unknown option %1").arg(arg.first), "AwBIDSManager::toBIDS");
 			return -1;
 		}
 	}
+	// check for at least subject and task option
+	if (subj.isEmpty() || task.isEmpty()) {
+		throw AwException(QString("Missing subj or task option"), "AwBIDSManager::toBIDS");
+		return -1;
+	}
 
+	// shape the BIDS file names
+	QString fileName, json, channels_tsv, events_tsv;
+	fileName = QString("%1/sub-%2").arg(dir).arg(subj);
+	json = QString("%1/sub-%2").arg(dir).arg(subj);
+	channels_tsv = QString("%1/sub-%2").arg(dir).arg(subj);
+	events_tsv = QString("%1/sub-%2").arg(dir).arg(subj);
+	if (!session.isEmpty()) {
+		fileName = QString("%1_ses-%2").arg(fileName).arg(session);
+		json = QString("%1_ses-%2").arg(json).arg(session);
+		channels_tsv = QString("%1_ses-%2").arg(channels_tsv).arg(session);
+		events_tsv = QString("%1_ses-%2").arg(events_tsv).arg(session);
+	}
+	fileName = QString("%1_task-%2").arg(fileName).arg(task);
+	json = QString("%1_task-%2").arg(json).arg(task);
+	channels_tsv = QString("%1_task-%2").arg(channels_tsv).arg(task);
+	events_tsv = QString("%1_task-%2").arg(events_tsv).arg(task);
+	// acq comes after task
+	if (!acq.isEmpty()) {
+		fileName = QString("%1_acq-%2").arg(fileName).arg(acq);
+		json = QString("%1_acq-%2").arg(json).arg(acq);
+		channels_tsv = QString("%1_acq-%2").arg(channels_tsv).arg(acq);
+		events_tsv = QString("%1_acq-%2").arg(events_tsv).arg(acq);
+	}
+	// run comes after acq or task
+	if (!run.isEmpty()) {
+		fileName = QString("%1_run-%2").arg(fileName).arg(run);
+		json = QString("%1_run-%2").arg(json).arg(run);
+		channels_tsv = QString("%1_run-%2").arg(channels_tsv).arg(run);
+		events_tsv = QString("%1_run-%2").arg(events_tsv).arg(run);
+	}
+	// proc comes after run
+	if (!proc.isEmpty()) {
+		fileName = QString("%1_proc-%2").arg(fileName).arg(proc);
+		json = QString("%1_proc-%2").arg(json).arg(proc);
+		channels_tsv = QString("%1_proc-%2").arg(channels_tsv).arg(proc);
+		events_tsv = QString("%1_proc-%2").arg(events_tsv).arg(proc);
+	}
+
+	if (fileType == "seegfile") {
+		fileName = QString("%1_ieeg.%2").arg(fileName).arg(ext);
+		json = QString("%1_ieeg.json").arg(json);
+		channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
+		events_tsv = QString("%1_events.tsv").arg(events_tsv);
+	}
+
+	// generate events.tsv only if we have markers
+	if (!reader->infos.blocks().first()->markers().isEmpty()) {
+		// create events.tsv (not fixed by the draft at this time)
+		QStringList events_headers = { "onset", "duration", "trial_type" };
+		QFile eventFile(events_tsv);
+		QTextStream stream_events(&eventFile);
+		if (eventFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			for (int i = 0; i < events_headers.size(); i++) {
+				stream_events << events_headers.at(i);
+				if (i < events_headers.size() - 1)
+					stream_events << "\t";
+			}
+			stream_events << endl;
+			for (auto m : reader->infos.blocks().first()->markers())
+				stream_events << m->start() << "\t" << m->duration() << "\t" << m->label() << endl;
+			eventFile.close();
+		}
+	}
+
+	// Create channels.tsv
+	QStringList headers = { "name", "type", "units", "sampling_frequency", "low_cutoff", "high_cutoff", "notch", "group", "reference",
+		"description", "status", "status_description" };
+
+	QFile channel(channels_tsv);
+	QTextStream stream(&channel);
+	// to get the group from electrode
+	QRegularExpression re("\\d+$");
+	QRegularExpressionMatch match;
+	int countSEEG = 0, countECG = 0, countTRIG = 0;
+	if (channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		for (int i = 0; i < headers.size(); i++) {
+			stream << headers.at(i);
+			if (i < headers.size() - 1)
+				stream << "\t";
+		}
+		stream << endl;
+		for (auto c : reader->infos.channels()) { // raw file contains EEG or eventually trigger channels. There is no id to specify that is SEEG.
+												  // name
+			stream << c->name() << "\t";
+			// type and units
+			if (c->type() == AwChannel::Trigger) {
+				stream << "TRIG" << "\t" << "n/a" << "\t";
+				countTRIG++;
+			}
+			else if (c->type() == AwChannel::ECG) {
+				stream << "ECG" << "\t" << "microV" << "\t";
+				countECG++;
+			}
+			else if (c->type() == AwChannel::SEEG || c->type() == AwChannel::EEG) {
+				stream << "SEEG" << "\t" << "microV" << "\t";
+				countSEEG++;
+			}
+			else
+				stream << "OTHER" << "\t" << "n/a" << "\t";
+
+			// sampling_frequency
+			stream << c->samplingRate() << "\t";
+			// filters
+			stream << "n/a" << "\t" << "n/a" << "\t" << "n/a" << "\t";
+			// group
+			match = re.match(c->name());
+			QString name = c->name();
+			if (match.hasMatch())
+				stream << name.remove(re) << "\t";
+			else
+				stream << "n/a" << "\t";
+			// reference
+			stream << "n/a" << "\t";
+			// description
+			stream << AwChannel::typeToString(c->type()) << "\t";
+			// status
+			stream << "good" << "\t";
+			// status_description
+			stream << "n/a";
+			// END
+			stream << endl;
+		}
+		channel.close();
+	}
+	else {
+		throw(AwException("Could no create channels.tsv", "AwBIDSManager::convertToBIDS"));
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+
+	QString manufacturer = reader->plugin()->manufacturer;
+	if (manufacturer.isEmpty())
+		manufacturer = "n/a";
+	// JSON
+	QJsonObject jObject;
+	jObject.insert("TaskName", QJsonValue::fromVariant(task));
+	jObject.insert("Manufacturer", QJsonValue::fromVariant(manufacturer));
+	jObject.insert("PowerLineFrequency", QJsonValue::fromVariant(50));
+	jObject.insert("SEEGChannelCount", QJsonValue::fromVariant(countSEEG));
+	if (countECG)
+		jObject.insert("ECGChannelCount", QJsonValue::fromVariant(countECG));
+	if (countTRIG)
+		jObject.insert("TriggerChannelCount", QJsonValue::fromVariant(countTRIG));
+	jObject.insert("RecordingDuration", QJsonValue::fromVariant(reader->infos.totalDuration()));
+	jObject.insert("RecordingType", QJsonValue::fromVariant("continuous"));
+	// add  recording date and time
+	jObject.insert("RecordingTime", QJsonValue::fromVariant(reader->infos.recordingTime()));
+	jObject.insert("RecordingDate", QJsonValue::fromVariant(reader->infos.recordingDate()));
+	jObject.insert("RecordingISODate", QJsonValue::fromVariant(reader->infos.isoDate()));
+	QJsonDocument doc(jObject);
+	QFile jsonFile(json);
+	if (jsonFile.open(QIODevice::WriteOnly)) {
+		jsonFile.write(doc.toJson());
+		jsonFile.close();
+	}
+	else {
+		throw(AwException(QString("Could no create %1").arg(json), "AwBIDSManager::toBIDS"));
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+
+
+	// convert file only if output option is not specified or equals to "all"
+	if (output.isEmpty() || output == "all") {
+		if (fileType == "seegfile") {
+			// rename file to match BIDS recommandation
+			QString pluginName;
+			if (ext == "edf")
+				pluginName = "EDF/BDF IO";
+			else if (ext == "vhdr")
+				pluginName = "Brainvision Analyser Format";
+
+			//  TODO : convert to EDF if not alread an edf file
+			if (reader->plugin()->name != pluginName) {
+				try {
+					if (ext == "vhdr")
+						convertToVHDR(fileName, reader);
+					else if (ext == "edf")
+						convertToEDF(fileName, reader);
+				}
+				catch (const AwException& e) {
+					throw e;
+					reader->plugin()->deleteInstance(reader);
+					return -1;
+				}
+			}
+			else { // just rename 
+				QFile::copy(file, fileName);
+			}
+		}
+	}
 	return 0;
 }
 
