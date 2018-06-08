@@ -43,8 +43,9 @@
 #include <QVTKOpenGLWidget.h>
 #endif
 
-//#include <qstylefactory.h>
 #include <qcommandlineparser.h>
+#include "AwException.h"
+#include "IO/BIDS/AwBIDSManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -97,6 +98,7 @@ int main(int argc, char *argv[])
 	QCommandLineOption BIDSRunOpt("bids_run", "BIDS run", "run", QString());
 	QCommandLineOption BIDSDestOpt("bids_dir", "BIDS destination folder", "dir", QString());
 	QCommandLineOption BIDSFormatOpt("bids_format", "data format for output EDF (default) or VHDR", "format", QString());
+	QCommandLineOption BIDSAcqOpt("bids_acq", "acquisition method", "acq", QString());
 
 	parser.addOption(seegBIDSOpt);
 	parser.addOption(BIDSSidecarsOpt);
@@ -106,6 +108,7 @@ int main(int argc, char *argv[])
 	parser.addOption(BIDSRunOpt);
 	parser.addOption(BIDSDestOpt);
 	parser.addOption(BIDSFormatOpt);
+	parser.addOption(BIDSAcqOpt);
 	parser.process(QCoreApplication::arguments());
 	QStringList args = parser.positionalArguments();
 
@@ -124,6 +127,7 @@ int main(int argc, char *argv[])
 		QString dir = parser.value(BIDSDestOpt);
 		QString format = parser.value(BIDSFormatOpt);
 		QString output = parser.value(BIDSSidecarsOpt);
+		QString acq = parser.value(BIDSAcqOpt);
 
 		if (file.isEmpty() || subj.isEmpty() || task.isEmpty()) {
 			parser.showHelp();
@@ -139,9 +143,38 @@ int main(int argc, char *argv[])
 				exit(-1);
 			}
 		}
+		
+		QList<AwArgument> arguments;
+		// first argument must be the kind of file to convert (here SEEG)
+		arguments << AwArgument("SEEGFile", file);
+		// subject is mandatory and should be the second argument.
+		arguments << AwArgument("subject", subj);
+		if (!task.isEmpty())
+			arguments << AwArgument("task", task);
+		if (!session.isEmpty())
+			arguments << AwArgument("session", session);
+		if (!run.isEmpty())
+			arguments << AwArgument("run", run);
+		if (!dir.isEmpty())
+			arguments << AwArgument("dir", dir);
+		if (!format.isEmpty())
+			arguments << AwArgument("format", format);
+		if (!output.isEmpty())
+			arguments << AwArgument("output", output);
 
-		if (window.doSEEGToBIDS(file, dir, format.toUpper(), subj, task, output, session, run) == -1)
-			exit(-1);
+		//if (window.doSEEGToBIDS(file, dir, format.toUpper(), subj, task, output, session, run) == -1)
+		//	exit(-1);
+
+		try {
+			//AwBIDSManager::instance()->toBIDS(arguments);
+			if (AwBIDSManager::instance()->seegToBIDS(file, dir, format.toUpper(), subj, task, output, session, run, acq) == -1)
+				exit(-1);
+		}
+		catch (const AwException& e)
+		{
+			
+		}
+
 		exit(0);
 	}
 

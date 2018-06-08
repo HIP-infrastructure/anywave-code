@@ -15,7 +15,7 @@ AwBIDSManager *AwBIDSManager::m_instance = 0;
 
 
 int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subj, const QString& task, 
-	const QString& sideCars, const QString& session, const QString& run)
+	const QString& sideCars, const QString& session, const QString& run, const QString& acq)
 {
 	// get the reader plugin
 	AwPluginManager *pm = AwPluginManager::getInstance();
@@ -43,34 +43,68 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 
 	// shape the BIDS file names
 	QString fileName, json, channels_tsv, events_tsv;
-	if (session.isEmpty()) {
-		if (run.isEmpty()) {
-			fileName = QString("%1/sub-%2_task-%3_ieeg.%4").arg(dir).arg(subj).arg(task).arg(ext);
-			json = QString("%1/sub-%2_task-%3_ieeg.json").arg(dir).arg(subj).arg(task);
-			channels_tsv = QString("%1/sub-%2_task-%3_channels.tsv").arg(dir).arg(subj).arg(task);
-			events_tsv = QString("%1/sub-%2_task-%3_events.tsv").arg(dir).arg(subj).arg(task);
-		}
-		else {
-			fileName = QString("%1/sub-%2_task-%3_run-%4_ieeg.%5").arg(dir).arg(subj).arg(task).arg(run).arg(ext);
-			json = QString("%1/sub-%2_task-%3_run-%4_ieeg.json").arg(dir).arg(subj).arg(task).arg(run);
-			channels_tsv = QString("%1/sub-%2_task-%3_run-%4_channels.tsv").arg(dir).arg(subj).arg(task).arg(run);
-			events_tsv = QString("%1/sub-%2_task-%3_run-%4_events.tsv").arg(dir).arg(subj).arg(task).arg(run);
-		}
+	fileName = QString("%1/sub-%2").arg(dir).arg(subj);
+	json = QString("%1/sub-%2").arg(dir).arg(subj);
+	channels_tsv = QString("%1/sub-%2").arg(dir).arg(subj);
+	events_tsv = QString("%1/sub-%2").arg(dir).arg(subj);
+	if (!session.isEmpty()) {
+		fileName = QString("%1_ses-%2").arg(fileName).arg(session);
+		json = QString("%1_ses-%2").arg(json).arg(session);
+		channels_tsv = QString("%1_ses-%2").arg(channels_tsv).arg(session);
+		events_tsv = QString("%1_ses-%2").arg(events_tsv).arg(session);
 	}
-	else {
-		if (run.isEmpty()) {
-			fileName = QString("%1/sub-%2_ses-%3_task-%4_ieeg.%5").arg(dir).arg(subj).arg(session).arg(task).arg(ext);
-			json = QString("%1/sub-%2_ses-%3_task-%4_ieeg.json").arg(dir).arg(subj).arg(session).arg(task);
-			channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_channels.tsv").arg(dir).arg(subj).arg(session).arg(task);
-			events_tsv = QString("%1/sub-%3_ses-%3_task-%4_events.tsv").arg(dir).arg(subj).arg(session).arg(task);
-		}
-		else {
-			fileName = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.%6").arg(dir).arg(subj).arg(session).arg(task).arg(run).arg(ext);
-			json = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.json").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-			channels_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_channels.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-			events_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_events.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-		}
+	fileName = QString("%1_task-%2").arg(fileName).arg(task);
+	json = QString("%1_task-%2").arg(json).arg(task);
+	channels_tsv = QString("%1_task-%2").arg(channels_tsv).arg(task);
+	events_tsv = QString("%1_task-%2").arg(events_tsv).arg(task);
+	// acq comes after task
+	if (!acq.isEmpty()) {
+		fileName = QString("%1_acq-%2").arg(fileName).arg(acq);
+		json = QString("%1_acq-%2").arg(json).arg(acq);
+		channels_tsv = QString("%1_acq-%2").arg(channels_tsv).arg(acq);
+		events_tsv = QString("%1_acq-%2").arg(events_tsv).arg(acq);
 	}
+	// run comes after acq or task
+	if (!run.isEmpty()) {
+		fileName = QString("%1_run-%2").arg(fileName).arg(run);
+		json = QString("%1_run-%2").arg(json).arg(run);
+		channels_tsv = QString("%1_run-%2").arg(channels_tsv).arg(run);
+		events_tsv = QString("%1_run-%2").arg(events_tsv).arg(run);
+	}
+	
+	fileName = QString("%1_ieeg.%2").arg(fileName).arg(ext);
+	json = QString("%1_ieeg.json").arg(json);
+	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
+	events_tsv = QString("%1_events.tsv").arg(events_tsv);
+
+	//if (session.isEmpty()) {
+	//	if (run.isEmpty()) {
+	//		fileName = QString("%1/sub-%2_task-%3_ieeg.%4").arg(dir).arg(subj).arg(task).arg(ext);
+	//		json = QString("%1/sub-%2_task-%3_ieeg.json").arg(dir).arg(subj).arg(task);
+	//		channels_tsv = QString("%1/sub-%2_task-%3_channels.tsv").arg(dir).arg(subj).arg(task);
+	//		events_tsv = QString("%1/sub-%2_task-%3_events.tsv").arg(dir).arg(subj).arg(task);
+	//	}
+	//	else {
+	//		fileName = QString("%1/sub-%2_task-%3_run-%4_ieeg.%5").arg(dir).arg(subj).arg(task).arg(run).arg(ext);
+	//		json = QString("%1/sub-%2_task-%3_run-%4_ieeg.json").arg(dir).arg(subj).arg(task).arg(run);
+	//		channels_tsv = QString("%1/sub-%2_task-%3_run-%4_channels.tsv").arg(dir).arg(subj).arg(task).arg(run);
+	//		events_tsv = QString("%1/sub-%2_task-%3_run-%4_events.tsv").arg(dir).arg(subj).arg(task).arg(run);
+	//	}
+	//}
+	//else {
+	//	if (run.isEmpty()) {
+	//		fileName = QString("%1/sub-%2_ses-%3_task-%4_ieeg.%5").arg(dir).arg(subj).arg(session).arg(task).arg(ext);
+	//		json = QString("%1/sub-%2_ses-%3_task-%4_ieeg.json").arg(dir).arg(subj).arg(session).arg(task);
+	//		channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_channels.tsv").arg(dir).arg(subj).arg(session).arg(task);
+	//		events_tsv = QString("%1/sub-%3_ses-%3_task-%4_events.tsv").arg(dir).arg(subj).arg(session).arg(task);
+	//	}
+	//	else {
+	//		fileName = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.%6").arg(dir).arg(subj).arg(session).arg(task).arg(run).arg(ext);
+	//		json = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.json").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+	//		channels_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_channels.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+	//		events_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_events.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
+	//	}
+	//}
 
 	// generate events.tsv only if we have markers
 	if (!reader->infos.blocks().first()->markers().isEmpty()) {
@@ -219,6 +253,76 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 
 	reader->cleanUpAndClose();
 //	reader->plugin()->deleteInstance(reader);
+	return 0;
+}
+
+int AwBIDSManager::toBIDS(QList<AwArgument>& args)
+{
+	if (args.isEmpty()) {
+		throw(AwException("No arguments", "AwBIDSManager::toBIDS"));
+		return -1;
+	}
+
+	auto first = args.takeFirst();
+	auto fileType = first.first.toLower();
+	auto file = first.second;
+
+	if (fileType != "seegfile") {
+		throw(AwException("Unknown file type", "AwBIDSManager::toBIDS"));
+		return -1;
+	}
+
+	// get the reader plugin
+	AwPluginManager *pm = AwPluginManager::getInstance();
+	AwFileIO *reader = pm->getReaderToOpenFile(file);
+	if (reader == NULL) {
+		throw AwException(QString("No reader found for file %1").arg(file), "AwBIDSManager::toBIDS");
+		return -1;
+	}
+	if (reader->openFile(file) != AwFileIO::NoError) {
+		throw AwException(QString("Could not open the file %1").arg(file), "AwBIDSManager::toBIDS");
+		return -1;
+	}
+
+	QString ext;
+	if (fileType == "seegfile")
+		ext = "edf"; // default extension for SEEG file is edf.
+	QString dir;
+	// default output dir if the directory where the file is located.
+	QFileInfo fi(file);
+	dir = fi.absolutePath();
+	QString subject, task, run, acq;
+	
+	while (!args.isEmpty()) {
+		auto arg = args.takeFirst();
+		if (arg.first == "dir") {
+			dir = arg.second;
+		}
+		else if (arg.first == "format") {
+			if (arg.second.toLower() == "edf")
+				ext = "edf";
+			else if (arg.second.toLower() == "vhdr")
+				ext = "vhdr";
+			else {
+				throw AwException("Format option invalid.", "AwBIDSManager::toBIDS");
+				return -1;
+			}
+		}
+		else if (arg.first == "subject") {
+			subject = arg.second;
+		}
+		else if (arg.first == "task")
+			task = arg.second;
+		else if (arg.first == "run")
+			run = arg.second;
+		else if (arg.first == "acq")
+			acq = arg.second;
+		else {
+			throw AwException(QString("Unknown option %1").arg(arg.first), "AwBIDSManager::toBIDS");
+			return -1;
+		}
+	}
+
 	return 0;
 }
 
