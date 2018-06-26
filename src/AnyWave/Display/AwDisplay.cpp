@@ -116,7 +116,7 @@ AwChannelList AwDisplay::displayedChannels()
 AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 {
 	// Set other views flag
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->setProcessFlags(AwSignalView::NoProcessUpdate);
 
 	AwSignalView *view = new AwSignalView((AwViewSettings *)setup);
@@ -127,7 +127,7 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	QList<AwDisplayPlugin *> plugins = AwPluginManager::getInstance()->displays();
 	QList<AwProcessPlugin *> QTSplugins = pm->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
 
-	foreach (AwDisplayPlugin *plugin, plugins)
+	for (auto plugin : plugins)
 		view->addNewDisplayPlugin(plugin);
 
 	m_signalViews << view;
@@ -157,21 +157,20 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	if (!m_virtualChannels.isEmpty())
 		view->addVirtualChannels(m_virtualChannels);
 
-//	m_splitterWidget->addWidget(view->widget());
 	m_splitterWidget->addWidget(view);
 	m_splitterWidget->repaint();
 	
 	// set flags so that the views inform the Process Manager about changes.
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->setProcessFlags(AwSignalView::UpdateProcess);
 
 	view->setMarkers(AwMarkerManager::instance()->displayedMarkers());
 	
 	// QTS
 	QStringList list;
-	foreach(AwProcessPlugin *p, QTSplugins) {
+	for (auto p : QTSplugins) 
 		list << p->name;
-	}
+	
 	view->scene()->setQTSPlugins(list);
 	connect(view->scene(), SIGNAL(processSelectedForLaunch(QString&, AwChannelList&, float, float)),
 		pm, SLOT(launchQTSPlugin(QString&, AwChannelList&, float, float)));
@@ -477,7 +476,7 @@ void AwDisplay::alignViewsHorizontaly()
 
 void AwDisplay::setSelectedChannelsFromLabels(const QStringList& labels)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->selectChannelsFromLabels(labels);
 }
 
@@ -501,7 +500,7 @@ void AwDisplay::updateICAChannelRejected(const QString& label, bool rejected)
 
 void AwDisplay::makeChannelVisible(const QString& label)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->scene()->showChannel(label);
 }
 
@@ -511,7 +510,7 @@ void AwDisplay::makeChannelVisible(const QString& label)
 /// check for all channels corresponding with name parameter and set their selected state to parameter selected.
 void AwDisplay::changeChannelsSelectionState(const QString& name, bool selected)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->changeChannelSelectionState(name, selected);
 }
 
@@ -525,19 +524,19 @@ void AwDisplay::addVirtualChannels(AwChannelList *channels)
 
 	m_virtualChannels += *channels;
 	// add the channels all signal views.
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->addVirtualChannels(*channels);
 }
 
 void AwDisplay::removeICAChannels()
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v: m_signalViews)
 		v->removeICAChannels();
 
 	// get channel list back from scenes
 	AwChannelList completeList;
 
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		completeList += v->displayedChannels();
 
 	// send new displayed channels event
@@ -550,10 +549,10 @@ void AwDisplay::removeVirtualChannels(AwChannelList *channels)
 	if (channels->isEmpty())
 		return;
 
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->removeVirtualChannels(*channels);
 
-	foreach(AwChannel *c, *channels)
+	for (auto c : *channels)
 		if (m_virtualChannels.contains(c))
 			m_virtualChannels.removeAll(c);
 }
@@ -561,7 +560,7 @@ void AwDisplay::removeVirtualChannels(AwChannelList *channels)
 
 void AwDisplay::updateDisplay()
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		v->update();
 }
 
@@ -625,7 +624,6 @@ void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
 
 	// remove all the current views
 	foreach (AwSignalView *v, m_signalViews) {
-//		v->widget()->setParent(NULL);
 		v->setParent(NULL);
 		delete v;
 	}

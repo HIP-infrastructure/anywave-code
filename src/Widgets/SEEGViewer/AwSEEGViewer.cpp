@@ -24,7 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <widget/AwSEEGViewer.h>
-#include "AwSEEGWidget.h"
+
 #include <QFile>
 #define BUFFER_SIZE_S	30  // size of data cache in seconds
 
@@ -42,26 +42,13 @@ AwSEEGViewer::AwSEEGViewer(QObject *parent) : AwDataClient(parent)
 
 AwSEEGViewer::~AwSEEGViewer()
 {
+	clean();
 	delete m_widget;
-}
-
-bool AwSEEGViewer::checkForMeshAndElectrodes(const QString& path)
-{
-	QString mesh = "/mesh.stl";
-	QString elec = "/electrodes.txt";
-
-	if (QFile::exists(path + mesh) && QFile::exists(path + elec)) {
-		loadMesh(path + mesh);
-		loadElectrodes(path + elec);
-		return true;
-	}
-	m_widget->show();
-	return false;
 }
 
 void AwSEEGViewer::setFilters(float LP, float HP)
 {
-	foreach (AwChannel *c, m_seegChannels) {
+	for (auto c : m_seegChannels) {
 		c->setLowFilter(LP);
 		c->setHighFilter(HP);
 	}
@@ -92,6 +79,13 @@ void AwSEEGViewer::dataReceived(AwChannelList *channels)
 
 }
 
+
+void AwSEEGViewer::clean()
+{
+	while (!m_seegChannels.isEmpty())
+		delete m_seegChannels.takeFirst();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
 
@@ -106,23 +100,28 @@ void AwSEEGViewer::handleWidgetClosed()
 void AwSEEGViewer::setMappingMode(bool active)
 {
 	m_mappingIsActive = active;
+	if (!active) {
+		m_widget->reset();
+	}
 }
 
 void AwSEEGViewer::loadMesh(const QString& file)
 {
 	m_widget->openMesh(file);
-	m_widget->show();
+//	m_widget->show();
 }
 
 void AwSEEGViewer::loadElectrodes(const QString& file)
 {
 	m_widget->loadElectrodes(file);
-	m_widget->show();
+//	m_widget->show();
 }
 
 void AwSEEGViewer::setSEEGChannels(const AwChannelList& channels)
 {
-	m_seegChannels = channels;
+	// clean up and auto. duplicates channels
+	clean();
+	m_seegChannels = AwChannel::duplicateChannels(channels);
 	emit newDataConnection(this);
 }
 

@@ -1,5 +1,4 @@
-#ifndef AWSEEGWIDGET_H
-#define AWSEEGWIDGET_H
+#pragma once
 #include <QWidget>
 #include <vtkRenderer.h>
 #include <vtkPolyDataMapper.h>
@@ -7,6 +6,8 @@
 #include <vtkActor.h>
 #include <vtkFollower.h>
 #include <AwChannel.h>
+#include <AwGlobal.h>
+#include <widget/AwVTKWidget.h>
 namespace Ui {class AwSEEGWidgetUi;};
 class AwSEEGViewer;
 
@@ -25,13 +26,16 @@ public:
 };
 
 
-class AwSEEGWidget : public QWidget
+class AW_WIDGETS_EXPORT AwSEEGWidget : public QWidget
 {
 	Q_OBJECT
 	friend class AwSEEGViewer;
 public:
 	AwSEEGWidget(const QString& meshFile = QString(), QWidget *parent = 0);
 	~AwSEEGWidget();
+
+	void setSelectedActor(vtkActor *actor);
+	vtkActor *meshActor() { return m_meshActor; }
 public slots:
 	void loadElectrodes();
 	void loadElectrodes(const QString& file);
@@ -42,8 +46,11 @@ public slots:
 	void changeSmoothRendering(bool on);
 	void computeMap(AwChannelList& channels, float latency, qint64 sample);
 	void showElectrodesLabels(bool on);
+	/** reset to initial state with loaded mesh and electrodes. **/
+	void reset();
 signals:
 	void closed();
+	void selectedElectrodes(const QStringList& labels);
 protected:
 	void clearElectrodes();
 	void clearBalls();
@@ -54,19 +61,21 @@ protected:
 
 	AwSEEGViewer *m_viewer;
 	QHash<QString, AwSEEGPad *> m_hPads;
-	QList<AwSEEGPad *> m_electrodes;  // real electrodes
+	// m_electrodes = all loaded electrodes from electrodes file.
+	// m_bipolarElectodes = virtual bipolard electrodes computed when loading the electrode file.
+	// m_balls = virtual electrodes used in mapping mode to represent amplitude values.
+	QList<AwSEEGPad *> m_electrodes, m_bipolarElectrodes, m_balls; 
 	vtkSmartPointer<vtkPolyDataMapper> m_meshMapper;
 	vtkSmartPointer<vtkActor> m_meshActor;
-	vtkSmartPointer<vtkRenderer> m_renderer;
 	vtkSmartPointer<vtkRenderer> m_electrodesRenderer;
 	vtkSmartPointer<vtkPolyData> m_mesh;
 	vtkSmartPointer<vtkPolyDataNormals> m_smoothMesh;
 	QList<vtkSmartPointer<vtkFollower> > m_labelActors;
-	QList<AwSEEGPad * > m_balls;	// temporary balls representing amplitude values
 	QHash<QString, QStringList *> m_electrodesLabels;
 	double m_meshBounds[6];
 	double m_a, m_l;
+//	QStringList m_selectedElectrodes;	// hold all selected electrodes (picked with the mouse).
 	Ui::AwSEEGWidgetUi *m_ui;
+	// VTK Objects
+	AwVTKWidget *m_widget;
 };
-
-#endif // AWSEEGWIDGET_H

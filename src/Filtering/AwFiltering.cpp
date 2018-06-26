@@ -334,7 +334,7 @@ AwChannel *filterChannel(AwChannel *chan)
 	// apply notch first if set
 	if (chan->notch() > 0) {
 		Dsp::SimpleFilter <Dsp::ChebyshevI::BandStop <4>, 1> f;
-		f.setup(4, chan->samplingRate(), chan->notch(), 4, 1);	// 4Hz band width
+		f.setup(4, chan->samplingRate(), chan->notch(), 1, 1);	// 1Hz band width
 		f.process(vdata.size(), data);
 	}
 

@@ -30,7 +30,7 @@
 #include <QSystemTrayIcon>
 #include <QTranslator>
 #include <AwMarker.h>
-#include "AwFileInfo.h"
+#include <AwFileInfo.h>
 
 class AwFileIO;
 class AwDisplaySetup;
@@ -59,7 +59,6 @@ public:
 	void createMatlabShellScript(const QString& path);
 	void emptyMatlabShellScript();
 #endif
-	//void closeFile() { currentIcaFile.clear(); }
 	void closeFile();
 
 	// User folders paths
@@ -79,17 +78,14 @@ public:
 	// the maximum of cores available and the maximum of core to use with AnyWave.
 	int totalCPUCores, maxCPUCores;
 
-//	inline QString& currentFileDir() { return m_currentFileDir; }
-//	inline QString& currentFileName() { return m_currentFileName; }
 	inline QString homeDirectory() { return m_homeDirectory; }
 	inline QString MATLABMexPath() { return m_mexPath; }
 	inline QString PythonModulePath() { return m_pythonModulePath; }
 
 	inline QString systemPath() { return m_systemPath; }
-	//inline QString filePath() { return m_filePath; }
-	//void setFilePath(const QString& path);
+
 	inline AwFileIO *currentReader() { return m_currentReader; }
-//	inline void setCurrentReader(AwFileIO *fr) { m_currentReader = fr; }
+
 	void setReader(AwFileIO *reader, const QString& path);
 
 	inline AwFileInfo *fileInfo() { return m_fileInfo; }
@@ -153,9 +149,6 @@ protected:
 	QSystemTrayIcon *m_sysTrayIcon;
 	QStringList m_recentFiles, m_recentBIDS;
 	qint32 m_recentFilesMax;
-	//QString m_currentFileDir;
-	//QString m_currentFileName;
-	//QString m_filePath;
 	QString m_pdfMarkerFile;			// Predefined markers file path
 	QTranslator m_anyWaveTranslator;
 	QTranslator m_readWriteTranslator;

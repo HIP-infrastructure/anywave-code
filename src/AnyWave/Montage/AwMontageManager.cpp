@@ -436,6 +436,7 @@ void AwMontageManager::newFilters()
 	AwFiltersManager *fm = AwFiltersManager::instance();
 	fm->fo().setFilters(m_channels);
 	fm->fo().setFilters(m_channelsAsRecorded);
+	fm->fo().setFilters(AwSettings::getInstance()->currentReader()->infos.channels());
 }
 
 void AwMontageManager::quit()

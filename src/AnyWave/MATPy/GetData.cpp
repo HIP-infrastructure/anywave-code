@@ -33,7 +33,7 @@
 #include "Data/AwDataServer.h"
 #include "Display/AwDisplay.h"
 #include <AwFiltering.h>
-
+#include "Filter/AwFiltersManager.h"
 #include "AwResponse.h"
 
 
@@ -187,6 +187,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 #endif
 	if (fo)
 		fo->setFilters(requestedChannels);
+	else // apply current filters set in AwFiltersManager.
+		AwFiltersManager::instance()->fo().setFilters(requestedChannels); 
 
 	if (decim > 1) {
 		requestData(&requestedChannels, start, duration, true);

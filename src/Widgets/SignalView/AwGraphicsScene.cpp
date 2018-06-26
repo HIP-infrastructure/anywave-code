@@ -404,7 +404,7 @@ QGraphicsItem *AwGraphicsScene::getItemUnderMouse(QPointF pos, int *itemType)
 void AwGraphicsScene::selectChannels(const QStringList& labels)
 {
 	AwGraphicsSignalItem *last_item = NULL;
-	foreach (AwGraphicsSignalItem *i, m_signalItems) {
+	for (auto i : m_signalItems) {
 		if (labels.contains(i->channel()->name())) {
 			i->setSelected(true);
 			i->channel()->setSelected(true);
@@ -415,11 +415,10 @@ void AwGraphicsScene::selectChannels(const QStringList& labels)
 			i->channel()->setSelected(false);
 		}
 	}
+	if (last_item)	// make the last item visibile, setting no margins
+		views().at(0)->ensureVisible(last_item, 0, 0);
 	updateSelection();
 	update();
-	if (last_item)
-		// make the last item visibile, setting no margins
-		views().at(0)->ensureVisible(last_item, 0, 0);
 }
 
 void AwGraphicsScene::selectChannelsOfType()

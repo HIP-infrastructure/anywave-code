@@ -10,7 +10,8 @@
 class AW_RW_EXPORT AwFileInfo
 {
 public:
-	AwFileInfo(AwFileIO *currentReader, const QString& fullPath);
+	AwFileInfo(AwFileIO *currentReader, const QString& fullPath = QString());
+	enum Features { SEEGElectrodeFile, MeshFile };
 
 	inline AwFileIO *currentReader() { return m_reader; }
 	void addExtraInfo(const QString& key, const QVariant& value);
@@ -19,6 +20,8 @@ public:
 	inline QString& filePath() { return m_filePath; }
 	inline QString& fileName() { return m_fileName; }
 	inline QString& dirPath() { return m_dirPath; }
+
+	QVariant getFeature(int type);
 protected:
 	AwFileIO * m_reader;
 	QMap<QString, QVariant> m_extraInfos;

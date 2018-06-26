@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AwFileInfo.cpp" />
     <ClCompile Include="AwReadWriteLib.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\AwFileInfo.h" />
     <ClInclude Include="..\..\include\AwFileIO.h" />
     <ClInclude Include="..\..\include\AwIO.h" />
     <ClInclude Include="..\..\include\AwReadWriteLib.h" />

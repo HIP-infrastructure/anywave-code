@@ -256,12 +256,6 @@
     <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp">
       <Filter>SEEGViewer</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwSEEGWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwSEEGWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="AwMarkAroundWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -364,6 +358,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwComboDS.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSEEGWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSEEGWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwVTKWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="AwVTKWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwVTKWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp">
+      <Filter>SEEGViewer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AwAmplitudeWidget.ui">
@@ -465,9 +477,6 @@
     <CustomBuild Include="..\..\include\widget\AwSEEGViewer.h">
       <Filter>SEEGViewer</Filter>
     </CustomBuild>
-    <CustomBuild Include="SEEGViewer\AwSEEGWidget.h">
-      <Filter>SEEGViewer</Filter>
-    </CustomBuild>
     <CustomBuild Include="SEEGViewer\AwSEEGWidget.ui">
       <Filter>SEEGViewer</Filter>
     </CustomBuild>
@@ -514,6 +523,12 @@
       <Filter>SignalView</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\include\widget\AwComboDS.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwSEEGWidget.h">
+      <Filter>SEEGViewer</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwVTKWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -568,6 +583,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwInputMarkerWidget.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SEEGViewer\AwSEEGInteractor.h">
+      <Filter>SEEGViewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

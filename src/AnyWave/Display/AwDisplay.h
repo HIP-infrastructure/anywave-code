@@ -93,7 +93,7 @@ signals:
 	void selectedChannelsChanged(AwChannelList& selection);
 	void gainLevelsUpdated(float eeg, float seeg, float meg, float ecg, float trigger);
 	void clickedAtLatency(float latency);
-	void displayedChannelsChanged(AwChannelList &channels);
+	void displayedChannelsChanged(const AwChannelList &channels);
 	void resetMarkerMode();
 	void setupChanged(AwDisplaySetup *setup, int flags);
 	void mappingTimeSelectionDone(float pos, float duration);

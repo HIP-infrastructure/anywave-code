@@ -1267,9 +1267,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwFiltersManager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Prefs\AwFileInfo.cpp">
-      <Filter>Prefs</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
@@ -1999,9 +1996,6 @@
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwFileItem.h">
       <Filter>IO\BIDS</Filter>
-    </ClInclude>
-    <ClInclude Include="Prefs\AwFileInfo.h">
-      <Filter>Prefs</Filter>
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSItem.h">
       <Filter>IO\BIDS</Filter>

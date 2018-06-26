@@ -64,6 +64,9 @@ public:
 	virtual qint64 readDataFromChannels(float start, float duration, AwChannelList &channelList) { return 0; }
 	/** Returns a list of trigger channels present in the file. The list may be empty. **/
 	virtual AwChannelList triggerChannels() { return AwChannelList(); }
+	/** Get current full path to file **/
+	inline QString& fullPath() { return m_fullPath; }
+	void setFullPath(const QString& path) { m_fullPath = path; }
 	// Output
 	/** Create file for output **/
 	virtual FileStatus createFile(const QString &path, int flags = 0) { return AwFileIO::NoError;	}
@@ -88,6 +91,7 @@ public slots:
 protected:
 	int m_flags;
 	QString m_error;	// used by methods returning a status after an operation.
+	QString m_fullPath;	// full path to current open file.
 	AwFileIOPlugin *m_plugin;
 };
 

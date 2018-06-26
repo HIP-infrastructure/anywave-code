@@ -108,7 +108,7 @@ void AwDataConnection::computeVirtuals(const AwChannelList& channels)
 {
 	QList<AwVirtualChannel *> virtualChannels;
 
-	foreach (AwChannel *c, channels)	{
+	for (auto c : channels)	{
 		if (c->isVirtual())
 			virtualChannels << static_cast<AwVirtualChannel *>(c);
 	}
@@ -118,7 +118,7 @@ void AwDataConnection::computeVirtuals(const AwChannelList& channels)
 		QFuture<void> future = QtConcurrent::map(virtualChannels, computeVirtual);
 		future.waitForFinished();
 	}
-	foreach (AwVirtualChannel *vc, virtualChannels) {
+	for (auto vc : virtualChannels) {
 		vc->update();
 		vc->update(m_positionInFile, m_duration);
 	}
@@ -188,9 +188,9 @@ void AwDataConnection::parseChannels(AwChannelList& channels)
 	}
 
 	// browse virtual channels to get the connected channels 
-	foreach (AwChannel *channel, m_virtualChannels) {
+	for (auto channel : m_virtualChannels) {
 		AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(channel);
-		foreach (AwChannel *c, vc->connectedChannels()) {
+		for (auto c : vc->connectedChannels()) {
 			m_connectionsList << c;
 		}
 	}
@@ -300,7 +300,6 @@ void AwDataConnection::computeVirtualChannels()
 
 // SLOTS
 
-//void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, quint64 duration, float downSampling, AwFilteringOptions *foptions)
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, quint64 duration, bool rawData)
 {
 #ifndef NDEBUG
@@ -324,7 +323,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, qu
 }
 
 
-//void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker, float downSampling, AwFilteringOptions *foptions)
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker, bool rawData)
 
 {
@@ -348,7 +346,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker,
 		return;
 	}
 
-	//loadData(channelsToLoad, marker->start(), marker->duration(), downSampling, foptions);
 	loadData(channelsToLoad, marker->start(), marker->duration(), rawData);
 }
 

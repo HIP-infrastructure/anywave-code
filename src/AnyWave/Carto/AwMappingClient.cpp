@@ -38,7 +38,7 @@ AwMappingClient::AwMappingClient(int type)
 
 	// get current reader and extract channels matching type
 	AwFileIO *reader = AwSettings::getInstance()->currentReader();
-	foreach (AwChannel *c, reader->infos.channels()) {
+	for (auto c : reader->infos.channels()) {
 		if (c->type() == type)	{
 			m_channels << new AwChannel(c);
 			m_labels << c->name();
@@ -60,6 +60,8 @@ void AwMappingClient::openConnection()
 		AwDataServer::getInstance()->openConnection(this);
 		m_isAConnectionActive = true;
 		connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
+		AwFiltersManager *fm = AwFiltersManager::instance();
+		fm->fo().setFilters(m_channels);
 	}
 }
 
@@ -172,7 +174,7 @@ void AwMappingClient::dataReceived(AwChannelList *channels)
 	qint64 samplePos = (qint64)ceil((m_latency - m_startCachePos) * m_channels.first()->samplingRate());
 	QVector<float> data;
 	data.reserve(m_channels.size());
-	foreach(AwChannel *chan, m_channels)
+	for (auto chan : m_channels)
 		data.append(chan->data()[samplePos]);
 
 	emit dataReceived(m_latency, data, m_labels);

@@ -64,7 +64,7 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	m_fileMenu = NULL;
 	m_viewMenu = NULL;
 	m_processes = AwPluginManager::getInstance()->processes();
-	foreach (AwProcessPlugin *plugin, m_processes)
+	for (auto plugin : m_processes)
 		addProcess(plugin);
 	setObjectName("AwProcessManager");
 	m_processesWidget = new AwProcessesWidget();
@@ -144,7 +144,7 @@ AwBaseProcess *AwProcessManager::newProcessFromPluginName(const QString &name)
 QList<AwProcessPlugin *> AwProcessManager::processPluginsWithFeatures(int flags)
 {
 	QList<AwProcessPlugin *> result;
-	foreach (AwProcessPlugin *plugin, m_processes)	{
+	for (auto plugin : m_processes)	{
 		if (plugin->flags() & flags)
 			result << plugin;
 	}
@@ -449,7 +449,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 			list << sources.at(i);
 	 }
 	 p->pdi.input.channels += AwChannel::duplicateChannels(list);
-
+	 // make sure current filters are set for the channels.
+	 AwFiltersManager::instance()->fo().setFilters(p->pdi.input.channels);
 	 return true;
  }
 

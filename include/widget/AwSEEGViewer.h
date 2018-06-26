@@ -28,7 +28,7 @@
 #include <QObject>
 #include <AwDataClient.h>
 #include <AwGlobal.h>
-class AwSEEGWidget;
+#include <widget/AwSEEGWidget.h>
 
 class AW_WIDGETS_EXPORT AwSEEGViewer : public AwDataClient
 {
@@ -38,7 +38,6 @@ public:
 	AwSEEGViewer(QObject *parent = 0);
 	~AwSEEGViewer();
 	inline AwSEEGWidget *widget() { return m_widget; }
-	bool checkForMeshAndElectrodes(const QString& path);
 	inline bool isMappingActive() { return m_mappingIsActive; }
 	void setFilters(float LP, float HP);
 	void dataReceived(AwChannelList *channels);
@@ -55,6 +54,7 @@ protected slots:
 	void handleWidgetClosed();
 protected:
 	void loadCache();
+	void clean();
 
 	AwSEEGWidget *m_widget;
 	AwChannelList m_seegChannels;

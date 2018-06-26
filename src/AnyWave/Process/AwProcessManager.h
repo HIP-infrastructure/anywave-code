@@ -96,9 +96,9 @@ public:
 
 public slots:
 	void startProcessFromMenu();
-	void setDisplayedChannels(AwChannelList& list) { m_displayedChannels = list; }
-	void setSelectedChannels(AwChannelList& list) { m_selectedChannels = list; }
-	void setMontageChannels(AwChannelList& list) { m_montageChannels = list; }
+	void setDisplayedChannels(const AwChannelList& list) { m_displayedChannels = list; }
+	void setSelectedChannels(const AwChannelList& list) { m_selectedChannels = list; }
+	void setMontageChannels(const AwChannelList& list) { m_montageChannels = list; }
 	void handleProcessTermination();
 	void startDisplayProcesses(AwChannelList& channels);
 	void stopProcess(AwProcess *process);
