@@ -1,6 +1,7 @@
 # EpochLib
 project(AwEpochLib)
 add_definitions("-DAW_BUILD_EPOCH_LIB")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 SET(HEADERS ../../include/epoch/AwEpochAverageChannel.h 
     ../../include/epoch/AwEpoch.h 
     ../../include/epoch/AwEpochComputeSettings.h 

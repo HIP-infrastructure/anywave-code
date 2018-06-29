@@ -2,6 +2,7 @@
 project(AnyWave)
 # disable epoching
 add_definitions("-DAW_DISABLE_EPOCHING")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 SET(AnyWave_SRCS
 ./AnyWave.cpp  
@@ -149,8 +150,7 @@ SET(AnyWave_SRCS
     ./Epoch/AwEpochThumbCreator.cpp  
     ./Epoch/AwEpochVisuWidget.cpp  
     ./Epoch/AwStatChartWidget.cpp  
-    ./Epoch/AwStatsModel.cpp
-)
+    ./Epoch/AwStatsModel.cpp)
 
 SET(HEADERS ./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
@@ -285,8 +285,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Epoch/AwAvgSignalItem.h  
     ./Epoch/AwEditStatsDialog.h  
     ./Epoch/AwStatsModel.h  
-    ./Epoch/AwStatChartWidget.h
-)
+    ./Epoch/AwStatChartWidget.h)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
@@ -342,8 +341,7 @@ SET(FORMS ./AnyWave.ui
     ./Epoch/AwEpochAverageWidget.ui  
     ./Epoch/AwAverageDialog.ui  
     ./Epoch/AwAverageItemWidget.ui  
-    ./Epoch/AwEditStatsDialog.ui
-	)
+    ./Epoch/AwEditStatsDialog.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
 
@@ -373,7 +371,7 @@ ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC} ${AnyWav
 QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml Charts)
 SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml Qt5::Charts)
 TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
-#add_dependencies(AnyWaveLinux ${AW_LIBS})
+add_dependencies(AnyWaveLinux ${AW_LIBS})
 
 
 

@@ -2,12 +2,13 @@
 add_definitions(-DQT_PLUGIN)
 project(4DNIReader)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 SET(SRCS
 ${CMAKE_SOURCE_DIR}/src/plugins/4DNI_Reader/meg4dreader.cpp) 
 
- SET(MOCS
-     ${CMAKE_SOURCE_DIR}/src/plugins/4DNI_Reader/meg4dreader.h)
+SET(MOCS
+    ${CMAKE_SOURCE_DIR}/src/plugins/4DNI_Reader/meg4dreader.h)
 
 
 qt5_wrap_cpp(4DNI_MOCS ${MOCS})
@@ -18,9 +19,9 @@ add_library(4DNIReader SHARED ${SRCS} ${4DNI_MOCS} ${4DNI_QRC})
 qt5_use_modules(4DNIReader Core)
 
 IF(APPLE)
-	target_link_libraries(4DNIReader AwCoreLib AwReadWriteLib Qt5::Core)
+	target_link_libraries(4DNIReader AwCore AwReadWriteLib Qt5::Core)
 ELSE() # link with openmp lib on Linux
-	target_link_libraries(4DNIReader AwCoreLib AwReadWriteLib Qt5::Core gomp)
+	target_link_libraries(4DNIReader AwCore AwReadWrite Qt5::Core gomp)
 ENDIF()
 
 

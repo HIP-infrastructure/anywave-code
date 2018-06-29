@@ -1,6 +1,7 @@
 # AwMappingLib
 project(AwMapping)
 add_definitions("-DAW_BUILD_MAPPING_LIB")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 SET(MOCS ${CMAKE_SOURCE_DIR}/include/mapping/AwMap.h)
 QT5_WRAP_CPP(AwMappingMOC ${MOCS})
 ADD_LIBRARY(AwMapping SHARED ${AwMappingMOC} AwMap.cpp AwMeshManager.cpp)

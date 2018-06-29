@@ -1,6 +1,7 @@
 # HDF5Lib
 project(AwHDF5)
 add_definitions("-DAW_BUILD_HDF5_LIB")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 add_library(AwHDF5 SHARED AwHDF5.cpp)
 qt5_use_modules(AwHDF5 Core)
 TARGET_LINK_LIBRARIES(AwHDF5 AwCore Qt5::Core ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})

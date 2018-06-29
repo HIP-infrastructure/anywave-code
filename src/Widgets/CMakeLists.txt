@@ -1,6 +1,7 @@
 # AwWidgetLib
 project(AwWidget)
 add_definitions("-DAW_BUILD_WIDGETS_LIB")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.qrc)
 
 SET(HEADERS ../../include/widget/AwMessageBox.h  
@@ -43,7 +44,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwInputMarkerTableView.h  
     ../../include/widget/AwInputMarkerWidget.h)
 
-SET(SRC./Aw2DGrid.cpp  
+SET(SRC ./Aw2DGrid.cpp  
     ./AwAddPredefinedMarker.cpp  
     ./AwAddTargetChannels.cpp  
     ./AwComboCMap.cpp  
@@ -80,8 +81,7 @@ SET(SRC./Aw2DGrid.cpp
     ./SEEGViewer/AwSEEGWidget.cpp  
     ./InputMarker/AwInputMarkerTableView.cpp  
     ./InputMarker/AwInputMarkerWidget.cpp  
-    ./InputMarker/InputMarkerModel.cpp
-)
+    ./InputMarker/InputMarkerModel.cpp)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 

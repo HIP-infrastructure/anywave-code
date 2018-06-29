@@ -1,6 +1,7 @@
 # AwGraphicsLib
 project(AwGraphics)
 add_definitions("-DAW_BUILD_GRAPHICS_LIB")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set (AwGraphicsLib_SRCS
     Mark/AwHighLightPositionMarker.cpp 
