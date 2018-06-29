@@ -33,7 +33,6 @@
 #include <AwMarker.h>
 #include <AwProcessInterface.h>
 #include "Script/AwScriptDefines.h"
-//#include <QScriptValue>
 #include <QDockWidget>
 #include <QMutex>
 #include <AwFileIO.h>

@@ -6,8 +6,9 @@
 #include <vtkAutoInit.h>
 #endif
 #include <vtkSmartPointer.h>
-#define VTK8_SUPPORT (VTK_MAJOR_VERSION >= 7 && QT_VERSION >= QT_VERSION_CHECK(5,5,0))
-
+#ifndef VTK8_SUPPORT
+#define VTK8_SUPPORT (VTK_MAJOR_VERSION >= 8 && QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+#endif
 #if VTK8_SUPPORT
 #include <QVTKOpenGLWidget.h>
 #include <vtkGenericOpenGLRenderWindow.h>

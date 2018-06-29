@@ -24,7 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwScript.h"
-#if QT_VERSION <= QT_VERSION_CHECK(5,8,0)
+#if QT_VERSION < QT_VERSION_CHECK(5,8,0)
 #include <QScriptSyntaxCheckResult>
 #endif
 #include "Montage/AwMontageManager.h"
@@ -64,13 +64,13 @@ QSVALUE AwScript::getProcess(QString pluginName)
 {
 	AwBaseProcess *process = AwProcessManager::instance()->newProcessFromPluginName(pluginName);
 	if (process == NULL)
-#if QT_VERSION <= QT_VERSION_CHECK(5,8,0)
+#if QT_VERSION < QT_VERSION_CHECK(5,8,0)
 		return m_engine->nullValue();
 #else
 		return QJSValue(QJSValue::NullValue);
 #endif
 	if (!(process->flags() & Aw::ProcessFlags::ProcessIsScriptable))
-#if QT_VERSION <= QT_VERSION_CHECK(5,8,0)
+#if QT_VERSION < QT_VERSION_CHECK(5,8,0)
 		return m_engine->nullValue();
 #else
 		return QJSValue(QJSValue::NullValue);
@@ -85,7 +85,7 @@ void AwScript::run()
 	QFile file(m_scriptPath);
 	if (file.open(QIODevice::ReadOnly|QIODevice::Text))	{
 		QString script = file.readAll();
-#if QT_VERSION <= QT_VERSION_CHECK(5,8,0)
+#if QT_VERSION < QT_VERSION_CHECK(5,8,0)
 		if (m_engine->checkSyntax(script).state() == QScriptSyntaxCheckResult::Valid) {
 			m_engine->evaluate(script);
 			if (m_engine->hasUncaughtException())

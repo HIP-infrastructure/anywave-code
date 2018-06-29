@@ -516,9 +516,6 @@
     <CustomBuild Include="..\..\include\widget\AwSpectroWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\include\widget\AwSignalSplitterWidget.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\include\widget\SignalView\AwBaseSignalView.h">
       <Filter>SignalView</Filter>
     </CustomBuild>
