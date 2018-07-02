@@ -1,0 +1,18 @@
+variables:
+   registry: gitlab.thevirtualbrain.org:5000
+   ubuntu: dynamap/aw-ubuntu
+   tag: dynamap/anywave
+   
+build:
+   stage: build
+   script:
+      docker build -t $registry/$ubuntu -f Docker/Dockerfile-aw-ubuntu Docker
+      docker build -t $registry/$tag -f Docker/Dockerfile-aw .
+      docker push $registry/$ubuntu
+      docker push $registry/$tag
+      
+test:
+   stage: test
+   image: $registry/$tag
+   script:
+   
