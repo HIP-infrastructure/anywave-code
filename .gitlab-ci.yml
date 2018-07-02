@@ -20,8 +20,8 @@ build:
    script:
      - docker build -t $CONTAINER_UBUNTU_IMAGE -f Docker/Dockerfile-aw-ubuntu Docker
      - docker push  $CONTAINER_UBUNTU_IMAGE
-     - docker build -t CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
-     - docker push CONTAINER_TEST_IMAGE
+     - docker build -t $CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
+     - docker push $CONTAINER_TEST_IMAGE
       
 test:
    stage: test
