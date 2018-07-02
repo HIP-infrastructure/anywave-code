@@ -1,4 +1,4 @@
-FROM anywave/aw-ubuntu
+FROM anywave/aw-ubuntu:latest
 
 RUN useradd -ms /bin/bash anywave
 USER anywave
