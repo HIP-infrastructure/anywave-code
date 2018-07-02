@@ -1,14 +1,16 @@
-FROM anywave/anywave/aw-ubuntu
+FROM anywave/aw-ubuntu
 
-COPY ./armadillo /anywave/armadillo
-COPY ./include /anywave/include
-COPY ./resources /anywave/resources
-COPY ./src /anywave/src
-COPY ./cmake /anywave/cmake
-COPY CMakeLists.txt /anywave
-COPY entrypoint.sh /bin/entrypoint.sh
-RUN chmod +x /bin/entrypoint.sh
-RUN mkdir /anywave/build
-WORKDIR /anywave/build
-RUN cd /anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
-CMD /bin/entrypoint.sh
+RUN useradd -ms /bin/bash anywave
+USER anywave
+WORKDIR /home/anywave
+
+COPY ./armadillo /home/anywave/armadillo
+COPY ./include /home/anywave/include
+COPY ./resources /home/anywave/resources
+COPY ./src /home/anywave/src
+COPY ./cmake /home/anywave/cmake
+COPY CMakeLists.txt /home/anywave
+ 
+RUN mkdir /home/anywave/build
+WORKDIR /home/anywave/build
+RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
