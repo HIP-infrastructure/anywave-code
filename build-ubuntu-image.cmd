@@ -1,1 +1,0 @@
-docker build -t aw-ubuntu -f Docker/Dockerfile-aw-ubuntu Docker
