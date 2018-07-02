@@ -1,5 +1,6 @@
 FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
+RUN apt-get install -y sudo
 RUN useradd -ms /bin/bash anywave && echo "anywave:anywave" | chpasswd && adduser anywave sudo
 USER anywave
 cMD /bin/bash
