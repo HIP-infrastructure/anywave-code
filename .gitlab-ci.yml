@@ -1,6 +1,6 @@
 variables:
    registry: gitlab.thevirtualbrain.org:5000
-   ubuntu: anywave/aw-ubuntu
+   ubuntu: anywave/anywave/aw-ubuntu
    tag: anywave/anywave
    
 build:
@@ -10,7 +10,6 @@ build:
      - docker build -t $registry/$ubuntu -f Docker/Dockerfile-aw-ubuntu Docker
      - docker push $registry/$ubuntu
      - docker build -t $registry/$tag -f Docker/Dockerfile-aw .
-     - docker push $registry/$ubuntu
      - docker push $registry/$tag
       
 test:
