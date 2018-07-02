@@ -8,6 +8,7 @@ build:
    script:
      - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
      - docker build -t $registry/$ubuntu -f Docker/Dockerfile-aw-ubuntu Docker
+     - docker push $registry/$ubuntu
      - docker build -t $registry/$tag -f Docker/Dockerfile-aw .
      - docker push $registry/$ubuntu
      - docker push $registry/$tag
