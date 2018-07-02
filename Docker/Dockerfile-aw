@@ -1,4 +1,4 @@
-FROM anywave/aw-ubuntu
+FROM anywave/anywave/aw-ubuntu
 
 COPY ./armadillo /anywave/armadillo
 COPY ./include /anywave/include
