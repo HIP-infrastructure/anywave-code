@@ -6,6 +6,10 @@ sudo apt-get -y update && apt-get -y install cmake qtbase5-dev libqt5dbus5
     libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev
     build-essential libpython2.7-dev python2.7 python-numpy
 ```
+You should be able to adapt the script above for your own distribution.   
+Note that cmake v3 is required and some distributions (CentOS) only provides CMake 2.8.   
+You may have to add extra source repositories to get cmake3.
+
 ## Build with CMake
 ```bash
 mkdir build && cd build
