@@ -10,7 +10,7 @@ COPY ./resources /home/anywave/resources
 COPY ./src /home/anywave/src
 COPY ./cmake /home/anywave/cmake
 COPY CMakeLists.txt /home/anywave
-
+ 
 RUN mkdir /home/anywave/build
 WORKDIR /home/anywave/build
 RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
