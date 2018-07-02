@@ -1,7 +1,7 @@
 variables:
    registry: gitlab.thevirtualbrain.org:5000
-   ubuntu: dynamap/aw-ubuntu
-   tag: dynamap/anywave
+   ubuntu: anywave/aw-ubuntu
+   tag: anywave/anywave
    
 build:
    stage: build
