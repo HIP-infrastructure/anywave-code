@@ -52,6 +52,10 @@ public:
 	/** Returns the current active features for the reader. **/
 	inline int flags() { return m_flags; }
 
+	/** Parse labels of electrodes and rename those which may be incorrect. 
+	also check for doublons. Return true if everything is ok. **/
+	bool checkForElectrodeLabels();
+
 	// Input 
 	/** Override this method to open the file and fill up the data structure. **/
 	virtual FileStatus openFile(const QString &path) { return AwFileIO::WrongFormat; }

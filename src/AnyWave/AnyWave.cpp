@@ -865,6 +865,12 @@ void AnyWave::openFile(const QString &path)
 		QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
 		return;
 	}
+	
+	// remove spaces in all labels  and check for doublons.
+	if (!m_currentReader->checkForElectrodeLabels()) {
+		QMessageBox::critical(this, tr("Electode labels error"), tr("Some labels are identical."), QMessageBox::Discard);
+	}
+	
 	// set global settings with new current reader
 	settings->setReader(m_currentReader, filePath);
 	m_currentReader->setFullPath(filePath);

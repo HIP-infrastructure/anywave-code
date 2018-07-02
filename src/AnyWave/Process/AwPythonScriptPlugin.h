@@ -45,9 +45,6 @@ public slots:
 	void error(QProcess::ProcessError error);
 protected:
 	QProcess *m_python;
-//	QString m_pythonInterpreter; // path to python interpreter
-//	QString m_pythonBaseDir;
-//	QString m_libPath;	// path to lib dir for python
 };
 
 

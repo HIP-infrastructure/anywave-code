@@ -27,7 +27,6 @@
 #define AWSCRIPT_H
 
 #include <QObject>
-//#include "AwScriptDefines.h"
 #include <qjsengine.h>
 #include <qjsvalue.h>
 

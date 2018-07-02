@@ -1,0 +1,1 @@
+docker build -t aw-anywave -f Docker/Dockerfile-aw .

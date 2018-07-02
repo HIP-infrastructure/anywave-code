@@ -344,17 +344,21 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 		QDir dir(settings->workingDir);
 		if (!dir.exists()) {
 			if (dir.mkdir(plugin->name))
-				process->pdi.input.workingDirPath = settings->workingDir +  plugin->name;
+				process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
 		}
-		else 
-			process->pdi.input.workingDirPath = settings->workingDir +  plugin->name;
+		else
+			process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
 	auto fi = AwSettings::getInstance()->fileInfo();
-	process->pdi.input.setReader(fi->currentReader());
-	process->pdi.input.dataFolder = fi->dirPath();
-	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(fi->fileName());
-	process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
+	// if fi == NULL that means no file are currently open by AnyWave.
+	if (fi) {
+		// prepare input settings only if a file is currently open.
+		process->pdi.input.setReader(fi->currentReader());
+		process->pdi.input.dataFolder = fi->dirPath();
+		process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(fi->fileName());
+		process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
+	}
 	return process;
 }
 
