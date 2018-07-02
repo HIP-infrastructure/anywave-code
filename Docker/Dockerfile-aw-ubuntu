@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get -y update && apt-get -y install tzdata cmake qtbase5-dev qt5-qmake libqt5dbus5 \
-	qt5-default libvtk8-qt-dev libopenblas-base libopenblas-dev libqt5charts5-dev \
+	qt5-default libvtk7-qt-dev libopenblas-base libopenblas-dev libqt5charts5-dev \
 	libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev \
 	build-essential \
 	libpython2.7-dev python2.7 python-numpy
