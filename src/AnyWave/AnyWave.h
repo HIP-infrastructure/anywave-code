@@ -52,7 +52,7 @@ class AwUpdater;
 class AwMeshManager;
 class AwLayoutManager;
 class AwSEEGViewer;
-//class AwEpochManager;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AnyWave
 ///
@@ -75,6 +75,8 @@ public:
 	int doSEEGToBIDS(const QString& file, const QString& destDir, const QString& format,
 		const QString& subject, const QString& task, const QString& doSidecars, const QString& session = QString(), 
 		const QString& run = QString());
+
+//	int toBIDS(const QList<AwArgument>& args);
 protected:
 	void closeEvent(QCloseEvent *e);
 	void dragMoveEvent(QDragMoveEvent *e);

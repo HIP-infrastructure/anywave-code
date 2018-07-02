@@ -74,6 +74,7 @@ AwSettings::AwSettings(QObject *parent)
 	
 	m_matlabInterface = NULL;
 	m_pdfMarkerFile = "marker_tool.mrk";
+	m_fileInfo = Q_NULLPTR;
 }
 
 AwSettings::~AwSettings()
@@ -93,6 +94,8 @@ AwSettings::~AwSettings()
 		settings.setValue("BIDSPath", m_recentBIDS.at(i));
 	}
 	settings.endArray();
+	if (m_fileInfo)
+		delete m_fileInfo;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +153,11 @@ void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// LANGUAGE END
 
+void AwSettings::closeFile()
+{ 
+	currentIcaFile.clear(); 
+}
+
 
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
@@ -197,13 +205,14 @@ AwFileIO* AwSettings::readerAt(int index)
 		return NULL;
 }
 
-void AwSettings::setFilePath(const QString& path)
+void AwSettings::setReader(AwFileIO *reader, const QString& path)
 {
-	m_filePath = path;
-	QFileInfo info(path);
-	m_currentFileDir = info.path();
-	m_currentFileName = info.fileName();
+	m_currentReader = reader;
+	if (m_fileInfo) 
+		delete m_fileInfo;
+	m_fileInfo = new AwFileInfo(reader, path);
 }
+
 
 QString AwSettings::shortenFilePath(const QString& path)
 {

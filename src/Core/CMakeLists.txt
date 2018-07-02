@@ -1,7 +1,7 @@
 # CoreLib
 project(AwCore)
 add_definitions("-DAW_BUILD_CORE_LIB")
-
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 SET(HEADERS     ../../include/AwChannel.h  
     ../../include/AwDataClient.h 
     ../../include/AwFilteringOptions.h 

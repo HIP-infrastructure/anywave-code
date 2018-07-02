@@ -2,7 +2,7 @@
 project(BrainVisionIO)
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
-
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
 SET(SRCS
@@ -15,7 +15,7 @@ SET(MOCS
  qt5_wrap_cpp(BrainVision_MOCS ${MOCS})
  add_library(BrainVisionIO SHARED ${SRCS} ${BrainVision_MOCS})
  qt5_use_modules(BrainVisionIO Core)
- target_link_libraries(BrainVisionIO AwCoreLib AwReadWriteLib Qt5::Core)
+ target_link_libraries(BrainVisionIO AwCore AwReadWrite Qt5::Core)
 
 
 

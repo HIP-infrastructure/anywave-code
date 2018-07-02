@@ -26,6 +26,12 @@ Root: HKCR; Subkey: "AnyWave\shell\open\command"; ValueType: string; ValueName: 
 [Files]
 Source: ".\bin\x64\Release\*"; DestDir: "{app}"
 Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"
+Source: ".\bin\x64\Release\AwCoreLib.dll"; DestDir: "{app}\Python"
+Source: ".\bin\x64\Release\Qt5Network.dll"; DestDir: "{app}\Python"
+Source: ".\bin\x64\Release\Qt5Core.dll"; DestDir: "{app}\Python"
+Source: ".\bin\x64\Release\AwCoreLib.dll"; DestDir: "{app}\Plugins\MATLAB\AnyWave"
+Source: ".\bin\x64\Release\Qt5Network.dll"; DestDir: "{app}\Plugins\MATLAB\AnyWave"
+Source: ".\bin\x64\Release\Qt5Core.dll"; DestDir: "{app}\Plugins\MATLAB\AnyWave"
 Source: ".\bin\x64\Release\Plugins\MATLAB\*.*"; DestDir: "{app}\Plugins\MATLAB"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\ANT_Reader.dll"; DestDir: "{app}\Plugins";

@@ -1,8 +1,3 @@
-#include <vtkVersion.h>
-#if VTK_MAJOR_VERSION > 5
-#include <vtkAutoInit.h>
-#endif
-#include "AwSEEGWidget.h"
 #include "ui_AwSEEGWidget.h"
 #include <qstring.h>
 #include <vtkPolyData.h>
@@ -22,6 +17,8 @@
 #include <qtextstream.h>
 #include <qfiledialog.h>
 #include <widget/AwSEEGViewer.h>
+#include <AwException.h>
+#include "AwSEEGInteractor.h"
 
 #define L	30	// 10 cm maximum radius for bubbles
 
@@ -56,41 +53,40 @@ AwSEEGPad::AwSEEGPad(double *c, double radius)
 AwSEEGWidget::AwSEEGWidget(const QString& meshFile, QWidget *parent)
 	: QWidget(parent)
 {
-#if VTK_MAJOR_VERSION == 6
-    VTK_MODULE_INIT(vtkRenderingOpenGL);
-    VTK_MODULE_INIT(vtkInteractionStyle);
-    VTK_MODULE_INIT(vtkRenderingFreeType);
-#endif
-#if VTK_MAJOR_VERSION > 6
-    VTK_MODULE_INIT(vtkRenderingOpenGL2);
-    VTK_MODULE_INIT(vtkInteractionStyle);
-    VTK_MODULE_INIT(vtkRenderingFreeType);
-#endif
-
-
+	m_widget = new AwVTKWidget(this);
 	m_ui = new Ui::AwSEEGWidgetUi();
 	m_ui->setupUi(this);
+	m_ui->mainLayout->replaceWidget(m_ui->widget, m_widget);
 	m_meshMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	m_meshActor =  vtkSmartPointer<vtkActor>::New();
 	m_meshActor->SetMapper(m_meshMapper);
 	m_meshActor->GetProperty()->SetOpacity(0.2);
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
-	m_renderer =  vtkSmartPointer<vtkRenderer>::New();
+	m_meshActor->SetPickable(false);
 	m_electrodesRenderer =  vtkSmartPointer<vtkRenderer>::New();
-	window->AddRenderer(m_renderer);
-	m_renderer->AddActor(m_meshActor);
+	m_widget->renderer()->AddActor(m_meshActor);
+
+	// An interactor
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+	renderWindowInteractor->SetRenderWindow(m_widget->window());
+	// Our custom style interactor
+	vtkSmartPointer<AwSEEGInteractor> style =
+		vtkSmartPointer<AwSEEGInteractor>::New();
+	style->setWidget(this);
+	style->SetDefaultRenderer(m_widget->renderer());
+	renderWindowInteractor->SetInteractorStyle(style);
 
 	// check for Depth Peeling
-	int depthPeelingUsed = m_renderer->GetLastRenderingUsedDepthPeeling();
+	int depthPeelingUsed = m_widget->renderer()->GetLastRenderingUsedDepthPeeling();
 	if (!depthPeelingUsed) {
-		window->SetAlphaBitPlanes(1);
-		window->SetMultiSamples(0);
-		m_renderer->SetUseDepthPeeling(1);
-		m_renderer->SetMaximumNumberOfPeels(50);
-		m_renderer->SetOcclusionRatio(0.2);
+		m_widget->window()->SetAlphaBitPlanes(1);
+		m_widget->window()->SetMultiSamples(0);
+		m_widget->renderer()->SetUseDepthPeeling(1);
+		m_widget->renderer()->SetMaximumNumberOfPeels(50);
+		m_widget->renderer()->SetOcclusionRatio(0.2);
 	}
 
-	window->Render();
+	m_widget->window()->Render();
 	openMesh(meshFile);
 }
 
@@ -99,6 +95,53 @@ AwSEEGWidget::~AwSEEGWidget()
 	delete m_ui;
 	clearElectrodes();
 	clearBalls();
+}
+
+void AwSEEGWidget::setSelectedActor(vtkActor *actor)
+{
+	// Should be better to use a Hash Table.
+	bool found = false;
+	AwSEEGPad *p = NULL;
+	for (auto pad : m_electrodes) {
+		if (pad->actor == actor) {
+			p = pad;
+			found = true;
+			break;
+		}
+	}
+	if (!found) {
+		for (auto pad : m_balls) {
+			if (pad->actor == actor) {
+				p = pad;
+				found = true;
+				break;
+			}
+		}
+	}
+	if (found) {
+		//if (m_selectedElectrodes.contains(p->label))
+		//	m_selectedElectrodes.removeAll(p->label);
+		//else
+		//	m_selectedElectrodes.append(p->label);
+		//emit selectedElectrodes(m_selectedElectrodes);
+		QStringList labels = { p->label };
+		emit selectedElectrodes(labels);
+	}
+	
+}
+
+void AwSEEGWidget::reset()
+{
+	vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
+	camera->SetPosition(0, 0, 400);
+	camera->SetFocalPoint(0, 0, 0);
+	m_widget->renderer()->SetActiveCamera(camera);
+	clearBalls();
+	for (auto pad : m_electrodes) {
+		m_widget->renderer()->AddActor(pad->actor);
+	}
+	m_widget->window()->Render();
+	setWindowTitle("SEEG Viewer");
 }
 
 void AwSEEGWidget::closeEvent(QCloseEvent *e)
@@ -115,20 +158,19 @@ void AwSEEGWidget::loadMesh()
 
 void AwSEEGWidget::changeFastRendering(bool on)
 {
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
 	if (on) {
-		window->SetAlphaBitPlanes(0);
-		window->SetMultiSamples(1);
-		m_renderer->SetUseDepthPeeling(0);
+		m_widget->window()->SetAlphaBitPlanes(0);
+		m_widget->window()->SetMultiSamples(1);
+		m_widget->renderer()->SetUseDepthPeeling(0);
 	}
 	else {
-		window->SetAlphaBitPlanes(1);
-		window->SetMultiSamples(0);
-		m_renderer->SetUseDepthPeeling(1);
-		m_renderer->SetMaximumNumberOfPeels(50);
-		m_renderer->SetOcclusionRatio(0.2);
+		m_widget->window()->SetAlphaBitPlanes(1);
+		m_widget->window()->SetMultiSamples(0);
+		m_widget->renderer()->SetUseDepthPeeling(1);
+		m_widget->renderer()->SetMaximumNumberOfPeels(50);
+		m_widget->renderer()->SetOcclusionRatio(0.2);
 	}
-	window->Render();
+	m_widget->window()->Render();
 }
 
 void AwSEEGWidget::changeSmoothRendering(bool on)
@@ -138,8 +180,7 @@ void AwSEEGWidget::changeSmoothRendering(bool on)
 	else {
 		m_meshMapper->SetInputData(m_smoothMesh->GetOutput());
 	}
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
-	window->Render();
+    m_widget->window()->Render();
 }
 
 void AwSEEGWidget::openMesh(const QString& file)
@@ -169,30 +210,33 @@ void AwSEEGWidget::openMesh(const QString& file)
 
 	changeSmoothRendering(true);
 	vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
-	camera->SetPosition(0, 0, 200);
+	camera->SetPosition(0, 0, 400);
 	camera->SetFocalPoint(0, 0, 0);
-	m_renderer->SetActiveCamera(camera);
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
-	window->Render();
+	m_widget->renderer()->SetActiveCamera(camera);
+	m_widget->window()->Render();
 
 }
 
 void AwSEEGWidget::changeMeshOpacity(int value) 
 {
 	m_meshActor->GetProperty()->SetOpacity((double)(value) / 100.);
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
-	window->Render();
+	m_widget->window()->Render();
 }
 
 void AwSEEGWidget::clearElectrodes()
 {
 	while (!m_electrodes.isEmpty()) {
 		AwSEEGPad *pad = m_electrodes.takeFirst();
-		m_renderer->RemoveActor(pad->actor);
+		m_widget->renderer()->RemoveActor(pad->actor);
+		delete pad;
+	}
+	while (!m_bipolarElectrodes.isEmpty()) {
+		AwSEEGPad *pad = m_bipolarElectrodes.takeFirst();
+		m_widget->renderer()->RemoveActor(pad->actor);
 		delete pad;
 	}
 	QStringList keys = m_electrodesLabels.keys();
-	foreach (QString k, keys) {
+	for (auto k : keys) {
 		delete m_electrodesLabels.value(k);
 	}
 	m_electrodesLabels.clear();
@@ -200,8 +244,8 @@ void AwSEEGWidget::clearElectrodes()
 
 void  AwSEEGWidget::clearBalls()
 {
-	foreach(AwSEEGPad *pad, m_balls)
-		m_renderer->RemoveActor(pad->actor);
+	for (auto pad : m_balls)
+		m_widget->renderer()->RemoveActor(pad->actor);
 
 	while (!m_balls.isEmpty()) {
 		delete m_balls.takeFirst();
@@ -222,15 +266,24 @@ void AwSEEGWidget::loadElectrodes(const QString& file)
 
 	QFile elecFile(file);
 	QTextStream stream(&elecFile);
-	if (!elecFile.open(QIODevice::ReadOnly|QIODevice::Text))
+	if (!elecFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		throw AwException("Failed to open electrode file.", "AwSEEGWidget::loadElectrodes");
 		return;
+	}
 
 	clearElectrodes();
 	m_hPads.clear();
+
+	// check first line (must start with "Electrodes" string)
+	QString line = stream.readLine();
+	if (line.isEmpty() || !line.toLower().startsWith("electrode")) {
+		throw AwException("Electode file format is incorrect.", "AwSEEGWidget::loadElectrodes");
+		elecFile.close();
+		return;
+	}
 	while (!stream.atEnd()) {
-		QString line;
 		line = stream.readLine();
-		if (line.toLower().startsWith("electrode")) // skip
+		if (line.toLower().startsWith("#")) // skip commented lines.
 			continue;
 		QStringList tokens = line.split('\t');
 		if (tokens.size() >= 5) {
@@ -258,22 +311,44 @@ void AwSEEGWidget::loadElectrodes(const QString& file)
 			if (!m_hPads.contains(label))
 				m_hPads.insert(label, pad);
 			m_electrodes.append(pad);
-			m_renderer->AddActor(pad->actor);
+			m_widget->renderer()->AddActor(pad->actor);
 		}
 	}
+
+	// generate bipolar virtual sphere to use in bipolar montages.
+	for (QStringList* labels : m_electrodesLabels.values()) {
+		AwSEEGPad *firstPad = m_hPads.value(labels->first());
+		for (int i = 1; i < labels->size(); i++) {
+			AwSEEGPad *nextPad = m_hPads.value(labels->at(i));
+			double x = (firstPad->center[0] + nextPad->center[0]) / 2;
+			double y = (firstPad->center[1] + nextPad->center[1]) / 2;
+			double z = (firstPad->center[2] + nextPad->center[2]) / 2;
+			vtkSmartPointer<vtkSphereSource> sphere = vtkSmartPointer<vtkSphereSource>::New();
+			sphere->SetRadius(1.0);
+			sphere->SetCenter(x, y, z);
+			sphere->Update();
+			AwSEEGPad *pad = new AwSEEGPad(sphere->GetOutput());
+			pad->center[0] = x;
+			pad->center[1] = y;
+			pad->center[2] = z;
+			pad->label = QString("%1-%2").arg(firstPad->label).arg(nextPad->label);
+			m_hPads.insert(pad->label, pad);
+			m_bipolarElectrodes.append(pad);
+			firstPad = nextPad;
+		}
+
+	}
 	generateElectrodesLabels();
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
-	window->Render();
+	m_widget->window()->Render();
 }
 
 void AwSEEGWidget::generateElectrodesLabels()
 {
 	QStringList keys = m_electrodesLabels.keys();
-	foreach (vtkSmartPointer<vtkFollower> f, m_labelActors) {
-		m_renderer->RemoveActor(f);
-	}
+	for (auto f : m_labelActors)
+		m_widget->renderer()->RemoveActor(f);
 	m_labelActors.clear();
-	foreach (QString k, keys) {
+	for (auto k : keys) {
 		vtkSmartPointer<vtkVectorText> textSource = vtkSmartPointer<vtkVectorText>::New();
 		textSource->SetText(k.toLatin1().data());
 		textSource->Update();
@@ -311,79 +386,50 @@ sample = position in sample in the data
 **/
 void AwSEEGWidget::computeMap(AwChannelList& channels, float latency, qint64 sample)
 {
+	setWindowTitle(QString("SEEG Viewer - Mapping at position: %1s").arg(latency));
 	clearBalls();
-	QRegExp rx("(\\d+)");  // Regular Expression to get a number in a string
-	foreach (AwChannel *c, channels) {
-		AwSEEGPad *ball = NULL;
-		//QString label = c->name().toLower();
-		//int pos = rx.indexIn(label);
+	for (auto c : channels) {
 		float value = c->data()[sample];
-		AwSEEGPad *pad = m_hPads.value(c->name());
+		AwSEEGPad *ball = NULL;
+		auto pad = m_hPads.value(c->fullName());
 		if (pad == NULL)
 			continue;
-
 		// compute radius based on amplitude
-		double radius = m_a * (qAbs(value) / c->gain()) + 1;
+		double radius = m_a * (std::abs(value) / c->gain()) + 1;
 		if (radius > m_l / 3)
-			radius = m_l /3;
-
-		if (c->hasReferences()) { // extract pad numbers from labels
-			QString label = c->name();
-			int pos = rx.indexIn(label);
-			if (pos != -1) {
-				label.truncate(pos);
-				// get plot number
-				int plot = rx.cap(1).toInt();
-				AwSEEGPad *p2 = m_hPads.value(label + QString::number(plot + 1 ));
-				if (p2) {
-					double _center[3];
-					vtkMath::Add(pad->center, p2->center, _center);
-					_center[0] /= 2;
-					_center[1] /= 2;
-					_center[2] /= 2;
-					ball = new AwSEEGPad(_center, radius);
-				}
-			}
-		}
-		else {
-			ball = new AwSEEGPad(pad->center, radius);
-		}
-
-		if (ball) {
-			// compute color based on value (positive = red, negative = blue)
-			if (value > 0)
-				ball->actor->GetProperty()->SetColor(1.0, 0, 0);
-			else
-				ball->actor->GetProperty()->SetColor(0, 0, 1.0);
-			m_balls.append(ball);
-		}
+			radius = m_l / 3;
+		ball = new AwSEEGPad(pad->center, radius);
+		// compute color based on value (positive = red, negative = blue)
+		if (value > 0)
+			ball->actor->GetProperty()->SetColor(1.0, 0, 0);
+		else
+			ball->actor->GetProperty()->SetColor(0, 0, 1.0);
+		m_balls.append(ball);
 	}
 	updateMap();
 }
 
 void AwSEEGWidget::updateMap()
 {
-	foreach (AwSEEGPad *pad, m_balls) {
-		m_renderer->AddActor(pad->actor);
-	}
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
-	window->Render();
+	for (auto pad : m_balls) 
+		m_widget->renderer()->AddActor(pad->actor);
+	
+	m_widget->window()->Render();
 }
 
 void AwSEEGWidget::showElectrodesLabels(bool on)
 {
-	m_renderer->ResetCameraClippingRange();
+	m_widget->renderer()->ResetCameraClippingRange();
 	if (on)	{
 		for (int i = 0; i < m_labelActors.size(); i++)	{
-			m_renderer->AddActor(m_labelActors.at(i));
-			m_labelActors.at(i)->SetCamera(m_renderer->GetActiveCamera());
+			m_widget->renderer()->AddActor(m_labelActors.at(i));
+			m_labelActors.at(i)->SetCamera(m_widget->renderer()->GetActiveCamera());
 		}
 	}
 	else {
 		for (int i = 0; i < m_labelActors.size(); i++)	{
-			m_renderer->RemoveActor(m_labelActors.at(i));
+			m_widget->renderer()->RemoveActor(m_labelActors.at(i));
 		}
 	}
-	vtkSmartPointer<vtkRenderWindow> window = m_ui->widget->GetRenderWindow();
-	window->Render();
+	m_widget->window()->Render();
 }

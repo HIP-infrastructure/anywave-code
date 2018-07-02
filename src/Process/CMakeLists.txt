@@ -1,7 +1,8 @@
 # AwProcessLib
 project(AwProcess)
 add_definitions("-DAW_BUILD_PROCESS_LIB")
-LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 
 SET(SRC AwProcessIO.cpp AwProcessLib.cpp AwProcessGUIWidget.cpp)
 SET(HEADERS ../../include/AwProcess.h

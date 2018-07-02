@@ -199,7 +199,7 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 			delete m;
 		}
 	}
-
+	m_fullPath = path;
 	return AwFileIO::NoError;
 }
 

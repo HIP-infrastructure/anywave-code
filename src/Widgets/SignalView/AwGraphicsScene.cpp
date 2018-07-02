@@ -404,7 +404,7 @@ QGraphicsItem *AwGraphicsScene::getItemUnderMouse(QPointF pos, int *itemType)
 void AwGraphicsScene::selectChannels(const QStringList& labels)
 {
 	AwGraphicsSignalItem *last_item = NULL;
-	foreach (AwGraphicsSignalItem *i, m_signalItems) {
+	for (auto i : m_signalItems) {
 		if (labels.contains(i->channel()->name())) {
 			i->setSelected(true);
 			i->channel()->setSelected(true);
@@ -415,11 +415,10 @@ void AwGraphicsScene::selectChannels(const QStringList& labels)
 			i->channel()->setSelected(false);
 		}
 	}
+	if (last_item)	// make the last item visibile, setting no margins
+		views().at(0)->ensureVisible(last_item, 0, 0);
 	updateSelection();
 	update();
-	if (last_item)
-		// make the last item visibile, setting no margins
-		views().at(0)->ensureVisible(last_item, 0, 0);
 }
 
 void AwGraphicsScene::selectChannelsOfType()
@@ -1343,6 +1342,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 				m_currentMarkerItem->marker()->setStart(start);
 				m_currentMarkerItem->marker()->setEnd(end_pos);
 			}
+			// check if auto target is on
 			if (m_markingSettings->autoTargetChannel) {
 				// check for item under the mouse
 				QGraphicsItem *item = NULL;
@@ -1359,18 +1359,19 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 					}
 				}
 				if (item) {
-					forceTarget = true;
 					AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(item);
-					target = sitem->channel()->name();
-					if (sitem->channel()->hasReferences())
-						target += "-" + sitem->channel()->referenceName();
+					QStringList list = { sitem->channel()->fullName() };
+					m_currentMarkerItem->marker()->setTargetChannels(list);
 				}
 			}
+			// check if targets are predefined for the marker.
+			if (!m_markingSettings->targets.isEmpty())
+				m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
 			// prepare contextual menu if the user choosed to use predefined markers
 			if (m_markingSettings->isUsingList && !m_markingSettings->list.isEmpty()) {
 				menu_predefined = new QMenu;
 				int index = 0;
-				foreach(AwMarker *m, m_markingSettings->list) {
+				for (auto m : m_markingSettings->list) {
 					QAction *action = new QAction(m->label() + " " + QString::number(m->value()), menu_predefined);
 					action->setData(index); // store the index of item in list in action custom data.
 					index++;
@@ -1383,12 +1384,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			}
 			if (menu_predefined) {
 				menu_predefined->exec(e->screenPos());
-				if (forceTarget) {
-					QStringList targets;
-					targets << target;
-					m_currentMarkerItem->marker()->setTargetChannels(targets);
-				}
-				else if (m_markingSettings->isTargettingChannels)
+			    if (m_markingSettings->isTargettingChannels)
 					m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
 				delete menu_predefined;
 

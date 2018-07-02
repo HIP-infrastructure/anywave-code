@@ -16,7 +16,7 @@ AwMarkersExportWidget::AwMarkersExportWidget(const AwMarkerList& selection, cons
 	else
 		m_ui.radioAll->setChecked(true);
 
-	m_ui.lineEditFile->setText(QString("%1/%2").arg(AwSettings::getInstance()->currentFileDir()).arg("Export"));
+	m_ui.lineEditFile->setText(QString("%1/%2").arg(AwSettings::getInstance()->fileInfo()->dirPath()).arg("Export"));
 
 	connect(m_ui.buttonSelectFile, &QPushButton::clicked, this, &AwMarkersExportWidget::selectFile);
 }
@@ -29,7 +29,7 @@ AwMarkersExportWidget::~AwMarkersExportWidget()
 void AwMarkersExportWidget::selectFile()
 {
 	QString filter = m_ui.radioMATLAB->isChecked() ? "*.mat" : "*.ades";
-	QString file = QFileDialog::getSaveFileName(this, "Export to file", AwSettings::getInstance()->currentFileDir(), filter);
+	QString file = QFileDialog::getSaveFileName(this, "Export to file", AwSettings::getInstance()->fileInfo()->dirPath(), filter);
 	if (file.isEmpty())
 		return;
 	m_ui.lineEditFile->setText(file);

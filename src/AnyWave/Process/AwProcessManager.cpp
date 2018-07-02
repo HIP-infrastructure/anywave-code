@@ -64,7 +64,7 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	m_fileMenu = NULL;
 	m_viewMenu = NULL;
 	m_processes = AwPluginManager::getInstance()->processes();
-	foreach (AwProcessPlugin *plugin, m_processes)
+	for (auto plugin : m_processes)
 		addProcess(plugin);
 	setObjectName("AwProcessManager");
 	m_processesWidget = new AwProcessesWidget();
@@ -144,7 +144,7 @@ AwBaseProcess *AwProcessManager::newProcessFromPluginName(const QString &name)
 QList<AwProcessPlugin *> AwProcessManager::processPluginsWithFeatures(int flags)
 {
 	QList<AwProcessPlugin *> result;
-	foreach (AwProcessPlugin *plugin, m_processes)	{
+	for (auto plugin : m_processes)	{
 		if (plugin->flags() & flags)
 			result << plugin;
 	}
@@ -344,17 +344,21 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 		QDir dir(settings->workingDir);
 		if (!dir.exists()) {
 			if (dir.mkdir(plugin->name))
-				process->pdi.input.workingDirPath = settings->workingDir +  plugin->name;
+				process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
 		}
-		else 
-			process->pdi.input.workingDirPath = settings->workingDir +  plugin->name;
+		else
+			process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	
-	process->pdi.input.setReader(settings->currentReader());
-	process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
-	process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(AwSettings::getInstance()->currentFileName());
-	process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
+	auto fi = AwSettings::getInstance()->fileInfo();
+	// if fi == NULL that means no file are currently open by AnyWave.
+	if (fi) {
+		// prepare input settings only if a file is currently open.
+		process->pdi.input.setReader(fi->currentReader());
+		process->pdi.input.dataFolder = fi->dirPath();
+		process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(fi->fileName());
+		process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
+	}
 	return process;
 }
 
@@ -449,7 +453,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 			list << sources.at(i);
 	 }
 	 p->pdi.input.channels += AwChannel::duplicateChannels(list);
-
+	 // make sure current filters are set for the channels.
+	 AwFiltersManager::instance()->fo().setFilters(p->pdi.input.channels);
 	 return true;
  }
 
@@ -747,8 +752,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 	if (initProcessIO(process)) {
 		if (!skipDataFile) {
-			process->pdi.input.dataPath = AwSettings::getInstance()->filePath();
-			process->pdi.input.dataFolder = AwSettings::getInstance()->currentFileDir();
+			process->pdi.input.dataPath = AwSettings::getInstance()->fileInfo()->filePath();
+			process->pdi.input.dataFolder = AwSettings::getInstance()->fileInfo()->dirPath();
 			process->pdi.input.setReader(m_currentReader);
 			process->pdi.input.fileDuration = m_currentReader->infos.totalDuration();
 			process->pdi.input.badLabels = AwMontageManager::instance()->badLabels();

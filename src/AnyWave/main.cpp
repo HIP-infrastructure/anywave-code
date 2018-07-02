@@ -39,17 +39,22 @@
 #endif
 
 #include <vtkVersion.h>
-#if VTK_MAJOR_VERSION >= 8
+#if VTK_MAJOR_VERSION > 7
 #include <QVTKOpenGLWidget.h>
+#include <vtkOpenGLRenderWindow.h>
 #endif
 
-//#include <qstylefactory.h>
 #include <qcommandlineparser.h>
+#include "AwException.h"
+#include "IO/BIDS/AwBIDSManager.h"
+#include <qstylefactory.h>
+#include <qtextstream.h>
 
 int main(int argc, char *argv[])
 {
-#if VTK_MAJOR_VERSION >= 7
+#if VTK_MAJOR_VERSION > 7
 	// init surface map for further use in VTK 8.1
+	vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
 #endif
 
@@ -58,8 +63,9 @@ int main(int argc, char *argv[])
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-//	QApplication::setStyle(QStyleFactory::create("Fusion"));
-
+#ifdef Q_OS_WIN
+	QApplication::setStyle(QStyleFactory::create("windowsvista"));
+#endif
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);
@@ -97,6 +103,8 @@ int main(int argc, char *argv[])
 	QCommandLineOption BIDSRunOpt("bids_run", "BIDS run", "run", QString());
 	QCommandLineOption BIDSDestOpt("bids_dir", "BIDS destination folder", "dir", QString());
 	QCommandLineOption BIDSFormatOpt("bids_format", "data format for output EDF (default) or VHDR", "format", QString());
+	QCommandLineOption BIDSAcqOpt("bids_acq", "acquisition method", "acq", QString());
+	QCommandLineOption BIDSProcOpt("bids_proc", "proc", "proc", QString());
 
 	parser.addOption(seegBIDSOpt);
 	parser.addOption(BIDSSidecarsOpt);
@@ -106,6 +114,8 @@ int main(int argc, char *argv[])
 	parser.addOption(BIDSRunOpt);
 	parser.addOption(BIDSDestOpt);
 	parser.addOption(BIDSFormatOpt);
+	parser.addOption(BIDSAcqOpt);
+	parser.addOption(BIDSProcOpt);
 	parser.process(QCoreApplication::arguments());
 	QStringList args = parser.positionalArguments();
 
@@ -124,6 +134,8 @@ int main(int argc, char *argv[])
 		QString dir = parser.value(BIDSDestOpt);
 		QString format = parser.value(BIDSFormatOpt);
 		QString output = parser.value(BIDSSidecarsOpt);
+		QString acq = parser.value(BIDSAcqOpt);
+		QString proc = parser.value(BIDSProcOpt);
 
 		if (file.isEmpty() || subj.isEmpty() || task.isEmpty()) {
 			parser.showHelp();
@@ -139,17 +151,43 @@ int main(int argc, char *argv[])
 				exit(-1);
 			}
 		}
+		
+		QList<AwArgument> arguments;
+		// first argument must be the kind of file to convert (here SEEG)
+		arguments << AwArgument("SEEGFile", file);
+		// subject is mandatory and should be the second argument.
+		arguments << AwArgument("subject", subj);
+		if (!task.isEmpty())
+			arguments << AwArgument("task", task);
+		if (!session.isEmpty())
+			arguments << AwArgument("session", session);
+		if (!run.isEmpty())
+			arguments << AwArgument("run", run);
+		if (!dir.isEmpty())
+			arguments << AwArgument("dir", dir);
+		if (!format.isEmpty())
+			arguments << AwArgument("format", format);
+		if (!output.isEmpty())
+			arguments << AwArgument("output", output);
+		if (!acq.isEmpty())
+			arguments << AwArgument("acq", acq);
+		if (!proc.isEmpty())
+			arguments << AwArgument("proc", proc);
 
-		if (window.doSEEGToBIDS(file, dir, format.toUpper(), subj, task, output, session, run) == -1)
+		try {
+			AwBIDSManager::instance()->toBIDS(arguments);
+
+		}
+		catch (const AwException& e)
+		{
 			exit(-1);
+		}
 		exit(0);
 	}
 
 	if (args.count() == 1)
 		window.openFile(args.at(0));
 		
-	//if (argc > 1)
-	//	window.openFile(QString(argv[1]));
 	window.showMaximized();
 	return app.exec();
 }

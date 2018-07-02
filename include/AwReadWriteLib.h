@@ -87,6 +87,7 @@ protected:
 
 typedef QList<AwBlock *> AwBlockList;  ///< Define a list of blocks.
 
+
 /*!
  * \brief
  * This is the base class to manage informations about Reader or Writer Plugins.

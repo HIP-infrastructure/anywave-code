@@ -1,6 +1,7 @@
 project(FIFFReader)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 SET(SRCS
 ${CMAKE_SOURCE_DIR}/src/plugins/FIFF_Reader/fiff_reader.cpp
@@ -22,7 +23,7 @@ SET(MOCS
 qt5_wrap_cpp(FR_MOCS ${MOCS})
 add_library(FIFFReader SHARED ${SRCS} ${FR_MOCS})
 qt5_use_modules(FIFFReader Core)
-target_link_libraries(FIFFReader AwCoreLib AwReadWriteLib Qt5::Core)
+target_link_libraries(FIFFReader AwCore AwReadWrite Qt5::Core)
 
 
 

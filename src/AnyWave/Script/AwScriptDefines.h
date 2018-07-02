@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include <QtGlobal>
-#if QT_VERSION > QT_VERSION_CHECK(5,8,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5,8,0)
 #include <qjsengine.h>
 #include <qjsvalue.h>
 #define QSVALUE QJSValue

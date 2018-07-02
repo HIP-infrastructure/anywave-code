@@ -288,7 +288,6 @@ void AwBaseSignalView::goToPos(int pos)
 
 void AwBaseSignalView::reloadData()
 {
-	//requestData(&m_channels, m_positionInFile, m_pageDuration);
 	if (m_channels.isEmpty())
 		return;
 	m_client.requestData(&m_channels, m_positionInFile, m_pageDuration);

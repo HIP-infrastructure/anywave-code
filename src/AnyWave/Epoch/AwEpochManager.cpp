@@ -54,7 +54,7 @@ AwEpochManager::AwEpochManager()
 {
 	// Get the current reader information (total duration)
 	m_totalDuration = AwSettings::getInstance()->currentReader()->infos.totalDuration();
-	m_dataPath = AwSettings::getInstance()->filePath();
+	m_dataPath = AwSettings::getInstance()->fileInfo()->filePath();
 	load();
 	m_reviewWidget = NULL;
 }

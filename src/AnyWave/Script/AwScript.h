@@ -27,7 +27,8 @@
 #define AWSCRIPT_H
 
 #include <QObject>
-#include "AwScriptDefines.h"
+#include <qjsengine.h>
+#include <qjsvalue.h>
 
 class AwScriptProcessFileInput;
 class AwProcess;
@@ -37,7 +38,7 @@ class AwScript : public QObject
 	Q_OBJECT
 
 public:
-	AwScript(QSENGINE *engine, const QString& scriptPath, QObject *parent = 0);
+	AwScript(QJSEngine *engine, const QString& scriptPath, QObject *parent = 0);
 	~AwScript();
 	inline QString& path() { return m_scriptPath; }
 	inline QString& processName() { return m_processName; }
@@ -50,11 +51,11 @@ signals:
 	void processMessage(const QString& message);
 public slots:
 	void run();
-	QSVALUE getProcess(QString name);
-	QSVALUE getFileInput();
-	void runProcess(QSVALUE process, QSVALUE fileInput);
+	QJSValue getProcess(QString name);
+	QJSValue getFileInput();
+	void runProcess(QJSValue process, QJSValue fileInput);
 private:
-	QSENGINE *m_engine;
+	QJSEngine *m_engine;
 	QString m_scriptPath;
 	QString m_processName;
 	AwScriptProcessFileInput *m_processFileInput;

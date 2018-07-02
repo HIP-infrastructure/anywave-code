@@ -5,7 +5,10 @@
 #include <AwFileIO.h>
 class AwFileItem;
 
-#define AWBIDS_SOURCE_DIRS	2
+#define AWBIDS_SOURCE_DIRS 3
+
+// command line parsing
+using AwArgument = QPair<QString, QString>;
 
 class AwBIDSManager : public QObject
 {
@@ -13,7 +16,8 @@ class AwBIDSManager : public QObject
 public:
 	AwBIDSManager(const QString& rootDir);
 	enum itemTypes { iEEG, MEG };
-	enum dataSources { raw = 0, source = 1 }; // indicates the type of data ordering (source data are place in a source_data folder).
+	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
+	enum Derivatives { EPITOOLS, EI, ICA};
 	// utilities static methods
 	static AwBIDSManager *instance(const QString& rootDir = QString());
 
@@ -21,7 +25,9 @@ public:
 
 	/** Convert a SEEG file to BIDS. If option sideCars is set, only generates the json and tsv files. **/
 	int seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subject, const QString& task, 
-		const QString& sideCars, const QString &session = QString(), const QString& run = QString());
+		const QString& sideCars, const QString &session = QString(), const QString& run = QString(), const QString& acq = QString());
+
+	int toBIDS(QList<AwArgument>& args);
 
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
@@ -29,6 +35,7 @@ public:
 	QWidget *ui() { return m_ui; }
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
 	AwBIDSSubjectList& getSubjectsFromSourceDir(int sourceDir = raw);
+	QString getDerivativesPath(int type, AwBIDSSubject *subject);
 protected:
 	static AwBIDSManager *m_instance;
 

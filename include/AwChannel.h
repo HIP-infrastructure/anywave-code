@@ -56,9 +56,9 @@ public:
 	enum SourceType { Real, Virtual };   	
 	
 	/** Default constructor **/
-	AwChannel();
+	explicit AwChannel();
 	/** Copy constructor **/
-	AwChannel(AwChannel *chan);
+	explicit AwChannel(AwChannel *chan);
 	/** Destructor **/
 	virtual ~AwChannel();
 

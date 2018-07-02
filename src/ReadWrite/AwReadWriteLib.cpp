@@ -207,3 +207,23 @@ void AwDataInfo::changeChannelName(const QString& old, const QString& newName)
 		m_labelToIndex.insert(newName, index);
 	}
 }
+
+///
+/// AwFileIO
+///
+
+
+bool AwFileIO::checkForElectrodeLabels()
+{
+	// remove all spaces that may be found in the label.
+	QStringList list;
+	bool ok = true;
+	for (auto c : infos.channels()) {
+		c->setName(c->name().trimmed());
+		if (list.contains(c->name()))
+			ok = false;
+		else
+			list << c->name();
+	}
+	return ok;
+}

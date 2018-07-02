@@ -1,0 +1,5 @@
+FROM aw-anywave
+
+
+RUN anywave --version
+

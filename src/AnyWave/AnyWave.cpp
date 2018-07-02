@@ -84,7 +84,7 @@
 #endif
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
-
+#include <AwFileInfo.h>
 
 
 AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
@@ -255,7 +255,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
 		m_display, SLOT(executeCommand(int, const QVariantList&)));
 
-	connect(m_display, SIGNAL(displayedChannelsChanged(AwChannelList&)), process_manager, SLOT(setDisplayedChannels(AwChannelList&)));
+	connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setDisplayedChannels(const AwChannelList&)));
 	connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList *)), m_display, SLOT(addVirtualChannels(AwChannelList *)));
 	connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList *)), m_display, SLOT(removeVirtualChannels(AwChannelList *)));
 	connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
@@ -842,8 +842,7 @@ void AnyWave::openFile(const QString &path)
 	closeFile();
 
 	m_currentReader = newReader;
-	settings->setCurrentReader(m_currentReader);
-
+	//settings->setCurrentReader(m_currentReader);
 	int res = m_currentReader->openFile(filePath);
 
 	if (res != AwFileIO::NoError)	{
@@ -866,6 +865,15 @@ void AnyWave::openFile(const QString &path)
 		QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
 		return;
 	}
+	
+	// remove spaces in all labels  and check for doublons.
+	if (!m_currentReader->checkForElectrodeLabels()) {
+		QMessageBox::critical(this, tr("Electode labels error"), tr("Some labels are identical."), QMessageBox::Discard);
+	}
+	
+	// set global settings with new current reader
+	settings->setReader(m_currentReader, filePath);
+	m_currentReader->setFullPath(filePath);
 
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
 	m_saveFileName.clear();
@@ -880,7 +888,7 @@ void AnyWave::openFile(const QString &path)
 	title += tr("Duration: ") + AwUtilities::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
-	settings->setFilePath(m_openFileName);
+//	settings->setFilePath(m_openFileName);
 	m_currentReader->infos.setFileName(m_openFileName);
 	data_server->setMainReader(m_currentReader);
 	actionMontage->setEnabled(true);
@@ -934,9 +942,11 @@ void AnyWave::openFile(const QString &path)
 	m_display->newFile(m_currentReader);
 
 	// Are there events?
-	if (m_currentReader->infos.blocks().at(0)->markersCount())
+	if (m_currentReader->infos.blocks().at(0)->markersCount()) {
 		AwMarkerManager::instance()->addMarkers(m_currentReader->infos.blocks().at(0)->markers());
+	}
 	AwMarkerManager::instance()->setFilename(m_openFileName);
+	
 
 	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
 	AwAmplitudeManager::instance()->setFilename(m_openFileName);
@@ -1232,41 +1242,44 @@ void AnyWave::runMapping()
 			isEEGOK = false;
 	}
 
-	// check for SEEG channels in the current Montage
-	AwChannelList displayedChannels = AwChannel::duplicateChannels(m_display->displayedChannels());
+	// check for SEEG channels from as recorded channels in the Montage
 	AwChannelList seegChannels;
-	foreach (AwChannel *c, displayedChannels) {
-		if (c->isSEEG()) {
-			displayedChannels.removeAll(c);
+	for (auto c : m_display->displayedChannels()) {
+		if (c->isSEEG())
 			seegChannels << c;
-		}
 	}
-	while (!displayedChannels.isEmpty())
-		delete displayedChannels.takeFirst();
 
-	if (!seegChannels.isEmpty()) { // open SEEG Viewer
-		if (m_SEEGViewer == NULL) {
-			m_SEEGViewer = new AwSEEGViewer;
-			connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient *)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient *)));
-			connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
-			connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping())); 
-		}
-		m_SEEGViewer->setSEEGChannels(seegChannels);
-		
-		
-		if (!m_SEEGViewer->checkForMeshAndElectrodes(AwSettings::getInstance()->currentFileDir())) {
-			isSEEGOK = false;
-			QMessageBox::critical(this, tr("Mapping"), tr("No mapping available considering electrodes locations or types!"));
-		}
-		else {
+	if (!seegChannels.isEmpty()) {  // we've got SEEG channels, check for mesh and electrode files
+		AwFileInfo afi(m_currentReader);
+
+		QString mesh = afi.getFeature(AwFileInfo::MeshFile).toString();
+		QString electrodes = afi.getFeature(AwFileInfo::SEEGElectrodeFile).toString();
+
+		if (!mesh.isEmpty() && !electrodes.isEmpty()) {
+			if (m_SEEGViewer == NULL) {
+				m_SEEGViewer = new AwSEEGViewer;
+				connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient *)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient *)));
+				connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
+				connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
+				connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
+				connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+			}
+			// the viewer will automatically duplicate channel objects.
+			m_SEEGViewer->setSEEGChannels(seegChannels);
+			m_SEEGViewer->loadElectrodes(electrodes);
+			m_SEEGViewer->loadMesh(mesh);
+
 			m_display->setMappingModeOn(true);
 			m_SEEGViewer->setMappingMode(true);
+			//// put the widget in a QDockWidget
+			//QDockWidget *dock = new QDockWidget(tr("SEEG Mapping"), this);
+			//dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+			//addDockWidget(Qt::LeftDockWidgetArea, dock);
+			//dock->setFloating(true);
+			//dock->setWidget(m_SEEGViewer->widget());
+			m_SEEGViewer->widget()->show();
 		}
-	}
 
-	if (!isEEGOK && !isMEGOK && !isSEEGOK)	{
-		QMessageBox::critical(this, tr("Mapping"), tr("No mapping available considering electrodes locations or types!"));
-		return;
 	}
 
 	// disable cursor toolbar when mapping is active.
@@ -1642,7 +1655,7 @@ void AnyWave::on_actionQuit_triggered()
 
 void AnyWave::loadBeamformer()
 {
-	QString dir = AwSettings::getInstance()->currentFileDir();
+	QString dir = AwSettings::getInstance()->fileInfo()->dirPath();
 	QString file = QFileDialog::getOpenFileName(0, "Beamformer", dir, "beamformer matrices (*.bf)");
 	if (file.isEmpty())
 		return;

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-include(config.pri)
+include(docker.pri)
 CONFIG += release
 INCLUDEPATH += $$INCLUDEDIR
 

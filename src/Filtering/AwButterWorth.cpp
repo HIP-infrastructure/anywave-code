@@ -25,7 +25,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwButterWorth.h"
-#include <math.h>
+#include <cmath>
 #include <stdlib.h>
 #include <QtGlobal>
 
@@ -102,7 +102,7 @@ double tmpden;
 	if (tmpden != 0.0)
         tmpden = 1./tmpden;
 	else
-        tmpden = HUGE;
+        tmpden = HUGE_VAL;
 	i.re = x.re * tmpden;
 	i.im = - x.im * tmpden;
 	return (i);
@@ -140,7 +140,7 @@ double f;
 
 	if ((f=cabs2(x)) == 0.0)
 	{
-        i.re = -HUGE;
+        i.re = -HUGE_VAL;
         i.im = 0.0;
 	}
 	else

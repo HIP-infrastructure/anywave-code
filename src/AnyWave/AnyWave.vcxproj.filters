@@ -1249,9 +1249,6 @@
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSTreeItem.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSTools.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
@@ -1259,9 +1256,6 @@
       <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwFileItem.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSFileItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwFiltersManager.cpp">
@@ -1272,6 +1266,9 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwFiltersManager.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1994,16 +1991,13 @@
     <ClInclude Include="GeneratedFiles\ui_AwBIDSGUI.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSTreeItem.h">
-      <Filter>IO\BIDS</Filter>
-    </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSSession.h">
       <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwFileItem.h">
       <Filter>IO\BIDS</Filter>
     </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSFileItem.h">
+    <ClInclude Include="IO\BIDS\AwBIDSItem.h">
       <Filter>IO\BIDS</Filter>
     </ClInclude>
   </ItemGroup>

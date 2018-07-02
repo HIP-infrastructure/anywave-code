@@ -33,10 +33,9 @@ HEADERS += ./Data/AwDataConnection.h \
     ./IO/HDF5/structs.h \
     ./IO/HDF5/HDF5IO.h \
     ./IO/MATLAB/MATLABIO.h \
-    ./IO/BIDS/AwBIDSFileItem.h \
+    ./IO/BIDS/AwBIDSItem.h \
     ./IO/BIDS/AwBIDSSession.h \
     ./IO/BIDS/AwBIDSTools.h \
-    ./IO/BIDS/AwBIDSTreeItem.h \
     ./IO/BIDS/AwFileItem.h \
     ./IO/BIDS/AwBIDSManager.h \
     ./IO/BIDS/AwBIDSSubject.h \
@@ -173,13 +172,12 @@ SOURCES += ./AnyWave.cpp \
     ./IO/HDF5/HDF5IO.cpp \
     ./IO/HDF5/structs.cpp \
     ./IO/MATLAB/MATLABIO.cpp \
-    ./IO/BIDS/AwBIDSFileItem.cpp \
     ./IO/BIDS/AwBIDSGUI.cpp \
+    ./IO/BIDS/AwBIDSItem.cpp \
     ./IO/BIDS/AwBIDSManager.cpp \
     ./IO/BIDS/AwBIDSSession.cpp \
     ./IO/BIDS/AwBIDSSubject.cpp \
     ./IO/BIDS/AwBIDSTools.cpp \
-    ./IO/BIDS/AwBIDSTreeItem.cpp \
     ./IO/BIDS/AwFileItem.cpp \
     ./Marker/AwDockAddMarker.cpp \
     ./Marker/AwExtractTriggers.cpp \
