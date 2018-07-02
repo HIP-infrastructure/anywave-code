@@ -14,7 +14,7 @@ You may have to add extra source repositories to get cmake3.
 ```bash
 mkdir build && cd build
 cmake ..
-make install
+sudo make install
 ```
 
 By default the installation path is /usr/local/AnyWave but you can change the prefix path using:   
@@ -22,4 +22,8 @@ By default the installation path is /usr/local/AnyWave but you can change the pr
 cmake .. -DCMAKE_PREFIX_PATH=/home/user
 ```
 The application will then be installed in /home/user/AnyWave   
-The binaries are built using RPATH to the CMAKE_PREFIX_PATH so you should not create script to set the LD_LIBRARY_PATH
+The binaries are built using RPATH to the CMAKE_PREFIX_PATH and a link called anywave will be created in /usr/bin    
+Launch Anywave:
+```bash
+anywave
+```
