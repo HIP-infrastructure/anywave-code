@@ -1,7 +1,8 @@
 FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
-RUN useradd -ms /bin/bash anywave
+RUN useradd -ms /bin/bash anywave && echo "anywave:anywave" | chpasswd && adduser anywave sudo
 USER anywave
+cMD /bin/bash
 WORKDIR /home/anywave
 
 COPY ./armadillo /home/anywave/armadillo
