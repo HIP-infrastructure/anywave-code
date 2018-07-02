@@ -2,7 +2,7 @@
 
 ```bash
 sudo apt-get -y update && apt-get -y install git cmake qtbase5-dev libqt5dbus5 
-    qt5-default libvtk8-qt-dev libopenblas-base libopenblas-dev libqt5charts5-dev
+    qt5-default libvtk7-qt-dev libopenblas-base libopenblas-dev libqt5charts5-dev
     libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev
     build-essential libpython2.7-dev python2.7 python-numpy
 ```
