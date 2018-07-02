@@ -1,4 +1,4 @@
-FROM anywave/aw-ubuntu:latest
+FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
 RUN useradd -ms /bin/bash anywave
 USER anywave
