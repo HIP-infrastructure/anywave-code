@@ -2,12 +2,12 @@ FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
 RUN apt-get install -y sudo
 USER root
-ADD ./sudoers.txt /etc/sudoers
+ADD sudoers.txt /etc/sudoers
 RUN chmod 440 /etc/sudoers
 
 RUN useradd -ms /bin/bash anywave && echo "anywave:anywave" | chpasswd && adduser anywave sudo
 USER anywave
-cMD /bin/bash
+CMD /bin/bash
 WORKDIR /home/anywave
 
 COPY ./armadillo /home/anywave/armadillo
@@ -20,3 +20,7 @@ COPY CMakeLists.txt /home/anywave
 RUN mkdir /home/anywave/build
 WORKDIR /home/anywave/build
 RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && sudo make install
+
+ADD entrypoint.sh /bin/entrypoint.sh
+RUN chmod +x /bin/entrypoint.sh
+CMD /bin/entrypoint.sh
