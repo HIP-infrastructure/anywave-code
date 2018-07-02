@@ -1384,12 +1384,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			}
 			if (menu_predefined) {
 				menu_predefined->exec(e->screenPos());
-				if (forceTarget) {
-					QStringList targets;
-					targets << target;
-					m_currentMarkerItem->marker()->setTargetChannels(targets);
-				}
-				else if (m_markingSettings->isTargettingChannels)
+			    if (m_markingSettings->isTargettingChannels)
 					m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
 				delete menu_predefined;
 
