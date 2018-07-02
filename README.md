@@ -18,4 +18,4 @@ By default the installation path is /usr/local/AnyWave but you can change the pr
 cmake .. -DCMAKE_PREFIX_PATH=/home/user
 ```
 
-The binary are built using RPATH to the CMAKE_PREFIX_PATH so you should not create script to set the LD_LIBRAY_PATH
+The binaries are built using RPATH to the CMAKE_PREFIX_PATH so you should not create script to set the LD_LIBRARY_PATH
