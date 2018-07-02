@@ -6,11 +6,9 @@ stages:
     
 variables:
    registry: gitlab.thevirtualbrain.org:5000
-   ubuntu: anywave/anywave/aw-ubuntu
-   tag: anywave/anywave
    CONTAINER_TEST_IMAGE: gitlab.thevirtualbrain.org:5000/anywave/anywave:$CI_BUILD_REF_NAME
    CONTAINER_UBUNTU_IMAGE: gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
-   CONTAINER_RELEASE_IMAGe:  gitlab.thevirtualbrain.org:5000/anywave/anywave:latest
+   CONTAINER_RELEASE_IMAGE:  gitlab.thevirtualbrain.org:5000/anywave/anywave:latest
 
 before_script:
    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
