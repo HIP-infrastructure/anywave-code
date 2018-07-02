@@ -24,4 +24,4 @@ build:
 test:
    stage: test
    script:
-     - docker run --rm -v /data:/data CONTAINER_TEST_IMAGE --version
+     - docker run --rm -v /data:/data $CONTAINER_TEST_IMAGE --version
