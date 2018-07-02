@@ -6,9 +6,9 @@ variables:
 build:
    stage: build
    script:
+     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
      - docker build -t $registry/$ubuntu -f Docker/Dockerfile-aw-ubuntu Docker
      - docker build -t $registry/$tag -f Docker/Dockerfile-aw .
-     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
      - docker push $registry/$ubuntu
      - docker push $registry/$tag
       
