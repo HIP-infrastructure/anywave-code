@@ -16,4 +16,4 @@ test:
    stage: test
    image: $registry/$tag
    script:
-     - docker run --rm -v /data:/data dynamap/anywave --version
+     - docker run --rm -v /data:/data anywave/anywave --version
