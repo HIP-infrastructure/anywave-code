@@ -1,4 +1,4 @@
-FROM dynamap/aw-ubuntu
+FROM anywave/aw-ubuntu
 
 COPY ./armadillo /anywave/armadillo
 COPY ./include /anywave/include
