@@ -7,3 +7,4 @@ RUN apt-get -y update && apt-get -y install tzdata cmake qtbase5-dev qt5-qmake l
 	libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev \
 	build-essential \
 	libpython2.7-dev python2.7 python-numpy
+  
