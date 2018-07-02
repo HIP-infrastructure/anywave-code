@@ -1,19 +1,31 @@
+image: docker.git
+
+services: 
+    - docker:dind
+stages:
+    - build
+    - test
+    
 variables:
    registry: gitlab.thevirtualbrain.org:5000
    ubuntu: anywave/anywave/aw-ubuntu
    tag: anywave/anywave
+   CONTAINER_TEST_IMAGE: gitlab.thevirtualbrain.org:5000/anywave/anywave:$CI_BUILD_REF_NAME
+   CONTAINER_UBUNTU_IMAGE: gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
+   CONTAINER_RELEASE_IMAGe:  gitlab.thevirtualbrain.org:5000/anywave/anywave:latest
+
+before_script:
+   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
    
 build:
    stage: build
    script:
-     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
-     - docker build -t $registry/$ubuntu -f Docker/Dockerfile-aw-ubuntu Docker
-     - docker push $registry/$ubuntu
-     - docker build -t $registry/$tag -f Docker/Dockerfile-aw .
-     - docker push $registry/$tag
+     - docker build -t $CONTAINER_UBUNTU_IMAGE -f Docker/Dockerfile-aw-ubuntu Docker
+     - docker push  $CONTAINER_UBUNTU_IMAG
+     - docker build -t CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
+     - docker push CONTAINER_TEST_IMAGE
       
 test:
    stage: test
-   image: $registry/$tag
    script:
-     - docker run --rm -v /data:/data anywave/anywave --version
+     - docker run --rm -v /data:/data CONTAINER_TEST_IMAGE --version
