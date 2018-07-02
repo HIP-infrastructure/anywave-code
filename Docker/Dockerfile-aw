@@ -6,7 +6,9 @@ COPY ./resources /anywave/resources
 COPY ./src /anywave/src
 COPY ./cmake /anywave/cmake
 COPY CMakeLists.txt /anywave
+COPY entrypoint.sh /bin/entrypoint.sh
+RUN chmod +x /bin/entrypoint.sh
 RUN mkdir /anywave/build
 WORKDIR /anywave/build
 RUN cd /anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
-
+CMD /bin/entrypoint.sh
