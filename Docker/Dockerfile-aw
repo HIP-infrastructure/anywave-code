@@ -1,6 +1,10 @@
 FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
 RUN apt-get install -y sudo
+USER root
+ADD ./sudoers.txt /etc/sudoers
+RUN chmod 440 /etc/sudoers
+
 RUN useradd -ms /bin/bash anywave && echo "anywave:anywave" | chpasswd && adduser anywave sudo
 USER anywave
 cMD /bin/bash
