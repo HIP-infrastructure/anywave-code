@@ -224,7 +224,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
 	markerInspectorWidget->setPredefinedMarkers(AwSettings::getInstance()->loadPredefinedMarkers());
 	connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
-	connect(montage_manager, SIGNAL(montageChanged(AwChannelList&)), markerInspectorWidget, SLOT(setTargets(AwChannelList&)));
+	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
 	
 	m_display = new AwDisplay(this);
 	m_display->setParent(this);
@@ -260,14 +260,14 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList *)), m_display, SLOT(removeVirtualChannels(AwChannelList *)));
 	connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
 	connect(process_manager, SIGNAL(displayProcessTerminated(AwProcess *)), m_display, SLOT(processHasFinished()));
-	connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), process_manager, SLOT(setSelectedChannels(AwChannelList&)));
+	connect(m_display, SIGNAL(selectedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setSelectedChannels(const AwChannelList&)));
 
 	// Process Manager and Marker Manager
 	connect(process_manager, SIGNAL(newMarkersAvailable(const AwMarkerList&)), marker_manager, SLOT(addMarkers(const AwMarkerList&)));
 	// Process Manager and Montage Manager
-	connect(montage_manager, SIGNAL(montageChanged(AwChannelList&)), process_manager, SLOT(setMontageChannels(AwChannelList&)));
+	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), process_manager, SLOT(setMontageChannels(const AwChannelList&)));
     // Display and Montage manager
-	connect(montage_manager, SIGNAL(montageChanged(AwChannelList&)), m_display, SLOT(setChannels(AwChannelList&)));
+	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
 	// Marker Manager and AnyWave
 	connect(marker_manager, SIGNAL(modificationsDone()), this, SLOT(setModified()));
 	// Montage Manager and AnyWave

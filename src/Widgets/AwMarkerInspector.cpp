@@ -94,13 +94,12 @@ void AwMarkerInspector::setTargets(const QStringList& targets)
 	m_ui->radioSpecific->setEnabled(!m_targets.isEmpty());
 }
 
-void AwMarkerInspector::setTargets(AwChannelList& channels)
+void AwMarkerInspector::setTargets(const AwChannelList& channels)
 {
 	m_targets.clear();
-	foreach (AwChannel *c, channels) {
-		QString target = c->name();
-		if (c->hasReferences())
-			target += "-" + c->referenceName();
+	for (auto c : channels) {
+		QString target = c->fullName();
+
 		if (!m_targets.contains(target))
 			m_targets << target;
 	}
@@ -110,7 +109,7 @@ void AwMarkerInspector::setTargets(AwChannelList& channels)
 void AwMarkerInspector::setMarkers(const AwMarkerList& markers)
 {
 	m_markers = markers;
-	foreach (AwMarker *m, markers)	{
+	for (auto m :  markers)	{
 		QString value = QString::number(m->value());
 		if (!m_markerLabels.contains(m->label()))
 			m_markerLabels << m->label();

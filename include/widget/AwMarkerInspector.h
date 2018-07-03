@@ -48,7 +48,7 @@ public:
 public slots:
 	void setMarkers(const AwMarkerList& markers);
 	void setTargets(const QStringList& targets);
-	void setTargets(AwChannelList& channels);
+	void setTargets(const AwChannelList& channels);
 protected:
 	void bindOnLabel(const QString& label);
 	void bindOnValue(float value);

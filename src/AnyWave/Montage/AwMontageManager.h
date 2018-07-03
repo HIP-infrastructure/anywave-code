@@ -136,7 +136,7 @@ public:
 
 signals:
 	/** Signal émis lorsque un nouveau montage a ete calcule. La liste des canaux montés est passée en paramètre. **/
-	void montageChanged(AwChannelList &channels);
+	void montageChanged(const AwChannelList &channels);
 	/** Signal sent every time a montage is saved or a data file is open. **/
 	void quickMontagesUpdated();
 	void badChannelsSet(const QStringList& labels);

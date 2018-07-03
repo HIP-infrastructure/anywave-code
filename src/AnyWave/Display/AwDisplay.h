@@ -90,7 +90,7 @@ private:
 	void loadChannelSelections();
 signals:
 	void newMarker(float pos, float duration);
-	void selectedChannelsChanged(AwChannelList& selection);
+	void selectedChannelsChanged(const AwChannelList& selection);
 	void gainLevelsUpdated(float eeg, float seeg, float meg, float ecg, float trigger);
 	void clickedAtLatency(float latency);
 	void displayedChannelsChanged(const AwChannelList &channels);
