@@ -278,7 +278,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
 
 	// Filtering Manager and Montage Manager
-	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), montage_manager, SLOT(newFilters(AwFilteringOptions *)));
+	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), montage_manager, SLOT(newFilters()));
 
 	// Fitlering Manager and AnyWave
 	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));

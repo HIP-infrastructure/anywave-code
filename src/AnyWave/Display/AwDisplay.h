@@ -125,7 +125,7 @@ public slots:
 	void removeVirtualChannels(AwChannelList *channels);
 	/** remove ICA channels from views **/
 	void removeICAChannels();
-	void setChannels(AwChannelList& montage);
+	void setChannels(const AwChannelList& montage);
 	/** processHasFinished -
 	recoit les messages de fin de process de tous les plugins de type Display actifs sur l'affichage courant **/ 
 	void processHasFinished();
