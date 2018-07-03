@@ -14,6 +14,8 @@ before_script:
    
 build:
    stage: build
+   only:
+    - master
    script:
      - docker build -t $CONTAINER_UBUNTU_IMAGE -f Docker/Dockerfile-aw-ubuntu Docker
      - docker push  $CONTAINER_UBUNTU_IMAGE
@@ -24,5 +26,3 @@ test:
    stage: test
    script:
      - docker run --rm $CONTAINER_TEST_IMAGE --version
-only:
-    - master
