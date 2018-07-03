@@ -20,7 +20,7 @@ build:
      - docker build -t $CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
      - docker push $CONTAINER_TEST_IMAGE
     only:
-    - master
+     - master
 
 test:
    stage: test
