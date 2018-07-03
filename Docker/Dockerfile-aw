@@ -1,8 +1,15 @@
-FROM aw-ubuntu
+FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
-RUN useradd -ms /bin/bash anywave
-USER anywave
-WORKDIR /home/anywave
+USER root
+RUN apt-get install -y xvfb x11vnc fluxbox
+
+#ADD sudoers.txt /etc/sudoers
+#RUN chmod 440 /etc/sudoers
+
+#RUN useradd -ms /bin/bash anywave && echo "anywave:anywave" | chpasswd && adduser anywave sudo
+#USER anywave
+#CMD /bin/bash
+#WORKDIR /home/anywave
 
 COPY ./armadillo /home/anywave/armadillo
 COPY ./include /home/anywave/include
