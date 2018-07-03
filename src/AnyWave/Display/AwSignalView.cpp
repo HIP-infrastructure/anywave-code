@@ -269,13 +269,17 @@ void AwSignalView::applyChannelFilters()
 }
 
 
-void AwSignalView::setChannels(AwChannelList& channels)
+void AwSignalView::setChannels(const AwChannelList& channels)
 {
 	// received new montage.
-	// copy it
-	m_montageChannels = channels;
+	// clear previous channels and duplicates the new ones
 	// clear channels present in scene.
 	m_scene->clearChannels();
+	// destroying the main list.
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
+	// copy it
+	m_montageChannels = AwChannel::duplicateChannels(channels);
 	if (!m_isActive)
 		return;
 	// Before sending channels to scene, apply filter.

@@ -568,24 +568,22 @@ void AwDisplay::updateDisplay()
 /// setChannels()
 ///
 /// Recoit le nouveau montage et repercute sur l'affichage.
-void AwDisplay::setChannels(AwChannelList &montage)
+void AwDisplay::setChannels(const AwChannelList &montage)
 {
 	m_channels.clear();
 
 	m_channels = montage;
-	//foreach(AwSignalView *v, m_signalViews)
-	//	v->setChannels(montage);
 
-	// duplicate channel objects for each views.
-        AwChannelList tmp = AwChannel::duplicateChannels(montage);
+//	// duplicate channel objects for each views.
+ //   AwChannelList tmp = AwChannel::duplicateChannels(montage);
 	for (auto v : m_signalViews) {
-		v->setChannels(tmp);
+		v->setChannels(montage);
 	}
 
 	// get channel list back from scenes
 	AwChannelList completeList;
 
-	foreach (AwSignalView *v, m_signalViews)
+	for (auto v : m_signalViews)
 		completeList += v->displayedChannels();
 
 	// send new displayed channels event

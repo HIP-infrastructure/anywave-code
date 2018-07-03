@@ -50,7 +50,7 @@ public:
 	void quit();
 	inline void setProcessFlags(int flags) { m_processFlags = flags; }
 	void updateChannels();	// apply gains and redisplay channels
-	void setChannels(AwChannelList& channels);	
+	void setChannels(const AwChannelList& channels);	
 	void removeHighLigthMarker();
 	void displaySelectedChannelsOnly();
 signals:
