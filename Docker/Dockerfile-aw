@@ -18,10 +18,7 @@ COPY ./src /home/anywave/src
 COPY ./cmake /home/anywave/cmake
 COPY CMakeLists.txt /home/anywave
  
-RUN mkdir /home/anywave/build 
+RUN mkdir /home/anywave/build
 WORKDIR /home/anywave/build
 RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
 
-ADD entrypoint.sh /bin/entrypoint.sh
-RUN chmod +x /bin/entrypoint.sh
-ENTRYPOINT /bin/entrypoint.sh
