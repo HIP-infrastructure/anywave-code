@@ -22,3 +22,7 @@ RUN mkdir /home/anywave/build
 WORKDIR /home/anywave/build
 RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
 
+ADD entrypoint.sh /bin/entrypoint.sh
+RUN chmod +x /bin/entrypoint.sh
+ENTRYPOINT entrypoint.sh
+
