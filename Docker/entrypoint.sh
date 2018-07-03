@@ -20,4 +20,4 @@ awpid=$!
 wait $awpid
 
 # then stop the VNC server (kill -2 is Ctrl-C)
-kill -2 $xpid
+kill -2 $xpid 
