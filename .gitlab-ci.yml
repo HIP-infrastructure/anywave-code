@@ -18,11 +18,13 @@ build:
      - docker push  $CONTAINER_UBUNTU_IMAGE
      - docker build -t $CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
      - docker push $CONTAINER_TEST_IMAGE
+    only:
+    - master
       
 test:
    stage: test
    script:
      - docker run --rm -v /data:/data $CONTAINER_TEST_IMAGE --version
+   only:
+     - master
 
-only:
-    - master
