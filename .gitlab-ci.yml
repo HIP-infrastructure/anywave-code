@@ -19,7 +19,7 @@ build:
      - docker push  $CONTAINER_UBUNTU_IMAGE
      - docker build -t $CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
      - docker push $CONTAINER_TEST_IMAGE
-    only:
+   only:
      - master
 
 test:
