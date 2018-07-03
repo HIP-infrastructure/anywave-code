@@ -1,14 +1,14 @@
 FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
-RUN apt-get install -y sudo
+RUN apt-get install -y linuxvnc
 USER root
-ADD sudoers.txt /etc/sudoers
-RUN chmod 440 /etc/sudoers
+#ADD sudoers.txt /etc/sudoers
+#RUN chmod 440 /etc/sudoers
 
-RUN useradd -ms /bin/bash anywave && echo "anywave:anywave" | chpasswd && adduser anywave sudo
-USER anywave
-CMD /bin/bash
-WORKDIR /home/anywave
+#RUN useradd -ms /bin/bash anywave && echo "anywave:anywave" | chpasswd && adduser anywave sudo
+#USER anywave
+#CMD /bin/bash
+#WORKDIR /home/anywave
 
 COPY ./armadillo /home/anywave/armadillo
 COPY ./include /home/anywave/include
@@ -19,7 +19,7 @@ COPY CMakeLists.txt /home/anywave
  
 RUN mkdir /home/anywave/build
 WORKDIR /home/anywave/build
-RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && sudo make install
+RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
 
 ADD entrypoint.sh /bin/entrypoint.sh
 RUN sudo chmod +x /bin/entrypoint.sh
