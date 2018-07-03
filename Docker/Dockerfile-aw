@@ -1,7 +1,8 @@
 FROM gitlab.thevirtualbrain.org:5000/anywave/anywave:ubuntu
 
-RUN apt-get install -y linuxvnc
 USER root
+RUN apt-get install -y xvfb x11vnc fluxbox
+
 #ADD sudoers.txt /etc/sudoers
 #RUN chmod 440 /etc/sudoers
 
