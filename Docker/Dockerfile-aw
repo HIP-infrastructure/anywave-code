@@ -22,5 +22,5 @@ WORKDIR /home/anywave/build
 RUN cd /home/anywave/build && cmake -DCMAKE_INSTALL_PREFIX=/usr/local .. && make install
 
 ADD entrypoint.sh /bin/entrypoint.sh
-RUN sudo chmod +x /bin/entrypoint.sh
+RUN chmod +x /bin/entrypoint.sh
 ENTRYPOINT /bin/entrypoint.sh
