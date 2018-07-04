@@ -219,7 +219,7 @@ bool AwFileIO::checkForElectrodeLabels()
 	QStringList list;
 	bool ok = true;
 	for (auto c : infos.channels()) {
-		c->setName(c->name().trimmed());
+		c->setName(c->name().remove(' '));
 		if (list.contains(c->name()))
 			ok = false;
 		else
