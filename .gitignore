@@ -270,3 +270,6 @@ __pycache__/
 /build-ubuntu-image.cmd
 /Anywave_win64.iss
 /Anywave_INS.iss
+/Docker/local/Dockerfile-anywave
+/Docker/local/Dockerfile-ubuntuQt5
+/aw-entrypoint.sh
