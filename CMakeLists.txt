@@ -105,14 +105,28 @@ add_dependencies(AwLayout AwCore)
 # header files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION ${PROJECT_BINARY_DIR}/include)
 
-find_package(Matlab QUIET)
+find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY)
 
 # MATLAB SUPPORT
 if (Matlab_FOUND)
-  message(STATUS "MATLAB Support added.")
+  message(STATUS "MATLAB Support added. Root dir is ${Matlab_ROOT_DIR}")
   add_subdirectory(src/MatlabSupport)
+# Build mex files
+# build the common mex library
+   add_subdirectory(src/Mex)
 endif()
 # END OF MATLAB SUPPORT
+
+# PYTHON
+#SET(Python_ADDITIONAL_VERSIONS 2.7)
+#find_package(PythonLibs)
+#if (PYTHONLIBS_FOUND)
+#  find_package(NumPy)
+#  if (PYTHON_NUMPY_FOUND)
+#     message(STATUS "Python support added.")
+#     add_subdirectory(src/PythonSupport)
+#  endif()
+#endif()
 
 # AnyWave
 add_subdirectory(src/AnyWave)
@@ -142,6 +156,7 @@ add_dependencies(AppendFiles AwCore AwProcess AwReadWrite)
 
 # Install
 INSTALL(FILES ${PROJECT_BINARY_DIR}/bin/AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 #License files
 INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTINATION
@@ -157,6 +172,7 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 include(${CMAKE_SOURCE_DIR}/cmake/InstallSymlink.cmake)
-InstallSymlink(${CMAKE_INSTALL_PREFIX}/AnyWaveLinux /usr/local/bin/anywave)
+InstallSymlink(${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/local/bin/anywave)
+InstallSymlink(${CMAKE_INSTALL_PREFIX}/AnyWaveLinux /usr/local/bin/anywave-binary)
 
 
