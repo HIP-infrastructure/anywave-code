@@ -43,7 +43,7 @@ public:
 protected:
 	AwChannelList m_channels;		// channels to export
 	AwChannelList m_ICAChannels;	// ICA Channels to export
-	AwMarkerList m_selectedMarkers;
+	AwMarkerList m_skippedMarkers, m_exportedMarkers;
 	AwFileIOPlugin *m_plugin;
 	QString m_path;
 	AwFilteringOptions m_foptions;
