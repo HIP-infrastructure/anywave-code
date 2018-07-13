@@ -1,6 +1,6 @@
 stages:
     - build
-    - test
+#    - test
     
 variables:
    registry: gitlab.thevirtualbrain.org:5000
@@ -22,9 +22,9 @@ build:
    only:
      - master
 
-test:
-   stage: test
+#test:
+#   stage: test
 #   script:
 #     - docker run --rm $CONTAINER_TEST_IMAGE --version
-   only:
-     - master
+#   only:
+#     - master
