@@ -24,7 +24,7 @@ build:
 
 test:
    stage: test
-   script:
-     - docker run --rm $CONTAINER_TEST_IMAGE --version
+#   script:
+#     - docker run --rm $CONTAINER_TEST_IMAGE --version
    only:
      - master
