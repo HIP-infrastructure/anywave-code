@@ -30,6 +30,8 @@ AwExporterSelMarkers::AwExporterSelMarkers(QWidget *parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
+	m_ui.tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	m_ui.tableView->resizeColumnsToContents();
 }
 
 AwExporterSelMarkers::~AwExporterSelMarkers()

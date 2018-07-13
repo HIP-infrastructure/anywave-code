@@ -97,7 +97,7 @@ void AwExporterSettings::pickupFile()
 {
 	QString ext = extensions.at(comboWriters->currentIndex());
 	QFileInfo fi(initialPath);
-	filePath = QFileDialog::getSaveFileName(this, tr("Output file"), fi.absolutePath(), ext);
+	filePath = QFileDialog::getSaveFileName(this, tr("Save File"), fi.absolutePath(), ext);
 	lineEditFile->setText(filePath);
 }
 
@@ -114,10 +114,7 @@ int AwExporterSettings::exec()
 	spinEEGNotch->setValue(foptions.eegNotch);
 	spinMEGNotch->setValue(foptions.megNotch);
 	spinEMGNotch->setValue(foptions.emgNotch);
-
 	comboDS->setSamplingRate(channels.first()->samplingRate());
-
-
 	return QDialog::exec();
 }
 
