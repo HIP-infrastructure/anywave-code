@@ -178,6 +178,10 @@ AwChannel* AwDataInfo::addChannel(AwChannel& channel)
 	// copy constructor will set channel as parent for new channel.
 	// Here we don't want a parent for as recorded channel, so change it to null.
 	chan->setParent(NULL);
+
+	// remove all whitespaces in label
+	chan->setName(channel.name().remove(' '));
+
 	// check for existing label in infos.
 	if (m_labelToIndex.contains(chan->name()))
 		// auto rename label
@@ -206,24 +210,4 @@ void AwDataInfo::changeChannelName(const QString& old, const QString& newName)
 		m_channels.at(index)->setName(newName);
 		m_labelToIndex.insert(newName, index);
 	}
-}
-
-///
-/// AwFileIO
-///
-
-
-bool AwFileIO::checkForElectrodeLabels()
-{
-	// remove all spaces that may be found in the label.
-	QStringList list;
-	bool ok = true;
-	for (auto c : infos.channels()) {
-		c->setName(c->name().trimmed());
-		if (list.contains(c->name()))
-			ok = false;
-		else
-			list << c->name();
-	}
-	return ok;
 }

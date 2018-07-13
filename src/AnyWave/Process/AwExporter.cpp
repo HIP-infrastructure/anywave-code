@@ -26,6 +26,7 @@
 #include "AwExporter.h"
 #include "AwExporterSettings.h"
 #include <AwFiltering.h>
+#include <widget/AwMessageBox.h>
 
 
 AwExporterPlugin::AwExporterPlugin()
@@ -46,20 +47,32 @@ AwExporter::AwExporter() : AwProcess()
 }
 
 AwExporter::~AwExporter() 
-{}
-
-
+{
+	while (!m_skippedMarkers.isEmpty())
+		delete m_skippedMarkers.takeFirst();
+	while (!m_exportedMarkers.isEmpty())
+		delete m_exportedMarkers.takeFirst();
+}
 
 void AwExporter::run()
 {
 	AwMarkerList output_markers = pdi.input.markers;
-	if (!m_selectedMarkers.isEmpty()) {
-		AwMarkerList selection = AwMarker::invertMarkerSelection(m_selectedMarkers, "selection", pdi.input.reader()->infos.totalDuration());
-		output_markers = AwMarker::cutAroundMarkers(pdi.input.markers, m_selectedMarkers);
+	AwMarkerList selection;
+	if (!m_skippedMarkers.isEmpty()) {
+		sendMessage(QString("Skipping some markers from data..."));
+		selection = AwMarker::invertMarkerSelection(m_skippedMarkers, "selection", pdi.input.reader()->infos.totalDuration());
+		output_markers = AwMarker::cutAroundMarkers(pdi.input.markers, m_skippedMarkers);
 		if (selection.isEmpty()) {
-			sendMessage(QString("No data to read after markers were skipped."));
+			sendMessage(QString("No data to read after markers were skipped. Aborted."));
 			return;
 		}
+	}
+	if (!m_exportedMarkers.isEmpty()) {
+		sendMessage(QString("Exporting marked selections..."));
+		selection = m_exportedMarkers;
+	}
+	// process export with skipped or exported markers
+	if (!selection.isEmpty()) {
 		typedef QList<QVector<float> > VectorList;
 		QList<VectorList *> channelVectors;
 		for (auto c : m_channels) 
@@ -123,7 +136,7 @@ void AwExporter::run()
 		while (!channelVectors.isEmpty())
 			delete channelVectors.takeFirst();
 	} 
-	else {  // No markers to skip
+	else {  // Export all data, no markers used.
 		sendMessage("Reading data...");
 		if (m_downSample) {
 			requestData(&m_channels, 0., -1.0, true);
@@ -166,8 +179,6 @@ void AwExporter::run()
 	if (writer->createFile(m_path) != AwFileIO::NoError) {
 		sendMessage(tr("Error creating output file."));
 		m_plugin->deleteInstance(writer);
-		while (!m_selectedMarkers.isEmpty())
-			delete m_selectedMarkers.takeFirst();
 		return;
 	}
 	sendMessage(tr("Writing data..."));
@@ -205,6 +216,11 @@ bool AwExporter::showUi()
 		else
 			m_channels = ui.selectedChannels;
 		m_plugin = writers.value(ui.writer);
+
+		if (QFile::exists(ui.filePath)) {
+			if (AwMessageBox::information(0, tr("File"), tr("the file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+				return false;
+		}
 		m_path = ui.filePath;
 		m_foptions = ui.foptions;
 
@@ -218,8 +234,10 @@ bool AwExporter::showUi()
 		// build the complete list of channels to export
 		if (!m_ICAChannels.isEmpty())
 			m_channels += m_ICAChannels;
-
-		m_selectedMarkers = ui.selectedMarkers;
+		if (ui.skipMarkers)
+			m_skippedMarkers = ui.skippedMarkers;
+		if (ui.exportMarkers)
+			m_exportedMarkers = ui.exportedMarkers;
 		m_downSample = ui.downSample;
 		return true;
 	}

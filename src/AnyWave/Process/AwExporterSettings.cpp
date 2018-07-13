@@ -38,7 +38,8 @@ AwExporterSettings::AwExporterSettings(QWidget *parent)
 	connect(buttonFile, SIGNAL(clicked()), this, SLOT(pickupFile()));
 	connect(buttonSelectChannels, SIGNAL(clicked()), this, SLOT(selectChannels()));
 	connect(buttonSelectICA, SIGNAL(clicked()), this, SLOT(selectICAChannels()));
-	connect(buttonMarkers, SIGNAL(clicked()), this, SLOT(selectMarkers()));
+	connect(buttonSkipMarkers, SIGNAL(clicked()), this, SLOT(selectMarkersToSkip()));
+	connect(buttonExportMarkers, SIGNAL(clicked()), this, SLOT(selectMarkersToExport()));
 	connect(comboWriters, SIGNAL(currentIndexChanged(int)), this, SLOT(updateOutputFileExtension(int)));
 }
 
@@ -52,12 +53,21 @@ void AwExporterSettings::updateOutputFileExtension(int index)
 	lineEditFile->setText(QString("%1%2").arg(initialPath).arg(extensions.at(index)));
 }
 
-void AwExporterSettings::selectMarkers()
+void AwExporterSettings::selectMarkersToSkip()
 {
 	AwExporterSelMarkers ui;
 	ui.markers = markers;	// all markers
 	if (ui.exec() ==  QDialog::Accepted) {
-		selectedMarkers = ui.selectedMarkers;
+		skippedMarkers = ui.selectedMarkers;
+	}
+}
+
+void AwExporterSettings::selectMarkersToExport()
+{
+	AwExporterSelMarkers ui;
+	ui.markers = markers;	// all markers
+	if (ui.exec() == QDialog::Accepted) {
+		exportedMarkers = ui.selectedMarkers;
 	}
 }
 
@@ -87,7 +97,7 @@ void AwExporterSettings::pickupFile()
 {
 	QString ext = extensions.at(comboWriters->currentIndex());
 	QFileInfo fi(initialPath);
-	filePath = QFileDialog::getSaveFileName(this, tr("Output file"), fi.absolutePath(), ext);
+	filePath = QFileDialog::getSaveFileName(this, tr("Save File"), fi.absolutePath(), ext);
 	lineEditFile->setText(filePath);
 }
 
@@ -104,10 +114,7 @@ int AwExporterSettings::exec()
 	spinEEGNotch->setValue(foptions.eegNotch);
 	spinMEGNotch->setValue(foptions.megNotch);
 	spinEMGNotch->setValue(foptions.emgNotch);
-
 	comboDS->setSamplingRate(channels.first()->samplingRate());
-
-
 	return QDialog::exec();
 }
 
@@ -118,6 +125,16 @@ void AwExporterSettings::accept()
 		AwMessageBox::information(this, tr("Output File"), tr("Select a file"));
 		return;
 	}
+
+	if (checkSkipMarkers->isChecked() && skippedMarkers.isEmpty()) {
+		AwMessageBox::information(this, tr("Skipping markers"), tr("Select markers to skip."));
+		return;
+	}
+	if (checkExportMarkers->isChecked() && exportedMarkers.isEmpty()) {
+		AwMessageBox::information(this, tr("Export markers"), tr("Select markers to export."));
+		return;
+	}
+
 	// remove extensions to filePath
 	QFileInfo fi(filePath);
 	filePath = fi.absolutePath() + "/" + fi.baseName();
@@ -136,6 +153,8 @@ void AwExporterSettings::accept()
 	foptions.emgNotch = (float)spinEMGNotch->value();
 	downSample = comboDS->getSamplingRate();
 
+	skipMarkers = checkSkipMarkers->isChecked();
+	exportMarkers = checkExportMarkers->isChecked();
 
 	QDialog::accept();
 }

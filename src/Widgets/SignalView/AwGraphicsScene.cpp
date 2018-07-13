@@ -397,6 +397,22 @@ QGraphicsItem *AwGraphicsScene::getItemUnderMouse(QPointF pos, int *itemType)
 	return NULL;
 }
 
+///
+/// unselectChannels()
+/// unselect channels whose labels are specified
+/// mostly used after the user set some channels as bad or when the montage changes.
+void AwGraphicsScene::unselectChannels(const QStringList& labels)
+{
+	for (auto i : m_signalItems) {
+		if (labels.contains(i->channel()->name())) {
+			i->setSelected(false);
+			i->channel()->setSelected(false);
+		}
+	}
+	updateSelection();
+	update();
+}
+
 // selectChannels()
 // input: list of electrodes names
 // select all channels with corresponding electrode names.
