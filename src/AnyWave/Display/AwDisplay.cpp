@@ -147,6 +147,9 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 		view->scene(), SLOT(setMarkingSettings(AwMarkingSettings *)));
 	view->scene()->setMarkingSettings(&AwMarkerManager::instance()->markerInspector()->settings());
 
+	// Montage to view
+	connect(AwMontageManager::instance(), SIGNAL(badChannelsSet(const QStringList&)), view->scene(), SLOT(unselectChannels(const QStringList&)));
+
 	// close view connect
 	connect(view, SIGNAL(closeViewClicked()), this, SLOT(removeView()));
 

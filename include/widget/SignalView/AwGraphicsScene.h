@@ -114,6 +114,7 @@ public slots:
 	void selectChannelsOfType();
 	void selectChannelsOfType(int type);
 	void selectChannels(const QStringList& labels);
+	void unselectChannels(const QStringList& labels);
 	void selectChannelAtPosition(const QPointF& pos);
 	void showChannel(const QString& label);	// make the item visible in the view.
 	// cursors and markers

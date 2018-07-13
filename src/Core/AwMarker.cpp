@@ -385,20 +385,30 @@ AwMarkerList AwMarker::invertMarkerSelection(const AwMarkerList& markers, const 
 	AwMarkerList list = markers;
 	list = AwMarker::sort(list);
 	AwMarkerList res;
-	float pos = 0.;
+	// get first maker to handle special case
+	auto first = list.takeFirst();
+	float pos = std::min(first->end(), end);
+
+	if (first->start() > 0.) {
+		auto newMarker = new AwMarker(label);
+		newMarker->setStart(0.);
+		newMarker->setEnd(first->start());
+		res << newMarker;
+	}
+
 	while (!list.isEmpty()) {
-		AwMarker *m = list.takeFirst();
-		res << new AwMarker(label, pos, m->start());
-		//AwMarker *nm = new AwMarker(label, pos, m->start());
-		//nm->setEnd(m->start());
-		//res << nm;
-		pos = m->end();
+		auto m = list.takeFirst();
+		auto nm = new AwMarker(label);
+		nm->setStart(pos);
+		nm->setEnd(m->start());
+		res << nm;
+		pos = std::min(m->end(), end);
 	}
 	if (pos < end) {
-		res << new AwMarker(label, pos, end);
-	//	AwMarker *nm = new AwMarker(label, pos, end);
-	//	nm->setEnd(end);
-	//	res << nm;
+		auto newMarker = new AwMarker(label);
+		newMarker->setStart(pos);
+		newMarker->setEnd(end);
+		res << newMarker;
 	}
 	return res;
 }

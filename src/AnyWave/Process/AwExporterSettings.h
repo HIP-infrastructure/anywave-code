@@ -46,11 +46,11 @@ public:
 	AwChannelList selectedChannels;	
 	AwChannelList icaChannels;
 	AwChannelList selectedICA;	
-	AwMarkerList markers, selectedMarkers;
+	AwMarkerList markers, skippedMarkers, exportedMarkers;
 	QString filePath, initialPath;
 	AwFilteringOptions foptions;
 	bool useCurrentMontage;
-	bool exportICA;
+	bool exportICA, skipMarkers, exportMarkers;
 	float downSample, globalSamplingRate;
 public slots:
 	int exec() override;
@@ -59,7 +59,8 @@ protected slots:
 	void pickupFile();
 	void selectChannels();
 	void selectICAChannels();
-	void selectMarkers();
+	void selectMarkersToSkip();
+	void selectMarkersToExport();
 	void updateOutputFileExtension(int);
 };
 
