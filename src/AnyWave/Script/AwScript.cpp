@@ -196,10 +196,10 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 					process->pdi.input.markers = markers;
 					bool skipMarkers = !finput->skippedMarkers().isEmpty();
 					bool useMarkers = !finput->usedMarkers().isEmpty();
-					if (skipMarkers) 
-						markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
+					//if (skipMarkers) 
+					//	markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
 					if (skipMarkers || useMarkers) {
-						AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers());
+						AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers(), reader->infos.totalDuration());
 						if (filtered.isEmpty()) 
 							emit warning("no markers were kept after applying usedMarkers or skippedMarkers filters");
 						process->pdi.input.markers = filtered;
@@ -240,6 +240,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			AwDataServer::getInstance()->closeConnection(process);
 			m_runningProcesses.removeAll(process);
 			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(message(const QString&)));
+			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(processMessage(const QString&)));
 
 			// clean pdi.input for another usage
 			while (!process->pdi.input.channels.isEmpty())
