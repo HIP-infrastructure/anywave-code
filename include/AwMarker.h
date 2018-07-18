@@ -110,16 +110,16 @@ public:
 	inline void setLabel(const QString& label) { m_label = label; }
 	inline void setValue(float value) { m_code = value; }
 	inline void setStart(float start) { m_start = start; }
-	inline void setDuration(float duration) { m_duration = duration; if (duration > 0) m_type = Selection; }
+	inline void setDuration(float duration) { m_duration = duration; if (duration > 0) m_type = Selection;  }
 	inline void setTargetChannels(const QStringList& targetChannels) { m_targetChannels = targetChannels; }
 	inline void addTargetChannel(const QString& channel) { m_targetChannels.append(channel); }
 	inline void setColor(const QString& color) { m_color = color; }
 	inline QString& color() { return m_color; }
 	void setEnd(float end);
+	void reshape(float start, float end);
 protected:
 	QString m_label;		
 	int m_type;				
-	//qint16 m_code;			
 	float m_start, m_duration, m_code;		
 	QStringList m_targetChannels;	
 	QString m_color;

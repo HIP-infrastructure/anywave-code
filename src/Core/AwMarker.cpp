@@ -35,8 +35,7 @@ AwMarker::AwMarker()
 {
 	m_type = Single;
 	m_code = -1;
-	m_start = 0;
-	m_duration = 0;
+	m_start = m_duration = 0.;
 }
 
 AwMarker::AwMarker(const QString& label, float pos, float dur)
@@ -62,8 +61,24 @@ AwMarker::AwMarker(AwMarker *source)
 
 void AwMarker::setEnd(float end)
 {
-	if (end > m_start)
+	// if end is below start, reverse the position of the marker
+	if (end < m_start) {
+		m_start = end;
+		m_duration = m_start - end;
+	}
+	else 
 		m_duration = end - m_start;
+}
+
+void AwMarker::reshape(float start, float end)
+{
+	float s = start, e = end;
+	if (end < start) {
+		s = end;
+		e = start;
+	}
+	m_start = s;
+	m_duration = e - s;
 }
 
 bool AwMarker::contains(AwMarker *m)
@@ -390,7 +405,7 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 
 					if (startBefore && endWithin) { // crop marker from begining
 						auto nm = new AwMarker(u);
-						nm->setStart(m->end());
+						nm->reshape(m->end(), u->end());
 						usedMarkers.removeAll(u);
 						delete u;
 						usedMarkers << nm;
@@ -401,17 +416,17 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 					}
 					else if (startBefore && endAfter) {
 						auto nm1 = new AwMarker(u);
-						nm1->setEnd(m->start());
+						nm1->reshape(nm1->start(), m->start());
 						usedMarkers << nm1;
 						auto nm2 = new AwMarker(u);
-						nm2->setStart(m->end());
+						nm2->reshape(m->end(), u->end());
 						usedMarkers << nm2;
 						usedMarkers.removeAll(u);
 						delete u;
 					}
 					else if (startWithin && endAfter) {
 						auto nm = new AwMarker(u);
-						nm->setStart(m->end());
+						nm->reshape(m->end(), u->end());
 						usedMarkers << nm;
 						usedMarkers.removeAll(u);
 						delete u;
