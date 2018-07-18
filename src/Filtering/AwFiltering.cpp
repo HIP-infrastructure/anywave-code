@@ -95,6 +95,25 @@ void AwFiltering::downSample(const AwChannelList& channels, float freq)
 		delete toProcess.takeLast();
 }
 
+///
+/// downSample()
+/// Change the sampling rate of all channels by dividing it by factor.
+
+void AwFiltering::downSample(const AwChannelList& channels, int factor)
+{
+	if (channels.isEmpty())
+		return;
+
+	QList<down_sampling *> toProcess;
+	for (auto c :  channels) 
+		toProcess << new down_sampling(c, c->samplingRate() / factor);
+	
+	QFuture<void> res = QtConcurrent::mapped(toProcess, downSamplingChannel);
+	res.waitForFinished();
+	while (!toProcess.isEmpty())
+		delete toProcess.takeLast();
+}
+
 AwChannel *downSamplingChannel(down_sampling *ds)
 {
 	float sr = ds->c->samplingRate();
@@ -148,30 +167,6 @@ void AwFiltering::filter(AwChannelList* channels, AwFilteringOptions *fo)
 	AwFiltering::filter(*channels);
 }
 
-
-//void AwFiltering::notch(const AwChannelList& channels)
-//{
-//	if (channels.isEmpty())
-//		return;
-//
-//	AwChannelList channelsToFilter;
-//
-//	foreach (AwChannel *chan, channels)	{
-//		if (chan->notch() > 0)
-//			channelsToFilter.append(chan);
-//	}
-//
-//	if (channelsToFilter.isEmpty())
-//		return;
-//
-//	QFuture<void> res = QtConcurrent::mapped(channelsToFilter, notchFilterChannel);
-//	res.waitForFinished();
-//}
-
-//void AwFiltering::notch(AwChannelList *channels)
-//{
-//	AwFiltering::notch(*channels);
-//}
 
 ///
 /// decimate channels

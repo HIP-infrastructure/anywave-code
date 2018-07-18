@@ -102,70 +102,59 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 
 	bool usingLabels = !labels.isEmpty();
 	bool usingTypes = !types.isEmpty();
-	if (labels.isEmpty()) { // no labels specified, so use the input channels for the process
-		if (usingTypes) { // using types without labels => request channels from montage or file
-			if (usingFile)
-				//requestedChannels = AwChannel::duplicateChannels(reader->infos.channels());
-				requestedChannels = reader->infos.channels(); 
-			else 
-				requestedChannels = AwChannel::duplicateChannels(AwMontageManager::instance()->channels());
+	bool error = false;
 
-			AwChannelList types_list;
-			foreach (QString type, types) {
-				int t = AwChannel::stringToType(type);
-				foreach(AwChannel *c, requestedChannels) {
-					if (c->type() == t) 
-						types_list << c->duplicate();
-				}
-			}
-			requestedChannels = types_list;
+	// default case : not using labels nor types
+	requestedChannels = p->pdi.input.channels;
 
+	if (usingLabels && usingTypes) {
+		if (!usingFile) 
+			// get labels from current montage.
+			requestedChannels = AwChannel::getChannelWithLabels(AwMontageManager::instance()->channels(), labels);
+		else 
+			requestedChannels = AwChannel::getChannelWithLabels(reader->infos.channels(), labels);
+		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
+			emit log(QString("Error in aw_getdata: could not find channels with requested labels."));
+			error = true;
 		}
-		else { // NOT USING LABELS NOR TYPES
-			if (usingFile)
-				requestedChannels = AwChannel::duplicateChannels(reader->infos.channels());
-			else
-				requestedChannels = p->pdi.input.channels;
+		else { // now extract specified types.
+			AwChannelList channels;
+			for (auto t : types)
+				channels += AwChannel::getChannelsOfType(requestedChannels, AwChannel::stringToType(t));
+			requestedChannels = channels;
+			if (channels.isEmpty()) {
+				emit log(QString("Error in aw_getdata: could not find channels of requested type AND labels."));
+				error = true;
+			}
 		}
 	}
-	else {  // USING LABELS
-		if (usingFile) {
-			AwChannelList temp = AwChannel::getChannelWithLabels(reader->infos.channels(), labels);
-			if (usingTypes) {
-				AwChannelList types_list;
-				foreach (QString type, types) {
-					int t = AwChannel::stringToType(type);
-					foreach(AwChannel *c, temp) {
-						if (c->type() == t) 
-							types_list << c;
-					}
-				}
-				requestedChannels = AwChannel::duplicateChannels(types_list);
-			}
-			else
-				requestedChannels = AwChannel::duplicateChannels(temp);
-		}
-		else {
-			AwChannelList temp = AwMontageManager::instance()->channelsWithLabels(labels);
-			if (usingTypes) {
-				AwChannelList types_list;
-				foreach (QString type, types) {
-					int t = AwChannel::stringToType(type);
-					foreach(AwChannel *c, temp) {
-						if (c->type() == t) 
-							types_list << c;
-					}
-				}
-				requestedChannels = AwChannel::duplicateChannels(types_list);
-			}
-			else 
-				requestedChannels = AwChannel::duplicateChannels(temp);
+	else if (usingLabels && !usingTypes) {
+		if (!usingFile)
+			// get labels from current montage.
+			requestedChannels = AwChannel::getChannelWithLabels(AwMontageManager::instance()->channels(), labels);
+		else
+			requestedChannels = AwChannel::getChannelWithLabels(reader->infos.channels(), labels);
+		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
+			emit log(QString("Error in aw_getdata: could not find channels with requested labels."));
+			error = true;
 		}
 	}
-	
-	// check if requested channels are empty
-	if (requestedChannels.isEmpty()) {
-		emit log("No channels found using labels and/or types criterias");
+	else if (usingTypes && !usingLabels) {
+		AwChannelList channels;
+		if (!usingFile)
+			// get labels from current montage.
+			requestedChannels = AwMontageManager::instance()->channels();
+		else
+			requestedChannels = reader->infos.channels();
+		for (auto t : types)
+			channels += AwChannel::getChannelsOfType(requestedChannels, AwChannel::stringToType(t));
+		if (channels.isEmpty()) {
+			emit log(QString("Error in aw_getdata: could not find channels of requested types."));
+			error = true;
+		}
+		requestedChannels = channels;
+	}
+	if (error) {
 		stream << (qint64)0;
 		response.send();
 		if (fo)
@@ -177,9 +166,12 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		AwDataServer::getInstance()->openConnection(this, reader);
 		// ATTENTION:  opening a new connection with the same client, will close the previous one (i.e. the connection AwRequestServer made when starting)
 		// Do not forget to open again a connection.
-		if (montage.toUpper() == "SEEG BIPOLAR") 
+		if (montage.toUpper() == "SEEG BIPOLAR")
 			requestedChannels = AwMontageManager::makeSEEGBipolar(requestedChannels);
 	}
+
+	// duplicate all channels
+	requestedChannels = AwChannel::duplicateChannels(requestedChannels);
 
 	// requesting data
 #ifndef NDEBUG
@@ -192,7 +184,12 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 
 	if (decim > 1) {
 		requestData(&requestedChannels, start, duration, true);
-		AwFiltering::decimate(requestedChannels, decim);
+		//AwFiltering::decimate(requestedChannels, decim);
+		AwFiltering::downSample(requestedChannels, decim);
+		if (fo)
+			fo->setFilters(requestedChannels);
+		else // apply current filters set in AwFiltersManager.
+			AwFiltersManager::instance()->fo().setFilters(requestedChannels);
 		AwFiltering::filter(&requestedChannels);
 	}
 	else 
@@ -255,13 +252,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		}
 	}
 
-	// finished sending data
-	if (usingLabels || usingFile) {
-		while (!requestedChannels.isEmpty())
-			delete requestedChannels.takeFirst();
-	}
-	else
-		AwChannel::clearData(requestedChannels);
+	while (!requestedChannels.isEmpty())
+		delete requestedChannels.takeFirst();
 
 	emit log("Done.");
 }

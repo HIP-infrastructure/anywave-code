@@ -35,10 +35,13 @@ public:
     static void filter(const AwChannelList& channels);
 	static void filter(AwChannelList* channels);
 	static void filter(AwChannelList* channels, AwFilteringOptions *fo);
-//	static void notch(const AwChannelList& channels);
-//	static void notch(AwChannelList *channels);
+	/** down sample the data of a channel, to the new specified rate **/
 	static void downSample(AwChannel *channel, float newSamplingRate);
+	/** down sample the data of all channels, to the new specified rate **/
 	static void downSample(const AwChannelList& channels, float newSamplingRate);
+	/** down sample the data of all channels dividing the sampling rate by a factor **/
+	static void downSample(const AwChannelList& channels, int factor);
+	
 	static void decimate(const AwChannelList& channels, int factor);
 	static QVector<float> pad_left(AwChannel *c);
 	static QVector<float> pad_right(AwChannel *c);
