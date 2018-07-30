@@ -83,6 +83,10 @@ void ICA::run()
 {
 	emit progressChanged("Filtering channel types...");
 	m_channels = AwChannel::getChannelsOfType(pdi.input.channels, m_modality);
+	// if modality is set to SOURCE that may raise an issue as sources channels may also be present as As Recorded Channels if the data was previously exported.
+	// So check for doublons on sources to avoid miscalculation.
+	m_channels = AwChannel::removeDoublons(m_channels);
+
 	// check for sampling rate for  all channels
 	emit progressChanged("OK");
 
@@ -143,21 +147,7 @@ void ICA::run()
 		sendMessage("Filtering...");
 		AwFiltering::filter(m_channels);
 		sendMessage("Done.");
-		//float sr = m_channels.first()->samplingRate();
-		//sendMessage("Loading raw data...");
-		//requestData(&m_channels, 0.0f, -1.0f, true);
-		//sendMessage("Done.");
-		//sendMessage("Downsampling...");
-		//AwFiltering::downSample(m_channels, sr / decimate);
-		//sendMessage("Done.");
-		//sendMessage("Filtering...");
-		//AwChannel::clearFilters(m_channels);
-		//for (auto c : m_channels) {
-		//	c->setLowFilter(m_lpf);
-		//	c->setHighFilter(m_hpf);
-		//}
-		//AwFiltering::filter(m_channels);
-		//sendMessage("Done.");
+
 	}
 	else {
 		AwChannel::clearFilters(m_channels);

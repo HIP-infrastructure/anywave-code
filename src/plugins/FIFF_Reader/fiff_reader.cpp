@@ -548,6 +548,8 @@ qint64 FIFF_Reader::readDataFromChannels(float start, float duration, AwChannelL
 								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= pow(1,m_chanInfos.at(c->ID())->unit_mul);
 							if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_V)
 								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E-6;
+							if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_T)
+								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E12;
 						}
 						channel_index++;
 					}

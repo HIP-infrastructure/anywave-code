@@ -426,15 +426,7 @@ QString AwChannel::typeToString(int t)
 	int index;
 	for (auto s : stringTypes)
 		types << AwChannel::stringToType(s);
-
-//	stringTypes << "EEG" << "SEEG" << "MEG" << "EMG" << "ECG" << "Reference" << "Trigger" << "Other" << "ICA" << "SOURCE" << "GRAD";
-
-//	type << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::EMG << AwChannel::ECG << AwChannel::Reference << AwChannel::Trigger << AwChannel::Other
-//		<< AwChannel::ICA << AwChannel::Source << AwChannel::GRAD;
-
-
 	index = types.indexOf(t);
-
 	if (index == -1)
 		return QString();
 
@@ -603,6 +595,19 @@ QList<AwChannel *> AwChannel::cloneList(const QList<AwChannel *>& list, bool clo
 		if (cloneData && c->dataSize())  {
 			newChan->newData(c->dataSize());
 			memcpy(newChan->data(), c->data(), c->dataSize() * sizeof(float));
+		}
+	}
+	return res;
+}
+
+QList<AwChannel *> AwChannel::removeDoublons(const QList<AwChannel *>& list)
+{
+	QStringList labels;
+	AwChannelList res;
+	for (auto c : list) {
+		if (!labels.contains(c->name())) {
+			labels << c->name();
+			res << c;
 		}
 	}
 	return res;
