@@ -453,8 +453,8 @@ void AwMontageManager::clear()
 	while (!m_channels.isEmpty()) // delete current montage.
 		delete m_channels.takeLast();
 
-	m_channelHashTable.clear();
-	m_channelsAsRecorded.clear(); // clear as recorded Channels
+	//m_channelHashTable.clear();
+	//m_channelsAsRecorded.clear(); // clear as recorded Channels
 }
 
 void AwMontageManager::closeFile()
@@ -469,6 +469,8 @@ void AwMontageManager::closeFile()
 	m_badChannelLabels.clear();
 	m_montagePath = "";
 	m_badPath = "";
+	m_channelHashTable.clear();
+	m_channelsAsRecorded.clear(); // clear as recorded Channels
 }
 
 void AwMontageManager::newMontage(AwFileIO *reader)
@@ -1201,51 +1203,32 @@ void AwMontageManager::addChannelsByName(AwChannelList &channelsToAdd)
 	emit montageChanged(m_channels);
 }
 
-//
-// Build a new montage based on selected labels from a view.
-// Keep the references if any (bipolar channels)
 
-void AwMontageManager::buildNewMontageFomNames(const QStringList& names)
+
+void AwMontageManager::buildNewMontageFromChannels(const AwChannelList& channels)
 {
-	if (names.isEmpty())
+	if (channels.isEmpty())
 		return;
-
-	AwChannelList newMontage;
-	for (QString label : names) {
-		if (label.contains("-")) {
-			QStringList tokens = label.split("-");
-			if (tokens.size() < 2)
+	AwChannelList newMontage; // check the channels against the as recorded ones and also check the bad status.
+	for (auto c : channels) {
+		auto asRecorded = m_channelHashTable.value(c->name());
+		// do not add a bad channel in the montage
+		if (asRecorded == NULL)
+			continue;
+		if (asRecorded->isBad())
+			continue;
+		if (c->hasReferences()) { // do not add the channel if the reference channel is bad.
+			auto asRecorded = m_channelHashTable.value(c->referenceName());
+			if (asRecorded == NULL)
 				continue;
-			AwChannel *asRecorded = m_channelHashTable.value(tokens.first().trimmed());
-			if (asRecorded) {
-				if (!asRecorded->isBad()) {
-					AwChannel *new_c = static_cast<AwChannel *>(asRecorded->duplicate());
-					new_c->setReferenceName(tokens.at(1).trimmed());
-					newMontage << new_c;
-				}
-			}
+			if (asRecorded->isBad())
+				continue;
 		}
-		else { // no ref
-			AwChannel *asRecorded = m_channelHashTable.value(label);
-			if (asRecorded) {
-				if (!asRecorded->isBad()) {
-					newMontage << asRecorded->duplicate();
-				}
-			}
-		}
+		newMontage << c->duplicate();
 	}
-
-	//foreach (QString name, names)	{
-	//	AwChannel *asRecorded = m_channelHashTable.value(name);
-	//	if (asRecorded == NULL)
-	//		continue;
-	//	if (asRecorded->isBad())
-	//		continue;
-	//	newMontage << asRecorded->duplicate();
-	//}
-	// clear current Montage
-	clear();
-	// set new one
-	m_channels = newMontage;
-	emit montageChanged(m_channels);
+	if (!newMontage.isEmpty()) {
+		clear();
+		m_channels = newMontage;
+		emit montageChanged(m_channels);
+	}
 }

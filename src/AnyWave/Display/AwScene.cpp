@@ -51,8 +51,6 @@ AwScene::AwScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *pare
 
 AwScene::~AwScene()
 {
-//	clearMarkers();
-//	clearChannels();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,13 +59,25 @@ AwScene::~AwScene()
 void AwScene::setSelectionAsBad()
 {
 	QStringList badChannels;
-	foreach (QGraphicsItem *i, selectedItems())	{
+	for (auto i : selectedItems())	{
 		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
 
 		if (sitem)
 			badChannels << sitem->channel()->name();
 	}
 	AwMontageManager::instance()->markChannelsAsBad(badChannels);
+}
+
+void AwScene::setSelectionAsMontage()
+{
+	AwChannelList channels;
+	for (auto i : selectedItems()) {
+		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
+		if (sitem)
+			channels << sitem->channel();
+	}
+	AwMontageManager::instance()->buildNewMontageFromChannels(channels);
+
 }
 
 void AwScene::launchProcess()

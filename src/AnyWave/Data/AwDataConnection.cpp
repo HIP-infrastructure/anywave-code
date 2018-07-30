@@ -220,43 +220,65 @@ void AwDataConnection::deleteAVGChannels()
 
 void AwDataConnection::applyICAFilters(int type, AwChannelList& channels)
 {
+	if (type < 0 || type > AW_CHANNEL_TYPES - 1)
+		return;
+
+	QList<int> allowedTypes = { AwChannel::SEEG, AwChannel::EEG, AwChannel::MEG, AwChannel::EMG, AwChannel::Source };
+	if (!allowedTypes.contains(type))
+		return;
+
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
-	if (type == AwChannel::EEG)	{
-		if (!m_ICASourcesLoaded[AwChannel::EEG] || comps->sources().first()->dataSize() == 0)	{
-			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-		}
-		//AwICAManager::instance()->rejectEEGComponents(channels);
-		AwICAManager::instance()->rejectComponents(AwChannel::EEG, channels);
-		m_ICASourcesLoaded[AwChannel::EEG] = true;
-	}
-	else if (type == AwChannel::MEG) { // MEG
-		if (!m_ICASourcesLoaded[AwChannel::MEG] || comps->sources().first()->dataSize() == 0) {
-			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-		}
-		//AwICAManager::instance()->rejectMEGComponents(channels);
-		AwICAManager::instance()->rejectComponents(AwChannel::MEG, channels);
-		m_ICASourcesLoaded[AwChannel::MEG] = true;
-	}
-	else if (type == AwChannel::EMG) { // EMG
-		if (!m_ICASourcesLoaded[AwChannel::EMG] || comps->sources().first()->dataSize() == 0) {
-			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-		}
-		//AwICAManager::instance()->rejectMEGComponents(channels);
-		AwICAManager::instance()->rejectComponents(AwChannel::EMG, channels);
-		m_ICASourcesLoaded[AwChannel::EMG] = true;
-	}
-	else if (type == AwChannel::Source) { // EMG
-		if (!m_ICASourcesLoaded[AwChannel::Source] || comps->sources().first()->dataSize() == 0) {
-			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-		}
-		//AwICAManager::instance()->rejectMEGComponents(channels);
-		AwICAManager::instance()->rejectComponents(AwChannel::Source, channels);
-		m_ICASourcesLoaded[AwChannel::Source] = true;
-	}
+
+	if (!m_ICASourcesLoaded[type] || comps->sources().first()->dataSize() == 0) 
+		m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+	AwICAManager::instance()->rejectComponents(type, channels);
+	m_ICASourcesLoaded[type] = true;
+
+//	if (type == AwChannel::EEG)	{
+//		if (!m_ICASourcesLoaded[AwChannel::EEG] || comps->sources().first()->dataSize() == 0)	{
+//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+////			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
+//		}
+//		//AwICAManager::instance()->rejectEEGComponents(channels);
+//		AwICAManager::instance()->rejectComponents(AwChannel::EEG, channels);
+//		m_ICASourcesLoaded[AwChannel::EEG] = true;
+//	}
+//	else if (type == AwChannel::MEG) { // MEG
+//		if (!m_ICASourcesLoaded[AwChannel::MEG] || comps->sources().first()->dataSize() == 0) {
+//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+////			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
+//		}
+//		//AwICAManager::instance()->rejectMEGComponents(channels);
+//		AwICAManager::instance()->rejectComponents(AwChannel::MEG, channels);
+//		m_ICASourcesLoaded[AwChannel::MEG] = true;
+//	}
+//	else if (type == AwChannel::EMG) { // EMG
+//		if (!m_ICASourcesLoaded[AwChannel::EMG] || comps->sources().first()->dataSize() == 0) {
+//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+//			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
+//		}
+//		//AwICAManager::instance()->rejectMEGComponents(channels);
+//		AwICAManager::instance()->rejectComponents(AwChannel::EMG, channels);
+//		m_ICASourcesLoaded[AwChannel::EMG] = true;
+//	}
+//	else if (type == AwChannel::SEEG) { // SEEG
+//		if (!m_ICASourcesLoaded[AwChannel::SEEG] || comps->sources().first()->dataSize() == 0) {
+//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+//			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
+//		}
+//		//AwICAManager::instance()->rejectMEGComponents(channels);
+//		AwICAManager::instance()->rejectComponents(AwChannel::SEEG, channels);
+//		m_ICASourcesLoaded[AwChannel::SEEG] = true;
+//	}
+//	else if (type == AwChannel::Source) { // EMG
+//		if (!m_ICASourcesLoaded[AwChannel::Source] || comps->sources().first()->dataSize() == 0) {
+//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+//			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
+//		}
+//		//AwICAManager::instance()->rejectMEGComponents(channels);
+//		AwICAManager::instance()->rejectComponents(AwChannel::Source, channels);
+//		m_ICASourcesLoaded[AwChannel::Source] = true;
+//	}
 }
 
 void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
@@ -401,12 +423,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			if (!m_ICAChannels[i].isEmpty())
 				computeICAComponents(i, m_ICAChannels[i]);
 		}
-		//if (!m_icaEEGChannels.isEmpty())
-		//	computeICAComponents(AwChannel::EEG, m_icaEEGChannels);
-		//if (!m_icaMEGChannels.isEmpty())
-		//	computeICAComponents(AwChannel::MEG, m_icaMEGChannels); 
-		//if (!m_icaEMGChannels.isEmpty())
-		//	computeICAComponents(AwChannel::EMG, m_icaEMGChannels); 
 		if (!m_sourceEEGChannels.isEmpty())
 			computeSourceChannels(m_sourceEEGChannels);
 		if (!m_sourceMEGChannels.isEmpty())

@@ -151,8 +151,10 @@ public slots:
 	void buildQuickMontagesList();
 	/** Add channels to montage **/
 	void addChannelsByName(AwChannelList& channels);
-	/** Clear current montage and build a new one based on channels names passed as parameter **/
-	void buildNewMontageFomNames(const QStringList& names);
+	///** Clear current montage and build a new one based on channels names passed as parameter **/
+	//void buildNewMontageFomNames(const QStringList& names);
+	/** Build a new montage based on a list of channels **/
+	void buildNewMontageFromChannels(const AwChannelList& channels);
 	void newFilters();
 	/** Ajout d'un canal aux canals AsRecorded. Typiquement utilise pour ajouter un canal de source Virtual **/
 	void addChannelToAsRecorded(AwChannel *channel);

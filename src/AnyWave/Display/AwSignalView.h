@@ -72,7 +72,7 @@ public slots:
 	void addVirtualChannels(AwChannelList& channels);
 	void removeVirtualChannels(AwChannelList& channels);
 	void removeICAChannels(); // only remove ICA channels if the user cancels
-	void makeMontageFromSelection();
+//	void makeMontageFromSelection();
 protected:
 	// overriden methods
 	void dataReceived() override;

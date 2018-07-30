@@ -45,14 +45,13 @@ public:
 	void addVirtualChannels(AwChannelList& channels);
 public slots:
 	void updateMarkers();
-//	void newMarkers(AwMarkerList& mkrs);
-	void setSelectionAsBad();
+	void setSelectionAsBad() override;
 	void setChannelAsBad(const QString& label);
-signals:
-	void newMontage();
+	void setSelectionAsMontage() override;
+//signals:
+//	void newMontage();
 private slots:
 	void launchProcess();
-//	void contextMenuExportData();
 };
 
 #endif

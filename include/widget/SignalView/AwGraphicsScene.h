@@ -89,6 +89,8 @@ signals:
 public slots:
 	void registerDisplayPlugin(AwDisplayPlugin *plugin);
 	virtual void updateSettings(AwViewSettings *settings, int flags);
+	virtual void setSelectionAsBad() {}
+	virtual void setSelectionAsMontage() {}
 	void setMarkingSettings(AwMarkingSettings *settings);
 	void setPageDuration(float dur) { m_pageDuration = dur; }
 	void setStartPosition(float pos);

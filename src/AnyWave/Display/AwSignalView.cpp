@@ -54,7 +54,7 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	changeObjects(view, scene, NULL, markBar);
 	AwDisplaySetupManager *dsm = AwDisplaySetupManager::instance();
 	// connections
-	connect(m_scene, SIGNAL(newMontage()), this, SLOT(makeMontageFromSelection()));
+//	connect(m_scene, SIGNAL(newMontage()), this, SLOT(makeMontageFromSelection()));
 	connect(this, SIGNAL(settingsChanged()), dsm, SLOT(saveSettings()));
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();
@@ -293,18 +293,18 @@ void AwSignalView::setChannels(const AwChannelList& channels)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
 
-void AwSignalView::makeMontageFromSelection()
-{
-	QStringList names;
-	foreach (QGraphicsItem *i, m_scene->selectedItems()) {
-		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
-
-		if (sitem)
-			//	names << sitem->channel()->name();
-			names << sitem->channel()->fullName();
-	}
-	AwMontageManager::instance()->buildNewMontageFomNames(names);
-}
+//void AwSignalView::makeMontageFromSelection()
+//{
+//	QStringList names;
+//	foreach (QGraphicsItem *i, m_scene->selectedItems()) {
+//		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
+//
+//		if (sitem)
+//			//	names << sitem->channel()->name();
+//			names << sitem->channel()->fullName();
+//	}
+//	AwMontageManager::instance()->buildNewMontageFomNames(names);
+//}
 
 void AwSignalView::refresh()
 {

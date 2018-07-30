@@ -94,33 +94,6 @@ void AwICAComponents::computeComponents(AwICAChannelList& channels)
 			dest[c] = components(ica->index(), c);
 		ica->setDataReady();
 	}
-	//// build the data matrix
-	//int row = m_sources.size();
-	//int col = m_sources.at(0)->dataSize();
-	//fmat dataM(col, row);
-	//
-	//for (int i = 0; i < row; i++) {
-	//	AwChannel *c = m_sources.at(i);
-	//	memcpy(dataM.memptr() + i * col, c->data(), col * sizeof(float));
-	//	c->clearData();
-	//}
-	//dataM = dataM.t();
-
-	//fmat components = m_unmixing * dataM;
-	////// get components
-	//components = components.t();
-	//foreach (AwICAChannel *ica, channels) {
-	//	ica->newData(col);
-	//	memcpy(ica->data(), components.memptr() + ica->index() * col, col * sizeof(float));
-	//	ica->setDataReady();
-	//}
-
-	//// apply ICA filters if any
-	//AwChannelList f_channels;
-	//foreach (AwICAChannel *ica, channels) {
-	//	f_channels << ica;
-	//}
-	//AwFiltering::filter(&f_channels);
 }
 
 void AwICAComponents::buildChannels(const AwChannelList& channels)
@@ -160,33 +133,6 @@ void AwICAComponents::buildChannels(const AwChannelList& channels)
 			dest[c] = FData(index, c);
 		c->setDataReady();
 	}
-
-	//// Now prepare the data matrix
-	//int row = m_sources.size();
-	//int col = m_sources.at(0)->dataSize();
-
-	//fmat dataM(col, row);  // Armadillo matrices are COL major, so use the transpose to fill with data
-
-	//for (int i = 0; i < row; i++) {
-	//	AwChannel *c = m_sources.at(i);
-	//	memcpy(dataM.memptr() + i * col, c->data(), col * sizeof(float));
-	//	c->clearData();
-	//}
-	//dataM = dataM.t();
-
-	//fmat FData = m_mixing * diag * m_unmixing * dataM;
-
-	//FData = FData.t();
-	//float *fdata = FData.memptr();
-	//foreach (AwChannel *c, channels)	{
-	//	QStringList keys = m_labelToIndex.keys();
-	//	if (keys.contains(c->name())) {
-	//		int index = m_labelToIndex.value(c->name());
-	//		c->newData(col);
-	//		memcpy(c->data(), fdata + index * col, col * sizeof(float));
-	//		c->setDataReady();
-	//	}
-	//}
 }
 
 int  AwICAComponents::loadComponents(AwMATLABFile& file)
@@ -218,23 +164,6 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 	m_hpFilter = (float)hpf;
 	m_lpFilter = (float)lpf;
 
-	//double tmp;
-	//if (file.readScalar("lpf", &tmp) != 0)
-	//	return -1;
-	//m_lpFilter = (float)tmp;
-	//if (file.readScalar("hpf", &tmp) != 0)
-	//	return -1;
-	//m_hpFilter = (float)tmp;
-	//mat matrix;
-	//if (file.readMatrix("unmixing", matrix) != 0)
-	//	return -1;
-	//m_unmixing = conv_to<fmat>::from(matrix);
-	//if (file.readMatrix("mixing", matrix) != 0)
-	//	return -1;
-	//m_mixing = conv_to<fmat>::from(matrix);
-	//if (file.readStrings("labels", m_labels) != 0)
-	//	return -1;
-	
 	AwMontageManager *mm = AwMontageManager::instance();
 	// build source channels list
 	int index = 0;
@@ -283,11 +212,9 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 			chan->setLayout3D(l3D);
 		chan->setComponentType(m_type);
 		// topography values for component i are in the ith column of matrix mixing
-//		memcpy(values.data(), m_mixing.colptr(i), m_mixing.n_rows * sizeof(float));
 		for (uword r = 0; r < m_mixing.n_rows; r++)
 			values[r] = m_mixing(r, i);
 		// topography values for component i are in the ith column of matrix mixing
-	//	chan->setTopoValues(conv_to<fvec>::from(m_mixing.col(i)));
 		chan->setTopoValues(values);
 		chan->setLabels(m_labels);	
 		chan->setDisplayPluginName("ICA SignalItem");
