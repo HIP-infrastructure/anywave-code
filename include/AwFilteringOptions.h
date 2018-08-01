@@ -41,7 +41,7 @@
 class AW_CORE_EXPORT AwFilteringOptions
 {
 public:
-	AwFilteringOptions(); 
+	explicit AwFilteringOptions(); 
 	AwFilteringOptions& operator=(const AwFilteringOptions& other);
 
 	void setFilters(const AwChannelList& channels);

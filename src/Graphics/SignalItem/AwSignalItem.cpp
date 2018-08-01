@@ -37,18 +37,12 @@
 AwSignalItem::AwSignalItem(AwChannel *chan, AwDisplayPhysics *phys) : AwGraphicsSignalItem(chan, phys)
 {
 	m_hover = false;
-
 	setFlags(QGraphicsItem::ItemIsFocusable |  QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIgnoresTransformations);
 	setAcceptHoverEvents(true);
-	
     m_baseLineItem = new QGraphicsLineItem(this);
 	m_showScale = false;
 	setItemFlags(AwGraphicsItem::ItemHasUi);
-
-	m_sensorName = chan->name();
-	if (chan->hasReferences())
-		m_sensorName += " - " + chan->referenceName();
-
+	m_sensorName = chan->fullName();
 	m_labelItem = new AwSignalLabelItem(m_sensorName, this);
 	m_labelItem->setToolTip(m_sensorName);
 	m_labelItem->setZValue(this->zValue() + 1);
@@ -103,22 +97,19 @@ void AwSignalItem::computeMinMax(qint32 start, qint32 nbSamples, float *min, flo
 }
 
 /// SLOTS
-
 int AwSignalItem::execUi()
 {
 	AwSignalItemSettings ss(this);
 	// store filters before running ui
 	float l = m_channel->lowFilter();
 	float h = m_channel->highFilter();
+	float n = m_channel->notch();
 	if (ss.exec() == QDialog::Accepted) {
-		if (m_channel->lowFilter() != l ||
-			m_channel->highFilter() != h)
+		if (m_channel->lowFilter() != l || m_channel->highFilter() != h || m_channel->notch() != n)
 				emit filtersChanged();
-
-		repaint();
 		return QDialog::Accepted;
 	}
-
+	repaint();
 	return QDialog::Rejected;
 }
 
@@ -170,9 +161,6 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		// compute the polygon
 		QPolygonF poly;
 		float gain = m_channel->gain();
-		// MEG and Reference are expressed as pT/cm so convert pT to T before rendering the signal
-		//if (m_channel->isMEG() || m_channel->isReference() || m_channel->isGRAD())
-		//	gain *= 1E-12;
 		float min = 0., max = 0.;
 		for (int i = 0; i < scene()->width(); i++) {
 			float posInSec = i * m_pixelLengthInSecs;

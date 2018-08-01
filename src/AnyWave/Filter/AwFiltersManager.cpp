@@ -4,7 +4,7 @@
 #include <qjsonobject.h>
 #include "AwFilterSettings.h"
 #include <widget/AwMessageBox.h>
-
+#include "Debug/AwDebugLog.h"
 // statics
 AwFiltersManager *AwFiltersManager::m_instance = NULL;
 AwFiltersManager *AwFiltersManager::instance()
@@ -17,6 +17,7 @@ AwFiltersManager *AwFiltersManager::instance()
 AwFiltersManager::AwFiltersManager(QObject *parent) : QObject(parent)
 {
 	m_ui = new AwFilterSettings;
+	AwDebugLog::instance()->connectComponent("Filters Manager", this);
 }
 
 void AwFiltersManager::quit()
@@ -49,11 +50,14 @@ void AwFiltersManager::load()
 	QFile file(m_filePath);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 		return;
+	QJsonParseError error;
 	QString data = file.readAll();
 	file.close();
-	QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8());
-	if (doc.isNull())
+	QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &error);
+	if (doc.isNull() || doc.isEmpty()) {
+		emit log(QString("Error loading json file: %1 at %2").arg(error.errorString()).arg(error.offset));
 		return;
+	}
 	QJsonObject obj = doc.object();
 
 	// get objects as in FilteringOptions
@@ -233,8 +237,11 @@ void AwFiltersManager::setFilename(const QString& filename)
 	m_filePath = filename + ".flt";
 	if (QFile::exists(m_filePath))
 		load();
-	else
+	else {
+		emit log(QString(".flt file does not exists for file %1").arg(filename));
 		reset();
+		emit filtersChanged(&m_fo);
+	}
 }
 
 

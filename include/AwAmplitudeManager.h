@@ -45,7 +45,6 @@ public:
 	void closeFile();
 	void quit();
 	void setFilename(const QString& path);
-
 public slots:
 	void setAmplitude(int type, float value);
 	void reset();

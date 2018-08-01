@@ -484,7 +484,6 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	QList<int> keys = p->pdi.inputParameters().keys();
 	AwChannelList sources;
 	bool selection = !m_selectedChannels.isEmpty();
-
 	// browse for keys as process inputs
 	for (int i = 0; i < keys.size(); i++) {
 		int key = keys.at(i);
@@ -498,7 +497,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 			for (auto plugin : AwPluginManager::getInstance()->processes())
 				p->pdi.input.processPluginNames.append(plugin->name);
 		}
-		else if (key & Aw::ProcessInput::AnyChannels) {
+		else if (key & Aw::ProcessInput::AnyChannels) {  // any channels = selected channels if any or current montage if no channels is selected.
 			if (ignoreSelection)
 				sources = m_montageChannels;
 			else {

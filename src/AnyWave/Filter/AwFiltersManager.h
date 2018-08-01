@@ -25,6 +25,7 @@ public slots:
 	void setFilename(const QString& path); 
 signals:
 	void filtersChanged(AwFilteringOptions *fo);
+	void log(const QString& message);
 protected:
 	void load();
 	void save();
