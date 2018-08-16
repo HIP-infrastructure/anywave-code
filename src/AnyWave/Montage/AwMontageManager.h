@@ -123,10 +123,13 @@ public:
 	inline QString& path() { return m_path; }
 	/** Get labels of sensors marked as bad. **/
 	inline QStringList& badLabels() { return m_badChannelLabels; }
+	/** Remove bad channels in list **/
+	void removeBadChannels(AwChannelList& list);
 	/** Scripting support specific **/
 	AwChannelList loadAndApplyMontage(AwChannelList asRecorded, const QString& path);
 	/** Scripting support specific **/
 	void newMontage(AwFileIO *reader);
+
 
 
 	// ICA Channels specific

@@ -169,6 +169,10 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		if (montage.toUpper() == "SEEG BIPOLAR")
 			requestedChannels = AwMontageManager::makeSEEGBipolar(requestedChannels);
 	}
+	else {
+		// remove possible bad channels 
+		AwMontageManager::instance()->removeBadChannels(requestedChannels);
+	}
 
 	// duplicate all channels
 	requestedChannels = AwChannel::duplicateChannels(requestedChannels);

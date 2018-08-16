@@ -125,9 +125,6 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		}
 		switch (request)
 		{
-		//case AwRequest::GetMarkers:
-		//	handleGetMarkers(client, p);
-		//	break;
 		case AwRequest::GetMarkers2:
 			handleGetMarkers2(client, p);
 			break;
@@ -139,6 +136,9 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 			break;
 		case AwRequest::GetPluginInfo:
 			handleGetPluginInfo(client, p);
+			break;
+		case AwRequest::GetPluginIO:
+			handleGetPluginIO(client, p);
 			break;
 		case AwRequest::GetFileInfo:
 			handleGetFileInfo(client, p);

@@ -93,3 +93,51 @@ mxArray *createAnyWaveStruct()
     int dim = 1;
     return mxCreateStructMatrix(1, 1, 4, fields);
 }
+
+
+//// Classes implementations
+
+TCPRequest::TCPRequest(int requestID)
+{
+	m_status = TCPRequest::undefined;
+	m_socket = connect();
+	m_pid = -1;
+	m_requestID = requestID;
+	if (m_socket == NULL) {
+		m_status = TCPRequest::failed;
+	}
+	else {
+		m_status = TCPRequest::connected;
+		m_pid = getPid();
+	}
+}
+
+TCPRequest::~TCPRequest()
+{
+	if (m_socket)
+		delete m_socket;
+}
+
+bool TCPRequest::writeToHost(const QByteArray& data)
+{
+	QByteArray size;
+	QDataStream stream_size(&size, QIODevice::WriteOnly);
+	stream_size.setVersion(QDataStream::Qt_4_4);
+	int dataSize = data.size() + sizeof(int); // data size + request ID size
+	// always send the pid first then size and data.
+	stream_size << m_pid;
+	stream_size << dataSize << m_requestID;
+	m_socket->write(size);
+	if (!data.isEmpty())
+		m_socket->write(data);
+	return m_socket->waitForBytesWritten();
+}
+
+int TCPRequest::getResponse()
+{
+	int size = waitForResponse(m_socket);
+	if (size == -1) {
+		mexErrMsgTxt("Bad status received from AnyWave.");
+	}
+	return size;
+}

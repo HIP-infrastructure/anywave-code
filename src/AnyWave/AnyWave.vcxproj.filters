@@ -1270,6 +1270,9 @@
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\GetPluginIO.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">

@@ -420,6 +420,17 @@ AwChannel* AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
 	return 0;
 }
 
+/// Remove Bad Channels
+/// Remove channel marked as bad in the list.
+/// Modify the list directly.
+void AwMontageManager::removeBadChannels(AwChannelList& list)
+{
+	foreach (AwChannel *c, list) {
+		if (c->isBad() || m_badChannelLabels.contains(c->name()))
+			list.removeAll(c);
+	}
+}
+
 
 void AwMontageManager::applyGains()
 {

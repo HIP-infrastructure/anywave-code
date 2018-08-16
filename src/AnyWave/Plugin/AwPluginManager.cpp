@@ -329,11 +329,14 @@ void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QStr
 	if (tokens.isEmpty())
 		return;
 	int f = 0;
-	foreach (QString s, tokens) {
-		if (s.toLower() == "nodatarequired")
+	for (auto s : tokens) {
+		auto token = s.toLower();
+		if (token == "nodatarequired")
 			f |= Aw::ProcessFlags::ProcessDontRequireData;
-		if (s.toLower() == "hidden")
+		else if (token == "hidden")
 			f |= Aw::ProcessFlags::PluginIsHidden;
+		else if (token == "accepttimeselections")
+			f |= Aw::ProcessFlags::PluginAcceptsTimeSelections;
 	}
 	plugin->setFlags(f);
 }

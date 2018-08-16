@@ -10,10 +10,7 @@
     <ClCompile Include="infomax_algo.cpp" />
     <ClCompile Include="r250.c" />
     <ClCompile Include="randlcg.c" />
-    <ClCompile Include="runica.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pca.cpp">
+    <ClCompile Include="acsobiro.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -23,9 +20,6 @@
     <ClInclude Include="r250.h" />
     <ClInclude Include="randlcg.h" />
     <ClInclude Include="ica_global.h" />
-    <ClInclude Include="pca.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="ICASettings.h" />

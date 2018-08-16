@@ -39,7 +39,7 @@ ICA::ICA()
 	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, QString("0-n"));
 	pdi.addInputParameter(Aw::ProcessInput::SourceChannels|Aw::ProcessInput::ProcessIgnoresChannelSelection, QString("0-n"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	m_algoNames << "Infomax";
+	m_algoNames << "Infomax" << "acsobiro";
 }
 
 ICAPlugin::ICAPlugin()
@@ -211,6 +211,10 @@ void ICA::run()
 	case ICA::FASTICA:
 		createInputFile();
 		launchMatlabPlugin();
+		break;
+	case ICA::acsobiro:
+		if (run_acsobiro(nc) == 0)
+			saveToFile();
 		break;
 	}
 }

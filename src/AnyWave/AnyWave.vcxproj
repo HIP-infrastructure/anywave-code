@@ -1081,6 +1081,7 @@
     <ClCompile Include="MATPy\GetICAPanelCapture.cpp" />
     <ClCompile Include="MATPy\GetMarkers.cpp" />
     <ClCompile Include="MATPy\GetPluginInfo.cpp" />
+    <ClCompile Include="MATPy\GetPluginIO.cpp" />
     <ClCompile Include="MATPy\GetScreenCapture.cpp" />
     <ClCompile Include="MATPy\GetTriggers.cpp" />
     <ClCompile Include="MATPy\IsTerminated.cpp" />

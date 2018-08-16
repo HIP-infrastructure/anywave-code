@@ -182,6 +182,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexSendMessage", "src\Mex\M
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetFileInfo", "src\Mex\MexGetFileInfo\MexGetFileInfo.vcxproj", "{D4B90137-308B-4693-909A-651003ACE77B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetPluginIO", "src\Mex\MexGetPluginIO\MexGetPluginIO.vcxproj", "{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -524,12 +526,18 @@ Global
 		{D4B90137-308B-4693-909A-651003ACE77B}.Release|Win32.ActiveCfg = Release|x64
 		{D4B90137-308B-4693-909A-651003ACE77B}.Release|x64.ActiveCfg = Release|x64
 		{D4B90137-308B-4693-909A-651003ACE77B}.Release|x64.Build.0 = Release|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Debug|Win32.ActiveCfg = Debug|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Debug|x64.ActiveCfg = Debug|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Debug|x64.Build.0 = Debug|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Release|Win32.ActiveCfg = Release|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Release|x64.ActiveCfg = Release|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

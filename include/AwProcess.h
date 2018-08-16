@@ -25,10 +25,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+/// MATLAB and Python requests API ids
 namespace AwRequest {
 	enum Requests {
 		AddMarkers, GetMarkers, GetData2, GetPluginInfo, IsTerminated, SendMessage, SendCommand,
-		GetMarkers2, GetData3, GetFileInfo, GetScreenCapture, GetICAPanelCapture, SetBeamFormer, GetTriggers
+		GetMarkers2, GetData3, GetFileInfo, GetScreenCapture, GetICAPanelCapture, SetBeamFormer, GetTriggers, GetPluginIO
 	};
 	enum Commands { GetDataReadFile, GetDataReadSocket };
 };
