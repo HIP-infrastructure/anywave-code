@@ -54,13 +54,21 @@ void AwRequestServer::handleGetPluginIO(QTcpSocket *client, AwScriptProcess *p)
 		types << AwChannel::typeToString(c->type());
 	}
 
-
 	total_duration = p->pdi.input.reader()->infos.totalDuration();
 	temp_dir = QDir::toNativeSeparators(p->pdi.input.workingDirPath);
 	plug_dir = QDir::toNativeSeparators(p->pdi.input.pluginDirPath);
 	ica_file = QDir::toNativeSeparators(AwSettings::getInstance()->currentIcaFile);
 
 	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << p->pdi.input.dataFolder << types;
+
+	// send markers set as input
+	auto markers = p->pdi.input.markers;
+	stream << markers.size();
+	if (markers.size()) {
+		for (auto m : markers) {
+			stream << m->label() << m->start() << m->duration() << m->value() << m->targetChannels();
+		}
+	}
 	response.send();
 	emit log("Done.");
 }

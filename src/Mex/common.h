@@ -8,12 +8,21 @@
 #include <QtCore/QDataStream>
 
 int waitForResponse(QTcpSocket *socket);
-//int waitForResponse2(QTcpSocket *socket, QByteArray& response);
 int getPid();
 QTcpSocket *connect();
 mxArray *createAnyWaveStruct();
 void writeToHost(QTcpSocket *socket, int pid, const QByteArray& data);
 
+// utilities functions
+
+mxArray *floatToMat(float value);
+mxArray *doubleToMat(double value);
+mxArray *int32ToMat(qint32 value);
+mxArray *int16ToMat(qint16 value);
+
+QString toJson(const mxArray *struc);
+
+// Request class
 
 class TCPRequest
 {
@@ -25,7 +34,7 @@ public:
 	inline int status() { return m_status; }
 	inline QTcpSocket *socket() { return m_socket; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
-	bool writeToHost(const QByteArray& data = QByteArray());
+	bool sendRequest(const QByteArray& arguments = QByteArray());
 	int getResponse();
 
 protected:

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #define WAIT_TIME_OUT   3000000   // 300s socket time out
+
 void writeToHost(QTcpSocket *socket, int pid, const QByteArray& data)
 {
     QByteArray size;
@@ -94,6 +95,53 @@ mxArray *createAnyWaveStruct()
     return mxCreateStructMatrix(1, 1, 4, fields);
 }
 
+mxArray *floatToMat(float value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
+	float *s = (float *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+mxArray *doubleToMat(double value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+	double *s = (double *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+mxArray *int32ToMat(qint32 value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+	qint32 *s = (qint32 *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+mxArray *int16ToMat(qint16 value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxINT16_CLASS, mxREAL);
+	qint16 *s = (qint16 *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+
+QString toJson(const mxArray *struc)
+{
+	mxArray *out[1];
+	mxArray *in[1] = { (mxArray *)struc };
+	int status = mexCallMATLAB(1, out, 1, in, "jsonencode");
+	if (status != 0) {
+		return QString();
+	}
+
+	return QString(mxArrayToString(out[0]));
+}
+
+
+
 
 //// Classes implementations
 
@@ -118,7 +166,7 @@ TCPRequest::~TCPRequest()
 		delete m_socket;
 }
 
-bool TCPRequest::writeToHost(const QByteArray& data)
+bool TCPRequest::sendRequest(const QByteArray& data)
 {
 	QByteArray size;
 	QDataStream stream_size(&size, QIODevice::WriteOnly);

@@ -35,9 +35,9 @@ mxArray* request_info()
 	if (request.status() != TCPRequest::connected)
 		return output;
 
-	if (!request.writeToHost())
+	if (!request.sendRequest()) // check for error after sending request
 		return output;
-	int dataSize = request.getResponse();
+	int dataSize = request.getResponse();  // get the response size in bytes
 	if (dataSize < 0)
 		return output;
 
@@ -48,82 +48,101 @@ mxArray* request_info()
     QStringList labels, refs, types; // get labels of input channels, their references (may be empty and their types.
     float max_sr, total_dur;
     QString temp_dir, plugin_dir, file, ica_file, data_dir;
+	int nMarkers = 0;
     // prepare matlab structure for output
-    const char *fields[] = { "file", "data_dir", "labels", "refs", "types", "max_sr", "total_duration", "temp_dir", "plugin_dir", "ica_file" };
-    const int nFields = 10;
+    const char *fields[] = { "file", "data_dir", "labels", "refs", "types", "max_sr", "total_duration", "temp_dir", "plugin_dir", "ica_file", "markers" };
+    const int nFields = 11;
     output = mxCreateStructMatrix(1, 1, nFields, fields);
 	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> ica_file >> data_dir >> types;
-    
-    // labels cell array
-    mxArray *f_labels = NULL;
-    if (!labels.isEmpty()) {
-        f_labels = mxCreateCellMatrix(1, labels.size());
-        for (int i = 0; i < labels.size(); i++) {
-            mxArray *label = mxCreateString(labels.at(i).toLatin1().data());
-            mxSetCell(f_labels, i, label);
-        }
-    }
-    else 
-        f_labels = mxCreateCellMatrix(1, 1);
-    mxSetField(output, 0, "labels", f_labels);
-    
-    // refs
-    mxArray *f_refs = NULL;
-    if (!refs.isEmpty()) {
-        f_refs = mxCreateCellMatrix(1, refs.size());
-        for (int i = 0; i < refs.size(); i++) {
-            mxArray *ref = mxCreateString(refs.at(i).toLatin1().data());
-            mxSetCell(f_refs, i, ref);
-        }
-    }
-    else
-        f_refs = mxCreateCellMatrix(1, 1);
-    mxSetField(output, 0, "refs", f_refs);
 
-	// types
-	mxArray *f_types = NULL;
-	if (!types.isEmpty()) {
-		f_types = mxCreateCellMatrix(1, types.size());
-		for (int i = 0; i < types.size(); i++) {
-			mxArray *type = mxCreateString(types.at(i).toLatin1().data());
-			mxSetCell(f_types, i, type);
+	// send also the markers set as input
+	in >> nMarkers;
+	mxArray *markers = 0, *tmp = 0;
+	const char *marker_fields[] = { "label", "position", "duration", "value", "channels" };
+	if (nMarkers == 0) {
+		markers = mxCreateStructMatrix(0, 0, 5, marker_fields);
+	}
+	else {
+		markers = mxCreateStructMatrix(1, (size_t)nMarkers, 5, marker_fields);
+		for (auto i = 0; i < nMarkers; i++) {
+			QString label;
+			float start, duration, value;
+			QStringList channels;
+
+			in >> label >> start >> duration >> value >> channels;
+
+			// label
+			mxSetField(markers, i, "label", mxCreateString(label.toStdString().c_str()));
+			// start
+			mxSetField(markers, i, "position", floatToMat(start));
+			// duration
+			mxSetField(markers, i, "duration", floatToMat(duration));
+			// value
+			mxSetField(markers, i, "value", floatToMat(value));
+			// channels
+			tmp = NULL;
+			if (!channels.isEmpty()) {
+				tmp = mxCreateCellMatrix(1, channels.size());
+				for (mwSize j = 0; j < channels.size(); j++) {
+					mxSetCell(tmp, j, mxCreateString(channels.at(j).toStdString().c_str()));
+				}
+			}
+			else // create an empty cell array
+				tmp = mxCreateCellMatrix(1, 1);
+			mxSetField(markers, i, "channels", tmp);
+		}
+	}
+
+
+	// labels cell array
+	if (!labels.isEmpty()) {
+		tmp = mxCreateCellMatrix(1, labels.size());
+		for (int i = 0; i < labels.size(); i++) {
+			mxSetCell(tmp, i, mxCreateString(labels.at(i).toLatin1().data()));
 		}
 	}
 	else
-		f_refs = mxCreateCellMatrix(1, 1);
-	mxSetField(output, 0, "types", f_types);
+		tmp = mxCreateCellMatrix(1, 1);
+	mxSetField(output, 0, "labels", tmp);
+    
+    // refs
+    if (!refs.isEmpty()) {
+        tmp = mxCreateCellMatrix(1, refs.size());
+        for (int i = 0; i < refs.size(); i++) {
+            mxSetCell(tmp, i, mxCreateString(refs.at(i).toLatin1().data()));
+		}
+    }
+    else
+        tmp = mxCreateCellMatrix(1, 1);
+    mxSetField(output, 0, "refs", tmp);
+
+	// types
+	if (!types.isEmpty()) {
+		tmp = mxCreateCellMatrix(1, types.size());
+		for (int i = 0; i < types.size(); i++) {
+			mxSetCell(tmp, i, mxCreateString(types.at(i).toLatin1().data()));
+		}
+	}
+	else
+		tmp = mxCreateCellMatrix(1, 1);
+	mxSetField(output, 0, "types", tmp);
     
     // max_sr
-    mxArray *f_sr = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    double *v = (double *)mxGetData(f_sr);
-    v[0] = (double)max_sr;
-    mxSetField(output, 0, "max_sr", f_sr);
-    
+    mxSetField(output, 0, "max_sr", doubleToMat((double)max_sr));
     // total_duration
-    mxArray *f_dur = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    v = (double *)mxGetData(f_dur);
-    v[0] = (double)total_dur;
-    mxSetField(output, 0, "total_duration", f_dur);
-    
+    mxSetField(output, 0, "total_duration", doubleToMat((double)total_dur));
     // temp_dir
-    mxArray *f_temp =  mxCreateString(temp_dir.toStdString().c_str());
-    mxSetField(output, 0, "temp_dir", f_temp);
-    
+	mxSetField(output, 0, "temp_dir", mxCreateString(temp_dir.toStdString().c_str()));
     // plugin_dir
-    mxArray *f_plugin =  mxCreateString(plugin_dir.toStdString().c_str());
-    mxSetField(output, 0, "plugin_dir", f_plugin);
-    
+    mxSetField(output, 0, "plugin_dir", mxCreateString(plugin_dir.toStdString().c_str()));
     // file
-    mxArray *f_file =  mxCreateString(file.toStdString().c_str());
-    mxSetField(output, 0, "file", f_file);
-    
+    mxSetField(output, 0, "file", mxCreateString(file.toStdString().c_str()));
     // ica_file
-    mxArray *f_ica_file =  mxCreateString(ica_file.toStdString().c_str());
-    mxSetField(output, 0, "ica_file", f_ica_file);
-
+    mxSetField(output, 0, "ica_file", mxCreateString(ica_file.toStdString().c_str()));
 	// data_dir (the path to the folder containing the current data file)
-	mxArray *f_data_dir = mxCreateString(data_dir.toStdString().c_str());
-	mxSetField(output, 0, "data_dir", f_data_dir);
+	mxSetField(output, 0, "data_dir", mxCreateString(data_dir.toStdString().c_str()));
+	// markers
+	mxSetField(output, 0, "markers", markers);
     
     return output;
 }
