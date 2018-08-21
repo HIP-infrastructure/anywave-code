@@ -185,6 +185,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetPluginIO", "src\Mex\MexGetPluginIO\MexGetPluginIO.vcxproj", "{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetDataEx", "src\Mex\MexGetDataEx\MexGetDataEx.vcxproj", "{51F00B64-760C-46F2-884F-35C66D39EE57}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -545,7 +548,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

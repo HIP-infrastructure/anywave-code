@@ -19,6 +19,7 @@ mxArray *floatToMat(float value);
 mxArray *doubleToMat(double value);
 mxArray *int32ToMat(qint32 value);
 mxArray *int16ToMat(qint16 value);
+mxArray *boolToLogical(bool value);
 
 QString toJson(const mxArray *struc);
 
@@ -33,13 +34,19 @@ public:
 
 	inline int status() { return m_status; }
 	inline QTcpSocket *socket() { return m_socket; }
+	QDataStream *stream() { return m_streamData; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
-	bool sendRequest(const QByteArray& arguments = QByteArray());
+	bool sendRequest();
 	int getResponse();
+	void clear();
 
 protected:
 	QTcpSocket * m_socket;
 	int m_status, m_pid, m_requestID;
+	QByteArray m_size;
+	QByteArray m_data;
+	QDataStream *m_streamSize;
+	QDataStream *m_streamData;
 };
 
 #endif

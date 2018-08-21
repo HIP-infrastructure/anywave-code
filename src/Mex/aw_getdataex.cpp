@@ -46,7 +46,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		out = parse_cfg(prhs[0]);
 	}
 
-	if (nlhs == 0) {
+	if (nrhs == 0) {
 		out = parse_cfg(0);
 	}
 
@@ -61,22 +61,87 @@ mxArray *parse_cfg(const mxArray *cfg)
 	if (request.status() != TCPRequest::connected)
 		return NULL;
 
-	QByteArray data;
+	QDataStream *stream = request.stream();
+	mxArray *output = NULL;
 
+	if (cfg)
+		*stream << toJson(cfg);
+	
 	// if cfg == NULL => send an empty string (default parameters = all data from current input channels set for the process).
-	if (cfg == NULL) {
-		data.append(QString());
-	}
-	else {
-		data.append(toJson(cfg));
 
-	}
-	if (!request.sendRequest(data))
+	if (!request.sendRequest())
 		return NULL;
 
+	int dataSize = request.getResponse();
+	if (dataSize < 0)
+		return NULL;
 
+	// Reading response..
+	QDataStream in(request.socket());
+	in.setVersion(QDataStream::Qt_4_4);
+
+	int nChannels = 0;
+
+	// create MATLAB data struct for output
+	int nfields = 9;
+	const char *fields[] = { "name", "type", "ref", "samplingRate", "data", "hpf", "lpf", "notch", "selected" };
+
+	// get response from AnyWave
+	in >> nChannels;
+	if (nChannels == 0)  // no channels returned (means that the requested labels did not match existing channels in AnyWave.
+		return output;
 	
+	output = mxCreateStructMatrix(1, nChannels, nfields, fields);
+	for (auto i = 0; i < nChannels; i++) {
+		dataSize = request.getResponse();
+		if (dataSize < 0) {
+			mexErrMsgTxt("Error received from AnyWave.");
+			return output;
+		}
+		QString name, ref, type;
+		float samplingRate, hpf, lpf, notch;
+		qint64 nSamples;
+		int selected;
+		in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> notch >> nSamples >> selected;
 
-
+		mxSetField(output, i, "name", mxCreateString(name.toStdString().c_str()));
+		mxSetField(output, i, "ref", mxCreateString(ref.toStdString().c_str()));
+		mxSetField(output, i, "type", mxCreateString(type.toStdString().c_str()));
+		mxSetField(output, i, "samplingRate",  floatToMat(samplingRate));
+		mxSetField(output, i, "hpf", floatToMat(hpf));
+		mxSetField(output, i, "lpf", floatToMat(lpf));
+		mxSetField(output, i, "notch", floatToMat(notch));
+		mxSetField(output, i, "selected", boolToLogical(selected > 0));
+		if (nSamples == 0) 
+			mxSetField(output, i, "data", mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL));
+		else {
+			mxArray *f_data = mxCreateNumericMatrix(1, nSamples, mxSINGLE_CLASS, mxREAL);
+			mxSetField(output, i, "data", f_data);
+			float *data = (float *)mxGetData(f_data);
+			// reading chuncks of data
+			bool finished = false;
+			qint64 nSamplesRead = 0;
+			do {
+				// waiting for chunk of data
+				dataSize = request.getResponse();
+				if (dataSize == -1) {
+					mexErrMsgTxt("Error while receiving data.");
+					return output;
+				}
+				qint64 chunkSize;
+				in >> chunkSize;
+				if (chunkSize == 0) { // finished receiving data
+					finished = true;
+				}
+				else {
+					for (qint64 j = 0; j < chunkSize; j++) {
+						in >> data[j + nSamplesRead];
+					}
+					nSamplesRead += chunkSize;
+				}
+			} while (!finished);
+		}
+	}
+	return output;
 }
 

@@ -127,6 +127,12 @@ mxArray *int16ToMat(qint16 value)
 	return tmp;
 }
 
+mxArray *boolToLogical(bool value)
+{
+	mxArray *tmp = mxCreateLogicalMatrix(1, 1);
+	*mxGetLogicals(tmp) = value;
+	return tmp;
+}
 
 QString toJson(const mxArray *struc)
 {
@@ -158,26 +164,35 @@ TCPRequest::TCPRequest(int requestID)
 		m_status = TCPRequest::connected;
 		m_pid = getPid();
 	}
+	m_streamSize = new QDataStream(&m_size, QIODevice::WriteOnly);
+	m_streamSize->setVersion(QDataStream::Qt_4_4);
+	m_streamData = new QDataStream(&m_data, QIODevice::WriteOnly);
+	m_streamData->setVersion(QDataStream::Qt_4_4);
 }
 
 TCPRequest::~TCPRequest()
 {
 	if (m_socket)
 		delete m_socket;
+	delete m_streamSize;
+	delete m_streamData;
 }
 
-bool TCPRequest::sendRequest(const QByteArray& data)
+void TCPRequest::clear()
 {
-	QByteArray size;
-	QDataStream stream_size(&size, QIODevice::WriteOnly);
-	stream_size.setVersion(QDataStream::Qt_4_4);
-	int dataSize = data.size() + sizeof(int); // data size + request ID size
+	m_size.clear();
+	m_data.clear();
+}
+
+bool TCPRequest::sendRequest()
+{
+
+	int dataSize = m_data.size() + sizeof(int); // data size + request ID size
 	// always send the pid first then size and data.
-	stream_size << m_pid;
-	stream_size << dataSize << m_requestID;
-	m_socket->write(size);
-	if (!data.isEmpty())
-		m_socket->write(data);
+	*m_streamSize << m_pid;
+	*m_streamSize << dataSize << m_requestID;
+	m_socket->write(m_size);
+	m_socket->write(m_data);
 	return m_socket->waitForBytesWritten();
 }
 

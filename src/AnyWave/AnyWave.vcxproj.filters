@@ -1273,6 +1273,12 @@
     <ClCompile Include="MATPy\GetPluginIO.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\GetDataEx.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\AwTCPResponse.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -2002,6 +2008,9 @@
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSItem.h">
       <Filter>IO\BIDS</Filter>
+    </ClInclude>
+    <ClInclude Include="MATPy\AwTCPResponse.h">
+      <Filter>MATPy</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
