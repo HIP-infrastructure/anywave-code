@@ -33,6 +33,7 @@
 #include "Montage/AwMontageManager.h"
 #include "Prefs/AwSettings.h"
 #include "Display/AwDisplay.h"
+#include "AwFiltering.h"
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 {
@@ -48,20 +49,21 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	// expecting a string containing json encoded structure or empty string for default behavior.
 	QString json;
 	in >> json;
-	p->sendMessage(QString("Coucou"));
 	int status = 0;
 	AwMarkerList markers;
 	auto pickFrom = PickFromInput; // default
 	bool usingFile = false, rawData = false;
 	QString fileToLoad;
 	QStringList types, labels;
+	int downsampling = 1;
 	AwFileIO *reader = AwSettings::getInstance()->currentReader();
+	QHash<QString, QVector<float> > filtersHash;
 	// not an empty json string => proceed json objects
 	if (!json.isEmpty()) {
 		QJsonParseError err;
 		QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8(), &err);
 		if (doc.isNull() || err.error != QJsonParseError::NoError) {
-			p->sendMessage(QString("error in json parsing: %1").arg(err.errorString()));
+			emit log(QString("error in json parsing: %1").arg(err.errorString()));
 			status = -1;
 		}
 		else {
@@ -71,7 +73,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 				QJsonArray array = root["chunks"].toArray();
 				// check size of array (must be even)
 				if (array.size() % 2) {
-					p->sendMessage(QString("chunks size is invalid: must be even."));
+					emit log(QString("chunks size is invalid: must be even."));
 					status = -1;
 				}
 				QVector<float> values(array.size());
@@ -81,7 +83,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 					markers << new AwMarker("marker", values.at(i), values.at(i + 1));
 			}
 			else {
-				p->sendMessage(QString("error: missing chunks parameter."));
+				emit log(QString("error: missing chunks parameter."));
 				status = -1;
 			}
 			// get pick_from
@@ -113,20 +115,42 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 				if (filters.contains("raw_data"))
 					rawData = filters["raw_data"].toBool();
 				if (filters.contains("eeg") && filters["eeg"].isArray()) {
-
+					auto array = filters["eeg"].toArray();
+					QVector<float> tmp(array.size());
+					for (auto i = 0; i < array.size(); i++)
+						tmp[i] = (float)array.at(i).toDouble();
+					filtersHash.insert("eeg", tmp);
 				}
 				if (filters.contains("seeg") && filters["seeg"].isArray()) {
-
+					auto array = filters["seeg"].toArray();
+					QVector<float> tmp(array.size());
+					for (auto i = 0; i < array.size(); i++)
+						tmp[i] = (float)array.at(i).toDouble();
+					filtersHash.insert("seeg", tmp);
 				}
 				if (filters.contains("meg") && filters["meg"].isArray()) {
-
+					auto array = filters["meg"].toArray();
+					QVector<float> tmp(array.size());
+					for (auto i = 0; i < array.size(); i++)
+						tmp[i] = (float)array.at(i).toDouble();
+					filtersHash.insert("meg", tmp);
 				}
 				if (filters.contains("emg") && filters["emg"].isArray()) {
-
+					auto array = filters["emg"].toArray();
+					QVector<float> tmp(array.size());
+					for (auto i = 0; i < array.size(); i++)
+						tmp[i] = (float)array.at(i).toDouble();
+					filtersHash.insert("emg", tmp);
 				}
 				if (filters.contains("grad") && filters["grad"].isArray()) {
-
+					auto array = filters["grad"].toArray();
+					QVector<float> tmp(array.size());
+					for (auto i = 0; i < array.size(); i++)
+						tmp[i] = (float)array.at(i).toDouble();
+					filtersHash.insert("grad", tmp);
 				}
+				if (filters.contains("downsampling_rate")) 
+					downsampling = filters["downsampling_rate"].toInt();
 			}
 
 		}
@@ -213,9 +237,21 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	for (auto m : markers) {
 		auto channels = AwChannel::duplicateChannels(requestedChannels);
 		chunks.append(channels);
+		if (rawData)
+			requestData(&channels, m, true);
+		else if (downsampling > 1) {
+			requestData(&channels, m, true);
+			AwFiltering::downSample(channels, downsampling);
+			if (fo)
+		}
 		requestData(&channels, m);
 		totalSamples += channels.first()->dataSize();
 	}
+
+	// send the number of channels to client
+	*stream << requestedChannels.size();
+	response.send();
+
 	QStringList selectedLabels = AwChannel::getLabels(AwDisplay::instance()->selectedChannels());
 	for (auto i = 0; i < requestedChannels.size(); i++) { // use i as index for the current channel towards chunks.
 		auto c = requestedChannels.at(i);
@@ -224,7 +260,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 		*stream << c->name() << AwChannel::typeToString(c->type()) << c->referenceName() << c->samplingRate() << c->highFilter();
 		*stream << c->lowFilter() << c->notch() << totalSamples << selected;
 		response.send();
-
+		
 		qint64 chunkSize = 200000;	// chunk of 200000 samples
 		for (auto chunk : chunks) {
 			auto channel = chunk.at(i);
@@ -234,7 +270,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 				qint64 nSamplesSent = 0;
 				qint64 nSamplesLeft = channel->dataSize();
 				while (!finished) {
-					response.clear();
 					if (nSamplesLeft == 0) {
 						finished = true;
 						continue;
@@ -256,7 +291,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 				continue;
 		}	
 		// send a ZERO to signal the end of data stream to the client.
-		response.clear();
 		chunkSize = 0;
 		*stream << chunkSize;
 		response.send();

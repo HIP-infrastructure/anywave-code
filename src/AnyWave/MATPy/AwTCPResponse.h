@@ -34,11 +34,11 @@ public:
 	explicit AwTCPResponse(QTcpSocket *socket);
 	~AwTCPResponse();
 
-	void clear();
-	//QByteArray& data() { return m_data; }
 	QDataStream *stream() { return m_streamData; }
 	void send(int status = 0);
 protected:
+	void clear();
+
 	QTcpSocket * m_socket;
 	QByteArray m_size;
 	QByteArray m_data;

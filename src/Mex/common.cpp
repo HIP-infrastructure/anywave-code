@@ -27,12 +27,16 @@ int waitForResponse(QTcpSocket *socket)
 	in.setVersion(QDataStream::Qt_4_4);
     int status, size;
     in >> status;
-    if (status == -1)   // if status is incorrect ends here.
-        return status;
+	if (status == -1) { // if status is incorrect ends here.
+		mexPrintf("Bad status returned by AnyWave.\n");
+		return status;
+	}
     // getting size of data (in bytes)
     while (socket->bytesAvailable() < sizeof(int))
-		if (!socket->waitForReadyRead(WAIT_TIME_OUT))
+		if (!socket->waitForReadyRead(WAIT_TIME_OUT)) {
+			mexPrintf("Nothing to read from socket.\n");
 			return -1;
+		}
 
     in >> size;
 
@@ -198,9 +202,5 @@ bool TCPRequest::sendRequest()
 
 int TCPRequest::getResponse()
 {
-	int size = waitForResponse(m_socket);
-	if (size == -1) {
-		mexErrMsgTxt("Bad status received from AnyWave.");
-	}
-	return size;
+	return waitForResponse(m_socket);
 }

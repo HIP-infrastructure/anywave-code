@@ -88,16 +88,15 @@ mxArray *parse_cfg(const mxArray *cfg)
 
 	// get response from AnyWave
 	in >> nChannels;
+
 	if (nChannels == 0)  // no channels returned (means that the requested labels did not match existing channels in AnyWave.
 		return output;
 	
 	output = mxCreateStructMatrix(1, nChannels, nfields, fields);
 	for (auto i = 0; i < nChannels; i++) {
-		dataSize = request.getResponse();
-		if (dataSize < 0) {
-			mexErrMsgTxt("Error received from AnyWave.");
+		if (request.getResponse() < 0) 
 			return output;
-		}
+		
 		QString name, ref, type;
 		float samplingRate, hpf, lpf, notch;
 		qint64 nSamples;
@@ -112,6 +111,7 @@ mxArray *parse_cfg(const mxArray *cfg)
 		mxSetField(output, i, "lpf", floatToMat(lpf));
 		mxSetField(output, i, "notch", floatToMat(notch));
 		mxSetField(output, i, "selected", boolToLogical(selected > 0));
+
 		if (nSamples == 0) 
 			mxSetField(output, i, "data", mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL));
 		else {
@@ -121,14 +121,14 @@ mxArray *parse_cfg(const mxArray *cfg)
 			// reading chuncks of data
 			bool finished = false;
 			qint64 nSamplesRead = 0;
+			qint64 chunkSize;
 			do {
 				// waiting for chunk of data
-				dataSize = request.getResponse();
+				dataSize = waitForResponse(request.socket());
 				if (dataSize == -1) {
-					mexErrMsgTxt("Error while receiving data.");
+					mexPrintf("Error while receiving data.");
 					return output;
 				}
-				qint64 chunkSize;
 				in >> chunkSize;
 				if (chunkSize == 0) { // finished receiving data
 					finished = true;

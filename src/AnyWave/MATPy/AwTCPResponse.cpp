@@ -46,10 +46,14 @@ void AwTCPResponse::send(int status)
 	*m_streamSize << m_data.size();
 	m_socket->write(m_size);
 	m_socket->write(m_data);
+	m_socket->waitForBytesWritten();
+	clear();
 }
 
 void AwTCPResponse::clear()
 {
 	m_data.clear();
 	m_size.clear();
+	m_streamData->device()->reset();
+	m_streamSize->device()->reset();
 }
