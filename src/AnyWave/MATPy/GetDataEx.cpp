@@ -56,8 +56,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	QString fileToLoad;
 	QStringList types, labels;
 	int downsampling = 1;
+	aw::filter::Settings filterSettings;
 	AwFileIO *reader = AwSettings::getInstance()->currentReader();
-	QHash<QString, QVector<float> > filtersHash;
+	
 	// not an empty json string => proceed json objects
 	if (!json.isEmpty()) {
 		QJsonParseError err;
@@ -119,35 +120,35 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 					QVector<float> tmp(array.size());
 					for (auto i = 0; i < array.size(); i++)
 						tmp[i] = (float)array.at(i).toDouble();
-					filtersHash.insert("eeg", tmp);
+					filterSettings.set("eeg", tmp);
 				}
 				if (filters.contains("seeg") && filters["seeg"].isArray()) {
 					auto array = filters["seeg"].toArray();
 					QVector<float> tmp(array.size());
 					for (auto i = 0; i < array.size(); i++)
 						tmp[i] = (float)array.at(i).toDouble();
-					filtersHash.insert("seeg", tmp);
+					filterSettings.set("seeg", tmp);
 				}
 				if (filters.contains("meg") && filters["meg"].isArray()) {
 					auto array = filters["meg"].toArray();
 					QVector<float> tmp(array.size());
 					for (auto i = 0; i < array.size(); i++)
 						tmp[i] = (float)array.at(i).toDouble();
-					filtersHash.insert("meg", tmp);
+					filterSettings.set("meg", tmp);
 				}
 				if (filters.contains("emg") && filters["emg"].isArray()) {
 					auto array = filters["emg"].toArray();
 					QVector<float> tmp(array.size());
 					for (auto i = 0; i < array.size(); i++)
 						tmp[i] = (float)array.at(i).toDouble();
-					filtersHash.insert("emg", tmp);
+					filterSettings.set("emg", tmp);
 				}
 				if (filters.contains("grad") && filters["grad"].isArray()) {
 					auto array = filters["grad"].toArray();
 					QVector<float> tmp(array.size());
 					for (auto i = 0; i < array.size(); i++)
 						tmp[i] = (float)array.at(i).toDouble();
-					filtersHash.insert("grad", tmp);
+					filterSettings.set("grad", tmp);
 				}
 				if (filters.contains("downsampling_rate")) 
 					downsampling = filters["downsampling_rate"].toInt();
@@ -242,9 +243,11 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 		else if (downsampling > 1) {
 			requestData(&channels, m, true);
 			AwFiltering::downSample(channels, downsampling);
-			if (fo)
 		}
-		requestData(&channels, m);
+		else { // apply filter
+			filterSettings.apply(channels);
+			requestData(&channels, m);
+		}
 		totalSamples += channels.first()->dataSize();
 	}
 
@@ -296,7 +299,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 		response.send();
 	}
 
-
+	//cleaning up
 	for (auto chunk : chunks)
 		while (chunk.isEmpty())
 			delete chunk.takeFirst();

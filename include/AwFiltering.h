@@ -29,6 +29,31 @@
 #include <AwChannel.h>
 #include <AwFilteringOptions.h>
 
+namespace aw
+{
+	namespace filter {
+		class AW_FILTER_EXPORT Settings
+		{
+		public:
+			/** set filters for a specified type of channel **/
+			void set(int type, const QVector<float>& values);
+			/** convenience method to use a string instead of the channel type **/
+			void set(const QString& name, const QVector<float>& values);
+			/** set filters for a specified type of channel **/
+			void set(int type, float hp, float lp, float notch);
+			/** apply the current settings to a channel **/
+			void apply(AwChannel *channel);
+			/** apply the current settings to a whole list of channels **/
+			void apply(const AwChannelList& channels);
+			/** save settings to json file **/
+			void save(const QString& file);
+			void load(const QString& file);
+		protected:
+			QHash<int, QVector<float>> m_hash;
+		};
+	}
+}
+
 class AW_FILTER_EXPORT AwFiltering
 {
 public:
