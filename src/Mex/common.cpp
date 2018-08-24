@@ -150,7 +150,32 @@ QString toJson(const mxArray *struc)
 	return QString(mxArrayToString(out[0]));
 }
 
+mxArray *floatVectorToMat(const QVector<float>& vector)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, vector.size(), mxSINGLE_CLASS, mxREAL);
+	float *data = (float *)mxGetData(tmp);
+	for (auto v : vector)
+		*data++ = v;
+	return tmp;
+}
 
+mxArray *doubleVectorToMat(const QVector<double>& vector)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, vector.size(), mxDOUBLE_CLASS, mxREAL);
+	double *data = (double *)mxGetData(tmp);
+	for (auto v : vector)
+		*data++ = v;
+	return tmp;
+}
+
+mxArray *intVectorToMat(const QVector<int>& vector)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, vector.size(), mxINT32_CLASS, mxREAL);
+	int *data = (int *)mxGetData(tmp);
+	for (auto v : vector)
+		*data++ = v;
+	return tmp;
+}
 
 
 //// Classes implementations

@@ -20,6 +20,10 @@ mxArray *doubleToMat(double value);
 mxArray *int32ToMat(qint32 value);
 mxArray *int16ToMat(qint16 value);
 mxArray *boolToLogical(bool value);
+mxArray *floatVectorToMat(const QVector<float>& vector);
+mxArray *doubleVectorToMat(const QVector<double>& vector);
+mxArray *intVectorToMat(const QVector<int>& vector);
+
 
 QString toJson(const mxArray *struc);
 

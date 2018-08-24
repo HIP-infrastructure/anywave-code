@@ -734,10 +734,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				}
 				else {
 					// create a marker as input which covers whole data
-					AwMarker *marker = new AwMarker;
-					marker->setStart(0);
-					marker->setDuration(m_currentReader->infos.totalDuration());
-					process->pdi.input.markers << marker;
+					process->pdi.input.markers << new AwMarker("whole data", 0., m_currentReader->infos.totalDuration());
 				}
 			}
 		}

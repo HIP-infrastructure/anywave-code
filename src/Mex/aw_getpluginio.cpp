@@ -58,18 +58,20 @@ mxArray* request_info()
 	// send also the markers set as input
 	in >> nMarkers;
 	mxArray *markers = 0, *tmp = 0;
-	const char *marker_fields[] = { "label", "position", "duration", "value", "channels" };
+#define MARKER_FIELDS 6 // edit nFields when changind the fields of the structure.
+	const char *marker_fields[] = { "label", "position", "duration", "value", "channels", "chunk" }; // chunk is a vector containing position and duration of the corresponding marker.
 	if (nMarkers == 0) {
-		markers = mxCreateStructMatrix(0, 0, 5, marker_fields);
+		markers = mxCreateStructMatrix(0, 0, MARKER_FIELDS, marker_fields);
 	}
 	else {
-		markers = mxCreateStructMatrix(1, (size_t)nMarkers, 5, marker_fields);
+		markers = mxCreateStructMatrix(1, (size_t)nMarkers, MARKER_FIELDS, marker_fields);
 		for (auto i = 0; i < nMarkers; i++) {
 			QString label;
 			float start, duration, value;
 			QStringList channels;
 
 			in >> label >> start >> duration >> value >> channels;
+			QVector<double> chunkVector = { start, duration };
 
 			// label
 			mxSetField(markers, i, "label", mxCreateString(label.toStdString().c_str()));
@@ -79,6 +81,8 @@ mxArray* request_info()
 			mxSetField(markers, i, "duration", floatToMat(duration));
 			// value
 			mxSetField(markers, i, "value", floatToMat(value));
+			// chunk
+			mxSetField(markers, i, "chunk", doubleVectorToMat(chunkVector));
 			// channels
 			tmp = NULL;
 			if (!channels.isEmpty()) {
