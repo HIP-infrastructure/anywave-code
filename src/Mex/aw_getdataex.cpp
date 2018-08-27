@@ -30,6 +30,9 @@ static mxArray *parse_cfg(const mxArray *);
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
+	if (nlhs == 0)
+		return;
+
 	if (nrhs > 1) {
 		// one parameter only is required.
 		mexErrMsgTxt("Wrong number of parameters (See help).");

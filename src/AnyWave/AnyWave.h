@@ -93,6 +93,7 @@ private:
 	QMenu *m_recentFilesMenu, *m_recentBIDSMenu;
 	// widgets
 	QList<QWidget *> m_toolBarWidgets;
+	QList<QWidget *> m_openWidgets;	 // list tracking all widget open by the user (and that must be closed when the application ends.)
 	QList<QAction *> m_actions;
 	QStatusBar *m_sBar;
 	AwCursorMarkerToolBar *m_cursorToolBar;
@@ -108,7 +109,6 @@ private:
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
-
 	// DockWidgets
 	QDockWidget *m_dockFilters, *m_addMarkerDock;
 	QDockWidget *m_dockMarkers, *m_dockBIDS;
@@ -118,9 +118,9 @@ private:
 	AwDockMapping *m_dockEEG;	
 	// updater 
 	AwUpdater *m_updater;
-
 	// flags
 	bool m_currentFileModified;
+	// methods
 	void createUserDirs();
 	void initToolBarsAndMenu();
 	void closeFile();

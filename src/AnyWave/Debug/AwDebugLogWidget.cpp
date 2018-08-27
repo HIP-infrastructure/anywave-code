@@ -26,8 +26,8 @@
 #include "AwDebugLogWidget.h"
 #include "AwDebugLog.h"
 
-AwDebugLogWidget::AwDebugLogWidget(QWidget *parent)
-	: QWidget(parent)
+AwDebugLogWidget::AwDebugLogWidget(QWidget *parent, Qt::WindowFlags flags)
+	: QWidget(parent, flags)
 {
 	m_ui.setupUi(this);
 	AwDebugLog *adl = AwDebugLog::instance();

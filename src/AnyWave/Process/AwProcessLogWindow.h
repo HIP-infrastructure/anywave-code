@@ -34,7 +34,7 @@ class AwProcessLogWindow : public QWidget
 	Q_OBJECT
 
 public:
-	AwProcessLogWindow(QWidget *parent = 0);
+	AwProcessLogWindow(QWidget *parent = 0, Qt::WindowFlags flags = Qt::Window );
 	~AwProcessLogWindow();
 
 	void setText(const QString& text) { m_ui.textEdit->setText(text); }

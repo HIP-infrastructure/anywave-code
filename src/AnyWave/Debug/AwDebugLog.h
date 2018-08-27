@@ -49,6 +49,7 @@ public:
 
 	QStringList components();
 	QStringList logsForComponent(const QString& name);
+	void clearLogForComponent(const QString& name);
 	void cleanUp();
 public slots:
 	void addLog(const QString& message);
@@ -59,7 +60,7 @@ protected:
 private:
 	static AwDebugLog *m_instance;
 	QHash<QObject *, QString> m_components;
-	QHash<QString, QStringList *> m_logs;
+	QHash<QString, QStringList> m_logs;
 };
 
 #endif // AWDEBUGLOG_H

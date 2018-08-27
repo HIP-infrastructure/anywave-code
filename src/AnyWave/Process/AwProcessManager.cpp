@@ -764,9 +764,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	plm->setParent(this);
 	plm->connectProcess(process);
 
-	// connect process to debug log system
-	AwDebugLog::instance()->connectComponent(process->plugin()->name, process);
-
 	AwDataServer *ds = 	AwDataServer::getInstance();
 
 	// set current language

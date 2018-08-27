@@ -105,15 +105,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	aws->setParent(this);
 	//Save system path
 	aws->setSystemPath(qgetenv("PATH"));
-
 	setWindowIcon(QIcon(":images/AnyWave_icon.png"));
-
-//	QSplashScreen *splash = new QSplashScreen;
-//	splash->setPixmap(QPixmap(":/images/AnyWave_logo.png"));
- //   splash->show();
-//	Qt::Alignment topRight = Qt::AlignRight | Qt::AlignTop;
- //   splash->showMessage(QObject::tr("Setting up the main window..."),
-  //                      topRight, Qt::white);
 
 	AwDataServer *data_server = AwDataServer::getInstance();
 	data_server->setParent(this);
@@ -149,9 +141,6 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	settings.setValue("general/buildDate", QString(__DATE__));
 	// searching for a Matlab and MCR installed versions on the computer.
 	initMatlab();
-//	splash->showMessage(QObject::tr("Loading plugins..."),
- //                       topRight, Qt::white);
-
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	plugin_manager->setParent(this);
 	AwProcessManager *process_manager = AwProcessManager::instance();
@@ -169,9 +158,9 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 		menuFile->insertMenu(actionFileProperties, process_manager->fileMenu());
 	if (process_manager->viewMenu())
 		menuView_->insertMenu(actionPlugins, process_manager->viewMenu());
-	foreach (QAction *a, process_manager->icaActions()) {
+	foreach (QAction *a, process_manager->icaActions()) 
 		menuICA->addAction(a);
-	}
+	
 	// END OF ADDING PLUGINGS MENUS
 
 	m_actions << actionMontage << actionMarkers << actionCarto3D << actionFileProperties << actionComponentsMaps << actionShow_map_on_signal << actionShow_Mappings << actionCreateEpoch
@@ -317,12 +306,8 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	retranslateUi(this);	// force translation to be applied.
 	checkMatlabAndMCRInit();
 	m_lastDirOpen = "/";
-//	m_epochManager = NULL;
-//	showMaximized();
 	m_updater = new AwUpdater(this);
 	m_updater->checkForUpdate();
-//	splash->finish(this);
-//	delete splash;
 }
 
 //
@@ -332,6 +317,8 @@ AnyWave::~AnyWave()
 {
 	delete m_meshManager;
 	delete m_layoutManager;
+	while (!m_openWidgets.empty()) 
+		delete m_openWidgets.takeFirst();
 }
 
 // EVENTS
@@ -413,6 +400,8 @@ void AnyWave::applyNewLanguage()
 
 void AnyWave::quit()
 {
+	for (auto w : m_openWidgets)
+		w->close();
 	// stop MATPy server if running
 	delete AwMATPyServer::instance();
 
@@ -1252,7 +1241,7 @@ void AnyWave::runMapping()
 
 		if (!mesh.isEmpty() && !electrodes.isEmpty()) {
 			if (m_SEEGViewer == NULL) {
-				m_SEEGViewer = new AwSEEGViewer;
+				m_SEEGViewer = new AwSEEGViewer(this);
 				connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient *)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient *)));
 				connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
 				connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
@@ -1266,12 +1255,6 @@ void AnyWave::runMapping()
 
 			m_display->setMappingModeOn(true);
 			m_SEEGViewer->setMappingMode(true);
-			//// put the widget in a QDockWidget
-			//QDockWidget *dock = new QDockWidget(tr("SEEG Mapping"), this);
-			//dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-			//addDockWidget(Qt::LeftDockWidgetArea, dock);
-			//dock->setFloating(true);
-			//dock->setWidget(m_SEEGViewer->widget());
 			m_SEEGViewer->widget()->show();
 		}
 
@@ -1611,8 +1594,10 @@ void AnyWave::on_actionPreferences_triggered()
 //
 void AnyWave::on_actionDebug_Logs_triggered()
 {
-	if (!m_debugLogWidget)
+	if (!m_debugLogWidget) {
 		m_debugLogWidget = new AwDebugLogWidget();
+		m_openWidgets.append(m_debugLogWidget);
+	}
 	m_debugLogWidget->show();
 }
 
