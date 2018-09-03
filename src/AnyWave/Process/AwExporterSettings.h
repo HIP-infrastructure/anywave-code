@@ -30,7 +30,8 @@
 #include "ui_AwExporterSettings.h"
 #include <AwChannel.h>
 #include <AwMarker.h>
-#include <AwFilteringOptions.h>
+#include <filter/AwFilterSettings.h>
+
 using namespace Ui;
 class AwExporterSettings : public QDialog, public AwExporterSettingsUi
 {
@@ -48,10 +49,10 @@ public:
 	AwChannelList selectedICA;	
 	AwMarkerList markers, skippedMarkers, exportedMarkers;
 	QString filePath, initialPath;
-	AwFilteringOptions foptions;
 	bool useCurrentMontage;
 	bool exportICA, skipMarkers, exportMarkers;
 	float downSample, globalSamplingRate;
+	AwFilterSettings filterSettings;
 public slots:
 	int exec() override;
 	void accept() override;

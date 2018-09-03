@@ -7,6 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwProcessLib", "src\Process
 	ProjectSection(ProjectDependencies) = postProject
 		{CA5B6E48-7EBE-4949-AA0B-79267B704C4D} = {CA5B6E48-7EBE-4949-AA0B-79267B704C4D}
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+		{7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E} = {7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwReadWriteLib", "src\ReadWrite\ReadWrite.vcxproj", "{CA5B6E48-7EBE-4949-AA0B-79267B704C4D}"
@@ -551,7 +552,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

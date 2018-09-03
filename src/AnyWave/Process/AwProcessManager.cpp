@@ -43,7 +43,6 @@
 #include <QApplication>
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
-#include "Filter/AwFiltersManager.h"
 #include "Debug/AwDebugLog.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
@@ -350,14 +349,14 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 			process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	auto fi = AwSettings::getInstance()->fileInfo();
+	auto fi = settings->fileInfo();
 	// if fi == NULL that means no file are currently open by AnyWave.
 	if (fi) {
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(fi->currentReader());
 		process->pdi.input.dataFolder = fi->dirPath();
 		process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(fi->fileName());
-		process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
+		process->pdi.input.filterSettings = settings->filterSettings();
 	}
 	return process;
 }
@@ -454,7 +453,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 }
 	 p->pdi.input.channels += AwChannel::duplicateChannels(list);
 	 // make sure current filters are set for the channels.
-	 AwFiltersManager::instance()->fo().setFilters(p->pdi.input.channels);
+	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels);
 	 return true;
  }
 

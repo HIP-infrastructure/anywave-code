@@ -30,8 +30,51 @@
 #include <qjsonarray.h>
 #include <AwException.h>
 #include <qfile.h>
+#include "AwFilterGUI.h"
+
+AwFilterSettings::AwFilterSettings()
+{
+	m_ui = NULL;
+}
+
+AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
+{
+	m_hash = settings.m_hash;
+	m_bounds = settings.m_bounds;
+	m_ui = NULL;
+}
+
+AwFilterSettings::~AwFilterSettings()
+{
+	if (m_ui != NULL) {
+		m_ui->close();
+		delete m_ui;
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+AwFilterSettings& AwFilterSettings::operator=(const AwFilterSettings& other)
+{
+	if (this != &other) {
+		this->m_hash = other.m_hash;
+		this->m_bounds = other.m_bounds;
+	}
+	return *this;
+}
+
+void AwFilterSettings::clear()
+{
+	m_bounds.clear();
+	m_hash.clear();
+}
+
+void AwFilterSettings::zero()
+{
+	for (auto k : m_hash.keys()) 
+		set(k, 0., 0., 0.);
+}
+
+
 void  AwFilterSettings::set(const QString& type, const QVector<float>& values)
 {
 	set(AwChannel::stringToType(type), values);
@@ -57,8 +100,88 @@ void AwFilterSettings::set(int type, float hp, float lp, float notch)
 		m_hash.insert(type, tmp);
 }
 
+void AwFilterSettings::setBounds(int type, const QVector<float>& values)
+{
+	// check if type is already in hash table
+	if (m_bounds.contains(type))
+		m_bounds[type] = values;
+	else
+		m_bounds.insert(type, values);
+}
 
-void AwFilterSettings::apply(AwChannel *channel)
+
+void AwFilterSettings::setBounds(int type, float hp, float lp)
+{
+	// check if type is already in hash table
+	QVector<float> tmp(2);
+	tmp[0] = hp; tmp[1] = lp; 
+	if (m_bounds.contains(type))
+		m_bounds[type] = tmp;
+	else
+		m_bounds.insert(type, tmp);
+}
+
+///
+/// returns a list of channels for which filter settings are beyond the bounds
+/// returns an empty list if filters are in the bounds.
+QList<int> AwFilterSettings::checkForBounds()
+{
+	QList<int> res;
+	if (m_bounds.isEmpty())
+		return res;
+	for (auto k : m_bounds.keys()) {
+		auto values = m_hash[k];
+		auto bounds = m_bounds[k];
+		// check only for HP and LP values.
+		bool ok = values[0] >= bounds[0] && values[0] <= bounds[0] &&
+			values[1] >= bounds[1] && values[1] <= bounds[1];
+		if (!ok)
+			res << k;
+	}
+	return res;
+}
+
+
+///
+/// initWithFile()
+/// try to load .flt file associated with the data file.
+/// If the file does not exist or loading failed, returns false.
+/// returns true if success.
+bool AwFilterSettings::initWithFile(const QString& filePath)
+{
+	QString file = QString("%1.flt").arg(filePath);
+	try {
+		load(file);
+	}
+	catch (AwException &e)
+	{
+		emit log(QString("%1:%2").arg(e.origin()).arg(e.errorString()));
+		return false;
+	}
+	return true;
+}
+
+void AwFilterSettings::initWithChannels(const AwChannelList& channels)
+{
+	// check for type of channels. Do not initiate filtering, just set the channels that might be filtered by the user afterward.
+
+	// get type of channels
+	auto types = AwChannel::getTypesAsInt(channels);
+	QList<int> uniques;
+	for (int i : types) {
+		if (uniques.contains(i))
+			continue;
+		uniques.append(i);
+	}
+	// remove channels we don't want the user can filter (Trigger, Other)
+	uniques.removeAll(AwChannel::Trigger);
+	uniques.removeAll(AwChannel::Other);
+	for (int i : uniques) {
+		set(i, 0., 0., 0.);
+	}
+}
+
+void AwFilterSettings::apply(AwChannel *channel) const
 {
 	if (!m_hash.contains(channel->type()))
 		return;
@@ -74,7 +197,7 @@ void AwFilterSettings::apply(AwChannel *channel)
 	channel->setNotch(tmp[2]);
 }
 
-void AwFilterSettings::apply(const AwChannelList& channels)
+void AwFilterSettings::apply(const AwChannelList& channels) const
 {
 	for (auto c : channels)
 		apply(c);
@@ -83,8 +206,9 @@ void AwFilterSettings::apply(const AwChannelList& channels)
 void AwFilterSettings::save(const QString& path)
 {
 	QFile file(path);
+	QString origin("AwFilterSettings::save");
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		throw AwException(QString("Failed to open %1 for writing.").arg(path), QString("aw::filter::Settings::save"));
+		throw AwException(QString("Failed to open %1 for writing.").arg(path), origin);
 		return;
 	}
 	QJsonObject root;
@@ -103,8 +227,9 @@ void AwFilterSettings::save(const QString& path)
 void AwFilterSettings::load(const QString& path)
 {
 	QFile file(path);
+	QString origin("AwFilterSettings::load");
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		throw AwException(QString("Failed to open %1 for reading.").arg(path), QString("aw::filter::Settings::load"));
+		throw AwException(QString("Failed to open %1 for reading.").arg(path), origin);
 		return;
 	}
 	QJsonParseError error;
@@ -112,7 +237,7 @@ void AwFilterSettings::load(const QString& path)
 	file.close();
 
 	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
-		throw AwException(QString("Json error: %1.").arg(error.errorString()), QString("aw::filter::Settings::load"));
+		throw AwException(QString("Json error: %1.").arg(error.errorString()), origin);
 		return;
 	}
 	m_hash.clear();
@@ -132,5 +257,37 @@ void AwFilterSettings::load(const QString& path)
 			m_hash.insert(AwChannel::stringToType(t), values);
 		}
 	}
+	if (m_hash.isEmpty()) { // empty hash table means the json format is old/wrond
+		throw AwException(QString("json format is too old or incompatible."), origin);
+		return;
+	}
+	updateGUI();
+	emit settingsChanged(*this);
 }
 
+QWidget *AwFilterSettings::ui()
+{
+	if (m_ui == NULL) {
+		m_ui = new AwFilterGUI(*this);
+		connect(m_ui, &AwFilterGUI::applyClicked, this, &AwFilterSettings::setNewSettings);
+	}
+	return m_ui;
+}
+
+
+///
+/// SLOTS
+///
+void AwFilterSettings::updateGUI()
+{
+	if (m_ui)
+		m_ui->updateSettings(*this);
+}
+
+
+void AwFilterSettings::setNewSettings(const AwFilterSettings& settings)
+{
+	m_hash = settings.m_hash;
+	m_bounds = settings.m_bounds;
+	emit settingsChanged(*this);
+}

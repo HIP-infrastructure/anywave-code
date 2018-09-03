@@ -36,6 +36,12 @@ class AwFileIO;
 class AwDisplaySetup;
 class AwMatlabInterface;
 
+#include <filter/AwFilterSettings.h>
+
+///
+/// Global object containing all global settings of AnyWave
+///
+
 class AwSettings : public QObject
 {
 	Q_OBJECT
@@ -97,6 +103,7 @@ public:
 	inline bool isAutoTriggerParsingOn() { return m_isAutoTriggerParsingOn; }
 	inline AwMatlabInterface *matlabInterface() { return m_matlabInterface; }
 	inline void setMatlabInterface(AwMatlabInterface *i) { m_matlabInterface = i; }
+	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 	AwFileIO* readerAt(int index);
 	QStringList& topoLayouts(); 
 
@@ -157,6 +164,8 @@ protected:
 	QString m_systemPath;
 	// topo layouts for the current opened file
 	QStringList m_topoLayouts;
+	// unique filter settings object.
+	AwFilterSettings m_filterSettings;
 private:
 	static AwSettings *m_instance;
 	

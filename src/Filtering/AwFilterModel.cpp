@@ -36,29 +36,18 @@ AwFilterModel::AwFilterModel(const AwFilterSettings& settings, QObject *parent) 
 void AwFilterModel::updateSettings(const AwFilterSettings& settings)
 {
 	beginResetModel();
-	m_selections.clear();
-	// build default selection of filter
-	for (auto t : m_settings.currentTypes()) {
-		bool isFilterSet = false;
-		auto filters = m_settings.filters(t);
-		for (auto f : filters) {
-			if (f > 0.) {
-				isFilterSet = true;
-				break;
-			}
-		}
-		m_selections.append(QPair<int, bool>(t, isFilterSet));
-	}
+	m_settings = settings;
+	m_keys.clear();
+	m_keys = m_settings.currentTypes();
 	endResetModel();
 }
-
 
 //
 // rowCount
 //
 int AwFilterModel::rowCount(const QModelIndex &parent) const
 {
-	return m_selections.count();
+	return m_keys.count();
 }
 
 //
@@ -78,14 +67,10 @@ Qt::ItemFlags AwFilterModel::flags(const QModelIndex &index) const
 		return Qt::ItemIsEnabled;
 
 	Qt::ItemFlags flags = QAbstractTableModel::flags(index);
-	auto isActive = m_selections.at(index.row()).second;
 
-	if (isActive)
-		flags |= Qt::ItemIsEnabled;
+	flags |= Qt::ItemIsEnabled;
 
-	if (index.column() == FILTER_COLUMN_SELECT)
-		flags |= Qt::ItemIsUserCheckable;
-	else if (index.column() != FILTER_COLUMN_TYPE)
+	if (index.column() != FILTER_COLUMN_TYPE)
 		flags |= Qt::ItemIsEditable;
 	return flags;
 }
@@ -97,9 +82,8 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 
 	auto col = index.column();
 	auto row = index.row();
-	auto type = m_selections.at(row).first;
-	auto isActive = m_selections.at(row).second;
-	auto values = m_settings.filters(m_selections.at(row).first);
+	auto type = m_keys.at(row);
+	auto values = m_settings.filters(type);
 	QString none = tr("None");
 
 	switch (col) {
@@ -118,7 +102,7 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 			return values[1];
 		else if (role == Qt::DisplayRole) {
 			if (values[1] > 0.)
-				return values[0];
+				return values[1];
 			else
 				return none;
 		}
@@ -133,19 +117,13 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 				return none;
 		}
 		break;
-	case FILTER_COLUMN_SELECT:
-		if (role == Qt::UserRole)
-			return isActive;
-		else if (role == Qt::CheckStateRole)
-			return isActive ? Qt::Checked : Qt::Unchecked;
-		break;
 	case FILTER_COLUMN_TYPE:
 		if (role == Qt::DisplayRole)
 			return AwChannel::typeToString(type);
 		break;
 	}
-
-
+	if (role == Qt::TextAlignmentRole)
+		return int(Qt::AlignCenter);
 	return QVariant();
 }
 
@@ -154,12 +132,8 @@ bool AwFilterModel::setData(const QModelIndex &index, const QVariant &value, int
 	if (!index.isValid())
 		return false;
 	auto col = index.column();
-	auto type = m_selections.at(index.row()).first;
+	auto type = m_keys.at(index.row());
 	auto values = m_settings.filters(type);
-	if (col == FILTER_COLUMN_SELECT && role == Qt::CheckStateRole) {
-		auto pair = m_selections.at(index.row());
-		pair.second = value.toInt() == Qt::Checked;
-	}
 	if (col == FILTER_COLUMN_HPF && role == Qt::EditRole) {
 		values[0] =(float)value.toDouble();
 		m_settings.set(type, values);
@@ -190,10 +164,8 @@ QVariant AwFilterModel::headerData(int section, Qt::Orientation orientation, int
 		return QString(tr("LP (Hz)"));
 	if (section == FILTER_COLUMN_NOTCH && role == Qt::DisplayRole)
 		return QString(tr("Notch (Hz)"));
-	if (section == FILTER_COLUMN_SELECT && role == Qt::DisplayRole)
-		return QString(tr("Enabled"));
 	if (section == FILTER_COLUMN_TYPE && role == Qt::DisplayRole)
-		return QString(tr("Channels"));
+		return QString(tr("Type"));
 
 	return QVariant();
 }

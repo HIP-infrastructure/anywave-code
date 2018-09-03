@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
-QT += concurrent
+QT += concurrent widgets
 include(../common.pri)
 TARGET = AwFilter
 TEMPLATE = lib
@@ -33,6 +32,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     AwButterWorth.cpp \
     AwFiltering.cpp \
+	AwFilterSettings.cpp \
+	AwFilterSwitchButton.cpp \
+	AwFilterModel.cpp \
     DspFilters/Bessel.cpp \
     DspFilters/Biquad.cpp \
     DspFilters/Butterworth.cpp \
@@ -53,7 +55,12 @@ SOURCES += \
 
 
 HEADERS += \
-    ../../include/AwFiltering.h
+    ../../include/filter/AwFiltering.h \
+	AwFilterModel.h \
+	../../include/filter/AwFilterSettings.h \
+	AwFilterSwitchButton.h
+	
+FORMS += AwFilterGUI.ui
 
 macx {
     LIBS += -framework AwCore

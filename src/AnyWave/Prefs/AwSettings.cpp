@@ -156,6 +156,8 @@ void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
 void AwSettings::closeFile()
 { 
 	currentIcaFile.clear(); 
+	if (m_fileInfo)
+		m_filterSettings.save(QString("%1.flt").arg(m_fileInfo->filePath()));
 }
 
 

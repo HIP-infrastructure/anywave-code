@@ -44,8 +44,6 @@
 #include "Widgets/AwDisplayToolBar.h"
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Filter/AwFilterToolBar.h"
-#include "Filter/AwFilterSettings.h"
-#include "Filter/AwFiltersManager.h"
 #include "Prefs/AwSettings.h"
 #include "Prefs/AwPreferences.h"
 #include "Prefs/AwPrefsDial.h"
@@ -82,6 +80,7 @@
 #ifdef AW_EPOCHING
 #include "Epoch/AwEpochManager.h"
 #endif
+
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwFileInfo.h>
@@ -114,7 +113,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	adl->setParent(this);
 
 	adl->connectComponent("AnyWave", this);
-
+	adl->connectComponent("Filters Settings", &aws->filterSettings());
 	createUserDirs();
 	
 	// AwSettings loads recentfiles in constructor, so get that list and update menu
@@ -158,7 +157,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 		menuFile->insertMenu(actionFileProperties, process_manager->fileMenu());
 	if (process_manager->viewMenu())
 		menuView_->insertMenu(actionPlugins, process_manager->viewMenu());
-	foreach (QAction *a, process_manager->icaActions()) 
+	for (auto a : process_manager->icaActions()) 
 		menuICA->addAction(a);
 	
 	// END OF ADDING PLUGINGS MENUS
@@ -175,7 +174,6 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	m_dockBIDS = NULL;
 	// Markers
 	m_dockMarkers = new QDockWidget(tr("Markers"), this);
-	//m_dockMarkers->setObjectName("dockMarkers");
 	addDockWidget(Qt::LeftDockWidgetArea, m_dockMarkers);
 	m_dockMarkers->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	m_dockMarkers->setWidget(AwMarkerManager::instance()->ui());
@@ -219,10 +217,6 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	m_display->setParent(this);
 	m_display->setAddMarkerDock(m_addMarkerDock);
 
-	// create Filtering Manager
-	AwFiltersManager *fm = AwFiltersManager::instance();
-	fm->setParent(this);
-
 	// AwSourceManager
 	AwSourceManager::instance()->setParent(this);
 	connect(AwSourceManager::instance(), SIGNAL(newSourcesCreated(int)), AwMontageManager::instance(), SLOT(addNewSources(int)));
@@ -234,7 +228,6 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	m_meshManager = AwMeshManager::instance();
 	// AwMeshManager
 	m_layoutManager = AwLayoutManager::instance();
-
 
 	// Connections !
 	// AnyWave and Script Manager
@@ -266,12 +259,6 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	// Settings and Display
 	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
 
-	// Filtering Manager and Montage Manager
-	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), montage_manager, SLOT(newFilters()));
-
-	// Fitlering Manager and AnyWave
-	connect(fm, SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
-
 	/// MAPPING
 	m_dockEEG = m_dockMEG = NULL;
 
@@ -281,28 +268,22 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 
 	// Menu  :View->plugins
 	connect(actionPlugins, SIGNAL(triggered()), plugin_manager, SLOT(showPluginsDial()));
-
 	// Menu: View->Processes
 	connect(actionProcesses, SIGNAL(triggered()), this, SLOT(showProcessDock()));
-
 	// Menu: File->export to svg
 	connect(actionExport_to_SVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
 	connect(actionSave_display_to_PDF, SIGNAL(triggered()), this, SLOT(exportToPDF()));
-
 	// Menu: File->Import marker file
 	connect(actionImport_mrk_file, SIGNAL(triggered()), this, SLOT(importMrkFile()));
 	// Menu: File->Load Beamformer matrix
 	connect(actionLoadBeamFormer, SIGNAL(triggered()), this, SLOT(loadBeamformer()));
 	// Menu: File->Properties
 	connect(actionFileProperties, SIGNAL(triggered()), this, SLOT(showFileProperties()));
-
 	// Menu: ICA->Review Components Maps
 	connect(actionComponentsMaps, SIGNAL(triggered()), this, SLOT(reviewComponentsMaps()));
 	// Menu: ICA->Show maps on signals
 	connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
-
 	connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
-
 	retranslateUi(this);	// force translation to be applied.
 	checkMatlabAndMCRInit();
 	m_lastDirOpen = "/";
@@ -402,12 +383,12 @@ void AnyWave::quit()
 {
 	for (auto w : m_openWidgets)
 		w->close();
+	AwSettings::getInstance()->closeFile();
 	// stop MATPy server if running
 	delete AwMATPyServer::instance();
 
 	AwMontageManager::instance()->quit();
 	AwAmplitudeManager::instance()->quit();
-	AwFiltersManager::instance()->quit();
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
 
@@ -446,7 +427,6 @@ void AnyWave::closeFile()
 {
 	AwMontageManager::instance()->closeFile();
 	AwAmplitudeManager::instance()->closeFile();
-	AwFiltersManager::instance()->closeFile();
 	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
 	
@@ -620,17 +600,14 @@ void AnyWave::initToolBarsAndMenu()
 	connect(im, SIGNAL(componentsLoaded()), filter_tb, SLOT(enableICAFiltering()));
 	connect(im, SIGNAL(filteringSwitched(bool)), filter_tb, SLOT(setICAMode(bool)));
 
-
 	// Filtering dock widget
-	m_dockFilters = new QDockWidget(tr("Filtering"), this);
-	m_dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	m_dockFilters->setFloating(true);
-	AwFilterSettings *widget = AwFiltersManager::instance()->ui();
-	connect(widget, &AwFilterSettings::filtersApplied, filter_tb, &AwFilterToolBar::applyFilters);
-	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, m_dockFilters, &QDockWidget::show);
-	m_dockFilters->setWidget(widget);
-	m_dockFilters->hide();
-
+	QDockWidget *dockFilters = new QDockWidget(tr("Filtering"), this);
+	dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	dockFilters->setFloating(true);
+	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, dockFilters, &QDockWidget::show);
+	dockFilters->hide();
+	dockFilters->setWidget(AwSettings::getInstance()->filterSettings().ui());
+	//connect(filter_tb, &AwFilterToolBar::filterButtonClicked, &AwSettings::getInstance()->filterSettings(), &AwFilterSettings::updateGUI);
 	filter_tb->setEnabled(false);
 	m_toolBarWidgets.append(filter_tb);
 
@@ -696,22 +673,6 @@ void AnyWave::initToolBarsAndMenu()
 	/////////////////////////////////////////////////////////////////////////////////////
 	connect(actionOpen_BIDS, SIGNAL(triggered()), this, SLOT(openBIDS()));
 }
-
-
-void AnyWave::newFilters()
-{
-	AwFiltersManager *fm = AwFiltersManager::instance();
-	if (m_SEEGViewer)
-		m_SEEGViewer->setFilters(fm->fo().eegLP, fm->fo().eegHP);
-}
-
-///
-/// changeFilterSettings()
-///
-void AnyWave::changeFilterSettings()
-{
-}
-
 
 bool AnyWave::checkForModified()
 {
@@ -892,15 +853,10 @@ void AnyWave::openFile(const QString &path)
 	ds->setParent(this);
 
 	// read flt file before loading the montage.
-	AwFiltersManager::instance()->setFilename(m_openFileName);
-	// check if file contains source or ica channels
-	AwChannelList ica_channels = AwChannel::getChannelsOfType(m_currentReader->infos.channels(), AwChannel::ICA); 
-	AwChannelList source_channels = AwChannel::getChannelsOfType(m_currentReader->infos.channels(), AwChannel::Source);
-	if (!ica_channels.isEmpty())
-		AwFiltersManager::instance()->ui()->enableICAFiltering();
-	if (!source_channels.isEmpty())
-		AwFiltersManager::instance()->ui()->enableSourceFiltering();
-
+	if (!AwSettings::getInstance()->filterSettings().initWithFile(m_openFileName)) {
+		// try to init from the reader channels if the loading of .flt file failed.
+		AwSettings::getInstance()->filterSettings().initWithChannels(m_currentReader->infos.channels());
+	}
 	AwMontageManager::instance()->newMontage(m_currentReader);
 
 	// Activer les QWidgets des toolbars.
@@ -937,17 +893,6 @@ void AnyWave::openFile(const QString &path)
 
 	if (openWithDialog)
 		settings->addRecentFilePath(filePath);
-}
-
-
-void AnyWave::on_actionLoadMesh_triggered()
-{
-	QString mesh = QFileDialog::getOpenFileName(this, tr("Load a mesh"), "/");
-	if (!mesh.isEmpty()) {
-		if (m_SEEGViewer == NULL)
-			m_SEEGViewer = new AwSEEGViewer(this);
-		m_SEEGViewer->loadMesh(mesh);
-	}
 }
 
 //
@@ -1247,6 +1192,8 @@ void AnyWave::runMapping()
 				connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
 				connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
 				connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+				connect(&AwSettings::getInstance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
+					SLOT(setNewFilters(const AwFilterSettings&)));
 			}
 			// the viewer will automatically duplicate channel objects.
 			m_SEEGViewer->setSEEGChannels(seegChannels);

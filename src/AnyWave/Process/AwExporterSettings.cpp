@@ -105,16 +105,8 @@ int AwExporterSettings::exec()
 {
 	updateOutputFileExtension(0);
 	comboWriters->addItems(writers);
-	spinMEGLP->setValue(foptions.megLP);
-	spinMEGHP->setValue(foptions.megHP);
-	spinEEGLP->setValue(foptions.eegLP);
-	spinEEGHP->setValue(foptions.eegHP);
-	spinEMGLP->setValue(foptions.emgLP);
-	spinEMGHP->setValue(foptions.emgHP);
-	spinEEGNotch->setValue(foptions.eegNotch);
-	spinMEGNotch->setValue(foptions.megNotch);
-	spinEMGNotch->setValue(foptions.emgNotch);
 	comboDS->setSamplingRate(channels.first()->samplingRate());
+	filterTableView->setSettings(filterSettings);
 	return QDialog::exec();
 }
 
@@ -142,19 +134,10 @@ void AwExporterSettings::accept()
 	writer = comboWriters->currentText();
 	useCurrentMontage = checkBoxCurrentMontage->isChecked();
 	exportICA = checkBoxICA->isChecked();
-	foptions.eegHP = (float)spinEEGHP->value();
-	foptions.eegLP = (float)spinEEGLP->value();
-	foptions.megHP = (float)spinMEGHP->value();
-	foptions.megLP = (float)spinMEGLP->value();
-	foptions.emgHP = (float)spinEMGHP->value();
-	foptions.emgLP = (float)spinEMGLP->value();
-	foptions.eegNotch = (float)spinEEGNotch->value();
-	foptions.megNotch = (float)spinMEGNotch->value();
-	foptions.emgNotch = (float)spinEMGNotch->value();
 	downSample = comboDS->getSamplingRate();
 
 	skipMarkers = checkSkipMarkers->isChecked();
 	exportMarkers = checkExportMarkers->isChecked();
-
+	filterSettings = filterTableView->settings();
 	QDialog::accept();
 }

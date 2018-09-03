@@ -33,7 +33,9 @@
 #include "Montage/AwMontageManager.h"
 #include "Prefs/AwSettings.h"
 #include "Display/AwDisplay.h"
-#include "AwFiltering.h"
+#include <filter/AwFiltering.h>
+#include <filter/AwFilterSettings.h>
+
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 {
@@ -56,7 +58,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	QString fileToLoad;
 	QStringList types, labels;
 	int downsampling = 1;
-	aw::filter::Settings filterSettings;
+	AwFilterSettings filterSettings;
 	AwFileIO *reader = AwSettings::getInstance()->currentReader();
 	
 	// not an empty json string => proceed json objects

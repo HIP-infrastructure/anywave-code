@@ -27,8 +27,6 @@
 #define AWFILTERING_H
 #include <AwGlobal.h>
 #include <AwChannel.h>
-#include <AwFilteringOptions.h>
-
 #include <filter/AwFilterSettings.h>
 
 class AW_FILTER_EXPORT AwFiltering
@@ -36,7 +34,6 @@ class AW_FILTER_EXPORT AwFiltering
 public:
     static void filter(const AwChannelList& channels);
 	static void filter(AwChannelList* channels);
-	static void filter(AwChannelList* channels, AwFilteringOptions *fo);
 	/** down sample the data of a channel, to the new specified rate **/
 	static void downSample(AwChannel *channel, float newSamplingRate);
 	/** down sample the data of all channels, to the new specified rate **/

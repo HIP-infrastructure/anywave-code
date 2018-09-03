@@ -30,7 +30,6 @@
 #include <QDomElement> // For xml input/output
 #include <widget/AwMessageBox.h>
 #include <QtCore>
-#include "Filter/AwFiltersManager.h"
 #include "Process/AwProcessManager.h"
 #include <QFileDialog>
 #include "ICA/AwICAManager.h"
@@ -227,8 +226,7 @@ void AwMontageManager::addNewSources(int type)
 	}
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
-	AwFiltersManager *fm = AwFiltersManager::instance();
-	fm->setSourceSettings(type, sm->hp(type), sm->lp(type));
+	AwSettings::getInstance()->filterSettings().setBounds(type, sm->hp(type), sm->lp(type));
 }
 
 int AwMontageManager::loadICA()
@@ -256,7 +254,7 @@ int AwMontageManager::loadICA(const QString& path)
 	clearICA();
 	AwICAManager *ica_man = AwICAManager::instance();
 	int count = 0;
-	AwFiltersManager *fm = AwFiltersManager::instance();
+//	AwFiltersManager *fm = AwFiltersManager::instance();
 	if (AwICAManager::instance()->loadComponents(path) == 0) { // if components sucessfully loaded, get components and make them as recorded channels.
 		// add ICA components to asRecorded and current montage.
 		AwICAComponents **comps = ica_man->getAllComponents();
@@ -273,7 +271,8 @@ int AwMontageManager::loadICA(const QString& path)
 				m_channelHashTable.insert(newChan->name(), newChan);
 				m_icaHashTable.insert(channel->name(), channel);
 			}
-			fm->setICASettings(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
+	//		fm->setICASettings(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
+			AwSettings::getInstance()->filterSettings().setBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
 		}
 
 		emit montageChanged(m_channels);
@@ -306,6 +305,9 @@ AwMontageManager::AwMontageManager()
 		m_quickMontagesHT.insert(key, m_path + "/" + files[i]);
 	}
 	qSort(m_quickMontages.begin(), m_quickMontages.end());
+
+	// connect to filter settings
+	connect(&aws->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
 }
 
 // destructeur
@@ -435,19 +437,24 @@ void AwMontageManager::removeBadChannels(AwChannelList& list)
 void AwMontageManager::applyGains()
 {
 	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	foreach (AwChannel *c, m_channels)
-		c->setGain(am->amplitude(c->type()));
-	foreach(AwChannel *c, m_channelsAsRecorded)
+	for (auto c : m_channels + m_channelsAsRecorded)
 		c->setGain(am->amplitude(c->type()));
 }
 
 
-void AwMontageManager::newFilters()
+//void AwMontageManager::newFilters()
+//{
+//	AwFiltersManager *fm = AwFiltersManager::instance();
+//	fm->fo().setFilters(m_channels);
+//	fm->fo().setFilters(m_channelsAsRecorded);
+//	fm->fo().setFilters(AwSettings::getInstance()->currentReader()->infos.channels());
+//}
+
+void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
 {
-	AwFiltersManager *fm = AwFiltersManager::instance();
-	fm->fo().setFilters(m_channels);
-	fm->fo().setFilters(m_channelsAsRecorded);
-	fm->fo().setFilters(AwSettings::getInstance()->currentReader()->infos.channels());
+	settings.apply(m_channels);
+	settings.apply(m_channelsAsRecorded);
+	settings.apply(AwSettings::getInstance()->currentReader()->infos.channels());
 }
 
 void AwMontageManager::quit()
@@ -519,10 +526,10 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
 	}
-	
+	setNewFilters(AwSettings::getInstance()->filterSettings());
 	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
-	newFilters();
+	//newFilters();
 	emit montageChanged(m_channels);
 }
 
@@ -760,8 +767,6 @@ AwChannelList AwMontageManager::load(const QString& path)
 			}
 			else 
 				channel = new AwChannel(asRecorded);
-			// Apply current global filtering options to the channel
-			applyGlobalFilter(channel);
 			child = element.firstChild();
 
 			while (!child.isNull())	{
@@ -887,8 +892,7 @@ bool AwMontageManager::apply(const QString& path)
 			}
 			else 
 				channel = new AwChannel(asRecorded);
-			// Apply current global filtering options to the channel
-			applyGlobalFilter(channel);
+
 			child = element.firstChild();
 
 			while (!child.isNull())	{
@@ -947,12 +951,6 @@ bool AwMontageManager::apply(const QString& path)
 	file.close();
 	return true;
 }
-
-void AwMontageManager::applyGlobalFilter(AwChannel *channel)
-{
-	AwFiltersManager::instance()->fo().setFilters(channel);
-}
-
 
 /// SCRIPTING support
 
@@ -1190,7 +1188,7 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 	}
 	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
-	newFilters();
+	setNewFilters(AwSettings::getInstance()->filterSettings());
 	emit montageChanged(m_channels);
 
 }

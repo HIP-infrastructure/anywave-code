@@ -27,28 +27,58 @@
 #include <AwGlobal.h>
 #include <AwChannel.h>
 #pragma once
-class AW_FILTER_EXPORT AwFilterSettings
+
+class AwFilterGUI;
+class AW_FILTER_EXPORT AwFilterSettings : public QObject
 {
+	Q_OBJECT
 public:
-	explicit AwFilterSettings() {}
-	explicit AwFilterSettings(const AwFilterSettings& copy) { m_hash = copy.m_hash; }
+	explicit AwFilterSettings();
+	explicit AwFilterSettings(const AwFilterSettings& copy);
+	~AwFilterSettings();
+	AwFilterSettings& operator=(const AwFilterSettings& other);
+	/** clean up all filter settings and bounds **/
+	void clear();
 	/** set filters for a specified type of channel **/
 	void set(int type, const QVector<float>& values);
 	/** convenience method to use a string instead of the channel type **/
 	void set(const QString& name, const QVector<float>& values);
 	/** set filters for a specified type of channel **/
 	void set(int type, float hp, float lp, float notch);
+	/** set bounds for a specified type of channel **/
+	void setBounds(int type, const QVector<float>& values);
+	void setBounds(int type, float hp, float lp);
+	/** check for bounds **/
+	QList<int> checkForBounds();
 	/** apply the current settings to a channel **/
-	void apply(AwChannel *channel);
+	void apply(AwChannel *channel) const;
 	/** apply the current settings to a whole list of channels **/
-	void apply(const AwChannelList& channels);
+	void apply(const AwChannelList& channels) const;
+	/** init from previously saved json file for a specified data file **/
+	bool initWithFile(const QString& filePath);
+	/** init from a list of channels **/
+	void initWithChannels(const AwChannelList& channels);
+	/** reset all filters settings to zero **/
+	void zero();
 	/** save settings to json file **/
 	void save(const QString& file);
 	void load(const QString& file);
 	inline int count() const { return m_hash.count(); }
 	QList<int> currentTypes() const { return m_hash.keys(); }
 	QVector<float> filters(int type) const { return m_hash[type]; }
+
+	QWidget *ui();
+signals:
+	void settingsChanged(const AwFilterSettings& settings);
+	/** DebugLog complience **/
+	void log(const QString& message);
+public slots:
+	void updateGUI();
+protected slots:
+	void setNewSettings(const AwFilterSettings& settings);
 protected:
 	QHash<int, QVector<float>> m_hash;
+	QHash<int, QVector<float>> m_bounds;	// bounds holds the frequency boundaries for virtual channels like ICA/Source.
+	AwFilterGUI *m_ui;
 };
 

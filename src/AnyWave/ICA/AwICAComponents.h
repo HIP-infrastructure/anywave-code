@@ -7,6 +7,7 @@
 #include <AwChannel.h>
 #include "AwICAChannel.h"
 #include <QMutex>
+#include <filter/AwFilterSettings.h>
 
 #include <armadillo>
 using namespace arma;
@@ -39,7 +40,7 @@ public:
 	inline int type() { return m_type; }
 public slots:
 	void showPanel();
-	void updateFilters();
+	void setNewFilters(const AwFilterSettings& settings);
 signals:
 	/** Sent when the user reject a component **/
 	void componentRejected(int index);

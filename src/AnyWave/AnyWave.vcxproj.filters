@@ -229,9 +229,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwSignalView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Filter\AwFilterSettings.cpp">
-      <Filter>Filter</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterSettings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1261,9 +1258,6 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_AwFiltersManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="Filter\AwFiltersManager.cpp">
-      <Filter>Filter</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwFiltersManager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
@@ -1337,12 +1331,6 @@
     </CustomBuild>
     <CustomBuild Include="Display\AwSignalView.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Filter\AwFilterSettings.h">
-      <Filter>Filter</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Filter\AwFilterSettings.ui">
-      <Filter>Filter</Filter>
     </CustomBuild>
     <CustomBuild Include="Filter\AwFilterToolBar.h">
       <Filter>Filter</Filter>
@@ -1800,9 +1788,6 @@
     <CustomBuild Include="IO\BIDS\AwBIDSGUI.ui">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
-    <CustomBuild Include="Filter\AwFiltersManager.h">
-      <Filter>Filter</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -1818,9 +1803,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwSaveAsNewSetupDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwFilterSettings.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwFilterToolBar.h">

@@ -29,7 +29,6 @@
 #include <widget/SignalView/AwNavigationBar.h>
 #include "Widgets/AwMarkersBar.h"
 #include <AwReadWriteLib.h>
-#include "Filter/AwFiltersManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Data/AwDataServer.h"
 #include <AwAmplitudeManager.h>
@@ -54,7 +53,6 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	changeObjects(view, scene, NULL, markBar);
 	AwDisplaySetupManager *dsm = AwDisplaySetupManager::instance();
 	// connections
-//	connect(m_scene, SIGNAL(newMontage()), this, SLOT(makeMontageFromSelection()));
 	connect(this, SIGNAL(settingsChanged()), dsm, SLOT(saveSettings()));
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();
@@ -62,9 +60,8 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
 	// using Global Marker Bar representation => connect to MarkerManager
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
-
 	// filters
-	connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
+	connect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
 	m_flags = UpdateProcess;	// by default a view will inform process manager that its contents changed.
@@ -220,9 +217,9 @@ void AwSignalView::enableView(AwFileIO *reader)
 	reloadData();
 }
 
-void AwSignalView::newFilters()
+void AwSignalView::setNewFilters(const AwFilterSettings& settings)
 {
-	AwFiltersManager::instance()->fo().setFilters(m_channels);
+	settings.apply(m_channels);
 	reloadData();
 }
 

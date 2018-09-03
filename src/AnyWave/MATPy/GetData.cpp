@@ -32,14 +32,14 @@
 #include "Plugin/AwPluginManager.h"
 #include "Data/AwDataServer.h"
 #include "Display/AwDisplay.h"
-#include <AwFiltering.h>
-#include "Filter/AwFiltersManager.h"
+#include <filter/AwFiltering.h>
 #include "AwResponse.h"
+#include "Prefs/AwSettings.h"
 
 
 void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 {
-	emit log("Processing aw_getdata...");
+	emit log("Processing aw_getdata/anywave.getdata() ...");
 
 	AwResponse response(client);
 
@@ -59,21 +59,16 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 	in >> file >> montage >> start >> duration >> decim >> labels >> types;
 	int flag;
 	in >> flag;
-	AwFilteringOptions *fo = NULL;
+	AwFilterSettings filterSettings;
+
 	if (flag == 1) {
-		fo = new AwFilteringOptions; 
 		float eegH, eegL, megH, megL, emgH, emgL;
 		in >> eegH >> eegL >> megH >> megL >> emgH >> emgL;
-		fo->eegLP = eegL;
-		fo->eegHP = eegH;
-		fo->megLP = megL;
-		fo->megHP = megH;
-		fo->emgLP = emgL;
-		fo->emgHP = emgH;
+		filterSettings.set(AwChannel::EEG, eegH, eegL, 0.);
+		filterSettings.set(AwChannel::SEEG, eegH, eegL, 0.);
+		filterSettings.set(AwChannel::MEG, megH, megL, 0.);
+		filterSettings.set(AwChannel::EMG, emgH, emgL, 0.);
 	}
-	else if (flag == 2)
-		fo = new AwFilteringOptions; 
-
 	// checking parameters
 	if (start <= 0)
 		start = 0;
@@ -94,8 +89,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		if (!usingFile) { // no plugin to open
 			stream << (qint64)0;
 			response.send();
-			if (fo)
-				delete fo;
 			return;
 		}
 	}
@@ -157,8 +150,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 	if (error) {
 		stream << (qint64)0;
 		response.send();
-		if (fo)
-			delete fo;
 		return;
 	}
 
@@ -181,19 +172,18 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 #ifndef NDEBUG
 	qDebug() << Q_FUNC_INFO << "requesting data..." << endl;
 #endif
-	if (fo)
-		fo->setFilters(requestedChannels);
+	if (filterSettings.count())
+		filterSettings.apply(requestedChannels);
 	else // apply current filters set in AwFiltersManager.
-		AwFiltersManager::instance()->fo().setFilters(requestedChannels); 
-
+		AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+	
 	if (decim > 1) {
 		requestData(&requestedChannels, start, duration, true);
-		//AwFiltering::decimate(requestedChannels, decim);
 		AwFiltering::downSample(requestedChannels, decim);
-		if (fo)
-			fo->setFilters(requestedChannels);
+		if (filterSettings.count())
+			filterSettings.apply(requestedChannels);
 		else // apply current filters set in AwFiltersManager.
-			AwFiltersManager::instance()->fo().setFilters(requestedChannels);
+			AwSettings::getInstance()->filterSettings().apply(requestedChannels);
 		AwFiltering::filter(&requestedChannels);
 	}
 	else 
@@ -203,8 +193,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 #endif
 	stream << requestedChannels.size();
 	response.send();
-	if (fo)
-		delete fo;
 
 	QStringList selected = AwChannel::getLabels(AwDisplay::instance()->selectedChannels());
 	foreach (AwChannel *c, requestedChannels) {

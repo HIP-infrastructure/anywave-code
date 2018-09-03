@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwExporter.h"
 #include "AwExporterSettings.h"
-#include <AwFiltering.h>
+#include <filter/AwFiltering.h>
 #include <widget/AwMessageBox.h>
 
 
@@ -91,14 +91,14 @@ void AwExporter::run()
 				AwFiltering::downSample(m_channels, m_downSample);
 				sendMessage("Done.");
 				AwChannel::clearFilters(m_channels);
-				m_foptions.setFilters(m_channels);
+				pdi.input.filterSettings.apply(m_channels);
 				sendMessage(QString("Filtering..."));
 				AwFiltering::filter(m_channels);
 				sendMessage("Done.");
 			}
 			else {
 				AwChannel::clearFilters(m_channels);
-				m_foptions.setFilters(m_channels);
+				pdi.input.filterSettings.apply(m_channels);
 				sendMessage(QString("Reading and filtering..."));
 				requestData(&m_channels, m);
 				if (endOfData()) {
@@ -149,12 +149,12 @@ void AwExporter::run()
 			AwFiltering::downSample(m_channels, m_downSample);
 			sendMessage("Done.");
 			AwChannel::clearFilters(m_channels);
-			m_foptions.setFilters(m_channels);
+			pdi.input.filterSettings.apply(m_channels);
 			AwFiltering::filter(m_channels);
 		}
 		else {
 			AwChannel::clearFilters(m_channels);
-			m_foptions.setFilters(m_channels);
+			pdi.input.filterSettings.apply(m_channels);
 			requestData(&m_channels, 0., -1.0);
 			if (endOfData()) {
 				sendMessage("Error reading data.");
@@ -209,6 +209,7 @@ bool AwExporter::showUi()
 
 	ui.markers = pdi.input.markers;
 	ui.icaChannels = m_ICAChannels;
+	ui.filterSettings = pdi.input.filterSettings;
 
 	if (ui.exec() == QDialog::Accepted) {
 		if (ui.useCurrentMontage)
@@ -222,7 +223,7 @@ bool AwExporter::showUi()
 				return false;
 		}
 		m_path = ui.filePath;
-		m_foptions = ui.foptions;
+		pdi.input.filterSettings = ui.filterSettings;
 
 		// if Export All ICA channels is checked => add all ICA channels to export
 		m_exportICAChannels = ui.exportICA;

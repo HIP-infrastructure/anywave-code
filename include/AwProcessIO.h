@@ -28,7 +28,7 @@
 #include <AwMarker.h>
 #include <AwFileIO.h>
 #include <QMutex>
-#include <AwFilteringOptions.h>
+#include <filter/AwFilterSettings.h>
 
 /** AwProcessIO defines object used as input or output by AwProcess **/
 class AW_PROCESS_EXPORT AwProcessIO
@@ -61,7 +61,7 @@ public:
 	QVariantList customData;
 	QStringList badLabels;		// contains channels marked as bad
 	QStringList processPluginNames;
-	AwFilteringOptions filteringOptions;
+	AwFilterSettings filterSettings;
 
 	// Display process specific
 	float currentPosInFile;

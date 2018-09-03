@@ -28,7 +28,6 @@
 
 #include <QObject>
 #include <AwChannel.h>
-#include <AwFilteringOptions.h>
 #include "ICA/AwICAChannel.h"
 #include "Source/AwSourceChannel.h"
 class AwDataServer;

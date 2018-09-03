@@ -6,11 +6,11 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
-    <height>232</height>
+    <width>797</width>
+    <height>348</height>
    </rect>
   </property>
-  <property name="minimumSize">
+  <property name="baseSize">
    <size>
     <width>400</width>
     <height>200</height>
@@ -22,12 +22,6 @@
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QGroupBox" name="groupBox">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
      <property name="title">
       <string>Channels</string>
      </property>
@@ -37,20 +31,10 @@
         <property name="editTriggers">
          <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
         </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
-        </property>
        </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="AwFilterAddButton" name="buttonAdd">
-          <property name="text">
-           <string>Add</string>
-          </property>
-         </widget>
-        </item>
         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
@@ -75,7 +59,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton_2">
+         <widget class="QRadioButton" name="radioButton">
           <property name="text">
            <string>Off</string>
           </property>
@@ -122,14 +106,9 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>AwFilterAddButton</class>
-   <extends>QPushButton</extends>
-   <header>AwFilterAddButton.h</header>
-  </customwidget>
- </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../resources/AnyWave.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>radioOn</sender>
@@ -138,28 +117,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>396</x>
-     <y>177</y>
+     <x>894</x>
+     <y>282</y>
     </hint>
     <hint type="destinationlabel">
-     <x>442</x>
-     <y>150</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioOn</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>buttonAdd</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>377</x>
-     <y>163</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>56</x>
-     <y>175</y>
+     <x>797</x>
+     <y>269</y>
     </hint>
    </hints>
   </connection>

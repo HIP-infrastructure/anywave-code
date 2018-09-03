@@ -52,9 +52,15 @@ settings::settings(QList<AwFileIOPlugin *>& readers, QList<AwFileIOPlugin *>& wr
 		m_tempReaders << fr;
 	}
 	ui.tableWidgetIN->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	filters = false;
-	eegLP = eegHP = megLP = megHP = eegNotch =  megNotch = 0.;
-	emgLP = emgHP = emgNotch = 0.;
+	// init filter settings
+	m_filterSettings.set(AwChannel::EEG, 0, 0, 0);
+	m_filterSettings.set(AwChannel::SEEG, 0, 0, 0);
+	m_filterSettings.set(AwChannel::MEG, 0, 0, 0);
+	m_filterSettings.set(AwChannel::GRAD, 0, 0, 0);
+	m_filterSettings.set(AwChannel::EMG, 0, 0, 0);
+	m_filterSettings.set(AwChannel::ECG, 0, 0, 0);
+
+	ui.filterTableView->setSettings(m_filterSettings);
 }
 
 settings::~settings()
@@ -128,17 +134,5 @@ int settings::exec()
 
 void settings::accept()
 {
-	filters = !ui.radioNoFiltering->isChecked();
-	if (filters) {
-		eegLP = ui.spEEGLP->value();
-		eegHP = ui.spEEGHP->value();
-		megLP = ui.spMEGLP->value();
-		megHP = ui.spMEGHP->value();
-		eegNotch = ui.spEEGNotch->value();
-		megNotch = ui.spMEGNotch->value();
-		emgLP = ui.spEMGLP->value();
-		emgHP = ui.spEMGHP->value();
-		emgNotch = ui.spEMGNotch->value();
-	}
 	QDialog::accept();
 }

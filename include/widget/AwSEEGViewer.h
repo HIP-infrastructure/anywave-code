@@ -29,6 +29,7 @@
 #include <AwDataClient.h>
 #include <AwGlobal.h>
 #include <widget/AwSEEGWidget.h>
+#include <filter/AwFilterSettings.h>
 
 class AW_WIDGETS_EXPORT AwSEEGViewer : public AwDataClient
 {
@@ -39,7 +40,7 @@ public:
 	~AwSEEGViewer();
 	inline AwSEEGWidget *widget() { return m_widget; }
 	inline bool isMappingActive() { return m_mappingIsActive; }
-	void setFilters(float LP, float HP);
+//	void setFilters(float LP, float HP);
 	void dataReceived(AwChannelList *channels);
 signals:
 	void newDataConnection(AwDataClient *);
@@ -50,6 +51,7 @@ public slots:
 	void loadElectrodes(const QString& file);
 	void setSEEGChannels(const AwChannelList& channels);
 	void updateMappingAt(float latency);
+	void setNewFilters(const AwFilterSettings& settings);
 protected slots:
 	void handleWidgetClosed();
 protected:

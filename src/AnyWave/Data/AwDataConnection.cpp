@@ -28,7 +28,6 @@
 #include "AwDataClient.h"
 #include <QtCore/qmath.h>
 #include <QtDebug>
-#include <AwFilteringOptions.h>
 #include "Montage/AwMontageManager.h"
 #include "Process/AwProcessManager.h"
 #include <AwProcessInterface.h>
@@ -38,9 +37,9 @@
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
 #include "Source/AwSourceManager.h"
-#include "Filter/AwFiltersManager.h"
 #include <QtCore>
-#include <AwFiltering.h>
+#include <filter/AwFiltering.h>
+#include "Prefs/AwSettings.h"
 
 #if QT_VERSION > QT_VERSION_CHECK(4, 8, 0)
 #include <QtConcurrent>
@@ -233,61 +232,13 @@ void AwDataConnection::applyICAFilters(int type, AwChannelList& channels)
 		m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
 	AwICAManager::instance()->rejectComponents(type, channels);
 	m_ICASourcesLoaded[type] = true;
-
-//	if (type == AwChannel::EEG)	{
-//		if (!m_ICASourcesLoaded[AwChannel::EEG] || comps->sources().first()->dataSize() == 0)	{
-//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-////			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-//		}
-//		//AwICAManager::instance()->rejectEEGComponents(channels);
-//		AwICAManager::instance()->rejectComponents(AwChannel::EEG, channels);
-//		m_ICASourcesLoaded[AwChannel::EEG] = true;
-//	}
-//	else if (type == AwChannel::MEG) { // MEG
-//		if (!m_ICASourcesLoaded[AwChannel::MEG] || comps->sources().first()->dataSize() == 0) {
-//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-////			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-//		}
-//		//AwICAManager::instance()->rejectMEGComponents(channels);
-//		AwICAManager::instance()->rejectComponents(AwChannel::MEG, channels);
-//		m_ICASourcesLoaded[AwChannel::MEG] = true;
-//	}
-//	else if (type == AwChannel::EMG) { // EMG
-//		if (!m_ICASourcesLoaded[AwChannel::EMG] || comps->sources().first()->dataSize() == 0) {
-//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-//			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-//		}
-//		//AwICAManager::instance()->rejectMEGComponents(channels);
-//		AwICAManager::instance()->rejectComponents(AwChannel::EMG, channels);
-//		m_ICASourcesLoaded[AwChannel::EMG] = true;
-//	}
-//	else if (type == AwChannel::SEEG) { // SEEG
-//		if (!m_ICASourcesLoaded[AwChannel::SEEG] || comps->sources().first()->dataSize() == 0) {
-//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-//			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-//		}
-//		//AwICAManager::instance()->rejectMEGComponents(channels);
-//		AwICAManager::instance()->rejectComponents(AwChannel::SEEG, channels);
-//		m_ICASourcesLoaded[AwChannel::SEEG] = true;
-//	}
-//	else if (type == AwChannel::Source) { // EMG
-//		if (!m_ICASourcesLoaded[AwChannel::Source] || comps->sources().first()->dataSize() == 0) {
-//			m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-//			//			AwFiltering::filter(&comps->sources()); // filter sources data with the filters used when computing ICA
-//		}
-//		//AwICAManager::instance()->rejectMEGComponents(channels);
-//		AwICAManager::instance()->rejectComponents(AwChannel::Source, channels);
-//		m_ICASourcesLoaded[AwChannel::Source] = true;
-//	}
 }
 
 void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 {
 	int type = channels.first()->subType();
 	AwSourceManager *sm = AwSourceManager::instance();
-	AwFiltersManager *fm = AwFiltersManager::instance();
-	fm->fo().setFilters(sm->realChannels(type));
-
+	AwSettings::getInstance()->filterSettings().apply(sm->realChannels(type));
 	m_reader->readDataFromChannels(m_positionInFile, m_duration, sm->realChannels(type));
 	AwFiltering::filter(sm->realChannels(type));
 	sm->computeSources(channels);
@@ -297,10 +248,9 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels)
 {
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
-	AwFiltersManager *fm = AwFiltersManager::instance();
 	if (comps)	{
 		// load source channels
-		fm->fo().setFilters(comps->sources());
+		AwSettings::getInstance()->filterSettings().apply(comps->sources());
 		m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
 		AwFiltering::filter(&comps->sources());
 		comps->computeComponents(channels);

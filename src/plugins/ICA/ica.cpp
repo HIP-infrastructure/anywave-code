@@ -29,7 +29,7 @@
 #include <AwMATLAB.h>
 #include <QFile>
 #include <QDir>
-#include <AwFiltering.h>
+#include <filter/AwFiltering.h>
 #include <math/AwMath.h>
 
 ICA::ICA()
@@ -39,7 +39,7 @@ ICA::ICA()
 	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, QString("0-n"));
 	pdi.addInputParameter(Aw::ProcessInput::SourceChannels|Aw::ProcessInput::ProcessIgnoresChannelSelection, QString("0-n"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	m_algoNames << "Infomax" << "acsobiro";
+	m_algoNames << "Infomax";
 }
 
 ICAPlugin::ICAPlugin()

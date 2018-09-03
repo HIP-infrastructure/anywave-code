@@ -31,6 +31,7 @@
 #include <AwChannel.h>
 #include <QTranslator>
 #include <AwMarker.h>
+#include <filter/AwFilterSettings.h>
 
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
@@ -110,7 +111,7 @@ private:
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
 	// DockWidgets
-	QDockWidget *m_dockFilters, *m_addMarkerDock;
+	QDockWidget *m_addMarkerDock;
 	QDockWidget *m_dockMarkers, *m_dockBIDS;
 	AwDockAddMarker *m_dockAddMarker;
 	// Mapping
@@ -150,9 +151,6 @@ signals:
 public slots:
 	/** Position le flag de fichier modifie */
 	void setModified(bool f = true) { m_currentFileModified = f; }
-	/** Display UI to set filters **/
-	void changeFilterSettings();
-	void newFilters();
 	/** Launch 3D mapping if signals are suitable **/
 	void runMapping();
 	/** Close mapping **/
@@ -178,7 +176,6 @@ private slots:
 	void on_actionQuit_triggered();
 	void on_actionMontage_triggered();
 	void on_actionOpen_triggered();
-	void on_actionLoadMesh_triggered();
 	void on_actionPreferences_triggered();
 	void on_actionShow_Mappings_triggered();
 	void on_actionAbout_AnyWave_triggered();

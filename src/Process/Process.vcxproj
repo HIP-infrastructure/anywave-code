@@ -165,7 +165,7 @@
       <OutputFile>$(OutDir)\$(ProjectName)d.dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5Guid.lib;AwCoreLibd.lib;AwReadWriteLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5Guid.lib;AwCoreLibd.lib;AwReadWriteLibd.lib;AwFilteringLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(AWROOT)\lib\$(TargetName)d.lib</ImportLibrary>
     </Link>
     <Lib>

@@ -30,12 +30,11 @@
 #include <filter/AwFilterSettings.h>
 
 // 
-#define FILTER_NB_COLUMN		5  
-#define FILTER_COLUMN_SELECT	0
-#define FILTER_COLUMN_TYPE		1
-#define FILTER_COLUMN_HPF		2	
-#define FILTER_COLUMN_LPF		3
-#define FILTER_COLUMN_NOTCH		4
+#define FILTER_NB_COLUMN		4  
+#define FILTER_COLUMN_TYPE		0
+#define FILTER_COLUMN_HPF		1	
+#define FILTER_COLUMN_LPF		2
+#define FILTER_COLUMN_NOTCH		3
 
 
 class AwFilterModel : public QAbstractTableModel
@@ -50,9 +49,10 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 	Qt::ItemFlags flags(const QModelIndex &index = QModelIndex()) const;
+	AwFilterSettings& settings() { return m_settings; }
 public slots:
 	void updateSettings(const AwFilterSettings& settings);
 protected:
 	AwFilterSettings m_settings;
-	QList<QPair<int, bool>> m_selections;	// that list will be used by the model.
+	QList<int> m_keys;
 };

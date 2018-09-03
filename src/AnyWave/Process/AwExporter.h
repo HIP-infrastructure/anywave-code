@@ -46,7 +46,6 @@ protected:
 	AwMarkerList m_skippedMarkers, m_exportedMarkers;
 	AwFileIOPlugin *m_plugin;
 	QString m_path;
-	AwFilteringOptions m_foptions;
 	bool m_exportICAChannels;			// this flag indicates that the data contains ICA virtual channels
 	float m_downSample;
 };

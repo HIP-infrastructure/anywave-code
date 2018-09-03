@@ -31,7 +31,6 @@
 #include <QWaitCondition>
 #include <AwChannel.h>
 #include <AwMarker.h>
-#include <AwFilteringOptions.h>
 #include <AwProcessIO.h>
 #include <AwMatlabInterface.h>
 

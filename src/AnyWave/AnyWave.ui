@@ -82,7 +82,6 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
-    <addaction name="actionLoad_Mesh"/>
     <addaction name="actionImport_mrk_file"/>
     <addaction name="actionLoadBeamFormer"/>
     <addaction name="actionLoadICA"/>

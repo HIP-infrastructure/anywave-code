@@ -22,7 +22,6 @@
     <ClCompile Include="AwChannel.cpp" />
     <ClCompile Include="AwDataBuffer.cpp" />
     <ClCompile Include="AwDataClient.cpp" />
-    <ClCompile Include="AwFilteringOptions.cpp" />
     <ClCompile Include="AwMarker.cpp" />
     <ClCompile Include="AwMEGSensorManager.cpp" />
     <ClCompile Include="AwSensor.cpp" />

@@ -184,17 +184,5 @@ void AwScriptProcessFileInput::downSample(float samplingRate)
 
 void AwScriptProcessFileInput::setFilters(QString channelType, float lp, float hp)
 {
-	QString type = channelType.toLower();
-	if (type == "seeg" || type == "eeg") {
-		m_filters.eegLP = lp; 
-		m_filters.eegHP = hp;
-	}
-	else if (type == "meg") {
-		m_filters.megLP = lp; 
-		m_filters.megHP = hp;
-	}
-	else if (type == "ecg" || type == "emg") {
-		m_filters.emgLP = lp; 
-		m_filters.emgHP = hp;
-	}
+	m_filterSettings.set(AwChannel::stringToType(channelType), hp, lp, 0.);
 }

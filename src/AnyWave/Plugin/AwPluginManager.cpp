@@ -337,6 +337,8 @@ void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QStr
 			f |= Aw::ProcessFlags::PluginIsHidden;
 		else if (token == "accepttimeselections")
 			f |= Aw::ProcessFlags::PluginAcceptsTimeSelections;
+		else if (token == "ignorechannelselections")
+			f |= Aw::ProcessInput::ProcessIgnoresChannelSelection;
 	}
 	plugin->setFlags(f);
 }

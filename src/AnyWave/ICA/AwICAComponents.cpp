@@ -2,16 +2,16 @@
 #include <layout/AwLayoutManager.h>
 #include "Montage/AwMontageManager.h"
 #include "Prefs/AwSettings.h"
-#include "Filter/AwFiltersManager.h"
 #include <QtGlobal>
 #ifndef NDEBUG
 #include <QDebug>
 #endif
 #include "AwICAManager.h"
 #include "AwICAPanel.h"
-#include <AwFiltering.h>
+#include <filter/AwFiltering.h>
 #include <widget/AwWait.h>
 #include "AwPanelItem.h"
+
 
 AwICAComponents::AwICAComponents(int type, QObject *parent)
 	: QObject(parent)
@@ -21,7 +21,7 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
-	connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(updateFilters()));
+	connect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwICAComponents::setNewFilters);
 }
 
 AwICAComponents::~AwICAComponents()
@@ -34,9 +34,9 @@ AwICAComponents::~AwICAComponents()
 		delete m_sources.takeFirst();
 }
 
-void AwICAComponents::updateFilters()
+void AwICAComponents::setNewFilters(const AwFilterSettings& settings)
 {
-	AwFiltersManager::instance()->fo().setFilters(m_sources);
+	settings.apply(m_sources);
 }
 
 //
@@ -172,11 +172,11 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 		AwChannel *asRecorded = mm->asRecordedChannel(s);
 		if (asRecorded) {
 			AwChannel *source = new AwChannel(asRecorded);
-			AwFiltersManager::instance()->fo().setFilters(source);
 			m_sources << source;
 			m_labelToIndex.insert(source->name(), index++);
 		}
 	}
+	AwSettings::getInstance()->filterSettings().apply(m_sources);
 	float sr = m_sources.at(0)->samplingRate();
 
 	// get layout
@@ -273,12 +273,11 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 		AwChannel *asRecorded = mm->asRecordedChannel(s);
 		if (asRecorded)		{
 			AwChannel *source = new AwChannel(asRecorded);
-			AwFiltersManager::instance()->fo().setFilters(source);
 			m_sources << source;	
 			m_labelToIndex.insert(source->name(), index++);
 		}
 	}
-
+	AwSettings::getInstance()->filterSettings().apply(m_sources);
 	float sr = m_sources.at(0)->samplingRate();
 
 	// get layout

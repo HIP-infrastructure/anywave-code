@@ -28,7 +28,7 @@
 
 #include <QObject>
 #include <QStringList>
-#include <AwFilteringOptions.h>
+#include <filter/AwFilterSettings.h>
 
 class AwProcessFileInputElement
 {
@@ -73,10 +73,10 @@ public:
 	void setUsedMarkers(const QStringList& markers) { m_usedMarkers = markers; }
 	void setSkippedMarkers(const QStringList& markers) { m_skippedMarkers = markers; }
 	inline AwPIElements& inputElements() { return m_inputElements; }
-	inline AwFilteringOptions& filters() { return m_filters; }
 	void parseFiles();	// build the internal data structure based on added files.
 	inline QStringList& usedMarkers() { return m_usedMarkers; }
 	inline QStringList& skippedMarkers() { return m_skippedMarkers; }
+	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 public slots:
 	void addFileExtension(QString ext) { m_fileExtensions << ext; }
 	void setRootDir(QString root);
@@ -94,7 +94,7 @@ private:
 	QStringList m_fileExtensions;	// set the extensions of files to be set as input
 	bool m_useMarkerFile;	// if true, marker files found in the same path will be used.
 	bool m_useMontageFile;	// if true, montage file found in the same path will be used.
-	AwFilteringOptions m_filters;
+	AwFilterSettings m_filterSettings;
 	float m_downSampleRate;	// if this value is greater then 0. then try to downsample the data before any further processing.
 	QString m_globalMontage;	// path to a montage file to use for all the input data files. (If empty, other options will be used (useMontageFile)
 	QString m_markerFile;	// name of the marker file to use (not a path)
