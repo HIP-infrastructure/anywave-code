@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>994</width>
-    <height>321</height>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -286,6 +286,13 @@
          </layout>
         </item>
         <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Filters:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="AwFilterTableView" name="filterTableView"/>
         </item>
        </layout>
@@ -345,14 +352,14 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>AwComboDS</class>
-   <extends>QComboBox</extends>
-   <header location="global">widget/AwComboDS.h</header>
-  </customwidget>
-  <customwidget>
    <class>AwFilterTableView</class>
    <extends>QTableView</extends>
    <header location="global">filter/AwFilterTableView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AwComboDS</class>
+   <extends>QComboBox</extends>
+   <header location="global">widget/AwComboDS.h</header>
   </customwidget>
  </customwidgets>
  <resources>

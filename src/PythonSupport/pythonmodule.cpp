@@ -42,6 +42,7 @@ int m_pidValue = 0;
 // method prototypes
 extern PyObject *getPluginInfo(PyObject *self, PyObject *args);
 extern PyObject *getData(PyObject *self, PyObject *args);
+extern PyObject *getDataEx(PyObject *self, PyObject *args);
 extern PyObject *getMarkers(PyObject *self, PyObject *args);
 extern PyObject *addMarkers(PyObject *self, PyObject *args);
 extern PyObject *sendMessage(PyObject *self, PyObject *args);
@@ -49,6 +50,8 @@ extern PyObject *sendMessage(PyObject *self, PyObject *args);
 static PyMethodDef AnyWaveMethods[] = {
 	{"get_data", (PyCFunction)getData,  METH_VARARGS,
 	"Request data from AnyWave"},
+	{"get_dataex", (PyCFunction)getDataEx,  METH_VARARGS,
+	"Request data from AnyWave" },
 	{"add_markers", (PyCFunction)addMarkers, METH_VARARGS,
 	"Add markers to AnyWave"},
 	{"get_markers", (PyCFunction )getMarkers, METH_VARARGS,

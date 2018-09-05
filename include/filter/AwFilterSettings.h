@@ -64,6 +64,7 @@ public:
 	void save(const QString& file);
 	void load(const QString& file);
 	inline int count() const { return m_hash.count(); }
+	inline bool isEmpty() const { return m_hash.count() == 0; }
 	QList<int> currentTypes() const { return m_hash.keys(); }
 	QVector<float> filters(int type) const { return m_hash[type]; }
 

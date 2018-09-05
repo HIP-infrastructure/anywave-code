@@ -526,10 +526,14 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
 	}
+	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
+	if (AwSettings::getInstance()->filterSettings().isEmpty()) {
+		AwSettings::getInstance()->filterSettings().initWithChannels(m_channels);
+	}
 	setNewFilters(AwSettings::getInstance()->filterSettings());
+	
 	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
-	//newFilters();
 	emit montageChanged(m_channels);
 }
 

@@ -115,42 +115,18 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 			// get filters object
 			if (root.contains("filters")) {
 				auto filters = root["filters"].toObject();
+				QStringList types = { "eeg", "seeg", "meg", "grad", "reference", "emg", "ecg" };
+
 				if (filters.contains("raw_data"))
 					rawData = filters["raw_data"].toBool();
-				if (filters.contains("eeg") && filters["eeg"].isArray()) {
-					auto array = filters["eeg"].toArray();
-					QVector<float> tmp(array.size());
-					for (auto i = 0; i < array.size(); i++)
-						tmp[i] = (float)array.at(i).toDouble();
-					filterSettings.set("eeg", tmp);
-				}
-				if (filters.contains("seeg") && filters["seeg"].isArray()) {
-					auto array = filters["seeg"].toArray();
-					QVector<float> tmp(array.size());
-					for (auto i = 0; i < array.size(); i++)
-						tmp[i] = (float)array.at(i).toDouble();
-					filterSettings.set("seeg", tmp);
-				}
-				if (filters.contains("meg") && filters["meg"].isArray()) {
-					auto array = filters["meg"].toArray();
-					QVector<float> tmp(array.size());
-					for (auto i = 0; i < array.size(); i++)
-						tmp[i] = (float)array.at(i).toDouble();
-					filterSettings.set("meg", tmp);
-				}
-				if (filters.contains("emg") && filters["emg"].isArray()) {
-					auto array = filters["emg"].toArray();
-					QVector<float> tmp(array.size());
-					for (auto i = 0; i < array.size(); i++)
-						tmp[i] = (float)array.at(i).toDouble();
-					filterSettings.set("emg", tmp);
-				}
-				if (filters.contains("grad") && filters["grad"].isArray()) {
-					auto array = filters["grad"].toArray();
-					QVector<float> tmp(array.size());
-					for (auto i = 0; i < array.size(); i++)
-						tmp[i] = (float)array.at(i).toDouble();
-					filterSettings.set("grad", tmp);
+				for (auto t : types) {
+					if (filters.contains(t) && filters[t].isArray()) {
+						auto array = filters[t].toArray();
+						QVector<float> tmp(array.size());
+						for (auto i = 0; i < array.size(); i++)
+							tmp[i] = (float)array.at(i).toDouble();
+						filterSettings.set(t, tmp);
+					}
 				}
 				if (filters.contains("downsampling_rate")) 
 					downsampling = filters["downsampling_rate"].toInt();

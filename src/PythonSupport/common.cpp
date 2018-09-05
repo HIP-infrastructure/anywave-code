@@ -27,14 +27,80 @@
 #include <Python.h>
 #include <QTcpSocket>
 #include <QDataStream>
-//#define NO_IMPORT_ARRAY
-//#define PY_ARRAY_UNIQUE_SYMBOL anywave_ARRAY_API
-//#define NPY_NO_DEPRECATED_API NPY_1_11_API_VERSION
+#include "common.h"
+#include <qjsonarray.h>
+#include <qjsonobject.h>
+#include <qjsondocument.h>
 
 extern PyObject *m_module;
 extern PyObject  *m_pid;
 extern int m_pidValue;
 extern PyObject *AnyWaveError;
+
+static QJsonObject dictToJsonObject(PyObject *dict);
+
+QJsonObject dictToJsonObject(PyObject *dict)
+{
+	// get keys
+	PyObject *keys = PyDict_Keys(dict);
+	Py_ssize_t size = PyList_Size(keys);
+	QStringList keys_;
+	QList<PyObject *> values_;
+	// browse keys
+	Py_ssize_t i;
+	for (i = 0; i < size; i++) {
+		PyObject *key_ = PyList_GetItem(keys, i);
+		keys_ << QString(PyString_AS_STRING(key_)).toLower();
+		values_ << PyDict_GetItem(dict, key_);
+	}
+	QJsonObject json;
+	for (int index = 0; index < keys_.size(); index++) {
+		auto k = keys_.at(index);
+		Py_ssize_t i = 0, nValues = 0;
+		PyObject *value = values_.at(index);
+		// check for object type.
+		if (PyString_Check(value))
+			json[k] = QString(PyString_AS_STRING(value));
+		else if (PyBool_Check(value))
+			json[k] = bool(PyObject_IsTrue(value));
+		else if (PyList_Check(value)) {
+			nValues = PyList_Size(value);
+			QJsonArray array;
+			for (auto i = 0; i < nValues; i++) {
+				PyObject *item = PyList_GetItem(value, i);
+				if (PyString_Check(item))
+					array.append(QJsonValue(QString(PyString_AS_STRING(item))));
+				else if (PyBool_Check(item))
+					array.append(QJsonValue(bool(PyObject_IsTrue(item))));
+				else if (PyInt_Check(item))
+					array.append(QJsonValue(PyInt_AsLong(item)));
+				else if (PyFloat_Check(item))
+					array.append(QJsonValue(PyFloat_AsDouble(item)));
+			}
+			json[k] = array;
+		}
+		else if (PyInt_Check(value))
+			json[k] = PyInt_AsLong(value);
+		else if (PyFloat_Check(value))
+			json[k] = PyFloat_AsDouble(value);
+		else if (PyDict_Check(value))
+			json[k] = dictToJsonObject(value);
+	}
+	return json;
+}
+
+// parse a whole dictionnary and convert it to JSON format.
+QString dictToJson(PyObject *dict)
+{
+	if (!PyDict_Check(dict)) {
+		PyErr_SetString(AnyWaveError, "the argument must be a dictionnary.");
+		return QString();
+	}
+	// convert all keys to json
+	QJsonObject json = dictToJsonObject(dict);
+	return QString(QJsonDocument(json).toJson());
+
+}
 
 void sendRequest(QTcpSocket *client, const QByteArray& data)
 {
@@ -112,4 +178,52 @@ QTcpSocket *connect()
 		return NULL;
 	}
 	return socket;
+}
+
+TCPRequest::TCPRequest(int requestID)
+{
+	m_status = TCPRequest::undefined;
+	m_socket = connect();
+	m_pid = m_pidValue;
+	m_requestID = requestID;
+	if (m_socket == NULL) {
+		m_status = TCPRequest::failed;
+	}
+	else {
+		m_status = TCPRequest::connected;
+	}
+	m_streamSize = new QDataStream(&m_size, QIODevice::WriteOnly);
+	m_streamSize->setVersion(QDataStream::Qt_4_4);
+	m_streamData = new QDataStream(&m_data, QIODevice::WriteOnly);
+	m_streamData->setVersion(QDataStream::Qt_4_4);
+}
+
+TCPRequest::~TCPRequest()
+{
+	if (m_socket)
+		delete m_socket;
+	delete m_streamSize;
+	delete m_streamData;
+}
+
+void TCPRequest::clear()
+{
+	m_size.clear();
+	m_data.clear();
+}
+
+bool TCPRequest::sendRequest()
+{
+	int dataSize = m_data.size() + sizeof(int); // data size + request ID size
+	// always send the pid first then size and data.
+	*m_streamSize << m_pid;
+	*m_streamSize << dataSize << m_requestID;
+	m_socket->write(m_size);
+	m_socket->write(m_data);
+	return m_socket->waitForBytesWritten();
+}
+
+int TCPRequest::getResponse()
+{
+	return waitForResponse(m_socket);
 }

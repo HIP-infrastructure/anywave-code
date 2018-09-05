@@ -833,7 +833,6 @@ void AnyWave::openFile(const QString &path)
 	title += tr("Duration: ") + AwUtilities::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
-//	settings->setFilePath(m_openFileName);
 	m_currentReader->infos.setFileName(m_openFileName);
 	data_server->setMainReader(m_currentReader);
 	actionMontage->setEnabled(true);

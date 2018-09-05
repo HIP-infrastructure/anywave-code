@@ -167,18 +167,13 @@ void AwFilterSettings::initWithChannels(const AwChannelList& channels)
 
 	// get type of channels
 	auto types = AwChannel::getTypesAsInt(channels);
-	QList<int> uniques;
-	for (int i : types) {
-		if (uniques.contains(i))
-			continue;
-		uniques.append(i);
-	}
 	// remove channels we don't want the user can filter (Trigger, Other)
-	uniques.removeAll(AwChannel::Trigger);
-	uniques.removeAll(AwChannel::Other);
-	for (int i : uniques) {
-		set(i, 0., 0., 0.);
+	types.removeAll(AwChannel::Trigger);
+	types.removeAll(AwChannel::Other);
+	for (int i : types) {
+		this->set(i, 0., 0., 0.);
 	}
+	updateGUI();
 }
 
 void AwFilterSettings::apply(AwChannel *channel) const
@@ -242,7 +237,7 @@ void AwFilterSettings::load(const QString& path)
 	}
 	m_hash.clear();
 	// types that can be filtered:
-	QStringList types = { "EEG", "SEEG", "EMG", "MEG", "GRAD", "ICA", "Source" };
+	QStringList types = { "EEG", "SEEG", "EMG", "MEG", "GRAD", "ICA", "Source", "Reference", "ECG" };
 	QJsonObject root = doc.object();
 	for (auto t : types) {
 		if (root.contains(t) && root[t].isArray()) {

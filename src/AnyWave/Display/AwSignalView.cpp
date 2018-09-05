@@ -217,12 +217,6 @@ void AwSignalView::enableView(AwFileIO *reader)
 	reloadData();
 }
 
-void AwSignalView::setNewFilters(const AwFilterSettings& settings)
-{
-	settings.apply(m_channels);
-	reloadData();
-}
-
 void AwSignalView::addVirtualChannels(AwChannelList& channels)
 {
 	foreach (AwChannel *c, channels)

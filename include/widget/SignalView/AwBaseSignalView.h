@@ -33,7 +33,7 @@
 #include <widget/SignalView/AwBaseMarkerBar.h>
 #include <widget/SignalView/AwNavigationBar.h>
 #include <widget/AwMarkerInspector.h>
-
+#include <filter/AwFilterSettings.h>
 
 class AW_WIDGETS_EXPORT AwBaseSignalView : public QWidget
 {
@@ -45,7 +45,7 @@ public:
 	// Default = full navigation 
 	enum Flags {
 		Default = 0, NoNavBar = 1, NoHScrollBar = 2, NoSettingsButton = 4, EnableMarking = 8, NoMarkerBar = 16, ViewAllChannels = 32,
-		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256
+		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512
 	};
 
 	void setFlags(int flags);
@@ -84,6 +84,7 @@ public slots:
 	virtual void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
 	virtual void updateSettings(AwViewSettings *settings, int flags);
 	virtual void updatePageDuration(float duration);
+	virtual void setNewFilters(const AwFilterSettings& settings);
 	void setMarkers(const AwMarkerList& markers);	// update the available markers
 	void startMarking();	
 	void stopMarking();
@@ -95,6 +96,7 @@ public slots:
 	void showMarkersValues(bool flag);
 	void showMarkersLabels(bool flag);
 	void stackChannels(bool flag);
+	void openFilterGUI();
 signals:
 	void settingsChanged(AwViewSettings *settings, int flags);
 	void positionChanged(float position);	// send when the position in file changed.
@@ -130,6 +132,7 @@ protected:
 	float m_totalDuration;
 	float m_startPosition;
 	int m_flags;
+	AwFilterSettings m_filterSettings;
 
 	virtual void dataReceived();
 	virtual void applyChannelFilters();

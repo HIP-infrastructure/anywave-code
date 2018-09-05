@@ -41,6 +41,8 @@ AwExporterSettings::AwExporterSettings(QWidget *parent)
 	connect(buttonSkipMarkers, SIGNAL(clicked()), this, SLOT(selectMarkersToSkip()));
 	connect(buttonExportMarkers, SIGNAL(clicked()), this, SLOT(selectMarkersToExport()));
 	connect(comboWriters, SIGNAL(currentIndexChanged(int)), this, SLOT(updateOutputFileExtension(int)));
+	filterTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	filterTableView->resizeColumnsToContents();
 }
 
 AwExporterSettings::~AwExporterSettings()
