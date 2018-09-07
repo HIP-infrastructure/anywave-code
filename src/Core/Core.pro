@@ -22,7 +22,6 @@ macx{
 FRAMEWORK_HEADERS.version = Versions
 FRAMEWORK_HEADERS.files =     ../../include/AwChannel.h  \
     ../../include/AwDataClient.h \
-    ../../include/AwFilteringOptions.h \
     ../../include/AwMarker.h \
     ../../include/AwMEGSensorManager.h \
     ../../include/AwSensor.h \
@@ -47,7 +46,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     AwChannel.cpp \
     AwDataClient.cpp \
-    AwFilteringOptions.cpp \
     AwMarker.cpp \
     AwMEGSensorManager.cpp \
     AwSensor.cpp \
@@ -57,7 +55,6 @@ SOURCES += \
 HEADERS += \
     ../../include/AwChannel.h  \
     ../../include/AwDataClient.h \
-    ../../include/AwFilteringOptions.h \
     ../../include/AwMarker.h \
     ../../include/AwMEGSensorManager.h \
     ../../include/AwSensor.h \

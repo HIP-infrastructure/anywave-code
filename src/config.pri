@@ -52,8 +52,6 @@ QWT_INCLUDE_PATH=/home/bruno/qwt-6.1.4/include
 QWT_LIB_PATH=/home/bruno/qwt-6.1.4/lib
 }
 macx {
-QWT_INCLUDE_PATH=
-QWT_LIB_PATH=
 INCLUDEPATH += /Library/Frameworks/qwt.framework/Headers
 }
 # MATLAB_ROOT  Path to the installation of MATLAB
