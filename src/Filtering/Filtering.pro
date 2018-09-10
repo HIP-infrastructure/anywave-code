@@ -33,8 +33,8 @@ SOURCES += \
     AwButterWorth.cpp \
     AwFiltering.cpp \
 	AwFilterSettings.cpp \
-	AwFilterSwitchButton.cpp \
 	AwFilterModel.cpp \
+	AwFilterGUI.cpp \
     DspFilters/Bessel.cpp \
     DspFilters/Biquad.cpp \
     DspFilters/Butterworth.cpp \
@@ -58,7 +58,8 @@ HEADERS += \
     ../../include/filter/AwFiltering.h \
 	AwFilterModel.h \
 	../../include/filter/AwFilterSettings.h \
-	AwFilterSwitchButton.h
+	AwFilterGUI.h
+
 	
 FORMS += AwFilterGUI.ui
 

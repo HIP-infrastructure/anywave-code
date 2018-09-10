@@ -29,7 +29,7 @@ unix:!macx{
  LIBS += -lAwCore $$VTK_LIBRARIES
 }
 
-LIBS += -lAwGraphics -lAwUtilities -lAwMath -lAwLayout -lAwMapping
+LIBS += -lAwGraphics -lAwUtilities -lAwMath -lAwLayout -lAwMapping -lAwFiltering
 
 unix {
     target.path = $$INSTALL_LIB_PATH

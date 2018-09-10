@@ -176,6 +176,9 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 			m_labelToIndex.insert(source->name(), index++);
 		}
 	}
+
+	// force current filter settings to match those store in the ICA file.
+	AwSettings::getInstance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, 0.);
 	AwSettings::getInstance()->filterSettings().apply(m_sources);
 	float sr = m_sources.at(0)->samplingRate();
 
@@ -243,7 +246,6 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 	if (tmp == NULL)
 		return -1;
 
-
 	// data read are row major => fill a col major matrix
 	mat unmix(tmp, col, row);
 	unmix = unmix.t();
@@ -277,6 +279,8 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 			m_labelToIndex.insert(source->name(), index++);
 		}
 	}
+	// force current filter settings to match those store in the ICA file.
+	AwSettings::getInstance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, 0.);
 	AwSettings::getInstance()->filterSettings().apply(m_sources);
 	float sr = m_sources.at(0)->samplingRate();
 
@@ -313,17 +317,13 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 		chan->setLayout2D(l);
 		if (l3D)
 			chan->setLayout3D(l3D);
-		// apply filters used to compute ICs
-		//chan->setLowFilter(m_lpFilter);
-		//chan->setHighFilter(m_hpFilter);
 		chan->setComponentType(m_type);
-//		// topography values for component i are in the ith column of matrix mixing
+		// topography values for component i are in the ith column of matrix mixing
 		memcpy(values.data(), m_mixing.colptr(i), m_mixing.n_rows * sizeof(float));
 		// set channel labels in the right order
 		chan->setLabels(m_labels);
 		// set values for topography
 		chan->setTopoValues(values);
-//		chan->setTopoValues(conv_to<fvec>::from(m_mixing.col(i)));
 		chan->setDisplayPluginName("ICA SignalItem");
 		m_icaChannels << chan;
 	}

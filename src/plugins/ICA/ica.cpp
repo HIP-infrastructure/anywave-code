@@ -31,6 +31,7 @@
 #include <QDir>
 #include <filter/AwFiltering.h>
 #include <math/AwMath.h>
+#include <filter/AwFilterSettings.h>
 
 ICA::ICA()
 {
@@ -118,6 +119,15 @@ void ICA::run()
 		}
 	emit progressChanged("OK.");
 
+	AwMarkerList selectedMarkers;
+	if (m_ignoreMarkers) 
+		selectedMarkers = AwMarker::invertMarkerSelection(pdi.input.markers, m_ignoredMarkerLabel, pdi.input.fileDuration);
+	
+	bool skipData = !selectedMarkers.isEmpty();
+
+	AwFilterSettings filterSettings(pdi.input.filterSettings);
+	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
+	
 	// compute decimate factor based on low pass filter
 	int decimate = 2;
 	if (m_lpf > 0) {
@@ -130,20 +140,19 @@ void ICA::run()
 	else 
 		decimate = 1;  // no decimation
 
-	
 	if (decimate > 1) {
 		sendMessage("Loading data...");
-		requestData(&m_channels, 0.0f, -1.0f, true);
+		if (skipData)
+			requestData(&m_channels, &selectedMarkers, true);
+		else
+			requestData(&m_channels, 0.0f, -1.0f, true);
 		sendMessage("Done.");
 		AwChannel::clearFilters(m_channels);
 		sendMessage("Decimating data...");
 		AwFiltering::decimate(m_channels, decimate);
 		sendMessage("Done.");
 		// applying filtering options to channels
-		foreach(AwChannel *c, m_channels) {
-			c->setLowFilter(m_lpf);
-			c->setHighFilter(m_hpf);
-		}
+		filterSettings.apply(m_channels);
 		sendMessage("Filtering...");
 		AwFiltering::filter(m_channels);
 		sendMessage("Done.");
@@ -151,16 +160,14 @@ void ICA::run()
 	}
 	else {
 		AwChannel::clearFilters(m_channels);
-		for (auto c : m_channels) {
-			c->setLowFilter(m_lpf);
-			c->setHighFilter(m_hpf);
-		}
+		filterSettings.apply(m_channels);
 		sendMessage("Loading data and filtering..");
-		requestData(&m_channels, 0.0f, -1.0f);
+		if (skipData)
+			requestData(&m_channels, &selectedMarkers, true);
+		else
+			requestData(&m_channels, 0.0f, -1.0f, true);
 		sendMessage("Done.");
 	}
-
-
 
 	// check for nan values
 	if (AwMath::isNanInChannels(m_channels)) {
@@ -170,24 +177,24 @@ void ICA::run()
 
 	int nSamples = m_channels.first()->dataSize(); // getting total number of samples
 
-	if (m_ignoreMarkers) {
-		emit progressChanged("Removing parts of data marked by " + m_ignoredMarkerLabel + " marker");
-		AwMarkerList artefacts;
-		foreach (AwMarker *m, pdi.input.markers) {
-			if (m->label() == m_ignoredMarkerLabel) 
-				artefacts << m;
-		}
-		artefacts = AwMarker::merge(artefacts);
+	//if (m_ignoreMarkers) {
+	//	emit progressChanged("Removing parts of data marked by " + m_ignoredMarkerLabel + " marker");
+	//	AwMarkerList artefacts = AwMarker::getMarkersWithLabel(pdi.input.markers, m_ignoredMarkerLabel);
+	//	//foreach (AwMarker *m, pdi.input.markers) {
+	//	//	if (m->label() == m_ignoredMarkerLabel) 
+	//	//		artefacts << m;
+	//	//}
+	//	artefacts = AwMarker::merge(artefacts);
 
-		foreach (AwChannel *c, m_channels) {
-			if (c->cutData(artefacts) == NULL) {
-				emit progressChanged("Failed to remove marked data in channel " + c->name());
-			}
-		}
-		emit progressChanged("OK.");
-		// update samples number
-		nSamples = m_channels.first()->dataSize();
-	}
+	//	foreach (AwChannel *c, m_channels) {
+	//		if (c->cutData(artefacts) == NULL) {
+	//			emit progressChanged("Failed to remove marked data in channel " + c->name());
+	//		}
+	//	}
+	//	emit progressChanged("OK.");
+	//	// update samples number
+	//	nSamples = m_channels.first()->dataSize();
+	//}
 
 	if (pow(sqrt(m_nComp * 1.0), 3.0) > nSamples) {
 		sendMessage(QString("Number of samples %1 for the number of components "
@@ -211,10 +218,6 @@ void ICA::run()
 	case ICA::FASTICA:
 		createInputFile();
 		launchMatlabPlugin();
-		break;
-	case ICA::acsobiro:
-		if (run_acsobiro(nc) == 0)
-			saveToFile();
 		break;
 	}
 }

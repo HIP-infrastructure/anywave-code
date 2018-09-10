@@ -272,7 +272,44 @@ void AwDataConnection::computeVirtualChannels()
 
 // SLOTS
 
-void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, quint64 duration, bool rawData)
+void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *markers, bool rawData)
+{
+	if (channelsToLoad->isEmpty() || markers->isEmpty()) {
+		setEndOfData();
+		return;
+	}
+	QList<AwChannelList> chunks;
+	qint64 totalSamples = 0;
+	for (auto m : *markers) {
+		if (m->duration() <= 0.)
+			continue;
+		auto channels = AwChannel::duplicateChannels(*channelsToLoad);
+		chunks.append(channels);
+		// load chunk without wakeing up the client...
+		loadData(&channels, m, rawData, true);
+		totalSamples += channels.first()->dataSize();
+	}
+
+	// fill channelsToLoad with all merged data in all the chunks
+	for (auto i = 0; i < channelsToLoad->size(); i++) {
+		auto destChannel = channelsToLoad->at(i);
+		float *data = destChannel->newData(totalSamples);
+		for (auto chunk : chunks) {
+			auto channel = chunk.at(i);
+			for (auto j = 0; j < channel->dataSize(); j++)
+				*data++ = channel->data()[j];
+			channel->clearData();
+		}
+	}
+	//cleaning up
+	for (auto chunk : chunks)
+		while (chunk.isEmpty())
+			delete chunk.takeFirst();
+	setDataAvailable();
+}
+
+
+void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, quint64 duration, bool rawData, bool doNotWakeUpClient)
 {
 #ifndef NDEBUG
 	if (channelsToLoad->isEmpty())
@@ -295,7 +332,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, qu
 }
 
 
-void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker, bool rawData)
+void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker, bool rawData, bool doNotWakeUpClient)
 
 {
 #ifndef NDEBUG
@@ -318,14 +355,13 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker,
 		return;
 	}
 
-	loadData(channelsToLoad, marker->start(), marker->duration(), rawData);
+	loadData(channelsToLoad, marker->start(), marker->duration(), rawData, doNotWakeUpClient);
 }
 
 //
 // loadData()
 //
-//void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, float duration, float downSampling, AwFilteringOptions *foptions)
-void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, float duration, bool rawData)
+void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, float duration, bool rawData, bool doNotWakeUpClient)
 {
 #ifndef NDEBUG
 	if (channelsToLoad->isEmpty())
@@ -473,7 +509,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 					channelsToFilter << c;
 			}
 			AwFiltering::filter(channelsToFilter);
-			//AwFiltering::notch(channelsToFilter);
 			// end of filtering
 		}
 
@@ -499,7 +534,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			c->setDataReady();
 
 	}
-	setDataAvailable();
+	if (!doNotWakeUpClient)
+		setDataAvailable();
 	deleteAVGChannels();
 
 #ifndef NDEBUG

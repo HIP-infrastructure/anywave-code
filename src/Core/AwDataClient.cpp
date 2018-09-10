@@ -32,29 +32,41 @@ AwDataClient::AwDataClient(QObject *parent)
 	m_endOfData = m_isConnected = m_errorOccured = false;
 }
 
-void AwDataClient::requestData(AwChannelList *channels, AwMarker *marker, bool rawData)
+void AwDataClient::requestData(AwChannelList *channels, AwMarker *marker, bool rawData, bool doNotWakeUpClient)
 {
 	if (!m_isConnected) {
 		m_errorOccured = true;
 		m_errorString = QString("Trying to request data but not connected to the data server.");
 		return;
 	}
-	emit needData(channels, marker, rawData);
+	emit needData(channels, marker, rawData, doNotWakeUpClient);
 	m_mutexDataAvailable.lock();
  	m_wcDataAvailable.wait(&m_mutexDataAvailable);
 	m_mutexDataAvailable.unlock();
 }
 
-void AwDataClient::requestData(AwChannelList *channels, float start, float duration, bool rawData)
+void AwDataClient::requestData(AwChannelList *channels, float start, float duration, bool rawData, bool doNotWakeUpClient)
 {
 	if (!m_isConnected) {
 		m_errorOccured = true;
 		m_errorString = QString("Trying to request data but not connected to the data server.");
 		return;
 	}
-	//emit needData(channels, start, duration, downSampling, foptions);
-	emit needData(channels, start, duration, rawData);
+	emit needData(channels, start, duration, rawData, doNotWakeUpClient);
 	m_mutexDataAvailable.lock();
  	m_wcDataAvailable.wait(&m_mutexDataAvailable);
+	m_mutexDataAvailable.unlock();
+}
+
+void AwDataClient::requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData)
+{
+	if (!m_isConnected) {
+		m_errorOccured = true;
+		m_errorString = QString("Trying to request data but not connected to the data server.");
+		return;
+	}
+	emit needData(channels, markers, rawData);
+	m_mutexDataAvailable.lock();
+	m_wcDataAvailable.wait(&m_mutexDataAvailable);
 	m_mutexDataAvailable.unlock();
 }

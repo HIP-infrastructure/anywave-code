@@ -59,8 +59,9 @@ public:
 	virtual ~AwDataClient() { }
 
 	inline bool endOfData() { return m_endOfData; }
-	void requestData(AwChannelList *channels, AwMarker *marker, bool rowData = false);
-	void requestData(AwChannelList *channels, float start, float duration, bool rawData = false);
+	void requestData(AwChannelList *channels, AwMarker *marker, bool rowData = false, bool doNotWakeUpClient = false);
+	void requestData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
+	void requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 	void setConnected(bool flag = true) { m_isConnected = flag; }
 	inline bool isConnected() { return m_isConnected;  }
 	QWaitCondition& waitForData() { return m_wcDataAvailable; }
@@ -68,8 +69,9 @@ public:
 	inline QString& errorString() { return m_errorString; }
 	inline void setError(const QString& error) { m_errorString = error; m_errorOccured = true; }
 signals:
-	void needData(AwChannelList *channels, float start, float duration, bool rawData = false);
-	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false);
+	void needData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
+	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false, bool doNotWakeUpClient = false);
+	void needData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 protected:
 	QWaitCondition m_wcDataAvailable;
 	QMutex m_mutexDataAvailable;

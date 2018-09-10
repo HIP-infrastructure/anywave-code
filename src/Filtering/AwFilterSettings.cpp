@@ -252,8 +252,34 @@ void AwFilterSettings::load(const QString& path)
 			m_hash.insert(AwChannel::stringToType(t), values);
 		}
 	}
-	if (m_hash.isEmpty()) { // empty hash table means the json format is old/wrond
-		throw AwException(QString("json format is too old or incompatible."), origin);
+	if (m_hash.isEmpty()) { // empty hash table means the json format is old/wrong
+		//throw AwException(QString("json format is too old or incompatible."), origin);
+		// read old format and convert it.
+		QVector<float> values(3);
+		values.fill(0.);
+		QStringList keys = { "EEG", "MEG", "EMG" };
+		for (auto k : keys) {
+			if (root.contains(k)) {
+				auto obj = root[k].toObject();
+				if (!obj.isEmpty()) {
+					values[0] = (float)obj["HP"].toDouble();
+					values[1] = (float)obj["LP"].toDouble();
+					values[2] = (float)obj["Notch"].toDouble();
+					if (k == "EEG") {
+						m_hash.insert(AwChannel::EEG, values);
+						m_hash.insert(AwChannel::SEEG, values);
+					}
+					else if (k == "MEG") {
+						m_hash.insert(AwChannel::MEG, values);
+						m_hash.insert(AwChannel::GRAD, values);
+					}
+					else if (k == "EMG") {
+						m_hash.insert(AwChannel::EMG, values);
+						m_hash.insert(AwChannel::ECG, values);
+					}
+				}
+			}
+		}
 		return;
 	}
 	updateGUI();

@@ -15,6 +15,6 @@ QT5_WRAP_CPP(MOC ${HEADERS})
 
 ADD_LIBRARY(AwProcess SHARED ${SRC} ${MOC})
 QT5_USE_MODULES(AwProcess Core Widgets)
-TARGET_LINK_LIBRARIES(AwProcess AwCore AwReadWrite Qt5::Core Qt5::Widgets)
+TARGET_LINK_LIBRARIES(AwProcess AwCore AwReadWrite AwFiltering Qt5::Core Qt5::Widgets)
 
 

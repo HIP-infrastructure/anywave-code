@@ -10,9 +10,6 @@
     <ClCompile Include="infomax_algo.cpp" />
     <ClCompile Include="r250.c" />
     <ClCompile Include="randlcg.c" />
-    <ClCompile Include="acsobiro.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_ICASettings.h" />
