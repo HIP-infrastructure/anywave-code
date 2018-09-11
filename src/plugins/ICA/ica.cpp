@@ -177,25 +177,6 @@ void ICA::run()
 
 	int nSamples = m_channels.first()->dataSize(); // getting total number of samples
 
-	//if (m_ignoreMarkers) {
-	//	emit progressChanged("Removing parts of data marked by " + m_ignoredMarkerLabel + " marker");
-	//	AwMarkerList artefacts = AwMarker::getMarkersWithLabel(pdi.input.markers, m_ignoredMarkerLabel);
-	//	//foreach (AwMarker *m, pdi.input.markers) {
-	//	//	if (m->label() == m_ignoredMarkerLabel) 
-	//	//		artefacts << m;
-	//	//}
-	//	artefacts = AwMarker::merge(artefacts);
-
-	//	foreach (AwChannel *c, m_channels) {
-	//		if (c->cutData(artefacts) == NULL) {
-	//			emit progressChanged("Failed to remove marked data in channel " + c->name());
-	//		}
-	//	}
-	//	emit progressChanged("OK.");
-	//	// update samples number
-	//	nSamples = m_channels.first()->dataSize();
-	//}
-
 	if (pow(sqrt(m_nComp * 1.0), 3.0) > nSamples) {
 		sendMessage(QString("Number of samples %1 for the number of components "
 			"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
