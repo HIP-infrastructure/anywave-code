@@ -73,16 +73,16 @@ QJsonObject dictToJsonObject(PyObject *dict)
 				else if (PyBool_Check(item))
 					array.append(QJsonValue(bool(PyObject_IsTrue(item))));
 				else if (PyInt_Check(item))
-					array.append(QJsonValue(PyInt_AsLong(item)));
+					array.append(QJsonValue(int(PyInt_AsLong(item))));
 				else if (PyFloat_Check(item))
 					array.append(QJsonValue(PyFloat_AsDouble(item)));
 			}
 			json[k] = array;
 		}
 		else if (PyInt_Check(value))
-			json[k] = PyInt_AsLong(value);
+			json[k] = int(PyInt_AsLong(value));
 		else if (PyFloat_Check(value))
-			json[k] = PyFloat_AsDouble(value);
+			json[k] = double(PyFloat_AsDouble(value));
 		else if (PyDict_Check(value))
 			json[k] = dictToJsonObject(value);
 	}

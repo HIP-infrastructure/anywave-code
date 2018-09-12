@@ -6,7 +6,7 @@
 
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS +=  core utilities rw process math filtering graphics matlab HDF5 layout mapping epoch widget MatlabSupport AnyWave \
+SUBDIRS +=  core filtering  utilities rw process math graphics matlab HDF5 layout mapping epoch widget MatlabSupport AnyWave \
   plugins Mex PythonSupport
 
 core.subdir = Core

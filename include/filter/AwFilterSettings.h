@@ -24,9 +24,9 @@
 //    cenir - antoine.ducorps@umpc.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
+#pragma once
 #include <AwGlobal.h>
 #include <AwChannel.h>
-#pragma once
 
 class AwFilterGUI;
 class AW_FILTER_EXPORT AwFilterSettings : public QObject

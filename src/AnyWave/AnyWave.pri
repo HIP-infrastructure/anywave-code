@@ -26,9 +26,7 @@ HEADERS += ./Data/AwDataConnection.h \
     ./Display/AwDisplay.h \
     ./Display/AwChannelSelectionModel.h \
     ./Display/AwChannelSelectionDial.h \
-    ./Filter/AwFiltersManager.h \
     ./Filter/AwFilterToolBar.h \
-    ./Filter/AwFilterSettings.h \
     ./IO/ADES/ADESIO.h \
     ./IO/HDF5/structs.h \
     ./IO/HDF5/HDF5IO.h \
@@ -58,6 +56,7 @@ HEADERS += ./Data/AwDataConnection.h \
     ./MATPy/AwPidManager.h \
     ./MATPy/AwRequestServer.h \
     ./MATPy/AwMATPyServer.h \
+    ./MATPy/AwTCPResponse.h \
     ./Montage/AwAVGChannel.h \
     ./Montage/AwMontageTableView.h \
     ./Montage/AwMontageManager.h \
@@ -165,8 +164,6 @@ SOURCES += ./AnyWave.cpp \
     ./Display/AwScene.cpp \
     ./Display/AwSignalView.cpp \
     ./Display/AwViewSetup.cpp \
-    ./Filter/AwFilterSettings.cpp \
-    ./Filter/AwFiltersManager.cpp \
     ./Filter/AwFilterToolBar.cpp \
     ./IO/ADES/ADESIO.cpp \
     ./IO/HDF5/HDF5IO.cpp \
@@ -200,6 +197,8 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/AwResponse.cpp \
     ./MATPy/GetData.cpp \
     ./MATPy/GetFileInfo.cpp \
+    ./MATPy/GetPluginIO.cpp \
+    ./MATPy/GetDataEx.cpp \
     ./MATPy/GetICAPanelCapture.cpp \
     ./MATPy/GetMarkers.cpp \
     ./MATPy/GetPluginInfo.cpp \
@@ -209,6 +208,7 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/SendCommand.cpp \
     ./MATPy/SendMessage.cpp \
     ./MATPy/SetBeamFormer.cpp \
+    ./MATPy/AwTCPResponse.cpp \
     ./Montage/AwAVGChannel.cpp \
     ./Montage/AwChannelListModel.cpp \
     ./Montage/AwMontageDial.cpp \
@@ -297,7 +297,6 @@ FORMS += ./AnyWave.ui \
     ./Display/AwDSMSaveSetupUI.ui \
     ./Display/AwNewViewDial.ui \
     ./Display/AwSaveAsNewSetupDialog.ui \
-    ./Filter/AwFilterSettings.ui \
     ./Filter/AwFilterToolBar.ui \
     ./IO/BIDS/AwBIDSGUI.ui \
     ./Marker/AwExportMarkersWizard.ui \

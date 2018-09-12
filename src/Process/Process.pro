@@ -33,7 +33,7 @@ unix:!macx{
  LIBS += -lAwCore
 }
 
-LIBS += -lAwFiltering
+LIBS += -lAwFilter
 
 
 unix {
