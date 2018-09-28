@@ -5,9 +5,8 @@ add_library(mexcommon common.cpp)
 qt5_use_modules(mexcommon Core Network)
 TARGET_LINK_LIBRARIES(mexcommon Qt5::Core Qt5::Network)
 
-
-
 matlab_add_mex(NAME aw_getdata SRC aw_getdata.cpp OUTPUT_NAME ../Plugins/MATLAB/AnyWave/aw_getdata LINK_TO mexcommon AwCore)
+matlab_add_mex(NAME aw_getdataex SRC aw_getdataex.cpp OUTPUT_NAME ../Plugins/MATLAB/AnyWave/aw_getdataex LINK_TO mexcommon AwCore)
 matlab_add_mex(NAME aw_getmarkers SRC aw_getmarkers.cpp OUTPUT_NAME ../Plugins/MATLAB/AnyWave/aw_getmarkers LINK_TO mexcommon AwCore)
 matlab_add_mex(NAME aw_addmarkers SRC aw_addmarkers.cpp OUTPUT_NAME ../Plugins/MATLAB/AnyWave/aw_addmarkers LINK_TO mexcommon AwCore)
 matlab_add_mex(NAME aw_getplugininfo SRC aw_getplugininfo.cpp OUTPUT_NAME ../Plugins/MATLAB/AnyWave/aw_getplugininfo LINK_TO mexcommon AwCore)

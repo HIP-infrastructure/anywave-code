@@ -29,8 +29,6 @@ SET(AnyWave_SRCS
     ./Display/AwScene.cpp  
     ./Display/AwSignalView.cpp  
     ./Display/AwViewSetup.cpp  
-    ./Filter/AwFilterSettings.cpp  
-    ./Filter/AwFiltersManager.cpp  
     ./Filter/AwFilterToolBar.cpp  
     ./IO/ADES/ADESIO.cpp  
     ./IO/HDF5/HDF5IO.cpp  
@@ -72,7 +70,10 @@ SET(AnyWave_SRCS
     ./MATPy/IsTerminated.cpp  
     ./MATPy/SendCommand.cpp  
     ./MATPy/SendMessage.cpp  
-    ./MATPy/SetBeamFormer.cpp  
+    ./MATPy/SetBeamFormer.cpp
+    ./MATPy/GetDataEx.cpp
+    ./MATPy/GetPluginIO.cpp  
+    ./MATPy/AwTCPResponse.cpp
     ./Montage/AwAVGChannel.cpp  
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
@@ -171,9 +172,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Display/AwDisplay.h  
     ./Display/AwChannelSelectionModel.h  
     ./Display/AwChannelSelectionDial.h  
-    ./Filter/AwFiltersManager.h  
     ./Filter/AwFilterToolBar.h  
-    ./Filter/AwFilterSettings.h  
     ./IO/ADES/ADESIO.h  
     ./IO/HDF5/structs.h  
     ./IO/HDF5/HDF5IO.h  
@@ -300,7 +299,6 @@ SET(FORMS ./AnyWave.ui
     ./Display/AwDSMSaveSetupUI.ui  
     ./Display/AwNewViewDial.ui  
     ./Display/AwSaveAsNewSetupDialog.ui  
-    ./Filter/AwFilterSettings.ui  
     ./Filter/AwFilterToolBar.ui  
     ./IO/BIDS/AwBIDSGUI.ui  
     ./Marker/AwExportMarkersWizard.ui  

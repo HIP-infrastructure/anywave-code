@@ -9,8 +9,8 @@ VTK_VERSION_SUFFIX = 8.1
 # VTK_INCLUDE_PATH  Path where to find headers for vtk
 # Linux
 unix:!macx {
-VTK_INCLUDE_PATH = /home/bruno/vtk8.1/include/vtk-$$VTK_VERSION_SUFFIX
-VTK_LIB_PATH = /home/bruno/vtk8.1/lib
+VTK_INCLUDE_PATH = /home/bruno/VTK/include/vtk-$$VTK_VERSION_SUFFIX
+VTK_LIB_PATH = /home/bruno/VTK/lib
 }
 # Mac OS X
 macx {
@@ -48,8 +48,8 @@ MATIO_LIB_PATH = /Users/bruno/matio/lib
 
 # QWT
 unix:!mac{
-QWT_INCLUDE_PATH=/home/bruno/qwt-6.1.4/include
-QWT_LIB_PATH=/home/bruno/qwt-6.1.4/lib
+QWT_INCLUDE_PATH=/usr/include/qwt
+QWT_LIB_PATH=/usr/lib
 }
 macx {
 INCLUDEPATH += /Library/Frameworks/qwt.framework/Headers
@@ -60,7 +60,7 @@ MATLAB_ROOT = /Applications/MATLAB_R2015a.app
 }
 
 unix:!macx {
-MATLAB_ROOT = /usr/local/MATLAB/R2015a
+MATLAB_ROOT = /usr/local/MATLAB/R2018b
 }
 
 # PYTHON PATH (Anaconda recommenced)

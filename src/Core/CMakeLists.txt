@@ -4,7 +4,6 @@ add_definitions("-DAW_BUILD_CORE_LIB")
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 SET(HEADERS     ../../include/AwChannel.h  
     ../../include/AwDataClient.h 
-    ../../include/AwFilteringOptions.h 
     ../../include/AwMarker.h 
     ../../include/AwMEGSensorManager.h 
     ../../include/AwSensor.h 
@@ -12,7 +11,6 @@ SET(HEADERS     ../../include/AwChannel.h
     ../../include/AwVirtualChannel.h)
 SET(SRC     AwChannel.cpp 
     AwDataClient.cpp 
-    AwFilteringOptions.cpp 
     AwMarker.cpp 
     AwMEGSensorManager.cpp 
     AwSensor.cpp 

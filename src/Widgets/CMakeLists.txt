@@ -105,5 +105,5 @@ QT5_WRAP_UI(UI ${FORMS})
 
 ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
 QT5_USE_MODULES(AwWidget Core Widgets PrintSupport)
-TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport ${VTK_LIBRARIES} ${QWT_LIBRARY})
+TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
 

@@ -52,6 +52,10 @@ find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5Svg REQUIRED)
 find_package(Qt5Charts REQUIRED)
 find_package(Qt5Qml REQUIRED)
+if(UNIX AND NOT APPLE)
+find_package(Qt5X11Extras REQUIRED)
+find_package(TOTO REQUIRED)
+ENDIF()
 
 MESSAGE(STATUS "Qt version is ${Qt5Core_VERSION}")
 
