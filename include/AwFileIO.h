@@ -108,7 +108,7 @@ protected:
 // * 
 // * 
 // */
-class AW_RW_EXPORT AwFileIOPlugin : public QObject
+class AW_RW_EXPORT AwFileIOPlugin: public QObject
 {
 public:
 	AwFileIOPlugin() { m_flags = 0x00000000; }
@@ -130,7 +130,6 @@ public:
 	inline bool canWrite() { return m_flags & Aw::CanWrite; }
 	/** Override this method to instantiate an object derived from AwFileReader. **/
 	virtual AwFileIO *newInstance(const QString& filename = QString()) = 0;
-
 	virtual void deleteInstance(AwFileIO *fr) { delete fr; fr = NULL; }
 	/** Override this method to provide a string list containing paths to montage files. **/
 	virtual QStringList montages() { return QStringList(); }

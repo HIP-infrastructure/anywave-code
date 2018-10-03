@@ -166,22 +166,25 @@ void AwSettings::closeFile()
 
 void AwSettings::createMatlabShellScript(const QString& path)
 {
-	QFile scriptFile(QDir::homePath() + "/AnyWave/matlab.sh");
+	QString scriptPath("%1/AnyWave/matlab.sh").arg(m_homeDirectory);
+	QFile scriptFile(scriptPath);
 	QTextStream stream(&scriptFile);
 
-	if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-        stream << "#!/bin/bash" << endl;
-		stream << "MATLAB=" + path << endl;
+	if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		stream << "#!/bin/bash" << endl;
+		stream << "MATLAB=" << path << endl;
 #ifdef Q_OS_MAC
-        stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
+		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
 #elif defined(Q_OS_LINUX)
-        stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MATLAB/bin/glnxa64:$MATLAB/sys/os/glnxa64" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MATLAB/bin/glnxa64" << endl;
 		stream << "export LD_LIBRARY_PATH" << endl;
 #endif
 		scriptFile.close();
+		emit log(QString("Sucessfully created file %1.").arg(scriptPath));
 	}
+	else
+		emit log(QString("Could not create %1 file").arg(scriptPath));
 }
 
 void AwSettings::emptyMatlabShellScript()

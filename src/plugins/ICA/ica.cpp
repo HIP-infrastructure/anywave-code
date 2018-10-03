@@ -161,7 +161,7 @@ void ICA::run()
 	else {
 		AwChannel::clearFilters(m_channels);
 		filterSettings.apply(m_channels);
-		sendMessage("Loading data and filtering..");
+		sendMessage("Loading data and filtering...");
 		if (skipData)
 			requestData(&m_channels, &selectedMarkers, true);
 		else

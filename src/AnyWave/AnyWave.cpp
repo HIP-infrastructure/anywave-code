@@ -114,6 +114,7 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 
 	adl->connectComponent("AnyWave", this);
 	adl->connectComponent("Filters Settings", &aws->filterSettings());
+	adl->connectComponent("Global Settings", aws);
 	createUserDirs();
 	
 	// AwSettings loads recentfiles in constructor, so get that list and update menu
@@ -285,10 +286,8 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
 	connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
 	retranslateUi(this);	// force translation to be applied.
-	checkMatlabAndMCRInit();
 	m_lastDirOpen = "/";
-	m_updater = new AwUpdater(this);
-	m_updater->checkForUpdate();
+	m_updater.checkForUpdate();
 }
 
 //
@@ -1282,7 +1281,7 @@ bool AnyWave::searchForMatlab()
 		if (programDir.exists())		{
 			QStringList files = programDir.entryList(QDir::AllDirs);
 			QString release;
-			foreach (QString s, files)
+			for (auto s : files)
 				if (s.startsWith("R"))				{
 					release = s;
 					break;
@@ -1290,32 +1289,19 @@ bool AnyWave::searchForMatlab()
 				if (!release.isEmpty())				{
 					matlabPath = programDir.absolutePath() + "/" + release;
 					settings.setValue("matlab/path", matlabPath);
-					settings.setValue("matlab/activated", true);
 					settings.setValue("matlab/detected", true);
-					return true;
+					isDetected = true;
 				}
 		}
-		settings.setValue("matlab/detected", false);
-		settings.setValue("matlab/activated", false);
-		return false;
 	}
-	else	{
-		if (settings.value("matlab/user_changed_folder", false).toBool())		{
-			settings.setValue("matlab/user_changed_folder", false);
-		}
-		return true;
-	}
-	return false;
 #endif
 #ifdef Q_OS_MAC
-
 	if (!isDetected) // not yet detected => searching for Matlab
 	{
 		QDir dir("/Applications");
 		QStringList files = dir.entryList(QDir::AllDirs);
 		QString release;
-		foreach (QString s, files)
-		{
+		for (auto s : files) {
 			if (s.contains("MATLAB_R"))			{
 				release = s;
 				break;
@@ -1324,31 +1310,13 @@ bool AnyWave::searchForMatlab()
 		if (!release.isEmpty())		{
 			matlabPath = "/Applications/" + release;
 			settings.setValue("matlab/path", matlabPath);
-			settings.setValue("matlab/installed", true);
 			// set detected flag
 			settings.setValue("matlab/detected", true);
 			isDetected = true;
-			settings.setValue("matlab/activated", true);
 			settings.setValue("matlab/require_restart", true);
             AwSettings::getInstance()->createMatlabShellScript(matlabPath);
-			return true;
 		}
 	}
-	else  // matlab was detected and script created
-	{
-		// set the require start to false for further launch.
-		settings.setValue("matlab/require_restart", false);
-		// Checking if the user has manually changed the matlab path.
-		if (settings.value("matlab/user_changed_folder", false).toBool())
-		{
-			// User changed the path, so recreate the script and reset flags for a relaunch.
-            AwSettings::getInstance()->createMatlabShellScript(settings.value("matlab/path").toString());
-			settings.setValue("matlab/require_restart", true);
-			settings.setValue("matlab/user_changed_folder", false);
-		}
-		return true;
-	}
-	return false;
 #endif
 #ifdef Q_OS_LINUX
 	if (!isDetected) // not yet detected => searching for Matlab
@@ -1356,16 +1324,13 @@ bool AnyWave::searchForMatlab()
 		QDir dir("/usr/local/bin");  // On Linux we look for a symlink called matlab in /usr/local/bin
 		QStringList files = dir.entryList(QDir::Files);
 		QString release;
-		foreach (QString s, files)
-		{
-			if (s.contains("matlab"))
-			{
+		foreach (auto s : files) {
+			if (s.contains("matlab")) {
 				release = s;
 				break;
 			}
 		}
-		if (!release.isEmpty())
-		{
+		if (!release.isEmpty())	{
 			// matlab is a symbol link, so get the target of the link
 			emit log("Linux: detected matlab in /usr/local/bin/" + release);
 			matlabPath = QFile::symLinkTarget("/usr/local/bin/" + release);
@@ -1378,123 +1343,72 @@ bool AnyWave::searchForMatlab()
 			// set detected flag
 			settings.setValue("matlab/detected", true);
 			isDetected = true;
-			settings.setValue("matlab/activated", true);
 			settings.setValue("matlab/require_restart", true);
             AwSettings::getInstance()->createMatlabShellScript(matlabPath);
-			return true;
 		}
 	}
-	else  // matlab was detected and script created
-	{
-		// set the require start to false for further launch.
-		settings.setValue("matlab/require_restart", false);
-		// Checking if the user has manually changed the matlab path.
-		if (settings.value("matlab/user_changed_folder", false).toBool())
-		{
-			// User changed the path, so recreate the script and reset flags for a relaunch.
-            AwSettings::getInstance()->createMatlabShellScript(settings.value("matlab/path").toString());
-			settings.setValue("matlab/require_restart", true);
-			settings.setValue("matlab/user_changed_folder", false);
-		}
+#endif
+	bool requireRestart = settings.value("matlab/require_restart", false).toBool();
+	if (isDetected) {
+		if (requireRestart)
+			AwMessageBox::information(this, tr("MATLAB"), tr("MATLAB was detected. Restart AnyWave to activate MATLAB plugins."));
 		return true;
 	}
+	// not detected. Save the flag.
+	settings.setValue("matlab/detected", false);
 	return false;
-#endif
 }
 
 void AnyWave::initMatlab()
 {
 	QSettings settings;
 	// Searching for Matlab
-	if (searchForMatlab())
-	{
+	if (searchForMatlab())	{
 		// matlab detected on the computer
-		// May be the user has deactivated Matlab usage?
-		bool isMatlabActivated = settings.value("matlab/activated", true).toBool();
-		if (isMatlabActivated)
-		{	
-			// matlab installed and activated => trying to load the AwMatlabSupport plugin
-			QString matlabPath = settings.value("matlab/path", QString()).toString();
-			emit log("Trying to load MatlabSupport Module...");
-#ifdef Q_OS_WIN64
-			matlabPath += "/bin/win64";
-#elif defined(Q_OS_WIN32)
-			matlabPath += "/bin/win32";
-#endif
-			QCoreApplication::addLibraryPath(matlabPath);
+		// matlab installed and activated => trying to load the AwMatlabSupport plugin
+		QString matlabPath = settings.value("matlab/path", QString()).toString();
+		emit log("Trying to load MatlabSupport Module...");
+		// trying to load AwMatlabSupport plugin
+		QString moduleName;
+		QString modulePath;
 #ifdef Q_OS_WIN
-			// Windows only need the path to point where matlab dll resides to find them.
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-			qputenv("PATH", matlabPath.toAscii());
-#else
-			qputenv("PATH", matlabPath.toLatin1());
-#endif // QT_VERSION
+		matlabPath += "/bin/win64";
+		QCoreApplication::addLibraryPath(matlabPath);
+    	// Windows only need the path to point where matlab dll resides to find them.
+		qputenv("PATH", matlabPath.toLatin1());
+		moduleName = "AwMatlabSupport.dll";
+		modulePath = qApp->applicationDirPath() + "/" + moduleName;
 #endif
-			// trying to load AwMatlabSupport plugin
-			QString moduleName;
-			QString modulePath;
+
 #ifdef Q_OS_MAC
-			moduleName = "libAwMatlabSupport.dylib";
-            modulePath = qApp->applicationDirPath() + "/../Frameworks/" + moduleName;
+		moduleName = "libAwMatlabSupport.dylib";
+        modulePath = qApp->applicationDirPath() + "/../Frameworks/" + moduleName;
 #endif
 #ifdef Q_OS_LINUX
-			moduleName = "libAwMatlabSupport.so";
-			modulePath = qApp->applicationDirPath() + "/lib/" + moduleName;
+		moduleName = "libAwMatlabSupport.so";
+		modulePath = qApp->applicationDirPath() + "/lib/" + moduleName;
 #endif
-#ifdef Q_OS_WIN
-			moduleName = "AwMatlabSupport.dll";
-			modulePath = qApp->applicationDirPath() + "/" + moduleName;
-#endif
-			QPluginLoader loader(modulePath);
-			QObject *module = loader.instance();
-			AwSettings::getInstance()->setMatlabPresent((module != NULL));
-			if (module) {
-				AwMatlabInterface *mi = qobject_cast<AwMatlabInterface *>(module);
-				AwSettings::getInstance()->setMatlabInterface(mi);
-				mi->setParent(this);
-				emit log("MatlabSupport module loaded.");
-				// Now that the module was loaded, we need the set the PATH on Mac and Linux systems.
-				// On Unices, matlab is spawned from a csh and so the matlab command must be in the PATH.
+		QPluginLoader loader(modulePath);
+		QObject *module = loader.instance();
+		AwSettings::getInstance()->setMatlabPresent((module != NULL));
+		if (module) {
+			AwMatlabInterface *mi = qobject_cast<AwMatlabInterface *>(module);
+			AwSettings::getInstance()->setMatlabInterface(mi);
+			mi->setParent(this);
+			emit log("MatlabSupport module loaded.");
+			// Now that the module was loaded, we need the set the PATH on Mac and Linux systems.
+			// On Unices, matlab is spawned from a csh and so the matlab command must be in the PATH.
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-				QString path = qgetenv("PATH") + ":" + matlabPath + "/bin";
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-				qputenv("PATH", path.toAscii());
-#else
+			QString path = qgetenv("PATH") + ":" + matlabPath + "/bin";
+			qputenv("PATH", path.toLatin1());
 #endif
-				qputenv("PATH", path.toLatin1());
-#endif
-			}
-			else {
-				emit log("MatlabSupport module not loaded.");
-				emit log(loader.errorString());
-			}
 		}
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-		else  // matlab detected but deactivated by the user
-            AwSettings::getInstance()->emptyMatlabShellScript();
-#endif
+		else {
+			emit log("MatlabSupport module not loaded.");
+			emit log(loader.errorString());
+		}
 	}
 }
-
-void AnyWave::checkMatlabAndMCRInit()
-{
-	AwSettings *aws = AwSettings::getInstance();
-	QSettings settings;
-
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-	if (!aws->isMatlabPresent())
-	{
-		bool isDetected = settings.value("matlab/detected", false).toBool();
-		if (isDetected)
-		{
-			bool requireRestart = settings.value("matlab/require_restart", false).toBool();
-			if (requireRestart)
-				AwMessageBox::information(this, tr("Matlab"), tr("Matlab was detected but AnyWave needs to restart to activate Matlab features."));
-		}
-	}
-#endif
-
-}	
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Menu triggered actions

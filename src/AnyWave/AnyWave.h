@@ -32,6 +32,7 @@
 #include <QTranslator>
 #include <AwMarker.h>
 #include <filter/AwFilterSettings.h>
+#include "AwUpdater.h"
 
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
@@ -49,7 +50,6 @@ class AwDockMapping2;
 class AwCursorMarkerToolBar;
 class AwDataInfoReader;
 class AwDebugLogWidget;
-class AwUpdater;
 class AwMeshManager;
 class AwLayoutManager;
 class AwSEEGViewer;
@@ -118,7 +118,7 @@ private:
 	AwDockMapping *m_dockMEG;
 	AwDockMapping *m_dockEEG;	
 	// updater 
-	AwUpdater *m_updater;
+	AwUpdater m_updater;
 	// flags
 	bool m_currentFileModified;
 	// methods

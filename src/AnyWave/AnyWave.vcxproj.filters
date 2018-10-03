@@ -229,12 +229,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwSignalView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterSettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterSettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
       <Filter>Filter</Filter>
     </ClCompile>
@@ -1254,12 +1248,6 @@
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwFileItem.cpp">
       <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFiltersManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFiltersManager.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
       <Filter>IO\BIDS</Filter>

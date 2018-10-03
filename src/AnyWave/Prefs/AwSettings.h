@@ -135,6 +135,7 @@ signals:
 	void recentFilesUpdated(const QStringList&);
 	void recentBIDSUpdated(const QStringList&);
 	void timeRepresentationChanged(bool HMS); // if HMS is true that means we go for HMS representation
+	void log(const QString& message);
 public slots:
 	void setAutoTriggerParsingOn(bool onoff);
 	void savePredefinedMarkers(const AwMarkerList& markers);

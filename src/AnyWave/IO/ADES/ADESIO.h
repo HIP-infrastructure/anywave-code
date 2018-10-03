@@ -62,5 +62,6 @@ class ADESIOPlugin : public AwFileIOPlugin
 	Q_INTERFACES(AwFileIOPlugin)
 public:
 	ADESIOPlugin();
+
 	ADESIO *newInstance(const QString& filename) { return new ADESIO(filename); }
 };

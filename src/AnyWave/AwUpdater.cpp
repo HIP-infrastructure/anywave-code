@@ -33,27 +33,32 @@ AwUpdater::AwUpdater(QObject *parent) : QObject(parent)
 
 void AwUpdater::checkForUpdate()
 {
-	QString platform, version, minor;
+	// now using macro that must be defines at compile time
+#if !defined(AW_PLATFORM) && !defined(AW_MAJOR_VERSION) && !defined(AW_MINOR_VERSION)
+	return;
+#else
+	QString platform = QString(AW_PLATFORM), version = QString(AW_MAJOR_VERSION), minor = QString(AW_MINOR_VERSION);
 
-#ifdef Q_OS_MACOS
-	platform = "Mac";
-	version = "1807";
-	minor = "0";
-#endif
-#ifdef Q_OS_WIN
-	platform = "Win";
-	version = "1807";
-	minor = "0";
-#endif
-#ifdef Q_OS_LINUX
-	platform = "Linux";
-	version = "1807";
-	minor = "0";
-#endif 
+//#ifdef Q_OS_MACOS
+//	platform = "Mac";
+//	version = "1807";
+//	minor = "0";
+//#endif
+//#ifdef Q_OS_WIN
+//	platform = "Win";
+//	version = "1807";
+//	minor = "0";
+//#endif
+//#ifdef Q_OS_LINUX
+//	platform = "Linux";
+//	version = "1807";
+//	minor = "0";
+//#endif 
 
 	QUrl url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
 	QNetworkRequest request(url);
 	m_webAccess.get(request);
+#endif
 }
 
 void AwUpdater::handleResult(QNetworkReply *reply)
