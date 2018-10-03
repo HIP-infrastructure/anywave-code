@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <widget/AwMessageBox.h>
@@ -675,7 +675,7 @@ void AnyWave::initToolBarsAndMenu()
 
 bool AnyWave::checkForModified()
 {
-	// Le fichier actuel est il en mode modifié ?
+	// Le fichier actuel est il en mode modifiï¿½ ?
 	if (m_currentFileModified)
 		if (QMessageBox(QMessageBox::Question, tr("Save modifications"), 
 			tr("Current file has been modified. Save the file before opening a new one.\nDo you want to continue (changes will be lost)?"),
@@ -737,7 +737,7 @@ void AnyWave::openFile(const QString &path)
 	QString ext;
 	bool openWithDialog = false;
 
-	// Le fichier actuel est il en mode modifié ?
+	// Le fichier actuel est il en mode modifiï¿½ ?
 	if (!checkForModified())
 		return;
 
@@ -810,7 +810,7 @@ void AnyWave::openFile(const QString &path)
 				break;
 			}
 		}
-		// Erreur à l'ouverture du fichier
+		// Erreur ï¿½ l'ouverture du fichier
 		QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
 		return;
 	}
@@ -827,7 +827,7 @@ void AnyWave::openFile(const QString &path)
 	m_lastDirOpen = fi.absolutePath();
 
 
-	// Mettre à jour le titre de la fenetre
+	// Mettre ï¿½ jour le titre de la fenetre
 	QString title = QString("AnyWave - ") +  filePath + QString(tr(" - %2 channels. ").arg(m_currentReader->infos.channelsCount()));
 	title += tr("Duration: ") + AwUtilities::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
@@ -1324,7 +1324,7 @@ bool AnyWave::searchForMatlab()
 		QDir dir("/usr/local/bin");  // On Linux we look for a symlink called matlab in /usr/local/bin
 		QStringList files = dir.entryList(QDir::Files);
 		QString release;
-		foreach (auto s : files) {
+		for (auto s : files) {
 			if (s.contains("matlab")) {
 				release = s;
 				break;
@@ -1387,6 +1387,7 @@ void AnyWave::initMatlab()
 #ifdef Q_OS_LINUX
 		moduleName = "libAwMatlabSupport.so";
 		modulePath = qApp->applicationDirPath() + "/lib/" + moduleName;
+		qputenv("LD_LIBRARY_PATH", "/usr/local/MATLAB/R2018b/bin/glnxa64");
 #endif
 		QPluginLoader loader(modulePath);
 		QObject *module = loader.instance();

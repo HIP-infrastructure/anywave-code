@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "Prefs/AwSettings.h"
@@ -166,7 +166,7 @@ void AwSettings::closeFile()
 
 void AwSettings::createMatlabShellScript(const QString& path)
 {
-	QString scriptPath("%1/AnyWave/matlab.sh").arg(m_homeDirectory);
+	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(m_homeDirectory);
 	QFile scriptFile(scriptPath);
 	QTextStream stream(&scriptFile);
 
@@ -187,16 +187,6 @@ void AwSettings::createMatlabShellScript(const QString& path)
 		emit log(QString("Could not create %1 file").arg(scriptPath));
 }
 
-void AwSettings::emptyMatlabShellScript()
-{
-	QFile scriptFile(QDir::homePath() + "/AnyWave/matlab.sh");
-	QTextStream stream(&scriptFile);
-	if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-		stream << "#!/bin/sh" << endl;
-		scriptFile.close();
-	}
-}
 #endif
 
 AwFileIO* AwSettings::readerAt(int index)

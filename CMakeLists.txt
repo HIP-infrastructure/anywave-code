@@ -11,11 +11,16 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
    MESSAGE(STATUS "GCC compiler detected")
    add_definitions("-w -fPIC -O3 -fpermissive -fopenmp") # g++ flags
    SET(GCC ON)
+   # DISABLE NEW LD FLAGS AS THIS WILL SET RUNPATH INSTEAD OF RPATH
+   set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--disable-new-tags")
+   set(CMAKE_EXE_LINKER_FLAGS "-Wl,--disable-new-tags")
 endif()
 
 SET(CMAKE_BUILD_TYPE "Release") # build in release mode
 SET(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
 
 # default install path
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
