@@ -15,6 +15,7 @@ qt5_wrap_cpp(AM_MOCS ${MOCS})
 add_library(AutoMarking SHARED ${SRCS} ${AM_MOCS} ${AM_QRC})
 qt5_use_modules(AutoMarking Core Gui Widgets)
 target_link_libraries(AutoMarking AwCore AwProcess AwReadWrite AwFiltering AwWidget Qt5::Core Qt5::Gui Qt5::Widgets)
+INSTALL(TARGETS AutoMarking DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 
 
 

@@ -16,6 +16,7 @@ SET(MOCS
  add_library(BrainVisionIO SHARED ${SRCS} ${BrainVision_MOCS})
  qt5_use_modules(BrainVisionIO Core)
  target_link_libraries(BrainVisionIO AwCore AwReadWrite Qt5::Core)
+INSTALL(TARGETS BrainVisionIO DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 
 
 

@@ -1,7 +1,7 @@
 # CoreLib
 project(AwCore)
 add_definitions("-DAW_BUILD_CORE_LIB")
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 SET(HEADERS     ../../include/AwChannel.h  
     ../../include/AwDataClient.h 
     ../../include/AwMarker.h 
@@ -21,7 +21,7 @@ QT5_WRAP_CPP(MOC ${HEADERS})
 add_library(AwCore SHARED ${MOC} ${SRC})
 qt5_use_modules(AwCore Core)
 TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
-
+INSTALL(TARGETS AwCore DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
 
 
 

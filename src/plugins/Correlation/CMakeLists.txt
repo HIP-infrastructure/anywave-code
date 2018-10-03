@@ -24,6 +24,7 @@ IF (APPLE)
 ELSE()
       target_link_libraries(Correlation AwCore AwProcess AwReadWrite Qt5::Core Qt5::Gui ${OpenBLAS_LIB} 
 ${QWT_LIBRARY} ${MATIO_LIBRARIES})
+INSTALL(TARGETS Correlation DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 ENDIF()
 
 

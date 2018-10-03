@@ -1,7 +1,7 @@
 # EpochLib
 project(AwEpochLib)
 add_definitions("-DAW_BUILD_EPOCH_LIB")
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 SET(HEADERS ../../include/epoch/AwEpochAverageChannel.h 
     ../../include/epoch/AwEpoch.h 
     ../../include/epoch/AwEpochComputeSettings.h 
@@ -21,6 +21,6 @@ add_library(AwEpoch SHARED ${MOC} ${SRC})
 qt5_use_modules(AwEpoch Core Widgets Gui)
 TARGET_LINK_LIBRARIES(AwEpoch AwCore AwMath Qt5::Core Qt5::Widgets Qt5::Gui)
 
-
+INSTALL(TARGETS AwEpoch DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
 
 

@@ -65,23 +65,38 @@ INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 find_package(Qwt REQUIRED)
 INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
 LINK_DIRECTORIES(${QWT_LIBRARY})
+message(STATUS "Qwt folders are ${QWT_INCLUDE_DIR} ${QWT_LIBRARY}")
 include_directories(${ARMADILLO_INCLUDE_DIRS})
-FIND_PACKAGE(HDF5 REQUIRED COMPONENTS HL)
+
+# use the static libs of HDF5
+SET(HDF5_USE_STATIC_LIBRARIES TRUE)
+FIND_PACKAGE(HDF5 REQUIRED COMPONENTS C HL)
 INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 LINK_DIRECTORIES(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+message(STATUS "HDF5 are ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}")
 find_package(OpenBLAS REQUIRED)
+
 find_package(MATIO REQUIRED)
+if(MATIO_FOUND)
+message(STATUS "Found Matio lib: ${MATIO_LIBRARIES}")
+endif()
 
 add_definitions(-DNDEBUG)
-# Add build flags
+# Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_BLAS -DARMA_USE_LAPACK -DAW_DISABLE_EPOCHING")
 
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
 # AnyWave SDK libraries
 add_subdirectory(src/Core)
@@ -115,8 +130,7 @@ if (Matlab_FOUND)
   message(STATUS "MATLAB Support added. Root dir is ${Matlab_ROOT_DIR}")
   add_subdirectory(src/MatlabSupport)
 # Build mex files
-# build the common mex library
-   add_subdirectory(src/Mex)
+  add_subdirectory(src/Mex)
 endif()
 # END OF MATLAB SUPPORT
 
@@ -158,7 +172,7 @@ add_subdirectory(src/plugins/AppendFiles)
 add_dependencies(AppendFiles AwCore AwProcess AwReadWrite)
 
 # Install
-INSTALL(FILES ${PROJECT_BINARY_DIR}/bin/AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+#INSTALL(FILES ${PROJECT_BINARY_DIR}/bin/AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 #License files
@@ -166,9 +180,9 @@ INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTIN
 	${CMAKE_INSTALL_PREFIX})
 
 #lib
-INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/lib  DESTINATION ${CMAKE_INSTALL_PREFIX})
+#INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/lib  DESTINATION ${CMAKE_INSTALL_PREFIX})
 #Plugins
-INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/Plugins  DESTINATION ${CMAKE_INSTALL_PREFIX})
+#INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/Plugins  DESTINATION ${CMAKE_INSTALL_PREFIX})
 # cmake
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
 # include 
@@ -176,6 +190,5 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX
 
 include(${CMAKE_SOURCE_DIR}/cmake/InstallSymlink.cmake)
 InstallSymlink(${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/local/bin/anywave)
-InstallSymlink(${CMAKE_INSTALL_PREFIX}/AnyWaveLinux /usr/local/bin/anywave-binary)
 
 
