@@ -233,7 +233,7 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
 				m_processMenu->addAction(act);
 			}
 			else {
-				int index = m_subProcessMenuNames.indexOf(sub.toLower());  // check is sub menu already exists
+				int index = m_subProcessMenuNames.indexOf(sub.toLower());  // check if sub menu already exists
 				if (index == -1) {	
 					// no => create it
 					QMenu *subMenu = new QMenu(sub, m_processMenu);
@@ -251,11 +251,14 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
 				}
 				else {
 					QMenu *subMenu = m_subProcessMenus.at(index);
-					QString title = tokens.at(2).trimmed();
+					QString title;
+					if (tokens.size() == 3)
+						title = tokens.at(2).trimmed();
 					if (title.isEmpty())
 						act->setText(plugin->name);
 					else
 						act->setText(title);
+					m_processMenu->addMenu(subMenu);
 					subMenu->addAction(act);
 				}
 			}

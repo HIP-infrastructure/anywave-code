@@ -95,6 +95,7 @@ void AwDataServer::openConnection(AwDataClient *client)
 
 	connect(client, SIGNAL(needData(AwChannelList *, float, float, bool)), dc, SLOT(loadData(AwChannelList *, float, float, bool)));
 	connect(client, SIGNAL(needData(AwChannelList *, AwMarker *,bool)), dc, SLOT(loadData(AwChannelList *, AwMarker *, bool)));
+	connect(client, SIGNAL(needData(AwChannelList *, AwMarkerList *, bool)), dc, SLOT(loadData(AwChannelList *, AwMarkerList *, bool)));
 	connect(dc, SIGNAL(outOfMemory()), this, SLOT(manageOutOfMemory()));
 
 	m_clientToConnection.insert(client, dc);

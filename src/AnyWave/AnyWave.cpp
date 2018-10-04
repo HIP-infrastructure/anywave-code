@@ -168,7 +168,6 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	for (QAction *a : m_actions)
 		a->setEnabled(false);
 
-
 	// instantiate Dock Widgets
 	// BIDS 
 	// BIDS dock is null by default and will be instantiated when needed.
