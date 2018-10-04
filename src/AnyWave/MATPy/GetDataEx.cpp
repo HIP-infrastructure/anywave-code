@@ -209,6 +209,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 			delete markers.takeFirst();
 		return;
 	}
+	// remove possible bad channels 
+	AwMontageManager::instance()->removeBadChannels(requestedChannels);
 
 	// if several markers are set then load all data defined by the markers and concatenate them into channels at the end.
 	QList<AwChannelList> chunks;

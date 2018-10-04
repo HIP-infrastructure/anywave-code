@@ -98,7 +98,14 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 	bool error = false;
 
 	// default case : not using labels nor types
-	requestedChannels = p->pdi.input.channels;
+	if (!usingFile)
+		requestedChannels = p->pdi.input.channels;
+	else {
+		// Handle duration = -1 when reading direclty from a file
+		if (duration == -1.)
+			duration = reader->infos.totalDuration();
+		requestedChannels = reader->infos.channels();
+	}
 
 	if (usingLabels && usingTypes) {
 		if (!usingFile) 
@@ -153,44 +160,74 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		return;
 	}
 
-	if (usingFile) {
-		AwDataServer::getInstance()->openConnection(this, reader);
-		// ATTENTION:  opening a new connection with the same client, will close the previous one (i.e. the connection AwRequestServer made when starting)
-		// Do not forget to open again a connection.
-		if (montage.toUpper() == "SEEG BIPOLAR")
-			requestedChannels = AwMontageManager::makeSEEGBipolar(requestedChannels);
-	}
-	else {
-		// remove possible bad channels 
-		AwMontageManager::instance()->removeBadChannels(requestedChannels);
-	}
+	// remove possible bad channels 
+	AwMontageManager::instance()->removeBadChannels(requestedChannels);
+
 
 	// duplicate all channels
 	requestedChannels = AwChannel::duplicateChannels(requestedChannels);
 
-	// requesting data
-#ifndef NDEBUG
-	qDebug() << Q_FUNC_INFO << "requesting data..." << endl;
-#endif
-	if (filterSettings.count())
-		filterSettings.apply(requestedChannels);
-	else // apply current filters set in AwFiltersManager.
-		AwSettings::getInstance()->filterSettings().apply(requestedChannels);
-	
-	if (decim > 1) {
-		requestData(&requestedChannels, start, duration, true);
-		AwFiltering::downSample(requestedChannels, decim);
-		if (filterSettings.count())
-			filterSettings.apply(requestedChannels);
-		else // apply current filters set in AwFiltersManager.
-			AwSettings::getInstance()->filterSettings().apply(requestedChannels);
-		AwFiltering::filter(&requestedChannels);
+	if (!usingFile) {
+		if (decim > 1) {
+			emit log("Loading raw data...");
+			requestData(&requestedChannels, start, duration, true);
+			emit log("Done.");
+			emit log("Downsampling...");
+			AwFiltering::downSample(requestedChannels, decim);
+			emit log("Done.");
+			if (filterSettings.count())
+				filterSettings.apply(requestedChannels);
+			else // apply current filters set in AwFiltersManager.
+				AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+			emit log("Filtering");
+			AwFiltering::filter(&requestedChannels);
+			emit log("Done.");
+		}
+		else {
+			if (filterSettings.count())
+				filterSettings.apply(requestedChannels);
+			else // apply current filters set in AwFiltersManager.
+				AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+			emit log("Loading and filtering data...");
+			requestData(&requestedChannels, start, duration);
+			emit log("Done.");
+		}
 	}
-	else 
-		requestData(&requestedChannels, start, duration);
-#ifndef NDEBUG
-	qDebug() << Q_FUNC_INFO << "data ready." << endl;
-#endif
+	else {
+		if (decim > 1) {
+			emit log("Loading raw data...");
+			auto nSamples = reader->readDataFromChannels(start, duration, requestedChannels);
+			// cleat filter settings before downsampling.
+			AwChannel::clearFilters(requestedChannels);
+			if (nSamples) {
+				emit log("Done.");
+				emit log("Downsampling...");
+				AwFiltering::downSample(requestedChannels, decim);
+				emit log("Done.");
+				if (filterSettings.count())
+					filterSettings.apply(requestedChannels);
+				else // apply current filters set in AwFiltersManager.
+					AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+				emit log("Filtering");
+				AwFiltering::filter(&requestedChannels);
+				emit log("Done.");
+			}
+			else
+				emit log("NO DATA LOADED");
+		}
+		else {
+			if (filterSettings.count())
+				filterSettings.apply(requestedChannels);
+			else // apply current filters set in AwFiltersManager.
+				AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+			emit log("Loading and filtering data...");
+			auto nSamples = reader->readDataFromChannels(start, duration, requestedChannels);
+			if (nSamples == 0) 
+				emit log("NO DATA LOADED");
+			else
+				emit log("Done.");
+		}
+	}
 	stream << requestedChannels.size();
 	response.send();
 
