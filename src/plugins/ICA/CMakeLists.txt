@@ -24,7 +24,7 @@ qt5_use_modules(ICA Core Gui)
 IF (APPLE)
 	target_link_libraries(ICA AwCoreLib AwFilteringLib AwProcessLib AwHDF5Lib AwMATLABLib /Users/bruno/HDF5/lib/libhdf5.a /Users/bruno/HDF5/lib/libhdf5_hl.a  Qt5::Core Qt5::Gui ${ACCELERATE_LIBRARY})
 ELSE()
-      target_link_libraries(ICA AwCore AwFiltering AwProcess AwHDF5 AwMATLAB Qt5::Core Qt5::Gui ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${OpenBLAS_LIB})
+      target_link_libraries(ICA AwCore AwFiltering AwProcess AwHDF5 AwMATLAB Qt5::Core Qt5::Gui ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${BLAS_LIBRARIES})
      INSTALL(TARGETS ICA DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 ENDIF()
 

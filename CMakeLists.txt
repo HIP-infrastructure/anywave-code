@@ -76,17 +76,32 @@ FIND_PACKAGE(HDF5 REQUIRED COMPONENTS C HL)
 INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 LINK_DIRECTORIES(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 message(STATUS "HDF5 are ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}")
-find_package(OpenBLAS REQUIRED)
+
 
 find_package(MATIO REQUIRED)
 if(MATIO_FOUND)
-message(STATUS "Found Matio lib: ${MATIO_LIBRARIES}")
+    message(STATUS "Found Matio lib: ${MATIO_LIBRARIES}")
+endif()
+
+# search for MKL
+find_package(MKL)
+if(NOT MKL_FOUND)
+    find_package(OpenBLAS REQUIRED)
+    SET(USE_MKL FALSE CACHE BOOL "Using MKL libraries")
+    SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
+else()
+    message(STATUS "MKL Found.")
+    SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
+    INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
+    SET(BLAS_LIBRARIES ${MKL_LIBRARIES})
 endif()
 
 add_definitions(-DNDEBUG)
 # Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_BLAS -DARMA_USE_LAPACK -DAW_DISABLE_EPOCHING")
-
+if(USE_MKL)
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DMKL")
+endif()
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -99,6 +114,8 @@ SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='$ORIGIN/lib'")
 
 # AnyWave SDK libraries
 add_subdirectory(src/Core)
@@ -174,23 +191,18 @@ add_subdirectory(src/plugins/AppendFiles)
 add_dependencies(AppendFiles AwCore AwProcess AwReadWrite)
 
 # Install
-#INSTALL(FILES ${PROJECT_BINARY_DIR}/bin/AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 #License files
 INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTINATION
 	${CMAKE_INSTALL_PREFIX})
-
-#lib
-#INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/lib  DESTINATION ${CMAKE_INSTALL_PREFIX})
-#Plugins
-#INSTALL(DIRECTORY  ${PROJECT_BINARY_DIR}/Plugins  DESTINATION ${CMAKE_INSTALL_PREFIX})
+# desktop
+INSTALL(FILES ${AW_RES_DIR}/linux/anywave.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
+# icon
+INSTALL(FILES ${AW_RES_DIR}/images/AnyWave.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/apps)
 # cmake
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
 # include 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
-
-include(${CMAKE_SOURCE_DIR}/cmake/InstallSymlink.cmake)
-InstallSymlink(${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/local/bin/anywave)
 
 
