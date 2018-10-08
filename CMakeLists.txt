@@ -17,8 +17,6 @@ SET(CMAKE_BUILD_TYPE "Release") # build in release mode
 SET(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
-
 # default install path
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
 
@@ -154,15 +152,15 @@ endif()
 # END OF MATLAB SUPPORT
 
 # PYTHON
-#SET(Python_ADDITIONAL_VERSIONS 2.7)
-#find_package(PythonLibs)
-#if (PYTHONLIBS_FOUND)
-#  find_package(NumPy)
-#  if (PYTHON_NUMPY_FOUND)
-#     message(STATUS "Python support added.")
-#     add_subdirectory(src/PythonSupport)
-#  endif()
-#endif()
+SET(Python_ADDITIONAL_VERSIONS 2.7)
+find_package(PythonLibs)
+if (PYTHONLIBS_FOUND)
+  find_package(NumPy)
+  if (PYTHON_NUMPY_FOUND)
+     message(STATUS "Python support added.")
+     add_subdirectory(src/PythonSupport)
+  endif()
+endif()
 
 # AnyWave
 add_subdirectory(src/AnyWave)
