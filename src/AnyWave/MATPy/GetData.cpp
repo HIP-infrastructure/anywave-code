@@ -280,9 +280,7 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 			} // end of while
 		}
 	}
-
 	while (!requestedChannels.isEmpty())
 		delete requestedChannels.takeFirst();
-
 	emit log("Done.");
 }

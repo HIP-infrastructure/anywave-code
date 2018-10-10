@@ -310,6 +310,8 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 	if (m_settings != settings)
 		return;
 
+	bool reload = false;
+
 	if (flags & AwViewSettings::Filters) {
 		// filter channels
 		m_channels.clear();
@@ -318,8 +320,10 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 			if (settings->filters.contains(c->type()))
 				m_channels << c;
 		m_scene->setChannels(m_channels);
-		if (m_channels.isEmpty()) 
+		if (m_channels.isEmpty())
 			AwMessageBox::information(m_view, tr("View Settings"), tr("No channels will be shown regarding the options selected."));
+		else
+			reload = true;
 	}
 	
 	if (flags & AwViewSettings::MarkerBarMode)
@@ -329,6 +333,8 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 			m_markerBar->hide();
 
 	if (flags & AwViewSettings::SecPerCm)
+		reload = true;
+	if (reload)
 		reloadData();
 }
 
