@@ -99,6 +99,8 @@ ipch/
 # TFS 2012 Local Workspace
 $tf/
 
+testcut.dat
+
 # Guidance Automation Toolkit
 *.gpState
 
