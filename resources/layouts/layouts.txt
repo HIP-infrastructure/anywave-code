@@ -8,3 +8,4 @@ BIOSEMI16,2D,EEG,biosemi16.lay
 BIOSEMI32,2D,EEG,biosemi32.lay
 BIOSEMI64,2D,EEG,biosemi64.lay
 ELEKTA102,3D,MEG,elekta102.lay
+EGI257,2D,EEG,egi257.lay

@@ -11,5 +11,6 @@
         <file>layouts/4D248_.lay</file>
         <file>layouts/biosemi64.lay</file>
         <file>layouts/elekta102.lay</file>
+		<file>layouts/egi257.lay</file>
     </qresource>
 </RCC>
