@@ -197,6 +197,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetDataEx", "src\Mex\Mex
 		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EGIReader", "src\plugins\EGIReader\EGIReader.vcxproj", "{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -551,12 +553,18 @@ Global
 		{51F00B64-760C-46F2-884F-35C66D39EE57}.Release|Win32.ActiveCfg = Release|x64
 		{51F00B64-760C-46F2-884F-35C66D39EE57}.Release|x64.ActiveCfg = Release|x64
 		{51F00B64-760C-46F2-884F-35C66D39EE57}.Release|x64.Build.0 = Release|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Debug|Win32.ActiveCfg = Debug|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Debug|x64.ActiveCfg = Debug|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Debug|x64.Build.0 = Debug|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Release|Win32.ActiveCfg = Release|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Release|x64.ActiveCfg = Release|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

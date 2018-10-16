@@ -441,15 +441,6 @@ void AwMontageManager::applyGains()
 		c->setGain(am->amplitude(c->type()));
 }
 
-
-//void AwMontageManager::newFilters()
-//{
-//	AwFiltersManager *fm = AwFiltersManager::instance();
-//	fm->fo().setFilters(m_channels);
-//	fm->fo().setFilters(m_channelsAsRecorded);
-//	fm->fo().setFilters(AwSettings::getInstance()->currentReader()->infos.channels());
-//}
-
 void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
 {
 	settings.apply(m_channels);

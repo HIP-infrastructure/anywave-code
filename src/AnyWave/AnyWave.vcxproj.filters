@@ -1261,6 +1261,15 @@
     <ClCompile Include="MATPy\AwTCPResponse.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="AwOpenFileDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwOpenFileDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwOpenFileDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1776,6 +1785,9 @@
     <CustomBuild Include="IO\BIDS\AwBIDSGUI.ui">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
+    <CustomBuild Include="AwOpenFileDialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2100,6 +2112,7 @@
     <None Include="anywave_en.ts">
       <Filter>Translation Files</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AnyWave.rc" />

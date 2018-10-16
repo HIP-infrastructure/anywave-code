@@ -81,6 +81,7 @@
 #include "Epoch/AwEpochManager.h"
 #endif
 
+#include "AwOpenFileDialog.h"
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwFileInfo.h>
@@ -747,13 +748,15 @@ void AnyWave::openFile(const QString &path)
 
 	// Empty path => open file dialog to pick a file.
 	if (path.isEmpty())	{
-		// build filter for open dialog box
-		foreach (AwFileIOPlugin *plugin, plugin_manager->readers())
-			for (int j = 0; j < plugin->fileExtensions.size(); j++)
-				filter += plugin->fileExtensions.at(j) + " ";
+		//// build filter for open dialog box
+		//for (auto plugin : plugin_manager->readers()) {
+		//	for (int j = 0; j < plugin->fileExtensions.size(); j++)
+		//		filter += plugin->fileExtensions.at(j) + " ";
+		//}
 
 		openWithDialog = true;
-		QFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
+	//	QFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
+		AwOpenFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
 		dlg.setFileMode(QFileDialog::ExistingFile);
 		dlg.setNameFilter(filter);
 		dlg.setViewMode(QFileDialog::Detail);

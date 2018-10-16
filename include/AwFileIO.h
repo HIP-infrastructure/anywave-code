@@ -32,7 +32,7 @@ namespace Aw
 {
 	/** Flags to activate some extra features **/
 
-	enum AwIOFlags { CanRead = 0x00000001, CanWrite = 0x00000002, HasExtension = 0x00000004, TriggerChannelIsWritable = 0x00000008 };
+	enum AwIOFlags { CanRead = 1, CanWrite = 2, HasExtension = 4, TriggerChannelIsWritable = 8, IsDirectory = 16 };
 }
 
 class AW_RW_EXPORT AwFileIO : public QObject
