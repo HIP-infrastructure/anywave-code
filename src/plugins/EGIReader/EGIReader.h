@@ -32,6 +32,9 @@
 #include "MIFFFile.h"
 #include "SignalFile.h"
 #include "epoch.h"
+#include "categories.h"
+#include "events.h"
+
 
 class EGIREADER_EXPORT EGIReader : public AwFileIO
 {
@@ -49,19 +52,30 @@ protected:
 	/** Get eeg signal.bin file and associated xml files (info.xml, sensorLayout.xml) **/
 	QStringList getEEGFiles();
 	bool checkInfoXMLForEEG(const QString& fileName);
-	int getMFFVersion();
+	void getMFFInfos();
 	void getEpochs();
+	void getCategories();
+	void initDataSet();
+	void getEvents();
 	// timing utilities
 	quint64 nanos2Samples(quint64 value);
 	quint64 micros2Samples(quint64 value);
 
 	MIFFFile m_file;
-	QString m_eegFile, m_infoEEGFile, m_epochsFile, m_infoFile;
+	QString m_recordTime;
+	// files required ( signalX.bin, infoX.xml info.xml, epochs.xml categories.xml where X is a number from 1 to n)
+	QString m_eegFile, m_infoEEGFile, m_epochsFile, m_infoFile, m_categoriesFile, m_sensorLayoutFile;
 	int m_nChannels;
 	int m_samplingRate;
 	Blocks m_signalBlocks;
 	Epochs m_epochs;
+	Events m_events;
+	Categories m_categories;
 	int m_mffVersion;
+	// use markers to trace data block timings in seconds.
+	AwMarkerList m_blockTimings;
+	// File object to handle signalX.bin data file
+	QFile m_binFile;
 };
 
 class EGIREADER_EXPORT EGIReaderPlugin : public AwFileIOPlugin

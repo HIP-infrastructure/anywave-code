@@ -187,6 +187,8 @@ add_subdirectory(src/plugins/AutoMarking)
 add_dependencies(AutoMarking AwCore AwProcess)
 add_subdirectory(src/plugins/AppendFiles)
 add_dependencies(AppendFiles AwCore AwProcess AwReadWrite)
+add_subdirectory(src/plugins/EGIReader)
+add_dependencies(EGIReader AwCore AwReadWrite)
 
 # Install
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})

@@ -16,7 +16,7 @@ class SignalFile
 {
 public:
 	SignalFile(const QString& uri);
-	QList<SignalBlock *> getSignalBlocks();
+	QList<FileSignalBlock *> getSignalBlocks();
 
 protected:
 	QFile m_file;
@@ -24,4 +24,4 @@ private:
 	FileSignalBlock *signalBlock();
 };
 
-typedef QList<SignalBlock *> Blocks;
+typedef QList<FileSignalBlock *> Blocks;

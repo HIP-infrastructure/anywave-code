@@ -265,22 +265,6 @@ AwMarkerList AwMarker::intersect(const AwMarkerList& markers, float start, float
 			res << m;
 	}
 	return res;
-
-	//foreach(AwMarker *m, markers) {
-	//	float m_start = m->start();
-	//	float m_end = m->end();
-	//	if (m_end < start) 
-	//		continue;
-	//	if (m_start > end) // ENDS if marker are after the end of the selection
-	//		break;
-	//	if (m_start <= end && start < m_end)
-	//		res << m;
-	//	else if (m_start >= start && m_start <= end)
-	//		res << m;
-	//	else if (m_end >= start && m_end <= end)
-	//		res << m;
-	//}
-	//return res;
 }
 
 

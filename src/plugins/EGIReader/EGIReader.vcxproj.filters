@@ -39,9 +39,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MFFResourceType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MIFFFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -55,6 +52,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="epoch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="categories.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="events.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

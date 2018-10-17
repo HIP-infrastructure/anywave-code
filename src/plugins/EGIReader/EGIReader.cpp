@@ -1,5 +1,6 @@
 #include "EGIReader.h"
 #include <QDomDocument>
+#include <AwException.h>
 
 EGIReaderPlugin::EGIReaderPlugin() : AwFileIOPlugin()
 {
@@ -23,12 +24,24 @@ EGIReader::~EGIReader()
 
 void EGIReader::cleanUpAndClose()
 {
+	while (!m_signalBlocks.isEmpty())
+		delete m_signalBlocks.takeFirst();
+	while (!m_blockTimings.isEmpty())
+		delete m_blockTimings.takeFirst();
+	while (!m_epochs.isEmpty())
+		delete m_epochs.takeFirst();
+	while (!m_categories.isEmpty())
+		delete m_categories.takeFirst();
+	while (!m_events.isEmpty())
+		delete m_events.takeFirst();
 }
 
 AwFileIO::FileStatus EGIReader::canRead(const QString &path)
 {
+	// very simple test: get the EEG data files.
 	m_file.setFilename(path);
 	auto eegFiles = getEEGFiles();
+
 	if (!eegFiles.isEmpty())
 		return AwFileIO::NoError;
 	return AwFileIO::WrongFormat;
@@ -36,7 +49,48 @@ AwFileIO::FileStatus EGIReader::canRead(const QString &path)
 
 qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList)
 {
-	return 0;
+	if (channelList.isEmpty())
+		return 0;
+	quint64 totalSamples = (quint64)floor(duration * m_samplingRate);
+	// check channels to read and allocate memory for the data vector.
+	// make a sublist of channel by removing channels that might not be present in file
+	// should never happen...
+	AwChannelList channels;
+	for (auto channel : channelList) {
+		int index = infos.indexOfChannel(channel->name());
+		if (index == -1)
+			continue;
+		// allocate memory
+		channel->newData(totalSamples);
+		// reset ID to hold the index in file
+		channel->setID(index);
+		channels << channel;
+	}
+	if (channels.isEmpty())
+		return 0;
+
+	// get markers that intersect reading positions
+	AwMarkerList markers = AwMarker::intersect(m_blockTimings, start, start + duration);
+
+	quint64 nSamplesRead = 0;
+	for (auto m : markers) {
+		float offset = 0.;
+		if (start > m->start())
+			offset = start - m->start();
+		quint64 startSample = (quint64)floor(offset * m_samplingRate);
+		float blockDuration = min(m->duration() - offset, duration);
+		quint64 nSamplesToRead = (quint64)floor(blockDuration * m_samplingRate);
+
+		// read data block
+		auto dataBlock = m_signalBlocks.at(m_blockTimings.indexOf(m));
+		for (auto channel : channels) {
+			float *dest = &channel->data()[nSamplesRead];
+			m_binFile.seek(dataBlock->fileOffsetForData + dataBlock->offsets[channel->ID()] + startSample * sizeof(float));
+			m_binFile.read((char *)dest, nSamplesToRead * sizeof(float));
+		}
+		nSamplesRead += nSamplesToRead;
+	}
+	return nSamplesRead;
 }
 
 
@@ -53,6 +107,8 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 	m_epochsFile = QString("%1/epochs.xml").arg(m_file.fileName());
 	// info.xml must be present too
 	m_infoFile = QString("%1/info.xml").arg(m_file.fileName());
+	// categories.xml must be present too
+	m_categoriesFile = QString("%1/categories.xml").arg(m_file.fileName());
 	if (!QFile::exists(m_epochsFile)) {
 		m_error = QString("Missing epochs.xml file.");
 		return AwFileIO::WrongFormat;
@@ -61,29 +117,291 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 		m_error = QString("Missing info.xml file.");
 		return AwFileIO::WrongFormat;
 	}
-
-	m_mffVersion = getMFFVersion();
-	if (m_mffVersion == -1) {
-		m_error = QString("MFF Version tag is not correct (check info.xml file).");
-		return AwFileIO::WrongFormat;
-	}
-	SignalFile signalFile(m_eegFile);
-	m_signalBlocks = signalFile.getSignalBlocks();
-
-	if (m_signalBlocks.isEmpty()) {
-		m_error = QString("No signal blocks present in file.");
+	// sensorLayout.xml is also required
+	m_sensorLayoutFile = QString("%1/sensorLayout.xml").arg(m_file.fileName());
+	if (!QFile::exists(m_sensorLayoutFile)) {
+		m_error = QString("Missing sensorLayout.xml file.");
 		return AwFileIO::WrongFormat;
 	}
 
-	auto block = m_signalBlocks.first();
-	m_nChannels = block->numberOfSignals;
-	m_samplingRate = block->signalFrequency[0];
+	// It seems that categories is optional.
+//	if (!QFile::exists(m_categoriesFile)) {
+//		m_error = QString("Missing categories.xml file.");
+//		return AwFileIO::WrongFormat;
+//	}
 
-	// get epoch informations
+	try {
+		getMFFInfos();
+		SignalFile signalFile(m_eegFile);
+		m_signalBlocks = signalFile.getSignalBlocks();
 
+		if (m_signalBlocks.isEmpty()) {
+			m_error = QString("No signal blocks present in file.");
+			return AwFileIO::WrongFormat;
+		}
 
+		auto block = m_signalBlocks.first();
+		m_nChannels = block->numberOfSignals;
+		m_samplingRate = block->signalFrequency[0];
+		// get epoch informations
+		getEpochs();
+		// For now we won't use categories (I did not get the need of it if categories are supposed to match epochs...
+		// if there are more than one epoch, just use the first one (AnyWave is reading continuous data only).
+		
+		// get segments
+		// Assuming the following, which shoulb be true: 1-1 mapping between segments and epochs.
+		// including quantity and begin times.
+//		if (QFile::exists(m_categoriesFile))
+//			getCategories();
+
+		initDataSet();
+		getEvents();
+
+	}
+	catch (const AwException& e) {
+		return AwFileIO::WrongFormat;
+	}
+
+	// build a list of data blocks start and duration (in seconds).
+	int blockIndex = 0;
+	float duration = 0.;
+	for (auto block : m_signalBlocks) {
+		float start = duration;
+		float dur = block->dataBlockSize / sizeof(float) / m_nChannels / m_samplingRate;
+		// store index of data block into value
+		AwMarker *marker = new AwMarker(QString("%1").arg(blockIndex), start, dur);
+		marker->setValue(blockIndex++);
+		m_blockTimings << marker;
+		duration += dur;
+	}
+	m_binFile.setFileName(m_eegFile);
+	if (!m_binFile.open(QIODevice::ReadOnly)) {
+		m_error = QString("Failed to open %1 for reading.").arg(m_eegFile);
+		return AwFileIO::FileAccess;
+	}
 
 	return AwFileIO::NoError;
+}
+
+
+void EGIReader::initDataSet()
+{
+	auto block = infos.newBlock();
+	block->setDuration(m_epochs.first()->duration);
+	block->setSamples(m_epochs.first()->nSamples);
+
+	// read sensorLayout
+	QFile file(m_sensorLayoutFile);
+	if (!file.open(QIODevice::ReadOnly)) {
+		m_error = QString("Could not open sensorLayout.xml file.");
+		throw AwException(m_error, QString("EGIReader::initDataSet()"));
+		return;
+	}
+	QDomDocument doc;
+	QDomElement element;
+	int line, col;
+	QString error;
+
+	if (!doc.setContent(&file, &error, &line, &col)) {
+		file.close();
+		m_error = error;
+		throw AwException(m_error, QString("EGIReader::initDataSet()"));
+		return;
+	}
+	QDomElement root = doc.documentElement();
+	auto elements = root.elementsByTagName("sensors");
+	auto sensorsTag = elements.at(0).toElement();
+	auto sensors = sensorsTag.elementsByTagName("sensor");
+
+	QString label, number;
+	int type;
+	double x, y, z;
+	for (int i = 0; i < sensors.size(); i++) {
+		auto sensor = sensors.at(i);
+		if (sensor.isElement()) {
+			auto child = sensor.firstChild();
+			while (!child.isNull()) {
+				auto tmp = child.toElement();
+				if (tmp.tagName() == "name") {
+					label = tmp.text();
+					if (label.isEmpty())
+						label = "E";
+				}
+				else if (tmp.tagName() == "number")
+					number = tmp.text();
+				else if (tmp.tagName() == "type")
+					type = tmp.text().toInt();
+				else if (tmp.tagName() == "x")
+					x = tmp.text().toDouble();
+				else if (tmp.tagName() == "y")
+					y = tmp.text().toDouble();
+				else if (tmp.tagName() == "z")
+					z = tmp.text().toDouble();
+				child = child.nextSibling();
+			}
+
+			// only add channels of type 0 or 1 !!!
+			if (type == 0 || type == 1) {
+				AwChannel chan;
+				chan.setID(number.toInt());
+				chan.setName(QString("%1%2").arg(label).arg(number));
+				chan.setSamplingRate(m_samplingRate);
+				chan.setXYZ(x, y, z);
+				chan.setType(AwChannel::EEG);
+				chan.setUnit(QString::fromLatin1("µV"));
+				infos.addChannel(chan);
+			}
+		}
+	}
+	file.close();
+	// check that channels count match nChannels from EEG Data file
+	if (m_nChannels != infos.channels().size()) {
+		m_error = QString("The number of channels read in sensorLayout is different than # channels read from data file.");
+		throw AwException(m_error, QString("EGIReader::initDataSet()"));
+		return;
+	}
+	
+}
+
+void EGIReader::getEvents()
+{
+	auto eventTracks = m_file.getEventTrackList();
+	if (eventTracks.isEmpty())
+		return;
+
+	while (!m_events.isEmpty())
+		delete m_events.takeFirst();
+
+	// read all eventtrack files.
+	// fill the list of events then sort events and check if they match a valid position/duration in the data.
+
+	for (auto eventFile : eventTracks) {
+		QString fileName = QString("%1/%2").arg(m_file.fileName()).arg(eventFile);
+
+		QFile file(fileName);
+		if (!file.open(QIODevice::ReadOnly)) {
+			m_error = QString("Could not open %1 file.").arg(fileName);
+			throw AwException(m_error, QString("EGIReader::getEvents()"));
+			return;
+		}
+		QDomDocument doc;
+		QDomElement element;
+		int line, col;
+		QString error;
+
+		if (!doc.setContent(&file, &error, &line, &col)) {
+			file.close();
+			m_error = error;
+			throw AwException(m_error, QString("EGIReader::getEvents()"));
+			return;
+		}
+		QDomElement root = doc.documentElement();
+		auto elements = root.elementsByTagName("event");
+		for (int i = 0; i < elements.size(); i++) {
+			auto e = elements.at(i).toElement();
+			auto child = e.firstChild();
+			Event *event_ = new Event;
+
+			while (!child.isNull()) {
+				auto tmp = child.toElement();
+				if (tmp.tagName() == "label")
+					event_->label = tmp.text();
+				else if (tmp.tagName() == "duration")
+					event_->duration = tmp.text().toInt();
+				else if (tmp.tagName() == "beginTime")
+					event_->beginTime = tmp.text();
+				child = child.nextSibling();
+			}
+			m_events << event_;
+		}
+		file.close();
+	}
+
+	// get the record time and make it a QDataTime Object
+	QDateTime record = QDateTime::fromString(m_recordTime, Qt::ISODate);
+	
+	// make events into markers
+	AwMarkerList markers;
+	for (auto event : m_events) {
+		AwMarker *marker = new AwMarker;
+		if (event->label.isEmpty())
+			event->label = "?";
+		marker->setLabel(event->label);
+		QDateTime time = QDateTime::fromString(event->beginTime, Qt::ISODate);
+		qint64 msBetween = record.msecsTo(time);
+		marker->setStart((float)msBetween / 1000.);
+		if (m_mffVersion == 0)
+			marker->setDuration(event->duration / 1000000000.);
+		else
+			marker->setDuration(event->duration / 1000000.);
+		markers << marker;
+	}
+
+	// be sure marker are not outside the data or end after them.
+	foreach(AwMarker *m, markers) {
+		if (m->end() > infos.totalDuration())
+			m->setEnd(infos.totalDuration());
+		if (m->start() > infos.totalDuration()) {
+			markers.removeAll(m);
+			delete m;
+		}
+		infos.blocks().first()->addMarker(m);
+	}
+	while (!markers.isEmpty())
+		delete markers.takeFirst();
+
+}
+
+void EGIReader::getCategories()
+{
+	QFile file(m_categoriesFile);
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		m_error = QString("Could not open categories.xml file.");
+		throw AwException(m_error, QString("EGIReader::getCategories()"));
+		return;
+	}
+	QDomDocument doc;
+	QDomElement element;
+	int line, col;
+	QString error;
+
+	if (!doc.setContent(&file, &error, &line, &col)) {
+		file.close();
+		m_error = error;
+		throw AwException(m_error, QString("EGIReader::getCategories()"));
+		return;
+	}
+
+	while (!m_categories.isEmpty())
+		delete m_categories.takeFirst();
+
+	//QDomElement root = doc.documentElement();
+	//auto elements = root.elementsByTagName("cat");
+	//for (int i = 0; i < elements.count(); i++) {
+	//	auto cat = elements.at(i);
+
+	//	if (epoch.isElement()) {
+	//		QString beginTime, endTime, evtBegin, evtEnd;
+	//		QDomElement element = epoch.toElement();
+	//		auto child = element.firstChild();
+	//		auto item = new Epoch;
+
+	//		while (!child.isNull()) {
+	//			auto tmp = child.toElement();
+	//			if (tmp.tagName() == "beginTime")
+	//				item->begin = tmp.text().toInt();
+	//			else if (tmp.tagName() == "endTime")
+	//				item->end = tmp.text().toInt();
+	//			else if (tmp.tagName() == "firstBlock")
+	//				item->firstBlock = tmp.text().toInt();
+	//			else if (tmp.tagName() == "lastBlock")
+	//				item->lastBlock = tmp.text().toInt();
+	//			child = child.nextSibling();
+	//		}
+	//		m_epochs << item;
+	//	}
+	//}
 }
 
 
@@ -93,6 +411,7 @@ void EGIReader::getEpochs()
 	
 	if (!file.open(QIODevice::ReadOnly)) {
 		m_error = QString("Could not open epoch.xml file.");
+		throw AwException(m_error, QString("EGIReader::getEpochs()"));
 		return;
 	}
 
@@ -104,9 +423,12 @@ void EGIReader::getEpochs()
 	if (!doc.setContent(&file, &error, &line, &col)) {
 		file.close();
 		m_error = error;
+		throw AwException(m_error, QString("EGIReader::getEpochs()"));
 		return;
 	}
-	m_epochs.clear();
+	while (!m_epochs.isEmpty())
+		delete m_epochs.takeFirst();
+
 	QDomElement root = doc.documentElement();
 	auto elements = root.elementsByTagName("epoch");
 	for (int i = 0; i < elements.count(); i++) {
@@ -151,6 +473,7 @@ void EGIReader::getEpochs()
 		e->nSamples = e->end - e->begin;
 		e->duration = e->endTime - e->beginTime;
 	}
+	file.close();
 }
 
 
@@ -175,13 +498,14 @@ QStringList EGIReader::getEEGFiles()
 	return res;
 }
 
-int EGIReader::getMFFVersion()
+void EGIReader::getMFFInfos()
 {
 	// search for version in info.xml
 	QFile file(m_infoFile);
 	if (!file.open(QIODevice::ReadOnly)) {
 		m_error = QString("Could not open info.xml.");
-		return -1;
+		throw AwException(m_error, QString("EGIReader::getMFFInfos()"));
+		return;
 	}
 	QDomDocument doc;
 	QDomElement element;
@@ -191,21 +515,29 @@ int EGIReader::getMFFVersion()
 	if (!doc.setContent(&file, &error, &line, &col)) {
 		file.close();
 		m_error = error;
-		return -1;
+		throw AwException(m_error, QString("EGIReader::getMFFInfos()"));
+		return;
 	}
 
 	QDomElement root = doc.documentElement();
 	auto elements = root.elementsByTagName("mffVersion");
 	if (elements.isEmpty()) {
 		file.close();
-		return -1;
+		m_error = QString("Missing mffVersion tag in file.");
+		throw AwException(m_error, QString("EGIReader::getMFFInfos()"));
+		return;
 	}
+	m_mffVersion = elements.at(0).toElement().text().toInt();
 
-	// should be one element with tag mffVersion
-	auto elem = elements.at(0).toElement();
-	if (!elem.isNull())
-		return elem.text().toInt();
-	return -1;
+	elements = root.elementsByTagName("recordTime");
+	if (elements.isEmpty()) {
+		file.close();
+		m_error = QString("Missing recordTime tag in file.");
+		throw AwException(m_error, QString("EGIReader::getMFFInfos()"));
+		return;
+	}
+	m_recordTime = elements.at(0).toElement().text();
+	file.close();
 }
 
 bool EGIReader::checkInfoXMLForEEG(const QString& fileName)
@@ -234,6 +566,7 @@ bool EGIReader::checkInfoXMLForEEG(const QString& fileName)
 		file.close();
 		return false;
 	}
+	file.close();
 	return true;
 }
 

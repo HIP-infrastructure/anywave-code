@@ -8,9 +8,9 @@ SignalFile::SignalFile(const QString& uri)
 	m_file.setFileName(uri);
 }
 
-QList<SignalBlock *> SignalFile::getSignalBlocks()
+QList<FileSignalBlock *> SignalFile::getSignalBlocks()
 {
-	QList<SignalBlock *> blocks;
+	QList<FileSignalBlock *> blocks;
 
 	if (!m_file.open(QIODevice::ReadOnly)) {
 		throw AwException(QString("Failed to open %1").arg(m_file.fileName()), QString("SignalFile::loadSignalBlocks"));
