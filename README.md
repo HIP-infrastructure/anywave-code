@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## Get ready to build using Ubuntu 18.04
 
 ```bash
@@ -69,5 +68,4 @@ The binaries are built using RPATH to the CMAKE_PREFIX_PATH and a link called an
 Launch Anywave:
 ```bash
 anywave
->>>>>>> unstable-dev
 ```
