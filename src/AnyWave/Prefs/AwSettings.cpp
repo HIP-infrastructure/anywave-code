@@ -42,7 +42,7 @@ AwSettings::AwSettings(QObject *parent)
 {
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
-	m_recentFilesMax = 10;
+	m_recentFilesMax = 15;
 	m_currentReader = NULL;
 
 	// load previously saved recent files
@@ -75,6 +75,25 @@ AwSettings::AwSettings(QObject *parent)
 	m_matlabInterface = NULL;
 	m_pdfMarkerFile = "marker_tool.mrk";
 	m_fileInfo = Q_NULLPTR;
+
+	m_appDirPath = QCoreApplication::applicationDirPath();
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+	m_appResourcePath = m_appDirPath;
+#endif
+#ifdef Q_OS_MAC
+	m_appResourcePath = QString("%1/../Resources").arg(m_appResourcePath);
+#endif
+
+	// check for a version.txt in resources
+	QString versionFile = QString("%1/version.txt").arg(m_appResourcePath);
+	if (QFile::exists(versionFile)) {
+		QFile file(versionFile);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			m_majorVersion = file.readLine();
+			m_minorVersion = file.readLine();
+			file.close();
+		}
+	}
 }
 
 AwSettings::~AwSettings()

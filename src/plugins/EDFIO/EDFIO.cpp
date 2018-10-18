@@ -988,7 +988,7 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 			}
 		}
 	}
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 

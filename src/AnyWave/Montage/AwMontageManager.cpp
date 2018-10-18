@@ -900,10 +900,11 @@ bool AwMontageManager::apply(const QString& path)
 					}
 				}
 				else if (ee.tagName() == "reference") {
-					// find reference in asRecorded
-					QString ref = ee.text();
-					if (m_channelHashTable.value(ref))
-						channel->setReferenceName(ref);
+//					// find reference in asRecorded
+//					QString ref = ee.text();
+//					if (m_channelHashTable.value(ref))
+//						channel->setReferenceName(ref);
+					channel->setReferenceName(ee.text());
 				}
 				else if (ee.tagName() == "color")
 					channel->setColor(ee.text());
@@ -919,10 +920,14 @@ bool AwMontageManager::apply(const QString& path)
 			}
 			// check for reference type
 			if (!channel->referenceName().isEmpty()) {
-				AwChannel *ref = m_channelHashTable.value(channel->referenceName());
-				AwChannel *asRecorded = m_channelHashTable.value(ref->name());
-				ref->setType(channel->type());
-				asRecorded->setType(channel->type());
+				AwChannel *ref = m_channelHashTable.value(channel->referenceName());		
+				if (ref != Q_NULLPTR) { // the reference channel is a REAL channel => change its type if necesseray.
+					AwChannel *asRecorded = m_channelHashTable.value(ref->name());
+					ref->setType(channel->type());
+					if (asRecorded != Q_NULLPTR)
+						asRecorded->setType(channel->type());
+				}
+				// if label are not found in channel hash table neither as recorded has table, this is a virtual channel (probably AVG).
 			}
 			m_channels << channel;
 		}

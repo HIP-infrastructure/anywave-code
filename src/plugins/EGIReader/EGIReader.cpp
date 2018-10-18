@@ -34,6 +34,7 @@ void EGIReader::cleanUpAndClose()
 		delete m_categories.takeFirst();
 	while (!m_events.isEmpty())
 		delete m_events.takeFirst();
+	m_binFile.close();
 }
 
 AwFileIO::FileStatus EGIReader::canRead(const QString &path)
@@ -51,7 +52,14 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 {
 	if (channelList.isEmpty())
 		return 0;
-	quint64 totalSamples = (quint64)floor(duration * m_samplingRate);
+	// Total duration to load (may be lower if we are beyond the end of data.
+	float totalDuration = duration;
+	if (start + totalDuration > infos.totalDuration())
+		totalDuration = infos.totalDuration() - start;
+
+	// convert totalDuration in samples
+	qint64 nSamples = (qint64)floor(totalDuration * m_samplingRate);
+
 	// check channels to read and allocate memory for the data vector.
 	// make a sublist of channel by removing channels that might not be present in file
 	// should never happen...
@@ -61,7 +69,7 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 		if (index == -1)
 			continue;
 		// allocate memory
-		channel->newData(totalSamples);
+		channel->newData(nSamples);
 		// reset ID to hold the index in file
 		channel->setID(index);
 		channels << channel;
@@ -70,25 +78,27 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 		return 0;
 
 	// get markers that intersect reading positions
-	AwMarkerList markers = AwMarker::intersect(m_blockTimings, start, start + duration);
+	AwMarkerList markers = AwMarker::intersect(m_blockTimings, start, start + totalDuration);
 
-	quint64 nSamplesRead = 0;
+	quint64 nSamplesRead = 0; // count samples that were successfully read.
 	for (auto m : markers) {
 		float offset = 0.;
 		if (start > m->start())
 			offset = start - m->start();
-		quint64 startSample = (quint64)floor(offset * m_samplingRate);
-		float blockDuration = min(m->duration() - offset, duration);
-		quint64 nSamplesToRead = (quint64)floor(blockDuration * m_samplingRate);
-
+		qint64 startSample = (qint64)floor(offset * m_samplingRate);
+		float blockDuration = min(m->duration() - offset, totalDuration);
+		quint64 nSamplesToRead = (quint64)floor(blockDuration * m_samplingRate) - nSamplesRead;
+		Q_ASSERT(nSamplesToRead > 0);
 		// read data block
 		auto dataBlock = m_signalBlocks.at(m_blockTimings.indexOf(m));
 		for (auto channel : channels) {
 			float *dest = &channel->data()[nSamplesRead];
 			m_binFile.seek(dataBlock->fileOffsetForData + dataBlock->offsets[channel->ID()] + startSample * sizeof(float));
 			m_binFile.read((char *)dest, nSamplesToRead * sizeof(float));
+
 		}
 		nSamplesRead += nSamplesToRead;
+
 	}
 	return nSamplesRead;
 }
@@ -97,6 +107,7 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 {
 	auto eegFiles = getEEGFiles();
+	// eegFiles must contain 2 items : the SignalX.bin file and it's infoX.xml sidecar file.
 	if (eegFiles.isEmpty() || eegFiles.size() != 2)
 		return AwFileIO::WrongFormat;
 
@@ -180,7 +191,12 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 		return AwFileIO::FileAccess;
 	}
 
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
+}
+
+QString EGIReader::realFilePath()
+{
+	return m_eegFile;
 }
 
 

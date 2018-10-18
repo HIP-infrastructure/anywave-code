@@ -322,7 +322,7 @@ AwFileIO::FileStatus ANT_Reader::openFile(const QString& path)
 			fclose(trg);
 		}
 	}
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 

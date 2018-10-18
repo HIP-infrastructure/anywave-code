@@ -388,7 +388,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 
 	readMarkerFile();
 
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 AwFileIO::FileStatus BrainVisionIO::canRead(const QString &path)

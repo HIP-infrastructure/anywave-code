@@ -44,10 +44,11 @@ public:
 	EGIReader(const QString& fileName = QString());
 	~EGIReader();
 
-	qint64 readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList);
-	FileStatus openFile(const QString &path);
-	FileStatus canRead(const QString &path);
-	void cleanUpAndClose();
+	qint64 readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList) override;
+	FileStatus openFile(const QString &path) override;
+	FileStatus canRead(const QString &path) override;
+	void cleanUpAndClose() override;
+	QString realFilePath() override;
 protected:
 	/** Get eeg signal.bin file and associated xml files (info.xml, sensorLayout.xml) **/
 	QStringList getEEGFiles();

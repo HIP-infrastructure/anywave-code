@@ -54,7 +54,7 @@ public:
 
 	// Input 
 	/** Override this method to open the file and fill up the data structure. **/
-	virtual FileStatus openFile(const QString &path) { return AwFileIO::WrongFormat; }
+	virtual FileStatus openFile(const QString &path) { m_fullPath = path;  return AwFileIO::NoError; }
 	/** Override this method to check if the file can be read by the reader. **/
 	virtual FileStatus canRead(const QString &path) {return AwFileIO::WrongFormat;	}
 	/**  Override this method to read data from the file.
@@ -79,6 +79,9 @@ public:
 
 	/** Override this method to close open file(s) and release memory if needed **/
 	virtual void cleanUpAndClose() { infos.clear(); }
+
+	/** Override this method to provide the full path to the file currently open by the plugin. **/
+	virtual QString realFilePath() { return QString(); }
 signals:
 	void triggerValuesWritten(bool status, int number);
 public slots:

@@ -84,9 +84,13 @@ public:
 	// the maximum of cores available and the maximum of core to use with AnyWave.
 	int totalCPUCores, maxCPUCores;
 
-	inline QString homeDirectory() { return m_homeDirectory; }
-	inline QString MATLABMexPath() { return m_mexPath; }
+	inline QString& homeDirectory() { return m_homeDirectory; }
+	inline QString& MATLABMexPath() { return m_mexPath; }
 	inline QString PythonModulePath() { return m_pythonModulePath; }
+	inline QString& appPath() { return m_appDirPath; }
+	inline QString& appResourcePath() { return m_appResourcePath; }
+	inline QString& majorVersion() { return m_majorVersion; }
+	inline QString& minorVersion() { return m_minorVersion; }
 
 	inline QString systemPath() { return m_systemPath; }
 
@@ -106,6 +110,7 @@ public:
 	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 	AwFileIO* readerAt(int index);
 	QStringList& topoLayouts(); 
+
 
 	// recent files specific
 	QString shortenFilePath(const QString& path);
@@ -151,6 +156,9 @@ protected:
 	QStringList m_locales;				// locales strings 
 	QString m_homeDirectory;
 	QString m_mexPath, m_pythonModulePath;
+	QString m_appDirPath, m_appResourcePath;
+	// Versioning
+	QString m_majorVersion, m_minorVersion;
 
 	AwFileIO *m_currentReader;
 	AwDisplaySetup *m_setup;

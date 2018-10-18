@@ -593,11 +593,6 @@ void AnyWave::initToolBarsAndMenu()
 	// Toolbar Filtering
 	AwFilterToolBar *filter_tb = new AwFilterToolBar(this);
 	addToolBar(Qt::TopToolBarArea, filter_tb->toolBar());
-	AwICAManager *im = AwICAManager::instance();
-	connect(filter_tb, SIGNAL(ICASwitchChanged(bool)), im, SLOT(setICAFiletring(bool)));
-	connect(this, SIGNAL(closingFile()), filter_tb, SLOT(closeFile()));
-	connect(im, SIGNAL(componentsLoaded()), filter_tb, SLOT(enableICAFiltering()));
-	connect(im, SIGNAL(filteringSwitched(bool)), filter_tb, SLOT(setICAMode(bool)));
 
 	// Filtering dock widget
 	QDockWidget *dockFilters = new QDockWidget(tr("Filtering"), this);
@@ -748,14 +743,7 @@ void AnyWave::openFile(const QString &path)
 
 	// Empty path => open file dialog to pick a file.
 	if (path.isEmpty())	{
-		//// build filter for open dialog box
-		//for (auto plugin : plugin_manager->readers()) {
-		//	for (int j = 0; j < plugin->fileExtensions.size(); j++)
-		//		filter += plugin->fileExtensions.at(j) + " ";
-		//}
-
 		openWithDialog = true;
-	//	QFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
 		AwOpenFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
 		dlg.setFileMode(QFileDialog::ExistingFile);
 		dlg.setNameFilter(filter);
@@ -812,25 +800,35 @@ void AnyWave::openFile(const QString &path)
 				break;
 			}
 		}
-		// Erreur � l'ouverture du fichier
 		QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
 		return;
 	}
-	
+
+	// if successfully open : check for special plugin which are designed to open a folder and not a file directly.
+	QString fullDataFilePath;
+	if (m_currentReader->plugin()->flags() & Aw::AwIOFlags::IsDirectory) // the plugin must provide the real full path to data file.
+		fullDataFilePath = m_currentReader->realFilePath();
+	if (fullDataFilePath.isEmpty()) // if not or if we have a classic plugin, get the file path.
+		if (!m_currentReader->fullPath().isEmpty()) // the plugin did not provide the full path, so override it with the path set in the dialog box.
+			fullDataFilePath = m_currentReader->fullPath();
+		else {
+			m_currentReader->setFullPath(filePath);
+			fullDataFilePath = filePath;
+		}
+
 	// set global settings with new current reader
-	settings->setReader(m_currentReader, filePath);
-	m_currentReader->setFullPath(filePath);
+	settings->setReader(m_currentReader, fullDataFilePath);
+	m_currentReader->setFullPath(fullDataFilePath);
 
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
 	m_saveFileName.clear();
 
-	m_openFileName = filePath;
+	m_openFileName = fullDataFilePath;
 	QFileInfo fi(m_openFileName);
 	m_lastDirOpen = fi.absolutePath();
 
-
-	// Mettre � jour le titre de la fenetre
-	QString title = QString("AnyWave - ") +  filePath + QString(tr(" - %2 channels. ").arg(m_currentReader->infos.channelsCount()));
+	// Update Window title
+	QString title = QString("AnyWave - ") + fullDataFilePath + QString(tr(" - %2 channels. ").arg(m_currentReader->infos.channelsCount()));
 	title += tr("Duration: ") + AwUtilities::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
