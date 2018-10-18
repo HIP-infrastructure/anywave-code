@@ -8,6 +8,7 @@ SET(AnyWave_SRCS
     ./AwExportDial.cpp  
     ./AwNoGUI.cpp  
     ./AwUpdater.cpp  
+     ./AwOpenFileDialog.cpp
     ./main.cpp  
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
@@ -262,6 +263,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./ICA/AwICAComponents.h  
     ./ICA/AwICASignalItem.h  
     ./ICA/AwICARejectButton.h  
+    ./AwOpenFileDialog.h
     ./AwUpdater.h  
     ./AwExportDial.h  
     ./AnyWave.h  

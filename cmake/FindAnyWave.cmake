@@ -7,11 +7,12 @@
 # MacOS : AWROOT must be the path to the Application Bundle, most often: /Applications/AnyWave.app
 # Once done this will define:
 #
-#  AW_FOUND		- True if AnyWave was found.
-#  AW_LIBRARIES         - All the libraries provided by AnyWave.
-#  AW_LIB_DIR           - The path the libraries
-#  AW_INCLUDE_DIR       - The path to the headers.
+#  AW_FOUND		    - True if AnyWave was found.
+#  AW_LIBRARIES   - All the libraries provided by AnyWave.
+#  AW_LIB_DIR     - The path the libraries
+#  AW_INCLUDE_DIR - The path to the headers.
 #  AW_PLUGINS_DIR	- The path where to put the plugins
+#  AW_ROOT_DIR    - The path where AnyWave is installed.
 # 
 #=============================================================================
 IF(DEFINED ENV{AWROOT})
@@ -34,6 +35,7 @@ ELSE()
    ENDIF()
    MESSAGE(STATUS "Found AnyWave at ${AW_ROOT}")
    SET(AW_FOUND TRUE)
+   SET(AW_ROOT_DIR ${AW_ROOT})
 ENDIF()
 
 mark_as_advanced(AW_INCLUDE_DIR AW_LIB_DIR)
@@ -41,7 +43,7 @@ mark_as_advanced(AW_INCLUDE_DIR AW_LIB_DIR)
 # handle the QUIETLY and REQUIRED arguments and set AW_FOUND to TRUE if 
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(AnyWave REQUIRED_VARS AW_INCLUDE_DIR AW_LIB_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(AnyWave REQUIRED_VARS AW_INCLUDE_DIR AW_LIB_DIR AW_ROOT_DIR)
 
 if(AW_FOUND)
    IF(APPLE)
@@ -54,7 +56,7 @@ if(AW_FOUND)
      set(AW_PLUGINS_DIR ${AW_ROOT}/Plugins)
    ENDIF()
    LINK_DIRECTORIES(${AW_LIB_DIR})
-   INCLUDE_DIRECTORIES(${AW_INCLUDE_DIR})
+   INCLUDE_DIRECTORIES(${AW_INCLUDE_DIR} ${AW_ROOT}/armadillo/include)
 else(AW_FOUND)
   set(AW_INCLUDE_DIR)
   set(AW_LIB_DIR)
