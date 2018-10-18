@@ -1,5 +1,5 @@
-stages:
-    - build
+#stages:
+#    - build
 #    - test
     
 variables:
@@ -9,18 +9,18 @@ variables:
    CONTAINER_RELEASE_IMAGE:  gitlab.thevirtualbrain.org:5000/anywave/anywave:latest
    USER: anywave
 
-before_script:
-   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
+#before_script:
+#   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $registry
    
-build:
-   stage: build
-   script:
-     - docker build -t $CONTAINER_UBUNTU_IMAGE -f Docker/Dockerfile-aw-ubuntu Docker
-     - docker push  $CONTAINER_UBUNTU_IMAGE
-     - docker build -t $CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
-     - docker push $CONTAINER_TEST_IMAGE
-   only:
-     - master
+#build:
+#   stage: build
+#   script:
+#     - docker build -t $CONTAINER_UBUNTU_IMAGE -f Docker/Dockerfile-aw-ubuntu Docker
+#     - docker push  $CONTAINER_UBUNTU_IMAGE
+#     - docker build -t $CONTAINER_TEST_IMAGE -f Docker/Dockerfile-aw .
+#     - docker push $CONTAINER_TEST_IMAGE
+#   only:
+#     - master
 
 #test:
 #   stage: test
