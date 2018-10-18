@@ -32,6 +32,7 @@ class AwViewSettings;
 class AwFileIO;
 class AwViewSetup;
 #include <widget/SignalView/AwBaseSignalView.h>
+#include <filter/AwFilterSettings.h>
 
 class AwSignalView : public AwBaseSignalView
 {
@@ -65,14 +66,12 @@ public slots:
 	void showPosition(float position);
 	void centerViewOnPosition(float position);
 	void updatePageDuration(float duration);
-	void updateSettings(AwViewSettings *settings, int flags);
-	void newFilters();
+//	void updateSettings(AwViewSettings *settings, int flags);
 	void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
 	void selectChannelsFromLabels(const QStringList& labels);
 	void addVirtualChannels(AwChannelList& channels);
 	void removeVirtualChannels(AwChannelList& channels);
 	void removeICAChannels(); // only remove ICA channels if the user cancels
-	void makeMontageFromSelection();
 protected:
 	// overriden methods
 	void dataReceived() override;

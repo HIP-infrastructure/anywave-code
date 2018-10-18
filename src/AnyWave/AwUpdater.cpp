@@ -33,22 +33,21 @@ AwUpdater::AwUpdater(QObject *parent) : QObject(parent)
 
 void AwUpdater::checkForUpdate()
 {
-	QString platform, version, minor;
+	QString platform; 
+	QString version = AwSettings::getInstance()->majorVersion();
+	QString minor = AwSettings::getInstance()->minorVersion();
+
+	if (version.isEmpty() || minor.isEmpty())
+		return;
 
 #ifdef Q_OS_MACOS
 	platform = "Mac";
-	version = "1807";
-	minor = "0";
 #endif
 #ifdef Q_OS_WIN
 	platform = "Win";
-	version = "1807";
-	minor = "0";
 #endif
 #ifdef Q_OS_LINUX
 	platform = "Linux";
-	version = "1807";
-	minor = "0";
 #endif 
 
 	QUrl url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));

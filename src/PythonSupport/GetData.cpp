@@ -85,7 +85,6 @@ PyObject *request_data(const QString& file, const QString& montage,  float start
 		return NULL;
 	}  
 
-
     // Get response
 	QDataStream in(socket);
 	in.setVersion(QDataStream::Qt_4_4);
@@ -166,121 +165,6 @@ PyObject *request_data(const QString& file, const QString& montage,  float start
 	} // end for
 	return list;
 }
-
-//PyObject *parse_cfg(PyObject *cfg)
-//{
-//	// get keys
-//	PyObject *keys = PyDict_Keys(cfg);
-//	Py_ssize_t size = PyList_Size(keys);
-//	QStringList keys_;
-//	QList<PyObject *> values_;
-//	// browse keys
-//	Py_ssize_t i;
-//	for (i = 0; i < size; i++) {
-//		PyObject *key_ = PyList_GetItem(keys, i);
-//		keys_ << QString(PyString_AS_STRING(key_)).toLower();
-//		values_ << PyDict_GetItem(cfg, key_);
-//	}
-//
-//    float start = 0, duration = -1;
-//    int decimate = 1;
-//	int filters = 0;
-//	int index;
-//    filtering *fo = NULL;
-//    QStringList labels, types;
-//	QString file;
-//
-//	// browse available keys
-//	index = keys_.indexOf("start");
-//	if (index != -1) {
-//		start = (float)PyFloat_AsDouble(values_.at(index));
-//		if (start <= 0)
-//			start = 0;
-//	}
-//
-//	index = keys_.indexOf("duration");
-//	if (index != -1) {
-//		duration = (float)PyFloat_AsDouble(values_.at(index));
-//		if (duration  <= 0)
-//			duration = -1;
-//	}
-//
-//	index = keys_.indexOf("decimate");
-//	if (index != -1) {
-//		decimate = (int)PyFloat_AsDouble(values_.at(index));
-//		if (decimate  <= 0)
-//			decimate = 1;
-//	}
-//
-//	index = keys_.indexOf("labels");
-//	if (index != -1) {
-//		if (!PyTuple_Check(values_.at(index))) {
-//			PyErr_SetString(AnyWaveError, "labels values must a tuple of strings.\n");
-//			return NULL;
-//		}
-//		PyObject *tuple = values_.at(index);
-//		Py_ssize_t size = PyList_Size(tuple);
-//		for (i = 0; i < size; i++)
-//			labels <<  QString(PyString_AS_STRING(PyTuple_GetItem(tuple, i)));
-//	}
-//
-//	index = keys_.indexOf("file");
-//	if (index != -1) {
-//		if (!PyString_Check(values_.at(index))) {
-//			PyErr_SetString(AnyWaveError, "file must be a string.\n");
-//			return NULL;
-//		}
-//		file = QString(PyString_AS_STRING(values_.at(index)));
-//	}
-//
-//	index = keys_.indexOf("filtering");
-//	if (index != -1) {
-//		QString sfilter = QString(PyString_AS_STRING(values_.at(index))).toLower();
-//		if (sfilter == "no") 
-//			fo = new filtering;
-//		else if (sfilter == "yes") {
-//			fo = new filtering;
-//			bool settings = false;
-//			// looking for eeg_lp, eeg_hp, meg_lp, meg_hp
-//			index = keys_.indexOf("eeg_lp");
-//			if (index != -1) {
-//				fo->eegLP = (float)PyFloat_AsDouble(values_.at(index));
-//				settings = true;
-//			}
-//			index = keys_.indexOf("eeg_hp");
-//			if (index != -1) {
-//				fo->eegHP = (float)PyFloat_AsDouble(values_.at(index));
-//				settings = true;
-//			}
-//			index = keys_.indexOf("meg_hp");
-//			if (index != -1) {
-//				fo->megHP = (float)PyFloat_AsDouble(values_.at(index));
-//				settings = true;
-//			}
-//			index = keys_.indexOf("meg_lp");
-//			if (index != -1) {
-//				fo->megLP =(float)PyFloat_AsDouble(values_.at(index));
-//				settings = true;
-//			}
-//			if (!settings) {
-//				PyErr_SetString(AnyWaveError, "Warning: filtering was set to yes but no filters are set.\n");
-//				delete fo;
-//				fo = NULL;
-//			}
-//		} // end if sFilter == yes
-//		else {
-//			PyErr_SetString(AnyWaveError, "filtering value is invalid.");
-//			return NULL;
-//		}
-//	}
-//
-//	PyObject *out = request_data(file, start, duration, labels, types, decimate, filters, fo);
-//	if (fo)
-//		delete fo;
-//
-//	return out;
-//
-//}
 
 PyObject *getData(PyObject *self, PyObject *args)
 {

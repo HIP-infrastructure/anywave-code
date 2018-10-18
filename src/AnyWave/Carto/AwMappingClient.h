@@ -27,6 +27,8 @@
 #define AWMAPPINGCLIENT_H
 
 #include <AwDataClient.h>
+#include <filter/AwFilterSettings.h>
+
 #define BUFFER_SIZE_S	30  // size of data cache in seconds
 
 class AwMappingClient : public AwDataClient
@@ -43,7 +45,7 @@ public:
 public slots:
 	void requestDataAtLatency(float latency);
 	void requestDataAtLatency(float start, float duration);	// request an interval of data
-	void newFilters();
+	void setNewFilters(const AwFilterSettings& settings);
 signals:
 	void dataReceived(float latency, const QVector<float>&, const QStringList&);
 	void PCADataReceived(float start, float end, const QVector<float>&, const QStringList&);

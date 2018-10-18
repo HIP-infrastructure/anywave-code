@@ -3,6 +3,7 @@
 
 #include "common.h"
 #define WAIT_TIME_OUT   3000000   // 300s socket time out
+
 void writeToHost(QTcpSocket *socket, int pid, const QByteArray& data)
 {
     QByteArray size;
@@ -26,12 +27,16 @@ int waitForResponse(QTcpSocket *socket)
 	in.setVersion(QDataStream::Qt_4_4);
     int status, size;
     in >> status;
-    if (status == -1)   // if status is incorrect ends here.
-        return status;
+	if (status == -1) { // if status is incorrect ends here.
+		mexPrintf("Bad status returned by AnyWave.\n");
+		return status;
+	}
     // getting size of data (in bytes)
     while (socket->bytesAvailable() < sizeof(int))
-		if (!socket->waitForReadyRead(WAIT_TIME_OUT))
+		if (!socket->waitForReadyRead(WAIT_TIME_OUT)) {
+			mexPrintf("Nothing to read from socket.\n");
 			return -1;
+		}
 
     in >> size;
 
@@ -92,4 +97,135 @@ mxArray *createAnyWaveStruct()
     const char *fields[] = { "input_channels", "data_path", "working_dir", "total_duration" };
     int dim = 1;
     return mxCreateStructMatrix(1, 1, 4, fields);
+}
+
+mxArray *floatToMat(float value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
+	float *s = (float *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+mxArray *doubleToMat(double value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+	double *s = (double *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+mxArray *int32ToMat(qint32 value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+	qint32 *s = (qint32 *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+mxArray *int16ToMat(qint16 value)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxINT16_CLASS, mxREAL);
+	qint16 *s = (qint16 *)mxGetData(tmp);
+	s[0] = value;
+	return tmp;
+}
+
+mxArray *boolToLogical(bool value)
+{
+	mxArray *tmp = mxCreateLogicalMatrix(1, 1);
+	*mxGetLogicals(tmp) = value;
+	return tmp;
+}
+
+QString toJson(const mxArray *struc)
+{
+	mxArray *out[1];
+	mxArray *in[1] = { (mxArray *)struc };
+	int status = mexCallMATLAB(1, out, 1, in, "jsonencode");
+	if (status != 0) {
+		return QString();
+	}
+
+	return QString(mxArrayToString(out[0]));
+}
+
+mxArray *floatVectorToMat(const QVector<float>& vector)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, vector.size(), mxSINGLE_CLASS, mxREAL);
+	float *data = (float *)mxGetData(tmp);
+	for (auto v : vector)
+		*data++ = v;
+	return tmp;
+}
+
+mxArray *doubleVectorToMat(const QVector<double>& vector)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, vector.size(), mxDOUBLE_CLASS, mxREAL);
+	double *data = (double *)mxGetData(tmp);
+	for (auto v : vector)
+		*data++ = v;
+	return tmp;
+}
+
+mxArray *intVectorToMat(const QVector<int>& vector)
+{
+	mxArray *tmp = mxCreateNumericMatrix(1, vector.size(), mxINT32_CLASS, mxREAL);
+	int *data = (int *)mxGetData(tmp);
+	for (auto v : vector)
+		*data++ = v;
+	return tmp;
+}
+
+
+//// Classes implementations
+
+TCPRequest::TCPRequest(int requestID)
+{
+	m_status = TCPRequest::undefined;
+	m_socket = connect();
+	m_pid = -1;
+	m_requestID = requestID;
+	if (m_socket == NULL) {
+		m_status = TCPRequest::failed;
+	}
+	else {
+		m_status = TCPRequest::connected;
+		m_pid = getPid();
+	}
+	m_streamSize = new QDataStream(&m_size, QIODevice::WriteOnly);
+	m_streamSize->setVersion(QDataStream::Qt_4_4);
+	m_streamData = new QDataStream(&m_data, QIODevice::WriteOnly);
+	m_streamData->setVersion(QDataStream::Qt_4_4);
+}
+
+TCPRequest::~TCPRequest()
+{
+	if (m_socket)
+		delete m_socket;
+	delete m_streamSize;
+	delete m_streamData;
+}
+
+void TCPRequest::clear()
+{
+	m_size.clear();
+	m_data.clear();
+}
+
+bool TCPRequest::sendRequest()
+{
+
+	int dataSize = m_data.size() + sizeof(int); // data size + request ID size
+	// always send the pid first then size and data.
+	*m_streamSize << m_pid;
+	*m_streamSize << dataSize << m_requestID;
+	m_socket->write(m_size);
+	m_socket->write(m_data);
+	return m_socket->waitForBytesWritten();
+}
+
+int TCPRequest::getResponse()
+{
+	return waitForResponse(m_socket);
 }

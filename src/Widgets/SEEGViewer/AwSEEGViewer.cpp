@@ -46,12 +46,9 @@ AwSEEGViewer::~AwSEEGViewer()
 	delete m_widget;
 }
 
-void AwSEEGViewer::setFilters(float LP, float HP)
+void AwSEEGViewer::setNewFilters(const AwFilterSettings& settings)
 {
-	for (auto c : m_seegChannels) {
-		c->setLowFilter(LP);
-		c->setHighFilter(HP);
-	}
+	settings.apply(m_seegChannels);
 	if (m_mappingIsActive) {
 		loadCache();
 		updateMappingAt(m_latency);

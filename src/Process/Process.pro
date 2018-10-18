@@ -33,6 +33,8 @@ unix:!macx{
  LIBS += -lAwCore
 }
 
+LIBS += -lAwFilter
+
 
 unix {
     target.path = $$INSTALL_LIB_PATH

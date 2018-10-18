@@ -26,7 +26,6 @@
 #include "AwMappingClient.h"
 #include "Prefs/AwSettings.h"
 #include "Data/AwDataServer.h"
-#include "Filter/AwFiltersManager.h"
 #include <AwFileIO.h>
 #include <math.h>
 #include <armadillo>
@@ -59,9 +58,9 @@ void AwMappingClient::openConnection()
 	if (!m_isAConnectionActive)	{
 		AwDataServer::getInstance()->openConnection(this);
 		m_isAConnectionActive = true;
-		connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
-		AwFiltersManager *fm = AwFiltersManager::instance();
-		fm->fo().setFilters(m_channels);
+		AwFilterSettings *fs = &AwSettings::getInstance()->filterSettings();
+		connect(fs, &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
+		fs->apply(m_channels);
 	}
 }
 
@@ -69,14 +68,12 @@ void AwMappingClient::closeConnection()
 {
 	AwDataServer::getInstance()->closeConnection(this);
 	m_isAConnectionActive = false;
-	disconnect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
+	disconnect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
 }
 
-
-void AwMappingClient::newFilters()
+void AwMappingClient::setNewFilters(const AwFilterSettings& settings)
 {
-	AwFiltersManager *fm = AwFiltersManager::instance();
-	fm->fo().setFilters(m_channels);
+	settings.apply(m_channels);
 	m_cacheLoaded = false;	// force cache to be reloaded
 	requestDataAtLatency(m_latency);
 }

@@ -75,6 +75,7 @@ signals:
 	void pageForwardClicked();
 	void positionChanged(int value);
 	void markingStarted();
+	void filterButtonClicked();
 protected:
 	void updatePositionLabel();
 	float m_totalDuration;

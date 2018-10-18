@@ -71,6 +71,8 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 			<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
 	}
 	makeConnections();
+
+	connect(&m_filterSettings, &AwFilterSettings::settingsChanged, this, &AwBaseSignalView::setNewFilters);
 }
 
 AwBaseSignalView::~AwBaseSignalView()
@@ -139,6 +141,7 @@ void AwBaseSignalView::makeConnections()
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), m_scene, SLOT(updateSettings(AwViewSettings *, int)));
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), this, SLOT(updateSettings(AwViewSettings *, int)));
 	connect(m_navBar, SIGNAL(markingStarted()), this, SLOT(startMarking()));
+	connect(m_navBar, &AwNavigationBar::filterButtonClicked, this, &AwBaseSignalView::openFilterGUI);
 
 	connect(m_view, SIGNAL(pageDurationChanged(float)), m_navBar, SLOT(updatePageDuration(float)));
 	connect(m_view, SIGNAL(pageDurationChanged(float)), this, SLOT(updatePageDuration(float)));
@@ -307,6 +310,8 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 	if (m_settings != settings)
 		return;
 
+	bool reload = false;
+
 	if (flags & AwViewSettings::Filters) {
 		// filter channels
 		m_channels.clear();
@@ -315,8 +320,10 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 			if (settings->filters.contains(c->type()))
 				m_channels << c;
 		m_scene->setChannels(m_channels);
-		if (m_channels.isEmpty()) 
+		if (m_channels.isEmpty())
 			AwMessageBox::information(m_view, tr("View Settings"), tr("No channels will be shown regarding the options selected."));
+		else
+			reload = true;
 	}
 	
 	if (flags & AwViewSettings::MarkerBarMode)
@@ -326,6 +333,8 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 			m_markerBar->hide();
 
 	if (flags & AwViewSettings::SecPerCm)
+		reload = true;
+	if (reload)
 		reloadData();
 }
 
@@ -417,4 +426,18 @@ void AwBaseSignalView::removeVisibleChannel(int type)
 		m_settings->filters.clear();
 	else
 		m_settings->filters.removeAll(type);
+}
+
+void AwBaseSignalView::setNewFilters(const AwFilterSettings& settings)
+{
+	settings.apply(m_channels);
+	reloadData();
+}
+
+void AwBaseSignalView::openFilterGUI()
+{
+	auto ui = m_filterSettings.ui();
+	if (m_filterSettings.isEmpty())
+		m_filterSettings.initWithChannels(m_channels);
+	ui->show();
 }

@@ -25,8 +25,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessLogWindow.h"
 
-AwProcessLogWindow::AwProcessLogWindow(QWidget *parent)
-	: QWidget(parent)
+AwProcessLogWindow::AwProcessLogWindow(QWidget *parent, Qt::WindowFlags flags)
+	: QWidget(parent, flags)
 {
 	m_ui.setupUi(this);
 }

@@ -23,17 +23,19 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include <AwFilteringOptions.h>
 #include "common.h"
 #include <AwProcess.h>
 #include <QtMath>
+#include <AwChannel.h>
 
 static mxArray *request_data(const QString&, float, float, 
-        const QStringList&, const QStringList&, int, int, AwFilteringOptions *);
+        const QStringList&, const QStringList&, int, int);
 static mxArray *parse_cfg(const mxArray *);
 
+QHash<int, QVector<float>> filterSettings;
+
 mxArray *request_data(const QString& file, const QString& montage, float start, float duration, const QStringList& labels, const QStringList& types, 
-					  int decimate, int filters, AwFilteringOptions *fo)
+					  int decimate)
 {
     QTcpSocket *socket = connect();
     mxArray *output = NULL;
@@ -53,15 +55,22 @@ mxArray *request_data(const QString& file, const QString& montage, float start, 
     stream_data << decimate;   // decimation factor for downsampling of data (if value is 1 => no downsampling)
     stream_data << labels;
 	stream_data << types;
-	stream_data << filters;		// filtering flag
 
-    if (fo)	{
-        stream_data << fo->eegHP;
-        stream_data << fo->eegLP;
-        stream_data << fo->megHP;
-        stream_data << fo->megLP;
-        stream_data << fo->emgHP;
-        stream_data << fo->emgLP;
+	int filters = 0;
+	if (!filterSettings.isEmpty())
+		filters = 1;
+	stream_data << filters;		// filtering flag
+	   
+    if (!filterSettings.isEmpty())	{
+		auto eegFilters = filterSettings[AwChannel::EEG];
+		auto megFilters = filterSettings[AwChannel::MEG];
+		auto emgFilters = filterSettings[AwChannel::EMG];
+        stream_data << eegFilters[0];
+		stream_data << eegFilters[1];
+		stream_data << megFilters[0];
+		stream_data << megFilters[1];
+		stream_data << emgFilters[0];
+		stream_data << emgFilters[1];
 	}  
     writeToHost(socket, getPid(), data);
     // waiting for response
@@ -183,7 +192,6 @@ mxArray *parse_cfg(const mxArray *cfg)
     float start = 0, duration = -1;
     int decimate = 1;
 	int filters = 0;
-    AwFilteringOptions *fo = NULL;
     QStringList labels, types;
 	QString file, montage;
     mxArray *output = NULL;
@@ -298,19 +306,23 @@ mxArray *parse_cfg(const mxArray *cfg)
 		}
 		else if (s_filtering == "yes") {
 			filters = 1; // filtering is set
-			fo = new AwFilteringOptions;  
 			bool settings = false;
+			QVector<float> eegFilters(2);
+			QVector<float> megFilters(2);
+			QVector<float> emgFilters(2);
+			eegFilters.fill(0);
+			megFilters.fill(0);
+			emgFilters.fill(0);
 			// check for dependent fields
 			f_index = mxGetFieldNumber(cfg, "eeg_lp");
 			if (f_index != -1) {
 				mxArray *f_eeglp = mxGetField(cfg, 0, "eeg_lp");
 				if (!mxIsDouble(f_eeglp)) {
 					mexErrMsgTxt("eeg_lp must be a double value.");
-					delete fo;
 					return output;
 				}
 				double v = *(double *)mxGetData(f_eeglp);
-				fo->eegLP = (float)v;
+				eegFilters[1] = (float)v;
 				settings = true;
 			}
 			// check for dependent fields
@@ -319,11 +331,10 @@ mxArray *parse_cfg(const mxArray *cfg)
 				mxArray *f_eeghp = mxGetField(cfg, 0, "eeg_hp");
 				if (!mxIsDouble(f_eeghp)) {
 					mexErrMsgTxt("eeg_hp must be a double value.");
-					delete fo;
 					return output;
 				}
 				double v = *(double *)mxGetData(f_eeghp);
-				fo->eegHP = (float)v;
+				eegFilters[0] = (float)v;
 				settings = true;
 			}
 			// check for dependent fields
@@ -332,11 +343,10 @@ mxArray *parse_cfg(const mxArray *cfg)
 				mxArray *f_meglp = mxGetField(cfg, 0, "meg_lp");
 				if (!mxIsDouble(f_meglp)) {
 					mexErrMsgTxt("meg_lp must be a double value.");
-					delete fo;
 					return output;
 				}
 				double v = *(double *)mxGetData(f_meglp);
-				fo->megLP = (float)v;
+				megFilters[1] = (float)v;
 				settings = true;
 			}
 			// check for dependent fields
@@ -345,17 +355,17 @@ mxArray *parse_cfg(const mxArray *cfg)
 				mxArray *f_meghp = mxGetField(cfg, 0, "meg_hp");
 				if (!mxIsDouble(f_meghp)) {
 					mexErrMsgTxt("meg_hp must be a double value.");
-					delete fo;
 					return output;
 				}
 				double v = *(double *)mxGetData(f_meghp);
-				fo->megHP = (float)v;
+				megFilters[0] = (float)v;
 				settings = true;
 			}
+			filterSettings.insert(AwChannel::EEG, eegFilters);
+			filterSettings.insert(AwChannel::MEG, megFilters);
+			filterSettings.insert(AwChannel::EMG, emgFilters);
 			if (!settings) {
 				mexPrintf("Warning: filtering was set to yes but no filters are set.\n");
-				delete fo;
-				fo = NULL;
 			}
 		}
 		else {
@@ -364,9 +374,7 @@ mxArray *parse_cfg(const mxArray *cfg)
 		}
 	}
 
-	output = request_data(file, montage, start, duration, labels, types, decimate, filters, fo);
-	if (fo)
-        delete fo;
+	output = request_data(file, montage, start, duration, labels, types, decimate);
     return output;
 }
 

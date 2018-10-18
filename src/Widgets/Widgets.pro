@@ -26,12 +26,13 @@ macx {
 
 
 unix:!macx{
- LIBS += -lAwCore $$VTK_LIBRARIES
+ LIBS += -lAwCore 
+   LIBS += -lvtkGUISupportQt-$$VTK_VERSION_SUFFIX -lvtkFiltersCore-$$VTK_VERSION_SUFFIX -lvtkCommonMisc-$$VTK_VERSION_SUFFIX \
+   -lvtkRenderingCore-$$VTK_VERSION_SUFFIX -lvtkIOGeometry-$$VTK_VERSION_SUFFIX -lvtkCommonExecutionModel-$$VTK_VERSION_SUFFIX \
+    -lvtkRenderingFreeType-$$VTK_VERSION_SUFFIX -lvtkFiltersSources-$$VTK_VERSION_SUFFIX -lvtkRenderingAnnotation-$$VTK_VERSION_SUFFIX \
+    -lvtkCommonCore-$$VTK_VERSION_SUFFIX -lvtkCommonDataModel-$$VTK_VERSION_SUFFIX -lvtkIOCore-$$VTK_VERSION_SUFFIX \
+    -lvtkRenderingOpenGL2-$$VTK_VERSION_SUFFIX
 }
 
-LIBS += -lAwGraphics -lAwUtilities -lAwMath -lAwLayout -lAwMapping
+LIBS += -lAwGraphics -lAwUtilities -lAwMath -lAwLayout -lAwMapping -lAwFilter
 
-unix {
-    target.path = $$INSTALL_LIB_PATH
-    INSTALLS += target
-}

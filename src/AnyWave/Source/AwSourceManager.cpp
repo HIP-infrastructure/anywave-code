@@ -6,7 +6,7 @@
 #include <QFile>
 #include <math/AwMath.h>
 #include <QFileDialog>
-#include "Filter/AwFiltersManager.h"
+
 // statics init and definitions
 AwSourceManager *AwSourceManager::m_instance = 0;
 

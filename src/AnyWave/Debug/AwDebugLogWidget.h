@@ -34,7 +34,7 @@ class AwDebugLogWidget : public QWidget
 	Q_OBJECT
 
 public:
-	AwDebugLogWidget(QWidget *parent = 0);
+	AwDebugLogWidget(QWidget *parent = 0, Qt::WindowFlags = Qt::Window);
 	~AwDebugLogWidget();
 protected:
 	void changeEvent(QEvent *);

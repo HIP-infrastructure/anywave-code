@@ -28,7 +28,6 @@
 
 #include <QObject>
 #include <AwChannel.h>
-#include <AwFilteringOptions.h>
 #include "ICA/AwICAChannel.h"
 #include "Source/AwSourceChannel.h"
 class AwDataServer;
@@ -44,21 +43,15 @@ public:
 	~AwDataConnection();
 	
 public slots:
-	//void loadData(AwChannelList *channels, float start, float duration, float downSampling = 0., AwFilteringOptions *foptions = NULL);
-	//void loadData(AwChannelList *channels, AwMarker *marker, float downSampling = 0., AwFilteringOptions *foptions = NULL);
-	//void loadData(AwChannelList *channels, quint64 start, quint64 duration, float downSampling = 0., AwFilteringOptions *foptions = NULL);
-
-	void loadData(AwChannelList *channels, float start, float duration, bool rawData = false);
-	void loadData(AwChannelList *channels, AwMarker *marker, bool rawData = false);
-	void loadData(AwChannelList *channels, quint64 start, quint64 duration, bool rawData = false);
-
-	//void filterData(AwChannelList *channels);
-
+	void loadData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
+	void loadData(AwChannelList *channels, AwMarker *marker, bool rawData = false, bool doNotWakeUpClient = false);
+	void loadData(AwChannelList *channels, quint64 start, quint64 duration, bool rawData = false, bool doNotWakeUpClient = false);
+	/** load data using a list of markers. The channels are filled with concatenated data of all makers. **/
+	void loadData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 signals:
 	void sendingData(AwChannelList *channels);   // signal informant que les donnees sont envoyees au client
 	void endOfData();
 	void outOfMemory();
-
 private:
 	AwFileIO *m_reader;
 	AwDataServer *m_server;
@@ -70,11 +63,9 @@ private:
 	AwSourceChannelList m_sourceMEGChannels, m_sourceEEGChannels;
 	AwChannelList m_realChannels[AW_CHANNEL_TYPES];
 	AwChannelList m_virtualChannels, m_avgChannels;
-
 	AwAVGChannel *m_avg[AW_CHANNEL_TYPES];	// theorically one AVG channel per type of channel.
 	bool m_ICASourcesLoaded[AW_CHANNEL_TYPES]; // flags that indicates if ICA sources channels have been loaded into memory.
 	
-
 	void setDataAvailable();
 	void computeVirtuals(const AwChannelList& channels);
 	void applyReferences(const AwChannelList& channels);	// do the reference computation.

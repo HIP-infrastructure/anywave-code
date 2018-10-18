@@ -160,33 +160,37 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			}
 
 			// apply filters
-			for (auto c : process->pdi.input.channels) {
-				switch (c->type())
-				{
-				case AwChannel::EEG:
-				case AwChannel::SEEG:
-					c->setHighFilter(finput->filters().eegHP);
-					c->setLowFilter(finput->filters().eegLP);
-					break;
-				case AwChannel::MEG:
-				case AwChannel::GRAD:
-					c->setHighFilter(finput->filters().megHP);
-					c->setLowFilter(finput->filters().megLP);
-					break;
-				case AwChannel::ECG:
-				case AwChannel::EMG:
-					c->setHighFilter(finput->filters().emgHP);
-					c->setLowFilter(finput->filters().emgLP);
-					break;
-				}
-			} // end foreach (AwChannel *c, process->pdi.input.channels)
+			finput->filterSettings().apply(process->pdi.input.channels);
+			//for (auto c : process->pdi.input.channels) {
+			//	switch (c->type())
+			//	{
+			//	case AwChannel::EEG:
+			//	case AwChannel::SEEG:
+			//		c->setHighFilter(finput->filters().eegHP);
+			//		c->setLowFilter(finput->filters().eegLP);
+			//		break;
+			//	case AwChannel::MEG:
+			//	case AwChannel::GRAD:
+			//		c->setHighFilter(finput->filters().megHP);
+			//		c->setLowFilter(finput->filters().megLP);
+			//		break;
+			//	case AwChannel::ECG:
+			//	case AwChannel::EMG:
+			//		c->setHighFilter(finput->filters().emgHP);
+			//		c->setLowFilter(finput->filters().emgLP);
+			//		break;
+			//	}
+			//} // end foreach (AwChannel *c, process->pdi.input.channels)
+			for (auto t : finput->filterSettings().currentTypes()) {
 
-			if (finput->filters().eegHP || finput->filters().eegLP)
-				emit message(QString("EEG/SEEG: Low pass filtering at %1Hz, High pass at %2Hz.").arg(finput->filters().eegLP).arg(finput->filters().eegHP));
-			if (finput->filters().megHP || finput->filters().megLP)
-				emit message(QString("MEG: Low pass filtering at %1Hz, High pass at %2Hz.").arg(finput->filters().megLP).arg(finput->filters().megHP));
-			if (finput->filters().emgHP || finput->filters().emgLP)
-				emit message(QString("EMG: Low pass filtering at %1Hz, High pass at %2Hz.").arg(finput->filters().emgLP).arg(finput->filters().emgHP));
+			}
+
+			//if (finput->filters().eegHP || finput->filters().eegLP)
+			//	emit message(QString("EEG/SEEG: Low pass filtering at %1Hz, High pass at %2Hz.").arg(finput->filters().eegLP).arg(finput->filters().eegHP));
+			//if (finput->filters().megHP || finput->filters().megLP)
+			//	emit message(QString("MEG: Low pass filtering at %1Hz, High pass at %2Hz.").arg(finput->filters().megLP).arg(finput->filters().megHP));
+			//if (finput->filters().emgHP || finput->filters().emgLP)
+			//	emit message(QString("EMG: Low pass filtering at %1Hz, High pass at %2Hz.").arg(finput->filters().emgLP).arg(finput->filters().emgHP));
 
 			// apply markers (if any)
 			if (!ifelem->markerPath().isEmpty()) {
@@ -196,10 +200,10 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 					process->pdi.input.markers = markers;
 					bool skipMarkers = !finput->skippedMarkers().isEmpty();
 					bool useMarkers = !finput->usedMarkers().isEmpty();
-					if (skipMarkers) 
-						markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
+					//if (skipMarkers) 
+					//	markers.append(new AwMarker("Global", 0, reader->infos.totalDuration()));
 					if (skipMarkers || useMarkers) {
-						AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers());
+						AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers(), reader->infos.totalDuration());
 						if (filtered.isEmpty()) 
 							emit warning("no markers were kept after applying usedMarkers or skippedMarkers filters");
 						process->pdi.input.markers = filtered;
@@ -240,6 +244,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			AwDataServer::getInstance()->closeConnection(process);
 			m_runningProcesses.removeAll(process);
 			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(message(const QString&)));
+			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(processMessage(const QString&)));
 
 			// clean pdi.input for another usage
 			while (!process->pdi.input.channels.isEmpty())

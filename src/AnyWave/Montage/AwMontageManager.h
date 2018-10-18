@@ -33,6 +33,7 @@ class AwAVGChannel;
 #include <QMutex>
 #include "ICA/AwICAChannel.h"
 #include "Source/AwSourceChannel.h"
+#include <filter/AwFilterSettings.h>
 
 /////////////////////////////////////////////////////////////////////////////////
 /// sorting function for AwChannel using labels
@@ -97,16 +98,13 @@ public:
 	static float *computeAVG(AwChannel *chan);
 	/** Convert EEG channels to SEEG and make a bipolar montage **/
 	static AwChannelList makeSEEGBipolar(AwChannelList& channels);
-
 	/** Remise à zero **/
 	void closeFile();
 	/** Quit **/
 	void quit();
-
 	/** Get user montages found in /Montages **/
 	inline QStringList& quickMontages() { return m_quickMontages; }
 	inline QStringList& localQuickMontages() { return m_localQuickMontages; }
-
 	/** Browse for .mtg in a directory and add found montage to quick montages. **/
 	void scanForMontagesInDirectory(const QString& dir);
 	/** Load a montage file picked by user. **/
@@ -123,12 +121,12 @@ public:
 	inline QString& path() { return m_path; }
 	/** Get labels of sensors marked as bad. **/
 	inline QStringList& badLabels() { return m_badChannelLabels; }
+	/** Remove bad channels in list **/
+	void removeBadChannels(AwChannelList& list);
 	/** Scripting support specific **/
 	AwChannelList loadAndApplyMontage(AwChannelList asRecorded, const QString& path);
 	/** Scripting support specific **/
 	void newMontage(AwFileIO *reader);
-
-
 	// ICA Channels specific
 	/** import ICA Components **/
 	int loadICA();
@@ -151,9 +149,11 @@ public slots:
 	void buildQuickMontagesList();
 	/** Add channels to montage **/
 	void addChannelsByName(AwChannelList& channels);
-	/** Clear current montage and build a new one based on channels names passed as parameter **/
-	void buildNewMontageFomNames(const QStringList& names);
-	void newFilters();
+	///** Clear current montage and build a new one based on channels names passed as parameter **/
+	//void buildNewMontageFomNames(const QStringList& names);
+	/** Build a new montage based on a list of channels **/
+	void buildNewMontageFromChannels(const AwChannelList& channels);
+	void setNewFilters(const AwFilterSettings& settings);
 	/** Ajout d'un canal aux canals AsRecorded. Typiquement utilise pour ajouter un canal de source Virtual **/
 	void addChannelToAsRecorded(AwChannel *channel);
 	/** Mark a channel as bad or not bad. Update montage if necessary **/
@@ -163,8 +163,6 @@ public slots:
 	void setChannels(AwChannelList& channels) { m_channels = channels; }
 	/** Add source channels into current montage **/
 	void addNewSources(int type);
-
-
 private:
 	QHash<QString, AwChannel*> m_channelHashTable;	///< Hash table permettant de retrouver un pointeur vers un objet AwChannel à partir de son label
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.
@@ -189,7 +187,6 @@ private:
 
 	void saveBadChannels();
 	void loadBadChannels();
-	void applyGlobalFilter(AwChannel *channel);		///> apply global filtering options to a particular channel.
 	void scanForPrebuiltMontages();
 	void clear();									///> clear current montage;
 	void applyGains();

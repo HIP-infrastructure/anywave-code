@@ -1283,22 +1283,6 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
-															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/MATLAB/AnyWave/.DS_Store</string>
-															<key>PATH_TYPE</key>
-															<integer>0</integer>
-															<key>PERMISSIONS</key>
-															<integer>420</integer>
-															<key>TYPE</key>
-															<integer>3</integer>
-															<key>UID</key>
-															<integer>0</integer>
-														</dict>
-														<dict>
-															<key>CHILDREN</key>
-															<array/>
-															<key>GID</key>
-															<integer>80</integer>
-															<key>PATH</key>
 															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/MATLAB/AnyWave/aw_addmarkers.mexmaci64</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
@@ -1363,6 +1347,22 @@
 															<key>GID</key>
 															<integer>80</integer>
 															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/MATLAB/AnyWave/aw_getdataex.mexmaci64</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array/>
+															<key>GID</key>
+															<integer>80</integer>
+															<key>PATH</key>
 															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/MATLAB/AnyWave/aw_getfileinfo.mexmaci64</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
@@ -1396,6 +1396,22 @@
 															<integer>80</integer>
 															<key>PATH</key>
 															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/MATLAB/AnyWave/aw_getplugininfo.mexmaci64</string>
+															<key>PATH_TYPE</key>
+															<integer>0</integer>
+															<key>PERMISSIONS</key>
+															<integer>493</integer>
+															<key>TYPE</key>
+															<integer>3</integer>
+															<key>UID</key>
+															<integer>0</integer>
+														</dict>
+														<dict>
+															<key>CHILDREN</key>
+															<array/>
+															<key>GID</key>
+															<integer>80</integer>
+															<key>PATH</key>
+															<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/MATLAB/AnyWave/aw_getpluginio.mexmaci64</string>
 															<key>PATH_TYPE</key>
 															<integer>0</integer>
 															<key>PERMISSIONS</key>

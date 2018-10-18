@@ -53,6 +53,7 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 	connect(ui->buttonPrevious, SIGNAL(clicked()), this, SIGNAL(pageBackwardClicked()));
 	connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SIGNAL(positionChanged(int)));
 	connect(ui->buttonMarker, SIGNAL(clicked()), this, SIGNAL(markingStarted()));
+	connect(ui->buttonFilter, &QPushButton::clicked, this, &AwNavigationBar::filterButtonClicked);
 	setFlags(flags);
 	// create horizontal scale
 	for (int i = 0; i < ui->comboSecsPerCm->count(); i++)
@@ -73,6 +74,7 @@ void AwNavigationBar::setFlags(int flags)
 	ui->labelTime->show();
 	ui->labelnChannels->show();
 	ui->labelnSelectedChannels->show();
+	ui->buttonFilter->hide();
 
 	if (flags & AwBaseSignalView::NoSettingsButton)
 		ui->buttonViewSettings->hide();
@@ -82,6 +84,8 @@ void AwNavigationBar::setFlags(int flags)
 		ui->buttonMarker->show();
 	if (flags & AwBaseSignalView::NoGainLevels)
 		ui->widgetGains->hide(); 
+	if (flags & AwBaseSignalView::FilterButton)
+		ui->buttonFilter->show();
 	if (flags & AwBaseSignalView::NoNavButtons) {
 		ui->buttonStart->hide();
 		ui->buttonEnd->hide();

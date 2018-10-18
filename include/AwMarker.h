@@ -87,7 +87,7 @@ public:
 	/** Create an inverter marker list that skip the markers set as input **/
 	static QList<AwMarker *> invertMarkerSelection(const QList<AwMarker *>& markers, const QString& label, float end);
 	/** Filters markers: markers can either be specified to be removed or used. **/
-	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used);
+	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
 	/** Returns the marker's type. AwMarker::Single or AwMarker::Selection. **/
@@ -110,16 +110,16 @@ public:
 	inline void setLabel(const QString& label) { m_label = label; }
 	inline void setValue(float value) { m_code = value; }
 	inline void setStart(float start) { m_start = start; }
-	inline void setDuration(float duration) { m_duration = duration; if (duration > 0) m_type = Selection; }
+	inline void setDuration(float duration) { m_duration = duration; if (duration > 0) m_type = Selection;  }
 	inline void setTargetChannels(const QStringList& targetChannels) { m_targetChannels = targetChannels; }
 	inline void addTargetChannel(const QString& channel) { m_targetChannels.append(channel); }
 	inline void setColor(const QString& color) { m_color = color; }
 	inline QString& color() { return m_color; }
 	void setEnd(float end);
+	void reshape(float start, float end);
 protected:
 	QString m_label;		
 	int m_type;				
-	//qint16 m_code;			
 	float m_start, m_duration, m_code;		
 	QStringList m_targetChannels;	
 	QString m_color;

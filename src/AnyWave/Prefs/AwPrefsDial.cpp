@@ -205,33 +205,31 @@ void AwPrefsDial::accept()
 
 	settings.setValue("py/interpreter", lineEditPythonPath->text());
 
-	if (!lineEditMatlabPath->text().isEmpty()) {
-		// compare path to previous one if any:
-		QString previousPath = settings.value("matlab/path", QString()).toString();
-		if (previousPath.toLower() == lineEditMatlabPath->text().toLower()) {
-			settings.setValue("matlab/detected", true);
-			settings.setValue("matlab/activated", true);
-		}
-		else {
-			QDir dir(lineEditMatlabPath->text());
-			if (!dir.exists()) {
-				QMessageBox::critical(this, tr("MATLAB"), tr("Invalid MATLAB location"));
-				settings.setValue("matlab/activated", false);
-				return;
-			}
-			settings.setValue("matlab/path", lineEditMatlabPath->text());
-			settings.setValue("matlab/detected", true);
-			settings.setValue("matlab/activated", true);
-			
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-			AwMessageBox::information(this, tr("MATLAB"), tr("The MATLAB location changed.\nAnyWave needs to be restarted."));
-			AwSettings::getInstance()->createMatlabShellScript(lineEditMatlabPath->text());
-#endif
-		}
-	}
-	else
-		settings.setValue("matlab/activated", false);
+	// if matlab path is empty => consider not using MATLAB plugins anymore.
+	// On Mac and Linux that will be done by deleting the matlab.sh script
+	if (lineEditMatlabPath->text().isEmpty()) {
+		settings.setValue("matlab/detected", false);
 
+#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
+		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->homeDirectory());
+		if (QFile::exists(scriptPath))
+			QFile::remove(scriptPath);
+#endif
+	}
+	else {
+		// check if location exists
+		QDir dir(lineEditMatlabPath->text());
+		if (!dir.exists()) {
+			QMessageBox::critical(this, tr("MATLAB"), tr("Invalid MATLAB location"));
+			settings.setValue("matlab/detected", false);
+			return;
+		}
+		settings.setValue("matlab/detected", true);
+		settings.setValue("matlab/path", lineEditMatlabPath->text());
+#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
+		AwSettings::getInstance()->createMatlabShellScript(lineEditMatlabPath->text());
+#endif
+	}
 	// MATLAB MCR on Linux and Mac
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 	if (!lineEditMCR->text().isEmpty())

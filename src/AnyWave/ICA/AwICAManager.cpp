@@ -104,15 +104,16 @@ int AwICAManager::loadComponents(const QString& icaFile)
 		return - 1;
 	}
 	AwMATLABFile file;
-	if (file.open(inputFile) != 0) {
-		AwMessageBox::critical(0, tr("ICA Components"), file.error());
-		return -1;
-	}
 	QString modality;
-	if (file.readString("modality", modality) != 0) {
-		AwMessageBox::critical(0, tr("ICA Components"), file.error());
+	try {
+		file.open(inputFile);
+		file.readString("modality", modality);
+	}
+	catch (AwException &e) {
+		AwMessageBox::critical(0, tr("ICA Components"), e.errorString());
 		return -1;
 	}
+
 	int type = AwChannel::stringToType(modality);
 	AwICAComponents *comp = new AwICAComponents(type);
 	try {
@@ -123,21 +124,12 @@ int AwICAManager::loadComponents(const QString& icaFile)
 		delete comp;
 		return -1;
 	}
-//	if (comp->loadComponents(file) == 0) {
-		// delete previous components if any
-		if (m_comps[type])
-			delete m_comps[type];
-		m_comps[type] = comp;
-		AwSettings::getInstance()->currentIcaFile = icaFile;
-		emit componentsFiltersLoaded(comp->lpFilter(), comp->hpFilter());
-//	}
-	//else {
-	//	AwMessageBox::critical(0, tr("ICA Components"), QString("Unable to load %1 components.").arg(modality));
-	//	delete comp;
-	//	return -1;
-	//}
+	if (m_comps[type])
+		delete m_comps[type];
+	m_comps[type] = comp;
+	AwSettings::getInstance()->currentIcaFile = icaFile;
+	emit componentsFiltersLoaded(comp->lpFilter(), comp->hpFilter());
 	emit componentsLoaded();
-	
 	return 0;
 }
 
@@ -179,6 +171,10 @@ QString AwICAManager::convertToMatlab(const QString& fileName)
 		file.setGroup("ica/Source");
 		modality = AwChannel::Source;
 	}
+	else if (file.isGroup("ica/SEEG")) {
+		file.setGroup("ica/SEEG");
+		modality = AwChannel::SEEG;
+	}
 
 	float lf, hf;
 	if (file.readFloatAttr("LPF", &lf) != AwHDF5::Ok)
@@ -215,29 +211,18 @@ QString AwICAManager::convertToMatlab(const QString& fileName)
 
 	QString newFile = QString("%1/ica_%2.mat").arg(path).arg(AwChannel::typeToString(modality));
 	AwMATLABFile matlabFile;
-	if (matlabFile.create(newFile) != 0) 
-		return QString();
-	
-	if (matlabFile.writeString(QString("modality"), AwChannel::typeToString(modality)) != 0) {
-		return QString();
+	try {
+		matlabFile.create(newFile);
+		matlabFile.writeString(QString("modality"), AwChannel::typeToString(modality));
+		matlabFile.writeScalar(QString("lpf"), (double)lf);
+		matlabFile.writeScalar(QString("hpf"), (double)hf);
+		matlabFile.writeScalar(QString("sr"), (double)-1);
+		matlabFile.writeMatrix(QString("mixing"), mix);
+		matlabFile.writeMatrix(QString("unmixing"), unmix);
+		matlabFile.writeStringCellArray(QString("labels"), names);
 	}
-
-	if (matlabFile.writeScalar(QString("lpf"), (double)lf) != 0) {
-		return QString();
-	}
-	if (matlabFile.writeScalar(QString("hpf"), (double)hf) != 0) {
-		return QString();
-	}
-	if (matlabFile.writeScalar(QString("sr"), (double)-1) != 0) {
-		return QString();
-	}
-	if (matlabFile.writeMatrix(QString("mixing"), mix) != 0) {
-		return QString();
-	}
-	if (matlabFile.writeMatrix(QString("unmixing"), unmix) != 0) {
-		return QString();
-	}
-	if (matlabFile.writeStringCellArray(QString("labels"), names) != 0) {
+	catch (AwException &e)
+	{
 		return QString();
 	}
 	return newFile;

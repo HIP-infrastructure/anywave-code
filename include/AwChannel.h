@@ -239,6 +239,8 @@ public:
 	static float meanRangeValue(const QList<AwChannel *>& list);
 	/** Build a string list containing all the available types of channels **/
 	static QStringList types();
+	/** remove doublons from a list. Doublons are checked based on name of channels. **/
+	static QList<AwChannel *> removeDoublons(const QList<AwChannel *>& list);
 	QVector<float> toVector();
 protected:
 	quint32 m_ID;					

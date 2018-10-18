@@ -42,12 +42,10 @@
 # either expressed or implied, of the FreeBSD Project.
 #=============================================================================
 
-find_path ( QWT_INCLUDE_DIR NAMES qwt_plot.h
+find_path ( QWT_INCLUDE_DIR NAMES qwt_plot.h HINTS ${QWT_ROOT}/include
   PATHS /usr/local ${QWT_DIR}
   PATH_SUFFIXES qwt qwt6 include
 )
-
-MESSAGE(STATUS "Qwt INCLUDE is ${QWT_INCLUDE_DIR}")
 
 set ( QWT_INCLUDE_DIRS ${QWT_INCLUDE_DIR} )
 
@@ -80,7 +78,7 @@ endif ()
 
 
 find_library ( QWT_LIBRARY
-  NAMES qwt qwt-qt3 qwt-qt4 qwt-qt5
+  NAMES qwt qwt-qt3 qwt-qt4 qwt-qt5 HINTS ${QWT_ROOT}/lib
   PATHS /usr/local  ${QWT_DIR}
   PATH_SUFFIXES lib
   HINTS ${QT_LIBRARY_DIR}
@@ -118,3 +116,4 @@ mark_as_advanced (
   QWT_VERSION_STRING
   QWT_ROOT_DIR
 )
+

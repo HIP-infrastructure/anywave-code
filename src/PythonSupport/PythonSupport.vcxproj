@@ -23,6 +23,7 @@
     <ClCompile Include="Channel.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="GetData.cpp" />
+    <ClCompile Include="GetDataEx.cpp" />
     <ClCompile Include="GetMarkers.cpp" />
     <ClCompile Include="GetPluginInfo.cpp" />
     <ClCompile Include="pythonmodule.cpp" />

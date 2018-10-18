@@ -37,6 +37,7 @@ typedef struct {
 	PyObject *type;			// string
 	float sr;
 	float lpf, hpf, notch;
+	int selected;
 	PyObject *data;			// numpy array
 } channel;
 
@@ -81,11 +82,11 @@ static PyObject *channel_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static int channel_init(channel *self, PyObject *args, PyObject *kwds)
 {
-	PyObject *label = NULL, *ref = NULL, *type = NULL, *data = NULL, *tmp;
+	PyObject *label = NULL, *ref = NULL, *type = NULL, *data = NULL, *selected = NULL, *tmp;
 
-	static char *kwlist[] = { "label", "ref", "type", "sr", "lpf", "hpf", "notch", "data", NULL };
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|SSSffffO", kwlist,
-		&label, &ref, &type, &self->sr, &self->lpf, &self->hpf, &self->notch, &data))
+	static char *kwlist[] = { "label", "ref", "type", "sr", "lpf", "hpf", "notch", "selected", "data", NULL };
+	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|SSSffffiO", kwlist,
+		&label, &ref, &type, &self->sr, &self->lpf, &self->hpf, &self->notch, &self->selected, &data))
 		return -1;
 
 	if (label) {
@@ -132,6 +133,8 @@ static PyMemberDef channel_members[] = {
      "high pass filter"},
 	{"notch", T_FLOAT, offsetof(channel, notch), 0,
 	"notch filter"},
+	{"selected", T_INT, offsetof(channel, selected), 0,
+	"flag for selection"},
     {NULL}  /* Sentinel */
 };
 
@@ -236,6 +239,25 @@ static int channel_setsr(channel *self, PyObject *value, void *closure)
 	}
 	self->sr = (float)PyFloat_AsDouble(value);
 	return 0;
+}
+
+static int channel_setselected(channel *self, PyObject *value, void *closure)
+{
+	if (value == NULL) {
+		PyErr_SetString(PyExc_TypeError, "Cannot delete selected");
+		return -1;
+	}
+	if (!PyInt_Check(value)) {
+		PyErr_SetString(PyExc_TypeError, "selected must be an int");
+		return -1;
+	}
+	self->selected = (int)PyInt_AsLong(value);
+	return 0;
+}
+
+static PyObject *channel_getselected(channel *self, void *closure)
+{
+	return PyInt_FromLong(self->selected);
 }
 
 static PyObject *channel_getsr(channel *self, void *closure)

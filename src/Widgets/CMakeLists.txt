@@ -1,7 +1,6 @@
 # AwWidgetLib
 project(AwWidget)
 add_definitions("-DAW_BUILD_WIDGETS_LIB")
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.qrc)
 
 SET(HEADERS ../../include/widget/AwMessageBox.h  
@@ -105,5 +104,6 @@ QT5_WRAP_UI(UI ${FORMS})
 
 ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
 QT5_USE_MODULES(AwWidget Core Widgets PrintSupport)
-TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping Qt5::Core Qt5::Widgets Qt5::PrintSupport ${VTK_LIBRARIES} ${QWT_LIBRARY})
+TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
+INSTALL(TARGETS AwWidget DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
 

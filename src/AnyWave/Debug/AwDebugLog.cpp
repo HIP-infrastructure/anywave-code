@@ -42,8 +42,8 @@ AwDebugLog::~AwDebugLog()
 
 void AwDebugLog::cleanUp()
 {
-	foreach (QStringList *list, m_logs.values())
-		delete list;
+//	foreach (QStringList *list, m_logs.values())
+//		delete list;
 	m_logs.clear();
 	m_components.clear();
 }
@@ -65,11 +65,14 @@ QStringList AwDebugLog::components()
 
 QStringList AwDebugLog::logsForComponent(const QString &name)
 {
-	QStringList* logs = m_logs.value(name);
-	if (logs)
-		return *logs;
-	else 
-		return QStringList();
+	//QStringList* logs = m_logs.value(name);
+	//if (logs)
+	//	return *logs;
+	//else 
+	//	return QStringList();
+	if (m_logs.contains(name))
+		return m_logs[name];
+	return QStringList();
 }
 
 
@@ -81,22 +84,32 @@ void AwDebugLog::addLog(const QString& message)
 {
 	// find the component which sent the message.
 	QString componentName = m_components.value(sender());
-	if (!componentName.isEmpty())
-	{
-		QTime t = QTime::currentTime();
-		QString slog = t.toString() + ": " + message;
-		// check if component already got some logs
-		if (m_logs.keys().contains(componentName))
-		{
-			QStringList *logs = m_logs.value(componentName);
-			logs->append(slog);
-		}
-		else
-		{
-			QStringList* logs = new QStringList;
-			logs->append(slog);
-			m_logs.insert(componentName, logs);
-		}
-		emit newLogsAdded();
-	}
+	if (componentName.isEmpty())
+		return;
+
+	QString logMessage = QString("%1 : %2").arg(QTime::currentTime().toString()).arg(message);
+	if (m_logs.contains(componentName))
+		m_logs[componentName].append(logMessage);
+	else
+		m_logs.insert(componentName, QStringList(logMessage));
+	emit newLogsAdded();
+
+	//if (!componentName.isEmpty())
+	//{
+	//	QTime t = QTime::currentTime();
+	//	QString slog = t.toString() + ": " + message;
+	//	// check if component already got some logs
+	//	if (m_logs.keys().contains(componentName))
+	//	{
+	//		QStringList *logs = m_logs.value(componentName);
+	//		logs->append(slog);
+	//	}
+	//	else
+	//	{
+	//		QStringList* logs = new QStringList;
+	//		logs->append(slog);
+	//		m_logs.insert(componentName, logs);
+	//	}
+	//	emit newLogsAdded();
+	//}
 }

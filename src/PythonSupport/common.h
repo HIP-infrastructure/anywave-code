@@ -23,10 +23,40 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-
 #include <QTcpSocket>
+#include <Python.h>
+#include <qdatastream.h>
 
 QTcpSocket *connect();
 void sendRequest(QTcpSocket *, const QByteArray& );
 QByteArray initRequest(int request);
 int waitForResponse(QTcpSocket *);
+
+/** parse a whole dictionnary and convert it to JSON format. **/
+QString dictToJson(PyObject *dict);
+
+// Request class
+
+class TCPRequest
+{
+public:
+	explicit TCPRequest(int requestID);
+	~TCPRequest();
+	enum Status { connected, failed, undefined };
+
+	inline int status() { return m_status; }
+	inline QTcpSocket *socket() { return m_socket; }
+	QDataStream *stream() { return m_streamData; }
+	/** Send a request to the host - data can be empty if the request does not require parameters. */
+	bool sendRequest();
+	int getResponse();
+	void clear();
+
+protected:
+	QTcpSocket * m_socket;
+	int m_status, m_pid, m_requestID;
+	QByteArray m_size;
+	QByteArray m_data;
+	QDataStream *m_streamSize;
+	QDataStream *m_streamData;
+};

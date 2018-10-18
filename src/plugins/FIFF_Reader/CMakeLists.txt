@@ -24,6 +24,7 @@ qt5_wrap_cpp(FR_MOCS ${MOCS})
 add_library(FIFFReader SHARED ${SRCS} ${FR_MOCS})
 qt5_use_modules(FIFFReader Core)
 target_link_libraries(FIFFReader AwCore AwReadWrite Qt5::Core)
+INSTALL(TARGETS FIFFReader DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 
 
 

@@ -426,15 +426,7 @@ QString AwChannel::typeToString(int t)
 	int index;
 	for (auto s : stringTypes)
 		types << AwChannel::stringToType(s);
-
-//	stringTypes << "EEG" << "SEEG" << "MEG" << "EMG" << "ECG" << "Reference" << "Trigger" << "Other" << "ICA" << "SOURCE" << "GRAD";
-
-//	type << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::EMG << AwChannel::ECG << AwChannel::Reference << AwChannel::Trigger << AwChannel::Other
-//		<< AwChannel::ICA << AwChannel::Source << AwChannel::GRAD;
-
-
 	index = types.indexOf(t);
-
 	if (index == -1)
 		return QString();
 
@@ -445,51 +437,11 @@ QString AwChannel::typeToString(int t)
 QList<int> AwChannel::getTypesAsInt(const QList<AwChannel *>& list)
 {
 	QList<int>  res;
-	foreach (AwChannel *c, list)
-	{
-		switch (c->type())
-		{
-		case AwChannel::MEG:
-			if (!res.contains(AwChannel::MEG))
-				res << AwChannel::MEG;
-			break;
-		case AwChannel::EEG:
-			if (!res.contains(AwChannel::EEG))
-				res << AwChannel::EEG;
-			break;
-		case AwChannel::SEEG:
-			if (!res.contains(AwChannel::SEEG))
-				res << AwChannel::SEEG;
-			break;
-		case AwChannel::EMG:
-			if (!res.contains(AwChannel::EMG))
-				res << AwChannel::EMG;
-			break;
-		case AwChannel::ECG:
-			if (!res.contains(AwChannel::ECG))
-				res << AwChannel::ECG;
-			break;
-		case AwChannel::Trigger:
-			if (!res.contains(AwChannel::Trigger))
-				res << AwChannel::Trigger;
-			break;
-		case AwChannel::Other:
-			if (!res.contains(AwChannel::Other))
-				res << AwChannel::Other;
-			break;
-		case AwChannel::ICA:
-			if (!res.contains(AwChannel::ICA))
-				res << AwChannel::ICA;
-			break;
-		case AwChannel::Source:
-			if (!res.contains(AwChannel::Source))
-				res << AwChannel::Source;
-			break;
-		case AwChannel::GRAD:
-			if (!res.contains(AwChannel::GRAD))
-				res << AwChannel::GRAD;
-			break;
-		}
+	
+	for (auto c : list) {
+		if (res.contains(c->type()))
+			continue;
+		res << c->type();
 	}
 	return res;
 }
@@ -497,48 +449,9 @@ QList<int> AwChannel::getTypesAsInt(const QList<AwChannel *>& list)
 QStringList AwChannel::getTypesAsString(const QList<AwChannel *>& list)
 {
 	QStringList res;
-	foreach (AwChannel *c, list)
-	{
-		switch (c->type())
-		{
-		case AwChannel::MEG:
-			if (!res.contains("MEG"))
-				res << "MEG";
-			break;
-		case AwChannel::EEG:
-			if (!res.contains("EEG"))
-				res << "EEG";
-			break;
-		case AwChannel::SEEG:
-			if (!res.contains("SEEG"))
-				res << "SEEG";
-			break;
-		case AwChannel::EMG:
-			if (!res.contains("EMG"))
-				res << "EMG";
-			break;
-		case AwChannel::ECG:
-			if (!res.contains("ECG"))
-				res << "ECG";
-			break;
-		case AwChannel::Trigger:
-			if (!res.contains("Trigger"))
-				res << "Trigger";
-			break;
-		case AwChannel::Other:
-			if (!res.contains("Other"))
-				res << "Other";
-			break;
-		case AwChannel::ICA:
-			if (!res.contains("ICA"))
-				res << "ICA";
-			break;
-		case AwChannel::Source:
-			if (!res.contains("Source"))
-				res << "Source";
-			break;
-		}
-	}
+	QList<int> types = AwChannel::getTypesAsInt(list);
+	for (auto t : types)
+		res << AwChannel::typeToString(t);
 	return res;
 }
 
@@ -603,6 +516,19 @@ QList<AwChannel *> AwChannel::cloneList(const QList<AwChannel *>& list, bool clo
 		if (cloneData && c->dataSize())  {
 			newChan->newData(c->dataSize());
 			memcpy(newChan->data(), c->data(), c->dataSize() * sizeof(float));
+		}
+	}
+	return res;
+}
+
+QList<AwChannel *> AwChannel::removeDoublons(const QList<AwChannel *>& list)
+{
+	QStringList labels;
+	AwChannelList res;
+	for (auto c : list) {
+		if (!labels.contains(c->name())) {
+			labels << c->name();
+			res << c;
 		}
 	}
 	return res;

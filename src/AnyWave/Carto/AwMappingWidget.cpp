@@ -29,7 +29,6 @@
 #include <vtkTextProperty.h>
 #include <vtkRenderWindow.h>
 #include "Widgets/AwPleaseWaitWidget.h"
-#include "Filter/AwFiltersManager.h"
 #include <graphics/AwColorMap.h>
 #include "Montage/AwMontageManager.h"
 #include <widget/AwTopoWidget.h>

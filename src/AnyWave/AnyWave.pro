@@ -72,7 +72,7 @@ QMAKE_RPATHDIR += @executable_path/../../../Anywave_plugins
 }
 
 unix:!macx{
- LIBS += -lAwCore -lopenblas -lgomp -lqwt  $$VTK_LIBRARIES
+ LIBS += -lAwCore -lopenblas -lgomp -lqwt-qt5  $$VTK_LIBRARIES
 }
 
 LIBS += -lAwUtilities -lAwMath -lAwFilter -lAwLayout -lAwMapping -lAwGraphics -lAwHDF5 -lAwMATLAB -lAwWidgets -lAwEpoch

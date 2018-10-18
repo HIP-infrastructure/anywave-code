@@ -1013,7 +1013,7 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		connect(actSelectionAsBad, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
 		menuSelection->addAction(actSelectionAsBad);
 		QAction *actToMontage = new QAction(tr("Set selection as the new Montage"), menuSelection);
-		connect(actToMontage, SIGNAL(triggered()), this, SIGNAL(newMontage()));
+		connect(actToMontage, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
 		menuSelection->addAction(actToMontage);
 	}
 	// End of Channel Selection

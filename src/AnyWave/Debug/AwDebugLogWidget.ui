@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../../../resources/AnyWave.qrc">
-    <normaloff>:/images/AnyWave_logo.jpg</normaloff>:/images/AnyWave_logo.jpg</iconset>
+    <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">

@@ -16,6 +16,7 @@ SET(MOCS
  add_library(EDFIO SHARED ${SRCS} ${EDFIO_MOCS})
  qt5_use_modules(EDFIO Core)
  target_link_libraries(EDFIO AwCore AwReadWrite Qt5::Core)
+INSTALL(TARGETS EDFIO DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 
 
 

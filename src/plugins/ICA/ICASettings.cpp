@@ -16,7 +16,8 @@ ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels,
 	m_modes.removeAll("ECG");
 	m_modes.removeAll("Other");
 	m_modes.removeAll("ICA");
-//	m_modes.removeAll("Source"); // add source as modality.
+	m_modes.removeAll("Reference");
+	m_modes.removeAll("GRAD");
 	m_ui.comboModality->addItems(m_modes);
 	m_labels = AwMarker::getUniqueLabels(markers);
 	if (m_labels.isEmpty()) {

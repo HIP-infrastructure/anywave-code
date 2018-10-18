@@ -29,7 +29,6 @@
 #include <widget/SignalView/AwNavigationBar.h>
 #include "Widgets/AwMarkersBar.h"
 #include <AwReadWriteLib.h>
-#include "Filter/AwFiltersManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Data/AwDataServer.h"
 #include <AwAmplitudeManager.h>
@@ -54,7 +53,6 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	changeObjects(view, scene, NULL, markBar);
 	AwDisplaySetupManager *dsm = AwDisplaySetupManager::instance();
 	// connections
-	connect(m_scene, SIGNAL(newMontage()), this, SLOT(makeMontageFromSelection()));
 	connect(this, SIGNAL(settingsChanged()), dsm, SLOT(saveSettings()));
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();
@@ -62,9 +60,8 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
 	// using Global Marker Bar representation => connect to MarkerManager
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
-
 	// filters
-	connect(AwFiltersManager::instance(), SIGNAL(filtersChanged(AwFilteringOptions *)), this, SLOT(newFilters()));
+	connect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
 	m_flags = UpdateProcess;	// by default a view will inform process manager that its contents changed.
@@ -78,8 +75,10 @@ AwSignalView::~AwSignalView()
 	foreach(AwChannel *c, m_virtualChannels)
 		m_channels.removeAll(c);
 
-	while (!m_channels.isEmpty())
-		delete m_channels.takeFirst();
+//	while (!m_channels.isEmpty())
+//		delete m_channels.takeFirst();
+	while (!m_montageChannels.isEmpty())
+		delete m_montageChannels.takeFirst();
 }
 
 void AwSignalView::updatePageDuration(float duration)
@@ -220,12 +219,6 @@ void AwSignalView::enableView(AwFileIO *reader)
 	reloadData();
 }
 
-void AwSignalView::newFilters()
-{
-	AwFiltersManager::instance()->fo().setFilters(m_channels);
-	reloadData();
-}
-
 void AwSignalView::addVirtualChannels(AwChannelList& channels)
 {
 	foreach (AwChannel *c, channels)
@@ -275,36 +268,21 @@ void AwSignalView::setChannels(const AwChannelList& channels)
 	// clear previous channels and duplicates the new ones
 	// clear channels present in scene.
 	m_scene->clearChannels();
-	// destroying the main list.
-	while (!m_channels.isEmpty())
-		delete m_channels.takeFirst();
 	// copy it
+	while (!m_montageChannels.isEmpty())
+		delete m_montageChannels.takeFirst();
 	m_montageChannels = AwChannel::duplicateChannels(channels);
 	if (!m_isActive)
 		return;
 	// Before sending channels to scene, apply filter.
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
-	m_client.requestData(&m_channels, m_positionInFile, m_scene->pageDuration());
-	dataReceived();
+	reloadData();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
-
-void AwSignalView::makeMontageFromSelection()
-{
-	QStringList names;
-	foreach (QGraphicsItem *i, m_scene->selectedItems()) {
-		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
-
-		if (sitem)
-			//	names << sitem->channel()->name();
-			names << sitem->channel()->fullName();
-	}
-	AwMontageManager::instance()->buildNewMontageFomNames(names);
-}
 
 void AwSignalView::refresh()
 {
@@ -339,30 +317,4 @@ void AwSignalView::dataReceived()
 	if (m_processFlags == AwSignalView::UpdateProcess)
 		emit displayedChannelsUpdated(m_channels);
 	m_scene->update();
-}
-
-void AwSignalView::updateSettings(AwViewSettings *settings, int flags)
-{
-	if (m_settings != settings)
-		return;
-
-	bool reload = false;
-	m_scene->updateSettings(settings, flags);
-	m_view->updateSettings(settings, flags);
-	m_navBar->updateSettings(settings, flags);
-
-	if (flags & AwViewSettings::Filters)  {
-		setChannels(m_montageChannels);
-		if (m_channels.isEmpty()) 
-			AwMessageBox::information(m_view, tr("View Channels"), tr("No channels in the current montage match the new view options."));
-	}
-
-	if (flags & AwViewSettings::MarkerBarMode)
-		if (settings->markerBarMode == AwViewSettings::ShowMarkerBar)
-			m_markerBar->show();
-		else
-			m_markerBar->hide();
-
-	if (flags & AwViewSettings::SecPerCm)
-		reloadData();
 }

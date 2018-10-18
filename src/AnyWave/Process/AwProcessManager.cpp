@@ -43,7 +43,6 @@
 #include <QApplication>
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
-#include "Filter/AwFiltersManager.h"
 #include "Debug/AwDebugLog.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
@@ -234,7 +233,7 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
 				m_processMenu->addAction(act);
 			}
 			else {
-				int index = m_subProcessMenuNames.indexOf(sub.toLower());  // check is sub menu already exists
+				int index = m_subProcessMenuNames.indexOf(sub.toLower());  // check if sub menu already exists
 				if (index == -1) {	
 					// no => create it
 					QMenu *subMenu = new QMenu(sub, m_processMenu);
@@ -252,11 +251,14 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
 				}
 				else {
 					QMenu *subMenu = m_subProcessMenus.at(index);
-					QString title = tokens.at(2).trimmed();
+					QString title;
+					if (tokens.size() == 3)
+						title = tokens.at(2).trimmed();
 					if (title.isEmpty())
 						act->setText(plugin->name);
 					else
 						act->setText(title);
+					m_processMenu->addMenu(subMenu);
 					subMenu->addAction(act);
 				}
 			}
@@ -350,14 +352,14 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 			process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	auto fi = AwSettings::getInstance()->fileInfo();
+	auto fi = settings->fileInfo();
 	// if fi == NULL that means no file are currently open by AnyWave.
 	if (fi) {
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(fi->currentReader());
 		process->pdi.input.dataFolder = fi->dirPath();
 		process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(fi->fileName());
-		process->pdi.input.filteringOptions = AwFiltersManager::instance()->fo();
+		process->pdi.input.filterSettings = settings->filterSettings();
 	}
 	return process;
 }
@@ -454,7 +456,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 }
 	 p->pdi.input.channels += AwChannel::duplicateChannels(list);
 	 // make sure current filters are set for the channels.
-	 AwFiltersManager::instance()->fo().setFilters(p->pdi.input.channels);
+	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels);
 	 return true;
  }
 
@@ -484,7 +486,6 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	QList<int> keys = p->pdi.inputParameters().keys();
 	AwChannelList sources;
 	bool selection = !m_selectedChannels.isEmpty();
-
 	// browse for keys as process inputs
 	for (int i = 0; i < keys.size(); i++) {
 		int key = keys.at(i);
@@ -498,7 +499,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 			for (auto plugin : AwPluginManager::getInstance()->processes())
 				p->pdi.input.processPluginNames.append(plugin->name);
 		}
-		else if (key & Aw::ProcessInput::AnyChannels) {
+		else if (key & Aw::ProcessInput::AnyChannels) {  // any channels = selected channels if any or current montage if no channels is selected.
 			if (ignoreSelection)
 				sources = m_montageChannels;
 			else {
@@ -735,10 +736,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				}
 				else {
 					// create a marker as input which covers whole data
-					AwMarker *marker = new AwMarker;
-					marker->setStart(0);
-					marker->setDuration(m_currentReader->infos.totalDuration());
-					process->pdi.input.markers << marker;
+					process->pdi.input.markers << new AwMarker("whole data", 0., m_currentReader->infos.totalDuration());
 				}
 			}
 		}
@@ -767,9 +765,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 	plm->connectProcess(process);
-
-	// connect process to debug log system
-	AwDebugLog::instance()->connectComponent(process->plugin()->name, process);
 
 	AwDataServer *ds = 	AwDataServer::getInstance();
 

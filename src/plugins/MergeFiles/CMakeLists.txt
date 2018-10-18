@@ -19,6 +19,7 @@ QT5_WRAP_UI(MF_UIS ${UIS})
 add_library(MergeFiles SHARED ${SRCS} ${MF_MOCS} ${MF_UIS})
 qt5_use_modules(MergeFiles Core Gui Widgets)
 target_link_libraries(MergeFiles AwCore AwProcess AwReadWrite AwFiltering Qt5::Core Qt5::Gui Qt5::Widgets)
+INSTALL(TARGETS MergeFiles DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 
 
 

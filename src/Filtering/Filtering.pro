@@ -4,20 +4,13 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
-QT += concurrent
+QT += concurrent widgets
 include(../common.pri)
 TARGET = AwFilter
 TEMPLATE = lib
 CONFIG += plugin
 DEFINES += AW_BUILD_FILTER_LIB
 DESTDIR = $$LIB_DIR
-
-#FRAMEWORK_HEADERS.version = Versions
-#FRAMEWORK_HEADERS.files =    ../../include/AwFiltering.h  ../../include/AwGlobal.h
-#FRAMEWORK_HEADERS.path = Headers
-#QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
-
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -33,6 +26,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     AwButterWorth.cpp \
     AwFiltering.cpp \
+	AwFilterSettings.cpp \
+	AwFilterModel.cpp \
+	AwFilterGUI.cpp \
+    AwFilterAddButton.cpp \
+    AwFilterTableView.cpp \
     DspFilters/Bessel.cpp \
     DspFilters/Biquad.cpp \
     DspFilters/Butterworth.cpp \
@@ -53,7 +51,15 @@ SOURCES += \
 
 
 HEADERS += \
-    ../../include/AwFiltering.h
+    ../../include/filter/AwFiltering.h \
+	AwFilterModel.h \
+    AwFilterAddButton.h \
+	../../include/filter/AwFilterSettings.h \
+    ../../include/filter/AwFilterTableView.h \
+	AwFilterGUI.h
+
+	
+FORMS += AwFilterGUI.ui
 
 macx {
     LIBS += -framework AwCore

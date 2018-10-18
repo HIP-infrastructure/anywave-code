@@ -36,6 +36,12 @@ class AwFileIO;
 class AwDisplaySetup;
 class AwMatlabInterface;
 
+#include <filter/AwFilterSettings.h>
+
+///
+/// Global object containing all global settings of AnyWave
+///
+
 class AwSettings : public QObject
 {
 	Q_OBJECT
@@ -78,9 +84,13 @@ public:
 	// the maximum of cores available and the maximum of core to use with AnyWave.
 	int totalCPUCores, maxCPUCores;
 
-	inline QString homeDirectory() { return m_homeDirectory; }
-	inline QString MATLABMexPath() { return m_mexPath; }
+	inline QString& homeDirectory() { return m_homeDirectory; }
+	inline QString& MATLABMexPath() { return m_mexPath; }
 	inline QString PythonModulePath() { return m_pythonModulePath; }
+	inline QString& appPath() { return m_appDirPath; }
+	inline QString& appResourcePath() { return m_appResourcePath; }
+	inline QString& majorVersion() { return m_majorVersion; }
+	inline QString& minorVersion() { return m_minorVersion; }
 
 	inline QString systemPath() { return m_systemPath; }
 
@@ -97,8 +107,10 @@ public:
 	inline bool isAutoTriggerParsingOn() { return m_isAutoTriggerParsingOn; }
 	inline AwMatlabInterface *matlabInterface() { return m_matlabInterface; }
 	inline void setMatlabInterface(AwMatlabInterface *i) { m_matlabInterface = i; }
+	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 	AwFileIO* readerAt(int index);
 	QStringList& topoLayouts(); 
+
 
 	// recent files specific
 	QString shortenFilePath(const QString& path);
@@ -128,6 +140,7 @@ signals:
 	void recentFilesUpdated(const QStringList&);
 	void recentBIDSUpdated(const QStringList&);
 	void timeRepresentationChanged(bool HMS); // if HMS is true that means we go for HMS representation
+	void log(const QString& message);
 public slots:
 	void setAutoTriggerParsingOn(bool onoff);
 	void savePredefinedMarkers(const AwMarkerList& markers);
@@ -143,6 +156,9 @@ protected:
 	QStringList m_locales;				// locales strings 
 	QString m_homeDirectory;
 	QString m_mexPath, m_pythonModulePath;
+	QString m_appDirPath, m_appResourcePath;
+	// Versioning
+	QString m_majorVersion, m_minorVersion;
 
 	AwFileIO *m_currentReader;
 	AwDisplaySetup *m_setup;
@@ -157,6 +173,8 @@ protected:
 	QString m_systemPath;
 	// topo layouts for the current opened file
 	QStringList m_topoLayouts;
+	// unique filter settings object.
+	AwFilterSettings m_filterSettings;
 private:
 	static AwSettings *m_instance;
 	

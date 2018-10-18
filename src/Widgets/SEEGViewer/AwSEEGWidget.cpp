@@ -119,11 +119,6 @@ void AwSEEGWidget::setSelectedActor(vtkActor *actor)
 		}
 	}
 	if (found) {
-		//if (m_selectedElectrodes.contains(p->label))
-		//	m_selectedElectrodes.removeAll(p->label);
-		//else
-		//	m_selectedElectrodes.append(p->label);
-		//emit selectedElectrodes(m_selectedElectrodes);
 		QStringList labels = { p->label };
 		emit selectedElectrodes(labels);
 	}
@@ -361,18 +356,11 @@ void AwSEEGWidget::generateElectrodesLabels()
 		vtkSmartPointer<vtkFollower> textActor = vtkSmartPointer<vtkFollower>::New();
 		textActor->SetPickable(false);
 		textActor->SetMapper(mapper);
-		// scale of text is 30% of minimal distance between sensors.
-		//textActor->SetScale(dist * 0.3, dist * 0.3, dist * 0.3);
 		textActor->GetProperty()->SetColor(1.0, 1.0 , 1.0);
 		textActor->SetScale(3, 3, 3);
 		// get the corresponding electrode
 		QString lastPad = m_electrodesLabels.value(k)->last();
 		AwSEEGPad *pad = m_hPads.value(lastPad); 
-		// move the text to the right of the electrode
-		//double pos[3];
-		//memcpy(pos, pad->center, 3 * sizeof(double));
-		//pos[2] += 10;
-		//textActor->AddPosition(pos);
 		textActor->AddPosition(pad->center);
 		m_labelActors.append(textActor);
 	}

@@ -7,6 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwProcessLib", "src\Process
 	ProjectSection(ProjectDependencies) = postProject
 		{CA5B6E48-7EBE-4949-AA0B-79267B704C4D} = {CA5B6E48-7EBE-4949-AA0B-79267B704C4D}
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+		{7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E} = {7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwReadWriteLib", "src\ReadWrite\ReadWrite.vcxproj", "{CA5B6E48-7EBE-4949-AA0B-79267B704C4D}"
@@ -25,6 +26,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwWidgetsLib", "src\Widgets
 		{4ADC7140-D1DF-4C66-A36E-5FF2EC96DBC1} = {4ADC7140-D1DF-4C66-A36E-5FF2EC96DBC1}
 		{B12702AD-ABFB-343A-A199-8E24837244A3} = {B12702AD-ABFB-343A-A199-8E24837244A3}
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+		{7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E} = {7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnyWave", "src\AnyWave\AnyWave.vcxproj", "{E3729A21-DA5B-4FA8-A92F-218BF8A0934B}"
@@ -167,6 +169,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetCapture", "src\Mex\MexGetCapture\MexGetCapture.vcxproj", "{B37D508A-1996-4C26-AA68-50D7BB1AD9D3}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetData", "src\Mex\MexGetData\MexGetData.vcxproj", "{6E97C6E3-9E8E-4404-A895-5A0EF5F259CD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetMarkers", "src\Mex\MexGetMarkers\MewGetMarkers.vcxproj", "{B28F5A22-FC67-43E5-8DD1-B87A710A3D89}"
 EndProject
@@ -181,6 +186,18 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexSendMessage", "src\Mex\MexSendMessage\MexSendMessage.vcxproj", "{C03E9340-C4D2-427D-A34D-098A703CDD1A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetFileInfo", "src\Mex\MexGetFileInfo\MexGetFileInfo.vcxproj", "{D4B90137-308B-4693-909A-651003ACE77B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetPluginIO", "src\Mex\MexGetPluginIO\MexGetPluginIO.vcxproj", "{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetDataEx", "src\Mex\MexGetDataEx\MexGetDataEx.vcxproj", "{51F00B64-760C-46F2-884F-35C66D39EE57}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EGIReader", "src\plugins\EGIReader\EGIReader.vcxproj", "{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -524,12 +541,30 @@ Global
 		{D4B90137-308B-4693-909A-651003ACE77B}.Release|Win32.ActiveCfg = Release|x64
 		{D4B90137-308B-4693-909A-651003ACE77B}.Release|x64.ActiveCfg = Release|x64
 		{D4B90137-308B-4693-909A-651003ACE77B}.Release|x64.Build.0 = Release|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Debug|Win32.ActiveCfg = Debug|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Debug|x64.ActiveCfg = Debug|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Debug|x64.Build.0 = Debug|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Release|Win32.ActiveCfg = Release|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Release|x64.ActiveCfg = Release|x64
+		{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}.Release|x64.Build.0 = Release|x64
+		{51F00B64-760C-46F2-884F-35C66D39EE57}.Debug|Win32.ActiveCfg = Debug|x64
+		{51F00B64-760C-46F2-884F-35C66D39EE57}.Debug|x64.ActiveCfg = Debug|x64
+		{51F00B64-760C-46F2-884F-35C66D39EE57}.Debug|x64.Build.0 = Debug|x64
+		{51F00B64-760C-46F2-884F-35C66D39EE57}.Release|Win32.ActiveCfg = Release|x64
+		{51F00B64-760C-46F2-884F-35C66D39EE57}.Release|x64.ActiveCfg = Release|x64
+		{51F00B64-760C-46F2-884F-35C66D39EE57}.Release|x64.Build.0 = Release|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Debug|Win32.ActiveCfg = Debug|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Debug|x64.ActiveCfg = Debug|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Debug|x64.Build.0 = Debug|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Release|Win32.ActiveCfg = Release|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Release|x64.ActiveCfg = Release|x64
+		{B6A5D6B6-C6D5-42FE-BFC4-4EBE5E371293}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

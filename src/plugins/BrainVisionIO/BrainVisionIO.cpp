@@ -99,7 +99,6 @@ qint64 BrainVisionIO::readDataFromChannels(float start, float duration, QList<Aw
 		if (m_dataFormat == BrainVisionIO::Multiplexed) {
 			float *buf = new float[totalSize];
 			m_binaryFile.seek(m_dataOffset + startSample * sizeof(float));
-			//read = m_streamBinary.readRawData((char *)buf, totalSize * sizeof(float));
 			read = m_binaryFile.read((char *)buf, totalSize * sizeof(float));
 			read /= sizeof(float);
 			if (read <= 0) {
@@ -107,12 +106,12 @@ qint64 BrainVisionIO::readDataFromChannels(float start, float duration, QList<Aw
 				return 0;
 			}
 			read /= nbChannels;
-			foreach(AwChannel *c, channelList) {
+			for (auto c : channelList) {
 				int index = infos.indexOfChannel(c->name());
 				float *data = c->newData(read);
 				qint64 count = 0;
 				while (count < read) {
-					*data++ = buf[index + count * nbChannels];
+					*data++ = buf[index + count * nbChannels] * m_scales.at(index);
 					count++;
 				}
 			}
@@ -124,6 +123,8 @@ qint64 BrainVisionIO::readDataFromChannels(float start, float duration, QList<Aw
 				m_binaryFile.seek(((infos.totalSamples() * index) + nStart) * sizeof(float));
 				float *dest = c->newData(nSamples);
 				read = m_binaryFile.read((char *)dest, nSamples * sizeof(float));
+				for (auto i = 0; i < c->dataSize(); i++)
+					c->data()[i] *= m_scales.at(index);
 				if (read == 0)
 					c->clearData();
 				else
@@ -136,7 +137,6 @@ qint64 BrainVisionIO::readDataFromChannels(float start, float duration, QList<Aw
 		if (m_dataFormat == BrainVisionIO::Multiplexed) {
 			qint16 *buf = new qint16[totalSize];
 			m_binaryFile.seek(m_dataOffset + startSample * sizeof(qint16));
-			//read = m_streamBinary.readRawData((char *)buf, totalSize * sizeof(qint16));
 			read = m_binaryFile.read((char *)buf, totalSize * sizeof(qint16));
 			read /= sizeof(qint16);
 			if (read <= 0) {
@@ -144,7 +144,7 @@ qint64 BrainVisionIO::readDataFromChannels(float start, float duration, QList<Aw
 				return 0;
 			}
 			read /= nbChannels;
-			foreach(AwChannel *c, channelList) {
+			for (auto c : channelList) {
 				int index = infos.indexOfChannel(c->name());
 				if (index == -1)
 					continue;
@@ -300,6 +300,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 		m_scales.reserve(nChannels);
 		while (count < nChannels) {
 			line = stream.readLine().remove(QChar('\0'));
+			float unit_factor = 1.0;
 			// remove all \0 null characters
 			if (!line.startsWith(";")) {
 				count++;
@@ -319,17 +320,23 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 				else {
 					// get unit (if any)
 					QString unit = tokens2.at(3);
-					if (unit.isEmpty() || unit != QString::fromLatin1("µV"))
-						unit = QString::fromLatin1("µV");
+					// handle other units than microVolt
+					if (unit.toLower() == "v")
+						unit_factor = 1e6;
+					else if (unit.toLower() == "mv")
+						unit_factor = 1e3;
+										
 					chan.setUnit(unit);
 					if (chan.unit() != QString::fromLatin1("µV"))
 						chan.setType(AwChannel::Other);
+
 				}
 
 				if (tokens2.at(2).isEmpty())
-					m_scales.append(1.0);
+					m_scales.append(1.0 * unit_factor);
 				else
-					m_scales.append(tokens2.at(2).toDouble());
+					m_scales.append(tokens2.at(2).toDouble() * unit_factor);
+		
 				infos.addChannel(chan);
 			}
 		}
@@ -381,7 +388,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 
 	readMarkerFile();
 
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 AwFileIO::FileStatus BrainVisionIO::canRead(const QString &path)
@@ -474,7 +481,7 @@ qint64 BrainVisionIO::writeData(QList<AwChannel*> *channels)
 	int nbChannel = channels->size();
 
 	for (qint64 i = 0; i < length; i++)
-		for (int j = 0; j < nbChannel; j++)
+		for (int j = 0; j < nbChannel; j++) 
 			m_streamBinary << channels->at(j)->data()[i];
 
 	m_binaryFile.flush();

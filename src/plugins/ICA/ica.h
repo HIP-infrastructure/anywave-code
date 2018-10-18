@@ -36,13 +36,14 @@ class ICA_EXPORT ICA : public AwProcess
 public:
 	ICA();
 	~ICA();
-	enum Algos { Infomax, FASTICA };
+	enum Algos { Infomax, FASTICA, acsobiro };
 	void run();
 	bool showUi();
 private:
 	void infomax(int m, int n, int nc);
 	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
 	int runica_matlab(int nc);
+	int run_acsobiro(int nc);
 	void saveToFile();
 	/* Prepare matlab input file for MATLAB ica code. */
 	void createInputFile();

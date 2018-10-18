@@ -530,9 +530,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 		if (chan->isTrigger())
 			m_triggers << chan;
 	}
-
-	m_fullPath = path;
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)

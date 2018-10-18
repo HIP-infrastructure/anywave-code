@@ -29,7 +29,7 @@
 #include <QDialog>
 #include "ui_settings.h"
 #include <AwFileIO.h>
-
+#include <filter/AwFilterSettings.h>
 
 typedef QPair<AwFileIOPlugin *, QString> input;
 
@@ -44,9 +44,7 @@ public:
 	AwFileIOPlugin *selectedWriter;
 	QString outputDir;
 	QList<input> inputs;
-	bool filters;
-	float eegLP, eegHP, megLP, megHP, eegNotch, megNotch;
-	float emgLP, emgHP, emgNotch;
+	AwFilterSettings& filterSettings() { return m_filterSettings; }
 public slots:
 	void accept();
 	int exec();
@@ -60,6 +58,7 @@ private:
 	QList<AwFileIO *> m_tempReaders;
 	QString m_inputFileFilters;
 	QString m_dirPath;
+	AwFilterSettings m_filterSettings;
 	Ui::settingsUi ui;
 };
 

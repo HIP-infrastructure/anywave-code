@@ -41,23 +41,11 @@ public:
 	inline QToolBar *toolBar() { return m_toolBar; }
 protected:
 	void changeEvent(QEvent *);
-public slots:
-	void applyFilters();
-	void enableICAFiltering();
-	void closeFile();
-	void setICAFiltering(bool onoff);	// activate or disable ICA filtering
-	void setICAMode(bool filter);
-protected slots:
-	void changeICAFiltering(int button, bool checked);
 signals:
 	void filterButtonClicked();
-	void filterICAClicked(bool toggle);
-	void ICASwitchChanged(bool onoff);
 protected:
 	QToolBar *m_toolBar;
-	bool m_dontSwitch;
-	QButtonGroup m_buttonGroupICA;
-	bool m_blockICASwitch;
+
 };
 
 #endif // AWFILTERTOOLBAR_H

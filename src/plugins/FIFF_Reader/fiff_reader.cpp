@@ -317,9 +317,11 @@ FIFF_Reader::FileStatus FIFF_Reader::openFile(const QString &path)
 		raw = fiff_dir_tree_find(m_fiffFile->dirtree, FIFFB_CONTINUOUS_DATA);
 	if (raw[0] == NULL)
 		raw = fiff_dir_tree_find(m_fiffFile->dirtree, FIFFB_SMSH_RAW_DATA);
+	if (raw[0] == NULL)
+		raw = fiff_dir_tree_find(m_fiffFile->dirtree, FIFFB_PROCESSED_DATA);
 	if (raw[0] == NULL) {
 		fiff_close(m_fiffFile);
-		m_error = "No raw data in file.";
+		m_error = "No raw data in file. AnyWave can't procces evoked data.";
 		return AwFileIO::WrongFormat;
 	}
 	// read events
@@ -546,6 +548,8 @@ qint64 FIFF_Reader::readDataFromChannels(float start, float duration, AwChannelL
 								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= pow(1,m_chanInfos.at(c->ID())->unit_mul);
 							if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_V)
 								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E-6;
+							if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_T)
+								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E12;
 						}
 						channel_index++;
 					}

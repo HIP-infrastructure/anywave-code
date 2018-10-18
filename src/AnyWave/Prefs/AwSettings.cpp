@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "Prefs/AwSettings.h"
@@ -42,7 +42,7 @@ AwSettings::AwSettings(QObject *parent)
 {
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
-	m_recentFilesMax = 10;
+	m_recentFilesMax = 15;
 	m_currentReader = NULL;
 
 	// load previously saved recent files
@@ -75,6 +75,25 @@ AwSettings::AwSettings(QObject *parent)
 	m_matlabInterface = NULL;
 	m_pdfMarkerFile = "marker_tool.mrk";
 	m_fileInfo = Q_NULLPTR;
+
+	m_appDirPath = QCoreApplication::applicationDirPath();
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+	m_appResourcePath = m_appDirPath;
+#endif
+#ifdef Q_OS_MAC
+	m_appResourcePath = QString("%1/../Resources").arg(m_appResourcePath);
+#endif
+
+	// check for a version.txt in resources
+	QString versionFile = QString("%1/version.txt").arg(m_appResourcePath);
+	if (QFile::exists(versionFile)) {
+		QFile file(versionFile);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			m_majorVersion = file.readLine();
+			m_minorVersion = file.readLine();
+			file.close();
+		}
+	}
 }
 
 AwSettings::~AwSettings()
@@ -156,6 +175,8 @@ void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
 void AwSettings::closeFile()
 { 
 	currentIcaFile.clear(); 
+	if (m_fileInfo)
+		m_filterSettings.save(QString("%1.flt").arg(m_fileInfo->filePath()));
 }
 
 
@@ -164,34 +185,27 @@ void AwSettings::closeFile()
 
 void AwSettings::createMatlabShellScript(const QString& path)
 {
-	QFile scriptFile(QDir::homePath() + "/AnyWave/matlab.sh");
+	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(m_homeDirectory);
+	QFile scriptFile(scriptPath);
 	QTextStream stream(&scriptFile);
 
-	if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-        stream << "#!/bin/bash" << endl;
-		stream << "MATLAB=" + path << endl;
+	if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		stream << "#!/bin/bash" << endl;
+		stream << "MATLAB=" << path << endl;
 #ifdef Q_OS_MAC
-        stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
+		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
 #elif defined(Q_OS_LINUX)
-        stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MATLAB/bin/glnxa64:$MATLAB/sys/os/glnxa64" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/AnyWave/lib:$MATLAB/bin/glnxa64" << endl;
 		stream << "export LD_LIBRARY_PATH" << endl;
 #endif
 		scriptFile.close();
+		emit log(QString("Sucessfully created file %1.").arg(scriptPath));
 	}
+	else
+		emit log(QString("Could not create %1 file").arg(scriptPath));
 }
 
-void AwSettings::emptyMatlabShellScript()
-{
-	QFile scriptFile(QDir::homePath() + "/AnyWave/matlab.sh");
-	QTextStream stream(&scriptFile);
-	if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-		stream << "#!/bin/sh" << endl;
-		scriptFile.close();
-	}
-}
 #endif
 
 AwFileIO* AwSettings::readerAt(int index)

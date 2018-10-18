@@ -165,7 +165,7 @@
       <OutputFile>$(OutDir)\$(ProjectName)d.dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5Guid.lib;AwCoreLibd.lib;AwReadWriteLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Widgetsd.lib;Qt5Guid.lib;AwCoreLibd.lib;AwReadWriteLibd.lib;AwFilteringLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(AWROOT)\lib\$(TargetName)d.lib</ImportLibrary>
     </Link>
     <Lib>
@@ -201,7 +201,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Widgets.lib;Qt5Gui.lib;AwCoreLib.lib;AwReadWriteLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Widgets.lib;Qt5Gui.lib;AwCoreLib.lib;AwReadWriteLib.lib;AwFilteringLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(AWROOT)\lib\$(TargetName).lib</ImportLibrary>
     </Link>
     <Lib>

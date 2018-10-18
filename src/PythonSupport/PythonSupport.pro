@@ -51,6 +51,7 @@ SOURCES += \
     Channel.cpp \
     common.cpp \
     GetData.cpp \
+    GetDataEx.cpp \
     GetMarkers.cpp \
     GetPluginInfo.cpp \
     Marker.cpp \

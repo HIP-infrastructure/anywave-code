@@ -31,6 +31,8 @@
 #include <AwChannel.h>
 #include <QTranslator>
 #include <AwMarker.h>
+#include <filter/AwFilterSettings.h>
+#include "AwUpdater.h"
 
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
@@ -48,7 +50,6 @@ class AwDockMapping2;
 class AwCursorMarkerToolBar;
 class AwDataInfoReader;
 class AwDebugLogWidget;
-class AwUpdater;
 class AwMeshManager;
 class AwLayoutManager;
 class AwSEEGViewer;
@@ -93,6 +94,7 @@ private:
 	QMenu *m_recentFilesMenu, *m_recentBIDSMenu;
 	// widgets
 	QList<QWidget *> m_toolBarWidgets;
+	QList<QWidget *> m_openWidgets;	 // list tracking all widget open by the user (and that must be closed when the application ends.)
 	QList<QAction *> m_actions;
 	QStatusBar *m_sBar;
 	AwCursorMarkerToolBar *m_cursorToolBar;
@@ -108,19 +110,18 @@ private:
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
-
 	// DockWidgets
-	QDockWidget *m_dockFilters, *m_addMarkerDock;
+	QDockWidget *m_addMarkerDock;
 	QDockWidget *m_dockMarkers, *m_dockBIDS;
 	AwDockAddMarker *m_dockAddMarker;
 	// Mapping
 	AwDockMapping *m_dockMEG;
 	AwDockMapping *m_dockEEG;	
 	// updater 
-	AwUpdater *m_updater;
-
+	AwUpdater m_updater;
 	// flags
 	bool m_currentFileModified;
+	// methods
 	void createUserDirs();
 	void initToolBarsAndMenu();
 	void closeFile();
@@ -150,9 +151,6 @@ signals:
 public slots:
 	/** Position le flag de fichier modifie */
 	void setModified(bool f = true) { m_currentFileModified = f; }
-	/** Display UI to set filters **/
-	void changeFilterSettings();
-	void newFilters();
 	/** Launch 3D mapping if signals are suitable **/
 	void runMapping();
 	/** Close mapping **/
@@ -178,7 +176,6 @@ private slots:
 	void on_actionQuit_triggered();
 	void on_actionMontage_triggered();
 	void on_actionOpen_triggered();
-	void on_actionLoadMesh_triggered();
 	void on_actionPreferences_triggered();
 	void on_actionShow_Mappings_triggered();
 	void on_actionAbout_AnyWave_triggered();

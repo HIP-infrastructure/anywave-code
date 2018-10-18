@@ -25,12 +25,19 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwSignalItemSettings.h"
 #include <AwAmplitudeManager.h>
-
+#include <qgraphicsscene.h>
 
 AwSignalItemSettings::AwSignalItemSettings(AwGraphicsSignalItem *item, QWidget *parent)
 	: AwGraphicsSignalDialog(item, parent)
 {
 	setupUi(this);	
+	m_copiedChannel = new AwChannel(item->channel());
+	m_sitem = item;
+}
+
+AwSignalItemSettings::~AwSignalItemSettings()
+{
+	delete m_copiedChannel;
 }
 
 
@@ -41,16 +48,12 @@ int AwSignalItemSettings::exec()
 		QDialog::done(QDialog::Rejected);
 
 	// init channel name
-	QString label = chan->name();
-	if (chan->hasReferences())
-		label += " - " + chan->referenceName();
-
-	labelChannel->setText(label);
+	labelChannel->setText(chan->fullName());
 	labelType->setText(AwChannel::typeToString(chan->type()));
 
 	// init combobox
 	int i = 0;
-	foreach (QString color, QColor::colorNames()) {
+	for (auto color : QColor::colorNames()) {
 		cb_Couleur->insertItem(i, color, i);
 		cb_Couleur->setItemData(i, QColor(color), Qt::DecorationRole);
 		i++;
@@ -63,29 +66,38 @@ int AwSignalItemSettings::exec()
 	cb_Couleur->setCurrentIndex(QColor::colorNames().indexOf(color_name));
 
 	// Init parametres filtrage
-	if (chan->highFilter() != -1)	{
-		checkHighPass->setChecked(true);
-		sbHigh->setEnabled(true);
-		sbHigh->setValue(chan->highFilter());
-	}
-	else {
-		checkHighPass->setChecked(false);
-		sbHigh->setEnabled(false);
-	}
-	
-	if (chan->lowFilter() != -1) {
-		checkLowPass->setChecked(true);
-		sbLow->setEnabled(true);
-		sbLow->setValue(chan->lowFilter());
-	}
-	else {
-		checkLowPass->setChecked(false);
-		sbLow->setEnabled(false);
-	}
+	checkHighPass->setChecked(chan->highFilter() > 0);
+	checkLowPass->setChecked(chan->lowFilter() > 0);
+	checkNotch->setChecked(chan->notch() > 0);
+	sbHigh->setValue(chan->highFilter());
+	sbLow->setValue(chan->lowFilter());
+	sbNotch->setValue(chan->notch());
+
 	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	spGainLevel->setValue(am->amplitude(m_item->channel()->type()));
-	spGainLevel->setSuffix(am->unitOfChannel(m_item->channel()->type()));
+	// fill combo box for levels
+	m_scale = am->getScale(chan->type());
+	for (auto item : m_scale) {
+		m_levels << QString("%1 %2/cm").arg(item).arg(chan->unit());
+	}
+	comboLevels->addItems(m_levels);
+	index = m_scale.indexOf(chan->gain());
+	if (index != -1)
+		comboLevels->setCurrentIndex(index);
+
+	connect(buttonDown, &QPushButton::clicked, this, &AwSignalItemSettings::upLevel);
+	connect(buttonUp, &QPushButton::clicked, this, &AwSignalItemSettings::downLevel);
+	// instant update for color and gain level.
+	connect(comboLevels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeChannelSettings()));
+	connect(cb_Couleur, SIGNAL(currentIndexChanged(int)), this, SLOT(changeChannelSettings()));
 	return QDialog::exec();
+}
+
+void AwSignalItemSettings::reject()
+{
+	auto channel = m_item->channel();
+	channel->setColor(m_copiedChannel->color());
+	channel->setGain(m_copiedChannel->gain());
+	QDialog::reject();
 }
 
 void AwSignalItemSettings::accept()
@@ -114,10 +126,31 @@ void AwSignalItemSettings::accept()
 		parent->setColor(chan->color());
 		parent = parent->parent();
 	}
-//	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-//	QVector<float> amps = am->getScale(chan->type());
-//	chan->setGain(amps[comboAmp->currentIndex()]);
-	chan->setGain((float)spGainLevel->value());
-	
+	chan->setGain(m_scale.at(comboLevels->currentIndex()));
 	QDialog::accept();
+}
+
+
+void AwSignalItemSettings::changeChannelSettings()
+{
+	auto chan = m_item->channel();
+	chan->setColor(QColor::colorNames().at(cb_Couleur->currentIndex()));
+	chan->setGain(m_scale.at(comboLevels->currentIndex()));
+	m_sitem->repaint();
+	m_sitem->scene()->update();
+}
+
+
+void AwSignalItemSettings::downLevel()
+{
+	int index = comboLevels->currentIndex();
+	if (index > 0) 
+		comboLevels->setCurrentIndex(index - 1);
+}
+
+void AwSignalItemSettings::upLevel()
+{
+	int index = comboLevels->currentIndex();
+	if (index < comboLevels->count())
+		comboLevels->setCurrentIndex(index + 1);
 }

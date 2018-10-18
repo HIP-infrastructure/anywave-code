@@ -39,9 +39,20 @@ class AW_GRAPHICS_EXPORT AwSignalItemSettings : public AwGraphicsSignalDialog, p
 
 public:
 	AwSignalItemSettings(AwGraphicsSignalItem *item = NULL, QWidget *parent = 0);
+	~AwSignalItemSettings();
 public slots:
-	int exec();
-	void accept();
+	int exec() override;
+	void accept() override;
+	void reject() override;
+protected slots:
+	void downLevel();
+	void upLevel();
+	void changeChannelSettings();
+protected:
+	QStringList m_levels;
+	QVector<float> m_scale; // values of amplitude in the scale.
+	AwChannel *m_copiedChannel;
+	AwGraphicsSignalItem *m_sitem;
 };
 
 #endif // SIGNAL_SETTINGS_H

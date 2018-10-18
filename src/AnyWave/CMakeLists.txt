@@ -2,13 +2,13 @@
 project(AnyWave)
 # disable epoching
 add_definitions("-DAW_DISABLE_EPOCHING")
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 SET(AnyWave_SRCS
 ./AnyWave.cpp  
     ./AwExportDial.cpp  
     ./AwNoGUI.cpp  
     ./AwUpdater.cpp  
+     ./AwOpenFileDialog.cpp
     ./main.cpp  
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
@@ -29,8 +29,6 @@ SET(AnyWave_SRCS
     ./Display/AwScene.cpp  
     ./Display/AwSignalView.cpp  
     ./Display/AwViewSetup.cpp  
-    ./Filter/AwFilterSettings.cpp  
-    ./Filter/AwFiltersManager.cpp  
     ./Filter/AwFilterToolBar.cpp  
     ./IO/ADES/ADESIO.cpp  
     ./IO/HDF5/HDF5IO.cpp  
@@ -72,7 +70,10 @@ SET(AnyWave_SRCS
     ./MATPy/IsTerminated.cpp  
     ./MATPy/SendCommand.cpp  
     ./MATPy/SendMessage.cpp  
-    ./MATPy/SetBeamFormer.cpp  
+    ./MATPy/SetBeamFormer.cpp
+    ./MATPy/GetDataEx.cpp
+    ./MATPy/GetPluginIO.cpp  
+    ./MATPy/AwTCPResponse.cpp
     ./Montage/AwAVGChannel.cpp  
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
@@ -171,9 +172,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Display/AwDisplay.h  
     ./Display/AwChannelSelectionModel.h  
     ./Display/AwChannelSelectionDial.h  
-    ./Filter/AwFiltersManager.h  
     ./Filter/AwFilterToolBar.h  
-    ./Filter/AwFilterSettings.h  
     ./IO/ADES/ADESIO.h  
     ./IO/HDF5/structs.h  
     ./IO/HDF5/HDF5IO.h  
@@ -264,6 +263,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./ICA/AwICAComponents.h  
     ./ICA/AwICASignalItem.h  
     ./ICA/AwICARejectButton.h  
+    ./AwOpenFileDialog.h
     ./AwUpdater.h  
     ./AwExportDial.h  
     ./AnyWave.h  
@@ -300,7 +300,6 @@ SET(FORMS ./AnyWave.ui
     ./Display/AwDSMSaveSetupUI.ui  
     ./Display/AwNewViewDial.ui  
     ./Display/AwSaveAsNewSetupDialog.ui  
-    ./Filter/AwFilterSettings.ui  
     ./Filter/AwFilterToolBar.ui  
     ./IO/BIDS/AwBIDSGUI.ui  
     ./Marker/AwExportMarkersWizard.ui  
@@ -370,10 +369,12 @@ AwMATLAB)
 ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC} ${AnyWave_TS})
 QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml Charts)
 SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml Qt5::Charts)
-TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
+#TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
+
+TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z)
 add_dependencies(AnyWaveLinux ${AW_LIBS})
 
-
+INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
 
 
 

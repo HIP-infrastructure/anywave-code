@@ -25,6 +25,7 @@ IF(APPLE)
 	target_link_libraries(ANTReader AwCore AwReadWrite Qt5::Core)
 ELSE() # link with openmp lib on Linux
 	target_link_libraries(ANTReader AwCore AwReadWrite Qt5::Core gomp)
+   INSTALL(TARGETS ANTReader DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 ENDIF()
 
 

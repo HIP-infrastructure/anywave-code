@@ -46,9 +46,6 @@
     <ClCompile Include="AwDataClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AwFilteringOptions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AwMarker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
