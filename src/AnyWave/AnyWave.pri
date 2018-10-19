@@ -115,6 +115,7 @@ HEADERS += ./Data/AwDataConnection.h \
     ./ICA/AwICARejectButton.h \
     ./AwUpdater.h \
     ./AwExportDial.h \
+    ./AwOpenFileDialog.h \
     ./AnyWave.h \
     ./Prefs/AwPreferences.h \
     ./Prefs/AwSettings.h \
@@ -140,6 +141,7 @@ SOURCES += ./AnyWave.cpp \
     ./AwNoGUI.cpp \
     ./AwUpdater.cpp \
     ./main.cpp \
+    ./AwOpenFileDialog.cpp \
     ./Data/AwDataConnection.cpp \
     ./Data/AwDataServer.cpp \
     ./Carto/AwDockMapping.cpp \
