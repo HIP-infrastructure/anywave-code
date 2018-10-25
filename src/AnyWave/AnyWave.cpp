@@ -77,6 +77,9 @@
 #include <mapping/AwMeshManager.h>
 #include "AwUpdater.h"
 #include "Script/AwScriptManager.h"
+
+#define AW_EPOCHING
+
 #ifdef AW_EPOCHING
 #include "Epoch/AwEpochManager.h"
 #endif
@@ -656,7 +659,7 @@ void AnyWave::initToolBarsAndMenu()
 	actionShow_map_on_signal->setEnabled(false);
 
 	// Epoch
-#ifndef AW_DISABLE_EPOCHING
+#ifdef AW_EPOCHING
 	connect(actionCreateEpoch, &QAction::triggered, this, &AnyWave::doEpoch);
 	connect(actionVisualiseEpoch, &QAction::triggered, this, &AnyWave::visualiseEpoch);
 	connect(actionAveraging, &QAction::triggered, this, &AnyWave::averageEpoch);

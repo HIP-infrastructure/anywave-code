@@ -34,15 +34,24 @@ class AwEpochTree;
 class AW_EPOCH_EXPORT AwEpoch
 {
 public:
-	AwEpoch();
+	AwEpoch(AwEpochTree *condition, AwMarker *marker);
 	~AwEpoch();
 
 	enum Tags { Average = 1 };
 
-	AwMarker *posAndDuration;
-	bool rejected;
-	int tags;
-	AwEpochTree *condition;
+	inline AwEpochTree *condition() { return m_condition; }
+	inline bool isRejected() { return m_rejected; }
+	inline void setRejected(bool flag = true) { m_rejected = flag; }
+	inline bool isLoaded() { return m_loaded; }
+	inline void setLoaded(bool flag = true) { m_loaded = flag; }
+	AwChannelList& channels() { return m_channels; }
+	inline AwMarker *posAndDuration() { return m_posAndDuration; }
+protected:
+	AwMarker *m_posAndDuration;
+	bool m_rejected, m_loaded;
+	int m_tags;
+	AwEpochTree *m_condition;
+	AwChannelList m_channels;	// The epoch holds a copy of channels set in EpochTree.
 };
 
 typedef QList<AwEpoch *> AwEpochList;

@@ -24,16 +24,20 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <epoch/AwEpoch.h>
+#include <epoch/AwEpochTree.h>
 
-
-AwEpoch::AwEpoch()
+AwEpoch::AwEpoch(AwEpochTree *condition, AwMarker *marker)
 {
-	posAndDuration = NULL;
-	rejected = false;
+	m_posAndDuration = marker;
+	m_rejected = m_loaded = false;
+	m_channels = AwChannel::duplicateChannels(condition->channels());
+	m_condition = condition;
 }
 
 AwEpoch::~AwEpoch()
 {
-	if (posAndDuration)
-		delete posAndDuration;
+	if (m_posAndDuration)
+		delete m_posAndDuration;
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
 }

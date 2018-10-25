@@ -45,21 +45,22 @@ AwEpochVisuWidget::AwEpochVisuWidget(QWidget *parent)
 	m_currentCondition = NULL;
 	m_currentEpochIndex = -1;
 	updateConditions();
-	m_signalView = new AwBaseSignalView();
-	m_signalView->setFlags(AwBaseSignalView::NoNavButtons | AwBaseSignalView::NoInfoLabels | AwBaseSignalView::ViewAllChannels
-		| AwBaseSignalView::NoHScrollBar | AwBaseSignalView::NoMarkerBar);
+	//m_signalView = new AwBaseSignalView();
+	//m_signalView->setFlags(AwBaseSignalView::NoNavButtons | AwBaseSignalView::NoInfoLabels | AwBaseSignalView::ViewAllChannels
+	//	| AwBaseSignalView::NoHScrollBar | AwBaseSignalView::NoMarkerBar);
+	//m_ui.groupBoxEpoch->layout()->replaceWidget(m_ui.widget, m_signalView);
+	//m_zeroMarker = NULL;
+	//m_buffer = new AwDataBuffer;
+	//m_buffer->openConnection(m_signalView->client());
+	//connect(this, &AwEpochVisuWidget::newDataLoaded, m_buffer, &AwDataBuffer::setNewData);
+	//m_signalView->setSecPerCm(0.1);
+	//m_signalView->showElectrodesNames(false);
+	//m_signalView->showZeroLine(false);
+	//m_signalView->showMarkersLabels(false);
+	//m_signalView->showMarkersValues(false);
+	//m_signalView->showMarkers(true);
+	m_signalView = new AwEpochSignalView();
 	m_ui.groupBoxEpoch->layout()->replaceWidget(m_ui.widget, m_signalView);
-	m_zeroMarker = NULL;
-	m_buffer = new AwDataBuffer;
-	m_buffer->openConnection(m_signalView->client());
-	connect(this, &AwEpochVisuWidget::newDataLoaded, m_buffer, &AwDataBuffer::setNewData);
-	m_signalView->setSecPerCm(0.1);
-	m_signalView->showElectrodesNames(false);
-	m_signalView->showZeroLine(false);
-	m_signalView->showMarkersLabels(false);
-	m_signalView->showMarkersValues(false);
-	m_signalView->showMarkers(true);
-
 	// update navigation widgets
 	for (auto c : AwEpochManager::instance()->conditions()) 
 		m_ui.comboCondition->addItem(c->name());
@@ -68,19 +69,19 @@ AwEpochVisuWidget::AwEpochVisuWidget(QWidget *parent)
 	connect(m_ui.buttonNext, &QPushButton::clicked, this, &AwEpochVisuWidget::nextEpoch);
 	connect(m_ui.buttonPrev, &QPushButton::clicked, this, &AwEpochVisuWidget::prevEpoch);
 	connect(m_ui.buttonReject, &QPushButton::clicked, this, &AwEpochVisuWidget::rejectEpoch);
-	connect(m_ui.buttonCoucou, &QPushButton::clicked, this, &AwEpochVisuWidget::qwtPreview);
-	connect(m_ui.buttonThumb, &QPushButton::clicked, this, &AwEpochVisuWidget::thumb);
+	//connect(m_ui.buttonCoucou, &QPushButton::clicked, this, &AwEpochVisuWidget::qwtPreview);
+	//connect(m_ui.buttonThumb, &QPushButton::clicked, this, &AwEpochVisuWidget::thumb);
 	repaint();
 }
 
 AwEpochVisuWidget::~AwEpochVisuWidget()
 {
 	delete m_signalView;
-	m_buffer->thread()->exit(0);
-	m_buffer->thread()->wait();
-	delete m_buffer;
-	if (m_zeroMarker)
-		delete m_zeroMarker;
+//	m_buffer->thread()->exit(0);
+//	m_buffer->thread()->wait();
+//	delete m_buffer;
+//	if (m_zeroMarker)
+//		delete m_zeroMarker;
 }
 
 void AwEpochVisuWidget::prevEpoch()
@@ -113,8 +114,8 @@ void AwEpochVisuWidget::rejectEpoch()
 
 	QStandardItem *epoch_item = cond_item->child(m_currentEpochIndex, 1);
 	AwEpoch *epoch = m_currentCondition->epochs().at(m_currentEpochIndex);
-	epoch->rejected = !epoch->rejected;
-	epoch->rejected ? epoch_item->setCheckState(Qt::Checked) : epoch_item->setCheckState(Qt::Unchecked);
+	epoch->setRejected(!epoch->isRejected());
+	epoch->isRejected() ? epoch_item->setCheckState(Qt::Checked) : epoch_item->setCheckState(Qt::Unchecked);
 	updateNavBar();
 }
 
@@ -185,7 +186,7 @@ QList<QStandardItem *> AwEpochVisuWidget::createChildStatus(AwEpochTree *conditi
 		status->setCheckable(true);
 		status->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
 		status->setData(i);	// store index of epoch in the list
-		epoch->rejected ? status->setCheckState(Qt::Checked) : status->setCheckState(Qt::Unchecked);
+		epoch->isRejected() ? status->setCheckState(Qt::Checked) : status->setCheckState(Qt::Unchecked);
 		list  << status;
 	}
 	return list;
@@ -219,30 +220,37 @@ void AwEpochVisuWidget::updateItem(QStandardItem *item)
 		return;
 	// update current epoch
 	AwEpoch *epoch = m_currentCondition->epochs().at(item->data().toInt());
-	epoch->rejected = item->checkState() == Qt::Checked;
+	epoch->setRejected(item->checkState() == Qt::Checked);
 	viewCurrentEpoch();
 }
 
 void AwEpochVisuWidget::viewCurrentEpoch()
 {
-	if (m_currentCondition->loadEpoch(m_currentEpochIndex) == 0) {
-		//m_signalView->widget()->show();
-		emit newDataLoaded(&m_currentCondition->channels());
-		m_signalView->setTotalDuration(m_buffer->duration());
-		m_signalView->setChannels(m_currentCondition->channels());
-		m_signalView->setTimeShift(-m_currentCondition->zeroPos());
-		int type = m_currentCondition->channels().first()->type();
-		float meanRange = AwChannel::meanRangeValue(m_currentCondition->channels());
-//		if (m_currentCondition->modality() == AwChannel::MEG || m_currentCondition->modality() == AwChannel::GRAD)
-//			meanRange *= 1E12;
-		m_signalView->navigationBar()->amplitudeWidget()->changeCurrentChannelTypeAndValue(type, meanRange);
-
-		AwMarkerList tmp;
-		m_zeroMarker = new AwMarker("0", m_currentCondition->zeroPos());
-		tmp.append(m_zeroMarker);
-		m_signalView->setMarkers(tmp);
-		repaint();
-	}
+	auto epoch = m_currentCondition->epochs().at(m_currentEpochIndex);
+	if (epoch == NULL)
+		return;
+	if (!epoch->isLoaded())
+		m_currentCondition->loadEpoch(epoch);
+	m_signalView->setEpoch(epoch);
+	m_signalView->show();
+//	if (m_currentCondition->loadEpoch(m_currentEpochIndex) == 0) {
+//		//m_signalView->widget()->show();
+//		emit newDataLoaded(&m_currentCondition->channels());
+//		m_signalView->setTotalDuration(m_buffer->duration());
+//		m_signalView->setChannels(m_currentCondition->channels());
+//		m_signalView->setTimeShift(-m_currentCondition->zeroPos());
+//		int type = m_currentCondition->channels().first()->type();
+//		float meanRange = AwChannel::meanRangeValue(m_currentCondition->channels());
+////		if (m_currentCondition->modality() == AwChannel::MEG || m_currentCondition->modality() == AwChannel::GRAD)
+////			meanRange *= 1E12;
+//		m_signalView->navigationBar()->amplitudeWidget()->changeCurrentChannelTypeAndValue(type, meanRange);
+//
+//		AwMarkerList tmp;
+//		m_zeroMarker = new AwMarker("0", m_currentCondition->zeroPos());
+//		tmp.append(m_zeroMarker);
+//		m_signalView->setMarkers(tmp);
+//		repaint();
+//	}
 }
 
 void AwEpochVisuWidget::showEpoch(const QModelIndex& index)
@@ -281,7 +289,7 @@ void AwEpochVisuWidget::updateNavBarCondition()
 void AwEpochVisuWidget::updateNavBar()
 {
 	m_ui.labelEpoch->setText(QString("Epoch %1").arg(m_currentEpochIndex + 1));
-	if (m_currentCondition->epochs().at(m_currentEpochIndex)->rejected) {
+	if (m_currentCondition->epochs().at(m_currentEpochIndex)->isRejected()) {
 		m_ui.labelEpochStatus->setStyleSheet("QLabel { color: red; text-align:center; font-family: Arial; font-size: 16pt; }");
 		m_ui.labelEpochStatus->setText("REJECTED");
 		m_ui.buttonReject->setText("Undo Reject");
@@ -340,7 +348,7 @@ void createThumbPixmap(Thumbnail *thumb)
 	plot.enableAxis(QwtPlot::yLeft, false);
 	plot.setFrameShape(QFrame::StyledPanel);
 	//plot.plotLayout()->setAlignCanvasToScales(true);
-	AwEpochTree *cond = thumb->epoch->condition;
+	AwEpochTree *cond = thumb->epoch->condition();
 	AwChannelList channels = cond->channels();
 	//double min = 0., max = 0.;
 	vec data(channels.first()->dataSize());

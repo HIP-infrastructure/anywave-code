@@ -27,6 +27,7 @@
 #include <epoch/AwEpochTree.h>
 #include <epoch/AwEpochAverageChannel.h>
 #include <math/AwMath.h>
+#include <AwException.h>
 
 /** The markers must have the same non null duration **/
 AwEpochTree::AwEpochTree(const QString& name, const AwChannelList& channels, float totalDuration, QObject *parent) : AwDataClient(parent)
@@ -38,7 +39,6 @@ AwEpochTree::AwEpochTree(const QString& name, const AwChannelList& channels, flo
 	m_zeroSample = 0;
 	m_name = name;
 	m_modality = channels.first()->type();
-	m_filters[0] = m_filters[1] = m_filters[2] = 0.;
 	m_avgIsDone = false;
 }
 
@@ -50,39 +50,37 @@ int AwEpochTree::numberOfGoodEpochs()
 {
 	int count = 0;
 	for (auto e : m_epochs)
-		if (!e->rejected)
+		if (!e->isRejected())
 			count++;
 
 	return count;
 }
 
-void AwEpochTree::setFilters(float *filters)
-{
-	memcpy(m_filters, filters, 3 * sizeof(float));
-	m_avgIsDone = false;	// flag to recompute avg when filters change
-}
-
 int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post)
 {
-	if (m_totalDuration <= 0.)
+	m_after = post;
+	m_before = pre;
+	if (m_totalDuration <= 0.) {
+		throw AwException(QString("duration of data file is zero."), QString("AwEpochTree::buildEpochs()"));
 		return -1;
+	}
 	clearEpochs();
+	m_markerLabel = label;
 	for (AwMarker *m : markers) {
 		if (m->label() != label)
 			continue;
 		float pos = m->start() - pre;
+		// skip epochs that overlap starting and/or ending positions of data.
 		if (pos < 0.) // skip this epoch 
 			continue;
 		if (m->start() + post > m_totalDuration)
 			continue;
 
-		AwEpoch *e = new AwEpoch;
-		e->posAndDuration = new AwMarker(label, pos, pre + post);
-		e->condition = this;
-		m_epochs << e;
+		m_epochs << new AwEpoch(this, new AwMarker(label, pos, pre + post));
 	}
 	m_zeroPos = pre;
 	m_zeroSample = (int)floor(pre * m_channels.first()->samplingRate());
+	m_epochDuration = pre + post;
 	return 0;
 }
 
@@ -93,12 +91,6 @@ void AwEpochTree::clearEpochs()
 	m_zeroPos = 0;
 	m_zeroSample = 0;
 	m_avgIsDone = false;
-}
-
-float AwEpochTree::epochDuration()
-{
-	// if no epochs return 0 otherwise return the first epoch duration.
-	return m_epochs.isEmpty() ? 0 : m_epochs.first()->posAndDuration->duration();
 }
 
 void AwEpochTree::setComputeSettings(AwEpochComputeSettings& settings)
@@ -114,7 +106,7 @@ int AwEpochTree::doAverage(bool verbose)
 	if (m_epochs.isEmpty())
 		return -1;
 	m_matrix.clear();
-	arma::uword nCols = (arma::uword)floor(m_epochs.first()->posAndDuration->duration() * m_channels.first()->samplingRate());
+	arma::uword nCols = (arma::uword)floor(m_epochDuration * m_channels.first()->samplingRate());
 	arma::uword nRows = (arma::uword)m_channels.size();
 	fmat epochs_matrix = arma::fmat(nRows, nCols);
 	epochs_matrix.zeros();
@@ -124,19 +116,15 @@ int AwEpochTree::doAverage(bool verbose)
 	// skip rejected epochs
 	int nEpochs = 0;
 	for (AwEpoch *e : m_epochs) {
-		if (e->rejected)
+		if (e->isRejected())
 			continue;
-		requestData(&m_channels, e->posAndDuration->start(), e->posAndDuration->duration());
+		loadEpoch(e); // (&m_channels, e->posAndDuration->start(), e->posAndDuration->duration());
 		
 		// apply baseline correction if set in settings
 		if (m_computeSettings.useBaselineCorrection) {
 			if (m_zeroPos > 0.) {
 				for (auto c : m_channels) {
 					fvec vec = AwMath::channelToVec(c);
-//					if (c->isMEG() || c->isGRAD())
-//						vec *= 1e12;
-//					else
-//						vec *= 1e6;
 					arma::uword n = (arma::uword)floor(m_zeroPos * c->samplingRate());
 					int start = 0, end = n - 1;
 					if (m_computeSettings.latencyRange[0] > 0 && m_computeSettings.latencyRange[0] <= m_zeroPos)
@@ -151,10 +139,6 @@ int AwEpochTree::doAverage(bool verbose)
 						float stddev = arma::stddev(vec(span(start, end))); 
 						vec /= stddev;
 					}
-	//				if (c->isMEG() || c->isGRAD())
-	//					vec *= 1e-12;
-	//				else
-	//					vec *= 1e-6;
 					// copy the data back to the original AwChannel object
 					memcpy(c->data(), vec.memptr(), c->dataSize() * sizeof(float));
 				}
@@ -249,17 +233,14 @@ int AwEpochTree::loadEpoch(int index)
 {
 	if (index < 0 || index >= m_epochs.size())
 		return -1;
-	// check if filters have changed
-	AwChannel *first = m_channels.first();
-	if (first->lowFilter() != m_filters[0] || first->highFilter() != m_filters[1] 
-		|| first->notch() != m_filters[2]) {  // apply filters settings to all channels
-		for (auto c : m_channels) {
-			c->setLowFilter(m_filters[0]);
-			c->setHighFilter(m_filters[1]);
-			c->setNotch(m_filters[2]);
-		}
-	}
-	requestData(&m_channels, m_epochs.at(index)->posAndDuration);
+
+	auto epoch = m_epochs.at(index);
+	if (epoch->isLoaded())
+		return 0;
+	auto channels = epoch->channels();
+	m_filterSettings.apply(channels);
+	requestData(&channels, epoch->posAndDuration());
+	epoch->setLoaded();
 	return 0;
 }
 

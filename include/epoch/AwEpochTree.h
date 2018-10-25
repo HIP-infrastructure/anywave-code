@@ -31,8 +31,8 @@
 #include <epoch/AwEpochDataBuffer.h>
 #include <epoch/AwEpochAverageChannel.h>
 #include <epoch/AwEpochComputeSettings.h>
-#include <armadillo>
-using namespace arma;
+#include <aw_armadillo.h>
+#include <filter/AwFilterSettings.h>
 
 class AW_EPOCH_EXPORT AwEpochTree : public AwDataClient
 {
@@ -57,11 +57,10 @@ public:
 	inline float totalDuration() { return m_totalDuration; }
 	inline bool isAvgAvailable() { return m_avgIsDone; }
 	inline int modality() { return m_modality; }
-	float epochDuration();
-
-	void setFilters(float *filters);
-	inline float* filters() { return m_filters; }
-
+	inline float preLatency() { return m_before; }
+	inline float postLatency() { return m_after; }
+	inline float epochDuration() { return m_epochDuration; }
+	inline QString& markerLabel() { return m_markerLabel; }
 	/** Build epochs using the markers, around a specific marker, giving pre and post latencies **/
 	int buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post);
 
@@ -92,7 +91,10 @@ protected:
 	fmat m_errorType;		// the error type of samples toward epochs.
 	fmat m_std;				// keep a copy of std deviation of samples toward epochs
 	QString m_name;			// condition name associated with the epochs
+	QString m_markerLabel;	// label of markers used to build epochs.
 	int m_modality;			// type of channels used to epoch.
-	float m_filters[3];		// the low pass, high pass and notch filter applied to data.
+	float m_before, m_after;	// pre and post latencies to build epochs.
+	float m_epochDuration;	// duration in seconds of each epochs.
+	AwFilterSettings m_filterSettings;
 	bool m_avgIsDone;		// Flag indicating if the averaging is done.
 };

@@ -30,7 +30,8 @@
 #include <qstandarditemmodel.h>
 #include <epoch/AwEpochTree.h>
 #include <AwDataBuffer.h>
-#include <widget/SignalView/AwBaseSignalView.h>
+//#include <widget/SignalView/AwBaseSignalView.h>
+#include <epoch/AwEpochSignalView.h>
 
 #include "AwEpochThumbCreator.h"
 
@@ -77,7 +78,7 @@ private:
 	QStandardItemModel m_treeViewModel;
 	AwEpochTree *m_currentCondition;	// current selected condition
 	int m_currentEpochIndex;			// current selected epoch within a condition
-	AwBaseSignalView *m_signalView;
+	AwEpochSignalView *m_signalView;
 	AwDataBuffer *m_buffer;
 	AwMarker *m_zeroMarker;
 	AwEpochThumbCreator m_tc;

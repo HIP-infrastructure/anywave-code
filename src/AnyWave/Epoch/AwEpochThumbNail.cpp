@@ -31,7 +31,7 @@ AwEpochThumbNail::AwEpochThumbNail(AwEpoch *epoch, const QPixmap& pixmap, QWidge
 	m_ui.setupUi(this);
 	m_ui.label->setPixmap(pixmap);
 	m_epoch = epoch;
-	if (m_epoch->rejected)
+	if (m_epoch->isRejected())
 		m_ui.buttonReject->setText("Undo Reject");
 	else 
 		m_ui.buttonReject->setText("Reject");
