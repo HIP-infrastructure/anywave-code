@@ -78,7 +78,7 @@
 #include "AwUpdater.h"
 #include "Script/AwScriptManager.h"
 
-#define AW_EPOCHING
+//#define AW_EPOCHING
 
 #ifdef AW_EPOCHING
 #include "Epoch/AwEpochManager.h"

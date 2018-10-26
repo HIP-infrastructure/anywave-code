@@ -68,7 +68,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;AwCoreLib.lib;AwMathLib.lib;Qt5Gui.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;AwCoreLib.lib;AwMathLib.lib;Qt5Gui.lib;Qt5Widgets.lib;AwWidgetsLib.lib;AwFilteringLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(AWROOT)\lib\$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
