@@ -61,13 +61,6 @@
            <widget class="QComboBox" name="comboCondition"/>
           </item>
           <item>
-           <widget class="QPushButton" name="buttonThumb">
-            <property name="text">
-             <string>Mosaic View</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -79,13 +72,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="buttonAverage">
-            <property name="text">
-             <string>Average</string>
-            </property>
-           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_3">
@@ -116,13 +102,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="labelEpoch">
-            <property name="text">
-             <string>Epoch</string>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="labelEpochStatus">
             <property name="text">
              <string>Epoch</string>
             </property>
@@ -152,13 +137,6 @@
            <widget class="QPushButton" name="buttonReject">
             <property name="text">
              <string>Reject</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="buttonCoucou">
-            <property name="text">
-             <string>COUCOU</string>
             </property>
            </widget>
           </item>

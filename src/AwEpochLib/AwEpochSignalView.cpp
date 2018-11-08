@@ -2,13 +2,14 @@
 #include <epoch/AwEpochTree.h>
 
 
-AwEpochSignalView::AwEpochSignalView(QWidget *parent, Qt::WindowFlags f, int flags, AwViewSettings *settings)
+AwEpochSignalView::AwEpochSignalView(QWidget *parent, Qt::WindowFlags f, int flags, AwViewSettings *settings) :
+	AwBaseSignalView(parent, f, flags, settings)
 {
 	m_epoch = Q_NULLPTR;
 	// set default flags for epoch signal view
-    int flags_ = AwBaseSignalView::NoNavButtons | AwBaseSignalView::NoInfoLabels | AwBaseSignalView::ViewAllChannels
-		| AwBaseSignalView::NoHScrollBar | AwBaseSignalView::NoMarkerBar;
-	AwBaseSignalView(parent, f, flags_, settings);
+	int flags_ = AwBaseSignalView::NoNavButtons | AwBaseSignalView::NoInfoLabels | AwBaseSignalView::ViewAllChannels
+		| AwBaseSignalView::NoMarkerBar | AwBaseSignalView::NoSettingsButton;
+	setFlags(flags_);
 	setSecPerCm(0.1);
 	showElectrodesNames(false);
 	showZeroLine(false);
@@ -47,6 +48,8 @@ void AwEpochSignalView::setEpoch(AwEpoch *epoch)
 	// channels will be those of the epoch Tree
 	m_channels = epoch->channels();
 	m_pageDuration = m_epoch->condition()->epochDuration();
+	m_view->setTimeShift(-epoch->condition()->preLatency());
+	setTotalDuration(m_pageDuration);
 	// channels must contain data.
 	setChannels(m_channels);
 }
@@ -56,6 +59,6 @@ void AwEpochSignalView::reloadData()
 	if (m_channels.isEmpty())
 		return;
 	dataReceived();
-	emit dataLoaded(0., m_pageDuration);
+	emit dataLoaded(m_positionInFile, m_pageDuration);
 }
 

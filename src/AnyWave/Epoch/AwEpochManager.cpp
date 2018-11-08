@@ -141,59 +141,6 @@ void AwEpochManager::loadEpochFile(const QString& path)
 		for (auto e : newCondition->epochs()) 
 			e->setRejected(flags[j++].toBool());
 	}
-
-	//clean();
-	//QFile file(path);
-	//QDataStream stream(&file);
-	//stream.setVersion(QDataStream::Qt_4_4);
-	//if (!file.open(QIODevice::ReadOnly))
-	//	return;
-	//int nConditions;
-	//stream >> nConditions;
-	//if (nConditions <= 0) { // error
-	//	file.close();
-	//	return;
-	//}
-	//for (int i = 0; i < nConditions; i++) {
-	//	QString name;
-	//	float totalDuration, zeroPos;
-	//	int nChannels, type, zeroSample;
-	//	float filters[3];
-	//	stream >> name >> totalDuration >> filters[0] >> filters[1] >> filters[2] >> zeroSample >> zeroPos >> nChannels >> type;
-	//	AwChannelList channels;
-	//	for (int j = 0; j < nChannels; j++) {
-	//		QString name, ref;
-	//		float sr;
-	//		stream >> name >> ref >> sr;
-	//		AwChannel *c = new AwChannel;
-	//		c->setType(type);
-	//		c->setName(name);
-	//		c->setReferenceName(ref);
-	//		c->setSamplingRate(sr);
-	//		channels << c;
-	//	}
-	//	AwEpochTree *tree = new AwEpochTree(name, channels, totalDuration);
-	//	tree->setZeroPos(zeroPos);
-	//	tree->setZeroSample(zeroSample);
-	//	tree->setFilters(filters);
-	//	int nEpochs;
-	//	stream >> nEpochs;
-	//	for (int j = 0; j < nEpochs; j++) {
-	//		float start, duration;
-	//		bool rejected;
-	//		int tags;
-	//		stream >> start >> duration >> rejected >> tags;
-	//		AwEpoch *e = new AwEpoch;
-	//		e->posAndDuration = new AwMarker("epoch", start, duration);
-	//		e->rejected = rejected;
-	//		e->tags = tags;
-	//		e->condition = tree;
-	//		tree->epochs().append(e);
-	//	}
-	//	m_hashEpochs.insert(name, tree);
-	//	AwDataServer::getInstance()->openConnection(tree);
-	//}
-	//file.close();
 }
 
 void AwEpochManager::saveEpochFile(const QString& path)
@@ -224,37 +171,6 @@ void AwEpochManager::saveEpochFile(const QString& path)
 	QJsonDocument doc(root);
 	file.write(doc.toJson());
 	file.close();
-
-	//if (m_hashEpochs.isEmpty())
-	//	return;
-	//QFile file(path);
-	//QDataStream stream(&file);
-	//stream.setVersion(QDataStream::Qt_4_4);
-	//if (!file.open(QIODevice::ReadWrite))
-	//	return;
-	//stream << m_hashEpochs.count();
-	//for (auto key : m_hashEpochs.keys()) {
-	//	auto condition = m_hashEpochs.value(key);
-	//	float *filters = condition->filters();
-	//	stream << condition->name();
-	//	stream << condition->totalDuration();
-	//	stream << filters[0] << filters[1] << filters[2];
-	//	stream << condition->zeroSample() << condition->zeroPos();
-	//	stream << condition->channels().size();
-	//	// save first channel type
-	//	stream << condition->channels().first()->type();
-	//	for (auto c : condition->channels()) 
-	//		stream << c->name() << c->referenceName() << c->samplingRate();
-	//	
-	//	stream << condition->epochs().size();
-	//	for (auto epoch : condition->epochs()) {
-	//		stream << epoch->posAndDuration->start();
-	//		stream << epoch->posAndDuration->duration();
-	//		stream << epoch->rejected;
-	//		stream << epoch->tags;
-	//	}
-	//}
-	//file.close();
 }
 
 void AwEpochManager::save()

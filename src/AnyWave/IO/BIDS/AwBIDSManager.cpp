@@ -77,35 +77,6 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
 	events_tsv = QString("%1_events.tsv").arg(events_tsv);
 
-	//if (session.isEmpty()) {
-	//	if (run.isEmpty()) {
-	//		fileName = QString("%1/sub-%2_task-%3_ieeg.%4").arg(dir).arg(subj).arg(task).arg(ext);
-	//		json = QString("%1/sub-%2_task-%3_ieeg.json").arg(dir).arg(subj).arg(task);
-	//		channels_tsv = QString("%1/sub-%2_task-%3_channels.tsv").arg(dir).arg(subj).arg(task);
-	//		events_tsv = QString("%1/sub-%2_task-%3_events.tsv").arg(dir).arg(subj).arg(task);
-	//	}
-	//	else {
-	//		fileName = QString("%1/sub-%2_task-%3_run-%4_ieeg.%5").arg(dir).arg(subj).arg(task).arg(run).arg(ext);
-	//		json = QString("%1/sub-%2_task-%3_run-%4_ieeg.json").arg(dir).arg(subj).arg(task).arg(run);
-	//		channels_tsv = QString("%1/sub-%2_task-%3_run-%4_channels.tsv").arg(dir).arg(subj).arg(task).arg(run);
-	//		events_tsv = QString("%1/sub-%2_task-%3_run-%4_events.tsv").arg(dir).arg(subj).arg(task).arg(run);
-	//	}
-	//}
-	//else {
-	//	if (run.isEmpty()) {
-	//		fileName = QString("%1/sub-%2_ses-%3_task-%4_ieeg.%5").arg(dir).arg(subj).arg(session).arg(task).arg(ext);
-	//		json = QString("%1/sub-%2_ses-%3_task-%4_ieeg.json").arg(dir).arg(subj).arg(session).arg(task);
-	//		channels_tsv = QString("%1/sub-%3_ses-%3_task-%4_channels.tsv").arg(dir).arg(subj).arg(session).arg(task);
-	//		events_tsv = QString("%1/sub-%3_ses-%3_task-%4_events.tsv").arg(dir).arg(subj).arg(session).arg(task);
-	//	}
-	//	else {
-	//		fileName = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.%6").arg(dir).arg(subj).arg(session).arg(task).arg(run).arg(ext);
-	//		json = QString("%1/sub-%2_ses-%3_task-%4_run-%5_ieeg.json").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-	//		channels_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_channels.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-	//		events_tsv = QString("%1/sub-%2_ses-%3_task-%4_run-%5_events.tsv").arg(dir).arg(subj).arg(session).arg(task).arg(run);
-	//	}
-	//}
-
 	// generate events.tsv only if we have markers
 	if (!reader->infos.blocks().first()->markers().isEmpty()) {
 		// create events.tsv (not fixed by the draft at this time)
@@ -171,7 +142,7 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 			if (match.hasMatch())
 				stream << name.remove(re) << "\t";
 			else
-				stream << "n/a" << "\t";
+				stream << AwChannel::typeToString(c->type()) << "\t";
 			// reference
 			stream << "n/a" << "\t";
 			// description
@@ -252,7 +223,6 @@ int AwBIDSManager::seegToBIDS(const QString& file, const QString& destDir, const
 	}
 
 	reader->cleanUpAndClose();
-//	reader->plugin()->deleteInstance(reader);
 	return 0;
 }
 
