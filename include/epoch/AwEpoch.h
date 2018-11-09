@@ -43,15 +43,21 @@ public:
 	inline bool isRejected() { return m_rejected; }
 	inline void setRejected(bool flag = true) { m_rejected = flag; }
 	inline bool isLoaded() { return m_loaded; }
-	inline void setLoaded(bool flag = true) { m_loaded = flag; }
+	inline void setLoaded(bool flag = true) { m_loaded = flag; computeMaxAmplitude(); }
 	AwChannelList& channels() { return m_channels; }
 	inline AwMarker *posAndDuration() { return m_posAndDuration; }
+	inline float maxAmplitude() { return m_maxAmplitude; }
+	inline int zeroSample() { return m_zeroSample; }
 protected:
+	void computeMaxAmplitude();
+
 	AwMarker *m_posAndDuration;
 	bool m_rejected, m_loaded;
 	int m_tags;
 	AwEpochTree *m_condition;
 	AwChannelList m_channels;	// The epoch holds a copy of channels set in EpochTree.
+	float m_maxAmplitude;		// hold the value of the maximum amplitude for the signals.
+	int m_zeroSample;	// number of samples before the zero position in data.
 };
 
 typedef QList<AwEpoch *> AwEpochList;

@@ -35,6 +35,8 @@
 
 #include "AwEpochThumbCreator.h"
 
+class AwEpochMosaicWidget;
+
 typedef struct {
 	AwEpoch *epoch;
 	AwChannelList channels;
@@ -59,8 +61,10 @@ protected slots:
 	void nextEpoch();
 	void prevEpoch();
 	void rejectEpoch();
+	void doAveraging();
 	void qwtPreview();
 	void thumb();
+	void openMosaicView();
 signals:
 	void epochClicked(AwEpochTree *condition, int index);
 	void newDataLoaded(AwChannelList *channels);
@@ -79,7 +83,8 @@ private:
 	AwEpochTree *m_currentCondition;	// current selected condition
 	int m_currentEpochIndex;			// current selected epoch within a condition
 	AwEpochSignalView *m_signalView;
-	AwDataBuffer *m_buffer;
-	AwMarker *m_zeroMarker;
-	AwEpochThumbCreator m_tc;
+//	AwDataBuffer *m_buffer;
+//	AwMarker *m_zeroMarker;
+//	AwEpochThumbCreator m_tc;
+	AwEpochMosaicWidget *m_mosaicWidget;
 };

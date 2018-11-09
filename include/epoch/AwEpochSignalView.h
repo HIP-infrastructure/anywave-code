@@ -21,6 +21,5 @@ public:
 	void setEpoch(AwEpoch *epoch);
 protected:
 	AwEpoch *m_epoch;
-	AwMarker m_zeroPosition;
 };
 

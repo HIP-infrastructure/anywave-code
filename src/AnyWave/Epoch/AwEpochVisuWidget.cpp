@@ -31,6 +31,7 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_renderer.h>
 #include <AwAmplitudeManager.h>
+#include "AwEpochMosaicWidget.h"
 
 void createThumbPixmap(Thumbnail *thumbnail);
 
@@ -55,6 +56,7 @@ AwEpochVisuWidget::AwEpochVisuWidget(QWidget *parent)
 	connect(m_ui.buttonNext, &QPushButton::clicked, this, &AwEpochVisuWidget::nextEpoch);
 	connect(m_ui.buttonPrev, &QPushButton::clicked, this, &AwEpochVisuWidget::prevEpoch);
 	connect(m_ui.buttonReject, &QPushButton::clicked, this, &AwEpochVisuWidget::rejectEpoch);
+	m_mosaicWidget = Q_NULLPTR;
 	repaint();
 }
 
@@ -100,11 +102,11 @@ void AwEpochVisuWidget::rejectEpoch()
 
 void AwEpochVisuWidget::qwtPreview()
 {
-	if (m_currentCondition == NULL || m_currentEpochIndex < 0)
-		return;
+	//if (m_currentCondition == NULL || m_currentEpochIndex < 0)
+	//	return;
 
-	AwEpoch *epoch = m_currentCondition->epochs().at(m_currentEpochIndex);
-	m_tc.plot(epoch);
+	//AwEpoch *epoch = m_currentCondition->epochs().at(m_currentEpochIndex);
+	//m_tc.plot(epoch);
 }
 
 void AwEpochVisuWidget::changeCondition(const QString& condition)
@@ -263,6 +265,21 @@ void AwEpochVisuWidget::updateNavBar()
 		m_ui.buttonReject->setText("Reject");
 	}
 	m_ui.labelEpoch->setText(message);
+}
+
+
+void AwEpochVisuWidget::doAveraging()
+{
+	this->close();
+	AwEpochManager::instance()->average();
+}
+
+void AwEpochVisuWidget::openMosaicView()
+{
+	if (m_mosaicWidget == Q_NULLPTR) {
+		m_mosaicWidget = new AwEpochMosaicWidget(this);
+	}
+	m_mosaicWidget->show();
 }
 
 ThumbnailList *AwEpochVisuWidget::createThumbs()

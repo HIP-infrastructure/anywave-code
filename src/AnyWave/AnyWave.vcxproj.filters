@@ -1270,6 +1270,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwOpenFileDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Epoch\AwEpochMosaicWidget.cpp">
+      <Filter>Epoch</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochMosaicWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochMosaicWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1788,6 +1797,12 @@
     <CustomBuild Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="Epoch\AwEpochMosaicWidget.ui">
+      <Filter>Epoch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Epoch\AwEpochMosaicWidget.h">
+      <Filter>Epoch</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -1993,6 +2008,9 @@
     </ClInclude>
     <ClInclude Include="MATPy\AwTCPResponse.h">
       <Filter>MATPy</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwEpochMosaicWidget.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

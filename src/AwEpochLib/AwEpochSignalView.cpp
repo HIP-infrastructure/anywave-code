@@ -17,8 +17,6 @@ AwEpochSignalView::AwEpochSignalView(QWidget *parent, Qt::WindowFlags f, int fla
 	showMarkersValues(false);
 	showMarkers(true);
 	stackChannels(true);
-	m_zeroPosition = AwMarker("zero", 0., 0.);
-	m_markers.append(&m_zeroPosition);
 }
 
 
@@ -44,7 +42,6 @@ void AwEpochSignalView::setEpoch(AwEpoch *epoch)
 {
 	m_epoch = epoch;
 	m_positionInFile = - epoch->condition()->preLatency();
-	m_zeroPosition.setStart(epoch->condition()->preLatency());
 	// channels will be those of the epoch Tree
 	m_channels = epoch->channels();
 	m_pageDuration = m_epoch->condition()->epochDuration();
@@ -52,6 +49,9 @@ void AwEpochSignalView::setEpoch(AwEpoch *epoch)
 	setTotalDuration(m_pageDuration);
 	// channels must contain data.
 	setChannels(m_channels);
+	// compute the gain factor for the max amplitude is shown for 3cm height
+	auto gain = m_epoch->maxAmplitude() / 3.;
+	m_navBar->amplitudeWidget()->changeCurrentChannelTypeAndValue(m_channels.first()->type(), gain);
 }
 
 void AwEpochSignalView::reloadData()
