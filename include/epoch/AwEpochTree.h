@@ -97,4 +97,6 @@ protected:
 	float m_epochDuration;	// duration in seconds of each epochs.
 	AwFilterSettings m_filterSettings;
 	bool m_avgIsDone;		// Flag indicating if the averaging is done.
+	// Threading
+	QMutex m_mutex;
 };

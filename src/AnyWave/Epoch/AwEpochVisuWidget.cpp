@@ -41,6 +41,7 @@ AwEpochVisuWidget::AwEpochVisuWidget(QWidget *parent)
 	m_ui.setupUi(this);
 	m_ui.treeView->setModel(&m_treeViewModel);
 	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
+	m_ui.treeView->header()->setDefaultAlignment(Qt::AlignCenter);
 	connect(m_ui.treeView, &QTreeView::clicked, this, &AwEpochVisuWidget::showEpoch);
 	connect(&m_treeViewModel, &QStandardItemModel::itemChanged, this, &AwEpochVisuWidget::updateItem);
 	m_currentCondition = NULL;
@@ -98,15 +99,6 @@ void AwEpochVisuWidget::rejectEpoch()
 	epoch->setRejected(!epoch->isRejected());
 	epoch->isRejected() ? epoch_item->setCheckState(Qt::Checked) : epoch_item->setCheckState(Qt::Unchecked);
 	updateNavBar();
-}
-
-void AwEpochVisuWidget::qwtPreview()
-{
-	//if (m_currentCondition == NULL || m_currentEpochIndex < 0)
-	//	return;
-
-	//AwEpoch *epoch = m_currentCondition->epochs().at(m_currentEpochIndex);
-	//m_tc.plot(epoch);
 }
 
 void AwEpochVisuWidget::changeCondition(const QString& condition)
@@ -180,6 +172,7 @@ void AwEpochVisuWidget::updateConditions()
 	m_treeViewModel.setColumnCount(2);
 	m_treeViewModel.setHeaderData(0, Qt::Horizontal, "Conditions");
 	m_treeViewModel.setHeaderData(1, Qt::Horizontal, "Status");
+
 	QList<AwEpochTree *> conditions = AwEpochManager::instance()->conditions();
 	for (auto cond : conditions) {
 		QStandardItem *condition = new QStandardItem(cond->name());
@@ -277,84 +270,15 @@ void AwEpochVisuWidget::doAveraging()
 void AwEpochVisuWidget::openMosaicView()
 {
 	if (m_mosaicWidget == Q_NULLPTR) {
-		m_mosaicWidget = new AwEpochMosaicWidget(this);
+		m_mosaicWidget = new AwEpochMosaicWidget(m_currentCondition, this);
 	}
 	m_mosaicWidget->show();
-}
-
-ThumbnailList *AwEpochVisuWidget::createThumbs()
-{
-	if (m_currentCondition == 0)
-		return NULL;
-	// check if current condition was already thumbnailed..
-	if (m_thumbs.contains(m_currentCondition))
-		return m_thumbs.value(m_currentCondition);
-	// prepare list of thumbnails
-	ThumbnailList *list = new ThumbnailList;
-	
-	for (auto e : m_currentCondition->epochs()) {
-		Thumbnail *tn = new Thumbnail;
-		tn->epoch = e;
-		if (m_currentCondition->loadEpoch(e) == 0) {
-			tn->channels = AwChannel::duplicateChannels(m_currentCondition->channels());
-		}
-		else {
-			delete list;
-			return NULL;
-		}
-		list->append(tn);
-	}
-	m_thumbs.insert(m_currentCondition, list);
-	return list;
-}
-
-void AwEpochVisuWidget::thumb()
-{
-	ThumbnailList *list = createThumbs();
-	if (list == NULL)
-		return;
-//	QFuture<void> res = QtConcurrent::mapped(*list, createThumbPixmap);
-//	res.waitForFinished();
-	createThumbPixmap(list->first());
-	list->first()->pixmap.save("d:\\pixmap.png");
+	if (m_currentCondition != Q_NULLPTR)
+		m_mosaicWidget->changeCondition(m_currentCondition->name());
+	else
+		m_mosaicWidget->changeCondition(AwEpochManager::instance()->conditions().first()->name());
 }
 
 
-void createThumbPixmap(Thumbnail *thumb)
-{
-	QwtPlot plot;
-	plot.setCanvasBackground(Qt::white);
-	plot.resize(800, 600);
-	plot.enableAxis(QwtPlot::xBottom, false);
-	plot.enableAxis(QwtPlot::yLeft, false);
-	plot.setFrameShape(QFrame::StyledPanel);
-	//plot.plotLayout()->setAlignCanvasToScales(true);
-	AwEpochTree *cond = thumb->epoch->condition();
-	AwChannelList channels = cond->channels();
-	//double min = 0., max = 0.;
-	vec data(channels.first()->dataSize());
-	vec x = linspace(0, channels.first()->dataSize() - 1, channels.first()->dataSize());
-	for (auto c : channels) {
-		QwtPlotCurve * curve = new QwtPlotCurve(c->name());
-		data.zeros();
-		for (qint64 i = 0; i < c->dataSize(); i++)
-			data(i) = c->data()[i];
-		//double d_min = data.min();
-		//double d_max = data.max();
-		//if (d_min < min)
-		//	min = d_min;
-		//if (d_max > max)
-		//	max = d_max;
 
-		curve->setSamples(x.memptr(), data.memptr(), (int)c->dataSize());
-		curve->attach(&plot);
-	}
-	//plot->setAxisScale(QwtPlot::yLeft, min, max);
-	plot.replot();
-	QPixmap pix(800, 600);
-	QPainter painter(&pix);
-	QwtPlotRenderer renderer;
-	renderer.render(&plot, &painter, plot.geometry());
-	thumb->pixmap = pix.scaled(QSize(100, 75), Qt::KeepAspectRatio);
-	//thumb->pixmap = pix;
-}
+

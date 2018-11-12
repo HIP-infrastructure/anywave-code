@@ -231,6 +231,7 @@ AwEpochAverageChannel *AwEpochTree::createAVGChannel(const QString& label)
 /// return -1 if failed.
 int AwEpochTree::loadEpoch(int index)
 {
+	QMutexLocker lock(&m_mutex);
 	if (index < 0 || index >= m_epochs.size())
 		return -1;
 
@@ -246,8 +247,5 @@ int AwEpochTree::loadEpoch(int index)
 
 int AwEpochTree::loadEpoch(AwEpoch *e)
 {
-	int index = m_epochs.indexOf(e);
-	if (index == -1)
-		return index;
-	return loadEpoch(index);
+	return loadEpoch(m_epochs.indexOf(e));
 }

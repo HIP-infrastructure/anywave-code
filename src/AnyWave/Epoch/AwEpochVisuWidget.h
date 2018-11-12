@@ -29,11 +29,7 @@
 #include "ui_AwEpochVisuWidget.h"
 #include <qstandarditemmodel.h>
 #include <epoch/AwEpochTree.h>
-#include <AwDataBuffer.h>
-//#include <widget/SignalView/AwBaseSignalView.h>
 #include <epoch/AwEpochSignalView.h>
-
-#include "AwEpochThumbCreator.h"
 
 class AwEpochMosaicWidget;
 
@@ -62,8 +58,6 @@ protected slots:
 	void prevEpoch();
 	void rejectEpoch();
 	void doAveraging();
-	void qwtPreview();
-	void thumb();
 	void openMosaicView();
 signals:
 	void epochClicked(AwEpochTree *condition, int index);
@@ -72,7 +66,6 @@ private:
 	void updateNavBarCondition();
 	void updateNavBar();
 	void viewCurrentEpoch();
-	ThumbnailList *createThumbs();
 
 	QMap<AwEpochTree *, ThumbnailList *> m_thumbs;
 
@@ -83,8 +76,5 @@ private:
 	AwEpochTree *m_currentCondition;	// current selected condition
 	int m_currentEpochIndex;			// current selected epoch within a condition
 	AwEpochSignalView *m_signalView;
-//	AwDataBuffer *m_buffer;
-//	AwMarker *m_zeroMarker;
-//	AwEpochThumbCreator m_tc;
 	AwEpochMosaicWidget *m_mosaicWidget;
 };
