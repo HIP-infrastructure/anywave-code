@@ -1063,14 +1063,8 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwEpochThumbNail.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Epoch\AwEpochThumbNail.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochThumbCreator.cpp">
       <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochThumbCreator.cpp">
-      <Filter>Epoch</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwEpochThumbCreator.cpp">
       <Filter>Generated Files\Release</Filter>
@@ -1713,15 +1707,6 @@
     <CustomBuild Include="Epoch\AwEpochVisuWidget.h">
       <Filter>Epoch</Filter>
     </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochThumbNail.ui">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochThumbNail.h">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochThumbCreator.h">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
     <CustomBuild Include="Epoch\AwEpochAverageWidget.ui">
       <Filter>Epoch</Filter>
     </CustomBuild>
@@ -1964,9 +1949,6 @@
     <ClInclude Include="GeneratedFiles\ui_AwEpochVisuWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEpochThumbNail.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwEpochAverageWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -2011,6 +1993,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwEpochMosaicWidget.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AwEpochThumbs.h">
+      <Filter>Epoch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

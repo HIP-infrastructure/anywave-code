@@ -33,7 +33,50 @@
 #include <AwAmplitudeManager.h>
 #include "AwEpochMosaicWidget.h"
 
-void createThumbPixmap(Thumbnail *thumbnail);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+/// EpochLoader implementation
+AwEpochLoader::AwEpochLoader(const QString& title, AwEpochTree *condition, QWidget *parent) : AwWaitWidget(title, parent)
+{
+	m_condition = condition;
+	m_signalView = new AwEpochSignalView;
+	m_signalView->resize(QSize(800, 600));
+	m_signalView->setAttribute(Qt::WA_DontShowOnScreen);
+	m_signalView->setFlags(AwBaseSignalView::NoNavBar | AwBaseSignalView::NoMarkerBar | AwBaseSignalView::ViewAllChannels);
+	m_signalView->show();
+	m_thumbs = new thumbList;
+}
+
+AwEpochLoader::~AwEpochLoader()
+{
+	delete m_signalView;
+}
+
+void AwEpochLoader::loadEpochs()
+{
+	int i = 0;
+	for (auto e : m_condition->epochs()) {
+		if (!e->isLoaded())
+			m_condition->loadEpoch(e);
+		auto t = new thumb;
+		t->epoch = e;
+		m_signalView->setEpoch(e);
+		m_signalView->repaint();
+	    t->pixmap = QPixmap(QSize(800, 600));
+		t->pixmap = m_signalView->grab();
+		t->pixmap = t->pixmap.scaled(QSize(200, 150), Qt::KeepAspectRatio);
+	   *m_thumbs << t;
+	   setCurrentProgress(i++);
+	}
+}
+
+
+int AwEpochLoader::exec()
+{
+	QTimer::singleShot(0, this, &AwEpochLoader::loadEpochs);
+	return AwWaitWidget::exec();
+}
+//////////////////////////////////////////////////////////////////////////////////////////
 
 AwEpochVisuWidget::AwEpochVisuWidget(QWidget *parent)
 	: QWidget(parent)
@@ -64,6 +107,11 @@ AwEpochVisuWidget::AwEpochVisuWidget(QWidget *parent)
 AwEpochVisuWidget::~AwEpochVisuWidget()
 {
 	delete m_signalView;
+	for (auto thumbs : m_hashThumbs.values()) {
+		while (!thumbs->isEmpty())
+			delete thumbs->takeFirst();
+		delete thumbs;
+	}
 }
 
 void AwEpochVisuWidget::prevEpoch()
@@ -269,16 +317,36 @@ void AwEpochVisuWidget::doAveraging()
 
 void AwEpochVisuWidget::openMosaicView()
 {
+	if (m_currentCondition == Q_NULLPTR) {
+		m_currentCondition = AwEpochManager::instance()->conditions().first();
+		m_currentEpochIndex = 0;
+	}
 	if (m_mosaicWidget == Q_NULLPTR) {
 		m_mosaicWidget = new AwEpochMosaicWidget(m_currentCondition, this);
+		connect(m_mosaicWidget, &AwEpochMosaicWidget::itemClicked, this, &AwEpochVisuWidget::selectEpoch);
 	}
-	m_mosaicWidget->show();
-	if (m_currentCondition != Q_NULLPTR)
-		m_mosaicWidget->changeCondition(m_currentCondition->name());
 	else
-		m_mosaicWidget->changeCondition(AwEpochManager::instance()->conditions().first()->name());
+		m_mosaicWidget->setCondition(m_currentCondition);
+	thumbList *thumbs;
+	if (!m_hashThumbs.contains(m_currentCondition->name())) {
+		AwEpochLoader loader("Building thumbnails...", m_currentCondition);
+		loader.initProgress(0, m_currentCondition->epochs().size());
+		loader.exec();
+		m_hashThumbs.insert(m_currentCondition->name(), loader.thumbs());
+		thumbs = loader.thumbs();
+	}
+	else
+		thumbs = m_hashThumbs.value(m_currentCondition->name());
+
+	m_mosaicWidget->setThumbs(thumbs);
+	m_mosaicWidget->show();
 }
 
 
 
-
+void AwEpochVisuWidget::selectEpoch(AwEpochTree *condition, int index)
+{
+	m_currentCondition = condition;
+	m_currentEpochIndex = index;
+	selectCurrentEpoch();
+}

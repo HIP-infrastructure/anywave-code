@@ -3,17 +3,9 @@
 #include <QWidget>
 #include "ui_AwEpochMosaicWidget.h"
 #include "AwEpochVisuWidget.h"
-
-// use a AwEpochSignalView object to generate thumbnails.
-#include <epoch/AwEpochSignalView.h>
 #include <epoch/AwEpochTree.h>
 
-typedef struct {
-	AwEpoch *epoch;
-	QPixmap pixmap;
-} thumb;
-
-typedef QList<thumb *> thumbList;
+#include "AwEpochThumbs.h"
 
 class AwEpochMosaicWidget : public QWidget
 {
@@ -22,15 +14,14 @@ class AwEpochMosaicWidget : public QWidget
 public:
 	AwEpochMosaicWidget(AwEpochTree *condition, AwEpochVisuWidget *parent);
 	~AwEpochMosaicWidget();
-	void setThumbSize(const QSize& size) { m_iconSize = size; ui.listWidget->setIconSize(m_iconSize); }
+	void setThumbs(thumbList *thumbs);
+	void setCondition(AwEpochTree *condition) { m_condition = condition; }
 public slots:
-	void changeCondition(const QString& condition);
+	void changeEpoch(QListWidgetItem *item);
+signals:
+	void itemClicked(AwEpochTree *condition, int index);
 private:
 	Ui::AwEpochMosaicWidget ui;
 	AwEpochVisuWidget *m_parent;
-	AwEpochSignalView *m_signalView;
 	AwEpochTree *m_condition;
-	QHash<QString, thumbList *> m_thumbs;
-	QSize m_iconSize;
-	thumb *newThumb(AwEpoch *epoch);
 };
