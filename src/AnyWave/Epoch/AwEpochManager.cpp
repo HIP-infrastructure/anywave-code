@@ -33,6 +33,7 @@
 #include "AwAverageDialog.h"
 #include <AwException.h>
 #include "Montage/AwMontageManager.h"
+#include <widget/AwWaitWidget.h>
 
 // statics init and definitions
 AwEpochManager *AwEpochManager::m_instance = 0;
@@ -194,12 +195,23 @@ void AwEpochManager::create()
 
 void AwEpochManager::average()
 {
+	if (conditions().isEmpty())
+		return;
+
 	AwAverageDialog dlg;
 	if (dlg.exec() == QDialog::Accepted) {
+		
 
-		AwEpochAverageWidget *widget = new AwEpochAverageWidget(dlg.selectedConditions);
-		m_avgWidgets.append(widget);
-		widget->show();
+		//AwEpochAverageWidget *widget = new AwEpochAverageWidget(dlg.selectedConditions);
+		//m_avgWidgets.append(widget);
+		//widget->show();
+
+		AwWaitWidget wait("Averaging...");
+		int i = 1;
+		for (auto c : dlg.selectedConditions) {
+			wait.setText(QString("Loading data for condition %1...").arg(c->name()));
+
+		}
 	}
 }
 

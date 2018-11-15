@@ -29,6 +29,7 @@
 #include "ui_AwAverageDialog.h"
 #include <epoch/AwEpochTree.h>
 #include <epoch/AwEpochComputeSettings.h>
+#include <filter/AwFilterSettings.h>
 
 class AwAverageDialog : public QDialog
 {
@@ -45,4 +46,5 @@ public slots:
 private:
 	Ui::AwAverageDialogUi m_ui;
 	AwEpochComputeSettings m_settings;
+	AwFilterSettings m_filterSettings;
 };

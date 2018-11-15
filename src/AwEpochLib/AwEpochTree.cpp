@@ -56,7 +56,8 @@ int AwEpochTree::numberOfGoodEpochs()
 	return count;
 }
 
-int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post)
+int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post, 
+	AwMarkerList& artefacts)
 {
 	m_after = post;
 	m_before = pre;
@@ -66,6 +67,7 @@ int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, 
 	}
 	clearEpochs();
 	m_markerLabel = label;
+	AwMarkerList tmp;
 	for (AwMarker *m : markers) {
 		if (m->label() != label)
 			continue;
@@ -76,7 +78,18 @@ int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, 
 		if (m->start() + post > m_totalDuration)
 			continue;
 
-		m_epochs << new AwEpoch(this, new AwMarker(label, pos, pre + post));
+		//m_epochs << new AwEpoch(this, new AwMarker(label, pos, pre + post));
+		tmp << new AwMarker(label, pos, pre + post);
+	}
+
+	if (!artefacts.isEmpty()) {
+		auto dummy = AwMarker::cutAroundMarkers(tmp, artefacts);
+		while (!tmp.isEmpty())
+			delete tmp.takeFirst();
+		tmp = dummy;
+	}
+	for (auto m : tmp) {
+		m_epochs << new AwEpoch(this, m);
 	}
 	m_zeroPos = pre;
 	m_zeroSample = (int)floor(pre * m_channels.first()->samplingRate());
@@ -97,6 +110,27 @@ void AwEpochTree::setComputeSettings(AwEpochComputeSettings& settings)
 {
 	m_computeSettings = settings;
 	m_avgIsDone = false;
+}
+
+void AwEpochTree::average()
+{
+	if (!m_isConnected)
+		return;
+	if (m_epochs.isEmpty())
+		return;
+
+	AwEpochList epochs;
+	for (auto e : m_epochs) { // remove rejected epochs before averaging
+		if (!e->isRejected())
+			epochs << e;
+	}
+
+	auto totalEpochs = epochs.size();
+
+	// shall we filter the data?
+	if (!m_filterSettings.isEmpty() && !m_filterSettings.filters(m_channels.first()->type()).isEmpty()) {
+
+	}
 }
 
 int AwEpochTree::doAverage(bool verbose)

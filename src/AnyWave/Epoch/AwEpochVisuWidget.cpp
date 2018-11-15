@@ -68,6 +68,7 @@ void AwEpochLoader::loadEpochs()
 	   *m_thumbs << t;
 	   setCurrentProgress(i++);
 	}
+	accept();
 }
 
 

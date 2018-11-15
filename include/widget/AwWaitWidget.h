@@ -37,14 +37,12 @@ class AW_WIDGETS_EXPORT AwWaitWidget : public QDialog
 public:
 	AwWaitWidget(const QString& title, QWidget *parent = Q_NULLPTR);
 	~AwWaitWidget();
-
-	void initProgress(int min, int max);
 protected:
 	void changeEvent(QEvent *);
 public slots:
 	void setText(const QString& text);
 	void setCurrentProgress(int value);
-
+	void initProgress(int min, int max);
 private:
 	Ui::AwWaitWidgetUi *ui;
 };

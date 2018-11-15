@@ -27,6 +27,7 @@
 #include "AwEpochModel.h"
 #include "AwEpochManager.h"
 #include <widget/AwMessageBox.h>
+#include "Prefs/AwSettings.h"
 
 AwAverageDialog::AwAverageDialog(QWidget *parent)
 	: QDialog(parent)
@@ -39,6 +40,9 @@ AwAverageDialog::AwAverageDialog(QWidget *parent)
 	m_ui.comboMethod->addItem("Substract Mean", AwEpochComputeSettings::SubstractMean);
 	m_ui.comboMethod->addItem("Divide by StdDev", AwEpochComputeSettings::DivideByStd);
 	connect(m_ui.tableView, &QTableView::clicked, this, &AwAverageDialog::updateConditionSettings);
+	// get filter settings from AnyWave
+	m_filterSettings = AwSettings::getInstance()->filterSettings();
+	m_ui.filterTableView->setSettings(m_filterSettings);
 }
 
 AwAverageDialog::~AwAverageDialog()

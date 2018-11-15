@@ -33,13 +33,20 @@ class AwAvgWorker : public QObject
 public:
 	AwAvgWorker(QObject* parent = Q_NULLPTR);
 	~AwAvgWorker();
-	void setCondition(AwEpochTree * condition);
+	void setConditions(const QStringList& conditions);
 public slots:
 	void run();
-	void updateProgress(int epoch);
 signals:
-	void done(AwEpochTree * condition);
-	void inProgress(int progress);
+	/** Sent when the computation is about to start **/
+	void readyToCompute(int numberOfConditions);
+	/** Sent to show progress while epoching **/
+	void epochsProcessed(int percent);
+	/** Sent when the data for all the epochs are loaded. **/
+	void dataLoaded(const QString& condition);
+	/** Sent when a condition averaging is done. **/
+	void done(const QString& condition);
+	/** Sent when everything is done **/
+	void finished();
 protected:
-	AwEpochTree * m_condition;
+	AwConditionList m_conditions;
 };

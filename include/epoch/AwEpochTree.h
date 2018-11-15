@@ -33,6 +33,7 @@
 #include <epoch/AwEpochComputeSettings.h>
 #include <aw_armadillo.h>
 #include <filter/AwFilterSettings.h>
+#include <epoch/AwAvgEpoch.h>
 
 class AW_EPOCH_EXPORT AwEpochTree : public AwDataClient
 {
@@ -61,28 +62,37 @@ public:
 	inline float postLatency() { return m_after; }
 	inline float epochDuration() { return m_epochDuration; }
 	inline QString& markerLabel() { return m_markerLabel; }
+
+	AwAvgEpoch *averagedResult() { return m_averaged; }
 	/** Build epochs using the markers, around a specific marker, giving pre and post latencies **/
-	int buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post);
+	int buildEpochs(const AwMarkerList& markers, const QString& label,
+		float pre, float post, AwMarkerList& artefacts = AwMarkerList());
 
 	/** Compute the average. Verbose will send a signal each time an epoch is loaded **/
 	int doAverage(bool verbose = false);
+	void average();
 	int loadEpoch(int index);
 	int loadEpoch(AwEpoch *epoch);
 	void setComputeSettings(AwEpochComputeSettings& settings);
+	void setFilterSettings(const AwFilterSettings& settings) { m_filterSettings = settings; }
 
 	/** Create a data buffer containing the averaged channels data **/
 	AwEpochDataBuffer *createAVGBuffer();
-
 	AwEpochAverageChannel *createAVGChannel(const QString& label);
 signals:
 	void averageChannelsCreated(AwChannelList *channels);
 	void epochLoaded(int epoch);
+	void progressChanged(int percent);
+	void dataLoaded();
 protected:
 	void clearEpochs();
 
 	AwChannelList m_channels, m_avgChannels;
+	AwMarkerList m_artefacts;	// may contain markers for artefacted data.
 	AwEpochComputeSettings m_computeSettings;
+	AwFilterSettings m_filterSettings;
 	AwEpochList m_epochs;
+	AwAvgEpoch *m_averaged;	// result of the averaging
 	float m_zeroPos;		// position of zero in the epochs
 	int m_zeroSample;		// offset in sample of zero position
 	qint64 m_nSamples;		// total number of samples in each epochs
@@ -95,8 +105,9 @@ protected:
 	int m_modality;			// type of channels used to epoch.
 	float m_before, m_after;	// pre and post latencies to build epochs.
 	float m_epochDuration;	// duration in seconds of each epochs.
-	AwFilterSettings m_filterSettings;
 	bool m_avgIsDone;		// Flag indicating if the averaging is done.
 	// Threading
 	QMutex m_mutex;
 };
+
+using AwConditionList = QList<AwEpochTree *>;
