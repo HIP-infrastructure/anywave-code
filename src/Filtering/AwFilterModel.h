@@ -55,4 +55,5 @@ public slots:
 protected:
 	AwFilterSettings m_settings;
 	QList<int> m_keys;
+	QStringList m_boundsTypes;
 };

@@ -26,7 +26,7 @@ ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels,
 	}
 	else
 		m_ui.comboIgnoredMarkers->addItems(m_labels);
-	m_ui.saveFileName->setText(m_dataPath);
+//	m_ui.saveFileName->setText(m_dataPath);
 	samplingRate = m_channels.at(0)->samplingRate(); 
 	connect(m_ui.cbAll, SIGNAL(toggled(bool)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
@@ -46,7 +46,7 @@ void ICASettings::accept()
 	if (!m_labels.isEmpty())
 		selectedMarker = m_labels.at(m_ui.comboIgnoredMarkers->currentIndex());
 	modality = AwChannel::stringToType(m_modes.at(m_ui.comboModality->currentIndex()));
-	filePath = m_ui.saveFileName->text();
+//	filePath = m_ui.saveFileName->text();
 	lpf = m_ui.spinLPF->value();
 	hpf = m_ui.spinHPF->value();
 	components = m_ui.spinNC->value();

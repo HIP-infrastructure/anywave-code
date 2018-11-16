@@ -271,8 +271,8 @@ int AwMontageManager::loadICA(const QString& path)
 				m_channelHashTable.insert(newChan->name(), newChan);
 				m_icaHashTable.insert(channel->name(), channel);
 			}
-	//		fm->setICASettings(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
-			AwSettings::getInstance()->filterSettings().setBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
+			//AwSettings::getInstance()->filterSettings().setBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
+			AwSettings::getInstance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
 		}
 
 		emit montageChanged(m_channels);

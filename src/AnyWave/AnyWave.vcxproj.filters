@@ -1279,9 +1279,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwEpochProcessAverageDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Epoch\AwEpochProcessAverageDialog.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1797,12 +1794,6 @@
     <CustomBuild Include="Epoch\AwEpochMosaicWidget.h">
       <Filter>Epoch</Filter>
     </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochProcessAverageDialog.ui">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochProcessAverageDialog.h">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2011,9 +2002,6 @@
     </ClInclude>
     <ClInclude Include="AwEpochThumbs.h">
       <Filter>Epoch</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEpochProcessAverageDialog.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

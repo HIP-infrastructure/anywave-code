@@ -32,6 +32,7 @@
 #include <filter/AwFiltering.h>
 #include <math/AwMath.h>
 #include <filter/AwFilterSettings.h>
+#include <QMessageBox.h>
 
 ICA::ICA()
 {
@@ -48,7 +49,7 @@ ICAPlugin::ICAPlugin()
     type = AwProcessPlugin::Background;
     category = "ICA";
     name = QString("ICA extraction");
-    description = QString("Compute independent components of selected signals");
+    description = QString("extract independent components");
 }
 
 ICA::~ICA()
@@ -74,6 +75,19 @@ bool ICA::showUi()
 		m_hpf = ui.hpf;
 		m_samplingRate = ui.samplingRate;
 		m_algo = ui.algo;
+		auto dateTime = QDateTime::currentDateTime();
+
+		auto hpString = QString::number(m_hpf, 'f', 1);
+		auto lpString = QString::number(m_lpf, 'f', 1);
+
+		// generates a file name based on filtering parameters and number of components.
+		m_fileName = QString("%1/%2Hz_%3Hz_%4c_ica.mat").arg(pdi.input.dataFolder).arg(hpString).arg(lpString).arg(m_nComp);
+		emit progressChanged(m_fileName);
+		QFile test(m_fileName);
+		if (!test.open(QIODevice::WriteOnly)) {
+			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
+			return false;
+		}
 		return true;
 	}
 	return false;
@@ -251,7 +265,6 @@ void ICA::saveToFile()
 {
 	emit progressChanged("Saving to file...");
 	AwMATLABFile file;
-
 	try {
 		file.create(m_fileName);
 		file.writeString("modality", AwChannel::typeToString(m_modality));

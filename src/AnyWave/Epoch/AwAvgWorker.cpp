@@ -25,7 +25,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwAvgWorker.h"
 #include <qthread.h>
-#include "AwEpochManager.h"
 
 AwAvgWorker::AwAvgWorker(QObject* parent) : QObject(parent)
 {
@@ -40,26 +39,19 @@ AwAvgWorker::~AwAvgWorker()
 	thread()->wait();
 }
 
-void AwAvgWorker::setConditions(const QStringList& conditions)
+void AwAvgWorker::setCondition(AwEpochTree * condition)
 {
-	for (auto c : conditions) {
-		auto condition = AwEpochManager::instance()->getCondition(c);
-		if (condition == Q_NULLPTR)
-			continue;
-		m_conditions << condition;
-		connect(condition, &AwEpochTree::progressChanged, this, &AwAvgWorker::epochsProcessed);
-		connect(condition, &AwEpochTree::dataLoaded, this, &AwAvgWorker::dataLoaded);
-	}
+	m_condition = condition;
+	connect(m_condition, &AwEpochTree::epochLoaded, this, &AwAvgWorker::updateProgress);
 }
 
 void AwAvgWorker::run()
 {
-	emit readyToCompute(m_conditions.size());
-	for (auto c : m_conditions) {
-		c->average();
-	}
-	emit finished();
-	//m_condition->doAverage(true);
-//	emit done(m_condition);
+	m_condition->doAverage(true);
+	emit done(m_condition);
 }
 
+void AwAvgWorker::updateProgress(int epoch)
+{
+	emit inProgress((epoch * 100) / m_condition->numberOfGoodEpochs());
+}
