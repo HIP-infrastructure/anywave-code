@@ -101,6 +101,9 @@
     <Filter Include="IO\BIDS">
       <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IO\MEMIO">
+      <UniqueIdentifier>{cef1cf63-cc97-410b-bd02-2de0bfde1510}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1057,18 +1060,6 @@
     <ClCompile Include="Epoch\AwEpochVisuWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochThumbNail.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochThumbNail.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochThumbCreator.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochThumbCreator.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochAverageWidget.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1273,11 +1264,20 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwEpochMosaicWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochProcessAverageDialog.cpp">
+    <ClCompile Include="IO\MEMIO\MEMIO.cpp">
+      <Filter>IO\MEMIO</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MEMIO.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochProcessAverageDialog.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_MEMIO.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\AwDataChunk.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\AwMemoryMapper.cpp">
+      <Filter>Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1794,6 +1794,9 @@
     <CustomBuild Include="Epoch\AwEpochMosaicWidget.h">
       <Filter>Epoch</Filter>
     </CustomBuild>
+    <CustomBuild Include="IO\MEMIO\MEMIO.h">
+      <Filter>IO\MEMIO</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2002,6 +2005,12 @@
     </ClInclude>
     <ClInclude Include="AwEpochThumbs.h">
       <Filter>Epoch</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\AwDataChunk.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\AwMemoryMapper.h">
+      <Filter>Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

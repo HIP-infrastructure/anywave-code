@@ -38,6 +38,7 @@
 #include "IO/ADES/ADESIO.h"
 #include "IO/HDF5/HDF5IO.h"
 #include "IO/MATLAB/MATLABIO.h"
+#include "IO/MEMIO/MEMIO.h"
 #include <graphics/AwSignalItem.h>
 #include "ICA/AwICASignalItem.h"
 #include "Prefs/AwSettings.h"
@@ -509,6 +510,7 @@ void AwPluginManager::loadPlugins()
 
 	m_pluginWriters += new AHDF5IOPlugin;
 	m_pluginReaders += new AHDF5IOPlugin;
+	m_pluginReaders += new MEMIOPlugin;
 	m_pluginWriters += new MATLABIOPlugin;
 
 	// Ajout du plugin TriggerParser

@@ -76,6 +76,13 @@ void AwDataServer::setMainReader(AwFileIO *fileReader)
 	m_plugin = fileReader->plugin();
 }
 
+AwDataServer *AwDataServer::duplicate(AwFileIO *fileReader)
+{
+	auto ds = new AwDataServer();
+	ds->setMainReader(fileReader);
+	return ds;
+}
+
 // SLOTS
 
 ///

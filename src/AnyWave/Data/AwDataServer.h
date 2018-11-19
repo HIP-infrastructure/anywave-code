@@ -47,6 +47,7 @@ public:
 	void setMainReader(AwFileIO *reader);
 	inline AwFileIO *reader() { return m_reader; }
 	QSemaphore *getLock() { return m_sem; }
+	AwDataServer *duplicate(AwFileIO *reader);
 public slots:
 	/** Open a connection between a client and the data server thread. If successful, a pointer to the instantiated reader is returned. **/
 	void openConnection(AwDataClient *client);
@@ -56,7 +57,7 @@ public slots:
 	void closeConnection(AwDataClient *client);
 	void closeAllConnections();
 	void manageOutOfMemory();
-private:
+protected:
 	QList<AwDataConnection *> m_dataConnections;
 	QMap<AwDataClient *, AwDataConnection *> m_clientToConnection;
 	AwFileIO *m_reader;
