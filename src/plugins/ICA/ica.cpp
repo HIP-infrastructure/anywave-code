@@ -80,14 +80,19 @@ bool ICA::showUi()
 		auto hpString = QString::number(m_hpf, 'f', 1);
 		auto lpString = QString::number(m_lpf, 'f', 1);
 
-		// generates a file name based on filtering parameters and number of components.
-		m_fileName = QString("%1/%2Hz_%3Hz_%4c_ica.mat").arg(pdi.input.dataFolder).arg(hpString).arg(lpString).arg(m_nComp);
+		if (ui.filePath.isEmpty())
+			// generates a file name based on filtering parameters and number of components.
+			m_fileName = QString("%1_%2Hz_%3Hz_%4c_ica.mat").arg(pdi.input.dataPath).arg(hpString).arg(lpString).arg(m_nComp);
+		else
+			m_fileName = QString("%1/%2_ica.mat").arg(pdi.input.dataFolder).arg(ui.filePath);
+
 		emit progressChanged(m_fileName);
 		QFile test(m_fileName);
 		if (!test.open(QIODevice::WriteOnly)) {
 			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
 			return false;
 		}
+		test.close();
 		return true;
 	}
 	return false;

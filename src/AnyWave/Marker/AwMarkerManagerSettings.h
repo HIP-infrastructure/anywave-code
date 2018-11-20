@@ -77,6 +77,7 @@ protected slots:
 	void launchProcess();
 	void writeTrigger();
 	void clearTrigger();
+	void saveSelectedMarkers();
 	void removeMarkers();
 	void removeAllLabels();
 	void selectAllLabels();

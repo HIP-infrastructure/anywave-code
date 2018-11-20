@@ -46,7 +46,7 @@ void ICASettings::accept()
 	if (!m_labels.isEmpty())
 		selectedMarker = m_labels.at(m_ui.comboIgnoredMarkers->currentIndex());
 	modality = AwChannel::stringToType(m_modes.at(m_ui.comboModality->currentIndex()));
-//	filePath = m_ui.saveFileName->text();
+	filePath = m_ui.lineEditFilename->text();
 	lpf = m_ui.spinLPF->value();
 	hpf = m_ui.spinHPF->value();
 	components = m_ui.spinNC->value();

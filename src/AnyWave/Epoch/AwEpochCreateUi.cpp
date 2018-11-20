@@ -37,6 +37,7 @@ AwEpochCreateUi::AwEpochCreateUi(const AwMarkerList& markers, QWidget *parent)
 	m_ui.setupUi(this);
 	m_markers = markers;
 	m_ui.comboBox->setMarkers(markers);
+	m_ui.comboArtefacts->setMarkers(markers);
     QList<AwEpochTree *> conds = AwEpochManager::instance()->conditions();
     m_ui.tableView->setModel(new AwEpochModel(conds, m_ui.tableView));
 	m_ui.tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);

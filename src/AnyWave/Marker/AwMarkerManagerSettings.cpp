@@ -40,6 +40,7 @@
 #include <QBarCategoryAxis>
 #include <QValueAxis>
 #include <QHorizontalBarSeries>
+#include <QFileDialog>
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -97,6 +98,9 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(action, SIGNAL(triggered()), this, SLOT(goToMarkerPos()));
 
 	m_menu->addSeparator();
+	action = new QAction(tr("Save to file"), this);
+	m_menu->addAction(action);
+	connect(action, &QAction::triggered, this, &AwMarkerManagerSettings::saveSelectedMarkers);
 	action = new QAction(tr("Remove"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(removeMarkers()));
@@ -625,6 +629,31 @@ void AwMarkerManagerSettings::removeAllLabels()
 	emit markersRemoved(markers);
 	m_displayedMarkers = m_model->markers();
 	emit markersChanged(m_displayedMarkers);
+}
+
+void AwMarkerManagerSettings::saveSelectedMarkers()
+{
+	// get selected indexes in tvMarkers
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+
+	if (indexes.isEmpty())
+		return;
+	
+	AwFileInfo afio(AwSettings::getInstance()->currentReader());
+
+	auto path = QFileDialog::getSaveFileName(0, tr("Save markers"), afio.dirPath(), "*.mrk");
+	if (!path.isEmpty()) {
+		AwMarkerList currentMarkers = m_model->markers();
+
+		AwMarkerList markers; // marker to save
+		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+		for (auto i : indexes) {
+			if (i.column() == 0)
+				markers << currentMarkers.at(proxy->mapToSource(i).row());
+		}
+		AwMarker::save(path, markers);
+		AwMessageBox::information(0, tr("Success"), QString(tr("Markers saved to %1")).arg(path));
+	}
 }
 
 void AwMarkerManagerSettings::removeMarkers()

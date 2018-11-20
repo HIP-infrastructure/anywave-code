@@ -34,6 +34,7 @@
 #include <AwException.h>
 #include "Montage/AwMontageManager.h"
 #include <widget/AwWaitWidget.h>
+#include "Data/AwMemoryMapper.h"
 
 // statics init and definitions
 AwEpochManager *AwEpochManager::m_instance = 0;
@@ -58,6 +59,7 @@ AwEpochManager::AwEpochManager()
 	// Get the current reader information (total duration)
 	m_totalDuration = AwSettings::getInstance()->currentReader()->infos.totalDuration();
 	m_dataPath = AwSettings::getInstance()->fileInfo()->filePath();
+	m_dataPreloaded = false;
 	load();
 	m_reviewWidget = NULL;
 }
@@ -200,18 +202,9 @@ void AwEpochManager::average()
 
 	AwAverageDialog dlg;
 	if (dlg.exec() == QDialog::Accepted) {
-		
-
-		//AwEpochAverageWidget *widget = new AwEpochAverageWidget(dlg.selectedConditions);
-		//m_avgWidgets.append(widget);
-		//widget->show();
-
-		AwWaitWidget wait("Averaging...");
-		int i = 1;
-		for (auto c : dlg.selectedConditions) {
-			wait.setText(QString("Loading data for condition %1...").arg(c->name()));
-
-		}
+		AwEpochAverageWidget *widget = new AwEpochAverageWidget(dlg.selectedConditions);
+		m_avgWidgets.append(widget);
+		widget->show();
 	}
 }
 
@@ -229,6 +222,34 @@ AwEpochTree *AwEpochManager::getCondition(const QString& name)
 	if (m_hashEpochs.contains(name))
 		return m_hashEpochs.value(name);
 	return NULL;
+}
+
+void AwEpochManager::setFilterSettings(const AwFilterSettings& settings)
+{
+	// check if settings have changed (need to preload again the data in that case)
+	bool filtersChanged = false;
+	if (m_filterSettings.isEmpty() && !settings.isEmpty()) 
+		filtersChanged = true;
+
+	// check for all conditions if the settings have changed
+	for (auto c : conditions()) {
+		auto modality = c->type();
+		auto filters = m_filterSettings.filters(modality);
+		auto newFilters = settings.filters(modality);
+
+		if (filters != newFilters) {
+			m_filterSettings = settings;
+			if (m_servers.contains(modality)) {
+				auto server = m_servers.value(modality);
+				auto channels = c->channels();
+				m_filterSettings.apply(channels);
+				auto newServer = AwMemoryMapper::buildDataServerWithPreloadedData(AwSettings::getInstance()->currentReader(),
+					channels);
+			}
+		}
+	}
+//	auto currentFilters = m_filterSettings.filters(m_condition->type());
+
 }
 
 /// Try to create a new condition. If a condition with the same name already exists, return it.

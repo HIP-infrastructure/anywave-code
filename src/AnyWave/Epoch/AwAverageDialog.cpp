@@ -98,8 +98,11 @@ void AwAverageDialog::accept()
 		}
 	}
 	// apply settings to selected conditions
-	for (auto c : selectedConditions)
+	for (auto c : selectedConditions) {
 		c->setComputeSettings(m_settings);
+	//	c->setFilterSettings(m_filterSettings);
+	}
+	AwEpochManager::instance()->setFilterSettings(m_filterSettings);
 
 	return QDialog::accept();
 }

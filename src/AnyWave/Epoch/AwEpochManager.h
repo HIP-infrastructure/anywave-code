@@ -28,6 +28,8 @@
 #include <epoch/AwEpochTree.h>
 #include "AwEpochVisuWidget.h"
 #include "AwEpochAverageWidget.h"
+#include <filter/AwFilterSettings.h>
+#include "Data/AwDataServer.h"
 
 class AwEpochManager : public QObject
 {
@@ -53,7 +55,7 @@ public:
 	void loadEpochFile(const QString& file);
 	void saveEpochFile(const QString& file);
 	void save();
-	
+	void setFilterSettings(const AwFilterSettings& settings);
 	/** Select conditions on which the averaging will be computed. **/
 	inline void selectConditions(QStringList& conditions) { m_selectedConditions = conditions; }
 protected:
@@ -67,4 +69,7 @@ protected:
 	QList<AwEpochAverageWidget *> m_avgWidgets;
 	QString m_dataPath;
 	QStringList m_selectedConditions;
+	AwFilterSettings m_filterSettings;
+	QHash<int, AwDataServer *> m_servers;
+	bool m_dataPreloaded;	// true if data have been preloaded.
 };

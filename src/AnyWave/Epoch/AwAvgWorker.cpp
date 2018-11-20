@@ -47,7 +47,8 @@ void AwAvgWorker::setCondition(AwEpochTree * condition)
 
 void AwAvgWorker::run()
 {
-	m_condition->doAverage(true);
+	//m_condition->doAverage(true);
+	m_condition->average();
 	emit done(m_condition);
 }
 

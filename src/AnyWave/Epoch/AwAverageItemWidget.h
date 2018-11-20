@@ -27,13 +27,19 @@
 
 #include <QWidget>
 #include "ui_AwAverageItemWidget.h"
-#include <AwDataBuffer.h>
-#include <widget/SignalView/AwBaseSignalView.h>
+//#include <AwDataBuffer.h>
+//#include <widget/SignalView/AwBaseSignalView.h>
 #include <epoch/AwEpochTree.h>
 #include <epoch/AwEpochAverageChannel.h>
-#include <epoch/AwEpochDataBuffer.h>
+//#include <epoch/AwEpochDataBuffer.h>
 #include "AwAvgSignalItem.h"
-#include "AwStatChartWidget.h"
+
+#include <epoch/AwEpochSignalView.h>
+#include <epoch/AwAvgEpoch.h>
+
+//#include "AwStatChartWidget.h"
+
+
 /** this widget is designed to be inserted as a row item in a Layout **/
 
 class AwAverageItemWidget : public QWidget
@@ -41,21 +47,21 @@ class AwAverageItemWidget : public QWidget
 	Q_OBJECT
 
 public:
-	AwAverageItemWidget(QWidget *parent = Q_NULLPTR);
+	AwAverageItemWidget(AwAvgEpoch *avgEpoch, QWidget *parent = Q_NULLPTR);
 	~AwAverageItemWidget();
-
-	void setCondition(AwEpochTree *condition, AwEpochDataBuffer *buffer);
 public slots:
 	void editStats();
 private:
-	AwEpochDataBuffer *m_buffer, *m_statBuffer;
-	AwBaseSignalView *m_signalViewAvg, *m_signalViewStats;
-	AwStatChartWidget *m_statWidget;
-	AwMarker *m_zeroMarker;
-	AwDisplayPluginAvgSignalItem m_plugin;
+	//AwEpochDataBuffer *m_buffer, *m_statBuffer;
+	//AwBaseSignalView *m_signalViewAvg, *m_signalViewStats;
+	AwEpochSignalView *m_signalView;
+	//AwStatChartWidget *m_statWidget;
+	//AwMarker *m_zeroMarker;
+	//AwDisplayPluginAvgSignalItem m_plugin;
 	Ui::AwAverageItemWidgetUi m_ui;
-	AwEpochTree *m_condition;
+	//AwEpochTree *m_condition;
 	//QMap<QString, AwEpochAverageChannel *> m_nameToChannels;
-	AwEpochChannelList m_statChannels;
+	//AwEpochChannelList m_statChannels;
+	AwAvgEpoch *m_epoch;	// the Averaged Epoch
 
 };

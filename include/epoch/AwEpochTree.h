@@ -32,7 +32,7 @@
 #include <epoch/AwEpochAverageChannel.h>
 #include <epoch/AwEpochComputeSettings.h>
 #include <aw_armadillo.h>
-#include <filter/AwFilterSettings.h>
+//#include <filter/AwFilterSettings.h>
 #include <epoch/AwAvgEpoch.h>
 
 class AW_EPOCH_EXPORT AwEpochTree : public AwDataClient
@@ -74,11 +74,11 @@ public:
 	int loadEpoch(int index);
 	int loadEpoch(AwEpoch *epoch);
 	void setComputeSettings(AwEpochComputeSettings& settings);
-	void setFilterSettings(const AwFilterSettings& settings) { m_filterSettings = settings; }
+//	void setFilterSettings(const AwFilterSettings& settings) { m_filterSettings = settings; }
 
 	/** Create a data buffer containing the averaged channels data **/
-	AwEpochDataBuffer *createAVGBuffer();
-	AwEpochAverageChannel *createAVGChannel(const QString& label);
+	//AwEpochDataBuffer *createAVGBuffer();
+	//AwEpochAverageChannel *createAVGChannel(const QString& label);
 signals:
 	void averageChannelsCreated(AwChannelList *channels);
 	void epochLoaded(int epoch);
@@ -90,7 +90,7 @@ protected:
 	AwChannelList m_channels, m_avgChannels;
 	AwMarkerList m_artefacts;	// may contain markers for artefacted data.
 	AwEpochComputeSettings m_computeSettings;
-	AwFilterSettings m_filterSettings;
+//	AwFilterSettings m_filterSettings;
 	AwEpochList m_epochs;
 	AwAvgEpoch *m_averaged;	// result of the averaging
 	float m_zeroPos;		// position of zero in the epochs
