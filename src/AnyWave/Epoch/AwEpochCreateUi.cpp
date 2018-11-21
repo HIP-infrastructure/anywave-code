@@ -94,6 +94,8 @@ void AwEpochCreateUi::addCondition()
 	}
 
 	int modality = m_ui.comboBoxChannels->itemData(m_ui.comboBoxChannels->currentIndex()).toInt();
+	QString artefact = m_ui.comboArtefacts->currentText();
+
 	AwChannelList channels = AwChannel::duplicateChannels(AwChannel::getChannelsOfType(AwMontageManager::instance()->channels(), modality));
 	if (AwEpochManager::instance()->createCondition(name, channels, m_ui.comboBox->currentText(), pre, post) != NULL) {
 		updateTableView();

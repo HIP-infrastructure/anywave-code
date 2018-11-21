@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>607</width>
-    <height>516</height>
+    <width>615</width>
+    <height>538</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -172,7 +172,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QCheckBox" name="checkBox">
+         <widget class="QCheckBox" name="checkBoxRawData">
           <property name="text">
            <string>Use raw data</string>
           </property>
@@ -195,6 +195,36 @@
       </item>
       <item>
        <widget class="AwFilterTableView" name="filterTableView"/>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QCheckBox" name="checkOfflineFiltering">
+          <property name="toolTip">
+           <string>Preload the whole data in memory and apply filtering (takes more time and memory)</string>
+          </property>
+          <property name="text">
+           <string>Offline filtering</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -244,8 +274,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>633</x>
-     <y>660</y>
+     <x>596</x>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>85</x>
@@ -261,11 +291,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>35</x>
-     <y>344</y>
+     <y>217</y>
     </hint>
     <hint type="destinationlabel">
      <x>97</x>
-     <y>376</y>
+     <y>249</y>
     </hint>
    </hints>
   </connection>
@@ -277,11 +307,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>69</x>
-     <y>349</y>
+     <y>222</y>
     </hint>
     <hint type="destinationlabel">
      <x>272</x>
-     <y>376</y>
+     <y>249</y>
     </hint>
    </hints>
   </connection>
@@ -293,27 +323,43 @@
    <hints>
     <hint type="sourcelabel">
      <x>92</x>
-     <y>346</y>
+     <y>219</y>
     </hint>
     <hint type="destinationlabel">
      <x>371</x>
-     <y>377</y>
+     <y>250</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>checkBox</sender>
+   <sender>checkBoxRawData</sender>
    <signal>toggled(bool)</signal>
    <receiver>filterTableView</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>53</x>
-     <y>362</y>
+     <y>305</y>
     </hint>
     <hint type="destinationlabel">
      <x>55</x>
      <y>440</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxRawData</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>checkOfflineFiltering</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>88</x>
+     <y>308</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>58</x>
+     <y>478</y>
     </hint>
    </hints>
   </connection>

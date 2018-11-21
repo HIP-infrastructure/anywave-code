@@ -12,5 +12,5 @@ class AwMemoryMapper
 {
 public:
 	/** create a DataServer object. Preload data for channels using reader, skip artefacts. **/
-	static AwDataServer *buildDataServerWithPreloadedData(AwFileIO *reader, const AwChannelList& channels, const AwMarkerList& artefacts = AwMarkerList());
+	static AwFileIO *buildDataServerWithPreloadedData(AwFileIO *reader, const AwChannelList& channels, const AwMarkerList& artefacts = AwMarkerList());
 };

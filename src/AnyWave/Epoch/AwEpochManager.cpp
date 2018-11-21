@@ -36,6 +36,36 @@
 #include <widget/AwWaitWidget.h>
 #include "Data/AwMemoryMapper.h"
 
+
+/////////////////////////////////////////////////////////////////////
+/// worker object to do the offline filtering
+//
+
+OfflineFilterWorker::OfflineFilterWorker(const AwChannelList& channels, const AwMarkerList& artefacts)
+{
+	m_channels = channels;
+	m_artefacts = artefacts;
+	m_reader = Q_NULLPTR;
+	QThread *t = new QThread(this);
+	moveToThread(t);
+	t->start();
+}
+
+OfflineFilterWorker::~OfflineFilterWorker()
+{
+	thread()->exit(0);
+	thread()->wait();
+}
+
+void OfflineFilterWorker::run()
+{
+	m_reader = AwMemoryMapper::buildDataServerWithPreloadedData(AwSettings::getInstance()->currentReader(),
+		m_channels, m_artefacts);
+	emit finished();
+}
+
+
+
 // statics init and definitions
 AwEpochManager *AwEpochManager::m_instance = 0;
 
@@ -59,7 +89,8 @@ AwEpochManager::AwEpochManager()
 	// Get the current reader information (total duration)
 	m_totalDuration = AwSettings::getInstance()->currentReader()->infos.totalDuration();
 	m_dataPath = AwSettings::getInstance()->fileInfo()->filePath();
-	m_dataPreloaded = false;
+	m_offlineDataServer = Q_NULLPTR;
+	m_memoryReader = Q_NULLPTR;
 	load();
 	m_reviewWidget = NULL;
 }
@@ -68,6 +99,9 @@ AwEpochManager::~AwEpochManager()
 {
 	if (m_reviewWidget)
 		delete m_reviewWidget;
+	if (m_offlineDataServer) {
+		delete m_offlineDataServer;
+	}
 	clean();
 }
 
@@ -195,6 +229,16 @@ void AwEpochManager::create()
 		visualise();
 }
 
+AwFileIO *AwEpochManager::offlineFiltering(const AwChannelList& channels)
+{
+	AwWaitWidget wait("Offline filtering of data...");
+	OfflineFilterWorker worker(channels, m_artefacts);
+	connect(&worker, &OfflineFilterWorker::finished, &wait, &AwWaitWidget::accept);
+	QMetaObject::invokeMethod(&worker, "run", Qt::QueuedConnection);
+	wait.exec();
+	return worker.memIOReader();
+}
+
 void AwEpochManager::average()
 {
 	if (conditions().isEmpty())
@@ -202,6 +246,64 @@ void AwEpochManager::average()
 
 	AwAverageDialog dlg;
 	if (dlg.exec() == QDialog::Accepted) {
+		// reset any previous offline filtering
+		if (m_offlineDataServer) {
+			m_offlineDataServer->closeAllConnections();
+			for (auto condition : conditions()) {
+				AwDataServer::getInstance()->openConnection(condition);
+			}
+		}
+		if (dlg.isRawData()) {
+			// browse all epochs of all conditions and reset filters to none for their respective channels.
+			for (auto condition : conditions())
+				for (auto epoch : condition->epochs()) {
+					AwChannel::clearFilters(epoch->channels());
+					epoch->setLoaded(false);
+				}
+		}
+		else {
+			AwFilterSettings settings = dlg.filterSettings();
+			if (!dlg.isOfflineFiltering()) {
+				for (auto condition : conditions())
+					for (auto epoch : condition->epochs()) {
+						settings.apply(epoch->channels());
+						epoch->setLoaded(false);
+					}
+			}
+			else {  // do offline filtering using a new data server and the MEMIO plugin.
+				// gather all channels from different modality.
+				QVector<int> modalities;
+				AwChannelList channels;
+				for (auto condition : conditions()) {
+					for (auto epoch : condition->epochs()) {
+						epoch->setLoaded(false);
+					}
+					if (modalities.contains(condition->type()))
+						continue;
+					modalities << condition->type();
+					channels += condition->channels();
+				}
+				// apply filters to gathered channels
+				m_filterSettings.apply(channels);
+				// do offline filtering
+				auto reader = offlineFiltering(channels);
+				// got a memio reader, associate it with a dedicated data server.
+				if (!m_offlineDataServer)
+					m_offlineDataServer = AwDataServer::getInstance()->duplicate(reader);
+				else
+					m_offlineDataServer->setMainReader(reader);
+				if (m_memoryReader)
+					m_memoryReader->plugin()->deleteInstance(m_memoryReader);
+				m_memoryReader = reader;
+		
+				for (auto condition : conditions()) {
+					AwDataServer::getInstance()->closeConnection(condition);
+					m_offlineDataServer->openConnection(condition);
+				}
+			}
+		}
+
+
 		AwEpochAverageWidget *widget = new AwEpochAverageWidget(dlg.selectedConditions);
 		m_avgWidgets.append(widget);
 		widget->show();
@@ -224,44 +326,21 @@ AwEpochTree *AwEpochManager::getCondition(const QString& name)
 	return NULL;
 }
 
-void AwEpochManager::setFilterSettings(const AwFilterSettings& settings)
-{
-	// check if settings have changed (need to preload again the data in that case)
-	bool filtersChanged = false;
-	if (m_filterSettings.isEmpty() && !settings.isEmpty()) 
-		filtersChanged = true;
-
-	// check for all conditions if the settings have changed
-	for (auto c : conditions()) {
-		auto modality = c->type();
-		auto filters = m_filterSettings.filters(modality);
-		auto newFilters = settings.filters(modality);
-
-		if (filters != newFilters) {
-			m_filterSettings = settings;
-			if (m_servers.contains(modality)) {
-				auto server = m_servers.value(modality);
-				auto channels = c->channels();
-				m_filterSettings.apply(channels);
-				auto newServer = AwMemoryMapper::buildDataServerWithPreloadedData(AwSettings::getInstance()->currentReader(),
-					channels);
-			}
-		}
-	}
-//	auto currentFilters = m_filterSettings.filters(m_condition->type());
-
-}
-
 /// Try to create a new condition. If a condition with the same name already exists, return it.
 /// If the epoching of the condition failed, return a null pointer otherwise return the newly created condition.
 ///
-AwEpochTree *AwEpochManager::createCondition(const QString& name, const AwChannelList& channels, const QString& event, float pre, float post)
+AwEpochTree *AwEpochManager::createCondition(const QString& name, const AwChannelList& channels, const QString& event, 
+	float pre, float post, const QString& artefactToAvoid)
 {
 	if (m_hashEpochs.contains(name))
 		return m_hashEpochs.value(name);
 
 	AwEpochTree *cond = new AwEpochTree(name, channels, m_totalDuration, this);
-	if (cond->buildEpochs(AwMarkerManager::instance()->getMarkers(), event, pre, post) == 0) {
+	auto markers = AwMarkerManager::instance()->getMarkers();
+	m_artefacts = AwMarker::getMarkersWithLabel(markers, artefactToAvoid);
+	
+
+	if (cond->buildEpochs(markers, event, pre, post, m_artefacts) == 0) {
 		m_hashEpochs.insert(name, cond);
 		AwDataServer::getInstance()->openConnection(cond);
 		return cond;

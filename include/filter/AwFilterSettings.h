@@ -44,8 +44,9 @@ class AW_FILTER_EXPORT AwFilterSettings : public QObject
 {
 	Q_OBJECT
 public:
-	explicit AwFilterSettings();
-	explicit AwFilterSettings(const AwFilterSettings& copy);
+	AwFilterSettings();
+	AwFilterSettings(const AwFilterSettings& copy);
+
 	~AwFilterSettings();
 	AwFilterSettings& operator=(const AwFilterSettings& other);
 	/** clean up all filter settings and bounds **/

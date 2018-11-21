@@ -102,7 +102,8 @@ void AwAverageDialog::accept()
 		c->setComputeSettings(m_settings);
 	//	c->setFilterSettings(m_filterSettings);
 	}
-	AwEpochManager::instance()->setFilterSettings(m_filterSettings);
-
+	m_rawData = m_ui.checkBoxRawData->isChecked();
+	m_offlineFiltering = m_ui.checkOfflineFiltering->isChecked();
+	
 	return QDialog::accept();
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>412</height>
+    <height>398</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -102,8 +102,17 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
+          </property>
           <property name="frame">
            <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="accelerated">
+           <bool>false</bool>
           </property>
           <property name="suffix">
            <string>Hz</string>
@@ -118,19 +127,6 @@
            <double>1000.000000000000000</double>
           </property>
          </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item>
          <widget class="QLabel" name="label_3">
@@ -153,8 +149,14 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
+          </property>
           <property name="frame">
            <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
           </property>
           <property name="suffix">
            <string>Hz</string>
@@ -363,7 +365,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QCheckBox" name="checkBox">
+         <widget class="QCheckBox" name="checkBoxSpecifyFile">
           <property name="text">
            <string>Specify output file</string>
           </property>
@@ -521,7 +523,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>checkBox</sender>
+   <sender>checkBoxSpecifyFile</sender>
    <signal>toggled(bool)</signal>
    <receiver>lineEditFilename</receiver>
    <slot>setEnabled(bool)</slot>

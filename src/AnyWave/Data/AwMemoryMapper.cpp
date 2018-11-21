@@ -5,7 +5,7 @@
 #include "Plugin/AwPluginManager.h"
 #include <AwException.h>
 
-AwDataServer *AwMemoryMapper::buildDataServerWithPreloadedData(AwFileIO *reader, const AwChannelList& channels, const AwMarkerList& artefacts)
+AwFileIO *AwMemoryMapper::buildDataServerWithPreloadedData(AwFileIO *reader, const AwChannelList& channels, const AwMarkerList& artefacts)
 {
 	// get MEMIO plugin
 	auto memioPlugin = AwPluginManager::getInstance()->getReaderPluginByName("Memory Reader");
@@ -57,5 +57,5 @@ AwDataServer *AwMemoryMapper::buildDataServerWithPreloadedData(AwFileIO *reader,
 	auto plugin = static_cast<MEMIOPlugin *>(memioPlugin);
 	auto memReader = plugin->newInstance();
 	memReader->setChunks(chunks);
-	return AwDataServer::getInstance()->duplicate(memReader);
+	return memReader;
 }

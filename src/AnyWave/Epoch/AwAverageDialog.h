@@ -40,11 +40,16 @@ public:
 	~AwAverageDialog();
 
 	QList<AwEpochTree *> selectedConditions;
+	AwFilterSettings& filterSettings()  { return m_filterSettings; }
+	inline bool isRawData() { return m_rawData; }
+	inline bool isOfflineFiltering() { return m_offlineFiltering; }
 public slots:
 	void accept();
 	void updateConditionSettings(const QModelIndex& index);
 private:
 	Ui::AwAverageDialogUi m_ui;
+	bool m_rawData;
+	bool m_offlineFiltering;
 	AwEpochComputeSettings m_settings;
 	AwFilterSettings m_filterSettings;
 };
