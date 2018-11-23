@@ -56,6 +56,15 @@ AwFileIO *AwMemoryMapper::buildDataServerWithPreloadedData(AwFileIO *reader, con
 		delete chunkMarkers.takeFirst();
 	auto plugin = static_cast<MEMIOPlugin *>(memioPlugin);
 	auto memReader = plugin->newInstance();
+	auto block = memReader->infos.newBlock();
+	block->setDuration(totalDuration);
+	block->setStartPosition(0.);
+	//for (auto c : loadedChannels)
+	//	memReader->infos.addChannel(c);
+	memReader->setPlugin(plugin);
 	memReader->setChunks(chunks);
+	// release loadedChannels
+	while (!loadedChannels.isEmpty())
+		delete loadedChannels.takeFirst();
 	return memReader;
 }

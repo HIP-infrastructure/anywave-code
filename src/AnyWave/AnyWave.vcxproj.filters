@@ -1213,9 +1213,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSSubject.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="AwNoGUI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUI.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1278,6 +1275,9 @@
     </ClCompile>
     <ClCompile Include="Data\AwMemoryMapper.cpp">
       <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="AwCommandLineManager.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2011,6 +2011,9 @@
     </ClInclude>
     <ClInclude Include="Data\AwMemoryMapper.h">
       <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="AwCommandLineManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

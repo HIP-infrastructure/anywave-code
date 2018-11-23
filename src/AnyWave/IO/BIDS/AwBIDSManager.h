@@ -3,6 +3,7 @@
 #include "AwBIDSSubject.h"
 #include "AwBIDSGUI.h"
 #include <AwFileIO.h>
+#include <AwCommandLine.h>
 class AwFileItem;
 
 #define AWBIDS_SOURCE_DIRS 3
@@ -24,10 +25,10 @@ public:
 	void setRootDir(const QString& path);
 
 	/** Convert a SEEG file to BIDS. If option sideCars is set, only generates the json and tsv files. **/
-	int seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subject, const QString& task, 
-		const QString& sideCars, const QString &session = QString(), const QString& run = QString(), const QString& acq = QString());
+//	int seegToBIDS(const QString& file, const QString& destDir, const QString& format, const QString& subject, const QString& task, 
+//		const QString& sideCars, const QString &session = QString(), const QString& run = QString(), const QString& acq = QString());
 
-	int toBIDS(QList<AwArgument>& args);
+	int SEEGtoBIDS(const AwArguments& args);
 
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);

@@ -73,7 +73,6 @@ protected:
 	AwFilterSettings m_filterSettings;
 	AwMarkerList m_artefacts;
 	AwDataServer *m_offlineDataServer;
-	AwFileIO *m_memoryReader;
 };
 
 /////////////////////////////////////////////////////////////////////

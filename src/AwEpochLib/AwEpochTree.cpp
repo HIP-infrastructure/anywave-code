@@ -40,10 +40,13 @@ AwEpochTree::AwEpochTree(const QString& name, const AwChannelList& channels, flo
 	m_name = name;
 	m_modality = channels.first()->type();
 	m_avgIsDone = false;
+	m_averaged = Q_NULLPTR;
 }
 
 AwEpochTree::~AwEpochTree()
 {
+	if (m_averaged)
+		delete m_averaged;
 }
 
 int AwEpochTree::numberOfGoodEpochs()
@@ -127,12 +130,82 @@ void AwEpochTree::average()
 
 	auto totalEpochs = epochs.size();
 
-	//// shall we filter the data?
-	//if (!m_filterSettings.isEmpty() && !m_filterSettings.filters(m_channels.first()->type()).isEmpty()) {
-	//	// Preload and filter data then reconnect epochs to the temporary data server.
+	// build a matric the size of the final averaged epoch
+	mat avgEpochMat = arma::zeros(this->channels().size(), (uword)floor(this->m_epochDuration * this->channels().first()->samplingRate()));
+	
 
-	//}
+	// precompute latencies to sample in case a baseline correction is required.
+	int baselineLowerSample = (int)floor(m_computeSettings.latencyRange[0] * m_epochs.first()->channels().first()->samplingRate());
+	int baselineHigherSample = (int)floor(m_computeSettings.latencyRange[1] * m_epochs.first()->channels().first()->samplingRate());
+
+	for (auto e : epochs) {
+		loadEpoch(e);
+
+		for (auto c : e->channels()) {
+			uword row = 0;
+			// get data as double not float
+			rowvec channelData = arma::conv_to<rowvec>::from(AwMath::channelToVec(c));
+			if (m_computeSettings.useBaselineCorrection) {
+				auto zeroSample = e->zeroSample();
+				auto endSample = zeroSample - 1;
+				auto start = zeroSample - baselineLowerSample;
+				auto end = endSample - baselineHigherSample;
+				if (start < 0)
+					start = 0;
+				double mean = 0., stddev = 0.;
+				switch (m_computeSettings.baselineMethod)
+				{
+				case AwEpochComputeSettings::SubstractMean:
+					mean = arma::mean(channelData(span(start, end)));
+					channelData -= mean;
+					break;
+				case AwEpochComputeSettings::DivideByStd:
+					stddev = arma::stddev(channelData(span(start, end)));
+					channelData /= stddev;
+					break;
+				}
+				// copy channel data back (for further std error computation)
+				for (auto i = 0; i < c->dataSize(); i++)
+					c->data()[i] = channelData(i);
+			}
+			// put row in the avgMatrix
+			// add channel data to matrix.
+			avgEpochMat.row(row) += channelData;
+			row++;
+		}
+		emit epochLoaded(totalEpochs);
+	}
+	
+	double sqr_n = sqrt(totalEpochs);
+	// create a std dev matrix of each samples of a channel through all epochs.
+	mat std_dev = arma::zeros(avgEpochMat.n_rows, avgEpochMat.n_cols);
+	vec valuesThroughEpochs(totalEpochs);
+	// compute error type based on std dev of each epochs
+	for (arma::uword n = 0; n < std_dev.n_rows; n++) {
+		for (arma::uword m = 0; m < std_dev.n_cols; m++) {
+			for (auto nE = 0; nE < totalEpochs; nE++) {
+				valuesThroughEpochs(nE) = epochs.at(nE)->channels().at(n)->data()[m];
+			}
+			std_dev(n, m) = stddev(valuesThroughEpochs);
+		}
+	}
+	// do the averaging of all epochs
+	avgEpochMat /= totalEpochs;
+	mat errorTypeMat = std_dev / sqr_n;
+
+	// build the resulting epoch
+	AwEpochChannelList resultChannels;
+	for (arma::uword n = 0; n < avgEpochMat.n_rows; n++) {
+		auto channel = new AwEpochAverageChannel(m_channels.value(n));
+		channel->setData(arma::conv_to<fvec>::from(avgEpochMat.row(n)));
+		channel->setErrorType(arma::conv_to<fvec>::from(errorTypeMat.row(n)));
+		resultChannels << channel;
+	}
+	if (!m_averaged)
+		m_averaged = new AwAvgEpoch(this, m_epochs.first()->posAndDuration());
+	m_averaged->setChannels(resultChannels);
 }
+
 
 int AwEpochTree::doAverage(bool verbose)
 {

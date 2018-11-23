@@ -90,7 +90,6 @@ AwEpochManager::AwEpochManager()
 	m_totalDuration = AwSettings::getInstance()->currentReader()->infos.totalDuration();
 	m_dataPath = AwSettings::getInstance()->fileInfo()->filePath();
 	m_offlineDataServer = Q_NULLPTR;
-	m_memoryReader = Q_NULLPTR;
 	load();
 	m_reviewWidget = NULL;
 }
@@ -99,9 +98,6 @@ AwEpochManager::~AwEpochManager()
 {
 	if (m_reviewWidget)
 		delete m_reviewWidget;
-	if (m_offlineDataServer) {
-		delete m_offlineDataServer;
-	}
 	clean();
 }
 
@@ -112,6 +108,8 @@ void AwEpochManager::clean()
 			AwDataServer::getInstance()->closeConnection(condition);
 		delete condition;
 	}
+	if (m_offlineDataServer)
+		delete m_offlineDataServer;
 	m_hashEpochs.clear();
 }
 
@@ -292,9 +290,6 @@ void AwEpochManager::average()
 					m_offlineDataServer = AwDataServer::getInstance()->duplicate(reader);
 				else
 					m_offlineDataServer->setMainReader(reader);
-				if (m_memoryReader)
-					m_memoryReader->plugin()->deleteInstance(m_memoryReader);
-				m_memoryReader = reader;
 		
 				for (auto condition : conditions()) {
 					AwDataServer::getInstance()->closeConnection(condition);

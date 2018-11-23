@@ -50,7 +50,7 @@ namespace Aw
 		enum AwProcessFlags {
 			ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02, ProcessHasOutputUi = 0x04,
 			ProcessDontRequireData = 0x08, ProcessIsScriptable = 0x10, ProcessRequiresChannelSelection = 0x20,
-			ProcessSkipInputCheck = 0x40, PluginIsHidden = 0x80
+			ProcessSkipInputCheck = 0x40, PluginIsHidden = 0x80, CanRunFromCommandLine = 0x100
 		};
 	}
 	namespace ProcessInput {

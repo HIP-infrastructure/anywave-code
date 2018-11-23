@@ -29,6 +29,7 @@
 #include <AwFileIO.h>
 #include <QMutex>
 #include <filter/AwFilterSettings.h>
+#include <AwCommandLine.h>
 
 /** AwProcessIO defines object used as input or output by AwProcess **/
 class AW_PROCESS_EXPORT AwProcessIO
@@ -48,6 +49,8 @@ public:
 	void clearChannels();
 	void clearMarkers();
 	void clearWidgets();
+	void setArguments(const AwArguments& arguments) { m_arguments = arguments; }
+	inline AwArguments& args() { return m_arguments; }
 
 	AwChannelList channels;
 	AwMarkerList markers;
@@ -73,5 +76,6 @@ public:
 
 protected:
 	AwFileIO *m_reader;
+	AwArguments m_arguments;	// used for pluing launches from the command line
 	QMutex m_mutex;
 };
