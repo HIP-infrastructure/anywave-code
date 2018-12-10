@@ -1067,6 +1067,7 @@ void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 		AwChannel *asRecorded = m_channelHashTable.value(label);
 		if (asRecorded == NULL)
 			continue;
+		asRecorded->setBad(true);
 		m_badChannelLabels << label;
 		foreach(AwChannel *c, m_channels) {
 			if (c->name() == asRecorded->name() || c->referenceName() == asRecorded->name()) {
