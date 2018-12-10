@@ -4,6 +4,8 @@
 
 HEADERS += ./Data/AwDataConnection.h \
     ./Data/AwDataServer.h \
+    ./Data/AwMemoryMapper.h \
+    ./Data/AwDataChunk.h \
     ./Carto/AwDockMapping.h \
     ./Carto/AwMappingWidget.h \
     ./Carto/AwMappingClient.h \
@@ -33,6 +35,7 @@ HEADERS += ./Data/AwDataConnection.h \
     ./IO/BIDS/AwBIDSManager.h \
     ./IO/BIDS/AwBIDSSubject.h \
     ./IO/BIDS/AwBIDSGUI.h \
+    ./IO/MEMIO/MEMIO.h \
     ./Marker/AwExtractTriggers.h \
     ./Marker/AwMarkersExportWidget.h \
     ./Marker/AwPickChannelsDial.h \
@@ -133,7 +136,9 @@ HEADERS += ./Data/AwDataConnection.h \
     ./Epoch/AwAvgSignalItem.h \
     ./Epoch/AwEditStatsDialog.h \
     ./Epoch/AwStatsModel.h \
-    ./Epoch/AwStatChartWidget.h
+    ./Epoch/AwEpochMosaicWidget.h \
+    ./Epoch/AwStatChartWidget.h \
+    ./AwCommandLineManager.h
 SOURCES += ./AnyWave.cpp \
     ./AwExportDial.cpp \
     ./AwNoGUI.cpp \
@@ -142,6 +147,8 @@ SOURCES += ./AnyWave.cpp \
     ./AwOpenFileDialog.cpp \
     ./Data/AwDataConnection.cpp \
     ./Data/AwDataServer.cpp \
+    ./Data/AwMemoryMapper.cpp \
+    ./Data/AwDataChunk.cpp \
     ./Carto/AwDockMapping.cpp \
     ./Carto/AwMappingClient.cpp \
     ./Carto/AwMappingWidget.cpp \
@@ -171,6 +178,7 @@ SOURCES += ./AnyWave.cpp \
     ./IO/BIDS/AwBIDSSubject.cpp \
     ./IO/BIDS/AwBIDSTools.cpp \
     ./IO/BIDS/AwFileItem.cpp \
+    ./IO/MEMIO/MEMIO.cpp \
     ./Marker/AwDockAddMarker.cpp \
     ./Marker/AwExtractTriggers.cpp \
     ./Marker/AwMarkerFindReplaceUi.cpp \
@@ -278,8 +286,10 @@ SOURCES += ./AnyWave.cpp \
     ./Epoch/AwEpochManager.cpp \
     ./Epoch/AwEpochModel.cpp \
     ./Epoch/AwEpochVisuWidget.cpp \
+    ./Epoch/AwEpochMosaicWidget.cpp \
     ./Epoch/AwStatChartWidget.cpp \
-    ./Epoch/AwStatsModel.cpp
+    ./Epoch/AwStatsModel.cpp \
+    ./AwCommandLineManager.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
     ./ICA/AwICAPanel.ui \
@@ -329,6 +339,7 @@ FORMS += ./AnyWave.ui \
     ./Epoch/AwEpochAverageWidget.ui \
     ./Epoch/AwAverageDialog.ui \
     ./Epoch/AwAverageItemWidget.ui \
+    ./Epoch/AwEpochMosaicWidget.ui \
     ./Epoch/AwEditStatsDialog.ui
 TRANSLATIONS += ./anywave_en.ts \
     ./anywave_fr.ts
