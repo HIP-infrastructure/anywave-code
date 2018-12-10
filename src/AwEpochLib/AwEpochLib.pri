@@ -6,9 +6,11 @@ HEADERS += ../../include/epoch/AwEpochAverageChannel.h \
     ../../include/epoch/AwEpoch.h \
     ../../include/epoch/AwEpochComputeSettings.h \
     ../../include/epoch/AwEpochDataBuffer.h \
-    ../../include/epoch/AwEpochTree.h
+    ../../include/epoch/AwEpochTree.h \
+    ../../include/epoch/AwAvgEpoch.h
 SOURCES += ./AwEpochAverageChannel.cpp \
     ./AwEpoch.cpp \
     ./AwEpochComputeSettings.cpp \
     ./AwEpochDataBuffer.cpp \
-    ./AwEpochTree.cpp
+    ./AwEpochTree.cpp \
+    ./AwAvgEpoch.cpp

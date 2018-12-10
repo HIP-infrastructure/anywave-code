@@ -66,7 +66,7 @@ public:
 	AwAvgEpoch *averagedResult() { return m_averaged; }
 	/** Build epochs using the markers, around a specific marker, giving pre and post latencies **/
 	int buildEpochs(const AwMarkerList& markers, const QString& label,
-		float pre, float post, AwMarkerList& artefacts = AwMarkerList());
+		float pre, float post, const AwMarkerList& artefacts = AwMarkerList());
 
 	/** Compute the average. Verbose will send a signal each time an epoch is loaded **/
 	int doAverage(bool verbose = false);

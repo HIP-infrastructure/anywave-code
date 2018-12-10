@@ -60,7 +60,7 @@ int AwEpochTree::numberOfGoodEpochs()
 }
 
 int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post, 
-	AwMarkerList& artefacts)
+	const AwMarkerList& artefacts)
 {
 	m_after = post;
 	m_before = pre;
@@ -86,7 +86,8 @@ int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, 
 	}
 
 	if (!artefacts.isEmpty()) {
-		auto dummy = AwMarker::cutAroundMarkers(tmp, artefacts);
+        auto artefactstemp = artefacts;
+		auto dummy = AwMarker::cutAroundMarkers(tmp, artefactstemp);
 		while (!tmp.isEmpty())
 			delete tmp.takeFirst();
 		tmp = dummy;

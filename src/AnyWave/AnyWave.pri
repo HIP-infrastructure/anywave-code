@@ -126,8 +126,6 @@ HEADERS += ./Data/AwDataConnection.h \
     ./Epoch/AwEpochCreateUi.h \
     ./Epoch/AwEpochModel.h \
     ./Epoch/AwEpochVisuWidget.h \
-    ./Epoch/AwEpochThumbNail.h \
-    ./Epoch/AwEpochThumbCreator.h \
     ./Epoch/AwEpochAverageWidget.h \
     ./Epoch/AwAverageDialog.h \
     ./Epoch/AwAverageItemWidget.h \
@@ -279,8 +277,6 @@ SOURCES += ./AnyWave.cpp \
     ./Epoch/AwEpochCreateUi.cpp \
     ./Epoch/AwEpochManager.cpp \
     ./Epoch/AwEpochModel.cpp \
-    ./Epoch/AwEpochThumbNail.cpp \
-    ./Epoch/AwEpochThumbCreator.cpp \
     ./Epoch/AwEpochVisuWidget.cpp \
     ./Epoch/AwStatChartWidget.cpp \
     ./Epoch/AwStatsModel.cpp
@@ -330,7 +326,6 @@ FORMS += ./AnyWave.ui \
     ./Prefs/AwPrefsDial.ui \
     ./Epoch/AwEpochCreateUi.ui \
     ./Epoch/AwEpochVisuWidget.ui \
-    ./Epoch/AwEpochThumbNail.ui \
     ./Epoch/AwEpochAverageWidget.ui \
     ./Epoch/AwAverageDialog.ui \
     ./Epoch/AwAverageItemWidget.ui \
