@@ -39,6 +39,7 @@ public:
 
 	void start();
 	void stop();
+	quint16 serverPort(); 
 signals:
 	void log(const QString& message);
 	void error(const QString& error);

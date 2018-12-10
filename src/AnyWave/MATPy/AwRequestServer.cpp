@@ -39,7 +39,10 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 {
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
-	if (m_server->listen(QHostAddress::Any, 50222)) {
+	m_serverPort = 0;
+	//if (m_server->listen(QHostAddress::Any, 50222)) {
+	if (m_server->listen(QHostAddress::Any, 0)) {
+		m_serverPort = m_server->serverPort();
 		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 		AwDataServer::getInstance()->openConnection(this);
 		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));

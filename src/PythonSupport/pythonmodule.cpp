@@ -34,6 +34,7 @@
 PyObject *AnyWaveError;		// error handling object
 PyObject *m_host;			// host to connect to
 PyObject *m_pid;			// process ID
+PyObject *m_server_port;		// server port number
 PyObject *m_module;			// the module
 
 // global variables (not included in Python module)
@@ -86,10 +87,13 @@ initanywave(void)
 	PyModule_AddObject(m_module, "error", AnyWaveError);
 	m_host = Py_BuildValue("s", "127.0.0.1");
 	m_pid = Py_BuildValue("i", 0);
+	m_server_port = Py_BuildValue("i", 0);
 	Py_INCREF(m_host);
 	Py_INCREF(m_pid);
+	Py_INCREF(m_server_port);
 	PyModule_AddObject(m_module, "host", m_host);
 	PyModule_AddObject(m_module, "pid", m_pid);
+	PyModule_AddObject(m_module, "server_port", m_server_port);
 	PyModule_AddObject(m_module, "marker", (PyObject *)&marker_Type);
 	PyModule_AddObject(m_module, "channel", (PyObject *)&channel_Type);
 }

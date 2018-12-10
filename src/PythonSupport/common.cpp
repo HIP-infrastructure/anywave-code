@@ -161,16 +161,26 @@ QTcpSocket *connect()
 		PyErr_SetString(AnyWaveError, "no pid in dict.");
 		return NULL;
 	}
-	char *s_pid;
+	PyObject *pyServerPort = PyDict_GetItemString(dict, "server_port");
+	if (pyServerPort == NULL) {
+		PyErr_SetString(AnyWaveError, "no server port defined in dict.");
+		return NULL;
+	}
+	char *s_pid, *s_serverPort;
 	if (PyString_Check(pyPid))
 		s_pid = PyString_AS_STRING(pyPid);
+	if (PyString_Check(pyServerPort))
+		s_serverPort = PyString_AS_STRING(pyServerPort);
 
 	m_pidValue = QString(s_pid).toInt();
 
 	QTcpSocket *socket = new QTcpSocket();
 
 	host = QString(s_host);
-	socket->connectToHost(host, 50222);
+	quint16 port = QString(s_serverPort).toInt();
+
+	//socket->connectToHost(host, 50222);
+	socket->connectToHost(host, port);
 	if (!socket->waitForConnected()) {
 		QString error = QString("Unable to connect to AnyWave: %1").arg(socket->errorString());
 		PyErr_SetString(AnyWaveError, error.toStdString().c_str());

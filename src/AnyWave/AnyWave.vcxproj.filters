@@ -2003,9 +2003,6 @@
     <ClInclude Include="GeneratedFiles\ui_AwEpochMosaicWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="AwEpochThumbs.h">
-      <Filter>Epoch</Filter>
-    </ClInclude>
     <ClInclude Include="Data\AwDataChunk.h">
       <Filter>Data</Filter>
     </ClInclude>
@@ -2014,6 +2011,9 @@
     </ClInclude>
     <ClInclude Include="AwCommandLineManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Epoch\AwEpochThumbs.h">
+      <Filter>Epoch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QtCore>
 
+
 #define AW_MATLAB_OUTPUT_BUFFER_SIZE	1024 * 20	// 20Kbytes buffer
 
 /** run()
@@ -36,7 +37,7 @@
 - dep: path to dependency folder to add to the path.
 - pid: process id of the script.
 **/
-void AwMatlabSupport::run(const QString& path, const QString& dep, int pid)
+void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quint16 serverPort)
 {
 	m_eng = engOpen(NULL);
 	emit progressChanged("Opening MATLAB Connection...");
@@ -55,7 +56,8 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid)
 		command = "evalin('base', 'pid = " + QString::number(pid) + "')";
 		engEvalString(m_eng, command.toLatin1().data());
 		// send port
-		command = "evalin('base', 'port = 50222')";
+	//	command = "evalin('base', 'port = 50222')";
+		command = QString("evalin('base', 'port = %1')").arg(serverPort);
 		engEvalString(m_eng, command.toLatin1().data());
 		// send host
 		engEvalString(m_eng, "evalin('base', 'host = ''127.0.0.1''')");
@@ -105,7 +107,3 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid)
 	else
 		emit progressChanged(tr("Failed to connect to MATLAB!"));
 }
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-Q_EXPORT_PLUGIN2(AwMatlabSupport, AwMatlabSupport)
-#endif

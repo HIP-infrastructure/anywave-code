@@ -81,7 +81,8 @@ void AwMatlabScriptProcess::run()
 		else
 			arguments << mcrPath;
 #endif
-		arguments << "127.0.0.1" << "50222" << QString::number(m_pid);
+		//arguments << "127.0.0.1" << "50222" << QString::number(m_pid);
+		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid); 
 		QProcess plugin(this);
 		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 
@@ -108,7 +109,7 @@ void AwMatlabScriptProcess::run()
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 
-			mi->run(m_path, aws->matlabPluginDir + "/dep", m_pid);
+			mi->run(m_path, aws->matlabPluginDir + "/dep", m_pid, AwMATPyServer::instance()->serverPort());
 		}
 	}
 }
