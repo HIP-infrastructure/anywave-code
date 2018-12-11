@@ -295,44 +295,6 @@ int AwEpochTree::doAverage(bool verbose)
 	return 0;
 }
 
-///
-/// Create a buffer for the average channels.
-/// Return NULL if the averaging is not done yet.
-//AwEpochDataBuffer *AwEpochTree::createAVGBuffer()
-//{
-//	if (!m_avgIsDone)
-//		return NULL;
-//
-//	//qDeleteAll(m_avgChannels);
-//	while (!m_avgChannels.isEmpty())
-//		delete m_avgChannels.takeLast();
-//	m_avgChannels.clear();
-//	for (arma::uword i = 0; i < m_matrix.n_rows; i++) {
-//		AwEpochAverageChannel *newc = new AwEpochAverageChannel(m_channels.at(i));
-//		newc->setData(conv_to<fvec>::from(m_matrix.row(i)));
-//		newc->setErrorType(conv_to<fvec>::from(m_errorType.row(i)));
-//		newc->setZeroPosition(m_zeroPos);
-//		m_avgChannels << newc;
-//	}
-//	AwEpochDataBuffer *buffer = new AwEpochDataBuffer(&m_avgChannels);
-//	return buffer;
-//}
-//
-//AwEpochAverageChannel *AwEpochTree::createAVGChannel(const QString& label)
-//{
-//	QStringList labels = AwChannel::getLabels(m_channels);
-//	int index = labels.indexOf(label);
-//	if (index == -1)
-//		return NULL;
-//
-//	AwEpochAverageChannel *newc = new AwEpochAverageChannel(m_channels.at(index));
-//
-//	newc->setData(conv_to<fvec>::from(m_matrix.row(index)));
-//	newc->setErrorType(conv_to<fvec>::from(m_errorType.row(index)));
-//	newc->setZeroPosition(m_zeroPos);
-//	newc->setCondition(this);
-//	return newc;
-//}
 
 ///
 /// Load the epoch at index index.

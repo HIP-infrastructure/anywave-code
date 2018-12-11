@@ -719,8 +719,6 @@ void AnyWave::openBIDS(const QString& path)
 	addDockWidget(Qt::RightDockWidgetArea, m_dockBIDS);
 	m_dockBIDS->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	m_dockBIDS->setWidget(AwBIDSManager::instance()->ui());
-
-
 	AwSettings::getInstance()->addRecentBIDS(path);
 }
 
@@ -887,13 +885,17 @@ void AnyWave::openFile(const QString &path)
 		AwMarkerManager::instance()->addMarkers(m_currentReader->infos.blocks().at(0)->markers());
 	}
 	AwMarkerManager::instance()->setFilename(m_openFileName);
-	
-
 	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
 	AwAmplitudeManager::instance()->setFilename(m_openFileName);
 
 	if (openWithDialog)
 		settings->addRecentFilePath(filePath);
+
+	// check for BIDS
+	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	if (!root.isEmpty()) {
+		openBIDS(root);
+	}
 }
 
 //
