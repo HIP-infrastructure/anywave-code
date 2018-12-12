@@ -10,6 +10,7 @@
 #include "AwBIDSTools.h"
 #include "AwFileItem.h"
 #include "Plugin/AwPluginManager.h"
+#include <widget/AwMessageBox.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
@@ -345,11 +346,14 @@ AwBIDSManager::AwBIDSManager(const QString& rootDir)
 		m_fileExtensions += r->fileExtensions;
 	
 	setRootDir(rootDir);
-
 }
 
 void AwBIDSManager::setRootDir(const QString& path)
 {
+	// check if root dir is the same as current one. If so, do nothing.
+	if (path == m_rootDir)
+		return;
+
 	if (path.isEmpty())
 		return;
 	// check that the folder exists
@@ -358,6 +362,13 @@ void AwBIDSManager::setRootDir(const QString& path)
 		throw AwException("Root directory does not exist.", "AwBIDSManager::setRootDir");
 		return;
 	}
+
+	if (isBIDSActive()) {
+		if (AwMessageBox::information(NULL, tr("BIDS warning"), tr("a BIDS folder is already open.\nClose it and open the new one?"), 
+			QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+			return;
+	}
+	
 	m_rootDir = path;
 	// instantiate UI if needed
 	if (m_ui == NULL)
@@ -454,12 +465,18 @@ void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
 void AwBIDSManager::getSubjects(int sourceDir)
 {
 	QString directory;
-	if (sourceDir == AwBIDSManager::raw) {
+	switch (sourceDir) {
+	case AwBIDSManager::raw:
 		directory = m_rootDir;
-	}
-	else { // sourcedata
+		break;
+	case AwBIDSManager::source:
 		directory = QString("%1/sourcedata").arg(m_rootDir);
+		break;
+	case AwBIDSManager::derivatives:
+		directory = QString("%1/derivatives").arg(m_rootDir);
+		break;
 	}
+
 	clearSubjects(sourceDir);
 	
 	QDirIterator it(directory, QDir::Dirs);
@@ -541,3 +558,153 @@ QString AwBIDSManager::getDerivativesPath(int type, AwBIDSSubject *sub)
 	}
 	return QString();
 }
+
+AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
+{
+	if (!isBIDSActive())
+		return Q_NULLPTR;
+	QFileInfo fi(path);
+	if (!fi.exists())
+		return Q_NULLPTR;
+
+	int sourceDir = AwBIDSManager::raw;
+	QDir dir = fi.absoluteDir();
+	// check for the first subfolder that could be : sourcedata or derivatives.
+	// if not we consider the path is in the default raw data
+	// climb up to the root folder.
+	while (dir.cdUp());
+
+	for (auto item : dir.entryList(QDir::Dirs)) {
+		if (item == "sourcedata") {
+			sourceDir = AwBIDSManager::source;
+			break;
+		}
+		if (item == "derivatives") {
+			sourceDir = AwBIDSManager::derivatives;
+			break;
+		}
+	}
+
+	// reset dir to the folder pointed by path
+	dir = fi.absoluteDir();
+	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
+	QRegularExpressionMatch match;
+	while (dir.cdUp()) {
+		for (auto item : dir.entryList(QDir::Dirs)) {
+			match = re.match(item);
+			if (match.hasMatch()) {
+				return getSubject(match.captured("ID"), sourceDir);
+			}
+		}
+	}
+	// failed to find a subject
+	return Q_NULLPTR;
+}
+
+AwChannelList AwBIDSManager::loadChannelsTsv(const QString& path)
+{
+	QFile file(path);
+	AwChannelList res;
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		QTextStream stream(&file);
+		// get columns
+		auto cols = stream.readLine();
+		auto items = cols.split('\t');
+		// check for at least name, type and units
+		if (!items.contains("name") || !items.contains("units") || !items.contains("type")) {
+			throw AwException("channels.tsv file is bad.", "AwBIDSManager::loadChannelsTsv");
+			return AwChannelList();
+		}
+		// build column indexes
+		QMap<int, QString> indexes;
+		int i = 0;
+		for (auto item : items)
+			indexes[i++] = item;
+
+		while (!stream.atEnd()) {
+			auto items = stream.readLine().split('\t');
+			if (items.isEmpty() || items.size() < 3)
+				continue;
+			auto channel = new AwChannel();
+			for (int i = 0; i < items.size(); i++) {
+				auto column = indexes[i];
+				auto item = items.value(i);
+				if (column == "name")
+					channel->setName(item);
+				else if (column == "units")
+					channel->setUnit(item);
+				else if (column == "type") {
+					// Note: We only parse for types handled by AnyWave here.
+					// all non recognized types will be assigned to Other.
+					// Missing types in AnyWave are: ECOG, DBS, VEOG, HEOG, EOG, AUDIO, PD, EYEGAZE, PUPIL, MISC
+					if (item == "MEGMAG")
+						channel->setType(AwChannel::MEG);
+					else if (item == "MEGREFMAG" || item == "MEGREFGRADAXIAL" || item == "MEGREFGRADPLANAR")
+						channel->setType(AwChannel::Reference);
+					else if (item == "MEGGRADAXIAL" || item == "MEGGRADPLANAR")
+						channel->setType(AwChannel::GRAD);
+					else if (item == "EEG")
+						channel->setType(AwChannel::EEG);
+					else if (item == "SEEG")
+						channel->setType(AwChannel::SEEG);
+					else if (item == "ECG")
+						channel->setType(AwChannel::ECG);
+					else if (item == "EMG")
+						channel->setType(AwChannel::EMG);
+					else if (item == "TRIG")
+						channel->setType(AwChannel::Trigger);
+					else
+						channel->setType(AwChannel::Other);
+				}
+				else if (column == "sampling_frequency")
+					channel->setSamplingRate(item.toDouble());
+				else if (column == "low_cutoff")
+					channel->setLowFilter(item.toDouble());
+				else if (column == "high_cutoff")
+					channel->setHighFilter(item.toDouble());
+				else if (column == "notch")
+					channel->setNotch(item.toDouble());
+				else if (column == "status")
+					if (item == "bad")
+						channel->setBad(true);
+				res << channel;
+			}
+		}
+	}
+	return res;
+}
+
+void AwBIDSManager::updateMontageFromChannelsTsv(const QString& dataPath, const AwChannelList& montage)
+{
+	if (!isBIDSActive())
+		return;
+	QString channels_tsv = QString("%1_channels.tsv").arg(dataPath);
+	if (!QFile::exists(channels_tsv))
+		return;
+	auto list = loadChannelsTsv(channels_tsv);
+
+	if (list.isEmpty())
+		return;
+
+	for (auto item : list) {
+
+	}
+}
+
+
+//AwChannelList AwBIDSManager::readChannelsTsv(AwBIDSSubject *subj, int itemType)
+//{
+//	bool ok = itemType == AwBIDSManager::MEG || itemType == AwBIDSManager::EEG || itemType == AwBIDSManager::iEEG;
+//	if (!ok)
+//		return AwChannelList();
+//
+//	// check for a channels.tsv in all subdir from subject dir
+//	QString path;
+//	if (itemType == AwBIDSManager::MEG)
+//		path = QString("%1/meg").arg(subj->fullPath());
+//	else if (itemType == AwBIDSManager::EEG)
+//		path = QString("%1/eeg").arg(subj->fullPath());
+//	else if (itemType == AwBIDSManager::iEEG)
+//		path = QString("%1/ieeg").arg(subj->fullPath());
+//
+//}

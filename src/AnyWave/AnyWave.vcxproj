@@ -22,6 +22,7 @@
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwCommandLineManager.cpp" />
     <ClCompile Include="AwExportDial.cpp" />
+    <ClCompile Include="AwFileOpenSave.cpp" />
     <ClCompile Include="AwOpenFileDialog.cpp" />
     <ClCompile Include="AwUpdater.cpp" />
     <ClCompile Include="Carto\AwDockMapping.cpp" />

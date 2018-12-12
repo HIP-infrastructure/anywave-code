@@ -40,6 +40,7 @@
 #include "AwAVGChannel.h"
 #include <widget/AwWait.h>
 #include <AwAmplitudeManager.h>
+#include "IO/BIDS/AwBIDSManager.h"
 
 // compare function for sorting labels of electrodes.
 bool compareSEEGLabels(const QString& s1, const QString& s2)
@@ -516,6 +517,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		if (!loadMontage(m_montagePath)) {
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
+		AwBIDSManager::instance()->updateMontageFromChannelsTsv(reader->infos.fileName(), m_channels);
 	}
 	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
 	if (AwSettings::getInstance()->filterSettings().isEmpty()) {
@@ -808,6 +810,8 @@ AwChannelList AwMontageManager::load(const QString& path)
 	}
 
 	file.close();
+
+
 	return res;
 }
 
@@ -900,10 +904,6 @@ bool AwMontageManager::apply(const QString& path)
 					}
 				}
 				else if (ee.tagName() == "reference") {
-//					// find reference in asRecorded
-//					QString ref = ee.text();
-//					if (m_channelHashTable.value(ref))
-//						channel->setReferenceName(ref);
 					channel->setReferenceName(ee.text());
 				}
 				else if (ee.tagName() == "color")
