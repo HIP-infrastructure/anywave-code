@@ -463,8 +463,6 @@ void AwMontageManager::clear()
 	while (!m_channels.isEmpty()) // delete current montage.
 		delete m_channels.takeLast();
 
-	//m_channelHashTable.clear();
-	//m_channelsAsRecorded.clear(); // clear as recorded Channels
 }
 
 void AwMontageManager::closeFile()
@@ -517,8 +515,9 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		if (!loadMontage(m_montagePath)) {
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
-		AwBIDSManager::instance()->updateMontageFromChannelsTsv(reader->infos.fileName(), m_channels);
 	}
+	updateMontageFromChannelsTsv(reader);
+
 	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
 	if (AwSettings::getInstance()->filterSettings().isEmpty()) {
 		AwSettings::getInstance()->filterSettings().initWithChannels(m_channels);
@@ -528,6 +527,54 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	emit montageChanged(m_channels);
+}
+
+
+void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
+{
+	auto filePath = reader->infos.fileName();
+	auto BM = AwBIDSManager::instance();
+
+	if (!BM->isBIDSActive())
+		return;
+
+	auto subj = BM->guessSubject(filePath);
+	if (!subj)
+		return;
+
+	auto baseFileName = filePath.remove(reader->plugin()->fileExtension);
+	
+
+	QString channels_tsv = QString("%1_channels.tsv").arg(filePath.remove(reader->plugin()->fileExtension));
+	if (!QFile::exists(channels_tsv))
+		return;
+	auto list = BM->loadChannelsTsv(channels_tsv);
+
+	if (list.isEmpty())
+		return;
+
+	// current montage is empty? => apply the montage found in channels.tsv
+	if (m_channels.isEmpty()) {
+		m_channels = AwChannel::duplicateChannels(list);
+		return;
+	}
+
+	// get labels of channels in current montage
+	auto labels = AwChannel::getLabels(m_channels);
+	for (auto item : list) {
+		auto index = labels.indexOf(item->name());
+		if (index == -1)
+			continue;
+		// modify the type and bad status considering the data stored in channels.tsv
+		// modify channel in the current montage
+		auto montageChannel = m_channels.value(index);
+		montageChannel->setBad(item->isBad());
+		montageChannel->setType(item->type());
+		// modify in the as recorded hash table
+		AwChannel *asRecorded = m_channelHashTable.value(montageChannel->name());
+		asRecorded->setBad(item->isBad());
+		asRecorded->setType(item->type());
+	}
 }
 
 ///

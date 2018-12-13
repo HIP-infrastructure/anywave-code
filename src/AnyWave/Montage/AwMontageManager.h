@@ -194,6 +194,8 @@ private:
 	// Source/ICA specific
 	void clearICA();
 	void clearSource(int type);
+	// BIDS support
+	void updateMontageFromChannelsTsv(AwFileIO *reader);
 };
 
 

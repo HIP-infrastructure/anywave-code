@@ -17,6 +17,8 @@ public:
 	AwFileItem *addItem(AwFileItem *item);
 	AwBIDSSessionList& sessions() { return m_sessions; }
 	AwFileItemList& fileItems() { return m_items; }
+	QStringList findFile(const QString& filePath);
+	AwFileItemList findFileItems(const QString& filePath);
 protected:
 	QString m_ID;
 	QString m_fullPath;

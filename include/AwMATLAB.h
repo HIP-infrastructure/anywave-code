@@ -36,6 +36,7 @@ namespace AwMATLAB {
 }
 
 class Matio;
+class matvar_t;
 
 class AW_MATLAB_EXPORT AwMATLABFile
 {
@@ -44,7 +45,9 @@ public:
 	~AwMATLABFile();
 
 	void close();
+	/** create a new file : returns 0 on success, -1 on failure **/
 	int create(const QString& file);
+	/** open file : returns 0 on success, -1 on failure **/
 	int open(const QString& file);
 
 	QString& error() { return m_error; }
@@ -75,6 +78,16 @@ public:
 	int setStructField(int handle, const char *fieldName, mat& matrix);
 	int setStructField(int handle, const char *fieldName, double scalar);
 	int setStructField(int handle, const char *fieldName, const QStringList& strings);
+	// Reading structures
+	int readStruct(const QString& name);
+	/** insert a structure coming from another struct into the hash table. **/
+	int addChildStruct(const QString& structName, const QString& childStructName);
+	QString getChildStructName(const QString& structName, const QString& child);
+	size_t getStructNumElements(const QString& name);
+	QStringList getStructFieldsName(const QString& name);
+	matvar_t *getField(const QString& structName, const QString& fieldName);
+	int readStringField(const QString& structName, const QString& fieldName, QString& string, size_t index);
+	int readScalarField(const QString& structName, const QString& fieldName, double *value, size_t index);
 	// READ
 	int readScalar(const QString& name, double *value);
 	int readScalar(const QString& name, float *value);

@@ -14,6 +14,9 @@ public:
 		for (auto s : struct_handles.values()) {
 			Mat_VarFree(s);
 		}
+		for (auto s : m_structNames.values()) {
+			Mat_VarFree(s);
+		}
 	}
     mat_t *fileptr;
 
@@ -24,10 +27,39 @@ public:
 	matvar_t* getStruct(int handle) {
 		return struct_handles.value(handle);
 	}
+	int insertStruct(const QString& name, matvar_t *s);
+	matvar_t *getStruct(const QString& name) { return m_structNames.value(name); }
+	void setFieldNames(const QString& name, const QStringList& fields) { m_structFields[name] = fields; }
+	QStringList getFieldNames(const QString& name) { return m_structFields.value(name); }
 protected:
 	int m_handles;
 	QMap<int, matvar_t *> struct_handles;
+	QMap<QString, matvar_t *> m_structNames;
+	QMap<QString, QStringList> m_structFields;
 };
+
+int Matio::insertStruct(const QString& name, matvar_t *s)
+{
+	//if (m_structNames.contains(name))
+	//	return -1;
+	//m_structNames[name] = s;
+	//return 0;
+	if (m_structNames.contains(name)) {
+		throw AwException("structure with same name already exists.", "Matio::insertStruct");
+		return  -1;
+	}
+	m_structNames[name] = s;
+	QStringList res;
+	auto nFields = Mat_VarGetNumberOfFields(s);
+	auto fields = Mat_VarGetStructFieldnames(s);
+	for (int i = 0; i < nFields; i++) {
+		res << QString::fromLatin1(fields[i]);
+	}
+	setFieldNames(name, res);
+	return 0;
+}
+
+
 
 AwMATLABFile::AwMATLABFile()
 {
@@ -89,7 +121,6 @@ void AwMATLABFile::close()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Structures
-
 
 int AwMATLABFile::createStruct(const QString& name, const char **fields, int nFields)
 {
@@ -1071,3 +1102,166 @@ int AwMATLABFile::readVec(const QString& name, fvec& vector)
 	return 0;
 }
 
+
+// read a structure, returns the list of fields names in a QStringList
+int AwMATLABFile::readStruct(const QString& name)
+{
+	if (FILEPTR == NULL)
+		return -1;
+	matvar_t *var = Mat_VarReadInfo(FILEPTR, name.toStdString().c_str());
+	if (var->class_type != MAT_C_STRUCT) {
+		m_error = QString("Variable is not a struct.");
+		Mat_VarFree(var);
+		throw AwException(m_error, "AwMATLABFile::readStruct");
+		return -1;
+	}
+	Mat_VarReadDataAll(FILEPTR, var);
+	if (m_matio->insertStruct(name, var) == 0) {
+		return 0;
+	}
+	m_error = QString("internal error settings fields");
+	throw AwException(m_error, "AwMATLABFile::readStruct");
+	return -1;
+}
+
+int AwMATLABFile::addChildStruct(const QString& sName, const QString& fieldName)
+{
+	//QString origin = QString("AwMATLABFile::addChildStruct");
+	//matvar_t *s = m_matio->getStruct(sName);
+	//if (s == NULL) {
+	//	m_error = QString("no structure named %1.").arg(sName);
+	//	throw AwException(m_error, origin);
+	//	return -1;
+	//}
+	auto child_field = getField(sName, fieldName);
+	return m_matio->insertStruct(getChildStructName(sName, fieldName), child_field);
+}
+
+QString AwMATLABFile::getChildStructName(const QString& name, const QString& child)
+{
+	return QString("%1/%2").arg(name).arg(child);
+}
+
+
+size_t AwMATLABFile::getStructNumElements(const QString& name)
+{
+	QString origin = QString("AwMATLABFile::getStructNumElements");
+	matvar_t *s = m_matio->getStruct(name);
+	if (s == NULL) {
+		m_error = QString("no structure named %1.").arg(name);
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	if (s->rank == 2) 
+		return s->dims[1];
+
+	m_error = QString("incorrect number of dimensions.");
+	throw AwException(m_error, origin);
+	return -1;
+}
+
+matvar_t *AwMATLABFile::getField(const QString& sName, const QString& fieldName)
+{
+	QString origin = QString("AwMATLABFile::getField");
+	matvar_t *s = m_matio->getStruct(sName);
+	if (s == NULL) {
+		m_error = QString("no structure named %1.").arg(sName);
+		throw AwException(m_error, origin);
+		return s;
+	}
+	auto fields = m_matio->getFieldNames(sName);
+	size_t index = fields.indexOf(fieldName);
+	if (index == -1) {
+		m_error = QString("no field named %1.").arg(fieldName);
+		throw AwException(m_error, origin);
+		return NULL;
+	}
+	return Mat_VarGetStructFieldByName(s, fieldName.toStdString().c_str(), index);
+}
+
+QStringList AwMATLABFile::getStructFieldsName(const QString& name)
+{
+	matvar_t *s = m_matio->getStruct(name);
+	if (s == NULL)
+		return QStringList();
+	QStringList res;
+	auto nFields = Mat_VarGetNumberOfFields(s);
+	auto fields = Mat_VarGetStructFieldnames(s);
+	for (int i = 0; i < nFields; i++) {
+		res << QString::fromLatin1(fields[i]);
+	}
+	return res;
+}
+
+
+int AwMATLABFile::readScalarField(const QString& structName, const QString& fieldName, double *value, size_t index)
+{
+	matvar_t *s = m_matio->getStruct(structName);
+	QString origin = QString("AwMATLABFile::readDoubleField");
+	if (s == NULL) {
+		m_error = QString("no structure named %1.").arg(structName);
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	auto fields = m_matio->getFieldNames(structName);
+	if (!fields.contains(fieldName)) {
+		m_error = QString("no field named %1 in %2.").arg(fieldName).arg(structName);
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	// get the field variable
+	auto field_matvar = Mat_VarGetStructFieldByName(s, fieldName.toStdString().c_str(), index);
+	if (field_matvar == NULL) {
+		m_error = QString("Failed to get the field variable");
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	if (field_matvar->rank != 2 || field_matvar->dims[0] > 1 || field_matvar->dims[1] > 1) {
+		m_error = QString("Variable is not a scalar.");
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	if (field_matvar->class_type != MAT_C_DOUBLE) {
+		m_error = QString("Variable is not a double.");
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	*value = *(double *)field_matvar->data;
+	return 0;
+}
+
+
+int AwMATLABFile::readStringField(const QString& structName, const QString& fieldName, QString& string, size_t index)
+{
+	matvar_t *s = m_matio->getStruct(structName);
+	QString origin = QString("AwMATLABFile::readStringField");
+	if (s == NULL) {
+		m_error = QString("no structure named %1.").arg(structName);
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	auto fields = m_matio->getFieldNames(structName);
+	if (!fields.contains(fieldName)) {
+		m_error = QString("no field named %1 in %2.").arg(fieldName).arg(structName);
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	// get the field variable
+	auto field_matvar = Mat_VarGetStructFieldByName(s, fieldName.toStdString().c_str(), index);
+	if (field_matvar == NULL) {
+		m_error = QString("Failed to get the field variable");
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	if (field_matvar->class_type != MAT_C_CHAR) {
+		m_error = QString("Variable is not a string.");
+		throw AwException(m_error, origin);
+		return -1;
+	}
+	char dummy[256];
+	size_t length = std::min(size_t(255), field_matvar->dims[0] * field_matvar->dims[1]);
+	memcpy(dummy, (char *)field_matvar->data, length);
+	dummy[length] = '\0';
+	string = QString::fromLatin1(dummy);
+	return 0;
+}

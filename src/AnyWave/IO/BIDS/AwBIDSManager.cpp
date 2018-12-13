@@ -567,35 +567,19 @@ AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
 	if (!fi.exists())
 		return Q_NULLPTR;
 
+	// using the full path we should be able to guess the BIDS base directory between (raw, sourcedata, derivatives).
 	int sourceDir = AwBIDSManager::raw;
-	QDir dir = fi.absoluteDir();
-	// check for the first subfolder that could be : sourcedata or derivatives.
-	// if not we consider the path is in the default raw data
-	// climb up to the root folder.
-	while (dir.cdUp());
-
-	for (auto item : dir.entryList(QDir::Dirs)) {
-		if (item == "sourcedata") {
-			sourceDir = AwBIDSManager::source;
-			break;
-		}
-		if (item == "derivatives") {
-			sourceDir = AwBIDSManager::derivatives;
-			break;
-		}
-	}
-
-	// reset dir to the folder pointed by path
-	dir = fi.absoluteDir();
-	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
-	QRegularExpressionMatch match;
-	while (dir.cdUp()) {
-		for (auto item : dir.entryList(QDir::Dirs)) {
-			match = re.match(item);
-			if (match.hasMatch()) {
-				return getSubject(match.captured("ID"), sourceDir);
-			}
-		}
+	if (path.contains("sourcedata"))
+		sourceDir = AwBIDSManager::source;
+	if (path.contains("derivatives"))
+		sourceDir = AwBIDSManager::derivatives;
+	auto subjects = m_subjects[sourceDir];
+	if (subjects.isEmpty())
+		return Q_NULLPTR;
+	for (auto subj : subjects) {
+		auto files = subj->findFile(path);
+		if (!files.isEmpty())
+			return subj;
 	}
 	// failed to find a subject
 	return Q_NULLPTR;
@@ -672,23 +656,6 @@ AwChannelList AwBIDSManager::loadChannelsTsv(const QString& path)
 		}
 	}
 	return res;
-}
-
-void AwBIDSManager::updateMontageFromChannelsTsv(const QString& dataPath, const AwChannelList& montage)
-{
-	if (!isBIDSActive())
-		return;
-	QString channels_tsv = QString("%1_channels.tsv").arg(dataPath);
-	if (!QFile::exists(channels_tsv))
-		return;
-	auto list = loadChannelsTsv(channels_tsv);
-
-	if (list.isEmpty())
-		return;
-
-	for (auto item : list) {
-
-	}
 }
 
 

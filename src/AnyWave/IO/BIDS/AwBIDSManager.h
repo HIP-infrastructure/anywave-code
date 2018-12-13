@@ -39,7 +39,7 @@ public:
 	AwBIDSSubject *guessSubject(const QString& path);
 
 	// Access to some tsv files
-	void updateMontageFromChannelsTsv(const QString& dataPath, const AwChannelList& montage);
+	AwChannelList loadChannelsTsv(const QString& path);
 	
 	// Get a channel list from a channels.tsv for a specific subject and an item type (ieeg, eeg, meg)
 	//AwChannelList readChannelsTsv(AwBIDSSubject *subj, int itemType);
@@ -53,7 +53,7 @@ protected:
 	AwFileItem *parseDir(const QString& fullPath, const QString& path);
 	void parseSubject(AwBIDSSubject *subject);
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
-	AwChannelList loadChannelsTsv(const QString& path);
+
 
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;

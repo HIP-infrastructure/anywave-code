@@ -198,11 +198,6 @@ AwChannelList FIFF_Reader::readChInfos()
 			MEGChannelsToHead << newChannel;
 		list << newChannel;
 	}
-	//QFile txtFile("d:\\elekta.txt");
-	//txtFile.open(QIODevice::ReadWrite|QIODevice::Text);
-	//QTextStream stream(&txtFile);
-	//int index = 1;
-
 	foreach(AwChannel *c, MEGChannelsToHead) {
 		fiffChInfo ci = m_chanInfos.at(c->ID());
 		fiff_coord_trans(ci->chpos.r0, m_coord, 1);
@@ -216,9 +211,7 @@ AwChannelList FIFF_Reader::readChInfos()
 			ci->chpos.ez[1] * ci->chpos.ez[1] +
 			ci->chpos.ez[2] * ci->chpos.ez[2]);
 		c->setXYZ(x_mag - ci->chpos.r0[0], y_mag - ci->chpos.r0[1], z_mag - ci->chpos.r0[2]);
-//		stream << index++ << " " << c->x() << " " << c->y() << " " << c->z() << " " << c->name() << endl;
 	}
-//	txtFile.close();
 	if (MEGChannelsToHead.size() == 102)
 		plugin()->layouts << "ELEKTA102";
 	return list;
@@ -547,85 +540,12 @@ qint64 FIFF_Reader::readDataFromChannels(float start, float duration, AwChannelL
 							if (m_chanInfos.at(c->ID())->unit_mul > 0)
 								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= pow(1,m_chanInfos.at(c->ID())->unit_mul);
 							if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_V)
-								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E-6;
+								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E6;
 							if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_T)
 								globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E12;
 						}
 						channel_index++;
 					}
-
-					//if (tag.type ==  FIFFT_SHORT) {
-					//	qint16 *src = (qint16 *)tag.data;
-					//	int channel_index = 0;
-					//	foreach(AwChannel *c, channelList) {
-					//		for (int i = first_pick; i < last_pick; i++) {
-					//			globalBuf[channel_index * nSamplesTotal + i + buffer_offset] = src[i * nChannelsTotal + c->ID()];
-					//			if (m_chanInfos.at(c->ID())->cal != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->cal;
-					//			if (m_chanInfos.at(c->ID())->range != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->range;
-					//			if (m_chanInfos.at(c->ID())->unit_mul > 0)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= pow(1,m_chanInfos.at(c->ID())->unit_mul);
-					//			if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_V)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E-6;
-					//		}
-					//		channel_index++;
-					//	}
-					//}
-					//if (tag.type ==  FIFFT_INT) {
-					//	qint32 *src = (qint32 *)tag.data;
-					//		int channel_index = 0;
-					//	foreach(AwChannel *c, channelList) {
-					//		for (int i = first_pick; i < last_pick; i++) {
-					//			globalBuf[channel_index * nSamplesTotal + i + buffer_offset] = src[i * nChannelsTotal + c->ID()];
-					//			if (m_chanInfos.at(c->ID())->cal != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->cal;
-					//			if (m_chanInfos.at(c->ID())->range != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->range;
-					//			if (m_chanInfos.at(c->ID())->unit_mul > 0)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= pow(1,m_chanInfos.at(c->ID())->unit_mul);
-					//			if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_V)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E-6;
-					//		}
-					//		channel_index++;
-					//	}
-					//}
-					//if (tag.type ==  FIFFT_FLOAT) {
-					//	float *src = (float*)tag.data;
-					//	int channel_index = 0;
-					//	foreach(AwChannel *c, channelList) {
-					//		for (int i = first_pick; i < last_pick; i++) {
-					//			globalBuf[channel_index * nSamplesTotal + i + buffer_offset] = src[i * nChannelsTotal + c->ID()];
-					//			if (m_chanInfos.at(c->ID())->cal != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->cal;
-					//			if (m_chanInfos.at(c->ID())->range != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->range;
-					//			if (m_chanInfos.at(c->ID())->unit_mul > 0)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= pow(1,m_chanInfos.at(c->ID())->unit_mul);
-					//			if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_V)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E-6;
-					//		}
-					//		channel_index++;
-					//	}
-					//}
-					//if (tag.type ==  FIFFT_DOUBLE) {
-					//	double *src = (double *)tag.data;
-					//	int channel_index = 0;
-					//	foreach(AwChannel *c, channelList) {
-					//		for (int i = first_pick; i < last_pick; i++) {
-					//			globalBuf[channel_index * nSamplesTotal + i + buffer_offset] = src[i * nChannelsTotal + c->ID()];
-					//			if (m_chanInfos.at(c->ID())->cal != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->cal;
-					//			if (m_chanInfos.at(c->ID())->range != 1.)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= m_chanInfos.at(c->ID())->range;
-					//			if (m_chanInfos.at(c->ID())->unit_mul > 0)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= pow(1,m_chanInfos.at(c->ID())->unit_mul);
-					//			if (m_chanInfos.at(c->ID())->unit == FIFF_UNIT_V)
-					//				globalBuf[channel_index * nSamplesTotal + i + buffer_offset] *= 1E-6;
-					//		}
-					//		channel_index++;
-					//	}
-					//}
 					free(tag.data);
 				}
 				buffer_offset += pick_samp;
