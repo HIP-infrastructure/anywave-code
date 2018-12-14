@@ -32,9 +32,15 @@
     <ClCompile Include="AwMatlabLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AwMATLABStruct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\AwMATLAB.h">
+    <ClInclude Include="..\..\include\matlab\AwMATLABStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\matlab\AwMATLAB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

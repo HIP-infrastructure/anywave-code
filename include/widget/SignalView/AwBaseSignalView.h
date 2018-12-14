@@ -66,7 +66,6 @@ public:
 	inline AwChannelList& displayedChannels() { return m_channels; }
 	virtual void setChannels(const AwChannelList& channels);
 	void setTotalDuration(float duration); // total length of data in seconds
-	void setStartPosition(float position); // default is zero: this must be called if you want to define a minimum start position for data.
 	void makeChannelVisible(int type);
 	void removeVisibleChannel(int type);
 	void addNewDisplayPlugin(AwDisplayPlugin *plugin) { m_scene->registerDisplayPlugin(plugin); }

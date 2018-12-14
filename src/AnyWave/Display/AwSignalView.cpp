@@ -75,8 +75,6 @@ AwSignalView::~AwSignalView()
 	foreach(AwChannel *c, m_virtualChannels)
 		m_channels.removeAll(c);
 
-//	while (!m_channels.isEmpty())
-//		delete m_channels.takeFirst();
 	while (!m_montageChannels.isEmpty())
 		delete m_montageChannels.takeFirst();
 }

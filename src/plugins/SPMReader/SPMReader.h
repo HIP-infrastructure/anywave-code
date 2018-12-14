@@ -2,6 +2,7 @@
 
 #include "spmreader_global.h"
 #include <AwFileIO.h>
+#include <QFile>
 
 class SPMREADER_EXPORT SPMReader : public AwFileIO
 {
@@ -15,6 +16,10 @@ public:
 	FileStatus openFile(const QString &path) override;
 	FileStatus canRead(const QString &path) override;
 	void cleanUpAndClose() override;
+protected:
+	float m_timeOnset, m_sr;
+	QString m_dataFile, m_binFileName;
+	QFile m_binaryFile;
 };
 
 class SPMREADER_EXPORT SPMReaderPlugin : public AwFileIOPlugin

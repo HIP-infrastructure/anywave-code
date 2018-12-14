@@ -81,6 +81,7 @@ protected:
 	float m_totalDuration;
 	float m_pageDuration;
 	float m_positionInFile;
+	float m_startPosition;
 	int m_flags;
 	AwViewSettings *m_settings;
 	// horizontal scale values

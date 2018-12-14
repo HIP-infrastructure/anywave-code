@@ -26,7 +26,7 @@
 #include "ica.h"
 #include "ICASettings.h"
 #include <QtMath>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include <QFile>
 #include <QDir>
 #include <filter/AwFiltering.h>

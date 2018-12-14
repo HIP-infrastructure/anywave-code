@@ -55,7 +55,7 @@ protected:
 	AwDisplayPhysics *m_physics;
 	qreal m_pageDuration;
 	// posInFile = current pos in file in the data, timeOffset = grid time shift (mostly used for average).
-	float m_posInFile, m_timeOffset , m_secsPerCm;
+	float m_posInFile, m_timeOffset, m_secsPerCm, m_startPosition;
 };
 
 

@@ -1,4 +1,4 @@
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include <math/AwMath.h>
 
 

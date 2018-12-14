@@ -76,9 +76,11 @@
   <ItemGroup>
     <ClCompile Include="AwMATLABFile.cpp" />
     <ClCompile Include="AwMatlabLib.cpp" />
+    <ClCompile Include="AwMATLABStruct.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\AwMATLAB.h" />
+    <ClInclude Include="..\..\include\matlab\AwMATLAB.h" />
+    <ClInclude Include="..\..\include\matlab\AwMATLABStruct.h" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

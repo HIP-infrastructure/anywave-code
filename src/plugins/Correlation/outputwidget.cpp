@@ -8,7 +8,7 @@
 #include <qwt_scale_draw.h>
 #include <qwt_scale_widget.h>
 #include <qwt_plot_layout.h>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include <QFileDialog>
 #include <widget/AwMessageBox.h>
 

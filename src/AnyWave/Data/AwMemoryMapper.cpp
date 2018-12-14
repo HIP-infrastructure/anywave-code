@@ -59,8 +59,6 @@ AwFileIO *AwMemoryMapper::buildDataServerWithPreloadedData(AwFileIO *reader, con
 	auto block = memReader->infos.newBlock();
 	block->setDuration(totalDuration);
 	block->setStartPosition(0.);
-	//for (auto c : loadedChannels)
-	//	memReader->infos.addChannel(c);
 	memReader->setPlugin(plugin);
 	memReader->setChunks(chunks);
 	// release loadedChannels

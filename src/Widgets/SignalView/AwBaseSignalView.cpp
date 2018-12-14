@@ -185,12 +185,6 @@ void AwBaseSignalView::changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNa
 	makeConnections();
 }
 
-void AwBaseSignalView::setStartPosition(float pos)
-{
-	m_startPosition = pos;
-	setTotalDuration(m_totalDuration);
-}
-
 void AwBaseSignalView::setTotalDuration(float dur)
 {
 	m_scene->reset();
@@ -260,7 +254,7 @@ void AwBaseSignalView::setPositionInFile(float pos)
 
 void AwBaseSignalView::updateVisibleMarkers()
 {
-	m_visibleMarkers = AwMarker::intersect(m_markers, m_positionInFile, m_positionInFile + m_pageDuration);
+	m_visibleMarkers = AwMarker::intersect(m_markers, m_positionInFile - m_startPosition, m_positionInFile - m_startPosition+ m_pageDuration);
 	m_scene->setMarkers(m_visibleMarkers);
 	m_markerBar->setMarkers(m_visibleMarkers);
 }

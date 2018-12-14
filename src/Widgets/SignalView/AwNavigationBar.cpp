@@ -42,6 +42,7 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 	m_totalDuration = 0;
 	m_pageDuration = 0;
 	m_positionInFile = 0;
+	m_startPosition = 0.;
 	m_settings = NULL;
 	m_settingsUi = NULL;
 	ui->buttonMarker->hide();
@@ -153,7 +154,7 @@ void AwNavigationBar::clean()
 
 void AwNavigationBar::updatePositionLabel()
 {
-	ui->labelTime->setText(AwUtilities::hmsTime(m_positionInFile, true));
+	ui->labelTime->setText(AwUtilities::hmsTime(m_positionInFile + m_startPosition, true));
 	QString dur = tr("Duration: ") + QString::number(m_pageDuration, 'f', 2) + "s";
 	ui->labelTime->setToolTip(dur);
 }
