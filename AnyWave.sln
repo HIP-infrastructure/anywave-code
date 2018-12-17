@@ -206,6 +206,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SPMReader", "src\plugins\SP
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEGLABReader", "src\plugins\EEGLABReader\EEGLABReader.vcxproj", "{DB8C9D04-6E69-47E8-A009-428CB29ADCC6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -572,12 +574,18 @@ Global
 		{BCB6760C-B459-43C1-96BF-65D859118073}.Release|Win32.ActiveCfg = Release|x64
 		{BCB6760C-B459-43C1-96BF-65D859118073}.Release|x64.ActiveCfg = Release|x64
 		{BCB6760C-B459-43C1-96BF-65D859118073}.Release|x64.Build.0 = Release|x64
+		{DB8C9D04-6E69-47E8-A009-428CB29ADCC6}.Debug|Win32.ActiveCfg = Debug|x64
+		{DB8C9D04-6E69-47E8-A009-428CB29ADCC6}.Debug|x64.ActiveCfg = Debug|x64
+		{DB8C9D04-6E69-47E8-A009-428CB29ADCC6}.Debug|x64.Build.0 = Debug|x64
+		{DB8C9D04-6E69-47E8-A009-428CB29ADCC6}.Release|Win32.ActiveCfg = Release|x64
+		{DB8C9D04-6E69-47E8-A009-428CB29ADCC6}.Release|x64.ActiveCfg = Release|x64
+		{DB8C9D04-6E69-47E8-A009-428CB29ADCC6}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

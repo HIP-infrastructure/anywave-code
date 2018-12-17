@@ -1,6 +1,6 @@
 #include "AwICAManager.h"
 #include <hdf5/AwHDF5.h>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include "AwICAComponents.h"
 #include <widget/AwMessageBox.h>
 #include "Prefs/AwSettings.h"

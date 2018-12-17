@@ -42,7 +42,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		return -1;
 	}
 
-	QString ext = "edf";
+	QString ext = ".edf";
 
 	QString dir;
 	// default output dir if the directory where the file is located.
@@ -238,33 +238,27 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		return -1;
 	}
 
-
 	// convert file only if output option is not specified or equals to "all"
 	if (output.isEmpty() || output == "all") {
-			// rename file to match BIDS recommandation
-			QString pluginName;
-			if (ext == "edf")
-				pluginName = "EDF/BDF IO";
-			else if (ext == "vhdr")
-				pluginName = "Brainvision Analyser Format";
+		// rename file to match BIDS recommandation
+		QString pluginName;
+		if (ext == ".edf")
+			pluginName = "EDF/BDF IO";
+		else if (ext == ".vhdr")
+			pluginName = "Brainvision Analyser Format";
 
-			//  TODO : convert to EDF if not alread an edf file
-			if (reader->plugin()->name != pluginName) {
-				try {
-					if (ext == "vhdr")
-						convertToVHDR(fileName, reader);
-					else if (ext == "edf")
-						convertToEDF(fileName, reader);
-				}
-				catch (const AwException& e) {
-					throw e;
-					reader->plugin()->deleteInstance(reader);
-					return -1;
-				}
-			}
-			else { // just rename 
-				QFile::copy(file, fileName);
-			}
+		//  TODO : convert to EDF if not alread an edf file
+		try {
+			if (ext == ".vhdr")
+				convertToVHDR(fileName, reader);
+			else if (ext == ".edf")
+				convertToEDF(fileName, reader);
+		}
+		catch (const AwException& e) {
+			throw e;
+			reader->plugin()->deleteInstance(reader);
+			return -1;
+		}
 	}
 	return 0;
 }

@@ -1,5 +1,4 @@
 #include "SPMReader.h"
-#include "matio.h"
 #include <matlab/AwMATLAB.h>
 #include <matlab/AwMATLABStruct.h>
 
@@ -26,7 +25,7 @@ SPMReader::~SPMReader()
 
 void SPMReader::cleanUpAndClose()
 {
-
+	m_binaryFile.close();
 }
 
 AwFileIO::FileStatus SPMReader::openFile(const QString &path)

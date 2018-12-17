@@ -325,10 +325,13 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 						unit_factor = 1e6;
 					else if (unit.toLower() == "mv")
 						unit_factor = 1e3;
+
+					if (unit.toLower().isEmpty() || unit.toLower() == "µv")
+						chan.setType(AwChannel::EEG);
+					else
+						chan.setType(AwChannel::Other);
 										
 					chan.setUnit(unit);
-					if (chan.unit() != QString::fromLatin1("µV"))
-						chan.setType(AwChannel::Other);
 
 				}
 

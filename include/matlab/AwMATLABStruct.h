@@ -17,6 +17,8 @@ public:
 
 	AwMATLABStruct* getChildStruct(const QString& field, size_t index);
 	inline QString& errorString() { return m_error; }
+	/** check if a field variable is empty. **/
+	bool isVariableEmpty(const QString& field, size_t index);
 protected:
 	bool m_isChild;
 	matvar_t *m_var;
