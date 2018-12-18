@@ -42,7 +42,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		return -1;
 	}
 
-	QString ext = ".edf";
+	QString ext = "edf";
 
 	QString dir;
 	// default output dir if the directory where the file is located.
@@ -52,13 +52,13 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 
 	auto format = args["format"].toString();
 	if (format.isEmpty()) {
-			ext = ".edf"; // default output format
+			ext = "edf"; // default output format
 	}
 	else {
 		if (format.toLower() == "edf")
-			ext = ".edf";
+			ext = "edf";
 		else if (format.toLower() == "vhdr")
-			ext = ".vhdr";
+			ext = "vhdr";
 		else {
 			throw AwException("Format option is invalid. (EDF or VHDR)", origin);
 			return -1;
@@ -242,16 +242,16 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	if (output.isEmpty() || output == "all") {
 		// rename file to match BIDS recommandation
 		QString pluginName;
-		if (ext == ".edf")
+		if (ext == "edf")
 			pluginName = "EDF/BDF IO";
-		else if (ext == ".vhdr")
+		else if (ext == "vhdr")
 			pluginName = "Brainvision Analyser Format";
 
 		//  TODO : convert to EDF if not alread an edf file
 		try {
-			if (ext == ".vhdr")
+			if (ext == "vhdr")
 				convertToVHDR(fileName, reader);
-			else if (ext == ".edf")
+			else if (ext == "edf")
 				convertToEDF(fileName, reader);
 		}
 		catch (const AwException& e) {
@@ -260,6 +260,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 			return -1;
 		}
 	}
+	reader->plugin()->deleteInstance(reader);
 	return 0;
 }
 
@@ -367,6 +368,8 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// instantiate UI if needed
 	if (m_ui == NULL)
 		m_ui = new AwBIDSGUI(this, path);
+	else
+		m_ui->setRootDir(path);
 	// check that the root dir contains subjects
 	getSubjects();
 	// check for source_data dir
@@ -424,32 +427,36 @@ void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
 	if (dirs.isEmpty())
 		return;
 
-	// check for session directory (optional)
-	bool isSession = false;
-	AwBIDSSession *session = NULL;
+	// check for session directories (optional)
 	for (auto d : dirs) {
 		if (d.startsWith("ses-")) {
 			// get session label
 			auto label = AwBIDSTools::getSessionLabel(d);
-			session = subject->addSession(label);
-			isSession = true;
-			break;
+			subject->addSession(label);
 		}
 	}
-	if (isSession) {
-		dir = QDir(session->fullPath());
-		dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	}
-	// search for iEEG or meg dirs
 
-	for (auto d : dirs) {
-		auto item = parseDir(dir.absolutePath(), d);
-		if (item) {
-			if (isSession)
-				session->addItem(item);
-			else
-				subject->addItem(item);
+	// have we got sessions?
+	if (subject->hasSessions()) {
+		// remove sessions from dirs
+		for (auto session : subject->sessions()) {
+			QDir sessionDir = QDir(session->fullPath());
+			QStringList entries = sessionDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+			for (auto d : entries) {
+				auto item = parseDir(sessionDir.absolutePath(), d);
+				if (item)
+					session->addItem(item);
+			}
 		}
+	}
+
+	// parse non ses- folders
+	for (auto d : dirs) {
+		if (d.startsWith("ses-"))
+			continue;
+		auto item = parseDir(dir.absolutePath(), d);
+		if (item)
+			subject->addItem(item);
 	}
 }
 
@@ -571,7 +578,7 @@ AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
 	if (subjects.isEmpty())
 		return Q_NULLPTR;
 	for (auto subj : subjects) {
-		auto files = subj->findFile(path);
+		auto files = subj->findFile(fi.fileName());
 		if (!files.isEmpty())
 			return subj;
 	}

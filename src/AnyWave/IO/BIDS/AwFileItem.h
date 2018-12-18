@@ -12,6 +12,8 @@ public:
 	inline int type() { return m_type; }
 	inline QStringList& files() { return m_files; }
 	inline QString& fullPath() { return m_fullPath; }
+	/** Returns the possibly file name for the given BIDS file for the current item **/
+	QString getChannelsTsvFor(const QString& fileName);
 protected:
 	int m_type;
 	QStringList m_files;	// files present in the iEEG directory

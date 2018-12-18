@@ -133,6 +133,31 @@ int AwICAManager::loadComponents(const QString& icaFile)
 	return 0;
 }
 
+QVector<int> AwICAManager::getRejectedComponentsIndexes(int type)
+{
+	QVector<int> res;
+	if (m_comps[type]) {
+		for (auto c : m_comps[type]->components())
+			if (c->isRejected())
+				res << c->index();
+	}
+	return res;
+}
+
+QMap<int, QVector<int>> AwICAManager::getAllRejectedComponents()
+{
+	QMap <int, QVector<int>> res;
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		if (m_comps[i]) {
+			auto r = getRejectedComponentsIndexes(i);
+			if (!r.isEmpty())
+				res[i] = r;
+		}
+			
+	}
+	return res;
+}
+
 
 AwICAComponents *AwICAManager::getComponents(int type)
 {

@@ -18,6 +18,7 @@ public:
 	enum ItemTypes { Subject, Session, ieeg, eeg, meg, DataFile };
 	void refresh();
 	void clear();
+	void setRootDir(const QString& path);
 public slots:
 	void changeSourceFolder(int index);
 signals:

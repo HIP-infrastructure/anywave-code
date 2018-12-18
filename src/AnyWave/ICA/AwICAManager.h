@@ -51,6 +51,8 @@ public:
 
 	inline bool isFilteringActive() { return m_isFilteringOn; }
 	void turnICAOff();
+	QVector<int> getRejectedComponentsIndexes(int type);
+	QMap<int, QVector<int> > getAllRejectedComponents();
 public slots:
 	void setICAFiletring(bool on) { m_isFilteringOn = on;  emit filteringSwitched(on); }
 signals:
