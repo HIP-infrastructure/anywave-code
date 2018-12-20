@@ -532,23 +532,25 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 {
-	auto filePath = reader->infos.fileName();
+	auto filePath = QFileInfo(reader->infos.fileName()).fileName();
 	auto BM = AwBIDSManager::instance();
 
 	if (!BM->isBIDSActive())
 		return;
 
-	auto subj = BM->guessSubject(filePath);
+	auto subj = BM->guessSubject(reader->infos.fileName());
 	if (!subj)
 		return;
 
-	auto baseFileName = filePath.remove(reader->plugin()->fileExtension);
+	auto items = subj->findFileItems(filePath);
+	if (items.isEmpty())
+		return;
 	
+	auto channels_tsv = items.first()->getChannelsTsvFor(filePath);
 
-	QString channels_tsv = QString("%1_channels.tsv").arg(filePath.remove(reader->plugin()->fileExtension));
 	if (!QFile::exists(channels_tsv))
 		return;
-	auto list = BM->loadChannelsTsv(channels_tsv);
+	auto list = BM->getMontageFromChannelsTsv(channels_tsv);
 
 	if (list.isEmpty())
 		return;
@@ -561,6 +563,7 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 
 	// get labels of channels in current montage
 	auto labels = AwChannel::getLabels(m_channels);
+	AwChannelList badChannels;
 	for (auto item : list) {
 		auto index = labels.indexOf(item->name());
 		if (index == -1)
@@ -569,11 +572,18 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		// modify channel in the current montage
 		auto montageChannel = m_channels.value(index);
 		montageChannel->setBad(item->isBad());
+		// if bad remove it from the current montage !
+		if (montageChannel->isBad())
+			badChannels << montageChannel;
 		montageChannel->setType(item->type());
 		// modify in the as recorded hash table
 		AwChannel *asRecorded = m_channelHashTable.value(montageChannel->name());
 		asRecorded->setBad(item->isBad());
 		asRecorded->setType(item->type());
+	}
+	for (auto bad : badChannels) {
+		m_channels.removeAll(bad);
+		delete bad;
 	}
 }
 

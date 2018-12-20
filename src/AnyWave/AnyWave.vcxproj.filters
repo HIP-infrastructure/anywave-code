@@ -104,6 +104,9 @@
     <Filter Include="IO\MEMIO">
       <UniqueIdentifier>{cef1cf63-cc97-410b-bd02-2de0bfde1510}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IO\JSON">
+      <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1282,6 +1285,12 @@
     <ClCompile Include="AwFileOpenSave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CommandLineParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\JSON\AwJSON.cpp">
+      <Filter>IO\JSON</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -2017,6 +2026,12 @@
     </ClInclude>
     <ClInclude Include="Epoch\AwEpochThumbs.h">
       <Filter>Epoch</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandLineParser.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\JSON\AwJSON.h">
+      <Filter>IO\JSON</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

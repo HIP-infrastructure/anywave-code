@@ -18,13 +18,20 @@ public:
 	enum itemTypes { iEEG, MEG, EEG };
 	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
 	enum Derivatives { EPITOOLS, EI, ICA, BIDSUpdates};
+
+	// destructor
+	~AwBIDSManager();
 	// utilities static methods
 	static AwBIDSManager *instance(const QString& rootDir = QString());
 	static QString detectBIDSFolderFromPath(const QString& path);
+	static bool isInstantiated() { return m_instance != NULL; }
+	static void destroy();
+	/** check if a path is a BIDS directory or not. **/
+	static bool isBIDS(const QString& path);
 
 	void setRootDir(const QString& path);
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
-
+	void closeBIDS();
 	
 	int SEEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader);
@@ -37,12 +44,11 @@ public:
 
 	// guess subject from a file
 	AwBIDSSubject *guessSubject(const QString& path);
-
 	// Access to some tsv files
-	AwChannelList loadChannelsTsv(const QString& path);
+	AwChannelList getMontageFromChannelsTsv(const QString& path);
+	/** returns a map table: keys are the columns label **/
+	QMap<QString, QVariantList> loadTsvFile(const QString& path);
 	
-	// Get a channel list from a channels.tsv for a specific subject and an item type (ieeg, eeg, meg)
-	//AwChannelList readChannelsTsv(AwBIDSSubject *subj, int itemType);
 protected:
 	AwBIDSManager(const QString& rootDir);
 	static AwBIDSManager *m_instance;
@@ -53,7 +59,6 @@ protected:
 	AwFileItem *parseDir(const QString& fullPath, const QString& path);
 	void parseSubject(AwBIDSSubject *subject);
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
-
 
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;

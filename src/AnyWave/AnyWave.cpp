@@ -29,7 +29,6 @@
 #include <QNetworkInterface>
 #include <QSplashScreen>
 #include <QDesktopServices>
-#include <QSvgGenerator>
 #include "AnyWave.h"
 #include "Process/AwProcessManager.h"
 #include "Process/AwProcessesWidget.h"
@@ -66,15 +65,13 @@
 #include <AwMatlabInterface.h>
 #include <AwMEGSensorManager.h>
 #include <widget/AwMarkerInspector.h>
-#include <widget/AwTopoBuilder.h>
 #include <widget/AwSEEGViewer.h>
-#include <QPrinter>
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
 #include "AwUpdater.h"
 #include "Script/AwScriptManager.h"
-
+#include <widget/AwTopoBuilder.h>
 #define AW_EPOCHING
 
 #ifdef AW_EPOCHING
@@ -420,58 +417,9 @@ void AnyWave::quit()
 	}
 #endif
 	AwScriptManager::destroy();
+	AwBIDSManager::destroy();
 }
 
-void AnyWave::closeFile()
-{
-	AwMontageManager::instance()->closeFile();
-	AwAmplitudeManager::instance()->closeFile();
-	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
-	AwSettings::getInstance()->closeFile();
-	
-	// stop cursor mode and selection mode
-	m_cursorToolBar->reset();
-
-	// Mappings cleanup
-	if (m_dockEEG)	{
-		disconnect(m_dockEEG, SIGNAL(mappingClosed()));
-		m_dockEEG->close();
-		delete m_dockEEG;
-		m_dockEEG = NULL;
-	}
-
-	if (m_dockMEG)	{
-		disconnect(m_dockMEG, SIGNAL(mappingClosed()));
-		m_dockMEG->close();
-		delete m_dockMEG;
-		m_dockMEG = NULL;
-	}
-
-	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
-	AwTopoBuilder::destroy();
-	m_display->closeFile();
-	AwProcessManager::instance()->closeFile();
-	AwMarkerManager::instance()->closeFile();
-	m_currentFileModified = false;
-
-	// reset actions to disabled
-	actionComponentsMaps->setEnabled(false);
-	actionShow_map_on_signal->setEnabled(false);
-
-	if (m_SEEGViewer) {
-		delete m_SEEGViewer;
-		m_SEEGViewer = NULL;
-	}
-
-	// Epoch Manager (destroy the object when closing the file)
-#ifdef AW_EPOCHING
-	if (AwEpochManager::instanceExists()) {
-		AwEpochManager::instance()->closeFile();
-		AwEpochManager::destroy();
-	}
-#endif
-	emit closingFile();
-}
 
 
 bool AnyWave::checkAndCreateFolder(const QString& root, const QString& name)
@@ -729,21 +677,6 @@ void AnyWave::averageEpoch()
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->average();
 #endif
-}
-
-//
-// Load ICA Components
-//
-void AnyWave::on_actionLoadICA_triggered()
-{
-	if (AwMontageManager::instance()->loadICA() == 0) {
-		if (QMessageBox::question(this, tr("Review Topographies"),
-			tr("Do you want to review all IC mappings?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
-			reviewComponentsMaps();
-		// enable menus
-		actionShow_map_on_signal->setEnabled(true);
-		actionComponentsMaps->setEnabled(true);
-	}
 }
 
 
@@ -1208,46 +1141,5 @@ void AnyWave::on_actionQuit_triggered()
 	close();
 }
 
-void AnyWave::loadBeamformer()
-{
-	QString dir = AwSettings::getInstance()->fileInfo()->dirPath();
-	QString file = QFileDialog::getOpenFileName(0, "Beamformer", dir, "beamformer matrices (*.bf)");
-	if (file.isEmpty())
-		return;
-	AwSourceManager::instance()->load(file);
-}
 
-void AnyWave::importMrkFile()
-{
-	AwMarkerManager::instance()->loadMarkers();
-}
 
-void AnyWave::exportToSVG()
-{
-	QString svgFile = QFileDialog::getSaveFileName(0, tr("Export to svg format"), AwSettings::getInstance()->workingDir, tr("Svg File (*.svg)"));
-	if (svgFile.isEmpty())
-		return;
-
-	QSvgGenerator generator;
-	generator.setFileName(svgFile);
-	generator.setSize(size());
-	generator.setTitle(tr("AnyWave SVG Export"));
-	generator.setDescription(tr("Exported from AnyWave"));
-	generator.setViewBox(geometry());
-
-	QPainter painter(&generator);
-	render(&painter);
-}
-
-void AnyWave::exportToPDF()
-{
-	QString pdfFile = QFileDialog::getSaveFileName(0, tr("Save display to PDF"), AwSettings::getInstance()->workingDir, tr("PDF File (*.pdf)"));
-	if (pdfFile.isEmpty())
-		return;
-	QPrinter printer(QPrinter::HighResolution);
-	printer.setOutputFormat(QPrinter::PdfFormat);
-	printer.setOutputFileName(pdfFile);
-
-	QPainter painter(&printer);
-	render(&painter);
-}

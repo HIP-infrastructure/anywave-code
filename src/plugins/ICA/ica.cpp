@@ -241,9 +241,10 @@ void ICA::run()
 		}
 	emit progressChanged("OK.");
 
+	auto markersToSkip = AwMarker::getMarkersWithLabel(pdi.input.markers, m_ignoredMarkerLabel);
 	AwMarkerList selectedMarkers;
 	if (m_ignoreMarkers) 
-		selectedMarkers = AwMarker::invertMarkerSelection(pdi.input.markers, m_ignoredMarkerLabel, pdi.input.fileDuration);
+		selectedMarkers = AwMarker::invertMarkerSelection(markersToSkip, m_ignoredMarkerLabel, pdi.input.fileDuration);
 	
 	bool skipData = !selectedMarkers.isEmpty();
 

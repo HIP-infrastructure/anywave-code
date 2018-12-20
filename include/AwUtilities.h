@@ -92,6 +92,4 @@ void AW_UTILITIES_EXPORT saveMarkerFont(const QFont& font, int type);
 char AW_UTILITIES_EXPORT *QStringToChar(const QString& str);
 }
 
-
-
 #endif // AWUTILITIES_H

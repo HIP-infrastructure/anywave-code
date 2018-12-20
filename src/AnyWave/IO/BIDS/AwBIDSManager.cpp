@@ -43,11 +43,12 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 
 	QString ext = "edf";
+	auto outputDir = args["dir"].toString();
 
-	QString dir;
 	// default output dir if the directory where the file is located.
 	QFileInfo fi(file);
-	dir = fi.absolutePath();
+	if (outputDir.isEmpty())
+		outputDir = fi.absolutePath();
 	QString subj, task, run, acq, session, output, proc;
 
 	auto format = args["format"].toString();
@@ -80,10 +81,10 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 
 	// shape the BIDS file names
 	QString fileName, json, channels_tsv, events_tsv;
-	fileName = QString("%1/sub-%2").arg(dir).arg(subj);
-	json = QString("%1/sub-%2").arg(dir).arg(subj);
-	channels_tsv = QString("%1/sub-%2").arg(dir).arg(subj);
-	events_tsv = QString("%1/sub-%2").arg(dir).arg(subj);
+	fileName = QString("%1/sub-%2").arg(outputDir).arg(subj);
+	json = QString("%1/sub-%2").arg(outputDir).arg(subj);
+	channels_tsv = QString("%1/sub-%2").arg(outputDir).arg(subj);
+	events_tsv = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	if (!session.isEmpty()) {
 		fileName = QString("%1_ses-%2").arg(fileName).arg(session);
 		json = QString("%1_ses-%2").arg(json).arg(session);
@@ -264,6 +265,20 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	return 0;
 }
 
+void AwBIDSManager::destroy()
+{
+	if (m_instance) {
+		delete m_instance;
+		m_instance = Q_NULLPTR;
+	}
+}
+
+bool AwBIDSManager::isBIDS(const QString& path)
+{
+	return QFile::exists(QString("%1/dataset_description.json").arg(path));
+}
+
+
 ///
 /// Search if the path is in a BIDS structure.
 /// Returns the BIDS folder if it exists.
@@ -343,6 +358,11 @@ AwBIDSManager::AwBIDSManager(const QString& rootDir)
 	setRootDir(rootDir);
 }
 
+AwBIDSManager::~AwBIDSManager()
+{
+	closeBIDS();
+}
+
 void AwBIDSManager::setRootDir(const QString& path)
 {
 	// check if root dir is the same as current one. If so, do nothing.
@@ -363,7 +383,7 @@ void AwBIDSManager::setRootDir(const QString& path)
 			QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
 			return;
 	}
-	
+	closeBIDS();
 	m_rootDir = path;
 	// instantiate UI if needed
 	if (m_ui == NULL)
@@ -498,6 +518,14 @@ void AwBIDSManager::getSubjects(int sourceDir)
 	}
 }
 
+void AwBIDSManager::closeBIDS()
+{
+	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
+		clearSubjects(i);
+	m_rootDir.clear();
+}
+
+
 void AwBIDSManager::clearSubjects(int sourceDir)
 {
 	while (!m_subjects[sourceDir].isEmpty())
@@ -586,7 +614,36 @@ AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
 	return Q_NULLPTR;
 }
 
-AwChannelList AwBIDSManager::loadChannelsTsv(const QString& path)
+QMap<QString, QVariantList> AwBIDSManager::loadTsvFile(const QString& path)
+{
+	QFile file(path);
+	QMap<QString, QVariantList>  res;
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		QTextStream stream(&file);
+		// get columns
+		auto cols = stream.readLine();
+		auto items = cols.split('\t');
+		for (auto item : items)
+			res[item] = QVariantList();
+		// build column indexes
+		QMap<int, QString> indexes;
+		int i = 0;
+		for (auto item : items)
+			indexes[i++] = item;
+		while (!stream.atEnd()) {
+			auto items = stream.readLine().split('\t');
+			for (int i = 0; i < items.size(); i++) {
+				auto item = items.value(i);
+				res[indexes[i]] << item;
+			}
+		}
+	}
+	return res;
+}
+
+
+
+AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 {
 	QFile file(path);
 	AwChannelList res;
@@ -652,27 +709,9 @@ AwChannelList AwBIDSManager::loadChannelsTsv(const QString& path)
 				else if (column == "status")
 					if (item == "bad")
 						channel->setBad(true);
-				res << channel;
 			}
+			res << channel;
 		}
 	}
 	return res;
 }
-
-
-//AwChannelList AwBIDSManager::readChannelsTsv(AwBIDSSubject *subj, int itemType)
-//{
-//	bool ok = itemType == AwBIDSManager::MEG || itemType == AwBIDSManager::EEG || itemType == AwBIDSManager::iEEG;
-//	if (!ok)
-//		return AwChannelList();
-//
-//	// check for a channels.tsv in all subdir from subject dir
-//	QString path;
-//	if (itemType == AwBIDSManager::MEG)
-//		path = QString("%1/meg").arg(subj->fullPath());
-//	else if (itemType == AwBIDSManager::EEG)
-//		path = QString("%1/eeg").arg(subj->fullPath());
-//	else if (itemType == AwBIDSManager::iEEG)
-//		path = QString("%1/ieeg").arg(subj->fullPath());
-//
-//}

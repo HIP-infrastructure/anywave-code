@@ -52,6 +52,15 @@ QStringList AwBIDSSubject::findFile(const QString &filePath)
 AwFileItemList AwBIDSSubject::findFileItems(const QString &filePath)
 {
 	AwFileItemList res;
+	for (auto session : m_sessions) {
+		for (auto item : session->fileItems()) {
+			// browse files inside a FileItem
+			for (auto file : item->files()) {
+				if (file == filePath || file.contains(filePath))
+					res << item;
+			}
+		}
+	}
 	for (auto item : m_items) {
 		// browse files inside a FileItem
 		for (auto file : item->files()) {
