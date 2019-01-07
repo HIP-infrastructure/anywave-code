@@ -47,7 +47,9 @@ public:
 	// Access to some tsv files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	/** returns a map table: keys are the columns label **/
-	QMap<QString, QVariantList> loadTsvFile(const QString& path);
+	QMap<QString, QStringList> loadTsvFile(const QString& path);
+	/** Create a TSV file based on a dictionnary **/
+	void saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict);
 	
 protected:
 	AwBIDSManager(const QString& rootDir);

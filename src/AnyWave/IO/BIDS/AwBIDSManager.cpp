@@ -614,17 +614,50 @@ AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
 	return Q_NULLPTR;
 }
 
-QMap<QString, QVariantList> AwBIDSManager::loadTsvFile(const QString& path)
+
+void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict)
 {
 	QFile file(path);
-	QMap<QString, QVariantList>  res;
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		QTextStream stream(&file);
+		// write first line (the columns names)
+		int index = 0;
+		QString columns;
+		for (auto col : dict.keys()) {
+			if (index)
+				columns += '\t';
+			columns += col;
+			index++;
+		}
+		stream << columns << endl;
+		// get the total count of items from name key
+		for (int i = 0; i < dict["name"].size(); i++) {
+			QString line;
+			for (int j = 0; j < dict.keys().size(); j++) {
+				auto values = dict[dict.keys().value(j)];
+				if (j)
+					line += '\t';
+				line += values.value(i);
+			}
+			stream << line << endl;
+			line.clear();
+		}
+		file.close();
+	}
+
+}
+
+QMap<QString, QStringList> AwBIDSManager::loadTsvFile(const QString& path)
+{
+	QFile file(path);
+	QMap<QString, QStringList>  res;
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		QTextStream stream(&file);
 		// get columns
 		auto cols = stream.readLine();
 		auto items = cols.split('\t');
 		for (auto item : items)
-			res[item] = QVariantList();
+			res[item] = QStringList();
 		// build column indexes
 		QMap<int, QString> indexes;
 		int i = 0;

@@ -196,6 +196,8 @@ private:
 	void clearSource(int type);
 	// BIDS support
 	void updateMontageFromChannelsTsv(AwFileIO *reader);
+	void updateChannelsTsvFromMontage();
+	QString m_channelsTsv; // full path to BIDS channels.tsv file
 };
 
 

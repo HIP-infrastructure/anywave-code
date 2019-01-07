@@ -467,6 +467,7 @@ void AwMontageManager::clear()
 
 void AwMontageManager::closeFile()
 {
+	updateChannelsTsvFromMontage();
 	clear();
 
 	if (!m_badChannelLabels.isEmpty()) // save bad channels
@@ -530,8 +531,61 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 }
 
 
+void AwMontageManager::updateChannelsTsvFromMontage()
+{
+	if (m_channelsTsv.isEmpty())
+		return;
+	auto BM = AwBIDSManager::instance();
+
+	auto dict = BM->loadTsvFile(m_channelsTsv);
+	if (dict.isEmpty())
+		return;
+
+	// check for columns named status, name, type
+	auto cols = dict.keys();
+	bool ok = cols.contains("name") && cols.contains("type");
+	if (!ok)
+		return;
+	// is there the OPTIONAL status column?
+	if (!cols.contains("status")) { // NO: create it
+		QStringList status;
+		for (auto name : dict["name"])
+			status << "good";
+		dict["status"] = status;
+	}
+	// now check for current as recorded channels
+	auto labels = dict["name"];
+	auto types = dict["type"];
+	auto status = dict["status"];
+	QString badStatus, type;
+	bool mustBeSaved = false;
+	for (auto channel : m_channelsAsRecorded) {
+		auto index = labels.indexOf(channel->name());
+		if (index == -1)
+			continue;
+		badStatus = channel->isBad() ? "bad" : "good";
+		type = AwChannel::typeToString(channel->type());
+		if (status.value(index) != badStatus) {
+			status.replace(index, badStatus);
+			mustBeSaved = true;
+		}
+		if (types.value(index) != type) {
+			types.replace(index, type);
+			mustBeSaved = true;
+		}
+	}
+	if (mustBeSaved) {
+		BM->saveTsvFile(m_channelsTsv, dict);
+	}
+}
+
+///
+/// updata current montage if a BIDS structure is detected AND a channels.tsv is found.
+///
 void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 {
+	// clear current BIDS subject
+	m_channelsTsv.clear();
 	auto filePath = QFileInfo(reader->infos.fileName()).fileName();
 	auto BM = AwBIDSManager::instance();
 
@@ -547,9 +601,11 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		return;
 	
 	auto channels_tsv = items.first()->getChannelsTsvFor(filePath);
-
+	
 	if (!QFile::exists(channels_tsv))
 		return;
+
+	m_channelsTsv = channels_tsv;
 	auto list = BM->getMontageFromChannelsTsv(channels_tsv);
 
 	if (list.isEmpty())
