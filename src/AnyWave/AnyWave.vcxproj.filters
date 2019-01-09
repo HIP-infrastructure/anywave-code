@@ -1291,6 +1291,15 @@
     <ClCompile Include="IO\JSON\AwJSON.cpp">
       <Filter>IO\JSON</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSValidateDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSValidateDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSValidateDialog.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1809,6 +1818,12 @@
     <CustomBuild Include="IO\MEMIO\MEMIO.h">
       <Filter>IO\MEMIO</Filter>
     </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSValidateDialog.ui">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSValidateDialog.h">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2032,6 +2047,9 @@
     </ClInclude>
     <ClInclude Include="IO\JSON\AwJSON.h">
       <Filter>IO\JSON</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBIDSValidateDialog.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

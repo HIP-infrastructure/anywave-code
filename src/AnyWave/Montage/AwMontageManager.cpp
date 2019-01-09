@@ -467,7 +467,7 @@ void AwMontageManager::clear()
 
 void AwMontageManager::closeFile()
 {
-	updateChannelsTsvFromMontage();
+	checkForBIDSMods();
 	clear();
 
 	if (!m_badChannelLabels.isEmpty()) // save bad channels
@@ -530,53 +530,74 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	emit montageChanged(m_channels);
 }
 
-
-void AwMontageManager::updateChannelsTsvFromMontage()
+void AwMontageManager::checkForBIDSMods()
 {
 	if (m_channelsTsv.isEmpty())
 		return;
 	auto BM = AwBIDSManager::instance();
-
-	auto dict = BM->loadTsvFile(m_channelsTsv);
-	if (dict.isEmpty())
-		return;
-
-	// check for columns named status, name, type
-	auto cols = dict.keys();
-	bool ok = cols.contains("name") && cols.contains("type");
-	if (!ok)
-		return;
-	// is there the OPTIONAL status column?
-	if (!cols.contains("status")) { // NO: create it
-		QStringList status;
-		for (auto name : dict["name"])
-			status << "good";
-		dict["status"] = status;
+	AwTSVDict dict;
+	try {
+		dict = BM->loadTsvFile(m_channelsTsv);
 	}
-	// now check for current as recorded channels
-	auto labels = dict["name"];
+	catch (const AwException& e) {
+		AwMessageBox::information(0, tr("BIDS"), e.errorString());
+		return;
+	}
+	// get columns from tsv file
+	auto cols = BM->readTsvColumns(m_channelsTsv);
+	if (cols.isEmpty()) {
+		return;
+	}
+
+	auto names = dict["name"];
 	auto types = dict["type"];
 	auto status = dict["status"];
+	// check if status column is present
+	if (status.isEmpty()) { // No => create it.
+		for (int i = 0; i < names.size(); i++) {
+			status << "good";
+		}
+	}
+	// from here, cols contains the keys to access the dictionnary.
 	QString badStatus, type;
 	bool mustBeSaved = false;
-	for (auto channel : m_channelsAsRecorded) {
-		auto index = labels.indexOf(channel->name());
-		if (index == -1)
-			continue;
-		badStatus = channel->isBad() ? "bad" : "good";
-		type = AwChannel::typeToString(channel->type());
-		if (status.value(index) != badStatus) {
-			status.replace(index, badStatus);
-			mustBeSaved = true;
-		}
-		if (types.value(index) != type) {
-			types.replace(index, type);
-			mustBeSaved = true;
+	for (int i = 0; i < names.size(); i++) {
+		auto name = names.value(i);
+		auto asRecorded = m_channelHashTable.value(name);
+		if (asRecorded) {
+			// convert AnyWave Channel type to BIDS
+			if (asRecorded->isMEG())
+				type = "MEGMAG";
+			else if (asRecorded->isGRAD())
+				type = "MEGGRADAXIAL";
+			else if (asRecorded->isECG())
+				type = "ECG";
+			else if (asRecorded->isSEEG())
+				type = "SEEG";
+			else if (asRecorded->isEEG())
+				type = "EEG";
+			else if (asRecorded->isEMG())
+				type = "EMG";
+			else if (asRecorded->isTrigger())
+				type = "TRIG";
+			else if (asRecorded->isReference())
+				type = "MEGREFMAG";
+			else
+				type = "OTHER";
+
+			badStatus = asRecorded->isBad() ? "bad" : "good";
+			if (types.value(i) != type) {
+				mustBeSaved = true;
+				break;
+			}
+			if (status.value(i) != badStatus) {
+				mustBeSaved = true;
+				break;
+			}
 		}
 	}
-	if (mustBeSaved) {
-		BM->saveTsvFile(m_channelsTsv, dict);
-	}
+	if (mustBeSaved)
+		BM->addModification(m_channelsTsv, AwBIDSManager::ChannelsTsv);
 }
 
 ///
@@ -617,25 +638,28 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		return;
 	}
 
-	// get labels of channels in current montage
-	auto labels = AwChannel::getLabels(m_channels);
+	// build a multi map for current montage to retreive channels by name.
+	QMultiMap<QString, AwChannel *> globalMap;
+	for (auto c : m_channels)
+		globalMap.insert(c->name(), c);
+
+	// reset as recorded channels to GOOD state
+	for (auto c : m_channelsAsRecorded)
+		c->setBad(false);
+	// now change type or bad status based on TSV
 	AwChannelList badChannels;
-	for (auto item : list) {
-		auto index = labels.indexOf(item->name());
-		if (index == -1)
-			continue;
-		// modify the type and bad status considering the data stored in channels.tsv
-		// modify channel in the current montage
-		auto montageChannel = m_channels.value(index);
-		montageChannel->setBad(item->isBad());
-		// if bad remove it from the current montage !
-		if (montageChannel->isBad())
-			badChannels << montageChannel;
-		montageChannel->setType(item->type());
-		// modify in the as recorded hash table
-		AwChannel *asRecorded = m_channelHashTable.value(montageChannel->name());
-		asRecorded->setBad(item->isBad());
-		asRecorded->setType(item->type());
+	for (auto c : list) {
+		auto asRecorded = m_channelHashTable.value(c->name());
+		if (asRecorded) {
+			asRecorded->setBad(c->isBad());
+			asRecorded->setType(c->type());
+			auto montageChannels = globalMap.values(c->name());
+			for (auto montageChannel : montageChannels) {
+				montageChannel->setType(c->type());
+				if (asRecorded->isBad())
+					badChannels << montageChannel;
+			}
+		}
 	}
 	for (auto bad : badChannels) {
 		m_channels.removeAll(bad);

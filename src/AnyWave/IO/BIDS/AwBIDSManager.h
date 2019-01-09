@@ -10,6 +10,7 @@ class AwFileItem;
 
 // command line parsing
 using AwArgument = QPair<QString, QString>;
+using AwTSVDict = QMap<QString, QStringList>;
 
 class AwBIDSManager : public QObject
 {
@@ -18,6 +19,7 @@ public:
 	enum itemTypes { iEEG, MEG, EEG };
 	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
 	enum Derivatives { EPITOOLS, EI, ICA, BIDSUpdates};
+	enum Modifications { ChannelsTsv, EventsTsv };
 
 	// destructor
 	~AwBIDSManager();
@@ -31,11 +33,15 @@ public:
 
 	void setRootDir(const QString& path);
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
+	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
 	void closeBIDS();
 	
 	int SEEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
+
+	/** Add a modification to the list of modification the user MUST validate before closing the current file **/
+	void addModification(const QString& itemPath, int modification);
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
 	
@@ -47,9 +53,11 @@ public:
 	// Access to some tsv files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	/** returns a map table: keys are the columns label **/
-	QMap<QString, QStringList> loadTsvFile(const QString& path);
+	AwTSVDict loadTsvFile(const QString& path);
+	/** returns the columns header of a tsv file **/
+	QStringList readTsvColumns(const QString& path);
 	/** Create a TSV file based on a dictionnary **/
-	void saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict);
+	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
 	
 protected:
 	AwBIDSManager(const QString& rootDir);
@@ -61,10 +69,15 @@ protected:
 	AwFileItem *parseDir(const QString& fullPath, const QString& path);
 	void parseSubject(AwBIDSSubject *subject);
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
+	void applyModifications();
+	void updateChannelsTsv(const QString& path);
 
+
+	QMap<int, QString> m_modifications;
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
 	AwBIDSSubjectList m_subjects[AWBIDS_SOURCE_DIRS];
 	QMap<QString, AwBIDSSubject *> m_subjectsIDs[AWBIDS_SOURCE_DIRS];
 	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
+	bool m_mustValidateModifications;
 };

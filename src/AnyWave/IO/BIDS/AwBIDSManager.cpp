@@ -11,7 +11,8 @@
 #include "AwFileItem.h"
 #include "Plugin/AwPluginManager.h"
 #include <widget/AwMessageBox.h>
-
+#include "AwBIDSValidateDialog.h"
+#include "Montage/AwMontageManager.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
@@ -356,6 +357,7 @@ AwBIDSManager::AwBIDSManager(const QString& rootDir)
 		m_fileExtensions += r->fileExtensions;
 	
 	setRootDir(rootDir);
+	m_mustValidateModifications = false;
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -523,8 +525,98 @@ void AwBIDSManager::closeBIDS()
 	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
 		clearSubjects(i);
 	m_rootDir.clear();
+	// check if some mods should be validated
+	if (!m_modifications.isEmpty()) {
+		AwBIDSValidateDialog dlg(m_modifications);
+		if (dlg.exec() == QDialog::Accepted)
+			applyModifications();
+	}
+	m_modifications.clear();
+	m_mustValidateModifications = false;
 }
 
+
+void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
+{
+	AwTSVDict dict;
+	try {
+		dict = loadTsvFile(itemPath);
+	}
+	catch (const AwException& e) {
+		AwMessageBox::information(0, tr("BIDS"), e.errorString());
+		return;
+	}
+	if (dict.isEmpty())
+		return;
+
+	auto MM = AwMontageManager::instance();
+
+	auto names = dict["name"];
+	auto types = dict["type"];
+	auto status = dict["status"];
+	// check if status column is present
+	if (status.isEmpty()) { // No => create it.
+		for (int i = 0; i < names.size(); i++) {
+			status << "good";
+		}
+	}
+
+	// from here, cols contains the keys to access the dictionnary.
+	QString badStatus, type;
+	bool mustBeSaved = false;
+	for (int i = 0; i < names.size(); i++) {
+		auto name = names.value(i);
+		auto asRecorded = MM->asRecordedChannel(name);
+		if (asRecorded) {
+			// convert AnyWave Channel type to BIDS
+			if (asRecorded->isMEG())
+				type = "MEGMAG";
+			else if (asRecorded->isGRAD())
+				type = "MEGGRADAXIAL";
+			else if (asRecorded->isECG())
+				type = "ECG";
+			else if (asRecorded->isSEEG())
+				type = "SEEG";
+			else if (asRecorded->isEEG())
+				type = "EEG";
+			else if (asRecorded->isEMG())
+				type = "EMG";
+			else if (asRecorded->isTrigger())
+				type = "TRIG";
+			else if (asRecorded->isReference())
+				type = "MEGREFMAG";
+			else
+				type = "OTHER";
+
+			badStatus = asRecorded->isBad() ? "bad" : "good";
+			if (types.value(i) != type) {
+				mustBeSaved = true;
+				types.replace(i, AwChannel::typeToString(asRecorded->type()));
+			}
+			if (status.value(i) != badStatus) {
+				mustBeSaved = true;
+				status.replace(i, badStatus);
+			}
+		}
+	}
+	if (mustBeSaved) {
+		dict["type"] = types;
+		dict["status"] = status;
+		QStringList columns = { "name", "type", "units" };
+		saveTsvFile(itemPath, dict, columns);
+	}
+}
+
+void AwBIDSManager::applyModifications()
+{
+	for (auto k : m_modifications.keys()) {
+		if (k == AwBIDSManager::ChannelsTsv)
+			updateChannelsTsv(m_modifications[k]);
+		else if (k == AwBIDSManager::EventsTsv) {
+
+		}
+	}
+}
 
 void AwBIDSManager::clearSubjects(int sourceDir)
 {
@@ -615,29 +707,36 @@ AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
 }
 
 
-void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict)
+void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)
 {
 	QFile file(path);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
 		QTextStream stream(&file);
+		QStringList columns = orderedColumns;
+		for (auto key : dict.keys()) {
+			if (!orderedColumns.contains(key))
+				columns << key;
+		}
+
 		// write first line (the columns names)
 		int index = 0;
-		QString columns;
-		for (auto col : dict.keys()) {
+		QString colLine;
+		for (auto col : columns) {
 			if (index)
-				columns += '\t';
-			columns += col;
+				colLine += '\t';
+			colLine += col;
 			index++;
 		}
-		stream << columns << endl;
+		stream << colLine << endl;
+		auto nElements = dict[columns.first()].size();
 		// get the total count of items from name key
-		for (int i = 0; i < dict["name"].size(); i++) {
+		for (int i = 0; i < nElements; i++) {
 			QString line;
-			for (int j = 0; j < dict.keys().size(); j++) {
-				auto values = dict[dict.keys().value(j)];
-				if (j)
+			int colIndex = 0;
+			for (auto col : columns) {
+				if (colIndex++) 
 					line += '\t';
-				line += values.value(i);
+				line += dict[col].value(i);
 			}
 			stream << line << endl;
 			line.clear();
@@ -647,28 +746,46 @@ void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QString
 
 }
 
-QMap<QString, QStringList> AwBIDSManager::loadTsvFile(const QString& path)
+QStringList AwBIDSManager::readTsvColumns(const QString& path)
 {
 	QFile file(path);
-	QMap<QString, QStringList>  res;
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		QTextStream stream(&file);
+		auto cols = stream.readLine().split('\t');
+		file.close();
+		return cols;
+	}
+	return QStringList();
+}
+
+AwTSVDict AwBIDSManager::loadTsvFile(const QString& path)
+{
+	QFile file(path);
+	AwTSVDict  res;
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		QTextStream stream(&file);
 		// get columns
-		auto cols = stream.readLine();
-		auto items = cols.split('\t');
-		for (auto item : items)
-			res[item] = QStringList();
-		// build column indexes
-		QMap<int, QString> indexes;
-		int i = 0;
-		for (auto item : items)
-			indexes[i++] = item;
+		auto columns = stream.readLine().split('\t');
+		QStringList wholeList;
 		while (!stream.atEnd()) {
-			auto items = stream.readLine().split('\t');
-			for (int i = 0; i < items.size(); i++) {
-				auto item = items.value(i);
-				res[indexes[i]] << item;
+			wholeList << stream.readLine();
+		}
+		QMultiMap<QString, QString> globalMap;
+		// now parse each lines and extract values
+		for (int i = 0; i < wholeList.size(); i++) {
+			// check that number of columns in line matches the number of columns of header line.
+			auto items = wholeList.value(i).split('\t');
+			if (items.size() != columns.size()) {
+				throw AwException("Error in tsv file. Wrong number of column items.", "AwBIDSManager::loadTsvFile()");
+				return res;
 			}
+			for (int j = 0; j < columns.size(); j++) 
+				globalMap.insert(columns.value(j), items.value(j));
+			
+		}
+		// now rebuild a dict based on global multi map
+		for (auto col : columns) {
+			res[col] = globalMap.values(col);
 		}
 	}
 	return res;
@@ -678,73 +795,60 @@ QMap<QString, QStringList> AwBIDSManager::loadTsvFile(const QString& path)
 
 AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 {
-	QFile file(path);
+	AwTSVDict dict;
 	AwChannelList res;
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		QTextStream stream(&file);
-		// get columns
-		auto cols = stream.readLine();
-		auto items = cols.split('\t');
-		// check for at least name, type and units
-		if (!items.contains("name") || !items.contains("units") || !items.contains("type")) {
-			throw AwException("channels.tsv file is bad.", "AwBIDSManager::loadChannelsTsv");
-			return AwChannelList();
-		}
-		// build column indexes
-		QMap<int, QString> indexes;
-		int i = 0;
-		for (auto item : items)
-			indexes[i++] = item;
+	try {
+		dict = loadTsvFile(path);
+	}
+	catch (const AwException& e)
+	{
+		throw e;
+		return AwChannelList();
+	}
+	auto keys = dict.keys();
+	if (keys.isEmpty() || !keys.contains("name") || !keys.contains("units") || !keys.contains("type")) {
+		throw AwException("channels.tsv file is bad.", "AwBIDSManager::getMontageFromChannelsTsv()");
+		return AwChannelList();
+	}
 
-		while (!stream.atEnd()) {
-			auto items = stream.readLine().split('\t');
-			if (items.isEmpty() || items.size() < 3)
-				continue;
-			auto channel = new AwChannel();
-			for (int i = 0; i < items.size(); i++) {
-				auto column = indexes[i];
-				auto item = items.value(i);
-				if (column == "name")
-					channel->setName(item);
-				else if (column == "units")
-					channel->setUnit(item);
-				else if (column == "type") {
-					// Note: We only parse for types handled by AnyWave here.
-					// all non recognized types will be assigned to Other.
-					// Missing types in AnyWave are: ECOG, DBS, VEOG, HEOG, EOG, AUDIO, PD, EYEGAZE, PUPIL, MISC
-					if (item == "MEGMAG")
-						channel->setType(AwChannel::MEG);
-					else if (item == "MEGREFMAG" || item == "MEGREFGRADAXIAL" || item == "MEGREFGRADPLANAR")
-						channel->setType(AwChannel::Reference);
-					else if (item == "MEGGRADAXIAL" || item == "MEGGRADPLANAR")
-						channel->setType(AwChannel::GRAD);
-					else if (item == "EEG")
-						channel->setType(AwChannel::EEG);
-					else if (item == "SEEG")
-						channel->setType(AwChannel::SEEG);
-					else if (item == "ECG")
-						channel->setType(AwChannel::ECG);
-					else if (item == "EMG")
-						channel->setType(AwChannel::EMG);
-					else if (item == "TRIG")
-						channel->setType(AwChannel::Trigger);
-					else
-						channel->setType(AwChannel::Other);
-				}
-				else if (column == "sampling_frequency")
-					channel->setSamplingRate(item.toDouble());
-				else if (column == "low_cutoff")
-					channel->setLowFilter(item.toDouble());
-				else if (column == "high_cutoff")
-					channel->setHighFilter(item.toDouble());
-				else if (column == "notch")
-					channel->setNotch(item.toDouble());
-				else if (column == "status")
-					if (item == "bad")
-						channel->setBad(true);
-			}
-			res << channel;
+	auto types = dict["type"];
+	auto names = dict["name"];
+	auto status = dict["status"];
+
+	for (int i = 0; i < names.size(); i++) {
+		auto channel = new AwChannel();
+		channel->setName(names.value(i));
+		auto type = types.value(i);
+		if (type == "MEGMAG")
+			channel->setType(AwChannel::MEG);
+		else if (type == "MEGREFMAG" || type == "MEGREFGRADAXIAL" || type == "MEGREFGRADPLANAR")
+			channel->setType(AwChannel::Reference);
+		else if (type == "MEGGRADAXIAL" || type == "MEGGRADPLANAR")
+			channel->setType(AwChannel::GRAD);
+		else if (type == "EEG")
+			channel->setType(AwChannel::EEG);
+		else if (type == "SEEG")
+			channel->setType(AwChannel::SEEG);
+		else if (type == "ECG")
+			channel->setType(AwChannel::ECG);
+		else if (type == "EMG")
+			channel->setType(AwChannel::EMG);
+		else if (type == "TRIG")
+			channel->setType(AwChannel::Trigger);
+		else
+			channel->setType(AwChannel::Other);
+		if (!status.isEmpty()) {
+			auto bad = status.value(i);
+			channel->setBad(bad == "bad");
 		}
+		res << channel;
 	}
 	return res;
+}
+
+
+void AwBIDSManager::addModification(const QString& itemPath, int modification)
+{
+	m_modifications[modification] = itemPath;
+	m_mustValidateModifications = true;
 }
