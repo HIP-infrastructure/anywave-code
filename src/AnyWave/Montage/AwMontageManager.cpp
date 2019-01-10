@@ -621,7 +621,7 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 	if (items.isEmpty())
 		return;
 	
-	auto channels_tsv = items.first()->getChannelsTsvFor(filePath);
+	auto channels_tsv = items.first()->getTsvFileFor(filePath, AwFileItem::channelsTsv);
 	
 	if (!QFile::exists(channels_tsv))
 		return;

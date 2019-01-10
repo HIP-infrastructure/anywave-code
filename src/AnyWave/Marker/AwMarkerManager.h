@@ -98,8 +98,13 @@ private:
 	AwMarkerList m_displayedMarkers;	// Currently displayed markers
 	QMutex m_mutex;
 	static AwMarkerManager *m_instance;
-
 	QString m_filePath;
+	// BIDS support
+	/** check the if Events.tsv file is available for current data file (filePath) **/
+	void updateMarkersFromEventsTsv(const QString& filePath);
+	void checkForBIDSMods();
+
+	QString m_eventsTsv;
 };
 
 #endif

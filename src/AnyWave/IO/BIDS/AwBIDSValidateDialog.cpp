@@ -4,8 +4,8 @@ AwBIDSValidateDialog::AwBIDSValidateDialog(const QMap<int, QString>& mods, QWidg
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
-	QStringList labels = { "item", "Apply Modification" };
-	m_ui.tableWidget->setHorizontalHeaderLabels(labels);
+	m_ui.tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	m_ui.tableView->setModel(new AwBIDSValidateModel(mods, m_ui.tableView));
 }
 
 AwBIDSValidateDialog::~AwBIDSValidateDialog()

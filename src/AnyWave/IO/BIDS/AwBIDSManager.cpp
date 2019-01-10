@@ -527,8 +527,8 @@ void AwBIDSManager::closeBIDS()
 	m_rootDir.clear();
 	// check if some mods should be validated
 	if (!m_modifications.isEmpty()) {
-		AwBIDSValidateDialog dlg(m_modifications);
-		if (dlg.exec() == QDialog::Accepted)
+		//AwBIDSValidateDialog dlg(m_modifications);
+		//if (dlg.exec() == QDialog::Accepted)
 			applyModifications();
 	}
 	m_modifications.clear();
@@ -610,8 +610,10 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 void AwBIDSManager::applyModifications()
 {
 	for (auto k : m_modifications.keys()) {
-		if (k == AwBIDSManager::ChannelsTsv)
-			updateChannelsTsv(m_modifications[k]);
+		if (k == AwBIDSManager::ChannelsTsv) {
+			if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
+				updateChannelsTsv(m_modifications[k]);
+		}
 		else if (k == AwBIDSManager::EventsTsv) {
 
 		}
@@ -788,9 +790,42 @@ AwTSVDict AwBIDSManager::loadTsvFile(const QString& path)
 			res[col] = globalMap.values(col);
 		}
 	}
+	else {
+		throw AwException(QString("Failed to open %1").arg(path), "AwBIDSManager::loadTsvFile()");
+	}
 	return res;
 }
 
+
+AwMarkerList AwBIDSManager::getMarkersFromEventsTsv(const QString& path)
+{
+	AwTSVDict dict;
+	AwMarkerList res;
+	try {
+		dict = loadTsvFile(path);
+	}
+	catch (const AwException& e)
+	{
+		throw e;
+		return res;
+	}
+	auto keys = dict.keys();
+	if (keys.isEmpty() || !keys.contains("onset") || !keys.contains("duration")) {
+		throw AwException("events.tsv file is bad.", "AwBIDSManager::getMarkersFromEventsTsv()");
+		return res;
+	}
+	auto onsets = dict["onset"];
+	auto durations = dict["duration"];
+	auto labels = dict["trial_type"]; // this is optional so check if it is present in current fils.
+	if (labels.isEmpty()) {
+		for (auto onset : onsets)
+			labels << "unknown";
+	}
+	for (int i = 0; i < onsets.size(); i++) {
+		res << new AwMarker(labels.value(i), onsets.value(i).toDouble(), durations.value(i).toDouble());
+	}
+	return res;
+}
 
 
 AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)

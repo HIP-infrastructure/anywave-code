@@ -7,7 +7,7 @@ AwFileItem::AwFileItem(int type)
 }
 
 
-QString AwFileItem::getChannelsTsvFor(const QString& fileName)
+QString AwFileItem::getTsvFileFor(const QString& fileName, int tsvType)
 {
 	// check that fileName is present in files
 	if (!m_files.contains(fileName))
@@ -29,6 +29,15 @@ QString AwFileItem::getChannelsTsvFor(const QString& fileName)
 		break;
 	}
 
+	QString tsv;
+	switch (tsvType) {
+	case AwFileItem::channelsTsv:
+		tsv = "channels.tsv";
+		break;
+	case AwFileItem::eventsTsv:
+		tsv = "events.tsv";
+		break;
+	}
 	// return FULL path to channels.tsv
-	return QString("%1/%2_channels.tsv").arg(m_fullPath).arg(base);
+	return QString("%1/%2_%3").arg(m_fullPath).arg(base).arg(tsv);
 }

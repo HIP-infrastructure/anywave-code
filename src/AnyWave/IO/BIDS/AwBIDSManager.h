@@ -52,6 +52,7 @@ public:
 	AwBIDSSubject *guessSubject(const QString& path);
 	// Access to some tsv files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
+	AwMarkerList getMarkersFromEventsTsv(const QString& path);
 	/** returns a map table: keys are the columns label **/
 	AwTSVDict loadTsvFile(const QString& path);
 	/** returns the columns header of a tsv file **/

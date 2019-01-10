@@ -31,41 +31,11 @@ AwAverageItemWidget::AwAverageItemWidget(AwAvgEpoch *avg, QWidget *parent)
 {
 	m_ui.setupUi(this);
 	m_ui.labelCondition->setText(QString("%1 - %2 epochs").arg(avg->condition()->name()).arg(avg->condition()->numberOfGoodEpochs()));
-	//m_buffer = NULL;
-	//m_signalViewAvg = new AwBaseSignalView();
-	//m_signalViewAvg->setFlags(AwBaseSignalView::NoNavButtons | AwBaseSignalView::NoInfoLabels | AwBaseSignalView::ViewAllChannels
-	//	| AwBaseSignalView::NoHScrollBar | AwBaseSignalView::NoMarkerBar);
-	//m_signalViewAvg->setSecPerCm(0.1);
-	//m_signalViewAvg->showElectrodesNames(false);
-	//m_signalViewAvg->showZeroLine(false);
-	//m_signalViewAvg->showMarkersLabels(false);
-	//m_signalViewAvg->showMarkersValues(false);
-	//m_signalViewAvg->showMarkers(true);
-	//m_signalViewAvg->stackChannels(true);
 	m_signalView = new AwEpochSignalView(this);
 	m_ui.horizontalLayout->replaceWidget(m_ui.signalViewAvg, m_signalView);
 	m_signalView->setEpoch(avg);
 	m_signalView->repaint();
 	delete m_ui.signalViewAvg;
-	//m_signalViewStats = new AwBaseSignalView();
-	//m_signalViewStats->setFlags(AwBaseSignalView::NoNavButtons | AwBaseSignalView::NoInfoLabels | AwBaseSignalView::ViewAllChannels
-	//	| AwBaseSignalView::NoHScrollBar | AwBaseSignalView::NoMarkerBar);
-	//m_signalViewStats->setSecPerCm(0.1);
-	//m_signalViewStats->showElectrodesNames(false);
-	//m_signalViewStats->showZeroLine(false);
-	//m_signalViewStats->showMarkersLabels(false);
-	//m_signalViewStats->showMarkersValues(false);
-	//m_signalViewStats->showMarkers(true);
-	//m_signalViewStats->stackChannels(true);
-	//m_signalViewStats->addNewDisplayPlugin(&m_plugin);
-	//m_ui.horizontalLayout->replaceWidget(m_ui.signalStats, m_signalViewStats);
-	//delete m_ui.signalStats;
-	//m_statWidget = new AwStatChartWidget;
-	//m_ui.horizontalLayout->replaceWidget(m_ui.chartWidget, m_statWidget);
-	//m_statWidget->resize(QSize(300, 200));
-	//delete m_ui.chartWidget;
-	//m_zeroMarker = NULL;
-	
 	connect(m_ui.buttonEditStats, &QPushButton::clicked, this, &AwAverageItemWidget::editStats);
 }
 
@@ -119,7 +89,7 @@ AwAverageItemWidget::~AwAverageItemWidget()
 //	if (channel) {
 //		channel->setColor(QColor(Qt::green).name());
 //		channel->setDisplayPluginName("Epoch AVG SignalItem");
-//		//m_ui.chartWidget->addChannel(channel);
+//		//m_ui.chartWidget->addChannel(channel); 
 //		m_statChannels.append(channel);
 //	}
 //	m_statWidget->setChannels(m_statChannels);
