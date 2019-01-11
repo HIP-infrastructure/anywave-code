@@ -11,7 +11,6 @@
 #include "AwFileItem.h"
 #include "Plugin/AwPluginManager.h"
 #include <widget/AwMessageBox.h>
-#include "AwBIDSValidateDialog.h"
 #include "Montage/AwMontageManager.h"
 #include "Marker/AwMarkerManager.h"
 // statics
