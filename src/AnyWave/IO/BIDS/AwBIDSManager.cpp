@@ -13,6 +13,7 @@
 #include <widget/AwMessageBox.h>
 #include "AwBIDSValidateDialog.h"
 #include "Montage/AwMontageManager.h"
+#include "Marker/AwMarkerManager.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
@@ -358,6 +359,7 @@ AwBIDSManager::AwBIDSManager(const QString& rootDir)
 	
 	setRootDir(rootDir);
 	m_mustValidateModifications = false;
+
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -527,14 +529,60 @@ void AwBIDSManager::closeBIDS()
 	m_rootDir.clear();
 	// check if some mods should be validated
 	if (!m_modifications.isEmpty()) {
-		//AwBIDSValidateDialog dlg(m_modifications);
-		//if (dlg.exec() == QDialog::Accepted)
 			applyModifications();
 	}
 	m_modifications.clear();
 	m_mustValidateModifications = false;
 }
 
+void AwBIDSManager::updateEventsTsv(const QString& itemPath)
+{
+	if (AwMessageBox::question(0, tr("EVENTS.TSV"), tr("The modified markers will be appended to current events.tsv file. Proceed?"),
+		QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+		return;
+	AwTSVDict dict;
+	try {
+		dict = loadTsvFile(itemPath);
+	}
+	catch (const AwException& e) {
+		AwMessageBox::information(0, tr("BIDS"), e.errorString());
+		return;
+	}
+	if (dict.isEmpty())
+		return;
+	auto markers = AwMarkerManager::instance()->getMarkers();
+	// get REQUIRED columns
+	auto onset = dict["onset"];
+	auto duration = dict["duration"];
+	auto trial_type = dict["trial_type"];
+	// get optional columns if any
+	auto responses = dict["response_time"];
+	auto stim_file = dict["stim_file"];
+	auto HED = dict["HED"];
+
+	for (auto m : markers) {
+		if (!responses.isEmpty())   // column is already present => so complete it for new markers
+			responses << "n/a";
+		if (!stim_file.isEmpty())
+			stim_file << "n/a";
+		if (!HED.isEmpty())
+			HED << "n/a";
+		onset << QString("%1").arg(m->start());
+		duration << QString("%1").arg(m->duration());
+		trial_type << m->label();
+	}
+	dict["onset"] = onset;
+	dict["duration"] = duration;
+	dict["trial_type"] = trial_type;
+	if (!HED.isEmpty())
+		dict["HED"] = HED;
+	if (!responses.isEmpty())
+		dict["response_time"] = responses;
+	if (!stim_file.isEmpty())
+		dict["stim_file"] = stim_file;
+	QStringList columns = { "onset", "duration", "trial_type" };
+	saveTsvFile(itemPath, dict, columns);
+}
 
 void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 {
@@ -615,7 +663,8 @@ void AwBIDSManager::applyModifications()
 				updateChannelsTsv(m_modifications[k]);
 		}
 		else if (k == AwBIDSManager::EventsTsv) {
-
+			if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+				updateEventsTsv(m_modifications[k]);
 		}
 	}
 }

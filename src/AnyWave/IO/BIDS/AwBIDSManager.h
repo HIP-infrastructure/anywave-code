@@ -72,6 +72,7 @@ protected:
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
 	void applyModifications();
 	void updateChannelsTsv(const QString& path);
+	void updateEventsTsv(const QString& path);
 
 
 	QMap<int, QString> m_modifications;

@@ -39,6 +39,7 @@
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
 #include "IO/BIDS/AwBIDSManager.h"
+#include <AwException.h>
 
 
 // statics
@@ -66,6 +67,7 @@ AwMarkerManager::AwMarkerManager()
 	connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
 
 	m_needSorting = true;
+	m_markersModified = false;
 	m_dock = NULL;
 	m_markerInspector = new AwMarkerInspector();	
 }
@@ -317,8 +319,22 @@ void AwMarkerManager::setFilename(const QString& path)
 	}
 }
 
+void AwMarkerManager::checkForBIDSMods()
+{
+	if (m_eventsTsv.isEmpty())
+		return;
+	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
+		return;
+	if (m_markersModified)
+		AwBIDSManager::instance()->addModification(m_eventsTsv, AwBIDSManager::EventsTsv);
+
+}
+
 void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
 {
+	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
+		return;
+
 	auto BM = AwBIDSManager::instance();
 
 	if (!BM->isBIDSActive())
@@ -345,18 +361,20 @@ void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
 
 void AwMarkerManager::quit()
 {
+	closeFile();
 	m_ui->close();
 	delete m_ui;
 	delete m_markerInspector;
-	clear();
 }
 
 void AwMarkerManager::closeFile()
 {
+	checkForBIDSMods();
 	// ask MarkerManagerSettings to clear
 	m_ui->cleanUp();
 	clear();
 	m_filePath = "";
+	m_markersModified = false;
 }
 
 // 
