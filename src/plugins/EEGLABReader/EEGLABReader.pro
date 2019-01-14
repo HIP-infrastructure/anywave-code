@@ -5,19 +5,17 @@
 #-------------------------------------------------
 
 QT       -= gui
-include(../common.pri)
-TARGET = AwMATLAB
+include(../../common.pri)
+include(../plugins.pri)
+TARGET = EEGLABReader
 TEMPLATE = lib
 CONFIG += plugin
-DEFINES += AW_BUILD_MATLAB_LIB
-DESTDIR = $$LIB_DIR
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.10
-
-
-#FRAMEWORK_HEADERS.version = Versions
-#FRAMEWORK_HEADERS.files =     ../../include/AwMATLAB.h    ../../include/AwGlobal.h
-#FRAMEWORK_HEADERS.path = Headers
-#QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+DESTDIR = $$PLUGIN_DIR
+QMAKE_CXXFLAGS_RELEASE += -Wno-c++11-narrowing
+macx {
+QMAKE_POST_LINK = \
+  install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $${DESTDIR}/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -30,22 +28,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+LIBS += -lAwRW -lAwMATLAB
 
-unix {
-    target.path = $$INSTALL_LIB_PATH
-    INSTALLS += target
-}
+HEADERS += \
+    EEGLABReader.h
 
-macx{
-    QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
-    LIBS += -lmatio
-}
-
-unix:!macx {
-    LIBS += -lmatio
-}
-
-SOURCES += \
-    AwMATLABFile.cpp AwMATLABStruct.cpp
+SOURCES += EEGLABReader.cpp
 
 
