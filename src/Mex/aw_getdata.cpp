@@ -28,14 +28,18 @@
 #include <QtMath>
 #include <AwChannel.h>
 
-static mxArray *request_data(const QString&, float, float, 
-        const QStringList&, const QStringList&, int, int);
+static mxArray *request_data();
 static mxArray *parse_cfg(const mxArray *);
 
+// parameters
+int filterFlags = 0; // 0 => AnyWave current filters, 1 => specified filters 2=> raw data
 QHash<int, QVector<float>> filterSettings;
+QString montage, file;
+float start = 0., duration = 0.;
+QStringList labels, types;
+int decimate = 0;
 
-mxArray *request_data(const QString& file, const QString& montage, float start, float duration, const QStringList& labels, const QStringList& types, 
-					  int decimate)
+mxArray *request_data()
 {
     QTcpSocket *socket = connect();
     mxArray *output = NULL;
@@ -55,13 +59,12 @@ mxArray *request_data(const QString& file, const QString& montage, float start, 
     stream_data << decimate;   // decimation factor for downsampling of data (if value is 1 => no downsampling)
     stream_data << labels;
 	stream_data << types;
-
-	int filters = 0;
-	if (!filterSettings.isEmpty())
-		filters = 1;
-	stream_data << filters;		// filtering flag
-	   
-    if (!filterSettings.isEmpty())	{
+	stream_data << filterFlags;
+	//if (!filterSettings.isEmpty())
+	//	filters = 1;
+	//stream_data << filters;		// filtering flag
+	
+	if (filterFlags == 1)	{
 		auto eegFilters = filterSettings[AwChannel::EEG];
 		auto megFilters = filterSettings[AwChannel::MEG];
 		auto emgFilters = filterSettings[AwChannel::EMG];
@@ -189,12 +192,12 @@ mxArray *request_data(const QString& file, const QString& montage, float start, 
 // parse the input cfg structure
 mxArray *parse_cfg(const mxArray *cfg)
 {
-    float start = 0, duration = -1;
-    int decimate = 1;
-	int filters = 0;
-    QStringList labels, types;
-	QString file, montage;
-    mxArray *output = NULL;
+ //   float start = 0, duration = -1;
+ //   int decimate = 1;
+	//int filters = 0;
+ //   QStringList labels, types;
+	//QString file, montage;
+  //  mxArray *output = NULL;
 
     // check for start
     // default value    
@@ -203,7 +206,7 @@ mxArray *parse_cfg(const mxArray *cfg)
         mxArray *f_start = mxGetField(cfg, 0, "start");
         if (!mxIsDouble(f_start)) {
             mexErrMsgTxt("start must be a double value.");
-            return output;
+            return NULL;
         }
         if (f_start) {
             double s = *(double *)mxGetData(f_start);
@@ -218,7 +221,7 @@ mxArray *parse_cfg(const mxArray *cfg)
         mxArray *f_dur = mxGetField(cfg, 0, "duration");
         if (!mxIsDouble(f_dur)) {
             mexErrMsgTxt("duration must be a double value.");
-            return output;
+            return NULL;
         }
         if (f_dur) {
             double d = *(double *)mxGetData(f_dur);
@@ -249,7 +252,7 @@ mxArray *parse_cfg(const mxArray *cfg)
         mxArray *f_labels = mxGetField(cfg, 0, "labels");
         if (!mxIsCell(f_labels)) {
             mexErrMsgTxt("labels must be a cell array (See help).");
-            return output;
+            return NULL;
         }
         for (int i = 0; i < mxGetNumberOfElements(f_labels); i++) {
             mxArray *m_label = mxGetCell(f_labels, i);
@@ -267,7 +270,7 @@ mxArray *parse_cfg(const mxArray *cfg)
         mxArray *f_types = mxGetField(cfg, 0, "types");
         if (!mxIsCell(f_types)) {
             mexErrMsgTxt("types must be a cell array (See help).");
-            return output;
+            return NULL;
         }
         for (int i = 0; i < mxGetNumberOfElements(f_types); i++) {
             mxArray *m_type = mxGetCell(f_types, i);
@@ -285,7 +288,7 @@ mxArray *parse_cfg(const mxArray *cfg)
          mxArray *f_decimate = mxGetField(cfg, 0, "decimate");
          if (!mxIsDouble(f_decimate)) {
              mexErrMsgTxt("decimate must be a value.");
-             return output;
+             return NULL;
          }
          if (f_decimate) {
              double d = *(double *)mxGetData(f_decimate);
@@ -297,85 +300,87 @@ mxArray *parse_cfg(const mxArray *cfg)
     
     // check for filtering options
     f_index = mxGetFieldNumber(cfg, "filtering");
-
-	if (f_index != -1) { // field found
-		mxArray *f_filtering =  mxGetField(cfg, 0, "filtering");
+	if (f_index == -1) {  // No filtering specified => filter flags => 0
+		filterFlags = 0;
+	}
+	else {
+		mxArray *f_filtering = mxGetField(cfg, 0, "filtering");
 		QString s_filtering = QString(mxArrayToString(f_filtering)).toLower();
 		if (s_filtering == "no") {
-			filters = 2;	// no filtering
+			filterFlags = 2;	// RAW DATA
 		}
-		else if (s_filtering == "yes") {
-			filters = 1; // filtering is set
-			bool settings = false;
-			QVector<float> eegFilters(2);
-			QVector<float> megFilters(2);
-			QVector<float> emgFilters(2);
-			eegFilters.fill(0);
-			megFilters.fill(0);
-			emgFilters.fill(0);
-			// check for dependent fields
-			f_index = mxGetFieldNumber(cfg, "eeg_lp");
-			if (f_index != -1) {
-				mxArray *f_eeglp = mxGetField(cfg, 0, "eeg_lp");
-				if (!mxIsDouble(f_eeglp)) {
+		if (s_filtering == "yes") {
+			filterFlags = 1;
+			int eegLP, eegHP, megLP, megHP, emgLP, emgHP;
+			eegLP = mxGetFieldNumber(cfg, "eeg_lp");
+			eegHP = mxGetFieldNumber(cfg, "eeg_hp");
+			megLP = mxGetFieldNumber(cfg, "meg_lp");
+			megHP = mxGetFieldNumber(cfg, "meg_hp");
+			emgLP = mxGetFieldNumber(cfg, "emg_lp");
+			emgHP = mxGetFieldNumber(cfg, "emg_hp");
+			QVector<float> eegFilters = { 0., 0. };
+			QVector<float> megFilters = { 0., 0. };
+			QVector<float> emgFilters = { 0., 0. };
+			if (eegLP != -1) {
+				auto field = mxGetField(cfg, 0, "eeg_lp");
+				if (!mxIsDouble(field)) {
 					mexErrMsgTxt("eeg_lp must be a double value.");
-					return output;
+					return NULL;
 				}
-				double v = *(double *)mxGetData(f_eeglp);
+				double v = *(double *)mxGetData(field);
 				eegFilters[1] = (float)v;
-				settings = true;
 			}
-			// check for dependent fields
-			f_index = mxGetFieldNumber(cfg, "eeg_hp");
-			if (f_index != -1) {
-				mxArray *f_eeghp = mxGetField(cfg, 0, "eeg_hp");
-				if (!mxIsDouble(f_eeghp)) {
+			if (eegHP != -1) {
+				auto field = mxGetField(cfg, 0, "eeg_hp");
+				if (!mxIsDouble(field)) {
 					mexErrMsgTxt("eeg_hp must be a double value.");
-					return output;
+					return NULL;
 				}
-				double v = *(double *)mxGetData(f_eeghp);
+				double v = *(double *)mxGetData(field);
 				eegFilters[0] = (float)v;
-				settings = true;
 			}
-			// check for dependent fields
-			f_index = mxGetFieldNumber(cfg, "meg_lp");
-			if (f_index != -1) {
-				mxArray *f_meglp = mxGetField(cfg, 0, "meg_lp");
-				if (!mxIsDouble(f_meglp)) {
+			if (megLP != -1) {
+				auto field = mxGetField(cfg, 0, "meg_lp");
+				if (!mxIsDouble(field)) {
 					mexErrMsgTxt("meg_lp must be a double value.");
-					return output;
+					return NULL;
 				}
-				double v = *(double *)mxGetData(f_meglp);
+				double v = *(double *)mxGetData(field);
 				megFilters[1] = (float)v;
-				settings = true;
 			}
-			// check for dependent fields
-			f_index = mxGetFieldNumber(cfg, "meg_hp");
-			if (f_index != -1) {
-				mxArray *f_meghp = mxGetField(cfg, 0, "meg_hp");
-				if (!mxIsDouble(f_meghp)) {
+			if (megHP != -1) {
+				auto field = mxGetField(cfg, 0, "meg_hp");
+				if (!mxIsDouble(field)) {
 					mexErrMsgTxt("meg_hp must be a double value.");
-					return output;
+					return NULL;
 				}
-				double v = *(double *)mxGetData(f_meghp);
+				double v = *(double *)mxGetData(field);
 				megFilters[0] = (float)v;
-				settings = true;
+			}
+			if (emgLP != -1) {
+				auto field = mxGetField(cfg, 0, "emg_lp");
+				if (!mxIsDouble(field)) {
+					mexErrMsgTxt("emg_lp must be a double value.");
+					return NULL;
+				}
+				double v = *(double *)mxGetData(field);
+				emgFilters[1] = (float)v;
+			}
+			if (emgHP != -1) {
+				auto field = mxGetField(cfg, 0, "emg_hp");
+				if (!mxIsDouble(field)) {
+					mexErrMsgTxt("emg_hp must be a double value.");
+					return NULL;
+				}
+				double v = *(double *)mxGetData(field);
+				megFilters[0] = (float)v;
 			}
 			filterSettings.insert(AwChannel::EEG, eegFilters);
 			filterSettings.insert(AwChannel::MEG, megFilters);
 			filterSettings.insert(AwChannel::EMG, emgFilters);
-			if (!settings) {
-				mexPrintf("Warning: filtering was set to yes but no filters are set.\n");
-			}
-		}
-		else {
-			mexErrMsgTxt("filtering field is invalid (See help).");
-			return output;
 		}
 	}
-
-	output = request_data(file, montage, start, duration, labels, types, decimate);
-    return output;
+    return request_data();
 }
 
 
