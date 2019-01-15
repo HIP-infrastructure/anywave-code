@@ -72,7 +72,7 @@
 #include "AwUpdater.h"
 #include "Script/AwScriptManager.h"
 #include <widget/AwTopoBuilder.h>
-#define AW_EPOCHING
+//#define AW_EPOCHING
 
 #ifdef AW_EPOCHING
 #include "Epoch/AwEpochManager.h"
