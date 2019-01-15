@@ -32,7 +32,7 @@
 #include <filter/AwFiltering.h>
 #include <math/AwMath.h>
 #include <filter/AwFilterSettings.h>
-#include <QMessageBox.h>
+#include <QMessageBox>
 
 ICA::ICA()
 {

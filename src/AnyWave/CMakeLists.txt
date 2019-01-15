@@ -8,10 +8,15 @@ SET(AnyWave_SRCS
     ./AwExportDial.cpp  
     ./AwNoGUI.cpp  
     ./AwUpdater.cpp  
-     ./AwOpenFileDialog.cpp
+    ./AwOpenFileDialog.cpp
     ./main.cpp  
+	./AwFileOpenSave.cpp
+	./CommandLineParser.cpp
+	./AwCommandLineManager.cpp
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
+	./Data/AwMemoryMapper.cpp  
+	./Data/AwDataChunk.cpp
     ./Carto/AwDockMapping.cpp  
     ./Carto/AwMappingClient.cpp  
     ./Carto/AwMappingWidget.cpp  
@@ -41,6 +46,7 @@ SET(AnyWave_SRCS
     ./IO/BIDS/AwBIDSSubject.cpp  
     ./IO/BIDS/AwBIDSTools.cpp  
     ./IO/BIDS/AwFileItem.cpp  
+	./IO/MEMIO/MEMIO.cpp
     ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
     ./Marker/AwMarkerFindReplaceUi.cpp  
@@ -147,14 +153,15 @@ SET(AnyWave_SRCS
     ./Epoch/AwEpochCreateUi.cpp  
     ./Epoch/AwEpochManager.cpp  
     ./Epoch/AwEpochModel.cpp  
-    ./Epoch/AwEpochThumbNail.cpp  
-    ./Epoch/AwEpochThumbCreator.cpp  
     ./Epoch/AwEpochVisuWidget.cpp  
     ./Epoch/AwStatChartWidget.cpp  
+	./Epoch/AwEpochMosaicWidget.cpp
     ./Epoch/AwStatsModel.cpp)
 
 SET(HEADERS ./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
+	./Data/AwMemoryMapper.h  
+	./Data/AwDataChunk.h
     ./Carto/AwDockMapping.h  
     ./Carto/AwMappingWidget.h  
     ./Carto/AwMappingClient.h  
@@ -184,6 +191,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./IO/BIDS/AwBIDSManager.h  
     ./IO/BIDS/AwBIDSSubject.h  
     ./IO/BIDS/AwBIDSGUI.h  
+	./IO/MEMIO/MEMIO.h
     ./Marker/AwExtractTriggers.h  
     ./Marker/AwMarkersExportWidget.h  
     ./Marker/AwPickChannelsDial.h  
@@ -267,6 +275,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./AwUpdater.h  
     ./AwExportDial.h  
     ./AnyWave.h  
+	./CommandLineParser.h
     ./Prefs/AwPreferences.h  
     ./Prefs/AwSettings.h  
     ./Prefs/AwPrefsDial.h  
@@ -276,8 +285,6 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Epoch/AwEpochCreateUi.h  
     ./Epoch/AwEpochModel.h  
     ./Epoch/AwEpochVisuWidget.h  
-    ./Epoch/AwEpochThumbNail.h  
-    ./Epoch/AwEpochThumbCreator.h  
     ./Epoch/AwEpochAverageWidget.h  
     ./Epoch/AwAverageDialog.h  
     ./Epoch/AwAverageItemWidget.h  
@@ -285,6 +292,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Epoch/AwAvgSignalItem.h  
     ./Epoch/AwEditStatsDialog.h  
     ./Epoch/AwStatsModel.h  
+	./Epoch/AwEpochMosaicWidget.h
     ./Epoch/AwStatChartWidget.h)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
@@ -336,10 +344,10 @@ SET(FORMS ./AnyWave.ui
     ./Prefs/AwPrefsDial.ui  
     ./Epoch/AwEpochCreateUi.ui  
     ./Epoch/AwEpochVisuWidget.ui  
-    ./Epoch/AwEpochThumbNail.ui  
     ./Epoch/AwEpochAverageWidget.ui  
     ./Epoch/AwAverageDialog.ui  
     ./Epoch/AwAverageItemWidget.ui  
+	./Epoch/AwEpochMosaicWidget.ui
     ./Epoch/AwEditStatsDialog.ui)
 
 QT5_WRAP_UI(UI ${FORMS})

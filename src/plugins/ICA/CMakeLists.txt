@@ -18,7 +18,6 @@ SET(UIS ICASettings.ui)
 QT5_WRAP_CPP(ICA_MOCS ${MOCS})
 QT5_WRAP_UI(ICA_UIS ${UIS})
 
-
 add_library(ICA SHARED ${SRCS} ${ICA_MOCS} ${ICA_UIS})
 qt5_use_modules(ICA Core Gui)
 IF (APPLE)
