@@ -67,13 +67,20 @@ void AwDataServer::setMainReader(AwFileIO *fileReader)
 {
 	// MUST BE CALLED ONLY WHEN A NEW FILE IS OPEN BY ANYWAVE
 	// If a reader is already set, close active connections if any and destroy the reader.
-	if (m_reader)
-	{
+	if (m_reader)	{
 		closeAllConnections();
-		delete m_reader;
+		if (m_plugin)
+			m_plugin->deleteInstance(m_reader);
 	}
 	m_reader = fileReader;
 	m_plugin = fileReader->plugin();
+}
+
+AwDataServer *AwDataServer::duplicate(AwFileIO *fileReader)
+{
+	auto ds = new AwDataServer();
+	ds->setMainReader(fileReader);
+	return ds;
 }
 
 // SLOTS

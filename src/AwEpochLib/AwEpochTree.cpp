@@ -27,6 +27,7 @@
 #include <epoch/AwEpochTree.h>
 #include <epoch/AwEpochAverageChannel.h>
 #include <math/AwMath.h>
+#include <AwException.h>
 
 /** The markers must have the same non null duration **/
 AwEpochTree::AwEpochTree(const QString& name, const AwChannelList& channels, float totalDuration, QObject *parent) : AwDataClient(parent)
@@ -38,51 +39,65 @@ AwEpochTree::AwEpochTree(const QString& name, const AwChannelList& channels, flo
 	m_zeroSample = 0;
 	m_name = name;
 	m_modality = channels.first()->type();
-	m_filters[0] = m_filters[1] = m_filters[2] = 0.;
 	m_avgIsDone = false;
+	m_averaged = Q_NULLPTR;
 }
 
 AwEpochTree::~AwEpochTree()
 {
+	if (m_averaged)
+		delete m_averaged;
 }
 
 int AwEpochTree::numberOfGoodEpochs()
 {
 	int count = 0;
 	for (auto e : m_epochs)
-		if (!e->rejected)
+		if (!e->isRejected())
 			count++;
 
 	return count;
 }
 
-void AwEpochTree::setFilters(float *filters)
+int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post, 
+	const AwMarkerList& artefacts)
 {
-	memcpy(m_filters, filters, 3 * sizeof(float));
-	m_avgIsDone = false;	// flag to recompute avg when filters change
-}
-
-int AwEpochTree::buildEpochs(const AwMarkerList& markers, const QString& label, float pre, float post)
-{
-	if (m_totalDuration <= 0.)
+	m_after = post;
+	m_before = pre;
+	if (m_totalDuration <= 0.) {
+		throw AwException(QString("duration of data file is zero."), QString("AwEpochTree::buildEpochs()"));
 		return -1;
+	}
 	clearEpochs();
+	m_markerLabel = label;
+	AwMarkerList tmp;
 	for (AwMarker *m : markers) {
 		if (m->label() != label)
 			continue;
 		float pos = m->start() - pre;
+		// skip epochs that overlap starting and/or ending positions of data.
 		if (pos < 0.) // skip this epoch 
 			continue;
 		if (m->start() + post > m_totalDuration)
 			continue;
 
-		AwEpoch *e = new AwEpoch;
-		e->posAndDuration = new AwMarker(label, pos, pre + post);
-		e->condition = this;
-		m_epochs << e;
+		//m_epochs << new AwEpoch(this, new AwMarker(label, pos, pre + post));
+		tmp << new AwMarker(label, pos, pre + post);
+	}
+
+	if (!artefacts.isEmpty()) {
+        auto artefactstemp = artefacts;
+		auto dummy = AwMarker::cutAroundMarkers(tmp, artefactstemp);
+		while (!tmp.isEmpty())
+			delete tmp.takeFirst();
+		tmp = dummy;
+	}
+	for (auto m : tmp) {
+		m_epochs << new AwEpoch(this, m);
 	}
 	m_zeroPos = pre;
 	m_zeroSample = (int)floor(pre * m_channels.first()->samplingRate());
+	m_epochDuration = pre + post;
 	return 0;
 }
 
@@ -95,17 +110,103 @@ void AwEpochTree::clearEpochs()
 	m_avgIsDone = false;
 }
 
-float AwEpochTree::epochDuration()
-{
-	// if no epochs return 0 otherwise return the first epoch duration.
-	return m_epochs.isEmpty() ? 0 : m_epochs.first()->posAndDuration->duration();
-}
-
 void AwEpochTree::setComputeSettings(AwEpochComputeSettings& settings)
 {
 	m_computeSettings = settings;
 	m_avgIsDone = false;
 }
+
+void AwEpochTree::average()
+{
+	if (!m_isConnected)
+		return;
+	if (m_epochs.isEmpty())
+		return;
+
+	AwEpochList epochs;
+	for (auto e : m_epochs) { // remove rejected epochs before averaging
+		if (!e->isRejected())
+			epochs << e;
+	}
+
+	auto totalEpochs = epochs.size();
+
+	// build a matric the size of the final averaged epoch
+	mat avgEpochMat = arma::zeros(this->channels().size(), (uword)floor(this->m_epochDuration * this->channels().first()->samplingRate()));
+	
+
+	// precompute latencies to sample in case a baseline correction is required.
+	int baselineLowerSample = (int)floor(m_computeSettings.latencyRange[0] * m_epochs.first()->channels().first()->samplingRate());
+	int baselineHigherSample = (int)floor(m_computeSettings.latencyRange[1] * m_epochs.first()->channels().first()->samplingRate());
+
+	for (auto e : epochs) {
+		loadEpoch(e);
+
+		for (auto c : e->channels()) {
+			uword row = 0;
+			// get data as double not float
+			rowvec channelData = arma::conv_to<rowvec>::from(AwMath::channelToVec(c));
+			if (m_computeSettings.useBaselineCorrection) {
+				auto zeroSample = e->zeroSample();
+				auto endSample = zeroSample - 1;
+				auto start = zeroSample - baselineLowerSample;
+				auto end = endSample - baselineHigherSample;
+				if (start < 0)
+					start = 0;
+				double mean = 0., stddev = 0.;
+				switch (m_computeSettings.baselineMethod)
+				{
+				case AwEpochComputeSettings::SubstractMean:
+					mean = arma::mean(channelData(span(start, end)));
+					channelData -= mean;
+					break;
+				case AwEpochComputeSettings::DivideByStd:
+					stddev = arma::stddev(channelData(span(start, end)));
+					channelData /= stddev;
+					break;
+				}
+				// copy channel data back (for further std error computation)
+				for (auto i = 0; i < c->dataSize(); i++)
+					c->data()[i] = channelData(i);
+			}
+			// put row in the avgMatrix
+			// add channel data to matrix.
+			avgEpochMat.row(row) += channelData;
+			row++;
+		}
+		emit epochLoaded(totalEpochs);
+	}
+	
+	double sqr_n = sqrt(totalEpochs);
+	// create a std dev matrix of each samples of a channel through all epochs.
+	mat std_dev = arma::zeros(avgEpochMat.n_rows, avgEpochMat.n_cols);
+	vec valuesThroughEpochs(totalEpochs);
+	// compute error type based on std dev of each epochs
+	for (arma::uword n = 0; n < std_dev.n_rows; n++) {
+		for (arma::uword m = 0; m < std_dev.n_cols; m++) {
+			for (auto nE = 0; nE < totalEpochs; nE++) {
+				valuesThroughEpochs(nE) = epochs.at(nE)->channels().at(n)->data()[m];
+			}
+			std_dev(n, m) = stddev(valuesThroughEpochs);
+		}
+	}
+	// do the averaging of all epochs
+	avgEpochMat /= totalEpochs;
+	mat errorTypeMat = std_dev / sqr_n;
+
+	// build the resulting epoch
+	AwEpochChannelList resultChannels;
+	for (arma::uword n = 0; n < avgEpochMat.n_rows; n++) {
+		auto channel = new AwEpochAverageChannel(m_channels.value(n));
+		channel->setData(arma::conv_to<fvec>::from(avgEpochMat.row(n)));
+		channel->setErrorType(arma::conv_to<fvec>::from(errorTypeMat.row(n)));
+		resultChannels << channel;
+	}
+	if (!m_averaged)
+		m_averaged = new AwAvgEpoch(this, m_epochs.first()->posAndDuration());
+	m_averaged->setChannels(resultChannels);
+}
+
 
 int AwEpochTree::doAverage(bool verbose)
 {
@@ -114,7 +215,7 @@ int AwEpochTree::doAverage(bool verbose)
 	if (m_epochs.isEmpty())
 		return -1;
 	m_matrix.clear();
-	arma::uword nCols = (arma::uword)floor(m_epochs.first()->posAndDuration->duration() * m_channels.first()->samplingRate());
+	arma::uword nCols = (arma::uword)floor(m_epochDuration * m_channels.first()->samplingRate());
 	arma::uword nRows = (arma::uword)m_channels.size();
 	fmat epochs_matrix = arma::fmat(nRows, nCols);
 	epochs_matrix.zeros();
@@ -124,19 +225,15 @@ int AwEpochTree::doAverage(bool verbose)
 	// skip rejected epochs
 	int nEpochs = 0;
 	for (AwEpoch *e : m_epochs) {
-		if (e->rejected)
+		if (e->isRejected())
 			continue;
-		requestData(&m_channels, e->posAndDuration->start(), e->posAndDuration->duration());
+		loadEpoch(e); // (&m_channels, e->posAndDuration->start(), e->posAndDuration->duration());
 		
 		// apply baseline correction if set in settings
 		if (m_computeSettings.useBaselineCorrection) {
 			if (m_zeroPos > 0.) {
 				for (auto c : m_channels) {
 					fvec vec = AwMath::channelToVec(c);
-//					if (c->isMEG() || c->isGRAD())
-//						vec *= 1e12;
-//					else
-//						vec *= 1e6;
 					arma::uword n = (arma::uword)floor(m_zeroPos * c->samplingRate());
 					int start = 0, end = n - 1;
 					if (m_computeSettings.latencyRange[0] > 0 && m_computeSettings.latencyRange[0] <= m_zeroPos)
@@ -151,10 +248,6 @@ int AwEpochTree::doAverage(bool verbose)
 						float stddev = arma::stddev(vec(span(start, end))); 
 						vec /= stddev;
 					}
-	//				if (c->isMEG() || c->isGRAD())
-	//					vec *= 1e-12;
-	//				else
-	//					vec *= 1e-6;
 					// copy the data back to the original AwChannel object
 					memcpy(c->data(), vec.memptr(), c->dataSize() * sizeof(float));
 				}
@@ -202,44 +295,6 @@ int AwEpochTree::doAverage(bool verbose)
 	return 0;
 }
 
-///
-/// Create a buffer for the average channels.
-/// Return NULL if the averaging is not done yet.
-AwEpochDataBuffer *AwEpochTree::createAVGBuffer()
-{
-	if (!m_avgIsDone)
-		return NULL;
-
-	//qDeleteAll(m_avgChannels);
-	while (!m_avgChannels.isEmpty())
-		delete m_avgChannels.takeLast();
-	m_avgChannels.clear();
-	for (arma::uword i = 0; i < m_matrix.n_rows; i++) {
-		AwEpochAverageChannel *newc = new AwEpochAverageChannel(m_channels.at(i));
-		newc->setData(conv_to<fvec>::from(m_matrix.row(i)));
-		newc->setErrorType(conv_to<fvec>::from(m_errorType.row(i)));
-		newc->setZeroPosition(m_zeroPos);
-		m_avgChannels << newc;
-	}
-	AwEpochDataBuffer *buffer = new AwEpochDataBuffer(&m_avgChannels);
-	return buffer;
-}
-
-AwEpochAverageChannel *AwEpochTree::createAVGChannel(const QString& label)
-{
-	QStringList labels = AwChannel::getLabels(m_channels);
-	int index = labels.indexOf(label);
-	if (index == -1)
-		return NULL;
-
-	AwEpochAverageChannel *newc = new AwEpochAverageChannel(m_channels.at(index));
-
-	newc->setData(conv_to<fvec>::from(m_matrix.row(index)));
-	newc->setErrorType(conv_to<fvec>::from(m_errorType.row(index)));
-	newc->setZeroPosition(m_zeroPos);
-	newc->setCondition(this);
-	return newc;
-}
 
 ///
 /// Load the epoch at index index.
@@ -247,26 +302,21 @@ AwEpochAverageChannel *AwEpochTree::createAVGChannel(const QString& label)
 /// return -1 if failed.
 int AwEpochTree::loadEpoch(int index)
 {
+	QMutexLocker lock(&m_mutex);
 	if (index < 0 || index >= m_epochs.size())
 		return -1;
-	// check if filters have changed
-	AwChannel *first = m_channels.first();
-	if (first->lowFilter() != m_filters[0] || first->highFilter() != m_filters[1] 
-		|| first->notch() != m_filters[2]) {  // apply filters settings to all channels
-		for (auto c : m_channels) {
-			c->setLowFilter(m_filters[0]);
-			c->setHighFilter(m_filters[1]);
-			c->setNotch(m_filters[2]);
-		}
-	}
-	requestData(&m_channels, m_epochs.at(index)->posAndDuration);
+
+	auto epoch = m_epochs.at(index);
+	if (epoch->isLoaded())
+		return 0;
+	auto channels = epoch->channels();
+//	m_filterSettings.apply(channels);
+	requestData(&channels, epoch->posAndDuration());
+	epoch->setLoaded();
 	return 0;
 }
 
 int AwEpochTree::loadEpoch(AwEpoch *e)
 {
-	int index = m_epochs.indexOf(e);
-	if (index == -1)
-		return index;
-	return loadEpoch(index);
+	return loadEpoch(m_epochs.indexOf(e));
 }

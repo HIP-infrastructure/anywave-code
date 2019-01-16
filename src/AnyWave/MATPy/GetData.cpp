@@ -57,11 +57,11 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 	AwFileIO *reader = NULL;
 
 	in >> file >> montage >> start >> duration >> decim >> labels >> types;
-	int flag;
-	in >> flag;
+	int filtersFlag;
+	in >> filtersFlag;
 	AwFilterSettings filterSettings;
 
-	if (flag == 1) {
+	if (filtersFlag == 1) {
 		float eegH, eegL, megH, megL, emgH, emgL;
 		in >> eegH >> eegL >> megH >> megL >> emgH >> emgL;
 		filterSettings.set(AwChannel::EEG, eegH, eegL, 0.);
@@ -175,21 +175,28 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 			emit log("Downsampling...");
 			AwFiltering::downSample(requestedChannels, decim);
 			emit log("Done.");
-			if (filterSettings.count())
+			if (filtersFlag == 1) // apply defined filters
 				filterSettings.apply(requestedChannels);
-			else // apply current filters set in AwFiltersManager.
+			else if (filtersFlag == 0) // apply anywave filters
 				AwSettings::getInstance()->filterSettings().apply(requestedChannels);
-			emit log("Filtering");
-			AwFiltering::filter(&requestedChannels);
-			emit log("Done.");
+			else if (filtersFlag == 2)
+				AwChannel::clearFilters(requestedChannels);
+			if (filtersFlag != 2) {
+				emit log("Filtering");
+				AwFiltering::filter(&requestedChannels);
+				emit log("Done.");
+			}
 		}
 		else {
-			if (filterSettings.count())
+			bool raw = false;
+			if (filtersFlag == 1) // apply defined filters
 				filterSettings.apply(requestedChannels);
-			else // apply current filters set in AwFiltersManager.
+			else if (filtersFlag == 0) // apply anywave filters
 				AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+			else if (filtersFlag == 2)
+				raw = true;
 			emit log("Loading and filtering data...");
-			requestData(&requestedChannels, start, duration);
+			requestData(&requestedChannels, start, duration, raw);
 			emit log("Done.");
 		}
 	}
@@ -204,22 +211,26 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 				emit log("Downsampling...");
 				AwFiltering::downSample(requestedChannels, decim);
 				emit log("Done.");
-				if (filterSettings.count())
+				if (filtersFlag == 1) // apply defined filters
 					filterSettings.apply(requestedChannels);
-				else // apply current filters set in AwFiltersManager.
+				else if (filtersFlag == 0) // apply anywave filters
 					AwSettings::getInstance()->filterSettings().apply(requestedChannels);
-				emit log("Filtering");
-				AwFiltering::filter(&requestedChannels);
-				emit log("Done.");
+				if (filtersFlag != 2) {
+					emit log("Filtering");
+					AwFiltering::filter(&requestedChannels);
+					emit log("Done.");
+				}
 			}
 			else
 				emit log("NO DATA LOADED");
 		}
 		else {
-			if (filterSettings.count())
+			if (filtersFlag == 1) // apply defined filters
 				filterSettings.apply(requestedChannels);
-			else // apply current filters set in AwFiltersManager.
+			else if (filtersFlag == 0) // apply anywave filters
 				AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+			else if (filtersFlag == 2)
+				AwChannel::clearFilters(requestedChannels);
 			emit log("Loading and filtering data...");
 			auto nSamples = reader->readDataFromChannels(start, duration, requestedChannels);
 			if (nSamples == 0) 

@@ -27,25 +27,24 @@
 #define AWWAITWIDGET_H
 #include <AwGlobal.h>
 #include <QWidget>
-namespace Ui {class AwWaitWidget;};
+namespace Ui {class AwWaitWidgetUi;};
+#include <QDialog>
 
-class AW_WIDGETS_EXPORT AwWaitWidget : public QWidget
+class AW_WIDGETS_EXPORT AwWaitWidget : public QDialog
 {
 	Q_OBJECT
 
 public:
-	AwWaitWidget(const QString& title, const QString& text, QWidget *parent = 0);
+	AwWaitWidget(const QString& title, QWidget *parent = Q_NULLPTR);
 	~AwWaitWidget();
-
-	void initProgress(int min, int max);
-	void setCurrentProgress(int value); 
 protected:
 	void changeEvent(QEvent *);
 public slots:
 	void setText(const QString& text);
-
+	void setCurrentProgress(int value);
+	void initProgress(int min, int max);
 private:
-	Ui::AwWaitWidget *ui;
+	Ui::AwWaitWidgetUi *ui;
 };
 
 #endif // AWWAITWIDGET_H

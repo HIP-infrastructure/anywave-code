@@ -5,7 +5,7 @@
 //#define PY_ARRAY_UNIQUE_SYMBOL anywave_ARRAY_API
 //#define NPY_NO_DEPRECATED_API NPY_1_11_API_VERSION
 #include <QDataStream>
-
+#include <AwChannel.h>
 extern PyObject *AnyWaveError;
 
 PyObject *getPluginInfo(PyObject *sef, PyObject *args)
@@ -32,7 +32,8 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
     QStringList labels, refs;
     float max_sr, total_dur;
     QString temp_dir, plugin_dir, file, icaFile;
-	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> icaFile;
+	QMap<int, QVector<int>> rejected;
+	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> icaFile >> rejected;
 
 	PyObject *out = PyDict_New(); // create a new dict.
 	if (out == NULL) {
@@ -82,6 +83,22 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	// temp dir
 	PyObject *plugin = PyString_FromString(plugin_dir.toStdString().c_str());
 	PyDict_SetItemString(out, "plugin_dir", plugin);
+
+	// create a dict for rejected components if any
+	if (!rejected.isEmpty()) {
+		PyObject *rejected_dict = PyDict_New(); // create a new dict.
+		for (auto type : rejected.keys()) {
+			auto key = AwChannel::typeToString(type).toStdString().c_str();
+			auto values = rejected[type];
+			PyObject *tuple = PyTuple_New(values.size());
+			int i = 0;
+			for (auto v : values) {
+				PyTuple_SetItem(tuple, i++, PyLong_FromLong(v));
+			}
+			PyDict_SetItem(rejected_dict, PyString_FromString(key), tuple);
+		}
+		PyDict_SetItemString(out, "rejected_ics", rejected_dict);
+	}
 
 	return out;
 }

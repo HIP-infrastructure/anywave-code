@@ -326,7 +326,10 @@ qint64 EDFIO::readDataFromChannels(float start, float duration, QList<AwChannel 
 	qint64 samplesRead = 0;
 	for(auto chan : channelList) {
 		float *data;
-		int edf_channel = m_labelToIndex[chan->name()];
+	//	int edf_channel = m_labelToIndex[chan->name()];
+		int edf_channel = m_labels.indexOf(chan->name());
+		if (edf_channel == -1)
+			continue;
 
 		float sr = chan->samplingRate();
 		qint64 samples = (qint64)floor(sr * duration);
@@ -666,14 +669,18 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 	for (i = 0; i<m_edfhdr.edfsignals; i++) {
 		strncpy(scratchpad, edf_hdr + 256 + (i * 16), 16);
 		if (m_edfhdr.edfplus) 	{
-			if (!strncmp(scratchpad, "EDF Annotations ", 16)) {
+			QString tmp = QString::fromLatin1(scratchpad);
+			if (tmp.contains("EDF Annotations")) {
+			//if (!strncmp(scratchpad, "EDF Annotations ", 16)) {
 				m_edfhdr.annot_ch[m_edfhdr.nr_annot_chns] = i;
 				m_edfhdr.nr_annot_chns++;
 				m_edfhdr.edfparam[i].annotation = 1;
 			}
 		}
 		if (m_edfhdr.bdfplus) {
-			if (!strncmp(scratchpad, "BDF Annotations ", 16)) {
+			QString tmp = QString::fromLatin1(scratchpad);
+			if (tmp.contains("BDF Annotations")) {
+			//if (!strncmp(scratchpad, "BDF Annotations ", 16)) {
 				m_edfhdr.annot_ch[m_edfhdr.nr_annot_chns] = i;
 				m_edfhdr.nr_annot_chns++;
 				m_edfhdr.edfparam[i].annotation = 1;
@@ -928,7 +935,7 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 		}
 	}
 
-	for (i = 0; i<m_edfhdr.edfsignals; i++)	{
+	for (i = 0; i<m_edfhdr.edfsignals - m_edfhdr.nr_annot_chns; i++)	{
 		int channel = m_edfhdr.mapped_signals[i];
 
 		strcpy(m_header.signalparam[i].label, m_edfhdr.edfparam[channel].label);
@@ -945,7 +952,7 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 	// Build AnyWave list of channels
 	float max_sr = 0.;
 	
-	for (i = 0; i < m_edfhdr.edfsignals; i++) {
+	for (i = 0; i < m_edfhdr.edfsignals - m_edfhdr.nr_annot_chns; i++) {
 		AwChannel channel;
 		channel.setName(QString(m_header.signalparam[i].label).trimmed());
 		channel.setUnit(m_header.signalparam[i].physdimension);
@@ -963,7 +970,8 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 		if (channel.name().startsWith("STATUS"))
 			channel.setType(AwChannel::Trigger);
 		infos.addChannel(channel);
-		m_labelToIndex.insert(channel.name(), i);
+	//	m_labelToIndex.insert(channel.name(), i);
+		m_labels << channel.name();
 	}
 
 	AwBlock *block = infos.newBlock();

@@ -123,6 +123,7 @@ protected:
 	edf_hdr_struct m_header; 
 	struct edfhdrblock m_edfhdr;
 	QMap<QString, int> m_labelToIndex;	// map a channel label to the corresponding index in m_header.signalParam
+	QStringList m_labels;
 	int m_handle;
 };
 

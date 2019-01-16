@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
-    <height>465</height>
+    <width>570</width>
+    <height>565</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -119,6 +119,37 @@
         </item>
         <item row="1" column="5" colspan="2">
          <widget class="QLineEdit" name="editName"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QCheckBox" name="checkBoxArtefacts">
+          <property name="text">
+           <string>Avoid artefacts</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="AwComboMarker" name="comboArtefacts">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -260,8 +291,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>333</x>
-     <y>441</y>
+     <x>389</x>
+     <y>541</y>
     </hint>
     <hint type="destinationlabel">
      <x>242</x>
@@ -276,8 +307,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>417</x>
-     <y>443</y>
+     <x>559</x>
+     <y>554</y>
     </hint>
     <hint type="destinationlabel">
      <x>121</x>
@@ -292,12 +323,28 @@
    <slot>addCondition()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>411</x>
-     <y>100</y>
+     <x>549</x>
+     <y>137</y>
     </hint>
     <hint type="destinationlabel">
      <x>111</x>
      <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxArtefacts</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>comboArtefacts</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>175</x>
+     <y>100</y>
     </hint>
    </hints>
   </connection>

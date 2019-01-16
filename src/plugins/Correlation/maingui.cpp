@@ -1,6 +1,6 @@
 #include "maingui.h"
 #include <qfiledialog.h>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include <widget/AwMessageBox.h>
 
 

@@ -73,6 +73,8 @@ public:
 	virtual void init() {}
 	/* main excecution entry point */
 	virtual void run() {}
+	/* command line (NO GUI run mode) */
+	virtual void runFromCommandLine() {}
 	void connectClient(AwDataClient *client);
 	bool isAborted();
 	// threading specific

@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <hdf5/AwHDF5.h>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include <AwChannel.h>
 #include "AwICAChannel.h"
 #include <QMutex>

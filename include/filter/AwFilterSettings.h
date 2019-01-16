@@ -29,12 +29,24 @@
 #include <AwChannel.h>
 
 class AwFilterGUI;
+
+class AW_FILTER_EXPORT AwFilterBounds
+{
+public:
+	explicit AwFilterBounds(int t = 0, float hp = 0., float lp = 0.);
+	AwFilterBounds& operator=(const AwFilterBounds& other);
+
+	int type;
+	float bounds[2];
+};
+
 class AW_FILTER_EXPORT AwFilterSettings : public QObject
 {
 	Q_OBJECT
 public:
-	explicit AwFilterSettings();
-	explicit AwFilterSettings(const AwFilterSettings& copy);
+	AwFilterSettings();
+	AwFilterSettings(const AwFilterSettings& copy);
+
 	~AwFilterSettings();
 	AwFilterSettings& operator=(const AwFilterSettings& other);
 	/** clean up all filter settings and bounds **/
@@ -48,6 +60,8 @@ public:
 	/** set bounds for a specified type of channel **/
 	void setBounds(int type, const QVector<float>& values);
 	void setBounds(int type, float hp, float lp);
+	void setFilterBounds(int type, const AwFilterBounds& bounds);
+	QHash<QString, AwFilterBounds> filterBounds() const { return m_filterBounds; }
 	/** check for bounds **/
 	QList<int> checkForBounds();
 	/** apply the current settings to a channel **/
@@ -80,6 +94,12 @@ protected slots:
 protected:
 	QHash<int, QVector<float>> m_hash;
 	QHash<int, QVector<float>> m_bounds;	// bounds holds the frequency boundaries for virtual channels like ICA/Source.
+	
+	QHash<QString, AwFilterBounds> m_filterBounds;
+	// AwFilterBounds contains the target channel type which should be constrained.
+	// This container is only used to display pertinent infomation in the GUI. 
+	// However, we must use the setFilterBounds method instead of setBounds. setFilterBounds will call setBounds so the checking of frequency bands will operate
+	// as previously.
 	AwFilterGUI *m_ui;
 };
 

@@ -32,7 +32,7 @@
 class AwMatlabInterface : public QObject
 {
 public:
-	virtual void run(const QString& path, const QString& dep, int pid) = 0;
+	virtual void run(const QString& path, const QString& dep, int pid, quint16 serverPort) = 0;
 signals:
 	void progressChanged(const QString&);
 };

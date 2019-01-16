@@ -38,6 +38,8 @@
 #include "Widgets/AwDockMarker.h"
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
+#include "IO/BIDS/AwBIDSManager.h"
+#include <AwException.h>
 
 
 // statics
@@ -65,6 +67,7 @@ AwMarkerManager::AwMarkerManager()
 	connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
 
 	m_needSorting = true;
+	m_markersModified = false;
 	m_dock = NULL;
 	m_markerInspector = new AwMarkerInspector();	
 }
@@ -282,6 +285,7 @@ void AwMarkerManager::removeAllUserMarkers()
 	emit markersRemoved();
 	while (!temp.isEmpty())
 		delete temp.takeFirst();
+	emit modificationsDone();
 }
 
 void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
@@ -297,6 +301,7 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 	while (!temp.isEmpty())
 		delete temp.takeFirst();
 	emit markersRemoved();
+	emit modificationsDone();
 }
 
 void AwMarkerManager::setFilename(const QString& path)
@@ -305,28 +310,71 @@ void AwMarkerManager::setFilename(const QString& path)
 	m_ui->setEnabled(true);
 	if (QFile::exists(m_filePath))	{
 		m_markers = loadMarkers(m_filePath);
+		updateMarkersFromEventsTsv(path);
 		if (!m_markers.isEmpty()) {
-			removeDuplicates();
+			//removeDuplicates();
 			m_ui->setMarkers(m_markers);
 			showDockUI();
 		}
 	}
 }
 
+void AwMarkerManager::checkForBIDSMods()
+{
+	if (m_eventsTsv.isEmpty())
+		return;
+	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
+		return;
+	if (m_markersModified)
+		AwBIDSManager::instance()->addModification(m_eventsTsv, AwBIDSManager::EventsTsv);
+
+}
+
+void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
+{
+	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
+		return;
+
+	auto BM = AwBIDSManager::instance();
+
+	if (!BM->isBIDSActive())
+		return;
+
+	auto subj = BM->guessSubject(filePath);
+	if (!subj)
+		return;
+
+	auto items = subj->findFileItems(filePath);
+	if (items.isEmpty())
+		return;
+
+	auto events_tsv = items.first()->getTsvFileFor(filePath, AwFileItem::eventsTsv);
+	if (!QFile::exists(events_tsv))
+		return;
+
+	// keep a copy of the path to events.tsv file
+	m_eventsTsv = events_tsv;
+	// append markers loaded from Events.tsv to current markers (duplicates are removed just after);
+	m_markers += BM->getMarkersFromEventsTsv(events_tsv);
+	removeDuplicates();
+}
+
 void AwMarkerManager::quit()
 {
+	closeFile();
 	m_ui->close();
 	delete m_ui;
 	delete m_markerInspector;
-	clear();
 }
 
 void AwMarkerManager::closeFile()
 {
+	checkForBIDSMods();
 	// ask MarkerManagerSettings to clear
 	m_ui->cleanUp();
 	clear();
 	m_filePath = "";
+	m_markersModified = false;
 }
 
 // 

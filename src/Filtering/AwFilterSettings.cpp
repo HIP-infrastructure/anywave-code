@@ -32,6 +32,26 @@
 #include <qfile.h>
 #include "AwFilterGUI.h"
 
+
+AwFilterBounds::AwFilterBounds(int t, float hp, float lp)
+{
+	type = t;
+	bounds[0] = hp;
+	bounds[1] = lp;
+}
+
+AwFilterBounds& AwFilterBounds::operator=(const AwFilterBounds& other)
+{
+	if (this != &other) {
+		this->type = other.type;
+		this->bounds[0] = other.bounds[0];
+		this->bounds[1] = other.bounds[1];
+	}
+	return *this;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 AwFilterSettings::AwFilterSettings()
 {
 	m_ui = NULL;
@@ -41,6 +61,7 @@ AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
 {
 	m_hash = settings.m_hash;
 	m_bounds = settings.m_bounds;
+	m_filterBounds = settings.m_filterBounds;
 	m_ui = NULL;
 }
 
@@ -58,6 +79,7 @@ AwFilterSettings& AwFilterSettings::operator=(const AwFilterSettings& other)
 	if (this != &other) {
 		this->m_hash = other.m_hash;
 		this->m_bounds = other.m_bounds;
+		this->m_filterBounds = other.m_filterBounds;
 	}
 	return *this;
 }
@@ -66,6 +88,7 @@ void AwFilterSettings::clear()
 {
 	m_bounds.clear();
 	m_hash.clear();
+	m_filterBounds.clear();
 }
 
 void AwFilterSettings::zero()
@@ -119,6 +142,20 @@ void AwFilterSettings::setBounds(int type, float hp, float lp)
 		m_bounds[type] = tmp;
 	else
 		m_bounds.insert(type, tmp);
+}
+
+void AwFilterSettings::setFilterBounds(int type, const AwFilterBounds& bounds)
+{
+	setBounds(bounds.type, bounds.bounds[0], bounds.bounds[1]);
+	// build a unique key based on the virtual channel and its sources channels types.
+	// for example if ICA was computed on MEG channels then generates the key: ICA-MEG
+	QString key = QString("%1-%2").arg(AwChannel::typeToString(type)).arg(AwChannel::typeToString(bounds.type));
+
+	if (m_filterBounds.contains(key))
+		m_filterBounds.remove(key);
+	m_filterBounds.insert(key, bounds);
+	updateGUI();
+	emit settingsChanged(*this);
 }
 
 ///

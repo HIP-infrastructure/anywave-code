@@ -32,7 +32,7 @@ unix:!macx{
  LIBS += -lAwCore
 }
 
-LIBS += -lAwMath
+LIBS += -lAwMath -lAwWidgets
 
 unix {
     target.path = $$INSTALL_LIB_PATH

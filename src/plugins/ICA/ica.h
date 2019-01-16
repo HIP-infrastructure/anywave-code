@@ -37,7 +37,8 @@ public:
 	ICA();
 	~ICA();
 	enum Algos { Infomax, FASTICA, acsobiro };
-	void run();
+	void run() override;
+	void runFromCommandLine() override;
 	bool showUi();
 private:
 	void infomax(int m, int n, int nc);

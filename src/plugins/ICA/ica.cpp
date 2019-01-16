@@ -26,12 +26,13 @@
 #include "ica.h"
 #include "ICASettings.h"
 #include <QtMath>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include <QFile>
 #include <QDir>
 #include <filter/AwFiltering.h>
 #include <math/AwMath.h>
 #include <filter/AwFilterSettings.h>
+#include <QMessageBox>
 
 ICA::ICA()
 {
@@ -39,7 +40,7 @@ ICA::ICA()
 	pdi.addInputParameter(Aw::ProcessInput::GetProcessPluginNames , QString("1-n"));
 	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, QString("0-n"));
 	pdi.addInputParameter(Aw::ProcessInput::SourceChannels|Aw::ProcessInput::ProcessIgnoresChannelSelection, QString("0-n"));
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_algoNames << "Infomax";
 }
 
@@ -48,7 +49,7 @@ ICAPlugin::ICAPlugin()
     type = AwProcessPlugin::Background;
     category = "ICA";
     name = QString("ICA extraction");
-    description = QString("Compute independent components of selected signals");
+    description = QString("extract independent components");
 }
 
 ICA::~ICA()
@@ -74,11 +75,132 @@ bool ICA::showUi()
 		m_hpf = ui.hpf;
 		m_samplingRate = ui.samplingRate;
 		m_algo = ui.algo;
+		auto dateTime = QDateTime::currentDateTime();
+
+		auto hpString = QString::number(m_hpf, 'f', 1);
+		auto lpString = QString::number(m_lpf, 'f', 1);
+
+		if (ui.filePath.isEmpty())
+			// generates a file name based on filtering parameters and number of components.
+			m_fileName = QString("%1_%2Hz_%3Hz_%4c_ica.mat").arg(pdi.input.dataPath).arg(hpString).arg(lpString).arg(m_nComp);
+		else
+			m_fileName = QString("%1/%2_ica.mat").arg(pdi.input.dataFolder).arg(ui.filePath);
+
+		emit progressChanged(m_fileName);
+		QFile test(m_fileName);
+		if (!test.open(QIODevice::WriteOnly)) {
+			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
+			return false;
+		}
+		test.close();
 		return true;
 	}
 	return false;
 }
 
+
+void ICA::runFromCommandLine()
+{
+	auto args = pdi.input.args();
+	
+	m_modality = AwChannel::stringToType(args["modality"].toString());
+	m_channels = AwChannel::getChannelsOfType(pdi.input.channels, m_modality);
+	m_channels = AwChannel::removeDoublons(m_channels);
+	m_samplingRate = m_channels.first()->samplingRate();
+	auto badLabels = args["bad_labels"].toStringList();
+	if (!badLabels.isEmpty()) {
+		foreach(AwChannel *c, m_channels)
+			if (badLabels.contains(c->name()))
+				m_channels.removeAll(c);
+	}
+	m_nComp = m_channels.size();
+	if (m_nComp < 2)
+		return;
+
+	AwMarkerList selectedMarkers;
+	auto skipArtefacts = args["skip"].toString();
+	if (!skipArtefacts.isEmpty())
+		selectedMarkers = AwMarker::invertMarkerSelection(pdi.input.markers, args["skip"].toString(), pdi.input.fileDuration);
+
+	bool skipData = !selectedMarkers.isEmpty();
+
+	auto lp = args["lp"].toString();
+	auto hp = args["hp"].toString();
+	m_lpf = m_hpf = 0.;
+	if (!lp.isEmpty())
+		m_lpf = lp.toDouble();
+	if (!hp.isEmpty())
+		m_hpf = hp.toDouble();
+	AwFilterSettings filterSettings;
+	filterSettings.set(m_modality, m_hpf, m_lpf, 0.);
+	// compute decimate factor based on low pass filter
+	int decimate = 2;
+	if (m_lpf > 0) {
+		float fc = m_lpf * 3;
+
+		while (m_samplingRate / decimate > fc)
+			decimate++;
+		decimate--;
+	}
+	else
+		decimate = 1;  // no decimation
+
+	if (decimate > 1) {
+		sendMessage("Loading data...");
+		if (skipData)
+			requestData(&m_channels, &selectedMarkers, true);
+		else
+			requestData(&m_channels, 0.0f, -1.0f, true);
+		sendMessage("Done.");
+		AwChannel::clearFilters(m_channels);
+		sendMessage("Decimating data...");
+		AwFiltering::decimate(m_channels, decimate);
+		sendMessage("Done.");
+		// applying filtering options to channels
+		filterSettings.apply(m_channels);
+		sendMessage("Filtering...");
+		AwFiltering::filter(m_channels);
+		sendMessage("Done.");
+
+	}
+	else {
+		AwChannel::clearFilters(m_channels);
+		filterSettings.apply(m_channels);
+		sendMessage("Loading data and filtering...");
+		if (skipData)
+			requestData(&m_channels, &selectedMarkers, true);
+		else
+			requestData(&m_channels, 0.0f, -1.0f, true);
+		sendMessage("Done.");
+	}
+
+	// check for nan values
+	if (AwMath::isNanInChannels(m_channels)) {
+		sendMessage("A Nan value was detected in the data. Computation aborted.");
+		return;
+	}
+
+	int nSamples = m_channels.first()->dataSize(); // getting total number of samples
+
+	if (pow(sqrt(m_nComp * 1.0), 3.0) > nSamples) {
+		sendMessage(QString("Number of samples %1 for the number of components "
+			"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
+		return;
+	}
+
+	// channels have been prepared.
+	// prepare data matrix
+	int m = m_channels.size();
+	int n = nSamples;
+	int nc = m_nComp;
+
+	auto hpString = QString::number(m_hpf, 'f', 1);
+	auto lpString = QString::number(m_lpf, 'f', 1);
+	m_fileName = QString("%1_%2Hz_%3Hz_%4c_ica.mat").arg(pdi.input.dataPath).arg(hpString).arg(lpString).arg(m_nComp);
+
+	infomax(m, n, nc);
+	saveToFile();
+}
 
 void ICA::run()
 {
@@ -119,9 +241,10 @@ void ICA::run()
 		}
 	emit progressChanged("OK.");
 
+	auto markersToSkip = AwMarker::getMarkersWithLabel(pdi.input.markers, m_ignoredMarkerLabel);
 	AwMarkerList selectedMarkers;
 	if (m_ignoreMarkers) 
-		selectedMarkers = AwMarker::invertMarkerSelection(pdi.input.markers, m_ignoredMarkerLabel, pdi.input.fileDuration);
+		selectedMarkers = AwMarker::invertMarkerSelection(markersToSkip, m_ignoredMarkerLabel, pdi.input.fileDuration);
 	
 	bool skipData = !selectedMarkers.isEmpty();
 
@@ -251,7 +374,6 @@ void ICA::saveToFile()
 {
 	emit progressChanged("Saving to file...");
 	AwMATLABFile file;
-
 	try {
 		file.create(m_fileName);
 		file.writeString("modality", AwChannel::typeToString(m_modality));

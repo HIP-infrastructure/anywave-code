@@ -35,12 +35,10 @@ class AWMATLABSUPPORT_EXPORT AwMatlabSupport : public AwMatlabInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(AwMatlabInterface)
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	Q_PLUGIN_METADATA(IID AwMatlabInterface_IID)
-#endif
 public:
 	/** run a matlab script **/
-	void run(const QString& path, const QString& dep, int pid);
+	void run(const QString& path, const QString& dep, int pid, quint16 serverPort) override;
 signals:
 	void progressChanged(const QString&);
 private:

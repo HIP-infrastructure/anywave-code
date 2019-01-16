@@ -325,10 +325,13 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 						unit_factor = 1e6;
 					else if (unit.toLower() == "mv")
 						unit_factor = 1e3;
+
+					if (unit.toLower().isEmpty() || unit.toLower() == QString::fromLatin1("µv"))
+						chan.setType(AwChannel::EEG);
+					else
+						chan.setType(AwChannel::Other);
 										
 					chan.setUnit(unit);
-					if (chan.unit() != QString::fromLatin1("µV"))
-						chan.setType(AwChannel::Other);
 
 				}
 
@@ -492,6 +495,9 @@ qint64 BrainVisionIO::writeData(QList<AwChannel*> *channels)
 
 AwFileIO::FileStatus BrainVisionIO::writeMarkers()
 {
+	if (infos.blocks().first()->markersCount() == 0)
+		return AwFileIO::NoError;
+
 	// marker
 	QFile fileMarker(m_markerPath);
 	if (!fileMarker.open(QIODevice::WriteOnly))
@@ -572,7 +578,8 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 	stream << endl << "[Common Infos]" << endl;
 
 	stream << "DataFile=" << m_binFileName << endl;
-	stream << "MarkerFile=" << m_markerFileName << endl;
+	if (infos.blocks().first()->markersCount())
+		stream << "MarkerFile=" << m_markerFileName << endl;
 	stream << "DataFormat=BINARY" << endl;
 	stream << "DataType=TIMEDOMAIN" << endl;
 	stream << "DataOrientation=MULTIPLEXED" << endl;

@@ -31,6 +31,40 @@
 #include <qdir.h>
 #include "Data/AwDataServer.h"
 #include "AwAverageDialog.h"
+#include <AwException.h>
+#include "Montage/AwMontageManager.h"
+#include <widget/AwWaitWidget.h>
+#include "Data/AwMemoryMapper.h"
+
+
+/////////////////////////////////////////////////////////////////////
+/// worker object to do the offline filtering
+//
+
+OfflineFilterWorker::OfflineFilterWorker(const AwChannelList& channels, const AwMarkerList& artefacts)
+{
+	m_channels = channels;
+	m_artefacts = artefacts;
+	m_reader = Q_NULLPTR;
+	QThread *t = new QThread(this);
+	moveToThread(t);
+	t->start();
+}
+
+OfflineFilterWorker::~OfflineFilterWorker()
+{
+	thread()->exit(0);
+	thread()->wait();
+}
+
+void OfflineFilterWorker::run()
+{
+	m_reader = AwMemoryMapper::buildDataServerWithPreloadedData(AwSettings::getInstance()->currentReader(),
+		m_channels, m_artefacts);
+	emit finished();
+}
+
+
 
 // statics init and definitions
 AwEpochManager *AwEpochManager::m_instance = 0;
@@ -55,6 +89,7 @@ AwEpochManager::AwEpochManager()
 	// Get the current reader information (total duration)
 	m_totalDuration = AwSettings::getInstance()->currentReader()->infos.totalDuration();
 	m_dataPath = AwSettings::getInstance()->fileInfo()->filePath();
+	m_offlineDataServer = Q_NULLPTR;
 	load();
 	m_reviewWidget = NULL;
 }
@@ -73,6 +108,8 @@ void AwEpochManager::clean()
 			AwDataServer::getInstance()->closeConnection(condition);
 		delete condition;
 	}
+	if (m_offlineDataServer)
+		delete m_offlineDataServer;
 	m_hashEpochs.clear();
 }
 
@@ -87,91 +124,87 @@ void AwEpochManager::load()
 
 void AwEpochManager::loadEpochFile(const QString& path)
 {
-	clean();
 	QFile file(path);
-	QDataStream stream(&file);
-	stream.setVersion(QDataStream::Qt_4_4);
-	if (!file.open(QIODevice::ReadOnly))
-		return;
-	int nConditions;
-	stream >> nConditions;
-	if (nConditions <= 0) { // error
-		file.close();
+	QString origin("AwEpochManager::loadEpochFile()");
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		throw AwException(QString("Failed to open %1 for reading.").arg(path), origin);
 		return;
 	}
-	for (int i = 0; i < nConditions; i++) {
-		QString name;
-		float totalDuration, zeroPos;
-		int nChannels, type, zeroSample;
-		float filters[3];
-		stream >> name >> totalDuration >> filters[0] >> filters[1] >> filters[2] >> zeroSample >> zeroPos >> nChannels >> type;
-		AwChannelList channels;
-		for (int j = 0; j < nChannels; j++) {
-			QString name, ref;
-			float sr;
-			stream >> name >> ref >> sr;
-			AwChannel *c = new AwChannel;
-			c->setType(type);
-			c->setName(name);
-			c->setReferenceName(ref);
-			c->setSamplingRate(sr);
-			channels << c;
-		}
-		AwEpochTree *tree = new AwEpochTree(name, channels, totalDuration);
-		tree->setZeroPos(zeroPos);
-		tree->setZeroSample(zeroSample);
-		tree->setFilters(filters);
-		int nEpochs;
-		stream >> nEpochs;
-		for (int j = 0; j < nEpochs; j++) {
-			float start, duration;
-			bool rejected;
-			int tags;
-			stream >> start >> duration >> rejected >> tags;
-			AwEpoch *e = new AwEpoch;
-			e->posAndDuration = new AwMarker("epoch", start, duration);
-			e->rejected = rejected;
-			e->tags = tags;
-			e->condition = tree;
-			tree->epochs().append(e);
-		}
-		m_hashEpochs.insert(name, tree);
-		AwDataServer::getInstance()->openConnection(tree);
-	}
+	QJsonParseError error;
+	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
 	file.close();
+
+	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
+		throw AwException(QString("Json error: %1.").arg(error.errorString()), origin);
+		return;
+	}
+	QJsonObject root = doc.object();
+	if (!root.contains("conditions") || !root["conditions"].isArray()) {
+		throw AwException(QString("Unknown format."), origin);
+		return;
+	}
+	clean();
+	QJsonArray conditions = root["conditions"].toArray();
+	for (int i = 0; i < conditions.size(); i++) {
+		QJsonObject jsonCondition = conditions[i].toObject();
+		QJsonArray flags;
+		float pre = (float)jsonCondition["pre_latency"].toDouble();
+		float post = (float)jsonCondition["post_latency"].toDouble();
+		QString label = jsonCondition["marker"].toString();
+		QString name = jsonCondition["condition"].toString();
+		int modality = AwChannel::stringToType(jsonCondition["modality"].toString());
+		int nEpochs = jsonCondition["number of epochs"].toInt();
+		flags = jsonCondition["rejected"].toArray();
+		// get channels of matching modality from the current reader.
+		auto channels = AwSettings::getInstance()->currentReader()->infos.channels();
+		channels = AwChannel::getChannelsOfType(channels, modality);
+		// remove bad channels.
+		AwMontageManager::instance()->removeBadChannels(channels);
+		AwEpochTree *newCondition = createCondition(name, channels, label, pre, post);
+		if (newCondition == NULL) {
+			throw AwException(QString("Failed to build epochs for condition %1.").arg(name), origin);
+			return;
+		}
+		// check number of epochs generated vs number of epochs in json file
+		if (nEpochs != newCondition->epochs().size()) {
+			throw AwException(QString("Generated epochs mismatch the number of epochs saved in json file."), origin);
+			delete newCondition;
+			return;
+		}
+		// now read rejected flags and update epochs accordingly.
+		int j = 0;
+		for (auto e : newCondition->epochs()) 
+			e->setRejected(flags[j++].toBool());
+	}
 }
 
 void AwEpochManager::saveEpochFile(const QString& path)
 {
-	if (m_hashEpochs.isEmpty())
-		return;
+	// save to JSON format
 	QFile file(path);
-	QDataStream stream(&file);
-	stream.setVersion(QDataStream::Qt_4_4);
-	if (!file.open(QIODevice::ReadWrite))
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		throw AwException(QString("Failed to open %1 for writing.").arg(path), QString("AwEpochManager::saveEpochFile()"));
 		return;
-	stream << m_hashEpochs.count();
-	for (auto key : m_hashEpochs.keys()) {
-		auto condition = m_hashEpochs.value(key);
-		float *filters = condition->filters();
-		stream << condition->name();
-		stream << condition->totalDuration();
-		stream << filters[0] << filters[1] << filters[2];
-		stream << condition->zeroSample() << condition->zeroPos();
-		stream << condition->channels().size();
-		// save first channel type
-		stream << condition->channels().first()->type();
-		for (auto c : condition->channels()) 
-			stream << c->name() << c->referenceName() << c->samplingRate();
-		
-		stream << condition->epochs().size();
-		for (auto epoch : condition->epochs()) {
-			stream << epoch->posAndDuration->start();
-			stream << epoch->posAndDuration->duration();
-			stream << epoch->rejected;
-			stream << epoch->tags;
-		}
 	}
+	QJsonObject root;
+	QJsonArray conditions;
+	for (auto condition : m_hashEpochs.values()) {
+		QJsonArray  rejectedFlags;
+		QJsonObject jsonCondition;
+		jsonCondition["condition"] = condition->name();
+		jsonCondition["modality"] = AwChannel::typeToString(condition->modality());
+		jsonCondition["pre_latency"] = condition->preLatency();
+		jsonCondition["post_latency"] = condition->postLatency();
+		jsonCondition["marker"] = condition->markerLabel();
+		jsonCondition["number of epochs"] = condition->epochs().size();
+		for (auto epoch : condition->epochs()) 
+			rejectedFlags.append(epoch->isRejected());
+		jsonCondition["rejected"] = rejectedFlags;
+		conditions.append(jsonCondition);
+	}
+	root["conditions"] = conditions;
+	QJsonDocument doc(root);
+	file.write(doc.toJson());
 	file.close();
 }
 
@@ -194,10 +227,77 @@ void AwEpochManager::create()
 		visualise();
 }
 
+AwFileIO *AwEpochManager::offlineFiltering(const AwChannelList& channels)
+{
+	AwWaitWidget wait("Offline filtering of data...");
+	OfflineFilterWorker worker(channels, m_artefacts);
+	connect(&worker, &OfflineFilterWorker::finished, &wait, &AwWaitWidget::accept);
+	QMetaObject::invokeMethod(&worker, "run", Qt::QueuedConnection);
+	wait.exec();
+	return worker.memIOReader();
+}
+
 void AwEpochManager::average()
 {
+	if (conditions().isEmpty())
+		return;
+
 	AwAverageDialog dlg;
 	if (dlg.exec() == QDialog::Accepted) {
+		// reset any previous offline filtering
+		if (m_offlineDataServer) {
+			m_offlineDataServer->closeAllConnections();
+			for (auto condition : conditions()) {
+				AwDataServer::getInstance()->openConnection(condition);
+			}
+		}
+		if (dlg.isRawData()) {
+			// browse all epochs of all conditions and reset filters to none for their respective channels.
+			for (auto condition : conditions())
+				for (auto epoch : condition->epochs()) {
+					AwChannel::clearFilters(epoch->channels());
+					epoch->setLoaded(false);
+				}
+		}
+		else {
+			AwFilterSettings settings = dlg.filterSettings();
+			if (!dlg.isOfflineFiltering()) {
+				for (auto condition : conditions())
+					for (auto epoch : condition->epochs()) {
+						settings.apply(epoch->channels());
+						epoch->setLoaded(false);
+					}
+			}
+			else {  // do offline filtering using a new data server and the MEMIO plugin.
+				// gather all channels from different modality.
+				QVector<int> modalities;
+				AwChannelList channels;
+				for (auto condition : conditions()) {
+					for (auto epoch : condition->epochs()) {
+						epoch->setLoaded(false);
+					}
+					if (modalities.contains(condition->type()))
+						continue;
+					modalities << condition->type();
+					channels += condition->channels();
+				}
+				// apply filters to gathered channels
+				m_filterSettings.apply(channels);
+				// do offline filtering
+				auto reader = offlineFiltering(channels);
+				// got a memio reader, associate it with a dedicated data server.
+				if (!m_offlineDataServer)
+					m_offlineDataServer = AwDataServer::getInstance()->duplicate(reader);
+				else
+					m_offlineDataServer->setMainReader(reader);
+		
+				for (auto condition : conditions()) {
+					AwDataServer::getInstance()->closeConnection(condition);
+					m_offlineDataServer->openConnection(condition);
+				}
+			}
+		}
+
 
 		AwEpochAverageWidget *widget = new AwEpochAverageWidget(dlg.selectedConditions);
 		m_avgWidgets.append(widget);
@@ -224,13 +324,18 @@ AwEpochTree *AwEpochManager::getCondition(const QString& name)
 /// Try to create a new condition. If a condition with the same name already exists, return it.
 /// If the epoching of the condition failed, return a null pointer otherwise return the newly created condition.
 ///
-AwEpochTree *AwEpochManager::createCondition(const QString& name, const AwChannelList& channels, const QString& event, float pre, float post)
+AwEpochTree *AwEpochManager::createCondition(const QString& name, const AwChannelList& channels, const QString& event, 
+	float pre, float post, const QString& artefactToAvoid)
 {
 	if (m_hashEpochs.contains(name))
 		return m_hashEpochs.value(name);
 
 	AwEpochTree *cond = new AwEpochTree(name, channels, m_totalDuration, this);
-	if (cond->buildEpochs(AwMarkerManager::instance()->getMarkers(), event, pre, post) == 0) {
+	auto markers = AwMarkerManager::instance()->getMarkers();
+	m_artefacts = AwMarker::getMarkersWithLabel(markers, artefactToAvoid);
+	
+
+	if (cond->buildEpochs(markers, event, pre, post, m_artefacts) == 0) {
 		m_hashEpochs.insert(name, cond);
 		AwDataServer::getInstance()->openConnection(cond);
 		return cond;

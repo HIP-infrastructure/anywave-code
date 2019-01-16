@@ -1,6 +1,6 @@
 #include "AwICAManager.h"
 #include <hdf5/AwHDF5.h>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 #include "AwICAComponents.h"
 #include <widget/AwMessageBox.h>
 #include "Prefs/AwSettings.h"
@@ -131,6 +131,31 @@ int AwICAManager::loadComponents(const QString& icaFile)
 	emit componentsFiltersLoaded(comp->lpFilter(), comp->hpFilter());
 	emit componentsLoaded();
 	return 0;
+}
+
+QVector<int> AwICAManager::getRejectedComponentsIndexes(int type)
+{
+	QVector<int> res;
+	if (m_comps[type]) {
+		for (auto c : m_comps[type]->components())
+			if (c->isRejected())
+				res << c->index();
+	}
+	return res;
+}
+
+QMap<int, QVector<int>> AwICAManager::getAllRejectedComponents()
+{
+	QMap <int, QVector<int>> res;
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		if (m_comps[i]) {
+			auto r = getRejectedComponentsIndexes(i);
+			if (!r.isEmpty())
+				res[i] = r;
+		}
+			
+	}
+	return res;
 }
 
 

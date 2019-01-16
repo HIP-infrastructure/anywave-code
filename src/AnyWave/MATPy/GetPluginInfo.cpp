@@ -30,6 +30,7 @@
 #include <QDir>
 #include "AwResponse.h"
 #include "Prefs/AwSettings.h"
+#include "ICA/AwICAManager.h"
 
 void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *p)
 {
@@ -57,8 +58,8 @@ void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *p
 	temp_dir = QDir::toNativeSeparators(p->pdi.input.workingDirPath);
 	plug_dir = QDir::toNativeSeparators(p->pdi.input.pluginDirPath);
 	ica_file =  QDir::toNativeSeparators(AwSettings::getInstance()->currentIcaFile);
-
-	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file;
+	auto rejecteds = AwICAManager::instance()->getAllRejectedComponents();
+	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << rejecteds;
 	response.send();
 	emit log("Done.");
 }

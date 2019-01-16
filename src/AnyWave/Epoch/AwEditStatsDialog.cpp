@@ -72,15 +72,15 @@ void AwEditStatsDialog::addRow()
 	//		break;
 	//	}
 	//}
-	for (auto l : m_allLabels) {
-		if (!m_statChannelLabels.contains(l)) {
-			AwEpochAverageChannel *channel = m_condition->createAVGChannel(l);
-			if (channel)
-				m_channels.append(channel);
-			static_cast<AwStatsModel *>(m_ui.tableView->model())->update();
-			break;
-		}
-	}
+	//for (auto l : m_allLabels) {
+	//	if (!m_statChannelLabels.contains(l)) {
+	//		AwEpochAverageChannel *channel = m_condition->createAVGChannel(l);
+	//		if (channel)
+	//			m_channels.append(channel);
+	//		static_cast<AwStatsModel *>(m_ui.tableView->model())->update();
+	//		break;
+	//	}
+	//}
 }
 
 void AwEditStatsDialog::accept()

@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include <AwFileIO.h>
-#include <AwMATLAB.h>
+#include <matlab/AwMATLAB.h>
 
 class MATLABIO : public AwFileIO
 {

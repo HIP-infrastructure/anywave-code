@@ -46,6 +46,6 @@ unix:!macx {
 }
 
 SOURCES += \
-    AwMATLABFile.cpp
+    AwMATLABFile.cpp AwMATLABStruct.cpp
 
 

@@ -98,7 +98,6 @@ void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 		QVarLengthArray<QLineF, 100> lines;
 		QVarLengthArray<QLineF, 30> linesMs;
 		float posInFile = m_posInFile + m_timeOffset;
-	//	nextSecond = (float)floor(posInFile + 1);
 		nextSecond = ceil(posInFile);
 		startingOffsetSecond = (nextSecond - posInFile) * m_physics->xPixPerSec();
 		float pixPer100ms = m_physics->xPixPerSec() / 10;
@@ -106,19 +105,12 @@ void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 		if (m_settings->secsPerCm < 0.1 ) { // when the time scale is < 0.5s/cm display the 100ms lines
 			show100ms = true;
 			// compute the starting 100ms line
-			//quint32 timeMs = (quint32)floor(posInFile) * 1000;
 			quint32 timeMs = (quint32)floor(std::abs(posInFile)) * 1000;
 			float diff = (posInFile * 1000) - timeMs;
 			next100ms = (int)floor(diff / 100);
 			next100ms *= 100;
 			startingOffset100ms = ((next100ms - diff) / 1000) * m_physics->xPixPerSec();	
 			next100ms += 100;
-			//quint32 timeMs = (quint32)floor(abs(posInFile)) * 1000;
-			//float diff = abs(posInFile * 1000) - timeMs;
-			//next100ms = (int)floor(diff / 100);
-			//next100ms *= 100;
-			//startingOffset100ms = startingOffsetSecond + 0.1 * m_physics->xPixPerSec();
-			//next100ms += 100;
 		}
 
 		for (float i = startingOffsetSecond; i < rect.width(); i += m_physics->xPixPerSec())

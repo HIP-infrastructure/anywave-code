@@ -24,6 +24,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwFilterModel.h"
+#include <QColor>
+
 
 AwFilterModel::AwFilterModel(const AwFilterSettings& settings, QObject *parent) : QAbstractTableModel(parent)
 {
@@ -39,6 +41,7 @@ void AwFilterModel::updateSettings(const AwFilterSettings& settings)
 	m_settings = settings;
 	m_keys.clear();
 	m_keys = m_settings.currentTypes();
+	m_boundsTypes = m_settings.filterBounds().keys();
 	endResetModel();
 }
 
@@ -47,7 +50,7 @@ void AwFilterModel::updateSettings(const AwFilterSettings& settings)
 //
 int AwFilterModel::rowCount(const QModelIndex &parent) const
 {
-	return m_keys.count();
+	return m_keys.count() + m_boundsTypes.size();
 }
 
 //
@@ -70,6 +73,9 @@ Qt::ItemFlags AwFilterModel::flags(const QModelIndex &index) const
 
 	flags |= Qt::ItemIsEnabled;
 
+	if (index.row() >= m_keys.count())  // this is a filter bound setting => not editable
+		return flags;
+	
 	if (index.column() != FILTER_COLUMN_TYPE)
 		flags |= Qt::ItemIsEditable;
 	return flags;
@@ -81,10 +87,21 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 
 	auto col = index.column();
-	auto row = index.row();
-	auto type = m_keys.at(row);
-	auto values = m_settings.filters(type);
+	bool isFilterBounds = index.row() >= m_keys.size();
+	QVector<float> values;
+	QString type;
+	if (!isFilterBounds) {
+		values = m_settings.filters(m_keys.value(index.row()));
+		type = AwChannel::typeToString(m_keys.value(index.row()));
+	}
+	else {
+		type = m_boundsTypes.value(index.row() - m_keys.size());
+		auto bounds = m_settings.filterBounds().value(type);
+		// set a fake notch filter.
+		values << bounds.bounds[0] << bounds.bounds[1] << 0.;
+	}
 	QString none = tr("None");
+	
 
 	switch (col) {
 	case FILTER_COLUMN_HPF:
@@ -119,11 +136,14 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 		break;
 	case FILTER_COLUMN_TYPE:
 		if (role == Qt::DisplayRole)
-			return AwChannel::typeToString(type);
+			return type;
 		break;
 	}
 	if (role == Qt::TextAlignmentRole)
 		return int(Qt::AlignCenter);
+	if (role == Qt::BackgroundColorRole && isFilterBounds) {
+		return QColor(Qt::red);
+	}
 	return QVariant();
 }
 

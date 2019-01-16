@@ -37,6 +37,7 @@ AwEpochCreateUi::AwEpochCreateUi(const AwMarkerList& markers, QWidget *parent)
 	m_ui.setupUi(this);
 	m_markers = markers;
 	m_ui.comboBox->setMarkers(markers);
+	m_ui.comboArtefacts->setMarkers(markers);
     QList<AwEpochTree *> conds = AwEpochManager::instance()->conditions();
     m_ui.tableView->setModel(new AwEpochModel(conds, m_ui.tableView));
 	m_ui.tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -93,6 +94,8 @@ void AwEpochCreateUi::addCondition()
 	}
 
 	int modality = m_ui.comboBoxChannels->itemData(m_ui.comboBoxChannels->currentIndex()).toInt();
+	QString artefact = m_ui.comboArtefacts->currentText();
+
 	AwChannelList channels = AwChannel::duplicateChannels(AwChannel::getChannelsOfType(AwMontageManager::instance()->channels(), modality));
 	if (AwEpochManager::instance()->createCondition(name, channels, m_ui.comboBox->currentText(), pre, post) != NULL) {
 		updateTableView();

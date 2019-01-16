@@ -232,7 +232,7 @@ void AwGraphicsScene::setPositionInFile(float pos)
 	updateMarkers();
 	if (!m_hmarkers.isEmpty()) { 
 		foreach (AwHighLightMarker *hm, m_hmarkers) {
-			hm->setPositionInFile(m_currentPosInFile);
+			hm->setPositionInFile(m_currentPosInFile - m_startPosition);
 			hm->updatePosition();
 		}
 	}
@@ -460,13 +460,6 @@ void AwGraphicsScene::selectChannelsOfType(int type)
 }
 
 
-void AwGraphicsScene::setStartPosition(float pos)
-{
-	m_startPosition = pos;
-
-}
-
-
 void AwGraphicsScene::goToStart()
 {
 	emit updatePositionInFile(m_startPosition);
@@ -647,7 +640,7 @@ void AwGraphicsScene::addHighLigthMarker(const QString& text, float pos, float d
 
 	m_hmarkers << hlm;
 	addItem(hlm);
-	hlm->setPos(views().at(0)->mapToScene((pos - m_currentPosInFile) * m_physics->xPixPerSec() , 0));
+	hlm->setPos(views().at(0)->mapToScene((pos - m_currentPosInFile - m_startPosition) * m_physics->xPixPerSec() , 0));
 	update();
 }
 
@@ -711,7 +704,7 @@ void AwGraphicsScene::highlightMarker(AwMarker *marker)
 						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, marker, item, this);
 						lastItem = amci;
 						addItem(amci);
-						amci->setPositionInFile(m_currentPosInFile);
+						amci->setPositionInFile(m_currentPosInFile - m_startPosition);
 						m_markerItemsDisplayed << amci;
 						amci->updatePosition();
 					}
@@ -800,7 +793,7 @@ void AwGraphicsScene::updateMarkers()
 	for (int i = 0; i < m_markers.count(); i++)	{
 		if (m_markers.at(i)->targetChannels().isEmpty())	{
 			AwMarkerItem *item = insertMarker(m_markers.at(i), prev, i);
-			item->setPositionInFile(m_currentPosInFile);
+			item->setPositionInFile(m_currentPosInFile - m_startPosition);
 			m_markerItemsDisplayed << item;
 			item->showLabel(m_settings->showMarkerLabels);
 			item->showValue(m_settings->showMarkerValues);
@@ -826,7 +819,7 @@ void AwGraphicsScene::updateMarkers()
 					if (item->channel()->referenceName() == ref) {
 						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, m_markers.at(i), item, this);
 						addItem(amci);
-						amci->setPositionInFile(m_currentPosInFile);
+						amci->setPositionInFile(m_currentPosInFile - m_startPosition);
 						m_markerItemsDisplayed << amci;
 						amci->updatePosition();
 					}

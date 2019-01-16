@@ -29,18 +29,27 @@
 #include "ui_AwEpochVisuWidget.h"
 #include <qstandarditemmodel.h>
 #include <epoch/AwEpochTree.h>
-#include <AwDataBuffer.h>
-#include <widget/SignalView/AwBaseSignalView.h>
+#include <epoch/AwEpochSignalView.h>
 
-#include "AwEpochThumbCreator.h"
+class AwEpochMosaicWidget;
+#include "AwEpochThumbs.h"
+#include <widget/AwWaitWidget.h>
 
-typedef struct {
-	AwEpoch *epoch;
-	AwChannelList channels;
-	QPixmap pixmap;
-} Thumbnail;
-
-typedef QList<Thumbnail *> ThumbnailList;
+class AwEpochLoader : public AwWaitWidget
+{
+	Q_OBJECT
+public:
+	AwEpochLoader(const QString& title, AwEpochTree *condition, QWidget *parent = Q_NULLPTR);
+	~AwEpochLoader();
+	thumbList *thumbs() { return m_thumbs; }
+public slots:
+	void loadEpochs();
+	int exec() override;
+protected:
+	AwEpochTree *m_condition;
+	AwEpochSignalView *m_signalView;
+	thumbList *m_thumbs;
+};
 
 class AwEpochVisuWidget : public QWidget
 {
@@ -50,6 +59,9 @@ public:
 	AwEpochVisuWidget(QWidget *parent = Q_NULLPTR);
 	~AwEpochVisuWidget();
 	void updateConditions();
+public slots:
+	/** connected to MosaicView => a click in the mosaic view should select the corresponding epoch in Visu Widget **/
+	void selectEpoch(AwEpochTree *condition, int index);
 protected slots:
 	void showEpoch(const QModelIndex& index);
 	void updateItem(QStandardItem *item);
@@ -58,8 +70,8 @@ protected slots:
 	void nextEpoch();
 	void prevEpoch();
 	void rejectEpoch();
-	void qwtPreview();
-	void thumb();
+	void doAveraging();
+	void openMosaicView();
 signals:
 	void epochClicked(AwEpochTree *condition, int index);
 	void newDataLoaded(AwChannelList *channels);
@@ -67,9 +79,6 @@ private:
 	void updateNavBarCondition();
 	void updateNavBar();
 	void viewCurrentEpoch();
-	ThumbnailList *createThumbs();
-
-	QMap<AwEpochTree *, ThumbnailList *> m_thumbs;
 
 	QList<QStandardItem *> createChildEpochs(AwEpochTree *condition);
 	QList<QStandardItem *> createChildStatus(AwEpochTree *condition);
@@ -77,8 +86,7 @@ private:
 	QStandardItemModel m_treeViewModel;
 	AwEpochTree *m_currentCondition;	// current selected condition
 	int m_currentEpochIndex;			// current selected epoch within a condition
-	AwBaseSignalView *m_signalView;
-	AwDataBuffer *m_buffer;
-	AwMarker *m_zeroMarker;
-	AwEpochThumbCreator m_tc;
+	AwEpochSignalView *m_signalView;
+	AwEpochMosaicWidget *m_mosaicWidget;
+	QHash<QString, thumbList *> m_hashThumbs;
 };

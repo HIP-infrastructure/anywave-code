@@ -52,9 +52,9 @@ AwEpochAverageWidget::~AwEpochAverageWidget()
 void AwEpochAverageWidget::computeAVG(AwEpochTree *cond)
 {
 	if (cond->isAvgAvailable()) {
-		AwAverageItemWidget *item = new AwAverageItemWidget();
-		AwEpochDataBuffer *buffer = cond->createAVGBuffer();
-		item->setCondition(cond, buffer);
+		AwAverageItemWidget *item = new AwAverageItemWidget(cond->averagedResult());
+		//AwEpochDataBuffer *buffer = cond->createAVGBuffer();
+		//item->setCondition(cond, buffer);
 		m_items.append(item);
 		m_ui.verticalLayout->addWidget(item);
 		repaint();

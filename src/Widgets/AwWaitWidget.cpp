@@ -1,15 +1,11 @@
 #include <widget/AwWaitWidget.h>
 #include "ui_AwWaitWidget.h"
 
-AwWaitWidget::AwWaitWidget(const QString& title, const QString& text, QWidget *parent)
-	: QWidget(parent)
+AwWaitWidget::AwWaitWidget(const QString& title, QWidget *parent) : QDialog(parent)
 {
-	ui = new Ui::AwWaitWidget();
+	ui = new Ui::AwWaitWidgetUi();
 	ui->setupUi(this);
-	ui->label->setText(text);
 	setWindowTitle(title);
-	ui->progressBar->hide();
-	show();
 }
 
 AwWaitWidget::~AwWaitWidget()

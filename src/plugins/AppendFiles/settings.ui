@@ -258,9 +258,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>comboBoxWriters</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>settingsUi</receiver>
+   <slot>changeCurrentWriter(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>643</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>261</x>
+     <y>676</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addFiles()</slot>
   <slot>changeOutputFile()</slot>
+  <slot>changeCurrentWriter(int)</slot>
  </slots>
 </ui>

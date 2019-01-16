@@ -15,6 +15,11 @@ AwBIDSGUI::AwBIDSGUI(AwBIDSManager *bids, const QString& rootDir, QWidget *paren
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
+void AwBIDSGUI::setRootDir(const QString& path)
+{
+	m_ui.leDIR->setText(path);
+}
+
 AwBIDSGUI::~AwBIDSGUI()
 {
 	clear();

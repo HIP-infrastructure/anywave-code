@@ -101,6 +101,12 @@
     <Filter Include="IO\BIDS">
       <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IO\MEMIO">
+      <UniqueIdentifier>{cef1cf63-cc97-410b-bd02-2de0bfde1510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO\JSON">
+      <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1057,24 +1063,6 @@
     <ClCompile Include="Epoch\AwEpochVisuWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochThumbNail.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochThumbNail.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochThumbNail.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochThumbCreator.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochThumbCreator.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochThumbCreator.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochAverageWidget.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1228,9 +1216,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSSubject.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="AwNoGUI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUI.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1268,6 +1253,48 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwOpenFileDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Epoch\AwEpochMosaicWidget.cpp">
+      <Filter>Epoch</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochMosaicWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochMosaicWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\MEMIO\MEMIO.cpp">
+      <Filter>IO\MEMIO</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MEMIO.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MEMIO.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\AwDataChunk.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\AwMemoryMapper.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="AwCommandLineManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwFileOpenSave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandLineParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\JSON\AwJSON.cpp">
+      <Filter>IO\JSON</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSValidateDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSValidateDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1704,15 +1731,6 @@
     <CustomBuild Include="Epoch\AwEpochVisuWidget.h">
       <Filter>Epoch</Filter>
     </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochThumbNail.ui">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochThumbNail.h">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochThumbCreator.h">
-      <Filter>Epoch</Filter>
-    </CustomBuild>
     <CustomBuild Include="Epoch\AwEpochAverageWidget.ui">
       <Filter>Epoch</Filter>
     </CustomBuild>
@@ -1787,6 +1805,15 @@
     </CustomBuild>
     <CustomBuild Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Epoch\AwEpochMosaicWidget.ui">
+      <Filter>Epoch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Epoch\AwEpochMosaicWidget.h">
+      <Filter>Epoch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\MEMIO\MEMIO.h">
+      <Filter>IO\MEMIO</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1949,9 +1976,6 @@
     <ClInclude Include="GeneratedFiles\ui_AwEpochVisuWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEpochThumbNail.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwEpochAverageWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -1993,6 +2017,27 @@
     </ClInclude>
     <ClInclude Include="MATPy\AwTCPResponse.h">
       <Filter>MATPy</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwEpochMosaicWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\AwDataChunk.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\AwMemoryMapper.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="AwCommandLineManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Epoch\AwEpochThumbs.h">
+      <Filter>Epoch</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandLineParser.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\JSON\AwJSON.h">
+      <Filter>IO\JSON</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2113,6 +2158,12 @@
       <Filter>Translation Files</Filter>
     </None>
     <None Include="cpp.hint" />
+    <None Include="GeneratedFiles\Debug\AwEpochManager.moc">
+      <Filter>Generated Files\Debug</Filter>
+    </None>
+    <None Include="GeneratedFiles\Release\AwEpochManager.moc">
+      <Filter>Generated Files\Release</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AnyWave.rc" />

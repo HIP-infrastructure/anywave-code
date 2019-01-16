@@ -144,5 +144,8 @@ protected:
 Q_DECLARE_INTERFACE(AwFileIOPlugin, AwFileIOInterfacePlugin_IID)
 Q_DECLARE_INTERFACE(AwFileIO, "AnyWave.FileIOInterface")
 
+#define AW_INSTANTIATE_PLUGIN(P) P* newInstance(const QString& filename = QString()) { return new P(filename); }
+
+
 
 #endif

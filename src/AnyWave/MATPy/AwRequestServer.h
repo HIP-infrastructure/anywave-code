@@ -36,6 +36,7 @@ public:
 	AwRequestServer(/*QTcpServer *server, */QObject *parent = 0);
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
+	inline quint16 serverPort() { return m_serverPort; }
 public slots:
 	void handleNewConnection();
 	void dataReceived();
@@ -51,6 +52,7 @@ protected:
 	QMutex m_mutex;
 	QThread *m_thread;
 	bool m_isListening;
+	quint16 m_serverPort;
 private:
 	AwMarkerList m_markers;	// hold the markers added by process
 	void handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process);

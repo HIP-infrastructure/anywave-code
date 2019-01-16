@@ -93,7 +93,6 @@ public slots:
 	virtual void setSelectionAsMontage() {}
 	void setMarkingSettings(AwMarkingSettings *settings);
 	void setPageDuration(float dur) { m_pageDuration = dur; }
-	void setStartPosition(float pos);
 	void updateSelection();
 	void displaySelectedChannelsOnly();
 	void displayAllChannels();

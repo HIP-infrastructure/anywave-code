@@ -83,3 +83,10 @@ void AwMATPyServer::stop()
 		m_rs = NULL;
 	}
 }
+
+quint16 AwMATPyServer::serverPort()
+{
+	if (m_rs == Q_NULLPTR)
+		return 0;
+	return m_rs->serverPort();
+}

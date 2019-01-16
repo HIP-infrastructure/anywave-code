@@ -174,7 +174,7 @@ void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 		float lower = (e->pos().x() - 3) / xPixSec;
 		lower += m_positionInFile;
 		float higher = (e->pos().x() + 3) / xPixSec;
-		higher += m_positionInFile;
+		higher += m_positionInFile ;
 		AwMarker *found = findMarkerBetween(lower, higher);
 
 		if (found)
@@ -187,7 +187,6 @@ void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 			m_sliderDragging = true;
 			m_xOffset = posInSecs - m_positionInFile;
 		}
-
 	}
 }
 
@@ -229,8 +228,8 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 			float pixDur = m_totalDuration / this->size().width();
 			qreal posInSecs = e->pos().x() * pixDur;
 			m_positionInFile = posInSecs - m_xOffset;
-			if (m_positionInFile < 0)
-				m_positionInFile = 0;
+			if (m_positionInFile < 0.)
+				m_positionInFile = 0.;
 		}
 		update();
 	}
@@ -291,7 +290,7 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 		QBrush sliderBrush = QBrush(Qt::gray);
 		QColor color(Qt::darkGray);
 		painter.setPen(QPen(color, 1.5));
-		m_sliderRect = QRectF(m_positionInFile / m_pixDur, 1., m_pageDuration / m_pixDur, AW_MARKERS_BAR_HEIGHT - 2);
+		m_sliderRect = QRectF(m_positionInFile  / m_pixDur, 1., m_pageDuration / m_pixDur, AW_MARKERS_BAR_HEIGHT - 2);
 		sliderBrush.setStyle(Qt::Dense4Pattern);
 		painter.drawRect(m_sliderRect);
 		painter.fillRect(m_sliderRect, sliderBrush);

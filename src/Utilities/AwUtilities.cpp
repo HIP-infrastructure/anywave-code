@@ -120,9 +120,12 @@ QString AwUtilities::hmsTime(qint64 milliseconds, bool showMs)
 		else
 			return QString("00:00:00");
 
+	bool negative = milliseconds < 0;
+	auto abs = std::abs(milliseconds);
+
 	QTime time(0, 0, 0, 0);  // Qt5 requires an initialized QTime object before adding secs or msecs.
 
-	qint64 tmp = milliseconds;
+	qint64 tmp = abs;
 	int h = tmp / (1000 * 3600);
 	tmp -= h * 1000 * 3600;
 	int m = tmp / (1000 * 60);
@@ -140,10 +143,14 @@ QString AwUtilities::hmsTime(qint64 milliseconds, bool showMs)
 	if (tmp)
 		time = time.addMSecs(tmp);
 
+	QString prefix = "";
+	if (negative)
+		prefix = "-";
+
 	if (!showMs)
-		return time.toString("hh:mm:ss");
+		return time.toString(QString("%1hh:mm:ss").arg(prefix));
 	
-	return time.toString("hh:mm:ss.zzz");
+	return time.toString(QString("%1hh:mm:ss.zzz").arg(prefix));
 }
 
 void AwUtilities::saveTimeHMS(bool flag)

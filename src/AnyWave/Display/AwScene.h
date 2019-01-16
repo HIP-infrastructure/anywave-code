@@ -48,8 +48,6 @@ public slots:
 	void setSelectionAsBad() override;
 	void setChannelAsBad(const QString& label);
 	void setSelectionAsMontage() override;
-//signals:
-//	void newMontage();
 private slots:
 	void launchProcess();
 };

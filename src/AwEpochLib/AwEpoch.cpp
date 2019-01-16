@@ -24,16 +24,42 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <epoch/AwEpoch.h>
+#include <epoch/AwEpochTree.h>
 
-
-AwEpoch::AwEpoch()
+AwEpoch::AwEpoch(AwEpochTree *condition, AwMarker *marker)
 {
-	posAndDuration = NULL;
-	rejected = false;
+	m_posAndDuration = marker;
+	m_rejected = m_loaded = false;
+	m_channels = AwChannel::duplicateChannels(condition->channels());
+	m_condition = condition;
+	m_maxAmplitude = 0.;
+	m_zeroSample = (int)floor(condition->preLatency() * m_channels.first()->samplingRate());
 }
 
 AwEpoch::~AwEpoch()
 {
-	if (posAndDuration)
-		delete posAndDuration;
+	if (m_posAndDuration)
+		delete m_posAndDuration;
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
+}
+
+void AwEpoch::computeMaxAmplitude()
+{
+	// compute only if data loaded.
+	if (m_channels.isEmpty())
+		return;
+	if (m_channels.first()->dataSize() == 0)
+		return;
+
+	// compute the auto gain level
+	float min = 0., max = 0.;
+	for (auto c : m_channels)
+		for (auto i = 0; i < c->dataSize(); i++) {
+			if (c->data()[i] < min)
+				min = c->data()[i];
+			if (c->data()[i] > max)
+				max = c->data()[i];
+		}
+	m_maxAmplitude = std::max(std::abs(min), std::abs(max));
 }

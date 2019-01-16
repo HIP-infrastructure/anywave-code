@@ -1,9 +1,6 @@
 #!/bin/bash
-
 # change rpath names in the libraries
-#  
-# first arg must be the path to AnyWave bundle contents (path to AnyWave.app/Contents/Frameworks)
-
+#first arg must be the path to AnyWave bundle contents (path to AnyWave.app/Contents/Frameworks)
 # Filtering
 install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/libAwFilter.dylib
 install_name_tool -change libAwMath.dylib @rpath/libAwMath.dylib $1/libAwFilter.dylib

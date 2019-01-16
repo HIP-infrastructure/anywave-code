@@ -106,7 +106,9 @@ void AwPythonScriptProcess::run()
 	QString scriptPath = m_path + "/__main__.py";
 	scriptPath = QDir::toNativeSeparators(scriptPath);
 
-	arguments << initpy <<  pyPath << QString::number(m_pid) << dataPath << scriptPath;
+	//arguments << initpy <<  pyPath << QString::number(m_pid) << dataPath << scriptPath;
+
+	arguments << initpy << pyPath << QString::number(m_pid) << QString::number(AwMATPyServer::instance()->serverPort()) << dataPath << scriptPath;
 
 	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 

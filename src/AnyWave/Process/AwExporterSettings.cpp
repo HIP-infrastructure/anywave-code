@@ -99,8 +99,9 @@ void AwExporterSettings::pickupFile()
 {
 	QString ext = extensions.at(comboWriters->currentIndex());
 	QFileInfo fi(initialPath);
-	filePath = QFileDialog::getSaveFileName(this, tr("Save File"), fi.absolutePath(), ext);
-	lineEditFile->setText(filePath);
+	filePath = QFileDialog::getSaveFileName(this, tr("Save File"), fi.absolutePath(), QString("*%1").arg(ext));
+	if (!filePath.isEmpty())
+		lineEditFile->setText(filePath);
 }
 
 int AwExporterSettings::exec()

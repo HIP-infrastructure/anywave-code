@@ -285,7 +285,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 			continue;
 		auto channels = AwChannel::duplicateChannels(*channelsToLoad);
 		chunks.append(channels);
-		// load chunk without wakeing up the client...
+		// load chunk without waking up the client...
 		loadData(&channels, m, rawData, true);
 		totalSamples += channels.first()->dataSize();
 	}
