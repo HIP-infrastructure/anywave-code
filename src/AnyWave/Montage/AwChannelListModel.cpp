@@ -706,7 +706,7 @@ QWidget *AwChannelListDelegate::createEditor(QWidget *parent, const QStyleOption
 				connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));
 				return editor;
 			}
-			else if (t == AwChannel::MEG || t == AwChannel::GRAD) {
+			else if (t == AwChannel::MEG || t == AwChannel::GRAD || t == AwChannel::Other) {
 				QComboBox *editor = new QComboBox(parent);
 				editor->addItem("No Ref.");
 				QStringList items = m_labels[t];

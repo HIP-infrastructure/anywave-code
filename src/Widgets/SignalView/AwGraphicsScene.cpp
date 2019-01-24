@@ -698,10 +698,11 @@ void AwGraphicsScene::highlightMarker(AwMarker *marker)
 		if (!marker->targetChannels().isEmpty()) {  // show only the last marker found
 			AwMarkerChannelItem *lastItem = NULL;
 			foreach (QString target, marker->targetChannels()) {
+				auto height = this->height() / m_signalItems.size();
 				foreach (AwGraphicsSignalItem *item, m_signalItems)	{ 
 					// find item with matching names
 					if (item->channel()->name() == target) {
-						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, marker, item, this);
+						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, marker, item, height, this);
 						lastItem = amci;
 						addItem(amci);
 						amci->setPositionInFile(m_currentPosInFile - m_startPosition);
@@ -815,9 +816,10 @@ void AwGraphicsScene::updateMarkers()
 				if (items.isEmpty())
 					continue;
 
+				auto height = this->height() / m_signalItems.size();
 				for (auto item : items) {
 					if (item->channel()->referenceName() == ref) {
-						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, m_markers.at(i), item, this);
+						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, m_markers.at(i), item, height, this);
 						addItem(amci);
 						amci->setPositionInFile(m_currentPosInFile - m_startPosition);
 						m_markerItemsDisplayed << amci;

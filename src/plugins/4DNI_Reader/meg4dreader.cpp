@@ -638,7 +638,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 		for (i = 0; i < bufferSize / m_dataSize; i++) {
@@ -652,7 +652,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 				for (i = 0; i < c->dataSize(); i++) {
@@ -681,7 +681,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		}
 		read /= nChannelsTotal;
 		read /= m_dataSize;
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 		for (qint64 i = 0; i < bufferSize / m_dataSize; i++) {
@@ -694,7 +694,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 
 			if (index != -1) {
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 				for (qint64 i = 0; i < c->dataSize(); i++) {
@@ -724,7 +724,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 		for (i = 0; i < data_size; i++) {
@@ -738,7 +738,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1) {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 				for (i = 0; i < c->dataSize(); i++) {
@@ -768,7 +768,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 		read /= nChannelsTotal;
 		read /= m_dataSize;
 		qint64 i;
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 		for (i = 0; i < bufferSize / m_dataSize; i++){
@@ -783,7 +783,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 			if (index != -1)  {
 				my_channel_data *channel_data = m_hashChannelsData.value(infos.channels().at(index)->ID());
 				float *data = c->newData(nSamplesTotal);
-#ifndef Q_OS_MACOS
+#if defined(_OPENMP)
 #pragma omp parallel for
 #endif
 				for (i = 0; i < c->dataSize(); i++)	{

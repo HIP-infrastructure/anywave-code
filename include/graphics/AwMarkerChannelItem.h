@@ -34,7 +34,7 @@ class QGraphicsSceneHoverEvent;
 class AW_GRAPHICS_EXPORT AwMarkerChannelItem : public AwMarkerItem
 {
 public:
-	AwMarkerChannelItem(AwDisplayPhysics *phys, AwMarker *mark, AwGraphicsSignalItem *sitem, QGraphicsScene *scene);  
+	AwMarkerChannelItem(AwDisplayPhysics *phys, AwMarker *mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene);  
 	~AwMarkerChannelItem();
 
 	void updatePosition();
@@ -44,6 +44,7 @@ protected:
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
 
 	AwGraphicsSignalItem *m_signalItem;
+	qreal m_height;
 };
 
 #endif // AWMARKERCHANNELITEM_H
