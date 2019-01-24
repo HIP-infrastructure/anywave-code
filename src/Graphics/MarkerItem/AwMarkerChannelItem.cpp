@@ -33,10 +33,20 @@
 #include <QStyleOptionGraphicsItem>
 #include <QPainter>
 
-AwMarkerChannelItem::AwMarkerChannelItem(AwDisplayPhysics *phys, AwMarker *mark, AwGraphicsSignalItem *sitem, QGraphicsScene *scene)
+#define MCI_MAX_HEIGHT	15
+#define MCI_MIN_HEIGHT  5
+
+AwMarkerChannelItem::AwMarkerChannelItem(AwDisplayPhysics *phys, AwMarker *mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene)
 										 : AwMarkerItem(phys, NULL, mark, scene, 0)
 {
 	m_signalItem = sitem;
+	m_height = height;
+	if (height > MCI_MAX_HEIGHT)
+		m_height = MCI_MAX_HEIGHT;
+	if (height < MCI_MIN_HEIGHT)
+		m_height = MCI_MIN_HEIGHT;
+	
+
 	setOpacity(0.5);
 	showLabel(false);	// do not show label or values for marker on channels.
 	showValue(false);
@@ -53,22 +63,29 @@ void AwMarkerChannelItem::updatePosition()
 {
 	QPointF pos; 
 
+	auto height2 = m_height / 2.;
 	if (m_marker->duration() > 0)
 		if (m_marker->start() < m_posInFile) {
-			pos = QPointF(m_signalItem->pos().x(), m_signalItem->pos().y() - 15);
+			//pos = QPointF(m_signalItem->pos().x(), m_signalItem->pos().y() - 15);
+			pos = QPointF(m_signalItem->pos().x(), m_signalItem->pos().y() - height2);
 			setPos(pos);
 			qreal offset = m_posInFile - m_marker->start();
-			setRect(QRectF(0, 0, (m_marker->duration() - offset) * m_physics->xPixPerSec(), 30));
+		    //setRect(QRectF(0, 0, (m_marker->duration() - offset) * m_physics->xPixPerSec(), 30));
+			setRect(QRectF(0, 0, (m_marker->duration() - offset) * m_physics->xPixPerSec(), m_height));
 		}
 		else {
-			pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - 15);
+			//pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - 15);
+			pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - height2);
 			setPos(pos);
-			setRect(QRectF(0, 0, m_marker->duration() * m_physics->xPixPerSec(), 30));
+			//setRect(QRectF(0, 0, m_marker->duration() * m_physics->xPixPerSec(), 30));
+			setRect(QRectF(0, 0, m_marker->duration() * m_physics->xPixPerSec(), m_height));
 		}
 	else {
-		pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - 15);
+		//pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - 15);
+		pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - height2);
 		setPos(pos);
-		setRect(QRectF(-3, 0, 6, 30));
+		//setRect(QRectF(-3, 0, 6, 30));
+		setRect(QRectF(-3, 0, 6, m_height));
 	}
 	update();
 }

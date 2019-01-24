@@ -627,7 +627,13 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		return;
 
 	m_channelsTsv = channels_tsv;
-	auto list = BM->getMontageFromChannelsTsv(channels_tsv);
+	AwChannelList list;
+	try {
+		list = BM->getMontageFromChannelsTsv(channels_tsv);
+	}
+	catch (const AwException& e) {
+		return;
+	}
 
 	if (list.isEmpty())
 		return;

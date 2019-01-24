@@ -60,9 +60,6 @@ mxArray *request_data()
     stream_data << labels;
 	stream_data << types;
 	stream_data << filterFlags;
-	//if (!filterSettings.isEmpty())
-	//	filters = 1;
-	//stream_data << filters;		// filtering flag
 	
 	if (filterFlags == 1)	{
 		auto eegFilters = filterSettings[AwChannel::EEG];
@@ -192,13 +189,6 @@ mxArray *request_data()
 // parse the input cfg structure
 mxArray *parse_cfg(const mxArray *cfg)
 {
- //   float start = 0, duration = -1;
- //   int decimate = 1;
-	//int filters = 0;
- //   QStringList labels, types;
-	//QString file, montage;
-  //  mxArray *output = NULL;
-
     // check for start
     // default value    
     int f_index = mxGetFieldNumber(cfg, "start");
