@@ -66,7 +66,7 @@ class AnyWave : public QMainWindow, private Ui::AnyWaveClass
 
 public:
 	/** Constructeur **/
-	AnyWave(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	AnyWave(bool GUI = true, QWidget *parent = 0, Qt::WindowFlags flags = 0);
 
 	/** Destructeur **/
 	~AnyWave();

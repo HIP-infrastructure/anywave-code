@@ -88,11 +88,20 @@ int main(int argc, char *argv[])
 	bool res = SetDllDirectory((LPCWSTR)dllDir);
 #endif
 	
-	AnyWave window;
-	auto args = aw::commandLine::doParsing();
+	// check if at least one argument 
 
-	if (args.count() == 1)
-		window.openFile(args.at(0));
+	// check if arguments 
+	auto args = aw::commandLine::doParsing();
+	AnyWave window(args.isEmpty()); // args not empty means something to do in command line mode => no gui mode on 
+	int status = aw::commandLine::doCommandLineOperations(args);
+	if (status == 0)
+		exit(0);
+
+	QCommandLineParser parser;
+	auto positionalArgs = parser.positionalArguments();
+
+	if (positionalArgs.count() == 1)
+		window.openFile(positionalArgs.at(0));
 		
 	window.showMaximized();
 	return app.exec();

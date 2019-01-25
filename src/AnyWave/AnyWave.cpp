@@ -84,7 +84,7 @@
 #include <AwFileInfo.h>
 
 
-AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
+AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
@@ -102,7 +102,8 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	aws->setParent(this);
 	//Save system path
 	aws->setSystemPath(qgetenv("PATH"));
-	setWindowIcon(QIcon(":images/AnyWave_icon.png"));
+	if (isGUIMode)
+		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 
 	AwDataServer *data_server = AwDataServer::getInstance();
 	data_server->setParent(this);
@@ -115,21 +116,23 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	adl->connectComponent("Global Settings", aws);
 	createUserDirs();
 	
-	// AwSettings loads recentfiles in constructor, so get that list and update menu
-	QStringList recentFiles = aws->recentFiles();
-	if (!recentFiles.isEmpty())	{
-		QStringList shortenFiles;
-		for (auto s : recentFiles)
-			shortenFiles << aws->shortenFilePath(s);
-		updateRecentFiles(shortenFiles);
-	}
+	if (isGUIMode) {
+		// AwSettings loads recentfiles in constructor, so get that list and update menu
+		QStringList recentFiles = aws->recentFiles();
+		if (!recentFiles.isEmpty()) {
+			QStringList shortenFiles;
+			for (auto s : recentFiles)
+				shortenFiles << aws->shortenFilePath(s);
+			updateRecentFiles(shortenFiles);
+		}
 
-	QStringList recentBIDS = aws->recentBIDS();
-	if (!recentBIDS.isEmpty()) {
-		QStringList shortenFiles;
-		for (auto  s : recentBIDS)
-			shortenFiles << aws->shortenFilePath(s);
-		updateRecentBIDS(shortenFiles);
+		QStringList recentBIDS = aws->recentBIDS();
+		if (!recentBIDS.isEmpty()) {
+			QStringList shortenFiles;
+			for (auto s : recentBIDS)
+				shortenFiles << aws->shortenFilePath(s);
+			updateRecentBIDS(shortenFiles);
+		}
 	}
 
 	QSettings settings;
@@ -137,8 +140,9 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	// init settings
     settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
-	// searching for a Matlab and MCR installed versions on the computer.
-	initMatlab();
+	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
+	if (isGUIMode)
+		initMatlab();
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	plugin_manager->setParent(this);
 	AwProcessManager *process_manager = AwProcessManager::instance();
@@ -151,38 +155,44 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	// PLUGIN MENUS
 	// get menus from process manager 
 	// process menu
-	QMainWindow::menuBar()->addMenu(process_manager->processMenu());
-	if (process_manager->fileMenu())
-		menuFile->insertMenu(actionFileProperties, process_manager->fileMenu());
-	if (process_manager->viewMenu())
-		menuView_->insertMenu(actionPlugins, process_manager->viewMenu());
-	for (auto a : process_manager->icaActions()) 
-		menuICA->addAction(a);
-	
-	// END OF ADDING PLUGINGS MENUS
+	if (isGUIMode) {
+		QMainWindow::menuBar()->addMenu(process_manager->processMenu());
+		if (process_manager->fileMenu())
+			menuFile->insertMenu(actionFileProperties, process_manager->fileMenu());
+		if (process_manager->viewMenu())
+			menuView_->insertMenu(actionPlugins, process_manager->viewMenu());
+		for (auto a : process_manager->icaActions())
+			menuICA->addAction(a);
 
-	m_actions << actionMontage << actionMarkers << actionCarto3D << actionFileProperties << actionComponentsMaps << actionShow_map_on_signal << actionShow_Mappings << actionCreateEpoch
-		<< actionVisualiseEpoch << actionAveraging;
-	for (QAction *a : m_actions)
-		a->setEnabled(false);
+		// END OF ADDING PLUGINGS MENUS
 
-	// instantiate Dock Widgets
-	// BIDS 
-	// BIDS dock is null by default and will be instantiated when needed.
-	m_dockBIDS = NULL;
-	// Markers
-	m_dockMarkers = new QDockWidget(tr("Markers"), this);
-	addDockWidget(Qt::LeftDockWidgetArea, m_dockMarkers);
-	m_dockMarkers->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	m_dockMarkers->setWidget(AwMarkerManager::instance()->ui());
-	m_dockMarkers->hide();
+		m_actions << actionMontage << actionMarkers << actionCarto3D << actionFileProperties << actionComponentsMaps << actionShow_map_on_signal << actionShow_Mappings << actionCreateEpoch
+			<< actionVisualiseEpoch << actionAveraging;
+		for (QAction *a : m_actions)
+			a->setEnabled(false);
+	}
 
-	m_addMarkerDock = new QDockWidget(tr("Adding Markers Tool"), this);
-	m_addMarkerDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	m_addMarkerDock->setFloating(true);
-	AwMarkerInspector *markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
-	m_addMarkerDock->setWidget(markerInspectorWidget);
-	m_addMarkerDock->hide();
+	AwMarkerInspector *markerInspectorWidget = NULL;
+
+	if (isGUIMode) {
+		// instantiate Dock Widgets
+		// BIDS 
+		// BIDS dock is null by default and will be instantiated when needed.
+		m_dockBIDS = NULL;
+		// Markers
+		m_dockMarkers = new QDockWidget(tr("Markers"), this);
+		addDockWidget(Qt::LeftDockWidgetArea, m_dockMarkers);
+		m_dockMarkers->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		m_dockMarkers->setWidget(AwMarkerManager::instance()->ui());
+		m_dockMarkers->hide();
+
+		m_addMarkerDock = new QDockWidget(tr("Adding Markers Tool"), this);
+		m_addMarkerDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		m_addMarkerDock->setFloating(true);
+		markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
+		m_addMarkerDock->setWidget(markerInspectorWidget);
+		m_addMarkerDock->hide();
+	}
 
 	// Scripts
 	// Script manager
@@ -206,14 +216,20 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	AwMarkerManager *marker_manager = AwMarkerManager::instance();
 	marker_manager->setParent(this);
 	marker_manager->setDock(m_dockMarkers);
-	connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
-	markerInspectorWidget->setPredefinedMarkers(AwSettings::getInstance()->loadPredefinedMarkers());
-	connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
+	if (markerInspectorWidget) {
+		connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
+		connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
+		markerInspectorWidget->setPredefinedMarkers(AwSettings::getInstance()->loadPredefinedMarkers());
+	}
+	
 	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
 	
-	m_display = new AwDisplay(this);
-	m_display->setParent(this);
-	m_display->setAddMarkerDock(m_addMarkerDock);
+	m_display = NULL;
+	if (isGUIMode) {
+		m_display = new AwDisplay(this);
+		m_display->setParent(this);
+		m_display->setAddMarkerDock(m_addMarkerDock);
+	}
 
 	// AwSourceManager
 	AwSourceManager::instance()->setParent(this);
@@ -231,16 +247,21 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	// AnyWave and Script Manager
 	connect(actionExecuteScript, SIGNAL(triggered()), scriptManager, SLOT(runScript()));
 	// Display and Process Manager
-
-	connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
-		m_display, SLOT(executeCommand(int, const QVariantList&)));
-
-	connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setDisplayedChannels(const AwChannelList&)));
-	connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList *)), m_display, SLOT(addVirtualChannels(AwChannelList *)));
-	connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList *)), m_display, SLOT(removeVirtualChannels(AwChannelList *)));
-	connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
-	connect(process_manager, SIGNAL(displayProcessTerminated(AwProcess *)), m_display, SLOT(processHasFinished()));
-	connect(m_display, SIGNAL(selectedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setSelectedChannels(const AwChannelList&)));
+	   	  
+	if (m_display) {
+		connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList *)), m_display, SLOT(removeVirtualChannels(AwChannelList *)));
+		connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
+		connect(process_manager, SIGNAL(displayProcessTerminated(AwProcess *)), m_display, SLOT(processHasFinished()));
+		connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList *)), m_display, SLOT(addVirtualChannels(AwChannelList *)));
+		connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
+			m_display, SLOT(executeCommand(int, const QVariantList&)));
+		connect(m_display, SIGNAL(selectedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setSelectedChannels(const AwChannelList&)));
+		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setDisplayedChannels(const AwChannelList&)));
+		// Display and Montage manager
+		connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
+		// Settings and Display
+		connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
+	}
 
 	// Process Manager and Marker Manager
 	connect(process_manager, SIGNAL(newMarkersAvailable(const AwMarkerList&)), marker_manager, SLOT(addMarkers(const AwMarkerList&)));
@@ -254,37 +275,35 @@ AnyWave::AnyWave(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, f
 	// Settings and AnyWave
 	connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList&)));
 	connect(aws, SIGNAL(recentBIDSUpdated(const QStringList&)), this, SLOT(updateRecentBIDS(const QStringList&)));
-	// Settings and Display
-	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
+
 
 	/// MAPPING
 	m_dockEEG = m_dockMEG = NULL;
-
-	initToolBarsAndMenu();
-
 	m_currentFileModified = false;
-
-	// Menu  :View->plugins
-	connect(actionPlugins, SIGNAL(triggered()), plugin_manager, SLOT(showPluginsDial()));
-	// Menu: View->Processes
-	connect(actionProcesses, SIGNAL(triggered()), this, SLOT(showProcessDock()));
-	// Menu: File->export to svg
-	connect(actionExport_to_SVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
-	connect(actionSave_display_to_PDF, SIGNAL(triggered()), this, SLOT(exportToPDF()));
-	// Menu: File->Import marker file
-	connect(actionImport_mrk_file, SIGNAL(triggered()), this, SLOT(importMrkFile()));
-	// Menu: File->Load Beamformer matrix
-	connect(actionLoadBeamFormer, SIGNAL(triggered()), this, SLOT(loadBeamformer()));
-	// Menu: File->Properties
-	connect(actionFileProperties, SIGNAL(triggered()), this, SLOT(showFileProperties()));
-	// Menu: ICA->Review Components Maps
-	connect(actionComponentsMaps, SIGNAL(triggered()), this, SLOT(reviewComponentsMaps()));
-	// Menu: ICA->Show maps on signals
-	connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
-	connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
-	retranslateUi(this);	// force translation to be applied.
+	if (isGUIMode) {
+		initToolBarsAndMenu();
+		// Menu  :View->plugins
+		connect(actionPlugins, SIGNAL(triggered()), plugin_manager, SLOT(showPluginsDial()));
+		// Menu: View->Processes
+		connect(actionProcesses, SIGNAL(triggered()), this, SLOT(showProcessDock()));
+		// Menu: File->export to svg
+		connect(actionExport_to_SVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
+		connect(actionSave_display_to_PDF, SIGNAL(triggered()), this, SLOT(exportToPDF()));
+		// Menu: File->Import marker file
+		connect(actionImport_mrk_file, SIGNAL(triggered()), this, SLOT(importMrkFile()));
+		// Menu: File->Load Beamformer matrix
+		connect(actionLoadBeamFormer, SIGNAL(triggered()), this, SLOT(loadBeamformer()));
+		// Menu: File->Properties
+		connect(actionFileProperties, SIGNAL(triggered()), this, SLOT(showFileProperties()));
+		// Menu: ICA->Review Components Maps
+		connect(actionComponentsMaps, SIGNAL(triggered()), this, SLOT(reviewComponentsMaps()));
+		// Menu: ICA->Show maps on signals
+		connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
+		connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
+		retranslateUi(this);	// force translation to be applied.
+		m_updater.checkForUpdate();
+	}
 	m_lastDirOpen = "/";
-	m_updater.checkForUpdate();
 }
 
 //
@@ -377,6 +396,19 @@ void AnyWave::applyNewLanguage()
 
 void AnyWave::quit()
 {
+	// get log component Command Line
+	auto logs = AwDebugLog::instance()->logsForComponent("Command Line");
+	if (!logs.isEmpty()) {
+		QString outputFile = QString("%1/CommandLine.log").arg(AwSettings::getInstance()->logDir);
+		QFile file(outputFile);
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			QTextStream stream(&file);
+			for (auto l : logs)
+				stream << l << endl;
+			file.close();
+		}
+	}
+
 	for (auto w : m_openWidgets)
 		w->close();
 	AwSettings::getInstance()->closeFile();
@@ -402,8 +434,8 @@ void AnyWave::quit()
 		delete m_dockMEG;
 		m_dockMEG = NULL;
 	}
-
-	m_display->quit();
+	if (m_display)
+		m_display->quit();
 	if (m_SEEGViewer) {
 		delete m_SEEGViewer;
 		m_SEEGViewer = NULL;

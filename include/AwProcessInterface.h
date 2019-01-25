@@ -225,6 +225,7 @@ signals:
 	void finished();
 	void aborted();
 	void idle();
+	void log(const QString& message);
 	
 	// AnyWave - AwProcess API
 	void progressChanged(int percent);
