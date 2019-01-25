@@ -5,9 +5,40 @@
 
 using namespace aw::commandLine;
 
-QStringList aw::commandLine::doParsing() 
+int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
+{
+	if (operations.isEmpty())
+		return -1; // no operations to do.
+	for (auto op : operations.keys()) {
+		switch (op) {
+		case aw::commandLine::BIDS_SEEG:
+			try {
+				AwBIDSManager::instance()->SEEGtoBIDS(operations[op]);
+			}
+			catch (const AwException& e)
+			{
+				exit(-1);
+			}
+			break;
+		case aw::commandLine::ICA:
+			try {
+				AwCommandLineManager::computeICA(operations[op]);
+			}
+			catch (const AwException& e)
+			{
+				exit(-1);
+			}
+			break;
+		}
+	}
+	// every operations were done successfully
+	return 0;
+}
+
+QMap<int, AwArguments> aw::commandLine::doParsing() 
 {
 	QCommandLineParser parser;
+	QMap<int, AwArguments> res;
 	parser.setApplicationDescription("AnyWave");
 	parser.addVersionOption();
 	parser.addHelpOption();
@@ -71,15 +102,7 @@ QStringList aw::commandLine::doParsing()
 		if (!lp.isEmpty())
 			arguments["lp"] = lp;
 		arguments.insert("modality", mod);
-		try {
-			AwCommandLineManager::computeICA(arguments);
-		}
-		catch (const AwException& e)
-		{
-			exit(-1);
-		}
-		exit(0);
-
+		res[aw::commandLine::ICA] = arguments;
 	}
 	if (parser.isSet(seegBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt)) {
@@ -113,45 +136,36 @@ QStringList aw::commandLine::doParsing()
 			}
 		}
 		// first argument must be the kind of file to convert (here SEEG)
-		//arguments << AwArgument("SEEGFile", file);
 		arguments["SEEGFile"] = file;
 		// subject is mandatory and should be the second argument.
-		//arguments << AwArgument("subject", subj);
 		arguments["subject"] = subj;
 		if (!task.isEmpty())
-			//arguments << AwArgument("task", task);
 			arguments["task"] = task;
 		if (!session.isEmpty())
-			//arguments << AwArgument("session", session);
 			arguments["session"] = session;
 		if (!run.isEmpty())
-			//arguments << AwArgument("run", run);
 			arguments["run"] = run;
 		if (!dir.isEmpty())
-			//arguments << AwArgument("dir", dir);
 			arguments["dir"] = dir;
 		if (!format.isEmpty())
-			//arguments << AwArgument("format", format);
 			arguments["format"] = format;
 		if (!output.isEmpty())
-			//arguments << AwArgument("output", output);
 			arguments["output"] = output;
 		if (!acq.isEmpty())
-			//arguments << AwArgument("acq", acq);
 			arguments["acq"] = acq;
 		if (!proc.isEmpty())
-			//arguments << AwArgument("proc", proc);
 			arguments["proc"] = proc;
 
-		try {
-			AwBIDSManager::instance()->SEEGtoBIDS(arguments);
+		res[aw::commandLine::BIDS_SEEG] = arguments;
+		//try {
+		//	AwBIDSManager::instance()->SEEGtoBIDS(arguments);
 
-		}
-		catch (const AwException& e)
-		{
-			exit(-1);
-		}
-		exit(0);
+		//}
+		//catch (const AwException& e)
+		//{
+		//	exit(-1);
+		//}
+		//exit(0);
 	}
-	return parser.positionalArguments();
+	return res;
 }

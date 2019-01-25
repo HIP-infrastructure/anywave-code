@@ -13,20 +13,27 @@
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
 #include "Marker/AwMarkerManager.h"
+#include "Debug/AwDebugLog.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
+	// connect to debug log as Command Line component to enable log files traces
+	AwDebugLog::instance()->connectComponent(QString("Command Line"), this);
+	emit log("Starting SEEG to BIDS conversion...");
+
+	QString origin = "AwBIDSManager::SEEGtoBIDS";
 	if (args.isEmpty()) {
-		throw(AwException("No arguments", "AwBIDSManager::toBIDS"));
+		emit log("AwBIDSManager::SEEGtoBIDS - no arguments specified.");
+		throw(AwException("No arguments", origin));
 		return -1;
 	}
 
-	QString origin = "AwBIDSManager::toBIDS";
 	auto file = args["SEEGFile"].toString();
 
 	if (file.isEmpty()) {
+		emit log("AwBIDSManager::SEEGtoBIDS - No SEEG file specified.");
 		throw AwException("No SEEG file specified", origin);
 		return -1;
 	}
@@ -35,10 +42,12 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	AwPluginManager *pm = AwPluginManager::getInstance();
 	AwFileIO *reader = pm->getReaderToOpenFile(file);
 	if (reader == NULL) {
+		emit log(QString("No reader found for file %1").arg(file));
 		throw AwException(QString("No reader found for file %1").arg(file), origin);
 		return -1;
 	}
 	if (reader->openFile(file) != AwFileIO::NoError) {
+		emit log(QString("Could not open the file %1").arg(file));
 		throw AwException(QString("Could not open the file %1").arg(file), origin);
 		return -1;
 	}
@@ -62,6 +71,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		else if (format.toLower() == "vhdr")
 			ext = "vhdr";
 		else {
+			emit log("Format option is invalid. (EDF or VHDR)");
 			throw AwException("Format option is invalid. (EDF or VHDR)", origin);
 			return -1;
 		}
@@ -76,6 +86,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	
 	// check for at least subject and task option
 	if (subj.isEmpty() || task.isEmpty()) {
+		emit log("Missing subj or task option");
 		throw AwException(QString("Missing subj or task option"), "AwBIDSManager::toBIDS");
 		return -1;
 	}
@@ -204,6 +215,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		channel.close();
 	}
 	else {
+		emit log("Could no create channels.tsv");
 		throw(AwException("Could no create channels.tsv", "AwBIDSManager::convertToBIDS"));
 		reader->plugin()->deleteInstance(reader);
 		return -1;
@@ -235,6 +247,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		jsonFile.close();
 	}
 	else {
+		emit log(QString("Could no create %1").arg(json));
 		throw(AwException(QString("Could no create %1").arg(json), "AwBIDSManager::toBIDS"));
 		reader->plugin()->deleteInstance(reader);
 		return -1;
@@ -257,12 +270,14 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 				convertToEDF(fileName, reader);
 		}
 		catch (const AwException& e) {
-			throw e;
+			emit log(QString("Error during file conversion: %1").arg(e.errorString()));
+			throw;
 			reader->plugin()->deleteInstance(reader);
 			return -1;
 		}
 	}
 	reader->plugin()->deleteInstance(reader);
+	emit log("SEEG to BIDS conversion done.");
 	return 0;
 }
 

@@ -59,7 +59,8 @@ public:
 	QStringList readTsvColumns(const QString& path);
 	/** Create a TSV file based on a dictionnary **/
 	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
-	
+signals:
+	void log(const QString& message);
 protected:
 	AwBIDSManager(const QString& rootDir);
 	static AwBIDSManager *m_instance;
