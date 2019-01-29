@@ -42,6 +42,7 @@ ICA::ICA()
 	pdi.addInputParameter(Aw::ProcessInput::SourceChannels|Aw::ProcessInput::ProcessIgnoresChannelSelection, QString("0-n"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_algoNames << "Infomax";
+	m_isDownsamplingActive = true;
 }
 
 ICAPlugin::ICAPlugin()
@@ -69,7 +70,7 @@ bool ICA::showUi()
 		m_ignoreMarkers = ui.ignoreMarkers;
 		m_ignoreBadChannels = ui.ignoreBadChannels;
 		m_nComp = ui.components;
-		m_decimateFactor = ui.decimateFactor;
+		m_isDownsamplingActive = ui.downSampling;
 		m_fileName = ui.filePath;
 		m_lpf = ui.lpf;
 		m_hpf = ui.hpf;
@@ -133,17 +134,18 @@ void ICA::runFromCommandLine()
 		m_hpf = hp.toDouble();
 	AwFilterSettings filterSettings;
 	filterSettings.set(m_modality, m_hpf, m_lpf, 0.);
-	// compute decimate factor based on low pass filter
-	int decimate = 2;
-	if (m_lpf > 0) {
-		float fc = m_lpf * 3;
+	int decimate = 1;
+	if (m_isDownsamplingActive) {
+		decimate = 2;
+		// compute decimate factor based on low pass filter
+		if (m_lpf > 0) {
+			float fc = m_lpf * 3;
 
-		while (m_samplingRate / decimate > fc)
-			decimate++;
-		decimate--;
+			while (m_samplingRate / decimate > fc)
+				decimate++;
+			decimate--;
+		}
 	}
-	else
-		decimate = 1;  // no decimation
 
 	if (decimate > 1) {
 		sendMessage("Loading data...");
@@ -251,17 +253,18 @@ void ICA::run()
 	AwFilterSettings filterSettings(pdi.input.filterSettings);
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	
-	// compute decimate factor based on low pass filter
-	int decimate = 2;
-	if (m_lpf > 0) {
-		float fc = m_lpf * 3;
-		
-		while ( m_samplingRate / decimate > fc)
-			decimate++;
-		decimate--;
+	int decimate = 1;
+	if (m_isDownsamplingActive) {
+		decimate = 2;
+		// compute decimate factor based on low pass filter
+		if (m_lpf > 0) {
+			float fc = m_lpf * 3;
+
+			while (m_samplingRate / decimate > fc)
+				decimate++;
+			decimate--;
+		}
 	}
-	else 
-		decimate = 1;  // no decimation
 
 	if (decimate > 1) {
 		sendMessage("Loading data...");

@@ -45,22 +45,26 @@ public:
 	~AwDebugLog();
 
 	// connect an AnyWave's component to debug log. A name must be specified for the component. 
-	void connectComponent(const QString& name, QObject *component);
+	void connectComponent(const QString& name, QObject *component, const QString& fileName = QString());
 
 	QStringList components();
 	QStringList logsForComponent(const QString& name);
 	void clearLogForComponent(const QString& name);
+	void disconnectComponent(QObject *component);
 	void cleanUp();
+	void closeFile();
 public slots:
 	void addLog(const QString& message);
 signals:
 	void newLogsAdded();
 protected:
 	AwDebugLog(QObject *parent = 0);
+	void writeLog(const QString& name);
 private:
 	static AwDebugLog *m_instance;
 	QHash<QObject *, QString> m_components;
 	QHash<QString, QStringList> m_logs;
+	QHash<QString, QString> m_logFiles;
 };
 
 #endif // AWDEBUGLOG_H

@@ -49,6 +49,7 @@ public:
 	int components;
 	float samplingRate;
 	int algo;
+	bool downSampling;
 public slots:
 	void accept();
 protected slots:

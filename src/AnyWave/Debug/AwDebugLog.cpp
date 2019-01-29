@@ -26,7 +26,9 @@
 #include "AwDebugLog.h"
 #include <QStringList>
 #include <QTime>
-
+#include "Prefs/AwSettings.h"
+#include <QFile>
+#include <QTextStream>
 AwDebugLog *AwDebugLog::m_instance = NULL;
 
 AwDebugLog::AwDebugLog(QObject *parent)
@@ -42,17 +44,58 @@ AwDebugLog::~AwDebugLog()
 
 void AwDebugLog::cleanUp()
 {
-//	foreach (QStringList *list, m_logs.values())
-//		delete list;
 	m_logs.clear();
 	m_components.clear();
 }
 
-void AwDebugLog::connectComponent(const QString &name, QObject *component)
+void AwDebugLog::closeFile()
+{
+	auto date = QDate::currentDate().toString("dd_MM_yyyy");
+	auto time = QTime::currentTime().toString("hh_mm_ss");
+	auto dir = AwSettings::getInstance()->logDir;
+	for (auto component : m_logFiles.keys()) {
+		auto logs = logsForComponent(component);
+		if (logs.isEmpty())
+			continue;
+		writeLog(component);
+	}
+	m_logFiles.clear();
+}
+
+void AwDebugLog::writeLog(const QString& name)
+{
+	auto logs = logsForComponent(name);
+	if (logs.isEmpty())
+		return;
+	auto date = QDate::currentDate().toString("dd_MM_yyyy");
+	auto time = QTime::currentTime().toString("hh_mm_ss");
+	auto dir = AwSettings::getInstance()->logDir;
+	QString filePath = QString("%1/%2_%3_%4.log").arg(dir).arg(m_logFiles[name]).arg(date).arg(time);
+	QFile file(filePath);
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		QTextStream stream(&file);
+		for (auto l : logs)
+			stream << l << endl;
+		file.close();
+	}
+}
+
+void AwDebugLog::disconnectComponent(QObject *component)
+{
+	if (!m_components.contains(component))
+		return;
+	auto name = m_components[component];
+	if (m_logFiles.contains(name)) 
+		writeLog(name);
+}
+
+void AwDebugLog::connectComponent(const QString &name, QObject *component, const QString& fileName)
 {
 	if (!m_components.contains(component))
 	{
 		m_components.insert(component, name);
+		if (!fileName.isEmpty())
+			m_logFiles[name] = fileName;
 		connect(component, SIGNAL(log(const QString&)), this, SLOT(addLog(const QString&)));
 	}
 }
@@ -65,11 +108,6 @@ QStringList AwDebugLog::components()
 
 QStringList AwDebugLog::logsForComponent(const QString &name)
 {
-	//QStringList* logs = m_logs.value(name);
-	//if (logs)
-	//	return *logs;
-	//else 
-	//	return QStringList();
 	if (m_logs.contains(name))
 		return m_logs[name];
 	return QStringList();
@@ -93,23 +131,4 @@ void AwDebugLog::addLog(const QString& message)
 	else
 		m_logs.insert(componentName, QStringList(logMessage));
 	emit newLogsAdded();
-
-	//if (!componentName.isEmpty())
-	//{
-	//	QTime t = QTime::currentTime();
-	//	QString slog = t.toString() + ": " + message;
-	//	// check if component already got some logs
-	//	if (m_logs.keys().contains(componentName))
-	//	{
-	//		QStringList *logs = m_logs.value(componentName);
-	//		logs->append(slog);
-	//	}
-	//	else
-	//	{
-	//		QStringList* logs = new QStringList;
-	//		logs->append(slog);
-	//		m_logs.insert(componentName, logs);
-	//	}
-	//	emit newLogsAdded();
-	//}
 }

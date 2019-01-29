@@ -2,6 +2,7 @@
 #include "AwCommandLineManager.h"
 #include <AwException.h>
 #include "IO/BIDS/AwBIDSManager.h"
+#include "Debug/AwDebugLog.h"
 
 using namespace aw::commandLine;
 
@@ -12,32 +13,22 @@ int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
 	for (auto op : operations.keys()) {
 		switch (op) {
 		case aw::commandLine::BIDS_SEEG:
-			try {
-				AwBIDSManager::instance()->SEEGtoBIDS(operations[op]);
-			}
-			catch (const AwException& e)
-			{
-				exit(-1);
-			}
+			AwBIDSManager::instance()->SEEGtoBIDS(operations[op]);
 			break;
 		case aw::commandLine::ICA:
-			try {
-				AwCommandLineManager::computeICA(operations[op]);
-			}
-			catch (const AwException& e)
-			{
-				exit(-1);
-			}
+			AwCommandLineManager::computeICA(operations[op]);
 			break;
 		}
 	}
-	// every operations were done successfully
+	// something happend.
+	AwDebugLog::instance()->closeFile();
 	return 0;
 }
 
 QMap<int, AwArguments> aw::commandLine::doParsing() 
 {
 	QCommandLineParser parser;
+	AwCommandLogger logger(QString("Command Line"));
 	QMap<int, AwArguments> res;
 	parser.setApplicationDescription("AnyWave");
 	parser.addVersionOption();
@@ -106,7 +97,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 	}
 	if (parser.isSet(seegBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt)) {
-			parser.showHelp();
+			logger.sendLog("seegBIDS: Missing subject or task argument");
 			exit(-1);
 		}
 		// Session option is not required
@@ -122,7 +113,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 		QString proc = parser.value(BIDSProcOpt);
 
 		if (file.isEmpty() || subj.isEmpty() || task.isEmpty()) {
-			parser.showHelp();
+			logger.sendLog("seegBIDS: a required argument is missing (file, subject, task)");
 			exit(-1);
 		}
 
@@ -131,7 +122,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 				format = "EDF";
 			bool formatOK = format.toUpper() == "EDF" || format.toUpper() == "VHDR";
 			if (!formatOK) {
-				parser.showHelp();
+				logger.sendLog("seegBIDS: output format is invalid. (must be EDF or VHDR)");
 				exit(-1);
 			}
 		}
@@ -157,15 +148,24 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 			arguments["proc"] = proc;
 
 		res[aw::commandLine::BIDS_SEEG] = arguments;
-		//try {
-		//	AwBIDSManager::instance()->SEEGtoBIDS(arguments);
-
-		//}
-		//catch (const AwException& e)
-		//{
-		//	exit(-1);
-		//}
-		//exit(0);
 	}
 	return res;
+}
+
+
+using namespace aw::commandLine;
+
+AwCommandLogger::AwCommandLogger(const QString& component)
+{
+	AwDebugLog::instance()->connectComponent(component, this, QString("command_line"));
+}
+
+AwCommandLogger::~AwCommandLogger()
+{
+	AwDebugLog::instance()->disconnectComponent(this);
+}
+
+void AwCommandLogger::sendLog(const QString& message)
+{
+	emit log(message);
 }

@@ -56,7 +56,7 @@ private:
 	bool m_ignoreMarkers;
 	bool m_ignoreBadChannels;
 	int m_nComp;
-	int m_decimateFactor;
+	bool m_isDownsamplingActive;
 	int m_algo;
 	QString m_fileName;
 	float m_lpf, m_hpf, m_samplingRate;

@@ -26,12 +26,12 @@ ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels,
 	}
 	else
 		m_ui.comboIgnoredMarkers->addItems(m_labels);
-//	m_ui.saveFileName->setText(m_dataPath);
 	samplingRate = m_channels.at(0)->samplingRate(); 
 	connect(m_ui.cbAll, SIGNAL(toggled(bool)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(updateMaxNumOfIC()));
 	m_ui.labelTotalIC->hide();
+	downSampling = true;
 }
 
 ICASettings::~ICASettings()
@@ -59,7 +59,7 @@ void ICASettings::accept()
 	}
 
 	algo = m_ui.comboAlgo->currentIndex();
-
+	downSampling = !m_ui.checkBoxDS->isChecked();
 	return QDialog::accept();
 }
 

@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	auto args = aw::commandLine::doParsing();
 	AnyWave window(args.isEmpty()); // args not empty means something to do in command line mode => no gui mode on 
 	int status = aw::commandLine::doCommandLineOperations(args);
-	if (status == 0)
+	if (status == 0) 
 		exit(0);
 
 	QCommandLineParser parser;
