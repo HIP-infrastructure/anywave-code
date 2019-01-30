@@ -1297,6 +1297,18 @@
     <ClCompile Include="GeneratedFiles\Release\moc_CommandLineParser.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="AwCLGetData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwCommandLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwCommandLogger.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwCommandLogger.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1816,6 +1828,9 @@
       <Filter>IO\MEMIO</Filter>
     </CustomBuild>
     <CustomBuild Include="CommandLineParser.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="AwCommandLogger.h">
       <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>

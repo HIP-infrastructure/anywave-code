@@ -124,7 +124,6 @@ void ICA::runFromCommandLine()
 		selectedMarkers = AwMarker::invertMarkerSelection(pdi.input.markers, args["skip"].toString(), pdi.input.fileDuration);
 
 	bool skipData = !selectedMarkers.isEmpty();
-
 	auto lp = args["lp"].toString();
 	auto hp = args["hp"].toString();
 	m_lpf = m_hpf = 0.;
@@ -132,47 +131,40 @@ void ICA::runFromCommandLine()
 		m_lpf = lp.toDouble();
 	if (!hp.isEmpty())
 		m_hpf = hp.toDouble();
-	AwFilterSettings filterSettings;
-	filterSettings.set(m_modality, m_hpf, m_lpf, 0.);
+
+	AwFilterSettings filterSettings(pdi.input.filterSettings);
+	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
+	filterSettings.apply(m_channels);
+	if (skipData)
+		requestData(&m_channels, &selectedMarkers, true);
+	else
+		requestData(&m_channels, 0.0f, -1.0f, true);
+
 	int decimate = 1;
 	if (m_isDownsamplingActive) {
 		decimate = 2;
 		// compute decimate factor based on low pass filter
 		if (m_lpf > 0) {
-			float fc = m_lpf * 3;
+			float fc = m_lpf * 4;
 
 			while (m_samplingRate / decimate > fc)
 				decimate++;
 			decimate--;
 		}
+		sendMessage(QString("Decimating data by a a factor of %1...").arg(decimate));
+		try {
+			AwFiltering::decimate(m_channels, decimate);
+		}
+		catch (const AwException& e)
+		{
+			sendMessage("Error during decimation of data. Aborted.");
+			return;
+		}
+		sendMessage("Done.");
 	}
-
-	if (decimate > 1) {
-		sendMessage("Loading data...");
-		if (skipData)
-			requestData(&m_channels, &selectedMarkers, true);
-		else
-			requestData(&m_channels, 0.0f, -1.0f, true);
-		sendMessage("Done.");
-		AwChannel::clearFilters(m_channels);
-		sendMessage("Decimating data...");
-		AwFiltering::decimate(m_channels, decimate);
-		sendMessage("Done.");
-		// applying filtering options to channels
-		filterSettings.apply(m_channels);
+	else { // just filter the data
 		sendMessage("Filtering...");
-		AwFiltering::filter(m_channels);
-		sendMessage("Done.");
-
-	}
-	else {
-		AwChannel::clearFilters(m_channels);
-		filterSettings.apply(m_channels);
-		sendMessage("Loading data and filtering...");
-		if (skipData)
-			requestData(&m_channels, &selectedMarkers, true);
-		else
-			requestData(&m_channels, 0.0f, -1.0f, true);
+		AwFiltering::filter(&m_channels);
 		sendMessage("Done.");
 	}
 
@@ -184,7 +176,7 @@ void ICA::runFromCommandLine()
 
 	int nSamples = m_channels.first()->dataSize(); // getting total number of samples
 
-	if (pow(sqrt(m_nComp * 1.0), 3.0) > nSamples) {
+	if (sqrt(nSamples / 30.) < m_nComp) {
 		sendMessage(QString("Number of samples %1 for the number of components "
 			"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
 		return;
@@ -252,46 +244,37 @@ void ICA::run()
 
 	AwFilterSettings filterSettings(pdi.input.filterSettings);
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
-	
+	filterSettings.apply(m_channels);
+	if (skipData)
+		requestData(&m_channels, &selectedMarkers, true);
+	else
+		requestData(&m_channels, 0.0f, -1.0f, true);
+
 	int decimate = 1;
 	if (m_isDownsamplingActive) {
 		decimate = 2;
 		// compute decimate factor based on low pass filter
 		if (m_lpf > 0) {
-			float fc = m_lpf * 3;
+			float fc = m_lpf * 4;
 
 			while (m_samplingRate / decimate > fc)
 				decimate++;
 			decimate--;
 		}
+		sendMessage(QString("Decimating data by a a factor of %1...").arg(decimate));
+		try {
+			AwFiltering::decimate(m_channels, decimate);
+		}
+		catch (const AwException& e)
+		{
+			sendMessage("Error during decimation of data. Aborted.");
+			return;
+		}
+		sendMessage("Done.");
 	}
-
-	if (decimate > 1) {
-		sendMessage("Loading data...");
-		if (skipData)
-			requestData(&m_channels, &selectedMarkers, true);
-		else
-			requestData(&m_channels, 0.0f, -1.0f, true);
-		sendMessage("Done.");
-		AwChannel::clearFilters(m_channels);
-		sendMessage("Decimating data...");
-		AwFiltering::decimate(m_channels, decimate);
-		sendMessage("Done.");
-		// applying filtering options to channels
-		filterSettings.apply(m_channels);
+	else { // just filter the data
 		sendMessage("Filtering...");
-		AwFiltering::filter(m_channels);
-		sendMessage("Done.");
-
-	}
-	else {
-		AwChannel::clearFilters(m_channels);
-		filterSettings.apply(m_channels);
-		sendMessage("Loading data and filtering...");
-		if (skipData)
-			requestData(&m_channels, &selectedMarkers, true);
-		else
-			requestData(&m_channels, 0.0f, -1.0f, true);
+		AwFiltering::filter(&m_channels);
 		sendMessage("Done.");
 	}
 
@@ -302,8 +285,7 @@ void ICA::run()
 	}
 
 	int nSamples = m_channels.first()->dataSize(); // getting total number of samples
-
-	if (pow(sqrt(m_nComp * 1.0), 3.0) > nSamples) {
+	if (sqrt(nSamples / 30.) < m_nComp) {
 		sendMessage(QString("Number of samples %1 for the number of components "
 			"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
 		return;

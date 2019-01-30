@@ -39,6 +39,7 @@ ICASettings::~ICASettings()
 
 }
 
+
 void ICASettings::accept()
 {
 	ignoreBadChannels = m_ui.ignoreBads->isChecked();
@@ -59,7 +60,7 @@ void ICASettings::accept()
 	}
 
 	algo = m_ui.comboAlgo->currentIndex();
-	downSampling = !m_ui.checkBoxDS->isChecked();
+	downSampling = !m_ui.checkBoxDS->isChecked() && m_ui.spinLPF->value() > 0.;
 	return QDialog::accept();
 }
 
