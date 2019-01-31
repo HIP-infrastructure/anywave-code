@@ -53,7 +53,7 @@ class AwPythonScriptPlugin : public AwScriptPlugin
 	Q_OBJECT
 
 public:
-	AwPythonScriptPlugin() : AwScriptPlugin() { }
+	AwPythonScriptPlugin() : AwScriptPlugin() { m_backend = AwScriptPlugin::Python; }
 
 	AwPythonScriptProcess *newInstance();
 };

@@ -33,13 +33,12 @@ class AwScriptProcess : public AwProcess
 	Q_OBJECT
 public:
 	AwScriptProcess() : AwProcess() { m_isCompiled = false;  } 
-	
 	void setScriptPath(const QString& path) { m_path = path; }
 	inline void setPid(int pid) { m_pid = pid; }
 	inline int pid() { return m_pid; }
 	void setCompiled(bool flag = true) { m_isCompiled = flag; }
 protected:
-	QString m_path;
+	QString m_path;	// path to plugin executable file (optional)
 	bool m_isCompiled; // used for MATLAB compiled plugin
 	int m_pid;	
 };
@@ -49,10 +48,11 @@ class AwScriptPlugin : public AwProcessPlugin
 	Q_OBJECT
 public:
 	AwScriptPlugin() : AwProcessPlugin() { type = AwProcessPlugin::Background; m_isCompiled = false;}
-
+	enum Backends { Python, MATLAB};
 	void setNameAndDesc(const QString& name, const QString& description);
 	void setScriptPath(const QString& path) { m_path = path; }
 	void setPluginDir(const QString& dir) { m_pluginDir = dir; }
+	void setPluginBackend(int backend) { m_backend = backend; }
 	void initProcess(AwScriptProcess *process);
 	inline bool isCompiled() { return m_isCompiled; }
 	inline void setAsCompiled(bool f) { m_isCompiled = f; }
@@ -61,6 +61,7 @@ protected:
 	void checkIOForProcess(AwScriptProcess *p);
 	QString m_path;			// path to script or executable file
 	QString m_pluginDir;	// path to the directory where the plugin is installed.
+	int m_backend;	// either Python or MATLAB
 };
 
 #endif // AWSCRIPTPLUGIN_H

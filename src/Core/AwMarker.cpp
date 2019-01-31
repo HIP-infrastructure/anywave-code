@@ -378,8 +378,6 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
         skippedMarkers = AwMarker::merge(tmp);
         tmp = AwMarker::getMarkersWithLabels(markers, used);
         usedMarkers = AwMarker::merge(tmp);
-		//skippedMarkers = AwMarker::merge(AwMarker::getMarkersWithLabels(markers, skipped));
-		//usedMarkers = AwMarker::merge(AwMarker::getMarkersWithLabels(markers, used));
 		// browse used markers and test if they overlap rejected/skipped ones.
 		for (int i = 0; i < skippedMarkers.size(); i++) {
 			auto m = skippedMarkers.at(i);

@@ -101,12 +101,13 @@ void AwPythonScriptProcess::run()
 	initpy = QDir::toNativeSeparators(initpy);
 	pyPath = QDir::toNativeSeparators(AwSettings::getInstance()->PythonModulePath());
 
-	emit progressChanged(tr("Launching Python script..."));
+	if (m_isCompiled)
+		emit progressChanged(tr("Launching Python plugin..."));
+	else
+		emit progressChanged(tr("Launching Python script..."));
 	// Building the command line arguments:
 	QString scriptPath = m_path + "/__main__.py";
 	scriptPath = QDir::toNativeSeparators(scriptPath);
-
-	//arguments << initpy <<  pyPath << QString::number(m_pid) << dataPath << scriptPath;
 
 	arguments << initpy << pyPath << QString::number(m_pid) << QString::number(AwMATPyServer::instance()->serverPort()) << dataPath << scriptPath;
 
@@ -131,7 +132,12 @@ void AwPythonScriptProcess::run()
 	connect(m_python, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
 	QSettings settings;
 	QString python = settings.value("py/interpreter").toString();
-	m_python->start(python, arguments,  QIODevice::ReadWrite);
+
+	if (!m_isCompiled)
+		m_python->start(python, arguments, QIODevice::ReadWrite);
+	else
+		m_python->start(m_path, arguments, QIODevice::ReadWrite);
+
 	if (!m_python->waitForStarted())
 		emit progressChanged("waitForStarted() failed.");
 

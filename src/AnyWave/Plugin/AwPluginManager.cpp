@@ -204,120 +204,121 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 QStringList dirs = dir.entryList(QDir::Dirs);
 	 dirs.removeAll(".");
 	 dirs.removeAll("..");
-	 foreach (QString folder, dirs)	 { 
+	 for (auto folder : dirs) {
 		 QString name = folder;
 		 QString desc, processType, category, compiledPath, flags;
 		 int type = AwProcessPlugin::Background;	// default type if none defined
-		 int isCompiled = false;
+		 bool isMATLABCompiled = false, isPythonCompiled = false;
 		 QString pluginPath = dir.absolutePath() + "/" + folder;
-		 if (QFile::exists(pluginPath + "/desc.txt")) {
-			QFile file(pluginPath + "/desc.txt");
-			QTextStream stream(&file);
-			if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
-				while (!stream.atEnd()) {
-					QString line = stream.readLine();
-					if (line.startsWith("#"))
-						continue;
-					if (line.contains("name")) {
-						QStringList res = line.split("=");
-						if (res.size() == 2)
-							name = res.at(1).trimmed();
-					}
-					else if (line.contains("description")) {
-						QStringList res = line.split("=");
-						if (res.size() == 2)
-							desc = res.at(1).trimmed();
-					}
-					else if (line.contains("type"))	{
-						QStringList res = line.split("=");
-						if (res.size() == 2) {
-							processType = res.at(1).trimmed().toLower();
-							if (processType == "background")
-								type = AwProcessPlugin::Background;
-							if (processType == "display")
-								type = AwProcessPlugin::Display;
-							if (processType == "displaybackground")
-								type = AwProcessPlugin::DisplayBackground;
-						}		
-					}
-					else if (line.contains("compiled plugin")) {
-						isCompiled = true;
-						QStringList res = line.split("=");
-						if (res.size() == 2)
-							compiledPath = res.at(1).trimmed();
-					}
-					else if (line.contains("category")) {
-						QStringList res = line.split("=");
-						if (res.size() == 2)
-							category = res.at(1).trimmed();
-					}
-					else if (line.contains("flags")) {
-						QStringList res = line.split("=");
-						if (res.size() == 2)
-							flags = res.at(1).trimmed();
-					}
-				}
-				// check the kind of script we have.
-				if (QFile::exists(pluginPath + "/__main__.py"))	{
-					AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
+		 QString exePluginPath; // can handle the path to standalone executable plugins
+		 QString pythonCode = QString("%1/__main__.py").arg(pluginPath);
+		 QString matlabCode = QString("%1/main.m").arg(pluginPath);
+		 bool isMATLABScript = QFile::exists(matlabCode);
+		 bool isPythonScript = QFile::exists(pythonCode);
+		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
+		 if (!QFile::exists(descPath))
+			 continue;
+		 QFile file(descPath);
+		 QTextStream stream(&file);
+		 if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+			 continue;
+		 while (!stream.atEnd()) {
+			 auto line = stream.readLine();
+			 if (line.startsWith("#"))
+				 continue;
+			 if (line.contains("name")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2)
+					 name = res.at(1).trimmed();
+			 }
+			 else if (line.contains("description")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2)
+					 desc = res.at(1).trimmed();
+			 }
+			 else if (line.contains("type")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2) {
+					 processType = res.at(1).trimmed().toLower();
+					 if (processType == "background")
+						 type = AwProcessPlugin::Background;
+					 if (processType == "display")
+						 type = AwProcessPlugin::Display;
+					 if (processType == "displaybackground")
+						 type = AwProcessPlugin::DisplayBackground;
+				 }
+			 }
+			 else if (line.contains("compiled plugin")) { // for backward compatibility, we keep the compiled plugin for MATLAB plugins
+				 QStringList res = line.split("=");
+				 if (res.size() == 2) {
+					 isMATLABCompiled = true;
+					 compiledPath = res.at(1).trimmed();
+					 exePluginPath = QString("%1/%2").arg(pluginPath).arg(compiledPath);
+				 }
+			 }
+			 else if (line.contains("compiled python plugin")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2) {
+					 isPythonCompiled = true;
+					 compiledPath = res.at(1).trimmed();
+					 exePluginPath = QString("%1/%2").arg(pluginPath).arg(compiledPath);
+				 }
+			 }
+			 else if (line.contains("category")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2)
+					 category = res.at(1).trimmed();
+			 }
+			 else if (line.contains("flags")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2)
+					 flags = res.at(1).trimmed();
+			 }
+		 }
+		 file.close();
+		 // now instantiante objects depending on plugin type
+		 // check for MATLAB connection before
+		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->isMatlabPresent();
+		 if (isMATLABScript || isMATLABCompiled) {
+			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
+			 plugin->type = type;
+			 plugin->setNameAndDesc(name, desc);
+			 if (isMATLABCompiled)
+				 plugin->setScriptPath(exePluginPath);
+			 else
+				 plugin->setScriptPath(pluginPath);
+			 plugin->setPluginDir(pluginPath);
+			 plugin->category = category;
+			 setFlagsForScriptPlugin(plugin, flags);
+			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
+			 if (p) {
+				 m_pluginProcesses.removeAll(p);
+				 m_processFactory.removePlugin(name);
+				 delete p;
+			 }
+			 m_processFactory.addPlugin(name, plugin);
+			 m_pluginProcesses += plugin;
+		 }
+		 if (isPythonScript || isPythonCompiled) {
+			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
 
-					plugin->type = type;
-					plugin->setNameAndDesc(name, desc);
-					plugin->setScriptPath(pluginPath);
-					plugin->setPluginDir(pluginPath);
-					plugin->category = category;
-					setFlagsForScriptPlugin(plugin, flags);
-					AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-					if (p) {
-						m_pluginProcesses.removeAll(p);
-						m_processFactory.removePlugin(name);
-						delete p;
-					}
-					m_processFactory.addPlugin(name, plugin);
-					m_pluginProcesses += plugin;
-				}
-				else if (isCompiled) { // MATLAB compiled plugin
-					QString fullBinaryPath = pluginPath + "/" + compiledPath;
-					if (QFile::exists(fullBinaryPath)) {
-						AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
-						plugin->type = type;
-						plugin->setNameAndDesc(name, desc);
-						plugin->setScriptPath(fullBinaryPath);
-						plugin->setPluginDir(pluginPath);
-						plugin->category = category;
-						plugin->setAsCompiled(true);
-						setFlagsForScriptPlugin(plugin, flags);						
-						AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-						if (p) 	{
-							m_pluginProcesses.removeAll(p);
-							m_processFactory.removePlugin(name);
-							delete p;
-						}
-						m_processFactory.addPlugin(name, plugin);
-						m_pluginProcesses += plugin;
-					}
-				}
-				else if (AwSettings::getInstance()->isMatlabPresent()) {
-					if (QFile::exists(pluginPath + "/main.m")) {
-						AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
-						plugin->type = type;
-						plugin->setNameAndDesc(name, desc);
-						plugin->setScriptPath(pluginPath);
-						plugin->setPluginDir(pluginPath);
-						plugin->category = category;
-						setFlagsForScriptPlugin(plugin, flags);
-						AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-						if (p) {
-							m_pluginProcesses.removeAll(p);
-							m_processFactory.removePlugin(name);
-							delete p;
-						}
-						m_processFactory.addPlugin(name, plugin);
-						m_pluginProcesses += plugin;
-					}
-				}
-			}
-			file.close();
+			 plugin->type = type;
+			 plugin->setNameAndDesc(name, desc);
+			 if (isPythonCompiled)
+				 plugin->setScriptPath(exePluginPath);
+			 else
+				 plugin->setScriptPath(pluginPath);
+			 plugin->setPluginDir(pluginPath);
+			 plugin->category = category;
+			 setFlagsForScriptPlugin(plugin, flags);
+			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
+			 if (p) {
+				 m_pluginProcesses.removeAll(p);
+				 m_processFactory.removePlugin(name);
+				 delete p;
+			 }
+			 m_processFactory.addPlugin(name, plugin);
+			 m_pluginProcesses += plugin;
 		 }
 	 }
 }

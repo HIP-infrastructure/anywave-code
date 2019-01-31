@@ -48,7 +48,7 @@ class AwMatlabScriptPlugin : public AwScriptPlugin
 	Q_OBJECT
 
 public:
-	AwMatlabScriptPlugin() : AwScriptPlugin() { }
+	AwMatlabScriptPlugin() : AwScriptPlugin() { m_backend = AwScriptPlugin::MATLAB; }
 
 	AwMatlabScriptProcess *newInstance();
 };
