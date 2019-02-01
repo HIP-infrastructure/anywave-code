@@ -100,16 +100,16 @@ PyObject *getMarkers(PyObject *self, PyObject *args)
 	QVector<float> values;
 	QStringList labels, channels;
 
-	if (PyArg_ParseTuple(args, ""))
-		return request_markers(file, extractTriggers, values, labels, channels);
+	//if (PyArg_ParseTuple(args, ""))
+	//	return request_markers(file, extractTriggers, values, labels, channels);
 
-	PyObject *dict = NULL;
-	if (!PyArg_ParseTuple(args, "O", &dict)) {
-		PyErr_SetString(AnyWaveError, "incorrect argument.");
-		return NULL;
-	}
-	if (dict == NULL) 
-		return request_markers(file, extractTriggers, values, labels, channels);
+	PyObject *dict = args;
+	//if (!PyArg_ParseTuple(args, "O", &dict)) {
+	//	PyErr_SetString(AnyWaveError, "incorrect argument.");
+	//	return NULL;
+	//}
+	//if (dict == NULL) 
+	//	return request_markers(file, extractTriggers, values, labels, channels);
 
 	if (!PyDict_Check(dict)) {
 		PyErr_SetString(AnyWaveError, "incorrect argument.");

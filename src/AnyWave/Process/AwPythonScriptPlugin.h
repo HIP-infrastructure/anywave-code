@@ -44,7 +44,7 @@ public slots:
 	void pythonError();
 	void error(QProcess::ProcessError error);
 protected:
-	QProcess *m_python;
+	QProcess m_python;
 };
 
 

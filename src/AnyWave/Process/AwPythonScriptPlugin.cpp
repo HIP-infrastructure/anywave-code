@@ -49,24 +49,24 @@ AwPythonScriptProcess *AwPythonScriptPlugin::newInstance()
 
 AwPythonScriptProcess::AwPythonScriptProcess() : AwScriptProcess()
 {
-	m_python = NULL;
+	m_python.setReadChannel(QProcess::StandardOutput);
+	m_python.setProcessChannelMode(QProcess::MergedChannels);
 }
 
 AwPythonScriptProcess::~AwPythonScriptProcess()
 {
-	if (m_python)
-		delete m_python;
+
 }
 
 
 void AwPythonScriptProcess::pythonOutput()
 {
-	emit progressChanged(QString(m_python->readAllStandardOutput()));
+	emit progressChanged(QString(m_python.readAllStandardOutput()));
 }
 
 void AwPythonScriptProcess::pythonError()
 {
-	emit progressChanged("error: " + QString(m_python->readAllStandardOutput()));
+	emit progressChanged("error: " + QString(m_python.readAllStandardOutput()));
 }
 
 void AwPythonScriptProcess::error(QProcess::ProcessError error)
@@ -94,14 +94,13 @@ void AwPythonScriptProcess::run()
 {
 	QStringList arguments;
 	QString initpy;
-	QString pyPath;
 	QString dataPath = pdi.input.dataPath;
 	dataPath = QDir::toNativeSeparators(dataPath);
 	initpy = AwSettings::getInstance()->PythonModulePath() + "/init.py";
 	initpy = QDir::toNativeSeparators(initpy);
-	pyPath = QDir::toNativeSeparators(AwSettings::getInstance()->PythonModulePath());
-
-	if (m_isCompiled)
+	auto anywaveModulePath = QDir::toNativeSeparators(AwSettings::getInstance()->PythonModulePath());
+	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
+	if (isCompiled)
 		emit progressChanged(tr("Launching Python plugin..."));
 	else
 		emit progressChanged(tr("Launching Python script..."));
@@ -109,12 +108,15 @@ void AwPythonScriptProcess::run()
 	QString scriptPath = m_path + "/__main__.py";
 	scriptPath = QDir::toNativeSeparators(scriptPath);
 
-	arguments << initpy << pyPath << QString::number(m_pid) << QString::number(AwMATPyServer::instance()->serverPort()) << dataPath << scriptPath;
+	if (!isCompiled)
+		arguments << initpy;
 
-	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	arguments << anywaveModulePath << QString::number(m_pid) << QString::number(AwMATPyServer::instance()->serverPort()) << dataPath << scriptPath;
 
-	env.insert("PATH", AwSettings::getInstance()->systemPath()); // Very important to define the full system path in the process environment.
-	env.insert("PATH", qApp->applicationDirPath());
+	//QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+	//env.insert("PATH", AwSettings::getInstance()->systemPath()); // Very important to define the full system path in the process environment.
+	//env.insert("PATH", qApp->applicationDirPath());
 #ifdef Q_OS_MAC
 	QString application = QCoreApplication::applicationDirPath();
     application += "/../Frameworks";
@@ -123,24 +125,24 @@ void AwPythonScriptProcess::run()
 #ifdef Q_OS_LINUX
     env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
 #endif
-	m_python = new QProcess();
-	m_python->setProcessEnvironment(env);
-	m_python->setReadChannel(QProcess::StandardOutput);
-	m_python->setProcessChannelMode(QProcess::MergedChannels);
-	connect(m_python, SIGNAL(readyReadStandardOutput()), this, SLOT(pythonOutput()));
-	connect(m_python, SIGNAL(readyReadStandardError()), this, SLOT(pythonError()));
-	connect(m_python, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
+	QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
+	env.remove("PATH");
+	env.insert("PATH", AwSettings::getInstance()->systemPath());
+	m_python.setProcessEnvironment(env);
+	connect(&m_python, SIGNAL(readyReadStandardOutput()), this, SLOT(pythonOutput()));
+	connect(&m_python, SIGNAL(readyReadStandardError()), this, SLOT(pythonError()));
+	connect(&m_python, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
 	QSettings settings;
 	QString python = settings.value("py/interpreter").toString();
 
-	if (!m_isCompiled)
-		m_python->start(python, arguments, QIODevice::ReadWrite);
+	if (!isCompiled)
+		m_python.start(python, arguments, QIODevice::ReadWrite);
 	else
-		m_python->start(m_path, arguments, QIODevice::ReadWrite);
+		m_python.start(m_path, arguments, QIODevice::ReadWrite);
 
-	if (!m_python->waitForStarted())
+	if (!m_python.waitForStarted())
 		emit progressChanged("waitForStarted() failed.");
 
-	m_python->waitForFinished(-1); // wait for plugin to finish. (Wait forever).
+	m_python.waitForFinished(-1); // wait for plugin to finish. (Wait forever).
 	emit progressChanged(tr("Python script has finished."));
 }

@@ -283,8 +283,10 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
 			 plugin->type = type;
 			 plugin->setNameAndDesc(name, desc);
-			 if (isMATLABCompiled)
+			 if (isMATLABCompiled) {
+				 plugin->setAsCompiled(true);
 				 plugin->setScriptPath(exePluginPath);
+			 }
 			 else
 				 plugin->setScriptPath(pluginPath);
 			 plugin->setPluginDir(pluginPath);
@@ -304,8 +306,10 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 
 			 plugin->type = type;
 			 plugin->setNameAndDesc(name, desc);
-			 if (isPythonCompiled)
+			 if (isPythonCompiled) {
+				 plugin->setAsCompiled(true);
 				 plugin->setScriptPath(exePluginPath);
+			 }
 			 else
 				 plugin->setScriptPath(pluginPath);
 			 plugin->setPluginDir(pluginPath);

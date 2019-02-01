@@ -42,21 +42,28 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 	if (request.status() != TCPRequest::connected)
 		return NULL;
 	QDataStream *stream = request.stream();
-	if (PyArg_ParseTuple(args, "")) { // no arguments => default parameters
-
-	}	
-	else {
-		PyObject *dict = NULL;
-		if (!PyArg_ParseTuple(args, "O", &dict)) {
-			PyErr_SetString(AnyWaveError, "incorrect argument.");
-			return NULL;
-		}
-		if (!PyDict_Check(dict)) {
-			PyErr_SetString(AnyWaveError, "incorrect argument.");
-			return NULL;
-		}
-		*stream << dictToJson(dict);
+	auto dict = args;
+	if (!PyDict_Check(dict)) {
+		PyErr_SetString(AnyWaveError, "incorrect argument.");
+		return NULL;
 	}
+	*stream << dictToJson(dict);
+
+	//if (PyArg_ParseTuple(args, "")) { // no arguments => default parameters
+
+	//}	
+	//else {
+	//	PyObject *dict = NULL;
+	//	if (!PyArg_ParseTuple(args, "O", &dict)) {
+	//		PyErr_SetString(AnyWaveError, "incorrect argument.");
+	//		return NULL;
+	//	}
+	//	if (!PyDict_Check(dict)) {
+	//		PyErr_SetString(AnyWaveError, "incorrect argument.");
+	//		return NULL;
+	//	}
+	//	*stream << dictToJson(dict);
+	//}
 
 	if (!request.sendRequest())
 		return NULL;

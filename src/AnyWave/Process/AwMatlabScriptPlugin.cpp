@@ -71,7 +71,8 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 void AwMatlabScriptProcess::run()
 {
 	AwMatlabInterface *mi = NULL;
-	if (m_isCompiled) { // this is a MATLAB compiled standalone plugin.
+	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
+	if (isCompiled) { // this is a MATLAB compiled standalone plugin.
 		QStringList arguments;
 		AwDebugLog::instance()->connectComponent("MATLAB Compiled Plugins", this);
 		emit log(QString("System PATH for %1 is %2").arg(this->plugin()->name).arg(m_systemPath));
