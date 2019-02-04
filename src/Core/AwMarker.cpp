@@ -268,6 +268,55 @@ AwMarkerList AwMarker::intersect(const AwMarkerList& markers, float start, float
 }
 
 
+AwMarkerList AwMarker::applyANDOperation(AwMarkerList& source, AwMarkerList& dest)
+{
+	AwMarkerList res;
+	if (source.isEmpty() && dest.isEmpty())
+		return res;
+	if (source.isEmpty() && !dest.isEmpty())
+		return AwMarker::duplicate(dest);
+	if (!source.isEmpty() && dest.isEmpty())
+		return AwMarker::duplicate(source);
+
+	auto sources = AwMarker::merge(AwMarker::sort(source));
+	auto destinations = AwMarker::merge(AwMarker::sort(dest));
+
+	for (auto m : sources) {
+		auto intersection = AwMarker::intersect(destinations, m->start(), m->end());
+		if (intersection.isEmpty())
+			continue;
+		for (auto i : intersection) {
+			bool startBeforeEndAfter = i->start() < m->start() && i->end() > m->end();
+			bool startBeforeEndWithin = i->start() < m->start() && i->end() <= m->end();
+			bool startWithinEndAfter = i->start() >= m->start() && i->end() > m->end();
+			bool isWithin = i->start() >= m->start() && i->end() <= m->end();
+
+			if (startBeforeEndAfter) {
+				auto nm = new AwMarker(i);
+				nm->reshape(m->start(), m->end());
+				res << nm;
+			}
+			if (startBeforeEndWithin) {
+				auto nm = new AwMarker(i);
+				nm->reshape(m->start(), i->end());
+				res << nm;
+			}
+			if (startWithinEndAfter) {
+				auto nm = new AwMarker(i);
+				nm->reshape(i->start(), m->end());
+				res << nm;
+			}
+			if (isWithin)
+				res << new AwMarker(i);
+		}
+	}
+	while (!sources.isEmpty())
+		delete sources.takeFirst();
+	while (!destinations.isEmpty())
+		delete destinations.takeFirst();
+	return res;
+}
+
 AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cutMarkers)
 {
 	if (cutMarkers.isEmpty() || markers.isEmpty())

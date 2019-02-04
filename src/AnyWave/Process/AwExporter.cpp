@@ -73,10 +73,10 @@ void AwExporter::run()
 		output_markers = filteredMarkers;
 
 	if (skip && !use) {
-		selection = AwMarker::invertMarkerSelection(m_skippedMarkers, "selection", endTimePos);
+		selection = AwMarker::cutAroundMarkers(pdi.input.markers, m_skippedMarkers);
 	}
 	if (!skip && use) {
-		selection = AwMarker::merge(m_exportedMarkers);
+		selection = AwMarker::applyANDOperation(m_exportedMarkers, pdi.input.markers);
 	}
 	if (skip && use)
 		selection = filteredMarkers;
