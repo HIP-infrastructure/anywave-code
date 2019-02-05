@@ -47,7 +47,7 @@ protected:
 	AwFileIOPlugin *m_plugin;
 	QString m_path;
 	bool m_exportICAChannels;			// this flag indicates that the data contains ICA virtual channels
-	float m_downSample;
+	int m_decimateFactor;
 };
 
 class AwExporterPlugin : public AwProcessPlugin

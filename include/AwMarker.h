@@ -76,10 +76,12 @@ public:
 	static void save(const QString& file, const QList<AwMarker *>& markers);
 	/** duplicate markers **/
 	static QList<AwMarker *> duplicate(const QList<AwMarker *>& markers);
-	/** Sort markers, chronologically **/
+	/** Sort markers, chronologically. Don't duplicate.**/
 	static QList<AwMarker *>& sort(QList<AwMarker *>& markers);
-	/** Shift all markers like if the data where cut around cut markers **/
+	/** Shift all markers like if the data where cut around cut markers. Duplicates markers. **/
 	static QList<AwMarker *> cutAroundMarkers(QList<AwMarker *>& markers, QList<AwMarker *>& cutMarkers);
+	/** Apply logical AND between markers. Returns duplicated makers. **/
+	static QList<AwMarker *> applyANDOperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
 	/** Merge markers whichs overlaps. Return the resulting merged markers **/
 	static QList<AwMarker *> merge(QList<AwMarker *>& markers);
 	/** Get markers from a list which intersect a time selection **/

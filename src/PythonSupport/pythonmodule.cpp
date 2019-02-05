@@ -25,8 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "pythonmodule.h"
 #define PY_ARRAY_UNIQUE_SYMBOL anywave_ARRAY_API
-#define NPY_NO_DEPRECATED_API NPY_1_12_API_VERSION
-//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 
 
@@ -49,15 +48,15 @@ extern PyObject *addMarkers(PyObject *self, PyObject *args);
 extern PyObject *sendMessage(PyObject *self, PyObject *args);
 
 static PyMethodDef AnyWaveMethods[] = {
-	{"get_data", (PyCFunction)getData,  METH_VARARGS,
+	{"get_data", (PyCFunction)getData,  METH_O,
 	"Request data from AnyWave"},
-	{"get_dataex", (PyCFunction)getDataEx,  METH_VARARGS,
+	{"get_dataex", (PyCFunction)getDataEx,  METH_O,
 	"Request data from AnyWave" },
-	{"add_markers", (PyCFunction)addMarkers, METH_VARARGS,
+	{"add_markers", (PyCFunction)addMarkers, METH_O,
 	"Add markers to AnyWave"},
-	{"get_markers", (PyCFunction )getMarkers, METH_VARARGS,
+	{"get_markers", (PyCFunction )getMarkers, METH_O,
 	"Get markers from AnyWave"},
-	{"send_message", (PyCFunction)sendMessage, METH_VARARGS,
+	{"send_message", (PyCFunction)sendMessage, METH_O,
 	"Send a message to AnyWave"},
 	{"get_plugininfo", (PyCFunction)getPluginInfo, METH_NOARGS,
 	"Get information about the plugin's inputs"},

@@ -2,6 +2,8 @@
 #include "AwCommandLineManager.h"
 #include <AwException.h>
 #include "IO/BIDS/AwBIDSManager.h"
+#include "Debug/AwDebugLog.h"
+#include "AwCommandLogger.h"
 
 using namespace aw::commandLine;
 
@@ -12,37 +14,53 @@ int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
 	for (auto op : operations.keys()) {
 		switch (op) {
 		case aw::commandLine::BIDS_SEEG:
-			try {
-				AwBIDSManager::instance()->SEEGtoBIDS(operations[op]);
-			}
-			catch (const AwException& e)
-			{
-				exit(-1);
-			}
+			AwBIDSManager::instance()->SEEGtoBIDS(operations[op]);
 			break;
 		case aw::commandLine::ICA:
-			try {
-				AwCommandLineManager::computeICA(operations[op]);
-			}
-			catch (const AwException& e)
-			{
-				exit(-1);
-			}
+			AwCommandLineManager::computeICA(operations[op]);
+			break;
+		case aw::commandLine::GetData:
+			AwCommandLineManager::getData(operations[op]);
 			break;
 		}
 	}
-	// every operations were done successfully
+	// something happend.
+	AwDebugLog::instance()->closeFile();
 	return 0;
 }
 
 QMap<int, AwArguments> aw::commandLine::doParsing() 
 {
 	QCommandLineParser parser;
+	AwCommandLogger logger(QString("Command Line"));
 	QMap<int, AwArguments> res;
 	parser.setApplicationDescription("AnyWave");
 	parser.addVersionOption();
 	parser.addHelpOption();
 	parser.addPositionalArgument("file", "The file to open.");
+
+	// Common flags for input/output
+	QCommandLineOption inputFile("input_file", "specify the input file to open.", "input_file", QString());
+	QCommandLineOption outputFile("output_file", "specify the file to create.", "output_file", QString());
+	QCommandLineOption outputFormat("output_format", "specify the file format to create. (ADES, MATLAB)", "output_format", QString());
+	QCommandLineOption skipMarker("skip_marker", "specify a marker label to skip when exporting data.", "skip_marker", QString());
+	parser.addOption(inputFile);
+	parser.addOption(outputFile);
+	parser.addOption(outputFormat);
+	parser.addOption(skipMarker);
+	// common filters flags
+	QCommandLineOption filterHP("hp", "specify the High Pass filter (Hz).", "hp", QString());
+	QCommandLineOption filterLP("lp", "specify the Low Pass filter (Hz).", "lp", QString());
+	QCommandLineOption filterNotch("notch", "specify the notch filter (Hz)", "notch", QString());
+	parser.addOption(filterHP);
+	parser.addOption(filterLP);
+	parser.addOption(filterNotch);
+
+	// GET DATA options
+	QCommandLineOption getDataOpt("get_data", "request for data from a file.", "get_data", QString());
+	parser.addOption(getDataOpt);
+	
+	// SEEG BIDS
 	QCommandLineOption seegBIDSOpt("seegBIDS", "SEEG file to BIDSify.\nRequires task and sub options.", "file", QString());
 	QCommandLineOption BIDSSidecarsOpt("bids_output", "sidecars : Only generates sidecar files. all : full conversion", "sidecars", QString());
 	QCommandLineOption BIDSTaskOpt("bids_task", "BIDS task", "task", QString());
@@ -58,9 +76,9 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 	///
 	QCommandLineOption ICAOption("ICA", "Compute ICA on specified file.", "file", QString());
 	QCommandLineOption ICAModality("modality", "optional: specify the channels modality for ICA", "modality", QString());
-	QCommandLineOption ICAArtefact("skip_artefacts", "optional: specify artefact markers to skip", "artefacts", QString());
-	QCommandLineOption ICAHP("hp", "optional: high pass filter", "hp", QString());
-	QCommandLineOption ICALP("lp", "optional: low pass filter", "lp", QString());
+	//QCommandLineOption ICAArtefact("skip_artefacts", "optional: specify artefact markers to skip", "artefacts", QString());
+	//QCommandLineOption ICAHP("hp", "optional: high pass filter", "hp", QString());
+	//QCommandLineOption ICALP("lp", "optional: low pass filter", "lp", QString());
 
 	parser.addOption(seegBIDSOpt);
 	parser.addOption(BIDSSidecarsOpt);
@@ -75,9 +93,9 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 
 	parser.addOption(ICAOption);
 	parser.addOption(ICAModality);
-	parser.addOption(ICAArtefact);
-	parser.addOption(ICAHP);
-	parser.addOption(ICALP);
+	//parser.addOption(ICAArtefact);
+	//parser.addOption(ICAHP);
+	//parser.addOption(ICALP);
 
 	parser.process(QCoreApplication::arguments());
 	
@@ -90,13 +108,13 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 			parser.showHelp();
 			exit(-1);
 		}
-		auto artefacts = parser.value(ICAArtefact);
+		auto artefacts = parser.value(skipMarker);
 		//arguments << AwArgument("ICA_File", file);
 		arguments.insert("ICA_File", file);
 		if (!artefacts.isEmpty())
 			arguments.insert("skip", artefacts);
-		auto hp = parser.value(ICAHP);
-		auto lp = parser.value(ICALP);
+		auto hp = parser.value(filterHP);
+		auto lp = parser.value(filterLP);
 		if (!hp.isEmpty())
 			arguments["hp"] = hp;
 		if (!lp.isEmpty())
@@ -104,9 +122,37 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 		arguments.insert("modality", mod);
 		res[aw::commandLine::ICA] = arguments;
 	}
-	if (parser.isSet(seegBIDSOpt)) {
+	else if (parser.isSet(getDataOpt)) {
+		auto inputF = parser.value(inputFile);
+		if (inputF.isEmpty()) {
+			logger.sendLog("get_data: Missing input file.");
+			exit(-1);
+		}
+		auto outputF = parser.value(outputFile);
+		if (outputF.isEmpty()) {
+			logger.sendLog("get_data: Missing output file.");
+			exit(-1);
+		}
+		arguments["input_file"] = inputF;
+		arguments["output_file"] = outputF;
+		// check for optional arguments
+		auto fHP = parser.value(filterHP);
+		auto fLP = parser.value(filterLP);
+		auto format = parser.value(outputFormat);
+		auto skipedMarker = parser.value(skipMarker);
+		if (!fHP.isEmpty())
+			arguments["hp"] = fHP;
+		if (!fLP.isEmpty())
+			arguments["lp"] = fLP;
+		if (!format.isEmpty())
+			arguments["output_format"] = format;
+		if (!skipedMarker.isEmpty())
+			arguments["skip_marker"] = skipedMarker;
+		res[aw::commandLine::GetData] = arguments;
+	}
+	else if (parser.isSet(seegBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt)) {
-			parser.showHelp();
+			logger.sendLog("seegBIDS: Missing subject or task argument");
 			exit(-1);
 		}
 		// Session option is not required
@@ -122,7 +168,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 		QString proc = parser.value(BIDSProcOpt);
 
 		if (file.isEmpty() || subj.isEmpty() || task.isEmpty()) {
-			parser.showHelp();
+			logger.sendLog("seegBIDS: a required argument is missing (file, subject, task)");
 			exit(-1);
 		}
 
@@ -131,7 +177,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 				format = "EDF";
 			bool formatOK = format.toUpper() == "EDF" || format.toUpper() == "VHDR";
 			if (!formatOK) {
-				parser.showHelp();
+				logger.sendLog("seegBIDS: output format is invalid. (must be EDF or VHDR)");
 				exit(-1);
 			}
 		}
@@ -157,15 +203,9 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 			arguments["proc"] = proc;
 
 		res[aw::commandLine::BIDS_SEEG] = arguments;
-		//try {
-		//	AwBIDSManager::instance()->SEEGtoBIDS(arguments);
-
-		//}
-		//catch (const AwException& e)
-		//{
-		//	exit(-1);
-		//}
-		//exit(0);
 	}
 	return res;
 }
+
+
+

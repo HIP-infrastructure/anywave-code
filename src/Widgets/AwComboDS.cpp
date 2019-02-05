@@ -31,3 +31,8 @@ float AwComboDS::getSamplingRate()
 		break;
 	}
 }
+
+int AwComboDS::getDecimateFactor()
+{
+	return currentIndex() + 1;
+}

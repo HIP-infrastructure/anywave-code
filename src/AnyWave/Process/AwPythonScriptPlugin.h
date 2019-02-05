@@ -44,7 +44,7 @@ public slots:
 	void pythonError();
 	void error(QProcess::ProcessError error);
 protected:
-	QProcess *m_python;
+	QProcess m_python;
 };
 
 
@@ -53,7 +53,7 @@ class AwPythonScriptPlugin : public AwScriptPlugin
 	Q_OBJECT
 
 public:
-	AwPythonScriptPlugin() : AwScriptPlugin() { }
+	AwPythonScriptPlugin() : AwScriptPlugin() { m_backend = AwScriptPlugin::Python; }
 
 	AwPythonScriptProcess *newInstance();
 };

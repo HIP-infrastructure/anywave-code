@@ -117,13 +117,8 @@ void send_markers(const AwMarkerList& markers)
 
 PyObject *addMarkers(PyObject *self, PyObject *args)
 {
-	PyObject *cfg = NULL;
+	PyObject *cfg = args;
 	
-	if (!PyArg_ParseTuple(args, "O", &cfg)) {
-		PyErr_SetString(AnyWaveError, "argument must be a list.");
-		return NULL;
-	}
-
 	if (!PyList_Check(cfg)) {
 		PyErr_SetString(AnyWaveError, "argument must be a list.");
 		return NULL;

@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <QApplication>
@@ -94,10 +94,12 @@ int main(int argc, char *argv[])
 	auto args = aw::commandLine::doParsing();
 	AnyWave window(args.isEmpty()); // args not empty means something to do in command line mode => no gui mode on 
 	int status = aw::commandLine::doCommandLineOperations(args);
-	if (status == 0)
+	if (status == 0) 
 		exit(0);
 
 	QCommandLineParser parser;
+	parser.addPositionalArgument("file", "data file to open");
+	parser.process(app);
 	auto positionalArgs = parser.positionalArguments();
 
 	if (positionalArgs.count() == 1)

@@ -35,6 +35,7 @@ public:
 	AwComboDS(QWidget *parent) : QComboBox(parent) {}
 	void setSamplingRate(float sr);
 	float getSamplingRate();
+	int getDecimateFactor();
 protected:
 	float m_samplingRate;
 };

@@ -51,7 +51,8 @@ public:
 	QString filePath, initialPath;
 	bool useCurrentMontage;
 	bool exportICA, skipMarkers, exportMarkers;
-	float downSample, globalSamplingRate;
+	float globalSamplingRate;
+	int decimateFactor;
 	AwFilterSettings filterSettings;
 public slots:
 	int exec() override;

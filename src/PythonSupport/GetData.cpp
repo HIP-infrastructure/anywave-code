@@ -29,7 +29,7 @@
 #include <Python.h>
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL	anywave_ARRAY_API
-#define NPY_NO_DEPRECATED_API NPY_1_12_API_VERSION
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 
 
@@ -175,16 +175,16 @@ PyObject *getData(PyObject *self, PyObject *args)
 	QStringList labels, types; // no labels, no types
 	QString file, montage; // no file, no montage
 
-	if (PyArg_ParseTuple(args, "")) // no arguments => default parameters
-		return  request_data(file, montage, start, duration, labels, types, decimate, filters, fo);
+//	if (PyArg_ParseTuple(args, "")) // no arguments => default parameters
+//		return  request_data(file, montage, start, duration, labels, types, decimate, filters, fo);
 
-	PyObject *dict = NULL;
-	if (!PyArg_ParseTuple(args, "O", &dict)) {
-		PyErr_SetString(AnyWaveError, "incorrect argument.");
-		return NULL;
-	}
-	if (dict == NULL)
-		return request_data(file, montage, start, duration, labels, types, decimate, filters, fo);
+	PyObject *dict = args;
+	//if (!PyArg_ParseTuple(args, "O", &dict)) {
+	//	PyErr_SetString(AnyWaveError, "incorrect argument.");
+	//	return NULL;
+	//}
+	//if (dict == NULL)
+	//	return request_data(file, montage, start, duration, labels, types, decimate, filters, fo);
 
 	if (!PyDict_Check(dict)) {
 		PyErr_SetString(AnyWaveError, "incorrect argument.");

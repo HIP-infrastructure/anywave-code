@@ -20,7 +20,7 @@ AwBIDSManager *AwBIDSManager::m_instance = 0;
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
 	// connect to debug log as Command Line component to enable log files traces
-	AwDebugLog::instance()->connectComponent(QString("Command Line"), this);
+	AwDebugLog::instance()->connectComponent(QString("BIDSManager"), this, QString("seegBIDS"));
 	emit log("Starting SEEG to BIDS conversion...");
 
 	QString origin = "AwBIDSManager::SEEGtoBIDS";

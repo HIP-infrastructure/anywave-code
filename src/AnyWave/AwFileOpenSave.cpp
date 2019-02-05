@@ -23,6 +23,7 @@
 #include "MATPy/AwMATPyServer.h"
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Carto/AwDockMapping.h"
+#include "Debug/AwDebugLog.h"
 //
 // Menu File->Open
 // 
@@ -435,5 +436,6 @@ void AnyWave::closeFile()
 		AwEpochManager::destroy();
 	}
 #endif
+	AwDebugLog::instance()->closeFile();
 	emit closingFile();
 }

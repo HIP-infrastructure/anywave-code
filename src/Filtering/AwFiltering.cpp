@@ -35,6 +35,7 @@
 #include <qjsonobject.h>
 #include <qjsonarray.h>
 #include <qjsondocument.h>
+#include <AwException.h>
 
 struct decimation {
 	AwChannel *c;
@@ -62,43 +63,6 @@ AwChannel *notchFilterChannel(AwChannel *chan);
 /* function for down sampling a channel */
 AwChannel *downSamplingChannel(down_sampling *ds);
 
-void AwFiltering::downSample(AwChannel *chan, float freq)
-{
-	float sr = chan->samplingRate();
-	if (freq >= sr)
-		return;
-
-	int decim_factor = (int)floor(sr / freq);
-	// recompute target Sampling rate with new decim factor.
-	float new_sr = sr / (float)decim_factor;
-	// check if current low filter is lower than anti aliasing filter required
-	float aa = freq / 3;
-	if (aa > chan->lowFilter()) { // need to apply anti aliasing filter
-		filterButterWorthAA(chan);
-	}
-	chan->decimate(decim_factor);
-	filterChannel(chan); // apply filters.
-	chan->setSamplingRate(new_sr);
-}
-
-void AwFiltering::downSample(const AwChannelList& channels, float freq)
-{
-	if (channels.isEmpty())
-		return;
-	
-	QList<down_sampling *> toProcess;
-	foreach(AwChannel *c, channels) {
-		if (freq < c->samplingRate()) {
-			toProcess << new down_sampling(c, freq);
-		}
-	}
-
-	QFuture<void> res = QtConcurrent::mapped(toProcess, downSamplingChannel);
-	res.waitForFinished();
-	while (!toProcess.isEmpty())
-		delete toProcess.takeLast();
-}
-
 ///
 /// downSample()
 /// Change the sampling rate of all channels by dividing it by factor.
@@ -107,6 +71,8 @@ void AwFiltering::downSample(const AwChannelList& channels, int factor)
 {
 	if (channels.isEmpty())
 		return;
+
+	AwFiltering::decimate(channels, factor);
 
 	QList<down_sampling *> toProcess;
 	for (auto c :  channels) 
@@ -128,9 +94,6 @@ AwChannel *downSamplingChannel(down_sampling *ds)
 	int decim_factor = (int)floor(sr / freq);
 	// recompute target Sampling rate with new decim factor.
 	float new_sr = sr / (float)decim_factor;
-
-	float aa = sr / 3;
-	filterButterWorthAA(ds->c);
 	ds->c->decimate(decim_factor);
 	ds->c->setSamplingRate(new_sr);
 
@@ -171,33 +134,30 @@ void AwFiltering::decimate(const AwChannelList& channels, int factor)
 {
 	// filter all channels
 	AwChannelList toFilter = channels;
-	QFuture<void> future = QtConcurrent::map(toFilter, filterButterWorthAA);
-	future.waitForFinished();
+
+	for (auto c : toFilter) {
+		// we assume all channels have the same filter options.
+		float aa = c->samplingRate() / (factor * 4);
+		auto lp = c->lowFilter();
+		if (lp <= 0.)
+			lp = aa;
+		if (aa < lp) {
+			throw AwException("Low pass filter for decimation is invalid.", "AwFiltering::decimate");
+			return;
+		}
+		c->setLowFilter(lp);
+	}
+	AwFiltering::filter(toFilter);
 
 	QList<decimation *> decims;
 	foreach (AwChannel *c, toFilter)
 		decims <<  new decimation(c, factor);
 
-	future = QtConcurrent::map(decims, decimateChannel);
+	QFuture<void> future = QtConcurrent::map(decims, decimateChannel);
 	future.waitForFinished();
 	while (!decims.isEmpty())
 		delete decims.takeLast();
 }
-
-//AwChannel *notchFilterChannel(AwChannel *c)
-//{
-//	// check for data pointer. If null pointer => don't filter
-//	// null data pointer can mean a virtual channel that is not computed yet.
-//	if(c->data() == NULL)
-//		return c;
-//	Dsp::SimpleFilter <Dsp::ChebyshevI::BandStop <3>, 1> f;
-//	f.setup(3, c->samplingRate(), c->notch(), 4, 1);	// 4Hz band width
-//	float *data[1];
-//	data[0] = c->data();
-//	f.process(c->dataSize(), data);
-//	c->setDataReady();
-//	return c;
-//}
 
 QVector<float> AwFiltering::pad_left(AwChannel *channel)
 {

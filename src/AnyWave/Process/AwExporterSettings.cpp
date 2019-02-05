@@ -34,7 +34,7 @@ AwExporterSettings::AwExporterSettings(QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
-	downSample = 0.;
+	decimateFactor = 1;
 	connect(buttonFile, SIGNAL(clicked()), this, SLOT(pickupFile()));
 	connect(buttonSelectChannels, SIGNAL(clicked()), this, SLOT(selectChannels()));
 	connect(buttonSelectICA, SIGNAL(clicked()), this, SLOT(selectICAChannels()));
@@ -137,7 +137,7 @@ void AwExporterSettings::accept()
 	writer = comboWriters->currentText();
 	useCurrentMontage = checkBoxCurrentMontage->isChecked();
 	exportICA = checkBoxICA->isChecked();
-	downSample = comboDS->getSamplingRate();
+	decimateFactor = comboDS->getDecimateFactor();
 
 	skipMarkers = checkSkipMarkers->isChecked();
 	exportMarkers = checkExportMarkers->isChecked();

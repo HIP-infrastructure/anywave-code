@@ -220,9 +220,9 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
 		connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
 		markerInspectorWidget->setPredefinedMarkers(AwSettings::getInstance()->loadPredefinedMarkers());
+		connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
 	}
 	
-	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
 	
 	m_display = NULL;
 	if (isGUIMode) {
@@ -267,8 +267,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	connect(process_manager, SIGNAL(newMarkersAvailable(const AwMarkerList&)), marker_manager, SLOT(addMarkers(const AwMarkerList&)));
 	// Process Manager and Montage Manager
 	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), process_manager, SLOT(setMontageChannels(const AwChannelList&)));
-    // Display and Montage manager
-	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
 	// Marker Manager and AnyWave
 	connect(marker_manager, SIGNAL(modificationsDone()), this, SLOT(setModified()));
 	// Montage Manager and AnyWave
@@ -396,18 +394,8 @@ void AnyWave::applyNewLanguage()
 
 void AnyWave::quit()
 {
-	// get log component Command Line
-	auto logs = AwDebugLog::instance()->logsForComponent("Command Line");
-	if (!logs.isEmpty()) {
-		QString outputFile = QString("%1/CommandLine.log").arg(AwSettings::getInstance()->logDir);
-		QFile file(outputFile);
-		if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-			QTextStream stream(&file);
-			for (auto l : logs)
-				stream << l << endl;
-			file.close();
-		}
-	}
+
+	AwDebugLog::instance()->closeFile();
 
 	for (auto w : m_openWidgets)
 		w->close();
@@ -960,6 +948,7 @@ bool AnyWave::searchForMatlab()
 	QString matlabPath;
 	QSettings settings;
 	bool isDetected = settings.value("matlab/detected", false).toBool();
+	bool needRestart = false;
 	// check if AnyWave has already detected Matlab
 	// the every first time AnyWave is launched, matlab is surely not detected.
 	// the detected flag can be reset to false when the user changes preferences settings about Matlab
@@ -1003,7 +992,8 @@ bool AnyWave::searchForMatlab()
 			// set detected flag
 			settings.setValue("matlab/detected", true);
 			isDetected = true;
-			settings.setValue("matlab/require_restart", true);
+	//		settings.setValue("matlab/require_restart", true);
+			needRestart = true;
             AwSettings::getInstance()->createMatlabShellScript(matlabPath);
 		}
 	}
@@ -1033,19 +1023,21 @@ bool AnyWave::searchForMatlab()
 			// set detected flag
 			settings.setValue("matlab/detected", true);
 			isDetected = true;
-			settings.setValue("matlab/require_restart", true);
+//			settings.setValue("matlab/require_restart", true);
+			needRestart = true;
             AwSettings::getInstance()->createMatlabShellScript(matlabPath);
 		}
 	}
 #endif
-	bool requireRestart = settings.value("matlab/require_restart", false).toBool();
+//	bool requireRestart = settings.value("matlab/require_restart", false).toBool();
 	if (isDetected) {
-		if (requireRestart)
+		if (needRestart)
 			AwMessageBox::information(this, tr("MATLAB"), tr("MATLAB was detected. Restart AnyWave to activate MATLAB plugins."));
 		return true;
 	}
 	// not detected. Save the flag.
-	settings.setValue("matlab/detected", false);
+	else 
+		settings.setValue("matlab/detected", false);
 	return false;
 }
 

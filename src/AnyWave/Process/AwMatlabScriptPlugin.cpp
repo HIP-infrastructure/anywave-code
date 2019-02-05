@@ -71,7 +71,8 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 void AwMatlabScriptProcess::run()
 {
 	AwMatlabInterface *mi = NULL;
-	if (m_isCompiled) { // this is a MATLAB compiled standalone plugin.
+	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
+	if (isCompiled) { // this is a MATLAB compiled standalone plugin.
 		QStringList arguments;
 		AwDebugLog::instance()->connectComponent("MATLAB Compiled Plugins", this);
 		emit log(QString("System PATH for %1 is %2").arg(this->plugin()->name).arg(m_systemPath));
@@ -84,27 +85,11 @@ void AwMatlabScriptProcess::run()
 		else
 			arguments << mcrPath;
 #endif
-		//arguments << "127.0.0.1" << "50222" << QString::number(m_pid);
 		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid); 
 		QProcess plugin(this);
-		//QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-				//	env.insert("PATH", m_systemPath); // Very important to define the full system path in the process environment.
 		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
-	//	auto path = QString("%1;%2").arg(m_systemPath).arg(QCoreApplication::applicationDirPath());
 		env.remove("PATH");
 		env.insert("PATH", m_systemPath);
-	//	emit log(QString("PATH for plugin %1 will be %2").arg(this->plugin()->name).arg(path));
-
-//#ifdef Q_OS_LINUX
-//		QString application = QCoreApplication::applicationDirPath();
-//        QString path = QString("/lib/x86_64-linux:") + QString("%1/lib").arg(application);
-//        env.insert("LD_LIBRARY_PATH", "path");
-//#endif
-//#ifdef Q_OS_MAC	// insert DYLD path to mex files
-//		QString application = QCoreApplication::applicationDirPath();
-//        application += "/../Frameworks";
-//		env.insert("AW_LIBPATH", application);  // this environment variable must be used in run script on the plugin side.
-//#endif
 		plugin.setProcessEnvironment(env);
 		plugin.start(m_path, arguments,  QIODevice::ReadWrite);
 		plugin.waitForFinished(-1); // wait for plugin to finish. (Wait forever).

@@ -43,7 +43,7 @@ AwExporter::AwExporter() : AwProcess()
 	pdi.addInputParameter(Aw::ProcessInput::GetWriterPlugins, "1-n");
 	pdi.addInputParameter(Aw::ProcessInput::GetCurrentMontage|Aw::ProcessInput::ProcessIgnoresChannelSelection, "0-n");
 	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "0-n");
-	m_downSample = 0.;
+	m_decimateFactor = 1;
 }
 
 AwExporter::~AwExporter() 
@@ -56,113 +56,45 @@ AwExporter::~AwExporter()
 
 void AwExporter::run()
 {
-	AwMarkerList output_markers = pdi.input.markers;
+	auto output_markers = pdi.input.markers;
 	AwMarkerList selection;
-	if (!m_skippedMarkers.isEmpty()) {
-		sendMessage(QString("Skipping some markers from data..."));
-		selection = AwMarker::invertMarkerSelection(m_skippedMarkers, "selection", pdi.input.reader()->infos.totalDuration());
-		output_markers = AwMarker::cutAroundMarkers(pdi.input.markers, m_skippedMarkers);
-		if (selection.isEmpty()) {
-			sendMessage(QString("No data to read after markers were skipped. Aborted."));
-			return;
-		}
-	}
-	if (!m_exportedMarkers.isEmpty()) {
-		sendMessage(QString("Exporting marked selections..."));
-		selection = m_exportedMarkers;
-	}
-	// process export with skipped or exported markers
-	if (!selection.isEmpty()) {
-		typedef QList<QVector<float> > VectorList;
-		QList<VectorList *> channelVectors;
-		for (auto c : m_channels) 
-			channelVectors << new VectorList;
-		for (auto m : selection) {
-			sendMessage(QString("Reading data between %1s and %2s ...").arg(m->start()).arg(m->end()));
-			if (m_downSample) {
-				requestData(&m_channels, m, true);
-				if (endOfData()) {
-					sendMessage("Error reading data.");
-					while (!channelVectors.isEmpty())
-						delete channelVectors.takeFirst();
-					return;
-				}
-				sendMessage(QString("Downsampling data..."));
-				AwFiltering::downSample(m_channels, m_downSample);
-				sendMessage("Done.");
-				AwChannel::clearFilters(m_channels);
-				pdi.input.filterSettings.apply(m_channels);
-				sendMessage(QString("Filtering..."));
-				AwFiltering::filter(m_channels);
-				sendMessage("Done.");
-			}
-			else {
-				AwChannel::clearFilters(m_channels);
-				pdi.input.filterSettings.apply(m_channels);
-				sendMessage(QString("Reading and filtering..."));
-				requestData(&m_channels, m);
-				if (endOfData()) {
-					sendMessage("Error reading data.");
-					while (!channelVectors.isEmpty())
-						delete channelVectors.takeFirst();
-					return;
-				}
-				sendMessage("Done.");
-			}
-			for (int i = 0; i < m_channels.size(); i++) {
-				AwChannel *c = m_channels.at(i);
-				QVector<float> vector = c->toVector();
-				channelVectors.at(i)->append(vector);
-			}
-		}
-		// Concatenate all data chunks into one piece for each channels
-		for (int i = 0; i < m_channels.size(); i++) {
-			AwChannel *c = m_channels.at(i);
-			qint64 totalSamples = 0;
-			VectorList *vl = channelVectors.at(i);
+	bool skip = !m_skippedMarkers.isEmpty();
+	bool use = !m_exportedMarkers.isEmpty();
+	AwMarkerList filteredMarkers;
+	bool isDecimate = m_decimateFactor > 1;
+	auto skippedMarkers = AwMarker::getAllLabels(m_skippedMarkers);
+	auto usedMarkers = AwMarker::getAllLabels(m_exportedMarkers);
+	auto endTimePos = pdi.input.reader()->infos.totalDuration();
+	// apply filter settings
+	pdi.input.filterSettings.apply(m_channels);
 
-			for (int j = 0; j < vl->size(); j++) {
-				QVector<float> v = vl->at(j);
-				totalSamples += v.size();
-			}
-			float *dest = c->newData(totalSamples);
-			for (int j = 0; j < vl->size(); j++) {
-				QVector<float> v = vl->at(j);
-				float *source = v.data();
-				for (int k = 0; k < v.size(); k++)
-					*dest++ = *source++;
-			}
-		}
-		while (!channelVectors.isEmpty())
-			delete channelVectors.takeFirst();
-	} 
-	else {  // Export all data, no markers used.
-		sendMessage("Reading data...");
-		if (m_downSample) {
-			requestData(&m_channels, 0., -1.0, true);
-			sendMessage("Done.");
-			if (endOfData()) {
-				sendMessage("Error reading data.");
-				return;
-			}
-			sendMessage(QString("Downsampling data..."));
-			AwFiltering::downSample(m_channels, m_downSample);
-			sendMessage("Done.");
-			AwChannel::clearFilters(m_channels);
-			pdi.input.filterSettings.apply(m_channels);
-			AwFiltering::filter(m_channels);
-		}
-		else {
-			AwChannel::clearFilters(m_channels);
-			pdi.input.filterSettings.apply(m_channels);
-			requestData(&m_channels, 0., -1.0);
-			if (endOfData()) {
-				sendMessage("Error reading data.");
-				return;
-			}
-		}
-		sendMessage("Done.");
+	filteredMarkers = AwMarker::applySelectionFilter(pdi.input.markers, skippedMarkers, usedMarkers, pdi.input.reader()->infos.totalDuration());
+	if (skip || use)
+		output_markers = filteredMarkers;
+
+	if (skip && !use) {
+		selection = AwMarker::cutAroundMarkers(pdi.input.markers, m_skippedMarkers);
 	}
+	if (!skip && use) {
+		selection = AwMarker::applyANDOperation(m_exportedMarkers, pdi.input.markers);
+	}
+	if (skip && use)
+		selection = filteredMarkers;
+	if (!skip && !use)
+		selection << new AwMarker("global", 0, endTimePos);
+
+	sendMessage("Loading data...");
+	if (isDecimate) {
+		requestData(&m_channels, &selection, true);
+		AwFiltering::downSample(m_channels, m_decimateFactor);
+	}
+	else { 
+		requestData(&m_channels, &selection);
+	}
+	sendMessage("Done.");
+
+	while (!selection.isEmpty())
+		delete selection.takeFirst();
 
 	AwFileIO *writer = m_plugin->newInstance();
 	writer->setPlugin(m_plugin);
@@ -184,6 +116,9 @@ void AwExporter::run()
 	sendMessage(tr("Writing data..."));
 	writer->writeData(&m_channels);
 	sendMessage("Done.");
+	if (use || skip)
+		while (!output_markers.isEmpty())
+			delete output_markers.takeFirst();
 	writer->cleanUpAndClose();
 	m_plugin->deleteInstance(writer);
 }
@@ -239,7 +174,7 @@ bool AwExporter::showUi()
 			m_skippedMarkers = ui.skippedMarkers;
 		if (ui.exportMarkers)
 			m_exportedMarkers = ui.exportedMarkers;
-		m_downSample = ui.downSample;
+		m_decimateFactor = ui.decimateFactor;
 		return true;
 	}
 	return false;
