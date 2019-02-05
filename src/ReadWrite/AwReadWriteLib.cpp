@@ -25,6 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwReadWriteLib.h"
 #include <AwFileIO.h>
+#include <QTextStream>
 
 // AwBlock
 // constructor
@@ -157,30 +158,15 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	// copy constructor will set channel as parent for new channel.
 	// Here we don't want a parent for as recorded channel, so change it to null.
 	chan->setParent(NULL);
-	// check for existing label in infos.
-	if (m_labelToIndex.contains(chan->name()))
-		// auto rename label
-		chan->setName(chan->name() + "_" + QString::number(m_channelsCount));
-	// add in hash table.
-	m_labelToIndex.insert(chan->name(), m_channelsCount);
-	// set an ID which is a channel index in as recorded list of channels.
-	chan->setID(m_channelsCount++);
-	m_channels.append(chan);
-	return chan;
-}
-
-///
-/// The channel is duplicated and then inserted in the current list of As Recorded channels for the file.
-/// Remember to delete the channel passed as parameter after the insertion is complete.
-AwChannel* AwDataInfo::addChannel(AwChannel& channel)
-{
-	AwChannel *chan = new AwChannel(&channel);
-	// copy constructor will set channel as parent for new channel.
-	// Here we don't want a parent for as recorded channel, so change it to null.
-	chan->setParent(NULL);
-
 	// remove all whitespaces in label
-	chan->setName(channel.name().remove(' '));
+	chan->setName(chan->name().remove(' '));
+	auto s = chan->name();
+	for (int i = 0; i < s.size(); i++) {
+		if (i < s.size() - 1)
+			if (s.at(i) == '0')
+				s.remove(i, 1);
+	}
+	chan->setName(s);
 
 	// check for existing label in infos.
 	if (m_labelToIndex.contains(chan->name()))
@@ -193,6 +179,31 @@ AwChannel* AwDataInfo::addChannel(AwChannel& channel)
 	m_channels.append(chan);
 	return chan;
 }
+
+/////
+///// The channel is duplicated and then inserted in the current list of As Recorded channels for the file.
+///// Remember to delete the channel passed as parameter after the insertion is complete.
+//AwChannel* AwDataInfo::addChannel(AwChannel& channel)
+//{
+//	AwChannel *chan = new AwChannel(&channel);
+//	// copy constructor will set channel as parent for new channel.
+//	// Here we don't want a parent for as recorded channel, so change it to null.
+//	chan->setParent(NULL);
+//
+//	// remove all whitespaces in label
+//	chan->setName(channel.name().remove(' '));
+//
+//	// check for existing label in infos.
+//	if (m_labelToIndex.contains(chan->name()))
+//		// auto rename label
+//		chan->setName(chan->name() + "_" + QString::number(m_channelsCount));
+//	// add in hash table.
+//	m_labelToIndex.insert(chan->name(), m_channelsCount);
+//	// set an ID which is a channel index in as recorded list of channels.
+//	chan->setID(m_channelsCount++);
+//	m_channels.append(chan);
+//	return chan;
+//}
 
 int AwDataInfo::indexOfChannel(const QString& name)
 {

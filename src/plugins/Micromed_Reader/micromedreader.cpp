@@ -1597,7 +1597,7 @@ MicromedReader::FileStatus MicromedReader::openFile(const QString& path)
 		if (electrode.Rate_Coefficient <= 0)
 			electrode.Rate_Coefficient = 1;
 		chan.setSamplingRate(electrode.Rate_Coefficient * m_Head.Rate_Min);
-		infos.addChannel(chan);
+		infos.addChannel(&chan);
 	}
 
 	// parse Notes

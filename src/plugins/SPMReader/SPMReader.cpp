@@ -66,7 +66,7 @@ AwFileIO::FileStatus SPMReader::openFile(const QString &path)
 			channel.setSamplingRate(m_sr);
 			channel.setGain(100);
 			channel.setBad(bad != 0.);
-			infos.addChannel(channel);
+			infos.addChannel(&channel);
 		}
 		auto block = infos.newBlock();
 		block->setSamples(nSamples);

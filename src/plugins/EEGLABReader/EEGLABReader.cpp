@@ -84,7 +84,7 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 			channel.setSamplingRate(m_sr);
 			channel.setGain(100);
 			channel.setUnit(QString::fromLatin1("µV"));
-			infos.addChannel(channel);
+			infos.addChannel(&channel);
 		}
 		auto block = infos.newBlock();
 		block->setSamples(nSamples);

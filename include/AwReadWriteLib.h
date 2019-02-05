@@ -159,9 +159,9 @@ public:
 	/** Adds a new channel as As Recorded channel.
 	The As Recorded channels are the channels found in the data file. **/
 	AwChannel* addChannel(AwChannel *channel);
-	/** Adds a new channel as As Recorded channel.
-	The As Recorded channels are the channels found in the data file. **/
-	AwChannel* addChannel(AwChannel& channel);
+	///** Adds a new channel as As Recorded channel.
+	//The As Recorded channels are the channels found in the data file. **/
+	//AwChannel* addChannel(AwChannel& channel);
 	/** Allows to change the name of a previously inserted channel.
 	This will do nothing if the channel does not exist. **/
 	void changeChannelName(const QString& oldName, const QString& newName);
