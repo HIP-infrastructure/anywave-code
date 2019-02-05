@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwPythonScriptPlugin.h"
@@ -113,7 +113,7 @@ void AwPythonScriptProcess::run()
 
 	arguments << anywaveModulePath << QString::number(m_pid) << QString::number(AwMATPyServer::instance()->serverPort()) << dataPath << scriptPath;
 
-	//QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 
 	//env.insert("PATH", AwSettings::getInstance()->systemPath()); // Very important to define the full system path in the process environment.
 	//env.insert("PATH", qApp->applicationDirPath());
@@ -125,7 +125,6 @@ void AwPythonScriptProcess::run()
 #ifdef Q_OS_LINUX
     env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
 #endif
-	QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 	env.remove("PATH");
 	env.insert("PATH", AwSettings::getInstance()->systemPath());
 	m_python.setProcessEnvironment(env);

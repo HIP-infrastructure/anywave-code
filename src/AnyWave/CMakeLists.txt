@@ -11,8 +11,10 @@ SET(AnyWave_SRCS
     ./AwOpenFileDialog.cpp
     ./main.cpp  
 	./AwFileOpenSave.cpp
-	./CommandLineParser.cpp
-	./AwCommandLineManager.cpp
+    ./CommandLineParser.cpp
+    ./AwCommandLogger.cpp
+    ./AwCommandLineManager.cpp
+    ./AwCLGetData.cpp
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
 	./Data/AwMemoryMapper.cpp  
@@ -275,7 +277,8 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./AwUpdater.h  
     ./AwExportDial.h  
     ./AnyWave.h  
-	./CommandLineParser.h
+    ./CommandLineParser.h
+    ./AwCommandLogger.h
     ./Prefs/AwPreferences.h  
     ./Prefs/AwSettings.h  
     ./Prefs/AwPrefsDial.h  
