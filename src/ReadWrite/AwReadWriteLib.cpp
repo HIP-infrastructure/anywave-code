@@ -161,10 +161,18 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	// remove all whitespaces in label
 	chan->setName(chan->name().remove(' '));
 	auto s = chan->name();
-	for (int i = 0; i < s.size(); i++) {
-		if (i < s.size() - 1)
-			if (s.at(i) == '0')
-				s.remove(i, 1);
+	// looking for ending zeros
+	int count = 0;
+	for (int i = s.size() - 1; i >= 0; i--) {
+		if (s.at(i) == '0')
+			count++;
+		else
+			break;
+	}
+	auto limit = s.size() - count - 1;
+	for (int i = 0; i < limit; i++) {
+		if (s.at(i) == '0')
+			s.remove(i, 1);
 	}
 	chan->setName(s);
 
