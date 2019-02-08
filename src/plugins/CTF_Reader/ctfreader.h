@@ -109,7 +109,7 @@ class CTFREADER_EXPORT CTFReader : public AwFileIOPlugin
 #endif
 public:
 	CTFReader();
-	CTFFileReader *newInstance(const QString& filename) { return new CTFFileReader(filename); }
+	AW_INSTANTIATE_PLUGIN(CTFFileReader)
 };
 
 

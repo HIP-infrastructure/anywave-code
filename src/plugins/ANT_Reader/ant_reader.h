@@ -117,7 +117,7 @@ class ANT_READER_EXPORT ANT_ReaderPlugin : public AwFileIOPlugin
 	Q_INTERFACES(AwFileIOPlugin)
 public:
 	ANT_ReaderPlugin();
-	ANT_Reader *newInstance(const QString& filename) { return new ANT_Reader(filename); }
+	AW_INSTANTIATE_PLUGIN(ANT_Reader)
 };
 
 

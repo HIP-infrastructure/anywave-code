@@ -8,6 +8,7 @@ class AwFileItem;
 
 #define AWBIDS_SOURCE_DIRS 3
 
+class AwFileIO;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
 using AwTSVDict = QMap<QString, QStringList>;
@@ -25,16 +26,19 @@ public:
 	~AwBIDSManager();
 	// utilities static methods
 	static AwBIDSManager *instance(const QString& rootDir = QString());
-	static QString detectBIDSFolderFromPath(const QString& path);
+	
 	static bool isInstantiated() { return m_instance != NULL; }
 	static void destroy();
 	/** check if a path is a BIDS directory or not. **/
 	static bool isBIDS(const QString& path);
+	static QString detectBIDSFolderFromPath(const QString& path);
 
+	void newFile(AwFileIO *reader);
 	void setRootDir(const QString& path);
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
 	void closeBIDS();
+	inline AwBIDSSubject *getSubject() { return m_currentSubject; }
 	
 	int SEEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader);
@@ -48,7 +52,7 @@ public:
 	AwBIDSSubjectList& getSubjectsFromSourceDir(int sourceDir = raw);
 	QString getDerivativesPath(int type, AwBIDSSubject *subject);
 
-	// guess subject from a file
+	/** guess subject from a file. Set the subject as the current subject if success. **/
 	AwBIDSSubject *guessSubject(const QString& path);
 	// Access to some tsv files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
@@ -61,9 +65,12 @@ public:
 	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
 signals:
 	void log(const QString& message);
+	void BIDSClosed();
 protected:
 	AwBIDSManager(const QString& rootDir);
 	static AwBIDSManager *m_instance;
+	static QString m_parsingPath;	// path to place the json file to prevent BIDSManager of any updates.
+
 
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 	void getSubjects(int sourceDir = raw);
@@ -74,7 +81,8 @@ protected:
 	void applyModifications();
 	void updateChannelsTsv(const QString& path);
 	void updateEventsTsv(const QString& path);
-
+	QString getParsingPath();
+	void modifyUpdateJson(const QStringList& branches);
 
 	QMap<int, QString> m_modifications;
 	AwBIDSGUI *m_ui;
@@ -82,5 +90,7 @@ protected:
 	AwBIDSSubjectList m_subjects[AWBIDS_SOURCE_DIRS];
 	QMap<QString, AwBIDSSubject *> m_subjectsIDs[AWBIDS_SOURCE_DIRS];
 	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
+	// keep the subject associated with the current open file in AnyWave
+	AwBIDSSubject *m_currentSubject;
 	bool m_mustValidateModifications;
 };

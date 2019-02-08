@@ -35,6 +35,7 @@
 #include <AwChannel.h>
 #include <QTime>
 #include <QDate>
+#include <QJsonDocument>
 
 class AW_UTILITIES_EXPORT QDebugStream
 {
@@ -90,6 +91,7 @@ void AW_UTILITIES_EXPORT saveMappingCursorFont(const QFont& font);
 void AW_UTILITIES_EXPORT saveMarkerFont(const QFont& font, int type);
 /** Convert a QString into a classic C string. The string buffer is allocated by the function. **/
 char AW_UTILITIES_EXPORT *QStringToChar(const QString& str);
+QJsonDocument AW_UTILITIES_EXPORT readJsonFile(const QString& file);
 }
 
 #endif // AWUTILITIES_H

@@ -206,10 +206,10 @@ void AnyWave::openFile(const QString &path)
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 	ds->setParent(this);
 
-	// check for BIDS
 	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
 	if (!root.isEmpty()) {
 		openBIDS(root);
+		AwBIDSManager::instance()->newFile(m_currentReader);
 	}
 
 	// read flt file before loading the montage.
@@ -306,12 +306,17 @@ void AnyWave::openBIDS(const QString& path)
 	else
 		AwBIDSManager::instance()->setRootDir(path);
 	// instantiate dock widget if needed
-	if (m_dockBIDS == NULL) {
-		m_dockBIDS = new QDockWidget(tr("BIDS"), this);
-		addDockWidget(Qt::RightDockWidgetArea, m_dockBIDS);
-		m_dockBIDS->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		m_dockBIDS->setWidget(AwBIDSManager::instance()->ui());
+	auto dock = m_dockWidgets["BIDS"];
+	if (dock == NULL) {
+		dock = new QDockWidget(tr("BIDS"), this);
+		m_dockWidgets["BIDS"] = dock;
+		dock->setWidget(AwBIDSManager::instance()->ui());
+		addDockWidget(Qt::RightDockWidgetArea, dock);
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		menuView_->addAction(dock->toggleViewAction());
+		connect(AwBIDSManager::instance(), &AwBIDSManager::BIDSClosed, dock, &QDockWidget::hide);
 	}
+	dock->show();
 	AwSettings::getInstance()->addRecentBIDS(path);
 }
 
@@ -399,18 +404,22 @@ void AnyWave::closeFile()
 	m_cursorToolBar->reset();
 
 	// Mappings cleanup
-	if (m_dockEEG) {
-		disconnect(m_dockEEG, SIGNAL(mappingClosed()));
-		m_dockEEG->close();
-		delete m_dockEEG;
-		m_dockEEG = NULL;
+	auto dockEEG = static_cast<AwDockMapping *>(m_dockWidgets["eeg_mapping"]);
+	auto dockMEG = static_cast<AwDockMapping *>(m_dockWidgets["meg_mapping"]);
+	if (dockEEG) {
+		disconnect(dockEEG, SIGNAL(mappingClosed()));
+		dockEEG->close();
+		delete dockEEG;
+		m_dockWidgets.remove("eeg_mapping");
+		//m_dockEEG = NULL;
 	}
 
-	if (m_dockMEG) {
-		disconnect(m_dockMEG, SIGNAL(mappingClosed()));
-		m_dockMEG->close();
-		delete m_dockMEG;
-		m_dockMEG = NULL;
+	if (dockMEG) {
+		disconnect(dockMEG, SIGNAL(mappingClosed()));
+		dockMEG->close();
+		delete dockMEG;
+		m_dockWidgets.remove("meg_mapping");
+		//m_dockMEG = NULL;
 	}
 
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/

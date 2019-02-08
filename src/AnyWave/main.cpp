@@ -46,7 +46,7 @@
 
 #include <qstylefactory.h>
 #include <qtextstream.h>
-#include "CommandLineParser.h"
+#include "CL/CommandLineParser.h"
 
 int main(int argc, char *argv[])
 {

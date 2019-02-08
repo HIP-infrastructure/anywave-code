@@ -34,6 +34,8 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 	QCommandLineParser parser;
 	AwCommandLogger logger(QString("Command Line"));
 	QMap<int, AwArguments> res;
+	QStringList outputAcceptedFormats = { "vhdr", "edf", "matlab", "ades" };
+
 	parser.setApplicationDescription("AnyWave");
 	parser.addVersionOption();
 	parser.addHelpOption();
@@ -42,12 +44,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 	// Common flags for input/output
 	QCommandLineOption inputFile("input_file", "specify the input file to open.", "input_file", QString());
 	QCommandLineOption outputFile("output_file", "specify the file to create.", "output_file", QString());
-	QCommandLineOption outputFormat("output_format", "specify the file format to create. (ADES, MATLAB)", "output_format", QString());
+	QCommandLineOption outputFormat("output_format", "specify the file format to create. (ADES, MATLAB)", "output_format", "vhdr,edf,MATLAB,ADES");
+	QCommandLineOption outputDir("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
 	QCommandLineOption skipMarker("skip_marker", "specify a marker label to skip when exporting data.", "skip_marker", QString());
 	parser.addOption(inputFile);
 	parser.addOption(outputFile);
 	parser.addOption(outputFormat);
 	parser.addOption(skipMarker);
+	parser.addOption(outputDir);
 	// common filters flags
 	QCommandLineOption filterHP("hp", "specify the High Pass filter (Hz).", "hp", QString());
 	QCommandLineOption filterLP("lp", "specify the Low Pass filter (Hz).", "lp", QString());
@@ -76,9 +80,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 	///
 	QCommandLineOption ICAOption("ICA", "Compute ICA on specified file.", "file", QString());
 	QCommandLineOption ICAModality("modality", "optional: specify the channels modality for ICA", "modality", QString());
-	//QCommandLineOption ICAArtefact("skip_artefacts", "optional: specify artefact markers to skip", "artefacts", QString());
-	//QCommandLineOption ICAHP("hp", "optional: high pass filter", "hp", QString());
-	//QCommandLineOption ICALP("lp", "optional: low pass filter", "lp", QString());
 
 	parser.addOption(seegBIDSOpt);
 	parser.addOption(BIDSSidecarsOpt);
@@ -93,14 +94,47 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 
 	parser.addOption(ICAOption);
 	parser.addOption(ICAModality);
-	//parser.addOption(ICAArtefact);
-	//parser.addOption(ICAHP);
-	//parser.addOption(ICALP);
 
 	parser.process(QCoreApplication::arguments());
-	
+
 
 	AwArguments arguments;
+	//// parse common options
+
+	// output_format 
+	auto format = parser.value(outputFormat).toLower();
+	bool isFormatOption = !format.isEmpty();
+	QMap<QString, QString> availableWriters;
+	availableWriters["vhdr"] = QString("Brainvision Analyser Format");
+	availableWriters["edf"] = QString("EDF/BDF IO");
+	availableWriters["matlab"] = QString("MATLAB Output Plugin");
+	availableWriters["ades"] = QString("AnyWave ADES Format");
+	// output dir
+	auto oDir = parser.value(outputDir);
+	if (!oDir.isEmpty()) 
+		arguments["output_dir"] = oDir;
+	// hp/lp
+	auto fHP = parser.value(filterHP);
+	auto fLP = parser.value(filterLP);
+	if (!fHP.isEmpty())
+		arguments["hp"] = fHP;
+	if (!fLP.isEmpty())
+		arguments["lp"] = fLP;
+	// skip marker
+	auto skipedMarker = parser.value(skipMarker);
+	if (!skipedMarker.isEmpty())
+		arguments["skip_marker"] = skipedMarker;
+
+	   
+	if (isFormatOption) {
+		if (!outputAcceptedFormats.contains(format)) {
+			logger.sendLog("specify a valid output_format option. (vhdr, edf, MATLAB, ADES)");
+			exit(-1);
+		}
+		arguments["output_format"] = format;
+		arguments["output_writer"] = availableWriters[format];
+	}
+	
 	if (parser.isSet(ICAOption)) {
 		auto file = parser.value(ICAOption);
 		auto mod = parser.value(ICAModality);
@@ -109,7 +143,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 			exit(-1);
 		}
 		auto artefacts = parser.value(skipMarker);
-		//arguments << AwArgument("ICA_File", file);
 		arguments.insert("ICA_File", file);
 		if (!artefacts.isEmpty())
 			arguments.insert("skip", artefacts);
@@ -123,6 +156,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 		res[aw::commandLine::ICA] = arguments;
 	}
 	else if (parser.isSet(getDataOpt)) {
+		// mandatory arguments
 		auto inputF = parser.value(inputFile);
 		if (inputF.isEmpty()) {
 			logger.sendLog("get_data: Missing input file.");
@@ -133,21 +167,12 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 			logger.sendLog("get_data: Missing output file.");
 			exit(-1);
 		}
+		if (!isFormatOption) {
+			logger.sendLog("get_data: Missing output_format option.");
+			exit(-1);
+		}
 		arguments["input_file"] = inputF;
 		arguments["output_file"] = outputF;
-		// check for optional arguments
-		auto fHP = parser.value(filterHP);
-		auto fLP = parser.value(filterLP);
-		auto format = parser.value(outputFormat);
-		auto skipedMarker = parser.value(skipMarker);
-		if (!fHP.isEmpty())
-			arguments["hp"] = fHP;
-		if (!fLP.isEmpty())
-			arguments["lp"] = fLP;
-		if (!format.isEmpty())
-			arguments["output_format"] = format;
-		if (!skipedMarker.isEmpty())
-			arguments["skip_marker"] = skipedMarker;
 		res[aw::commandLine::GetData] = arguments;
 	}
 	else if (parser.isSet(seegBIDSOpt)) {

@@ -105,9 +105,6 @@ int AwMarker::stringToType(const QString& s)
 	return type.at(stringTypes.indexOf(s));
 }
 
-//
-// typeToString()
-//
 ///\return a QString containing the name of the type.
 ///\code{.cpp}
 /// QString type = AwMarker::stringToType(AwMarker::Single);

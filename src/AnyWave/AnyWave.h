@@ -39,14 +39,9 @@
 // Mapping
 #define AW_MAX_CARTO	2
 
-//class AwDockFilter;
-class AwDockAddMarker;
 class AwFileIOPlugin;
 class AwFileIO;
 class AwDisplay;
-class AwDockProcess;
-class AwDockMapping;
-class AwDockMapping2;
 class AwCursorMarkerToolBar;
 class AwDataInfoReader;
 class AwDebugLogWidget;
@@ -81,6 +76,7 @@ protected:
 	void changeEvent(QEvent *e);
 
 private:
+	QMap<QString, QDockWidget *> m_dockWidgets;
 	AwFileIO *m_currentReader;
 	QString m_openFileName;				// Full path to current open file.
 	QString m_lastDirOpen;				// Keep path to last directory used when opening a file
@@ -104,13 +100,6 @@ private:
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
-	// DockWidgets
-	QDockWidget *m_addMarkerDock;
-	QDockWidget *m_dockMarkers, *m_dockBIDS;
-	AwDockAddMarker *m_dockAddMarker;
-	// Mapping
-	AwDockMapping *m_dockMEG;
-	AwDockMapping *m_dockEEG;	
 	// updater 
 	AwUpdater m_updater;
 	// flags

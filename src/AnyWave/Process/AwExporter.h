@@ -40,6 +40,7 @@ public:
 
 	bool showUi();
 	void run();
+	void runFromCommandLine();
 protected:
 	AwChannelList m_channels;		// channels to export
 	AwChannelList m_ICAChannels;	// ICA Channels to export

@@ -87,5 +87,5 @@ class EGIREADER_EXPORT EGIReaderPlugin : public AwFileIOPlugin
 
 public:
 	EGIReaderPlugin();
-	EGIReader *newInstance(const QString& filename) { return new EGIReader(filename); }
+	AW_INSTANTIATE_PLUGIN(EGIReader)
 };

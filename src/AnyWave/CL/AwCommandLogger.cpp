@@ -1,4 +1,4 @@
-#include "AwCommandLogger.h"
+#include "CL/AwCommandLogger.h"
 #include "Debug/AwDebugLog.h"
 
 AwCommandLogger::AwCommandLogger(const QString& component, const QString& logFile)

@@ -78,6 +78,6 @@ class FIFF_READER_EXPORT FIFF_ReaderPlugin : public AwFileIOPlugin
 	Q_INTERFACES(AwFileIOPlugin)
 public:
 	FIFF_ReaderPlugin();
-	FIFF_Reader *newInstance(const QString& filename) { return new FIFF_Reader(filename); }
+	AW_INSTANTIATE_PLUGIN(FIFF_Reader)
 };
 #endif // FIFF_READER_H

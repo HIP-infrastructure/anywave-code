@@ -315,7 +315,7 @@ class MEG4DREADER_EXPORT NI4DReader : public AwFileIOPlugin
 	Q_INTERFACES(AwFileIOPlugin)
 public:
 	NI4DReader();
-	NI4DFileReader *newInstance(const QString& filename) { return new NI4DFileReader(filename); }
+	AW_INSTANTIATE_PLUGIN(NI4DFileReader)
 	QStringList montages();
 };
 
