@@ -113,9 +113,12 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 	auto oDir = parser.value(outputDir);
 	if (!oDir.isEmpty()) 
 		arguments["output_dir"] = oDir;
-	// hp/lp
+	// hp/lp/notch
 	auto fHP = parser.value(filterHP);
 	auto fLP = parser.value(filterLP);
+	auto fNotch = parser.value(filterNotch);
+	if (!fNotch.isEmpty())
+		arguments["notch"] = fNotch;
 	if (!fHP.isEmpty())
 		arguments["hp"] = fHP;
 	if (!fLP.isEmpty())
@@ -124,8 +127,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 	auto skipedMarker = parser.value(skipMarker);
 	if (!skipedMarker.isEmpty())
 		arguments["skip_marker"] = skipedMarker;
-
-	   
+		   
 	if (isFormatOption) {
 		if (!outputAcceptedFormats.contains(format)) {
 			logger.sendLog("specify a valid output_format option. (vhdr, edf, MATLAB, ADES)");
@@ -146,12 +148,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing()
 		arguments.insert("ICA_File", file);
 		if (!artefacts.isEmpty())
 			arguments.insert("skip", artefacts);
-		auto hp = parser.value(filterHP);
-		auto lp = parser.value(filterLP);
-		if (!hp.isEmpty())
-			arguments["hp"] = hp;
-		if (!lp.isEmpty())
-			arguments["lp"] = lp;
 		arguments.insert("modality", mod);
 		res[aw::commandLine::ICA] = arguments;
 	}

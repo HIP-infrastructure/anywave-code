@@ -27,57 +27,58 @@
 #include "Plugin/AwPluginManager.h"
 #include "Process/AwProcessManager.h"
 #include <AwException.h>
-#include <QTextStream>
 #include "Data/AwDataServer.h"
 
-void AwCommandLineManager::computeICA(AwArguments& arguments)
-{	
-	auto pm = AwPluginManager::getInstance();
-	auto ica_plugin = pm->getProcessPluginByName("ICA extraction");
-	auto file = arguments["ICA_File"].toString();
-	QString origin = "AwCommandLineManager::computeICA";
 
-	if (file.isEmpty()) {
-		throw AwException(QString("Could not open the file %1").arg(file), origin);
-		return;
+AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& pluginName, const AwArguments& args, const QString& inputFile)
+{
+	auto pm = AwPluginManager::getInstance();
+	auto plugin = pm->getProcessPluginByName(pluginName);
+	const QString origin = "AwCommandLineManager::createNewProcess()";
+	if (plugin == Q_NULLPTR) {
+		throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
+		return Q_NULLPTR;
 	}
 
-	if (ica_plugin) {
-		auto *reader = pm->getReaderToOpenFile(file);
-		if (reader == NULL) {
-			throw AwException(QString("No reader found for file %1").arg(file), origin);
-			return;
+	AwFileIO *reader = Q_NULLPTR;
+	if (!inputFile.isEmpty()) {
+		reader = pm->getReaderToOpenFile(inputFile);
+		if (reader == Q_NULLPTR) {
+			throw AwException(QString("no reader can open %1").arg(inputFile), origin);
+			return Q_NULLPTR;
 		}
-		if (reader->openFile(file) != AwFileIO::NoError) {
-			throw AwException(QString("Could not open the file %1").arg(file), origin);
-			return;
+		if (reader->openFile(inputFile) != AwFileIO::NoError) {
+			throw AwException(QString("Could not open %1").arg(inputFile), origin);
+			reader->plugin()->deleteInstance(reader);
+			return Q_NULLPTR;
 		}
-		auto markerFile = QString("%1.mrk").arg(file);
-		auto process = ica_plugin->newInstance();
-		auto process_manager = AwProcessManager::instance();
-		process->pdi.input.channels = reader->infos.channels();
-		process->pdi.input.markers = AwMarker::load(markerFile);
-		// add bad channels to arguments
-		auto badFile = QString("%1.bad").arg(file);
-		QStringList badLabels;
-		QFile tmp(badFile);
-		if (tmp.open(QIODevice::Text | QIODevice::ReadOnly)) {
-			QTextStream stream(&tmp);
-			while (!stream.atEnd())
-				badLabels << stream.readLine();
-			tmp.close();
-		}
-		if (!badLabels.isEmpty())
-			arguments["bad_labels"] = badLabels;
+	}
 
-		process->pdi.input.setArguments(arguments);
-		// DONT FORGET TO SET DATAPATH !
-		process->pdi.input.dataPath = file;
-		//process_manager->runProcess(process);
+	auto process = plugin->newInstance();
+	if (!inputFile.isEmpty()) {
+		float hp = 0., lp = 0., notch = 0.;
+		process->pdi.input.dataPath = inputFile;
+		process->pdi.input.setReader(reader);
+		process->pdi.input.channels = reader->infos.channels();
+		process->pdi.input.markers = reader->infos.blocks().first()->markers();
+		// check for optional filter settings
+		if (args.contains("hp"))
+			hp = args["hp"].toDouble();
+		if (args.contains("lp"))
+			lp = args["lp"].toDouble();
+		if (args.contains("notch"))
+			notch = args["notch"].toDouble();
+		if (lp || notch || hp) {
+			for (auto c : process->pdi.input.channels) {
+				c->setLowFilter(lp);
+				c->setHighFilter(hp);
+				c->setNotch(notch);
+			}
+		}
 		AwDataServer::getInstance()->setMainReader(reader);
 		AwDataServer::getInstance()->openConnection(process);
-		process->runFromCommandLine();
-		ica_plugin->deleteInstance(process);
-		reader->plugin()->deleteInstance(reader);
 	}
+	process->pdi.input.readers = pm->readers();
+	process->pdi.input.writers = pm->writers();
+	return process;
 }

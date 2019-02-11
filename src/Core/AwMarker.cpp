@@ -180,6 +180,13 @@ AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 	return markers;
 }
 
+AwMarkerList& AwMarker::rename(AwMarkerList& markers, const QString& label)
+{
+	for (auto m : markers)
+		m->setLabel(label);
+	return markers;
+}
+
 ///
 /// merge()
 /// Check if selection markers overlap. If so, merge them.

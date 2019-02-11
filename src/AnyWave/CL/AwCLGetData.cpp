@@ -28,6 +28,7 @@
 #include <AwProcessInterface.h>
 #include <QFile>
 #include "AwCommandLogger.h"
+#include <AwException.h>
 
 void AwCommandLineManager::getData(AwArguments& arguments)
 {
@@ -38,6 +39,16 @@ void AwCommandLineManager::getData(AwArguments& arguments)
 		logger.sendLog(QString("file %1 does not exist.").arg(inputFile));
 		return;
 	}
+	
+	AwBaseProcess *process;
+	try {
+		process = AwCommandLineManager::createAndInitNewProcess("File Exporter", arguments, inputFile);
+	}
+	catch (const AwException& e) {
+		logger.sendLog(e.errorString());
+		return;
+	}
+
 	auto *reader = pm->getReaderToOpenFile(inputFile);
 	if (reader == NULL) {
 		logger.sendLog(QString("No reader plugin found to open %1.").arg(inputFile));
@@ -53,15 +64,11 @@ void AwCommandLineManager::getData(AwArguments& arguments)
 		logger.sendLog(QString("skip_marker was specified but no marker file exist. Continue ignoring skip_marker option..."));
 		arguments.remove("skip_marker");
 	}
-	// instantiate the process
-	auto plugin = pm->getProcessPluginByName("File Exporter");
-	if (!plugin) {
-		logger.sendLog("File Exporter plugin not found (should never happened.)");
-		return;
-	}
-	auto process = plugin->newInstance();
 	process->pdi.input.setArguments(arguments);
-	process->pdi.input.dataPath = inputFile;
 	process->runFromCommandLine();
-	plugin->deleteInstance(process);
+	process->plugin()->deleteInstance(process);
+	// also delete the reader 
+	reader = process->pdi.input.reader();
+	reader->cleanUpAndClose();
+	reader->plugin()->deleteInstance(reader);
 }

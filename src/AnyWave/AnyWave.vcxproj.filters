@@ -1303,6 +1303,9 @@
     <ClCompile Include="CL\AwComputeICA.cpp">
       <Filter>CL</Filter>
     </ClCompile>
+    <ClCompile Include="CL\AwCommandLineManager.cpp">
+      <Filter>CL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
