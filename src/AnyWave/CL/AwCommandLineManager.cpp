@@ -59,7 +59,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 		float hp = 0., lp = 0., notch = 0.;
 		process->pdi.input.dataPath = inputFile;
 		process->pdi.input.setReader(reader);
-		process->pdi.input.channels = reader->infos.channels();
+		process->pdi.input.channels = AwChannel::duplicateChannels(reader->infos.channels());
 		process->pdi.input.markers = reader->infos.blocks().first()->markers();
 		// check for optional filter settings
 		if (args.contains("hp"))

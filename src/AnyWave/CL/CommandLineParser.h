@@ -29,8 +29,8 @@
 #include "AwCommandLine.h"
 namespace aw {
 	namespace commandLine {
-		enum Commands { BIDS_SEEG, ICA, GetData };
-		QMap<int, AwArguments> doParsing();
+		enum Commands { BIDS_SEEG, ICA, ConvertFile };
+		QMap<int, AwArguments> doParsing(const QStringList& args);
 		int doCommandLineOperations(QMap<int, AwArguments>& operations);
 
 	}

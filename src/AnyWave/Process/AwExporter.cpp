@@ -93,14 +93,8 @@ void AwExporter::runFromCommandLine()
 	else
 		output_markers = markers;
 
-
 	writer->infos.setChannels(channels);
 	AwBlock *block = writer->infos.newBlock();
-	block->setSamples(channels.first()->dataSize());
-	block->setDuration((float)channels.first()->dataSize() / channels.first()->samplingRate());
-	writer->infos.setDate(reader->infos.recordingDate());
-	writer->infos.setTime(reader->infos.recordingTime());
-	writer->infos.setISODate(reader->infos.isoDate());
 
 	if (!output_markers.isEmpty())
 		block->setMarkers(output_markers);
@@ -112,16 +106,22 @@ void AwExporter::runFromCommandLine()
 	requestData(&pdi.input.channels, &input_markers);
 	sendMessage("Done.");
 
+	block->setSamples(channels.first()->dataSize());
+	block->setDuration((float)channels.first()->dataSize() / channels.first()->samplingRate());
+	writer->infos.setDate(reader->infos.recordingDate());
+	writer->infos.setTime(reader->infos.recordingTime());
+	writer->infos.setISODate(reader->infos.isoDate());
+
 	if (writer->createFile(outputPath) != AwFileIO::NoError) {
 		sendMessage(QString("Error creating %1.").arg(outputPath));
-		m_plugin->deleteInstance(writer);
+		writer->plugin()->deleteInstance(writer);
 		return;
 	}
 	sendMessage("Writting data...");
 	writer->writeData(&m_channels);
 	sendMessage("Done.");
 	writer->cleanUpAndClose();
-	m_plugin->deleteInstance(writer);
+	writer->plugin()->deleteInstance(writer);
 
 	while (!input_markers.isEmpty())
 		delete input_markers.takeFirst();
@@ -165,11 +165,7 @@ void AwExporter::run()
 	writer->setPlugin(m_plugin);
 	writer->infos.setChannels(m_channels);
 	AwBlock *block = writer->infos.newBlock();
-	block->setSamples(m_channels.first()->dataSize());
-	block->setDuration((float)m_channels.first()->dataSize() / m_channels.first()->samplingRate());
-	writer->infos.setDate(pdi.input.reader()->infos.recordingDate());
-	writer->infos.setTime(pdi.input.reader()->infos.recordingTime());
-	writer->infos.setISODate(pdi.input.reader()->infos.isoDate());
+
 
 	if (!output_markers.isEmpty())
 		block->setMarkers(output_markers);
@@ -188,6 +184,12 @@ void AwExporter::run()
 	sendMessage("Done.");
 	while (!input_markers.isEmpty())
 		delete input_markers.takeFirst();
+
+	block->setSamples(m_channels.first()->dataSize());
+	block->setDuration((float)m_channels.first()->dataSize() / m_channels.first()->samplingRate());
+	writer->infos.setDate(pdi.input.reader()->infos.recordingDate());
+	writer->infos.setTime(pdi.input.reader()->infos.recordingTime());
+	writer->infos.setISODate(pdi.input.reader()->infos.isoDate());
 
 	if (writer->createFile(m_path) != AwFileIO::NoError) {
 		sendMessage(tr("Error creating output file."));

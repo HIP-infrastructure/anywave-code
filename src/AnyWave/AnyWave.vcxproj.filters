@@ -1291,9 +1291,6 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_AwCommandLogger.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="CL\AwCLGetData.cpp">
-      <Filter>CL</Filter>
-    </ClCompile>
     <ClCompile Include="CL\AwCommandLogger.cpp">
       <Filter>CL</Filter>
     </ClCompile>
@@ -1304,6 +1301,9 @@
       <Filter>CL</Filter>
     </ClCompile>
     <ClCompile Include="CL\AwCommandLineManager.cpp">
+      <Filter>CL</Filter>
+    </ClCompile>
+    <ClCompile Include="CL\AwConvertFile.cpp">
       <Filter>CL</Filter>
     </ClCompile>
   </ItemGroup>

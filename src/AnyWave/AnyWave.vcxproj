@@ -27,10 +27,10 @@
     <ClCompile Include="Carto\AwDockMapping.cpp" />
     <ClCompile Include="Carto\AwMappingClient.cpp" />
     <ClCompile Include="Carto\AwMappingWidget.cpp" />
-    <ClCompile Include="CL\AwCLGetData.cpp" />
     <ClCompile Include="CL\AwCommandLineManager.cpp" />
     <ClCompile Include="CL\AwCommandLogger.cpp" />
     <ClCompile Include="CL\AwComputeICA.cpp" />
+    <ClCompile Include="CL\AwConvertFile.cpp" />
     <ClCompile Include="CL\CommandLineParser.cpp" />
     <ClCompile Include="Data\AwDataChunk.cpp" />
     <ClCompile Include="Data\AwDataConnection.cpp" />
