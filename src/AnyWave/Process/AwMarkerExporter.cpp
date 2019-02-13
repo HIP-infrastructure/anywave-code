@@ -49,7 +49,7 @@ AwMarkerExporter::~AwMarkerExporter()
 
 void AwMarkerExporter::run()
 {
-	if (pdi.input.markers.isEmpty()) {
+	if (pdi.input.markers().isEmpty()) {
 		sendMessage("No markers selected as input.");
 		return;
 	}
@@ -62,26 +62,26 @@ void AwMarkerExporter::run()
 			sendMessage(m_matlabFile.error());
 			return;
 		}
-		if (m_matlabFile.writeScalar("sr", pdi.input.channels.first()->samplingRate()) != 0) {
+		if (m_matlabFile.writeScalar("sr", pdi.input.channels().first()->samplingRate()) != 0) {
 			sendMessage(m_matlabFile.error());
 			return;
 		}
-		QStringList labels = AwChannel::getLabels(pdi.input.channels);
+		QStringList labels = AwChannel::getLabels(pdi.input.channels());
 		if (m_matlabFile.writeStringCellArray("electrodes", labels) != 0) {
 			sendMessage(m_matlabFile.error());
 			return;
 		}
-		positions = fvec(pdi.input.markers.size());
+		positions = fvec(pdi.input.markers().size());
 	}
 	else { // ADES
 		m_adesFile.setPlugin(&m_adesPlugin);
 	}
 	int count = 1;
-	for (auto m : pdi.input.markers) {
+	for (auto m : pdi.input.markers()) {
 		sendMessage("Getting data...");
-		requestData(&pdi.input.channels, m);
+		requestData(&pdi.input.channels(), m);
 		sendMessage("Data loaded.");
-		matrix = AwMath::channelsToFMat(pdi.input.channels);
+		matrix = AwMath::channelsToFMat(pdi.input.channels());
 		sendMessage("Saving to file...");
 		if (matlabFormat) { // TRANSPOSE the matrix as MATLAB has a column major ordering
 			positions(count - 1) = m->start();
@@ -91,17 +91,17 @@ void AwMarkerExporter::run()
 			}
 		} 
 		else {
-			m_adesFile.infos.setChannels(pdi.input.channels);
+			m_adesFile.infos.setChannels(pdi.input.channels());
 			AwBlock *block = m_adesFile.infos.newBlock();
 			block->setDuration(m->duration());
-			block->setSamples(pdi.input.channels.first()->dataSize());
+			block->setSamples(pdi.input.channels().first()->dataSize());
 			QString path = outputFile.remove(".ades");
 
 			if (m_adesFile.createFile(QString("%1%2.ades").arg(path).arg(count++)) != AwFileIO::NoError) {
 				sendMessage(m_adesFile.errorMessage());
 				return;
 			}
-			m_adesFile.writeData(&pdi.input.channels);
+			m_adesFile.writeData(&pdi.input.channels());
 			m_adesFile.cleanUpAndClose();
 		}
 		sendMessage("Done.");

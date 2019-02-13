@@ -46,21 +46,61 @@ bool AwProcessIO::isEmpty()
 }
 
 
+void AwProcessIO::setNewChannels(const AwChannelList& channels, bool duplicate)
+{
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
+	m_channels = duplicate ? AwChannel::duplicateChannels(channels) : channels;
+}
+
+void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
+{
+	while (!m_markers.isEmpty())
+		delete m_markers.takeFirst();
+	m_markers = duplicate ? AwMarker::duplicate(markers) : markers;
+}
+
+void AwProcessIO::addChannels(const AwChannelList& channels, bool duplicate)
+{
+	m_channels += duplicate ? AwChannel::duplicateChannels(channels) : channels;
+}
+
+void AwProcessIO::addMarkers(const AwMarkerList& markers, bool duplicate)
+{
+	m_markers += duplicate ? AwMarker::duplicate(markers) : markers;
+}
+
+void AwProcessIO::addMarker(AwMarker *marker)
+{
+	m_markers << marker;
+}
+
+void AwProcessIO::addChannel(AwChannel *channel)
+{
+	m_channels << channel;
+}
+
+void AwProcessIO::addWidget(QWidget *widget)
+{
+	m_widgets << widget;
+}
+
+
 void AwProcessIO::clearChannels()
 {
-	while (!channels.isEmpty())
-		delete channels.takeFirst();
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
 }
 
 void AwProcessIO::clearMarkers()
 {
-	while (!markers.isEmpty())
-		delete markers.takeFirst();
+	while (!m_markers.isEmpty())
+		delete m_markers.takeFirst();
 }
 
 void AwProcessIO::clearWidgets()
 {
-	while (!widgets.isEmpty())
-		delete widgets.takeFirst();
+	while (!m_widgets.isEmpty())
+		delete m_widgets.takeFirst();
 }
 

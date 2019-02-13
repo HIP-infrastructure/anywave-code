@@ -36,5 +36,6 @@ public:
 	static void convertFile(AwArguments& arguments);
 	/** Instantiante a process given the plugin name. Also initialize the process PDI with default settings. Throw an exception if failed. **/
 	/** if an inputFile is specified, the reader is instantiated and the file is open. The optional filter settings are also applied. **/
-	static AwBaseProcess *createAndInitNewProcess(const QString& pluginName, const AwArguments& args, const QString& inputFile = QString());
+	/** Arguments cand be modified to add extra parameters based on input file argument for example. **/
+	static AwBaseProcess *createAndInitNewProcess(const QString& pluginName, AwArguments& args, const QString& inputFile = QString());
 };

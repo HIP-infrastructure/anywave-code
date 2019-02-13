@@ -94,9 +94,9 @@ void AwProcessManager::closeFile()
 		}
 		if (p->isIdle()) {
 			if (p->pdi.hasOutputWidgets())
-				foreach (QWidget *w, p->pdi.output.widgets)	{
+				foreach (QWidget *w, p->pdi.output.widgets())	{
 					w->close();
-					p->pdi.output.widgets.removeAll(w);
+					//p->pdi.output.widgets().removeAll(w);
 				//	w->deleteLater();
 				}
 		}
@@ -403,7 +403,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	// Check for process of type DisplayBackground
 	if (type == AwProcessPlugin::DisplayBackground)	{
 		// if input markers are empty => launch process in Display mode
-		if (p->pdi.input.markers.isEmpty())
+		if (p->pdi.input.markers().isEmpty())
 			type = AwProcessPlugin::Display;
 		else
 			type = AwProcessPlugin::Background;
@@ -454,9 +454,9 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 for (int i = 0; i < size; i++) {
 			list << sources.at(i);
 	 }
-	 p->pdi.input.channels += AwChannel::duplicateChannels(list);
+	 p->pdi.input.setNewChannels(p->pdi.input.channels() + AwChannel::duplicateChannels(list));
 	 // make sure current filters are set for the channels.
-	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels);
+	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
 	 return true;
  }
 
@@ -466,13 +466,13 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 AwBaseProcess *process = newProcessFromPluginName(name);
 	  if (process == NULL)
 		 return;
-	 process->pdi.input.channels = channels;
+	 process->pdi.input.setNewChannels(channels);
 	 AwMarkerList markers;
 	 AwMarker *m = new AwMarker();
 	 m->setStart(pos);
 	 m->setEnd(end);
 	 markers << m;
-	 process->pdi.input.markers = markers;
+	 process->pdi.input.setNewMarkers(markers);
 	 // set flag to skip buildPDI checking
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
 	 runProcess(process);
@@ -492,7 +492,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		bool ignoreSelection = key & Aw::ProcessInput::ProcessIgnoresChannelSelection;
 		QString errorString = p->plugin()->name;
 		if (key & Aw::ProcessInput::GetAsRecordedChannels) { // copy as recorded channels as input for the process and keep going. No check for IO Min and Max.
-			p->pdi.input.channels += AwChannel::duplicateChannels(AwMontageManager::instance()->asRecordedChannels());
+			p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
 			continue;
 		}
 		else if (key & Aw::ProcessInput::GetProcessPluginNames) {
@@ -664,7 +664,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::GetAllMarkers) {
 			foreach(AwMarker *m, AwMarkerManager::instance()->getMarkers())
-				p->pdi.input.markers << new AwMarker(m);
+				p->pdi.input.addMarker(new AwMarker(m));
 		}
 		else if (key & Aw::ProcessInput::GetReaderPlugins) {
 			QList<AwFileIOPlugin *> plugins = AwPluginManager::getInstance()->readers();
@@ -691,8 +691,9 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 					sources = m_selectedChannels;
 			}
 			// clear previous input channels if any
-			while (!p->pdi.input.channels.isEmpty())
-				delete p->pdi.input.channels.takeFirst();
+			//while (!p->pdi.input.channels.isEmpty())
+			//	delete p->pdi.input.channels.takeFirst();
+			p->pdi.input.clearChannels();
 			if (!processIOCheckMinMax(p, i, sources))
 				return false;	
 		}
@@ -726,7 +727,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	if (!skipDataFile) {
 		// UPDATE 18/11/2014
 		if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections) {
-			if (process->pdi.input.markers.isEmpty()) {
+			if (process->pdi.input.markers().isEmpty()) {
 				int res = AwMessageBox::question(NULL, tr("Process Input"),
 					tr("This process is designed to get time selections as input but none are set.\nThe process will be launched on the whole data."),
 					QMessageBox::Ok | QMessageBox::Abort);
@@ -736,7 +737,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				}
 				else {
 					// create a marker as input which covers whole data
-					process->pdi.input.markers << new AwMarker("whole data", 0., m_currentReader->infos.totalDuration());
+					process->pdi.input.addMarker(new AwMarker("whole data", 0., m_currentReader->infos.totalDuration()));
 				}
 			}
 		}
@@ -833,7 +834,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			registerProcessForDisplay(p);
 		// connect the process as well. 
 		else if (p->runMode() == AwProcessPlugin::Internal && !skipDataFile) {
-			AwChannelList *output = &p->pdi.output.channels;
+			AwChannelList *output = &p->pdi.output.channels();
 			if (!output->isEmpty())
 				emit channelsAddedForProcess(output);
 			m_activeInternals << p;
@@ -847,8 +848,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		p->init();
 
 		if (!skipDataFile)
-			if (!p->pdi.output.channels.isEmpty())
-				emit channelsAddedForProcess(&p->pdi.output.channels);
+			if (!p->pdi.output.channels().isEmpty())
+				emit channelsAddedForProcess(&p->pdi.output.channels());
 
 		m_dock->show();
 
@@ -869,8 +870,6 @@ void AwProcessManager::registerProcessForDisplay(AwProcess *process)
 
 void AwProcessManager::unregisterProcessForDisplay(AwProcess *process)
 {
-	AwChannelList *output = &process->pdi.output.channels;
-
 	foreach (AwDisplayProcessRegistration *dr, m_registeredDisplayProcesses) {
 		if (dr->process() == process)	{
 			m_registeredDisplayProcesses.removeAll(dr);
@@ -971,7 +970,7 @@ void AwProcessManager::stopProcess(AwProcess *process)
 	if (process->isRunning())
 		process->stop();
 	else { // process is not running so we suppose it is idle.
-		AwChannelList *output = &process->pdi.output.channels;
+		AwChannelList *output = &process->pdi.output.channels();
 		if (process->runMode() == AwProcessPlugin::Display) 	{
 			unregisterProcessForDisplay(process);
 			if (!output->isEmpty())
@@ -1012,7 +1011,7 @@ void AwProcessManager::handleProcessTermination()
 
 	// check if the process was aborted by the user or terminated by the user
 	if (process->wasAborted())	{
-		AwChannelList *output = &process->pdi.output.channels;
+		AwChannelList *output = &process->pdi.output.channels();
 		// Display plugin
 		if (process->runMode() == AwProcessPlugin::Display)
 			unregisterProcessForDisplay(process);
@@ -1042,7 +1041,7 @@ void AwProcessManager::handleProcessTermination()
 	if (process->runMode() == AwProcessPlugin::Display) {
 		// Display process might have some virtual channels to update after they have finished.
 		emit processHasFinishedOnDisplay();
-		foreach (AwChannel *c, process->pdi.output.channels)
+		foreach (AwChannel *c, process->pdi.output.channels())
 			if (c->isVirtual())	{
 				AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
 				vc->update();
@@ -1053,7 +1052,7 @@ void AwProcessManager::handleProcessTermination()
 		if (process->flags() & Aw::ProcessFlags::ProcessHasOutputUi) {
 			process->prepareOutputUi();
 
-			foreach (QWidget *w, process->pdi.output.widgets) {
+			foreach (QWidget *w, process->pdi.output.widgets()) {
 				w->moveToThread(thread());
 				w->show();
 			}
@@ -1066,15 +1065,15 @@ void AwProcessManager::handleProcessTermination()
 			sysTray->show();
 			sysTray->showMessage(tr("Message"), tr("Process ") + process->plugin()->name +  tr(" has finished."));
 		}
-		if (!process->pdi.output.markers.isEmpty())
-			AwMarkerManager::instance()->addMarkers(AwMarker::duplicate(process->pdi.output.markers));
+		if (!process->pdi.output.markers().isEmpty())
+			AwMarkerManager::instance()->addMarkers(AwMarker::duplicate(process->pdi.output.markers()));
 		return;
 	}
 
 	if (process->isFinished()) { // Process must be destroyed
-		AwChannelList *output = &process->pdi.output.channels;
-		if (!process->pdi.output.markers.isEmpty())
-			AwMarkerManager::instance()->addMarkers(AwMarker::duplicate(process->pdi.output.markers));
+		AwChannelList *output = &process->pdi.output.channels();
+		if (!process->pdi.output.markers().isEmpty())
+			AwMarkerManager::instance()->addMarkers(AwMarker::duplicate(process->pdi.output.markers()));
 
 		if (process->runMode() == AwProcessPlugin::Background) {
 			// Notify user that the process has finished normally
@@ -1189,35 +1188,22 @@ AwDisplayProcessRegistration::AwDisplayProcessRegistration(AwProcess *process)
 {
 	m_process = process;
 	m_canRun = false;
-	// keep a copy the input channels list 
-	foreach (AwChannel *c, process->pdi.input.channels)
-		m_inputChannels  << c;
-	// clone channels
-	process->pdi.input.channels.clear();
-	foreach (AwChannel *c, m_inputChannels)
-	{
-		AwChannel *newC = new AwChannel(c);
-		newC->newData(c->dataSize());
-		memcpy(newC->data(), c->data(), c->dataSize() * sizeof(float));
-		process->pdi.input.channels << newC;
-	}
+	process->pdi.input.setNewChannels(AwChannel::duplicateChannels(process->pdi.input.channels()));
 }
 
 
 void AwDisplayProcessRegistration::cloneInputChannels(AwChannelList& displayedChannels)
 {
-	AwChannelList input = m_process->pdi.input.channels;
+	AwChannelList input = m_process->pdi.input.channels();
 	bool viewFound = false;	// displayedChannels might come from a view that does not contain any of the expected channels for input.
 	// this flag will be set to true if the View is found as the one containing input channels for the process.
 
 	// check for corresponding channels 
-	for (int i = 0; i < m_inputChannels.size(); i++)
-	{
+	for (int i = 0; i < m_inputChannels.size(); i++) {
 		AwChannel *c = m_inputChannels.at(i);
 		int index = displayedChannels.indexOf(c);
 
-		if (index != -1)
-		{
+		if (index != -1) {
 			viewFound = true;
 			AwChannel *source =  displayedChannels.at(index);
 			AwChannel *dest = input.at(i);
@@ -1228,14 +1214,11 @@ void AwDisplayProcessRegistration::cloneInputChannels(AwChannelList& displayedCh
 			m_canRun = true;
 		}
 	}
-	if (viewFound)
-	{
+	if (viewFound)	{
 		// remove displayedChannels not found in proces input channels
-		for (int i = 0; i < m_inputChannels.size(); i++)
-		{
+		for (int i = 0; i < m_inputChannels.size(); i++) {
 			AwChannel *c = m_inputChannels.at(i);
-			if (!displayedChannels.contains(c))
-			{
+			if (!displayedChannels.contains(c)) 	{
 				m_inputChannels.removeAt(i);
 				input.removeAt(i);
 			}

@@ -60,7 +60,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(filterLPO);
 	parser.addOption(filterNotchO);
 
-	// GET DATA options
+	// Convert File options
 	QCommandLineOption ConvertOpt("convert", "convert a file to another format.");
 	parser.addOption(ConvertOpt);
 	
@@ -78,8 +78,8 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	// 
 	// ICA
 	///
-	QCommandLineOption ICAOption("ICA", "Compute ICA on specified file.", "file", QString());
-	QCommandLineOption ICAModality("modality", "optional: specify the channels modality for ICA", "modality", QString());
+	QCommandLineOption ICAOption("ica", "Compute ICA on specified file.");
+	QCommandLineOption ICAModality("modality", "specify the channels modality for --ica option", "modality", QString());
 
 	parser.addOption(seegBIDSOpt);
 	parser.addOption(BIDSSidecarsOpt);
@@ -152,10 +152,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			logger.sendLog("ICA: Missing modality.");
 			throw(exception);
 		}
-		auto artefacts = parser.value(skipMarkerO);
-		arguments.insert("ICA_File", inputF);
-		if (!artefacts.isEmpty())
-			arguments.insert("skip", artefacts);
 		arguments.insert("modality", mod);
 		res[aw::commandLine::ICA] = arguments;
 	}

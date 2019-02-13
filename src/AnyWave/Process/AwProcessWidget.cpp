@@ -188,10 +188,11 @@ void AwProcessWidget::stop()
 	}
 	if (m_process->isIdle()) {
 		if (m_process->pdi.hasOutputWidgets())
-			foreach (QWidget *w, m_process->pdi.output.widgets)	{
+			m_process->pdi.output.clearWidgets();
+			foreach (QWidget *w, m_process->pdi.output.widgets())	{
 				w->close();
-				m_process->pdi.output.widgets.removeAll(w);
-				w->deleteLater();
+			//	m_process->pdi.output.widgets.removeAll(w);
+			//	w->deleteLater();
 			}
 		m_process->stop();
 	}
@@ -222,6 +223,6 @@ void AwProcessWidget::showLog()
 
 void AwProcessWidget::showResults()
 {
-	foreach (QWidget *w, m_process->pdi.output.widgets)
+	foreach (QWidget *w, m_process->pdi.output.widgets())
 		w->show();
 }

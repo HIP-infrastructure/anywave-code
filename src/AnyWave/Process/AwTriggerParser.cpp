@@ -57,7 +57,7 @@ void AwTriggerParser::clearMarkers()
 
 bool AwTriggerParser::showUi()
 {
-	TPUi dlg(pdi.input.channels);
+	TPUi dlg(pdi.input.channels());
 
 	if (dlg.exec() == QDialog::Accepted) {
 		if (dlg.isMaskValueSet())

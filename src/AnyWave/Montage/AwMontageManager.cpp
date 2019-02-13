@@ -89,6 +89,19 @@ AwMontageManager *AwMontageManager::instance()
 	return m_instance;
 }
 
+QStringList AwMontageManager::loadBad(const QString& filePath)
+{
+	QFile file(filePath);
+	QTextStream stream(&file);
+	QStringList res;
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		while (!stream.atEnd()) 
+			res << stream.readLine().trimmed();
+		file.close();
+	}
+	return res;
+}
+
 AwChannelList AwMontageManager::makeSEEGBipolar(AwChannelList& channels)
 {
 	AwChannelList res = channels;

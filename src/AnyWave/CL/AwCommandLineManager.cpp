@@ -27,10 +27,11 @@
 #include "Plugin/AwPluginManager.h"
 #include "Process/AwProcessManager.h"
 #include <AwException.h>
+#include "Montage/AwMontageManager.h"
 #include "Data/AwDataServer.h"
 
 
-AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& pluginName, const AwArguments& args, const QString& inputFile)
+AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& pluginName, AwArguments& args, const QString& inputFile)
 {
 	auto pm = AwPluginManager::getInstance();
 	auto plugin = pm->getProcessPluginByName(pluginName);
@@ -56,11 +57,24 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 
 	auto process = plugin->newInstance();
 	if (!inputFile.isEmpty()) {
+		// detect optional anywave files (.mrk, .mtg, .bad)
+		QString tmp = QString("%1.mrk").arg(inputFile);
+		if (QFile::exists(tmp))
+			args["marker_file"] = tmp;
+		tmp = QString("%1.mtg").arg(inputFile);
+		if (QFile::exists(tmp))
+			args["montage_file"] = tmp;
+		tmp = QString("%1.bad").arg(inputFile);
+		if (QFile::exists(tmp)) {
+			args["bad_file"] = tmp;
+			process->pdi.input.badLabels = AwMontageManager::loadBad(tmp);
+		}
+
 		float hp = 0., lp = 0., notch = 0.;
 		process->pdi.input.dataPath = inputFile;
 		process->pdi.input.setReader(reader);
-		process->pdi.input.channels = AwChannel::duplicateChannels(reader->infos.channels());
-		process->pdi.input.markers = reader->infos.blocks().first()->markers();
+		process->pdi.input.setNewChannels(reader->infos.channels(), true);
+		process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
 		// check for optional filter settings
 		if (args.contains("hp"))
 			hp = args["hp"].toDouble();
@@ -69,7 +83,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 		if (args.contains("notch"))
 			notch = args["notch"].toDouble();
 		if (lp || notch || hp) {
-			for (auto c : process->pdi.input.channels) {
+			for (auto c : process->pdi.input.channels()) {
 				c->setLowFilter(lp);
 				c->setHighFilter(hp);
 				c->setNotch(notch);

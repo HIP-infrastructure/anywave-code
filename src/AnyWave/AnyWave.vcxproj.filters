@@ -1288,9 +1288,6 @@
     <ClCompile Include="IO\JSON\AwJSON.cpp">
       <Filter>IO\JSON</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwCommandLogger.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="CL\AwCommandLogger.cpp">
       <Filter>CL</Filter>
     </ClCompile>
@@ -1305,6 +1302,12 @@
     </ClCompile>
     <ClCompile Include="CL\AwConvertFile.cpp">
       <Filter>CL</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwCommandLogger.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwCommandLogger.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

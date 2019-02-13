@@ -46,7 +46,7 @@ void AwRequestServer::handleGetPluginIO(QTcpSocket *client, AwScriptProcess *p)
 
 	file = p->pdi.input.dataPath;
 
-	for (auto c : p->pdi.input.channels) {
+	for (auto c : p->pdi.input.channels()) {
 		labels << c->name();
 		refs << c->referenceName();
 		if (c->samplingRate() > max_sr)
@@ -62,7 +62,7 @@ void AwRequestServer::handleGetPluginIO(QTcpSocket *client, AwScriptProcess *p)
 	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << p->pdi.input.dataFolder << types;
 
 	// send markers set as input
-	auto markers = p->pdi.input.markers;
+	auto markers = p->pdi.input.markers();
 	stream << markers.size();
 	if (markers.size()) {
 		for (auto m : markers) {

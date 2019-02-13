@@ -47,7 +47,7 @@ void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *p
 
 	file = p->pdi.input.dataPath;
 
-	foreach (AwChannel *c, p->pdi.input.channels) {
+	for (auto c: p->pdi.input.channels()) {
 		labels << c->name();
 		refs << c->referenceName();
 		if (c->samplingRate() > max_sr)

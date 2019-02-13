@@ -100,7 +100,7 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 
 	// default case : not using labels nor types
 	if (!usingFile)
-		requestedChannels = p->pdi.input.channels;
+		requestedChannels = p->pdi.input.channels();
 	else {
 		// Handle duration = -1 when reading direclty from a file
 		if (duration == -1.)

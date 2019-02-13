@@ -80,20 +80,21 @@ void AwExporter::runFromCommandLine()
 		return;
 	}
 
-	AwChannelList channels = reader->infos.channels();
 	auto endTimePos = reader->infos.totalDuration();
-	AwMarkerList markers = pdi.input.markers, skippedMarkers, output_markers, input_markers;
+	AwMarkerList markers = pdi.input.markers(), skippedMarkers, output_markers, input_markers;
 	if (args.contains("marker_file"))
 		markers = AwMarker::load(args["marker_file"].toString());
 	if (args.contains("skip_marker")) {
-		skippedMarkers = AwMarker::getMarkersWithLabel(markers, args["skip_marker"].toString());
-		input_markers = AwMarker::invertMarkerSelection(markers, args["skip_marker"].toString(), endTimePos);
+		skippedMarkers = AwMarker::merge(AwMarker::getMarkersWithLabel(markers, args["skip_marker"].toString()));
+		input_markers = AwMarker::invertMarkerSelection(skippedMarkers, "osef", endTimePos);
 		output_markers = AwMarker::cutAroundMarkers(markers, skippedMarkers);
+		/** destroy skipped markers as AwMarker::merge() duplicates marker objects **/
+		qDeleteAll(skippedMarkers);
 	}
 	else
 		output_markers = markers;
 
-	writer->infos.setChannels(channels);
+	writer->infos.setChannels(pdi.input.channels());
 	AwBlock *block = writer->infos.newBlock();
 
 	if (!output_markers.isEmpty())
@@ -103,11 +104,11 @@ void AwExporter::runFromCommandLine()
 		input_markers << new AwMarker("global", 0, endTimePos);
 
 	sendMessage("loading data...");
-	requestData(&pdi.input.channels, &input_markers);
+	requestData(&pdi.input.channels(), &input_markers);
 	sendMessage("Done.");
 
-	block->setSamples(channels.first()->dataSize());
-	block->setDuration((float)channels.first()->dataSize() / channels.first()->samplingRate());
+	block->setSamples(pdi.input.channels().first()->dataSize());
+	block->setDuration((float)pdi.input.channels().first()->dataSize() / pdi.input.channels().first()->samplingRate());
 	writer->infos.setDate(reader->infos.recordingDate());
 	writer->infos.setTime(reader->infos.recordingTime());
 	writer->infos.setISODate(reader->infos.isoDate());
@@ -118,7 +119,7 @@ void AwExporter::runFromCommandLine()
 		return;
 	}
 	sendMessage("Writting data...");
-	writer->writeData(&m_channels);
+	writer->writeData(&pdi.input.channels());
 	sendMessage("Done.");
 	writer->cleanUpAndClose();
 	writer->plugin()->deleteInstance(writer);
@@ -131,13 +132,13 @@ void AwExporter::runFromCommandLine()
 
 void AwExporter::run()
 {
-	auto output_markers = pdi.input.markers;
+	auto output_markers = pdi.input.markers();
 	bool skip = !m_skippedMarkers.isEmpty();
 	bool use = !m_exportedMarkers.isEmpty();
 	bool isDecimate = m_decimateFactor > 1;
 	auto skippedMarkers = AwMarker::getAllLabels(m_skippedMarkers);
 	// rename skipped markers in the current input markers with a unique label
-	for (auto m : pdi.input.markers) {
+	for (auto m : pdi.input.markers()) {
 		if (skippedMarkers.contains(m->label()))
 			m->setLabel("Skipped");
 	}
@@ -149,15 +150,15 @@ void AwExporter::run()
 	
 	AwMarkerList input_markers;
 	if (skip && !use) {
-		output_markers = AwMarker::cutAroundMarkers(pdi.input.markers, m_skippedMarkers);
-		input_markers = AwMarker::invertMarkerSelection(pdi.input.markers, "Skipped", endTimePos);
+		output_markers = AwMarker::cutAroundMarkers(pdi.input.markers(), m_skippedMarkers);
+		input_markers = AwMarker::invertMarkerSelection(m_skippedMarkers, "Skipped", endTimePos);
 	}
 	if (!skip && use) {
-		output_markers = AwMarker::applyANDOperation(m_exportedMarkers, pdi.input.markers);
+		output_markers = AwMarker::applyANDOperation(m_exportedMarkers, pdi.input.markers());
 		input_markers = AwMarker::duplicate(m_exportedMarkers);
 	}
 	if (skip && use) {
-		output_markers = AwMarker::applySelectionFilter(pdi.input.markers, skippedMarkers, usedMarkers, pdi.input.reader()->infos.totalDuration());
+		output_markers = AwMarker::applySelectionFilter(pdi.input.markers(), skippedMarkers, usedMarkers, pdi.input.reader()->infos.totalDuration());
 		input_markers = AwMarker::duplicate(output_markers);
 	}
 
@@ -218,14 +219,14 @@ bool AwExporter::showUi()
 	}
 
 	// separate ICA channels from others, if any
-	for (auto c : pdi.input.channels) {
+	for (auto c : pdi.input.channels()) {
 		if (c->isICA())
 			m_ICAChannels << c;
 		else 
 			ui.channels << c;
 	}
 
-	ui.markers = pdi.input.markers;
+	ui.markers = pdi.input.markers();
 	ui.icaChannels = m_ICAChannels;
 	ui.filterSettings = pdi.input.filterSettings;
 

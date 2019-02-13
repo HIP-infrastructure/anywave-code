@@ -145,7 +145,7 @@ void AwProcessFromMarkersDial::accept()
 	// the plugin may be of type DisplayBackground, so force it to be Background only to launch the process.
 	AwBaseProcess *process = process_manager->newProcessFromPluginName(m_ui.comboProcess->itemText(m_ui.comboProcess->currentIndex()));
 	// set markers to compute data on
-	process->pdi.input.markers = m_processMarkers;
+	process->pdi.input.setNewMarkers(m_processMarkers);
 	// start process
 	process_manager->runProcess(process);
 	QDialog::accept();

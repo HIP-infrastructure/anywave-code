@@ -57,10 +57,10 @@ corr_result *Correlation::computeCorrelation(float start, float duration)
 	emit progressChanged(tr("Computing correlation..."));
 	corr_result *res = new corr_result;
 	if (m_ui->computeAllvsAll) {
-		mat chan1 = AwMath::channelsToMat(pdi.input.channels);
+		mat chan1 = AwMath::channelsToMat(pdi.input.channels());
 		emit progressChanged(tr("Done."));
 		res->corr = cor(chan1.t());
-		res->xLabels = res->yLabels = AwChannel::getLabels(pdi.input.channels);
+		res->xLabels = res->yLabels = AwChannel::getLabels(pdi.input.channels());
 	}
 	else {
 		// 
@@ -103,11 +103,11 @@ corr_result *Correlation::computeCorrelation(float start, float duration)
 void Correlation::prepareOutputUi()
 {
 	if (m_results.size() > 2)
-		pdi.output.widgets << new maingui(m_results);
+		pdi.output.addWidget(new maingui(m_results));
 
 	if (m_results.size() < 3) {
 		for (auto r : m_results) {
-			pdi.output.widgets << new OutputWidget(r);
+			pdi.output.addWidget(new OutputWidget(r));
 		}
 	}
 }
@@ -117,15 +117,15 @@ void Correlation::run()
 	if (m_ui->marker.isEmpty()) {
 		emit progressChanged(tr("Computing using all the data..."));
 		emit progressChanged(tr("Loading data..."));
-		requestData(&pdi.input.channels, (float)0, (float)-1);
+		requestData(&pdi.input.channels(), (float)0, (float)-1);
 		emit progressChanged(tr("OK."));
 		m_results << computeCorrelation(0, pdi.input.reader()->infos.totalDuration());
 	}
 	else {
-		foreach (AwMarker *m, pdi.input.markers) {
+		foreach (AwMarker *m, pdi.input.markers()) {
 			if (m->label() == m_ui->marker) {
 				emit progressChanged(tr("Loading data..."));
-				requestData(&pdi.input.channels, m->start(), m->duration());
+				requestData(&pdi.input.channels(), m->start(), m->duration());
 				emit progressChanged(tr("OK."));
 				m_results << computeCorrelation(m->start(), m->duration());
 			}
@@ -139,7 +139,7 @@ void Correlation::run()
 bool Correlation::showUi()
 {
 	if (m_ui == NULL)
-		m_ui = new settings(pdi.input.channels, pdi.input.markers);
+		m_ui = new settings(pdi.input.channels(), pdi.input.markers());
 	if (m_ui->exec() == QDialog::Accepted) 
 		return true;
 	return false;

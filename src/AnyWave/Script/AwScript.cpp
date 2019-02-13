@@ -152,15 +152,15 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			// apply montage
 			if (ifelem->montagePath().isEmpty()) { // No Montage Defined => default montage
 				emit warning("No montage file specified. Using default montage.");
-				process->pdi.input.channels = AwChannel::duplicateChannels(reader->infos.channels());
+				process->pdi.input.setNewChannels(reader->infos.channels(), true);
 			}
 			else {
 				emit message("Applying montage file " + ifelem->montagePath());
-				process->pdi.input.channels = mm->loadAndApplyMontage(reader->infos.channels(), ifelem->montagePath());
+				process->pdi.input.setNewChannels(mm->loadAndApplyMontage(reader->infos.channels(), ifelem->montagePath()));
 			}
 
 			// apply filters
-			finput->filterSettings().apply(process->pdi.input.channels);
+			finput->filterSettings().apply(process->pdi.input.channels());
 
 			for (auto t : finput->filterSettings().currentTypes()) {
 
@@ -171,7 +171,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 				emit message("Using marker file " + ifelem->markerPath());
 				AwMarkerList markers = AwMarker::load(ifelem->markerPath());
 				if (!markers.isEmpty()) {
-					process->pdi.input.markers = markers;
+					process->pdi.input.setNewMarkers(markers);
 					bool skipMarkers = !finput->skippedMarkers().isEmpty();
 					bool useMarkers = !finput->usedMarkers().isEmpty();
 
@@ -179,7 +179,7 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 						AwMarkerList filtered = AwMarker::applySelectionFilter(markers, finput->skippedMarkers(), finput->usedMarkers(), reader->infos.totalDuration());
 						if (filtered.isEmpty()) 
 							emit warning("no markers were kept after applying usedMarkers or skippedMarkers filters");
-						process->pdi.input.markers = filtered;
+						process->pdi.input.setNewMarkers(filtered);
 						// Destroy loaded markers as applySelection duplicates them.
 						while (!markers.isEmpty())
 							delete markers.takeFirst();
@@ -220,10 +220,8 @@ void AwScript::runProcess(QSVALUE sprocess, QSVALUE fileInput)
 			disconnect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(processMessage(const QString&)));
 
 			// clean pdi.input for another usage
-			while (!process->pdi.input.channels.isEmpty())
-				delete process->pdi.input.channels.takeFirst();
-			while (!process->pdi.input.markers.isEmpty())
-				delete process->pdi.input.markers.takeFirst();
+			process->pdi.input.clearChannels();
+			process->pdi.input.clearMarkers();
 		} // end foreach (AwInputFile *ifile, inputs)
 	} // end if (p && m_taskFileInput)
 	else

@@ -98,6 +98,8 @@ public:
 	static float *computeAVG(AwChannel *chan);
 	/** Convert EEG channels to SEEG and make a bipolar montage **/
 	static AwChannelList makeSEEGBipolar(AwChannelList& channels);
+	/** Load bad channels file **/
+	static QStringList loadBad(const QString& file);
 	/** Remise à zero **/
 	void closeFile();
 	/** Quit **/
