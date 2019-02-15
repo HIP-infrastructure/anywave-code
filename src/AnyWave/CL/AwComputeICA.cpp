@@ -33,7 +33,7 @@
 
 void AwCommandLineManager::computeICA(AwArguments& arguments)
 {
-	AwCommandLogger logger("convertFile", "cl_convert");
+	AwCommandLogger logger("computeICA", "cl_ica");
 	auto inputFile = arguments["input_file"].toString();
 	if (!QFile::exists(inputFile)) {
 		logger.sendLog(QString("file %1 does not exist.").arg(inputFile));

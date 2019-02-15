@@ -75,12 +75,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption BIDSFormatOpt("bids_format", "data format for output EDF (default) or VHDR", "format", QString());
 	QCommandLineOption BIDSAcqOpt("bids_acq", "acquisition method", "acq", QString());
 	QCommandLineOption BIDSProcOpt("bids_proc", "proc", "proc", QString());
-	// 
-	// ICA
-	///
-	QCommandLineOption ICAOption("ica", "Compute ICA on specified file.");
-	QCommandLineOption ICAModality("modality", "specify the channels modality for --ica option", "modality", QString());
-
 	parser.addOption(seegBIDSOpt);
 	parser.addOption(BIDSSidecarsOpt);
 	parser.addOption(BIDSTaskOpt);
@@ -91,10 +85,16 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(BIDSFormatOpt);
 	parser.addOption(BIDSAcqOpt);
 	parser.addOption(BIDSProcOpt);
-
+	// 
+	// ICA
+	///
+	QCommandLineOption ICAOption("ica", "Compute ICA on specified file.");
+	QCommandLineOption ICAModality("modality", "specify the channels modality for --ica option", "modality", QString());
+	QCommandLineOption ICAComponents("comp", "specify the number of components to compute", "comp", QString());
 	parser.addOption(ICAOption);
 	parser.addOption(ICAModality);
-
+	parser.addOption(ICAComponents);
+	   	  
 	//parser.process(QCoreApplication::arguments());
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
@@ -131,7 +131,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	auto skipedMarker = parser.value(skipMarkerO);
 	if (!skipedMarker.isEmpty())
 		arguments["skip_marker"] = skipedMarker;
-		   
+	// input file
+	auto inputF = parser.value(inputFileO);
+	if (!inputF.isEmpty())
+		arguments["input_file"] = inputF;
+	auto outputF = parser.value(outputFileO);
+	if (!outputF.isEmpty()) 
+		arguments["output_file"] = outputF;
+	   
 	if (isFormatOption) {
 		if (!outputAcceptedFormats.contains(format)) {
 			logger.sendLog("specify a valid output_format option: (vhdr, edf, MATLAB, ADES)");
@@ -142,37 +149,37 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	}
 	
 	if (parser.isSet(ICAOption)) {
-		auto inputF = parser.value(inputFileO);
-		if (inputF.isEmpty()) {
-			logger.sendLog("ICA: Missing input file.");
+		// mandatory arguments
+		if (!arguments.contains("input_file")) {
+			logger.sendLog("ica: Missing input file.");
 			throw(exception);
 		}
 		auto mod = parser.value(ICAModality);
 		if ( mod.isEmpty()) {
-			logger.sendLog("ICA: Missing modality.");
+			logger.sendLog("ica: Missing modality.");
 			throw(exception);
 		}
-		arguments.insert("modality", mod);
+		// optional arguments
+		auto nc = parser.value(ICAComponents);
+		if (!nc.isEmpty())
+			arguments["comp"] = nc;
+		arguments["modality"] =  mod;
 		res[aw::commandLine::ICA] = arguments;
 	}
 	else if (parser.isSet(ConvertOpt)) {
 		// mandatory arguments
-		auto inputF = parser.value(inputFileO);
-		if (inputF.isEmpty()) {
-			logger.sendLog("get_data: Missing input file.");
+		if (!arguments.contains("input_file")) {
+			logger.sendLog("convert: Missing input file.");
 			throw(exception);
 		}
-		auto outputF = parser.value(outputFileO);
-		if (outputF.isEmpty()) {
-			logger.sendLog("get_data: Missing output file.");
+		if (!arguments.contains("output_file")) {
+			logger.sendLog("convert: Missing output file.");
 			throw(exception);
 		}
 		if (!isFormatOption) {
-			logger.sendLog("get_data: Missing output_format option.");
+			logger.sendLog("convert: Missing output_format option.");
 			throw(exception);
 		}
-		arguments["input_file"] = inputF;
-		arguments["output_file"] = outputF;
 		res[aw::commandLine::ConvertFile] = arguments;
 	}
 	else if (parser.isSet(seegBIDSOpt)) {

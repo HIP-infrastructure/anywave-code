@@ -115,6 +115,15 @@ void ICA::runFromCommandLine()
 				m_channels.removeAll(c);
 	}
 	m_nComp = m_channels.size();
+
+	if (args.contains("comp"))
+		m_nComp = args["comp"].toInt();
+
+	if (m_nComp > m_channels.size()) {
+		sendMessage("The specified number of components is greater dans the number of available channels in data. Aborted.");
+		return;
+	}
+
 	if (m_nComp < 2) {
 		sendMessage("Not enough components to compute. Aborted.");
 		return;
@@ -122,13 +131,15 @@ void ICA::runFromCommandLine()
 
 	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.dataPath).arg(args["modality"].toString()));
 
+	if (args.contains("marker_file")) 
+		pdi.input.setNewMarkers(AwMarker::load(args["marker_file"].toString()));
 
 	AwMarkerList selectedMarkers;
-
-	auto skipArtefacts = args["skip_marker"].toString();
-	if (!skipArtefacts.isEmpty()) {
-		selectedMarkers = AwMarker::invertMarkerSelection(pdi.input.markers(), skipArtefacts, pdi.input.fileDuration);
-		sendMessage(QString("Markers called %1 will be skipped.").arg(skipArtefacts));
+	auto labelToSkip = args["skip_marker"].toString();
+	if (!labelToSkip.isEmpty()) {
+		auto markersToSkip = AwMarker::getMarkersWithLabel(pdi.input.markers(), labelToSkip);
+		selectedMarkers = AwMarker::invertMarkerSelection(markersToSkip, labelToSkip, pdi.input.reader()->infos.totalDuration());
+		sendMessage(QString("Markers named %1 will be skipped.").arg(labelToSkip));
 	}
 
 	bool skipData = !selectedMarkers.isEmpty();
@@ -153,6 +164,7 @@ void ICA::runFromCommandLine()
 	else
 		requestData(&m_channels, 0.0f, -1.0f, true);
 	sendMessage("Done");
+	qDeleteAll(selectedMarkers);
 	int decimate = 1;
 	if (m_isDownsamplingActive) {
 		decimate = 2;
@@ -262,6 +274,8 @@ void ICA::run()
 		requestData(&m_channels, &selectedMarkers, true);
 	else
 		requestData(&m_channels, 0.0f, -1.0f, true);
+
+	qDeleteAll(selectedMarkers);
 
 	int decimate = 1;
 	if (m_isDownsamplingActive) {
