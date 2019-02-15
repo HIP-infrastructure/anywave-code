@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include "EGIReader.h"
 #include <QDomDocument>
 #include <AwException.h>
@@ -1202,5 +1201,4 @@ quint64 EGIReader::micros2Samples(quint64 value)
 	double sampleDuration = 1000000. / (double)m_samplingRate;
 	double sampleNumber = (double)value / sampleDuration;
 	return (quint64)floor(sampleNumber);
->>>>>>> remotes/origin/master
 }

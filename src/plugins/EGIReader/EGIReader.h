@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
 //                 Université d’Aix Marseille (AMU) - 
@@ -182,4 +181,4 @@ public:
 	EGIReaderPlugin();
 	EGIReader *newInstance(const QString& filename) { return new EGIReader(filename); }
 };
->>>>>>> remotes/origin/master
+
