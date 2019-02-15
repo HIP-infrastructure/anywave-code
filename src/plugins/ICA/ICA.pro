@@ -17,7 +17,7 @@ QMAKE_POST_LINK = \
   install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $${DESTDIR}/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 }
 
-# The following define makes your compiler emit warnings if you use
+# The following define makes your compiler emit warnings if you use/Users/bruno/dev/aw-gitlab/src/plugins/EGIReader/EGIReader.h
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
@@ -34,7 +34,7 @@ LIBS += -lopenblas
 macx{
 LIBS += -framework Accelerate
 }
-LIBS += -lAwProcess -lAwWidgets -lAwFilter -lAwMath -lAwMATLAB
+LIBS += -lAwProcess -lAwWidgets -lAwFilter -lAwMath -lAwMATLAB -lAwRW
 
 FORMS += \
     ICASettings.ui
