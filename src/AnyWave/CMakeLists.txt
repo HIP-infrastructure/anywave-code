@@ -15,6 +15,7 @@ SET(AnyWave_SRCS
     ./CL/AwCommandLogger.cpp
     ./CL/AwCommandLineManager.cpp
     ./CL/AwComputeICA.cpp
+    ./CL/AwConvertFile.cpp
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
 	./Data/AwMemoryMapper.cpp  

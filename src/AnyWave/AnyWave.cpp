@@ -74,7 +74,7 @@
 #include <widget/AwTopoBuilder.h>
 //#define AW_EPOCHING
 
-#ifdef AW_EPOCHING
+#ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
 #endif
 
