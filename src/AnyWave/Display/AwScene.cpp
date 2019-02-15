@@ -100,7 +100,7 @@ void AwScene::launchProcess()
 	inputList << newMarker;
 	
 	// set markers to compute data on
-	process->pdi.input.markers = inputList;
+	process->pdi.input.setNewMarkers(inputList);
 	// do not delete markers after computation
 	// start process
 	process_manager->runProcess(process);

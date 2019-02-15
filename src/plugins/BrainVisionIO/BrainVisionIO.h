@@ -81,5 +81,5 @@ class BRAINVISIONIO_EXPORT BrainVisionIOPlugin : public AwFileIOPlugin
 #endif
 public:
 	BrainVisionIOPlugin();
-	BrainVisionIO *newInstance(const QString& filename) { return new BrainVisionIO(filename); }
+	AW_INSTANTIATE_PLUGIN(BrainVisionIO)
 };

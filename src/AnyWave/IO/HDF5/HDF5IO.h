@@ -58,5 +58,5 @@ class AHDF5IOPlugin : public AwFileIOPlugin
 	Q_INTERFACES(AwFileIOPlugin)
 public:
 	AHDF5IOPlugin();
-	AHDF5IO *newInstance(const QString& filename) { return new AHDF5IO(filename); }
+	AW_INSTANTIATE_PLUGIN(AHDF5IO)
 };

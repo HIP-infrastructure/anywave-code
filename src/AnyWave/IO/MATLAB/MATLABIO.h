@@ -50,5 +50,5 @@ class MATLABIOPlugin : public AwFileIOPlugin
 	Q_INTERFACES(AwFileIOPlugin)
 public:
 	MATLABIOPlugin();
-	MATLABIO *newInstance(const QString& filename) { return new MATLABIO(filename); }
+	AW_INSTANTIATE_PLUGIN(MATLABIO)
 };

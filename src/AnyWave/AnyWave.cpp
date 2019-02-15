@@ -74,7 +74,7 @@
 #include <widget/AwTopoBuilder.h>
 //#define AW_EPOCHING
 
-#ifdef AW_EPOCHING
+#ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
 #endif
 
@@ -175,23 +175,18 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwMarkerInspector *markerInspectorWidget = NULL;
 
 	if (isGUIMode) {
-		// instantiate Dock Widgets
-		// BIDS 
-		// BIDS dock is null by default and will be instantiated when needed.
-		m_dockBIDS = NULL;
-		// Markers
-		m_dockMarkers = new QDockWidget(tr("Markers"), this);
-		addDockWidget(Qt::LeftDockWidgetArea, m_dockMarkers);
-		m_dockMarkers->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		m_dockMarkers->setWidget(AwMarkerManager::instance()->ui());
-		m_dockMarkers->hide();
+		m_dockWidgets["markers"] = new QDockWidget(tr("Markers"), this);
+		addDockWidget(Qt::LeftDockWidgetArea, m_dockWidgets["markers"]);
+		m_dockWidgets["markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		m_dockWidgets["markers"]->setWidget(AwMarkerManager::instance()->ui());
+		m_dockWidgets["markers"]->hide();
 
-		m_addMarkerDock = new QDockWidget(tr("Adding Markers Tool"), this);
-		m_addMarkerDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		m_addMarkerDock->setFloating(true);
+		m_dockWidgets["add_markers"] = new QDockWidget(tr("Adding Markers Tool"), this);
+		m_dockWidgets["add_markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		m_dockWidgets["add_markers"]->setFloating(true);
 		markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
-		m_addMarkerDock->setWidget(markerInspectorWidget);
-		m_addMarkerDock->hide();
+		m_dockWidgets["add_markers"]->setWidget(markerInspectorWidget);
+		m_dockWidgets["add_markers"]->hide();
 	}
 
 	// Scripts
@@ -199,14 +194,16 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwScriptManager *scriptManager = AwScriptManager::instance();
 	scriptManager->setParent(this);
 
-	QDockWidget *dockScripts = new QDockWidget(tr("Scripts"), this);
+	auto dockScripts = new QDockWidget(tr("Scripts"), this);
+	m_dockWidgets["scripts"] = dockScripts;
 	addDockWidget(Qt::LeftDockWidgetArea, dockScripts);
 	dockScripts->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockScripts->setWidget(AwScriptManager::instance()->scriptsWidget());
 	dockScripts->hide();
 	AwScriptManager::instance()->setDock(dockScripts);
 	// Processes
-	QDockWidget *dockProcess = new QDockWidget(tr("Processes"), this);
+	auto dockProcess = new QDockWidget(tr("Processes"), this);
+	m_dockWidgets["processes"] = dockProcess;
 	addDockWidget(Qt::LeftDockWidgetArea, dockProcess);
 	dockProcess->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockProcess->setWidget(AwProcessManager::instance()->processesWidget());
@@ -215,7 +212,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 
 	AwMarkerManager *marker_manager = AwMarkerManager::instance();
 	marker_manager->setParent(this);
-	marker_manager->setDock(m_dockMarkers);
+	marker_manager->setDock(m_dockWidgets["markers"]);
 	if (markerInspectorWidget) {
 		connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
 		connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
@@ -228,7 +225,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	if (isGUIMode) {
 		m_display = new AwDisplay(this);
 		m_display->setParent(this);
-		m_display->setAddMarkerDock(m_addMarkerDock);
+		m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
 	}
 
 	// AwSourceManager
@@ -274,9 +271,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList&)));
 	connect(aws, SIGNAL(recentBIDSUpdated(const QStringList&)), this, SLOT(updateRecentBIDS(const QStringList&)));
 
-
-	/// MAPPING
-	m_dockEEG = m_dockMEG = NULL;
 	m_currentFileModified = false;
 	if (isGUIMode) {
 		initToolBarsAndMenu();
@@ -298,6 +292,10 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		// Menu: ICA->Show maps on signals
 		connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
 		connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
+		// Populate View Menu to show/hide DockWidgets
+		menuView_->addSeparator();
+		for (auto v : m_dockWidgets.values())
+			menuView_->addAction(v->toggleViewAction());
 		retranslateUi(this);	// force translation to be applied.
 		m_updater.checkForUpdate();
 	}
@@ -409,18 +407,27 @@ void AnyWave::quit()
 	AwTopoBuilder::destroy();
 
 	// Mappings cleanup
-	if (m_dockEEG)	{
-		disconnect(m_dockEEG, SIGNAL(mappingClosed()));
-		m_dockEEG->close();
-		delete m_dockEEG;
-		m_dockEEG = NULL;
+	auto dockEEG = m_dockWidgets["eeg_mapping"];
+
+	if (dockEEG)	{
+		auto dock = static_cast<AwDockMapping *>(dockEEG);
+		disconnect(dock, SIGNAL(mappingClosed()));
+		dockEEG->close();
+		delete dock;
+		m_dockWidgets.remove("eeg_mapping");
+		//delete m_dockEEG;
+		//m_dockEEG = NULL;
 	}
 
-	if (m_dockMEG)	{
-		disconnect(m_dockMEG, SIGNAL(mappingClosed()));
-		m_dockMEG->close();
-		delete m_dockMEG;
-		m_dockMEG = NULL;
+	auto dockMEG = m_dockWidgets["meg_mapping"];
+
+	if (dockMEG)	{
+		auto dock = static_cast<AwDockMapping *>(dockMEG);
+		disconnect(dock, SIGNAL(mappingClosed()));
+		dockMEG->close();
+		m_dockWidgets.remove("meg_mapping");
+		delete dock;
+		//m_dockMEG = NULL;
 	}
 	if (m_display)
 		m_display->quit();
@@ -533,7 +540,7 @@ void AnyWave::createUserDirs()
 //
 void AnyWave::initToolBarsAndMenu()
 {
-	m_dockMarkers = NULL;
+	//m_dockMarkers = NULL;
 	AwSettings *aws = AwSettings::getInstance();
 
 	// ToolBar File Operations (from AwFileToolBar)
@@ -552,7 +559,7 @@ void AnyWave::initToolBarsAndMenu()
 	addToolBar(Qt::TopToolBarArea, m_cursorToolBar->toolBar());
 	m_cursorToolBar->setEnabled(false);
 	connect(m_cursorToolBar, SIGNAL(cursorModeChanged(bool)), m_display, SLOT(cursorModeChanged(bool)));
-	connect(m_cursorToolBar, &AwCursorMarkerToolBar::markerModeChanged, m_addMarkerDock, &QDockWidget::setVisible);
+	connect(m_cursorToolBar, &AwCursorMarkerToolBar::markerModeChanged, m_dockWidgets["add_markers"], &QDockWidget::setVisible);
 	connect(m_cursorToolBar, SIGNAL(QTSModeChanged(bool)), m_display, SLOT(setQTSMode(bool)));
 	connect(m_display, SIGNAL(QTSModeEnded()), m_cursorToolBar, SLOT(stopQTSMode()));
 	connect(m_display, SIGNAL(resetMarkerMode()), m_cursorToolBar, SLOT(reset()));
@@ -563,13 +570,13 @@ void AnyWave::initToolBarsAndMenu()
 	addToolBar(Qt::TopToolBarArea, filter_tb->toolBar());
 
 	// Filtering dock widget
-	QDockWidget *dockFilters = new QDockWidget(tr("Filtering"), this);
+	auto dockFilters = new QDockWidget(tr("Filtering"), this);
+	m_dockWidgets["filters"] = dockFilters;
 	dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockFilters->setFloating(true);
 	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, dockFilters, &QDockWidget::show);
 	dockFilters->hide();
 	dockFilters->setWidget(AwSettings::getInstance()->filterSettings().ui());
-	//connect(filter_tb, &AwFilterToolBar::filterButtonClicked, &AwSettings::getInstance()->filterSettings(), &AwFilterSettings::updateGUI);
 	filter_tb->setEnabled(false);
 	m_toolBarWidgets.append(filter_tb);
 
@@ -756,12 +763,17 @@ void AnyWave::runMapping()
 	bool isMEGOK = true;
 	bool isEEGOK = true;
 	bool isSEEGOK = true;
-	if (m_dockMEG) { // MEG mapping was already created
-		m_dockMEG->show();
-		m_dockMEG->openConnection();
+
+	auto dockMEG = m_dockWidgets["meg_mapping"];
+	auto dockEEG = m_dockWidgets["eeg_mapping"];
+
+	if (dockMEG) { // MEG mapping was already created
+		dockMEG->show();
+		auto realDockMEG = static_cast<AwDockMapping *>(dockMEG);
+		realDockMEG->openConnection();
 		// reconnect signals and slots
-		connect(m_display, SIGNAL(clickedAtLatency(float)), m_dockMEG, SLOT(newMappingAtPosition(float)));
-		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)),  m_dockMEG, SLOT(newMappingSelection(float, float)));
+		connect(m_display, SIGNAL(clickedAtLatency(float)), realDockMEG, SLOT(newMappingAtPosition(float)));
+		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), realDockMEG, SLOT(newMappingSelection(float, float)));
 		m_display->setMappingModeOn(true);
 	}
 	else { // check for available layouts, and create MEG Mapping objects
@@ -776,39 +788,41 @@ void AnyWave::runMapping()
 			l3D = lm->guessLayout(m_currentReader, AwLayout::L3D|AwLayout::MEG);
 		}
 		if (l2D || l3D) { // at least one layout was found => build topo
-			m_dockMEG = new AwDockMapping(AwChannel::MEG, tr("MEG Mapping"), l2D, l3D, this);
+			auto dock = new AwDockMapping(AwChannel::MEG, tr("MEG Mapping"), l2D, l3D, this);
+			m_dockWidgets["meg_mapping"] = dock;
 			//m_dockMEG2->setFeatures(QDockWidget::AllDockWidgetFeatures);
-			m_dockMEG->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+			dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 			//m_dockMEG2->show();
-			addDockWidget(Qt::LeftDockWidgetArea, m_dockMEG);
-			m_dockMEG->setFloating(true);
+			addDockWidget(Qt::LeftDockWidgetArea, dock);
+			dock->setFloating(true);
 			// connections
-			connect(m_display, SIGNAL(clickedAtLatency(float)), m_dockMEG, SLOT(newMappingAtPosition(float)));
-			connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)),  m_dockMEG, SLOT(newMappingSelection(float, float)));
-			connect(m_dockMEG, SIGNAL(mappingClosed()), this, SLOT(stopMapping())); 
-			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), m_dockMEG, SLOT(setSelectedChannels(AwChannelList&)));
-			connect(m_dockMEG, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			m_dockMEG->setSelectedChannels(m_display->selectedChannels());
-			m_dockMEG->setBadLabels(AwMontageManager::instance()->badLabels());
+			connect(m_display, SIGNAL(clickedAtLatency(float)), dock, SLOT(newMappingAtPosition(float)));
+			connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), dock, SLOT(newMappingSelection(float, float)));
+			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
+			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
+			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+			dock->setSelectedChannels(m_display->selectedChannels());
+			dock->setBadLabels(AwMontageManager::instance()->badLabels());
 			m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
 			QRect geo = this->geometry();
 			int centerx = (geo.x() + geo.width() / 4);
 			int centery = (geo.y() + geo.height() / 4);
-			m_dockMEG->move(centerx, centery);
-			m_dockMEG->show();
+			dock->move(centerx, centery);
+			dock->show();
 		}
 		else 
 			isMEGOK = false;
 	}
 
 	// EEG
-	if (m_dockEEG) { // MEG mapping was already created
-		m_dockEEG->show();
-		m_dockEEG->openConnection();
+	if (dockEEG) { // MEG mapping was already created
+		dockEEG->show();
+		auto realDock = static_cast<AwDockMapping *>(dockMEG);
+		realDock->openConnection();
 		// reconnect signals and slots
-		connect(m_display, SIGNAL(clickedAtLatency(float)), m_dockEEG, SLOT(newMappingAtPosition(float)));
-		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)),  m_dockEEG, SLOT(newMappingSelection(float, float)));
+		connect(m_display, SIGNAL(clickedAtLatency(float)), realDock, SLOT(newMappingAtPosition(float)));
+		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), realDock, SLOT(newMappingSelection(float, float)));
 		m_display->setMappingModeOn(true);
 	}
 	else { // check for avaible layouts, and create MEG Mapping objects
@@ -823,25 +837,26 @@ void AnyWave::runMapping()
 			l3D = lm->guessLayout(m_currentReader, AwLayout::L3D|AwLayout::EEG);
 		}
 		if (l2D || l3D) { // at least one layout was found => build topo
-			m_dockEEG = new AwDockMapping(AwChannel::EEG, tr("EEG Mapping"), l2D, l3D, this);
-			m_dockEEG->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-			addDockWidget(Qt::LeftDockWidgetArea, m_dockEEG);
-			m_dockEEG->setFloating(true);
+			auto dock = new AwDockMapping(AwChannel::EEG, tr("EEG Mapping"), l2D, l3D, this);
+			m_dockWidgets["eeg_mapping"] = dock;
+			dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+			addDockWidget(Qt::LeftDockWidgetArea, dock);
+			dock->setFloating(true);
 			// connections
-			connect(m_display, SIGNAL(clickedAtLatency(float)), m_dockEEG, SLOT(newMappingAtPosition(float)));
-			connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)),  m_dockEEG, SLOT(newMappingSelection(float, float)));
-			connect(m_dockEEG, SIGNAL(mappingClosed()), this, SLOT(stopMapping())); 
-			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), m_dockEEG, SLOT(setSelectedChannels(AwChannelList&)));
-			connect(m_dockEEG, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			m_dockEEG->setSelectedChannels(m_display->selectedChannels());
-			m_dockEEG->setBadLabels(AwMontageManager::instance()->badLabels());
+			connect(m_display, SIGNAL(clickedAtLatency(float)), dock, SLOT(newMappingAtPosition(float)));
+			connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), dock, SLOT(newMappingSelection(float, float)));
+			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
+			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
+			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+			dock->setSelectedChannels(m_display->selectedChannels());
+			dock->setBadLabels(AwMontageManager::instance()->badLabels());
 			m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
 			QRect geo = this->geometry();
 			int centerx = (geo.x() + geo.width() / 2);
 			int centery = (geo.y() + geo.height() / 2);
-			m_dockEEG->move(centerx, centery);
-			m_dockEEG->show();
+			dock->move(centerx, centery);
+			dock->show();
 		}
 		else 
 			isEEGOK = false;
@@ -895,15 +910,17 @@ void AnyWave::stopMapping()
 {
 	// check if dock widgets are active
 	bool MEGOK = true;
-	if (!m_dockMEG)
+	auto dockMEG =static_cast<AwDockMapping *>(m_dockWidgets["meg_mapping"]);
+	auto dockEEG = static_cast<AwDockMapping *>(m_dockWidgets["eeg_mapping"]);
+	if (!dockMEG)
 		MEGOK = false;
-	else if (m_dockMEG->isClosed())
+	else if (dockMEG->isClosed())
 		MEGOK = false;
 
 	bool EEGOK = true;
-	if (!m_dockEEG)
+	if (!dockEEG)
 		EEGOK = false;
-	else if (m_dockEEG->isClosed())
+	else if (dockEEG->isClosed())
 		EEGOK = false;
 
 	bool SEEGActive = false;

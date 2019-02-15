@@ -14,8 +14,12 @@
 #include "Montage/AwMontageManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Debug/AwDebugLog.h"
+#include <AwUtilities.h>
+#include <QJsonArray>
+
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
+QString AwBIDSManager::m_parsingPath = QString("derivatives/parsing");
 
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
@@ -304,13 +308,13 @@ QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 	// search for a dataset_description.json file which MUST be present at the root level
 
 	QFileInfo fi(path);
-	if (!fi.exists())
+	if (!fi.exists()) 
 		return QString();
 
 	// look in current path
 	auto dirPath = fi.absolutePath();
-	if (QFile::exists(QString("%1/dataset_description.json").arg(dirPath)))
-		return dirPath;
+	if (QFile::exists(QString("%1/dataset_description.json").arg(dirPath))) 
+		return QString();
 
 	// check on higher branches of the directory tree
 	QDir dir = fi.absoluteDir();
@@ -318,8 +322,9 @@ QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 	while (true) {
 		if (!dir.cdUp())
 			break;
-		if (QFile::exists(QString("%1/dataset_description.json").arg(dir.absolutePath())))
+		if (QFile::exists(QString("%1/dataset_description.json").arg(dir.absolutePath()))) {
 			return dir.absolutePath();
+		}
 	} 
 	return QString();
 }
@@ -366,6 +371,7 @@ AwBIDSManager *AwBIDSManager::instance(const QString& rootDir)
 AwBIDSManager::AwBIDSManager(const QString& rootDir)
 {
 	m_ui = NULL;
+	m_currentSubject = Q_NULLPTR;
 	// Get extensions readers can handle.
 	auto pm = AwPluginManager::getInstance();
 	for (auto r : pm->readers()) 
@@ -373,12 +379,18 @@ AwBIDSManager::AwBIDSManager(const QString& rootDir)
 	
 	setRootDir(rootDir);
 	m_mustValidateModifications = false;
-
 }
 
 AwBIDSManager::~AwBIDSManager()
 {
 	closeBIDS();
+}
+
+QString AwBIDSManager::getParsingPath()
+{
+	if (!isBIDSActive())
+		return QString();
+	return QString("%1/%2").arg(m_rootDir).arg(m_parsingPath);
 }
 
 void AwBIDSManager::setRootDir(const QString& path)
@@ -538,15 +550,69 @@ void AwBIDSManager::getSubjects(int sourceDir)
 
 void AwBIDSManager::closeBIDS()
 {
-	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
-		clearSubjects(i);
-	m_rootDir.clear();
+	if (!isBIDSActive())
+		return;
 	// check if some mods should be validated
 	if (!m_modifications.isEmpty()) {
 			applyModifications();
 	}
+	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
+		clearSubjects(i);
+	m_rootDir.clear();
 	m_modifications.clear();
 	m_mustValidateModifications = false;
+	m_currentSubject = Q_NULLPTR;
+	emit BIDSClosed();
+}
+
+void AwBIDSManager::modifyUpdateJson(const QStringList& branches)
+{
+	auto filePath = QString("%1/tobeparsed.json").arg(getParsingPath());
+	auto json = AwUtilities::readJsonFile(filePath);
+	QJsonObject root;
+	if (json.isEmpty()) 
+		json.setObject(root);
+	else
+		root = json.object();
+
+	bool isDone = false;
+	QJsonArray array;
+	// check if object contains Updated
+	if (root.contains("Updated")) {
+		array = root["Updated"].toArray();
+		for (auto i : array) {
+			if (i.isObject()) {
+				auto obj = i.toObject();
+				auto subjID = obj["sub"];
+				if (subjID.toString() == m_currentSubject->ID()) { // our subject is already present in the json file => end.
+					isDone = true;
+				}
+			}
+		}
+	}
+	else {
+		root["Updated"] = array;
+	}
+
+	if (isDone)
+		return;
+
+	// all updated arrays parsed and our subject is not present in them. Add it!
+	QJsonObject updatedSubject;
+	updatedSubject["sub"] = m_currentSubject->ID();
+	QJsonArray updatedBranches;
+	for (auto b : branches)
+		updatedBranches.append(b);
+	updatedSubject["branch"] = updatedBranches;
+	updatedSubject["updated_by"] = QString("AnyWave");
+	array.append(updatedSubject);
+
+	// save new file
+	QFile file(filePath);
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		file.write(json.toJson());
+		file.close();
+	}
 }
 
 void AwBIDSManager::updateEventsTsv(const QString& itemPath)
@@ -596,6 +662,9 @@ void AwBIDSManager::updateEventsTsv(const QString& itemPath)
 		dict["stim_file"] = stim_file;
 	QStringList columns = { "onset", "duration", "trial_type" };
 	saveTsvFile(itemPath, dict, columns);
+
+	QStringList branches = { "raw" };
+	modifyUpdateJson(branches);
 }
 
 void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
@@ -667,6 +736,9 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 		QStringList columns = { "name", "type", "units" };
 		saveTsvFile(itemPath, dict, columns);
 	}
+
+	QStringList branches = { "raw" };
+	modifyUpdateJson(branches);
 }
 
 void AwBIDSManager::applyModifications()
@@ -745,8 +817,24 @@ QString AwBIDSManager::getDerivativesPath(int type, AwBIDSSubject *sub)
 	return QString();
 }
 
+void AwBIDSManager::newFile(AwFileIO *reader)
+{
+	if (!isBIDSActive())
+		return;
+	// check if the new file is in a BIDS structure or not
+	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->infos.fileName());
+	if (root.isEmpty()) {
+		closeBIDS(); // close current BIDS
+		return;
+	}
+	auto subj = guessSubject(reader->infos.fileName());
+	if (subj)
+		m_currentSubject = subj;
+}
+
 AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
 {
+	m_currentSubject = Q_NULLPTR;
 	if (!isBIDSActive())
 		return Q_NULLPTR;
 	QFileInfo fi(path);
@@ -764,13 +852,14 @@ AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
 		return Q_NULLPTR;
 	for (auto subj : subjects) {
 		auto files = subj->findFile(fi.fileName());
-		if (!files.isEmpty())
+		if (!files.isEmpty()) {
+			m_currentSubject = subj;
 			return subj;
+		}
 	}
 	// failed to find a subject
 	return Q_NULLPTR;
 }
-
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)
 {

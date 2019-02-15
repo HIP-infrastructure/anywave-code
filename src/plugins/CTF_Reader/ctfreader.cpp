@@ -354,7 +354,7 @@ CTFFileReader::FileStatus CTFFileReader::openFile(const QString &path)
 		chan.setName(sLabel);
 		// on en profite pour definir le sample rate
 		chan.setSamplingRate(m_sampleRate);
-		infos.addChannel(chan);
+		infos.addChannel(&chan);
 	}
 
 	// read the sensor information

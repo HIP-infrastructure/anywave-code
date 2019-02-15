@@ -53,6 +53,6 @@ bool AwTriggerWriter::showUi()
 void AwTriggerWriter::run()
 {
 	sendMessage("Writing values...");
-	int count = pdi.input.reader()->writeTriggerChannel(m_triggerChannel, pdi.input.markers);
+	int count = pdi.input.reader()->writeTriggerChannel(m_triggerChannel, pdi.input.markers());
 	sendMessage(QString("%1 values written.").arg(count));
 }

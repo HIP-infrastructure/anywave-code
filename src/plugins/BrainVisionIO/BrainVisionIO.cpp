@@ -340,7 +340,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 				else
 					m_scales.append(tokens2.at(2).toDouble() * unit_factor);
 		
-				infos.addChannel(chan);
+				infos.addChannel(&chan);
 			}
 		}
 	}

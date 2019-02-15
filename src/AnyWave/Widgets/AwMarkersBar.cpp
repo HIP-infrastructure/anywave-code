@@ -85,7 +85,7 @@ void AwMarkersBar::launchProcess()
 		// the plugin may be of type DisplayBackground, so force it to be Background only to launch the process.
 		AwBaseProcess *process = process_manager->newProcessFromPluginName(act->data().toString());
 		// set markers to compute data on
-		process->pdi.input.markers << new AwMarker(m_markerUnderMouse);
+		process->pdi.input.addMarker(new AwMarker(m_markerUnderMouse));
 		// start process
 		process_manager->runProcess(process);
 	}

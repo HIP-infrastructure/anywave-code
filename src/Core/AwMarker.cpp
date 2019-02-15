@@ -105,9 +105,6 @@ int AwMarker::stringToType(const QString& s)
 	return type.at(stringTypes.indexOf(s));
 }
 
-//
-// typeToString()
-//
 ///\return a QString containing the name of the type.
 ///\code{.cpp}
 /// QString type = AwMarker::stringToType(AwMarker::Single);
@@ -180,6 +177,13 @@ AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 {
 	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+	return markers;
+}
+
+AwMarkerList& AwMarker::rename(AwMarkerList& markers, const QString& label)
+{
+	for (auto m : markers)
+		m->setLabel(label);
 	return markers;
 }
 

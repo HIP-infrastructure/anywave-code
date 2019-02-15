@@ -156,7 +156,7 @@ AHDF5IO::FileStatus AHDF5IO::openFile(const QString &path)
 		chan.setXYZ(c.x, c.y, c.z);
 		chan.setOrientationXYZ(c.ox, c.oy, c.oz);
 
-		infos.addChannel(chan);
+		infos.addChannel(&chan);
 	}
 
 	// read blocks

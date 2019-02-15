@@ -61,7 +61,7 @@ bool ICA::showUi()
 {
 	if (pdi.input.processPluginNames.contains("MultiICA_MATLAB"))
 		m_algoNames << "FastICA(MATLAB)";
-	ICASettings ui(pdi.input.dataPath, pdi.input.channels, pdi.input.markers, m_algoNames);
+	ICASettings ui(pdi.input.dataPath, pdi.input.channels(), pdi.input.markers(), m_algoNames);
 
 	if (ui.exec() == QDialog::Accepted)	{
 		m_modality = ui.modality;
@@ -103,43 +103,68 @@ bool ICA::showUi()
 void ICA::runFromCommandLine()
 {
 	auto args = pdi.input.args();
-	
+
 	m_modality = AwChannel::stringToType(args["modality"].toString());
-	m_channels = AwChannel::getChannelsOfType(pdi.input.channels, m_modality);
+	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 	m_channels = AwChannel::removeDoublons(m_channels);
 	m_samplingRate = m_channels.first()->samplingRate();
-	auto badLabels = args["bad_labels"].toStringList();
-	if (!badLabels.isEmpty()) {
+	// check for bad labels 
+	if (!pdi.input.badLabels.isEmpty()) {
 		foreach(AwChannel *c, m_channels)
-			if (badLabels.contains(c->name()))
+			if (pdi.input.badLabels.contains(c->name()))
 				m_channels.removeAll(c);
 	}
 	m_nComp = m_channels.size();
-	if (m_nComp < 2)
+
+	if (args.contains("comp"))
+		m_nComp = args["comp"].toInt();
+
+	if (m_nComp > m_channels.size()) {
+		sendMessage("The specified number of components is greater dans the number of available channels in data. Aborted.");
 		return;
+	}
+
+	if (m_nComp < 2) {
+		sendMessage("Not enough components to compute. Aborted.");
+		return;
+	}
+
+	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.dataPath).arg(args["modality"].toString()));
+
+	if (args.contains("marker_file")) 
+		pdi.input.setNewMarkers(AwMarker::load(args["marker_file"].toString()));
 
 	AwMarkerList selectedMarkers;
-	auto skipArtefacts = args["skip"].toString();
-	if (!skipArtefacts.isEmpty())
-		selectedMarkers = AwMarker::invertMarkerSelection(pdi.input.markers, args["skip"].toString(), pdi.input.fileDuration);
+	auto labelToSkip = args["skip_marker"].toString();
+	if (!labelToSkip.isEmpty()) {
+		auto markersToSkip = AwMarker::getMarkersWithLabel(pdi.input.markers(), labelToSkip);
+		selectedMarkers = AwMarker::invertMarkerSelection(markersToSkip, labelToSkip, pdi.input.reader()->infos.totalDuration());
+		sendMessage(QString("Markers named %1 will be skipped.").arg(labelToSkip));
+	}
 
 	bool skipData = !selectedMarkers.isEmpty();
 	auto lp = args["lp"].toString();
 	auto hp = args["hp"].toString();
+	auto notch = args["notch"].toString();
 	m_lpf = m_hpf = 0.;
+	float notchf = 0.;
 	if (!lp.isEmpty())
 		m_lpf = lp.toDouble();
 	if (!hp.isEmpty())
 		m_hpf = hp.toDouble();
+	if (!notch.isEmpty())
+		notchf = notch.toDouble();
 
 	AwFilterSettings filterSettings(pdi.input.filterSettings);
-	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
+	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, notchf);
 	filterSettings.apply(m_channels);
+	sendMessage("Loading data...");
 	if (skipData)
 		requestData(&m_channels, &selectedMarkers, true);
 	else
 		requestData(&m_channels, 0.0f, -1.0f, true);
-
+	sendMessage("Done");
+	qDeleteAll(selectedMarkers);
 	int decimate = 1;
 	if (m_isDownsamplingActive) {
 		decimate = 2;
@@ -199,7 +224,7 @@ void ICA::runFromCommandLine()
 void ICA::run()
 {
 	emit progressChanged("Filtering channel types...");
-	m_channels = AwChannel::getChannelsOfType(pdi.input.channels, m_modality);
+	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 	// if modality is set to SOURCE that may raise an issue as sources channels may also be present as As Recorded Channels if the data was previously exported.
 	// So check for doublons on sources to avoid miscalculation.
 	m_channels = AwChannel::removeDoublons(m_channels);
@@ -235,7 +260,7 @@ void ICA::run()
 		}
 	emit progressChanged("OK.");
 
-	auto markersToSkip = AwMarker::getMarkersWithLabel(pdi.input.markers, m_ignoredMarkerLabel);
+	auto markersToSkip = AwMarker::getMarkersWithLabel(pdi.input.markers(), m_ignoredMarkerLabel);
 	AwMarkerList selectedMarkers;
 	if (m_ignoreMarkers) 
 		selectedMarkers = AwMarker::invertMarkerSelection(markersToSkip, m_ignoredMarkerLabel, pdi.input.fileDuration);
@@ -249,6 +274,8 @@ void ICA::run()
 		requestData(&m_channels, &selectedMarkers, true);
 	else
 		requestData(&m_channels, 0.0f, -1.0f, true);
+
+	qDeleteAll(selectedMarkers);
 
 	int decimate = 1;
 	if (m_isDownsamplingActive) {

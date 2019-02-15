@@ -24,8 +24,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <QApplication>
-
 #include "AnyWave.h"
+#include <AwException.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -46,7 +46,7 @@
 
 #include <qstylefactory.h>
 #include <qtextstream.h>
-#include "CommandLineParser.h"
+#include "CL/CommandLineParser.h"
 
 int main(int argc, char *argv[])
 {
@@ -88,14 +88,23 @@ int main(int argc, char *argv[])
 	bool res = SetDllDirectory((LPCWSTR)dllDir);
 #endif
 	
-	// check if at least one argument 
-
 	// check if arguments 
-	auto args = aw::commandLine::doParsing();
-	AnyWave window(args.isEmpty()); // args not empty means something to do in command line mode => no gui mode on 
-	int status = aw::commandLine::doCommandLineOperations(args);
-	if (status == 0) 
-		exit(0);
+	QStringList args = app.arguments();
+	bool isGui = args.size() <= 1;
+
+	AnyWave window(isGui); // args not empty means something to do in command line mode => no gui mode on 
+	if (!isGui) {
+		QMap<int, AwArguments> arguments;
+		try {
+			arguments = aw::commandLine::doParsing(args);
+		}
+		catch (const AwException& e) {
+			exit(0);
+		}
+		int status = aw::commandLine::doCommandLineOperations(arguments);
+		if (status == 0)
+			exit(0);
+	}
 
 	QCommandLineParser parser;
 	parser.addPositionalArgument("file", "data file to open");

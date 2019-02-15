@@ -156,7 +156,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	bool usingTypes = !types.isEmpty();
 
 	// default: use channels defined as input for the process
-	requestedChannels = p->pdi.input.channels;
+	requestedChannels = p->pdi.input.channels();
 
 	if (pickFrom == PickFromMontage)
 		requestedChannels = AwMontageManager::instance()->channels();

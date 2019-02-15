@@ -81,7 +81,7 @@ public:
 		{ m_outputParameters.insert(parameter, value); }
 
 	inline bool hasOutput() { return !output.isEmpty(); }
-	inline bool hasOutputWidgets() { return !output.widgets.isEmpty(); }
+	inline bool hasOutputWidgets() { return !output.widgets().isEmpty(); }
 	inline AwMatlabInterface *MATLAB() { return m_mi; }
 	inline void setMI(AwMatlabInterface *mi) { m_mi = mi; }
 protected:		

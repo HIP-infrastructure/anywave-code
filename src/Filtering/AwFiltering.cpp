@@ -142,7 +142,7 @@ void AwFiltering::decimate(const AwChannelList& channels, int factor)
 		if (lp <= 0.)
 			lp = aa;
 		if (aa < lp) {
-			throw AwException("Low pass filter for decimation is invalid.", "AwFiltering::decimate");
+	//		throw AwException("Low pass filter for decimation is invalid.", "AwFiltering::decimate");
 			return;
 		}
 		c->setLowFilter(lp);

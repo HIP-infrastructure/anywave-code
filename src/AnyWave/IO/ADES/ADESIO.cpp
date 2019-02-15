@@ -144,7 +144,7 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		AwChannel chan;
 		QPair<QString, int> pair = labels.at(i);
 		chan.setName(pair.first);
-		AwChannel *inserted = infos.addChannel(chan);
+		AwChannel *inserted = infos.addChannel(&chan);
 		inserted->setType(pair.second);
 		inserted->setSamplingRate(m_samplingRate);
 		switch (pair.second)

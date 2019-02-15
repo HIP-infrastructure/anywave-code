@@ -46,8 +46,8 @@ AwConverter::~AwConverter()
 
 void AwConverter::run()
 {
-	QList<AwChannel *> list = pdi.input.channels;			    // Les canaux a convertir/exporter
-	QList<AwMarker *> markers = pdi.input.markers;		// Les marqueurs à convertir/exporter
+	auto list = pdi.input.channels();	    // Les canaux a convertir/exporter
+	auto markers = pdi.input.markers();		// Les marqueurs à convertir/exporter
 	m_writer->infos.setChannels(list);
 	
 	// markers should contain one and only one marker
@@ -57,11 +57,11 @@ void AwConverter::run()
 	}
 
 	// see which marker from global list of markers is present in the range of local markers
-	AwMarker *m = markers.at(0);
+	AwMarker *m = markers.first();
 	// add at least one block
 	AwBlock *block = m_writer->infos.newBlock();
 	block->setDuration(m->duration());
-	block->setSamples(pdi.input.channels.at(0)->samplingRate() * m->duration());
+	block->setSamples(pdi.input.channels().first()->samplingRate() * m->duration());
 
 	QList<AwMarker *> markersToWrite;
 

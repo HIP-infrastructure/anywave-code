@@ -89,6 +89,19 @@ AwMontageManager *AwMontageManager::instance()
 	return m_instance;
 }
 
+QStringList AwMontageManager::loadBad(const QString& filePath)
+{
+	QFile file(filePath);
+	QTextStream stream(&file);
+	QStringList res;
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		while (!stream.atEnd()) 
+			res << stream.readLine().trimmed();
+		file.close();
+	}
+	return res;
+}
+
 AwChannelList AwMontageManager::makeSEEGBipolar(AwChannelList& channels)
 {
 	AwChannelList res = channels;
@@ -467,7 +480,9 @@ void AwMontageManager::clear()
 
 void AwMontageManager::closeFile()
 {
-	checkForBIDSMods();
+	if (AwBIDSManager::isInstantiated())
+		if (AwBIDSManager::instance()->isBIDSActive())
+			checkForBIDSMods();
 	clear();
 
 	if (!m_badChannelLabels.isEmpty()) // save bad channels
@@ -484,7 +499,7 @@ void AwMontageManager::closeFile()
 
 void AwMontageManager::newMontage(AwFileIO *reader)
 {
-	closeFile();
+	//closeFile();
 	AwChannelList channels = reader->infos.channels();
 
 	// init as recorded channels list
@@ -613,7 +628,7 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 	if (!BM->isBIDSActive())
 		return;
 
-	auto subj = BM->guessSubject(reader->infos.fileName());
+	auto subj = BM->getSubject();
 	if (!subj)
 		return;
 

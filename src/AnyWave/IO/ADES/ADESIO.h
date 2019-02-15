@@ -63,5 +63,5 @@ class ADESIOPlugin : public AwFileIOPlugin
 public:
 	ADESIOPlugin();
 
-	ADESIO *newInstance(const QString& filename) { return new ADESIO(filename); }
+	AW_INSTANTIATE_PLUGIN(ADESIO)
 };

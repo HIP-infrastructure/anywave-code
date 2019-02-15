@@ -193,7 +193,7 @@ AwChannelList FIFF_Reader::readChInfos()
 		}
 		c.setName(QString(ci->ch_name).trimmed().remove(' '));
 		c.setSamplingRate(m_sampleRate);
-		AwChannel *newChannel = infos.addChannel(c);
+		AwChannel *newChannel = infos.addChannel(&c);
 		if (newChannel->isMEG() && m_coord)
 			MEGChannelsToHead << newChannel;
 		list << newChannel;

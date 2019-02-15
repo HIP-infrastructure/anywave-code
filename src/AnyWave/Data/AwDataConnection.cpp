@@ -515,13 +515,12 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		// check for internal processes
 		QList<AwProcess *> internals = AwProcessManager::instance()->activeInternalProcesses();
 		if (!internals.isEmpty()) {
+			
 			foreach (AwProcess *p, internals) {
+				auto channels = p->pdi.input.channels() + *channelsToLoad;
 				p->pdi.input.currentPosInFile = start;
 				p->pdi.input.fileDuration = duration;
-				// reset inputs
-				p->pdi.input.clearChannels();
-				//
-				p->pdi.input.channels += *channelsToLoad;
+				p->pdi.input.setNewChannels(channels);
 				QMetaObject::invokeMethod(p, "start", Qt::QueuedConnection);
 				// wait for process to finished before launching other one
 				// Not so pretty but...

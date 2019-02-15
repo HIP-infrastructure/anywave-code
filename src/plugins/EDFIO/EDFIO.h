@@ -136,6 +136,6 @@ class EDFIO_EXPORT EDFIOPlugin : public AwFileIOPlugin
 #endif
 public:
 	EDFIOPlugin();
-	EDFIO *newInstance(const QString& filename) { return new EDFIO(filename); }
+	AW_INSTANTIATE_PLUGIN(EDFIO)
 };
 

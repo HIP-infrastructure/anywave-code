@@ -518,8 +518,8 @@ void AwMarkerManagerSettings::exportWizard()
 	if (dlg.exec() == QDialog::Accepted) {
 		AwMarkerExporter *exporter = new AwMarkerExporter;
 		exporter->outputFile = dlg.file();
-		exporter->pdi.input.markers = dlg.markers();
-		exporter->pdi.input.channels = dlg.channels();
+		exporter->pdi.input.setNewMarkers(dlg.markers());
+		exporter->pdi.input.setNewChannels(dlg.channels());
 		exporter->concatenate = dlg.concatenate();
 		exporter->matlabFormat = dlg.isMatlabFormat();
 		AwProcessManager::instance()->runProcess(exporter);
@@ -709,7 +709,7 @@ void AwMarkerManagerSettings::writeTrigger()
 			AwMessageBox::critical(0, "Missing Plugin", "The Trigger Writer plugin is not loaded.");
 			return;
 		}
-		process->pdi.input.markers = AwMarker::duplicate(markers);
+		process->pdi.input.setNewMarkers(markers, true);
 		AwProcessManager::instance()->runProcess(process);
 	}
 	else 

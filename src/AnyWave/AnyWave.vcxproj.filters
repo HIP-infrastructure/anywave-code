@@ -107,6 +107,9 @@
     <Filter Include="IO\JSON">
       <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CL">
+      <UniqueIdentifier>{c3e57cdc-9212-4554-86e5-41e441da7831}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1279,29 +1282,26 @@
     <ClCompile Include="Data\AwMemoryMapper.cpp">
       <Filter>Data</Filter>
     </ClCompile>
-    <ClCompile Include="AwCommandLineManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AwFileOpenSave.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CommandLineParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IO\JSON\AwJSON.cpp">
       <Filter>IO\JSON</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_CommandLineParser.cpp">
-      <Filter>Generated Files\Debug</Filter>
+    <ClCompile Include="CL\AwCommandLogger.cpp">
+      <Filter>CL</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_CommandLineParser.cpp">
-      <Filter>Generated Files\Release</Filter>
+    <ClCompile Include="CL\CommandLineParser.cpp">
+      <Filter>CL</Filter>
     </ClCompile>
-    <ClCompile Include="AwCLGetData.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CL\AwComputeICA.cpp">
+      <Filter>CL</Filter>
     </ClCompile>
-    <ClCompile Include="AwCommandLogger.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CL\AwCommandLineManager.cpp">
+      <Filter>CL</Filter>
+    </ClCompile>
+    <ClCompile Include="CL\AwConvertFile.cpp">
+      <Filter>CL</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwCommandLogger.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -1827,11 +1827,8 @@
     <CustomBuild Include="IO\MEMIO\MEMIO.h">
       <Filter>IO\MEMIO</Filter>
     </CustomBuild>
-    <CustomBuild Include="CommandLineParser.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwCommandLogger.h">
-      <Filter>Source Files</Filter>
+    <CustomBuild Include="CL\AwCommandLogger.h">
+      <Filter>CL</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -2045,14 +2042,17 @@
     <ClInclude Include="Data\AwMemoryMapper.h">
       <Filter>Data</Filter>
     </ClInclude>
-    <ClInclude Include="AwCommandLineManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Epoch\AwEpochThumbs.h">
       <Filter>Epoch</Filter>
     </ClInclude>
     <ClInclude Include="IO\JSON\AwJSON.h">
       <Filter>IO\JSON</Filter>
+    </ClInclude>
+    <ClInclude Include="CL\AwCommandLineManager.h">
+      <Filter>CL</Filter>
+    </ClInclude>
+    <ClInclude Include="CL\CommandLineParser.h">
+      <Filter>CL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -969,7 +969,7 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 			channel.setType(AwChannel::EMG);
 		if (channel.name().startsWith("STATUS"))
 			channel.setType(AwChannel::Trigger);
-		infos.addChannel(channel);
+		infos.addChannel(&channel);
 	//	m_labelToIndex.insert(channel.name(), i);
 		m_labels << channel.name();
 	}

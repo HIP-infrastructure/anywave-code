@@ -28,7 +28,7 @@
 #include <QtCore/qmath.h>
 #include <QSettings>
 #include <AwMarker.h>
-
+#include <QFile>
 
 QDebugStream::QDebugStream(int streamType)
 {
@@ -315,4 +315,20 @@ char *AwUtilities::QStringToChar(const QString& str)
 	memcpy(res, ba.data(), str.size());
 	res[str.size() - 1] = '\0';
 	return res;
+}
+
+
+QJsonDocument AwUtilities::readJsonFile(const QString& filePath)
+{
+	QFile file(filePath);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		return QJsonDocument();
+	}
+	QJsonParseError error;
+	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
+	file.close();
+	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
+		return QJsonDocument();
+	}
+	return doc;
 }

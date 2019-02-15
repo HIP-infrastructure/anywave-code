@@ -25,6 +25,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwReadWriteLib.h"
 #include <AwFileIO.h>
+#include <QTextStream>
+#include <QRegularExpression>
 
 // AwBlock
 // constructor
@@ -157,31 +159,20 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	// copy constructor will set channel as parent for new channel.
 	// Here we don't want a parent for as recorded channel, so change it to null.
 	chan->setParent(NULL);
-	// check for existing label in infos.
-	if (m_labelToIndex.contains(chan->name()))
-		// auto rename label
-		chan->setName(chan->name() + "_" + QString::number(m_channelsCount));
-	// add in hash table.
-	m_labelToIndex.insert(chan->name(), m_channelsCount);
-	// set an ID which is a channel index in as recorded list of channels.
-	chan->setID(m_channelsCount++);
-	m_channels.append(chan);
-	return chan;
-}
-
-///
-/// The channel is duplicated and then inserted in the current list of As Recorded channels for the file.
-/// Remember to delete the channel passed as parameter after the insertion is complete.
-AwChannel* AwDataInfo::addChannel(AwChannel& channel)
-{
-	AwChannel *chan = new AwChannel(&channel);
-	// copy constructor will set channel as parent for new channel.
-	// Here we don't want a parent for as recorded channel, so change it to null.
-	chan->setParent(NULL);
-
 	// remove all whitespaces in label
-	chan->setName(channel.name().remove(' '));
+	chan->setName(chan->name().remove(' '));
+	auto s = chan->name();
 
+	// only reformat plot number for EEG or SEEG
+	if (chan->isEEG() || chan->isSEEG()) {
+		QRegularExpression re("\\d+$");
+		QRegularExpressionMatch match = re.match(s);
+		if (match.hasMatch()) {
+			QString elec = s.remove(re);
+			int number = match.captured(0).toInt();
+			chan->setName(QString("%1%2").arg(elec).arg(number));
+		}
+	}
 	// check for existing label in infos.
 	if (m_labelToIndex.contains(chan->name()))
 		// auto rename label
