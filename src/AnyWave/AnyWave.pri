@@ -138,8 +138,11 @@ HEADERS += ./Data/AwDataConnection.h \
     ./Epoch/AwStatsModel.h \
     ./Epoch/AwEpochMosaicWidget.h \
     ./Epoch/AwStatChartWidget.h \
-    ./AwCommandLineManager.h \
-    ./CommandLineParser.h
+    ./CL/AwCommandLineManager.h \
+    ./CL/AwCommandLogger.h \
+    ./CL/AwComputeICA.h \
+    ./CL/AwConvertFile.h \
+    ./CL/AwCommandLineParser.h
 SOURCES += ./AnyWave.cpp \
     ./AwExportDial.cpp \
     ./AwNoGUI.cpp \
@@ -290,9 +293,12 @@ SOURCES += ./AnyWave.cpp \
     ./Epoch/AwEpochMosaicWidget.cpp \
     ./Epoch/AwStatChartWidget.cpp \
     ./Epoch/AwStatsModel.cpp \
-    ./AwCommandLineManager.cpp \
+    ./CL/AwCommandLineManager.cpp \
+    ./CL/AwCommandLogger.cpp \
+    ./CL/AwComputeICA.cpp \
+    ./CL/AwConvertFile.cpp \
     ./AwFileOpenSave.cpp \
-    ./CommandLineParser.cpp
+    ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
     ./ICA/AwICAPanel.ui \
