@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwExporter.h"
@@ -85,7 +85,8 @@ void AwExporter::runFromCommandLine()
 	if (args.contains("marker_file"))
 		markers = AwMarker::load(args["marker_file"].toString());
 	if (args.contains("skip_marker")) {
-		skippedMarkers = AwMarker::merge(AwMarker::getMarkersWithLabel(markers, args["skip_marker"].toString()));
+		auto labels = AwMarker::getMarkersWithLabel(markers, args["skip_marker"].toString());
+		skippedMarkers = AwMarker::merge(labels);
 		input_markers = AwMarker::invertMarkerSelection(skippedMarkers, "osef", endTimePos);
 		output_markers = AwMarker::cutAroundMarkers(markers, skippedMarkers);
 		/** destroy skipped markers as AwMarker::merge() duplicates marker objects **/
