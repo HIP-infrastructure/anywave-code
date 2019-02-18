@@ -46,8 +46,11 @@ MATLAB support should be automatic if you have MATLAB installed in /usr/local/MA
 That will build the mex files required by MATLAB Plugins to communicate with AnyWave.
 
 ## Use MKL
-If you have installed the MKL libraries on your system, define a environment variable called MKLROOT that must point to the installation folder of MKL
-(/opt/intel/mkl)
+If you have installed the MKL libraries on your system, AnyWave can use it to speed up some calculations.
+Before building using cmake, execute the following script:   
+````bash
+source /opt/intel/mkl/bin/mklvars.sh intel64
+````
 CMake will detect and use MKL to build AnyWave
 
 Launch Anywave:
