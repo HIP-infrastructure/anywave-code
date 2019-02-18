@@ -324,8 +324,9 @@ AwMarkerList AwMarker::applyANDOperation(AwMarkerList& source, AwMarkerList& des
 AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cutMarkers)
 {
 	if (cutMarkers.isEmpty() || markers.isEmpty())
-		return markers;
-	AwMarkerList copiedList = AwMarker::sort(markers);
+		return AwMarkerList();
+
+	auto copiedList = AwMarker::sort(markers);
 
 	// remove markers that may be present on both list from the source list
 	QStringList labels = AwMarker::getAllLabels(cutMarkers);
@@ -402,6 +403,49 @@ AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cut
 }
 
 
+
+AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList& skipLabels, const QStringList& useLabels, float totalDuration)
+{
+	bool skip = !skipLabels.isEmpty();
+	bool use = !useLabels.isEmpty();
+	AwMarkerList inputMarkers;
+
+	if (!use && !skip) { // do not modify markers and return ALL DATA as input.
+		inputMarkers << new AwMarker("All Data", 0, totalDuration);
+	}
+	else if (use && !skip) { // just use some markers as input =>  reshape markers and return used markers as input.
+		auto used = AwMarker::getMarkersWithLabels(markers, useLabels);
+		inputMarkers = AwMarker::duplicate(used);
+		// reshape markers to keep only the ones which overlaps used markers.
+		// keep only the intersection part of the marker.
+		auto interMarkers = AwMarker::applyANDOperation(used, markers);
+		qDeleteAll(markers);
+		markers = interMarkers;
+	}
+	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
+		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		inputMarkers = AwMarker::invertMarkerSelection(skippedMarkers, "Selection", totalDuration);
+		// now reshape all the markers after removing skipped ones.
+		auto cutMarkers = AwMarker::cutAroundMarkers(markers, skippedMarkers);
+		qDeleteAll(markers);
+		markers = cutMarkers;
+	}
+	else if (skip && use) {
+		auto usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		// now reshape all the markers after removing skipped ones.
+		auto cutMarkers = AwMarker::cutAroundMarkers(markers, skippedMarkers);
+		// and reshape again to keep only markers which overlaps used ones.
+		auto reshaped = AwMarker::applyANDOperation(usedMarkers, cutMarkers);
+
+		inputMarkers = AwMarker::cutAroundMarkers(usedMarkers, skippedMarkers);
+		qDeleteAll(markers);
+		qDeleteAll(cutMarkers);
+		markers = reshaped;
+	}
+
+	return inputMarkers;
+}
 
 ///
 /// applySelectionFilter

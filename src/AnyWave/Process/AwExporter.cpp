@@ -137,31 +137,35 @@ void AwExporter::run()
 	bool skip = !m_skippedMarkers.isEmpty();
 	bool use = !m_exportedMarkers.isEmpty();
 	bool isDecimate = m_decimateFactor > 1;
-	auto skippedMarkers = AwMarker::getAllLabels(m_skippedMarkers);
-	// rename skipped markers in the current input markers with a unique label
-	for (auto m : pdi.input.markers()) {
-		if (skippedMarkers.contains(m->label()))
-			m->setLabel("Skipped");
-	}
+	auto skipLabels = AwMarker::getAllLabels(m_skippedMarkers);
+	auto useLabels = AwMarker::getAllLabels(m_exportedMarkers);
 
-	auto usedMarkers = AwMarker::getAllLabels(m_exportedMarkers);
-	auto endTimePos = pdi.input.reader()->infos.totalDuration();
-	// apply filter settings
-	pdi.input.filterSettings.apply(m_channels);
-	
-	AwMarkerList input_markers;
-	if (skip && !use) {
-		output_markers = AwMarker::cutAroundMarkers(pdi.input.markers(), m_skippedMarkers);
-		input_markers = AwMarker::invertMarkerSelection(m_skippedMarkers, "Skipped", endTimePos);
-	}
-	if (!skip && use) {
-		output_markers = AwMarker::applyANDOperation(m_exportedMarkers, pdi.input.markers());
-		input_markers = AwMarker::duplicate(m_exportedMarkers);
-	}
-	if (skip && use) {
-		output_markers = AwMarker::applySelectionFilter(pdi.input.markers(), skippedMarkers, usedMarkers, pdi.input.reader()->infos.totalDuration());
-		input_markers = AwMarker::duplicate(output_markers);
-	}
+	auto inputMarkers = AwMarker::getInputMarkers(output_markers, skipLabels, useLabels, pdi.input.reader()->infos.totalDuration());
+
+	//// rename skipped markers in the current input markers with a unique label
+	//for (auto m : pdi.input.markers()) {
+	//	if (skippedMarkers.contains(m->label()))
+	//		m->setLabel("Skipped");
+	//}
+
+	//auto usedMarkers = AwMarker::getAllLabels(m_exportedMarkers);
+	//auto endTimePos = pdi.input.reader()->infos.totalDuration();
+	//// apply filter settings
+	//pdi.input.filterSettings.apply(m_channels);
+	//
+	//AwMarkerList input_markers;
+	//if (skip && !use) {
+	//	output_markers = AwMarker::cutAroundMarkers(pdi.input.markers(), m_skippedMarkers);
+	//	input_markers = AwMarker::invertMarkerSelection(m_skippedMarkers, "Skipped", endTimePos);
+	//}
+	//if (!skip && use) {
+	//	output_markers = AwMarker::applyANDOperation(m_exportedMarkers, pdi.input.markers());
+	//	input_markers = AwMarker::duplicate(m_exportedMarkers);
+	//}
+	//if (skip && use) {
+	//	output_markers = AwMarker::applySelectionFilter(pdi.input.markers(), skippedMarkers, usedMarkers, pdi.input.reader()->infos.totalDuration());
+	//	input_markers = AwMarker::duplicate(output_markers);
+	//}
 
 	AwFileIO *writer = m_plugin->newInstance();
 	writer->setPlugin(m_plugin);
@@ -172,20 +176,19 @@ void AwExporter::run()
 	if (!output_markers.isEmpty())
 		block->setMarkers(output_markers);
 
-	if (input_markers.isEmpty())
-		input_markers << new AwMarker("global", 0, endTimePos);
+	//if (input_markers.isEmpty())
+	//	input_markers << new AwMarker("global", 0, endTimePos);
 
 	sendMessage("Loading data...");
 	if (isDecimate) {
-		requestData(&m_channels, &input_markers, true);
+		requestData(&m_channels, &inputMarkers, true);
 		AwFiltering::downSample(m_channels, m_decimateFactor);
 	}
 	else {
-		requestData(&m_channels, &input_markers);
+		requestData(&m_channels, &inputMarkers);
 	}
 	sendMessage("Done.");
-	while (!input_markers.isEmpty())
-		delete input_markers.takeFirst();
+	qDeleteAll(inputMarkers);
 
 	block->setSamples(m_channels.first()->dataSize());
 	block->setDuration((float)m_channels.first()->dataSize() / m_channels.first()->samplingRate());
