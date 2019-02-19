@@ -49,10 +49,6 @@ AwExporter::AwExporter() : AwProcess()
 
 AwExporter::~AwExporter() 
 {
-	while (!m_skippedMarkers.isEmpty())
-		delete m_skippedMarkers.takeFirst();
-	while (!m_exportedMarkers.isEmpty())
-		delete m_exportedMarkers.takeFirst();
 }
 
 void AwExporter::runFromCommandLine()
@@ -142,42 +138,13 @@ void AwExporter::run()
 
 	auto inputMarkers = AwMarker::getInputMarkers(output_markers, skipLabels, useLabels, pdi.input.reader()->infos.totalDuration());
 
-	//// rename skipped markers in the current input markers with a unique label
-	//for (auto m : pdi.input.markers()) {
-	//	if (skippedMarkers.contains(m->label()))
-	//		m->setLabel("Skipped");
-	//}
-
-	//auto usedMarkers = AwMarker::getAllLabels(m_exportedMarkers);
-	//auto endTimePos = pdi.input.reader()->infos.totalDuration();
-	//// apply filter settings
-	//pdi.input.filterSettings.apply(m_channels);
-	//
-	//AwMarkerList input_markers;
-	//if (skip && !use) {
-	//	output_markers = AwMarker::cutAroundMarkers(pdi.input.markers(), m_skippedMarkers);
-	//	input_markers = AwMarker::invertMarkerSelection(m_skippedMarkers, "Skipped", endTimePos);
-	//}
-	//if (!skip && use) {
-	//	output_markers = AwMarker::applyANDOperation(m_exportedMarkers, pdi.input.markers());
-	//	input_markers = AwMarker::duplicate(m_exportedMarkers);
-	//}
-	//if (skip && use) {
-	//	output_markers = AwMarker::applySelectionFilter(pdi.input.markers(), skippedMarkers, usedMarkers, pdi.input.reader()->infos.totalDuration());
-	//	input_markers = AwMarker::duplicate(output_markers);
-	//}
-
 	AwFileIO *writer = m_plugin->newInstance();
 	writer->setPlugin(m_plugin);
 	writer->infos.setChannels(m_channels);
 	AwBlock *block = writer->infos.newBlock();
 
-
 	if (!output_markers.isEmpty())
 		block->setMarkers(output_markers);
-
-	//if (input_markers.isEmpty())
-	//	input_markers << new AwMarker("global", 0, endTimePos);
 
 	sendMessage("Loading data...");
 	if (isDecimate) {
@@ -258,10 +225,8 @@ bool AwExporter::showUi()
 		// build the complete list of channels to export
 		if (!m_ICAChannels.isEmpty())
 			m_channels += m_ICAChannels;
-		if (ui.skipMarkers)
-			m_skippedMarkers = ui.skippedMarkers;
-		if (ui.exportMarkers)
-			m_exportedMarkers = ui.exportedMarkers;
+		m_skippedMarkers = ui.skippedMarkers();
+		m_exportedMarkers = ui.usedMarkers();
 		m_decimateFactor = ui.decimateFactor;
 		return true;
 	}

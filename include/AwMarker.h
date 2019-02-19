@@ -82,7 +82,6 @@ public:
 	static QList<AwMarker *>& sort(QList<AwMarker *>& markers);
 	/** Cut all markers using markers in cutMarkers. Returns the list of reshaped markers without the cut markers. **/
 	static QList<AwMarker *> cutAroundMarkers(QList<AwMarker *>& markers, QList<AwMarker *>& cutMarkers);
-	/** Apply logical AND between markers. The first list is always significant and reshaped. Returns duplicated makers. **/
 	static QList<AwMarker *> applyANDOperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
 	/** Merge markers whichs overlaps. Return the resulting merged markers **/
 	static QList<AwMarker *> merge(QList<AwMarker *>& markers);

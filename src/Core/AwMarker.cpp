@@ -271,7 +271,6 @@ AwMarkerList AwMarker::intersect(const AwMarkerList& markers, float start, float
 	return res;
 }
 
-
 AwMarkerList AwMarker::applyANDOperation(AwMarkerList& source, AwMarkerList& dest)
 {
 	AwMarkerList res;
@@ -326,7 +325,8 @@ AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cut
 	if (cutMarkers.isEmpty() || markers.isEmpty())
 		return AwMarkerList();
 
-	auto copiedList = AwMarker::sort(markers);
+	auto copiedList = AwMarker::duplicate(AwMarker::sort(markers));
+	auto cutList = AwMarker::merge(cutMarkers);
 
 	// remove markers that may be present on both list from the source list
 	QStringList labels = AwMarker::getAllLabels(cutMarkers);
@@ -336,68 +336,69 @@ AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cut
 			copiedList.removeAll(m);
 	}
 
-	AwMarkerList res, toRemove;
-	for (auto sk : AwMarker::merge(cutMarkers)) {
-		for (int i = 0; i < copiedList.size(); i++) {
-			AwMarker *m = copiedList.at(i);
+	AwMarkerList res, toDelete;
+	float shiftedTimePos = 0.;
+	
+	for (auto cutM : cutList) {
+		foreach(AwMarker *m, copiedList) { // just copy markers that are located BEFORE the current cut (cutM).
 			// copy markers that ends before the first cut and remove it from copied list.
-			if (m->end() < sk->start()) {
-				copiedList.removeAll(m);
+			float start = m->start() - shiftedTimePos;
+			if (start < 0.)
+				start = 0.;
+			m->setStart(start);
+			if (m->end() < cutM->start()) {
 				res << new AwMarker(m);
-				i--;
-				continue;
+				copiedList.removeAll(m); // remove then from the current list.
+				toDelete << m;
 			}
-			if (m->start() > sk->end())  // skip markers that are after the current cut.
+			if (m->start() > cutM->end())
 				break;
-
-			// 
-			bool startBeforeEndWithin = m->start() < sk->start() && m->end() <= sk->end();
-			bool startBeforeEndAfter = m->start() < sk->start() && m->end() > sk->end();
-			bool startWhitinEndAfter = m->start() >= sk->start() && m->end() > sk->end();
-			bool isWithin = m->start() >= sk->start() && m->end() <= sk->end();
-
-			if (isWithin) {
-				copiedList.removeAll(m);
-				i--;
-				continue;
+		}
+		// all markers BEFORE cutM were copied, now check it cutM intersects some markers in the current list.
+		// check if cutM intersect some markers
+		auto intersection = AwMarker::intersect(copiedList, cutM->start(), cutM->end());
+		for (auto iM : intersection) { // reshape all the markers which overlap cutM.
+			bool startBeforeEndAfter = iM->start() < cutM->start() && iM->end() > cutM->end();
+			bool startBeforeEndWithin = iM->start() < cutM->start() && iM->end() <= cutM->end();
+			bool startWithinEndAfter = iM->start() >= cutM->start() && iM->end() > cutM->end();
+			bool isWithin = iM->start() >= cutM->start() && iM->end() <= cutM->end();
+			
+			if (startBeforeEndAfter) { // cut the part inside Im and reshape it
+				iM->reshape(iM->start(), iM->end() - cutM->duration());
+				res << new AwMarker(iM);
+				//copiedList.removeAll(iM); // remove it from the current list.
 			}
 			if (startBeforeEndWithin) {
-				AwMarker *nm = new AwMarker(m);
-				nm->setEnd(sk->start());
-				res << nm;
-				copiedList.removeAll(m);
-				i--;
-				continue;
+				iM->reshape(iM->start(), cutM->start());
+				res << new AwMarker(iM);
+				copiedList.removeAll(iM); // remove it from the current list.
+				toDelete << iM;
 			}
-
-			if (startWhitinEndAfter) {
-				AwMarker *nm = new AwMarker(m);
-				nm->setStart(sk->end());
-				nm->setEnd(m->end());
-				res << nm;
-				copiedList.removeAll(m);
-				i--;
-				continue;
+			if (startWithinEndAfter) {
+				auto offset = cutM->end() - iM->start();
+				iM->reshape(cutM->start(), cutM->start() + offset);
 			}
-
-			if (startBeforeEndAfter) {
-				AwMarker *nm1 = new AwMarker(m);
-				nm1->setEnd(sk->start());
-				res << nm1;
-				AwMarker *nm2 = new AwMarker(m);
-				nm2->setStart(sk->end());
-				nm2->setEnd(m->end());
-				res << nm2;
-				copiedList.removeAll(m);
-				i--;
-				continue;
+			if (isWithin) { // totally in the cutM => just make it disapear
+				copiedList.removeAll(iM); // remove it from the current list.
+				toDelete << iM;
 			}
 		}
+
+		// a cut has be done => shift time pos for other markers
+		shiftedTimePos += cutM->duration();
+	}
+	// duplicates the rest of copiedList
+	for (auto m : copiedList) {
+		float start = m->start() - shiftedTimePos;
+		if (start < 0.)
+			start = 0.;
+		m->setStart(start);
+		res << new AwMarker(m);
 	}
 
-	// duplicates the rest of copiedList
-	for (auto m : copiedList)
-		res << new AwMarker(m);
+	qDeleteAll(copiedList);
+	qDeleteAll(toDelete);
+	qDeleteAll(cutList);
 
 	return res;
 }

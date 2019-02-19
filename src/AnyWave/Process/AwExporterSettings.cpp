@@ -28,7 +28,7 @@
 #include <QFileDialog>
 #include <widget/AwMessageBox.h>
 #include "AwExportSelChannels.h"
-#include "AwExporterSelMarkers.h"
+//#include "AwExporterSelMarkers.h"
 
 AwExporterSettings::AwExporterSettings(QWidget *parent)
 	: QDialog(parent)
@@ -38,9 +38,11 @@ AwExporterSettings::AwExporterSettings(QWidget *parent)
 	connect(buttonFile, SIGNAL(clicked()), this, SLOT(pickupFile()));
 	connect(buttonSelectChannels, SIGNAL(clicked()), this, SLOT(selectChannels()));
 	connect(buttonSelectICA, SIGNAL(clicked()), this, SLOT(selectICAChannels()));
-	connect(buttonSkipMarkers, SIGNAL(clicked()), this, SLOT(selectMarkersToSkip()));
-	connect(buttonExportMarkers, SIGNAL(clicked()), this, SLOT(selectMarkersToExport()));
 	connect(comboWriters, SIGNAL(currentIndexChanged(int)), this, SLOT(updateOutputFileExtension(int)));
+	connect(buttonSkip, &QPushButton::clicked, this, &AwExporterSettings::addSkipLabel);
+	connect(buttonUse, &QPushButton::clicked, this, &AwExporterSettings::addUseLabel);
+	connect(buttonClearUse, &QPushButton::clicked, this, &AwExporterSettings::clearUse);
+	connect(buttonClearSkip, &QPushButton::clicked, this, &AwExporterSettings::clearSkip);
 	filterTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	filterTableView->resizeColumnsToContents();
 }
@@ -55,22 +57,52 @@ void AwExporterSettings::updateOutputFileExtension(int index)
 	lineEditFile->setText(QString("%1%2").arg(initialPath).arg(extensions.at(index)));
 }
 
-void AwExporterSettings::selectMarkersToSkip()
+void AwExporterSettings::addSkipLabel()
 {
-	AwExporterSelMarkers ui;
-	ui.markers = markers;	// all markers
-	if (ui.exec() ==  QDialog::Accepted) {
-		skippedMarkers = ui.selectedMarkers;
+	auto item = comboSkip->currentText();
+	if (!m_skipLabels.contains(item)) {
+		m_skipLabels << item;
+		listWidgetSkip->addItem(item);
+		listWidgetSkip->update();
 	}
 }
 
-void AwExporterSettings::selectMarkersToExport()
+void AwExporterSettings::addUseLabel()
 {
-	AwExporterSelMarkers ui;
-	ui.markers = markers;	// all markers
-	if (ui.exec() == QDialog::Accepted) {
-		exportedMarkers = ui.selectedMarkers;
+	auto item = comboUse->currentText();
+	if (!m_useLabels.contains(item)) {
+		m_useLabels << item;
+		listWidgetUse->addItem(item);
+		listWidgetUse->update();
 	}
+}
+
+AwMarkerList AwExporterSettings::skippedMarkers()
+{
+	if (m_skipLabels.isEmpty())
+		return AwMarkerList();
+
+	return AwMarker::getMarkersWithLabels(markers, m_skipLabels);
+}
+
+AwMarkerList AwExporterSettings::usedMarkers()
+{
+	if (m_useLabels.isEmpty())
+		return AwMarkerList();
+
+	return AwMarker::getMarkersWithLabels(markers, m_useLabels);
+}
+
+void AwExporterSettings::clearUse()
+{
+	listWidgetUse->clear();
+	m_useLabels.clear();
+}
+
+void AwExporterSettings::clearSkip()
+{
+	listWidgetSkip->clear();
+	m_skipLabels.clear();
 }
 
 void AwExporterSettings::selectICAChannels()
@@ -110,6 +142,19 @@ int AwExporterSettings::exec()
 	comboWriters->addItems(writers);
 	comboDS->setSamplingRate(channels.first()->samplingRate());
 	filterTableView->setSettings(filterSettings);
+	// init combo markers only with markers which have a duration.
+	AwMarkerList tmp;
+	for (auto m : markers) {
+		if (m->duration() > 0.)
+			tmp << m;
+	}
+	if (!tmp.isEmpty()) {
+		comboSkip->setMarkers(tmp);
+		comboUse->setMarkers(tmp);
+	}
+	else {
+		groupBoxMarkers->setDisabled(true);
+	}
 	return QDialog::exec();
 }
 
@@ -121,26 +166,13 @@ void AwExporterSettings::accept()
 		return;
 	}
 
-	if (checkSkipMarkers->isChecked() && skippedMarkers.isEmpty()) {
-		AwMessageBox::information(this, tr("Skipping markers"), tr("Select markers to skip."));
-		return;
-	}
-	if (checkExportMarkers->isChecked() && exportedMarkers.isEmpty()) {
-		AwMessageBox::information(this, tr("Export markers"), tr("Select markers to export."));
-		return;
-	}
-
 	// remove extensions to filePath
 	QFileInfo fi(filePath);
 	filePath = fi.absolutePath() + "/" + fi.baseName();
-
 	writer = comboWriters->currentText();
 	useCurrentMontage = checkBoxCurrentMontage->isChecked();
 	exportICA = checkBoxICA->isChecked();
 	decimateFactor = comboDS->getDecimateFactor();
-
-	skipMarkers = checkSkipMarkers->isChecked();
-	exportMarkers = checkExportMarkers->isChecked();
 	filterSettings = filterTableView->settings();
 	QDialog::accept();
 }
