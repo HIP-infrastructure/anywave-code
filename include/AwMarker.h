@@ -82,7 +82,10 @@ public:
 	static QList<AwMarker *>& sort(QList<AwMarker *>& markers);
 	/** Cut all markers using markers in cutMarkers. Returns the list of reshaped markers without the cut markers. **/
 	static QList<AwMarker *> cutAroundMarkers(QList<AwMarker *>& markers, QList<AwMarker *>& cutMarkers);
+	/** AND operator : keep markers on m2 which overlaps markers on m1. reshape them to match the intersection of m1. **/
 	static QList<AwMarker *> applyANDOperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
+	/** XOR operator : slice markers on m1 which are intersected by markers on m2. **/
+	static QList<AwMarker *> applyXOROperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
 	/** Merge markers whichs overlaps. Return the resulting merged markers **/
 	static QList<AwMarker *> merge(QList<AwMarker *>& markers);
 	/** Get markers from a list which intersect a time selection **/

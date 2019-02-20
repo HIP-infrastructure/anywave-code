@@ -90,6 +90,9 @@
     <ClInclude Include="..\..\include\AwException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\AwCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\include\AwDataBuffer.h">

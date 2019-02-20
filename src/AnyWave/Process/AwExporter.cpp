@@ -129,14 +129,14 @@ void AwExporter::runFromCommandLine()
 
 void AwExporter::run()
 {
-	auto output_markers = pdi.input.markers();
+	auto output_markers = AwMarker::duplicate(pdi.input.markers());
 	bool skip = !m_skippedMarkers.isEmpty();
 	bool use = !m_exportedMarkers.isEmpty();
 	bool isDecimate = m_decimateFactor > 1;
 	auto skipLabels = AwMarker::getAllLabels(m_skippedMarkers);
 	auto useLabels = AwMarker::getAllLabels(m_exportedMarkers);
 
-	auto inputMarkers = AwMarker::getInputMarkers(output_markers, skipLabels, useLabels, pdi.input.reader()->infos.totalDuration());
+	auto inputMarkers = AwMarker::getInputMarkers(AwMarker::sort(output_markers), skipLabels, useLabels, pdi.input.reader()->infos.totalDuration());
 
 	AwFileIO *writer = m_plugin->newInstance();
 	writer->setPlugin(m_plugin);
