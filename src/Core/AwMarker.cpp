@@ -393,7 +393,7 @@ AwMarkerList AwMarker::applyANDOperation(AwMarkerList& sources, AwMarkerList& ma
 	AwMarkerList res, toDelete;
 
 	auto op1 = AwMarker::merge(sources);
-	auto op2 = AwMarker::merge(markers);
+	auto op2 = AwMarker::duplicate(markers);
 
 	for (auto m : op1) {
 		auto intersections = AwMarker::intersect(op2, m->start(), m->end());
@@ -512,46 +512,55 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		inputMarkers << new AwMarker("All Data", 0, totalDuration);
 	}
 	else if (use && !skip) { // just use some markers as input =>  reshape markers and return used markers as input.
-		auto used = AwMarker::getMarkersWithLabels(markers, useLabels);
-		inputMarkers = AwMarker::duplicate(used);
-		// reshape markers to keep only the ones which overlaps used markers.
-		// keep only the intersection part of the marker.
-		auto interMarkers = AwMarker::applyANDOperation(used, markers);
-		AW_DESTROY_LIST(markers);
-		markers = interMarkers;
+		inputMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		// remove used markers from the list
+		for (auto m : inputMarkers)
+			markers.removeAll(m);
+		// revert selection using usedCut markers
+		auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
+		// reshape intersected markers using XOR
+		auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
+		// now cut all the markers.
+		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
+		AW_DESTROY_LIST(markers)
+		AW_DESTROY_LIST(reshaped)
+		AW_DESTROY_LIST(revertSelection)
+		markers = cutMarkers;
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
 		inputMarkers = AwMarker::invertMarkerSelection(skippedMarkers, "Selection", totalDuration);
+		// remove skipped markers from the list
+		for (auto m : skippedMarkers)
+			markers.removeAll(m);
+		auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
 		// now reshape all the markers after removing skipped ones.
-		auto cutMarkers = AwMarker::cutAroundMarkers(markers, skippedMarkers);
+		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, skippedMarkers);
 		AW_DESTROY_LIST(markers);
 		markers = cutMarkers;
+		AW_DESTROY_LIST(reshaped);
+		AW_DESTROY_LIST(skippedMarkers);
 	}
 	else if (skip && use) {
 		auto usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		// remove artefact markers from the marker list
+		for (auto m : skippedMarkers)
+			markers.removeAll(m);
 		// first => cut used markers with skipmarkers using XOR 
 		auto usedCut = AwMarker::applyXOROperation(usedMarkers, skippedMarkers);
-		// now cut all the markers using skipped ones.
-		auto cutMarkers = AwMarker::cutAroundMarkers(markers, skippedMarkers);
-		// and reshape again to keep only markers which overlaps used ones.
-		auto reshaped = AwMarker::applyANDOperation(usedCut, cutMarkers);
-		// time shift the markers which overlapped usedCut
-		float timeOffset = 0.;
-		for (auto m : usedCut) {
-			auto inters = AwMarker::intersect(reshaped, m->start(), m->end());
-			for (auto i : inters) {
-				i->setStart(i->start() - m->start());
-			}
-		}
-
-		inputMarkers = usedCut;
-		//inputMarkers = AwMarker::applyXOROperation(usedMarkers, skippedMarkers);
-		//qDeleteAll(markers);
+		// revert selection using usedCut markers
+		auto revertSelection = AwMarker::invertMarkerSelection(usedCut, "Selection", totalDuration);
+		// reshape intersected markers using XOR
+		auto reshaped = AwMarker::applyANDOperation(usedCut, markers);
+		// now cut all the markers.
+		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
 		AW_DESTROY_LIST(markers);
-		AW_DESTROY_LIST(cutMarkers);
-		markers = reshaped;
+		markers = cutMarkers;
+		inputMarkers = usedCut;
+		AW_DESTROY_LIST(revertSelection)
+		AW_DESTROY_LIST(skippedMarkers)
+		AW_DESTROY_LIST(reshaped)
 	}
 
 	return inputMarkers;
