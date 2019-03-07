@@ -40,8 +40,12 @@ ADESIO::ADESIO(const QString& path) : AwFileIO(path)
 	m_binStream.setVersion(QDataStream::Qt_4_4);
 	m_samplingRate = 0;
 	m_nSamples = 0;
-	m_unitFactors = QVector<int>(AW_CHANNEL_TYPES);
-	m_unitFactors.fill(1);
+	//m_unitFactors = QVector<float>(AW_CHANNEL_TYPES);
+	//m_unitFactors.fill(1.);
+	m_unitFactors[AwChannel::MEG] = 1e12;
+	m_unitFactors[AwChannel::GRAD] = 1e12;
+	m_unitFactors[AwChannel::Reference] = 1e12;
+
 }
 
 
@@ -108,11 +112,33 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 				// extract type and unit
 				QStringList units = tokens.at(1).split(",");
 				if (units.size() == 2) {
-					int type = AwChannel::stringToType(units.at(0).trimmed());
-					QString unit = units.at(1).toLower();
+					auto type = AwChannel::stringToType(units.at(0).trimmed());
+					auto unit = units.at(1).trimmed().toLower();
 					if (type != -1) {
-						if (unit == "v")
-							m_unitFactors[type] = 1e6;
+						switch (type) {
+						case AwChannel::EEG:
+						case AwChannel::SEEG:
+						case AwChannel::ECG:
+						case AwChannel::EMG:
+							if (unit == "v")
+								m_unitFactors[type] = 1e6;
+							if (unit == "mv")
+								m_unitFactors[type] = 1e3;
+							break;
+						case AwChannel::MEG:
+						case AwChannel::GRAD:
+						case AwChannel::Reference:
+							if (unit == "t" || unit == "t/m")
+								m_unitFactors[type] = 1e12;
+							break;
+						default:
+							if (unit == "v")
+								m_unitFactors[type] = 1e6;
+							if (unit == "mv")
+								m_unitFactors[type] = 1e3;
+							if (unit == "t" || unit == "t/m")
+								m_unitFactors[type] = 1e12;
+						}
 					}
 				}
 			}
@@ -244,8 +270,11 @@ qint64 ADESIO::readDataFromChannels(float start, float duration, AwChannelList &
 		int index = infos.indexOfChannel(c->name());
 		float *data = c->newData(read);
 		qint64 count = 0;
+		float factor = 1.;
+		if (m_unitFactors.contains(c->type()))
+			factor = m_unitFactors[c->type()];
 		while (count < read) {
-			*data++ = (float)buf[index + count * nbChannels] * m_unitFactors[c->type()];
+			*data++ = (float)buf[index + count * nbChannels] * factor;
 			count++;
 		}
 		c->setDataReady();

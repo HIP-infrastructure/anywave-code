@@ -53,7 +53,8 @@ private:
 	float m_samplingRate;
 	qint64 m_nSamples;
 	QString m_binPath;
-	QVector<int> m_unitFactors;
+	//QVector<float> m_unitFactors;
+	QMap<int, float> m_unitFactors;
 };
 
 class ADESIOPlugin : public AwFileIOPlugin
