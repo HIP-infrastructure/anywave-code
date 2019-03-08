@@ -453,7 +453,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 for (int i = 0; i < size; i++) {
 			list << sources.at(i);
 	 }
-	 p->pdi.input.setNewChannels(p->pdi.input.channels() + AwChannel::duplicateChannels(list));
+
+	 p->pdi.input.addChannels(AwChannel::duplicateChannels(list));
 	 // make sure current filters are set for the channels.
 	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
 	 return true;
