@@ -32,7 +32,7 @@
 #include <QSemaphore>
 #include <QVector>
 #include <AwMarker.h>
-#define AW_CHANNEL_TYPES	11
+#define AW_CHANNEL_TYPES	12
 /*!
  * \brief
  * This class defines the AwChannel object.
@@ -52,7 +52,7 @@ class AW_CORE_EXPORT AwChannel
 {
 public:
 	enum ChannelType {EEG = 0, SEEG = 0x01, MEG = 0x02, EMG = 0x03, ECG = 0x04, Reference = 0x05, Trigger = 0x06, Other = 0x07, 
-	ICA = 0x08, Source = 0x09, GRAD = 0xA};
+	ICA = 0x08, Source = 0x09, GRAD = 0xA, ECoG = 0xA1 };
 	enum SourceType { Real, Virtual };   	
 	
 	/** Default constructor **/
@@ -225,7 +225,7 @@ public:
 	/** Get a sub list containing only channels of specified type. The list can be empty. **/
 	static QList<AwChannel *> getChannelsOfType(const QList<AwChannel *>& list, int type);
 	static QList<AwChannel *> duplicateChannels(const QList<AwChannel *>& list);
-	static QList<AwChannel *> getChannelWithLabels(const QList<AwChannel *>& list, const QStringList& labels);
+	static QList<AwChannel *> getChannelsWithLabels(const QList<AwChannel *>& list, const QStringList& labels);
 	/** Get the labels as a list from the channels. Fullname flag will return the full labels (ie. with the reference channel) **/
 	static QStringList getLabels(const QList<AwChannel *>& list, bool fullName = false);
 	static QList<AwChannel *> cloneList(const QList<AwChannel *>& list, bool cloneData = false);

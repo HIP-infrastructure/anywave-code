@@ -5,7 +5,7 @@ AwFilterAddButton::AwFilterAddButton(QWidget *parent) : QPushButton(parent)
 {
 	m_menu = new QMenu(this);
 	QList<int> channels = { AwChannel::EEG, AwChannel::SEEG, AwChannel::MEG, AwChannel::GRAD, AwChannel::ICA, AwChannel::Source, AwChannel::EMG, AwChannel::ECG, 
-	AwChannel::Reference };
+	AwChannel::Reference, AwChannel::ECoG };
 	for (auto c : channels) {
 		auto action = m_menu->addAction(AwChannel::typeToString(c));
 		connect(action, &QAction::triggered, this, &AwFilterAddButton::addNewFilter);

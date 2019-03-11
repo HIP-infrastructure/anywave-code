@@ -1309,6 +1309,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwCommandLogger.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwECoGDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwECoGDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Montage\AwECoGDialog.cpp">
+      <Filter>Montage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1830,6 +1839,12 @@
     <CustomBuild Include="CL\AwCommandLogger.h">
       <Filter>CL</Filter>
     </CustomBuild>
+    <CustomBuild Include="Montage\AwECoGDialog.ui">
+      <Filter>Montage</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Montage\AwECoGDialog.h">
+      <Filter>Montage</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2053,6 +2068,9 @@
     </ClInclude>
     <ClInclude Include="CL\CommandLineParser.h">
       <Filter>CL</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwECoGDialog.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

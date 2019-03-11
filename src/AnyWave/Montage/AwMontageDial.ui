@@ -522,6 +522,13 @@ Dragging channels from As Recorded list directly to the montage will also add th
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="buttonECOG">
+            <property name="text">
+             <string>ECoG Montage</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="buttonAVG">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">

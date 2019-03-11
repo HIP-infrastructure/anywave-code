@@ -69,6 +69,9 @@ AwAmplitudeButton::AwAmplitudeButton(QWidget *parent)
 	// SEEG
 	QMenu *seeg_menu = new QMenu("SEEG", m_menu);
 	createActionGroup(seeg_menu, AwChannel::SEEG);
+	// ECOG
+	QMenu *ecog_menu = new QMenu("ECoG", m_menu);
+	createActionGroup(ecog_menu, AwChannel::ECoG);
 	// EMG
 	QMenu *emg_menu = new QMenu("EMG", m_menu);
 	createActionGroup(emg_menu, AwChannel::EMG);
@@ -89,6 +92,7 @@ AwAmplitudeButton::AwAmplitudeButton(QWidget *parent)
 	m_menu->addMenu(ref_menu);
 	m_menu->addMenu(eeg_menu);
 	m_menu->addMenu(seeg_menu);
+	m_menu->addMenu(ecog_menu);
 	m_menu->addMenu(emg_menu);
 	m_menu->addMenu(trigger_menu);
 	m_menu->addMenu(other_menu);

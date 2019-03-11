@@ -27,6 +27,8 @@
 #include <AwVirtualChannel.h>
 #include <QtMath>
 
+static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
+
 //
 // Default constructor
 //
@@ -392,45 +394,46 @@ void AwChannel::setDataReady(bool flag)
 
 int AwChannel::stringToType(const QString& s)
 {
-	QList<int> type;
-	QStringList stringTypes;
-	int index;
+	//QList<int> type = { AwChannel::EEG , AwChannel::SEEG , AwChannel::MEG , AwChannel::ECG , AwChannel::EMG , AwChannel::Reference , AwChannel::Trigger , AwChannel::Other
+	//	, AwChannel::ICA , AwChannel::Source , AwChannel::GRAD, AwChannel::ECoG };
+	// string types must match the enumerated values in ChannelType.
+//	QStringList stringTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
+//	auto index = stringTypes.indexOf(s.toUpper());
 
-	stringTypes << "EEG" << "SEEG" << "MEG" << "ECG" << "EMG" <<  "REFERENCE" << "TRIGGER" << "OTHER" << "ICA" << "SOURCE" << "GRAD";
+	auto index = ChannelTypes.indexOf(s.toUpper());
 
-	type << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::ECG << AwChannel::EMG << AwChannel::Reference << AwChannel::Trigger << AwChannel::Other
-		<< AwChannel::ICA << AwChannel::Source << AwChannel::GRAD;
-
-
-	index = stringTypes.indexOf(s.toUpper());
-
-	if (index == -1)
-		return index;
+	return index;
+	//if (index == -1)
+	//	return index;
 	
-	return type.at(index);
+	//return type.at(index);
 }
 
 QStringList AwChannel::types()
 {
-	QStringList types;
-	types << "EEG" << "SEEG" << "MEG" << "EMG" << "ECG" << "Reference" << "Trigger" << "Other" << "ICA" << "SOURCE" << "GRAD";
-	return types;
+	QStringList stringTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
+	return stringTypes;
 }
 ///
 ///
 ///
 QString AwChannel::typeToString(int t)
 {
-	QList<int> types;
-	QStringList stringTypes = AwChannel::types();
-	int index;
-	for (auto s : stringTypes)
-		types << AwChannel::stringToType(s);
-	index = types.indexOf(t);
-	if (index == -1)
-		return QString();
+	//QList<int> types;
+	//QStringList stringTypes = AwChannel::types();
+	//int index;
+	//for (auto s : stringTypes)
+	//	types << AwChannel::stringToType(s);
+	//index = types.indexOf(t);
+	//if (index == -1)
+	//	return QString();
 
-	return stringTypes.at(index);
+	//return stringTypes.at(index);
+
+	if (t >= AW_CHANNEL_TYPES)
+		return QString();
+	//return AwChannel::types().at(t);
+	return ChannelTypes.at(t);
 }
 
 
@@ -480,14 +483,23 @@ QList<AwChannel *> AwChannel::getChannelsOfType(const QList<AwChannel *>& list, 
 	return res;
 }
 
-QList<AwChannel *> AwChannel::getChannelWithLabels(const QList<AwChannel *>& list, const QStringList& labels)
+QList<AwChannel *> AwChannel::getChannelsWithLabels(const QList<AwChannel *>& list, const QStringList& labels)
 {
-	AwChannelList res;
+	AwChannelList res, tmp;
 	foreach(AwChannel *c, list) {
 		if (labels.contains(c->name()))
-			res << c;
+			tmp << c;
 	}
-	return res;
+	// reorder list to match the order of labels in labels
+	for (auto l : labels) {
+		foreach(AwChannel *c, tmp) {
+			if (c->name() == l) {
+				res << c;
+				tmp.removeAll(c);
+			}
+		}
+	}
+ 	return res;
 }
 
 //

@@ -169,7 +169,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	bool error = false;
 	if (usingLabels && usingTypes) {
 		// get labels from current montage.
-		requestedChannels = AwChannel::getChannelWithLabels(requestedChannels, labels);
+		requestedChannels = AwChannel::getChannelsWithLabels(requestedChannels, labels);
 		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
 			emit log(QString("Error in aw_getdata: could not find channels with requested labels."));
 			error = true;
@@ -186,7 +186,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 		}
 	}
 	else if (usingLabels && !usingTypes) {
-		requestedChannels = AwChannel::getChannelWithLabels(requestedChannels, labels);
+		requestedChannels = AwChannel::getChannelsWithLabels(requestedChannels, labels);
 		if (requestedChannels.isEmpty()) {
 			emit log(QString("Error in aw_getdata: could not find channels of requested type AND labels."));
 			error = true;
