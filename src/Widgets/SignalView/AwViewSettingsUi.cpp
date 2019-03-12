@@ -25,6 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwViewSettingsUi.h"
 #include <widget/SignalView/AwViewSettings.h>
+#include <AwChannel.h>
 
 AwViewSettingsUi::AwViewSettingsUi(AwViewSettings *settings, QWidget *parent)
 	: QDialog(parent)
@@ -35,20 +36,40 @@ AwViewSettingsUi::AwViewSettingsUi(AwViewSettings *settings, QWidget *parent)
 	connect(buttonNone, SIGNAL(clicked()), this, SLOT(unselectAllFilters()));
 	connect(checkLimit, SIGNAL(toggled(bool)), this, SLOT(updateMaxChannels(bool)));
 
-	// Build check button list with corresponding indexes's types
-	m_checks << checkEEG << checkSEEG << checkMEG << checkEMG << checkECG << checkReference << checkTrigger << checkOther
-		<< checkICA << checkSource << checkGRAD;
+
+	//// Build check button list with corresponding indexes's types
+	//m_checks << checkEEG << checkSEEG << checkMEG << checkEMG << checkECG << checkReference << checkTrigger << checkOther
+	//	<< checkICA << checkSource << checkGRAD;
+
+	// add check boxes for all types of channels available.
+	auto labels = AwChannel::types();
+	int row = 0, col = 0;
+	for (int i = 0; i < labels.size(); i++) {
+		auto l = labels.at(i);
+		auto cb = new QCheckBox(l, this);
+		gridLayoutTypes->addWidget(cb, row, col);
+		m_checkBoxes[cb] = i;
+		col++;
+		if (col == 4) {
+			row++;
+			col = 0;
+		}
+	}
 }
 
 void AwViewSettingsUi::selectAllFilters()
 {
-	foreach (QCheckBox *cb, m_checks)
+	//foreach (QCheckBox *cb, m_checks)
+	//	cb->setChecked(true);
+	for (auto cb : m_checkBoxes.keys())
 		cb->setChecked(true);
 }
 
 void AwViewSettingsUi::unselectAllFilters()
 {
-	foreach (QCheckBox *cb, m_checks)
+	//foreach (QCheckBox *cb, m_checks)
+	//	cb->setChecked(false);
+	for (auto cb : m_checkBoxes.keys())
 		cb->setChecked(false);
 }
 
@@ -69,11 +90,17 @@ int AwViewSettingsUi::exec()
 	checkMarkerLabel->setChecked(m_settings->showMarkerLabels);
 	checkMarkerValue->setChecked(m_settings->showMarkerValues);
 
-	foreach (QCheckBox *cb, m_checks)
-		cb->setChecked(false);
+	//foreach (QCheckBox *cb, m_checks)
+	//	cb->setChecked(false);
+	unselectAllFilters();
 
-	foreach (int index, m_settings->filters)
-		m_checks.at(index)->setChecked(true);
+	//foreach (int index, m_settings->filters)
+	//	m_checks.at(index)->setChecked(true);
+
+	for (auto cb : m_checkBoxes.keys()) {
+		if (m_settings->filters.contains(m_checkBoxes[cb]))
+			cb->setChecked(true);
+	}
 
 	switch (m_settings->markerBarMode) {
 	case AwViewSettings::ShowMarkerBar:
@@ -131,9 +158,12 @@ void AwViewSettingsUi::accept()
 		flags |= AwViewSettings::Overlay;
 
 	QList<int> filters;
-	for (int i = 0; i < m_checks.size(); i++)
-		if (m_checks.at(i)->isChecked())
-			filters << i;
+	//for (int i = 0; i < m_checks.size(); i++)
+	//	if (m_checks.at(i)->isChecked())
+	//		filters << i;
+	for (auto cb : m_checkBoxes.keys())
+		if (cb->isChecked())
+			filters << m_checkBoxes[cb];
 
 	foreach (int f, copiedSettings->filters)
 		if (!filters.contains(f))

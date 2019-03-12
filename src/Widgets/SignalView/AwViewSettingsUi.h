@@ -47,7 +47,8 @@ signals:
 	void settingsChanged(AwViewSettings *settings, int flags);
 protected:
 	AwViewSettings *m_settings;
-	QList<QCheckBox *> m_checks;
+	//QList<QCheckBox *> m_checks;
+	QMap<QCheckBox *, int> m_checkBoxes;
 };
 
 #endif // AwViewSettingsUi

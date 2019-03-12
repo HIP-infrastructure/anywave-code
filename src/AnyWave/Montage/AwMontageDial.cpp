@@ -39,6 +39,7 @@
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
 #include "ICA/AwICAChannel.h"
+#include "AwECoGDialog.h"
 #include <algorithm>
 using namespace std;
 
@@ -158,7 +159,7 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	connect(m_ui.tvDisplay, SIGNAL(customContextMenuRequested(const QPoint& )), this, SLOT(contextMenuMontageRequested(const QPoint&)));
 	connect(m_ui.tvChannelsAsRecorded, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuAsRecordedRequested(const QPoint&)));
 	connect(m_ui.buttonEEGSEEG, SIGNAL(clicked()), this, SLOT(computeSEEGMontageFromEEGChannels()));
-	connect(m_ui.buttonEEGSEEG, &QPushButton::clicked, this, &AwMontageDial::makeECOGBipolar);
+	connect(m_ui.buttonECOG, &QPushButton::clicked, this, &AwMontageDial::makeECOGBipolar);
 }
 
 AwMontageDial::~AwMontageDial()
@@ -400,7 +401,8 @@ void AwMontageDial::makeECOGBipolar()
 		AwMessageBox::information(this, tr("ECoG Bipolar"), tr("Could not make a bipolar montage (no ECoG channels in the current montage)"));
 		return;
 	}
-
+	AwECoGDialog dlg(channels);
+	dlg.exec();
 }
 
 void AwMontageDial::makeSEEGBipolar()
