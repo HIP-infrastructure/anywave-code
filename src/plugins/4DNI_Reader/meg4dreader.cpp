@@ -456,9 +456,6 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 					inserted->setType(AwChannel::MEG);
 				else
 					inserted->setType(AwChannel::Reference);
-				inserted->setUnit("pT");
-				// Meg gains are expected to be in pT/cm
-				inserted->setGain(10.);
 				inserted->setID(channel->chan_no);
 			}
 			break;
@@ -472,8 +469,6 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			if (c) {
 				inserted = infos.addChannel(c);
 				inserted->setType(AwChannel::EEG);
-				inserted->setUnit(QString::fromLatin1("µV"));
-				inserted->setGain(150);
 				inserted->setID(channel->chan_no);
 			}
 			break;
@@ -485,8 +480,6 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 				// TRIGGER CHANNELS ARE RENAMED WITH ORIGINAL LABEL CONTAINED IN CONFIG FILE
 				inserted->setName(QString(channel->chan_name));
 				inserted->setType(AwChannel::Trigger);
-				inserted->setUnit("?");
-				inserted->setGain(10);
 				m_trigger = inserted;
 				inserted->setID(channel->chan_no);
 			}
@@ -499,8 +492,6 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			if (c)	{
 				inserted = infos.addChannel(c);
 				inserted->setType(AwChannel::Other);
-				inserted->setUnit("?");
-				inserted->setGain(10);
 				inserted->setID(channel->chan_no);
 			}
 			break;
@@ -510,8 +501,6 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			if (c)	{
 				inserted = infos.addChannel(c);
 				inserted->setType(AwChannel::Other);
-				inserted->setUnit("?");
-				inserted->setGain(10);
 				inserted->setID(channel->chan_no);
 			}
 			break;

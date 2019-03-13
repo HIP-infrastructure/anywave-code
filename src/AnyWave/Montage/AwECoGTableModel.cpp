@@ -1,4 +1,5 @@
 #include "AwECoGTableModel.h"
+#include <QComboBox>
 
 AwECoGTableModel::AwECoGTableModel(QObject *parent)
 	: QAbstractTableModel(parent)
@@ -110,4 +111,65 @@ QVariant AwECoGTableModel::headerData(int section, Qt::Orientation orientation, 
 	return QVariant();
 }
 
+bool AwECoGTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+	if (!index.isValid())
+		return false;
+	auto grid = m_grids.value(index.row());
+	if (index.column() == AW_ECOG_ORIENTATION && role == Qt::EditRole) {
+		grid->setOrientation(value.toInt());
+		return true;
+	}
+	emit dataChanged(index, index);
 
+	return true;
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+QWidget *AwECoGModelDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+	if (index.column() == AW_ECOG_ORIENTATION) {
+		QComboBox *editor = new QComboBox(parent);
+		editor->insertItem(0, QString("Horizontal"),  AwECoGGrid::Horizontal);
+		editor->insertItem(1, QString("Vertical"), AwECoGGrid::Vertical);
+		editor->setFocusPolicy(Qt::StrongFocus);
+		// close comboBox when an item is picked up
+		connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));
+		return editor;
+	}
+	
+	return QItemDelegate::createEditor(parent, option, index);
+}
+
+void AwECoGModelDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+{
+	if (index.column() == AW_ECOG_ORIENTATION) {
+		QComboBox *cb = static_cast<QComboBox *>(editor);
+		model->setData(index, cb->itemData(cb->currentIndex()).toInt(), Qt::EditRole);
+		return;
+	}
+	QItemDelegate::setModelData(editor, model, index);
+}
+
+void AwECoGModelDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+
+	if (index.column() == AW_ECOG_ORIENTATION) {
+		QComboBox *cb = static_cast<QComboBox *>(editor);
+		cb->setGeometry(option.rect.x(), option.rect.y(), option.rect.width() + 100, option.rect.height());
+		cb->showPopup();
+	}
+	else
+		editor->setGeometry(option.rect);
+
+}
+
+void AwECoGModelDelegate::commitAndCloseComboBox()
+{
+	QComboBox *cb = qobject_cast<QComboBox *>(sender());
+	emit commitData(cb);
+	emit closeEditor(cb);
+}

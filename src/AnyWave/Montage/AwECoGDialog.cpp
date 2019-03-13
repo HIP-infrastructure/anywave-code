@@ -15,6 +15,7 @@ AwECoGDialog::AwECoGDialog(const AwChannelList& channels, QWidget *parent)
 	ui.listWidget->addItems(AwChannel::getLabels(channels));
 	connect(ui.buttonGrid, &QPushButton::clicked, this, &AwECoGDialog::addGridStrip);
 	ui.tableView->setModel(new AwECoGTableModel(this));
+	ui.tableView->setItemDelegate(new AwECoGModelDelegate(this));
 	ui.tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui.tableView->resizeColumnsToContents();
 }

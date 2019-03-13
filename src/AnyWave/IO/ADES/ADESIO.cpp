@@ -173,31 +173,31 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		AwChannel *inserted = infos.addChannel(&chan);
 		inserted->setType(pair.second);
 		inserted->setSamplingRate(m_samplingRate);
-		switch (pair.second)
-		{
-		case AwChannel::EEG:
-		case AwChannel::ECG:
-		case AwChannel::EMG:
-			inserted->setGain(150);
-			inserted->setUnit(QString::fromLatin1("µV"));
-			break;
-		case AwChannel::SEEG:
-			inserted->setGain(300);
-			inserted->setUnit(QString::fromLatin1("µV"));
-			break;
-		case AwChannel::MEG:
-			inserted->setGain(4);
-			inserted->setUnit("pT");
-			break;
-		case AwChannel::GRAD:
-			inserted->setGain(15);
-			inserted->setUnit("pT/m");
-			break;
-		case AwChannel::Trigger:
-			inserted->setGain(1000);
-			inserted->setUnit("n/a");
-			break;
-		}
+		//switch (pair.second)
+		//{
+		//case AwChannel::EEG:
+		//case AwChannel::ECG:
+		//case AwChannel::EMG:
+		//	inserted->setGain(150);
+		//	inserted->setUnit(QString::fromLatin1("µV"));
+		//	break;
+		//case AwChannel::SEEG:
+		//	inserted->setGain(300);
+		//	inserted->setUnit(QString::fromLatin1("µV"));
+		//	break;
+		//case AwChannel::MEG:
+		//	inserted->setGain(4);
+		//	inserted->setUnit("pT");
+		//	break;
+		//case AwChannel::GRAD:
+		//	inserted->setGain(15);
+		//	inserted->setUnit("pT/m");
+		//	break;
+		//case AwChannel::Trigger:
+		//	inserted->setGain(1000);
+		//	inserted->setUnit("n/a");
+		//	break;
+		//}
 	}
 
 	AwBlock *block = infos.newBlock();

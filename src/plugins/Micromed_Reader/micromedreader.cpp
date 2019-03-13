@@ -1538,13 +1538,6 @@ MicromedReader::FileStatus MicromedReader::openFile(const QString& path)
 	infos.setTime(time.toString("hh:mm:ss"));
 	infos.setDate(date.toString("dd.MM.yy"));
 	infos.setISODate(QDateTime(date, time).toString(Qt::ISODate));
-
-	//QStringList months;
-	//months  << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun" << "Jul" << "Aug" << "Sep" << "Oct" << "Nov" << "Dec";
-	//QString Date = QString::number((int)m_Head.Date.Day);
-	//Date += " " + months.at((int)m_Head.Date.Month - 1) + " " + QString::number((int)1900 + (int)m_Head.Date.Year);
-	//infos.setDate(Date);
-
 	infos.setPatientName(QString(m_Head.Patient_Data.Surname).trimmed() + " " +  QString(m_Head.Patient_Data.Name).trimmed());
 
 	// add a block
@@ -1593,7 +1586,6 @@ MicromedReader::FileStatus MicromedReader::openFile(const QString& path)
 			chan.setUnit(QString::fromLatin1("µV"));
 			break;
 		}
-		chan.setGain(100);
 		if (electrode.Rate_Coefficient <= 0)
 			electrode.Rate_Coefficient = 1;
 		chan.setSamplingRate(electrode.Rate_Coefficient * m_Head.Rate_Min);

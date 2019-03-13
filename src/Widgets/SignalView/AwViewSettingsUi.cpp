@@ -36,11 +36,6 @@ AwViewSettingsUi::AwViewSettingsUi(AwViewSettings *settings, QWidget *parent)
 	connect(buttonNone, SIGNAL(clicked()), this, SLOT(unselectAllFilters()));
 	connect(checkLimit, SIGNAL(toggled(bool)), this, SLOT(updateMaxChannels(bool)));
 
-
-	//// Build check button list with corresponding indexes's types
-	//m_checks << checkEEG << checkSEEG << checkMEG << checkEMG << checkECG << checkReference << checkTrigger << checkOther
-	//	<< checkICA << checkSource << checkGRAD;
-
 	// add check boxes for all types of channels available.
 	auto labels = AwChannel::types();
 	int row = 0, col = 0;
@@ -59,16 +54,12 @@ AwViewSettingsUi::AwViewSettingsUi(AwViewSettings *settings, QWidget *parent)
 
 void AwViewSettingsUi::selectAllFilters()
 {
-	//foreach (QCheckBox *cb, m_checks)
-	//	cb->setChecked(true);
 	for (auto cb : m_checkBoxes.keys())
 		cb->setChecked(true);
 }
 
 void AwViewSettingsUi::unselectAllFilters()
 {
-	//foreach (QCheckBox *cb, m_checks)
-	//	cb->setChecked(false);
 	for (auto cb : m_checkBoxes.keys())
 		cb->setChecked(false);
 }
@@ -89,13 +80,7 @@ int AwViewSettingsUi::exec()
 	checkOverlay->setChecked(m_settings->stackChannels);
 	checkMarkerLabel->setChecked(m_settings->showMarkerLabels);
 	checkMarkerValue->setChecked(m_settings->showMarkerValues);
-
-	//foreach (QCheckBox *cb, m_checks)
-	//	cb->setChecked(false);
 	unselectAllFilters();
-
-	//foreach (int index, m_settings->filters)
-	//	m_checks.at(index)->setChecked(true);
 
 	for (auto cb : m_checkBoxes.keys()) {
 		if (m_settings->filters.contains(m_checkBoxes[cb]))
@@ -158,9 +143,6 @@ void AwViewSettingsUi::accept()
 		flags |= AwViewSettings::Overlay;
 
 	QList<int> filters;
-	//for (int i = 0; i < m_checks.size(); i++)
-	//	if (m_checks.at(i)->isChecked())
-	//		filters << i;
 	for (auto cb : m_checkBoxes.keys())
 		if (cb->isChecked())
 			filters << m_checkBoxes[cb];

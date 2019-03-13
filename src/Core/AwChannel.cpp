@@ -28,6 +28,9 @@
 #include <QtMath>
 
 static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
+static QStringList UnitTypes = { QString::fromLatin1("µv"), QString::fromLatin1("µv") , "pT", QString::fromLatin1("µv"), QString::fromLatin1("µv") ,
+	"pT", "n/a", "n/a", "unit", "unit", "pT/m", QString::fromLatin1("µv") };
+static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
 
 //
 // Default constructor
@@ -35,6 +38,7 @@ static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REF
 AwChannel::AwChannel()
 {
 	m_type = AwChannel::EEG;
+	m_unit = AwChannel::unitForType(AwChannel::EEG);
 	m_sourceType = AwChannel::Real;
 	m_data = NULL;
 	m_dataSize = 0;
@@ -165,6 +169,8 @@ void AwChannel::setType(int t)
 {
 	m_type = t;
 	m_referenceName = "";
+	m_unit = AwChannel::unitForType(t);
+	m_gain = AwChannel::defaultAmplitudeForType(t);
 	m_references.clear();
 }
 	 
@@ -394,19 +400,8 @@ void AwChannel::setDataReady(bool flag)
 
 int AwChannel::stringToType(const QString& s)
 {
-	//QList<int> type = { AwChannel::EEG , AwChannel::SEEG , AwChannel::MEG , AwChannel::ECG , AwChannel::EMG , AwChannel::Reference , AwChannel::Trigger , AwChannel::Other
-	//	, AwChannel::ICA , AwChannel::Source , AwChannel::GRAD, AwChannel::ECoG };
-	// string types must match the enumerated values in ChannelType.
-//	QStringList stringTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
-//	auto index = stringTypes.indexOf(s.toUpper());
-
 	auto index = ChannelTypes.indexOf(s.toUpper());
-
 	return index;
-	//if (index == -1)
-	//	return index;
-	
-	//return type.at(index);
 }
 
 QStringList AwChannel::types()
@@ -414,25 +409,24 @@ QStringList AwChannel::types()
 	QStringList stringTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
 	return stringTypes;
 }
+
+
+QString& AwChannel::unitForType(int type)
+{
+	return UnitTypes.value(type);
+}
+
+float AwChannel::defaultAmplitudeForType(int type)
+{
+	return DefaultAmplitudeValues.value(type);
+}
 ///
 ///
 ///
 QString AwChannel::typeToString(int t)
 {
-	//QList<int> types;
-	//QStringList stringTypes = AwChannel::types();
-	//int index;
-	//for (auto s : stringTypes)
-	//	types << AwChannel::stringToType(s);
-	//index = types.indexOf(t);
-	//if (index == -1)
-	//	return QString();
-
-	//return stringTypes.at(index);
-
 	if (t >= AW_CHANNEL_TYPES)
 		return QString();
-	//return AwChannel::types().at(t);
 	return ChannelTypes.at(t);
 }
 

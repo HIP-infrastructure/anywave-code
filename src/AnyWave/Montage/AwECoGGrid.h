@@ -14,6 +14,7 @@ public:
 	inline int cols() { return m_cols; }
 	inline int orientation() { return m_orientation; }
 	inline QStringList& labels() { return m_electrodes; }
+	void setOrientation(int orientation);
 protected:
 	int m_rows, m_cols;
 	int m_orientation;

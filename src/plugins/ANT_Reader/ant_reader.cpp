@@ -293,7 +293,6 @@ AwFileIO::FileStatus ANT_Reader::openFile(const QString& path)
 		channel.setName(label);
 		channel.setSamplingRate(m_sampleRate);
 		channel.setID(i);
-		channel.setUnit(QString::fromLatin1(m_cnt->eep_header.chanv[i].runit));
 		infos.addChannel(&channel);
 	}
 

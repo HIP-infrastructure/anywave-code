@@ -239,6 +239,10 @@ public:
 	static float meanRangeValue(const QList<AwChannel *>& list);
 	/** Build a string list containing all the available types of channels **/
 	static QStringList types();
+	/** Get the unit string of a channel type **/
+	static QString& unitForType(int type);
+	/** Get default amplitude value for a channel type **/
+	static float defaultAmplitudeForType(int type);
 	/** remove doublons from a list. Doublons are checked based on name of channels. **/
 	static QList<AwChannel *> removeDoublons(const QList<AwChannel *>& list);
 	QVector<float> toVector();

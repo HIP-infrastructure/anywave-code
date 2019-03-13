@@ -45,39 +45,20 @@ AwAmplitudeManager::AwAmplitudeManager(QObject *parent)
 	: QObject(parent)
 {
 	defaults();
-	m_units[AwChannel::EEG] = QString::fromLatin1("µV/cm");
-	m_units[AwChannel::SEEG] = QString::fromLatin1("µV/cm");
-	m_units[AwChannel::ECG] = QString::fromLatin1("µV/cm");
-	m_units[AwChannel::EMG] = QString::fromLatin1("µV/cm");
-	m_units[AwChannel::MEG] = QString::fromLatin1("pT/cm");
-	m_units[AwChannel::Reference] = QString::fromLatin1("pT/cm");
-	m_units[AwChannel::Trigger] = QString::fromLatin1("unit/cm");
-	m_units[AwChannel::Other] = QString::fromLatin1("unit/cm");
-	m_units[AwChannel::Source] = QString::fromLatin1("unit/cm");
-	m_units[AwChannel::ICA] = QString::fromLatin1("unit/cm");
-	m_units[AwChannel::GRAD] = QString::fromLatin1("pT/m/cm");
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++)
+		m_units[i] = QString("%1/cm").arg(AwChannel::unitForType(i));
 }
 
 
 void AwAmplitudeManager::defaults()
 {
 	// default amplitudes
-	m_amplitude[AwChannel::EEG] = 100;
-	m_amplitude[AwChannel::ECG] = 400;
-	m_amplitude[AwChannel::EMG] = 300;
-	m_amplitude[AwChannel::SEEG] = 300;
-	m_amplitude[AwChannel::Trigger] = 100;
-	m_amplitude[AwChannel::Other] = 100;
-	m_amplitude[AwChannel::MEG] = 4;
-	m_amplitude[AwChannel::GRAD] = 150;
-	m_amplitude[AwChannel::Reference] = 10;
-	m_amplitude[AwChannel::ICA] = 10;
-	m_amplitude[AwChannel::Source] = 10;
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		m_amplitudes[i].clear();
+		m_amplitude[i] = AwChannel::defaultAmplitudeForType(i);
+	}
 
 	float v;
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++)
-		m_amplitudes[i].clear();
-
 	// The MEG scale goes from 0.1 to 500 pt/cm with step of 0.1 and 1.
 	for (v = 0.1; v < 1; v += 0.1) {
 		m_amplitudes[AwChannel::MEG] << v;
@@ -96,6 +77,7 @@ void AwAmplitudeManager::defaults()
 	// The other scales go from 0.0001 to 1 with a step of 0.001
 	for (v = 0.0001; v < 1.; v += 0.01) {
 		m_amplitudes[AwChannel::EEG] << v;
+		m_amplitudes[AwChannel::ECoG] << v;
 		m_amplitudes[AwChannel::SEEG] << v;
 		m_amplitudes[AwChannel::EMG] << v;
 		m_amplitudes[AwChannel::ECG] << v;
@@ -107,6 +89,7 @@ void AwAmplitudeManager::defaults()
 	// The other scales continue from 1 to 10, with a step of 1.
 	for (v = 1.; v < 10; v += 2.) {
 		m_amplitudes[AwChannel::EEG] << v;
+		m_amplitudes[AwChannel::ECoG] << v;
 		m_amplitudes[AwChannel::SEEG] << v;
 		m_amplitudes[AwChannel::EMG] << v;
 		m_amplitudes[AwChannel::ECG] << v;
@@ -118,6 +101,7 @@ void AwAmplitudeManager::defaults()
 	//  The other scales continue from 10 to 500, with a step of 10.
 	for (v = 10.; v < 500; v += 10) {
 		m_amplitudes[AwChannel::EEG] << v;
+		m_amplitudes[AwChannel::ECoG] << v;
 		m_amplitudes[AwChannel::SEEG] << v;
 		m_amplitudes[AwChannel::EMG] << v;
 		m_amplitudes[AwChannel::ECG] << v;
@@ -129,6 +113,7 @@ void AwAmplitudeManager::defaults()
 	//  The other scales continue from 500 to 5000, with a step of 100.
 	for (v = 500.; v < 5000; v += 100) {
 		m_amplitudes[AwChannel::EEG] << v;
+		m_amplitudes[AwChannel::ECoG] << v;
 		m_amplitudes[AwChannel::SEEG] << v;
 		m_amplitudes[AwChannel::EMG] << v;
 		m_amplitudes[AwChannel::ECG] << v;
@@ -145,6 +130,7 @@ void AwAmplitudeManager::defaults()
 	m_amplitudes[AwChannel::Trigger] << 5000;
 	m_amplitudes[AwChannel::ICA] << 5000;
 	m_amplitudes[AwChannel::Source] << 5000;
+	m_amplitudes[AwChannel::ECoG] << 5000;
 }
 
 void AwAmplitudeManager::reset()
@@ -163,7 +149,7 @@ void AwAmplitudeManager::save()
 	QTextStream stream(&file);
 	stream << "[Levels]" << endl;
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++) 
-		stream << QString("%1=%2").arg(AwChannel::typeToString(i)).arg(m_amplitude[i]) << endl;
+		stream << QString("%1=%2").arg(AwChannel::types().value(i)).arg(m_amplitude[i]) << endl;
 	file.close();
 }
 
@@ -173,7 +159,7 @@ void AwAmplitudeManager::load()
 	settings.setIniCodec(QTextCodec::codecForName("UTF-8"));
 	settings.beginGroup("Levels");
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++)  {
-		m_amplitude[i] = (float)settings.value(AwChannel::typeToString(i)).toDouble();
+		m_amplitude[i] = (float)settings.value(AwChannel::types().value(i)).toDouble();
 		// check if amplitudes are present in scales, if not add the value to the scale
 		if (m_amplitudes[i].indexOf(m_amplitude[i]) == -1) {
 			m_amplitudes[i].append(m_amplitude[i]);

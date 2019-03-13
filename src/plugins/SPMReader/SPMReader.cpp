@@ -64,7 +64,6 @@ AwFileIO::FileStatus SPMReader::openFile(const QString &path)
 			sChannels->readScalar("bad", &bad, i);
 			channel.setName(label);
 			channel.setSamplingRate(m_sr);
-			channel.setGain(100);
 			channel.setBad(bad != 0.);
 			infos.addChannel(&channel);
 		}

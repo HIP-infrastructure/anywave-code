@@ -955,13 +955,12 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 	for (i = 0; i < m_edfhdr.edfsignals - m_edfhdr.nr_annot_chns; i++) {
 		AwChannel channel;
 		channel.setName(QString(m_header.signalparam[i].label).trimmed());
-		channel.setUnit(m_header.signalparam[i].physdimension);
 		channel.setType(AwChannel::EEG);
 		float samplingRate = m_header.signalparam[i].smp_in_datarecord / (m_header.datarecord_duration / 1E7);
 		if (samplingRate > max_sr)
 			max_sr = samplingRate;
 		channel.setSamplingRate(samplingRate);
-		channel.setGain(150.);
+
 		// try to guess electrode type using label
 		if (channel.name().contains("ECG"))
 			channel.setType(AwChannel::ECG);
@@ -970,7 +969,6 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 		if (channel.name().startsWith("STATUS"))
 			channel.setType(AwChannel::Trigger);
 		infos.addChannel(&channel);
-	//	m_labelToIndex.insert(channel.name(), i);
 		m_labels << channel.name();
 	}
 
