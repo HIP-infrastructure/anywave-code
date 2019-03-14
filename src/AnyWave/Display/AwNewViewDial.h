@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "ui_AwNewViewDial.h"
+#include <QCheckBox>
 
 class AwNewViewDial : public QDialog
 {
@@ -21,7 +22,7 @@ public slots:
 private:
 	Ui::AwNewViewDialUi m_ui;
 
-	QList<QCheckBox *> m_checkBoxes;	// all check boxes for channel types.
+	QMap<QCheckBox *, int> m_checkBoxes;
 	QVector<int> m_types;				// corresponding channel types
 	QList<int> m_filters;				// selected filters.
 };
