@@ -5,14 +5,20 @@ AwNewViewDial::AwNewViewDial(QWidget *parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
-
-	m_checkBoxes << m_ui.checkEEG << m_ui.checkSEEG << m_ui.checkEMG << m_ui.checkECG;
-	m_checkBoxes << m_ui.checkMEG << m_ui.checkReference << m_ui.checkTrigger << m_ui.checkOther;
-	m_checkBoxes << m_ui.checkICA << m_ui.checkSource << m_ui.checkGRAD;
-	m_types << AwChannel::EEG << AwChannel::SEEG << AwChannel::EMG << AwChannel::ECG;
-	m_types << AwChannel::MEG << AwChannel::Reference << AwChannel::Trigger << AwChannel::Other;
-	m_types << AwChannel::ICA << AwChannel::Source << AwChannel::GRAD;
-
+	// add check boxes for all types of channels available.
+	auto labels = AwChannel::types();
+	int row = 0, col = 0;
+	for (int i = 0; i < labels.size(); i++) {
+		auto l = labels.at(i);
+		auto cb = new QCheckBox(l, this);
+		m_ui.gridLayout->addWidget(cb, row, col);
+		m_checkBoxes[cb] = i;
+		col++;
+		if (col == 4) {
+			row++;
+			col = 0;
+		}
+	}
 }
 
 AwNewViewDial::~AwNewViewDial()
@@ -36,22 +42,22 @@ void AwNewViewDial::changeEvent(QEvent *e)
 
 void AwNewViewDial::accept()
 {
-	for (int i = 0; i < m_checkBoxes.size(); i++)
-	{
-		if (m_checkBoxes.at(i)->isChecked())
-			m_filters << m_types.at(i);
+	for (auto k : m_checkBoxes.keys()) {
+		if (k->isChecked())
+			m_filters << m_checkBoxes[k];
+
 	}
 	QDialog::accept();
 }
 
 void AwNewViewDial::all()
 {
-	foreach (QCheckBox *cb, m_checkBoxes)
-		cb->setChecked(true);
+	for (auto k : m_checkBoxes.keys())
+		k->setChecked(true);
 }
 
 void AwNewViewDial::none()
 {
-	foreach (QCheckBox *cb, m_checkBoxes)
-		cb->setChecked(false);
+	for (auto k : m_checkBoxes.keys())
+		k->setChecked(false);
 }

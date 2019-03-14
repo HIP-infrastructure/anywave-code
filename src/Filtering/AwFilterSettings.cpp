@@ -274,7 +274,8 @@ void AwFilterSettings::load(const QString& path)
 	}
 	m_hash.clear();
 	// types that can be filtered:
-	QStringList types = { "EEG", "SEEG", "EMG", "MEG", "GRAD", "ICA", "Source", "Reference", "ECG" };
+	// all types of channels can be filtered
+	auto types = AwChannel::types();
 	QJsonObject root = doc.object();
 	for (auto t : types) {
 		if (root.contains(t) && root[t].isArray()) {

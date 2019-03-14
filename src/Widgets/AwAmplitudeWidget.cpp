@@ -35,15 +35,20 @@ AwAmplitudeWidget::AwAmplitudeWidget(QWidget *parent)
 {
 	m_ui = new Ui::AwAmplitudeWidgetUi();
 	m_ui->setupUi(this);
-	connect(m_ui->comboLevels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLevelForChannel(int)));
 	m_ui->spValue->hide();
 	m_channelType = -1;
 	connect(m_ui->spValue, SIGNAL(valueChanged(double)), this, SLOT(changeAmplitude(double)));
 	connect(m_ui->buttonUp, SIGNAL(clicked()),this, SLOT(up()));
 	connect(m_ui->buttonDown, SIGNAL(clicked()),this, SLOT(down()));
 	m_am = AwAmplitudeManager::instance();
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) 
-		m_indexes[i]  = m_am->getScale(i).indexOf(m_am->amplitude(i));
+	// init combo levels => first Item MUST be All Gain Levels at index 0
+	// Channel types will be added after and shifted by one in the called slot.
+	m_ui->comboLevels->addItem(tr("All Gain Levels"));
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		m_indexes[i] = m_am->getScale(i).indexOf(m_am->amplitude(i));
+		m_ui->comboLevels->addItem(AwChannel::types().value(i), i);
+	}
+	connect(m_ui->comboLevels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLevelForChannel(int)));
 }
 
 AwAmplitudeWidget::~AwAmplitudeWidget()

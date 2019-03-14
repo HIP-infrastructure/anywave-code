@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,17 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <AwChannel.h>
 #include <AwVirtualChannel.h>
 #include <QtMath>
+
+static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
+static QStringList UnitTypes = { QString::fromLatin1("ï¿½v"), QString::fromLatin1("ï¿½v") , "pT", QString::fromLatin1("ï¿½v"), QString::fromLatin1("ï¿½v") ,
+	"pT", "n/a", "n/a", "unit", "unit", "pT/m", QString::fromLatin1("ï¿½v") };
+static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
 
 //
 // Default constructor
@@ -33,6 +38,7 @@
 AwChannel::AwChannel()
 {
 	m_type = AwChannel::EEG;
+	m_unit = AwChannel::unitForType(AwChannel::EEG);
 	m_sourceType = AwChannel::Real;
 	m_data = NULL;
 	m_dataSize = 0;
@@ -163,6 +169,8 @@ void AwChannel::setType(int t)
 {
 	m_type = t;
 	m_referenceName = "";
+	m_unit = AwChannel::unitForType(t);
+	m_gain = AwChannel::defaultAmplitudeForType(t);
 	m_references.clear();
 }
 	 
@@ -392,45 +400,34 @@ void AwChannel::setDataReady(bool flag)
 
 int AwChannel::stringToType(const QString& s)
 {
-	QList<int> type;
-	QStringList stringTypes;
-	int index;
-
-	stringTypes << "EEG" << "SEEG" << "MEG" << "ECG" << "EMG" <<  "REFERENCE" << "TRIGGER" << "OTHER" << "ICA" << "SOURCE" << "GRAD";
-
-	type << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::ECG << AwChannel::EMG << AwChannel::Reference << AwChannel::Trigger << AwChannel::Other
-		<< AwChannel::ICA << AwChannel::Source << AwChannel::GRAD;
-
-
-	index = stringTypes.indexOf(s.toUpper());
-
-	if (index == -1)
-		return index;
-	
-	return type.at(index);
+	auto index = ChannelTypes.indexOf(s.toUpper());
+	return index;
 }
 
 QStringList AwChannel::types()
 {
-	QStringList types;
-	types << "EEG" << "SEEG" << "MEG" << "EMG" << "ECG" << "Reference" << "Trigger" << "Other" << "ICA" << "SOURCE" << "GRAD";
-	return types;
+	QStringList stringTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
+	return stringTypes;
+}
+
+
+QString AwChannel::unitForType(int type)
+{
+	return UnitTypes.value(type);
+}
+
+float AwChannel::defaultAmplitudeForType(int type)
+{
+	return DefaultAmplitudeValues.value(type);
 }
 ///
 ///
 ///
 QString AwChannel::typeToString(int t)
 {
-	QList<int> types;
-	QStringList stringTypes = AwChannel::types();
-	int index;
-	for (auto s : stringTypes)
-		types << AwChannel::stringToType(s);
-	index = types.indexOf(t);
-	if (index == -1)
+	if (t >= AW_CHANNEL_TYPES)
 		return QString();
-
-	return stringTypes.at(index);
+	return ChannelTypes.at(t);
 }
 
 
@@ -480,14 +477,23 @@ QList<AwChannel *> AwChannel::getChannelsOfType(const QList<AwChannel *>& list, 
 	return res;
 }
 
-QList<AwChannel *> AwChannel::getChannelWithLabels(const QList<AwChannel *>& list, const QStringList& labels)
+QList<AwChannel *> AwChannel::getChannelsWithLabels(const QList<AwChannel *>& list, const QStringList& labels)
 {
-	AwChannelList res;
+	AwChannelList res, tmp;
 	foreach(AwChannel *c, list) {
 		if (labels.contains(c->name()))
-			res << c;
+			tmp << c;
 	}
-	return res;
+	// reorder list to match the order of labels in labels
+	for (auto l : labels) {
+		foreach(AwChannel *c, tmp) {
+			if (c->name() == l) {
+				res << c;
+				tmp.removeAll(c);
+			}
+		}
+	}
+ 	return res;
 }
 
 //

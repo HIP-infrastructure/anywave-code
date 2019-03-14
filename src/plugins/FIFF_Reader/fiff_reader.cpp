@@ -157,39 +157,25 @@ AwChannelList FIFF_Reader::readChInfos()
 		case FIFFV_MEG_CH:
 			if (ci->unit == FIFF_UNIT_T_M) { // this is a gradiometer 
 				c.setType(AwChannel::GRAD);
-				c.setGain(100);
-				c.setUnit(QString::fromLatin1("pT/m"));
 			}
 			else {
 				c.setType(AwChannel::MEG);
-				c.setGain(10);
-				c.setUnit(QString::fromLatin1("pT"));
 			}
 			break;
 			case FIFFV_ECG_CH:
 				c.setType(AwChannel::ECG);
-				c.setGain(150);
-				c.setUnit(QString::fromLatin1("µv"));
 				break;
 			case FIFFV_EMG_CH:
 				c.setType(AwChannel::EMG);
-				c.setGain(150);
-				c.setUnit(QString::fromLatin1("µv"));
 				break;
 			case FIFFV_STIM_CH:
 				c.setType(AwChannel::Trigger);
-				c.setGain(10);
-				c.setUnit(QString::fromLatin1("unit"));
 				break;
 			case FIFFV_EEG_CH:
 				c.setType(AwChannel::EEG);
-				c.setGain(50);
-				c.setUnit(QString::fromLatin1("µV"));
 				break;
 			default:
 				c.setType(AwChannel::Other);
-				c.setGain(1);
-				c.setUnit(QString::fromLatin1("unit"));
 		}
 		c.setName(QString(ci->ch_name).trimmed().remove(' '));
 		c.setSamplingRate(m_sampleRate);

@@ -39,6 +39,7 @@
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
 #include "ICA/AwICAChannel.h"
+#include "AwECoGDialog.h"
 #include <algorithm>
 using namespace std;
 
@@ -158,6 +159,7 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	connect(m_ui.tvDisplay, SIGNAL(customContextMenuRequested(const QPoint& )), this, SLOT(contextMenuMontageRequested(const QPoint&)));
 	connect(m_ui.tvChannelsAsRecorded, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuAsRecordedRequested(const QPoint&)));
 	connect(m_ui.buttonEEGSEEG, SIGNAL(clicked()), this, SLOT(computeSEEGMontageFromEEGChannels()));
+	connect(m_ui.buttonECOG, &QPushButton::clicked, this, &AwMontageDial::makeECOGBipolar);
 }
 
 AwMontageDial::~AwMontageDial()
@@ -390,6 +392,18 @@ void AwMontageDial::computeSEEGMontageFromEEGChannels()
 	makeSEEGBipolar();
 }
 
+
+void AwMontageDial::makeECOGBipolar()
+{
+	auto montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
+	auto channels = AwChannel::getChannelsOfType(montage, AwChannel::ECoG);
+	if (channels.isEmpty()) {
+		AwMessageBox::information(this, tr("ECoG Bipolar"), tr("Could not make a bipolar montage (no ECoG channels in the current montage)"));
+		return;
+	}
+	AwECoGDialog dlg(channels);
+	dlg.exec();
+}
 
 void AwMontageDial::makeSEEGBipolar()
 {
@@ -629,45 +643,11 @@ void AwMontageDial::createContextMenuAndActions()
 	m_menuAsRecorded = new QMenu(m_ui.tvChannelsAsRecorded);
 	QMenu *menuChangeType = m_menuAsRecorded->addMenu(tr("Change type"));
 
-	QAction *actChangeEEG = new QAction(AwChannel::typeToString(AwChannel::EEG), menuChangeType);
-	actChangeEEG->setData(AwChannel::EEG);
-	menuChangeType->addAction(actChangeEEG);
-	connect(actChangeEEG, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
-
-	QAction *actChangeSEEG = new QAction(AwChannel::typeToString(AwChannel::SEEG), menuChangeType);
-	actChangeSEEG->setData(AwChannel::SEEG);
-	menuChangeType->addAction(actChangeSEEG);
-	connect(actChangeSEEG, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
-
-	QAction *actChangeMEG = new QAction(AwChannel::typeToString(AwChannel::MEG), menuChangeType);
-	actChangeMEG->setData(AwChannel::MEG);
-	menuChangeType->addAction(actChangeMEG);
-	connect(actChangeMEG, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
-
-	QAction *actChangeECG = new QAction(AwChannel::typeToString(AwChannel::ECG), menuChangeType);
-	actChangeECG->setData(AwChannel::ECG);
-	menuChangeType->addAction(actChangeECG);
-	connect(actChangeECG, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
-
-	QAction *actChangeEMG = new QAction(AwChannel::typeToString(AwChannel::EMG), menuChangeType);
-	actChangeEMG->setData(AwChannel::EMG);
-	menuChangeType->addAction(actChangeEMG);
-	connect(actChangeEMG, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
-
-	QAction *actChangeReference = new QAction(AwChannel::typeToString(AwChannel::Reference), menuChangeType);
-	actChangeReference->setData(AwChannel::Reference);
-	menuChangeType->addAction(actChangeReference);
-	connect(actChangeReference, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
-
-	QAction *actChangeTrigger = new QAction(AwChannel::typeToString(AwChannel::Trigger), menuChangeType);
-	actChangeTrigger->setData(AwChannel::Trigger);
-	menuChangeType->addAction(actChangeTrigger);
-	connect(actChangeTrigger, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
-
-	QAction *actChangeOther = new QAction(AwChannel::typeToString(AwChannel::Other), menuChangeType);
-	actChangeOther->setData(AwChannel::Other);
-	menuChangeType->addAction(actChangeOther);
-	connect(actChangeOther, SIGNAL(triggered()), this, SLOT(changeAsRecordedType()));
+	for (auto type = 0; type < AW_CHANNEL_TYPES; type++) {
+		auto action = menuChangeType->addAction(AwChannel::typeToString(type));
+		action->setData(type);
+		connect(action, &QAction::triggered, this, &AwMontageDial::changeAsRecordedType);
+	}
 	
 	QAction *actMarkAsBad = new QAction(tr("Mark as bad"), m_ui.tvChannelsAsRecorded);
 	m_menuAsRecorded->addAction(actMarkAsBad);

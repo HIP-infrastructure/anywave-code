@@ -111,9 +111,9 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 	if (usingLabels && usingTypes) {
 		if (!usingFile) 
 			// get labels from current montage.
-			requestedChannels = AwChannel::getChannelWithLabels(AwMontageManager::instance()->channels(), labels);
+			requestedChannels = AwChannel::getChannelsWithLabels(AwMontageManager::instance()->channels(), labels);
 		else 
-			requestedChannels = AwChannel::getChannelWithLabels(reader->infos.channels(), labels);
+			requestedChannels = AwChannel::getChannelsWithLabels(reader->infos.channels(), labels);
 		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
 			emit log(QString("Error in aw_getdata: could not find channels with requested labels."));
 			error = true;
@@ -132,9 +132,9 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 	else if (usingLabels && !usingTypes) {
 		if (!usingFile)
 			// get labels from current montage.
-			requestedChannels = AwChannel::getChannelWithLabels(AwMontageManager::instance()->channels(), labels);
+			requestedChannels = AwChannel::getChannelsWithLabels(AwMontageManager::instance()->channels(), labels);
 		else
-			requestedChannels = AwChannel::getChannelWithLabels(reader->infos.channels(), labels);
+			requestedChannels = AwChannel::getChannelsWithLabels(reader->infos.channels(), labels);
 		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
 			emit log(QString("Error in aw_getdata: could not find channels with requested labels."));
 			error = true;

@@ -88,6 +88,9 @@ SET(AnyWave_SRCS
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
     ./Montage/AwMontageTableView.cpp  
+	./Montage/AwECoGDialog.cpp 
+    ./Montage/AwECoGGrid.cpp 
+    ./Montage/AwECoGTableModel.cpp 
     ./Plugin/AwPluginDial.cpp  
     ./Plugin/AwPluginManager.cpp  
     ./Process/AwConverter.cpp  
@@ -218,6 +221,8 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Montage/AwMontageManager.h  
     ./Montage/AwMontageDial.h  
     ./Montage/AwChannelListModel.h  
+	./Montage/AwECoGDialog.h 
+    ./Montage/AwECoGTableModel.h 
     ./Plugin/AwPluginManager.h  
     ./Plugin/AwPluginDial.h  
     ./Process/AwExporterTypes.h  
@@ -322,6 +327,7 @@ SET(FORMS ./AnyWave.ui
     ./Marker/AwPickChannelsDial.ui  
     ./Marker/AwMarkersExportWidget.ui  
     ./Montage/AwMontageDial.ui  
+	./Montage/AwECoGDialog.ui
     ./Plugin/AwPluginDial.ui  
     ./Process/AwProcessesWidget.ui  
     ./Process/AwProcessFromMarkersDial.ui  

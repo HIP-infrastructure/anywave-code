@@ -52,48 +52,15 @@ AwAmplitudeButton::AwAmplitudeButton(QWidget *parent)
 		m_groups[i] = NULL;
 
 	m_menu = new QMenu(this);
-	QAction *act;
-
 	m_am = AwAmplitudeManager::instance();
 	
 	connect(m_am, SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
-	// MEG
-	QMenu *meg_menu = new QMenu("MEG", m_menu);
-	createActionGroup(meg_menu, AwChannel::MEG);
-	// Reference
-	QMenu *ref_menu = new QMenu("Reference", m_menu);
-	createActionGroup(ref_menu, AwChannel::Reference);
-	// EEG
-	QMenu *eeg_menu = new QMenu("EEG", m_menu);
-	createActionGroup(eeg_menu, AwChannel::EEG);
-	// SEEG
-	QMenu *seeg_menu = new QMenu("SEEG", m_menu);
-	createActionGroup(seeg_menu, AwChannel::SEEG);
-	// EMG
-	QMenu *emg_menu = new QMenu("EMG", m_menu);
-	createActionGroup(emg_menu, AwChannel::EMG);
-	// ICA
-	QMenu *ica_menu = new QMenu("ICA", m_menu);
-	createActionGroup(ica_menu, AwChannel::ICA);
-	// Source
-	QMenu *source_menu = new QMenu("Source", m_menu);
-	createActionGroup(source_menu, AwChannel::Source);
-	// Trigger
-	QMenu *trigger_menu = new QMenu("Trigger", m_menu);
-	createActionGroup(trigger_menu, AwChannel::Trigger);
-	// Other
-	QMenu *other_menu = new QMenu("Other", m_menu);
-	createActionGroup(other_menu, AwChannel::Other);
 
-	m_menu->addMenu(meg_menu);
-	m_menu->addMenu(ref_menu);
-	m_menu->addMenu(eeg_menu);
-	m_menu->addMenu(seeg_menu);
-	m_menu->addMenu(emg_menu);
-	m_menu->addMenu(trigger_menu);
-	m_menu->addMenu(other_menu);
-	m_menu->addMenu(ica_menu);
-	m_menu->addMenu(source_menu);
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		auto menu = new QMenu(AwChannel::types().value(i), m_menu);
+		createActionGroup(menu, i);
+		m_menu->addMenu(menu);
+	}
 	this->setMenu(m_menu);
 }
 

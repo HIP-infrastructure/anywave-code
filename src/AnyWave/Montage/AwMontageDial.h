@@ -91,6 +91,8 @@ private slots:
 	
 	/** Browse the current montage for SEEG channels and make them bipolar **/
 	void makeSEEGBipolar();
+	/** Create a grid or a strip for ECOG channels **/
+	void makeECOGBipolar();
 
 	/** Set AVG references on compatible channels **/
 	void setAVGRefMontage();

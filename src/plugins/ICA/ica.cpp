@@ -270,10 +270,12 @@ void ICA::run()
 	AwFilterSettings filterSettings(pdi.input.filterSettings);
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	filterSettings.apply(m_channels);
+	sendMessage("Loading data...");
 	if (skipData)
 		requestData(&m_channels, &selectedMarkers, true);
 	else
 		requestData(&m_channels, 0.0f, -1.0f, true);
+	sendMessage("Done.");
 
 	qDeleteAll(selectedMarkers);
 

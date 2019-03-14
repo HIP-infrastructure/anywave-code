@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,13 +20,14 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <AwMarker.h>
 #include <QStringList>
 #include <QFile>
 #include <QTextStream>
+#include <AwCore.h>
 
 //
 // AwMarker
@@ -187,64 +188,108 @@ AwMarkerList& AwMarker::rename(AwMarkerList& markers, const QString& label)
 	return markers;
 }
 
+
+AwMarkerList AwMarker::merge(AwMarkerList& markers)
+{
+	if (markers.isEmpty())
+		return AwMarkerList();
+	auto copiedList = AwMarker::duplicate(AwMarker::sort(markers));
+	AwMarkerList res, toDelete;
+
+	// do not process single markers
+	foreach(AwMarker *m, copiedList) {
+		if (m->duration() <= 0.) {
+			res << m;
+			copiedList.removeAll(m);
+		}
+	}
+	while (!copiedList.isEmpty()) {
+		auto first = copiedList.takeFirst();
+		auto itsc = AwMarker::intersect(copiedList, first->start(), first->end());
+		auto intersections = AwMarker::sort(itsc);
+		if (intersections.isEmpty()) {
+			res << first;
+		}
+		else {
+			float start = first->start();
+			float end = first->end();
+			for (auto i : intersections) {
+				// merge intersected markers into first and re put it in the list.
+				if (i->start() < start)
+					start = i->start();
+				if (i->end() > end)
+					end = i->end();
+				copiedList.removeAll(i);
+				toDelete << i;
+			}
+			first->reshape(start, end);
+			res << first;
+			if (!copiedList.isEmpty())
+				copiedList.insert(0, first);
+		}
+	}
+	AW_DESTROY_LIST(toDelete);
+	return res;
+ }
+
 ///
 /// merge()
 /// Check if selection markers overlap. If so, merge them.
 /// Note : single marker are not processed.
 /// The return list contains duplicated markers.
-AwMarkerList AwMarker::merge(AwMarkerList& markers)
-{
-	if (markers.isEmpty()) 
-		return AwMarkerList();
-
-	AwMarkerList sorted = AwMarker::sort(markers);
-	AwMarkerList res;
-
-	// do not process single markers => copy them
-	for (int i = 0; i < sorted.size(); i++) {
-		AwMarker *m = sorted.at(i);
-		if (m->duration() == 0.) {
-			res << new AwMarker(m);
-			sorted.removeAll(m);
-			i--;
-		}
-	}
-
-	if (sorted.isEmpty())
-		return res;
-
-	if (sorted.size() == 1) {
-		res << new AwMarker(sorted.first());
-		return res;
-	}
-
-	// At least two selection markers remaining.
-	do {
-		AwMarker *first = sorted.first();
-		AwMarker *m = sorted.at(1);
-		bool startAfter = m->start() > first->end();
-		bool startInsideEndAfter = m->start() <= first->end() && m->end() > first->end();
-		bool isWithin = m->start() >= first->start() && m->end() <= first->end();
-		if (startAfter) { // just copy the previous marker to the result list.
-			res << new AwMarker(first);
-			sorted.removeAll(first);
-		}
-		else if (startInsideEndAfter) { // merge the two markers.
-			float end = m->end();
-			m->setStart(first->start());
-			m->setEnd(end);
-			sorted.removeAll(first);
-		}
-		else if (isWithin) {
-			sorted.removeAll(m);
-		}
-	} while (sorted.size() > 1);
-
-	for (auto m : sorted)
-		res << new AwMarker(m);
-
-	return res;
-}
+//AwMarkerList AwMarker::merge(AwMarkerList& markers)
+//{
+//	if (markers.isEmpty()) 
+//		return AwMarkerList();
+//
+//	AwMarkerList sorted = AwMarker::sort(markers);
+//	AwMarkerList res;
+//
+//	// do not process single markers => copy them
+//	for (int i = 0; i < sorted.size(); i++) {
+//		AwMarker *m = sorted.at(i);
+//		if (m->duration() == 0.) {
+//			res << new AwMarker(m);
+//			sorted.removeAll(m);
+//			i--;
+//		}
+//	}
+//
+//	if (sorted.isEmpty())
+//		return res;
+//
+//	if (sorted.size() == 1) {
+//		res << new AwMarker(sorted.first());
+//		return res;
+//	}
+//
+//	// At least two selection markers remaining.
+//	do {
+//		AwMarker *first = sorted.first();
+//		AwMarker *m = sorted.at(1);
+//		bool startAfter = m->start() > first->end();
+//		bool startInsideEndAfter = m->start() <= first->end() && m->end() > first->end();
+//		bool isWithin = m->start() >= first->start() && m->end() <= first->end();
+//		if (startAfter) { // just copy the previous marker to the result list.
+//			res << new AwMarker(first);
+//			sorted.removeAll(first);
+//		}
+//		else if (startInsideEndAfter) { // merge the two markers.
+//			float end = m->end();
+//			m->setStart(first->start());
+//			m->setEnd(end);
+//			sorted.removeAll(first);
+//		}
+//		else if (isWithin) {
+//			sorted.removeAll(m);
+//		}
+//	} while (sorted.size() > 1);
+//
+//	for (auto m : sorted)
+//		res << new AwMarker(m);
+//
+//	return res;
+//}
 
 ///
 /// intersect()
@@ -271,61 +316,127 @@ AwMarkerList AwMarker::intersect(const AwMarkerList& markers, float start, float
 	return res;
 }
 
-
-AwMarkerList AwMarker::applyANDOperation(AwMarkerList& source, AwMarkerList& dest)
+AwMarkerList AwMarker::applyXOROperation(AwMarkerList& source, AwMarkerList& cutList)
 {
-	AwMarkerList res;
-	if (source.isEmpty() && dest.isEmpty())
+	// We assume markers are sorted before processing
+	AwMarkerList res, toDelete;
+	if (source.isEmpty() && cutList.isEmpty())
 		return res;
-	if (source.isEmpty() && !dest.isEmpty())
-		return AwMarker::duplicate(dest);
-	if (!source.isEmpty() && dest.isEmpty())
+	if (source.isEmpty() && !cutList.isEmpty())
+		return AwMarker::duplicate(cutList);
+	if (!source.isEmpty() && cutList.isEmpty())
 		return AwMarker::duplicate(source);
 
-	auto sources = AwMarker::merge(AwMarker::sort(source));
-	auto destinations = AwMarker::merge(AwMarker::sort(dest));
+	auto sources = AwMarker::merge(source);
+	auto cuts = AwMarker::merge(cutList);
 
-	for (auto m : sources) {
-		auto intersection = AwMarker::intersect(destinations, m->start(), m->end());
-		if (intersection.isEmpty())
-			continue;
-		for (auto i : intersection) {
-			bool startBeforeEndAfter = i->start() < m->start() && i->end() > m->end();
-			bool startBeforeEndWithin = i->start() < m->start() && i->end() <= m->end();
-			bool startWithinEndAfter = i->start() >= m->start() && i->end() > m->end();
-			bool isWithin = i->start() >= m->start() && i->end() <= m->end();
+	for (auto cutM : cuts) {
+		foreach(AwMarker *m, sources) {
+			bool startBeforeEndAfter = m->start() < cutM->start() && m->end() > cutM->end();
+			bool startBeforeEndWithin = m->start() < cutM->start() && m->end() <= cutM->end();
+			bool startWithinEndAfter = m->start() >= cutM->start() && m->end() > cutM->end();
+			bool isWithin = m->start() >= cutM->start() && m->end() <= cutM->end();
+			bool isBefore = m->end() < cutM->start();
+			bool isAfter = m->start() > cutM->end();
 
-			if (startBeforeEndAfter) {
-				auto nm = new AwMarker(i);
-				nm->reshape(m->start(), m->end());
-				res << nm;
+			if (isBefore) {
+				res << new AwMarker(m);
+				sources.removeAll(m);
+				toDelete << m;
 			}
-			if (startBeforeEndWithin) {
-				auto nm = new AwMarker(i);
-				nm->reshape(m->start(), i->end());
-				res << nm;
+			else if (isAfter) {
+				break;
 			}
-			if (startWithinEndAfter) {
-				auto nm = new AwMarker(i);
-				nm->reshape(i->start(), m->end());
+			else if (startBeforeEndAfter) {
+				// split in two parts
+				auto nm = new AwMarker(m);
+				nm->reshape(m->start(), cutM->start());
 				res << nm;
+				// split the current marker to be the second part and let it in the list
+				m->reshape(cutM->end(), m->end());
 			}
-			if (isWithin)
-				res << new AwMarker(i);
+			else if (startBeforeEndWithin) {
+				m->reshape(m->start(), cutM->start());
+				res << new AwMarker(m);
+				sources.removeAll(m);
+				toDelete << m;
+			}
+			else if (startWithinEndAfter) {
+				m->reshape(cutM->end(), m->end());
+			}
+			else if (isWithin) {
+				sources.removeAll(m);
+				toDelete << m;
+			}
 		}
 	}
-	while (!sources.isEmpty())
-		delete sources.takeFirst();
-	while (!destinations.isEmpty())
-		delete destinations.takeFirst();
+	// duplicates the rest of copiedList
+	for (auto m : sources) {
+		res << new AwMarker(m);
+	}
+
+	AW_DESTROY_LIST(sources);
+	AW_DESTROY_LIST(toDelete);
+	AW_DESTROY_LIST(cuts);
 	return res;
 }
 
+/** Reshape markers to keep only markers that are contained in the data markers by source markers. **/
+/** Do an AND operation on overlapping markers **/
+AwMarkerList AwMarker::applyANDOperation(AwMarkerList& sources, AwMarkerList& markers)
+{
+	if (markers.isEmpty())
+		return AwMarker::duplicate(sources);
+	if (sources.isEmpty())
+		return sources;
+
+	// We assume markers are sorted before processing
+	AwMarkerList res, toDelete;
+
+	auto op1 = AwMarker::merge(sources);
+	auto op2 = AwMarker::duplicate(markers);
+
+	for (auto m : op1) {
+		auto intersections = AwMarker::intersect(op2, m->start(), m->end());
+		for (auto iM : intersections) {
+			bool startBeforeEndAfter = iM->start() < m->start() && iM->end() > m->end();
+			bool startBeforeEndWithin = iM->start() < m->start() && iM->end() <= m->end();
+			bool startWithinEndAfter = iM->start() >= m->start() && iM->end() > m->end();
+			bool isWithin = iM->start() >= m->start() && iM->end() <= m->end();
+			if (startBeforeEndAfter) {
+				auto nm = new AwMarker(iM);
+				nm->reshape(m->start(), m->end());
+				res << nm;
+			}
+			else if (startBeforeEndWithin) {
+				auto nm = new AwMarker(iM);
+				nm->reshape(m->start(), iM->end());
+				res << nm;
+			}
+			else if (startWithinEndAfter) {
+				auto nm = new AwMarker(iM);
+				nm->reshape(iM->start(), m->end());
+				res << nm;
+			}
+			else if (isWithin) {
+				res << new AwMarker(iM);
+			}
+		}
+	}
+	AW_DESTROY_LIST(op1)
+	AW_DESTROY_LIST(op2)
+	return res;
+}
+
+/** Cut data marked by cutMarkers. Reshape markers and return a new list with markers after the cut. **/
 AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cutMarkers)
 {
+	// We assume markers are sorted before processing
 	if (cutMarkers.isEmpty() || markers.isEmpty())
-		return markers;
-	AwMarkerList copiedList = AwMarker::sort(markers);
+		return AwMarkerList();
+
+	auto copiedList = AwMarker::duplicate(markers);
+	auto cutList = AwMarker::merge(cutMarkers);
 
 	// remove markers that may be present on both list from the source list
 	QStringList labels = AwMarker::getAllLabels(cutMarkers);
@@ -335,73 +446,126 @@ AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cut
 			copiedList.removeAll(m);
 	}
 
-	AwMarkerList res, toRemove;
-	for (auto sk : AwMarker::merge(cutMarkers)) {
-		for (int i = 0; i < copiedList.size(); i++) {
-			AwMarker *m = copiedList.at(i);
-			// copy markers that ends before the first cut and remove it from copied list.
-			if (m->end() < sk->start()) {
-				copiedList.removeAll(m);
+	AwMarkerList res, toDelete;
+	float shiftedTimePos = 0.;
+	
+	for (auto cutM : cutList) {
+		foreach(AwMarker *m, copiedList) {
+			bool startBeforeEndAfter = m->start() < cutM->start() && m->end() > cutM->end();
+			bool startBeforeEndWithin = m->start() < cutM->start() && m->end() <= cutM->end();
+			bool startWithinEndAfter = m->start() >= cutM->start() && m->end() > cutM->end();
+			bool isWithin = m->start() >= cutM->start() && m->end() <= cutM->end();
+			bool isBefore = m->end() < cutM->start();
+			bool isAfter = m->start() > cutM->end();
+
+			// markers before are copied to res and removed from the list
+			if (isBefore) {
 				res << new AwMarker(m);
-				i--;
-				continue;
+				copiedList.removeAll(m); // remove then from the current list.
+				toDelete << m;
 			}
-			if (m->start() > sk->end())  // skip markers that are after the current cut.
-				break;
-
-			// 
-			bool startBeforeEndWithin = m->start() < sk->start() && m->end() <= sk->end();
-			bool startBeforeEndAfter = m->start() < sk->start() && m->end() > sk->end();
-			bool startWhitinEndAfter = m->start() >= sk->start() && m->end() > sk->end();
-			bool isWithin = m->start() >= sk->start() && m->end() <= sk->end();
-
-			if (isWithin) {
-				copiedList.removeAll(m);
-				i--;
-				continue;
+			// markers after are time shifted by the cutm duration
+			else if (isAfter) {
+				float start = m->start() - cutM->duration();
+				if (start < 0.)
+					start = 0.;
+				m->setStart(start);
 			}
-			if (startBeforeEndWithin) {
-				AwMarker *nm = new AwMarker(m);
-				nm->setEnd(sk->start());
-				res << nm;
-				copiedList.removeAll(m);
-				i--;
-				continue;
+			else if (startBeforeEndAfter) { // cut the part inside Im and reshape it
+				m->reshape(m->start(), m->end() - cutM->duration());
+				//copiedList.removeAll(iM); // remove it from the current list.
 			}
-
-			if (startWhitinEndAfter) {
-				AwMarker *nm = new AwMarker(m);
-				nm->setStart(sk->end());
-				nm->setEnd(m->end());
-				res << nm;
-				copiedList.removeAll(m);
-				i--;
-				continue;
+			else if (startBeforeEndWithin) {
+				m->reshape(m->start(), cutM->start());
 			}
-
-			if (startBeforeEndAfter) {
-				AwMarker *nm1 = new AwMarker(m);
-				nm1->setEnd(sk->start());
-				res << nm1;
-				AwMarker *nm2 = new AwMarker(m);
-				nm2->setStart(sk->end());
-				nm2->setEnd(m->end());
-				res << nm2;
-				copiedList.removeAll(m);
-				i--;
-				continue;
+			else if (startWithinEndAfter) {
+				auto offset = cutM->end() - m->start();
+				m->reshape(cutM->start(), cutM->start() + offset);
+			}
+			else if (isWithin) { // remove the marker
+				copiedList.removeAll(m); // remove then from the current list.
+				toDelete << m;
 			}
 		}
 	}
 
 	// duplicates the rest of copiedList
-	for (auto m : copiedList)
+	for (auto m : copiedList) {
 		res << new AwMarker(m);
+	}
+
+	AW_DESTROY_LIST(copiedList);
+	AW_DESTROY_LIST(toDelete);
+	AW_DESTROY_LIST(cutList);
 
 	return res;
 }
 
 
+
+AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList& skipLabels, const QStringList& useLabels, float totalDuration)
+{
+	bool skip = !skipLabels.isEmpty();
+	bool use = !useLabels.isEmpty();
+	AwMarkerList inputMarkers;
+
+	if (!use && !skip) { // do not modify markers and return ALL DATA as input.
+		inputMarkers << new AwMarker("All Data", 0, totalDuration);
+	}
+	else if (use && !skip) { // just use some markers as input =>  reshape markers and return used markers as input.
+		inputMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		// remove used markers from the list
+		for (auto m : inputMarkers)
+			markers.removeAll(m);
+		// revert selection using usedCut markers
+		auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
+		// reshape intersected markers using XOR
+		auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
+		// now cut all the markers.
+		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
+		AW_DESTROY_LIST(markers)
+		AW_DESTROY_LIST(reshaped)
+		AW_DESTROY_LIST(revertSelection)
+		markers = cutMarkers;
+	}
+	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
+		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		inputMarkers = AwMarker::invertMarkerSelection(skippedMarkers, "Selection", totalDuration);
+		// remove skipped markers from the list
+		for (auto m : skippedMarkers)
+			markers.removeAll(m);
+		auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
+		// now reshape all the markers after removing skipped ones.
+		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, skippedMarkers);
+		AW_DESTROY_LIST(markers);
+		markers = cutMarkers;
+		AW_DESTROY_LIST(reshaped);
+		AW_DESTROY_LIST(skippedMarkers);
+	}
+	else if (skip && use) {
+		auto usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		// remove artefact markers from the marker list
+		for (auto m : skippedMarkers)
+			markers.removeAll(m);
+		// first => cut used markers with skipmarkers using XOR 
+		auto usedCut = AwMarker::applyXOROperation(usedMarkers, skippedMarkers);
+		// revert selection using usedCut markers
+		auto revertSelection = AwMarker::invertMarkerSelection(usedCut, "Selection", totalDuration);
+		// reshape intersected markers using XOR
+		auto reshaped = AwMarker::applyANDOperation(usedCut, markers);
+		// now cut all the markers.
+		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
+		AW_DESTROY_LIST(markers);
+		markers = cutMarkers;
+		inputMarkers = usedCut;
+		AW_DESTROY_LIST(revertSelection)
+		AW_DESTROY_LIST(skippedMarkers)
+		AW_DESTROY_LIST(reshaped)
+	}
+
+	return inputMarkers;
+}
 
 ///
 /// applySelectionFilter

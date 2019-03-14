@@ -312,7 +312,6 @@ void AwProcessManager::addProcess(AwProcessPlugin *plugin)
 		break;
 	case AwProcessPlugin::Internal:
 		m_internalProcess.append(plugin);
-	//	addProcessToMenu(plugin);
 		break;
 	}
 }
@@ -454,7 +453,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 for (int i = 0; i < size; i++) {
 			list << sources.at(i);
 	 }
-	 p->pdi.input.setNewChannels(p->pdi.input.channels() + AwChannel::duplicateChannels(list));
+
+	 p->pdi.input.addChannels(AwChannel::duplicateChannels(list));
 	 // make sure current filters are set for the channels.
 	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
 	 return true;
@@ -727,17 +727,25 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	if (!skipDataFile) {
 		// UPDATE 18/11/2014
 		if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections) {
-			if (process->pdi.input.markers().isEmpty()) {
-				int res = AwMessageBox::question(NULL, tr("Process Input"),
-					tr("This process is designed to get time selections as input but none are set.\nThe process will be launched on the whole data."),
-					QMessageBox::Ok | QMessageBox::Abort);
-				if (res == QMessageBox::Abort) {
-					process->plugin()->deleteInstance(process);
-					return;
+			if (process->pdi.input.markers().isEmpty()) { // if empty at this stage => the user launches the plugin with no time selections.
+				// so, feed input with markers which have duration from MarkersManager
+				auto markers = AwMarkerManager::instance()->getMarkers();
+				for (auto m : markers) {
+					if (m->duration() > 0.)
+						process->pdi.input.addMarker(new AwMarker(m));
 				}
-				else {
-					// create a marker as input which covers whole data
-					process->pdi.input.addMarker(new AwMarker("whole data", 0., m_currentReader->infos.totalDuration()));
+				if (process->pdi.input.markers().isEmpty()) {
+					int res = AwMessageBox::question(NULL, tr("Process Input"),
+						tr("This process is designed to get time selections as input but none are set.\nThe process will be launched on the whole data."),
+						QMessageBox::Ok | QMessageBox::Abort);
+					if (res == QMessageBox::Abort) {
+						process->plugin()->deleteInstance(process);
+						return;
+					}
+					else {
+						// create a marker as input which covers whole data
+						process->pdi.input.addMarker(new AwMarker("whole data", 0., m_currentReader->infos.totalDuration()));
+					}
 				}
 			}
 		}

@@ -23,14 +23,9 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#ifndef AW_DATA_OBJECTS_H
-#define AW_DATA_OBJECTS_H
-
-#include <AwChannel.h>
-#include <AwMarker.h>
-#include <AwFilteringOptions.h>
-#include <AwSensor.h>
-#include <AwSensorLayout.h>
+#pragma once
 
 
-#endif  // End of AwDataObjects
+#define AW_DESTROY_LIST(L) while(!(L).isEmpty()) delete (L).takeFirst();
+
+

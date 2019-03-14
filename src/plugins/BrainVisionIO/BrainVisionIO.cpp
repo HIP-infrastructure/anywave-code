@@ -567,9 +567,9 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 
 	QTextStream stream(&hdr);
 
-	QString binPath = fullPath.replace(QString(".vhdr"), QString(".dat"));
-	m_markerPath = fullPath.replace(QString(".dat"), QString(".vmrk"));
-	m_binFileName = fileName.replace(QString(".vhdr"), QString(".dat"));
+	QString binPath = fullPath.replace(QString(".vhdr"), QString(".eeg"));
+	m_markerPath = fullPath.replace(QString(".eeg"), QString(".vmrk"));
+	m_binFileName = fileName.replace(QString(".vhdr"), QString(".eeg"));
 	fileName = info.fileName();
 	m_markerFileName = fileName.replace(QString(".vhdr"), QString(".vmrk"));
 

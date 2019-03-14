@@ -376,6 +376,12 @@
     <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp">
       <Filter>SEEGViewer</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSelectInputDataWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="AwSelectInputDataWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AwAmplitudeWidget.ui">
@@ -528,6 +534,12 @@
     <CustomBuild Include="..\..\include\widget\AwVTKWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="AwSelectInputDataWidget.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwSelectInputDataWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwAmplitudeWidget.h">
@@ -583,6 +595,9 @@
     </ClInclude>
     <ClInclude Include="SEEGViewer\AwSEEGInteractor.h">
       <Filter>SEEGViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwSelectInputDataWidget.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

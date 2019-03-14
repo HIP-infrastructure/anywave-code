@@ -264,8 +264,6 @@ void EGIReader::initDataSet()
 				chan.setName(QString("%1%2").arg(label).arg(number));
 				chan.setSamplingRate(m_samplingRate);
 				chan.setXYZ(x, y, z);
-				chan.setType(AwChannel::EEG);
-				chan.setUnit(QString::fromLatin1("µV"));
 				infos.addChannel(&chan);
 			}
 		}

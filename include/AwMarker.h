@@ -80,16 +80,20 @@ public:
 	static QList<AwMarker *> duplicate(const QList<AwMarker *>& markers);
 	/** Sort markers, chronologically. Don't duplicate.**/
 	static QList<AwMarker *>& sort(QList<AwMarker *>& markers);
-	/** Shift all markers like if the data where cut around cut markers. Duplicates markers. **/
+	/** Cut all markers using markers in cutMarkers. Returns the list of reshaped markers without the cut markers. **/
 	static QList<AwMarker *> cutAroundMarkers(QList<AwMarker *>& markers, QList<AwMarker *>& cutMarkers);
-	/** Apply logical AND between markers. Returns duplicated makers. **/
+	/** AND operator : keep markers on m2 which overlaps markers on m1. reshape them to match the intersection of m1. **/
 	static QList<AwMarker *> applyANDOperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
+	/** XOR operator : slice markers on m1 which are intersected by markers on m2. **/
+	static QList<AwMarker *> applyXOROperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
 	/** Merge markers whichs overlaps. Return the resulting merged markers **/
 	static QList<AwMarker *> merge(QList<AwMarker *>& markers);
 	/** Get markers from a list which intersect a time selection **/
 	static QList<AwMarker *> intersect(const QList<AwMarker *>& markers, float start, float end);
 	/** Create an inverter marker list that skip the markers set as input **/
 	static QList<AwMarker *> invertMarkerSelection(const QList<AwMarker *>& markers, const QString& label, float end);
+	/** Get input markers after use/skip options is applied. The original list is modified accordingly. **/
+	static QList<AwMarker *> getInputMarkers(QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Filters markers: markers can either be specified to be removed or used. **/
 	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Returns the marker's label. **/

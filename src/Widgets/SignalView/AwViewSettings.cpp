@@ -32,7 +32,7 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	showZeroLine = false;
 	stackChannels = false;
 	maxChannels = 40;
-	filters << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::GRAD;
+	filters << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::GRAD << AwChannel::ECoG;
 	secsPerCm = 0.5;
 	markerBarMode = AwViewSettings::ShowMarkerBar;
 }
