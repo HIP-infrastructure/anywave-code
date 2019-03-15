@@ -8,7 +8,7 @@ class AwECoGGrid
 {
 public:
 	AwECoGGrid(int rows, int cols, const QStringList& labels);
-	enum Orientation { Horizontal, Vertical };
+	enum Orientation { Horizontal, Vertical, Both };
 
 	inline int rows() { return m_rows;  }
 	inline int cols() { return m_cols; }

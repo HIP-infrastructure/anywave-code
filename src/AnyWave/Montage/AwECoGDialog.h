@@ -11,6 +11,8 @@ class AwECoGDialog : public QDialog
 public:
 	AwECoGDialog(const AwChannelList& channels, QWidget *parent = Q_NULLPTR);
 	~AwECoGDialog();
+
+	AwChannelList& channels() { return m_channels; }
 public slots:
 	void accept() override;
 	void addGridStrip();
@@ -20,4 +22,5 @@ protected slots:
 private:
 	Ui::AwECoGDialogUi ui;
 	AwChannelList m_channels;
+	QMap<QString, AwChannel *> m_channelsMap;
 };

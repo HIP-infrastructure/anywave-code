@@ -401,8 +401,23 @@ void AwMontageDial::makeECOGBipolar()
 		AwMessageBox::information(this, tr("ECoG Bipolar"), tr("Could not make a bipolar montage (no ECoG channels in the current montage)"));
 		return;
 	}
-	AwECoGDialog dlg(channels);
-	dlg.exec();
+	// remove channels from montage
+	// keep a copy of original montage
+	AwChannelList copy = AwChannel::duplicateChannels(montage);
+	auto ecogChannels = AwChannel::getChannelsOfType(copy, AwChannel::ECoG);
+	foreach(AwChannel *c, ecogChannels) {
+		copy.removeAll(c);
+	}
+
+	AwECoGDialog dlg(ecogChannels);
+	if (dlg.exec() == QDialog::Accepted) {
+		copy = dlg.channels() + copy;
+		static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(copy);
+	}
+	else {
+		while (!copy.isEmpty())
+			delete copy.takeFirst();
+	}
 }
 
 void AwMontageDial::makeSEEGBipolar()

@@ -50,7 +50,7 @@
 
 int main(int argc, char *argv[])
 {
-#if VTK_MAJOR_VERSION > 7
+#if VTK_MAJOR_VERSION >= 7
 	// init surface map for further use in VTK 8.1
 	vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	}
 	bool res = SetDllDirectory((LPCWSTR)dllDir);
 #endif
-	
+
 	// check if arguments 
 	QStringList args = app.arguments();
 	bool isGui = args.size() <= 1;

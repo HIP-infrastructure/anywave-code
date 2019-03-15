@@ -851,5 +851,4 @@ void AwChannelListDelegateAsRecorded::commitAndCloseComboBox()
 	QComboBox *cb = qobject_cast<QComboBox *>(sender());
 	emit commitData(cb);
 	emit closeEditor(cb); 
-		
 }
