@@ -62,10 +62,10 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>$(OutDir)\$(OutDir)\aw_getplugininfod.mexw64</OutputFile>
+      <OutputFile>$(OutDir)\aw_getplugininfod.mexw64</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2015a\extern\lib\win64\microsoft;$(QTDIR)\lib;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Networkd.lib;MexCommon.lib;libmx.lib;libmat.lib;libmex.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Networkd.lib;MexCommond.lib;libmx.lib;libmat.lib;libmex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <QtMoc>

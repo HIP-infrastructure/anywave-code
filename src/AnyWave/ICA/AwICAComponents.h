@@ -38,6 +38,7 @@ public:
 	QList<AwPanelItem *> createPanelItems();
 	inline AwICAPanel *getPanelWidget() { return m_panel; }
 	inline int type() { return m_type; }
+	inline QStringList& labels() { return m_labels; }
 public slots:
 	void showPanel();
 	void setNewFilters(const AwFilterSettings& settings);

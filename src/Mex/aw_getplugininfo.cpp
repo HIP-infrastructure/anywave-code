@@ -63,40 +63,51 @@ mxArray* request_info()
     // reading response
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_4);
-    QStringList labels, refs;
+	QStringList labels, refs, rejectedComponents;
     float max_sr, total_dur;
     QString temp_dir, plugin_dir, file, ica_file;
     // prepare matlab structure for output
-    const char *fields[] = { "file", "labels", "refs", "max_sr", "total_duration", "temp_dir", "plugin_dir", "ica_file" };
-    const int nFields = 8;
+    const char *fields[] = { "file", "labels", "refs", "max_sr", "total_duration", "temp_dir", "plugin_dir", "ica_file", "rejected_ics"};
+    const int nFields = 9;
     output = mxCreateStructMatrix(1, 1, nFields, fields);
-    in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> ica_file;
+	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> ica_file >> rejectedComponents;
     
+	mxArray *dummy = NULL;
     // labels cell array
-    mxArray *f_labels = NULL;
     if (!labels.isEmpty()) {
-        f_labels = mxCreateCellMatrix(1, labels.size());
+		dummy = mxCreateCellMatrix(1, labels.size());
         for (int i = 0; i < labels.size(); i++) {
             mxArray *label = mxCreateString(labels.at(i).toLatin1().data());
-            mxSetCell(f_labels, i, label);
+            mxSetCell(dummy, i, label);
         }
     }
     else 
-        f_labels = mxCreateCellMatrix(1, 1);
-    mxSetField(output, 0, "labels", f_labels);
+		dummy = mxCreateCellMatrix(1, 1);
+    mxSetField(output, 0, "labels", dummy);
+
+	// rejected ICA components
+	if (!rejectedComponents.isEmpty()) {
+		dummy = mxCreateCellMatrix(1, rejectedComponents.size());
+		for (int i = 0; i < rejectedComponents.size(); i++) {
+			mxArray *label = mxCreateString(rejectedComponents.at(i).toLatin1().data());
+			mxSetCell(dummy, i, label);
+		}
+	}
+	else
+		dummy = mxCreateCellMatrix(1, 1);
+	mxSetField(output, 0, "rejected_ics", dummy);
     
     // refs
-    mxArray *f_refs = NULL;
     if (!refs.isEmpty()) {
-        f_refs = mxCreateCellMatrix(1, refs.size());
+		dummy = mxCreateCellMatrix(1, refs.size());
         for (int i = 0; i < refs.size(); i++) {
             mxArray *ref = mxCreateString(refs.at(i).toLatin1().data());
-            mxSetCell(f_refs, i, ref);
+            mxSetCell(dummy, i, ref);
         }
     }
     else
-        f_refs = mxCreateCellMatrix(1, 1);
-    mxSetField(output, 0, "refs", f_refs);
+		dummy = mxCreateCellMatrix(1, 1);
+    mxSetField(output, 0, "refs", dummy);
     
     // max_sr
     mxArray *f_sr = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);

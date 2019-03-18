@@ -29,11 +29,11 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	// reading response
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_4);
-    QStringList labels, refs;
+    QStringList labels, refs, rejected_ics;
     float max_sr, total_dur;
-    QString temp_dir, plugin_dir, file, icaFile;
-	QMap<int, QVector<int>> rejected;
-	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> icaFile >> rejected;
+	QString temp_dir, plugin_dir, file, icaFile;
+
+	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> icaFile >> rejected_ics;
 
 	PyObject *out = PyDict_New(); // create a new dict.
 	if (out == NULL) {
@@ -57,6 +57,16 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 			PyList_SetItem(list_labels, i, s);
 		}
 		PyDict_SetItemString(out, "labels", list_labels);
+	}
+
+	// REJECTED_ICS
+	if (!rejected_ics.isEmpty()) {
+		PyObject *list_labels = PyList_New((Py_ssize_t)rejected_ics.size());
+		for (int i = 0; i < rejected_ics.size(); i++) {
+			PyObject *s = PyString_FromString(rejected_ics.at(i).toStdString().c_str());
+			PyList_SetItem(list_labels, i, s);
+		}
+		PyDict_SetItemString(out, "rejected_ics", list_labels);
 	}
 
 	// REFS
@@ -83,22 +93,6 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	// temp dir
 	PyObject *plugin = PyString_FromString(plugin_dir.toStdString().c_str());
 	PyDict_SetItemString(out, "plugin_dir", plugin);
-
-	// create a dict for rejected components if any
-	if (!rejected.isEmpty()) {
-		PyObject *rejected_dict = PyDict_New(); // create a new dict.
-		for (auto type : rejected.keys()) {
-			auto key = AwChannel::typeToString(type).toStdString().c_str();
-			auto values = rejected[type];
-			PyObject *tuple = PyTuple_New(values.size());
-			int i = 0;
-			for (auto v : values) {
-				PyTuple_SetItem(tuple, i++, PyLong_FromLong(v));
-			}
-			PyDict_SetItem(rejected_dict, PyString_FromString(key), tuple);
-		}
-		PyDict_SetItemString(out, "rejected_ics", rejected_dict);
-	}
 
 	return out;
 }

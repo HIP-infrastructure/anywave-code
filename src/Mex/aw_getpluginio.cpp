@@ -45,15 +45,15 @@ mxArray* request_info()
     // reading response
     QDataStream in(request.socket());
     in.setVersion(QDataStream::Qt_4_4);
-    QStringList labels, refs, types; // get labels of input channels, their references (may be empty and their types.
+    QStringList labels, refs, types, rejected_ics; // get labels of input channels, their references (may be empty and their types.
     float max_sr, total_dur;
     QString temp_dir, plugin_dir, file, ica_file, data_dir;
 	int nMarkers = 0;
     // prepare matlab structure for output
-    const char *fields[] = { "file", "data_dir", "labels", "refs", "types", "max_sr", "total_duration", "temp_dir", "plugin_dir", "ica_file", "markers" };
-    const int nFields = 11;
+    const char *fields[] = { "file", "data_dir", "labels", "refs", "types", "max_sr", "total_duration", "temp_dir", "plugin_dir", "ica_file", "markers", "rejected_ics" };
+    const int nFields = 12;
     output = mxCreateStructMatrix(1, 1, nFields, fields);
-	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> ica_file >> data_dir >> types;
+	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> ica_file >> data_dir >> types >> rejected_ics;
 
 	// send also the markers set as input
 	in >> nMarkers;
@@ -108,6 +108,17 @@ mxArray* request_info()
 	else
 		tmp = mxCreateCellMatrix(1, 1);
 	mxSetField(output, 0, "labels", tmp);
+
+	// rejected_ics cell array
+	if (!rejected_ics.isEmpty()) {
+		tmp = mxCreateCellMatrix(1, rejected_ics.size());
+		for (int i = 0; i < rejected_ics.size(); i++) {
+			mxSetCell(tmp, i, mxCreateString(rejected_ics.at(i).toLatin1().data()));
+		}
+	}
+	else
+		tmp = mxCreateCellMatrix(1, 1);
+	mxSetField(output, 0, "rejected_ics", tmp);
     
     // refs
     if (!refs.isEmpty()) {

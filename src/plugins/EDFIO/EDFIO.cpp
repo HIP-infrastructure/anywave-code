@@ -326,7 +326,6 @@ qint64 EDFIO::readDataFromChannels(float start, float duration, QList<AwChannel 
 	qint64 samplesRead = 0;
 	for(auto chan : channelList) {
 		float *data;
-	//	int edf_channel = m_labelToIndex[chan->name()];
 		int edf_channel = m_labels.indexOf(chan->name());
 		if (edf_channel == -1)
 			continue;
@@ -968,8 +967,8 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 			channel.setType(AwChannel::EMG);
 		if (channel.name().startsWith("STATUS"))
 			channel.setType(AwChannel::Trigger);
-		infos.addChannel(&channel);
-		m_labels << channel.name();
+		auto chan = infos.addChannel(&channel);
+		m_labels << chan->name();
 	}
 
 	AwBlock *block = infos.newBlock();

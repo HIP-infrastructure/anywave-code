@@ -163,6 +163,14 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	chan->setName(chan->name().remove(' '));
 	auto s = chan->name();
 
+	// DO NOT PERMIT EMPTY LABEL
+	if (s.isEmpty()) 
+		s = QString("No Label");
+
+	// Replace some characters by _ ( , ;)
+	s = s.replace(QRegExp("[,;]"), QString("_"));
+	chan->setName(s);
+		
 	// only reformat plot number for EEG or SEEG
 	if (chan->isEEG() || chan->isSEEG()) {
 		QRegularExpression re("\\d+$");
@@ -195,8 +203,7 @@ int AwDataInfo::indexOfChannel(const QString& name)
 void AwDataInfo::changeChannelName(const QString& old, const QString& newName)
 {
 	int index = indexOfChannel(old);
-	if (index != -1)
-	{
+	if (index != -1) {
 		m_labelToIndex.remove(old);
 		m_channels.at(index)->setName(newName);
 		m_labelToIndex.insert(newName, index);

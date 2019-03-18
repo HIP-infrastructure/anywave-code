@@ -158,6 +158,17 @@ QMap<int, QVector<int>> AwICAManager::getAllRejectedComponents()
 	return res;
 }
 
+QStringList AwICAManager::getRejectedLabels() 
+{
+	QStringList res;
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		if (m_comps[i]) {
+			for (auto comp : getRejectedComponentsIndexes(i))
+				res << m_comps[i]->components().value(comp)->name();
+		}
+	}
+	return res;
+}
 
 AwICAComponents *AwICAManager::getComponents(int type)
 {

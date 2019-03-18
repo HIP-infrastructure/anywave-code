@@ -795,7 +795,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			connect(p, SIGNAL(aboutToBeDestroyed()), this, SLOT(removeGUIProcess()));
 			connect(p, SIGNAL(connectionClosed(AwDataClient *)), ds, SLOT(closeConnection(AwDataClient *)));
 			connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), p, SLOT(setMarkers(const AwMarkerList&)));
-			//connect(p, SIGNAL(markerAdded(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), ds, SLOT(openConnection(AwDataClient *)));
 			// copy the actual marker list to the process
 			p->setMarkers(mm->getMarkers());
