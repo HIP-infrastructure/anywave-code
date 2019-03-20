@@ -201,7 +201,7 @@ void AwSettings::closeFile()
 
 void AwSettings::createMatlabShellScript(const QString& path)
 {
-	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(m_homeDirectory);
+	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(m_settings["homeDir"].toString());
 	QFile scriptFile(scriptPath);
 	QTextStream stream(&scriptFile);
 
