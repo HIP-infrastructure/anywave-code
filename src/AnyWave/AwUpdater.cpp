@@ -29,9 +29,9 @@
 #include <QFileInfo>
 #include <QTemporaryDir>
 #include <widget/AwWaitWidget.h>
+#include <QProcess>
 #ifdef Q_OS_WIN
 #include "zip.h"
-#include <QProcess>
 #endif
 //////////////////////////////////////////////////////////////////////////////////////////
 /// Downloader
