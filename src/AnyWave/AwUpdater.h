@@ -28,6 +28,23 @@
 #include <QObject>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
+
+class AwDownloader : public QObject
+{
+	Q_OBJECT
+public:
+	AwDownloader(QObject *parent = 0);
+	void download();
+protected slots:
+	void downloadFinished(QNetworkReply *reply);
+protected:
+	void error(const QString& error);
+
+	QNetworkAccessManager m_manager;
+
+};
+
+
 class AwUpdater : public QObject
 {
 	Q_OBJECT
@@ -40,5 +57,8 @@ protected slots:
 	void handleResult(QNetworkReply *reply);
 protected:
 	 QNetworkAccessManager m_webAccess;
+	 AwDownloader m_downloader;
 };
+
+
 #endif

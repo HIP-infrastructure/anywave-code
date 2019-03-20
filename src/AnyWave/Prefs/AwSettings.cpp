@@ -42,7 +42,8 @@ AwSettings::AwSettings(QObject *parent)
 {
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
-	m_recentFilesMax = 15;
+//	m_recentFilesMax = 15;
+	m_settings["recentFilesMax"] = (int)15;
 	m_currentReader = NULL;
 
 	// load previously saved recent files
@@ -50,47 +51,59 @@ AwSettings::AwSettings(QObject *parent)
 
 	// load recent files
 	int size = settings.beginReadArray("recentFiles");
+	QStringList recentFiles, recentBIDS;
 	for (int i = 0; i < size; i++)	{
 		settings.setArrayIndex(i);
-		m_recentFiles << settings.value("filePath").toString();
+		recentFiles << settings.value("filePath").toString();
 	}
 	settings.endArray();
 	// load recend BIDS
 	size = settings.beginReadArray("recentBIDS");
 	for (int i = 0; i < size; i++) {
 		settings.setArrayIndex(i);
-		m_recentBIDS << settings.value("BIDSPath").toString();
+		recentBIDS << settings.value("BIDSPath").toString();
 	}
 	settings.endArray();
 
-	m_isMatlabPresent = false;
-	m_isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
+	m_settings["recentFiles"] = recentFiles;
+	m_settings["recentBIDS"] = recentBIDS;
+	m_settings["isMatlabPresent"] = false;
+
+	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
+	m_settings["isAutoTriggerParsingOn"] = isAutoTriggerParsingOn;
 
 	//// languages
 	loadLanguage();
 	// Cpu cores
-	totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
-	maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
-	
+	auto totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
+	m_settings["totalCPUCores"] = totalCPUCores;
+	auto maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
+	m_settings["maxCPUCores"] = maxCPUCores;
+
+	bool checkForUpdates = settings.value("general/checkForUpdates", true).toBool();
+	m_settings["checkForUpdates"] = checkForUpdates;
+
 	m_matlabInterface = NULL;
-	m_pdfMarkerFile = "marker_tool.mrk";
+	m_settings["predefinedMarkerFile"] = QString("marker_tool.mrk");
+
 	m_fileInfo = Q_NULLPTR;
 
-	m_appDirPath = QCoreApplication::applicationDirPath();
+	auto appPath = QCoreApplication::applicationDirPath();
+	m_settings["appDirPath"] = appPath;
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-	m_appResourcePath = m_appDirPath;
+	m_settings["appResourcePath"] = appPath;
 #endif
 #ifdef Q_OS_MAC
-	m_appResourcePath = QString("%1/../Resources").arg(m_appResourcePath);
+	m_settings["ppResourcePath"] = QString("%1/../Resources").arg(appPath);
 #endif
 
 	// check for a version.txt in resources
-	QString versionFile = QString("%1/version.txt").arg(m_appResourcePath);
+	QString versionFile = QString("%1/version.txt").arg(m_settings["appResourcePath"].toString());
 	if (QFile::exists(versionFile)) {
 		QFile file(versionFile);
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-			m_majorVersion = file.readLine();
-			m_minorVersion = file.readLine();
+			m_settings["majorVersion"] =  file.readLine();
+			m_settings["minorVersion"] =  file.readLine();
 			file.close();
 		}
 	}
@@ -101,16 +114,18 @@ AwSettings::~AwSettings()
 	// save recent files
 	QSettings settings;
 	settings.beginWriteArray("recentFiles");
-	for (int i = 0; i < m_recentFiles.size(); i++)	{
+	auto recentFiles = m_settings["recentFiles"].toStringList();
+	for (int i = 0; i < recentFiles.size(); i++)	{
 		settings.setArrayIndex(i);
-		settings.setValue("filePath", m_recentFiles.at(i));
+		settings.setValue("filePath", recentFiles.at(i));
 	}
 	settings.endArray();
 	// save recent BIDS
+	auto recentBIDS = m_settings["recentBIDS"].toStringList();
 	settings.beginWriteArray("recentBIDS");
-	for (int i = 0; i < m_recentBIDS.size(); i++) {
+	for (int i = 0; i < recentBIDS.size(); i++) {
 		settings.setArrayIndex(i);
-		settings.setValue("BIDSPath", m_recentBIDS.at(i));
+		settings.setValue("BIDSPath", recentBIDS.at(i));
 	}
 	settings.endArray();
 	if (m_fileInfo)
@@ -174,7 +189,8 @@ void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
 
 void AwSettings::closeFile()
 { 
-	currentIcaFile.clear(); 
+//	currentIcaFile.clear(); 
+	setSettings("currentIcaFile", QString());
 	if (m_fileInfo)
 		m_filterSettings.save(QString("%1.flt").arg(m_fileInfo->filePath()));
 }
@@ -242,56 +258,64 @@ QString AwSettings::shortenFilePath(const QString& path)
 
 void AwSettings::addRecentFilePath(const QString& path)
 {
-	if (m_recentFiles.contains(path))
+	auto recentFiles = m_settings["recentFiles"].toStringList();
+
+	if (recentFiles.contains(path))
 		return;
 	
-	if (m_recentFiles.size() == m_recentFilesMax)
-		m_recentFiles.removeLast();
+	if (recentFiles.size() == m_settings["recentFilesMax"].toInt())
+		recentFiles.removeLast();
 
-	m_recentFiles.insert(0, path);
+	recentFiles.insert(0, path);
 	QStringList result;
-	for (auto s : m_recentFiles)
+	for (auto s : recentFiles)
 		result << shortenFilePath(s);
+	m_settings["recentFiles"] = recentFiles;
 
 	emit recentFilesUpdated(result);
 }
 
 void AwSettings::addRecentBIDS(const QString& path)
 {
-	if (m_recentBIDS.contains(path))
+	auto recentBIDS = m_settings["recentBIDS"].toStringList();
+	if (recentBIDS.contains(path))
 		return;
-	if (m_recentBIDS.size() == m_recentFilesMax)
-		m_recentBIDS.removeLast();
+	if (recentBIDS.size() == m_settings["recentFilesMax"].toInt())
+		recentBIDS.removeLast();
 
-	m_recentBIDS.insert(0, path);
+	recentBIDS.insert(0, path);
 	QStringList result;
-	for (auto s : m_recentBIDS)
+	for (auto s : recentBIDS)
 		result << shortenFilePath(s);
-
+	m_settings["recentBIDS"] = recentBIDS;
 	emit recentBIDSUpdated(result);
 }
 
 void AwSettings::removeRecentFilePath(const QString& path)
 {
-	if (!m_recentFiles.contains(path))
+	auto recentFiles = m_settings["recentFiles"].toStringList();
+	if (!recentFiles.contains(path))
 		return;
 
-	m_recentFiles.removeAll(path);
+	recentFiles.removeAll(path);
 	QStringList result;
-	foreach (QString s, m_recentFiles)
+	foreach (QString s, recentFiles)
 		result << shortenFilePath(s);
+	m_settings["recentFiles"] = recentFiles;
 	emit recentFilesUpdated(result);
 }
 
 void AwSettings::removeRecentBIDS(const QString& path)
 {
-	if (!m_recentBIDS.contains(path))
+	auto recentBIDS = m_settings["recentBIDS"].toStringList();
+	if (!recentBIDS.contains(path))
 		return;
 
-	m_recentBIDS.removeAll(path);
+	recentBIDS.removeAll(path);
 	QStringList result;
-	for (auto s : m_recentBIDS)
+	for (auto s : recentBIDS)
 		result << shortenFilePath(s);
+	m_settings["recentBIDS"] = recentBIDS;
 	emit recentBIDSUpdated(result);
 }
 
@@ -310,18 +334,22 @@ QStringList& AwSettings::topoLayouts()
 
 void AwSettings::savePredefinedMarkers(const AwMarkerList& markers)
 {
+	auto markerRulesDir = m_settings["markerRulesDir"].toString();
+	auto file = m_settings["predefinedMarkerFile"].toString();
 	if (markerRulesDir.isEmpty())
 		return;
 	if (markers.isEmpty()) {
-		QFile::remove(m_pdfMarkerFile);
+		QFile::remove(file);
 		return;
 	}
-	AwMarker::save(m_pdfMarkerFile, markers);
+	AwMarker::save(file, markers);
 }
 
 AwMarkerList AwSettings::loadPredefinedMarkers()
 {
+	auto markerRulesDir = m_settings["markerRulesDir"].toString();
+	auto file = m_settings["predefinedMarkerFile"].toString();
 	if (markerRulesDir.isEmpty())
 		return AwMarkerList();
-	return AwMarker::load(m_pdfMarkerFile);
+	return AwMarker::load(file);
 }

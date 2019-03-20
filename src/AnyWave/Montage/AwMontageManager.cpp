@@ -303,7 +303,7 @@ AwMontageManager::AwMontageManager()
 	QStringList filter("*.mtg");
 	AwSettings *aws = AwSettings::getInstance();
 
-	m_path = aws->montageDir;
+	m_path = aws->getString("montageDir");
 	if (m_path.isEmpty())
 		return;
 
@@ -1304,7 +1304,7 @@ void AwMontageManager::buildQuickMontagesList()
 	AwSettings *aws = AwSettings::getInstance();
 	// check in AnyWave's montage directory
 	QStringList filter("*.mtg");
-	m_path = aws->montageDir;
+	m_path = aws->getString("montageDir");
 	if (m_path.isEmpty())
 		return;
 

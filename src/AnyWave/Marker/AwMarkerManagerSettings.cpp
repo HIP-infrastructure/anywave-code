@@ -115,8 +115,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(cutAround()));
 #endif
-
-	m_markerDir = AwSettings::getInstance()->markerRulesDir;
+	m_markerDir = AwSettings::getInstance()->getString("markerRulesDir");
 
 	// always add a rule set as "No Rule" at first index
 	m_noRuleString = QString(tr("No rule"));

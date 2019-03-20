@@ -68,7 +68,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	changeMarkerFontText(AwUtilities::markerFont(AwMarker::Single));
 
 	// Auto trigger parsing
-	if ((aws->isAutoTriggerParsingOn()))
+	if (aws->getBool("isAutoTriggerParsingOn"))
 		radioTriggerParserOn->setChecked(true);
 	else
 		radioTriggerParserOff->setChecked(true);
@@ -80,9 +80,14 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		radioHMSOff->setChecked(true);
 
 	// CPU Cores
-	int cores = settings.value("general/cpu_cores", aws->totalCPUCores).toInt();
-	sliderCPU->setRange(2, aws->totalCPUCores);
+	auto totalCPUCores = aws->getInt("totalCPUCores");
+	int cores = aws->getInt("maxCPUCores");
+	sliderCPU->setRange(2, totalCPUCores);
 	sliderCPU->setValue(cores);
+
+	// check for updates when starting
+	bool checkForUpdates = aws->getBool("checkForUpdates");
+	checkBoxUpdates->setChecked(checkForUpdates);
 
 	// language
 	QDir dir(aws->langPath);
@@ -244,8 +249,14 @@ void AwPrefsDial::accept()
 	aws->loadLanguage(lang);
 
 	// CPU CORES
-    aws->maxCPUCores = sliderCPU->value();
-    QThreadPool::globalInstance()->setMaxThreadCount(aws->maxCPUCores);
+	auto maxCPUCores = sliderCPU->value();
+	aws->setSettings("maxCPUCores", maxCPUCores);
+    QThreadPool::globalInstance()->setMaxThreadCount(maxCPUCores);
+	// Check for updates
+	auto check = checkBoxUpdates->isChecked();
+	aws->setSettings("checkForUpdates", check);
+	settings.setValue("general/checkForUpdates", check);
+
 	QDialog::accept();
 }
 

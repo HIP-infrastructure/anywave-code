@@ -228,7 +228,7 @@ void AnyWave::openFile(const QString &path)
 		action->setEnabled(true);
 
 	if (!m_currentReader->triggerChannels().isEmpty()) {
-		if (settings->isAutoTriggerParsingOn()) {
+		if (settings->getBool("isAutoTriggerParsingOn")) {
 			AwTriggerParsingDialog dlg;
 			if (dlg.exec() == QDialog::Accepted)
 				AwProcessManager::instance()->startProcess(QString("Trigger Parser"));
@@ -259,7 +259,7 @@ void AnyWave::openRecentFile()
 	AwSettings *aws = AwSettings::getInstance();
 
 	qint32 index = action->data().toInt();
-	QString file = aws->recentFiles().at(index);
+	QString file = aws->getStringList("recentFiles").value(index);
 	// Open the file
 	if (QFile::exists(file))
 		openFile(file);
@@ -276,7 +276,7 @@ void AnyWave::openRecentBIDS()
 	AwSettings *aws = AwSettings::getInstance();
 
 	qint32 index = action->data().toInt();
-	QString dir = aws->recentBIDS().at(index);
+	QString dir = aws->getStringList("recentBIDS").value(index);
 
 	if (QDir(dir).exists())
 		openBIDS(dir);
@@ -340,7 +340,8 @@ void AnyWave::importMrkFile()
 
 void AnyWave::exportToSVG()
 {
-	QString svgFile = QFileDialog::getSaveFileName(0, tr("Export to svg format"), AwSettings::getInstance()->workingDir, tr("Svg File (*.svg)"));
+	auto dir = AwSettings::getInstance()->getString("workingDir");
+	QString svgFile = QFileDialog::getSaveFileName(0, tr("Export to svg format"), dir, tr("Svg File (*.svg)"));
 	if (svgFile.isEmpty())
 		return;
 
@@ -357,7 +358,8 @@ void AnyWave::exportToSVG()
 
 void AnyWave::exportToPDF()
 {
-	QString pdfFile = QFileDialog::getSaveFileName(0, tr("Save display to PDF"), AwSettings::getInstance()->workingDir, tr("PDF File (*.pdf)"));
+	auto dir = AwSettings::getInstance()->getString("workingDir");
+	QString pdfFile = QFileDialog::getSaveFileName(0, tr("Save display to PDF"), dir, tr("PDF File (*.pdf)"));
 	if (pdfFile.isEmpty())
 		return;
 	QPrinter printer(QPrinter::HighResolution);

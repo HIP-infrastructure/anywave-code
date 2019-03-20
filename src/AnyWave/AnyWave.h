@@ -102,6 +102,7 @@ private:
 	AwLayoutManager *m_layoutManager;
 	// updater 
 	AwUpdater m_updater;
+	AwDownloader m_downloader;
 	// flags
 	bool m_currentFileModified;
 	// methods

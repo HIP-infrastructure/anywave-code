@@ -35,8 +35,7 @@ AwScriptLog::AwScriptLog(AwScript *script, QObject *parent)
 {
 	m_script = script;
 	// get log directory and create a file with date and time.
-//	QString logDir = AwSettings::getInstance()->logDirectory();
-	QString logDir = AwSettings::getInstance()->logDir;
+	auto logDir = AwSettings::getInstance()->getString("logDir");
 	if (logDir.isEmpty()) {
 		closeLog();
 		return;

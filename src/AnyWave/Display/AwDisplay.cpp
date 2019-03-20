@@ -305,7 +305,8 @@ void AwDisplay::captureViews()
 {
 	AwSettings *aws = AwSettings::getInstance();
 	// first, clear the lastCaptureFile set in Settings
-	aws->lastCaptureFile.clear();  // so in case of error when capturing, the file remains empty.
+//	aws->lastCaptureFile.clear();  // so in case of error when capturing, the file remains empty.
+	aws->setSettings("lastCapturedFile", QString());
 
 	QString dir = aws->fileInfo()->dirPath();
 	int count = 1;
@@ -327,7 +328,7 @@ void AwDisplay::captureViews()
 	sysTray->show();
 	sysTray->showMessage(tr("AnyWave"), tr("Capture saved."));
 	if (ok) // saving of file was ok
-		aws->lastCaptureFile = file;
+		aws->setSettings("lastCapturedFile", file);
 }
 
 

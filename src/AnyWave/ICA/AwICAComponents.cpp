@@ -327,7 +327,7 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 		chan->setDisplayPluginName("ICA SignalItem");
 		m_icaChannels << chan;
 	}
-	AwSettings::getInstance()->currentIcaFile = file.fileName();
+	AwSettings::getInstance()->setSettings("currentIcaFile", file.fileName());
 	return AwHDF5::Ok;
 }
 

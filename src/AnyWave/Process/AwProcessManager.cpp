@@ -338,17 +338,18 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	AwSettings *settings = AwSettings::getInstance();
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
+	auto workingDir = settings->getString("workingDir");
 	// create a folder in local Anywave's directories for the plugin
 	// Check if working exists 
 	// if working is empty it means AnyWave could not create user's directories.
-	if (!settings->workingDir.isEmpty()) {
-		QDir dir(settings->workingDir);
+	if (!workingDir.isEmpty()) {
+		QDir dir(workingDir);
 		if (!dir.exists()) {
 			if (dir.mkdir(plugin->name))
-				process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
+				process->pdi.input.workingDirPath = workingDir + plugin->name;
 		}
 		else
-			process->pdi.input.workingDirPath = settings->workingDir + plugin->name;
+			process->pdi.input.workingDirPath = workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
 	auto fi = settings->fileInfo();
@@ -396,7 +397,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	int type = p->plugin()->type;
 
 	// set the MATLAB interface for the plugin if MATLAB support is available
-	if (AwSettings::getInstance()->isMatlabPresent())
+	if (AwSettings::getInstance()->getBool("isMatlabPresent"))
 		p->pdi.setMI(AwSettings::getInstance()->matlabInterface());
 
 	// Check for process of type DisplayBackground
