@@ -171,16 +171,16 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	s = s.replace(QRegExp("[,;]"), QString("_"));
 	chan->setName(s);
 		
-	// only reformat plot number for EEG or SEEG
-	if (chan->isEEG() || chan->isSEEG()) {
-		QRegularExpression re("\\d+$");
-		QRegularExpressionMatch match = re.match(s);
-		if (match.hasMatch()) {
-			QString elec = s.remove(re);
-			int number = match.captured(0).toInt();
-			chan->setName(QString("%1%2").arg(elec).arg(number));
-		}
-	}
+	//// only reformat plot number for EEG or SEEG
+	//if (chan->isEEG() || chan->isSEEG()) {
+	//	QRegularExpression re("\\d+$");
+	//	QRegularExpressionMatch match = re.match(s);
+	//	if (match.hasMatch()) {
+	//		QString elec = s.remove(re);
+	//		int number = match.captured(0).toInt();
+	//		chan->setName(QString("%1%2").arg(elec).arg(number));
+	//	}
+	//}
 	// check for existing label in infos.
 	if (m_labelToIndex.contains(chan->name()))
 		// auto rename label

@@ -72,7 +72,11 @@ signals:
 	void clearTriggerClicked();
 
 protected slots:
-	void changeReplaceForSelection();
+	//void changeReplaceForSelection();
+	void renameAllMarkers();
+	void renameSelectedMarkers();
+	void changeValueAllMarkers();
+	void changeValueSelectedMarkers();
 	void exportWizard();
 	void launchProcess();
 	void writeTrigger();

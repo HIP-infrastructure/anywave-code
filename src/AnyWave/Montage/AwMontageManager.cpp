@@ -41,6 +41,7 @@
 #include <widget/AwWait.h>
 #include <AwAmplitudeManager.h>
 #include "IO/BIDS/AwBIDSManager.h"
+#include <AwException.h>
 
 // compare function for sorting labels of electrodes.
 bool compareSEEGLabels(const QString& s1, const QString& s2)
@@ -268,33 +269,34 @@ int AwMontageManager::loadICA(const QString& path)
 	clearICA();
 	AwICAManager *ica_man = AwICAManager::instance();
 	int count = 0;
-//	AwFiltersManager *fm = AwFiltersManager::instance();
-	if (AwICAManager::instance()->loadComponents(path) == 0) { // if components sucessfully loaded, get components and make them as recorded channels.
-		// add ICA components to asRecorded and current montage.
-		AwICAComponents **comps = ica_man->getAllComponents();
-		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-			if (comps[i] == NULL)
-				continue;
-			count += comps[i]->components().size();
-			foreach(AwICAChannel *channel, comps[i]->components()) {
-				m_icaAsRecorded << channel;
-				m_channelsAsRecorded << channel;
-				AwICAChannel *newChan = new AwICAChannel(channel);
-				newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-				m_channels << newChan;
-				m_channelHashTable.insert(newChan->name(), newChan);
-				m_icaHashTable.insert(channel->name(), channel);
-			}
-			//AwSettings::getInstance()->filterSettings().setBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
-			AwSettings::getInstance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
-		}
-
-		emit montageChanged(m_channels);
-		AwMessageBox::information(0, tr("ICA Components"), QString::number(count) + tr(" ICA components added to the current montage."));
-		return 0;
+	try {
+		ica_man->loadComponents(path);
 	}
-	AwMessageBox::critical(0, tr("ICA Components"), tr("Failed to import ICA components. Maybe the ICA components can't be applied to this data file?"));
-	return -1;
+	catch (const AwException& e) {
+		AwMessageBox::critical(0, tr("ICA Components"),QString(tr("Failed to import ICA components: %1")).arg(e.errorString()));
+		return -1;
+	}
+	// add ICA components to asRecorded and current montage.
+	AwICAComponents **comps = ica_man->getAllComponents();
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		if (comps[i] == NULL)
+			continue;
+		count += comps[i]->components().size();
+		foreach(AwICAChannel *channel, comps[i]->components()) {
+			m_icaAsRecorded << channel;
+			m_channelsAsRecorded << channel;
+			AwICAChannel *newChan = new AwICAChannel(channel);
+			newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
+			m_channels << newChan;
+			m_channelHashTable.insert(newChan->name(), newChan);
+			m_icaHashTable.insert(channel->name(), channel);
+		}
+		AwSettings::getInstance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
+	}
+
+	emit montageChanged(m_channels);
+	AwMessageBox::information(0, tr("ICA Components"), QString(tr("%1 components added to the current montage.").arg(count)));
+	return 0;
 }
 
 // constructor

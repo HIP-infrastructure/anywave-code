@@ -41,6 +41,7 @@
 #include <QValueAxis>
 #include <QHorizontalBarSeries>
 #include <QFileDialog>
+#include <widget/AwGetValueDialog.h>
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -67,13 +68,24 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	m_menu->addAction(m_selectAllLabel);
 	connect(m_selectAllLabel, SIGNAL(triggered()), this, SLOT(selectAllLabels()));
 
-	QAction *action = new QAction(tr("Edit"), this);
+	QAction *action;
+
+	action = new QAction(tr("Rename all markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(renameAllMarkers()));
+	action = new QAction(tr("Rename selected markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(renameSelectedMarkers()));
+	action = new QAction(tr("change values of all markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(changeValueAllMarkers()));
+	action = new QAction(tr("Change values of selected markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(changeValueSelectedMarkers()));
+	m_menu->addSeparator();
+	action = new QAction(tr("Edit"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(editCurrentItem()));
-
-	action = new QAction(tr("Quick replace"), this);
-	m_menu->addAction(action);
-	connect(action, SIGNAL(triggered()), this, SLOT(changeReplaceForSelection()));
 
 	m_menu->addSeparator();
 	
@@ -552,29 +564,99 @@ void AwMarkerManagerSettings::goToMarkerPos()
 	}
 }
 
-void AwMarkerManagerSettings::changeReplaceForSelection()
+//void AwMarkerManagerSettings::changeReplaceForSelection()
+//{
+//	// get selected indexes in tvMarkers
+//	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+//	if (indexes.isEmpty())
+//		return;
+//
+//	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+//
+//	AwMarkerFindReplaceUi dlg;
+//	if (dlg.exec() == QDialog::Accepted) {
+//		for (auto i : indexes) {
+//			QModelIndex sourceIndex = proxy->mapToSource(i);
+//			if (dlg.replaceValues() && i.column() == MARKER_COLUMN_CODE)
+//				tvMarkers->model()->setData(sourceIndex, dlg.value(), Qt::EditRole);
+//			else if (i.column() == MARKER_COLUMN_LABEL)
+//				tvMarkers->model()->setData(sourceIndex, dlg.label(), Qt::EditRole);
+//		}
+//		m_displayedMarkers = m_model->markers();
+//		emit markersChanged(m_displayedMarkers);
+//		updateStats();
+//	}
+//}
+
+void AwMarkerManagerSettings::renameAllMarkers()
 {
-	// get selected indexes in tvMarkers
-	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	if (indexes.isEmpty())
+
+	AwGetValueDialog dlg("Set new label");
+	if (dlg.exec() == QDialog::Rejected)
 		return;
 
-	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-
-	AwMarkerFindReplaceUi dlg;
-	if (dlg.exec() == QDialog::Accepted) {
-		for (auto i : indexes) {
-			QModelIndex sourceIndex = proxy->mapToSource(i);
-			if (dlg.replaceValues() && i.column() == MARKER_COLUMN_CODE)
-				tvMarkers->model()->setData(sourceIndex, dlg.value(), Qt::EditRole);
-			else if (i.column() == MARKER_COLUMN_LABEL)
-				tvMarkers->model()->setData(sourceIndex, dlg.label(), Qt::EditRole);
-		}
-		m_displayedMarkers = m_model->markers();
-		emit markersChanged(m_displayedMarkers);
-		updateStats();
+	auto newLabel = dlg.value();
+	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
+		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_LABEL);
+		if (index.isValid())
+			tvMarkers->model()->setData(index, newLabel, Qt::EditRole);
 	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
 }
+
+void AwMarkerManagerSettings::renameSelectedMarkers()
+{
+	AwGetValueDialog dlg("Set new label");
+	if (dlg.exec() == QDialog::Rejected)
+		return;
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+	
+	for (auto i : indexes) {
+		if (i.column() == MARKER_COLUMN_LABEL) {
+			tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+		}
+	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
+}
+
+void AwMarkerManagerSettings::changeValueAllMarkers()
+{
+	AwGetValueDialog dlg("Set new value");
+	if (dlg.exec() == QDialog::Rejected)
+		return;
+
+	auto newValue = dlg.value().toDouble();
+	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
+		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_CODE);
+		if (index.isValid())
+			tvMarkers->model()->setData(index, newValue, Qt::EditRole);
+	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
+}
+
+void AwMarkerManagerSettings::changeValueSelectedMarkers()
+{
+	AwGetValueDialog dlg("Set new value");
+	if (dlg.exec() == QDialog::Rejected)
+		return;
+
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+	for (auto i : indexes) {
+		if (i.column() == MARKER_COLUMN_CODE) {
+			tvMarkers->model()->setData(i, dlg.value().toDouble(), Qt::EditRole);
+		}
+	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
+}
+
 
 void AwMarkerManagerSettings::launchProcess()
 {

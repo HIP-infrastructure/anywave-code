@@ -42,7 +42,6 @@ AwSettings::AwSettings(QObject *parent)
 {
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
-//	m_recentFilesMax = 15;
 	m_settings["recentFilesMax"] = (int)15;
 	m_currentReader = NULL;
 

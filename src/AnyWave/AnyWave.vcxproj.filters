@@ -259,9 +259,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwDockAddMarker.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Marker\AwMarkerFindReplaceUi.cpp">
-      <Filter>Marker</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerFindReplaceUi.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1401,12 +1398,6 @@
     <CustomBuild Include="Marker\AwExportMarkersWizard.ui">
       <Filter>Marker</Filter>
     </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerFindReplaceUi.h">
-      <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerFindReplaceUi.ui">
-      <Filter>Marker</Filter>
-    </CustomBuild>
     <CustomBuild Include="Marker\AwMarkerListModel.h">
       <Filter>Marker</Filter>
     </CustomBuild>
@@ -1884,9 +1875,6 @@
       <Filter>IO\HDF5</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwExportMarkersWizard.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMarkerFindReplaceUi.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwMarkerManagerSettings.h">
