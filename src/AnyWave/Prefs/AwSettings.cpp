@@ -94,7 +94,7 @@ AwSettings::AwSettings(QObject *parent)
 	m_settings["appResourcePath"] = appPath;
 #endif
 #ifdef Q_OS_MAC
-	m_settings["ppResourcePath"] = QString("%1/../Resources").arg(appPath);
+	m_settings["appResourcePath"] = QString("%1/../Resources").arg(appPath);
 #endif
 
 	// check for a version.txt in resources
