@@ -137,7 +137,6 @@ void AnyWave::openFile(const QString &path)
 	closeFile();
 
 	m_currentReader = newReader;
-	//settings->setCurrentReader(m_currentReader);
 	int res = m_currentReader->openFile(filePath);
 
 	if (res != AwFileIO::NoError) {

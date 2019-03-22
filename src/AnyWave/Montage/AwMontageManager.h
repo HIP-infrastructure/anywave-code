@@ -41,27 +41,6 @@ class AwAVGChannel;
 bool channelLabelLessThan(AwChannel *c1, AwChannel *c2);
 bool compareSEEGLabels(const QString& s1, const QString& s2);
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// CustomReference
-///
-/// objet qui défini une reference definie par l'utilisateur.
-/// la reference a un nom et une liste de labels d'electrodes.
-/// L'utilisateur choisi un nom d'électrode et défini quelles électrodes réelles elle regroupe pour former une référence.
-class CustomReference
-{
-public:
-	/** Constructeur avec nom de référence **/
-	CustomReference(QString referenceName) { m_name = referenceName; }
-	/** Destructeur **/
-	~CustomReference() {}
-	inline QString& name() { return m_name; }
-	inline QStringList& references() { return m_references; }
-protected:
-	QString m_name;				///< Nom de la référence personnalisée (par exemple MaRéférenceAMoi)
-	QStringList m_references;		///< Listes des noms d'éléctrodes formant la référence personnalisée. Ex: (O1, O2, Cz).
-};
-
 ///
 /// MontageManager
 ///
@@ -78,13 +57,10 @@ public:
 	/** Retourne la liste des objets AwChannel du montage courant **/
 	AwChannelList& channels() { return m_channels;}
 	/** Retourne la liste des AwChannels AsRecorded **/
-	AwChannelList& asRecordedChannels() { return m_channelsAsRecorded; }
-	/** Get Hash Table to get as recorded channels by their label. **/
-	QHash<QString, AwChannel*> hashTable() { return m_channelHashTable; }
-	/** Return a pointer to the as recorded channel with given name **/
-	AwChannel * asRecordedChannel(const QString& name) { return m_channelHashTable.value(name); }
-	/** Retourne le premier objet AwChannel trouvé du type spéficié **/
-	AwChannel *containsChannelOfType(AwChannel::ChannelType t);  // Renvoie le pointeur vers le premier AwChannel de type t trouvé ou Zero si non trouvé	
+	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded[name]; }
+	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
+	QHash<QString, AwChannel *> cloneAsRecordedChannels();
+	bool containsChannelOfType(AwChannel::ChannelType t); 
 	/** Get channels from current montage that matches the label. **/
 	AwChannelList channelsWithLabel(const QString& label);
 	/** Get channels from current montage that matches all the labels in labels **/
@@ -151,8 +127,6 @@ public slots:
 	void buildQuickMontagesList();
 	/** Add channels to montage **/
 	void addChannelsByName(AwChannelList& channels);
-	///** Clear current montage and build a new one based on channels names passed as parameter **/
-	//void buildNewMontageFomNames(const QStringList& names);
 	/** Build a new montage based on a list of channels **/
 	void buildNewMontageFromChannels(const AwChannelList& channels);
 	void setNewFilters(const AwFilterSettings& settings);
@@ -166,16 +140,12 @@ public slots:
 	/** Add source channels into current montage **/
 	void addNewSources(int type);
 private:
-	QHash<QString, AwChannel*> m_channelHashTable;	///< Hash table permettant de retrouver un pointeur vers un objet AwChannel à partir de son label
+	QHash<QString, AwChannel *> m_asRecorded;
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.
-	AwChannelList m_channelsAsRecorded;				///< Liste des canaux lus par le plugins (les canaux asrecorded dans le fichier)
-	QList<CustomReference *> m_customReferences;	///< Une liste d'objet CustomReference (pour les références personnalisées).
 
-	// ICA/Source specific
-	AwICAChannelList m_icaAsRecorded;
-	AwSourceChannelList m_sourceAsRecorded;
-	QHash<QString, AwICAChannel *> m_icaHashTable;
-	QHash<QString, AwSourceChannel *> m_sourceHashTable;
+	// ICA/Source specific	
+	AwICAChannelList m_icaAsRecorded;				///< Copy of ICA channels inserted is m_asRecorded.
+	AwSourceChannelList m_sourceAsRecorded;			///< Copy of Source channels inserted is m_asRecorded.
 
 	QString m_path;									///< Chemin par défaut pour stocker les montages 
 	QHash<QString, QString> m_quickMontagesHT;		///< Hash table pour stocker des paires "nom de montage/fichier".

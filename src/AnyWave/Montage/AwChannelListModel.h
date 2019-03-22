@@ -92,6 +92,9 @@ public:
 	// Methodes propres au modele
 	void beginUpdateChannels();
 	void endUpdateChannels();
+
+	void sortByName();
+	void sortByNameAndType();
 signals:
 	/** Sent when the user drags and drops as recorded channels into the current montage **/
 	void channelsDropped(const QStringList& labels, int beginRow);

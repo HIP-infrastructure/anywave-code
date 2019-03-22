@@ -76,7 +76,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	action = new QAction(tr("Rename selected markers"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(renameSelectedMarkers()));
-	action = new QAction(tr("change values of all markers"), this);
+	action = new QAction(tr("Change values of all markers"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(changeValueAllMarkers()));
 	action = new QAction(tr("Change values of selected markers"), this);
@@ -89,10 +89,6 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 
 	m_menu->addSeparator();
 	
-	action = new QAction(tr("Export data"), this);
-	m_menu->addAction(action);
-	connect(action, SIGNAL(triggered()), this, SLOT(exportWizard()));
-
 	action = new QAction(tr("Write to TRIGGER channel"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(writeTrigger()));
@@ -514,28 +510,28 @@ void AwMarkerManagerSettings::setRule(const QString& rule)
 }
 
 
-void AwMarkerManagerSettings::exportWizard()
-{
-	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	AwMarkerList selection;
-	if (!indexes.isEmpty()) {
-		for (auto i : indexes) {
-			if (i.column() == 0)
-				selection << m_displayedMarkers.at(i.row());
-		}
-	}
-
-	AwMarkersExportWidget dlg(selection, m_markers);
-	if (dlg.exec() == QDialog::Accepted) {
-		AwMarkerExporter *exporter = new AwMarkerExporter;
-		exporter->outputFile = dlg.file();
-		exporter->pdi.input.setNewMarkers(dlg.markers());
-		exporter->pdi.input.setNewChannels(dlg.channels());
-		exporter->concatenate = dlg.concatenate();
-		exporter->matlabFormat = dlg.isMatlabFormat();
-		AwProcessManager::instance()->runProcess(exporter);
-	}
-}
+//void AwMarkerManagerSettings::exportWizard()
+//{
+//	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+//	AwMarkerList selection;
+//	if (!indexes.isEmpty()) {
+//		for (auto i : indexes) {
+//			if (i.column() == 0)
+//				selection << m_displayedMarkers.at(i.row());
+//		}
+//	}
+//
+//	AwMarkersExportWidget dlg(selection, m_markers);
+//	if (dlg.exec() == QDialog::Accepted) {
+//		AwMarkerExporter *exporter = new AwMarkerExporter;
+//		exporter->outputFile = dlg.file();
+//		exporter->pdi.input.setNewMarkers(dlg.markers());
+//		exporter->pdi.input.setNewChannels(dlg.channels());
+//		exporter->concatenate = dlg.concatenate();
+//		exporter->matlabFormat = dlg.isMatlabFormat();
+//		AwProcessManager::instance()->runProcess(exporter);
+//	}
+//}
 
 void AwMarkerManagerSettings::goToMarkerAtRow(int row)
 {

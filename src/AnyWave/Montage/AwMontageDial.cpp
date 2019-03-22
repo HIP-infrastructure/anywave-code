@@ -86,13 +86,14 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	m_ui.setupUi(this);
 	
 	AwMontageManager *mm = AwMontageManager::instance();
+	m_asRecorded = mm->cloneAsRecordedChannels();
 
-	// copy as recorded channels as well
-	for (auto c : mm->asRecordedChannels()) {
-		AwChannel *chan = new AwChannel(c);
-		m_channelsAsRecorded << chan;
-		m_channelsMap.insert(chan->name(), chan);
-	}
+	//// copy as recorded channels as well
+	//for (auto c : mm->asRecordedChannels()) {
+	//	AwChannel *chan = new AwChannel(c);
+	//	m_channelsAsRecorded << chan;
+	//	m_channelsMap.insert(chan->name(), chan);
+	//}
 	
 	m_badChannelsLabels = mm->badLabels();
 	m_path = mm->path();
@@ -123,7 +124,7 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	AsRecordedProxyModel *sortModelAsRecorded = new AsRecordedProxyModel(this);
 	// Set the sort mode to UserRole, to give the possibility to sort the Bad column.
 	sortModelAsRecorded->setSortRole(Qt::UserRole);
-	AwChannelListModelAsRecorded *modelAsRecorded = new AwChannelListModelAsRecorded(m_channelsAsRecorded, this);
+	AwChannelListModelAsRecorded *modelAsRecorded = new AwChannelListModelAsRecorded(m_asRecorded.values(), this);
 	connect(modelAsRecorded, &AwChannelListModelAsRecorded::badChannelSet, this, &AwMontageDial::setBadChannel);
 	connect(modelAsRecorded, &AwChannelListModelAsRecorded::badChannelUnset, this, &AwMontageDial::unsetBadChannel);
 
@@ -164,8 +165,12 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 
 AwMontageDial::~AwMontageDial()
 {
-	while (!m_channelsAsRecorded.isEmpty())
-		delete m_channelsAsRecorded.takeFirst();
+	//while (!m_channelsAsRecorded.isEmpty())
+	//	delete m_channelsAsRecorded.takeFirst();
+
+	for (auto c : m_asRecorded.values()) 
+		delete c;
+	
 }	
 
 // EVENTS
@@ -317,7 +322,7 @@ void AwMontageDial::sortLabelsByTypes()
 {
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 		m_labelTypes[i].clear();
-	for (auto c : m_channelsAsRecorded) {
+	for (auto c : m_asRecorded.values()) {
 		if (!c->isBad()) 
 			m_labelTypes[c->type()].append(c->name());
 	}
@@ -329,7 +334,7 @@ void AwMontageDial::addDroppedChannels(const QStringList& labels, int beginRow)
 {
 	AwChannelList montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
 	for (auto l : labels) {
-		AwChannel *asRecorded = m_channelsMap.value(l);
+		auto asRecorded = m_asRecorded[l];
 		montage.insert(beginRow++, new AwChannel(asRecorded));
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
@@ -344,7 +349,7 @@ void AwMontageDial::addChannelsByTypes()
 	QStringList labels = m_labelTypes[act->data().toInt()];
 	AwChannelList channels;
 	for (auto l : labels) {
-		AwChannel *asRecorded = m_channelsMap.value(l);
+		auto asRecorded = m_asRecorded[l];
 		if (asRecorded)
 			channels << new AwChannel(asRecorded);
 	}
@@ -370,8 +375,9 @@ void AwMontageDial::computeSEEGMontageFromEEGChannels()
 	if (res == QMessageBox::No)
 		return;
 
+	auto asRecordedChannels = m_asRecorded.values();
 	// Transform EEG into SEEG is As Recorded
-	for (auto c : m_channelsAsRecorded) {
+	for (auto c : asRecordedChannels) {
 		if (c->isEEG())
 			c->setType(AwChannel::SEEG);
 	}
@@ -384,7 +390,7 @@ void AwMontageDial::computeSEEGMontageFromEEGChannels()
 			delete c;
 		}
 	}
-	for (auto c : m_channelsAsRecorded) {
+	for (auto c : asRecordedChannels) {
 		if (c->isSEEG())
 			channels.append(new AwChannel(c));
 	}
@@ -447,7 +453,7 @@ void AwMontageDial::makeSEEGBipolar()
 			else
 				ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
 			// check that the ref electrode exists and is a SEEG electrode.
-			AwChannel *c = m_channelsMap.value(ref);
+			AwChannel *c = m_asRecorded[ref];
 			bool exist = c != NULL;
 			if (!exist) {
 				monopolarLeft = true;
@@ -545,7 +551,7 @@ void AwMontageDial::resetToAsRecorded()
 	}
 	// Reset the montage, whit no virtual channels
 	channels.clear();
-	for (auto c : m_channelsAsRecorded)
+	for (auto c : m_asRecorded.values())
 		if (!c->isVirtual())
 			channels << new AwChannel(c);
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
@@ -585,7 +591,7 @@ void AwMontageDial::addChannelsToMontage()
 	for (auto i : selectedIndexes) {
 		if (i.column() == AW_ASRECORDED_COLUMN_NAME) {
 			name = m_ui.tvChannelsAsRecorded->model()->data(i, Qt::DisplayRole).toString();
-			AwChannel *channel = m_channelsMap.value(name);
+			AwChannel *channel = m_asRecorded[name];
 			if (channel) {
 				if (channel->isBad())
 					continue;

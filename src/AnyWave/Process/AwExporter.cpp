@@ -140,7 +140,7 @@ void AwExporter::run()
 
 	AwFileIO *writer = m_plugin->newInstance();
 	writer->setPlugin(m_plugin);
-	writer->infos.setChannels(m_channels);
+	
 	AwBlock *block = writer->infos.newBlock();
 
 	if (!output_markers.isEmpty())
@@ -163,11 +163,50 @@ void AwExporter::run()
 	writer->infos.setTime(pdi.input.reader()->infos.recordingTime());
 	writer->infos.setISODate(pdi.input.reader()->infos.isoDate());
 
+	if (m_relabelChannels) {
+		// remove 0 in label likely (A01 will become A1).
+		// check if the renaming does not create doublons !
+		QMap<QString, AwChannel *> map;
+		for (auto c : m_channels)
+			map[c->name()] = c;
+		for (auto c : m_channels) {
+			if (c->isEEG() || c->isSEEG()) {
+				auto label = c->name();
+				QString newLabel;
+				QRegularExpression re("\\d+$");
+				QRegularExpressionMatch match = re.match(label);
+				if (match.hasMatch()) {
+					QString elec = label.remove(re);
+					int number = match.captured(0).toInt();
+					newLabel = QString("%1%2").arg(elec).arg(number);
+					// search if newLabel already exists = do not create doublons.
+					if (map.contains(newLabel)) {
+						auto channel = map[newLabel];
+						// rename existing label by adding "-" between name and number.
+						QString label = QString("%1_%2").arg(elec).arg(number);
+						channel->setName(label);
+						map.remove(newLabel);
+						map[label] = channel;
+					}
+					else {
+						map.remove(c->name());
+						map[newLabel] = c;
+					}
+				}
+			}
+		}
+	}
+	// now that the channels have optionaly being renamed, create the output file.
+	writer->infos.setChannels(m_channels);
+
 	if (writer->createFile(m_path) != AwFileIO::NoError) {
 		sendMessage(tr("Error creating output file."));
 		m_plugin->deleteInstance(writer);
 		return;
 	}
+
+
+
 	sendMessage(tr("Writting data..."));
 	writer->writeData(&m_channels);
 	sendMessage("Done.");
@@ -228,6 +267,7 @@ bool AwExporter::showUi()
 		m_skippedMarkers = ui.skippedMarkers();
 		m_exportedMarkers = ui.usedMarkers();
 		m_decimateFactor = ui.decimateFactor;
+		m_relabelChannels = ui.renameLabels;
 		return true;
 	}
 	return false;

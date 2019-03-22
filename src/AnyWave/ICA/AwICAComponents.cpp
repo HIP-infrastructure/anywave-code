@@ -169,7 +169,7 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 	int index = 0;
 	for (auto s : m_labels) {
 		// get the corresponding as recorded channel
-		AwChannel *asRecorded = mm->asRecordedChannel(s);
+		auto asRecorded = mm->asRecordedChannel(s);
 		if (asRecorded) {
 			AwChannel *source = new AwChannel(asRecorded);
 			m_sources << source;

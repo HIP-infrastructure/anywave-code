@@ -563,7 +563,14 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 		return AwFileIO::WrongParameter;
 	}
 
-	m_sampleRate = infos.channels().at(0)->samplingRate();
+	// rename channels which contain ','
+	auto channels = infos.channels();
+	for (auto c : channels) {
+		auto s = c->name();
+		s = s.replace(QRegExp("[,;]"), QString("_"));
+		c->setName(s);
+	}
+	m_sampleRate = infos.channels().first()->samplingRate();
 
 	QTextStream stream(&hdr);
 
@@ -585,7 +592,7 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 	stream << "DataOrientation=MULTIPLEXED" << endl;
 	stream << "NumberOfChannels=" << infos.channelsCount() << endl;
 	stream.setRealNumberPrecision(12);
-	stream << "SamplingInterval=" << (double)((1 / infos.channels().at(0)->samplingRate()) * 1E6) << endl;
+	stream << "SamplingInterval=" << (double)((1 / infos.channels().first()->samplingRate()) * 1E6) << endl;
 	stream << endl;
 	stream << "[Binary Infos]" << endl;
 	stream << "BinaryFormat=IEEE_FLOAT_32" << endl << endl;

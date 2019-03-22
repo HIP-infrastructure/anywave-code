@@ -51,20 +51,19 @@ public:
 	AwMontageDial(QWidget *parent = 0);
 	~AwMontageDial();
 
-	/** Overload accept() **/
 
 	void initMontageList();
 	/** Sauvegarde un montage dans le chemin spécifié. **/
 	bool saveMontage(const QString& path);
 	AwChannelList channels() { return static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage(); }
-	AwChannelList asRecordedChannels() { return m_channelsAsRecorded; }
+//	AwChannelList asRecordedChannels() { return m_channelsAsRecorded; }
+	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
 	inline QStringList badLabels() { return m_badChannelsLabels; }
-//	AwChannel *asRecordedChannel(const QString& name) { return m_channelHashTable.value(name); }
 protected:
 	void closeEvent(QCloseEvent *e);
 public slots:
-	void accept();
-	void reject();
+	void accept() override;
+	void reject() override;
 	/** Détruit le montage actuel **/
 	void cleanMontage();
 	/** Restaure le montage As Recorded, c'est-à-dire le montage lu dans le fichier de donnés. (le plus souvent il s'agit des canaux monopolaires du fichier) **/
@@ -114,10 +113,10 @@ private slots:
 	
 private:
 	Ui::MontageDialClass m_ui;
-	QMap<QString, AwChannel *> m_channelsMap;
-
+//	QMap<QString, AwChannel *> m_channelsMap;
+	QHash<QString, AwChannel *> m_asRecorded;	
 	///< copy of the list from Montage Manager.
-	QList<AwChannel *> m_channelsAsRecorded;
+//	QList<AwChannel *> m_channelsAsRecorded;
 
 	QStringList m_badChannelsLabels;					/// store the labels of bad channels
 	QStringList m_labelTypes[AW_CHANNEL_TYPES];			/// store the labels for each types of channels

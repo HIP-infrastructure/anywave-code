@@ -131,6 +131,16 @@ AwChannelListModel::AwChannelListModel(const AwChannelList& channels, QObject *p
 		m_channels << new AwChannel(c);
 }
 
+void AwChannelListModel::sortByName()
+{
+
+}
+
+void AwChannelListModel::sortByNameAndType()
+{
+
+}
+
 //
 // rowCount
 //

@@ -269,7 +269,7 @@ void AwSettings::addRecentFilePath(const QString& path)
 	QStringList result;
 	for (auto s : recentFiles)
 		result << shortenFilePath(s);
-	m_settings["recentFiles"] = recentFiles;
+	m_settings["recentFiles"] = result;
 
 	emit recentFilesUpdated(result);
 }
@@ -286,7 +286,7 @@ void AwSettings::addRecentBIDS(const QString& path)
 	QStringList result;
 	for (auto s : recentBIDS)
 		result << shortenFilePath(s);
-	m_settings["recentBIDS"] = recentBIDS;
+	m_settings["recentBIDS"] = result;
 	emit recentBIDSUpdated(result);
 }
 
@@ -300,7 +300,7 @@ void AwSettings::removeRecentFilePath(const QString& path)
 	QStringList result;
 	foreach (QString s, recentFiles)
 		result << shortenFilePath(s);
-	m_settings["recentFiles"] = recentFiles;
+	m_settings["recentFiles"] = result;
 	emit recentFilesUpdated(result);
 }
 
@@ -314,7 +314,7 @@ void AwSettings::removeRecentBIDS(const QString& path)
 	QStringList result;
 	for (auto s : recentBIDS)
 		result << shortenFilePath(s);
-	m_settings["recentBIDS"] = recentBIDS;
+	m_settings["recentBIDS"] = result;
 	emit recentBIDSUpdated(result);
 }
 
