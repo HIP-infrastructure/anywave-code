@@ -113,6 +113,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		return;
 
 	clearChannels();
+//	m_selectedChannels.clear();
 
 	m_channels = channels;
 	m_maxSR = channels.first()->samplingRate();
@@ -240,28 +241,35 @@ void AwGraphicsScene::setPositionInFile(float pos)
 
 void AwGraphicsScene::updateSelection()
 {
-	m_selectedChannels.clear();
-	m_selectedMarkers.clear();
-	foreach (QGraphicsItem *i, selectedItems())	{
-		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
-
+	int count = 0;
+	for (auto i : selectedItems()) {
+		auto sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
 		if (sitem)
-			m_selectedChannels << sitem->channel();
-
-		AwGraphicsMarkerItem *mitem = qgraphicsitem_cast<AwGraphicsMarkerItem *>(i);
-		if (mitem)
-			m_selectedMarkers << mitem->marker();
+			count++;
 	}
-
-	// Re ordering selecting channels to match m_channels order..
-	AwChannelList sortedList;
-	foreach (AwChannel *c, m_channels)
-		if (m_selectedChannels.indexOf(c) != -1)
-			sortedList << c;
-	m_selectedChannels = sortedList;
-
-	emit newSceneSelection(m_selectedChannels);
-	emit markersSelected(m_selectedMarkers);
+	emit channelsSelectionChanged(count);
+//	m_selectedChannels.clear();
+//	m_selectedMarkers.clear();
+//	foreach (QGraphicsItem *i, selectedItems())	{
+//		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
+//
+//		if (sitem)
+//			m_selectedChannels << sitem->channel();
+//
+//		AwGraphicsMarkerItem *mitem = qgraphicsitem_cast<AwGraphicsMarkerItem *>(i);
+//		if (mitem)
+//			m_selectedMarkers << mitem->marker();
+//	}
+//
+//	// Re ordering selecting channels to match m_channels order..
+//	AwChannelList sortedList;
+//	foreach (AwChannel *c, m_channels)
+//		if (m_selectedChannels.indexOf(c) != -1)
+//			sortedList << c;
+//	m_selectedChannels = sortedList;
+//
+//	emit newSceneSelection(m_selectedChannels);
+//	emit markersSelected(m_selectedMarkers);
 }
 
 
@@ -294,7 +302,7 @@ void AwGraphicsScene::clearChannels()
 // Detruit egalement les items.
 void AwGraphicsScene::clean()
 {
-	m_selectedChannels.clear();
+//	m_selectedChannels.clear();
 	m_channels.clear();
 	clearChannels();
 	m_markerItemsDisplayed.clear();
@@ -314,7 +322,7 @@ void AwGraphicsScene::selectUnselectChannel()
 
 	sitem->setSelected(!sitem->isSelected());
 	sitem->channel()->setSelected(!sitem->isSelected());
-	updateSelection();
+	//updateSelection();
 	update();
 }
 
@@ -324,8 +332,8 @@ void AwGraphicsScene::selectUnselectChannel()
 ///
 void AwGraphicsScene::displaySelectedChannelsOnly()
 {
-	if (m_selectedChannels.isEmpty())
-		return;
+	//if (m_selectedChannels.isEmpty())
+	//	return;
 
 	m_visibleSignalItems = m_signalItems;
 
@@ -439,25 +447,36 @@ void AwGraphicsScene::selectChannels(const QStringList& labels)
 
 void AwGraphicsScene::selectChannelsOfType()
 {
-	QAction *act = qobject_cast<QAction *>(sender());
-	Q_ASSERT(act != NULL);
-	selectChannelsOfType(act->data().toInt());
-}
+	//QAction *act = qobject_cast<QAction *>(sender());
+	//Q_ASSERT(act != NULL);
+	//selectChannelsOfType(act->data().toInt());
 
-///
-/// selectChannelsOfType()
-///
-void AwGraphicsScene::selectChannelsOfType(int type)
-{
-	foreach (AwGraphicsSignalItem *i, m_signalItems)
+	QAction *act = qobject_cast<QAction *>(sender());
+	if (act == Q_NULLPTR)
+		return;
+	auto type = act->data().toInt();
+	foreach(AwGraphicsSignalItem *i, m_signalItems)
 		if (i->channel()->type() == type) {
 			i->setSelected(true);
 			i->channel()->setSelected(true);
 		}
-
-	updateSelection();
 	update();
 }
+
+/////
+///// selectChannelsOfType()
+/////
+//void AwGraphicsScene::selectChannelsOfType(int type)
+//{
+//	foreach (AwGraphicsSignalItem *i, m_signalItems)
+//		if (i->channel()->type() == type) {
+//			i->setSelected(true);
+//			i->channel()->setSelected(true);
+//		}
+//
+////	updateSelection();
+//	update();
+//}
 
 
 void AwGraphicsScene::goToStart()
@@ -528,7 +547,7 @@ void AwGraphicsScene::showChannel(const QString& label)
 // set channel with corresponding name to selected or not selected
 void AwGraphicsScene::changeChannelsSelectionState(const QString& name, bool selected)
 {
-	foreach (AwGraphicsSignalItem *i, m_signalItems)
+	for (auto i : m_signalItems)
 		if (i->channel()->name() == name)		{
 			i->setSelected(selected);
 			i->channel()->setSelected(selected);
@@ -538,12 +557,22 @@ void AwGraphicsScene::changeChannelsSelectionState(const QString& name, bool sel
 	update();
 }
 
+
+AwChannelList AwGraphicsScene::selectedChannels()
+{
+	AwChannelList res;
+	for (auto i : m_signalItems)
+		if (i->isSelected())
+			res << i->channel();
+	return res;
+}
+
 ///
 /// selectAllChannels()
 ///
 void AwGraphicsScene::selectAllChannels()
 {
-	foreach (AwGraphicsSignalItem *i, m_signalItems) {
+	for (auto i : m_signalItems) {
 		i->setSelected(true);
 		i->channel()->setSelected(true);
 	}
@@ -556,7 +585,7 @@ void AwGraphicsScene::selectAllChannels()
 ///
 void AwGraphicsScene::invertChannelSelection()
 {
-	foreach (AwGraphicsSignalItem *i, m_signalItems)	{
+	for (auto i : m_signalItems)	{
 		i->setSelected(!i->isSelected());
 		i->channel()->setSelected(!i->isSelected());
 	}
@@ -569,7 +598,7 @@ void AwGraphicsScene::invertChannelSelection()
 ///
 void AwGraphicsScene::clearChannelSelection()
 {
-	foreach (AwGraphicsSignalItem *i, m_signalItems)	{
+	for (auto i : m_signalItems)	{
 		i->setSelected(false);
 		i->channel()->setSelected(false);
 	}
@@ -622,7 +651,7 @@ void AwGraphicsScene::selectChannelAtPosition(const QPointF& pos)
 	if (sitem)	{
 		sitem->setSelected(!sitem->isSelected());
 		sitem->channel()->setSelected(!sitem->isSelected());
-		updateSelection();
+		//updateSelection();
 	}
 	update();
 }
@@ -709,7 +738,6 @@ void AwGraphicsScene::highlightMarker(AwMarker *marker)
 						m_markerItemsDisplayed << amci;
 						amci->updatePosition();
 					}
-				//	views().at(0)->ensureVisible(amci);
 				}
 			}
 			if (lastItem)
@@ -973,31 +1001,43 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 
 	// Channel Selection
 	QMenu *menuSelection = menuDisplay->addMenu(tr("Selection"));
-	QAction *actSelectAll = new QAction(tr("Select all channels"), menuSelection);
-	connect(actSelectAll, SIGNAL(triggered()), this, SLOT(selectAllChannels()));
-	menuSelection->addAction(actSelectAll);
-	// 
-	QAction *actSelectEEG = new QAction(tr("Select EEG channels"), menuSelection);
-	connect(actSelectEEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	actSelectEEG->setData(AwChannel::EEG);
-	menuSelection->addAction(actSelectEEG);
-	// 
-	QAction *actSelectSEEG = new QAction(tr("Select SEEG channels"), menuSelection);
-	connect(actSelectSEEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	actSelectSEEG->setData(AwChannel::SEEG);
-	menuSelection->addAction(actSelectSEEG);
-	// 
-	QAction *actSelectMEG = new QAction(tr("Select MEG channels"), menuSelection);
-	connect(actSelectMEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	actSelectMEG->setData(AwChannel::MEG);
-	menuSelection->addAction(actSelectMEG);
-	//
-	QAction *actSelectICA = new QAction(tr("Select ICA channels"), menuSelection);
-	connect(actSelectICA, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	actSelectICA->setData(AwChannel::ICA);
-	menuSelection->addAction(actSelectICA);
+	QAction *action = menuSelection->addAction(tr("Select all channels"));
+	connect(action, &QAction::triggered, this, &AwGraphicsScene::selectAllChannels);
+
+	auto channelTypes = AwChannel::types();
+	for (auto t : channelTypes) {
+		action = menuSelection->addAction(QString(tr("Select %1 channels").arg(t)));
+		action->setData(AwChannel::stringToType(t));
+		connect(action, &QAction::triggered, this, &AwGraphicsScene::selectChannelsOfType);
+	}
+
+	//QAction *actSelectAll = new QAction(tr("Select all channels"), menuSelection);
+	//connect(actSelectAll, SIGNAL(triggered()), this, SLOT(selectAllChannels()));
+	//menuSelection->addAction(actSelectAll);
+	//// 
+	//QAction *actSelectEEG = new QAction(tr("Select EEG channels"), menuSelection);
+	//connect(actSelectEEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
+	//actSelectEEG->setData(AwChannel::EEG);
+	//menuSelection->addAction(actSelectEEG);
+	//// 
+	//QAction *actSelectSEEG = new QAction(tr("Select SEEG channels"), menuSelection);
+	//connect(actSelectSEEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
+	//actSelectSEEG->setData(AwChannel::SEEG);
+	//menuSelection->addAction(actSelectSEEG);
+	//// 
+	//QAction *actSelectMEG = new QAction(tr("Select MEG channels"), menuSelection);
+	//connect(actSelectMEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
+	//actSelectMEG->setData(AwChannel::MEG);
+	//menuSelection->addAction(actSelectMEG);
+	////
+	//QAction *actSelectICA = new QAction(tr("Select ICA channels"), menuSelection);
+	//connect(actSelectICA, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
+	//actSelectICA->setData(AwChannel::ICA);
+	//menuSelection->addAction(actSelectICA);
 	
-	if (!m_selectedChannels.isEmpty())	{
+	auto selectedChannels = this->selectedChannels();
+
+	if (!selectedChannels.isEmpty())	{
 		QAction *actInvertSelection = new QAction(tr("Invert selection"), menuSelection);
 		connect(actInvertSelection, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
 		menuSelection->addAction(actInvertSelection);
@@ -1244,18 +1284,6 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
 		}
 		break;
 	case AwGraphicsScene::AddingMarker:
-		//if (pos.x() >= (v->viewport()->width() - 20)) {// +- 20 pixels margin
-		//	nextPage();
-		//	// move mouse cursor to the middle of the view
-		//	QPoint globalPos((int)v->width() / 2, (int)v->height() / 2);
-		//	QCursor::setPos(v->mapToGlobal(globalPos));
-		//}
-		//else if (pos.x() <= (v->viewport()->x() + 20)) { // +- 20 pixels margin
-		//	previousPage();
-		//	// move mouse cursor to the middle of the view
-		//	QPoint globalPos((int)v->width() / 2, (int)v->height() / 2);
-		//	QCursor::setPos(v->mapToGlobal(globalPos));
-		//}
 		if (m_isTimeSelectionStarted) {
 			m_currentMarkerItem->marker()->setEnd(timeAtPos(pos));
 			// check if we move after the end of the file

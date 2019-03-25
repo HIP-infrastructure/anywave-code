@@ -438,9 +438,9 @@ Dragging channels from As Recorded list directly to the montage will also add th
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="buttonSortName">
+           <widget class="QPushButton" name="buttonSort">
             <property name="text">
-             <string>Sort by name</string>
+             <string>ReOrder</string>
             </property>
            </widget>
           </item>
@@ -517,7 +517,7 @@ Dragging channels from As Recorded list directly to the montage will also add th
              <string>Click to reset the current montage and to build a SEEG bipolar one</string>
             </property>
             <property name="text">
-             <string>Make SEEG as Bipolar</string>
+             <string>SEEG Montage</string>
             </property>
            </widget>
           </item>
@@ -537,7 +537,7 @@ Dragging channels from As Recorded list directly to the montage will also add th
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Make EEG AVG Ref.</string>
+             <string> EEG AVG Ref. Montage</string>
             </property>
            </widget>
           </item>

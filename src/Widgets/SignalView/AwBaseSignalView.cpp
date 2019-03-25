@@ -112,11 +112,12 @@ void AwBaseSignalView::makeConnections()
 
 	connect(m_scene, SIGNAL(needRefresh()), this, SLOT(reloadData()));
 	connect(m_scene, SIGNAL(updatePositionInFile(float)), this , SLOT(setPositionInFile(float)));
-	connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), m_navBar, SLOT(updateNumberOfSelectedChannels(AwChannelList&)));
+	connect(m_scene, &AwGraphicsScene::channelsSelectionChanged, m_navBar, &AwNavigationBar::updateNumberOfSelectedChannels);
+	//connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), m_navBar, SLOT(updateNumberOfSelectedChannels(AwChannelList&)));
 	connect(m_scene, SIGNAL(closeViewClicked()), this, SIGNAL(closeViewClicked()));
 	connect(m_scene, SIGNAL(cursorPositionChanged(float)), this, SIGNAL(cursorPositionChanged(float)));
 	connect(m_scene, SIGNAL(mappingPositionChanged(float)), this, SIGNAL(mappingPositionChanged(float)));
-	connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), this, SLOT(setSelectedChannels(AwChannelList&)));
+	//connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), this, SLOT(setSelectedChannels(AwChannelList&)));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_view, SLOT(layoutItems()));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_navBar, SLOT(updateNumberOfChannels(int)));
 	connect(m_scene, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));
@@ -230,10 +231,15 @@ void AwBaseSignalView::updatePageDuration(float duration)
 		reloadData();
 }
 
-void AwBaseSignalView::setSelectedChannels(AwChannelList& channels)
+//void AwBaseSignalView::setSelectedChannels(AwChannelList& channels)
+//{
+//	m_selectedChannels = channels;
+//	emit channelSelectionChanged(m_selectedChannels);
+//}
+
+AwChannelList AwBaseSignalView::selectedChannels()
 {
-	m_selectedChannels = channels;
-	emit channelSelectionChanged(m_selectedChannels);
+	return m_scene->selectedChannels();
 }
 
 

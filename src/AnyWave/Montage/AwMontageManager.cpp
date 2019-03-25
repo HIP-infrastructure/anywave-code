@@ -30,7 +30,7 @@
 #include <QDomElement> // For xml input/output
 #include <widget/AwMessageBox.h>
 #include <QtCore>
-#include "Process/AwProcessManager.h"
+//#include "Process/AwProcessManager.h"
 #include <QFileDialog>
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
@@ -544,7 +544,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	}
 	setNewFilters(AwSettings::getInstance()->filterSettings());
 	
-	AwProcessManager::instance()->setMontageChannels(m_channels);
+//	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	emit montageChanged(m_channels);
 }
@@ -1355,7 +1355,7 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 		QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
 		return;
 	}
-	AwProcessManager::instance()->setMontageChannels(m_channels);
+//	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	setNewFilters(AwSettings::getInstance()->filterSettings());
 	emit montageChanged(m_channels);
@@ -1395,17 +1395,17 @@ void AwMontageManager::buildNewMontageFromChannels(const AwChannelList& channels
 		// do not add a bad channel in the montage
 		if (asRecorded->isBad())
 			continue;
-		if (c->hasReferences()) { // do not add the channel if the reference channel is bad.
-			if (!m_asRecorded.contains(c->referenceName()))
-				continue;
-			auto asRecorded = m_asRecorded[c->referenceName()];
-			if (asRecorded->isBad())
+		if (c->hasReferences() && m_asRecorded.contains(c->referenceName())) { // do not add the channel if the reference channel is bad.
+			if (m_asRecorded[c->referenceName()]->isBad())
 				continue;
 		}
+
 		newMontage << c->duplicate();
 	}
 	if (!newMontage.isEmpty()) {
-		clear();
+		//clear();
+		while (!m_channels.isEmpty())
+			delete m_channels.takeFirst();
 		m_channels = newMontage;
 		emit montageChanged(m_channels);
 	}

@@ -243,6 +243,8 @@ public:
 	static QString unitForType(int type);
 	/** Get default amplitude value for a channel type **/
 	static float defaultAmplitudeForType(int type);
+	static QList<AwChannel *> sortByName(const QList<AwChannel * > & list);
+	static QList<AwChannel *> sortByType(const QList<AwChannel * > & list, const QStringList& types = QStringList());
 	/** remove doublons from a list. Doublons are checked based on name of channels. **/
 	static QList<AwChannel *> removeDoublons(const QList<AwChannel *>& list);
 	QVector<float> toVector();

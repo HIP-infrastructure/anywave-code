@@ -484,9 +484,11 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	if (p->runMode() == AwProcessPlugin::Internal)
 		return true;
 
+	auto selectedChannels = AwDisplay::instance()->selectedChannels();
+	auto montageChannels = AwMontageManager::instance()->channels();
 	QList<int> keys = p->pdi.inputParameters().keys();
 	AwChannelList sources;
-	bool selection = !m_selectedChannels.isEmpty();
+	bool selection = !selectedChannels.isEmpty();
 	// browse for keys as process inputs
 	for (int i = 0; i < keys.size(); i++) {
 		int key = keys.at(i);
@@ -502,30 +504,30 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::AnyChannels) {  // any channels = selected channels if any or current montage if no channels is selected.
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 			if (!processIOCheckMinMax(p, i, sources))
 				return false;	
 		}
 		else if (key & Aw::ProcessInput::EEGChannels) {
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 
 			// get only EEG channels from sources
@@ -538,15 +540,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::SourceChannels) {
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels())
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 
 			// get only Source channels from sources
@@ -559,15 +561,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::SEEGChannels) {
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 
 			// get only SEEG channels from sources
@@ -580,15 +582,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::MEGChannels) {
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 
 			// get only MEG channels from sources
@@ -601,15 +603,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::EMGChannels) {
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 
 			// get only EMG channels from sources
@@ -622,15 +624,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::ECGChannels) {
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 
 			// get only ECG channels from sources
@@ -647,11 +649,11 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 
 			// get only Trigger channels from sources
@@ -681,15 +683,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		}
 		else if (key & Aw::ProcessInput::GetCurrentMontage) {
 			if (ignoreSelection)
-				sources = m_montageChannels;
+				sources = montageChannels;
 			else {
 				if (!selection)
 					if (confirmProcessWithAllChannels()) 
-						sources = m_montageChannels;
+						sources = montageChannels;
 					else
 						return false;
 				else
-					sources = m_selectedChannels;
+					sources = selectedChannels;
 			}
 			// clear previous input channels if any
 			//while (!p->pdi.input.channels.isEmpty())
@@ -750,7 +752,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				}
 			}
 		}
-		if (process->plugin()->flags() & Aw::ProcessFlags::ProcessRequiresChannelSelection && m_selectedChannels.isEmpty()) {
+		auto selectedChannels = AwDisplay::instance()->selectedChannels();
+		if (process->plugin()->flags() & Aw::ProcessFlags::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
 			process->plugin()->deleteInstance(process);

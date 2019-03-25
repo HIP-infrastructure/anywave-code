@@ -32,6 +32,8 @@
 #include <QSortFilterProxyModel>
 #include "Montage/AwAVGChannel.h"
 
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ProxyFilters
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,12 +135,16 @@ AwChannelListModel::AwChannelListModel(const AwChannelList& channels, QObject *p
 
 void AwChannelListModel::sortByName()
 {
-
+	beginResetModel();
+	m_channels = AwChannel::sortByName(m_channels);
+	endResetModel();
 }
 
 void AwChannelListModel::sortByNameAndType()
 {
-
+	beginResetModel();
+	m_channels = AwChannel::sortByType(m_channels);
+	endResetModel();
 }
 
 //

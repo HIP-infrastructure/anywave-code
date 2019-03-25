@@ -55,7 +55,8 @@ public:
 
 	AwDisplay(QMainWindow *window);
 	~AwDisplay();
-	inline AwChannelList& selectedChannels() { return m_allSelectedChannels; }
+//	inline AwChannelList& selectedChannels() { return m_allSelectedChannels; }
+	AwChannelList selectedChannels();
 	inline QToolBar *toolBar() { return m_toolBar; }
 
 	void newFile(AwFileIO *reader);
@@ -99,7 +100,7 @@ signals:
 	void mappingTimeSelectionDone(float pos, float duration);
 	void QTSModeEnded();
 public slots:
-	void updateSelectedChannels();
+	//void updateSelectedChannels();
 	void updateSetup(AwDisplaySetup *setup, int flags);
 	void executeCommand(int command, const QVariantList& args);
 	void synchronizeMappingCursorPos(float position);

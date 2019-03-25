@@ -148,8 +148,9 @@ void AwNavigationBar::clean()
 {
 	m_positionInFile = 0.;
 	updateNumberOfChannels(0);
-    AwChannelList dumb;
-	updateNumberOfSelectedChannels(dumb);
+ //   AwChannelList dumb;
+//	updateNumberOfSelectedChannels(dumb);
+	updateNumberOfSelectedChannels(0);
 }
 
 void AwNavigationBar::updatePositionLabel()
@@ -176,15 +177,25 @@ void AwNavigationBar::updateNumberOfChannels(int n)
 		ui->labelnChannels->hide();
 }
 
-void AwNavigationBar::updateNumberOfSelectedChannels(AwChannelList& list)
+//void AwNavigationBar::updateNumberOfSelectedChannels(AwChannelList& list)
+//{
+//	ui->labelnSelectedChannels->setVisible(list.size() > 0);
+//	QString message = QString::number(list.size()) + tr(" selected");
+//	ui->labelnSelectedChannels->setText(message);
+//	if (m_flags & AwBaseSignalView::NoInfoLabels)
+//		ui->labelnSelectedChannels->setVisible(false);
+//	else
+//		ui->labelnSelectedChannels->setVisible(list.size() > 0);
+//}
+
+void AwNavigationBar::updateNumberOfSelectedChannels(int n)
 {
-	ui->labelnSelectedChannels->setVisible(list.size() > 0);
-	QString message = QString::number(list.size()) + tr(" selected");
-	ui->labelnSelectedChannels->setText(message);
 	if (m_flags & AwBaseSignalView::NoInfoLabels)
 		ui->labelnSelectedChannels->setVisible(false);
 	else
-		ui->labelnSelectedChannels->setVisible(list.size() > 0);
+		ui->labelnSelectedChannels->setVisible(n > 0);
+
+	ui->labelnSelectedChannels->setText(QString(tr("%1 selected").arg(n)));
 }
 
 void AwNavigationBar::updateSettings(AwViewSettings *settings, int flags)

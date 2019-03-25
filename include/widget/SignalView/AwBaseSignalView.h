@@ -58,7 +58,8 @@ public:
 	inline AwViewSettings *settings() { return m_settings; }
 	inline AwGraphicsView *view() { return m_view; }
 	inline AwGraphicsScene *scene() { return m_scene; }
-	inline AwChannelList& selectedChannels() { return m_selectedChannels; }
+//	inline AwChannelList& selectedChannels() { return m_selectedChannels; }
+	AwChannelList selectedChannels();
 	inline AwNavigationBar *navigationBar() { return m_navBar; }
 	void changeChannelSelectionState(const QString& name, bool selected) { m_scene->changeChannelsSelectionState(name, selected); }
 	void update() { m_scene->update(); }
@@ -78,7 +79,7 @@ public slots:
 	void setAmplitude(int type, float value);
 	void setAmplitudes();
 	void setPositionInFile(float pos);
-	void setSelectedChannels(AwChannelList& channels);
+	//void setSelectedChannels(AwChannelList& channels);
 	virtual void reloadData();	// reload data after filtering options or settings changed
 	virtual void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
 	virtual void updateSettings(AwViewSettings *settings, int flags);
@@ -102,7 +103,7 @@ signals:
 	void settingsChanged();
 	void cursorPositionChanged(float position);
 	void mappingPositionChanged(float position);
-	void channelSelectionChanged(AwChannelList& selection);
+//	void channelSelectionChanged(AwChannelList& selection);
 	void closeViewClicked();
 	void cursorClicked(float time);	// send when user clicks the left button while cursor is active in the view.
 	void mappingTimeSelectionDone(float time, float duration);
@@ -123,7 +124,7 @@ protected:
 	AwMarkerInspector *m_markerInspector;
 	AwChannelList m_channels;				// active list of channels displayed in the scene.
 	AwChannelList m_montageChannels;		// channels from current montage.
-	AwChannelList m_selectedChannels;
+//	AwChannelList m_selectedChannels;
 	AwMarkerList m_markers;
 	AwMarkerList m_visibleMarkers;
 	float m_positionInFile;					// current position of the view in the data (in seconds)

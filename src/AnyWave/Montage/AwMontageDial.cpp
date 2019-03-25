@@ -43,40 +43,6 @@
 #include <algorithm>
 using namespace std;
 
-
-///////////////////////////////////////////////////////
-// compareChannels (using the name)
-bool compareChannelsAlphaOrder(AwChannel *a, AwChannel *b)
-{
-	static QRegularExpression re("\\d+$");
-	QString s1 = a->name(), s2 = b->name();
-	QRegularExpressionMatch match1 = re.match(s1);
-	QRegularExpressionMatch match2 = re.match(s2);
-	bool m1 = match1.hasMatch();
-	bool m2 = match2.hasMatch();
-	QString elec1 = s1, elec2 = s2;
-	if (m2 && m1) { // the electode got a terminating plot number, remove it
-		elec1.remove(re);
-		elec2.remove(re);
-
-		// base name without plot number are not the same
-		if (elec1 != elec2)
-			return s1 < s2;
-
-		int plot1, plot2;
-		plot1 = match1.captured(0).toInt();
-		plot2 = match2.captured(0).toInt();
-		return plot1 < plot2;
-	}
-	return s1 < s2;
-}
-
-bool compareChannelsInverseAlpha(AwChannel *a, AwChannel *b)
-{
-	return !compareChannelsAlphaOrder(a, b);
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 /// constructor
 ///
@@ -87,14 +53,6 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	
 	AwMontageManager *mm = AwMontageManager::instance();
 	m_asRecorded = mm->cloneAsRecordedChannels();
-
-	//// copy as recorded channels as well
-	//for (auto c : mm->asRecordedChannels()) {
-	//	AwChannel *chan = new AwChannel(c);
-	//	m_channelsAsRecorded << chan;
-	//	m_channelsMap.insert(chan->name(), chan);
-	//}
-	
 	m_badChannelsLabels = mm->badLabels();
 	m_path = mm->path();
 
@@ -118,7 +76,13 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	connect(m_ui.buttonReset, &QPushButton::clicked, this, &AwMontageDial::resetToAsRecorded);
 	connect(m_ui.buttonUp, &QPushButton::clicked, this, &AwMontageDial::moveUp);
 	connect(m_ui.buttonDown, &QPushButton::clicked, this, &AwMontageDial::moveDown);
-	connect(m_ui.buttonSortName, &QPushButton::clicked, this, &AwMontageDial::sortNames);
+	// Menu for button Re-Order
+	auto sortMenu = new QMenu(m_ui.buttonSort);
+	auto action = sortMenu->addAction("Sort by name");
+	connect(action, &QAction::triggered, this, &AwMontageDial::sortMontageByName);
+	action = sortMenu->addAction("Sort by type");
+	connect(action, &QAction::triggered, this, &AwMontageDial::sortMontageByType);
+	m_ui.buttonSort->setMenu(sortMenu);
 
 	// sorting proxy for as recorded channels
 	AsRecordedProxyModel *sortModelAsRecorded = new AsRecordedProxyModel(this);
@@ -165,9 +129,6 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 
 AwMontageDial::~AwMontageDial()
 {
-	//while (!m_channelsAsRecorded.isEmpty())
-	//	delete m_channelsAsRecorded.takeFirst();
-
 	for (auto c : m_asRecorded.values()) 
 		delete c;
 	
@@ -233,23 +194,16 @@ void AwMontageDial::moveUp()
 	m_ui.tvDisplay->setFocus();
 }
 
-
-void AwMontageDial::sortNames()
+void AwMontageDial::sortMontageByName()
 {
-	static bool alphaSorted = false;
-	AwChannelList channels = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
-	if (channels.isEmpty())
-		return;
-	if (!alphaSorted) {
-		std::sort(channels.begin(), channels.end(), compareChannelsAlphaOrder);
-		alphaSorted = true;
-	}
-	else {
-		std::sort(channels.begin(), channels.end(), compareChannelsInverseAlpha);
-		alphaSorted = false;
-	}
-	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(channels);
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->sortByName();
 }
+
+void AwMontageDial::sortMontageByType()
+{
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->sortByNameAndType();
+}
+
 
 void AwMontageDial::moveDown()
 {
@@ -434,48 +388,27 @@ void AwMontageDial::makeSEEGBipolar()
 		AwMessageBox::information(this, tr("SEEG Bipolar"), tr("Could not make a bipolar montage (no SEEG channels in the current montage)"));
 		return;
 	}
-	AwChannelList temp;
+
 	QRegularExpression exp("([A-Z]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match;
-	bool monopolarLeft = false;
-	for (int i = 0; i < seegChannels.size(); i++) {
-		AwChannel *seegChan = seegChannels.at(i);
-		match = exp.match(seegChan->name());
+	for (auto c : seegChannels) {
+		match = exp.match(c->name());
 		if (match.hasMatch()) {
-			QString elec = match.captured(1);
-			QString number = match.captured(2);
-			// WARNING 
-			// some electrodes may have plot numbers starting with a ZERO
-			bool startsWithZero = number.startsWith("0");
-			QString ref;
-			if (startsWithZero && number.toInt() < 9)
-				ref = elec + "0" + QString::number(number.toInt() + 1);
-			else
-				ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
-			// check that the ref electrode exists and is a SEEG electrode.
-			AwChannel *c = m_asRecorded[ref];
-			bool exist = c != NULL;
-			if (!exist) {
-				monopolarLeft = true;
-				montage.removeAll(seegChan);
-				temp << seegChan;
-				continue;
+			auto elec = match.captured(1);
+			auto number = match.captured(2);
+			// some electodes may have preceding zeros before pad number
+			while (number.startsWith("0")) {
+				elec += "0";
+				number.remove(0, 1);
 			}
-			// be sure ref exists is SEEG and is not bad
-			if (!c->isBad() && m_labelTypes[AwChannel::SEEG].contains(ref))
-				seegChan->setReferenceName(ref);
-			else {
-				monopolarLeft = true;
-				montage.removeAll(seegChan);
-				temp << seegChan;
-			}
+			auto ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
+			// check if ref exists in asRecorded.
+			if (m_asRecorded.contains(ref)) 
+				// build the ref
+				c->setReferenceName(ref);
 		}
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
-	if (monopolarLeft) 
-		AwMessageBox::information(this, tr("SEEG Bipolar"), tr("Some SEEG monopolar channels have been removed from the montage"));
-	while (!temp.isEmpty())
-		delete temp.takeFirst();
 }
 
 void AwMontageDial::unsetBadChannel(const QString& label)

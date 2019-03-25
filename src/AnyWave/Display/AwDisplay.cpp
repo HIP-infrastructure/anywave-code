@@ -132,7 +132,7 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	m_signalViews << view;
 
 	// connections
-	connect(view, SIGNAL(channelSelectionChanged(AwChannelList&)), this, SLOT(updateSelectedChannels()));
+	//connect(view, SIGNAL(channelSelectionChanged(AwChannelList&)), this, SLOT(updateSelectedChannels()));
 	connect(view, SIGNAL(positionChanged(float)), this, SLOT(synchronizeViews(float)));
 	connect(view, SIGNAL(cursorPositionChanged(float)), this, SLOT(synchronizeCursorPos(float)));
 	connect(view, SIGNAL(mappingPositionChanged(float)), this, SLOT(synchronizeMappingCursorPos(float)));
@@ -224,19 +224,22 @@ void AwDisplay::quit()
 
 void AwDisplay::saveChannelSelections()
 {
+	auto selectedChannels = this->selectedChannels();
+	if (selectedChannels.isEmpty())
+		return;
+	auto selectedLabels = AwChannel::getLabels(selectedChannels);
 	auto fi = AwSettings::getInstance()->fileInfo();
 	if (!fi)
 		return;
 	QString path = fi->filePath() + ".sel";
-	if (m_selectedLabels.isEmpty()) {
-		if (QFile::exists(path))
-			QFile::remove(path);
-		return;
-	}
+	if (QFile::exists(path))
+		QFile::remove(path);
+	return;
+
 	QFile file(path);
 	if (file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate)) {
 		QTextStream stream(&file);
-		for (auto label : m_selectedLabels)
+		for (auto label : selectedLabels)
 			stream << label << endl;
 		file.close();
 	}
@@ -456,7 +459,7 @@ void AwDisplay::removeView()
 		return;
 	}
 	m_signalViews.removeOne(view);
-//	view->widget()->setParent(NULL); // remove it from QSplitter
+
 	view->setParent(NULL);
 	m_setup->deleteViewSetup(index);
 	delete view;
@@ -574,11 +577,7 @@ void AwDisplay::updateDisplay()
 void AwDisplay::setChannels(const AwChannelList &montage)
 {
 	m_channels.clear();
-
 	m_channels = montage;
-
-//	// duplicate channel objects for each views.
- //   AwChannelList tmp = AwChannel::duplicateChannels(montage);
 	for (auto v : m_signalViews) {
 		v->setChannels(montage);
 	}
@@ -674,16 +673,24 @@ void AwDisplay::setQTSMode(bool on)
 		v->scene()->setQTSMode(on);
 }
 
-void AwDisplay::updateSelectedChannels()
+//void AwDisplay::updateSelectedChannels()
+//{
+//	m_allSelectedChannels.clear();
+//	m_selectedLabels.clear();
+//
+//	foreach (AwSignalView *v, m_signalViews)
+//		m_allSelectedChannels += v->selectedChannels();
+//
+//	m_selectedLabels = AwChannel::getLabels(m_allSelectedChannels);
+//	emit selectedChannelsChanged(m_allSelectedChannels);
+//}
+
+AwChannelList AwDisplay::selectedChannels()
 {
-	m_allSelectedChannels.clear();
-	m_selectedLabels.clear();
-
-	foreach (AwSignalView *v, m_signalViews)
-		m_allSelectedChannels += v->selectedChannels();
-
-	m_selectedLabels = AwChannel::getLabels(m_allSelectedChannels);
-	emit selectedChannelsChanged(m_allSelectedChannels);
+	AwChannelList res;
+	for (auto v : m_signalViews)
+		res += v->selectedChannels();
+	return res;
 }
 
 
