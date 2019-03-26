@@ -177,17 +177,6 @@ void AwNavigationBar::updateNumberOfChannels(int n)
 		ui->labelnChannels->hide();
 }
 
-//void AwNavigationBar::updateNumberOfSelectedChannels(AwChannelList& list)
-//{
-//	ui->labelnSelectedChannels->setVisible(list.size() > 0);
-//	QString message = QString::number(list.size()) + tr(" selected");
-//	ui->labelnSelectedChannels->setText(message);
-//	if (m_flags & AwBaseSignalView::NoInfoLabels)
-//		ui->labelnSelectedChannels->setVisible(false);
-//	else
-//		ui->labelnSelectedChannels->setVisible(list.size() > 0);
-//}
-
 void AwNavigationBar::updateNumberOfSelectedChannels(int n)
 {
 	if (m_flags & AwBaseSignalView::NoInfoLabels)

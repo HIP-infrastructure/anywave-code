@@ -30,7 +30,6 @@
 #include <QDomElement> // For xml input/output
 #include <widget/AwMessageBox.h>
 #include <QtCore>
-//#include "Process/AwProcessManager.h"
 #include <QFileDialog>
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
@@ -42,6 +41,7 @@
 #include <AwAmplitudeManager.h>
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
+#include <AwMontage.h>
 
 // compare function for sorting labels of electrodes.
 bool compareSEEGLabels(const QString& s1, const QString& s2)
@@ -543,8 +543,6 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		AwSettings::getInstance()->filterSettings().initWithChannels(m_channels);
 	}
 	setNewFilters(AwSettings::getInstance()->filterSettings());
-	
-//	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	emit montageChanged(m_channels);
 }
@@ -876,133 +874,187 @@ bool AwMontageManager::saveMontage(const QString& name)
 
 AwChannelList AwMontageManager::load(const QString& path)
 {
-	QFile file(path);
-	AwChannelList res;
 
-	if (!file.open(QIODevice::ReadOnly))
-		return AwChannelList();
-
-	QDomDocument doc;
-	QDomElement element;
-	QString error;
-	int line, col;
-	
-	if (!doc.setContent(&file, &error, &line, &col)) {
-		AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
-		file.close();
-		return AwChannelList();
+	AwChannelList channels, res;
+	try {
+		channels = AwMontage::load(path);
+	}
+	catch (const AwException& e)
+	{
+		AwMessageBox::information(0, tr("Error"), e.errorString());
+		return channels;
 	}
 
-	QDomElement root = doc.documentElement(); // get root tag
-	if (root.tagName() != "Montage") {
-		file.close();
-		return AwChannelList();
-	}
-
-	QDomNode node = root.firstChild();
-	while (!node.isNull())	{
-		element = node.toElement();
-		QDomNode child;
-		AwChannel *channel = NULL;
-		if (element.tagName() == "Channel")	{
-			QString name = element.attribute("name");
-			auto asRecorded = m_asRecorded[name];
-			if (!asRecorded) { // channel not found in as recorded => skipping
-				if (name == "SEEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::SEEG);
-				}
-				else if (name == "MEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::MEG);
-					}
-				else if ( name == "EEG_AVG") {
-					channel =  new AwAVGChannel(AwChannel::EEG);
-				}
-				else {// unknowm channel type => skip
-					node = node.nextSibling();
-					continue;
-				}
-			}
-			// skip channels marked as bad in as Recorded.
-			else if (asRecorded->isBad()) {
-				node = node.nextSibling();
+	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
+	for (auto c : channels) {
+		// search for a match in as recorded
+		auto asRecorded = m_asRecorded[c->name()];
+		if (asRecorded) {
+			if (asRecorded->isBad())
 				continue;
+			if (c->hasReferences()) {
+				auto asRecordedRef = m_asRecorded[c->referenceName()];
+				if (asRecordedRef)
+					if (asRecorded->isBad())
+						continue;
 			}
-			else 
-				channel = new AwChannel(asRecorded);
-			child = element.firstChild();
-
-			while (!child.isNull())	{
-				QDomElement ee = child.toElement();
-				if (ee.tagName() == "type") {
-					int t = AwChannel::stringToType(ee.text());
-					if (channel->type() != t) {
-						asRecorded->setType(t);
-						channel->setType(t);
-					}
-				}
-				else if (ee.tagName() == "reference") {
-					// find reference in asRecorded
-					QString ref = ee.text();
-					if (m_asRecorded.contains(ref))
-						channel->setReferenceName(ref);
-				}
-				else if (ee.tagName() == "color") {
-					if (ee.text().isEmpty())
-						channel->setColor("black");
-					else
-						channel->setColor(ee.text());
-				}
-				else if (ee.tagName() == "filters") {
-					// overwrite global filtering options if the channel was saved with a specific filtering setting.
-					QString lp = ee.attribute("lowPass");
-					QString hp = ee.attribute("highPass");
-
-					channel->setLowFilter(lp.toDouble());
-					channel->setHighFilter(hp.toDouble());
-				}
-				child = child.nextSibling();
-			}
-			// check for reference type
-			if (!channel->referenceName().isEmpty()) {
-				auto ref = m_asRecorded[channel->referenceName()];
-				auto asRecorded = m_asRecorded[ref->name()];
-				ref->setType(channel->type());
-				asRecorded->setType(channel->type());
-			}
-			res << channel;
+			// Change asrecorded type to match the one in .mtg
+			asRecorded->setType(c->type());
+			// instantiante from as recorded
+			auto newChan = asRecorded->duplicate();
+			// copy settings set in .mtg file
+			newChan->setColor(c->color());
+			newChan->setLowFilter(c->lowFilter());
+			newChan->setHighFilter(c->highFilter());
+			newChan->setReferenceName(c->referenceName());
+			res << newChan;
 		}
-		node = node.nextSibling();
+		else {  // not present in as recorded
+			// checking for special names
+			if (c->name() == "SEEG_AVG") {
+				res << new AwAVGChannel(AwChannel::SEEG);
+			}
+			else if (c->name() == "EEG_AVG") {
+				res << new AwAVGChannel(AwChannel::EEG);
+			}
+			else if(c->name() == "MEG_AVG") {
+				res << new AwAVGChannel(AwChannel::MEG);
+			}
+		}
 	}
 
-	file.close();
-
+	while (!channels.isEmpty())
+		delete channels.takeFirst();
 
 	return res;
+
+	//QFile file(path);
+	//AwChannelList res;
+
+	//if (!file.open(QIODevice::ReadOnly))
+	//	return AwChannelList();
+
+	//QDomDocument doc;
+	//QDomElement element;
+	//QString error;
+	//int line, col;
+	//
+	//if (!doc.setContent(&file, &error, &line, &col)) {
+	//	AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
+	//	file.close();
+	//	return AwChannelList();
+	//}
+
+	//QDomElement root = doc.documentElement(); // get root tag
+	//if (root.tagName() != "Montage") {
+	//	file.close();
+	//	return AwChannelList();
+	//}
+
+	//QDomNode node = root.firstChild();
+	//while (!node.isNull())	{
+	//	element = node.toElement();
+	//	QDomNode child;
+	//	AwChannel *channel = NULL;
+	//	if (element.tagName() == "Channel")	{
+	//		QString name = element.attribute("name");
+	//		auto asRecorded = m_asRecorded[name];
+	//		if (!asRecorded) { // channel not found in as recorded => skipping
+	//			if (name == "SEEG_AVG")	{
+	//				channel = new AwAVGChannel(AwChannel::SEEG);
+	//			}
+	//			else if (name == "MEG_AVG")	{
+	//				channel = new AwAVGChannel(AwChannel::MEG);
+	//				}
+	//			else if ( name == "EEG_AVG") {
+	//				channel =  new AwAVGChannel(AwChannel::EEG);
+	//			}
+	//			else {// unknowm channel type => skip
+	//				node = node.nextSibling();
+	//				continue;
+	//			}
+	//		}
+	//		// skip channels marked as bad in as Recorded.
+	//		else if (asRecorded->isBad()) {
+	//			node = node.nextSibling();
+	//			continue;
+	//		}
+	//		else 
+	//			channel = new AwChannel(asRecorded);
+	//		child = element.firstChild();
+
+	//		while (!child.isNull())	{
+	//			QDomElement ee = child.toElement();
+	//			if (ee.tagName() == "type") {
+	//				int t = AwChannel::stringToType(ee.text());
+	//				if (channel->type() != t) {
+	//					asRecorded->setType(t);
+	//					channel->setType(t);
+	//				}
+	//			}
+	//			else if (ee.tagName() == "reference") {
+	//				// find reference in asRecorded
+	//				QString ref = ee.text();
+	//				if (m_asRecorded.contains(ref))
+	//					channel->setReferenceName(ref);
+	//			}
+	//			else if (ee.tagName() == "color") {
+	//				if (ee.text().isEmpty())
+	//					channel->setColor("black");
+	//				else
+	//					channel->setColor(ee.text());
+	//			}
+	//			else if (ee.tagName() == "filters") {
+	//				// overwrite global filtering options if the channel was saved with a specific filtering setting.
+	//				QString lp = ee.attribute("lowPass");
+	//				QString hp = ee.attribute("highPass");
+
+	//				channel->setLowFilter(lp.toDouble());
+	//				channel->setHighFilter(hp.toDouble());
+	//			}
+	//			child = child.nextSibling();
+	//		}
+	//		// check for reference type
+	//		if (!channel->referenceName().isEmpty()) {
+	//			auto ref = m_asRecorded[channel->referenceName()];
+	//			auto asRecorded = m_asRecorded[ref->name()];
+	//			ref->setType(channel->type());
+	//			asRecorded->setType(channel->type());
+	//		}
+	//		res << channel;
+	//	}
+	//	node = node.nextSibling();
+	//}
+
+	//file.close();
+
+
+	//return res;
 }
 
 bool AwMontageManager::apply(const QString& path)
 {
-	QFile file(path);
+	//QFile file(path);
 
-	if (!file.open(QIODevice::ReadOnly))
-		return false;
+	//if (!file.open(QIODevice::ReadOnly))
+	//	return false;
 
-	QDomDocument doc;
-	QDomElement element;
-	QString error;
-	int line, col;
-	
-	if (!doc.setContent(&file, &error, &line, &col)) {
-		AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
-		file.close();
-		return false;
-	}
+	//QDomDocument doc;
+	//QDomElement element;
+	//QString error;
+	//int line, col;
+	//
+	//if (!doc.setContent(&file, &error, &line, &col)) {
+	//	AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
+	//	file.close();
+	//	return false;
+	//}
 
-	QDomElement root = doc.documentElement(); // get root tag
-	if (root.tagName() != "Montage") {
-		file.close();
-		return false;
-	}
+	//QDomElement root = doc.documentElement(); // get root tag
+	//if (root.tagName() != "Montage") {
+	//	file.close();
+	//	return false;
+	//}
 
 	// Save ICA channels if already loaded
 	AwICAChannelList savedICAChannels;
@@ -1026,74 +1078,76 @@ bool AwMontageManager::apply(const QString& path)
 	while (!m_channels.isEmpty())
 		delete m_channels.takeLast();
 
-	QDomNode node = root.firstChild();
-	while (!node.isNull())	{
-		element = node.toElement();
-		QDomNode child;
-		AwChannel *channel = NULL;
-		if (element.tagName() == "Channel")	{
-			QString name = element.attribute("name");
-			auto  asRecorded = m_asRecorded[name];
-			if (!asRecorded) { // channel not found in as recorded => skipping
-				if (name == "SEEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::SEEG);
-				}
-				else if (name == "MEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::MEG);
-				}
-				else if ( name == "EEG_AVG") {
-					channel = new AwAVGChannel(AwChannel::EEG);
-				}
-				else {// unknowm channel type => skip
-					node = node.nextSibling();
-					continue;
-				}
-			}
-			// skip channels marked as bad in as Recorded.
-			else if (asRecorded->isBad()) {
-				node = node.nextSibling();
-				continue;
-			}
-			else 
-				channel = new AwChannel(asRecorded);
+	m_channels = load(path);
 
-			child = element.firstChild();
+	//QDomNode node = root.firstChild();
+	//while (!node.isNull())	{
+	//	element = node.toElement();
+	//	QDomNode child;
+	//	AwChannel *channel = NULL;
+	//	if (element.tagName() == "Channel")	{
+	//		QString name = element.attribute("name");
+	//		auto  asRecorded = m_asRecorded[name];
+	//		if (!asRecorded) { // channel not found in as recorded => skipping
+	//			if (name == "SEEG_AVG")	{
+	//				channel = new AwAVGChannel(AwChannel::SEEG);
+	//			}
+	//			else if (name == "MEG_AVG")	{
+	//				channel = new AwAVGChannel(AwChannel::MEG);
+	//			}
+	//			else if ( name == "EEG_AVG") {
+	//				channel = new AwAVGChannel(AwChannel::EEG);
+	//			}
+	//			else {// unknowm channel type => skip
+	//				node = node.nextSibling();
+	//				continue;
+	//			}
+	//		}
+	//		// skip channels marked as bad in as Recorded.
+	//		else if (asRecorded->isBad()) {
+	//			node = node.nextSibling();
+	//			continue;
+	//		}
+	//		else 
+	//			channel = new AwChannel(asRecorded);
 
-			while (!child.isNull())	{
-				QDomElement ee = child.toElement();
-				if (ee.tagName() == "type") 	{
-					int t = AwChannel::stringToType(ee.text());
-					if (channel->type() != t) {
-						asRecorded->setType(t);
-						channel->setType(t);
-					}
-				}
-				else if (ee.tagName() == "reference") {
-					channel->setReferenceName(ee.text());
-				}
-				else if (ee.tagName() == "color")
-					channel->setColor(ee.text());
-				else if (ee.tagName() == "filters") {
-					// overwrite global filtering options if the channel was saved with a specific filtering setting.
-					QString lp = ee.attribute("lowPass");
-					QString hp = ee.attribute("highPass");
+	//		child = element.firstChild();
 
-					channel->setLowFilter(lp.toDouble());
-					channel->setHighFilter(hp.toDouble());
-				}
-				child = child.nextSibling();
-			}
-			// check for reference type
-			auto refString = channel->referenceName();
-			if (!refString.isEmpty() && m_asRecorded.contains(refString)) {
-				auto ref = m_asRecorded[refString];
-				ref->setType(channel->type());
+	//		while (!child.isNull())	{
+	//			QDomElement ee = child.toElement();
+	//			if (ee.tagName() == "type") 	{
+	//				int t = AwChannel::stringToType(ee.text());
+	//				if (channel->type() != t) {
+	//					asRecorded->setType(t);
+	//					channel->setType(t);
+	//				}
+	//			}
+	//			else if (ee.tagName() == "reference") {
+	//				channel->setReferenceName(ee.text());
+	//			}
+	//			else if (ee.tagName() == "color")
+	//				channel->setColor(ee.text());
+	//			else if (ee.tagName() == "filters") {
+	//				// overwrite global filtering options if the channel was saved with a specific filtering setting.
+	//				QString lp = ee.attribute("lowPass");
+	//				QString hp = ee.attribute("highPass");
 
-			}
-			m_channels << channel;
-		}
-		node = node.nextSibling();
-	}
+	//				channel->setLowFilter(lp.toDouble());
+	//				channel->setHighFilter(hp.toDouble());
+	//			}
+	//			child = child.nextSibling();
+	//		}
+	//		// check for reference type
+	//		auto refString = channel->referenceName();
+	//		if (!refString.isEmpty() && m_asRecorded.contains(refString)) {
+	//			auto ref = m_asRecorded[refString];
+	//			ref->setType(channel->type());
+
+	//		}
+	//		m_channels << channel;
+	//	}
+	//	node = node.nextSibling();
+	//}
 
 	// Restore ICA channels if any
 	foreach (AwICAChannel *channel, savedICAChannels) {
@@ -1109,7 +1163,7 @@ bool AwMontageManager::apply(const QString& path)
 		m_asRecorded[channel->name()] = channel;
 	}
 
-	file.close();
+	//file.close();
 	return true;
 }
 

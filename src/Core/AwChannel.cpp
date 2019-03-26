@@ -29,8 +29,8 @@
 #include <QRegularExpression>
 
 static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
-static QStringList UnitTypes = { QString::fromLatin1("�v"), QString::fromLatin1("�v") , "pT", QString::fromLatin1("�v"), QString::fromLatin1("�v") ,
-	"pT", "n/a", "n/a", "unit", "unit", "pT/m", QString::fromLatin1("�v") };
+static QStringList UnitTypes = { QString::fromLatin1("µV"), QString::fromLatin1("µV") , "pT", QString::fromLatin1("µV"), QString::fromLatin1("µV") ,
+	"pT", "n/a", "n/a", "unit", "unit", "pT/m", QString::fromLatin1("µV") };
 static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
 
 ///////////////////////////////////////////////////////////////////////////////////////////

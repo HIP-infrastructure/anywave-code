@@ -55,7 +55,6 @@ public:
 
 	AwDisplay(QMainWindow *window);
 	~AwDisplay();
-//	inline AwChannelList& selectedChannels() { return m_allSelectedChannels; }
 	AwChannelList selectedChannels();
 	inline QToolBar *toolBar() { return m_toolBar; }
 

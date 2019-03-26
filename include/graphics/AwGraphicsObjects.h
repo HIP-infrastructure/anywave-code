@@ -86,6 +86,7 @@ public slots:
 signals:
 	void sizeChanged();
 	void filtersChanged();
+	void selectionChanged(bool selected);
 protected:
 	AwDisplayPhysics *m_physics;
 	int m_flags;
@@ -169,6 +170,7 @@ protected:
 
 class AW_GRAPHICS_EXPORT AwGraphicsSignalItem : public AwBaseGraphicsSignalItem, public QGraphicsItem /* public QGraphicsPolygonItem */
 {
+	Q_OBJECT
 public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_SIGNAL_TYPE };
 	int itemType() { return AW_GRAPHICS_ITEM_SIGNAL_TYPE; }
@@ -186,6 +188,9 @@ public:
 	inline int displayFlags() { return m_flags; }
 	virtual QRectF labelBoundingBox() { return QRectF(0, 0, 0, 0); }
 	void setLabelXOffset(qreal offset);
+	QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
+signals:
+	void selectionChanged(AwGraphicsSignalItem *item, bool selected);
 protected:
 	// override the QGraphicsItem mousePress method to suppress the default selecting scheme.
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) { }

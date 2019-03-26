@@ -113,8 +113,6 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		return;
 
 	clearChannels();
-//	m_selectedChannels.clear();
-
 	m_channels = channels;
 	m_maxSR = channels.first()->samplingRate();
 	
@@ -132,6 +130,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 
 		AwBaseGraphicsSignalItem *base = dp->newInstance(c, m_physics);
 		AwGraphicsSignalItem *item = static_cast<AwGraphicsSignalItem *>(base);
+		QObject::connect(item, &AwGraphicsSignalItem::selectionChanged, this, &AwGraphicsScene::updateSignalItemSelection);
 
 		Q_ASSERT(item != NULL);
 
@@ -146,6 +145,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		item->repaint();
 	}
 	m_visibleSignalItems = m_signalItems;
+	m_selectedSignalItems.clear();
 	updateVisibleItemsHashTable();
 	emit numberOfDisplayedChannelsChanged(m_visibleSignalItems.size());
 }
@@ -187,6 +187,15 @@ void AwGraphicsScene::updateSettings(AwViewSettings *settings, int flags)
 	}
 	if (flags & AwViewSettings::ShowMarkerLabel || flags & AwViewSettings::ShowMarkerValue)	
 		updateMarkers();
+}
+
+void AwGraphicsScene::updateSignalItemSelection(AwGraphicsSignalItem *item, bool selected)
+{
+	if (selected) 
+		m_selectedSignalItems << item;
+	else
+		m_selectedSignalItems.removeAll(item);
+
 }
 
 
@@ -248,28 +257,6 @@ void AwGraphicsScene::updateSelection()
 			count++;
 	}
 	emit channelsSelectionChanged(count);
-//	m_selectedChannels.clear();
-//	m_selectedMarkers.clear();
-//	foreach (QGraphicsItem *i, selectedItems())	{
-//		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
-//
-//		if (sitem)
-//			m_selectedChannels << sitem->channel();
-//
-//		AwGraphicsMarkerItem *mitem = qgraphicsitem_cast<AwGraphicsMarkerItem *>(i);
-//		if (mitem)
-//			m_selectedMarkers << mitem->marker();
-//	}
-//
-//	// Re ordering selecting channels to match m_channels order..
-//	AwChannelList sortedList;
-//	foreach (AwChannel *c, m_channels)
-//		if (m_selectedChannels.indexOf(c) != -1)
-//			sortedList << c;
-//	m_selectedChannels = sortedList;
-//
-//	emit newSceneSelection(m_selectedChannels);
-//	emit markersSelected(m_selectedMarkers);
 }
 
 
@@ -287,11 +274,10 @@ void AwGraphicsScene::clearChannels()
 		removeItem(item);
 
 	while (!m_signalItems.isEmpty()) {
-		//delete  m_signalItems.takeFirst();
 		m_signalItems.takeFirst()->deleteLater();
 	}
 	m_visibleSignalItems.clear();
-
+	m_selectedSignalItems.clear();
 	update();
 }
 
@@ -302,7 +288,6 @@ void AwGraphicsScene::clearChannels()
 // Detruit egalement les items.
 void AwGraphicsScene::clean()
 {
-//	m_selectedChannels.clear();
 	m_channels.clear();
 	clearChannels();
 	m_markerItemsDisplayed.clear();
@@ -322,7 +307,7 @@ void AwGraphicsScene::selectUnselectChannel()
 
 	sitem->setSelected(!sitem->isSelected());
 	sitem->channel()->setSelected(!sitem->isSelected());
-	//updateSelection();
+	updateSelection();
 	update();
 }
 
@@ -332,9 +317,6 @@ void AwGraphicsScene::selectUnselectChannel()
 ///
 void AwGraphicsScene::displaySelectedChannelsOnly()
 {
-	//if (m_selectedChannels.isEmpty())
-	//	return;
-
 	m_visibleSignalItems = m_signalItems;
 
 	foreach (AwGraphicsSignalItem *item, m_visibleSignalItems) {
@@ -447,10 +429,6 @@ void AwGraphicsScene::selectChannels(const QStringList& labels)
 
 void AwGraphicsScene::selectChannelsOfType()
 {
-	//QAction *act = qobject_cast<QAction *>(sender());
-	//Q_ASSERT(act != NULL);
-	//selectChannelsOfType(act->data().toInt());
-
 	QAction *act = qobject_cast<QAction *>(sender());
 	if (act == Q_NULLPTR)
 		return;
@@ -462,21 +440,6 @@ void AwGraphicsScene::selectChannelsOfType()
 		}
 	update();
 }
-
-/////
-///// selectChannelsOfType()
-/////
-//void AwGraphicsScene::selectChannelsOfType(int type)
-//{
-//	foreach (AwGraphicsSignalItem *i, m_signalItems)
-//		if (i->channel()->type() == type) {
-//			i->setSelected(true);
-//			i->channel()->setSelected(true);
-//		}
-//
-////	updateSelection();
-//	update();
-//}
 
 
 void AwGraphicsScene::goToStart()
@@ -561,9 +524,10 @@ void AwGraphicsScene::changeChannelsSelectionState(const QString& name, bool sel
 AwChannelList AwGraphicsScene::selectedChannels()
 {
 	AwChannelList res;
-	for (auto i : m_signalItems)
-		if (i->isSelected())
-			res << i->channel();
+
+	// return selection in the same order the user selected channels
+	for (auto i : m_selectedSignalItems)
+		res << i->channel();
 	return res;
 }
 
@@ -651,7 +615,7 @@ void AwGraphicsScene::selectChannelAtPosition(const QPointF& pos)
 	if (sitem)	{
 		sitem->setSelected(!sitem->isSelected());
 		sitem->channel()->setSelected(!sitem->isSelected());
-		//updateSelection();
+		updateSelection();
 	}
 	update();
 }
@@ -1011,32 +975,7 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		connect(action, &QAction::triggered, this, &AwGraphicsScene::selectChannelsOfType);
 	}
 
-	//QAction *actSelectAll = new QAction(tr("Select all channels"), menuSelection);
-	//connect(actSelectAll, SIGNAL(triggered()), this, SLOT(selectAllChannels()));
-	//menuSelection->addAction(actSelectAll);
-	//// 
-	//QAction *actSelectEEG = new QAction(tr("Select EEG channels"), menuSelection);
-	//connect(actSelectEEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	//actSelectEEG->setData(AwChannel::EEG);
-	//menuSelection->addAction(actSelectEEG);
-	//// 
-	//QAction *actSelectSEEG = new QAction(tr("Select SEEG channels"), menuSelection);
-	//connect(actSelectSEEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	//actSelectSEEG->setData(AwChannel::SEEG);
-	//menuSelection->addAction(actSelectSEEG);
-	//// 
-	//QAction *actSelectMEG = new QAction(tr("Select MEG channels"), menuSelection);
-	//connect(actSelectMEG, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	//actSelectMEG->setData(AwChannel::MEG);
-	//menuSelection->addAction(actSelectMEG);
-	////
-	//QAction *actSelectICA = new QAction(tr("Select ICA channels"), menuSelection);
-	//connect(actSelectICA, SIGNAL(triggered()), this, SLOT(selectChannelsOfType()));
-	//actSelectICA->setData(AwChannel::ICA);
-	//menuSelection->addAction(actSelectICA);
-	
 	auto selectedChannels = this->selectedChannels();
-
 	if (!selectedChannels.isEmpty())	{
 		QAction *actInvertSelection = new QAction(tr("Invert selection"), menuSelection);
 		connect(actInvertSelection, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
@@ -1063,7 +1002,6 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	menuDisplay->addAction(actShowMarkers);
 	menuDisplay->addAction(actHideMarkers);
 	menuDisplay->addSeparator();
-
 
 	return menuDisplay;
 }
@@ -1559,6 +1497,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 				selectChannelAtPosition(e->scenePos());
 		}
 		QGraphicsScene::mouseReleaseEvent(e);
+
 		updateSelection();
 		update();
 		emit clickedAtTime(m_positionClicked);

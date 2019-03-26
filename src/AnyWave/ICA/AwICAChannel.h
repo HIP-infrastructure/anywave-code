@@ -50,20 +50,17 @@ public:
 	inline void setLayout3D(AwLayout *layout) { m_layout3D = layout; }
 	inline void setTopoValues(const QVector<float>& values) { m_topoValues = values; }
 	inline QVector<float>& topoValues() { return m_topoValues;  }
-//	void setTopoValues(fvec& vec) { m_topoValues = vec; }
-//	fvec& topoValues() { return m_topoValues; }
 	inline void setLabels(const QStringList& labels) { m_labels = labels; }
 	inline QStringList& labels() { return m_labels; }
 	void setAutoScale(bool flag) { m_autoYScale = flag; }
 	inline bool isAutoScaling() { return m_autoYScale; }
-	AwICAChannel *duplicate();
+	AwICAChannel *duplicate() override;
 	void update();
 protected:
 	int m_index;	// index in components matrix
 	int m_compType;	// component type (MEG or EEG)
 	AwLayout *m_layout2D, *m_layout3D;
 	QVector<float> m_topoValues;
-//	fvec m_topoValues;
 	QStringList m_labels;	// Channel labels for topography
 	bool m_autoYScale;
 	bool m_isRejected;

@@ -132,7 +132,6 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	m_signalViews << view;
 
 	// connections
-	//connect(view, SIGNAL(channelSelectionChanged(AwChannelList&)), this, SLOT(updateSelectedChannels()));
 	connect(view, SIGNAL(positionChanged(float)), this, SLOT(synchronizeViews(float)));
 	connect(view, SIGNAL(cursorPositionChanged(float)), this, SLOT(synchronizeCursorPos(float)));
 	connect(view, SIGNAL(mappingPositionChanged(float)), this, SLOT(synchronizeMappingCursorPos(float)));
@@ -234,7 +233,6 @@ void AwDisplay::saveChannelSelections()
 	QString path = fi->filePath() + ".sel";
 	if (QFile::exists(path))
 		QFile::remove(path);
-	return;
 
 	QFile file(path);
 	if (file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate)) {

@@ -30,7 +30,7 @@
 class AwAvgSignalItem : public AwSignalItem
 {
 	Q_OBJECT
-		Q_INTERFACES(AwGraphicsSignalItem)
+	Q_INTERFACES(AwGraphicsSignalItem)
 public:
 	AwAvgSignalItem(AwChannel *chan, AwDisplayPhysics *phys = NULL);
 	~AwAvgSignalItem();
