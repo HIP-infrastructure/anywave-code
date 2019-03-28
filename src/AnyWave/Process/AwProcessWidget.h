@@ -52,7 +52,6 @@ public slots:
 	void setProgression(int value);
 	void stop();
 	void showResults();
-	void updateLog();
 	void showLog();
 	void removeMe();
 protected slots:
@@ -67,7 +66,6 @@ private:
 	bool m_logUpdated;
 	bool m_isActive;
 	AwProcessLogWindow *m_logWindow;
-	QStringList m_log;
 	QTimer *m_timer;
 	AwProcess *m_process;
 };

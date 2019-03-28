@@ -32,4 +32,5 @@ class AW_MONTAGE_EXPORT AwMontage
 {
 public:
 	static AwChannelList load(const QString& path);
+	static void save(const QString& path, const AwChannelList& channels);
 };

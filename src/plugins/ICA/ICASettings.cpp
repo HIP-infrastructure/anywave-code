@@ -12,11 +12,11 @@ ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels,
 	m_channels = channels;
 	m_modes = AwChannel::getTypesAsString(channels);
 	// remove unwanted modalities
-	m_modes.removeAll("Trigger");
+	m_modes.removeAll("TRIGGER");
 	m_modes.removeAll("ECG");
-	m_modes.removeAll("Other");
+	m_modes.removeAll("OTHER");
 	m_modes.removeAll("ICA");
-	m_modes.removeAll("Reference");
+	m_modes.removeAll("REFERENCE");
 	m_modes.removeAll("GRAD");
 	m_ui.comboModality->addItems(m_modes);
 	m_labels = AwMarker::getUniqueLabels(markers);

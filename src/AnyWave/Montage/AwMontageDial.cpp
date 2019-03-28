@@ -72,6 +72,7 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	move(QPoint(100,0));
 	// resizing done
 
+
 	connect(m_ui.buttonClean, &QPushButton::clicked, this, &AwMontageDial::cleanMontage);
 	connect(m_ui.buttonReset, &QPushButton::clicked, this, &AwMontageDial::resetToAsRecorded);
 	connect(m_ui.buttonUp, &QPushButton::clicked, this, &AwMontageDial::moveUp);
@@ -125,6 +126,17 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	connect(m_ui.tvChannelsAsRecorded, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuAsRecordedRequested(const QPoint&)));
 	connect(m_ui.buttonEEGSEEG, SIGNAL(clicked()), this, SLOT(computeSEEGMontageFromEEGChannels()));
 	connect(m_ui.buttonECOG, &QPushButton::clicked, this, &AwMontageDial::makeECOGBipolar);
+
+	/// Columns hide/show buttons
+	connect(m_ui.checkColor, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
+	connect(m_ui.checkHP, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
+	connect(m_ui.checkLP, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
+	connect(m_ui.checkNotch, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
+
+	m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_HPF, true);
+	m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_LPF, true);
+	m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_NOTCH, true);
+	m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_COLOR, true);
 }
 
 AwMontageDial::~AwMontageDial()
@@ -315,10 +327,10 @@ void AwMontageDial::addChannelsByTypes()
 void AwMontageDial::setAVGRefMontage()
 {
 	AwChannelList channels = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
-	for (auto c : channels) {
-		if (c->isEEG())
-			c->setReferenceName("AVG");
-	}
+
+	for (auto c : AwChannel::getChannelsOfType(channels, AwChannel::EEG)) 
+		c->setReferenceName("AVG");
+	
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(channels);
 }
 
@@ -331,24 +343,19 @@ void AwMontageDial::computeSEEGMontageFromEEGChannels()
 
 	auto asRecordedChannels = m_asRecorded.values();
 	// Transform EEG into SEEG is As Recorded
-	for (auto c : asRecordedChannels) {
-		if (c->isEEG())
+	for (auto c : AwChannel::getChannelsOfType(asRecordedChannels, AwChannel::EEG)) 
 			c->setType(AwChannel::SEEG);
-	}
+	
 	sortLabelsByTypes();
-	// Get current montage , duplicate it, remove EEG channels, make them SEEG with references
-	AwChannelList channels = AwChannel::duplicateChannels(static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage());
-	foreach(AwChannel *c, channels) {
-		if (c->isEEG()) {
-			channels.removeAll(c);
-			delete c;
-		}
+	// get the montage and change EEG into SEEG
+	auto channels = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
+	auto eegChannels = AwChannel::getChannelsOfType(channels, AwChannel::EEG);
+	for (auto c : eegChannels) {
+		c->setType(AwChannel::SEEG);
+		c->clearRefName();
+		c->setGain(AwChannel::defaultAmplitudeForType(AwChannel::SEEG));
 	}
-	for (auto c : asRecordedChannels) {
-		if (c->isSEEG())
-			channels.append(new AwChannel(c));
-	}
-	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(channels);
 	makeSEEGBipolar();
 }
 
@@ -528,7 +535,8 @@ void AwMontageDial::addChannelsToMontage()
 			if (channel) {
 				if (channel->isBad())
 					continue;
-				channels << new AwChannel(channel);
+				//channels << new AwChannel(channel);
+				channels << channel->duplicate();
 			}
 		}
 	}
@@ -805,5 +813,25 @@ void AwMontageDial::contextMenuApplyColorToSelection()
 		if (i.column() == AW_MONTAGE_COLUMN_COLOR) {
 			m_ui.tvDisplay->model()->setData(i, color, Qt::EditRole);
 		}
+	}
+}
+
+
+void AwMontageDial::showColumn(bool flag)
+{
+	QCheckBox *cb = (QCheckBox *)sender();
+	if (cb == NULL)
+		return;
+	if (cb == m_ui.checkColor) {
+		m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_COLOR, !flag);
+	}
+	else if (cb == m_ui.checkHP) {
+		m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_HPF, !flag);
+	}
+	else if (cb == m_ui.checkLP) {
+		m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_LPF, !flag);
+	}
+	else if (cb == m_ui.checkNotch) {
+		m_ui.tvDisplay->setColumnHidden(AW_MONTAGE_COLUMN_NOTCH, !flag);
 	}
 }

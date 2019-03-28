@@ -171,6 +171,7 @@ void AwGraphicsCursorItem::setCurrentPos(float pos)
 
 QVariant AwGraphicsSignalItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
+	// handle only selection/deselection changes and send a message to warn the scene about selection changes.
 	if (change == ItemSelectedChange && scene()) {
 		emit selectionChanged(this, value.toBool());
 	}

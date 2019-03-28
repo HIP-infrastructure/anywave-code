@@ -37,7 +37,7 @@ public:
 	AwProcessLogWindow(QWidget *parent = 0, Qt::WindowFlags flags = Qt::Window );
 	~AwProcessLogWindow();
 
-	void setText(const QString& text) { m_ui.textEdit->setText(text); }
+	void appendText(const QString& text) { m_ui.plainTextEdit->appendMessage(text); }
 protected:
 	void changeEvent(QEvent *e);
 private:

@@ -24,6 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "EDFIO.h"
+#include <AwMarker.h>
 
 /* max size of annotationtext */
 #define EDFLIB_WRITE_MAX_ANNOTATION_LEN 40
@@ -1077,13 +1078,26 @@ AwFileIO::FileStatus EDFIO::createFile(const QString& path, int flags)
 		// very misnamed function, the samplefrequency is in fact the number of sample per data record.
 		edf_set_samplefrequency(m_handle, i, nsamples);
 	}
-
 	edf_set_equipment(m_handle, "AnyWave EDF+ exporter");
 	return AwFileIO::NoError;
 }
 
 AwFileIO::FileStatus EDFIO::writeMarkers()
 {
+	char desc[EDFLIB_MAX_ANNOTATION_LEN + 1];
+	for (auto m : infos.blocks().first()->markers()) {
+		auto onset = (long long)floor(m->start() * EDFLIB_TIME_DIMENSION);
+		auto duration = (long long)floor(m->duration() * EDFLIB_TIME_DIMENSION);
+		auto str = m->label().toStdString().c_str();
+		int i = 0;
+		while (i < m->label().size()) 
+			desc[i] = str[i++];
+		desc[i] = '\0';
+		if (edfwrite_annotation_latin1(m_handle, onset, duration, desc) == -1) {
+			m_error = QString("Error adding marker.");
+			return AwFileIO::FileAccess;
+		}
+	}
 	return AwFileIO::NoError;
 }
 void EDFIO::cleanUpAndClose()

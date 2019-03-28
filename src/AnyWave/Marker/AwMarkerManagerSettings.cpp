@@ -29,7 +29,6 @@
 #include "AwMarkersExportWidget.h"
 #include "Process/AwProcessFromMarkersDial.h"
 #include "AwMarkerRuleManageDial.h"
-#include "AwMarkerFindReplaceUi.h"
 #include <QMenu>
 #include <widget/AwMessageBox.h>
 #include <AwFileIO.h>
@@ -509,30 +508,6 @@ void AwMarkerManagerSettings::setRule(const QString& rule)
 		applyRule(m_currentRule);
 }
 
-
-//void AwMarkerManagerSettings::exportWizard()
-//{
-//	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-//	AwMarkerList selection;
-//	if (!indexes.isEmpty()) {
-//		for (auto i : indexes) {
-//			if (i.column() == 0)
-//				selection << m_displayedMarkers.at(i.row());
-//		}
-//	}
-//
-//	AwMarkersExportWidget dlg(selection, m_markers);
-//	if (dlg.exec() == QDialog::Accepted) {
-//		AwMarkerExporter *exporter = new AwMarkerExporter;
-//		exporter->outputFile = dlg.file();
-//		exporter->pdi.input.setNewMarkers(dlg.markers());
-//		exporter->pdi.input.setNewChannels(dlg.channels());
-//		exporter->concatenate = dlg.concatenate();
-//		exporter->matlabFormat = dlg.isMatlabFormat();
-//		AwProcessManager::instance()->runProcess(exporter);
-//	}
-//}
-
 void AwMarkerManagerSettings::goToMarkerAtRow(int row)
 {
 	AwMarkerList currentMarkers = m_model->markers();
@@ -559,30 +534,6 @@ void AwMarkerManagerSettings::goToMarkerPos()
 		}
 	}
 }
-
-//void AwMarkerManagerSettings::changeReplaceForSelection()
-//{
-//	// get selected indexes in tvMarkers
-//	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-//	if (indexes.isEmpty())
-//		return;
-//
-//	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-//
-//	AwMarkerFindReplaceUi dlg;
-//	if (dlg.exec() == QDialog::Accepted) {
-//		for (auto i : indexes) {
-//			QModelIndex sourceIndex = proxy->mapToSource(i);
-//			if (dlg.replaceValues() && i.column() == MARKER_COLUMN_CODE)
-//				tvMarkers->model()->setData(sourceIndex, dlg.value(), Qt::EditRole);
-//			else if (i.column() == MARKER_COLUMN_LABEL)
-//				tvMarkers->model()->setData(sourceIndex, dlg.label(), Qt::EditRole);
-//		}
-//		m_displayedMarkers = m_model->markers();
-//		emit markersChanged(m_displayedMarkers);
-//		updateStats();
-//	}
-//}
 
 void AwMarkerManagerSettings::renameAllMarkers()
 {

@@ -160,14 +160,13 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	// Here we don't want a parent for as recorded channel, so change it to null.
 	chan->setParent(NULL);
 	// remove all whitespaces in label
-	chan->setName(chan->name().remove(' '));
-	auto s = chan->name();
-
+//	chan->setName(chan->name().remove(' '));
+	auto s = chan->name().trimmed();
 	// DO NOT PERMIT EMPTY LABEL
 	if (s.isEmpty()) {
 		s = QString("No Label");
-		chan->setName(s);
 	}
+	chan->setName(s);
 	// check for existing label in infos.
 	if (m_labelToIndex.contains(chan->name()))
 		// auto rename label

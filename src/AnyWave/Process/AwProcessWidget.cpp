@@ -76,8 +76,8 @@ void AwProcessWidget::changeEvent(QEvent *e)
 
 void AwProcessWidget::addLog(const QString& message)
 {
-	m_log <<  QTime::currentTime().toString() + ": " + message + "\n";
-	updateLog();
+	auto text = QString("%1: %2").arg(QTime::currentTime().toString()).arg(message);
+	m_logWindow->appendText(text);
 }
 
 /// 
@@ -149,10 +149,8 @@ void AwProcessWidget::setMessage(const QString &message)
 	m_ui.labelMessage->show();
 	m_ui.labelMessage->setText(message);
 	addLog(message);
-	if (!m_logWindow->isVisible())
-	{	
-		if (!m_logUpdated)
-		{
+	if (!m_logWindow->isVisible())	{	
+		if (!m_logUpdated)	{
 			m_timer = new QTimer(this);
 			connect(m_timer, SIGNAL(timeout()), this, SLOT(makeShowLogBlink()));
 			m_timer->start(500);
@@ -199,15 +197,6 @@ void AwProcessWidget::stop()
 	else
 		setFinished();
 }
-
-void AwProcessWidget::updateLog()
-{
-	QString text;
-	foreach (QString s, m_log)
-		text += s;
-	m_logWindow->setText(text);
-}
-
 void AwProcessWidget::showLog()
 {
 	m_logWindow->show();

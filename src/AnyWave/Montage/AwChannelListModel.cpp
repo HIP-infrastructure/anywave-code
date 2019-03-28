@@ -357,6 +357,17 @@ QVariant AwChannelListModel::data(const QModelIndex &index, int role) const
 		else if (role == Qt::ToolTipRole)
 			return QString(tr("High pass filter value in Hz."));
 		break;
+	case AW_MONTAGE_COLUMN_NOTCH:
+		if (role == Qt::DisplayRole)
+			if (chan->notch() <= 0.)
+				return QString(tr("No Filter"));
+			else
+				return QString::number(chan->notch());
+		else if (role == Qt::UserRole)
+			return chan->notch();
+		else if (role == Qt::ToolTipRole)
+			return QString(tr("Notch filter value in Hz."));
+		break;
 	case AW_MONTAGE_COLUMN_COLOR:
 		if (role == Qt::DisplayRole || role == Qt::UserRole || role == Qt::EditRole)
 			return chan->color();
@@ -400,6 +411,11 @@ bool AwChannelListModel::setData(const QModelIndex &index, const QVariant &value
 		float val = value.toDouble();
 		if (val >= 0)
 			chan->setLowFilter(val);
+	}
+	else if (col == AW_MONTAGE_COLUMN_NOTCH && role == Qt::EditRole) {
+		float val = value.toDouble();
+		if (val >= 0)
+			chan->setNotch(val);
 	}
 	else if (col == AW_MONTAGE_COLUMN_HPF && role == Qt::EditRole)	{
 		float val = value.toDouble();
@@ -451,6 +467,8 @@ QVariant AwChannelListModel::headerData(int section, Qt::Orientation orientation
 		return QString(tr("LPF (Hz)"));
 	else if (section == AW_MONTAGE_COLUMN_HPF && role == Qt::DisplayRole)
 		return QString(tr("HPF (Hz)"));
+	else if (section == AW_MONTAGE_COLUMN_NOTCH && role == Qt::DisplayRole)
+		return QString(tr("Notch (Hz)"));
 	return QVariant();
 }
 

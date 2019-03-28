@@ -1321,6 +1321,15 @@
     <ClCompile Include="Montage\AwECoGGrid.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwLogPlainTextEdit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwLogPlainTextEdit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\AwLogPlainTextEdit.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1841,6 +1850,9 @@
     </CustomBuild>
     <CustomBuild Include="Montage\AwECoGTableModel.h">
       <Filter>Montage</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\AwLogPlainTextEdit.h">
+      <Filter>Process</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

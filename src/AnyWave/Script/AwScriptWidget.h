@@ -46,7 +46,6 @@ public slots:
 	void setFinished();
 	void setMessage(const QString& message);
 	void stop();
-	void updateLog();
 	void showLog();
 	void removeMe();
 protected slots:
@@ -59,7 +58,6 @@ private:
 
 	Ui::AwScriptWidgetUi *ui;
 	AwProcessLogWindow *m_logWindow;
-	QStringList m_log;
 	bool m_logUpdated;
 	bool m_isActive;
 	AwScript *m_script;

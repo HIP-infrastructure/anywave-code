@@ -27,7 +27,6 @@
 #include "AwMontageManager.h"
 #include "AwMontageDial.h"
 #include "Prefs/AwSettings.h"
-#include <QDomElement> // For xml input/output
 #include <widget/AwMessageBox.h>
 #include <QtCore>
 #include <QFileDialog>
@@ -42,43 +41,7 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
 #include <AwMontage.h>
-
-// compare function for sorting labels of electrodes.
-bool compareSEEGLabels(const QString& s1, const QString& s2)
-{
-	QRegularExpression re("\\d+$");
-	Q_ASSERT(re.isValid());
-	QString elec1 = s1, elec2 = s2;
-	QRegularExpressionMatch match1 = re.match(elec1);
-	QRegularExpressionMatch match2 = re.match(elec2);
-	
-	bool m2 = match2.hasMatch();
-	bool m1 =  match1.hasMatch();
-	
-	if (m2 && m1) { // the electode got a terminating plot number, remove it
-		elec1.remove(re);
-		elec2.remove(re);
-
-		// base name without plot number are not the same
-		if (elec1 != elec2)
-			return s1 < s2;
-
-		int plot1, plot2;
-		plot1 = match1.captured(0).toInt();
-		plot2 = match2.captured(0).toInt();
-		return plot1 < plot2;
-	}
-	return s1 < s2;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-/// sorting function for AwChannel using labels
-/// When sorting we want A2 to come before A10 for example.
-bool channelLabelLessThan(AwChannel *c1, AwChannel *c2)
-{
-	return compareSEEGLabels(c1->name(),c2->name());
-}
-
+#include <AwCore.h>
 // statics init and definitions
 AwMontageManager *AwMontageManager::m_instance = 0;
 
@@ -103,87 +66,37 @@ QStringList AwMontageManager::loadBad(const QString& filePath)
 	return res;
 }
 
+/** transform any EEG into SEEG. Make SEEG bipolar montage. returns SEEG channels (monopolar channels may be present). **/
 AwChannelList AwMontageManager::makeSEEGBipolar(AwChannelList& channels)
 {
-	AwChannelList res = channels;
-	QStringList chanLabels;
-	foreach (AwChannel *c, res) {
-		chanLabels << c->name();
-		if (c->isEEG() && !c->isVirtual())
-			c->setType(AwChannel::SEEG);
+	QHash<QString, AwChannel *> hash;
+	auto eegChannels = AwChannel::getChannelsOfType(channels, AwChannel::EEG);
+	// convert them to SEEG
+	for (auto c : eegChannels) {
+		c->setType(AwChannel::SEEG);
+		hash[c->name()] = c;
 	}
+	QRegularExpression exp("([A-Z]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
+	QRegularExpressionMatch match;
 
-	QStringList labels;
-	foreach (AwChannel *chan, res) {
-		if (chan->isSEEG())
-			labels << chan->name();
-	}
-
-	// sort labels
-	qSort(labels.begin(), labels.end(), compareSEEGLabels);
-	AwChannelList bipolarChannels;
-	QRegularExpression exp("\\d+$");
-	QRegularExpressionMatch match1, match2;
-	while (labels.size() > 1) {
-		QString elec1 = labels.first();
-		QString elec2 = labels.at(1);
-		AwChannel *chan = res.at(chanLabels.indexOf(elec1));
-		labels.removeFirst();
-		if (chan == NULL)
-			continue;
-		match1 = exp.match(elec1);
-		match2 = exp.match(elec2);
-		if (!match1.hasMatch() || !match2.hasMatch())  // one of the electodre does not have a plot number, so skip it
-			continue;
-		// check if the both electrodes share the same base name (by removing the plot number).
-		QString base1 = elec1;
-		base1.remove(exp);
-		QString base2 = elec2;
-		base2.remove(exp);
-		int plot1, plot2;
-		plot1 = match1.captured(0).toInt();
-		plot2 = match2.captured(0).toInt();
-		if (base1 == base2 && plot1 == plot2 - 1) { // MATCH = > do the bipolar channel
-			AwChannel *ref = NULL;
-			if (chanLabels.contains(elec2))
-				ref = res.at(chanLabels.indexOf(elec2));
-			if (ref) {
-				if (ref->isSEEG() && !ref->isBad()) {
-					AwChannel *bipolar = new AwChannel(chan);
-					bipolar->setReferenceName(elec2);
-					bipolarChannels << bipolar;
-				}
+	for (auto c : eegChannels) {
+		match = exp.match(c->name());
+		if (match.hasMatch()) {
+			auto elec = match.captured(1);
+			auto number = match.captured(2);
+			// some electodes may have preceding zeros before pad number
+			while (number.startsWith("0")) {
+				elec += "0";
+				number.remove(0, 1);
 			}
+			auto ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
+			// check if ref exists in asRecorded.
+			if (hash.contains(ref))
+				// build the ref
+				c->setReferenceName(ref);
 		}
 	}
-
-	AwChannelList removedChannels;
-	AwChannelList seegMonopolars;
-	for (int i = 0; i < res.size(); i++) {
-		AwChannel *chan = res.at(i);
-		foreach(AwChannel *chan2, bipolarChannels) {
-			if (chan2->name() == chan->name()) {
-				res.removeAt(i);
-				removedChannels << chan;
-				res.insert(i, chan2);
-			}
-		}
-	}
-
-	foreach (AwChannel *chan, res) {
-		// remove SEEG channels left as monopolar
-		if (chan->isSEEG() && !chan->hasReferences()) {
-			seegMonopolars << chan;
-			res.removeAll(chan);
-		}
-	}
-
-	removedChannels += seegMonopolars;
-
-	while (!removedChannels.isEmpty())
-		delete removedChannels.takeFirst();
-
-	return res;
+	return eegChannels;
 }
 
 //end of statics
@@ -802,46 +715,12 @@ void AwMontageManager::showInterface()
 
 bool AwMontageManager::save(const QString& filename, const AwChannelList& channels)
 {
-	QFile file(filename);
-	
-	if (!file.open(QIODevice::WriteOnly))
-		return false;
-	
-	QTextStream stream(&file);
-	QDomDocument doc("AnyWaveMontage");
-	QDomElement root = doc.createElement("Montage");
-	QDomElement element;
-	QDomElement child;
-
-	doc.appendChild(root);
-	foreach (AwChannel *chan, channels)	{
-		element = doc.createElement("Channel");
-		element.setAttribute("name", chan->name());
-		root.appendChild(element);
-
-		child = doc.createElement("type");
-		element.appendChild(child);
-		child.appendChild(doc.createTextNode(AwChannel::typeToString(chan->type())));
-
-		child = doc.createElement("reference");
-		element.appendChild(child);
-		child.appendChild(doc.createTextNode(chan->referenceName()));
-
-		child = doc.createElement("color");
-		element.appendChild(child);
-		if (chan->color().isEmpty())
-			chan->setColor("black");
-		child.appendChild(doc.createTextNode(chan->color()));
-
-		// add filtering options
-		child = doc.createElement("filters");
-		child.setAttribute("lowPass", chan->lowFilter());
-		child.setAttribute("highPass", chan->highFilter());
-		element.appendChild(child);
-
+	try {
+		AwMontage::save(filename, channels);
 	}
-	doc.save(stream, 3);
-	file.close();
+	catch (const AwException& e) {
+		return false;
+	}
 	return true;
 }
 
@@ -886,13 +765,18 @@ AwChannelList AwMontageManager::load(const QString& path)
 	}
 
 	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
-	for (auto c : channels) {
+	foreach(AwChannel *c, channels) {
+		if (!m_asRecorded.contains(c->name())) {
+			channels.removeAll(c);
+			delete c;
+			continue;
+		}
 		// search for a match in as recorded
 		auto asRecorded = m_asRecorded[c->name()];
 		if (asRecorded) {
 			if (asRecorded->isBad())
 				continue;
-			if (c->hasReferences()) {
+			if (c->hasReferences() && c->referenceName() != "AVG") {
 				auto asRecordedRef = m_asRecorded[c->referenceName()];
 				if (asRecordedRef)
 					if (asRecorded->isBad())
@@ -927,152 +811,27 @@ AwChannelList AwMontageManager::load(const QString& path)
 		delete channels.takeFirst();
 
 	return res;
-
-	//QFile file(path);
-	//AwChannelList res;
-
-	//if (!file.open(QIODevice::ReadOnly))
-	//	return AwChannelList();
-
-	//QDomDocument doc;
-	//QDomElement element;
-	//QString error;
-	//int line, col;
-	//
-	//if (!doc.setContent(&file, &error, &line, &col)) {
-	//	AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
-	//	file.close();
-	//	return AwChannelList();
-	//}
-
-	//QDomElement root = doc.documentElement(); // get root tag
-	//if (root.tagName() != "Montage") {
-	//	file.close();
-	//	return AwChannelList();
-	//}
-
-	//QDomNode node = root.firstChild();
-	//while (!node.isNull())	{
-	//	element = node.toElement();
-	//	QDomNode child;
-	//	AwChannel *channel = NULL;
-	//	if (element.tagName() == "Channel")	{
-	//		QString name = element.attribute("name");
-	//		auto asRecorded = m_asRecorded[name];
-	//		if (!asRecorded) { // channel not found in as recorded => skipping
-	//			if (name == "SEEG_AVG")	{
-	//				channel = new AwAVGChannel(AwChannel::SEEG);
-	//			}
-	//			else if (name == "MEG_AVG")	{
-	//				channel = new AwAVGChannel(AwChannel::MEG);
-	//				}
-	//			else if ( name == "EEG_AVG") {
-	//				channel =  new AwAVGChannel(AwChannel::EEG);
-	//			}
-	//			else {// unknowm channel type => skip
-	//				node = node.nextSibling();
-	//				continue;
-	//			}
-	//		}
-	//		// skip channels marked as bad in as Recorded.
-	//		else if (asRecorded->isBad()) {
-	//			node = node.nextSibling();
-	//			continue;
-	//		}
-	//		else 
-	//			channel = new AwChannel(asRecorded);
-	//		child = element.firstChild();
-
-	//		while (!child.isNull())	{
-	//			QDomElement ee = child.toElement();
-	//			if (ee.tagName() == "type") {
-	//				int t = AwChannel::stringToType(ee.text());
-	//				if (channel->type() != t) {
-	//					asRecorded->setType(t);
-	//					channel->setType(t);
-	//				}
-	//			}
-	//			else if (ee.tagName() == "reference") {
-	//				// find reference in asRecorded
-	//				QString ref = ee.text();
-	//				if (m_asRecorded.contains(ref))
-	//					channel->setReferenceName(ref);
-	//			}
-	//			else if (ee.tagName() == "color") {
-	//				if (ee.text().isEmpty())
-	//					channel->setColor("black");
-	//				else
-	//					channel->setColor(ee.text());
-	//			}
-	//			else if (ee.tagName() == "filters") {
-	//				// overwrite global filtering options if the channel was saved with a specific filtering setting.
-	//				QString lp = ee.attribute("lowPass");
-	//				QString hp = ee.attribute("highPass");
-
-	//				channel->setLowFilter(lp.toDouble());
-	//				channel->setHighFilter(hp.toDouble());
-	//			}
-	//			child = child.nextSibling();
-	//		}
-	//		// check for reference type
-	//		if (!channel->referenceName().isEmpty()) {
-	//			auto ref = m_asRecorded[channel->referenceName()];
-	//			auto asRecorded = m_asRecorded[ref->name()];
-	//			ref->setType(channel->type());
-	//			asRecorded->setType(channel->type());
-	//		}
-	//		res << channel;
-	//	}
-	//	node = node.nextSibling();
-	//}
-
-	//file.close();
-
-
-	//return res;
 }
 
 bool AwMontageManager::apply(const QString& path)
 {
-	//QFile file(path);
-
-	//if (!file.open(QIODevice::ReadOnly))
-	//	return false;
-
-	//QDomDocument doc;
-	//QDomElement element;
-	//QString error;
-	//int line, col;
-	//
-	//if (!doc.setContent(&file, &error, &line, &col)) {
-	//	AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
-	//	file.close();
-	//	return false;
+	//// Save ICA channels if already loaded
+	//AwICAChannelList savedICAChannels;
+	//foreach (AwChannel *c, m_channels)  {
+	//	if (c->isICA() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
+	//		savedICAChannels << static_cast<AwICAChannel *>(m_asRecorded[c->name()]);
+	//		m_asRecorded.remove(c->name());
+	//	}
 	//}
 
-	//QDomElement root = doc.documentElement(); // get root tag
-	//if (root.tagName() != "Montage") {
-	//	file.close();
-	//	return false;
+	//// Save ICA channels if already loaded
+	//AwSourceChannelList savedSourceChannels;
+	//foreach (AwChannel *c, m_channels)  {
+	//	if (c->isSource() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
+	//		savedSourceChannels <<  static_cast<AwSourceChannel *>(m_asRecorded[c->name()]);
+	//		m_asRecorded.remove(c->name());
+	//	}
 	//}
-
-	// Save ICA channels if already loaded
-	AwICAChannelList savedICAChannels;
-	foreach (AwChannel *c, m_channels)  {
-		if (c->isICA() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
-			savedICAChannels << static_cast<AwICAChannel *>(m_asRecorded[c->name()]);
-			m_asRecorded.remove(c->name());
-		}
-	}
-
-	// Save ICA channels if already loaded
-	AwSourceChannelList savedSourceChannels;
-	foreach (AwChannel *c, m_channels)  {
-		if (c->isSource() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
-			savedSourceChannels <<  static_cast<AwSourceChannel *>(m_asRecorded[c->name()]);
-			m_asRecorded.remove(c->name());
-		}
-	}
 
 	// deleting current channels.
 	while (!m_channels.isEmpty())
@@ -1080,90 +839,20 @@ bool AwMontageManager::apply(const QString& path)
 
 	m_channels = load(path);
 
-	//QDomNode node = root.firstChild();
-	//while (!node.isNull())	{
-	//	element = node.toElement();
-	//	QDomNode child;
-	//	AwChannel *channel = NULL;
-	//	if (element.tagName() == "Channel")	{
-	//		QString name = element.attribute("name");
-	//		auto  asRecorded = m_asRecorded[name];
-	//		if (!asRecorded) { // channel not found in as recorded => skipping
-	//			if (name == "SEEG_AVG")	{
-	//				channel = new AwAVGChannel(AwChannel::SEEG);
-	//			}
-	//			else if (name == "MEG_AVG")	{
-	//				channel = new AwAVGChannel(AwChannel::MEG);
-	//			}
-	//			else if ( name == "EEG_AVG") {
-	//				channel = new AwAVGChannel(AwChannel::EEG);
-	//			}
-	//			else {// unknowm channel type => skip
-	//				node = node.nextSibling();
-	//				continue;
-	//			}
-	//		}
-	//		// skip channels marked as bad in as Recorded.
-	//		else if (asRecorded->isBad()) {
-	//			node = node.nextSibling();
-	//			continue;
-	//		}
-	//		else 
-	//			channel = new AwChannel(asRecorded);
-
-	//		child = element.firstChild();
-
-	//		while (!child.isNull())	{
-	//			QDomElement ee = child.toElement();
-	//			if (ee.tagName() == "type") 	{
-	//				int t = AwChannel::stringToType(ee.text());
-	//				if (channel->type() != t) {
-	//					asRecorded->setType(t);
-	//					channel->setType(t);
-	//				}
-	//			}
-	//			else if (ee.tagName() == "reference") {
-	//				channel->setReferenceName(ee.text());
-	//			}
-	//			else if (ee.tagName() == "color")
-	//				channel->setColor(ee.text());
-	//			else if (ee.tagName() == "filters") {
-	//				// overwrite global filtering options if the channel was saved with a specific filtering setting.
-	//				QString lp = ee.attribute("lowPass");
-	//				QString hp = ee.attribute("highPass");
-
-	//				channel->setLowFilter(lp.toDouble());
-	//				channel->setHighFilter(hp.toDouble());
-	//			}
-	//			child = child.nextSibling();
-	//		}
-	//		// check for reference type
-	//		auto refString = channel->referenceName();
-	//		if (!refString.isEmpty() && m_asRecorded.contains(refString)) {
-	//			auto ref = m_asRecorded[refString];
-	//			ref->setType(channel->type());
-
-	//		}
-	//		m_channels << channel;
-	//	}
-	//	node = node.nextSibling();
+	//// Restore ICA channels if any
+	//foreach (AwICAChannel *channel, savedICAChannels) {
+	//	AwICAChannel *newChan = new AwICAChannel(channel);
+	//	m_channels << newChan;
+	//	m_asRecorded[channel->name()] = channel;
 	//}
 
-	// Restore ICA channels if any
-	foreach (AwICAChannel *channel, savedICAChannels) {
-		AwICAChannel *newChan = new AwICAChannel(channel);
-		m_channels << newChan;
-		m_asRecorded[channel->name()] = channel;
-	}
+	//// Restore Source channels if any
+	//foreach (AwSourceChannel *channel, savedSourceChannels) {
+	//	AwSourceChannel *newChan = new AwSourceChannel(channel);
+	//	m_channels << newChan;
+	//	m_asRecorded[channel->name()] = channel;
+	//}
 
-	// Restore Source channels if any
-	foreach (AwSourceChannel *channel, savedSourceChannels) {
-		AwSourceChannel *newChan = new AwSourceChannel(channel);
-		m_channels << newChan;
-		m_asRecorded[channel->name()] = channel;
-	}
-
-	//file.close();
 	return true;
 }
 
@@ -1177,78 +866,32 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 
-	// reimplementing loading of montage files to only apply on asRecorded channels
-	// removing all procedures related to AnyWave UI
-	QFile file(path);
+	AwChannelList channels, res;
+	try {
+		channels = AwMontage::load(path);
+	}
+	catch (const AwException& e) {
+		return channels;
+	}
 
-
-	QHash<QString, AwChannel *> asRecordedH;
-
-	if (!file.open(QIODevice::ReadOnly))
-		return AwChannelList();
-
-	QDomDocument doc;
-	QDomElement element;
+	QHash<QString, AwChannel *> hash;
+	for (auto c : asRecorded)
+		hash[c->name()] = c;
 	
-	if (!doc.setContent(&file))	{
-		file.close();
-		return  AwChannelList();
+	for (auto c : channels) {
+		if (!hash.contains(c->name()))
+			continue;
+		auto newChannel = new AwChannel(c);
+		hash[c->name()]->setType(c->type());
+		if (c->hasReferences() && hash.contains(c->referenceName())) 
+			// make sure the type of ref channel is matching the one in montage
+			hash[c->referenceName()]->setType(c->type());
+		else 
+			newChannel->clearRefName();
+		res << newChannel;
 	}
-
-	QDomElement root = doc.documentElement(); // get root tag
-	if (root.tagName() != "Montage") {
-		file.close();
-		return AwChannelList();
-	}
-
-	foreach (AwChannel *c, asRecorded)
-		asRecordedH.insert(c->name(), c);
-
-	QDomNode node = root.firstChild();
-	AwChannel *chan = NULL;
-	AwChannelList channels;
-
-	while (!node.isNull())	{
-		element = node.toElement();
-		QDomNode child;
-		if (element.tagName() == "Channel")	{
-			QString name = element.attribute("name");
-			AwChannel *asRecorded = asRecordedH.value(name);
-			if (asRecorded) {
-				child = element.firstChild();
-				chan = new AwChannel(asRecorded);
-				while (!child.isNull()) {
-					QDomElement ee = child.toElement();
-					// check type and force it if necessary
-					if (ee.tagName() == "type")	{
-						int t = AwChannel::stringToType(ee.text());
-						if (chan->type() != t)	{
-							asRecorded->setType(t);
-							chan->setType(t);
-						}
-					}
-					else if (ee.tagName() == "reference") {
-							// find reference in asRecorded
-						QString ref = ee.text();
-						if (asRecordedH.value(ref))
-							chan->setReferenceName(ref);
-					}
-					child = child.nextSibling();
-				} // end while (!child.isNull())
-				
-				// check for reference type
-				if (!chan->referenceName().isEmpty()) {
-					AwChannel *ref = asRecordedH.value(chan->referenceName());
-					AwChannel *asRecorded = asRecordedH.value(ref->name());
-					ref->setType(chan->type());
-					asRecorded->setType(chan->type());
-				}
-				channels << chan;
-			} //end if(asRecorded)
-		} // end if (element.tagName() == "Channel")
-		node = node.nextSibling();
-	} // end while (!node.isNull())
-	return channels;
+	AW_DESTROY_LIST(channels);
+	return res;
 }
 
 

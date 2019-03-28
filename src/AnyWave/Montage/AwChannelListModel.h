@@ -34,13 +34,14 @@
 #include <AwChannel.h>
 
 // Defines pour la mise en place des colonnes de données dans le display setup
-#define AW_MONTAGE_NB_COLUMN	6    
+#define AW_MONTAGE_NB_COLUMN	7    
 #define AW_MONTAGE_COLUMN_NAME	0
 #define AW_MONTAGE_COLUMN_REF	1
 #define AW_MONTAGE_COLUMN_TYPE	2	
 #define AW_MONTAGE_COLUMN_COLOR	3
 #define AW_MONTAGE_COLUMN_LPF	4
 #define AW_MONTAGE_COLUMN_HPF	5
+#define AW_MONTAGE_COLUMN_NOTCH	6
 
 // Defines pour la mise en place des colonnes de données dans le as recorded tableview
 #define AW_ASRECORDED_NB_COLUMN		3   

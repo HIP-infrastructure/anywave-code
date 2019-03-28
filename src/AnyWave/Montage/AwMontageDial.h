@@ -78,6 +78,7 @@ public slots:
 	void computeSEEGMontageFromEEGChannels();
 
 private slots:
+	void showColumn(bool flag);
 	void addChannelsByTypes();
 	void moveUp();
 	void moveDown();
