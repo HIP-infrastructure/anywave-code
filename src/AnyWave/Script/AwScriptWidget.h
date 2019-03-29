@@ -44,18 +44,16 @@ public:
 public slots:
 	void setRunning();
 	void setFinished();
-	void setMessage(const QString& message);
 	void stop();
 	void showLog();
 	void removeMe();
 protected slots:
 	void makeShowLogBlink();
+	void updateNewLog();
 signals:
 	void removed();
 	void removeClicked(AwScriptWidget *widget);
 private:
-	void addLog(const QString& message);
-
 	Ui::AwScriptWidgetUi *ui;
 	AwProcessLogWindow *m_logWindow;
 	bool m_logUpdated;

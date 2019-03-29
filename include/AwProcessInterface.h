@@ -230,6 +230,8 @@ signals:
 	// AnyWave - AwProcess API
 	void progressChanged(int percent);
 	void progressChanged(const QString& message);
+	void error(const QString& message);
+	void warning(const QString& message);
 	// Error handling
 	void criticalMessage(QString message);
 	void outOfMemory();		// emitted when memory allocation failed.

@@ -24,6 +24,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessLogWindow.h"
+#include <QTime>
+#include <QScrollBar>
 
 AwProcessLogWindow::AwProcessLogWindow(QWidget *parent, Qt::WindowFlags flags)
 	: QWidget(parent, flags)
@@ -41,4 +43,28 @@ void AwProcessLogWindow::changeEvent(QEvent *e)
 	if (e)
 		if (e->type() == QEvent::LanguageChange)
 			m_ui.retranslateUi(this);
+}
+
+void AwProcessLogWindow::appendLog(const QString& text)
+{
+	auto message = QString("%1: %2").arg(QTime::currentTime().toString()).arg(text);
+	m_ui.plainTextEdit->appendPlainText(message);
+	m_ui.plainTextEdit->verticalScrollBar()->setValue(m_ui.plainTextEdit->verticalScrollBar()->maximum());
+}
+
+void AwProcessLogWindow::appendError(const QString& text)
+{
+	QString errorHtml = "<font color=\"red\">";
+	QString endHtml = "</font><br>";
+	auto message = QString("%1: %2").arg(QTime::currentTime().toString()).arg(text);
+
+	m_ui.plainTextEdit->appendHtml(QString("%1%2%3").arg(errorHtml).arg(message).arg(endHtml));
+	m_ui.plainTextEdit->verticalScrollBar()->setValue(m_ui.plainTextEdit->verticalScrollBar()->maximum());
+}
+
+void AwProcessLogWindow::appendWarning(const QString& text)
+{
+	auto message = QString("%1: %2").arg(QTime::currentTime().toString()).arg(text);
+	m_ui.plainTextEdit->appendPlainText(message);
+	m_ui.plainTextEdit->verticalScrollBar()->setValue(m_ui.plainTextEdit->verticalScrollBar()->maximum());
 }

@@ -47,9 +47,13 @@ AwScriptWidget::AwScriptWidget(AwScript *script, QWidget *parent)
 	m_isActive = true;
 
 	connect(script, SIGNAL(finished()), this, SLOT(setFinished()));
-	connect(script, SIGNAL(message(const QString&)), this, SLOT(setMessage(const QString&)));
-	connect(script, SIGNAL(warning(const QString&)), this, SLOT(setMessage(const QString&)));
-	connect(script, SIGNAL(error(const QString&)), this, SLOT(setMessage(const QString&)));
+
+	connect(script, SIGNAL(message(const QString&)), m_logWindow, SLOT(appendLog(const QString&)));
+	connect(script, SIGNAL(error(const QString&)), m_logWindow, SLOT(appendError(const QString&)));
+	connect(script, SIGNAL(warning(const QString&)), m_logWindow, SLOT(appendWarning(const QString&)));
+	connect(script, SIGNAL(message(const QString&)), this, SLOT(updateNewLog()));
+	connect(script, SIGNAL(error(const QString&)), this, SLOT(updateNewLog()));
+	connect(script, SIGNAL(warning(const QString&)), this, SLOT(updateNewLog()));
 }
 
 AwScriptWidget::~AwScriptWidget()
@@ -58,13 +62,7 @@ AwScriptWidget::~AwScriptWidget()
 	delete m_logWindow;
 }
 
-void AwScriptWidget::addLog(const QString& message)
-{
-	auto text = QString("%1: %2").arg(QTime::currentTime().toString()).arg(message);
-	m_logWindow->appendText(text);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////:
+////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
 
 void AwScriptWidget::removeMe()
@@ -72,11 +70,8 @@ void AwScriptWidget::removeMe()
 	emit removeClicked(this);
 }
 
-void AwScriptWidget::setMessage(const QString &message)
+void AwScriptWidget::updateNewLog()
 {
-	ui->labelMessage->show();
-	ui->labelMessage->setText(message);
-	addLog(message);
 	if (!m_logWindow->isVisible())	{	
 		if (!m_logUpdated)	{
 			m_timer = new QTimer(this);
@@ -110,16 +105,9 @@ void AwScriptWidget::setFinished()
 	ui->buttonRemove->show();
 	ui->labelTime->show();
 	ui->labelTime->setText(QTime::currentTime().toString());
+	m_logWindow->appendLog(tr("Finished"));
 	m_isActive = false;
 }
-
-//void AwScriptWidget::updateLog()
-//{
-//	QString text;
-//	foreach (QString s, m_log)
-//		text += s;
-//	m_logWindow->setText(text);
-//}
 
 void AwScriptWidget::showLog()
 {
@@ -135,7 +123,7 @@ void AwScriptWidget::showLog()
 
 void AwScriptWidget::setRunning()
 {
-	addLog(tr("Started"));
+	m_logWindow->appendLog("Started");
 	ui->labelMessage->show();
 	ui->labelMessage->setText(tr("Running..."));
 }

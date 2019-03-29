@@ -48,7 +48,6 @@ public slots:
 	void setIdle();
 	void setRunning();
 	void setFinished();
-	void setMessage(const QString& message);
 	void setProgression(int value);
 	void stop();
 	void showResults();
@@ -56,12 +55,11 @@ public slots:
 	void removeMe();
 protected slots:
 	void makeShowLogBlink();
+	void updateNewLog();
 signals:
 	void removed();
 	void removeClicked(AwProcessWidget *widget);
 private:
-	void addLog(const QString& message);
-
 	Ui::AwProcessWidgetUi m_ui;
 	bool m_logUpdated;
 	bool m_isActive;

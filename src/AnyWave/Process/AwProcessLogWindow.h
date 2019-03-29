@@ -36,8 +36,10 @@ class AwProcessLogWindow : public QWidget
 public:
 	AwProcessLogWindow(QWidget *parent = 0, Qt::WindowFlags flags = Qt::Window );
 	~AwProcessLogWindow();
-
-	void appendText(const QString& text) { m_ui.plainTextEdit->appendMessage(text); }
+public slots:
+	void appendLog(const QString& text);
+	void appendWarning(const QString& text);
+	void appendError(const QString& text);
 protected:
 	void changeEvent(QEvent *e);
 private:
