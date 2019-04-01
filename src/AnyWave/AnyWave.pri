@@ -95,6 +95,7 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Process/AwProcessesWidget.h \
     ./Process/AwMatlabScriptPlugin.h \
     ./Process/AwConverter.h \
+	./Process/AwLogPlainTextEdit.h \
     ./Script/AwScriptDefines.h \
     ./Script/AwScriptsWidget.h \
     ./Script/AwScriptWidget.h \
@@ -257,6 +258,7 @@ SOURCES += ./AnyWave.cpp \
     ./Process/AwTriggerEraser.cpp \
     ./Process/AwTriggerParser.cpp \
     ./Process/AwTriggerWriter.cpp \
+	./Process/AwLogPlainTextEdit.cpp \
     ./Process/TPUi.cpp \
     ./Script/AwScript.cpp \
     ./Script/AwScriptLog.cpp \
