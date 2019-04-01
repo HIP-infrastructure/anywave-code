@@ -30,6 +30,7 @@
 #include <QTemporaryDir>
 #include <widget/AwWaitWidget.h>
 #include <QProcess>
+#include <QStandardPaths>
 #ifdef Q_OS_WIN
 #include "zip.h"
 #endif
@@ -83,7 +84,8 @@ void AwDownloader::downloadFinished(QNetworkReply *reply)
 	}
 
 	// save to temp folder.
-	QTemporaryDir dir;
+	auto downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+	QTemporaryDir dir(QString("%1/AnyWave").arg(downloadPath));
 	if (!dir.isValid()) {
 		error(QString("Could not create a temporary folder to save the update."));
 		return;

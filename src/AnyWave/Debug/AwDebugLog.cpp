@@ -130,5 +130,5 @@ void AwDebugLog::addLog(const QString& message)
 		m_logs[componentName].append(logMessage);
 	else
 		m_logs.insert(componentName, QStringList(logMessage));
-	emit newLogsAdded();
+	emit newLog(logMessage);
 }

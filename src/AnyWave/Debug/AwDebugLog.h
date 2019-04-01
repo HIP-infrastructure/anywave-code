@@ -56,7 +56,7 @@ public:
 public slots:
 	void addLog(const QString& message);
 signals:
-	void newLogsAdded();
+	void newLog(const QString& message);
 protected:
 	AwDebugLog(QObject *parent = 0);
 	void writeLog(const QString& name);

@@ -451,6 +451,8 @@ void AwMontageDial::updateChannelsType(const QStringList& labels, int type)
 		if (labels.contains(c->name())) {
 			c->setType(type);
 			c->clearRefName();
+			if (m_asRecorded.contains(c->name()))
+				m_asRecorded[c->name()]->setType(type);
 		}
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(channels);

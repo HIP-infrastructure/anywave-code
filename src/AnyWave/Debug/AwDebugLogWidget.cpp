@@ -36,7 +36,7 @@ AwDebugLogWidget::AwDebugLogWidget(QWidget *parent, Qt::WindowFlags flags)
 	comps.insert(0, tr("All Components"));
 	m_ui.comboLogType->addItems(comps);
 	m_ui.comboLogType->setCurrentIndex(0);
-	connect(adl, SIGNAL(newLogsAdded()), this, SLOT(refresh()));
+	connect(adl, &AwDebugLog::newLog, this, &AwDebugLogWidget::refresh);
 }
 
 AwDebugLogWidget::~AwDebugLogWidget()
@@ -73,13 +73,13 @@ void AwDebugLogWidget::updateLogs(QString type)
 		logs = adl->logsForComponent(type);
 
 	if (logs.isEmpty())
-		m_ui.textEditLogs->setPlainText(tr("No Debug Logs"));
+		m_ui.plainTextEditLogs->setPlainText(tr("No Debug Logs"));
 	else
 	{
 		QString text;
 		foreach (QString s, logs)
 			text += s + "\n";
-		m_ui.textEditLogs->setPlainText(text);
+		m_ui.plainTextEditLogs->setPlainText(text);
 	}
 }
 
