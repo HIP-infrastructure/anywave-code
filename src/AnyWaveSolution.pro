@@ -6,12 +6,14 @@
 
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS +=  core filtering  utilities rw process math graphics matlab HDF5 layout mapping epoch widget MatlabSupport AnyWave \
+SUBDIRS +=  core filtering  utilities montage rw process math graphics matlab HDF5 layout mapping epoch widget MatlabSupport AnyWave \
   plugins Mex PythonSupport
 
 core.subdir = Core
 rw.subdir = ReadWrite
 rw.depends = core
+montage.subdir = AwMontageLib
+montage.depends = core
 process.subdir = Process
 process.depends = core
 math.subdir = Math
@@ -33,4 +35,4 @@ epoch.depends = core
 widget.subdir =  Widgets
 widget.depends = core graphics layout mapping math utilities
 
-AnyWave.depends = core process rw math utilities filtering graphics matlab HDF5 layout mapping epoch widget
+AnyWave.depends = core process montage rw math utilities filtering graphics matlab HDF5 layout mapping epoch widget
