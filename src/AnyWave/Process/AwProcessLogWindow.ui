@@ -28,7 +28,7 @@
   <customwidget>
    <class>AwLogPlainTextEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header>AwLogPlainTextEdit.h</header>
+   <header>Process/AwLogPlainTextEdit.h</header>
   </customwidget>
  </customwidgets>
  <resources>
