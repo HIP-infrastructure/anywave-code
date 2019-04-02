@@ -36,3 +36,7 @@ unix:!macx{
 
 LIBS += -lAwGraphics -lAwUtilities -lAwMath -lAwLayout -lAwMapping -lAwFilter
 
+unix {
+    target.path = $$INSTALL_LIB_PATH
+    INSTALLS += target
+}

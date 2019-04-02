@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
@@ -58,7 +58,6 @@ public:
 	inline AwViewSettings *settings() { return m_settings; }
 	inline AwGraphicsView *view() { return m_view; }
 	inline AwGraphicsScene *scene() { return m_scene; }
-//	inline AwChannelList& selectedChannels() { return m_selectedChannels; }
 	AwChannelList selectedChannels();
 	inline AwNavigationBar *navigationBar() { return m_navBar; }
 	void changeChannelSelectionState(const QString& name, bool selected) { m_scene->changeChannelsSelectionState(name, selected); }
