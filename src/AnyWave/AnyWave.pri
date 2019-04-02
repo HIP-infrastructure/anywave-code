@@ -43,7 +43,6 @@ HEADERS += ./Data/AwDataChunk.h \
     ./IO/MEMIO/MEMIO.h \
     ./IO/JSON/AwJSON.h \
     ./Marker/AwExtractTriggers.h \
-    ./Marker/AwMarkersExportWidget.h \
     ./Marker/AwPickChannelsDial.h \
     ./Marker/AwNewMarkerRuleDial.h \
     ./Marker/AwMarkerTableView.h \
@@ -54,7 +53,6 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Marker/AwMarkerManagerSettings.h \
     ./Marker/AwMarkerManager.h \
     ./Marker/AwMarkerListModel.h \
-    ./Marker/AwMarkerFindReplaceUi.h \
     ./Marker/AwDockAddMarker.h \
     ./MATPy/AwTCPResponse.h \
     ./MATPy/AwResponse.h \
@@ -195,7 +193,6 @@ SOURCES += ./AnyWave.cpp \
     ./IO/JSON/AwJSON.cpp \
     ./Marker/AwDockAddMarker.cpp \
     ./Marker/AwExtractTriggers.cpp \
-    ./Marker/AwMarkerFindReplaceUi.cpp \
     ./Marker/AwMarkerListModel.cpp \
     ./Marker/AwMarkerManager.cpp \
     ./Marker/AwMarkerManagerSettings.cpp \
@@ -203,7 +200,6 @@ SOURCES += ./AnyWave.cpp \
     ./Marker/AwMarkerRuleElement.cpp \
     ./Marker/AwMarkerRuleManageDial.cpp \
     ./Marker/AwMarkerRuleWidget.cpp \
-    ./Marker/AwMarkersExportWidget.cpp \
     ./Marker/AwMarkerTableView.cpp \
     ./Marker/AwNewMarkerRuleDial.cpp \
     ./Marker/AwPickChannelsDial.cpp \
@@ -324,8 +320,6 @@ FORMS += ./AnyWave.ui \
     ./Display/AwSaveAsNewSetupDialog.ui \
     ./Filter/AwFilterToolBar.ui \
     ./IO/BIDS/AwBIDSGUI.ui \
-    ./Marker/AwExportMarkersWizard.ui \
-    ./Marker/AwMarkerFindReplaceUi.ui \
     ./Marker/AwMarkerManagerSettings.ui \
     ./Marker/AwMarkerRuleManageDial.ui \
     ./Marker/AwMarkerRuleWidget.ui \
