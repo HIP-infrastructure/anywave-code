@@ -827,7 +827,8 @@ void AnyWave::runMapping()
 			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
 			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
 			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			dock->setSelectedChannels(m_display->selectedChannels());
+			auto selectedChannels = m_display->selectedChannels();
+			dock->setSelectedChannels(selectedChannels);
 			dock->setBadLabels(AwMontageManager::instance()->badLabels());
 			m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
@@ -874,7 +875,8 @@ void AnyWave::runMapping()
 			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
 			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
 			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			dock->setSelectedChannels(m_display->selectedChannels());
+			auto selectedChannels = m_display->selectedChannels();
+			dock->setSelectedChannels(selectedChannels);
 			dock->setBadLabels(AwMontageManager::instance()->badLabels());
 			m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
