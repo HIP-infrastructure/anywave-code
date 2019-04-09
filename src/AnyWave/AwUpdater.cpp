@@ -50,15 +50,22 @@ void AwDownloader::error(const QString& message)
 void AwDownloader::download()
 {
 	QUrl url;
+	bool isINSVersion = AwSettings::getInstance()->getBool("INS_Version");
+	QString baseURL;
+	if (isINSVersion)
+		baseURL = QString("http://139.124.150.47/AnyWave");
+	else
+		baseURL = QString("http://meg.univ-amu.fr/AnyWave");
+
 #ifdef Q_OS_WIN
-	url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_win64.zip"));
+	url = QUrl(QString("%1/AnyWave_win64.zip").arg(baseURL));
 #endif
 
 #ifdef Q_OS_MAC
-	url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave.dmg"));
+	url = QUrl(QString("%1/AnyWave.dmg").arg(baseURL));
 #endif
 #ifdef Q_OS_LINUX
-	url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/install_AnyWave.run"));
+	url = QUrl(QString("%1/install_AnyWave.run").arg(baseURL));
 #endif
 
 	QNetworkRequest request(url);
@@ -177,6 +184,7 @@ void AwUpdater::checkForUpdate()
 	QString platform; 
 	QString version = AwSettings::getInstance()->getString("majorVersion");
 	QString minor = AwSettings::getInstance()->getString("minorVersion");
+	bool isINSVersion = AwSettings::getInstance()->getBool("INS_Version");
 
 	if (!AwSettings::getInstance()->getBool("checkForUpdates"))
 		return;
@@ -194,8 +202,11 @@ void AwUpdater::checkForUpdate()
 #ifdef Q_OS_LINUX
 	platform = "Linux";
 #endif 
-
-	QUrl url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
+	QUrl url;
+	if (!isINSVersion)
+		url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
+	else
+		url = QUrl(QString("http://139.124.150.47/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
 	QNetworkRequest request(url);
 	m_webAccess.get(request);
 

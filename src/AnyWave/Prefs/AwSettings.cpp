@@ -96,8 +96,10 @@ AwSettings::AwSettings(QObject *parent)
 	m_settings["appResourcePath"] = QString("%1/../Resources").arg(appPath);
 #endif
 
+	m_settings["INS_Version"] = false;
 	// check for a version.txt in resources
 	QString versionFile = QString("%1/version.txt").arg(m_settings["appResourcePath"].toString());
+	QString insVersionFile = QString("%1/ins.txt").arg(m_settings["appResourcePath"].toString());
 	if (QFile::exists(versionFile)) {
 		QFile file(versionFile);
 		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -106,6 +108,9 @@ AwSettings::AwSettings(QObject *parent)
 			file.close();
 		}
 	}
+	// check for a file called ins.txt
+	if (QFile::exists(insVersionFile))
+		m_settings["INS_Version"] = true;
 }
 
 AwSettings::~AwSettings()
