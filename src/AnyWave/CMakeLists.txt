@@ -52,7 +52,6 @@ SET(AnyWave_SRCS
 	./IO/MEMIO/MEMIO.cpp
     ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
-    ./Marker/AwMarkerFindReplaceUi.cpp  
     ./Marker/AwMarkerListModel.cpp  
     ./Marker/AwMarkerManager.cpp  
     ./Marker/AwMarkerManagerSettings.cpp  
@@ -88,7 +87,7 @@ SET(AnyWave_SRCS
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
     ./Montage/AwMontageTableView.cpp  
-	./Montage/AwECoGDialog.cpp 
+    ./Montage/AwECoGDialog.cpp 
     ./Montage/AwECoGGrid.cpp 
     ./Montage/AwECoGTableModel.cpp 
     ./Plugin/AwPluginDial.cpp  
@@ -211,7 +210,6 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Marker/AwMarkerManagerSettings.h  
     ./Marker/AwMarkerManager.h  
     ./Marker/AwMarkerListModel.h  
-    ./Marker/AwMarkerFindReplaceUi.h  
     ./Marker/AwDockAddMarker.h  
     ./MATPy/AwResponse.h  
     ./MATPy/AwPidManager.h  
@@ -321,7 +319,6 @@ SET(FORMS ./AnyWave.ui
     ./Filter/AwFilterToolBar.ui  
     ./IO/BIDS/AwBIDSGUI.ui  
     ./Marker/AwExportMarkersWizard.ui  
-    ./Marker/AwMarkerFindReplaceUi.ui  
     ./Marker/AwMarkerManagerSettings.ui  
     ./Marker/AwMarkerRuleManageDial.ui  
     ./Marker/AwMarkerRuleWidget.ui  
@@ -369,7 +366,7 @@ ${AW_RES_DIR}/awreadwritelib_fr.ts
 ${AW_RES_DIR}/awwidgetlib_fr.ts)
 qt5_create_translation(AnyWaveTS ${Languages})
 
-SET(AW_LIBS AwCore
+SET(AW_LIBS AwCore AwMontage
 AwGraphics
 AwWidget
 AwHDF5

@@ -124,6 +124,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='$ORIGIN/lib'")
 # AnyWave SDK libraries
 add_subdirectory(src/Core)
 add_subdirectory(src/AwEpochLib)
+add_subdirectory(src/AwMontageLib)
 add_subdirectory(src/Filtering)
 add_subdirectory(src/Utilities)
 add_subdirectory(src/Graphics)
@@ -142,6 +143,7 @@ add_dependencies(AwProcess AwCore)
 add_dependencies(AwReadWrite AwCore)
 add_dependencies(AwWidget AwGraphics AwCore AwMath)
 add_dependencies(AwLayout AwCore)
+add_dependencies(AwMontage AwCore)
 
 # header files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION ${PROJECT_BINARY_DIR}/include)
