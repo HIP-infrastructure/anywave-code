@@ -518,11 +518,11 @@ AwFileIO::FileStatus BrainVisionIO::writeMarkers()
 
 	for (qint32 i = 0; i < infos.blocks().at(0)->markersCount(); i++) {
 		AwMarker *m = infos.blocks().at(0)->markers().at(i);
-		QString label = m->label();
+		auto label = m->label().simplified();
 		if (label.contains(',')) {
 			label = label.replace(',', "_");
-			m->setLabel(label);
 		}
+		m->setLabel(label);
 
 		// Stimulus markers if marker has a value
 

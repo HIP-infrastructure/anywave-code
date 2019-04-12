@@ -158,8 +158,8 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 
 	// Create channels.tsv
-	QStringList headers = { "name", "type", "units", "sampling_frequency", "low_cutoff", "high_cutoff", "notch", "group", "reference",
-		"description", "status", "status_description" };
+	QStringList headers = { "name", "type", "units", "low_cutoff", "high_cutoff", "reference",  "notch", "group", "sampling_frequency", 
+		"description", "notch", "status", "status_description" };
 
 	QFile channel(channels_tsv);
 	QTextStream stream(&channel);
@@ -234,16 +234,19 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	jObject.insert("Manufacturer", QJsonValue::fromVariant(manufacturer));
 	jObject.insert("PowerLineFrequency", QJsonValue::fromVariant(50));
 	jObject.insert("SEEGChannelCount", QJsonValue::fromVariant(countSEEG));
+	jObject["SamplingFrequency"] = reader->infos.channels().first()->samplingRate();
+	jObject["SoftwareFilters"] = QString("n/a");
+	jObject["iEEGReference"] = QString("n/a");
 	if (countECG)
 		jObject.insert("ECGChannelCount", QJsonValue::fromVariant(countECG));
 	if (countTRIG)
 		jObject.insert("TriggerChannelCount", QJsonValue::fromVariant(countTRIG));
 	jObject.insert("RecordingDuration", QJsonValue::fromVariant(reader->infos.totalDuration()));
 	jObject.insert("RecordingType", QJsonValue::fromVariant("continuous"));
-	// add  recording date and time
-	jObject.insert("RecordingTime", QJsonValue::fromVariant(reader->infos.recordingTime()));
-	jObject.insert("RecordingDate", QJsonValue::fromVariant(reader->infos.recordingDate()));
-	jObject.insert("RecordingISODate", QJsonValue::fromVariant(reader->infos.isoDate()));
+	//// add  recording date and time
+	//jObject.insert("RecordingTime", QJsonValue::fromVariant(reader->infos.recordingTime()));
+	//jObject.insert("RecordingDate", QJsonValue::fromVariant(reader->infos.recordingDate()));
+	//jObject.insert("RecordingISODate", QJsonValue::fromVariant(reader->infos.isoDate()));
 	QJsonDocument doc(jObject);
 	QFile jsonFile(json);
 	if (jsonFile.open(QIODevice::WriteOnly)) {
