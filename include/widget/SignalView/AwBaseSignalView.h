@@ -34,6 +34,7 @@
 #include <widget/SignalView/AwNavigationBar.h>
 #include <widget/AwMarkerInspector.h>
 #include <filter/AwFilterSettings.h>
+#include <QTime>
 
 class AW_WIDGETS_EXPORT AwBaseSignalView : public QWidget
 {
@@ -70,6 +71,7 @@ public:
 	void removeVisibleChannel(int type);
 	void addNewDisplayPlugin(AwDisplayPlugin *plugin) { m_scene->registerDisplayPlugin(plugin); }
 	void changeSettings(AwViewSettings *settings, int flags) { emit settingsChanged(settings, flags); }
+	void setRecordedTime(const QTime& time);
 
 	inline void showZeroLine(bool flag) { if (m_settings) { m_settings->showZeroLine = flag; emit settingsChanged(m_settings, AwViewSettings::ShowBaseLine); } }
 	inline void setTimeShift(float shift) { if (m_view) m_view->setTimeShift(shift); }
@@ -102,7 +104,6 @@ signals:
 	void settingsChanged();
 	void cursorPositionChanged(float position);
 	void mappingPositionChanged(float position);
-//	void channelSelectionChanged(AwChannelList& selection);
 	void closeViewClicked();
 	void cursorClicked(float time);	// send when user clicks the left button while cursor is active in the view.
 	void mappingTimeSelectionDone(float time, float duration);
@@ -123,7 +124,6 @@ protected:
 	AwMarkerInspector *m_markerInspector;
 	AwChannelList m_channels;				// active list of channels displayed in the scene.
 	AwChannelList m_montageChannels;		// channels from current montage.
-//	AwChannelList m_selectedChannels;
 	AwMarkerList m_markers;
 	AwMarkerList m_visibleMarkers;
 	float m_positionInFile;					// current position of the view in the data (in seconds)
@@ -132,6 +132,7 @@ protected:
 	float m_startPosition;
 	int m_flags;
 	AwFilterSettings m_filterSettings;
+	QTime m_recordedTime;
 
 	virtual void dataReceived();
 	virtual void applyChannelFilters();

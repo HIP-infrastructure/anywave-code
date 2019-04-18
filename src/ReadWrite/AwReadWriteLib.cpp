@@ -57,7 +57,9 @@ AwMarker *AwBlock::addMarker(AwMarker& marker)
 	AwMarker *mark = new AwMarker;
 	mark->setStart(marker.start());
 	mark->setDuration(marker.duration());
-	mark->setLabel(marker.label());
+	// simplified label (avoid labels with \n)
+	auto simpl = marker.label().simplified();
+	mark->setLabel(simpl);
 	mark->setValue(marker.value());
 	mark->setTargetChannels(marker.targetChannels());
 	m_markers.append(mark);
@@ -66,20 +68,12 @@ AwMarker *AwBlock::addMarker(AwMarker& marker)
 
 AwMarker* AwBlock::addMarker(AwMarker* marker)
 {
-	AwMarker *mark = new AwMarker;
-
-	mark->setStart(marker->start());
-	mark->setDuration(marker->duration());
-	mark->setLabel(marker->label());
-	mark->setValue(marker->value());
-
-	m_markers.append(mark);
-	return mark;
+	return addMarker(*marker);
 }
 
 void AwBlock::setMarkers(const AwMarkerList& markers)
 {
-	foreach (AwMarker *m, markers)
+	for (auto m : markers)
 		addMarker(m);
 }
 

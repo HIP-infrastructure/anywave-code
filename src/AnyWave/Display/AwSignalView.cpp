@@ -213,6 +213,7 @@ void AwSignalView::enableView(AwFileIO *reader)
 	m_reader = reader;
 	AwDataServer::getInstance()->openConnection(client());
 	setTotalDuration(reader->infos.totalDuration());
+	setRecordedTime(QTime::fromString(reader->infos.recordingTime(), Qt::TextDate));
 	m_isActive = true;
 	reloadData();
 }

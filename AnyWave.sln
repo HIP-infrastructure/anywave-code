@@ -214,6 +214,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwMontageLib", "src\AwMonta
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CompumedicsPF", "src\plugins\CompumedicsPF\CompumedicsPF.vcxproj", "{D6E88A56-0AAF-4858-A273-F4C950956DED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -592,12 +594,18 @@ Global
 		{4325F489-6DAA-4B94-A4E6-BE027C68A38A}.Release|Win32.ActiveCfg = Release|x64
 		{4325F489-6DAA-4B94-A4E6-BE027C68A38A}.Release|x64.ActiveCfg = Release|x64
 		{4325F489-6DAA-4B94-A4E6-BE027C68A38A}.Release|x64.Build.0 = Release|x64
+		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Debug|Win32.ActiveCfg = Debug|x64
+		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Debug|x64.ActiveCfg = Debug|x64
+		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Debug|x64.Build.0 = Debug|x64
+		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Release|Win32.ActiveCfg = Release|x64
+		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Release|x64.ActiveCfg = Release|x64
+		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

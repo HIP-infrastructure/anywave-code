@@ -51,7 +51,6 @@ public:
 	AwBlock();
 	AwBlock(int index);
 	~AwBlock();
-
 	/** Gets the total duration in seconds. **/
 	inline float duration() { return m_duration; }
 	/** Sets the duration in seconds. **/
@@ -77,6 +76,7 @@ public:
 	/** Adds a complete list of markers to the block. Markers are cloned. **/
 	void setMarkers(const AwMarkerList& markers);
 	void clear();
+
 protected:
 	float m_duration;	
 	qint64 m_samples;	

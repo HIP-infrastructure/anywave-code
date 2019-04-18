@@ -21,24 +21,46 @@
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 QString AwBIDSManager::m_parsingPath = QString("derivatives/parsing");
 
-int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
+void AwBIDSManager::toBIDS(const AwArguments& args)
 {
-	// connect to debug log as Command Line component to enable log files traces
-	AwDebugLog::instance()->connectComponent(QString("BIDSManager"), this, QString("seegBIDS"));
-	emit log("Starting SEEG to BIDS conversion...");
-
-	QString origin = "AwBIDSManager::SEEGtoBIDS";
+	AwDebugLog::instance()->connectComponent(QString("BIDSManager"), this, QString("toBIDS"));
+	emit log("Starting BIDS conversion...");
+	QString origin = "AwBIDSManager::toBIDS";
 	if (args.isEmpty()) {
-		emit log("AwBIDSManager::SEEGtoBIDS - no arguments specified.");
+		emit log("AwBIDSManager::toBIDS - no arguments specified.");
 		throw(AwException("No arguments", origin));
-		return -1;
+		return;
 	}
 
-	auto file = args["SEEGFile"].toString();
+	// check for modality
+	auto mod = args["bids_modality"].toString().trimmed().toLower();
+	if (mod == "ieeg") {
+		SEEGtoBIDS(args);
+	}
+	else if (mod == "meg") {
+		MEGtoBIDS(args);
+	}
+	else {
+		emit log("AwBIDSManager::toBIDS - invalid bids_modality.");
+		throw(AwException("bids_modality is invalid.", origin));
+		return;
+	}
+}
+
+void AwBIDSManager::MEGtoBIDS(const AwArguments& args)
+{
+
+}
+
+int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
+{
+	QString origin = "AwBIDSManager::SEEGtoBIDS";
+
+	auto file = args["input_file"].toString();
 
 	if (file.isEmpty()) {
 		emit log("AwBIDSManager::SEEGtoBIDS - No SEEG file specified.");
-		throw AwException("No SEEG file specified", origin);
+		throw AwException("No input file specified", origin);
 		return -1;
 	}
 
@@ -57,7 +79,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 
 	QString ext = "edf";
-	auto outputDir = args["dir"].toString();
+	auto outputDir = args["output_dir"].toString();
 
 	// default output dir if the directory where the file is located.
 	QFileInfo fi(file);
@@ -65,7 +87,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		outputDir = fi.absolutePath();
 	QString subj, task, run, acq, session, output, proc;
 
-	auto format = args["format"].toString();
+	auto format = args["bids_format"].toString();
 	if (format.isEmpty()) {
 			ext = "edf"; // default output format
 	}
@@ -81,12 +103,12 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		}
 	}
 
-	subj = args["subject"].toString();
-	task = args["task"].toString();
-	session = args["session"].toString();
-	run = args["run"].toString();
-	acq = args["acq"].toString();
-	proc = args["proc"].toString();
+	subj = args["bids_subject"].toString();
+	task = args["bids_task"].toString();
+	session = args["bids_session"].toString();
+	run = args["bids_run"].toString();
+	acq = args["bids_acq"].toString();
+	proc = args["bids_proc"].toString();
 	
 	// check for at least subject and task option
 	if (subj.isEmpty() || task.isEmpty()) {
@@ -243,10 +265,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		jObject.insert("TriggerChannelCount", QJsonValue::fromVariant(countTRIG));
 	jObject.insert("RecordingDuration", QJsonValue::fromVariant(reader->infos.totalDuration()));
 	jObject.insert("RecordingType", QJsonValue::fromVariant("continuous"));
-	//// add  recording date and time
-	//jObject.insert("RecordingTime", QJsonValue::fromVariant(reader->infos.recordingTime()));
-	//jObject.insert("RecordingDate", QJsonValue::fromVariant(reader->infos.recordingDate()));
-	//jObject.insert("RecordingISODate", QJsonValue::fromVariant(reader->infos.isoDate()));
+
 	QJsonDocument doc(jObject);
 	QFile jsonFile(json);
 	if (jsonFile.open(QIODevice::WriteOnly)) {

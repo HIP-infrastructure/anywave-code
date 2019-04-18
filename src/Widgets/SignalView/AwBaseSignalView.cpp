@@ -186,6 +186,12 @@ void AwBaseSignalView::changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNa
 	makeConnections();
 }
 
+void AwBaseSignalView::setRecordedTime(const QTime& time)
+{
+	m_recordedTime = time;
+	m_view->setRecordedTime(time);
+}
+
 void AwBaseSignalView::setTotalDuration(float dur)
 {
 	m_scene->reset();
