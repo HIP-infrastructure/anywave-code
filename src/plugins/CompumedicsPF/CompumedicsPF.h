@@ -27,6 +27,7 @@
 
 #include "compumedicspf_global.h"
 #include <AwFileIO.h>
+#include <QFile>
 
 class COMPUMEDICSPF_EXPORT CompumedicsReader : public AwFileIO
 {
@@ -47,6 +48,11 @@ protected:
 
 	QStringList m_resources, m_sdyFiles, m_iniFiles, m_rdaFiles, m_EPFiles;
 	QString m_eventsFile;
+
+	QFile m_rdaFile;	// the binary data file.
+	qint64 m_magic, m_firstSample, m_numSamples;
+	qint64 m_fileStartPos;
+	float m_samplingRate;
 };
 
 

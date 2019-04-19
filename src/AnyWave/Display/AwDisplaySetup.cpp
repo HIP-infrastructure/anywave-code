@@ -183,7 +183,7 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 				else if (e.tagName() == "ShowSensors")
 					setup->showSensors = e.text() == "true";
 				else if (e.tagName() == "GridTimingRepresentation") {
-					if (e.text().toLower() == "ShowRelativeTime")
+					if (e.text() == "ShowRelativeTime")
 						setup->timeMode = AwViewSettings::ShowRelativeTime;
 					else
 						setup->timeMode = AwViewSettings::ShowRecordedTime;

@@ -180,7 +180,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 
 	// Create channels.tsv
-	QStringList headers = { "name", "type", "units", "low_cutoff", "high_cutoff", "reference",  "notch", "group", "sampling_frequency", 
+	QStringList headers = { "name", "type", "units", "low_cutoff", "high_cutoff", "reference",  "group", "sampling_frequency", 
 		"description", "notch", "status", "status_description" };
 
 	QFile channel(channels_tsv);
@@ -197,7 +197,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		}
 		stream << endl;
 		for (auto c : reader->infos.channels()) { // raw file contains EEG or eventually trigger channels. There is no id to specify that is SEEG.
-												  // name
+			// name
 			stream << c->name() << "\t";
 			// type and units
 			if (c->type() == AwChannel::Trigger) {
@@ -215,9 +215,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 			else
 				stream << "OTHER" << "\t" << "n/a" << "\t";
 
-			// sampling_frequency
-			stream << c->samplingRate() << "\t";
-			// filters
+			// low_cutoff high_cutoff reference 
 			stream << "n/a" << "\t" << "n/a" << "\t" << "n/a" << "\t";
 
 			// group
@@ -227,10 +225,14 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 				stream << name.remove(re) << "\t";
 			else
 				stream << AwChannel::typeToString(c->type()) << "\t";
-			// reference
-			stream << "n/a" << "\t";
+
+			// sampling_frequency
+			stream << c->samplingRate() << "\t";
+
 			// description
 			stream << AwChannel::typeToString(c->type()) << "\t";
+			// notch
+			stream << "n/a" << "\t";
 			// status
 			stream << "good" << "\t";
 			// status_description
