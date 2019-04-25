@@ -28,9 +28,10 @@
 #include <QtMath>
 #include <QRegularExpression>
 
-static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
-static QStringList UnitTypes = { "µV", "µV" , "pT", "µV", "µV" , "pT", "n/a", "n/a", "unit", "unit", "pT/m", "µV" };
+static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
+static QStringList UnitTypes = { "µV", "µV" , "pT", "µV", "µV" , "pT", "n/a", "n/a", "unit", "unit", "pT/m", "µV", "unit" };
 static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // global functions

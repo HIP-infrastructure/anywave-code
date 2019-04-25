@@ -32,7 +32,7 @@
 #include <QSemaphore>
 #include <QVector>
 #include <AwMarker.h>
-#define AW_CHANNEL_TYPES	12
+#define AW_CHANNEL_TYPES	13
 /*!
  * \brief
  * This class defines the AwChannel object.
@@ -51,10 +51,11 @@
 class AW_CORE_EXPORT AwChannel
 {
 public:
-	enum ChannelType {EEG = 0, SEEG = 0x01, MEG = 0x02, EMG = 0x03, ECG = 0x04, Reference = 0x05, Trigger = 0x06, Other = 0x07, 
-	ICA = 0x08, Source = 0x09, GRAD = 0xA, ECoG = 0xB };
-	enum SourceType { Real, Virtual };   	
-	
+	enum ChannelType {
+		EEG = 0, SEEG = 0x01, MEG = 0x02, EMG = 0x03, ECG = 0x04, Reference = 0x05, Trigger = 0x06, Other = 0x07,
+		ICA = 0x08, Source = 0x09, GRAD = 0xA, ECoG = 0xB, EOG = 0xC};
+	enum SourceType { Real, Virtual };   
+
 	/** Default constructor **/
 	explicit AwChannel();
 	/** Copy constructor **/

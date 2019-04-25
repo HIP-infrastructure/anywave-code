@@ -210,19 +210,30 @@ AwFileIO::FileStatus CompumedicsReader::openFile(const QString &path)
 
 	db.setDatabaseName(dbString);
 	if (db.open()) {
-		QString command = "'SELECT EventTypeID, EventCategoryID, StartSecondHi, DurationHi, EventString FROM EEGEvent WHERE IsEndEvent=false;'";
+		QString command = "SELECT EventTypeID, EventCategoryID, StartSecondHi, DurationHi, EventString FROM EEGEvent WHERE IsEndEvent=false;";
 		QStringList list;
-		QSqlQuery result = db.exec(command);
-		while (result.next()) {
-			list << result.value(0).toString();
-		}
-		db.close();
-		for (auto item : list) {
+		QSqlQuery query = db.exec(command);
+		while (query.next()) {
+			int typeID = query.value(0).toInt();
+			int category = query.value(1).toInt();
+			qint64 start = query.value(2).toInt();
+			qint64 dur = query.value(3).toInt();
+			QString label = query.value(4).toString();
+
+			if (label.isEmpty() || start < 0 || dur < 0)
+				continue;
+
+			AwMarker mark(label, (float)start / 1000, (float)dur/ 1000);
+			mark.setValue(typeID);
+			block->addMarker(mark);
 
 		}
+		db.close();
 	}
 	else {
+#ifdef _DEBUG
 		qDebug() << db.lastError().text() << endl;
+#endif
 	}
 
 	return AwFileIO::openFile(path);
@@ -279,9 +290,6 @@ qint64 CompumedicsReader::readDataFromChannels(float start, float duration, QLis
 		nSamples = infos.totalSamples() - nStart;
 
 	qint64 totalSize = nSamples * nbChannels;
-
-	if (channelList.isEmpty())
-		return 0;
 
 	if (duration <= 0)
 		return 0;
