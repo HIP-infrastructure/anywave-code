@@ -43,6 +43,7 @@ public:
 	FileStatus canRead(const QString &path) override;
 	void cleanUpAndClose() override;
 protected:
+	QFile file;
 	FiffRawData m_raw;
 	QHash<QString, int> m_channelsIndexes;
 };

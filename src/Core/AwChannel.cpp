@@ -415,8 +415,7 @@ int AwChannel::stringToType(const QString& s)
 
 QStringList AwChannel::types()
 {
-	QStringList stringTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
-	return stringTypes;
+	return ChannelTypes;
 }
 
 

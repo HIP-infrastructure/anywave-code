@@ -28,7 +28,6 @@ AwFileIO::FileStatus FIFFIO::canRead(const QString &path)
 	QFile file(path);
 	FiffRawData raw(file);
 	if (raw.isEmpty()) {
-		m_error = "No raw data in the file.";
 		return AwFileIO::WrongFormat;
 	}
 	return AwFileIO::NoError;
@@ -36,23 +35,8 @@ AwFileIO::FileStatus FIFFIO::canRead(const QString &path)
 
 AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 {
-	QFile file(path);
-
+	file.setFileName(path);
 	m_raw = FiffRawData(file);
-	QStringList include;
-	include << "STI 014";
-	// get only meg channels and set up projector
-	RowVectorXi picks = m_raw.info.pick_types(true, false, false, include, m_raw.info.bads);
-
-	// setup projection
-	if (m_raw.info.projs.size() > 0) {
-		for (int k = 0; k < m_raw.info.projs.size(); k++)
-			m_raw.info.projs[k].active = true;
-		fiff_int_t nproj = m_raw.info.make_projector(m_raw.proj);		
-	}
-	if (m_raw.proj.size() == 0) {
-		m_raw.
-	}
 
 	for (int i = 0; i < m_raw.info.nchan; i++) {
 		AwChannel channel;
@@ -88,10 +72,7 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 	block->setSamples(m_raw.last_samp - m_raw.first_samp + 1);
 	block->setDuration((float)block->samples() / m_raw.info.sfreq);
 
-
-
 	return AwFileIO::NoError;
-
 }
 
 void FIFFIO::cleanUpAndClose()
@@ -104,36 +85,34 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 {
 	if (channelList.isEmpty())
 		return 0;
-
-	int max_samples = 0;
-	int nSamplesRead = 0;
-
-	//	if (m_dataOrientation == 0) {// multiplexed
-// number of samples to read
-	int nSamples = (int)floor(duration * m_raw.info.sfreq);
-	// starting sample in channel.
-	int nStart = (int)floor(start * m_raw.info.sfreq);
-	if (nSamples <= 0)
-		return 0;
-
-	if (nStart > infos.totalSamples())
-		return 0;
-	if (nStart + nSamples > infos.totalSamples())
-		nSamples = infos.totalSamples() - nStart;
+	auto totalDuration = infos.totalDuration();
+	float end = start + duration;
+	if (end > totalDuration)
+		end = totalDuration;
 
 	MatrixXd data, times;
-
+	
 	auto labels = AwChannel::getLabels(channelList);
-	RowVectorXi picks = m_raw.info.pick_channels(labels);
+	QList<int> indexes;
+	for (auto l : labels) {
+		indexes << m_raw.info.ch_names.indexOf(l);
+	}
 
-	//RowVectorXi sel(channelList.size());
-	//for (auto chan : channelList) {
-	//	int idx = infos.indexOfChannel(chan->name());
-	//	if (idx != -1)
-	//		sel << idx;
-	//}
-	m_raw.read_raw_segment(data, times, nStart, nStart + nSamples, picks);
-
-
+	if (m_raw.read_raw_segment_times(data, times, start, end)) {
+		for (int i = 0; i < channelList.size(); i++) {
+			auto row = indexes.value(i);
+			auto channel = channelList.at(i);
+			float *dest = channel->newData(data.cols());
+			for (int j = 0; j < data.cols(); j++) {
+				auto value = data(row, j);
+				if (channel->isEEG() || channel->isEMG() || channel->isECG())
+					value *= 1e6;
+				if (channel->isMEG() || channel->isGRAD() || channel->isReference())
+					value *= 1e12;
+				*dest++ = (float)value;
+			}
+		}
+		return channelList.first()->dataSize();
+	}
 	return 0;
 }
