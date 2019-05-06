@@ -158,6 +158,30 @@
     <ClCompile Include="utils\warp.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="fif_raw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_direntry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_stream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_id.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_tag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_ch_pos.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_dig_point.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fiffio_global.h">
@@ -315,6 +339,48 @@
     </ClInclude>
     <ClInclude Include="utils\warp.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_raw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_direntry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_dirnode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_rawdir.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_tag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_ch_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_ch_pos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_dig_point.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

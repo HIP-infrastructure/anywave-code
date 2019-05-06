@@ -91,6 +91,14 @@ int main(int argc, char *argv[])
 	// check if arguments 
 	QStringList args = app.arguments();
 	bool isGui = args.size() <= 1;
+	QCommandLineParser parser;
+	parser.addPositionalArgument("file", "data file to open");
+	parser.process(app);
+	auto positionalArgs = parser.positionalArguments();
+	if (positionalArgs.count() == 1) {
+		isGui = true;
+	}
+	
 
 	AnyWave window(isGui); // args not empty means something to do in command line mode => no gui mode on 
 	if (!isGui) {
@@ -105,13 +113,7 @@ int main(int argc, char *argv[])
 		if (status == 0)
 			exit(0);
 	}
-
-	QCommandLineParser parser;
-	parser.addPositionalArgument("file", "data file to open");
-	parser.process(app);
-	auto positionalArgs = parser.positionalArguments();
-
-	if (positionalArgs.count() == 1)
+	if (positionalArgs.count() == 1) 
 		window.openFile(positionalArgs.at(0));
 		
 	window.showMaximized();

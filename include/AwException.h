@@ -7,7 +7,7 @@ class AwException : public exception
 {
 public:
 	enum levels { warning, error };
-	AwException(const QString& message, const QString& from, int level = error) throw()
+	AwException(const QString& message, const QString& from = QString(), int level = error) throw()
 		: m_level(level), m_message(message), m_from(from) 
 	{}
 

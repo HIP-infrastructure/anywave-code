@@ -116,3 +116,9 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 	}
 	return 0;
 }
+
+
+AwFileIO::FileStatus FIFFIO::createFile(const QString &path, int flags)
+{
+
+}

@@ -42,6 +42,9 @@ public:
 	FileStatus openFile(const QString &path) override;
 	FileStatus canRead(const QString &path) override;
 	void cleanUpAndClose() override;
+
+	qint64 writeData(QList<AwChannel *> *channels) override;
+	FileStatus createFile(const QString& path, int flags = 0) override;
 protected:
 	QFile file;
 	FiffRawData m_raw;
