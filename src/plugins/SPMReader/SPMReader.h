@@ -45,6 +45,7 @@ protected:
 	float m_timeOnset, m_sr;
 	QString m_dataFile, m_binFileName;
 	QFile m_binaryFile;
+	QVector<float> m_unitScales;
 };
 
 class SPMREADER_EXPORT SPMReaderPlugin : public AwFileIOPlugin

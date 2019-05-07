@@ -124,7 +124,9 @@
     <ClCompile Include="fiff\fiff_raw_dir.cpp" />
     <ClCompile Include="fiff\fiff_stream.cpp" />
     <ClCompile Include="fiff\fiff_tag.cpp" />
+    <ClCompile Include="fif_ch_info.cpp" />
     <ClCompile Include="fif_ch_pos.cpp" />
+    <ClCompile Include="fif_coord_trans.cpp" />
     <ClCompile Include="fif_dig_point.cpp" />
     <ClCompile Include="fif_direntry.cpp" />
     <ClCompile Include="fif_id.cpp" />
@@ -182,6 +184,7 @@
     <ClInclude Include="fif_ch_info.h" />
     <ClInclude Include="fif_ch_pos.h" />
     <ClInclude Include="fif_constants.h" />
+    <ClInclude Include="fif_coord_trans.h" />
     <ClInclude Include="fif_dig_point.h" />
     <ClInclude Include="fif_direntry.h" />
     <ClInclude Include="fif_dirnode.h" />

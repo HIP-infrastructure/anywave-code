@@ -27,8 +27,9 @@
 
 #include "fiffio_global.h"
 #include <AwFileIO.h>
-#include "fiff/fiff_io.h"
-using namespace FIFFLIB;
+//#include "fiff/fiff_io.h"
+//using namespace FIFFLIB;
+#include "fif_raw.h"
 
 class FIFFIO_EXPORT FIFFIO : public AwFileIO
 {
@@ -43,11 +44,12 @@ public:
 	FileStatus canRead(const QString &path) override;
 	void cleanUpAndClose() override;
 
-	qint64 writeData(QList<AwChannel *> *channels) override;
+	//qint64 writeData(QList<AwChannel *> *channels) override;
 	FileStatus createFile(const QString& path, int flags = 0) override;
 protected:
 	QFile file;
-	FiffRawData m_raw;
+	//FiffRawData m_raw;
+	fifRaw m_raw;
 	QHash<QString, int> m_channelsIndexes;
 };
 

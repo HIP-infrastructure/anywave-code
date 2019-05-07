@@ -50,7 +50,7 @@ void fifStream::finish_writing_raw()
 	end_file();
 }
 
-bool fifStream::check_beginning()
+fifId fifStream::check_beginning()
 {
 	fifTag tag;
 
@@ -58,9 +58,9 @@ bool fifStream::check_beginning()
 
 	if (tag.kind != FIFF_FILE_ID || tag.type != FIFFT_ID_STRUCT || tag.size() != 20) {
 		throw AwException("file does not start with a file id tag.");
-		return false;
+		return fifId();
 	}
-	return true;
+	return tag.toFifId();
 }
 
 void fifStream::read_tag(fifTag *tag, fiff_long_t pos)

@@ -1,17 +1,12 @@
 #pragma once
 
 #include "fif_types.h"
-using namespace FIFFLIB;
+
 class fifDirEntry
 {
 public:
-	inline static qint32 storageSize();
+	static qint32 storageSize() { return 16; }
 	fifDirEntry();
 
 	fiff_int_t kind, type, size, pos;
 };
-
-inline qint32 fifDirEntry::storageSize()
-{
-	return 16;
-}

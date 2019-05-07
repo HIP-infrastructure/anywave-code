@@ -1,9 +1,8 @@
 #include "fif_raw.h"
 #include <AwException.h>
 
-fifRaw::fifRaw(const QString& filePath)
+fifRaw::fifRaw()
 {
-	m_file.setFileName(filePath);
 	m_lastSample = m_firstSample = -1;
 	m_stream = Q_NULLPTR;
 }
@@ -15,8 +14,10 @@ fifRaw::~fifRaw()
 }
 
 
-bool fifRaw::open(QIODevice::OpenModeFlag mode)
+bool fifRaw::open(const QString& path, QIODevice::OpenModeFlag mode)
 {
+	m_file.close();
+	m_file.setFileName(path);
 	if (!m_file.open(mode)) {
 		throw AwException(m_file.errorString());
 	}
@@ -26,12 +27,15 @@ bool fifRaw::open(QIODevice::OpenModeFlag mode)
 
 	try {
 		if (mode & QIODevice::ReadOnly) {
-			m_stream->check_beginning();
+			m_id = m_stream->check_beginning();
+			// check for raw data tags...
+
 		}
 	}
 
 	catch (const AwException& e) {
 		throw e;
-		return;
+		return false;
 	}
+	return true;
 }

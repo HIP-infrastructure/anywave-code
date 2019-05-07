@@ -55,6 +55,8 @@ AwFileIO::FileStatus SPMReader::openFile(const QString &path)
 		// get the structure pointer by field channels
 		sChannels = sD->getChildStruct("channels", 0);
 		auto nChannels = sChannels->getDimSize(1);
+		m_unitScales = QVector<float>(nChannels);
+		m_unitScales.fill(1.); // default to micro V for all channels.
 		for (int i = 0; i < nChannels; i++) {
 			AwChannel channel;
 			QString label, units;
@@ -66,6 +68,8 @@ AwFileIO::FileStatus SPMReader::openFile(const QString &path)
 			channel.setSamplingRate(m_sr);
 			channel.setBad(bad != 0.);
 			infos.addChannel(&channel);
+			if (units == "v")  // V should indicate Volt so => apply scale factor to get microV.
+				m_unitScales[i] = 1e6;
 		}
 		auto block = infos.newBlock();
 		block->setSamples(nSamples);
@@ -165,7 +169,7 @@ qint64 SPMReader::readDataFromChannels(float start, float duration, QList<AwChan
 		float *data = c->newData(read);
 		qint64 count = 0;
 		while (count < read) {
-			*data++ = buf[index + count * nbChannels] *1e6;
+			*data++ = buf[index + count * nbChannels] * 1e6;
 			count++;
 		}
 	}

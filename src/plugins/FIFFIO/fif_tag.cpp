@@ -2,6 +2,8 @@
 #include "fif_direntry.h"
 #include "fif_ch_info.h"
 #include "fif_dig_point.h"
+#include "fif_coord_trans.h"
+#include "fif_constants.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -481,11 +483,11 @@ void fifTag::convert_tag_data(fifTag *tag, int from_endian, int to_endian)
 		break;
 
 	case FIFFT_COORD_TRANS_STRUCT:
-		np = tag->size() / FiffCoordTrans::storageSize();
+		np = tag->size() / fifCoordTrans::storageSize();
 
 		for (k = 0; k < np; ++k)
 		{
-			offset = tag->data() + k * FiffCoordTrans::storageSize();
+			offset = tag->data() + k * fifCoordTrans::storageSize();
 			ithis = (fiff_int_t*)offset;
 			fthis = (float*)offset;
 
@@ -521,5 +523,121 @@ fiff_int_t fifTag::getType() const
 	else
 	{
 		return this->type;
+	}
+}
+
+void fifTag::convert_ch_pos(fifChPos* pos)
+{
+	int k;
+	pos->coil_type = swap_int(pos->coil_type);
+	for (k = 0; k < 3; k++) {
+		swap_floatp(&pos->r0[k]);
+		swap_floatp(&pos->ex[k]);
+		swap_floatp(&pos->ey[k]);
+		swap_floatp(&pos->ez[k]);
+	}
+	return;
+}
+
+fifId fifTag::toFifId()
+{
+	fifId id;
+	if (this->isMatrix() || this->getType() != FIFFT_ID_STRUCT || this->data() == NULL)
+		return id;
+	else
+	{
+		const qint32* t_pInt32 = (qint32*)this->data();
+
+		id.version = t_pInt32[0];
+		id.machid[0] = t_pInt32[1];
+		id.machid[1] = t_pInt32[2];
+		id.time.secs = t_pInt32[3];
+		id.time.usecs = t_pInt32[4];
+
+		return id;
+	}
+}
+
+fifChInfo fifTag::toChInfo()
+{
+	fifChInfo info;
+
+	if (this->isMatrix() || this->getType() != FIFFT_CH_INFO_STRUCT || this->data() == NULL)
+		return info;
+	else
+	{
+		qint32* t_pInt32 = (qint32*)this->data();
+		info.scanNo = t_pInt32[0];
+		info.logNo = t_pInt32[1];
+		info.kind = t_pInt32[2];
+		float* t_pFloat = (float*)this->data();
+		info.range = t_pFloat[3];
+		info.cal = t_pFloat[4];
+		info.chpos.coil_type = t_pInt32[5];
+
+		//
+		//   Read the coil coordinate system definition
+		//
+		qint32 r;
+		// r0
+		for (r = 0; r < 3; ++r)
+			info.chpos.r0[r] = t_pFloat[6 + r];
+		// ex
+		for (r = 0; r < 3; ++r)
+			info.chpos.ex[r] = t_pFloat[6 + 3 + r];
+		// ey
+		for (r = 0; r < 3; ++r)
+			info.chpos.ey[r] = t_pFloat[6 + 6 + r];
+		// ez
+		for (r = 0; r < 3; ++r)
+			info.chpos.ez[r] = t_pFloat[6 + 9 + r];
+
+		info.coord_frame = FIFFV_COORD_UNKNOWN;
+
+		//
+		//   Convert loc into a more useful format
+		//
+		if (info.kind == FIFFV_MEG_CH || info.kind == FIFFV_REF_MEG_CH)
+		{
+			info.coil_trans.setIdentity(4, 4);
+			// r0
+			for (r = 0; r < 3; ++r)
+				info.coil_trans(r, 3) = info.chpos.r0[r];
+			// ex
+			for (r = 0; r < 3; ++r)
+				info.coil_trans(r, 0) = info.chpos.ex[r];
+			// ey
+			for (r = 0; r < 3; ++r)
+				info.coil_trans(r, 1) = info.chpos.ey[r];
+			// ez
+			for (r = 0; r < 3; ++r)
+				info.coil_trans(r, 2) = info.chpos.ez[r];
+
+			info.coord_frame = FIFFV_COORD_DEVICE;
+		}
+		else if (info.kind == FIFFV_EEG_CH)
+		{
+			if (info.chpos.ex.norm() > 0) {
+				info.eeg_loc.block(0, 0, 3, 1) = info.chpos.r0.block(0, 0, 3, 1);
+				info.eeg_loc.block(0, 1, 3, 1) = info.chpos.ex.block(0, 0, 3, 1);
+			}
+			else {
+				info.eeg_loc.block(0, 0, 3, 1) = info.chpos.r0.block(0, 0, 3, 1);
+			}
+			info.coord_frame = FIFFV_COORD_HEAD;
+		}
+		//
+		//   Unit and exponent
+		//
+		info.unit = t_pInt32[18];
+		info.unit_mul = t_pInt32[19];
+
+		//
+		//   Handle the channel name
+		//
+		char* orig = (char*)this->data();
+		info.ch_name = QString::fromUtf8(orig + 80).replace(" ", "");
+
+		return info;
 	}
 }

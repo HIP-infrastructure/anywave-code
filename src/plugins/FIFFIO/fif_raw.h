@@ -6,6 +6,7 @@
 #include <QFile>
 #include "fif_info.h"
 #include "fif_stream.h"
+#include "fif_id.h"
 #include <Eigen/Core>
 using namespace Eigen;
 class fifRawDir;
@@ -13,10 +14,11 @@ class fifRawDir;
 class fifRaw
 {
 public:
-	fifRaw(const QString& filePath);
+	fifRaw();
 	~fifRaw();
 
-	bool open(QIODevice::OpenModeFlag mode);
+	bool open(const QString& filePath, QIODevice::OpenModeFlag mode);
+	inline fifId id() { return m_id; }
 protected:
 	QFile m_file;
 	int m_firstSample, m_lastSample;
@@ -25,4 +27,5 @@ protected:
 	RowVectorXd m_cals;
 	fifStream *m_stream;
 	QList<fifRawDir *> m_rawDirs;
+	fifId m_id;
 };

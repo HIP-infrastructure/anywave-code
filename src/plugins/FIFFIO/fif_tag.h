@@ -4,6 +4,8 @@
 #include "fif_types.h"
 #include "fif_id.h"
 #include "fif_file.h"
+#include "fif_ch_pos.h"
+#include "fif_ch_info.h"
 
 //
 //   The magic hexadecimal values
@@ -23,7 +25,6 @@ class fifTag : public QByteArray
 public:
 	fifTag();
 	fifTag(const fifTag& tag);
-	virtual ~fifTag();
 
 	static void convert_tag_data(fifTag *tag, int from_endian, int to_endian);
 	fiff_int_t getMatrixCoding() const;
@@ -32,6 +33,9 @@ public:
 	static fiff_int_t fiff_type_matrix_coding(fiff_int_t type) { return type & FIFFTS_MC_MASK; }
 	static void convert_matrix_from_file_data(fifTag *tag);
 	static void convert_matrix_to_file_data(fifTag *tag);
+	static void convert_ch_pos(fifChPos *pos);
+	fifId toFifId();
+	fifChInfo toChInfo();
 
 	bool isMatrix() const;
 	fiff_int_t getType() const;
