@@ -40,6 +40,7 @@
 #include <QtCore>
 #include <filter/AwFiltering.h>
 #include "Prefs/AwSettings.h"
+#include <AwCore.h>
 
 #if QT_VERSION > QT_VERSION_CHECK(4, 8, 0)
 #include <QtConcurrent>
@@ -278,33 +279,80 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 		setEndOfData();
 		return;
 	}
-	QList<AwChannelList> chunks;
-	qint64 totalSamples = 0;
-	for (auto m : *markers) {
-		if (m->duration() <= 0.)
-			continue;
-		auto channels = AwChannel::duplicateChannels(*channelsToLoad);
-		chunks.append(channels);
-		// load chunk without waking up the client...
-		loadData(&channels, m, rawData, true);
-		totalSamples += channels.first()->dataSize();
-	}
 
-	// fill channelsToLoad with all merged data in all the chunks
-	for (auto i = 0; i < channelsToLoad->size(); i++) {
-		auto destChannel = channelsToLoad->at(i);
-		float *data = destChannel->newData(totalSamples);
-		for (auto chunk : chunks) {
-			auto channel = chunk.at(i);
-			for (auto j = 0; j < channel->dataSize(); j++)
-				*data++ = channel->data()[j];
-			channel->clearData();
+	// detect filters
+	bool hasFilters = false;
+	for (auto c : *channelsToLoad) {
+		if (c->lowFilter() > 0. || c->highFilter() > 0. || c->notch() > 0.) {
+			hasFilters = true;
+			break;
 		}
 	}
-	//cleaning up
-	for (auto chunk : chunks)
-		while (chunk.isEmpty())
-			delete chunk.takeFirst();
+	if (hasFilters) {
+		float start, end, duration, offset;
+		AwMarker::boundingInterval(*markers, &start, &end);
+
+		if (end > m_reader->infos.totalDuration())
+			duration = -1;
+		else
+			duration = end - start;
+		
+
+		auto channels = AwChannel::duplicateChannels(*channelsToLoad);
+		float totalDuration = 0;
+		for (auto m : *markers)
+			totalDuration += m->duration();
+	
+		loadData(&channels, start, duration, rawData, true);
+		int index = 0;
+		for (auto c : *channelsToLoad) {
+			auto sourceChannel = channels.value(index);
+			qint64 totalSamples = 0;
+			QVector<qint64> samples;
+			qint64 offsetSamples = (qint64)floor(start * c->samplingRate());
+			for (auto m : *markers) {
+				totalSamples += (qint64)floor(m->duration() * c->samplingRate());
+				samples << (qint64)floor(m->start() * c->samplingRate()) + offsetSamples << (qint64)floor(m->duration() * c->samplingRate());
+			}
+
+			float *data = c->newData(totalSamples);
+			for (int i = 0; i < samples.size(); i += 2) {
+				for (auto s = samples.value(i); s < samples.value(i + 1); s++)
+					*data++ = sourceChannel->data()[s];
+			}
+			sourceChannel->clearData();
+		}
+		AW_DESTROY_LIST(channels)
+	}
+	else {
+
+		QList<AwChannelList> chunks;
+		qint64 totalSamples = 0;
+		for (auto m : *markers) {
+			if (m->duration() <= 0.)
+				continue;
+			auto channels = AwChannel::duplicateChannels(*channelsToLoad);
+			chunks.append(channels);
+			// load chunk without waking up the client...
+			loadData(&channels, m, rawData, true);
+			totalSamples += channels.first()->dataSize();
+		}
+
+		// fill channelsToLoad with all merged data in all the chunks
+		for (auto i = 0; i < channelsToLoad->size(); i++) {
+			auto destChannel = channelsToLoad->at(i);
+			float *data = destChannel->newData(totalSamples);
+			for (auto chunk : chunks) {
+				auto channel = chunk.at(i);
+				for (auto j = 0; j < channel->dataSize(); j++)
+					*data++ = channel->data()[j];
+				channel->clearData();
+			}
+		}
+		//cleaning up
+		for (auto chunk : chunks)
+			AW_DESTROY_LIST(chunk)
+	}
 	setDataAvailable();
 }
 

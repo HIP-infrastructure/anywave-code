@@ -96,6 +96,8 @@ public:
 	static QList<AwMarker *> getInputMarkers(QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Filters markers: markers can either be specified to be removed or used. **/
 	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
+	/** Get a bounding interval to load data around markers **/
+	static void boundingInterval(const  QList<AwMarker *>& markers, float *start, float *end);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
 	/** Returns the marker's type. AwMarker::Single or AwMarker::Selection. **/

@@ -207,7 +207,7 @@ void AwExporter::run()
 
 
 
-	sendMessage(tr("Writting data..."));
+	sendMessage(tr("Writing data..."));
 	writer->writeData(&m_channels);
 	sendMessage("Done.");
 	if (use || skip) // output markers contains duplicated markers => delete them

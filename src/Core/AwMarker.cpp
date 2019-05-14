@@ -222,10 +222,9 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 				copiedList.removeAll(i);
 				toDelete << i;
 			}
+			// reshape marker and insert it again at first position
 			first->reshape(start, end);
-			res << first;
-			if (!copiedList.isEmpty())
-				copiedList.insert(0, first);
+			copiedList.insert(0, first);
 		}
 	}
 	AW_DESTROY_LIST(toDelete);
@@ -233,63 +232,25 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
  }
 
 ///
-/// merge()
-/// Check if selection markers overlap. If so, merge them.
-/// Note : single marker are not processed.
-/// The return list contains duplicated markers.
-//AwMarkerList AwMarker::merge(AwMarkerList& markers)
-//{
-//	if (markers.isEmpty()) 
-//		return AwMarkerList();
-//
-//	AwMarkerList sorted = AwMarker::sort(markers);
-//	AwMarkerList res;
-//
-//	// do not process single markers => copy them
-//	for (int i = 0; i < sorted.size(); i++) {
-//		AwMarker *m = sorted.at(i);
-//		if (m->duration() == 0.) {
-//			res << new AwMarker(m);
-//			sorted.removeAll(m);
-//			i--;
-//		}
-//	}
-//
-//	if (sorted.isEmpty())
-//		return res;
-//
-//	if (sorted.size() == 1) {
-//		res << new AwMarker(sorted.first());
-//		return res;
-//	}
-//
-//	// At least two selection markers remaining.
-//	do {
-//		AwMarker *first = sorted.first();
-//		AwMarker *m = sorted.at(1);
-//		bool startAfter = m->start() > first->end();
-//		bool startInsideEndAfter = m->start() <= first->end() && m->end() > first->end();
-//		bool isWithin = m->start() >= first->start() && m->end() <= first->end();
-//		if (startAfter) { // just copy the previous marker to the result list.
-//			res << new AwMarker(first);
-//			sorted.removeAll(first);
-//		}
-//		else if (startInsideEndAfter) { // merge the two markers.
-//			float end = m->end();
-//			m->setStart(first->start());
-//			m->setEnd(end);
-//			sorted.removeAll(first);
-//		}
-//		else if (isWithin) {
-//			sorted.removeAll(m);
-//		}
-//	} while (sorted.size() > 1);
-//
-//	for (auto m : sorted)
-//		res << new AwMarker(m);
-//
-//	return res;
-//}
+/// boundingInterval()
+/// Compute a bounding interval around the markers set as input.
+/// This is to avoid filtering effects on small data.
+
+void AwMarker::boundingInterval(const AwMarkerList& markers, float *start, float *end)
+{
+	const float pad_duration = 5.; // 
+
+	auto s = markers.first()->start();
+	auto e = markers.last()->end();
+
+	s -= pad_duration;
+	e += pad_duration;
+	if (s < 0)
+		s = 0.;
+	*start = s;
+	*end = e;
+}
+
 
 ///
 /// intersect()
