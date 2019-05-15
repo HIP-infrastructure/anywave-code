@@ -1330,6 +1330,15 @@
     <ClCompile Include="Process\AwLogPlainTextEdit.cpp">
       <Filter>Process</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMATLABMarkersExporter.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\AwMATLABMarkersExporter.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMATLABMarkersExporter.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1852,6 +1861,9 @@
       <Filter>Montage</Filter>
     </CustomBuild>
     <CustomBuild Include="Process\AwLogPlainTextEdit.h">
+      <Filter>Process</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\AwMATLABMarkersExporter.h">
       <Filter>Process</Filter>
     </CustomBuild>
   </ItemGroup>

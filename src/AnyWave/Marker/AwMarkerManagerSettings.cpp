@@ -105,9 +105,13 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(action, SIGNAL(triggered()), this, SLOT(goToMarkerPos()));
 
 	m_menu->addSeparator();
-	action = new QAction(tr("Save to file"), this);
+	action = new QAction(tr("Save markers to .mrk file"), this);
 	m_menu->addAction(action);
 	connect(action, &QAction::triggered, this, &AwMarkerManagerSettings::saveSelectedMarkers);
+	action = new QAction(tr("Save data to MATLAB file"), this);
+	m_menu->addAction(action);
+	connect(action, &QAction::triggered, this, &AwMarkerManagerSettings::saveSelectedMarkersToMATLAB);
+	m_menu->addSeparator();
 	action = new QAction(tr("Remove"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(removeMarkers()));
@@ -657,6 +661,49 @@ void AwMarkerManagerSettings::removeAllLabels()
 	emit markersRemoved(markers);
 	m_displayedMarkers = m_model->markers();
 	emit markersChanged(m_displayedMarkers);
+}
+
+void AwMarkerManagerSettings::saveSelectedMarkersToMATLAB()
+{
+	// get selected indexes in tvMarkers
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+
+	if (indexes.isEmpty())
+		return;
+
+	AwFileInfo afio(AwSettings::getInstance()->currentReader());
+	auto path = QFileDialog::getSaveFileName(0, tr("Save marked data"), afio.dirPath(), "*.mat");
+	if (!path.isEmpty()) {
+		AwMarkerList currentMarkers = m_model->markers();
+
+		AwMarkerList markers; // marker to save
+		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+		for (auto i : indexes) {
+			if (i.column() == 0) {
+				auto m = currentMarkers.at(proxy->mapToSource(i).row());
+				if (m->duration() > 0.)
+					markers << m;
+			}
+		}
+		// check for marker with duration
+		if (markers.isEmpty()) {
+			AwMessageBox::information(0, tr("Error"), QString("Selected markers have no duration."));
+			return;
+		}
+		// Instantiate process
+		AwProcessManager *process_manager = AwProcessManager::instance();
+		auto process = process_manager->newProcessFromPluginName("MATLAB_MARKERS_EXPORTER");
+		if (process == Q_NULLPTR) {
+			AwMessageBox::information(0, tr("Error"), QString("Missing process plugin to do the job."));
+			return;
+		}
+		// set markers to compute data on
+		process->pdi.input.setNewMarkers(markers, true);
+		process->pdi.input.addArgument("output_file", path);
+		// start process
+		process_manager->runProcess(process);
+	}
+
 }
 
 void AwMarkerManagerSettings::saveSelectedMarkers()

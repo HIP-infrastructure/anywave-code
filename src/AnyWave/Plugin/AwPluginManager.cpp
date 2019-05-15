@@ -46,6 +46,7 @@
 #include "Process/AwMatlabScriptPlugin.h"
 #include "Process/AwTriggerWriter.h"
 #include "Process/AwTriggerEraser.h"
+#include "Process/AwMATLABMarkersExporter.h"
 #include "Debug/AwDebugLog.h"
 #ifdef AW_EPOCHING
 #include "Epoch/AwAvgSignalItem.h"
@@ -513,6 +514,9 @@ void AwPluginManager::loadPlugins()
 
 	// Add Converter plugin
 	m_pluginProcesses += new AwConverterPlugin;
+	 
+	// add MATLAB_MARKERS_EXPORTER
+	m_pluginProcesses += new AwMATLABMarkersExporterPlugin;
 
 	// Add Exporter plugin
 	m_pluginProcesses += new AwExporterPlugin;
