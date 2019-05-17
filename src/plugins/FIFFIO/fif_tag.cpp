@@ -558,6 +558,32 @@ fifId fifTag::toFifId()
 	}
 }
 
+
+QList<fifDirEntry *> fifTag::toDirEntry() const
+{
+	QList<fifDirEntry *> dirs;
+	if (isMatrix() || getType() != FIFFT_DIR_ENTRY_STRUCT || data() == NULL)
+		return dirs;
+	fifDirEntry *dirEntry;
+	qint32 *t_pInt32 = (qint32 *)data();
+	for (int k = 0; k < size() / 16; k++) {
+		dirEntry = new fifDirEntry;
+		dirEntry->kind = t_pInt32[k * 4];
+		dirEntry->type = t_pInt32[k * 4 + 1];
+		dirEntry->size = t_pInt32[k * 4 + 2];
+		dirEntry->pos = t_pInt32[k * 4 + 3];
+		dirs.append(dirEntry);
+	}
+	return dirs;
+}
+
+qint32* fifTag::toInt()
+{
+	if (isMatrix() || getType() != FIFFT_INT) 
+		return NULL;
+	return (qint32*)data();
+}
+
 fifChInfo fifTag::toChInfo()
 {
 	fifChInfo info;

@@ -118,7 +118,8 @@ private:
 	///< copy of the list from Montage Manager.
 
 	QStringList m_badChannelsLabels;					/// store the labels of bad channels
-	QStringList m_labelTypes[AW_CHANNEL_TYPES];			/// store the labels for each types of channels
+//	QStringList m_labelTypes[AW_CHANNEL_TYPES];			/// store the labels for each types of channels
+	QHash<int, QStringList> m_labelsByTypes;
 
 	QString m_path;
 	QMenu *m_contextMenuMontage;					///< Menu contextuel de la QTableView des montages.

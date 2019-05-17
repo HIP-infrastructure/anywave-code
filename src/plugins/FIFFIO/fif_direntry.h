@@ -10,3 +10,5 @@ public:
 
 	fiff_int_t kind, type, size, pos;
 };
+
+using fifDirEntries = QList<fifDirEntry *>;

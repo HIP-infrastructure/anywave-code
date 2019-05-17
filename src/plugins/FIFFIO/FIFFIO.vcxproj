@@ -129,8 +129,12 @@
     <ClCompile Include="fif_coord_trans.cpp" />
     <ClCompile Include="fif_dig_point.cpp" />
     <ClCompile Include="fif_direntry.cpp" />
+    <ClCompile Include="fif_dir_node.cpp" />
     <ClCompile Include="fif_id.cpp" />
     <ClCompile Include="fif_info.cpp" />
+    <ClCompile Include="fif_info_base.cpp" />
+    <ClCompile Include="fif_named_matrix.cpp" />
+    <ClCompile Include="fif_proj.cpp" />
     <ClCompile Include="fif_raw.cpp" />
     <ClCompile Include="fif_stream.cpp" />
     <ClCompile Include="fif_tag.cpp" />
@@ -181,6 +185,7 @@
     <ClInclude Include="fiff\fiff_stream.h" />
     <ClInclude Include="fiff\fiff_tag.h" />
     <ClInclude Include="fiff\fiff_types.h" />
+    <ClInclude Include="fifInfo.h" />
     <ClInclude Include="fif_ch_info.h" />
     <ClInclude Include="fif_ch_pos.h" />
     <ClInclude Include="fif_constants.h" />
@@ -191,6 +196,9 @@
     <ClInclude Include="fif_file.h" />
     <ClInclude Include="fif_id.h" />
     <ClInclude Include="fif_info.h" />
+    <ClInclude Include="fif_info_base.h" />
+    <ClInclude Include="fif_named_matrix.h" />
+    <ClInclude Include="fif_proj.h" />
     <ClInclude Include="fif_raw.h" />
     <ClInclude Include="fif_rawdir.h" />
     <ClInclude Include="fif_stream.h" />

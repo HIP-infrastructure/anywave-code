@@ -160,14 +160,14 @@ class AwChannelListDelegate : public QItemDelegate
 	Q_OBJECT
 
 public:
-	AwChannelListDelegate(QStringList* labels, QObject *parent = 0);
+	AwChannelListDelegate(const QHash<int, QStringList>& labelsByType, QObject *parent = 0);
 
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	void setEditorData(QWidget *editor, const QModelIndex &index) const;
 	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 	void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 private:
-	QStringList m_labels[AW_CHANNEL_TYPES];
+	QHash<int, QStringList> m_labels;
 private slots:
 	void commitAndCloseComboBox();
 
