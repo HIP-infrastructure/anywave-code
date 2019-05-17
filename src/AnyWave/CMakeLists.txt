@@ -115,7 +115,8 @@ SET(AnyWave_SRCS
     ./Process/AwTriggerParser.cpp  
     ./Process/AwTriggerWriter.cpp  
     ./Process/TPUi.cpp  
-	./Process/AwLogPlainTextEdit.cpp
+    ./Process/AwLogPlainTextEdit.cpp
+    ./Process/AwMATLABMarkersExporter.cpp 
     ./Script/AwScript.cpp  
     ./Script/AwScriptLog.cpp  
     ./Script/AwScriptLogManager.cpp  
@@ -248,7 +249,8 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Process/AwProcessesWidget.h  
     ./Process/AwMatlabScriptPlugin.h  
     ./Process/AwConverter.h  
-	./Process/AwLogPlainTextEdit.h 
+    ./Process/AwLogPlainTextEdit.h 
+    ./Process/AwMATLABMarkersExporter.h 
     ./Script/AwScriptDefines.h  
     ./Script/AwScriptsWidget.h  
     ./Script/AwScriptWidget.h  
