@@ -49,7 +49,7 @@ public:
 	AwChannelList selectedICA;	
 	AwMarkerList markers;
 	QString filePath, initialPath;
-	bool useCurrentMontage;
+	bool useCurrentMontage, renameLabels;
 	bool exportICA;
 	float globalSamplingRate;
 	int decimateFactor;

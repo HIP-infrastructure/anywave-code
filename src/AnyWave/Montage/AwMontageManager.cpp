@@ -27,10 +27,8 @@
 #include "AwMontageManager.h"
 #include "AwMontageDial.h"
 #include "Prefs/AwSettings.h"
-#include <QDomElement> // For xml input/output
 #include <widget/AwMessageBox.h>
 #include <QtCore>
-#include "Process/AwProcessManager.h"
 #include <QFileDialog>
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
@@ -41,43 +39,9 @@
 #include <widget/AwWait.h>
 #include <AwAmplitudeManager.h>
 #include "IO/BIDS/AwBIDSManager.h"
-
-// compare function for sorting labels of electrodes.
-bool compareSEEGLabels(const QString& s1, const QString& s2)
-{
-	QRegularExpression re("\\d+$");
-	Q_ASSERT(re.isValid());
-	QString elec1 = s1, elec2 = s2;
-	QRegularExpressionMatch match1 = re.match(elec1);
-	QRegularExpressionMatch match2 = re.match(elec2);
-	
-	bool m2 = match2.hasMatch();
-	bool m1 =  match1.hasMatch();
-	
-	if (m2 && m1) { // the electode got a terminating plot number, remove it
-		elec1.remove(re);
-		elec2.remove(re);
-
-		// base name without plot number are not the same
-		if (elec1 != elec2)
-			return s1 < s2;
-
-		int plot1, plot2;
-		plot1 = match1.captured(0).toInt();
-		plot2 = match2.captured(0).toInt();
-		return plot1 < plot2;
-	}
-	return s1 < s2;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-/// sorting function for AwChannel using labels
-/// When sorting we want A2 to come before A10 for example.
-bool channelLabelLessThan(AwChannel *c1, AwChannel *c2)
-{
-	return compareSEEGLabels(c1->name(),c2->name());
-}
-
+#include <AwException.h>
+#include <AwMontage.h>
+#include <AwCore.h>
 // statics init and definitions
 AwMontageManager *AwMontageManager::m_instance = 0;
 
@@ -102,101 +66,61 @@ QStringList AwMontageManager::loadBad(const QString& filePath)
 	return res;
 }
 
+/** transform any EEG into SEEG. Make SEEG bipolar montage. returns SEEG channels (monopolar channels may be present). **/
 AwChannelList AwMontageManager::makeSEEGBipolar(AwChannelList& channels)
 {
-	AwChannelList res = channels;
-	QStringList chanLabels;
-	foreach (AwChannel *c, res) {
-		chanLabels << c->name();
-		if (c->isEEG() && !c->isVirtual())
-			c->setType(AwChannel::SEEG);
+	QHash<QString, AwChannel *> hash;
+	auto eegChannels = AwChannel::getChannelsOfType(channels, AwChannel::EEG);
+	// convert them to SEEG
+	for (auto c : eegChannels) {
+		c->setType(AwChannel::SEEG);
+		hash[c->name()] = c;
 	}
+	QRegularExpression exp("([A-Z]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
+	QRegularExpressionMatch match;
 
-	QStringList labels;
-	foreach (AwChannel *chan, res) {
-		if (chan->isSEEG())
-			labels << chan->name();
-	}
-
-	// sort labels
-	qSort(labels.begin(), labels.end(), compareSEEGLabels);
-	AwChannelList bipolarChannels;
-	QRegularExpression exp("\\d+$");
-	QRegularExpressionMatch match1, match2;
-	while (labels.size() > 1) {
-		QString elec1 = labels.first();
-		QString elec2 = labels.at(1);
-		AwChannel *chan = res.at(chanLabels.indexOf(elec1));
-		labels.removeFirst();
-		if (chan == NULL)
-			continue;
-		match1 = exp.match(elec1);
-		match2 = exp.match(elec2);
-		if (!match1.hasMatch() || !match2.hasMatch())  // one of the electodre does not have a plot number, so skip it
-			continue;
-		// check if the both electrodes share the same base name (by removing the plot number).
-		QString base1 = elec1;
-		base1.remove(exp);
-		QString base2 = elec2;
-		base2.remove(exp);
-		int plot1, plot2;
-		plot1 = match1.captured(0).toInt();
-		plot2 = match2.captured(0).toInt();
-		if (base1 == base2 && plot1 == plot2 - 1) { // MATCH = > do the bipolar channel
-			AwChannel *ref = NULL;
-			if (chanLabels.contains(elec2))
-				ref = res.at(chanLabels.indexOf(elec2));
-			if (ref) {
-				if (ref->isSEEG() && !ref->isBad()) {
-					AwChannel *bipolar = new AwChannel(chan);
-					bipolar->setReferenceName(elec2);
-					bipolarChannels << bipolar;
-				}
+	for (auto c : eegChannels) {
+		match = exp.match(c->name());
+		if (match.hasMatch()) {
+			auto elec = match.captured(1);
+			auto number = match.captured(2);
+			// some electodes may have preceding zeros before pad number
+			while (number.startsWith("0")) {
+				elec += "0";
+				number.remove(0, 1);
 			}
+			auto ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
+			// check if ref exists in asRecorded.
+			if (hash.contains(ref))
+				// build the ref
+				c->setReferenceName(ref);
 		}
 	}
-
-	AwChannelList removedChannels;
-	AwChannelList seegMonopolars;
-	for (int i = 0; i < res.size(); i++) {
-		AwChannel *chan = res.at(i);
-		foreach(AwChannel *chan2, bipolarChannels) {
-			if (chan2->name() == chan->name()) {
-				res.removeAt(i);
-				removedChannels << chan;
-				res.insert(i, chan2);
-			}
-		}
-	}
-
-	foreach (AwChannel *chan, res) {
-		// remove SEEG channels left as monopolar
-		if (chan->isSEEG() && !chan->hasReferences()) {
-			seegMonopolars << chan;
-			res.removeAll(chan);
-		}
-	}
-
-	removedChannels += seegMonopolars;
-
-	while (!removedChannels.isEmpty())
-		delete removedChannels.takeFirst();
-
-	return res;
+	return eegChannels;
 }
 
 //end of statics
 
+
+QHash<QString, AwChannel *> AwMontageManager::cloneAsRecordedChannels()
+{
+	QHash<QString, AwChannel *> res;
+	auto channels = m_asRecorded.values();
+	for (auto c : channels)
+		res[c->name()] = c->duplicate();
+	return res;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////::
 // Source/ICA specific
 
 void AwMontageManager::clearICA()
 {
-	// remove ICA channels from asRecorded list
-	foreach (AwICAChannel *c, m_icaAsRecorded)
-		m_channelsAsRecorded.removeAll(c);
-	m_icaHashTable.clear();
+	// remove previous ICA channels from asRecorded
+	// DO NOT DELETE channels as they belong to a AwComponent instance
+	for (auto c : m_icaAsRecorded)
+		m_asRecorded.remove(c->name());
+	m_icaAsRecorded.clear();
 
 	// remove ICA channels from current montage
 	foreach(AwChannel *c, m_channels)
@@ -211,8 +135,8 @@ void AwMontageManager::clearSource(int type)
 	// remove Source of type 'type' from channels from asRecorded list
 	foreach (AwSourceChannel *c, m_sourceAsRecorded) {
 		if (c->type() == type) {
-			m_channelsAsRecorded.removeAll(c);
-			m_sourceHashTable.remove(c->name());
+			m_asRecorded.remove(c->name());
+			m_sourceAsRecorded.removeAll(c);
 		}
 	}
 
@@ -233,10 +157,8 @@ void AwMontageManager::addNewSources(int type)
 		AwSourceChannel *source = new AwSourceChannel(c);
 		source->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::Source));
 		m_sourceAsRecorded << c;
-		m_channelsAsRecorded << c;
 		m_channels << source;
-		m_channelHashTable.insert(source->name(), source);
-		m_sourceHashTable.insert(c->name(), c);
+		m_asRecorded[source->name()] = source;
 	}
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
@@ -268,33 +190,33 @@ int AwMontageManager::loadICA(const QString& path)
 	clearICA();
 	AwICAManager *ica_man = AwICAManager::instance();
 	int count = 0;
-//	AwFiltersManager *fm = AwFiltersManager::instance();
-	if (AwICAManager::instance()->loadComponents(path) == 0) { // if components sucessfully loaded, get components and make them as recorded channels.
-		// add ICA components to asRecorded and current montage.
-		AwICAComponents **comps = ica_man->getAllComponents();
-		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-			if (comps[i] == NULL)
-				continue;
-			count += comps[i]->components().size();
-			foreach(AwICAChannel *channel, comps[i]->components()) {
-				m_icaAsRecorded << channel;
-				m_channelsAsRecorded << channel;
-				AwICAChannel *newChan = new AwICAChannel(channel);
-				newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
-				m_channels << newChan;
-				m_channelHashTable.insert(newChan->name(), newChan);
-				m_icaHashTable.insert(channel->name(), channel);
-			}
-			//AwSettings::getInstance()->filterSettings().setBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter());
-			AwSettings::getInstance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
-		}
-
-		emit montageChanged(m_channels);
-		AwMessageBox::information(0, tr("ICA Components"), QString::number(count) + tr(" ICA components added to the current montage."));
-		return 0;
+	try {
+		ica_man->loadComponents(path);
 	}
-	AwMessageBox::critical(0, tr("ICA Components"), tr("Failed to import ICA components. Maybe the ICA components can't be applied to this data file?"));
-	return -1;
+	catch (const AwException& e) {
+		AwMessageBox::critical(0, tr("ICA Components"),QString(tr("Failed to import ICA components: %1")).arg(e.errorString()));
+		return -1;
+	}
+	// add ICA components to asRecorded and current montage.
+	AwICAComponents **comps = ica_man->getAllComponents();
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		if (comps[i] == NULL)
+			continue;
+		count += comps[i]->components().size();
+		foreach(AwICAChannel *channel, comps[i]->components()) {
+			m_icaAsRecorded << channel;
+			AwICAChannel *newChan = new AwICAChannel(channel);
+			newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
+			m_channels << newChan;
+			// add ica to as recorded
+			m_asRecorded[channel->name()] = channel;
+		}
+		AwSettings::getInstance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
+	}
+
+	emit montageChanged(m_channels);
+	AwMessageBox::information(0, tr("ICA Components"), QString(tr("%1 components added to the current montage.").arg(count)));
+	return 0;
 }
 
 // constructor
@@ -303,7 +225,7 @@ AwMontageManager::AwMontageManager()
 	QStringList filter("*.mtg");
 	AwSettings *aws = AwSettings::getInstance();
 
-	m_path = aws->montageDir;
+	m_path = aws->getString("montageDir");
 	if (m_path.isEmpty())
 		return;
 
@@ -425,15 +347,13 @@ QStringList AwMontageManager::labels()
 //
 // Retourne le premier canal de type t present dans la liste des canaux AsRecorded.
 // Retourne NULL si aucun canal trouvé.
-AwChannel* AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
+bool AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
 {
-	if (m_channelsAsRecorded.isEmpty())
-		return 0;
-
-	for (auto c : m_channelsAsRecorded)
+	auto channels = m_asRecorded.values();
+	for (auto c : channels)
 		if (c->type() == t)
-			return c;
-	return 0;
+			return true;
+	return false;
 }
 
 /// Remove Bad Channels
@@ -451,14 +371,14 @@ void AwMontageManager::removeBadChannels(AwChannelList& list)
 void AwMontageManager::applyGains()
 {
 	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	for (auto c : m_channels + m_channelsAsRecorded)
+	for (auto c : m_channels + m_asRecorded.values())
 		c->setGain(am->amplitude(c->type()));
 }
 
 void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
 {
 	settings.apply(m_channels);
-	settings.apply(m_channelsAsRecorded);
+	settings.apply(m_asRecorded.values());
 	settings.apply(AwSettings::getInstance()->currentReader()->infos.channels());
 }
 
@@ -493,21 +413,18 @@ void AwMontageManager::closeFile()
 	m_badChannelLabels.clear();
 	m_montagePath = "";
 	m_badPath = "";
-	m_channelHashTable.clear();
-	m_channelsAsRecorded.clear(); // clear as recorded Channels
+	m_asRecorded.clear();
 }
 
 void AwMontageManager::newMontage(AwFileIO *reader)
 {
-	//closeFile();
+	closeFile();
 	AwChannelList channels = reader->infos.channels();
 
 	// init as recorded channels list
 	for (auto c : channels)  {
 		// insert in hash table
-		m_channelHashTable.insert(c->name(), c);
-		// insert the as recorded channel in asRecorded list
-		m_channelsAsRecorded << c;
+		m_asRecorded[c->name()] = c;
 		// make a copy a as recorded channel and insert it in channels.
 		// do not insert Reference channels in default montage
 		if (!c->isReference())
@@ -539,8 +456,6 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		AwSettings::getInstance()->filterSettings().initWithChannels(m_channels);
 	}
 	setNewFilters(AwSettings::getInstance()->filterSettings());
-	
-	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	emit montageChanged(m_channels);
 }
@@ -578,7 +493,8 @@ void AwMontageManager::checkForBIDSMods()
 	bool mustBeSaved = false;
 	for (int i = 0; i < names.size(); i++) {
 		auto name = names.value(i);
-		auto asRecorded = m_channelHashTable.value(name);
+		//auto asRecorded = m_channelHashTable.value(name);
+		auto asRecorded = m_asRecorded[name];
 		if (asRecorded) {
 			// convert AnyWave Channel type to BIDS
 			if (asRecorded->isMEG())
@@ -665,12 +581,12 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		globalMap.insert(c->name(), c);
 
 	// reset as recorded channels to GOOD state
-	for (auto c : m_channelsAsRecorded)
+	for (auto c : m_asRecorded.values())
 		c->setBad(false);
 	// now change type or bad status based on TSV
 	AwChannelList badChannels;
 	for (auto c : list) {
-		auto asRecorded = m_channelHashTable.value(c->name());
+		auto asRecorded = m_asRecorded[c->name()];
 		if (asRecorded) {
 			asRecorded->setBad(c->isBad());
 			asRecorded->setType(c->type());
@@ -730,15 +646,15 @@ void AwMontageManager::loadBadChannels()
 		file.close();
 	}
 	// reset as recorded channels bad status
-	for (auto chan : m_channelsAsRecorded)
+	for (auto chan : m_asRecorded.values())
 		chan->setBad(false);
 	for (auto label : m_badChannelLabels) {
-		AwChannel *chan = m_channelHashTable.value(label);
+		AwChannel *chan = m_asRecorded[label];
 		if (chan)
 			chan->setBad(true);
 	}
 	foreach(AwChannel *chan, m_channels) {
-		AwChannel *asRecorded =  m_channelHashTable.value(chan->name());
+		AwChannel *asRecorded =  m_asRecorded[chan->name()];
 		if (asRecorded)  
 			if (asRecorded->isBad()) {
 				m_channels.removeAll(chan);
@@ -764,17 +680,19 @@ void AwMontageManager::showInterface()
 		while (!m_channels.isEmpty())
 			delete m_channels.takeFirst();
 
-		// Get as recorded channels and check if their types and bas status have changed.
+		// Get as recorded channels and check if their types and bad status have changed.
 		for (auto c : ui.asRecordedChannels()) {
-			AwChannel *asRecorded = m_channelHashTable.value(c->name());
-			asRecorded->setBad(c->isBad());
-			asRecorded->setType(c->type());
+			auto asRecorded = m_asRecorded[c->name()]; 
+			if (asRecorded) {
+				asRecorded->setBad(c->isBad());
+				asRecorded->setType(c->type());
+			}
 		}
 		
 		// now browse channels defined as montage and instantiate them properly 
 		QStringList labels = AwChannel::getLabels(ui.channels());
 		for (int i = 0; i < labels.size(); i++) {
-			AwChannel *asRecorded = m_channelHashTable.value(labels.at(i));
+			auto asRecorded = m_asRecorded[labels.value(i)];
 			if (asRecorded) {
 				if (asRecorded->isVirtual())
 					m_channels << static_cast<AwVirtualChannel *>(asRecorded)->duplicate();
@@ -797,46 +715,12 @@ void AwMontageManager::showInterface()
 
 bool AwMontageManager::save(const QString& filename, const AwChannelList& channels)
 {
-	QFile file(filename);
-	
-	if (!file.open(QIODevice::WriteOnly))
-		return false;
-	
-	QTextStream stream(&file);
-	QDomDocument doc("AnyWaveMontage");
-	QDomElement root = doc.createElement("Montage");
-	QDomElement element;
-	QDomElement child;
-
-	doc.appendChild(root);
-	foreach (AwChannel *chan, channels)	{
-		element = doc.createElement("Channel");
-		element.setAttribute("name", chan->name());
-		root.appendChild(element);
-
-		child = doc.createElement("type");
-		element.appendChild(child);
-		child.appendChild(doc.createTextNode(AwChannel::typeToString(chan->type())));
-
-		child = doc.createElement("reference");
-		element.appendChild(child);
-		child.appendChild(doc.createTextNode(chan->referenceName()));
-
-		child = doc.createElement("color");
-		element.appendChild(child);
-		if (chan->color().isEmpty())
-			chan->setColor("black");
-		child.appendChild(doc.createTextNode(chan->color()));
-
-		// add filtering options
-		child = doc.createElement("filters");
-		child.setAttribute("lowPass", chan->lowFilter());
-		child.setAttribute("highPass", chan->highFilter());
-		element.appendChild(child);
-
+	try {
+		AwMontage::save(filename, channels);
 	}
-	doc.save(stream, 3);
-	file.close();
+	catch (const AwException& e) {
+		return false;
+	}
 	return true;
 }
 
@@ -869,244 +753,76 @@ bool AwMontageManager::saveMontage(const QString& name)
 
 AwChannelList AwMontageManager::load(const QString& path)
 {
-	QFile file(path);
-	AwChannelList res;
 
-	if (!file.open(QIODevice::ReadOnly))
-		return AwChannelList();
-
-	QDomDocument doc;
-	QDomElement element;
-	QString error;
-	int line, col;
-	
-	if (!doc.setContent(&file, &error, &line, &col)) {
-		AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
-		file.close();
-		return AwChannelList();
+	AwChannelList channels, res;
+	try {
+		channels = AwMontage::load(path);
+	}
+	catch (const AwException& e)
+	{
+		AwMessageBox::information(0, tr("Error"), e.errorString());
+		return channels;
 	}
 
-	QDomElement root = doc.documentElement(); // get root tag
-	if (root.tagName() != "Montage") {
-		file.close();
-		return AwChannelList();
-	}
-
-	QDomNode node = root.firstChild();
-	while (!node.isNull())	{
-		element = node.toElement();
-		QDomNode child;
-		AwChannel *channel = NULL;
-		if (element.tagName() == "Channel")	{
-			QString name = element.attribute("name");
-			AwChannel *asRecorded = m_channelHashTable.value(name);
-			if (!asRecorded) { // channel not found in as recorded => skipping
-				if (name == "SEEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::SEEG);
-				}
-				else if (name == "MEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::MEG);
-					}
-				else if ( name == "EEG_AVG") {
-					channel =  new AwAVGChannel(AwChannel::EEG);
-				}
-				else {// unknowm channel type => skip
-					node = node.nextSibling();
-					continue;
-				}
-			}
-			// skip channels marked as bad in as Recorded.
-			else if (asRecorded->isBad()) {
-				node = node.nextSibling();
-				continue;
-			}
-			else 
-				channel = new AwChannel(asRecorded);
-			child = element.firstChild();
-
-			while (!child.isNull())	{
-				QDomElement ee = child.toElement();
-				if (ee.tagName() == "type") {
-					int t = AwChannel::stringToType(ee.text());
-					if (channel->type() != t) {
-						asRecorded->setType(t);
-						channel->setType(t);
-					}
-				}
-				else if (ee.tagName() == "reference") {
-					// find reference in asRecorded
-					QString ref = ee.text();
-					if (m_channelHashTable.value(ref))
-						channel->setReferenceName(ref);
-				}
-				else if (ee.tagName() == "color") {
-					if (ee.text().isEmpty())
-						channel->setColor("black");
-					else
-						channel->setColor(ee.text());
-				}
-				else if (ee.tagName() == "filters") {
-					// overwrite global filtering options if the channel was saved with a specific filtering setting.
-					QString lp = ee.attribute("lowPass");
-					QString hp = ee.attribute("highPass");
-
-					channel->setLowFilter(lp.toDouble());
-					channel->setHighFilter(hp.toDouble());
-				}
-				child = child.nextSibling();
-			}
-			// check for reference type
-			if (!channel->referenceName().isEmpty()) {
-				AwChannel *ref = m_channelHashTable.value(channel->referenceName());
-				AwChannel *asRecorded = m_channelHashTable.value(ref->name());
-				ref->setType(channel->type());
-				asRecorded->setType(channel->type());
-			}
-			res << channel;
+	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
+	foreach(AwChannel *c, channels) {
+		if (!m_asRecorded.contains(c->name())) {
+			channels.removeAll(c);
+			delete c;
+			continue;
 		}
-		node = node.nextSibling();
+		// search for a match in as recorded
+		auto asRecorded = m_asRecorded[c->name()];
+		if (asRecorded) {
+			if (asRecorded->isBad())
+				continue;
+			if (c->hasReferences() && c->referenceName() != "AVG") {
+				auto asRecordedRef = m_asRecorded[c->referenceName()];
+				if (asRecordedRef) {
+					if (asRecorded->isBad())
+						continue;
+				}
+				else  // reference not found => remove it
+					c->clearRefName();
+			}
+			// Change asrecorded type to match the one in .mtg
+			asRecorded->setType(c->type());
+			// instantiante from as recorded
+			auto newChan = asRecorded->duplicate();
+			// copy settings set in .mtg file
+			newChan->setColor(c->color());
+			newChan->setLowFilter(c->lowFilter());
+			newChan->setHighFilter(c->highFilter());
+			newChan->setReferenceName(c->referenceName());
+			res << newChan;
+		}
+		else {  // not present in as recorded
+			// checking for special names
+			if (c->name() == "SEEG_AVG") {
+				res << new AwAVGChannel(AwChannel::SEEG);
+			}
+			else if (c->name() == "EEG_AVG") {
+				res << new AwAVGChannel(AwChannel::EEG);
+			}
+			else if(c->name() == "MEG_AVG") {
+				res << new AwAVGChannel(AwChannel::MEG);
+			}
+		}
 	}
 
-	file.close();
-
+	while (!channels.isEmpty())
+		delete channels.takeFirst();
 
 	return res;
 }
 
 bool AwMontageManager::apply(const QString& path)
 {
-	QFile file(path);
-
-	if (!file.open(QIODevice::ReadOnly))
-		return false;
-
-	QDomDocument doc;
-	QDomElement element;
-	QString error;
-	int line, col;
-	
-	if (!doc.setContent(&file, &error, &line, &col)) {
-		AwMessageBox::information(0, tr("Error"), QString("%1 line %2 column %3").arg(error).arg(line).arg(col));
-		file.close();
-		return false;
-	}
-
-	QDomElement root = doc.documentElement(); // get root tag
-	if (root.tagName() != "Montage") {
-		file.close();
-		return false;
-	}
-
-	// Save ICA channels if already loaded
-	AwICAChannelList savedICAChannels;
-	foreach (AwChannel *c, m_channels)  {
-		if (c->isICA() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
-			savedICAChannels << m_icaHashTable.value(c->name());	
-			m_channelHashTable.remove(c->name());
-		}
-	}
-
-	// Save ICA channels if already loaded
-	AwSourceChannelList savedSourceChannels;
-	foreach (AwChannel *c, m_channels)  {
-		if (c->isSource() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
-			savedSourceChannels << m_sourceHashTable.value(c->name());	
-			m_channelHashTable.remove(c->name());
-		}
-	}
-
 	// deleting current channels.
 	while (!m_channels.isEmpty())
 		delete m_channels.takeLast();
 
-	QDomNode node = root.firstChild();
-	while (!node.isNull())	{
-		element = node.toElement();
-		QDomNode child;
-		AwChannel *channel = NULL;
-		if (element.tagName() == "Channel")	{
-			QString name = element.attribute("name");
-			AwChannel *asRecorded = m_channelHashTable.value(name);
-			if (!asRecorded) { // channel not found in as recorded => skipping
-				if (name == "SEEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::SEEG);
-				}
-				else if (name == "MEG_AVG")	{
-					channel = new AwAVGChannel(AwChannel::MEG);
-				}
-				else if ( name == "EEG_AVG") {
-					channel = new AwAVGChannel(AwChannel::EEG);
-				}
-				else {// unknowm channel type => skip
-					node = node.nextSibling();
-					continue;
-				}
-			}
-			// skip channels marked as bad in as Recorded.
-			else if (asRecorded->isBad()) {
-				node = node.nextSibling();
-				continue;
-			}
-			else 
-				channel = new AwChannel(asRecorded);
-
-			child = element.firstChild();
-
-			while (!child.isNull())	{
-				QDomElement ee = child.toElement();
-				if (ee.tagName() == "type") 	{
-					int t = AwChannel::stringToType(ee.text());
-					if (channel->type() != t) {
-						asRecorded->setType(t);
-						channel->setType(t);
-					}
-				}
-				else if (ee.tagName() == "reference") {
-					channel->setReferenceName(ee.text());
-				}
-				else if (ee.tagName() == "color")
-					channel->setColor(ee.text());
-				else if (ee.tagName() == "filters") {
-					// overwrite global filtering options if the channel was saved with a specific filtering setting.
-					QString lp = ee.attribute("lowPass");
-					QString hp = ee.attribute("highPass");
-
-					channel->setLowFilter(lp.toDouble());
-					channel->setHighFilter(hp.toDouble());
-				}
-				child = child.nextSibling();
-			}
-			// check for reference type
-			if (!channel->referenceName().isEmpty()) {
-				AwChannel *ref = m_channelHashTable.value(channel->referenceName());		
-				if (ref != Q_NULLPTR) { // the reference channel is a REAL channel => change its type if necesseray.
-					AwChannel *asRecorded = m_channelHashTable.value(ref->name());
-					ref->setType(channel->type());
-					if (asRecorded != Q_NULLPTR)
-						asRecorded->setType(channel->type());
-				}
-				// if label are not found in channel hash table neither as recorded has table, this is a virtual channel (probably AVG).
-			}
-			m_channels << channel;
-		}
-		node = node.nextSibling();
-	}
-
-	// Restore ICA channels if any
-	foreach (AwICAChannel *channel, savedICAChannels) {
-		AwICAChannel *newChan = new AwICAChannel(channel);
-		m_channels << newChan;
-		m_channelHashTable.insert(newChan->name(), newChan);
-	}
-
-	// Restore Source channels if any
-	foreach (AwSourceChannel *channel, savedSourceChannels) {
-		AwSourceChannel *newChan = new AwSourceChannel(channel);
-		m_channels << newChan;
-		m_channelHashTable.insert(newChan->name(), newChan);
-	}
-
-	file.close();
+	m_channels = load(path);
 	return true;
 }
 
@@ -1120,78 +836,32 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 
-	// reimplementing loading of montage files to only apply on asRecorded channels
-	// removing all procedures related to AnyWave UI
-	QFile file(path);
+	AwChannelList channels, res;
+	try {
+		channels = AwMontage::load(path);
+	}
+	catch (const AwException& e) {
+		return channels;
+	}
 
-
-	QHash<QString, AwChannel *> asRecordedH;
-
-	if (!file.open(QIODevice::ReadOnly))
-		return AwChannelList();
-
-	QDomDocument doc;
-	QDomElement element;
+	QHash<QString, AwChannel *> hash;
+	for (auto c : asRecorded)
+		hash[c->name()] = c;
 	
-	if (!doc.setContent(&file))	{
-		file.close();
-		return  AwChannelList();
+	for (auto c : channels) {
+		if (!hash.contains(c->name()))
+			continue;
+		auto newChannel = new AwChannel(c);
+		hash[c->name()]->setType(c->type());
+		if (c->hasReferences() && hash.contains(c->referenceName())) 
+			// make sure the type of ref channel is matching the one in montage
+			hash[c->referenceName()]->setType(c->type());
+		else 
+			newChannel->clearRefName();
+		res << newChannel;
 	}
-
-	QDomElement root = doc.documentElement(); // get root tag
-	if (root.tagName() != "Montage") {
-		file.close();
-		return AwChannelList();
-	}
-
-	foreach (AwChannel *c, asRecorded)
-		asRecordedH.insert(c->name(), c);
-
-	QDomNode node = root.firstChild();
-	AwChannel *chan = NULL;
-	AwChannelList channels;
-
-	while (!node.isNull())	{
-		element = node.toElement();
-		QDomNode child;
-		if (element.tagName() == "Channel")	{
-			QString name = element.attribute("name");
-			AwChannel *asRecorded = asRecordedH.value(name);
-			if (asRecorded) {
-				child = element.firstChild();
-				chan = new AwChannel(asRecorded);
-				while (!child.isNull()) {
-					QDomElement ee = child.toElement();
-					// check type and force it if necessary
-					if (ee.tagName() == "type")	{
-						int t = AwChannel::stringToType(ee.text());
-						if (chan->type() != t)	{
-							asRecorded->setType(t);
-							chan->setType(t);
-						}
-					}
-					else if (ee.tagName() == "reference") {
-							// find reference in asRecorded
-						QString ref = ee.text();
-						if (asRecordedH.value(ref))
-							chan->setReferenceName(ref);
-					}
-					child = child.nextSibling();
-				} // end while (!child.isNull())
-				
-				// check for reference type
-				if (!chan->referenceName().isEmpty()) {
-					AwChannel *ref = asRecordedH.value(chan->referenceName());
-					AwChannel *asRecorded = asRecordedH.value(ref->name());
-					ref->setType(chan->type());
-					asRecorded->setType(chan->type());
-				}
-				channels << chan;
-			} //end if(asRecorded)
-		} // end if (element.tagName() == "Channel")
-		node = node.nextSibling();
-	} // end while (!node.isNull())
-	return channels;
+	AW_DESTROY_LIST(channels);
+	return res;
 }
 
 
@@ -1221,19 +891,24 @@ bool AwMontageManager::loadMontage(const QString& path)
 void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 {
 	bool updateMontage = false;
+	AwChannelList toDelete;
 	foreach(QString label, labels)	{
-		AwChannel *asRecorded = m_channelHashTable.value(label);
-		if (asRecorded == NULL)
+		if (!m_asRecorded.contains(label))
 			continue;
+		auto asRecorded = m_asRecorded[label];
 		asRecorded->setBad(true);
 		m_badChannelLabels << label;
 		foreach(AwChannel *c, m_channels) {
 			if (c->name() == asRecorded->name() || c->referenceName() == asRecorded->name()) {
 				m_channels.removeAll(c);
+				toDelete << c;
 				updateMontage = true;
 			}
 		}
 	}
+	while (!toDelete.isEmpty())
+		delete toDelete.takeFirst();
+
 	if (updateMontage) {
 		emit badChannelsSet(m_badChannelLabels);
 		emit montageChanged(m_channels);
@@ -1249,8 +924,9 @@ void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 // compute new montage.
 void AwMontageManager::markChannelAsBad(const QString& channelName, bool bad)
 {
-	AwChannel *asRecorded = m_channelHashTable.value(channelName);
+	auto asRecorded = m_asRecorded[channelName];
 	if (asRecorded) { // channel found
+		AwChannelList toDelete;
 		if (bad) { // set it to bad
 			if (!m_badChannelLabels.contains(channelName))
 				m_badChannelLabels << channelName;
@@ -1260,6 +936,7 @@ void AwMontageManager::markChannelAsBad(const QString& channelName, bool bad)
 			foreach (AwChannel *c, m_channels) { // check in montage for reference to channelName. If any reference found, remove channel from montage.
 				if (c->name() == asRecorded->name() || c->referenceName() == asRecorded->name()) {
 					m_channels.removeAll(c);
+					toDelete << c;
 					updateMontage = true;
 				}
 			}
@@ -1273,6 +950,8 @@ void AwMontageManager::markChannelAsBad(const QString& channelName, bool bad)
 			asRecorded->setBad(false);
 			emit badChannelsSet(m_badChannelLabels);
 		}
+		while (!toDelete.isEmpty())
+			delete toDelete.takeFirst();
 		saveBadChannels();
 	}
 }
@@ -1286,9 +965,7 @@ void AwMontageManager::addChannelToAsRecorded(AwChannel *channel)
 	// si le canal n'est pas de source virtual on ne fait rien
 	if (!channel->isVirtual())
 		return;
-	m_channelsAsRecorded.append(channel);
-	// ajout dans la hastable
-	m_channelHashTable.insert(channel->name(), channel);
+	m_asRecorded[channel->name()] = channel;
 }
 
 
@@ -1304,7 +981,7 @@ void AwMontageManager::buildQuickMontagesList()
 	AwSettings *aws = AwSettings::getInstance();
 	// check in AnyWave's montage directory
 	QStringList filter("*.mtg");
-	m_path = aws->montageDir;
+	m_path = aws->getString("montageDir");
 	if (m_path.isEmpty())
 		return;
 
@@ -1345,7 +1022,7 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 		QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
 		return;
 	}
-	AwProcessManager::instance()->setMontageChannels(m_channels);
+//	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	setNewFilters(AwSettings::getInstance()->filterSettings());
 	emit montageChanged(m_channels);
@@ -1360,9 +1037,9 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 void AwMontageManager::addChannelsByName(AwChannelList &channelsToAdd)
 {
 	foreach (AwChannel *c, channelsToAdd)	{
-		AwChannel *asRecorded = m_channelHashTable.value(c->name());
-		if (asRecorded == NULL)
+		if (!m_asRecorded.contains(c->name()))
 			continue;
+		auto asRecorded = m_asRecorded[c->name()];
 		if (asRecorded->isBad())
 			continue;
 		m_channels << asRecorded->duplicate();
@@ -1379,23 +1056,23 @@ void AwMontageManager::buildNewMontageFromChannels(const AwChannelList& channels
 		return;
 	AwChannelList newMontage; // check the channels against the as recorded ones and also check the bad status.
 	for (auto c : channels) {
-		auto asRecorded = m_channelHashTable.value(c->name());
-		// do not add a bad channel in the montage
-		if (asRecorded == NULL)
+		if (!m_asRecorded.contains(c->name()))
 			continue;
+		auto asRecorded = m_asRecorded[c->name()];
+		// do not add a bad channel in the montage
 		if (asRecorded->isBad())
 			continue;
-		if (c->hasReferences()) { // do not add the channel if the reference channel is bad.
-			auto asRecorded = m_channelHashTable.value(c->referenceName());
-			if (asRecorded == NULL)
-				continue;
-			if (asRecorded->isBad())
+		if (c->hasReferences() && m_asRecorded.contains(c->referenceName())) { // do not add the channel if the reference channel is bad.
+			if (m_asRecorded[c->referenceName()]->isBad())
 				continue;
 		}
+
 		newMontage << c->duplicate();
 	}
 	if (!newMontage.isEmpty()) {
-		clear();
+		//clear();
+		while (!m_channels.isEmpty())
+			delete m_channels.takeFirst();
 		m_channels = newMontage;
 		emit montageChanged(m_channels);
 	}

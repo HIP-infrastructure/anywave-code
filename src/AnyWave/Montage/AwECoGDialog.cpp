@@ -11,7 +11,8 @@ AwECoGDialog::AwECoGDialog(const AwChannelList& channels, QWidget *parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
-	m_channels = channels;
+	for (auto c : channels)
+		m_channelsMap[c->name()] = c;
 	ui.listWidget->addItems(AwChannel::getLabels(channels));
 	connect(ui.buttonGrid, &QPushButton::clicked, this, &AwECoGDialog::addGridStrip);
 	ui.tableView->setModel(new AwECoGTableModel(this));
@@ -22,6 +23,7 @@ AwECoGDialog::AwECoGDialog(const AwChannelList& channels, QWidget *parent)
 
 AwECoGDialog::~AwECoGDialog()
 {
+
 }
 
 void AwECoGDialog::addGridStrip()
@@ -103,26 +105,35 @@ void AwECoGDialog::accept()
 {
 	auto grids = static_cast<AwECoGTableModel *>(ui.tableView->model())->grids();
 	for (auto g : grids) {
-		QStringList labels;
-		int limit1 = 0, limit2 = 0;
-		if (g->orientation() == AwECoGGrid::Horizontal) {
-			limit1 = g->rows();
-			limit2 = g->cols();
-		}
-		else {
-			limit1 = g->cols();
-			limit2 = g->rows();
-		}
-		for (int i = 0; i < limit1; i++) {
-			for (int j = 0; j < limit2; j++) {
-				labels << g->labels().value(i * limit2 + j);
+		
+		auto orientation = g->orientation();
+		if (orientation == AwECoGGrid::Horizontal || orientation == AwECoGGrid::Both) {
+			QStringList labels;
+			for (int i = 0; i < g->rows(); i++) {
+				for (int j = 0; j < g->cols(); j++) 
+					labels << g->labels().value(i * g->cols() + j);
+				for (int k = 0; k < labels.size() - 1; k++) {
+					auto label = labels.value(k);
+					auto newChannel = new AwChannel(m_channelsMap[label]);
+					newChannel->setReferenceName(labels.value(k + 1));
+					m_channels << newChannel;
+				}
+				labels.clear();
 			}
-			auto channels = AwChannel::getChannelsWithLabels(m_channels, labels);
-			int count = 0;
-			for (int k = 0; k < channels.size() - 1; k++) {
-				channels.at(k)->setReferenceName(labels.value(k + 1));
+		}
+		if (orientation == AwECoGGrid::Vertical || orientation == AwECoGGrid::Both) {
+			QStringList labels;
+			for (int i = 0; i < g->cols(); i++) {
+				for (int j = 0; j < g->rows(); j++) 
+					labels << g->labels().value(j * g->cols() + i);
+				for (int k = 0; k < labels.size() - 1; k++) {
+					auto label = labels.value(k);
+					auto newChannel = new AwChannel(m_channelsMap[label]);
+					newChannel->setReferenceName(labels.value(k + 1));
+					m_channels << newChannel;
+				}
+				labels.clear();
 			}
-			labels.clear();
 		}
 	}
 	QDialog::accept();

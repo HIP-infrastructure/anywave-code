@@ -382,6 +382,15 @@
     <ClCompile Include="AwSelectInputDataWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwGetValueDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwGetValueDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwGetValueDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AwAmplitudeWidget.ui">
@@ -540,6 +549,12 @@
     <CustomBuild Include="..\..\include\widget\AwSelectInputDataWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="AwGetValueDialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwGetValueDialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwAmplitudeWidget.h">
@@ -597,6 +612,9 @@
       <Filter>SEEGViewer</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwSelectInputDataWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwGetValueDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

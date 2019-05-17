@@ -224,10 +224,11 @@ void AwMarkerRule::checkIfValid()
 
 bool AwMarkerRule::save()
 {
-	if (AwSettings::getInstance()->markerRulesDir.isEmpty())
+	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
+	if (dir.isEmpty())
 		return false;
 
-	QString path = AwSettings::getInstance()->markerRulesDir + m_name + ".awr";
+	QString path = QString("%1%2.awr").arg(dir).arg(m_name);
 	QFile file(path);
 
 	if (!file.open(QIODevice::WriteOnly))
@@ -337,10 +338,11 @@ bool AwMarkerRule::save()
 
 bool AwMarkerRule::load()
 {
-	if (AwSettings::getInstance()->markerRulesDir.isEmpty())
+	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
+	if (dir.isEmpty())
 		return false;
 
-	QString path = AwSettings::getInstance()->markerRulesDir + m_name + ".awr";
+	QString path = QString("%1%2.awr").arg(dir).arg(m_name);
 
 	QFile file(path);
 
@@ -485,10 +487,12 @@ bool AwMarkerRule::load()
 
 void AwMarkerRule::remove(const QString& name)
 {
-	if (AwSettings::getInstance()->markerRulesDir.isEmpty())
+	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
+
+	if (dir.isEmpty())
 		return;
 
-	QString path = AwSettings::getInstance()->markerRulesDir + name + ".awr";
+	QString path = QString("%1%2.awr").arg(dir).arg(name);
 	QFile::remove(path);
 }
 
@@ -506,11 +510,13 @@ void AwMarkerRule::addElement(AwMarkerRuleElement *elem)
 
 bool AwMarkerRule::exists()
 {
+	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
 
-	if (AwSettings::getInstance()->markerRulesDir.isEmpty())
+
+	if (dir.isEmpty())
 		return false;
 
-	QString path = AwSettings::getInstance()->markerRulesDir + m_name + ".awr";
+	QString path = QString("%1%2.awr").arg(dir).arg(m_name);
 	return QFile::exists(path);
 }
 

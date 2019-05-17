@@ -38,8 +38,6 @@ AwScriptWidget::AwScriptWidget(AwScript *script, QWidget *parent)
 	ui->buttonRemove->hide();
 	ui->labelMessage->hide();
 	ui->labelTime->hide();
-//	connect(ui->buttonStop, SIGNAL(clicked()), this, SLOT(stop()));
-//	connect(ui->buttonRemove, SIGNAL(clicked()), this, SLOT(removeMe()));
 	connect(ui->buttonShowLog, SIGNAL(clicked()), this, SLOT(showLog()));
 	
 	m_logUpdated = false;
@@ -47,19 +45,15 @@ AwScriptWidget::AwScriptWidget(AwScript *script, QWidget *parent)
 	m_logWindow->hide();
 	m_timer = NULL;
 	m_isActive = true;
-//#ifdef Q_OS_MAC
-//	QMargins margins = layout()->contentsMargins();
-//	margins.setBottom(margins.bottom() - 6);
-//    layout()->setContentsMargins(margins);
-//#endif
-	//connect(process, SIGNAL(aborted()), this, SLOT(setFinished()));
-	//connect(process, SIGNAL(idle()), this, SLOT(setIdle()));
+
 	connect(script, SIGNAL(finished()), this, SLOT(setFinished()));
-	//connect(process, SIGNAL(progressChanged(int)), this, SLOT(setProgression(int)));
-	connect(script, SIGNAL(message(const QString&)), this, SLOT(setMessage(const QString&)));
-	connect(script, SIGNAL(warning(const QString&)), this, SLOT(setMessage(const QString&)));
-	connect(script, SIGNAL(error(const QString&)), this, SLOT(setMessage(const QString&)));
-	//connect(process, SIGNAL(started()), this, SLOT(setRunning()));
+
+	connect(script, SIGNAL(message(const QString&)), m_logWindow, SLOT(appendLog(const QString&)));
+	connect(script, SIGNAL(error(const QString&)), m_logWindow, SLOT(appendError(const QString&)));
+	connect(script, SIGNAL(warning(const QString&)), m_logWindow, SLOT(appendWarning(const QString&)));
+	connect(script, SIGNAL(message(const QString&)), this, SLOT(updateNewLog()));
+	connect(script, SIGNAL(error(const QString&)), this, SLOT(updateNewLog()));
+	connect(script, SIGNAL(warning(const QString&)), this, SLOT(updateNewLog()));
 }
 
 AwScriptWidget::~AwScriptWidget()
@@ -68,13 +62,7 @@ AwScriptWidget::~AwScriptWidget()
 	delete m_logWindow;
 }
 
-void AwScriptWidget::addLog(const QString& message)
-{
-	m_log <<  QTime::currentTime().toString() + ": " + message + "\n";
-	updateLog();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////:
+////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
 
 void AwScriptWidget::removeMe()
@@ -82,11 +70,8 @@ void AwScriptWidget::removeMe()
 	emit removeClicked(this);
 }
 
-void AwScriptWidget::setMessage(const QString &message)
+void AwScriptWidget::updateNewLog()
 {
-	ui->labelMessage->show();
-	ui->labelMessage->setText(message);
-	addLog(message);
 	if (!m_logWindow->isVisible())	{	
 		if (!m_logUpdated)	{
 			m_timer = new QTimer(this);
@@ -120,15 +105,8 @@ void AwScriptWidget::setFinished()
 	ui->buttonRemove->show();
 	ui->labelTime->show();
 	ui->labelTime->setText(QTime::currentTime().toString());
+	m_logWindow->appendLog(tr("Finished"));
 	m_isActive = false;
-}
-
-void AwScriptWidget::updateLog()
-{
-	QString text;
-	foreach (QString s, m_log)
-		text += s;
-	m_logWindow->setText(text);
 }
 
 void AwScriptWidget::showLog()
@@ -145,7 +123,7 @@ void AwScriptWidget::showLog()
 
 void AwScriptWidget::setRunning()
 {
-	addLog(tr("Started"));
+	m_logWindow->appendLog("Started");
 	ui->labelMessage->show();
 	ui->labelMessage->setText(tr("Running..."));
 }

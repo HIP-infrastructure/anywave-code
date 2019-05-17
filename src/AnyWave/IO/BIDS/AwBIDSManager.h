@@ -40,7 +40,9 @@ public:
 	void closeBIDS();
 	inline AwBIDSSubject *getSubject() { return m_currentSubject; }
 	
+	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
+	void MEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
 

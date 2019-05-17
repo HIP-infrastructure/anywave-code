@@ -95,6 +95,17 @@ int AwViewSettingsUi::exec()
 		radioHidden->setChecked(true);
 		break;
 	}
+
+	switch (m_settings->timeMode) {
+	case AwViewSettings::ShowRecordedTime:
+		radioRecordedTime->setChecked(true);
+		break;
+	case AwViewSettings::ShowRelativeTime:
+		radioRelativeTime->setChecked(true);
+		break;
+	}
+
+	radioRelativeTime->setChecked(m_settings->timeMode == AwViewSettings::ShowRelativeTime);
 	return QDialog::exec();
 }
 
@@ -163,6 +174,14 @@ void AwViewSettingsUi::accept()
 
 	if (copiedSettings->markerBarMode != m_settings->markerBarMode)
 		flags |= AwViewSettings::MarkerBarMode;
+
+	if (radioRelativeTime->isChecked())
+		m_settings->timeMode = AwViewSettings::ShowRelativeTime;
+	else
+		m_settings->timeMode = AwViewSettings::ShowRecordedTime;
+
+	if (copiedSettings->timeMode != m_settings->timeMode)
+		flags |= m_settings->timeMode;
 
 	if (flags)
 		emit settingsChanged(m_settings, flags);

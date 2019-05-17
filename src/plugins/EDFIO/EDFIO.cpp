@@ -24,6 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "EDFIO.h"
+#include <AwMarker.h>
 
 /* max size of annotationtext */
 #define EDFLIB_WRITE_MAX_ANNOTATION_LEN 40
@@ -326,7 +327,6 @@ qint64 EDFIO::readDataFromChannels(float start, float duration, QList<AwChannel 
 	qint64 samplesRead = 0;
 	for(auto chan : channelList) {
 		float *data;
-	//	int edf_channel = m_labelToIndex[chan->name()];
 		int edf_channel = m_labels.indexOf(chan->name());
 		if (edf_channel == -1)
 			continue;
@@ -968,8 +968,8 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 			channel.setType(AwChannel::EMG);
 		if (channel.name().startsWith("STATUS"))
 			channel.setType(AwChannel::Trigger);
-		infos.addChannel(&channel);
-		m_labels << channel.name();
+		auto chan = infos.addChannel(&channel);
+		m_labels << chan->name();
 	}
 
 	AwBlock *block = infos.newBlock();
@@ -986,7 +986,7 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 				AwMarker marker;
 				marker.setLabel(QString::fromLatin1(annot.annotation));
 				marker.setStart(((float)(annot.onset) / EDFLIB_TIME_DIMENSION));
-				double duration = QString::fromLatin1(annot.duration).toDouble() / EDFLIB_TIME_DIMENSION;
+				double duration = QString::fromLatin1(annot.duration).toDouble();
 				if (duration)
 					marker.setDuration(duration);
 
@@ -1078,8 +1078,23 @@ AwFileIO::FileStatus EDFIO::createFile(const QString& path, int flags)
 		// very misnamed function, the samplefrequency is in fact the number of sample per data record.
 		edf_set_samplefrequency(m_handle, i, nsamples);
 	}
-
 	edf_set_equipment(m_handle, "AnyWave EDF+ exporter");
+
+	char desc[EDFLIB_MAX_ANNOTATION_LEN + 1];
+	for (auto m : infos.blocks().first()->markers()) {
+		auto onset = (long long)floor(m->start() * 1e-3 * EDFLIB_TIME_DIMENSION);
+		auto duration = (long long)floor(m->duration() * 1e-3 * EDFLIB_TIME_DIMENSION);
+		std::string str = m->label().toStdString();
+		const char *buf = str.c_str();
+		int i = 0;
+		while (i < str.size())
+			desc[i] = buf[i++];
+		desc[i] = '\0';
+		if (edfwrite_annotation_latin1(m_handle, onset, duration, desc) == -1) {
+			m_error = QString("Error adding marker.");
+			return AwFileIO::FileAccess;
+		}
+	}
 	return AwFileIO::NoError;
 }
 
@@ -1087,6 +1102,7 @@ AwFileIO::FileStatus EDFIO::writeMarkers()
 {
 	return AwFileIO::NoError;
 }
+
 void EDFIO::cleanUpAndClose()
 {
 	m_file.close();

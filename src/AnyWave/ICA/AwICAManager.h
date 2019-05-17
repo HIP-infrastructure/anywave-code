@@ -53,6 +53,8 @@ public:
 	void turnICAOff();
 	QVector<int> getRejectedComponentsIndexes(int type);
 	QMap<int, QVector<int> > getAllRejectedComponents();
+	/** Get the labels of all rejected components **/
+	QStringList getRejectedLabels();
 public slots:
 	void setICAFiletring(bool on) { m_isFilteringOn = on;  emit filteringSwitched(on); }
 signals:

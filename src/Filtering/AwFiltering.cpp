@@ -72,7 +72,7 @@ void AwFiltering::downSample(const AwChannelList& channels, int factor)
 	if (channels.isEmpty())
 		return;
 
-	AwFiltering::decimate(channels, factor);
+	//AwFiltering::decimate(channels, factor);
 
 	QList<down_sampling *> toProcess;
 	for (auto c :  channels) 

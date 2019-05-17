@@ -26,11 +26,20 @@
 #include <AwChannel.h>
 #include <AwVirtualChannel.h>
 #include <QtMath>
+#include <QRegularExpression>
 
-static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
-static QStringList UnitTypes = { QString::fromLatin1("�v"), QString::fromLatin1("�v") , "pT", QString::fromLatin1("�v"), QString::fromLatin1("�v") ,
-	"pT", "n/a", "n/a", "unit", "unit", "pT/m", QString::fromLatin1("�v") };
+static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
+static QStringList UnitTypes = { "µV", "µV" , "pT", "µV", "µV" , "pT", "n/a", "n/a", "unit", "unit", "pT/m", "µV", "unit" };
 static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// global functions
+
+bool compareNames(AwChannel * c1, AwChannel *c2);
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
 
 //
 // Default constructor
@@ -406,8 +415,7 @@ int AwChannel::stringToType(const QString& s)
 
 QStringList AwChannel::types()
 {
-	QStringList stringTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG" };
-	return stringTypes;
+	return ChannelTypes;
 }
 
 
@@ -592,6 +600,39 @@ void AwChannel::setFilters(const QList<AwChannel *>& list, float hp, float lp, f
 	}
 }
 
+QList<AwChannel *> AwChannel::sortByName(const QList<AwChannel *>& list)
+{
+	AwChannelList res = list;
+	std::sort(res.begin(), res.end(), compareNames);
+	return res;
+}
+
+QList<AwChannel *> AwChannel::sortByType(const QList<AwChannel *>& list, const QStringList& types)
+{
+	// get all types
+	auto allTypes = AwChannel::types();
+	auto requestedTypes = types;
+	if (requestedTypes.isEmpty()) 
+		// if no types specified, build a default list with EEG, SEEG, ECOG, MEG, GRAD, EMG, ECG, Trigger, Other)
+		requestedTypes <<  "EEG" << "SEEG" << "ECOG" << "MEG" << "GRAD" << "EMG" << "ECG" << "TRIGGER" << "OTHER";
+	for (auto t : requestedTypes)
+		allTypes.removeAll(t);
+	requestedTypes = requestedTypes + allTypes;
+	QList<int> typeNumbers;
+	for (auto t : requestedTypes)
+		typeNumbers << AwChannel::stringToType(t);
+
+	AwChannelList res;
+	for (auto t : typeNumbers) {
+		auto l = AwChannel::getChannelsOfType(list, t);
+		res += sortByName(l);
+	}
+	
+	return res;
+}
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // END OF STATIC METHODS
@@ -696,4 +737,37 @@ void AwVirtualChannel::clearConnectedChannels()
 		delete m_connectedChannels.takeFirst();
 	m_connectedChannels.clear();
 	m_channelsFromName.clear();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/// functions implementations
+
+
+bool compareNames(AwChannel *c1, AwChannel *c2)
+{
+	auto s1 = c1->name();
+	auto s2 = c2->name();
+	QRegularExpression re("\\d+$");
+	auto  elec1 = s1, elec2 = s2;
+	auto match1 = re.match(elec1);
+	auto match2 = re.match(elec2);
+
+	bool m2 = match2.hasMatch();
+	bool m1 = match1.hasMatch();
+
+	if (m2 && m1) { // the electode got a terminating plot number, remove it
+		elec1.remove(re);
+		elec2.remove(re);
+
+		// base name without plot number are not the same
+		if (elec1 != elec2)
+			return s1 < s2;
+
+		int plot1, plot2;
+		plot1 = match1.captured(0).toInt();
+		plot2 = match2.captured(0).toInt();
+		return plot1 < plot2;
+	}
+	return s1 < s2;
 }

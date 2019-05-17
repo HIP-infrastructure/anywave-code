@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <widget/SignalView/AwBaseSignalView.h>
@@ -112,11 +112,12 @@ void AwBaseSignalView::makeConnections()
 
 	connect(m_scene, SIGNAL(needRefresh()), this, SLOT(reloadData()));
 	connect(m_scene, SIGNAL(updatePositionInFile(float)), this , SLOT(setPositionInFile(float)));
-	connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), m_navBar, SLOT(updateNumberOfSelectedChannels(AwChannelList&)));
+	connect(m_scene, &AwGraphicsScene::channelsSelectionChanged, m_navBar, &AwNavigationBar::updateNumberOfSelectedChannels);
+	//connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), m_navBar, SLOT(updateNumberOfSelectedChannels(AwChannelList&)));
 	connect(m_scene, SIGNAL(closeViewClicked()), this, SIGNAL(closeViewClicked()));
 	connect(m_scene, SIGNAL(cursorPositionChanged(float)), this, SIGNAL(cursorPositionChanged(float)));
 	connect(m_scene, SIGNAL(mappingPositionChanged(float)), this, SIGNAL(mappingPositionChanged(float)));
-	connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), this, SLOT(setSelectedChannels(AwChannelList&)));
+	//connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), this, SLOT(setSelectedChannels(AwChannelList&)));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_view, SLOT(layoutItems()));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_navBar, SLOT(updateNumberOfChannels(int)));
 	connect(m_scene, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));
@@ -185,6 +186,12 @@ void AwBaseSignalView::changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNa
 	makeConnections();
 }
 
+void AwBaseSignalView::setRecordedTime(const QTime& time)
+{
+	m_recordedTime = time;
+	m_view->setRecordedTime(time);
+}
+
 void AwBaseSignalView::setTotalDuration(float dur)
 {
 	m_scene->reset();
@@ -230,10 +237,9 @@ void AwBaseSignalView::updatePageDuration(float duration)
 		reloadData();
 }
 
-void AwBaseSignalView::setSelectedChannels(AwChannelList& channels)
+AwChannelList AwBaseSignalView::selectedChannels()
 {
-	m_selectedChannels = channels;
-	emit channelSelectionChanged(m_selectedChannels);
+	return m_scene->selectedChannels();
 }
 
 

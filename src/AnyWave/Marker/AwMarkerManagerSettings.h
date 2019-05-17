@@ -72,12 +72,16 @@ signals:
 	void clearTriggerClicked();
 
 protected slots:
-	void changeReplaceForSelection();
-	void exportWizard();
+	void renameAllMarkers();
+	void renameSelectedMarkers();
+	void changeValueAllMarkers();
+	void changeValueSelectedMarkers();
+	//void exportWizard();
 	void launchProcess();
 	void writeTrigger();
 	void clearTrigger();
 	void saveSelectedMarkers();
+	void saveSelectedMarkersToMATLAB();
 	void removeMarkers();
 	void removeAllLabels();
 	void selectAllLabels();

@@ -19,11 +19,18 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QTextEdit" name="textEdit"/>
+    <widget class="AwLogPlainTextEdit" name="plainTextEdit"/>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>AwLogPlainTextEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Process/AwLogPlainTextEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../resources/AnyWave.qrc"/>
  </resources>

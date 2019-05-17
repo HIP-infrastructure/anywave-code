@@ -96,9 +96,10 @@ void AwPythonScriptProcess::run()
 	QString initpy;
 	QString dataPath = pdi.input.dataPath;
 	dataPath = QDir::toNativeSeparators(dataPath);
-	initpy = AwSettings::getInstance()->PythonModulePath() + "/init.py";
+	auto pythonModulePath = AwSettings::getInstance()->getString("pythonModulePath");
+	initpy = pythonModulePath + "/init.py";
 	initpy = QDir::toNativeSeparators(initpy);
-	auto anywaveModulePath = QDir::toNativeSeparators(AwSettings::getInstance()->PythonModulePath());
+	auto anywaveModulePath = QDir::toNativeSeparators(pythonModulePath);
 	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
 	if (isCompiled)
 		emit progressChanged(tr("Launching Python plugin..."));
@@ -126,7 +127,7 @@ void AwPythonScriptProcess::run()
     env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
 #endif
 	env.remove("PATH");
-	env.insert("PATH", AwSettings::getInstance()->systemPath());
+	env.insert("PATH", AwSettings::getInstance()->getString("systemPath"));
 	m_python.setProcessEnvironment(env);
 	connect(&m_python, SIGNAL(readyReadStandardOutput()), this, SLOT(pythonOutput()));
 	connect(&m_python, SIGNAL(readyReadStandardError()), this, SLOT(pythonError()));

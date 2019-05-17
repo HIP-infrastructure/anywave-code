@@ -29,6 +29,7 @@
 #include <QGraphicsView>
 #include <graphics/AwGraphicsObjects.h>
 #include "AwViewSettings.h"
+#include <QTime>
 
 class AW_WIDGETS_EXPORT AwGraphicsView : public QGraphicsView
 {
@@ -42,6 +43,7 @@ public slots:
 	void applySettings(AwViewSettings *settings);
 	void updateSettings(AwViewSettings *settings, int flags);
 	void setPositionInFile(float pos) { m_posInFile = pos; }
+	void setRecordedTime(const QTime& time) { m_startTime = time; }
 protected:
 	void resizeEvent(QResizeEvent *event);
 	void scrollContentsBy(int dx, int dy);
@@ -56,6 +58,7 @@ protected:
 	qreal m_pageDuration;
 	// posInFile = current pos in file in the data, timeOffset = grid time shift (mostly used for average).
 	float m_posInFile, m_timeOffset, m_secsPerCm, m_startPosition;
+	QTime m_startTime;	// copy of the recorded time
 };
 
 

@@ -24,78 +24,66 @@
     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
-    <number>5</number>
-   </property>
-   <property name="topMargin">
-    <number>5</number>
-   </property>
-   <property name="rightMargin">
-    <number>5</number>
-   </property>
-   <property name="bottomMargin">
-    <number>5</number>
-   </property>
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Show debug logs for:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="comboLogType">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QTextEdit" name="textEditLogs">
-       <property name="font">
-        <font>
-         <family>Arial</family>
-         <pointsize>14</pointsize>
-        </font>
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="readOnly">
-        <bool>true</bool>
+       <property name="text">
+        <string>Show debug logs for:</string>
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QComboBox" name="comboLogType">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="AwLogPlainTextEdit" name="plainTextEditLogs">
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>AwLogPlainTextEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header>Process/AwLogPlainTextEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../resources/AnyWave.qrc"/>
  </resources>

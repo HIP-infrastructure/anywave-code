@@ -390,33 +390,6 @@ void EGIReader::getCategories()
 
 	while (!m_categories.isEmpty())
 		delete m_categories.takeFirst();
-
-	//QDomElement root = doc.documentElement();
-	//auto elements = root.elementsByTagName("cat");
-	//for (int i = 0; i < elements.count(); i++) {
-	//	auto cat = elements.at(i);
-
-	//	if (epoch.isElement()) {
-	//		QString beginTime, endTime, evtBegin, evtEnd;
-	//		QDomElement element = epoch.toElement();
-	//		auto child = element.firstChild();
-	//		auto item = new Epoch;
-
-	//		while (!child.isNull()) {
-	//			auto tmp = child.toElement();
-	//			if (tmp.tagName() == "beginTime")
-	//				item->begin = tmp.text().toInt();
-	//			else if (tmp.tagName() == "endTime")
-	//				item->end = tmp.text().toInt();
-	//			else if (tmp.tagName() == "firstBlock")
-	//				item->firstBlock = tmp.text().toInt();
-	//			else if (tmp.tagName() == "lastBlock")
-	//				item->lastBlock = tmp.text().toInt();
-	//			child = child.nextSibling();
-	//		}
-	//		m_epochs << item;
-	//	}
-	//}
 }
 
 

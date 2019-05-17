@@ -35,6 +35,7 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	filters << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::GRAD << AwChannel::ECoG;
 	secsPerCm = 0.5;
 	markerBarMode = AwViewSettings::ShowMarkerBar;
+	timeMode = AwViewSettings::ShowRelativeTime;
 }
 
 AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObject(parent)
@@ -51,4 +52,5 @@ AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObjec
 	secsPerCm = source->secsPerCm;
 	showMarkerLabels = source->showMarkerLabels;
 	showMarkerValues = source->showMarkerValues;
+	timeMode = source->timeMode;
 }

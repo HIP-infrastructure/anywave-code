@@ -30,8 +30,7 @@ void AwDSMSaveSetupUI::changeEvent(QEvent *e)
 
 void AwDSMSaveSetupUI::accept()
 {
-//	QString setupDir = AwSettings::getInstance()->setupDirectory();
-	QString setupDir = AwSettings::getInstance()->displaySetupDir;
+	auto setupDir = AwSettings::getInstance()->getString("displaySetupDir");
 	if (setupDir.isEmpty()) {
 		QMessageBox::critical(this, tr("Setup Folder"), tr("No Setup folder found in user directories.\nCannot save current setup."));
 		QDialog::accept();

@@ -43,6 +43,8 @@ public slots:
 	void setText(const QString& text);
 	void setCurrentProgress(int value);
 	void initProgress(int min, int max);
+	/** WaitWidget should never be closed by reject action **/
+	void reject() override {} 
 private:
 	Ui::AwWaitWidgetUi *ui;
 };

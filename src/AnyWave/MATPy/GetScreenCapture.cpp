@@ -42,7 +42,7 @@ void AwRequestServer::handleGetScreenCapture(QTcpSocket *client, AwScriptProcess
 	AwDisplay::instance()->captureViews();
 	QDataStream stream_data(response.buffer());
 	stream_data.setVersion(QDataStream::Qt_4_4);
-	stream_data << AwSettings::getInstance()->lastCaptureFile;
+	stream_data << AwSettings::getInstance()->getString("lastCapturedFile");
 	response.send();
 	emit log("Done.");
 }

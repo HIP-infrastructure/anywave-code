@@ -6,6 +6,7 @@ AwWaitWidget::AwWaitWidget(const QString& title, QWidget *parent) : QDialog(pare
 	ui = new Ui::AwWaitWidgetUi();
 	ui->setupUi(this);
 	setWindowTitle(title);
+	initProgress(0, 0);
 }
 
 AwWaitWidget::~AwWaitWidget()

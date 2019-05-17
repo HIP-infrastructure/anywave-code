@@ -61,8 +61,6 @@ AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
 
 AwDisplaySetup::~AwDisplaySetup()
 {
-//	while (!m_ds.isEmpty())
-//		delete m_ds.takeFirst();
 }
 
 void AwDisplaySetup::setSynchronized(bool flag)
@@ -114,9 +112,7 @@ void AwDisplaySetup::deleteViewSetup(int index)
 void AwDisplaySetup::setName(const QString& name)
 {
 	m_name = name;
-//	m_fullPath = AwSettings::getInstance()->setupDirectory() + m_name + ".aws";
-	m_fullPath = AwSettings::getInstance()->displaySetupDir + m_name + ".aws";
-
+	m_fullPath = QString("%1%2.aws").arg(AwSettings::getInstance()->getString("displaySetupDir")).arg(name);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,8 +180,14 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->showSeconds = e.text() == "true";
 				else if (e.tagName() == "OverlayChannels")
 					setup->stackChannels = e.text() == "true";
-				else if( e.tagName() == "ShowSensors")
+				else if (e.tagName() == "ShowSensors")
 					setup->showSensors = e.text() == "true";
+				else if (e.tagName() == "GridTimingRepresentation") {
+					if (e.text() == "ShowRelativeTime")
+						setup->timeMode = AwViewSettings::ShowRelativeTime;
+					else
+						setup->timeMode = AwViewSettings::ShowRecordedTime;
+				}
 				else if (e.tagName() == "LimitNumberOfChannels") {
 					setup->limitChannels = e.text() == "true";
 					setup->maxChannels = e.attribute("NumberOfChannels").toInt();
@@ -277,6 +279,7 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		element.appendChild(e);
 		root.appendChild(element);
 
+
 		e = doc.createElement("DisplaySeconds");
 		e.appendChild(doc.createTextNode(dsv->showSeconds ? sTrue : sFalse));
 		element.appendChild(e);
@@ -303,6 +306,14 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 			e.appendChild(doc.createTextNode("Show"));
 		else
 			e.appendChild(doc.createTextNode("Hide"));
+		element.appendChild(e);
+		root.appendChild(element);
+
+		e = doc.createElement("GridTimingRepresentation");
+		if (dsv->timeMode == AwViewSettings::ShowRelativeTime)
+			e.appendChild(doc.createTextNode("ShowRelativeTime"));
+		else
+			e.appendChild(doc.createTextNode("ShowRecordedTime"));
 		element.appendChild(e);
 		root.appendChild(element);
 

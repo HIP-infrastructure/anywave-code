@@ -58,8 +58,6 @@ AwDisplayPhysics::AwDisplayPhysics()
 		}
 
 		// compute physical values for AnyWave
-		//m_xPixPerCm = selected->physicalDotsPerInchX() / 2.54;
-		//m_yPixPerCm = selected->physicalDotsPerInchY() / 2.54;
 		m_xPixPerCm = selected->logicalDotsPerInchX() / 2.54;
 		m_yPixPerCm = selected->logicalDotsPerInchY() / 2.54;
 		settings.setValue("display/xPixPerCm", m_xPixPerCm);
@@ -170,4 +168,14 @@ void AwGraphicsCursorItem::setCurrentPos(float pos)
 	m_currentPos = pos;
 	update();
 }
+
+QVariant AwGraphicsSignalItem::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+	// handle only selection/deselection changes and send a message to warn the scene about selection changes.
+	if (change == ItemSelectedChange && scene()) {
+		emit selectionChanged(this, value.toBool());
+	}
+	return QGraphicsItem::itemChange(change, value);
+}
+
 

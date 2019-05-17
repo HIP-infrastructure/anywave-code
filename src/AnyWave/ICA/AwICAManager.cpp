@@ -127,7 +127,7 @@ int AwICAManager::loadComponents(const QString& icaFile)
 	if (m_comps[type])
 		delete m_comps[type];
 	m_comps[type] = comp;
-	AwSettings::getInstance()->currentIcaFile = icaFile;
+	AwSettings::getInstance()->setSettings("currentIcaFile", icaFile);
 	emit componentsFiltersLoaded(comp->lpFilter(), comp->hpFilter());
 	emit componentsLoaded();
 	return 0;
@@ -158,6 +158,17 @@ QMap<int, QVector<int>> AwICAManager::getAllRejectedComponents()
 	return res;
 }
 
+QStringList AwICAManager::getRejectedLabels() 
+{
+	QStringList res;
+	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+		if (m_comps[i]) {
+			for (auto comp : getRejectedComponentsIndexes(i))
+				res << m_comps[i]->components().value(comp)->name();
+		}
+	}
+	return res;
+}
 
 AwICAComponents *AwICAManager::getComponents(int type)
 {

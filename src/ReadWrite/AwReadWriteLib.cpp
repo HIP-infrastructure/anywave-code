@@ -57,7 +57,9 @@ AwMarker *AwBlock::addMarker(AwMarker& marker)
 	AwMarker *mark = new AwMarker;
 	mark->setStart(marker.start());
 	mark->setDuration(marker.duration());
-	mark->setLabel(marker.label());
+	// simplified label (avoid labels with \n)
+	auto simpl = marker.label().simplified();
+	mark->setLabel(simpl);
 	mark->setValue(marker.value());
 	mark->setTargetChannels(marker.targetChannels());
 	m_markers.append(mark);
@@ -66,20 +68,12 @@ AwMarker *AwBlock::addMarker(AwMarker& marker)
 
 AwMarker* AwBlock::addMarker(AwMarker* marker)
 {
-	AwMarker *mark = new AwMarker;
-
-	mark->setStart(marker->start());
-	mark->setDuration(marker->duration());
-	mark->setLabel(marker->label());
-	mark->setValue(marker->value());
-
-	m_markers.append(mark);
-	return mark;
+	return addMarker(*marker);
 }
 
 void AwBlock::setMarkers(const AwMarkerList& markers)
 {
-	foreach (AwMarker *m, markers)
+	for (auto m : markers)
 		addMarker(m);
 }
 
@@ -160,19 +154,13 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	// Here we don't want a parent for as recorded channel, so change it to null.
 	chan->setParent(NULL);
 	// remove all whitespaces in label
-	chan->setName(chan->name().remove(' '));
-	auto s = chan->name();
-
-	// only reformat plot number for EEG or SEEG
-	if (chan->isEEG() || chan->isSEEG()) {
-		QRegularExpression re("\\d+$");
-		QRegularExpressionMatch match = re.match(s);
-		if (match.hasMatch()) {
-			QString elec = s.remove(re);
-			int number = match.captured(0).toInt();
-			chan->setName(QString("%1%2").arg(elec).arg(number));
-		}
+//	chan->setName(chan->name().remove(' '));
+	auto s = chan->name().trimmed();
+	// DO NOT PERMIT EMPTY LABEL
+	if (s.isEmpty()) {
+		s = QString("No Label");
 	}
+	chan->setName(s);
 	// check for existing label in infos.
 	if (m_labelToIndex.contains(chan->name()))
 		// auto rename label
@@ -195,8 +183,7 @@ int AwDataInfo::indexOfChannel(const QString& name)
 void AwDataInfo::changeChannelName(const QString& old, const QString& newName)
 {
 	int index = indexOfChannel(old);
-	if (index != -1)
-	{
+	if (index != -1) {
 		m_labelToIndex.remove(old);
 		m_channels.at(index)->setName(newName);
 		m_labelToIndex.insert(newName, index);

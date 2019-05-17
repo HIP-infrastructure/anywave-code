@@ -29,7 +29,6 @@
 #include "AwMarkersExportWidget.h"
 #include "Process/AwProcessFromMarkersDial.h"
 #include "AwMarkerRuleManageDial.h"
-#include "AwMarkerFindReplaceUi.h"
 #include <QMenu>
 #include <widget/AwMessageBox.h>
 #include <AwFileIO.h>
@@ -41,6 +40,7 @@
 #include <QValueAxis>
 #include <QHorizontalBarSeries>
 #include <QFileDialog>
+#include <widget/AwGetValueDialog.h>
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -67,20 +67,27 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	m_menu->addAction(m_selectAllLabel);
 	connect(m_selectAllLabel, SIGNAL(triggered()), this, SLOT(selectAllLabels()));
 
-	QAction *action = new QAction(tr("Edit"), this);
+	QAction *action;
+
+	action = new QAction(tr("Rename all markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(renameAllMarkers()));
+	action = new QAction(tr("Rename selected markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(renameSelectedMarkers()));
+	action = new QAction(tr("Change values of all markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(changeValueAllMarkers()));
+	action = new QAction(tr("Change values of selected markers"), this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(changeValueSelectedMarkers()));
+	m_menu->addSeparator();
+	action = new QAction(tr("Edit"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(editCurrentItem()));
 
-	action = new QAction(tr("Quick replace"), this);
-	m_menu->addAction(action);
-	connect(action, SIGNAL(triggered()), this, SLOT(changeReplaceForSelection()));
-
 	m_menu->addSeparator();
 	
-	action = new QAction(tr("Export data"), this);
-	m_menu->addAction(action);
-	connect(action, SIGNAL(triggered()), this, SLOT(exportWizard()));
-
 	action = new QAction(tr("Write to TRIGGER channel"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(writeTrigger()));
@@ -98,9 +105,13 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(action, SIGNAL(triggered()), this, SLOT(goToMarkerPos()));
 
 	m_menu->addSeparator();
-	action = new QAction(tr("Save to file"), this);
+	action = new QAction(tr("Save markers to .mrk file"), this);
 	m_menu->addAction(action);
 	connect(action, &QAction::triggered, this, &AwMarkerManagerSettings::saveSelectedMarkers);
+	action = new QAction(tr("Save data to MATLAB file"), this);
+	m_menu->addAction(action);
+	connect(action, &QAction::triggered, this, &AwMarkerManagerSettings::saveSelectedMarkersToMATLAB);
+	m_menu->addSeparator();
 	action = new QAction(tr("Remove"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(removeMarkers()));
@@ -115,8 +126,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(cutAround()));
 #endif
-
-	m_markerDir = AwSettings::getInstance()->markerRulesDir;
+	m_markerDir = AwSettings::getInstance()->getString("markerRulesDir");
 
 	// always add a rule set as "No Rule" at first index
 	m_noRuleString = QString(tr("No rule"));
@@ -502,30 +512,6 @@ void AwMarkerManagerSettings::setRule(const QString& rule)
 		applyRule(m_currentRule);
 }
 
-
-void AwMarkerManagerSettings::exportWizard()
-{
-	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	AwMarkerList selection;
-	if (!indexes.isEmpty()) {
-		for (auto i : indexes) {
-			if (i.column() == 0)
-				selection << m_displayedMarkers.at(i.row());
-		}
-	}
-
-	AwMarkersExportWidget dlg(selection, m_markers);
-	if (dlg.exec() == QDialog::Accepted) {
-		AwMarkerExporter *exporter = new AwMarkerExporter;
-		exporter->outputFile = dlg.file();
-		exporter->pdi.input.setNewMarkers(dlg.markers());
-		exporter->pdi.input.setNewChannels(dlg.channels());
-		exporter->concatenate = dlg.concatenate();
-		exporter->matlabFormat = dlg.isMatlabFormat();
-		AwProcessManager::instance()->runProcess(exporter);
-	}
-}
-
 void AwMarkerManagerSettings::goToMarkerAtRow(int row)
 {
 	AwMarkerList currentMarkers = m_model->markers();
@@ -553,29 +539,75 @@ void AwMarkerManagerSettings::goToMarkerPos()
 	}
 }
 
-void AwMarkerManagerSettings::changeReplaceForSelection()
+void AwMarkerManagerSettings::renameAllMarkers()
 {
-	// get selected indexes in tvMarkers
-	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	if (indexes.isEmpty())
+
+	AwGetValueDialog dlg("Set new label");
+	if (dlg.exec() == QDialog::Rejected)
 		return;
 
-	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-
-	AwMarkerFindReplaceUi dlg;
-	if (dlg.exec() == QDialog::Accepted) {
-		for (auto i : indexes) {
-			QModelIndex sourceIndex = proxy->mapToSource(i);
-			if (dlg.replaceValues() && i.column() == MARKER_COLUMN_CODE)
-				tvMarkers->model()->setData(sourceIndex, dlg.value(), Qt::EditRole);
-			else if (i.column() == MARKER_COLUMN_LABEL)
-				tvMarkers->model()->setData(sourceIndex, dlg.label(), Qt::EditRole);
-		}
-		m_displayedMarkers = m_model->markers();
-		emit markersChanged(m_displayedMarkers);
-		updateStats();
+	auto newLabel = dlg.value();
+	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
+		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_LABEL);
+		if (index.isValid())
+			tvMarkers->model()->setData(index, newLabel, Qt::EditRole);
 	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
 }
+
+void AwMarkerManagerSettings::renameSelectedMarkers()
+{
+	AwGetValueDialog dlg("Set new label");
+	if (dlg.exec() == QDialog::Rejected)
+		return;
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+	
+	for (auto i : indexes) {
+		if (i.column() == MARKER_COLUMN_LABEL) {
+			tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+		}
+	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
+}
+
+void AwMarkerManagerSettings::changeValueAllMarkers()
+{
+	AwGetValueDialog dlg("Set new value");
+	if (dlg.exec() == QDialog::Rejected)
+		return;
+
+	auto newValue = dlg.value().toDouble();
+	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
+		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_CODE);
+		if (index.isValid())
+			tvMarkers->model()->setData(index, newValue, Qt::EditRole);
+	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
+}
+
+void AwMarkerManagerSettings::changeValueSelectedMarkers()
+{
+	AwGetValueDialog dlg("Set new value");
+	if (dlg.exec() == QDialog::Rejected)
+		return;
+
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+	for (auto i : indexes) {
+		if (i.column() == MARKER_COLUMN_CODE) {
+			tvMarkers->model()->setData(i, dlg.value().toDouble(), Qt::EditRole);
+		}
+	}
+	m_displayedMarkers = m_model->markers();
+	emit markersChanged(m_displayedMarkers);
+	updateStats();
+}
+
 
 void AwMarkerManagerSettings::launchProcess()
 {
@@ -629,6 +661,49 @@ void AwMarkerManagerSettings::removeAllLabels()
 	emit markersRemoved(markers);
 	m_displayedMarkers = m_model->markers();
 	emit markersChanged(m_displayedMarkers);
+}
+
+void AwMarkerManagerSettings::saveSelectedMarkersToMATLAB()
+{
+	// get selected indexes in tvMarkers
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+
+	if (indexes.isEmpty())
+		return;
+
+	AwFileInfo afio(AwSettings::getInstance()->currentReader());
+	auto path = QFileDialog::getSaveFileName(0, tr("Save marked data"), afio.dirPath(), "*.mat");
+	if (!path.isEmpty()) {
+		AwMarkerList currentMarkers = m_model->markers();
+
+		AwMarkerList markers; // marker to save
+		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+		for (auto i : indexes) {
+			if (i.column() == 0) {
+				auto m = currentMarkers.at(proxy->mapToSource(i).row());
+				if (m->duration() > 0.)
+					markers << m;
+			}
+		}
+		// check for marker with duration
+		if (markers.isEmpty()) {
+			AwMessageBox::information(0, tr("Error"), QString("Selected markers have no duration."));
+			return;
+		}
+		// Instantiate process
+		AwProcessManager *process_manager = AwProcessManager::instance();
+		auto process = process_manager->newProcessFromPluginName("MATLAB_MARKERS_EXPORTER");
+		if (process == Q_NULLPTR) {
+			AwMessageBox::information(0, tr("Error"), QString("Missing process plugin to do the job."));
+			return;
+		}
+		// set markers to compute data on
+		process->pdi.input.setNewMarkers(markers, true);
+		process->pdi.input.addArgument("output_file", path);
+		// start process
+		process_manager->runProcess(process);
+	}
+
 }
 
 void AwMarkerManagerSettings::saveSelectedMarkers()

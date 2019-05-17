@@ -46,6 +46,7 @@
 #include "Process/AwMatlabScriptPlugin.h"
 #include "Process/AwTriggerWriter.h"
 #include "Process/AwTriggerEraser.h"
+#include "Process/AwMATLABMarkersExporter.h"
 #include "Debug/AwDebugLog.h"
 #ifdef AW_EPOCHING
 #include "Epoch/AwAvgSignalItem.h"
@@ -278,7 +279,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 file.close();
 		 // now instantiante objects depending on plugin type
 		 // check for MATLAB connection before
-		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->isMatlabPresent();
+		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->getBool("isMatlabPresent");
 		 if (isMATLABScript || isMATLABCompiled) {
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
 			 plugin->type = type;
@@ -357,13 +358,16 @@ void AwPluginManager::loadUserPlugins()
 {
 	// Plugins found in user directory will override plugins located in AnyWave/Plugins application directory.
 	AwSettings *aws = AwSettings::getInstance();
-	QString pluginDir = aws->pluginDir;
+	auto pluginDir = aws->getString("pluginDir");
+	auto matlabPluginDir = aws->getString("matlabPluginDir");
+	auto pythonPluginDir = aws->getString("pythonPluginDir");
+	auto montageDir = aws->getString("montageDir");
 	if (pluginDir.isEmpty()) // No Plugins dir in 'user documents\AnyWave\'
 		return;
-	if (!aws->matlabPluginDir.isEmpty())
-		checkForScriptPlugins(aws->matlabPluginDir);
-	if (!aws->pythonPluginDir.isEmpty())
-		checkForScriptPlugins(aws->pythonPluginDir);
+	if (!matlabPluginDir.isEmpty())
+		checkForScriptPlugins(matlabPluginDir);
+	if (!pythonPluginDir.isEmpty())
+		checkForScriptPlugins(pythonPluginDir);
 
 
 	// plugin dir exists, so check for plugins 
@@ -391,15 +395,14 @@ void AwPluginManager::loadUserPlugins()
 				}
 				m_pluginList += plugin;
 				// check if reader plugin has montages
-				if (!fio->montages().isEmpty() && 							// check if Montage user's directory exists!
-					/*!AwSettings::getInstance()->montageDirectory().isEmpty()*/ !AwSettings::getInstance()->montageDir.isEmpty()) {
+				if (!fio->montages().isEmpty() &&  !montageDir.isEmpty()) {
 					// create montage by copying montages provided to the user montages' directory
 					QStringList montages = fio->montages();
 					foreach(QString montage, montages) {
 						// remove the ":/" from the original montage filename.
 						QString source_path = montage;
 						//QString dest_path = AwSettings::getInstance()->montageDirectory() + montage.remove(":/");
-						QString dest_path = AwSettings::getInstance()->montageDir + montage.remove(":/");
+						QString dest_path = montageDir + montage.remove(":/");
 						// if file already exists, skip the copye
 						if (QFile::exists(dest_path))
 							continue;
@@ -483,31 +486,13 @@ void AwPluginManager::loadUserPlugins()
 //
 void AwPluginManager::loadPlugins()
 {
-	m_pluginsDir = QDir(qApp->applicationDirPath());
+	AwSettings *aws = AwSettings::getInstance();
+	m_pluginsDir = QDir(aws->getString("appPluginDir"));
+	auto matlabPluginDir = aws->getString("appMatlabPluginDir");
+	auto pythonPluginDir = aws->getString("appPythonPluginDir");
 
-#if defined(Q_OS_MAC)
-	if (m_pluginsDir.dirName() == "MacOS") {
-		m_pluginsDir.cdUp();
-		m_pluginsDir.cdUp();
-		m_pluginsDir.cdUp();
-	}
-	m_pluginsDir.cd("Anywave_Plugins");
-#else
-	m_pluginsDir.cd("Plugins");
-#endif
-
-	// 
-	AwSettings *as = AwSettings::getInstance();
-	// define path to Python module and MATLAB mex files.
-	as->setMATLABMexPath(m_pluginsDir.absolutePath() + "/Matlab/AnyWave");
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-	as->setPythonModulePath(QDir(qApp->applicationDirPath()).absolutePath() + "/Python");
-#endif
-#ifdef Q_OS_MAC
-	as->setPythonModulePath(QDir(qApp->applicationDirPath()).absolutePath() + "/../Python");
-#endif
-	checkForScriptPlugins(m_pluginsDir.absolutePath() + "/Python");
-	checkForScriptPlugins(m_pluginsDir.absolutePath() + "/Matlab");
+	checkForScriptPlugins(matlabPluginDir);
+	checkForScriptPlugins(pythonPluginDir);
 
 	// Ajout de plugins integres directement dans l'appli.
 	m_pluginWriters += new ADESIOPlugin;
@@ -529,6 +514,9 @@ void AwPluginManager::loadPlugins()
 
 	// Add Converter plugin
 	m_pluginProcesses += new AwConverterPlugin;
+	 
+	// add MATLAB_MARKERS_EXPORTER
+	m_pluginProcesses += new AwMATLABMarkersExporterPlugin;
 
 	// Add Exporter plugin
 	m_pluginProcesses += new AwExporterPlugin;
@@ -602,18 +590,18 @@ void AwPluginManager::loadFileIOReaderPlugin(AwFileIOPlugin *plugin)
 		emit log("Reader plugin " + plugin->name + " already exists.Previous version unloaded.");
 		delete p;
 	}
+	auto montageDir = AwSettings::getInstance()->getString("montageDir");
 	m_readerFactory.addPlugin(plugin->name, plugin);
 	m_pluginReaders += plugin;
 	m_pluginList += plugin;
 	// check if reader plugin has montages
-	if (!plugin->montages().isEmpty() && 							// check if Montage user's directory exists!
-		!AwSettings::getInstance()->montageDir.isEmpty()) {
+	if (!plugin->montages().isEmpty() && !montageDir.isEmpty()) {
 		// create montage by copying montages provided to the user montages' directory
 		QStringList montages = plugin->montages();
 		foreach(QString montage, montages) {
 			// remove the ":/" from the original montage filename.
 			QString source_path = montage;
-			QString dest_path = AwSettings::getInstance()->montageDir + montage.remove(":/");
+			QString dest_path = montageDir + montage.remove(":/");
 			// if file already exists, skip copying
 			if (QFile::exists(dest_path))
 				continue;

@@ -52,7 +52,7 @@ void AwDebugLog::closeFile()
 {
 	auto date = QDate::currentDate().toString("dd_MM_yyyy");
 	auto time = QTime::currentTime().toString("hh_mm_ss");
-	auto dir = AwSettings::getInstance()->logDir;
+	auto dir = AwSettings::getInstance()->getString("logDir");
 	for (auto component : m_logFiles.keys()) {
 		auto logs = logsForComponent(component);
 		if (logs.isEmpty())
@@ -69,7 +69,7 @@ void AwDebugLog::writeLog(const QString& name)
 		return;
 	auto date = QDate::currentDate().toString("dd_MM_yyyy");
 	auto time = QTime::currentTime().toString("hh_mm_ss");
-	auto dir = AwSettings::getInstance()->logDir;
+	auto dir = AwSettings::getInstance()->getString("logDir");
 	QString filePath = QString("%1/%2_%3_%4.log").arg(dir).arg(m_logFiles[name]).arg(date).arg(time);
 	QFile file(filePath);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -130,5 +130,5 @@ void AwDebugLog::addLog(const QString& message)
 		m_logs[componentName].append(logMessage);
 	else
 		m_logs.insert(componentName, QStringList(logMessage));
-	emit newLogsAdded();
+	emit newLog(logMessage);
 }

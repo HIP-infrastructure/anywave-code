@@ -57,7 +57,12 @@ AwProcessWidget::AwProcessWidget(AwProcess *process, QWidget *parent)
 	connect(process, SIGNAL(idle()), this, SLOT(setIdle()));
 	connect(process, SIGNAL(finished()), this, SLOT(setFinished()));
 	connect(process, SIGNAL(progressChanged(int)), this, SLOT(setProgression(int)));
-	connect(process, SIGNAL(progressChanged(const QString&)), this, SLOT(setMessage(const QString&)));
+	connect(process, SIGNAL(progressChanged(const QString&)), m_logWindow, SLOT(appendLog(const QString&)));
+	connect(process, SIGNAL(error(const QString&)), m_logWindow, SLOT(appendError(const QString&)));
+	connect(process, SIGNAL(warning(const QString&)), m_logWindow, SLOT(appendWarning(const QString&)));
+	connect(process, SIGNAL(progressChanged(const QString&)), this, SLOT(updateNewLog()));
+	connect(process, SIGNAL(error(const QString&)), this, SLOT(updateNewLog()));
+	connect(process, SIGNAL(warning(const QString&)), this, SLOT(updateNewLog()));
 	connect(process, SIGNAL(started()), this, SLOT(setRunning()));
 }
 
@@ -71,13 +76,6 @@ void AwProcessWidget::changeEvent(QEvent *e)
 	if (e)
 		if (e->type() == QEvent::LanguageChange)
 			m_ui.retranslateUi(this);
-}
-
-
-void AwProcessWidget::addLog(const QString& message)
-{
-	m_log <<  QTime::currentTime().toString() + ": " + message + "\n";
-	updateLog();
 }
 
 /// 
@@ -104,9 +102,8 @@ void AwProcessWidget::setIdle()
 	m_ui.buttonStop->show();
 	m_ui.labelMessage->show();
 	m_ui.labelMessage->setText(tr("Idle"));
-	addLog(tr("Running time = ") + AwUtilities::hmsTime(m_process->executionTime()));
+	m_logWindow->appendLog(tr("Running time = ") + AwUtilities::hmsTime(m_process->executionTime()));
 
-	//if (m_process->pdi.hasOutputWidgets())
 	if (m_process->flags() & Aw::ProcessFlags::ProcessHasOutputUi)
 		m_ui.buttonShowResults->show();
 }
@@ -128,7 +125,7 @@ void AwProcessWidget::setFinished()
 
 	m_ui.labelTime->show();
 	m_ui.labelTime->setText(message);
-	addLog(message);
+	m_logWindow->appendLog(message);
 
 	m_isActive = false;
 }
@@ -137,22 +134,17 @@ void AwProcessWidget::setRunning()
 {
 	m_ui.buttonStop->show();
 	m_ui.progress->show();
-	addLog(tr("Started"));
+	m_logWindow->appendLog(tr("Started"));
 	m_ui.progress->setMinimum(0);
 	m_ui.progress->setMaximum(0);
 	m_ui.labelMessage->show();
 	m_ui.labelMessage->setText(tr("Running..."));
 }
 
-void AwProcessWidget::setMessage(const QString &message)
+void AwProcessWidget::updateNewLog()
 {
-	m_ui.labelMessage->show();
-	m_ui.labelMessage->setText(message);
-	addLog(message);
-	if (!m_logWindow->isVisible())
-	{	
-		if (!m_logUpdated)
-		{
+	if (!m_logWindow->isVisible())	{	
+		if (!m_logUpdated)	{
 			m_timer = new QTimer(this);
 			connect(m_timer, SIGNAL(timeout()), this, SLOT(makeShowLogBlink()));
 			m_timer->start(500);
@@ -182,7 +174,7 @@ void AwProcessWidget::setProgression(int value)
 void AwProcessWidget::stop()
 {
 	if (m_process->isRunning())	{
-		setMessage(QString(tr("Aborting...")));
+		m_logWindow->appendLog(QString(tr("Aborting...")));
 		m_process->abort();
 		return;
 	}
@@ -191,23 +183,12 @@ void AwProcessWidget::stop()
 			m_process->pdi.output.clearWidgets();
 			foreach (QWidget *w, m_process->pdi.output.widgets())	{
 				w->close();
-			//	m_process->pdi.output.widgets.removeAll(w);
-			//	w->deleteLater();
 			}
 		m_process->stop();
 	}
 	else
 		setFinished();
 }
-
-void AwProcessWidget::updateLog()
-{
-	QString text;
-	foreach (QString s, m_log)
-		text += s;
-	m_logWindow->setText(text);
-}
-
 void AwProcessWidget::showLog()
 {
 	m_logWindow->show();

@@ -57,8 +57,11 @@ public:
 
 	QGraphicsItem *labelItem() { return m_labelItem; }
 	void setLabelHeight(int h) { m_labelItem->setFontHeight(h); }
+
 public slots:
 	int execUi();
+signals:
+	void itemSelectionChanged(bool selected);
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void mousePressEvent(QGraphicsSceneMouseEvent *e);

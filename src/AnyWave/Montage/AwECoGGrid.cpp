@@ -10,6 +10,5 @@ AwECoGGrid::AwECoGGrid(int rows, int cols, const QStringList& labels)
 
 void AwECoGGrid::setOrientation(int o)
 {
-	if (o == AwECoGGrid::Vertical || o == AwECoGGrid::Horizontal)
-		m_orientation = o;
+	m_orientation = o;
 }

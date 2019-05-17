@@ -58,7 +58,8 @@ public:
 public slots:
 	void updatePageDuration(float dur);
 	void updateNumberOfChannels(int n);
-	void updateNumberOfSelectedChannels(AwChannelList& list);
+	//void updateNumberOfSelectedChannels(AwChannelList& list);
+	void updateNumberOfSelectedChannels(int n);
 	void updatePositionInFile(float pos);
 	void updateSettings(AwViewSettings *settings, int flags);
 	void setNewSettings(AwViewSettings *settings);

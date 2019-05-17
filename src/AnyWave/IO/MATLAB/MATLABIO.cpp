@@ -66,7 +66,7 @@ AwFileIO::FileStatus MATLABIO::createFile(const QString &path, int flags)
 		m_error = QString("No channels to write");
 		return AwFileIO::WrongParameter;
 	}
-	float sampleRate = infos.channels().at(0)->samplingRate();
+	float sampleRate = infos.channels().first()->samplingRate();
 
 	// write header variables
 	m_file.writeScalar("sr", sampleRate);
@@ -82,8 +82,8 @@ AwFileIO::FileStatus MATLABIO::createFile(const QString &path, int flags)
 	m_file.writeStringCellArray("channel_types", types);
 
 	// Write markers if any
-	if (infos.blocks().at(0)->markersCount()) { // we consider a continous file (only one block)
-		AwMarkerList markers = infos.blocks().at(0)->markers();
+	auto markers = infos.blocks().first()->markers();
+	if (!markers.isEmpty()) { // we consider a continous file (only one block)
 		QStringList labels = AwMarker::getAllLabels(markers);
 
 		QVector<float> values(labels.size());

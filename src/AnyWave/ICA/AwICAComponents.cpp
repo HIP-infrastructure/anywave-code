@@ -169,7 +169,7 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 	int index = 0;
 	for (auto s : m_labels) {
 		// get the corresponding as recorded channel
-		AwChannel *asRecorded = mm->asRecordedChannel(s);
+		auto asRecorded = mm->asRecordedChannel(s);
 		if (asRecorded) {
 			AwChannel *source = new AwChannel(asRecorded);
 			m_sources << source;
@@ -327,7 +327,7 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 		chan->setDisplayPluginName("ICA SignalItem");
 		m_icaChannels << chan;
 	}
-	AwSettings::getInstance()->currentIcaFile = file.fileName();
+	AwSettings::getInstance()->setSettings("currentIcaFile", file.fileName());
 	return AwHDF5::Ok;
 }
 

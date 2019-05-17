@@ -5,6 +5,7 @@ QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.
 
 SET(HEADERS ../../include/widget/AwMessageBox.h  
     ../../include/widget/AwWait.h  
+	../../include/widget/AwGetValueDialog.h  
     ./Aw2DGrid.h  
     ../../include/widget/AwWaitWidget.h  
     ../../include/widget/AwComboCMap.h  
@@ -44,6 +45,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwInputMarkerWidget.h)
 
 SET(SRC ./Aw2DGrid.cpp  
+    ./AwGetValueDialog.cpp
     ./AwAddPredefinedMarker.cpp  
     ./AwAddTargetChannels.cpp  
     ./AwComboCMap.cpp  
@@ -85,7 +87,8 @@ SET(SRC ./Aw2DGrid.cpp
 QT5_WRAP_CPP(MOC ${HEADERS})
 
 
-SET(FORMS ./AwAmplitudeWidget.ui  
+SET(FORMS ./AwAmplitudeWidget.ui 
+	./AwGetValueDialog.ui
     ./AwMarkerInspector.ui  
     ./AwAddPredefinedMarker.ui  
     ./AwAddTargetChannels.ui  

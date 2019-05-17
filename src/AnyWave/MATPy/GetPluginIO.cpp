@@ -30,6 +30,7 @@
 #include <QDir>
 #include "AwResponse.h"
 #include "Prefs/AwSettings.h"
+#include "ICA/AwICAManager.h"
 
 void AwRequestServer::handleGetPluginIO(QTcpSocket *client, AwScriptProcess *p)
 {
@@ -57,9 +58,9 @@ void AwRequestServer::handleGetPluginIO(QTcpSocket *client, AwScriptProcess *p)
 	total_duration = p->pdi.input.reader()->infos.totalDuration();
 	temp_dir = QDir::toNativeSeparators(p->pdi.input.workingDirPath);
 	plug_dir = QDir::toNativeSeparators(p->pdi.input.pluginDirPath);
-	ica_file = QDir::toNativeSeparators(AwSettings::getInstance()->currentIcaFile);
+	ica_file = QDir::toNativeSeparators(AwSettings::getInstance()->getString("currentIcaFile"));
 
-	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << p->pdi.input.dataFolder << types;
+	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << p->pdi.input.dataFolder << types << AwICAManager::instance()->getRejectedLabels();
 
 	// send markers set as input
 	auto markers = p->pdi.input.markers();

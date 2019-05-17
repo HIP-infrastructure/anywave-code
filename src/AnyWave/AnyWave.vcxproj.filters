@@ -259,15 +259,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwDockAddMarker.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Marker\AwMarkerFindReplaceUi.cpp">
-      <Filter>Marker</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerFindReplaceUi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerFindReplaceUi.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwMarkerListModel.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
@@ -1330,6 +1321,24 @@
     <ClCompile Include="Montage\AwECoGGrid.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwLogPlainTextEdit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwLogPlainTextEdit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\AwLogPlainTextEdit.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMATLABMarkersExporter.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\AwMATLABMarkersExporter.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMATLABMarkersExporter.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1396,15 +1405,6 @@
       <Filter>Filter</Filter>
     </CustomBuild>
     <CustomBuild Include="Marker\AwDockAddMarker.h">
-      <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwExportMarkersWizard.ui">
-      <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerFindReplaceUi.h">
-      <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerFindReplaceUi.ui">
       <Filter>Marker</Filter>
     </CustomBuild>
     <CustomBuild Include="Marker\AwMarkerListModel.h">
@@ -1860,6 +1860,12 @@
     <CustomBuild Include="Montage\AwECoGTableModel.h">
       <Filter>Montage</Filter>
     </CustomBuild>
+    <CustomBuild Include="Process\AwLogPlainTextEdit.h">
+      <Filter>Process</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\AwMATLABMarkersExporter.h">
+      <Filter>Process</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -1882,12 +1888,6 @@
     </ClInclude>
     <ClInclude Include="IO\HDF5\structs.h">
       <Filter>IO\HDF5</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwExportMarkersWizard.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMarkerFindReplaceUi.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwMarkerManagerSettings.h">
       <Filter>Generated Files</Filter>

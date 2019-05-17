@@ -34,13 +34,14 @@
 #include <AwChannel.h>
 
 // Defines pour la mise en place des colonnes de données dans le display setup
-#define AW_MONTAGE_NB_COLUMN	6    
+#define AW_MONTAGE_NB_COLUMN	7    
 #define AW_MONTAGE_COLUMN_NAME	0
 #define AW_MONTAGE_COLUMN_REF	1
 #define AW_MONTAGE_COLUMN_TYPE	2	
 #define AW_MONTAGE_COLUMN_COLOR	3
 #define AW_MONTAGE_COLUMN_LPF	4
 #define AW_MONTAGE_COLUMN_HPF	5
+#define AW_MONTAGE_COLUMN_NOTCH	6
 
 // Defines pour la mise en place des colonnes de données dans le as recorded tableview
 #define AW_ASRECORDED_NB_COLUMN		3   
@@ -92,6 +93,9 @@ public:
 	// Methodes propres au modele
 	void beginUpdateChannels();
 	void endUpdateChannels();
+
+	void sortByName();
+	void sortByNameAndType();
 signals:
 	/** Sent when the user drags and drops as recorded channels into the current montage **/
 	void channelsDropped(const QStringList& labels, int beginRow);
@@ -156,14 +160,14 @@ class AwChannelListDelegate : public QItemDelegate
 	Q_OBJECT
 
 public:
-	AwChannelListDelegate(QStringList* labels, QObject *parent = 0);
+	AwChannelListDelegate(const QHash<int, QStringList>& labelsByType, QObject *parent = 0);
 
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	void setEditorData(QWidget *editor, const QModelIndex &index) const;
 	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 	void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 private:
-	QStringList m_labels[AW_CHANNEL_TYPES];
+	QHash<int, QStringList> m_labels;
 private slots:
 	void commitAndCloseComboBox();
 

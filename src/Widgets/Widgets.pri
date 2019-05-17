@@ -6,6 +6,7 @@ HEADERS += ../../include/widget/AwMessageBox.h \
     ../../include/widget/AwWait.h \
     ./Aw2DGrid.h \
     ../../include/widget/AwWaitWidget.h \
+	../../include/widget/AwGetValueDialog.h \
     ../../include/widget/AwSelectInputDataWidget.h \
     ../../include/widget/AwComboCMap.h \
     ./AwTopoLabelImage.h \
@@ -44,6 +45,7 @@ HEADERS += ../../include/widget/AwMessageBox.h \
     ../../include/widget/AwInputMarkerTableView.h \
     ../../include/widget/AwInputMarkerWidget.h
 SOURCES += ./Aw2DGrid.cpp \
+	./AwGetValueDialog.cpp \
     ./AwSelectInputDataWidget.cpp \
     ./AwAddPredefinedMarker.cpp \
     ./AwAddTargetChannels.cpp \
@@ -83,6 +85,7 @@ SOURCES += ./Aw2DGrid.cpp \
     ./InputMarker/AwInputMarkerWidget.cpp \
     ./InputMarker/InputMarkerModel.cpp
 FORMS += ./AwAmplitudeWidget.ui \
+	./AwGetValueDialog.ui \
     ./AwSelectInputDataWidget.ui \
     ./AwMarkerInspector.ui \
     ./AwAddPredefinedMarker.ui \

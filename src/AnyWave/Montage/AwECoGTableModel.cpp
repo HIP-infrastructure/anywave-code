@@ -67,8 +67,20 @@ QVariant AwECoGTableModel::data(const QModelIndex &index, int role) const
 	switch (col)
 	{
 	case AW_ECOG_ORIENTATION:
-		if (role == Qt::DisplayRole || role == Qt::UserRole) 
-			return grid->orientation() == AwECoGGrid::Horizontal ? QString("Horizontal") : QString("Vertical");
+		if (role == Qt::DisplayRole || role == Qt::UserRole) {
+			switch (grid->orientation())
+			{
+			case AwECoGGrid::Horizontal:
+				return QString("Horizontal");
+				break;
+			case  AwECoGGrid::Vertical:
+				return QString("Horizontal");
+				break;
+			case AwECoGGrid::Both:
+				return QString("Both");
+				break;
+			}
+		}
 		else if (role == Qt::ToolTipRole)
 			return QString(tr("Montage orientation"));
 		break;
@@ -117,7 +129,10 @@ bool AwECoGTableModel::setData(const QModelIndex &index, const QVariant &value, 
 		return false;
 	auto grid = m_grids.value(index.row());
 	if (index.column() == AW_ECOG_ORIENTATION && role == Qt::EditRole) {
-		grid->setOrientation(value.toInt());
+		auto orientation = value.toInt();
+		grid->setOrientation(orientation);
+		if (grid->rows() == 1 && orientation != AwECoGGrid::Horizontal)
+			grid->setOrientation(AwECoGGrid::Horizontal);
 		return true;
 	}
 	emit dataChanged(index, index);
@@ -135,6 +150,7 @@ QWidget *AwECoGModelDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 		QComboBox *editor = new QComboBox(parent);
 		editor->insertItem(0, QString("Horizontal"),  AwECoGGrid::Horizontal);
 		editor->insertItem(1, QString("Vertical"), AwECoGGrid::Vertical);
+		editor->insertItem(2, QString("Both"), AwECoGGrid::Both);
 		editor->setFocusPolicy(Qt::StrongFocus);
 		// close comboBox when an item is picked up
 		connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));

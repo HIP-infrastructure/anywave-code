@@ -225,8 +225,6 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		if (sampleIndex < m_channel->dataSize()) {
 			float gain = m_channel->gain();
 			float value = m_channel->data()[sampleIndex];
-			//if (m_channel->isMEG() || m_channel->isReference() || m_channel->isGRAD())
-			//	value *= 1E12;
 
 			QString tt = m_sensorName + ":" + AwChannel::typeToString(m_channel->type());
 			tt += "\nValue: " + QString::number(value) + m_channel->unit();

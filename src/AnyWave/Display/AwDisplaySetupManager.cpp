@@ -30,7 +30,6 @@
 #include <QSystemTrayIcon>
 #include <QMessageBox>
 #include "AwDisplaySetup.h"
-//#include "AwDisplaySetupView.h"
 #include "AwViewSetup.h"
 #include <QDir>
 #include <QSettings>
@@ -55,8 +54,7 @@ AwDisplaySetupManager* AwDisplaySetupManager::instance()
 AwDisplaySetupManager::AwDisplaySetupManager(QObject *parent)
 	: QObject(parent)
 {
-//	m_setupDir = AwSettings::getInstance()->setupDirectory();
-	m_setupDir = AwSettings::getInstance()->displaySetupDir;
+	m_setupDir = AwSettings::getInstance()->getString("displaySetupDir");
 	m_currentSetup = NULL;
 	if (!m_setupDir.isEmpty())	{
 		// check for the existence of Default Setup
@@ -113,11 +111,6 @@ void AwDisplaySetupManager::setFilename(const QString &path)
 // SLOTS
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-//void AwDisplaySetupManager::retranslate()
-//{
-//	m_toolBar->retranslate();
-//}
-
 void AwDisplaySetupManager::resetToDefault()
 {
 	AwDisplaySetup *setup = new AwDisplaySetup("Default Setup");
@@ -163,8 +156,7 @@ void AwDisplaySetupManager::changeSetup(const QString &newSetup)
 
 	if (m_loadedSetups.contains(newSetup)) {
 		AwDisplaySetup *setup = new AwDisplaySetup(newSetup);
-//		QString path = AwSettings::getInstance()->setupDirectory() + newSetup + ".aws";
-		QString path = AwSettings::getInstance()->displaySetupDir + newSetup + ".aws";
+		auto path  = QString("%1%2.aws").arg(AwSettings::getInstance()->getString("displaySetupDir")).arg(newSetup);
 		
 		if (setup->loadFromFile(path)) {
 			emit newSetupSelected(setup);

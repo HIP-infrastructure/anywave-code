@@ -230,6 +230,8 @@ signals:
 	// AnyWave - AwProcess API
 	void progressChanged(int percent);
 	void progressChanged(const QString& message);
+	void error(const QString& message);
+	void warning(const QString& message);
 	// Error handling
 	void criticalMessage(QString message);
 	void outOfMemory();		// emitted when memory allocation failed.
@@ -254,7 +256,6 @@ Q_DECLARE_INTERFACE(AwProcessPlugin, AwProcessPlugin_IID)
 Q_DECLARE_INTERFACE(AwProcess, AwProcess_IID)
 Q_DECLARE_INTERFACE(AwGUIProcess, AwGUIProcess_IID)
 
-
-
+#define AW_INSTANTIATE_PROCESS(P) P* newInstance() { auto process = new P; process->setPlugin(this); return process; }
 
 #endif /*PROCESS_INTERFACE_H_*/

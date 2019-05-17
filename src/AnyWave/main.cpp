@@ -50,7 +50,7 @@
 
 int main(int argc, char *argv[])
 {
-#if VTK_MAJOR_VERSION > 7
+#if VTK_MAJOR_VERSION >= 7
 	// init surface map for further use in VTK 8.1
 	vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
@@ -87,10 +87,18 @@ int main(int argc, char *argv[])
 	}
 	bool res = SetDllDirectory((LPCWSTR)dllDir);
 #endif
-	
+
 	// check if arguments 
 	QStringList args = app.arguments();
 	bool isGui = args.size() <= 1;
+	QCommandLineParser parser;
+	parser.addPositionalArgument("file", "data file to open");
+	parser.process(app);
+	auto positionalArgs = parser.positionalArguments();
+	if (positionalArgs.count() == 1) {
+		isGui = true;
+	}
+	
 
 	AnyWave window(isGui); // args not empty means something to do in command line mode => no gui mode on 
 	if (!isGui) {
@@ -105,13 +113,7 @@ int main(int argc, char *argv[])
 		if (status == 0)
 			exit(0);
 	}
-
-	QCommandLineParser parser;
-	parser.addPositionalArgument("file", "data file to open");
-	parser.process(app);
-	auto positionalArgs = parser.positionalArguments();
-
-	if (positionalArgs.count() == 1)
+	if (positionalArgs.count() == 1) 
 		window.openFile(positionalArgs.at(0));
 		
 	window.showMaximized();

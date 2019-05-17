@@ -129,25 +129,49 @@ void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 			painter->setFont(font);
 			int value = (int)nextSecond;
 			int step5 = 0;
-			for (float x = startingOffsetSecond; x < rect.width(); x += m_physics->xPixPerSec()) {
-				QString text = QString::number(value);
+			QRectF tmpRect; // hold rects for displaying timing text values
+
+			for (auto x = startingOffsetSecond; x < rect.width(); x += m_physics->xPixPerSec()) {
+				QString text;
+				if (m_settings->timeMode == AwViewSettings::ShowRelativeTime)
+					text = QString("%1").arg(value);
+				else {
+					auto time = m_startTime.addSecs(value);
+					text = QString("%1").arg(time.toString(Qt::TextDate));
+				}
 				int w = metrics.width(text);
+				QRectF rectTimeValue(x - w / 2, 0., (qreal)w, (qreal)metrics.height());
 				value++;
-				// display seconds value only every 5 seconds if the time scale is too short
-				bool fontOverlap = (x + ( w / 2 )) >=  (x +  m_physics->xPixPerSec());
-				if (m_physics->xPixPerSec() < 30 || fontOverlap) {
-					if (step5 == 0)  {	
-						painter->drawText(x - w / 2, rect.y() + metrics.height() , text);
-						painter->drawText(x - w / 2, (rect.y() + rect.height()) - metrics.height() , text);
+				
+				// check with tmpRect if exists
+				if (tmpRect.isNull()) {
+					painter->drawText(rectTimeValue.x(), rect.y() + rectTimeValue.height(), text);
+					painter->drawText(rectTimeValue.x(), (rect.y() + rect.height()) - rectTimeValue.height(), text);
+					tmpRect = rectTimeValue;
+				}
+				else {
+					if (!rectTimeValue.intersects(tmpRect)) {
+						painter->drawText(rectTimeValue.x(), rect.y() + rectTimeValue.height(), text);
+						painter->drawText(rectTimeValue.x(), (rect.y() + rect.height()) - rectTimeValue.height(), text);
+						tmpRect = rectTimeValue;
 					}
-					step5++;
-					if (step5 == 5)
-						step5 = 0;
 				}
-				else { 
-					painter->drawText(x - w / 2, rect.y() + metrics.height() , text);
-					painter->drawText(x - w / 2, (rect.y() + rect.height()) - metrics.height() , text);
-				}
+
+				//// display seconds value only every 5 seconds if the time scale is too short
+				//bool fontOverlap = (x + ( w / 2 )) >=  (x +  m_physics->xPixPerSec());
+				//if (m_physics->xPixPerSec() < 30 || fontOverlap) {
+				//	if (step5 == 0)  {	
+				//		painter->drawText(x - w / 2, rect.y() + metrics.height() , text);
+				//		painter->drawText(x - w / 2, (rect.y() + rect.height()) - metrics.height() , text);
+				//	}
+				//	step5++;
+				//	if (step5 == 5)
+				//		step5 = 0;
+				//}
+				//else { 
+				//	painter->drawText(x - w / 2, rect.y() + metrics.height() , text);
+				//	painter->drawText(x - w / 2, (rect.y() + rect.height()) - metrics.height() , text);
+				//}
 			}
 
 			if (show100ms) {
@@ -433,7 +457,8 @@ void AwGraphicsView::applySettings(AwViewSettings *settings)
 
 void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 {
-	if (flags & AwViewSettings::ShowSecondTicks || flags & AwViewSettings::ShowTimeGrid) {
+	if (flags & AwViewSettings::ShowSecondTicks || flags & AwViewSettings::ShowTimeGrid 
+		|| flags & AwViewSettings::ShowRecordedTime || flags & AwViewSettings::ShowRelativeTime) {
 		resetCachedContent();
 		repaint();
 	}

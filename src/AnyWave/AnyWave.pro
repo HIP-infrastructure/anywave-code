@@ -75,7 +75,7 @@ unix:!macx{
  LIBS += -lAwCore -lopenblas -lgomp -lqwt-qt5  $$VTK_LIBRARIES
 }
 
-LIBS += -lAwUtilities -lAwMath -lAwFilter -lAwLayout -lAwMapping -lAwGraphics -lAwHDF5 -lAwMATLAB -lAwWidgets -lAwEpoch
+LIBS += -lAwMontage -lAwUtilities -lAwMath -lAwFilter -lAwLayout -lAwMapping -lAwGraphics -lAwHDF5 -lAwMATLAB -lAwWidgets -lAwEpoch
 LIBS += -lAwRW -lAwProcess -lhdf5 -lhdf5_hl -lmatio
 
 install_extra.path = $$DESTDIR

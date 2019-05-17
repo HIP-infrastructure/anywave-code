@@ -51,6 +51,7 @@ public:
 	void clearWidgets();
 	void setArguments(const AwArguments& arguments) { m_arguments = arguments; }
 	inline AwArguments& args() { return m_arguments; }
+	void addArgument(const QString& key, const QVariant& value) { m_arguments[key] = value; }
 
 	inline AwChannelList& channels() { return m_channels; }
 	inline AwMarkerList& markers() { return m_markers; }

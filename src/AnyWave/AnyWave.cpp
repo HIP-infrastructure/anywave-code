@@ -101,7 +101,8 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
 	//Save system path
-	aws->setSystemPath(qgetenv("PATH"));
+//	aws->setSystemPath(qgetenv("PATH"));
+	aws->setSettings("systemPath", QString(qgetenv("PATH")));
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 
@@ -118,7 +119,8 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	
 	if (isGUIMode) {
 		// AwSettings loads recentfiles in constructor, so get that list and update menu
-		QStringList recentFiles = aws->recentFiles();
+		//QStringList recentFiles = aws->recentFiles();
+		QStringList recentFiles = aws->getStringList("recentFiles");
 		if (!recentFiles.isEmpty()) {
 			QStringList shortenFiles;
 			for (auto s : recentFiles)
@@ -126,7 +128,8 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 			updateRecentFiles(shortenFiles);
 		}
 
-		QStringList recentBIDS = aws->recentBIDS();
+		//QStringList recentBIDS = aws->recentBIDS();
+		QStringList recentBIDS = aws->getStringList("recentBIDS");
 		if (!recentBIDS.isEmpty()) {
 			QStringList shortenFiles;
 			for (auto s : recentBIDS)
@@ -489,7 +492,8 @@ void AnyWave::createUserDirs()
 	}
 	else {
 		homeDir = dirs.first();
-		aws->setHomeDirectory(homeDir);
+//		aws->setHomeDirectory(homeDir);
+		aws->setSettings("homeDir", homeDir);
 	}
 #endif
 	QString montageDir = homeDir + "/AnyWave/Montages/";
@@ -498,7 +502,7 @@ void AnyWave::createUserDirs()
 	QString markerRulesDir = homeDir + "/AnyWave/Markers/";
 	QString logDir = homeDir + "/AnyWave/Log/";
 	QString pluginDir = homeDir + "/AnyWave/Plugins";
-	QString matlabPluginDir = pluginDir + "/Matlab";
+	QString matlabPluginDir = pluginDir + "/MATLAB";
 	QString pythonPluginDir = pluginDir + "/Python";
 
 	// convert workingDir to native filesystem syntax.
@@ -516,23 +520,46 @@ void AnyWave::createUserDirs()
 	homeDir += "/AnyWave";
 
 	if (checkAndCreateFolder(homeDir, "Montages"))
-		aws->montageDir= montageDir;
+		aws->setSettings("montageDir", montageDir);
 	if (checkAndCreateFolder(homeDir, "Markers"))
-		aws->markerRulesDir = markerRulesDir;
+		aws->setSettings("markerRulesDir", markerRulesDir);
 	if (checkAndCreateFolder(homeDir, "Plugins"))
-		aws->pluginDir = pluginDir;
-	if (checkAndCreateFolder(pluginDir, "Matlab"))
-		aws->matlabPluginDir = matlabPluginDir;
+		aws->setSettings("pluginDir", pluginDir);
+	if (checkAndCreateFolder(pluginDir, "MATLAB"))
+		aws->setSettings("matlabPluginDir", matlabPluginDir);
 	// add a dep folder in MATLAB => the place to put all dependencies for the plugin
 	checkAndCreateFolder(matlabPluginDir, "dep");
 	if (checkAndCreateFolder(pluginDir, "Python"))
-		aws->pythonPluginDir = pythonPluginDir;
+		aws->setSettings("pythonPluginDir", pythonPluginDir);
 	if (checkAndCreateFolder(homeDir, "Setups"))
-		aws->displaySetupDir = setupDir;
+		aws->setSettings("displaySetupDir", setupDir);
 	if (checkAndCreateFolder(homeDir, "Log"))
-		aws->logDir = logDir;
+		aws->setSettings("logDir", logDir);
 	if (checkAndCreateFolder(homeDir, "Work"))
-		aws->workingDir = workingDir;
+		aws->setSettings("workingDir", workingDir);
+
+	// set application specific folders for plugins
+	auto appDir = QDir(qApp->applicationDirPath());
+
+	QString appPluginPath;
+	auto appPath = appDir.absolutePath();
+#ifdef Q_OS_MAC
+	appDir.cdUp();
+	appDir.cdUp();
+	appDir.cdUp();
+	appDir.cd("Anywave_Plugins");
+	aws->setSettings("pythonModulePath", appPath + "/../Python");
+#else
+	appDir.cd("Plugins");
+	aws->setSettings("pythonModulePath", appPath + "/Python");
+#endif
+	appPluginPath = appDir.absolutePath();
+	aws->setSettings("appPluginDir", appPluginPath);
+	aws->setSettings("appMatlabPluginDir", appPluginPath + "/MATLAB");
+	aws->setSettings("appPythonPluginDir", appPluginPath + "/Python");
+	// Mex path
+	aws->setSettings("mexPath", appPluginPath + "/MATLAB/AnyWave");
+	
 }
 
 //
@@ -540,7 +567,6 @@ void AnyWave::createUserDirs()
 //
 void AnyWave::initToolBarsAndMenu()
 {
-	//m_dockMarkers = NULL;
 	AwSettings *aws = AwSettings::getInstance();
 
 	// ToolBar File Operations (from AwFileToolBar)
@@ -744,7 +770,7 @@ void AnyWave::runGARDEL()
 #endif
 #ifdef Q_OS_WIN // Windows
 	if (launch) {
-		QString fullPath = AwSettings::getInstance()->systemPath();
+		QString fullPath = AwSettings::getInstance()->getString("systemPath");
 		QProcess process(this);
 		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 		qputenv("PATH", fullPath.toLatin1());
@@ -801,7 +827,8 @@ void AnyWave::runMapping()
 			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
 			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
 			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			dock->setSelectedChannels(m_display->selectedChannels());
+			auto selectedChannels = m_display->selectedChannels();
+			dock->setSelectedChannels(selectedChannels);
 			dock->setBadLabels(AwMontageManager::instance()->badLabels());
 			m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
@@ -848,7 +875,8 @@ void AnyWave::runMapping()
 			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
 			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
 			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			dock->setSelectedChannels(m_display->selectedChannels());
+			auto selectedChannels = m_display->selectedChannels();
+			dock->setSelectedChannels(selectedChannels);
 			dock->setBadLabels(AwMontageManager::instance()->badLabels());
 			m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
@@ -1090,7 +1118,8 @@ void AnyWave::initMatlab()
 #endif
 		QPluginLoader loader(modulePath);
 		QObject *module = loader.instance();
-		AwSettings::getInstance()->setMatlabPresent((module != NULL));
+		//AwSettings::getInstance()->setMatlabPresent((module != NULL));
+		AwSettings::getInstance()->setSettings("isMatlabPresent", module != NULL);
 		if (module) {
 			AwMatlabInterface *mi = qobject_cast<AwMatlabInterface *>(module);
 			AwSettings::getInstance()->setMatlabInterface(mi);

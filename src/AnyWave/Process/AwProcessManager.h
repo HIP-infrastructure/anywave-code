@@ -95,9 +95,9 @@ public:
 
 public slots:
 	void startProcessFromMenu();
-	void setDisplayedChannels(const AwChannelList& list) { m_displayedChannels = list; }
-	void setSelectedChannels(const AwChannelList& list) { m_selectedChannels = list; }
-	void setMontageChannels(const AwChannelList& list) { m_montageChannels = list; }
+//	void setDisplayedChannels(const AwChannelList& list) { m_displayedChannels = list; }
+//	void setSelectedChannels(const AwChannelList& list) { m_selectedChannels = list; }
+//	void setMontageChannels(const AwChannelList& list) { m_montageChannels = list; }
 	void handleProcessTermination();
 	void startDisplayProcesses(AwChannelList& channels);
 	void stopProcess(AwProcess *process);
@@ -151,9 +151,9 @@ private:
 	QList<QMenu *> m_subProcessMenus;	// list of sub menus for process menu (depending on sub categories)
 	QStringList m_subProcessMenuNames;	// corresponding menu titles
 	QList<QAction *> m_actions;
-	AwChannelList m_selectedChannels;	// copy of the currently selected channels
-	AwChannelList m_displayedChannels;	// Copy of currently displayed channels
-	AwChannelList m_montageChannels;	// Copy of currently channels present in montage
+//	AwChannelList m_selectedChannels;	// copy of the currently selected channels
+//	AwChannelList m_displayedChannels;	// Copy of currently displayed channels
+//	AwChannelList m_montageChannels;	// Copy of currently channels present in montage
 	QHash<QString, QAction *> m_hashProcessAction;
 	QList<AwDisplayProcessRegistration *> m_registeredDisplayProcesses;
 	AwFileIO *m_currentReader;

@@ -48,6 +48,7 @@ public:
 	enum Mode { Cursor, Mapping, AddingMarker, None, QTS };
 	inline float pageDuration() { return m_pageDuration; }
 	inline AwChannelList& channels() { return m_channels; }
+	AwChannelList selectedChannels();
 	inline float currentPosInFile() { return m_currentPosInFile; }
 	inline QList<AwGraphicsSignalItem *>& signalItems() { return m_signalItems; }
 	inline QList<AwGraphicsSignalItem *>& visibleSignalItems() { return m_visibleSignalItems; }
@@ -67,10 +68,7 @@ signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
 	void needRefresh();
-	// Sent every times the selected channels changed.
-	void newSceneSelection(AwChannelList& channels);
-	/** Sent when markers are selected **/
-	void markersSelected(AwMarkerList& markers);
+	void channelsSelectionChanged(int nbSelectedChannels);
 	void updatePositionInFile(float position);
 	// signal sent whenever the user changes the filters settings of a channel.
 	void channelFiltersChanged();
@@ -87,6 +85,7 @@ signals:
 	//
 	void closeViewClicked();
 public slots:
+	void updateSignalItemSelection(AwGraphicsSignalItem *item, bool selected);
 	void registerDisplayPlugin(AwDisplayPlugin *plugin);
 	virtual void updateSettings(AwViewSettings *settings, int flags);
 	virtual void setSelectionAsBad() {}
@@ -113,7 +112,6 @@ public slots:
 	void invertChannelSelection();
 	void clearChannelSelection();
 	void selectChannelsOfType();
-	void selectChannelsOfType(int type);
 	void selectChannels(const QStringList& labels);
 	void unselectChannels(const QStringList& labels);
 	void selectChannelAtPosition(const QPointF& pos);
@@ -162,13 +160,11 @@ protected:
 	QMenu *m_QTSMenu;	// context menu that may launch a QTS compatible plugin;
 	QHash<QString, AwDisplayPlugin *> m_hPlugins;
 	AwChannelList m_channels;			// channels currently set for the scene
-	AwChannelList m_selectedChannels;		// current selected channels
 	AwMarkerList m_selectedMarkers;			// current selected markers
 	AwMarkerList m_markers;	// current markers in the scene
 	AwMarker m_mappingMarker;	// marker used to store the current mapping position and duration
 	QList<AwGraphicsMarkerItem *> m_markerItemsDisplayed;
-	QList<AwGraphicsSignalItem *> m_signalItems;
-	QList<AwGraphicsSignalItem *> m_visibleSignalItems;
+	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;
 	QMultiHash<QString, AwGraphicsSignalItem *> m_hashNameToItem;	// retreive signal item by the channel's name.
 	AwViewSettings *m_settings;

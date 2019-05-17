@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwPrefsDial.h"
@@ -68,7 +68,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	changeMarkerFontText(AwUtilities::markerFont(AwMarker::Single));
 
 	// Auto trigger parsing
-	if ((aws->isAutoTriggerParsingOn()))
+	if (aws->getBool("isAutoTriggerParsingOn"))
 		radioTriggerParserOn->setChecked(true);
 	else
 		radioTriggerParserOff->setChecked(true);
@@ -80,9 +80,14 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		radioHMSOff->setChecked(true);
 
 	// CPU Cores
-	int cores = settings.value("general/cpu_cores", aws->totalCPUCores).toInt();
-	sliderCPU->setRange(2, aws->totalCPUCores);
+	auto totalCPUCores = aws->getInt("totalCPUCores");
+	int cores = aws->getInt("maxCPUCores");
+	sliderCPU->setRange(2, totalCPUCores);
 	sliderCPU->setValue(cores);
+
+	// check for updates when starting
+	bool checkForUpdates = aws->getBool("checkForUpdates");
+	checkBoxUpdates->setChecked(checkForUpdates);
 
 	// language
 	QDir dir(aws->langPath);
@@ -211,7 +216,7 @@ void AwPrefsDial::accept()
 		settings.setValue("matlab/detected", false);
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->homeDirectory());
+		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->getString("homeDir"));
 		if (QFile::exists(scriptPath))
 			QFile::remove(scriptPath);
 #endif
@@ -244,8 +249,14 @@ void AwPrefsDial::accept()
 	aws->loadLanguage(lang);
 
 	// CPU CORES
-    aws->maxCPUCores = sliderCPU->value();
-    QThreadPool::globalInstance()->setMaxThreadCount(aws->maxCPUCores);
+	auto maxCPUCores = sliderCPU->value();
+	aws->setSettings("maxCPUCores", maxCPUCores);
+    QThreadPool::globalInstance()->setMaxThreadCount(maxCPUCores);
+	// Check for updates
+	auto check = checkBoxUpdates->isChecked();
+	aws->setSettings("checkForUpdates", check);
+	settings.setValue("general/checkForUpdates", check);
+
 	QDialog::accept();
 }
 
