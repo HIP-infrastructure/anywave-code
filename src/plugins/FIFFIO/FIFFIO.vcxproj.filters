@@ -188,6 +188,18 @@
     <ClCompile Include="fif_ch_info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="fif_dir_node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_info_base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_named_matrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fif_proj.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fiffio_global.h">
@@ -389,6 +401,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fif_coord_trans.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fifInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_info_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_proj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fif_named_matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

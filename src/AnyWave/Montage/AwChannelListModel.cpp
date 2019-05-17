@@ -665,11 +665,10 @@ QVariant AwChannelListModelAsRecorded::headerData(int section, Qt::Orientation o
 
 // AwChannelListDelegate
 
-AwChannelListDelegate::AwChannelListDelegate(QStringList* labels, QObject *parent)
+AwChannelListDelegate::AwChannelListDelegate(const QHash<int, QStringList>& labelsByTypes, QObject *parent)
 : QItemDelegate(parent)
 {
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++)
-		m_labels[i] = labels[i];
+	m_labels = labelsByTypes;
 }
 
 QWidget *AwChannelListDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -704,52 +703,18 @@ QWidget *AwChannelListDelegate::createEditor(QWidget *parent, const QStyleOption
 			int t = AwChannel::stringToType(type);
 			QString name = index.model()->data(nameIndex, Qt::DisplayRole).toString();
 
-			if (t == AwChannel::EEG) { // for EEG reference, just add all other EEG electrodes + the AVG one (for avg referencing)
-				QComboBox *editor = new QComboBox(parent);
-				QStringList items = m_labels[t];
-				items.removeAll(name);
-				editor->addItem("No Ref.");
+			// Generalize the procedure to all type of channels (every channels can be set as a reference to another channel (of the same type).
+			QComboBox *editor = new QComboBox(parent);
+			QStringList items = m_labels[t];
+			items.removeAll(name); // remove the channel itself from the list
+			editor->addItem("No Ref.");
+			// special case for EEG => the AVG reference
+			if (t == AwChannel::EEG)
 				editor->addItem("AVG");
-				editor->addItems(items);
-				// close comboBox when an item is picked up
-				connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));
-				return editor;
-			}
-			else if (t == AwChannel::SEEG) {
-				QComboBox *editor = new QComboBox(parent);
-				editor->addItem("No Ref.");
-				QStringList items = m_labels[t];
-				// get the electrode name apart from the pad number.
-				QRegularExpression exp("([A-Z]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
-				QRegularExpressionMatch match = exp.match(name);
-				if (!match.hasMatch()) { // did not get a match, for example "AA"
-					items.removeAll(name);
-					editor->addItems(items);
-				}
- 				else { // got a match, for example "A1"
-					QString elec = match.captured(1);
-					items.removeAll(name);
-					QStringList seegItems;
-					for (auto i : items) {
-						if (i.startsWith(elec))
-							seegItems.append(i);
-					}
-					editor->addItems(seegItems);
-				}
-				// close comboBox when an item is picked up
-				connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));
-				return editor;
-			}
-			else if (t == AwChannel::MEG || t == AwChannel::GRAD || t == AwChannel::Other) {
-				QComboBox *editor = new QComboBox(parent);
-				editor->addItem("No Ref.");
-				QStringList items = m_labels[t];
-				items.removeAll(name);
-				editor->addItems(items);
-				// close comboBox when an item is picked up
-				connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));
-				return editor;
-			}
+			editor->addItems(items);
+			// close comboBox when an item is picked up
+			connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));
+			return editor;
 		}
 	}
 	return QItemDelegate::createEditor(parent, option, index);
@@ -838,7 +803,7 @@ void AwChannelListDelegate::commitAndCloseComboBox()
 AwChannelListDelegateAsRecorded::AwChannelListDelegateAsRecorded(QObject *parent)
 : QItemDelegate(parent)
 {
-//     types << "EEG" << "SEEG" << "MEG" << "ECG" << "EMG" << "Trigger" << "Other";
+
 }
 
 

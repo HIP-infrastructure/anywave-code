@@ -340,6 +340,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwMATLABMarkersExporter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwMatlabScriptPlugin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -842,6 +846,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwMATLABMarkersExporter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwMatlabScriptPlugin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -1133,6 +1141,7 @@
     <ClCompile Include="Process\AwExportSelChannels.cpp" />
     <ClCompile Include="Process\AwLogPlainTextEdit.cpp" />
     <ClCompile Include="Process\AwMarkerExporter.cpp" />
+    <ClCompile Include="Process\AwMATLABMarkersExporter.cpp" />
     <ClCompile Include="Process\AwMatlabScriptPlugin.cpp" />
     <ClCompile Include="Process\AwProcessesWidget.cpp" />
     <ClCompile Include="Process\AwProcessFromMarkersDial.cpp" />
@@ -1784,6 +1793,24 @@
     </CustomBuild>
     <ClInclude Include="Montage\AwECoGGrid.h" />
     <CustomBuild Include="Process\AwLogPlainTextEdit.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_OPENGL_LIB -DQT_SVG_LIB -DQT_WIDGETS_LIB -DQT_XML_LIB -DQT_CONCURRENT_LIB -DQT_PRINTSUPPORT_LIB -DQT_QML_LIB -D%(PreprocessorDefinitions) "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtSvg" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtConcurrent" "-I.\ICA" "-I.\Process" "-I$(QTDIR)\include\QtPrintSupport" "-I.\Script" "-I.\Display" "-I.\Carto" "-I.\Epoch" "-I.\Marker" "-I$(QTDIR)\include\QtQml" "-I.\IO\BIDS" "-I.\Filter" "-I.\Montage"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_OPENGL_LIB -DQT_SVG_LIB -DQT_WIDGETS_LIB -DQT_XML_LIB -DQT_CONCURRENT_LIB -DMKL -DQT_PRINTSUPPORT_LIB -DQWT_DLL -DH5_BUILT_AS_DYNAMIC_LIB -DAW_DISABLE_EPOCHING -DQT_QML_LIB -D%(PreprocessorDefinitions) "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtSvg" "-I$(QTDIR)\include\QtWidgets" "-I$(AWROOT)\include" "-I$(DEV_ROOT)\win64\VS2015\HDF5\1.8.18\include" "-I$(QTDIR)\include\QtAngle" "-I$(DEV_ROOT)\win64\VS2017\VTK810\include\vtk-8.1" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtConcurrent" "-I.\ICA" "-I.\Process" "-I$(DEV_ROOT)\win64\armadillo-7.800.2\include" "-I$(QTDIR)\include\QtPrintSupport" "-I.\Script" "-I.\Display" "-I.\Carto" "-I.\Epoch" "-ID:\Dev\win64\VS2015\Qwt-6.1.3\include" "-I$(QTDIR)\include\QtCharts" "-I.\Marker" "-ID:\Dev\win64\matio\include" "-I$(QTDIR)\include\QtQml" "-I.\IO\BIDS" "-I.\Filter" "-I.\Montage" "-ID:\Dev\vcpkg\packages\libzip_x64-windows\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_OPENGL_LIB -DQT_SVG_LIB -DQT_WIDGETS_LIB -DQT_XML_LIB -DQT_CONCURRENT_LIB -DQT_PRINTSUPPORT_LIB -DQT_QML_LIB -D%(PreprocessorDefinitions) "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtSvg" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtConcurrent" "-I.\ICA" "-I.\Process" "-I$(QTDIR)\include\QtPrintSupport" "-I.\Script" "-I.\Display" "-I.\Carto" "-I.\Epoch" "-I.\Marker" "-I$(QTDIR)\include\QtQml" "-I.\IO\BIDS" "-I.\Filter" "-I.\Montage"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_OPENGL_LIB -DQT_SVG_LIB -DQT_WIDGETS_LIB -DQT_XML_LIB -DQT_CONCURRENT_LIB -DMKL -DQT_PRINTSUPPORT_LIB -DQWT_DLL -DH5_BUILT_AS_DYNAMIC_LIB -DAW_DISABLE_EPOCHING -DQT_QML_LIB -DAW_PLATFORM="Win" -DAW_MAJOR_VERSION="1809" -DAW_MINOR_VERSION="0" -D%(PreprocessorDefinitions) "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtSvg" "-I$(QTDIR)\include\QtWidgets" "-I$(AWROOT)\include" "-I$(DEV_ROOT)\win64\VS2015\HDF5\1.8.18\include" "-I$(QTDIR)\include\QtAngle" "-ID:\Dev\win64\VS2012\VTK630\include\vtk-6.3" "-I$(QTDIR)\include\QtXml" "-I$(QTDIR)\include\QtConcurrent" "-I.\ICA" "-I.\Process" "-I$(DEV_ROOT)\win64\armadillo-7.800.2\include" "-I$(QTDIR)\include\QtPrintSupport" "-I.\Script" "-I.\Display" "-I.\Carto" "-I.\Epoch" "-ID:\Dev\win64\VS2015\Qwt-6.1.3\include" "-I$(QTDIR)\include\QtCharts" "-I.\Marker" "-ID:\Dev\win64\matio\include" "-I$(QTDIR)\include\QtQml" "-I.\IO\BIDS" "-I.\Filter" "-I.\Montage" "-ID:\Dev\vcpkg\packages\libzip_x64-windows\include"</Command>
+    </CustomBuild>
+    <CustomBuild Include="Process\AwMATLABMarkersExporter.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>

@@ -6,6 +6,7 @@
 #include "fif_file.h"
 #include "fif_ch_pos.h"
 #include "fif_ch_info.h"
+#include "fif_direntry.h"
 
 //
 //   The magic hexadecimal values
@@ -36,11 +37,13 @@ public:
 	static void convert_ch_pos(fifChPos *pos);
 	fifId toFifId();
 	fifChInfo toChInfo();
+	qint32* toInt();
 
 	bool isMatrix() const;
 	fiff_int_t getType() const;
 	QString getInfo() const;
 	fifId toFifID() const;
+	QList<fifDirEntry *> toDirEntry() const;
 
 	fiff_int_t  kind;       /**< Tag number.
 							 *   This defines the meaning of the item */

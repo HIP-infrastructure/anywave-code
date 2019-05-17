@@ -778,9 +778,12 @@ AwChannelList AwMontageManager::load(const QString& path)
 				continue;
 			if (c->hasReferences() && c->referenceName() != "AVG") {
 				auto asRecordedRef = m_asRecorded[c->referenceName()];
-				if (asRecordedRef)
+				if (asRecordedRef) {
 					if (asRecorded->isBad())
 						continue;
+				}
+				else  // reference not found => remove it
+					c->clearRefName();
 			}
 			// Change asrecorded type to match the one in .mtg
 			asRecorded->setType(c->type());
@@ -815,44 +818,11 @@ AwChannelList AwMontageManager::load(const QString& path)
 
 bool AwMontageManager::apply(const QString& path)
 {
-	//// Save ICA channels if already loaded
-	//AwICAChannelList savedICAChannels;
-	//foreach (AwChannel *c, m_channels)  {
-	//	if (c->isICA() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
-	//		savedICAChannels << static_cast<AwICAChannel *>(m_asRecorded[c->name()]);
-	//		m_asRecorded.remove(c->name());
-	//	}
-	//}
-
-	//// Save ICA channels if already loaded
-	//AwSourceChannelList savedSourceChannels;
-	//foreach (AwChannel *c, m_channels)  {
-	//	if (c->isSource() && c->isVirtual()) { // we saved the As Recored parent, not the channel itself which will be destroyed just after that.
-	//		savedSourceChannels <<  static_cast<AwSourceChannel *>(m_asRecorded[c->name()]);
-	//		m_asRecorded.remove(c->name());
-	//	}
-	//}
-
 	// deleting current channels.
 	while (!m_channels.isEmpty())
 		delete m_channels.takeLast();
 
 	m_channels = load(path);
-
-	//// Restore ICA channels if any
-	//foreach (AwICAChannel *channel, savedICAChannels) {
-	//	AwICAChannel *newChan = new AwICAChannel(channel);
-	//	m_channels << newChan;
-	//	m_asRecorded[channel->name()] = channel;
-	//}
-
-	//// Restore Source channels if any
-	//foreach (AwSourceChannel *channel, savedSourceChannels) {
-	//	AwSourceChannel *newChan = new AwSourceChannel(channel);
-	//	m_channels << newChan;
-	//	m_asRecorded[channel->name()] = channel;
-	//}
-
 	return true;
 }
 

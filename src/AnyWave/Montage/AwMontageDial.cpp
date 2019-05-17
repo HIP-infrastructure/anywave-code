@@ -97,7 +97,8 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	AwChannelListModel *model = new AwChannelListModel(mm->channels(), this);
 	connect(model, &AwChannelListModel::channelsDropped, this, &AwMontageDial::addDroppedChannels);
 	m_ui.tvDisplay->setModel(model);
-	m_ui.tvDisplay->setItemDelegate(new AwChannelListDelegate(m_labelTypes, this));
+//	m_ui.tvDisplay->setItemDelegate(new AwChannelListDelegate(m_labelTypes, this));
+	m_ui.tvDisplay->setItemDelegate(new AwChannelListDelegate(m_labelsByTypes, this));
 
 	m_ui.tvChannelsAsRecorded->setModel(sortModelAsRecorded);
 	m_ui.tvChannelsAsRecorded->setItemDelegate(new AwChannelListDelegateAsRecorded(this));
@@ -162,6 +163,7 @@ void AwMontageDial::loadMontage()
 	if (channels.isEmpty())
 		return;
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
+	sortLabelsByTypes();
 }
 
 
@@ -263,12 +265,11 @@ void AwMontageDial::updateButtonAddByTypes()
 	// create menu and actions for the Add By Types button, based on available types of channels in the As Recorded list.
 	m_addByTypesMenu.clear();
 	QAction *act;
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (!m_labelTypes[i].isEmpty()) {
-			act = m_addByTypesMenu.addAction(AwChannel::typeToString(i));
-			act->setData(i);
-			connect(act, &QAction::triggered, this, &AwMontageDial::addChannelsByTypes);
-		}
+
+	for (auto k : m_labelsByTypes.keys()) {
+		act = m_addByTypesMenu.addAction(AwChannel::typeToString(k));
+		act->setData(k);
+		connect(act, &QAction::triggered, this, &AwMontageDial::addChannelsByTypes);
 	}
 }
 
@@ -286,11 +287,17 @@ void AwMontageDial::updateButtonAddByTypes()
  */
 void AwMontageDial::sortLabelsByTypes()
 {
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++)
-		m_labelTypes[i].clear();
-	for (auto c : m_asRecorded.values()) {
-		if (!c->isBad()) 
-			m_labelTypes[c->type()].append(c->name());
+	m_labelsByTypes.clear();
+	auto asRecordedChannels = m_asRecorded.values();
+	for (auto c : m_asRecorded) {
+		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+			auto channels = AwChannel::getChannelsOfType(asRecordedChannels, i);
+			if (!channels.isEmpty()) {
+				auto labels = AwChannel::getLabels(channels);
+				labels.sort();
+				m_labelsByTypes[i] = labels;
+			}
+		}
 	}
 	updateButtonAddByTypes();
 }
@@ -312,7 +319,9 @@ void AwMontageDial::addChannelsByTypes()
 	if (act == NULL)
 		return;
 
-	QStringList labels = m_labelTypes[act->data().toInt()];
+	int type = act->data().toInt();
+	auto labels = m_labelsByTypes[type];
+
 	AwChannelList channels;
 	for (auto l : labels) {
 		auto asRecorded = m_asRecorded[l];

@@ -27,8 +27,9 @@ bool fifRaw::open(const QString& path, QIODevice::OpenModeFlag mode)
 
 	try {
 		if (mode & QIODevice::ReadOnly) {
-			m_id = m_stream->check_beginning();
-			// check for raw data tags...
+			m_stream->check_beginning();
+			m_stream->setup_read_raw();
+
 
 		}
 	}
