@@ -305,10 +305,10 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 	
 		loadData(&channels, start, duration, rawData, true);
 		int index = 0;
+		QVector<qint64> samples(markers->size() * 2);
 		for (auto c : *channelsToLoad) {
 			auto sourceChannel = channels.value(index);
 			qint64 totalSamples = 0;
-			QVector<qint64> samples;
 			qint64 offsetSamples = (qint64)floor(start * c->samplingRate());
 			for (auto m : *markers) {
 				totalSamples += (qint64)floor(m->duration() * c->samplingRate());
@@ -317,7 +317,10 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 
 			float *data = c->newData(totalSamples);
 			for (int i = 0; i < samples.size(); i += 2) {
-				for (auto s = samples.value(i); s < samples.value(i + 1); s++)
+				auto start = samples.value(i);
+				auto count = samples.value(i + 1);
+
+				for (auto s = start; s < start + count; s++)
 					*data++ = sourceChannel->data()[s];
 			}
 			sourceChannel->clearData();
