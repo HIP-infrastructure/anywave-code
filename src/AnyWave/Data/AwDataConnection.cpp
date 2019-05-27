@@ -279,7 +279,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 		setEndOfData();
 		return;
 	}
-
 	// detect filters
 	bool hasFilters = false;
 	for (auto c : *channelsToLoad) {

@@ -193,7 +193,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			throw(exception);
 		}
 		// Session option is not required
-		QString toBIDS = parser.value(toBIDSOpt);
+	//	QString toBIDS = parser.value(toBIDSOpt);
 		QString modality = parser.value(BIDSModalityOpt);
 		QString subj = parser.value(BIDSSubjectOpt);
 		QString task = parser.value(BIDSTaskOpt);
