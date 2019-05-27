@@ -503,7 +503,7 @@ void AwMontageDial::resetToAsRecorded()
 	// Reset the montage, whit no virtual channels
 	channels.clear();
 	for (auto c : m_asRecorded.values())
-		if (!c->isVirtual())
+		if (!c->isVirtual() && !c->isBad())
 			channels << new AwChannel(c);
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
 }
