@@ -29,7 +29,30 @@
 #include <AwException.h>
 #include "Montage/AwMontageManager.h"
 #include "Data/AwDataServer.h"
+#include <AwMontage.h>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <AwUtilities.h>
+#include "Prefs/AwSettings.h"
 
+void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
+{
+	float hp = 0., lp = 0., notch = 0.;
+	// check for optional filter settings
+	if (args.contains("hp"))
+		hp = args["hp"].toDouble();
+	if (args.contains("lp"))
+		lp = args["lp"].toDouble();
+	if (args.contains("notch"))
+		notch = args["notch"].toDouble();
+	if (lp || notch || hp) {
+		for (auto c : channels) {
+			c->setLowFilter(lp);
+			c->setHighFilter(hp);
+			c->setNotch(notch);
+		}
+	}
+}
 
 AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& pluginName, AwArguments& args, const QString& inputFile)
 {
@@ -42,6 +65,15 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 	}
 
 	AwFileIO *reader = Q_NULLPTR;
+	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDontRequireData;
+
+	if (!doNotRequiresData && inputFile.isEmpty()) {
+		throw AwException(QString("input_file must be specified."), origin);
+		return Q_NULLPTR;
+	}
+	auto process = plugin->newInstance();
+	process->setPlugin(plugin);
+
 	if (!inputFile.isEmpty()) {
 		reader = pm->getReaderToOpenFile(inputFile);
 		if (reader == Q_NULLPTR) {
@@ -53,46 +85,95 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 			reader->plugin()->deleteInstance(reader);
 			return Q_NULLPTR;
 		}
+		AwFileInfo fi(reader, inputFile);
+		process->pdi.input.dataFolder = fi.dirPath();
+		process->pdi.input.fileDuration = reader->infos.totalDuration();
+		process->pdi.input.badLabels = AwMontageManager::instance()->badLabels();
+		process->pdi.input.dataPath = inputFile;
+		process->pdi.input.setReader(reader);
+	}
+	// get arguments (could be a json file path or a json string)
+	QString p_args = args["process_args"].toString();
+	if (!p_args.isEmpty()) {
+		// check for json file
+		QJsonDocument doc;
+		if (QFile::exists(p_args)) {
+			doc = AwUtilities::readJsonFile(p_args);
+			if (doc.isEmpty() || doc.isNull()) {
+				throw AwException("json file is invalid.", origin);
+				return Q_NULLPTR;
+			}
+		}
+		else {
+			doc = QJsonDocument::fromJson(p_args.toUtf8());
+		}
+		args.unite(doc.object().toVariantHash());
+
+		// SPECIAL CASE for marker_file or montage_file.
+		// if those arguments are specified within the json file, handle them as relative to the data file folder, not as an absolute file path.
+		if (args.contains("marker_file")) {
+			QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(args["marker_file"].toString());
+			args["marker_file"] = fullPath;
+		}
+		if (args.contains("montage_file")) {
+			QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(args["montage_file"].toString());
+			args["montage_file"] = fullPath;
+		}
 	}
 
-	auto process = plugin->newInstance();
 	if (!inputFile.isEmpty()) {
 		// detect optional anywave files (.mrk, .mtg, .bad)
+		
 		QString tmp = QString("%1.mrk").arg(inputFile);
-		if (QFile::exists(tmp))
-			args["marker_file"] = tmp;
+		// detect only if marker_file option is not specified by the user
+		if (!args.contains("marker_file")) 
+			if (QFile::exists(tmp))
+				args["marker_file"] = tmp;
+		// detect only if montager_file option is not specified by the user
 		tmp = QString("%1.mtg").arg(inputFile);
-		if (QFile::exists(tmp))
-			args["montage_file"] = tmp;
+		if (!args.contains("montage_file"))
+			if (QFile::exists(tmp))
+				args["montage_file"] = tmp;
 		tmp = QString("%1.bad").arg(inputFile);
 		if (QFile::exists(tmp)) {
 			args["bad_file"] = tmp;
 			process->pdi.input.badLabels = AwMontageManager::loadBad(tmp);
 		}
 
-		float hp = 0., lp = 0., notch = 0.;
-		process->pdi.input.dataPath = inputFile;
-		process->pdi.input.setReader(reader);
-		process->pdi.input.setNewChannels(reader->infos.channels(), true);
-		process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
-		// check for optional filter settings
-		if (args.contains("hp"))
-			hp = args["hp"].toDouble();
-		if (args.contains("lp"))
-			lp = args["lp"].toDouble();
-		if (args.contains("notch"))
-			notch = args["notch"].toDouble();
-		if (lp || notch || hp) {
-			for (auto c : process->pdi.input.channels()) {
-				c->setLowFilter(lp);
-				c->setHighFilter(hp);
-				c->setNotch(notch);
+		// if marker file is found => load markers and use them for the process
+		if (args.contains("marker_file"))
+			process->pdi.input.setNewMarkers(AwMarker::load(args["marker_file"].toString()));
+		else
+			process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
+		
+		try {
+			// same thing for montage
+			if (args.contains("montage_file")) {
+				auto channels = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args["montage_file"].toString(), process->pdi.input.badLabels);
+				if (!channels.isEmpty())
+					process->pdi.input.setNewChannels(channels);
+				else 
+					process->pdi.input.setNewChannels(reader->infos.channels(), true);
 			}
+			else
+				process->pdi.input.setNewChannels(reader->infos.channels(), true);
 		}
+		catch (const AwException& e) {
+			throw e;
+			return Q_NULLPTR;
+		}
+		//process->pdi.input.dataFolder = AwSettings::getInstance()->fileInfo()->dirPath();
+		//process->pdi.input.fileDuration = reader->infos.totalDuration();
+		//process->pdi.input.badLabels = AwMontageManager::instance()->badLabels();
+		//process->pdi.input.dataPath = inputFile;
+		process->pdi.input.setReader(reader);
+		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
+		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
 		AwDataServer::getInstance()->setMainReader(reader);
 		AwDataServer::getInstance()->openConnection(process);
 	}
 	process->pdi.input.readers = pm->readers();
 	process->pdi.input.writers = pm->writers();
+
 	return process;
 }

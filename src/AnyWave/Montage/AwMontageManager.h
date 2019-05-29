@@ -102,7 +102,7 @@ public:
 	/** Remove bad channels in list **/
 	void removeBadChannels(AwChannelList& list);
 	/** Scripting support specific **/
-	AwChannelList loadAndApplyMontage(AwChannelList asRecorded, const QString& path);
+	AwChannelList loadAndApplyMontage(AwChannelList asRecorded, const QString& path, const QStringList& bads = QStringList());
 	/** Scripting support specific **/
 	void newMontage(AwFileIO *reader);
 	// ICA Channels specific

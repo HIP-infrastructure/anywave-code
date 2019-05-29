@@ -546,13 +546,12 @@ void AwMarkerManagerSettings::renameAllMarkers()
 	if (dlg.exec() == QDialog::Rejected)
 		return;
 
-	auto newLabel = dlg.value();
-	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
-		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_LABEL);
-		if (index.isValid())
-			tvMarkers->model()->setData(index, newLabel, Qt::EditRole);
-	}
-	m_displayedMarkers = m_model->markers();
+	AwMarkerList currentMarkers = m_model->markers();
+	for (auto m : currentMarkers)
+		m->setLabel(dlg.value());
+
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
@@ -563,13 +562,19 @@ void AwMarkerManagerSettings::renameSelectedMarkers()
 	if (dlg.exec() == QDialog::Rejected)
 		return;
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	
+	AwMarkerList currentMarkers = m_model->markers();
+	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+
 	for (auto i : indexes) {
 		if (i.column() == MARKER_COLUMN_LABEL) {
-			tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+			int row = proxy->mapToSource(i).row();
+			//tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+			auto m = currentMarkers.value(row);
+			m->setLabel(dlg.value());
 		}
 	}
-	m_displayedMarkers = m_model->markers();
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
@@ -581,12 +586,12 @@ void AwMarkerManagerSettings::changeValueAllMarkers()
 		return;
 
 	auto newValue = dlg.value().toDouble();
-	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
-		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_CODE);
-		if (index.isValid())
-			tvMarkers->model()->setData(index, newValue, Qt::EditRole);
-	}
-	m_displayedMarkers = m_model->markers();
+	AwMarkerList currentMarkers = m_model->markers();
+	for (auto m : currentMarkers)
+		m->setValue(newValue);
+
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
@@ -598,12 +603,19 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 		return;
 
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+	AwMarkerList currentMarkers = m_model->markers();
+	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+
 	for (auto i : indexes) {
-		if (i.column() == MARKER_COLUMN_CODE) {
-			tvMarkers->model()->setData(i, dlg.value().toDouble(), Qt::EditRole);
+		if (i.column() == MARKER_COLUMN_LABEL) {
+			int row = proxy->mapToSource(i).row();
+			//tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+			auto m = currentMarkers.value(row);
+			m->setValue(dlg.value().toDouble());
 		}
 	}
-	m_displayedMarkers = m_model->markers();
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }

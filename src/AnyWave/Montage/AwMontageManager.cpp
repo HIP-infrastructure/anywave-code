@@ -832,7 +832,7 @@ bool AwMontageManager::apply(const QString& path)
 // in: List of as Recorded channels
 // path to montage file to apply.
 // out: List of montaged channels or empty list if error.
-AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, const QString &path)
+AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, const QString &path, const QStringList& badLabels)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 
@@ -847,15 +847,27 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 	QHash<QString, AwChannel *> hash;
 	for (auto c : asRecorded)
 		hash[c->name()] = c;
+
+	if (!badLabels.isEmpty()) {
+		for (auto k : hash.keys())
+			if (badLabels.contains(k))
+				hash[k]->setBad(true);
+	}
 	
 	for (auto c : channels) {
 		if (!hash.contains(c->name()))
 			continue;
-		auto newChannel = new AwChannel(c);
+		if (hash[c->name()]->isBad())
+			continue;
+		auto newChannel = new AwChannel(hash[c->name()]);
 		hash[c->name()]->setType(c->type());
-		if (c->hasReferences() && hash.contains(c->referenceName())) 
+		if (c->hasReferences() && hash.contains(c->referenceName())) {
 			// make sure the type of ref channel is matching the one in montage
-			hash[c->referenceName()]->setType(c->type());
+			if (!hash[c->referenceName()]->isBad())
+				hash[c->referenceName()]->setType(c->type());
+			else 
+				newChannel->clearRefName();
+		}
 		else 
 			newChannel->clearRefName();
 		res << newChannel;

@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <AwMarker.h>
 #include <QFile>
+#include <qjsondocument.h>
 
 QDebugStream::QDebugStream(int streamType)
 {

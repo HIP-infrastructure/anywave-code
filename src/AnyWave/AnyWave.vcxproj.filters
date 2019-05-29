@@ -1339,6 +1339,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwMATLABMarkersExporter.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="CL\AwRunProcess.cpp">
+      <Filter>CL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">

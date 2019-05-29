@@ -23,22 +23,43 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "AwCommandLineManager.h"
+#include <AwProcessInterface.h>
+#include <QFile>
+#include "AwCommandLogger.h"
+#include <AwException.h>
 
-#include <AwCommandLine.h>
-#include <AwChannel.h>
-class AwBaseProcess;
-
-class AwCommandLineManager
+void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
-public:
-	static void computeICA(AwArguments& arguments);
-	static void convertFile(AwArguments& arguments);
-	static void runProcess(AwArguments& arguments);
-	/** Instantiante a process given the plugin name. Also initialize the process PDI with default settings. Throw an exception if failed. **/
-	/** if an inputFile is specified, the reader is instantiated and the file is open. The optional filter settings are also applied. **/
-	/** Arguments cand be modified to add extra parameters based on input file argument for example. **/
-	static AwBaseProcess *createAndInitNewProcess(const QString& pluginName, AwArguments& args, const QString& inputFile = QString());
-	/** apply filters that might be defined in arguments to channels **/
-	static void applyFilters(const AwChannelList& channels, const AwArguments& args);
-};
+	AwCommandLogger logger("runProcess", "cl_run");
+	auto inputFile = arguments["input_file"].toString();
+
+	if (!QFile::exists(inputFile)) {
+		logger.sendLog(QString("file %1 does not exist.").arg(inputFile));
+		return;
+	}
+	AwBaseProcess *process;
+	try {
+		process = AwCommandLineManager::createAndInitNewProcess(arguments["run_process"].toString(), arguments, inputFile);
+	}
+	catch (const AwException& e) {
+		logger.sendLog(e.errorString());
+		return;
+	}
+
+	// get arguments (could be a json file path or a json string)
+	QString args = arguments["process_args"].toString();
+	if (args.isEmpty()) {
+		logger.sendLog("arguments is empty.");
+		return;
+	}
+
+	applyFilters(process->pdi.input.channels(), arguments);
+	process->pdi.input.setArguments(arguments);
+	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
+	process->runFromCommandLine();
+	logger.sendLog(QString("Done."));
+	delete process->pdi.input.reader();
+	delete process;
+}
+

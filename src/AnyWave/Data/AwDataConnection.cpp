@@ -273,7 +273,7 @@ void AwDataConnection::computeVirtualChannels()
 
 // SLOTS
 
-void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *markers, bool rawData)
+void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *markers, bool rawData, bool doNotWakeupClient)
 {
 	if (channelsToLoad->isEmpty() || markers->isEmpty()) {
 		setEndOfData();
@@ -304,22 +304,26 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 	
 		loadData(&channels, start, duration, rawData, true);
 		int index = 0;
+		
 		QVector<qint64> samples(markers->size() * 2);
 		for (auto c : *channelsToLoad) {
-			auto sourceChannel = channels.value(index);
+			auto sourceChannel = channels.value(index++);
 			qint64 totalSamples = 0;
 			qint64 offsetSamples = (qint64)floor(start * c->samplingRate());
+			int i = 0;
 			for (auto m : *markers) {
 				totalSamples += (qint64)floor(m->duration() * c->samplingRate());
-				samples << (qint64)floor(m->start() * c->samplingRate()) + offsetSamples << (qint64)floor(m->duration() * c->samplingRate());
+				samples[i] = (qint64)floor(m->start() * c->samplingRate()) + offsetSamples;
+				samples[i + 1] = (qint64)floor(m->duration() * c->samplingRate());
+				i += 2;
 			}
 
 			float *data = c->newData(totalSamples);
-			for (int i = 0; i < samples.size(); i += 2) {
-				auto start = samples.value(i);
-				auto count = samples.value(i + 1);
+			for (int j = 0; j < samples.size(); j += 2) {
+				auto start = samples.value(j);
+				auto count = samples.value(j + 1);
 
-				for (auto s = start; s < start + count; s++)
+				for (qint64 s = start; s < start + count; s++)
 					*data++ = sourceChannel->data()[s];
 			}
 			sourceChannel->clearData();
@@ -405,7 +409,10 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker,
 		return;
 	}
 
-	loadData(channelsToLoad, marker->start(), marker->duration(), rawData, doNotWakeUpClient);
+//	loadData(channelsToLoad, marker->start(), marker->duration(), rawData, doNotWakeUpClient);
+	AwMarkerList markers = { marker };
+	loadData(channelsToLoad, &markers, rawData, doNotWakeUpClient);
+
 }
 
 //

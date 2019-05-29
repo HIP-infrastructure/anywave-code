@@ -4,6 +4,7 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
 #include "AwCommandLogger.h"
+#include <AwUtilities.h>
 
 using namespace aw::commandLine;
 
@@ -21,6 +22,9 @@ int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
 			break;
 		case aw::commandLine::ConvertFile:
 			AwCommandLineManager::convertFile(operations[op]);
+			break;
+		case aw::commandLine::RunProcess:
+			AwCommandLineManager::runProcess(operations[op]);
 			break;
 		}
 	}
@@ -65,10 +69,13 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	// Convert File options
 	QCommandLineOption ConvertOpt("convert", "convert a file to another format.");
 	parser.addOption(ConvertOpt);
+
+	// run process options
+	QCommandLineOption runProcessOpt("run", "launch a process with arguments.", "processName", QString());
+	QCommandLineOption processArgsOpt("args", "plugin arguments", "args", QString());
 	
-	// SEEG BIDS
+	// BIDS
 	QCommandLineOption toBIDSOpt("toBIDS", "convert files to BIDS.");
-	//QCommandLineOption seegBIDSOpt("seegBIDS", "SEEG file to BIDSify.\nRequires task and sub options.", "file", QString());
 	QCommandLineOption BIDSModalityOpt("bids_modality", "ieeg or meg", "bids modality", QString());
 	QCommandLineOption BIDSSidecarsOpt("bids_output", "sidecars : Only generates sidecar files. all : full conversion", "sidecars", QString());
 	QCommandLineOption BIDSTaskOpt("bids_task", "BIDS task", "task", QString());
@@ -90,6 +97,8 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(BIDSFormatOpt);
 	parser.addOption(BIDSAcqOpt);
 	parser.addOption(BIDSProcOpt);
+	parser.addOption(runProcessOpt);
+	parser.addOption(processArgsOpt);
 	// 
 	// ICA
 	///
@@ -100,7 +109,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(ICAModality);
 	parser.addOption(ICAComponents);
 	   	  
-	//parser.process(QCoreApplication::arguments());
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
 		throw exception;
@@ -187,13 +195,21 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		}
 		res[aw::commandLine::ConvertFile] = arguments;
 	}
+	else if (parser.isSet(runProcessOpt)) {
+		if (!parser.isSet(processArgsOpt)) {
+			logger.sendLog("run: Missing process arguments");
+			throw(exception);
+		}
+		arguments["run_process"] = parser.value(runProcessOpt);
+		arguments["process_args"] = parser.value(processArgsOpt);
+		res[aw::commandLine::RunProcess] = arguments;
+	}
 	else if (parser.isSet(toBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
 			logger.sendLog("toBIDS: Missing subject,task or modality argument");
 			throw(exception);
 		}
 		// Session option is not required
-	//	QString toBIDS = parser.value(toBIDSOpt);
 		QString modality = parser.value(BIDSModalityOpt);
 		QString subj = parser.value(BIDSSubjectOpt);
 		QString task = parser.value(BIDSTaskOpt);
@@ -210,15 +226,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			throw(exception);
 		}
 
-		//if (output.toUpper() != "SIDECARS") {
-		//	if (format.isEmpty())
-		//		format = "EDF";
-		//	bool formatOK = format.toUpper() == "EDF" || format.toUpper() == "VHDR";
-		//	if (!formatOK) {
-		//		logger.sendLog("seegBIDS: output format is invalid. (must be EDF or VHDR)");
-		//		throw(exception);
-		//	}
-		//}
 		// first argument must be the kind of file to convert (here SEEG)
 		arguments["bids_modality"] = modality;
 		// subject is mandatory and should be the second argument.
@@ -229,8 +236,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			arguments["bids_session"] = session;
 		if (!run.isEmpty())
 			arguments["bids_run"] = run;
-		//if (!dir.isEmpty())
-		//	arguments["bids_dir"] = dir;
 		if (!format.isEmpty())
 			arguments["bids_format"] = format;
 		if (!output.isEmpty())
