@@ -293,14 +293,15 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->setPluginDir(pluginPath);
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
-			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-			 if (p) {
-				 m_pluginProcesses.removeAll(p);
-				 m_processFactory.removePlugin(name);
-				 delete p;
-			 }
-			 m_processFactory.addPlugin(name, plugin);
-			 m_pluginProcesses += plugin;
+			 loadProcessPlugin(plugin);
+			 //AwProcessPlugin *p = m_processFactory.getPluginByName(name);
+			 //if (p) {
+				// m_pluginProcesses.removeAll(p);
+				// m_processFactory.removePlugin(name);
+				// delete p;
+			 //}
+			 //m_processFactory.addPlugin(name, plugin);
+			 //m_pluginProcesses += plugin;
 		 }
 		 if (isPythonScript || isPythonCompiled) {
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
@@ -316,14 +317,15 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->setPluginDir(pluginPath);
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
+			 loadProcessPlugin(plugin);
 			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-			 if (p) {
-				 m_pluginProcesses.removeAll(p);
-				 m_processFactory.removePlugin(name);
-				 delete p;
-			 }
-			 m_processFactory.addPlugin(name, plugin);
-			 m_pluginProcesses += plugin;
+			 //if (p) {
+				// m_pluginProcesses.removeAll(p);
+				// m_processFactory.removePlugin(name);
+				// delete p;
+			 //}
+			 //m_processFactory.addPlugin(name, plugin);
+			 //m_pluginProcesses += plugin;
 		 }
 	 }
 }
@@ -339,7 +341,7 @@ void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QStr
 	for (auto s : tokens) {
 		auto token = s.toLower();
 		if (token == "nodatarequired")
-			f |= Aw::ProcessFlags::ProcessDontRequireData;
+			f |= Aw::ProcessFlags::ProcessDoesntRequireData;
 		else if (token == "hidden")
 			f |= Aw::ProcessFlags::PluginIsHidden;
 		else if (token == "accepttimeselections")
@@ -650,7 +652,7 @@ void AwPluginManager::loadProcessPlugin(AwProcessPlugin *plugin)
 		delete p;
 		emit log("Process plugin " + plugin->name + " already exists.Previous version unloaded.");
 	}
-	m_processFactory.addPlugin(plugin->name, plugin);
+ 	m_processFactory.addPlugin(plugin->name, plugin);
 	m_pluginList += plugin;
 	m_pluginProcesses += plugin;
 }

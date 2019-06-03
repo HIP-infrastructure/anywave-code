@@ -37,6 +37,8 @@ public:
 	inline void setPid(int pid) { m_pid = pid; }
 	inline int pid() { return m_pid; }
 	void setCompiled(bool flag = true) { m_isCompiled = flag; }
+	/** calls to runFromCommandLine redirected to run() : command line run options. **/
+	void runFromCommandLine() override { run(); }
 protected:
 	QString m_path;	// path to plugin executable file (optional)
 	bool m_isCompiled; // used for MATLAB compiled plugin

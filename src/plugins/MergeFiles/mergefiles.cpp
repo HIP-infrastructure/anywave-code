@@ -7,7 +7,7 @@ MergeFilePlugin::MergeFilePlugin()
 	name = "Merge Files to ADES";
 	description = tr("Merge two files in one (ADES).");
 	category = "Process:File Operation:Merge Files";
-	setFlags(Aw::ProcessFlags::ProcessDontRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
 }
 
 MergeFile::MergeFile()

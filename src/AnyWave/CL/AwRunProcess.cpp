@@ -56,6 +56,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 
 	applyFilters(process->pdi.input.channels(), arguments);
 	process->pdi.input.setArguments(arguments);
+	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
 	process->runFromCommandLine();
 	logger.sendLog(QString("Done."));

@@ -66,23 +66,35 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 		s_EEG->readScalar("pnts", &tmp, 0);
 		nSamples = (qint64)ceil(tmp);
 		s_chanlocs = s_EEG->getChildStruct("chanlocs", 0);
-		for (int i = 0; i < nChannels; i++) {
-			AwChannel channel;
-			double X = 0., Y = 0., Z = 0.;
-			QString label;
-			s_chanlocs->readString("labels", label, i);
-			channel.setName(label);
-			if (!s_chanlocs->isVariableEmpty("X", 0)) {
-				s_chanlocs->readScalar("X", &X, i);
+		if (s_chanlocs) {
+			for (int i = 0; i < nChannels; i++) {
+				AwChannel channel;
+				double X = 0., Y = 0., Z = 0.;
+				QString label;
+				s_chanlocs->readString("labels", label, i);
+				channel.setName(label);
+				if (!s_chanlocs->isVariableEmpty("X", 0)) {
+					s_chanlocs->readScalar("X", &X, i);
+				}
+				if (!s_chanlocs->isVariableEmpty("Y", 0)) {
+					s_chanlocs->readScalar("Y", &Y, i);
+				}
+				if (!s_chanlocs->isVariableEmpty("Z", 0)) {
+					s_chanlocs->readScalar("Z", &Z, i);
+				}
+				channel.setSamplingRate(m_sr);
+				infos.addChannel(&channel);
 			}
-			if (!s_chanlocs->isVariableEmpty("Y", 0)) {
-				s_chanlocs->readScalar("Y", &Y, i);
+		}
+		else {  // no chan locs !!!
+			// build a list of EEG channels with a number
+			for (int i = 0; i < nChannels; i++) {
+				AwChannel channel;
+				channel.setName(QString("EEG%1").arg(i));
+				channel.setSamplingRate(m_sr);
+				channel.setGain(AwChannel::defaultAmplitudeForType(channel.type()));
+				infos.addChannel(&channel);
 			}
-			if (!s_chanlocs->isVariableEmpty("Z", 0)) {
-				s_chanlocs->readScalar("Z", &Z, i);
-			}
-			channel.setSamplingRate(m_sr);
-			infos.addChannel(&channel);
 		}
 		auto block = infos.newBlock();
 		block->setSamples(nSamples);
@@ -90,31 +102,39 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 
 		// now the events
 		s_event = s_EEG->getChildStruct("event", 0);
-		for (int i = 0; i < s_event->getDimSize(1); i++) {
-			AwMarker marker;
-			QString label;
-			double tmp;
-			// get label from type
-			s_event->readString("type", label, i);
-			marker.setLabel(label);
-			// get position from latency
-			s_event->readScalar("latency", &tmp, i);
-			marker.setStart(tmp / m_sr);
-			// get target channels using channel
-			s_event->readScalar("channel", &tmp, i);
-			int chanIndex = (int)ceil(tmp);
-			if (chanIndex > 0) {
-				QStringList targets;
-				targets << infos.channels().value(chanIndex)->name();
-				marker.setTargetChannels(targets);
+		if (s_event) {
+			for (int i = 0; i < s_event->getDimSize(1); i++) {
+				AwMarker marker;
+				QString label;
+				double tmp;
+				// get label from type
+				s_event->readString("type", label, i);
+				marker.setLabel(label);
+				// get position from latency
+				s_event->readScalar("latency", &tmp, i);
+				marker.setStart(tmp / m_sr);
+				// get target channels using channel
+				auto status = s_event->readScalar("channel", &tmp, i);
+				if (status != -1) {
+					int chanIndex = (int)ceil(tmp);
+					if (chanIndex > 0) {
+						QStringList targets;
+						targets << infos.channels().value(chanIndex)->name();
+						marker.setTargetChannels(targets);
+					}
+				}
+				// get value from urevent
+				status = s_event->readScalar("urevent", &tmp, i);
+				if (status != -1) {
+					marker.setValue((float)tmp);
+				}
+				// get duration from duration
+				status = s_event->readScalar("duration", &tmp, i);
+				if (status != -1) {
+					marker.setDuration(tmp);
+				}
+				block->addMarker(marker);
 			}
-			// get value from urevent
-			s_event->readScalar("urevent", &tmp, i);
-			marker.setValue((float)tmp);
-			// get duration from duration
-			s_event->readScalar("duration", &tmp, i);
-			marker.setDuration(tmp);
-			block->addMarker(marker);
 		}
 	}
 	catch (const AwException& e)	{

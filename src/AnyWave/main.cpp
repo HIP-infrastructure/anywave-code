@@ -106,12 +106,9 @@ int main(int argc, char *argv[])
 		if (status == 0)
 			exit(0);
 	}
-	if (openFile) 
-		window.openFile(args.last());
 
-	//if (positionalArgs.count() == 1) 
-	//	window.openFile(positionalArgs.at(0));
-		
 	window.showMaximized();
+	if (openFile)
+		window.openFile(args.last());
 	return app.exec();
 }

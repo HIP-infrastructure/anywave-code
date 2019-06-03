@@ -76,9 +76,10 @@ int AwMATLABStruct::readScalar(const QString& fieldName, double *value, size_t i
 	QString origin = QString("AwMATLABStruct::readScalar");
 	// get the field variable
 	auto field_matvar = Mat_VarGetStructFieldByName(m_var, fieldName.toStdString().c_str(), index);
+	// do not raise an exception if variable is not found, just return -1 to notify the variable is missing.
 	if (field_matvar == NULL) {
-		m_error = QString("Failed to get the field variable");
-		throw AwException(m_error, origin);
+	//	m_error = QString("Failed to get the field variable");
+	//	throw AwException(m_error, origin);
 		return -1;
 	}
 	if (field_matvar->rank != 2 || field_matvar->dims[0] > 1 || field_matvar->dims[1] > 1) {
@@ -95,20 +96,31 @@ int AwMATLABStruct::readScalar(const QString& fieldName, double *value, size_t i
 	return 0;
 }
 
+/// 
+/// get a child struct based on the fieldname.
+/// If the fiedname does not exist or is empty, returns NULL.
 AwMATLABStruct *AwMATLABStruct::getChildStruct(const QString& fieldName, size_t index)
 {
-	QString origin = QString("AwMATLABStruct::getChildStruct");
+//	QString origin = QString("AwMATLABStruct::getChildStruct");
 	// get the field variable
 	auto field_matvar = Mat_VarGetStructFieldByName(m_var, fieldName.toStdString().c_str(), index);
-	if (field_matvar == NULL) {
-		m_error = QString("Failed to get the field variable");
-		throw AwException(m_error, origin);
+	// update : if field_matvar is null that means the struct is empty => do not raise an exception
+	if (field_matvar == NULL)
 		return NULL;
-	}
-	if (field_matvar->class_type != MAT_C_STRUCT) {
-		m_error = QString("Variable is not a struct.");
-		throw AwException(m_error, origin);
+
+	if (field_matvar->class_type != MAT_C_STRUCT)
 		return NULL;
-	}
+
+
+	//if (field_matvar == NULL) {
+	//	m_error = QString("Failed to get the field variable");
+	//	throw AwException(m_error, origin);
+	//	return NULL;
+	//}
+	//if (field_matvar->class_type != MAT_C_STRUCT) {
+	//	m_error = QString("Variable is not a struct.");
+	//	throw AwException(m_error, origin);
+	//	return NULL;
+	//}
 	return new AwMATLABStruct(field_matvar, true);
 }

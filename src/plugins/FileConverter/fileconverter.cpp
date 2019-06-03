@@ -33,7 +33,7 @@ FileConverterPlugin::FileConverterPlugin()
 	name = "File Convert";
 	description = tr("Converts files to another format.");
 	category = "Process:File Operation:Convert Files";
-	setFlags(Aw::ProcessFlags::ProcessDontRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
 }
 
 FileConverter::FileConverter()

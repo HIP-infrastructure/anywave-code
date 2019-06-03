@@ -65,7 +65,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 	}
 
 	AwFileIO *reader = Q_NULLPTR;
-	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDontRequireData;
+	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 
 	if (!doNotRequiresData && inputFile.isEmpty()) {
 		throw AwException(QString("input_file must be specified."), origin);
@@ -108,6 +108,8 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 			doc = QJsonDocument::fromJson(p_args.toUtf8());
 		}
 		args.unite(doc.object().toVariantHash());
+		// add the json string also for MATLAB/Python plugin
+		args["json_args"] = QString(doc.toJson());
 
 		// SPECIAL CASE for marker_file or montage_file.
 		// if those arguments are specified within the json file, handle them as relative to the data file folder, not as an absolute file path.

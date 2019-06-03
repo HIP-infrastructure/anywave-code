@@ -266,7 +266,7 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
 		}
 	}
 
-	act->setEnabled(plugin->flags() & Aw::ProcessFlags::ProcessDontRequireData);
+	act->setEnabled(plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData);
 
 	if (plugin->type == AwProcessPlugin::Internal)	{
 		m_hashProcessAction.insert(plugin->name, act);
@@ -723,7 +723,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
  */
 void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& args)
 {
-	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDontRequireData;
+	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	if (skipDataFile)
 		process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
 

@@ -101,7 +101,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
 	//Save system path
-//	aws->setSystemPath(qgetenv("PATH"));
 	aws->setSettings("systemPath", QString(qgetenv("PATH")));
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
@@ -144,8 +143,9 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
     settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
-	if (isGUIMode)
-		initMatlab();
+//	if (isGUIMode)
+//		initMatlab();
+	initMatlab();
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	plugin_manager->setParent(this);
 	AwProcessManager *process_manager = AwProcessManager::instance();
@@ -1119,8 +1119,8 @@ void AnyWave::initMatlab()
 		QPluginLoader loader(modulePath);
 		QObject *module = loader.instance();
 		//AwSettings::getInstance()->setMatlabPresent((module != NULL));
-		AwSettings::getInstance()->setSettings("isMatlabPresent", module != NULL);
 		if (module) {
+			AwSettings::getInstance()->setSettings("isMatlabPresent", true);
 			AwMatlabInterface *mi = qobject_cast<AwMatlabInterface *>(module);
 			AwSettings::getInstance()->setMatlabInterface(mi);
 			mi->setParent(this);

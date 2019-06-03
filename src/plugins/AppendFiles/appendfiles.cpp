@@ -33,7 +33,7 @@ AppendFilesPlugin::AppendFilesPlugin()
 	name = "Append Files";
 	description = tr("Append compatible files into one.");
 	category = "Process:File Operation:Append Files";
-	setFlags(Aw::ProcessFlags::ProcessDontRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
 }
 
 AppendFiles::AppendFiles()

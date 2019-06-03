@@ -39,7 +39,7 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 	p->pdi.input.pluginDirPath = m_pluginDir;
 
 	// Fixed input as any channels by default
-	if (!(m_flags & Aw::ProcessFlags::ProcessDontRequireData))
+	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData))
 		p->pdi.addInputParameter(Aw::ProcessInput::AnyChannels, "1-n");
 }
 
