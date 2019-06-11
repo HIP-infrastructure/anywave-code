@@ -17,12 +17,6 @@ int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
 		case aw::commandLine::BIDS:
 			AwBIDSManager::instance()->toBIDS(operations[op]);
 			break;
-		case aw::commandLine::ICA:
-			AwCommandLineManager::computeICA(operations[op]);
-			break;
-		case aw::commandLine::ConvertFile:
-			AwCommandLineManager::convertFile(operations[op]);
-			break;
 		case aw::commandLine::RunProcess:
 			AwCommandLineManager::runProcess(operations[op]);
 			break;
@@ -51,12 +45,11 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputFileO("output_file", "specify the file to create.", "output_file", QString());
 	QCommandLineOption outputFormatO("output_format", "specify the file format to create. (vhdr, edf, MATLAB, ADES)", "output_format", QString());
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
-	QCommandLineOption skipMarkerO("skip_marker", "specify a marker label to skip when exporting data.", "skip_marker", QString());
+
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
 	parser.addOption(outputFileO);
 	parser.addOption(outputFormatO);
-	parser.addOption(skipMarkerO);
 	parser.addOption(outputDirO);
 	// common filters flags
 	QCommandLineOption filterHPO("hp", "specify the High Pass filter (Hz).", "hp", QString());
@@ -71,8 +64,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(ConvertOpt);
 
 	// run process options
-	QCommandLineOption runProcessOpt("run", "launch a process with arguments.", "processName", QString());
-	QCommandLineOption processArgsOpt("args", "plugin arguments", "args", QString());
+	QCommandLineOption runProcessOpt("run", "launch a process using json file or json string.", "runArgs", QString());
 	
 	// BIDS
 	QCommandLineOption toBIDSOpt("toBIDS", "convert files to BIDS.");
@@ -98,22 +90,11 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(BIDSAcqOpt);
 	parser.addOption(BIDSProcOpt);
 	parser.addOption(runProcessOpt);
-	parser.addOption(processArgsOpt);
-	// 
-	// ICA
-	///
-	QCommandLineOption ICAOption("ica", "Compute ICA on specified file.");
-	QCommandLineOption ICAModality("modality", "specify the channels modality for --ica option", "modality", QString());
-	QCommandLineOption ICAComponents("comp", "specify the number of components to compute", "comp", QString());
-	parser.addOption(ICAOption);
-	parser.addOption(ICAModality);
-	parser.addOption(ICAComponents);
 	   	  
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
 		throw exception;
 	}
-
 
 	AwArguments arguments;
 	//// parse common options
@@ -140,11 +121,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		arguments["hp"] = fHP;
 	if (!fLP.isEmpty())
 		arguments["lp"] = fLP;
-	// skip marker
-	auto skipedMarker = parser.value(skipMarkerO);
-	if (!skipedMarker.isEmpty())
-		arguments["skip_marker"] = skipedMarker;
-	// input file
+
 	auto inputF = parser.value(inputFileO);
 	if (!inputF.isEmpty())
 		arguments["input_file"] = inputF;
@@ -161,47 +138,8 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		arguments["output_writer"] = availableWriters[format];
 	}
 	
-	if (parser.isSet(ICAOption)) {
-		// mandatory arguments
-		if (!arguments.contains("input_file")) {
-			logger.sendLog("ica: Missing input file.");
-			throw(exception);
-		}
-		auto mod = parser.value(ICAModality);
-		if ( mod.isEmpty()) {
-			logger.sendLog("ica: Missing modality.");
-			throw(exception);
-		}
-		// optional arguments
-		auto nc = parser.value(ICAComponents);
-		if (!nc.isEmpty())
-			arguments["comp"] = nc;
-		arguments["modality"] =  mod;
-		res[aw::commandLine::ICA] = arguments;
-	}
-	else if (parser.isSet(ConvertOpt)) {
-		// mandatory arguments
-		if (!arguments.contains("input_file")) {
-			logger.sendLog("convert: Missing input file.");
-			throw(exception);
-		}
-		if (!arguments.contains("output_file")) {
-			logger.sendLog("convert: Missing output file.");
-			throw(exception);
-		}
-		if (!isFormatOption) {
-			logger.sendLog("convert: Missing output_format option.");
-			throw(exception);
-		}
-		res[aw::commandLine::ConvertFile] = arguments;
-	}
-	else if (parser.isSet(runProcessOpt)) {
-		if (!parser.isSet(processArgsOpt)) {
-			logger.sendLog("run: Missing process arguments");
-			throw(exception);
-		}
+	if (parser.isSet(runProcessOpt)) {
 		arguments["run_process"] = parser.value(runProcessOpt);
-		arguments["process_args"] = parser.value(processArgsOpt);
 		res[aw::commandLine::RunProcess] = arguments;
 	}
 	else if (parser.isSet(toBIDSOpt)) {

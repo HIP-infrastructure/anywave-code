@@ -32,34 +32,34 @@
 
 void AwCommandLineManager::convertFile(AwArguments& arguments)
 {
-	AwCommandLogger logger("convertFile", "cl_convert");
-	auto inputFile = arguments["input_file"].toString();
-	
-	if (!QFile::exists(inputFile)) {
-		logger.sendLog(QString("file %1 does not exist.").arg(inputFile));
-		return;
-	}
+	//AwCommandLogger logger("convertFile", "cl_convert");
+	//auto inputFile = arguments["input_file"].toString();
+	//
+	//if (!QFile::exists(inputFile)) {
+	//	logger.sendLog(QString("file %1 does not exist.").arg(inputFile));
+	//	return;
+	//}
 
-	AwBaseProcess *process;
-	try {
-		process = AwCommandLineManager::createAndInitNewProcess("File Exporter", arguments, inputFile);
-	}
-	catch (const AwException& e) {
-		logger.sendLog(e.errorString());
-		return;
-	}
+	//AwBaseProcess *process;
+	//try {
+	//	process = AwCommandLineManager::createAndInitNewProcess("File Exporter", arguments, inputFile);
+	//}
+	//catch (const AwException& e) {
+	//	logger.sendLog(e.errorString());
+	//	return;
+	//}
 
-	logger.sendLog(QString("converting file %1...").arg(inputFile));
-	bool isMarkerFile = arguments.contains("marker_file");
-	// if skipedMarker options is set, look for marker file
-	if (arguments.contains("skip_marker") && !isMarkerFile) {
-		// no marker file associated to the data file => remove the skip markers options
-		logger.sendLog(QString("skip_marker was specified but no marker file exist. Continue ignoring skip_marker option..."));
-		arguments.remove("skip_marker");
-	}
-	process->pdi.input.setArguments(arguments);
-	process->runFromCommandLine();
-	logger.sendLog(QString("Done."));
-	delete process->pdi.input.reader();
-	delete process;
+	//logger.sendLog(QString("converting file %1...").arg(inputFile));
+	//bool isMarkerFile = arguments.contains("marker_file");
+	//// if skipedMarker options is set, look for marker file
+	//if (arguments.contains("skip_marker") && !isMarkerFile) {
+	//	// no marker file associated to the data file => remove the skip markers options
+	//	logger.sendLog(QString("skip_marker was specified but no marker file exist. Continue ignoring skip_marker option..."));
+	//	arguments.remove("skip_marker");
+	//}
+	//process->pdi.input.setArguments(arguments);
+	//process->runFromCommandLine();
+	//logger.sendLog(QString("Done."));
+	//delete process->pdi.input.reader();
+	//delete process;
 }

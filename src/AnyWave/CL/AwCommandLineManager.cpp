@@ -33,6 +33,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <AwUtilities.h>
+
 #include "Prefs/AwSettings.h"
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
@@ -54,11 +55,34 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 	}
 }
 
-AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& pluginName, AwArguments& args, const QString& inputFile)
+AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 {
-	auto pm = AwPluginManager::getInstance();
-	auto plugin = pm->getProcessPluginByName(pluginName);
 	const QString origin = "AwCommandLineManager::createNewProcess()";
+	// get plugin name from json argumetns
+	if (!args.contains("run_process")) {
+		throw AwException("missing json argument.", origin);
+		return Q_NULLPTR;
+	}
+	// check for json file
+	QJsonDocument doc;
+	QJsonObject obj;
+	QString json = args["run_process"].toString();
+	// get json file or parse the string
+	if (QFile::exists(json)) {
+		doc = AwUtilities::readJsonFile(json);
+		if (doc.isEmpty() || doc.isNull()) {
+			throw AwException("json file is invalid.", origin);
+			return Q_NULLPTR;
+		}
+	}
+	else 
+		doc = QJsonDocument::fromJson(json.toUtf8());
+	obj = doc.object();
+
+	auto pm = AwPluginManager::getInstance();
+	QString pluginName = obj["plugin"].toString();
+	auto plugin = pm->getProcessPluginByName(pluginName);
+
 	if (plugin == Q_NULLPTR) {
 		throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
 		return Q_NULLPTR;
@@ -66,6 +90,13 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 
 	AwFileIO *reader = Q_NULLPTR;
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
+
+	QString inputFile;
+	if (args.contains("input_file"))
+		inputFile = args["input_file"].toString();
+	if (obj.contains("input_file"))
+		inputFile = obj["input_file"].toString();
+
 
 	if (!doNotRequiresData && inputFile.isEmpty()) {
 		throw AwException(QString("input_file must be specified."), origin);
@@ -92,40 +123,24 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 		process->pdi.input.dataPath = inputFile;
 		process->pdi.input.setReader(reader);
 	}
-	// get arguments (could be a json file path or a json string)
-	QString p_args = args["process_args"].toString();
-	if (!p_args.isEmpty()) {
-		// check for json file
-		QJsonDocument doc;
-		if (QFile::exists(p_args)) {
-			doc = AwUtilities::readJsonFile(p_args);
-			if (doc.isEmpty() || doc.isNull()) {
-				throw AwException("json file is invalid.", origin);
-				return Q_NULLPTR;
-			}
-		}
-		else {
-			doc = QJsonDocument::fromJson(p_args.toUtf8());
-		}
-		args.unite(doc.object().toVariantHash());
-		// add the json string also for MATLAB/Python plugin
-		args["json_args"] = QString(doc.toJson());
-
-		// SPECIAL CASE for marker_file or montage_file.
-		// if those arguments are specified within the json file, handle them as relative to the data file folder, not as an absolute file path.
-		if (args.contains("marker_file")) {
-			QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(args["marker_file"].toString());
-			args["marker_file"] = fullPath;
-		}
-		if (args.contains("montage_file")) {
-			QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(args["montage_file"].toString());
-			args["montage_file"] = fullPath;
-		}
+	// check for special case, marker_file, montage_file set in json must be relative to data file
+	if (obj.contains("marker_file")) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(obj["marker_file"].toString());
+		obj["marker_file"] = fullPath;
 	}
+	if (obj.contains("montage_file")) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(obj["montage_file"].toString());
+		obj["montage_file"] = fullPath;
+	}
+
+	// Unite arguments and json !
+	args.unite(doc.object().toVariantHash());
+
+	// add the json string also for MATLAB/Python plugin
+	args["json_args"] = QString(doc.toJson());
 
 	if (!inputFile.isEmpty()) {
 		// detect optional anywave files (.mrk, .mtg, .bad)
-		
 		QString tmp = QString("%1.mrk").arg(inputFile);
 		// detect only if marker_file option is not specified by the user
 		if (!args.contains("marker_file")) 
@@ -164,10 +179,27 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(const QString& plug
 			throw e;
 			return Q_NULLPTR;
 		}
-		//process->pdi.input.dataFolder = AwSettings::getInstance()->fileInfo()->dirPath();
-		//process->pdi.input.fileDuration = reader->infos.totalDuration();
-		//process->pdi.input.badLabels = AwMontageManager::instance()->badLabels();
-		//process->pdi.input.dataPath = inputFile;
+
+		// if no markers set as input => add the GLOBAL ONE
+		if (process->pdi.input.markers().isEmpty()) 
+			process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.fileDuration));
+		
+		// handle skipping markers and/or use specific markers
+		QStringList skippedLabels, usedLabels;
+		if (args.contains("skip_markers"))
+			skippedLabels = args["skip_markers"].toStringList();
+		if (args.contains("use_markers"))
+			usedLabels = args["use_markers"].toStringList();
+
+		bool skipMarkers = !skippedLabels.isEmpty();
+		bool useMarkers = !usedLabels.isEmpty();
+		if (skipMarkers || useMarkers) {
+			auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels, process->pdi.input.fileDuration);
+			if (!markers.isEmpty()) {
+				process->pdi.input.setNewMarkers(markers);
+			}
+		}
+
 		process->pdi.input.setReader(reader);
 		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.

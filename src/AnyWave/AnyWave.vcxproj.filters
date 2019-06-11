@@ -1285,13 +1285,7 @@
     <ClCompile Include="CL\CommandLineParser.cpp">
       <Filter>CL</Filter>
     </ClCompile>
-    <ClCompile Include="CL\AwComputeICA.cpp">
-      <Filter>CL</Filter>
-    </ClCompile>
     <ClCompile Include="CL\AwCommandLineManager.cpp">
-      <Filter>CL</Filter>
-    </ClCompile>
-    <ClCompile Include="CL\AwConvertFile.cpp">
       <Filter>CL</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwCommandLogger.cpp">

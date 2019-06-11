@@ -32,25 +32,13 @@
 void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
 	AwCommandLogger logger("runProcess", "cl_run");
-	auto inputFile = arguments["input_file"].toString();
 
-	if (!QFile::exists(inputFile)) {
-		logger.sendLog(QString("file %1 does not exist.").arg(inputFile));
-		return;
-	}
 	AwBaseProcess *process;
 	try {
-		process = AwCommandLineManager::createAndInitNewProcess(arguments["run_process"].toString(), arguments, inputFile);
+		process = AwCommandLineManager::createAndInitNewProcess(arguments);
 	}
 	catch (const AwException& e) {
 		logger.sendLog(e.errorString());
-		return;
-	}
-
-	// get arguments (could be a json file path or a json string)
-	QString args = arguments["process_args"].toString();
-	if (args.isEmpty()) {
-		logger.sendLog("arguments is empty.");
 		return;
 	}
 

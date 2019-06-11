@@ -29,8 +29,6 @@
     <ClCompile Include="Carto\AwMappingWidget.cpp" />
     <ClCompile Include="CL\AwCommandLineManager.cpp" />
     <ClCompile Include="CL\AwCommandLogger.cpp" />
-    <ClCompile Include="CL\AwComputeICA.cpp" />
-    <ClCompile Include="CL\AwConvertFile.cpp" />
     <ClCompile Include="CL\AwRunProcess.cpp" />
     <ClCompile Include="CL\CommandLineParser.cpp" />
     <ClCompile Include="Data\AwDataChunk.cpp" />

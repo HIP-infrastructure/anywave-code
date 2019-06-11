@@ -231,26 +231,6 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 	return res;
  }
 
-///
-/// boundingInterval()
-/// Compute a bounding interval around the markers set as input.
-/// This is to avoid filtering effects on small data.
-
-void AwMarker::boundingInterval(const AwMarkerList& markers, float *start, float *end)
-{
-	const float pad_duration = 5.; // 
-
-	auto s = markers.first()->start();
-	auto e = markers.last()->end();
-
-	s -= pad_duration;
-	e += pad_duration;
-	if (s < 0)
-		s = 0.;
-	*start = s;
-	*end = e;
-}
-
 
 ///
 /// intersect()
@@ -569,9 +549,9 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 					bool endAfter = u->end() > m->end();
 					bool included = u->start() >= m->start() && u->end() <= m->end();
 
-					if (startBefore && endWithin) { // crop marker from begining
+					if (startBefore && endWithin) { 
 						auto nm = new AwMarker(u);
-						nm->reshape(m->end(), u->end());
+						nm->reshape(u->start(), m->start());
 						usedMarkers.removeAll(u);
 						delete u;
 						usedMarkers << nm;

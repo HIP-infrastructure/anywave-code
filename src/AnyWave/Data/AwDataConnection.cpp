@@ -279,87 +279,35 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 		setEndOfData();
 		return;
 	}
-	// detect filters
-	bool hasFilters = false;
-	for (auto c : *channelsToLoad) {
-		if (c->lowFilter() > 0. || c->highFilter() > 0. || c->notch() > 0.) {
-			hasFilters = true;
-			break;
-		}
-	}
-	if (hasFilters) {
-		float start, end, duration, offset;
-		AwMarker::boundingInterval(*markers, &start, &end);
-
-		if (end > m_reader->infos.totalDuration())
-			duration = -1;
-		else
-			duration = end - start;
-		
-
+	QList<AwChannelList> chunks;
+	qint64 totalSamples = 0;
+	for (auto m : *markers) {
+		if (m->duration() <= 0.)
+			continue;
 		auto channels = AwChannel::duplicateChannels(*channelsToLoad);
-		float totalDuration = 0;
-		for (auto m : *markers)
-			totalDuration += m->duration();
-	
-		loadData(&channels, start, duration, rawData, true);
-		int index = 0;
-		
-		QVector<qint64> samples(markers->size() * 2);
-		for (auto c : *channelsToLoad) {
-			auto sourceChannel = channels.value(index++);
-			qint64 totalSamples = 0;
-			qint64 offsetSamples = (qint64)floor(start * c->samplingRate());
-			int i = 0;
-			for (auto m : *markers) {
-				totalSamples += (qint64)floor(m->duration() * c->samplingRate());
-				samples[i] = (qint64)floor(m->start() * c->samplingRate()) + offsetSamples;
-				samples[i + 1] = (qint64)floor(m->duration() * c->samplingRate());
-				i += 2;
-			}
-
-			float *data = c->newData(totalSamples);
-			for (int j = 0; j < samples.size(); j += 2) {
-				auto start = samples.value(j);
-				auto count = samples.value(j + 1);
-
-				for (qint64 s = start; s < start + count; s++)
-					*data++ = sourceChannel->data()[s];
-			}
-			sourceChannel->clearData();
-		}
-		AW_DESTROY_LIST(channels)
+		chunks.append(channels);
+		// load chunk without waking up the client...
+		loadData(&channels, m->start(), m->duration(), rawData, true);
+		totalSamples += channels.first()->dataSize();
 	}
-	else {
 
-		QList<AwChannelList> chunks;
-		qint64 totalSamples = 0;
-		for (auto m : *markers) {
-			if (m->duration() <= 0.)
-				continue;
-			auto channels = AwChannel::duplicateChannels(*channelsToLoad);
-			chunks.append(channels);
-			// load chunk without waking up the client...
-			loadData(&channels, m, rawData, true);
-			totalSamples += channels.first()->dataSize();
+	// fill channelsToLoad with all merged data in all the chunks
+	for (auto i = 0; i < channelsToLoad->size(); i++) {
+		auto destChannel = channelsToLoad->at(i);
+		float *data = destChannel->newData(totalSamples);
+		for (auto chunk : chunks) {
+			auto channel = chunk.at(i);
+			for (auto j = 0; j < channel->dataSize(); j++)
+				*data++ = channel->data()[j];
+			channel->clearData();
 		}
-
-		// fill channelsToLoad with all merged data in all the chunks
-		for (auto i = 0; i < channelsToLoad->size(); i++) {
-			auto destChannel = channelsToLoad->at(i);
-			float *data = destChannel->newData(totalSamples);
-			for (auto chunk : chunks) {
-				auto channel = chunk.at(i);
-				for (auto j = 0; j < channel->dataSize(); j++)
-					*data++ = channel->data()[j];
-				channel->clearData();
-			}
-		}
-		//cleaning up
-		for (auto chunk : chunks)
-			AW_DESTROY_LIST(chunk)
 	}
-	setDataAvailable();
+	//cleaning up
+	for (auto chunk : chunks)
+		AW_DESTROY_LIST(chunk)
+
+	if (!doNotWakeupClient)
+		setDataAvailable();
 }
 
 
@@ -389,25 +337,25 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, qu
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker, bool rawData, bool doNotWakeUpClient)
 
 {
-#ifndef NDEBUG
-	if (channelsToLoad->isEmpty())
-		qDebug() << Q_FUNC_INFO << "Channel list is empty() ! " << endl;
-	qDebug() << Q_FUNC_INFO << endl;
-#endif
-	if (channelsToLoad->isEmpty())	{
-		setEndOfData();
-		return;
-	}
-
-	float start = marker->start();
-	// check start position
-	if (start >= m_reader->infos.totalDuration())	{
-#ifndef NDEBUG
-	qDebug() << Q_FUNC_INFO << " in thread " << thread() << " start position beyong total duration." << endl;
-#endif
-		setEndOfData();
-		return;
-	}
+//#ifndef NDEBUG
+//	if (channelsToLoad->isEmpty())
+//		qDebug() << Q_FUNC_INFO << "Channel list is empty() ! " << endl;
+//	qDebug() << Q_FUNC_INFO << endl;
+//#endif
+//	if (channelsToLoad->isEmpty())	{
+//		setEndOfData();
+//		return;
+//	}
+//
+//	float start = marker->start();
+//	// check start position
+//	if (start >= m_reader->infos.totalDuration())	{
+//#ifndef NDEBUG
+//	qDebug() << Q_FUNC_INFO << " in thread " << thread() << " start position beyong total duration." << endl;
+//#endif
+//		setEndOfData();
+//		return;
+//	}
 
 //	loadData(channelsToLoad, marker->start(), marker->duration(), rawData, doNotWakeUpClient);
 	AwMarkerList markers = { marker };

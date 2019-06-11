@@ -32,13 +32,13 @@ class AwBaseProcess;
 class AwCommandLineManager
 {
 public:
-	static void computeICA(AwArguments& arguments);
-	static void convertFile(AwArguments& arguments);
+	//static void computeICA(AwArguments& arguments);
+	//static void convertFile(AwArguments& arguments);
 	static void runProcess(AwArguments& arguments);
 	/** Instantiante a process given the plugin name. Also initialize the process PDI with default settings. Throw an exception if failed. **/
 	/** if an inputFile is specified, the reader is instantiated and the file is open. The optional filter settings are also applied. **/
 	/** Arguments cand be modified to add extra parameters based on input file argument for example. **/
-	static AwBaseProcess *createAndInitNewProcess(const QString& pluginName, AwArguments& args, const QString& inputFile = QString());
+	static AwBaseProcess *createAndInitNewProcess(AwArguments& args);
 	/** apply filters that might be defined in arguments to channels **/
 	static void applyFilters(const AwChannelList& channels, const AwArguments& args);
 };

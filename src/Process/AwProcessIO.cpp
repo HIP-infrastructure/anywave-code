@@ -50,6 +50,8 @@ void AwProcessIO::setNewChannels(const AwChannelList& channels, bool duplicate)
 {
 	while (!m_channels.isEmpty())
 		delete m_channels.takeFirst();
+	if (channels.isEmpty())
+		return;
 	m_channels = duplicate ? AwChannel::duplicateChannels(channels) : channels;
 }
 
@@ -57,6 +59,8 @@ void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
 {
 	while (!m_markers.isEmpty())
 		delete m_markers.takeFirst();
+	if (markers.isEmpty())
+		return;
 	m_markers = duplicate ? AwMarker::duplicate(markers) : markers;
 }
 

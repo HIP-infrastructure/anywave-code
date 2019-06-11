@@ -1,6 +1,7 @@
 #include <matlab/AwMATLABStruct.h>
 #include "matio.h"
 #include <AwException.h>
+#include <QFile>
 
 AwMATLABStruct::AwMATLABStruct(matvar_t *var, bool isChild)
 {
@@ -48,14 +49,88 @@ bool AwMATLABStruct::isVariableEmpty(const QString& field, size_t index)
 	return true;
 }
 
+int AwMATLABStruct::saveMatrixToFile(const QString& fieldName, const QString& filePath, size_t index)
+{
+	auto field_matvar = Mat_VarGetStructFieldByName(m_var, fieldName.toStdString().c_str(), index);
+	if (field_matvar == NULL) {
+		return -1;
+	}
+	if (field_matvar->class_type != MAT_C_DOUBLE && field_matvar->class_type !=  MAT_C_SINGLE) {
+		return -1;
+	}
+	auto nrows = field_matvar->dims[0];
+	auto ncols = field_matvar->dims[1];
+	if (nrows < 1 || ncols < 1)
+		return -1;
+
+	QFile file(filePath);
+	if (!file.open(QIODevice::WriteOnly))
+		return -1;
+	if (field_matvar->class_type == MAT_C_DOUBLE) {
+		double *source = (double *)field_matvar->data;
+		for (auto r = 0; r < nrows; r++) {
+			for (auto c = 0; c < ncols; c++) {
+				file.write((char *)&source[c * nrows + r], sizeof(double));
+			}
+		}
+	}
+	else {
+		float *source = (float *)field_matvar->data;
+		for (auto r = 0; r < nrows; r++) {
+			for (auto c = 0; c < ncols; c++) {
+				file.write((char *)&source[c * nrows + r], sizeof(float));
+			}
+		}
+	}
+	file.close();
+	return 0;
+}
+
+int AwMATLABStruct::readMatrix(const QString& fieldName, mat& matrix, size_t index)
+{
+	// get the field variable
+	auto field_matvar = Mat_VarGetStructFieldByName(m_var, fieldName.toStdString().c_str(), index);
+	if (field_matvar == NULL) {
+		return -1;
+	}
+	if (field_matvar->class_type != MAT_C_DOUBLE) {
+		return -1;
+	}
+	auto nrows = field_matvar->dims[0];
+	auto ncols = field_matvar->dims[1];
+	if (nrows < 1 || ncols < 1)
+		return -1;
+	matrix = mat((double *)field_matvar->data, nrows, ncols);
+	return 0;
+}
+
+int  AwMATLABStruct::readSingleMatrix(const QString& fieldName, fmat& matrix, size_t index)
+{
+	// get the field variable
+	auto field_matvar = Mat_VarGetStructFieldByName(m_var, fieldName.toStdString().c_str(), index);
+	if (field_matvar == NULL) {
+		return -1;
+	}
+	if (field_matvar->class_type != MAT_C_SINGLE) {
+		return -1;
+	}
+	auto nrows = field_matvar->dims[0];
+	auto ncols = field_matvar->dims[1];
+	if (nrows < 1 || ncols < 1)
+		return -1;
+
+	matrix = fmat((float *)field_matvar->data, nrows, ncols);
+	return 0;
+}
+
 int AwMATLABStruct::readString(const QString& fieldName, QString& string, size_t index)
 {
 	QString origin = "AwMATLABStruct::readString";
 	// get the field variable
 	auto field_matvar = Mat_VarGetStructFieldByName(m_var, fieldName.toStdString().c_str(), index);
 	if (field_matvar == NULL) {
-		m_error = QString("Failed to get the field variable");
-		throw AwException(m_error, origin);
+	//	m_error = QString("Failed to get the field variable");
+	//	throw AwException(m_error, origin);
 		return -1;
 	}
 	if (field_matvar->class_type != MAT_C_CHAR) {
@@ -101,7 +176,6 @@ int AwMATLABStruct::readScalar(const QString& fieldName, double *value, size_t i
 /// If the fiedname does not exist or is empty, returns NULL.
 AwMATLABStruct *AwMATLABStruct::getChildStruct(const QString& fieldName, size_t index)
 {
-//	QString origin = QString("AwMATLABStruct::getChildStruct");
 	// get the field variable
 	auto field_matvar = Mat_VarGetStructFieldByName(m_var, fieldName.toStdString().c_str(), index);
 	// update : if field_matvar is null that means the struct is empty => do not raise an exception
@@ -111,16 +185,5 @@ AwMATLABStruct *AwMATLABStruct::getChildStruct(const QString& fieldName, size_t 
 	if (field_matvar->class_type != MAT_C_STRUCT)
 		return NULL;
 
-
-	//if (field_matvar == NULL) {
-	//	m_error = QString("Failed to get the field variable");
-	//	throw AwException(m_error, origin);
-	//	return NULL;
-	//}
-	//if (field_matvar->class_type != MAT_C_STRUCT) {
-	//	m_error = QString("Variable is not a struct.");
-	//	throw AwException(m_error, origin);
-	//	return NULL;
-	//}
 	return new AwMATLABStruct(field_matvar, true);
 }

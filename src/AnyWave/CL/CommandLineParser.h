@@ -29,7 +29,7 @@
 #include "AwCommandLine.h"
 namespace aw {
 	namespace commandLine {
-		enum Commands { BIDS, ICA, ConvertFile, RunProcess };
+		enum Commands { BIDS, RunProcess };
 		QMap<int, AwArguments> doParsing(const QStringList& args);
 		int doCommandLineOperations(QMap<int, AwArguments>& operations);
 	}

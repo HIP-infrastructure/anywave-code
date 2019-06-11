@@ -41,6 +41,7 @@ public:
 	void runFromCommandLine() override;
 	bool showUi();
 private:
+	int initParameters();
 	void infomax(int m, int n, int nc);
 	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
 	int runica_matlab(int nc);
@@ -59,6 +60,7 @@ private:
 	bool m_isDownsamplingActive;
 	int m_algo;
 	QString m_fileName;
+	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate;
 	AwChannelList m_channels;
 	QStringList m_algoNames;

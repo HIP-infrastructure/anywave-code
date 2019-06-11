@@ -385,9 +385,6 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_AwGetValueDialog.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwGetValueDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="AwGetValueDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

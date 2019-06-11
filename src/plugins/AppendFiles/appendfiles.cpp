@@ -30,7 +30,7 @@
 AppendFilesPlugin::AppendFilesPlugin()
 {
 	type = AwProcessPlugin::Background;
-	name = "Append Files";
+	name = "APPEND_FILES";
 	description = tr("Append compatible files into one.");
 	category = "Process:File Operation:Append Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);

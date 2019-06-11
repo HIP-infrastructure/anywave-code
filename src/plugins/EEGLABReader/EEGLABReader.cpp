@@ -70,11 +70,15 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 			for (int i = 0; i < nChannels; i++) {
 				AwChannel channel;
 				double X = 0., Y = 0., Z = 0.;
-				QString label;
-				s_chanlocs->readString("labels", label, i);
-				channel.setName(label);
+				QString label, ref;
+				int status = s_chanlocs->readString("labels", label, i);
+				if (status != -1)
+					channel.setName(label);
+				else
+					channel.setName(QString("EEG%1").arg(i+1));
 				if (!s_chanlocs->isVariableEmpty("X", 0)) {
 					s_chanlocs->readScalar("X", &X, i);
+					
 				}
 				if (!s_chanlocs->isVariableEmpty("Y", 0)) {
 					s_chanlocs->readScalar("Y", &Y, i);
@@ -82,6 +86,12 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 				if (!s_chanlocs->isVariableEmpty("Z", 0)) {
 					s_chanlocs->readScalar("Z", &Z, i);
 				}
+				// new EEGLAB format, check for ref
+				if (!s_chanlocs->isVariableEmpty("ref", 0)) {
+					s_chanlocs->readString("ref", ref, i);
+					channel.setReferenceName(ref);
+				}
+				channel.setXYZ(X, Y, Z);
 				channel.setSamplingRate(m_sr);
 				infos.addChannel(&channel);
 			}
@@ -90,7 +100,7 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 			// build a list of EEG channels with a number
 			for (int i = 0; i < nChannels; i++) {
 				AwChannel channel;
-				channel.setName(QString("EEG%1").arg(i));
+				channel.setName(QString("EEG%1").arg(i+1));
 				channel.setSamplingRate(m_sr);
 				channel.setGain(AwChannel::defaultAmplitudeForType(channel.type()));
 				infos.addChannel(&channel);
@@ -151,14 +161,24 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 			delete s;
 	}
 
+
 	// data file has same name but .dat extension
 	m_dataFile = path;
 	m_dataFile = m_dataFile.replace(QString(".set"), QString(".fdt"));
 
-	m_binaryFile.setFileName(m_dataFile);
-	if (!m_binaryFile.open(QIODevice::ReadOnly))
-		return AwFileIO::BadHeader;
-
+	// check for .fdt file presence
+	if (QFile::exists(m_dataFile)) {
+		m_binaryFile.setFileName(m_dataFile);
+		if (!m_binaryFile.open(QIODevice::ReadOnly))
+			return AwFileIO::BadHeader;
+	}
+	else {  // check for data variable in .set
+		int status = s_EEG->saveMatrixToFile("data", m_dataFile, 0);
+		if (status == -1)
+			return  AwFileIO::WrongFormat;
+		m_binaryFile.setFileName(m_dataFile);
+		m_binaryFile.open(QIODevice::ReadOnly);
+	}
 	return AwFileIO::openFile(path);
 }
 

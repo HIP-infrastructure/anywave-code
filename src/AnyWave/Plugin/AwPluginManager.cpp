@@ -230,7 +230,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 if (line.contains("name")) {
 				 QStringList res = line.split("=");
 				 if (res.size() == 2)
-					 name = res.at(1).trimmed();
+					 name = res.at(1).trimmed().toUpper();
 			 }
 			 else if (line.contains("description")) {
 				 QStringList res = line.split("=");
@@ -294,14 +294,6 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
 			 loadProcessPlugin(plugin);
-			 //AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-			 //if (p) {
-				// m_pluginProcesses.removeAll(p);
-				// m_processFactory.removePlugin(name);
-				// delete p;
-			 //}
-			 //m_processFactory.addPlugin(name, plugin);
-			 //m_pluginProcesses += plugin;
 		 }
 		 if (isPythonScript || isPythonCompiled) {
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
@@ -319,13 +311,6 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 setFlagsForScriptPlugin(plugin, flags);
 			 loadProcessPlugin(plugin);
 			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-			 //if (p) {
-				// m_pluginProcesses.removeAll(p);
-				// m_processFactory.removePlugin(name);
-				// delete p;
-			 //}
-			 //m_processFactory.addPlugin(name, plugin);
-			 //m_pluginProcesses += plugin;
 		 }
 	 }
 }
@@ -449,6 +434,8 @@ void AwPluginManager::loadUserPlugins()
 
 			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
 			if (iprocess) {
+				// make the name uppercase
+				iprocess->name = iprocess->name.toUpper();
 				AwProcessPlugin *p = m_processFactory.getPluginByName(iprocess->name);
 				// is there a plugin with the same name loaded in Application's plugins dir?
 				if (p) { // yes, so remove it and replace it with the one loaded in user's plugins dir
@@ -570,6 +557,8 @@ void AwPluginManager::loadPlugins()
 			}
 			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
 			if (iprocess) {
+				// make the name uppercase
+				iprocess->name = iprocess->name.toUpper();
 				loadProcessPlugin(iprocess);
 				continue;
 			}
