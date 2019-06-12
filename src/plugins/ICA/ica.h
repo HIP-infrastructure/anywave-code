@@ -28,6 +28,7 @@
 #include <AwProcessInterface.h>
 #include "ica_global.h"
 #include <armadillo>
+
 using namespace arma;
 
 class ICA_EXPORT ICA : public AwProcess
@@ -47,10 +48,10 @@ private:
 	int runica_matlab(int nc);
 	int run_acsobiro(int nc);
 	void saveToFile();
-	/* Prepare matlab input file for MATLAB ica code. */
-	void createInputFile();
-	/* Launch matlab plugin to compute ICA. */
-	void launchMatlabPlugin();
+	///* Prepare matlab input file for MATLAB ica code. */
+	//void createInputFile();
+	///* Launch matlab plugin to compute ICA. */
+	//void launchMatlabPlugin();
 
 	int m_modality;
 	QString m_ignoredMarkerLabel;
@@ -77,7 +78,7 @@ class ICA_EXPORT ICAPlugin : public AwProcessPlugin
     Q_INTERFACES(AwProcessPlugin)
 public:
     ICAPlugin();
-    ICA *newInstance() { return new ICA; }
+	AW_INSTANTIATE_PROCESS(ICA)
 };
 
 

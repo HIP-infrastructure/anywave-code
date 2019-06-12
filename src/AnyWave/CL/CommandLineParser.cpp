@@ -59,9 +59,9 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(filterLPO);
 	parser.addOption(filterNotchO);
 
-	// Convert File options
-	QCommandLineOption ConvertOpt("convert", "convert a file to another format.");
-	parser.addOption(ConvertOpt);
+	//// Convert File options
+	//QCommandLineOption ConvertOpt("convert", "convert a file to another format.");
+	//parser.addOption(ConvertOpt);
 
 	// run process options
 	QCommandLineOption runProcessOpt("run", "launch a process using json file or json string.", "runArgs", QString());

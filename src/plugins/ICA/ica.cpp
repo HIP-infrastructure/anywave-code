@@ -123,6 +123,10 @@ int ICA::initParameters()
 	m_modality = AwChannel::stringToType(args["modality"].toString());
 	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 	m_channels = AwChannel::removeDoublons(m_channels);
+	if (args.contains("skip_bad")) {
+		if (args["skip_bas"].toBool())
+			pdi.input.badLabels.clear();
+	}
 	m_samplingRate = m_channels.first()->samplingRate();
 	if (args.contains("downsampling"))
 		m_isDownsamplingActive = args["downsampling"].toBool();
@@ -154,6 +158,17 @@ int ICA::initParameters()
 	AwFilterSettings filterSettings;
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	filterSettings.apply(m_channels);
+
+	// check if we have to use specific markers or skipped some
+	bool use = args.contains("use_markers");
+	bool skip = args.contains("skip_markers");
+	// in the case of one option is set, the AwRunProcess method has already setup the input markers for us if we runFromCommandLine
+	// If we run in GUI mode, the showUi also has already setup the input.
+	// But if we run in command line mode and no use_markers or skip_markers is specified we must set the input markers to what ICA expects 
+	if (!use && !skip) {
+		pdi.input.clearMarkers();
+		pdi.input.addMarker(new AwMarker("global", 0., pdi.input.fileDuration));
+	}
 
 	// if the skip markers were selected then input markers already represent the data to load. 
 	// if not than one marker should marked the entire data in pdi.input.markers.;
