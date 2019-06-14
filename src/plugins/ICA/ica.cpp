@@ -187,16 +187,18 @@ int ICA::initParameters()
 				decimate++;
 			decimate--;
 		}
-		sendMessage(QString("Decimating data by a a factor of %1...").arg(decimate));
-		try {
-			AwFiltering::decimate(m_channels, decimate);
+		if (decimate > 1) {
+			sendMessage(QString("Decimating data by a a factor of %1...").arg(decimate));
+			try {
+				AwFiltering::decimate(m_channels, decimate);
+			}
+			catch (const AwException& e)
+			{
+				sendMessage("Error during decimation of data. Aborted.");
+				return -1;
+			}
+			sendMessage("Done.");
 		}
-		catch (const AwException& e)
-		{
-			sendMessage("Error during decimation of data. Aborted.");
-			return -1;
-		}
-		sendMessage("Done.");
 	}
 	else { // just filter the data
 		sendMessage("Filtering...");
@@ -214,7 +216,7 @@ int ICA::initParameters()
 
 	if (sqrt(nSamples / 30.) < m_nComp) {
 		sendMessage(QString("Number of samples %1 for the number of components "
-			"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
+			"requested %2 may be insufficient. Aborted.").arg(nSamples).arg(m_nComp));
 		return -1;
 	}
 
@@ -349,7 +351,8 @@ void ICA::run()
 	//int n = nSamples;
 	//int nc = m_nComp;
 
-	initParameters();
+	if (initParameters() == -1)
+		return;
 
 	infomax(m, n, m_nComp);
 	if (!isAborted()) {

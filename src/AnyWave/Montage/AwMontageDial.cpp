@@ -97,7 +97,6 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	AwChannelListModel *model = new AwChannelListModel(mm->channels(), this);
 	connect(model, &AwChannelListModel::channelsDropped, this, &AwMontageDial::addDroppedChannels);
 	m_ui.tvDisplay->setModel(model);
-//	m_ui.tvDisplay->setItemDelegate(new AwChannelListDelegate(m_labelTypes, this));
 	m_ui.tvDisplay->setItemDelegate(new AwChannelListDelegate(m_labelsByTypes, this));
 
 	m_ui.tvChannelsAsRecorded->setModel(sortModelAsRecorded);
@@ -405,9 +404,14 @@ void AwMontageDial::makeSEEGBipolar()
 		return;
 	}
 
+	// make a montage with ONLY SEEG as bipolar, remove all other channels.
+	auto dup = AwChannel::duplicateChannels(seegChannels);
+	// clear montage
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->clearMontage();
+
 	QRegularExpression exp("([A-Z]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
 	QRegularExpressionMatch match;
-	for (auto c : seegChannels) {
+	for (auto c : dup) {
 		match = exp.match(c->name());
 		if (match.hasMatch()) {
 			auto elec = match.captured(1);
@@ -424,7 +428,16 @@ void AwMontageDial::makeSEEGBipolar()
 				c->setReferenceName(ref);
 		}
 	}
-	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
+
+	// check for remaining monopolar channels
+	foreach (AwChannel *c,  dup) {
+		if (!c->hasReferences()) {
+			dup.removeAll(c);
+			delete c;
+		}
+	}
+
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
 }
 
 void AwMontageDial::unsetBadChannel(const QString& label)
@@ -501,7 +514,8 @@ void AwMontageDial::resetToAsRecorded()
 			return;
 	}
 	// Reset the montage, whit no virtual channels
-	channels.clear();
+	//channels.clear();
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->clearMontage();
 	for (auto c : m_asRecorded.values())
 		if (!c->isVirtual() && !c->isBad())
 			channels << new AwChannel(c);

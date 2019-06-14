@@ -60,7 +60,7 @@
 #include "Source/AwSourceManager.h"
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
-#include "Script/AwScriptManager.h"
+//#include "Script/AwScriptManager.h"
 #include <AwFileIO.h>
 #include <AwMatlabInterface.h>
 #include <AwMEGSensorManager.h>
@@ -70,7 +70,6 @@
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
 #include "AwUpdater.h"
-#include "Script/AwScriptManager.h"
 #include <widget/AwTopoBuilder.h>
 //#define AW_EPOCHING
 
@@ -192,18 +191,18 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_dockWidgets["add_markers"]->hide();
 	}
 
-	// Scripts
-	// Script manager
-	AwScriptManager *scriptManager = AwScriptManager::instance();
-	scriptManager->setParent(this);
+	//// Scripts
+	//// Script manager
+	//AwScriptManager *scriptManager = AwScriptManager::instance();
+	//scriptManager->setParent(this);
 
-	auto dockScripts = new QDockWidget(tr("Scripts"), this);
-	m_dockWidgets["scripts"] = dockScripts;
-	addDockWidget(Qt::LeftDockWidgetArea, dockScripts);
-	dockScripts->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	dockScripts->setWidget(AwScriptManager::instance()->scriptsWidget());
-	dockScripts->hide();
-	AwScriptManager::instance()->setDock(dockScripts);
+	//auto dockScripts = new QDockWidget(tr("Scripts"), this);
+	//m_dockWidgets["scripts"] = dockScripts;
+	//addDockWidget(Qt::LeftDockWidgetArea, dockScripts);
+	//dockScripts->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	//dockScripts->setWidget(AwScriptManager::instance()->scriptsWidget());
+	//dockScripts->hide();
+	//AwScriptManager::instance()->setDock(dockScripts);
 	// Processes
 	auto dockProcess = new QDockWidget(tr("Processes"), this);
 	m_dockWidgets["processes"] = dockProcess;
@@ -244,9 +243,9 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	m_layoutManager = AwLayoutManager::instance();
 
 	// Connections !
-	// AnyWave and Script Manager
-	connect(actionExecuteScript, SIGNAL(triggered()), scriptManager, SLOT(runScript()));
-	// Display and Process Manager
+	//// AnyWave and Script Manager
+	//connect(actionExecuteScript, SIGNAL(triggered()), scriptManager, SLOT(runScript()));
+	//// Display and Process Manager
 	   	  
 	if (m_display) {
 		connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList *)), m_display, SLOT(removeVirtualChannels(AwChannelList *)));
@@ -342,18 +341,18 @@ void AnyWave::closeEvent(QCloseEvent *e)
 {
 	// check if a script is running
 
-	if (AwScriptManager::instanceExists()) {
-		AwScriptManager *sm = AwScriptManager::instance();
-		if (sm->isAScriptRunning()) {
-			if (AwMessageBox::question(this, "Script", "At least one script is running. Kill all scripts and close?") == QMessageBox::Yes) {
-				sm->quitAllScripts();
-			}
-			else {
-				e->ignore();
-				return;
-			}
-		}
-	}
+	//if (AwScriptManager::instanceExists()) {
+	//	AwScriptManager *sm = AwScriptManager::instance();
+	//	if (sm->isAScriptRunning()) {
+	//		if (AwMessageBox::question(this, "Script", "At least one script is running. Kill all scripts and close?") == QMessageBox::Yes) {
+	//			sm->quitAllScripts();
+	//		}
+	//		else {
+	//			e->ignore();
+	//			return;
+	//		}
+	//	}
+	//}
 	quit();
 	QMainWindow::closeEvent(e);
 }
@@ -446,7 +445,7 @@ void AnyWave::quit()
 		AwEpochManager::destroy();
 	}
 #endif
-	AwScriptManager::destroy();
+//	AwScriptManager::destroy();
 	AwBIDSManager::destroy();
 }
 

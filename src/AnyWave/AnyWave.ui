@@ -86,7 +86,6 @@
     <addaction name="actionLoadBeamFormer"/>
     <addaction name="actionLoadICA"/>
     <addaction name="separator"/>
-    <addaction name="actionExecuteScript"/>
     <addaction name="separator"/>
     <addaction name="actionSave_display_to_PDF"/>
     <addaction name="actionExport_to_SVG"/>

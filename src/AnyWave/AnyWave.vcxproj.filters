@@ -68,9 +68,6 @@
     <Filter Include="Process">
       <UniqueIdentifier>{84a391ca-48c0-41d1-90d8-5b0cfffe08a8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Script">
-      <UniqueIdentifier>{1e27fd49-c8e2-4eee-a5cf-9328666c1595}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Widgets">
       <UniqueIdentifier>{042359da-f1ee-4221-b0ff-e1d7e520dd29}</UniqueIdentifier>
     </Filter>
@@ -109,6 +106,9 @@
     </Filter>
     <Filter Include="CL">
       <UniqueIdentifier>{c3e57cdc-9212-4554-86e5-41e441da7831}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Signal">
+      <UniqueIdentifier>{cabb318c-61b6-4997-920d-200e0b613cd1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -523,17 +523,11 @@
     <ClCompile Include="GeneratedFiles\Release\moc_TPUi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Script\AwScript.cpp">
-      <Filter>Script</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwScript.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwScript.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Script\AwScriptLog.cpp">
-      <Filter>Script</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwScriptLog.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -541,26 +535,17 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwScriptLog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Script\AwScriptLogManager.cpp">
-      <Filter>Script</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwScriptLogManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwScriptLogManager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Script\AwScriptManager.cpp">
-      <Filter>Script</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwScriptManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwScriptManager.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Script\AwScriptProcessFileInput.cpp">
-      <Filter>Script</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwScriptProcessFileInput.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -874,17 +859,11 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwScriptWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Script\AwScriptWidget.cpp">
-      <Filter>Script</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwScriptsWidget.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwScriptsWidget.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Script\AwScriptsWidget.cpp">
-      <Filter>Script</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwCentralWidget.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -1336,6 +1315,9 @@
     <ClCompile Include="CL\AwRunProcess.cpp">
       <Filter>CL</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SignalInfo.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1521,21 +1503,6 @@
     <CustomBuild Include="Process\TPUi.ui">
       <Filter>Process</Filter>
     </CustomBuild>
-    <CustomBuild Include="Script\AwScript.h">
-      <Filter>Script</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptLog.h">
-      <Filter>Script</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptLogManager.h">
-      <Filter>Script</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptManager.h">
-      <Filter>Script</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptProcessFileInput.h">
-      <Filter>Script</Filter>
-    </CustomBuild>
     <CustomBuild Include="Widgets\AwAboutAnyWave.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
@@ -1679,18 +1646,6 @@
     </CustomBuild>
     <CustomBuild Include="ICA\AwPanelItem.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptWidget.h">
-      <Filter>Script</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptWidget.ui">
-      <Filter>Script</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptsWidget.ui">
-      <Filter>Script</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Script\AwScriptsWidget.h">
-      <Filter>Script</Filter>
     </CustomBuild>
     <CustomBuild Include="Display\AwCentralWidget.h">
       <Filter>Display</Filter>
@@ -1979,12 +1934,6 @@
     <ClInclude Include="GeneratedFiles\ui_AwPanelItem.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwScriptWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwScriptsWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource2.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -2032,9 +1981,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwMarkersExportWidget.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\AwScriptDefines.h">
-      <Filter>Script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\aw_armadillo.h">
       <Filter>Generated Files</Filter>

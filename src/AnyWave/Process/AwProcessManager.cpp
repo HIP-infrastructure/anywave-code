@@ -1133,10 +1133,10 @@ void AwProcessManager::executeCommand(int command, QVariantList args)
 	{
 	case AwProcessCommand::LaunchProcess:
 		if (nargs == 1)
-			startProcess(args.first().toString());
+			startProcess(args.first().toString().toUpper());
 		else if (nargs > 1) {
 			// consider all arguments are QString 
-			QString processName = args.first().toString();
+			QString processName = args.first().toString().toUpper();
 			QVariantList tmp = args;
 			tmp.removeAll(args.first());
 			QStringList processArgs;
