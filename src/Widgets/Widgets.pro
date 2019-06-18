@@ -15,7 +15,7 @@ QT += widgets
 include(Widgets.pri)
 
 macx {
-    LIBS += -framework AwCore -framework qwt -framework AppKit
+    LIBS += -framework AwCore -framework qwt -framework AppKit -framework Accelerate
     QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
    LIBS += -lvtkGUISupportQt-$$VTK_VERSION_SUFFIX -lvtkFiltersCore-$$VTK_VERSION_SUFFIX -lvtkCommonMisc-$$VTK_VERSION_SUFFIX \
    -lvtkRenderingCore-$$VTK_VERSION_SUFFIX -lvtkIOGeometry-$$VTK_VERSION_SUFFIX -lvtkCommonExecutionModel-$$VTK_VERSION_SUFFIX \

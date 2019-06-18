@@ -7,6 +7,8 @@ install_name_tool -change libAwMath.dylib @rpath/libAwMath.dylib $1/libAwFilter.
 # Epoch
 install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/libAwEpoch.dylib
 install_name_tool -change libAwMath.dylib @rpath/libAwMath.dylib $1/libAwEpoch.dylib
+# Montage
+install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/libAwMontage.dylib
 # Graphics
 install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $1/libAwGraphics.dylib
 install_name_tool -change libAwUtilities.dylib @rpath/libAwUtilities.dylib $1/libAwGraphics.dylib

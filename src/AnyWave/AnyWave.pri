@@ -67,6 +67,7 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Plugin/AwPluginDial.h \
     ./Process/AwExporterTypes.h \
     ./Process/AwMarkerExporter.h \
+    ./Process/AwMATLABMarkersExporter.h \
     ./Process/AwTriggerWriter.h \
     ./Process/AwTriggerEraser.h \
     ./Process/AwProcessLogManager.h \
@@ -90,14 +91,6 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Process/AwMatlabScriptPlugin.h \
     ./Process/AwConverter.h \
 	./Process/AwLogPlainTextEdit.h \
-    ./Script/AwScriptDefines.h \
-    ./Script/AwScriptsWidget.h \
-    ./Script/AwScriptWidget.h \
-    ./Script/AwScriptProcessFileInput.h \
-    ./Script/AwScriptManager.h \
-    ./Script/AwScriptLogManager.h \
-    ./Script/AwScriptLog.h \
-    ./Script/AwScript.h \
     ./Widgets/AwSelectTriggerChannelDialog.h \
     ./Widgets/AwTriggerParsingDialog.h \
     ./Widgets/AwPleaseWaitWidget.h \
@@ -235,6 +228,7 @@ SOURCES += ./AnyWave.cpp \
     ./Process/AwExporterSettings.cpp \
     ./Process/AwExportSelChannels.cpp \
     ./Process/AwMarkerExporter.cpp \
+    ./Process/AwMATLABMarkersExporter.cpp \
     ./Process/AwMatlabScriptPlugin.cpp \
     ./Process/AwProcessesWidget.cpp \
     ./Process/AwProcessFromMarkersDial.cpp \
@@ -252,13 +246,6 @@ SOURCES += ./AnyWave.cpp \
     ./Process/AwTriggerWriter.cpp \
 	./Process/AwLogPlainTextEdit.cpp \
     ./Process/TPUi.cpp \
-    ./Script/AwScript.cpp \
-    ./Script/AwScriptLog.cpp \
-    ./Script/AwScriptLogManager.cpp \
-    ./Script/AwScriptManager.cpp \
-    ./Script/AwScriptProcessFileInput.cpp \
-    ./Script/AwScriptsWidget.cpp \
-    ./Script/AwScriptWidget.cpp \
     ./Widgets/AwAboutAnyWave.cpp \
     ./Widgets/AwCursorMarkerToolBar.cpp \
     ./Widgets/AwDisplaySetupToolBar.cpp \
@@ -301,8 +288,7 @@ SOURCES += ./AnyWave.cpp \
     ./Epoch/AwStatsModel.cpp \
     ./CL/AwCommandLineManager.cpp \
     ./CL/AwCommandLogger.cpp \
-    ./CL/AwComputeICA.cpp \
-    ./CL/AwConvertFile.cpp \
+    ./CL/AwRunProcess.cpp \
     ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
@@ -333,8 +319,6 @@ FORMS += ./AnyWave.ui \
     ./Process/AwExporterSettings.ui \
     ./Process/AwExportSelChannels.ui \
     ./Process/AwExporterSelMarkers.ui \
-    ./Script/AwScriptWidget.ui \
-    ./Script/AwScriptsWidget.ui \
     ./Widgets/AwAboutAnyWave.ui \
     ./Widgets/AwCursorMarkerToolBar.ui \
     ./Widgets/AwDisplaySetupToolBar.ui \

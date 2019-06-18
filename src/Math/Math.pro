@@ -41,7 +41,7 @@ macx {
 }
 
 unix:!macx{
- LIBS += -lAwCore -lopenblas
+   LIBS += -lAwCore -lopenblas
 }
 
 

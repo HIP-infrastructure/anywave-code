@@ -19,8 +19,8 @@ VTK_LIB_PATH = /Users/bruno/vtk810/lib
 }
 
 # ARMA_INCLUDE_PATH  Path to find armadillo C++ include files
-ARMA_INCLUDE_PATH = $$PWD/../armadillo/include
-
+#ARMA_INCLUDE_PATH = $$PWD/../armadillo/include
+ARMA_INCLUDE_PATH = /users/bruno/armadillo-9.400.4/include
 # HDF5 DIRS
 # Linux
 unix:!macx {
