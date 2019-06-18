@@ -215,6 +215,8 @@ void AwFilterSettings::initWithChannels(const AwChannelList& channels)
 
 void AwFilterSettings::apply(AwChannel *channel) const
 {
+	if (channel == NULL)
+		return;
 	if (!m_hash.contains(channel->type()))
 		return;
 

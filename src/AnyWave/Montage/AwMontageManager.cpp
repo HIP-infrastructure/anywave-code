@@ -371,8 +371,10 @@ void AwMontageManager::removeBadChannels(AwChannelList& list)
 void AwMontageManager::applyGains()
 {
 	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	for (auto c : m_channels + m_asRecorded.values())
-		c->setGain(am->amplitude(c->type()));
+	for (auto c : m_channels + m_asRecorded.values()) {
+		if (c != NULL)
+			c->setGain(am->amplitude(c->type()));
+	}
 }
 
 void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
