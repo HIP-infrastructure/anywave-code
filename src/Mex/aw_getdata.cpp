@@ -32,12 +32,13 @@ static mxArray *request_data();
 static mxArray *parse_cfg(const mxArray *);
 
 // parameters
-static int filterFlags = 0; // 0 => AnyWave current filters, 1 => specified filters 2=> raw data
-static QHash<int, QVector<float>> filterSettings;
+int filterFlags = 0; // 0 => AnyWave current filters, 1 => specified filters 2=> raw data
+QHash<int, QVector<float>> filterSettings;
 static QString montage, file;
-static float start = 0., duration = 0.;
-static QStringList labels, types;
-static int decimate = 0;
+//static float start = 0., duration = 0.;
+float start, duration;
+QStringList labels, types;
+int decimate = 0;
 
 mxArray *request_data()
 {
@@ -202,8 +203,7 @@ mxArray *parse_cfg(const mxArray *cfg)
         }
         if (f_start) {
             double s = *(double *)mxGetData(f_start);
-            if (s > 0.)
-                start = (float)s;
+            start = (float)s;
         }
     }
         
@@ -217,8 +217,7 @@ mxArray *parse_cfg(const mxArray *cfg)
         }
         if (f_dur) {
             double d = *(double *)mxGetData(f_dur);
-            if (d > 0.)
-                duration = (float)d;
+            duration = (float)d;
         }
     }
 

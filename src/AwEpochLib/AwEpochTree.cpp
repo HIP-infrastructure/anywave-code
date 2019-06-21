@@ -233,7 +233,7 @@ int AwEpochTree::doAverage(bool verbose)
 		if (m_computeSettings.useBaselineCorrection) {
 			if (m_zeroPos > 0.) {
 				for (auto c : m_channels) {
-					fvec vec = AwMath::channelToVec(c);
+					fvec vec = AwMath::channelToFVec(c);
 					arma::uword n = (arma::uword)floor(m_zeroPos * c->samplingRate());
 					int start = 0, end = n - 1;
 					if (m_computeSettings.latencyRange[0] > 0 && m_computeSettings.latencyRange[0] <= m_zeroPos)

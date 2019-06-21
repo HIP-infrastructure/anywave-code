@@ -474,6 +474,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 m->setEnd(end);
 	 markers << m;
 	 process->pdi.input.setNewMarkers(markers);
+	 process->pdi.input.currentPosInFile = pos;
+
 	 // set flag to skip buildPDI checking
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
 	 runProcess(process);

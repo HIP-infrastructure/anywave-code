@@ -52,11 +52,26 @@ namespace AwMath {
 		}
 		return res;
 	}
-	fvec channelToVec(AwChannel *channel)
+	fvec channelToFVec(AwChannel *channel)
 	{
 		fvec vec(channel->dataSize());
 		memcpy(vec.memptr(), channel->data(), channel->dataSize() * sizeof(float));
 		return vec;
+	}
+	vec channelToVec(AwChannel *channel)
+	{
+		vec res(channel->dataSize());
+		//memcpy(vec.memptr(), channel->data(), channel->dataSize() * sizeof(float));
+		for (qint64 i = 0; i < channel->dataSize(); i++)
+			res(i) = (double)channel->data()[i];
+		return res;
+	}
+	QVector<double> vecToQVector(vec& x)
+	{
+		QVector<double> res(x.n_elem);
+		for (auto i = 0; i < x.n_elem; i++)
+			res[i] = x(i);
+		return res;
 	}
 
 	bool isNanInChannels(const AwChannelList& channels)

@@ -75,8 +75,13 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			return Q_NULLPTR;
 		}
 	}
-	else 
+	else {
 		doc = QJsonDocument::fromJson(json.toUtf8());
+		if (doc.isEmpty() || doc.isNull()) {
+			throw AwException("json string is invalid.", origin);
+			return Q_NULLPTR;
+		}
+	}
 	obj = doc.object();
 
 	auto pm = AwPluginManager::getInstance();
@@ -144,7 +149,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		// check if the process cares about specific channels or just want all channels or montaged channels
 		auto input = process->pdi.inputParameters();
 		bool needMontage = true;
-		bool needMarkers = false;
+		//bool needMarkers = false;
 
 		// check for BAD file
 		QString tmp = QString("%1.bad").arg(inputFile);
@@ -156,8 +161,8 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		for (auto k : input.keys()) {
 			if (k & Aw::ProcessInput::GetAsRecordedChannels) 
 				needMontage = false;
-			if (k & Aw::ProcessInput::GetAllMarkers)
-				needMarkers = true;
+			//if (k & Aw::ProcessInput::GetAllMarkers)
+			//	needMarkers = true;
 		}
 		// Check if MONTAGE file is needed
 		if (needMontage) {
@@ -204,7 +209,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		}
 		
 		// CHECK if marker file is needed
-		if (needMarkers) {
+	//	if (needMarkers) {
 			tmp = QString("%1.mrk").arg(inputFile);
 			// detect only if marker_file option is not specified by the user
 			if (!args.contains("marker_file"))
@@ -236,7 +241,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		   // if no markers set as input => add the GLOBAL ONE
 			if (process->pdi.input.markers().isEmpty())
 				process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.fileDuration));
-		}
+		//}
 
 		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.

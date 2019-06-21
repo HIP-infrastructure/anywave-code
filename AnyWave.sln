@@ -219,6 +219,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CompumedicsPF", "src\plugin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFFIO", "src\plugins\FIFFIO\FIFFIO.vcxproj", "{5200B1BC-8155-42D7-85F0-DB07DB672ED2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeltamedBinTxtReader", "src\plugins\DeltamedBinTxtReader\DeltamedBinTxtReader.vcxproj", "{8E75E05F-5A28-468D-8BCE-0865B321B368}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SignalInfos", "src\plugins\SignalInfos\SignalInfos.vcxproj", "{ADE9199F-976C-4132-B55E-C22A71644CEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -609,12 +613,24 @@ Global
 		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Release|Win32.ActiveCfg = Release|x64
 		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Release|x64.ActiveCfg = Release|x64
 		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Release|x64.Build.0 = Release|x64
+		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Debug|Win32.ActiveCfg = Debug|x64
+		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Debug|x64.ActiveCfg = Debug|x64
+		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Debug|x64.Build.0 = Debug|x64
+		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Release|Win32.ActiveCfg = Release|x64
+		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Release|x64.ActiveCfg = Release|x64
+		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Release|x64.Build.0 = Release|x64
+		{ADE9199F-976C-4132-B55E-C22A71644CEF}.Debug|Win32.ActiveCfg = Debug|x64
+		{ADE9199F-976C-4132-B55E-C22A71644CEF}.Debug|x64.ActiveCfg = Debug|x64
+		{ADE9199F-976C-4132-B55E-C22A71644CEF}.Debug|x64.Build.0 = Debug|x64
+		{ADE9199F-976C-4132-B55E-C22A71644CEF}.Release|Win32.ActiveCfg = Release|x64
+		{ADE9199F-976C-4132-B55E-C22A71644CEF}.Release|x64.ActiveCfg = Release|x64
+		{ADE9199F-976C-4132-B55E-C22A71644CEF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

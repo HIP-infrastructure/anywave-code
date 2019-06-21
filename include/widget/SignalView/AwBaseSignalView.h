@@ -60,6 +60,7 @@ public:
 	inline AwGraphicsView *view() { return m_view; }
 	inline AwGraphicsScene *scene() { return m_scene; }
 	AwChannelList selectedChannels();
+	inline AwChannelList& channels() { return m_channels; }
 	inline AwNavigationBar *navigationBar() { return m_navBar; }
 	void changeChannelSelectionState(const QString& name, bool selected) { m_scene->changeChannelsSelectionState(name, selected); }
 	void update() { m_scene->update(); }
