@@ -84,6 +84,9 @@ public:
 	inline bool hasOutputWidgets() { return !output.widgets().isEmpty(); }
 	inline AwMatlabInterface *MATLAB() { return m_mi; }
 	inline void setMI(AwMatlabInterface *mi) { m_mi = mi; }
+
+	/** Parse input parameters and returns a list of channel type required as input. Empty list means  AnyChannels. **/
+	QList<int> getInputChannelsMinMax(int *min, int *max);
 protected:		
 	AwMatlabInterface *m_mi;
 	QMap<int, QVariant> m_inputParameters;

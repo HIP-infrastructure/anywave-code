@@ -478,6 +478,25 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	 // set flag to skip buildPDI checking
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
+
+	 // check for input channels anywave depending on the flags defined in the plugin
+	 QList<int> keys = process->pdi.inputParameters().keys();
+	 for (int i = 0; i < keys.size(); i++) {
+		 int k = keys.value(i);
+		 int min, max;
+		 if (k & Aw::ProcessInput::AnyChannels) {
+			 QString value = process->pdi.inputParameters().values().at(i).toString();
+			 QStringList tokens = value.split("-");
+			 if (tokens.size() != 2)
+				 continue;
+			 min = tokens.first().toInt();
+			 max = tokens.last().toInt();
+			 if (channels.size()) {
+
+			 }
+		 }
+	 }
+
 	 runProcess(process);
  }
 

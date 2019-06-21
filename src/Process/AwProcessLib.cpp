@@ -174,3 +174,36 @@ void AwProcessPlugin::addLanguageTranslation(const QString& resourceFile)
 		delete translator;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// AwProcessDataInterface
+
+bool AwProcessDataInterface::doChannelsMatchInputParameters(const AwChannelList& channels)
+{
+	auto keys = m_inputParameters.keys();
+	bool res = false;
+	int min, max;
+	
+	for (auto k : keys) {
+		bool minMaxOk = false;
+		QString value = m_inputParameters[k].toString();
+		QStringList tokens = value.split("-");
+		if (tokens.size() != 2)
+			continue;
+		min = tokens.first().toInt();
+		max = tokens.last().toInt();
+		if (max == 0)
+			max = channels.size();
+		if (channels.size() >= min && channels.size() <= max)
+			minMaxOk = true;
+		if (k & Aw::ProcessInput::AnyChannels) {
+			res = minMaxOk;
+			break;
+		}
+		if (k & Aw::ProcessInput::ECGChannels) {
+			auto tmp = AwChannel::getChannelsOfType(channels, AwChannel::ECG);
+			res = (tmp.size() == channels.size()) && minMaxOk;
+			break;
+ 		}
+	}
+	return res;
+}
