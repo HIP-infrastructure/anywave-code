@@ -62,35 +62,33 @@
 class AW_PROCESS_EXPORT AwProcessDataInterface
 {
 public:
-	AwProcessDataInterface() { m_mi = NULL; }
+	AwProcessDataInterface() { m_mi = NULL; m_inputFlags = 0; }
 	~AwProcessDataInterface() {}
+	enum inputs { AnyChannels = -1 };
 
 	// Parameters
 	AwProcessIO input;
 	AwProcessIO output;
 
 	// Methods
-	QMap<int, QVariant>& inputParameters() { return m_inputParameters; }
-	QMap<int, QVariant>& outputParameters() { return m_outputParameters; }
-
-	/** Sets an input parameter. **/
-	void addInputParameter(int parameter, QVariant value) 
-		{ m_inputParameters.insert(parameter, value); }
-	/** Sets an output parameter **/
-	void addOutputParameter(int parameter, QVariant value)
-		{ m_outputParameters.insert(parameter, value); }
+	/** Specify the type of channels required by the process as input. **/
+	void addInputChannel(int type, int min, int max);
+	bool areInputChannelSet() { return !m_inputChannels.isEmpty(); }
+	QList<int> getInputChannels() { return m_inputChannels.keys(); }
+	inline QPair<int, int> getInputChannelMinMax(int type) { return m_inputChannels.value(type); }
+	/** Specify the input flags for the process **/
+	void setInputFlags(int flags) { m_inputFlags = flags; }
+	inline int inputFlags() { return m_inputFlags; }
 
 	inline bool hasOutput() { return !output.isEmpty(); }
 	inline bool hasOutputWidgets() { return !output.widgets().isEmpty(); }
 	inline AwMatlabInterface *MATLAB() { return m_mi; }
 	inline void setMI(AwMatlabInterface *mi) { m_mi = mi; }
-
-	/** Parse input parameters and returns a list of channel type required as input. Empty list means  AnyChannels. **/
-	QList<int> getInputChannelsMinMax(int *min, int *max);
 protected:		
 	AwMatlabInterface *m_mi;
-	QMap<int, QVariant> m_inputParameters;
-	QMap<int, QVariant> m_outputParameters;
+	QMap<int, QPair<int, int>> m_inputChannels;  // if empty => accept any channels (1-n)
+	int m_inputFlags;
+
 };
 
 

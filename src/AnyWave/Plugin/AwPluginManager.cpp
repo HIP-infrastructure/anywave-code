@@ -56,15 +56,26 @@
 template<typename AwPlugin>
 void AwPluginFactory<AwPlugin>::addPlugin(const QString& name, AwPlugin *plugin)
 {
-	if (!m_map.contains(name))
-		m_map.insert(name, plugin); 
+	QString key = name.toUpper();
+	if (!m_map.contains(key))
+		m_map.insert(key, plugin); 
 }
 
 template<typename AwPlugin>
 void AwPluginFactory<AwPlugin>::removePlugin(const QString& name)
 {
-	if (m_map.contains(name))
-		m_map.remove(name);
+	QString key = name.toUpper();
+	if (m_map.contains(key))
+		m_map.remove(key);
+}
+
+template<typename AwPlugin>
+AwPlugin* AwPluginFactory<AwPlugin>::getPluginByName(const QString& name)
+{
+	QString key = name.toUpper();
+	if (m_map.contains(key))
+		return m_map.value(key);
+	return Q_NULLPTR;
 }
 
 // statics
@@ -230,7 +241,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 if (line.contains("name")) {
 				 QStringList res = line.split("=");
 				 if (res.size() == 2)
-					 name = res.at(1).trimmed().toUpper();
+					 name = res.at(1).trimmed();
 			 }
 			 else if (line.contains("description")) {
 				 QStringList res = line.split("=");
@@ -310,7 +321,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
 			 loadProcessPlugin(plugin);
-			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
+			 //AwProcessPlugin *p = m_processFactory.getPluginByName(name);
 		 }
 	 }
 }
@@ -434,20 +445,7 @@ void AwPluginManager::loadUserPlugins()
 
 			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
 			if (iprocess) {
-				// make the name uppercase
-				iprocess->name = iprocess->name.toUpper();
-				AwProcessPlugin *p = m_processFactory.getPluginByName(iprocess->name);
-				// is there a plugin with the same name loaded in Application's plugins dir?
-				if (p) { // yes, so remove it and replace it with the one loaded in user's plugins dir
-					m_pluginProcesses.removeAll(p);
-					m_pluginList.removeAll(p);
-					m_processFactory.removePlugin(iprocess->name);
-					delete p;
-					emit log("Process plugin " +  iprocess->name + " already exists.Previous version unloaded.");
-				}
-				m_processFactory.addPlugin(iprocess->name, iprocess);
-				m_pluginProcesses += iprocess;
-				m_pluginList += plugin;
+				loadProcessPlugin(iprocess);
 				continue;
 			}
 			AwDisplayPlugin *idisplay = qobject_cast<AwDisplayPlugin *>(plugin);
@@ -557,8 +555,7 @@ void AwPluginManager::loadPlugins()
 			}
 			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
 			if (iprocess) {
-				// make the name uppercase
-				iprocess->name = iprocess->name.toUpper();
+				iprocess->name = iprocess->name;
 				loadProcessPlugin(iprocess);
 				continue;
 			}

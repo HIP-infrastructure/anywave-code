@@ -30,7 +30,7 @@
 FileConverterPlugin::FileConverterPlugin()
 {
 	type = AwProcessPlugin::Background;
-	name = "File Convert";
+	name = "File Converter";
 	description = tr("Converts files to another format.");
 	category = "Process:File Operation:Convert Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
@@ -38,9 +38,8 @@ FileConverterPlugin::FileConverterPlugin()
 
 FileConverter::FileConverter()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::ProcessInput::GetReaderPlugins, "1-n");
-	pdi.addInputParameter(Aw::ProcessInput::GetWriterPlugins, "1-n");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins|Aw::ProcessInput::GetWriterPlugins);
 }
 
 FileConverter::~FileConverter()

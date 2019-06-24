@@ -45,7 +45,7 @@ class AwPluginFactory
 {
 public:
 	enum OperationStatus { Ok, UnloadPlugin };
-	AwPlugin *getPluginByName(const QString& name) { return m_map.value(name); }
+	AwPlugin *getPluginByName(const QString& name); 
 	void addPlugin(const QString& name, AwPlugin *plugin);
 	void removePlugin(const QString& name);
 	

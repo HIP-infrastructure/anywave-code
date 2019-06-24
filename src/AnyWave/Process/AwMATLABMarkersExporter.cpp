@@ -5,7 +5,7 @@
 
 AwMATLABMarkersExporter::AwMATLABMarkersExporter()
 {
-	pdi.addInputParameter(Aw::ProcessInput::GetCurrentMontage|Aw::ProcessInput::ProcessIgnoresChannelSelection, "1-n");
+	pdi.setInputFlags(Aw::ProcessInput::GetCurrentMontage | Aw::ProcessInput::ProcessIgnoresChannelSelection);
 }
 
 

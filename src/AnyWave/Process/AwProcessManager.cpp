@@ -417,49 +417,49 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	return buildPDIForProcess(p);
 }
 
- bool AwProcessManager::processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources)
- {
-	 QRegExp rx("(\\S*)-{1,1}(\\S*)");
-	 QList<QVariant> vals = p->pdi.inputParameters().values();
-	 QString val = vals.at(keyIndex).toString();
-	 int pos = rx.indexIn(val);
-	 int min, max;
-	 if (pos == -1)
-		 return false;
-	 else {
-		 min = rx.cap(1).toInt();
-		 max = rx.cap(2).toInt();
-	 }
+ //bool AwProcessManager::processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources)
+ //{
+	// QRegExp rx("(\\S*)-{1,1}(\\S*)");
+	// QList<QVariant> vals = p->pdi.inputParameters().values();
+	// QString val = vals.at(keyIndex).toString();
+	// int pos = rx.indexIn(val);
+	// int min, max;
+	// if (pos == -1)
+	//	 return false;
+	// else {
+	//	 min = rx.cap(1).toInt();
+	//	 max = rx.cap(2).toInt();
+	// }
 
-	 QString errorString = p->plugin()->name;
+	// QString errorString = p->plugin()->name;
 
-	 // check for correct min and max
-	 if (min > sources.size()) {
-		 errorString += QString(tr(": the number of channels is incorrect. Process requires %1 channels")).arg(min);
-		 AwMessageBox::critical(0, tr("Process input"), errorString, QMessageBox::Discard);
-		 return false;
-	 }
+	// // check for correct min and max
+	// if (min > sources.size()) {
+	//	 errorString += QString(tr(": the number of channels is incorrect. Process requires %1 channels")).arg(min);
+	//	 AwMessageBox::critical(0, tr("Process input"), errorString, QMessageBox::Discard);
+	//	 return false;
+	// }
 
-	 int size = sources.size();
-	 if (max > 0 && max < sources.size()) {
-		 errorString += QString(tr(": the process requires a maximum of %1 channels")).arg(max);
-		 AwMessageBox::information(0, tr("Process input"), errorString, QMessageBox::Discard);
-		 return false;
-	 }
+	// int size = sources.size();
+	// if (max > 0 && max < sources.size()) {
+	//	 errorString += QString(tr(": the process requires a maximum of %1 channels")).arg(max);
+	//	 AwMessageBox::information(0, tr("Process input"), errorString, QMessageBox::Discard);
+	//	 return false;
+	// }
 
-	 if (max > 0)
-		 size = std::min(size, max);
-	 
-	 AwChannelList list;
-	 for (int i = 0; i < size; i++) {
-			list << sources.at(i);
-	 }
+	// if (max > 0)
+	//	 size = std::min(size, max);
+	// 
+	// AwChannelList list;
+	// for (int i = 0; i < size; i++) {
+	//		list << sources.at(i);
+	// }
 
-	 p->pdi.input.addChannels(AwChannel::duplicateChannels(list));
-	 // make sure current filters are set for the channels.
-	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
-	 return true;
- }
+	// p->pdi.input.addChannels(AwChannel::duplicateChannels(list));
+	// // make sure current filters are set for the channels.
+	// AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
+	// return true;
+ //}
 
  void AwProcessManager::launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end)
  {
@@ -477,27 +477,9 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 process->pdi.input.currentPosInFile = pos;
 
 	 // set flag to skip buildPDI checking
-	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
-
-	 // check for input channels anywave depending on the flags defined in the plugin
-	 QList<int> keys = process->pdi.inputParameters().keys();
-	 for (int i = 0; i < keys.size(); i++) {
-		 int k = keys.value(i);
-		 int min, max;
-		 if (k & Aw::ProcessInput::AnyChannels) {
-			 QString value = process->pdi.inputParameters().values().at(i).toString();
-			 QStringList tokens = value.split("-");
-			 if (tokens.size() != 2)
-				 continue;
-			 min = tokens.first().toInt();
-			 max = tokens.last().toInt();
-			 if (channels.size()) {
-
-			 }
-		 }
-	 }
-
-	 runProcess(process);
+//	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
+	 if (buildPDIForProcess(process))
+		  runProcess(process);
  }
 
  bool AwProcessManager::buildPDIForProcess(AwBaseProcess *p)
@@ -507,221 +489,307 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	auto selectedChannels = AwDisplay::instance()->selectedChannels();
 	auto montageChannels = AwMontageManager::instance()->channels();
-	QList<int> keys = p->pdi.inputParameters().keys();
+	
 	AwChannelList sources;
 	bool selection = !selectedChannels.isEmpty();
-	// browse for keys as process inputs
-	for (int i = 0; i < keys.size(); i++) {
-		int key = keys.at(i);
-		bool ignoreSelection = key & Aw::ProcessInput::ProcessIgnoresChannelSelection;
-		QString errorString = p->plugin()->name;
-		if (key & Aw::ProcessInput::GetAsRecordedChannels) { // copy as recorded channels as input for the process and keep going. No check for IO Min and Max.
-			p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
-			continue;
-		}
-		else if (key & Aw::ProcessInput::GetProcessPluginNames) {
-			for (auto plugin : AwPluginManager::getInstance()->processes())
-				p->pdi.input.processPluginNames.append(plugin->name);
-		}
-		else if (key & Aw::ProcessInput::AnyChannels) {  // any channels = selected channels if any or current montage if no channels is selected.
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::EEGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+	int inputF = p->pdi.inputFlags();
 
-			// get only EEG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isEEG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::SourceChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels())
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+	bool requireSelection = inputF & Aw::ProcessInput::ProcessRequiresChannelSelection;
+	bool ignoreSelection = inputF & Aw::ProcessInput::ProcessIgnoresChannelSelection; 
+	// of course, requireSelection and ignoreSelection are mutual exclusive.
 
-			// get only Source channels from sources
-			foreach(AwChannel *c, sources) {
-				if (!c->isSource())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
+	if (inputF & Aw::ProcessInput::GetReaderPlugins) {
+		for (auto plugin : AwPluginManager::getInstance()->readers())
+			p->pdi.input.readers.append(plugin);	
+	}
+	if (inputF & Aw::ProcessInput::GetWriterPlugins) {
+		for (auto plugin : AwPluginManager::getInstance()->writers())
+			p->pdi.input.writers.append(plugin);
+	}
+	if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
+		for (auto plugin : AwPluginManager::getInstance()->processes())
+			p->pdi.input.processPluginNames.append(plugin->name);
+	}
+
+	if (inputF & Aw::ProcessInput::GetAllMarkers) {
+		p->pdi.input.setNewMarkers(AwMarkerManager::instance()->getMarkers());
+	}
+
+	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
+		p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
+	}
+	if (inputF & Aw::ProcessInput::GetCurrentMontage) { // skip requireSelection flag here and get a copy of channels present in the file.
+		p->pdi.input.addChannels(montageChannels, true);
+	}
+
+	if (!p->pdi.areInputChannelSet())
+		return true;
+
+	// check if inputChannels is emptry
+	if (ignoreSelection)
+		sources = montageChannels;
+	else {
+		if (!selection && requireSelection) {
+			if (confirmProcessWithAllChannels())
+				sources = montageChannels;
+			else
 				return false;
 		}
-		else if (key & Aw::ProcessInput::SEEGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+		else  if (selection) {
+			sources = selectedChannels;
+		}
+		else
+			sources = montageChannels;
+	}
 
-			// get only SEEG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isSEEG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
+	// input channels are set
+	auto types = p->pdi.getInputChannels();
+	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
+	AwChannelList res;
+	for (auto t : types) {
+		
+		QPair<int, int> min_max = p->pdi.getInputChannelMinMax(t);
+		int min = min_max.first;
+		int max = min_max.second;
+		QString channelType = "Any Channels";
+		if (t != -1)
+			channelType = AwChannel::typeToString(t);
+		// check for correct min and max
+		if (min > sources.size()) {
+			AwMessageBox::critical(0, "Process input", QString("Process requires at least %1 channel(s) of type %2").arg(min).arg(channelType),
+				QMessageBox::Discard);
+			return false;
 		}
-		else if (key & Aw::ProcessInput::MEGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+		if (min_max.second > 0 && min_max.second < sources.size()) {
+			AwMessageBox::critical(0, "Process input", QString("Process requires a maximum of %1 channels").arg(max).arg(channelType),
+				QMessageBox::Discard);
+			return false;
+		}
+		if (t == -1)
+			res += sources;
+		else {
+			res += AwChannel::getChannelsOfType(sources, t);
+		}
+	}
 
-			// get only MEG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isMEG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::EMGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+	p->pdi.input.addChannels(res, true);
+	// make sure current filters are set for the channels.
+	AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
+	
 
-			// get only EMG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isEMG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::ECGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
 
-			// get only ECG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isECG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::TriggerChannels) {  // look for Triggers in AS RECORDED not in the current montage
-			if (ignoreSelection)
-				sources = AwMontageManager::instance()->asRecordedChannels();
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+	//// browse for keys as process inputs
+	//for (int i = 0; i < keys.size(); i++) {
+	//	int key = keys.at(i);
+	//	bool ignoreSelection = key & Aw::ProcessInput::ProcessIgnoresChannelSelection;
+	//	QString errorString = p->plugin()->name;
+	//	if (key & Aw::ProcessInput::GetAsRecordedChannels) { // copy as recorded channels as input for the process and keep going. No check for IO Min and Max.
+	//		p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
+	//		continue;
+	//	}
+	//	else if (key & Aw::ProcessInput::GetProcessPluginNames) {
+	//		for (auto plugin : AwPluginManager::getInstance()->processes())
+	//			p->pdi.input.processPluginNames.append(plugin->name);
+	//	}
+	//	else if (key & Aw::ProcessInput::AnyChannels) {  // any channels = selected channels if any or current montage if no channels is selected.
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+	//	}
+	//	else if (key & Aw::ProcessInput::EEGChannels) {
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
 
-			// get only Trigger channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isTrigger())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
+	//		// get only EEG channels from sources
+	//		foreach (AwChannel *c, sources) {
+	//			if (!c->isEEG())
+	//				sources.removeAll(c);
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+	//	}
+	//	else if (key & Aw::ProcessInput::SourceChannels) {
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels())
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
 
-		}
-		else if (key & Aw::ProcessInput::GetAllMarkers) {
-			foreach(AwMarker *m, AwMarkerManager::instance()->getMarkers())
-				p->pdi.input.addMarker(new AwMarker(m));
-		}
-		else if (key & Aw::ProcessInput::GetReaderPlugins) {
-			QList<AwFileIOPlugin *> plugins = AwPluginManager::getInstance()->readers();
-			foreach (AwFileIOPlugin *plugin, plugins) {
-				p->pdi.input.readers.append(plugin);
-			}
-		}
-		else if (key & Aw::ProcessInput::GetWriterPlugins) {
-			QList<AwFileIOPlugin *> plugins = AwPluginManager::getInstance()->writers();
-			foreach (AwFileIOPlugin *plugin, plugins) {
-				p->pdi.input.writers.append(plugin);
-			}
-		}
-		else if (key & Aw::ProcessInput::GetCurrentMontage) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
-			// clear previous input channels if any
-			//while (!p->pdi.input.channels.isEmpty())
-			//	delete p->pdi.input.channels.takeFirst();
-			p->pdi.input.clearChannels();
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-	} // end for
+	//		// get only Source channels from sources
+	//		foreach(AwChannel *c, sources) {
+	//			if (!c->isSource())
+	//				sources.removeAll(c);
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;
+	//	}
+	//	else if (key & Aw::ProcessInput::SEEGChannels) {
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
+
+	//		// get only SEEG channels from sources
+	//		foreach (AwChannel *c, sources) {
+	//			if (!c->isSEEG())
+	//				sources.removeAll(c);
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+	//	}
+	//	else if (key & Aw::ProcessInput::MEGChannels) {
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
+
+	//		// get only MEG channels from sources
+	//		foreach (AwChannel *c, sources) {
+	//			if (!c->isMEG())
+	//				sources.removeAll(c);
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+	//	}
+	//	else if (key & Aw::ProcessInput::EMGChannels) {
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
+
+	//		// get only EMG channels from sources
+	//		foreach (AwChannel *c, sources) {
+	//			if (!c->isEMG())
+	//				sources.removeAll(c);
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+	//	}
+	//	else if (key & Aw::ProcessInput::ECGChannels) {
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
+
+	//		// get only ECG channels from sources
+	//		foreach (AwChannel *c, sources) {
+	//			if (!c->isECG())
+	//				sources.removeAll(c);
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+	//	}
+	//	else if (key & Aw::ProcessInput::TriggerChannels) {  // look for Triggers in AS RECORDED not in the current montage
+	//		if (ignoreSelection)
+	//			sources = AwMontageManager::instance()->asRecordedChannels();
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
+
+	//		// get only Trigger channels from sources
+	//		foreach (AwChannel *c, sources) {
+	//			if (!c->isTrigger())
+	//				sources.removeAll(c);
+	//		}
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+
+	//	}
+	//	else if (key & Aw::ProcessInput::GetAllMarkers) {
+	//		foreach(AwMarker *m, AwMarkerManager::instance()->getMarkers())
+	//			p->pdi.input.addMarker(new AwMarker(m));
+	//	}
+	//	else if (key & Aw::ProcessInput::GetReaderPlugins) {
+	//		QList<AwFileIOPlugin *> plugins = AwPluginManager::getInstance()->readers();
+	//		foreach (AwFileIOPlugin *plugin, plugins) {
+	//			p->pdi.input.readers.append(plugin);
+	//		}
+	//	}
+	//	else if (key & Aw::ProcessInput::GetWriterPlugins) {
+	//		QList<AwFileIOPlugin *> plugins = AwPluginManager::getInstance()->writers();
+	//		foreach (AwFileIOPlugin *plugin, plugins) {
+	//			p->pdi.input.writers.append(plugin);
+	//		}
+	//	}
+	//	else if (key & Aw::ProcessInput::GetCurrentMontage) {
+	//		if (ignoreSelection)
+	//			sources = montageChannels;
+	//		else {
+	//			if (!selection)
+	//				if (confirmProcessWithAllChannels()) 
+	//					sources = montageChannels;
+	//				else
+	//					return false;
+	//			else
+	//				sources = selectedChannels;
+	//		}
+	//		// clear previous input channels if any
+	//		//while (!p->pdi.input.channels.isEmpty())
+	//		//	delete p->pdi.input.channels.takeFirst();
+	//		p->pdi.input.clearChannels();
+	//		if (!processIOCheckMinMax(p, i, sources))
+	//			return false;	
+	//	}
+	//} // end for
 	return true;
 }
 
@@ -774,7 +842,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			}
 		}
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
-		if (process->plugin()->flags() & Aw::ProcessFlags::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
+		if (process->inputFlags() & Aw::ProcessInput::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
 			process->plugin()->deleteInstance(process);
@@ -1154,10 +1222,10 @@ void AwProcessManager::executeCommand(int command, QVariantList args)
 	{
 	case AwProcessCommand::LaunchProcess:
 		if (nargs == 1)
-			startProcess(args.first().toString().toUpper());
+			startProcess(args.first().toString());
 		else if (nargs > 1) {
 			// consider all arguments are QString 
-			QString processName = args.first().toString().toUpper();
+			QString processName = args.first().toString();
 			QVariantList tmp = args;
 			tmp.removeAll(args.first());
 			QStringList processArgs;

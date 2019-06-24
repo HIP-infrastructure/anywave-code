@@ -36,10 +36,8 @@
 
 ICA::ICA()
 {
-	pdi.addInputParameter(Aw::ProcessInput::GetAsRecordedChannels, QString("1-n"));
-	pdi.addInputParameter(Aw::ProcessInput::GetProcessPluginNames , QString("1-n"));
-	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, QString("0-n"));
-	pdi.addInputParameter(Aw::ProcessInput::SourceChannels|Aw::ProcessInput::ProcessIgnoresChannelSelection, QString("0-n"));
+	pdi.setInputFlags(Aw::ProcessInput::GetAsRecordedChannels|Aw::ProcessInput::GetProcessPluginNames |Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	pdi.addInputChannel(AwChannel::Source, 0, 0);
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;
@@ -48,7 +46,7 @@ ICA::ICA()
 ICAPlugin::ICAPlugin()
 {
     type = AwProcessPlugin::Background;
-    category = "ICA:Get Components";
+    category = "ICA:ICA Extraction";
     name = QString("ICA");
     description = QString("extract independent components");
 }

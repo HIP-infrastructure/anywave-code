@@ -126,7 +126,7 @@ protected:
 	bool initProcessIO(AwBaseProcess *p);
 	bool buildPDIForProcess(AwBaseProcess *p, AwChannelList& fromList);
 	bool buildPDIForProcess(AwBaseProcess *p);
-	bool processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources);
+	//bool processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources);
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);
 	

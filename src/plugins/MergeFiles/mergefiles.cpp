@@ -4,7 +4,7 @@
 MergeFilePlugin::MergeFilePlugin()
 {
 	type = AwProcessPlugin::Background;
-	name = "Merge Files to ADES";
+	name = "Merge Files";
 	description = tr("Merge two files in one (ADES).");
 	category = "Process:File Operation:Merge Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
@@ -12,9 +12,8 @@ MergeFilePlugin::MergeFilePlugin()
 
 MergeFile::MergeFile()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::ProcessInput::GetReaderPlugins, "1-n");
-	pdi.addInputParameter(Aw::ProcessInput::GetWriterPlugins, "1-n");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetWriterPlugins);
 	m_adesPlugin = NULL;
 }
 

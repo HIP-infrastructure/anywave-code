@@ -40,7 +40,7 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 
 	// Fixed input as any channels by default
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData))
-		p->pdi.addInputParameter(Aw::ProcessInput::AnyChannels, "1-n");
+		p->pdi.addInputChannel(-1, 1, 0);
 }
 
 void AwScriptPlugin::checkIOForProcess(AwScriptProcess *p)

@@ -46,20 +46,33 @@ namespace AwProcessCommand
 
 namespace Aw
 {
+	//namespace ProcessFlags {
+	//	enum AwProcessFlags {
+	//		ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02, ProcessHasOutputUi = 0x04,
+	//		ProcessDoesntRequireData = 0x08, ProcessIsScriptable = 0x10, ProcessRequiresChannelSelection = 0x20,
+	//		ProcessSkipInputCheck = 0x40, PluginIsHidden = 0x80, CanRunFromCommandLine = 0x100
+	//	};
+	//}
+	//namespace ProcessInput {
+	//	enum AwProcessInputs {
+	//		ProcessIgnoresChannelSelection = 0x01, GetAllMarkers = 0x02, GetReaderPlugins = 0x04,
+	//		GetWriterPlugins = 0x08, AnyChannels = 0x10, EEGChannels = 0x20, MEGChannels = 0x40,
+	//		ECGChannels = 0x80, EMGChannels = 0x100, SEEGChannels = 0x200,
+	//		GetAsRecordedChannels = 0x400, GetCurrentMontage = 0x800, TriggerChannels = 0x1000, SourceChannels = 0x2000,
+	//		GetProcessPluginNames = 0x4000
+	//	};
+	//}
 	namespace ProcessFlags {
 		enum AwProcessFlags {
 			ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02, ProcessHasOutputUi = 0x04,
-			ProcessDoesntRequireData = 0x08, ProcessIsScriptable = 0x10, ProcessRequiresChannelSelection = 0x20,
-			ProcessSkipInputCheck = 0x40, PluginIsHidden = 0x80, CanRunFromCommandLine = 0x100
+			ProcessDoesntRequireData = 0x08, ProcessSkipInputCheck = 0x10, PluginIsHidden = 0x20, CanRunFromCommandLine = 0x40
 		};
 	}
 	namespace ProcessInput {
 		enum AwProcessInputs {
-			ProcessIgnoresChannelSelection = 0x01, GetAllMarkers = 0x02, GetReaderPlugins = 0x04,
-			GetWriterPlugins = 0x08, AnyChannels = 0x10, EEGChannels = 0x20, MEGChannels = 0x40,
-			ECGChannels = 0x80, EMGChannels = 0x100, SEEGChannels = 0x200,
-			GetAsRecordedChannels = 0x400, GetCurrentMontage = 0x800, TriggerChannels = 0x1000, SourceChannels = 0x2000,
-			GetProcessPluginNames = 0x4000
+			ProcessIgnoresChannelSelection = 1, GetAllMarkers = 2, GetReaderPlugins = 4,
+			GetWriterPlugins = 8, GetAsRecordedChannels = 16, GetCurrentMontage = 32, 
+			GetProcessPluginNames = 64, ProcessRequiresChannelSelection = 128
 		};
 	}
 }
