@@ -618,7 +618,6 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 	{
 		float *buffer = new float[data_size];
 		read = readBuffer((char *)buffer, bufferSize);
-	//	read = m_file.read((char *)buffer, bufferSize);
 		if (read <= 0) {
 			delete[] buffer;
 			m_error = QString("Failed to read data (Float).");

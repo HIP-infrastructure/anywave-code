@@ -80,6 +80,7 @@ private:
 	void fileUnlock();
 	void prepareAVGChannel(AwAVGChannel *channel);	// create the list of channels to add as connections.
 	void computeVirtualChannels();
+	qint64 readWithOfflineFiltering(float start, float duration, const AwChannelList& channels);	// apply an offline filtering around the part of the data to read then provide the data.
 };
 
 #endif // AWDATACONNECTION_H

@@ -46,6 +46,8 @@
 #include <QtConcurrent>
 #endif
 
+#define AW_DC_OFFLINE_FILTERING_PADDING		5  // 5s padding around the data for a kind of offline filtering.
+
 // Use QtConcurrent to multithread the compute method of all virtual channels.
 void computeVirtual(AwVirtualChannel *c)
 {
@@ -230,7 +232,8 @@ void AwDataConnection::applyICAFilters(int type, AwChannelList& channels)
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
 
 	if (!m_ICASourcesLoaded[type] || comps->sources().first()->dataSize() == 0) 
-		m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
+		//m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
 	AwICAManager::instance()->rejectComponents(type, channels);
 	m_ICASourcesLoaded[type] = true;
 }
@@ -240,8 +243,9 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 	int type = channels.first()->subType();
 	AwSourceManager *sm = AwSourceManager::instance();
 	AwSettings::getInstance()->filterSettings().apply(sm->realChannels(type));
-	m_reader->readDataFromChannels(m_positionInFile, m_duration, sm->realChannels(type));
-	AwFiltering::filter(sm->realChannels(type));
+	//m_reader->readDataFromChannels(m_positionInFile, m_duration, sm->realChannels(type));
+	//AwFiltering::filter(sm->realChannels(type));
+	readWithOfflineFiltering(m_positionInFile, m_duration, sm->realChannels(type));
 	sm->computeSources(channels);
 
 }
@@ -252,8 +256,9 @@ void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels
 	if (comps)	{
 		// load source channels
 		AwSettings::getInstance()->filterSettings().apply(comps->sources());
-		m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-		AwFiltering::filter(&comps->sources());
+		//m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
+		//AwFiltering::filter(&comps->sources());
+		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
 		comps->computeComponents(channels);
 	}
 	m_ICASourcesLoaded[type] = true;
@@ -318,49 +323,74 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, qu
 		qDebug() << Q_FUNC_INFO << "Channel list is empty() ! " << endl;
 	qDebug() << Q_FUNC_INFO << "called " << endl;
 #endif
-	if (channelsToLoad->isEmpty())	{
+	if (channelsToLoad->isEmpty()) {
 		setEndOfData();
 		return;
 	}
 	// check start position
-	if (start >= m_reader->infos.totalSamples())	{
+	if (start >= m_reader->infos.totalSamples()) {
 #ifndef NDEBUG
-	qDebug() << "AwDataConnection::loadData() - in thread " << thread() << " start position beyong total duration." << endl;
-	qDebug() << "AwDataConnection::loadData() - in thread " << thread() << " unlocking reader." << endl;
+		qDebug() << "AwDataConnection::loadData() - in thread " << thread() << " start position beyong total duration." << endl;
+		qDebug() << "AwDataConnection::loadData() - in thread " << thread() << " unlocking reader." << endl;
 #endif
 		setEndOfData();
 		return;
 	}
+
+}
+
+////
+//// readWithOfflineFiltering()
+//// read channels using more data than requested in case of filtering is required.
+//// The channels which are to be filtered will load more data, then the filtering is done and data are resized to get the part intially requested.
+////
+qint64 AwDataConnection::readWithOfflineFiltering(float start, float duration, const AwChannelList& channels)
+{
+	// assuming the channels are in loadingList.
+	// check for channels with filtering options
+	AwChannelList toFilter, others;
+	for (auto c : channels) {
+		if (c->lowFilter() > 0 || c->highFilter() > 0)
+			toFilter << c;  
+		else
+			others << c;
+	}
+	qint64 read = 0; // number of samples really read from the file
+	if (!others.isEmpty())
+		read = m_reader->readDataFromChannels(start, duration, others);
+	if (!toFilter.isEmpty()) {
+		float s = std::max((float)0., start - AW_DC_OFFLINE_FILTERING_PADDING);
+		float d = std::min(m_reader->infos.totalDuration(), duration + AW_DC_OFFLINE_FILTERING_PADDING);
+		// read more data than requested (before and after)
+		read = m_reader->readDataFromChannels(s, d, toFilter);
+		if (read > 0) {
+			// filter the data
+			AwFiltering::filter(toFilter);
+			// reslice data for channels
+			for (auto c : toFilter) {
+				qint64 startOffset = std::floor(c->samplingRate() * (start - s));
+				qint64 samplesRead = c->dataSize();
+				samplesRead -= startOffset;
+				qint64 samplesToCopy  = std::floor(c->samplingRate() * duration);
+				samplesToCopy = std::min(samplesToCopy, samplesRead);
+				float *dest = new float[samplesToCopy];
+				float *source = &c->data()[startOffset];
+				for (qint64 i = 0; i < samplesToCopy; i++)
+					dest[i] = source[i];
+				// assign new data to channel.
+				c->setData(dest, samplesToCopy);
+			}
+		}
+	}
+	return read;
 }
 
 
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker, bool rawData, bool doNotWakeUpClient)
 
 {
-//#ifndef NDEBUG
-//	if (channelsToLoad->isEmpty())
-//		qDebug() << Q_FUNC_INFO << "Channel list is empty() ! " << endl;
-//	qDebug() << Q_FUNC_INFO << endl;
-//#endif
-//	if (channelsToLoad->isEmpty())	{
-//		setEndOfData();
-//		return;
-//	}
-//
-//	float start = marker->start();
-//	// check start position
-//	if (start >= m_reader->infos.totalDuration())	{
-//#ifndef NDEBUG
-//	qDebug() << Q_FUNC_INFO << " in thread " << thread() << " start position beyong total duration." << endl;
-//#endif
-//		setEndOfData();
-//		return;
-//	}
-
-//	loadData(channelsToLoad, marker->start(), marker->duration(), rawData, doNotWakeUpClient);
 	AwMarkerList markers = { marker };
 	loadData(channelsToLoad, &markers, rawData, doNotWakeUpClient);
-
 }
 
 //
@@ -387,6 +417,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		m_client->setError(QString("start position beyond total duration."));
 		return;
 	}
+
 
 	// Build a full list of channels to load.
 	// The list is based on channelsToLoad plus channels required for montage.
@@ -432,7 +463,10 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			fileLock();  // get access to the file for reading
 			for (auto c : m_loadingList)
 				c->clearData();
-			read = m_reader->readDataFromChannels(m_positionInFile, m_duration, m_loadingList);
+			if (rawData)
+				read = m_reader->readDataFromChannels(m_positionInFile, m_duration, m_loadingList);
+			else
+				read = readWithOfflineFiltering(m_positionInFile, m_duration, m_loadingList);
 			fileUnlock();
 		}
 	}
@@ -502,20 +536,20 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		while (!m_refList.isEmpty())
 			delete m_refList.takeLast();
 
-		if (!rawData) {
-
-			// Filtering
-			for (auto c : m_loadingList + m_virtualChannels) {
-				if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
-					channelsToFilter << c;
-			}
-			for (auto c : m_sourceEEGChannels + m_sourceMEGChannels) {
-				if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
-					channelsToFilter << c;
-			}
-			AwFiltering::filter(channelsToFilter);
-			// end of filtering
-		}
+		//if (!rawData) {
+		//	// re read data with padding to ensure the filtering will not affect short parts of data
+		//	// Filtering
+		//	for (auto c : m_loadingList + m_virtualChannels) {
+		//		if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
+		//			channelsToFilter << c;
+		//	}
+		//	for (auto c : m_sourceEEGChannels + m_sourceMEGChannels) {
+		//		if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
+		//			channelsToFilter << c;
+		//	}
+		//	AwFiltering::filter(channelsToFilter);
+		//	// end of filtering
+		//}
 
 		// check for internal processes
 		QList<AwProcess *> internals = AwProcessManager::instance()->activeInternalProcesses();
