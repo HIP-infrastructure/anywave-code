@@ -57,7 +57,7 @@ public:
 	/** Retourne la liste des objets AwChannel du montage courant **/
 	AwChannelList& channels() { return m_channels;}
 	/** Retourne la liste des AwChannels AsRecorded **/
-	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded[name]; }
+	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
 	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
 	QHash<QString, AwChannel *> cloneAsRecordedChannels();
 	bool containsChannelOfType(AwChannel::ChannelType t); 

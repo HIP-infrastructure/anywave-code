@@ -442,7 +442,14 @@ AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cut
 	return res;
 }
 
-
+AwMarkerList AwMarker::getMarkersWithDuration(const AwMarkerList& markers)
+{
+	AwMarkerList res;
+	for (auto m : markers)
+		if (m->duration())
+			res << m;
+	return res;
+}
 
 AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList& skipLabels, const QStringList& useLabels, float totalDuration)
 {

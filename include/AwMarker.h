@@ -66,9 +66,11 @@ public:
 	static QList<QPair<QString, int> > count(const QList<AwMarker *>& markers);
 	/** Gets all markers labels **/
 	static QStringList getAllLabels(const QList<AwMarker *>& markers);
-	/* Get alls markers with a label, markers are not duplicated. */
+	/* Get all markers with a duration, markers are not duplicated. */
+	static QList<AwMarker *> getMarkersWithDuration(const QList<AwMarker *>& markers);
+	/* Get all markers with a label, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabel(const QList<AwMarker *>& markers, const QString& label);
-	/* Get alls markers with specified labels, markers are not duplicated. */
+	/* Get all markers with specified labels, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabels(const QList<AwMarker *>& markers, const QStringList& labels); 
 	/** Rename all markers in a list. **/
 	static QList<AwMarker *>& rename(QList<AwMarker *>& markers, const QString& newLabel);

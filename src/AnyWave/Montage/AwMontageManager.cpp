@@ -466,71 +466,10 @@ void AwMontageManager::checkForBIDSMods()
 {
 	if (m_channelsTsv.isEmpty())
 		return;
+	if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+		return;
 	auto BM = AwBIDSManager::instance();
-	AwTSVDict dict;
-	try {
-		dict = BM->loadTsvFile(m_channelsTsv);
-	}
-	catch (const AwException& e) {
-		AwMessageBox::information(0, tr("BIDS"), e.errorString());
-		return;
-	}
-	// get columns from tsv file
-	auto cols = BM->readTsvColumns(m_channelsTsv);
-	if (cols.isEmpty()) {
-		return;
-	}
-
-	auto names = dict["name"];
-	auto types = dict["type"];
-	auto status = dict["status"];
-	// check if status column is present
-	if (status.isEmpty()) { // No => create it.
-		for (int i = 0; i < names.size(); i++) {
-			status << "good";
-		}
-	}
-	// from here, cols contains the keys to access the dictionnary.
-	QString badStatus, type;
-	bool mustBeSaved = false;
-	for (int i = 0; i < names.size(); i++) {
-		auto name = names.value(i);
-		//auto asRecorded = m_channelHashTable.value(name);
-		auto asRecorded = m_asRecorded[name];
-		if (asRecorded) {
-			// convert AnyWave Channel type to BIDS
-			if (asRecorded->isMEG())
-				type = "MEGMAG";
-			else if (asRecorded->isGRAD())
-				type = "MEGGRADAXIAL";
-			else if (asRecorded->isECG())
-				type = "ECG";
-			else if (asRecorded->isSEEG())
-				type = "SEEG";
-			else if (asRecorded->isEEG())
-				type = "EEG";
-			else if (asRecorded->isEMG())
-				type = "EMG";
-			else if (asRecorded->isTrigger())
-				type = "TRIG";
-			else if (asRecorded->isReference())
-				type = "MEGREFMAG";
-			else
-				type = "OTHER";
-
-			badStatus = asRecorded->isBad() ? "bad" : "good";
-			if (types.value(i) != type) {
-				mustBeSaved = true;
-				break;
-			}
-			if (status.value(i) != badStatus) {
-				mustBeSaved = true;
-				break;
-			}
-		}
-	}
-	if (mustBeSaved)
-		BM->addModification(m_channelsTsv, AwBIDSManager::ChannelsTsv);
+	BM->updateChannelsTsv(m_channelsTsv);
 }
 
 ///
@@ -1036,7 +975,6 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 		QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
 		return;
 	}
-//	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	setNewFilters(AwSettings::getInstance()->filterSettings());
 	emit montageChanged(m_channels);

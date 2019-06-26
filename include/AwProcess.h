@@ -70,9 +70,9 @@ namespace Aw
 	}
 	namespace ProcessInput {
 		enum AwProcessInputs {
-			ProcessIgnoresChannelSelection = 1, GetAllMarkers = 2, GetReaderPlugins = 4,
-			GetWriterPlugins = 8, GetAsRecordedChannels = 16, GetCurrentMontage = 32, 
-			GetProcessPluginNames = 64, ProcessRequiresChannelSelection = 128
+			ProcessIgnoresChannelSelection = 1, GetAllMarkers = 2, GetDurationMarkers = 4, GetReaderPlugins = 8,
+			GetWriterPlugins = 16, GetAsRecordedChannels = 32, GetCurrentMontage = 64,	GetProcessPluginNames = 128,
+			ProcessRequiresChannelSelection = 256
 		};
 	}
 }

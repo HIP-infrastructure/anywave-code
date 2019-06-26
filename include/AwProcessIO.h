@@ -42,6 +42,7 @@ public:
 	inline bool containsMarkers() { return !m_markers.isEmpty(); }
 	inline bool containsWidgets() { return !m_widgets.isEmpty(); }
 	inline bool containsCustomData() { return !customData.isEmpty(); }
+	inline bool launchedUsingQST() { return timeSelection.duration() > 0.; }
 	inline bool containsICA() { return !icaPath.isEmpty(); }
 	bool isEmpty();
 	inline AwFileIO *reader() { return m_reader; }
@@ -76,6 +77,7 @@ public:
 	QString workingDirPath;
 	QString pluginDirPath;
 	QString icaPath;			// contains the path to the .ica.h5 file or is empty if no ICA was computed.
+	AwMarker timeSelection;		// optional marker used in Quick Time Selection mode in AnyWave (contains the timing the user has selected before launching the process).
 	//QList<QWidget *> widgets;
 	QVariantList customData;
 	QStringList badLabels;		// contains channels marked as bad
@@ -93,6 +95,7 @@ public:
 protected:
 	AwChannelList m_channels;
 	AwMarkerList m_markers;
+
 	QList<QWidget *> m_widgets;
 	AwFileIO *m_reader;
 	AwArguments m_arguments;	// used for pluing launches from the command line

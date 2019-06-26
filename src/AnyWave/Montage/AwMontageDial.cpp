@@ -415,17 +415,26 @@ void AwMontageDial::makeSEEGBipolar()
 		match = exp.match(c->name());
 		if (match.hasMatch()) {
 			auto elec = match.captured(1);
+			auto elecCopy = elec;
 			auto number = match.captured(2);
 			// some electodes may have preceding zeros before pad number
 			while (number.startsWith("0")) {
 				elec += "0";
 				number.remove(0, 1);
 			}
-			auto ref = QString("%1%2").arg(elec).arg(number.toInt() + 1);
-			// check if ref exists in asRecorded.
-			if (m_asRecorded.contains(ref)) 
-				// build the ref
+			// next electrode could be weird 
+			// example : X09 and X10 not X010
+			// try to guess the possible reference
+			bool refFound = false;
+			auto nextNumber = number.toInt() + 1;
+			auto ref = QString("%1%2").arg(elec).arg(nextNumber);
+			if (m_asRecorded.contains(ref))
 				c->setReferenceName(ref);
+			else {
+				ref = QString("%1%2").arg(elecCopy).arg(nextNumber);
+				if (m_asRecorded.contains(ref))
+					c->setReferenceName(ref);
+			}
 		}
 	}
 
@@ -516,9 +525,11 @@ void AwMontageDial::resetToAsRecorded()
 	// Reset the montage, whit no virtual channels
 	//channels.clear();
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->clearMontage();
-	for (auto c : m_asRecorded.values())
+	channels.clear();
+	for (auto c : m_asRecorded.values()) {
 		if (!c->isVirtual() && !c->isBad())
 			channels << new AwChannel(c);
+	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
 }
 

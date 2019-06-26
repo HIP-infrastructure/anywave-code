@@ -721,7 +721,7 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 	bool mustBeSaved = false;
 	for (int i = 0; i < names.size(); i++) {
 		auto name = names.value(i);
-		auto asRecorded = MM->asRecordedChannel(name);
+		AwChannel *asRecorded = MM->asRecordedChannel(name);
 		if (asRecorded) {
 			// convert AnyWave Channel type to BIDS
 			if (asRecorded->isMEG())

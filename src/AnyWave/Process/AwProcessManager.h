@@ -124,8 +124,8 @@ protected:
 	void addProcessToMenu(AwProcessPlugin *plugin);
 	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
 	bool initProcessIO(AwBaseProcess *p);
-	bool buildPDIForProcess(AwBaseProcess *p, AwChannelList& fromList);
-	bool buildPDIForProcess(AwBaseProcess *p);
+	//bool buildPDIForProcess(AwBaseProcess *p, AwChannelList& fromList);
+	bool buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources = AwChannelList());
 	//bool processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources);
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);

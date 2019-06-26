@@ -65,6 +65,7 @@ public:
 	QStringList readTsvColumns(const QString& path);
 	/** Create a TSV file based on a dictionnary **/
 	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
+	void updateChannelsTsv(const QString& path);
 signals:
 	void log(const QString& message);
 	void BIDSClosed();
@@ -81,7 +82,7 @@ protected:
 	void parseSubject(AwBIDSSubject *subject);
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
 	void applyModifications();
-	void updateChannelsTsv(const QString& path);
+
 	void updateEventsTsv(const QString& path);
 	QString getParsingPath();
 	void modifyUpdateJson(const QStringList& branches);

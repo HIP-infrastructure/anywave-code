@@ -36,7 +36,7 @@
 
 ICA::ICA()
 {
-	pdi.setInputFlags(Aw::ProcessInput::GetAsRecordedChannels|Aw::ProcessInput::GetProcessPluginNames |Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	pdi.setInputFlags(Aw::ProcessInput::GetAsRecordedChannels|Aw::ProcessInput::GetProcessPluginNames |Aw::ProcessInput::GetDurationMarkers| Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_algoNames << "Infomax";
@@ -57,8 +57,6 @@ ICA::~ICA()
 
 bool ICA::showUi()
 {
-	//if (pdi.input.processPluginNames.contains("MultiICA_MATLAB"))
-	//	m_algoNames << "FastICA(MATLAB)";
 	ICASettings ui(pdi.input.dataPath, pdi.input.channels(), pdi.input.markers(), m_algoNames);
 
 	if (ui.exec() == QDialog::Accepted)	{
@@ -78,25 +76,15 @@ bool ICA::showUi()
 			pdi.input.clearMarkers();
 			pdi.input.addMarker(new AwMarker("global", 0., pdi.input.fileDuration));
 		}
-		//m_ignoredMarkerLabel = ui.selectedMarker;
-		//m_ignoreMarkers = ui.ignoreMarkers;
-		//m_ignoreBadChannels = ui.ignoreBadChannels;
-
 		// NOT SKIPPING BAD CHANNELS, ok clear badLabels from input.
 		if (!ui.ignoreBadChannels) {
 			pdi.input.badLabels.clear();
 		}
 
-	//	m_nComp = ui.components;
 		args["comp"] = ui.components;
-		//m_isDownsamplingActive = ui.downSampling;
 		args["downsampling"] = ui.downSampling;
-		//m_fileName = ui.filePath;
-		//m_lpf = ui.lpf;
-		//m_hpf = ui.hpf;
 		args["hp"] = ui.hpf;
 		args["lp"] = ui.lpf;
-		//m_samplingRate = ui.samplingRate;
 		m_algo = ui.algo;
 
 		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.dataFolder);
@@ -246,109 +234,6 @@ void ICA::runFromCommandLine()
 
 void ICA::run()
 {
-	//emit progressChanged("Filtering channel types...");
-	//m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
-	//// if modality is set to SOURCE that may raise an issue as sources channels may also be present as As Recorded Channels if the data was previously exported.
-	//// So check for doublons on sources to avoid miscalculation.
-	//m_channels = AwChannel::removeDoublons(m_channels);
-
-	//// check for sampling rate for  all channels
-	//emit progressChanged("OK");
-
-	//if (m_ignoreBadChannels) {
-	//	emit progressChanged("Removing bad channels...");
-	//	foreach(AwChannel *c, m_channels)
-	//		if (c->isBad())
-	//			m_channels.removeAll(c);
-	//	emit progressChanged("OK.");
-	//}
-
-	//// Verify number of IC vs total number of chans after removing bad ones
-	//if (m_nComp > m_channels.size()) {
-	//	emit progressChanged("Adjusting number of IC to " + QString::number(m_channels.size()));
-	//	m_nComp = m_channels.size();
-	//}
-
-	//if (m_channels.size() < 2) {
-	//	emit progressChanged("Insufficient channels (" + QString::number(m_channels.size()) + ")");
-	//	return;
-	//}
-
-	//emit progressChanged("Checking for sampling rate through all channels...");
-	//for (int i = 1; i < m_channels.size(); i++)
-	//	if (m_channels.at(i)->samplingRate() != m_samplingRate) {
-	//		emit progressChanged("not all channels have same sampling rate, "
-	//			"please resample data before performing ICA.");
-	//		return;
-	//	}
-	//emit progressChanged("OK.");
-
-	//auto markersToSkip = AwMarker::getMarkersWithLabel(pdi.input.markers(), m_ignoredMarkerLabel);
-	//AwMarkerList selectedMarkers;
-	//if (m_ignoreMarkers) 
-	//	selectedMarkers = AwMarker::invertMarkerSelection(markersToSkip, m_ignoredMarkerLabel, pdi.input.fileDuration);
-	//
-	//bool skipData = !selectedMarkers.isEmpty();
-
-	//AwFilterSettings filterSettings(pdi.input.filterSettings);
-	//filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
-	//filterSettings.apply(m_channels);
-	//sendMessage("Loading data...");
-	//if (skipData)
-	//	requestData(&m_channels, &selectedMarkers, true);
-	//else
-	//	requestData(&m_channels, 0.0f, -1.0f, true);
-	//sendMessage("Done.");
-
-	//qDeleteAll(selectedMarkers);
-
-	//int decimate = 1;
-	//if (m_isDownsamplingActive) {
-	//	decimate = 2;
-	//	// compute decimate factor based on low pass filter
-	//	if (m_lpf > 0) {
-	//		float fc = m_lpf * 4;
-
-	//		while (m_samplingRate / decimate > fc)
-	//			decimate++;
-	//		decimate--;
-	//	}
-	//	sendMessage(QString("Decimating data by a a factor of %1...").arg(decimate));
-	//	try {
-	//		AwFiltering::decimate(m_channels, decimate);
-	//	}
-	//	catch (const AwException& e)
-	//	{
-	//		sendMessage("Error during decimation of data. Aborted.");
-	//		return;
-	//	}
-	//	sendMessage("Done.");
-	//}
-	//else { // just filter the data
-	//	sendMessage("Filtering...");
-	//	AwFiltering::filter(&m_channels);
-	//	sendMessage("Done.");
-	//}
-
-	//// check for nan values
-	//if (AwMath::isNanInChannels(m_channels)) {
-	//	sendMessage("A Nan value was detected in the data. Computation aborted.");
-	//	return;
-	//}
-
-	//int nSamples = m_channels.first()->dataSize(); // getting total number of samples
-	//if (sqrt(nSamples / 30.) < m_nComp) {
-	//	sendMessage(QString("Number of samples %1 for the number of components "
-	//		"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
-	//	return;
-	//}
-
-	//// channels have been prepared.
-	//// prepare data matrix
-	//int m = m_channels.size();
-	//int n = nSamples;
-	//int nc = m_nComp;
-
 	if (initParameters() == -1)
 		return;
 
@@ -361,19 +246,6 @@ void ICA::run()
 		args.append(m_fileName);
 		emit sendCommand(AwProcessCommand::LoadICA, args);
 	}
-
-	//switch (m_algo)
-	//{
-	//case ICA::Infomax:
-	//	infomax(m, n, m_nComp);
-	//	if (!isAborted())
-	//		saveToFile();
-	//	break;
-	//case ICA::FASTICA:
-	//	createInputFile();
-	//	launchMatlabPlugin();
-	//	break;
-	//}
 }
 
 

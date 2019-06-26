@@ -445,7 +445,6 @@ void AnyWave::quit()
 		AwEpochManager::destroy();
 	}
 #endif
-//	AwScriptManager::destroy();
 	AwBIDSManager::destroy();
 }
 
