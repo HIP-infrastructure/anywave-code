@@ -28,8 +28,8 @@
 #include <QtMath>
 
 static mxArray *parse_cfg(const mxArray *);
-static mxArray *request_markers(const QString& file, const QString& extractTriggers, 
-								QVector<float>& values, QStringList& labels, QStringList& channels);
+static mxArray *request_markers(const QString& file, const QString& extractTriggers,
+	QVector<float>& values, QStringList& labels, QStringList& channels);
 
 
 mxArray *request_markers(const QString& file, const QString& extractTriggers, QVector<float>& values, QStringList& labels, QStringList& channels)
@@ -49,7 +49,7 @@ mxArray *request_markers(const QString& file, const QString& extractTriggers, QV
     stream_data.setVersion(QDataStream::Qt_4_4);
     stream_size << getPid(); 
     stream_data << request;
-    stream_data << file << extractTriggers << values << labels << channels;
+	stream_data << file << extractTriggers << values << labels << channels;
        
     // send request
     stream_size << data.size();
@@ -126,7 +126,7 @@ mxArray *parse_cfg(const mxArray *cfg)
     // default value
     QVector<float> values;
     QStringList labels;
-    QStringList channels;
+	QStringList channels;
 	QString file, extractTriggers;
     
     if (cfg) {  // parse structure if a structure is passed as parameter
@@ -199,7 +199,7 @@ mxArray *parse_cfg(const mxArray *cfg)
             }
         }
     }
-    return request_markers(file, extractTriggers, values, labels, channels);
+	return request_markers(file, extractTriggers, values, labels, channels);
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])

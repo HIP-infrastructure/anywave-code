@@ -576,10 +576,6 @@ void AwBIDSManager::closeBIDS()
 {
 	if (!isBIDSActive())
 		return;
-	// check if some mods should be validated
-	if (!m_modifications.isEmpty()) {
-			applyModifications();
-	}
 	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
 		clearSubjects(i);
 	m_rootDir.clear();
@@ -765,19 +761,19 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 	modifyUpdateJson(branches);
 }
 
-void AwBIDSManager::applyModifications()
-{
-	for (auto k : m_modifications.keys()) {
-		if (k == AwBIDSManager::ChannelsTsv) {
-			if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
-				updateChannelsTsv(m_modifications[k]);
-		}
-		else if (k == AwBIDSManager::EventsTsv) {
-			if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-				updateEventsTsv(m_modifications[k]);
-		}
-	}
-}
+//void AwBIDSManager::applyModifications()
+//{
+//	//for (auto k : m_modifications.keys()) {
+//	//	if (k == AwBIDSManager::ChannelsTsv) {
+//	//		if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
+//	//			updateChannelsTsv(m_modifications[k]);
+//	//	}
+//	//	else if (k == AwBIDSManager::EventsTsv) {
+//	//		if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+//	//			updateEventsTsv(m_modifications[k]);
+//	//	}
+//	//}
+//}
 
 void AwBIDSManager::clearSubjects(int sourceDir)
 {
@@ -1058,8 +1054,8 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 }
 
 
-void AwBIDSManager::addModification(const QString& itemPath, int modification)
-{
-	m_modifications[modification] = itemPath;
-	m_mustValidateModifications = true;
-}
+//void AwBIDSManager::addModification(const QString& itemPath, int modification)
+//{
+//	m_modifications[modification] = itemPath;
+//	m_mustValidateModifications = true;
+//}

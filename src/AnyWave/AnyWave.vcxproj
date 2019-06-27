@@ -1046,6 +1046,7 @@
     <ClCompile Include="Marker\AwNewMarkerRuleDial.cpp" />
     <ClCompile Include="Marker\AwPickChannelsDial.cpp" />
     <ClCompile Include="MATPy\AddMarkers.cpp" />
+    <ClCompile Include="MATPy\AwGetMarkersEx.cpp" />
     <ClCompile Include="MATPy\AwMATPyServer.cpp" />
     <ClCompile Include="MATPy\AwPidManager.cpp" />
     <ClCompile Include="MATPy\AwRequestServer.cpp" />

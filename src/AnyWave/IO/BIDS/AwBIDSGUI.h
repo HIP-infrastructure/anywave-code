@@ -31,7 +31,6 @@ protected:
 	QMap<int, QStandardItemModel *> m_models;
 
 	void initModel(QStandardItemModel *model, const AwBIDSSubjectList& subjects);
-	void checkForElectrodeAndMesh(const QString& path) {}
 private:
 	Ui::AwBIDSGUIUi m_ui;
 	QStandardItemModel *m_currentModel;

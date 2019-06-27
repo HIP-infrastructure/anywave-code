@@ -116,23 +116,15 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	createUserDirs();
 	
 	if (isGUIMode) {
-		// AwSettings loads recentfiles in constructor, so get that list and update menu
-		//QStringList recentFiles = aws->recentFiles();
 		QStringList recentFiles = aws->getStringList("recentFiles");
 		if (!recentFiles.isEmpty()) {
-			QStringList shortenFiles;
-			for (auto s : recentFiles)
-				shortenFiles << aws->shortenFilePath(s);
-			updateRecentFiles(shortenFiles);
+			updateRecentFiles(recentFiles);
 		}
 
 		//QStringList recentBIDS = aws->recentBIDS();
 		QStringList recentBIDS = aws->getStringList("recentBIDS");
 		if (!recentBIDS.isEmpty()) {
-			QStringList shortenFiles;
-			for (auto s : recentBIDS)
-				shortenFiles << aws->shortenFilePath(s);
-			updateRecentBIDS(shortenFiles);
+			updateRecentBIDS(recentBIDS);
 		}
 	}
 

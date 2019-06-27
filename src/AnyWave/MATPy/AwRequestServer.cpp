@@ -137,6 +137,9 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		case AwRequest::GetDataEx:
 			handleGetDataEx(client, p);
 			break;
+		case AwRequest::GetMarkersEx:
+			handleGetMarkersEx(client, p);
+			break;
 		case AwRequest::AddMarkers:
 			handleAddMarkers(client, p);
 			break;

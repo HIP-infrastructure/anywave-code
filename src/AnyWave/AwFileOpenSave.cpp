@@ -48,7 +48,8 @@ void AnyWave::updateRecentBIDS(const QStringList &files)
 
 	qint32 count = 1;
 	for (auto s : files) {
-		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentBIDSMenu);
+		auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+		QAction *action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentBIDSMenu);
 		m_recentBIDSMenu->addAction(action);
 		// add index number in data()
 		action->setData(count - 1);
@@ -64,7 +65,8 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 
 	qint32 count = 1;
 	for (auto s : files) {
-		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentFilesMenu);
+		auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+		QAction *action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentFilesMenu);
 		m_recentFilesMenu->addAction(action);
 		// add index number in data()
 		action->setData(count - 1);

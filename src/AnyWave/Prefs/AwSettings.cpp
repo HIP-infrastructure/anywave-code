@@ -193,7 +193,6 @@ void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
 
 void AwSettings::closeFile()
 { 
-//	currentIcaFile.clear(); 
 	setSettings("currentIcaFile", QString());
 	if (m_fileInfo)
 		m_filterSettings.save(QString("%1.flt").arg(m_fileInfo->filePath()));
@@ -271,12 +270,9 @@ void AwSettings::addRecentFilePath(const QString& path)
 		recentFiles.removeLast();
 
 	recentFiles.insert(0, path);
-	QStringList result;
-	for (auto s : recentFiles)
-		result << shortenFilePath(s);
-	m_settings["recentFiles"] = result;
+	m_settings["recentFiles"] = recentFiles;
 
-	emit recentFilesUpdated(result);
+	emit recentFilesUpdated(recentFiles);
 }
 
 void AwSettings::addRecentBIDS(const QString& path)
@@ -288,11 +284,8 @@ void AwSettings::addRecentBIDS(const QString& path)
 		recentBIDS.removeLast();
 
 	recentBIDS.insert(0, path);
-	QStringList result;
-	for (auto s : recentBIDS)
-		result << shortenFilePath(s);
-	m_settings["recentBIDS"] = result;
-	emit recentBIDSUpdated(result);
+	m_settings["recentBIDS"] = recentBIDS;
+	emit recentBIDSUpdated(recentBIDS);
 }
 
 void AwSettings::removeRecentFilePath(const QString& path)

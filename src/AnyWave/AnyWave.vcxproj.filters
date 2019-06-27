@@ -1276,6 +1276,9 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_SignalInfo.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\AwGetMarkersEx.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">

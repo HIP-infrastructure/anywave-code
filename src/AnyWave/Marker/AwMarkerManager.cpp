@@ -325,9 +325,13 @@ void AwMarkerManager::checkForBIDSMods()
 		return;
 	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
 		return;
-	if (m_markersModified)
-		AwBIDSManager::instance()->addModification(m_eventsTsv, AwBIDSManager::EventsTsv);
-
+	if (m_markersModified) {
+		if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+			return;
+		auto BM = AwBIDSManager::instance();
+		BM->updateEventsTsv(m_eventsTsv);
+	}
+	//AwBIDSManager::instance()->addModification(m_eventsTsv, AwBIDSManager::EventsTsv);
 }
 
 void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
