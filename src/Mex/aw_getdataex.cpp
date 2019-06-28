@@ -86,25 +86,26 @@ mxArray *parse_cfg(const mxArray *cfg)
 	int nChannels = 0;
 
 	// create MATLAB data struct for output
-	int nfields = 9;
-	const char *fields[] = { "name", "type", "ref", "samplingRate", "data", "hpf", "lpf", "notch", "selected" };
+	int nfields = 8;
+	const char *fields[] = { "name", "type", "ref", "samplingRate", "data", "hpf", "lpf", "notch" };
 
 	// get response from AnyWave
 	in >> nChannels;
 
-	if (nChannels == 0)  // no channels returned (means that the requested labels did not match existing channels in AnyWave.
+	if (nChannels == 0) // no channels returned (means that the requested labels did not match existing channels in AnyWave.
 		return output;
-	
+		
 	output = mxCreateStructMatrix(1, nChannels, nfields, fields);
 	for (auto i = 0; i < nChannels; i++) {
-		if (request.getResponse() < 0) 
-			return output;
+		if (request.getResponse() == 0) {
+			return NULL;
+		}
 		
 		QString name, ref, type;
 		float samplingRate, hpf, lpf, notch;
 		qint64 nSamples;
 		int selected;
-		in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> notch >> nSamples >> selected;
+		in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> notch >> nSamples;
 
 		mxSetField(output, i, "name", mxCreateString(name.toStdString().c_str()));
 		mxSetField(output, i, "ref", mxCreateString(ref.toStdString().c_str()));
@@ -113,7 +114,6 @@ mxArray *parse_cfg(const mxArray *cfg)
 		mxSetField(output, i, "hpf", floatToMat(hpf));
 		mxSetField(output, i, "lpf", floatToMat(lpf));
 		mxSetField(output, i, "notch", floatToMat(notch));
-		mxSetField(output, i, "selected", boolToLogical(selected > 0));
 
 		if (nSamples == 0) 
 			mxSetField(output, i, "data", mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL));
@@ -127,8 +127,7 @@ mxArray *parse_cfg(const mxArray *cfg)
 			qint64 chunkSize;
 			do {
 				// waiting for chunk of data
-				dataSize = waitForResponse(request.socket());
-				if (dataSize == -1) {
+				if (request.getResponse() == 0) {
 					mexPrintf("Error while receiving data.");
 					return output;
 				}

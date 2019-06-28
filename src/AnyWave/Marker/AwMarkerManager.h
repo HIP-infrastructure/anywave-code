@@ -48,6 +48,8 @@ public:
 
 	/** Donne la liste de tous les marqueurs. **/
 	AwMarkerList getMarkers();
+	/** Thread support version **/
+	AwMarkerList getMarkersThread();
 	inline AwMarkerList& displayedMarkers() { return m_displayedMarkers; }
 	/** Get markers from position s1 to position s2 **/
 	AwMarkerList getMarkers(float s1, float s2);

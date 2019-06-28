@@ -92,6 +92,15 @@ AwMarkerList AwMarkerManager::getMarkers()
 	return m_markers;
 }
 
+AwMarkerList AwMarkerManager::getMarkersThread()
+{
+	QMutexLocker locker(&m_mutex);
+	if (m_needSorting)
+		qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+
+	return AwMarker::duplicate(m_markers);
+}
+
 void AwMarkerManager::showDockUI()
 {
 	if (m_dock)
