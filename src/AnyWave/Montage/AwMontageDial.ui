@@ -421,6 +421,9 @@ Dragging channels from As Recorded list directly to the montage will also add th
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>move selected channels upward in the list</string>
+          </property>
           <property name="text">
            <string>Up</string>
           </property>
@@ -433,6 +436,9 @@ Dragging channels from As Recorded list directly to the montage will also add th
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>move the selected channels downward in the list</string>
           </property>
           <property name="text">
            <string>Down</string>
@@ -452,7 +458,7 @@ Dragging channels from As Recorded list directly to the montage will also add th
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Restore the default Montage</string>
+           <string>Make a montage with as recorded channels found in data file</string>
           </property>
           <property name="text">
            <string>Restore Default</string>
@@ -489,6 +495,9 @@ Dragging channels from As Recorded list directly to the montage will also add th
         </item>
         <item>
          <widget class="QPushButton" name="buttonSort">
+          <property name="toolTip">
+           <string>Sort the montage list</string>
+          </property>
           <property name="text">
            <string>ReOrder</string>
           </property>
@@ -546,6 +555,9 @@ Dragging channels from As Recorded list directly to the montage will also add th
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>Load a montage file</string>
+          </property>
           <property name="text">
            <string>Load</string>
           </property>
@@ -556,38 +568,15 @@ Dragging channels from As Recorded list directly to the montage will also add th
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QPushButton" name="buttonAutomaticMontage">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QPushButton" name="buttonSpecial">
+          <property name="contextMenuPolicy">
+           <enum>Qt::DefaultContextMenu</enum>
           </property>
           <property name="toolTip">
-           <string>Click to reset the current montage and to build a SEEG bipolar one</string>
+           <string>Allows to setup Bipolar or AVG references montages</string>
           </property>
           <property name="text">
-           <string>SEEG Montage</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="buttonECOG">
-          <property name="text">
-           <string>ECoG Montage</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="buttonAVG">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string> EEG AVG Ref. Montage</string>
+           <string>Special Montages</string>
           </property>
          </widget>
         </item>

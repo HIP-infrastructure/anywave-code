@@ -58,14 +58,8 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(filterHPO);
 	parser.addOption(filterLPO);
 	parser.addOption(filterNotchO);
-
-	//// Convert File options
-	//QCommandLineOption ConvertOpt("convert", "convert a file to another format.");
-	//parser.addOption(ConvertOpt);
-
 	// run process options
 	QCommandLineOption runProcessOpt("run", "launch a process using json file or json string.", "runArgs", QString());
-	
 	// BIDS
 	QCommandLineOption toBIDSOpt("toBIDS", "convert files to BIDS.");
 	QCommandLineOption BIDSModalityOpt("bids_modality", "ieeg or meg", "bids modality", QString());

@@ -462,6 +462,8 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 	}
 	else if (use && !skip) { // just use some markers as input =>  reshape markers and return used markers as input.
 		inputMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		if (inputMarkers.isEmpty())
+			return AwMarker::duplicate(markers);
 		// remove used markers from the list
 		for (auto m : inputMarkers)
 			markers.removeAll(m);
@@ -478,6 +480,8 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		if (skippedMarkers.isEmpty())
+			return AwMarker::duplicate(markers);
 		inputMarkers = AwMarker::invertMarkerSelection(skippedMarkers, "Selection", totalDuration);
 		// remove skipped markers from the list
 		for (auto m : skippedMarkers)
@@ -493,6 +497,8 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 	else if (skip && use) {
 		auto usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		if (usedMarkers.isEmpty() || skippedMarkers.isEmpty())
+			return AwMarker::duplicate(markers);
 		// remove artefact markers from the marker list
 		for (auto m : skippedMarkers)
 			markers.removeAll(m);

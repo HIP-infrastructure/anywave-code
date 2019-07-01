@@ -44,12 +44,12 @@ public:
 protected:
 	AwChannelList m_channels;		// channels to export
 	AwChannelList m_ICAChannels;	// ICA Channels to export
-	AwMarkerList m_skippedMarkers, m_exportedMarkers;
 	AwFileIOPlugin *m_plugin;
 	QString m_path;
 	bool m_exportICAChannels;			// this flag indicates that the data contains ICA virtual channels
 	bool m_relabelChannels;
 	int m_decimateFactor;
+	AwMarkerList m_inputMarkers, m_outputMarkers;
 };
 
 class AwExporterPlugin : public AwProcessPlugin

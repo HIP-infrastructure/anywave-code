@@ -43,8 +43,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	emit log("processing aw_getdataex/getdataex()");
 	AwTCPResponse response(client);
 
-	//enum  { PickFromMontage, PickFromDataFile, PickFromInput, PickAsRecorded };
-
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
@@ -113,18 +111,10 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 		if (root.contains("downsampling_factor"))
 			downsampling = root["downsampling_factor"].toInt();
 		// get filters
-		if (root.contains("filters") && root["filters"].isObject()) {
-			auto filters = root["filters"].toObject();
-			QStringList types = AwChannel::types();
-
-			for (auto t : types) {
-				auto lowerT = t.toLower();
-				if (filters.contains(lowerT) && filters[lowerT].isArray()) {
-					QVector<float> tmp;
-					for (auto i : filters[lowerT].toArray()) 
-						tmp << i.toDouble();
-					filterSettings.set(lowerT, tmp);
-				}
+		QVector<float> filters;
+		if (root.contains("filters") && root["filters"].isArray()) {
+			for (auto f : root["filters"].toArray()) {
+				filters << f.toDouble();
 			}
 		}
 		AwMarkerList markers = AwMarkerManager::instance()->getMarkersThread();
@@ -169,7 +159,11 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 			}
 			requestedChannels = tmp;
 		}
-		filterSettings.apply(requestedChannels);
+		// apply filters
+		if (!filters.isEmpty()) {
+			float notch = filters.size() == 3 ? filters.value(2) : 0.;
+			AwChannel::setFilters(requestedChannels, filters.value(0), filters.value(1), notch);
+		}
 	}
 	// remove possible bad channels 
 	AwMontageManager::instance()->removeBadChannels(requestedChannels);

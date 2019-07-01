@@ -61,8 +61,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 mxArray *parse_cfg(const mxArray *cfg)
 {
 	TCPRequest request(AwRequest::GetDataEx);
-	if (request.status() != TCPRequest::connected)
+	if (request.status() != TCPRequest::connected) {
+		mexErrMsgTxt("Failed to connect to AnyWave.");
 		return NULL;
+	}
 
 	QDataStream *stream = request.stream();
 	mxArray *output = NULL;
@@ -72,12 +74,16 @@ mxArray *parse_cfg(const mxArray *cfg)
 	
 	// if cfg == NULL => send an empty string (default parameters = all data from current input channels set for the process).
 
-	if (!request.sendRequest())
+	if (!request.sendRequest()) {
+		mexErrMsgTxt("sending request failed.");
 		return NULL;
+	}
 
 	int dataSize = request.getResponse();
-	if (dataSize < 0)
+	if (dataSize < 0) {
+		mexErrMsgTxt("AnyWave did not respond to the request.");
 		return NULL;
+	}
 
 	// Reading response..
 	QDataStream in(request.socket());
@@ -86,16 +92,16 @@ mxArray *parse_cfg(const mxArray *cfg)
 	int nChannels = 0;
 
 	// create MATLAB data struct for output
-	int nfields = 8;
 	const char *fields[] = { "name", "type", "ref", "samplingRate", "data", "hpf", "lpf", "notch" };
 
 	// get response from AnyWave
 	in >> nChannels;
 
-	if (nChannels == 0) // no channels returned (means that the requested labels did not match existing channels in AnyWave.
-		return output;
+	if (nChannels == 0) { // no channels returned (means that the requested labels did not match existing channels in AnyWave.
+		return mxCreateStructMatrix(0, 0, 8, fields);
+	}
 		
-	output = mxCreateStructMatrix(1, nChannels, nfields, fields);
+	output = mxCreateStructMatrix(1, nChannels, 8, fields);
 	for (auto i = 0; i < nChannels; i++) {
 		if (request.getResponse() == 0) {
 			return NULL;

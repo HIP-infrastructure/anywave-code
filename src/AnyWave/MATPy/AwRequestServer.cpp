@@ -27,7 +27,6 @@
 #include "Process/AwScriptPlugin.h"
 #include <QTcpSocket>
 #include <QDataStream>
-//#include <process/AwTcpProcessRequest.h>
 #include "AwPidManager.h"
 #include "Data/AwDataServer.h"
 #include "Debug/AwDebugLog.h"
