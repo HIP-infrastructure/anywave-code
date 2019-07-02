@@ -197,7 +197,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 		response.send();
 		if (c->dataSize()) {
 			bool finished = false;
-			qint64 chunkSize = 200000;	// chunk of 200000 samples
+			qint64 chunkSize = 1000000;	// chunk of 100 000 samples
 			qint64 nSamplesSent = 0;
 			qint64 nSamplesLeft = c->dataSize();
 
