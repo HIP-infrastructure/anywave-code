@@ -1,0 +1,17 @@
+#ADES header file
+samplingRate = 256
+numberOfSamples = 2560
+date = Not Available
+time = Not Available
+A1 = SEEG
+A2 = SEEG
+A3 = SEEG
+A4 = SEEG
+A5 = SEEG
+A6 = SEEG
+A7 = SEEG
+A8 = SEEG
+A9 = SEEG
+A10 = SEEG
+ECG = ECG
+Trigger = TRIGGER
