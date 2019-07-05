@@ -233,7 +233,6 @@ void AwDataConnection::applyICAFilters(int type, AwChannelList& channels)
 
 	if (!m_ICASourcesLoaded[type] || comps->sources().first()->dataSize() == 0) 
 		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
-		//m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
 	AwICAManager::instance()->rejectComponents(type, channels);
 	m_ICASourcesLoaded[type] = true;
 }
@@ -243,8 +242,6 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 	int type = channels.first()->subType();
 	AwSourceManager *sm = AwSourceManager::instance();
 	AwSettings::getInstance()->filterSettings().apply(sm->realChannels(type));
-	//m_reader->readDataFromChannels(m_positionInFile, m_duration, sm->realChannels(type));
-	//AwFiltering::filter(sm->realChannels(type));
 	readWithOfflineFiltering(m_positionInFile, m_duration, sm->realChannels(type));
 	sm->computeSources(channels);
 
@@ -350,7 +347,7 @@ qint64 AwDataConnection::readWithOfflineFiltering(float start, float duration, c
 	// check for channels with filtering options
 	AwChannelList toFilter, others;
 	for (auto c : channels) {
-		if (c->lowFilter() > 0 || c->highFilter() > 0)
+		if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
 			toFilter << c;  
 		else
 			others << c;
@@ -535,21 +532,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		}
 		while (!m_refList.isEmpty())
 			delete m_refList.takeLast();
-
-		//if (!rawData) {
-		//	// re read data with padding to ensure the filtering will not affect short parts of data
-		//	// Filtering
-		//	for (auto c : m_loadingList + m_virtualChannels) {
-		//		if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
-		//			channelsToFilter << c;
-		//	}
-		//	for (auto c : m_sourceEEGChannels + m_sourceMEGChannels) {
-		//		if (c->lowFilter() > 0 || c->highFilter() > 0 || c->notch() > 0)
-		//			channelsToFilter << c;
-		//	}
-		//	AwFiltering::filter(channelsToFilter);
-		//	// end of filtering
-		//}
 
 		// check for internal processes
 		QList<AwProcess *> internals = AwProcessManager::instance()->activeInternalProcesses();

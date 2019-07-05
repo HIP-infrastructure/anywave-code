@@ -74,11 +74,12 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 		}
 		if (!triggerChannels.isEmpty()) {
 			emit log("Extracting values from trigger channels...");
-			reader->readDataFromChannels(0, -1, triggerChannels);
-			AwExtractTriggers extractT;
-			extractT._channels = triggerChannels;
-			extractT.extract();
-			source_markers = extractT._markers;   // replace markers in reader by the ones extracted from trigger channels
+			if (reader->readDataFromChannels(0, reader->infos.totalDuration(), triggerChannels) != 0) {
+				AwExtractTriggers extractT;
+				extractT._channels = triggerChannels;
+				extractT.extract();
+				source_markers = extractT._markers;   // replace markers in reader by the ones extracted from trigger channels
+			}
 		}
 	}
 
