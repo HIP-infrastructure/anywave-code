@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QSqlError>
 #endif
+#include <AwCore.h>
 
 CompumedicsReaderPlugin::CompumedicsReaderPlugin() : AwFileIOPlugin()
 {
@@ -73,29 +74,6 @@ void CompumedicsReader::getResources(const QString& path)
 AwFileIO::FileStatus CompumedicsReader::openFile(const QString &path)
 {
 	getResources(path);
-
-	//// check for EEGData.ini => the only element, normaly, in m_iniFiles
-	//QFile EEGData(m_iniFiles.first());
-	//if (!EEGData.open(QIODevice::ReadOnly | QIODevice::Text)) {
-	//	m_error = QString("Failed to open %1").arg(m_iniFiles.first());
-	//	return AwFileIO::FileAccess;
-	//}
-	//quint64 nSamples;
-	//QTextStream stream(&EEGData);
-	//while (!stream.atEnd()) {
-	//	auto line = stream.readLine();
-	//	if (line.contains("size in samples")) {
-	//		auto tokens = line.split("=");
-	//		if (tokens.size() != 2) {
-	//			m_error = QString("Wrong information in EEGData.ini");
-	//			return AwFileIO::WrongFormat;
-	//		}
-	//		nSamples = tokens.value(1).toInt();
-	//		break;
-	//	}
-	//}
-	//EEGData.close();
-
 	// Open the binary data file
 	m_rdaFile.setFileName(m_rdaFiles.first());
 	if (!m_rdaFile.open(QIODevice::ReadOnly)) {
@@ -127,6 +105,7 @@ AwFileIO::FileStatus CompumedicsReader::openFile(const QString &path)
 	}
 	sdyFile.close();
 	QHash<QString, AwChannel *> channels;
+	AwChannelList orderedChannels;
 	QDomElement root = doc.documentElement();
 	auto elements = root.elementsByTagName("Study");
 	if (elements.isEmpty()) {
@@ -159,6 +138,7 @@ AwFileIO::FileStatus CompumedicsReader::openFile(const QString &path)
 			chan->setSamplingRate(m_samplingRate);
 			chan->setUnit(AwChannel::unitForType(AwChannel::EEG));
 			channels[name] = chan;
+			orderedChannels << chan;
 		}
 	}
 	// get creation date and time
@@ -193,10 +173,10 @@ AwFileIO::FileStatus CompumedicsReader::openFile(const QString &path)
 		}
 	}
 
-	for (auto chan : channels.values()) {
+	for (auto chan : orderedChannels) {
 		infos.addChannel(chan);
-		delete chan;
 	}
+	AW_DESTROY_LIST(orderedChannels);
 
 	auto block = infos.newBlock();
 	block->setDuration(m_numSamples / m_samplingRate);

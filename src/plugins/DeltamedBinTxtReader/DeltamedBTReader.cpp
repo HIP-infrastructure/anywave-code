@@ -140,7 +140,7 @@ qint64 DeltamedBTReader::readDataFromChannels(float start, float duration, QList
 		nSamples = infos.totalSamples() - nStart;
 
 	qint64 totalSize = nSamples * nbChannels;
-	m_file.seek(startSample);
+	m_file.seek(startSample * sizeof(qint16));
 	qint16 *buf = new qint16[totalSize];
 	qint64 read = m_file.read((char *)buf, totalSize * sizeof(qint16));
 	read /= sizeof(qint16);
@@ -153,11 +153,9 @@ qint64 DeltamedBTReader::readDataFromChannels(float start, float duration, QList
 	foreach(AwChannel *c, channelList) {
 		int index = infos.indexOfChannel(c->name());
 		float *data = c->newData(read);
-		qint64 count = 0;
-		while (count < read) {
-			*data++ = (float)buf[index + count * nbChannels] * (m_gainsx1000[index] / 1000.);
-			count++;
-		}
+		float gf = (float)m_gainsx1000[index] / 1000.;
+		for (auto i = 0; i < read; i++)
+			c->data()[i] = (float)buf[index + i * nbChannels] * gf;
 	}
 	delete[] buf;
 	return read;

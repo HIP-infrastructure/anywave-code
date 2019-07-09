@@ -134,6 +134,8 @@ private:
 	void sortLabelsByTypes();
 	void updateButtonAddByTypes();
 	void createContextMenuAndActions();
+	/** remove bad channels directly in the specified list. **/
+	void removeBadChannels(AwChannelList& channels);
 };
 
 #endif // MONTAGEDIAL_H

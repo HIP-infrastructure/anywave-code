@@ -58,8 +58,10 @@ public:
 	void initProcess(AwScriptProcess *process);
 	inline bool isCompiled() { return m_isCompiled; }
 	inline void setAsCompiled(bool f) { m_isCompiled = f; }
+	void setInputFlags(int flags) { m_inputFlags = flags; }
 protected:
 	bool m_isCompiled;
+	int m_inputFlags;	// input flags to set when instantiating the process.
 	void checkIOForProcess(AwScriptProcess *p);
 	QString m_path;			// path to script or executable file
 	QString m_pluginDir;	// path to the directory where the plugin is installed.

@@ -105,6 +105,7 @@ private:
 	void loadUserPlugins();
 	void checkForScriptPlugins(const QString& startingPath);
 	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
+	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);
 	void loadFileIOWriterPlugin(AwFileIOPlugin *plugin);

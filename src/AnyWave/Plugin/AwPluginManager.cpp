@@ -218,7 +218,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 dirs.removeAll("..");
 	 for (auto folder : dirs) {
 		 QString name = folder;
-		 QString desc, processType, category, compiledPath, flags;
+		 QString desc, processType, category, compiledPath, flags, inputFlags;
 		 int type = AwProcessPlugin::Background;	// default type if none defined
 		 bool isMATLABCompiled = false, isPythonCompiled = false;
 		 QString pluginPath = dir.absolutePath() + "/" + folder;
@@ -281,6 +281,11 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 				 if (res.size() == 2)
 					 category = res.at(1).trimmed();
 			 }
+			 else if (line.contains("input_flags")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2)
+					 inputFlags = res.at(1).trimmed();
+			 }
 			 else if (line.contains("flags")) {
 				 QStringList res = line.split("=");
 				 if (res.size() == 2)
@@ -304,6 +309,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->setPluginDir(pluginPath);
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
+			 setInputFlagsForScriptPlugin(plugin, inputFlags);
 			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
@@ -321,9 +327,29 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
 			 loadProcessPlugin(plugin);
-			 //AwProcessPlugin *p = m_processFactory.getPluginByName(name);
 		 }
 	 }
+}
+
+void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
+{
+	if (flags.isEmpty())
+		return;
+	QStringList tokens;
+	if (flags.contains(":")) {
+		tokens = flags.split(":");
+		if (tokens.isEmpty())
+			return;
+	}
+	else
+		tokens << flags;
+	int f = 0;
+	for (auto s : tokens) {
+		auto token = s.toLower();
+		if (token == "getallmarkers")
+			f |= Aw::ProcessInput::GetAllMarkers;
+	}
+	plugin->setInputFlags(f);
 }
 
 void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)

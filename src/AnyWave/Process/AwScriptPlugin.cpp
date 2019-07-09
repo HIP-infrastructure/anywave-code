@@ -31,6 +31,7 @@ void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
 {
 	name = n;
 	description = desc;
+	m_inputFlags = 0;
 }
 
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
@@ -39,8 +40,10 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 	p->pdi.input.pluginDirPath = m_pluginDir;
 
 	// Fixed input as any channels by default
-	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData))
+	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
 		p->pdi.addInputChannel(-1, 1, 0);
+		p->pdi.setInputFlags(m_inputFlags);
+	}
 }
 
 void AwScriptPlugin::checkIOForProcess(AwScriptProcess *p)

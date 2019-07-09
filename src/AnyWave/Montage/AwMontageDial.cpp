@@ -164,6 +164,7 @@ void AwMontageDial::loadMontage()
 	if (path.isEmpty())
 		return;
 	AwChannelList channels = AwMontageManager::instance()->load(path);
+	removeBadChannels(channels);
 	if (channels.isEmpty())
 		return;
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
@@ -330,7 +331,8 @@ void AwMontageDial::addChannelsByTypes()
 	for (auto l : labels) {
 		auto asRecorded = m_asRecorded[l];
 		if (asRecorded)
-			channels << new AwChannel(asRecorded);
+			if (!asRecorded->isBad())
+				channels << new AwChannel(asRecorded);
 	}
 	if (!channels.isEmpty())
 		static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->addChannels(channels);
@@ -354,9 +356,18 @@ void AwMontageDial::computeSEEGMontageFromEEGChannels()
 }
 
 
+void AwMontageDial::removeBadChannels(AwChannelList& channels)
+{
+
+	foreach(AwChannel *c, channels)
+		if (c->isBad() || m_badChannelsLabels.contains(c->name()))
+			channels.removeAll(c);
+}
+
 void AwMontageDial::makeECOGBipolar()
 {
 	auto channels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::ECoG);
+	removeBadChannels(channels);
 	if (channels.isEmpty()) {
 		AwMessageBox::information(this, tr("ECoG Bipolar"), tr("Could not make a bipolar montage (no ECoG channels in data file.)"));
 		return;
@@ -366,6 +377,13 @@ void AwMontageDial::makeECOGBipolar()
 	AwChannelList dup = AwChannel::duplicateChannels(channels);
 	AwECoGDialog dlg(dup);
 	if (dlg.exec() == QDialog::Accepted) {
+		// check for valid references
+		for (auto c : dup) {
+			if (c->hasReferences())
+				if (m_badChannelsLabels.contains(c->referenceName()))
+					c->clearRefName();
+		}
+
 		// check for remaining monopolar channels
 		foreach(AwChannel *c, dup) {
 			if (!c->hasReferences()) {
@@ -384,11 +402,11 @@ void AwMontageDial::makeECOGBipolar()
 void AwMontageDial::setAVGRefMontage()
 {
 	auto channels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::EEG);
+	removeBadChannels(channels);
 	if (channels.isEmpty()) {
 		AwMessageBox::information(this, tr("EEG AVG"), tr("Could not make a EEG AVG Ref. montage (no EEG channels in data file.)"));
 		return;
 	}
-
 	// make a montage with ONLY SEEG as bipolar, remove all other channels.
 	auto dup = AwChannel::duplicateChannels(channels);
 	for (auto c : dup)
@@ -399,11 +417,11 @@ void AwMontageDial::setAVGRefMontage()
 void AwMontageDial::setSEEGAVGRefMontage()
 {
 	auto channels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::SEEG);
+	removeBadChannels(channels);
 	if (channels.isEmpty()) {
 		AwMessageBox::information(this, tr("SEEG AVG"), tr("Could not make a SEEG AVG Ref. montage (no SEEG channels in data file.)"));
 		return;
 	}
-
 	// make a montage with ONLY SEEG as bipolar, remove all other channels.
 	auto dup = AwChannel::duplicateChannels(channels);
 	for (auto c : dup)
@@ -414,11 +432,11 @@ void AwMontageDial::setSEEGAVGRefMontage()
 void AwMontageDial::makeSEEGBipolar()
 {
 	auto seegChannels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::SEEG);
+	removeBadChannels(seegChannels);
 	if (seegChannels.isEmpty()) {
 		AwMessageBox::information(this, tr("SEEG Bipolar"), tr("Could not make a bipolar montage (no SEEG channels in data file.)"));
 		return;
 	}
-
 	// make a montage with ONLY SEEG as bipolar, remove all other channels.
 	auto dup = AwChannel::duplicateChannels(seegChannels);
 	// clear montage
@@ -445,11 +463,13 @@ void AwMontageDial::makeSEEGBipolar()
 			auto nextNumber = number.toInt() + 1;
 			auto ref = QString("%1%2").arg(elec).arg(nextNumber);
 			if (m_asRecorded.contains(ref))
-				c->setReferenceName(ref);
+				if (!m_badChannelsLabels.contains(ref))
+					c->setReferenceName(ref);
 			else {
 				ref = QString("%1%2").arg(elecCopy).arg(nextNumber);
 				if (m_asRecorded.contains(ref))
-					c->setReferenceName(ref);
+					if (!m_badChannelsLabels.contains(ref))
+						c->setReferenceName(ref);
 			}
 		}
 	}
@@ -468,6 +488,8 @@ void AwMontageDial::makeSEEGBipolar()
 void AwMontageDial::unsetBadChannel(const QString& label)
 {
 	m_badChannelsLabels.removeAll(label);
+	if (m_asRecorded.contains(label))
+		m_asRecorded[label]->setBad(false);
 }
 
 //
@@ -488,6 +510,8 @@ void AwMontageDial::setBadChannel(const QString& electrodeLabel)
 		delete channels.takeFirst();
 
 	m_badChannelsLabels << electrodeLabel;
+	if (m_asRecorded.contains(electrodeLabel))
+		m_asRecorded[electrodeLabel]->setBad(true);
 }
 
 
@@ -585,7 +609,6 @@ void AwMontageDial::addChannelsToMontage()
 			if (channel) {
 				if (channel->isBad())
 					continue;
-				//channels << new AwChannel(channel);
 				channels << channel->duplicate();
 			}
 		}

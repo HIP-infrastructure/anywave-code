@@ -614,30 +614,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
 
 	if (!skipDataFile) {
-		//// UPDATE 18/11/2014
-		//if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections) {
-		//	if (process->pdi.input.markers().isEmpty()) { // if empty at this stage => the user launches the plugin with no time selections.
-		//		// so, feed input with markers which have duration from MarkersManager
-		//		auto markers = AwMarkerManager::instance()->getMarkers();
-		//		for (auto m : markers) {
-		//			if (m->duration() > 0.)
-		//				process->pdi.input.addMarker(new AwMarker(m));
-		//		}
-		//		if (process->pdi.input.markers().isEmpty()) {
-		//			int res = AwMessageBox::question(NULL, tr("Process Input"),
-		//				tr("This process is designed to get time selections as input but none are set.\nThe process will be launched on the whole data."),
-		//				QMessageBox::Ok | QMessageBox::Abort);
-		//			if (res == QMessageBox::Abort) {
-		//				process->plugin()->deleteInstance(process);
-		//				return;
-		//			}
-		//			else {
-		//				// create a marker as input which covers whole data
-		//				process->pdi.input.addMarker(new AwMarker("whole data", 0., m_currentReader->infos.totalDuration()));
-		//			}
-		//		}
-		//	}
-		//}
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
 		if (process->inputFlags() & Aw::ProcessInput::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
