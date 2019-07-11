@@ -413,6 +413,10 @@
    </property>
   </action>
   <action name="actionOpen_New_AnyWave_Application">
+   <property name="icon">
+    <iconset resource="../../resources/AnyWave.qrc">
+     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
+   </property>
    <property name="text">
     <string>New AnyWave application</string>
    </property>
