@@ -169,6 +169,7 @@ private slots:
 	void reviewComponentsMaps();
 	void showFileProperties();
 	void runGARDEL();
+	void openNewAnyWave();
 	void doEpoch();
 	void visualiseEpoch();
 	void averageEpoch();

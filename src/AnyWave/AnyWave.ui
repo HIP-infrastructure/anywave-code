@@ -81,6 +81,7 @@
     <addaction name="actionOpen_BIDS"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
+    <addaction name="actionOpen_New_AnyWave_Application"/>
     <addaction name="separator"/>
     <addaction name="actionImport_mrk_file"/>
     <addaction name="actionLoadBeamFormer"/>
@@ -409,6 +410,11 @@
   <action name="actiondrerz">
    <property name="text">
     <string>drerz</string>
+   </property>
+  </action>
+  <action name="actionOpen_New_AnyWave_Application">
+   <property name="text">
+    <string>New AnyWave application</string>
    </property>
   </action>
  </widget>

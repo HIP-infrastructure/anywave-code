@@ -60,7 +60,6 @@
 #include "Source/AwSourceManager.h"
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
-//#include "Script/AwScriptManager.h"
 #include <AwFileIO.h>
 #include <AwMatlabInterface.h>
 #include <AwMEGSensorManager.h>
@@ -134,8 +133,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
     settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
-//	if (isGUIMode)
-//		initMatlab();
 	initMatlab();
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	plugin_manager->setParent(this);
@@ -183,18 +180,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_dockWidgets["add_markers"]->hide();
 	}
 
-	//// Scripts
-	//// Script manager
-	//AwScriptManager *scriptManager = AwScriptManager::instance();
-	//scriptManager->setParent(this);
-
-	//auto dockScripts = new QDockWidget(tr("Scripts"), this);
-	//m_dockWidgets["scripts"] = dockScripts;
-	//addDockWidget(Qt::LeftDockWidgetArea, dockScripts);
-	//dockScripts->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	//dockScripts->setWidget(AwScriptManager::instance()->scriptsWidget());
-	//dockScripts->hide();
-	//AwScriptManager::instance()->setDock(dockScripts);
 	// Processes
 	auto dockProcess = new QDockWidget(tr("Processes"), this);
 	m_dockWidgets["processes"] = dockProcess;
@@ -233,12 +218,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	m_meshManager = AwMeshManager::instance();
 	// AwMeshManager
 	m_layoutManager = AwLayoutManager::instance();
-
-	// Connections !
-	//// AnyWave and Script Manager
-	//connect(actionExecuteScript, SIGNAL(triggered()), scriptManager, SLOT(runScript()));
-	//// Display and Process Manager
-	   	  
+  	  
 	if (m_display) {
 		connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList *)), m_display, SLOT(removeVirtualChannels(AwChannelList *)));
 		connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
@@ -286,6 +266,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		// Menu: ICA->Show maps on signals
 		connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
 		connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
+		connect(actionOpen_New_AnyWave_Application, SIGNAL(triggered()), this, SLOT(openNewAnyWave()));
 		// Populate View Menu to show/hide DockWidgets
 		menuView_->addSeparator();
 		for (auto v : m_dockWidgets.values())
@@ -331,20 +312,6 @@ void AnyWave::changeEvent(QEvent *e)
 
 void AnyWave::closeEvent(QCloseEvent *e)
 {
-	// check if a script is running
-
-	//if (AwScriptManager::instanceExists()) {
-	//	AwScriptManager *sm = AwScriptManager::instance();
-	//	if (sm->isAScriptRunning()) {
-	//		if (AwMessageBox::question(this, "Script", "At least one script is running. Kill all scripts and close?") == QMessageBox::Yes) {
-	//			sm->quitAllScripts();
-	//		}
-	//		else {
-	//			e->ignore();
-	//			return;
-	//		}
-	//	}
-	//}
 	quit();
 	QMainWindow::closeEvent(e);
 }
@@ -482,7 +449,6 @@ void AnyWave::createUserDirs()
 	}
 	else {
 		homeDir = dirs.first();
-//		aws->setHomeDirectory(homeDir);
 		aws->setSettings("homeDir", homeDir);
 	}
 #endif
@@ -720,6 +686,15 @@ void AnyWave::averageEpoch()
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->average();
 #endif
+}
+
+void AnyWave::openNewAnyWave()
+{
+	QProcess process;
+//#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+	process.setProgram(QCoreApplication::applicationFilePath());
+	process.startDetached();
+//#endif
 }
 
 
