@@ -411,6 +411,7 @@ void AwMontageDial::setAVGRefMontage()
 	auto dup = AwChannel::duplicateChannels(channels);
 	for (auto c : dup)
 		c->setReferenceName("AVG");
+	AwChannel::sortByName(dup);
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
 }
 
@@ -426,6 +427,7 @@ void AwMontageDial::setSEEGAVGRefMontage()
 	auto dup = AwChannel::duplicateChannels(channels);
 	for (auto c : dup)
 		c->setReferenceName("AVG");
+	AwChannel::sortByName(dup);
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
 }
 

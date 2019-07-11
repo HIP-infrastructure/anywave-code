@@ -76,11 +76,11 @@ mxArray* request_info()
 			// label
 			mxSetField(markers, i, "label", mxCreateString(label.toStdString().c_str()));
 			// start
-			mxSetField(markers, i, "position", floatToMat(start));
+			mxSetField(markers, i, "position", doubleToMat(start));
 			// duration
-			mxSetField(markers, i, "duration", floatToMat(duration));
+			mxSetField(markers, i, "duration", doubleToMat(duration));
 			// value
-			mxSetField(markers, i, "value", floatToMat(value));
+			mxSetField(markers, i, "value", doubleToMat(value));
 			// chunk
 			mxSetField(markers, i, "chunk", doubleVectorToMat(chunkVector));
 			// channels
