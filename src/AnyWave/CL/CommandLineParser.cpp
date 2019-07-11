@@ -45,12 +45,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputFileO("output_file", "specify the file to create.", "output_file", QString());
 	QCommandLineOption outputFormatO("output_format", "specify the file format to create. (vhdr, edf, MATLAB, ADES)", "output_format", QString());
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
+	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
 
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
 	parser.addOption(outputFileO);
 	parser.addOption(outputFormatO);
 	parser.addOption(outputDirO);
+	parser.addOption(outputPrefixO);
 	// common filters flags
 	QCommandLineOption filterHPO("hp", "specify the High Pass filter (Hz).", "hp", QString());
 	QCommandLineOption filterLPO("lp", "specify the Low Pass filter (Hz).", "lp", QString());
