@@ -1,15 +1,18 @@
 #include "CompumedicsPF.h"
 #include <QDir>
 #include <QDomDocument>
-#include <qdatastream.h>
+#include <QDataStream>
 #include <QTextStream>
+#ifdef Q_OS_WIN
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #ifdef _DEBUG
 #include <QDebug>
 #include <QSqlError>
 #endif
+#endif
 #include <AwCore.h>
+#include <math.h>
 
 CompumedicsReaderPlugin::CompumedicsReaderPlugin() : AwFileIOPlugin()
 {
@@ -181,6 +184,7 @@ AwFileIO::FileStatus CompumedicsReader::openFile(const QString &path)
 	auto block = infos.newBlock();
 	block->setDuration(m_numSamples / m_samplingRate);
 	block->setSamples(m_numSamples);
+#ifdef Q_OS_WIN
 	// READING EVENTS involves Microsoft Access Database connection using QSqlDatabase.. 
 	// TO DO LATER
 	QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");
@@ -215,7 +219,7 @@ AwFileIO::FileStatus CompumedicsReader::openFile(const QString &path)
 		qDebug() << db.lastError().text() << endl;
 #endif
 	}
-
+#endif
 	return AwFileIO::openFile(path);
 }
 

@@ -203,6 +203,7 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/GetFileInfo.cpp \
     ./MATPy/GetICAPanelCapture.cpp \
     ./MATPy/GetMarkers.cpp \
+    ./MATPy/AwGetMarkersEx.cpp \
     ./MATPy/GetPluginInfo.cpp \
     ./MATPy/GetPluginIO.cpp \
     ./MATPy/GetScreenCapture.cpp \
