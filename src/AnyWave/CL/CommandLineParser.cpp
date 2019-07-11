@@ -107,6 +107,10 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	auto oDir = parser.value(outputDirO);
 	if (!oDir.isEmpty()) 
 		arguments["output_dir"] = oDir;
+	// output_prefix
+	auto oPrefix = parser.value(outputPrefixO);
+	if (!oPrefix.isEmpty())
+		arguments["output_prefix"] = oPrefix;
 	// hp/lp/notch
 	auto fHP = parser.value(filterHPO);
 	auto fLP = parser.value(filterLPO);
