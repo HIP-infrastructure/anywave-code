@@ -36,7 +36,7 @@ int filterFlags = 0; // 0 => AnyWave current filters, 1 => specified filters 2=>
 QHash<int, QVector<float>> filterSettings;
 static QString montage, file;
 //static float start = 0., duration = 0.;
-float start, duration;
+float start = 0., duration = 0.;
 QStringList labels, types;
 int decimate = 0;
 
@@ -49,6 +49,7 @@ mxArray *request_data()
         return output;
     }
     int request = AwRequest::GetData3;
+
     QByteArray data;
     QDataStream stream_data(&data, QIODevice::WriteOnly);
 	stream_data.setVersion(QDataStream::Qt_4_4);
