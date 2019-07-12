@@ -211,15 +211,15 @@ int ICA::initParameters()
 	m = m_channels.size();
 	n = nSamples;
 
-
 	QString dir;
 	if (args.contains("output_dir"))
 		dir = args["output_dir"].toString();
 	else
 		dir = pdi.input.dataFolder;
-
+	QFileInfo fi(pdi.input.dataPath);
+	m_fileName = QString("%1/%2").arg(dir).arg(fi.fileName());
 	QString mod = args["modality"].toString();
-	m_fileName = QString("%1/%2_%3Hz_%4Hz_%5c_ica.mat").arg(dir).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
+	m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	return 0;
 }
 
@@ -247,50 +247,6 @@ void ICA::run()
 		emit sendCommand(AwProcessCommand::LoadICA, args);
 	}
 }
-
-
-//void ICA::createInputFile()
-//{
-//	QString inputFile = QString("%1/%2").arg(pdi.input.dataFolder).arg("input.mat");
-//
-//	AwMATLABFile file;
-//	if (file.create(inputFile) != 0) {
-//		sendMessage("Could not create input.mat for MATLAB plugin.");
-//		return;
-//	}
-//
-//	// create the data matrix
-//	mat data = AwMath::channelsToMat(m_channels);
-//	if (file.writeMatrix("data", data) != 0) {
-//		sendMessage("Failed to write data in input.mat.");
-//		return;
-//	}
-//	data.clear();
-//	AwChannel::clearData(m_channels);
-//	// create nc (number of components)
-//	file.writeScalar("nc", m_nComp);
-//	file.writeString("modality", AwChannel::typeToString(m_channels.first()->type()));
-//	file.writeScalar("hpf", (double)m_hpf);
-//	file.writeScalar("lpf", (double)m_lpf);
-//	file.writeStringCellArray("labels", AwChannel::getLabels(m_channels, true));
-//	// create algo (type of algo to use)
-//	switch (m_algo) {
-//	case ICA::FASTICA:
-//		file.writeString("algo", "FASTICA");
-//		break;
-//	default:
-//		break;
-//	}
-//	//done
-//}
-
-//void ICA::launchMatlabPlugin()
-//{
-//	QVariantList args;
-//	args << "MultiICA_MATLAB";
-//	emit sendCommand(AwProcessCommand::LaunchProcess, args);
-//}
-
 
 void ICA::saveToFile()
 {

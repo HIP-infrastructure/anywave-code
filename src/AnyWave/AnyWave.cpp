@@ -691,10 +691,8 @@ void AnyWave::averageEpoch()
 void AnyWave::openNewAnyWave()
 {
 	QProcess process;
-//#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
 	process.setProgram(QCoreApplication::applicationFilePath());
 	process.startDetached();
-//#endif
 }
 
 
