@@ -516,6 +516,9 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		return;
 	}
 
+	//  clear bad channels previously loaded 
+	m_badChannelLabels.clear();
+
 	// build a multi map for current montage to retreive channels by name.
 	QMultiMap<QString, AwChannel *> globalMap;
 	for (auto c : m_channels)
@@ -534,8 +537,10 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 			auto montageChannels = globalMap.values(c->name());
 			for (auto montageChannel : montageChannels) {
 				montageChannel->setType(c->type());
-				if (asRecorded->isBad())
+				if (asRecorded->isBad()) {
 					badChannels << montageChannel;
+					m_badChannelLabels << c->name();
+				}
 			}
 		}
 	}

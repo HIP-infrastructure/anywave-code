@@ -29,6 +29,7 @@
 #include <QFrame>
 #include <QMenu>
 #include <AwMarker.h>
+#include <QPixmap>
 #define AW_MARKERS_BAR_HEIGHT	20
 class AwDisplayPhysics;
 
@@ -37,10 +38,11 @@ class AW_WIDGETS_EXPORT AwBaseMarkerBar : public QFrame
 	Q_OBJECT
 public:
 	AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent = NULL);
+	~AwBaseMarkerBar();
 	QSize sizeHint() const { return QSize(0, AW_MARKERS_BAR_HEIGHT); }
 	enum Types { Classic, Global };
 	void setMode(int mode) {
-		m_mode = mode; repaint();
+		m_mode = mode; m_globalRepaintNeeded = true;  repaint();
 	}
 	void setTotalDuration(float dur) { m_totalDuration = dur;  repaint();
 	}
@@ -68,6 +70,7 @@ protected:
 	void mousePressEvent(QMouseEvent *e);
 	void mouseReleaseEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
+	void resizeEvent(QResizeEvent *e);
 
 	AwMarker *findMarkerBetween(float low, float high);
 	AwMarkerList findMarkersBetween(float low, float high);
@@ -80,8 +83,9 @@ protected:
 	QMenu *m_menu;
 	int m_mode;	// handle two different types of marker bars (0 = classic one, 1 = global file summary)
 	QRectF m_sliderRect;	// Global mode slider
-	float m_pixDur, m_xOffset;
-	bool m_sliderDragging;
+	float m_xOffset;
+	bool m_sliderDragging, m_globalRepaintNeeded;
+	QPixmap m_globalPixmap;
 };
 
 #endif
