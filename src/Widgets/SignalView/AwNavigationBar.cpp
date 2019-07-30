@@ -148,8 +148,6 @@ void AwNavigationBar::clean()
 {
 	m_positionInFile = 0.;
 	updateNumberOfChannels(0);
- //   AwChannelList dumb;
-//	updateNumberOfSelectedChannels(dumb);
 	updateNumberOfSelectedChannels(0);
 }
 

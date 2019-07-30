@@ -466,8 +466,7 @@ void AwGraphicsScene::previous()
 		newPos--;
 	if (newPos < 0.)
 		return;
-	else
-		emit updatePositionInFile(newPos);
+	emit updatePositionInFile(newPos);
 }
 
 void AwGraphicsScene::next()
@@ -478,18 +477,15 @@ void AwGraphicsScene::next()
 		newPos += 0.1;
 	else
 		newPos++;
-	if (newPos > m_fileDuration)
+	if (newPos + m_pageDuration > m_fileDuration)
 		return;
-	else
-		emit updatePositionInFile(newPos);
+	emit updatePositionInFile(newPos);
 }
 
 void AwGraphicsScene::nextPage()
 {
-	float newPos = m_currentPosInFile + m_pageDuration;
-	if (newPos > m_fileDuration)
-		return;
-	else
+	auto newPos = std::min(m_fileDuration - m_pageDuration, m_currentPosInFile + m_pageDuration);
+	if (newPos > m_currentPosInFile)
 		emit updatePositionInFile(newPos);
 }
 
