@@ -46,8 +46,6 @@ public:
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
 
-	/** Add a modification to the list of modification the user MUST validate before closing the current file **/
-//	void addModification(const QString& itemPath, int modification);
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
 	

@@ -687,93 +687,70 @@ void AwBIDSManager::updateEventsTsv(const QString& itemPath)
 	modifyUpdateJson(branches);
 }
 
+///
+/// updateChannelsTsv
+/// Keep the order and update bad/good status
+/// Warning: this method can display a Message box.
 void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 {
-	AwTSVDict dict;
-	try {
-		dict = loadTsvFile(itemPath);
-	}
-	catch (const AwException& e) {
-		AwMessageBox::information(0, tr("BIDS"), e.errorString());
+	// try to copy tsv file as tsv.bak
+	QString bak = itemPath + ".bak";
+	QFile::copy(itemPath, bak);
+	QFile sourceFile(bak);
+	QFile destFile(itemPath);
+	
+	if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
 		return;
 	}
-	if (dict.isEmpty())
+	QTextStream sourceStream(&sourceFile);
+	QString line = sourceStream.readLine();
+	QStringList columns = line.split('\t');
+	auto indexName = columns.indexOf("name");
+	auto indexStatus = columns.indexOf("status");
+	// check that columns contains at leats name and status
+	if (indexName == -1 || indexStatus == -1) {
+		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
+		sourceFile.close();
 		return;
+	}
 
+	if (!destFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		QFile::copy(bak, itemPath);
+		AwMessageBox::information(0, tr("BIDS"), QString("Could not update %1.").arg(itemPath));
+		sourceFile.close();
+		return;
+	}
+	QTextStream destStream(&destFile);
+	destStream << line << endl;
 	auto MM = AwMontageManager::instance();
-
-	auto names = dict["name"];
-	auto types = dict["type"];
-	auto status = dict["status"];
-	// check if status column is present
-	if (status.isEmpty()) { // No => create it.
-		for (int i = 0; i < names.size(); i++) {
-			status << "good";
+	while (!sourceStream.atEnd()) {
+		line = sourceStream.readLine();
+		QStringList cols = line.split('\t');
+		if (cols.size() != columns.size())
+			break;
+		auto name = cols.value(indexName);
+		auto asRecordedChannel = MM->asRecordedChannel(name);
+		if (asRecordedChannel == Q_NULLPTR) {
+			destStream << line << endl;
+			continue;
+		} 
+		else {
+			QString status = asRecordedChannel->isBad() ? "bad" : "good";
+			cols.replace(indexStatus, status);
+			for (auto i = 0; i < cols.size(); i++) {
+				destStream << cols.value(i);
+				if (i + 1 < cols.size())
+					destStream << '\t';
+			}
+			destStream << endl;
 		}
 	}
-
-	// from here, cols contains the keys to access the dictionnary.
-	QString badStatus, type;
-	bool mustBeSaved = false;
-	for (int i = 0; i < names.size(); i++) {
-		auto name = names.value(i);
-		AwChannel *asRecorded = MM->asRecordedChannel(name);
-		if (asRecorded) {
-			// convert AnyWave Channel type to BIDS
-			if (asRecorded->isMEG())
-				type = "MEGMAG";
-			else if (asRecorded->isGRAD())
-				type = "MEGGRADAXIAL";
-			else if (asRecorded->isECG())
-				type = "ECG";
-			else if (asRecorded->isSEEG())
-				type = "SEEG";
-			else if (asRecorded->isEEG())
-				type = "EEG";
-			else if (asRecorded->isEMG())
-				type = "EMG";
-			else if (asRecorded->isTrigger())
-				type = "TRIG";
-			else if (asRecorded->isReference())
-				type = "MEGREFMAG";
-			else
-				type = "OTHER";
-
-			badStatus = asRecorded->isBad() ? "bad" : "good";
-			if (types.value(i) != type) {
-				mustBeSaved = true;
-				types.replace(i, AwChannel::typeToString(asRecorded->type()));
-			}
-			if (status.value(i) != badStatus) {
-				mustBeSaved = true;
-				status.replace(i, badStatus);
-			}
-		}
-	}
-	if (mustBeSaved) {
-		dict["type"] = types;
-		dict["status"] = status;
-		QStringList columns = { "name", "type", "units" };
-		saveTsvFile(itemPath, dict, columns);
-	}
-
-	QStringList branches = { "raw" };
-	modifyUpdateJson(branches);
+	sourceFile.close();
+	destFile.close();
+	QFile::copy(bak, itemPath);
+	QFile::remove(bak);
 }
-
-//void AwBIDSManager::applyModifications()
-//{
-//	//for (auto k : m_modifications.keys()) {
-//	//	if (k == AwBIDSManager::ChannelsTsv) {
-//	//		if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
-//	//			updateChannelsTsv(m_modifications[k]);
-//	//	}
-//	//	else if (k == AwBIDSManager::EventsTsv) {
-//	//		if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-//	//			updateEventsTsv(m_modifications[k]);
-//	//	}
-//	//}
-//}
 
 void AwBIDSManager::clearSubjects(int sourceDir)
 {
@@ -1052,10 +1029,3 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 	}
 	return res;
 }
-
-
-//void AwBIDSManager::addModification(const QString& itemPath, int modification)
-//{
-//	m_modifications[modification] = itemPath;
-//	m_mustValidateModifications = true;
-//}

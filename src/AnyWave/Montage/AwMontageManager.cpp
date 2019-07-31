@@ -480,6 +480,7 @@ void AwMontageManager::checkForBIDSMods()
 		return;
 	auto BM = AwBIDSManager::instance();
 	BM->updateChannelsTsv(m_channelsTsv);
+	m_channelsTsv.clear();
 }
 
 ///
