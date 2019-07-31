@@ -459,6 +459,16 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	}
 	setNewFilters(AwSettings::getInstance()->filterSettings());
 	applyGains();
+
+	// check that none NULL channels are present in asRecorder nor m_channels
+	for (auto k : m_asRecorded.keys()) {
+		if (m_asRecorded[k] == Q_NULLPTR)
+			m_asRecorded.remove(k);
+	}
+	foreach(AwChannel *c, m_channels)
+		if (c == Q_NULLPTR)
+			m_channels.removeAll(c);
+
 	emit montageChanged(m_channels);
 }
 
