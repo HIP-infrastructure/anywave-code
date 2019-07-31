@@ -692,7 +692,11 @@ void AnyWave::openNewAnyWave()
 {
 	QProcess process;
 	process.setProgram(QCoreApplication::applicationFilePath());
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+	process.startDetached(QCoreApplication::applicationFilePath());
+#else
 	process.startDetached();
+#endif
 }
 
 

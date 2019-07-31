@@ -14,9 +14,7 @@ SET(AnyWave_SRCS
     ./CL/CommandLineParser.cpp
     ./CL/AwCommandLogger.cpp
     ./CL/AwCommandLineManager.cpp
-    ./CL/AwComputeICA.cpp
-    ./CL/AwConvertFile.cpp
-	./CL/AwRunProcess.cpp
+    ./CL/AwRunProcess.cpp
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
 	./Data/AwMemoryMapper.cpp  
@@ -72,7 +70,8 @@ SET(AnyWave_SRCS
     ./MATPy/GetData.cpp  
     ./MATPy/GetFileInfo.cpp  
     ./MATPy/GetICAPanelCapture.cpp  
-    ./MATPy/GetMarkers.cpp  
+    ./MATPy/GetMarkers.cpp
+    ./MATPy/AwGetMarkersEx.cpp    
     ./MATPy/GetPluginInfo.cpp  
     ./MATPy/GetScreenCapture.cpp  
     ./MATPy/GetTriggers.cpp  
@@ -118,13 +117,6 @@ SET(AnyWave_SRCS
     ./Process/TPUi.cpp  
     ./Process/AwLogPlainTextEdit.cpp
     ./Process/AwMATLABMarkersExporter.cpp 
-    ./Script/AwScript.cpp  
-    ./Script/AwScriptLog.cpp  
-    ./Script/AwScriptLogManager.cpp  
-    ./Script/AwScriptManager.cpp  
-    ./Script/AwScriptProcessFileInput.cpp  
-    ./Script/AwScriptsWidget.cpp  
-    ./Script/AwScriptWidget.cpp  
     ./Widgets/AwAboutAnyWave.cpp  
     ./Widgets/AwCursorMarkerToolBar.cpp  
     ./Widgets/AwDisplaySetupToolBar.cpp  
@@ -222,7 +214,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Montage/AwMontageManager.h  
     ./Montage/AwMontageDial.h  
     ./Montage/AwChannelListModel.h  
-	./Montage/AwECoGDialog.h 
+    ./Montage/AwECoGDialog.h 
     ./Montage/AwECoGTableModel.h 
     ./Plugin/AwPluginManager.h  
     ./Plugin/AwPluginDial.h  
@@ -252,14 +244,6 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Process/AwConverter.h  
     ./Process/AwLogPlainTextEdit.h 
     ./Process/AwMATLABMarkersExporter.h 
-    ./Script/AwScriptDefines.h  
-    ./Script/AwScriptsWidget.h  
-    ./Script/AwScriptWidget.h  
-    ./Script/AwScriptProcessFileInput.h  
-    ./Script/AwScriptManager.h  
-    ./Script/AwScriptLogManager.h  
-    ./Script/AwScriptLog.h  
-    ./Script/AwScript.h  
     ./Widgets/AwSelectTriggerChannelDialog.h  
     ./Widgets/AwTriggerParsingDialog.h  
     ./Widgets/AwPleaseWaitWidget.h  
@@ -339,8 +323,6 @@ SET(FORMS ./AnyWave.ui
     ./Process/AwExporterSettings.ui  
     ./Process/AwExportSelChannels.ui  
     ./Process/AwExporterSelMarkers.ui  
-    ./Script/AwScriptWidget.ui  
-    ./Script/AwScriptsWidget.ui  
     ./Widgets/AwAboutAnyWave.ui  
     ./Widgets/AwCursorMarkerToolBar.ui  
     ./Widgets/AwDisplaySetupToolBar.ui  

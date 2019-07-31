@@ -53,30 +53,30 @@
 #endif
 
 // PluginFactory
-template<typename AwPlugin>
-void AwPluginFactory<AwPlugin>::addPlugin(const QString& name, AwPlugin *plugin)
-{
-	QString key = name.toUpper();
-	if (!m_map.contains(key))
-		m_map.insert(key, plugin); 
-}
+//template<typename AwPlugin>
+//void AwPluginFactory<AwPlugin>::addPlugin(const QString& name, AwPlugin *plugin)
+//{
+//	QString key = name.toUpper();
+//	if (!m_map.contains(key))
+//		m_map.insert(key, plugin); 
+//}
 
-template<typename AwPlugin>
-void AwPluginFactory<AwPlugin>::removePlugin(const QString& name)
-{
-	QString key = name.toUpper();
-	if (m_map.contains(key))
-		m_map.remove(key);
-}
+//template<typename AwPlugin>
+//void AwPluginFactory<AwPlugin>::removePlugin(const QString& name)
+//{
+//	QString key = name.toUpper();
+//	if (m_map.contains(key))
+//		m_map.remove(key);
+//}
 
-template<typename AwPlugin>
-AwPlugin* AwPluginFactory<AwPlugin>::getPluginByName(const QString& name)
-{
-	QString key = name.toUpper();
-	if (m_map.contains(key))
-		return m_map.value(key);
-	return Q_NULLPTR;
-}
+//template<typename AwPlugin>
+//AwPlugin* AwPluginFactory<AwPlugin>::getPluginByName(const QString& name)
+//{
+//	QString key = name.toUpper();
+//	if (m_map.contains(key))
+//		return m_map.value(key);
+//	return Q_NULLPTR;
+//}
 
 // statics
 AwPluginManager *AwPluginManager::m_instance = 0;
