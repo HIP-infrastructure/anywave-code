@@ -73,6 +73,7 @@ public:
 	void addNewDisplayPlugin(AwDisplayPlugin *plugin) { m_scene->registerDisplayPlugin(plugin); }
 	void changeSettings(AwViewSettings *settings, int flags) { emit settingsChanged(settings, flags); }
 	void setRecordedTime(const QTime& time);
+	void setRecordedTime(const QString& timeString) { setRecordedTime(QTime::fromString(timeString)); }
 
 	inline void showZeroLine(bool flag) { if (m_settings) { m_settings->showZeroLine = flag; emit settingsChanged(m_settings, AwViewSettings::ShowBaseLine); } }
 	inline void setTimeShift(float shift) { if (m_view) m_view->setTimeShift(shift); }

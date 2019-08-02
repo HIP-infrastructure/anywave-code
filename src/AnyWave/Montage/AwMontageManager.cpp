@@ -820,8 +820,10 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 		hash[c->name()]->setType(c->type());
 		if (c->hasReferences() && hash.contains(c->referenceName())) {
 			// make sure the type of ref channel is matching the one in montage
-			if (!hash[c->referenceName()]->isBad())
+			if (!hash[c->referenceName()]->isBad()) {
 				hash[c->referenceName()]->setType(c->type());
+				newChannel->setReferenceName(c->referenceName());
+			}
 			else 
 				newChannel->clearRefName();
 		}

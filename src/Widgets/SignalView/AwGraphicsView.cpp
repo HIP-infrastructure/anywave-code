@@ -83,6 +83,10 @@ void AwGraphicsView::scrollContentsBy(int dx, int dy)
 	scene()->update();
 }
 
+void AwGraphicsView::setPositionInFile(float pos)
+{
+	m_posInFile = pos;
+}
 
 void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 {

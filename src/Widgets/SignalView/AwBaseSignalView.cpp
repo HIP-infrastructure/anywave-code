@@ -95,8 +95,10 @@ void AwBaseSignalView::setFlags(int flags)
 	}
 	if (flags & AwBaseSignalView::ViewAllChannels) {
 		m_settings->filters.clear();
-		m_settings->filters << AwChannel::EEG << AwChannel::MEG << AwChannel::SEEG << AwChannel::ICA << AwChannel::Source
-			<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
+		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
+			m_settings->filters << i;
+		//m_settings->filters << AwChannel::EEG << AwChannel::MEG << AwChannel::SEEG << AwChannel::ICA << AwChannel::Source
+		//	<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
 	}
 	m_navBar->setFlags(flags);
 	if (m_flags & AwBaseSignalView::NoNavBar)

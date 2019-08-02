@@ -119,8 +119,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		if (!recentFiles.isEmpty()) {
 			updateRecentFiles(recentFiles);
 		}
-
-		//QStringList recentBIDS = aws->recentBIDS();
 		QStringList recentBIDS = aws->getStringList("recentBIDS");
 		if (!recentBIDS.isEmpty()) {
 			updateRecentBIDS(recentBIDS);
@@ -134,10 +132,15 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	settings.setValue("general/buildDate", QString(__DATE__));
 	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
 	initMatlab();
+	// Plugins
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	plugin_manager->setParent(this);
+	// Processes
 	AwProcessManager *process_manager = AwProcessManager::instance();
 	process_manager->setParent(this);
+	// As initializing ProcessManager, give it the Process Menu instance !
+	process_manager->setMenu(menuProcesses);
+	// Montage
 	AwMontageManager *montage_manager = AwMontageManager::instance();
 	montage_manager->setParent(this);
 	m_currentReader = NULL;
@@ -147,7 +150,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	// get menus from process manager 
 	// process menu
 	if (isGUIMode) {
-		QMainWindow::menuBar()->addMenu(process_manager->processMenu());
 		if (process_manager->fileMenu())
 			menuFile->insertMenu(actionFileProperties, process_manager->fileMenu());
 		if (process_manager->viewMenu())
@@ -167,26 +169,28 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 
 	if (isGUIMode) {
 		m_dockWidgets["markers"] = new QDockWidget(tr("Markers"), this);
+		m_dockWidgets["markers"]->hide();
 		addDockWidget(Qt::LeftDockWidgetArea, m_dockWidgets["markers"]);
 		m_dockWidgets["markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 		m_dockWidgets["markers"]->setWidget(AwMarkerManager::instance()->ui());
-		m_dockWidgets["markers"]->hide();
+		
 
 		m_dockWidgets["add_markers"] = new QDockWidget(tr("Adding Markers Tool"), this);
+		m_dockWidgets["add_markers"]->hide();
 		m_dockWidgets["add_markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 		m_dockWidgets["add_markers"]->setFloating(true);
 		markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
 		m_dockWidgets["add_markers"]->setWidget(markerInspectorWidget);
-		m_dockWidgets["add_markers"]->hide();
+		
 	}
 
 	// Processes
 	auto dockProcess = new QDockWidget(tr("Processes"), this);
+	dockProcess->hide();
 	m_dockWidgets["processes"] = dockProcess;
 	addDockWidget(Qt::LeftDockWidgetArea, dockProcess);
 	dockProcess->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockProcess->setWidget(AwProcessManager::instance()->processesWidget());
-	dockProcess->hide();
 	AwProcessManager::instance()->setDock(dockProcess);
 
 	AwMarkerManager *marker_manager = AwMarkerManager::instance();

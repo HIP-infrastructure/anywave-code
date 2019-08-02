@@ -209,13 +209,11 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		if (!args.contains("montage_file"))
 			if (QFile::exists(tmp))
 				args["montage_file"] = tmp;
-		try {
-			if (args.contains("montage_file")) { // did we finally got a montage file?
+		if (args.contains("montage_file")) { // did we finally got a montage file?
 				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args["montage_file"].toString(), process->pdi.input.badLabels);
-			}
 		}
-		catch (const AwException& e) {
-			throw e;
+		if (montage.isEmpty()) { // error when loading and/or applying mtg file
+			throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
 			return Q_NULLPTR;
 		}
 		if (!buildPDI(process, montage, reader->infos.channels())) {

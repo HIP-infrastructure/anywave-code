@@ -117,7 +117,6 @@
     <addaction name="separator"/>
     <addaction name="actionDebug_Logs"/>
     <addaction name="separator"/>
-    <addaction name="actionAbout_AnyWave"/>
    </widget>
    <widget class="QMenu" name="menuMapping">
     <property name="title">
@@ -140,12 +139,25 @@
     <addaction name="actionVisualiseEpoch"/>
     <addaction name="actionAveraging"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionAbout_AnyWave"/>
+   </widget>
+   <widget class="QMenu" name="menuProcesses">
+    <property name="title">
+     <string>Processes</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView_"/>
    <addaction name="menuICA"/>
    <addaction name="menuMapping"/>
    <addaction name="menuEpoch"/>
+   <addaction name="menuProcesses"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">

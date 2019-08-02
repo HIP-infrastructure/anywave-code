@@ -57,14 +57,15 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	: QObject(parent)
 {
 	// instantiate menu
-	m_processMenu = new QMenu();
-	m_processMenu->setTitle(tr("Processes"));
+	//m_processMenu = new QMenu();
+	//m_processMenu->setTitle(tr("Processes"));
+	m_processMenu = NULL;
 	// other menus set to NULL
 	m_fileMenu = NULL;
 	m_viewMenu = NULL;
-	m_processes = AwPluginManager::getInstance()->processes();
-	for (auto plugin : m_processes)
-		addProcess(plugin);
+	//m_processes = AwPluginManager::getInstance()->processes();
+	//for (auto plugin : m_processes)
+	//	addProcess(plugin);
 	setObjectName("AwProcessManager");
 	m_processesWidget = new AwProcessesWidget();
 	m_dock = NULL;
@@ -73,6 +74,14 @@ AwProcessManager::AwProcessManager(QObject *parent)
 AwProcessManager::~AwProcessManager()
 {
 	delete m_processesWidget;
+}
+
+void AwProcessManager::setMenu(QMenu *menu)
+{
+	m_processMenu = menu;
+	m_processes = AwPluginManager::getInstance()->processes();
+	for (auto plugin : m_processes)
+		addProcess(plugin);
 }
 
 void AwProcessManager::quit()
@@ -417,50 +426,6 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	return buildPDIForProcess(p);
 }
-
- //bool AwProcessManager::processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources)
- //{
-	// QRegExp rx("(\\S*)-{1,1}(\\S*)");
-	// QList<QVariant> vals = p->pdi.inputParameters().values();
-	// QString val = vals.at(keyIndex).toString();
-	// int pos = rx.indexIn(val);
-	// int min, max;
-	// if (pos == -1)
-	//	 return false;
-	// else {
-	//	 min = rx.cap(1).toInt();
-	//	 max = rx.cap(2).toInt();
-	// }
-
-	// QString errorString = p->plugin()->name;
-
-	// // check for correct min and max
-	// if (min > sources.size()) {
-	//	 errorString += QString(tr(": the number of channels is incorrect. Process requires %1 channels")).arg(min);
-	//	 AwMessageBox::critical(0, tr("Process input"), errorString, QMessageBox::Discard);
-	//	 return false;
-	// }
-
-	// int size = sources.size();
-	// if (max > 0 && max < sources.size()) {
-	//	 errorString += QString(tr(": the process requires a maximum of %1 channels")).arg(max);
-	//	 AwMessageBox::information(0, tr("Process input"), errorString, QMessageBox::Discard);
-	//	 return false;
-	// }
-
-	// if (max > 0)
-	//	 size = std::min(size, max);
-	// 
-	// AwChannelList list;
-	// for (int i = 0; i < size; i++) {
-	//		list << sources.at(i);
-	// }
-
-	// p->pdi.input.addChannels(AwChannel::duplicateChannels(list));
-	// // make sure current filters are set for the channels.
-	// AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
-	// return true;
- //}
 
  void AwProcessManager::launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end)
  {
