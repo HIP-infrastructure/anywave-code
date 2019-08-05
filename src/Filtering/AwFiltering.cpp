@@ -72,7 +72,7 @@ void AwFiltering::downSample(const AwChannelList& channels, int factor)
 	if (channels.isEmpty())
 		return;
 
-	//AwFiltering::decimate(channels, factor);
+	AwFiltering::decimate(channels, factor);
 
 	QList<down_sampling *> toProcess;
 	for (auto c :  channels) 
@@ -94,6 +94,7 @@ AwChannel *downSamplingChannel(down_sampling *ds)
 	int decim_factor = (int)floor(sr / freq);
 	// recompute target Sampling rate with new decim factor.
 	float new_sr = sr / (float)decim_factor;
+	/** ask channel to reduce its number of samples **/
 	ds->c->decimate(decim_factor);
 	ds->c->setSamplingRate(new_sr);
 
@@ -180,28 +181,6 @@ QVector<float>  AwFiltering::pad_right(AwChannel *channel)
 	qint64 last_sample = channel->dataSize() - 1;
 	vector.fill(channel->data()[last_sample]);
 	return vector;
-
-
-	//// one sample won't be used, so check the special case when padding lenght = signal length.
-	//if (padding == channel->dataSize())
-	//	padding--;
-	//if (padding <= 0) {
-	//	vector.resize(3 * sample_1s);
-	//	vector.fill(channel->data()[last_sample]);
-	//	return vector;
-	//}
-	//// skip 1st sample of original data
-	//float sample_x0 = channel->data()[last_sample];
-
-	//// copy 3s of signal in reverse order
-	//for (int i = last_sample - 1;  i > last_sample - padding - 1; i--)
-	//	vector << channel->data()[i];
-
-	//float *pad_data = vector.data();
-	//for (int i = 0; i < vector.size(); i++)
-	//	pad_data[i] = 2 * sample_x0 - pad_data[i];
-
-	//return vector;
 }
 
 
