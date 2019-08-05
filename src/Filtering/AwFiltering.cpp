@@ -75,31 +75,35 @@ void AwFiltering::downSample(const AwChannelList& channels, int factor)
 	AwFiltering::decimate(channels, factor);
 
 	QList<down_sampling *> toProcess;
-	for (auto c :  channels) 
-		toProcess << new down_sampling(c, c->samplingRate() / factor);
-	
-	QFuture<void> res = QtConcurrent::mapped(toProcess, downSamplingChannel);
-	res.waitForFinished();
-	while (!toProcess.isEmpty())
-		delete toProcess.takeLast();
+
+	for (auto c : channels)
+		c->setSamplingRate(c->samplingRate() / factor);
+
+	//for (auto c :  channels) 
+	//	toProcess << new down_sampling(c, c->samplingRate() / factor);
+	//
+	//QFuture<void> res = QtConcurrent::mapped(toProcess, downSamplingChannel);
+	//res.waitForFinished();
+	//while (!toProcess.isEmpty())
+	//	delete toProcess.takeLast();
 }
 
-AwChannel *downSamplingChannel(down_sampling *ds)
-{
-	float sr = ds->c->samplingRate();
-	float freq = ds->freq;
-	if (freq >= sr)
-		return ds->c;
-
-	int decim_factor = (int)floor(sr / freq);
-	// recompute target Sampling rate with new decim factor.
-	float new_sr = sr / (float)decim_factor;
-	/** ask channel to reduce its number of samples **/
-	ds->c->decimate(decim_factor);
-	ds->c->setSamplingRate(new_sr);
-
-	return ds->c;
-}
+//AwChannel *downSamplingChannel(down_sampling *ds)
+//{
+//	float sr = ds->c->samplingRate();
+//	float freq = ds->freq;
+//	if (freq >= sr)
+//		return ds->c;
+//
+//	int decim_factor = (int)floor(sr / freq);
+//	// recompute target Sampling rate with new decim factor.
+//	float new_sr = sr / (float)decim_factor;
+//	/** ask channel to reduce its number of samples **/
+//	ds->c->decimate(decim_factor);
+//	ds->c->setSamplingRate(new_sr);
+//
+//	return ds->c;
+//}
 
 void AwFiltering::filter(const AwChannelList& channels)
 {
