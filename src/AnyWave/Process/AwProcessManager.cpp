@@ -482,12 +482,17 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		for (auto plugin : AwPluginManager::getInstance()->processes())
 			p->pdi.input.processPluginNames.append(plugin->name);
 	}
-	if (inputF & Aw::ProcessInput::GetDurationMarkers) {
+	// if input markers are already set (by other features, like Launch Process from Markers GUI..
+	// then set an input flag to warn the plugin about that.
+	// Also we handle GetDurationMarkers and GetAllMarkers only if no markers already exist as input (Launch Process feature from Markers GUI may add markers as input for the process.)
+	if (!p->pdi.input.markers().isEmpty())
+		p->setInputFlags(p->inputFlags() | Aw::ProcessInput::UserSelectedMarkers);
+	if (inputF & Aw::ProcessInput::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
 		auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
 		if (!markers.isEmpty())
 			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 	}
-	if (inputF & Aw::ProcessInput::GetAllMarkers) {
+	if (inputF & Aw::ProcessInput::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
 		auto markers = AwMarkerManager::instance()->getMarkers();
 		if (!markers.isEmpty())
 			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));

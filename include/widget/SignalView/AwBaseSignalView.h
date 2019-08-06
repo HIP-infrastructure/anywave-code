@@ -46,7 +46,7 @@ public:
 	// Default = full navigation 
 	enum Flags {
 		Default = 0, NoNavBar = 1, NoHScrollBar = 2, NoSettingsButton = 4, EnableMarking = 8, NoMarkerBar = 16, ViewAllChannels = 32,
-		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512
+		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512, HidePositionInFile = 1024
 	};
 
 	void setFlags(int flags);

@@ -141,7 +141,6 @@ void AwProcessFromMarkersDial::accept()
 	// launch process
 	// Instantiate process
 	AwProcessManager *process_manager = AwProcessManager::instance();
-	//AwProcessPlugin *plugin = pm->getProcessPluginByName(comboProcess->itemText(comboProcess->currentIndex()));
 	// the plugin may be of type DisplayBackground, so force it to be Background only to launch the process.
 	AwBaseProcess *process = process_manager->newProcessFromPluginName(m_ui.comboProcess->itemText(m_ui.comboProcess->currentIndex()));
 	// set markers to compute data on

@@ -98,6 +98,7 @@ void AwNavigationBar::setFlags(int flags)
 		ui->labelnChannels->hide();
 		ui->labelnSelectedChannels->hide();
 	}
+	ui->labelTime->setVisible(~(flags & AwBaseSignalView::HidePositionInFile));
 	m_flags = flags;
 }
 

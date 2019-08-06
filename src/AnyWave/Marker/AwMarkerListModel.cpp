@@ -327,13 +327,14 @@ void AwMarkerListDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
 
 void AwMarkerListDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-	if (index.column() == MARKER_COLUMN_COLOR)	{
+	if (index.column() == MARKER_COLUMN_COLOR) {
 		QComboBox *cb = static_cast<QComboBox *>(editor);
 		cb->setGeometry(option.rect.x(), option.rect.y(), option.rect.width() + 100, option.rect.height());
 		cb->showPopup();
 	}
 	else
-		editor->setGeometry(option.rect);
+		//editor->setGeometry(option.rect);
+		QItemDelegate::updateEditorGeometry(editor, option, index);
 
 }
 

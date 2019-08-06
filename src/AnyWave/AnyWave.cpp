@@ -168,20 +168,24 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwMarkerInspector *markerInspectorWidget = NULL;
 
 	if (isGUIMode) {
-		m_dockWidgets["markers"] = new QDockWidget(tr("Markers"), this);
-		m_dockWidgets["markers"]->hide();
-		addDockWidget(Qt::LeftDockWidgetArea, m_dockWidgets["markers"]);
-		m_dockWidgets["markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		m_dockWidgets["markers"]->setWidget(AwMarkerManager::instance()->ui());
+		auto dock = new QDockWidget(tr("Markers"), this);
+		m_dockWidgets["markers"] = dock;
+		dock->hide();
+		dock->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dock->setWidget(AwMarkerManager::instance()->ui());
+		dock->widget()->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+		addDockWidget(Qt::LeftDockWidgetArea, dock);
+		resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 		
-
-		m_dockWidgets["add_markers"] = new QDockWidget(tr("Adding Markers Tool"), this);
-		m_dockWidgets["add_markers"]->hide();
-		m_dockWidgets["add_markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		m_dockWidgets["add_markers"]->setFloating(true);
+		dock = new QDockWidget(tr("Adding Markers Tool"), this);
+		m_dockWidgets["add_markers"] = dock;
+		dock->hide();
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dock->setFloating(true);
 		markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
-		m_dockWidgets["add_markers"]->setWidget(markerInspectorWidget);
-		
+		dock->setWidget(markerInspectorWidget);
+
 	}
 
 	// Processes

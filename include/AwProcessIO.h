@@ -69,8 +69,6 @@ public:
 	/** Append channels **/
 	void addChannels(const AwChannelList& channels, bool duplicate = false);
 	void addChannel(AwChannel *channel);
-	//AwChannelList channels;
-	//AwMarkerList markers;
 	QList<AwFileIOPlugin *> readers, writers;
 	QString dataFolder;
 	QString dataPath;
@@ -78,7 +76,6 @@ public:
 	QString pluginDirPath;
 	QString icaPath;			// contains the path to the .ica.h5 file or is empty if no ICA was computed.
 	AwMarker timeSelection;		// optional marker used in Quick Time Selection mode in AnyWave (contains the timing the user has selected before launching the process).
-	//QList<QWidget *> widgets;
 	QVariantList customData;
 	QStringList badLabels;		// contains channels marked as bad
 	QStringList processPluginNames;
@@ -94,6 +91,7 @@ public:
 
 protected:
 	AwChannelList m_channels;
+	// markers will contain input markers for the process.
 	AwMarkerList m_markers;
 
 	QList<QWidget *> m_widgets;

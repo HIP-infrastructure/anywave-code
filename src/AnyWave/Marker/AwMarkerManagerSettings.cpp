@@ -187,7 +187,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(checkTargets, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
 	connect(checkColor, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
 	// Statistics histogram
-	connect(buttonHisto, &QPushButton::clicked, this, &AwMarkerManagerSettings::showHistogram);
+//	connect(buttonHisto, &QPushButton::clicked, this, &AwMarkerManagerSettings::showHistogram);
 
 	tvMarkers->setColumnHidden(MARKER_COLUMN_CODE, true);
 	tvMarkers->setColumnHidden(MARKER_COLUMN_COLOR, true);
