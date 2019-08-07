@@ -561,11 +561,11 @@ void AnyWave::initToolBarsAndMenu()
 
 	// Filtering dock widget
 	auto dockFilters = new QDockWidget(tr("Filtering"), this);
+	dockFilters->hide();
 	m_dockWidgets["filters"] = dockFilters;
 	dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockFilters->setFloating(true);
 	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, dockFilters, &QDockWidget::show);
-	dockFilters->hide();
 	dockFilters->setWidget(AwSettings::getInstance()->filterSettings().ui());
 	filter_tb->setEnabled(false);
 	m_toolBarWidgets.append(filter_tb);

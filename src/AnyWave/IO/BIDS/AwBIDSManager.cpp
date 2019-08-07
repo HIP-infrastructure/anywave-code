@@ -49,6 +49,9 @@ void AwBIDSManager::toBIDS(const AwArguments& args)
 
 void AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 {
+	QString origin = "AwBIDSManager::MEGtoBIDS";
+	auto folder = args["input_file"].toString(); // here input_file should be a folder containing MEG data.
+
 
 }
 
