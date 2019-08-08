@@ -103,6 +103,8 @@ public:
 	QList<AwProcessPlugin *>& processes() { return m_pluginProcesses; }
 	QList<AwDisplayPlugin *>& displays() { return m_pluginDisplays; }
 
+	/** Returns processes plugin that matches flags or empty list if none matches. **/
+	QList<AwProcessPlugin *> processesWithFlags(int flags);
 
 	// plugins related methods
 	AwDisplayPlugin *getDisplayPluginByName(const QString& name) { return m_displayFactory.getPluginByName(name); }

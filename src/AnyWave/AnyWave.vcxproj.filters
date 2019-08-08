@@ -451,9 +451,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwProcessesWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Process\AwProcessFromMarkersDial.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessFromMarkersDial.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1434,12 +1431,6 @@
     <CustomBuild Include="Process\AwProcessesWidget.ui">
       <Filter>Process</Filter>
     </CustomBuild>
-    <CustomBuild Include="Process\AwProcessFromMarkersDial.h">
-      <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessFromMarkersDial.ui">
-      <Filter>Process</Filter>
-    </CustomBuild>
     <CustomBuild Include="Process\AwProcessManager.h">
       <Filter>Process</Filter>
     </CustomBuild>
@@ -1827,9 +1818,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwProcessesWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwProcessFromMarkersDial.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_TPUi.h">

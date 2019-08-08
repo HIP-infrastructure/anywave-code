@@ -146,6 +146,18 @@ void AwPluginManager::deleteReaderInstance(AwFileIO *fr)
 	fr->plugin()->deleteInstance(fr);
 }
 
+QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
+{
+	QList<AwProcessPlugin *> res;
+	for (auto p : m_pluginProcesses) {
+		if (p->flags() & flags)
+			res << p;
+	}
+	return res;
+}
+
+
+
 AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 {
 	QMutexLocker lock(&m_mutex);	// threading lock

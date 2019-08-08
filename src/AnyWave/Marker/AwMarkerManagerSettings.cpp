@@ -27,7 +27,6 @@
 #include "Prefs/AwSettings.h"
 #include "AwPickChannelsDial.h"
 #include "AwMarkersExportWidget.h"
-#include "Process/AwProcessFromMarkersDial.h"
 #include "AwMarkerRuleManageDial.h"
 #include <QMenu>
 #include <widget/AwMessageBox.h>
@@ -41,6 +40,7 @@
 #include <QHorizontalBarSeries>
 #include <QFileDialog>
 #include <widget/AwGetValueDialog.h>
+#include <Plugin/AwPluginManager.h>
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -63,6 +63,16 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 
 	// Context Menu for QTableView
 	m_menu = new QMenu(tvMarkers);
+	auto processes = AwPluginManager::getInstance()->processesWithFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	if (!processes.isEmpty()) {
+		QMenu *menu = m_menu->addMenu("Launch process");
+		for (auto p : processes) {
+			auto action = menu->addAction(QString("%1 - %2").arg(p->name).arg(p->description));
+			action->setData(p->name);
+			connect(action, &QAction::triggered, this, &AwMarkerManagerSettings::launchProcess);
+		}
+	}
+
 	m_selectAllLabel = new QAction(tr("Select all"), this);
 	m_menu->addAction(m_selectAllLabel);
 	connect(m_selectAllLabel, SIGNAL(triggered()), this, SLOT(selectAllLabels()));
@@ -96,9 +106,11 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(clearTrigger()));
 
-	action = new QAction(tr("Launch process"), this);
-	m_menu->addAction(action);
-	connect(action, SIGNAL(triggered()), this, SLOT(launchProcess()));
+	//action = new QAction(tr("Launch process"), this);
+	//m_menu->addAction(action);
+	//connect(action, SIGNAL(triggered()), this, SLOT(launchProcess()));
+
+
 
 	action = new QAction(tr("Center views on marker"), this);
 	m_menu->addAction(action);
@@ -637,10 +649,15 @@ void AwMarkerManagerSettings::launchProcess()
 			markers << currentMarkers.at(proxy->mapToSource(i).row());
 	}
 
-	// Launch Process Dial
-	AwProcessFromMarkersDial* dlg = new AwProcessFromMarkersDial(m_displayedMarkers, markers);
-	dlg->exec();
-	dlg->deleteLater();
+	QAction *action = (QAction *)sender();
+	if (action == Q_NULLPTR)
+		return;
+	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(action->data().toString());
+	if (plugin) {
+		auto process = AwProcessManager::instance()->newProcess(plugin);
+		process->pdi.input.setNewMarkers(markers, true);
+		AwProcessManager::instance()->runProcess(process);
+	}
 }
 
 void AwMarkerManagerSettings::selectAllLabels() 

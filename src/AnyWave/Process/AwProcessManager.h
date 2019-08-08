@@ -76,6 +76,7 @@ public:
 	QList<QAction *>& icaActions() { return m_icaActions; }
 	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList());
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
+	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
 	void startProcess(const QString& name, const QStringList& args = QStringList());
 	void closeFile();
 	void quit();
@@ -92,6 +93,7 @@ public:
 	inline void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline QWidget *processesWidget() { return (QWidget *)m_processesWidget; }
 	inline QDockWidget *dock() { return m_dock; }
+
 
 public slots:
 	void startProcessFromMenu();
@@ -119,7 +121,6 @@ signals:
 protected:
 	void addProcess(AwProcessPlugin *plugin);
 	void addProcessToMenu(AwProcessPlugin *plugin);
-	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
 	bool initProcessIO(AwBaseProcess *p);
 	bool buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources = AwChannelList());
 	void registerProcessForDisplay(AwProcess *process);
