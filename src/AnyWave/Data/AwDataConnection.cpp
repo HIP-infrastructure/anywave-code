@@ -94,8 +94,13 @@ void AwDataConnection::prepareAVGChannel(AwAVGChannel *avg_channel)
 	AwChannelList connections;
 
 	foreach (AwChannel *c, asRecorded)	{
-		if (c->type() == avg_channel->type() && !c->isBad())
-			connections << new AwChannel(c);
+		if (c->type() == avg_channel->type() && !c->isBad()) {
+			auto chan = new AwChannel(c);
+			chan->setLowFilter(avg_channel->lowFilter());
+			chan->setHighFilter(avg_channel->highFilter());
+			chan->setNotch(avg_channel->notch());
+			connections << chan;
+		}
 	}
 	avg_channel->connectChannels(connections);
 }
@@ -139,6 +144,9 @@ void AwDataConnection::parseChannels(AwChannelList& channels)
 	m_loadingList.clear();
 	m_refList.clear();
 	m_connectionsList.clear();
+
+	// Make SURE here that all dependent channels required have the SAME filter options than the requested ones !
+
 
 	foreach(AwChannel *c, channels)	{
 		if (!c->isVirtual()) {
@@ -204,7 +212,11 @@ void AwDataConnection::parseChannels(AwChannelList& channels)
 void AwDataConnection::createAVGChannel(AwChannel *channel)
 {
 	if (m_avg[channel->type()] == NULL) {
-		m_avg[channel->type()] = new AwAVGChannel(channel->type());
+		auto chan = new AwAVGChannel(channel->type());
+		chan->setLowFilter(channel->lowFilter());
+		chan->setHighFilter(channel->highFilter());
+		chan->setNotch(channel->notch());
+		m_avg[channel->type()] = chan;
 		prepareAVGChannel(m_avg[channel->type()]);
 	}
 
@@ -357,9 +369,9 @@ qint64 AwDataConnection::readWithOfflineFiltering(float start, float duration, c
 		read = m_reader->readDataFromChannels(start, duration, others);
 	if (!toFilter.isEmpty()) {
 		float s = std::max((float)0., start - AW_DC_OFFLINE_FILTERING_PADDING);
-		float d = std::min(m_reader->infos.totalDuration(), duration + AW_DC_OFFLINE_FILTERING_PADDING);
+		float end = std::min(m_reader->infos.totalDuration(), start + duration +  AW_DC_OFFLINE_FILTERING_PADDING);
 		// read more data than requested (before and after)
-		read = m_reader->readDataFromChannels(s, d, toFilter);
+		read = m_reader->readDataFromChannels(s, end - s, toFilter);
 		if (read > 0) {
 			// filter the data
 			AwFiltering::filter(toFilter);
@@ -462,8 +474,14 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 				c->clearData();
 			if (rawData)
 				read = m_reader->readDataFromChannels(m_positionInFile, m_duration, m_loadingList);
-			else
+			else {
 				read = readWithOfflineFiltering(m_positionInFile, m_duration, m_loadingList);
+			}
+			
+
+			//read = m_reader->readDataFromChannels(m_positionInFile, m_duration, m_loadingList);
+			////if (!rawData)
+			////	AwFiltering::filter(m_loadingList);
 			fileUnlock();
 		}
 	}
@@ -532,6 +550,9 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		}
 		while (!m_refList.isEmpty())
 			delete m_refList.takeLast();
+
+		//if (!rawData)
+		//	AwFiltering::filter(m_loadingList);
 
 		// check for internal processes
 		QList<AwProcess *> internals = AwProcessManager::instance()->activeInternalProcesses();

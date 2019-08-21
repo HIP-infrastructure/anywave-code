@@ -211,10 +211,17 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 				args["montage_file"] = tmp;
 		if (args.contains("montage_file")) { // did we finally got a montage file?
 				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args["montage_file"].toString(), process->pdi.input.badLabels);
+				if (montage.isEmpty()) { // error when loading and/or applying mtg file
+					throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
+					return Q_NULLPTR;
+				}
 		}
-		if (montage.isEmpty()) { // error when loading and/or applying mtg file
-			throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
-			return Q_NULLPTR;
+		else  { // no montage specified or detected
+			//throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
+			//return Q_NULLPTR;
+
+			// applying default file montage
+			montage = AwChannel::duplicateChannels(reader->infos.channels());
 		}
 		if (!buildPDI(process, montage, reader->infos.channels())) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
