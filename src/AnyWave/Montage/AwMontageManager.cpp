@@ -818,16 +818,22 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 			continue;
 		auto newChannel = new AwChannel(hash[c->name()]);
 		hash[c->name()]->setType(c->type());
+		/* Handle AVG references */
+		if (c->referenceName() == "AVG") {
+			newChannel->setReferenceName("AVG");
+			res << newChannel;
+			continue;
+		}
 		if (c->hasReferences() && hash.contains(c->referenceName())) {
 			// make sure the type of ref channel is matching the one in montage
 			if (!hash[c->referenceName()]->isBad()) {
 				hash[c->referenceName()]->setType(c->type());
 				newChannel->setReferenceName(c->referenceName());
 			}
-			else 
+			else
 				newChannel->clearRefName();
 		}
-		else 
+		else
 			newChannel->clearRefName();
 		res << newChannel;
 	}
