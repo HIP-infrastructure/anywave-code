@@ -477,11 +477,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			else {
 				read = readWithOfflineFiltering(m_positionInFile, m_duration, m_loadingList);
 			}
-			
-
-			//read = m_reader->readDataFromChannels(m_positionInFile, m_duration, m_loadingList);
-			////if (!rawData)
-			////	AwFiltering::filter(m_loadingList);
 			fileUnlock();
 		}
 	}
@@ -550,9 +545,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		}
 		while (!m_refList.isEmpty())
 			delete m_refList.takeLast();
-
-		//if (!rawData)
-		//	AwFiltering::filter(m_loadingList);
 
 		// check for internal processes
 		QList<AwProcess *> internals = AwProcessManager::instance()->activeInternalProcesses();

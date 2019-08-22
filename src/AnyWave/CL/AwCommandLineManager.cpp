@@ -217,8 +217,6 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 				}
 		}
 		else  { // no montage specified or detected
-			//throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
-			//return Q_NULLPTR;
 
 			// applying default file montage
 			montage = AwChannel::duplicateChannels(reader->infos.channels());

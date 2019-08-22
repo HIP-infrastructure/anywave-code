@@ -67,7 +67,8 @@ mxArray *parse_cfg(const mxArray *cfg)
 
 	if (cfg)
 		*stream << toJson(cfg);
-
+	else
+		*stream << QString();
 	// if cfg == NULL => send an empty string (default parameters = all data from current input channels set for the process).
 
 	if (!request.sendRequest())
