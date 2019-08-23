@@ -109,6 +109,7 @@ public slots:
 	void alignViewsHorizontaly();
 	void synchronizeViews(float position);
 	void synchronizeOnCursor(float position);	// reposition the views based on the cursor position from a particular view.
+	void setCursorPosition(float position); // change the cursor position in the view. Can make the view change its position.
 	void synchronizeCursorPos(float position);
 	void showPositionInViews(float position);
 	void highlightMarker(AwMarker *m);

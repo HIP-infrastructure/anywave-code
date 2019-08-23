@@ -165,7 +165,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Limit the number of channels</string>
+            <string>Limit number of channels</string>
            </property>
           </widget>
          </item>
@@ -220,7 +220,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Show the channel name</string>
+            <string>Show label</string>
            </property>
           </widget>
          </item>
@@ -233,7 +233,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Show the zero line</string>
+            <string>Show zero line</string>
            </property>
           </widget>
          </item>

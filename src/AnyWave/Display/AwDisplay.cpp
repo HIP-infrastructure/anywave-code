@@ -391,6 +391,16 @@ void AwDisplay::showPositionInViews(float position)
 	m_dontSynchronize = false;
 }
 
+void AwDisplay::setCursorPosition(float position)
+{
+	m_dontSynchronize = true;
+
+	for (auto v : m_signalViews)
+		v->synchronizeOnPosition(position);
+
+	m_dontSynchronize = false;
+}
+
 void AwDisplay::synchronizeOnCursor(float position)
 {
 	if (!m_setup->synchronizeViews())
@@ -670,18 +680,6 @@ void AwDisplay::setQTSMode(bool on)
 	foreach(AwSignalView *v, m_signalViews)
 		v->scene()->setQTSMode(on);
 }
-
-//void AwDisplay::updateSelectedChannels()
-//{
-//	m_allSelectedChannels.clear();
-//	m_selectedLabels.clear();
-//
-//	foreach (AwSignalView *v, m_signalViews)
-//		m_allSelectedChannels += v->selectedChannels();
-//
-//	m_selectedLabels = AwChannel::getLabels(m_allSelectedChannels);
-//	emit selectedChannelsChanged(m_allSelectedChannels);
-//}
 
 AwChannelList AwDisplay::selectedChannels()
 {

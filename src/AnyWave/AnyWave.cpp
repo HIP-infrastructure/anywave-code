@@ -70,6 +70,7 @@
 #include <mapping/AwMeshManager.h>
 #include "AwUpdater.h"
 #include <widget/AwTopoBuilder.h>
+#include <widget/AwVideoPlayer.h>
 //#define AW_EPOCHING
 
 #ifndef AW_DISABLE_EPOCHING
@@ -186,6 +187,14 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
 		dock->setWidget(markerInspectorWidget);
 
+		dock = new QDockWidget(tr("Video"), this);
+		m_dockWidgets["video"] = dock;
+		dock->hide();
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dock->setFloating(true);
+		m_player = new AwVideoPlayer;
+		dock->setWidget(m_player);
+		addDockWidget(Qt::LeftDockWidgetArea, dock);
 	}
 
 	// Processes
@@ -213,6 +222,8 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_display = new AwDisplay(this);
 		m_display->setParent(this);
 		m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
+		connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::cursorModeChanged);
+		connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setCursorPosition);
 	}
 
 	// AwSourceManager
@@ -361,7 +372,6 @@ void AnyWave::applyNewLanguage()
 
 void AnyWave::quit()
 {
-
 	AwDebugLog::instance()->closeFile();
 
 	for (auto w : m_openWidgets)
@@ -1185,6 +1195,3 @@ void AnyWave::on_actionQuit_triggered()
 {
 	close();
 }
-
-
-

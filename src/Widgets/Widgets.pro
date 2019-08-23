@@ -11,7 +11,7 @@ TEMPLATE = lib
 CONFIG += plugin
 DEFINES += AW_BUILD_WIDGETS_LIB
 DESTDIR = $$LIB_DIR
-QT += widgets
+QT += widgets multimedia multimediawidgets
 include(Widgets.pri)
 
 macx {

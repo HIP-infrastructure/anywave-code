@@ -24,6 +24,8 @@
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLog.h"
+#include "AwVideoManager.h"
+#include <widget/AwVideoPlayer.h>
 //
 // Menu File->Open
 // 
@@ -31,6 +33,14 @@ void AnyWave::on_actionOpen_triggered()
 {
 	openFile();
 }
+
+void AnyWave::on_actionOpen_video_triggered()
+{
+	m_dockWidgets["video"]->show();
+	m_player->openFile();
+}
+
+
    
 
 //   
@@ -402,7 +412,8 @@ void AnyWave::closeFile()
 	AwAmplitudeManager::instance()->closeFile();
 	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
-
+	if (AwVideoManager::isInstantiated())
+		delete AwVideoManager::instance();
 	// stop cursor mode and selection mode
 	m_cursorToolBar->reset();
 

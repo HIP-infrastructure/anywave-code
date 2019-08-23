@@ -120,17 +120,19 @@ void AwSignalView::updatePositionInFile(float pos)
 
 void AwSignalView::synchronizeOnPosition(float pos)
 {
-	float newPos = pos;
+	float newPos;
 	if (pos < 0.)
 		newPos = 0.;
 	if (pos + m_pageDuration > m_totalDuration)
 		pos = m_totalDuration - m_pageDuration;
-
-	m_positionInFile = newPos;
+	newPos = pos;
 	m_view->setPositionInFile(newPos);
 	m_scene->setPositionInFile(newPos);
 	m_navBar->updatePositionInFile(newPos);
 	m_markerBar->setPositionInFile(newPos);
+	if (newPos == m_positionInFile)
+		return;
+	m_positionInFile = newPos;
 	m_client.requestData(&m_channels, newPos, m_pageDuration);
 	dataReceived();
 }

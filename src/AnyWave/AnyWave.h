@@ -48,6 +48,7 @@ class AwDebugLogWidget;
 class AwMeshManager;
 class AwLayoutManager;
 class AwSEEGViewer;
+class AwVideoPlayer;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AnyWave
@@ -103,6 +104,8 @@ private:
 	// updater 
 	AwUpdater m_updater;
 	AwDownloader m_downloader;
+	// VIDEO Widget
+	AwVideoPlayer *m_player;
 	// flags
 	bool m_currentFileModified;
 	// methods
@@ -165,6 +168,7 @@ private slots:
 	void on_actionAbout_AnyWave_triggered();
 	void on_actionDebug_Logs_triggered();
 	void on_actionLoadICA_triggered();
+	void on_actionOpen_video_triggered();
 	void loadBeamformer();
 	void reviewComponentsMaps();
 	void showFileProperties();

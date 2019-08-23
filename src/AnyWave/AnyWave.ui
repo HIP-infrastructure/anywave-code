@@ -79,8 +79,10 @@
     </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionOpen_BIDS"/>
+    <addaction name="actionOpen_video"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
+    <addaction name="separator"/>
     <addaction name="actionOpen_New_AnyWave_Application"/>
     <addaction name="separator"/>
     <addaction name="actionImport_mrk_file"/>
@@ -431,6 +433,11 @@
    </property>
    <property name="text">
     <string>New AnyWave application</string>
+   </property>
+  </action>
+  <action name="actionOpen_video">
+   <property name="text">
+    <string>Open video</string>
    </property>
   </action>
  </widget>

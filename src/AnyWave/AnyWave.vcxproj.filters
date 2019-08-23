@@ -451,12 +451,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwProcessesWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessFromMarkersDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessFromMarkersDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwProcessManager.cpp">
       <Filter>Process</Filter>
     </ClCompile>
@@ -1276,6 +1270,21 @@
     <ClCompile Include="MATPy\AwGetMarkersEx.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwVideoManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwVideoManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Display\AwVideoManager.cpp">
+      <Filter>Display</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1769,6 +1778,9 @@
     </CustomBuild>
     <CustomBuild Include="Process\AwMATLABMarkersExporter.h">
       <Filter>Process</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Display\AwVideoManager.h">
+      <Filter>Display</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
