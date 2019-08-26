@@ -62,6 +62,10 @@ AwGraphicsScene::~AwGraphicsScene()
 		delete m_gotoChannelMenu;
 	if (m_QTSMenu)
 		delete m_QTSMenu;
+	for (auto cursor : m_cursors.values()) {
+		removeItem(cursor);
+		delete cursor;
+	}
 }
 
 void AwGraphicsScene::setQTSPlugins(const QStringList& plugins)
@@ -1613,6 +1617,42 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 	update();
 }
 
+
+void AwGraphicsScene::addCursor(const QString& label, const QString& color)
+{
+	if (m_cursors.contains(label)) {
+		auto value = m_cursors[label];
+		removeItem(value);
+		delete value;
+	}
+	auto cursor = new  AwCursorItem(0, 0, label, color, AwUtilities::cursorFont());
+	cursor->setPhysics(m_physics);
+	cursor->setPositionInFile(m_currentPosInFile);
+	m_cursors[label] = cursor;
+	addItem(cursor);
+	update();
+}
+
+void AwGraphicsScene::removeCursor(const QString& name)
+{
+	if (!m_cursors.contains(name))
+		return;
+	auto cursor = m_cursors[name];
+	removeItem(cursor);
+	m_cursors.remove(name);
+	delete cursor;
+	update();
+}
+
+void AwGraphicsScene::setCursorPosition(const QString& name, float startingPosition, float position)
+{
+	if (!m_cursors.contains(name))
+		return;
+	auto cursor = m_cursors[name];
+	cursor->setPosition(startingPosition, position);
+	update();
+}
+
 //
 // setCursor(bool flag)
 // Active ou desactive le curseur de suivi de souris dans la scene
@@ -1625,7 +1665,7 @@ void AwGraphicsScene::setCursorMode(bool flag)
 		else if (m_mouseMode == AwGraphicsScene::Mapping)
 			return; // do not allow cursor mode while in Mapping mode
 
-		m_cursor = new AwCursorItem(0, 0, AwUtilities::cursorColor(), AwUtilities::cursorFont());
+		m_cursor = new AwCursorItem(0, 0, "Cursor", AwUtilities::cursorColor(), AwUtilities::cursorFont());
 		m_cursor->setPhysics(m_physics);
 		m_cursor->setPositionInFile(m_currentPosInFile);
 		addItem(m_cursor);

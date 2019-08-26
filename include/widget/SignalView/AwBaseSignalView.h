@@ -77,6 +77,7 @@ public:
 
 	inline void showZeroLine(bool flag) { if (m_settings) { m_settings->showZeroLine = flag; emit settingsChanged(m_settings, AwViewSettings::ShowBaseLine); } }
 	inline void setTimeShift(float shift) { if (m_view) m_view->setTimeShift(shift); }
+	inline float currentEndPosition() { return m_positionInFile + m_pageDuration; }
 public slots:
 	void clean();
 	void setAmplitude(int type, float value);

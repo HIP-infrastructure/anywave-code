@@ -64,6 +64,11 @@ public:
 	virtual void applyNewSettings(AwViewSettings *settings);
 	virtual void updateMarkers();
 	virtual void refresh();
+
+	/* add a new cursor referenced by a name. Default color is red. */
+	void addCursor(const QString& name, const QString& color = "#FF0000");
+	void removeCursor(const QString& name);
+	void setCursorPosition(const QString& cursorName, float posInFile, float position);
 signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
@@ -166,6 +171,7 @@ protected:
 	QList<AwGraphicsMarkerItem *> m_markerItemsDisplayed;
 	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;
+	QMap<QString, AwCursorItem *> m_cursors;
 	QMultiHash<QString, AwGraphicsSignalItem *> m_hashNameToItem;	// retreive signal item by the channel's name.
 	AwViewSettings *m_settings;
 	AwDisplayPhysics *m_physics;

@@ -31,13 +31,15 @@ using namespace AwUtilities;
 #include <QGraphicsScene>
 
 
-AwCursorItem::AwCursorItem(float currentPosInFile, float cursorPos, const QString& color, const QFont& font) : AwGraphicsCursorItem(currentPosInFile, cursorPos)
+AwCursorItem::AwCursorItem(float currentPosInFile, float cursorPos, const QString& label, const QString& color, const QFont& font) :
+	AwGraphicsCursorItem(currentPosInFile, cursorPos)
 {
 	setOpacity(1);
 	m_otherPositionActivated = false;
 	m_font = font;
 	m_color = color;
 	m_width = 1.;
+	m_label = label;
 }
 
 void AwCursorItem::setOtherPos(const QPointF& pos)
@@ -49,6 +51,13 @@ void AwCursorItem::setOtherPos(const QPointF& pos)
 void AwCursorItem::setWidth(float width)
 {
 	m_width = width;
+	update();
+}
+
+void AwCursorItem::setPosition(float positionInFile, float position)
+{
+	m_positionInFile = positionInFile;
+	setPos((position - m_positionInFile) * m_physics->xPixPerSec(), 0);
 	update();
 }
 
@@ -87,6 +96,7 @@ void AwCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		label = AwUtilities::hmsTime(m_currentPos);
 	else
 		label.sprintf("%.3f", m_currentPos);
+	label = QString("%1:%2").arg(m_label).arg(label);
 	int label_width = fm.width(label);
 	for (quint32 i = 0; i < height; i += AW_CURSOR_LABEL_VERTICAL_SPACING)	{
 		painter->fillRect(8, i, label_width + 4, fm.height() + 2, brush);
@@ -99,7 +109,7 @@ void AwCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		pen.setStyle(Qt::DashDotLine);
 		QString label;
 		label.sprintf("%.3fs", (otherPosInSecs - posInSec));
-
+		label = QString("%1:%2").arg(m_label).arg(label);
 		int label_width = fm.width(label);
 		for (quint32 i = AW_CURSOR_LABEL_VERTICAL_SPACING + fm.height(); i < height; i += AW_CURSOR_LABEL_VERTICAL_SPACING) { // skip top line 
 			painter->drawLine(QPointF(0, i), QPointF(m_width, i));

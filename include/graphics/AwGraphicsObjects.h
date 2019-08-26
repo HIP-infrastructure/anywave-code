@@ -161,6 +161,7 @@ public:
 	/** Defines the absolute position in seconds for the cursor in the scene **/
 	void setCurrentPos(float position);	
 	void updatePosition();
+
 public slots:
 	virtual void setPositionInFile(float pos) { m_positionInFile = pos; }
 protected:

@@ -222,8 +222,8 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_display = new AwDisplay(this);
 		m_display->setParent(this);
 		m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
-		connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::cursorModeChanged);
-		connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setCursorPosition);
+		connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::handleVideoCursor);
+		connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setVideoPosition);
 	}
 
 	// AwSourceManager

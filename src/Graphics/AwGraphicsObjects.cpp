@@ -178,4 +178,3 @@ QVariant AwGraphicsSignalItem::itemChange(GraphicsItemChange change, const QVari
 	return QGraphicsItem::itemChange(change, value);
 }
 
-

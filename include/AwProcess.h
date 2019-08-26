@@ -39,7 +39,7 @@ namespace AwProcessCommand
 {
 	enum Commands {
 		AddHighlightedSection, RemoveLastHighlightedSection, ShowOnlySelectedChannels,
-		SelectChannels, ShowAllChannels, LaunchProcess, CenterOnPos, LoadICA, UpdateMarkers
+		SelectChannels, ShowAllChannels, LaunchProcess, CenterOnPos, LoadICA, UpdateMarkers, AddVideoCursor, RemoveCursor
 	};
 }
 

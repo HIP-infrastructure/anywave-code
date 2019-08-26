@@ -9,6 +9,7 @@ AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 	m_mediaPlayer = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
 	QVideoWidget *videoWidget = new QVideoWidget;
 
+	videoWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	QAbstractButton *openButton = new QPushButton(tr("Open..."));
 	connect(openButton, &QAbstractButton::clicked, this, &AwVideoPlayer::openFile);
 	m_closeButton = new QPushButton(tr("Close"));
@@ -34,6 +35,7 @@ AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 	QBoxLayout *controlLayout = new QHBoxLayout;
 	controlLayout->setMargin(0);
 	controlLayout->addWidget(openButton);
+	controlLayout->addWidget(m_closeButton);
 	controlLayout->addWidget(m_playButton);
 	controlLayout->addWidget(m_positionSlider);
 
@@ -51,6 +53,7 @@ AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 	connect(m_mediaPlayer, &QMediaPlayer::durationChanged, this, &AwVideoPlayer::durationChanged);
 	connect(m_mediaPlayer, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
 		this, &AwVideoPlayer::handleError);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 AwVideoPlayer::~AwVideoPlayer()
@@ -85,6 +88,9 @@ void AwVideoPlayer::setUrl(const QUrl &url)
 	m_mediaPlayer->setMedia(url);
 	m_playButton->setEnabled(true);
 	m_closeButton->setEnabled(true);
+	auto dateTime = m_mediaPlayer->metaData("DateTimeOriginal").toDateTime();
+	m_originalTime = dateTime.time();
+	repaint();
 	emit videoReady(true);
 }
 

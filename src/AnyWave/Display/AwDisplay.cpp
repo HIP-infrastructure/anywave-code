@@ -262,6 +262,35 @@ void AwDisplay::loadChannelSelections()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 ///    S L O T S
+
+void AwDisplay::addVideoCursor()
+{
+	for (auto v : m_signalViews)
+		v->scene()->addCursor("Video");
+}
+
+void AwDisplay::removeVideoCursor()
+{
+	for (auto v : m_signalViews)
+		v->scene()->removeCursor("Video");
+}
+
+void AwDisplay::handleVideoCursor(bool flag)
+{
+	flag ? addVideoCursor() : removeVideoCursor();
+}
+
+void AwDisplay::setVideoPosition(float position)
+{
+	if (position < 0.)
+		return;
+	for (auto v : m_signalViews) {
+		if (position > v->currentEndPosition() || position < v->positionInFile()) 
+			v->setPositionInFile(position);
+		v->scene()->setCursorPosition("Video", v->positionInFile(), position);
+	}
+}
+
 void AwDisplay::executeCommand(int com, const QVariantList& args)
 {
 	switch (com)
@@ -299,6 +328,15 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 		foreach (AwSignalView *v, m_signalViews)
 			v->updateMarkers();
 		break;
+	case  AwProcessCommand::AddVideoCursor:
+		foreach(AwSignalView *v, m_signalViews)
+			v->scene()->addCursor("Video");
+		break;
+	case AwProcessCommand::RemoveCursor:
+		QString name = args.first().toString();
+		foreach(AwSignalView *v, m_signalViews)
+			v->scene()->removeCursor(name);
+		break;
 	}
 }
 
@@ -306,7 +344,6 @@ void AwDisplay::captureViews()
 {
 	AwSettings *aws = AwSettings::getInstance();
 	// first, clear the lastCaptureFile set in Settings
-//	aws->lastCaptureFile.clear();  // so in case of error when capturing, the file remains empty.
 	aws->setSettings("lastCapturedFile", QString());
 
 	QString dir = aws->fileInfo()->dirPath();

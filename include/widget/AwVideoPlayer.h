@@ -3,6 +3,7 @@
 #include <QMediaPlayer>
 #include <QWidget>
 #include <AwGlobal.h>
+#include <QTime>
 
 QT_BEGIN_NAMESPACE
 class QAbstractButton;
@@ -19,6 +20,7 @@ public:
 	~AwVideoPlayer();
 
 	void setUrl(const QUrl &url);
+	QTime& time() { return m_originalTime; }
 signals:
 	void videoPositionChanged(float position);
 	void videoReady(bool flag);
@@ -39,4 +41,5 @@ private:
 	QAbstractButton *m_playButton, *m_closeButton;
 	QSlider *m_positionSlider;
 	QLabel *m_errorLabel;
+	QTime m_originalTime;
 };
