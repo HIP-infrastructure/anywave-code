@@ -394,8 +394,6 @@ void AnyWave::quit()
 		dockEEG->close();
 		delete dock;
 		m_dockWidgets.remove("eeg_mapping");
-		//delete m_dockEEG;
-		//m_dockEEG = NULL;
 	}
 
 	auto dockMEG = m_dockWidgets["meg_mapping"];
@@ -406,7 +404,6 @@ void AnyWave::quit()
 		dockMEG->close();
 		m_dockWidgets.remove("meg_mapping");
 		delete dock;
-		//m_dockMEG = NULL;
 	}
 	if (m_display)
 		m_display->quit();

@@ -117,6 +117,7 @@ public slots:
 	void removeVideoCursor();
 	void handleVideoCursor(bool flag);
 	void setVideoPosition(float pos);
+	void setVideoTime(const QTime& time);
 
 
 	/** Change selected state of one or more channels, referenced by name **/

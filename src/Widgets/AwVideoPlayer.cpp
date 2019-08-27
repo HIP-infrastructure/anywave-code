@@ -1,71 +1,50 @@
 #include <widget/AwVideoPlayer.h>
+#include "ui_AwVideoPlayer.h"
 
 #include <QtWidgets>
 #include <QVideoWidget>
+#include <QMediaMetaData>
 
 AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 	: QWidget(parent)
 {
+	m_ui = new Ui::AwVideoPlayerUi;
+	m_ui->setupUi(this);
 	m_mediaPlayer = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
 	QVideoWidget *videoWidget = new QVideoWidget;
+	m_ui->verticalLayout->replaceWidget(m_ui->widget, videoWidget);
+	delete m_ui->widget;
+	m_ui->widget = videoWidget;
+	connect(m_ui->buttonOpen, &QAbstractButton::clicked, this, &AwVideoPlayer::openFile);
+	connect(m_ui->buttonClose, &QAbstractButton::clicked, this, &AwVideoPlayer::closeFile);
+	m_ui->buttonClose->setEnabled(false);
+	m_ui->buttonPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+	m_ui->buttonPlay->setEnabled(false);
+	connect(m_ui->buttonPlay, &QAbstractButton::clicked, this, &AwVideoPlayer::play);
+	m_ui->slider->setRange(0, 0);
 
-	videoWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	QAbstractButton *openButton = new QPushButton(tr("Open..."));
-	connect(openButton, &QAbstractButton::clicked, this, &AwVideoPlayer::openFile);
-	m_closeButton = new QPushButton(tr("Close"));
-	connect(m_closeButton, &QAbstractButton::clicked, this, &AwVideoPlayer::closeFile);
-	m_closeButton->setEnabled(false);
-
-	m_playButton = new QPushButton;
-	m_playButton->setEnabled(false);
-	m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-
-	connect(m_playButton, &QAbstractButton::clicked,
-		this, &AwVideoPlayer::play);
-
-	m_positionSlider = new QSlider(Qt::Horizontal);
-	m_positionSlider->setRange(0, 0);
-
-	connect(m_positionSlider, &QAbstractSlider::sliderMoved,
-		this, &AwVideoPlayer::setPosition);
-
-	m_errorLabel = new QLabel;
-	m_errorLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-
-	QBoxLayout *controlLayout = new QHBoxLayout;
-	controlLayout->setMargin(0);
-	controlLayout->addWidget(openButton);
-	controlLayout->addWidget(m_closeButton);
-	controlLayout->addWidget(m_playButton);
-	controlLayout->addWidget(m_positionSlider);
-
-	QBoxLayout *layout = new QVBoxLayout;
-	layout->addWidget(videoWidget);
-	layout->addLayout(controlLayout);
-	layout->addWidget(m_errorLabel);
-
-	setLayout(layout);
+	connect(m_ui->slider, &QAbstractSlider::sliderMoved, this, &AwVideoPlayer::setPosition);
 
 	m_mediaPlayer->setVideoOutput(videoWidget);
-	connect(m_mediaPlayer, &QMediaPlayer::stateChanged,
-		this, &AwVideoPlayer::mediaStateChanged);
+	connect(m_mediaPlayer, &QMediaPlayer::stateChanged,	this, &AwVideoPlayer::mediaStateChanged);
 	connect(m_mediaPlayer, &QMediaPlayer::positionChanged, this, &AwVideoPlayer::positionChanged);
 	connect(m_mediaPlayer, &QMediaPlayer::durationChanged, this, &AwVideoPlayer::durationChanged);
 	connect(m_mediaPlayer, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
 		this, &AwVideoPlayer::handleError);
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 }
 
 AwVideoPlayer::~AwVideoPlayer()
 {
+	delete m_ui;
 }
 
 void AwVideoPlayer::closeFile()
 {
-	m_playButton->setEnabled(false);
+	m_ui->buttonPlay->setEnabled(false);
 	m_mediaPlayer->stop();
 	emit videoReady(false);
-	m_closeButton->setEnabled(false);
+	m_ui->buttonClose->setEnabled(false);
 }
 
 void AwVideoPlayer::openFile()
@@ -83,14 +62,14 @@ void AwVideoPlayer::openFile()
 
 void AwVideoPlayer::setUrl(const QUrl &url)
 {
-	m_errorLabel->setText(QString());
+	m_ui->label->setText(QString());
 	setWindowFilePath(url.isLocalFile() ? url.toLocalFile() : QString());
 	m_mediaPlayer->setMedia(url);
-	m_playButton->setEnabled(true);
-	m_closeButton->setEnabled(true);
-	auto dateTime = m_mediaPlayer->metaData("DateTimeOriginal").toDateTime();
-	m_originalTime = dateTime.time();
-	repaint();
+	m_ui->buttonPlay->setEnabled(true);
+	m_ui->buttonClose->setEnabled(true);
+	QSize size = m_mediaPlayer->metaData(QMediaMetaData::Resolution).toSize();
+	if (!size.isNull())
+		m_ui->widget->resize(size);
 	emit videoReady(true);
 }
 
@@ -110,23 +89,30 @@ void AwVideoPlayer::mediaStateChanged(QMediaPlayer::State state)
 {
 	switch (state) {
 	case QMediaPlayer::PlayingState:
-		m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+		m_ui->buttonPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
 		break;
 	default:
-		m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+		m_ui->buttonPlay->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
 		break;
 	}
 }
 
 void AwVideoPlayer::positionChanged(qint64 position)
 {
-	m_positionSlider->setValue(position);
-	emit videoPositionChanged((float)position / 1000.);
+	m_ui->slider->setValue(position);
+	auto pos = (float)position / 1000.;
+	pos -= m_synchSettings.shift / 1000.;
+	float duration = m_mediaPlayer->duration() / 1000.;
+	float drift = (duration * (m_synchSettings.drift / 1000.)) / 3600.;
+	pos += drift;
+	if (pos < 0.)
+		pos = 0.;
+	emit videoPositionChanged(pos);
 }
 
 void AwVideoPlayer::durationChanged(qint64 duration)
 {
-	m_positionSlider->setRange(0, duration);
+	m_ui->slider->setRange(0, duration);
 }
 
 void AwVideoPlayer::setPosition(int position)
@@ -136,13 +122,13 @@ void AwVideoPlayer::setPosition(int position)
 
 void AwVideoPlayer::handleError()
 {
-	m_playButton->setEnabled(false);
+	m_ui->buttonPlay->setEnabled(false);
 	const QString errorString = m_mediaPlayer->errorString();
 	QString message = "Error: ";
 	if (errorString.isEmpty())
 		message += " #" + QString::number(int(m_mediaPlayer->error()));
 	else
 		message += errorString;
-	m_errorLabel->setText(message);
+	m_ui->label->setText(message);
 	emit videoReady(false);
 }

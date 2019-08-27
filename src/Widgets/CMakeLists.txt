@@ -103,6 +103,7 @@ SET(FORMS ./AwAmplitudeWidget.ui
     ./SignalView/AwNavigationBarv2.ui  
     ./SignalView/AwViewSettingsUi.ui  
     ./SEEGViewer/AwSEEGWidget.ui  
+	./AwVideoPlayer.ui
     ./InputMarker/AwInputMarkerWidget.ui)
 
 QT5_WRAP_UI(UI ${FORMS})

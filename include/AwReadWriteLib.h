@@ -87,6 +87,13 @@ protected:
 
 typedef QList<AwBlock *> AwBlockList;  ///< Define a list of blocks.
 
+struct AW_RW_EXPORT AwVideoSynch {
+	AwVideoSynch() {
+		shift = drift = 0;
+	}
+	qint32 shift;
+	qint32 drift;
+};
 
 /*!
  * \brief
@@ -159,14 +166,13 @@ public:
 	/** Adds a new channel as As Recorded channel.
 	The As Recorded channels are the channels found in the data file. **/
 	AwChannel* addChannel(AwChannel *channel);
-	///** Adds a new channel as As Recorded channel.
-	//The As Recorded channels are the channels found in the data file. **/
-	//AwChannel* addChannel(AwChannel& channel);
 	/** Allows to change the name of a previously inserted channel.
 	This will do nothing if the channel does not exist. **/
 	void changeChannelName(const QString& oldName, const QString& newName);
 	/** set the date and time in ISO format **/
 	void setISODate(const QString& dateTime) { m_isoDate = dateTime; }
+	/** get the structure for video synchronization **/
+	inline AwVideoSynch& videoSynch() { return m_videoSynch; }
 protected:
 	AwBlockList m_blocks;
 	AwChannelList m_channels;
@@ -179,6 +185,7 @@ protected:
 	quint32 m_channelsCount;
 	// Hash table to store index of channels and their name.
 	QHash<QString, int> m_labelToIndex;
+	AwVideoSynch m_videoSynch;
 };
 
 #endif // AWREADWRITELIB_H

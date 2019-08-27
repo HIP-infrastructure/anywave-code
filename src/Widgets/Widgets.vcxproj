@@ -422,6 +422,7 @@
     </CustomBuild>
     <ClInclude Include="GeneratedFiles\ui_AwGetValueDialog.h" />
     <ClInclude Include="GeneratedFiles\ui_AwSelectInputDataWidget.h" />
+    <ClInclude Include="GeneratedFiles\ui_AwVideoPlayer.h" />
     <ClInclude Include="SEEGViewer\AwSEEGInteractor.h" />
     <CustomBuild Include="InputMarker\InputMarkerModel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -1624,6 +1625,24 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
+    <CustomBuild Include="AwVideoPlayer.ui">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+    </CustomBuild>
     <None Include="awwidgetslib_en.ts" />
     <None Include="awwidgetslib_fr.ts" />
     <CustomBuild Include="InputMarker\AwInputMarkerWidget.ui">
@@ -1734,7 +1753,7 @@
       <OutputFile>$(OutDir)\$(ProjectName)d.dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(AWROOT)\lib;$(DEV_ROOT)\win64\VS2015\Qwt-6.1.3\lib;D:\Dev\win64\VS2017\VTK810\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;Qt5PrintSupportd.lib;AwCoreLibd.lib;AwGraphicsLibd.lib;AwUtilitiesLibd.lib;AwMappingLibd.lib;AwMathLibd.lib;AwLayoutLibd.lib;AwProcessLibd.lib;AwFilteringLibd.lib;qwtd.lib;vtkCommonCore-8.1.lib;vtkCommonDataModel-8.1.lib;vtkCommonMisc-8.1.lib;vtkFiltersCore-8.1.lib;vtkGUISupportQt-8.1.lib;vtkFiltersGeometry-8.1.lib;vtkRenderingCore-8.1.lib;vtkInteractionStyle-8.1.lib;vtkCommonExecutionModel-8.1.lib;vtkFiltersSources-8.1.lib;vtkRenderingOpenGL2-8.1.lib;vtkRenderingFreeType-8.1.lib;vtkRenderingAnnotation-8.1.lib;vtkIOCore-8.1.lib;vtkIOGeometry-8.1.lib;mkl_intel_lp64_dll.lib;mkl_core_dll.lib;mkl_tbb_thread_dll.lib;tbb.lib;Qt5Multimediad.lib;Qt5MultimediaWidgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;Qt5PrintSupportd.lib;AwCoreLibd.lib;AwGraphicsLibd.lib;AwUtilitiesLibd.lib;AwMappingLibd.lib;AwMathLibd.lib;AwLayoutLibd.lib;AwProcessLibd.lib;AwFilteringLibd.lib;AwReadWriteLibd.lib;qwtd.lib;vtkCommonCore-8.1.lib;vtkCommonDataModel-8.1.lib;vtkCommonMisc-8.1.lib;vtkFiltersCore-8.1.lib;vtkGUISupportQt-8.1.lib;vtkFiltersGeometry-8.1.lib;vtkRenderingCore-8.1.lib;vtkInteractionStyle-8.1.lib;vtkCommonExecutionModel-8.1.lib;vtkFiltersSources-8.1.lib;vtkRenderingOpenGL2-8.1.lib;vtkRenderingFreeType-8.1.lib;vtkRenderingAnnotation-8.1.lib;vtkIOCore-8.1.lib;vtkIOGeometry-8.1.lib;mkl_intel_lp64_dll.lib;mkl_core_dll.lib;mkl_tbb_thread_dll.lib;tbb.lib;Qt5Multimediad.lib;Qt5MultimediaWidgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(AWROOT)\lib\$(TargetName)d.lib</ImportLibrary>
     </Link>
     <Lib>

@@ -564,6 +564,9 @@
     <CustomBuild Include="..\..\include\widget\AwVideoPlayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="AwVideoPlayer.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwAmplitudeWidget.h">
@@ -624,6 +627,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwGetValueDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwVideoPlayer.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

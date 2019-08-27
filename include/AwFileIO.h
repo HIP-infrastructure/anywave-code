@@ -32,7 +32,7 @@ namespace Aw
 {
 	/** Flags to activate some extra features **/
 
-	enum AwIOFlags { CanRead = 1, CanWrite = 2, HasExtension = 4, TriggerChannelIsWritable = 8, IsDirectory = 16 };
+	enum AwIOFlags { CanRead = 1, CanWrite = 2, HasExtension = 4, TriggerChannelIsWritable = 8, IsDirectory = 16, HasVideoSupport = 32 };
 }
 
 class AW_RW_EXPORT AwFileIO : public QObject
@@ -82,6 +82,11 @@ public:
 
 	/** Override this method to provide the full path to the file currently open by the plugin. **/
 	virtual QString realFilePath() { return QString(); }
+
+	/** Override this method if the plugin provides video support **/
+	virtual QString videoPath() { return QString(); }
+	inline bool hasVideoFile() { return !videoPath().isEmpty(); }
+
 signals:
 	void triggerValuesWritten(bool status, int number);
 public slots:

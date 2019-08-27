@@ -291,6 +291,13 @@ void AwDisplay::setVideoPosition(float position)
 	}
 }
 
+void AwDisplay::setVideoTime(const QTime& time)
+{
+	// get the file starting time
+	auto recordedTime = AwSettings::getInstance()->currentReader()->infos.recordingTime();
+	auto videoTime = time.toString();
+}
+
 void AwDisplay::executeCommand(int com, const QVariantList& args)
 {
 	switch (com)

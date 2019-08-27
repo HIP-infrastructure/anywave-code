@@ -262,6 +262,12 @@ void AnyWave::openFile(const QString &path)
 
 	if (openWithDialog)
 		settings->addRecentFilePath(filePath);
+
+	if (m_currentReader->hasVideoFile()) {
+		m_dockWidgets["video"]->show();
+		m_player->setVideoSyncSettings(m_currentReader->infos.videoSynch());
+		m_player->setUrl(QUrl::fromLocalFile(m_currentReader->videoPath()));
+	}
 }
 
 void AnyWave::openRecentFile()
