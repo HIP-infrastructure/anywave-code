@@ -34,6 +34,10 @@
 #include <filter/AwFilterSettings.h>
 #include <QMessageBox>
 
+// use layout manager to store a layout in the matlab file
+#include <layout/AwLayoutManager.h>
+#include <layout/AwLayout.h>
+
 ICA::ICA()
 {
 	pdi.setInputFlags(Aw::ProcessInput::GetAsRecordedChannels|Aw::ProcessInput::GetProcessPluginNames |Aw::ProcessInput::GetDurationMarkers| Aw::ProcessInput::ProcessIgnoresChannelSelection);
@@ -250,6 +254,17 @@ void ICA::run()
 
 void ICA::saveToFile()
 {
+	AwLayout *layout = nullptr;
+	int flags = 0;
+	if (m_modality == AwChannel::EEG)
+		flags = AwLayout::EEG | AwLayout::L2D;
+	if (m_modality == AwChannel::MEG) 
+		flags = AwLayout::MEG | AwLayout::L2D;;
+	if (flags) {
+		auto lm = AwLayoutManager::instance();
+		layout = lm->guessLayout(pdi.input.reader(), flags);
+	}
+	
 	emit progressChanged("Saving to file...");
 	AwMATLABFile file;
 	try {
@@ -261,6 +276,10 @@ void ICA::saveToFile()
 		file.writeMatrix("mixing", m_mixing);
 		file.writeMatrix("unmixing", m_unmixing);
 		file.writeStringCellArray(QString("labels"), AwChannel::getLabels(m_channels));
+		if (layout)
+			file.writeString("layout", layout->name());
+		else
+			file.writeString("layout", QString());
 	}
 	catch (const AwException& e) {
 		sendMessage(QString("Error saving to .mat : %1").arg(e.errorString()));

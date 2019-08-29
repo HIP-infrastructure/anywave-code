@@ -198,6 +198,10 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 			delete m;
 		}
 	}
+
+	// check for ica file 
+	QString icaPath = path + ".ica.mat";
+
 	m_fullPath = path;
 	return AwFileIO::NoError;
 }

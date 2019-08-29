@@ -102,7 +102,7 @@ void AwExporter::runFromCommandLine()
 		AW_DESTROY_LIST(m_outputMarkers);
 	}
 
-	sendMessage("loading data...");
+	sendMessage("Loading data...");
 	requestData(&pdi.input.channels(), &m_inputMarkers);
 	sendMessage("Done.");
 	AW_DESTROY_LIST(m_inputMarkers);
@@ -118,7 +118,7 @@ void AwExporter::runFromCommandLine()
 		writer->plugin()->deleteInstance(writer);
 		return;
 	}
-	sendMessage("Writting data...");
+	sendMessage("Writing data...");
 	writer->writeData(&pdi.input.channels());
 	sendMessage("Done.");
 	writer->cleanUpAndClose();
@@ -233,18 +233,24 @@ bool AwExporter::showUi()
 		else
 			m_channels = ui.selectedChannels;
 		m_plugin = writers.value(ui.writer);
-
+		
 		if (QFile::exists(ui.filePath)) {
 			if (AwMessageBox::information(0, tr("File"), tr("the file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
 				return false;
 		}
 		m_path = ui.filePath;
 		pdi.input.filterSettings = ui.filterSettings;
+		/** Apply filters **/
+		ui.filterSettings.apply(m_channels);
 
 		// if Export All ICA channels is checked => add all ICA channels to export
 		m_exportICAChannels = ui.exportICA;
-		if (m_exportICAChannels) 
+		if (m_exportICAChannels) {
 			m_ICAChannels = ui.icaChannels;
+			QString extension = ui.extensions.value(ui.writers.indexOf(ui.writer));
+			// copy the ICA.Mat fileto be used with the exported file.
+			QFile::copy(pdi.input.icaPath, ui.filePath + extension + ".ica.mat");
+		}
 		else if (!ui.selectedICA.isEmpty()) // only a subset of ICA channels are selected for export
 			m_ICAChannels = ui.selectedICA;
 
