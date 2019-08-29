@@ -110,15 +110,15 @@ mxArray* request_info()
     mxSetField(output, 0, "refs", dummy);
     
     // max_sr
-    mxArray *f_sr = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    double *v = (double *)mxGetData(f_sr);
-    v[0] = (double)max_sr;
+    mxArray *f_sr = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
+    float *v = (float *)mxGetData(f_sr);
+    v[0] = max_sr;
     mxSetField(output, 0, "max_sr", f_sr);
     
     // total_duration
-    mxArray *f_dur = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    v = (double *)mxGetData(f_dur);
-    v[0] = (double)total_dur;
+    mxArray *f_dur = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
+    v = (float *)mxGetData(f_dur);
+    v[0] = total_dur;
     mxSetField(output, 0, "total_duration", f_dur);
     
     // temp_dir

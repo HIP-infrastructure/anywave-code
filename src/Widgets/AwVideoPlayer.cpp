@@ -11,10 +11,6 @@ AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 	m_ui = new Ui::AwVideoPlayerUi;
 	m_ui->setupUi(this);
 	m_mediaPlayer = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
-	QVideoWidget *videoWidget = new QVideoWidget;
-	m_ui->verticalLayout->replaceWidget(m_ui->widget, videoWidget);
-	delete m_ui->widget;
-	m_ui->widget = videoWidget;
 	connect(m_ui->buttonOpen, &QAbstractButton::clicked, this, &AwVideoPlayer::openFile);
 	connect(m_ui->buttonClose, &QAbstractButton::clicked, this, &AwVideoPlayer::closeFile);
 	m_ui->buttonClose->setEnabled(false);
@@ -25,7 +21,7 @@ AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 
 	connect(m_ui->slider, &QAbstractSlider::sliderMoved, this, &AwVideoPlayer::setPosition);
 
-	m_mediaPlayer->setVideoOutput(videoWidget);
+	m_mediaPlayer->setVideoOutput(m_ui->widget);
 	connect(m_mediaPlayer, &QMediaPlayer::stateChanged,	this, &AwVideoPlayer::mediaStateChanged);
 	connect(m_mediaPlayer, &QMediaPlayer::positionChanged, this, &AwVideoPlayer::positionChanged);
 	connect(m_mediaPlayer, &QMediaPlayer::durationChanged, this, &AwVideoPlayer::durationChanged);
@@ -105,6 +101,11 @@ void AwVideoPlayer::positionChanged(qint64 position)
 	float duration = m_mediaPlayer->duration() / 1000.;
 	float drift = (duration * (m_synchSettings.drift / 1000.)) / 3600.;
 	pos += drift;
+#ifndef NDEBUG
+	QString debug = QString("shift:%1ms - drift:%2ms - eeg: %3s - video: %4s").arg(m_synchSettings.shift).arg(m_synchSettings.drift) \
+		.arg(pos).arg(float(position) / 1000.);
+	m_ui->label->setText(debug);
+#endif
 	if (pos < 0.)
 		pos = 0.;
 	emit videoPositionChanged(pos);
