@@ -248,8 +248,11 @@ bool AwExporter::showUi()
 		if (m_exportICAChannels) {
 			m_ICAChannels = ui.icaChannels;
 			QString extension = ui.extensions.value(ui.writers.indexOf(ui.writer));
+			QString destFile = ui.filePath + extension + ".ica.mat";
+			if (QFile::exists(destFile))
+				QFile::remove(destFile);
 			// copy the ICA.Mat fileto be used with the exported file.
-			QFile::copy(pdi.input.icaPath, ui.filePath + extension + ".ica.mat");
+			QFile::copy(pdi.input.icaPath, destFile);
 		}
 		else if (!ui.selectedICA.isEmpty()) // only a subset of ICA channels are selected for export
 			m_ICAChannels = ui.selectedICA;

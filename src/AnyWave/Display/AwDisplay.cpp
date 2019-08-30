@@ -379,14 +379,18 @@ void AwDisplay::captureViews()
 
 void AwDisplay::showICAMapOverChannel(bool flag)
 {
-	foreach (AwSignalView *v, m_signalViews) {
+	for (auto v : m_signalViews) {
 		QList<AwGraphicsSignalItem *> items = v->scene()->signalItems();
-		foreach (AwGraphicsSignalItem *item, items) {
-			if (item->channel()->isICA() && item->channel()->isVirtual()) {
-				AwICASignalItem *ica_item = static_cast<AwICASignalItem *>(item);
-				Q_ASSERT(ica_item != NULL);
-				ica_item->showMap(flag);
-			}
+		for (auto item : items) {
+			// Try to cast the graphics item as AwICASignalItem.
+			AwICASignalItem *ica_item = static_cast<AwICASignalItem *>(item);
+			// the cast will failed if the item is not totally real ICA.
+			// There is the case where the ICA is virtual and compluted on the fly using the mixing matrix.
+			// There is the case where the channel is real (exported before)
+			// And finally there is the case where the channel is read but in ADES file with ICA result and then could be used as a virtual one...
+			if (ica_item == nullptr)
+				return;
+			ica_item->showMap(flag);
 		}
 		v->view()->layoutItems();
 		v->view()->scene()->update();

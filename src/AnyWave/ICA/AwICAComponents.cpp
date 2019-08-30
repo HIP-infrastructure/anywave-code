@@ -207,7 +207,7 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 
 	for (int i = 0; i < m_unmixing.n_rows; i++) {
 		AwICAChannel *chan = new AwICAChannel();
-		chan->setName(QString("%1_ICA %2").arg(AwChannel::typeToString(m_type)).arg(i + 1));
+		chan->setName(QString("%1_ICA_%2").arg(AwChannel::typeToString(m_type)).arg(i + 1));
 		chan->setSamplingRate(sr);
 		chan->setIndex(i);
 		chan->setLayout2D(l);

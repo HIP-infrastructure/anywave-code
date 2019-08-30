@@ -31,29 +31,6 @@ AwAvgSignalItem::AwAvgSignalItem(AwChannel *chan, AwDisplayPhysics *phys) : AwSi
 {
 	m_avgChannel = static_cast<AwEpochAverageChannel *>(chan);
 	setAcceptHoverEvents(true);
-
-	//// custom actions => specific contextual menu
-	//QAction *act = new QAction(tr("Reject component"), this);
-	//connect(act, SIGNAL(triggered()), this, SLOT(reject()));
-	//m_actions << act;
-	//act = new QAction(tr("Undo reject"), this);
-	//connect(act, SIGNAL(triggered()), this, SLOT(addComponent()));
-	//m_actions << act;
-	//if (m_icaChannel->layout2D()) {
-	//	act = new QAction(tr("Show map"), this);
-	//	connect(act, SIGNAL(triggered()), this, SLOT(showMap()));
-	//	m_actions << act;
-	//	act = new QAction(tr("Hide map"), this);
-	//	connect(act, SIGNAL(triggered()), this, SLOT(hideMap()));
-	//	m_actions << act;
-	//}
-	//// add the 2D/3D map switch if a 3D layout is available
-	//if (m_icaChannel->layout3D()) {
-	//	act = new QAction(tr("Show 3D map"), this);
-	//	connect(act, SIGNAL(triggered()), this, SLOT(show3DMap()));
-	//	m_actions << act;
-	//}
-
 }
 
 AwAvgSignalItem::~AwAvgSignalItem()
@@ -100,9 +77,6 @@ void AwAvgSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 		m_errorPath = QPainterPath();
 		
 		float gain = m_channel->gain();
-		// MEG and Reference are expressed as pT/cm so convert pT to T before rendering the signal
-//		if (m_channel->isMEG() || m_channel->isReference() || m_channel->isGRAD())
-//			gain *= 1E-12;
 		float min = 0., max = 0.;
 		QVector<qreal> minValues, maxValues;
 		fvec error = m_avgChannel->error();
@@ -198,8 +172,6 @@ void AwAvgSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 		if (sampleIndex < m_channel->dataSize()) {
 			float gain = m_channel->gain();
 			float value = m_channel->data()[sampleIndex];
-//			if (m_channel->isMEG() || m_channel->isReference() || m_channel->isGRAD())
-//				value *= 1E12;
 
 			QString tt = m_sensorName + ":" + AwChannel::typeToString(m_channel->type());
 			tt += "\nValue: " + QString::number(value) + m_channel->unit();

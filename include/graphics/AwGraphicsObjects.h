@@ -106,7 +106,7 @@ public:
 	virtual void showLabel(bool flag) { m_label = flag; }
 	inline bool isLabelVisible() { return m_label; }
 	virtual void showBaseline(bool flag) { m_baseLine = flag;  }
-	inline AwChannel *channel() { return m_channel; }
+	virtual AwChannel *channel() { return m_channel; }
 	inline void setChannel(AwChannel *chan) { m_channel = chan; }
 	// override this method to implement specific refresh for the item. 
 	// That could be to repaint the item as new data have been set to.
