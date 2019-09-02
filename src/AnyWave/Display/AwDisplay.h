@@ -42,9 +42,9 @@ class AwGainManager;
 class AwFileIO;
 class AwCentralWidget;
 
-#define TOP_LEFT		0
-#define BOTTOM_RIGHT	1
-#define AW_MAX_VIEW_SCENE	2
+#define TOP_LEFT				0
+#define BOTTOM_RIGHT			1
+#define AW_MAX_VIEW_SCENE		2
 #define AW_CALIBRATION_WIDTH	200	// 200 pixels line width reference
 
 class AwDisplay : public QObject
@@ -117,7 +117,6 @@ public slots:
 	void removeVideoCursor();
 	void handleVideoCursor(bool flag);
 	void setVideoPosition(float pos);
-	void setVideoTime(const QTime& time);
 
 
 	/** Change selected state of one or more channels, referenced by name **/
