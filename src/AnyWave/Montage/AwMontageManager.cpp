@@ -430,7 +430,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		// make a copy a as recorded channel and insert it in channels.
 		// do not insert Reference channels in default montage
 		if (!c->isReference())
-			m_channels << new AwChannel(c);
+			m_channels << c->duplicate();
 	}
 
 	// check for .bad file

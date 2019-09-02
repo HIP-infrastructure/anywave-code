@@ -24,6 +24,12 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "ADESIO.h"
+#include <matlab/AwMATLAB.h>
+#include <aw_armadillo.h>
+#include "ICA/AwICAChannel.h"
+#include <layout/AwLayoutManager.h>
+#include <layout/AwLayout.h>
+#include <AwCore.h>
 
 ADESIOPlugin::ADESIOPlugin() : AwFileIOPlugin()
 {
@@ -164,14 +170,87 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 	if (labels.isEmpty() || m_samplingRate == 0. || m_nSamples == 0)
 		return AwFileIO::WrongFormat;
 
+	// check for ica file 
+	QString icaPath = path + ".ica.mat";
+	bool icaFileExists = QFile::exists(icaPath);
+	QMap<QString, AwICAChannel *> icaChannelsMap;
+	AwICAChannelList icaChannels;
+	if (icaFileExists) {
+		QString modality, layout2D, layout3D;
+		QStringList labels;
+		mat mixing;
+		AwMATLABFile file;
+		bool error = false;
+		try {
+			file.open(icaPath);
+			file.readString("modality", modality);
+			file.readMatrix("mixing", mixing);
+			file.readString("layout2D", layout2D);
+			file.readString("layout3D", layout3D);
+			file.readStrings("labels", labels);
+		}
+		catch (const AwException& e)
+		{
+			error = true;
+		}
+		if (!error) {
+			// getting layouts
+			auto lm = AwLayoutManager::instance();
+			int layoutType = 0;
+			if (modality == "MEG")
+				layoutType = AwLayout::MEG;
+			if (modality == "EEG")
+				layoutType = AwLayout::EEG;
+			AwLayout *l2D = nullptr, *l3D = nullptr;
+			if (!layout2D.isEmpty()) 
+				l2D = lm->layoutByName(layout2D, layoutType |AwLayout::L2D);
+			if (!layout3D.isEmpty())
+				l3D = lm->layoutByName(layout3D, layoutType | AwLayout::L3D);
+			QVector<float> values(mixing.n_rows);
+			// number of components =  number of columns of mixing matrix
+			for (auto i = 0; i < mixing.n_cols; i++) {
+				AwICAChannel *chan = new AwICAChannel();
+				chan->setName(QString("%1_ICA_%2").arg(modality).arg(i + 1));
+				chan->setSamplingRate(m_samplingRate);
+				chan->setIndex(i);
+				chan->setLayout2D(l2D);
+				if (l3D)
+					chan->setLayout3D(l3D);
+				chan->setComponentType(AwChannel::stringToType(modality));
+				// topography values for component i are in the ith column of matrix mixing
+				for (uword r = 0; r < mixing.n_rows; r++)
+					values[r] = mixing(r, i);
+				chan->setTopoValues(values);
+				chan->setLabels(labels);
+				chan->setDisplayPluginName("ICA SignalItem");
+				// TRICKING PART
+				// AnyWave must considered those channels as REAL. 
+				// Using AwICAChannel made them Virtual, so we have to cheat AnyWave:
+				chan->setSourceType(AwChannel::Real);
+				icaChannelsMap.insert(chan->name(), chan);
+				icaChannels << chan;
+			}
+		}
+	}
+
 	for (int i = 0; i < labels.size(); i++) {
 		AwChannel chan;
 		QPair<QString, int> pair = labels.at(i);
-		chan.setName(pair.first);
-		AwChannel *inserted = infos.addChannel(&chan);
-		inserted->setType(pair.second);
-		inserted->setSamplingRate(m_samplingRate);
+		if (icaChannelsMap.contains(pair.first)) {
+			infos.addChannel(icaChannelsMap.value(pair.first));
+		}
+		else {
+			chan.setName(pair.first);
+			AwChannel *inserted = infos.addChannel(&chan);
+			inserted->setType(pair.second);
+			inserted->setSamplingRate(m_samplingRate);
+		}
 	}
+	//if (!icaChannelsMap.isEmpty()) {
+	//	AW_DESTROY_LIST(icaChannelsMap.values());
+	//	icaChannelsMap.clear();
+	//}
+	AW_DESTROY_LIST(icaChannels);
 
 	AwBlock *block = infos.newBlock();
 	block->setDuration((float)m_nSamples / m_samplingRate);
@@ -198,6 +277,7 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 			delete m;
 		}
 	}
+
 	m_fullPath = path;
 	return AwFileIO::NoError;
 }
@@ -299,11 +379,8 @@ ADESIO::FileStatus ADESIO::createFile(const QString &path, int flags)
 
 	// Write markers if any
 	if (infos.blocks().at(0)->markersCount()) { // we consider a continous file (only one block)
-		QFile markerFile(markerPath);
-		if (!markerFile.open(QIODevice::WriteOnly))
+		if (AwMarker::save(markerPath, infos.blocks().at(0)->markers()) == -1)
 			return AwFileIO::FileAccess;
-		markerFile.close();
-		AwMarker::save(markerPath, infos.blocks().at(0)->markers());
 	}
 
 	m_binFile.setFileName(binPath);

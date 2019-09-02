@@ -78,6 +78,7 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 	if (!process->pdi.areInputChannelSet()) { // no input channels specified => ok set to AnyChannels (1-n)
 		process->pdi.addInputChannel(-1, 1, 0);
 	}
+	process->pdi.input.icaPath = AwSettings::getInstance()->getString("currentIcaFile");
 	// input channels are set
 	auto types = process->pdi.getInputChannels();
 	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.

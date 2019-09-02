@@ -137,13 +137,13 @@ QStringList AwMarker::markersTypeList()
 	return list;
 }
 
-void AwMarker::save(const QString& path, const AwMarkerList& markers)
+int AwMarker::save(const QString& path, const AwMarkerList& markers)
 {
 	QFile file(path);
 	QTextStream stream(&file);
 
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-		return;
+		return -1;
 
 	stream << "// AnyWave Marker File" << endl;
 	foreach (AwMarker *m, markers) {
@@ -165,6 +165,7 @@ void AwMarker::save(const QString& path, const AwMarkerList& markers)
 		stream << endl;
 	}
 	file.close();
+	return 0;
 }
 
 AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)

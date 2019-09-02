@@ -149,12 +149,11 @@ void AwDataInfo::clear()
 /// Remember to delete the channel passed as parameter after the insertion is complete.
 AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 {
-	AwChannel *chan = new AwChannel(channel);
+	auto chan = channel->duplicate();
+	//AwChannel *chan = new AwChannel(channel);
 	// copy constructor will set channel as parent for new channel.
 	// Here we don't want a parent for as recorded channel, so change it to null.
 	chan->setParent(NULL);
-	// remove all whitespaces in label
-//	chan->setName(chan->name().remove(' '));
 	auto s = chan->name().trimmed();
 	// DO NOT PERMIT EMPTY LABEL
 	if (s.isEmpty()) {
