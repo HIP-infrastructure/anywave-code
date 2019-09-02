@@ -458,6 +458,8 @@ void AnyWave::closeFile()
 		m_SEEGViewer = NULL;
 	}
 
+	m_dockWidgets["video"]->hide();
+
 	// Epoch Manager (destroy the object when closing the file)
 #ifdef AW_EPOCHING
 	if (AwEpochManager::instanceExists()) {
