@@ -24,6 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwSignalView.h"
+#include "ICA/AwICASignalItem.h"
 #include <widget/SignalView/AwGraphicsView.h>
 #include "AwScene.h"
 #include <widget/SignalView/AwNavigationBar.h>
@@ -284,6 +285,19 @@ void AwSignalView::setChannels(const AwChannelList& channels)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
+
+
+void AwSignalView::showICAMaps(bool flag)
+{
+	QList<AwGraphicsSignalItem *> items = scene()->signalItems();
+	for (auto i : items) {
+		auto channel = i->channel();
+		if (channel->type() == AwChannel::ICA && channel->className() == "AwVirtual") {
+			AwICASignalItem *ica_item = static_cast<AwICASignalItem *>(i);
+			ica_item->showMap(flag);
+		}
+	}
+}
 
 void AwSignalView::refresh()
 {

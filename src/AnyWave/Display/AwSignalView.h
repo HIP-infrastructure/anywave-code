@@ -71,6 +71,8 @@ public slots:
 	void addVirtualChannels(AwChannelList& channels);
 	void removeVirtualChannels(AwChannelList& channels);
 	void removeICAChannels(); // only remove ICA channels if the user cancels
+	/** Toggles the displays of the maping over the channel **/
+	void showICAMaps(bool flag);
 protected:
 	// overriden methods
 	void dataReceived() override;

@@ -77,7 +77,7 @@ public:
 	/** Load a marker file and returns the markers */ 
 	static QList<AwMarker *> load(const QString& file);
 	/** Save markers to a file **/
-	static void save(const QString& file, const QList<AwMarker *>& markers);
+	static int save(const QString& file, const QList<AwMarker *>& markers);
 	/** duplicate markers **/
 	static QList<AwMarker *> duplicate(const QList<AwMarker *>& markers);
 	/** Sort markers, chronologically. Don't duplicate.**/

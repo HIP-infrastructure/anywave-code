@@ -265,8 +265,6 @@ void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels
 	if (comps)	{
 		// load source channels
 		AwSettings::getInstance()->filterSettings().apply(comps->sources());
-		//m_reader->readDataFromChannels(m_positionInFile, m_duration, comps->sources());
-		//AwFiltering::filter(&comps->sources());
 		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
 		comps->computeComponents(channels);
 	}

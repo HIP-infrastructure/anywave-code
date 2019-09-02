@@ -46,6 +46,8 @@ public:
 	QRectF boundingRect() const;
 	QSize minimumSize() const;
 
+	AwChannel *channel() override { return m_icaChannel; }
+
 	/* set the component as rejected on not. Therefore the ICA filtering is modified for all the data. */
 	void setRejected(bool rejected);	
 	/* set the component state as rejected or not. Only update the signal display settings, does not change the ICA filtering of data. */

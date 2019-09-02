@@ -466,6 +466,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	bool selection = !selectedChannels.isEmpty();
 	int inputF = p->pdi.inputFlags();
 
+	p->pdi.input.icaPath = AwSettings::getInstance()->getString("currentIcaFile");
+
 	bool requireSelection = inputF & Aw::ProcessInput::ProcessRequiresChannelSelection;
 	bool ignoreSelection = inputF & Aw::ProcessInput::ProcessIgnoresChannelSelection; 
 	// of course, requireSelection and ignoreSelection are mutual exclusive.
