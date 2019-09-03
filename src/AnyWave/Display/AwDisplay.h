@@ -97,6 +97,7 @@ signals:
 	void resetMarkerMode();
 	void setupChanged(AwDisplaySetup *setup, int flags);
 	void mappingTimeSelectionDone(float pos, float duration);
+	void draggedCursorPositionChanged(float pos);
 	void QTSModeEnded();
 public slots:
 	void updateSetup(AwDisplaySetup *setup, int flags);

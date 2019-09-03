@@ -58,7 +58,6 @@ void AwCursorItem::setPosition(float positionInFile, float position)
 {
 	m_positionInFile = positionInFile;
 	setPos((position - m_positionInFile) * m_physics->xPixPerSec(), 0);
-	update();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +85,7 @@ void AwCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	QPen pen = QPen(QColor(m_color));
 	pen.setWidth(1);
 	painter->setPen(pen);
+	painter->setBrush(QBrush(QColor(m_color), Qt::CrossPattern));
 	painter->drawRect(rect);
 	painter->setFont(m_font);
 	QBrush brush(Qt::white);

@@ -55,7 +55,7 @@ public slots:
 	void openFile();
 	void play();
 	void closeFile();
-
+	void setPositionFromSignals(float position);
 private slots:
 	void mediaStateChanged(QMediaPlayer::State state);
 	void positionChanged(qint64 position);
@@ -67,4 +67,7 @@ private:
 	AwVideoSynch m_synchSettings;
 	QMediaPlayer* m_mediaPlayer;
 	Ui::AwVideoPlayerUi *m_ui;
+	bool m_sendSignals;
+	float m_driftInSecs;
+	float m_shiftInSecs;
 };

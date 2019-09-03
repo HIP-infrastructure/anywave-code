@@ -1150,9 +1150,14 @@ void AwGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 		QGraphicsItem *item = itemAt(e->scenePos());
 #else
 		QGraphicsItem *item = itemAt(e->scenePos(), QTransform());
-#endif
-		if (item)
+		if (item) {
 			QGraphicsScene::mousePressEvent(e);
+			if (item->type() == QGraphicsItem::UserType + AW_GRAPHICS_ITEM_CURSOR_TYPE) {
+				m_draggedCursor = static_cast<AwCursorItem *>(item);
+				m_mouseMode = AwGraphicsScene::DraggingCursor;
+			}
+		}
+#endif
 	}
 	else if (m_mouseMode == AwGraphicsScene::Mapping) {
 		if (!m_selectionRectangle) 	{
@@ -1187,6 +1192,11 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
 	QPointF pos = e->scenePos();
 	QGraphicsView *v = views().at(0);
 	switch (m_mouseMode) {
+	case AwGraphicsScene::DraggingCursor:
+		m_draggedCursor->setPosition(m_currentPosInFile, timeAtPos(pos));
+		update();
+		emit draggedCursorPositionChanged(m_draggedCursor->currentPos());
+		break;
 	case AwGraphicsScene::Mapping:
 		if (!m_mousePressed) {
 			m_mappingCursor->setPos(v->mapToScene(pos.x(), 0));
@@ -1294,6 +1304,9 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 
 	m_mousePressed = false;
 	QPointF pos = e->scenePos();
+
+	if (m_mouseMode == AwGraphicsScene::DraggingCursor) 
+		m_mouseMode = AwGraphicsScene::None;
 
 	switch (m_mouseMode) {
 	case AddingMarker:
@@ -1618,7 +1631,7 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 }
 
 
-void AwGraphicsScene::addCursor(const QString& label, const QString& color)
+AwCursorItem *AwGraphicsScene::addCursor(const QString& label, const QString& color, float width)
 {
 	if (m_cursors.contains(label)) {
 		auto value = m_cursors[label];
@@ -1628,9 +1641,11 @@ void AwGraphicsScene::addCursor(const QString& label, const QString& color)
 	auto cursor = new  AwCursorItem(0, 0, label, color, AwUtilities::cursorFont());
 	cursor->setPhysics(m_physics);
 	cursor->setPositionInFile(m_currentPosInFile);
+	cursor->setWidth(width);
 	m_cursors[label] = cursor;
 	addItem(cursor);
 	update();
+	return cursor;
 }
 
 void AwGraphicsScene::removeCursor(const QString& name)

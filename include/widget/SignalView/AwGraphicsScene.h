@@ -45,7 +45,7 @@ public:
 	AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent = 0);
 	~AwGraphicsScene();
 
-	enum Mode { Cursor, Mapping, AddingMarker, None, QTS };
+	enum Mode { Cursor, Mapping, AddingMarker, None, QTS, DraggingCursor };
 	inline float pageDuration() { return m_pageDuration; }
 	inline AwChannelList& channels() { return m_channels; }
 	AwChannelList selectedChannels();
@@ -66,7 +66,7 @@ public:
 	virtual void refresh();
 
 	/* add a new cursor referenced by a name. Default color is red. */
-	void addCursor(const QString& name, const QString& color = "#FF0000");
+	AwCursorItem *addCursor(const QString& name, const QString& color = "#FF0000", float width = 2.);
 	void removeCursor(const QString& name);
 	void setCursorPosition(const QString& cursorName, float posInFile, float position);
 signals:
@@ -78,6 +78,7 @@ signals:
 	// signal sent whenever the user changes the filters settings of a channel.
 	void channelFiltersChanged();
 	// Cursors
+	void draggedCursorPositionChanged(float position);
 	void cursorPositionChanged(float position);
 	void mappingPositionChanged(float position);
 	void markerInserted(AwMarker *marker);
@@ -175,7 +176,7 @@ protected:
 	QMultiHash<QString, AwGraphicsSignalItem *> m_hashNameToItem;	// retreive signal item by the channel's name.
 	AwViewSettings *m_settings;
 	AwDisplayPhysics *m_physics;
-	AwCursorItem *m_cursor;
+	AwCursorItem *m_cursor, *m_draggedCursor;
 	AwMappingCursorItem *m_mappingCursor;
 	AwMappingCursorItem *m_mappingFixedCursor;
 	AwMarkerItem *m_currentMarkerItem;

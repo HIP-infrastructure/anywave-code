@@ -224,6 +224,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
 		connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::handleVideoCursor);
 		connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setVideoPosition);
+		connect(m_display, &AwDisplay::draggedCursorPositionChanged, m_player, &AwVideoPlayer::setPositionFromSignals);
 	}
 
 	// AwSourceManager
@@ -1056,7 +1057,6 @@ bool AnyWave::searchForMatlab()
 		}
 	}
 #endif
-//	bool requireRestart = settings.value("matlab/require_restart", false).toBool();
 	if (isDetected) {
 		if (needRestart)
 			AwMessageBox::information(this, tr("MATLAB"), tr("MATLAB was detected. Restart AnyWave to activate MATLAB plugins."));

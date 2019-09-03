@@ -27,7 +27,8 @@ AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 	connect(m_mediaPlayer, &QMediaPlayer::durationChanged, this, &AwVideoPlayer::durationChanged);
 	connect(m_mediaPlayer, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
 		this, &AwVideoPlayer::handleError);
-
+	m_sendSignals = true;
+	m_driftInSecs = m_shiftInSecs = 0.;
 }
 
 AwVideoPlayer::~AwVideoPlayer()
@@ -97,10 +98,8 @@ void AwVideoPlayer::positionChanged(qint64 position)
 {
 	m_ui->slider->setValue(position);
 	auto pos = (float)position / 1000.;
-	pos -= m_synchSettings.shift / 1000.;
-	float duration = m_mediaPlayer->duration() / 1000.;
-	float drift = (duration * (m_synchSettings.drift / 1000.)) / 3600.;
-	pos += drift;
+	pos -= m_shiftInSecs;
+	pos += m_driftInSecs;
 #ifndef NDEBUG
 	QString debug = QString("shift:%1ms - drift:%2ms - eeg: %3s - video: %4s").arg(m_synchSettings.shift).arg(m_synchSettings.drift) \
 		.arg(pos).arg(float(position) / 1000.);
@@ -108,12 +107,16 @@ void AwVideoPlayer::positionChanged(qint64 position)
 #endif
 	if (pos < 0.)
 		pos = 0.;
-	emit videoPositionChanged(pos);
+	if (m_sendSignals)
+		emit videoPositionChanged(pos);
 }
 
 void AwVideoPlayer::durationChanged(qint64 duration)
 {
 	m_ui->slider->setRange(0, duration);
+	float dur = (float)duration  / 1000.;
+	m_driftInSecs = (dur * (m_synchSettings.drift / 1000.)) / 3600.;
+	m_shiftInSecs = m_synchSettings.drift / 1000.;
 }
 
 void AwVideoPlayer::setPosition(int position)
@@ -132,4 +135,19 @@ void AwVideoPlayer::handleError()
 		message += errorString;
 	m_ui->label->setText(message);
 	emit videoReady(false);
+}
+
+
+void AwVideoPlayer::setPositionFromSignals(float position)
+{
+	disconnect(m_ui->slider, &QAbstractSlider::sliderMoved, this, &AwVideoPlayer::setPosition);
+	disconnect(m_mediaPlayer, &QMediaPlayer::positionChanged, this, &AwVideoPlayer::positionChanged);
+	float pos = position + m_shiftInSecs;
+	pos -= m_driftInSecs;
+	m_sendSignals = false;
+	setPosition((int)floor(position * 1000));
+	m_ui->slider->setValue((int)floor(position * 1000));
+	connect(m_ui->slider, &QAbstractSlider::sliderMoved, this, &AwVideoPlayer::setPosition);
+	connect(m_mediaPlayer, &QMediaPlayer::positionChanged, this, &AwVideoPlayer::positionChanged);
+	m_sendSignals = true;
 }

@@ -138,6 +138,7 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	connect(view, SIGNAL(displayedChannelsUpdated(AwChannelList&)), pm, SLOT(startDisplayProcesses(AwChannelList&)));
 	connect(view->scene(), SIGNAL(clickedAtTime(float)), this, SIGNAL(clickedAtLatency(float)));
 	connect(view->scene(), SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
+	connect(view->scene(), &AwGraphicsScene::draggedCursorPositionChanged, this, &AwDisplay::draggedCursorPositionChanged);
 	connect(view, SIGNAL(cursorClicked(float)), this, SLOT(synchronizeOnCursor(float)));
 	connect(view, SIGNAL(markerBarHighlighted(AwMarker *)), this, SLOT(highlightMarker(AwMarker *)));
 
@@ -265,8 +266,10 @@ void AwDisplay::loadChannelSelections()
 
 void AwDisplay::addVideoCursor()
 {
-	for (auto v : m_signalViews)
-		v->scene()->addCursor("Video");
+	for (auto v : m_signalViews) {
+		auto cursor = v->scene()->addCursor("Video");
+		cursor->setWidth(5.0);
+	}
 }
 
 void AwDisplay::removeVideoCursor()
@@ -329,8 +332,10 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 			v->updateMarkers();
 		break;
 	case  AwProcessCommand::AddVideoCursor:
-		foreach(AwSignalView *v, m_signalViews)
-			v->scene()->addCursor("Video");
+		foreach(AwSignalView *v, m_signalViews) {
+			auto cursor = v->scene()->addCursor("Video");
+			cursor->setWidth(5.0);
+		}
 		break;
 	case AwProcessCommand::RemoveCursor:
 		QString name = args.first().toString();
@@ -374,19 +379,6 @@ void AwDisplay::showICAMapOverChannel(bool flag)
 {
 	for (auto v : m_signalViews) {
 		v->showICAMaps(flag);
-		//QList<AwGraphicsSignalItem *> items = v->scene()->signalItems();
-		//for (auto item : items) {
-		//	if (item->channel()->type() == AwChannel::ICA && )
-		//	// Try to cast the graphics item as AwICASignalItem.
-		//	AwICASignalItem *ica_item = static_cast<AwICASignalItem *>(item);
-		//	// the cast will failed if the item is not totally real ICA.
-		//	// There is the case where the ICA is virtual and compluted on the fly using the mixing matrix.
-		//	// There is the case where the channel is real (exported before)
-		//	// And finally there is the case where the channel is read but in ADES file with ICA result and then could be used as a virtual one...
-		//	if (ica_item == nullptr)
-		//		return;
-		//	ica_item->showMap(flag);
-		//}
 		v->view()->layoutItems();
 		v->view()->scene()->update();
 	}
