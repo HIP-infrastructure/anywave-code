@@ -6,7 +6,6 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <QDirIterator>
-#include <qregularexpression.h>
 #include "AwBIDSTools.h"
 #include "AwFileItem.h"
 #include "Plugin/AwPluginManager.h"
@@ -28,7 +27,7 @@ void AwBIDSManager::toBIDS(const AwArguments& args)
 	QString origin = "AwBIDSManager::toBIDS";
 	if (args.isEmpty()) {
 		emit log("AwBIDSManager::toBIDS - no arguments specified.");
-		throw(AwException("No arguments", origin));
+		//throw(AwException("No arguments", origin));
 		return;
 	}
 
@@ -38,32 +37,196 @@ void AwBIDSManager::toBIDS(const AwArguments& args)
 		SEEGtoBIDS(args);
 	}
 	else if (mod == "meg") {
+		// output_dir option must be specified
+		if (!args.contains("output_dir")) {
+			emit log("AwBIDSManager::toBIDS - output_dir option must be set for MEG modality.");
+		//	throw(AwException("Missing arguments", origin));
+			return;
+		}
+		if (!args.contains("input_dir")) {
+			emit log("AwBIDSManager::toBIDS - input_dir option must be set for MEG modality.");
+	//		throw(AwException("Missing arguments", origin));
+			return;
+		}
 		MEGtoBIDS(args);
 	}
 	else {
 		emit log("AwBIDSManager::toBIDS - invalid bids_modality.");
-		throw(AwException("bids_modality is invalid.", origin));
+		//throw(AwException("bids_modality is invalid.", origin));
 		return;
 	}
 }
 
-void AwBIDSManager::MEGtoBIDS(const AwArguments& args)
+int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 {
-	QString origin = "AwBIDSManager::MEGtoBIDS";
-	auto folder = args["input_file"].toString(); // here input_file should be a folder containing MEG data.
+	auto folder = args["input_dir"].toString(); // here input_file should be a folder containing MEG data.
+	AwPluginManager *pm = AwPluginManager::getInstance();
+	// given the input folder search for a file with ,
+	QDir dir(folder);
+	auto files = dir.entryList(QDir::Files);
+	AwFileIO *reader = nullptr;
+	bool found = false;
+	QString filePath;
+	for (auto f : files) {
+		if (f.contains(",") && files.contains("config") && !f.contains(".")) {
+			filePath = QString("%1/%2").arg(folder).arg(f);
+			reader = pm->getReaderToOpenFile(filePath);
+			if (reader) 
+				return convert4DNI(args, reader, filePath);
+		}
+	}
+	// not a 4DNI run
+	// no other format supported for now.
+	emit log("no 4DNI MEG format detected (only support this format for now).");
+	return -1;
+}
+
+int AwBIDSManager::convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile)
+{
+	auto inputDir = args["input_dir"].toString(); // here input_file should be a folder containing MEG data.
+
+	auto subj = args["bids_subject"].toString();
+	auto task = args["bids_task"].toString();
+	auto session = args["bids_session"].toString();
+	auto run = args["bids_run"].toString();
+	auto acq = args["bids_acq"].toString();
+	auto proc = args["bids_proc"].toString();
+	if (run.isEmpty()) {
+		emit log("bids_run is missing.");
+		return -1;
+	}
+
+	if (reader->openFile(dataFile) != AwFileIO::NoError) {
+		emit log(QString("Could not open the file %1").arg(dataFile));
+		return -1;
+	}
+
+	auto outputDir = args["output_dir"].toString();
+	bool headshapeExists = false;
+
+	QString folderName, json, channels_tsv;
+	folderName = QString("%1/sub-%2").arg(outputDir).arg(subj);
+	if (!session.isEmpty())
+		folderName = QString("%1_ses-%2").arg(folderName).arg(session);
+	folderName = QString("%1_task-%2").arg(folderName).arg(task);
+	// acq comes after task
+	if (!acq.isEmpty()) 
+		folderName = QString("%1_acq-%2").arg(folderName).arg(acq);
+	// run comes after acq or task
+	if (!run.isEmpty()) 
+		folderName = QString("%1_run-%2").arg(folderName).arg(run);
+	// proc comes after run
+	if (!proc.isEmpty()) 
+		folderName = QString("%1_proc-%2").arg(folderName).arg(proc);
+
+	folderName = QString("%1_meg").arg(folderName);
+	//
+	json = QString("%1.json").arg(folderName);
+	channels_tsv = QString("%1_channels.tsv").arg(folderName);
+
+	// ok create the destination folder with the BIDS name
+	QDir dir(folderName);
+	if (!dir.mkdir(folderName)) {
+		emit log(QString("could not create %1").arg(folderName));
+		return -1;
+	}
+
+	// copy all files
+	QDir input(inputDir);
+	for (auto f : input.entryList(QDir::Files)) {
+		auto sourceFile = QString("%1/%2").arg(inputDir).arg(f);
+		auto destFile = QString("%1/%2").arg(folderName).arg(f);
+		if (QFile::exists(destFile))
+			QFile::remove(destFile);
+		if (!QFile::copy(sourceFile, destFile)) {
+			emit log(QString("could not copy file %1 to %2").arg(f).arg(folderName));
+			return -1;
+		}
+		headshapeExists = f.contains("hs_file");
+	}
+	// create json file
+	QString manufacturer = reader->plugin()->manufacturer;
+	if (manufacturer.isEmpty())
+		manufacturer = "n/a";
+	// JSON
+	QJsonObject jObject;
+	jObject["TaskName"] = task;
+	jObject["Manufacturer"] = manufacturer;
+	jObject["PowerLineFrequency"] = (int)50;
+	jObject["SamplingFrequency"] = reader->infos.channels().first()->samplingRate();
+	jObject["SoftwareFilters"] = QString("n/a");
+	jObject["DewarPosition"] = QString("n/a");
+	jObject["DigitizedLandmarks"] = false;
+	jObject["DigitizedHeadPoints"] = headshapeExists;
+
+	QJsonDocument doc(jObject);
+	QFile jsonFile(json);
+	if (!jsonFile.open(QIODevice::WriteOnly)) {
+		emit log(QString("Could no create %1").arg(json));
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+	jsonFile.write(doc.toJson());
+	jsonFile.close();
+
+	// create optional coordsystem.json
+	jObject = QJsonObject();
+	jObject["MEGCoordinateSystem"] = QString("ALS");
+	jObject["MEGCoordinateUnits"] = QString("m");
+	doc = QJsonDocument(jObject);
+	jsonFile.setFileName(QString("%1_coordsystem.json").arg(folderName));
+	if (!jsonFile.open(QIODevice::WriteOnly)) {
+		emit log(QString("Could no create %1").arg(json));
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+	jsonFile.write(doc.toJson());
+	jsonFile.close();
 
 
+	// create channels.tsv file
+		// Create channels.tsv
+	QStringList headers = { "name", "type", "units"  };
+
+	QFile channel(channels_tsv);
+	QTextStream stream(&channel);
+	if (!channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		emit log("Could no create channels.tsv");
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+	for (int i = 0; i < headers.size(); i++) {
+		stream << headers.at(i);
+		if (i < headers.size() - 1)
+			stream << "\t";
+	}
+	stream << endl;
+	for (auto c : reader->infos.channels()) { // raw file contains EEG or eventually trigger channels. There is no id to specify that is SEEG.
+		// name
+		stream << c->name() << "\t";
+		// type and units
+		if (c->type() == AwChannel::Trigger)
+			stream << "TRIG" << "\t" << "n/a" << "\t";
+		else if (c->type() == AwChannel::EEG)
+			stream << "EEG" << "\t" << "V" << "\t";
+		else if (c->type() == AwChannel::Reference)
+			stream << "MEGREFMAG" << "\t" << "T" << "\t";
+		else if (c->type() == AwChannel::MEG)
+			stream << "MEGMAG" << "\t" << "T" << "\t";
+		else
+			stream << "OTHER" << "\t" << "n/a" << "\t";
+		stream << endl;
+	}
+	channel.close();
+	return 0;
 }
 
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
-	QString origin = "AwBIDSManager::SEEGtoBIDS";
-
 	auto file = args["input_file"].toString();
 
 	if (file.isEmpty()) {
 		emit log("AwBIDSManager::SEEGtoBIDS - No SEEG file specified.");
-		throw AwException("No input file specified", origin);
 		return -1;
 	}
 
@@ -72,12 +235,10 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	AwFileIO *reader = pm->getReaderToOpenFile(file);
 	if (reader == NULL) {
 		emit log(QString("No reader found for file %1").arg(file));
-		throw AwException(QString("No reader found for file %1").arg(file), origin);
 		return -1;
 	}
 	if (reader->openFile(file) != AwFileIO::NoError) {
 		emit log(QString("Could not open the file %1").arg(file));
-		throw AwException(QString("Could not open the file %1").arg(file), origin);
 		return -1;
 	}
 
@@ -101,7 +262,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 			ext = "vhdr";
 		else {
 			emit log("Format option is invalid. (EDF or VHDR)");
-			throw AwException("Format option is invalid. (EDF or VHDR)", origin);
 			return -1;
 		}
 	}
@@ -116,7 +276,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	// check for at least subject and task option
 	if (subj.isEmpty() || task.isEmpty()) {
 		emit log("Missing subj or task option");
-		throw AwException(QString("Missing subj or task option"), "AwBIDSManager::toBIDS");
 		return -1;
 	}
 
@@ -247,7 +406,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 	else {
 		emit log("Could no create channels.tsv");
-		throw(AwException("Could no create channels.tsv", "AwBIDSManager::convertToBIDS"));
 		reader->plugin()->deleteInstance(reader);
 		return -1;
 	}
@@ -279,7 +437,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 	else {
 		emit log(QString("Could no create %1").arg(json));
-		throw(AwException(QString("Could no create %1").arg(json), "AwBIDSManager::toBIDS"));
 		reader->plugin()->deleteInstance(reader);
 		return -1;
 	}
@@ -302,7 +459,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		}
 		catch (const AwException& e) {
 			emit log(QString("Error during file conversion: %1").arg(e.errorString()));
-			throw;
 			reader->plugin()->deleteInstance(reader);
 			return -1;
 		}

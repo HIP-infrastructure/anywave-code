@@ -6,6 +6,21 @@
 #include "AwCommandLogger.h"
 #include <AwUtilities.h>
 
+//
+// options descriptions
+//
+// --toBIDS : Convert a file or folder to BIDS by converting the data format if necessary and creating the .json files 
+// Options for --toBIDS:
+//	--bids_modality <modality> : MANDATORY. [ seeg or meg4DNI ]
+//  --bids_sub <subj>			: MANDATORY. The BIDS subject
+//	--bids_task <task>			: MANDATORY. The BIDS task
+//	--bids_ses <sessions>		: OPTIONAL. The BIDS session.
+//	--bids_run <run>			: OPTIONAL. The BIDS run.
+//	--bids_acq <acq>			: OPTIONAL. The BIDS acquisition.
+//	--bids_proc <proc>			: OPTIONAL. The BIDS processing.
+//	--bids_output <options>		: OPTIONAL. [ sidecars = generates only .json sidecars file. full = convert the data file and generetes .json sidecars files]
+//	--bids_format <file format>	: OPTIONAL. Used with seeg bids_modality. Specify the output file format [ EDF or VHDR ]
+
 using namespace aw::commandLine;
 
 int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
@@ -70,7 +85,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption BIDSSubjectOpt("bids_sub", "BIDS subject", "subject", QString());
 	QCommandLineOption BIDSSessionOpt("bids_ses", "BIDS session", "session", QString());
 	QCommandLineOption BIDSRunOpt("bids_run", "BIDS run", "run", QString());
-	QCommandLineOption BIDSDestOpt("bids_dir", "BIDS destination folder", "dir", QString());
 	QCommandLineOption BIDSFormatOpt("bids_format", "data format for output EDF (default) or VHDR", "format", QString());
 	QCommandLineOption BIDSAcqOpt("bids_acq", "acquisition method", "acq", QString());
 	QCommandLineOption BIDSProcOpt("bids_proc", "proc", "proc", QString());
@@ -81,7 +95,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(BIDSSubjectOpt);
 	parser.addOption(BIDSSessionOpt);
 	parser.addOption(BIDSRunOpt);
-	parser.addOption(BIDSDestOpt);
 	parser.addOption(BIDSFormatOpt);
 	parser.addOption(BIDSAcqOpt);
 	parser.addOption(BIDSProcOpt);
@@ -107,6 +120,10 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	auto oDir = parser.value(outputDirO);
 	if (!oDir.isEmpty()) 
 		arguments["output_dir"] = oDir;
+	// input dir
+	auto iDir = parser.value(inputDirO);
+	if (!iDir.isEmpty())
+		arguments["input_dir"] = iDir;
 	// output_prefix
 	auto oPrefix = parser.value(outputPrefixO);
 	if (!oPrefix.isEmpty())
@@ -153,7 +170,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		QString task = parser.value(BIDSTaskOpt);
 		QString session = parser.value(BIDSSessionOpt);
 		QString run = parser.value(BIDSRunOpt);
-		QString dir = parser.value(BIDSDestOpt);
 		QString format = parser.value(BIDSFormatOpt);
 		QString output = parser.value(BIDSSidecarsOpt);
 		QString acq = parser.value(BIDSAcqOpt);

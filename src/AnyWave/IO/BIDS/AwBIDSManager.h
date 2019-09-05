@@ -42,7 +42,7 @@ public:
 	
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
-	void MEGtoBIDS(const AwArguments& args);
+	int MEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
 
@@ -73,16 +73,13 @@ protected:
 	static AwBIDSManager *m_instance;
 	static QString m_parsingPath;	// path to place the json file to prevent BIDSManager of any updates.
 
-
+	int convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 	void getSubjects(int sourceDir = raw);
 	void clearSubjects(int sourceDir = raw);
 	AwFileItem *parseDir(const QString& fullPath, const QString& path);
 	void parseSubject(AwBIDSSubject *subject);
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
-	//void applyModifications();
-
-	
 	QString getParsingPath();
 	void modifyUpdateJson(const QStringList& branches);
 
