@@ -246,10 +246,6 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 			inserted->setSamplingRate(m_samplingRate);
 		}
 	}
-	//if (!icaChannelsMap.isEmpty()) {
-	//	AW_DESTROY_LIST(icaChannelsMap.values());
-	//	icaChannelsMap.clear();
-	//}
 	AW_DESTROY_LIST(icaChannels);
 
 	AwBlock *block = infos.newBlock();

@@ -119,10 +119,11 @@ int AwBIDSManager::convert4DNI(const AwArguments& args, AwFileIO *reader, const 
 	if (!proc.isEmpty()) 
 		folderName = QString("%1_proc-%2").arg(folderName).arg(proc);
 
+	auto baseName = folderName;
 	folderName = QString("%1_meg").arg(folderName);
 	//
 	json = QString("%1.json").arg(folderName);
-	channels_tsv = QString("%1_channels.tsv").arg(folderName);
+	channels_tsv = QString("%1_channels.tsv").arg(baseName);
 
 	// ok create the destination folder with the BIDS name
 	QDir dir(folderName);
@@ -174,7 +175,7 @@ int AwBIDSManager::convert4DNI(const AwArguments& args, AwFileIO *reader, const 
 	jObject["MEGCoordinateSystem"] = QString("ALS");
 	jObject["MEGCoordinateUnits"] = QString("m");
 	doc = QJsonDocument(jObject);
-	jsonFile.setFileName(QString("%1_coordsystem.json").arg(folderName));
+	jsonFile.setFileName(QString("%1_coordsystem.json").arg(baseName));
 	if (!jsonFile.open(QIODevice::WriteOnly)) {
 		emit log(QString("Could no create %1").arg(json));
 		reader->plugin()->deleteInstance(reader);
@@ -183,6 +184,11 @@ int AwBIDSManager::convert4DNI(const AwArguments& args, AwFileIO *reader, const 
 	jsonFile.write(doc.toJson());
 	jsonFile.close();
 
+	if (reader->hasHeadShapeFile()) {
+		auto source = reader->getHeadShapeFile();
+		auto dest = QString("%1_headshape.pos").arg(baseName);
+		QFile::copy(reader->getHeadShapeFile(), QString("%1_headshape.pos").arg(baseName));
+	}
 
 	// create channels.tsv file
 		// Create channels.tsv

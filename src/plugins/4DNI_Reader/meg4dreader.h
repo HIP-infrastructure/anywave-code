@@ -284,6 +284,9 @@ public:
 	AwChannelList triggerChannels() { return m_triggers; }
 
 	FileStatus createFile(const QString& fileName, int flags) { return AwFileIO::NoError; }
+	QVector<double> getHeadshapeCoordinates() override;
+	QString getHeadShapeFile() override { return m_headshapeFilePath; }
+	bool hasHeadShapeFile() override { return !m_headshapeFilePath.isEmpty(); }
 signals:
 	void triggerValuesWritten(bool status, int number);
 public slots:
@@ -291,6 +294,7 @@ public slots:
 	int clearTriggerChannels(const QStringList& labels) override;
 private:
 	QFile m_file;
+	QString m_headshapeFilePath;
 	QDataStream m_stream;
 	QHash<int, my_channel_data *> m_hashChannelsData;
 	AwChannelList m_triggers;

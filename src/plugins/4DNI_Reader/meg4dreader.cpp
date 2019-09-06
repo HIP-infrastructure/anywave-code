@@ -126,6 +126,25 @@ void NI4DFileReader::cleanUpAndClose()
 	m_hashChannelsData.clear();
 }
 
+QVector<double> NI4DFileReader::getHeadshapeCoordinates()
+{
+	QVector<double> res;
+	if (m_headshapeFilePath.isEmpty())
+		return res;
+	QFile file(m_headshapeFilePath);
+	if (!file.open(QIODevice::ReadOnly))
+		return res;
+	QDataStream stream(&file);
+	stream.skipRawData(12);
+	qint32 nPoints;
+	stream.readRawData((char *)&nPoints, sizeof(qint32));
+	res.reserve(nPoints);
+	stream.readRawData((char *)res.data(), nPoints * sizeof(double) * 3);
+	file.close();
+	return res;
+}
+
+
 NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 {
     quint32 nChannels;
@@ -135,6 +154,11 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 	QStringList labelsInDataFile;
 
 	m_file.setFileName(path);
+
+	QFileInfo fi(path);
+	m_headshapeFilePath = QString("%1/hs_file").arg(fi.absolutePath());
+	if (!QFile::exists(m_headshapeFilePath))
+		m_headshapeFilePath.clear();
 
 	if (!m_file.open(QIODevice::ReadOnly)) {
 		m_error = QString("Could not open the file for reading.");
@@ -291,7 +315,6 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 
 	// Process config file
 	m_file.close(); // on ferme le fichier actuel pour le réouvrir apres
-	QFileInfo fi(path);
 	QDir dir = fi.absoluteDir();
 	m_file.setFileName(dir.absolutePath() + "/config");
 	if (!m_file.open(QIODevice::ReadOnly))

@@ -87,6 +87,11 @@ public:
 	virtual QString videoPath() { return QString(); }
 	inline bool hasVideoFile() { return !videoPath().isEmpty(); }
 
+	/** headshape feature (MEG recordings mostly) **/
+	virtual QVector<double> getHeadshapeCoordinates() { return QVector<double>(); }
+	virtual QString getHeadShapeFile() { return QString(); }
+	virtual bool hasHeadShapeFile() { return !getHeadShapeFile().isEmpty();	}
+
 signals:
 	void triggerValuesWritten(bool status, int number);
 public slots:
