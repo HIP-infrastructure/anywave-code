@@ -31,6 +31,19 @@
 #include <QDataStream>
 #include "fiff_types.h"
 
+class fiffTreeNode {
+public:
+	explicit fiffTreeNode(fiff_dir_entry_t *d = nullptr, fiffTreeNode *p = nullptr) { dir = d;  parent = p; }
+
+	void clear() { blocks.clear(); tags.clear(); parent = nullptr; }
+	QList<fiffTreeNode *> findBlock(int kind);
+
+	QMultiMap<int, fiffTreeNode *> blocks;
+	QMap<int, qint64> tags; // tag refered by kind and value is the position in file
+	fiffTreeNode *parent;
+	fiff_dir_entry_t *dir;
+};
+
 class FIFFIO_EXPORT FIFFIO : public AwFileIO
 {
 	Q_OBJECT
@@ -49,10 +62,11 @@ public:
 
 	void cleanUpAndClose();
 protected:
-	void readTag(fiff_tag_t *tag, qint64 pos);
+	void readTag(fiff_tag_t *tag, qint64 pos = 0);
 	void readFileIDTag(fiff_tag_t *tag);
 	template<typename T>
 	T readTagData(fiff_tag_t *tag);
+	void buildTree();
 
 
 	bool checkForFileStart();
@@ -61,12 +75,13 @@ protected:
 	QDataStream m_stream;
 	fiffId *m_fileID;
 	fiff_dir_entry_t *m_dir;
-	int m_nent;
+	qint32 m_nchan, m_dataPack, m_firstSample, m_lastSample, m_skipSample;
+	qint32 m_nSamples;	// total number of samples in data
+	float m_sfreq;
 	QList<fiff_dir_entry_t *> m_dirEntries;
-	QMultiMap<int, fiff_dir_entry_t *> m_blockEntries;
-	QMultiMap<fiff_int_t, fiff_dir_entry_t *> m_entriesMap;
 	QList<fiffChInfo> m_chInfos;
-
+	fiffTreeNode m_root;
+	QList<fiffTreeNode *> m_children; // list of node inserted in tree as children of root node.
 };
 
 class FIFFIO_EXPORT FIFFIOPlugin : public AwFileIOPlugin

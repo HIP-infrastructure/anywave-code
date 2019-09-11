@@ -27,6 +27,24 @@
 #include "fiff_file.h"
 #include <AwCore.h>
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// fiffTreeNode
+
+QList<fiffTreeNode *> fiffTreeNode::findBlock(int kind)
+{
+	QList<fiffTreeNode *> res;
+	if (blocks.isEmpty())
+		return res;
+	auto keys = blocks.keys();
+	if (keys.contains(kind)) 
+		return blocks.values(kind);
+	// recursive search in children nodes
+	for (auto b : blocks.values()) 
+		return b->findBlock(kind);
+	return res;
+}
+
 FIFFIOPlugin::FIFFIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("FIFF Format");
@@ -41,8 +59,11 @@ FIFFIOPlugin::FIFFIOPlugin() : AwFileIOPlugin()
 
 FIFFIO::FIFFIO(const QString& filename) : AwFileIO(filename)
 {
-	m_nent = 0;
 	m_dir = nullptr;
+	m_nchan = 0;
+	m_sfreq = 0;
+	m_dataPack = 0;
+	m_firstSample = m_lastSample = m_skipSample = 0;
 }
 
 FIFFIO::~FIFFIO()
@@ -53,9 +74,9 @@ FIFFIO::~FIFFIO()
 void FIFFIO::cleanUpAndClose()
 {
 	AwFileIO::cleanUpAndClose();
-	m_entriesMap.clear();
-	m_blockEntries.clear();
+	m_root.clear();
 	AW_DESTROY_LIST(m_dirEntries);
+	AW_DESTROY_LIST(m_children);
 	m_file.close();
 }
 
@@ -64,65 +85,69 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 	return 0;
 }
 
+void FIFFIO::buildTree()
+{
+	// build a tree based on dir entries
+	fiffTreeNode *node = &m_root;
+	fiffTreeNode *childNode = nullptr;
+	// reset file to beginning
+	m_file.seek(0);
+	fiff_tag_t tag;
+	for (auto dir : m_dirEntries) {
+		if (dir->kind == FIFF_BLOCK_START) {
+			// block start
+			readTag(&tag, dir->pos);
+			qint32 blockKind = readTagData<qint32>(&tag);
+			childNode = new fiffTreeNode(dir, node);
+			node->blocks.insert(blockKind, childNode);
+			m_children << childNode;
+			node = childNode;
+		}
+		else if (dir->kind == FIFF_BLOCK_END) {
+			// level up in the branch
+			if (node->parent)
+				node = node->parent;
+		}
+		else { // a tag
+			readTag(&tag, dir->pos);
+			node->tags.insert(tag.kind, dir->pos);
+		}
+	}
+}
+
 AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 {
 	cleanUpAndClose();
 	if (!checkForCompatibleFile(path))
 		return AwFileIO::WrongFormat;
 
-	// get MEAS_INFO block
-	auto values = m_blockEntries.values(FIFFB_MEAS_INFO);
-	if (values.isEmpty()) {
-		m_error = QString("the file does not contain meas_info block.");
-		return AwFileIO::WrongFormat;
-	}
+	buildTree();
 
-	// should have only one value
-	auto dir_entry = values.first();
-	fiff_tag_t tag;
-	readTag(&tag, dir_entry->pos);
-	// skip bloc tag data
-	auto kind = readTagData<qint32>(&tag);
-	qint32 nchan = 0;
-	float sfreq = 0.;
-	qint64 chinfoPos = 0;
-	int blockLevel = 0;
-	while (tag.next != -1) {
-		readTag(&tag, tag.next);
-		if (tag.kind == FIFF_BLOCK_END && blockLevel == 0)
-			break;
-		switch (tag.kind) {
-		case FIFF_NCHAN:
-			nchan = readTagData<qint32>(&tag);
-			break;
-		case FIFF_SFREQ:
-			sfreq = readTagData<float>(&tag); 
-			break;
-		case FIFF_CH_INFO:
-			chinfoPos = m_file.pos() - FIFFC_TAG_INFO_SIZE;
-			break;
-		case FIFF_BLOCK_END:
-			blockLevel--;
-			m_file.seek(m_file.pos() + tag.size);
-			break;
-		case FIFF_BLOCK_START:
-			blockLevel++;
-			m_file.seek(m_file.pos() + tag.size);
-			break;
-		default:
-			m_file.seek(m_file.pos() + tag.size);
-		}
-	}
+	auto blocks = m_root.findBlock(FIFFB_MEAS_INFO);
+	// get required tags
+	auto meas_info = blocks.first();
+	auto sfreqPos = meas_info->tags.value(FIFF_SFREQ);
+	auto nchanPos = meas_info->tags.value(FIFF_NCHAN);
+	auto chaninfoPos = meas_info->tags.value(FIFF_CH_INFO);
 
-	if (nchan == 0 || sfreq == 0. || chinfoPos == 0) {
+	if (sfreqPos == 0 || nchanPos == 0 || chaninfoPos == 0) {
 		m_error = QString("Could not get nchan, sfreq and chinfo tags.");
 		return AwFileIO::WrongFormat;
 	}
+	fiff_tag_t tag;
+	readTag(&tag, nchanPos);
+	m_nchan = readTagData<qint32>(&tag);
+	readTag(&tag, sfreqPos);
+	m_sfreq = readTagData<float>(&tag);
+	// check for data_pack tag
+	if (meas_info->tags.contains(FIFF_DATA_PACK)) {
+		readTag(&tag, meas_info->tags.value(FIFF_DATA_PACK));
+		m_dataPack = readTagData<qint32>(&tag);
+	}
 
 	// extract channel informations
-	m_file.seek(chinfoPos);
-	readTag(&tag, m_file.pos());
-	for (auto i = 0; i < nchan; i++) {
+	readTag(&tag, chaninfoPos);
+	for (auto i = 0; i < m_nchan; i++) {
 		fiffChInfo chinfo = new fiff_ch_info_t;
 		fiff_ch_pos_t chpos;
 		m_stream >> chinfo->scanNo >> chinfo->logNo >> chinfo->kind >> chinfo->range >> chinfo->cal;
@@ -159,9 +184,115 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 			c.setType(AwChannel::Other);
 		}
 		c.setName(QString(chinfo->ch_name).trimmed().remove(' '));
-		c.setSamplingRate(sfreq);
+		c.setSamplingRate(m_sfreq);
+		c.setID(chinfo->scanNo); // use the channel ID as index to retrieve the channel in data
 		infos.addChannel(&c);
 	}
+
+	// get data block 
+	// first get raw data
+	blocks = m_root.findBlock(FIFFB_RAW_DATA);
+	if (blocks.isEmpty()) 
+		blocks = m_root.findBlock(FIFFB_CONTINUOUS_DATA);
+	if (blocks.isEmpty())
+		blocks = m_root.findBlock(FIFFB_PROCESSED_DATA);
+
+	if (blocks.isEmpty()) {
+		m_error = QString("Could not get a valid DATA tag (RAW, PROCESSED, CONTINUOUS).");
+		return AwFileIO::WrongFormat;
+	}
+
+	// get first last skip samples if tags exist
+	auto data_block = blocks.first();
+	//m_file.seek(data_block->dir->pos + FIFFC_DATA_OFFSET + data_block->dir->size);
+	readTag(&tag, data_block->dir->pos);
+	// skip tag data
+	m_file.seek(m_file.pos() + data_block->dir->size);
+	while (tag.next != -1) {
+		readTag(&tag);
+		m_file.seek(m_file.pos() + tag.size);
+	}
+
+	
+
+
+	//if (data_block->tags.contains(FIFF_FIRST_SAMPLE)) {
+	//	readTag(&tag, data_block->tags.value(FIFF_FIRST_SAMPLE));
+	//	m_firstSample = readTagData<qint32>(&tag);
+	//}
+	//if (data_block->tags.contains(FIFF_LAST_SAMPLE)) {
+	//	readTag(&tag, data_block->tags.value(FIFF_LAST_SAMPLE));
+	//	m_lastSample = readTagData<qint32>(&tag);
+	//}
+	//if (data_block->tags.contains(FIFF_DATA_SKIP_SAMP)) {
+	//	readTag(&tag, data_block->tags.value(FIFF_DATA_SKIP_SAMP));
+	//	m_skipSample = readTagData<qint32>(&tag);
+	//}
+	//if (data_block->tags.contains(FIFF_DATA_SKIP)) {
+	//	readTag(&tag, data_block->tags.value(FIFF_DATA_SKIP));
+	//	m_skipSample = readTagData<qint32>(&tag);
+	//}
+	//// get data buffer and its type
+	//if (!(data_block->tags.contains(FIFF_DATA_BUFFER))) {
+	//	m_error = QString("No DATA BUFFER.");
+	//	return AwFileIO::WrongFormat;
+	//}
+
+
+
+
+
+	// how many buffers
+	auto bufferPositions = data_block->tags.values(FIFF_DATA_BUFFER);
+	if (bufferPositions.isEmpty()) {
+		m_error = QString("No DATA BUFFER.");
+		return AwFileIO::WrongFormat;
+	}
+	qint64 samples = 0;
+	for (auto b : bufferPositions) {
+		readTag(&tag, b);
+		switch (tag.type) {
+		case FIFFT_SHORT:
+		case FIFFT_DAU_PACK16:
+		case FIFFT_DAU_PACK13:
+		case FIFFT_OLD_PACK:
+			samples += tag.size / (2 * m_nchan);
+			break;
+		case FIFFT_FLOAT:
+		case FIFFT_INT:
+			samples = tag.size / (4 * m_nchan);
+			break;
+		case FIFFT_DOUBLE:
+			samples = tag.size / (8 * m_nchan);
+			break;
+		default:
+			m_error = QString("Data type not supported.");
+			return AwFileIO::WrongFormat;
+		}
+	}
+
+	//readTag(&tag, data_block->tags.value(FIFF_DATA_BUFFER));
+	//switch(tag.type) {
+	//	case FIFFT_SHORT:
+	//	case FIFFT_DAU_PACK16:
+	//	case FIFFT_DAU_PACK13:
+	//	case FIFFT_OLD_PACK:
+	//		m_nSamples = tag.size / (2 * m_nchan);
+	//		break;
+	//	case FIFFT_FLOAT:
+	//	case FIFFT_INT:
+	//		m_nSamples = tag.size / (4 * m_nchan);
+	//		break;
+	//	case FIFFT_DOUBLE:
+	//		m_nSamples = tag.size / (8 * m_nchan);
+	//		break;
+	//	default:
+	//		m_error = QString("Data type not supported.");
+	//		return AwFileIO::WrongFormat;
+	//}
+	auto block = infos.newBlock();
+	block->setSamples(m_nSamples);
+	block->setDuration((float)m_nSamples / m_sfreq);
 
 	return AwFileIO::NoError;
 }
@@ -209,15 +340,25 @@ bool FIFFIO::checkForCompatibleFile(const QString& path)
 		m_file.close();
 		return false;
 	}
-	// check if file contains raw or processed data (we can't handle evoked data for now).
-	bool data = m_blockEntries.contains(FIFFB_RAW_DATA) || m_entriesMap.contains(FIFFB_PROCESSED_DATA);
-	return data && m_blockEntries.contains(FIFFB_MEAS_INFO);
+	buildTree();
+
+	auto blocks = m_root.findBlock(FIFFB_MEAS_INFO);
+	if (blocks.isEmpty())
+		return false;
+	blocks = m_root.findBlock(FIFFB_CONTINUOUS_DATA);
+	if (blocks.isEmpty())
+		blocks = m_root.findBlock(FIFFB_PROCESSED_DATA);
+	if (blocks.isEmpty())
+		return false;
+
+	return true;
 }
 
 
 bool FIFFIO::checkForFileStart()
 {
 	fiff_tag_t tag;
+	m_file.seek(0);
 	readTag(&tag, 0);
 	if (tag.kind != FIFF_FILE_ID || tag.type != FIFFT_ID_STRUCT)
 		return false;
@@ -229,28 +370,17 @@ bool FIFFIO::checkForFileStart()
 	qint32 dirPos = readTagData<qint32>(&tag);
 	if (dirPos <= 0)
 		return false;
-	m_file.seek(dirPos);
-	readTag(&tag, m_file.pos());
+	readTag(&tag, dirPos);
 	if (tag.kind != FIFF_DIR || tag.type != FIFFT_DIR_ENTRY_STRUCT)
 		return false;
 	// read dir entries
-	m_nent = tag.size / sizeof(fiff_dir_entry_t);
-	if (m_nent < 1)
+	auto nent = tag.size / sizeof(fiff_dir_entry_t);
+	if (nent < 1)
 		return false;
-	for (int i = 0; i < m_nent; i++) {
+	for (int i = 0; i < nent; i++) {
 		auto entry = new fiff_dir_entry_t;
 		m_stream >> entry->kind >> entry->type >> entry->size >> entry->pos;
 		m_dirEntries << entry;
-		m_entriesMap.insert(entry->kind, entry);
 	}
-
-	// get blocks
-	auto blocks = m_entriesMap.values(FIFF_BLOCK_START);
-	for (auto b : blocks) {
-		readTag(&tag, b->pos);
-		qint32 type = readTagData<qint32>(&tag);
-		m_blockEntries.insert(type, b);
-	}
-
 	return true;
 }
