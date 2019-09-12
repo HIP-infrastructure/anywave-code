@@ -262,7 +262,11 @@ typedef struct _fiffChPosRec {
 } fiffChPosRec,*fiffChPos;                 /**< Measurement channel position and coil type */
 
 typedef fiffChPosRec fiff_ch_pos_t;
- 
+
+
+/** Alias for fiffChInfoRec */
+
+
 /*
  * Coil types
  */
@@ -300,6 +304,18 @@ typedef fiffChPosRec fiff_ch_pos_t;
 
 #define FIFFM_IS_VV_COIL(c) ((c)/1000 == 3)
 
+						 // old chinfo struct
+typedef struct {		/* One channel is described here */
+	fiff_int_t scanNo;		/* Scanning order # */
+	fiff_int_t logNo;		/* Logical channel # */
+	fiff_int_t kind;		/* Kind of channel:
+				   * 1 = magnetic
+				   * 2 = electric
+				   * 3 = stimulus */
+	fiff_float_t range;		/* Voltmeter range (-1 = auto ranging) */
+	fiff_float_t cal;		/* Calibration from volts to... */
+	fiff_float_t loc[9];		/* Location for a magnetic channel */
+} oldChInfoRec, *oldChInfo;
 
 /** Description of one channel */
 

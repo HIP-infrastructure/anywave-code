@@ -31,14 +31,20 @@
 #include <QDataStream>
 #include "fiff_types.h"
 
+
+// fiffTreeNode
+// node of a tree. The tree has a node for each blocks in the file.
+// a block should not be present several times but if it is, nent is incremented.
+// A node can contain childrens (sub blocks) and tags.
+// A tag can be present several times (ch_info, data_buffer) 
 class fiffTreeNode {
 public:
 	explicit fiffTreeNode(fiff_dir_entry_t *d = nullptr, fiffTreeNode *p = nullptr) { dir = d;  parent = p; }
 
 	void clear() { blocks.clear(); tags.clear(); parent = nullptr; }
-	QList<fiffTreeNode *> findBlock(int kind);
-
-	QMultiMap<int, fiffTreeNode *> blocks;
+	//QList<fiffTreeNode *> findBlock(int kind);
+	fiffTreeNode *findBlock(int kind);
+	QHash<int, fiffTreeNode *> blocks; 
 	QMap<int, qint64> tags; // tag refered by kind and value is the position in file
 	fiffTreeNode *parent;
 	fiff_dir_entry_t *dir;
@@ -65,9 +71,11 @@ protected:
 	void readTag(fiff_tag_t *tag, qint64 pos = 0);
 	void readFileIDTag(fiff_tag_t *tag);
 	template<typename T>
-	T readTagData(fiff_tag_t *tag);
+	T readTagData();
 	void buildTree();
-
+	void convert_loc(float oldloc[9], float r0[3], float *ex, float *ey, float *ez);
+	void convertOldChinfo(oldChInfoRec *old, fiffChInfoRec *newChinfo);
+	int findBuffer(int samplePosition, int left, int right);
 
 	bool checkForFileStart();
 	bool checkForCompatibleFile(const QString& path);
@@ -75,13 +83,14 @@ protected:
 	QDataStream m_stream;
 	fiffId *m_fileID;
 	fiff_dir_entry_t *m_dir;
-	qint32 m_nchan, m_dataPack, m_firstSample, m_lastSample, m_skipSample;
-	qint32 m_nSamples;	// total number of samples in data
+	qint32 m_nchan, m_dataPack, m_firstSample, m_nSamples;;
 	float m_sfreq;
 	QList<fiff_dir_entry_t *> m_dirEntries;
 	QList<fiffChInfo> m_chInfos;
 	fiffTreeNode m_root;
 	QList<fiffTreeNode *> m_children; // list of node inserted in tree as children of root node.
+	QVector<int> m_bufferSamples;	// number of sample for each buffer
+	QVector<qint64> m_bufferPositions;	// position in file of each buffer
 };
 
 class FIFFIO_EXPORT FIFFIOPlugin : public AwFileIOPlugin
