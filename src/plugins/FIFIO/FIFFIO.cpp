@@ -29,6 +29,73 @@
 #include "dot.h"
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Fonctions de conversion BigEndian LitleEndian
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+inline quint32 fromBigEndian(const uchar *src)
+{
+	return 0
+		| src[3]
+		| src[2] * quint32(0x00000100)
+		| src[1] * quint32(0x00010000)
+		| src[0] * quint32(0x01000000);
+}
+
+inline quint16 fromBigEndian16(const uchar *src)
+{
+	return 0
+		| src[1]
+		| src[0] * 0x0100;
+}
+
+inline quint64 fromBigEndian64(const uchar *src)
+{
+	return 0
+		| src[7]
+		| src[6] * Q_UINT64_C(0x0000000000000100)
+		| src[5] * Q_UINT64_C(0x0000000000010000)
+		| src[4] * Q_UINT64_C(0x0000000001000000)
+		| src[3] * Q_UINT64_C(0x0000000100000000)
+		| src[2] * Q_UINT64_C(0x0000010000000000)
+		| src[1] * Q_UINT64_C(0x0001000000000000)
+		| src[0] * Q_UINT64_C(0x0100000000000000);
+}
+
+#define HP3852A_OVERFLOW 11.0
+
+static float HP3852A_uprange[4] = { 9.765625e-6, 7.8125e-5, 6.25e-4, 2.5e-3 };
+/**
+ * Unpack HP 3852A packed data used in fiff files. (format 'pack13')
+ *
+ * Output vector can be the same as the input vector.
+ */
+
+void fiff_unpack_HP3852A(const short *packed,  /**< The packed data (input) */
+	int nrd,              /**< Number of readings */
+	float *unpacked)      /**< The unpacked result */
+{
+	int k;
+	short help;
+	short mantissa;
+	float res;
+
+	for (k = nrd - 1; k >= 0; k--) {
+		help = packed[k];
+		if (help > 0)
+			res = HP3852A_OVERFLOW;
+		else {
+			mantissa = (help & 07777);
+			res = mantissa * HP3852A_uprange[(help & 077777) >> 13];
+			if (help & 010000)
+				res = -res;
+		}
+		unpacked[k] = res;
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // fiffTreeNode
 
@@ -75,20 +142,24 @@ void FIFFIO::cleanUpAndClose()
 	m_root.clear();
 	AW_DESTROY_LIST(m_dirEntries);
 	AW_DESTROY_LIST(m_children);
+	AW_DESTROY_LIST(m_buffers);
 	m_file.close();
 }
 
-int FIFFIO::findBuffer(int samples, int l, int r)
+int FIFFIO::findBuffer(int sampleIndex, int l, int r)
 {
 	// find the buffers which contains the data
    // dichotomic search
 	if (r >= l) {
 		int mid = l + (r - 1) / 2;
-		if (m_bufferSamples.value(mid) == samples)
+		auto databuf = m_buffers.value(mid);
+		// found the right interval !
+		if (databuf->startSample <= sampleIndex && sampleIndex <= databuf->endSample)
 			return mid;
-		if (m_bufferSamples.value(mid) > samples)
-			return findBuffer(samples, l, mid - 1);
-		return findBuffer(samples, mid + 1, r);
+		// left side ?
+		if (databuf->startSample > sampleIndex)
+			return findBuffer(sampleIndex, l, mid - 1);
+		return findBuffer(sampleIndex, mid + 1, r);
 	}
 	return -1;
 }
@@ -105,10 +176,8 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 	qint64 nSamples = (qint64)floor(duration * m_sfreq);
 	// starting sample in channel.
 	qint64 nStart = (qint64)floor(start * m_sfreq);
-	// total number of channels in file.
-	quint32 nbChannels = infos.channelsCount();
 	// starting sample in file.
-	qint64 startSample = nStart * nbChannels;
+	qint64 startSample = nStart * m_nchan;
 	if (nSamples <= 0)
 		return 0;
 
@@ -118,14 +187,105 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 	if (nStart + nSamples > infos.totalSamples())
 		nSamples = infos.totalSamples() - nStart;
 
+	qint64 totalSize = nSamples * m_nchan;
+
 	int startingBuffer = 0, endingBuffer = 0;
 
-	startingBuffer = findBuffer(nStart, 0, m_bufferSamples.size() - 1);
-	endingBuffer = findBuffer(nStart + nSamples, startingBuffer, m_bufferSamples.size() - 1);
+	startingBuffer = findBuffer(nStart, 0, m_buffers.size() - 1);
+	endingBuffer = findBuffer(nStart + nSamples, startingBuffer, m_buffers.size() - 1);
 	if (startingBuffer == -1 || endingBuffer == -1)
 		return 0;
 
-	return 0;
+	// allocate memory for channels data vectors
+	AwChannelList channels;
+	for (auto c : channelList) {
+		int index = infos.indexOfChannel(c->name());
+		if (index != -1) {
+			channels << c;
+			c->newData(nSamples);
+		}
+	}
+
+	// read first buffer samples
+	auto buf = m_buffers.at(startingBuffer);
+	// all buffers are suposed to have the same size, except the last one.
+	// preallocate once the buffer to optimize reading spead.
+	auto samplesInBuffer = buf->endSample - buf->startSample;
+	qint16 *bufferInt16 = nullptr; 
+	auto sampleOffset = nStart - buf->startSample;
+	auto nSamplesLeft = nSamples;
+	qint64 nSamplesRead = 0;
+    qint64 read = 0;
+	while (true) {
+		m_file.seek(buf->filePosition + sampleOffset * m_sampleSize * m_nchan);
+		int samplesToReadInBuffer = std::min((qint64)(buf->endSample - buf->startSample - sampleOffset), nSamplesLeft);
+		int totalSamples = samplesToReadInBuffer * m_nchan;
+		if (m_dataType == FIFFT_SHORT || m_dataType == FIFFT_DAU_PACK16 || m_dataType == FIFFT_DAU_PACK13 || m_dataType == FIFFT_OLD_PACK) {
+			if (bufferInt16 == nullptr)
+				bufferInt16 = new qint16[samplesInBuffer * m_nchan];
+			//qint16 *buffer = new qint16[totalSamples];
+			read = m_stream.readRawData((char *)bufferInt16, totalSamples * sizeof(qint16));
+			if (read <= 0) {
+				delete[] bufferInt16;
+				return 0;
+			}
+			// get the number of samples really read.
+			read /= m_nchan;
+			read /= sizeof(qint16);
+		
+			// convert data to little endian
+			qint64 i;
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+			for (i = 0; i < totalSamples; i++) {
+				quint16 val = fromBigEndian16((uchar *)&bufferInt16[i]);
+				memcpy(&bufferInt16[i], &val, sizeof(qint16));
+			}
+	
+			// feed channels vectors
+			// only channels which match a chinfo struct
+			for (auto c : channels) {
+				float *dest = &c->data()[nSamplesRead];
+				for (i = 0; i < read; i++) {
+					auto chinfo = m_chInfos.value(c->ID());
+					if (chinfo) {
+						switch (m_dataPack) {
+						case FIFFT_DAU_PACK13:
+							fiff_unpack_HP3852A(&bufferInt16[c->ID() + i * m_nchan] , 1, &dest[i]);
+							break;
+						default:
+							// convert short buffer value to float and put it in the channel vector
+							dest[i] = (float)bufferInt16[c->ID() + i * m_nchan];
+							break;
+						}
+						// transform value to real units
+						dest[i] *= chinfo->cal;
+						dest[i] *= chinfo->range;
+						if (chinfo->unit_mul > 0)
+							dest[i] *= pow(1, chinfo->unit_mul);
+						// apply gain for AnyWave (MEG and Grad are expressed in pT while EEG/ECG are expressed in microV)
+						if (c->isMEG() || c->isGRAD() || c->isReference())
+							dest[i] *= 1e12;
+						if (c->isEEG() || c->isEMG() || c->isECG())
+							dest[i] *= 1e6;
+					}
+				}
+			}
+			nSamplesRead += read;
+
+		}
+		if (startingBuffer == endingBuffer)
+			break;
+		startingBuffer++;
+		// after reading the first buffer, reset starting offet
+		sampleOffset = 0;
+		buf = m_buffers.at(startingBuffer);
+	}
+	
+	if (bufferInt16)
+		delete[] bufferInt16;
+	return nSamplesRead;
 }
 
 void FIFFIO::buildTree()
@@ -341,21 +501,29 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 			case FIFFT_DAU_PACK13:
 			case FIFFT_OLD_PACK:
 				nsamples = (int)floor(tag.size / (2 * m_nchan));
+				m_sampleSize = 2;
 				break;
 			case FIFFT_FLOAT:
 			case FIFFT_INT:
 				nsamples = (int)floor(tag.size / (4 * m_nchan));
+				m_sampleSize = 4;
 				break;
 			case FIFFT_DOUBLE:
 				nsamples = (int)floor(tag.size / (8 * m_nchan));
+				m_sampleSize = 8;
 				break;
 			default:
 				m_error = QString("the data type for buffer is not supported.");
 				return AwFileIO::WrongFormat;
 			}
 			m_nSamples += nsamples;
-			m_bufferSamples.append(m_nSamples - nsamples);
-			m_bufferPositions.append(m_file.pos());
+			m_dataType = tag.type;
+			
+			auto databuf = new data_buffer;
+			databuf->startSample = m_nSamples - nsamples;
+			databuf->endSample = databuf->startSample + nsamples;
+			databuf->filePosition = m_file.pos();
+			m_buffers << databuf;
 			m_file.seek(m_file.pos() + tag.size);
 		}
 		else if (tag.kind == FIFF_DATA_SKIP) {

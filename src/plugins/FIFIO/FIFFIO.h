@@ -50,6 +50,12 @@ public:
 	fiff_dir_entry_t *dir;
 };
 
+typedef struct {
+	int startSample;
+	int endSample;
+	qint64 filePosition;
+} data_buffer;
+
 class FIFFIO_EXPORT FIFFIO : public AwFileIO
 {
 	Q_OBJECT
@@ -83,14 +89,13 @@ protected:
 	QDataStream m_stream;
 	fiffId *m_fileID;
 	fiff_dir_entry_t *m_dir;
-	qint32 m_nchan, m_dataPack, m_firstSample, m_nSamples;;
+	qint32 m_nchan, m_dataPack, m_firstSample, m_nSamples, m_dataType, m_sampleSize;
 	float m_sfreq;
 	QList<fiff_dir_entry_t *> m_dirEntries;
 	QList<fiffChInfo> m_chInfos;
 	fiffTreeNode m_root;
 	QList<fiffTreeNode *> m_children; // list of node inserted in tree as children of root node.
-	QVector<int> m_bufferSamples;	// number of sample for each buffer
-	QVector<qint64> m_bufferPositions;	// position in file of each buffer
+	QList<data_buffer *> m_buffers;
 };
 
 class FIFFIO_EXPORT FIFFIOPlugin : public AwFileIOPlugin
