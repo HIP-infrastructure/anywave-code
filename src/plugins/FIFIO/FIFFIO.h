@@ -42,7 +42,6 @@ public:
 	explicit fiffTreeNode(fiff_dir_entry_t *d = nullptr, fiffTreeNode *p = nullptr) { dir = d;  parent = p; }
 
 	void clear() { blocks.clear(); tags.clear(); parent = nullptr; }
-	//QList<fiffTreeNode *> findBlock(int kind);
 	fiffTreeNode *findBlock(int kind);
 	QHash<int, fiffTreeNode *> blocks; 
 	QMap<int, qint64> tags; // tag refered by kind and value is the position in file
@@ -78,6 +77,8 @@ protected:
 	void readFileIDTag(fiff_tag_t *tag);
 	template<typename T>
 	T readTagData();
+	template<typename T>
+	T* allocateBuffer(int nSamples);
 	void buildTree();
 	void convert_loc(float oldloc[9], float r0[3], float *ex, float *ey, float *ez);
 	void convertOldChinfo(oldChInfoRec *old, fiffChInfoRec *newChinfo);

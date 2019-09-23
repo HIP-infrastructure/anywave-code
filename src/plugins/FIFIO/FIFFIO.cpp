@@ -146,21 +146,24 @@ void FIFFIO::cleanUpAndClose()
 	m_file.close();
 }
 
-int FIFFIO::findBuffer(int sampleIndex, int l, int r)
+
+
+int FIFFIO::findBuffer(int sampleIndex, int low, int high)
 {
 	// find the buffers which contains the data
-   // dichotomic search
-	if (r >= l) {
-		int mid = l + (r - 1) / 2;
-		auto databuf = m_buffers.value(mid);
-		// found the right interval !
-		if (databuf->startSample <= sampleIndex && sampleIndex <= databuf->endSample)
+	// dichotomic search
+	int mid;
+	while (low <= high) {
+		mid = low + ((high - low) >> 1);
+		auto buf = m_buffers.at(mid);
+		if (sampleIndex >= buf->startSample && sampleIndex <= buf->endSample)
 			return mid;
-		// left side ?
-		if (databuf->startSample > sampleIndex)
-			return findBuffer(sampleIndex, l, mid - 1);
-		return findBuffer(sampleIndex, mid + 1, r);
+		else if (sampleIndex < buf->startSample)
+			high = mid - 1;
+		else if (sampleIndex > buf->endSample)
+			low = mid + 1;
 	}
+	
 	return -1;
 }
 
@@ -196,96 +199,161 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 	if (startingBuffer == -1 || endingBuffer == -1)
 		return 0;
 
-	// allocate memory for channels data vectors
-	AwChannelList channels;
-	for (auto c : channelList) {
-		int index = infos.indexOfChannel(c->name());
-		if (index != -1) {
-			channels << c;
-			c->newData(nSamples);
-		}
-	}
-
-	// read first buffer samples
-	auto buf = m_buffers.at(startingBuffer);
-	// all buffers are suposed to have the same size, except the last one.
-	// preallocate once the buffer to optimize reading spead.
-	auto samplesInBuffer = buf->endSample - buf->startSample;
-	qint16 *bufferInt16 = nullptr; 
-	auto sampleOffset = nStart - buf->startSample;
-	auto nSamplesLeft = nSamples;
-	qint64 nSamplesRead = 0;
+	// read all data buffers into one buffer
     qint64 read = 0;
-	while (true) {
-		m_file.seek(buf->filePosition + sampleOffset * m_sampleSize * m_nchan);
-		int samplesToReadInBuffer = std::min((qint64)(buf->endSample - buf->startSample - sampleOffset), nSamplesLeft);
-		int totalSamples = samplesToReadInBuffer * m_nchan;
-		if (m_dataType == FIFFT_SHORT || m_dataType == FIFFT_DAU_PACK16 || m_dataType == FIFFT_DAU_PACK13 || m_dataType == FIFFT_OLD_PACK) {
-			if (bufferInt16 == nullptr)
-				bufferInt16 = new qint16[samplesInBuffer * m_nchan];
-			//qint16 *buffer = new qint16[totalSamples];
-			read = m_stream.readRawData((char *)bufferInt16, totalSamples * sizeof(qint16));
-			if (read <= 0) {
-				delete[] bufferInt16;
+	qint64 bufferSize = nSamples * m_nchan;
+	qint64 positionInBuffer = 0;
+	qint64 totalSamplesRead = 0;
+	qint64 endSamples = nStart + nSamples;
+
+	if (m_dataType == FIFFT_SHORT || m_dataType == FIFFT_DAU_PACK16 || m_dataType == FIFFT_DAU_PACK13 || m_dataType == FIFFT_OLD_PACK) {
+		auto buffer = allocateBuffer<qint16>(bufferSize);
+	 
+		int buffer_index = startingBuffer;
+		while (buffer_index <= endingBuffer) {
+			auto data_buffer = m_buffers.at(buffer_index);
+			m_file.seek(data_buffer->filePosition);
+			int startingSample = data_buffer->startSample;
+				
+			if (buffer_index == startingBuffer) {  // special case for first buffer that may start after startSample
+				// check for real starting sample position in the first buffer.
+				if (data_buffer->startSample < nStart) {
+					m_file.seek(m_file.pos() + (nStart - data_buffer->startSample) * m_sampleSize * m_nchan);
+					startingSample = nStart - data_buffer->startSample;
+				}
+			}
+
+			int samplesToRead = data_buffer->endSample - startingSample;
+
+			if (buffer_index == endingBuffer) { // ending buffer may stop before endSample
+				auto endingSample = std::min(nSamples, (qint64)data_buffer->endSample);
+				samplesToRead = endingSample - startingSample;
+			}
+
+			read = m_stream.readRawData((char *)&buffer[positionInBuffer], samplesToRead * m_nchan * m_sampleSize);
+			if (read == 0) {
+				delete[] buffer;
 				return 0;
 			}
-			// get the number of samples really read.
-			read /= m_nchan;
-			read /= sizeof(qint16);
-		
-			// convert data to little endian
-			qint64 i;
+			read /= m_sampleSize;
+			totalSamplesRead += read / m_nchan;
+			positionInBuffer += read;
+			buffer_index++;
+		}
+		// all data buffers read into buffer.
+		// convert now the buffer into little endian
+		qint64 i;
 #if defined(_OPENMP)
 #pragma omp parallel for
 #endif
-			for (i = 0; i < totalSamples; i++) {
-				quint16 val = fromBigEndian16((uchar *)&bufferInt16[i]);
-				memcpy(&bufferInt16[i], &val, sizeof(qint16));
-			}
-	
-			// feed channels vectors
-			// only channels which match a chinfo struct
-			for (auto c : channels) {
-				float *dest = &c->data()[nSamplesRead];
-				for (i = 0; i < read; i++) {
-					auto chinfo = m_chInfos.value(c->ID());
-					if (chinfo) {
-						switch (m_dataPack) {
-						case FIFFT_DAU_PACK13:
-							fiff_unpack_HP3852A(&bufferInt16[c->ID() + i * m_nchan] , 1, &dest[i]);
-							break;
-						default:
-							// convert short buffer value to float and put it in the channel vector
-							dest[i] = (float)bufferInt16[c->ID() + i * m_nchan];
-							break;
-						}
-						// transform value to real units
-						dest[i] *= chinfo->cal;
-						dest[i] *= chinfo->range;
-						if (chinfo->unit_mul > 0)
-							dest[i] *= pow(1, chinfo->unit_mul);
-						// apply gain for AnyWave (MEG and Grad are expressed in pT while EEG/ECG are expressed in microV)
-						if (c->isMEG() || c->isGRAD() || c->isReference())
-							dest[i] *= 1e12;
-						if (c->isEEG() || c->isEMG() || c->isECG())
-							dest[i] *= 1e6;
-					}
-				}
-			}
-			nSamplesRead += read;
-
+		for (i = 0; i < bufferSize; i++) {
+			quint16 val = fromBigEndian16((uchar *)&buffer[i]);
+			memcpy(&buffer[i], &val, sizeof(quint16));
 		}
-		if (startingBuffer == endingBuffer)
-			break;
-		startingBuffer++;
-		// after reading the first buffer, reset starting offet
-		sampleOffset = 0;
-		buf = m_buffers.at(startingBuffer);
+
+		// now feed the channels
+		float value = 0.; // tmp variable to get real measured value
+		for (auto c : channelList) {
+			if (infos.indexOfChannel(c->name()) == -1)
+				continue;
+			// get chinfo for channel
+			auto chinfo = m_chInfos.value(c->ID());
+			if (!chinfo)
+				continue;
+			c->newData(totalSamplesRead);
+			
+			for (i = 0; i < totalSamplesRead; i++) {
+				if (m_dataPack == FIFFT_DAU_PACK13)
+					fiff_unpack_HP3852A(&buffer[c->ID() + i * m_nchan], 1, &value);
+				else
+					value = (float)buffer[c->ID() + i * m_nchan];
+				// transform value to real units
+				value *= chinfo->cal;
+				value *= chinfo->range;
+				if (chinfo->unit_mul > 0)
+					value *= pow(1, chinfo->unit_mul);
+				// apply gain for AnyWave (MEG and Grad are expressed in pT while EEG/ECG are expressed in microV)
+				if (c->isMEG() || c->isGRAD() || c->isReference())
+					value *= 1e12;
+				if (c->isEEG() || c->isEMG() || c->isECG())
+					value *= 1e6;
+				c->data()[i] = value;
+			}
+		}
+		// clear the buffer
+		delete[] buffer;
 	}
-	
-	if (bufferInt16)
-		delete[] bufferInt16;
-	return nSamplesRead;
+	else if (m_dataType == FIFFT_FLOAT) {
+		auto buffer = allocateBuffer<float>(bufferSize);
+
+		int buffer_index = startingBuffer;
+		while (buffer_index <= endingBuffer) {
+			auto data_buffer = m_buffers.at(buffer_index);
+			m_file.seek(data_buffer->filePosition);
+			int startingSample = data_buffer->startSample;
+
+			// check for real starting sample position in the first buffer.
+			if (data_buffer->startSample < nStart) {
+				m_file.seek(m_file.pos() + (nStart - data_buffer->startSample) * m_sampleSize * m_nchan);
+				startingSample = data_buffer->startSample + (nStart - data_buffer->startSample);
+			}
+		
+			int samplesToRead = data_buffer->endSample - startingSample;
+			if (buffer_index == endingBuffer) 
+				samplesToRead -= (data_buffer->endSample - endSamples);
+		
+
+			read = m_stream.readRawData((char *)&buffer[positionInBuffer], samplesToRead * m_nchan * m_sampleSize);
+			if (read == 0) {
+				delete[] buffer;
+				return 0;
+			}
+			read /= m_sampleSize;
+			totalSamplesRead += read / m_nchan;
+			positionInBuffer += read;
+			buffer_index++;
+		}
+		// all data buffers read into buffer.
+		// convert now the buffer into little endian
+		qint64 i;
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (i = 0; i < bufferSize; i++) {
+			quint32 val = fromBigEndian((uchar *)&buffer[i]);
+			memcpy(&buffer[i], &val, sizeof(quint32));
+		}
+
+		// now feed the channels
+		float value = 0.; // tmp variable to get real measured value
+		for (auto c : channelList) {
+			if (infos.indexOfChannel(c->name()) == -1)
+				continue;
+			// get chinfo for channel
+			auto chinfo = m_chInfos.value(c->ID());
+			if (!chinfo)
+				continue;
+			c->newData(totalSamplesRead);
+
+			for (i = 0; i < totalSamplesRead; i++) {
+				value = buffer[c->ID() + i * m_nchan];
+				// transform value to real units
+				value *= chinfo->cal;
+				value *= chinfo->range;
+				if (chinfo->unit_mul > 0)
+					value *= pow(1, chinfo->unit_mul);
+				// apply gain for AnyWave (MEG and Grad are expressed in pT while EEG/ECG are expressed in microV)
+				if (c->isMEG() || c->isGRAD() || c->isReference())
+					value *= 1e12;
+				if (c->isEEG() || c->isEMG() || c->isECG())
+					value *= 1e6;
+				c->data()[i] = value;
+			}
+		}
+		// clear the buffer
+		delete[] buffer;
+	}
+	return totalSamplesRead;
 }
 
 void FIFFIO::buildTree()
@@ -396,7 +464,7 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 
 	bool ok = isMeasInfo && isDataOk;
 	if (!ok) {
-		m_error = QString("The file is missing required blocks (MEAS_INFO, RAW_DATA, FIFFB_SMSH_RAW_DATA, CONTINUOUS DATA.");
+		m_error = QString("The file is missing required blocks (MEAS_INFO, RAW_DATA, FIFFB_SMSH_RAW_DATA, CONTINUOUS DATA.)");
 		return AwFileIO::WrongFormat;
 	}
 
@@ -456,18 +524,22 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 			else {
 				c.setType(AwChannel::MEG);
 			}
+			c.setGain(4);
 			break;
 		case FIFFV_ECG_CH:
 			c.setType(AwChannel::ECG);
+			c.setGain(350);
 			break;
 		case FIFFV_EMG_CH:
 			c.setType(AwChannel::EMG);
+			c.setGain(200);
 			break;
 		case FIFFV_STIM_CH:
 			c.setType(AwChannel::Trigger);
 			break;
 		case FIFFV_EEG_CH:
 			c.setType(AwChannel::EEG);
+			c.setGain(100);
 			break;
 		default:
 			c.setType(AwChannel::Other);
@@ -532,10 +604,40 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		else 
 			m_file.seek(m_file.pos() + tag.size);
 	}
+
+	// be sure we have data buffers
+	if (m_buffers.isEmpty()) {
+		m_error = QString("No data buffers in file.");
+		return AwFileIO::WrongFormat;
+	}
+
 	auto block = infos.newBlock();
 	block->setSamples(m_nSamples);
 	block->setDuration((float)m_nSamples / m_sfreq);
 
+	// read events
+	fiffTreeNode *eventNode = nullptr;
+	for (auto b : measInfoBlock->blocks.keys()) {
+		if (b == FIFFB_EVENTS)
+			eventNode = measInfoBlock->blocks[b];
+	}
+
+	if (eventNode) {
+		tags = eventNode->tags;
+		if (tags.contains(FIFF_EVENT_LIST)) {
+			readTag(&tag, tags[FIFF_EVENT_LIST]);
+			auto nEvents = tag.size / (3 * sizeof(qint32));
+			AwMarker marker;
+			for (int i = 0; i < nEvents; i++) {
+				marker.setLabel("event");
+				int samples, before, after;
+				m_stream >> samples >> before >> after;
+				marker.setStart((samples - before) / m_sfreq);
+				marker.setEnd((samples + after) / m_sfreq);
+				block->addMarker(marker);
+			}
+ 		}
+	}
 	return AwFileIO::NoError;
 }
 
@@ -568,6 +670,12 @@ T FIFFIO::readTagData()
 	T val;
 	m_stream >> val;
 	return val;
+}
+
+template<typename T>
+T* FIFFIO::allocateBuffer(int nSamples)
+{
+	return new T[nSamples];
 }
 
 bool FIFFIO::checkForCompatibleFile(const QString& path)
