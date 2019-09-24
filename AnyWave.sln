@@ -130,12 +130,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Correlation", "src\plugins\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppendFiles", "src\plugins\AppendFiles\AppendFiles.vcxproj", "{B26C4E34-D92B-45FC-99A6-2DCCF43F8892}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFF_Reader", "src\plugins\FIFF_Reader\FIFF_Reader.vcxproj", "{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{CA5B6E48-7EBE-4949-AA0B-79267B704C4D} = {CA5B6E48-7EBE-4949-AA0B-79267B704C4D}
-		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BrainVisionIO", "src\plugins\BrainVisionIO\BrainVisionIO.vcxproj", "{7EF281FD-C2D8-435B-857C-FCFEAAE15836}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwEpochLib", "src\AwEpochLib\AwEpochLib.vcxproj", "{27C31D2D-BADA-4742-AD6D-760371A9A007}"
@@ -218,15 +212,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwMontageLib", "src\AwMonta
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CompumedicsPF", "src\plugins\CompumedicsPF\CompumedicsPF.vcxproj", "{D6E88A56-0AAF-4858-A273-F4C950956DED}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFFIO", "src\plugins\FIFFIO\FIFFIO.vcxproj", "{5200B1BC-8155-42D7-85F0-DB07DB672ED2}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeltamedBinTxtReader", "src\plugins\DeltamedBinTxtReader\DeltamedBinTxtReader.vcxproj", "{8E75E05F-5A28-468D-8BCE-0865B321B368}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SignalInfos", "src\plugins\SignalInfos\SignalInfos.vcxproj", "{ADE9199F-976C-4132-B55E-C22A71644CEF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetMarkersEx", "src\Mex\MexGetMarkersEx\MexGetMarkersEx.vcxproj", "{652458E8-25E1-4722-A03A-73F63709D2AA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFIO", "src\plugins\FIFIO\FIFIO.vcxproj", "{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFFIO", "src\plugins\FIFIO\FIFIO.vcxproj", "{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CA5B6E48-7EBE-4949-AA0B-79267B704C4D} = {CA5B6E48-7EBE-4949-AA0B-79267B704C4D}
+		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -420,14 +416,6 @@ Global
 		{B26C4E34-D92B-45FC-99A6-2DCCF43F8892}.Release|Win32.Build.0 = Release|Win32
 		{B26C4E34-D92B-45FC-99A6-2DCCF43F8892}.Release|x64.ActiveCfg = Release|x64
 		{B26C4E34-D92B-45FC-99A6-2DCCF43F8892}.Release|x64.Build.0 = Release|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|Win32.Build.0 = Debug|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|x64.ActiveCfg = Debug|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|x64.Build.0 = Debug|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|Win32.ActiveCfg = Release|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|Win32.Build.0 = Release|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|x64.ActiveCfg = Release|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|x64.Build.0 = Release|x64
 		{7EF281FD-C2D8-435B-857C-FCFEAAE15836}.Debug|Win32.ActiveCfg = Debug|x64
 		{7EF281FD-C2D8-435B-857C-FCFEAAE15836}.Debug|x64.ActiveCfg = Debug|x64
 		{7EF281FD-C2D8-435B-857C-FCFEAAE15836}.Debug|x64.Build.0 = Debug|x64
@@ -612,12 +600,6 @@ Global
 		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Release|Win32.ActiveCfg = Release|x64
 		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Release|x64.ActiveCfg = Release|x64
 		{D6E88A56-0AAF-4858-A273-F4C950956DED}.Release|x64.Build.0 = Release|x64
-		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Debug|Win32.ActiveCfg = Debug|x64
-		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Debug|x64.ActiveCfg = Debug|x64
-		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Debug|x64.Build.0 = Debug|x64
-		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Release|Win32.ActiveCfg = Release|x64
-		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Release|x64.ActiveCfg = Release|x64
-		{5200B1BC-8155-42D7-85F0-DB07DB672ED2}.Release|x64.Build.0 = Release|x64
 		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Debug|Win32.ActiveCfg = Debug|x64
 		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Debug|x64.ActiveCfg = Debug|x64
 		{8E75E05F-5A28-468D-8BCE-0865B321B368}.Debug|x64.Build.0 = Debug|x64
@@ -647,7 +629,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

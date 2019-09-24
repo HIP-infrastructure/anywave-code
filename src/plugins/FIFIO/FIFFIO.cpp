@@ -24,9 +24,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "FIFFIO.h"
+#include <qdatetime.h>
 #include "fiff_file.h"
 #include <AwCore.h>
 #include "dot.h"
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,19 +98,29 @@ void fiff_unpack_HP3852A(const short *packed,  /**< The packed data (input) */
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// fiffTreeNode
+/** Apply coordinate transformation
+ *
+ */
 
-fiffTreeNode *fiffTreeNode::findBlock(int kind)
+void fiff_coord_trans(float r[3],       /**< Vector to be transformed (in situ) */
+	fiffCoordTrans t, /**< Transformation to apply            */
+	int do_move)	 /**< Do move as well or just rotate?    */
+
 {
-	if (blocks.isEmpty())
-		return nullptr;
-	if (blocks.contains(kind))
-		return blocks[kind];
-	for (auto b : blocks.values())
-		return b->findBlock(kind);
-	return nullptr;
+	int j, k;
+	float res[3];
+
+	for (j = 0; j < 3; j++) {
+		res[j] = (do_move ? t->move[j] : 0.0F);
+		for (k = 0; k < 3; k++)
+			res[j] += t->rot[j][k] * r[k];
+	}
+	for (j = 0; j < 3; j++)
+		r[j] = res[j];
 }
+
+
+
 
 FIFFIOPlugin::FIFFIOPlugin() : AwFileIOPlugin()
 {
@@ -129,6 +141,7 @@ FIFFIO::FIFFIO(const QString& filename) : AwFileIO(filename)
 	m_sfreq = 0;
 	m_dataPack = 0;
 	m_firstSample = m_nSamples =  0;
+
 }
 
 FIFFIO::~FIFFIO()
@@ -138,12 +151,14 @@ FIFFIO::~FIFFIO()
 
 void FIFFIO::cleanUpAndClose()
 {
-	AwFileIO::cleanUpAndClose();
-	m_root.clear();
 	AW_DESTROY_LIST(m_dirEntries);
-	AW_DESTROY_LIST(m_children);
 	AW_DESTROY_LIST(m_buffers);
+	m_dirEntries.clear();
 	m_file.close();
+	auto values = m_blocks.values();
+	AW_DESTROY_LIST(values);
+	m_blocks.clear();
+	AwFileIO::cleanUpAndClose();
 }
 
 
@@ -208,27 +223,23 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 
 	if (m_dataType == FIFFT_SHORT || m_dataType == FIFFT_DAU_PACK16 || m_dataType == FIFFT_DAU_PACK13 || m_dataType == FIFFT_OLD_PACK) {
 		auto buffer = allocateBuffer<qint16>(bufferSize);
-	 
+
 		int buffer_index = startingBuffer;
 		while (buffer_index <= endingBuffer) {
 			auto data_buffer = m_buffers.at(buffer_index);
 			m_file.seek(data_buffer->filePosition);
 			int startingSample = data_buffer->startSample;
-				
-			if (buffer_index == startingBuffer) {  // special case for first buffer that may start after startSample
-				// check for real starting sample position in the first buffer.
-				if (data_buffer->startSample < nStart) {
-					m_file.seek(m_file.pos() + (nStart - data_buffer->startSample) * m_sampleSize * m_nchan);
-					startingSample = nStart - data_buffer->startSample;
-				}
+
+			// check for real starting sample position in the first buffer.
+			if (data_buffer->startSample < nStart) {
+				m_file.seek(m_file.pos() + (nStart - data_buffer->startSample) * m_sampleSize * m_nchan);
+				startingSample = data_buffer->startSample + (nStart - data_buffer->startSample);
 			}
 
 			int samplesToRead = data_buffer->endSample - startingSample;
+			if (buffer_index == endingBuffer)
+				samplesToRead -= (data_buffer->endSample - endSamples);
 
-			if (buffer_index == endingBuffer) { // ending buffer may stop before endSample
-				auto endingSample = std::min(nSamples, (qint64)data_buffer->endSample);
-				samplesToRead = endingSample - startingSample;
-			}
 
 			read = m_stream.readRawData((char *)&buffer[positionInBuffer], samplesToRead * m_nchan * m_sampleSize);
 			if (read == 0) {
@@ -356,24 +367,20 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 	return totalSamplesRead;
 }
 
-void FIFFIO::buildTree()
+void FIFFIO::buildNodes()
 {
-	// build a tree based on dir entries
-	fiffTreeNode *node = &m_root;
-	fiffTreeNode *childNode = nullptr;
-	// reset file to beginning
 	m_file.seek(0);
 	fiff_tag_t tag;
-
+	fiffTreeNode *node = new fiffTreeNode; // root block
+	m_blocks.insert(0, node);
 	for (auto dir : m_dirEntries) {
 		if (dir->kind == FIFF_BLOCK_START) {
 			// block start
 			readTag(&tag, dir->pos);
 			qint32 blockKind = readTagData<qint32>();
-			childNode = new fiffTreeNode(dir, node);
-			node->blocks.insert(blockKind, childNode);
-			m_children << childNode;
+			auto childNode = new fiffTreeNode(blockKind, dir, node);
 			node = childNode;
+			m_blocks.insert(blockKind, node);
 		}
 		else if (dir->kind == FIFF_BLOCK_END) {
 			// level up in the branch
@@ -386,6 +393,13 @@ void FIFFIO::buildTree()
 				node->tags.insert(tag.kind, dir->pos);
 		}
 	}
+}
+
+fiffTreeNode *FIFFIO::findBlock(int kind)
+{
+	if (m_blocks.contains(kind)) // if several entries with the same key, return the first one.
+		return m_blocks.values(kind).first();
+	return nullptr;
 }
 
 // convert channel position from old struct to new
@@ -451,33 +465,27 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 	if (!checkForCompatibleFile(path))
 		return AwFileIO::WrongFormat;
 
-	buildTree();
+	QDateTime dateTime;
+
+	buildNodes(); // create node (blocks) from dirEntries
 
 	// checks for blocks
-	auto measInfoBlock = m_root.findBlock(FIFFB_MEAS_INFO);
+	auto measInfoBlock = findBlock(FIFFB_MEAS_INFO);
 	bool isMeasInfo = measInfoBlock != nullptr;
-	fiffTreeNode *dataBlock;
-	bool isRawData = m_root.findBlock(FIFFB_RAW_DATA) != nullptr;
-	bool isSMSH = m_root.findBlock(FIFFB_SMSH_RAW_DATA) != nullptr; 
-	bool isContinuous = m_root.findBlock(FIFFB_CONTINUOUS_DATA) != nullptr;
-	bool isDataOk = isRawData || isSMSH || isContinuous;
+	fiffTreeNode *dataBlock = findBlock(FIFFB_RAW_DATA);
+	if (!dataBlock)
+		dataBlock = findBlock(FIFFB_SMSH_RAW_DATA);
+	if (!dataBlock)
+		dataBlock = findBlock(FIFFB_CONTINUOUS_DATA);
 
-	bool ok = isMeasInfo && isDataOk;
+	bool ok = isMeasInfo && dataBlock;
 	if (!ok) {
-		m_error = QString("The file is missing required blocks (MEAS_INFO, RAW_DATA, FIFFB_SMSH_RAW_DATA, CONTINUOUS DATA.)");
+		m_error = QString("The file is missing required blocks (MEAS_INFO, RAW_DATA, FIFFB_SMSH_RAW_DATA, CONTINUOUS DATA).");
 		return AwFileIO::WrongFormat;
 	}
-
-	if (isRawData)
-		dataBlock = m_root.findBlock(FIFFB_RAW_DATA);
-	else if (isSMSH)
-		dataBlock = m_root.findBlock(FIFFB_SMSH_RAW_DATA);
-	else 
-		dataBlock = m_root.findBlock(FIFFB_CONTINUOUS_DATA);
-
 	auto tags = measInfoBlock->tags;
 	if (!tags.contains(FIFF_SFREQ) || !tags.contains(FIFF_NCHAN) || !tags.contains(FIFF_CH_INFO)) {
-		m_error = QString("The file is missing required tags (NCHAN, SFREQ, CHINFO.");
+		m_error = QString("The file is missing required tags (NCHAN, SFREQ, CHINFO).");
 		return AwFileIO::WrongFormat;
 	}
 
@@ -490,8 +498,28 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		readTag(&tag, tags[FIFF_DATA_PACK]);
 		m_dataPack = readTagData<qint32>();
 	}
+	if (tags.contains(FIFF_MEAS_DATE)) {
+		readTag(&tag, tags[FIFF_MEAS_DATE]);
+		quint32 date = readTagData<quint32>();
+		dateTime.setTime_t(date);
+	}
+	fiffCoordTransRec *coord_trans = nullptr;
+	if (tags.contains(FIFF_COORD_TRANS)) {
+		readTag(&tag, tags[FIFF_COORD_TRANS]);
+		coord_trans = new fiffCoordTransRec;
+		m_stream >> coord_trans->from >> coord_trans->to;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+				m_stream >> coord_trans->rot[i][j];
+		m_stream >> coord_trans->move[0] >> coord_trans->move[1] >> coord_trans->move[2];
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+				m_stream >> coord_trans->invrot[i][j];
+		m_stream >> coord_trans->invmove[0] >> coord_trans->invmove[1] >> coord_trans->invmove[2];
+	}
 	// move to tag position 
 	m_file.seek(tags[FIFF_CH_INFO]);
+	AwChannelList MEGheadChannels;
 	// extract channel informations
 	for (auto i = 0; i < m_nchan; i++) {
 		readTag(&tag);
@@ -516,6 +544,7 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		}
 		m_chInfos.append(chinfo);
 		AwChannel c;
+	
 		switch (chinfo->kind) {
 		case FIFFV_MEG_CH:
 			if (chinfo->unit == FIFF_UNIT_T_M) { // this is a gradiometer 
@@ -544,11 +573,34 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		default:
 			c.setType(AwChannel::Other);
 		}
-		c.setName(QString::fromLatin1(chinfo->ch_name).trimmed());
+		c.setName(QString::fromLatin1(chinfo->ch_name).simplified().remove(' '));
 		c.setSamplingRate(m_sfreq);
 		c.setID(chinfo->scanNo - 1); // use the channel ID as index to retrieve the channel in data
-		infos.addChannel(&c);
+		auto insertedChannel = infos.addChannel(&c);
+		if (insertedChannel->isMEG() && coord_trans != nullptr)
+			MEGheadChannels << insertedChannel;
 	}
+
+	for (auto c : MEGheadChannels) {
+		auto ci = m_chInfos[c->ID()];
+		fiff_coord_trans(ci->chpos.r0, coord_trans, 1);
+		double x_mag = sqrt(ci->chpos.ex[0] * ci->chpos.ex[0] +
+			ci->chpos.ex[1] * ci->chpos.ex[1] +
+			ci->chpos.ex[2] * ci->chpos.ex[2]);
+		double y_mag = sqrt(ci->chpos.ey[0] * ci->chpos.ey[0] +
+			ci->chpos.ey[1] * ci->chpos.ey[1] +
+			ci->chpos.ey[2] * ci->chpos.ey[2]);
+		double z_mag = sqrt(ci->chpos.ez[0] * ci->chpos.ez[0] +
+			ci->chpos.ez[1] * ci->chpos.ez[1] +
+			ci->chpos.ez[2] * ci->chpos.ez[2]);
+		c->setXYZ(x_mag - ci->chpos.r0[0], y_mag - ci->chpos.r0[1], z_mag - ci->chpos.r0[2]);
+	}
+	if (MEGheadChannels.size() == 102)
+		plugin()->layouts << "ELEKTA102";
+
+	if (coord_trans)
+		delete coord_trans;
+
 	// read the data from block position
 	readTag(&tag, dataBlock->dir->pos);
 	// skip data
@@ -605,6 +657,14 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 			m_file.seek(m_file.pos() + tag.size);
 	}
 
+	// adjust time on first sample
+	if (m_firstSample && !dateTime.isNull())
+		dateTime.addSecs(m_firstSample / m_sfreq);
+	if (dateTime.isValid() && !dateTime.isNull())  {
+		infos.setDate(dateTime.date().toString(Qt::ISODate));
+		infos.setTime(dateTime.time().toString(Qt::ISODate));
+	}
+
 	// be sure we have data buffers
 	if (m_buffers.isEmpty()) {
 		m_error = QString("No data buffers in file.");
@@ -616,11 +676,7 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 	block->setDuration((float)m_nSamples / m_sfreq);
 
 	// read events
-	fiffTreeNode *eventNode = nullptr;
-	for (auto b : measInfoBlock->blocks.keys()) {
-		if (b == FIFFB_EVENTS)
-			eventNode = measInfoBlock->blocks[b];
-	}
+	fiffTreeNode *eventNode = findBlock(FIFFB_EVENTS);
 
 	if (eventNode) {
 		tags = eventNode->tags;
@@ -637,6 +693,22 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 				block->addMarker(marker);
 			}
  		}
+	}
+
+	// get subject info
+	auto subject = findBlock(FIFFB_SUBJECT);
+	if (subject) {
+		tags = subject->tags;
+		QString firstName, lastName;
+		if (tags.contains(FIFF_SUBJ_FIRST_NAME)) {
+			readTag(&tag, tags[FIFF_SUBJ_FIRST_NAME]);
+			firstName = readTagString(&tag);
+		}
+		if (tags.contains(FIFF_SUBJ_LAST_NAME)) {
+			readTag(&tag, tags[FIFF_SUBJ_LAST_NAME]);
+			lastName = readTagString(&tag);
+		}
+		infos.setPatientName(QString("%1 %2").arg(firstName).arg(lastName));
 	}
 	return AwFileIO::NoError;
 }
@@ -657,11 +729,16 @@ void FIFFIO::readTag(fiff_tag_t *tag, qint64 pos)
 	m_stream >> tag->kind >> tag->type >> tag->size >> tag->next;
 }
 
-void FIFFIO::readFileIDTag(fiff_tag_t *tag)
+void FIFFIO::readFileIDTag()
 {
-	m_fileID = new fiffId;
-	m_stream >> m_fileID->version >> m_fileID->machid[0] >> m_fileID->machid[1] >> m_fileID->time.secs >> m_fileID->time.usecs;
+	m_stream >> m_fileID.version >> m_fileID.machid[0] >> m_fileID.machid[1] >> m_fileID.time.secs >> m_fileID.time.usecs;
+}
 
+QString FIFFIO::readTagString(fiff_tag_t *tag)
+{
+	char *buf = new char[tag->size];
+	m_stream.readRawData(buf, tag->size);
+	return QString::fromLatin1(buf);
 }
 
 template<typename T>
@@ -701,7 +778,7 @@ bool FIFFIO::checkForFileStart()
 	readTag(&tag, 0);
 	if (tag.kind != FIFF_FILE_ID || tag.type != FIFFT_ID_STRUCT)
 		return false;
-	readFileIDTag(&tag);
+	readFileIDTag();
 	// read dir pointer
 	readTag(&tag, m_file.pos());
 	if (tag.kind != FIFF_DIR_POINTER || tag.type != FIFFT_INT)

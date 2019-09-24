@@ -31,22 +31,15 @@
 #include <QDataStream>
 #include "fiff_types.h"
 
-
-// fiffTreeNode
-// node of a tree. The tree has a node for each blocks in the file.
-// a block should not be present several times but if it is, nent is incremented.
-// A node can contain childrens (sub blocks) and tags.
-// A tag can be present several times (ch_info, data_buffer) 
-class fiffTreeNode {
+class fiffTreeNode 
+{  // tree node is similar to a FIFF block and can contain tags.
 public:
-	explicit fiffTreeNode(fiff_dir_entry_t *d = nullptr, fiffTreeNode *p = nullptr) { dir = d;  parent = p; }
+	explicit fiffTreeNode(int k = 0, fiff_dir_entry_t *d = nullptr, fiffTreeNode *p = nullptr) { dir = d;  parent = p; kind = k; }
 
-	void clear() { blocks.clear(); tags.clear(); parent = nullptr; }
-	fiffTreeNode *findBlock(int kind);
-	QHash<int, fiffTreeNode *> blocks; 
-	QMap<int, qint64> tags; // tag refered by kind and value is the position in file
 	fiffTreeNode *parent;
+	int kind;
 	fiff_dir_entry_t *dir;
+	QHash<int, qint64> tags;
 };
 
 typedef struct {
@@ -74,12 +67,14 @@ public:
 	void cleanUpAndClose();
 protected:
 	void readTag(fiff_tag_t *tag, qint64 pos = 0);
-	void readFileIDTag(fiff_tag_t *tag);
+	void readFileIDTag();
 	template<typename T>
 	T readTagData();
 	template<typename T>
 	T* allocateBuffer(int nSamples);
-	void buildTree();
+	QString readTagString(fiff_tag_t *tag);
+	void buildNodes();
+	fiffTreeNode *findBlock(int kind);
 	void convert_loc(float oldloc[9], float r0[3], float *ex, float *ey, float *ez);
 	void convertOldChinfo(oldChInfoRec *old, fiffChInfoRec *newChinfo);
 	int findBuffer(int samplePosition, int left, int right);
@@ -88,14 +83,13 @@ protected:
 	bool checkForCompatibleFile(const QString& path);
 	QFile m_file;
 	QDataStream m_stream;
-	fiffId *m_fileID;
+	fiffId m_fileID;
 	fiff_dir_entry_t *m_dir;
 	qint32 m_nchan, m_dataPack, m_firstSample, m_nSamples, m_dataType, m_sampleSize;
 	float m_sfreq;
 	QList<fiff_dir_entry_t *> m_dirEntries;
 	QList<fiffChInfo> m_chInfos;
-	fiffTreeNode m_root;
-	QList<fiffTreeNode *> m_children; // list of node inserted in tree as children of root node.
+	QMultiHash<int, fiffTreeNode *> m_blocks; // list of blocks from dirEntries.
 	QList<data_buffer *> m_buffers;
 };
 
