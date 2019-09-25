@@ -224,6 +224,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFFIO", "src\plugins\FIFIO
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFF_Reader", "src\plugins\FIFF_Reader\FIFF_Reader.vcxproj", "{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -624,12 +626,20 @@ Global
 		{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}.Release|Win32.ActiveCfg = Release|x64
 		{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}.Release|x64.ActiveCfg = Release|x64
 		{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}.Release|x64.Build.0 = Release|x64
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|Win32.Build.0 = Debug|Win32
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|x64.ActiveCfg = Debug|x64
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|x64.Build.0 = Debug|x64
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|Win32.ActiveCfg = Release|Win32
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|Win32.Build.0 = Release|Win32
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|x64.ActiveCfg = Release|x64
+		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

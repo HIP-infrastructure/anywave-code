@@ -61,11 +61,17 @@ public:
 	AwFileIO::FileStatus canRead(const QString &path);
 
 	//qint64 writeData(QList<AwChannel *> *channels);
-	//FileStatus createFile(const QString& path, int flags = 0);
+	FileStatus createFile(const QString& path, int flags = 0);
 	//FileStatus writeMarkers();
 
 	void cleanUpAndClose();
 protected:
+	void initTag(fiff_tag_t *tag, int kind, int type);
+	void writeTag(fiff_tag_t *tag, qint64 pos = 0);
+	template<typename T>
+	void writeTagData(T data);
+	void writeBlockStart(fiff_tag_t *tag, int kind, qint64 pos = 0);
+	void writeBlockEnd(fiff_tag_t *tag, int kind, qint64 pos = 0);
 	void readTag(fiff_tag_t *tag, qint64 pos = 0);
 	void readFileIDTag();
 	template<typename T>
@@ -91,6 +97,8 @@ protected:
 	QList<fiffChInfo> m_chInfos;
 	QMultiHash<int, fiffTreeNode *> m_blocks; // list of blocks from dirEntries.
 	QList<data_buffer *> m_buffers;
+	qint64 m_dirPosition, m_fileStartPos; // offset in file where to write the dir position and position where we can start writting tags.
+
 };
 
 class FIFFIO_EXPORT FIFFIOPlugin : public AwFileIOPlugin
