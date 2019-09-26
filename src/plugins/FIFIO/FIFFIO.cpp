@@ -436,8 +436,12 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	if (infos.channels().isEmpty())
 		return AwFileIO::WrongFormat;
 
+	QString fullPath = path;
+	if (!path.endsWith(".fif"))
+		fullPath += plugin()->fileExtension;
+
 	float sfreq = infos.channels().first()->samplingRate();
-	m_file.setFileName(path);
+	m_file.setFileName(fullPath);
 	if (!m_file.open(QIODevice::WriteOnly))
 		return AwFileIO::FileAccess;
 	m_stream.setDevice(&m_file);
@@ -458,42 +462,42 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	// store the position of the dirpos !
 	m_dirPosition = m_file.pos();
 	m_stream << dirPos;
-	m_fileStartPos = 0;
+	m_currentFilePos = 0;
 
 	auto entry = new fiff_dir_entry_t;
 	entry->kind = FIFF_FILE_ID;
 	entry->type = FIFFT_ID_STRUCT;
-	entry->pos = m_fileStartPos;
+	entry->pos = m_currentFilePos;
 	entry->size = sizeof(m_fileID);
 	m_dirEntries << entry;
-	m_fileStartPos += FIFFC_TAG_INFO_SIZE + entry->size;
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
 
 	entry = new fiff_dir_entry_t;
 	entry->kind = FIFF_DIR_POINTER;
 	entry->type = FIFFT_INT;
 	entry->size = sizeof(qint32);
-	entry->pos = m_fileStartPos;
+	entry->pos = m_currentFilePos;
 	m_dirEntries << entry;
-	m_fileStartPos += FIFFC_TAG_INFO_SIZE + entry->size;
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
 
 	// meas_info
 	entry = new fiff_dir_entry_t;
 	entry->kind = FIFF_BLOCK_START;
 	entry->type = FIFFT_INT;
 	entry->size = sizeof(qint32);
-	entry->pos = m_fileStartPos;
+	entry->pos = m_currentFilePos;
 	m_dirEntries << entry;
 	writeBlockStart(&tag, FIFFB_MEAS_INFO);
 	// tags in meas_info
-	m_fileStartPos += FIFFC_TAG_INFO_SIZE + entry->size;
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
 	// nchan
 	entry = new fiff_dir_entry_t;
 	entry->kind = FIFF_NCHAN;
 	entry->type = FIFFT_INT;
 	entry->size = sizeof(qint32);
-	entry->pos = m_fileStartPos;
+	entry->pos = m_currentFilePos;
 	m_dirEntries << entry;
-	m_fileStartPos += FIFFC_TAG_INFO_SIZE + entry->size;
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
 	initTag(&tag, FIFF_NCHAN, FIFFT_INT);
 	writeTag(&tag);
 	writeTagData<qint32>(infos.channelsCount());
@@ -502,9 +506,9 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	entry->kind = FIFF_SFREQ;
 	entry->type = FIFFT_FLOAT;
 	entry->size = sizeof(float);
-	entry->pos = m_fileStartPos;
+	entry->pos = m_currentFilePos;
 	m_dirEntries << entry;
-	m_fileStartPos += FIFFC_TAG_INFO_SIZE + entry->size;
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
 	initTag(&tag, FIFF_SFREQ, FIFFT_FLOAT);
 	writeTag(&tag);
 	writeTagData<float>(sfreq);
@@ -513,14 +517,14 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	entry->kind = FIFF_CH_INFO;
 	entry->type = FIFFT_CH_INFO_STRUCT;
 	entry->size = sizeof(fiffChInfo) * infos.channelsCount();
-	entry->pos = m_fileStartPos;
+	entry->pos = m_currentFilePos;
 	m_dirEntries << entry;
-	m_fileStartPos += FIFFC_TAG_INFO_SIZE + entry->size;
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
 	initTag(&tag, FIFF_CH_INFO, FIFFT_CH_INFO_STRUCT);
 	tag.size = entry->size;
 	writeTag(&tag);
 	for (int i = 0; i < infos.channels().size(); i++) {
-		AwChannel *chan = infos.channels.at(i);
+		AwChannel *chan = infos.channels().at(i);
 		fiffChInfoRec chinfo;
 		chinfo.cal = 1.;
 		chinfo.scanNo = i + 1;
@@ -534,10 +538,12 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 		case AwChannel::MEG:
 			chinfo.kind = FIFFV_MEG_CH;
 			chinfo.unit = FIFF_UNIT_T;
+			chinfo.chpos.coil_type = FIFFV_MEG_CH;
 			break;
 		case AwChannel::GRAD:
 			chinfo.kind = FIFFV_MEG_CH;
 			chinfo.unit = FIFF_UNIT_T_M;
+			chinfo.chpos.coil_type = FIFFV_MEG_CH;
 			break;
 		case AwChannel::EEG:
 			chinfo.kind = FIFFV_EEG_CH;
@@ -564,18 +570,128 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 			chinfo.unit = FIFF_UNIT_NONE;
 			break;
 		}
+		chinfo.chpos.r0[0] = chinfo.chpos.r0[1] = chinfo.chpos.r0[2] = 0.;
+		// x unit vector
+		chinfo.chpos.ex[0] = chan->x();
+		chinfo.chpos.ex[1] =  chinfo.chpos.ex[2] = 1.;
+		// y unit vector
+		chinfo.chpos.ey[0] = chinfo.chpos.ey[2] = 1.;
+		chinfo.chpos.ey[1] = chan->y();
+		// z unit vector
+		chinfo.chpos.ez[0] = chinfo.chpos.ez[1] = 1;
+		chinfo.chpos.ez[2] = chan->z();
 		// write data
-
+		m_stream << chinfo.scanNo << chinfo.logNo << chinfo.kind << chinfo.range << chinfo.cal;
+		m_stream << chinfo.chpos.coil_type << chinfo.chpos.r0[0] << chinfo.chpos.r0[1] << chinfo.chpos.r0[2] \
+			<< chinfo.chpos.ex[0] << chinfo.chpos.ex[1] << chinfo.chpos.ex[2] << chinfo.chpos.ey[0] << chinfo.chpos.ey[1] << chinfo.chpos.ey[2] \
+			<< chinfo.chpos.ez[0] << chinfo.chpos.ez[1] << chinfo.chpos.ez[2];
+		m_stream << chinfo.unit << chinfo.unit_mul;
+		m_stream.writeBytes(chinfo.ch_name, 16);
 	}
 	// end of measinfo
 	entry = new fiff_dir_entry_t;
 	entry->kind = FIFF_BLOCK_END;
 	entry->type = FIFFT_INT;
 	entry->size = sizeof(qint32);
-	entry->pos = m_fileStartPos;
+	entry->pos = m_currentFilePos;
 	m_dirEntries << entry;
+	writeBlockEnd(&tag, FIFFB_MEAS_INFO);
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
+	// processed_data block
+		// end of measinfo
+	entry = new fiff_dir_entry_t;
+	entry->kind = FIFF_BLOCK_START;
+	entry->type = FIFFT_INT;
+	entry->size = sizeof(qint32);
+	entry->pos = m_currentFilePos;
+	m_dirEntries << entry;
+	writeBlockStart(&tag, FIFFB_PROCESSED_DATA);
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
+	
+	entry = new fiff_dir_entry_t;
+	entry->kind = FIFF_BLOCK_START;
+	entry->type = FIFFT_INT;
+	entry->size = sizeof(qint32);
+	entry->pos = m_currentFilePos;
+	m_dirEntries << entry;
+	writeBlockStart(&tag, FIFFB_CONTINUOUS_DATA);
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
 
+	// at this point m_currentFilePos is at the position where to store the data for the channels (buffers).
 	return AwFileIO::NoError;
+}
+
+
+///
+/// writeData()
+/// must be called only once after a call to createFile().
+///
+qint64 FIFFIO::writeData(AwChannelList *channels)
+{
+	// check that the number of channels matches the one already set for the file.
+	if (channels->size() != infos.channelsCount())
+		return 0;
+
+	qint64 length = channels->first()->dataSize();
+	qint64 nSamplesLeft = length;
+	fiff_tag_t tag;
+	fiff_dir_entry_t *entry;
+	qint64 dataPosition = 0;
+	// create all the data buffers and fill them with data
+	while (nSamplesLeft) {
+		auto samplesInBuffer = std::min(nSamplesLeft, (qint64)1000);
+		entry = new fiff_dir_entry_t;
+		entry->kind = FIFF_DATA_BUFFER;
+		entry->type = FIFFT_FLOAT;
+		entry->size = samplesInBuffer * infos.channelsCount() * sizeof(float);
+		entry->pos = m_currentFilePos;
+		m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
+		initTag(&tag, FIFF_DATA_BUFFER, FIFFT_FLOAT);
+		for (auto i = 0; i < samplesInBuffer; i++)
+			for (auto j = 0; j < infos.channelsCount(); j++)
+				m_stream << channels->at(j)->data()[i + dataPosition];
+		nSamplesLeft -= samplesInBuffer;
+		dataPosition += samplesInBuffer;
+	}
+	// end continuous data block
+	entry = new fiff_dir_entry_t;
+	entry->kind = FIFF_BLOCK_END;
+	entry->type = FIFFT_INT;
+	entry->size = sizeof(qint32);
+	entry->pos = m_currentFilePos;
+	m_dirEntries << entry;
+	writeBlockEnd(&tag, FIFFB_CONTINUOUS_DATA);
+	m_currentFilePos += FIFFC_TAG_INFO_SIZE + entry->size;
+
+	// end processed_data block
+	entry = new fiff_dir_entry_t;
+	entry->kind = FIFF_BLOCK_END;
+	entry->type = FIFFT_INT;
+	entry->size = sizeof(qint32);
+	entry->pos = m_currentFilePos;
+	m_dirEntries << entry;
+	writeBlockEnd(&tag, FIFFB_PROCESSED_DATA);
+	
+	qint64 dirEntryPos = m_file.pos();
+	// DIR_ENTRY TAG
+	initTag(&tag, FIFF_DIR, FIFFT_DIR_ENTRY_STRUCT);
+	tag.size = sizeof(fiffDirEntryRec) * m_dirEntries.size();
+	writeTag(&tag);
+
+	// now write dir entries after the data
+	for (auto entry : m_dirEntries) 
+		m_stream << entry->kind << entry->type << entry->size << entry->pos;
+	
+	// write end of file
+	initTag(&tag, FIFF_NOP, FIFFT_INT);
+	writeTag(&tag);
+	writeTagData<qint32>(0);
+
+	// update DIRPOINTER
+	m_file.seek(m_dirPosition);
+	m_stream << (qint32)dirEntryPos;
+
+	return length;
 }
 
 //  Handle old chinfo struct by converting it to the new one.

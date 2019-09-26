@@ -60,7 +60,7 @@ public:
 	AwFileIO::FileStatus openFile(const QString &path);
 	AwFileIO::FileStatus canRead(const QString &path);
 
-	//qint64 writeData(QList<AwChannel *> *channels);
+	qint64 writeData(QList<AwChannel *> *channels);
 	FileStatus createFile(const QString& path, int flags = 0);
 	//FileStatus writeMarkers();
 
@@ -97,7 +97,7 @@ protected:
 	QList<fiffChInfo> m_chInfos;
 	QMultiHash<int, fiffTreeNode *> m_blocks; // list of blocks from dirEntries.
 	QList<data_buffer *> m_buffers;
-	qint64 m_dirPosition, m_fileStartPos; // offset in file where to write the dir position and position where we can start writting tags.
+	qint64 m_dirPosition, m_currentFilePos; // offset in file where to write the dir position and position where we can start writting tags.
 
 };
 
