@@ -80,7 +80,6 @@
     <addaction name="actionOpen"/>
     <addaction name="actionOpen_BIDS"/>
     <addaction name="actionOpen_video"/>
-    <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_New_AnyWave_Application"/>

@@ -62,7 +62,6 @@ public:
 
 	qint64 writeData(QList<AwChannel *> *channels);
 	FileStatus createFile(const QString& path, int flags = 0);
-	//FileStatus writeMarkers();
 
 	void cleanUpAndClose();
 protected:
@@ -74,6 +73,7 @@ protected:
 	void writeBlockEnd(fiff_tag_t *tag, int kind, qint64 pos = 0);
 	void readTag(fiff_tag_t *tag, qint64 pos = 0);
 	void readFileIDTag();
+	fiff_dir_entry_t *addEntry(int kind, int type, int size);
 	template<typename T>
 	T readTagData();
 	template<typename T>
@@ -97,7 +97,7 @@ protected:
 	QList<fiffChInfo> m_chInfos;
 	QMultiHash<int, fiffTreeNode *> m_blocks; // list of blocks from dirEntries.
 	QList<data_buffer *> m_buffers;
-	qint64 m_dirPosition, m_currentFilePos; // offset in file where to write the dir position and position where we can start writting tags.
+	qint64 m_dirPosition; // offset in file where to write the dir entries 
 
 };
 
