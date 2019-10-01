@@ -201,6 +201,8 @@ add_subdirectory(src/plugins/EEGLABReader)
 add_dependencies(EEGLABReader AwCore AwReadWrite AwMATLAB)
 add_subdirectory(src/plugins/SPMReader)
 add_dependencies(SPMReader AwCore AwReadWrite AwMATLAB)
+add_subdirectory(src/plugins/FIFIO)
+add_dependencies(FIFFIO AwCore AwReadWrite)
 
 
 # Install

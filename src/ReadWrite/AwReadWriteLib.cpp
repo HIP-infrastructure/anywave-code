@@ -90,7 +90,7 @@ void AwBlock::clear()
 // constructor
 AwDataInfo::AwDataInfo()
 {
-	m_patientName = QObject::tr("Unknown");
+	m_firstName = m_lastName = QObject::tr("Unknown");
 	m_manufacturer = QObject::tr("Unknown");
 	m_date = QObject::tr("Not Available");
 	m_time = QObject::tr("Not Available");
@@ -154,7 +154,7 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	// copy constructor will set channel as parent for new channel.
 	// Here we don't want a parent for as recorded channel, so change it to null.
 	chan->setParent(NULL);
-	auto s = chan->name().trimmed();
+	auto s = chan->name().simplified();
 	// DO NOT PERMIT EMPTY LABEL
 	if (s.isEmpty()) {
 		s = QString("No Label");
@@ -166,8 +166,7 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 		chan->setName(chan->name() + "_" + QString::number(m_channelsCount));
 	// add in hash table.
 	m_labelToIndex.insert(chan->name(), m_channelsCount);
-	// set an ID which is a channel index in as recorded list of channels.
-	chan->setID(m_channelsCount++);
+	m_channelsCount++;
 	m_channels.append(chan);
 	return chan;
 }

@@ -115,7 +115,7 @@ int AwMATLABFile::create(const QString& file)
 	QString fileName = QDir::toNativeSeparators(file);
     FILEPTR = Mat_CreateVer(fileName.toUtf8().data(), NULL, MAT_FT_MAT5);
     if (FILEPTR == NULL) {
-		m_error = "Could not create the file.";
+		m_error = QString("Could not create file: %1").arg(file);
 		throw AwException(m_error, "AwMATLABFile::create");
 		return -1;
 	}
