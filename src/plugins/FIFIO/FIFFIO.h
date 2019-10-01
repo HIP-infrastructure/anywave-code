@@ -72,13 +72,15 @@ protected:
 	void writeBlockStart(fiff_tag_t *tag, int kind, qint64 pos = 0);
 	void writeBlockEnd(fiff_tag_t *tag, int kind, qint64 pos = 0);
 	void readTag(fiff_tag_t *tag, qint64 pos = 0);
+	QString readTagString(fiff_tag_t *tag);
+	void writeTagString(fiff_tag_t *tag, int kind, const QString& string);
 	void readFileIDTag();
 	fiff_dir_entry_t *addEntry(int kind, int type, int size);
 	template<typename T>
 	T readTagData();
 	template<typename T>
 	T* allocateBuffer(int nSamples);
-	QString readTagString(fiff_tag_t *tag);
+	
 	void buildNodes();
 	fiffTreeNode *findBlock(int kind);
 	void convert_loc(float oldloc[9], float r0[3], float *ex, float *ey, float *ez);

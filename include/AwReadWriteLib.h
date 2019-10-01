@@ -91,8 +91,8 @@ struct AW_RW_EXPORT AwVideoSynch {
 	AwVideoSynch() {
 		shift = drift = 0;
 	}
-	qint32 shift;
-	qint32 drift;
+	qint32 shift;	// expressed in ms
+	qint32 drift;	// expressed in ms
 };
 
 /*!
@@ -123,7 +123,8 @@ public:
 	/** Returns the number of channels present in the file. **/
 	inline qint32 channelsCount() { return m_channels.size(); }	
 	/** Gets the patient's name. It could be an empty string. **/
-	inline QString& patientName() { return m_patientName; }
+	inline QString& firstName() { return m_firstName; }
+	inline QString& lastName() { return m_lastName; }
 	/** Gets the recording date. It could be an empty string. **/
 	inline QString& recordingDate() { return m_date; }
 	/** Gets the recording time. It could be an empty string. **/
@@ -156,7 +157,8 @@ public:
 	/** Sets the recording date. **/
 	inline void setDate(const QString& date) { m_date = date; }
 	/** Sets the patient's name. **/
-	inline void setPatientName(const QString& name) { m_patientName = name; }
+	void setFirstName(const QString& firstName) { m_firstName = firstName; }
+	void setLastName(const QString& lastName) { m_lastName = lastName; }
 	inline void setChannels(const AwChannelList& channels) { m_channels = channels; }
 	virtual void clear();
 
@@ -176,7 +178,7 @@ public:
 protected:
 	AwBlockList m_blocks;
 	AwChannelList m_channels;
-	QString m_patientName;
+	QString m_firstName, m_lastName;
 	QString m_date;	 // recording date
 	QString m_time;	 // recording time
 	QString m_isoDate;	// new iso date/time string (must be set by the plugin).

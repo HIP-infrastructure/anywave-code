@@ -90,7 +90,7 @@ void AwBlock::clear()
 // constructor
 AwDataInfo::AwDataInfo()
 {
-	m_patientName = QObject::tr("Unknown");
+	m_firstName = m_lastName = QObject::tr("Unknown");
 	m_manufacturer = QObject::tr("Unknown");
 	m_date = QObject::tr("Not Available");
 	m_time = QObject::tr("Not Available");

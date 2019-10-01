@@ -481,6 +481,59 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	addEntry(FIFF_BLOCK_START, FIFFT_INT, sizeof(int));
 	writeBlockStart(&tag, FIFFB_MEAS_INFO);
 
+	// meas_date ??
+	if (!infos.recordingDate().isEmpty() && !infos.recordingTime().isEmpty()) {
+		QDateTime dateTime;
+		QDate date = QDate::fromString(infos.recordingDate(), Qt::ISODate);
+		QTime time = QTime::fromString(infos.recordingTime(), Qt::ISODate);
+		dateTime.setDate(date);
+		dateTime.setTime(time);
+		addEntry(FIFF_MEAS_DATE, FIFFT_INT, sizeof(int));
+		initTag(&tag, FIFF_MEAS_DATE, FIFFT_INT);
+		writeTag(&tag);
+		writeTagData<qint32>(dateTime.toTime_t());
+	}
+
+
+	// create SUBJECT_INFO block if patient name exists
+	if (!infos.firstName().isEmpty() && !infos.lastName().isEmpty()) {
+		addEntry(FIFF_BLOCK_START, FIFFT_INT, sizeof(int));
+		writeBlockStart(&tag, FIFFB_SUBJECT);
+		// subj_id
+		addEntry(FIFF_SUBJ_ID, FIFFT_INT, sizeof(int));
+		writeTagData<qint32>(0);
+		// subj first name
+		addEntry(FIFF_SUBJ_FIRST_NAME, FIFFT_STRING, infos.firstName().size());
+		writeTagString(&tag, FIFF_SUBJ_FIRST_NAME, infos.firstName());
+		// subj last name
+		addEntry(FIFF_SUBJ_LAST_NAME, FIFFT_STRING, infos.lastName().size());
+		writeTagString(&tag, FIFF_SUBJ_LAST_NAME, infos.lastName());
+		// end of block
+		addEntry(FIFF_BLOCK_END, FIFFT_INT, sizeof(int));
+		writeBlockEnd(&tag, FIFFB_SUBJECT);
+	}
+
+	// events ????
+	// are there markers in first block?
+	if (infos.blocks().first()->markersCount()) {
+		addEntry(FIFF_BLOCK_START, FIFFT_INT, sizeof(int));
+		writeBlockStart(&tag, FIFFB_EVENTS);
+		// init tag only once 
+		initTag(&tag, FIFF_EVENT_LIST, FIFFT_INT);
+		tag.size = sizeof(int) * 3;
+		for (auto m : infos.blocks().first()->markers()) {
+			addEntry(FIFF_EVENT_LIST, FIFFT_INT, sizeof(int) * 3);
+			writeTag(&tag);
+			// write tag data (before, samples, after)
+			qint32 before = 0, after = 0;
+			qint32 samples = (qint32)std::floor(m->start() * m_sfreq);
+			if (m->duration()) 
+				after = (qint32)std::floor(m->duration() * m_sfreq);
+			m_stream << before << samples << after;
+		}
+	}
+
+
 	// tags in meas_info
 	addEntry(FIFF_NCHAN, FIFFT_INT, sizeof(int));
 	// nchan
@@ -925,13 +978,12 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		QString firstName, lastName;
 		if (tags.contains(FIFF_SUBJ_FIRST_NAME)) {
 			readTag(&tag, tags[FIFF_SUBJ_FIRST_NAME]);
-			firstName = readTagString(&tag);
+			infos.setFirstName(readTagString(&tag));
 		}
 		if (tags.contains(FIFF_SUBJ_LAST_NAME)) {
 			readTag(&tag, tags[FIFF_SUBJ_LAST_NAME]);
-			lastName = readTagString(&tag);
+			infos.setLastName(readTagString(&tag));
 		}
-		infos.setPatientName(QString("%1 %2").arg(firstName).arg(lastName));
 	}
 	// get bad channels
 	auto badChannels = findBlock(FIFFB_BAD_CHANNELS);
@@ -1024,6 +1076,18 @@ template<typename T>
 void FIFFIO::writeTagData(T data)
 {
 	m_stream << data;
+}
+
+///
+/// write the tag AND its data
+///
+void FIFFIO::writeTagString(fiff_tag_t *tag, int kind, const QString& string)
+{
+	std::string cstr = string.toStdString();
+	initTag(tag, kind, FIFFT_STRING);
+	tag->size = cstr.size();
+	writeTag(tag);
+	m_stream.writeRawData(cstr.c_str(), cstr.size());
 }
 
 void FIFFIO::writeBlockStart(fiff_tag_t *tag, int kind, qint64 pos)
