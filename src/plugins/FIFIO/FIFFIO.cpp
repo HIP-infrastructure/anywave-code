@@ -142,7 +142,7 @@ FIFFIO::FIFFIO(const QString& filename) : AwFileIO(filename)
 	m_sfreq = 0;
 	m_dataPack = 0;
 	m_firstSample = m_nSamples =  0;
-
+	m_containsHeadShape = false;
 }
 
 FIFFIO::~FIFFIO()
@@ -162,7 +162,10 @@ void FIFFIO::cleanUpAndClose()
 	AwFileIO::cleanUpAndClose();
 }
 
-
+bool FIFFIO::hasHeadShapeFile()
+{
+	return m_containsHeadShape;
+}
 
 int FIFFIO::findBuffer(int sampleIndex, int low, int high)
 {
@@ -763,6 +766,15 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 	if (!tags.contains(FIFF_SFREQ) || !tags.contains(FIFF_NCHAN) || !tags.contains(FIFF_CH_INFO)) {
 		m_error = QString("The file is missing required tags (NCHAN, SFREQ, CHINFO).");
 		return AwFileIO::WrongFormat;
+	}
+
+	// headshape optional
+	// search for HPI block
+	auto hpi = findBlock(FIFFB_HPI_RESULT);
+	if (hpi) {
+		auto tags = hpi->tags;
+		if (tags.contains(FIFF_DIG_POINT))
+			m_containsHeadShape = true;
 	}
 
 	fiff_tag_t tag;

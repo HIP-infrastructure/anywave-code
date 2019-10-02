@@ -56,14 +56,14 @@ public:
 	FIFFIO(const QString& fileName);
 	~FIFFIO();
 
-	qint64 readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList);
-	AwFileIO::FileStatus openFile(const QString &path);
-	AwFileIO::FileStatus canRead(const QString &path);
+	qint64 readDataFromChannels(float start, float duration, QList<AwChannel *> &channelList) override;
+	AwFileIO::FileStatus openFile(const QString &path) override;
+	AwFileIO::FileStatus canRead(const QString &path) override;
 
-	qint64 writeData(QList<AwChannel *> *channels);
-	FileStatus createFile(const QString& path, int flags = 0);
-
-	void cleanUpAndClose();
+	qint64 writeData(QList<AwChannel *> *channels) override;
+	FileStatus createFile(const QString& path, int flags = 0) override;
+	bool hasHeadShapeFile() override;
+	void cleanUpAndClose() override;
 protected:
 	void initTag(fiff_tag_t *tag, int kind, int type);
 	void writeTag(fiff_tag_t *tag, qint64 pos = 0);
@@ -80,15 +80,14 @@ protected:
 	T readTagData();
 	template<typename T>
 	T* allocateBuffer(int nSamples);
-	
 	void buildNodes();
 	fiffTreeNode *findBlock(int kind);
 	void convert_loc(float oldloc[9], float r0[3], float *ex, float *ey, float *ez);
 	void convertOldChinfo(oldChInfoRec *old, fiffChInfoRec *newChinfo);
 	int findBuffer(int samplePosition, int left, int right);
-
 	bool checkForFileStart();
 	bool checkForCompatibleFile(const QString& path);
+
 	QFile m_file;
 	QDataStream m_stream;
 	fiffId m_fileID;
@@ -100,7 +99,7 @@ protected:
 	QMultiHash<int, fiffTreeNode *> m_blocks; // list of blocks from dirEntries.
 	QList<data_buffer *> m_buffers;
 	qint64 m_dirPosition; // offset in file where to write the dir entries 
-
+	bool m_containsHeadShape;	// true if the file contains the hpi_result block and dig_point tags.
 };
 
 class FIFFIO_EXPORT FIFFIOPlugin : public AwFileIOPlugin
