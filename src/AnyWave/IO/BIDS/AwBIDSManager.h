@@ -21,6 +21,7 @@ public:
 	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
 	enum Derivatives { EPITOOLS, EI, ICA, BIDSUpdates};
 	enum Modifications { ChannelsTsv, EventsTsv };
+	enum supportedMEGFormats { Bti4DNI, Elekta };
 
 	// destructor
 	~AwBIDSManager();
@@ -73,7 +74,7 @@ protected:
 	static AwBIDSManager *m_instance;
 	static QString m_parsingPath;	// path to place the json file to prevent BIDSManager of any updates.
 
-	int convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile);
+	//int convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 	void getSubjects(int sourceDir = raw);
 	void clearSubjects(int sourceDir = raw);
