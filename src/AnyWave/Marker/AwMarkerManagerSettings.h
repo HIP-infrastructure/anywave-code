@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AW_MARKERS_MANAGER_SETTINGS_H
@@ -32,11 +32,8 @@
 #include "AwMarkerRuleManageDial.h"
 #include "AwMarkerRule.h"
 #include <QSortFilterProxyModel>
-// using QtCharts to plot the histogram
-#include <QChartView>
 
 using namespace Ui;
-using namespace QtCharts;
 
 class AwMarkerManagerSettings : public QWidget, public MarkersManagerSettingsClass
 {
@@ -58,7 +55,6 @@ public slots:
 	void show();
 	void editCurrentItem();
 	void setMarkerAddingMode(bool on);
-	void showHistogram();
 
 signals:
 	/** Sent whenever displayed markers changed, depending on filtering rules **/
@@ -108,8 +104,6 @@ protected:
 	void updateStats();
 	// EVENTS
 	void changeEvent(QEvent*);
-	void buildHistogram();
-	void updateHistogram();
 
 	AwMarkerList m_markers;
 	AwMarkerList m_displayedMarkers;
@@ -127,7 +121,6 @@ protected:
 	QMenu *m_menu;
 	QAction *m_removeAllLabel, *m_selectAllLabel;	// keep pointer for specific action Remove all "MARKER" and Select all "MARKER"
 	bool m_isAddingMarker;
-	QChartView *m_histogramView;
 };
 
 #endif // MARKERS_MANAGER_SETTINGS_H

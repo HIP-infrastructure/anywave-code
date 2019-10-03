@@ -5,6 +5,7 @@
 HEADERS += ../../include/widget/AwMessageBox.h \
     ../../include/widget/AwWait.h \
     ./Aw2DGrid.h \
+     ../../include/widget/AwVideoPlayer.h \
     ../../include/widget/AwWaitWidget.h \
 	../../include/widget/AwGetValueDialog.h \
     ../../include/widget/AwSelectInputDataWidget.h \
@@ -69,6 +70,7 @@ SOURCES += ./Aw2DGrid.cpp \
     ./AwTopoWidgetSettings.cpp \
     ./AwVTKWidget.cpp \
     ./AwWaitWidget.cpp \
+    ./AwVideoPlayer.cpp \
     ./SignalView/AwBaseMarkerBar.cpp \
     ./SignalView/AwBaseSignalView.cpp \
     ./SignalView/AwGoToLatencyDial.cpp \
@@ -85,6 +87,7 @@ SOURCES += ./Aw2DGrid.cpp \
     ./InputMarker/AwInputMarkerWidget.cpp \
     ./InputMarker/InputMarkerModel.cpp
 FORMS += ./AwAmplitudeWidget.ui \
+    ./AwVideoPlayer.ui \
 	./AwGetValueDialog.ui \
     ./AwSelectInputDataWidget.ui \
     ./AwMarkerInspector.ui \

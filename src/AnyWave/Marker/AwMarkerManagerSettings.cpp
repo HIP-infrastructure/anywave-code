@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMarkerManagerSettings.h"
@@ -33,11 +33,6 @@
 #include <AwFileIO.h>
 #include "Process/AwMarkerExporter.h"
 #include "Process/AwProcessManager.h"
-#include <QChart>
-#include <QBarSet>
-#include <QBarCategoryAxis>
-#include <QValueAxis>
-#include <QHorizontalBarSeries>
 #include <QFileDialog>
 #include <widget/AwGetValueDialog.h>
 #include <Plugin/AwPluginManager.h>
@@ -105,12 +100,6 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	action = new QAction(tr("Clear a TRIGGER channel"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(clearTrigger()));
-
-	//action = new QAction(tr("Launch process"), this);
-	//m_menu->addAction(action);
-	//connect(action, SIGNAL(triggered()), this, SLOT(launchProcess()));
-
-
 
 	action = new QAction(tr("Center views on marker"), this);
 	m_menu->addAction(action);
@@ -198,24 +187,16 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(checkDuration, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
 	connect(checkTargets, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
 	connect(checkColor, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
-	// Statistics histogram
-//	connect(buttonHisto, &QPushButton::clicked, this, &AwMarkerManagerSettings::showHistogram);
 
 	tvMarkers->setColumnHidden(MARKER_COLUMN_CODE, true);
 	tvMarkers->setColumnHidden(MARKER_COLUMN_COLOR, true);
 	tvMarkers->setColumnHidden(MARKER_COLUMN_TARGET, true);
-
-	m_histogramView = NULL;
 }
 
 AwMarkerManagerSettings::~AwMarkerManagerSettings()
 {
 	if (m_currentRule)
 		delete m_currentRule;
-	if (m_histogramView) {
-		m_histogramView->close();
-		delete m_histogramView;
-	}
 }
 
 void AwMarkerManagerSettings::changeEvent(QEvent *e)
@@ -308,46 +289,6 @@ void AwMarkerManagerSettings::updateStats()
 	}
 }
 
-
-void AwMarkerManagerSettings::buildHistogram()
-{
-	QChart *chart = new QChart();
-	chart->setTitle(tr("Markers count"));
-	m_histogramView = new QChartView(chart);
-	m_histogramView->setWindowIcon(QIcon(":images/AnyWave_icon.png"));
-	m_histogramView->setWindowTitle(tr("Markers Count"));
-	m_histogramView->setRenderHint(QPainter::Antialiasing);
-}
-
-void AwMarkerManagerSettings::updateHistogram()
-{
-	QChart *oldChart = m_histogramView->chart();
-	QChart *chart = new QChart();
-	AwMarkerList markers = m_model->markers();
-	QList<QPair<QString, int> > markers_count = AwMarker::count(markers);
-
-	// limit the number of unique markers to ten for now.
-	QStringList yLabels;
-	QHorizontalBarSeries *series = new QHorizontalBarSeries();
-	yLabels << "Markers";
-	for (int i = 0; i < std::min(markers_count.size(), 10); i++) {
-		QBarSet *set = new QBarSet(markers_count.at(i).first);
-		set->append(markers_count.at(i).second);
-		series->append(set);
-	}
-	chart->addSeries(series);
-	QBarCategoryAxis *axisY = new QBarCategoryAxis();
-	axisY->append(yLabels);
-	chart->setAxisY(axisY, series);
-	chart->setAnimationOptions(QChart::SeriesAnimations);
-	QValueAxis *axisX = new QValueAxis();
-	chart->setAxisX(axisX, series);
-	axisX->applyNiceNumbers();
-	m_histogramView->setChart(chart);
-	delete oldChart;
-	m_histogramView->resize(400, 300);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
 
@@ -377,16 +318,6 @@ void AwMarkerManagerSettings::cutAround()
 }
 #endif
 
-
-void AwMarkerManagerSettings::showHistogram()
-{
-	if (m_model->markers().isEmpty())
-		return;
-	if (m_histogramView == NULL)
-		buildHistogram();
-	updateHistogram();
-	m_histogramView->show();
-}
 
 void AwMarkerManagerSettings::showColumn(bool flag)
 {

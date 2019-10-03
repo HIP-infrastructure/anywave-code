@@ -1101,6 +1101,22 @@
 											<key>GID</key>
 											<integer>80</integer>
 											<key>PATH</key>
+											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libCompumedicsPF.dylib</string>
+											<key>PATH_TYPE</key>
+											<integer>0</integer>
+											<key>PERMISSIONS</key>
+											<integer>493</integer>
+											<key>TYPE</key>
+											<integer>3</integer>
+											<key>UID</key>
+											<integer>0</integer>
+										</dict>
+										<dict>
+											<key>CHILDREN</key>
+											<array/>
+											<key>GID</key>
+											<integer>80</integer>
+											<key>PATH</key>
 											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libCorrelation.dylib</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
@@ -1118,6 +1134,22 @@
 											<integer>80</integer>
 											<key>PATH</key>
 											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libCTFReader.dylib</string>
+											<key>PATH_TYPE</key>
+											<integer>0</integer>
+											<key>PERMISSIONS</key>
+											<integer>493</integer>
+											<key>TYPE</key>
+											<integer>3</integer>
+											<key>UID</key>
+											<integer>0</integer>
+										</dict>
+										<dict>
+											<key>CHILDREN</key>
+											<array/>
+											<key>GID</key>
+											<integer>80</integer>
+											<key>PATH</key>
+											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libDeltamedBTReader.dylib</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -1213,7 +1245,7 @@
 											<key>GID</key>
 											<integer>80</integer>
 											<key>PATH</key>
-											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libFIFFReader.dylib</string>
+											<string>/Users/bruno/dev/aw-gitlab/qmake_build/release/bin/Anywave_Plugins/libFIFFIO.dylib</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>
@@ -2649,6 +2681,38 @@
 											<integer>0</integer>
 											<key>PATH</key>
 											<string>/Library/Frameworks/QtGui.framework</string>
+											<key>PATH_TYPE</key>
+											<integer>0</integer>
+											<key>PERMISSIONS</key>
+											<integer>493</integer>
+											<key>TYPE</key>
+											<integer>3</integer>
+											<key>UID</key>
+											<integer>0</integer>
+										</dict>
+										<dict>
+											<key>CHILDREN</key>
+											<array/>
+											<key>GID</key>
+											<integer>0</integer>
+											<key>PATH</key>
+											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtMultimedia.framework</string>
+											<key>PATH_TYPE</key>
+											<integer>0</integer>
+											<key>PERMISSIONS</key>
+											<integer>493</integer>
+											<key>TYPE</key>
+											<integer>3</integer>
+											<key>UID</key>
+											<integer>0</integer>
+										</dict>
+										<dict>
+											<key>CHILDREN</key>
+											<array/>
+											<key>GID</key>
+											<integer>0</integer>
+											<key>PATH</key>
+											<string>/Users/bruno/Qt5/5.10.0/clang_64/lib/QtMultimediaWidgets.framework</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
 											<key>PERMISSIONS</key>

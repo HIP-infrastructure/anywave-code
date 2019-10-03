@@ -24,7 +24,7 @@
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLog.h"
-#include "AwVideoManager.h"
+#include "Display/AwVideoManager.h"
 #include <widget/AwVideoPlayer.h>
 //
 // Menu File->Open

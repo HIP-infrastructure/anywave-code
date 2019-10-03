@@ -14,8 +14,8 @@ unix:!macx {
 
 include(../common.pri)
 include(AnyWave.pri)
-QT += widgets xml svg concurrent qml printsupport charts
-CONFIG += qwt
+QT += widgets xml svg concurrent qml printsupport multimedia multimediawidgets charts
+CONFIG += qwt 
 macx {
 CONFIG -= app_bundle
 }
