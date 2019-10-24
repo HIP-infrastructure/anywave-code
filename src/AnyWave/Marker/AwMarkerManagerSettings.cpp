@@ -387,6 +387,8 @@ void AwMarkerManagerSettings::updateMarkerList()
 	updateStats();
 }
 
+
+
 void AwMarkerManagerSettings::addRule(const QString& name)
 {
 	m_loadedRules << name;
@@ -715,6 +717,21 @@ void AwMarkerManagerSettings::removeMarkers()
 	emit markersChanged(m_displayedMarkers);
 }
 
+void AwMarkerManagerSettings::highlightMarker(AwMarker *marker)
+{
+	// find the marker in the list
+	AwMarkerList currentMarkers = m_model->markers();
+	int index = currentMarkers.indexOf(marker);
+	if (index == -1)
+		return;
+	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+
+	QModelIndex mindex = m_model->index(index, MARKER_COLUMN_LABEL);
+	auto row = proxy->mapFromSource(mindex).row();
+	tvMarkers->setFocus();
+	tvMarkers->showRow(row);
+	tvMarkers->selectRow(row);
+}
 
 void AwMarkerManagerSettings::writeTrigger()
 {

@@ -25,8 +25,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <graphics/AwCursorItem.h>
 #include <graphics/AwGraphicsDefines.h>
-#include <AwUtilities.h>
-using namespace AwUtilities;
+#include <utils/time.h>
+using namespace AwUtilities::time;
 
 #include <QGraphicsScene>
 
@@ -92,8 +92,8 @@ void AwCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	QFontMetrics fm(m_font);
 
 	QString label;
-	if (AwUtilities::isTimeHMS())
-		label = AwUtilities::hmsTime(m_currentPos);
+	if (isTimeHMS())
+		label = hmsTime(m_currentPos);
 	else
 		label.sprintf("%.3f", m_currentPos);
 	label = QString("%1:%2").arg(m_label).arg(label);

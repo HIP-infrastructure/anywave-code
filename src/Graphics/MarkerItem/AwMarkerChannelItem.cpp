@@ -26,12 +26,13 @@
 #include <graphics/AwMarkerChannelItem.h>
 #include <QGraphicsScene>
 #include <QGraphicsProxyWidget>
-#include <AwUtilities.h>
+#include <utils/gui.h>
 #include "AwMarkerLabelButton.h"
 #include "AwMarkerValueButton.h"
 #include <graphics/AwGraphicsDefines.h>
 #include <QStyleOptionGraphicsItem>
 #include <QPainter>
+
 
 #define MCI_MAX_HEIGHT	15
 #define MCI_MIN_HEIGHT  5
@@ -66,25 +67,19 @@ void AwMarkerChannelItem::updatePosition()
 	auto height2 = m_height / 2.;
 	if (m_marker->duration() > 0)
 		if (m_marker->start() < m_posInFile) {
-			//pos = QPointF(m_signalItem->pos().x(), m_signalItem->pos().y() - 15);
 			pos = QPointF(m_signalItem->pos().x(), m_signalItem->pos().y() - height2);
 			setPos(pos);
 			qreal offset = m_posInFile - m_marker->start();
-		    //setRect(QRectF(0, 0, (m_marker->duration() - offset) * m_physics->xPixPerSec(), 30));
 			setRect(QRectF(0, 0, (m_marker->duration() - offset) * m_physics->xPixPerSec(), m_height));
 		}
 		else {
-			//pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - 15);
 			pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - height2);
 			setPos(pos);
-			//setRect(QRectF(0, 0, m_marker->duration() * m_physics->xPixPerSec(), 30));
 			setRect(QRectF(0, 0, m_marker->duration() * m_physics->xPixPerSec(), m_height));
 		}
 	else {
-		//pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - 15);
 		pos = QPointF((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), m_signalItem->pos().y() - height2);
 		setPos(pos);
-		//setRect(QRectF(-3, 0, 6, 30));
 		setRect(QRectF(-3, 0, 6, m_height));
 	}
 	update();
@@ -106,7 +101,6 @@ void AwMarkerChannelItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 	pen.setWidth(1);
 	painter->setPen(pen);
 
-//	m_widgets->setPos(5, 5);
 	m_labelItem->setPos(5, 5);
 	m_valueItem->setPos(5, m_labelItem->rect().height() + 5);
 
@@ -119,7 +113,7 @@ void AwMarkerChannelItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 		// use default color or user defined color
 	QColor color;
 	if (m_marker->color().isEmpty())
-		color = QColor(AwUtilities::markerColor(m_marker->type()));
+		color = QColor(AwUtilities::gui::markerColor(m_marker->type()));
 	else
 		color = QColor(m_marker->color());
 
@@ -127,19 +121,20 @@ void AwMarkerChannelItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 		painter->fillRect(this->rect(), color);
 	else
 		painter->fillRect(this->rect(), color.lighter(50));
+	if (m_marker) {
+		QString info = QString("Marker %1 at %2s").arg(m_marker->label()).arg(m_marker->start());
+		if (m_marker->duration())
+			info += QString("\nduration: %1s").arg(m_marker->duration());
+		info += QString("\nValue: %1").arg(m_marker->value());
+		setToolTip(info);
+	}
 }
 
 void AwMarkerChannelItem::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
-	QString message = m_marker->label();
-	if (message.isEmpty())
-		message = tr("No Label");
-	message += "\n";
-	message += QString::number(m_marker->value());
-	setToolTip(message);
 }
 
 void AwMarkerChannelItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 {
-	setToolTip("");
+
 }

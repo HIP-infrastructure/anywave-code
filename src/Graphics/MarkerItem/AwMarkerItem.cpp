@@ -31,7 +31,7 @@
 #include "AwMarkerLabelButton.h"
 #include "AwMarkerValueButton.h"
 #include <QVBoxLayout>
-#include <AwUtilities.h>
+#include <utils/gui.h>
 
 
 AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, AwMarker *mark, QGraphicsScene *scene, int offset) 
@@ -121,7 +121,7 @@ void AwMarkerItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	// use default color or user defined color
 	QColor color;
 	if (m_marker->color().isEmpty())
-		color = QColor(AwUtilities::markerColor(m_marker->type()));
+		color = QColor(AwUtilities::gui::markerColor(m_marker->type()));
 	else
 		color = QColor(m_marker->color());
 
@@ -137,6 +137,13 @@ void AwMarkerItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		else
 			painter->fillRect(this->rect(), QBrush(color.lighter(150), Qt::Dense4Pattern));
 	} 
+	if (m_marker) {
+		QString info = QString("Marker %1 at %2s").arg(m_marker->label()).arg(m_marker->start());
+		if (m_marker->duration())
+			info += QString("\nduration: %1s").arg(m_marker->duration());
+		info += QString("\nValue: %1").arg(m_marker->value());
+		setToolTip(info);
+	}
 }
 
 

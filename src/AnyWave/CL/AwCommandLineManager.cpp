@@ -32,9 +32,8 @@
 #include <AwMontage.h>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <AwUtilities.h>
 #include <AwCore.h>
-
+#include <utils/AwUtilities.h>
 #include "Prefs/AwSettings.h"
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)

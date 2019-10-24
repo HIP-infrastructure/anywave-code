@@ -33,7 +33,10 @@
 #include <widget/AwMessageBox.h>
 #include <QFileDialog>
 #include "Display/AwDisplay.h"
-#include <AwUtilities.h>
+#include <utils/gui.h>
+#include <utils/time.h>
+using namespace AwUtilities::time;
+using namespace AwUtilities::gui;
 
 AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	: QDialog(parent)
@@ -54,18 +57,18 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	// GENERAL
 	// COLORS
 	m_colorsChanged = false;
-	m_markerColors << AwUtilities::markerColor(AwMarker::Single) << AwUtilities::markerColor(AwMarker::Selection);
+	m_markerColors << markerColor(AwMarker::Single) << markerColor(AwMarker::Selection);
 	m_markerTypes << "Single" << "Selection";
 	comboType->insertItems(0, m_markerTypes);
 	comboType->setCurrentIndex(0);
 	m_markerIndex = 0;
 	buttonColor->setStyleSheet("background: " + m_markerColors.at(0) + ";");
 
-	changeCursorColor(AwUtilities::cursorColor());
-	changeMappingCursorColor(AwUtilities::mappingCursorColor());
-	changeCursorFontText(AwUtilities::cursorFont());
-	changeMappingCursorFontText(AwUtilities::mappingCursorFont());
-	changeMarkerFontText(AwUtilities::markerFont(AwMarker::Single));
+	changeCursorColor(cursorColor());
+	changeMappingCursorColor(mappingCursorColor());
+	changeCursorFontText(cursorFont());
+	changeMappingCursorFontText(mappingCursorFont());
+	changeMarkerFontText(markerFont(AwMarker::Single));
 
 	// Auto trigger parsing
 	if (aws->getBool("isAutoTriggerParsingOn"))
@@ -74,7 +77,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		radioTriggerParserOff->setChecked(true);
 
 	// Time representation
-	if ((AwUtilities::isTimeHMS()))
+	if ((isTimeHMS()))
 		radioHMSOn->setChecked(true);
 	else
 		radioHMSOff->setChecked(true);
@@ -206,7 +209,7 @@ void AwPrefsDial::accept()
 
 	//// misc. parameters
 	AwSettings *aws = AwSettings::getInstance();
-	AwUtilities::saveTimeHMS(radioHMSOn->isChecked());
+	saveTimeHMS(radioHMSOn->isChecked());
 
 	settings.setValue("py/interpreter", lineEditPythonPath->text());
 
@@ -266,24 +269,24 @@ void AwPrefsDial::restoreDefaultMarkersColors()
 	comboType->setCurrentIndex(0);
 	m_markerIndex = 0;
 	m_markerColors.clear();
-	m_markerColors << AwUtilities::defaultMarkerColor(AwMarker::Single) <<  AwUtilities::defaultMarkerColor(AwMarker::Selection);
+	m_markerColors << defaultMarkerColor(AwMarker::Single) <<  defaultMarkerColor(AwMarker::Selection);
 	buttonColor->setStyleSheet("background: " + m_markerColors.at(0) + ";");
-	AwUtilities::saveMarkerFont(QFont("Helvetica", 10, QFont::Normal), AwMarker::Single);
-	changeMarkerFontText(AwUtilities::markerFont(AwMarker::Single));
+	saveMarkerFont(QFont("Helvetica", 10, QFont::Normal), AwMarker::Single);
+	changeMarkerFontText(markerFont(AwMarker::Single));
 }
 
 void AwPrefsDial::restoreDefaultCursorColors()
 {
-	buttonCursorColor->setStyleSheet("background: " + AwUtilities::defaultCursorColor() + ";");
-	AwUtilities::saveCursorFont(QFont("Helvetica", 10, QFont::Normal));
-	changeCursorFontText(AwUtilities::cursorFont());
+	buttonCursorColor->setStyleSheet("background: " + defaultCursorColor() + ";");
+	saveCursorFont(QFont("Helvetica", 10, QFont::Normal));
+	changeCursorFontText(cursorFont());
 }
 
 void AwPrefsDial::restoreDefaultMappingColors()
 {
-	buttonMappingColor->setStyleSheet("background: " + AwUtilities::mappingCursorColor() + ";");
-	AwUtilities::saveMappingCursorFont(QFont("Helvetica", 10, QFont::Normal));
-	changeMappingCursorFontText(AwUtilities::mappingCursorFont());
+	buttonMappingColor->setStyleSheet("background: " + mappingCursorColor() + ";");
+	saveMappingCursorFont(QFont("Helvetica", 10, QFont::Normal));
+	changeMappingCursorFontText(mappingCursorFont());
 }
 
 void AwPrefsDial::changeMarkerType(int index)
@@ -308,18 +311,18 @@ void AwPrefsDial::changeMarkerColor(const QString& color)
 		m_markerColors.replace(m_markerIndex, color);
 
 	if (m_markerIndex == 0)
-		AwUtilities::saveMarkerColor(color, AwMarker::Single);
+		saveMarkerColor(color, AwMarker::Single);
 	else
-		AwUtilities::saveMarkerColor(color, AwMarker::Selection);
+		saveMarkerColor(color, AwMarker::Selection);
 }
 
 
 void AwPrefsDial::selectCursorColor()
 {
-	QColor color = QColorDialog::getColor(QColor(AwUtilities::cursorColor()), this, tr("Edit cursor's color"));
+	QColor color = QColorDialog::getColor(QColor(cursorColor()), this, tr("Edit cursor's color"));
 	
 	if (color.isValid())	{
-		AwUtilities::saveCursorColor(color.name());
+		saveCursorColor(color.name());
 		changeCursorColor(color.name());
 	}
 }
@@ -327,21 +330,21 @@ void AwPrefsDial::selectCursorColor()
 void AwPrefsDial::changeCursorColor(const QString& color)
 {
 	buttonCursorColor->setStyleSheet("background: " + color + ";");
-	AwUtilities::saveCursorColor(color);
+	saveCursorColor(color);
 }
 
 void AwPrefsDial::changeMappingCursorColor(const QString& color)
 {
 	buttonMappingColor->setStyleSheet("background: " + color + ";");
-	AwUtilities::saveMappingCursorColor(color);
+	saveMappingCursorColor(color);
 }
 
 void AwPrefsDial::selectMappingColor()
 {
-	QColor color = QColorDialog::getColor(QColor(AwUtilities::mappingCursorColor()), this, tr("Edit mapping cursor's color"));
+	QColor color = QColorDialog::getColor(QColor(mappingCursorColor()), this, tr("Edit mapping cursor's color"));
 	
 	if (color.isValid())	{
-		AwUtilities::saveMappingCursorColor(color.name());
+		saveMappingCursorColor(color.name());
 		changeMappingCursorColor(color.name());
 	}
 }
@@ -349,9 +352,9 @@ void AwPrefsDial::selectMappingColor()
 void AwPrefsDial::editMappingFont()
 {
 	bool ok;
-	QFont font = QFontDialog::getFont(&ok, AwUtilities::mappingCursorFont(), this, tr("Choose Mapping Cursor Font"));
+	QFont font = QFontDialog::getFont(&ok, mappingCursorFont(), this, tr("Choose Mapping Cursor Font"));
 	if (ok)	{
-		AwUtilities::saveMappingCursorFont(font);
+		saveMappingCursorFont(font);
 		changeMappingCursorFontText(font);
 	}
 }
@@ -359,9 +362,9 @@ void AwPrefsDial::editMappingFont()
 void AwPrefsDial::editCursorFont()
 {
 	bool ok;
-	QFont font = QFontDialog::getFont(&ok, AwUtilities::cursorFont(), this, tr("Choose Cursor Font"));
+	QFont font = QFontDialog::getFont(&ok, cursorFont(), this, tr("Choose Cursor Font"));
 	if (ok)	{
-		AwUtilities::saveCursorFont(font);
+		saveCursorFont(font);
 		changeCursorFontText(font);
 	}
 }
@@ -369,9 +372,9 @@ void AwPrefsDial::editCursorFont()
 void AwPrefsDial::editMarkerFont()
 {
 	bool ok;
-	QFont font = QFontDialog::getFont(&ok,  AwUtilities::markerFont(AwMarker::Single), this, tr("Choose Marker Font"));
+	QFont font = QFontDialog::getFont(&ok,  markerFont(AwMarker::Single), this, tr("Choose Marker Font"));
 	if (ok)	{
-		AwUtilities::saveMarkerFont(font, AwMarker::Single);
+		saveMarkerFont(font, AwMarker::Single);
 		changeMarkerFontText(font);
 	}
 }

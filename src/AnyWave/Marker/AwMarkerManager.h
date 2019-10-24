@@ -85,6 +85,7 @@ public slots:
 	void saveMarkers(const QString& filePath);
 	/** Set a new list of displayed markers **/
 	void setMarkers(const AwMarkerList& markers);
+	void highlightMarkerInList(AwMarker *marker);
 signals:
 	void goTo(float pos);
 	void displayedMarkersChanged(const AwMarkerList& markers);

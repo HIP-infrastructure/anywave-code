@@ -9,7 +9,7 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Display/AwDisplaySetupManager.h"
 #include "Montage/AwMontageManager.h"
-#include <AwUtilities.h>
+#include <utils/time.h>
 #include "Marker/AwMarkerManager.h"
 #include <widget/AwMessageBox.h>
 #include "Widgets/AwTriggerParsingDialog.h"
@@ -196,7 +196,7 @@ void AnyWave::openFile(const QString &path)
 
 	// Update Window title
 	QString title = QString("AnyWave - ") + fullDataFilePath + QString(tr(" - %2 channels. ").arg(m_currentReader->infos.channelsCount()));
-	title += tr("Duration: ") + AwUtilities::timeToString(m_currentReader->infos.totalDuration());
+	title += tr("Duration: ") + AwUtilities::time::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
 	m_currentReader->infos.setFileName(m_openFileName);

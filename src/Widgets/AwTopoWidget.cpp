@@ -37,7 +37,7 @@
 #include <QResizeEvent>
 #include <widget/AwTopoBuilder.h>
 #include <QMenu>
-#include <AwUtilities.h>
+#include <utils/time.h>
 #include "AwTopoWidgetSettings.h"
 //////
 /// QWT
@@ -291,7 +291,7 @@ void AwTopoWidget::showValue(double value)
 void AwTopoWidget::setLatency(float lat)
 {
 	QString latency = QString::number(lat, 'g', 3) + "s ";
-	QString HMS = AwUtilities::hmsTime(lat);
+	QString HMS = AwUtilities::time::hmsTime(lat);
 	ui->labelLatency->setText(tr("Latency:") + latency + "(" + HMS + ")");
 }
 
@@ -299,9 +299,9 @@ void AwTopoWidget::setLatency(float start, float end)
 {
 	QString s_start = QString::number(start, 'g', 3) + "s ";
 	QString s_end = QString::number(end, 'g', 3) + "s ";
-	QString HMSStart = AwUtilities::hmsTime(start);
-	QString HMSEnd = AwUtilities::hmsTime(end);
-	if (AwUtilities::isTimeHMS())
+	QString HMSStart = AwUtilities::time::hmsTime(start);
+	QString HMSEnd = AwUtilities::time::hmsTime(end);
+	if (AwUtilities::time::isTimeHMS())
 		ui->labelLatency->setText("[ " + HMSStart + " - " + HMSEnd + " ]");
 	else
 		ui->labelLatency->setText("[ " + s_start + " - " + s_end + " ]");

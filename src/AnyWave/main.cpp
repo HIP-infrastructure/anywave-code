@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-#ifdef Q_OS_WIN
-	QApplication::setStyle(QStyleFactory::create("windowsvista"));
-#endif
+//#ifdef Q_OS_WIN
+//	QApplication::setStyle(QStyleFactory::create("windowsvista"));
+//#endif
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);

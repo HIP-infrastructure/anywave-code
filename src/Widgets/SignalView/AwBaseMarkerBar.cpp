@@ -27,7 +27,7 @@
 #include <graphics/AwGraphicsObjects.h>
 #include <QMouseEvent>
 #include <qpainter.h>
-#include <AwUtilities.h>
+#include <utils/gui.h>
 #include <AwCore.h>
 
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
@@ -261,13 +261,13 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 
 			switch (m->type()) {
 			case AwMarker::Single:
-				color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Single) : m->color());
+				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
 				pen.setColor(color);
 				painter.setPen(pen);
 				painter.drawRect(QRectF((m->start() - m_positionInFile) * m_physics->xPixPerSec(), 0, 0, AW_MARKERS_BAR_HEIGHT - 1));
 				break;
 			case AwMarker::Selection:
-				color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Selection) : m->color());
+				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
 				pen.setColor(color);
 				brushSelection.setColor(color);
 				painter.setPen(pen);
@@ -292,13 +292,13 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 
 				switch (m->type()) {
 				case AwMarker::Single:
-					color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Single) : m->color());
+					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
 					pen.setColor(color);
 					pixPainter.setPen(pen);
 					pixPainter.drawRect(QRectF(m->start() * pixPerSec, 0, 0, AW_MARKERS_BAR_HEIGHT - 1));
 					break;
 				case AwMarker::Selection:
-					color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Selection) : m->color());
+					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
 					pen.setColor(color);
 					brushSelection.setColor(color);
 					pixPainter.setPen(pen);

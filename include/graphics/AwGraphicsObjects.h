@@ -143,8 +143,9 @@ class AW_GRAPHICS_EXPORT AwBaseGraphicsMarkerItem : public AwGraphicsItem
 {
 public:
 	AwBaseGraphicsMarkerItem(AwMarker *marker, AwDisplayPhysics *phys);
+	virtual int itemType() { return AW_GRAPHICS_ITEM_MARKER_TYPE; }
 	inline AwMarker *marker() { return m_marker; }
-	int itemType() { return AW_GRAPHICS_ITEM_MARKER_TYPE; }
+
 protected:
 	AwMarker *m_marker;
 };
@@ -211,6 +212,7 @@ public:
 
 class AW_GRAPHICS_EXPORT AwGraphicsMarkerItem : public AwBaseGraphicsMarkerItem, public QGraphicsRectItem
 {
+	Q_OBJECT
 public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_MARKER_TYPE };
 	inline int type() const { return Type; }

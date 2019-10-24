@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <widget/SignalView/AwNavigationBar.h>
 #include <QtCore/qmath.h>
-#include <AwUtilities.h>
+#include <utils/time.h>
 #include <widget/SignalView/AwViewSettings.h>
 #include <QtWidgets/QApplication>
 #include "AwViewSettingsUi.h"
@@ -154,7 +154,7 @@ void AwNavigationBar::clean()
 
 void AwNavigationBar::updatePositionLabel()
 {
-	ui->labelTime->setText(AwUtilities::hmsTime(m_positionInFile + m_startPosition, true));
+	ui->labelTime->setText(AwUtilities::time::hmsTime(m_positionInFile + m_startPosition, true));
 	QString dur = tr("Duration: ") + QString::number(m_pageDuration, 'f', 2) + "s";
 	ui->labelTime->setToolTip(dur);
 }

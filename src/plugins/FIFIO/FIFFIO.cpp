@@ -30,42 +30,9 @@
 #include <AwCore.h>
 #include <cmath>
 #include "dot.h"
+#include <utils/endian.h>
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Fonctions de conversion BigEndian LitleEndian
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-inline quint32 fromBigEndian(const uchar *src)
-{
-	return 0
-		| src[3]
-		| src[2] * quint32(0x00000100)
-		| src[1] * quint32(0x00010000)
-		| src[0] * quint32(0x01000000);
-}
-
-inline quint16 fromBigEndian16(const uchar *src)
-{
-	return 0
-		| src[1]
-		| src[0] * 0x0100;
-}
-
-inline quint64 fromBigEndian64(const uchar *src)
-{
-	return 0
-		| src[7]
-		| src[6] * Q_UINT64_C(0x0000000000000100)
-		| src[5] * Q_UINT64_C(0x0000000000010000)
-		| src[4] * Q_UINT64_C(0x0000000001000000)
-		| src[3] * Q_UINT64_C(0x0000000100000000)
-		| src[2] * Q_UINT64_C(0x0000010000000000)
-		| src[1] * Q_UINT64_C(0x0001000000000000)
-		| src[0] * Q_UINT64_C(0x0100000000000000);
-}
+using namespace AwUtilities::endianness;
 
 #define HP3852A_OVERFLOW 11.0
 

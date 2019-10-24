@@ -131,6 +131,7 @@ SET(AnyWave_SRCS
     ./Widgets/AwPleaseWaitWidget.cpp  
     ./Widgets/AwSelectTriggerChannelDialog.cpp  
     ./Widgets/AwTriggerParsingDialog.cpp  
+	./Widgets/AwVideoSettingsDial.cpp
     ./ICA/AwICAChannel.cpp  
     ./ICA/AwICAComponents.cpp  
     ./ICA/AwICAManager.cpp  
@@ -258,6 +259,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Widgets/AwDisplaySetupToolBar.h  
     ./Widgets/AwCursorMarkerToolBar.h  
     ./Widgets/AwAboutAnyWave.h  
+	./Widgets/AwVideoSettingsDial.h
     ./ICA/AwICAChannel.h  
     ./ICA/AwMappingButton.h  
     ./ICA/AwICAPanel.h  
@@ -334,6 +336,7 @@ SET(FORMS ./AnyWave.ui
     ./Widgets/AwPleaseWaitWidget.ui  
     ./Widgets/AwTriggerParsingDialog.ui  
     ./Widgets/AwSelectTriggerChannelDialog.ui  
+	./Widgets/AwVideoSettingsDial.ui
     ./Prefs/AwPrefsDial.ui  
     ./Epoch/AwEpochCreateUi.ui  
     ./Epoch/AwEpochVisuWidget.ui  

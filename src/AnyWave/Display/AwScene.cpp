@@ -33,7 +33,6 @@
 #include "Process/AwProcessManager.h"
 #include <AwProcessInterface.h>
 #include "Montage/AwMontageManager.h"
-#include <AwUtilities.h>
 #include "AwDisplaySetup.h"
 #include "AwViewSetup.h"
 #include <graphics/AwMarkerChannelItem.h>

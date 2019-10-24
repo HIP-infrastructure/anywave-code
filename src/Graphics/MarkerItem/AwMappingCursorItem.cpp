@@ -27,7 +27,7 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <graphics/AwGraphicsDefines.h>
-#include <AwUtilities.h>
+#include <utils/time.h>
 
 AwMappingCursorItem::AwMappingCursorItem(float currentPosInFile, float cursorPos, const QString& color, const QFont& font,
 										 int flags, AwDisplayPhysics *phys) : AwGraphicsCursorItem(currentPosInFile, cursorPos, phys)
@@ -72,8 +72,8 @@ void AwMappingCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 	int label_width;
 
 	if (m_flags == Normal)	{
-		if (AwUtilities::isTimeHMS())
-			label = AwUtilities::hmsTime(m_currentPos);
+		if (AwUtilities::time::isTimeHMS())
+			label = AwUtilities::time::hmsTime(m_currentPos);
 		else
 			label.sprintf("%.3fs", m_currentPos);
 	}

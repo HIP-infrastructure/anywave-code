@@ -13,8 +13,8 @@
 #include "Montage/AwMontageManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Debug/AwDebugLog.h"
-#include <AwUtilities.h>
 #include <QJsonArray>
+#include <utils/AwUtilities.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
