@@ -133,7 +133,7 @@ typedef struct
 EEGInto4DPlugin::EEGInto4DPlugin()
 {
 	type = AwProcessPlugin::Background;
-	name = tr("Add EEG channels into a 4DNI file");
+	name = tr("EEG4DNi");
 	description = tr("Load an EEG File and add its channels into a 4DNI file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
