@@ -17,7 +17,6 @@ HEADERS += ../../include/widget/AwMessageBox.h \
     ../../include/widget/AwComboMarker.h \
     ../../include/widget/AwComboDS.h \
     ../../include/widget/AwSpectroWidget.h \
-    ../../include/widget/AwSignalSplitterWidget.h \
     ../../include/widget/AwVTKWidget.h \
     ../../include/widget/AwMarkerInspector.h \
     ./AwAddPredefinedMarker.h \
