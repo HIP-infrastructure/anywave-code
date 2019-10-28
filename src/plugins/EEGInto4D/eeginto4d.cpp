@@ -654,7 +654,8 @@ void EEGInto4D::run()
 		for (auto i = 0; i < nChannels; i++) {
 			auto channel = m_megReader->infos.channels().value(i);
 			int index = m_megReader->infos.indexOfChannel(channel->name());
-			if (index == -1 || !channel->isEEG())
+			// the channel must have a valid index, must be EEG AND must be present in EEG file!!!
+			if (index == -1 || !channel->isEEG() || !eegLabels.contains(channel->name()))
 				continue;
 			auto eegChannel = m_eegChannels.value(eegLabels.indexOf(channel->name()));
 			sendMessage(QString("Injecting channel %1...").arg(channel->name()));
