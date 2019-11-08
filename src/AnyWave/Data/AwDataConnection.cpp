@@ -353,6 +353,10 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, qu
 ////
 qint64 AwDataConnection::readWithOfflineFiltering(float start, float duration, const AwChannelList& channels)
 {
+	// start and duration may have invalide values (the user may want to see values at different time and the start and value may not be correctly updated before the call to this slot).
+	if (start < 0 || duration <= 0)
+		return 0;
+
 	// assuming the channels are in loadingList.
 	// check for channels with filtering options
 	AwChannelList toFilter, others;
