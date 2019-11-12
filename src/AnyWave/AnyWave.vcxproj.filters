@@ -1270,12 +1270,6 @@
     <ClCompile Include="MATPy\AwGetMarkersEx.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwVideoManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1284,6 +1278,15 @@
     </ClCompile>
     <ClCompile Include="Display\AwVideoManager.cpp">
       <Filter>Display</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwVideoSettingsDial.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwVideoSettingsDial.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
+      <Filter>Widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1782,6 +1785,12 @@
     <CustomBuild Include="Display\AwVideoManager.h">
       <Filter>Display</Filter>
     </CustomBuild>
+    <CustomBuild Include="Widgets\AwVideoSettingsDial.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Widgets\AwVideoSettingsDial.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -1993,6 +2002,9 @@
     </ClInclude>
     <ClInclude Include="Montage\AwECoGGrid.h">
       <Filter>Montage</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwVideoSettingsDial.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

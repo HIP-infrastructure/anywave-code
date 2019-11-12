@@ -39,4 +39,4 @@ HEADERS += \
 SOURCES += \
     meg4dreader.cpp
 
-LIBS += -lAwRW
+LIBS += -lAwRW -lAwUtilities

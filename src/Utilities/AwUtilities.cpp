@@ -23,7 +23,11 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include "AwUtilities.h"
+
+#include <utils/AwUtilities.h>
+#include <utils/gui.h>
+#include <utils/time.h>
+#include <utils/endian.h>
 #include <QTime>
 #include <QtCore/qmath.h>
 #include <QSettings>
@@ -59,7 +63,7 @@ QString QDebugStream::text()
 	return out;
 }
 
-QString AwUtilities::timeToString(float seconds)
+QString AwUtilities::time::timeToString(float seconds)
 {
 	float tmp = seconds;
 	int h = seconds / 3600;
@@ -89,31 +93,31 @@ QString AwUtilities::timeToString(float seconds)
 }
 
 // Time representations
-float AwUtilities::roundedTime(float time)
+float AwUtilities::time::roundedTime(float time)
 {
 	QString round;
 	round.setNum(time, 'g', 3);
 	return (float)round.toDouble();
 }
 
-QTime AwUtilities::timeFromString(const QString& string)
+QTime AwUtilities::time::timeFromString(const QString& string)
 {
 	return QTime::fromString(string, "hh':'mm':'ss");
 }
 
-QDate AwUtilities::dateFromString(const QString& string)
+QDate AwUtilities::time::dateFromString(const QString& string)
 {
 	return QDate::fromString(string, "dd'.'MM'.'yyyy");
 }
 
 
-QString AwUtilities::hmsTime(float seconds, bool showMs)
+QString AwUtilities::time::hmsTime(float seconds, bool showMs)
 {
 	qint64 ms = (qint64)qFloor(seconds * 1000);
-	return AwUtilities::hmsTime(ms, showMs);
+	return AwUtilities::time::hmsTime(ms, showMs);
 }
 
-QString AwUtilities::hmsTime(qint64 milliseconds, bool showMs)
+QString AwUtilities::time::hmsTime(qint64 milliseconds, bool showMs)
 {
 	if (milliseconds == 0)
 		if (showMs)
@@ -154,53 +158,53 @@ QString AwUtilities::hmsTime(qint64 milliseconds, bool showMs)
 	return time.toString(QString("%1hh:mm:ss.zzz").arg(prefix));
 }
 
-void AwUtilities::saveTimeHMS(bool flag)
+void AwUtilities::time::saveTimeHMS(bool flag)
 {
 	QSettings settings;
 	settings.setValue("Preferences/time/HMS", flag);
 }
 
-bool AwUtilities::isTimeHMS()
+bool AwUtilities::time::isTimeHMS()
 {
 	QSettings settings;
 	return settings.value("Preferences/time/HMS", true).toBool();
 }
 
-QString AwUtilities::cursorColor()
+QString AwUtilities::gui::cursorColor()
 {
 	QSettings settings;
 	return settings.value("Preferences/colors/cursor", "darkGreen").toString();
 }
 
-QString AwUtilities::defaultCursorColor()
+QString AwUtilities::gui::defaultCursorColor()
 {
 	return QString("darkGreen");
 }
 
-void AwUtilities::saveCursorColor(const QString& color)
+void AwUtilities::gui::saveCursorColor(const QString& color)
 {
 	QSettings settings;
 	settings.setValue("Preferences/colors/cursor", color);
 }
 
-QString AwUtilities::mappingCursorColor()
+QString AwUtilities::gui::mappingCursorColor()
 {
 	QSettings settings;
 	return settings.value("Preferences/colors/mapping_cursor", "#ff8000").toString();
 }
 
-QString AwUtilities::defaultMappingCursorColor()
+QString AwUtilities::gui::defaultMappingCursorColor()
 {
 	return QString("#ff8000");
 }
 
-void AwUtilities::saveMappingCursorColor(const QString& color)
+void AwUtilities::gui::saveMappingCursorColor(const QString& color)
 {
 	QSettings settings;
 	settings.setValue("Preferences/colors/mapping_cursor", color);
 }
 
-QString AwUtilities::markerColor(int type)
+QString AwUtilities::gui::markerColor(int type)
 {
 	QSettings settings;
 	if (type == AwMarker::Single)
@@ -209,7 +213,7 @@ QString AwUtilities::markerColor(int type)
 	return settings.value("Preferences/colors/marker_selection", "magenta").toString();
 }
 
-QString AwUtilities::defaultMarkerColor(int type)
+QString AwUtilities::gui::defaultMarkerColor(int type)
 {
 	if (type == AwMarker::Single)
 		return QString("darkBlue");
@@ -217,7 +221,7 @@ QString AwUtilities::defaultMarkerColor(int type)
 	return QString("magenta");
 }
 
-void AwUtilities::saveMarkerColor(const QString& color, int type)
+void AwUtilities::gui::saveMarkerColor(const QString& color, int type)
 {
 	QSettings settings;
 	if (type == AwMarker::Single)
@@ -227,7 +231,7 @@ void AwUtilities::saveMarkerColor(const QString& color, int type)
 }
 
 
-QFont AwUtilities::cursorFont()
+QFont AwUtilities::gui::cursorFont()
 {
 	QSettings settings;
 	QString family = settings.value("Preferences/fonts/cursor/family", "Helvetica").toString();
@@ -238,7 +242,7 @@ QFont AwUtilities::cursorFont()
 	return QFont(family, size, weight, italic);
 }
 
-void AwUtilities::saveCursorFont(const QFont& font)
+void AwUtilities::gui::saveCursorFont(const QFont& font)
 {
 	QSettings settings;
 	settings.setValue("Preferences/fonts/cursor/family", font.family());
@@ -247,7 +251,7 @@ void AwUtilities::saveCursorFont(const QFont& font)
 	settings.setValue("Preferences/fonts/cursor/italic", font.italic());
 }
 
-QFont AwUtilities::mappingCursorFont()
+QFont AwUtilities::gui::mappingCursorFont()
 {
 	QSettings settings;
 	QString family = settings.value("Preferences/fonts/mapping_cursor/family", "Helvetica").toString();
@@ -258,7 +262,7 @@ QFont AwUtilities::mappingCursorFont()
 	return QFont(family, size, weight, italic);
 }
 
-void AwUtilities::saveMappingCursorFont(const QFont& font)
+void AwUtilities::gui::saveMappingCursorFont(const QFont& font)
 {
 	QSettings settings;
 	settings.setValue("Preferences/fonts/mapping_cursor/family", font.family());
@@ -267,7 +271,7 @@ void AwUtilities::saveMappingCursorFont(const QFont& font)
 	settings.setValue("Preferences/fonts/mapping_cursor/italic", font.italic());
 }
 
-QFont AwUtilities::markerFont(int type)
+QFont AwUtilities::gui::markerFont(int type)
 {
 	QSettings settings;
 	QString family;
@@ -289,7 +293,7 @@ QFont AwUtilities::markerFont(int type)
 	return QFont(family, size, weight, italic);
 }
 
-void AwUtilities::saveMarkerFont(const QFont& font, int type)
+void AwUtilities::gui::saveMarkerFont(const QFont& font, int type)
 {
 	QSettings settings;
 
@@ -332,4 +336,33 @@ QJsonDocument AwUtilities::readJsonFile(const QString& filePath)
 		return QJsonDocument();
 	}
 	return doc;
+}
+
+quint32 AwUtilities::endianness::fromBigEndian(const uchar *src)
+{
+	return 0
+		| src[3]
+		| src[2] * quint32(0x00000100)
+		| src[1] * quint32(0x00010000)
+		| src[0] * quint32(0x01000000);
+}
+
+quint16 AwUtilities::endianness::fromBigEndian16(const uchar *src)
+{
+	return 0
+		| src[1]
+		| src[0] * 0x0100;
+}
+
+quint64 AwUtilities::endianness::fromBigEndian64(const uchar *src)
+{
+	return 0
+		| src[7]
+		| src[6] * Q_UINT64_C(0x0000000000000100)
+		| src[5] * Q_UINT64_C(0x0000000000010000)
+		| src[4] * Q_UINT64_C(0x0000000001000000)
+		| src[3] * Q_UINT64_C(0x0000000100000000)
+		| src[2] * Q_UINT64_C(0x0000010000000000)
+		| src[1] * Q_UINT64_C(0x0001000000000000)
+		| src[0] * Q_UINT64_C(0x0100000000000000);
 }

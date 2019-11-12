@@ -25,18 +25,13 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "InputMarkerModel.h"
 #include <widget/AwInputMarkerTableView.h>
-#include <AwUtilities.h>
+#include <utils/gui.h>
+#include <utils/time.h>
 
 InputMarkerModel::InputMarkerModel(QObject *parent) : QAbstractTableModel(parent)
 {
 
 }
-
-//InputMarkerModel::~InputMarkerModel()
-//{
-//	while (!m_markers.isEmpty())
-//		delete m_markers.takeFirst();
-//}
 
 //
 // flags
@@ -80,15 +75,15 @@ QVariant InputMarkerModel::data(const QModelIndex &index, int role) const
 		break;
 	case MARKER_MODEL_COLUMN_START:
 		if (role == Qt::DisplayRole)
-			if (AwUtilities::isTimeHMS())
-				return AwUtilities::hmsTime(m->start());
+			if (AwUtilities::time::isTimeHMS())
+				return AwUtilities::time::hmsTime(m->start());
 			else
 				return m->start();
 		if (role == Qt::UserRole)
 			return m->start();
 		if (role == Qt::ForegroundRole) {
 			if (m->color().isEmpty())  // no color set => default color
-				return QBrush(QColor(AwUtilities::markerColor(m->type())));
+				return QBrush(QColor(AwUtilities::gui::markerColor(m->type())));
 			else
 				return QBrush(QColor(m->color()));
 		}

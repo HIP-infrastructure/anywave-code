@@ -13,8 +13,8 @@
 #include "Montage/AwMontageManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Debug/AwDebugLog.h"
-#include <AwUtilities.h>
 #include <QJsonArray>
+#include <utils/AwUtilities.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
@@ -82,10 +82,18 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 				break;
 			}
 		}
+		else if (f.endsWith(".res4")) {
+			reader = pm->getReaderToOpenFile(inputDir);
+			if (reader) {
+				kind = AwBIDSManager::CTF;
+				break;
+			}
+		}
+
 	}
 	if (kind == -1) { 	// not a 4DNI run or a FIFF file
 						// no other format supported for now.
-		emit log("no 4DNI/FIFF MEG format detected (only support those formats for now).");
+		emit log("no 4DNI/FIFF/CTF MEG format detected (only support those formats for now).");
 		return -1;
 	}
 
@@ -161,6 +169,26 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		}
 		headshapeExists = reader->hasHeadShapeFile();
 	}
+	else if (kind == AwBIDSManager::CTF) {
+		// ok create the destination folder with the BIDS name
+		QDir dir(folderName);
+		if (!dir.mkdir(folderName)) {
+			emit log(QString("could not create %1").arg(folderName));
+			return -1;
+		}
+		// copy all files
+		QDir input(inputDir);
+		for (auto f : input.entryList(QDir::Files)) {
+			auto sourceFile = QString("%1/%2").arg(inputDir).arg(f);
+			auto destFile = QString("%1/%2").arg(folderName).arg(f);
+			if (QFile::exists(destFile))
+				QFile::remove(destFile);
+			if (!QFile::copy(sourceFile, destFile)) {
+				emit log(QString("could not copy file %1 to %2").arg(f).arg(folderName));
+				return -1;
+			}
+		}
+	}
 
 	// create json file
 	QString manufacturer = reader->plugin()->manufacturer;
@@ -202,6 +230,10 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	case AwBIDSManager::Elekta:
 		jObject["MEGCoordinateSystem"] = QString("RAS");
 		jObject["MEGCoordinateUnits"] = QString("m");
+		break;
+	case AwBIDSManager::CTF:
+		jObject["MEGCoordinateSystem"] = QString("ALS");
+		jObject["MEGCoordinateUnits"] = QString("cm");
 		break;
 	}
 	doc = QJsonDocument(jObject);
@@ -278,151 +310,6 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	channel.close();
 	return 0;
 }
-
-//int AwBIDSManager::convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile)
-//{
-//	auto inputDir = args["input_dir"].toString(); // here input_file should be a folder containing MEG data.
-//
-//	auto subj = args["bids_subject"].toString();
-//	auto task = args["bids_task"].toString();
-//	auto session = args["bids_session"].toString();
-//	auto run = args["bids_run"].toString();
-//	auto acq = args["bids_acq"].toString();
-//	auto proc = args["bids_proc"].toString();
-//	if (run.isEmpty()) {
-//		emit log("bids_run is missing.");
-//		return -1;
-//	}
-//
-//	if (reader->openFile(dataFile) != AwFileIO::NoError) {
-//		emit log(QString("Could not open the file %1").arg(dataFile));
-//		return -1;
-//	}
-//
-//	auto outputDir = args["output_dir"].toString();
-//	bool headshapeExists = false;
-//
-//	QString folderName, json, channels_tsv;
-//	folderName = QString("%1/sub-%2").arg(outputDir).arg(subj);
-//	if (!session.isEmpty())
-//		folderName = QString("%1_ses-%2").arg(folderName).arg(session);
-//	folderName = QString("%1_task-%2").arg(folderName).arg(task);
-//	// acq comes after task
-//	if (!acq.isEmpty()) 
-//		folderName = QString("%1_acq-%2").arg(folderName).arg(acq);
-//	// run comes after acq or task
-//	if (!run.isEmpty()) 
-//		folderName = QString("%1_run-%2").arg(folderName).arg(run);
-//	// proc comes after run
-//	if (!proc.isEmpty()) 
-//		folderName = QString("%1_proc-%2").arg(folderName).arg(proc);
-//
-//	auto baseName = folderName;
-//	folderName = QString("%1_meg").arg(folderName);
-//	//
-//	json = QString("%1.json").arg(folderName);
-//	channels_tsv = QString("%1_channels.tsv").arg(baseName);
-//
-//	// ok create the destination folder with the BIDS name
-//	QDir dir(folderName);
-//	if (!dir.mkdir(folderName)) {
-//		emit log(QString("could not create %1").arg(folderName));
-//		return -1;
-//	}
-//
-//	// copy all files
-//	QDir input(inputDir);
-//	for (auto f : input.entryList(QDir::Files)) {
-//		auto sourceFile = QString("%1/%2").arg(inputDir).arg(f);
-//		auto destFile = QString("%1/%2").arg(folderName).arg(f);
-//		if (QFile::exists(destFile))
-//			QFile::remove(destFile);
-//		if (!QFile::copy(sourceFile, destFile)) {
-//			emit log(QString("could not copy file %1 to %2").arg(f).arg(folderName));
-//			return -1;
-//		}
-//		headshapeExists = f.contains("hs_file");
-//	}
-//	// create json file
-//	QString manufacturer = reader->plugin()->manufacturer;
-//	if (manufacturer.isEmpty())
-//		manufacturer = "n/a";
-//	// JSON
-//	QJsonObject jObject;
-//	jObject["TaskName"] = task;
-//	jObject["Manufacturer"] = manufacturer;
-//	jObject["PowerLineFrequency"] = (int)50;
-//	jObject["SamplingFrequency"] = reader->infos.channels().first()->samplingRate();
-//	jObject["SoftwareFilters"] = QString("n/a");
-//	jObject["DewarPosition"] = QString("n/a");
-//	jObject["DigitizedLandmarks"] = false;
-//	jObject["DigitizedHeadPoints"] = headshapeExists;
-//
-//	QJsonDocument doc(jObject);
-//	QFile jsonFile(json);
-//	if (!jsonFile.open(QIODevice::WriteOnly)) {
-//		emit log(QString("Could no create %1").arg(json));
-//		reader->plugin()->deleteInstance(reader);
-//		return -1;
-//	}
-//	jsonFile.write(doc.toJson());
-//	jsonFile.close();
-//
-//	// create optional coordsystem.json
-//	jObject = QJsonObject();
-//	jObject["MEGCoordinateSystem"] = QString("ALS");
-//	jObject["MEGCoordinateUnits"] = QString("m");
-//	doc = QJsonDocument(jObject);
-//	jsonFile.setFileName(QString("%1_coordsystem.json").arg(baseName));
-//	if (!jsonFile.open(QIODevice::WriteOnly)) {
-//		emit log(QString("Could no create %1").arg(json));
-//		reader->plugin()->deleteInstance(reader);
-//		return -1;
-//	}
-//	jsonFile.write(doc.toJson());
-//	jsonFile.close();
-//
-//	if (reader->hasHeadShapeFile()) {
-//		auto source = reader->getHeadShapeFile();
-//		auto dest = QString("%1_headshape.pos").arg(baseName);
-//		QFile::copy(reader->getHeadShapeFile(), QString("%1_headshape.pos").arg(baseName));
-//	}
-//
-//	// Create channels.tsv
-//	QStringList headers = { "name", "type", "units"  };
-//
-//	QFile channel(channels_tsv);
-//	QTextStream stream(&channel);
-//	if (!channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
-//		emit log("Could no create channels.tsv");
-//		reader->plugin()->deleteInstance(reader);
-//		return -1;
-//	}
-//	for (int i = 0; i < headers.size(); i++) {
-//		stream << headers.at(i);
-//		if (i < headers.size() - 1)
-//			stream << "\t";
-//	}
-//	stream << endl;
-//	for (auto c : reader->infos.channels()) { // raw file contains EEG or eventually trigger channels. There is no id to specify that is SEEG.
-//		// name
-//		stream << c->name() << "\t";
-//		// type and units
-//		if (c->type() == AwChannel::Trigger)
-//			stream << "TRIG" << "\t" << "n/a" << "\t";
-//		else if (c->type() == AwChannel::EEG)
-//			stream << "EEG" << "\t" << "V" << "\t";
-//		else if (c->type() == AwChannel::Reference)
-//			stream << "MEGREFMAG" << "\t" << "T" << "\t";
-//		else if (c->type() == AwChannel::MEG)
-//			stream << "MEGMAG" << "\t" << "T" << "\t";
-//		else
-//			stream << "OTHER" << "\t" << "n/a" << "\t";
-//		stream << endl;
-//	}
-//	channel.close();
-//	return 0;
-//}
 
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {

@@ -58,6 +58,7 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();
 	connect(m_scene, SIGNAL(markerInserted(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
+	connect(m_scene, &AwScene::showMarkerUnderMouse, mm, &AwMarkerManager::highlightMarkerInList);
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
 	// using Global Marker Bar representation => connect to MarkerManager
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));

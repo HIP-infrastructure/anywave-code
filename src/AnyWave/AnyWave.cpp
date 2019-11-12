@@ -71,6 +71,7 @@
 #include "AwUpdater.h"
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
+#include "Widgets/AwVideoSettingsDial.h"
 //#define AW_EPOCHING
 
 #ifndef AW_DISABLE_EPOCHING
@@ -81,6 +82,8 @@
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwFileInfo.h>
+
+#define AW_HELP_URL "http://meg.univ-amu.fr/wiki/AnyWave"
 
 
 AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
@@ -224,6 +227,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
 		connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::handleVideoCursor);
 		connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setVideoPosition);
+		connect(m_player, &AwVideoPlayer::changeSyncSettings, this, &AnyWave::editVideoSyncSettings);
 		connect(m_display, &AwDisplay::draggedCursorPositionChanged, m_player, &AwVideoPlayer::setPositionFromSignals);
 	}
 
@@ -295,6 +299,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_updater.checkForUpdate();
 	}
 	m_lastDirOpen = "/";
+	readSettings();
 }
 
 //
@@ -421,6 +426,7 @@ void AnyWave::quit()
 	}
 #endif
 	AwBIDSManager::destroy();
+	writeSettings();
 }
 
 
@@ -1191,4 +1197,46 @@ void AnyWave::on_actionMarkers_triggered()
 void AnyWave::on_actionQuit_triggered()
 {
 	close();
+}
+
+
+// Help
+void AnyWave::on_actionHelp_triggered()
+{
+	QDesktopServices::openUrl(QUrl::fromLocalFile(AW_HELP_URL));
+}
+
+///
+/// save application state and geometry.
+/// toolbar positions are saved
+void AnyWave::readSettings()
+{
+	QSettings settings;
+	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
+	QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
+	restoreState(stateData);
+	restoreGeometry(geometryData);
+}
+
+///
+/// restore application state and geometry.
+/// toolbar positions are restored
+void AnyWave::writeSettings()
+{
+	QSettings settings;
+	// Write the values to disk in categories.
+	settings.setValue("state/mainWindowState", saveState());
+	settings.setValue("geometry/mainWindowGeometry", saveGeometry());
+}
+
+
+void AnyWave::editVideoSyncSettings()
+{
+	AwVideoSettingsDial dlg;
+	if (dlg.exec() == QDialog::Accepted) {
+		AwVideoSynch synch;
+		synch.drift = dlg.drift;
+		synch.shift = dlg.shift;
+		m_player->setVideoSyncSettings(synch);
+	}
 }

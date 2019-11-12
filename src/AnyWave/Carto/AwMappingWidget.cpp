@@ -24,7 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMappingWidget.h"
-#include <AwUtilities.h>
+#include <utils/time.h>
 #include "Data/AwDataServer.h"
 #include <vtkTextProperty.h>
 #include <vtkRenderWindow.h>
@@ -136,7 +136,7 @@ void AwMappingWidget::updateMaps(float latency, const QVector<float>& data, cons
 		ui.topoWidget2D->resetComputationFlags();
 	}
 	if (m_l3D) {
-		ui.qvtkWidget3D->setLatency(latency, AwUtilities::isTimeHMS());
+		ui.qvtkWidget3D->setLatency(latency, AwUtilities::time::isTimeHMS());
 		ui.qvtkWidget3D->updateMap(latency, data, labels);
 	}
 }
@@ -148,7 +148,7 @@ void AwMappingWidget::updateMapsPCA(float start, float end, const QVector<float>
 		ui.topoWidget2D->setComputationFlags("PCA");
 	}
 	if (m_l3D) {
-		ui.qvtkWidget3D->setLatency(start, end, AwUtilities::isTimeHMS());
+		ui.qvtkWidget3D->setLatency(start, end, AwUtilities::time::isTimeHMS());
 		ui.qvtkWidget3D->updateMap(start, data, labels);
 	}
 }

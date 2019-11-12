@@ -153,8 +153,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2", "D:\Dev\aw-h2\H2.vcxpr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFWavelet2", "D:\Dev\aw-tfwavelet\TFWavelet2.vcxproj", "{02D7C130-4763-42DE-8D86-64A6F6587020}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEGInto4D", "D:\Dev\aw-eeginto4D\EEGInto4D.vcxproj", "{7A80BFFA-5097-495D-897A-A956654B2E71}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2Graphs", "D:\Dev\h2-graphs\H2Graphs.vcxproj", "{438D0D9F-7136-4A67-8E06-08929888BE72}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rewrite4DNI", "D:\Dev\aw-rewrite4D\AwRewrite4DNI.vcxproj", "{211CE931-E804-42F4-86EB-A9E8923C1984}"
@@ -224,7 +222,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFFIO", "src\plugins\FIFIO
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFF_Reader", "src\plugins\FIFF_Reader\FIFF_Reader.vcxproj", "{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEGInto4D", "src\plugins\EEGInto4D\EEGInto4D.vcxproj", "{7A80BFFA-5097-495D-897A-A956654B2E71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -472,14 +470,6 @@ Global
 		{02D7C130-4763-42DE-8D86-64A6F6587020}.Release|Win32.ActiveCfg = Release|x64
 		{02D7C130-4763-42DE-8D86-64A6F6587020}.Release|x64.ActiveCfg = Release|x64
 		{02D7C130-4763-42DE-8D86-64A6F6587020}.Release|x64.Build.0 = Release|x64
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|Win32.Build.0 = Debug|Win32
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|x64.ActiveCfg = Debug|x64
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|x64.Build.0 = Debug|x64
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|Win32.ActiveCfg = Release|Win32
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|Win32.Build.0 = Release|Win32
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.ActiveCfg = Release|x64
-		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.Build.0 = Release|x64
 		{438D0D9F-7136-4A67-8E06-08929888BE72}.Debug|Win32.ActiveCfg = Debug|x64
 		{438D0D9F-7136-4A67-8E06-08929888BE72}.Debug|x64.ActiveCfg = Debug|x64
 		{438D0D9F-7136-4A67-8E06-08929888BE72}.Debug|x64.Build.0 = Debug|x64
@@ -626,20 +616,20 @@ Global
 		{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}.Release|Win32.ActiveCfg = Release|x64
 		{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}.Release|x64.ActiveCfg = Release|x64
 		{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}.Release|x64.Build.0 = Release|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|Win32.Build.0 = Debug|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|x64.ActiveCfg = Debug|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Debug|x64.Build.0 = Debug|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|Win32.ActiveCfg = Release|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|Win32.Build.0 = Release|Win32
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|x64.ActiveCfg = Release|x64
-		{5C687BAD-3AA7-4CB2-846F-96CDA9039CB2}.Release|x64.Build.0 = Release|x64
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|Win32.Build.0 = Debug|Win32
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|x64.ActiveCfg = Debug|x64
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Debug|x64.Build.0 = Debug|x64
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|Win32.ActiveCfg = Release|Win32
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|Win32.Build.0 = Release|Win32
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.ActiveCfg = Release|x64
+		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

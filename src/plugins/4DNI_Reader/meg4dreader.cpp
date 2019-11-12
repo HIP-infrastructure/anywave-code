@@ -25,45 +25,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "meg4dreader.h"
 #include <AwMEGSensorManager.h>
+#include <utils/endian.h>
 
 #ifdef Q_OS_MACOS
 #define BUFFER_CHUNK_READ
 #endif
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Fonctions de conversion BigEndian LitleEndian
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-inline quint32 fromBigEndian(const uchar *src)
-{
-	return 0 
-         | src[3] 
-         | src[2] * quint32(0x00000100) 
-         | src[1] * quint32(0x00010000) 
-         | src[0] * quint32(0x01000000); 
-}
-
-inline quint16 fromBigEndian16(const uchar *src)
-{
-	return 0
-		| src[1]
-		| src[0] * 0x0100;
-}
-
-inline quint64 fromBigEndian64(const uchar *src)
-{
-	return 0
-         | src[7] 
-         | src[6] * Q_UINT64_C(0x0000000000000100) 
-         | src[5] * Q_UINT64_C(0x0000000000010000) 
-         | src[4] * Q_UINT64_C(0x0000000001000000) 
-         | src[3] * Q_UINT64_C(0x0000000100000000) 
-         | src[2] * Q_UINT64_C(0x0000010000000000) 
-         | src[1] * Q_UINT64_C(0x0001000000000000) 
-         | src[0] * Q_UINT64_C(0x0100000000000000); 
-}
-//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Plugin Object
 
@@ -198,7 +165,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 
 	if (sampling_rate > 5000 || sampling_rate <= 0)	{
 		cleanUpAndClose();
-		m_error = QString("Samlping rate is incorrect.");
+		m_error = QString("Sampling rate is incorrect.");
 		return AwFileIO::BadHeader;
 	}
 
@@ -653,7 +620,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 #pragma omp parallel for
 #endif
 		for (i = 0; i < bufferSize / m_dataSize; i++) {
-			quint32 val = fromBigEndian((uchar *)&buffer[i]);
+			quint32 val = AwUtilities::endianness::fromBigEndian((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 		// copy data to channels
@@ -696,7 +663,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 #pragma omp parallel for
 #endif
 		for (qint64 i = 0; i < bufferSize / m_dataSize; i++) {
-			quint64 val = fromBigEndian64((uchar *)&buffer[i]);
+			quint64 val = AwUtilities::endianness::fromBigEndian64((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 		// copy data to channels
@@ -739,7 +706,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 #pragma omp parallel for
 #endif
 		for (i = 0; i < data_size; i++) {
-			quint16 val = fromBigEndian16((uchar *)&buffer[i]);
+			quint16 val = AwUtilities::endianness::fromBigEndian16((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 		// copy data to channels
@@ -783,7 +750,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 #pragma omp parallel for
 #endif
 		for (i = 0; i < bufferSize / m_dataSize; i++){
-			quint32 val = fromBigEndian((uchar *)&buffer[i]);
+			quint32 val = AwUtilities::endianness::fromBigEndian((uchar *)&buffer[i]);
 			memcpy(&buffer[i], &val, m_dataSize);
 		}
 

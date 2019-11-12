@@ -88,7 +88,8 @@ signals:
 	// QTS = Quick Time Selection (of channels)
 	void processSelectedForLaunch(QString& name, AwChannelList& channels, float pos, float end);
 	void QTSModeEnded();
-	//
+	// markers
+	void showMarkerUnderMouse(AwMarker *marker);
 	void closeViewClicked();
 public slots:
 	void updateSignalItemSelection(AwGraphicsSignalItem *item, bool selected);
@@ -112,6 +113,9 @@ public slots:
 	void centerViewOnPosition(float pos);
 	void highlightPosition(float pos);
 	void showMarkers(bool show);
+	// markers
+	/// show current marker under mouse in the marker list.
+	void showMarkerInList();
 	// selection
 	void changeChannelsSelectionState(const QString& name, bool selected);
 	void selectAllChannels();

@@ -51,6 +51,7 @@ public:
 signals:
 	void videoPositionChanged(float position);
 	void videoReady(bool flag);
+	void changeSyncSettings();
 public slots:
 	void openFile();
 	void play();

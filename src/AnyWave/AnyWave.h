@@ -119,6 +119,8 @@ private:
 	void searchForPython();
 	bool checkAndCreateFolder(const QString& root, const QString& name);
 	void applyNewLanguage();
+	void writeSettings();
+	void readSettings();
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 	void createMatlabShellScript(const QString& path);
@@ -156,10 +158,12 @@ public slots:
 	void exportToPDF();
 	/** Import a marker file **/
 	void importMrkFile();
+	void editVideoSyncSettings();
 
 private slots:
 	void on_actionSave_as_triggered();
 	void on_actionMarkers_triggered();
+	void on_actionHelp_triggered();
 	void on_actionQuit_triggered();
 	void on_actionMontage_triggered();
 	void on_actionOpen_triggered();

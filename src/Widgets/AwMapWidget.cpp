@@ -50,7 +50,7 @@
 #include <vtkRendererCollection.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkLookupTable.h>
-#include <AwUtilities.h>
+#include <utils/time.h>
 #include <widget/AwTopoBuilder.h>
 #include <QDebug>
 
@@ -95,7 +95,6 @@ AwMapWidget::AwMapWidget(QWidget *parent, int flags) : QVTK_CLASS(parent)
 	m_window = vtkSmartPointer<vtkRenderWindow>::New();
 	m_window->AddRenderer(m_renderer);
 	SetRenderWindow(m_window);
-	//this->GetRenderWindow()->AddRenderer(m_renderer);
 #endif
 }
 
@@ -328,7 +327,7 @@ void AwMapWidget::setLatency(float lat, bool HMS)
 	if (m_latency > -1)	{
 		QString sLatency;
 		if (HMS)
-			sLatency = AwUtilities::hmsTime(lat);
+			sLatency = AwUtilities::time::hmsTime(lat);
 		else
 			sLatency.sprintf("%.3fs", m_latency);  
 		m_latencyActor->SetInput(sLatency.toLatin1().data());
@@ -343,8 +342,8 @@ void AwMapWidget::setLatency(float start, float end, bool HMS)
 	if (m_latency > -1)	{
 		QString sLatency, sEnd;
 		if (HMS) {
-			sLatency = AwUtilities::hmsTime(start);
-			sEnd = AwUtilities::hmsTime(end);
+			sLatency = AwUtilities::time::hmsTime(start);
+			sEnd = AwUtilities::time::hmsTime(end);
 		}
 		else {
 			sLatency.sprintf("%.3fs", m_latency);

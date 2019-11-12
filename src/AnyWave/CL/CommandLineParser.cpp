@@ -4,7 +4,6 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
 #include "AwCommandLogger.h"
-#include <AwUtilities.h>
 
 //
 // options descriptions

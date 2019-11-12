@@ -27,7 +27,6 @@
 
 #include <AwProcessInterface.h>
 #include <math/AwMath.h>
-#include <AwUtilities.h>
 #include <matlab/AwMATLAB.h>
 #include "IO/ADES/ADESIO.h"
 using namespace arma;

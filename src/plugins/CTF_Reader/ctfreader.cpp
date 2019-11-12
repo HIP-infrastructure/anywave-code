@@ -24,44 +24,9 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "ctfreader.h"
+#include <utils/endian.h>
 
 #define MEG4_OFFSET	8	// les 8 premiers octects sont reserves pour le type de fichier (MEG41CP par exemple)
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Fonctions de conversion BigEndian LitleEndian
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-inline quint32 fromBigEndian(const uchar *src)
-{
-	return 0 
-         | src[3] 
-         | src[2] * quint32(0x00000100) 
-         | src[1] * quint32(0x00010000) 
-         | src[0] * quint32(0x01000000); 
-}
-
-inline quint16 fromBigEndian16(const uchar *src)
-{
-	return 0
-		| src[1]
-		| src[0] * 0x0100;
-}
-
-inline quint64 fromBigEndian64(const uchar *src)
-{
-	return 0
-         | src[7] 
-         | src[6] * Q_UINT64_C(0x0000000000000100) 
-         | src[5] * Q_UINT64_C(0x0000000000010000) 
-         | src[4] * Q_UINT64_C(0x0000000001000000) 
-         | src[3] * Q_UINT64_C(0x0000000100000000) 
-         | src[2] * Q_UINT64_C(0x0000010000000000) 
-         | src[1] * Q_UINT64_C(0x0001000000000000) 
-         | src[0] * Q_UINT64_C(0x0100000000000000); 
-}
-
-
 
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,11 +161,11 @@ typedef struct {
 CTFReader::CTFReader() : AwFileIOPlugin()
 {
   name = QString("CTF Reader");
-  description = QString(tr("Reads CTF .meg4 files"));
+  description = QString(tr("Read CTF .ds"));
   version = QString("1.0");
   manufacturer = "CTF";
-  fileExtensions << "*.meg4";
-  m_flags = Aw::HasExtension | Aw::CanRead;
+  fileExtensions << "*.ds";
+  m_flags = Aw::HasExtension | Aw::CanRead | Aw::IsDirectory;
 }
 
 CTFFileReader::CTFFileReader(const QString& filename) : AwFileIO(filename)
@@ -225,23 +190,31 @@ void CTFFileReader::cleanUpAndClose()
 }
 
 
+QStringList CTFFileReader::getFiles(const QString& path)
+{
+	QDir dir(path);
+	return  dir.entryList(QDir::Files);
+}
+
+
 CTFFileReader::FileStatus CTFFileReader::canRead(const QString &path)
 {
-	// On prend le dossier ou se trouve le fichier et on y cherche un fichier nomme "****.res4".
-	QFileInfo fi(path);
-	QDir dir = fi.absoluteDir();
-	QStringList filters;	
 
-	filters << "*.res4";
-	dir.setFilter(QDir::Files);
-	dir.setNameFilters(filters);
-
-	QStringList fileList = dir.entryList();
-	if (fileList.isEmpty()) // Pas de fichier ***.res4 dans le dossier => donc pas possible que ce soit un ds CTF
+	auto files = getFiles(path);
+	if (files.isEmpty())
 		return AwFileIO::WrongFormat;
 
-	// fichier .res4 trouvé, on l'ouvre pour vérifier
-	m_res4Path = dir.absoluteFilePath(fileList.at(0));
+
+	QString res4;
+	for (auto file : files) {
+		if (file.endsWith(".res4")) {
+			res4 = file;
+			break;
+		}
+	}
+	if (res4.isEmpty()) 
+		return AwFileIO::WrongFormat;
+	m_res4Path = res4;
 
 	m_file.close();
 	m_file.setFileName(m_res4Path);
@@ -258,12 +231,23 @@ CTFFileReader::FileStatus CTFFileReader::canRead(const QString &path)
 CTFFileReader::FileStatus CTFFileReader::openFile(const QString &path)
 {
 	m_file.close();
+	auto files = getFiles(path);
+	if (files.isEmpty())
+		return AwFileIO::WrongFormat;
 
-	// check for .res4 file
-	m_res4Path = path;
-	m_res4Path = m_res4Path.remove("meg4");
-	m_res4Path = QString("%1res4").arg(m_res4Path);
+	// check for .res4 and .megfile
+	QString res4, meg4;
+	for (auto file : files) {
+		if (file.endsWith(".res4")) 
+			res4 = file;
+		if (file.endsWith(".meg4"))
+			meg4 = file;
+	}
+	if (res4.isEmpty() || meg4.isEmpty())
+		return AwFileIO::WrongFormat;
+
 	
+	m_res4Path = res4;
 	m_file.setFileName(m_res4Path);
 
 	if (!m_file.open(QIODevice::ReadOnly))
@@ -486,7 +470,7 @@ CTFFileReader::FileStatus CTFFileReader::openFile(const QString &path)
 
 	m_file.close();
 	// ouvrir le fichier meg4
-	m_file.setFileName(path);
+	m_file.setFileName(meg4);
 	m_file.open(QIODevice::ReadOnly);
 	m_stream.setDevice(&m_file);
 	return AwFileIO::NoError;
@@ -575,7 +559,7 @@ qint64 CTFFileReader::readDataFromChannels(float start, float duration, AwChanne
 			// copy data to channel
 			for (qint64 j = 0; j < nbytes / m_dataSize; j++) {
 				qint32 val = buf[j];
-				qint32 le = fromBigEndian((uchar *)&val);
+				qint32 le = AwUtilities::endianness::fromBigEndian((uchar *)&val);
 				float value = (float)le * gain;
 				*data++ = value * eeg_factor;
 			}

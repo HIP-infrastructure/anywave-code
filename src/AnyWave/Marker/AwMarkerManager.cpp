@@ -399,3 +399,10 @@ void AwMarkerManager::clear()
 	while (!m_markers.isEmpty())
 		delete m_markers.takeFirst();
 }
+
+
+void AwMarkerManager::highlightMarkerInList(AwMarker *marker)
+{
+	showDockUI();
+	m_ui->highlightMarker(marker);
+}

@@ -18,7 +18,7 @@ AwVideoPlayer::AwVideoPlayer(QWidget *parent)
 	m_ui->buttonPlay->setEnabled(false);
 	connect(m_ui->buttonPlay, &QAbstractButton::clicked, this, &AwVideoPlayer::play);
 	m_ui->slider->setRange(0, 0);
-
+	connect(m_ui->buttonSettings, &QAbstractButton::clicked, this, &AwVideoPlayer::changeSyncSettings);
 	connect(m_ui->slider, &QAbstractSlider::sliderMoved, this, &AwVideoPlayer::setPosition);
 
 	m_mediaPlayer->setVideoOutput(m_ui->widget);

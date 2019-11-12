@@ -55,6 +55,7 @@ public slots:
 	void show();
 	void editCurrentItem();
 	void setMarkerAddingMode(bool on);
+	void highlightMarker(AwMarker *marker);
 
 signals:
 	/** Sent whenever displayed markers changed, depending on filtering rules **/
@@ -72,7 +73,6 @@ protected slots:
 	void renameSelectedMarkers();
 	void changeValueAllMarkers();
 	void changeValueSelectedMarkers();
-	//void exportWizard();
 	void launchProcess();
 	void writeTrigger();
 	void clearTrigger();

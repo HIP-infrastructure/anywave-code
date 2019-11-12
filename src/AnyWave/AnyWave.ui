@@ -145,6 +145,7 @@
      <string>About</string>
     </property>
     <addaction name="actionAbout_AnyWave"/>
+    <addaction name="actionHelp"/>
    </widget>
    <widget class="QMenu" name="menuProcesses">
     <property name="title">
@@ -437,6 +438,11 @@
   <action name="actionOpen_video">
    <property name="text">
     <string>Open video</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
    </property>
   </action>
  </widget>
