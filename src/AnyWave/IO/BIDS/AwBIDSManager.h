@@ -21,7 +21,7 @@ public:
 	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
 	enum Derivatives { EPITOOLS, EI, ICA, BIDSUpdates};
 	enum Modifications { ChannelsTsv, EventsTsv };
-	enum supportedMEGFormats { Bti4DNI, Elekta };
+	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
 
 	// destructor
 	~AwBIDSManager();
