@@ -460,7 +460,7 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	if (!m_file.open(QIODevice::WriteOnly))
 		return AwFileIO::FileAccess;
 	m_stream.setDevice(&m_file);
-	m_stream.setVersion(QDataStream::Qt_5_10);
+	m_stream.setVersion(QDataStream::Qt_5_9);
 	m_stream.setFloatingPointPrecision(QDataStream::FloatingPointPrecision::SinglePrecision);
 
 	addEntry(FIFF_FILE_ID, FIFFT_ID_STRUCT, sizeof(m_fileID));
@@ -1155,7 +1155,7 @@ bool FIFFIO::checkForCompatibleFile(const QString& path)
 	if (!m_file.open(QIODevice::ReadOnly))
 		return false;
 	m_stream.setDevice(&m_file);
-	m_stream.setVersion(QDataStream::Qt_5_10);
+	m_stream.setVersion(QDataStream::Qt_5_9);
 	m_stream.setFloatingPointPrecision(QDataStream::FloatingPointPrecision::SinglePrecision);
 	if (!checkForFileStart()) {
 		m_file.close();

@@ -36,6 +36,7 @@ SET(AnyWave_SRCS
     ./Display/AwScene.cpp  
     ./Display/AwSignalView.cpp  
     ./Display/AwViewSetup.cpp  
+    ./Display/AwVideoManager.cpp  
     ./Filter/AwFilterToolBar.cpp  
     ./IO/ADES/ADESIO.cpp  
     ./IO/HDF5/HDF5IO.cpp  
@@ -179,6 +180,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Display/AwDisplay.h  
     ./Display/AwChannelSelectionModel.h  
     ./Display/AwChannelSelectionDial.h  
+    ./Display/AwVideoManager.h  
     ./Filter/AwFilterToolBar.h  
     ./IO/ADES/ADESIO.h  
     ./IO/HDF5/structs.h  
