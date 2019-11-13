@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-#ifdef Q_OS_WIN
-	QApplication::setStyle(QStyleFactory::create("windowsvista"));
-#endif
+//#ifdef Q_OS_WIN
+//	QApplication::setStyle(QStyleFactory::create("windowsvista"));
+//#endif
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);
@@ -106,12 +106,9 @@ int main(int argc, char *argv[])
 		if (status == 0)
 			exit(0);
 	}
-	if (openFile) 
-		window.openFile(args.last());
 
-	//if (positionalArgs.count() == 1) 
-	//	window.openFile(positionalArgs.at(0));
-		
 	window.showMaximized();
+	if (openFile)
+		window.openFile(args.last());
 	return app.exec();
 }

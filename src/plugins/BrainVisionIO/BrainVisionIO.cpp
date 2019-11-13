@@ -61,6 +61,9 @@ qint64 BrainVisionIO::readDataFromChannels(float start, float duration, QList<Aw
 	if (channelList.isEmpty())
 		return 0;
 
+	if (duration <= 0)
+		return 0;
+
 	qint64 max_samples = 0;
 	qint64 nSamplesRead = 0;
 
@@ -84,13 +87,6 @@ qint64 BrainVisionIO::readDataFromChannels(float start, float duration, QList<Aw
 		nSamples = infos.totalSamples() - nStart;
 
 	qint64 totalSize = nSamples * nbChannels;
-
-	if (channelList.isEmpty())
-		return 0;
-
-	if (duration <= 0)
-		return 0;
-
 	qint64 read = 0;
 
 	switch (m_binaryData)

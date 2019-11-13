@@ -37,9 +37,9 @@
 - dep: path to dependency folder to add to the path.
 - pid: process id of the script.
 **/
-void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quint16 serverPort)
+void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quint16 serverPort, const QString& jsonArgs)
 {
-	m_eng = engOpen(NULL);
+	m_eng = engOpen(NULL); 
 	emit progressChanged("Opening MATLAB Connection...");
 	if (m_eng != NULL) {
 		emit progressChanged("Connection to MATLAB established.");
@@ -48,19 +48,28 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 		QString command;
 		QString envPath;
 		
-		// set global variables host and pid
+		// set global variables host, pid, port and json_args
 		engEvalString(m_eng, "evalin('base', 'global host')");
 		engEvalString(m_eng, "evalin('base', 'global pid')");
 		engEvalString(m_eng, "evalin('base', 'global port')");
+		engEvalString(m_eng, "evalin('base', 'global json_args')");
 		// send pid
 		command = "evalin('base', 'pid = " + QString::number(pid) + "')";
 		engEvalString(m_eng, command.toLatin1().data());
 		// send port
-	//	command = "evalin('base', 'port = 50222')";
 		command = QString("evalin('base', 'port = %1')").arg(serverPort);
 		engEvalString(m_eng, command.toLatin1().data());
 		// send host
 		engEvalString(m_eng, "evalin('base', 'host = ''127.0.0.1''')");
+
+		if (!jsonArgs.isEmpty())
+			// send json args
+			command = "evalin('base', 'json_args =  jsondecode(''" + jsonArgs.simplified() + "'')')";
+		else
+			command = QString("evalin('base', 'json_args = ''''''')");
+
+		engEvalString(m_eng, command.toLatin1().data());
+	
 		engOutputBuffer(m_eng, buffer, AW_MATLAB_OUTPUT_BUFFER_SIZE);
 
 		// add path to AnyWave parent folder

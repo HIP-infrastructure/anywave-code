@@ -21,6 +21,7 @@ public:
 	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
 	enum Derivatives { EPITOOLS, EI, ICA, BIDSUpdates};
 	enum Modifications { ChannelsTsv, EventsTsv };
+	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
 
 	// destructor
 	~AwBIDSManager();
@@ -42,12 +43,10 @@ public:
 	
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
-	void MEGtoBIDS(const AwArguments& args);
+	int MEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
 
-	/** Add a modification to the list of modification the user MUST validate before closing the current file **/
-	void addModification(const QString& itemPath, int modification);
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
 	
@@ -65,6 +64,8 @@ public:
 	QStringList readTsvColumns(const QString& path);
 	/** Create a TSV file based on a dictionnary **/
 	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
+	void updateChannelsTsv(const QString& path);
+	void updateEventsTsv(const QString& path);
 signals:
 	void log(const QString& message);
 	void BIDSClosed();
@@ -73,16 +74,13 @@ protected:
 	static AwBIDSManager *m_instance;
 	static QString m_parsingPath;	// path to place the json file to prevent BIDSManager of any updates.
 
-
+	//int convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 	void getSubjects(int sourceDir = raw);
 	void clearSubjects(int sourceDir = raw);
 	AwFileItem *parseDir(const QString& fullPath, const QString& path);
 	void parseSubject(AwBIDSSubject *subject);
 	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
-	void applyModifications();
-	void updateChannelsTsv(const QString& path);
-	void updateEventsTsv(const QString& path);
 	QString getParsingPath();
 	void modifyUpdateJson(const QStringList& branches);
 

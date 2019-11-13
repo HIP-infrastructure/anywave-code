@@ -28,7 +28,7 @@
 #include <QFileDialog>
 #include <widget/AwMessageBox.h>
 #include "AwExportSelChannels.h"
-//#include "AwExporterSelMarkers.h"
+
 
 AwExporterSettings::AwExporterSettings(QWidget *parent)
 	: QDialog(parent)
@@ -60,8 +60,8 @@ void AwExporterSettings::updateOutputFileExtension(int index)
 void AwExporterSettings::addSkipLabel()
 {
 	auto item = comboSkip->currentText();
-	if (!m_skipLabels.contains(item)) {
-		m_skipLabels << item;
+	if (!skippedMarkers.contains(item)) {
+		skippedMarkers << item;
 		listWidgetSkip->addItem(item);
 		listWidgetSkip->update();
 	}
@@ -70,39 +70,23 @@ void AwExporterSettings::addSkipLabel()
 void AwExporterSettings::addUseLabel()
 {
 	auto item = comboUse->currentText();
-	if (!m_useLabels.contains(item)) {
-		m_useLabels << item;
+	if (!usedMarkers.contains(item)) {
+		usedMarkers << item;
 		listWidgetUse->addItem(item);
 		listWidgetUse->update();
 	}
 }
 
-AwMarkerList AwExporterSettings::skippedMarkers()
-{
-	if (m_skipLabels.isEmpty())
-		return AwMarkerList();
-
-	return AwMarker::getMarkersWithLabels(markers, m_skipLabels);
-}
-
-AwMarkerList AwExporterSettings::usedMarkers()
-{
-	if (m_useLabels.isEmpty())
-		return AwMarkerList();
-
-	return AwMarker::getMarkersWithLabels(markers, m_useLabels);
-}
-
 void AwExporterSettings::clearUse()
 {
 	listWidgetUse->clear();
-	m_useLabels.clear();
+	usedMarkers.clear();
 }
 
 void AwExporterSettings::clearSkip()
 {
 	listWidgetSkip->clear();
-	m_skipLabels.clear();
+	skippedMarkers.clear();
 }
 
 void AwExporterSettings::selectICAChannels()

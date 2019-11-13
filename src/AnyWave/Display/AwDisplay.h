@@ -42,9 +42,9 @@ class AwGainManager;
 class AwFileIO;
 class AwCentralWidget;
 
-#define TOP_LEFT		0
-#define BOTTOM_RIGHT	1
-#define AW_MAX_VIEW_SCENE	2
+#define TOP_LEFT				0
+#define BOTTOM_RIGHT			1
+#define AW_MAX_VIEW_SCENE		2
 #define AW_CALIBRATION_WIDTH	200	// 200 pixels line width reference
 
 class AwDisplay : public QObject
@@ -97,9 +97,9 @@ signals:
 	void resetMarkerMode();
 	void setupChanged(AwDisplaySetup *setup, int flags);
 	void mappingTimeSelectionDone(float pos, float duration);
+	void draggedCursorPositionChanged(float pos);
 	void QTSModeEnded();
 public slots:
-	//void updateSelectedChannels();
 	void updateSetup(AwDisplaySetup *setup, int flags);
 	void executeCommand(int command, const QVariantList& args);
 	void synchronizeMappingCursorPos(float position);
@@ -109,10 +109,15 @@ public slots:
 	void alignViewsHorizontaly();
 	void synchronizeViews(float position);
 	void synchronizeOnCursor(float position);	// reposition the views based on the cursor position from a particular view.
+	void setCursorPosition(float position);     // change the cursor position in the view. Can make the view change its position.
 	void synchronizeCursorPos(float position);
 	void showPositionInViews(float position);
 	void highlightMarker(AwMarker *m);
 	void captureViews();
+	void addVideoCursor();
+	void removeVideoCursor();
+	void handleVideoCursor(bool flag);
+	void setVideoPosition(float pos);
 
 
 	/** Change selected state of one or more channels, referenced by name **/

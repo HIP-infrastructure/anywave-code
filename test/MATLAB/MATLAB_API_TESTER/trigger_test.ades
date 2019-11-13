@@ -1,0 +1,7 @@
+#ADES header file
+samplingRate = 512
+numberOfSamples = 5160
+date = Not Available
+time = Not Available
+A1 = EEG
+TRIGGER = TRIGGER

@@ -74,7 +74,6 @@ public slots:
 	/** Efface les canaux actuellement sélectionnés dans la liste de montage. **/
 	void removeChannelsInMontage();
 	///** Add All Channels of specified type to Montage  **/
-	//void addChannelsWithType(int type);
 	void computeSEEGMontageFromEEGChannels();
 
 private slots:
@@ -94,10 +93,10 @@ private slots:
 
 	/** Set AVG references on compatible channels **/
 	void setAVGRefMontage();
+	void setSEEGAVGRefMontage();
 
 	void setBadChannel(const QString& electrodeLabel);
 	void unsetBadChannel(const QString& electrode);
-	//void updateChannelType(QString& electrodeLabel, int newType);
 	void updateChannelsType(const QStringList& labels, int type);
 
 	void contextMenuMontageRequested(const QPoint& pos);
@@ -115,10 +114,10 @@ private slots:
 private:
 	Ui::MontageDialClass m_ui;
 	QHash<QString, AwChannel *> m_asRecorded;	
+	AwChannelList m_asRecordedChannels;
 	///< copy of the list from Montage Manager.
 
 	QStringList m_badChannelsLabels;					/// store the labels of bad channels
-//	QStringList m_labelTypes[AW_CHANNEL_TYPES];			/// store the labels for each types of channels
 	QHash<int, QStringList> m_labelsByTypes;
 
 	QString m_path;
@@ -135,9 +134,8 @@ private:
 	void sortLabelsByTypes();
 	void updateButtonAddByTypes();
 	void createContextMenuAndActions();
-	bool channelsLessThan(const AwChannel*& s1, const AwChannel*& s2);
-
-
+	/** remove bad channels directly in the specified list. **/
+	void removeBadChannels(AwChannelList& channels);
 };
 
 #endif // MONTAGEDIAL_H

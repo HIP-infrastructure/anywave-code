@@ -504,6 +504,12 @@ QList<AwChannel *> AwChannel::getChannelsWithLabels(const QList<AwChannel *>& li
  	return res;
 }
 
+QList<AwChannel *> AwChannel::getChannelsWithLabel(const QList<AwChannel *>& list, const QString& label)
+{
+	QStringList labels = { label };
+	return  AwChannel::getChannelsWithLabels(list, labels);
+}
+
 //
 // Get a copy of channels depending on type from a list.
 // 

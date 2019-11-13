@@ -27,7 +27,6 @@
 #include "Process/AwScriptPlugin.h"
 #include <QTcpSocket>
 #include <QDataStream>
-//#include <process/AwTcpProcessRequest.h>
 #include "AwPidManager.h"
 #include "Data/AwDataServer.h"
 #include "Debug/AwDebugLog.h"
@@ -136,6 +135,9 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 			break;
 		case AwRequest::GetDataEx:
 			handleGetDataEx(client, p);
+			break;
+		case AwRequest::GetMarkersEx:
+			handleGetMarkersEx(client, p);
 			break;
 		case AwRequest::AddMarkers:
 			handleAddMarkers(client, p);

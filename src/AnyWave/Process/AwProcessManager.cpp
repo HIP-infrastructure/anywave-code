@@ -57,14 +57,15 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	: QObject(parent)
 {
 	// instantiate menu
-	m_processMenu = new QMenu();
-	m_processMenu->setTitle(tr("Processes"));
+	//m_processMenu = new QMenu();
+	//m_processMenu->setTitle(tr("Processes"));
+	m_processMenu = NULL;
 	// other menus set to NULL
 	m_fileMenu = NULL;
 	m_viewMenu = NULL;
-	m_processes = AwPluginManager::getInstance()->processes();
-	for (auto plugin : m_processes)
-		addProcess(plugin);
+	//m_processes = AwPluginManager::getInstance()->processes();
+	//for (auto plugin : m_processes)
+	//	addProcess(plugin);
 	setObjectName("AwProcessManager");
 	m_processesWidget = new AwProcessesWidget();
 	m_dock = NULL;
@@ -73,6 +74,14 @@ AwProcessManager::AwProcessManager(QObject *parent)
 AwProcessManager::~AwProcessManager()
 {
 	delete m_processesWidget;
+}
+
+void AwProcessManager::setMenu(QMenu *menu)
+{
+	m_processMenu = menu;
+	m_processes = AwPluginManager::getInstance()->processes();
+	for (auto plugin : m_processes)
+		addProcess(plugin);
 }
 
 void AwProcessManager::quit()
@@ -266,7 +275,7 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
 		}
 	}
 
-	act->setEnabled(plugin->flags() & Aw::ProcessFlags::ProcessDontRequireData);
+	act->setEnabled(plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData);
 
 	if (plugin->type == AwProcessPlugin::Internal)	{
 		m_hashProcessAction.insert(plugin->name, act);
@@ -360,6 +369,7 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 		process->pdi.input.dataFolder = fi->dirPath();
 		process->pdi.input.dataPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(fi->fileName());
 		process->pdi.input.filterSettings = settings->filterSettings();
+		process->pdi.input.fileDuration = fi->currentReader()->infos.totalDuration();
 	}
 	return process;
 }
@@ -417,290 +427,138 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	return buildPDIForProcess(p);
 }
 
- bool AwProcessManager::processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources)
- {
-	 QRegExp rx("(\\S*)-{1,1}(\\S*)");
-	 QList<QVariant> vals = p->pdi.inputParameters().values();
-	 QString val = vals.at(keyIndex).toString();
-	 int pos = rx.indexIn(val);
-	 int min, max;
-	 if (pos == -1)
-		 return false;
-	 else {
-		 min = rx.cap(1).toInt();
-		 max = rx.cap(2).toInt();
-	 }
-
-	 QString errorString = p->plugin()->name;
-
-	 // check for correct min and max
-	 if (min > sources.size()) {
-		 errorString += QString(tr(": the number of channels is incorrect. Process requires %1 channels")).arg(min);
-		 AwMessageBox::critical(0, tr("Process input"), errorString, QMessageBox::Discard);
-		 return false;
-	 }
-
-	 int size = sources.size();
-	 if (max > 0 && max < sources.size()) {
-		 errorString += QString(tr(": the process requires a maximum of %1 channels")).arg(max);
-		 AwMessageBox::information(0, tr("Process input"), errorString, QMessageBox::Discard);
-		 return false;
-	 }
-
-	 if (max > 0)
-		 size = std::min(size, max);
-	 
-	 AwChannelList list;
-	 for (int i = 0; i < size; i++) {
-			list << sources.at(i);
-	 }
-
-	 p->pdi.input.addChannels(AwChannel::duplicateChannels(list));
-	 // make sure current filters are set for the channels.
-	 AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
-	 return true;
- }
-
  void AwProcessManager::launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end)
  {
 
 	 AwBaseProcess *process = newProcessFromPluginName(name);
 	  if (process == NULL)
 		 return;
-	 process->pdi.input.setNewChannels(channels);
-	 AwMarkerList markers;
-	 AwMarker *m = new AwMarker();
-	 m->setStart(pos);
-	 m->setEnd(end);
-	 markers << m;
-	 process->pdi.input.setNewMarkers(markers);
-	 // set flag to skip buildPDI checking
+
+	 process->pdi.input.timeSelection.setStart(pos);
+	 process->pdi.input.timeSelection.setEnd(end);
+	 process->pdi.input.currentPosInFile = pos;
+
+	 // add an input flag to avoid buildForPDI to consider channels selected by the user and also to skip later call to buildPDI in initProcessIO
+	 process->pdi.setInputFlags(process->pdi.inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
-	 runProcess(process);
+
+	 if (buildPDIForProcess(process, channels))
+		  runProcess(process);
  }
 
- bool AwProcessManager::buildPDIForProcess(AwBaseProcess *p)
+
+ ///
+ /// buildPDIForProcess
+ /// will setup all the input for a process.
+ /// if sources is specified, use those channels as the sources when preparing the input.
+ /// if sources is left empty, use the current Montage of AnyWave as the source for preparing the process inputs.
+  bool AwProcessManager::buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources)
 {
 	if (p->runMode() == AwProcessPlugin::Internal)
 		return true;
 
 	auto selectedChannels = AwDisplay::instance()->selectedChannels();
-	auto montageChannels = AwMontageManager::instance()->channels();
-	QList<int> keys = p->pdi.inputParameters().keys();
-	AwChannelList sources;
+	AwChannelList montageChannels = sources;
+	if (sources.isEmpty())
+		montageChannels = AwMontageManager::instance()->channels();
+	
+	AwChannelList inputChannels;
 	bool selection = !selectedChannels.isEmpty();
-	// browse for keys as process inputs
-	for (int i = 0; i < keys.size(); i++) {
-		int key = keys.at(i);
-		bool ignoreSelection = key & Aw::ProcessInput::ProcessIgnoresChannelSelection;
-		QString errorString = p->plugin()->name;
-		if (key & Aw::ProcessInput::GetAsRecordedChannels) { // copy as recorded channels as input for the process and keep going. No check for IO Min and Max.
-			p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
-			continue;
-		}
-		else if (key & Aw::ProcessInput::GetProcessPluginNames) {
-			for (auto plugin : AwPluginManager::getInstance()->processes())
-				p->pdi.input.processPluginNames.append(plugin->name);
-		}
-		else if (key & Aw::ProcessInput::AnyChannels) {  // any channels = selected channels if any or current montage if no channels is selected.
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::EEGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+	int inputF = p->pdi.inputFlags();
 
-			// get only EEG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isEEG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::SourceChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels())
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+	p->pdi.input.icaPath = AwSettings::getInstance()->getString("currentIcaFile");
 
-			// get only Source channels from sources
-			foreach(AwChannel *c, sources) {
-				if (!c->isSource())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
+	bool requireSelection = inputF & Aw::ProcessInput::ProcessRequiresChannelSelection;
+	bool ignoreSelection = inputF & Aw::ProcessInput::ProcessIgnoresChannelSelection; 
+	// of course, requireSelection and ignoreSelection are mutual exclusive.
+
+	if (inputF & Aw::ProcessInput::GetReaderPlugins) {
+		for (auto plugin : AwPluginManager::getInstance()->readers())
+			p->pdi.input.readers.append(plugin);	
+	}
+	if (inputF & Aw::ProcessInput::GetWriterPlugins) {
+		for (auto plugin : AwPluginManager::getInstance()->writers())
+			p->pdi.input.writers.append(plugin);
+	}
+	if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
+		for (auto plugin : AwPluginManager::getInstance()->processes())
+			p->pdi.input.processPluginNames.append(plugin->name);
+	}
+	// if input markers are already set (by other features, like Launch Process from Markers GUI..
+	// then set an input flag to warn the plugin about that.
+	// Also we handle GetDurationMarkers and GetAllMarkers only if no markers already exist as input (Launch Process feature from Markers GUI may add markers as input for the process.)
+	if (!p->pdi.input.markers().isEmpty())
+		p->setInputFlags(p->inputFlags() | Aw::ProcessInput::UserSelectedMarkers);
+	if (inputF & Aw::ProcessInput::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
+		auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
+		if (!markers.isEmpty())
+			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+	}
+	if (inputF & Aw::ProcessInput::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
+		auto markers = AwMarkerManager::instance()->getMarkers();
+		if (!markers.isEmpty())
+			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+	}
+	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
+		p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
+	}
+	if (inputF & Aw::ProcessInput::GetCurrentMontage) { // skip requireSelection flag here and get a copy of channels present in the file.
+		p->pdi.input.addChannels(montageChannels, true);
+	}
+
+	if (!p->pdi.areInputChannelSet())
+		return true;
+
+	// check if inputChannels is emptry
+	if (ignoreSelection)
+		inputChannels = montageChannels;
+	else {
+		if (!selection && requireSelection) {
+			if (confirmProcessWithAllChannels())
+				inputChannels = montageChannels;
+			else
 				return false;
 		}
-		else if (key & Aw::ProcessInput::SEEGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+		else  if (selection) {
+			inputChannels = selectedChannels;
+		}
+		else
+			inputChannels = montageChannels;
+	}
 
-			// get only SEEG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isSEEG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
+	// input channels are set
+	auto types = p->pdi.getInputChannels();
+	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
+	AwChannelList res;
+	for (auto t : types) {
+		
+		QPair<int, int> min_max = p->pdi.getInputChannelMinMax(t);
+		int min = min_max.first;
+		int max = min_max.second;
+		QString channelType = "Any Channels";
+		if (t != -1)
+			channelType = AwChannel::typeToString(t);
+		// check for correct min and max
+		if (min > inputChannels.size()) {
+			AwMessageBox::critical(0, "Process input", QString("Process requires at least %1 channel(s) of type %2").arg(min).arg(channelType),
+				QMessageBox::Discard);
+			return false;
 		}
-		else if (key & Aw::ProcessInput::MEGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
+		if (min_max.second > 0 && min_max.second < inputChannels.size()) {
+			AwMessageBox::critical(0, "Process input", QString("Too many channels selected as input. The process accepts %1 channels max.").arg(max).arg(channelType),
+				QMessageBox::Discard);
+			return false;
+		}
+		if (t == -1)
+			res += inputChannels;
+		else {
+			res += AwChannel::getChannelsOfType(inputChannels, t);
+		}
+	}
 
-			// get only MEG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isMEG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::EMGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
-
-			// get only EMG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isEMG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::ECGChannels) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
-
-			// get only ECG channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isECG())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-		else if (key & Aw::ProcessInput::TriggerChannels) {  // look for Triggers in AS RECORDED not in the current montage
-			if (ignoreSelection)
-				sources = AwMontageManager::instance()->asRecordedChannels();
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
-
-			// get only Trigger channels from sources
-			foreach (AwChannel *c, sources) {
-				if (!c->isTrigger())
-					sources.removeAll(c);
-			}
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-
-		}
-		else if (key & Aw::ProcessInput::GetAllMarkers) {
-			foreach(AwMarker *m, AwMarkerManager::instance()->getMarkers())
-				p->pdi.input.addMarker(new AwMarker(m));
-		}
-		else if (key & Aw::ProcessInput::GetReaderPlugins) {
-			QList<AwFileIOPlugin *> plugins = AwPluginManager::getInstance()->readers();
-			foreach (AwFileIOPlugin *plugin, plugins) {
-				p->pdi.input.readers.append(plugin);
-			}
-		}
-		else if (key & Aw::ProcessInput::GetWriterPlugins) {
-			QList<AwFileIOPlugin *> plugins = AwPluginManager::getInstance()->writers();
-			foreach (AwFileIOPlugin *plugin, plugins) {
-				p->pdi.input.writers.append(plugin);
-			}
-		}
-		else if (key & Aw::ProcessInput::GetCurrentMontage) {
-			if (ignoreSelection)
-				sources = montageChannels;
-			else {
-				if (!selection)
-					if (confirmProcessWithAllChannels()) 
-						sources = montageChannels;
-					else
-						return false;
-				else
-					sources = selectedChannels;
-			}
-			// clear previous input channels if any
-			//while (!p->pdi.input.channels.isEmpty())
-			//	delete p->pdi.input.channels.takeFirst();
-			p->pdi.input.clearChannels();
-			if (!processIOCheckMinMax(p, i, sources))
-				return false;	
-		}
-	} // end for
+	p->pdi.input.addChannels(res, true);
+	// make sure current filters are set for the channels.
+	AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
 	return true;
 }
 
@@ -723,37 +581,13 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
  */
 void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& args)
 {
-	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDontRequireData;
+	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	if (skipDataFile)
 		process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
 
 	if (!skipDataFile) {
-		// UPDATE 18/11/2014
-		if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections) {
-			if (process->pdi.input.markers().isEmpty()) { // if empty at this stage => the user launches the plugin with no time selections.
-				// so, feed input with markers which have duration from MarkersManager
-				auto markers = AwMarkerManager::instance()->getMarkers();
-				for (auto m : markers) {
-					if (m->duration() > 0.)
-						process->pdi.input.addMarker(new AwMarker(m));
-				}
-				if (process->pdi.input.markers().isEmpty()) {
-					int res = AwMessageBox::question(NULL, tr("Process Input"),
-						tr("This process is designed to get time selections as input but none are set.\nThe process will be launched on the whole data."),
-						QMessageBox::Ok | QMessageBox::Abort);
-					if (res == QMessageBox::Abort) {
-						process->plugin()->deleteInstance(process);
-						return;
-					}
-					else {
-						// create a marker as input which covers whole data
-						process->pdi.input.addMarker(new AwMarker("whole data", 0., m_currentReader->infos.totalDuration()));
-					}
-				}
-			}
-		}
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
-		if (process->plugin()->flags() & Aw::ProcessFlags::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
+		if (process->inputFlags() & Aw::ProcessInput::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
 			process->plugin()->deleteInstance(process);
@@ -768,6 +602,10 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			process->pdi.input.setReader(m_currentReader);
 			process->pdi.input.fileDuration = m_currentReader->infos.totalDuration();
 			process->pdi.input.badLabels = AwMontageManager::instance()->badLabels();
+			// verify that plugin which accepts time selection get at least the whole selection as input
+			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
+				if (process->pdi.input.markers().isEmpty())
+					process->pdi.input.addMarker(new AwMarker("global", 0, process->pdi.input.fileDuration));
 		}
 	}
 	else {

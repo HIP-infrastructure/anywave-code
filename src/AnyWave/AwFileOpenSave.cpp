@@ -9,7 +9,7 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Display/AwDisplaySetupManager.h"
 #include "Montage/AwMontageManager.h"
-#include <AwUtilities.h>
+#include <utils/time.h>
 #include "Marker/AwMarkerManager.h"
 #include <widget/AwMessageBox.h>
 #include "Widgets/AwTriggerParsingDialog.h"
@@ -24,6 +24,8 @@
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLog.h"
+#include "Display/AwVideoManager.h"
+#include <widget/AwVideoPlayer.h>
 //
 // Menu File->Open
 // 
@@ -31,6 +33,14 @@ void AnyWave::on_actionOpen_triggered()
 {
 	openFile();
 }
+
+void AnyWave::on_actionOpen_video_triggered()
+{
+	m_dockWidgets["video"]->show();
+	m_player->openFile();
+}
+
+
    
 
 //   
@@ -48,7 +58,8 @@ void AnyWave::updateRecentBIDS(const QStringList &files)
 
 	qint32 count = 1;
 	for (auto s : files) {
-		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentBIDSMenu);
+		auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+		QAction *action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentBIDSMenu);
 		m_recentBIDSMenu->addAction(action);
 		// add index number in data()
 		action->setData(count - 1);
@@ -64,7 +75,8 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 
 	qint32 count = 1;
 	for (auto s : files) {
-		QAction *action = new QAction(QString("%1 .").arg(count) + s, m_recentFilesMenu);
+		auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+		QAction *action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentFilesMenu);
 		m_recentFilesMenu->addAction(action);
 		// add index number in data()
 		action->setData(count - 1);
@@ -184,7 +196,7 @@ void AnyWave::openFile(const QString &path)
 
 	// Update Window title
 	QString title = QString("AnyWave - ") + fullDataFilePath + QString(tr(" - %2 channels. ").arg(m_currentReader->infos.channelsCount()));
-	title += tr("Duration: ") + AwUtilities::timeToString(m_currentReader->infos.totalDuration());
+	title += tr("Duration: ") + AwUtilities::time::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
 	m_currentReader->infos.setFileName(m_openFileName);
@@ -250,6 +262,12 @@ void AnyWave::openFile(const QString &path)
 
 	if (openWithDialog)
 		settings->addRecentFilePath(filePath);
+
+	if (m_currentReader->hasVideoFile()) {
+		m_dockWidgets["video"]->show();
+		m_player->setVideoSyncSettings(m_currentReader->infos.videoSynch());
+		m_player->setUrl(QUrl::fromLocalFile(m_currentReader->videoPath()));
+	}
 }
 
 void AnyWave::openRecentFile()
@@ -400,7 +418,8 @@ void AnyWave::closeFile()
 	AwAmplitudeManager::instance()->closeFile();
 	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
-
+	if (AwVideoManager::isInstantiated())
+		delete AwVideoManager::instance();
 	// stop cursor mode and selection mode
 	m_cursorToolBar->reset();
 
@@ -438,6 +457,8 @@ void AnyWave::closeFile()
 		delete m_SEEGViewer;
 		m_SEEGViewer = NULL;
 	}
+
+	m_dockWidgets["video"]->hide();
 
 	// Epoch Manager (destroy the object when closing the file)
 #ifdef AW_EPOCHING

@@ -5,6 +5,21 @@
 #include "Debug/AwDebugLog.h"
 #include "AwCommandLogger.h"
 
+//
+// options descriptions
+//
+// --toBIDS : Convert a file or folder to BIDS by converting the data format if necessary and creating the .json files 
+// Options for --toBIDS:
+//	--bids_modality <modality> : MANDATORY. [ seeg or meg4DNI ]
+//  --bids_sub <subj>			: MANDATORY. The BIDS subject
+//	--bids_task <task>			: MANDATORY. The BIDS task
+//	--bids_ses <sessions>		: OPTIONAL. The BIDS session.
+//	--bids_run <run>			: OPTIONAL. The BIDS run.
+//	--bids_acq <acq>			: OPTIONAL. The BIDS acquisition.
+//	--bids_proc <proc>			: OPTIONAL. The BIDS processing.
+//	--bids_output <options>		: OPTIONAL. [ sidecars = generates only .json sidecars file. full = convert the data file and generetes .json sidecars files]
+//	--bids_format <file format>	: OPTIONAL. Used with seeg bids_modality. Specify the output file format [ EDF or VHDR ]
+
 using namespace aw::commandLine;
 
 int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
@@ -16,11 +31,8 @@ int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
 		case aw::commandLine::BIDS:
 			AwBIDSManager::instance()->toBIDS(operations[op]);
 			break;
-		case aw::commandLine::ICA:
-			AwCommandLineManager::computeICA(operations[op]);
-			break;
-		case aw::commandLine::ConvertFile:
-			AwCommandLineManager::convertFile(operations[op]);
+		case aw::commandLine::RunProcess:
+			AwCommandLineManager::runProcess(operations[op]);
 			break;
 		}
 	}
@@ -47,13 +59,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputFileO("output_file", "specify the file to create.", "output_file", QString());
 	QCommandLineOption outputFormatO("output_format", "specify the file format to create. (vhdr, edf, MATLAB, ADES)", "output_format", QString());
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
-	QCommandLineOption skipMarkerO("skip_marker", "specify a marker label to skip when exporting data.", "skip_marker", QString());
+	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
+
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
 	parser.addOption(outputFileO);
 	parser.addOption(outputFormatO);
-	parser.addOption(skipMarkerO);
 	parser.addOption(outputDirO);
+	parser.addOption(outputPrefixO);
 	// common filters flags
 	QCommandLineOption filterHPO("hp", "specify the High Pass filter (Hz).", "hp", QString());
 	QCommandLineOption filterLPO("lp", "specify the Low Pass filter (Hz).", "lp", QString());
@@ -61,21 +74,16 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(filterHPO);
 	parser.addOption(filterLPO);
 	parser.addOption(filterNotchO);
-
-	// Convert File options
-	QCommandLineOption ConvertOpt("convert", "convert a file to another format.");
-	parser.addOption(ConvertOpt);
-	
-	// SEEG BIDS
+	// run process options
+	QCommandLineOption runProcessOpt("run", "launch a process using json file or json string.", "runArgs", QString());
+	// BIDS
 	QCommandLineOption toBIDSOpt("toBIDS", "convert files to BIDS.");
-	//QCommandLineOption seegBIDSOpt("seegBIDS", "SEEG file to BIDSify.\nRequires task and sub options.", "file", QString());
 	QCommandLineOption BIDSModalityOpt("bids_modality", "ieeg or meg", "bids modality", QString());
 	QCommandLineOption BIDSSidecarsOpt("bids_output", "sidecars : Only generates sidecar files. all : full conversion", "sidecars", QString());
 	QCommandLineOption BIDSTaskOpt("bids_task", "BIDS task", "task", QString());
 	QCommandLineOption BIDSSubjectOpt("bids_sub", "BIDS subject", "subject", QString());
 	QCommandLineOption BIDSSessionOpt("bids_ses", "BIDS session", "session", QString());
 	QCommandLineOption BIDSRunOpt("bids_run", "BIDS run", "run", QString());
-	QCommandLineOption BIDSDestOpt("bids_dir", "BIDS destination folder", "dir", QString());
 	QCommandLineOption BIDSFormatOpt("bids_format", "data format for output EDF (default) or VHDR", "format", QString());
 	QCommandLineOption BIDSAcqOpt("bids_acq", "acquisition method", "acq", QString());
 	QCommandLineOption BIDSProcOpt("bids_proc", "proc", "proc", QString());
@@ -86,26 +94,15 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(BIDSSubjectOpt);
 	parser.addOption(BIDSSessionOpt);
 	parser.addOption(BIDSRunOpt);
-	parser.addOption(BIDSDestOpt);
 	parser.addOption(BIDSFormatOpt);
 	parser.addOption(BIDSAcqOpt);
 	parser.addOption(BIDSProcOpt);
-	// 
-	// ICA
-	///
-	QCommandLineOption ICAOption("ica", "Compute ICA on specified file.");
-	QCommandLineOption ICAModality("modality", "specify the channels modality for --ica option", "modality", QString());
-	QCommandLineOption ICAComponents("comp", "specify the number of components to compute", "comp", QString());
-	parser.addOption(ICAOption);
-	parser.addOption(ICAModality);
-	parser.addOption(ICAComponents);
+	parser.addOption(runProcessOpt);
 	   	  
-	//parser.process(QCoreApplication::arguments());
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
 		throw exception;
 	}
-
 
 	AwArguments arguments;
 	//// parse common options
@@ -122,6 +119,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	auto oDir = parser.value(outputDirO);
 	if (!oDir.isEmpty()) 
 		arguments["output_dir"] = oDir;
+	// input dir
+	auto iDir = parser.value(inputDirO);
+	if (!iDir.isEmpty())
+		arguments["input_dir"] = iDir;
+	// output_prefix
+	auto oPrefix = parser.value(outputPrefixO);
+	if (!oPrefix.isEmpty())
+		arguments["output_prefix"] = oPrefix;
 	// hp/lp/notch
 	auto fHP = parser.value(filterHPO);
 	auto fLP = parser.value(filterLPO);
@@ -132,11 +137,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		arguments["hp"] = fHP;
 	if (!fLP.isEmpty())
 		arguments["lp"] = fLP;
-	// skip marker
-	auto skipedMarker = parser.value(skipMarkerO);
-	if (!skipedMarker.isEmpty())
-		arguments["skip_marker"] = skipedMarker;
-	// input file
+
 	auto inputF = parser.value(inputFileO);
 	if (!inputF.isEmpty())
 		arguments["input_file"] = inputF;
@@ -153,39 +154,9 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		arguments["output_writer"] = availableWriters[format];
 	}
 	
-	if (parser.isSet(ICAOption)) {
-		// mandatory arguments
-		if (!arguments.contains("input_file")) {
-			logger.sendLog("ica: Missing input file.");
-			throw(exception);
-		}
-		auto mod = parser.value(ICAModality);
-		if ( mod.isEmpty()) {
-			logger.sendLog("ica: Missing modality.");
-			throw(exception);
-		}
-		// optional arguments
-		auto nc = parser.value(ICAComponents);
-		if (!nc.isEmpty())
-			arguments["comp"] = nc;
-		arguments["modality"] =  mod;
-		res[aw::commandLine::ICA] = arguments;
-	}
-	else if (parser.isSet(ConvertOpt)) {
-		// mandatory arguments
-		if (!arguments.contains("input_file")) {
-			logger.sendLog("convert: Missing input file.");
-			throw(exception);
-		}
-		if (!arguments.contains("output_file")) {
-			logger.sendLog("convert: Missing output file.");
-			throw(exception);
-		}
-		if (!isFormatOption) {
-			logger.sendLog("convert: Missing output_format option.");
-			throw(exception);
-		}
-		res[aw::commandLine::ConvertFile] = arguments;
+	if (parser.isSet(runProcessOpt)) {
+		arguments["run_process"] = parser.value(runProcessOpt);
+		res[aw::commandLine::RunProcess] = arguments;
 	}
 	else if (parser.isSet(toBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
@@ -193,13 +164,11 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			throw(exception);
 		}
 		// Session option is not required
-	//	QString toBIDS = parser.value(toBIDSOpt);
 		QString modality = parser.value(BIDSModalityOpt);
 		QString subj = parser.value(BIDSSubjectOpt);
 		QString task = parser.value(BIDSTaskOpt);
 		QString session = parser.value(BIDSSessionOpt);
 		QString run = parser.value(BIDSRunOpt);
-		QString dir = parser.value(BIDSDestOpt);
 		QString format = parser.value(BIDSFormatOpt);
 		QString output = parser.value(BIDSSidecarsOpt);
 		QString acq = parser.value(BIDSAcqOpt);
@@ -210,15 +179,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			throw(exception);
 		}
 
-		//if (output.toUpper() != "SIDECARS") {
-		//	if (format.isEmpty())
-		//		format = "EDF";
-		//	bool formatOK = format.toUpper() == "EDF" || format.toUpper() == "VHDR";
-		//	if (!formatOK) {
-		//		logger.sendLog("seegBIDS: output format is invalid. (must be EDF or VHDR)");
-		//		throw(exception);
-		//	}
-		//}
 		// first argument must be the kind of file to convert (here SEEG)
 		arguments["bids_modality"] = modality;
 		// subject is mandatory and should be the second argument.
@@ -229,8 +189,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			arguments["bids_session"] = session;
 		if (!run.isEmpty())
 			arguments["bids_run"] = run;
-		//if (!dir.isEmpty())
-		//	arguments["bids_dir"] = dir;
 		if (!format.isEmpty())
 			arguments["bids_format"] = format;
 		if (!output.isEmpty())

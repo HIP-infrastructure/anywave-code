@@ -92,6 +92,15 @@ AwMarkerList AwMarkerManager::getMarkers()
 	return m_markers;
 }
 
+AwMarkerList AwMarkerManager::getMarkersThread()
+{
+	QMutexLocker locker(&m_mutex);
+	if (m_needSorting)
+		qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+
+	return AwMarker::duplicate(m_markers);
+}
+
 void AwMarkerManager::showDockUI()
 {
 	if (m_dock)
@@ -325,9 +334,13 @@ void AwMarkerManager::checkForBIDSMods()
 		return;
 	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
 		return;
-	if (m_markersModified)
-		AwBIDSManager::instance()->addModification(m_eventsTsv, AwBIDSManager::EventsTsv);
-
+	if (m_markersModified) {
+		if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+			return;
+		auto BM = AwBIDSManager::instance();
+		BM->updateEventsTsv(m_eventsTsv);
+		m_eventsTsv.clear();
+	}
 }
 
 void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
@@ -385,4 +398,11 @@ void AwMarkerManager::clear()
 	m_displayedMarkers.clear();
 	while (!m_markers.isEmpty())
 		delete m_markers.takeFirst();
+}
+
+
+void AwMarkerManager::highlightMarkerInList(AwMarker *marker)
+{
+	showDockUI();
+	m_ui->highlightMarker(marker);
 }

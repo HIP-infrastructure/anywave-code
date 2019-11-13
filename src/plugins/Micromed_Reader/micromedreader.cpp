@@ -1534,11 +1534,11 @@ MicromedReader::FileStatus MicromedReader::openFile(const QString& path)
 
 	QDate date((int)m_Head.Date.Year + 1900, (int)m_Head.Date.Month, (int)m_Head.Date.Day);
 	QTime time((int)m_Head.Time.Hour, (int)m_Head.Time.Min, (int)m_Head.Time.Sec);
-
-	infos.setTime(time.toString("hh:mm:ss"));
-	infos.setDate(date.toString("dd.MM.yy"));
+	infos.setTime(time.toString(Qt::ISODate));
+	infos.setDate(date.toString(Qt::ISODate));
 	infos.setISODate(QDateTime(date, time).toString(Qt::ISODate));
-	infos.setPatientName(QString(m_Head.Patient_Data.Surname).trimmed() + " " +  QString(m_Head.Patient_Data.Name).trimmed());
+	infos.setFirstName(QString(m_Head.Patient_Data.Surname).trimmed());
+	infos.setLastName(QString(m_Head.Patient_Data.Name).trimmed());
 
 	// add a block
 	AwBlock *block = infos.newBlock();

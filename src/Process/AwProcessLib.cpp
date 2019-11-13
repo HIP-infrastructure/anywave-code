@@ -174,3 +174,10 @@ void AwProcessPlugin::addLanguageTranslation(const QString& resourceFile)
 		delete translator;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// AwProcessDataInterface
+
+void AwProcessDataInterface::addInputChannel(int type, int min, int max)
+{
+	m_inputChannels[type] = QPair<int, int>(min, max);
+}

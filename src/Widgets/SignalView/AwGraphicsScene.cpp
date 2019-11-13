@@ -33,7 +33,7 @@
 #include <graphics/AwHighLightPositionMarker.h>
 #include <graphics/AwMarkerChannelItem.h>
 #include <AwMarkingSettings.h>
-#include <AwUtilities.h>
+#include <utils/gui.h>
 #include "AwGTCMenu.h"
 
 AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : QGraphicsScene(parent)
@@ -62,6 +62,10 @@ AwGraphicsScene::~AwGraphicsScene()
 		delete m_gotoChannelMenu;
 	if (m_QTSMenu)
 		delete m_QTSMenu;
+	for (auto cursor : m_cursors.values()) {
+		removeItem(cursor);
+		delete cursor;
+	}
 }
 
 void AwGraphicsScene::setQTSPlugins(const QStringList& plugins)
@@ -466,8 +470,7 @@ void AwGraphicsScene::previous()
 		newPos--;
 	if (newPos < 0.)
 		return;
-	else
-		emit updatePositionInFile(newPos);
+	emit updatePositionInFile(newPos);
 }
 
 void AwGraphicsScene::next()
@@ -478,18 +481,15 @@ void AwGraphicsScene::next()
 		newPos += 0.1;
 	else
 		newPos++;
-	if (newPos > m_fileDuration)
+	if (newPos + m_pageDuration > m_fileDuration)
 		return;
-	else
-		emit updatePositionInFile(newPos);
+	emit updatePositionInFile(newPos);
 }
 
 void AwGraphicsScene::nextPage()
 {
-	float newPos = m_currentPosInFile + m_pageDuration;
-	if (newPos > m_fileDuration)
-		return;
-	else
+	auto newPos = std::min(m_fileDuration - m_pageDuration, m_currentPosInFile + m_pageDuration);
+	if (newPos > m_currentPosInFile)
 		emit updatePositionInFile(newPos);
 }
 
@@ -836,6 +836,17 @@ void AwGraphicsScene::clearMarkers()
 }
 
 
+void AwGraphicsScene::showMarkerInList()
+{
+	QAction *act = qobject_cast<QAction *>(sender());
+	if (!act)
+		return;
+
+	AwGraphicsMarkerItem *mitem = act->data().value<AwGraphicsMarkerItem *>();
+
+	emit showMarkerUnderMouse(mitem->marker());
+}
+
 
 ///
 /// keyPress()
@@ -1028,8 +1039,18 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 		delete menuDisplay;
 		return;
 	}
-
-	if (itemType == AW_GRAPHICS_ITEM_SIGNAL_TYPE)	{
+	if (itemType == AW_GRAPHICS_ITEM_MARKER_TYPE) {
+		AwGraphicsMarkerItem *mitem = qgraphicsitem_cast<AwGraphicsMarkerItem *>(item);
+		// insert the action to the first position in default context menu.
+		auto action = new QAction("Show marker in list");
+		menuDisplay->insertAction(menuDisplay->actions().first(), action);
+		action->setData(QVariant::fromValue<AwGraphicsMarkerItem *>(mitem));
+		connect(action, &QAction::triggered, this, &AwGraphicsScene::showMarkerInList);
+		menuDisplay->exec(e->screenPos());
+		delete menuDisplay;
+		return;
+	}
+	else if (itemType == AW_GRAPHICS_ITEM_SIGNAL_TYPE)	{
 		AwGraphicsSignalItem *sitem =  qgraphicsitem_cast<AwGraphicsSignalItem *>(item);
 		// Extend basic context menu
 		menuDisplay->addSeparator();
@@ -1070,7 +1091,7 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 		return;
 	}
 	// Is this a AwBaseGraphics2DPlotItem? (a spectrogram like)
-	if (itemType == AW_GRAPHICS_ITEM_2DSIGNAL_TYPE)	{
+	else if (itemType == AW_GRAPHICS_ITEM_2DSIGNAL_TYPE)	{
 		AwGraphicsSignalItem *sitem =  qgraphicsitem_cast<AwGraphicsSignalItem *>(item);
 		// check if sitem has custom actions 
 		QList<QAction *> actions = sitem->customActions();
@@ -1150,9 +1171,14 @@ void AwGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 		QGraphicsItem *item = itemAt(e->scenePos());
 #else
 		QGraphicsItem *item = itemAt(e->scenePos(), QTransform());
-#endif
-		if (item)
+		if (item) {
 			QGraphicsScene::mousePressEvent(e);
+			if (item->type() == QGraphicsItem::UserType + AW_GRAPHICS_ITEM_CURSOR_TYPE) {
+				m_draggedCursor = static_cast<AwCursorItem *>(item);
+				m_mouseMode = AwGraphicsScene::DraggingCursor;
+			}
+		}
+#endif
 	}
 	else if (m_mouseMode == AwGraphicsScene::Mapping) {
 		if (!m_selectionRectangle) 	{
@@ -1161,7 +1187,7 @@ void AwGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
 #else
 			m_selectionRectangle = new QGraphicsRectItem(0);
 #endif
-			QColor mappingColor = QColor(AwUtilities::mappingCursorColor());
+			QColor mappingColor = QColor(AwUtilities::gui::mappingCursorColor());
 			m_selectionRectangle->setZValue(100);
 			m_selectionRectangle->setPen(QPen(mappingColor));
 			m_selectionRectangle->setBrush(QBrush(mappingColor, Qt::SolidPattern)); 
@@ -1187,6 +1213,11 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
 	QPointF pos = e->scenePos();
 	QGraphicsView *v = views().at(0);
 	switch (m_mouseMode) {
+	case AwGraphicsScene::DraggingCursor:
+		m_draggedCursor->setPosition(m_currentPosInFile, timeAtPos(pos));
+		update();
+		emit draggedCursorPositionChanged(m_draggedCursor->currentPos());
+		break;
 	case AwGraphicsScene::Mapping:
 		if (!m_mousePressed) {
 			m_mappingCursor->setPos(v->mapToScene(pos.x(), 0));
@@ -1295,6 +1326,9 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 	m_mousePressed = false;
 	QPointF pos = e->scenePos();
 
+	if (m_mouseMode == AwGraphicsScene::DraggingCursor) 
+		m_mouseMode = AwGraphicsScene::None;
+
 	switch (m_mouseMode) {
 	case AddingMarker:
 		if (m_markingSettings->type == AwMarker::Single || m_isTimeSelectionStarted) {
@@ -1389,7 +1423,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 		break;
 	case Mapping:
 		if (m_mappingFixedCursor == NULL) {
-			m_mappingFixedCursor = new AwMappingCursorItem(m_currentPosInFile, m_positionClicked, AwUtilities::mappingCursorColor(), AwUtilities::mappingCursorFont(), AwMappingCursorItem::Fixed);
+			m_mappingFixedCursor = new AwMappingCursorItem(m_currentPosInFile, m_positionClicked, AwUtilities::gui::mappingCursorColor(), AwUtilities::gui::mappingCursorFont(), AwMappingCursorItem::Fixed);
 			m_mappingFixedCursor->setPhysics(m_physics);
 			addItem(m_mappingFixedCursor);
 		}
@@ -1535,7 +1569,7 @@ void AwGraphicsScene::setMappingMode(bool on)
 		if (m_mouseMode == Cursor)
 			setCursorMode(false);
 
-		m_mappingCursor = new AwMappingCursorItem(0, 0, AwUtilities::mappingCursorColor(), AwUtilities::mappingCursorFont());
+		m_mappingCursor = new AwMappingCursorItem(0, 0, AwUtilities::gui::mappingCursorColor(), AwUtilities::gui::mappingCursorFont());
 		m_mappingCursor->setPhysics(m_physics);
 		addItem(m_mappingCursor);
 		m_mouseMode = AwGraphicsScene::Mapping;
@@ -1617,6 +1651,44 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 	update();
 }
 
+
+AwCursorItem *AwGraphicsScene::addCursor(const QString& label, const QString& color, float width)
+{
+	if (m_cursors.contains(label)) {
+		auto value = m_cursors[label];
+		removeItem(value);
+		delete value;
+	}
+	auto cursor = new  AwCursorItem(0, 0, label, color, AwUtilities::gui::cursorFont());
+	cursor->setPhysics(m_physics);
+	cursor->setPositionInFile(m_currentPosInFile);
+	cursor->setWidth(width);
+	m_cursors[label] = cursor;
+	addItem(cursor);
+	update();
+	return cursor;
+}
+
+void AwGraphicsScene::removeCursor(const QString& name)
+{
+	if (!m_cursors.contains(name))
+		return;
+	auto cursor = m_cursors[name];
+	removeItem(cursor);
+	m_cursors.remove(name);
+	delete cursor;
+	update();
+}
+
+void AwGraphicsScene::setCursorPosition(const QString& name, float startingPosition, float position)
+{
+	if (!m_cursors.contains(name))
+		return;
+	auto cursor = m_cursors[name];
+	cursor->setPosition(startingPosition, position);
+	update();
+}
+
 //
 // setCursor(bool flag)
 // Active ou desactive le curseur de suivi de souris dans la scene
@@ -1629,7 +1701,7 @@ void AwGraphicsScene::setCursorMode(bool flag)
 		else if (m_mouseMode == AwGraphicsScene::Mapping)
 			return; // do not allow cursor mode while in Mapping mode
 
-		m_cursor = new AwCursorItem(0, 0, AwUtilities::cursorColor(), AwUtilities::cursorFont());
+		m_cursor = new AwCursorItem(0, 0, "Cursor", AwUtilities::gui::cursorColor(), AwUtilities::gui::cursorFont());
 		m_cursor->setPhysics(m_physics);
 		m_cursor->setPositionInFile(m_currentPosInFile);
 		addItem(m_cursor);

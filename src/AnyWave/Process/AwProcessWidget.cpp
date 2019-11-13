@@ -24,7 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessWidget.h"
-#include <AwUtilities.h>
+#include <utils/time.h>
 
 AwProcessWidget::AwProcessWidget(AwProcess *process, QWidget *parent)
 	: QWidget(parent)
@@ -102,7 +102,7 @@ void AwProcessWidget::setIdle()
 	m_ui.buttonStop->show();
 	m_ui.labelMessage->show();
 	m_ui.labelMessage->setText(tr("Idle"));
-	m_logWindow->appendLog(tr("Running time = ") + AwUtilities::hmsTime(m_process->executionTime()));
+	m_logWindow->appendLog(tr("Running time = ") + AwUtilities::time::hmsTime(m_process->executionTime()));
 
 	if (m_process->flags() & Aw::ProcessFlags::ProcessHasOutputUi)
 		m_ui.buttonShowResults->show();
@@ -121,7 +121,7 @@ void AwProcessWidget::setFinished()
 	if (m_process->wasAborted())
 		message = tr("Aborted by user");
 	else
-		message = tr("Running time = ") + AwUtilities::hmsTime(m_process->executionTime());
+		message = tr("Running time = ") + AwUtilities::time::hmsTime(m_process->executionTime());
 
 	m_ui.labelTime->show();
 	m_ui.labelTime->setText(message);

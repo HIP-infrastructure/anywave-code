@@ -37,6 +37,8 @@ public:
 	inline void setPid(int pid) { m_pid = pid; }
 	inline int pid() { return m_pid; }
 	void setCompiled(bool flag = true) { m_isCompiled = flag; }
+	/** calls to runFromCommandLine redirected to run() : command line run options. **/
+	void runFromCommandLine() override { run(); }
 protected:
 	QString m_path;	// path to plugin executable file (optional)
 	bool m_isCompiled; // used for MATLAB compiled plugin
@@ -56,8 +58,10 @@ public:
 	void initProcess(AwScriptProcess *process);
 	inline bool isCompiled() { return m_isCompiled; }
 	inline void setAsCompiled(bool f) { m_isCompiled = f; }
+	void setInputFlags(int flags) { m_inputFlags = flags; }
 protected:
 	bool m_isCompiled;
+	int m_inputFlags;	// input flags to set when instantiating the process.
 	void checkIOForProcess(AwScriptProcess *p);
 	QString m_path;			// path to script or executable file
 	QString m_pluginDir;	// path to the directory where the plugin is installed.

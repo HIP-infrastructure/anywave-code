@@ -25,6 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMappingToolBar.h"
 
+
 AwMappingToolBar::AwMappingToolBar(QWidget *parent)
 	: QWidget(parent)
 {
@@ -38,7 +39,6 @@ AwMappingToolBar::AwMappingToolBar(QWidget *parent)
 
 AwMappingToolBar::~AwMappingToolBar()
 {
-
 }
 
 

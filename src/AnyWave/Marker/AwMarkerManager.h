@@ -48,6 +48,8 @@ public:
 
 	/** Donne la liste de tous les marqueurs. **/
 	AwMarkerList getMarkers();
+	/** Thread support version **/
+	AwMarkerList getMarkersThread();
 	inline AwMarkerList& displayedMarkers() { return m_displayedMarkers; }
 	/** Get markers from position s1 to position s2 **/
 	AwMarkerList getMarkers(float s1, float s2);
@@ -83,6 +85,7 @@ public slots:
 	void saveMarkers(const QString& filePath);
 	/** Set a new list of displayed markers **/
 	void setMarkers(const AwMarkerList& markers);
+	void highlightMarkerInList(AwMarker *marker);
 signals:
 	void goTo(float pos);
 	void displayedMarkersChanged(const AwMarkerList& markers);

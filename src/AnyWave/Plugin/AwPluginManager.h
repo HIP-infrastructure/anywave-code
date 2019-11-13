@@ -45,7 +45,7 @@ class AwPluginFactory
 {
 public:
 	enum OperationStatus { Ok, UnloadPlugin };
-	AwPlugin *getPluginByName(const QString& name) { return m_map.value(name); }
+	AwPlugin *getPluginByName(const QString& name); 
 	void addPlugin(const QString& name, AwPlugin *plugin);
 	void removePlugin(const QString& name);
 	
@@ -53,6 +53,32 @@ private:
 	QMap<QString, AwPlugin *> m_map;
 	
 };
+
+// PluginFactory
+template<typename AwPlugin>
+void AwPluginFactory<AwPlugin>::addPlugin(const QString& name, AwPlugin *plugin)
+{
+	QString key = name.toUpper();
+	if (!m_map.contains(key))
+		m_map.insert(key, plugin); 
+}
+
+template<typename AwPlugin>
+void AwPluginFactory<AwPlugin>::removePlugin(const QString& name)
+{
+	QString key = name.toUpper();
+	if (m_map.contains(key))
+		m_map.remove(key);
+}
+
+template<typename AwPlugin>
+AwPlugin* AwPluginFactory<AwPlugin>::getPluginByName(const QString& name)
+{
+	QString key = name.toUpper();
+	if (m_map.contains(key))
+		return m_map.value(key);
+	return Q_NULLPTR;
+}
 
 typedef AwPluginFactory<AwDisplayPlugin> DisplayPluginFactory;
 typedef AwPluginFactory<AwProcessPlugin> ProcessPluginFactory;
@@ -77,6 +103,8 @@ public:
 	QList<AwProcessPlugin *>& processes() { return m_pluginProcesses; }
 	QList<AwDisplayPlugin *>& displays() { return m_pluginDisplays; }
 
+	/** Returns processes plugin that matches flags or empty list if none matches. **/
+	QList<AwProcessPlugin *> processesWithFlags(int flags);
 
 	// plugins related methods
 	AwDisplayPlugin *getDisplayPluginByName(const QString& name) { return m_displayFactory.getPluginByName(name); }
@@ -105,6 +133,7 @@ private:
 	void loadUserPlugins();
 	void checkForScriptPlugins(const QString& startingPath);
 	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
+	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);
 	void loadFileIOWriterPlugin(AwFileIOPlugin *plugin);

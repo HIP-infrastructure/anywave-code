@@ -24,6 +24,7 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Display/AwDisplay.h \
     ./Display/AwChannelSelectionModel.h \
     ./Display/AwChannelSelectionDial.h \
+    ./Display/AwVideoManager.h \
     ./Filter/AwFilterToolBar.h \
     ./IO/ADES/ADESIO.h \
     ./IO/HDF5/structs.h \
@@ -67,6 +68,7 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Plugin/AwPluginDial.h \
     ./Process/AwExporterTypes.h \
     ./Process/AwMarkerExporter.h \
+    ./Process/AwMATLABMarkersExporter.h \
     ./Process/AwTriggerWriter.h \
     ./Process/AwTriggerEraser.h \
     ./Process/AwProcessLogManager.h \
@@ -90,14 +92,6 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Process/AwMatlabScriptPlugin.h \
     ./Process/AwConverter.h \
 	./Process/AwLogPlainTextEdit.h \
-    ./Script/AwScriptDefines.h \
-    ./Script/AwScriptsWidget.h \
-    ./Script/AwScriptWidget.h \
-    ./Script/AwScriptProcessFileInput.h \
-    ./Script/AwScriptManager.h \
-    ./Script/AwScriptLogManager.h \
-    ./Script/AwScriptLog.h \
-    ./Script/AwScript.h \
     ./Widgets/AwSelectTriggerChannelDialog.h \
     ./Widgets/AwTriggerParsingDialog.h \
     ./Widgets/AwPleaseWaitWidget.h \
@@ -112,6 +106,7 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Widgets/AwDisplaySetupToolBar.h \
     ./Widgets/AwCursorMarkerToolBar.h \
     ./Widgets/AwAboutAnyWave.h \
+    ./Widgets/AwVideoSettingsDial.h \
     ./ICA/AwICAChannel.h \
     ./ICA/AwMappingButton.h \
     ./ICA/AwICAPanel.h \
@@ -173,6 +168,7 @@ SOURCES += ./AnyWave.cpp \
     ./Display/AwScene.cpp \
     ./Display/AwSignalView.cpp \
     ./Display/AwViewSetup.cpp \
+    ./Display/AwVideoManager.cpp \
     ./Filter/AwFilterToolBar.cpp \
     ./IO/ADES/ADESIO.cpp \
     ./IO/HDF5/HDF5IO.cpp \
@@ -210,6 +206,7 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/GetFileInfo.cpp \
     ./MATPy/GetICAPanelCapture.cpp \
     ./MATPy/GetMarkers.cpp \
+    ./MATPy/AwGetMarkersEx.cpp \
     ./MATPy/GetPluginInfo.cpp \
     ./MATPy/GetPluginIO.cpp \
     ./MATPy/GetScreenCapture.cpp \
@@ -235,6 +232,7 @@ SOURCES += ./AnyWave.cpp \
     ./Process/AwExporterSettings.cpp \
     ./Process/AwExportSelChannels.cpp \
     ./Process/AwMarkerExporter.cpp \
+    ./Process/AwMATLABMarkersExporter.cpp \
     ./Process/AwMatlabScriptPlugin.cpp \
     ./Process/AwProcessesWidget.cpp \
     ./Process/AwProcessFromMarkersDial.cpp \
@@ -252,13 +250,6 @@ SOURCES += ./AnyWave.cpp \
     ./Process/AwTriggerWriter.cpp \
 	./Process/AwLogPlainTextEdit.cpp \
     ./Process/TPUi.cpp \
-    ./Script/AwScript.cpp \
-    ./Script/AwScriptLog.cpp \
-    ./Script/AwScriptLogManager.cpp \
-    ./Script/AwScriptManager.cpp \
-    ./Script/AwScriptProcessFileInput.cpp \
-    ./Script/AwScriptsWidget.cpp \
-    ./Script/AwScriptWidget.cpp \
     ./Widgets/AwAboutAnyWave.cpp \
     ./Widgets/AwCursorMarkerToolBar.cpp \
     ./Widgets/AwDisplaySetupToolBar.cpp \
@@ -273,6 +264,7 @@ SOURCES += ./AnyWave.cpp \
     ./Widgets/AwPleaseWaitWidget.cpp \
     ./Widgets/AwSelectTriggerChannelDialog.cpp \
     ./Widgets/AwTriggerParsingDialog.cpp \
+    ./Widgets/AwVideoSettingsDial.cpp \
     ./ICA/AwICAChannel.cpp \
     ./ICA/AwICAComponents.cpp \
     ./ICA/AwICAManager.cpp \
@@ -301,8 +293,7 @@ SOURCES += ./AnyWave.cpp \
     ./Epoch/AwStatsModel.cpp \
     ./CL/AwCommandLineManager.cpp \
     ./CL/AwCommandLogger.cpp \
-    ./CL/AwComputeICA.cpp \
-    ./CL/AwConvertFile.cpp \
+    ./CL/AwRunProcess.cpp \
     ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
@@ -333,8 +324,6 @@ FORMS += ./AnyWave.ui \
     ./Process/AwExporterSettings.ui \
     ./Process/AwExportSelChannels.ui \
     ./Process/AwExporterSelMarkers.ui \
-    ./Script/AwScriptWidget.ui \
-    ./Script/AwScriptsWidget.ui \
     ./Widgets/AwAboutAnyWave.ui \
     ./Widgets/AwCursorMarkerToolBar.ui \
     ./Widgets/AwDisplaySetupToolBar.ui \
@@ -346,6 +335,7 @@ FORMS += ./AnyWave.ui \
     ./Widgets/AwPleaseWaitWidget.ui \
     ./Widgets/AwTriggerParsingDialog.ui \
     ./Widgets/AwSelectTriggerChannelDialog.ui \
+    ./Widgets/AwVideoSettingsDial.ui \
     ./Prefs/AwPrefsDial.ui \
     ./Epoch/AwEpochCreateUi.ui \
     ./Epoch/AwEpochVisuWidget.ui \

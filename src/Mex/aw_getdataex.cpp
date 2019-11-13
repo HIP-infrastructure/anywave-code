@@ -26,7 +26,7 @@
 #include "common.h"
 #include <AwProcess.h>
 
-static mxArray *parse_cfg(const mxArray *);
+static void parse_cfg(const mxArray *, mxArray *plhs[], int nlhs);
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -46,38 +46,37 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			mexErrMsgTxt("the parameter must be a struct (See help).");
 			return;
 		}
-		out = parse_cfg(prhs[0]);
+		parse_cfg(prhs[0], plhs, nlhs);
 	}
 
-	if (nrhs == 0) {
-		out = parse_cfg(0);
-	}
-
-	if (out)
-		plhs[0] = out;
+	if (nrhs == 0) 
+		parse_cfg(NULL, plhs, nlhs);
 }
 
 /// parse the cfg structure set as input parameter
-mxArray *parse_cfg(const mxArray *cfg)
+void parse_cfg(const mxArray *cfg, mxArray *plhs[], int nlhs)
 {
 	TCPRequest request(AwRequest::GetDataEx);
-	if (request.status() != TCPRequest::connected)
-		return NULL;
+	if (request.status() != TCPRequest::connected) {
+		mexErrMsgTxt("Failed to connect to AnyWave.");
+		return;
+	}
 
 	QDataStream *stream = request.stream();
 	mxArray *output = NULL;
-
 	if (cfg)
 		*stream << toJson(cfg);
 	
-	// if cfg == NULL => send an empty string (default parameters = all data from current input channels set for the process).
-
-	if (!request.sendRequest())
-		return NULL;
+	if (!request.sendRequest()) {
+		mexErrMsgTxt("sending request failed.");
+		return;
+	}
 
 	int dataSize = request.getResponse();
-	if (dataSize < 0)
-		return NULL;
+	if (dataSize < 0) {
+		mexErrMsgTxt("AnyWave did not respond to the request.");
+		return;
+	}
 
 	// Reading response..
 	QDataStream in(request.socket());
@@ -86,25 +85,26 @@ mxArray *parse_cfg(const mxArray *cfg)
 	int nChannels = 0;
 
 	// create MATLAB data struct for output
-	int nfields = 9;
-	const char *fields[] = { "name", "type", "ref", "samplingRate", "data", "hpf", "lpf", "notch", "selected" };
+	const char *fields[] = { "name", "type", "ref", "samplingRate", "data", "hpf", "lpf", "notch" };
 
 	// get response from AnyWave
 	in >> nChannels;
 
-	if (nChannels == 0)  // no channels returned (means that the requested labels did not match existing channels in AnyWave.
-		return output;
-	
-	output = mxCreateStructMatrix(1, nChannels, nfields, fields);
+	if (nChannels == 0) { // no channels returned (means that the requested labels did not match existing channels in AnyWave.
+		plhs[0] = mxCreateStructMatrix(0, 0, 8, fields);
+		return;
+	}
+		
+	output = mxCreateStructMatrix(1, nChannels, 8, fields);
+
 	for (auto i = 0; i < nChannels; i++) {
-		if (request.getResponse() < 0) 
-			return output;
+		if (request.getResponse() == 0) 
+			return;
 		
 		QString name, ref, type;
 		float samplingRate, hpf, lpf, notch;
 		qint64 nSamples;
-		int selected;
-		in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> notch >> nSamples >> selected;
+		in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> notch >> nSamples;
 
 		mxSetField(output, i, "name", mxCreateString(name.toStdString().c_str()));
 		mxSetField(output, i, "ref", mxCreateString(ref.toStdString().c_str()));
@@ -113,12 +113,16 @@ mxArray *parse_cfg(const mxArray *cfg)
 		mxSetField(output, i, "hpf", floatToMat(hpf));
 		mxSetField(output, i, "lpf", floatToMat(lpf));
 		mxSetField(output, i, "notch", floatToMat(notch));
-		mxSetField(output, i, "selected", boolToLogical(selected > 0));
 
-		if (nSamples == 0) 
+		if (nSamples == 0) {
 			mxSetField(output, i, "data", mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL));
+			plhs[0] = output;
+			mexErrMsgTxt("No samples sent by AnyWave.");
+			return;
+		}
 		else {
 			mxArray *f_data = mxCreateNumericMatrix(1, nSamples, mxSINGLE_CLASS, mxREAL);
+
 			mxSetField(output, i, "data", f_data);
 			float *data = (float *)mxGetData(f_data);
 			// reading chuncks of data
@@ -127,10 +131,10 @@ mxArray *parse_cfg(const mxArray *cfg)
 			qint64 chunkSize;
 			do {
 				// waiting for chunk of data
-				dataSize = waitForResponse(request.socket());
-				if (dataSize == -1) {
-					mexPrintf("Error while receiving data.");
-					return output;
+				if (request.getResponse() == 0) {
+					mexErrMsgTxt("Error while receiving data.");
+					plhs[0] = output;
+					return;
 				}
 				in >> chunkSize;
 				if (chunkSize == 0) { // finished receiving data
@@ -145,6 +149,6 @@ mxArray *parse_cfg(const mxArray *cfg)
 			} while (!finished);
 		}
 	}
-	return output;
+	plhs[0] = output;
 }
 

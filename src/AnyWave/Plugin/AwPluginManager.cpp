@@ -53,19 +53,30 @@
 #endif
 
 // PluginFactory
-template<typename AwPlugin>
-void AwPluginFactory<AwPlugin>::addPlugin(const QString& name, AwPlugin *plugin)
-{
-	if (!m_map.contains(name))
-		m_map.insert(name, plugin); 
-}
+//template<typename AwPlugin>
+//void AwPluginFactory<AwPlugin>::addPlugin(const QString& name, AwPlugin *plugin)
+//{
+//	QString key = name.toUpper();
+//	if (!m_map.contains(key))
+//		m_map.insert(key, plugin); 
+//}
 
-template<typename AwPlugin>
-void AwPluginFactory<AwPlugin>::removePlugin(const QString& name)
-{
-	if (m_map.contains(name))
-		m_map.remove(name);
-}
+//template<typename AwPlugin>
+//void AwPluginFactory<AwPlugin>::removePlugin(const QString& name)
+//{
+//	QString key = name.toUpper();
+//	if (m_map.contains(key))
+//		m_map.remove(key);
+//}
+
+//template<typename AwPlugin>
+//AwPlugin* AwPluginFactory<AwPlugin>::getPluginByName(const QString& name)
+//{
+//	QString key = name.toUpper();
+//	if (m_map.contains(key))
+//		return m_map.value(key);
+//	return Q_NULLPTR;
+//}
 
 // statics
 AwPluginManager *AwPluginManager::m_instance = 0;
@@ -134,6 +145,18 @@ void AwPluginManager::deleteReaderInstance(AwFileIO *fr)
 	fr->cleanUpAndClose();
 	fr->plugin()->deleteInstance(fr);
 }
+
+QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
+{
+	QList<AwProcessPlugin *> res;
+	for (auto p : m_pluginProcesses) {
+		if (p->flags() & flags)
+			res << p;
+	}
+	return res;
+}
+
+
 
 AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 {
@@ -207,7 +230,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 dirs.removeAll("..");
 	 for (auto folder : dirs) {
 		 QString name = folder;
-		 QString desc, processType, category, compiledPath, flags;
+		 QString desc, processType, category, compiledPath, flags, inputFlags;
 		 int type = AwProcessPlugin::Background;	// default type if none defined
 		 bool isMATLABCompiled = false, isPythonCompiled = false;
 		 QString pluginPath = dir.absolutePath() + "/" + folder;
@@ -270,6 +293,11 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 				 if (res.size() == 2)
 					 category = res.at(1).trimmed();
 			 }
+			 else if (line.contains("input_flags")) {
+				 QStringList res = line.split("=");
+				 if (res.size() == 2)
+					 inputFlags = res.at(1).trimmed();
+			 }
 			 else if (line.contains("flags")) {
 				 QStringList res = line.split("=");
 				 if (res.size() == 2)
@@ -293,14 +321,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->setPluginDir(pluginPath);
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
-			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-			 if (p) {
-				 m_pluginProcesses.removeAll(p);
-				 m_processFactory.removePlugin(name);
-				 delete p;
-			 }
-			 m_processFactory.addPlugin(name, plugin);
-			 m_pluginProcesses += plugin;
+			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
@@ -316,16 +338,30 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->setPluginDir(pluginPath);
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
-			 AwProcessPlugin *p = m_processFactory.getPluginByName(name);
-			 if (p) {
-				 m_pluginProcesses.removeAll(p);
-				 m_processFactory.removePlugin(name);
-				 delete p;
-			 }
-			 m_processFactory.addPlugin(name, plugin);
-			 m_pluginProcesses += plugin;
+			 loadProcessPlugin(plugin);
 		 }
 	 }
+}
+
+void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
+{
+	if (flags.isEmpty())
+		return;
+	QStringList tokens;
+	if (flags.contains(":")) {
+		tokens = flags.split(":");
+		if (tokens.isEmpty())
+			return;
+	}
+	else
+		tokens << flags;
+	int f = 0;
+	for (auto s : tokens) {
+		auto token = s.toLower();
+		if (token == "getallmarkers")
+			f |= Aw::ProcessInput::GetAllMarkers;
+	}
+	plugin->setInputFlags(f);
 }
 
 void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
@@ -339,7 +375,7 @@ void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QStr
 	for (auto s : tokens) {
 		auto token = s.toLower();
 		if (token == "nodatarequired")
-			f |= Aw::ProcessFlags::ProcessDontRequireData;
+			f |= Aw::ProcessFlags::ProcessDoesntRequireData;
 		else if (token == "hidden")
 			f |= Aw::ProcessFlags::PluginIsHidden;
 		else if (token == "accepttimeselections")
@@ -447,18 +483,7 @@ void AwPluginManager::loadUserPlugins()
 
 			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
 			if (iprocess) {
-				AwProcessPlugin *p = m_processFactory.getPluginByName(iprocess->name);
-				// is there a plugin with the same name loaded in Application's plugins dir?
-				if (p) { // yes, so remove it and replace it with the one loaded in user's plugins dir
-					m_pluginProcesses.removeAll(p);
-					m_pluginList.removeAll(p);
-					m_processFactory.removePlugin(iprocess->name);
-					delete p;
-					emit log("Process plugin " +  iprocess->name + " already exists.Previous version unloaded.");
-				}
-				m_processFactory.addPlugin(iprocess->name, iprocess);
-				m_pluginProcesses += iprocess;
-				m_pluginList += plugin;
+				loadProcessPlugin(iprocess);
 				continue;
 			}
 			AwDisplayPlugin *idisplay = qobject_cast<AwDisplayPlugin *>(plugin);
@@ -568,6 +593,7 @@ void AwPluginManager::loadPlugins()
 			}
 			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
 			if (iprocess) {
+				iprocess->name = iprocess->name;
 				loadProcessPlugin(iprocess);
 				continue;
 			}
@@ -650,7 +676,7 @@ void AwPluginManager::loadProcessPlugin(AwProcessPlugin *plugin)
 		delete p;
 		emit log("Process plugin " + plugin->name + " already exists.Previous version unloaded.");
 	}
-	m_processFactory.addPlugin(plugin->name, plugin);
+ 	m_processFactory.addPlugin(plugin->name, plugin);
 	m_pluginList += plugin;
 	m_pluginProcesses += plugin;
 }

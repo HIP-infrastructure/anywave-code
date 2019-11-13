@@ -32,7 +32,7 @@ class AwCommandLogger : public QObject
 public:
 	AwCommandLogger(const QString& componentName, const QString& logFile = QString("command_line"));
 	~AwCommandLogger();
-
+public slots:
 	void sendLog(const QString& message);
 signals:
 	void log(const QString& message);

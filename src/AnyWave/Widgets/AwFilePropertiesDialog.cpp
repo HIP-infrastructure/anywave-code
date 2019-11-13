@@ -34,20 +34,18 @@ AwFilePropertiesDialog::AwFilePropertiesDialog(AwFileIO *reader, QWidget *parent
 {
 	m_ui.setupUi(this);
 
-	if (!reader->infos.patientName().isEmpty())
-		m_ui.lineEditPatient->setText(reader->infos.patientName());
-	else
-		m_ui.lineEditPatient->setText(tr("Unknown"));
+	auto patientName = QString("%1 %2").arg(reader->infos.firstName()).arg(reader->infos.lastName());
+	m_ui.lineEditPatient->setText(patientName);
 
 	if (!reader->infos.recordingDate().isEmpty())
 		m_ui.lineEditDate->setText(reader->infos.recordingDate());
 	else
-		m_ui.lineEditDate->setText(tr("Not set"));
+		m_ui.lineEditDate->setText(tr("n/a"));
 
 	if (!reader->infos.recordingTime().isEmpty())
 		m_ui.lineEditTime->setText(reader->infos.recordingTime());
 	else
-		m_ui.lineEditTime->setText(tr("Not set"));
+		m_ui.lineEditTime->setText(tr("n/a"));
 
 	m_ui.lineEditnChannels->setText(QString::number(reader->infos.channelsCount()));
 

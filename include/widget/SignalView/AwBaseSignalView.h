@@ -46,7 +46,7 @@ public:
 	// Default = full navigation 
 	enum Flags {
 		Default = 0, NoNavBar = 1, NoHScrollBar = 2, NoSettingsButton = 4, EnableMarking = 8, NoMarkerBar = 16, ViewAllChannels = 32,
-		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512
+		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512, HidePositionInFile = 1024
 	};
 
 	void setFlags(int flags);
@@ -60,6 +60,7 @@ public:
 	inline AwGraphicsView *view() { return m_view; }
 	inline AwGraphicsScene *scene() { return m_scene; }
 	AwChannelList selectedChannels();
+	inline AwChannelList& channels() { return m_channels; }
 	inline AwNavigationBar *navigationBar() { return m_navBar; }
 	void changeChannelSelectionState(const QString& name, bool selected) { m_scene->changeChannelsSelectionState(name, selected); }
 	void update() { m_scene->update(); }
@@ -72,9 +73,11 @@ public:
 	void addNewDisplayPlugin(AwDisplayPlugin *plugin) { m_scene->registerDisplayPlugin(plugin); }
 	void changeSettings(AwViewSettings *settings, int flags) { emit settingsChanged(settings, flags); }
 	void setRecordedTime(const QTime& time);
+	void setRecordedTime(const QString& timeString) { setRecordedTime(QTime::fromString(timeString)); }
 
 	inline void showZeroLine(bool flag) { if (m_settings) { m_settings->showZeroLine = flag; emit settingsChanged(m_settings, AwViewSettings::ShowBaseLine); } }
 	inline void setTimeShift(float shift) { if (m_view) m_view->setTimeShift(shift); }
+	inline float currentEndPosition() { return m_positionInFile + m_pageDuration; }
 public slots:
 	void clean();
 	void setAmplitude(int type, float value);

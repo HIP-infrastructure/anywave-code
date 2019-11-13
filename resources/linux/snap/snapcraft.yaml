@@ -1,0 +1,45 @@
+name: anywave
+version: '1.0'
+summary: AnyWave Software
+description: software to visualise EEG/SEEG/MEG recordings 
+confinement: classic
+base : core18
+parts:
+  anywave:
+    plugin: cmake
+    source: https://gitlab.thevirtualbrain.org/anywave/AnyWave.git
+    build-packages:
+       - build-essential
+       - qtbase5-dev
+       - qt5-default
+       - libvtk7-qt-dev
+       - libopenblas-dev
+       - libmatio-dev
+       - libfftw3-dev
+       - libqwt-qt5-dev
+       - qttools5-dev-tools
+       - libqt5svg5-dev
+       - libxt-dev
+       - libhdf5-dev
+       - libpython2.7-dev
+    stage-packages:
+      - python2.7
+      - python-numpy
+      - libopenblas-base
+      - libmatio4
+      - libvtk7.1-qt
+      - libfftw3-3
+      - libqt5concurrent5
+      - libqt5core5a
+      - libqt5dbus5
+      - libqt5gui5
+      - libqt5multimedia5
+      - libqt5multimedia5-plugins
+      - libqt5multimediawidgets5
+      - libqt5network5
+      - libqt5opengl5
+
+
+apps:
+  anywave:
+    command: bin/anywave

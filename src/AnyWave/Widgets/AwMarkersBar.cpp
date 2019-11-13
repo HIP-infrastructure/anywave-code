@@ -26,7 +26,6 @@
 #include "AwMarkersBar.h"
 #include <QMenu>
 #include <QPainter>
-#include <AwUtilities.h>
 #include "Prefs/AwSettings.h"
 #include "Display/AwScene.h"
 #include "Process/AwProcessManager.h"

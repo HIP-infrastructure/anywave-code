@@ -95,8 +95,10 @@ void AwBaseSignalView::setFlags(int flags)
 	}
 	if (flags & AwBaseSignalView::ViewAllChannels) {
 		m_settings->filters.clear();
-		m_settings->filters << AwChannel::EEG << AwChannel::MEG << AwChannel::SEEG << AwChannel::ICA << AwChannel::Source
-			<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
+		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
+			m_settings->filters << i;
+		//m_settings->filters << AwChannel::EEG << AwChannel::MEG << AwChannel::SEEG << AwChannel::ICA << AwChannel::Source
+		//	<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
 	}
 	m_navBar->setFlags(flags);
 	if (m_flags & AwBaseSignalView::NoNavBar)
@@ -113,11 +115,9 @@ void AwBaseSignalView::makeConnections()
 	connect(m_scene, SIGNAL(needRefresh()), this, SLOT(reloadData()));
 	connect(m_scene, SIGNAL(updatePositionInFile(float)), this , SLOT(setPositionInFile(float)));
 	connect(m_scene, &AwGraphicsScene::channelsSelectionChanged, m_navBar, &AwNavigationBar::updateNumberOfSelectedChannels);
-	//connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), m_navBar, SLOT(updateNumberOfSelectedChannels(AwChannelList&)));
 	connect(m_scene, SIGNAL(closeViewClicked()), this, SIGNAL(closeViewClicked()));
 	connect(m_scene, SIGNAL(cursorPositionChanged(float)), this, SIGNAL(cursorPositionChanged(float)));
 	connect(m_scene, SIGNAL(mappingPositionChanged(float)), this, SIGNAL(mappingPositionChanged(float)));
-	//connect(m_scene, SIGNAL(newSceneSelection(AwChannelList&)), this, SLOT(setSelectedChannels(AwChannelList&)));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_view, SLOT(layoutItems()));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_navBar, SLOT(updateNumberOfChannels(int)));
 	connect(m_scene, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));

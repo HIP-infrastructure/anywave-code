@@ -83,122 +83,115 @@ void AwGraphicsView::scrollContentsBy(int dx, int dy)
 	scene()->update();
 }
 
+void AwGraphicsView::setPositionInFile(float pos)
+{
+	m_posInFile = pos;
+}
 
 void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 {
-	if (m_settings->showTimeGrid) {
-		QPen pen(Qt::blue);
-		pen.setStyle(Qt::DotLine);
-		bool show100ms = false;
-		int next100ms;
-		float nextSecond;
-		float startingOffset100ms; 
-		float startingOffsetSecond;
+	if (!m_settings->ShowTimeGrid)
+		return;
+	QPen pen(Qt::blue);
+	pen.setStyle(Qt::DotLine);
+	bool show100ms = false;
+	int next100ms;
+	float nextSecond;
+	float startingOffset100ms;
+	float startingOffsetSecond;
 
-		QVarLengthArray<QLineF, 100> lines;
-		QVarLengthArray<QLineF, 30> linesMs;
-		float posInFile = m_posInFile + m_timeOffset;
-		nextSecond = ceil(posInFile);
-		startingOffsetSecond = (nextSecond - posInFile) * m_physics->xPixPerSec();
-		float pixPer100ms = m_physics->xPixPerSec() / 10;
+	QVarLengthArray<QLineF, 100> lines;
+	QVarLengthArray<QLineF, 30> linesMs;
+	float posInFile = m_posInFile + m_timeOffset;
+	nextSecond = ceil(posInFile);
+	startingOffsetSecond = (nextSecond - posInFile) * m_physics->xPixPerSec();
+	float pixPer100ms = m_physics->xPixPerSec() / 10;
 
-		if (m_settings->secsPerCm < 0.1 ) { // when the time scale is < 0.5s/cm display the 100ms lines
-			show100ms = true;
-			// compute the starting 100ms line
-			quint32 timeMs = (quint32)floor(std::abs(posInFile)) * 1000;
-			float diff = (posInFile * 1000) - timeMs;
-			next100ms = (int)floor(diff / 100);
-			next100ms *= 100;
-			startingOffset100ms = ((next100ms - diff) / 1000) * m_physics->xPixPerSec();	
-			next100ms += 100;
-		}
+	if (m_settings->secsPerCm < 0.1) { // when the time scale is < 0.5s/cm display the 100ms lines
+		show100ms = true;
+		// compute the starting 100ms line
+		quint32 timeMs = (quint32)floor(std::abs(posInFile)) * 1000;
+		float diff = (posInFile * 1000) - timeMs;
+		next100ms = (int)floor(diff / 100);
+		next100ms *= 100;
+		startingOffset100ms = ((next100ms - diff) / 1000) * m_physics->xPixPerSec();
+		next100ms += 100;
+	}
 
-		for (float i = startingOffsetSecond; i < rect.width(); i += m_physics->xPixPerSec())
-			lines.append(QLineF(i , rect.y() , i, rect.height() + rect.y()));
+	for (float i = startingOffsetSecond; i < rect.width(); i += m_physics->xPixPerSec())
+		lines.append(QLineF(i, rect.y(), i, rect.height() + rect.y()));
 
-		if (show100ms)
-			for (float i = startingOffset100ms; i < rect.width(); i += pixPer100ms)
-				linesMs.append(QLineF(i , rect.y() , i, rect.height() + rect.y()));
+	if (show100ms)
+		for (float i = startingOffset100ms; i < rect.width(); i += pixPer100ms)
+			linesMs.append(QLineF(i, rect.y(), i, rect.height() + rect.y()));
 
-		if (m_settings->showSeconds) {
-			QPen pen(Qt::darkBlue);
-			QFont font("Times", 14, QFont::Bold);
-			QFontMetrics metrics(font);
+	if (m_settings->showSeconds) {
+		QPen pen(Qt::darkBlue);
+		QFont font("Times", 14, QFont::Bold);
+		QFontMetrics metrics(font);
 
-			painter->setPen(pen);
-			painter->setFont(font);
-			int value = (int)nextSecond;
-			int step5 = 0;
-			QRectF tmpRect; // hold rects for displaying timing text values
+		painter->setPen(pen);
+		painter->setFont(font);
+		int value = (int)nextSecond;
+		int step5 = 0;
+		QRectF tmpRect; // hold rects for displaying timing text values
 
-			for (auto x = startingOffsetSecond; x < rect.width(); x += m_physics->xPixPerSec()) {
-				QString text;
-				if (m_settings->timeMode == AwViewSettings::ShowRelativeTime)
-					text = QString("%1").arg(value);
-				else {
-					auto time = m_startTime.addSecs(value);
-					text = QString("%1").arg(time.toString(Qt::TextDate));
-				}
-				int w = metrics.width(text);
-				QRectF rectTimeValue(x - w / 2, 0., (qreal)w, (qreal)metrics.height());
-				value++;
-				
-				// check with tmpRect if exists
-				if (tmpRect.isNull()) {
+		// check if recorded time is really possible
+		bool recordedTimeDisabled = m_startTime.isNull() || !m_startTime.isValid();
+		if (recordedTimeDisabled)
+			m_settings->timeMode = AwViewSettings::ShowRelativeTime;
+		for (auto x = startingOffsetSecond; x < rect.width(); x += m_physics->xPixPerSec()) {
+			QString text;
+			
+			if (m_settings->timeMode == AwViewSettings::ShowRelativeTime)
+				text = QString("%1").arg(value);
+			else {
+				auto time = m_startTime.addSecs(value);
+				text = QString("%1").arg(time.toString(Qt::TextDate));
+			}
+			int w = metrics.width(text);
+			QRectF rectTimeValue(x - w / 2, 0., (qreal)w, (qreal)metrics.height());
+			value++;
+
+			// check with tmpRect if exists
+			if (tmpRect.isNull()) {
+				painter->drawText(rectTimeValue.x(), rect.y() + rectTimeValue.height(), text);
+				painter->drawText(rectTimeValue.x(), (rect.y() + rect.height()) - rectTimeValue.height(), text);
+				tmpRect = rectTimeValue;
+			}
+			else {
+				if (!rectTimeValue.intersects(tmpRect)) {
 					painter->drawText(rectTimeValue.x(), rect.y() + rectTimeValue.height(), text);
 					painter->drawText(rectTimeValue.x(), (rect.y() + rect.height()) - rectTimeValue.height(), text);
 					tmpRect = rectTimeValue;
 				}
-				else {
-					if (!rectTimeValue.intersects(tmpRect)) {
-						painter->drawText(rectTimeValue.x(), rect.y() + rectTimeValue.height(), text);
-						painter->drawText(rectTimeValue.x(), (rect.y() + rect.height()) - rectTimeValue.height(), text);
-						tmpRect = rectTimeValue;
-					}
-				}
-
-				//// display seconds value only every 5 seconds if the time scale is too short
-				//bool fontOverlap = (x + ( w / 2 )) >=  (x +  m_physics->xPixPerSec());
-				//if (m_physics->xPixPerSec() < 30 || fontOverlap) {
-				//	if (step5 == 0)  {	
-				//		painter->drawText(x - w / 2, rect.y() + metrics.height() , text);
-				//		painter->drawText(x - w / 2, (rect.y() + rect.height()) - metrics.height() , text);
-				//	}
-				//	step5++;
-				//	if (step5 == 5)
-				//		step5 = 0;
-				//}
-				//else { 
-				//	painter->drawText(x - w / 2, rect.y() + metrics.height() , text);
-				//	painter->drawText(x - w / 2, (rect.y() + rect.height()) - metrics.height() , text);
-				//}
-			}
-
-			if (show100ms) {
-				QFont fontMs("Times", 8, QFont::Normal);
-				QFontMetrics metricsMs(fontMs);
-				painter->setFont(fontMs);
-
-				// skip first value as it is the starting position
-				for (float i = startingOffset100ms + pixPer100ms; i < rect.width(); i += pixPer100ms) {
-					if (next100ms == 1000) { // skip seconds
-						next100ms = 100;	
-						continue;
-					}
-					
-					QString text = "+" + QString::number(next100ms) + "ms";
-					int w = metricsMs.width(text);
-
-					painter->drawText(i - w / 2, rect.y() + metricsMs.height(), text);
-					painter->drawText(i - w / 2, (rect.y() + rect.height()) - metricsMs.height(), text);
-					next100ms += 100;
-				}
 			}
 		}
-		painter->setPen(pen);
-		painter->drawLines(lines.data(), lines.size());
-		painter->drawLines(linesMs.data(), linesMs.size());
+
+		if (show100ms) {
+			QFont fontMs("Times", 8, QFont::Normal);
+			QFontMetrics metricsMs(fontMs);
+			painter->setFont(fontMs);
+
+			// skip first value as it is the starting position
+			for (float i = startingOffset100ms + pixPer100ms; i < rect.width(); i += pixPer100ms) {
+				if (next100ms == 1000) { // skip seconds
+					next100ms = 100;
+					continue;
+				}
+
+				QString text = "+" + QString::number(next100ms) + "ms";
+				int w = metricsMs.width(text);
+
+				painter->drawText(i - w / 2, rect.y() + metricsMs.height(), text);
+				painter->drawText(i - w / 2, (rect.y() + rect.height()) - metricsMs.height(), text);
+				next100ms += 100;
+			}
+		}
 	}
+	painter->setPen(pen);
+	painter->drawLines(lines.data(), lines.size());
+	painter->drawLines(linesMs.data(), linesMs.size());
 }
 
 

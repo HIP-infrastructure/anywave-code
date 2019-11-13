@@ -70,12 +70,13 @@ public:
 	~AwProcessManager();
 
 	static AwProcessManager *instance();
-	inline QMenu *processMenu() { return m_processMenu; }
+	void setMenu(QMenu *menu);
 	inline QMenu *fileMenu() { return m_fileMenu; }
 	inline QMenu *viewMenu() { return m_viewMenu; }
 	QList<QAction *>& icaActions() { return m_icaActions; }
 	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList());
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
+	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
 	void startProcess(const QString& name, const QStringList& args = QStringList());
 	void closeFile();
 	void quit();
@@ -93,11 +94,9 @@ public:
 	inline QWidget *processesWidget() { return (QWidget *)m_processesWidget; }
 	inline QDockWidget *dock() { return m_dock; }
 
+
 public slots:
 	void startProcessFromMenu();
-//	void setDisplayedChannels(const AwChannelList& list) { m_displayedChannels = list; }
-//	void setSelectedChannels(const AwChannelList& list) { m_selectedChannels = list; }
-//	void setMontageChannels(const AwChannelList& list) { m_montageChannels = list; }
 	void handleProcessTermination();
 	void startDisplayProcesses(AwChannelList& channels);
 	void stopProcess(AwProcess *process);
@@ -122,11 +121,8 @@ signals:
 protected:
 	void addProcess(AwProcessPlugin *plugin);
 	void addProcessToMenu(AwProcessPlugin *plugin);
-	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
 	bool initProcessIO(AwBaseProcess *p);
-	bool buildPDIForProcess(AwBaseProcess *p, AwChannelList& fromList);
-	bool buildPDIForProcess(AwBaseProcess *p);
-	bool processIOCheckMinMax(AwBaseProcess *p, int keyIndex, const AwChannelList& sources);
+	bool buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources = AwChannelList());
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);
 	
@@ -151,9 +147,6 @@ private:
 	QList<QMenu *> m_subProcessMenus;	// list of sub menus for process menu (depending on sub categories)
 	QStringList m_subProcessMenuNames;	// corresponding menu titles
 	QList<QAction *> m_actions;
-//	AwChannelList m_selectedChannels;	// copy of the currently selected channels
-//	AwChannelList m_displayedChannels;	// Copy of currently displayed channels
-//	AwChannelList m_montageChannels;	// Copy of currently channels present in montage
 	QHash<QString, QAction *> m_hashProcessAction;
 	QList<AwDisplayProcessRegistration *> m_registeredDisplayProcesses;
 	AwFileIO *m_currentReader;

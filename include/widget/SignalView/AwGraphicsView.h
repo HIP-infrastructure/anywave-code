@@ -42,7 +42,7 @@ public slots:
 	void layoutItems();
 	void applySettings(AwViewSettings *settings);
 	void updateSettings(AwViewSettings *settings, int flags);
-	void setPositionInFile(float pos) { m_posInFile = pos; }
+	void setPositionInFile(float pos); 
 	void setRecordedTime(const QTime& time) { m_startTime = time; }
 protected:
 	void resizeEvent(QResizeEvent *event);

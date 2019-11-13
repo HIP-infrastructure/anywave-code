@@ -32,17 +32,21 @@
 class AW_GRAPHICS_EXPORT AwCursorItem : public AwGraphicsCursorItem
 {
 public:
-	AwCursorItem(float currentPosInFile, float cursorPos, const QString& color, const QFont& font);
+	AwCursorItem(float currentPosInFile, float cursorPos, const QString& label, const QString& color, const QFont& font);
 
 	void setOtherPos(const QPointF& pos);
 	void setWidth(float width);
 	inline void noOtherPos() { m_otherPositionActivated = false; update(); }
+	/** change the position of the cursor in seconds, not in scene coordinates **/
+	void setPosition(float positionInFile, float position);
+
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	QPointF m_otherPos;
 	bool m_otherPositionActivated;
 	QFont m_font;
 	QString m_color;
+	QString m_label;
 	qreal m_width;
 };
 

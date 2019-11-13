@@ -36,8 +36,7 @@ AwConverterPlugin::AwConverterPlugin()
 
 AwConverter::AwConverter() : AwProcess()
 {
-	setFlags(Aw::ProcessFlags::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::ProcessInput::AnyChannels, "1-n");
+	pdi.addInputChannel(-1, 1, 0);
 }
 
 AwConverter::~AwConverter()

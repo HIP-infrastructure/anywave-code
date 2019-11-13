@@ -43,11 +43,8 @@ public:
 	bool ignoreMarkers;
 	QString selectedMarker;
 	int modality;
-	int decimateFactor;
 	float hpf, lpf;
-	QString filePath;
 	int components;
-	float samplingRate;
 	int algo;
 	bool downSampling;
 public slots:
@@ -56,7 +53,6 @@ protected slots:
 	void updateMaxNumOfIC();
 private:
 	Ui::ICASettingsUI m_ui;
-	QString m_dataPath;
 	AwChannelList m_channels;
 	QStringList m_modes;
 	QStringList m_labels;

@@ -60,7 +60,6 @@
 #include "Source/AwSourceManager.h"
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
-#include "Script/AwScriptManager.h"
 #include <AwFileIO.h>
 #include <AwMatlabInterface.h>
 #include <AwMEGSensorManager.h>
@@ -70,8 +69,9 @@
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
 #include "AwUpdater.h"
-#include "Script/AwScriptManager.h"
 #include <widget/AwTopoBuilder.h>
+#include <widget/AwVideoPlayer.h>
+#include "Widgets/AwVideoSettingsDial.h"
 //#define AW_EPOCHING
 
 #ifndef AW_DISABLE_EPOCHING
@@ -82,6 +82,8 @@
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwFileInfo.h>
+
+#define AW_HELP_URL "http://meg.univ-amu.fr/wiki/AnyWave"
 
 
 AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
@@ -101,7 +103,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
 	//Save system path
-//	aws->setSystemPath(qgetenv("PATH"));
 	aws->setSettings("systemPath", QString(qgetenv("PATH")));
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
@@ -118,23 +119,13 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	createUserDirs();
 	
 	if (isGUIMode) {
-		// AwSettings loads recentfiles in constructor, so get that list and update menu
-		//QStringList recentFiles = aws->recentFiles();
 		QStringList recentFiles = aws->getStringList("recentFiles");
 		if (!recentFiles.isEmpty()) {
-			QStringList shortenFiles;
-			for (auto s : recentFiles)
-				shortenFiles << aws->shortenFilePath(s);
-			updateRecentFiles(shortenFiles);
+			updateRecentFiles(recentFiles);
 		}
-
-		//QStringList recentBIDS = aws->recentBIDS();
 		QStringList recentBIDS = aws->getStringList("recentBIDS");
 		if (!recentBIDS.isEmpty()) {
-			QStringList shortenFiles;
-			for (auto s : recentBIDS)
-				shortenFiles << aws->shortenFilePath(s);
-			updateRecentBIDS(shortenFiles);
+			updateRecentBIDS(recentBIDS);
 		}
 	}
 
@@ -144,12 +135,16 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
     settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
-	if (isGUIMode)
-		initMatlab();
+	initMatlab();
+	// Plugins
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	plugin_manager->setParent(this);
+	// Processes
 	AwProcessManager *process_manager = AwProcessManager::instance();
 	process_manager->setParent(this);
+	// As initializing ProcessManager, give it the Process Menu instance !
+	process_manager->setMenu(menuProcesses);
+	// Montage
 	AwMontageManager *montage_manager = AwMontageManager::instance();
 	montage_manager->setParent(this);
 	m_currentReader = NULL;
@@ -159,7 +154,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	// get menus from process manager 
 	// process menu
 	if (isGUIMode) {
-		QMainWindow::menuBar()->addMenu(process_manager->processMenu());
 		if (process_manager->fileMenu())
 			menuFile->insertMenu(actionFileProperties, process_manager->fileMenu());
 		if (process_manager->viewMenu())
@@ -178,39 +172,41 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwMarkerInspector *markerInspectorWidget = NULL;
 
 	if (isGUIMode) {
-		m_dockWidgets["markers"] = new QDockWidget(tr("Markers"), this);
-		addDockWidget(Qt::LeftDockWidgetArea, m_dockWidgets["markers"]);
-		m_dockWidgets["markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		m_dockWidgets["markers"]->setWidget(AwMarkerManager::instance()->ui());
-		m_dockWidgets["markers"]->hide();
-
-		m_dockWidgets["add_markers"] = new QDockWidget(tr("Adding Markers Tool"), this);
-		m_dockWidgets["add_markers"]->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		m_dockWidgets["add_markers"]->setFloating(true);
+		auto dock = new QDockWidget(tr("Markers"), this);
+		m_dockWidgets["markers"] = dock;
+		dock->hide();
+		dock->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dock->setWidget(AwMarkerManager::instance()->ui());
+		dock->widget()->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+		addDockWidget(Qt::LeftDockWidgetArea, dock);
+		resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
+		
+		dock = new QDockWidget(tr("Adding Markers Tool"), this);
+		m_dockWidgets["add_markers"] = dock;
+		dock->hide();
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dock->setFloating(true);
 		markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
-		m_dockWidgets["add_markers"]->setWidget(markerInspectorWidget);
-		m_dockWidgets["add_markers"]->hide();
+		dock->setWidget(markerInspectorWidget);
+
+		dock = new QDockWidget(tr("Video"), this);
+		m_dockWidgets["video"] = dock;
+		dock->hide();
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dock->setFloating(true);
+		m_player = new AwVideoPlayer;
+		dock->setWidget(m_player);
+		addDockWidget(Qt::LeftDockWidgetArea, dock);
 	}
 
-	// Scripts
-	// Script manager
-	AwScriptManager *scriptManager = AwScriptManager::instance();
-	scriptManager->setParent(this);
-
-	auto dockScripts = new QDockWidget(tr("Scripts"), this);
-	m_dockWidgets["scripts"] = dockScripts;
-	addDockWidget(Qt::LeftDockWidgetArea, dockScripts);
-	dockScripts->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	dockScripts->setWidget(AwScriptManager::instance()->scriptsWidget());
-	dockScripts->hide();
-	AwScriptManager::instance()->setDock(dockScripts);
 	// Processes
 	auto dockProcess = new QDockWidget(tr("Processes"), this);
+	dockProcess->hide();
 	m_dockWidgets["processes"] = dockProcess;
 	addDockWidget(Qt::LeftDockWidgetArea, dockProcess);
 	dockProcess->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockProcess->setWidget(AwProcessManager::instance()->processesWidget());
-	dockProcess->hide();
 	AwProcessManager::instance()->setDock(dockProcess);
 
 	AwMarkerManager *marker_manager = AwMarkerManager::instance();
@@ -229,6 +225,10 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_display = new AwDisplay(this);
 		m_display->setParent(this);
 		m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
+		connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::handleVideoCursor);
+		connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setVideoPosition);
+		connect(m_player, &AwVideoPlayer::changeSyncSettings, this, &AnyWave::editVideoSyncSettings);
+		connect(m_display, &AwDisplay::draggedCursorPositionChanged, m_player, &AwVideoPlayer::setPositionFromSignals);
 	}
 
 	// AwSourceManager
@@ -242,12 +242,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	m_meshManager = AwMeshManager::instance();
 	// AwMeshManager
 	m_layoutManager = AwLayoutManager::instance();
-
-	// Connections !
-	// AnyWave and Script Manager
-	connect(actionExecuteScript, SIGNAL(triggered()), scriptManager, SLOT(runScript()));
-	// Display and Process Manager
-	   	  
+  	  
 	if (m_display) {
 		connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList *)), m_display, SLOT(removeVirtualChannels(AwChannelList *)));
 		connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
@@ -295,6 +290,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		// Menu: ICA->Show maps on signals
 		connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
 		connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
+		connect(actionOpen_New_AnyWave_Application, SIGNAL(triggered()), this, SLOT(openNewAnyWave()));
 		// Populate View Menu to show/hide DockWidgets
 		menuView_->addSeparator();
 		for (auto v : m_dockWidgets.values())
@@ -303,6 +299,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		m_updater.checkForUpdate();
 	}
 	m_lastDirOpen = "/";
+	readSettings();
 }
 
 //
@@ -340,20 +337,6 @@ void AnyWave::changeEvent(QEvent *e)
 
 void AnyWave::closeEvent(QCloseEvent *e)
 {
-	// check if a script is running
-
-	if (AwScriptManager::instanceExists()) {
-		AwScriptManager *sm = AwScriptManager::instance();
-		if (sm->isAScriptRunning()) {
-			if (AwMessageBox::question(this, "Script", "At least one script is running. Kill all scripts and close?") == QMessageBox::Yes) {
-				sm->quitAllScripts();
-			}
-			else {
-				e->ignore();
-				return;
-			}
-		}
-	}
 	quit();
 	QMainWindow::closeEvent(e);
 }
@@ -395,7 +378,6 @@ void AnyWave::applyNewLanguage()
 
 void AnyWave::quit()
 {
-
 	AwDebugLog::instance()->closeFile();
 
 	for (auto w : m_openWidgets)
@@ -418,8 +400,6 @@ void AnyWave::quit()
 		dockEEG->close();
 		delete dock;
 		m_dockWidgets.remove("eeg_mapping");
-		//delete m_dockEEG;
-		//m_dockEEG = NULL;
 	}
 
 	auto dockMEG = m_dockWidgets["meg_mapping"];
@@ -430,7 +410,6 @@ void AnyWave::quit()
 		dockMEG->close();
 		m_dockWidgets.remove("meg_mapping");
 		delete dock;
-		//m_dockMEG = NULL;
 	}
 	if (m_display)
 		m_display->quit();
@@ -446,8 +425,8 @@ void AnyWave::quit()
 		AwEpochManager::destroy();
 	}
 #endif
-	AwScriptManager::destroy();
 	AwBIDSManager::destroy();
+	writeSettings();
 }
 
 
@@ -492,7 +471,6 @@ void AnyWave::createUserDirs()
 	}
 	else {
 		homeDir = dirs.first();
-//		aws->setHomeDirectory(homeDir);
 		aws->setSettings("homeDir", homeDir);
 	}
 #endif
@@ -597,11 +575,11 @@ void AnyWave::initToolBarsAndMenu()
 
 	// Filtering dock widget
 	auto dockFilters = new QDockWidget(tr("Filtering"), this);
+	dockFilters->hide();
 	m_dockWidgets["filters"] = dockFilters;
 	dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockFilters->setFloating(true);
 	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, dockFilters, &QDockWidget::show);
-	dockFilters->hide();
 	dockFilters->setWidget(AwSettings::getInstance()->filterSettings().ui());
 	filter_tb->setEnabled(false);
 	m_toolBarWidgets.append(filter_tb);
@@ -729,6 +707,17 @@ void AnyWave::averageEpoch()
 {
 #ifdef AW_EPOCHING
 	AwEpochManager::instance()->average();
+#endif
+}
+
+void AnyWave::openNewAnyWave()
+{
+	QProcess process;
+	process.setProgram(QCoreApplication::applicationFilePath());
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+	process.startDetached(QCoreApplication::applicationFilePath());
+#else
+	process.startDetached();
 #endif
 }
 
@@ -1074,7 +1063,6 @@ bool AnyWave::searchForMatlab()
 		}
 	}
 #endif
-//	bool requireRestart = settings.value("matlab/require_restart", false).toBool();
 	if (isDetected) {
 		if (needRestart)
 			AwMessageBox::information(this, tr("MATLAB"), tr("MATLAB was detected. Restart AnyWave to activate MATLAB plugins."));
@@ -1119,8 +1107,8 @@ void AnyWave::initMatlab()
 		QPluginLoader loader(modulePath);
 		QObject *module = loader.instance();
 		//AwSettings::getInstance()->setMatlabPresent((module != NULL));
-		AwSettings::getInstance()->setSettings("isMatlabPresent", module != NULL);
 		if (module) {
+			AwSettings::getInstance()->setSettings("isMatlabPresent", true);
 			AwMatlabInterface *mi = qobject_cast<AwMatlabInterface *>(module);
 			AwSettings::getInstance()->setMatlabInterface(mi);
 			mi->setParent(this);
@@ -1212,4 +1200,43 @@ void AnyWave::on_actionQuit_triggered()
 }
 
 
+// Help
+void AnyWave::on_actionHelp_triggered()
+{
+	QDesktopServices::openUrl(QUrl::fromLocalFile(AW_HELP_URL));
+}
 
+///
+/// save application state and geometry.
+/// toolbar positions are saved
+void AnyWave::readSettings()
+{
+	QSettings settings;
+	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
+	QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
+	restoreState(stateData);
+	restoreGeometry(geometryData);
+}
+
+///
+/// restore application state and geometry.
+/// toolbar positions are restored
+void AnyWave::writeSettings()
+{
+	QSettings settings;
+	// Write the values to disk in categories.
+	settings.setValue("state/mainWindowState", saveState());
+	settings.setValue("geometry/mainWindowGeometry", saveGeometry());
+}
+
+
+void AnyWave::editVideoSyncSettings()
+{
+	AwVideoSettingsDial dlg;
+	if (dlg.exec() == QDialog::Accepted) {
+		AwVideoSynch synch;
+		synch.drift = dlg.drift;
+		synch.shift = dlg.shift;
+		m_player->setVideoSyncSettings(synch);
+	}
+}

@@ -6,7 +6,6 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <QDirIterator>
-#include <qregularexpression.h>
 #include "AwBIDSTools.h"
 #include "AwFileItem.h"
 #include "Plugin/AwPluginManager.h"
@@ -14,8 +13,8 @@
 #include "Montage/AwMontageManager.h"
 #include "Marker/AwMarkerManager.h"
 #include "Debug/AwDebugLog.h"
-#include <AwUtilities.h>
 #include <QJsonArray>
+#include <utils/AwUtilities.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
@@ -28,7 +27,6 @@ void AwBIDSManager::toBIDS(const AwArguments& args)
 	QString origin = "AwBIDSManager::toBIDS";
 	if (args.isEmpty()) {
 		emit log("AwBIDSManager::toBIDS - no arguments specified.");
-		throw(AwException("No arguments", origin));
 		return;
 	}
 
@@ -38,29 +36,287 @@ void AwBIDSManager::toBIDS(const AwArguments& args)
 		SEEGtoBIDS(args);
 	}
 	else if (mod == "meg") {
+		// output_dir option must be specified
+		if (!args.contains("output_dir")) {
+			emit log("AwBIDSManager::toBIDS - output_dir option must be set for MEG modality.");
+			return;
+		}
+		if (!args.contains("input_dir")) {
+			emit log("AwBIDSManager::toBIDS - input_dir option must be set for MEG modality.");
+			return;
+		}
 		MEGtoBIDS(args);
 	}
 	else {
 		emit log("AwBIDSManager::toBIDS - invalid bids_modality.");
-		throw(AwException("bids_modality is invalid.", origin));
 		return;
 	}
 }
 
-void AwBIDSManager::MEGtoBIDS(const AwArguments& args)
+int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 {
+	int kind = -1;
+	auto inputDir = args["input_dir"].toString(); // here input_file should be a folder containing MEG data.
+	AwPluginManager *pm = AwPluginManager::getInstance();
+	// given the input folder search for a file with ,
+	QDir dir(inputDir);
+	auto files = dir.entryList(QDir::Files);
+	AwFileIO *reader = nullptr;
+	bool found = false;
+	QString filePath;
+	for (auto f : files) {
+		if (f.contains(",") && files.contains("config") && !f.contains(".")) {
+			filePath = QString("%1/%2").arg(inputDir).arg(f);
+			reader = pm->getReaderToOpenFile(filePath);
+			if (reader) {
+				//return convert4DNI(args, reader, filePath);
+				kind = AwBIDSManager::Bti4DNI;
+				break;
+			}
+		}
+		else if (f.endsWith(".fif")) {
+			filePath = QString("%1/%2").arg(inputDir).arg(f);
+			reader = pm->getReaderToOpenFile(filePath);
+			if (reader) {
+				kind = AwBIDSManager::Elekta;
+				break;
+			}
+		}
+		else if (f.endsWith(".res4")) {
+			reader = pm->getReaderToOpenFile(inputDir);
+			if (reader) {
+				kind = AwBIDSManager::CTF;
+				break;
+			}
+		}
 
+	}
+	if (kind == -1) { 	// not a 4DNI run or a FIFF file
+						// no other format supported for now.
+		emit log("no 4DNI/FIFF/CTF MEG format detected (only support those formats for now).");
+		return -1;
+	}
+
+	// common BIDS code to all MEG formats
+	auto subj = args["bids_subject"].toString();
+	auto task = args["bids_task"].toString();
+	auto session = args["bids_session"].toString();
+	auto run = args["bids_run"].toString();
+	auto acq = args["bids_acq"].toString();
+	auto proc = args["bids_proc"].toString();
+	if (run.isEmpty() && kind == AwBIDSManager::Bti4DNI) { // bids run must be specified if converting 4DNI MEG format
+		emit log("bids_run is missing.");
+		return -1;
+	}
+	if (reader->openFile(filePath) != AwFileIO::NoError) {
+		emit log(QString("Could not open the file %1").arg(filePath));
+		return -1;
+	}
+	auto outputDir = args["output_dir"].toString();
+	bool headshapeExists = false;
+
+	QString folderName, json, channels_tsv;
+	folderName = QString("%1/sub-%2").arg(outputDir).arg(subj);
+	if (!session.isEmpty())
+		folderName = QString("%1_ses-%2").arg(folderName).arg(session);
+	folderName = QString("%1_task-%2").arg(folderName).arg(task);
+	// acq comes after task
+	if (!acq.isEmpty())
+		folderName = QString("%1_acq-%2").arg(folderName).arg(acq);
+	// run comes after acq or task
+	if (!run.isEmpty())
+		folderName = QString("%1_run-%2").arg(folderName).arg(run);
+	// proc comes after run
+	if (!proc.isEmpty())
+		folderName = QString("%1_proc-%2").arg(folderName).arg(proc);
+
+	auto baseName = folderName;
+	folderName = QString("%1_meg").arg(folderName);
+	//
+	json = QString("%1.json").arg(folderName);
+	channels_tsv = QString("%1_channels.tsv").arg(baseName);
+	// common BIDS code to all MEG formats
+
+	if (kind == AwBIDSManager::Bti4DNI) { // 4DNI specific code
+		// ok create the destination folder with the BIDS name
+		QDir dir(folderName);
+		if (!dir.mkdir(folderName)) {
+			emit log(QString("could not create %1").arg(folderName));
+			return -1;
+		}
+		// copy all files
+		QDir input(inputDir);
+		for (auto f : input.entryList(QDir::Files)) {
+			auto sourceFile = QString("%1/%2").arg(inputDir).arg(f);
+			auto destFile = QString("%1/%2").arg(folderName).arg(f);
+			if (QFile::exists(destFile))
+				QFile::remove(destFile);
+			if (!QFile::copy(sourceFile, destFile)) {
+				emit log(QString("could not copy file %1 to %2").arg(f).arg(folderName));
+				return -1;
+			}
+			headshapeExists = f.contains("hs_file");
+		}
+	}
+	else if (kind == AwBIDSManager::Elekta) {
+		// copy the fiff file to its new name and location
+		auto destFile = QString("%1.fif").arg(folderName);
+		if (QFile::exists(destFile))
+			QFile::remove(destFile);
+		if (!QFile::copy(filePath, destFile)) {
+			emit log(QString("could not copy file %1 to %2").arg(filePath).arg(destFile));
+			return -1;
+		}
+		headshapeExists = reader->hasHeadShapeFile();
+	}
+	else if (kind == AwBIDSManager::CTF) {
+		// ok create the destination folder with the BIDS name
+		QDir dir(folderName);
+		if (!dir.mkdir(folderName)) {
+			emit log(QString("could not create %1").arg(folderName));
+			return -1;
+		}
+		// copy all files
+		QDir input(inputDir);
+		for (auto f : input.entryList(QDir::Files)) {
+			auto sourceFile = QString("%1/%2").arg(inputDir).arg(f);
+			auto destFile = QString("%1/%2").arg(folderName).arg(f);
+			if (QFile::exists(destFile))
+				QFile::remove(destFile);
+			if (!QFile::copy(sourceFile, destFile)) {
+				emit log(QString("could not copy file %1 to %2").arg(f).arg(folderName));
+				return -1;
+			}
+		}
+	}
+
+	// create json file
+	QString manufacturer = reader->plugin()->manufacturer;
+	if (manufacturer.isEmpty())
+		manufacturer = "n/a";
+	// JSON
+	QJsonObject jObject;
+	jObject["TaskName"] = task;
+	jObject["Manufacturer"] = manufacturer;
+	jObject["PowerLineFrequency"] = (int)50;
+	jObject["SamplingFrequency"] = reader->infos.channels().first()->samplingRate();
+	jObject["SoftwareFilters"] = QString("n/a");
+	jObject["DewarPosition"] = QString("n/a");
+	jObject["DigitizedLandmarks"] = false;
+	jObject["DigitizedHeadPoints"] = headshapeExists;
+
+	QJsonDocument doc(jObject);
+	QFile jsonFile(json);
+	if (!jsonFile.open(QIODevice::WriteOnly)) {
+		emit log(QString("Could no create %1").arg(json));
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+	jsonFile.write(doc.toJson());
+	jsonFile.close();
+
+	// create optional coordsystem.json
+	jObject = QJsonObject();
+	switch (kind) {
+	case AwBIDSManager::Bti4DNI:
+		jObject["MEGCoordinateSystem"] = QString("ALS");
+		jObject["MEGCoordinateUnits"] = QString("m");
+		if (reader->hasHeadShapeFile()) {
+			auto source = reader->getHeadShapeFile();
+			auto dest = QString("%1_headshape.pos").arg(baseName);
+			QFile::copy(reader->getHeadShapeFile(), QString("%1_headshape.pos").arg(baseName));
+		}
+		break;
+	case AwBIDSManager::Elekta:
+		jObject["MEGCoordinateSystem"] = QString("RAS");
+		jObject["MEGCoordinateUnits"] = QString("m");
+		break;
+	case AwBIDSManager::CTF:
+		jObject["MEGCoordinateSystem"] = QString("ALS");
+		jObject["MEGCoordinateUnits"] = QString("cm");
+		break;
+	}
+	doc = QJsonDocument(jObject);
+	jsonFile.setFileName(QString("%1_coordsystem.json").arg(baseName));
+	if (!jsonFile.open(QIODevice::WriteOnly)) {
+		emit log(QString("Could no create %1").arg(json));
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+	jsonFile.write(doc.toJson());
+	jsonFile.close();
+	   
+	// Create channels.tsv
+	QStringList headers = { "name", "type", "units" };
+
+	QFile channel(channels_tsv);
+	QTextStream stream(&channel);
+	if (!channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		emit log("Could no create channels.tsv");
+		reader->plugin()->deleteInstance(reader);
+		return -1;
+	}
+	for (int i = 0; i < headers.size(); i++) {
+		stream << headers.at(i);
+		if (i < headers.size() - 1)
+			stream << "\t";
+	}
+	for (auto c : reader->infos.channels()) { // raw file contains EEG or eventually trigger channels. There is no id to specify that is SEEG.
+		// name
+		stream << endl;
+		stream << c->name() << "\t";
+		QString unit = "n/a";
+		QString channelType;
+		// type and units
+		switch (c->type()) {
+		case  AwChannel::Trigger:
+			channelType = "TRIG";
+			break;
+		case  AwChannel::EEG:
+			channelType = "EEG";
+			unit = "V";
+			break;
+		case  AwChannel::EMG:
+			channelType = "EMG";
+			unit = "V";
+			break;
+		case  AwChannel::ECG:
+			channelType = "ECG";
+			unit = "V";
+			break;
+		case  AwChannel::SEEG:
+			channelType = "EEG";
+			unit = "V";
+			break;
+		case  AwChannel::EOG:
+		case  AwChannel::Reference:
+			channelType = "MEGREFMAG";
+			unit = "T";
+			break;
+		case  AwChannel::MEG:
+			channelType = "MEGMAG";
+			unit = "T";
+			break;
+		case  AwChannel::GRAD:
+			channelType = "MEGGRADAXIAL";
+			unit = "Tm";
+			break;
+		default:
+			channelType = "OTHER";
+			break;
+		}
+		stream << channelType << "\t" << unit;
+	}
+	channel.close();
+	return 0;
 }
 
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
-	QString origin = "AwBIDSManager::SEEGtoBIDS";
-
 	auto file = args["input_file"].toString();
 
 	if (file.isEmpty()) {
 		emit log("AwBIDSManager::SEEGtoBIDS - No SEEG file specified.");
-		throw AwException("No input file specified", origin);
 		return -1;
 	}
 
@@ -69,12 +325,10 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	AwFileIO *reader = pm->getReaderToOpenFile(file);
 	if (reader == NULL) {
 		emit log(QString("No reader found for file %1").arg(file));
-		throw AwException(QString("No reader found for file %1").arg(file), origin);
 		return -1;
 	}
 	if (reader->openFile(file) != AwFileIO::NoError) {
 		emit log(QString("Could not open the file %1").arg(file));
-		throw AwException(QString("Could not open the file %1").arg(file), origin);
 		return -1;
 	}
 
@@ -98,7 +352,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 			ext = "vhdr";
 		else {
 			emit log("Format option is invalid. (EDF or VHDR)");
-			throw AwException("Format option is invalid. (EDF or VHDR)", origin);
 			return -1;
 		}
 	}
@@ -113,7 +366,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	// check for at least subject and task option
 	if (subj.isEmpty() || task.isEmpty()) {
 		emit log("Missing subj or task option");
-		throw AwException(QString("Missing subj or task option"), "AwBIDSManager::toBIDS");
 		return -1;
 	}
 
@@ -244,7 +496,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 	else {
 		emit log("Could no create channels.tsv");
-		throw(AwException("Could no create channels.tsv", "AwBIDSManager::convertToBIDS"));
 		reader->plugin()->deleteInstance(reader);
 		return -1;
 	}
@@ -276,7 +527,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 	else {
 		emit log(QString("Could no create %1").arg(json));
-		throw(AwException(QString("Could no create %1").arg(json), "AwBIDSManager::toBIDS"));
 		reader->plugin()->deleteInstance(reader);
 		return -1;
 	}
@@ -299,7 +549,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		}
 		catch (const AwException& e) {
 			emit log(QString("Error during file conversion: %1").arg(e.errorString()));
-			throw;
 			reader->plugin()->deleteInstance(reader);
 			return -1;
 		}
@@ -576,10 +825,6 @@ void AwBIDSManager::closeBIDS()
 {
 	if (!isBIDSActive())
 		return;
-	// check if some mods should be validated
-	if (!m_modifications.isEmpty()) {
-			applyModifications();
-	}
 	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
 		clearSubjects(i);
 	m_rootDir.clear();
@@ -691,92 +936,69 @@ void AwBIDSManager::updateEventsTsv(const QString& itemPath)
 	modifyUpdateJson(branches);
 }
 
+///
+/// updateChannelsTsv
+/// Keep the order and update bad/good status
+/// Warning: this method can display a Message box.
 void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 {
-	AwTSVDict dict;
-	try {
-		dict = loadTsvFile(itemPath);
-	}
-	catch (const AwException& e) {
-		AwMessageBox::information(0, tr("BIDS"), e.errorString());
+	// try to copy tsv file as tsv.bak
+	QString bak = itemPath + ".bak";
+	QFile::copy(itemPath, bak);
+	QFile sourceFile(bak);
+	QFile destFile(itemPath);
+	
+	if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
 		return;
 	}
-	if (dict.isEmpty())
+	QTextStream sourceStream(&sourceFile);
+	QString line = sourceStream.readLine();
+	QStringList columns = line.split('\t');
+	auto indexName = columns.indexOf("name");
+	auto indexStatus = columns.indexOf("status");
+	// check that columns contains at leats name and status
+	if (indexName == -1 || indexStatus == -1) {
+		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
+		sourceFile.close();
 		return;
+	}
 
+	if (!destFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		QFile::copy(bak, itemPath);
+		AwMessageBox::information(0, tr("BIDS"), QString("Could not update %1.").arg(itemPath));
+		sourceFile.close();
+		return;
+	}
+	QTextStream destStream(&destFile);
+	destStream << line << endl;
 	auto MM = AwMontageManager::instance();
-
-	auto names = dict["name"];
-	auto types = dict["type"];
-	auto status = dict["status"];
-	// check if status column is present
-	if (status.isEmpty()) { // No => create it.
-		for (int i = 0; i < names.size(); i++) {
-			status << "good";
-		}
-	}
-
-	// from here, cols contains the keys to access the dictionnary.
-	QString badStatus, type;
-	bool mustBeSaved = false;
-	for (int i = 0; i < names.size(); i++) {
-		auto name = names.value(i);
-		auto asRecorded = MM->asRecordedChannel(name);
-		if (asRecorded) {
-			// convert AnyWave Channel type to BIDS
-			if (asRecorded->isMEG())
-				type = "MEGMAG";
-			else if (asRecorded->isGRAD())
-				type = "MEGGRADAXIAL";
-			else if (asRecorded->isECG())
-				type = "ECG";
-			else if (asRecorded->isSEEG())
-				type = "SEEG";
-			else if (asRecorded->isEEG())
-				type = "EEG";
-			else if (asRecorded->isEMG())
-				type = "EMG";
-			else if (asRecorded->isTrigger())
-				type = "TRIG";
-			else if (asRecorded->isReference())
-				type = "MEGREFMAG";
-			else
-				type = "OTHER";
-
-			badStatus = asRecorded->isBad() ? "bad" : "good";
-			if (types.value(i) != type) {
-				mustBeSaved = true;
-				types.replace(i, AwChannel::typeToString(asRecorded->type()));
+	while (!sourceStream.atEnd()) {
+		line = sourceStream.readLine();
+		QStringList cols = line.split('\t');
+		if (cols.size() != columns.size())
+			break;
+		auto name = cols.value(indexName);
+		auto asRecordedChannel = MM->asRecordedChannel(name);
+		if (asRecordedChannel == Q_NULLPTR) {
+			destStream << line << endl;
+			continue;
+		} 
+		else {
+			QString status = asRecordedChannel->isBad() ? "bad" : "good";
+			cols.replace(indexStatus, status);
+			for (auto i = 0; i < cols.size(); i++) {
+				destStream << cols.value(i);
+				if (i + 1 < cols.size())
+					destStream << '\t';
 			}
-			if (status.value(i) != badStatus) {
-				mustBeSaved = true;
-				status.replace(i, badStatus);
-			}
+			destStream << endl;
 		}
 	}
-	if (mustBeSaved) {
-		dict["type"] = types;
-		dict["status"] = status;
-		QStringList columns = { "name", "type", "units" };
-		saveTsvFile(itemPath, dict, columns);
-	}
-
-	QStringList branches = { "raw" };
-	modifyUpdateJson(branches);
-}
-
-void AwBIDSManager::applyModifications()
-{
-	for (auto k : m_modifications.keys()) {
-		if (k == AwBIDSManager::ChannelsTsv) {
-			if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
-				updateChannelsTsv(m_modifications[k]);
-		}
-		else if (k == AwBIDSManager::EventsTsv) {
-			if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-				updateEventsTsv(m_modifications[k]);
-		}
-	}
+	sourceFile.close();
+	destFile.close();
+	QFile::copy(bak, itemPath);
+	QFile::remove(bak);
 }
 
 void AwBIDSManager::clearSubjects(int sourceDir)
@@ -1055,11 +1277,4 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 		res << channel;
 	}
 	return res;
-}
-
-
-void AwBIDSManager::addModification(const QString& itemPath, int modification)
-{
-	m_modifications[modification] = itemPath;
-	m_mustValidateModifications = true;
 }

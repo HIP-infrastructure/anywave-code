@@ -72,33 +72,14 @@ void AwFiltering::downSample(const AwChannelList& channels, int factor)
 	if (channels.isEmpty())
 		return;
 
-	//AwFiltering::decimate(channels, factor);
+	AwFiltering::decimate(channels, factor);
 
 	QList<down_sampling *> toProcess;
-	for (auto c :  channels) 
-		toProcess << new down_sampling(c, c->samplingRate() / factor);
-	
-	QFuture<void> res = QtConcurrent::mapped(toProcess, downSamplingChannel);
-	res.waitForFinished();
-	while (!toProcess.isEmpty())
-		delete toProcess.takeLast();
+
+	for (auto c : channels)
+		c->setSamplingRate(c->samplingRate() / factor);
 }
 
-AwChannel *downSamplingChannel(down_sampling *ds)
-{
-	float sr = ds->c->samplingRate();
-	float freq = ds->freq;
-	if (freq >= sr)
-		return ds->c;
-
-	int decim_factor = (int)floor(sr / freq);
-	// recompute target Sampling rate with new decim factor.
-	float new_sr = sr / (float)decim_factor;
-	ds->c->decimate(decim_factor);
-	ds->c->setSamplingRate(new_sr);
-
-	return ds->c;
-}
 
 void AwFiltering::filter(const AwChannelList& channels)
 {
@@ -180,28 +161,6 @@ QVector<float>  AwFiltering::pad_right(AwChannel *channel)
 	qint64 last_sample = channel->dataSize() - 1;
 	vector.fill(channel->data()[last_sample]);
 	return vector;
-
-
-	//// one sample won't be used, so check the special case when padding lenght = signal length.
-	//if (padding == channel->dataSize())
-	//	padding--;
-	//if (padding <= 0) {
-	//	vector.resize(3 * sample_1s);
-	//	vector.fill(channel->data()[last_sample]);
-	//	return vector;
-	//}
-	//// skip 1st sample of original data
-	//float sample_x0 = channel->data()[last_sample];
-
-	//// copy 3s of signal in reverse order
-	//for (int i = last_sample - 1;  i > last_sample - padding - 1; i--)
-	//	vector << channel->data()[i];
-
-	//float *pad_data = vector.data();
-	//for (int i = 0; i < vector.size(); i++)
-	//	pad_data[i] = 2 * sample_x0 - pad_data[i];
-
-	//return vector;
 }
 
 
@@ -274,7 +233,7 @@ AwChannel *filterChannel(AwChannel *chan)
 	QVector<float> signal = chan->toVector();
 	QVector<float> total = pad_l + signal + pad_r;
 			
-	arma::fvec vdata(total.data(), total.size());
+	fvec vdata(total.data(), total.size());
 #ifndef OLD_FILTER
 	float *data[1];
 	data[0] = vdata.memptr();

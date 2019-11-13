@@ -7,7 +7,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-SUBDIRS += common getdata getdataex getmarkers getfileinfo getpluginio getplugininfo addmarkers sendcommand setbf getcapture captureicapanel gettriggers \
+SUBDIRS += common getdata getdataex getmarkers getmarkers_ex getfileinfo getpluginio getplugininfo addmarkers sendcommand setbf getcapture captureicapanel gettriggers \
 sendmessage isprocessterminated
 
 getdataex.file = ./getdataex.pro
@@ -15,6 +15,7 @@ getpluginio.file =./getpluginio.pro
 common.file = ./common.pro
 getdata.file = ./getdata.pro
 getmarkers.file = ./getmarkers.pro
+getmarkers_ex.file = ./getmarkers_ex.pro
 getfileinfo.file = ./getfileinfo.pro
 getplugininfo.file = ./getplugininfo.pro
 addmarkers.file = ./addmarkers.pro

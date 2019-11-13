@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,22 +20,27 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <AwCommandLine.h>
-
+#include <AwChannel.h>
 class AwBaseProcess;
 
 class AwCommandLineManager
 {
 public:
-	static void computeICA(AwArguments& arguments);
-	static void convertFile(AwArguments& arguments);
+	static void runProcess(AwArguments& arguments);
 	/** Instantiante a process given the plugin name. Also initialize the process PDI with default settings. Throw an exception if failed. **/
 	/** if an inputFile is specified, the reader is instantiated and the file is open. The optional filter settings are also applied. **/
 	/** Arguments cand be modified to add extra parameters based on input file argument for example. **/
-	static AwBaseProcess *createAndInitNewProcess(const QString& pluginName, AwArguments& args, const QString& inputFile = QString());
+	static AwBaseProcess *createAndInitNewProcess(AwArguments& args);
+	/** apply filters that might be defined in arguments to channels **/
+	static void applyFilters(const AwChannelList& channels, const AwArguments& args);
+protected:
+	/** Similar to buildPDI in Process Manager, excepts it will handle for batch mode processes. **/
+	/** montage is the montage detected or set in the arguments, as recorded are the channels in the data file. **/
+	static bool buildPDI(AwBaseProcess *process, const AwChannelList& montage, const AwChannelList& asRecorded);
 };

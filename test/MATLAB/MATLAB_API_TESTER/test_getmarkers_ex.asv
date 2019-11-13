@@ -1,0 +1,50 @@
+function [outputArg1,outputArg2] = test_getmarkers_ex(inputArg1,inputArg2)
+%TEST_GETMARKERS_EX Summary of this function goes here
+AwSendMessage('aw_getmarkers_ex tests...');
+% get all markers (default)
+markers = aw_getmarkers_ex();
+assert(~isempty(markers), 'returns no markers. failed.');
+assert(numel(markers) == 5, 'aw_getmarkers_ex: expecting 5 markers. failed.');
+expected_labels = { 'm1', 'm2', 'm3', 'm4', 'm5' };
+labels = { markers(:).label };
+assert(size(labels, 2) == size(expected_labels, 2), 'aw_getmarkers_ex: labels number mismatch. failed.');
+assert(all(ismember(labels, expected_labels)) == true, 'aw_getmarkers_ex: labels mismatch. failed.');
+expected_values = single([ -1, 1, 5.5, 10, 22]);
+values = [ markers(:).value ];
+assert(size(expected_values, 2) == size(values, 2) , 'aw_getmarkers_ex: values number mismatch. failed.');
+assert(all(ismember(expected_values, values)) == true, 'aw_getmarkers_ex: values mismatch. failed.');
+% check for durations of each markers
+expected_durations = single([0, 8, 0, 2, 0]);
+durations = [ markers(:).duration ];
+assert(all(ismember(expected_durations, durations)) == true, 'aw_getmarkers_ex: duration values mismatch. failed.');
+expected_targets = { 'A2'};
+% m5 must target A2
+assert(size(markers(5).channels, 2) == size(expected_targets, 2), 'aw_getmarkers_ex: m5 must target channel A2. failed.');
+assert(all(cellfun(@isequal, markers(5).channels, expected_targets)) == true, 'aw_getmarkers_ex: m5 must target channel A2. failed.');
+% ask for a specific marker label
+cfg = [];
+cfg.labels = { 'm1', 'm5' };
+markers = aw_getmarkers_ex(cfg);
+result = { markers(:).label };
+assert(size(result, 2) == size(cfg.labels, 2), 'aw_getmarkers_ex: requested m1 and m5, got wrong result. failed.');
+assert(all(cellfun(@isequal, cfg.labels, result)) == true, 'aw_getmarkers_ex: requested m1 and m5, got wrong result. failed.');
+% ask for specific marker values
+cfg = [];
+cfg.values = [-1, 22];
+expected = { 'm1', 'm5' };
+markers = aw_getmarkers_ex(cfg);
+result = { markers(:).label };
+assert(size(result, 2) == size(expected, 2), 'requested markers for values -1 and 22 got wrong result. failed.');
+assert(all(cellfun(@isequal, expected, result)) == true, 'requested markers for values -1 and 22 got wrong result. failed.');
+% testing options
+% get only markers which have a duration
+cfg = [];
+cfg.options = {'with duration'};
+markers = aw_getmarkers_ex(cfg);
+assert(numel(markers) == 2, sprintf('requested markers with duration: expected 2 got %d. failed.', numel(markers)));
+durations = [ markers(:).duration ];
+expected_durations = single([8, 2]);
+assert(all(ismember(expected_durations, durations)) == true, 'aw_getmarkers_ex: duration values mismatch. failed.');
+AwSendMessage('aw_getmarkers_ex: Passed.');
+end
+

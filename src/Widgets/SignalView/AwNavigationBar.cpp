@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <widget/SignalView/AwNavigationBar.h>
 #include <QtCore/qmath.h>
-#include <AwUtilities.h>
+#include <utils/time.h>
 #include <widget/SignalView/AwViewSettings.h>
 #include <QtWidgets/QApplication>
 #include "AwViewSettingsUi.h"
@@ -98,6 +98,7 @@ void AwNavigationBar::setFlags(int flags)
 		ui->labelnChannels->hide();
 		ui->labelnSelectedChannels->hide();
 	}
+	ui->labelTime->setVisible(~(flags & AwBaseSignalView::HidePositionInFile));
 	m_flags = flags;
 }
 
@@ -148,14 +149,12 @@ void AwNavigationBar::clean()
 {
 	m_positionInFile = 0.;
 	updateNumberOfChannels(0);
- //   AwChannelList dumb;
-//	updateNumberOfSelectedChannels(dumb);
 	updateNumberOfSelectedChannels(0);
 }
 
 void AwNavigationBar::updatePositionLabel()
 {
-	ui->labelTime->setText(AwUtilities::hmsTime(m_positionInFile + m_startPosition, true));
+	ui->labelTime->setText(AwUtilities::time::hmsTime(m_positionInFile + m_startPosition, true));
 	QString dur = tr("Duration: ") + QString::number(m_pageDuration, 'f', 2) + "s";
 	ui->labelTime->setToolTip(dur);
 }

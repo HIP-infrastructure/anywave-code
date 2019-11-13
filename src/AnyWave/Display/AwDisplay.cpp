@@ -138,6 +138,7 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	connect(view, SIGNAL(displayedChannelsUpdated(AwChannelList&)), pm, SLOT(startDisplayProcesses(AwChannelList&)));
 	connect(view->scene(), SIGNAL(clickedAtTime(float)), this, SIGNAL(clickedAtLatency(float)));
 	connect(view->scene(), SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
+	connect(view->scene(), &AwGraphicsScene::draggedCursorPositionChanged, this, &AwDisplay::draggedCursorPositionChanged);
 	connect(view, SIGNAL(cursorClicked(float)), this, SLOT(synchronizeOnCursor(float)));
 	connect(view, SIGNAL(markerBarHighlighted(AwMarker *)), this, SLOT(highlightMarker(AwMarker *)));
 
@@ -262,6 +263,37 @@ void AwDisplay::loadChannelSelections()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 ///    S L O T S
+
+void AwDisplay::addVideoCursor()
+{
+	for (auto v : m_signalViews) {
+		auto cursor = v->scene()->addCursor("Video");
+		cursor->setWidth(5.0);
+	}
+}
+
+void AwDisplay::removeVideoCursor()
+{
+	for (auto v : m_signalViews)
+		v->scene()->removeCursor("Video");
+}
+
+void AwDisplay::handleVideoCursor(bool flag)
+{
+	flag ? addVideoCursor() : removeVideoCursor();
+}
+
+void AwDisplay::setVideoPosition(float position)
+{
+	if (position < 0.)
+		return;
+	for (auto v : m_signalViews) {
+		if (position > v->currentEndPosition() || position < v->positionInFile()) 
+			v->setPositionInFile(position);
+		v->scene()->setCursorPosition("Video", v->positionInFile(), position);
+	}
+}
+
 void AwDisplay::executeCommand(int com, const QVariantList& args)
 {
 	switch (com)
@@ -299,6 +331,17 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 		foreach (AwSignalView *v, m_signalViews)
 			v->updateMarkers();
 		break;
+	case  AwProcessCommand::AddVideoCursor:
+		foreach(AwSignalView *v, m_signalViews) {
+			auto cursor = v->scene()->addCursor("Video");
+			cursor->setWidth(5.0);
+		}
+		break;
+	case AwProcessCommand::RemoveCursor:
+		QString name = args.first().toString();
+		foreach(AwSignalView *v, m_signalViews)
+			v->scene()->removeCursor(name);
+		break;
 	}
 }
 
@@ -306,7 +349,6 @@ void AwDisplay::captureViews()
 {
 	AwSettings *aws = AwSettings::getInstance();
 	// first, clear the lastCaptureFile set in Settings
-//	aws->lastCaptureFile.clear();  // so in case of error when capturing, the file remains empty.
 	aws->setSettings("lastCapturedFile", QString());
 
 	QString dir = aws->fileInfo()->dirPath();
@@ -335,15 +377,8 @@ void AwDisplay::captureViews()
 
 void AwDisplay::showICAMapOverChannel(bool flag)
 {
-	foreach (AwSignalView *v, m_signalViews) {
-		QList<AwGraphicsSignalItem *> items = v->scene()->signalItems();
-		foreach (AwGraphicsSignalItem *item, items) {
-			if (item->channel()->isICA() && item->channel()->isVirtual()) {
-				AwICASignalItem *ica_item = static_cast<AwICASignalItem *>(item);
-				Q_ASSERT(ica_item != NULL);
-				ica_item->showMap(flag);
-			}
-		}
+	for (auto v : m_signalViews) {
+		v->showICAMaps(flag);
 		v->view()->layoutItems();
 		v->view()->scene()->update();
 	}
@@ -387,6 +422,16 @@ void AwDisplay::showPositionInViews(float position)
 	m_dontSynchronize = true;
 	foreach (AwSignalView *v, m_signalViews)
 		v->showPosition(position);
+
+	m_dontSynchronize = false;
+}
+
+void AwDisplay::setCursorPosition(float position)
+{
+	m_dontSynchronize = true;
+
+	for (auto v : m_signalViews)
+		v->synchronizeOnPosition(position);
 
 	m_dontSynchronize = false;
 }
@@ -670,18 +715,6 @@ void AwDisplay::setQTSMode(bool on)
 	foreach(AwSignalView *v, m_signalViews)
 		v->scene()->setQTSMode(on);
 }
-
-//void AwDisplay::updateSelectedChannels()
-//{
-//	m_allSelectedChannels.clear();
-//	m_selectedLabels.clear();
-//
-//	foreach (AwSignalView *v, m_signalViews)
-//		m_allSelectedChannels += v->selectedChannels();
-//
-//	m_selectedLabels = AwChannel::getLabels(m_allSelectedChannels);
-//	emit selectedChannelsChanged(m_allSelectedChannels);
-//}
 
 AwChannelList AwDisplay::selectedChannels()
 {

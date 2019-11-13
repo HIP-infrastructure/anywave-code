@@ -25,7 +25,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMarkerListModel.h"
 #include <Prefs/AwSettings.h>
-#include <AwUtilities.h>
+#include <utils/gui.h>
+#include <utils/time.h>
 #include <AwFileIO.h>
 //
 // rowCount
@@ -83,8 +84,8 @@ QVariant AwMarkerListModel::data(const QModelIndex &index, int role) const
 		if (col == MARKER_COLUMN_LABEL)
 			return m->label();
 		if (col == MARKER_COLUMN_POS)
-			if (AwUtilities::isTimeHMS())
-				return AwUtilities::hmsTime(m->start());
+			if (AwUtilities::time::isTimeHMS())
+				return AwUtilities::time::hmsTime(m->start());
 			else
 				return m->start();
 		if (col == MARKER_COLUMN_DURATION) 
@@ -164,7 +165,7 @@ QVariant AwMarkerListModel::data(const QModelIndex &index, int role) const
 	case Qt::ForegroundRole:
 		if (col == MARKER_COLUMN_LABEL) {
 			if (m->color().isEmpty())  // no color set => default color
-				return QBrush(QColor(AwUtilities::markerColor(m->type())));
+				return QBrush(QColor(AwUtilities::gui::markerColor(m->type())));
 			else
 				return QBrush(QColor(m->color()));
 		}
@@ -245,7 +246,7 @@ QVariant AwMarkerListModel::headerData(int section, Qt::Orientation orientation,
 		if (section == MARKER_COLUMN_CODE)
 			return QString(tr("Value"));
 		if (section == MARKER_COLUMN_POS)
-			if (AwUtilities::isTimeHMS())
+			if (AwUtilities::time::isTimeHMS())
 				return QString(tr("Pos. (HMS)"));
 			else
 				return QString(tr("Pos. (s)"));
@@ -327,13 +328,14 @@ void AwMarkerListDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
 
 void AwMarkerListDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-	if (index.column() == MARKER_COLUMN_COLOR)	{
+	if (index.column() == MARKER_COLUMN_COLOR) {
 		QComboBox *cb = static_cast<QComboBox *>(editor);
 		cb->setGeometry(option.rect.x(), option.rect.y(), option.rect.width() + 100, option.rect.height());
 		cb->showPopup();
 	}
 	else
-		editor->setGeometry(option.rect);
+		//editor->setGeometry(option.rect);
+		QItemDelegate::updateEditorGeometry(editor, option, index);
 
 }
 

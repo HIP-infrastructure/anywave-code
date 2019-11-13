@@ -48,6 +48,7 @@ class AwDebugLogWidget;
 class AwMeshManager;
 class AwLayoutManager;
 class AwSEEGViewer;
+class AwVideoPlayer;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AnyWave
@@ -103,6 +104,8 @@ private:
 	// updater 
 	AwUpdater m_updater;
 	AwDownloader m_downloader;
+	// VIDEO Widget
+	AwVideoPlayer *m_player;
 	// flags
 	bool m_currentFileModified;
 	// methods
@@ -116,6 +119,8 @@ private:
 	void searchForPython();
 	bool checkAndCreateFolder(const QString& root, const QString& name);
 	void applyNewLanguage();
+	void writeSettings();
+	void readSettings();
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 	void createMatlabShellScript(const QString& path);
@@ -153,10 +158,12 @@ public slots:
 	void exportToPDF();
 	/** Import a marker file **/
 	void importMrkFile();
+	void editVideoSyncSettings();
 
 private slots:
 	void on_actionSave_as_triggered();
 	void on_actionMarkers_triggered();
+	void on_actionHelp_triggered();
 	void on_actionQuit_triggered();
 	void on_actionMontage_triggered();
 	void on_actionOpen_triggered();
@@ -165,10 +172,12 @@ private slots:
 	void on_actionAbout_AnyWave_triggered();
 	void on_actionDebug_Logs_triggered();
 	void on_actionLoadICA_triggered();
+	void on_actionOpen_video_triggered();
 	void loadBeamformer();
 	void reviewComponentsMaps();
 	void showFileProperties();
 	void runGARDEL();
+	void openNewAnyWave();
 	void doEpoch();
 	void visualiseEpoch();
 	void averageEpoch();

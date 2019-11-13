@@ -54,8 +54,8 @@ public:
 	float globalSamplingRate;
 	int decimateFactor;
 	AwFilterSettings filterSettings;
-	AwMarkerList skippedMarkers();
-	AwMarkerList usedMarkers();
+	QStringList skippedMarkers;
+	QStringList usedMarkers;
 public slots:
 	int exec() override;
 	void accept() override;
@@ -68,8 +68,6 @@ protected slots:
 	void clearSkip();
 	void clearUse();
 	void updateOutputFileExtension(int);
-protected:
-	QStringList m_skipLabels, m_useLabels;
 };
 
 #endif // AWEXPORTERSETTINGS_H

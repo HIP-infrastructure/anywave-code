@@ -50,6 +50,13 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 	int step = 0;
 
 	in >> file >> extractTriggers >> values >> labels >> channels;
+
+	//  writing markers
+	response.begin();
+	QDataStream stream_data(response.buffer());
+	stream_data.setVersion(QDataStream::Qt_4_4);
+
+
 	bool usingFile = false;
 	AwMarkerList source_markers;
 	if (!file.isEmpty()) { // got a file
@@ -58,6 +65,13 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 		if (reader) {
 			if (reader->openFile(file)  == AwFileIO::NoError)
 				usingFile = true;
+		}
+		if (usingFile == false) {
+			// a file was specified but coud not be open.
+			emit log(QString("the file %1 could not be open.").arg(file));
+			stream_data << (int)0;
+			response.send();
+			return;
 		}
 	}
 	
@@ -74,11 +88,12 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 		}
 		if (!triggerChannels.isEmpty()) {
 			emit log("Extracting values from trigger channels...");
-			reader->readDataFromChannels(0, -1, triggerChannels);
-			AwExtractTriggers extractT;
-			extractT._channels = triggerChannels;
-			extractT.extract();
-			source_markers = extractT._markers;   // replace markers in reader by the ones extracted from trigger channels
+			if (reader->readDataFromChannels(0, reader->infos.totalDuration(), triggerChannels) != 0) {
+				AwExtractTriggers extractT;
+				extractT._channels = triggerChannels;
+				extractT.extract();
+				source_markers = extractT._markers;   // replace markers in reader by the ones extracted from trigger channels
+			}
 		}
 	}
 
@@ -124,10 +139,10 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 		markers = result;
 	}
 
-	//  writing markers
-	response.begin();
-	QDataStream stream_data(response.buffer());
-	stream_data.setVersion(QDataStream::Qt_4_4);
+	////  writing markers
+	//response.begin();
+	//QDataStream stream_data(response.buffer());
+	//stream_data.setVersion(QDataStream::Qt_4_4);
 
 	stream_data << markers.size();
 

@@ -130,12 +130,13 @@ extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 #endif
 #endif
 
+
 #ifdef Q_OS_MAC
 extern "C" int idamax_(int *, double *, int *);
 extern "C" void dcopy_(int *, double *, int *, double *, int *);
 extern "C" void dsymm_(char *, char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
 extern "C" void daxpy_(int *, double *, double *, int *, double *, int *);
-extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
+//extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 extern "C" void dscal_(int *, double *, double *, int *);
 extern "C" void dswap_(int *, double *, int *, double *, int *);
 #endif
@@ -157,8 +158,6 @@ extern "C" void dsymm_(char *, char *, int *, int *, double *, double *, int *, 
 extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 extern "C" void dscal_(int *, double *, double *, int *);
 #endif
-
-
 
 
 using namespace InfoMaxAlgo;

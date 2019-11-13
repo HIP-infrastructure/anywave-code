@@ -87,6 +87,13 @@ protected:
 
 typedef QList<AwBlock *> AwBlockList;  ///< Define a list of blocks.
 
+struct AW_RW_EXPORT AwVideoSynch {
+	AwVideoSynch() {
+		shift = drift = 0;
+	}
+	qint32 shift;	// expressed in ms
+	qint32 drift;	// expressed in ms
+};
 
 /*!
  * \brief
@@ -116,7 +123,8 @@ public:
 	/** Returns the number of channels present in the file. **/
 	inline qint32 channelsCount() { return m_channels.size(); }	
 	/** Gets the patient's name. It could be an empty string. **/
-	inline QString& patientName() { return m_patientName; }
+	inline QString& firstName() { return m_firstName; }
+	inline QString& lastName() { return m_lastName; }
 	/** Gets the recording date. It could be an empty string. **/
 	inline QString& recordingDate() { return m_date; }
 	/** Gets the recording time. It could be an empty string. **/
@@ -149,7 +157,8 @@ public:
 	/** Sets the recording date. **/
 	inline void setDate(const QString& date) { m_date = date; }
 	/** Sets the patient's name. **/
-	inline void setPatientName(const QString& name) { m_patientName = name; }
+	void setFirstName(const QString& firstName) { m_firstName = firstName; }
+	void setLastName(const QString& lastName) { m_lastName = lastName; }
 	inline void setChannels(const AwChannelList& channels) { m_channels = channels; }
 	virtual void clear();
 
@@ -159,18 +168,17 @@ public:
 	/** Adds a new channel as As Recorded channel.
 	The As Recorded channels are the channels found in the data file. **/
 	AwChannel* addChannel(AwChannel *channel);
-	///** Adds a new channel as As Recorded channel.
-	//The As Recorded channels are the channels found in the data file. **/
-	//AwChannel* addChannel(AwChannel& channel);
 	/** Allows to change the name of a previously inserted channel.
 	This will do nothing if the channel does not exist. **/
 	void changeChannelName(const QString& oldName, const QString& newName);
 	/** set the date and time in ISO format **/
 	void setISODate(const QString& dateTime) { m_isoDate = dateTime; }
+	/** get the structure for video synchronization **/
+	inline AwVideoSynch& videoSynch() { return m_videoSynch; }
 protected:
 	AwBlockList m_blocks;
 	AwChannelList m_channels;
-	QString m_patientName;
+	QString m_firstName, m_lastName;
 	QString m_date;	 // recording date
 	QString m_time;	 // recording time
 	QString m_isoDate;	// new iso date/time string (must be set by the plugin).
@@ -179,6 +187,7 @@ protected:
 	quint32 m_channelsCount;
 	// Hash table to store index of channels and their name.
 	QHash<QString, int> m_labelToIndex;
+	AwVideoSynch m_videoSynch;
 };
 
 #endif // AWREADWRITELIB_H

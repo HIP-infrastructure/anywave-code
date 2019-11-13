@@ -27,7 +27,8 @@
 #include <graphics/AwGraphicsObjects.h>
 #include <QMouseEvent>
 #include <qpainter.h>
-#include <AwUtilities.h>
+#include <utils/gui.h>
+#include <AwCore.h>
 
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	: QFrame(parent)
@@ -62,6 +63,13 @@ AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	m_mode = AwBaseMarkerBar::Classic;
 	setMouseTracking(true);
 	m_sliderDragging = false;
+	m_globalRepaintNeeded = false;
+}
+
+AwBaseMarkerBar::~AwBaseMarkerBar()
+{
+	AW_DESTROY_LIST(m_markers);
+	AW_DESTROY_LIST(m_allMarkers);
 }
 
 ///
@@ -129,16 +137,16 @@ AwMarker *AwBaseMarkerBar::findMarkerBetween(float low, float high)
 
 void AwBaseMarkerBar::setMarkers(const AwMarkerList& markers)
 {
-	qDeleteAll(m_markers);
+	AW_DESTROY_LIST(m_markers);
 	m_markers = AwMarker::duplicate(markers); 
 	repaint(); 
 }
 
 void AwBaseMarkerBar::setAllMarkers(const AwMarkerList& markers)
 {
-	while (!m_allMarkers.isEmpty())
-		delete m_allMarkers.takeFirst();
+	AW_DESTROY_LIST(m_allMarkers);
 	m_allMarkers = AwMarker::duplicate(markers);
+	m_globalRepaintNeeded = true;
 	repaint();
 }
 
@@ -160,6 +168,11 @@ void AwBaseMarkerBar::switchToGlobal()
 ///
 /// EVENTS
 ///
+void AwBaseMarkerBar::resizeEvent(QResizeEvent *e)
+{
+	QFrame::resizeEvent(e);
+	m_globalRepaintNeeded = true;
+}
 
 
 void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
@@ -196,7 +209,8 @@ void AwBaseMarkerBar::mouseReleaseEvent(QMouseEvent *e)
 		return;
 	if (m_mode == AwBaseMarkerBar::Global) {
 		if (!m_sliderDragging) { // just a click somewhere in the bar => change the position
-			m_positionInFile = e->pos().x() * m_pixDur - (m_pageDuration / 2) * m_pixDur;
+			auto pixPerSec = size().width() / m_totalDuration;
+			m_positionInFile = e->pos().x() / pixPerSec;
 			if (m_positionInFile < 0.)
 				m_positionInFile = 0.;
 		}
@@ -232,8 +246,7 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 				m_positionInFile = 0.;
 		}
 		update();
-	}
-	
+	}	
 }
 
 void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
@@ -248,13 +261,13 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 
 			switch (m->type()) {
 			case AwMarker::Single:
-				color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Single) : m->color());
+				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
 				pen.setColor(color);
 				painter.setPen(pen);
 				painter.drawRect(QRectF((m->start() - m_positionInFile) * m_physics->xPixPerSec(), 0, 0, AW_MARKERS_BAR_HEIGHT - 1));
 				break;
 			case AwMarker::Selection:
-				color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Selection) : m->color());
+				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
 				pen.setColor(color);
 				brushSelection.setColor(color);
 				painter.setPen(pen);
@@ -266,31 +279,42 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 		}
 	}
 	else { // Global 
-		for (AwMarker *m : m_allMarkers) {
-			QColor color;
+		auto pixPerSec = (float)size().width() / m_totalDuration;
+		if (m_globalRepaintNeeded) {
+			if (m_totalDuration <= 0)
+				return;
+			
+			m_globalPixmap = QPixmap(this->size());
+			m_globalPixmap.fill(palette().color(QPalette::Background));
+			QPainter pixPainter(&m_globalPixmap);
+			for (AwMarker *m : m_allMarkers) {
+				QColor color;
 
-			switch (m->type()) {
-			case AwMarker::Single:
-				color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Single) : m->color());
-				pen.setColor(color);
-				painter.setPen(pen);
-				painter.drawRect(QRectF(m->start() / m_pixDur, 0, 0, AW_MARKERS_BAR_HEIGHT - 1));
-				break;
-			case AwMarker::Selection:
-				color = QColor(m->color().isEmpty() ? AwUtilities::markerColor(AwMarker::Selection) : m->color());
-				pen.setColor(color);
-				brushSelection.setColor(color);
-				painter.setPen(pen);
-				QRectF rect = QRectF(m->start() / m_pixDur, 0, m->duration() / m_pixDur, AW_MARKERS_BAR_HEIGHT - 1);
-				painter.drawRect(rect);
-				painter.fillRect(rect, brushSelection);
-				break;
+				switch (m->type()) {
+				case AwMarker::Single:
+					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
+					pen.setColor(color);
+					pixPainter.setPen(pen);
+					pixPainter.drawRect(QRectF(m->start() * pixPerSec, 0, 0, AW_MARKERS_BAR_HEIGHT - 1));
+					break;
+				case AwMarker::Selection:
+					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
+					pen.setColor(color);
+					brushSelection.setColor(color);
+					pixPainter.setPen(pen);
+					QRectF rect = QRectF(m->start() * pixPerSec, 0, m->duration() * pixPerSec, AW_MARKERS_BAR_HEIGHT - 1);
+					pixPainter.drawRect(rect);
+					pixPainter.fillRect(rect, brushSelection);
+					break;
+				}
 			}
+			m_globalRepaintNeeded = false;
 		}
+		painter.drawPixmap(0, 0, m_globalPixmap);
 		QBrush sliderBrush = QBrush(Qt::gray);
 		QColor color(Qt::darkGray);
 		painter.setPen(QPen(color, 1.5));
-		m_sliderRect = QRectF(m_positionInFile  / m_pixDur, 1., m_pageDuration / m_pixDur, AW_MARKERS_BAR_HEIGHT - 2);
+		m_sliderRect = QRectF(m_positionInFile * pixPerSec, 1., m_pageDuration * pixPerSec, AW_MARKERS_BAR_HEIGHT - 2);
 		sliderBrush.setStyle(Qt::Dense4Pattern);
 		painter.drawRect(m_sliderRect);
 		painter.fillRect(m_sliderRect, sliderBrush);
@@ -306,7 +330,6 @@ void AwBaseMarkerBar::contextMenuEvent(QContextMenuEvent *e)
 void AwBaseMarkerBar::setPageDuration(float duration)
 {
 	m_pageDuration = duration;
-	m_pixDur = m_totalDuration / this->size().width();
 	repaint();
 }
 
@@ -314,7 +337,6 @@ void AwBaseMarkerBar::setPositionInFile(float pos)
 {
 	if (pos != m_positionInFile) {
 		m_positionInFile = pos;
-		m_pixDur = m_totalDuration / this->size().width();
 	}
 }
 

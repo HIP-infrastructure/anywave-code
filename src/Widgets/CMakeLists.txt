@@ -42,7 +42,8 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwSEEGWidget.h  
     ./InputMarker/InputMarkerModel.h  
     ../../include/widget/AwInputMarkerTableView.h  
-    ../../include/widget/AwInputMarkerWidget.h)
+    ../../include/widget/AwInputMarkerWidget.h
+	../../include/widget/AwVideoPlayer.h)
 
 SET(SRC ./Aw2DGrid.cpp  
     ./AwGetValueDialog.cpp
@@ -68,6 +69,7 @@ SET(SRC ./Aw2DGrid.cpp
     ./AwTopoWidgetSettings.cpp  
     ./AwVTKWidget.cpp  
     ./AwWaitWidget.cpp  
+	./AwVideoPlayer.cpp
     ./SignalView/AwBaseMarkerBar.cpp  
     ./SignalView/AwBaseSignalView.cpp  
     ./SignalView/AwGoToLatencyDial.cpp  
@@ -101,12 +103,14 @@ SET(FORMS ./AwAmplitudeWidget.ui
     ./SignalView/AwNavigationBarv2.ui  
     ./SignalView/AwViewSettingsUi.ui  
     ./SEEGViewer/AwSEEGWidget.ui  
+	./AwVideoPlayer.ui
     ./InputMarker/AwInputMarkerWidget.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
 
 ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
-QT5_USE_MODULES(AwWidget Core Widgets PrintSupport)
-TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
+QT5_USE_MODULES(AwWidget Core Widgets PrintSupport Multimedia MultimediaWidgets)
+TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
+  Qt5::MultimediaWidgets ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
 INSTALL(TARGETS AwWidget DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
 

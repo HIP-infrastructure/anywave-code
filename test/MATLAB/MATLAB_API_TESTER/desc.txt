@@ -1,0 +1,4 @@
+name = MATLAB_API_TESTER
+description = run MATLAB API tests.
+category = Process:MATLAB:API_TESTER
+input_flags = GetAllMarkers

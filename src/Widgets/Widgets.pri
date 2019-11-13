@@ -5,6 +5,7 @@
 HEADERS += ../../include/widget/AwMessageBox.h \
     ../../include/widget/AwWait.h \
     ./Aw2DGrid.h \
+     ../../include/widget/AwVideoPlayer.h \
     ../../include/widget/AwWaitWidget.h \
 	../../include/widget/AwGetValueDialog.h \
     ../../include/widget/AwSelectInputDataWidget.h \
@@ -16,7 +17,6 @@ HEADERS += ../../include/widget/AwMessageBox.h \
     ../../include/widget/AwComboMarker.h \
     ../../include/widget/AwComboDS.h \
     ../../include/widget/AwSpectroWidget.h \
-    ../../include/widget/AwSignalSplitterWidget.h \
     ../../include/widget/AwVTKWidget.h \
     ../../include/widget/AwMarkerInspector.h \
     ./AwAddPredefinedMarker.h \
@@ -69,6 +69,7 @@ SOURCES += ./Aw2DGrid.cpp \
     ./AwTopoWidgetSettings.cpp \
     ./AwVTKWidget.cpp \
     ./AwWaitWidget.cpp \
+    ./AwVideoPlayer.cpp \
     ./SignalView/AwBaseMarkerBar.cpp \
     ./SignalView/AwBaseSignalView.cpp \
     ./SignalView/AwGoToLatencyDial.cpp \
@@ -85,6 +86,7 @@ SOURCES += ./Aw2DGrid.cpp \
     ./InputMarker/AwInputMarkerWidget.cpp \
     ./InputMarker/InputMarkerModel.cpp
 FORMS += ./AwAmplitudeWidget.ui \
+    ./AwVideoPlayer.ui \
 	./AwGetValueDialog.ui \
     ./AwSelectInputDataWidget.ui \
     ./AwMarkerInspector.ui \
@@ -99,6 +101,7 @@ FORMS += ./AwAmplitudeWidget.ui \
     ./SignalView/AwNavigationBarv2.ui \
     ./SignalView/AwViewSettingsUi.ui \
     ./SEEGViewer/AwSEEGWidget.ui \
+	./AwVideoPlayer.ui \
     ./InputMarker/AwInputMarkerWidget.ui
 TRANSLATIONS += ./awwidgetslib_en.ts \
     ./awwidgetslib_fr.ts

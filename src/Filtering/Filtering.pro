@@ -62,7 +62,7 @@ HEADERS += \
 FORMS += AwFilterGUI.ui
 
 macx {
-    LIBS += -framework AwCore
+    LIBS += -framework AwCore -framework Accelerate
     QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 }
 

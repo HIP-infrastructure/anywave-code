@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,27 +20,22 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMarkerManagerSettings.h"
 #include "Prefs/AwSettings.h"
 #include "AwPickChannelsDial.h"
 #include "AwMarkersExportWidget.h"
-#include "Process/AwProcessFromMarkersDial.h"
 #include "AwMarkerRuleManageDial.h"
 #include <QMenu>
 #include <widget/AwMessageBox.h>
 #include <AwFileIO.h>
 #include "Process/AwMarkerExporter.h"
 #include "Process/AwProcessManager.h"
-#include <QChart>
-#include <QBarSet>
-#include <QBarCategoryAxis>
-#include <QValueAxis>
-#include <QHorizontalBarSeries>
 #include <QFileDialog>
 #include <widget/AwGetValueDialog.h>
+#include <Plugin/AwPluginManager.h>
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -63,6 +58,16 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 
 	// Context Menu for QTableView
 	m_menu = new QMenu(tvMarkers);
+	auto processes = AwPluginManager::getInstance()->processesWithFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	if (!processes.isEmpty()) {
+		QMenu *menu = m_menu->addMenu("Launch process");
+		for (auto p : processes) {
+			auto action = menu->addAction(QString("%1 - %2").arg(p->name).arg(p->description));
+			action->setData(p->name);
+			connect(action, &QAction::triggered, this, &AwMarkerManagerSettings::launchProcess);
+		}
+	}
+
 	m_selectAllLabel = new QAction(tr("Select all"), this);
 	m_menu->addAction(m_selectAllLabel);
 	connect(m_selectAllLabel, SIGNAL(triggered()), this, SLOT(selectAllLabels()));
@@ -95,10 +100,6 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	action = new QAction(tr("Clear a TRIGGER channel"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(clearTrigger()));
-
-	action = new QAction(tr("Launch process"), this);
-	m_menu->addAction(action);
-	connect(action, SIGNAL(triggered()), this, SLOT(launchProcess()));
 
 	action = new QAction(tr("Center views on marker"), this);
 	m_menu->addAction(action);
@@ -186,24 +187,16 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(checkDuration, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
 	connect(checkTargets, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
 	connect(checkColor, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
-	// Statistics histogram
-	connect(buttonHisto, &QPushButton::clicked, this, &AwMarkerManagerSettings::showHistogram);
 
 	tvMarkers->setColumnHidden(MARKER_COLUMN_CODE, true);
 	tvMarkers->setColumnHidden(MARKER_COLUMN_COLOR, true);
 	tvMarkers->setColumnHidden(MARKER_COLUMN_TARGET, true);
-
-	m_histogramView = NULL;
 }
 
 AwMarkerManagerSettings::~AwMarkerManagerSettings()
 {
 	if (m_currentRule)
 		delete m_currentRule;
-	if (m_histogramView) {
-		m_histogramView->close();
-		delete m_histogramView;
-	}
 }
 
 void AwMarkerManagerSettings::changeEvent(QEvent *e)
@@ -296,46 +289,6 @@ void AwMarkerManagerSettings::updateStats()
 	}
 }
 
-
-void AwMarkerManagerSettings::buildHistogram()
-{
-	QChart *chart = new QChart();
-	chart->setTitle(tr("Markers count"));
-	m_histogramView = new QChartView(chart);
-	m_histogramView->setWindowIcon(QIcon(":images/AnyWave_icon.png"));
-	m_histogramView->setWindowTitle(tr("Markers Count"));
-	m_histogramView->setRenderHint(QPainter::Antialiasing);
-}
-
-void AwMarkerManagerSettings::updateHistogram()
-{
-	QChart *oldChart = m_histogramView->chart();
-	QChart *chart = new QChart();
-	AwMarkerList markers = m_model->markers();
-	QList<QPair<QString, int> > markers_count = AwMarker::count(markers);
-
-	// limit the number of unique markers to ten for now.
-	QStringList yLabels;
-	QHorizontalBarSeries *series = new QHorizontalBarSeries();
-	yLabels << "Markers";
-	for (int i = 0; i < std::min(markers_count.size(), 10); i++) {
-		QBarSet *set = new QBarSet(markers_count.at(i).first);
-		set->append(markers_count.at(i).second);
-		series->append(set);
-	}
-	chart->addSeries(series);
-	QBarCategoryAxis *axisY = new QBarCategoryAxis();
-	axisY->append(yLabels);
-	chart->setAxisY(axisY, series);
-	chart->setAnimationOptions(QChart::SeriesAnimations);
-	QValueAxis *axisX = new QValueAxis();
-	chart->setAxisX(axisX, series);
-	axisX->applyNiceNumbers();
-	m_histogramView->setChart(chart);
-	delete oldChart;
-	m_histogramView->resize(400, 300);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
 
@@ -365,16 +318,6 @@ void AwMarkerManagerSettings::cutAround()
 }
 #endif
 
-
-void AwMarkerManagerSettings::showHistogram()
-{
-	if (m_model->markers().isEmpty())
-		return;
-	if (m_histogramView == NULL)
-		buildHistogram();
-	updateHistogram();
-	m_histogramView->show();
-}
 
 void AwMarkerManagerSettings::showColumn(bool flag)
 {
@@ -443,6 +386,8 @@ void AwMarkerManagerSettings::updateMarkerList()
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
+
+
 
 void AwMarkerManagerSettings::addRule(const QString& name)
 {
@@ -546,13 +491,12 @@ void AwMarkerManagerSettings::renameAllMarkers()
 	if (dlg.exec() == QDialog::Rejected)
 		return;
 
-	auto newLabel = dlg.value();
-	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
-		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_LABEL);
-		if (index.isValid())
-			tvMarkers->model()->setData(index, newLabel, Qt::EditRole);
-	}
-	m_displayedMarkers = m_model->markers();
+	AwMarkerList currentMarkers = m_model->markers();
+	for (auto m : currentMarkers)
+		m->setLabel(dlg.value());
+
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
@@ -563,13 +507,19 @@ void AwMarkerManagerSettings::renameSelectedMarkers()
 	if (dlg.exec() == QDialog::Rejected)
 		return;
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	
+	AwMarkerList currentMarkers = m_model->markers();
+	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+
 	for (auto i : indexes) {
 		if (i.column() == MARKER_COLUMN_LABEL) {
-			tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+			int row = proxy->mapToSource(i).row();
+			//tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+			auto m = currentMarkers.value(row);
+			m->setLabel(dlg.value());
 		}
 	}
-	m_displayedMarkers = m_model->markers();
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
@@ -581,12 +531,12 @@ void AwMarkerManagerSettings::changeValueAllMarkers()
 		return;
 
 	auto newValue = dlg.value().toDouble();
-	for (int i = 0; i < tvMarkers->model()->rowCount(); i++) {
-		QModelIndex index = tvMarkers->model()->index(i, MARKER_COLUMN_CODE);
-		if (index.isValid())
-			tvMarkers->model()->setData(index, newValue, Qt::EditRole);
-	}
-	m_displayedMarkers = m_model->markers();
+	AwMarkerList currentMarkers = m_model->markers();
+	for (auto m : currentMarkers)
+		m->setValue(newValue);
+
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
@@ -598,12 +548,19 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 		return;
 
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+	AwMarkerList currentMarkers = m_model->markers();
+	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+
 	for (auto i : indexes) {
-		if (i.column() == MARKER_COLUMN_CODE) {
-			tvMarkers->model()->setData(i, dlg.value().toDouble(), Qt::EditRole);
+		if (i.column() == MARKER_COLUMN_LABEL) {
+			int row = proxy->mapToSource(i).row();
+			//tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
+			auto m = currentMarkers.value(row);
+			m->setValue(dlg.value().toDouble());
 		}
 	}
-	m_displayedMarkers = m_model->markers();
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
 	updateStats();
 }
@@ -625,10 +582,15 @@ void AwMarkerManagerSettings::launchProcess()
 			markers << currentMarkers.at(proxy->mapToSource(i).row());
 	}
 
-	// Launch Process Dial
-	AwProcessFromMarkersDial* dlg = new AwProcessFromMarkersDial(m_displayedMarkers, markers);
-	dlg->exec();
-	dlg->deleteLater();
+	QAction *action = (QAction *)sender();
+	if (action == Q_NULLPTR)
+		return;
+	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(action->data().toString());
+	if (plugin) {
+		auto process = AwProcessManager::instance()->newProcess(plugin);
+		process->pdi.input.setNewMarkers(markers, true);
+		AwProcessManager::instance()->runProcess(process);
+	}
 }
 
 void AwMarkerManagerSettings::selectAllLabels() 
@@ -755,6 +717,21 @@ void AwMarkerManagerSettings::removeMarkers()
 	emit markersChanged(m_displayedMarkers);
 }
 
+void AwMarkerManagerSettings::highlightMarker(AwMarker *marker)
+{
+	// find the marker in the list
+	AwMarkerList currentMarkers = m_model->markers();
+	int index = currentMarkers.indexOf(marker);
+	if (index == -1)
+		return;
+	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
+
+	QModelIndex mindex = m_model->index(index, MARKER_COLUMN_LABEL);
+	auto row = proxy->mapFromSource(mindex).row();
+	tvMarkers->setFocus();
+	tvMarkers->showRow(row);
+	tvMarkers->selectRow(row);
+}
 
 void AwMarkerManagerSettings::writeTrigger()
 {

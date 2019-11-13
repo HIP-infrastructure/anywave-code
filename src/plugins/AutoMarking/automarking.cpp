@@ -29,16 +29,15 @@
 AutoMarkingPlugin::AutoMarkingPlugin()
 {
 	type = AwProcessPlugin::GUI;
-	name = "Mark around an event";
+	name = "Epoch Maker";
 	description = tr("Automatically add markers around an existing marker.");
-	category = "Process:Markers:Mark around markers";
+	category = "Process:Markers:Epoch Maker";
 }
 
 
 AutoMarking::AutoMarking()
 {
-//	setFlags(Aw::ProcessFlags::ProcessIsScriptable);
-	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "0-n");
+	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers);
 }
 
 AutoMarking::~AutoMarking()

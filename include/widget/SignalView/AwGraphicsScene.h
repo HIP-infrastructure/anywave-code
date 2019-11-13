@@ -45,7 +45,7 @@ public:
 	AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent = 0);
 	~AwGraphicsScene();
 
-	enum Mode { Cursor, Mapping, AddingMarker, None, QTS };
+	enum Mode { Cursor, Mapping, AddingMarker, None, QTS, DraggingCursor };
 	inline float pageDuration() { return m_pageDuration; }
 	inline AwChannelList& channels() { return m_channels; }
 	AwChannelList selectedChannels();
@@ -64,6 +64,11 @@ public:
 	virtual void applyNewSettings(AwViewSettings *settings);
 	virtual void updateMarkers();
 	virtual void refresh();
+
+	/* add a new cursor referenced by a name. Default color is red. */
+	AwCursorItem *addCursor(const QString& name, const QString& color = "#FF0000", float width = 2.);
+	void removeCursor(const QString& name);
+	void setCursorPosition(const QString& cursorName, float posInFile, float position);
 signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
@@ -73,6 +78,7 @@ signals:
 	// signal sent whenever the user changes the filters settings of a channel.
 	void channelFiltersChanged();
 	// Cursors
+	void draggedCursorPositionChanged(float position);
 	void cursorPositionChanged(float position);
 	void mappingPositionChanged(float position);
 	void markerInserted(AwMarker *marker);
@@ -82,7 +88,8 @@ signals:
 	// QTS = Quick Time Selection (of channels)
 	void processSelectedForLaunch(QString& name, AwChannelList& channels, float pos, float end);
 	void QTSModeEnded();
-	//
+	// markers
+	void showMarkerUnderMouse(AwMarker *marker);
 	void closeViewClicked();
 public slots:
 	void updateSignalItemSelection(AwGraphicsSignalItem *item, bool selected);
@@ -106,6 +113,9 @@ public slots:
 	void centerViewOnPosition(float pos);
 	void highlightPosition(float pos);
 	void showMarkers(bool show);
+	// markers
+	/// show current marker under mouse in the marker list.
+	void showMarkerInList();
 	// selection
 	void changeChannelsSelectionState(const QString& name, bool selected);
 	void selectAllChannels();
@@ -166,10 +176,11 @@ protected:
 	QList<AwGraphicsMarkerItem *> m_markerItemsDisplayed;
 	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;
+	QMap<QString, AwCursorItem *> m_cursors;
 	QMultiHash<QString, AwGraphicsSignalItem *> m_hashNameToItem;	// retreive signal item by the channel's name.
 	AwViewSettings *m_settings;
 	AwDisplayPhysics *m_physics;
-	AwCursorItem *m_cursor;
+	AwCursorItem *m_cursor, *m_draggedCursor;
 	AwMappingCursorItem *m_mappingCursor;
 	AwMappingCursorItem *m_mappingFixedCursor;
 	AwMarkerItem *m_currentMarkerItem;

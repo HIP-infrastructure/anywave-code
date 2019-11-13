@@ -371,8 +371,10 @@ void AwMontageManager::removeBadChannels(AwChannelList& list)
 void AwMontageManager::applyGains()
 {
 	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	for (auto c : m_channels + m_asRecorded.values())
-		c->setGain(am->amplitude(c->type()));
+	for (auto c : m_channels + m_asRecorded.values()) {
+		if (c != NULL)
+			c->setGain(am->amplitude(c->type()));
+	}
 }
 
 void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
@@ -428,7 +430,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		// make a copy a as recorded channel and insert it in channels.
 		// do not insert Reference channels in default montage
 		if (!c->isReference())
-			m_channels << new AwChannel(c);
+			m_channels << c->duplicate();
 	}
 
 	// check for .bad file
@@ -457,6 +459,16 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	}
 	setNewFilters(AwSettings::getInstance()->filterSettings());
 	applyGains();
+
+	// check that none NULL channels are present in asRecorder nor m_channels
+	for (auto k : m_asRecorded.keys()) {
+		if (m_asRecorded[k] == Q_NULLPTR)
+			m_asRecorded.remove(k);
+	}
+	foreach(AwChannel *c, m_channels)
+		if (c == Q_NULLPTR)
+			m_channels.removeAll(c);
+
 	emit montageChanged(m_channels);
 }
 
@@ -464,71 +476,11 @@ void AwMontageManager::checkForBIDSMods()
 {
 	if (m_channelsTsv.isEmpty())
 		return;
+	if (QMessageBox::question(0, tr("BIDS"), tr("Update channels.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+		return;
 	auto BM = AwBIDSManager::instance();
-	AwTSVDict dict;
-	try {
-		dict = BM->loadTsvFile(m_channelsTsv);
-	}
-	catch (const AwException& e) {
-		AwMessageBox::information(0, tr("BIDS"), e.errorString());
-		return;
-	}
-	// get columns from tsv file
-	auto cols = BM->readTsvColumns(m_channelsTsv);
-	if (cols.isEmpty()) {
-		return;
-	}
-
-	auto names = dict["name"];
-	auto types = dict["type"];
-	auto status = dict["status"];
-	// check if status column is present
-	if (status.isEmpty()) { // No => create it.
-		for (int i = 0; i < names.size(); i++) {
-			status << "good";
-		}
-	}
-	// from here, cols contains the keys to access the dictionnary.
-	QString badStatus, type;
-	bool mustBeSaved = false;
-	for (int i = 0; i < names.size(); i++) {
-		auto name = names.value(i);
-		//auto asRecorded = m_channelHashTable.value(name);
-		auto asRecorded = m_asRecorded[name];
-		if (asRecorded) {
-			// convert AnyWave Channel type to BIDS
-			if (asRecorded->isMEG())
-				type = "MEGMAG";
-			else if (asRecorded->isGRAD())
-				type = "MEGGRADAXIAL";
-			else if (asRecorded->isECG())
-				type = "ECG";
-			else if (asRecorded->isSEEG())
-				type = "SEEG";
-			else if (asRecorded->isEEG())
-				type = "EEG";
-			else if (asRecorded->isEMG())
-				type = "EMG";
-			else if (asRecorded->isTrigger())
-				type = "TRIG";
-			else if (asRecorded->isReference())
-				type = "MEGREFMAG";
-			else
-				type = "OTHER";
-
-			badStatus = asRecorded->isBad() ? "bad" : "good";
-			if (types.value(i) != type) {
-				mustBeSaved = true;
-				break;
-			}
-			if (status.value(i) != badStatus) {
-				mustBeSaved = true;
-				break;
-			}
-		}
-	}
-	if (mustBeSaved)
-		BM->addModification(m_channelsTsv, AwBIDSManager::ChannelsTsv);
+	BM->updateChannelsTsv(m_channelsTsv);
+	m_channelsTsv.clear();
 }
 
 ///
@@ -575,6 +527,9 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		return;
 	}
 
+	//  clear bad channels previously loaded 
+	m_badChannelLabels.clear();
+
 	// build a multi map for current montage to retreive channels by name.
 	QMultiMap<QString, AwChannel *> globalMap;
 	for (auto c : m_channels)
@@ -593,8 +548,10 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 			auto montageChannels = globalMap.values(c->name());
 			for (auto montageChannel : montageChannels) {
 				montageChannel->setType(c->type());
-				if (asRecorded->isBad())
+				if (asRecorded->isBad()) {
 					badChannels << montageChannel;
+					m_badChannelLabels << c->name();
+				}
 			}
 		}
 	}
@@ -832,7 +789,7 @@ bool AwMontageManager::apply(const QString& path)
 // in: List of as Recorded channels
 // path to montage file to apply.
 // out: List of montaged channels or empty list if error.
-AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, const QString &path)
+AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, const QString &path, const QStringList& badLabels)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 
@@ -847,16 +804,36 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 	QHash<QString, AwChannel *> hash;
 	for (auto c : asRecorded)
 		hash[c->name()] = c;
+
+	if (!badLabels.isEmpty()) {
+		for (auto k : hash.keys())
+			if (badLabels.contains(k))
+				hash[k]->setBad(true);
+	}
 	
 	for (auto c : channels) {
 		if (!hash.contains(c->name()))
 			continue;
-		auto newChannel = new AwChannel(c);
+		if (hash[c->name()]->isBad())
+			continue;
+		auto newChannel = new AwChannel(hash[c->name()]);
 		hash[c->name()]->setType(c->type());
-		if (c->hasReferences() && hash.contains(c->referenceName())) 
+		/* Handle AVG references */
+		if (c->referenceName() == "AVG") {
+			newChannel->setReferenceName("AVG");
+			res << newChannel;
+			continue;
+		}
+		if (c->hasReferences() && hash.contains(c->referenceName())) {
 			// make sure the type of ref channel is matching the one in montage
-			hash[c->referenceName()]->setType(c->type());
-		else 
+			if (!hash[c->referenceName()]->isBad()) {
+				hash[c->referenceName()]->setType(c->type());
+				newChannel->setReferenceName(c->referenceName());
+			}
+			else
+				newChannel->clearRefName();
+		}
+		else
 			newChannel->clearRefName();
 		res << newChannel;
 	}
@@ -1022,7 +999,6 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 		QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
 		return;
 	}
-//	AwProcessManager::instance()->setMontageChannels(m_channels);
 	applyGains();
 	setNewFilters(AwSettings::getInstance()->filterSettings());
 	emit montageChanged(m_channels);

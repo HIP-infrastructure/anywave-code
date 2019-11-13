@@ -137,13 +137,13 @@ QStringList AwMarker::markersTypeList()
 	return list;
 }
 
-void AwMarker::save(const QString& path, const AwMarkerList& markers)
+int AwMarker::save(const QString& path, const AwMarkerList& markers)
 {
 	QFile file(path);
 	QTextStream stream(&file);
 
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-		return;
+		return -1;
 
 	stream << "// AnyWave Marker File" << endl;
 	foreach (AwMarker *m, markers) {
@@ -165,6 +165,7 @@ void AwMarker::save(const QString& path, const AwMarkerList& markers)
 		stream << endl;
 	}
 	file.close();
+	return 0;
 }
 
 AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
@@ -230,26 +231,6 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 	AW_DESTROY_LIST(toDelete);
 	return res;
  }
-
-///
-/// boundingInterval()
-/// Compute a bounding interval around the markers set as input.
-/// This is to avoid filtering effects on small data.
-
-void AwMarker::boundingInterval(const AwMarkerList& markers, float *start, float *end)
-{
-	const float pad_duration = 5.; // 
-
-	auto s = markers.first()->start();
-	auto e = markers.last()->end();
-
-	s -= pad_duration;
-	e += pad_duration;
-	if (s < 0)
-		s = 0.;
-	*start = s;
-	*end = e;
-}
 
 
 ///
@@ -462,7 +443,14 @@ AwMarkerList AwMarker::cutAroundMarkers(AwMarkerList& markers, AwMarkerList& cut
 	return res;
 }
 
-
+AwMarkerList AwMarker::getMarkersWithDuration(const AwMarkerList& markers)
+{
+	AwMarkerList res;
+	for (auto m : markers)
+		if (m->duration())
+			res << m;
+	return res;
+}
 
 AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList& skipLabels, const QStringList& useLabels, float totalDuration)
 {
@@ -475,6 +463,8 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 	}
 	else if (use && !skip) { // just use some markers as input =>  reshape markers and return used markers as input.
 		inputMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		if (inputMarkers.isEmpty())
+			return AwMarker::duplicate(markers);
 		// remove used markers from the list
 		for (auto m : inputMarkers)
 			markers.removeAll(m);
@@ -491,6 +481,8 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		if (skippedMarkers.isEmpty())
+			return AwMarker::duplicate(markers);
 		inputMarkers = AwMarker::invertMarkerSelection(skippedMarkers, "Selection", totalDuration);
 		// remove skipped markers from the list
 		for (auto m : skippedMarkers)
@@ -506,6 +498,8 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 	else if (skip && use) {
 		auto usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		if (usedMarkers.isEmpty() || skippedMarkers.isEmpty())
+			return AwMarker::duplicate(markers);
 		// remove artefact markers from the marker list
 		for (auto m : skippedMarkers)
 			markers.removeAll(m);
@@ -569,9 +563,9 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 					bool endAfter = u->end() > m->end();
 					bool included = u->start() >= m->start() && u->end() <= m->end();
 
-					if (startBefore && endWithin) { // crop marker from begining
+					if (startBefore && endWithin) { 
 						auto nm = new AwMarker(u);
-						nm->reshape(m->end(), u->end());
+						nm->reshape(u->start(), m->start());
 						usedMarkers.removeAll(u);
 						delete u;
 						usedMarkers << nm;

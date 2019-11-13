@@ -10,6 +10,7 @@ INCLUDEPATH += $$INCLUDEDIR
 
 !isEmpty(ARMA_INCLUDE_PATH) {
     INCLUDEPATH += $$ARMA_INCLUDE_PATH
+    DEFINES += ARMA_DONT_USE_WRAPPER
 }
 !isEmpty(VTK_INCLUDE_PATH) {
     INCLUDEPATH += $$VTK_INCLUDE_PATH
@@ -37,7 +38,7 @@ LIB_DIR = $$DESTDIR/lib
 HEADER_DIR = $$DESTDIR
 
 macx {
-  LIBS += -F$$LIB_DIR -F/Library/Frameworks
+  LIBS += -F$$LIB_DIR -F/Library/Frameworks 
 }
 
 !isEmpty(H5_LIB_PATH) {
@@ -81,7 +82,7 @@ macx {
 
 LIBS += -L$$LIB_DIR
 
-DEFINES += ARMA_DONT_USE_WRAPPER NDEBUG
+DEFINES +=  NDEBUG
 macx {
 INSTALL_LIB_PATH = $$DESTDIR/bin/AnyWave.app/Contents/Frameworks
 INSTALL_APP_PATH = $$DESTDIR/bin/AnyWave.app/Contents/MacOS
@@ -101,6 +102,6 @@ QMAKE_CXXFLAGS_RELEASE += -fopenmp
 QMAKE_CXXFLAGS_RELEASE += -fPIC
 }
 
-macx {
+macx { 
   QMAKE_CXXFLAGS += -framework qwt
 }

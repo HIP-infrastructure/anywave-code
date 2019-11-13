@@ -30,7 +30,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 LIBS += -lAwRW -lAwProcess -lAwWidgets -lAwGraphics -lAwMath -lAwMATLAB
 
 macx {
-  LIBS += -framework Accelerate
+ LIBS += -framework Accelerate
 }
 
 FORMS += \

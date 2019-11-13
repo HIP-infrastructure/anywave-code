@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Marmaduke Woodman – Laboratoire UMR INS INSERM 1106 - michael.woodman@univ-amu.fr
+//    Author: Marmaduke Woodman ï¿½ Laboratoire UMR INS INSERM 1106 - michael.woodman@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef ICA_H
@@ -28,6 +28,7 @@
 #include <AwProcessInterface.h>
 #include "ica_global.h"
 #include <armadillo>
+
 using namespace arma;
 
 class ICA_EXPORT ICA : public AwProcess
@@ -41,15 +42,16 @@ public:
 	void runFromCommandLine() override;
 	bool showUi();
 private:
+	int initParameters();
 	void infomax(int m, int n, int nc);
 	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
 	int runica_matlab(int nc);
 	int run_acsobiro(int nc);
 	void saveToFile();
-	/* Prepare matlab input file for MATLAB ica code. */
-	void createInputFile();
-	/* Launch matlab plugin to compute ICA. */
-	void launchMatlabPlugin();
+	///* Prepare matlab input file for MATLAB ica code. */
+	//void createInputFile();
+	///* Launch matlab plugin to compute ICA. */
+	//void launchMatlabPlugin();
 
 	int m_modality;
 	QString m_ignoredMarkerLabel;
@@ -59,6 +61,7 @@ private:
 	bool m_isDownsamplingActive;
 	int m_algo;
 	QString m_fileName;
+	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate;
 	AwChannelList m_channels;
 	QStringList m_algoNames;
@@ -75,7 +78,7 @@ class ICA_EXPORT ICAPlugin : public AwProcessPlugin
     Q_INTERFACES(AwProcessPlugin)
 public:
     ICAPlugin();
-    ICA *newInstance() { return new ICA; }
+	AW_INSTANTIATE_PROCESS(ICA)
 };
 
 

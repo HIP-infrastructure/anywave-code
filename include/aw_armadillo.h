@@ -9,5 +9,6 @@
 #if defined(MKL)
 #define ARMA_USE_MKL_ALLOC
 #endif
+
 #include <armadillo>
 using namespace arma;

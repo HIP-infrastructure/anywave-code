@@ -82,7 +82,6 @@ public:
 	FileStatus canRead(const QString &path);
 	void cleanUpAndClose();
 	AwChannelList triggerChannels();
-//	AwSensorLayoutList layouts();
 public slots:
 	void writeTriggerChannel(AwMarkerList&) {}
 private:
@@ -96,8 +95,7 @@ private:
 	qint16 m_nbTrials;
 	qint32 m_samplesByTrial;
 	qint32 m_dataSize;
-
-
+	QStringList getFiles(const QString& path);
 };
 
 class CTFREADER_EXPORT CTFReader : public AwFileIOPlugin

@@ -227,6 +227,7 @@ public:
 	static QList<AwChannel *> getChannelsOfType(const QList<AwChannel *>& list, int type);
 	static QList<AwChannel *> duplicateChannels(const QList<AwChannel *>& list);
 	static QList<AwChannel *> getChannelsWithLabels(const QList<AwChannel *>& list, const QStringList& labels);
+	static QList<AwChannel *> getChannelsWithLabel(const QList<AwChannel *>& list, const QString& label);
 	/** Get the labels as a list from the channels. Fullname flag will return the full labels (ie. with the reference channel) **/
 	static QStringList getLabels(const QList<AwChannel *>& list, bool fullName = false);
 	static QList<AwChannel *> cloneList(const QList<AwChannel *>& list, bool cloneData = false);

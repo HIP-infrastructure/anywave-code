@@ -30,7 +30,7 @@ namespace AwRequest {
 	enum Requests {
 		AddMarkers, GetMarkers, GetData2, GetPluginInfo, IsTerminated, SendMessage, SendCommand,
 		GetMarkers2, GetData3, GetFileInfo, GetScreenCapture, GetICAPanelCapture, SetBeamFormer, GetTriggers, GetPluginIO,
-		GetDataEx
+		GetDataEx, GetMarkersEx
 	};
 	enum Commands { GetDataReadFile, GetDataReadSocket };
 };
@@ -39,7 +39,7 @@ namespace AwProcessCommand
 {
 	enum Commands {
 		AddHighlightedSection, RemoveLastHighlightedSection, ShowOnlySelectedChannels,
-		SelectChannels, ShowAllChannels, LaunchProcess, CenterOnPos, LoadICA, UpdateMarkers
+		SelectChannels, ShowAllChannels, LaunchProcess, CenterOnPos, LoadICA, UpdateMarkers, AddVideoCursor, RemoveCursor
 	};
 }
 
@@ -49,17 +49,14 @@ namespace Aw
 	namespace ProcessFlags {
 		enum AwProcessFlags {
 			ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02, ProcessHasOutputUi = 0x04,
-			ProcessDontRequireData = 0x08, ProcessIsScriptable = 0x10, ProcessRequiresChannelSelection = 0x20,
-			ProcessSkipInputCheck = 0x40, PluginIsHidden = 0x80, CanRunFromCommandLine = 0x100
+			ProcessDoesntRequireData = 0x08, ProcessSkipInputCheck = 0x10, PluginIsHidden = 0x20, CanRunFromCommandLine = 0x40
 		};
 	}
 	namespace ProcessInput {
 		enum AwProcessInputs {
-			ProcessIgnoresChannelSelection = 0x01, GetAllMarkers = 0x02, GetReaderPlugins = 0x04,
-			GetWriterPlugins = 0x08, AnyChannels = 0x10, EEGChannels = 0x20, MEGChannels = 0x40,
-			ECGChannels = 0x80, EMGChannels = 0x100, SEEGChannels = 0x200,
-			GetAsRecordedChannels = 0x400, GetCurrentMontage = 0x800, TriggerChannels = 0x1000, SourceChannels = 0x2000,
-			GetProcessPluginNames = 0x4000
+			ProcessIgnoresChannelSelection = 1, GetAllMarkers = 2, GetDurationMarkers = 4, GetReaderPlugins = 8,
+			GetWriterPlugins = 16, GetAsRecordedChannels = 32, GetCurrentMontage = 64,	GetProcessPluginNames = 128,
+			ProcessRequiresChannelSelection = 256, UserSelectedMarkers = 512
 		};
 	}
 }

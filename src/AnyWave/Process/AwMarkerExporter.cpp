@@ -24,7 +24,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMarkerExporter.h"
-#include "AwUtilities.h"
 
 AwMarkerExporterPlugin::AwMarkerExporterPlugin() : AwProcessPlugin()
 {

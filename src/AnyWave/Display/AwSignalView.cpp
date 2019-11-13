@@ -24,6 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwSignalView.h"
+#include "ICA/AwICASignalItem.h"
 #include <widget/SignalView/AwGraphicsView.h>
 #include "AwScene.h"
 #include <widget/SignalView/AwNavigationBar.h>
@@ -57,6 +58,7 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();
 	connect(m_scene, SIGNAL(markerInserted(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
+	connect(m_scene, &AwScene::showMarkerUnderMouse, mm, &AwMarkerManager::highlightMarkerInList);
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
 	// using Global Marker Bar representation => connect to MarkerManager
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
@@ -120,17 +122,19 @@ void AwSignalView::updatePositionInFile(float pos)
 
 void AwSignalView::synchronizeOnPosition(float pos)
 {
-	float newPos = pos;
+	float newPos;
 	if (pos < 0.)
 		newPos = 0.;
 	if (pos + m_pageDuration > m_totalDuration)
 		pos = m_totalDuration - m_pageDuration;
-
-	m_positionInFile = newPos;
+	newPos = pos;
 	m_view->setPositionInFile(newPos);
 	m_scene->setPositionInFile(newPos);
 	m_navBar->updatePositionInFile(newPos);
 	m_markerBar->setPositionInFile(newPos);
+	if (newPos == m_positionInFile)
+		return;
+	m_positionInFile = newPos;
 	m_client.requestData(&m_channels, newPos, m_pageDuration);
 	dataReceived();
 }
@@ -282,6 +286,19 @@ void AwSignalView::setChannels(const AwChannelList& channels)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
+
+
+void AwSignalView::showICAMaps(bool flag)
+{
+	QList<AwGraphicsSignalItem *> items = scene()->signalItems();
+	for (auto i : items) {
+		auto channel = i->channel();
+		if (channel->type() == AwChannel::ICA && channel->className() == "AwVirtual") {
+			AwICASignalItem *ica_item = static_cast<AwICASignalItem *>(i);
+			ica_item->showMap(flag);
+		}
+	}
+}
 
 void AwSignalView::refresh()
 {

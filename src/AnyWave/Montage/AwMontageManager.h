@@ -57,7 +57,7 @@ public:
 	/** Retourne la liste des objets AwChannel du montage courant **/
 	AwChannelList& channels() { return m_channels;}
 	/** Retourne la liste des AwChannels AsRecorded **/
-	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded[name]; }
+	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
 	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
 	QHash<QString, AwChannel *> cloneAsRecordedChannels();
 	bool containsChannelOfType(AwChannel::ChannelType t); 
@@ -102,7 +102,7 @@ public:
 	/** Remove bad channels in list **/
 	void removeBadChannels(AwChannelList& list);
 	/** Scripting support specific **/
-	AwChannelList loadAndApplyMontage(AwChannelList asRecorded, const QString& path);
+	AwChannelList loadAndApplyMontage(AwChannelList asRecorded, const QString& path, const QStringList& bads = QStringList());
 	/** Scripting support specific **/
 	void newMontage(AwFileIO *reader);
 	// ICA Channels specific

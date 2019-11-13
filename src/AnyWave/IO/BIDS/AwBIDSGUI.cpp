@@ -46,27 +46,10 @@ void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 
 	// get item type
 	int type = item->data(AwBIDSGUI::TypeRole).toInt();
-	if (type == AwBIDSGUI::DataFile) {
+
+	if (type == AwBIDSGUI::DataFile) 
 		// open the file 
-		emit dataFileClicked(item->data(AwBIDSGUI::PathRole).toString());
-		// check for electrodes and meshes in derivatives for ieeg 
-		// get parent item to check if it is ieeg
-		auto parent = item->parent();
-		if (parent) {
-			if (parent->data(AwBIDSGUI::TypeRole).toInt() == AwBIDSGUI::ieeg) {
-				// get top parent and the subject object.
-				auto top = parent->parent();
-				if (!top)
-					top = parent;
-				else 
-					while (top)
-						top = parent->parent();
-				checkForElectrodeAndMesh(AwBIDSManager::instance()->getDerivativesPath(AwBIDSManager::EPITOOLS, static_cast<AwBIDSItem *>(top)->subject()));
-			}
-		}
-		
-		
-	}
+		emit dataFileClicked(item->data(AwBIDSGUI::PathRole).toString());				
 }
 
 

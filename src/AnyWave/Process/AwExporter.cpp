@@ -27,6 +27,7 @@
 #include "AwExporterSettings.h"
 #include <filter/AwFiltering.h>
 #include <widget/AwMessageBox.h>
+#include <AwCore.h>
 
 
 AwExporterPlugin::AwExporterPlugin()
@@ -39,11 +40,9 @@ AwExporterPlugin::AwExporterPlugin()
 
 AwExporter::AwExporter() : AwProcess()
 {
-	setFlags(Aw::ProcessFlags::ProcessIsScriptable|Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
-	pdi.addInputParameter(Aw::ProcessInput::GetWriterPlugins, "1-n");
-	pdi.addInputParameter(Aw::ProcessInput::GetReaderPlugins, "1-n");
-	pdi.addInputParameter(Aw::ProcessInput::GetCurrentMontage|Aw::ProcessInput::ProcessIgnoresChannelSelection, "0-n");
-	pdi.addInputParameter(Aw::ProcessInput::GetAllMarkers, "0-n");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
+	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::GetWriterPlugins | Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetCurrentMontage
+		| Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	m_decimateFactor = 1;
 }
 
@@ -77,32 +76,36 @@ void AwExporter::runFromCommandLine()
 	}
 
 	auto endTimePos = reader->infos.totalDuration();
-	AwMarkerList markers = pdi.input.markers(), skippedMarkers, output_markers, input_markers;
+	AwMarkerList markers;
 	if (args.contains("marker_file"))
 		markers = AwMarker::load(args["marker_file"].toString());
-	if (args.contains("skip_marker")) {
-		auto labels = AwMarker::getMarkersWithLabel(markers, args["skip_marker"].toString());
-		skippedMarkers = AwMarker::merge(labels);
-		input_markers = AwMarker::invertMarkerSelection(skippedMarkers, "osef", endTimePos);
-		output_markers = AwMarker::cutAroundMarkers(markers, skippedMarkers);
-		/** destroy skipped markers as AwMarker::merge() duplicates marker objects **/
-		qDeleteAll(skippedMarkers);
-	}
-	else
-		output_markers = markers;
 
+	if (markers.isEmpty())
+		m_inputMarkers << new  AwMarker("global", 0, endTimePos);
+	else {
+		if (args.contains("skip_markers") || args.contains("use_markers")) {
+			auto skippedLabels = args["skip_markers"].toStringList();
+			auto usedLabels = args["use_markers"].toStringList();
+			m_outputMarkers = markers;
+			m_inputMarkers = AwMarker::getInputMarkers(m_outputMarkers, skippedLabels, usedLabels, endTimePos);
+		}
+		else { // no use neither skip options => read all the data and export all the markers
+			m_inputMarkers << new  AwMarker("global", 0, endTimePos);
+			m_outputMarkers = AwMarker::duplicate(markers);
+		}
+	}
 	writer->infos.setChannels(pdi.input.channels());
 	AwBlock *block = writer->infos.newBlock();
 
-	if (!output_markers.isEmpty())
-		block->setMarkers(output_markers);
+	if (!m_outputMarkers.isEmpty()) {
+		block->setMarkers(m_outputMarkers);
+		AW_DESTROY_LIST(m_outputMarkers);
+	}
 
-	if (input_markers.isEmpty())
-		input_markers << new AwMarker("global", 0, endTimePos);
-
-	sendMessage("loading data...");
-	requestData(&pdi.input.channels(), &input_markers);
+	sendMessage("Loading data...");
+	requestData(&pdi.input.channels(), &m_inputMarkers);
 	sendMessage("Done.");
+	AW_DESTROY_LIST(m_inputMarkers);
 
 	block->setSamples(pdi.input.channels().first()->dataSize());
 	block->setDuration((float)pdi.input.channels().first()->dataSize() / pdi.input.channels().first()->samplingRate());
@@ -115,47 +118,32 @@ void AwExporter::runFromCommandLine()
 		writer->plugin()->deleteInstance(writer);
 		return;
 	}
-	sendMessage("Writting data...");
+	sendMessage("Writing data...");
 	writer->writeData(&pdi.input.channels());
 	sendMessage("Done.");
 	writer->cleanUpAndClose();
 	writer->plugin()->deleteInstance(writer);
-
-	while (!input_markers.isEmpty())
-		delete input_markers.takeFirst();
-	while (!output_markers.isEmpty())
-		delete output_markers.takeFirst();
 }
 
 void AwExporter::run()
 {
-	auto output_markers = AwMarker::duplicate(pdi.input.markers());
-	bool skip = !m_skippedMarkers.isEmpty();
-	bool use = !m_exportedMarkers.isEmpty();
 	bool isDecimate = m_decimateFactor > 1;
-	auto skipLabels = AwMarker::getAllLabels(m_skippedMarkers);
-	auto useLabels = AwMarker::getAllLabels(m_exportedMarkers);
-
-	auto inputMarkers = AwMarker::getInputMarkers(AwMarker::sort(output_markers), skipLabels, useLabels, pdi.input.reader()->infos.totalDuration());
 
 	AwFileIO *writer = m_plugin->newInstance();
 	writer->setPlugin(m_plugin);
 	
 	AwBlock *block = writer->infos.newBlock();
-
-	if (!output_markers.isEmpty())
-		block->setMarkers(output_markers);
-
+	
 	sendMessage("Loading data...");
 	if (isDecimate) {
-		requestData(&m_channels, &inputMarkers, true);
+		requestData(&m_channels, &m_inputMarkers, true);
 		AwFiltering::downSample(m_channels, m_decimateFactor);
 	}
 	else {
-		requestData(&m_channels, &inputMarkers);
+		requestData(&m_channels, &m_inputMarkers);
 	}
 	sendMessage("Done.");
-	qDeleteAll(inputMarkers);
+	AW_DESTROY_LIST(m_inputMarkers);
 
 	block->setSamples(m_channels.first()->dataSize());
 	block->setDuration((float)m_channels.first()->dataSize() / m_channels.first()->samplingRate());
@@ -198,6 +186,10 @@ void AwExporter::run()
 	}
 	// now that the channels have optionaly being renamed, create the output file.
 	writer->infos.setChannels(m_channels);
+	if (!m_outputMarkers.isEmpty()) {
+		writer->infos.blocks().first()->setMarkers(m_outputMarkers);
+		AW_DESTROY_LIST(m_outputMarkers);
+	}
 
 	if (writer->createFile(m_path) != AwFileIO::NoError) {
 		sendMessage(tr("Error creating output file."));
@@ -205,14 +197,9 @@ void AwExporter::run()
 		return;
 	}
 
-
-
 	sendMessage(tr("Writing data..."));
 	writer->writeData(&m_channels);
 	sendMessage("Done.");
-	if (use || skip) // output markers contains duplicated markers => delete them
-		while (!output_markers.isEmpty())
-			delete output_markers.takeFirst();
 	writer->cleanUpAndClose();
 	m_plugin->deleteInstance(writer);
 }
@@ -246,26 +233,43 @@ bool AwExporter::showUi()
 		else
 			m_channels = ui.selectedChannels;
 		m_plugin = writers.value(ui.writer);
-
+		
 		if (QFile::exists(ui.filePath)) {
 			if (AwMessageBox::information(0, tr("File"), tr("the file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
 				return false;
 		}
 		m_path = ui.filePath;
 		pdi.input.filterSettings = ui.filterSettings;
+		/** Apply filters **/
+		ui.filterSettings.apply(m_channels);
 
 		// if Export All ICA channels is checked => add all ICA channels to export
 		m_exportICAChannels = ui.exportICA;
-		if (m_exportICAChannels) 
+		if (m_exportICAChannels) {
 			m_ICAChannels = ui.icaChannels;
+			QString extension = ui.extensions.value(ui.writers.indexOf(ui.writer));
+			QString destFile = ui.filePath + extension + ".ica.mat";
+			if (QFile::exists(destFile))
+				QFile::remove(destFile);
+			// copy the ICA.Mat fileto be used with the exported file.
+			QFile::copy(pdi.input.icaPath, destFile);
+		}
 		else if (!ui.selectedICA.isEmpty()) // only a subset of ICA channels are selected for export
 			m_ICAChannels = ui.selectedICA;
 
 		// build the complete list of channels to export
 		if (!m_ICAChannels.isEmpty())
 			m_channels += m_ICAChannels;
-		m_skippedMarkers = ui.skippedMarkers();
-		m_exportedMarkers = ui.usedMarkers();
+
+		if (!ui.skippedMarkers.isEmpty() || !ui.usedMarkers.isEmpty()) {
+			m_outputMarkers = AwMarker::duplicate(pdi.input.markers());
+			m_inputMarkers = AwMarker::getInputMarkers(m_outputMarkers, ui.skippedMarkers, ui.usedMarkers, pdi.input.fileDuration);
+		}
+		else {
+			m_inputMarkers << new AwMarker("whole data", 0., pdi.input.fileDuration);
+			m_outputMarkers = AwMarker::duplicate(pdi.input.markers());
+		}
+
 		m_decimateFactor = ui.decimateFactor;
 		m_relabelChannels = ui.renameLabels;
 		return true;

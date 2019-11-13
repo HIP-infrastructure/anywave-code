@@ -79,14 +79,15 @@
     </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionOpen_BIDS"/>
-    <addaction name="actionSave"/>
+    <addaction name="actionOpen_video"/>
     <addaction name="actionSave_as"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_New_AnyWave_Application"/>
     <addaction name="separator"/>
     <addaction name="actionImport_mrk_file"/>
     <addaction name="actionLoadBeamFormer"/>
     <addaction name="actionLoadICA"/>
     <addaction name="separator"/>
-    <addaction name="actionExecuteScript"/>
     <addaction name="separator"/>
     <addaction name="actionSave_display_to_PDF"/>
     <addaction name="actionExport_to_SVG"/>
@@ -117,7 +118,6 @@
     <addaction name="separator"/>
     <addaction name="actionDebug_Logs"/>
     <addaction name="separator"/>
-    <addaction name="actionAbout_AnyWave"/>
    </widget>
    <widget class="QMenu" name="menuMapping">
     <property name="title">
@@ -140,12 +140,26 @@
     <addaction name="actionVisualiseEpoch"/>
     <addaction name="actionAveraging"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionAbout_AnyWave"/>
+    <addaction name="actionHelp"/>
+   </widget>
+   <widget class="QMenu" name="menuProcesses">
+    <property name="title">
+     <string>Processes</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView_"/>
    <addaction name="menuICA"/>
    <addaction name="menuMapping"/>
    <addaction name="menuEpoch"/>
+   <addaction name="menuProcesses"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -410,6 +424,25 @@
   <action name="actiondrerz">
    <property name="text">
     <string>drerz</string>
+   </property>
+  </action>
+  <action name="actionOpen_New_AnyWave_Application">
+   <property name="icon">
+    <iconset resource="../../resources/AnyWave.qrc">
+     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>New AnyWave application</string>
+   </property>
+  </action>
+  <action name="actionOpen_video">
+   <property name="text">
+    <string>Open video</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
    </property>
   </action>
  </widget>

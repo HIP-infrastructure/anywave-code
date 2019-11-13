@@ -134,7 +134,7 @@ public:
 	// default constructor
 	AwProcessPlugin() { m_flags = 0x00000000; }
 
-	enum RunMode { GUI = 2, Display = 4, Background = 8, DisplayBackground = 16, Internal = 32, Scripted = 64 };
+	enum RunMode { GUI = 2, Display = 4, Background = 8, DisplayBackground = 16, Internal = 32 };
 	/** Plugin's name. Set it in constructor with an unique name. This is MANDATORY. **/
 	QString name;
 	/** Plugin's description. Set it in constructor with a brief description. This is MANDATORY **/
@@ -214,7 +214,6 @@ public:
 	inline bool isFinished() { return m_status == AwProcess::Finished; }
 	inline bool isIdle() { return m_status == AwProcess::Idle; }
 	inline qint64 executionTime() { return m_executionTime; }
-	inline bool isScripted() { return m_runMode & AwProcessPlugin::Scripted; }
 	inline void sendMessage(const QString& message) { emit progressChanged(message); }
 	inline void sendProgressUpdate(int percent) { emit progressChanged(percent); }
 public slots:
