@@ -205,6 +205,8 @@ add_subdirectory(src/plugins/SPMReader)
 add_dependencies(SPMReader AwCore AwReadWrite AwMATLAB)
 add_subdirectory(src/plugins/FIFIO)
 add_dependencies(FIFFIO AwCore AwReadWrite)
+add_subdirectory(src/plugins/EEGInto4D)
+add_dependencies(EEGInto4D AwCore AwReadWrite AwUtilities)
 
 
 # Install
