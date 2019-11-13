@@ -145,20 +145,20 @@ SET(AnyWave_SRCS
     ./Prefs/AwPrefsDial.cpp  
     ./Prefs/AwSettings.cpp  
     ./Source/AwSourceChannel.cpp  
-    ./Source/AwSourceManager.cpp  
-    ./Epoch/AwAverageDialog.cpp  
-    ./Epoch/AwAverageItemWidget.cpp  
-    ./Epoch/AwAvgSignalItem.cpp  
-    ./Epoch/AwAvgWorker.cpp  
-    ./Epoch/AwEditStatsDialog.cpp  
-    ./Epoch/AwEpochAverageWidget.cpp  
-    ./Epoch/AwEpochCreateUi.cpp  
-    ./Epoch/AwEpochManager.cpp  
-    ./Epoch/AwEpochModel.cpp  
-    ./Epoch/AwEpochVisuWidget.cpp  
-    ./Epoch/AwStatChartWidget.cpp  
-	./Epoch/AwEpochMosaicWidget.cpp
-    ./Epoch/AwStatsModel.cpp)
+    ./Source/AwSourceManager.cpp)  
+    #./Epoch/AwAverageDialog.cpp  
+    #./Epoch/AwAverageItemWidget.cpp  
+    #./Epoch/AwAvgSignalItem.cpp  
+    #./Epoch/AwAvgWorker.cpp  
+    #./Epoch/AwEditStatsDialog.cpp  
+    #./Epoch/AwEpochAverageWidget.cpp  
+    #./Epoch/AwEpochCreateUi.cpp  
+    #./Epoch/AwEpochManager.cpp  
+    #./Epoch/AwEpochModel.cpp  
+    #./Epoch/AwEpochVisuWidget.cpp  
+    #./Epoch/AwStatChartWidget.cpp  
+	#./Epoch/AwEpochMosaicWidget.cpp
+    #./Epoch/AwStatsModel.cpp)
 
 SET(HEADERS ./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
@@ -279,20 +279,20 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Prefs/AwSettings.h  
     ./Prefs/AwPrefsDial.h  
     ./Source/AwSourceChannel.h  
-    ./Source/AwSourceManager.h  
-    ./Epoch/AwEpochManager.h  
-    ./Epoch/AwEpochCreateUi.h  
-    ./Epoch/AwEpochModel.h  
-    ./Epoch/AwEpochVisuWidget.h  
-    ./Epoch/AwEpochAverageWidget.h  
-    ./Epoch/AwAverageDialog.h  
-    ./Epoch/AwAverageItemWidget.h  
-    ./Epoch/AwAvgWorker.h  
-    ./Epoch/AwAvgSignalItem.h  
-    ./Epoch/AwEditStatsDialog.h  
-    ./Epoch/AwStatsModel.h  
-	./Epoch/AwEpochMosaicWidget.h
-    ./Epoch/AwStatChartWidget.h)
+    ./Source/AwSourceManager.h)  
+    #./Epoch/AwEpochManager.h  
+    #./Epoch/AwEpochCreateUi.h  
+    #./Epoch/AwEpochModel.h  
+    #./Epoch/AwEpochVisuWidget.h  
+    #./Epoch/AwEpochAverageWidget.h  
+    #./Epoch/AwAverageDialog.h  
+   # ./Epoch/AwAverageItemWidget.h  
+   # ./Epoch/AwAvgWorker.h  
+   # ./Epoch/AwAvgSignalItem.h  
+   # ./Epoch/AwEditStatsDialog.h  
+   # ./Epoch/AwStatsModel.h  
+   #	./Epoch/AwEpochMosaicWidget.h
+   #   ./Epoch/AwStatChartWidget.h)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
@@ -339,14 +339,14 @@ SET(FORMS ./AnyWave.ui
     ./Widgets/AwTriggerParsingDialog.ui  
     ./Widgets/AwSelectTriggerChannelDialog.ui  
 	./Widgets/AwVideoSettingsDial.ui
-    ./Prefs/AwPrefsDial.ui  
-    ./Epoch/AwEpochCreateUi.ui  
-    ./Epoch/AwEpochVisuWidget.ui  
-    ./Epoch/AwEpochAverageWidget.ui  
-    ./Epoch/AwAverageDialog.ui  
-    ./Epoch/AwAverageItemWidget.ui  
-	./Epoch/AwEpochMosaicWidget.ui
-    ./Epoch/AwEditStatsDialog.ui)
+    ./Prefs/AwPrefsDial.ui)  
+ #   ./Epoch/AwEpochCreateUi.ui  
+ #   ./Epoch/AwEpochVisuWidget.ui  
+ #   ./Epoch/AwEpochAverageWidget.ui  
+ #   ./Epoch/AwAverageDialog.ui  
+ #   ./Epoch/AwAverageItemWidget.ui 
+#	./Epoch/AwEpochMosaicWidget.ui
+#    ./Epoch/AwEditStatsDialog.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
 
@@ -373,8 +373,8 @@ AwMATLAB)
 
 
 ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC} ${AnyWave_TS})
-QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport)
-SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport)
+QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
+SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml)
 #TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
 
 TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z)
