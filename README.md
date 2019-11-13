@@ -2,9 +2,9 @@
 
 ```bash
 sudo apt-get -y update && apt-get -y install git cmake qtbase5-dev libqt5dbus5 
-    qt5-default libvtk7-qt-dev libopenblas-base libopenblas-dev libqt5charts5-dev qtdeclaratives5-dev
+    qt5-default libvtk7-qt-dev libopenblas-base libopenblas-dev qtmultimedia5-dev libqt5x11extras5-dev
     libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev
-    build-essential libpython2.7-dev python2.7 python-numpy
+    build-essential libpython2.7-dev python2.7 python-numpy libqt5x11extras5 libqt5multimedia5
 ```
 You should be able to adapt the script above for your own distribution.   
 Note that cmake v3 is required and some distributions (CentOS) only provides CMake 2.8.   
@@ -14,9 +14,9 @@ You may have to add extra source repositories to get cmake3.
 
 ```bash
 sudo apt-get -y update && apt-get -y install git cmake qtbase5-dev libqt5dbus5 
-    qt5-default libvtk6-qt-dev libopenblas-base libopenblas-dev libqt5charts5-dev qtdeclaratives5-dev
+    qt5-default libvtk6-qt-dev libopenblas-base libopenblas-dev qtmultimedia5-dev libqt5x11extras5-dev
     libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev
-    build-essential libpython2.7-dev python2.7 python-numpy libproj-dev
+    build-essential libpython2.7-dev python2.7 python-numpy libproj-dev libqt5x11extras5 libqt5multimedia5
 ```
 
 WARNING: On Ubuntu 16.04 some Qt5 packages are not availabel (Qt5Charts Qt5Declarative). 
