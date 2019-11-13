@@ -12,6 +12,8 @@ parts:
        - build-essential
        - qtbase5-dev
        - qt5-default
+       - qtmultimedia5-dev
+       - libqt5x11extras5-dev
        - libvtk7-qt-dev
        - libopenblas-dev
        - libmatio-dev
@@ -38,6 +40,7 @@ parts:
       - libqt5multimediawidgets5
       - libqt5network5
       - libqt5opengl5
+      - libqt5x11extras5
 
 
 apps:
