@@ -161,11 +161,19 @@ int ICA::initParameters()
 		pdi.input.addMarker(new AwMarker("global", 0., pdi.input.fileDuration));
 	}
 
-	// if the skip markers were selected then input markers already represent the data to load. 
-	// if not than one marker should marked the entire data in pdi.input.markers.;
-	sendMessage("Loading data...");
-	requestData(&m_channels, &pdi.input.markers(), true);
-	sendMessage("Done");
+    // Watch for memory exception
+	try {
+
+		// if the skip markers were selected then input markers already represent the data to load. 
+		// if not than one marker should marked the entire data in pdi.input.markers.;
+		sendMessage("Loading data...");
+		requestData(&m_channels, &pdi.input.markers(), true);
+		sendMessage("Done");
+	}
+	catch (std::bad_alloc& ba) {
+		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+		return -1;
+	}
 
 	int decimate = 1;
 	if (m_isDownsamplingActive) {
@@ -242,7 +250,13 @@ void ICA::run()
 	if (initParameters() == -1)
 		return;
 
-	infomax(m, n, m_nComp);
+	try {
+		infomax(m, n, m_nComp);
+	}
+	catch (std::bad_alloc& ba) {
+		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+		return;
+	}
 	if (!isAborted()) {
 		saveToFile();
 
