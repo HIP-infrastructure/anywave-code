@@ -158,6 +158,6 @@ void AwExporterSettings::accept()
 	exportICA = checkBoxICA->isChecked();
 	decimateFactor = comboDS->getDecimateFactor();
 	filterSettings = filterTableView->settings();
-	renameLabels = checkRelabel->isChecked();
+//	renameLabels = checkRelabel->isChecked();
 	QDialog::accept();
 }

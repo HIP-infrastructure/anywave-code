@@ -409,8 +409,10 @@ void AwMontageManager::closeFile()
 
 	if (!m_badChannelLabels.isEmpty()) // save bad channels
 		saveBadChannels();
-	else if (QFile::exists(m_badPath))  // no bad channels but may be a previous bad file is present, so delete the file.
-		QFile::remove(m_badPath);
+	else {
+		if (QFile::exists(m_badPath))  // no bad channels but may be a previous bad file is present, so delete the file.
+			QFile::remove(m_badPath);
+	}
 		
 	m_badChannelLabels.clear();
 	m_montagePath = "";

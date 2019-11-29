@@ -90,6 +90,7 @@ bool ICA::showUi()
 		args["hp"] = ui.hpf;
 		args["lp"] = ui.lpf;
 		m_algo = ui.algo;
+		args["infomax_extended"] = ui.infomaxExtended;
 
 		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.dataFolder);
 		QFile test(testFile);

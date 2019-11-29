@@ -18,7 +18,7 @@
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
-QString AwBIDSManager::m_parsingPath = QString("derivatives/parsing");
+//QString AwBIDSManager::m_parsingPath = QString("derivatives/parsing");
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
@@ -652,6 +652,10 @@ AwBIDSManager::AwBIDSManager(const QString& rootDir)
 	
 	setRootDir(rootDir);
 	m_mustValidateModifications = false;
+
+	// init settings
+	m_settings["parsing_path"] = QString("derivatives/parsing");
+	m_settings["aw_derivatives"] = QString("derivatives/anywave");
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -663,7 +667,8 @@ QString AwBIDSManager::getParsingPath()
 {
 	if (!isBIDSActive())
 		return QString();
-	return QString("%1/%2").arg(m_rootDir).arg(m_parsingPath);
+	return m_settings["parsing_path"].toString();
+	//return QString("%1/%2").arg(m_rootDir).arg(m_parsingPath);
 }
 
 void AwBIDSManager::setRootDir(const QString& path)
@@ -1050,18 +1055,18 @@ int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const Q
 }
 
 
-QString AwBIDSManager::getDerivativesPath(int type, AwBIDSSubject *sub)
-{
-	switch (type) {
-	case AwBIDSManager::EPITOOLS:
-		break;
-	case AwBIDSManager::EI:
-		break;
-	case AwBIDSManager::ICA:
-		break;
-	}
-	return QString();
-}
+//QString AwBIDSManager::getDerivativesPath(int type, AwBIDSSubject *sub)
+//{
+//	switch (type) {
+//	case AwBIDSManager::EPITOOLS:
+//		break;
+//	case AwBIDSManager::EI:
+//		break;
+//	case AwBIDSManager::ICA:
+//		break;
+//	}
+//	return QString();
+//}
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>437</width>
-    <height>405</height>
+    <width>546</width>
+    <height>553</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,6 +63,22 @@
          </spacer>
         </item>
        </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupInfomax">
+     <property name="title">
+      <string>Infomax parameters</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="cbInfomaxExtended">
+        <property name="text">
+         <string>Compute extended ICA</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

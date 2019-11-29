@@ -136,8 +136,12 @@ void AwExporter::run()
 	
 	sendMessage("Loading data...");
 	if (isDecimate) {
+		AwChannel::clearFilters(m_channels);
 		requestData(&m_channels, &m_inputMarkers, true);
 		AwFiltering::downSample(m_channels, m_decimateFactor);
+		// apply filters set in the UI
+		pdi.input.filterSettings.apply(m_channels);
+		AwFiltering::filter(m_channels);
 	}
 	else {
 		requestData(&m_channels, &m_inputMarkers);
@@ -151,39 +155,42 @@ void AwExporter::run()
 	writer->infos.setTime(pdi.input.reader()->infos.recordingTime());
 	writer->infos.setISODate(pdi.input.reader()->infos.isoDate());
 
-	if (m_relabelChannels) {
-		// remove 0 in label likely (A01 will become A1).
-		// check if the renaming does not create doublons !
-		QMap<QString, AwChannel *> map;
-		for (auto c : m_channels)
-			map[c->name()] = c;
-		for (auto c : m_channels) {
-			if (c->isEEG() || c->isSEEG()) {
-				auto label = c->name();
-				QString newLabel;
-				QRegularExpression re("\\d+$");
-				QRegularExpressionMatch match = re.match(label);
-				if (match.hasMatch()) {
-					QString elec = label.remove(re);
-					int number = match.captured(0).toInt();
-					newLabel = QString("%1%2").arg(elec).arg(number);
-					// search if newLabel already exists = do not create doublons.
-					if (map.contains(newLabel)) {
-						auto channel = map[newLabel];
-						// rename existing label by adding "-" between name and number.
-						QString label = QString("%1_%2").arg(elec).arg(number);
-						channel->setName(label);
-						map.remove(newLabel);
-						map[label] = channel;
-					}
-					else {
-						map.remove(c->name());
-						map[newLabel] = c;
-					}
-				}
-			}
-		}
-	}
+	// DOES NOT WORK FOR NOW
+	//if (m_relabelChannels) {
+	//	// remove 0 in label likely (A01 will become A1).
+	//	// check if the renaming does not create doublons !
+	//	QMap<QString, AwChannel *> map;
+	//	for (auto c : m_channels)
+	//		map[c->name()] = c;
+	//	for (auto c : m_channels) {
+	//		if (c->isEEG() || c->isSEEG()) {
+	//			auto label = c->name();
+	//			if (!label.contains("0"))  // do not proceed with  lable if no zero is present inside.
+	//				continue;
+	//			QString newLabel;
+	//			QRegularExpression re("\\d+$");
+	//			QRegularExpressionMatch match = re.match(label);
+	//			if (match.hasMatch()) {
+	//				QString elec = label.remove(re);
+	//				int number = match.captured(0).toInt();
+	//				newLabel = QString("%1%2").arg(elec).arg(number);
+	//				// search if newLabel already exists = do not create doublons.
+	//				if (map.contains(newLabel)) {
+	//					auto channel = map[newLabel];
+	//					// rename existing label by adding "-" between name and number.
+	//					QString label = QString("%1_%2").arg(elec).arg(number);
+	//					channel->setName(label);
+	//					map.remove(newLabel);
+	//					map[label] = channel;
+	//				}
+	//				else {
+	//					map.remove(c->name());
+	//					map[newLabel] = c;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 	// now that the channels have optionaly being renamed, create the output file.
 	writer->infos.setChannels(m_channels);
 	if (!m_outputMarkers.isEmpty()) {

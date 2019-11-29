@@ -64,7 +64,7 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwDisplayPhysics *phys) : AwSi
 	m_labelRejectedProxyWidget->setZValue(this->zValue() + 1);
 	m_labelRejectedProxyWidget->hide();
 
-	m_rejected = false;
+	m_rejected = m_icaChannel->isRejected();
 	m_mouseOverLabel = false;
 	showMap(false);
 	setAcceptHoverEvents(true);
@@ -132,6 +132,7 @@ void AwICASignalItem::setRejected(bool rejected)
 		AwICAManager::instance()->getComponents(m_icaChannel->componentType())->addComponent(m_icaChannel->index());
 		m_labelRejectedProxyWidget->hide();
 	}
+	m_icaChannel->setRejected(rejected);
 }
 
 void AwICASignalItem::showMap(bool flag)
@@ -285,9 +286,6 @@ void AwICASignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 		// compute the polygon
 		QPolygonF poly;
 		float gain = m_channel->gain();
-		//// MEG and Reference are expressed as pT/cm so convert pT to T before rendering the signal
-		//if (m_channel->isMEG() || m_channel->isReference() || m_channel->isGRAD())
-		//	gain *= 1E-12;
 		float min = 0., max = 0.;
 		for (int i = 0; i < scene()->width(); i++) {
 			float posInSec = i * m_pixelLengthInSecs;
