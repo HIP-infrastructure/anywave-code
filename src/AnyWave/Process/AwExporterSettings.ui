@@ -150,27 +150,7 @@
       <string>Channels</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkRelabel">
-        <property name="text">
-         <string>Remove &quot;0&quot; in electrodes labels (A01 =&gt; A1)</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="checkBoxCurrentMontage">
-        <property name="text">
-         <string>Export Current Montage or</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
+      <item row="0" column="1">
        <widget class="QPushButton" name="buttonSelectChannels">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -183,14 +163,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="checkBoxICA">
-        <property name="text">
-         <string>Export All ICA Channels or</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
+      <item row="1" column="1">
        <widget class="QPushButton" name="buttonSelectICA">
         <property name="enabled">
          <bool>false</bool>
@@ -203,6 +176,23 @@
         </property>
         <property name="text">
          <string>Select Channels</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="checkBoxICA">
+        <property name="text">
+         <string>Export All ICA Channels or</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkBoxCurrentMontage">
+        <property name="text">
+         <string>Export Current Montage or</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

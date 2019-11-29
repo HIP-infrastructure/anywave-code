@@ -588,7 +588,7 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 	stream << "DataOrientation=MULTIPLEXED" << endl;
 	stream << "NumberOfChannels=" << infos.channelsCount() << endl;
 	stream.setRealNumberPrecision(12);
-	stream << "SamplingInterval=" << (double)((1 / infos.channels().first()->samplingRate()) * 1E6) << endl;
+	stream << "SamplingInterval=" << (double)((1 / m_sampleRate) * 1E6) << endl;
 	stream << endl;
 	stream << "[Binary Infos]" << endl;
 	stream << "BinaryFormat=IEEE_FLOAT_32" << endl << endl;

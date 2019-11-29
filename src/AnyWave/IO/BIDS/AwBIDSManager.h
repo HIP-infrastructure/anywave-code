@@ -51,7 +51,7 @@ public:
 	QWidget *ui() { return m_ui; }
 	
 	AwBIDSSubjectList& getSubjectsFromSourceDir(int sourceDir = raw);
-	QString getDerivativesPath(int type, AwBIDSSubject *subject);
+//	QString getDerivativesPath(int type, AwBIDSSubject *subject);
 
 	/** guess subject from a file. Set the subject as the current subject if success. **/
 	AwBIDSSubject *guessSubject(const QString& path);
@@ -72,7 +72,8 @@ signals:
 protected:
 	AwBIDSManager(const QString& rootDir);
 	static AwBIDSManager *m_instance;
-	static QString m_parsingPath;	// path to place the json file to prevent BIDSManager of any updates.
+	//static QString m_parsingPath;	// path to place the json file to prevent BIDSManager of any updates.
+	QHash<QString, QVariant> m_settings;
 
 	//int convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);

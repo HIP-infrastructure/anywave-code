@@ -182,12 +182,12 @@ AwUpdater::AwUpdater(QObject *parent) : QObject(parent)
 void AwUpdater::checkForUpdate()
 {
 	QString platform; 
-	QString version = AwSettings::getInstance()->getString("majorVersion");
-	QString minor = AwSettings::getInstance()->getString("minorVersion");
-	bool isINSVersion = AwSettings::getInstance()->getBool("INS_Version");
 
 	if (!AwSettings::getInstance()->getBool("checkForUpdates"))
 		return;
+	QString version = AwSettings::getInstance()->getString("majorVersion");
+	QString minor = AwSettings::getInstance()->getString("minorVersion");
+	bool isINSVersion = AwSettings::getInstance()->getBool("INS_Version");
 
 	if (version.isEmpty() || minor.isEmpty())
 		return;

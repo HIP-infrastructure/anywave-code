@@ -47,6 +47,7 @@ public:
 	int components;
 	int algo;
 	bool downSampling;
+	bool infomaxExtended;
 public slots:
 	void accept();
 protected slots:

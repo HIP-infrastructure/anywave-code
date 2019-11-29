@@ -30,6 +30,7 @@ ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels,
 	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(updateMaxNumOfIC()));
 	m_ui.labelTotalIC->hide();
 	downSampling = true;
+	infomaxExtended = false;
 }
 
 ICASettings::~ICASettings()
@@ -57,6 +58,7 @@ void ICASettings::accept()
 	}
 
 	algo = m_ui.comboAlgo->currentIndex();
+	infomaxExtended = m_ui.cbInfomaxExtended->isChecked();
 	downSampling = !m_ui.checkBoxDS->isChecked() && m_ui.spinLPF->value() > 0.;
 	return QDialog::accept();
 }
