@@ -656,6 +656,8 @@ AwBIDSManager::AwBIDSManager(const QString& rootDir)
 	// init settings
 	m_settings["parsing_path"] = QString("derivatives/parsing");
 	m_settings["aw_derivatives"] = QString("derivatives/anywave");
+	m_knownDerivativesPaths[AwBIDSManager::AnyWave] = QString("%1/derivatives/anywave").arg(rootDir);
+	m_knownDerivativesPaths[AwBIDSManager::EpiTools] = QString("%1/derivatives/epitools").arg(rootDir);
 }
 
 AwBIDSManager::~AwBIDSManager()

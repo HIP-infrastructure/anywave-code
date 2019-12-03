@@ -38,6 +38,6 @@ QString AwFileItem::getTsvFileFor(const QString& fileName, int tsvType)
 		tsv = "events.tsv";
 		break;
 	}
-	// return FULL path to channels.tsv
+	// return FULL path to tsv file
 	return QString("%1/%2_%3").arg(m_fullPath).arg(base).arg(tsv);
 }

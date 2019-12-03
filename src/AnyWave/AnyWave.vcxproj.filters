@@ -1288,6 +1288,15 @@
     <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSParser.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSParser.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSParser.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1790,6 +1799,9 @@
     </CustomBuild>
     <CustomBuild Include="Widgets\AwVideoSettingsDial.h">
       <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSParser.h">
+      <Filter>IO\BIDS</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

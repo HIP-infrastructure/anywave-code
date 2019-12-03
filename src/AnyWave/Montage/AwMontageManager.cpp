@@ -406,15 +406,8 @@ void AwMontageManager::closeFile()
 		if (AwBIDSManager::instance()->isBIDSActive())
 			checkForBIDSMods();
 	clear();
-
-	if (!m_badChannelLabels.isEmpty()) // save bad channels
-		saveBadChannels();
-	else {
-		if (QFile::exists(m_badPath))  // no bad channels but may be a previous bad file is present, so delete the file.
-			QFile::remove(m_badPath);
-	}
-		
-	m_badChannelLabels.clear();
+	//saveBadChannels();
+	//m_badChannelLabels.clear();
 	m_montagePath = "";
 	m_badPath = "";
 	m_asRecorded.clear();
@@ -436,11 +429,11 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	}
 
 	// check for .bad file
+	m_badChannelLabels.clear();
 	m_badPath = reader->infos.fileName() + ".bad";
 	if (QFile::exists(m_badPath))
 		loadBadChannels();
-	else
-		m_badChannelLabels.clear();
+	
 
 	QFileInfo fi(reader->infos.fileName());
 	// check for local montages.
@@ -482,11 +475,17 @@ void AwMontageManager::checkForBIDSMods()
 		return;
 	auto BM = AwBIDSManager::instance();
 	BM->updateChannelsTsv(m_channelsTsv);
+	m_badChannelLabels.clear();
+	for (auto c : m_asRecorded.values()) {
+		if (c->isBad())
+			m_badChannelLabels << c->name();
+	}
+	saveBadChannels();
 	m_channelsTsv.clear();
 }
 
 ///
-/// updata current montage if a BIDS structure is detected AND a channels.tsv is found.
+/// update current montage if a BIDS structure is detected AND a channels.tsv is found.
 ///
 void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 {
@@ -547,12 +546,13 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		if (asRecorded) {
 			asRecorded->setBad(c->isBad());
 			asRecorded->setType(c->type());
+			if (c->isBad())
+				m_badChannelLabels << c->name();
 			auto montageChannels = globalMap.values(c->name());
 			for (auto montageChannel : montageChannels) {
 				montageChannel->setType(c->type());
 				if (asRecorded->isBad()) {
 					badChannels << montageChannel;
-					m_badChannelLabels << c->name();
 				}
 			}
 		}
@@ -561,6 +561,9 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		m_channels.removeAll(bad);
 		delete bad;
 	}
+	// be sure that .bad file is equivalent to tsv file in term of bad channels.
+	m_badPath = reader->infos.fileName() + ".bad";
+	saveBadChannels();
 }
 
 ///
@@ -596,12 +599,8 @@ void AwMontageManager::loadBadChannels()
 	
 	if (file.open(QIODevice::ReadOnly|QIODevice::Text))  {
 		m_badChannelLabels.clear();
-		while (!stream.atEnd()) 	{
-			QString line = stream.readLine();
-			line = line.trimmed();
-			//markChannelAsBad(line);
-			m_badChannelLabels << line;
-		}
+		while (!stream.atEnd()) 	
+			m_badChannelLabels << stream.readLine().trimmed();
 		file.close();
 	}
 	// reset as recorded channels bad status
