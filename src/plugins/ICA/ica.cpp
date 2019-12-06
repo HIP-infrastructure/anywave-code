@@ -113,9 +113,25 @@ int ICA::initParameters()
 	m_isDownsamplingActive = true;
 	m_modality = AwChannel::stringToType(args["modality"].toString());
 	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+	// BIDS specific:
+	// when launching ICA in batch mode and specifying ieeg as modality:
+	// check for SEEG channels if none present check for EEG.
+	if (args["modality"].toString().toLower() == "ieeg") {
+		m_modality = AwChannel::SEEG;
+		m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+		if (m_channels.isEmpty()) {
+			m_modality = AwChannel::EEG;
+			m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+		}
+	}
+	if (m_channels.isEmpty()) {
+		sendMessage(QString("No channels of type %1 found in file").arg(AwChannel::typeToString(m_modality)));
+		return -1;
+	}
+
 	m_channels = AwChannel::removeDoublons(m_channels);
 	if (args.contains("skip_bad")) {
-		if (args["skip_bas"].toBool())
+		if (!args["skip_bad"].toBool())
 			pdi.input.badLabels.clear();
 	}
 	m_samplingRate = m_channels.first()->samplingRate();
@@ -240,7 +256,13 @@ int ICA::initParameters()
 void ICA::runFromCommandLine()
 {
 	if (initParameters() == 0) {
-		infomax(m, n, m_nComp);
+		try {
+			infomax(m, n, m_nComp);
+		}
+		catch (std::bad_alloc& ba) {
+			sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+			return;
+		}
 		saveToFile();
 	}
 }

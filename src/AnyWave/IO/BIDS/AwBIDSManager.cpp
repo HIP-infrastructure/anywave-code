@@ -15,6 +15,7 @@
 #include "Debug/AwDebugLog.h"
 #include <QJsonArray>
 #include <utils/AwUtilities.h>
+#include "AwBIDSParser.h"
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
@@ -631,33 +632,40 @@ int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader)
 }
 
 
-AwBIDSManager *AwBIDSManager::instance(const QString& rootDir)
+//AwBIDSManager *AwBIDSManager::instance(const QString& rootDir)
+//{
+//	if (!m_instance)
+//		m_instance = new AwBIDSManager(rootDir);
+//	else
+//		m_instance->setRootDir(rootDir);
+//	return m_instance;
+//}
+
+AwBIDSManager *AwBIDSManager::instance()
 {
 	if (!m_instance)
-		m_instance = new AwBIDSManager(rootDir);
-	else
-		m_instance->setRootDir(rootDir);
+		m_instance = new AwBIDSManager;
 	return m_instance;
 }
 
 
-AwBIDSManager::AwBIDSManager(const QString& rootDir)
+AwBIDSManager::AwBIDSManager()
 {
 	m_ui = NULL;
-	m_currentSubject = Q_NULLPTR;
-	// Get extensions readers can handle.
-	auto pm = AwPluginManager::getInstance();
-	for (auto r : pm->readers()) 
-		m_fileExtensions += r->fileExtensions;
+	//m_currentSubject = Q_NULLPTR;
+	//// Get extensions readers can handle.
+	//auto pm = AwPluginManager::getInstance();
+	//for (auto r : pm->readers()) 
+	//	m_fileExtensions += r->fileExtensions;
 	
-	setRootDir(rootDir);
+//	setRootDir(rootDir);
 	m_mustValidateModifications = false;
 
 	// init settings
-	m_settings["parsing_path"] = QString("derivatives/parsing");
-	m_settings["aw_derivatives"] = QString("derivatives/anywave");
-	m_knownDerivativesPaths[AwBIDSManager::AnyWave] = QString("%1/derivatives/anywave").arg(rootDir);
-	m_knownDerivativesPaths[AwBIDSManager::EpiTools] = QString("%1/derivatives/epitools").arg(rootDir);
+	//m_settings["parsing_path"] = QString("derivatives/parsing");
+	//m_settings["aw_derivatives"] = QString("derivatives/anywave");
+	//m_knownDerivativesPaths[AwBIDSManager::AnyWave] = QString("%1/derivatives/anywave").arg(rootDir);
+	//m_knownDerivativesPaths[AwBIDSManager::EpiTools] = QString("%1/derivatives/epitools").arg(rootDir);
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -700,26 +708,30 @@ void AwBIDSManager::setRootDir(const QString& path)
 		m_ui = new AwBIDSGUI(this, path);
 	else
 		m_ui->setRootDir(path);
-	// check that the root dir contains subjects
-	getSubjects();
-	// check for source_data dir
-	bool source = false, derivatives = false;
-	QDirIterator it(m_rootDir, QDir::Dirs);
-	while (it.hasNext()) {
-		it.next();
-		QString name = it.fileName();
-		if (name == "sourcedata")
-			source = true;
-		else if (name == "derivatives")
-			derivatives = true;
-		if (source && derivatives)
-			break;
-	}
-	if (source)
-		getSubjects(AwBIDSManager::source);
-	if (derivatives) 
-		getSubjects(AwBIDSManager::derivatives);
-	
+	//// check that the root dir contains subjects
+	//getSubjects();
+	//// check for source_data dir
+	//bool source = false, derivatives = false;
+	//QDirIterator it(m_rootDir, QDir::Dirs);
+	//while (it.hasNext()) {
+	//	it.next();
+	//	QString name = it.fileName();
+	//	if (name == "sourcedata")
+	//		source = true;
+	//	else if (name == "derivatives")
+	//		derivatives = true;
+	//	if (source && derivatives)
+	//		break;
+	//}
+	//if (source)
+	//	getSubjects(AwBIDSManager::source);
+	//if (derivatives) 
+	//	getSubjects(AwBIDSManager::derivatives);
+
+	AwBIDSParser parser;
+	parser.parse();
+	m_nodes = parser.nodes();
+
 	m_ui->refresh();
 }
 
@@ -761,7 +773,7 @@ void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
 	for (auto d : dirs) {
 		if (d.startsWith("ses-")) {
 			// get session label
-			auto label = AwBIDSTools::getSessionLabel(d);
+			auto label = AwBIDS::getSessionLabel(d);
 			subject->addSession(label);
 		}
 	}

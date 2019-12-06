@@ -317,7 +317,7 @@ void AnyWave::openBIDS()
 void AnyWave::openBIDS(const QString& path)
 {
 	if (!AwBIDSManager::isInstantiated()) {
-		AwBIDSManager::instance(path);
+		AwBIDSManager::instance()->setRootDir(path);
 		connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
 	}
 	else

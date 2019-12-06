@@ -35,7 +35,7 @@ public:
 	AwBIDSSubject(const QString& root, const QString& ID);
 	~AwBIDSSubject();
 
-	inline QString& fullPath() { return m_fullPath; }
+	QString fullPath();
 	inline QString& ID() { return m_ID; }
 	inline bool hasSessions() { return !m_sessions.isEmpty(); }
 	AwBIDSSession *addSession(const QString& label);
@@ -45,9 +45,11 @@ public:
 	QStringList findFile(const QString& filePath);
 	AwFileItemList findFileItems(const QString& filePath);
 	QString getDerivativesPath(int softwareKind);
+
 protected:
 	QString m_ID;
-	QString m_fullPath;
+	//QString m_fullPath;
+	QString m_rootDir;	// BIDS root folder path.
 	AwBIDSSessionList m_sessions;
 	QList<AwFileItem *> m_items;
 };

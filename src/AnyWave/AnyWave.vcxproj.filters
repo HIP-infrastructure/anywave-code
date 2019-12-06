@@ -1297,6 +1297,9 @@
     <ClCompile Include="IO\BIDS\AwBIDSParser.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSNode.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -2017,6 +2020,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwVideoSettingsDial.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\BIDS\AwBIDSNode.h">
+      <Filter>IO\BIDS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

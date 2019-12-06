@@ -26,6 +26,7 @@
 #pragma once
 #include <qobject.h>
 #include "AwBIDSSubject.h"
+#include "AwBIDSNode.h"
 #include "AwBIDSGUI.h"
 #include <AwFileIO.h>
 #include <AwCommandLine.h>
@@ -44,14 +45,14 @@ class AwBIDSManager : public QObject
 public:
 	enum itemTypes { iEEG, MEG, EEG };
 	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
-	enum KnownDerivativesDirs { AnyWave, EpiTools, BIDSUpdates};
 	enum Modifications { ChannelsTsv, EventsTsv };
 	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
 
 	// destructor
 	~AwBIDSManager();
 	// utilities static methods
-	static AwBIDSManager *instance(const QString& rootDir = QString());
+	//static AwBIDSManager *instance(const QString& rootDir = QString());
+	static AwBIDSManager *instance();
 	
 	static bool isInstantiated() { return m_instance != NULL; }
 	static void destroy();
@@ -95,7 +96,7 @@ signals:
 	void log(const QString& message);
 	void BIDSClosed();
 protected:
-	AwBIDSManager(const QString& rootDir);
+	AwBIDSManager();
 	static AwBIDSManager *m_instance;
 	QHash<QString, QVariant> m_settings;
 
@@ -118,5 +119,6 @@ protected:
 	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSSubject *m_currentSubject;
+	AwBIDSNodes m_nodes;
 	bool m_mustValidateModifications;
 };

@@ -27,8 +27,11 @@
 
 #include <QString>
 
-namespace AwBIDSTools
+namespace AwBIDS
 {
 	QString getSessionLabel(const QString& data);
 	QString getSubjectID(const QString& data);
+	enum class SearchFolders : int { AnyWave, EpiTools, Source };
+	QString searchFoldersEnumToString(const SearchFolders& sf);
+
 }
