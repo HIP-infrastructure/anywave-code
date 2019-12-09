@@ -703,11 +703,7 @@ void AwBIDSManager::setRootDir(const QString& path)
 	}
 	closeBIDS();
 	m_rootDir = path;
-	// instantiate UI if needed
-	if (m_ui == NULL)
-		m_ui = new AwBIDSGUI(this, path);
-	else
-		m_ui->setRootDir(path);
+
 	//// check that the root dir contains subjects
 	//getSubjects();
 	//// check for source_data dir
@@ -731,125 +727,132 @@ void AwBIDSManager::setRootDir(const QString& path)
 	AwBIDSParser parser;
 	parser.parse();
 	m_nodes = parser.nodes();
-
+	m_IDToSubject.clear();
+	for (auto n : m_nodes)
+		m_IDToSubject[n->ID()] = n;
+	// instantiate UI if needed
+	if (m_ui == NULL)
+		m_ui = new AwBIDSGUI;
 	m_ui->refresh();
 }
 
-AwBIDSSubjectList& AwBIDSManager::getSubjectsFromSourceDir(int sourceDir)
-{
-	return m_subjects[sourceDir];
-}
+//AwBIDSSubjectList& AwBIDSManager::getSubjectsFromSourceDir(int sourceDir)
+//{
+//	return m_subjects[sourceDir];
+//}
 
 
-AwFileItem *AwBIDSManager::parseDir(const QString& fullPath, const QString& dir)
-{
-	QStringList items = { "ieeg", "eeg", "meg" };
-	QVector<int> types = { AwFileItem::ieeg, AwFileItem::eeg, AwFileItem::meg };
-	int index = items.indexOf(dir);
-	if (index == -1)
-		return NULL;
-	// parse files
-	QString fullPathItem = QString("%1/%2").arg(fullPath).arg(dir);
-	QDir directory(fullPathItem);
-	QStringList files = directory.entryList(m_fileExtensions, QDir::Files);
-	if (files.isEmpty())
-		return NULL;
-	AwFileItem *item = new AwFileItem(types.value(index));
-	item->setFullPath(fullPathItem);
-	item->setFiles(files);
-	return item;
-}
+//AwFileItem *AwBIDSManager::parseDir(const QString& fullPath, const QString& dir)
+//{
+//	QStringList items = { "ieeg", "eeg", "meg" };
+//	QVector<int> types = { AwFileItem::ieeg, AwFileItem::eeg, AwFileItem::meg };
+//	int index = items.indexOf(dir);
+//	if (index == -1)
+//		return NULL;
+//	// parse files
+//	QString fullPathItem = QString("%1/%2").arg(fullPath).arg(dir);
+//	QDir directory(fullPathItem);
+//	QStringList files = directory.entryList(m_fileExtensions, QDir::Files);
+//	if (files.isEmpty())
+//		return NULL;
+//	AwFileItem *item = new AwFileItem(types.value(index));
+//	item->setFullPath(fullPathItem);
+//	item->setFiles(files);
+//	return item;
+//}
 
-void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
-{
-	// check for subdirs that AnyWave could handle (iEEG, MEG, SES-)
+//void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
+//{
+//	// check for subdirs that AnyWave could handle (iEEG, MEG, SES-)
+//
+//	QDir dir(subject->fullPath());
+//	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+//	if (dirs.isEmpty())
+//		return;
+//
+//	// check for session directories (optional)
+//	for (auto d : dirs) {
+//		if (d.startsWith("ses-")) {
+//			// get session label
+//			auto label = AwBIDS::getSessionLabel(d);
+//			subject->addSession(label);
+//		}
+//	}
+//
+//	// have we got sessions?
+//	if (subject->hasSessions()) {
+//		// remove sessions from dirs
+//		for (auto session : subject->sessions()) {
+//			QDir sessionDir = QDir(session->fullPath());
+//			QStringList entries = sessionDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+//			for (auto d : entries) {
+//				auto item = parseDir(sessionDir.absolutePath(), d);
+//				if (item)
+//					session->addItem(item);
+//			}
+//		}
+//	}
+//
+//	// parse non ses- folders
+//	for (auto d : dirs) {
+//		if (d.startsWith("ses-"))
+//			continue;
+//		auto item = parseDir(dir.absolutePath(), d);
+//		if (item)
+//			subject->addItem(item);
+//	}
+//}
 
-	QDir dir(subject->fullPath());
-	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	if (dirs.isEmpty())
-		return;
-
-	// check for session directories (optional)
-	for (auto d : dirs) {
-		if (d.startsWith("ses-")) {
-			// get session label
-			auto label = AwBIDS::getSessionLabel(d);
-			subject->addSession(label);
-		}
-	}
-
-	// have we got sessions?
-	if (subject->hasSessions()) {
-		// remove sessions from dirs
-		for (auto session : subject->sessions()) {
-			QDir sessionDir = QDir(session->fullPath());
-			QStringList entries = sessionDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-			for (auto d : entries) {
-				auto item = parseDir(sessionDir.absolutePath(), d);
-				if (item)
-					session->addItem(item);
-			}
-		}
-	}
-
-	// parse non ses- folders
-	for (auto d : dirs) {
-		if (d.startsWith("ses-"))
-			continue;
-		auto item = parseDir(dir.absolutePath(), d);
-		if (item)
-			subject->addItem(item);
-	}
-}
-
-/// Parse root dir to get all the subjects present in the structure.
-/// Create subject objects
-/// Can result in an empty list if no subject is found.
-void AwBIDSManager::getSubjects(int sourceDir)
-{
-	QString directory;
-	switch (sourceDir) {
-	case AwBIDSManager::raw:
-		directory = m_rootDir;
-		break;
-	case AwBIDSManager::source:
-		directory = QString("%1/sourcedata").arg(m_rootDir);
-		break;
-	case AwBIDSManager::derivatives:
-		directory = QString("%1/derivatives").arg(m_rootDir);
-		break;
-	}
-
-	clearSubjects(sourceDir);
-	
-	QDirIterator it(directory, QDir::Dirs);
-	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
-	QRegularExpressionMatch match;
-	while (it.hasNext()) {
-		it.next();
-		QString name = it.fileName();
-		match = re.match(name);
-		if (match.hasMatch()) {
-			name = match.captured("ID");
-			m_subjects[sourceDir].append(new AwBIDSSubject(directory, name));
-		}
-	}
-
-	for (auto s : m_subjects[sourceDir]) {
-		parseSubject(s);
-	}
-}
+///// Parse root dir to get all the subjects present in the structure.
+///// Create subject objects
+///// Can result in an empty list if no subject is found.
+//void AwBIDSManager::getSubjects(int sourceDir)
+//{
+//	QString directory;
+//	switch (sourceDir) {
+//	case AwBIDSManager::raw:
+//		directory = m_rootDir;
+//		break;
+//	case AwBIDSManager::source:
+//		directory = QString("%1/sourcedata").arg(m_rootDir);
+//		break;
+//	case AwBIDSManager::derivatives:
+//		directory = QString("%1/derivatives").arg(m_rootDir);
+//		break;
+//	}
+//
+//	clearSubjects(sourceDir);
+//	
+//	QDirIterator it(directory, QDir::Dirs);
+//	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
+//	QRegularExpressionMatch match;
+//	while (it.hasNext()) {
+//		it.next();
+//		QString name = it.fileName();
+//		match = re.match(name);
+//		if (match.hasMatch()) {
+//			name = match.captured("ID");
+//			m_subjects[sourceDir].append(new AwBIDSSubject(directory, name));
+//		}
+//	}
+//
+//	for (auto s : m_subjects[sourceDir]) {
+//		parseSubject(s);
+//	}
+//}
 
 void AwBIDSManager::closeBIDS()
 {
 	if (!isBIDSActive())
 		return;
-	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
-		clearSubjects(i);
+	//for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
+	//	clearSubjects(i);
+	while (!m_nodes.isEmpty())
+		delete m_nodes.takeFirst();
 	m_rootDir.clear();
 	m_modifications.clear();
 	m_mustValidateModifications = false;
-	m_currentSubject = Q_NULLPTR;
+//	m_currentSubject = Q_NULLPTR;
 	emit BIDSClosed();
 }
 
@@ -1020,19 +1023,19 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 	QFile::remove(bak);
 }
 
-void AwBIDSManager::clearSubjects(int sourceDir)
-{
-	while (!m_subjects[sourceDir].isEmpty())
-		delete m_subjects[sourceDir].takeFirst();
-	m_subjectsIDs[sourceDir].clear();
-}
+//void AwBIDSManager::clearSubjects(int sourceDir)
+//{
+//	while (!m_subjects[sourceDir].isEmpty())
+//		delete m_subjects[sourceDir].takeFirst();
+//	m_subjectsIDs[sourceDir].clear();
+//}
 
-AwBIDSSubject *AwBIDSManager::getSubject(const QString& ID, int sourceDir)
-{
-	if (m_subjectsIDs[sourceDir].contains(ID))
-		return m_subjectsIDs[sourceDir].value(ID);
-	return Q_NULLPTR;
-}
+//AwBIDSSubject *AwBIDSManager::getSubject(const QString& ID, int sourceDir)
+//{
+//	if (m_subjectsIDs[sourceDir].contains(ID))
+//		return m_subjectsIDs[sourceDir].value(ID);
+//	return Q_NULLPTR;
+//}
 
 int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file)
 {
@@ -1097,34 +1100,34 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 		m_currentSubject = subj;
 }
 
-AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
-{
-	m_currentSubject = Q_NULLPTR;
-	if (!isBIDSActive())
-		return Q_NULLPTR;
-	QFileInfo fi(path);
-	if (!fi.exists())
-		return Q_NULLPTR;
-
-	// using the full path we should be able to guess the BIDS base directory between (raw, sourcedata, derivatives).
-	int sourceDir = AwBIDSManager::raw;
-	if (path.contains("sourcedata"))
-		sourceDir = AwBIDSManager::source;
-	if (path.contains("derivatives"))
-		sourceDir = AwBIDSManager::derivatives;
-	auto subjects = m_subjects[sourceDir];
-	if (subjects.isEmpty())
-		return Q_NULLPTR;
-	for (auto subj : subjects) {
-		auto files = subj->findFile(fi.fileName());
-		if (!files.isEmpty()) {
-			m_currentSubject = subj;
-			return subj;
-		}
-	}
-	// failed to find a subject
-	return Q_NULLPTR;
-}
+//AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
+//{
+//	m_currentSubject = Q_NULLPTR;
+//	if (!isBIDSActive())
+//		return Q_NULLPTR;
+//	QFileInfo fi(path);
+//	if (!fi.exists())
+//		return Q_NULLPTR;
+//
+//	// using the full path we should be able to guess the BIDS base directory between (raw, sourcedata, derivatives).
+//	int sourceDir = AwBIDSManager::raw;
+//	if (path.contains("sourcedata"))
+//		sourceDir = AwBIDSManager::source;
+//	if (path.contains("derivatives"))
+//		sourceDir = AwBIDSManager::derivatives;
+//	auto subjects = m_subjects[sourceDir];
+//	if (subjects.isEmpty())
+//		return Q_NULLPTR;
+//	for (auto subj : subjects) {
+//		auto files = subj->findFile(fi.fileName());
+//		if (!files.isEmpty()) {
+//			m_currentSubject = subj;
+//			return subj;
+//		}
+//	}
+//	// failed to find a subject
+//	return Q_NULLPTR;
+//}
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)
 {

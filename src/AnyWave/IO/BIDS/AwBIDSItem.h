@@ -25,13 +25,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include <QStandardItem>
-#include "AwBIDSSubject.h"
+//#include "AwBIDSSubject.h"
+#include "AwBIDSNode.h"
 
 class AwBIDSItem : public QStandardItem
 {
 public:
-	AwBIDSItem(const QString& text, AwBIDSSubject *sub);
-	inline AwBIDSSubject * subject() { return m_sub; }
+	AwBIDSItem(const QString& text, AwBIDSNode *sub);
+	inline AwBIDSNode * subject() { return m_sub; }
 protected:
-	AwBIDSSubject * m_sub;
+	AwBIDSNode * m_sub;
 };

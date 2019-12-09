@@ -66,7 +66,8 @@ public:
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
 	void closeBIDS();
-	inline AwBIDSSubject *getSubject() { return m_currentSubject; }
+//	inline AwBIDSSubject *getSubject() { return m_currentSubject; }
+	AwBIDSNodes& subjects() { return m_nodes; }
 	
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
@@ -80,7 +81,7 @@ public:
 	AwBIDSSubjectList& getSubjectsFromSourceDir(int sourceDir = raw);
 
 	/** guess subject from a file. Set the subject as the current subject if success. **/
-	AwBIDSSubject *guessSubject(const QString& path);
+//	AwBIDSSubject *guessSubject(const QString& path);
 	// Access to some tsv files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
@@ -102,11 +103,11 @@ protected:
 
 	//int convert4DNI(const AwArguments& args, AwFileIO *reader, const QString& dataFile);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
-	void getSubjects(int sourceDir = raw);
-	void clearSubjects(int sourceDir = raw);
-	AwFileItem *parseDir(const QString& fullPath, const QString& path);
-	void parseSubject(AwBIDSSubject *subject);
-	AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
+	//void getSubjects(int sourceDir = raw);
+	//void clearSubjects(int sourceDir = raw);
+	//AwFileItem *parseDir(const QString& fullPath, const QString& path);
+	//void parseSubject(AwBIDSSubject *subject);
+	//AwBIDSSubject *getSubject(const QString& ID, int sourceDir = raw);
 	QString getParsingPath();
 	void modifyUpdateJson(const QStringList& branches);
 
@@ -120,5 +121,6 @@ protected:
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSSubject *m_currentSubject;
 	AwBIDSNodes m_nodes;
+	QHash<QString, AwBIDSNode *> m_IDToSubject;
 	bool m_mustValidateModifications;
 };

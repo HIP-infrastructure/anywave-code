@@ -40,6 +40,10 @@ public:
 
 	inline QString& fullPath() { return m_fullPath; }
 	inline int type() { return m_type; }
+	inline QString& ID() { return m_ID; }
+	inline QList<AwBIDSNode *>& children() { return m_children; }
+	inline QStringList& files() { return m_files; }
+
 
 	AwBIDSNode * addChild(AwBIDSNode *node) { m_children.append(node); return node; }
 	void addFiles(const QStringList& files) { m_files.append(files); }
