@@ -19,7 +19,9 @@
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
-//QString AwBIDSManager::m_parsingPath = QString("derivatives/parsing");
+
+QStringList AwBIDSManager::m_dataFileSuffixes = { "_eeg", "_meg", "_ieeg" };
+
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
@@ -632,15 +634,6 @@ int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader)
 }
 
 
-//AwBIDSManager *AwBIDSManager::instance(const QString& rootDir)
-//{
-//	if (!m_instance)
-//		m_instance = new AwBIDSManager(rootDir);
-//	else
-//		m_instance->setRootDir(rootDir);
-//	return m_instance;
-//}
-
 AwBIDSManager *AwBIDSManager::instance()
 {
 	if (!m_instance)
@@ -651,21 +644,8 @@ AwBIDSManager *AwBIDSManager::instance()
 
 AwBIDSManager::AwBIDSManager()
 {
-	m_ui = NULL;
-	//m_currentSubject = Q_NULLPTR;
-	//// Get extensions readers can handle.
-	//auto pm = AwPluginManager::getInstance();
-	//for (auto r : pm->readers()) 
-	//	m_fileExtensions += r->fileExtensions;
-	
-//	setRootDir(rootDir);
+	m_ui = nullptr;
 	m_mustValidateModifications = false;
-
-	// init settings
-	//m_settings["parsing_path"] = QString("derivatives/parsing");
-	//m_settings["aw_derivatives"] = QString("derivatives/anywave");
-	//m_knownDerivativesPaths[AwBIDSManager::AnyWave] = QString("%1/derivatives/anywave").arg(rootDir);
-	//m_knownDerivativesPaths[AwBIDSManager::EpiTools] = QString("%1/derivatives/epitools").arg(rootDir);
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -678,7 +658,6 @@ QString AwBIDSManager::getParsingPath()
 	if (!isBIDSActive())
 		return QString();
 	return m_settings["parsing_path"].toString();
-	//return QString("%1/%2").arg(m_rootDir).arg(m_parsingPath);
 }
 
 void AwBIDSManager::setRootDir(const QString& path)
@@ -704,26 +683,6 @@ void AwBIDSManager::setRootDir(const QString& path)
 	closeBIDS();
 	m_rootDir = path;
 
-	//// check that the root dir contains subjects
-	//getSubjects();
-	//// check for source_data dir
-	//bool source = false, derivatives = false;
-	//QDirIterator it(m_rootDir, QDir::Dirs);
-	//while (it.hasNext()) {
-	//	it.next();
-	//	QString name = it.fileName();
-	//	if (name == "sourcedata")
-	//		source = true;
-	//	else if (name == "derivatives")
-	//		derivatives = true;
-	//	if (source && derivatives)
-	//		break;
-	//}
-	//if (source)
-	//	getSubjects(AwBIDSManager::source);
-	//if (derivatives) 
-	//	getSubjects(AwBIDSManager::derivatives);
-
 	AwBIDSParser parser;
 	parser.parse();
 	m_nodes = parser.nodes();
@@ -731,128 +690,21 @@ void AwBIDSManager::setRootDir(const QString& path)
 	for (auto n : m_nodes)
 		m_IDToSubject[n->ID()] = n;
 	// instantiate UI if needed
-	if (m_ui == NULL)
+	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
 	m_ui->refresh();
 }
-
-//AwBIDSSubjectList& AwBIDSManager::getSubjectsFromSourceDir(int sourceDir)
-//{
-//	return m_subjects[sourceDir];
-//}
-
-
-//AwFileItem *AwBIDSManager::parseDir(const QString& fullPath, const QString& dir)
-//{
-//	QStringList items = { "ieeg", "eeg", "meg" };
-//	QVector<int> types = { AwFileItem::ieeg, AwFileItem::eeg, AwFileItem::meg };
-//	int index = items.indexOf(dir);
-//	if (index == -1)
-//		return NULL;
-//	// parse files
-//	QString fullPathItem = QString("%1/%2").arg(fullPath).arg(dir);
-//	QDir directory(fullPathItem);
-//	QStringList files = directory.entryList(m_fileExtensions, QDir::Files);
-//	if (files.isEmpty())
-//		return NULL;
-//	AwFileItem *item = new AwFileItem(types.value(index));
-//	item->setFullPath(fullPathItem);
-//	item->setFiles(files);
-//	return item;
-//}
-
-//void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
-//{
-//	// check for subdirs that AnyWave could handle (iEEG, MEG, SES-)
-//
-//	QDir dir(subject->fullPath());
-//	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-//	if (dirs.isEmpty())
-//		return;
-//
-//	// check for session directories (optional)
-//	for (auto d : dirs) {
-//		if (d.startsWith("ses-")) {
-//			// get session label
-//			auto label = AwBIDS::getSessionLabel(d);
-//			subject->addSession(label);
-//		}
-//	}
-//
-//	// have we got sessions?
-//	if (subject->hasSessions()) {
-//		// remove sessions from dirs
-//		for (auto session : subject->sessions()) {
-//			QDir sessionDir = QDir(session->fullPath());
-//			QStringList entries = sessionDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-//			for (auto d : entries) {
-//				auto item = parseDir(sessionDir.absolutePath(), d);
-//				if (item)
-//					session->addItem(item);
-//			}
-//		}
-//	}
-//
-//	// parse non ses- folders
-//	for (auto d : dirs) {
-//		if (d.startsWith("ses-"))
-//			continue;
-//		auto item = parseDir(dir.absolutePath(), d);
-//		if (item)
-//			subject->addItem(item);
-//	}
-//}
-
-///// Parse root dir to get all the subjects present in the structure.
-///// Create subject objects
-///// Can result in an empty list if no subject is found.
-//void AwBIDSManager::getSubjects(int sourceDir)
-//{
-//	QString directory;
-//	switch (sourceDir) {
-//	case AwBIDSManager::raw:
-//		directory = m_rootDir;
-//		break;
-//	case AwBIDSManager::source:
-//		directory = QString("%1/sourcedata").arg(m_rootDir);
-//		break;
-//	case AwBIDSManager::derivatives:
-//		directory = QString("%1/derivatives").arg(m_rootDir);
-//		break;
-//	}
-//
-//	clearSubjects(sourceDir);
-//	
-//	QDirIterator it(directory, QDir::Dirs);
-//	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
-//	QRegularExpressionMatch match;
-//	while (it.hasNext()) {
-//		it.next();
-//		QString name = it.fileName();
-//		match = re.match(name);
-//		if (match.hasMatch()) {
-//			name = match.captured("ID");
-//			m_subjects[sourceDir].append(new AwBIDSSubject(directory, name));
-//		}
-//	}
-//
-//	for (auto s : m_subjects[sourceDir]) {
-//		parseSubject(s);
-//	}
-//}
 
 void AwBIDSManager::closeBIDS()
 {
 	if (!isBIDSActive())
 		return;
-	//for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
-	//	clearSubjects(i);
 	while (!m_nodes.isEmpty())
 		delete m_nodes.takeFirst();
 	m_rootDir.clear();
 	m_modifications.clear();
 	m_mustValidateModifications = false;
-//	m_currentSubject = Q_NULLPTR;
+	m_currentSubject = nullptr;
 	emit BIDSClosed();
 }
 
@@ -1023,19 +875,6 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 	QFile::remove(bak);
 }
 
-//void AwBIDSManager::clearSubjects(int sourceDir)
-//{
-//	while (!m_subjects[sourceDir].isEmpty())
-//		delete m_subjects[sourceDir].takeFirst();
-//	m_subjectsIDs[sourceDir].clear();
-//}
-
-//AwBIDSSubject *AwBIDSManager::getSubject(const QString& ID, int sourceDir)
-//{
-//	if (m_subjectsIDs[sourceDir].contains(ID))
-//		return m_subjectsIDs[sourceDir].value(ID);
-//	return Q_NULLPTR;
-//}
 
 int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file)
 {
@@ -1072,18 +911,57 @@ int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const Q
 }
 
 
-//QString AwBIDSManager::getDerivativesPath(int type, AwBIDSSubject *sub)
-//{
-//	switch (type) {
-//	case AwBIDSManager::EPITOOLS:
-//		break;
-//	case AwBIDSManager::EI:
-//		break;
-//	case AwBIDSManager::ICA:
-//		break;
-//	}
-//	return QString();
-//}
+QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
+{
+	if (m_currentSubject == nullptr || !isBIDSActive())
+		return QString();
+
+	QString suffix;
+	if (type == AwBIDSManager::EventsTsv)
+		suffix = "_events.tsv";
+	else if (type == AwBIDSManager::ChannelsTsv)
+		suffix = "_channels.tsv";
+	else
+		return QString();
+
+	// find the child node in current subject which contains the file
+	auto node = m_currentSubject->findNode(QFileInfo(dataFilePath).fileName(), m_currentSubject);
+	if (node == nullptr)
+		return QString();
+
+	// remove the extension
+	auto base = QFileInfo(dataFilePath).baseName();
+
+	for (auto e : m_dataFileSuffixes) {
+		if (base.contains(e)) {
+			base.remove(e);
+			break;
+		}
+	}
+	QString res = QString("%1/%2%3").arg(node->fullPath()).arg(base).arg(suffix);
+	if (QFile::exists(res))
+		return res;
+	return QString();
+}
+
+AwBIDSNode *AwBIDSManager::findSubject(const QString& dataFilePath)
+{
+	m_currentSubject = nullptr;
+	if (!isBIDSActive())
+		return nullptr;
+	QFileInfo fi(dataFilePath);
+	if (!fi.exists())
+		return nullptr;
+	auto fileName = fi.fileName();
+	for (auto s : m_nodes) {
+		auto files = s->gatherFiles();
+		if (files.contains(fileName)) {
+			m_currentSubject = s;
+			return s;
+		}
+	}
+	return m_currentSubject;
+}
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
@@ -1095,39 +973,9 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 		closeBIDS(); // close current BIDS
 		return;
 	}
-	auto subj = guessSubject(reader->infos.fileName());
-	if (subj)
-		m_currentSubject = subj;
+	// find the corresponding subject node
+	m_currentSubject = findSubject(reader->infos.fileName());
 }
-
-//AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
-//{
-//	m_currentSubject = Q_NULLPTR;
-//	if (!isBIDSActive())
-//		return Q_NULLPTR;
-//	QFileInfo fi(path);
-//	if (!fi.exists())
-//		return Q_NULLPTR;
-//
-//	// using the full path we should be able to guess the BIDS base directory between (raw, sourcedata, derivatives).
-//	int sourceDir = AwBIDSManager::raw;
-//	if (path.contains("sourcedata"))
-//		sourceDir = AwBIDSManager::source;
-//	if (path.contains("derivatives"))
-//		sourceDir = AwBIDSManager::derivatives;
-//	auto subjects = m_subjects[sourceDir];
-//	if (subjects.isEmpty())
-//		return Q_NULLPTR;
-//	for (auto subj : subjects) {
-//		auto files = subj->findFile(fi.fileName());
-//		if (!files.isEmpty()) {
-//			m_currentSubject = subj;
-//			return subj;
-//		}
-//	}
-//	// failed to find a subject
-//	return Q_NULLPTR;
-//}
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)
 {

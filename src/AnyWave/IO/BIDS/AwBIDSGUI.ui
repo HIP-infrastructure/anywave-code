@@ -54,13 +54,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Available data files:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QTreeView" name="treeView">
      <property name="layoutDirection">
       <enum>Qt::LeftToRight</enum>

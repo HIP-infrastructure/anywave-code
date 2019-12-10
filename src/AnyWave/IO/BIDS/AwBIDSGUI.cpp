@@ -3,52 +3,27 @@
 #include <qfileiconprovider.h>
 #include "AwBIDSItem.h"
 
-//AwBIDSGUI::AwBIDSGUI(AwBIDSManager *bids, const QString& rootDir, QWidget *parent)
-//	: QWidget(parent)
-//{
-//	m_ui.setupUi(this);
-//	m_ui.leDIR->setText(rootDir);
-//	m_bids = bids;
-////	connect(m_ui.comboSource, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSourceFolder(int)));
-//	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
-//	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
-//	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-//}
-
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
 	m_ui.setupUi(this);
 	m_bids = AwBIDSManager::instance();
 	m_ui.leDIR->setText(m_bids->rootDir());
 	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
+	m_ui.treeView->setHeaderHidden(true);
 	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_model = new QStandardItemModel(this);
 	m_ui.treeView->setModel(m_model);
 }
 
-//void AwBIDSGUI::setRootDir(const QString& path)
-//{
-//	m_ui.leDIR->setText(path);
-//}
 
 AwBIDSGUI::~AwBIDSGUI()
 {
-	//clear();
 }
-
-//void AwBIDSGUI::clear()
-//{
-//	//for (auto m : m_models.values())
-//	//	delete m;
-//	//m_models.clear();
-//}
-
 
 void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 {
 	// get the item
-	//auto item = m_currentModel->itemFromIndex(index);
 	auto item = m_model->itemFromIndex(index);
 
 	if (item == 0)
@@ -69,50 +44,10 @@ void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 
 void AwBIDSGUI::refresh()
 {
-	//clear();
-	//// check for available source directories and subjects
-	//AwBIDSSubjectList raw = m_bids->getSubjectsFromSourceDir(AwBIDSManager::raw);
-	//AwBIDSSubjectList sourcedata = m_bids->getSubjectsFromSourceDir(AwBIDSManager::source);
-	//bool isRaw = !raw.isEmpty();
-	//bool isSource = !sourcedata.isEmpty();
-
-	//QStandardItemModel *model = NULL;
-	//if (isRaw) {
-	//	m_ui.comboSource->addItem("raw data", QVariant(AwBIDSManager::raw));
-	//	model = new QStandardItemModel;
-	//	initModel(model, raw);
-	//	m_models.insert(AwBIDSManager::raw, model);
-	//}
-	//if (isSource) {
-	//	m_ui.comboSource->addItem("source data", QVariant(AwBIDSManager::source));
-	//	model = new QStandardItemModel;
-	//	initModel(model, sourcedata);
-	//	m_models.insert(AwBIDSManager::source, model);
-	//}
-	//model->setHeaderData(0, Qt::Horizontal, "Subjects");
-	//m_ui.comboSource->setCurrentIndex(0);
-	//changeSourceFolder(0);
-
-	//clear();
-//	m_model->clear();
-//	auto subjects = m_bids->subjects();
 	m_model->clear();
-	initModel(m_bids->subjects(), nullptr);
+	initModel(m_bids->subjects(), m_model->invisibleRootItem());
 }
 
-
-//void AwBIDSGUI::changeSourceFolder(int index)
-//{
-//	if (m_models.isEmpty())
-//		return;
-//	int type = m_ui.comboSource->itemData(index, Qt::EditRole).toInt();
-//
-//	auto  model = m_models.value(type);
-//	if (model) {
-//		m_ui.treeView->setModel(model);
-//		m_currentModel = model;
-//	}
-//}
 
 void AwBIDSGUI::initModel(const AwBIDSNodes& nodes, QStandardItem *parent)
 {
@@ -133,7 +68,7 @@ void AwBIDSGUI::initModel(const AwBIDSNodes& nodes, QStandardItem *parent)
 			item->setData(AwBIDSGUI::Subject, AwBIDSGUI::TypeRole);
 			item->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 			// subject are always root items =>
-			m_model->appendRow(item);
+			parent->appendRow(item);
 			initModel(node->children(), item);
 			break;
 		case AwBIDSNode::session:
@@ -209,125 +144,3 @@ void AwBIDSGUI::initModel(const AwBIDSNodes& nodes, QStandardItem *parent)
 		}
 	}
 }
-
-//void AwBIDSGUI::initModel(QStandardItemModel *model, const AwBIDSSubjectList& subjects)
-//{
-//	model->clear();
-//	QFileIconProvider fi;
-//
-//	for (auto s : subjects) {
-//		// first item is a AwBIDSItem to hold the reference to the subject object.
-//		auto subItem = new AwBIDSItem(s->ID(), s);
-//		subItem->setToolTip(tr("subject"));
-//		// set custom data
-//		subItem->setData(s->fullPath(), AwBIDSGUI::PathRole);
-//		subItem->setData(AwBIDSGUI::Subject, AwBIDSGUI::TypeRole);
-//		subItem->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//		QList<QStandardItem *> subChildren;
-//		if (s->hasSessions()) {
-//			for (auto session : s->sessions()) {
-//				auto sessionItem = new QStandardItem(session->label());
-//				sessionItem->setToolTip(tr("session"));
-//				sessionItem->setData(session->fullPath(), AwBIDSGUI::PathRole);
-//				sessionItem->setData(AwBIDSGUI::Session, AwBIDSGUI::TypeRole);
-//				sessionItem->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//				subChildren.append(sessionItem);
-//				QList<QStandardItem *> sesChildren;
-//				for (auto fileItem : session->fileItems()) {
-//					switch (fileItem->type()) {
-//					case AwFileItem::eeg:
-//						break;
-//					case AwFileItem::ieeg:
-//					{
-//						auto ieegItem = new QStandardItem("ieeg");
-//						ieegItem->setData(AwBIDSGUI::ieeg, AwBIDSGUI::TypeRole);
-//						ieegItem->setData(fileItem->fullPath(), AwBIDSGUI::PathRole);
-//						ieegItem->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//						sesChildren.append(ieegItem);
-//						QList<QStandardItem *> ieegChildren;
-//						for (auto file : fileItem->files()) {
-//							auto item = new QStandardItem(file);
-//							item->setToolTip("SEEG data file");
-//							item->setData(QString("%1/%2").arg(fileItem->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//							item->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//							item->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//							ieegChildren.append(item);
-//						}
-//						ieegItem->insertColumn(0, ieegChildren);
-//					}
-//					break;
-//					case AwFileItem::meg:
-//					{
-//						auto megItem = new QStandardItem("meg");
-//						megItem->setData(AwBIDSGUI::ieeg, AwBIDSGUI::TypeRole);
-//						megItem->setData(fileItem->fullPath(), AwBIDSGUI::PathRole);
-//						megItem->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//						sesChildren.append(megItem);
-//						QList<QStandardItem *> megChildren;
-//						for (auto file : fileItem->files()) {
-//							auto item = new QStandardItem(file);
-//							item->setToolTip("MEG data file");
-//							item->setData(QString("%1/%2").arg(fileItem->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//							item->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//							item->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//							megChildren.append(item);
-//						}
-//						megItem->insertColumn(0, megChildren);
-//					}
-//					break;
-//					}
-//				}
-//				sessionItem->insertColumn(0, sesChildren);
-//			}
-//			subItem->insertColumn(0, subChildren);
-//		}
-//		else {
-//			for (auto fileItem : s->fileItems()) {
-//				switch (fileItem->type()) {
-//				case AwFileItem::eeg:
-//					break;
-//				case AwFileItem::ieeg:
-//				{
-//					auto ieegItem = new QStandardItem("ieeg");
-//					ieegItem->setData(AwBIDSGUI::ieeg, AwBIDSGUI::TypeRole);
-//					ieegItem->setData(fileItem->fullPath(), AwBIDSGUI::PathRole);
-//					ieegItem->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//					subChildren.append(ieegItem);
-//					QList<QStandardItem *> ieegChildren;
-//					for (auto file : fileItem->files()) {
-//						auto item = new QStandardItem(file);
-//						item->setToolTip("SEEG data file");
-//						item->setData(QString("%1/%2").arg(fileItem->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//						item->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//						item->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//						ieegChildren.append(item);
-//					}
-//					ieegItem->insertColumn(0, ieegChildren);
-//				}
-//				break;
-//				case AwFileItem::meg:
-//				{
-//					auto megItem = new QStandardItem("meg");
-//					megItem->setData(AwBIDSGUI::ieeg, AwBIDSGUI::TypeRole);
-//					megItem->setData(fileItem->fullPath(), AwBIDSGUI::PathRole);
-//					megItem->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//					subChildren.append(megItem);
-//					QList<QStandardItem *> megChildren;
-//					for (auto file : fileItem->files()) {
-//						auto item = new QStandardItem(file);
-//						item->setToolTip("MEG data file");
-//						item->setData(QString("%1/%2").arg(fileItem->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//						item->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//						item->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//						megChildren.append(item);
-//					}
-//					megItem->insertColumn(0, megChildren);
-//				}
-//					break;
-//				}
-//			}
-//			subItem->insertColumn(0, subChildren);
-//		}
-//		model->appendRow(subItem);
-//	}
-//}

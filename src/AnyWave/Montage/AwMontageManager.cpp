@@ -497,17 +497,9 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 	if (!BM->isBIDSActive())
 		return;
 
-	auto subj = BM->getSubject();
-	if (!subj)
-		return;
-
-	auto items = subj->findFileItems(filePath);
-	if (items.isEmpty())
-		return;
+	auto channels_tsv = BM->getTSVFile(reader->infos.fileName(), AwBIDSManager::ChannelsTsv);
 	
-	auto channels_tsv = items.first()->getTsvFileFor(filePath, AwFileItem::channelsTsv);
-	
-	if (!QFile::exists(channels_tsv))
+	if (channels_tsv.isEmpty())
 		return;
 
 	m_channelsTsv = channels_tsv;

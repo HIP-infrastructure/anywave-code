@@ -43,11 +43,16 @@ public:
 	inline QString& ID() { return m_ID; }
 	inline QList<AwBIDSNode *>& children() { return m_children; }
 	inline QStringList& files() { return m_files; }
-
+	/** return all the files contained in the node and the child nodes. **/
+	QStringList gatherFiles();
 
 	AwBIDSNode * addChild(AwBIDSNode *node) { m_children.append(node); return node; }
 	void addFiles(const QStringList& files) { m_files.append(files); }
+	/** Find child node which contains the file. **/
+	AwBIDSNode *findNode(const QString& fileName, AwBIDSNode *node);
 protected:
+	QStringList findFiles(AwBIDSNode *node);
+
 	QString m_parentDir, m_ID, m_fullPath;
 	// a node may contain files
 	QStringList m_files;

@@ -38,3 +38,34 @@ AwBIDSNode::~AwBIDSNode()
 	while (!m_children.isEmpty())
 		delete m_children.takeFirst();
 }
+
+///
+/// findNode: 
+/// given a subject node, browse though children nodes to find the data file.
+/// filePath must be the filename only not the full path.
+AwBIDSNode *AwBIDSNode::findNode(const QString& filePath, AwBIDSNode *node)
+{
+	if (node->m_files.contains(filePath))
+		return node;
+	for (auto child : node->m_children)
+		return findNode(filePath, child);
+	return nullptr;
+}
+
+QStringList AwBIDSNode::findFiles(AwBIDSNode *node)
+{
+	QStringList res;
+	if (node->m_children.isEmpty()) {
+		res += node->files();
+		return res;
+	}
+	for (auto child : node->m_children)
+		return findFiles(child);
+	return res;
+}
+
+
+QStringList AwBIDSNode::gatherFiles()
+{
+	return findFiles(this);
+}
