@@ -39,10 +39,9 @@ class AwBIDSManager : public QObject
 {
 	Q_OBJECT
 public:
-	enum itemTypes { iEEG, MEG, EEG };
-	enum dataSources { raw = 0, source = 1, derivatives = 2 }; // indicates the type of data ordering (source data are place in a source_data folder).
 	enum Modifications { ChannelsTsv, EventsTsv };
 	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
+	enum Derivatives { ICA };
 
 	// destructor
 	~AwBIDSManager();
@@ -63,6 +62,7 @@ public:
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
 	void closeBIDS();
 	AwBIDSNodes& subjects() { return m_nodes; }
+	QString buildPath(const QString& dataFilePath, int derivativesKind);
 	
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
@@ -88,6 +88,8 @@ public:
 	AwBIDSNode *findSubject(const QString& dataFilePath);
 	/** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
 	QString getTSVFile(const QString& dataFilePath, int tsvType);
+	/** Get the BIDS path to the current open file **/
+	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
 signals:
 	void log(const QString& message);
 	void BIDSClosed();
@@ -97,6 +99,7 @@ protected:
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
 
 	QHash<QString, QVariant> m_settings;
+	QHash<QString, AwBIDSNode *> m_hashNodes;
 
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 

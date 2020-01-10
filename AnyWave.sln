@@ -224,6 +224,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFFIO", "src\plugins\FIFIO
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEGInto4D", "src\plugins\EEGInto4D\EEGInto4D.vcxproj", "{7A80BFFA-5097-495D-897A-A956654B2E71}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEPIO", "src\plugins\EEPIO\EEPIO.vcxproj", "{C56501D8-7276-4207-B8FC-AAE4D647AABA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -624,12 +626,18 @@ Global
 		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|Win32.Build.0 = Release|Win32
 		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.ActiveCfg = Release|x64
 		{7A80BFFA-5097-495D-897A-A956654B2E71}.Release|x64.Build.0 = Release|x64
+		{C56501D8-7276-4207-B8FC-AAE4D647AABA}.Debug|Win32.ActiveCfg = Debug|x64
+		{C56501D8-7276-4207-B8FC-AAE4D647AABA}.Debug|x64.ActiveCfg = Debug|x64
+		{C56501D8-7276-4207-B8FC-AAE4D647AABA}.Debug|x64.Build.0 = Debug|x64
+		{C56501D8-7276-4207-B8FC-AAE4D647AABA}.Release|Win32.ActiveCfg = Release|x64
+		{C56501D8-7276-4207-B8FC-AAE4D647AABA}.Release|x64.ActiveCfg = Release|x64
+		{C56501D8-7276-4207-B8FC-AAE4D647AABA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

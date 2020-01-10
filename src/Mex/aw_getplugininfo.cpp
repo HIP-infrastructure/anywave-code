@@ -110,32 +110,17 @@ mxArray* request_info()
     mxSetField(output, 0, "refs", dummy);
     
     // max_sr
-    mxArray *f_sr = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-    float *v = (float *)mxGetData(f_sr);
-    v[0] = max_sr;
-    mxSetField(output, 0, "max_sr", f_sr);
-    
+	mxSetField(output, 0, "max_sr", doubleToMat((double)max_sr));   
     // total_duration
-    mxArray *f_dur = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-    v = (float *)mxGetData(f_dur);
-    v[0] = total_dur;
-    mxSetField(output, 0, "total_duration", f_dur);
-    
+	mxSetField(output, 0, "total_duration", doubleToMat((double)total_dur));   
     // temp_dir
-    mxArray *f_temp =  mxCreateString(temp_dir.toStdString().c_str());
-    mxSetField(output, 0, "temp_dir", f_temp);
-    
+	mxSetField(output, 0, "temp_dir", mxCreateString(temp_dir.toStdString().c_str()));
     // plugin_dir
-    mxArray *f_plugin =  mxCreateString(plugin_dir.toStdString().c_str());
-    mxSetField(output, 0, "plugin_dir", f_plugin);
-    
+	mxSetField(output, 0, "plugin_dir", mxCreateString(plugin_dir.toStdString().c_str()));    
     // file
-    mxArray *f_file =  mxCreateString(file.toStdString().c_str());
-    mxSetField(output, 0, "file", f_file);
-    
+	mxSetField(output, 0, "file", mxCreateString(file.toStdString().c_str()));   
     // ica_file
-    mxArray *f_ica_file =  mxCreateString(ica_file.toStdString().c_str());
-    mxSetField(output, 0, "ica_file", f_ica_file);
+	mxSetField(output, 0, "ica_file", mxCreateString(ica_file.toStdString().c_str()));
     
     return output;
 }

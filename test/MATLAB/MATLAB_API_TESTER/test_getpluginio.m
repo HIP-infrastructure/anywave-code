@@ -26,7 +26,7 @@ expected = [ -1, 1, 5.5, 10, 22];
 values =  [ plugin_io.markers(:).value ];
 assert(all(ismember(expected, values)) == true, 'aw_getpluginio: marker values mismatched');
 % test durations
-expected_durations = [ 0, 8, 0, 2, 0];
+expected_durations = single([ 0, 8, 0, 2, 0]);
 durations = [ plugin_io.markers(:).duration ];
 assert(all(ismember(expected_durations, durations)) == true, 'aw_getpluginio: marker durations mismatched');
 % test positions

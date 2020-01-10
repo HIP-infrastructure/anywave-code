@@ -88,7 +88,6 @@ public:
 
 	void lock() { m_mutex.lock(); }
 	void unlock() { m_mutex.unlock(); }
-
 protected:
 	AwChannelList m_channels;
 	// markers will contain input markers for the process.

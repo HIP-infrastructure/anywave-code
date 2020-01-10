@@ -23,50 +23,37 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include "AwBIDSNode.h"
+#pragma once
 
-AwBIDSNode::AwBIDSNode(const QString& parentDir, const QString& relativePath, int type, const QString& ID)
+#include "eepio_global.h"
+#include <AwFileIO.h>
+#include "cnt/cnt.h"
+
+class EEPIO_EXPORT EEPIO : public AwFileIO
 {
-	m_parentDir = parentDir;
-	m_type = type;
-	m_ID = ID;
-	m_fullPath = QString("%1/%2").arg(parentDir).arg(relativePath);
-	m_parent = nullptr;
-}
+	Q_OBJECT
+	Q_INTERFACES(AwFileIO)
+public:
+	EEPIO(const QString& fileName);
+	~EEPIO();
 
-AwBIDSNode::~AwBIDSNode()
+	void cleanUpAndClose() override;
+	qint64 readDataFromChannels(float start, float duration, AwChannelList &channelList) override;
+	FileStatus openFile(const QString &path) override;
+	FileStatus canRead(const QString &path) override;
+protected:
+	eeg_t *_libeep_cnt;	// pointer to eeprobe data structure
+	float m_sampleRate;
+	QVector<double> m_scales;
+};
+
+
+class EEPIO_EXPORT EEPIOPlugin : public AwFileIOPlugin
 {
-	while (!m_children.isEmpty())
-		delete m_children.takeFirst();
-}
-
-///
-/// findNode: 
-/// given a subject node, browse though children nodes to find the data file.
-/// filePath must be the filename only not the full path.
-AwBIDSNode *AwBIDSNode::findNode(const QString& filePath, AwBIDSNode *node)
-{
-	if (node->m_files.contains(filePath))
-		return node;
-	for (auto child : node->m_children)
-		return findNode(filePath, child);
-	return nullptr;
-}
-
-QStringList AwBIDSNode::findFiles(AwBIDSNode *node)
-{
-	QStringList res;
-	if (node->m_children.isEmpty()) {
-		res += node->files();
-		return res;
-	}
-	for (auto child : node->m_children)
-		return findFiles(child);
-	return res;
-}
-
-
-QStringList AwBIDSNode::gatherFiles()
-{
-	return findFiles(this);
-}
+	Q_OBJECT
+	Q_PLUGIN_METADATA(IID AwFileIOInterfacePlugin_IID)
+	Q_INTERFACES(AwFileIOPlugin)
+public:
+	EEPIOPlugin();
+	AW_INSTANTIATE_PLUGIN(EEPIO)
+};

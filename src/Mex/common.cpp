@@ -111,7 +111,7 @@ mxArray *doubleToMat(double value)
 {
 	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
 	double *s = (double *)mxGetData(tmp);
-	s[0] = value;
+	*s = value;
 	return tmp;
 }
 

@@ -686,9 +686,8 @@ void AwBIDSManager::setRootDir(const QString& path)
 	AwBIDSParser parser;
 	parser.parse();
 	m_nodes = parser.nodes();
-	m_IDToSubject.clear();
-	for (auto n : m_nodes)
-		m_IDToSubject[n->ID()] = n;
+	m_hashNodes = parser.hash();
+	
 	// instantiate UI if needed
 	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
@@ -705,6 +704,8 @@ void AwBIDSManager::closeBIDS()
 	m_modifications.clear();
 	m_mustValidateModifications = false;
 	m_currentSubject = nullptr;
+	m_hashNodes.clear();
+	m_IDToSubject.clear();
 	emit BIDSClosed();
 }
 
@@ -950,16 +951,16 @@ AwBIDSNode *AwBIDSManager::findSubject(const QString& dataFilePath)
 	if (!isBIDSActive())
 		return nullptr;
 	QFileInfo fi(dataFilePath);
-	if (!fi.exists())
-		return nullptr;
-	auto fileName = fi.fileName();
-	for (auto s : m_nodes) {
-		auto files = s->gatherFiles();
-		if (files.contains(fileName)) {
-			m_currentSubject = s;
-			return s;
+	auto n = m_hashNodes[fi.fileName()];
+	if (n) {
+		auto parent = n->parent();
+		while (parent) {
+			n = parent;
+			parent = n->parent();
 		}
+		m_settings["BIDS_FilePath"] = dataFilePath;
 	}
+	m_currentSubject = n;
 	return m_currentSubject;
 }
 

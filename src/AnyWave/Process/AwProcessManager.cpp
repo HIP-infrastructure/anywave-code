@@ -44,6 +44,7 @@
 #include <AwVirtualChannel.h>
 #include "AwProcessLogManager.h"
 #include "Debug/AwDebugLog.h"
+#include "IO/BIDS/AwBIDSManager.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -611,6 +612,13 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	else {
 		process->plugin()->deleteInstance(process);
 		return;
+	}
+
+	if (AwBIDSManager::isInstantiated()) {
+		auto BM = AwBIDSManager::instance();
+		if (BM->isBIDSActive()) 
+			process->pdi.input.addArgument(QString("BIDS_FilePath"), BM->getCurrentBIDSPath());
+
 	}
 
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
