@@ -73,8 +73,16 @@ AwFileIO::FileStatus EEPIO::openFile(const QString &path)
 		channel.setName(label);
 		channel.setSamplingRate(m_sampleRate);
 		auto unit = QString::fromLatin1(eep_get_chan_unit(_libeep_cnt, i));
+		// consider microV as the default unit
+		float gainFactor = 1.0;
+		// check if unit is V or mV
+		if (unit == "V" || unit == "v")
+			gainFactor = 1e6;
+		if (unit == "mV" || unit == "mv")
+			gainFactor = 1e3;
+
 		channel.setUnit(unit);
-		m_scales.append(eep_get_chan_scale(_libeep_cnt, i));
+		m_scales.append(eep_get_chan_scale(_libeep_cnt, i) * gainFactor);
 
 		infos.addChannel(&channel);
 	}

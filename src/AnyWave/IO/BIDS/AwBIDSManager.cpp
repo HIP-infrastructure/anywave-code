@@ -35,7 +35,7 @@ void AwBIDSManager::toBIDS(const AwArguments& args)
 
 	// check for modality
 	auto mod = args["bids_modality"].toString().trimmed().toLower();
-	if (mod == "ieeg") {
+	if (mod == "ieeg" || mod == "eeg") {
 		SEEGtoBIDS(args);
 	}
 	else if (mod == "meg") {
@@ -317,9 +317,10 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
 	auto file = args["input_file"].toString();
+	auto mod = args["bids_modality"].toString().trimmed().toLower();
 
 	if (file.isEmpty()) {
-		emit log("AwBIDSManager::SEEGtoBIDS - No SEEG file specified.");
+		emit log(QString("AwBIDSManager::SEEGtoBIDS - No %1 file specified.").arg(mod));
 		return -1;
 	}
 
@@ -410,7 +411,10 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		events_tsv = QString("%1_proc-%2").arg(events_tsv).arg(proc);
 	}
 
-	fileName = QString("%1_ieeg.%2").arg(fileName).arg(ext);
+	if (mod == "seeg")
+		fileName = QString("%1_ieeg.%2").arg(fileName).arg(ext);
+	else  // Converting eeg file
+		fileName = QString("%1_eeg.%2").arg(fileName).arg(ext);
 	json = QString("%1_ieeg.json").arg(json);
 	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
 	events_tsv = QString("%1_events.tsv").arg(events_tsv);
@@ -443,7 +447,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	// to get the group from electrode
 	QRegularExpression re("\\d+$");
 	QRegularExpressionMatch match;
-	int countSEEG = 0, countECG = 0, countTRIG = 0;
+	int countSEEG = 0, countECG = 0, countTRIG = 0, countEEG = 0;
 	if (channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		for (int i = 0; i < headers.size(); i++) {
 			stream << headers.at(i);
@@ -463,9 +467,13 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 				stream << "ECG" << "\t" << "microV" << "\t";
 				countECG++;
 			}
-			else if (c->type() == AwChannel::SEEG || c->type() == AwChannel::EEG) {
+			else if (c->type() == AwChannel::SEEG || (c->type() == AwChannel::EEG && mod == "seeg")) {
 				stream << "SEEG" << "\t" << "microV" << "\t";
 				countSEEG++;
+			}
+			else if (c->isEEG()) {
+				stream << "EEG" << "\t" << "microV" << "\t";
+				countEEG++;
 			}
 			else
 				stream << "OTHER" << "\t" << "n/a" << "\t";
@@ -511,10 +519,17 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	jObject.insert("TaskName", QJsonValue::fromVariant(task));
 	jObject.insert("Manufacturer", QJsonValue::fromVariant(manufacturer));
 	jObject.insert("PowerLineFrequency", QJsonValue::fromVariant(50));
-	jObject.insert("SEEGChannelCount", QJsonValue::fromVariant(countSEEG));
+	if (mod == "seeg") {
+		jObject.insert("SEEGChannelCount", QJsonValue::fromVariant(countSEEG));
+		jObject["iEEGReference"] = QString("n/a");
+	}
+	else {
+		jObject["EEGReference"] = QString("n/a");
+		jObject.insert("EEGChannelCount", QJsonValue::fromVariant(countEEG));
+	}
 	jObject["SamplingFrequency"] = reader->infos.channels().first()->samplingRate();
 	jObject["SoftwareFilters"] = QString("n/a");
-	jObject["iEEGReference"] = QString("n/a");
+	
 	if (countECG)
 		jObject.insert("ECGChannelCount", QJsonValue::fromVariant(countECG));
 	if (countTRIG)

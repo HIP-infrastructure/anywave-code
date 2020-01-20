@@ -10,7 +10,7 @@
 //
 // --toBIDS : Convert a file or folder to BIDS by converting the data format if necessary and creating the .json files 
 // Options for --toBIDS:
-//	--bids_modality <modality> : MANDATORY. [ seeg or meg4DNI ]
+//	--bids_modality <modality> : MANDATORY. [ seeg meg eeg ]
 //  --bids_sub <subj>			: MANDATORY. The BIDS subject
 //	--bids_task <task>			: MANDATORY. The BIDS task
 //	--bids_ses <sessions>		: OPTIONAL. The BIDS session.
