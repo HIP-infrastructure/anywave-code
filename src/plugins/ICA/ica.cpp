@@ -33,6 +33,7 @@
 #include <math/AwMath.h>
 #include <filter/AwFilterSettings.h>
 #include <QMessageBox>
+#include <AwCore.h>
 
 // use layout manager to store a layout in the matlab file
 #include <layout/AwLayoutManager.h>
@@ -69,17 +70,25 @@ bool ICA::showUi()
 		args["modality"] = AwChannel::typeToString(ui.modality);
 
 		if (ui.ignoreMarkers) {
-			QStringList skippedMarkers = { ui.selectedMarker };
+			QStringList skippedMarkers = { ui.skipMarker };
 			args["skip_markers"] = skippedMarkers;
 
-			AwMarkerList tmp = AwMarker::getMarkersWithLabels(pdi.input.markers(), skippedMarkers);
-			auto markers = AwMarker::invertMarkerSelection(tmp, "selection", pdi.input.fileDuration);
-			pdi.input.setNewMarkers(markers);
+			//AwMarkerList tmp = AwMarker::getMarkersWithLabels(pdi.input.markers(), skippedMarkers);
+			//auto markers = AwMarker::invertMarkerSelection(tmp, "selection", pdi.input.fileDuration);
+			//pdi.input.setNewMarkers(markers);
 		}
-		else { // set whole file as input
-			pdi.input.clearMarkers();
-			pdi.input.addMarker(new AwMarker("global", 0., pdi.input.fileDuration));
+		if (ui.useMarkers) {
+			QStringList markers = { ui.useMarker };
+			args["skip_markers"] = markers;
 		}
+
+		// use and skip marker labels must be different
+		if (!ui.useMarker.isEmpty() && !ui.skipMarker.isEmpty()) 
+			if (ui.useMarker == ui.skipMarker) {
+				QMessageBox::critical(0, "Data Input", QString("markers to use and skip must be different."));
+				return false;
+			}
+
 		// NOT SKIPPING BAD CHANNELS, ok clear badLabels from input.
 		if (!ui.ignoreBadChannels) {
 			pdi.input.badLabels.clear();
@@ -169,13 +178,32 @@ int ICA::initParameters()
 	// check if we have to use specific markers or skipped some
 	bool use = args.contains("use_markers");
 	bool skip = args.contains("skip_markers");
-	// in the case of one option is set, the AwRunProcess method has already setup the input markers for us if we runFromCommandLine
-	// If we run in GUI mode, the showUi also has already setup the input.
-	// But if we run in command line mode and no use_markers or skip_markers is specified we must set the input markers to what ICA expects 
-	if (!use && !skip) {
-		pdi.input.clearMarkers();
-		pdi.input.addMarker(new AwMarker("global", 0., pdi.input.fileDuration));
+
+	if (use || skip) {
+		auto markers = AwMarker::duplicate(pdi.input.markers());
+		QStringList skippedMarkers, usedMarkers;
+		if (use)
+			usedMarkers = args["use_markers"].toStringList();
+		if (skip)
+			skippedMarkers = args["skip_markers"].toStringList();
+
+		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, pdi.input.fileDuration);
+		if (inputMarkers.isEmpty()) {
+			pdi.input.clearMarkers();
+			pdi.input.addMarker(new AwMarker("whole data", 0., pdi.input.fileDuration));
+		}
+		else
+		{
+			pdi.input.clearMarkers();
+			pdi.input.setNewMarkers(inputMarkers);
+		}
+		AW_DESTROY_LIST(markers);
 	}
+	else {  // no markers to use or skip => compute on the whole data
+		pdi.input.clearMarkers();
+		pdi.input.addMarker(new AwMarker("whole data", 0., pdi.input.fileDuration));
+	}
+
 
     // Watch for memory exception
 	try {
@@ -334,5 +362,5 @@ void ICA::saveToFile()
 		sendMessage(QString("Error saving to .mat : %1").arg(e.errorString()));
 		return;
 	}
-	sendMessage(QString("saved results to %1.").arg(m_fileName));
+	sendMessage(QString("results saved to %1.").arg(m_fileName));
 }

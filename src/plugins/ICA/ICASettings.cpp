@@ -23,8 +23,10 @@ ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels,
 		m_ui.comboIgnoredMarkers->setEnabled(false);
 	    m_ui.checkIgnoreMarker->setEnabled(false);
 	}
-	else
+	else {
 		m_ui.comboIgnoredMarkers->addItems(m_labels);
+		m_ui.comboUseMarkers->addItems(m_labels);
+	}
 	connect(m_ui.cbAll, SIGNAL(toggled(bool)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(updateMaxNumOfIC()));
@@ -43,8 +45,12 @@ void ICASettings::accept()
 {
 	ignoreBadChannels = m_ui.ignoreBads->isChecked();
 	ignoreMarkers = m_ui.checkIgnoreMarker->isChecked();
-	if (!m_labels.isEmpty())
-		selectedMarker = m_labels.at(m_ui.comboIgnoredMarkers->currentIndex());
+	useMarkers = m_ui.checkUseMarkers->isChecked();
+	if (!m_labels.isEmpty()) {
+		skipMarker = m_labels.at(m_ui.comboIgnoredMarkers->currentIndex());
+		useMarker = m_labels.at(m_ui.comboUseMarkers->currentIndex());
+	}
+
 	modality = AwChannel::stringToType(m_modes.at(m_ui.comboModality->currentIndex()));
 	lpf = m_ui.spinLPF->value();
 	hpf = m_ui.spinHPF->value();

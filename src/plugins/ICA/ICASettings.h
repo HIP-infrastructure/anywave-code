@@ -40,8 +40,8 @@ public:
 	~ICASettings();
 
 	bool ignoreBadChannels;
-	bool ignoreMarkers;
-	QString selectedMarker;
+	bool ignoreMarkers, useMarkers;
+	QString skipMarker, useMarker;
 	int modality;
 	float hpf, lpf;
 	int components;

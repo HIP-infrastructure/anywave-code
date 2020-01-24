@@ -107,12 +107,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwFilteringLib", "src\Filte
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileConverter", "src\plugins\FileConverter\FileConverter.vcxproj", "{AFBD2728-57CE-429F-8C40-9FB4F8DB905B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ANT_Reader", "src\plugins\ANT_Reader\ANT_Reader.vcxproj", "{F2206D68-3226-41EC-AD37-B314DD27FEFA}"
-	ProjectSection(ProjectDependencies) = postProject
-		{CA5B6E48-7EBE-4949-AA0B-79267B704C4D} = {CA5B6E48-7EBE-4949-AA0B-79267B704C4D}
-		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AutoMarking", "src\plugins\AutoMarking\AutoMarking.vcxproj", "{9A321685-9E0B-44CB-88E0-B64DA3418DD9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
@@ -378,14 +372,6 @@ Global
 		{AFBD2728-57CE-429F-8C40-9FB4F8DB905B}.Release|Win32.Build.0 = Release|Win32
 		{AFBD2728-57CE-429F-8C40-9FB4F8DB905B}.Release|x64.ActiveCfg = Release|x64
 		{AFBD2728-57CE-429F-8C40-9FB4F8DB905B}.Release|x64.Build.0 = Release|x64
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Debug|Win32.Build.0 = Debug|Win32
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Debug|x64.ActiveCfg = Debug|x64
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Debug|x64.Build.0 = Debug|x64
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Release|Win32.ActiveCfg = Release|Win32
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Release|Win32.Build.0 = Release|Win32
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Release|x64.ActiveCfg = Release|x64
-		{F2206D68-3226-41EC-AD37-B314DD27FEFA}.Release|x64.Build.0 = Release|x64
 		{9A321685-9E0B-44CB-88E0-B64DA3418DD9}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9A321685-9E0B-44CB-88E0-B64DA3418DD9}.Debug|Win32.Build.0 = Debug|Win32
 		{9A321685-9E0B-44CB-88E0-B64DA3418DD9}.Debug|x64.ActiveCfg = Debug|x64
@@ -637,7 +623,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal
