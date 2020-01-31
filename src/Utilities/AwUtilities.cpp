@@ -28,10 +28,12 @@
 #include <utils/gui.h>
 #include <utils/time.h>
 #include <utils/endian.h>
+#include <utils/file.h>
 #include <QTime>
 #include <QtCore/qmath.h>
 #include <QSettings>
 #include <AwMarker.h>
+#include <QDir>
 #include <QFile>
 #include <qjsondocument.h>
 
@@ -365,4 +367,17 @@ quint64 AwUtilities::endianness::fromBigEndian64(const uchar *src)
 		| src[2] * Q_UINT64_C(0x0000010000000000)
 		| src[1] * Q_UINT64_C(0x0001000000000000)
 		| src[0] * Q_UINT64_C(0x0100000000000000);
+}
+
+
+bool AwUtilities::file::isPathValid(const QString &path)
+{
+	auto components = path.split(QDir::separator());
+	if (components.isEmpty())
+		return false;
+	for (auto c : components) {
+#ifdef Q_OS_WIN
+
+#endif
+	}
 }
