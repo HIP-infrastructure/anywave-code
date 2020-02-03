@@ -26,6 +26,7 @@
     <ClInclude Include="..\..\include\utils\endian.h" />
     <ClInclude Include="..\..\include\utils\gui.h" />
     <ClInclude Include="..\..\include\utils\time.h" />
+    <ClInclude Include="file.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4ADC7140-D1DF-4C66-A36E-5FF2EC96DBC1}</ProjectGuid>
