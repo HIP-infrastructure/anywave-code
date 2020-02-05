@@ -24,6 +24,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "pythonmodule.h"
+#include "Channel.h"
+#include "Marker.h"
 #define PY_ARRAY_UNIQUE_SYMBOL anywave_ARRAY_API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
@@ -63,38 +65,54 @@ static PyMethodDef AnyWaveMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
-// Channel and Marker types
-extern PyTypeObject channel_Type;
-extern PyTypeObject marker_Type;
+// Python 3 Module defintion
+static struct PyModuleDef module = {
+	PyModuleDef_HEAD_INIT,
+	"anywave",
+	"anywave API module",
+	-1,
+	AnyWaveMethods
+};
 
-PyMODINIT_FUNC
-initanywave(void)
+
+// Python 3 way of life:
+PyMODINIT_FUNC PyInit_anywave(void)
 {
-	if (PyType_Ready(&marker_Type) < 0)
-		 return;
+	// init Channel and Marker types
+	anywave_ChannelType.tp_new = PyType_GenericNew;
+	if (PyType_Ready(&anywave_ChannelType) < 0)
+		return NULL;
+	anywave_MarkerType.tp_new = PyType_GenericNew;
+	if (PyType_Ready(&anywave_MarkerType) < 0)
+		return NULL;
 
-	if (PyType_Ready(&channel_Type) < 0)
-		 return;
-
-	m_module = Py_InitModule("anywave", AnyWaveMethods);
+	m_module = PyModule_Create(&module);
 	if (m_module == NULL)
-		return;
+		return NULL;
 	import_array();
-	Py_INCREF(m_module);
+	
+	//Py_INCREF(m_module);
+	// add error object to module
 	AnyWaveError = PyErr_NewException("anywave.error", NULL, NULL);
 	Py_INCREF(AnyWaveError);
 	PyModule_AddObject(m_module, "error", AnyWaveError);
 	m_host = Py_BuildValue("s", "127.0.0.1");
 	m_pid = Py_BuildValue("i", 0);
 	m_server_port = Py_BuildValue("i", 0);
+	// add host object
 	Py_INCREF(m_host);
-	Py_INCREF(m_pid);
-	Py_INCREF(m_server_port);
 	PyModule_AddObject(m_module, "host", m_host);
+	// add pid object
+	Py_INCREF(m_pid);
 	PyModule_AddObject(m_module, "pid", m_pid);
+	// add server_port object
+	Py_INCREF(m_server_port);
 	PyModule_AddObject(m_module, "server_port", m_server_port);
-	PyModule_AddObject(m_module, "marker", (PyObject *)&marker_Type);
-	PyModule_AddObject(m_module, "channel", (PyObject *)&channel_Type);
+	// add channel and marker type objects
+	Py_INCREF(&anywave_ChannelType);
+	PyModule_AddObject(m_module, "Channel", (PyObject *)&anywave_ChannelType);
+	PyModule_AddObject(m_module, "Marker", (PyObject *)&anywave_MarkerType);
+	return m_module;
 }
 
 

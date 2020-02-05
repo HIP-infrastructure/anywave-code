@@ -29,12 +29,13 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 #include "common.h"
+#include "Channel.h"
 #include <AwProcess.h>
 #include <qjsonobject.h>
 #include <qjsonarray.h>
 
 extern PyObject *AnyWaveError;
-extern PyTypeObject channel_Type;
+
 
 PyObject *getDataEx(PyObject *self, PyObject *args)
 {
@@ -48,22 +49,6 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 		return NULL;
 	}
 	*stream << dictToJson(dict);
-
-	//if (PyArg_ParseTuple(args, "")) { // no arguments => default parameters
-
-	//}	
-	//else {
-	//	PyObject *dict = NULL;
-	//	if (!PyArg_ParseTuple(args, "O", &dict)) {
-	//		PyErr_SetString(AnyWaveError, "incorrect argument.");
-	//		return NULL;
-	//	}
-	//	if (!PyDict_Check(dict)) {
-	//		PyErr_SetString(AnyWaveError, "incorrect argument.");
-	//		return NULL;
-	//	}
-	//	*stream << dictToJson(dict);
-	//}
 
 	if (!request.sendRequest())
 		return NULL;
@@ -93,15 +78,15 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 		qint64 nSamples;
 		int selected;
 		in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> notch >> nSamples >> selected;
-		PyObject *py_channel = PyObject_CallObject((PyObject *)&channel_Type, NULL);
-		PyObject_SetAttrString(py_channel, "label", PyString_FromString(name.toStdString().c_str()));
-		PyObject_SetAttrString(py_channel, "ref", PyString_FromString(ref.toStdString().c_str()));
-		PyObject_SetAttrString(py_channel, "type", PyString_FromString(type.toStdString().c_str()));
+		PyObject *py_channel = PyObject_CallObject((PyObject *)&anywave_ChannelType, NULL);
+		PyObject_SetAttrString(py_channel, "label", PyUnicode_FromString(name.toStdString().c_str()));
+		PyObject_SetAttrString(py_channel, "ref", PyUnicode_FromString(ref.toStdString().c_str()));
+		PyObject_SetAttrString(py_channel, "type", PyUnicode_FromString(type.toStdString().c_str()));
 		PyObject_SetAttrString(py_channel, "sr", PyFloat_FromDouble(samplingRate));
 		PyObject_SetAttrString(py_channel, "lpf", PyFloat_FromDouble(lpf));
 		PyObject_SetAttrString(py_channel, "hpf", PyFloat_FromDouble(hpf));
 		PyObject_SetAttrString(py_channel, "notch", PyFloat_FromDouble(notch));
-		PyObject_SetAttrString(py_channel, "selected", PyInt_FromLong(selected));
+		PyObject_SetAttrString(py_channel, "selected", PyLong_FromLong(selected));
 		if (nSamples == 0)
 			continue;
 		else {

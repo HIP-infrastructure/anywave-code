@@ -24,7 +24,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 
-#include <Python.h>
 #include "common.h"
 #include <AwMarker.h>
 #include <AwProcess.h>
@@ -50,7 +49,7 @@ void parse_markers(PyObject *list)
 		PyObject *item = PyList_GetItem(list, i);
 
 		if (PyObject_HasAttrString(item, "label"))
-			s_label = QString(PyString_AsString(PyObject_GetAttrString(item, "label")));
+			s_label = QString(PyBytes_AsString(PyObject_GetAttrString(item, "label")));
 		if (PyObject_HasAttrString(item, "position"))
 			position = PyFloat_AsDouble(PyObject_GetAttrString(item, "position"));
 		if (PyObject_HasAttrString(item, "duration"))
@@ -63,12 +62,12 @@ void parse_markers(PyObject *list)
 			if (size) {
 				for (i = 0; i < size; i++) {
 					PyObject *pyChannel = PyList_GetItem(pyChannels, i);
-					channels << QString(PyString_AsString(pyChannel));
+					channels << QString(PyBytes_AsString(pyChannel));
 				}
 			}
 		}
 		if (PyObject_HasAttrString(item, "color"))
-			s_color =  QString(PyString_AsString(PyObject_GetAttrString(item, "color")));
+			s_color =  QString(PyBytes_AsString(PyObject_GetAttrString(item, "color")));
 
 		// create marker
         AwMarker *m = new AwMarker;

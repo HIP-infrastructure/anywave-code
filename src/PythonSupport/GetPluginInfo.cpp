@@ -42,18 +42,18 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	}
 	
 	// FILE
-	PyObject *pyFile = PyString_FromString(file.toStdString().c_str());
+	PyObject *pyFile = PyUnicode_FromString(file.toStdString().c_str());
 	PyDict_SetItemString(out, "file", pyFile);
 
 	// ICA FILE
-	PyObject *pyIcaFile = PyString_FromString(icaFile.toStdString().c_str());
+	PyObject *pyIcaFile = PyUnicode_FromString(icaFile.toStdString().c_str());
 	PyDict_SetItemString(out, "ica_file", pyIcaFile);
 	
 	// LABELS
 	if (!labels.isEmpty()) {
 		PyObject *list_labels = PyList_New((Py_ssize_t)labels.size());
 		for (int i = 0; i < labels.size(); i++) {
-			PyObject *s = PyString_FromString(labels.at(i).toStdString().c_str());
+			PyObject *s = PyUnicode_FromString(labels.at(i).toStdString().c_str());
 			PyList_SetItem(list_labels, i, s);
 		}
 		PyDict_SetItemString(out, "labels", list_labels);
@@ -63,7 +63,7 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	if (!rejected_ics.isEmpty()) {
 		PyObject *list_labels = PyList_New((Py_ssize_t)rejected_ics.size());
 		for (int i = 0; i < rejected_ics.size(); i++) {
-			PyObject *s = PyString_FromString(rejected_ics.at(i).toStdString().c_str());
+			PyObject *s = PyUnicode_FromString(rejected_ics.at(i).toStdString().c_str());
 			PyList_SetItem(list_labels, i, s);
 		}
 		PyDict_SetItemString(out, "rejected_ics", list_labels);
@@ -73,7 +73,7 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	if (!refs.isEmpty()) {
 		PyObject *list_refs = PyList_New((Py_ssize_t)refs.size());
 		for (int i = 0; i < refs.size(); i++) {
-			PyObject *s = PyString_FromString(refs.at(i).toStdString().c_str());
+			PyObject *s = PyUnicode_FromString(refs.at(i).toStdString().c_str());
 			PyList_SetItem(list_refs, i, s);
 		}
 		PyDict_SetItemString(out, "refs", list_refs);
@@ -87,11 +87,11 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	PyDict_SetItemString(out, "total_dur", dur);
 
 	// temp dir
-	PyObject *temp = PyString_FromString(temp_dir.toStdString().c_str());
+	PyObject *temp = PyUnicode_FromString(temp_dir.toStdString().c_str());
 	PyDict_SetItemString(out, "temp_dir", temp);
 
 	// temp dir
-	PyObject *plugin = PyString_FromString(plugin_dir.toStdString().c_str());
+	PyObject *plugin = PyUnicode_FromString(plugin_dir.toStdString().c_str());
 	PyDict_SetItemString(out, "plugin_dir", plugin);
 
 	return out;

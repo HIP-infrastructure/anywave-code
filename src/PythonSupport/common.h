@@ -24,6 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <QTcpSocket>
+#undef slots  // Python 3 header uses slots keyword which is also a Qt keyword...
 #include <Python.h>
 #include <qdatastream.h>
 
@@ -35,6 +36,8 @@ int waitForResponse(QTcpSocket *);
 /** parse a whole dictionnary and convert it to JSON format. **/
 QString dictToJson(PyObject *dict);
 
+// Python 3 string are all unicoded by default : this function will convert to QString.
+QString Py3StringToQString(PyObject *str);
 // Request class
 
 class TCPRequest

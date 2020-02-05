@@ -39,6 +39,11 @@ extern PyObject *AnyWaveError;
 
 static QJsonObject dictToJsonObject(PyObject *dict);
 
+QString Py3StringToQString(PyObject *str)
+{
+	return QString(PyBytes_AsString(PyUnicode_AsUTF8String(str)));
+}
+
 QJsonObject dictToJsonObject(PyObject *dict)
 {
 	// get keys
@@ -50,7 +55,7 @@ QJsonObject dictToJsonObject(PyObject *dict)
 	Py_ssize_t i;
 	for (i = 0; i < size; i++) {
 		PyObject *key_ = PyList_GetItem(keys, i);
-		keys_ << QString(PyString_AS_STRING(key_)).toLower();
+		keys_ << Py3StringToQString(key_).toLower();
 		values_ << PyDict_GetItem(dict, key_);
 	}
 	QJsonObject json;
@@ -59,8 +64,8 @@ QJsonObject dictToJsonObject(PyObject *dict)
 		Py_ssize_t i = 0, nValues = 0;
 		PyObject *value = values_.at(index);
 		// check for object type.
-		if (PyString_Check(value))
-			json[k] = QString(PyString_AS_STRING(value));
+		if (PyUnicode_Check(value))
+			json[k] = Py3StringToQString(value);
 		else if (PyBool_Check(value))
 			json[k] = bool(PyObject_IsTrue(value));
 		else if (PyList_Check(value)) {
@@ -68,21 +73,21 @@ QJsonObject dictToJsonObject(PyObject *dict)
 			QJsonArray array;
 			for (auto i = 0; i < nValues; i++) {
 				PyObject *item = PyList_GetItem(value, i);
-				if (PyString_Check(item))
-					array.append(QJsonValue(QString(PyString_AS_STRING(item))));
+				if (PyUnicode_Check(item))
+					array.append(QJsonValue(Py3StringToQString(item)));
 				else if (PyBool_Check(item))
 					array.append(QJsonValue(bool(PyObject_IsTrue(item))));
-				else if (PyInt_Check(item))
-					array.append(QJsonValue(int(PyInt_AsLong(item))));
+				else if (PyLong_Check(item))
+					array.append(QJsonValue(PyLong_AsLong(item)));
 				else if (PyFloat_Check(item))
 					array.append(QJsonValue(PyFloat_AsDouble(item)));
 			}
 			json[k] = array;
 		}
-		else if (PyInt_Check(value))
-			json[k] = int(PyInt_AsLong(value));
+		else if (PyLong_Check(value))
+			json[k] = PyLong_AsLong(value);
 		else if (PyFloat_Check(value))
-			json[k] = double(PyFloat_AsDouble(value));
+			json[k] = PyFloat_AsDouble(value);
 		else if (PyDict_Check(value))
 			json[k] = dictToJsonObject(value);
 	}
@@ -146,41 +151,42 @@ QTcpSocket *connect()
 {
 	// get module's dict
 	PyObject *dict = PyModule_GetDict(m_module);
-	char *s_host = "";
-	QString host;
-	PyObject *pyHost = PyDict_GetItemString(dict, "host");
-	if (PyString_Check(pyHost))
-		s_host = PyString_AS_STRING(pyHost);
-	else {
-		PyErr_SetString(AnyWaveError, "host is not a string.");
-		return NULL;
-	}
+	//char *s_host = "";
+	QString host = Py3StringToQString(PyDict_GetItemString(dict, "host"));
+	//QString pid = Py3StringToQString(PyDict_GetItemString(dict, "pid"));
+	QString port = Py3StringToQString(PyDict_GetItemString(dict, "server_port"));
+	//if (PyString_Check(pyHost))
+	//	s_host = PyString_AS_STRING(pyHost);
+	//else {
+	//	PyErr_SetString(AnyWaveError, "host is not a string.");
+	//	return NULL;
+	//}
 
-	PyObject *pyPid = PyDict_GetItemString(dict, "pid");
-	if (pyPid == NULL) {
-		PyErr_SetString(AnyWaveError, "no pid in dict.");
-		return NULL;
-	}
-	PyObject *pyServerPort = PyDict_GetItemString(dict, "server_port");
-	if (pyServerPort == NULL) {
-		PyErr_SetString(AnyWaveError, "no server port defined in dict.");
-		return NULL;
-	}
-	char *s_pid, *s_serverPort;
-	if (PyString_Check(pyPid))
-		s_pid = PyString_AS_STRING(pyPid);
-	if (PyString_Check(pyServerPort))
-		s_serverPort = PyString_AS_STRING(pyServerPort);
+	//PyObject *pyPid = PyDict_GetItemString(dict, "pid");
+	//if (pyPid == NULL) {
+	//	PyErr_SetString(AnyWaveError, "no pid in dict.");
+	//	return NULL;
+	//}
+	//PyObject *pyServerPort = PyDict_GetItemString(dict, "server_port");
+	//if (pyServerPort == NULL) {
+	//	PyErr_SetString(AnyWaveError, "no server port defined in dict.");
+	//	return NULL;
+	//}
+	//char *s_pid, *s_serverPort;
+	//if (PyString_Check(pyPid))
+	//	s_pid = PyString_AS_STRING(pyPid);
+	//if (PyString_Check(pyServerPort))
+	//	s_serverPort = PyString_AS_STRING(pyServerPort);
 
-	m_pidValue = QString(s_pid).toInt();
+	//m_pidValue = QString(s_pid).toInt();
 
 	QTcpSocket *socket = new QTcpSocket();
 
-	host = QString(s_host);
-	quint16 port = QString(s_serverPort).toInt();
+	//host = QString(s_host);
+	//quint16 port = QString(s_serverPort).toInt();
 
 	//socket->connectToHost(host, 50222);
-	socket->connectToHost(host, port);
+	socket->connectToHost(host, (quint16)port.toInt());
 	if (!socket->waitForConnected()) {
 		QString error = QString("Unable to connect to AnyWave: %1").arg(socket->errorString());
 		PyErr_SetString(AnyWaveError, error.toStdString().c_str());

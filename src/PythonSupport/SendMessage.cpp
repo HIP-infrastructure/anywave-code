@@ -25,7 +25,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "common.h"
 #include <AwProcess.h>
-#include <Python.h>
+//#undef signals
+//#include <Python.h>
 
 #include <QDataStream>
 
@@ -39,7 +40,7 @@ PyObject *sendMessage(PyObject *self, PyObject *args)
 		return NULL;
 	}
 
-	QString s_message = QString(PyString_AsString(message));
+	QString s_message = QString(PyBytes_AsString(message));
 
 	QTcpSocket *socket = connect();
 	int request = AwRequest::SendMessage;
