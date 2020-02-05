@@ -62,44 +62,47 @@ ICA::~ICA()
 
 bool ICA::showUi()
 {
-	ICASettings ui(pdi.input.dataPath, pdi.input.channels(), pdi.input.markers(), m_algoNames);
+//	ICASettings ui(pdi.input.dataPath, pdi.input.channels(), pdi.input.markers(), m_algoNames);
+	ICASettings ui(this);
 
 	if (ui.exec() == QDialog::Accepted)	{
-		m_modality = ui.modality;
+		//m_modality = ui.modality;
 		auto args = pdi.input.args();
-		args["modality"] = AwChannel::typeToString(ui.modality);
+		args.unite(ui.args);
 
-		if (ui.ignoreMarkers) {
-			QStringList skippedMarkers = { ui.skipMarker };
-			args["skip_markers"] = skippedMarkers;
+		//args["modality"] = AwChannel::typeToString(ui.modality);
 
-			//AwMarkerList tmp = AwMarker::getMarkersWithLabels(pdi.input.markers(), skippedMarkers);
-			//auto markers = AwMarker::invertMarkerSelection(tmp, "selection", pdi.input.fileDuration);
-			//pdi.input.setNewMarkers(markers);
-		}
-		if (ui.useMarkers) {
-			QStringList markers = { ui.useMarker };
-			args["skip_markers"] = markers;
-		}
+		//if (ui.ignoreMarkers) {
+		//	QStringList skippedMarkers = { ui.skipMarker };
+		//	args["skip_markers"] = skippedMarkers;
+
+		//	//AwMarkerList tmp = AwMarker::getMarkersWithLabels(pdi.input.markers(), skippedMarkers);
+		//	//auto markers = AwMarker::invertMarkerSelection(tmp, "selection", pdi.input.fileDuration);
+		//	//pdi.input.setNewMarkers(markers);
+		//}
+		//if (ui.useMarkers) {
+		//	QStringList markers = { ui.useMarker };
+		//	args["skip_markers"] = markers;
+		//}
 
 		// use and skip marker labels must be different
-		if (!ui.useMarker.isEmpty() && !ui.skipMarker.isEmpty()) 
-			if (ui.useMarker == ui.skipMarker) {
-				QMessageBox::critical(0, "Data Input", QString("markers to use and skip must be different."));
-				return false;
-			}
+		//if (!ui.useMarker.isEmpty() && !ui.skipMarker.isEmpty()) 
+		//	if (ui.useMarker == ui.skipMarker) {
+		//		QMessageBox::critical(0, "Data Input", QString("markers to use and skip must be different."));
+		//		return false;
+		//	}
 
-		// NOT SKIPPING BAD CHANNELS, ok clear badLabels from input.
-		if (!ui.ignoreBadChannels) {
-			pdi.input.badLabels.clear();
-		}
+		//// NOT SKIPPING BAD CHANNELS, ok clear badLabels from input.
+		//if (!ui.ignoreBadChannels) {
+		//	pdi.input.badLabels.clear();
+		//}
 
-		args["comp"] = ui.components;
-		args["downsampling"] = ui.downSampling;
-		args["hp"] = ui.hpf;
-		args["lp"] = ui.lpf;
-		m_algo = ui.algo;
-		args["infomax_extended"] = ui.infomaxExtended;
+		//args["comp"] = ui.components;
+		//args["downsampling"] = ui.downSampling;
+		//args["hp"] = ui.hpf;
+		//args["lp"] = ui.lpf;
+		//m_algo = ui.algo;
+		//args["infomax_extended"] = ui.infomaxExtended;
 
 		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.dataFolder);
 		QFile test(testFile);
@@ -258,9 +261,9 @@ int ICA::initParameters()
 	qint64 nSamples = m_channels.first()->dataSize(); // getting total number of samples
 
 	if (sqrt(nSamples / 30.) < m_nComp) {
-		sendMessage(QString("Number of samples %1 for the number of components "
-			"requested %2 may be insufficient. Aborted.").arg(nSamples).arg(m_nComp));
-		return -1;
+		sendMessage(QString("Warning: Number of samples %1 for the number of components "
+			"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
+	//	return -1;
 	}
 
 	// channels have been prepared.
