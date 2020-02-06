@@ -118,16 +118,17 @@ void AwPythonScriptProcess::run()
 
 	//env.insert("PATH", AwSettings::getInstance()->systemPath()); // Very important to define the full system path in the process environment.
 	//env.insert("PATH", qApp->applicationDirPath());
+	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
 #ifdef Q_OS_MAC
-	QString application = QCoreApplication::applicationDirPath();
-    application += "/../Frameworks";
-	env.insert("DYLD_LIBRARY_PATH", application);
+	auto LDPATH = QString("%1/../Frameworks").arg(application);
+   	env.insert("DYLD_LIBRARY_PATH", LDPATH);
 #endif
 #ifdef Q_OS_LINUX
     env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
 #endif
+	QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
 	env.remove("PATH");
-	env.insert("PATH", AwSettings::getInstance()->getString("systemPath"));
+	env.insert("PATH", fullPath);
 	m_python.setProcessEnvironment(env);
 	connect(&m_python, SIGNAL(readyReadStandardOutput()), this, SLOT(pythonOutput()));
 	connect(&m_python, SIGNAL(readyReadStandardError()), this, SLOT(pythonError()));

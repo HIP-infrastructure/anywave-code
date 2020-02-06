@@ -35,7 +35,8 @@
 extern PyObject *m_module;
 extern PyObject  *m_pid;
 extern int m_pidValue;
-extern PyObject *AnyWaveError;
+
+#define WAIT_TIME_OUT   3000000   // 300s socket time out
 
 static QJsonObject dictToJsonObject(PyObject *dict);
 
@@ -123,25 +124,29 @@ void sendRequest(QTcpSocket *client, const QByteArray& data)
 int waitForResponse(QTcpSocket *socket)
 {
     while (socket->bytesAvailable() < sizeof(int))
-       if (!socket->waitForReadyRead())
+       if (!socket->waitForReadyRead(WAIT_TIME_OUT))
 			return -1;
 
     QDataStream in(socket);
 	in.setVersion(QDataStream::Qt_4_4);
     int status, size;
     in >> status;
-    if (status == -1)   // if status is incorrect ends here.
-        return status;
+	if (status == -1) {  // if status is incorrect ends here.
+		PyErr_SetString(AnyWaveError, "Bad status returned by AnyWave.");
+		return status;
+	}
     // getting size of data (in bytes)
     while (socket->bytesAvailable() < sizeof(int))
-		if (!socket->waitForReadyRead())
+		if (!socket->waitForReadyRead()) {
+			PyErr_SetString(AnyWaveError, "Nothing to read from socket.");
 			return -1;
+		}
 
     in >> size;
 
 	// update 3.7.2014   Wait for all data to be available
 	while (socket->bytesAvailable() < size)
-        if (!socket->waitForReadyRead())
+        if (!socket->waitForReadyRead(WAIT_TIME_OUT))
 			return -1;
 
     return size;
@@ -151,41 +156,12 @@ QTcpSocket *connect()
 {
 	// get module's dict
 	PyObject *dict = PyModule_GetDict(m_module);
-	//char *s_host = "";
 	QString host = Py3StringToQString(PyDict_GetItemString(dict, "host"));
-	//QString pid = Py3StringToQString(PyDict_GetItemString(dict, "pid"));
+	QString pid = Py3StringToQString(PyDict_GetItemString(dict, "pid"));
 	QString port = Py3StringToQString(PyDict_GetItemString(dict, "server_port"));
-	//if (PyString_Check(pyHost))
-	//	s_host = PyString_AS_STRING(pyHost);
-	//else {
-	//	PyErr_SetString(AnyWaveError, "host is not a string.");
-	//	return NULL;
-	//}
-
-	//PyObject *pyPid = PyDict_GetItemString(dict, "pid");
-	//if (pyPid == NULL) {
-	//	PyErr_SetString(AnyWaveError, "no pid in dict.");
-	//	return NULL;
-	//}
-	//PyObject *pyServerPort = PyDict_GetItemString(dict, "server_port");
-	//if (pyServerPort == NULL) {
-	//	PyErr_SetString(AnyWaveError, "no server port defined in dict.");
-	//	return NULL;
-	//}
-	//char *s_pid, *s_serverPort;
-	//if (PyString_Check(pyPid))
-	//	s_pid = PyString_AS_STRING(pyPid);
-	//if (PyString_Check(pyServerPort))
-	//	s_serverPort = PyString_AS_STRING(pyServerPort);
-
-	//m_pidValue = QString(s_pid).toInt();
+	m_pidValue = pid.toInt();
 
 	QTcpSocket *socket = new QTcpSocket();
-
-	//host = QString(s_host);
-	//quint16 port = QString(s_serverPort).toInt();
-
-	//socket->connectToHost(host, 50222);
 	socket->connectToHost(host, (quint16)port.toInt());
 	if (!socket->waitForConnected()) {
 		QString error = QString("Unable to connect to AnyWave: %1").arg(socket->errorString());
@@ -202,16 +178,13 @@ TCPRequest::TCPRequest(int requestID)
 	m_socket = connect();
 	m_pid = m_pidValue;
 	m_requestID = requestID;
-	if (m_socket == NULL) {
-		m_status = TCPRequest::failed;
-	}
-	else {
-		m_status = TCPRequest::connected;
-	}
+	m_status = m_socket == NULL ? TCPRequest::failed : TCPRequest::connected;
 	m_streamSize = new QDataStream(&m_size, QIODevice::WriteOnly);
 	m_streamSize->setVersion(QDataStream::Qt_4_4);
 	m_streamData = new QDataStream(&m_data, QIODevice::WriteOnly);
 	m_streamData->setVersion(QDataStream::Qt_4_4);
+	m_streamResponse = new QDataStream(m_socket);
+	m_streamResponse->setVersion(QDataStream::Qt_4_4);
 }
 
 TCPRequest::~TCPRequest()
@@ -220,6 +193,7 @@ TCPRequest::~TCPRequest()
 		delete m_socket;
 	delete m_streamSize;
 	delete m_streamData;
+	delete m_streamResponse;
 }
 
 void TCPRequest::clear()

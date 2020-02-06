@@ -28,6 +28,8 @@
 #include <Python.h>
 #include <qdatastream.h>
 
+extern PyObject *AnyWaveError;
+
 QTcpSocket *connect();
 void sendRequest(QTcpSocket *, const QByteArray& );
 QByteArray initRequest(int request);
@@ -50,6 +52,7 @@ public:
 	inline int status() { return m_status; }
 	inline QTcpSocket *socket() { return m_socket; }
 	QDataStream *stream() { return m_streamData; }
+	QDataStream *response() { return m_streamResponse; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
 	bool sendRequest();
 	int getResponse();
@@ -62,4 +65,5 @@ protected:
 	QByteArray m_data;
 	QDataStream *m_streamSize;
 	QDataStream *m_streamData;
+	QDataStream *m_streamResponse;
 };

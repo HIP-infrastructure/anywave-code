@@ -34,8 +34,6 @@
 #include <qjsonobject.h>
 #include <qjsonarray.h>
 
-extern PyObject *AnyWaveError;
-
 
 PyObject *getDataEx(PyObject *self, PyObject *args)
 {

@@ -1,39 +1,32 @@
 #include "common.h"
 #include <AwProcess.h>
 #include <Python.h>
-//#define NO_IMPORT_ARRAY
-//#define PY_ARRAY_UNIQUE_SYMBOL anywave_ARRAY_API
-//#define NPY_NO_DEPRECATED_API NPY_1_11_API_VERSION
 #include <QDataStream>
 #include <AwChannel.h>
 extern PyObject *AnyWaveError;
 
 PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 {
-	 QTcpSocket *socket = connect();
+	TCPRequest request(AwRequest::GetPluginInfo);
+	if (request.status() == TCPRequest::failed) {
+		PyErr_SetString(AnyWaveError, "Connection to AnyWave failed.");
+		return NULL;
+	}
+	if (!request.sendRequest())
+		return NULL;
+	int size = request.getResponse();
+	if (size == -1) {
+		PyErr_SetString(AnyWaveError, "No response received from AnyWave.");
+		return NULL;
+	}
 
-	 int request = AwRequest::GetPluginInfo;
-	 QByteArray data;
-	 QDataStream stream_data(&data, QIODevice::WriteOnly);
-	 stream_data.setVersion(QDataStream::Qt_4_4);
-	 stream_data << request;
-
-	 sendRequest(socket, data);
-
-	// wait for response
-    int dataSize = waitForResponse(socket);
-    if (dataSize == -1) {
-        PyErr_SetString(AnyWaveError, "No response received from AnyWave.");
-        return NULL;
-    }
-	// reading response
-    QDataStream in(socket);
-    in.setVersion(QDataStream::Qt_4_4);
-    QStringList labels, refs, rejected_ics;
-    float max_sr, total_dur;
+	// get the data stream
+	QDataStream& response = *request.response();
+	QStringList labels, refs, rejected_ics;
+	float max_sr, total_dur;
 	QString temp_dir, plugin_dir, file, icaFile;
 
-	in >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> icaFile >> rejected_ics;
+	response >> file >> labels >> refs >> max_sr >> total_dur >> temp_dir >> plugin_dir >> icaFile >> rejected_ics;
 
 	PyObject *out = PyDict_New(); // create a new dict.
 	if (out == NULL) {
