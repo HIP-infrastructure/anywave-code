@@ -1081,6 +1081,7 @@
     <ClCompile Include="MATPy\GetScreenCapture.cpp" />
     <ClCompile Include="MATPy\GetTriggers.cpp" />
     <ClCompile Include="MATPy\IsTerminated.cpp" />
+    <ClCompile Include="MATPy\OpenNewFile.cpp" />
     <ClCompile Include="MATPy\SendCommand.cpp" />
     <ClCompile Include="MATPy\SendMessage.cpp" />
     <ClCompile Include="MATPy\SetBeamFormer.cpp" />

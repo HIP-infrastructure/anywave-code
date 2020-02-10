@@ -33,6 +33,8 @@
 #include "Montage/AwMontageManager.h"
 #include "AwPidManager.h"
 #include "AwRequestServer.h"
+#include "Plugin/AwPluginManager.h"
+#include "AwCore.h"
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// statics
 
@@ -48,19 +50,61 @@ AwMATPyServer *AwMATPyServer::instance()
 	return m_instance;
 }
 
+AwMATPyServer *AwMATPyServer::newInstance()
+{	
+	auto instance = new AwMATPyServer;
+	AwMATPyServer::instance()->addDuplicatedInstance(instance);
+	return instance;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 AwMATPyServer::AwMATPyServer()
 {
-	// Get or Create AwPidManager
-	AwPidManager::instance()->setParent(this);
-	m_rs = NULL;
+	m_rs = nullptr;
+	m_pm = nullptr;
 }
 
 AwMATPyServer::~AwMATPyServer()
 {
 	if (m_rs)
 		delete m_rs;
+	// destroy possible duplicated instances
+	AW_DESTROY_LIST(m_duplicatedInstances);
+}
+
+void AwMATPyServer::addDuplicatedInstance(AwMATPyServer *instance)
+{
+	m_duplicatedInstances << instance;
+}
+
+void AwMATPyServer::deleteDuplicatedInstance(AwMATPyServer *instance)
+{
+	m_duplicatedInstances.removeAll(instance);
+	delete instance;
+}
+
+void AwMATPyServer::addProcess(AwScriptProcess *p)
+{
+	if (m_pm == nullptr)
+		m_pm = new AwPidManager(this);
+	m_pm->createNewPid(p);
+}
+
+
+bool AwMATPyServer::startWithFile(const QString& dataPath)
+{
+	if (m_rs)
+		delete m_rs;
+
+	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
+	if (reader == nullptr)
+		return false;
+	m_rs = new AwRequestServer(dataPath);
+	// IMPORTANT : set the connection to the pid manager!
+	m_rs->setPidManager(m_pm);
+	// check if dataPath is a valid file that the data server can handle
+	return m_rs->isListening();
 }
 
 void AwMATPyServer::start()
@@ -69,11 +113,14 @@ void AwMATPyServer::start()
 		return;
 
 	m_rs = new AwRequestServer();
+	// IMPORTANT : set the connection to the pid manager!
+	m_rs->setPidManager(m_pm);
 	if (!m_rs->isListening()) { // failed to listen on TCP port
 		delete m_rs;
 		m_rs = NULL;
 	}
 }	
+
 
 void AwMATPyServer::stop()
 {

@@ -36,13 +36,18 @@ AwPythonScriptProcess *AwPythonScriptPlugin::newInstance()
 {
 	AwPythonScriptProcess *p = new AwPythonScriptProcess;
 	initProcess(p);
-	// Instantiate or get current server
-	AwMATPyServer *server = AwMATPyServer::instance();
-	// Get or Create AwPidManager
-	AwPidManager *pidm = AwPidManager::instance();
-	AwPidManager::instance()->createNewPid(p);  // set pid to process
 
-	AwMATPyServer::instance()->start();	// start listening for network requests
+	AwMATPyServer *server = AwMATPyServer::instance();
+	server->addProcess(p);
+	server->start();
+
+	//// Instantiate or get current server
+	//AwMATPyServer *server = AwMATPyServer::instance();
+	//// Get or Create AwPidManager
+	//AwPidManager *pidm = AwPidManager::instance();
+	//AwPidManager::instance()->createNewPid(p);  // set pid to process
+
+	//AwMATPyServer::instance()->start();	// start listening for network requests
 
 	return p;
 }
@@ -119,14 +124,19 @@ void AwPythonScriptProcess::run()
 	//env.insert("PATH", AwSettings::getInstance()->systemPath()); // Very important to define the full system path in the process environment.
 	//env.insert("PATH", qApp->applicationDirPath());
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
+	QString fullPath;
 #ifdef Q_OS_MAC
 	auto LDPATH = QString("%1/../Frameworks").arg(application);
    	env.insert("DYLD_LIBRARY_PATH", LDPATH);
+	fullPath = QString("%1:%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
 #endif
 #ifdef Q_OS_LINUX
     env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
+	fullPath = QString("%1:%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
 #endif
-	QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+#ifdef Q_OS_WIN
+	fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+#endif
 	env.remove("PATH");
 	env.insert("PATH", fullPath);
 	m_python.setProcessEnvironment(env);

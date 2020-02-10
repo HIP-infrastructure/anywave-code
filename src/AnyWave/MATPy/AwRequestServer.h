@@ -28,15 +28,20 @@
 #include <QObject>
 #include <QTcpServer>
 class AwScriptProcess;
+class AwDataServer;
+class AwPidManager;
 #include <AwDataClient.h>
 class AwRequestServer : public AwDataClient
 {
 	Q_OBJECT
 public:
-	AwRequestServer(/*QTcpServer *server, */QObject *parent = 0);
+	AwRequestServer(QObject *parent = 0);
+	AwRequestServer(const QString& dataPath, QObject *parent = 0);
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
+
+	void setPidManager(AwPidManager *pm) { m_pm = pm; }
 public slots:
 	void handleNewConnection();
 	void dataReceived();
@@ -53,6 +58,8 @@ protected:
 	QThread *m_thread;
 	bool m_isListening;
 	quint16 m_serverPort;
+	AwDataServer *m_ds;
+	AwPidManager *m_pm;
 private:
 	AwMarkerList m_markers;	// hold the markers added by process
 	void handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process);
@@ -70,6 +77,7 @@ private:
 	void handleGetICAPanelCapture(QTcpSocket *client, AwScriptProcess *process);
 	void handleSetBeamFormer(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetTriggers(QTcpSocket *client, AwScriptProcess *process);
+	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
 };
 
 

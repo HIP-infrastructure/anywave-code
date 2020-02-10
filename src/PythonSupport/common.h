@@ -54,8 +54,9 @@ public:
 	QDataStream *stream() { return m_streamData; }
 	QDataStream *response() { return m_streamResponse; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
-	bool sendRequest();
-	int getResponse();
+	bool sendRequest(QString& jsonString = QString());
+//	bool sendRequest();
+	bool getResponse();
 	void clear();
 
 protected:

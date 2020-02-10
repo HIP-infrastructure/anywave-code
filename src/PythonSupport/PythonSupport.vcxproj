@@ -26,6 +26,7 @@
     <ClCompile Include="GetDataEx.cpp" />
     <ClCompile Include="GetMarkers.cpp" />
     <ClCompile Include="GetPluginInfo.cpp" />
+    <ClCompile Include="OpenNewAnyWave.cpp" />
     <ClCompile Include="pythonmodule.cpp" />
     <ClCompile Include="Marker.cpp" />
     <ClCompile Include="SendMessage.cpp" />
@@ -109,7 +110,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_CORE_LIB;QT_NETWORK_LIB;PYTHONSUPPORT_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;c:\dev\Anaconda3\Lib\site-packages\numpy\core\include;c:\dev\Anaconda3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtNetwork;c:\dev\Anaconda3\Lib\site-packages\numpy\core\include;c:\dev\Anaconda3\include;$(AWROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -118,7 +119,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\anywave.pyd</OutputFile>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;D:\Anaconda3\libs;$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;c:\dev\Anaconda3\libs;$(AWROOT)\lib;c:\dev\Anaconda3\Lib\site-packages\numpy\core\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Networkd.lib;AwCoreLibd.lib;python37.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>

@@ -24,10 +24,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 
-//#define NO_IMPORT_ARRAY
-//#define PY_ARRAY_UNIQUE_SYMBOL anywave_ARRAY_API
-//#define NPY_NO_DEPRECATED_API NPY_1_11_API_VERSION
-
 #include "common.h"
 #include "structmember.h"
 #include "Marker.h"
@@ -91,7 +87,6 @@ static int Marker_init(Marker *self, PyObject *args, PyObject *kwds)
 		self->channels = channels;
 		Py_XDECREF(tmp);
 	}
-
 	return 0;
 }
 

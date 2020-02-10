@@ -25,22 +25,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwPidManager.h"
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// statics
-
-AwPidManager *AwPidManager::m_instance = NULL;
-bool AwPidManager::m_isActive = false;
-AwPidManager *AwPidManager::instance()
-{
-	if (!m_instance)
-		// instantiate server and move it to another thread.
-		m_instance = new AwPidManager();
-
-	return m_instance;
-}
-
-
 void AwPidManager::createNewPid(AwScriptProcess *process)
 {
 	process->setPid(m_index);

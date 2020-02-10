@@ -35,7 +35,7 @@
 PyObject *AnyWaveError;		// error handling object
 PyObject *m_host;			// host to connect to
 PyObject *m_pid;			// process ID
-PyObject *m_server_port;		// server port number
+PyObject *m_server_port;	// server port number
 PyObject *m_module;			// the module
 
 // global variables (not included in Python module)
@@ -48,6 +48,7 @@ extern PyObject *getDataEx(PyObject *self, PyObject *args);
 extern PyObject *getMarkers(PyObject *self, PyObject *args);
 extern PyObject *addMarkers(PyObject *self, PyObject *args);
 extern PyObject *sendMessage(PyObject *self, PyObject *args);
+extern PyObject *openNewFile(PyObject *self, PyObject *args);
 
 static PyMethodDef AnyWaveMethods[] = {
 	{"get_data", (PyCFunction)getData,  METH_O,
@@ -62,6 +63,8 @@ static PyMethodDef AnyWaveMethods[] = {
 	"Send a message to AnyWave"},
 	{"get_plugininfo", (PyCFunction)getPluginInfo, METH_NOARGS,
 	"Get information about the plugin's inputs"},
+	{"open_new_file", (PyCFunction)openNewFile, METH_O,
+	"Launch a new instance of the AnyWave dataserver and connect to it"},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -114,5 +117,6 @@ PyMODINIT_FUNC PyInit_anywave(void)
 	PyModule_AddObject(m_module, "Marker", (PyObject *)&anywave_MarkerType);
 	return m_module;
 }
+
 
 

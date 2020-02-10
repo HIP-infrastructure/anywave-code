@@ -33,12 +33,15 @@
 #include <QThread>
 #include "Marker/AwMarkerManager.h"
 #include "Source/AwSourceManager.h"
+#include "Plugin/AwPluginManager.h"
 
 AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 {
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
+	m_ds = nullptr;
+	m_pm = nullptr;
 	
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
@@ -56,10 +59,35 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 	m_thread->start();
 }
 
+AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwDataClient(parent)
+{
+	m_thread = new QThread(this);
+	m_server = new QTcpServer(this);
+	m_serverPort = 0;
+	m_ds = nullptr;
+	m_pm = nullptr;
+
+	if (m_server->listen(QHostAddress::Any, 0)) {
+		m_serverPort = m_server->serverPort();
+		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
+		//AwDataServer::getInstance()->openConnection(this);
+		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
+		m_ds = AwDataServer::getInstance()->duplicate(reader);
+		m_ds->openConnection(this);
+		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
+		m_isListening = true;
+	}
+	else
+		m_isListening = false;
+}
+
 AwRequestServer::~AwRequestServer()
 {
 	m_thread->exit();
 	m_thread->wait();
+	// is there a decicated data server?
+	if (m_ds)
+		delete m_ds;
 }
 
 void AwRequestServer::handleNewConnection()
@@ -112,7 +140,11 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	emit log(tr("Received request ") + QString::number(request));
 	// get the matchin process if pid is valid
 	if (pid >= 0) {
-		AwScriptProcess *p = AwPidManager::instance()->process(pid);
+		if (m_pm == nullptr) { // SHOULD NEVER HAPPENS
+			emit log(tr("ERROR: request server has no connection to a pid manager instance."));
+			return;
+		}
+		AwScriptProcess *p = m_pm->process(pid);
 
 		if (p == NULL) {// no process found, send a bad status as response
 			// write a bad status
@@ -127,6 +159,9 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		}
 		switch (request)
 		{
+		case AwRequest::OpenNewFile:
+			handleOpenNewFile(client, p);
+			break;
 		case AwRequest::GetMarkers2:
 			handleGetMarkers2(client, p);
 			break;

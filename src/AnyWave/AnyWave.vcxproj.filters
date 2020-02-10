@@ -1300,6 +1300,9 @@
     <ClCompile Include="IO\BIDS\AwBIDSNode.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\OpenNewFile.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">

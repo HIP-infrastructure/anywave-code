@@ -202,18 +202,19 @@ void TCPRequest::clear()
 	m_data.clear();
 }
 
-bool TCPRequest::sendRequest()
+bool TCPRequest::sendRequest(QString& jsonString)
 {
-	int dataSize = m_data.size() + sizeof(int); // data size + request ID size
+	int dataSize = jsonString.size() + sizeof(int); // data size + request ID size
 	// always send the pid first then size and data.
 	*m_streamSize << m_pid;
 	*m_streamSize << dataSize << m_requestID;
 	m_socket->write(m_size);
+	*m_streamData << jsonString;
 	m_socket->write(m_data);
 	return m_socket->waitForBytesWritten();
 }
 
-int TCPRequest::getResponse()
+bool TCPRequest::getResponse()
 {
-	return waitForResponse(m_socket);
+	return waitForResponse(m_socket) >= 0;
 }

@@ -215,7 +215,6 @@ void TCPRequest::clear()
 
 bool TCPRequest::sendRequest()
 {
-
 	int dataSize = m_data.size() + sizeof(int); // data size + request ID size
 	// always send the pid first then size and data.
 	*m_streamSize << m_pid;
