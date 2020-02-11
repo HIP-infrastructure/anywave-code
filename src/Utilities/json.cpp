@@ -23,14 +23,23 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include <utils/json.h>
+#include <qjsondocument.h>
+#include <qjsonobject.h>
+#include <qjsonarray.h>
 
-#include <QCommandLineParser>
-#include "AwCommandLine.h"
-namespace aw {
-	namespace commandLine {
-		enum Commands { BIDS, RunProcess, DedicatedDataServerMode };
-		QMap<int, AwArguments> doParsing(const QStringList& args);
-		int doCommandLineOperations(QMap<int, AwArguments>& operations);
+QVariantHash AwUtilities::json::hashFromJson(const QString& jsonString, QString& errorString)
+{
+	QJsonDocument doc;
+	QVariantHash hash;
+	if (!jsonString.isEmpty()) {
+		QJsonParseError err;
+		doc = QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+		if (doc.isNull() || err.error != QJsonParseError::NoError) {
+			errorString = err.errorString();
+			return hash;
+		}
+		return doc.object().toVariantHash();
 	}
+	return hash;
 }

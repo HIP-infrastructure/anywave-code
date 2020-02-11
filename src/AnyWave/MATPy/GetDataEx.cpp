@@ -27,18 +27,18 @@
 #include "Process/AwScriptPlugin.h"
 #include "AwTCPResponse.h"
 #include <QDataStream>
-#include <qjsondocument.h>
-#include <qjsonobject.h>
-#include <qjsonarray.h>
+#include <utils/json.h>
 #include "Montage/AwMontageManager.h"
 #include "Marker/AwMarkerManager.h"
 #include <filter/AwFiltering.h>
 #include <filter/AwFilterSettings.h>
+#include "Prefs/AwSettings.h"
 #include <AwCore.h>
 
+#include <QJsonArray>
 
 
-void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("processing aw_getdataex/getdataex()");
 	AwTCPResponse response(client);
@@ -52,68 +52,65 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 	in >> json;
 	int status = 0;
 	AwMarkerList markers;
-	QDataStream *stream = response.stream();
+	QDataStream& stream = *response.stream();
 
-	QJsonDocument doc;
-	if (!json.isEmpty()) {
-		QJsonParseError err;
-		doc = QJsonDocument::fromJson(json.toUtf8(), &err);
-		if (doc.isNull() || err.error != QJsonParseError::NoError) {
-			emit log(QString("error in json parsing: %1").arg(err.errorString()));
-			*stream << (qint64)0;
-			response.send();
-			return;
-		}
-	}
-	// common default values
-	float start = 0., duration = p->pdi.input.fileDuration;
 	bool rawData = false;
 	int downsampling = 1;
 	AwChannelList requestedChannels;
 	AwMarkerList input_markers;
+	auto reader = AwSettings::getInstance()->currentReader();
+	float fileDuration = process == nullptr ? reader->infos.totalDuration() : process->pdi.input.fileDuration;
+	float start = 0., duration = 0.;
 
-	if (doc.isNull() || doc.isEmpty()) {
-		requestedChannels = p->pdi.input.channels();
-		input_markers << new AwMarker("global", 0., p->pdi.input.fileDuration);
+	if (json.isEmpty()) {
+		if (process)
+			requestedChannels = process->pdi.input.channels();
+		else
+			requestedChannels = reader->infos.channels();
+
+		input_markers << new AwMarker("global", 0., fileDuration);
 	}
 	else {
-		auto root = doc.object();
-
+		QString error;
+		auto dict = AwUtilities::json::hashFromJson(json, error);
+		if (dict.isEmpty()) {
+			emit log(QString("error in json parsing: %1").arg(error));
+			stream << (qint64)0;;
+			response.send();
+			return;
+		}
 		QStringList use_markers, skip_markers, labels, types;
 		QString pickFrom;
 
 		AwFilterSettings filterSettings;
 		// check for start/Duration or use markers options
-		if (root.contains("use_markers") && root["use_markers"].isArray())
-			for (auto m : root["use_markers"].toArray())
-				use_markers << m.toString();
-		if (root.contains("skip_markers") && root["skip_markers"].isArray())
-			for (auto m : root["skip_markers"].toArray())
-				skip_markers << m.toString();
+		if (dict.contains("use_markers"))
+			use_markers = dict["use_markers"].toStringList();
+		if (dict.contains("skip_markers"))
+			skip_markers = dict["skip_markers"].toStringList();
 		// check for channel labels
-		if (root.contains("channel_labels") && root["channel_labels"].isArray())
-			for (auto l : root["channel_labels"].toArray())
-				labels << l.toString();
+		if (dict.contains("channel_labels"))
+			labels = dict["channel_labels"].toStringList();
 		// check for channel types
-		if (root.contains("channel_types") && root["channel_types"].isArray())
-			for (auto t : root["channel_types"].toArray())
-				types << t.toString();
+		if (dict.contains("channel_types"))
+			types = dict["channel_types"].toStringList();
 		bool usingMarkers = !use_markers.isEmpty();
 		bool skippingMarkers = !skip_markers.isEmpty();
-		if (root.contains("start"))
-			start = root["start"].toDouble();
-		if (root.contains("duration"))
-			duration = root["duration"].toDouble();
-		if (root.contains("pick_channels_from"))
-			pickFrom = root["pick_channels_from"].toString().toLower();
-		if (root.contains("raw_data"))
-			rawData = root["raw_data"].toBool();
-		if (root.contains("downsampling_factor"))
-			downsampling = root["downsampling_factor"].toInt();
+		if (dict.contains("start"))
+			start = dict["start"].toDouble();
+		if (dict.contains("duration"))
+			duration = dict["duration"].toDouble();
+		if (dict.contains("pick_channels_from"))
+			pickFrom = dict["pick_channels_from"].toString().toLower();
+		if (dict.contains("raw_data"))
+			rawData = dict["raw_data"].toBool();
+		if (dict.contains("downsampling_factor"))
+			downsampling = dict["downsampling_factor"].toInt();
 		// get filters
 		QVector<float> filters;
-		if (root.contains("filters") && root["filters"].isArray()) {
-			for (auto f : root["filters"].toArray()) {
+		if (dict.contains("filters")) {
+			auto array = dict["filters"].toJsonArray();
+			for (auto f : array) {
 				filters << f.toDouble();
 			}
 		}
@@ -125,12 +122,20 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
 		}
 		// preparing input channels
-		if (pickFrom.isEmpty())
-			requestedChannels = p->pdi.input.channels();
+		if (pickFrom.isEmpty()) {
+			if (process == nullptr)
+				requestedChannels = reader->infos.channels();
+			else
+				requestedChannels = process->pdi.input.channels();
+		}
 		else if (pickFrom.toLower() == "montage")
 			requestedChannels = AwMontageManager::instance()->channels();
-		else if (pickFrom.toLower() == "as recorded")
-			requestedChannels = p->pdi.input.reader()->infos.channels();
+		else if (pickFrom.toLower() == "as recorded") {
+			if (process == nullptr)
+				requestedChannels = reader->infos.channels();
+			else
+				requestedChannels = process->pdi.input.reader()->infos.channels();
+		}
 
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
@@ -146,7 +151,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 						c->setReferenceName(splitted.last());
 					res += tmp;
 				}
-				else 
+				else
 					res += AwChannel::getChannelsWithLabel(requestedChannels, l);
 
 			}
@@ -183,17 +188,17 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 		emit log("Done.");
 	}
 	AW_DESTROY_LIST(input_markers);
-	*stream << requestedChannels.size();
+	stream << requestedChannels.size();
 	response.send();
 	for (auto c : requestedChannels) {
-		*stream << c->name();
-		*stream << AwChannel::typeToString(c->type());
-		*stream << c->referenceName();
-		*stream << c->samplingRate();
-		*stream << c->highFilter();
-		*stream << c->lowFilter();
-		*stream << c->notch();
-		*stream << c->dataSize();
+		stream << c->name();
+		stream << AwChannel::typeToString(c->type());
+		stream << c->referenceName();
+		stream << c->samplingRate();
+		stream << c->highFilter();
+		stream << c->lowFilter();
+		stream << c->notch();
+		stream << c->dataSize();
 		response.send();
 		if (c->dataSize()) {
 			bool finished = false;
@@ -204,17 +209,17 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *p)
 			while (!finished) {
 				if (nSamplesLeft == 0) {
 					chunkSize = 0;
-					*stream << chunkSize;
+					stream << chunkSize;
 					response.send();
 					finished = true;
 					continue;
 				}
 				if (nSamplesLeft < chunkSize)
 					chunkSize = nSamplesLeft;
-				*stream << chunkSize;
+				stream << chunkSize;
 				emit log("Sending chunk of data (size is " + QString::number(chunkSize) + " samples)");
 				for (int i = 0; i < chunkSize; i++)
-					*stream << c->data()[i + nSamplesSent];
+					stream << c->data()[i + nSamplesSent];
 				nSamplesSent += chunkSize;
 				response.send();
 				nSamplesLeft -= chunkSize;

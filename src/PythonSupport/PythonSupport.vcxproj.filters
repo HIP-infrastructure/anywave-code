@@ -34,6 +34,9 @@
     <ClCompile Include="OpenNewAnyWave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RunAnyWave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">

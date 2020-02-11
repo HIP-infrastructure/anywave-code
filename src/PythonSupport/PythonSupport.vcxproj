@@ -29,6 +29,7 @@
     <ClCompile Include="OpenNewAnyWave.cpp" />
     <ClCompile Include="pythonmodule.cpp" />
     <ClCompile Include="Marker.cpp" />
+    <ClCompile Include="RunAnyWave.cpp" />
     <ClCompile Include="SendMessage.cpp" />
   </ItemGroup>
   <ItemGroup>

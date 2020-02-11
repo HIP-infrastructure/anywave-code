@@ -42,7 +42,9 @@ static QJsonObject dictToJsonObject(PyObject *dict);
 
 QString Py3StringToQString(PyObject *str)
 {
-	return QString(PyBytes_AsString(PyUnicode_AsUTF8String(str)));
+	if (str)
+		return QString(PyBytes_AsString(PyUnicode_AsUTF8String(str)));
+	return QString();
 }
 
 QJsonObject dictToJsonObject(PyObject *dict)

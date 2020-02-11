@@ -2,18 +2,21 @@
 #include "Process/AwScriptPlugin.h"
 #include <QDataStream>
 #include <QTcpSocket>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 
-void AwRequestServer::handleIsTerminated(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleIsTerminated(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing is process terminated...");
-	AwResponse response(client);
-
-	response.begin();
-	QDataStream stream_data(response.buffer());
-	stream_data.setVersion(QDataStream::Qt_4_4);
-
-	stream_data << p->wasAborted();
+	AwTCPResponse response(client);
+	QDataStream& stream = *response.stream();
+	if (process == nullptr) {
+		// cannot run in dedicated data server mode
+		emit log("Unattended call in dedicated data server mode...");
+		stream << (bool)true;
+	}
+	else {
+		stream << process->wasAborted();
+	}
 	response.send();
 	emit log("Done.");
 }

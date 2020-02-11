@@ -37,7 +37,7 @@
 #include "Prefs/AwSettings.h"
 
 
-void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing aw_getdata/anywave.getdata() ...");
 
@@ -94,13 +94,23 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		}
 	}
 
+	// Dedicated Data Server if process is nullptr
+	if (process == nullptr)
+		reader = AwSettings::getInstance()->currentReader();
+
 	bool usingLabels = !labels.isEmpty();
 	bool usingTypes = !types.isEmpty();
 	bool error = false;
 
 	// default case : not using labels nor types
-	if (!usingFile)
-		requestedChannels = p->pdi.input.channels();
+	if (!usingFile) {
+		if (process == nullptr) {  // Dedicated Data Server Mode
+			requestedChannels = reader->infos.channels();
+		}
+		else {
+			requestedChannels = process->pdi.input.channels();
+		}
+	}
 	else {
 		// Handle duration = -1 when reading direclty from a file
 		if (duration == -1.)

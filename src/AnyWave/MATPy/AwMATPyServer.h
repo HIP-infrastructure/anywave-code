@@ -26,10 +26,10 @@
 #ifndef AWMATPYSERVER_H
 #define AWMATPYSERVER_H
 
-#include "Process/AwMatlabScriptPlugin.h"
 class AwRequestServer;
 class AwPidManager;
 class AwScriptProcess;
+#include <QObject>
 
 class AwMATPyServer : public QObject
 {

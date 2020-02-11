@@ -214,6 +214,7 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/IsTerminated.cpp \
     ./MATPy/SendCommand.cpp \
     ./MATPy/SendMessage.cpp \
+	./MATPy/OpenNewFile.cpp \
     ./MATPy/SetBeamFormer.cpp \
     ./Montage/AwAVGChannel.cpp \
     ./Montage/AwChannelListModel.cpp \
@@ -294,6 +295,7 @@ SOURCES += ./AnyWave.cpp \
     ./CL/AwCommandLineManager.cpp \
     ./CL/AwCommandLogger.cpp \
     ./CL/AwRunProcess.cpp \
+	./CL/DedicatedDataServer.cpp \
     ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \

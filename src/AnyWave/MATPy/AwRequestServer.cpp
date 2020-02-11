@@ -42,7 +42,7 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 	m_serverPort = 0;
 	m_ds = nullptr;
 	m_pm = nullptr;
-	
+
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
 		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
@@ -50,7 +50,7 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
 		m_isListening = true;
 	}
-	else 
+	else
 		m_isListening = false;
 
 	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
@@ -59,7 +59,7 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 	m_thread->start();
 }
 
-AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwDataClient(parent)
+AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
 {
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
@@ -67,7 +67,7 @@ AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwD
 	m_ds = nullptr;
 	m_pm = nullptr;
 
-	if (m_server->listen(QHostAddress::Any, 0)) {
+	if (m_server->listen(QHostAddress::Any, port)) {
 		m_serverPort = m_server->serverPort();
 		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 		//AwDataServer::getInstance()->openConnection(this);
@@ -113,7 +113,7 @@ void AwRequestServer::dataReceived()
 	stream.setVersion(QDataStream::Qt_4_4);
 	stream >> pid >> size;
 	while (client->bytesAvailable() < size)
-		client->waitForReadyRead();	
+		client->waitForReadyRead();
 
 	int request;
 	stream >> request;
@@ -138,13 +138,14 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	stream_size.setVersion(QDataStream::Qt_4_4);
 	int status = 0;
 	emit log(tr("Received request ") + QString::number(request));
+	AwScriptProcess *p = nullptr;
 	// get the matchin process if pid is valid
 	if (pid >= 0) {
 		if (m_pm == nullptr) { // SHOULD NEVER HAPPENS
 			emit log(tr("ERROR: request server has no connection to a pid manager instance."));
 			return;
 		}
-		AwScriptProcess *p = m_pm->process(pid);
+		p = m_pm->process(pid);
 
 		if (p == NULL) {// no process found, send a bad status as response
 			// write a bad status
@@ -157,62 +158,63 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 			emit log(tr("Done."));
 			return;
 		}
-		switch (request)
-		{
-		case AwRequest::OpenNewFile:
-			handleOpenNewFile(client, p);
-			break;
-		case AwRequest::GetMarkers2:
-			handleGetMarkers2(client, p);
-			break;
-		case AwRequest::GetData3:
-			handleGetData3(client, p);
-			break;
-		case AwRequest::GetDataEx:
-			handleGetDataEx(client, p);
-			break;
-		case AwRequest::GetMarkersEx:
-			handleGetMarkersEx(client, p);
-			break;
-		case AwRequest::AddMarkers:
-			handleAddMarkers(client, p);
-			break;
-		case AwRequest::GetPluginInfo:
-			handleGetPluginInfo(client, p);
-			break;
-		case AwRequest::GetPluginIO:
-			handleGetPluginIO(client, p);
-			break;
-		case AwRequest::GetFileInfo:
-			handleGetFileInfo(client, p);
-			break;
-		case AwRequest::IsTerminated:
-			handleIsTerminated(client, p);
-			break;
-		case AwRequest::SendMessage:
-			handleSendMessage(client, p);
-			break;
-		case AwRequest::SendCommand:
-			handleSendCommand(client, p);
-			break;
-		case AwRequest::GetScreenCapture:
-			handleGetScreenCapture(client, p);
-			break;
-		case AwRequest::GetICAPanelCapture:
-			handleGetICAPanelCapture(client, p);
-			break;
-		case AwRequest::SetBeamFormer:
-			handleSetBeamFormer(client, p);
-			break;
-		case AwRequest::GetTriggers:
-			handleGetTriggers(client, p);
-			break;
-		default:
-			emit log("Unknown request received!");
-			break;
-		}
-	} // end if pid >=0
-	else {
-		// handle here requests for processes without a pid.
+	}
+	
+	// WARNING: p can be nullptr if the pid was negative. 
+	// a nullptr p means that we are running in dedicated data server mode : AnyWave was launched by a Python/MATLAB plugin with a specified file.
+
+	switch (request)
+	{
+	case AwRequest::OpenNewFile:
+		handleOpenNewFile(client, p);
+		break;
+	case AwRequest::GetMarkers2:
+		handleGetMarkers2(client, p);
+		break;
+	case AwRequest::GetData3:
+		handleGetData3(client, p);
+		break;
+	case AwRequest::GetDataEx:
+		handleGetDataEx(client, p);
+		break;
+	case AwRequest::GetMarkersEx:
+		handleGetMarkersEx(client, p);
+		break;
+	case AwRequest::AddMarkers:
+		handleAddMarkers(client, p);
+		break;
+	case AwRequest::GetPluginInfo:
+		handleGetPluginInfo(client, p);
+		break;
+	case AwRequest::GetPluginIO:
+		handleGetPluginIO(client, p);
+		break;
+	case AwRequest::GetFileInfo:
+		handleGetFileInfo(client, p);
+		break;
+	case AwRequest::IsTerminated:
+		handleIsTerminated(client, p);
+		break;
+	case AwRequest::SendMessage:
+		handleSendMessage(client, p);
+		break;
+	case AwRequest::SendCommand:
+		handleSendCommand(client, p);
+		break;
+	case AwRequest::GetScreenCapture:
+		handleGetScreenCapture(client, p);
+		break;
+	case AwRequest::GetICAPanelCapture:
+		handleGetICAPanelCapture(client, p);
+		break;
+	case AwRequest::SetBeamFormer:
+		handleSetBeamFormer(client, p);
+		break;
+	case AwRequest::GetTriggers:
+		handleGetTriggers(client, p);
+		break;
+	default:
+		emit log("Unknown request received!");
+		break;
 	}
 }

@@ -20,11 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwUtilities.cpp" />
+    <ClCompile Include="json.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\utils\AwUtilities.h" />
     <ClInclude Include="..\..\include\utils\endian.h" />
     <ClInclude Include="..\..\include\utils\gui.h" />
+    <ClInclude Include="..\..\include\utils\json.h" />
     <ClInclude Include="..\..\include\utils\time.h" />
     <ClInclude Include="file.h" />
   </ItemGroup>

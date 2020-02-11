@@ -10,7 +10,7 @@
 //
 // --toBIDS : Convert a file or folder to BIDS by converting the data format if necessary and creating the .json files 
 // Options for --toBIDS:
-//	--bids_modality <modality> : MANDATORY. [ seeg meg eeg ]
+//	--bids_modality <modality> : MANDATORY. [ ieeg meg eeg ]
 //  --bids_sub <subj>			: MANDATORY. The BIDS subject
 //	--bids_task <task>			: MANDATORY. The BIDS task
 //	--bids_ses <sessions>		: OPTIONAL. The BIDS session.
@@ -33,6 +33,9 @@ int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
 			break;
 		case aw::commandLine::RunProcess:
 			AwCommandLineManager::runProcess(operations[op]);
+			break;
+		case aw::commandLine::DedicatedDataServerMode:
+			AwCommandLineManager::runDedicatedDataServer(operations[op]);
 			break;
 		}
 	}
@@ -98,6 +101,11 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(BIDSAcqOpt);
 	parser.addOption(BIDSProcOpt);
 	parser.addOption(runProcessOpt);
+	// Dedicated data server mode for plugins
+	QCommandLineOption serverOpt("server", "start an instance of anywave and listen to client connections.");
+	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which listen.", QString());
+	parser.addOption(serverOpt);
+	parser.addOption(serverPortOpt);
 	   	  
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
@@ -199,6 +207,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			arguments["bids_proc"] = proc;
 
 		res[aw::commandLine::BIDS] = arguments;
+	}
+	else if (parser.isSet(serverOpt)) {
+		if (!parser.isSet(serverPortOpt) || !parser.isSet(inputFileO)) {
+			logger.sendLog("server: Missing server_port or input_file argument");
+			throw(exception);
+		}
+		arguments["server_port"] = parser.value(serverPortOpt).toInt();
+		res[aw::commandLine::DedicatedDataServerMode] = arguments;
 	}
 	return res;
 }

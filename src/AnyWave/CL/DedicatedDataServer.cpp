@@ -23,14 +23,12 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "AwCommandLineManager.h"
+#include "AwCommandLogger.h"
 
-#include <QCommandLineParser>
-#include "AwCommandLine.h"
-namespace aw {
-	namespace commandLine {
-		enum Commands { BIDS, RunProcess, DedicatedDataServerMode };
-		QMap<int, AwArguments> doParsing(const QStringList& args);
-		int doCommandLineOperations(QMap<int, AwArguments>& operations);
-	}
+
+
+void AwCommandLineManager::runDedicatedDataServer(AwArguments& arguments)
+{
+
 }

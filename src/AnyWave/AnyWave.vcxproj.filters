@@ -1303,6 +1303,9 @@
     <ClCompile Include="MATPy\OpenNewFile.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="CL\DedicatedDataServer.cpp">
+      <Filter>CL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">

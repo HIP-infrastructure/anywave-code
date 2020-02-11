@@ -27,7 +27,7 @@
 #include "Process/AwScriptPlugin.h"
 #include <QDataStream>
 #include <QTcpSocket>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Display/AwDisplay.h"
 #include "Prefs/AwSettings.h"
 #include "ICA/AwICAManager.h"
@@ -37,13 +37,13 @@
 void AwRequestServer::handleGetICAPanelCapture(QTcpSocket *client, AwScriptProcess *p)
 {
 	emit log("Processing aw_captureicapanel...");
-	AwResponse response(client);
+	AwTCPResponse response(client);
 	QString filePath, message;
 	AwICAManager *ica_man = AwICAManager::instance();
 	AwSettings *aws = AwSettings::getInstance();
-	response.begin();
-	QDataStream stream_data(response.buffer());
-	stream_data.setVersion(QDataStream::Qt_4_4);
+
+	QDataStream& stream = *response.stream();
+
 	// get MEG components
 	if (ica_man->containsComponents(AwChannel::MEG)) {
 		filePath = QString("%1/ica_panel_meg.png").arg(aws->fileInfo()->dirPath());
@@ -51,10 +51,10 @@ void AwRequestServer::handleGetICAPanelCapture(QTcpSocket *client, AwScriptProce
 		AwICAPanel *panel = ica_man->getComponents(AwChannel::MEG)->getPanelWidget();
 		if (panel != NULL) {
 			panel->grabMappings(filePath);
-			stream_data << filePath;
+			stream << filePath;
 		}
 		else 
-			stream_data << QString();
+			stream << QString();
 	}
 	// get EEG components
 	if (ica_man->containsComponents(AwChannel::EEG)) {
@@ -63,10 +63,10 @@ void AwRequestServer::handleGetICAPanelCapture(QTcpSocket *client, AwScriptProce
 		AwICAPanel *panel = ica_man->getComponents(AwChannel::EEG)->getPanelWidget();
 		if (panel != NULL) {
 			panel->grabMappings(filePath);
-			stream_data << filePath;
+			stream << filePath;
 		}
 		else 
-			stream_data << QString();
+			stream << QString();
 	}
 	response.send();
 	emit log("Done.");

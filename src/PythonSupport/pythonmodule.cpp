@@ -49,6 +49,7 @@ extern PyObject *getMarkers(PyObject *self, PyObject *args);
 extern PyObject *addMarkers(PyObject *self, PyObject *args);
 extern PyObject *sendMessage(PyObject *self, PyObject *args);
 extern PyObject *openNewFile(PyObject *self, PyObject *args);
+extern PyObject *launchAnyWave(PyObject *self, PyObject *args);
 
 static PyMethodDef AnyWaveMethods[] = {
 	{"get_data", (PyCFunction)getData,  METH_O,
@@ -64,7 +65,9 @@ static PyMethodDef AnyWaveMethods[] = {
 	{"get_plugininfo", (PyCFunction)getPluginInfo, METH_NOARGS,
 	"Get information about the plugin's inputs"},
 	{"open_new_file", (PyCFunction)openNewFile, METH_O,
-	"Launch a new instance of the AnyWave dataserver and connect to it"},
+	"Request AnyWave to load a file and connect to the newly loaded file."},
+	{"run", (PyCFunction)launchAnyWave, METH_O,
+	"Launch a new AnyWave instance with a file and connect to it."},
 	{NULL, NULL, 0, NULL}
 };
 

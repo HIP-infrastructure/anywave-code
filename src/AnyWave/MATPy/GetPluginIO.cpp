@@ -28,48 +28,55 @@
 #include <QDataStream>
 #include <QTcpSocket>
 #include <QDir>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Prefs/AwSettings.h"
 #include "ICA/AwICAManager.h"
 
-void AwRequestServer::handleGetPluginIO(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleGetPluginIO(QTcpSocket *client, AwScriptProcess *process)
 {
-	emit log("Processing aw_getpluginio...");
-	AwResponse response(client);
-
-	response.begin();
-	QDataStream stream(response.buffer());
-	stream.setVersion(QDataStream::Qt_4_4);
-
+	emit log("Processing aw_getpluginio/anywave.get_plugin_io()...");
+	AwTCPResponse response(client);
+	QDataStream& stream = *response.stream();
 	QStringList labels, refs, types;
-	float max_sr = 0., total_duration;
+	float max_sr = 0., total_duration = 0.;
 	QString temp_dir, plug_dir, file, ica_file;
 
-	file = p->pdi.input.dataPath;
-
-	for (auto c : p->pdi.input.channels()) {
-		labels << c->name();
-		refs << c->referenceName();
-		if (c->samplingRate() > max_sr)
-			max_sr = c->samplingRate();
-		types << AwChannel::typeToString(c->type());
+	if (process == nullptr) {
+		emit log("Unattended call in dedicated data server mode.");
+		stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file <<
+			QString() << types << QStringList();
+		stream << int(0); // markers size
+		response.send();
+		emit log("Done.");
 	}
+	else {
+		file = process->pdi.input.dataPath;
 
-	total_duration = p->pdi.input.reader()->infos.totalDuration();
-	temp_dir = QDir::toNativeSeparators(p->pdi.input.workingDirPath);
-	plug_dir = QDir::toNativeSeparators(p->pdi.input.pluginDirPath);
-	ica_file = QDir::toNativeSeparators(AwSettings::getInstance()->getString("currentIcaFile"));
-
-	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << p->pdi.input.dataFolder << types << AwICAManager::instance()->getRejectedLabels();
-
-	// send markers set as input
-	auto markers = p->pdi.input.markers();
-	stream << markers.size();
-	if (markers.size()) {
-		for (auto m : markers) {
-			stream << m->label() << m->start() << m->duration() << m->value() << m->targetChannels();
+		for (auto c : process->pdi.input.channels()) {
+			labels << c->name();
+			refs << c->referenceName();
+			if (c->samplingRate() > max_sr)
+				max_sr = c->samplingRate();
+			types << AwChannel::typeToString(c->type());
 		}
+
+		total_duration = process->pdi.input.reader()->infos.totalDuration();
+		temp_dir = QDir::toNativeSeparators(process->pdi.input.workingDirPath);
+		plug_dir = QDir::toNativeSeparators(process->pdi.input.pluginDirPath);
+		ica_file = QDir::toNativeSeparators(AwSettings::getInstance()->getString("currentIcaFile"));
+
+		stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << 
+			process->pdi.input.dataFolder << types << AwICAManager::instance()->getRejectedLabels();
+
+		// send markers set as input
+		auto markers = process->pdi.input.markers();
+		stream << markers.size();
+		if (markers.size()) {
+			for (auto m : markers) {
+				stream << m->label() << m->start() << m->duration() << m->value() << m->targetChannels();
+			}
+		}
+		response.send();
+		emit log("Done.");
 	}
-	response.send();
-	emit log("Done.");
 }

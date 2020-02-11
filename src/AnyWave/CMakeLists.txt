@@ -15,6 +15,7 @@ SET(AnyWave_SRCS
     ./CL/AwCommandLogger.cpp
     ./CL/AwCommandLineManager.cpp
     ./CL/AwRunProcess.cpp
+	./CL/DedicatedDataServer.cpp
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
 	./Data/AwMemoryMapper.cpp  
@@ -82,6 +83,7 @@ SET(AnyWave_SRCS
     ./MATPy/SetBeamFormer.cpp
     ./MATPy/GetDataEx.cpp
     ./MATPy/GetPluginIO.cpp  
+	./MATPy/OpenNewFile.cpp
     ./MATPy/AwTCPResponse.cpp
     ./Montage/AwAVGChannel.cpp  
     ./Montage/AwChannelListModel.cpp  
