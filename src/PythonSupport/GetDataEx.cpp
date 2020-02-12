@@ -40,26 +40,20 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 	TCPRequest request(AwRequest::GetDataEx);
 	if (request.status() != TCPRequest::connected)
 		return NULL;
-//	QDataStream *stream = request.stream();
 	auto dict = args;
 	if (!PyDict_Check(dict)) {
 		PyErr_SetString(AnyWaveError, "incorrect argument.");
 		return NULL;
 	}
-//	*stream << dictToJson(dict);
 
 	if (!request.sendRequest(dictToJson(dict)))
 		return NULL;
 
-	//int dataSize = request.getResponse();
-	//if (dataSize < 0)
-	//	return NULL;
 	if (!request.getResponse())
 		return NULL;
 
 	// Reading response..
-	QDataStream in(request.socket());
-	in.setVersion(QDataStream::Qt_4_4);
+	QDataStream& in = *request.response();
 	int nChannels = 0;
 	in >> nChannels;
 	if (nChannels == 0) {
@@ -68,13 +62,7 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 	// create a list
 	PyObject *list = PyList_New(nChannels);
 	for (int i = 0; i < nChannels; i++) {
-		//if (request.getResponse() < 0) {
-		//	PyErr_SetString(AnyWaveError, "Error receiving data.");
-		//	Py_DECREF(list);
-		//	return NULL;
-		//}
 		if (!request.getResponse()) {
-			PyErr_SetString(AnyWaveError, "Error receiving data.");
 			Py_DECREF(list);
 			return NULL;
 		}
@@ -105,7 +93,6 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 			do {
 				// waiting for chunk of data
 				if (!request.getResponse()) {
-					PyErr_SetString(AnyWaveError, "Error while receiving data.");
 					Py_DECREF(list);
 					return NULL;
 				}

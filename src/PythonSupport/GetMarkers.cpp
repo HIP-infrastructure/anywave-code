@@ -37,27 +37,22 @@ extern PyObject *AnyWaveError;
 
 PyObject *request_markers(const QString& file, const QString& extractTriggers, QVector<float>& values, QStringList& labels, QStringList& channels)
 {
-	QTcpSocket *socket = connect();
-	if (!socket) 
+	TCPRequest request(AwRequest::GetMarkers2);
+	if (request.status() == TCPRequest::failed) {
 		return NULL;
+	}
+	QDataStream& stream_data = *request.stream(); 
+	QDataStream& in = *request.response();
 
-	int request = AwRequest::GetMarkers2;
-	QByteArray data;
-	QDataStream stream_data(&data, QIODevice::WriteOnly);
-	stream_data.setVersion(QDataStream::Qt_4_4);
-	stream_data << request;
 
 	stream_data << file << extractTriggers << values << labels << channels;
-	sendRequest(socket, data);
-	 // waiting for response
-	int dataSize = waitForResponse(socket);  
-   	if (dataSize == -1)	{
-		PyErr_SetString(AnyWaveError, "Bad status received from AnyWave.");
-		delete socket;
+	if (!request.sendRequest()) {
 		return NULL;
-	}  
-	QDataStream in(socket);
-    in.setVersion(QDataStream::Qt_4_4);
+	}
+	if (!request.getResponse()) {
+		return NULL;
+	}
+
     int nMarkers;
     in >> nMarkers;
 

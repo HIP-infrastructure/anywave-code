@@ -47,7 +47,7 @@ public:
 	void start(); 
 	void stop();
 	// start a new thread in which the server will listen to clients and connect to a NEW data server specifying a file)
-	bool startWithFile(const QString& dataPath);
+	bool startWithFile(const QString& dataPath, quint16 serverPort = 0);
 	quint16 serverPort(); 
 
 	// removes a duplicated instance from the list and delete it.

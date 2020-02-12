@@ -29,15 +29,15 @@
 #include <AwProcess.h>
 #include <QDataStream>
 
-static void parse_markers(PyObject *);
-static void send_markers(const AwMarkerList& markers);
+static PyObject* parse_markers(PyObject *);
+static PyObject* send_markers(const AwMarkerList& markers);
 extern PyObject *AnyWaveError;
 
-void parse_markers(PyObject *list)
+PyObject* parse_markers(PyObject *list)
 {
 	Py_ssize_t i, size = PyList_Size(list);
 	if (size == 0)
-		return;
+		return Py_None;
 
 	AwMarkerList markers;
 	for (i = 0; i < size; i++) {
@@ -83,35 +83,33 @@ void parse_markers(PyObject *list)
         
         markers << m;
 	}
-	send_markers(markers);
-
+	auto res = send_markers(markers);
 	while (!markers.isEmpty())
 		delete markers.takeFirst();
+	if (res == NULL)
+		return NULL;
+	return Py_None;
 }
 
-void send_markers(const AwMarkerList& markers)
+PyObject *send_markers(const AwMarkerList& markers)
 {
-	QTcpSocket *socket = connect();
-	if (!socket) 
-		return;
-	int request = AwRequest::AddMarkers;
-    QByteArray data;
-    QDataStream stream_data(&data, QIODevice::WriteOnly);
-    stream_data.setVersion(QDataStream::Qt_4_4);
-	
-	stream_data << request;
-	stream_data << markers.size();
+	TCPRequest request(AwRequest::AddMarkers);
+	if (request.status() == TCPRequest::failed) 
+		return NULL;
+	QDataStream& stream = *request.stream();
+	stream << markers.size();
     for (int i = 0; i < markers.size(); i++)    {
         AwMarker *marker = markers.at(i);
         // add marker
-        stream_data << marker->label();
-        stream_data << marker->start();
-        stream_data << marker->duration();
-        stream_data << marker->value();
-        stream_data << marker->targetChannels();
-		stream_data << marker->color();
+        stream << marker->label();
+        stream << marker->start();
+        stream << marker->duration();
+        stream << marker->value();
+        stream << marker->targetChannels();
+		stream << marker->color();
     }
-	sendRequest(socket, data);
+	if (!request.sendRequest()) 
+			return NULL;
 }
 
 PyObject *addMarkers(PyObject *self, PyObject *args)
@@ -123,6 +121,5 @@ PyObject *addMarkers(PyObject *self, PyObject *args)
 		return NULL;
 	}
 
-	parse_markers(cfg);
-	return Py_None;
+	return parse_markers(cfg);
 }

@@ -69,7 +69,7 @@ AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject 
 
 	if (m_server->listen(QHostAddress::Any, port)) {
 		m_serverPort = m_server->serverPort();
-		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
+		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(port), this);
 		//AwDataServer::getInstance()->openConnection(this);
 		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
 		m_ds = AwDataServer::getInstance()->duplicate(reader);
@@ -79,6 +79,9 @@ AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject 
 	}
 	else
 		m_isListening = false;
+
+	moveToThread(m_thread);
+	m_thread->start();
 }
 
 AwRequestServer::~AwRequestServer()

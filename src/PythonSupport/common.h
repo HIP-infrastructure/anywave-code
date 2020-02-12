@@ -30,10 +30,9 @@
 
 extern PyObject *AnyWaveError;
 
-QTcpSocket *connect();
-void sendRequest(QTcpSocket *, const QByteArray& );
-QByteArray initRequest(int request);
-int waitForResponse(QTcpSocket *);
+//void sendRequest(QTcpSocket *, const QByteArray& );
+//QByteArray initRequest(int request);
+//int waitForResponse(QTcpSocket *);
 
 /** parse a whole dictionnary and convert it to JSON format. **/
 QString dictToJson(PyObject *dict);
@@ -50,17 +49,20 @@ public:
 	enum Status { connected, failed, undefined };
 
 	inline int status() { return m_status; }
-	inline QTcpSocket *socket() { return m_socket; }
+//	inline QTcpSocket *socket() { return m_socket; }
 	QDataStream *stream() { return m_streamData; }
 	QDataStream *response() { return m_streamResponse; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
 	bool sendRequest(QString& jsonString = QString());
-//	bool sendRequest();
 	bool getResponse();
 	void clear();
 
 protected:
-	QTcpSocket * m_socket;
+	// connect to AnyWave
+	void connect();
+	// wait for a response from AnyWave
+	int waitForResponse();
+	QTcpSocket m_socket;
 	int m_status, m_pid, m_requestID;
 	QByteArray m_size;
 	QByteArray m_data;

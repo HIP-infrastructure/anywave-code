@@ -25,30 +25,22 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "common.h"
 #include <AwProcess.h>
-//#undef signals
-//#include <Python.h>
-
 #include <QDataStream>
 
 extern PyObject *AnyWaveError;
 
 PyObject *sendMessage(PyObject *self, PyObject *args)
 {
-	PyObject *message = NULL;
-	if (!PyArg_ParseTuple(args, "S", &message)) {
+	if (!PyUnicode_Check(args)) {
 		PyErr_SetString(AnyWaveError, "argument must be a string.");
 		return NULL;
 	}
-
-	QString s_message = QString(PyBytes_AsString(message));
-
-	QTcpSocket *socket = connect();
-	int request = AwRequest::SendMessage;
-	QByteArray data;
-	QDataStream stream_data(&data, QIODevice::WriteOnly);
-	stream_data.setVersion(QDataStream::Qt_4_4);
-	stream_data << request << s_message;
-	sendRequest(socket, data);
-	delete socket;
+	TCPRequest request(AwRequest::SendMessage);
+	if (request.status() != TCPRequest::connected) 
+		return NULL;
+	QDataStream& stream = *request.stream();
+	stream << Py3StringToQString(args);
+	if (!request.sendRequest())
+		return NULL;
 	return Py_None;
 }

@@ -751,9 +751,6 @@
     <ClCompile Include="MATPy\SendMessage.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="MATPy\AwResponse.cpp">
-      <Filter>MATPy</Filter>
-    </ClCompile>
     <ClCompile Include="MATPy\GetPluginInfo.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
@@ -1912,9 +1909,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwProcessWidget.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MATPy\AwResponse.h">
-      <Filter>MATPy</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwMappingWidget.h">
       <Filter>Generated Files</Filter>

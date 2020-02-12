@@ -37,18 +37,13 @@ PyObject *openNewFile(PyObject *self, PyObject *args)
 	}
 
 	TCPRequest request(AwRequest::OpenNewFile);
-	if (request.status() == TCPRequest::failed) {
-		PyErr_SetString(AnyWaveError, "Connection to AnyWave failed.");
+	if (request.status() == TCPRequest::failed) 
 		return NULL;
-	}
-	if (!request.sendRequest(dictToJson(args))) {
-		PyErr_SetString(AnyWaveError, "Failed to send request to AnyWave.");
+	if (!request.sendRequest(dictToJson(args))) 
 		return NULL;
-	}
-	if (!request.getResponse()) {
-		PyErr_SetString(AnyWaveError, "No response received from AnyWave.");
+	if (!request.getResponse())
 		return NULL;
-	}
+	
 	QDataStream& out = *request.response();
 	// AnyWave returns status and new server_port
 	int  status,  port;

@@ -154,7 +154,7 @@ int waitForResponse(QTcpSocket *socket)
     return size;
 }
 
-QTcpSocket *connect()
+void TCPRequest::connect()
 {
 	// get module's dict
 	PyObject *dict = PyModule_GetDict(m_module);
@@ -162,37 +162,31 @@ QTcpSocket *connect()
 	QString pid = Py3StringToQString(PyDict_GetItemString(dict, "pid"));
 	QString port = Py3StringToQString(PyDict_GetItemString(dict, "server_port"));
 	m_pidValue = pid.toInt();
-
-	QTcpSocket *socket = new QTcpSocket();
-	socket->connectToHost(host, (quint16)port.toInt());
-	if (!socket->waitForConnected()) {
-		QString error = QString("Unable to connect to AnyWave: %1").arg(socket->errorString());
+	m_socket.connectToHost(host, (quint16)port.toInt());
+	if (!m_socket.waitForConnected()) {
+		m_status = TCPRequest::failed;
+		QString error = QString("Unable to connect to AnyWave: %1").arg(m_socket.errorString());
 		PyErr_SetString(AnyWaveError, error.toStdString().c_str());
-		delete socket;
-		return NULL;
 	}
-	return socket;
+	m_status = TCPRequest::connected;
 }
 
 TCPRequest::TCPRequest(int requestID)
 {
 	m_status = TCPRequest::undefined;
-	m_socket = connect();
+	connect();
 	m_pid = m_pidValue;
 	m_requestID = requestID;
-	m_status = m_socket == NULL ? TCPRequest::failed : TCPRequest::connected;
 	m_streamSize = new QDataStream(&m_size, QIODevice::WriteOnly);
 	m_streamSize->setVersion(QDataStream::Qt_4_4);
 	m_streamData = new QDataStream(&m_data, QIODevice::WriteOnly);
 	m_streamData->setVersion(QDataStream::Qt_4_4);
-	m_streamResponse = new QDataStream(m_socket);
+	m_streamResponse = new QDataStream(&m_socket);
 	m_streamResponse->setVersion(QDataStream::Qt_4_4);
 }
 
 TCPRequest::~TCPRequest()
 {
-	if (m_socket)
-		delete m_socket;
 	delete m_streamSize;
 	delete m_streamData;
 	delete m_streamResponse;
@@ -210,13 +204,48 @@ bool TCPRequest::sendRequest(QString& jsonString)
 	// always send the pid first then size and data.
 	*m_streamSize << m_pid;
 	*m_streamSize << dataSize << m_requestID;
-	m_socket->write(m_size);
+	m_socket.write(m_size);
 	*m_streamData << jsonString;
-	m_socket->write(m_data);
-	return m_socket->waitForBytesWritten();
+	m_socket.write(m_data);
+	if (!m_socket.waitForBytesWritten()) {
+		PyErr_SetString(AnyWaveError, "Error while sending request to AnyWave.");
+		return false;
+	}
+	return true;
+}
+
+int TCPRequest::waitForResponse()
+{
+	while (m_socket.bytesAvailable() < sizeof(int))
+		if (!m_socket.waitForReadyRead(WAIT_TIME_OUT))
+			return -1;
+
+	QDataStream in(&m_socket);
+	in.setVersion(QDataStream::Qt_4_4);
+	int status, size;
+	in >> status;
+	if (status == -1) {  // if status is incorrect ends here.
+		PyErr_SetString(AnyWaveError, "Bad status returned by AnyWave.");
+		return status;
+	}
+	// getting size of data (in bytes)
+	while (m_socket.bytesAvailable() < sizeof(int))
+		if (!m_socket.waitForReadyRead()) {
+			PyErr_SetString(AnyWaveError, "Nothing to read from socket.");
+			return -1;
+		}
+
+	in >> size;
+
+	// update 3.7.2014   Wait for all data to be available
+	while (m_socket.bytesAvailable() < size)
+		if (!m_socket.waitForReadyRead(WAIT_TIME_OUT))
+			return -1;
+
+	return size;
 }
 
 bool TCPRequest::getResponse()
 {
-	return waitForResponse(m_socket) >= 0;
+	return waitForResponse() >= 0;
 }

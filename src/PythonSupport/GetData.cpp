@@ -50,63 +50,40 @@ static PyObject *request_data(const QString&, const QString&, float, float, cons
 PyObject *request_data(const QString& file, const QString& montage,  float start, float duration, const QStringList& labels, const QStringList& types, 
 					   int decimate, int filters, filtering *fo)
 {
-	 QTcpSocket *socket = connect();
-	 if (!socket) 
-		 return NULL;
-
-	int request = AwRequest::GetData3;
-	QByteArray data;
-    QDataStream stream_data(&data, QIODevice::WriteOnly);
-	stream_data.setVersion(QDataStream::Qt_4_4);
-	stream_data << request;
-	stream_data << file;
-	stream_data << montage;
-	stream_data << start;
-	stream_data << duration;  
-    stream_data << decimate;   // decimation factor for downsampling of data (if value is 1 => no downsampling)
-    stream_data << labels;
-	stream_data << types;
-	stream_data << filters;		// filtering flag
-
-    if (fo)	{
-        stream_data << fo->eegHP;
-        stream_data << fo->eegLP;
-        stream_data << fo->megHP;
-        stream_data << fo->megLP;
-        stream_data << fo->emgHP;
-        stream_data << fo->emgLP;
-	}
-	sendRequest(socket, data);
-	 // waiting for response
-	int dataSize = waitForResponse(socket);  
-   	if (dataSize == -1)	{
-		PyErr_SetString(AnyWaveError, "Bad status received from AnyWave.");
-		delete socket;
+	TCPRequest request(AwRequest::GetData3);
+	if (request.status() == TCPRequest::failed) {
+		PyErr_SetString(AnyWaveError, "Connection to AnyWave failed.");
 		return NULL;
-	}  
+	}
+	QDataStream& stream = *request.stream();
+	QDataStream& in = *request.response();
+	stream << file  << montage << start << duration  << decimate  << labels  << types  << filters;		// filtering flag
 
-    // Get response
-	QDataStream in(socket);
-	in.setVersion(QDataStream::Qt_4_4);
+    if (fo)	
+        stream << fo->eegHP  << fo->eegLP  << fo->megHP  << fo->megLP  << fo->emgHP << fo->emgLP;
+	
+	if (!request.sendRequest()) {
+		PyErr_SetString(AnyWaveError, "Error while requesting data to AnyWave.");
+		return NULL;
+	}
+
+	if (!request.getResponse()) {
+		PyErr_SetString(AnyWaveError, "Error while receiving response: bad status.");
+		return NULL;
+	}
     int nChannels = 0;
 
 	// get response from AnyWave
     in >> nChannels; 
 
     if (nChannels == 0) { // no channels returned (means that the requested labels did not match existing channels in AnyWave.
-        delete socket;
         return Py_None;
     }
-   
-	// create a list
+   	// create a list
 	PyObject *list = PyList_New(nChannels);
 	for (int i = 0; i < nChannels; i++)   {
-		dataSize = waitForResponse(socket);
-        if (dataSize == -1) {
-            PyErr_SetString(AnyWaveError, "Bad status received from AnyWave.");
-            delete socket;
-            return NULL;
-        }
+		if (!request.getResponse()) 
+			return NULL;
 
         QString name, ref, type;
         float samplingRate, hpf, lpf;
@@ -135,11 +112,7 @@ PyObject *request_data(const QString& file, const QString& montage,  float start
 			qint64 nSamplesRead = 0;
 			do {
 				// waiting for chunk of data
-				dataSize = waitForResponse(socket);
-				if (dataSize == -1) {
-					//PyErr_SetString(AnyWaveError, "Error while receiving data.");
-					delete socket;
-					//Py_DECREF(array);
+				if (!request.getResponse()) {
 					Py_DECREF(list);
 					return NULL;
 				}

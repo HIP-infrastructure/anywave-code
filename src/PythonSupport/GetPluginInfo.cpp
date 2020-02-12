@@ -8,17 +8,12 @@ extern PyObject *AnyWaveError;
 PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 {
 	TCPRequest request(AwRequest::GetPluginInfo);
-	if (request.status() == TCPRequest::failed) {
-		PyErr_SetString(AnyWaveError, "Connection to AnyWave failed.");
+	if (request.status() == TCPRequest::failed) 
 		return NULL;
-	}
-	if (!request.sendRequest())
+	if (!request.sendRequest()) 
 		return NULL;
-	int size = request.getResponse();
-	if (size == -1) {
-		PyErr_SetString(AnyWaveError, "No response received from AnyWave.");
+	if (!request.getResponse())
 		return NULL;
-	}
 
 	// get the data stream
 	QDataStream& response = *request.response();

@@ -38,6 +38,7 @@ void AwRequestServer::handleOpenNewFile(QTcpSocket *client, AwScriptProcess *pro
 		// success : respond with good status and port
 		stream << (int)0 << (int)server->serverPort();
 		response.send();
+		emit log("Done.");
 		return;
 	}
 	// failed to find key file in json
