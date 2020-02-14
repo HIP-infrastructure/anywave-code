@@ -35,6 +35,7 @@ void AwRequestServer::handleOpenNewFile(QTcpSocket *client, AwScriptProcess *pro
 			response.send();
 			return;
 		}
+		server->addProcess(process);
 		// success : respond with good status and port
 		stream << (int)0 << (int)server->serverPort();
 		response.send();

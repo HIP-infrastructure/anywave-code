@@ -110,6 +110,7 @@ PyObject *send_markers(const AwMarkerList& markers)
     }
 	if (!request.sendRequest()) 
 			return NULL;
+	return Py_None;
 }
 
 PyObject *addMarkers(PyObject *self, PyObject *args)

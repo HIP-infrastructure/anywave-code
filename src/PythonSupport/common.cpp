@@ -47,6 +47,13 @@ QString Py3StringToQString(PyObject *str)
 	return QString();
 }
 
+char *Py3StringtoCString(PyObject *str)
+{
+	if (str)
+		return PyBytes_AsString(PyUnicode_AsUTF8String(str));
+	return nullptr;
+}
+
 QJsonObject dictToJsonObject(PyObject *dict)
 {
 	// get keys
@@ -161,6 +168,9 @@ void TCPRequest::connect()
 	QString host = Py3StringToQString(PyDict_GetItemString(dict, "host"));
 	QString pid = Py3StringToQString(PyDict_GetItemString(dict, "pid"));
 	QString port = Py3StringToQString(PyDict_GetItemString(dict, "server_port"));
+	//PySys_WriteStdout("host is : %s\n", Py3StringtoCString(PyDict_GetItemString(dict, "host")));
+	//PySys_WriteStdout("server_port is : %s\n", Py3StringtoCString(PyDict_GetItemString(dict, "server_port")));
+	
 	m_pidValue = pid.toInt();
 	m_socket.connectToHost(host, (quint16)port.toInt());
 	if (!m_socket.waitForConnected()) {

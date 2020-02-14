@@ -67,8 +67,8 @@ AwMATPyServer::AwMATPyServer()
 
 AwMATPyServer::~AwMATPyServer()
 {
-	if (m_rs)
-		delete m_rs;
+	//if (m_rs)
+	//	delete m_rs;
 	// destroy possible duplicated instances
 	AW_DESTROY_LIST(m_duplicatedInstances);
 }
@@ -92,7 +92,7 @@ void AwMATPyServer::addProcess(AwScriptProcess *p)
 }
 
 
-bool AwMATPyServer::startWithFile(const QString& dataPath, quint16 port)
+bool AwMATPyServer::startWithFile(const QString& dataPath)
 {
 	if (m_rs)
 		delete m_rs;
@@ -100,7 +100,7 @@ bool AwMATPyServer::startWithFile(const QString& dataPath, quint16 port)
 	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
 	if (reader == nullptr)
 		return false;
-	m_rs = new AwRequestServer(dataPath, port);
+	m_rs = new AwRequestServer(dataPath, this);
 	// IMPORTANT : set the connection to the pid manager!
 	m_rs->setPidManager(m_pm);
 	// check if dataPath is a valid file that the data server can handle
@@ -112,7 +112,7 @@ void AwMATPyServer::start()
 	if (m_rs) // already instantianted
 		return;
 
-	m_rs = new AwRequestServer();
+	m_rs = new AwRequestServer(this);
 	// IMPORTANT : set the connection to the pid manager!
 	m_rs->setPidManager(m_pm);
 	if (!m_rs->isListening()) { // failed to listen on TCP port

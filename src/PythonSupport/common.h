@@ -39,6 +39,7 @@ QString dictToJson(PyObject *dict);
 
 // Python 3 string are all unicoded by default : this function will convert to QString.
 QString Py3StringToQString(PyObject *str);
+char *Py3StringtoCString(PyObject *str);
 // Request class
 
 class TCPRequest
