@@ -875,11 +875,12 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		case FIFFV_MEG_CH:
 			if (chinfo->unit == FIFF_UNIT_T_M) { // this is a gradiometer 
 				c.setType(AwChannel::GRAD);
+				c.setGain(300);
 			}
 			else {
 				c.setType(AwChannel::MEG);
+				c.setGain(15);
 			}
-			c.setGain(4);
 			break;
 		case FIFFV_ECG_CH:
 			c.setType(AwChannel::ECG);
