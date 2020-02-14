@@ -37,6 +37,7 @@ HEADERS += ./Data/AwDataChunk.h \
     ./IO/BIDS/AwBIDSManager.h \
     ./IO/BIDS/AwBIDSSubject.h \
     ./IO/BIDS/AwBIDSGUI.h \
+    ./IO/BIDS/AwBIDSParser.h \
     ./IO/MEMIO/MEMIO.h \
     ./IO/JSON/AwJSON.h \
     ./Marker/AwExtractTriggers.h \
@@ -52,7 +53,6 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Marker/AwMarkerListModel.h \
     ./Marker/AwDockAddMarker.h \
     ./MATPy/AwTCPResponse.h \
-    ./MATPy/AwResponse.h \
     ./MATPy/AwPidManager.h \
     ./MATPy/AwRequestServer.h \
     ./MATPy/AwMATPyServer.h \
@@ -180,6 +180,8 @@ SOURCES += ./AnyWave.cpp \
     ./IO/BIDS/AwBIDSSession.cpp \
     ./IO/BIDS/AwBIDSSubject.cpp \
     ./IO/BIDS/AwBIDSTools.cpp \
+    ./IO/BIDS/AwBIDSNode.cpp \
+    ./IO/BIDS/AwBIDSParser.cpp \
     ./IO/BIDS/AwFileItem.cpp \
     ./IO/MEMIO/MEMIO.cpp \
     ./IO/JSON/AwJSON.cpp \
@@ -199,7 +201,6 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/AwMATPyServer.cpp \
     ./MATPy/AwPidManager.cpp \
     ./MATPy/AwRequestServer.cpp \
-    ./MATPy/AwResponse.cpp \
     ./MATPy/AwTCPResponse.cpp \
     ./MATPy/GetData.cpp \
     ./MATPy/GetDataEx.cpp \
@@ -214,8 +215,8 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/IsTerminated.cpp \
     ./MATPy/SendCommand.cpp \
     ./MATPy/SendMessage.cpp \
-	./MATPy/OpenNewFile.cpp \
     ./MATPy/SetBeamFormer.cpp \
+    ./MATPy/OpenNewFile.cpp \
     ./Montage/AwAVGChannel.cpp \
     ./Montage/AwChannelListModel.cpp \
     ./Montage/AwECoGDialog.cpp \
@@ -295,7 +296,7 @@ SOURCES += ./AnyWave.cpp \
     ./CL/AwCommandLineManager.cpp \
     ./CL/AwCommandLogger.cpp \
     ./CL/AwRunProcess.cpp \
-	./CL/DedicatedDataServer.cpp \
+    ./CL/DedicatedDataServer.cpp \
     ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
@@ -346,6 +347,7 @@ FORMS += ./AnyWave.ui \
     ./Epoch/AwAverageItemWidget.ui \
     ./Epoch/AwEditStatsDialog.ui \
     ./Epoch/AwEpochMosaicWidget.ui
+
 TRANSLATIONS += ./anywave_en.ts \
     ./anywave_fr.ts
 RESOURCES += ../../resources/AnyWave.qrc

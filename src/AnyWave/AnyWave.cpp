@@ -72,7 +72,6 @@
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
-//#define AW_EPOCHING
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"

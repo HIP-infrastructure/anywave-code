@@ -7,7 +7,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS +=  core filtering  utilities montage rw process math graphics matlab HDF5 layout mapping epoch widget MatlabSupport AnyWave \
-  plugins Mex PythonSupport
+  plugins Mex 
 
 core.subdir = Core
 rw.subdir = ReadWrite

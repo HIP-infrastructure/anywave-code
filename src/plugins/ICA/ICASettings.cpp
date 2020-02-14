@@ -1,6 +1,7 @@
 #include "ICASettings.h"
 #include <QMessageBox>
 #include <AwCore.h>
+#include <math.h>
 
 //ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels, const AwMarkerList& markers, 
 //						 const QStringList& algos, QWidget *parent)
