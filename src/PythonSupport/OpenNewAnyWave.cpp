@@ -53,24 +53,15 @@ PyObject *openNewFile(PyObject *self, PyObject *args)
 		return NULL;
 	}
 
-	PyObject *newPort = Py_BuildValue("i", port);
-	// set the  module global server_port with new value
-	if (!PyObject_SetAttrString(m_module, "server_port", newPort)) {
-		PyErr_SetString(AnyWaveError, "Module error: could not set global named 'server_port'.");
+	auto dict = PyModule_GetDict(m_module);
+	if (dict == NULL) {
+		PyErr_SetString(AnyWaveError, "Module error: could not get __dict__.");
+		return NULL;
+	}
+	if (PyDict_SetItemString(dict, "server_port", QStringToPy3String(QString::number(port)))) {
+		PyErr_SetString(AnyWaveError, "Module error: failed to set 'server_port'.");
 		return NULL;
 	}
 
-
-
-	//if (PyDict_SetItemString(dict, "server_port", PyLong_FromLong(port))) {
-	//	Py_DECREF(dict);
-	//	PyErr_SetString(AnyWaveError, "Module error: could not set global named 'server_port'.");
-	//	return NULL;
-	//}
-	//if (PyDict_SetItemString(PyModule_GetDict(m_module), "server_port", PyLong_FromLong(port))) {
-	//	PyErr_SetString(AnyWaveError, "Module error: could not set global named 'server_port'.");
-	//	return NULL;
-	//}
-	//Py_DECREF(dict);
 	return Py_None;
 }

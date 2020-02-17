@@ -40,6 +40,7 @@ QString dictToJson(PyObject *dict);
 // Python 3 string are all unicoded by default : this function will convert to QString.
 QString Py3StringToQString(PyObject *str);
 char *Py3StringtoCString(PyObject *str);
+PyObject *QStringToPy3String(const QString& str);
 // Request class
 
 class TCPRequest
@@ -64,7 +65,7 @@ protected:
 	// wait for a response from AnyWave
 	int waitForResponse();
 	QTcpSocket m_socket;
-	int m_status, m_pid, m_requestID;
+	int m_status, m_requestID;
 	QByteArray m_size;
 	QByteArray m_data;
 	QDataStream *m_streamSize;

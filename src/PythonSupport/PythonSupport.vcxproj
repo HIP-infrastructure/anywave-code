@@ -22,6 +22,7 @@
     <ClCompile Include="AddMarkers.cpp" />
     <ClCompile Include="Channel.cpp" />
     <ClCompile Include="common.cpp" />
+    <ClCompile Include="GetProperties.cpp" />
     <ClCompile Include="GetData.cpp" />
     <ClCompile Include="GetDataEx.cpp" />
     <ClCompile Include="GetMarkers.cpp" />

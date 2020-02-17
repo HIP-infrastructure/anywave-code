@@ -33,7 +33,10 @@
 #include <qjsondocument.h>
 
 extern PyObject *m_module;
-extern PyObject  *m_pid;
+extern PyObject *m_pid;
+extern PyObject *m_host;		// host to connect to
+extern PyObject *m_pid;			// process ID
+extern PyObject *m_server_port;	// server port number
 extern int m_pidValue;
 
 #define WAIT_TIME_OUT   3000000   // 300s socket time out
@@ -45,6 +48,12 @@ QString Py3StringToQString(PyObject *str)
 	if (str)
 		return QString(PyBytes_AsString(PyUnicode_AsUTF8String(str)));
 	return QString();
+}
+
+PyObject *QStringToPy3String(const QString& str)
+{
+	QString temp = str;
+	return Py_BuildValue("s", str.toStdString().c_str());
 }
 
 char *Py3StringtoCString(PyObject *str)
@@ -168,15 +177,16 @@ void TCPRequest::connect()
 	QString host = Py3StringToQString(PyDict_GetItemString(dict, "host"));
 	QString pid = Py3StringToQString(PyDict_GetItemString(dict, "pid"));
 	QString port = Py3StringToQString(PyDict_GetItemString(dict, "server_port"));
-	//PySys_WriteStdout("host is : %s\n", Py3StringtoCString(PyDict_GetItemString(dict, "host")));
-	//PySys_WriteStdout("server_port is : %s\n", Py3StringtoCString(PyDict_GetItemString(dict, "server_port")));
-	
+
 	m_pidValue = pid.toInt();
 	m_socket.connectToHost(host, (quint16)port.toInt());
 	if (!m_socket.waitForConnected()) {
 		m_status = TCPRequest::failed;
-		QString error = QString("Unable to connect to AnyWave: %1").arg(m_socket.errorString());
-		PyErr_SetString(AnyWaveError, error.toStdString().c_str());
+		QString error = QString("Unable to connect to AnyWave: %1\n").arg(m_socket.errorString());
+		QString message = QString("%1host:%2\npid:%3\nport:%4\n").arg(error).arg(Py3StringToQString(m_host)).arg(PyLong_AsLong(m_pid)).arg(PyLong_AsLong(m_server_port));
+		PyErr_SetString(AnyWaveError, message.toStdString().c_str());
+		return;
+
 	}
 	m_status = TCPRequest::connected;
 }
@@ -185,7 +195,7 @@ TCPRequest::TCPRequest(int requestID)
 {
 	m_status = TCPRequest::undefined;
 	connect();
-	m_pid = m_pidValue;
+	//m_pid = m_pidValue;
 	m_requestID = requestID;
 	m_streamSize = new QDataStream(&m_size, QIODevice::WriteOnly);
 	m_streamSize->setVersion(QDataStream::Qt_4_4);
@@ -210,9 +220,13 @@ void TCPRequest::clear()
 
 bool TCPRequest::sendRequest(QString& jsonString)
 {
+	if (m_status != TCPRequest::connected) {
+		PyErr_SetString(AnyWaveError, "Error while sending request to AnyWave: not connected.");
+		return false;
+	}
 	int dataSize = jsonString.size() + sizeof(int); // data size + request ID size
 	// always send the pid first then size and data.
-	*m_streamSize << m_pid;
+	*m_streamSize << m_pidValue;
 	*m_streamSize << dataSize << m_requestID;
 	m_socket.write(m_size);
 	*m_streamData << jsonString;

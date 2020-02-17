@@ -27,7 +27,6 @@
 #define AWMATPYSERVER_H
 
 class AwRequestServer;
-class AwPidManager;
 class AwScriptProcess;
 #include <QObject>
 
@@ -61,7 +60,6 @@ protected:
 
 	static AwMATPyServer *m_instance;
 	AwRequestServer *m_rs;
-	AwPidManager *m_pm;
 	// every time an instance is duplicated the reference is stored here. All instances will be deleted when singleton instance is deleted.
 	QList<AwMATPyServer *> m_duplicatedInstances;
 };

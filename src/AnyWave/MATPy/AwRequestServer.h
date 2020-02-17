@@ -31,6 +31,7 @@ class AwScriptProcess;
 class AwDataServer;
 class AwPidManager;
 #include <AwDataClient.h>
+
 class AwRequestServer : public AwDataClient
 {
 	Q_OBJECT
@@ -42,8 +43,7 @@ public:
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
-
-	void setPidManager(AwPidManager *pm) { m_pm = pm; }
+	void addProcess(AwScriptProcess *process);
 public slots:
 	void handleNewConnection();
 	void dataReceived();

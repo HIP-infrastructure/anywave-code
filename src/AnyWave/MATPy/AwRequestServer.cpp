@@ -41,7 +41,7 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
 	m_ds = nullptr;
-	m_pm = nullptr;
+	m_pm = new AwPidManager(this);
 
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
@@ -65,12 +65,11 @@ AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwD
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
 	m_ds = nullptr;
-	m_pm = nullptr;
+	m_pm = new AwPidManager(this);
 
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
 		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(m_serverPort), this);
-		//AwDataServer::getInstance()->openConnection(this);
 		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
 		m_ds = AwDataServer::getInstance()->duplicate(reader);
 		m_ds->openConnection(this);
@@ -91,6 +90,12 @@ AwRequestServer::~AwRequestServer()
 	// is there a decicated data server?
 	if (m_ds)
 		delete m_ds;
+}
+
+void AwRequestServer::addProcess(AwScriptProcess *process)
+{
+	QMutexLocker lock(&m_mutex);
+	m_pm->createNewPid(process);
 }
 
 void AwRequestServer::handleNewConnection()
