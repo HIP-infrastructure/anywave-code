@@ -27,6 +27,28 @@
 #include <AwFileIO.h>
 #include <QTextStream>
 #include <QRegularExpression>
+#include <QFile>
+
+
+QString AwFileIO::getSideFile(const QString& extension)
+{
+	QRegularExpression exp(".[a-z:0-9]+$");
+	QRegularExpressionMatch match = exp.match(m_fullPath);
+	QString ext;
+	if (match.hasMatch()) 
+		ext = match.captured(0);
+	if (!ext.isEmpty()) {
+		auto markerFile = m_fullPath.replace(ext, extension);
+		if (QFile::exists(markerFile))
+			return markerFile;
+	}
+	else {
+		auto markerFile = QString("%1%2").arg(m_fullPath).arg(extension);
+		if (QFile::exists(markerFile))
+			return markerFile;
+	}
+	return QString();
+}
 
 // AwBlock
 // constructor

@@ -51,10 +51,9 @@ PyObject *request_data(const QString& file, const QString& montage,  float start
 					   int decimate, int filters, filtering *fo)
 {
 	TCPRequest request(AwRequest::GetData3);
-	if (request.status() == TCPRequest::failed) {
-		PyErr_SetString(AnyWaveError, "Connection to AnyWave failed.");
+	if (request.status() == TCPRequest::failed) 
 		return NULL;
-	}
+	
 	QDataStream& stream = *request.stream();
 	QDataStream& in = *request.response();
 	stream << file  << montage << start << duration  << decimate  << labels  << types  << filters;		// filtering flag
@@ -62,15 +61,13 @@ PyObject *request_data(const QString& file, const QString& montage,  float start
     if (fo)	
         stream << fo->eegHP  << fo->eegLP  << fo->megHP  << fo->megLP  << fo->emgHP << fo->emgLP;
 	
-	if (!request.sendRequest()) {
-		PyErr_SetString(AnyWaveError, "Error while requesting data to AnyWave.");
+	if (!request.sendRequest()) 
 		return NULL;
-	}
+	
 
-	if (!request.getResponse()) {
-		PyErr_SetString(AnyWaveError, "Error while receiving response: bad status.");
+	if (!request.getResponse()) 
 		return NULL;
-	}
+	
     int nChannels = 0;
 
 	// get response from AnyWave

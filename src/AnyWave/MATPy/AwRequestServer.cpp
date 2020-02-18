@@ -34,6 +34,7 @@
 #include "Marker/AwMarkerManager.h"
 #include "Source/AwSourceManager.h"
 #include "Plugin/AwPluginManager.h"
+#include <AwFileIO.h>
 
 AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 {
@@ -42,6 +43,7 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 	m_serverPort = 0;
 	m_ds = nullptr;
 	m_pm = new AwPidManager(this);
+	setHandlers();
 
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
@@ -66,21 +68,29 @@ AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwD
 	m_serverPort = 0;
 	m_ds = nullptr;
 	m_pm = new AwPidManager(this);
+	setHandlers();
 
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
 		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(m_serverPort), this);
 		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
+		if (reader->openFile(dataPath) != AwFileIO::NoError) {
+			emit log(QString("Unable to open %1").arg(dataPath));
+			m_isListening = false;
+			return;
+		}
 		m_ds = AwDataServer::getInstance()->duplicate(reader);
 		m_ds->openConnection(this);
 		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
 		m_isListening = true;
 	}
-	else
+	else 
 		m_isListening = false;
 
-	moveToThread(m_thread);
-	m_thread->start();
+	if (m_isListening) {
+		moveToThread(m_thread);
+		m_thread->start();
+	}
 }
 
 AwRequestServer::~AwRequestServer()
@@ -90,6 +100,42 @@ AwRequestServer::~AwRequestServer()
 	// is there a decicated data server?
 	if (m_ds)
 		delete m_ds;
+}
+
+void AwRequestServer::setHandlers()
+{
+	addHandler(&AwRequestServer::handleAddMarkers);			// AddMarkers
+	addHandler(&AwRequestServer::unusedHandler);			// GetMarkers (UNUSED)
+	addHandler(&AwRequestServer::unusedHandler);			// GetData2 (UNUSED)
+	addHandler(&AwRequestServer::handleGetPluginInfo);		// GetPluginInfo
+	addHandler(&AwRequestServer::handleIsTerminated);		// IsTerminated
+	addHandler(&AwRequestServer::handleSendMessage);		// SenMessage
+	addHandler(&AwRequestServer::handleSendCommand);		// SendCommand
+	addHandler(&AwRequestServer::handleGetMarkers2);		// GetMarkers2
+	addHandler(&AwRequestServer::handleGetData3);			// GetData3
+	addHandler(&AwRequestServer::handleGetFileInfo);		// GetFileInfo
+	addHandler(&AwRequestServer::handleGetScreenCapture);	// GetScreenCapture
+	addHandler(&AwRequestServer::handleGetICAPanelCapture);	// GetGetICAPanelCapture
+	addHandler(&AwRequestServer::handleSetBeamFormer);		// SetBeamFormer
+	addHandler(&AwRequestServer::handleGetTriggers);		// GetTriggers
+	addHandler(&AwRequestServer::handleGetPluginIO);		// GetPluginIO
+	addHandler(&AwRequestServer::handleGetDataEx);			// GetDataEx
+	addHandler(&AwRequestServer::handleGetMarkersEx);		// GetMarkersEx
+	addHandler(&AwRequestServer::handleOpenNewFile);		// OpenNewFile
+	addHandler(&AwRequestServer::handleRunAnyWave);			// RunAnyWave
+	addHandler(&AwRequestServer::handleGetProperties);		// GetProperties
+}
+
+void AwRequestServer::addHandler(void (AwRequestServer::* func)(QTcpSocket *, AwScriptProcess*))
+{
+	this->m_handlers.emplace_back(func);
+}
+
+AwFileIO *AwRequestServer::reader()
+{
+	if (m_ds)
+		return m_ds->reader();
+	return nullptr;
 }
 
 void AwRequestServer::addProcess(AwScriptProcess *process)
@@ -171,58 +217,66 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	// WARNING: p can be nullptr if the pid was negative. 
 	// a nullptr p means that we are running in dedicated data server mode : AnyWave was launched by a Python/MATLAB plugin with a specified file.
 
-	switch (request)
-	{
-	case AwRequest::OpenNewFile:
-		handleOpenNewFile(client, p);
-		break;
-	case AwRequest::GetMarkers2:
-		handleGetMarkers2(client, p);
-		break;
-	case AwRequest::GetData3:
-		handleGetData3(client, p);
-		break;
-	case AwRequest::GetDataEx:
-		handleGetDataEx(client, p);
-		break;
-	case AwRequest::GetMarkersEx:
-		handleGetMarkersEx(client, p);
-		break;
-	case AwRequest::AddMarkers:
-		handleAddMarkers(client, p);
-		break;
-	case AwRequest::GetPluginInfo:
-		handleGetPluginInfo(client, p);
-		break;
-	case AwRequest::GetPluginIO:
-		handleGetPluginIO(client, p);
-		break;
-	case AwRequest::GetFileInfo:
-		handleGetFileInfo(client, p);
-		break;
-	case AwRequest::IsTerminated:
-		handleIsTerminated(client, p);
-		break;
-	case AwRequest::SendMessage:
-		handleSendMessage(client, p);
-		break;
-	case AwRequest::SendCommand:
-		handleSendCommand(client, p);
-		break;
-	case AwRequest::GetScreenCapture:
-		handleGetScreenCapture(client, p);
-		break;
-	case AwRequest::GetICAPanelCapture:
-		handleGetICAPanelCapture(client, p);
-		break;
-	case AwRequest::SetBeamFormer:
-		handleSetBeamFormer(client, p);
-		break;
-	case AwRequest::GetTriggers:
-		handleGetTriggers(client, p);
-		break;
-	default:
+	if (request < 0 || request > m_handlers.size()) {
 		emit log("Unknown request received!");
-		break;
+		return;
 	}
+
+	auto h = m_handlers.at(request);
+	h(client, p);
+
+	//switch (request)
+	//{
+	//case AwRequest::OpenNewFile:
+	//	handleOpenNewFile(client, p);
+	//	break;
+	//case AwRequest::GetMarkers2:
+	//	handleGetMarkers2(client, p);
+	//	break;
+	//case AwRequest::GetData3:
+	//	handleGetData3(client, p);
+	//	break;
+	//case AwRequest::GetDataEx:
+	//	handleGetDataEx(client, p);
+	//	break;
+	//case AwRequest::GetMarkersEx:
+	//	handleGetMarkersEx(client, p);
+	//	break;
+	//case AwRequest::AddMarkers:
+	//	handleAddMarkers(client, p);
+	//	break;
+	//case AwRequest::GetPluginInfo:
+	//	handleGetPluginInfo(client, p);
+	//	break;
+	//case AwRequest::GetPluginIO:
+	//	handleGetPluginIO(client, p);
+	//	break;
+	//case AwRequest::GetFileInfo:
+	//	handleGetFileInfo(client, p);
+	//	break;
+	//case AwRequest::IsTerminated:
+	//	handleIsTerminated(client, p);
+	//	break;
+	//case AwRequest::SendMessage:
+	//	handleSendMessage(client, p);
+	//	break;
+	//case AwRequest::SendCommand:
+	//	handleSendCommand(client, p);
+	//	break;
+	//case AwRequest::GetScreenCapture:
+	//	handleGetScreenCapture(client, p);
+	//	break;
+	//case AwRequest::GetICAPanelCapture:
+	//	handleGetICAPanelCapture(client, p);
+	//	break;
+	//case AwRequest::SetBeamFormer:
+	//	handleSetBeamFormer(client, p);
+	//	break;
+	//case AwRequest::GetTriggers:
+	//	handleGetTriggers(client, p);
+	//	break;
+	//default:
+	//	emit log("Unknown request received!");
+	//	break;
+	//}
 }

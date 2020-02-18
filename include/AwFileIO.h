@@ -51,6 +51,9 @@ public:
 	AwFileIOPlugin *plugin() { return m_plugin;  }
 	/** Returns the current active features for the reader. **/
 	inline int flags() { return m_flags; }
+	/** Returns the side file path based on extension or empty string is none exists **/
+	QString getSideFile(const QString& extension); // getSideFile(".mrk") will return the file path to the marker file.
+
 
 	// Input 
 	/** Override this method to open the file and fill up the data structure. **/

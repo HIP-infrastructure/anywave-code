@@ -31,6 +31,7 @@ class AwScriptProcess;
 class AwDataServer;
 class AwPidManager;
 #include <AwDataClient.h>
+class AwFileIO;
 
 class AwRequestServer : public AwDataClient
 {
@@ -44,6 +45,8 @@ public:
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
 	void addProcess(AwScriptProcess *process);
+	/** return current reader instance or nullptr if none set **/
+	AwFileIO* reader();
 public slots:
 	void handleNewConnection();
 	void dataReceived();
@@ -63,8 +66,11 @@ protected:
 	AwDataServer *m_ds;
 	AwPidManager *m_pm;
 private:
-	AwMarkerList m_markers;	// hold the markers added by process
+	void addHandler(void (AwRequestServer::* func)(QTcpSocket *, AwScriptProcess*));
+	void setHandlers();
+
 	void handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetProperties(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetData3(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetDataEx(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *process);
@@ -80,6 +86,11 @@ private:
 	void handleSetBeamFormer(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetTriggers(QTcpSocket *client, AwScriptProcess *process);
 	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
+	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
+	void unusedHandler(QTcpSocket *client, AwScriptProcess *process) {}
+
+	std::vector<std::function<void(QTcpSocket *, AwScriptProcess *)>> m_handlers;
+	AwMarkerList m_markers;	// hold the markers added by process
 };
 
 

@@ -1303,6 +1303,12 @@
     <ClCompile Include="CL\DedicatedDataServer.cpp">
       <Filter>CL</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\GetProperties.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\RunAnyWave.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
