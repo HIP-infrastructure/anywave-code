@@ -27,7 +27,6 @@
 #include "Process/AwScriptPlugin.h"
 #include <QTcpSocket>
 #include <QDataStream>
-#include "AwPidManager.h"
 #include "Data/AwDataServer.h"
 #include "Debug/AwDebugLog.h"
 #include <QThread>
@@ -36,14 +35,14 @@
 #include "Plugin/AwPluginManager.h"
 #include <AwFileIO.h>
 
+
 AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 {
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
 	m_ds = nullptr;
-	m_pm = new AwPidManager(this);
-	setHandlers();
+	m_pidCounter = 0;
 
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
@@ -57,8 +56,12 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 
 	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
 	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
-	moveToThread(m_thread);
-	m_thread->start();
+
+	setHandlers();
+	if (m_isListening) {
+		moveToThread(m_thread);
+		m_thread->start();
+	}
 }
 
 AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwDataClient(parent)
@@ -67,8 +70,7 @@ AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwD
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
 	m_ds = nullptr;
-	m_pm = new AwPidManager(this);
-	setHandlers();
+	m_pidCounter = 0;
 
 	if (m_server->listen(QHostAddress::Any, 0)) {
 		m_serverPort = m_server->serverPort();
@@ -87,6 +89,10 @@ AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwD
 	else 
 		m_isListening = false;
 
+	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
+	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
+
+	setHandlers();
 	if (m_isListening) {
 		moveToThread(m_thread);
 		m_thread->start();
@@ -104,31 +110,33 @@ AwRequestServer::~AwRequestServer()
 
 void AwRequestServer::setHandlers()
 {
-	addHandler(&AwRequestServer::handleAddMarkers);			// AddMarkers
-	addHandler(&AwRequestServer::unusedHandler);			// GetMarkers (UNUSED)
-	addHandler(&AwRequestServer::unusedHandler);			// GetData2 (UNUSED)
-	addHandler(&AwRequestServer::handleGetPluginInfo);		// GetPluginInfo
-	addHandler(&AwRequestServer::handleIsTerminated);		// IsTerminated
-	addHandler(&AwRequestServer::handleSendMessage);		// SenMessage
-	addHandler(&AwRequestServer::handleSendCommand);		// SendCommand
-	addHandler(&AwRequestServer::handleGetMarkers2);		// GetMarkers2
-	addHandler(&AwRequestServer::handleGetData3);			// GetData3
-	addHandler(&AwRequestServer::handleGetFileInfo);		// GetFileInfo
-	addHandler(&AwRequestServer::handleGetScreenCapture);	// GetScreenCapture
-	addHandler(&AwRequestServer::handleGetICAPanelCapture);	// GetGetICAPanelCapture
-	addHandler(&AwRequestServer::handleSetBeamFormer);		// SetBeamFormer
-	addHandler(&AwRequestServer::handleGetTriggers);		// GetTriggers
-	addHandler(&AwRequestServer::handleGetPluginIO);		// GetPluginIO
-	addHandler(&AwRequestServer::handleGetDataEx);			// GetDataEx
-	addHandler(&AwRequestServer::handleGetMarkersEx);		// GetMarkersEx
-	addHandler(&AwRequestServer::handleOpenNewFile);		// OpenNewFile
-	addHandler(&AwRequestServer::handleRunAnyWave);			// RunAnyWave
-	addHandler(&AwRequestServer::handleGetProperties);		// GetProperties
+	addHandler(this, &AwRequestServer::handleAddMarkers, AwRequest::AddMarkers);		
+	addHandler(this, &AwRequestServer::handleGetPluginInfo, AwRequest::GetPluginInfo);		
+	addHandler(this, &AwRequestServer::handleIsTerminated, AwRequest::IsTerminated);		
+	addHandler(this, &AwRequestServer::handleSendMessage, AwRequest::SendMessage);		
+	addHandler(this, &AwRequestServer::handleSendCommand, AwRequest::SendCommand);		
+	addHandler(this, &AwRequestServer::handleGetMarkers2, AwRequest::GetMarkers2);		
+	addHandler(this, &AwRequestServer::handleGetData3, AwRequest::GetData3);			
+	addHandler(this, &AwRequestServer::handleGetFileInfo, AwRequest::GetFileInfo);		
+	addHandler(this, &AwRequestServer::handleGetScreenCapture, AwRequest::GetScreenCapture);	
+	addHandler(this, &AwRequestServer::handleGetICAPanelCapture, AwRequest::GetICAPanelCapture);	
+	addHandler(this, &AwRequestServer::handleSetBeamFormer, AwRequest::SetBeamFormer);		
+	addHandler(this, &AwRequestServer::handleGetTriggers, AwRequest::GetTriggers);		
+	addHandler(this, &AwRequestServer::handleGetPluginIO, AwRequest::GetPluginIO);		
+	addHandler(this, &AwRequestServer::handleGetDataEx, AwRequest::GetDataEx);			
+	addHandler(this, &AwRequestServer::handleGetMarkersEx, AwRequest::GetMarkersEx);	
+	addHandler(this, &AwRequestServer::handleOpenNewFile, AwRequest::OpenNewFile);		
+	addHandler(this, &AwRequestServer::handleRunAnyWave, AwRequest::RunAnyWave);			
+	addHandler(this, &AwRequestServer::handleGetProperties, AwRequest::GetProperties);		
 }
 
-void AwRequestServer::addHandler(void (AwRequestServer::* func)(QTcpSocket *, AwScriptProcess*))
+
+
+
+void AwRequestServer::addHandler(AwRequestServer *rs, void (AwRequestServer::* func)(QTcpSocket *, AwScriptProcess*), int request)
 {
-	this->m_handlers.emplace_back(func);
+	using namespace std::placeholders;
+	m_handlers[request] = std::bind(func, rs, _1, _2);
 }
 
 AwFileIO *AwRequestServer::reader()
@@ -141,7 +149,8 @@ AwFileIO *AwRequestServer::reader()
 void AwRequestServer::addProcess(AwScriptProcess *process)
 {
 	QMutexLocker lock(&m_mutex);
-	m_pm->createNewPid(process);
+	process->setPid(m_pidCounter);
+	m_registeredProcesses[m_pidCounter++] = process;
 }
 
 void AwRequestServer::handleNewConnection()
@@ -187,6 +196,11 @@ void AwRequestServer::clientDisconnected()
 
 void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 {
+	if (m_handlers.isEmpty() || !m_handlers.contains(request)) {
+		emit log(QString("received unknown request: %2. Nothing done.").arg(request));
+		return;
+	}
+
 	QByteArray size;
 	QDataStream stream_size(&size, QIODevice::WriteOnly);
 	stream_size.setVersion(QDataStream::Qt_4_4);
@@ -195,13 +209,7 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	AwScriptProcess *p = nullptr;
 	// get the matchin process if pid is valid
 	if (pid >= 0) {
-		if (m_pm == nullptr) { // SHOULD NEVER HAPPENS
-			emit log(tr("ERROR: request server has no connection to a pid manager instance."));
-			return;
-		}
-		p = m_pm->process(pid);
-
-		if (p == NULL) {// no process found, send a bad status as response
+		if (!m_registeredProcesses.contains(pid)) {
 			// write a bad status
 			status = -1;
 			stream_size << status;
@@ -212,17 +220,12 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 			emit log(tr("Done."));
 			return;
 		}
+		p = m_registeredProcesses[pid];
 	}
 	
 	// WARNING: p can be nullptr if the pid was negative. 
 	// a nullptr p means that we are running in dedicated data server mode : AnyWave was launched by a Python/MATLAB plugin with a specified file.
-
-	if (request < 0 || request > m_handlers.size()) {
-		emit log("Unknown request received!");
-		return;
-	}
-
-	auto h = m_handlers.at(request);
+	auto h = m_handlers[request];
 	h(client, p);
 
 	//switch (request)

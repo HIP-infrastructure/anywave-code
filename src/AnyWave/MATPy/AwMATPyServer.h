@@ -36,6 +36,7 @@ class AwMATPyServer : public QObject
 
 public:
 	static AwMATPyServer *instance();
+	static bool isRunning() { return m_instance != nullptr; }
 	~AwMATPyServer();
 
 	// adding new process to clients

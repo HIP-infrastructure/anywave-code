@@ -730,9 +730,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwPidManager.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="MATPy\AwPidManager.cpp">
-      <Filter>MATPy</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwRequestServer.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1598,9 +1595,6 @@
     </CustomBuild>
     <CustomBuild Include="Process\AwProcessWidget.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MATPy\AwPidManager.h">
-      <Filter>MATPy</Filter>
     </CustomBuild>
     <CustomBuild Include="MATPy\AwRequestServer.h">
       <Filter>MATPy</Filter>

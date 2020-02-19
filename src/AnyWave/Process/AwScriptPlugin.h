@@ -32,7 +32,7 @@ class AwScriptProcess : public AwProcess
 {
 	Q_OBJECT
 public:
-	AwScriptProcess() : AwProcess() { m_isCompiled = false;  } 
+	AwScriptProcess() : AwProcess() { m_isCompiled = false;  m_pid = -1; }
 	void setScriptPath(const QString& path) { m_path = path; }
 	inline void setPid(int pid) { m_pid = pid; }
 	inline int pid() { return m_pid; }

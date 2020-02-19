@@ -234,8 +234,8 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	AwSourceManager::instance()->setParent(this);
 	connect(AwSourceManager::instance(), SIGNAL(newSourcesCreated(int)), AwMontageManager::instance(), SLOT(addNewSources(int)));
 
-	// MATPyServer
-	AwMATPyServer::instance()->setParent(this);
+	//// MATPyServer
+	//AwMATPyServer::instance()->setParent(this);
 
 	// AwMeshManager
 	m_meshManager = AwMeshManager::instance();
@@ -383,7 +383,11 @@ void AnyWave::quit()
 		w->close();
 	AwSettings::getInstance()->closeFile();
 	// stop MATPy server if running
-	delete AwMATPyServer::instance();
+	//delete AwMATPyServer::instance();
+	if (AwMATPyServer::isRunning()) {
+		AwMATPyServer::instance()->stop();
+		delete AwMATPyServer::instance();
+	}
 
 	AwMontageManager::instance()->quit();
 	AwAmplitudeManager::instance()->quit();

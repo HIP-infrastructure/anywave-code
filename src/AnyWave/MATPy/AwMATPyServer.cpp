@@ -61,12 +61,14 @@ AwMATPyServer *AwMATPyServer::newInstance()
 
 AwMATPyServer::AwMATPyServer()
 {
-	m_rs = new AwRequestServer(this);
+	m_rs = new AwRequestServer;
 }
 
 AwMATPyServer::~AwMATPyServer()
 {
 	// destroy possible duplicated instances
+	if (m_rs)
+		delete m_rs;
 	AW_DESTROY_LIST(m_duplicatedInstances);
 }
 
@@ -99,21 +101,22 @@ bool AwMATPyServer::startWithFile(const QString& dataPath)
 	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
 	if (reader == nullptr)
 		return false;
-	m_rs = new AwRequestServer(dataPath, this);
+	m_rs = new AwRequestServer(dataPath);
 	// check if dataPath is a valid file that the data server can handle
 	return m_rs->isListening();
 }
 
 void AwMATPyServer::start()
 {
-	if (m_rs) // already instantianted
-		return;
+	//if (m_rs) // already instantianted
+	//	return;
 
-	m_rs = new AwRequestServer(this);
-	if (!m_rs->isListening()) { // failed to listen on TCP port
-		delete m_rs;
-		m_rs = nullptr;
-	}
+	//m_rs = new AwRequestServer(this);
+	//if (!m_rs->isListening()) { // failed to listen on TCP port
+	//	delete m_rs;
+	//	m_rs = nullptr;
+	//}
+	
 }	
 
 
