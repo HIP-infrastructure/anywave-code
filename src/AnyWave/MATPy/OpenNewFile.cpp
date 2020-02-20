@@ -28,14 +28,13 @@ void AwRequestServer::handleOpenNewFile(QTcpSocket *client, AwScriptProcess *pro
 	}
 	if (dict.contains("file")) {
 		AwMATPyServer *server = AwMATPyServer::instance()->newInstance();
-		if (!server->startWithFile(dict["file"].toString())) {
+		if (!server->start(dict["file"].toString(), process)) {
 			emit log(QString("ERROR: file %1 could not be open.").arg(dict["file"].toString()));
 			AwMATPyServer::instance()->deleteDuplicatedInstance(server);
 			stream << (int)-1;
 			response.send();
 			return;
 		}
-		server->addProcess(process);
 		// success : respond with good status and port
 		stream << (int)0 << (int)server->serverPort();
 		response.send();

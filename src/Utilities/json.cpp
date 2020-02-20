@@ -24,6 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <utils/json.h>
+#include <QFile>
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qjsonarray.h>
@@ -42,4 +43,21 @@ QVariantHash AwUtilities::json::hashFromJson(const QString& jsonString, QString&
 		return doc.object().toVariantHash();
 	}
 	return hash;
+}
+
+
+
+QJsonDocument AwUtilities::json::readJsonFile(const QString& filePath)
+{
+	QFile file(filePath);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		return QJsonDocument();
+	}
+	QJsonParseError error;
+	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
+	file.close();
+	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
+		return QJsonDocument();
+	}
+	return doc;
 }

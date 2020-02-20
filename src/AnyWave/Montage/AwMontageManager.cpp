@@ -406,8 +406,6 @@ void AwMontageManager::closeFile()
 		if (AwBIDSManager::instance()->isBIDSActive())
 			checkForBIDSMods();
 	clear();
-	//saveBadChannels();
-	//m_badChannelLabels.clear();
 	m_montagePath = "";
 	m_badPath = "";
 	m_asRecorded.clear();

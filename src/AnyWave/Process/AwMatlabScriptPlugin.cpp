@@ -47,9 +47,8 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	AwMatlabScriptProcess *p = new AwMatlabScriptProcess;
 	p->setPlugin(this);
 	initProcess(p);
-
 	AwMATPyServer *server = AwMATPyServer::instance();
-	server->addProcess(p);
+	AwPidManager::instance()->createNewPid(p);
 	server->start();
 
 

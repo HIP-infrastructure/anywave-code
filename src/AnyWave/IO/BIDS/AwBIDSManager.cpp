@@ -14,7 +14,7 @@
 #include "Marker/AwMarkerManager.h"
 #include "Debug/AwDebugLog.h"
 #include <QJsonArray>
-#include <utils/AwUtilities.h>
+#include <utils/json.h>
 #include "AwBIDSParser.h"
 
 // statics
@@ -727,7 +727,7 @@ void AwBIDSManager::closeBIDS()
 void AwBIDSManager::modifyUpdateJson(const QStringList& branches)
 {
 	auto filePath = QString("%1/tobeparsed.json").arg(getParsingPath());
-	auto json = AwUtilities::readJsonFile(filePath);
+	auto json = AwUtilities::json::readJsonFile(filePath);
 	QJsonObject root;
 	if (json.isEmpty()) 
 		json.setObject(root);

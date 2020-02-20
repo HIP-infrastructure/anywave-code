@@ -110,6 +110,9 @@ public:
 	int loadICA();
 	int loadICA(const QString& path);
 
+	/** Instantiate a new object and link it to a reader **/
+	AwMontageManager *duplicate(AwFileIO *reader);
+
 signals:
 	/** Signal émis lorsque un nouveau montage a ete calcule. La liste des canaux montés est passée en paramètre. **/
 	void montageChanged(const AwChannelList &channels);

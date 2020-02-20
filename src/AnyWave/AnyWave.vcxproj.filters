@@ -1306,6 +1306,18 @@
     <ClCompile Include="MATPy\RunAnyWave.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\AwPidManager.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwDataSet.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwDataSet.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\AwDataSet.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1808,6 +1820,12 @@
     </CustomBuild>
     <CustomBuild Include="IO\BIDS\AwBIDSParser.h">
       <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MATPy\AwPidManager.h">
+      <Filter>MATPy</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Data\AwDataSet.h">
+      <Filter>Data</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

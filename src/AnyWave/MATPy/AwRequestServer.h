@@ -29,7 +29,6 @@
 #include <QTcpServer>
 class AwScriptProcess;
 class AwDataServer;
-//class AwPidManager;
 #include <AwDataClient.h>
 class AwFileIO;
 
@@ -68,7 +67,6 @@ protected:
 	bool m_isListening;
 	quint16 m_serverPort;
 	AwDataServer *m_ds;
-	//AwPidManager *m_pm;
 	int m_pidCounter;
 
 private:
@@ -93,10 +91,8 @@ private:
 	void unusedHandler(QTcpSocket *client, AwScriptProcess *process) {}
 
 	void setHandlers();
-//	std::vector<std::function<void(QTcpSocket *, AwScriptProcess *)>> m_handlers;
-	//std::vector<std::function<void(int, QTcpSocket*, AwScriptProcess *)>> m_handlers;
+
 	QHash<int, std::function<void(QTcpSocket*, AwScriptProcess *)>> m_handlers;
-	QMap<int, AwScriptProcess *> m_registeredProcesses;
 	AwMarkerList m_markers;	// hold the markers added by process
 };
 

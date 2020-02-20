@@ -33,7 +33,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <AwCore.h>
-#include <utils/AwUtilities.h>
+#include <utils/json.h>
 #include "Prefs/AwSettings.h"
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
@@ -123,7 +123,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	QString json = args["run_process"].toString();
 	// get json file or parse the string
 	if (QFile::exists(json)) {
-		doc = AwUtilities::readJsonFile(json);
+		doc = AwUtilities::json::readJsonFile(json);
 		if (doc.isEmpty() || doc.isNull()) {
 			throw AwException("json file is invalid.", origin);
 			return Q_NULLPTR;

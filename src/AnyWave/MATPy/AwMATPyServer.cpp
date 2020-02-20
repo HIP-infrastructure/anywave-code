@@ -61,7 +61,7 @@ AwMATPyServer *AwMATPyServer::newInstance()
 
 AwMATPyServer::AwMATPyServer()
 {
-	m_rs = new AwRequestServer;
+	m_rs = nullptr;
 }
 
 AwMATPyServer::~AwMATPyServer()
@@ -83,40 +83,37 @@ void AwMATPyServer::deleteDuplicatedInstance(AwMATPyServer *instance)
 	delete instance;
 }
 
-void AwMATPyServer::addProcess(AwScriptProcess *p)
-{
-	if (m_rs == nullptr)
-		return;
-	m_rs->addProcess(p);
-}
-
-
-bool AwMATPyServer::startWithFile(const QString& dataPath)
+bool AwMATPyServer::start(const QString& dataPath, AwScriptProcess *p)
 {
 	if (m_rs) {
 		delete m_rs;
 		m_rs = nullptr;
 	}
-
+	AwPidManager::instance()->createNewPid(p);
 	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
 	if (reader == nullptr)
 		return false;
-	m_rs = new AwRequestServer(dataPath);
-	// check if dataPath is a valid file that the data server can handle
-	return m_rs->isListening();
+	m_rs = new AwRequestServer(dataPath, p);
+	if (!m_rs->isListening()) { // failed to listen on TCP port
+		delete m_rs;
+		m_rs = nullptr;
+		return false;
+	}
+	return true;
 }
 
-void AwMATPyServer::start()
+bool AwMATPyServer::start()
 {
-	//if (m_rs) // already instantianted
-	//	return;
+	if (m_rs) // already instantianted
+		return true;
 
-	//m_rs = new AwRequestServer(this);
-	//if (!m_rs->isListening()) { // failed to listen on TCP port
-	//	delete m_rs;
-	//	m_rs = nullptr;
-	//}
-	
+	m_rs = new AwRequestServer();
+	if (!m_rs->isListening()) { // failed to listen on TCP port
+		delete m_rs;
+		m_rs = nullptr;
+		return false;
+	}
+	return true;
 }	
 
 

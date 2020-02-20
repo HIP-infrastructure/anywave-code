@@ -32,7 +32,8 @@ class AwPidManager : public QObject
 {
 	Q_OBJECT
 public:
-	AwPidManager(QObject *parent = 0) : QObject(parent) { m_index = 0; }
+	static AwPidManager *instance();
+	
 	void createNewPid(AwScriptProcess *process);
 	AwScriptProcess *process(int pid) { return m_pids.value(pid); }
 public slots:
@@ -40,10 +41,11 @@ public slots:
 protected:
 	static AwPidManager *m_instance;
 	static bool m_isActive;
-	//AwPidManager() { m_index = 0; }
+	AwPidManager() { m_index = 0; }
 
 	QHash<int, AwScriptProcess *> m_pids;
 	int m_index;
+	QMutex m_mutex;
 };
 
 

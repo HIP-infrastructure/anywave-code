@@ -33,6 +33,7 @@
 #include "Marker/AwMarkerManager.h"
 #include "Source/AwSourceManager.h"
 #include "Plugin/AwPluginManager.h"
+#include "AwPidManager.h"
 #include <AwFileIO.h>
 
 
@@ -146,13 +147,6 @@ AwFileIO *AwRequestServer::reader()
 	return nullptr;
 }
 
-void AwRequestServer::addProcess(AwScriptProcess *process)
-{
-	QMutexLocker lock(&m_mutex);
-	process->setPid(m_pidCounter);
-	m_registeredProcesses[m_pidCounter++] = process;
-}
-
 void AwRequestServer::handleNewConnection()
 {
 	QTcpSocket *client = m_server->nextPendingConnection();
@@ -209,77 +203,21 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	AwScriptProcess *p = nullptr;
 	// get the matchin process if pid is valid
 	if (pid >= 0) {
-		if (!m_registeredProcesses.contains(pid)) {
+		p = AwPidManager::instance()->process(pid);
+		if (!p) {
 			// write a bad status
 			status = -1;
 			stream_size << status;
 			client->write(size);
-			emit log(tr("No corresponding process found for the request.."));
-			emit log(tr("Writing status code to socket..."));
+			emit log(QString("No corresponding process found for pid %1.").arg(pid));
 			client->waitForBytesWritten();
 			emit log(tr("Done."));
 			return;
 		}
-		p = m_registeredProcesses[pid];
 	}
 	
 	// WARNING: p can be nullptr if the pid was negative. 
 	// a nullptr p means that we are running in dedicated data server mode : AnyWave was launched by a Python/MATLAB plugin with a specified file.
 	auto h = m_handlers[request];
 	h(client, p);
-
-	//switch (request)
-	//{
-	//case AwRequest::OpenNewFile:
-	//	handleOpenNewFile(client, p);
-	//	break;
-	//case AwRequest::GetMarkers2:
-	//	handleGetMarkers2(client, p);
-	//	break;
-	//case AwRequest::GetData3:
-	//	handleGetData3(client, p);
-	//	break;
-	//case AwRequest::GetDataEx:
-	//	handleGetDataEx(client, p);
-	//	break;
-	//case AwRequest::GetMarkersEx:
-	//	handleGetMarkersEx(client, p);
-	//	break;
-	//case AwRequest::AddMarkers:
-	//	handleAddMarkers(client, p);
-	//	break;
-	//case AwRequest::GetPluginInfo:
-	//	handleGetPluginInfo(client, p);
-	//	break;
-	//case AwRequest::GetPluginIO:
-	//	handleGetPluginIO(client, p);
-	//	break;
-	//case AwRequest::GetFileInfo:
-	//	handleGetFileInfo(client, p);
-	//	break;
-	//case AwRequest::IsTerminated:
-	//	handleIsTerminated(client, p);
-	//	break;
-	//case AwRequest::SendMessage:
-	//	handleSendMessage(client, p);
-	//	break;
-	//case AwRequest::SendCommand:
-	//	handleSendCommand(client, p);
-	//	break;
-	//case AwRequest::GetScreenCapture:
-	//	handleGetScreenCapture(client, p);
-	//	break;
-	//case AwRequest::GetICAPanelCapture:
-	//	handleGetICAPanelCapture(client, p);
-	//	break;
-	//case AwRequest::SetBeamFormer:
-	//	handleSetBeamFormer(client, p);
-	//	break;
-	//case AwRequest::GetTriggers:
-	//	handleGetTriggers(client, p);
-	//	break;
-	//default:
-	//	emit log("Unknown request received!");
-	//	break;
-	//}
 }

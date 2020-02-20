@@ -53,7 +53,7 @@ QString Py3StringToQString(PyObject *str)
 PyObject *QStringToPy3String(const QString& str)
 {
 	QString temp = str;
-	return Py_BuildValue("s", str.toStdString().c_str());
+	return PyUnicode_FromString(str.toStdString().c_str());
 }
 
 char *Py3StringtoCString(PyObject *str)

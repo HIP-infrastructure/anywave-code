@@ -55,7 +55,7 @@ namespace AwUtilities // put utility functions inside a namespace
 {
 	/** Convert a QString into a classic C string. The string buffer is allocated by the function. **/
 	char AW_UTILITIES_EXPORT *QStringToChar(const QString& str);
-	QJsonDocument AW_UTILITIES_EXPORT readJsonFile(const QString& file);
+	
 
 }
 

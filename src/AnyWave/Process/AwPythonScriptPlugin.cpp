@@ -37,7 +37,8 @@ AwPythonScriptProcess *AwPythonScriptPlugin::newInstance()
 	AwPythonScriptProcess *p = new AwPythonScriptProcess;
 	initProcess(p);
 	AwMATPyServer *server = AwMATPyServer::instance();
-	server->addProcess(p);
+	AwPidManager::instance()->createNewPid(p);
+
 	server->start();
 	return p;
 }

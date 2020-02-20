@@ -39,15 +39,12 @@ public:
 	static bool isRunning() { return m_instance != nullptr; }
 	~AwMATPyServer();
 
-	// adding new process to clients
-	void addProcess(AwScriptProcess *p);
 	// instantiate a new server: the instance must be deleted when finished.
 	AwMATPyServer* newInstance();
 	// start a thread in which the server will listen and connect to the current data server.
-	void start(); 
+	bool start(); 
+	bool start(const QString& filePath, AwScriptProcess *process);
 	void stop();
-	// start a new thread in which the server will listen to clients and connect to a NEW data server specifying a file)
-	bool startWithFile(const QString& dataPath);
 	quint16 serverPort(); 
 
 	// removes a duplicated instance from the list and delete it.

@@ -325,20 +325,6 @@ char *AwUtilities::QStringToChar(const QString& str)
 }
 
 
-QJsonDocument AwUtilities::readJsonFile(const QString& filePath)
-{
-	QFile file(filePath);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		return QJsonDocument();
-	}
-	QJsonParseError error;
-	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
-	file.close();
-	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
-		return QJsonDocument();
-	}
-	return doc;
-}
 
 quint32 AwUtilities::endianness::fromBigEndian(const uchar *src)
 {
@@ -382,8 +368,6 @@ bool AwUtilities::file::isPathValid(const QString &path)
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////  JSON
 
 
 

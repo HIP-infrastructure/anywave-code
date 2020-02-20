@@ -32,5 +32,6 @@ namespace AwUtilities // put utility functions inside a namespace
 	namespace json {
 		// from a json string returns a variant hash : empty if error. errorString contains the error description
 		QVariantHash AW_UTILITIES_EXPORT hashFromJson(const QString& jsonString, QString& errorString);
+		QJsonDocument AW_UTILITIES_EXPORT readJsonFile(const QString& file);
 	}
 }
