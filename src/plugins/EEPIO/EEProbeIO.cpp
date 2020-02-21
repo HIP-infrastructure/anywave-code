@@ -99,7 +99,7 @@ AwFileIO::FileStatus EEPIO::openFile(const QString &path)
 		marker.setLabel(QString::fromLatin1(trg_code));
 		block->addMarker(&marker);
 	}
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 

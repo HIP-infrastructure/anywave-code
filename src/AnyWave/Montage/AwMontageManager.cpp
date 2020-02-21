@@ -40,7 +40,7 @@
 #include <AwAmplitudeManager.h>
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
-#include <AwMontage.h>
+#include <montage/AwMontage.h>
 #include <AwCore.h>
 // statics init and definitions
 AwMontageManager *AwMontageManager::m_instance = 0;
@@ -428,17 +428,17 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	// check for .bad file
 	m_badChannelLabels.clear();
-	m_badPath = reader->infos.fileName() + ".bad";
+	m_badPath = reader->getSideFile(".bad");
 	if (QFile::exists(m_badPath))
 		loadBadChannels();
 	
 
-	QFileInfo fi(reader->infos.fileName());
+	QFileInfo fi(reader->fullPath());
 	// check for local montages.
 	scanForMontagesInDirectory(fi.absolutePath());
 
 	// check for .montage file
-	m_montagePath = reader->infos.fileName() + ".mtg";
+	m_montagePath = reader->getSideFile(".mtg");
 	if (QFile::exists(m_montagePath))  {
 		if (!loadMontage(m_montagePath)) {
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
@@ -489,13 +489,13 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 {
 	// clear current BIDS subject
 	m_channelsTsv.clear();
-	auto filePath = QFileInfo(reader->infos.fileName()).fileName();
+	auto filePath = QFileInfo(reader->fullPath()).fileName();
 	auto BM = AwBIDSManager::instance();
 
 	if (!BM->isBIDSActive())
 		return;
 
-	auto channels_tsv = BM->getTSVFile(reader->infos.fileName(), AwBIDSManager::ChannelsTsv);
+	auto channels_tsv = BM->getTSVFile(reader->fullPath(), AwBIDSManager::ChannelsTsv);
 	
 	if (channels_tsv.isEmpty())
 		return;
@@ -552,7 +552,7 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 		delete bad;
 	}
 	// be sure that .bad file is equivalent to tsv file in term of bad channels.
-	m_badPath = reader->infos.fileName() + ".bad";
+	m_badPath = reader->fullPath() + ".bad";
 	saveBadChannels();
 }
 

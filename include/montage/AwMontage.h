@@ -27,10 +27,24 @@
 
 #include <AwGlobal.h>
 #include <AwChannel.h>
+class AwFileIO;
 
 class AW_MONTAGE_EXPORT AwMontage
 {
 public:
+	explicit AwMontage(AwFileIO *reader);
+	~AwMontage();
+
 	static AwChannelList load(const QString& path);
 	static void save(const QString& path, const AwChannelList& channels);
+	inline AwChannelList& channels() { return m_channels; }
+protected:
+	void loadBadChannels();
+	bool loadMontage(const QString& mtgFile);
+
+	AwChannelList m_asRecorded, m_channels;
+	QStringList m_badChannelLabels;
+	QHash<QString, AwChannel *> m_asRecordedHash;
+	QString m_badChannelPath;
+	AwFileIO *m_reader;
 };

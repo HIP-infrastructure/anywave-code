@@ -28,8 +28,8 @@
 #include <QObject>
 #include <QTcpServer>
 class AwScriptProcess;
-class AwDataServer;
 #include <AwDataClient.h>
+#include "Data/AwDataSet.h"
 class AwFileIO;
 
 
@@ -45,9 +45,6 @@ public:
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
 	void addProcess(AwScriptProcess *process);
-	/** return current reader instance or nullptr if none set **/
-	AwFileIO* reader();
-
 	/** add a request handler **/
 	void addHandler(AwRequestServer* const object, void(AwRequestServer::* const mf)(QTcpSocket *, AwScriptProcess*), int request);
 public slots:
@@ -66,7 +63,7 @@ protected:
 	QThread *m_thread;
 	bool m_isListening;
 	quint16 m_serverPort;
-	AwDataServer *m_ds;
+	AwDataSet *m_ds;
 	int m_pidCounter;
 
 private:

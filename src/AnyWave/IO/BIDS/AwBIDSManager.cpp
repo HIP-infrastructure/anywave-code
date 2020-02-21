@@ -984,13 +984,13 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 	if (!isBIDSActive())
 		return;
 	// check if the new file is in a BIDS structure or not
-	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->infos.fileName());
+	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
 	if (root.isEmpty()) {
 		closeBIDS(); // close current BIDS
 		return;
 	}
 	// find the corresponding subject node
-	m_currentSubject = findSubject(reader->infos.fileName());
+	m_currentSubject = findSubject(reader->fullPath());
 }
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)

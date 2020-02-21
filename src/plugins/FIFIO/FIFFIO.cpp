@@ -1059,7 +1059,7 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 			}
 		}
 	}
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 AwFileIO::FileStatus FIFFIO::canRead(const QString &path)

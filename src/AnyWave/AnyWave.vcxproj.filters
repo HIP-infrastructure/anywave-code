@@ -655,9 +655,6 @@
     <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Montage\AwAVGChannel.cpp">
-      <Filter>Montage</Filter>
-    </ClCompile>
     <ClCompile Include="Carto\AwMappingClient.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
@@ -1915,9 +1912,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwExportDial.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Montage\AwAVGChannel.h">
-      <Filter>Montage</Filter>
     </ClInclude>
     <ClInclude Include="ICA\AwICAChannel.h">
       <Filter>ICA</Filter>

@@ -473,7 +473,7 @@ CTFFileReader::FileStatus CTFFileReader::openFile(const QString &path)
 	m_file.setFileName(meg4);
 	m_file.open(QIODevice::ReadOnly);
 	m_stream.setDevice(&m_file);
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 qint64 CTFFileReader::readDataFromChannels(float start, float duration, AwChannelList &channelList)

@@ -38,7 +38,7 @@ namespace Aw
 class AW_RW_EXPORT AwFileIO : public QObject
 {
 public:
-	AwFileIO(const QString& fileName = QString()) { m_flags = 0; infos.setFileName(fileName); }
+	AwFileIO(const QString& fileName = QString()) { m_flags = 0;}
 	virtual ~AwFileIO() {}
 
 
@@ -57,7 +57,7 @@ public:
 
 	// Input 
 	/** Override this method to open the file and fill up the data structure. **/
-	virtual FileStatus openFile(const QString &path) { m_fullPath = path;  return AwFileIO::NoError; }
+	virtual FileStatus openFile(const QString &path);
 	/** Override this method to check if the file can be read by the reader. **/
 	virtual FileStatus canRead(const QString &path) {return AwFileIO::WrongFormat;	}
 	/**  Override this method to read data from the file.
@@ -109,6 +109,7 @@ protected:
 	QString m_error;	// used by methods returning a status after an operation.
 	QString m_fullPath;	// full path to current open file.
 	AwFileIOPlugin *m_plugin;
+	QMap<QString, QString> m_sideFiles;	// map containing path to side files (.mrk, .mtg, .bad etc)
 };
 
 ///*!

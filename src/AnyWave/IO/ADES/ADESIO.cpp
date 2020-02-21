@@ -274,8 +274,8 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		}
 	}
 
-	m_fullPath = path;
-	return AwFileIO::NoError;
+	m_sideFiles[".mrk"] = markerPath;
+	return AwFileIO::openFile(path);
 }
 
 qint64 ADESIO::readDataFromChannels(float start, float duration, AwChannelList &channelList)

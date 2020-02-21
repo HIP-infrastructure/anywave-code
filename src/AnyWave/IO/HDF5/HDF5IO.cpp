@@ -197,7 +197,7 @@ AHDF5IO::FileStatus AHDF5IO::openFile(const QString &path)
 	}
 	H5Gclose(gBlocks);
 
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 // extract markers from markers dataset in a specific block.

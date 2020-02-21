@@ -28,6 +28,7 @@
 #include <QTcpSocket>
 #include <QDataStream>
 #include "Data/AwDataServer.h"
+#include "Data/AwDataSet.h"
 #include "Debug/AwDebugLog.h"
 #include <QThread>
 #include "Marker/AwMarkerManager.h"
@@ -82,8 +83,10 @@ AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwD
 			m_isListening = false;
 			return;
 		}
-		m_ds = AwDataServer::getInstance()->duplicate(reader);
-		m_ds->openConnection(this);
+		m_ds = new AwDataSet(reader, this);
+		//m_ds = AwDataServer::getInstance()->duplicate(reader);
+		//m_ds->openConnection(this);
+		m_ds->connect(this);
 		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
 		m_isListening = true;
 	}
@@ -105,8 +108,6 @@ AwRequestServer::~AwRequestServer()
 	m_thread->exit();
 	m_thread->wait();
 	// is there a decicated data server?
-	if (m_ds)
-		delete m_ds;
 }
 
 void AwRequestServer::setHandlers()
@@ -138,13 +139,6 @@ void AwRequestServer::addHandler(AwRequestServer *rs, void (AwRequestServer::* f
 {
 	using namespace std::placeholders;
 	m_handlers[request] = std::bind(func, rs, _1, _2);
-}
-
-AwFileIO *AwRequestServer::reader()
-{
-	if (m_ds)
-		return m_ds->reader();
-	return nullptr;
 }
 
 void AwRequestServer::handleNewConnection()

@@ -29,7 +29,7 @@
 #include <AwException.h>
 #include "Montage/AwMontageManager.h"
 #include "Data/AwDataServer.h"
-#include <AwMontage.h>
+#include <montage/AwMontage.h>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <AwCore.h>

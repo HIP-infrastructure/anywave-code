@@ -7,6 +7,7 @@ HEADERS += ./Data/AwDataChunk.h \
     ./Data/AwMemoryMapper.h \
     ./Data/AwDataConnection.h \
     ./Data/AwDataServer.h \
+	./Data/AwDataSet.h \
     ./Carto/AwDockMapping.h \
     ./Carto/AwMappingWidget.h \
     ./Carto/AwMappingClient.h \
@@ -57,7 +58,6 @@ HEADERS += ./Data/AwDataChunk.h \
     ./MATPy/AwRequestServer.h \
     ./MATPy/AwMATPyServer.h \
     ./Montage/AwECoGGrid.h \
-    ./Montage/AwAVGChannel.h \
     ./Montage/AwECoGDialog.h \
     ./Montage/AwECoGTableModel.h \
     ./Montage/AwMontageTableView.h \
@@ -150,6 +150,7 @@ SOURCES += ./AnyWave.cpp \
     ./Data/AwDataChunk.cpp \
     ./Data/AwDataConnection.cpp \
     ./Data/AwDataServer.cpp \
+	./Data/AwDataSet.cpp \
     ./Data/AwMemoryMapper.cpp \
     ./Carto/AwDockMapping.cpp \
     ./Carto/AwMappingClient.cpp \
@@ -217,7 +218,6 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/SendMessage.cpp \
     ./MATPy/SetBeamFormer.cpp \
     ./MATPy/OpenNewFile.cpp \
-    ./Montage/AwAVGChannel.cpp \
     ./Montage/AwChannelListModel.cpp \
     ./Montage/AwECoGDialog.cpp \
     ./Montage/AwECoGGrid.cpp \

@@ -1625,7 +1625,7 @@ MicromedReader::FileStatus MicromedReader::openFile(const QString& path)
 			infos.blocks().at(0)->addMarker(marker);
 		}
 	}
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 

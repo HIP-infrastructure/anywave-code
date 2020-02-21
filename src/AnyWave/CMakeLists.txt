@@ -20,6 +20,7 @@ SET(AnyWave_SRCS
     ./Data/AwDataServer.cpp  
 	./Data/AwMemoryMapper.cpp  
 	./Data/AwDataChunk.cpp
+	./Data/AwDataSet.cpp
     ./Carto/AwDockMapping.cpp  
     ./Carto/AwMappingClient.cpp  
     ./Carto/AwMappingWidget.cpp  
@@ -85,7 +86,6 @@ SET(AnyWave_SRCS
     ./MATPy/GetPluginIO.cpp  
 	./MATPy/OpenNewFile.cpp
     ./MATPy/AwTCPResponse.cpp
-    ./Montage/AwAVGChannel.cpp  
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
@@ -166,6 +166,7 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./Data/AwDataServer.h  
 	./Data/AwMemoryMapper.h  
 	./Data/AwDataChunk.h
+	./Data/AwDataSet.h
     ./Carto/AwDockMapping.h  
     ./Carto/AwMappingWidget.h  
     ./Carto/AwMappingClient.h  
@@ -214,7 +215,6 @@ SET(HEADERS ./Data/AwDataConnection.h
     ./MATPy/AwPidManager.h  
     ./MATPy/AwRequestServer.h  
     ./MATPy/AwMATPyServer.h  
-    ./Montage/AwAVGChannel.h  
     ./Montage/AwMontageTableView.h  
     ./Montage/AwMontageManager.h  
     ./Montage/AwMontageDial.h  
@@ -361,6 +361,7 @@ qt5_create_translation(AnyWaveTS ${Languages})
 SET(AW_LIBS AwCore AwMontage
 AwGraphics
 AwWidget
+AwMontage
 AwHDF5
 AwReadWrite
 AwProcess
