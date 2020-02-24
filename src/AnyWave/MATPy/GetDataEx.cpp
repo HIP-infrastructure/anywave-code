@@ -59,7 +59,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AwChannelList requestedChannels;
 	AwMarkerList input_markers;
 	auto reader = AwSettings::getInstance()->currentReader();
-	float fileDuration = process == nullptr ? reader->infos.totalDuration() : process->pdi.input.fileDuration;
+	//float fileDuration = process == nullptr ? reader->infos.totalDuration() : process->pdi.input.fileDuration;
+	float fileDuration = process->pdi.input.settings[processio::file_duration].toDouble();
 	float start = 0., duration = 0.;
 
 	if (json.isEmpty()) {

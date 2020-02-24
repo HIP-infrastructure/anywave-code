@@ -214,8 +214,8 @@ static int marker_setchannels(Marker *self, PyObject *value, void *closure)
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the duration");
 		return -1;
 	}
-	if (!PyList_Check(value)) {
-		PyErr_SetString(PyExc_TypeError, "channels must be a list of strings");
+	if (!PyTuple_Check(value)) {
+		PyErr_SetString(PyExc_TypeError, "channels must be a tuple of strings");
 		return -1;
 	}
 	Py_XDECREF(self->channels);

@@ -554,8 +554,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			
 			foreach (AwProcess *p, internals) {
 				auto channels = p->pdi.input.channels() + *channelsToLoad;
-				p->pdi.input.currentPosInFile = start;
-				p->pdi.input.fileDuration = duration;
+				p->pdi.input.settings[processio::current_pos_in_file] = start;
+				p->pdi.input.settings[processio::file_duration] = duration;
 				p->pdi.input.setNewChannels(channels);
 				QMetaObject::invokeMethod(p, "start", Qt::QueuedConnection);
 				// wait for process to finished before launching other one

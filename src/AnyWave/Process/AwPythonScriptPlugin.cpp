@@ -90,7 +90,7 @@ void AwPythonScriptProcess::run()
 {
 	QStringList arguments;
 	QString initpy;
-	QString dataPath = pdi.input.dataPath;
+	QString dataPath = pdi.input.settings[processio::data_path].toString();
 	dataPath = QDir::toNativeSeparators(dataPath);
 	auto pythonModulePath = AwSettings::getInstance()->getString("pythonModulePath");
 	initpy = pythonModulePath + "/init.py";
