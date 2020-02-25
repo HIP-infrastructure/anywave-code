@@ -55,7 +55,7 @@ public:
 	~AwMontageManager();
 
 	/** Retourne la liste des objets AwChannel du montage courant **/
-	AwChannelList& channels() { return m_channels;}
+	AwChannelList& channels();
 	/** Retourne la liste des AwChannels AsRecorded **/
 	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
 	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }

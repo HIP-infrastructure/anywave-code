@@ -361,6 +361,7 @@ bool AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
 /// Modify the list directly.
 void AwMontageManager::removeBadChannels(AwChannelList& list)
 {
+	QMutexLocker lock(&m_mutex);
 	foreach (AwChannel *c, list) {
 		if (c->isBad() || m_badChannelLabels.contains(c->name()))
 			list.removeAll(c);
@@ -834,7 +835,11 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 
 
 
-
+AwChannelList& AwMontageManager::channels()
+{
+	QMutexLocker lock(&m_mutex);
+	return m_channels;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
