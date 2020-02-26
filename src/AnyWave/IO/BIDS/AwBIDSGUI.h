@@ -37,17 +37,12 @@ class AwBIDSGUI : public QWidget
 	Q_OBJECT
 
 public:
-	//AwBIDSGUI(AwBIDSManager *bids, const QString& rootDir = QString(), QWidget *parent = Q_NULLPTR);
 	AwBIDSGUI(QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUI();
 
 	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2};
 	enum ItemTypes { Subject, Session, ieeg, eeg, meg, Folder, DataFile };
 	void refresh();
-//	void clear();
-//	void setRootDir(const QString& path);
-//public slots:
-//	void changeSourceFolder(int index);
 signals:
 	void dataFileClicked(const QString&);
 protected slots:
@@ -55,13 +50,9 @@ protected slots:
 protected:
 	AwBIDSManager * m_bids;
 	// keep a copy of models for the TreeView
-//	QMap<int, QStandardItemModel *> m_models;
 	QStandardItemModel *m_model;
 
-//	void initModel(QStandardItemModel *model, const AwBIDSSubjectList& subjects);
 	void initModel(const AwBIDSNodes& subjects, QStandardItem *parent);
 private:
-	Ui::AwBIDSGUIUi m_ui;
-	//QStandardItemModel *m_currentModel;
-		
+	Ui::AwBIDSGUIUi m_ui;		
 };
