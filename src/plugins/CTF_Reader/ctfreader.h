@@ -107,7 +107,7 @@ class CTFREADER_EXPORT CTFReader : public AwFileIOPlugin
 #endif
 public:
 	CTFReader();
-	AW_INSTANTIATE_PLUGIN(CTFFileReader)
+	AW_INSTANTIATE_FILEIO_PLUGIN(CTFFileReader)
 };
 
 

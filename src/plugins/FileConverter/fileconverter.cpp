@@ -52,7 +52,7 @@ bool FileConverter::showUi()
 	m_ui = new settings(pdi.input.readers, pdi.input.writers);
 
 	// check for previous settings
-	QString settingsFile = pdi.input.workingDirPath + "/paths.txt";
+	QString settingsFile = pdi.input.settings[processio::working_dir].toString() + "/paths.txt";
 	if (QFile::exists(settingsFile)) {
 		QFile file(settingsFile);
 		if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {

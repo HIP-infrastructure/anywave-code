@@ -40,5 +40,8 @@
     <ClInclude Include="..\..\include\montage\AwMontage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\montage\AwMontagePlugin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

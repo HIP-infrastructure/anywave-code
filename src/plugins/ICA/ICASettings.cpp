@@ -50,15 +50,11 @@ ICASettings::~ICASettings()
 
 void ICASettings::accept()
 {
-	//ignoreBadChannels = m_ui.ignoreBads->isChecked();
-//	ignoreMarkers = m_ui.checkIgnoreMarker->isChecked();
-
 	args["skip_bad"] = m_ui.ignoreBads->isChecked();
 	bool ignore = m_ui.checkIgnoreMarker->isChecked() && m_ui.checkIgnoreMarker->isEnabled();
 	args["is_ignoring_markers"] = ignore;
 	bool use = m_ui.checkUseMarkers->isChecked() && m_ui.checkUseMarkers->isEnabled();
 	args["is_using_markers"] = use;
- 	//useMarkers = m_ui.checkUseMarkers->isChecked();
 	
 	args["modality"] = m_modes.at(m_ui.comboModality->currentIndex());
 	if (args["is_ignoring_markers"].toBool()) 
@@ -66,11 +62,6 @@ void ICASettings::accept()
 	if (args["is_using_markers"].toBool())
 		args["use_markers"] = QStringList(m_labels.at(m_ui.comboUseMarkers->currentIndex()));
 
-
-//	modality = AwChannel::stringToType(m_modes.at(m_ui.comboModality->currentIndex()));
-//	lpf = m_ui.spinLPF->value();
-//	hpf = m_ui.spinHPF->value();
-//	components = m_ui.spinNC->value();
 	args["lpf"] = m_ui.spinLPF->value();
 	args["hpf"] = m_ui.spinHPF->value();
 	args["comp"] = m_ui.spinNC->value();
@@ -79,7 +70,7 @@ void ICASettings::accept()
 	auto channels = AwChannel::getChannelsOfType(m_channels, AwChannel::stringToType(args["modality"].toString()));
 	channels = AwChannel::removeDoublons(channels);
 	if (m_ui.ignoreBads->isChecked()) { // ignoring bad channels
-		auto badLabels = m_process->pdi.input.badLabels;
+		auto badLabels = m_process->pdi.input.settings[processio::bad_labels].toStringList();
 		foreach (AwChannel *c, channels) {
 			if (badLabels.contains(c->name()))
 				channels.removeAll(c);
@@ -109,14 +100,15 @@ void ICASettings::accept()
 	}
 
 	// get the file duration
+	auto fd = m_process->pdi.input.settings[processio::file_duration].toDouble();
 	if (use || ignore) {
 		auto markers = AwMarker::duplicate(m_process->pdi.input.markers());
 		QStringList skippedMarkers = args["skip_markers"].toStringList();
 		QStringList usedMarkers = args["use_markers"].toStringList();
-
-		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, m_process->pdi.input.fileDuration);
+			
+		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
 		if (inputMarkers.isEmpty()) 
-			dataDuration = m_process->pdi.input.fileDuration;
+			dataDuration = fd;
 		else {
 			for (auto m : inputMarkers) 
 				dataDuration += m->duration();
@@ -124,7 +116,7 @@ void ICASettings::accept()
 		AW_DESTROY_LIST(markers);
 	}
 	else 
-		dataDuration = m_process->pdi.input.fileDuration;
+		dataDuration = fd;
 
 	qint64 nSamples = (qint64)floor(dataDuration * m_process->pdi.input.reader()->infos.channels().first()->samplingRate());
 	if (sqrt(nSamples / 30.) < m_ui.spinNC->value()) {

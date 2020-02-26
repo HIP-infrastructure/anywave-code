@@ -26,6 +26,8 @@
 #ifndef AW_FILEIO_H
 #define AW_FILEIO_H
 #include <AwReadWriteLib.h>
+#include <AwPluginBase.h>
+
 class AwFileIOPlugin;
 
 namespace Aw
@@ -125,13 +127,10 @@ protected:
 // * 
 // * 
 // */
-class AW_RW_EXPORT AwFileIOPlugin: public QObject
+class AW_RW_EXPORT AwFileIOPlugin: public AwPluginBase
 {
 public:
 	AwFileIOPlugin() { m_flags = 0x00000000; }
-	QString name;					///< plugin's name: MANDATORY
-	QString version;				///< plugin's version 
-	QString description;			///< short description: MANDATORY
 	QStringList fileExtensions;		///< A string list with supported file extensions: for reading.
 	QString manufacturer;			///< The name of the manufacturer: OPTIONAL
 	QStringList layouts;			///< Layout to use for topographies
@@ -147,18 +146,18 @@ public:
 	inline bool canWrite() { return m_flags & Aw::CanWrite; }
 	/** Override this method to instantiate an object derived from AwFileReader. **/
 	virtual AwFileIO *newInstance(const QString& filename = QString()) = 0;
+
 	virtual void deleteInstance(AwFileIO *fr) { delete fr; fr = NULL; }
 	/** Override this method to provide a string list containing paths to montage files. **/
 	virtual QStringList montages() { return QStringList(); }
 protected:
 	int m_flags;
 };
-#define AwFileIOInterfacePlugin_IID "AnyWave.FileIOInterfacePlugin"
-
+#define AwFileIOInterfacePlugin_IID  "AnyWave.FileIOInterfacePlugin"
 Q_DECLARE_INTERFACE(AwFileIOPlugin, AwFileIOInterfacePlugin_IID)
 Q_DECLARE_INTERFACE(AwFileIO, "AnyWave.FileIOInterface")
 
-#define AW_INSTANTIATE_PLUGIN(P) P* newInstance(const QString& filename = QString()) { auto r = new P(filename); r->setPlugin(this); return r; }
+#define AW_INSTANTIATE_FILEIO_PLUGIN(P) P* newInstance(const QString& filename = QString()) { auto r = new P(filename); r->setPlugin(this); return r; }
 
 
 

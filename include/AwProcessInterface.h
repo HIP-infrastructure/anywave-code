@@ -128,32 +128,19 @@ protected:
  * \see
  *  AwProcess
  */
-class AW_PROCESS_EXPORT AwProcessPlugin : public QObject
+class AW_PROCESS_EXPORT AwProcessPlugin : public AwPluginBase
 {
 public:
 	// default constructor
 	AwProcessPlugin() { m_flags = 0x00000000; }
+	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY.
+- Display type indicates that the plugin will process only displayed data.
+- Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
+- DisplayBackground type indicates that the plugin can work on displayed data or in background mode aswell.
+- Internal type indicates that the plugin will process data internally. For instance, process some calculation on datas before they will send to AwDataClient objects. **/
+	int type;
 
 	enum RunMode { GUI = 2, Display = 4, Background = 8, DisplayBackground = 16, Internal = 32 };
-	/** Plugin's name. Set it in constructor with an unique name. This is MANDATORY. **/
-	QString name;
-	/** Plugin's description. Set it in constructor with a brief description. This is MANDATORY **/
-	QString description;
-	/** Plugin's version string. **/
-	QString version;
-	/** Category **/
-	QString category;	// Optional: recommended to have a better positionning of the plugin in the main menu Interface of AnyWave.
-	// Category can be:
-	// File: My menu description => for plugin that only acts on files (conversion or export)
-	// View: My menu description => for plugin that only display graphics 
-	// Process:Category: My menu description => for classic process plugin that need to be categorized (for example : Filtering, Correlation, etc.)
-
-	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY. 
-	- Display type indicates that the plugin will process only displayed data.
-	- Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
-	- DisplayBackground type indicates that the plugin can work on displayed data or in background mode aswell.
-	- Internal type indicates that the plugin will process data internally. For instance, process some calculation on datas before they will send to AwDataClient objects. **/
-	int type;
 	
 	void setFlags(int flags) { m_flags |= flags; }
 	inline int flags() { return m_flags; }

@@ -29,5 +29,5 @@ class EEGLABREADER_EXPORT EEGLABReaderPlugin : public AwFileIOPlugin
 	Q_INTERFACES(AwFileIOPlugin)
 public:
 	EEGLABReaderPlugin();
-	AW_INSTANTIATE_PLUGIN(EEGLABReader)
+	AW_INSTANTIATE_FILEIO_PLUGIN(EEGLABReader)
 };

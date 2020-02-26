@@ -71,7 +71,6 @@ public:
 	inline bool containsWidgets() { return !m_widgets.isEmpty(); }
 	inline bool containsCustomData() { return !customData.isEmpty(); }
 	inline bool launchedUsingQST() { return timeSelection.duration() > 0.; }
-//	inline bool containsICA() { return !icaPath.isEmpty(); }
 	bool isEmpty();
 	inline AwFileIO *reader() { return m_reader; }
 	void setReader(AwFileIO *reader) { m_reader = reader; }
@@ -98,22 +97,11 @@ public:
 	void addChannels(const AwChannelList& channels, bool duplicate = false);
 	void addChannel(AwChannel *channel);
 	QList<AwFileIOPlugin *> readers, writers;
-//	QString dataFolder;
-//	QString dataPath;
-//	QString workingDirPath;
-//	QString pluginDirPath;
-//	QString icaPath;			// contains the path to the .ica.h5 file or is empty if no ICA was computed.
+
 	AwMarker timeSelection;		// optional marker used in Quick Time Selection mode in AnyWave (contains the timing the user has selected before launching the process).
 	QVariantList customData;
-//	QStringList badLabels;		// contains channels marked as bad
-//	QStringList processPluginNames;
+
 	AwFilterSettings filterSettings;
-
-	//// Display process specific
-	//float currentPosInFile;
-	//float pageDuration;
-	//float fileDuration;	// total duration of data in file
-
 	QVariantHash settings;
 
 	void lock() { m_mutex.lock(); }

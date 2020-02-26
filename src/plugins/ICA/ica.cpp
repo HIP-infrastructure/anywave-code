@@ -62,7 +62,6 @@ ICA::~ICA()
 
 bool ICA::showUi()
 {
-//	ICASettings ui(pdi.input.dataPath, pdi.input.channels(), pdi.input.markers(), m_algoNames);
 	ICASettings ui(this);
 
 	if (ui.exec() == QDialog::Accepted)	{
@@ -70,41 +69,7 @@ bool ICA::showUi()
 		auto args = pdi.input.args();
 		args.unite(ui.args);
 
-		//args["modality"] = AwChannel::typeToString(ui.modality);
-
-		//if (ui.ignoreMarkers) {
-		//	QStringList skippedMarkers = { ui.skipMarker };
-		//	args["skip_markers"] = skippedMarkers;
-
-		//	//AwMarkerList tmp = AwMarker::getMarkersWithLabels(pdi.input.markers(), skippedMarkers);
-		//	//auto markers = AwMarker::invertMarkerSelection(tmp, "selection", pdi.input.fileDuration);
-		//	//pdi.input.setNewMarkers(markers);
-		//}
-		//if (ui.useMarkers) {
-		//	QStringList markers = { ui.useMarker };
-		//	args["skip_markers"] = markers;
-		//}
-
-		// use and skip marker labels must be different
-		//if (!ui.useMarker.isEmpty() && !ui.skipMarker.isEmpty()) 
-		//	if (ui.useMarker == ui.skipMarker) {
-		//		QMessageBox::critical(0, "Data Input", QString("markers to use and skip must be different."));
-		//		return false;
-		//	}
-
-		//// NOT SKIPPING BAD CHANNELS, ok clear badLabels from input.
-		//if (!ui.ignoreBadChannels) {
-		//	pdi.input.badLabels.clear();
-		//}
-
-		//args["comp"] = ui.components;
-		//args["downsampling"] = ui.downSampling;
-		//args["hp"] = ui.hpf;
-		//args["lp"] = ui.lpf;
-		//m_algo = ui.algo;
-		//args["infomax_extended"] = ui.infomaxExtended;
-
-		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.dataFolder);
+		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[processio::data_dir].toString());
 		QFile test(testFile);
 		if (!test.open(QIODevice::WriteOnly)) {
 			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
@@ -142,17 +107,18 @@ int ICA::initParameters()
 	}
 
 	m_channels = AwChannel::removeDoublons(m_channels);
+	auto badLabels = pdi.input.settings[processio::bad_labels].toStringList();
 	if (args.contains("skip_bad")) {
 		if (!args["skip_bad"].toBool())
-			pdi.input.badLabels.clear();
+			badLabels.clear();
 	}
 	m_samplingRate = m_channels.first()->samplingRate();
 	if (args.contains("downsampling"))
 		m_isDownsamplingActive = args["downsampling"].toBool();
 	// check for bad labels 
-	if (!pdi.input.badLabels.isEmpty()) {
+	if (!badLabels.isEmpty()) {
 		foreach(AwChannel *c, m_channels)
-			if (pdi.input.badLabels.contains(c->name()))
+			if (badLabels.contains(c->name()))
 				m_channels.removeAll(c);
 	}
 	m_nComp = m_channels.size();
@@ -170,7 +136,7 @@ int ICA::initParameters()
 		return -1;
 	}
 
-	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.dataPath).arg(args["modality"].toString()));
+	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[processio::data_path].toString()).arg(args["modality"].toString()));
 
 	m_lpf = args["lp"].toDouble();
 	m_hpf = args["hp"].toDouble();
@@ -182,6 +148,7 @@ int ICA::initParameters()
 	bool use = args.contains("use_markers");
 	bool skip = args.contains("skip_markers");
 
+	auto fd = pdi.input.settings[processio::file_duration].toDouble();
 	if (use || skip) {
 		auto markers = AwMarker::duplicate(pdi.input.markers());
 		QStringList skippedMarkers, usedMarkers;
@@ -190,10 +157,10 @@ int ICA::initParameters()
 		if (skip)
 			skippedMarkers = args["skip_markers"].toStringList();
 
-		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, pdi.input.fileDuration);
+		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
 		if (inputMarkers.isEmpty()) {
 			pdi.input.clearMarkers();
-			pdi.input.addMarker(new AwMarker("whole data", 0., pdi.input.fileDuration));
+			pdi.input.addMarker(new AwMarker("whole data", 0., fd));
 		}
 		else
 		{
@@ -204,7 +171,7 @@ int ICA::initParameters()
 	}
 	else {  // no markers to use or skip => compute on the whole data
 		pdi.input.clearMarkers();
-		pdi.input.addMarker(new AwMarker("whole data", 0., pdi.input.fileDuration));
+		pdi.input.addMarker(new AwMarker("whole data", 0., fd));
 	}
 
 
@@ -275,8 +242,8 @@ int ICA::initParameters()
 	if (args.contains("output_dir"))
 		dir = args["output_dir"].toString();
 	else
-		dir = pdi.input.dataFolder;
-	QFileInfo fi(pdi.input.dataPath);
+		dir = pdi.input.settings[processio::data_dir].toString();
+	QFileInfo fi(pdi.input.settings[processio::data_path].toString());
 	m_fileName = QString("%1/%2").arg(dir).arg(fi.fileName());
 	QString mod = args["modality"].toString();
 	m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
