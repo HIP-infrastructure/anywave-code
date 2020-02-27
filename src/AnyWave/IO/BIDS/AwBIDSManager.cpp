@@ -16,6 +16,8 @@
 #include <QJsonArray>
 #include <utils/json.h>
 #include "AwBIDSParser.h"
+#include "Marker/AwExtractTriggers.h"
+#include <AwCore.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
@@ -118,7 +120,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	auto outputDir = args["output_dir"].toString();
 	bool headshapeExists = false;
 
-	QString folderName, json, channels_tsv;
+	QString folderName, json, channels_tsv, events_tsv;
 	folderName = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	if (!session.isEmpty())
 		folderName = QString("%1_ses-%2").arg(folderName).arg(session);
@@ -138,6 +140,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	//
 	json = QString("%1.json").arg(folderName);
 	channels_tsv = QString("%1_channels.tsv").arg(baseName);
+	events_tsv = QString("%1_events.tsv").arg(baseName);
 	// common BIDS code to all MEG formats
 
 	if (kind == AwBIDSManager::Bti4DNI) { // 4DNI specific code
@@ -248,6 +251,45 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	}
 	jsonFile.write(doc.toJson());
 	jsonFile.close();
+
+	// generate events.tsv only if we have markers
+	auto markers = AwMarker::duplicate(reader->infos.blocks().first()->markers());
+	//  extract trigger/responses values
+	AwChannelList triggerChannels;
+	for (auto c : reader->infos.channels()) {
+		if (c->isTrigger())
+			triggerChannels << c;
+	}
+	if (!triggerChannels.isEmpty()) {
+		emit log(QString("reading trigger channels from MEG file..."));
+		reader->readDataFromChannels(0, reader->infos.totalDuration(), triggerChannels);
+		emit log(QString("done."));
+		emit log(QString("extracting values..."));
+		AwExtractTriggers extractT;
+		extractT._channels = triggerChannels;
+		extractT.extract();
+		markers += extractT._markers;
+		emit log(QString("done."));
+	}
+
+	if (!markers.isEmpty()) {
+		// create events.tsv (not fixed by the draft at this time)
+		QStringList events_headers = { "onset", "duration", "trial_type" };
+		QFile eventFile(events_tsv);
+		QTextStream stream_events(&eventFile);
+		if (eventFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			for (int i = 0; i < events_headers.size(); i++) {
+				stream_events << events_headers.at(i);
+				if (i < events_headers.size() - 1)
+					stream_events << "\t";
+			}
+			stream_events << endl;
+			for (auto m : reader->infos.blocks().first()->markers())
+				stream_events << m->start() << "\t" << m->duration() << "\t" << m->label() << endl;
+			eventFile.close();
+		}
+		AW_DESTROY_LIST(markers);
+	}
 	   
 	// Create channels.tsv
 	QStringList headers = { "name", "type", "units" };
@@ -318,6 +360,10 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
 	auto file = args["input_file"].toString();
 	auto mod = args["bids_modality"].toString().trimmed().toLower();
+
+	if (mod == "seeg" || mod == "ieeg")
+		mod = "ieeg";
+	else mod = "eeg";
 
 	if (file.isEmpty()) {
 		emit log(QString("AwBIDSManager::SEEGtoBIDS - No %1 file specified.").arg(mod));
@@ -411,11 +457,9 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		events_tsv = QString("%1_proc-%2").arg(events_tsv).arg(proc);
 	}
 
-	if (mod == "seeg")
-		fileName = QString("%1_ieeg.%2").arg(fileName).arg(ext);
-	else  // Converting eeg file
-		fileName = QString("%1_eeg.%2").arg(fileName).arg(ext);
-	json = QString("%1_ieeg.json").arg(json);
+	fileName = QString("%1_%2.%3").arg(fileName).arg(mod).arg(ext);
+	json = QString("%1_%2.json").arg(json).arg(mod);
+
 	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
 	events_tsv = QString("%1_events.tsv").arg(events_tsv);
 
