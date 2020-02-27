@@ -1,0 +1,59 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// 
+//                 Université d’Aix Marseille (AMU) - 
+//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
+//                 Copyright © 2020 AMU, INSERM
+// 
+//  This software is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 3 of the License, or (at your option) any later version.
+//
+//  This software is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with This software; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//
+//
+//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+#pragma once
+
+#include <AwGlobal.h>
+#include <AwPluginBase.h>
+class AwChannel;
+
+class AW_FILTER_EXPORT AwFilter : public QObject
+{
+public:
+	AwFilter();
+
+	virtual void filter(AwChannel *channel) = 0;
+
+protected:
+};
+
+
+
+class AW_FILTER_EXPORT AwFilterPlugin : public AwPluginBase
+{
+public:
+	explicit AwFilterPlugin() { m_flags = 0; }
+	enum Flags { hasUI = 1 };
+
+	virtual AwFilter* newInstance() = 0;
+protected:
+	int m_flags;
+};
+
+#define AwFilterInterfacePlugin_IID  "AnyWave.FilterInterfacePlugin"
+Q_DECLARE_INTERFACE(AwFilterPlugin, AwFilterInterfacePlugin_IID)
+Q_DECLARE_INTERFACE(AwFilter, "AnyWave.FilterPluginInterface")
+
+#define AW_INSTANTIATE_FILTER_PLUGIN(P) P* newInstance() { auto r = new P; r->setPlugin(this); return r; }

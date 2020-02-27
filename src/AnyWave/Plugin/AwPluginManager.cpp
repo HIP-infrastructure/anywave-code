@@ -33,6 +33,7 @@
 #include "Process/AwConverter.h"
 #include "Process/AwExporter.h"
 #include <AwProcessInterface.h>
+#include <filter/AwFilterPlugin.h>
 #include <graphics/AwGraphicInterface.h>
 #include <graphics/AwGraphicsObjects.h>
 #include "IO/ADES/ADESIO.h"
@@ -51,32 +52,6 @@
 #ifdef AW_EPOCHING
 #include "Epoch/AwAvgSignalItem.h"
 #endif
-
-// PluginFactory
-//template<typename AwPlugin>
-//void AwPluginFactory<AwPlugin>::addPlugin(const QString& name, AwPlugin *plugin)
-//{
-//	QString key = name.toUpper();
-//	if (!m_map.contains(key))
-//		m_map.insert(key, plugin); 
-//}
-
-//template<typename AwPlugin>
-//void AwPluginFactory<AwPlugin>::removePlugin(const QString& name)
-//{
-//	QString key = name.toUpper();
-//	if (m_map.contains(key))
-//		m_map.remove(key);
-//}
-
-//template<typename AwPlugin>
-//AwPlugin* AwPluginFactory<AwPlugin>::getPluginByName(const QString& name)
-//{
-//	QString key = name.toUpper();
-//	if (m_map.contains(key))
-//		return m_map.value(key);
-//	return Q_NULLPTR;
-//}
 
 // statics
 AwPluginManager *AwPluginManager::m_instance = 0;
@@ -111,8 +86,8 @@ AwPluginManager::~AwPluginManager()
 // Displays the dialog showing loaded plugins
 void AwPluginManager::showPluginsDial()
 {
-  AwPluginDial dlg(m_pluginReaders, m_pluginWriters, m_pluginProcesses, m_pluginDisplays);
-  dlg.exec();
+	AwPluginDial dlg;
+	dlg.exec();
 }
 
 
@@ -149,7 +124,7 @@ void AwPluginManager::deleteReaderInstance(AwFileIO *fr)
 QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
 {
 	QList<AwProcessPlugin *> res;
-	for (auto p : m_pluginProcesses) {
+	for (auto p : m_processes) {
 		if (p->flags() & flags)
 			res << p;
 	}
@@ -170,7 +145,7 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 	// browse plugins
 	bool plugin_found = false;
 	AwFileIO *reader = NULL;
-	foreach (AwFileIOPlugin *plugin, m_pluginReaders)	{
+	foreach (AwFileIOPlugin *plugin, m_readers)	{
 		// check for plugin with file extensions
 		if (plugin->hasExtension()) {
 			foreach (QString extension, plugin->fileExtensions) {
@@ -423,7 +398,7 @@ void AwPluginManager::loadUserPlugins()
 			if (fio->canRead()) {
 				AwFileIOPlugin *p = m_readerFactory.getPluginByName(fio->name);
 				if (p) {
-					m_pluginReaders.removeAll(p);
+					m_readers.removeAll(p);
 					m_pluginList.removeAll(p);
 					m_readerFactory.removePlugin(fio->name);
 					delete p;
@@ -461,7 +436,7 @@ void AwPluginManager::loadUserPlugins()
 					}
 				}
 				m_readerFactory.addPlugin(fio->name, fio);
-				m_pluginReaders += fio;
+				m_readers += fio;
 				m_pluginList += plugin;	
 				continue;
 			}
@@ -469,14 +444,14 @@ void AwPluginManager::loadUserPlugins()
 			if (fio->canWrite()) {
 				AwFileIOPlugin *p = m_writerFactory.getPluginByName(fio->name);
 				if (p) {
-					m_pluginWriters.removeAll(p);
+					m_writers.removeAll(p);
 					m_pluginList.removeAll(p);
 					m_writerFactory.removePlugin(fio->name);
 					delete p;
 					emit log("Writer plugin " + fio->name + " already exists.Previous version unloaded.");
 				}
 				m_writerFactory.addPlugin(fio->name, fio);
-				m_pluginWriters += fio;
+				m_writers += fio;
 				m_pluginList += plugin;
 				continue;
 			}
@@ -490,16 +465,28 @@ void AwPluginManager::loadUserPlugins()
 			if (idisplay) {
 				AwDisplayPlugin *p = m_displayFactory.getPluginByName(idisplay->name);
 				if (p) {
-					m_pluginDisplays.removeAll(p);
+					m_displays.removeAll(p);
 					m_pluginList.removeAll(p);
 					m_displayFactory.removePlugin(idisplay->name);
 					delete p;
 					emit log("Display plugin " +  idisplay->name + " already exists.Previous version unloaded.");
 				}
 				m_displayFactory.addPlugin(idisplay->name, idisplay);
-				m_pluginDisplays += idisplay;
+				m_displays += idisplay;
 				m_pluginList += plugin;
 				continue;					
+			}
+
+			auto iFilter = qobject_cast<AwFilterPlugin *>(plugin);
+			if (iFilter) {
+				auto p = m_filterFactory.getPluginByName(iFilter->name);
+				if (p) {
+					m_filters.removeAll(p);
+					m_pluginList.removeAll(p);
+					m_filterFactory.removePlugin(iFilter->name);
+					delete p;
+					emit log("Filter plugin " + iFilter->name + " already exists.Previous version unloaded.");
+				}
 			}
 		}
 	}
@@ -520,50 +507,52 @@ void AwPluginManager::loadPlugins()
 	checkForScriptPlugins(pythonPluginDir);
 
 	// Ajout de plugins integres directement dans l'appli.
-	m_pluginWriters += new ADESIOPlugin;
-	m_pluginReaders += new ADESIOPlugin;
+	m_writers += new ADESIOPlugin;
+	m_readers += new ADESIOPlugin;
 
-	m_pluginWriters += new AHDF5IOPlugin;
-	m_pluginReaders += new AHDF5IOPlugin;
-	m_pluginReaders += new MEMIOPlugin;
-	m_pluginWriters += new MATLABIOPlugin;
+	m_writers += new AHDF5IOPlugin;
+	m_readers += new AHDF5IOPlugin;
+	m_readers += new MEMIOPlugin;
+	m_writers += new MATLABIOPlugin;
 
 	// Ajout du plugin TriggerParser
-	m_pluginProcesses += new AwTriggerParserPlugin;
+	m_processes += new AwTriggerParserPlugin;
 
 	// Add TriggerWriter
-	m_pluginProcesses += new AwTriggerWriterPlugin;
+	m_processes += new AwTriggerWriterPlugin;
 
 	// Add TriggerEraser
-	m_pluginProcesses += new AwTriggerEraserPlugin;
+	m_processes += new AwTriggerEraserPlugin;
 
 	// Add Converter plugin
-	m_pluginProcesses += new AwConverterPlugin;
+	m_processes += new AwConverterPlugin;
 	 
 	// add MATLAB_MARKERS_EXPORTER
-	m_pluginProcesses += new AwMATLABMarkersExporterPlugin;
+	m_processes += new AwMATLABMarkersExporterPlugin;
 
 	// Add Exporter plugin
-	m_pluginProcesses += new AwExporterPlugin;
+	m_processes += new AwExporterPlugin;
 
 	// add SignalItem as DisplayPlugin
-	m_pluginDisplays += new AwDisplayPluginSignalItem();
+	m_displays += new AwDisplayPluginSignalItem();
 
 	// add ICA SignalItem as DisplayPlugin
-	m_pluginDisplays += new AwDisplayPluginICASignalItem();
+	m_displays += new AwDisplayPluginICASignalItem();
 #ifdef AW_EPOCHING
 	m_pluginDisplays += new AwDisplayPluginAvgSignalItem;
 #endif
 
 	// Parse plugin to plugin's factory
-	foreach(AwFileIOPlugin *p, m_pluginReaders)
+	foreach(AwFileIOPlugin *p, m_readers)
 		m_readerFactory.addPlugin(p->name, p);
-	foreach(AwFileIOPlugin *p, m_pluginWriters)
+	foreach(AwFileIOPlugin *p, m_writers)
 		m_writerFactory.addPlugin(p->name, p);
-	foreach(AwProcessPlugin *p, m_pluginProcesses)
+	foreach(AwProcessPlugin *p, m_processes)
 		m_processFactory.addPlugin(p->name, p);
-	foreach(AwDisplayPlugin *p, m_pluginDisplays)
+	foreach(AwDisplayPlugin *p, m_displays)
 		m_displayFactory.addPlugin(p->name, p);
+	foreach(AwFilterPlugin *p, m_filters)
+		m_filterFactory.addPlugin(p->name, p);
 
 
 	// Lecture de tous les plugins trouvés
@@ -608,17 +597,17 @@ void AwPluginManager::loadPlugins()
 
 void AwPluginManager::loadFileIOReaderPlugin(AwFileIOPlugin *plugin)
 {
-	AwFileIOPlugin *p = m_readerFactory.getPluginByName(plugin->name);
+	auto p = m_readerFactory.getPluginByName(plugin->name);
 	if (p) {
 		m_pluginList.removeAll(p);
-		m_pluginReaders.removeAll(p);
+		m_readers.removeAll(p);
 		m_readerFactory.removePlugin(plugin->name);
 		emit log("Reader plugin " + plugin->name + " already exists.Previous version unloaded.");
 		delete p;
 	}
 	auto montageDir = AwSettings::getInstance()->getString("montageDir");
 	m_readerFactory.addPlugin(plugin->name, plugin);
-	m_pluginReaders += plugin;
+	m_readers += plugin;
 	m_pluginList += plugin;
 	// check if reader plugin has montages
 	if (!plugin->montages().isEmpty() && !montageDir.isEmpty()) {
@@ -653,24 +642,24 @@ void AwPluginManager::loadFileIOReaderPlugin(AwFileIOPlugin *plugin)
 
 void AwPluginManager::loadFileIOWriterPlugin(AwFileIOPlugin *plugin)
 {
-	AwFileIOPlugin *p = m_writerFactory.getPluginByName(plugin->name);
+	auto p = m_writerFactory.getPluginByName(plugin->name);
 	if (p) {
 		m_pluginList.removeAll(p);
-		m_pluginReaders.removeAll(p);
+		m_readers.removeAll(p);
 		m_readerFactory.removePlugin(plugin->name);
 		emit log("Reader plugin " + plugin->name + " already exists.Previous version unloaded.");
 		delete p;
 	}
 	m_writerFactory.addPlugin(plugin->name, plugin);
-	m_pluginWriters += plugin;
+	m_writers += plugin;
 	m_pluginList += plugin;
 }
 
 void AwPluginManager::loadProcessPlugin(AwProcessPlugin *plugin)
 {
-	AwProcessPlugin *p = m_processFactory.getPluginByName(plugin->name);
+	auto p = m_processFactory.getPluginByName(plugin->name);
 	if (p) {
-		m_pluginProcesses.removeAll(p);
+		m_processes.removeAll(p);
 		m_pluginList.removeAll(p);
 		m_processFactory.removePlugin(plugin->name);
 		delete p;
@@ -678,20 +667,36 @@ void AwPluginManager::loadProcessPlugin(AwProcessPlugin *plugin)
 	}
  	m_processFactory.addPlugin(plugin->name, plugin);
 	m_pluginList += plugin;
-	m_pluginProcesses += plugin;
+	m_processes += plugin;
 }
 
 void AwPluginManager::loadDisplayPlugin(AwDisplayPlugin *plugin)
 {
-	AwDisplayPlugin *p = m_displayFactory.getPluginByName(plugin->name);
+	auto *p = m_displayFactory.getPluginByName(plugin->name);
 	if (p) {
-		m_pluginDisplays.removeAll(p);
+		m_displays.removeAll(p);
 		m_pluginList.removeAll(p);
 		m_displayFactory.removePlugin(plugin->name);
 		delete p;
 		emit log("Display plugin " + plugin->name + " already exists.Previous version unloaded.");
 	}
 	m_displayFactory.addPlugin(plugin->name, plugin);
-	m_pluginDisplays += plugin;
+	m_displays += plugin;
 	m_pluginList += plugin;
 }
+
+void AwPluginManager::loadFilterPlugin(AwFilterPlugin *plugin)
+{
+	auto *p = m_filterFactory.getPluginByName(plugin->name);
+	if (p) {
+		m_filters.removeAll(p);
+		m_pluginList.removeAll(p);
+		m_filterFactory.removePlugin(plugin->name);
+		delete p;
+		emit log("Filter plugin " + plugin->name + " already exists.Previous version unloaded.");
+	}
+	m_filterFactory.addPlugin(plugin->name, plugin);
+	m_filters += plugin;
+	m_pluginList += plugin;
+}
+

@@ -28,12 +28,11 @@
 #include <QHeaderView>
 #include <AwFileIO.h>
 #include <AwProcessInterface.h>
+#include <Filter/AwFilterPlugin.h>
 #include <graphics/AwGraphicInterface.h>
+#include "Plugin/AwPluginManager.h"
 
-AwPluginDial::AwPluginDial(const QList<AwFileIOPlugin *>& readers,
-						   const QList<AwFileIOPlugin *>& writers,
-						   const QList<AwProcessPlugin *>& processes,
-						   const QList<AwDisplayPlugin *>& displayers, QWidget *parent)
+AwPluginDial::AwPluginDial(QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
@@ -42,83 +41,77 @@ AwPluginDial::AwPluginDial(const QList<AwFileIOPlugin *>& readers,
 
 	// Init TreeWidget
 	// Un item parent pour chaque type de plugins
-	QStringList labels;
-
-	labels << tr("Name") << tr("Description");
-	treeWidget->setHeaderLabels(labels);
-#if QT_VERSION < 5
-	treeWidget->header()->setResizeMode(0, QHeaderView::Stretch);
-    treeWidget->header()->setResizeMode(1, QHeaderView::Stretch);
-#else
+	treeWidget->setHeaderLabels({ "Name", "Description" });
 	treeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     treeWidget->header()->setSectionResizeMode(1, QHeaderView::Stretch);
-#endif
 
-	m_writerItem = new QTreeWidgetItem(treeWidget);
-	m_writerItem->setText(0, tr("Writer"));
-	treeWidget->setItemExpanded(m_writerItem, true);
-	m_writerItem->setIcon(0, QIcon(":/images/ox_plugin_32.png"));
+	auto writerRoot =  new QTreeWidgetItem(treeWidget);
+	writerRoot->setText(0, tr("Writer"));
+	treeWidget->setItemExpanded(writerRoot, true);
+	writerRoot->setIcon(0, QIcon(":/images/ox_plugin_32.png"));
 
-	m_processItem = new QTreeWidgetItem(treeWidget);
-	m_processItem->setText(0, tr("Process"));
-	treeWidget->setItemExpanded(m_processItem, true);
-	m_processItem->setIcon(0, QIcon(":/images/system_run_32.png"));
+	auto processRoot = new QTreeWidgetItem(treeWidget);
+	processRoot->setText(0, tr("Process"));
+	treeWidget->setItemExpanded(processRoot, true);
+	processRoot->setIcon(0, QIcon(":/images/system_run_32.png"));
 	
-	m_readerItem = new QTreeWidgetItem(treeWidget);
-	m_readerItem->setText(0, tr("Reader"));
-	treeWidget->setItemExpanded(m_readerItem, true);
-	m_readerItem->setIcon(0, QIcon(":/images/ox_plugin_32.png"));
+	auto filterRoot = new QTreeWidgetItem(treeWidget);
+	filterRoot->setText(0, tr("Filter"));
+	treeWidget->setItemExpanded(filterRoot, true);
+	processRoot->setIcon(0, QIcon(":/images/system_run_32.png"));
 
-	m_displayItem = new QTreeWidgetItem(treeWidget);
-	m_displayItem->setText(0, tr("Display"));
-	treeWidget->setItemExpanded(m_displayItem, true);
-	m_displayItem->setIcon(0, QIcon(":/images/display-settings.png"));
+	auto readerRoot = new QTreeWidgetItem(treeWidget);
+	readerRoot->setText(0, tr("Reader"));
+	treeWidget->setItemExpanded(readerRoot, true);
+	readerRoot->setIcon(0, QIcon(":/images/ox_plugin_32.png"));
 
-
-
-	QFont boldFont = m_readerItem->font(0);
+	auto displayRoot = new QTreeWidgetItem(treeWidget);
+	displayRoot->setText(0, tr("Display"));
+	treeWidget->setItemExpanded(displayRoot, true);
+	displayRoot->setIcon(0, QIcon(":/images/display-settings.png"));
+	
+	QFont boldFont = writerRoot->font(0);
     boldFont.setBold(true);
-    m_readerItem->setFont(0, boldFont);
- 	m_writerItem->setFont(0, boldFont);
-	m_processItem->setFont(0, boldFont);
-	m_displayItem->setFont(0, boldFont);
+	writerRoot->setFont(0, boldFont);
+	processRoot->setFont(0, boldFont);
+	filterRoot->setFont(0, boldFont);
+	readerRoot->setFont(0, boldFont);
+	displayRoot->setFont(0, boldFont);
 	
 	setWindowTitle(tr("Loaded Plug-ins"));
 
 	
 	// fill in the table widget
-	QTreeWidgetItem *pluginItem = NULL; 
-	if (!readers.isEmpty())	{
-		foreach (AwFileIOPlugin *p, readers)	{
-			 pluginItem = new QTreeWidgetItem(m_readerItem);
-			 pluginItem->setText(0, p->name);
-			 pluginItem->setText(1, p->description);
-			 pluginItem->setIcon(0, m_featureIcon);
-		}
+	auto pm = AwPluginManager::getInstance();
+	for (auto p : pm->readers()) {
+		auto item = new QTreeWidgetItem(readerRoot);
+		item->setText(0, p->name);
+		item->setText(1, p->description);
+		item->setIcon(0, m_featureIcon);
 	}
-	if (!writers.isEmpty()) {
-		foreach (AwFileIOPlugin *p, writers) {
-			 pluginItem = new QTreeWidgetItem(m_writerItem);
-			 pluginItem->setText(0, p->name);
-			 pluginItem->setText(1, p->description);
-			 pluginItem->setIcon(0, m_featureIcon);
-		}
+	for (auto p : pm->writers()) {
+		auto item = new QTreeWidgetItem(writerRoot);
+		item->setText(0, p->name);
+		item->setText(1, p->description);
+		item->setIcon(0, m_featureIcon);
 	}
-	if (!processes.isEmpty())	{
-		foreach (AwProcessPlugin *p, processes) {
-			 pluginItem = new QTreeWidgetItem(m_processItem);
-			 pluginItem->setText(0, p->name);
-			 pluginItem->setText(1, p->description);
-			 pluginItem->setIcon(0, m_featureIcon);
-		}
+	for (auto p : pm->processes()) {
+		auto item = new QTreeWidgetItem(processRoot);
+		item->setText(0, p->name);
+		item->setText(1, p->description);
+		item->setIcon(0, m_featureIcon);
 	}
-	if (!displayers.isEmpty())	{
-		foreach (AwDisplayPlugin *p, displayers)	{
-			 pluginItem = new QTreeWidgetItem(m_displayItem);
-			 pluginItem->setText(0, p->name);
-			 pluginItem->setText(1, p->description);
-			 pluginItem->setIcon(0, m_featureIcon);
-		}
+	for (auto p : pm->displays()) {
+		auto item = new QTreeWidgetItem(displayRoot);
+		item->setText(0, p->name);
+		item->setText(1, p->description);
+		item->setIcon(0, m_featureIcon);
+	}
+	for (auto p : pm->filters()) {
+		auto item = new QTreeWidgetItem(filterRoot);
+		item->setText(0, p->name);
+		item->setText(1, p->description);
+		item->setIcon(0, m_featureIcon);
 	}
 }
 
