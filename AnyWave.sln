@@ -223,7 +223,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EEPIO", "src\plugins\EEPIO\
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyTestPlugin", "src\plugins\PyTestPlugin\PyTestPlugin.pyproj", "{FD743525-716A-4802-8B00-05F055825FAC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zH0", "src\plugins\zH0\zH0.vcxproj", "{F9D26043-C240-4229-9BEB-FA5182985D59}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFV", "src\plugins\MultiFiltersViewer\MFV.vcxproj", "{F9D26043-C240-4229-9BEB-FA5182985D59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -756,7 +756,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal
