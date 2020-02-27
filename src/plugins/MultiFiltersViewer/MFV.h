@@ -23,34 +23,32 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include "zH0.h"
-#include "zH0GUI.h"
+#pragma once
 
-zH0Plugin::zH0Plugin()
+#include "MFV_global.h"
+#include <AwProcessInterface.h>
+
+class MFVGUI;
+
+class MFV_EXPORT MFV : public AwGUIProcess
 {
-	name = QString("zH0");
-	description = QString("Whiten signals using zH0");
-	type = AwProcessPlugin::GUI;
-}
+	Q_OBJECT
+	Q_INTERFACES(AwGUIProcess)
+public:
+	MFV();
+	void run(const QStringList& args) override; // main execution entry point of the plugin
+protected:
+	MFVGUI *m_widget;
+};
 
-zH0::zH0()
+
+class MFV_EXPORT MFVPlugin : public AwProcessPlugin
 {
-	// this plugin requires a user selection
-	pdi.setInputFlags(Aw::ProcessInput::ProcessRequiresChannelSelection);
-	// Limit the usage to 3 channels max
-	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 3);
-}
+	Q_OBJECT
+	Q_PLUGIN_METADATA(IID AwProcessPlugin_IID)
+	Q_INTERFACES(AwProcessPlugin)
+public:
+	MFVPlugin();
+	AW_INSTANTIATE_PROCESS(MFV);
 
-
-void zH0::run(const QStringList& args)
-{
-	m_widget = new zH0GUI;
-	// register our widget to auto close the plugin when the user closes the widget
-	registerGUIWidget(m_widget);
-	// connect the signal view client to the data server.
-	connectClient(m_widget->signalView()->client());
-	// we want to browse data through all the file
-	m_widget->signalView()->setTotalDuration(pdi.input.settings[processio::file_duration].toDouble());
-	m_widget->setChannels(pdi.input.channels());
-	m_widget->show();
-}
+};

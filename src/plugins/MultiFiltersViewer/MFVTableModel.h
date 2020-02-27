@@ -1,22 +1,22 @@
 #pragma once
 
-#include "zH0FilterSet.h"
+#include "MFVFilterSet.h"
 #include <QAbstractTableModel>
 #include <QItemDelegate>
 
-constexpr int ZH0_COLUMNS = 4;
-constexpr int ZH0_HP = 0;
-constexpr int ZH0_LP = 1;
-constexpr int ZH0_NOTCH = 2;
-constexpr int ZH0_COLOR = 3;
+constexpr int MFV_COLUMNS = 4;
+constexpr int MFV_HP = 0;
+constexpr int MFV_LP = 1;
+constexpr int MFV_NOTCH = 2;
+constexpr int MFV_COLOR = 3;
 
-class zH0TableModel : public QAbstractTableModel
+class MFVTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
-	zH0TableModel(QObject *parent);
-	~zH0TableModel();
+	MFVTableModel(QObject *parent);
+	~MFVTableModel();
 
 	QVariant data(const QModelIndex& index, int role) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -26,17 +26,17 @@ public:
 	bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
 	void clear();
-	void add(zH0FilterSet *set);
-	zH0FilterSets& filterSets() { return m_filterSets; }
+	void add(MFVFilterSet *set);
+	MFVFilterSets& filterSets() { return m_filterSets; }
 protected:
-	zH0FilterSets m_filterSets;
+	MFVFilterSets m_filterSets;
 };
 
-class zH0ModelDelegate : public QItemDelegate
+class MFVModelDelegate : public QItemDelegate
 {
 	Q_OBJECT
 public:
-	zH0ModelDelegate(QObject *parent = 0) : QItemDelegate(parent) {}
+	MFVModelDelegate(QObject *parent = 0) : QItemDelegate(parent) {}
 
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 	void setEditorData(QWidget *editor, const QModelIndex &index) const override;

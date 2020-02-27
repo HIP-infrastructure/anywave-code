@@ -26,38 +26,38 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="zH0.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zH0GUI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="zH0TableModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="zh0_global.h">
+    <ClInclude Include="MFV_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="zH0FilterSet.h">
+    <ClInclude Include="MFVFilterSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="zH0.h">
+    <QtMoc Include="MFV.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="zH0GUI.h">
+    <QtMoc Include="MFVGUI.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="zH0TableModel.h">
+    <QtMoc Include="MFVTableModel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="zH0GUI.ui">
+    <QtUic Include="MFVGUI.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MFV.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MFVGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MFVTableModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

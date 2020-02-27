@@ -65,7 +65,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PreprocessorDefinitions>ZH0_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MFV_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(AWROOT)\include;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -82,7 +82,7 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PreprocessorDefinitions>ZH0_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MFV_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(AWROOT)\include;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -93,19 +93,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="zH0.cpp" />
-    <ClCompile Include="zH0GUI.cpp" />
-    <ClCompile Include="zH0TableModel.cpp" />
+    <QtMoc Include="MFV.h" />
+    <ClInclude Include="MFVFilterSet.h" />
+    <QtMoc Include="MFVGUI.h" />
+    <QtMoc Include="MFVTableModel.h" />
+    <ClInclude Include="MFV_global.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="zH0.h" />
-    <QtMoc Include="zH0GUI.h" />
-    <QtMoc Include="zH0TableModel.h" />
-    <ClInclude Include="zH0FilterSet.h" />
-    <ClInclude Include="zh0_global.h" />
+    <QtUic Include="MFVGUI.ui" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="zH0GUI.ui" />
+    <ClCompile Include="MFV.cpp" />
+    <ClCompile Include="MFVGUI.cpp" />
+    <ClCompile Include="MFVTableModel.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

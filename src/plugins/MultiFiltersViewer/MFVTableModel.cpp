@@ -1,28 +1,28 @@
-#include "zH0TableModel.h"
+#include "MFVTableModel.h"
 #include <AwCore.h>
 #include <QComboBox>
 
-zH0TableModel::zH0TableModel(QObject *parent)
+MFVTableModel::MFVTableModel(QObject *parent)
 	: QAbstractTableModel(parent)
 {
 }
 
-zH0TableModel::~zH0TableModel()
+MFVTableModel::~MFVTableModel()
 {
 	AW_DESTROY_LIST(m_filterSets);
 }
 
-int zH0TableModel::rowCount(const QModelIndex &parent) const
+int MFVTableModel::rowCount(const QModelIndex &parent) const
 {
 	return m_filterSets.count();
 }
 
-int zH0TableModel::columnCount(const QModelIndex &parent) const
+int MFVTableModel::columnCount(const QModelIndex &parent) const
 {
-	return ZH0_COLUMNS;
+	return MFV_COLUMNS;
 }
 
-Qt::ItemFlags zH0TableModel::flags(const QModelIndex &index) const
+Qt::ItemFlags MFVTableModel::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::ItemIsEnabled | Qt::ItemIsDragEnabled;
@@ -33,14 +33,14 @@ Qt::ItemFlags zH0TableModel::flags(const QModelIndex &index) const
 	return QAbstractTableModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsEditable;
 }
 
-void zH0TableModel::clear()
+void MFVTableModel::clear()
 {
 	beginResetModel();
 	AW_DESTROY_LIST(m_filterSets);
 	endResetModel();
 }
 
-void zH0TableModel::add(zH0FilterSet *set)
+void MFVTableModel::add(MFVFilterSet *set)
 {
 	beginResetModel();
 	m_filterSets << set;
@@ -49,7 +49,7 @@ void zH0TableModel::add(zH0FilterSet *set)
 
 
 
-QVariant zH0TableModel::data(const QModelIndex &index, int role) const
+QVariant MFVTableModel::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -59,7 +59,7 @@ QVariant zH0TableModel::data(const QModelIndex &index, int role) const
 
 	switch (col)
 	{
-	case ZH0_HP:
+	case MFV_HP:
 		if (role == Qt::DisplayRole) {
 			if (set->hp())
 				return QString::number(set->hp());
@@ -71,7 +71,7 @@ QVariant zH0TableModel::data(const QModelIndex &index, int role) const
 		else if (role == Qt::ToolTipRole)
 			return QString(tr("High Pass in Hz"));
 		break;
-	case ZH0_LP:
+	case MFV_LP:
 		if (role == Qt::DisplayRole) {
 			if (set->lp())
 				return QString::number(set->lp());
@@ -83,7 +83,7 @@ QVariant zH0TableModel::data(const QModelIndex &index, int role) const
 		else if (role == Qt::ToolTipRole)
 			return QString(tr("Low Pass in Hz"));
 		break;
-	case ZH0_NOTCH:
+	case MFV_NOTCH:
 		if (role == Qt::DisplayRole) {
 			if (set->notch())
 				return QString::number(set->notch());
@@ -95,7 +95,7 @@ QVariant zH0TableModel::data(const QModelIndex &index, int role) const
 		else if (role == Qt::ToolTipRole)
 			return QString(tr("Notch in Hz"));
 		break;
-	case ZH0_COLOR:
+	case MFV_COLOR:
 		if (role == Qt::DisplayRole || role == Qt::UserRole || role == Qt::EditRole)
 			return set->color();
 		else if (role == Qt::ToolTipRole)
@@ -112,23 +112,23 @@ QVariant zH0TableModel::data(const QModelIndex &index, int role) const
 }
 
 
-QVariant zH0TableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant MFVTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Vertical)
 		return QVariant();
-	if (section == ZH0_HP && role == Qt::DisplayRole)
+	if (section == MFV_HP && role == Qt::DisplayRole)
 		return QString(tr("High Pass"));
-	else if (section == ZH0_LP && role == Qt::DisplayRole)
+	else if (section == MFV_LP && role == Qt::DisplayRole)
 		return QString(tr("Low Pass"));
-	else if (section == ZH0_NOTCH && role == Qt::DisplayRole)
+	else if (section == MFV_NOTCH && role == Qt::DisplayRole)
 		return QString(tr("Notch"));
-	else if (section == ZH0_COLOR && role == Qt::DisplayRole)
+	else if (section == MFV_COLOR && role == Qt::DisplayRole)
 		return QString(tr("Channel Color"));
 	return QVariant();
 }
 
 
-bool zH0TableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool MFVTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
 	if (!index.isValid())
 		return false;
@@ -136,16 +136,16 @@ bool zH0TableModel::setData(const QModelIndex &index, const QVariant &value, int
 	auto set = m_filterSets.at(index.row());
 	int col = index.column();
 
-	if (col == ZH0_HP && role == Qt::EditRole) {
+	if (col == MFV_HP && role == Qt::EditRole) {
 		set->setHP(value.toDouble());
 	}
-	else if (col == ZH0_LP && role == Qt::EditRole) {
+	else if (col == MFV_LP && role == Qt::EditRole) {
 		set->setLP(value.toDouble());
 	}
-	else if (col == ZH0_NOTCH && role == Qt::EditRole) {
+	else if (col == MFV_NOTCH && role == Qt::EditRole) {
 		set->setNotch(value.toDouble());
 	}
-	else if (col == ZH0_COLOR && role == Qt::EditRole) {
+	else if (col == MFV_COLOR && role == Qt::EditRole) {
 		set->setColor(value.toString());
 	}
 
@@ -156,9 +156,9 @@ bool zH0TableModel::setData(const QModelIndex &index, const QVariant &value, int
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-QWidget *zH0ModelDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget *MFVModelDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-	if (index.column() == ZH0_COLOR) {
+	if (index.column() == MFV_COLOR) {
 		QComboBox *editor = new QComboBox(parent);
 		for (int i = 0; i < QColor::colorNames().size(); i++) {
 			editor->insertItem(i, QColor::colorNames().at(i), i);
@@ -172,9 +172,9 @@ QWidget *zH0ModelDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 	return QItemDelegate::createEditor(parent, option, index);
 }
 
-void zH0ModelDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void MFVModelDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-	if (index.column() == ZH0_COLOR) {
+	if (index.column() == MFV_COLOR) {
 		QComboBox *cb = static_cast<QComboBox *>(editor);
 
 		QString colorName = index.model()->data(index, Qt::EditRole).toString();
@@ -186,9 +186,9 @@ void zH0ModelDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 	QItemDelegate::setEditorData(editor, index);
 }
 
-void zH0ModelDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+void MFVModelDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-	if (index.column() == ZH0_COLOR) {
+	if (index.column() == MFV_COLOR) {
 		QComboBox *cb = static_cast<QComboBox *>(editor);
 		model->setData(index, cb->currentText(), Qt::EditRole);
 		return;
@@ -196,10 +196,10 @@ void zH0ModelDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
 	QItemDelegate::setModelData(editor, model, index);
 }
 
-void zH0ModelDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void MFVModelDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 
-	if (index.column() == ZH0_COLOR) {
+	if (index.column() == MFV_COLOR) {
 		QComboBox *cb = static_cast<QComboBox *>(editor);
 		cb->setGeometry(option.rect.x(), option.rect.y(), option.rect.width() + 100, option.rect.height());
 		cb->showPopup();
@@ -209,7 +209,7 @@ void zH0ModelDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
 
 }
 
-void zH0ModelDelegate::commitAndCloseComboBox()
+void MFVModelDelegate::commitAndCloseComboBox()
 {
 	QComboBox *cb = qobject_cast<QComboBox *>(sender());
 	emit commitData(cb);

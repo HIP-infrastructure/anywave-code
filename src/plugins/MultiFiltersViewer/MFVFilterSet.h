@@ -5,10 +5,10 @@
 
 #include <QString>
 
-class zH0FilterSet
+class MFVFilterSet
 {
 public:
-	explicit zH0FilterSet() { m_hp = m_lp = m_notch = 0.; }
+	explicit MFVFilterSet() { m_hp = m_lp = m_notch = 0.; }
 
 	inline QString& color() { return m_color; }
 	inline float hp() { return m_hp; }
@@ -23,4 +23,4 @@ protected:
 	QString m_color;
 };
 
-using zH0FilterSets = QList<zH0FilterSet *>;
+using MFVFilterSets = QList<MFVFilterSet *>;
