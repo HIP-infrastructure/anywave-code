@@ -269,7 +269,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		extractT._channels = triggerChannels;
 		extractT.extract();
 		markers += extractT._markers;
-		emit log(QString("done."));
+		emit log(QString("found %1 values. done.").arg(extractT._markers.size()));
 	}
 
 	if (!markers.isEmpty()) {
@@ -284,7 +284,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 					stream_events << "\t";
 			}
 			stream_events << endl;
-			for (auto m : reader->infos.blocks().first()->markers())
+			for (auto m : markers)
 				stream_events << m->start() << "\t" << m->duration() << "\t" << m->label() << endl;
 			eventFile.close();
 		}
