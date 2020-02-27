@@ -211,6 +211,12 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	jObject["DigitizedLandmarks"] = false;
 	jObject["DigitizedHeadPoints"] = headshapeExists;
 
+	auto date = reader->infos.isoDate();
+	if (date.isEmpty())
+		date = "n/a";
+	jObject["AcquisitionDate"] = date;
+	
+
 	QJsonDocument doc(jObject);
 	QFile jsonFile(json);
 	if (!jsonFile.open(QIODevice::WriteOnly)) {
@@ -560,6 +566,10 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		manufacturer = "n/a";
 	// JSON
 	QJsonObject jObject;
+	auto date = reader->infos.isoDate();
+	if (date.isEmpty())
+		date = "n/a";
+	jObject["AcquisitionDate"] = date;
 	jObject.insert("TaskName", QJsonValue::fromVariant(task));
 	jObject.insert("Manufacturer", QJsonValue::fromVariant(manufacturer));
 	jObject.insert("PowerLineFrequency", QJsonValue::fromVariant(50));

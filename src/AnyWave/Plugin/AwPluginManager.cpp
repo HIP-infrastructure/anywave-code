@@ -591,6 +591,11 @@ void AwPluginManager::loadPlugins()
 				loadDisplayPlugin(idisplay);
 				continue;
 			}
+			auto ifilter = qobject_cast<AwFilterPlugin *>(plugin);
+			if (ifilter) {
+				loadFilterPlugin(ifilter);
+				continue;
+			}
 		}
 	}
 }
