@@ -573,7 +573,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	jObject.insert("TaskName", QJsonValue::fromVariant(task));
 	jObject.insert("Manufacturer", QJsonValue::fromVariant(manufacturer));
 	jObject.insert("PowerLineFrequency", QJsonValue::fromVariant(50));
-	if (mod == "seeg") {
+	if (mod == "ieeg") {
 		jObject.insert("SEEGChannelCount", QJsonValue::fromVariant(countSEEG));
 		jObject["iEEGReference"] = QString("n/a");
 	}

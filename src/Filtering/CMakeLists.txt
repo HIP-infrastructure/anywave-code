@@ -26,11 +26,12 @@ SET(SRC  AwButterWorth.cpp
     AwFilterGUI.cpp
     AwFilterModel.cpp
     AwFilterTableView.cpp
-    AwFilterAddButton.cpp)
+    AwFilterAddButton.cpp
+	AwFilterPlugin.cpp)
 
 
 SET(HEADERS  ../../include/filter/AwFiltering.h ../../include/filter/AwFilterSettings.h ../../include/filter/AwFilterTableView.h
- AwFilterGUI.h AwFilterModel.h AwFilterAddButton.h)
+ AwFilterGUI.h AwFilterModel.h AwFilterAddButton.h ../../include/filter/AwFilterPlugin.h)
 
 SET(UI AwFilterGUI.ui)
 

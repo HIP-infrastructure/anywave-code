@@ -47,11 +47,13 @@ SOURCES += \
     DspFilters/PoleFilter.cpp \
     DspFilters/RBJ.cpp \
     DspFilters/RootFinder.cpp \
-    DspFilters/State.cpp
+    DspFilters/State.cpp \
+	AwFilterPlugin.cpp
 
 
 HEADERS += \
     ../../include/filter/AwFiltering.h \
+	../../include/filter/AwFilterPlugin.h \
 	AwFilterModel.h \
     AwFilterAddButton.h \
 	../../include/filter/AwFilterSettings.h \

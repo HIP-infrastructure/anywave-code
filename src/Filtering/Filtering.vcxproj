@@ -24,6 +24,7 @@
     <ClCompile Include="AwFilterGUI.cpp" />
     <ClCompile Include="AwFiltering.cpp" />
     <ClCompile Include="AwFilterModel.cpp" />
+    <ClCompile Include="AwFilterPlugin.cpp" />
     <ClCompile Include="AwFilterSettings.cpp" />
     <ClCompile Include="AwFilterTableView.cpp" />
     <ClCompile Include="DspFilters\Bessel.cpp" />

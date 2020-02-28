@@ -23,37 +23,9 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include <filter/AwFilterPlugin.h>
 
-#include <AwGlobal.h>
-#include <AwPluginBase.h>
-class AwChannel;
-
-class AW_FILTER_EXPORT AwFilter : public AwPluginInstanceBase
+AwFilter::AwFilter()
 {
-public:
-	AwFilter();
 
-	virtual void filter(AwChannel *channel) = 0;
-
-protected:
-};
-
-
-
-class AW_FILTER_EXPORT AwFilterPlugin : public AwPluginBase
-{
-public:
-	explicit AwFilterPlugin() { m_flags = 0; }
-	enum Flags { hasUI = 1 };
-
-	virtual AwFilter* newInstance() = 0;
-protected:
-	int m_flags;
-};
-
-#define AwFilterInterfacePlugin_IID  "AnyWave.FilterInterfacePlugin"
-Q_DECLARE_INTERFACE(AwFilterPlugin, AwFilterInterfacePlugin_IID)
-Q_DECLARE_INTERFACE(AwFilter, "AnyWave.FilterPluginInterface")
-
-#define AW_INSTANTIATE_FILTER_PLUGIN(P) P* newInstance() { auto r = new P; r->setPlugin(this); return r; }
+}
