@@ -225,6 +225,12 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyTestPlugin", "src\plugins
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFV", "src\plugins\MultiFiltersViewer\MFV.vcxproj", "{F9D26043-C240-4229-9BEB-FA5182985D59}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zH0Filter", "..\plugins\zH0Filter\zH0Filter.vcxproj", "{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+		{7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E} = {7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -751,6 +757,14 @@ Global
 		{F9D26043-C240-4229-9BEB-FA5182985D59}.Release|Win32.ActiveCfg = Release|x64
 		{F9D26043-C240-4229-9BEB-FA5182985D59}.Release|x64.ActiveCfg = Release|x64
 		{F9D26043-C240-4229-9BEB-FA5182985D59}.Release|x64.Build.0 = Release|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Debug|Win32.ActiveCfg = Debug|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Debug|x64.ActiveCfg = Debug|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Debug|x64.Build.0 = Debug|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Release|Any CPU.ActiveCfg = Release|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Release|Win32.ActiveCfg = Release|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Release|x64.ActiveCfg = Release|x64
+		{A7770EB6-5E7F-41A0-8DC1-CFD304F925C7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
