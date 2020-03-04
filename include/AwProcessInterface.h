@@ -167,15 +167,11 @@ public:
 
 public slots:
 	void stop() { emit aboutToBeDestroyed(); m_plugin->deleteInstance(this); }
-	/** Set new markers as input for the plugin **/
-	virtual void setMarkers(const AwMarkerList& markers) { m_markers = markers; }  // default implementation
 signals:
 	void aboutToBeDestroyed();
 	void closed();
 	
 	void connectionClosed(AwDataClient *client);
-protected:
-	AwMarkerList m_markers;
 };
 
 class AW_PROCESS_EXPORT AwProcess : public AwBaseProcess

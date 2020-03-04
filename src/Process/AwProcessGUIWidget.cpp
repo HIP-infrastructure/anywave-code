@@ -26,8 +26,14 @@
 #include <process/AwProcessGUIWidget.h>
 #include <QCloseEvent>
 
+
 void AwProcessGUIWidget::closeEvent(QCloseEvent *event)
 {
 	emit closed();
 	event->accept();
+}
+
+void AwProcessGUIWidget::setProcess(AwGUIProcess *process)
+{
+	m_process = process;
 }
