@@ -54,6 +54,7 @@ protected:
 	QwtScaleWidget *m_yScaleWidget;
 protected slots:
 	void prepareSelection(const QRectF& rect);
+
 	
 };
 

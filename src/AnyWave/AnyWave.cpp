@@ -163,7 +163,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		// END OF ADDING PLUGINGS MENUS
 
 		m_actions << actionMontage << actionMarkers << actionCarto3D << actionFileProperties << actionComponentsMaps << actionShow_map_on_signal << actionShow_Mappings << actionCreateEpoch
-			<< actionVisualiseEpoch << actionAveraging;
+			<< actionVisualiseEpoch << actionAveraging << actionICA_Batching;
 		for (QAction *a : m_actions)
 			a->setEnabled(false);
 	}
@@ -636,7 +636,7 @@ void AnyWave::initToolBarsAndMenu()
 	// ICA Menu
 	actionComponentsMaps->setEnabled(false);
 	actionShow_map_on_signal->setEnabled(false);
-
+	actionICA_Batching->setEnabled(false);
 	// Epoch
 #ifdef AW_EPOCHING
 	connect(actionCreateEpoch, &QAction::triggered, this, &AnyWave::doEpoch);
@@ -1201,7 +1201,6 @@ void AnyWave::on_actionQuit_triggered()
 {
 	close();
 }
-
 
 // Help
 void AnyWave::on_actionHelp_triggered()

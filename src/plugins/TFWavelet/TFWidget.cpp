@@ -41,9 +41,9 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_ui.cbNorm->setCurrentIndex(0);
 	connect(m_ui.cbNorm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeNormalization(int)));
 	// Z Scale
-	m_ui.cbZScale->addItem("Max to Max");
-	m_ui.cbZScale->addItem("Min to Max");
-	m_ui.cbZScale->addItem("Zero to Max");
+	m_ui.cbZScale->addItem("Max to Max", DisplaySettings::MaxToMax);
+	m_ui.cbZScale->addItem("Min to Max", DisplaySettings::MinToMax);
+	m_ui.cbZScale->addItem("Zero to Max", DisplaySettings::ZeroToMax);
 	m_ui.cbZScale->setCurrentIndex(1);
 	connect(m_ui.cbZScale, SIGNAL(currentIndexChanged(int)), this, SLOT(changeZScale(int)));
 
@@ -242,7 +242,7 @@ void TFWidget::changeNormalization(int index)
 
 void TFWidget::changeZScale(int index)
 {
-	m_displaySettings.zInterval = index;
+	m_displaySettings.zInterval = m_ui.cbZScale->currentData().toInt();
 	updatePlots();
 }
 

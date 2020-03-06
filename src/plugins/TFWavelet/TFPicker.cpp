@@ -56,18 +56,12 @@ QwtText TFPicker::trackerText(const QPoint &pos) const
 	double value = map.invTransform(pos.y());
 	output.sprintf("%.2f Hz", value);
 	QwtText text(output);
-	text.setColor(m_trackerColor);
+	QBrush bg(Qt::SolidPattern);
+	bg.setColor(Qt::white);
+	text.setBackgroundBrush(bg);
+	text.setColor(Qt::black);
 	return text;
 }
-
-//void TFPicker::widgetMousePressEvent(QMouseEvent *e)
-//{
-//	QwtPlotPicker::widgetMousePressEvent(e);
-//	e->accept();
-//#ifndef NDEBUG
-//	qDebug() << "TFPicker - mousePressed." << endl;
-//#endif
-//}
 
 void TFPicker::prepareSelection(const QRectF &rect)
 {

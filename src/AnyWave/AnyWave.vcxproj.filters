@@ -724,9 +724,6 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_AwPidManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPidManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwRequestServer.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1315,6 +1312,15 @@
     <ClCompile Include="Data\AwDataSet.cpp">
       <Filter>Data</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwICABatchDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwICABatchDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="ICA\AwICABatchDialog.cpp">
+      <Filter>ICA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1824,6 +1830,12 @@
     <CustomBuild Include="Data\AwDataSet.h">
       <Filter>Data</Filter>
     </CustomBuild>
+    <CustomBuild Include="ICA\AwICABatchDialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ICA\AwICABatchDialog.h">
+      <Filter>ICA</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2035,6 +2047,9 @@
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSNode.h">
       <Filter>IO\BIDS</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwICABatchDialog.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

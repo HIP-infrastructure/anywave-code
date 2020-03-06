@@ -73,7 +73,6 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	m_freqScaleWidget->setTitle(freqText);
 	// default to Log scale transformation
 	m_freqScaleWidget->setTransformation(new QwtLogTransform());
-	m_freqScaleWidget->hide();
 	
 	// building the colormap widget
 	m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
@@ -85,6 +84,9 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	m_colorMapWidget->setColorBarWidth(25);
 	m_colorMapWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 	m_colorMapWidget->hide();
+
+	// default to log scale for freq
+	setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine());
 	
 	// building picker
 	m_picker = new TFPicker((QwtPlotCanvas *)canvas(), m_freqScaleWidget);
@@ -95,10 +97,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	connect(m_picker, SIGNAL(selectionDone(int, int, float, int, int)), this, SLOT(select(int, int, float, int, int)));
 	applyColorMap();
 
-	// default to log scale for freq
-	setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine());
 	updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
-//	m_raw_data = NULL;
 }
 
 TFPlot::~TFPlot()
@@ -153,7 +152,13 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 	double fmin = freqs.at(0);
 	double fmax = freqs.at(freqs.size() - 1);
 	QList<double> leftTicks[QwtScaleDiv::NTickTypes];
-	leftTicks[QwtScaleDiv::MajorTick] << fmin << freqs.at((freqs.size() / 2) - 1) << fmax;
+	auto start = fmin;
+	int interval = (int)std::floor((fmax + fmin) / 8);
+	while (start  < fmax) {
+		leftTicks[QwtScaleDiv::MajorTick] << start;
+		start += interval;
+	}
+	leftTicks[QwtScaleDiv::MajorTick] << fmax;
 	QwtScaleDiv divL(leftTicks[QwtScaleDiv::MajorTick].first(), leftTicks[QwtScaleDiv::MajorTick].last(), leftTicks);
 	m_freqScaleWidget->scaleDraw()->setScaleDiv(divL);
 	m_picker->setFreqScaleInterval(fmin, fmax);
@@ -200,24 +205,12 @@ void TFPlot::updateDisplaySettings()
 
 void TFPlot::applyNormalization()
 {
-	//int r = m_raw_rows;
-	//int c = m_raw_cols;
-
 	m_mat = mat(m_rawMat.memptr(), m_rawMat.n_rows, m_rawMat.n_cols, true);
 	QVector<double> matrix(m_mat.n_rows * m_mat.n_cols);
 	double *data = matrix.data();
 
 	switch (m_displaySettings->normalization) {
 	case DisplaySettings::N10log10Divisive:
-		//for (int i = 0; i < r; i++) {
-		//	double mean = 0.;
-		//	for (int j = 0; j < c; j++)
-		//		mean += m_raw_data[i * c + j];
-		//	mean /= c;
-		//	for (int j = 0; j < c; j++)
-		//		data[i * c + j] = 10 * log10(m_raw_data[i * c + j] / mean);
-		//}
-
 		// check for baseline correction
 		if (!m_baselineMat.is_empty()) {
 			for (auto i = 0; i < m_mat.n_rows; i++)
@@ -229,23 +222,8 @@ void TFPlot::applyNormalization()
 		}
 		break;
 	case DisplaySettings::NoNorm:
-		// restore raw data
-	//	memcpy(data, m_raw_data, r * c * sizeof(double));
 		break;
 	case DisplaySettings::ZScore:
-	
-		//for (int i = 0; i < r; i++) {
-		//	double mean = 0.;
-		//	double Exx2 = 0.;
-		//	for (int j = 0; j < c; j++)
-		//		mean += m_raw_data[i * c + j];
-		//	mean /= c;
-		//	for (int j = 0; j < c; j++)
-		//		Exx2 += (m_raw_data[i * c + j] - mean) *  (m_raw_data[i * c + j] - mean);
-		//	double sd = sqrt(Exx2 / c);
-		//	for (int j = 0; j < c; j++)
-		//		data[i * c + j] = (m_raw_data[i * c + j] - mean) / sd;
-		//}
 		if (!m_baselineMat.is_empty()) {
 			for (auto i = 0; i < m_mat.n_rows; i++) {
 				m_mat.row(i) -= arma::mean(m_baselineMat.row(i));
@@ -260,25 +238,12 @@ void TFPlot::applyNormalization()
 		}
 		break;
 	}
-	//// compute min max
-	//m_min = m_max = data[0];
-
-	//for (int i = 1; i < r * c; i++) {
-	//	if (data[i] < m_min)
-	//		m_min = data[i];
-	//	if (data[i] > m_max)
-	//		m_max = data[i];
-	//}
-
-	// transpose arma matrix because it's a column major matrix.
-	//m_mat.t();
 	// store min and max
 	m_min = m_mat.min();
 	m_max = m_mat.max();
 	for (auto r = 0; r < m_mat.n_rows; r++)
 		for (auto c = 0; c < m_mat.n_cols; c++)
 			*data++ = m_mat(r, c);
-	//memcpy(data, m_mat.memptr(), m_mat.n_elem * sizeof(double));
 
 	m_matrix->setValueMatrix(matrix, m_mat.n_cols);
 	m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
@@ -288,7 +253,6 @@ void TFPlot::applyNormalization()
 
 	// update z interval based on the Scale chosen
 	updateZScale();
-//	refresh();
 }
 
 void TFPlot::updateZScale()
@@ -313,9 +277,7 @@ void TFPlot::updateZScale()
 	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
 	m_colorMapWidget->setColorMap(ZInterval, AwQwtColorMap::newMap(m_displaySettings->colorMap));
 	m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-
 	updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
-
 	m_colorMapWidget->repaint();
 	m_spectro->invalidateCache();
 	replot();
@@ -329,20 +291,4 @@ void TFPlot::applyColorMap()
 	m_colorMapWidget->repaint();
 	m_spectro->invalidateCache();
 	replot();
-
-	//switch (m_displaySettings->colorMap)
-	//{
-	//case AwColorMap::BlueBlackRed:
-	//	m_picker->setTextColor(QColor(Qt::white));
-	//	break;
-	//case AwColorMap::Jet:
-	//	m_picker->setTextColor(QColor(Qt::red));
-	//	break;
-	//case AwColorMap::FireAndIce:
-	//	m_picker->setTextColor(QColor(Qt::white));
-	//	break;
-	//case AwColorMap::Gray:
-	//	m_picker->setTextColor(QColor(Qt::red));
-	//	break;
-	//}
 }

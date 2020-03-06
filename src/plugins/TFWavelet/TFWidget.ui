@@ -14,10 +14,10 @@
    <string>TFWavelet</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="C:/dev/AnyWaveGitlab/resources/AnyWave.qrc">
+   <iconset resource="../../../resources/AnyWave.qrc">
     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
    <item>
     <layout class="QGridLayout" name="signalsLayout" rowstretch="0" columnstretch="0"/>
    </item>
@@ -220,6 +220,19 @@
          </layout>
         </item>
         <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="Line" name="line">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -356,8 +369,14 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="toolTip">
+             <string>Show or hide the left Frequency scale.</string>
+            </property>
             <property name="text">
              <string>Show Freq. scale</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -415,7 +434,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="C:/dev/AnyWaveGitlab/resources/AnyWave.qrc"/>
+  <include location="../../../resources/AnyWave.qrc"/>
  </resources>
  <connections/>
 </ui>

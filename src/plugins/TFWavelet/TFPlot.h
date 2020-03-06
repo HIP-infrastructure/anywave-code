@@ -48,8 +48,6 @@ protected:
 	DisplaySettings m_displayCopy;
 	TFPicker *m_picker;
 	double m_min, m_max; // stored min and max values for current TF matrix.
-//	int m_raw_rows, m_raw_cols;
-//	double *m_raw_data;
 	mat m_mat, m_rawMat, m_baselineMat;
 
 	void applyNormalization();

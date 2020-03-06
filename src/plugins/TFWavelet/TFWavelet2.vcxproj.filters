@@ -31,47 +31,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TFWavelet2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_TFWavelet2.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_TFWavelet2.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="settingsui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_settingsui.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_settingsui.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tf_settings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_TFWidget.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_TFWidget.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TFWidget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_TFPlot.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_TFPlot.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TFPlot.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TFPicker.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_TFPicker.cpp">
       <Filter>Generated Files</Filter>
@@ -79,63 +43,87 @@
     <ClCompile Include="GeneratedFiles\Release\moc_TFPicker.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_TFPlot.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_TFPlot.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_TFWavelet2.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_TFWavelet2.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_TFWidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_TFWidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="display_settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TFBaseline.cpp">
+    <ClCompile Include="settingsui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_TFBaseline.cpp">
-      <Filter>Generated Files</Filter>
+    <ClCompile Include="tf_settings.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_TFBaseline.cpp">
-      <Filter>Generated Files</Filter>
+    <ClCompile Include="TFPicker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TFPlot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TFWavelet2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TFWidget.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="display_settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tf_settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tfparam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="tfwavelet2_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_settingsui.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="tf_settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_TFWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="display_settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tfparam.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="TFWavelet2.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="settingsui.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="settingsui.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="TFWidget.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="TFWidget.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="TFPlot.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="TFPicker.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="TFBaseline.h">
+    <CustomBuild Include="TFPlot.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="TFWavelet2.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="TFWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="settingsui.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="TFWidget.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>
