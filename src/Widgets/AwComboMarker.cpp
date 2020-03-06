@@ -40,6 +40,7 @@ void AwComboMarker::setMarkers(const AwMarkerList& markers)
 
 void AwComboMarker::filter()
 {
+	clear();
 	m_markers = m_saved;
 	if (m_filter & AwComboMarker::ExcludeNoDuration) {
 		foreach(AwMarker *m, m_markers) {

@@ -146,6 +146,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2", "D:\Dev\aw-h2\H2.vcxproj", "{058C0BB2-F4B7-4D69-A983-FD5B88F7961B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TFWavelet2", "D:\Dev\aw-tfwavelet\TFWavelet2.vcxproj", "{02D7C130-4763-42DE-8D86-64A6F6587020}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3989A648-CDF7-4B7B-8A1C-848DEC0D9AA9} = {3989A648-CDF7-4B7B-8A1C-848DEC0D9AA9}
+		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+		{C6AA3ED4-5F91-4754-99CB-6F2DD34D2CE4} = {C6AA3ED4-5F91-4754-99CB-6F2DD34D2CE4}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2Graphs", "D:\Dev\h2-graphs\H2Graphs.vcxproj", "{438D0D9F-7136-4A67-8E06-08929888BE72}"
 EndProject
@@ -770,7 +775,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

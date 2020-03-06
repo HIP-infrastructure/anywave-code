@@ -34,9 +34,7 @@ class AW_PROCESS_EXPORT AwProcessGUIWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	AwProcessGUIWidget(QWidget *parent) : QWidget(parent) {}
-
-	void setProcess(AwGUIProcess *p);
+	AwProcessGUIWidget(AwGUIProcess *process, QWidget *parent) : QWidget(parent) { m_process = process; }
 signals:
 	void closed();
 protected:
