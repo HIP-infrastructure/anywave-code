@@ -6,7 +6,7 @@
 
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS +=  4DNI_Reader ANT_Reader AppendFiles AutoMarking BrainVisionIO Correlation \
+SUBDIRS +=  4DNI_Reader AppendFiles AutoMarking BrainVisionIO Correlation \
 CTF_Reader FIFIO FileConverter ICA MergeFiles Micromed_Reader EDFIO EGIReader SPMReader \
-EEGLABReader DeltamedBinTxtReader CompumedicsPF EEGInto4D
+EEGLABReader DeltamedBinTxtReader CompumedicsPF EEGInto4D TFWavelet
 

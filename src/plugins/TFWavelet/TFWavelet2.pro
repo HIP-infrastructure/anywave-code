@@ -23,8 +23,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 macx { # add FFTW3 DIRS
-LIBS += -framework AwCore -L/Users/bruno/fftw/lib
-INCLUDEPATH += /Users/bruno/fftw/include
+LIBS += -framework AwCore -L/Users/bruno/vcpkg/packages/fftw3_x64-osx/lib
+INCLUDEPATH += /Users/bruno/vcpkg/packages/fftw3_x64-osx/include
 
 }
 

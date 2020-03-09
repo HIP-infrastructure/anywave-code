@@ -218,6 +218,8 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/SendMessage.cpp \
     ./MATPy/SetBeamFormer.cpp \
     ./MATPy/OpenNewFile.cpp \
+    ./MATPy/RunAnyWave.cpp \
+    ./MATPy/GetProperties.cpp \
     ./Montage/AwChannelListModel.cpp \
     ./Montage/AwECoGDialog.cpp \
     ./Montage/AwECoGGrid.cpp \
