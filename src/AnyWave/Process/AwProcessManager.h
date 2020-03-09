@@ -85,6 +85,7 @@ public:
 	inline QList<AwProcessPlugin *>& displayProcesses() { return m_displayProcess; }
 	inline QList<AwProcessPlugin *>& displayBackgroundProcesses() { return m_displayBackgroundProcess; }
 	inline QList<AwProcessPlugin *>& backgroundProcesses() { return m_backgroundProcess; }
+	QList<AwProcessPlugin *> getBatchableProcesses();
 	inline QList<AwProcess *>& activeInternalProcesses() { return m_activeInternals; }
 
 	inline bool processesAreRunning() { return !m_runningProcesses.isEmpty(); }

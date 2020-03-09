@@ -6,6 +6,7 @@ TFWavelet2Plugin::TFWavelet2Plugin()
 	name = QString(tr("Time Frequency using Wavelets"));
 	description = QString(tr("Display T/F of selected channels."));
 	type = AwProcessPlugin::GUI;
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 TFWavelet2::TFWavelet2()
@@ -13,7 +14,7 @@ TFWavelet2::TFWavelet2()
 	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::ProcessRequiresChannelSelection);
 	// Limit the usage to 3 channels max
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 3);
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+//	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 TFWavelet2::~TFWavelet2()

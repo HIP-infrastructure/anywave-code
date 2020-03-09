@@ -114,6 +114,22 @@ void AwProcessManager::closeFile()
 		gp->stop();
 }
 
+
+QList<AwProcessPlugin *> AwProcessManager::getBatchableProcesses()
+{
+	QList<AwProcessPlugin *> list;
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
+			auto settings = p->settings();
+			if (settings.contains(processio::json_ui) && settings.contains(processio::json_defaults))
+				list << p;
+		}
+	}
+	return list;
+}
+
+
+
 AwBaseProcess *AwProcessManager::newProcessFromPluginName(const QString &name)
 {
 	QMutexLocker lock(&m_mutex); // threading lock in case of a script thread calling this method

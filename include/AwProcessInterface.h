@@ -149,9 +149,11 @@ public:
 	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
 	virtual void deleteInstance(AwBaseProcess *process) { delete process;  }
 	void addLanguageTranslation(const QString& resourceFile);
+	inline QHash<QString, QVariant>& settings() { return m_settings; }
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
+	QHash<QString, QVariant> m_settings;
 };
 
 class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess
@@ -185,7 +187,7 @@ public:
 	/** Opens User Interface and returns true if ok. This method MUST be implemented by process that requires user to set parameters using a user interface. **/
 	virtual bool showUi() { return false;}	
 	/** Returns true is process has a User Interface. **/
-	inline bool hasInputUi() { return m_flags & Aw::ProcessFlags::ProcessHasInputUi; }
+	inline bool hasInputUi() { return plugin()->flags() & Aw::ProcessFlags::ProcessHasInputUi; }
 	/** Gets the process plugin that instanciated this process. **/
 	virtual void quit() { stop(); }
 	inline int flags() { return m_flags; }

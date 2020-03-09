@@ -29,7 +29,7 @@
 #include <qjsonobject.h>
 #include <qjsonarray.h>
 
-QVariantHash AwUtilities::json::hashFromJson(const QString& jsonString, QString& errorString)
+QVariantHash AwUtilities::json::hashFromJsonString(const QString& jsonString, QString& errorString)
 {
 	QJsonDocument doc;
 	QVariantHash hash;
@@ -60,4 +60,22 @@ QJsonDocument AwUtilities::json::readJsonFile(const QString& filePath)
 		return QJsonDocument();
 	}
 	return doc;
+}
+
+QVariantHash AwUtilities::json::fromJsonFileToHash(const QString& filePath)
+{
+	auto doc = readJsonFile(filePath);
+	if (!doc.isEmpty() && !doc.isNull())
+		return doc.object().toVariantHash();
+
+	return QVariantHash();
+}
+
+
+QString AwUtilities::json::fromJsonFileToString(const QString& filePath)
+{
+	auto doc = readJsonFile(filePath);
+	if (!doc.isEmpty() && !doc.isNull())
+		return QString(doc.toJson(QJsonDocument::JsonFormat::Compact));
+	return QString();
 }

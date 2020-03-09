@@ -33,12 +33,12 @@ FileConverterPlugin::FileConverterPlugin()
 	name = "File Converter";
 	description = tr("Converts files to another format.");
 	category = "Process:File Operation:Convert Files";
-	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 FileConverter::FileConverter()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins|Aw::ProcessInput::GetWriterPlugins);
 }
 

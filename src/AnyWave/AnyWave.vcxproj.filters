@@ -110,6 +110,9 @@
     <Filter Include="Signal">
       <UniqueIdentifier>{cabb318c-61b6-4997-920d-200e0b613cd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Batch">
+      <UniqueIdentifier>{fad4582d-3dc6-447f-a72d-bded135f70b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1321,6 +1324,15 @@
     <ClCompile Include="ICA\AwICABatchDialog.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchDialog.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1836,6 +1848,12 @@
     <CustomBuild Include="ICA\AwICABatchDialog.h">
       <Filter>ICA</Filter>
     </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchDialog.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchDialog.ui">
+      <Filter>Batch</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2049,6 +2067,9 @@
       <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwICABatchDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBatchDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

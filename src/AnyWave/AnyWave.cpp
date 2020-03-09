@@ -72,6 +72,7 @@
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
+#include "Batch/AwBatchDialog.h"
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -1193,6 +1194,14 @@ void AnyWave::on_actionMarkers_triggered()
 {
 	AwMarkerManager::instance()->showDockUI();
 }
+
+
+void AnyWave::on_actionCreate_batch_script_triggered()
+{
+	AwBatchDialog dlg;
+	dlg.exec();
+}
+
 
 //
 // File->Quit

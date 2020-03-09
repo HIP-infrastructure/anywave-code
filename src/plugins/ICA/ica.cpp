@@ -38,12 +38,13 @@
 // use layout manager to store a layout in the matlab file
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
+#include <utils/json.h>
 
 ICA::ICA()
 {
 	pdi.setInputFlags(Aw::ProcessInput::GetAsRecordedChannels|Aw::ProcessInput::GetProcessPluginNames |Aw::ProcessInput::GetDurationMarkers| Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
+//	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;
 }
@@ -54,6 +55,9 @@ ICAPlugin::ICAPlugin()
     category = "ICA:ICA Extraction";
     name = QString("ICA");
     description = QString("extract independent components");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
+	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/json/ui.json");
+	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/json/default.json");
 }
 
 ICA::~ICA()

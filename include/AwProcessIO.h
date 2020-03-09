@@ -55,6 +55,8 @@ namespace processio {
 	constexpr auto plugin_dir = "plugin_dir";
 	constexpr auto plugin_names = "plugin_names";
 	constexpr auto ica_file = "ica_file";
+	constexpr auto json_ui = "json_ui";
+	constexpr auto json_defaults = "json_def";
 }
 
 

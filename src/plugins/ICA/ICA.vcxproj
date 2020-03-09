@@ -108,7 +108,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(AWROOT)\lib;$(DEV_ROOT)\win64\VS2015\HDF5\1.8.18\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Widgetsd.lib;AwCoreLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwFilteringLibd.lib;AwHDF5Libd.lib;AwMatlablibd.lib;AwLayoutLibd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;hdf5.lib;hdf5_hl.lib;Qt5Concurrentd.lib;AwMathLibd.lib;Qt5Guid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Widgetsd.lib;AwCoreLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwFilteringLibd.lib;AwHDF5Libd.lib;AwMatlablibd.lib;AwLayoutLibd.lib;AwUtilitiesLibd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;hdf5.lib;hdf5_hl.lib;Qt5Concurrentd.lib;AwMathLibd.lib;Qt5Guid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -140,7 +140,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(AWROOT)\lib;$(DEV_ROOT)\win64\VS2015\HDF5\1.8.18\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Widgets.lib;AwCoreLib.lib;AwFilteringLib.lib;AwProcessLib.lib;AwHDF5Lib.lib;AwReadWriteLib.lib;AwMathLib.lib;AwMatlabLib.lib;AwLayoutLib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;hdf5.lib;hdf5_hl.lib;Qt5Concurrent.lib;Qt5Gui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Widgets.lib;AwCoreLib.lib;AwFilteringLib.lib;AwProcessLib.lib;AwHDF5Lib.lib;AwReadWriteLib.lib;AwMathLib.lib;AwMatlabLib.lib;AwLayoutLib.lib;AwUtilitieslib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;hdf5.lib;hdf5_hl.lib;Qt5Concurrent.lib;Qt5Gui.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

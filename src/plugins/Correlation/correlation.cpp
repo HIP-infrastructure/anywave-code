@@ -34,12 +34,12 @@ CorrelationPlugin::CorrelationPlugin()
 	name = "Channels Correlation";
 	description = tr("Compute the correlation matrix between channels.");
 	category = "Process:Correlation:Channels Correlation";
-	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections | Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 Correlation::Correlation()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers);
 	pdi.addInputChannel(-1, 2, 0);
 	m_ui = NULL;

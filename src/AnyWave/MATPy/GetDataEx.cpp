@@ -73,7 +73,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	}
 	else {
 		QString error;
-		auto dict = AwUtilities::json::hashFromJson(json, error);
+		auto dict = AwUtilities::json::hashFromJsonString(json, error);
 		if (dict.isEmpty()) {
 			emit log(QString("error in json parsing: %1").arg(error));
 			stream << (qint64)0;;
