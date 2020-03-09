@@ -26,26 +26,22 @@
 #include "AwPidManager.h"
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// statics
-
-AwPidManager *AwPidManager::m_instance = NULL;
-bool AwPidManager::m_isActive = false;
-AwPidManager *AwPidManager::instance()
-{
-	if (!m_instance)
-		// instantiate server and move it to another thread.
-		m_instance = new AwPidManager();
-
-	return m_instance;
-}
-
+AwPidManager *AwPidManager::m_instance = nullptr;
 
 void AwPidManager::createNewPid(AwScriptProcess *process)
 {
+	QMutexLocker lock(&m_mutex);
 	process->setPid(m_index);
 	m_pids.insert(m_index++, process);
 	connect(process, SIGNAL(finished()), this, SLOT(removePid()));
+}
+
+
+AwPidManager *AwPidManager::instance()
+{
+	if (m_instance == nullptr)
+		m_instance = new AwPidManager;
+	return m_instance;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

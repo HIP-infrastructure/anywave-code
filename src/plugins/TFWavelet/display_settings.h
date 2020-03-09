@@ -1,8 +1,8 @@
-ï»¿/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
-//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
-//                 Copyright ï¿½ 2013 AMU, INSERM
+//                 Université d’Aix Marseille (AMU) - 
+//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
+//                 Copyright © 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,17 +20,26 @@
 //
 //
 //
-//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef DISPLAY_SETTINGS_H
+#define DISPLAY_SETTINGS_H
 
-#include <AwGlobal.h>
-#include <AwChannel.h>
-
-class AW_MONTAGE_EXPORT AwMontage
+class DisplaySettings
 {
 public:
-	static AwChannelList load(const QString& path);
-	static void save(const QString& path, const AwChannelList& channels);
+	DisplaySettings();
+
+	enum Normalization { NoNorm = 1, N10log10Divisive = 2, ZScore = 4 };
+	enum Flags { Normalization = 1, ColorMap = 2 , ZScale = 4, LogScaleSwitch = 32};
+	enum ZMinMax { MaxToMax = 1, MinToMax = 2, ZeroToMax = 4};
+	int colorMap;
+	int normalization;
+	int zInterval;
+	bool logScale;
+	float gain;	// gain factor for TF
 };
+
+
+#endif

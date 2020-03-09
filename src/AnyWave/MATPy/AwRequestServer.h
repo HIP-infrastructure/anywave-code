@@ -29,14 +29,24 @@
 #include <QTcpServer>
 class AwScriptProcess;
 #include <AwDataClient.h>
+#include "Data/AwDataSet.h"
+class AwFileIO;
+
+
 class AwRequestServer : public AwDataClient
 {
 	Q_OBJECT
 public:
-	AwRequestServer(/*QTcpServer *server, */QObject *parent = 0);
+	// default constructor
+	explicit AwRequestServer(QObject *parent = 0);
+	// constructor that spawn a dedicated data server for the specified file. if port is specified, listen on that port.
+	AwRequestServer(const QString& dataPath, QObject *parent = 0);
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
+	void addProcess(AwScriptProcess *process);
+	/** add a request handler **/
+	void addHandler(AwRequestServer* const object, void(AwRequestServer::* const mf)(QTcpSocket *, AwScriptProcess*), int request);
 public slots:
 	void handleNewConnection();
 	void dataReceived();
@@ -53,9 +63,12 @@ protected:
 	QThread *m_thread;
 	bool m_isListening;
 	quint16 m_serverPort;
+	AwDataSet *m_ds;
+	int m_pidCounter;
+
 private:
-	AwMarkerList m_markers;	// hold the markers added by process
 	void handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetProperties(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetData3(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetDataEx(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *process);
@@ -70,6 +83,14 @@ private:
 	void handleGetICAPanelCapture(QTcpSocket *client, AwScriptProcess *process);
 	void handleSetBeamFormer(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetTriggers(QTcpSocket *client, AwScriptProcess *process);
+	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
+	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
+	void unusedHandler(QTcpSocket *client, AwScriptProcess *process) {}
+
+	void setHandlers();
+
+	QHash<int, std::function<void(QTcpSocket*, AwScriptProcess *)>> m_handlers;
+	AwMarkerList m_markers;	// hold the markers added by process
 };
 
 

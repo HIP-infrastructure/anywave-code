@@ -19,12 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AwFFT.cpp" />
+    <ClCompile Include="AwHilbertTransform.cpp" />
     <ClCompile Include="AwMath.cpp" />
     <ClCompile Include="AwPWelch.cpp" />
     <ClCompile Include="AwSpline2D.cpp" />
     <ClCompile Include="spectrogram.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\math\AwFFT.h" />
+    <ClInclude Include="..\..\include\math\AwHilbertTransform.h" />
     <ClInclude Include="..\..\include\math\AwMath.h" />
     <ClInclude Include="..\..\include\math\AwSpline2D.h" />
     <ClInclude Include="..\..\include\math\FFT.h" />

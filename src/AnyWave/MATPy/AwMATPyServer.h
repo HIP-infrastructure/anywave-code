@@ -26,8 +26,9 @@
 #ifndef AWMATPYSERVER_H
 #define AWMATPYSERVER_H
 
-#include "Process/AwMatlabScriptPlugin.h"
 class AwRequestServer;
+class AwScriptProcess;
+#include <QObject>
 
 class AwMATPyServer : public QObject
 {
@@ -35,11 +36,20 @@ class AwMATPyServer : public QObject
 
 public:
 	static AwMATPyServer *instance();
+	static bool isRunning() { return m_instance != nullptr; }
 	~AwMATPyServer();
 
-	void start();
+	// instantiate a new server: the instance must be deleted when finished.
+	AwMATPyServer* newInstance();
+	// start a thread in which the server will listen and connect to the current data server.
+	bool start(); 
+	bool start(const QString& filePath, AwScriptProcess *process);
 	void stop();
 	quint16 serverPort(); 
+
+	// removes a duplicated instance from the list and delete it.
+	void deleteDuplicatedInstance(AwMATPyServer *instance);
+	void addDuplicatedInstance(AwMATPyServer *instance);
 signals:
 	void log(const QString& message);
 	void error(const QString& error);
@@ -48,6 +58,8 @@ protected:
 
 	static AwMATPyServer *m_instance;
 	AwRequestServer *m_rs;
+	// every time an instance is duplicated the reference is stored here. All instances will be deleted when singleton instance is deleted.
+	QList<AwMATPyServer *> m_duplicatedInstances;
 };
 
 #endif // AWMATLABSERVER_H

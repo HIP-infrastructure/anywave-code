@@ -33,6 +33,7 @@ class AwCommandLineManager
 {
 public:
 	static void runProcess(AwArguments& arguments);
+	static void runDedicatedDataServer(AwArguments& arguments);
 	/** Instantiante a process given the plugin name. Also initialize the process PDI with default settings. Throw an exception if failed. **/
 	/** if an inputFile is specified, the reader is instantiated and the file is open. The optional filter settings are also applied. **/
 	/** Arguments cand be modified to add extra parameters based on input file argument for example. **/

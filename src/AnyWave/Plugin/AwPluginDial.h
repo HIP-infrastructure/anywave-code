@@ -42,9 +42,7 @@ class AwPluginDial : public QDialog, public PluginDialClass
 	Q_OBJECT
 
 public:
-	AwPluginDial(const QList<AwFileIOPlugin *>& readers, const QList<AwFileIOPlugin *>&,
-		const QList<AwProcessPlugin *>& processes, const QList<AwDisplayPlugin *>& displayers,
-		QWidget *parent = 0);
+	AwPluginDial(QWidget *parent = 0);
 protected:
 	void changeEvent(QEvent *e) {
 		if (e)
@@ -54,10 +52,6 @@ protected:
 private:
 	QIcon m_interfaceIcon;
 	QIcon m_featureIcon;
-	QTreeWidgetItem *m_readerItem; // Pointeur sur item parent des intefaces disponibles
-	QTreeWidgetItem *m_writerItem;  
-	QTreeWidgetItem *m_processItem;  
-	QTreeWidgetItem *m_displayItem;	
 };
 
 #endif // PLUGINDIAL_H

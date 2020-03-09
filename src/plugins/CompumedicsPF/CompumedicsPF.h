@@ -63,5 +63,5 @@ class COMPUMEDICSPF_EXPORT CompumedicsReaderPlugin : public AwFileIOPlugin
 	Q_PLUGIN_METADATA(IID AwFileIOInterfacePlugin_IID)
 public:
 	CompumedicsReaderPlugin();
-	AW_INSTANTIATE_PLUGIN(CompumedicsReader)
+	AW_INSTANTIATE_FILEIO_PLUGIN(CompumedicsReader)
 };

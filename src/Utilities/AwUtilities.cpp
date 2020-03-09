@@ -28,10 +28,12 @@
 #include <utils/gui.h>
 #include <utils/time.h>
 #include <utils/endian.h>
+#include <utils/file.h>
 #include <QTime>
 #include <QtCore/qmath.h>
 #include <QSettings>
 #include <AwMarker.h>
+#include <QDir>
 #include <QFile>
 #include <qjsondocument.h>
 
@@ -323,20 +325,6 @@ char *AwUtilities::QStringToChar(const QString& str)
 }
 
 
-QJsonDocument AwUtilities::readJsonFile(const QString& filePath)
-{
-	QFile file(filePath);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		return QJsonDocument();
-	}
-	QJsonParseError error;
-	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
-	file.close();
-	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
-		return QJsonDocument();
-	}
-	return doc;
-}
 
 quint32 AwUtilities::endianness::fromBigEndian(const uchar *src)
 {
@@ -366,3 +354,20 @@ quint64 AwUtilities::endianness::fromBigEndian64(const uchar *src)
 		| src[1] * Q_UINT64_C(0x0001000000000000)
 		| src[0] * Q_UINT64_C(0x0100000000000000);
 }
+
+
+bool AwUtilities::file::isPathValid(const QString &path)
+{
+	auto components = path.split(QDir::separator());
+	if (components.isEmpty())
+		return false;
+	for (auto c : components) {
+#ifdef Q_OS_WIN
+
+#endif
+	}
+}
+
+
+
+

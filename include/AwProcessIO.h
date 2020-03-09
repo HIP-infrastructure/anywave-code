@@ -31,6 +31,34 @@
 #include <filter/AwFilterSettings.h>
 #include <AwCommandLine.h>
 
+
+////
+//// process contains input and ouput objects that are used to communicate parameters.
+//// basic types for settings are stored in a Hash table named settings.
+////
+//// parameter name								 descritpion
+//// data_path								full path to data file
+//// data_dir								full path to the folder containing the data file
+//// file_duration							file duration in seconds
+//// bad_labels								electodes marked as bad
+//// current_pos_in_file					current position in file in seconds from the beginning
+//// working_dir							full path to the temporary directory created when a process is launched.
+//// plugin_dir								full path to the current plugin directory. Useless for classic C++ plugins.
+
+namespace processio {
+	constexpr auto data_path = "data_path";
+	constexpr auto data_dir = "data_dir";
+	constexpr auto file_duration = "file_duration";
+	constexpr auto bad_labels = "bad_labels";
+	constexpr auto current_pos_in_file = "current_pos_in_file";
+	constexpr auto working_dir = "working_dir";
+	constexpr auto plugin_dir = "plugin_dir";
+	constexpr auto plugin_names = "plugin_names";
+	constexpr auto ica_file = "ica_file";
+}
+
+
+
 /** AwProcessIO defines object used as input or output by AwProcess **/
 class AW_PROCESS_EXPORT AwProcessIO
 {
@@ -43,7 +71,6 @@ public:
 	inline bool containsWidgets() { return !m_widgets.isEmpty(); }
 	inline bool containsCustomData() { return !customData.isEmpty(); }
 	inline bool launchedUsingQST() { return timeSelection.duration() > 0.; }
-	inline bool containsICA() { return !icaPath.isEmpty(); }
 	bool isEmpty();
 	inline AwFileIO *reader() { return m_reader; }
 	void setReader(AwFileIO *reader) { m_reader = reader; }
@@ -70,25 +97,15 @@ public:
 	void addChannels(const AwChannelList& channels, bool duplicate = false);
 	void addChannel(AwChannel *channel);
 	QList<AwFileIOPlugin *> readers, writers;
-	QString dataFolder;
-	QString dataPath;
-	QString workingDirPath;
-	QString pluginDirPath;
-	QString icaPath;			// contains the path to the .ica.h5 file or is empty if no ICA was computed.
+
 	AwMarker timeSelection;		// optional marker used in Quick Time Selection mode in AnyWave (contains the timing the user has selected before launching the process).
 	QVariantList customData;
-	QStringList badLabels;		// contains channels marked as bad
-	QStringList processPluginNames;
-	AwFilterSettings filterSettings;
 
-	// Display process specific
-	float currentPosInFile;
-	float pageDuration;
-	float fileDuration;	// total duration of data in file
+	AwFilterSettings filterSettings;
+	QVariantHash settings;
 
 	void lock() { m_mutex.lock(); }
 	void unlock() { m_mutex.unlock(); }
-
 protected:
 	AwChannelList m_channels;
 	// markers will contain input markers for the process.

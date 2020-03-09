@@ -3,7 +3,7 @@
 AwBIDSSubject::AwBIDSSubject(const QString& root, const QString& ID)
 {
 	m_ID = ID;
-	m_fullPath = QString("%1/sub-%2").arg(root).arg(ID);
+	m_rootDir = root;
 }
 
 
@@ -13,6 +13,11 @@ AwBIDSSubject::~AwBIDSSubject()
 		delete m_sessions.takeFirst();
 	while (!m_items.isEmpty())
 		delete m_items.takeFirst();
+}
+
+QString AwBIDSSubject::fullPath()
+{
+	return QString("%1/%2").arg(m_rootDir).arg(m_ID);
 }
 
 AwBIDSSession *AwBIDSSubject::addSession(const QString& label)

@@ -33,20 +33,16 @@
 #include "Data/AwDataServer.h"
 #include "Display/AwDisplay.h"
 #include <filter/AwFiltering.h>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Prefs/AwSettings.h"
 
 
-void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing aw_getdata/anywave.getdata() ...");
 
-	AwResponse response(client);
-
-	// get parameters from client
-	QByteArray data;
-	QDataStream out(&data, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_4_4);
+	AwTCPResponse response(client);
+	QDataStream& stream = *response.stream();
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
 
@@ -76,9 +72,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		duration = -1;
 
 	AwChannelList requestedChannels;
-	response.begin();
-	QBuffer *buf = response.buffer();
-	QDataStream stream(buf);
 	bool usingFile = false;
 
 	if (!file.isEmpty()) { // got a file
@@ -94,13 +87,23 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		}
 	}
 
+	// Dedicated Data Server if process is nullptr
+	if (process == nullptr)
+		reader = AwSettings::getInstance()->currentReader();
+
 	bool usingLabels = !labels.isEmpty();
 	bool usingTypes = !types.isEmpty();
 	bool error = false;
 
 	// default case : not using labels nor types
-	if (!usingFile)
-		requestedChannels = p->pdi.input.channels();
+	if (!usingFile) {
+		if (process == nullptr) {  // Dedicated Data Server Mode
+			requestedChannels = reader->infos.channels();
+		}
+		else {
+			requestedChannels = process->pdi.input.channels();
+		}
+	}
 	else {
 		// Handle duration = -1 when reading direclty from a file
 		if (duration == -1.)
@@ -221,9 +224,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 		// get selected channels from Display if not using file
 		if (!usingFile) 			
 			c->setSelected(selected.contains(c->name()));
-		response.begin();
-		stream.setDevice(response.buffer());
-		stream.setVersion(QDataStream::Qt_4_4);
 		int selected = c->isSelected() ? (int)1 : (int)0;
 
 		stream << c->name();
@@ -243,9 +243,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *p)
 			qint64 nSamplesLeft = c->dataSize();
 
 			while (!finished) {
-				response.begin();
-				stream.setDevice(response.buffer());
-				stream.setVersion(QDataStream::Qt_4_4);
 				if (nSamplesLeft == 0) {
 					chunkSize = 0;
 					stream << chunkSize;

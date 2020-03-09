@@ -655,9 +655,6 @@
     <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="Montage\AwAVGChannel.cpp">
-      <Filter>Montage</Filter>
-    </ClCompile>
     <ClCompile Include="Carto\AwMappingClient.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
@@ -727,12 +724,6 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_AwPidManager.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPidManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="MATPy\AwPidManager.cpp">
-      <Filter>MATPy</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwRequestServer.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -749,9 +740,6 @@
       <Filter>MATPy</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\SendMessage.cpp">
-      <Filter>MATPy</Filter>
-    </ClCompile>
-    <ClCompile Include="MATPy\AwResponse.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\GetPluginInfo.cpp">
@@ -1288,6 +1276,51 @@
     <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSParser.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSParser.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSParser.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSNode.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\OpenNewFile.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="CL\DedicatedDataServer.cpp">
+      <Filter>CL</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\GetProperties.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\RunAnyWave.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\AwPidManager.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwDataSet.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwDataSet.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\AwDataSet.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwICABatchDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwICABatchDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="ICA\AwICABatchDialog.cpp">
+      <Filter>ICA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1578,9 +1611,6 @@
     <CustomBuild Include="Process\AwProcessWidget.ui">
       <Filter>Process</Filter>
     </CustomBuild>
-    <CustomBuild Include="MATPy\AwPidManager.h">
-      <Filter>MATPy</Filter>
-    </CustomBuild>
     <CustomBuild Include="MATPy\AwRequestServer.h">
       <Filter>MATPy</Filter>
     </CustomBuild>
@@ -1791,6 +1821,21 @@
     <CustomBuild Include="Widgets\AwVideoSettingsDial.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSParser.h">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MATPy\AwPidManager.h">
+      <Filter>MATPy</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Data\AwDataSet.h">
+      <Filter>Data</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ICA\AwICABatchDialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ICA\AwICABatchDialog.h">
+      <Filter>ICA</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -1880,9 +1925,6 @@
     <ClInclude Include="GeneratedFiles\ui_AwExportDial.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="Montage\AwAVGChannel.h">
-      <Filter>Montage</Filter>
-    </ClInclude>
     <ClInclude Include="ICA\AwICAChannel.h">
       <Filter>ICA</Filter>
     </ClInclude>
@@ -1891,9 +1933,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwProcessWidget.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MATPy\AwResponse.h">
-      <Filter>MATPy</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwMappingWidget.h">
       <Filter>Generated Files</Filter>
@@ -2004,6 +2043,12 @@
       <Filter>Montage</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwVideoSettingsDial.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\BIDS\AwBIDSNode.h">
+      <Filter>IO\BIDS</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwICABatchDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -53,5 +53,5 @@ class MEMIOPlugin : public AwFileIOPlugin
 public:
 	MEMIOPlugin();
 
-	AW_INSTANTIATE_PLUGIN(MEMIO)
+	AW_INSTANTIATE_FILEIO_PLUGIN(MEMIO)
 };

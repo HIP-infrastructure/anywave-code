@@ -28,38 +28,45 @@
 #include <QDataStream>
 #include <QTcpSocket>
 #include <QDir>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Prefs/AwSettings.h"
 #include "ICA/AwICAManager.h"
 
-void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing aw_getplugininfo...");
-	AwResponse response(client);
-
-	response.begin();
-	QDataStream stream(response.buffer());
-	stream.setVersion(QDataStream::Qt_4_4);
+	AwTCPResponse response(client);
+	QDataStream& stream = *response.stream();
 
 	QStringList labels, refs;
-	float max_sr = 0., total_duration;
+	float max_sr = 0., total_duration = 0.;
 	QString temp_dir, plug_dir, file, ica_file;
 
-	file = p->pdi.input.dataPath;
-
-	for (auto c: p->pdi.input.channels()) {
-		labels << c->name();
-		refs << c->referenceName();
-		if (c->samplingRate() > max_sr)
-			max_sr = c->samplingRate();
+	// this command cannot be processed in dedicated data server mode
+	if (process == nullptr) {
+		// return empty variables
+		emit log("Unattended call in dedicated data server mode.");
+		stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << QStringList();
+		response.send();
+		emit log("Done.");
 	}
+	else {
+		file = process->pdi.input.settings[processio::data_path].toString();
 
-	total_duration = p->pdi.input.reader()->infos.totalDuration();
-	temp_dir = QDir::toNativeSeparators(p->pdi.input.workingDirPath);
-	plug_dir = QDir::toNativeSeparators(p->pdi.input.pluginDirPath);
+		for (auto c : process->pdi.input.channels()) {
+			labels << c->name();
+			refs << c->referenceName();
+			if (c->samplingRate() > max_sr)
+				max_sr = c->samplingRate();
+		}
 
-	ica_file =  QDir::toNativeSeparators(AwSettings::getInstance()->getString("currentIcaFile"));
-	stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << AwICAManager::instance()->getRejectedLabels();
-	response.send();
-	emit log("Done.");
+		total_duration = process->pdi.input.reader()->infos.totalDuration();
+		temp_dir = QDir::toNativeSeparators(process->pdi.input.settings[processio::working_dir].toString());
+		plug_dir = QDir::toNativeSeparators(process->pdi.input.settings[processio::plugin_dir].toString());
+
+		ica_file = QDir::toNativeSeparators(AwSettings::getInstance()->getString("currentIcaFile"));
+		stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << AwICAManager::instance()->getRejectedLabels();
+		response.send();
+		emit log("Done.");
+	}
 }

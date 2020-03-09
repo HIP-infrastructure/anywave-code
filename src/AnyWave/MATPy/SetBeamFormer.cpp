@@ -27,13 +27,11 @@
 #include "Source/AwSourceManager.h"
 #include <QDataStream>
 #include <QTcpSocket>
-#include <QBuffer>
-#include <armadillo>
 #include "Prefs/AwSettings.h"
 #include <QFile>
-using namespace arma;
+#include <aw_armadillo.h>
 
-void AwRequestServer::handleSetBeamFormer(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleSetBeamFormer(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing aw_setbf...");
 	QDataStream in(client);

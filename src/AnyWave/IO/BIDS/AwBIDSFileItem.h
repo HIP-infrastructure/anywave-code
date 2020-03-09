@@ -1,11 +1,45 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// 
+//                 Université d’Aix Marseille (AMU) - 
+//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
+//                 Copyright © 2013 AMU, INSERM
+// 
+//  This library is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 3 of the License, or (at your option) any later version.
+//
+//  This library is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with this library; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//
+//
+//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//
+//////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "AwBIDSTreeItem.h"
 
-class AwBIDSFileItem : public AwBIDSTreeItem
+#include <QString>
+
+class AwBIDSFileItem
 {
 public:
-	explicit AwBIDSFileItem(const QVector<QVariant>& data, AwBIDSTreeItem *parent = 0) :
-		AwBIDSTreeItem(data, parent) {}
+	enum class FileType : int { ieeg, meg, eeg };
+	enum class TsvFiles : int { channels, events };
+	AwBIDSFileItem(AwBIDSFileItem::FileType type);
+	
+	/// return either associated channels or events tsv file path. Only works for ieeg, meg, eeg
+	/// return empty string if no tsv file found.
+	QString tsvFile(AwBIDSFileItem::TsvFiles tsvFile);
 
-	QVariant data(int column, int role = Qt::DisplayRole) override;
+protected:
+	AwBIDSFileItem::FileType m_type;
+	QString m_fullPath;	 // full path to file item
+	QStringList m_items;
 };

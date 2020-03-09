@@ -36,14 +36,10 @@ AwPythonScriptProcess *AwPythonScriptPlugin::newInstance()
 {
 	AwPythonScriptProcess *p = new AwPythonScriptProcess;
 	initProcess(p);
-	// Instantiate or get current server
 	AwMATPyServer *server = AwMATPyServer::instance();
-	// Get or Create AwPidManager
-	AwPidManager *pidm = AwPidManager::instance();
-	AwPidManager::instance()->createNewPid(p);  // set pid to process
+	AwPidManager::instance()->createNewPid(p);
 
-	AwMATPyServer::instance()->start();	// start listening for network requests
-
+	server->start();
 	return p;
 }
 
@@ -94,7 +90,7 @@ void AwPythonScriptProcess::run()
 {
 	QStringList arguments;
 	QString initpy;
-	QString dataPath = pdi.input.dataPath;
+	QString dataPath = pdi.input.settings[processio::data_path].toString();
 	dataPath = QDir::toNativeSeparators(dataPath);
 	auto pythonModulePath = AwSettings::getInstance()->getString("pythonModulePath");
 	initpy = pythonModulePath + "/init.py";
@@ -118,16 +114,22 @@ void AwPythonScriptProcess::run()
 
 	//env.insert("PATH", AwSettings::getInstance()->systemPath()); // Very important to define the full system path in the process environment.
 	//env.insert("PATH", qApp->applicationDirPath());
+	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
+	QString fullPath;
 #ifdef Q_OS_MAC
-	QString application = QCoreApplication::applicationDirPath();
-    application += "/../Frameworks";
-	env.insert("DYLD_LIBRARY_PATH", application);
+	auto LDPATH = QString("%1/../Frameworks").arg(application);
+   	env.insert("DYLD_LIBRARY_PATH", LDPATH);
+	fullPath = QString("%1:%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
 #endif
 #ifdef Q_OS_LINUX
     env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
+	fullPath = QString("%1:%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+#endif
+#ifdef Q_OS_WIN
+	fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
 #endif
 	env.remove("PATH");
-	env.insert("PATH", AwSettings::getInstance()->getString("systemPath"));
+	env.insert("PATH", fullPath);
 	m_python.setProcessEnvironment(env);
 	connect(&m_python, SIGNAL(readyReadStandardOutput()), this, SLOT(pythonOutput()));
 	connect(&m_python, SIGNAL(readyReadStandardError()), this, SLOT(pythonError()));

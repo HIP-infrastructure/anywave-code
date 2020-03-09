@@ -14,11 +14,16 @@
 #include "Marker/AwMarkerManager.h"
 #include "Debug/AwDebugLog.h"
 #include <QJsonArray>
-#include <utils/AwUtilities.h>
+#include <utils/json.h>
+#include "AwBIDSParser.h"
+#include "Marker/AwExtractTriggers.h"
+#include <AwCore.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
-//QString AwBIDSManager::m_parsingPath = QString("derivatives/parsing");
+
+QStringList AwBIDSManager::m_dataFileSuffixes = { "_eeg", "_meg", "_ieeg" };
+
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
@@ -32,7 +37,7 @@ void AwBIDSManager::toBIDS(const AwArguments& args)
 
 	// check for modality
 	auto mod = args["bids_modality"].toString().trimmed().toLower();
-	if (mod == "ieeg") {
+	if (mod == "ieeg" || mod == "eeg") {
 		SEEGtoBIDS(args);
 	}
 	else if (mod == "meg") {
@@ -115,7 +120,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	auto outputDir = args["output_dir"].toString();
 	bool headshapeExists = false;
 
-	QString folderName, json, channels_tsv;
+	QString folderName, json, channels_tsv, events_tsv;
 	folderName = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	if (!session.isEmpty())
 		folderName = QString("%1_ses-%2").arg(folderName).arg(session);
@@ -135,6 +140,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	//
 	json = QString("%1.json").arg(folderName);
 	channels_tsv = QString("%1_channels.tsv").arg(baseName);
+	events_tsv = QString("%1_events.tsv").arg(baseName);
 	// common BIDS code to all MEG formats
 
 	if (kind == AwBIDSManager::Bti4DNI) { // 4DNI specific code
@@ -205,6 +211,12 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	jObject["DigitizedLandmarks"] = false;
 	jObject["DigitizedHeadPoints"] = headshapeExists;
 
+	auto date = reader->infos.isoDate();
+	if (date.isEmpty())
+		date = "n/a";
+	jObject["AcquisitionDate"] = date;
+	
+
 	QJsonDocument doc(jObject);
 	QFile jsonFile(json);
 	if (!jsonFile.open(QIODevice::WriteOnly)) {
@@ -245,6 +257,45 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	}
 	jsonFile.write(doc.toJson());
 	jsonFile.close();
+
+	// generate events.tsv only if we have markers
+	auto markers = AwMarker::duplicate(reader->infos.blocks().first()->markers());
+	//  extract trigger/responses values
+	AwChannelList triggerChannels;
+	for (auto c : reader->infos.channels()) {
+		if (c->isTrigger())
+			triggerChannels << c;
+	}
+	if (!triggerChannels.isEmpty()) {
+		emit log(QString("reading trigger channels from MEG file..."));
+		reader->readDataFromChannels(0, reader->infos.totalDuration(), triggerChannels);
+		emit log(QString("done."));
+		emit log(QString("extracting values..."));
+		AwExtractTriggers extractT;
+		extractT._channels = triggerChannels;
+		extractT.extract();
+		markers += extractT._markers;
+		emit log(QString("found %1 values. done.").arg(extractT._markers.size()));
+	}
+
+	if (!markers.isEmpty()) {
+		// create events.tsv (not fixed by the draft at this time)
+		QStringList events_headers = { "onset", "duration", "trial_type" };
+		QFile eventFile(events_tsv);
+		QTextStream stream_events(&eventFile);
+		if (eventFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			for (int i = 0; i < events_headers.size(); i++) {
+				stream_events << events_headers.at(i);
+				if (i < events_headers.size() - 1)
+					stream_events << "\t";
+			}
+			stream_events << endl;
+			for (auto m : markers)
+				stream_events << m->start() << "\t" << m->duration() << "\t" << m->label() << endl;
+			eventFile.close();
+		}
+		AW_DESTROY_LIST(markers);
+	}
 	   
 	// Create channels.tsv
 	QStringList headers = { "name", "type", "units" };
@@ -314,9 +365,14 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 {
 	auto file = args["input_file"].toString();
+	auto mod = args["bids_modality"].toString().trimmed().toLower();
+
+	if (mod == "seeg" || mod == "ieeg")
+		mod = "ieeg";
+	else mod = "eeg";
 
 	if (file.isEmpty()) {
-		emit log("AwBIDSManager::SEEGtoBIDS - No SEEG file specified.");
+		emit log(QString("AwBIDSManager::SEEGtoBIDS - No %1 file specified.").arg(mod));
 		return -1;
 	}
 
@@ -407,8 +463,9 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		events_tsv = QString("%1_proc-%2").arg(events_tsv).arg(proc);
 	}
 
-	fileName = QString("%1_ieeg.%2").arg(fileName).arg(ext);
-	json = QString("%1_ieeg.json").arg(json);
+	fileName = QString("%1_%2.%3").arg(fileName).arg(mod).arg(ext);
+	json = QString("%1_%2.json").arg(json).arg(mod);
+
 	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
 	events_tsv = QString("%1_events.tsv").arg(events_tsv);
 
@@ -440,7 +497,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	// to get the group from electrode
 	QRegularExpression re("\\d+$");
 	QRegularExpressionMatch match;
-	int countSEEG = 0, countECG = 0, countTRIG = 0;
+	int countSEEG = 0, countECG = 0, countTRIG = 0, countEEG = 0;
 	if (channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		for (int i = 0; i < headers.size(); i++) {
 			stream << headers.at(i);
@@ -460,9 +517,13 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 				stream << "ECG" << "\t" << "microV" << "\t";
 				countECG++;
 			}
-			else if (c->type() == AwChannel::SEEG || c->type() == AwChannel::EEG) {
+			else if (c->type() == AwChannel::SEEG || (c->type() == AwChannel::EEG && mod == "seeg")) {
 				stream << "SEEG" << "\t" << "microV" << "\t";
 				countSEEG++;
+			}
+			else if (c->isEEG()) {
+				stream << "EEG" << "\t" << "microV" << "\t";
+				countEEG++;
 			}
 			else
 				stream << "OTHER" << "\t" << "n/a" << "\t";
@@ -505,13 +566,24 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		manufacturer = "n/a";
 	// JSON
 	QJsonObject jObject;
+	auto date = reader->infos.isoDate();
+	if (date.isEmpty())
+		date = "n/a";
+	jObject["AcquisitionDate"] = date;
 	jObject.insert("TaskName", QJsonValue::fromVariant(task));
 	jObject.insert("Manufacturer", QJsonValue::fromVariant(manufacturer));
 	jObject.insert("PowerLineFrequency", QJsonValue::fromVariant(50));
-	jObject.insert("SEEGChannelCount", QJsonValue::fromVariant(countSEEG));
+	if (mod == "ieeg") {
+		jObject.insert("SEEGChannelCount", QJsonValue::fromVariant(countSEEG));
+		jObject["iEEGReference"] = QString("n/a");
+	}
+	else {
+		jObject["EEGReference"] = QString("n/a");
+		jObject.insert("EEGChannelCount", QJsonValue::fromVariant(countEEG));
+	}
 	jObject["SamplingFrequency"] = reader->infos.channels().first()->samplingRate();
 	jObject["SoftwareFilters"] = QString("n/a");
-	jObject["iEEGReference"] = QString("n/a");
+	
 	if (countECG)
 		jObject.insert("ECGChannelCount", QJsonValue::fromVariant(countECG));
 	if (countTRIG)
@@ -631,31 +703,18 @@ int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader)
 }
 
 
-AwBIDSManager *AwBIDSManager::instance(const QString& rootDir)
+AwBIDSManager *AwBIDSManager::instance()
 {
 	if (!m_instance)
-		m_instance = new AwBIDSManager(rootDir);
-	else
-		m_instance->setRootDir(rootDir);
+		m_instance = new AwBIDSManager;
 	return m_instance;
 }
 
 
-AwBIDSManager::AwBIDSManager(const QString& rootDir)
+AwBIDSManager::AwBIDSManager()
 {
-	m_ui = NULL;
-	m_currentSubject = Q_NULLPTR;
-	// Get extensions readers can handle.
-	auto pm = AwPluginManager::getInstance();
-	for (auto r : pm->readers()) 
-		m_fileExtensions += r->fileExtensions;
-	
-	setRootDir(rootDir);
+	m_ui = nullptr;
 	m_mustValidateModifications = false;
-
-	// init settings
-	m_settings["parsing_path"] = QString("derivatives/parsing");
-	m_settings["aw_derivatives"] = QString("derivatives/anywave");
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -668,7 +727,6 @@ QString AwBIDSManager::getParsingPath()
 	if (!isBIDSActive())
 		return QString();
 	return m_settings["parsing_path"].toString();
-	//return QString("%1/%2").arg(m_rootDir).arg(m_parsingPath);
 }
 
 void AwBIDSManager::setRootDir(const QString& path)
@@ -693,156 +751,37 @@ void AwBIDSManager::setRootDir(const QString& path)
 	}
 	closeBIDS();
 	m_rootDir = path;
+
+	AwBIDSParser parser;
+	parser.parse();
+	m_nodes = parser.nodes();
+	m_hashNodes = parser.hash();
+	
 	// instantiate UI if needed
-	if (m_ui == NULL)
-		m_ui = new AwBIDSGUI(this, path);
-	else
-		m_ui->setRootDir(path);
-	// check that the root dir contains subjects
-	getSubjects();
-	// check for source_data dir
-	bool source = false, derivatives = false;
-	QDirIterator it(m_rootDir, QDir::Dirs);
-	while (it.hasNext()) {
-		it.next();
-		QString name = it.fileName();
-		if (name == "sourcedata")
-			source = true;
-		else if (name == "derivatives")
-			derivatives = true;
-		if (source && derivatives)
-			break;
-	}
-	if (source)
-		getSubjects(AwBIDSManager::source);
-	if (derivatives) 
-		getSubjects(AwBIDSManager::derivatives);
-	
+	if (m_ui == nullptr)
+		m_ui = new AwBIDSGUI;
 	m_ui->refresh();
-}
-
-AwBIDSSubjectList& AwBIDSManager::getSubjectsFromSourceDir(int sourceDir)
-{
-	return m_subjects[sourceDir];
-}
-
-
-AwFileItem *AwBIDSManager::parseDir(const QString& fullPath, const QString& dir)
-{
-	QStringList items = { "ieeg", "eeg", "meg" };
-	QVector<int> types = { AwFileItem::ieeg, AwFileItem::eeg, AwFileItem::meg };
-	int index = items.indexOf(dir);
-	if (index == -1)
-		return NULL;
-	// parse files
-	QString fullPathItem = QString("%1/%2").arg(fullPath).arg(dir);
-	QDir directory(fullPathItem);
-	QStringList files = directory.entryList(m_fileExtensions, QDir::Files);
-	if (files.isEmpty())
-		return NULL;
-	AwFileItem *item = new AwFileItem(types.value(index));
-	item->setFullPath(fullPathItem);
-	item->setFiles(files);
-	return item;
-}
-
-void AwBIDSManager::parseSubject(AwBIDSSubject *subject)
-{
-	// check for subdirs that AnyWave could handle (iEEG, MEG, SES-)
-
-	QDir dir(subject->fullPath());
-	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	if (dirs.isEmpty())
-		return;
-
-	// check for session directories (optional)
-	for (auto d : dirs) {
-		if (d.startsWith("ses-")) {
-			// get session label
-			auto label = AwBIDSTools::getSessionLabel(d);
-			subject->addSession(label);
-		}
-	}
-
-	// have we got sessions?
-	if (subject->hasSessions()) {
-		// remove sessions from dirs
-		for (auto session : subject->sessions()) {
-			QDir sessionDir = QDir(session->fullPath());
-			QStringList entries = sessionDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-			for (auto d : entries) {
-				auto item = parseDir(sessionDir.absolutePath(), d);
-				if (item)
-					session->addItem(item);
-			}
-		}
-	}
-
-	// parse non ses- folders
-	for (auto d : dirs) {
-		if (d.startsWith("ses-"))
-			continue;
-		auto item = parseDir(dir.absolutePath(), d);
-		if (item)
-			subject->addItem(item);
-	}
-}
-
-/// Parse root dir to get all the subjects present in the structure.
-/// Create subject objects
-/// Can result in an empty list if no subject is found.
-void AwBIDSManager::getSubjects(int sourceDir)
-{
-	QString directory;
-	switch (sourceDir) {
-	case AwBIDSManager::raw:
-		directory = m_rootDir;
-		break;
-	case AwBIDSManager::source:
-		directory = QString("%1/sourcedata").arg(m_rootDir);
-		break;
-	case AwBIDSManager::derivatives:
-		directory = QString("%1/derivatives").arg(m_rootDir);
-		break;
-	}
-
-	clearSubjects(sourceDir);
-	
-	QDirIterator it(directory, QDir::Dirs);
-	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
-	QRegularExpressionMatch match;
-	while (it.hasNext()) {
-		it.next();
-		QString name = it.fileName();
-		match = re.match(name);
-		if (match.hasMatch()) {
-			name = match.captured("ID");
-			m_subjects[sourceDir].append(new AwBIDSSubject(directory, name));
-		}
-	}
-
-	for (auto s : m_subjects[sourceDir]) {
-		parseSubject(s);
-	}
 }
 
 void AwBIDSManager::closeBIDS()
 {
 	if (!isBIDSActive())
 		return;
-	for (int i = 0; i < AWBIDS_SOURCE_DIRS; i++)
-		clearSubjects(i);
+	while (!m_nodes.isEmpty())
+		delete m_nodes.takeFirst();
 	m_rootDir.clear();
 	m_modifications.clear();
 	m_mustValidateModifications = false;
-	m_currentSubject = Q_NULLPTR;
+	m_currentSubject = nullptr;
+	m_hashNodes.clear();
+	m_IDToSubject.clear();
 	emit BIDSClosed();
 }
 
 void AwBIDSManager::modifyUpdateJson(const QStringList& branches)
 {
 	auto filePath = QString("%1/tobeparsed.json").arg(getParsingPath());
-	auto json = AwUtilities::readJsonFile(filePath);
+	auto json = AwUtilities::json::readJsonFile(filePath);
 	QJsonObject root;
 	if (json.isEmpty()) 
 		json.setObject(root);
@@ -1006,19 +945,6 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 	QFile::remove(bak);
 }
 
-void AwBIDSManager::clearSubjects(int sourceDir)
-{
-	while (!m_subjects[sourceDir].isEmpty())
-		delete m_subjects[sourceDir].takeFirst();
-	m_subjectsIDs[sourceDir].clear();
-}
-
-AwBIDSSubject *AwBIDSManager::getSubject(const QString& ID, int sourceDir)
-{
-	if (m_subjectsIDs[sourceDir].contains(ID))
-		return m_subjectsIDs[sourceDir].value(ID);
-	return Q_NULLPTR;
-}
 
 int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file)
 {
@@ -1055,61 +981,70 @@ int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const Q
 }
 
 
-//QString AwBIDSManager::getDerivativesPath(int type, AwBIDSSubject *sub)
-//{
-//	switch (type) {
-//	case AwBIDSManager::EPITOOLS:
-//		break;
-//	case AwBIDSManager::EI:
-//		break;
-//	case AwBIDSManager::ICA:
-//		break;
-//	}
-//	return QString();
-//}
+QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
+{
+	if (m_currentSubject == nullptr || !isBIDSActive())
+		return QString();
+
+	QString suffix;
+	if (type == AwBIDSManager::EventsTsv)
+		suffix = "_events.tsv";
+	else if (type == AwBIDSManager::ChannelsTsv)
+		suffix = "_channels.tsv";
+	else
+		return QString();
+
+	// find the child node in current subject which contains the file
+	auto node = m_currentSubject->findNode(QFileInfo(dataFilePath).fileName(), m_currentSubject);
+	if (node == nullptr)
+		return QString();
+
+	// remove the extension
+	auto base = QFileInfo(dataFilePath).baseName();
+
+	for (auto e : m_dataFileSuffixes) {
+		if (base.contains(e)) {
+			base.remove(e);
+			break;
+		}
+	}
+	QString res = QString("%1/%2%3").arg(node->fullPath()).arg(base).arg(suffix);
+	if (QFile::exists(res))
+		return res;
+	return QString();
+}
+
+AwBIDSNode *AwBIDSManager::findSubject(const QString& dataFilePath)
+{
+	m_currentSubject = nullptr;
+	if (!isBIDSActive())
+		return nullptr;
+	QFileInfo fi(dataFilePath);
+	auto n = m_hashNodes[fi.fileName()];
+	if (n) {
+		auto parent = n->parent();
+		while (parent) {
+			n = parent;
+			parent = n->parent();
+		}
+		m_settings["BIDS_FilePath"] = dataFilePath;
+	}
+	m_currentSubject = n;
+	return m_currentSubject;
+}
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
 	if (!isBIDSActive())
 		return;
 	// check if the new file is in a BIDS structure or not
-	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->infos.fileName());
+	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
 	if (root.isEmpty()) {
 		closeBIDS(); // close current BIDS
 		return;
 	}
-	auto subj = guessSubject(reader->infos.fileName());
-	if (subj)
-		m_currentSubject = subj;
-}
-
-AwBIDSSubject *AwBIDSManager::guessSubject(const QString& path)
-{
-	m_currentSubject = Q_NULLPTR;
-	if (!isBIDSActive())
-		return Q_NULLPTR;
-	QFileInfo fi(path);
-	if (!fi.exists())
-		return Q_NULLPTR;
-
-	// using the full path we should be able to guess the BIDS base directory between (raw, sourcedata, derivatives).
-	int sourceDir = AwBIDSManager::raw;
-	if (path.contains("sourcedata"))
-		sourceDir = AwBIDSManager::source;
-	if (path.contains("derivatives"))
-		sourceDir = AwBIDSManager::derivatives;
-	auto subjects = m_subjects[sourceDir];
-	if (subjects.isEmpty())
-		return Q_NULLPTR;
-	for (auto subj : subjects) {
-		auto files = subj->findFile(fi.fileName());
-		if (!files.isEmpty()) {
-			m_currentSubject = subj;
-			return subj;
-		}
-	}
-	// failed to find a subject
-	return Q_NULLPTR;
+	// find the corresponding subject node
+	m_currentSubject = findSubject(reader->fullPath());
 }
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)

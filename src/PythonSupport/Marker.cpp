@@ -23,42 +23,31 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include <Python.h>
-//#define NO_IMPORT_ARRAY
-//#define PY_ARRAY_UNIQUE_SYMBOL anywave_ARRAY_API
-//#define NPY_NO_DEPRECATED_API NPY_1_11_API_VERSION
 
-
+#include "common.h"
 #include "structmember.h"
+#include "Marker.h"
 
-typedef struct {
-	PyObject_HEAD
-	PyObject *label;
-	float value;
-	float position, duration;
-	PyObject *channels;
-	PyObject *color;	// color string ("green")
-} marker;
 
-static void marker_dealloc(marker *self)
+static void Marker_dealloc(Marker *self)
 {
 	Py_XDECREF(self->label);
 	Py_XDECREF(self->color);
 	Py_XDECREF(self->channels);
-	self->ob_type->tp_free((PyObject*)self);
+	Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static PyObject *marker_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+static PyObject *Marker_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-	marker *self = (marker *)type->tp_alloc(type, 0);
+	Marker *self = (Marker *)type->tp_alloc(type, 0);
 
 	if (self != NULL) {
-		self->label = PyString_FromString("");
+		self->label = PyUnicode_FromString("");
 		if (self->label == NULL) {
 			Py_DECREF(self);
 			return NULL;
 		}
-		self->color = PyString_FromString("");
+		self->color = PyUnicode_FromString("");
 		if (self->color == NULL) {
 			Py_DECREF(self);
 			return NULL;
@@ -71,7 +60,7 @@ static PyObject *marker_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	return (PyObject *)self;
 }
 
-static int marker_init(marker *self, PyObject *args, PyObject *kwds)
+static int Marker_init(Marker *self, PyObject *args, PyObject *kwds)
 {
 	PyObject *label = NULL, *channels = NULL, *color = NULL, *tmp;
 
@@ -98,39 +87,38 @@ static int marker_init(marker *self, PyObject *args, PyObject *kwds)
 		self->channels = channels;
 		Py_XDECREF(tmp);
 	}
-
 	return 0;
 }
 
-static PyMemberDef marker_members[] = {
-    {"label", T_OBJECT_EX, offsetof(marker, label), 0,
+static PyMemberDef Marker_members[] = {
+    {"label", T_OBJECT_EX, offsetof(Marker, label), 0,
      "marker's label"},
-    {"value", T_FLOAT, offsetof(marker, value), 0,
+    {"value", T_FLOAT, offsetof(Marker, value), 0,
      "marker's value"},
-    {"position", T_FLOAT, offsetof(marker, position), 0,
+    {"position", T_FLOAT, offsetof(Marker, position), 0,
      "marker's position"},
-    {"duration", T_FLOAT, offsetof(marker, duration), 0,
+    {"duration", T_FLOAT, offsetof(Marker, duration), 0,
      "marker's duration"},
-	{"color", T_OBJECT_EX, offsetof(marker, color), 0,
+	{"color", T_OBJECT_EX, offsetof(Marker, color), 0,
      "marker's color"},
-    {"channels", T_OBJECT_EX, offsetof(marker, channels), 0,
+    {"channels", T_OBJECT_EX, offsetof(Marker, channels), 0,
      "targeted channels"},
     {NULL}  /* Sentinel */
 };
 
-static PyObject *marker_getcolor(marker *self, void *closure)
+static PyObject *marker_getcolor(Marker *self, void *closure)
 {
 	Py_INCREF(self->color);
 	return self->color;
 }
 
-static int marker_setcolor(marker *self, PyObject *value, void *closure)
+static int marker_setcolor(Marker *self, PyObject *value, void *closure)
 {
 	if (value == NULL) {
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the color");
 		return -1;
 	}
-	if (!PyString_Check(value)) {
+	if (!PyUnicode_Check(value)) {
 		PyErr_SetString(PyExc_TypeError, "color must be a string");
 		return -1;
 	}
@@ -141,19 +129,19 @@ static int marker_setcolor(marker *self, PyObject *value, void *closure)
 }
 
 
-static PyObject *marker_getlabel(marker *self, void *closure)
+static PyObject *marker_getlabel(Marker *self, void *closure)
 {
 	Py_INCREF(self->label);
 	return self->label;
 }
 
-static int marker_setlabel(marker *self, PyObject *value, void *closure)
+static int marker_setlabel(Marker *self, PyObject *value, void *closure)
 {
 	if (value == NULL) {
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the label");
 		return -1;
 	}
-	if (!PyString_Check(value)) {
+	if (!PyUnicode_Check(value)) {
 		PyErr_SetString(PyExc_TypeError, "label must be a string");
 		return -1;
 	}
@@ -163,7 +151,7 @@ static int marker_setlabel(marker *self, PyObject *value, void *closure)
 	return 0;
 }
 
-static int marker_setvalue(marker *self, PyObject *value, void *closure)
+static int marker_setvalue(Marker *self, PyObject *value, void *closure)
 {
 	if (value == NULL) {
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the value");
@@ -177,12 +165,12 @@ static int marker_setvalue(marker *self, PyObject *value, void *closure)
 	return 0;
 }
 
-static PyObject *marker_getvalue(marker *self, void *closure)
+static PyObject *marker_getvalue(Marker *self, void *closure)
 {
 	return PyFloat_FromDouble(self->value);
 }
 
-static int marker_setpos(marker *self, PyObject *value, void *closure)
+static int marker_setpos(Marker *self, PyObject *value, void *closure)
 {
 	if (value == NULL) {
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the position");
@@ -196,12 +184,12 @@ static int marker_setpos(marker *self, PyObject *value, void *closure)
 	return 0;
 }
 
-static PyObject *marker_getpos(marker *self, void *closure)
+static PyObject *marker_getpos(Marker *self, void *closure)
 {
 	return PyFloat_FromDouble(self->position);
 }
 
-static int marker_setdur(marker *self, PyObject *value, void *closure)
+static int marker_setdur(Marker *self, PyObject *value, void *closure)
 {
 	if (value == NULL) {
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the duration");
@@ -215,19 +203,19 @@ static int marker_setdur(marker *self, PyObject *value, void *closure)
 	return 0;
 }
 
-static PyObject *marker_getdur(marker *self, void *closure)
+static PyObject *marker_getdur(Marker *self, void *closure)
 {
 	return PyFloat_FromDouble(self->duration);
 }
 
-static int marker_setchannels(marker *self, PyObject *value, void *closure)
+static int marker_setchannels(Marker *self, PyObject *value, void *closure)
 {
 	if (value == NULL) {
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the duration");
 		return -1;
 	}
-	if (!PyList_Check(value)) {
-		PyErr_SetString(PyExc_TypeError, "channels must be a list of strings");
+	if (!PyTuple_Check(value)) {
+		PyErr_SetString(PyExc_TypeError, "channels must be a tuple of strings");
 		return -1;
 	}
 	Py_XDECREF(self->channels);
@@ -236,13 +224,13 @@ static int marker_setchannels(marker *self, PyObject *value, void *closure)
 	return 0;
 }
 
-static PyObject *marker_getchannels(marker *self, void *closure)
+static PyObject *marker_getchannels(Marker *self, void *closure)
 {
 	Py_INCREF(self->channels);
 	return self->channels;
 }
 
-static PyGetSetDef marker_getseters[] = {
+static PyGetSetDef Marker_getseters[] = {
 	{"label", (getter)marker_getlabel, (setter)marker_setlabel,	"label", NULL},
 	{"value", (getter)marker_getvalue, (setter)marker_setvalue,  "value", NULL},
 	{"position", (getter)marker_getpos, (setter)marker_setpos, "position", NULL},
@@ -252,49 +240,53 @@ static PyGetSetDef marker_getseters[] = {
 	{NULL}  /* Sentinel */
 };
 
-PyTypeObject marker_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
-    "marker",             /*tp_name*/
-    sizeof(marker),             /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    (destructor)marker_dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "Marker objects",           /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
-    0,             /* tp_methods */
-    marker_members,             /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    (initproc)marker_init,      /* tp_init */
-    0,                         /* tp_alloc */
-    marker_new,                 /* tp_new */
+
+static PyMethodDef Marker_methods[] = {
+    {NULL}  /* Sentinel */
 };
 
-static PyMethodDef marker_methods[] = {
-    {NULL}  /* Sentinel */
+
+// do not make it static as it will be declared as extern to be used in other .cpp files.
+
+PyTypeObject anywave_MarkerType = {
+	PyVarObject_HEAD_INIT(NULL, 0)
+	"anywave.Marker",				// tp_name
+	sizeof(Marker),  				// tp_basicsize
+	0,								// tp_itemsize
+	(destructor)Marker_dealloc,		// tp_dealloc
+	0,								// tp_print
+	0,								// tp_getattr
+	0,								// tp_setattr
+	0,								// tp_reserved
+	0,								// tp_repr
+	0,								// tp_as_number
+	0,								// tp_as_sequence
+	0,								// tp_as_mapping
+	0,								// tp_hash
+	0,								// tp_call
+	0,								// tp_str
+	0,								// tp_getattro
+	0,								// tp_setattro
+	0,								// tp_as_buffer
+	Py_TPFLAGS_DEFAULT |
+		Py_TPFLAGS_BASETYPE,		// tp_flags
+	"anywave Marker Object",		// tp_doc
+	0,								// tp_traverse
+	0,								// tp_clear
+	0,								// tp_richcompare
+	0,								// tp_weaklistoffset
+	0,								// tp_iter
+	0,								// tp_iternext
+	Marker_methods,					// tp_methods
+	Marker_members,					// tp_members
+	Marker_getseters,				// tp_getset
+	0,								// tp_base
+	0,								// tp_dict
+	0,								// tp_descr_get
+	0,								// tp_descr_set
+	0,								// tp_dictoffset
+	(initproc)Marker_init,			// tp_init
+	0,								// tp_alloc
+	Marker_new,						// tp_new
 };
 

@@ -48,6 +48,7 @@
     <ClInclude Include="..\..\include\AwException.h" />
     <ClInclude Include="..\..\include\AwFilteringOptions.h" />
     <ClInclude Include="..\..\include\AwMarker.h" />
+    <ClInclude Include="..\..\include\AwPluginBase.h" />
     <ClInclude Include="..\..\include\AwSensor.h" />
     <ClInclude Include="..\..\include\AwVirtualChannel.h" />
     <CustomBuild Include="..\..\include\AwDataClient.h">

@@ -27,20 +27,21 @@
 #include "Process/AwScriptPlugin.h"
 #include <QDataStream>
 #include <QTcpSocket>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Plugin/AwPluginManager.h"
 #include "Marker/AwExtractTriggers.h"
 #include "Marker/AwMarkerManager.h"
 
 
-void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing aw_getmarkers...");
-	AwResponse response(client);
+	AwTCPResponse response(client);
 
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
+	QDataStream& stream = *response.stream();
 
 	AwFileIO *reader = NULL;
 	QVector<float> values;
@@ -50,12 +51,6 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 	int step = 0;
 
 	in >> file >> extractTriggers >> values >> labels >> channels;
-
-	//  writing markers
-	response.begin();
-	QDataStream stream_data(response.buffer());
-	stream_data.setVersion(QDataStream::Qt_4_4);
-
 
 	bool usingFile = false;
 	AwMarkerList source_markers;
@@ -69,7 +64,7 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 		if (usingFile == false) {
 			// a file was specified but coud not be open.
 			emit log(QString("the file %1 could not be open.").arg(file));
-			stream_data << (int)0;
+			stream << (int)0;
 			response.send();
 			return;
 		}
@@ -138,22 +133,9 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *p)
 				result << m;
 		markers = result;
 	}
-
-	////  writing markers
-	//response.begin();
-	//QDataStream stream_data(response.buffer());
-	//stream_data.setVersion(QDataStream::Qt_4_4);
-
-	stream_data << markers.size();
-
-	foreach (AwMarker *m, markers)	{
-		stream_data << m->label();
-		stream_data << m->start();
-		stream_data << m->duration();
-		stream_data << m->value();
-		stream_data << m->targetChannels();
-	}
-
+	stream << markers.size();
+	for (auto m : markers)	
+		stream << m->label() << m->start() << m->duration() << m->value() << m->targetChannels();
 	response.send();
 	emit log("Done.");
 }

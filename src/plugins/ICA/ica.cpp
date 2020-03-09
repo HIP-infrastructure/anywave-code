@@ -33,6 +33,7 @@
 #include <math/AwMath.h>
 #include <filter/AwFilterSettings.h>
 #include <QMessageBox>
+#include <AwCore.h>
 
 // use layout manager to store a layout in the matlab file
 #include <layout/AwLayoutManager.h>
@@ -61,38 +62,14 @@ ICA::~ICA()
 
 bool ICA::showUi()
 {
-	ICASettings ui(pdi.input.dataPath, pdi.input.channels(), pdi.input.markers(), m_algoNames);
+	ICASettings ui(this);
 
 	if (ui.exec() == QDialog::Accepted)	{
-		m_modality = ui.modality;
+		//m_modality = ui.modality;
 		auto args = pdi.input.args();
-		args["modality"] = AwChannel::typeToString(ui.modality);
+		args.unite(ui.args);
 
-		if (ui.ignoreMarkers) {
-			QStringList skippedMarkers = { ui.selectedMarker };
-			args["skip_markers"] = skippedMarkers;
-
-			AwMarkerList tmp = AwMarker::getMarkersWithLabels(pdi.input.markers(), skippedMarkers);
-			auto markers = AwMarker::invertMarkerSelection(tmp, "selection", pdi.input.fileDuration);
-			pdi.input.setNewMarkers(markers);
-		}
-		else { // set whole file as input
-			pdi.input.clearMarkers();
-			pdi.input.addMarker(new AwMarker("global", 0., pdi.input.fileDuration));
-		}
-		// NOT SKIPPING BAD CHANNELS, ok clear badLabels from input.
-		if (!ui.ignoreBadChannels) {
-			pdi.input.badLabels.clear();
-		}
-
-		args["comp"] = ui.components;
-		args["downsampling"] = ui.downSampling;
-		args["hp"] = ui.hpf;
-		args["lp"] = ui.lpf;
-		m_algo = ui.algo;
-		args["infomax_extended"] = ui.infomaxExtended;
-
-		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.dataFolder);
+		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[processio::data_dir].toString());
 		QFile test(testFile);
 		if (!test.open(QIODevice::WriteOnly)) {
 			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
@@ -113,18 +90,35 @@ int ICA::initParameters()
 	m_isDownsamplingActive = true;
 	m_modality = AwChannel::stringToType(args["modality"].toString());
 	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+	// BIDS specific:
+	// when launching ICA in batch mode and specifying ieeg as modality:
+	// check for SEEG channels if none present check for EEG.
+	if (args["modality"].toString().toLower() == "ieeg") {
+		m_modality = AwChannel::SEEG;
+		m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+		if (m_channels.isEmpty()) {
+			m_modality = AwChannel::EEG;
+			m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+		}
+	}
+	if (m_channels.isEmpty()) {
+		sendMessage(QString("No channels of type %1 found in file").arg(AwChannel::typeToString(m_modality)));
+		return -1;
+	}
+
 	m_channels = AwChannel::removeDoublons(m_channels);
+	auto badLabels = pdi.input.settings[processio::bad_labels].toStringList();
 	if (args.contains("skip_bad")) {
-		if (args["skip_bas"].toBool())
-			pdi.input.badLabels.clear();
+		if (!args["skip_bad"].toBool())
+			badLabels.clear();
 	}
 	m_samplingRate = m_channels.first()->samplingRate();
 	if (args.contains("downsampling"))
 		m_isDownsamplingActive = args["downsampling"].toBool();
 	// check for bad labels 
-	if (!pdi.input.badLabels.isEmpty()) {
+	if (!badLabels.isEmpty()) {
 		foreach(AwChannel *c, m_channels)
-			if (pdi.input.badLabels.contains(c->name()))
+			if (badLabels.contains(c->name()))
 				m_channels.removeAll(c);
 	}
 	m_nComp = m_channels.size();
@@ -142,7 +136,7 @@ int ICA::initParameters()
 		return -1;
 	}
 
-	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.dataPath).arg(args["modality"].toString()));
+	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[processio::data_path].toString()).arg(args["modality"].toString()));
 
 	m_lpf = args["lp"].toDouble();
 	m_hpf = args["hp"].toDouble();
@@ -153,19 +147,47 @@ int ICA::initParameters()
 	// check if we have to use specific markers or skipped some
 	bool use = args.contains("use_markers");
 	bool skip = args.contains("skip_markers");
-	// in the case of one option is set, the AwRunProcess method has already setup the input markers for us if we runFromCommandLine
-	// If we run in GUI mode, the showUi also has already setup the input.
-	// But if we run in command line mode and no use_markers or skip_markers is specified we must set the input markers to what ICA expects 
-	if (!use && !skip) {
+
+	auto fd = pdi.input.settings[processio::file_duration].toDouble();
+	if (use || skip) {
+		auto markers = AwMarker::duplicate(pdi.input.markers());
+		QStringList skippedMarkers, usedMarkers;
+		if (use)
+			usedMarkers = args["use_markers"].toStringList();
+		if (skip)
+			skippedMarkers = args["skip_markers"].toStringList();
+
+		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
+		if (inputMarkers.isEmpty()) {
+			pdi.input.clearMarkers();
+			pdi.input.addMarker(new AwMarker("whole data", 0., fd));
+		}
+		else
+		{
+			pdi.input.clearMarkers();
+			pdi.input.setNewMarkers(inputMarkers);
+		}
+		AW_DESTROY_LIST(markers);
+	}
+	else {  // no markers to use or skip => compute on the whole data
 		pdi.input.clearMarkers();
-		pdi.input.addMarker(new AwMarker("global", 0., pdi.input.fileDuration));
+		pdi.input.addMarker(new AwMarker("whole data", 0., fd));
 	}
 
-	// if the skip markers were selected then input markers already represent the data to load. 
-	// if not than one marker should marked the entire data in pdi.input.markers.;
-	sendMessage("Loading data...");
-	requestData(&m_channels, &pdi.input.markers(), true);
-	sendMessage("Done");
+
+    // Watch for memory exception
+	try {
+
+		// if the skip markers were selected then input markers already represent the data to load. 
+		// if not than one marker should marked the entire data in pdi.input.markers.;
+		sendMessage("Loading data...");
+		requestData(&m_channels, &pdi.input.markers(), true);
+		sendMessage("Done");
+	}
+	catch (std::bad_alloc& ba) {
+		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+		return -1;
+	}
 
 	int decimate = 1;
 	if (m_isDownsamplingActive) {
@@ -206,9 +228,9 @@ int ICA::initParameters()
 	qint64 nSamples = m_channels.first()->dataSize(); // getting total number of samples
 
 	if (sqrt(nSamples / 30.) < m_nComp) {
-		sendMessage(QString("Number of samples %1 for the number of components "
-			"requested %2 may be insufficient. Aborted.").arg(nSamples).arg(m_nComp));
-		return -1;
+		sendMessage(QString("Warning: Number of samples %1 for the number of components "
+			"requested %2 may be insufficient.").arg(nSamples).arg(m_nComp));
+	//	return -1;
 	}
 
 	// channels have been prepared.
@@ -220,8 +242,8 @@ int ICA::initParameters()
 	if (args.contains("output_dir"))
 		dir = args["output_dir"].toString();
 	else
-		dir = pdi.input.dataFolder;
-	QFileInfo fi(pdi.input.dataPath);
+		dir = pdi.input.settings[processio::data_dir].toString();
+	QFileInfo fi(pdi.input.settings[processio::data_path].toString());
 	m_fileName = QString("%1/%2").arg(dir).arg(fi.fileName());
 	QString mod = args["modality"].toString();
 	m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
@@ -232,7 +254,13 @@ int ICA::initParameters()
 void ICA::runFromCommandLine()
 {
 	if (initParameters() == 0) {
-		infomax(m, n, m_nComp);
+		try {
+			infomax(m, n, m_nComp);
+		}
+		catch (std::bad_alloc& ba) {
+			sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+			return;
+		}
 		saveToFile();
 	}
 }
@@ -242,7 +270,13 @@ void ICA::run()
 	if (initParameters() == -1)
 		return;
 
-	infomax(m, n, m_nComp);
+	try {
+		infomax(m, n, m_nComp);
+	}
+	catch (std::bad_alloc& ba) {
+		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+		return;
+	}
 	if (!isAborted()) {
 		saveToFile();
 
@@ -298,5 +332,5 @@ void ICA::saveToFile()
 		sendMessage(QString("Error saving to .mat : %1").arg(e.errorString()));
 		return;
 	}
-	sendMessage(QString("saved results to %1.").arg(m_fileName));
+	sendMessage(QString("results saved to %1.").arg(m_fileName));
 }

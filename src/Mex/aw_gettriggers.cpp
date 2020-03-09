@@ -81,34 +81,19 @@ mxArray *request_markers(const QString& file, const QStringList& channels)
 			in >> label >> start >> duration >> value >> channels;
 
 			// label
-			mxArray *output_label = mxCreateString(label.toStdString().c_str());
-			mxSetField(output, i, "label", output_label);
-
+			mxSetField(output, i, "label", mxCreateString(label.toStdString().c_str()));
 			// start
-			mxArray *output_start = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-			float *s = (float *)mxGetData(output_start);
-			s[0] = start;
-			mxSetField(output, i, "position", output_start);
-
+			mxSetField(output, i, "position", doubleToMat((double)start));
 			// duration
-			mxArray *output_duration = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-			float *d = (float *)mxGetData(output_duration);
-			d[0] = duration;
-			mxSetField(output, i, "duration", output_duration);
-
+			mxSetField(output, i, "duration", doubleToMat((double)duration));
 			// value
-			mxArray *output_value = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-			float *v = (float *)mxGetData(output_value);
-			v[0] = value;
-			mxSetField(output, i, "value", output_value);
-
+			mxSetField(output, i, "value", doubleToMat((double)value));
 			// channels
 			mxArray *output_channels = NULL;
 			if (!channels.isEmpty()) {
 				output_channels = mxCreateCellMatrix(1, channels.size());
 				for (mwSize j = 0; j < channels.size(); j++) {
-					mxArray *target = mxCreateString(channels.at(j).toLatin1().data());
-					mxSetCell(output_channels, j, target);
+					mxSetCell(output_channels, j, mxCreateString(channels.at(j).toStdString().c_str()));
 				}
 			}
 			else // create an empty cell array

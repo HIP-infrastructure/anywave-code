@@ -57,5 +57,5 @@ class SPMREADER_EXPORT SPMReaderPlugin : public AwFileIOPlugin
 #endif
 public:
 	SPMReaderPlugin();
-	AW_INSTANTIATE_PLUGIN(SPMReader)
+	AW_INSTANTIATE_FILEIO_PLUGIN(SPMReader)
 };

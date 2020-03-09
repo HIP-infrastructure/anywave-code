@@ -111,7 +111,7 @@ mxArray *doubleToMat(double value)
 {
 	mxArray *tmp = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
 	double *s = (double *)mxGetData(tmp);
-	s[0] = value;
+	*s = value;
 	return tmp;
 }
 
@@ -215,7 +215,6 @@ void TCPRequest::clear()
 
 bool TCPRequest::sendRequest()
 {
-
 	int dataSize = m_data.size() + sizeof(int); // data size + request ID size
 	// always send the pid first then size and data.
 	*m_streamSize << m_pid;

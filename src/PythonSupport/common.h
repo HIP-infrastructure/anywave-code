@@ -24,17 +24,23 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <QTcpSocket>
+#undef slots  // Python 3 header uses slots keyword which is also a Qt keyword...
 #include <Python.h>
 #include <qdatastream.h>
 
-QTcpSocket *connect();
-void sendRequest(QTcpSocket *, const QByteArray& );
-QByteArray initRequest(int request);
-int waitForResponse(QTcpSocket *);
+extern PyObject *AnyWaveError;
+
+//void sendRequest(QTcpSocket *, const QByteArray& );
+//QByteArray initRequest(int request);
+//int waitForResponse(QTcpSocket *);
 
 /** parse a whole dictionnary and convert it to JSON format. **/
 QString dictToJson(PyObject *dict);
 
+// Python 3 string are all unicoded by default : this function will convert to QString.
+QString Py3StringToQString(PyObject *str);
+char *Py3StringtoCString(PyObject *str);
+PyObject *QStringToPy3String(const QString& str);
 // Request class
 
 class TCPRequest
@@ -45,18 +51,24 @@ public:
 	enum Status { connected, failed, undefined };
 
 	inline int status() { return m_status; }
-	inline QTcpSocket *socket() { return m_socket; }
+//	inline QTcpSocket *socket() { return m_socket; }
 	QDataStream *stream() { return m_streamData; }
+	QDataStream *response() { return m_streamResponse; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
-	bool sendRequest();
-	int getResponse();
+	bool sendRequest(QString& jsonString = QString());
+	bool getResponse();
 	void clear();
 
 protected:
-	QTcpSocket * m_socket;
-	int m_status, m_pid, m_requestID;
+	// connect to AnyWave
+	void connect();
+	// wait for a response from AnyWave
+	int waitForResponse();
+	QTcpSocket m_socket;
+	int m_status, m_requestID;
 	QByteArray m_size;
 	QByteArray m_data;
 	QDataStream *m_streamSize;
 	QDataStream *m_streamData;
+	QDataStream *m_streamResponse;
 };

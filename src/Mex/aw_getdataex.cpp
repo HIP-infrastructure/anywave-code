@@ -109,10 +109,10 @@ void parse_cfg(const mxArray *cfg, mxArray *plhs[], int nlhs)
 		mxSetField(output, i, "name", mxCreateString(name.toStdString().c_str()));
 		mxSetField(output, i, "ref", mxCreateString(ref.toStdString().c_str()));
 		mxSetField(output, i, "type", mxCreateString(type.toStdString().c_str()));
-		mxSetField(output, i, "samplingRate",  floatToMat(samplingRate));
-		mxSetField(output, i, "hpf", floatToMat(hpf));
-		mxSetField(output, i, "lpf", floatToMat(lpf));
-		mxSetField(output, i, "notch", floatToMat(notch));
+		mxSetField(output, i, "samplingRate",  doubleToMat((double)samplingRate));
+		mxSetField(output, i, "hpf", doubleToMat((double)hpf));
+		mxSetField(output, i, "lpf", doubleToMat((double)lpf));
+		mxSetField(output, i, "notch", doubleToMat((double)notch));
 
 		if (nSamples == 0) {
 			mxSetField(output, i, "data", mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL));

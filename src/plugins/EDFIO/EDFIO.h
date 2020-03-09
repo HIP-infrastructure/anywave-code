@@ -136,6 +136,6 @@ class EDFIO_EXPORT EDFIOPlugin : public AwFileIOPlugin
 #endif
 public:
 	EDFIOPlugin();
-	AW_INSTANTIATE_PLUGIN(EDFIO)
+	AW_INSTANTIATE_FILEIO_PLUGIN(EDFIO)
 };
 

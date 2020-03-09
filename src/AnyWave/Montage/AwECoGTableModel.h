@@ -5,11 +5,11 @@
 #include "AwECoGGrid.h"
 
 // Defines pour la mise en place des colonnes de données dans le display setup
-#define AW_ECOG_NB_COLUMN	4    
-#define AW_ECOG_ORIENTATION	0
-#define AW_ECOG_ROWS		1
-#define AW_ECOG_COLS		2	
-#define AW_ECOG_LABELS		3
+constexpr int AW_ECOG_NB_COLUMN = 4;
+constexpr int AW_ECOG_ORIENTATION = 0;
+constexpr int AW_ECOG_ROWS = 1;
+constexpr int AW_ECOG_COLS = 2;
+constexpr int AW_ECOG_LABELS = 3;
 
 
 class AwECoGTableModel : public QAbstractTableModel

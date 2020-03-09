@@ -1,9 +1,46 @@
-#include <AwMontage.h>
+#include <montage/AwMontage.h>
+#include <montage/AwAVGChannel.h>
 #include <AwException.h>
 #include <QFile>
 #include <QDomElement>
 #include <QDomDocument>
 #include <QTextStream>
+#include <AwFileIO.h>
+#include <AwCore.h>
+
+AwMontage::AwMontage(AwFileIO *reader)
+{
+	m_reader = reader;
+	auto channels = reader->infos.channels();
+	// init as recorded channels list
+	for (auto c : channels) {
+		// insert in hash table
+		m_asRecordedHash[c->name()] = c;
+		m_asRecorded << c;
+		// make a copy a as recorded channel and insert it in channels.
+		// do not insert Reference channels in default montage
+		if (!c->isReference())
+			m_channels << c->duplicate();
+	}
+	auto m_badChannelPath = reader->getSideFile("*.bad");
+	if (!m_badChannelPath.isEmpty())
+		loadBadChannels();
+	auto mtgFile = reader->getSideFile("*.mtg");
+	if (!mtgFile.isEmpty()) 
+		load(mtgFile);
+	// remove null channels if any
+	foreach(AwChannel *c, m_channels)
+		if (c == Q_NULLPTR) {
+			m_channels.removeAll(c);
+			m_asRecordedHash.remove(c->name());
+		}
+	
+}
+
+AwMontage::~AwMontage()
+{
+	AW_DESTROY_LIST(m_channels);
+}
 
 
 void AwMontage::save(const QString& path, const AwChannelList& channels)
@@ -124,4 +161,82 @@ AwChannelList AwMontage::load(const QString& path)
 		node = node.nextSibling();
 	}
 	return res;
+}
+
+
+bool AwMontage::loadMontage(const QString& mtgFile)
+{
+	try {
+		m_channels = AwMontage::load(mtgFile);
+	}
+	catch (const AwException& e)
+	{
+		return false;
+	}
+	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
+	foreach(AwChannel *c, m_channels) {
+		if (!m_asRecordedHash.contains(c->name())) {
+			m_channels.removeAll(c);
+			delete c;
+			continue;
+		}
+		if (!m_asRecordedHash.contains(c->name())) {
+			auto asRecorded = m_asRecordedHash[c->name()];
+			if (asRecorded->isBad())
+				continue;
+			if (c->hasReferences() && c->referenceName() != "AVG") {
+				if (m_asRecordedHash.contains(c->referenceName())) {
+					if (m_asRecordedHash[c->referenceName()]->isBad())
+						continue;
+				}
+				else
+					c->clearRefName();
+			}
+			asRecorded->setType(c->type());
+		}
+		else {  // channel not present in as recorded
+			// checking for special names
+			if (c->name() == "SEEG_AVG") {
+				m_channels << new AwAVGChannel(AwChannel::SEEG);
+			}
+			else if (c->name() == "EEG_AVG") {
+				m_channels << new AwAVGChannel(AwChannel::EEG);
+			}
+			else if (c->name() == "MEG_AVG") {
+				m_channels << new AwAVGChannel(AwChannel::MEG);
+			}
+		}
+	}
+
+	return true;
+}
+
+void AwMontage::loadBadChannels()
+{
+	QFile file(m_badChannelPath);
+	QTextStream stream(&file);
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		m_badChannelLabels.clear();
+		while (!stream.atEnd())
+			m_badChannelLabels << stream.readLine().trimmed();
+		file.close();
+	}
+	// reset as recorded channels bad status
+
+	for (auto chan : m_asRecorded)
+		chan->setBad(false);
+	for (auto label : m_badChannelLabels) {
+		AwChannel *chan = m_asRecordedHash[label];
+		if (chan)
+			chan->setBad(true);
+	}
+	foreach(AwChannel *chan, m_channels) {
+		if (m_asRecordedHash.contains(chan->name())) {
+			auto asRecorded = m_asRecordedHash[chan->name()];
+			if (asRecorded->isBad()) {
+				m_channels.removeAll(chan);
+				delete chan;
+			}
+		}
+	}
 }

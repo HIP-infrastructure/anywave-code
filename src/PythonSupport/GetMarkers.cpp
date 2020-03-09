@@ -30,34 +30,29 @@
 #include <Python.h>
 #include <QDataStream>
 
-extern PyTypeObject marker_Type;
+#include "Marker.h"
 //static PyObject *parse_cfg(PyObject *cfg);
 static PyObject *request_markers(const QString& file, const QString& extractTriggers, QVector<float>& values, QStringList& labels, QStringList& channels);
 extern PyObject *AnyWaveError;
 
 PyObject *request_markers(const QString& file, const QString& extractTriggers, QVector<float>& values, QStringList& labels, QStringList& channels)
 {
-	QTcpSocket *socket = connect();
-	if (!socket) 
+	TCPRequest request(AwRequest::GetMarkers2);
+	if (request.status() == TCPRequest::failed) {
 		return NULL;
+	}
+	QDataStream& stream_data = *request.stream(); 
+	QDataStream& in = *request.response();
 
-	int request = AwRequest::GetMarkers2;
-	QByteArray data;
-	QDataStream stream_data(&data, QIODevice::WriteOnly);
-	stream_data.setVersion(QDataStream::Qt_4_4);
-	stream_data << request;
 
 	stream_data << file << extractTriggers << values << labels << channels;
-	sendRequest(socket, data);
-	 // waiting for response
-	int dataSize = waitForResponse(socket);  
-   	if (dataSize == -1)	{
-		PyErr_SetString(AnyWaveError, "Bad status received from AnyWave.");
-		delete socket;
+	if (!request.sendRequest()) {
 		return NULL;
-	}  
-	QDataStream in(socket);
-    in.setVersion(QDataStream::Qt_4_4);
+	}
+	if (!request.getResponse()) {
+		return NULL;
+	}
+
     int nMarkers;
     in >> nMarkers;
 
@@ -75,9 +70,9 @@ PyObject *request_markers(const QString& file, const QString& extractTriggers, Q
 		qint16 *tmpi = NULL;
 
 		in >> label >> start >> duration >> value >> channels;
-		PyObject *py_marker = PyObject_CallObject((PyObject *)&marker_Type, NULL);
+		PyObject *py_marker = PyObject_CallObject((PyObject *)&anywave_MarkerType, NULL);
 
-		PyObject_SetAttrString(py_marker, "label", PyString_FromString(label.toStdString().c_str()));
+		PyObject_SetAttrString(py_marker, "label", PyUnicode_FromString(label.toStdString().c_str()));
 		PyObject_SetAttrString(py_marker, "position", PyFloat_FromDouble(start));
 		PyObject_SetAttrString(py_marker, "duration", PyFloat_FromDouble(duration));
 		PyObject_SetAttrString(py_marker, "value", PyFloat_FromDouble(value));
@@ -85,7 +80,7 @@ PyObject *request_markers(const QString& file, const QString& extractTriggers, Q
 			Py_ssize_t count = 0;
 			PyObject *list = PyList_New(channels.size());
 			foreach (QString channel, channels) {
-				PyList_SetItem(list, count++, PyString_FromString(channel.toStdString().c_str()));
+				PyList_SetItem(list, count++, PyUnicode_FromString(channel.toStdString().c_str()));
 			}
 			PyObject_SetAttrString(py_marker, "channels", list);
 		}
@@ -99,17 +94,7 @@ PyObject *getMarkers(PyObject *self, PyObject *args)
 	QString file, extractTriggers;
 	QVector<float> values;
 	QStringList labels, channels;
-
-	//if (PyArg_ParseTuple(args, ""))
-	//	return request_markers(file, extractTriggers, values, labels, channels);
-
 	PyObject *dict = args;
-	//if (!PyArg_ParseTuple(args, "O", &dict)) {
-	//	PyErr_SetString(AnyWaveError, "incorrect argument.");
-	//	return NULL;
-	//}
-	//if (dict == NULL) 
-	//	return request_markers(file, extractTriggers, values, labels, channels);
 
 	if (!PyDict_Check(dict)) {
 		PyErr_SetString(AnyWaveError, "incorrect argument.");
@@ -126,7 +111,7 @@ PyObject *getMarkers(PyObject *self, PyObject *args)
 	Py_ssize_t i;
 	for (i = 0; i < size; i++) {
 		PyObject *key_ = PyList_GetItem(keys, i);
-		keys_ << QString(PyString_AS_STRING(key_)).toLower();
+		keys_ << Py3StringToQString(key_).toLower();
 		values_ << PyDict_GetItem(dict, key_);
 	}
 
@@ -136,21 +121,21 @@ PyObject *getMarkers(PyObject *self, PyObject *args)
 	index = keys_.indexOf("file");
 	if (index != -1) {
 		PyObject *file_ = values_.at(index);
-		if (!PyString_Check(file_)) {
+		if (!PyUnicode_Check(file_)) {
 			PyErr_SetString(AnyWaveError, "Specify file as a string.");
 			return NULL;
 		}
-		file = PyString_AS_STRING(file_);
+		file = Py3StringToQString(file_);
 	}
 	
 	index = keys_.indexOf("extracttriggers");
 	if (index != -1) {
 		PyObject *extract_ = values_.at(index);
-		if (!PyString_Check(extract_)) {
+		if (!PyUnicode_Check(extract_)) {
 			PyErr_SetString(AnyWaveError, "Specify ExtractTriggers as a string.");
 			return NULL;
 		}
-		extractTriggers = PyString_AS_STRING(extract_);
+		extractTriggers = Py3StringToQString(extract_);
 	}
 	// browse for values in dict
 	index = keys_.indexOf("values");
@@ -179,8 +164,8 @@ PyObject *getMarkers(PyObject *self, PyObject *args)
 		Py_ssize_t i, nValues = PyList_Size(list);
 		for (i = 0; i < nValues; i++) {
 			PyObject *value = PyList_GetItem(list, i);
-			if (PyString_Check(value))
-				labels << QString(PyString_AS_STRING(value));
+			if (PyUnicode_Check(value))
+				labels << Py3StringToQString(value);
 		}
 	}
 
@@ -195,8 +180,8 @@ PyObject *getMarkers(PyObject *self, PyObject *args)
 		Py_ssize_t i, nValues = PyList_Size(list);
 		for (i = 0; i < nValues; i++) {
 			PyObject *value = PyList_GetItem(list, i);
-			if (PyString_Check(value))
-				channels << QString(PyString_AS_STRING(value));
+			if (PyUnicode_Check(value))
+				channels << Py3StringToQString(value);
 		}
 	}
 

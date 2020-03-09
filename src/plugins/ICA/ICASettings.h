@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Marmaduke Woodman – Laboratoire UMR INS INSERM 1106 - michael.woodman@univ-amu.fr
+//    Author:Bruno Colombet – Laboratoire UMR INS INSERM 1106 - bruno.colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef ICASETTINGS_H
@@ -28,6 +28,7 @@
 
 #include <QDialog>
 #include "ui_ICASettings.h"
+#include <AwProcessInterface.h>
 #include <AwChannel.h>
 #include <AwMarker.h>
 
@@ -36,18 +37,20 @@ class ICASettings : public QDialog
 	Q_OBJECT
 
 public:
-	ICASettings(const QString& datapath, const AwChannelList& channels, const AwMarkerList& markers, const QStringList& algos, QWidget *parent = 0);
+	//ICASettings(const QString& datapath, const AwChannelList& channels, const AwMarkerList& markers, const QStringList& algos, QWidget *parent = 0);
+	ICASettings(AwProcess *process, QWidget *parent = 0);
 	~ICASettings();
 
-	bool ignoreBadChannels;
-	bool ignoreMarkers;
-	QString selectedMarker;
-	int modality;
-	float hpf, lpf;
-	int components;
-	int algo;
-	bool downSampling;
-	bool infomaxExtended;
+	//bool ignoreBadChannels;
+	//bool ignoreMarkers, useMarkers;
+	//QString skipMarker, useMarker;
+	//int modality;
+	//float hpf, lpf;
+	//int components;
+	//int algo;
+	//bool downSampling;
+	//bool infomaxExtended;
+	AwArguments args;
 public slots:
 	void accept();
 protected slots:
@@ -57,6 +60,7 @@ private:
 	AwChannelList m_channels;
 	QStringList m_modes;
 	QStringList m_labels;
+	AwProcess *m_process;
 };
 
 #endif // ICASETTINGS_H

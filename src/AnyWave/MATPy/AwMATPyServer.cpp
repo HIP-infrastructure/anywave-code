@@ -32,8 +32,9 @@
 #include "Marker/AwMarkerManager.h"
 #include "Montage/AwMontageManager.h"
 #include "AwPidManager.h"
-
 #include "AwRequestServer.h"
+#include "Plugin/AwPluginManager.h"
+#include "AwCore.h"
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// statics
 
@@ -49,44 +50,84 @@ AwMATPyServer *AwMATPyServer::instance()
 	return m_instance;
 }
 
+AwMATPyServer *AwMATPyServer::newInstance()
+{	
+	auto instance = new AwMATPyServer;
+	AwMATPyServer::instance()->addDuplicatedInstance(instance);
+	return instance;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 AwMATPyServer::AwMATPyServer()
 {
-	// Get or Create AwPidManager
-	AwPidManager::instance()->setParent(this);
-	m_rs = NULL;
+	m_rs = nullptr;
 }
 
 AwMATPyServer::~AwMATPyServer()
 {
+	// destroy possible duplicated instances
 	if (m_rs)
 		delete m_rs;
+	AW_DESTROY_LIST(m_duplicatedInstances);
 }
 
-void AwMATPyServer::start()
+void AwMATPyServer::addDuplicatedInstance(AwMATPyServer *instance)
+{
+	m_duplicatedInstances << instance;
+}
+
+void AwMATPyServer::deleteDuplicatedInstance(AwMATPyServer *instance)
+{
+	m_duplicatedInstances.removeAll(instance);
+	delete instance;
+}
+
+bool AwMATPyServer::start(const QString& dataPath, AwScriptProcess *p)
+{
+	if (m_rs) {
+		delete m_rs;
+		m_rs = nullptr;
+	}
+	AwPidManager::instance()->createNewPid(p);
+	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
+	if (reader == nullptr)
+		return false;
+	m_rs = new AwRequestServer(dataPath, p);
+	if (!m_rs->isListening()) { // failed to listen on TCP port
+		delete m_rs;
+		m_rs = nullptr;
+		return false;
+	}
+	return true;
+}
+
+bool AwMATPyServer::start()
 {
 	if (m_rs) // already instantianted
-		return;
+		return true;
 
 	m_rs = new AwRequestServer();
 	if (!m_rs->isListening()) { // failed to listen on TCP port
 		delete m_rs;
-		m_rs = NULL;
+		m_rs = nullptr;
+		return false;
 	}
+	return true;
 }	
+
 
 void AwMATPyServer::stop()
 {
 	if (m_rs)  {
 		delete m_rs;
-		m_rs = NULL;
+		m_rs = nullptr;
 	}
 }
 
 quint16 AwMATPyServer::serverPort()
 {
-	if (m_rs == Q_NULLPTR)
+	if (m_rs == nullptr)
 		return 0;
 	return m_rs->serverPort();
 }

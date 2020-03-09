@@ -81,5 +81,5 @@ class BRAINVISIONIO_EXPORT BrainVisionIOPlugin : public AwFileIOPlugin
 #endif
 public:
 	BrainVisionIOPlugin();
-	AW_INSTANTIATE_PLUGIN(BrainVisionIO)
+	AW_INSTANTIATE_FILEIO_PLUGIN(BrainVisionIO)
 };

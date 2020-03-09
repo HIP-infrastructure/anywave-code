@@ -36,6 +36,7 @@ class AwDisplayPlugin;
 class AwProcessPlugin;
 class AwScriptPlugin;
 class AwFileIOPlugin;
+class AwFilterPlugin;
 class AwFileIO;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -80,10 +81,17 @@ AwPlugin* AwPluginFactory<AwPlugin>::getPluginByName(const QString& name)
 	return Q_NULLPTR;
 }
 
-typedef AwPluginFactory<AwDisplayPlugin> DisplayPluginFactory;
-typedef AwPluginFactory<AwProcessPlugin> ProcessPluginFactory;
-typedef AwPluginFactory<AwFileIOPlugin> ReaderPluginFactory;
-typedef AwPluginFactory<AwFileIOPlugin> WriterPluginFactory;
+using DisplayPluginFactory = AwPluginFactory<AwDisplayPlugin>;
+using ProcessPluginFactory = AwPluginFactory<AwProcessPlugin>;
+using ReaderPluginFactory = AwPluginFactory<AwFileIOPlugin>;
+using WriterPluginFactory = AwPluginFactory<AwFileIOPlugin>;
+using FilterPluginFactory = AwPluginFactory<AwFilterPlugin>;
+
+using AwReaders = QList<AwFileIOPlugin *>;
+using AwProcesses = QList<AwProcessPlugin *>;
+using AwDisplays = QList<AwDisplayPlugin *>;
+using AwWriters = QList<AwFileIOPlugin *>;
+using AwFilters = QList<AwFilterPlugin *>;
 
 class AnyWave;
 class MontageManager;
@@ -98,10 +106,11 @@ public:
 
   	static AwPluginManager *getInstance();
 
-	QList<AwFileIOPlugin *>& readers() { return m_pluginReaders;  }
-	QList<AwFileIOPlugin *>& writers() { return m_pluginWriters; }
-	QList<AwProcessPlugin *>& processes() { return m_pluginProcesses; }
-	QList<AwDisplayPlugin *>& displays() { return m_pluginDisplays; }
+	inline AwReaders& readers() { return m_readers;  }
+	inline AwWriters& writers() { return m_writers; }
+	inline AwProcesses& processes() { return m_processes; }
+	inline AwDisplays& displays() { return m_displays; }
+	inline AwFilters& filters() { return m_filters; }
 
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
@@ -111,6 +120,7 @@ public:
 	AwFileIOPlugin *getReaderPluginByName(const QString& name) { return m_readerFactory.getPluginByName(name); }
 	AwFileIOPlugin *getWriterPluginByName(const QString& name) { return m_writerFactory.getPluginByName(name); }
 	AwProcessPlugin *getProcessPluginByName(const QString& name) { return m_processFactory.getPluginByName(name); }
+	AwFilterPlugin *getFilterPluginByName(const QString& name) { return m_filterFactory.getPluginByName(name); }
 
 	AwFileIO *getReaderToOpenFile(const QString& file);
 
@@ -139,19 +149,22 @@ private:
 	void loadFileIOWriterPlugin(AwFileIOPlugin *plugin);
 	void loadProcessPlugin(AwProcessPlugin *plugin);
 	void loadDisplayPlugin(AwDisplayPlugin *plugin);
+	void loadFilterPlugin(AwFilterPlugin *plugin);
 
 	// Plugins
 	static AwPluginManager *m_instance;
 	QDir m_pluginsDir;
 	QList<QObject *> m_pluginList;
-	QList<AwFileIOPlugin *> m_pluginReaders;
-	QList<AwFileIOPlugin *> m_pluginWriters;
-	QList<AwProcessPlugin *> m_pluginProcesses;
-	QList<AwDisplayPlugin *> m_pluginDisplays;
+	AwReaders m_readers;
+	AwWriters m_writers;
+	AwProcesses m_processes;
+	AwDisplays m_displays;
+	AwFilters m_filters;
 	DisplayPluginFactory m_displayFactory;
 	ReaderPluginFactory m_readerFactory;
 	WriterPluginFactory m_writerFactory;
 	ProcessPluginFactory m_processFactory;
+	FilterPluginFactory m_filterFactory;
 	QMutex m_mutex;
 
 	// Python plugins list (names)

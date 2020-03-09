@@ -26,7 +26,7 @@
 #include <AwProcess.h>
 #include "common.h"
 #include <QDataStream>
-#include <Python.h>
+#include "Channel.h"
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL	anywave_ARRAY_API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -34,7 +34,7 @@
 
 
 extern PyObject *AnyWaveError;
-extern PyTypeObject channel_Type;
+
 
 struct filtering {
 	float eegLP, eegHP;
@@ -50,63 +50,37 @@ static PyObject *request_data(const QString&, const QString&, float, float, cons
 PyObject *request_data(const QString& file, const QString& montage,  float start, float duration, const QStringList& labels, const QStringList& types, 
 					   int decimate, int filters, filtering *fo)
 {
-	 QTcpSocket *socket = connect();
-	 if (!socket) 
-		 return NULL;
-
-	int request = AwRequest::GetData3;
-	QByteArray data;
-    QDataStream stream_data(&data, QIODevice::WriteOnly);
-	stream_data.setVersion(QDataStream::Qt_4_4);
-	stream_data << request;
-	stream_data << file;
-	stream_data << montage;
-	stream_data << start;
-	stream_data << duration;  
-    stream_data << decimate;   // decimation factor for downsampling of data (if value is 1 => no downsampling)
-    stream_data << labels;
-	stream_data << types;
-	stream_data << filters;		// filtering flag
-
-    if (fo)	{
-        stream_data << fo->eegHP;
-        stream_data << fo->eegLP;
-        stream_data << fo->megHP;
-        stream_data << fo->megLP;
-        stream_data << fo->emgHP;
-        stream_data << fo->emgLP;
-	}
-	sendRequest(socket, data);
-	 // waiting for response
-	int dataSize = waitForResponse(socket);  
-   	if (dataSize == -1)	{
-		PyErr_SetString(AnyWaveError, "Bad status received from AnyWave.");
-		delete socket;
+	TCPRequest request(AwRequest::GetData3);
+	if (request.status() == TCPRequest::failed) 
 		return NULL;
-	}  
+	
+	QDataStream& stream = *request.stream();
+	QDataStream& in = *request.response();
+	stream << file  << montage << start << duration  << decimate  << labels  << types  << filters;		// filtering flag
 
-    // Get response
-	QDataStream in(socket);
-	in.setVersion(QDataStream::Qt_4_4);
+    if (fo)	
+        stream << fo->eegHP  << fo->eegLP  << fo->megHP  << fo->megLP  << fo->emgHP << fo->emgLP;
+	
+	if (!request.sendRequest()) 
+		return NULL;
+	
+
+	if (!request.getResponse()) 
+		return NULL;
+	
     int nChannels = 0;
 
 	// get response from AnyWave
     in >> nChannels; 
 
     if (nChannels == 0) { // no channels returned (means that the requested labels did not match existing channels in AnyWave.
-        delete socket;
         return Py_None;
     }
-   
-	// create a list
+   	// create a list
 	PyObject *list = PyList_New(nChannels);
 	for (int i = 0; i < nChannels; i++)   {
-		dataSize = waitForResponse(socket);
-        if (dataSize == -1) {
-            PyErr_SetString(AnyWaveError, "Bad status received from AnyWave.");
-            delete socket;
-            return NULL;
-        }
+		if (!request.getResponse()) 
+			return NULL;
 
         QString name, ref, type;
         float samplingRate, hpf, lpf;
@@ -114,10 +88,10 @@ PyObject *request_data(const QString& file, const QString& montage,  float start
 		int selected;
         
         in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> nSamples >> selected;
-		PyObject *py_channel = PyObject_CallObject((PyObject *)&channel_Type, NULL);
-		PyObject_SetAttrString(py_channel, "label", PyString_FromString(name.toStdString().c_str()));
-		PyObject_SetAttrString(py_channel, "ref", PyString_FromString(ref.toStdString().c_str()));
-		PyObject_SetAttrString(py_channel, "type", PyString_FromString(type.toStdString().c_str()));
+		PyObject *py_channel = PyObject_CallObject((PyObject *)&anywave_ChannelType, NULL);
+		PyObject_SetAttrString(py_channel, "label", PyUnicode_FromString(name.toStdString().c_str()));
+		PyObject_SetAttrString(py_channel, "ref", PyUnicode_FromString(ref.toStdString().c_str()));
+		PyObject_SetAttrString(py_channel, "type", PyUnicode_FromString(type.toStdString().c_str()));
 		PyObject_SetAttrString(py_channel, "sr", PyFloat_FromDouble(samplingRate));
 		PyObject_SetAttrString(py_channel, "lpf", PyFloat_FromDouble(lpf));
 		PyObject_SetAttrString(py_channel, "hpf", PyFloat_FromDouble(hpf));
@@ -135,11 +109,7 @@ PyObject *request_data(const QString& file, const QString& montage,  float start
 			qint64 nSamplesRead = 0;
 			do {
 				// waiting for chunk of data
-				dataSize = waitForResponse(socket);
-				if (dataSize == -1) {
-					//PyErr_SetString(AnyWaveError, "Error while receiving data.");
-					delete socket;
-					//Py_DECREF(array);
+				if (!request.getResponse()) {
 					Py_DECREF(list);
 					return NULL;
 				}
@@ -175,16 +145,7 @@ PyObject *getData(PyObject *self, PyObject *args)
 	QStringList labels, types; // no labels, no types
 	QString file, montage; // no file, no montage
 
-//	if (PyArg_ParseTuple(args, "")) // no arguments => default parameters
-//		return  request_data(file, montage, start, duration, labels, types, decimate, filters, fo);
-
 	PyObject *dict = args;
-	//if (!PyArg_ParseTuple(args, "O", &dict)) {
-	//	PyErr_SetString(AnyWaveError, "incorrect argument.");
-	//	return NULL;
-	//}
-	//if (dict == NULL)
-	//	return request_data(file, montage, start, duration, labels, types, decimate, filters, fo);
 
 	if (!PyDict_Check(dict)) {
 		PyErr_SetString(AnyWaveError, "incorrect argument.");
@@ -201,7 +162,7 @@ PyObject *getData(PyObject *self, PyObject *args)
 	Py_ssize_t i;
 	for (i = 0; i < size; i++) {
 		PyObject *key_ = PyList_GetItem(keys, i);
-		keys_ << QString(PyString_AS_STRING(key_)).toLower();
+		keys_ << Py3StringToQString(key_).toLower();
 		values_ << PyDict_GetItem(dict, key_);
 	}
 	int index;
@@ -211,22 +172,22 @@ PyObject *getData(PyObject *self, PyObject *args)
 	index = keys_.indexOf("file");
 	if (index != -1) {
 		PyObject *file_ = values_.at(index);
-		if (!PyString_Check(file_)) {
+		if (!PyUnicode_Check(file_)) {
 			PyErr_SetString(AnyWaveError, "Specify file as a string.");
 			return NULL;
 		}
-		file = PyString_AS_STRING(file_);
+		file = Py3StringToQString(file_);
 	}
 
 	// browse for montage
 	index = keys_.indexOf("montage");
 	if (index != -1) {
 		PyObject *montage_ = values_.at(index);
-		if (!PyString_Check(montage_)) {
+		if (!PyUnicode_Check(montage_)) {
 			PyErr_SetString(AnyWaveError, "Specify file as a string.");
 			return NULL;
 		}
-		montage = PyString_AS_STRING(montage_);
+		montage = Py3StringToQString(montage_);
 	}
 	// browse for start
 	index = keys_.indexOf("start");
@@ -262,8 +223,8 @@ PyObject *getData(PyObject *self, PyObject *args)
 		Py_ssize_t i, nValues = PyList_Size(list);
 		for (i = 0; i < nValues; i++) {
 			PyObject *value = PyList_GetItem(list, i);
-			if (PyString_Check(value))
-				labels << QString(PyString_AS_STRING(value));
+			if (PyUnicode_Check(value))
+				labels << Py3StringToQString(value);
 		}
 	}
 	// browse for types
@@ -278,8 +239,8 @@ PyObject *getData(PyObject *self, PyObject *args)
 		Py_ssize_t i, nValues = PyList_Size(list);
 		for (i = 0; i < nValues; i++) {
 			PyObject *value = PyList_GetItem(list, i);
-			if (PyString_Check(value))
-				types << QString(PyString_AS_STRING(value));
+			if (PyUnicode_Check(value))
+				types << Py3StringToQString(value);
 		}
 	}
 
@@ -288,11 +249,11 @@ PyObject *getData(PyObject *self, PyObject *args)
 	bool filtersRequired = false;
 	if (index != -1) {
 		PyObject *filtering_ = values_.at(index);
-		if (!PyString_Check(filtering_)) {
+		if (!PyUnicode_Check(filtering_)) {
 			PyErr_SetString(AnyWaveError, "Specify 'no' or 'yes' for filtering parameter.");
 			return NULL;
 		}
-		QString filter = QString(PyString_AS_STRING(filtering_)).toLower();
+		QString filter = Py3StringToQString(filtering_).toLower();
 		if (filter == "no")
 			fo = new filtering;
 		else if (filter == "yes") {

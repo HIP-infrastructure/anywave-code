@@ -29,11 +29,11 @@
 #include <AwException.h>
 #include "Montage/AwMontageManager.h"
 #include "Data/AwDataServer.h"
-#include <AwMontage.h>
+#include <montage/AwMontage.h>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <AwCore.h>
-#include <utils/AwUtilities.h>
+#include <utils/json.h>
 #include "Prefs/AwSettings.h"
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
@@ -68,8 +68,11 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 			process->pdi.input.writers.append(plugin);
 	}
 	if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
+		QStringList list;
 		for (auto plugin : AwPluginManager::getInstance()->processes())
-			process->pdi.input.processPluginNames.append(plugin->name);
+			//process->pdi.input.processPluginNames.append(plugin->name);
+			list << plugin->name;
+		process->pdi.input.settings[processio::plugin_names] = list;
 	}
 	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
 		process->pdi.input.addChannels(asRecorded, true);
@@ -77,7 +80,8 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 	if (!process->pdi.areInputChannelSet()) { // no input channels specified => ok set to AnyChannels (1-n)
 		process->pdi.addInputChannel(-1, 1, 0);
 	}
-	process->pdi.input.icaPath = AwSettings::getInstance()->getString("currentIcaFile");
+	//process->pdi.input.icaPath = AwSettings::getInstance()->getString("currentIcaFile");
+	process->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->getString("currentIcaFile");
 	// input channels are set
 	auto types = process->pdi.getInputChannels();
 	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
@@ -123,7 +127,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	QString json = args["run_process"].toString();
 	// get json file or parse the string
 	if (QFile::exists(json)) {
-		doc = AwUtilities::readJsonFile(json);
+		doc = AwUtilities::json::readJsonFile(json);
 		if (doc.isEmpty() || doc.isNull()) {
 			throw AwException("json file is invalid.", origin);
 			return Q_NULLPTR;
@@ -176,18 +180,22 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			return Q_NULLPTR;
 		}
 		AwFileInfo fi(reader, inputFile);
-		process->pdi.input.dataFolder = fi.dirPath();
-		process->pdi.input.fileDuration = reader->infos.totalDuration();
-		process->pdi.input.dataPath = inputFile;
+		process->pdi.input.settings[processio::data_dir] = fi.dirPath();
+		process->pdi.input.settings[processio::file_duration] = reader->infos.totalDuration();
+		process->pdi.input.settings[processio::data_path] = inputFile;
+
+		//process->pdi.input.dataFolder = fi.dirPath();
+		//process->pdi.input.fileDuration = reader->infos.totalDuration();
+		//process->pdi.input.dataPath = inputFile;
 		process->pdi.input.setReader(reader);
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file
 	if (obj.contains("marker_file")) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(obj["marker_file"].toString());
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(obj["marker_file"].toString());
 		obj["marker_file"] = fullPath;
 	}
 	if (obj.contains("montage_file")) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.dataFolder).arg(obj["montage_file"].toString());
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(obj["montage_file"].toString());
 		obj["montage_file"] = fullPath;
 	}
 
@@ -202,7 +210,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		QString tmp = QString("%1.bad").arg(inputFile);
 		if (QFile::exists(tmp)) {
 			args["bad_file"] = tmp;
-			process->pdi.input.badLabels = AwMontageManager::loadBad(tmp);
+			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::loadBad(tmp);
 		}
 		AwChannelList montage;
 		tmp = QString("%1.mtg").arg(inputFile);
@@ -210,7 +218,8 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			if (QFile::exists(tmp))
 				args["montage_file"] = tmp;
 		if (args.contains("montage_file")) { // did we finally got a montage file?
-				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args["montage_file"].toString(), process->pdi.input.badLabels);
+				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args["montage_file"].toString(), 
+					process->pdi.input.settings[processio::bad_labels].toStringList());
 				if (montage.isEmpty()) { // error when loading and/or applying mtg file
 					throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
 					return Q_NULLPTR;
@@ -248,7 +257,8 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		bool skipMarkers = !skippedLabels.isEmpty();
 		bool useMarkers = !usedLabels.isEmpty();
 		if (skipMarkers || useMarkers) {
-			auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels, process->pdi.input.fileDuration);
+			auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels, 
+				process->pdi.input.settings[processio::file_duration].toDouble());
 			if (!markers.isEmpty()) {
 				process->pdi.input.setNewMarkers(markers);
 			}
@@ -257,7 +267,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		// check if we have input markers after all
 		  // if no markers set as input => add the GLOBAL ONE
 		if (process->pdi.input.markers().isEmpty())
-			process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.fileDuration));
+			process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.settings[processio::file_duration].toDouble()));
 		
 		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.

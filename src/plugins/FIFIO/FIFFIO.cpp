@@ -266,6 +266,76 @@ qint64 FIFFIO::readDataFromChannels(float start, float duration, QList<AwChannel
 		// clear the buffer
 		delete[] buffer;
 	}
+	else if (m_dataType == FIFFT_INT) {
+		auto buffer = allocateBuffer<int>(bufferSize);
+
+		int buffer_index = startingBuffer;
+		while (buffer_index <= endingBuffer) {
+			auto data_buffer = m_buffers.at(buffer_index);
+			m_file.seek(data_buffer->filePosition);
+			int startingSample = data_buffer->startSample;
+
+			// check for real starting sample position in the first buffer.
+			if (data_buffer->startSample < nStart) {
+				m_file.seek(m_file.pos() + (nStart - data_buffer->startSample) * m_sampleSize * m_nchan);
+				startingSample = data_buffer->startSample + (nStart - data_buffer->startSample);
+			}
+
+			int samplesToRead = data_buffer->endSample - startingSample;
+			if (buffer_index == endingBuffer)
+				samplesToRead -= (data_buffer->endSample - endSamples);
+
+
+			read = m_stream.readRawData((char *)&buffer[positionInBuffer], samplesToRead * m_nchan * m_sampleSize);
+			if (read == 0) {
+				delete[] buffer;
+				return 0;
+			}
+			read /= m_sampleSize;
+			totalSamplesRead += read / m_nchan;
+			positionInBuffer += read;
+			buffer_index++;
+		}
+		// all data buffers read into buffer.
+		// convert now the buffer into little endian
+		qint64 i;
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (i = 0; i < bufferSize; i++) {
+			quint32 val = fromBigEndian((uchar *)&buffer[i]);
+			memcpy(&buffer[i], &val, sizeof(quint32));
+		}
+
+		// now feed the channels
+		float value = 0.; // tmp variable to get real measured value
+		for (auto c : channelList) {
+			if (infos.indexOfChannel(c->name()) == -1)
+				continue;
+			// get chinfo for channel
+			auto chinfo = m_chInfos.value(c->ID());
+			if (!chinfo)
+				continue;
+			c->newData(totalSamplesRead);
+
+			for (i = 0; i < totalSamplesRead; i++) {
+				value = (float)buffer[c->ID() + i * m_nchan];
+				// transform value to real units
+				value *= chinfo->cal;
+				value *= chinfo->range;
+				if (chinfo->unit_mul > 0)
+					value *= pow(1, chinfo->unit_mul);
+				// apply gain for AnyWave (MEG and Grad are expressed in pT while EEG/ECG are expressed in microV)
+				if (c->isMEG() || c->isGRAD() || c->isReference())
+					value *= 1e12;
+				if (c->isEEG() || c->isEMG() || c->isECG())
+					value *= 1e6;
+				c->data()[i] = value;
+			}
+		}
+		// clear the buffer
+		delete[] buffer;
+	}
 	else if (m_dataType == FIFFT_FLOAT) {
 		auto buffer = allocateBuffer<float>(bufferSize);
 
@@ -805,11 +875,12 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		case FIFFV_MEG_CH:
 			if (chinfo->unit == FIFF_UNIT_T_M) { // this is a gradiometer 
 				c.setType(AwChannel::GRAD);
+				c.setGain(300);
 			}
 			else {
 				c.setType(AwChannel::MEG);
+				c.setGain(15);
 			}
-			c.setGain(4);
 			break;
 		case FIFFV_ECG_CH:
 			c.setType(AwChannel::ECG);
@@ -988,7 +1059,7 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 			}
 		}
 	}
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }
 
 AwFileIO::FileStatus FIFFIO::canRead(const QString &path)

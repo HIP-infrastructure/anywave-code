@@ -353,18 +353,11 @@ void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
 	if (!BM->isBIDSActive())
 		return;
 
-	auto subj = BM->guessSubject(filePath);
-	if (!subj)
-		return;
+	auto events_tsv = BM->getTSVFile(filePath, AwBIDSManager::EventsTsv);
 
-	auto items = subj->findFileItems(filePath);
-	if (items.isEmpty())
+	if (events_tsv.isEmpty()) 
 		return;
-
-	auto events_tsv = items.first()->getTsvFileFor(filePath, AwFileItem::eventsTsv);
-	if (!QFile::exists(events_tsv))
-		return;
-
+	
 	// keep a copy of the path to events.tsv file
 	m_eventsTsv = events_tsv;
 	// append markers loaded from Events.tsv to current markers (duplicates are removed just after);

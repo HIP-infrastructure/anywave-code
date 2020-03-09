@@ -26,6 +26,8 @@
 #ifndef AW_FILEIO_H
 #define AW_FILEIO_H
 #include <AwReadWriteLib.h>
+#include <AwPluginBase.h>
+
 class AwFileIOPlugin;
 
 namespace Aw
@@ -38,7 +40,7 @@ namespace Aw
 class AW_RW_EXPORT AwFileIO : public QObject
 {
 public:
-	AwFileIO(const QString& fileName = QString()) { m_flags = 0; infos.setFileName(fileName); }
+	AwFileIO(const QString& fileName = QString()) { m_flags = 0;}
 	virtual ~AwFileIO() {}
 
 
@@ -51,10 +53,12 @@ public:
 	AwFileIOPlugin *plugin() { return m_plugin;  }
 	/** Returns the current active features for the reader. **/
 	inline int flags() { return m_flags; }
+	/** Returns the side file path based on extension or empty string is none exists **/
+	QString getSideFile(const QString& extension); // getSideFile(".mrk") will return the file path to the marker file.
 
 	// Input 
 	/** Override this method to open the file and fill up the data structure. **/
-	virtual FileStatus openFile(const QString &path) { m_fullPath = path;  return AwFileIO::NoError; }
+	virtual FileStatus openFile(const QString &path);
 	/** Override this method to check if the file can be read by the reader. **/
 	virtual FileStatus canRead(const QString &path) {return AwFileIO::WrongFormat;	}
 	/**  Override this method to read data from the file.
@@ -76,10 +80,8 @@ public:
 	virtual qint64 writeData(AwChannelList *AwChannels) { return  0; } // must be used for continous data
 																	   /** Write data corresponding to an epoch **/
 	virtual qint64 writeData(AwChannelList *AwChannels, int epoch) { return 0; } // must be used for epoched data
-
 	/** Override this method to close open file(s) and release memory if needed **/
 	virtual void cleanUpAndClose() { infos.clear(); }
-
 	/** Override this method to provide the full path to the file currently open by the plugin. **/
 	virtual QString realFilePath() { return QString(); }
 
@@ -106,6 +108,7 @@ protected:
 	QString m_error;	// used by methods returning a status after an operation.
 	QString m_fullPath;	// full path to current open file.
 	AwFileIOPlugin *m_plugin;
+	QMap<QString, QString> m_sideFiles;	// map containing path to side files (.mrk, .mtg, .bad etc)
 };
 
 ///*!
@@ -121,13 +124,10 @@ protected:
 // * 
 // * 
 // */
-class AW_RW_EXPORT AwFileIOPlugin: public QObject
+class AW_RW_EXPORT AwFileIOPlugin: public AwPluginBase
 {
 public:
 	AwFileIOPlugin() { m_flags = 0x00000000; }
-	QString name;					///< plugin's name: MANDATORY
-	QString version;				///< plugin's version 
-	QString description;			///< short description: MANDATORY
 	QStringList fileExtensions;		///< A string list with supported file extensions: for reading.
 	QString manufacturer;			///< The name of the manufacturer: OPTIONAL
 	QStringList layouts;			///< Layout to use for topographies
@@ -143,18 +143,18 @@ public:
 	inline bool canWrite() { return m_flags & Aw::CanWrite; }
 	/** Override this method to instantiate an object derived from AwFileReader. **/
 	virtual AwFileIO *newInstance(const QString& filename = QString()) = 0;
+
 	virtual void deleteInstance(AwFileIO *fr) { delete fr; fr = NULL; }
 	/** Override this method to provide a string list containing paths to montage files. **/
 	virtual QStringList montages() { return QStringList(); }
 protected:
 	int m_flags;
 };
-#define AwFileIOInterfacePlugin_IID "AnyWave.FileIOInterfacePlugin"
-
+#define AwFileIOInterfacePlugin_IID  "AnyWave.FileIOInterfacePlugin"
 Q_DECLARE_INTERFACE(AwFileIOPlugin, AwFileIOInterfacePlugin_IID)
 Q_DECLARE_INTERFACE(AwFileIO, "AnyWave.FileIOInterface")
 
-#define AW_INSTANTIATE_PLUGIN(P) P* newInstance(const QString& filename = QString()) { auto r = new P(filename); r->setPlugin(this); return r; }
+#define AW_INSTANTIATE_FILEIO_PLUGIN(P) P* newInstance(const QString& filename = QString()) { auto r = new P(filename); r->setPlugin(this); return r; }
 
 
 

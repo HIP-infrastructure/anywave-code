@@ -31,12 +31,27 @@
     <ClCompile Include="GetDataEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OpenNewAnyWave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RunAnyWave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GetProperties.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="pythonmodule_global.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Channel.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Marker.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

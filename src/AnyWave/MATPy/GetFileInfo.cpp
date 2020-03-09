@@ -28,23 +28,21 @@
 #include <QDataStream>
 #include <QTcpSocket>
 #include <QDir>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Plugin/AwPluginManager.h"
 
 void AwRequestServer::handleGetFileInfo(QTcpSocket *client, AwScriptProcess *p)
 {
-	emit log("Processing aw_getfileinfo...");
+	emit log("Processing aw_getfileinfo/anywave.get_file_info() ...");
 	QString file;
-	AwResponse response(client);
+	AwTCPResponse response(client);
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
+	QDataStream& stream = *response.stream();
+
 	AwFileIO *reader = NULL;
 	in >> file;
-
-	response.begin();
-	QDataStream stream(response.buffer());
-	stream.setVersion(QDataStream::Qt_4_4);
 
 	reader = AwPluginManager::getInstance()->getReaderToOpenFile(file);
 	if (!reader) {

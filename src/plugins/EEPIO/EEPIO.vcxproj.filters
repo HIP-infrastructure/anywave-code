@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="eep">
+      <UniqueIdentifier>{a087f85b-0e9d-4125-85d4-ea1030675028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cnt">
+      <UniqueIdentifier>{3b0d2dba-b182-4713-8f89-bb5b9702c657}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libcnt">
+      <UniqueIdentifier>{e84ff2d9-bc2c-44c2-90c4-9b4e8439cff9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libeep">
+      <UniqueIdentifier>{6d0d9bc4-73e3-45d1-8cf2-c8ba08c1d2b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="v4">
+      <UniqueIdentifier>{afa32cd6-cb0e-4cb3-8ce5-dba8ef8fc7a0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="v4\eep.cpp">
+      <Filter>v4</Filter>
+    </ClCompile>
+    <ClCompile Include="libeep\eepio.cpp">
+      <Filter>libeep</Filter>
+    </ClCompile>
+    <ClCompile Include="libeep\eepmem.cpp">
+      <Filter>libeep</Filter>
+    </ClCompile>
+    <ClCompile Include="libeep\eepmisc.cpp">
+      <Filter>libeep</Filter>
+    </ClCompile>
+    <ClCompile Include="libeep\eepraw.cpp">
+      <Filter>libeep</Filter>
+    </ClCompile>
+    <ClCompile Include="EEProbeIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\cnt.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\cntutils.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\evt.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\raw3.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\rej.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\riff.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\riff64.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\seg.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libcnt\trg.cpp">
+      <Filter>libcnt</Filter>
+    </ClCompile>
+    <ClCompile Include="libeep\val.cpp">
+      <Filter>libeep</Filter>
+    </ClCompile>
+    <ClCompile Include="libeep\var_string.cpp">
+      <Filter>libeep</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="eepio_global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\eepio.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\eepmem.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\eepmisc.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\eepraw.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\inttypes.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\stdint.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\val.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\var_string.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="eep\winsafe.h">
+      <Filter>eep</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\cnt.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\cnt_private.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\cnt_version.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\cntutils.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\evt.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\raw3.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\rej.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\riff.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\riff64.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\seg.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="cnt\trg.h">
+      <Filter>cnt</Filter>
+    </ClInclude>
+    <ClInclude Include="v4\eep.h">
+      <Filter>v4</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="EEProbeIO.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+</Project>

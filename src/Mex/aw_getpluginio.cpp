@@ -71,18 +71,18 @@ mxArray* request_info()
 			QStringList channels;
 
 			in >> label >> start >> duration >> value >> channels;
-			QVector<float> chunkVector = { start, duration };
+			QVector<double> chunkVector = { (double)start, (double)duration };
 
 			// label
 			mxSetField(markers, i, "label", mxCreateString(label.toStdString().c_str()));
 			// start
-			mxSetField(markers, i, "position", floatToMat(start));
+			mxSetField(markers, i, "position", doubleToMat((double)start));
 			// duration
-			mxSetField(markers, i, "duration", floatToMat(duration));
+			mxSetField(markers, i, "duration", doubleToMat((double)duration));
 			// value
-			mxSetField(markers, i, "value", floatToMat(value));
+			mxSetField(markers, i, "value", doubleToMat((double)value));
 			// chunk
-			mxSetField(markers, i, "chunk", floatVectorToMat(chunkVector));
+			mxSetField(markers, i, "chunk", doubleVectorToMat(chunkVector));
 			// channels
 			tmp = NULL;
 			if (!channels.isEmpty()) {
@@ -143,9 +143,9 @@ mxArray* request_info()
 	mxSetField(output, 0, "types", tmp);
     
     // max_sr
-    mxSetField(output, 0, "max_sr", floatToMat(max_sr));
+    mxSetField(output, 0, "max_sr", doubleToMat((double)max_sr));
     // total_duration
-    mxSetField(output, 0, "total_duration", floatToMat(total_dur));
+    mxSetField(output, 0, "total_duration", doubleToMat((double)total_dur));
     // temp_dir
 	mxSetField(output, 0, "temp_dir", mxCreateString(temp_dir.toStdString().c_str()));
     // plugin_dir

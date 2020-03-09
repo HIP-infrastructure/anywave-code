@@ -35,7 +35,6 @@ static mxArray *parse_cfg(const mxArray *);
 int filterFlags = 0; // 0 => AnyWave current filters, 1 => specified filters 2=> raw data
 QHash<int, QVector<float>> filterSettings;
 static QString montage, file;
-//static float start = 0., duration = 0.;
 float start = 0., duration = 0.;
 QStringList labels, types;
 int decimate = 0;
@@ -120,32 +119,15 @@ mxArray *request_data()
 		int selected;
         
         in >> name >> type >> ref >> samplingRate >> hpf >> lpf >> nSamples >> selected;
+      
+		mxSetField(output, i, "name", mxCreateString(name.toStdString().c_str()));
+		mxSetField(output, i, "type", mxCreateString(type.toStdString().c_str()));
+		mxSetField(output, i, "ref", mxCreateString(ref.toStdString().c_str()));
+		mxSetField(output, i, "samplingRate", doubleToMat((double)samplingRate));
+		mxSetField(output, i, "hpf", doubleToMat((double)hpf));
+		mxSetField(output, i, "lpf", doubleToMat((double)lpf));
 
-        mxArray *f_name = mxCreateString(name.toStdString().c_str());
-        mxSetField(output, i, "name", f_name);
-        
-        mxArray *f_type = mxCreateString(type.toStdString().c_str());
-        mxSetField(output, i, "type", f_type);
-        
-        mxArray *f_ref =  mxCreateString(ref.toStdString().c_str());
-        mxSetField(output, i, "ref", f_ref);
-        
-        mxArray *f_sr = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-        float *tmp = (float *)mxGetData(f_sr);
-        *tmp = samplingRate;
-        mxSetField(output, i, "samplingRate", f_sr);
-        
-        mxArray *f_hpf = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-        tmp = (float *)mxGetData(f_hpf);
-        *tmp = hpf;
-        mxSetField(output, i, "hpf", f_hpf);
-        
-        mxArray *f_lpf = mxCreateNumericMatrix(1, 1, mxSINGLE_CLASS, mxREAL);
-        tmp = (float *)mxGetData(f_lpf);
-        *tmp = lpf;
-        mxSetField(output, i, "lpf", f_lpf);
-
-	    mxArray *f_selected = mxCreateLogicalMatrix(1, 1);
+         mxArray *f_selected = mxCreateLogicalMatrix(1, 1);
 		*mxGetLogicals(f_selected) = selected;
 		mxSetField(output, i, "selected", f_selected);
         

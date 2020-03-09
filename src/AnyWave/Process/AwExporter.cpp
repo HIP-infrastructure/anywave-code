@@ -155,42 +155,6 @@ void AwExporter::run()
 	writer->infos.setTime(pdi.input.reader()->infos.recordingTime());
 	writer->infos.setISODate(pdi.input.reader()->infos.isoDate());
 
-	// DOES NOT WORK FOR NOW
-	//if (m_relabelChannels) {
-	//	// remove 0 in label likely (A01 will become A1).
-	//	// check if the renaming does not create doublons !
-	//	QMap<QString, AwChannel *> map;
-	//	for (auto c : m_channels)
-	//		map[c->name()] = c;
-	//	for (auto c : m_channels) {
-	//		if (c->isEEG() || c->isSEEG()) {
-	//			auto label = c->name();
-	//			if (!label.contains("0"))  // do not proceed with  lable if no zero is present inside.
-	//				continue;
-	//			QString newLabel;
-	//			QRegularExpression re("\\d+$");
-	//			QRegularExpressionMatch match = re.match(label);
-	//			if (match.hasMatch()) {
-	//				QString elec = label.remove(re);
-	//				int number = match.captured(0).toInt();
-	//				newLabel = QString("%1%2").arg(elec).arg(number);
-	//				// search if newLabel already exists = do not create doublons.
-	//				if (map.contains(newLabel)) {
-	//					auto channel = map[newLabel];
-	//					// rename existing label by adding "-" between name and number.
-	//					QString label = QString("%1_%2").arg(elec).arg(number);
-	//					channel->setName(label);
-	//					map.remove(newLabel);
-	//					map[label] = channel;
-	//				}
-	//				else {
-	//					map.remove(c->name());
-	//					map[newLabel] = c;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
 	// now that the channels have optionaly being renamed, create the output file.
 	writer->infos.setChannels(m_channels);
 	if (!m_outputMarkers.isEmpty()) {
@@ -214,7 +178,7 @@ void AwExporter::run()
 bool AwExporter::showUi()
 {
 	AwExporterSettings ui;
-	ui.initialPath = QString("%1/NewFile").arg(pdi.input.dataFolder);
+	ui.initialPath = QString("%1/NewFile").arg(pdi.input.settings[processio::data_dir].toString());
 	QHash<QString, AwFileIOPlugin *> writers;
 	for (auto p : pdi.input.writers) {
 		writers.insert(p->name, p);
@@ -259,7 +223,7 @@ bool AwExporter::showUi()
 			if (QFile::exists(destFile))
 				QFile::remove(destFile);
 			// copy the ICA.Mat fileto be used with the exported file.
-			QFile::copy(pdi.input.icaPath, destFile);
+			QFile::copy(pdi.input.settings[processio::ica_file].toString(), destFile);
 		}
 		else if (!ui.selectedICA.isEmpty()) // only a subset of ICA channels are selected for export
 			m_ICAChannels = ui.selectedICA;
@@ -270,10 +234,11 @@ bool AwExporter::showUi()
 
 		if (!ui.skippedMarkers.isEmpty() || !ui.usedMarkers.isEmpty()) {
 			m_outputMarkers = AwMarker::duplicate(pdi.input.markers());
-			m_inputMarkers = AwMarker::getInputMarkers(m_outputMarkers, ui.skippedMarkers, ui.usedMarkers, pdi.input.fileDuration);
+			m_inputMarkers = AwMarker::getInputMarkers(m_outputMarkers, ui.skippedMarkers, ui.usedMarkers, 
+				pdi.input.settings[processio::file_duration].toDouble());
 		}
 		else {
-			m_inputMarkers << new AwMarker("whole data", 0., pdi.input.fileDuration);
+			m_inputMarkers << new AwMarker("whole data", 0., pdi.input.settings[processio::file_duration].toDouble());
 			m_outputMarkers = AwMarker::duplicate(pdi.input.markers());
 		}
 

@@ -615,5 +615,5 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 	m_streamBinary.setByteOrder(QDataStream::LittleEndian);
 	// fin binaire
 
-	return AwFileIO::NoError;
+	return AwFileIO::openFile(path);
 }

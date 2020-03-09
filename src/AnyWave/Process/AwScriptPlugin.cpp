@@ -37,7 +37,7 @@ void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
 	p->setScriptPath(m_path);
-	p->pdi.input.pluginDirPath = m_pluginDir;
+	p->pdi.input.settings[processio::plugin_dir] = m_pluginDir;
 
 	// Fixed input as any channels by default
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {

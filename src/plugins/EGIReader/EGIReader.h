@@ -87,6 +87,6 @@ class EGIREADER_EXPORT EGIReaderPlugin : public AwFileIOPlugin
 
 public:
 	EGIReaderPlugin();
-	AW_INSTANTIATE_PLUGIN(EGIReader)
+	AW_INSTANTIATE_FILEIO_PLUGIN(EGIReader)
 };
 

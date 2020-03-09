@@ -27,16 +27,17 @@
 #include "Process/AwScriptPlugin.h"
 #include <QDataStream>
 #include <QTcpSocket>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Plugin/AwPluginManager.h"
 #include "Marker/AwExtractTriggers.h"
 #include "Marker/AwMarkerManager.h"
+#include <AwCore.h>
 
-void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *p)
+void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing aw_gettriggers...");
-	AwResponse response(client);
-
+	AwTCPResponse response(client);
+	QDataStream& stream = *response.stream();
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
@@ -86,23 +87,13 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *p)
 	}
 
 	 //  writing markers
-	response.begin();
-	QDataStream stream_data(response.buffer());
-	stream_data.setVersion(QDataStream::Qt_4_4);
+	stream << markers.size();
 
-	stream_data << markers.size();
-
-	foreach(AwMarker *m, markers) {
-		stream_data << m->label();
-		stream_data << m->start();
-		stream_data << m->duration();
-		stream_data << m->value();
-		stream_data << m->targetChannels();
-	}
-
+	for (auto m : markers) 
+		stream << m->label() << m->start() << m->duration() << m->value() << m->targetChannels();
+	
 	response.send();
 	// clean markers
-	while (!markers.isEmpty())
-		delete markers.takeFirst();
+	AW_DESTROY_LIST(markers);
 	emit log("Done.");
 }

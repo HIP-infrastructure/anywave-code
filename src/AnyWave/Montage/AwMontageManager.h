@@ -55,7 +55,7 @@ public:
 	~AwMontageManager();
 
 	/** Retourne la liste des objets AwChannel du montage courant **/
-	AwChannelList& channels() { return m_channels;}
+	AwChannelList& channels();
 	/** Retourne la liste des AwChannels AsRecorded **/
 	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
 	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
@@ -109,6 +109,9 @@ public:
 	/** import ICA Components **/
 	int loadICA();
 	int loadICA(const QString& path);
+
+	/** Instantiate a new object and link it to a reader **/
+	AwMontageManager *duplicate(AwFileIO *reader);
 
 signals:
 	/** Signal émis lorsque un nouveau montage a ete calcule. La liste des canaux montés est passée en paramètre. **/

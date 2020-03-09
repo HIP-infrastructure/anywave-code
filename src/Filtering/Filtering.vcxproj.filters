@@ -135,6 +135,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwFilterAddButton.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="AwFilterPlugin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DspFilters\Bessel.h">
@@ -214,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwFilterGUI.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\filter\AwFilterPlugin.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

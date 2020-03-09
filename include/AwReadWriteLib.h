@@ -145,11 +145,11 @@ public:
 	/** Returns true if the file contains more than one block. The file is then considered as Epoched. **/
 	inline bool isEpoched() { return m_blocks.size() > 1; }
 
-	/** Returns the full path to the current open data file. **/
-	inline QString& fileName() { return m_fileName; }
+	///** Returns the full path to the current open data file. **/
+	//inline QString& fileName() { return m_fileName; }
 	
-	/** Sets the full path to data file. **/
-	inline void setFileName(const QString& name) { m_fileName = name; }
+	///** Sets the full path to data file. **/
+	//inline void setFileName(const QString& name) { m_fileName = name; }
 	/** Sets the manufacturer name. **/
 	inline void setManufacturer(const QString& man) { m_manufacturer = man; }
 	/** Sets the recording time. **/
@@ -183,7 +183,7 @@ protected:
 	QString m_time;	 // recording time
 	QString m_isoDate;	// new iso date/time string (must be set by the plugin).
 	QString m_manufacturer;
-	QString m_fileName;	
+	//QString m_fileName;	
 	quint32 m_channelsCount;
 	// Hash table to store index of channels and their name.
 	QHash<QString, int> m_labelToIndex;

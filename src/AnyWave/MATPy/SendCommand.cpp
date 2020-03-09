@@ -27,7 +27,6 @@
 #include "Process/AwScriptPlugin.h"
 #include <QDataStream>
 #include <QTcpSocket>
-#include <QBuffer>
 #include "Process/AwProcessManager.h"
 
 void AwRequestServer::handleSendCommand(QTcpSocket *client, AwScriptProcess *process)

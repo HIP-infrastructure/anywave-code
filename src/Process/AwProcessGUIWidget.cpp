@@ -26,6 +26,7 @@
 #include <process/AwProcessGUIWidget.h>
 #include <QCloseEvent>
 
+
 void AwProcessGUIWidget::closeEvent(QCloseEvent *event)
 {
 	emit closed();

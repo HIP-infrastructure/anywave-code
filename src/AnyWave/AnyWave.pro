@@ -5,6 +5,10 @@
 #-------------------------------------------------
 
 TEMPLATE = app
+
+
+include(../common.pri)
+include(AnyWave.pri)
 macx {
     TARGET = AnyWaveMac
 }
@@ -12,8 +16,6 @@ unix:!macx {
     TARGET = AnyWaveLinux
 }
 
-include(../common.pri)
-include(AnyWave.pri)
 QT += widgets xml svg concurrent qml printsupport multimedia multimediawidgets charts
 CONFIG += qwt 
 macx {

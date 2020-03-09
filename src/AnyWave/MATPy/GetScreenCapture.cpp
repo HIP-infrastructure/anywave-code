@@ -27,7 +27,7 @@
 #include "Process/AwScriptPlugin.h"
 #include <QDataStream>
 #include <QTcpSocket>
-#include "AwResponse.h"
+#include "AwTCPResponse.h"
 #include "Display/AwDisplay.h"
 #include "Prefs/AwSettings.h"
 
@@ -35,14 +35,11 @@
 void AwRequestServer::handleGetScreenCapture(QTcpSocket *client, AwScriptProcess *p)
 {
 	emit log("Processing aw_getcapture...");
-	AwResponse response(client);
+	AwTCPResponse response(client);
+	QDataStream& stream = *response.stream();
 	AwSettings *aws = AwSettings::getInstance();
-
-	response.begin();
 	AwDisplay::instance()->captureViews();
-	QDataStream stream_data(response.buffer());
-	stream_data.setVersion(QDataStream::Qt_4_4);
-	stream_data << AwSettings::getInstance()->getString("lastCapturedFile");
+	stream << AwSettings::getInstance()->getString("lastCapturedFile");
 	response.send();
 	emit log("Done.");
 }

@@ -36,24 +36,11 @@ void AwComboMarker::setMarkers(const AwMarkerList& markers)
 	m_saved = markers;
 	m_markers.clear();
 	filter();
-	//if (m_filter == AwComboMarker::UniqueLabels) {
-	//	m_labels.clear();
-	//	foreach(AwMarker *m, markers) {
-	//		if (!m_labels.contains(m->label())) {
-	//			m_markers << m;
-	//			m_labels << m->label();
-	//		}
-	//	}
-	//}
-	//else {
-	//	m_markers = markers;
-	//	m_labels.clear();
-	//}
-//	buildComboList();
 }
 
 void AwComboMarker::filter()
 {
+	clear();
 	m_markers = m_saved;
 	if (m_filter & AwComboMarker::ExcludeNoDuration) {
 		foreach(AwMarker *m, m_markers) {
@@ -69,27 +56,4 @@ void AwComboMarker::setFilter(int type)
 {
 	m_filter = type;
 	filter();
-	//if (m_filter == AwComboMarker::UniqueLabels && !m_markers.isEmpty()) 
-	//	setMarkers(m_markers);
-	//else 
-	//	m_markers = m_saved;
-	//buildComboList();
 }
-
-//void AwComboMarker::buildComboList()
-//{
-//	addItems(AwMarker::getUniqueLabels(m_markers));
-//	update();
-//}
-
-//QString AwComboMarker::selectedLabel()
-//{
-//	return currentText();
-//}
-//
-//AwMarker *AwComboMarker::selectedMarker()
-//{
-//	if (m_filter == AwComboMarker::AllLabels)
-//		return NULL;
-//	return m_markers.at(currentIndex());
-//}

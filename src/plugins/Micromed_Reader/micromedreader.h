@@ -79,7 +79,7 @@ class MICROMEDREADER_EXPORT MicromedReaderPlugin : public AwFileIOPlugin
 #endif	
 public:
 	MicromedReaderPlugin();
-	MicromedReader *newInstance(const QString& filename) { return new MicromedReader(filename); }
+	AW_INSTANTIATE_FILEIO_PLUGIN(MicromedReader)
 };
 
 

@@ -33,5 +33,5 @@ class DELTAMEDBINTXTREADER_EXPORT DeltamedBTReaderPlugin : public AwFileIOPlugin
 
 public:
 	DeltamedBTReaderPlugin();
-	AW_INSTANTIATE_PLUGIN(DeltamedBTReader)
+	AW_INSTANTIATE_FILEIO_PLUGIN(DeltamedBTReader)
 };
