@@ -62,8 +62,8 @@ void ICASettings::accept()
 	if (args["is_using_markers"].toBool())
 		args["use_markers"] = QStringList(m_labels.at(m_ui.comboUseMarkers->currentIndex()));
 
-	args["lpf"] = m_ui.spinLPF->value();
-	args["hpf"] = m_ui.spinHPF->value();
+	args["lp"] = m_ui.spinLPF->value();
+	args["hp"] = m_ui.spinHPF->value();
 	args["comp"] = m_ui.spinNC->value();
 
 	// get channels matching modality

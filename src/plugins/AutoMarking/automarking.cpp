@@ -48,7 +48,7 @@ AutoMarking::~AutoMarking()
 
 void AutoMarking::run(const QStringList& args)
 {
-	if (m_markers.isEmpty()) {
+	if (pdi.input.markers().isEmpty()) {
 		QMessageBox::critical(0, tr("No Markers"), tr("At least one marker should be present."));
 		emit closed();
 		return;
@@ -57,7 +57,7 @@ void AutoMarking::run(const QStringList& args)
 	//m_widget = new AwAutoMarkWidget(m_markers, pdi.input.fileDuration);
 	m_widget = new AwMarkAroundWidget;
 	m_widget->setTotalDuration(pdi.input.settings[processio::file_duration].toDouble());
-	m_widget->setMarkers(m_markers);
+	m_widget->setMarkers(pdi.input.markers());
 	connect(m_widget, SIGNAL(closed()), this, SIGNAL(closed()));
 	connect(m_widget, SIGNAL(newMarkersCreated(const AwMarkerList&)), this, SLOT(newMarkers(const AwMarkerList&)));
 	m_widget->show();

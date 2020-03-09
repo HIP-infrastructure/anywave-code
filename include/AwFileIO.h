@@ -56,7 +56,6 @@ public:
 	/** Returns the side file path based on extension or empty string is none exists **/
 	QString getSideFile(const QString& extension); // getSideFile(".mrk") will return the file path to the marker file.
 
-
 	// Input 
 	/** Override this method to open the file and fill up the data structure. **/
 	virtual FileStatus openFile(const QString &path);
@@ -81,10 +80,8 @@ public:
 	virtual qint64 writeData(AwChannelList *AwChannels) { return  0; } // must be used for continous data
 																	   /** Write data corresponding to an epoch **/
 	virtual qint64 writeData(AwChannelList *AwChannels, int epoch) { return 0; } // must be used for epoched data
-
 	/** Override this method to close open file(s) and release memory if needed **/
 	virtual void cleanUpAndClose() { infos.clear(); }
-
 	/** Override this method to provide the full path to the file currently open by the plugin. **/
 	virtual QString realFilePath() { return QString(); }
 

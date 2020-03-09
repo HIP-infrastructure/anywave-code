@@ -10,7 +10,7 @@ class MFVGUI : public AwProcessGUIWidget
 	Q_OBJECT
 
 public:
-	MFVGUI(QWidget *parent = Q_NULLPTR);
+	MFVGUI(AwGUIProcess *process, QWidget *parent = Q_NULLPTR);
 	~MFVGUI();
 
 	AwBaseSignalView *signalView() { return m_signalView; }

@@ -3,8 +3,8 @@
 #include <AwCore.h>
 #include <widget/AwMessageBox.h>
 
-MFVGUI::MFVGUI(QWidget *parent)
-	 : AwProcessGUIWidget(parent)
+MFVGUI::MFVGUI(AwGUIProcess *process, QWidget *parent)
+	 : AwProcessGUIWidget(process, parent)
 {
 	m_ui.setupUi(this);
 	m_signalView = new AwBaseSignalView();
