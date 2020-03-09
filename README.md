@@ -1,10 +1,10 @@
 ## Get ready to build using Ubuntu 18.04
 
 ```bash
-sudo apt-get -y update && apt-get -y install git cmake qtbase5-dev libqt5dbus5 
+sudo apt-get -y update && apt-get -y install git cmake qtbase5-dev
     qt5-default libvtk7-qt-dev libopenblas-base libopenblas-dev qtmultimedia5-dev libqt5x11extras5-dev
     libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev
-    build-essential libpython2.7-dev python2.7 python-numpy libqt5x11extras5 libqt5multimedia5
+    build-essential libpython3.6-dev python3-numpy 
 ```
 You should be able to adapt the script above for your own distribution.   
 Note that cmake v3 is required and some distributions (CentOS) only provides CMake 2.8.   
