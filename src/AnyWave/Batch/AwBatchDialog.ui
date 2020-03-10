@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>670</width>
-    <height>389</height>
+    <width>445</width>
+    <height>206</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Batching a process</string>
+   <string>Batching processes</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -27,9 +27,15 @@
       <widget class="QComboBox" name="comboPlugin"/>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_4">
+      <widget class="QPushButton" name="buttonAdd">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>Add Action</string>
+        <string>Add To Operations</string>
        </property>
       </widget>
      </item>
@@ -110,8 +116,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>365</x>
-     <y>323</y>
+     <x>383</x>
+     <y>513</y>
     </hint>
     <hint type="destinationlabel">
      <x>478</x>
@@ -126,8 +132,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>270</x>
-     <y>323</y>
+     <x>302</x>
+     <y>513</y>
     </hint>
     <hint type="destinationlabel">
      <x>226</x>

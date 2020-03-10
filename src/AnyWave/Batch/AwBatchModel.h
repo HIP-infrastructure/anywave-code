@@ -25,27 +25,45 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-// class designed to represent a filtering set 
-// contains HP,LP,Notch filtering settings and associated color
+#include <QAbstractTableModel>
+#include <QItemDelegate>
+#include "AwBatchModelItem.h"
 
-#include <QString>
+constexpr int BATCH_COLUMNS =2;
+constexpr int BATCH_PLUGIN = 0;
+constexpr int BATCH_PARAMETERS = 1;
 
-class MFVFilterSet
+using AwBatchItems = QList<AwBatchModelItem *>;
+
+class AwBatchTableModel : public QAbstractTableModel
 {
-public:
-	explicit MFVFilterSet() { m_hp = m_lp = m_notch = 0.; }
+	Q_OBJECT
 
-	inline QString& color() { return m_color; }
-	inline float hp() { return m_hp; }
-	inline float lp() { return m_lp; }
-	inline float notch() { return m_notch; }
-	void setHP(float hp) { m_hp = hp; }
-	void setLP(float lp) { m_lp = lp; }
-	void setNotch(float notch) { m_notch = notch; }
-	void setColor(const QString& color) { m_color = color; }
+public:
+	AwBatchTableModel(QObject *parent);
+	~AwBatchTableModel();
+
+	QVariant data(const QModelIndex& index, int role) const override;
+	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+	Qt::ItemFlags flags(const QModelIndex &index = QModelIndex()) const override;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+	//bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+
+	void clear();
+	void add(AwBatchModelItem *item);
+	void update();
+	AwBatchItems& items() { return m_items; }
 protected:
-	float m_lp, m_hp, m_notch;
-	QString m_color;
+	AwBatchItems m_items;
 };
 
-using MFVFilterSets = QList<MFVFilterSet *>;
+class AwBatchItemDelegate : public QItemDelegate
+{
+	Q_OBJECT
+public:
+	AwBatchItemDelegate(QObject *parent = nullptr) : QItemDelegate(parent) {}
+
+	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex& index) const override;
+};
+

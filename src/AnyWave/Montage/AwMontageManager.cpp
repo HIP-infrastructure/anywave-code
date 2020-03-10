@@ -107,7 +107,8 @@ QHash<QString, AwChannel *> AwMontageManager::cloneAsRecordedChannels()
 	QHash<QString, AwChannel *> res;
 	auto channels = m_asRecorded.values();
 	for (auto c : channels)
-		res[c->name()] = c->duplicate();
+		if (c != nullptr)
+			res[c->name()] = c->duplicate();
 	return res;
 }
 
@@ -723,6 +724,8 @@ AwChannelList AwMontageManager::load(const QString& path)
 		// search for a match in as recorded
 		auto asRecorded = m_asRecorded[c->name()];
 		if (asRecorded) {
+			// Change asrecorded type to match the one in .mtg
+			asRecorded->setType(c->type());
 			if (asRecorded->isBad())
 				continue;
 			if (c->hasReferences() && c->referenceName() != "AVG") {
@@ -734,8 +737,6 @@ AwChannelList AwMontageManager::load(const QString& path)
 				else  // reference not found => remove it
 					c->clearRefName();
 			}
-			// Change asrecorded type to match the one in .mtg
-			asRecorded->setType(c->type());
 			// instantiante from as recorded
 			auto newChan = asRecorded->duplicate();
 			// copy settings set in .mtg file
