@@ -33,11 +33,12 @@ AwTriggerWriterPlugin::AwTriggerWriterPlugin()
 	version = "1.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::PluginIsHidden);
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 AwTriggerWriter::AwTriggerWriter() : AwProcess()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 bool AwTriggerWriter::showUi()

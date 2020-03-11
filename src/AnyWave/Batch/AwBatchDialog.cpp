@@ -56,7 +56,7 @@ AwBatchDialog::~AwBatchDialog()
 void AwBatchDialog::addItem()
 {
 	auto name = m_ui.comboPlugin->currentText();
-	auto item = new AwBatchModelItem(name);
+	auto item = new AwBatchModelItem(m_plugins[name]);
 	static_cast<AwBatchTableModel *>(m_ui.tableView->model())->add(item);
 	editItem(item);
 }

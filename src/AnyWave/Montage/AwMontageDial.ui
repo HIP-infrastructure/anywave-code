@@ -101,8 +101,11 @@
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QPushButton" name="buttonEEGSEEG">
+          <property name="toolTip">
+           <string>Change the type of all channels (including the channels in the montage)</string>
+          </property>
           <property name="text">
-           <string>Convert EEG to SEEG</string>
+           <string>Change All EEG Channels to SEEG</string>
           </property>
          </widget>
         </item>

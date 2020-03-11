@@ -58,8 +58,7 @@ class MERGEFILES_EXPORT MergeFilePlugin : public AwProcessPlugin
 	Q_INTERFACES(AwProcessPlugin)
 public:
 	MergeFilePlugin();
-
-	MergeFile *newInstance() { return new MergeFile; }
+	AW_INSTANTIATE_PROCESS(MergeFile)
 
 };
 

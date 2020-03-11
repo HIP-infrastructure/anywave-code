@@ -69,11 +69,14 @@ QString AwFileIO::getSideFile(const QString& extension)
 		return m_sideFiles[extension];
 
 	QString tmp = QString("%1%2").arg(m_fullPath).arg(extension);
-	if (QFile::exists(tmp)) {
-		m_sideFiles[extension] = tmp;
-		return tmp;
-	}
-	return QString();
+	m_sideFiles[extension] = tmp;
+	return tmp;
+
+	//if (QFile::exists(tmp)) {
+	//	m_sideFiles[extension] = tmp;
+	//	return tmp;
+	//}
+	//return QString();
 }
 
 // AwBlock

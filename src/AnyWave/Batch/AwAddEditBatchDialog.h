@@ -15,4 +15,7 @@ public:
 private:
 	Ui::AwAddEditBatchDialogUi m_ui;
 	AwBatchModelItem *m_item;
+	QMap<QString, QWidget *> m_widgets;	// store widgets based on keys defined in json ui
+
+	void setupParamsUi();
 };

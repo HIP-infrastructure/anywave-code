@@ -446,6 +446,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
 	}
+
 	updateMontageFromChannelsTsv(reader);
 
 	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)

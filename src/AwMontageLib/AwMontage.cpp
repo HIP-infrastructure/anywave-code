@@ -23,10 +23,10 @@ AwMontage::AwMontage(AwFileIO *reader)
 			m_channels << c->duplicate();
 	}
 	auto m_badChannelPath = reader->getSideFile("*.bad");
-	if (!m_badChannelPath.isEmpty())
+	if (!m_badChannelPath.isEmpty() && QFile::exists(m_badChannelPath))
 		loadBadChannels();
 	auto mtgFile = reader->getSideFile("*.mtg");
-	if (!mtgFile.isEmpty()) 
+	if (!mtgFile.isEmpty() && QFile::exists(mtgFile)) 
 		load(mtgFile);
 	// remove null channels if any
 	foreach(AwChannel *c, m_channels)

@@ -36,11 +36,12 @@ AwExporterPlugin::AwExporterPlugin()
 	description = QString(tr("Export data to a file"));
 	version = "1.0";
 	type = AwProcessPlugin::Background;
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 }
 
 AwExporter::AwExporter() : AwProcess()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
+	//setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
 	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::GetWriterPlugins | Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetCurrentMontage
 		| Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	m_decimateFactor = 1;
@@ -129,8 +130,8 @@ void AwExporter::run()
 {
 	bool isDecimate = m_decimateFactor > 1;
 
-	AwFileIO *writer = m_plugin->newInstance();
-	writer->setPlugin(m_plugin);
+	AwFileIO *writer = m_ioPlugin->newInstance();
+	writer->setPlugin(m_ioPlugin);
 	
 	AwBlock *block = writer->infos.newBlock();
 	
@@ -164,7 +165,7 @@ void AwExporter::run()
 
 	if (writer->createFile(m_path) != AwFileIO::NoError) {
 		sendMessage(tr("Error creating output file."));
-		m_plugin->deleteInstance(writer);
+		m_ioPlugin->deleteInstance(writer);
 		return;
 	}
 
@@ -172,7 +173,7 @@ void AwExporter::run()
 	writer->writeData(&m_channels);
 	sendMessage("Done.");
 	writer->cleanUpAndClose();
-	m_plugin->deleteInstance(writer);
+	m_ioPlugin->deleteInstance(writer);
 }
 
 bool AwExporter::showUi()
@@ -203,7 +204,7 @@ bool AwExporter::showUi()
 			m_channels = ui.channels;
 		else
 			m_channels = ui.selectedChannels;
-		m_plugin = writers.value(ui.writer);
+		m_ioPlugin = writers.value(ui.writer);
 		
 		if (QFile::exists(ui.filePath)) {
 			if (AwMessageBox::information(0, tr("File"), tr("the file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)

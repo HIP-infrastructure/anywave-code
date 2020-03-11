@@ -44,7 +44,7 @@ public:
 protected:
 	AwChannelList m_channels;		// channels to export
 	AwChannelList m_ICAChannels;	// ICA Channels to export
-	AwFileIOPlugin *m_plugin;
+	AwFileIOPlugin *m_ioPlugin;
 	QString m_path;
 	bool m_exportICAChannels;			// this flag indicates that the data contains ICA virtual channels
 	bool m_relabelChannels;
@@ -59,7 +59,7 @@ class AwExporterPlugin : public AwProcessPlugin
 public:
 	AwExporterPlugin();
 
-	AwExporter *newInstance() { return new AwExporter(); }
+	AW_INSTANTIATE_PROCESS(AwExporter)
 };
 
 #endif

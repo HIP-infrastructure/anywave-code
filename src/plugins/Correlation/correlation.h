@@ -66,7 +66,7 @@ class CORRELATION_EXPORT CorrelationPlugin : public AwProcessPlugin
 public:
 	CorrelationPlugin();
 
-	Correlation *newInstance() { return new Correlation; }
+	AW_INSTANTIATE_PROCESS(Correlation)
 
 };
 

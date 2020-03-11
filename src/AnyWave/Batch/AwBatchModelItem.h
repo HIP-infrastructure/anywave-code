@@ -26,17 +26,21 @@
 #pragma once
 
 #include <QStringList>
+#include <AwProcessInterface.h>
 
 class AwBatchModelItem
 {
 public:
-	explicit AwBatchModelItem(const QString& name) { m_pluginName = name; }
+	explicit AwBatchModelItem(AwProcessPlugin *plugin) { m_plugin = plugin; }
 
-	inline QString& pluginName() { return m_pluginName; }
+	inline QString& pluginName() { return m_plugin->name; }
 	inline QStringList& files() { return m_files; }
 	inline QString& jsonFile() { return m_jsonArgs; }
+	AwProcessPlugin *plugin() { return m_plugin; }
+
 protected:
 	QString m_pluginName;		// name of the plugin
 	QString m_jsonArgs;			// json file used as arguments to run the process
 	QStringList m_files;		// list of file to use as input.
+	AwProcessPlugin *m_plugin;
 };

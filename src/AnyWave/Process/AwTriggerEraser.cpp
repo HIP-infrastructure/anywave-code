@@ -32,12 +32,12 @@ AwTriggerEraserPlugin::AwTriggerEraserPlugin()
 	description = QString(tr("Erase a trigger channel"));
 	version = "1.0";
 	type = AwProcessPlugin::Background;
-	setFlags(Aw::ProcessFlags::PluginIsHidden);
+	setFlags(Aw::ProcessFlags::PluginIsHidden | Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 AwTriggerEraser::AwTriggerEraser() : AwProcess()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 bool AwTriggerEraser::showUi()

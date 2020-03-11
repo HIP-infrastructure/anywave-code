@@ -537,7 +537,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 			if (match.hasMatch())
 				stream << name.remove(re) << "\t";
 			else
-				stream << AwChannel::typeToString(c->type()) << "\t";
+				stream << name << "\t";
 
 			// sampling_frequency
 			stream << c->samplingRate() << "\t";

@@ -56,8 +56,7 @@ class FILECONVERTER_EXPORT FileConverterPlugin : public AwProcessPlugin
 	Q_INTERFACES(AwProcessPlugin)
 public:
 	FileConverterPlugin();
-
-	FileConverter *newInstance() { return new FileConverter; }
+	AW_INSTANTIATE_PROCESS(FileConverter)
 
 };
 

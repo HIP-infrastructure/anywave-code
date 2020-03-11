@@ -34,6 +34,7 @@ AwTriggerParserPlugin::AwTriggerParserPlugin()
 	description = QString(tr("Extract digital values from trigger channels and make them markers"));
 	version = "1.0";
 	type = AwProcessPlugin::Background;
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 AwTriggerParser::AwTriggerParser() : AwProcess()
@@ -41,7 +42,7 @@ AwTriggerParser::AwTriggerParser() : AwProcess()
 	// INPUT PARAMS
 	pdi.setInputFlags(Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	pdi.addInputChannel(AwChannel::Trigger, 1, 0);
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+
 	m_maskValue = 0;
 }
 
