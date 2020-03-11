@@ -136,12 +136,12 @@ EEGInto4DPlugin::EEGInto4DPlugin()
 	name = tr("EEG4DNi");
 	description = tr("Load an EEG File and add its channels into a 4DNI file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
-	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 EEGInto4D::EEGInto4D() 
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins);
 }
 
