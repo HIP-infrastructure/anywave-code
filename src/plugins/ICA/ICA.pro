@@ -34,7 +34,7 @@ LIBS += -lopenblas
 macx{
 LIBS += -framework Accelerate
 }
-LIBS += -lAwProcess -lAwWidgets -lAwFilter -lAwMath -lAwMATLAB -lAwRW -lAwLayout
+LIBS += -lAwProcess -lAwWidgets -lAwFilter -lAwMath -lAwMATLAB -lAwRW -lAwLayout -lAwUtilities
 
 FORMS += \
     ICASettings.ui

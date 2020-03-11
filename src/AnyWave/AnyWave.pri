@@ -3,7 +3,11 @@
 # ------------------------------------------------------
 
 
-HEADERS += ./Data/AwDataChunk.h \
+HEADERS += ./Batch/AwBatchDialog.h \
+     ./Batch/AwBatchModel.h \
+     ./Batch/AwBatchModelIem.h \
+     ./Batch/AwAddEditBatchDialog.h \
+     ./Data/AwDataChunk.h \
     ./Data/AwMemoryMapper.h \
     ./Data/AwDataConnection.h \
     ./Data/AwDataServer.h \
@@ -147,6 +151,9 @@ SOURCES += ./AnyWave.cpp \
     ./AwOpenFileDialog.cpp \
     ./AwUpdater.cpp \
     ./main.cpp \
+    ./Batch/AwBatchDialog.cpp \
+    ./Batch/AwBatchModel.cpp \
+    ./Batch/AwAddEditBatchDialog.cpp \
     ./Data/AwDataChunk.cpp \
     ./Data/AwDataConnection.cpp \
     ./Data/AwDataServer.cpp \
@@ -302,6 +309,8 @@ SOURCES += ./AnyWave.cpp \
     ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
+    ./Batch/AwBatchDialog.ui \
+    ./Batch/AwAddEditBatchDialog.ui \
     ./ICA/AwICAPanel.ui \
     ./ICA/AwPanelItem.ui \
     ./Carto/AwMappingWidget.ui \
