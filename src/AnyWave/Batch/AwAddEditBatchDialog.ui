@@ -11,11 +11,15 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>AwAddEditBatchDialog</string>
+   <string>Batch parameters</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <property name="windowIcon">
+   <iconset resource="../../../resources/AnyWave.qrc">
+    <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
+    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
@@ -45,6 +49,36 @@
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayoutFiles">
+          <item row="2" column="0">
+           <widget class="QPushButton" name="buttonAddFromDir">
+            <property name="toolTip">
+             <string>Click to pick a root directory</string>
+            </property>
+            <property name="text">
+             <string>Add From Directory</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="buttonAddFiles">
+            <property name="toolTip">
+             <string>Click to add files</string>
+            </property>
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QPushButton" name="pushButton">
+            <property name="toolTip">
+             <string>Remove selected filles</string>
+            </property>
+            <property name="text">
+             <string>Remove</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelFiles">
             <property name="text">
@@ -65,22 +99,39 @@
             </property>
            </spacer>
           </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="QListWidget" name="listWidget"/>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QPushButton" name="buttonAddFromDir">
-            <property name="text">
-             <string>Add Files in Directory</string>
+          <item row="1" column="0" colspan="4">
+           <widget class="QTableWidget" name="tableWidget">
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
             </property>
+            <property name="alternatingRowColors">
+             <bool>true</bool>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::MultiSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <property name="columnCount">
+             <number>2</number>
+            </property>
+            <column/>
+            <column/>
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QPushButton" name="buttonAddFiles">
-            <property name="text">
-             <string>Add Files</string>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -89,10 +140,15 @@
      </item>
      <item>
       <widget class="QGroupBox" name="groupParameters">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title">
         <string>Parameters</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2"/>
       </widget>
      </item>
     </layout>
@@ -131,7 +187,9 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../../../resources/AnyWave.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>pushButton_4</sender>
@@ -140,8 +198,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>189</x>
-     <y>432</y>
+     <x>626</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>89</x>
@@ -156,8 +214,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>268</x>
-     <y>427</y>
+     <x>705</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>366</x>
@@ -165,5 +223,58 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonAddFromDir</sender>
+   <signal>clicked()</signal>
+   <receiver>AwAddEditBatchDialogUi</receiver>
+   <slot>addFilesFromDir()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>121</x>
+     <y>388</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>266</x>
+     <y>435</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonAddFiles</sender>
+   <signal>clicked()</signal>
+   <receiver>AwAddEditBatchDialogUi</receiver>
+   <slot>addFiles()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>267</x>
+     <y>391</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>206</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>AwAddEditBatchDialogUi</receiver>
+   <slot>removeFiles()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>336</x>
+     <y>396</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>445</x>
+     <y>441</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>addFilesFromDir()</slot>
+  <slot>addFiles()</slot>
+  <slot>removeFiles()</slot>
+ </slots>
 </ui>

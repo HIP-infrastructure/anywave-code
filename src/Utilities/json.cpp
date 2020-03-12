@@ -29,6 +29,32 @@
 #include <qjsonobject.h>
 #include <qjsonarray.h>
 
+
+QString  AwUtilities::json::hashToJsonString(const QVariantHash& hash)
+{
+
+	auto object = QJsonObject::fromVariantHash(hash);
+	QJsonDocument doc(object);
+	return QString(doc.toJson(QJsonDocument::Compact));
+}
+
+QVariantMap AwUtilities::json::mapFromJsonString(const QString& jsonString, QString& errorString)
+{
+	QJsonDocument doc;
+	QVariantMap map;
+	if (!jsonString.isEmpty()) {
+		QJsonParseError err;
+		doc = QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+		if (doc.isNull() || err.error != QJsonParseError::NoError) {
+			errorString = err.errorString();
+			return map;
+		}
+		return doc.object().toVariantMap();
+	}
+	return map;
+}
+
+
 QVariantHash AwUtilities::json::hashFromJsonString(const QString& jsonString, QString& errorString)
 {
 	QJsonDocument doc;

@@ -81,6 +81,9 @@ public:
 	void setMarkersReceived();	// must be called by the markers receiver to inform the process that the markers have been successfully received
 	void addMarkers(AwMarkerList *markers);
 	void addMarker(AwMarker *marker);
+
+	/** specific to process which supports command line batching. **/
+	virtual bool batchParameterCheck(const QVariantHash& args) { return true; }
 signals:
 	// Adding markers to AnyWave
 	void sendMarkers(AwMarkerList *markers);
@@ -201,6 +204,7 @@ public:
 	inline qint64 executionTime() { return m_executionTime; }
 	inline void sendMessage(const QString& message) { emit progressChanged(message); }
 	inline void sendProgressUpdate(int percent) { emit progressChanged(percent); }
+
 public slots:
 	void stop();
 	void start();

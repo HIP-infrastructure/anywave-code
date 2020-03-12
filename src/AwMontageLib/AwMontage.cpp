@@ -181,12 +181,12 @@ bool AwMontage::loadMontage(const QString& mtgFile)
 			continue;
 		}
 		if (!m_asRecordedHash.contains(c->name())) {
-			auto asRecorded = m_asRecordedHash[c->name()];
+			auto asRecorded = m_asRecordedHash.value(c->name());
 			if (asRecorded->isBad())
 				continue;
 			if (c->hasReferences() && c->referenceName() != "AVG") {
 				if (m_asRecordedHash.contains(c->referenceName())) {
-					if (m_asRecordedHash[c->referenceName()]->isBad())
+					if (m_asRecordedHash.value(c->referenceName())->isBad())
 						continue;
 				}
 				else
@@ -226,13 +226,13 @@ void AwMontage::loadBadChannels()
 	for (auto chan : m_asRecorded)
 		chan->setBad(false);
 	for (auto label : m_badChannelLabels) {
-		AwChannel *chan = m_asRecordedHash[label];
+		AwChannel *chan = m_asRecordedHash.value(label);
 		if (chan)
 			chan->setBad(true);
 	}
 	foreach(AwChannel *chan, m_channels) {
 		if (m_asRecordedHash.contains(chan->name())) {
-			auto asRecorded = m_asRecordedHash[chan->name()];
+			auto asRecorded = m_asRecordedHash.value(chan->name());
 			if (asRecorded->isBad()) {
 				m_channels.removeAll(chan);
 				delete chan;

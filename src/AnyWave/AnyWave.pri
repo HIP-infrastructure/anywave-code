@@ -154,6 +154,7 @@ SOURCES += ./AnyWave.cpp \
     ./Batch/AwBatchDialog.cpp \
     ./Batch/AwBatchModel.cpp \
     ./Batch/AwAddEditBatchDialog.cpp \
+	./Batch/AwBatchModelItem.cpp \
     ./Data/AwDataChunk.cpp \
     ./Data/AwDataConnection.cpp \
     ./Data/AwDataServer.cpp \

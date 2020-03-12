@@ -87,6 +87,14 @@ bool ICA::showUi()
 	return false;
 }
 
+
+bool ICA::batchParameterCheck(const QVariantHash& hash)
+{
+	// this is an exhaustive test as we don't have a file open at this stage.
+	// just checking for some parameters: 
+	return hash.value("comp").toInt() > 1;
+}
+
 int ICA::initParameters()
 {
 	auto args = pdi.input.args();
@@ -97,7 +105,7 @@ int ICA::initParameters()
 	// BIDS specific:
 	// when launching ICA in batch mode and specifying ieeg as modality:
 	// check for SEEG channels if none present check for EEG.
-	if (args["modality"].toString().toLower() == "ieeg") {
+	if (args.value("modality").toString().toLower() == "ieeg") {
 		m_modality = AwChannel::SEEG;
 		m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 		if (m_channels.isEmpty()) {
@@ -113,12 +121,12 @@ int ICA::initParameters()
 	m_channels = AwChannel::removeDoublons(m_channels);
 	auto badLabels = pdi.input.settings[processio::bad_labels].toStringList();
 	if (args.contains("skip_bad")) {
-		if (!args["skip_bad"].toBool())
+		if (!args.value("skip_bad").toBool())
 			badLabels.clear();
 	}
 	m_samplingRate = m_channels.first()->samplingRate();
 	if (args.contains("downsampling"))
-		m_isDownsamplingActive = args["downsampling"].toBool();
+		m_isDownsamplingActive = args.value("downsampling").toBool();
 	// check for bad labels 
 	if (!badLabels.isEmpty()) {
 		foreach(AwChannel *c, m_channels)
@@ -142,8 +150,8 @@ int ICA::initParameters()
 
 	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[processio::data_path].toString()).arg(args["modality"].toString()));
 
-	m_lpf = args["lp"].toDouble();
-	m_hpf = args["hp"].toDouble();
+	m_lpf = args.value("lp").toDouble();
+	m_hpf = args.value("hp").toDouble();
 	AwFilterSettings filterSettings;
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	filterSettings.apply(m_channels);
@@ -157,9 +165,9 @@ int ICA::initParameters()
 		auto markers = AwMarker::duplicate(pdi.input.markers());
 		QStringList skippedMarkers, usedMarkers;
 		if (use)
-			usedMarkers = args["use_markers"].toStringList();
+			usedMarkers = args.value("use_markers").toStringList();
 		if (skip)
-			skippedMarkers = args["skip_markers"].toStringList();
+			skippedMarkers = args.value("skip_markers").toStringList();
 
 		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
 		if (inputMarkers.isEmpty()) {
@@ -244,12 +252,12 @@ int ICA::initParameters()
 
 	QString dir;
 	if (args.contains("output_dir"))
-		dir = args["output_dir"].toString();
+		dir = args.value("output_dir").toString();
 	else
 		dir = pdi.input.settings[processio::data_dir].toString();
 	QFileInfo fi(pdi.input.settings[processio::data_path].toString());
 	m_fileName = QString("%1/%2").arg(dir).arg(fi.fileName());
-	QString mod = args["modality"].toString();
+	QString mod = args.value("modality").toString();
 	m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	return 0;
 }

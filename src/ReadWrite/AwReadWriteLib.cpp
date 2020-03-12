@@ -26,7 +26,6 @@
 #include "AwReadWriteLib.h"
 #include <AwFileIO.h>
 #include <QTextStream>
-//#include <QRegularExpression>
 #include <QFile>
 
 
@@ -47,36 +46,13 @@ AwFileIO::FileStatus AwFileIO::openFile(const QString &path)
 
 QString AwFileIO::getSideFile(const QString& extension)
 {
-	//QRegularExpression exp(".[a-z:0-9]+$");
-	//QRegularExpressionMatch match = exp.match(m_fullPath);
-	//QString ext;
-	//if (match.hasMatch()) 
-	//	ext = match.captured(0);
-	//if (!ext.isEmpty()) {
-	//	auto markerFile = m_fullPath.replace(ext, extension);
-	//	if (QFile::exists(markerFile))
-	//		return markerFile;
-	//}
-	//else {
-	//	auto markerFile = QString("%1%2").arg(m_fullPath).arg(extension);
-	//	if (QFile::exists(markerFile))
-	//		return markerFile;
-	//}
-	//return QString();
-
 	// check in map FIRST !
 	if (m_sideFiles.contains(extension))
-		return m_sideFiles[extension];
+		return m_sideFiles.value(extension);
 
 	QString tmp = QString("%1%2").arg(m_fullPath).arg(extension);
 	m_sideFiles[extension] = tmp;
 	return tmp;
-
-	//if (QFile::exists(tmp)) {
-	//	m_sideFiles[extension] = tmp;
-	//	return tmp;
-	//}
-	//return QString();
 }
 
 // AwBlock

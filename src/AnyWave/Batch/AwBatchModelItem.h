@@ -35,12 +35,15 @@ public:
 
 	inline QString& pluginName() { return m_plugin->name; }
 	inline QStringList& files() { return m_files; }
-	inline QString& jsonFile() { return m_jsonArgs; }
+	void setFiles(const QStringList& files) { m_files = files; }
+	inline QString& jsonParameters() { return m_jsonArgs; }
+	void setJsonParameters(const QString& args) { m_jsonArgs = args; }
 	AwProcessPlugin *plugin() { return m_plugin; }
-
+	inline bool isEmpty() { return m_jsonArgs.isEmpty(); }
+	bool checkPluginParams();
 protected:
 	QString m_pluginName;		// name of the plugin
-	QString m_jsonArgs;			// json file used as arguments to run the process
+	QString m_jsonArgs;			// json string used as arguments to run the process
 	QStringList m_files;		// list of file to use as input.
 	AwProcessPlugin *m_plugin;
 };

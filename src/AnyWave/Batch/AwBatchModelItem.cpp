@@ -2,9 +2,9 @@
 // 
 //                 Université d’Aix Marseille (AMU) - 
 //                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Copyright © 2020 AMU, INSERM
 // 
-//  This library is free software; you can redistribute it and/or
+//  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 3 of the License, or (at your option) any later version.
@@ -23,19 +23,12 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
-#include <AwGlobal.h>
-#include <QVariant>
+#include "AwBatchModelItem.h"
+#include <utils/json.h>
 
-namespace AwUtilities // put utility functions inside a namespace
+bool AwBatchModelItem::checkPluginParams()
 {
-	namespace json {
-		// from a json string returns a variant hash : empty if error. errorString contains the error description
-		QVariantHash AW_UTILITIES_EXPORT hashFromJsonString(const QString& jsonString, QString& errorString);
-		QString AW_UTILITIES_EXPORT hashToJsonString(const QVariantHash& hash);
-		QVariantMap AW_UTILITIES_EXPORT mapFromJsonString(const QString& jsonString, QString& errorString);
-		QJsonDocument AW_UTILITIES_EXPORT readJsonFile(const QString& file);
-		QVariantHash AW_UTILITIES_EXPORT fromJsonFileToHash(const QString& file);
-		QString AW_UTILITIES_EXPORT fromJsonFileToString(const QString& file);
-	}
+	auto instance = m_plugin->newInstance();
+	QString error;
+	return instance->batchParameterCheck(AwUtilities::json::hashFromJsonString(this->m_jsonArgs, error));
 }

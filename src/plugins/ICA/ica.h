@@ -41,6 +41,8 @@ public:
 	void run() override;
 	void runFromCommandLine() override;
 	bool showUi();
+
+	bool batchParameterCheck(const QVariantHash& args) override;
 private:
 	int initParameters();
 	void infomax(int m, int n, int nc);

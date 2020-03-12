@@ -305,6 +305,7 @@ private:
 	float m_sampleRate;
 
 	void alignFilePointer();
+	void alignFilePointer(QFile& file);
 	qint64 readBuffer(char *buffer, qint64 bufferSize);
 	/** Get the position in the file for the sample of channel channel **/
 	qint64 samplePosition(int channel, qint64 sample); 

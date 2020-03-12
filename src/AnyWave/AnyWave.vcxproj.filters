@@ -1351,6 +1351,9 @@
     <ClCompile Include="Batch\AwAddEditBatchDialog.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
+    <ClCompile Include="Batch\AwBatchModelItem.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">

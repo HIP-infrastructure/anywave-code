@@ -27,6 +27,7 @@
     <ClCompile Include="Batch\AwAddEditBatchDialog.cpp" />
     <ClCompile Include="Batch\AwBatchDialog.cpp" />
     <ClCompile Include="Batch\AwBatchModel.cpp" />
+    <ClCompile Include="Batch\AwBatchModelItem.cpp" />
     <ClCompile Include="Carto\AwDockMapping.cpp" />
     <ClCompile Include="Carto\AwMappingClient.cpp" />
     <ClCompile Include="Carto\AwMappingWidget.cpp" />

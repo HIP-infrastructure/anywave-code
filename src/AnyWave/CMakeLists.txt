@@ -11,6 +11,10 @@ SET(AnyWave_SRCS
     ./AwOpenFileDialog.cpp
     ./main.cpp  
 	./AwFileOpenSave.cpp
+	./Batch/AwAddEditBatchDialog.cpp
+	./Batch/AwBatchDialog.cpp
+	./Batch/AwBatchModelItem.cpp
+	./Batch/AwBatchModel.cpp
     ./CL/CommandLineParser.cpp
     ./CL/AwCommandLogger.cpp
     ./CL/AwCommandLineManager.cpp
@@ -162,7 +166,11 @@ SET(AnyWave_SRCS
 	#./Epoch/AwEpochMosaicWidget.cpp
     #./Epoch/AwStatsModel.cpp)
 
-SET(HEADERS ./Data/AwDataConnection.h  
+SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
+	./Batch/AwBatchDialog.h
+	./Batch/AwBatchModelItem.h
+	./Batch/AwBatchModel.h
+	./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
 	./Data/AwMemoryMapper.h  
 	./Data/AwDataChunk.h
@@ -301,6 +309,8 @@ QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
 
 SET(FORMS ./AnyWave.ui  
     ./AwExportDial.ui  
+	./Batch/AwAddEditBatchDialog.ui
+	./Batch/AwBatchDialog.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
     ./Carto/AwMappingWidget.ui  

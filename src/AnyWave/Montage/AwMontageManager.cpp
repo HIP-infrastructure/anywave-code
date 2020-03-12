@@ -236,10 +236,10 @@ AwMontageManager::AwMontageManager()
 
 	// init quick montages
 	for (int i = 0; i < files.count(); i++)	{
-		QString key = files[i];
+		QString key = files.value(i);
 		key = key.remove(".mtg", Qt::CaseInsensitive);
 		m_quickMontages << key;
-		m_quickMontagesHT.insert(key, m_path + "/" + files[i]);
+		m_quickMontagesHT.insert(key, m_path + "/" + files.value(i));
 	}
 	qSort(m_quickMontages.begin(), m_quickMontages.end());
 
@@ -264,10 +264,10 @@ void AwMontageManager::scanForMontagesInDirectory(const QString& dir)
 
 	// init hash table
 	for (int i = 0; i < files.count(); i++)	{
-		QString key = files[i];
+		QString key = files.value(i);
 		key = key.remove(".mtg", Qt::CaseInsensitive);
 		m_localQuickMontages << key;
-		m_localQuickMontagesHT.insert(key, dir + "/" + files[i]);
+		m_localQuickMontagesHT.insert(key, dir + "/" + files.value(i));
 	}
 	
 	qSort(m_localQuickMontages.begin(), m_localQuickMontages.end());
@@ -290,10 +290,10 @@ void AwMontageManager::scanForPrebuiltMontages()
 
 	// init hash table
 	for (int i = 0; i < files.count(); i++)	{
-		QString key = files[i];
+		QString key = files.value(i);
 		key = key.remove(".mtg", Qt::CaseInsensitive);
 		m_quickMontages << key;
-		m_quickMontagesHT.insert(key, path + files[i]);
+		m_quickMontagesHT.insert(key, path + key);
 	}
 
 	qSort(m_quickMontages.begin(), m_quickMontages.end());
@@ -458,7 +458,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	// check that none NULL channels are present in asRecorder nor m_channels
 	for (auto k : m_asRecorded.keys()) {
-		if (m_asRecorded[k] == Q_NULLPTR)
+		if (m_asRecorded.value(k) == Q_NULLPTR)
 			m_asRecorded.remove(k);
 	}
 	foreach(AwChannel *c, m_channels)
@@ -535,7 +535,7 @@ void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 	// now change type or bad status based on TSV
 	AwChannelList badChannels;
 	for (auto c : list) {
-		auto asRecorded = m_asRecorded[c->name()];
+		auto asRecorded = m_asRecorded.value(c->name());
 		if (asRecorded) {
 			asRecorded->setBad(c->isBad());
 			asRecorded->setType(c->type());
@@ -600,12 +600,12 @@ void AwMontageManager::loadBadChannels()
 	for (auto chan : m_asRecorded.values())
 		chan->setBad(false);
 	for (auto label : m_badChannelLabels) {
-		AwChannel *chan = m_asRecorded[label];
+		AwChannel *chan = m_asRecorded.value(label);
 		if (chan)
 			chan->setBad(true);
 	}
 	foreach(AwChannel *chan, m_channels) {
-		AwChannel *asRecorded =  m_asRecorded[chan->name()];
+		AwChannel *asRecorded =  m_asRecorded.value(chan->name());
 		if (asRecorded)  
 			if (asRecorded->isBad()) {
 				m_channels.removeAll(chan);
@@ -633,7 +633,7 @@ void AwMontageManager::showInterface()
 
 		// Get as recorded channels and check if their types and bad status have changed.
 		for (auto c : ui.asRecordedChannels()) {
-			auto asRecorded = m_asRecorded[c->name()]; 
+			auto asRecorded = m_asRecorded.value(c->name()); 
 			if (asRecorded) {
 				asRecorded->setBad(c->isBad());
 				asRecorded->setType(c->type());
@@ -643,7 +643,7 @@ void AwMontageManager::showInterface()
 		// now browse channels defined as montage and instantiate them properly 
 		QStringList labels = AwChannel::getLabels(ui.channels());
 		for (int i = 0; i < labels.size(); i++) {
-			auto asRecorded = m_asRecorded[labels.value(i)];
+			auto asRecorded = m_asRecorded.value(labels.value(i));
 			if (asRecorded) {
 				if (asRecorded->isVirtual())
 					m_channels << static_cast<AwVirtualChannel *>(asRecorded)->duplicate();
@@ -723,14 +723,14 @@ AwChannelList AwMontageManager::load(const QString& path)
 			continue;
 		}
 		// search for a match in as recorded
-		auto asRecorded = m_asRecorded[c->name()];
+		auto asRecorded = m_asRecorded.value(c->name());
 		if (asRecorded) {
 			// Change asrecorded type to match the one in .mtg
 			asRecorded->setType(c->type());
 			if (asRecorded->isBad())
 				continue;
 			if (c->hasReferences() && c->referenceName() != "AVG") {
-				auto asRecordedRef = m_asRecorded[c->referenceName()];
+				auto asRecordedRef = m_asRecorded.value(c->referenceName());
 				if (asRecordedRef) {
 					if (asRecorded->isBad())
 						continue;
@@ -802,16 +802,16 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 	if (!badLabels.isEmpty()) {
 		for (auto k : hash.keys())
 			if (badLabels.contains(k))
-				hash[k]->setBad(true);
+				hash.value(k)->setBad(true);
 	}
 	
 	for (auto c : channels) {
 		if (!hash.contains(c->name()))
 			continue;
-		if (hash[c->name()]->isBad())
+		if (hash.value(c->name())->isBad())
 			continue;
-		auto newChannel = new AwChannel(hash[c->name()]);
-		hash[c->name()]->setType(c->type());
+		auto newChannel = new AwChannel(hash.value(c->name()));
+		hash.value(c->name())->setType(c->type());
 		/* Handle AVG references */
 		if (c->referenceName() == "AVG") {
 			newChannel->setReferenceName("AVG");
@@ -820,8 +820,8 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 		}
 		if (c->hasReferences() && hash.contains(c->referenceName())) {
 			// make sure the type of ref channel is matching the one in montage
-			if (!hash[c->referenceName()]->isBad()) {
-				hash[c->referenceName()]->setType(c->type());
+			if (!hash.value(c->referenceName())->isBad()) {
+				hash.value(c->referenceName())->setType(c->type());
 				newChannel->setReferenceName(c->referenceName());
 			}
 			else
@@ -870,7 +870,7 @@ void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 	foreach(QString label, labels)	{
 		if (!m_asRecorded.contains(label))
 			continue;
-		auto asRecorded = m_asRecorded[label];
+		auto asRecorded = m_asRecorded.value(label);
 		asRecorded->setBad(true);
 		m_badChannelLabels << label;
 		foreach(AwChannel *c, m_channels) {
@@ -899,7 +899,7 @@ void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 // compute new montage.
 void AwMontageManager::markChannelAsBad(const QString& channelName, bool bad)
 {
-	auto asRecorded = m_asRecorded[channelName];
+	auto asRecorded = m_asRecorded.value(channelName);
 	if (asRecorded) { // channel found
 		AwChannelList toDelete;
 		if (bad) { // set it to bad
@@ -966,10 +966,10 @@ void AwMontageManager::buildQuickMontagesList()
 
 	// init hash table
 	for (int i = 0; i < files.count(); i++)	{
-		QString key = files[i];
+		QString key = files.value(i);
 		key = key.remove(".mtg", Qt::CaseInsensitive);
 		m_quickMontages << key;
-		m_quickMontagesHT.insert(key, m_path + files[i]);
+		m_quickMontagesHT.insert(key, m_path + files.value(i));
 	}
 
 	qSort(m_quickMontages.begin(), m_quickMontages.end());
@@ -1013,7 +1013,7 @@ void AwMontageManager::addChannelsByName(AwChannelList &channelsToAdd)
 	foreach (AwChannel *c, channelsToAdd)	{
 		if (!m_asRecorded.contains(c->name()))
 			continue;
-		auto asRecorded = m_asRecorded[c->name()];
+		auto asRecorded = m_asRecorded.value(c->name());
 		if (asRecorded->isBad())
 			continue;
 		m_channels << asRecorded->duplicate();
@@ -1032,12 +1032,12 @@ void AwMontageManager::buildNewMontageFromChannels(const AwChannelList& channels
 	for (auto c : channels) {
 		if (!m_asRecorded.contains(c->name()))
 			continue;
-		auto asRecorded = m_asRecorded[c->name()];
+		auto asRecorded = m_asRecorded.value(c->name());
 		// do not add a bad channel in the montage
 		if (asRecorded->isBad())
 			continue;
 		if (c->hasReferences() && m_asRecorded.contains(c->referenceName())) { // do not add the channel if the reference channel is bad.
-			if (m_asRecorded[c->referenceName()]->isBad())
+			if (m_asRecorded.value(c->referenceName())->isBad())
 				continue;
 		}
 
