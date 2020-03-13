@@ -27,7 +27,7 @@ private:
 	void setupParamsUi();
 	void fetchParams();
 	void fetchFiles();
-	void checkFilesAndFillList(const QStringList& files, bool warning = true);
+	void checkFilesAndFillList(const QStringList& files, bool warning = true, bool checkReaderPlugins = true);
 	void recursiveFill(const QString& dirPath);
 	bool pluginParamCheck();
 };

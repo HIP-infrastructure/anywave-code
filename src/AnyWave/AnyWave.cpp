@@ -486,6 +486,7 @@ void AnyWave::createUserDirs()
 	QString pluginDir = homeDir + "/AnyWave/Plugins";
 	QString matlabPluginDir = pluginDir + "/MATLAB";
 	QString pythonPluginDir = pluginDir + "/Python";
+	QString batchDir = homeDir + "/AnyWave/Batch/";
 
 	// convert workingDir to native filesystem syntax.
 	// Used by 'outside' plugins like MATLAB code.
@@ -509,6 +510,8 @@ void AnyWave::createUserDirs()
 		aws->setSettings("pluginDir", pluginDir);
 	if (checkAndCreateFolder(pluginDir, "MATLAB"))
 		aws->setSettings("matlabPluginDir", matlabPluginDir);
+	if (checkAndCreateFolder(homeDir, "Batch"))
+		aws->setSettings("batchDir", batchDir);
 	// add a dep folder in MATLAB => the place to put all dependencies for the plugin
 	checkAndCreateFolder(matlabPluginDir, "dep");
 	if (checkAndCreateFolder(pluginDir, "Python"))

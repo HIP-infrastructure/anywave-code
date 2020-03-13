@@ -27,6 +27,7 @@
 #include "Process/AwProcessManager.h"
 #include "AwBatchModel.h"
 #include "AwAddEditBatchDialog.h"
+#include <AwCore.h>
 
 AwBatchDialog::AwBatchDialog(QWidget *parent)
 	: QDialog(parent)
@@ -45,12 +46,29 @@ AwBatchDialog::AwBatchDialog(QWidget *parent)
 	m_ui.tableView->resizeColumnsToContents();
 
 	connect(m_ui.buttonAdd, &QPushButton::clicked, this, &AwBatchDialog::addItem);
+	connect(m_ui.tableView, &QTableView::clicked, this, &AwBatchDialog::itemClick);
 }
 
 AwBatchDialog::~AwBatchDialog()
 {
 }
 
+
+void AwBatchDialog::removeOperation()
+{
+	auto indexes = m_ui.tableView->selectionModel()->selectedRows();
+	for (auto index : indexes) {
+		m_ui.tableView->model()->removeRow(index.row());
+	}
+ }
+
+void AwBatchDialog::itemClick(const QModelIndex& index)
+{
+	if (!index.isValid())
+		return;
+	if (index.column() == BATCH_PARAMETERS)
+		editItem(m_items.at(index.row()));
+}
 
 
 void AwBatchDialog::addItem()
@@ -59,6 +77,7 @@ void AwBatchDialog::addItem()
 	auto item = new AwBatchModelItem(m_plugins[name]);
 	static_cast<AwBatchTableModel *>(m_ui.tableView->model())->add(item);
 	editItem(item);
+	m_items.append(item);
 }
 
 void AwBatchDialog::editItem(AwBatchModelItem *item)

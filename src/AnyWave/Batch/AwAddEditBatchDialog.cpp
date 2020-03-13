@@ -34,6 +34,8 @@ void AwAddEditBatchDialog::setupParamsUi()
 		delete oldLayout;
 	auto gridLayout = new QGridLayout(m_ui.groupParameters);
 
+	
+
 	// get the json ui
 	QString error;
 	m_jsonUi = AwUtilities::json::mapFromJsonString(m_item->plugin()->settings().value(processio::json_ui).toString(), m_errorString);
@@ -55,6 +57,11 @@ void AwAddEditBatchDialog::setupParamsUi()
 		m_ui.buttonAddFromDir->hide();
 	}
 
+
+	// get the files
+	auto files = m_item->files();
+	if (!files.isEmpty())
+		checkFilesAndFillList(files, false, false);
 	int row = 0;
 	for (auto k : m_jsonUi.keys()) {
 		auto value = m_jsonUi.value(k).toString();
@@ -180,17 +187,21 @@ void AwAddEditBatchDialog::recursiveFill(const QString& dirPath)
 		recursiveFill(subDir.filePath());
 }
 
-void AwAddEditBatchDialog::checkFilesAndFillList(const QStringList& files, bool warning)
+void AwAddEditBatchDialog::checkFilesAndFillList(const QStringList& files, bool warning, bool checkReaderPlugins)
 {
 	if (files.isEmpty())
 		return;
 	// first check that files can be open by AnyWave
 	QStringList res;
-	for (auto f : files) {
-		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(f);
-		if (reader != nullptr) {
-			res << f;
-			reader->plugin()->deleteInstance(reader);
+	if (!checkReaderPlugins)
+		res = files;
+	else {
+		for (auto f : files) {
+			auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(f);
+			if (reader != nullptr) {
+				res << f;
+				reader->plugin()->deleteInstance(reader);
+			}
 		}
 	}
 	if (res.isEmpty() && warning) {
@@ -224,7 +235,7 @@ void AwAddEditBatchDialog::fetchFiles()
 {
 	QStringList files;
 	for (auto i = 0; i < m_ui.tableWidget->rowCount(); i++) {
-		auto item = m_ui.tableWidget->itemAt(i, 1);
+		auto item = m_ui.tableWidget->item(i, 1);
 		files << item->data(Qt::UserRole).toString();
 	}
 	m_item->setFiles(files);

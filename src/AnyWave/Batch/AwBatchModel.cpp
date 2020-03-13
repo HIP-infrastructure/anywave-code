@@ -57,6 +57,11 @@ Qt::ItemFlags AwBatchTableModel::flags(const QModelIndex &index) const
 //	return QAbstractTableModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsEditable;
 }
 
+bool AwBatchTableModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+	return true;
+}
+
 
 void AwBatchTableModel::update()
 {
@@ -88,7 +93,7 @@ QVariant AwBatchTableModel::data(const QModelIndex &index, int role) const
 			return QString(tr("Name of the plugin to batch."));
 		break;
 	case BATCH_PARAMETERS:
-		 if (role == Qt::ToolTipRole)
+		if (role == Qt::ToolTipRole)
 			return QString(tr("Click to modify the batch running parameters."));
 		break;
 	}

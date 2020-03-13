@@ -29,3 +29,4 @@
 #define AW_DESTROY_LIST(L) while(!(L).isEmpty()) delete (L).takeFirst();
 
 
+template<typename T> constexpr void destroyList(T t) { while (!t.isEmpty()) delete t.takeFirst(); }

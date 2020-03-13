@@ -42,7 +42,11 @@ public:
 public slots:
 	void addItem();
 	void editItem(AwBatchModelItem *item);
+	void removeOperation();
+private slots:
+	void itemClick(const QModelIndex& index);
 private:
 	Ui::AwBatchDialogUi m_ui;
 	QMap<QString, AwProcessPlugin *> m_plugins;
+	QList< AwBatchModelItem *> m_items;
 };
