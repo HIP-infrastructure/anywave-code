@@ -34,7 +34,8 @@
 #include <filter/AwFilterSettings.h>
 #include "Prefs/AwSettings.h"
 #include <AwCore.h>
-
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QJsonArray>
 
 
@@ -59,9 +60,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AwChannelList requestedChannels;
 	AwMarkerList input_markers;
 	auto reader = AwSettings::getInstance()->currentReader();
-	//float fileDuration = process == nullptr ? reader->infos.totalDuration() : process->pdi.input.fileDuration;
-	float fileDuration = process->pdi.input.settings[processio::file_duration].toDouble();
-	float start = 0., duration = 0.;
+	float fileDuration = process->pdi.input.settings.value(processio::file_duration).toDouble();
+	float start = 0., duration = fileDuration;
 
 	if (json.isEmpty()) {
 		if (process)
@@ -73,47 +73,60 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	}
 	else {
 		QString error;
-		auto dict = AwUtilities::json::hashFromJsonString(json, error);
-		if (dict.isEmpty()) {
-			emit log(QString("error in json parsing: %1").arg(error));
+		auto doc = AwUtilities::json::jsonStringToDocument(json);
+		if (doc.isEmpty() || doc.isNull()) {
+			emit log(QString("error in json parsing"));
 			stream << (qint64)0;;
 			response.send();
 			return;
 		}
+		auto dict = doc.object();
 		QStringList use_markers, skip_markers, labels, types;
 		QString pickFrom;
 
 		AwFilterSettings filterSettings;
 		// check for start/Duration or use markers options
-		if (dict.contains("use_markers"))
-			use_markers = dict["use_markers"].toStringList();
-		if (dict.contains("skip_markers"))
-			skip_markers = dict["skip_markers"].toStringList();
+		if (dict.contains("use_markers")) {
+			auto tmp = dict.value("use_markers").toArray();
+			for (auto t : tmp)
+				use_markers << t.toString();
+		}
+		if (dict.contains("skip_markers")) {
+			auto tmp = dict.value("skip_markers").toArray();
+			for (auto t : tmp)
+				skip_markers << t.toString();
+		}
 		// check for channel labels
-		if (dict.contains("channel_labels"))
-			labels = dict["channel_labels"].toStringList();
+		if (dict.contains("channel_labels")) {
+			auto tmp = dict.value("channel_labels").toArray();
+			for (auto t : tmp)
+				labels << t.toString();
+		}
+			
 		// check for channel types
-		if (dict.contains("channel_types"))
-			types = dict["channel_types"].toStringList();
+		if (dict.contains("channel_types")) {
+			auto tmp = dict.value("channel_types").toArray();
+			for (auto t : tmp)
+				types << t.toString();
+		}
 		bool usingMarkers = !use_markers.isEmpty();
 		bool skippingMarkers = !skip_markers.isEmpty();
 		if (dict.contains("start"))
-			start = dict["start"].toDouble();
+			start = dict.value("start").toDouble();
 		if (dict.contains("duration"))
-			duration = dict["duration"].toDouble();
+			duration = dict.value("duration").toDouble();
 		if (dict.contains("pick_channels_from"))
-			pickFrom = dict["pick_channels_from"].toString().toLower();
+			pickFrom = dict.value("pick_channels_from").toString().toLower();
 		if (dict.contains("raw_data"))
-			rawData = dict["raw_data"].toBool();
+			rawData = dict.value("raw_data").toBool();
 		if (dict.contains("downsampling_factor"))
-			downsampling = dict["downsampling_factor"].toInt();
+			downsampling = dict.value("downsampling_factor").toInt();
 		// get filters
 		QVector<float> filters;
 		if (dict.contains("filters")) {
-			auto array = dict["filters"].toJsonArray();
-			for (auto f : array) {
-				filters << f.toDouble();
-			}
+			auto tmp = dict.value("filters").toArray();
+			for (auto t : tmp)
+				filters << t.toDouble();
 		}
 		AwMarkerList markers = AwMarkerManager::instance()->getMarkersThread();
 		// parsing input is done, now preparing input markers
@@ -167,8 +180,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		}
 		// apply filters
 		if (!filters.isEmpty()) {
-			float notch = filters.size() == 3 ? filters.value(2) : 0.;
-			AwChannel::setFilters(requestedChannels, filters.value(0), filters.value(1), notch);
+			emit log(QString("Filters set : %1 %2").arg(filters.at(0)).arg(filters.at(1)));
+			float notch = filters.size() == 3 ? filters.at(2) : 0.;
+			AwChannel::setFilters(requestedChannels, filters.at(0), filters.at(1), notch);
 		}
 	}
 	// remove possible bad channels 

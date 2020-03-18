@@ -54,7 +54,7 @@ AwDisplaySetupManager* AwDisplaySetupManager::instance()
 AwDisplaySetupManager::AwDisplaySetupManager(QObject *parent)
 	: QObject(parent)
 {
-	m_setupDir = AwSettings::getInstance()->getString("displaySetupDir");
+	m_setupDir = AwSettings::getInstance()->value(aws::setup_dir).toString();
 	m_currentSetup = NULL;
 	if (!m_setupDir.isEmpty())	{
 		// check for the existence of Default Setup
@@ -156,7 +156,8 @@ void AwDisplaySetupManager::changeSetup(const QString &newSetup)
 
 	if (m_loadedSetups.contains(newSetup)) {
 		AwDisplaySetup *setup = new AwDisplaySetup(newSetup);
-		auto path  = QString("%1%2.aws").arg(AwSettings::getInstance()->getString("displaySetupDir")).arg(newSetup);
+		auto dir = AwSettings::getInstance()->value(aws::setup_dir).toString();
+		auto path  = QString("%1%2.aws").arg(dir).arg(newSetup);
 		
 		if (setup->loadFromFile(path)) {
 			emit newSetupSelected(setup);

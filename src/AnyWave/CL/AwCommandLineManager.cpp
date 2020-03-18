@@ -35,6 +35,7 @@
 #include <AwCore.h>
 #include <utils/json.h>
 #include "Prefs/AwSettings.h"
+#include <AwFileInfo.h>
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
 {
@@ -80,8 +81,7 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 	if (!process->pdi.areInputChannelSet()) { // no input channels specified => ok set to AnyChannels (1-n)
 		process->pdi.addInputChannel(-1, 1, 0);
 	}
-	//process->pdi.input.icaPath = AwSettings::getInstance()->getString("currentIcaFile");
-	process->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->getString("currentIcaFile");
+	process->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->value(aws::ica_file).toString();
 	// input channels are set
 	auto types = process->pdi.getInputChannels();
 	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.

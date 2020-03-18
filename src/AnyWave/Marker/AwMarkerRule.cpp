@@ -224,7 +224,7 @@ void AwMarkerRule::checkIfValid()
 
 bool AwMarkerRule::save()
 {
-	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
+	auto dir = AwSettings::getInstance()->value(aws::marker_rules_dir).toString();
 	if (dir.isEmpty())
 		return false;
 
@@ -338,7 +338,7 @@ bool AwMarkerRule::save()
 
 bool AwMarkerRule::load()
 {
-	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
+	auto dir = AwSettings::getInstance()->value(aws::marker_rules_dir).toString();
 	if (dir.isEmpty())
 		return false;
 
@@ -479,7 +479,6 @@ bool AwMarkerRule::load()
 		}
 		node = node.nextSibling();
 	}
-
 	file.close();
 	return true;
 }
@@ -487,7 +486,7 @@ bool AwMarkerRule::load()
 
 void AwMarkerRule::remove(const QString& name)
 {
-	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
+	auto dir = AwSettings::getInstance()->value(aws::marker_rules_dir).toString();
 
 	if (dir.isEmpty())
 		return;
@@ -510,12 +509,9 @@ void AwMarkerRule::addElement(AwMarkerRuleElement *elem)
 
 bool AwMarkerRule::exists()
 {
-	auto dir = AwSettings::getInstance()->getString("markerRulesDir");
-
-
+	auto dir = AwSettings::getInstance()->value(aws::marker_rules_dir).toString();
 	if (dir.isEmpty())
 		return false;
-
 	QString path = QString("%1%2.awr").arg(dir).arg(m_name);
 	return QFile::exists(path);
 }

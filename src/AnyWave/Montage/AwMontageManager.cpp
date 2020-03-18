@@ -42,6 +42,7 @@
 #include <AwException.h>
 #include <montage/AwMontage.h>
 #include <AwCore.h>
+#include <AwFileInfo.h>
 // statics init and definitions
 AwMontageManager *AwMontageManager::m_instance = 0;
 
@@ -226,7 +227,7 @@ AwMontageManager::AwMontageManager()
 	QStringList filter("*.mtg");
 	AwSettings *aws = AwSettings::getInstance();
 
-	m_path = aws->getString("montageDir");
+	m_path = aws->value(aws::montage_dir).toString();
 	if (m_path.isEmpty())
 		return;
 
@@ -956,7 +957,7 @@ void AwMontageManager::buildQuickMontagesList()
 	AwSettings *aws = AwSettings::getInstance();
 	// check in AnyWave's montage directory
 	QStringList filter("*.mtg");
-	m_path = aws->getString("montageDir");
+	m_path = aws->value(aws::montage_dir).toString();
 	if (m_path.isEmpty())
 		return;
 

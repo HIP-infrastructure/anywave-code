@@ -4,6 +4,7 @@
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
 #include <AwFileIO.h>
+#include <AwFileInfo.h>
 
 AwMarkersExportWidget::AwMarkersExportWidget(const AwMarkerList& selection, const AwMarkerList& markers, QWidget *parent)
 	: QDialog(parent)

@@ -45,7 +45,7 @@
 #include "AwProcessLogManager.h"
 #include "Debug/AwDebugLog.h"
 #include "IO/BIDS/AwBIDSManager.h"
-
+#include <AwFileInfo.h>
 
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
@@ -354,10 +354,11 @@ void AwProcessManager::addProcess(AwProcessPlugin *plugin)
  */
 AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 {
-	AwSettings *settings = AwSettings::getInstance();
+	auto aws = AwSettings::getInstance();
+	
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
-	auto workingDir = settings->getString("workingDir");
+	auto workingDir = aws->value(aws::work_dir).toString();
 	// create a folder in local Anywave's directories for the plugin
 	// Check if working exists 
 	// if working is empty it means AnyWave could not create user's directories.
@@ -371,14 +372,14 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 			process->pdi.input.settings[processio::working_dir] = workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	auto fi = settings->fileInfo();
+	auto fi = aws->fileInfo();
 	// if fi == NULL that means no file are currently open by AnyWave.
 	if (fi) {
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(fi->currentReader());
 		process->pdi.input.settings[processio::data_dir] = fi->dirPath();
 		process->pdi.input.settings[processio::data_path] = QString("%1/%2").arg(fi->dirPath()).arg(fi->fileName());
-		process->pdi.input.filterSettings = settings->filterSettings();
+		process->pdi.input.filterSettings = aws->filterSettings();
 		process->pdi.input.settings[processio::file_duration] = fi->currentReader()->infos.totalDuration();
 	}
 	return process;
@@ -417,7 +418,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	int type = p->plugin()->type;
 
 	// set the MATLAB interface for the plugin if MATLAB support is available
-	if (AwSettings::getInstance()->getBool("isMatlabPresent"))
+	if (AwSettings::getInstance()->value(aws::matlab_present).toBool())
 		p->pdi.setMI(AwSettings::getInstance()->matlabInterface());
 
 	// Check for process of type DisplayBackground
@@ -476,7 +477,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	bool selection = !selectedChannels.isEmpty();
 	int inputF = p->pdi.inputFlags();
 
-	p->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->getString("currentIcaFile");
+	p->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->value(aws::ica_file).toString();
 
 	bool requireSelection = inputF & Aw::ProcessInput::ProcessRequiresChannelSelection;
 	bool ignoreSelection = inputF & Aw::ProcessInput::ProcessIgnoresChannelSelection; 
@@ -640,7 +641,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	AwDataServer *ds = 	AwDataServer::getInstance();
 
 	// set current language
-	process->setLocale(AwSettings::getInstance()->language());
+//	process->setLocale(AwSettings::getInstance()->language());
 
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess

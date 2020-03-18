@@ -39,7 +39,7 @@ void AwRequestServer::handleGetScreenCapture(QTcpSocket *client, AwScriptProcess
 	QDataStream& stream = *response.stream();
 	AwSettings *aws = AwSettings::getInstance();
 	AwDisplay::instance()->captureViews();
-	stream << AwSettings::getInstance()->getString("lastCapturedFile");
+	stream << AwSettings::getInstance()->value(aws::last_captured_file).toString();
 	response.send();
 	emit log("Done.");
 }

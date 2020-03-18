@@ -49,6 +49,7 @@
 #include "AwCentralWidget.h"
 #include "Plugin/AwPluginManager.h"
 #include <QTextStream>
+#include <AwFileInfo.h>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
@@ -347,9 +348,9 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 
 void AwDisplay::captureViews()
 {
-	AwSettings *aws = AwSettings::getInstance();
+	auto aws = AwSettings::getInstance();
 	// first, clear the lastCaptureFile set in Settings
-	aws->setSettings("lastCapturedFile", QString());
+//	aws->setSettings("lastCapturedFile", QString());
 
 	QString dir = aws->fileInfo()->dirPath();
 	int count = 1;
@@ -371,7 +372,7 @@ void AwDisplay::captureViews()
 	sysTray->show();
 	sysTray->showMessage(tr("AnyWave"), tr("Capture saved."));
 	if (ok) // saving of file was ok
-		aws->setSettings("lastCapturedFile", file);
+		aws->setValue(aws::last_captured_file, file);
 }
 
 

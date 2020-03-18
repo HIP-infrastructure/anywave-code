@@ -36,6 +36,7 @@
 #include <QFileDialog>
 #include <widget/AwGetValueDialog.h>
 #include <Plugin/AwPluginManager.h>
+#include <AwFileInfo.h>
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -127,7 +128,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(cutAround()));
 #endif
-	m_markerDir = AwSettings::getInstance()->getString("markerRulesDir");
+	m_markerDir = AwSettings::getInstance()->value(aws::marker_rules_dir).toString();
 
 	// always add a rule set as "No Rule" at first index
 	m_noRuleString = QString(tr("No rule"));

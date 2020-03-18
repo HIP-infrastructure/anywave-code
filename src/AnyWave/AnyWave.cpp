@@ -102,8 +102,10 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
+	
 	//Save system path
-	aws->setSettings("systemPath", QString(qgetenv("PATH")));
+	aws->setValue(aws::system_path, QString(qgetenv("PATH")));
+
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 
@@ -119,21 +121,21 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	createUserDirs();
 	
 	if (isGUIMode) {
-		QStringList recentFiles = aws->getStringList("recentFiles");
+		QStringList recentFiles = aws->value(aws::recent_files).toStringList();
 		if (!recentFiles.isEmpty()) {
 			updateRecentFiles(recentFiles);
 		}
-		QStringList recentBIDS = aws->getStringList("recentBIDS");
+		QStringList recentBIDS = aws->value(aws::recent_bids).toStringList();
 		if (!recentBIDS.isEmpty()) {
 			updateRecentBIDS(recentBIDS);
 		}
 	}
 
-	QSettings settings;
+	QSettings qsettings;
 	m_SEEGViewer = NULL;
 	// init settings
-    settings.setValue("general/secureMode", false);
-	settings.setValue("general/buildDate", QString(__DATE__));
+    qsettings.setValue("general/secureMode", false);
+	qsettings.setValue("general/buildDate", QString(__DATE__));
 	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
 	initMatlab();
 	// Plugins
@@ -327,7 +329,7 @@ void AnyWave::changeEvent(QEvent *e)
 			{
 				QString locale = QLocale::system().name();
 				locale.truncate(locale.lastIndexOf('_'));
-				AwSettings::getInstance()->loadLanguage(locale);
+			//	AwSettings::getInstance()->loadLanguage(locale);
 			}
 			break;
 		}
@@ -453,6 +455,7 @@ void AnyWave::createUserDirs()
 {
 	QString homeDir;
 	AwSettings *aws = AwSettings::getInstance();
+	
 	QStringList dirs;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)  // Qt 4
 #if defined(Q_OS_WIN)
@@ -475,7 +478,7 @@ void AnyWave::createUserDirs()
 	}
 	else {
 		homeDir = dirs.first();
-		aws->setSettings("homeDir", homeDir);
+		aws->setValue(aws::home_dir, homeDir);
 	}
 #endif
 	QString montageDir = homeDir + "/AnyWave/Montages/";
@@ -503,48 +506,53 @@ void AnyWave::createUserDirs()
 	homeDir += "/AnyWave";
 
 	if (checkAndCreateFolder(homeDir, "Montages"))
-		aws->setSettings("montageDir", montageDir);
+		aws->setValue(aws::montage_dir, montageDir);
 	if (checkAndCreateFolder(homeDir, "Markers"))
-		aws->setSettings("markerRulesDir", markerRulesDir);
+		aws->setValue(aws::marker_rules_dir , markerRulesDir);
 	if (checkAndCreateFolder(homeDir, "Plugins"))
-		aws->setSettings("pluginDir", pluginDir);
+		aws->setValue(aws::plugins_dir , pluginDir);
 	if (checkAndCreateFolder(pluginDir, "MATLAB"))
-		aws->setSettings("matlabPluginDir", matlabPluginDir);
+		aws->setValue(aws::matlab_plugins_dir , matlabPluginDir);
 	if (checkAndCreateFolder(homeDir, "Batch"))
-		aws->setSettings("batchDir", batchDir);
+		aws->setValue(aws::batch_dir , batchDir);
 	// add a dep folder in MATLAB => the place to put all dependencies for the plugin
 	checkAndCreateFolder(matlabPluginDir, "dep");
 	if (checkAndCreateFolder(pluginDir, "Python"))
-		aws->setSettings("pythonPluginDir", pythonPluginDir);
+		aws->setValue(aws::python_plugins_dir , pythonPluginDir);
 	if (checkAndCreateFolder(homeDir, "Setups"))
-		aws->setSettings("displaySetupDir", setupDir);
+		aws->setValue(aws::setup_dir, setupDir);
 	if (checkAndCreateFolder(homeDir, "Log"))
-		aws->setSettings("logDir", logDir);
+		aws->setValue(aws::log_dir, logDir);
 	if (checkAndCreateFolder(homeDir, "Work"))
-		aws->setSettings("workingDir", workingDir);
+		aws->setValue(aws::work_dir,  workingDir);
 
 	// set application specific folders for plugins
 	auto appDir = QDir(qApp->applicationDirPath());
 
 	QString appPluginPath;
 	auto appPath = appDir.absolutePath();
+	aws->setValue(aws::app_dir, appPath);
 #ifdef Q_OS_MAC
+	// set python module path on mac it's in the application bundle
+	settings[aws::python_module_dir] = appPath + "/../Python";
+	// no change to plugin dir
 	appDir.cdUp();
 	appDir.cdUp();
 	appDir.cdUp();
 	appDir.cd("Anywave_Plugins");
-	aws->setSettings("pythonModulePath", appPath + "/../Python");
+	//aws->setSeawsttings("pythonModulePath", appPath + "/../Python");
+	aws-setValue(aws::app_plugins_dir, appDir.absolutePath());
+
 #else
+	aws->setValue(aws::python_module_dir, appPath + "/Python");
 	appDir.cd("Plugins");
-	aws->setSettings("pythonModulePath", appPath + "/Python");
+	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
 #endif
-	appPluginPath = appDir.absolutePath();
-	aws->setSettings("appPluginDir", appPluginPath);
-	aws->setSettings("appMatlabPluginDir", appPluginPath + "/MATLAB");
-	aws->setSettings("appPythonPluginDir", appPluginPath + "/Python");
+	auto appPluginDir = aws->value(aws::app_plugins_dir).toString();
+	aws->setValue(aws::app_matlab_plugins_dir, appPluginDir + "/MATLAB");
+	aws->setValue(aws::app_python_plugins_dir, appPluginDir + "/Python");
 	// Mex path
-	aws->setSettings("mexPath", appPluginPath + "/MATLAB/AnyWave");
-	
+	aws->setValue(aws::mex_dir, appPluginDir + "/MATLAB/AnyWave");
 }
 
 //
@@ -766,7 +774,7 @@ void AnyWave::runGARDEL()
 #endif
 #ifdef Q_OS_WIN // Windows
 	if (launch) {
-		QString fullPath = AwSettings::getInstance()->getString("systemPath");
+		auto fullPath = settings.value(aws::system_path).toString();
 		QProcess process(this);
 		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 		qputenv("PATH", fullPath.toLatin1());
@@ -1083,12 +1091,12 @@ bool AnyWave::searchForMatlab()
 
 void AnyWave::initMatlab()
 {
-	QSettings settings;
+	QSettings qsettings;
 	// Searching for Matlab
 	if (searchForMatlab())	{
 		// matlab detected on the computer
 		// matlab installed and activated => trying to load the AwMatlabSupport plugin
-		QString matlabPath = settings.value("matlab/path", QString()).toString();
+		QString matlabPath = qsettings.value("matlab/path", QString()).toString();
 		emit log("Trying to load MatlabSupport Module...");
 		// trying to load AwMatlabSupport plugin
 		QString moduleName;
@@ -1115,7 +1123,9 @@ void AnyWave::initMatlab()
 		QObject *module = loader.instance();
 		//AwSettings::getInstance()->setMatlabPresent((module != NULL));
 		if (module) {
-			AwSettings::getInstance()->setSettings("isMatlabPresent", true);
+			//AwSettings::getInstance()->setSettings("isMatlabPresent", true);
+			auto  aws = AwSettings::getInstance();
+			aws->setValue(aws::matlab_present, true);
 			AwMatlabInterface *mi = qobject_cast<AwMatlabInterface *>(module);
 			AwSettings::getInstance()->setMatlabInterface(mi);
 			mi->setParent(this);

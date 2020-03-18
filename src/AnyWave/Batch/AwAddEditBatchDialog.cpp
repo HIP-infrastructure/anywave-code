@@ -6,9 +6,11 @@
 #include <QDoubleSpinBox>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QPushButton>
 #include <widget/AwMessageBox.h>
 #include <QFileDialog>
 #include <QTableWidgetItem>
+#include "Prefs/AwSettings.h"
 
 AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *parent)
 	: QDialog(parent)
@@ -20,27 +22,25 @@ AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *pare
 		m_item->setJsonParameters(m_item->plugin()->settings().value(processio::json_defaults).toString());
 	m_ui.tableWidget->setHorizontalHeaderLabels({ "parent dir", "file" });
 	m_ui.tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	setupParamsUi();
+	setupParamsUi(m_item->jsonParameters());
 }
 
 AwAddEditBatchDialog::~AwAddEditBatchDialog()
 {
 }
 
-void AwAddEditBatchDialog::setupParamsUi()
+void AwAddEditBatchDialog::setupParamsUi(const QString& jsonValues)
 {
 	auto oldLayout = m_ui.groupParameters->layout();
 	if (oldLayout != nullptr)
 		delete oldLayout;
 	auto gridLayout = new QGridLayout(m_ui.groupParameters);
 
-	
-
 	// get the json ui
 	QString error;
 	m_jsonUi = AwUtilities::json::mapFromJsonString(m_item->plugin()->settings().value(processio::json_ui).toString(), m_errorString);
-	auto jsonDefaults = AwUtilities::json::mapFromJsonString(m_item->jsonParameters(), m_errorString);
-	if (!m_errorString.isEmpty()) {
+	auto jsonDefaults = AwUtilities::json::mapFromJsonString(jsonValues, m_errorString);
+	if (!m_errorString.isEmpty() || jsonDefaults.isEmpty()) {
 		AwMessageBox::critical(this, "JSON error", m_errorString);
 		this->reject();
 	}
@@ -112,6 +112,13 @@ void AwAddEditBatchDialog::setupParamsUi()
 			m_widgets.insert(k, edit);
 		}
 	}
+	// add two buttons 'Apply profile', 'Save as profile'
+	auto button = new QPushButton("Apply Profile");
+	gridLayout->addWidget(button, row, 0, 1, 1);
+	connect(button, &QPushButton::clicked, this, &AwAddEditBatchDialog::applyProfile);
+	button = new QPushButton("Save as Profile");
+	gridLayout->addWidget(button, row, 1, 1, 1);
+	connect(button, &QPushButton::clicked, this, &AwAddEditBatchDialog::saveProfile);
 }
 
 
@@ -255,4 +262,24 @@ void AwAddEditBatchDialog::accept()
 		return;
 	}
 	QDialog::accept();
+}
+
+
+void AwAddEditBatchDialog::applyProfile()
+{
+	auto dir = AwSettings::getInstance()->value(aws::batch_dir).toString();
+	auto file = QFileDialog::getOpenFileName(this, "Load Batch Profile", dir, "Profiles (*.json)");
+	if (file.isEmpty())
+		return;
+	setupParamsUi(AwUtilities::json::fromJsonFileToString(file));
+}
+
+void AwAddEditBatchDialog::saveProfile()
+{
+	auto dir = AwSettings::getInstance()->value(aws::batch_dir).toString();
+	auto file = QFileDialog::getSaveFileName(this, "Save Batch Profile", dir, "Profiles (*.json)");
+	if (file.isEmpty())
+		return;
+	fetchParams();
+	AwUtilities::json::jsonStringToFile(m_item->jsonParameters(), file);
 }

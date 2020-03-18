@@ -59,6 +59,13 @@ Qt::ItemFlags AwBatchTableModel::flags(const QModelIndex &index) const
 
 bool AwBatchTableModel::removeRows(int row, int count, const QModelIndex& parent)
 {
+	beginRemoveRows(parent, row, row + count);
+	int i = row;
+	while (i < row + count) {
+		auto item = m_items.at(i++);
+		m_items.removeAll(item);
+	}
+	endRemoveRows();
 	return true;
 }
 

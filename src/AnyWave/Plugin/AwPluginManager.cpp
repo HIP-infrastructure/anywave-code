@@ -282,7 +282,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 file.close();
 		 // now instantiante objects depending on plugin type
 		 // check for MATLAB connection before
-		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->getBool("isMatlabPresent");
+		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
 		 if (isMATLABScript || isMATLABCompiled) {
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
 			 plugin->type = type;
@@ -369,10 +369,11 @@ void AwPluginManager::loadUserPlugins()
 {
 	// Plugins found in user directory will override plugins located in AnyWave/Plugins application directory.
 	AwSettings *aws = AwSettings::getInstance();
-	auto pluginDir = aws->getString("pluginDir");
-	auto matlabPluginDir = aws->getString("matlabPluginDir");
-	auto pythonPluginDir = aws->getString("pythonPluginDir");
-	auto montageDir = aws->getString("montageDir");
+	
+	auto pluginDir = aws->value(aws::plugins_dir).toString();
+	auto matlabPluginDir = aws->value(aws::matlab_plugins_dir).toString();
+	auto pythonPluginDir = aws->value(aws::python_plugins_dir).toString();
+	auto montageDir = aws->value(aws::montage_dir).toString();
 	if (pluginDir.isEmpty()) // No Plugins dir in 'user documents\AnyWave\'
 		return;
 	if (!matlabPluginDir.isEmpty())
@@ -499,10 +500,10 @@ void AwPluginManager::loadUserPlugins()
 void AwPluginManager::loadPlugins()
 {
 	AwSettings *aws = AwSettings::getInstance();
-	m_pluginsDir = QDir(aws->getString("appPluginDir"));
-	auto matlabPluginDir = aws->getString("appMatlabPluginDir");
-	auto pythonPluginDir = aws->getString("appPythonPluginDir");
-
+	
+	m_pluginsDir = aws->value(aws::app_plugins_dir).toString();
+	auto matlabPluginDir = aws->value(aws::app_matlab_plugins_dir).toString();
+	auto pythonPluginDir = aws->value(aws::app_python_plugins_dir).toString();
 	checkForScriptPlugins(matlabPluginDir);
 	checkForScriptPlugins(pythonPluginDir);
 
@@ -610,7 +611,7 @@ void AwPluginManager::loadFileIOReaderPlugin(AwFileIOPlugin *plugin)
 		emit log("Reader plugin " + plugin->name + " already exists.Previous version unloaded.");
 		delete p;
 	}
-	auto montageDir = AwSettings::getInstance()->getString("montageDir");
+	auto montageDir = AwSettings::getInstance()->value(aws::montage_dir).toString();
 	m_readerFactory.addPlugin(plugin->name, plugin);
 	m_readers += plugin;
 	m_pluginList += plugin;

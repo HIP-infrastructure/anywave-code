@@ -40,6 +40,7 @@
 #include "Montage/AwMontageManager.h"
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
+#include <AwFileInfo.h>
 
 
 // statics

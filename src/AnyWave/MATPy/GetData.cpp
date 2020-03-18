@@ -33,6 +33,7 @@
 #include "Data/AwDataServer.h"
 #include "Display/AwDisplay.h"
 #include <filter/AwFiltering.h>
+#include <Filter/AwFilterSettingsStore.h>
 #include "AwTCPResponse.h"
 #include "Prefs/AwSettings.h"
 
@@ -179,12 +180,19 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 	}
 	if (!usingFile) {
 		if (decim > 1) {
+			AwFilterSettingsStore store(requestedChannels);
+			AwChannel::clearFilters(requestedChannels);
 			emit log("Loading raw data...");
 			requestData(&requestedChannels, start, duration, true);
 			emit log("Done.");
 			emit log("Downsampling...");
 			AwFiltering::downSample(requestedChannels, decim);
 			emit log("Done.");
+			requestedChannels = store.restore();
+			emit log("Filtering...");
+			AwFiltering::filter(requestedChannels);
+			emit log("Done.");
+
 		}
 		else {
 			emit log("Loading and filtering data...");
@@ -198,8 +206,13 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 			auto nSamples = reader->readDataFromChannels(start, duration, requestedChannels);
 			if (nSamples) {
 				emit log("Done.");
+				AwFilterSettingsStore store(requestedChannels);
+				AwChannel::clearFilters(requestedChannels);
 				emit log("Downsampling...");
 				AwFiltering::downSample(requestedChannels, decim);
+				emit log("Done.");
+				emit log("Filtering...");
+				AwFiltering::filter(requestedChannels);
 				emit log("Done.");
 			}
 			else

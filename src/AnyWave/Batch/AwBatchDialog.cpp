@@ -47,6 +47,7 @@ AwBatchDialog::AwBatchDialog(QWidget *parent)
 
 	connect(m_ui.buttonAdd, &QPushButton::clicked, this, &AwBatchDialog::addItem);
 	connect(m_ui.tableView, &QTableView::clicked, this, &AwBatchDialog::itemClick);
+	connect(m_ui.buttonRemove, &QPushButton::clicked, this, &AwBatchDialog::removeOperation);
 }
 
 AwBatchDialog::~AwBatchDialog()

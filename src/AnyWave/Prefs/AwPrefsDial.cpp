@@ -42,18 +42,13 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
-	AwSettings *aws = AwSettings::getInstance();
+	auto aws = AwSettings::getInstance();
+	QSettings qsettings;
 
-
-	QSettings settings;
-
-	int sh = settings.value("Preferences/screenCalibration/heightMM", 0).toInt();
-	int sw = settings.value("Preferences/screenCalibration/widthMM", 0).toInt();
-
-
+	int sh = qsettings.value("Preferences/screenCalibration/heightMM", 0).toInt();
+	int sw = qsettings.value("Preferences/screenCalibration/widthMM", 0).toInt();
 	spinBoxV->setValue(sh);
 	spinBoxH->setValue(sw);
-
 	// GENERAL
 	// COLORS
 	m_colorsChanged = false;
@@ -71,10 +66,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	changeMarkerFontText(markerFont(AwMarker::Single));
 
 	// Auto trigger parsing
-	if (aws->getBool("isAutoTriggerParsingOn"))
-		radioTriggerParserOn->setChecked(true);
-	else
-		radioTriggerParserOff->setChecked(true);
+	radioTriggerParserOn->setChecked(aws->value(aws::auto_trigger_parsing).toBool());
 
 	// Time representation
 	if ((isTimeHMS()))
@@ -83,35 +75,35 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		radioHMSOff->setChecked(true);
 
 	// CPU Cores
-	auto totalCPUCores = aws->getInt("totalCPUCores");
-	int cores = aws->getInt("maxCPUCores");
+	auto totalCPUCores = aws->value(aws::total_cpu_cores).toInt();
+	int cores = aws->value(aws::max_cpu_cores).toInt();
 	sliderCPU->setRange(2, totalCPUCores);
 	sliderCPU->setValue(cores);
 
 	// check for updates when starting
-	bool checkForUpdates = aws->getBool("checkForUpdates");
-	checkBoxUpdates->setChecked(checkForUpdates);
+	checkBoxUpdates->setChecked(aws->value(aws::check_updates).toBool());
 
-	// language
-	QDir dir(aws->langPath);
-	QStringList files = dir.entryList(QStringList("anywave_*.qm"));
-	if (files.isEmpty()) // if no language files are found, disable the language option
-		comboLanguage->setDisabled(true);
-	QString savedLocale = settings.value("general/locale", QString("en")).toString();
-	for (int i = 0; i < files.size(); i++) {
-		QString locale;
-		locale = files[i];
-		locale.truncate(locale.lastIndexOf('.'));
-		locale.remove(0, locale.indexOf('_') + 1);
-		QString lang = QLocale::languageToString(QLocale(locale).language());
-		comboLanguage->addItem(lang, locale);
-		if (locale == savedLocale)
-			comboLanguage->setCurrentIndex(i);
-	}
+	//// language
+	comboLanguage->setDisabled(true);
+	//QDir dir(aws->langPath);
+	//QStringList files = dir.entryList(QStringList("anywave_*.qm"));
+	//if (files.isEmpty()) // if no language files are found, disable the language option
+	//	comboLanguage->setDisabled(true);
+	//QString savedLocale = qsettings.value("general/locale", QString("en")).toString();
+	//for (int i = 0; i < files.size(); i++) {
+	//	QString locale;
+	//	locale = files[i];
+	//	locale.truncate(locale.lastIndexOf('.'));
+	//	locale.remove(0, locale.indexOf('_') + 1);
+	//	QString lang = QLocale::languageToString(QLocale(locale).language());
+	//	comboLanguage->addItem(lang, locale);
+	//	if (locale == savedLocale)
+	//		comboLanguage->setCurrentIndex(i);
+	//}
 
 	plainTextEdit->setVisible(false);
 	// MATLAB
-	bool isMatlabDetected = settings.value("matlab/detected", false).toBool();
+	bool isMatlabDetected = qsettings.value("matlab/detected", false).toBool();
 
 	if (!isMatlabDetected) {
 		plainTextEdit->setVisible(true);
@@ -126,12 +118,12 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		plainTextEdit->appendPlainText("Location could be /Applications/MATLAB_R2015a.app");
 #endif
 	}
-	lineEditMatlabPath->setText(settings.value("matlab/path").toString());
+	lineEditMatlabPath->setText(qsettings.value("matlab/path").toString());
 	labelMCR->hide();
 	lineEditMCR->hide();
 	buttonSelectMCR->hide();
     
-    lineEditGARDEL->setText(settings.value("GARDEL/path").toString());
+    lineEditGARDEL->setText(qsettings.value("GARDEL/path").toString());
 
 	// COMPILED PLUGIN. Windows do not required environments variables to be set but Linux and Mac OS X do.
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
@@ -141,7 +133,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	lineEditMCR->setText(settings.value("matlab/mcr_path").toString());
 #endif
 
-	QString python = settings.value("py/interpreter", QString()).toString();
+	QString python = qsettings.value("py/interpreter", QString()).toString();
 	if (python.isEmpty()) { // set default path to the interpreter name
 #ifdef Q_OS_WIN
 		python = "python.exe";
@@ -149,7 +141,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 #if defined Q_OS_MAC || defined Q_OS_LINUX
 		python = "python";
 #endif
-		settings.setValue("py/interpreter", python);
+		qsettings.setValue("py/interpreter", python);
 	}
 	lineEditPythonPath->setText(python);
 
@@ -181,45 +173,46 @@ void AwPrefsDial::pickMatlabFolder()
 void AwPrefsDial::accept()
 {
 	// SCREEN CALIBRATION
-	QSettings settings;
+	QSettings qsettings;
 	int w = spinBoxH->value();
 	int h = spinBoxV->value();
 	float xPixPerCm, yPixPerCm;
 	
 	if (h > 0)	{
-		settings.setValue("Preferences/screenCalibration/heightMM", h);
+		qsettings.setValue("Preferences/screenCalibration/heightMM", h);
 		h /= 10;
 		yPixPerCm = AW_CALIBRATION_WIDTH / h;
-		settings.setValue("Preferences/screenCalibration/yPixPerCm", yPixPerCm);
+		qsettings.setValue("Preferences/screenCalibration/yPixPerCm", yPixPerCm);
 	}
 	if (w > 0)	{
-		settings.setValue("Preferences/screenCalibration/widthMM", w);
+		qsettings.setValue("Preferences/screenCalibration/widthMM", w);
 		w /= 10;
 		xPixPerCm = AW_CALIBRATION_WIDTH / w;
-		settings.setValue("Preferences/screenCalibration/xPixPerCm", xPixPerCm);
+		qsettings.setValue("Preferences/screenCalibration/xPixPerCm", xPixPerCm);
 	}
 
 	// calibration has been done
-	settings.setValue("Preferences/screenCalibration/calibrationDone", true);
+	qsettings.setValue("Preferences/screenCalibration/calibrationDone", true);
 
 	emit screenCalibrationChanged(xPixPerCm, yPixPerCm);
 
 	// CPU CORES
-	settings.setValue("general/cpu_cores", spinCPU->value());
+	qsettings.setValue("general/cpu_cores", spinCPU->value());
 
 	//// misc. parameters
 	AwSettings *aws = AwSettings::getInstance();
+	
 	saveTimeHMS(radioHMSOn->isChecked());
 
-	settings.setValue("py/interpreter", lineEditPythonPath->text());
+	qsettings.setValue("py/interpreter", lineEditPythonPath->text());
 
 	// if matlab path is empty => consider not using MATLAB plugins anymore.
 	// On Mac and Linux that will be done by deleting the matlab.sh script
 	if (lineEditMatlabPath->text().isEmpty()) {
-		settings.setValue("matlab/detected", false);
+		qsettings.setValue("matlab/detected", false);
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->getString("homeDir"));
+		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->settings().value(settings::home_dir).toString());
 		if (QFile::exists(scriptPath))
 			QFile::remove(scriptPath);
 #endif
@@ -229,11 +222,11 @@ void AwPrefsDial::accept()
 		QDir dir(lineEditMatlabPath->text());
 		if (!dir.exists()) {
 			QMessageBox::critical(this, tr("MATLAB"), tr("Invalid MATLAB location"));
-			settings.setValue("matlab/detected", false);
+			qsettings.setValue("matlab/detected", false);
 			return;
 		}
-		settings.setValue("matlab/detected", true);
-		settings.setValue("matlab/path", lineEditMatlabPath->text());
+		qsettings.setValue("matlab/detected", true);
+		qsettings.setValue("matlab/path", lineEditMatlabPath->text());
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 		AwSettings::getInstance()->createMatlabShellScript(lineEditMatlabPath->text());
 #endif
@@ -241,24 +234,23 @@ void AwPrefsDial::accept()
 	// MATLAB MCR on Linux and Mac
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 	if (!lineEditMCR->text().isEmpty())
-		settings.setValue("matlab/mcr_path", lineEditMCR->text());
+		qsettings.setValue("matlab/mcr_path", lineEditMCR->text());
 #endif
 	QString Gardel = lineEditGARDEL->text();
 	if (QFile::exists(Gardel))
-		settings.setValue("GARDEL/path", Gardel);
+		qsettings.setValue("GARDEL/path", Gardel);
 
-	// change language
-	QString lang = comboLanguage->itemData(comboLanguage->currentIndex()).toString();
-	aws->loadLanguage(lang);
+	//// change language
+	//QString lang = comboLanguage->itemData(comboLanguage->currentIndex()).toString();
+	//aws->loadLanguage(lang);
 
 	// CPU CORES
-	auto maxCPUCores = sliderCPU->value();
-	aws->setSettings("maxCPUCores", maxCPUCores);
-    QThreadPool::globalInstance()->setMaxThreadCount(maxCPUCores);
+	aws->setValue(aws::max_cpu_cores, sliderCPU->value());
+    QThreadPool::globalInstance()->setMaxThreadCount(sliderCPU->value());
 	// Check for updates
 	auto check = checkBoxUpdates->isChecked();
-	aws->setSettings("checkForUpdates", check);
-	settings.setValue("general/checkForUpdates", check);
+	aws->setValue(aws::check_updates, check);
+	qsettings.setValue("general/checkForUpdates", check);
 
 	QDialog::accept();
 }

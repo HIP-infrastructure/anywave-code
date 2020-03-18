@@ -64,7 +64,7 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 		p->setCompiled();
 #ifdef Q_OS_WIN
 		QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
-		QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+		QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->value(aws::system_path).toString());
 		p->setSystemPath(fullPath);
 #else
 		p->setSystemPath(AwSettings::getInstance()->getString("systemPath"));
@@ -103,10 +103,10 @@ void AwMatlabScriptProcess::run()
 	else	{
 		AwSettings *aws = AwSettings::getInstance();
 		mi = aws->matlabInterface();
-		if (aws->getBool("isMatlabPresent")) {
+		if (aws->value(aws::matlab_present).toBool()) {
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-			mi->run(m_path, aws->getString("matlabPluginDir") + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), pdi.input.args()["json_args"].toString());
+			mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), pdi.input.args()["json_args"].toString());
 		}
 	}
 }

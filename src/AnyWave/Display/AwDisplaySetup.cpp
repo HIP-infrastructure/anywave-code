@@ -112,7 +112,7 @@ void AwDisplaySetup::deleteViewSetup(int index)
 void AwDisplaySetup::setName(const QString& name)
 {
 	m_name = name;
-	m_fullPath = QString("%1%2.aws").arg(AwSettings::getInstance()->getString("displaySetupDir")).arg(name);
+	m_fullPath = QString("%1%2.aws").arg(AwSettings::getInstance()->value(aws::setup_dir).toString()).arg(name);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

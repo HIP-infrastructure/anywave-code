@@ -17,6 +17,8 @@ private slots:
 	void addFiles();
 	void addFilesFromDir();
 	void removeFiles();
+	void saveProfile();
+	void applyProfile();
 private:
 	Ui::AwAddEditBatchDialogUi m_ui;
 	AwBatchModelItem *m_item;
@@ -24,7 +26,7 @@ private:
 	QVariantMap m_jsonUi;
 	QString m_errorString;
 
-	void setupParamsUi();
+	void setupParamsUi(const QString& jsonValues);
 	void fetchParams();
 	void fetchFiles();
 	void checkFilesAndFillList(const QStringList& files, bool warning = true, bool checkReaderPlugins = true);

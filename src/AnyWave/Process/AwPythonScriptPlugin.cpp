@@ -92,7 +92,7 @@ void AwPythonScriptProcess::run()
 	QString initpy;
 	QString dataPath = pdi.input.settings[processio::data_path].toString();
 	dataPath = QDir::toNativeSeparators(dataPath);
-	auto pythonModulePath = AwSettings::getInstance()->getString("pythonModulePath");
+	auto pythonModulePath = AwSettings::getInstance()->value(aws::python_module_dir).toString();
 	initpy = pythonModulePath + "/init.py";
 	initpy = QDir::toNativeSeparators(initpy);
 	auto anywaveModulePath = QDir::toNativeSeparators(pythonModulePath);
@@ -116,17 +116,18 @@ void AwPythonScriptProcess::run()
 	//env.insert("PATH", qApp->applicationDirPath());
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
 	QString fullPath;
+	auto systemPath = AwSettings::getInstance()->value(aws::system_path).toString();
 #ifdef Q_OS_MAC
 	auto LDPATH = QString("%1/../Frameworks").arg(application);
    	env.insert("DYLD_LIBRARY_PATH", LDPATH);
-	fullPath = QString("%1:%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+	fullPath = QString("%1:%2").arg(application).arg(systemPath);
 #endif
 #ifdef Q_OS_LINUX
     env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
-	fullPath = QString("%1:%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+	fullPath = QString("%1:%2").arg(application).arg(systemPath);
 #endif
 #ifdef Q_OS_WIN
-	fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+	fullPath = QString("%1;%2").arg(application).arg(systemPath);
 #endif
 	env.remove("PATH");
 	env.insert("PATH", fullPath);

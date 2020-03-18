@@ -28,7 +28,7 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qjsonarray.h>
-
+#include <QTextStream>
 
 QString  AwUtilities::json::hashToJsonString(const QVariantHash& hash)
 {
@@ -71,6 +71,25 @@ QVariantHash AwUtilities::json::hashFromJsonString(const QString& jsonString, QS
 	return hash;
 }
 
+QJsonDocument  AwUtilities::json::jsonStringToDocument(const QString& jsonString)
+{
+	QJsonDocument doc;
+	if (jsonString.isEmpty())
+		return doc;
+	QJsonParseError err;
+	return QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+}
+
+bool  AwUtilities::json::jsonStringToFile(const QString& jsonString, const QString& filePath)
+{
+	QFile file(filePath);
+	QTextStream stream(&file);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+		return false;
+	stream << jsonString;
+	file.close();
+	return true;
+}
 
 
 QJsonDocument AwUtilities::json::readJsonFile(const QString& filePath)

@@ -6,6 +6,7 @@
 #include <QFile>
 #include <math/AwMath.h>
 #include <QFileDialog>
+#include <AwFileInfo.h>
 
 // statics init and definitions
 AwSourceManager *AwSourceManager::m_instance = 0;
