@@ -74,6 +74,7 @@ public:
 	inline QMenu *fileMenu() { return m_fileMenu; }
 	inline QMenu *viewMenu() { return m_viewMenu; }
 	QList<QAction *>& icaActions() { return m_icaActions; }
+	void runBuiltInProcess(AwBuiltInProcess *process);
 	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList());
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
 	AwBaseProcess * newProcess(AwProcessPlugin *plugin);

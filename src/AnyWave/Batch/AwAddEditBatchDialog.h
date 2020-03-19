@@ -19,6 +19,7 @@ private slots:
 	void removeFiles();
 	void saveProfile();
 	void applyProfile();
+	void browseInputDir();
 private:
 	Ui::AwAddEditBatchDialogUi m_ui;
 	AwBatchModelItem *m_item;

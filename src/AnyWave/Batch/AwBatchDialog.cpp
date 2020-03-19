@@ -27,6 +27,7 @@
 #include "Process/AwProcessManager.h"
 #include "AwBatchModel.h"
 #include "AwAddEditBatchDialog.h"
+#include "AwBatchRunner.h"
 #include <AwCore.h>
 
 AwBatchDialog::AwBatchDialog(QWidget *parent)
@@ -86,4 +87,16 @@ void AwBatchDialog::editItem(AwBatchModelItem *item)
 	auto dlg = new AwAddEditBatchDialog(item);
 	dlg->exec();
 	delete dlg;
+}
+
+void AwBatchDialog::reject()
+{
+	AW_DESTROY_LIST(m_items);
+}
+
+void AwBatchDialog::accept()
+{
+	auto plugin = new AwBatchRunnerPlugin;
+	auto runner = new AwBatchRunner(plugin, m_items);
+	AwProcessManager::instance()->runBuiltInProcess(runner);
 }

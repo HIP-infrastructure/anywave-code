@@ -46,17 +46,18 @@ void AwAddEditBatchDialog::setupParamsUi(const QString& jsonValues)
 	}
 	auto input = m_jsonUi.value("input").toString().toLower();
 	if (input == "file") {
+		m_item->setInputType(AwBatchModelItem::Files);
 		m_ui.labelDir->hide(); 
 		m_ui.editDir->hide();
 		m_ui.buttonBrowseDir->hide();
 	}
 	else {
+		m_item->setInputType(AwBatchModelItem::Directory);
 		m_ui.labelFiles->hide();
 		m_ui.tableWidget->hide();
 		m_ui.buttonAddFiles->hide();
 		m_ui.buttonAddFromDir->hide();
 	}
-
 
 	// get the files
 	auto files = m_item->files();
@@ -163,6 +164,15 @@ void AwAddEditBatchDialog::addFilesFromDir()
 	recursiveFill(dir);
 }
 
+void AwAddEditBatchDialog::browseInputDir()
+{
+	auto dir = QFileDialog::getExistingDirectory(this, "Select Directory", "/");
+	if (dir.isEmpty())
+		return;
+	m_item->setInputDir(dir);
+	m_ui.editDir->setText(dir);
+}
+
 void AwAddEditBatchDialog::removeFiles()
 {
 	auto ranges = m_ui.tableWidget->selectedRanges();
@@ -250,10 +260,18 @@ void AwAddEditBatchDialog::fetchFiles()
 
 void AwAddEditBatchDialog::accept()
 {
-	fetchFiles();
-	if (m_item->files().isEmpty()) {
-		AwMessageBox::information(this, "Files", "Add at least one file to run the batch.");
-		return;
+	if (m_item->inputType() == AwBatchModelItem::Files) {
+		fetchFiles();
+		if (m_item->files().isEmpty()) {
+			AwMessageBox::information(this, "Files", "Add at least one file to run the batch.");
+			return;
+		}
+	}
+	else {
+		if (m_item->inputDir().isEmpty()) {
+			AwMessageBox::information(this, "Directory", "Set an input directory.");
+			return;
+		}
 	}
 
 	fetchParams();

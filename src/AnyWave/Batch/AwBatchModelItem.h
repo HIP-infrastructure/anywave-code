@@ -31,7 +31,8 @@
 class AwBatchModelItem
 {
 public:
-	explicit AwBatchModelItem(AwProcessPlugin *plugin) { m_plugin = plugin; }
+	explicit AwBatchModelItem(AwProcessPlugin *plugin) { m_plugin = plugin; m_inputType = 0; }
+	enum Inputs { Directory, Files };
 
 	inline QString& pluginName() { return m_plugin->name; }
 	inline QStringList& files() { return m_files; }
@@ -41,9 +42,17 @@ public:
 	AwProcessPlugin *plugin() { return m_plugin; }
 	inline bool isEmpty() { return m_jsonArgs.isEmpty(); }
 	bool checkPluginParams();
+	void setInputType(int type) { m_inputType = type; }
+	inline int inputType() { return m_inputType; }
+	void setInputDir(const QString& dirPath) { m_inputDir = dirPath; }
+	QString& inputDir() { return m_inputDir; }
 protected:
 	QString m_pluginName;		// name of the plugin
+	QString m_inputDir;
 	QString m_jsonArgs;			// json string used as arguments to run the process
 	QStringList m_files;		// list of file to use as input.
+	int m_inputType;
 	AwProcessPlugin *m_plugin;
 };
+
+using AwBatchItems = QList<AwBatchModelItem *>;

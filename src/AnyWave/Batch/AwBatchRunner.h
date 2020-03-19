@@ -23,38 +23,28 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include "AwCommandLineManager.h"
+#pragma once
+
 #include <AwProcessInterface.h>
-#include <QFile>
-#include "AwCommandLogger.h"
-#include <AwException.h>
+#include "AwBatchModelItem.h"
 
-void AwCommandLineManager::runProcess(AwArguments& arguments)
+class AwBatchRunner : public AwBuiltInProcess
 {
-	AwCommandLogger logger("runProcess", "cl_run");
-	AwBaseProcess *process = nullptr;
-	
-	try {
-		process = AwCommandLineManager::createAndInitNewProcess(arguments);
-	}
-	catch (const AwException& e) {
-		logger.sendLog(e.errorString());
-		if (process) {
-			auto reader = process->pdi.input.reader();
-			if (reader)
-				reader->plugin()->deleteInstance(reader);
-			process->plugin()->deleteInstance(process);
-		}
-		return;
-	}
-	auto reader = process->pdi.input.reader();
-	applyFilters(process->pdi.input.channels(), arguments);
-	process->pdi.input.setArguments(arguments);
-	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
-	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
-	process->runFromCommandLine();
-	logger.sendLog(QString("Done."));
-	reader->plugin()->deleteInstance(reader);
-	process->plugin()->deleteInstance(process);
-}
+	Q_OBJECT
+public:
+	AwBatchRunner(AwBuiltInPlugin *plugin, const AwBatchItems& items);
+	void run() override;
+	void init() override;
+protected:
+	AwBaseProcess *createAndInitProcess(QVariantHash& dict, const QString& pluginName);
+	AwBatchItems m_items;
+};
 
+class AwBatchRunnerPlugin : public AwBuiltInPlugin
+{
+	Q_OBJECT
+	Q_PLUGIN_METADATA(IID AwProcessPlugin_IID)
+	Q_INTERFACES(AwProcessPlugin)
+public:
+	AwBatchRunnerPlugin();
+};

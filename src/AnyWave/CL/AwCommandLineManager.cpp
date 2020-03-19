@@ -172,22 +172,17 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		reader = pm->getReaderToOpenFile(inputFile);
 		if (reader == Q_NULLPTR) {
 			throw AwException(QString("no reader can open %1").arg(inputFile), origin);
-			return Q_NULLPTR;
+			return process;
 		}
+		process->pdi.input.setReader(reader);
 		if (reader->openFile(inputFile) != AwFileIO::NoError) {
 			throw AwException(QString("Could not open %1").arg(inputFile), origin);
-			reader->plugin()->deleteInstance(reader);
-			return Q_NULLPTR;
+			return process;
 		}
 		AwFileInfo fi(reader, inputFile);
 		process->pdi.input.settings[processio::data_dir] = fi.dirPath();
 		process->pdi.input.settings[processio::file_duration] = reader->infos.totalDuration();
 		process->pdi.input.settings[processio::data_path] = inputFile;
-
-		//process->pdi.input.dataFolder = fi.dirPath();
-		//process->pdi.input.fileDuration = reader->infos.totalDuration();
-		//process->pdi.input.dataPath = inputFile;
-		process->pdi.input.setReader(reader);
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file
 	if (obj.contains("marker_file")) {
@@ -222,7 +217,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 					process->pdi.input.settings[processio::bad_labels].toStringList());
 				if (montage.isEmpty()) { // error when loading and/or applying mtg file
 					throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
-					return Q_NULLPTR;
+					return process;
 				}
 		}
 		else  { // no montage specified or detected
@@ -232,7 +227,8 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		}
 		if (!buildPDI(process, montage, reader->infos.channels())) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
-			return Q_NULLPTR;
+			AW_DESTROY_LIST(montage);
+			return process;
 		}
 		AW_DESTROY_LIST(montage);
 		

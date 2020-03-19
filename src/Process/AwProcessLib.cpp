@@ -180,3 +180,12 @@ void AwProcessDataInterface::addInputChannel(int type, int min, int max)
 {
 	m_inputChannels[type] = QPair<int, int>(min, max);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// builtin proces
+AwBuiltInProcess::AwBuiltInProcess(AwBuiltInPlugin *plugin)
+{
+	m_plugin = plugin;
+	plugin->setParent(this);
+}

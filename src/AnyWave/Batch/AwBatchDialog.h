@@ -43,6 +43,8 @@ public slots:
 	void addItem();
 	void editItem(AwBatchModelItem *item);
 	void removeOperation();
+	void accept() override;
+	void reject() override;
 private slots:
 	void itemClick(const QModelIndex& index);
 private:

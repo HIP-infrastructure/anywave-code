@@ -246,8 +246,8 @@
    <slot>addFiles()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>267</x>
-     <y>391</y>
+     <x>203</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>206</x>
@@ -271,10 +271,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonBrowseDir</sender>
+   <signal>clicked()</signal>
+   <receiver>AwAddEditBatchDialogUi</receiver>
+   <slot>browseInputDir()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>334</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>114</x>
+     <y>434</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addFilesFromDir()</slot>
   <slot>addFiles()</slot>
   <slot>removeFiles()</slot>
+  <slot>browseInputDir()</slot>
  </slots>
 </ui>

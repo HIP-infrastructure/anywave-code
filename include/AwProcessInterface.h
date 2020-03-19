@@ -232,6 +232,51 @@ protected:
 };
 
 
+/*!
+ * \brief
+ * Base class for builtin plugins.
+ *
+ * Derived your built int plugin from this class.
+ * This object will only handle flags and will be used as a default plugin
+ * by the Process Manager. This plugin class won't instantiate any process.
+ * A builtin process must be instantianced explicilty.
+ *
+ *
+ * \see
+ *  AwProcessPlugin
+ */
+class AW_PROCESS_EXPORT AwBuiltInPlugin : public AwProcessPlugin
+{
+public:
+	AwBuiltInPlugin() : AwProcessPlugin() { }
+	/** override newInstance() as this is pure virtual method **/
+	AwBaseProcess *newInstance() override { return nullptr; }
+};
+
+
+/*!
+ * \brief
+ * Base class for builtin processes.
+ *
+ * This class is for process not coming from plugin but built in in AnyWave.
+ * No plugin object are connected to this class.
+ *
+ *
+ * \see
+ *  AwProcess
+ */
+
+class AW_PROCESS_EXPORT AwBuiltInProcess : public AwProcess
+{
+	Q_OBJECT
+public:
+	/** Instiante using a process instance using a plugin instance. The plugin instance will be parented to the process instance. **/
+	AwBuiltInProcess(AwBuiltInPlugin *plugin);
+};
+
+
+
+
 
 #define AW_INPUT_PARAMETER(x, y)	pdi.addInputParameter(x, y)
 #define AW_OUTPUT_PARAMETER(x, y)	pdi.addOutputParameter(x, y)

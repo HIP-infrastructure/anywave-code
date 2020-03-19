@@ -65,6 +65,8 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	setObjectName("AwProcessManager");
 	m_processesWidget = new AwProcessesWidget();
 	m_dock = NULL;
+	auto plm = AwProcessLogManager::instance();
+	plm->setParent(this);
 }
 
 AwProcessManager::~AwProcessManager()
@@ -576,6 +578,65 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	return true;
 }
 
+
+  void AwProcessManager::runBuiltInProcess(AwBuiltInProcess *process)
+  {
+	  AwProcessLogManager *plm = AwProcessLogManager::instance();
+	  plm->setParent(this);
+	  plm->connectProcess(process);
+	  bool isFileOpen = AwSettings::getInstance()->currentReader() != nullptr;
+
+	  bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
+	  if (skipDataFile)
+		  process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	  if (!skipDataFile && !isFileOpen) {
+		  AwMessageBox::critical(nullptr, "Process Input",
+			  "This process requires an open file.");
+		  delete process;
+	  }
+	  if (process->plugin()->flags() & Aw::ProcessFlags::ProcessHasInputUi) {
+		  if (!process->showUi()) {
+			  delete process;
+			  return; 
+		  }
+	  }
+	  auto selectedChannels = AwDisplay::instance()->selectedChannels();
+	  if (process->inputFlags() & Aw::ProcessInput::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
+		  AwMessageBox::critical(NULL, tr("Process Input"),
+			  tr("This process is designed to get selected channels as input but no channel is selected."));
+		  delete process;
+		  return;
+	  }
+
+	  AwDataServer *ds = AwDataServer::getInstance();
+
+	  // create the process thread and move process object in it.
+	  QThread *processThread = new QThread;
+	  process->moveToThread(processThread);
+
+	  connect(process, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+	  connect(process, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
+	  connect(process, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
+
+	  if (!skipDataFile) {
+		  // Markers API
+		  AwMarkerManager *mm = AwMarkerManager::instance();
+		  connect(process, SIGNAL(sendMarker(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
+		  connect(process, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
+		  connect(process, SIGNAL(dataConnectionRequested(AwDataClient *)), ds, SLOT(openConnection(AwDataClient *)));
+		  // connect the process as a client of a DataServer thread.
+		  AwDataServer::getInstance()->openConnection(process);
+	  }
+	  connect(process, SIGNAL(finished()), this, SLOT(handleProcessTermination()));
+	  connect(process, SIGNAL(aborted()), this, SLOT(handleProcessTermination()));
+	  connect(process, SIGNAL(idle()), this, SLOT(handleProcessTermination()));
+	  m_runningProcesses << process;
+	  process->init();
+	  m_dock->show();
+	  // start process thread
+	  processThread->start();
+	  QMetaObject::invokeMethod(process, "start", Qt::QueuedConnection);
+  }
 
 /*!
  * \brief
