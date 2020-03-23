@@ -34,7 +34,10 @@ AwBatchTableModel::AwBatchTableModel(QObject *parent)
 
 AwBatchTableModel::~AwBatchTableModel()
 {
+	beginResetModel();
 	AW_DESTROY_LIST(m_items);
+	endResetModel();
+
 }
 
 int AwBatchTableModel::columnCount(const QModelIndex &parent) const
@@ -53,8 +56,6 @@ Qt::ItemFlags AwBatchTableModel::flags(const QModelIndex &index) const
 		return Qt::ItemIsEnabled | Qt::ItemIsDragEnabled;
 
 	return QAbstractTableModel::flags(index) | Qt::ItemIsEnabled;
-
-//	return QAbstractTableModel::flags(index) | Qt::ItemIsEnabled | Qt::ItemIsEditable;
 }
 
 bool AwBatchTableModel::removeRows(int row, int count, const QModelIndex& parent)

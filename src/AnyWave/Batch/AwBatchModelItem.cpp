@@ -26,9 +26,21 @@
 #include "AwBatchModelItem.h"
 #include <utils/json.h>
 
+AwBatchModelItem::AwBatchModelItem(AwBatchModelItem *copy)
+{
+	m_plugin = copy->m_plugin;
+	m_pluginName = copy->pluginName();
+	m_inputDir = copy->m_inputDir;
+	m_args = copy->m_args;
+	m_files = copy->m_files;
+	m_inputType = copy->m_inputType;
+}
+
 bool AwBatchModelItem::checkPluginParams()
 {
 	auto instance = m_plugin->newInstance();
 	QString error;
-	return instance->batchParameterCheck(AwUtilities::json::hashFromJsonString(this->m_jsonArgs, error));
+	auto res = instance->batchParameterCheck(this->m_args);
+	m_plugin->deleteInstance(instance);
+	return res;
 }

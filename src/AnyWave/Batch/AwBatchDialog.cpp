@@ -89,14 +89,10 @@ void AwBatchDialog::editItem(AwBatchModelItem *item)
 	delete dlg;
 }
 
-void AwBatchDialog::reject()
-{
-	AW_DESTROY_LIST(m_items);
-}
-
 void AwBatchDialog::accept()
 {
 	auto plugin = new AwBatchRunnerPlugin;
 	auto runner = new AwBatchRunner(plugin, m_items);
 	AwProcessManager::instance()->runBuiltInProcess(runner);
+	QDialog::accept();
 }

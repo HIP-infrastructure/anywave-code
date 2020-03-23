@@ -13,14 +13,23 @@
 
 AwBatchRunnerPlugin::AwBatchRunnerPlugin()
 {
+	name = "Batch Runner";
+	description = "execute process in batch.";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
 }
 
 AwBatchRunner::AwBatchRunner(AwBuiltInPlugin *plugin, const AwBatchItems& items) : AwBuiltInProcess(plugin)
 {
-	m_items = items;
+	// duplicate items
+	for (auto item : items)
+		m_items << new AwBatchModelItem(item);
 	auto plm = AwProcessLogManager::instance();
 	plm->connectProcess(this);
+}
+
+AwBatchRunner::~AwBatchRunner()
+{
+	AW_DESTROY_LIST(m_items);
 }
 
 void AwBatchRunner::init()
@@ -135,11 +144,12 @@ void AwBatchRunner::run()
 	for (auto item : m_items) {
 		auto pluginName = item->pluginName();
 		QString error;
-		auto dict = AwUtilities::json::hashFromJsonString(item->jsonParameters(), error);
-		if (!error.isEmpty()) {
-			sendMessage(QString("json paremeters error: %1").arg(error));
-			continue;
-		}
+		//auto dict = AwUtilities::json::hashFromJsonString(item->jsonParameters(), error);
+		//if (!error.isEmpty()) {
+		//	sendMessage(QString("json paremeters error: %1").arg(error));
+		//	continue;
+		//}
+		auto dict = item->jsonParameters();
 		sendMessage(QString("running process %1").arg(pluginName));
 
 		AwBaseProcess *process = nullptr;
@@ -188,7 +198,7 @@ void AwBatchRunner::run()
 				process->runFromCommandLine();
 				sendMessage(QString("process %1 has finished").arg(pluginName));
 				delete ds;
-				reader->plugin()->deleteInstance(reader);
+				// deleting DataServer will also delete the reader instance.
 				process->plugin()->deleteInstance(process);
 			}
 		}

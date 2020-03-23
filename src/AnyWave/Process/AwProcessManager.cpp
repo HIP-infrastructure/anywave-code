@@ -627,6 +627,12 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		  // connect the process as a client of a DataServer thread.
 		  AwDataServer::getInstance()->openConnection(process);
 	  }
+	  // instantiate a new AwProcessesWidget if needed
+	  if (m_processesWidget == NULL)
+		  m_processesWidget = new AwProcessesWidget();
+	  m_processesWidget->addWidget(new AwProcessWidget(process));
+
+
 	  connect(process, SIGNAL(finished()), this, SLOT(handleProcessTermination()));
 	  connect(process, SIGNAL(aborted()), this, SLOT(handleProcessTermination()));
 	  connect(process, SIGNAL(idle()), this, SLOT(handleProcessTermination()));

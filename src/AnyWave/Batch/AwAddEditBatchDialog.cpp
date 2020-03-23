@@ -17,34 +17,37 @@ AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *pare
 {
 	m_ui.setupUi(this);
 	m_item = item;
-
-	if (m_item->isEmpty())
-		m_item->setJsonParameters(m_item->plugin()->settings().value(processio::json_defaults).toString());
+	setWindowTitle(QString("%1 parameters").arg(item->pluginName()));
 	m_ui.tableWidget->setHorizontalHeaderLabels({ "parent dir", "file" });
 	m_ui.tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	setupParamsUi(m_item->jsonParameters());
+	// get the json ui
+	QString error;
+	m_jsonUi = AwUtilities::json::mapFromJsonString(m_item->plugin()->settings().value(processio::json_ui).toString(), m_errorString);
+	m_jsonDefaults = AwUtilities::json::hashFromJsonString(m_item->plugin()->settings().value(processio::json_defaults).toString(), error);
+	if (!error.isEmpty()) {
+		AwMessageBox::critical(this, "JSON error", error);
+		QDialog::reject();
+	}
+	if (m_item->isEmpty())
+		m_item->setJsonParameters(m_jsonDefaults);
+	// init wigets
+	setupParamsUi();
+	m_homeDir = "/";
 }
 
 AwAddEditBatchDialog::~AwAddEditBatchDialog()
 {
 }
 
-void AwAddEditBatchDialog::setupParamsUi(const QString& jsonValues)
+void AwAddEditBatchDialog::setupParamsUi()
 {
 	auto oldLayout = m_ui.groupParameters->layout();
 	if (oldLayout != nullptr)
 		delete oldLayout;
 	auto gridLayout = new QGridLayout(m_ui.groupParameters);
 
-	// get the json ui
-	QString error;
-	m_jsonUi = AwUtilities::json::mapFromJsonString(m_item->plugin()->settings().value(processio::json_ui).toString(), m_errorString);
-	auto jsonDefaults = AwUtilities::json::mapFromJsonString(jsonValues, m_errorString);
-	if (!m_errorString.isEmpty() || jsonDefaults.isEmpty()) {
-		AwMessageBox::critical(this, "JSON error", m_errorString);
-		this->reject();
-	}
-	auto input = m_jsonUi.value("input").toString().toLower();
+	auto input = m_jsonUi.value("input_type").toString().toLower();
+	auto args = m_item->jsonParameters();
 	if (input == "file") {
 		m_item->setInputType(AwBatchModelItem::Files);
 		m_ui.labelDir->hide(); 
@@ -63,51 +66,67 @@ void AwAddEditBatchDialog::setupParamsUi(const QString& jsonValues)
 	auto files = m_item->files();
 	if (!files.isEmpty())
 		checkFilesAndFillList(files, false, false);
+
+	// get field ordering
+	auto ordering = m_jsonUi.value("fields_ordering").toStringList();
+
 	int row = 0;
-	for (auto k : m_jsonUi.keys()) {
-		auto value = m_jsonUi.value(k).toString();
-		if (value == "string") {
-			auto label = new QLabel(QString("%1:").arg(k));
+	for (auto k : ordering) {
+		auto list = m_jsonUi.value(k).toStringList();
+		auto key_value = list.last();
+		auto key_label = list.first();
+		if (key_value == "string") {
+			auto label = new QLabel(QString("%1:").arg(key_label));
 			gridLayout->addWidget(label, row, 0, 1, 1);
 			auto edit = new QLineEdit;
-			edit->setText(jsonDefaults.value(k).toString());
+			edit->setText(args.value(k).toString());
 			gridLayout->addWidget(edit, row, 1, 1, 2);
 			row++;
 			m_widgets.insert(k, edit);
 		}
-		else if (value == "double") {
-			auto label = new QLabel(QString("%1:").arg(k));
+		else if (key_value == "stringlist") {
+			auto label = new QLabel(QString("%1:").arg(key_label));
+			gridLayout->addWidget(label, row, 0, 1, 1);
+			auto edit = new QLineEdit;
+			edit->setText(args.value(k).toString());
+			edit->setToolTip("string list: use ; to separate strings.");
+			gridLayout->addWidget(edit, row, 1, 1, 2);
+			row++;
+			m_widgets.insert(k, edit);
+		}
+		else if (key_value == "double") {
+			auto label = new QLabel(QString("%1:").arg(key_label));
 			gridLayout->addWidget(label, row, 0, 1, 1);
 			auto edit = new QDoubleSpinBox;
 			edit->setMaximum(std::numeric_limits<double>::max());
-			edit->setValue(jsonDefaults.value(k).toDouble());
+			edit->setValue(args.value(k).toDouble());
 			gridLayout->addWidget(edit, row, 1, 1, 1);
 			row++;
 			m_widgets.insert(k, edit);
 		}
-		else if (value == "int") {
-			auto label = new QLabel(QString("%1:").arg(k));
+		else if (key_value == "int") {
+			auto label = new QLabel(QString("%1:").arg(key_label));
 			gridLayout->addWidget(label, row, 0, 1, 1);
 			auto edit = new QSpinBox;
 			edit->setMaximum(std::numeric_limits<int>::max());
-			edit->setValue(jsonDefaults.value(k).toInt());
+			edit->setValue(args.value(k).toInt());
 			gridLayout->addWidget(edit, row, 1, 1, 1);
 			row++;
 			m_widgets.insert(k, edit);
 		}
-		else if (value == "list") {
-			auto label = new QLabel(QString("%1:").arg(k));
+		else if (key_value == "list") {
+			auto label = new QLabel(QString("%1:").arg(key_label));
 			gridLayout->addWidget(label, row, 0, 1, 1);
 			auto edit = new QComboBox;
-			edit->addItems(jsonDefaults.value(k).toStringList());
+			edit->addItems(args.value(k).toStringList());
 			gridLayout->addWidget(edit, row, 1, 1, 1);
 			row++;
 			m_widgets.insert(k, edit);
 		}
-		else if (value == "boolean") {
+		else if (key_value == "boolean") {
 			auto edit = new QCheckBox;
-			edit->setText(k);
-			edit->setChecked(jsonDefaults.value(k).toBool());
+			edit->setText(key_label);
+			edit->setChecked(args.value(k).toBool());
 			gridLayout->addWidget(edit, row, 0, 1, 1);
 			row++;
 			m_widgets.insert(k, edit);
@@ -125,34 +144,104 @@ void AwAddEditBatchDialog::setupParamsUi(const QString& jsonValues)
 
 void AwAddEditBatchDialog::fetchParams()
 {
-	QVariantHash hash;
+	auto params = m_item->jsonParameters();
 	for (auto k : m_jsonUi.keys()) {
-		auto val = m_jsonUi.value(k);
+		auto list = m_jsonUi.value(k).toStringList();
+		auto val_type = list.last();
 		auto widget = m_widgets.value(k);
 		if (widget == nullptr)  
 			continue;
-		if (val == "string")
-			hash[k] = static_cast<QLineEdit *>(widget)->text();
-		else if (val == "double")
-			hash[k] = static_cast<QDoubleSpinBox *>(widget)->value();
-		else if (val == "int")
-			hash[k] = static_cast<QSpinBox *>(widget)->value();
-		else if (val == "boolean")
-			hash[k] = static_cast<QCheckBox *>(widget)->isChecked();
-		else if (val == "string")
-			hash[k] = static_cast<QComboBox *>(widget)->currentText();
+		if (val_type == "string") {
+			auto text  = static_cast<QLineEdit *>(widget)->text();
+			if (!text.isEmpty())
+				params[k] = text;
+			else
+				params.remove(k);
+		}
+		else if (val_type == "stringlist") {
+			auto text = static_cast<QLineEdit *>(widget)->text();
+			if (!text.isEmpty()) {
+				text = text.trimmed();
+				auto strings = text.split(";");
+				if (!strings.isEmpty())
+					params[k] = strings;
+				else 
+					params.remove(k);
+			}
+			else
+				params.remove(k);
+		}
+		else if (val_type == "double")
+			params[k] = static_cast<QDoubleSpinBox *>(widget)->value();
+		else if (val_type == "int")
+			params[k] = static_cast<QSpinBox *>(widget)->value();
+		else if (val_type == "boolean")
+			params[k] = static_cast<QCheckBox *>(widget)->isChecked();
+		else if (val_type == "list")
+			params[k] = static_cast<QComboBox *>(widget)->currentText();
 	}
-	m_item->setJsonParameters(AwUtilities::json::hashToJsonString(hash));
+	m_item->setJsonParameters(params);
+}
+
+void AwAddEditBatchDialog::setParams()
+{
+	// fill in widgets values based on args dictionnary
+	auto args = m_item->jsonParameters();
+
+	for (auto k : m_jsonUi.keys()) {
+		auto list = m_jsonUi.value(k).toStringList();
+		auto val_type = list.last();
+		
+		auto widget = m_widgets.value(k);
+		if (widget == nullptr)
+			continue;
+		if (val_type == "string") {
+			auto w = static_cast<QLineEdit *>(widget);
+			w->setText(args.value(k).toString());
+		}
+		else if (val_type == "stringlist") {
+			auto w = static_cast<QLineEdit *>(widget);
+			auto strings = args.value(k).toStringList();
+			QString text;
+			if (!strings.isEmpty()) {
+				text = strings.first();
+				for (int i = 1; i < strings.size(); i++)
+					text += QString(";%1").arg(strings.at(i));
+				w->setText(text);
+			}
+		}
+		else if (val_type == "double") {
+			auto w = static_cast<QDoubleSpinBox *>(widget);
+			w->setValue(args.value(k).toDouble());
+		}
+		else if (val_type == "int") {
+			auto w = static_cast<QSpinBox *>(widget);
+			w->setValue(args.value(k).toInt());
+		}
+		else if (val_type == "boolean") {
+			auto w = static_cast<QCheckBox *>(widget);
+			w->setChecked(args.value(k).toBool());
+		}
+		else if (val_type == "list") {
+			auto w = static_cast<QComboBox *>(widget);
+			// get default lits in json ui
+			auto list = m_jsonDefaults.value(k).toStringList();
+			auto label = args.value(k).toString();
+			w->setCurrentIndex(list.indexOf(label));
+		}
+	}
 }
 
 
 void AwAddEditBatchDialog::addFiles()
 {
-	auto files = QFileDialog::getOpenFileNames(this, "Select files", "/");
+	auto files = QFileDialog::getOpenFileNames(this, "Select files", m_homeDir);
 
 	if (files.isEmpty())
 		return;
 
+	QFileInfo fi(files.first());
+	m_homeDir = fi.absolutePath();
 	checkFilesAndFillList(files);
 }
 
@@ -289,7 +378,8 @@ void AwAddEditBatchDialog::applyProfile()
 	auto file = QFileDialog::getOpenFileName(this, "Load Batch Profile", dir, "Profiles (*.json)");
 	if (file.isEmpty())
 		return;
-	setupParamsUi(AwUtilities::json::fromJsonFileToString(file));
+	m_item->setJsonParameters(AwUtilities::json::fromJsonFileToHash(file));
+	setParams();
 }
 
 void AwAddEditBatchDialog::saveProfile()
@@ -299,5 +389,5 @@ void AwAddEditBatchDialog::saveProfile()
 	if (file.isEmpty())
 		return;
 	fetchParams();
-	AwUtilities::json::jsonStringToFile(m_item->jsonParameters(), file);
+	AwUtilities::json::jsonStringToFile(AwUtilities::json::hashToJsonString(m_item->jsonParameters()), file);
 }

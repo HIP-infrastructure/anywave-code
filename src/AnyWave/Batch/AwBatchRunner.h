@@ -33,6 +33,8 @@ class AwBatchRunner : public AwBuiltInProcess
 	Q_OBJECT
 public:
 	AwBatchRunner(AwBuiltInPlugin *plugin, const AwBatchItems& items);
+	~AwBatchRunner();
+
 	void run() override;
 	void init() override;
 protected:

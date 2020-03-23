@@ -180,19 +180,12 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 	}
 	if (!usingFile) {
 		if (decim > 1) {
-			AwFilterSettingsStore store(requestedChannels);
-			AwChannel::clearFilters(requestedChannels);
 			emit log("Loading raw data...");
 			requestData(&requestedChannels, start, duration, true);
 			emit log("Done.");
 			emit log("Downsampling...");
 			AwFiltering::downSample(requestedChannels, decim);
 			emit log("Done.");
-			requestedChannels = store.restore();
-			emit log("Filtering...");
-			AwFiltering::filter(requestedChannels);
-			emit log("Done.");
-
 		}
 		else {
 			emit log("Loading and filtering data...");

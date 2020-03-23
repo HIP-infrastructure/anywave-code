@@ -100,6 +100,10 @@ int ICA::initParameters()
 
 	m_isDownsamplingActive = true;
 	m_modality = AwChannel::stringToType(args["modality"].toString());
+	if (m_modality == -1) {
+		sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
+		return -1;
+	}
 	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 	// BIDS specific:
 	// when launching ICA in batch mode and specifying ieeg as modality:

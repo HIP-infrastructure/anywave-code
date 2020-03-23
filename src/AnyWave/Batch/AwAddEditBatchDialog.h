@@ -25,10 +25,13 @@ private:
 	AwBatchModelItem *m_item;
 	QMap<QString, QWidget *> m_widgets;	// store widgets based on keys defined in json ui
 	QVariantMap m_jsonUi;
+	QVariantHash m_jsonDefaults;
 	QString m_errorString;
+	QString m_homeDir;
 
-	void setupParamsUi(const QString& jsonValues);
+	void setupParamsUi();
 	void fetchParams();
+	void setParams();
 	void fetchFiles();
 	void checkFilesAndFillList(const QStringList& files, bool warning = true, bool checkReaderPlugins = true);
 	void recursiveFill(const QString& dirPath);
