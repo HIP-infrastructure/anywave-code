@@ -144,11 +144,7 @@ void AwBatchRunner::run()
 	for (auto item : m_items) {
 		auto pluginName = item->pluginName();
 		QString error;
-		//auto dict = AwUtilities::json::hashFromJsonString(item->jsonParameters(), error);
-		//if (!error.isEmpty()) {
-		//	sendMessage(QString("json paremeters error: %1").arg(error));
-		//	continue;
-		//}
+
 		auto dict = item->jsonParameters();
 		sendMessage(QString("running process %1").arg(pluginName));
 

@@ -1,0 +1,11 @@
+{
+"hp" : 0.,
+"lp" : 0.,
+"comp." : 0,
+"modality" : [ "MEG", "EEG", "EMG", "SEEG"],
+"downsampling" : false,
+"skip_markers" : "",
+"use_markers" : "",
+"extended mode" :  false, 
+"skip_bad" : true
+}

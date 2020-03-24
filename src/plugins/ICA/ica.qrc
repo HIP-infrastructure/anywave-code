@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/json">
+        <file>ui.json</file>
+        <file>default.json</file>
+    </qresource>
+</RCC>

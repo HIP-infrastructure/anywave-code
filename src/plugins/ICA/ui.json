@@ -1,0 +1,13 @@
+{
+"input_type" : "file",
+"hp" : ["High Pass", "double"],
+"lp" : ["Low Pas", "double" ],
+"comp" : ["Components", "int"],
+"modality" : ["Modality", "list"],
+"downsampling" : ["Downsampling data", "boolean"],
+"skip_markers" : ["Avoid markers", "stringlist"],
+"use_markers" : ["Use markers", "stringlist"],
+"extended" : ["Infomax extended mode", "boolean"],
+"skip_bad" : ["Skip bad channels", "boolean"],
+"fields_ordering" : ["comp", "hp", "lp", "modality", "skip_bad", "downsampling", "extended",  "skip_markers", "use_markers"]
+}

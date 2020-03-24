@@ -48,15 +48,15 @@ AwBatchDialog::AwBatchDialog(QWidget *parent)
 
 	connect(m_ui.buttonAdd, &QPushButton::clicked, this, &AwBatchDialog::addItem);
 	connect(m_ui.tableView, &QTableView::clicked, this, &AwBatchDialog::itemClick);
-	connect(m_ui.buttonRemove, &QPushButton::clicked, this, &AwBatchDialog::removeOperation);
+	connect(m_ui.buttonRemove, &QPushButton::clicked, this, &AwBatchDialog::removeOperations);
+	connect(m_ui.buttonDuplicate, &QPushButton::clicked, this, &AwBatchDialog::duplicateOperations);
 }
 
 AwBatchDialog::~AwBatchDialog()
 {
 }
 
-
-void AwBatchDialog::removeOperation()
+void AwBatchDialog::removeOperations()
 {
 	auto indexes = m_ui.tableView->selectionModel()->selectedRows();
 	for (auto index : indexes) {
@@ -64,14 +64,27 @@ void AwBatchDialog::removeOperation()
 	}
  }
 
+void AwBatchDialog::duplicateOperations()
+{
+	auto indexes = m_ui.tableView->selectionModel()->selectedRows();
+	auto model = static_cast<AwBatchTableModel *>(m_ui.tableView->model());
+	auto items = model->items();
+	for (auto index : indexes) {
+		if (index.column() == 0) {
+			model->add(new AwBatchModelItem(items.at(index.row())));
+		}
+	}
+}
+
 void AwBatchDialog::itemClick(const QModelIndex& index)
 {
 	if (!index.isValid())
 		return;
-	if (index.column() == BATCH_PARAMETERS)
-		editItem(m_items.at(index.row()));
-}
+	auto model = static_cast<AwBatchTableModel *>(m_ui.tableView->model());
 
+	if (index.column() == BATCH_PARAMETERS)
+		editItem(model->items().at(index.row()));
+}
 
 void AwBatchDialog::addItem()
 {
@@ -79,7 +92,6 @@ void AwBatchDialog::addItem()
 	auto item = new AwBatchModelItem(m_plugins[name]);
 	static_cast<AwBatchTableModel *>(m_ui.tableView->model())->add(item);
 	editItem(item);
-	m_items.append(item);
 }
 
 void AwBatchDialog::editItem(AwBatchModelItem *item)
@@ -90,7 +102,8 @@ void AwBatchDialog::editItem(AwBatchModelItem *item)
 }
 
 void AwBatchDialog::accept()
-{
+{  
+	m_items = static_cast<AwBatchTableModel *>(m_ui.tableView->model())->items();
 	auto plugin = new AwBatchRunnerPlugin;
 	auto runner = new AwBatchRunner(plugin, m_items);
 	AwProcessManager::instance()->runBuiltInProcess(runner);

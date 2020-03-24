@@ -454,7 +454,7 @@
   </action>
   <action name="actionCreate_batch_script">
    <property name="text">
-    <string>Create batch script</string>
+    <string>Batch Processing</string>
    </property>
   </action>
  </widget>

@@ -48,7 +48,7 @@ ICA::ICA()
 	m_isDownsamplingActive = true;
 }
 
-ICAPlugin::ICAPlugin()
+ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";

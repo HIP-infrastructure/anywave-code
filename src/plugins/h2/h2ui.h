@@ -2,9 +2,9 @@
 // 
 //                 Université d’Aix Marseille (AMU) - 
 //                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2020 AMU, INSERM
+//                 Copyright © 2013 AMU, INSERM
 // 
-//  This software is free software; you can redistribute it and/or
+//  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 3 of the License, or (at your option) any later version.
@@ -23,32 +23,40 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef H2UI_H
+#define H2UI_H
 
 #include <QDialog>
-#include "ui_AwBatchDialog.h"
+#include "ui_h2ui.h"
+#include <AwMarker.h>
 
-class AwProcessPlugin;
-class AwBatchModelItem;
+using namespace Ui;
 
-class AwBatchDialog : public QDialog
+typedef QPair<float, float> band;
+typedef QPair<QDoubleSpinBox *, QDoubleSpinBox *> spinBox;
+
+class H2UI : public QDialog, public H2UIClass
 {
 	Q_OBJECT
 
 public:
-	AwBatchDialog(QWidget *parent = Q_NULLPTR);
-	~AwBatchDialog();
-
+	H2UI(QWidget *parent = 0);
+	~H2UI();
+	QString dataFolder;
+	QMap<QString, QPair<float, float> > bands;
+	int method;
+	int downSampling;
+	float samplingRate;
+	QString directory;
+	AwMarkerList markers;
+	QStringList usedLabels, skippedLabels;
 public slots:
-	void addItem();
-	void editItem(AwBatchModelItem *item);
-	void removeOperations();
-	void duplicateOperations();
 	void accept() override;
-private slots:
-	void itemClick(const QModelIndex& index);
-private:
-	Ui::AwBatchDialogUi m_ui;
-	QMap<QString, AwProcessPlugin *> m_plugins;
-	QList< AwBatchModelItem *> m_items;
+	int exec() override;
+protected:
+	QStringList m_bandNames;
+	QList<spinBox> m_spinBoxes;
+	QList<QCheckBox *> m_checkBoxes;
 };
+
+#endif // H2UI_H

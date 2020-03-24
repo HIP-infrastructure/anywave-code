@@ -2,9 +2,9 @@
 // 
 //                 Université d’Aix Marseille (AMU) - 
 //                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2020 AMU, INSERM
+//                 Copyright © 2013 AMU, INSERM
 // 
-//  This software is free software; you can redistribute it and/or
+//  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 3 of the License, or (at your option) any later version.
@@ -23,32 +23,23 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef H2_CHANNEL_PAIR_H
+#define H2_CHANNEL_PAIR_H
+#include "H2Params.h"
+#include <AwVirtualChannel.h>
 
-#include <QDialog>
-#include "ui_AwBatchDialog.h"
-
-class AwProcessPlugin;
-class AwBatchModelItem;
-
-class AwBatchDialog : public QDialog
+class H2ChannelPair : public AwVirtualChannel
 {
-	Q_OBJECT
-
 public:
-	AwBatchDialog(QWidget *parent = Q_NULLPTR);
-	~AwBatchDialog();
+	H2ChannelPair(AwChannel *c) : AwVirtualChannel(c) {}
+	H2ChannelPair(QPair<h2_params *, h2_params *>& p, float startPosition, float totalDuration);
+	void update(float pos, float duration);
 
-public slots:
-	void addItem();
-	void editItem(AwBatchModelItem *item);
-	void removeOperations();
-	void duplicateOperations();
-	void accept() override;
-private slots:
-	void itemClick(const QModelIndex& index);
-private:
-	Ui::AwBatchDialogUi m_ui;
-	QMap<QString, AwProcessPlugin *> m_plugins;
-	QList< AwBatchModelItem *> m_items;
+	QPair<h2_params *, h2_params *> params;
+	float step, windowSize;
+	float maxDuration, currentDuration;	// maximum duration for the H2 channels 
+	float startPosition, currentPosition;
 };
+
+
+#endif

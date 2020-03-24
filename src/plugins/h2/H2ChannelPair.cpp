@@ -2,9 +2,9 @@
 // 
 //                 Université d’Aix Marseille (AMU) - 
 //                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2020 AMU, INSERM
+//                 Copyright © 2013 AMU, INSERM
 // 
-//  This software is free software; you can redistribute it and/or
+//  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 3 of the License, or (at your option) any later version.
@@ -23,32 +23,31 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "H2ChannelPair.h"
 
-#include <QDialog>
-#include "ui_AwBatchDialog.h"
-
-class AwProcessPlugin;
-class AwBatchModelItem;
-
-class AwBatchDialog : public QDialog
+H2ChannelPair::H2ChannelPair(QPair<h2_params *, h2_params *>& p, float start, float totalDuration)
+	: AwVirtualChannel()
 {
-	Q_OBJECT
+	m_gain = 1;
+	m_type = AwChannel::Other;
+	m_unit = QString::fromLatin1("H2");
+	currentPosition = startPosition = start;
+	currentDuration = maxDuration = totalDuration;
+	setDisplayPluginName("H2_ChannelItem");
+	params = p;
+}
 
-public:
-	AwBatchDialog(QWidget *parent = Q_NULLPTR);
-	~AwBatchDialog();
+void H2ChannelPair::update(float pos, float duration)
+{
+	if (pos > startPosition)
+		currentPosition = pos;
+	else
+		currentPosition = startPosition;
 
-public slots:
-	void addItem();
-	void editItem(AwBatchModelItem *item);
-	void removeOperations();
-	void duplicateOperations();
-	void accept() override;
-private slots:
-	void itemClick(const QModelIndex& index);
-private:
-	Ui::AwBatchDialogUi m_ui;
-	QMap<QString, AwProcessPlugin *> m_plugins;
-	QList< AwBatchModelItem *> m_items;
-};
+	if (duration < maxDuration)
+		currentDuration = duration;
+	else
+		currentDuration = maxDuration;
+
+	setDataReady();
+}
