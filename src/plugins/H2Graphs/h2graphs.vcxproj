@@ -11,11 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{79AFAD8F-FAFD-44C2-821F-F76B347854E0}</ProjectGuid>
+    <ProjectGuid>{FD5810B7-8729-4BF4-8E09-AC3F0ECFE342}</ProjectGuid>
     <Keyword>QtVS_v302</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
-    <ProjectName>H2</ProjectName>
+    <ProjectName>H2Graphs</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -50,11 +50,11 @@
   </ImportGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>5.10</QtInstall>
-    <QtModules>core;gui;svg;widgets;concurrent</QtModules>
+    <QtModules>core;gui;widgets;svg</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>5.10</QtInstall>
-    <QtModules>core;gui;svg;widgets;concurrent</QtModules>
+    <QtModules>core;gui;widgets;svg</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -66,15 +66,15 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PreprocessorDefinitions>H2_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(AWROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>H2GRAPHS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);$(AWROOT)\include;D:\Dev\win64\VS2015\Qwt-6.1.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AwCorelibd.lib;AwWidgetslibd.lib;AwProcessLibd.lib;AwGraphicsLibd.lib;AwMATLABLibd.lib;AwMathLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwFilteringLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(Qt_LIBPATH_);$(AWROOT)\lib;$(DEV_ROOT)\win64\VS2015\Qwt-6.1.3\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwWidgetsLibd.lib;qwtd.lib;AwMATLABLibd.lib;AwGraphicsLibd.lib;AwReadWriteLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -83,38 +83,52 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PreprocessorDefinitions>H2_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(AWROOT)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>H2GRAPHS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(Qt_INCLUDEPATH_);$(AWROOT)\include;D:\Dev\win64\VS2015\Qwt-6.1.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwMATLABLib.lib;AwMathLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwFilteringLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(Qt_LIBPATH_);$(AWROOT)\lib;$(DEV_ROOT)\win64\VS2015\Qwt-6.1.3\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwWidgetsLib.lib;qwt.lib;AwMATLABLib.lib;AwGraphicsLib.lib;AwReadWriteLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="h2.cpp" />
-    <ClCompile Include="H2ChannelPair.cpp" />
-    <ClCompile Include="H2ChannelPairItem.cpp" />
-    <ClCompile Include="h2ui.cpp" />
+    <ClCompile Include="GraphArrow.cpp" />
+    <ClCompile Include="GraphArrowBase.cpp" />
+    <ClCompile Include="GraphArrowDir.cpp" />
+    <ClCompile Include="GraphArrowLag.cpp" />
+    <ClCompile Include="GraphColorMap.cpp" />
+    <ClCompile Include="GraphLegend.cpp" />
+    <ClCompile Include="GraphManagerWidget.cpp" />
+    <ClCompile Include="GraphSensorItem.cpp" />
+    <ClCompile Include="GraphSet.cpp" />
+    <ClCompile Include="GraphSetModel.cpp" />
+    <ClCompile Include="GraphWindow.cpp" />
+    <ClCompile Include="H2Graphs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="h2.h" />
+    <ClInclude Include="GraphArrow.h" />
+    <ClInclude Include="GraphArrowBase.h" />
+    <ClInclude Include="GraphArrowDir.h" />
+    <ClInclude Include="GraphArrowLag.h" />
+    <ClInclude Include="GraphColorMap.h" />
+    <ClInclude Include="GraphLegend.h" />
+    <ClInclude Include="GraphSensorItem.h" />
+    <ClInclude Include="GraphSet.h" />
+    <ClInclude Include="h2graphs_global.h" />
+    <QtMoc Include="H2Graphs.h" />
+    <QtMoc Include="GraphWindow.h" />
+    <QtMoc Include="GraphSetModel.h" />
+    <QtMoc Include="GraphManagerWidget.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="H2ChannelPair.h" />
-    <ClInclude Include="H2Params.h" />
-    <QtMoc Include="h2ui.h" />
-    <QtMoc Include="H2ChannelPairItem.h" />
-    <ClInclude Include="h2_global.h" />
+    <QtRcc Include="Graphs.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="h2ui.ui" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="Resource.qrc" />
+    <QtUic Include="GraphManagerWidget.ui" />
+    <QtUic Include="GraphWindow.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

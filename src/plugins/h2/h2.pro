@@ -38,10 +38,7 @@ unix:!macx {
 FORMS += \
     h2ui.ui
 
-DISTFILES += \
-    h2_fr.qm \
-    h2_en.ts \
-    h2_fr.ts
+RESOURCES += Resources.qrc
 
 HEADERS += \
     h2.h \

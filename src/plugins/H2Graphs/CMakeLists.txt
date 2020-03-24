@@ -1,0 +1,39 @@
+# H2 GRAPHS
+project(H2Graphs)
+SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Svg REQUIRED)
+find_package(Qwt REQUIRED)
+INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+LINK_DIRECTORIES(${QWT_LIBRARY})
+SET(CMAKE_INSTALL_RPATH ${AW_LIB_DIR})
+SET(SRCS GraphArrow.cpp GraphWindow.cpp GraphArrowBase.cpp GraphArrowDir.cpp GraphArrowLag.cpp GraphColorMap.cpp
+GraphLegend.cpp GraphSet.cpp GraphSetModel.cpp H2Graphs.cpp GraphSensorItem.cpp GraphManagerWidget.cpp)
+
+SET(MOCS GraphArrow.h GraphWindow.h GraphArrowBase.h GraphArrowDir.h GraphArrowLag.h GraphColorMap.h
+GraphLegend.h GraphSet.h GraphSetModel.h H2Graphs.h GraphSensorItem.h GraphManagerWidget.h)
+
+SET(UIS GraphManagerWidget.ui GraphWindow.ui)
+SET(RES Graphs.qrc)
+
+qt5_wrap_cpp(H2G_MOCS ${MOCS})
+QT5_WRAP_UI(H2G_UIS ${UIS})
+QT5_ADD_RESOURCES(${RES})
+
+add_library(H2Graphs SHARED ${SRCS} ${H2G_MOCS} ${H2G_UIS})
+qt5_use_modules(H2Graphs Core Gui Widgets Svg)
+
+IF(APPLE)
+	target_link_libraries(H2Graphs ${AW_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
+ELSE()
+    target_link_libraries(H2Graphs ${AW_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
+ENDIF()
+INSTALL(TARGETS H2Graphs DESTINATION ${AW_PLUGINS_DIR})
+
+
+
+
+
