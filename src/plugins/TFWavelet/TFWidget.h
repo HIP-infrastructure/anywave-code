@@ -43,6 +43,8 @@ private slots:
 private:
 	Ui::TFWidgetUi m_ui;
 	AwBaseSignalView *m_signalView;
+	QwtScaleWidget *m_colorMapWidget; // global color map
+	double m_min, m_max;
 	TFSettings *m_settings;
 	DisplaySettings m_displaySettings;
 	QList<TFParam *> m_tfComputations, m_baselineComputations;

@@ -19,8 +19,10 @@ public:
 
 	inline QWidget *leftWidget() { return (QWidget *)m_freqScaleWidget; }
 	inline QWidget *rightWidget() { return (QWidget *)m_colorMapWidget; }
+	inline double min() { return m_min; }
+	inline double max() { return m_max; }
+	void setMinMax(double min, double max);
 public slots:
-	//void setNewData(float position, const QVector<double>& data, int row, int col);
 	void setNewData(float position, TFParam *param);
 	void updateDisplaySettings();
 	void showFreqScale(bool flag);

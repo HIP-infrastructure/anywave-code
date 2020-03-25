@@ -7,9 +7,9 @@
 #include "TFWavelet2.h"
 #include <QtConcurrent>
 #include <graphics/AwColorMap.h>
+#include <graphics/AwQwtColorMap.h>
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
-
 
 static void compute_tf(TFParam *p);
 static QMutex TFMutex;
@@ -48,7 +48,7 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	connect(m_ui.cbZScale, SIGNAL(currentIndexChanged(int)), this, SLOT(changeZScale(int)));
 
 	// gains
-	connect(m_ui.sliderGain, SIGNAL(valueChanged(int)), this, SLOT(changeGain(int)));
+//	connect(m_ui.sliderGain, SIGNAL(valueChanged(int)), this, SLOT(changeGain(int)));
 
 	// init compute settings
 	m_ui.sbXi->setValue(m_settings->xi);
@@ -66,6 +66,8 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_ui.comboMarkers->setMarkers(markers);
 	m_ui.comboMarkers->setFilter(AwComboMarker::ExcludeNoDuration);
 	m_baselineComputed = false;
+	m_min = m_max = 0;
+	m_colorMapWidget = nullptr;
 }
 
 TFWidget::~TFWidget()
@@ -102,8 +104,6 @@ void TFWidget::updateBaselineOptions()
 	bool disabled = m_ui.comboMarkers->count() == 0;
 	m_ui.checkBaseline->setDisabled(disabled);
 	m_ui.comboMarkers->setDisabled(disabled);
-
-
 }
 
 void TFWidget::compute()
@@ -137,19 +137,54 @@ void TFWidget::compute()
 		}
 	}
 	
-
 	QFuture<void> future = QtConcurrent::map(m_tfComputations, compute_tf);
 	future.waitForFinished();
 	int i = 0;
-	for (TFParam *p : m_tfComputations)
-		m_plots.at(i++)->setNewData(m_signalView->positionInFile(), p);
+
+	// update plots data and compute global color map min and max.
+	m_min = m_max = 0.;
+	for (TFParam *p : m_tfComputations) {
+		auto plot = m_plots.at(i++);
+		plot->setNewData(m_signalView->positionInFile(), p);
+		m_min = std::min(plot->min(), m_min);
+		m_max = std::max(plot->max(), m_max);
+	}
+	for (auto plot : m_plots)
+		plot->setMinMax(m_min, m_max);
+
+	QList<double> rTicks[QwtScaleDiv::NTickTypes];
+	auto range = m_max - m_min;
+	auto step = std::abs(range / 4);
+	QwtInterval zInterval(m_min, m_max);
+	rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
+	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
+	m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
+	m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
+	m_colorMapWidget->repaint();
+
 	repaint();
 }
 
 void TFWidget::updatePlots() 
 {
-	for (auto p : m_plots) 
+	m_min = m_max = 0.;
+	for (auto p : m_plots) {
 		p->updateDisplaySettings();
+		// update plots data and compute global color map min and max.
+		m_min = std::min(p->min(), m_min);
+		m_max = std::max(p->max(), m_max);
+	}
+	for (auto plot : m_plots)
+		plot->setMinMax(m_min, m_max);
+	QList<double> rTicks[QwtScaleDiv::NTickTypes];
+	auto range = m_max - m_min;
+	auto step = std::abs(range / 4);
+	QwtInterval zInterval(m_min, m_max);
+	rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
+	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
+	m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
+	m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
+	m_colorMapWidget->repaint();
 }
 
 void TFWidget::setChannels(const AwChannelList& channels)
@@ -160,6 +195,20 @@ void TFWidget::setChannels(const AwChannelList& channels)
 	int row = 0;
 	layout->addWidget(m_signalView, row++, 1);
 	layout->setRowStretch(1, 0);
+	layout->setColumnStretch(1, 1);
+
+	if (m_colorMapWidget == nullptr) {
+		// building the colormap widget
+		m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale, this);
+		m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
+		m_colorMapWidget->setBorderDist(1, 1);
+		m_colorMapWidget->setSpacing(5);
+		m_colorMapWidget->setMargin(5);
+		m_colorMapWidget->setColorBarEnabled(true);
+		//m_colorMapWidget->setColorBarWidth(25);
+		m_colorMapWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		m_colorMapWidget->hide();
+	}
 
 	// Build params for computation and add plot to the layout
 	for (auto c : channels) {
@@ -172,8 +221,8 @@ void TFWidget::setChannels(const AwChannelList& channels)
 		TFPlot *plot = new TFPlot(m_settings, &m_displaySettings, c);
 		m_plots << plot;
 		layout->addWidget(plot, row, 1);
-		layout->addWidget(plot->leftWidget(), row, 0);
-		layout->addWidget(plot->rightWidget(), row++, 2);
+		layout->addWidget(plot->leftWidget(), row++, 0);
+		//layout->addWidget(plot->rightWidget(), row++, 2);
 
 		connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
 		connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));
@@ -182,6 +231,9 @@ void TFWidget::setChannels(const AwChannelList& channels)
 		connect(plot, SIGNAL(selectionMade(AwChannel *, float, int, int, float, int, int)), this, SIGNAL(selectionMade(AwChannel *, float, int, int, float, int, int)));
 		connect(this, SIGNAL(freqScaleChanged(float, float, float)), plot, SLOT(updateFreqScale(float, float, float)));
 	}
+	auto nPlotRows = row - 1;
+	// add color map widget to the right column and span it to all the rows used by TF plots
+	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
 	connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute()));
 	m_signalView->setChannels(channels);
 	m_channels = channels;
@@ -197,8 +249,7 @@ void TFWidget::setMarkers(const AwMarkerList& markers)
 
 void TFWidget::showColorMapScale(bool flag)
 {
-	for (auto p : m_plots)
-		p->showColorMapScale(flag);
+	m_colorMapWidget->setVisible(flag);
 	repaint();
 }
 
@@ -435,11 +486,6 @@ void compute_tf(TFParam *p)
 			p->data(index, i) = c_out[i + j][0] * c_out[i + j][0] + c_out[i + j][1] * c_out[i + j][1];
 
 	}
-	//p->data = matrix;
-	//p->data_row = nscale;
-	//p->data_col = nsamples;
-
-
 	fftw_free(c_in);
 	fftw_free(c_out);
 	fftw_free(fftx);

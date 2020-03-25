@@ -12,9 +12,8 @@ TFWavelet2Plugin::TFWavelet2Plugin()
 TFWavelet2::TFWavelet2()
 {
 	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::ProcessRequiresChannelSelection);
-	// Limit the usage to 3 channels max
-	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 3);
-//	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	// Limit the number of channels
+	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 5);
 }
 
 TFWavelet2::~TFWavelet2()

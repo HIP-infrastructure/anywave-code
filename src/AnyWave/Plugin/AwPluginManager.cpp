@@ -49,6 +49,7 @@
 #include "Process/AwTriggerEraser.h"
 #include "Process/AwMATLABMarkersExporter.h"
 #include "Debug/AwDebugLog.h"
+#include <utils/json.h>
 #ifdef AW_EPOCHING
 #include "Epoch/AwAvgSignalItem.h"
 #endif
@@ -68,6 +69,24 @@ AwPluginManager *AwPluginManager::getInstance()
 //
 AwPluginManager::AwPluginManager()
 {
+
+	// init input flags map for MATLAB/Python plugins
+	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessInput::GetAllMarkers);
+	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessInput::GetAsRecordedChannels);
+	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessInput::GetDurationMarkers);
+	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessInput::GetCurrentMontage);
+	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessInput::ProcessRequiresChannelSelection);
+	m_MATPyInputFlagsMap.insert("userselectedmarkers", Aw::ProcessInput::UserSelectedMarkers);
+
+	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
+	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	m_MATPyPluginFlagsMap.insert("processdoesntrequiredata", Aw::ProcessFlags::ProcessDoesntRequireData);
+	// for compatibilty
+	m_MATPyPluginFlagsMap.insert("nodatarequired", Aw::ProcessFlags::ProcessDoesntRequireData);
+
+	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
+
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
 	loadPlugins();
 	loadUserPlugins();
@@ -215,6 +234,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 bool isMATLABScript = QFile::exists(matlabCode);
 		 bool isPythonScript = QFile::exists(pythonCode);
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
+		 QString jsonUiPath = QString("%1/ui.json").arg(pluginPath);
+		 QString jsonDefaultsPath = QString("%1/defaults.json").arg(pluginPath);
 		 if (!QFile::exists(descPath))
 			 continue;
 		 QFile file(descPath);
@@ -297,6 +318,10 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			 if (QFile::exists(jsonUiPath))
+				 setJsonUi(plugin, jsonUiPath);
+			 if (QFile::exists(jsonDefaultsPath))
+				 setJsonDefaults(plugin, jsonDefaultsPath);
 			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
@@ -318,6 +343,20 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 }
 }
 
+void AwPluginManager::setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonPath)
+{
+	auto jsonString = AwUtilities::json::fromJsonFileToString(jsonPath);
+	if (!jsonString.isEmpty())
+		plugin->setSettings(processio::json_defaults, jsonString);
+}
+
+void AwPluginManager::setJsonUi(AwScriptPlugin *plugin, const QString& jsonPath)
+{
+	auto jsonString = AwUtilities::json::fromJsonFileToString(jsonPath);
+	if (!jsonString.isEmpty())
+		plugin->setSettings(processio::json_ui, jsonString);
+}
+
 void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
 {
 	if (flags.isEmpty())
@@ -330,11 +369,13 @@ void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const
 	}
 	else
 		tokens << flags;
+
+	// compared flags strings to hash table
 	int f = 0;
 	for (auto s : tokens) {
 		auto token = s.toLower();
-		if (token == "getallmarkers")
-			f |= Aw::ProcessInput::GetAllMarkers;
+		if (m_MATPyInputFlagsMap.contains(token))
+			f |= m_MATPyInputFlagsMap.value(token);
 	}
 	plugin->setInputFlags(f);
 }
@@ -349,14 +390,16 @@ void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QStr
 	int f = 0;
 	for (auto s : tokens) {
 		auto token = s.toLower();
-		if (token == "nodatarequired")
-			f |= Aw::ProcessFlags::ProcessDoesntRequireData;
-		else if (token == "hidden")
-			f |= Aw::ProcessFlags::PluginIsHidden;
-		else if (token == "accepttimeselections")
-			f |= Aw::ProcessFlags::PluginAcceptsTimeSelections;
-		else if (token == "ignorechannelselections")
-			f |= Aw::ProcessInput::ProcessIgnoresChannelSelection;
+		if (m_MATPyPluginFlagsMap.contains(token))
+			f |= m_MATPyPluginFlagsMap.value(token);
+		//if (token == "nodatarequired")
+		//	f |= Aw::ProcessFlags::ProcessDoesntRequireData;
+		//else if (token == "hidden")
+		//	f |= Aw::ProcessFlags::PluginIsHidden;
+		//else if (token == "accepttimeselections")
+		//	f |= Aw::ProcessFlags::PluginAcceptsTimeSelections;
+		//else if (token == "ignorechannelselections")
+		//	f |= Aw::ProcessInput::ProcessIgnoresChannelSelection;
 	}
 	plugin->setFlags(f);
 }

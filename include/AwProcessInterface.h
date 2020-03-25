@@ -135,7 +135,7 @@ class AW_PROCESS_EXPORT AwProcessPlugin : public AwPluginBase
 {
 public:
 	// default constructor
-	AwProcessPlugin() { m_flags = 0x00000000; }
+	AwProcessPlugin() : AwPluginBase() { m_flags = 0x00000000; }
 	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY.
 - Display type indicates that the plugin will process only displayed data.
 - Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
@@ -153,6 +153,7 @@ public:
 	virtual void deleteInstance(AwBaseProcess *process) { delete process;  }
 	void addLanguageTranslation(const QString& resourceFile);
 	inline QHash<QString, QVariant>& settings() { return m_settings; }
+	void setSettings(const QString& key, const QVariant& value) { m_settings[key] = value; }
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;

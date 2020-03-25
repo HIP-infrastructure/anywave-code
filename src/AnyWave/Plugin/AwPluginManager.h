@@ -143,6 +143,8 @@ private:
 	void loadUserPlugins();
 	void checkForScriptPlugins(const QString& startingPath);
 	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
+	void setJsonUi(AwScriptPlugin *plugin, const QString& jsonUiPath);
+	void setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonDefaultsPath);
 	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);
@@ -166,6 +168,8 @@ private:
 	ProcessPluginFactory m_processFactory;
 	FilterPluginFactory m_filterFactory;
 	QMutex m_mutex;
+	QMap<QString, int> m_MATPyInputFlagsMap;	// hold input flags for the process object instance.
+	QMap<QString, int> m_MATPyPluginFlagsMap;	// hold general flags for the plugin object.
 
 	// Python plugins list (names)
 	QStringList m_pythonPlugins;
