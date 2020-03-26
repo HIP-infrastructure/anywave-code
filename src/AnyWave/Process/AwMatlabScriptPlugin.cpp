@@ -31,6 +31,7 @@
 #include <QDir>
 #include "Prefs/AwSettings.h"
 #include "Debug/AwDebugLog.h"
+#include <utils/json.h>
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 #include <QSettings>
@@ -90,7 +91,8 @@ void AwMatlabScriptProcess::run()
 		else
 			arguments << mcrPath;
 #endif
-		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid); //<< pdi.input.args()["json_args"].toString().simplified();
+		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::hashToJsonString(pdi.input.args()).simplified();
+			pdi.input.args().value("json_args").toString().simplified();
 		QProcess plugin(this);
 		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 		env.remove("PATH");
@@ -106,7 +108,7 @@ void AwMatlabScriptProcess::run()
 		if (aws->value(aws::matlab_present).toBool()) {
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-			mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), pdi.input.args()["json_args"].toString());
+			mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::hashToJsonString(pdi.input.args()).simplified());
 		}
 	}
 }

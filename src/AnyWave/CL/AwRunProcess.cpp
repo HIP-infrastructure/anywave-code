@@ -54,7 +54,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
 	process->runFromCommandLine();
 	logger.sendLog(QString("Done."));
-	reader->plugin()->deleteInstance(reader);
+	//reader->plugin()->deleteInstance(reader);
 	process->plugin()->deleteInstance(process);
 }
 

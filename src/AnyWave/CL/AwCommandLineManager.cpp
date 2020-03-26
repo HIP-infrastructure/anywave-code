@@ -197,9 +197,6 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	// Unite arguments and json !
 	args.unite(doc.object().toVariantHash());
 
-	// add the json string also for MATLAB/Python plugin
-	args["json_args"] = QString(doc.toJson());
-
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
 		QString tmp = QString("%1.bad").arg(inputFile);

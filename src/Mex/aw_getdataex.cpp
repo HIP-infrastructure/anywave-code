@@ -94,6 +94,11 @@ void parse_cfg(const mxArray *cfg, mxArray *plhs[], int nlhs)
 		plhs[0] = mxCreateStructMatrix(0, 0, 8, fields);
 		return;
 	}
+	if (nChannels == -1) {
+		QString errorString;
+		in >> errorString;
+		mexErrMsgIdAndTxt("AnyWave:aw_getdataex", errorString.toStdString().c_str());
+	}
 		
 	output = mxCreateStructMatrix(1, nChannels, 8, fields);
 

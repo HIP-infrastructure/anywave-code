@@ -71,13 +71,18 @@ QVariantHash AwUtilities::json::hashFromJsonString(const QString& jsonString, QS
 	return hash;
 }
 
-QJsonDocument  AwUtilities::json::jsonStringToDocument(const QString& jsonString)
+QJsonDocument  AwUtilities::json::jsonStringToDocument(const QString& jsonString, QString& errorString)
 {
 	QJsonDocument doc;
 	if (jsonString.isEmpty())
 		return doc;
 	QJsonParseError err;
-	return QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+	doc = QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+	if (doc.isNull() || err.error != QJsonParseError::NoError) {
+		errorString = err.errorString();
+		return doc;
+	}
+	return doc;
 }
 
 bool  AwUtilities::json::jsonStringToFile(const QString& jsonString, const QString& filePath)

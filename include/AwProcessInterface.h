@@ -157,7 +157,7 @@ public:
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
-	QHash<QString, QVariant> m_settings;
+	QVariantHash m_settings;
 };
 
 class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess

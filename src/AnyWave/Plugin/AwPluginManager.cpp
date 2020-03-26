@@ -338,6 +338,11 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->setPluginDir(pluginPath);
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
+			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			 if (QFile::exists(jsonUiPath))
+				 setJsonUi(plugin, jsonUiPath);
+			 if (QFile::exists(jsonDefaultsPath))
+				 setJsonDefaults(plugin, jsonDefaultsPath);
 			 loadProcessPlugin(plugin);
 		 }
 	 }
