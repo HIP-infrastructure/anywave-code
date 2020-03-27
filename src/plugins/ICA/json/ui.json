@@ -1,5 +1,6 @@
 {
-"input_type" : "file",
+"input_keys" : ["input_file"],
+"input_file" : ["Input File", "check"],
 "hp" : ["High Pass", "double"],
 "lp" : ["Low Pas", "double" ],
 "comp" : ["Components", "int"],

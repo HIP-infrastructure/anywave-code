@@ -9,8 +9,9 @@
 #include <QPushButton>
 #include <widget/AwMessageBox.h>
 #include <QFileDialog>
-#include <QTableWidgetItem>
+#include <QLineEdit>
 #include "Prefs/AwSettings.h"
+#include "AwBatchFileInputWidget.h"
 
 AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *parent)
 	: QDialog(parent)
@@ -18,18 +19,6 @@ AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *pare
 	m_ui.setupUi(this);
 	m_item = item;
 	setWindowTitle(QString("%1 parameters").arg(item->pluginName()));
-	m_ui.tableWidget->setHorizontalHeaderLabels({ "parent dir", "file" });
-	m_ui.tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	// get the json ui
-	QString error;
-	m_jsonUi = AwUtilities::json::mapFromJsonString(m_item->plugin()->settings().value(processio::json_ui).toString(), m_errorString);
-	m_jsonDefaults = AwUtilities::json::hashFromJsonString(m_item->plugin()->settings().value(processio::json_defaults).toString(), error);
-	if (!error.isEmpty()) {
-		AwMessageBox::critical(this, "JSON error", error);
-		QDialog::reject();
-	}
-	if (m_item->isEmpty())
-		m_item->setJsonParameters(m_jsonDefaults);
 	// init wigets
 	setupParamsUi();
 	m_homeDir = "/";
@@ -46,33 +35,61 @@ void AwAddEditBatchDialog::setupParamsUi()
 		delete oldLayout;
 	auto gridLayout = new QGridLayout(m_ui.groupParameters);
 
-	auto input = m_jsonUi.value("input_type").toString().toLower();
 	auto args = m_item->jsonParameters();
-	if (input == "file") {
-		m_item->setInputType(AwBatchModelItem::Files);
-		m_ui.labelDir->hide(); 
-		m_ui.editDir->hide();
-		m_ui.buttonBrowseDir->hide();
+	auto jsonUi = m_item->jsonUi();
+	/// Input layout
+	auto inputLayout = m_ui.groupInput->layout();
+	if (inputLayout)
+		delete inputLayout;
+	inputLayout = new QHBoxLayout(m_ui.groupInput);
+	auto inputs = m_item->inputsMap();
+	auto keys = inputs.keys();
+	if (keys.size() == 0)
+		m_ui.groupInput->hide();
+	if (keys.size() == 1) {
+		auto list = jsonUi.value(keys.first()).toStringList();
+		auto key_label = list.first();
+		bool checkAnyWaveCanOpen = list.last() == "check";
+		auto widget = new AwBatchFileInputWidget(checkAnyWaveCanOpen);
+		widget->checkFilesAndFillList(inputs.value(keys.first()), false);
+		m_widgets.insert(keys.first(), widget);
+		inputLayout->addWidget(widget);
 	}
-	else {
-		m_item->setInputType(AwBatchModelItem::Directory);
-		m_ui.labelFiles->hide();
-		m_ui.tableWidget->hide();
-		m_ui.buttonAddFiles->hide();
-		m_ui.buttonAddFromDir->hide();
+	if (keys.size() > 1) {
+		auto widget = new QTabWidget;
+		inputLayout->addWidget(widget);
+		widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		for (auto k : keys) {
+			auto list = jsonUi.value(k).toStringList();
+			auto key_label = list.first();
+			bool checkAnyWaveCanOpen = list.last() == "check";
+			auto fileWidget = new AwBatchFileInputWidget(checkAnyWaveCanOpen);
+			fileWidget->checkFilesAndFillList(inputs.value(k), false);
+			widget->addTab(fileWidget, key_label);
+			m_widgets.insert(k, fileWidget);
+		}
 	}
-
-	// get the files
-	auto files = m_item->files();
-	if (!files.isEmpty())
-		checkFilesAndFillList(files, false, false);
+	//// Parameters layout
 
 	// get field ordering
-	auto ordering = m_jsonUi.value("fields_ordering").toStringList();
+	auto ordering = jsonUi.value("fields_ordering").toStringList();
 
 	int row = 0;
+    // check for  input_dir first
+	if (jsonUi.contains("input_dir")) {
+		auto label = new QLabel("Input Dir.:");
+		gridLayout->addWidget(label, row, 0, 1, 1);
+		auto edit = new QLineEdit;
+		gridLayout->addWidget(edit, row, 1, 1, 2);
+		m_widgets.insert("input_dir", edit);
+		auto button = new QPushButton("Browse");
+		button->setProperty("key", QString("input_dir"));
+		connect(button, &QPushButton::clicked, this, &AwAddEditBatchDialog::browseInputDir);
+		gridLayout->addWidget(edit, row, 3, 1, 1);
+		row++;
+	}
 	for (auto k : ordering) {
-		auto list = m_jsonUi.value(k).toStringList();
+		auto list = jsonUi.value(k).toStringList();
 		auto key_value = list.last();
 		auto key_label = list.first();
 		if (key_value == "string") {
@@ -131,6 +148,20 @@ void AwAddEditBatchDialog::setupParamsUi()
 			row++;
 			m_widgets.insert(k, edit);
 		}
+		else if (key_value == "file") {
+			auto label = new QLabel(QString("%1:").arg(key_label));
+			gridLayout->addWidget(label, row, 0, 1, 1);
+			auto edit = new QLineEdit;
+			edit->setText(args.value(k).toString());
+			gridLayout->addWidget(edit, row, 1, 1, 2);
+			auto button = new QPushButton("Select File");
+			button->setProperty("key", k);
+			button->setProperty("value", key_value);
+			gridLayout->addWidget(button, row, 3, 1, 1);
+			connect(button, &QPushButton::clicked, this, &AwAddEditBatchDialog::setFileProperty);
+			m_widgets.insert(k, edit);
+			row++;
+		}
 	}
 	// add two buttons 'Apply profile', 'Save as profile'
 	auto button = new QPushButton("Apply Profile");
@@ -142,11 +173,32 @@ void AwAddEditBatchDialog::setupParamsUi()
 }
 
 
+void AwAddEditBatchDialog::setFileProperty()
+{
+	QPushButton *button = static_cast<QPushButton *>(sender());
+	if (button == nullptr)
+		return;
+
+	auto file = QFileDialog::getOpenFileName(this, "Select file", m_homeDir);
+	if (file.isEmpty())
+		return;
+
+	QString key = button->property("key").toString();
+	QString value = button->property("value").toString();
+
+	QLineEdit *edit = static_cast<QLineEdit *>(m_widgets.value(key));
+	edit->setText(file);
+	QFileInfo fi(file);
+	m_homeDir = fi.absolutePath();
+}
+
+
 void AwAddEditBatchDialog::fetchParams()
 {
 	auto params = m_item->jsonParameters();
-	for (auto k : m_jsonUi.keys()) {
-		auto list = m_jsonUi.value(k).toStringList();
+	auto jsonUi = m_item->jsonUi();
+	for (auto k : jsonUi.keys()) {
+		auto list = jsonUi.value(k).toStringList();
 		auto val_type = list.last();
 		auto widget = m_widgets.value(k);
 		if (widget == nullptr)  
@@ -187,9 +239,11 @@ void AwAddEditBatchDialog::setParams()
 {
 	// fill in widgets values based on args dictionnary
 	auto args = m_item->jsonParameters();
+	auto jsonUi = m_item->jsonUi();
+	auto jsonDefaults = m_item->jsonDefaults();
 
-	for (auto k : m_jsonUi.keys()) {
-		auto list = m_jsonUi.value(k).toStringList();
+	for (auto k : jsonUi.keys()) {
+		auto list = jsonUi.value(k).toStringList();
 		auto val_type = list.last();
 		
 		auto widget = m_widgets.value(k);
@@ -225,32 +279,11 @@ void AwAddEditBatchDialog::setParams()
 		else if (val_type == "list") {
 			auto w = static_cast<QComboBox *>(widget);
 			// get default lits in json ui
-			auto list = m_jsonDefaults.value(k).toStringList();
+			auto list = jsonDefaults.value(k).toStringList();
 			auto label = args.value(k).toString();
 			w->setCurrentIndex(list.indexOf(label));
 		}
 	}
-}
-
-
-void AwAddEditBatchDialog::addFiles()
-{
-	auto files = QFileDialog::getOpenFileNames(this, "Select files", m_homeDir);
-
-	if (files.isEmpty())
-		return;
-
-	QFileInfo fi(files.first());
-	m_homeDir = fi.absolutePath();
-	checkFilesAndFillList(files);
-}
-
-void AwAddEditBatchDialog::addFilesFromDir()
-{
-	auto dir = QFileDialog::getExistingDirectory(this, "Select Directory", "/");
-	if (dir.isEmpty())
-		return;
-	recursiveFill(dir);
 }
 
 void AwAddEditBatchDialog::browseInputDir()
@@ -258,111 +291,46 @@ void AwAddEditBatchDialog::browseInputDir()
 	auto dir = QFileDialog::getExistingDirectory(this, "Select Directory", "/");
 	if (dir.isEmpty())
 		return;
-	m_item->setInputDir(dir);
-	m_ui.editDir->setText(dir);
-}
-
-void AwAddEditBatchDialog::removeFiles()
-{
-	auto ranges = m_ui.tableWidget->selectedRanges();
-	if (ranges.isEmpty())
-		return;
-	int begin = ranges.first().topRow();
-	int count = ranges.first().rowCount();
-
-	do {
-		m_ui.tableWidget->removeRow(begin);
-
-	} while (--count);
-
-}
-
-void AwAddEditBatchDialog::recursiveFill(const QString& dirPath)
-{
-	QDir dir(dirPath);
-	if (dir.isEmpty())
-		return;
-
-	auto list = dir.entryInfoList(QDir::Files);
-	QStringList files;
-	for (auto l : list)
-		files << l.filePath();
-	checkFilesAndFillList(files, false);
-	auto subDirs = dir.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot);
-	for (auto subDir : subDirs)
-		recursiveFill(subDir.filePath());
-}
-
-void AwAddEditBatchDialog::checkFilesAndFillList(const QStringList& files, bool warning, bool checkReaderPlugins)
-{
-	if (files.isEmpty())
-		return;
-	// first check that files can be open by AnyWave
-	QStringList res;
-	if (!checkReaderPlugins)
-		res = files;
-	else {
-		for (auto f : files) {
-			auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(f);
-			if (reader != nullptr) {
-				res << f;
-				reader->plugin()->deleteInstance(reader);
-			}
-		}
-	}
-	if (res.isEmpty() && warning) {
-		AwMessageBox::information(this, "Files", "The selected files are not files AnyWave can read.");
-		return;
-	}
-	// fill list widget
-	auto row = m_ui.tableWidget->rowCount();
-	for (auto f : res) {
-		QFileInfo info(f);
-		// insert a row into the table
-		m_ui.tableWidget->insertRow(row);
-		// first fill the file column with only the filename but associate the full path as item's data.
-		auto item = new QTableWidgetItem(info.fileName());
-		item->setData(Qt::UserRole, f);
-		item->setToolTip(f);
-		m_ui.tableWidget->setItem(row, 1, item);
-		// now add the first colum (the parent dir)
-		item = new QTableWidgetItem(info.path());
-		m_ui.tableWidget->setItem(row, 0, item);
-		row++;
-	}
-}
-
-bool AwAddEditBatchDialog::pluginParamCheck()
-{
-	return true;
+	//m_item->setInputDir(dir);
+	QLineEdit *edit = static_cast<QLineEdit *>(m_widgets.value("input_dir"));
+	edit->setText(dir);
 }
 
 void AwAddEditBatchDialog::fetchFiles()
 {
-	QStringList files;
-	for (auto i = 0; i < m_ui.tableWidget->rowCount(); i++) {
-		auto item = m_ui.tableWidget->item(i, 1);
-		files << item->data(Qt::UserRole).toString();
+	auto inputMap = m_item->inputsMap();
+	for (auto k : inputMap.keys()) {
+		AwBatchFileInputWidget *w = static_cast<AwBatchFileInputWidget *>(m_widgets.value(k));
+		m_item->addFiles(k, w->getFiles());
 	}
-	m_item->setFiles(files);
 }
 
 void AwAddEditBatchDialog::accept()
 {
-	if (m_item->inputType() == AwBatchModelItem::Files) {
-		fetchFiles();
-		if (m_item->files().isEmpty()) {
-			AwMessageBox::information(this, "Files", "Add at least one file to run the batch.");
-			return;
-		}
-	}
-	else {
-		if (m_item->inputDir().isEmpty()) {
-			AwMessageBox::information(this, "Directory", "Set an input directory.");
-			return;
-		}
-	}
+	fetchFiles();
+	// check that all input keys have the same number of files 
+	auto inputs = m_item->inputsMap();
+	if (!inputs.isEmpty()) {
+		bool ok = true;
+		auto inputKeys = inputs.keys();
+		int firstSize = inputs.value(inputKeys.first()).size();
 
+		for (int i = 1; i < inputKeys.size(); i++) {
+			int size = inputs.value(inputKeys.at(i)).size();
+			if (size != firstSize) {
+				ok = false;
+				break;
+			}
+		}
+		if (!ok) {
+			AwMessageBox::information(this, "Input Files", "The number of files set is different between input parameters.");
+			return;
+		}
+		if (firstSize == 0) {
+			AwMessageBox::information(this, "Input Files", "Add at least one file as input to run the batch.");
+			return;
+		}
+	}
 	fetchParams();
 	if (!m_item->checkPluginParams()) {
 		AwMessageBox::information(this, "Plugin", "A parameter is not valid.");

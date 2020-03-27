@@ -31,33 +31,38 @@
 class AwBatchModelItem
 {
 public:
-	explicit AwBatchModelItem(AwProcessPlugin *plugin) { m_plugin = plugin; m_inputType = 0; }
+	explicit AwBatchModelItem(AwProcessPlugin *plugin); 
 	explicit AwBatchModelItem(AwBatchModelItem *copy);
-	enum Inputs { Directory, Files };
+	enum Inputs { Directory, Files, None };
 
 	inline QString& pluginName() { return m_plugin->name; }
-	inline QStringList& files() { return m_files; }
-	void setFiles(const QStringList& files) { m_files = files; }
-//	inline QString& jsonParameters() { return m_jsonArgs; }
+//	inline QStringList& files() { return m_files; }
+//	void setFiles(const QStringList& files) { m_files = files; }
 	QVariantHash& jsonParameters() { return m_args; }
-//	void setJsonParameters(const QString& args) { m_jsonArgs = args; }
 	void setJsonParameters(const QVariantHash& args) { m_args = args; }
 	AwProcessPlugin *plugin() { return m_plugin; }
-//	inline bool isEmpty() { return m_jsonArgs.isEmpty(); }
 	inline bool isEmpty() { return m_args.isEmpty(); }
 	bool checkPluginParams();
 	void setInputType(int type) { m_inputType = type; }
 	inline int inputType() { return m_inputType; }
-	void setInputDir(const QString& dirPath) { m_inputDir = dirPath; }
-	QString& inputDir() { return m_inputDir; }
+//	void setInputDir(const QString& dirPath) { m_inputDir = dirPath; }
+//	QString& inputDir() { return m_inputDir; }
+	QVariantMap& jsonUi() { return m_jsonUi; }
+	QString getFileForInput(const QString& key, int index);
+	QStringList getFilesForInput(const QString& key);
+	QMap<QString, QStringList>& inputsMap() { return m_inputFilesMap; }
+	QVariantHash& jsonDefaults() { return m_jsonDefaults; }
+	void addFiles(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
 protected:
 	QString m_pluginName;		// name of the plugin
-	QString m_inputDir;
-//	QString m_jsonArgs;			// json string used as arguments to run the process
+//	QString m_inputDir;
 	QVariantHash m_args;
-	QStringList m_files;		// list of file to use as input.
+//	QStringList m_files;		// list of file to use as input.
 	int m_inputType;
 	AwProcessPlugin *m_plugin;
+	QVariantMap m_jsonUi;
+	QVariantHash m_jsonDefaults;
+	QMap<QString, QStringList> m_inputFilesMap;	// hold a list of files for a specific key.
 };
 
 using AwBatchItems = QList<AwBatchModelItem *>;

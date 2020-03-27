@@ -49,7 +49,7 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 
 	float start, duration;
 	int decim;
-	QString file, montage;
+	QString file, montage, error;
 	QStringList labels, types;
 	AwFileIO *reader = NULL;
 
@@ -81,8 +81,9 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 		if (reader) 
 			usingFile = reader->openFile(file)  == AwFileIO::NoError;
 		if (!usingFile) { // no plugin to open
-			emit log("No reader plugin found to open and load the specified file.");
-			stream << (qint64)0;
+			error = QString("No reader plugin found to open and load the specified file.");
+			emit log(error);
+			stream << (qint64)-1 << error;
 			response.send();
 			return;
 		}
@@ -94,7 +95,7 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 
 	bool usingLabels = !labels.isEmpty();
 	bool usingTypes = !types.isEmpty();
-	bool error = false;
+//	bool error = false;
 
 	// default case : not using labels nor types
 	if (!usingFile) {
@@ -119,8 +120,13 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 		else 
 			requestedChannels = AwChannel::getChannelsWithLabels(reader->infos.channels(), labels);
 		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
-			emit log(QString("Error in aw_getdata: could not find channels with requested labels."));
-			error = true;
+			error = QString("Error in aw_getdata: could not find channels with requested labels.");
+			emit log(error);
+			stream << (int)-1 << error;
+			response.send();
+			if (usingFile)
+				reader->plugin()->deleteInstance(reader);
+			return;
 		}
 		else { // now extract specified types.
 			AwChannelList channels;
@@ -128,8 +134,13 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 				channels += AwChannel::getChannelsOfType(requestedChannels, AwChannel::stringToType(t));
 			requestedChannels = channels;
 			if (channels.isEmpty()) {
-				emit log(QString("Error in aw_getdata: could not find channels of requested type AND labels."));
-				error = true;
+				error = QString("Error in aw_getdata : could not find channels of requested type AND labels.");
+				emit log(error);
+				stream << (int)-1 << error;
+				response.send();
+				if (usingFile)
+					reader->plugin()->deleteInstance(reader);
+				return;
 			}
 		}
 	}
@@ -140,8 +151,13 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 		else
 			requestedChannels = AwChannel::getChannelsWithLabels(reader->infos.channels(), labels);
 		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
-			emit log(QString("Error in aw_getdata: could not find channels with requested labels."));
-			error = true;
+			error = QString("Error in aw_getdata: could not find channels with requested labels.");
+			emit log(error);
+			stream << (int)-1 << error;
+			response.send();
+			if (usingFile)
+				reader->plugin()->deleteInstance(reader);
+			return;
 		}
 	}
 	else if (usingTypes && !usingLabels) {
@@ -154,16 +170,17 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 		for (auto t : types)
 			channels += AwChannel::getChannelsOfType(requestedChannels, AwChannel::stringToType(t));
 		if (channels.isEmpty()) {
-			emit log(QString("Error in aw_getdata: could not find channels of requested types."));
-			error = true;
+			error = QString("Error in aw_getdata: could not find channels of requested types.");
+			emit log(error);
+			stream << (int)-1 << error;
+			response.send();
+			if (usingFile)
+				reader->plugin()->deleteInstance(reader);
+			return;
 		}
 		requestedChannels = channels;
 	}
-	if (error) {
-		stream << (qint64)0;
-		response.send();
-		return;
-	}
+
 
 	// remove possible bad channels 
 	AwMontageManager::instance()->removeBadChannels(requestedChannels);
@@ -199,26 +216,33 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 			auto nSamples = reader->readDataFromChannels(start, duration, requestedChannels);
 			if (nSamples) {
 				emit log("Done.");
-				AwFilterSettingsStore store(requestedChannels);
-				AwChannel::clearFilters(requestedChannels);
 				emit log("Downsampling...");
 				AwFiltering::downSample(requestedChannels, decim);
 				emit log("Done.");
-				emit log("Filtering...");
-				AwFiltering::filter(requestedChannels);
-				emit log("Done.");
 			}
-			else
-				emit log("NO DATA LOADED");
+			else {
+				error = QString("No data loaded.");
+				emit log(error);
+				stream << (int)-1 << error;
+				response.send();
+				reader->plugin()->deleteInstance(reader);
+				return;
+			}
 		}
 		else {
 			emit log("Loading and filtering data...");
 			auto nSamples = reader->readDataFromChannels(start, duration, requestedChannels);
 			if (filtersFlag != 2)
 				AwFiltering::filter(requestedChannels);
-			if (nSamples == 0) 
-				emit log("NO DATA LOADED");
-			else
+			if (nSamples == 0) {
+				error = QString("No data loaded.");
+				emit log(error);
+				stream << (int)-1 << error;
+				response.send();
+				reader->plugin()->deleteInstance(reader);
+				return;
+			}
+			else 
 				emit log("Done.");
 		}
 	}

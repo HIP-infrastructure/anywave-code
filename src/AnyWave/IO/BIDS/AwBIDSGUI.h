@@ -27,7 +27,6 @@
 
 #include <QWidget>
 #include "ui_AwBIDSGUI.h"
-//#include "AwBIDSSubject.h"
 #include <qstandarditemmodel.h>
 class AwBIDSManager;
 #include "AwBIDSNode.h"

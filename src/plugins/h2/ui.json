@@ -1,5 +1,6 @@
 {
-"input_type" : "file",
+"input_keys" : [ "input_file"],
+"input_file" : ["Input File", "check"],
 "algorithm" : ["Algorithm", "list"],
 "time_window" : ["Window(s)", "double" ],
 "max_lag" : ["Max. lag (s)", "double"],

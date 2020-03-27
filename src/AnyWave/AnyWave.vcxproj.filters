@@ -1363,6 +1363,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwBatchRunner.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchFileInputWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchFileInputWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchFileInputWidget.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1896,6 +1905,12 @@
     <CustomBuild Include="Batch\AwBatchRunner.h">
       <Filter>Batch</Filter>
     </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchFileInputWidget.ui">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchFileInputWidget.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2118,6 +2133,9 @@
       <Filter>Batch</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwAddEditBatchDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBatchFileInputWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

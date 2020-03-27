@@ -149,15 +149,24 @@ void AwBatchRunner::run()
 		sendMessage(QString("running process %1").arg(pluginName));
 
 		AwBaseProcess *process = nullptr;
-
-		if (item->inputType() == AwBatchModelItem::Directory) {
-			dict["input_dir"] = item->inputDir();
+		auto inputs = item->inputsMap();
+		auto input_keys = inputs.keys();
+		int input_index = 0;
+		do {
+			if (input_index < input_keys.size()) {
+				for (auto k : input_keys) {
+					dict[k] = inputs.value(k).at(input_index);
+				}
+			}
 			try {
 				process = createAndInitProcess(dict, pluginName);
 			}
 			catch (const AwException& e) {
 				sendMessage(e.errorString());
 				if (process) {
+					auto reader = process->pdi.input.reader();
+					if (reader)
+						reader->plugin()->deleteInstance(reader);
 					process->plugin()->deleteInstance(process);
 				}
 				continue;
@@ -169,34 +178,58 @@ void AwBatchRunner::run()
 			auto reader = process->pdi.input.reader();
 			reader->plugin()->deleteInstance(reader);
 			process->plugin()->deleteInstance(process);
-		}
-		else {
-			for (auto file : item->files()) {
-				dict["input_file"] = file;
-				try {
-					process = createAndInitProcess(dict, pluginName);
-				}
-				catch (const AwException& e) {
-					sendMessage(e.errorString());
-					if (process) {
-						auto reader = process->pdi.input.reader();
-						if (reader)
-							reader->plugin()->deleteInstance(reader);
-						process->plugin()->deleteInstance(process);
-					}
-					continue;
-				}
-				process->pdi.input.setArguments(dict);
-				auto reader = process->pdi.input.reader();
-				auto ds = AwDataServer::getInstance()->duplicate(reader);
-				QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-				ds->openConnection(process);
-				process->runFromCommandLine();
-				sendMessage(QString("process %1 has finished").arg(pluginName));
-				delete ds;
-				// deleting DataServer will also delete the reader instance.
-				process->plugin()->deleteInstance(process);
-			}
-		}
+			input_index++;
+		} 
+		while (input_index < input_keys.size());
 	}
+
+	//	if (item->inputType() == AwBatchModelItem::Directory) {
+	//		dict["input_dir"] = item->inputDir();
+	//		try {
+	//			process = createAndInitProcess(dict, pluginName);
+	//		}
+	//		catch (const AwException& e) {
+	//			sendMessage(e.errorString());
+	//			if (process) {
+	//				process->plugin()->deleteInstance(process);
+	//			}
+	//			continue;
+	//		}
+	//		process->pdi.input.setArguments(dict);
+	//		QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	//		process->runFromCommandLine();
+	//		sendMessage(QString("process %1 has finished").arg(pluginName));
+	//		auto reader = process->pdi.input.reader();
+	//		reader->plugin()->deleteInstance(reader);
+	//		process->plugin()->deleteInstance(process);
+	//	}
+	//	else {
+	//		for (auto file : item->files()) {
+	//			dict["input_file"] = file;
+	//			try {
+	//				process = createAndInitProcess(dict, pluginName);
+	//			}
+	//			catch (const AwException& e) {
+	//				sendMessage(e.errorString());
+	//				if (process) {
+	//					auto reader = process->pdi.input.reader();
+	//					if (reader)
+	//						reader->plugin()->deleteInstance(reader);
+	//					process->plugin()->deleteInstance(process);
+	//				}
+	//				continue;
+	//			}
+	//			process->pdi.input.setArguments(dict);
+	//			auto reader = process->pdi.input.reader();
+	//			auto ds = AwDataServer::getInstance()->duplicate(reader);
+	//			QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	//			ds->openConnection(process);
+	//			process->runFromCommandLine();
+	//			sendMessage(QString("process %1 has finished").arg(pluginName));
+	//			delete ds;
+	//			// deleting DataServer will also delete the reader instance.
+	//			process->plugin()->deleteInstance(process);
+	//		}
+	//	}
+	//}
 }

@@ -26,14 +26,40 @@
 #include "AwBatchModelItem.h"
 #include <utils/json.h>
 
+AwBatchModelItem::AwBatchModelItem(AwProcessPlugin *plugin)
+{
+	m_plugin = plugin; 
+	m_inputType = 0;
+	QString error;
+	m_jsonUi = AwUtilities::json::mapFromJsonString(plugin->settings().value(processio::json_ui).toString(), error);
+	m_jsonDefaults = AwUtilities::json::hashFromJsonString(plugin->settings().value(processio::json_defaults).toString(), error);
+	auto inputs = m_jsonUi.value("input_keys").toStringList();
+	for (auto input : inputs) 
+		m_inputFilesMap.insert(input, QStringList());	
+	// default arguments are json defaults
+	m_args = m_jsonDefaults;
+}
+
 AwBatchModelItem::AwBatchModelItem(AwBatchModelItem *copy)
 {
 	m_plugin = copy->m_plugin;
 	m_pluginName = copy->pluginName();
-	m_inputDir = copy->m_inputDir;
 	m_args = copy->m_args;
-	m_files = copy->m_files;
 	m_inputType = copy->m_inputType;
+	m_inputFilesMap = copy->m_inputFilesMap;
+}
+
+QString AwBatchModelItem::getFileForInput(const QString& key, int index)
+{
+	auto list = m_inputFilesMap.value(key);
+	if (list.isEmpty() || index >= list.size() || index < 0)
+		return QString();
+	return list.at(index);
+}
+
+QStringList AwBatchModelItem::getFilesForInput(const QString& key)
+{
+	return m_inputFilesMap.value(key);
 }
 
 bool AwBatchModelItem::checkPluginParams()
