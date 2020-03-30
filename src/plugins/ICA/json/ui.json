@@ -10,5 +10,5 @@
 "use_markers" : ["Use markers", "stringlist"],
 "extended" : ["Infomax extended mode", "boolean"],
 "skip_bad" : ["Skip bad channels", "boolean"],
-"fields_ordering" : ["comp", "hp", "lp", "modality", "skip_bad", "downsampling", "extended",  "skip_markers", "use_markers"]
+ "fields_ordering": [ "comp", "hp", "lp", "modality", "skip_bad", "downsampling", "extended", "skip_markers", "use_markers" ]
 }

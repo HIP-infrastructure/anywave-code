@@ -10,7 +10,7 @@
     <ClCompile Include="infomax_algo.cpp" />
     <ClCompile Include="r250.c" />
     <ClCompile Include="randlcg.c" />
-    <ClCompile Include="GeneratedFiles\qrc_Resource.cpp">
+    <ClCompile Include="GeneratedFiles\qrc_resource.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -25,7 +25,7 @@
     <CustomBuild Include="ICASettings.h" />
     <CustomBuild Include="ica.h" />
     <CustomBuild Include="ICASettings.ui" />
-    <CustomBuild Include="Resource.qrc">
+    <CustomBuild Include="resource.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -50,5 +50,13 @@
       <Extensions>moc;h;cpp</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="json\default.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="json\ui.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

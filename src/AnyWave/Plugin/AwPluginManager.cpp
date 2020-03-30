@@ -235,7 +235,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 bool isPythonScript = QFile::exists(pythonCode);
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
 		 QString jsonUiPath = QString("%1/ui.json").arg(pluginPath);
-		 QString jsonDefaultsPath = QString("%1/defaults.json").arg(pluginPath);
+		 QString jsonDefaultsPath = QString("%1/default.json").arg(pluginPath);
 		 if (!QFile::exists(descPath))
 			 continue;
 		 QFile file(descPath);

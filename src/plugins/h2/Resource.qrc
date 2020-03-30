@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/json">
+    <qresource prefix="/h2">
         <file>default.json</file>
         <file>ui.json</file>
     </qresource>

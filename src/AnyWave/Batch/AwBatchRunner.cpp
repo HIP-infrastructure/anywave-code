@@ -48,93 +48,90 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 	}
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
-	// quick case: the process does not require an input file but an input dir
-	if (!dict.contains("input_file")) {
-		if (!dict.contains("input_dir")) {
-			throw AwException(QString("error: input_dir not specified."));
+	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
+	if (!doNotRequiresData && !dict.contains("input_file")) {
+		throw AwException(QString("error: input_dir not specified."));
+		return process;
+	}
+	process->pdi.input.setArguments(dict);
+	if (dict.contains("input_file")) {
+		auto file = dict.value("input_file").toString();
+		auto reader = pm->getReaderToOpenFile(file);
+		if (reader == nullptr) {
+			throw AwException(QString("plugin: %1 file: %2 no reader plugin found.").arg(pluginName).arg(file));
 			return process;
 		}
-		process->pdi.input.setArguments(dict);
-		return process;
-	}
-
-	auto file = dict.value("input_file").toString();
-	auto reader = pm->getReaderToOpenFile(file);
-	if (reader == nullptr) {
-		throw AwException(QString("plugin: %1 file: %2 no reader plugin found.").arg(pluginName).arg(file));
-		return process;
-	}
-	process->pdi.input.setReader(reader);
-	if (reader->openFile(file) != AwFileIO::NoError) {
-		throw AwException(QString("plugin: %1 file: %2 reader could not open the file.").arg(pluginName).arg(file));
-		return process;
-	}
-	
-	AwFileInfo fi(reader, file);
-	process->pdi.input.settings[processio::data_dir] = fi.dirPath();
-	process->pdi.input.settings[processio::file_duration] = reader->infos.totalDuration();
-	process->pdi.input.settings[processio::data_path] = file;
-	process->pdi.input.setReader(reader);
-	// add extras settings based on input file
-	auto badFile = reader->getSideFile(".bad");
-	if (QFile::exists(badFile)) {
-		dict["bad_file"] = badFile;
-		process->pdi.input.settings[processio::bad_labels] = AwMontageManager::loadBad(badFile);
-	}
-	else
-		dict.remove("bad_file");
-	// montage step : if a montage file if set, use is a input for the process
-	auto mtgFile = reader->getSideFile(".mtg");
-	if (QFile::exists(mtgFile))
-		dict["montage_file"] = mtgFile;
-	else
-		dict.remove("montage_file");
-	AwChannelList montage;
-	if (dict.contains("montage_file")) {
-		montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), dict.value("montage_file").toString(),
-			process->pdi.input.settings[processio::bad_labels].toStringList());
-		if (montage.isEmpty()) {
-			sendMessage(QString("error: %1 file could not be applied.").arg(mtgFile));
+		process->pdi.input.setReader(reader);
+		if (reader->openFile(file) != AwFileIO::NoError) {
+			throw AwException(QString("plugin: %1 file: %2 reader could not open the file.").arg(pluginName).arg(file));
+			return process;
+		}
+		AwFileInfo fi(reader, file);
+		process->pdi.input.settings[processio::data_dir] = fi.dirPath();
+		process->pdi.input.settings[processio::file_duration] = reader->infos.totalDuration();
+		process->pdi.input.settings[processio::data_path] = file;
+		process->pdi.input.setReader(reader);
+		// add extras settings based on input file
+		auto badFile = reader->getSideFile(".bad");
+		if (QFile::exists(badFile)) {
+			dict["bad_file"] = badFile;
+			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::loadBad(badFile);
+		}
+		else
+			dict.remove("bad_file");
+		// montage step : if a montage file if set, use is a input for the process
+		auto mtgFile = reader->getSideFile(".mtg");
+		if (QFile::exists(mtgFile))
+			dict["montage_file"] = mtgFile;
+		else
+			dict.remove("montage_file");
+		AwChannelList montage;
+		if (dict.contains("montage_file")) {
+			montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), dict.value("montage_file").toString(),
+				process->pdi.input.settings[processio::bad_labels].toStringList());
+			if (montage.isEmpty()) {
+				sendMessage(QString("error: %1 file could not be applied.").arg(mtgFile));
+				montage = AwChannel::duplicateChannels(reader->infos.channels());
+			}
+		}
+		else { // no montage file, use as recorded montage
 			montage = AwChannel::duplicateChannels(reader->infos.channels());
 		}
-	}
-	else { // no montage file, use as recorded montage
-		montage = AwChannel::duplicateChannels(reader->infos.channels());
-	}
-	if (!AwCommandLineManager::buildPDI(process, montage, reader->infos.channels())) {
-		sendMessage(QString("input channels cannot be set").arg(file));
-		reader->plugin()->deleteInstance(reader);
-		AW_DESTROY_LIST(montage);
-	}
-	AW_DESTROY_LIST(montage);
-	auto mrkFile = reader->getSideFile(".mrk");
-	if (!dict.contains("marker_file"))
-		if (QFile::exists(mrkFile))
-			dict["marker_file"] = mrkFile;
-	if (dict.contains("marker_file"))
-		process->pdi.input.setNewMarkers(AwMarker::load(dict.value("marker_file").toString()));
-	else
-		process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
-	// handle skipping markers and/or use specific markers
-	QStringList skippedLabels, usedLabels;
-	if (dict.contains("skip_markers"))
-		skippedLabels = dict.value("skip_markers").toStringList();
-	if (dict.contains("use_markers"))
-		usedLabels = dict.value("use_markers").toStringList();
-	bool skipMarkers = !skippedLabels.isEmpty();
-	bool useMarkers = !usedLabels.isEmpty();
-	if (skipMarkers || useMarkers) {
-		auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels,
-			process->pdi.input.settings[processio::file_duration].toDouble());
-		if (!markers.isEmpty()) {
-			process->pdi.input.setNewMarkers(markers);
+		if (!AwCommandLineManager::buildPDI(process, montage, reader->infos.channels())) {
+			sendMessage(QString("input channels cannot be set").arg(file));
+			reader->plugin()->deleteInstance(reader);
+			AW_DESTROY_LIST(montage);
 		}
+		AW_DESTROY_LIST(montage);
+		auto mrkFile = reader->getSideFile(".mrk");
+		if (!dict.contains("marker_file"))
+			if (QFile::exists(mrkFile))
+				dict["marker_file"] = mrkFile;
+		if (dict.contains("marker_file"))
+			process->pdi.input.setNewMarkers(AwMarker::load(dict.value("marker_file").toString()));
+		else
+			process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
+		// handle skipping markers and/or use specific markers
+		QStringList skippedLabels, usedLabels;
+		if (dict.contains("skip_markers"))
+			skippedLabels = dict.value("skip_markers").toStringList();
+		if (dict.contains("use_markers"))
+			usedLabels = dict.value("use_markers").toStringList();
+		bool skipMarkers = !skippedLabels.isEmpty();
+		bool useMarkers = !usedLabels.isEmpty();
+		if (skipMarkers || useMarkers) {
+			auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels,
+				process->pdi.input.settings[processio::file_duration].toDouble());
+			if (!markers.isEmpty()) {
+				process->pdi.input.setNewMarkers(markers);
+			}
+		}
+		// check if we have input markers after all
+		 // if no markers set as input => add the GLOBAL ONE
+		if (process->pdi.input.markers().isEmpty())
+			process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.settings[processio::file_duration].toDouble()));
+		AwCommandLineManager::applyFilters(process->pdi.input.channels(), dict);
 	}
-	// check if we have input markers after all
-	 // if no markers set as input => add the GLOBAL ONE
-	if (process->pdi.input.markers().isEmpty())
-		process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.settings[processio::file_duration].toDouble()));
-	AwCommandLineManager::applyFilters(process->pdi.input.channels(), dict);
 	return process;
 }
 
@@ -146,17 +143,16 @@ void AwBatchRunner::run()
 		QString error;
 
 		auto dict = item->jsonParameters();
-		sendMessage(QString("running process %1").arg(pluginName));
 
 		AwBaseProcess *process = nullptr;
 		auto inputs = item->inputsMap();
 		auto input_keys = inputs.keys();
-		int input_index = 0;
-		do {
-			if (input_index < input_keys.size()) {
-				for (auto k : input_keys) {
-					dict[k] = inputs.value(k).at(input_index);
-				}
+		// we assume all input keys have the same number of files.
+		
+		int input_file_index = 0;
+		for (int i = 0; i < inputs.value(input_keys.first()).size(); i++) {
+			for (auto k : input_keys) {
+				dict[k] = inputs.value(k).at(input_file_index);
 			}
 			try {
 				process = createAndInitProcess(dict, pluginName);
@@ -169,18 +165,21 @@ void AwBatchRunner::run()
 						reader->plugin()->deleteInstance(reader);
 					process->plugin()->deleteInstance(process);
 				}
+				input_file_index++;
 				continue;
 			}
+			sendMessage(QString("running process %1 on file(s):\n").arg(pluginName));
+			for (auto k : input_keys) 
+				sendMessage(QString("%1\n").arg(dict.value(k).toString()));
+
 			process->pdi.input.setArguments(dict);
 			QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 			process->runFromCommandLine();
 			sendMessage(QString("process %1 has finished").arg(pluginName));
 			auto reader = process->pdi.input.reader();
-			reader->plugin()->deleteInstance(reader);
 			process->plugin()->deleteInstance(process);
-			input_index++;
+			input_file_index++;
 		} 
-		while (input_index < input_keys.size());
 	}
 
 	//	if (item->inputType() == AwBatchModelItem::Directory) {

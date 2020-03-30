@@ -35,18 +35,13 @@ public:
 	explicit AwBatchModelItem(AwBatchModelItem *copy);
 	enum Inputs { Directory, Files, None };
 
+	void copy(AwBatchModelItem *source);
 	inline QString& pluginName() { return m_plugin->name; }
-//	inline QStringList& files() { return m_files; }
-//	void setFiles(const QStringList& files) { m_files = files; }
 	QVariantHash& jsonParameters() { return m_args; }
 	void setJsonParameters(const QVariantHash& args) { m_args = args; }
 	AwProcessPlugin *plugin() { return m_plugin; }
 	inline bool isEmpty() { return m_args.isEmpty(); }
 	bool checkPluginParams();
-	void setInputType(int type) { m_inputType = type; }
-	inline int inputType() { return m_inputType; }
-//	void setInputDir(const QString& dirPath) { m_inputDir = dirPath; }
-//	QString& inputDir() { return m_inputDir; }
 	QVariantMap& jsonUi() { return m_jsonUi; }
 	QString getFileForInput(const QString& key, int index);
 	QStringList getFilesForInput(const QString& key);
@@ -55,10 +50,7 @@ public:
 	void addFiles(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
 protected:
 	QString m_pluginName;		// name of the plugin
-//	QString m_inputDir;
 	QVariantHash m_args;
-//	QStringList m_files;		// list of file to use as input.
-	int m_inputType;
 	AwProcessPlugin *m_plugin;
 	QVariantMap m_jsonUi;
 	QVariantHash m_jsonDefaults;

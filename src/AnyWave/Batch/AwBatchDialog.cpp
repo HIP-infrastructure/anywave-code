@@ -90,14 +90,19 @@ void AwBatchDialog::addItem()
 {
 	auto name = m_ui.comboPlugin->currentText();
 	auto item = new AwBatchModelItem(m_plugins[name]);
-	static_cast<AwBatchTableModel *>(m_ui.tableView->model())->add(item);
-	editItem(item);
+	auto dlg = new AwAddEditBatchDialog(item);
+	if (dlg->exec() == QDialog::Accepted)
+		static_cast<AwBatchTableModel *>(m_ui.tableView->model())->add(item);
+	else
+		delete item;
+	//editItem(item);
+	delete dlg;
 }
 
 void AwBatchDialog::editItem(AwBatchModelItem *item)
 {
 	auto dlg = new AwAddEditBatchDialog(item);
-	dlg->exec();
+	dlg->exec();  // exec won't do anything to item if the dialog has been rejected.
 	delete dlg;
 }
 

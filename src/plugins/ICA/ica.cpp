@@ -54,9 +54,9 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
     category = "ICA:ICA Extraction";
     name = QString("ICA");
     description = QString("extract independent components");
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
-	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/json/ui.json");
-	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/json/default.json");
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
+	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/ica/json/ui.json");
+	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/ica/json/default.json");
 }
 
 ICA::~ICA()

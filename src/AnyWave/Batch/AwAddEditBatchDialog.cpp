@@ -18,6 +18,7 @@ AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *pare
 {
 	m_ui.setupUi(this);
 	m_item = item;
+	m_itemCopy = new AwBatchModelItem(item);
 	setWindowTitle(QString("%1 parameters").arg(item->pluginName()));
 	// init wigets
 	setupParamsUi();
@@ -26,6 +27,7 @@ AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *pare
 
 AwAddEditBatchDialog::~AwAddEditBatchDialog()
 {
+	delete m_itemCopy;
 }
 
 void AwAddEditBatchDialog::setupParamsUi()
@@ -232,7 +234,8 @@ void AwAddEditBatchDialog::fetchParams()
 		else if (val_type == "list")
 			params[k] = static_cast<QComboBox *>(widget)->currentText();
 	}
-	m_item->setJsonParameters(params);
+	//m_item->setJsonParameters(params);
+	m_itemCopy->setJsonParameters(params);
 }
 
 void AwAddEditBatchDialog::setParams()
@@ -301,7 +304,7 @@ void AwAddEditBatchDialog::fetchFiles()
 	auto inputMap = m_item->inputsMap();
 	for (auto k : inputMap.keys()) {
 		AwBatchFileInputWidget *w = static_cast<AwBatchFileInputWidget *>(m_widgets.value(k));
-		m_item->addFiles(k, w->getFiles());
+		m_itemCopy->addFiles(k, w->getFiles());
 	}
 }
 
@@ -309,7 +312,7 @@ void AwAddEditBatchDialog::accept()
 {
 	fetchFiles();
 	// check that all input keys have the same number of files 
-	auto inputs = m_item->inputsMap();
+	auto inputs = m_itemCopy->inputsMap();
 	if (!inputs.isEmpty()) {
 		bool ok = true;
 		auto inputKeys = inputs.keys();
@@ -332,10 +335,11 @@ void AwAddEditBatchDialog::accept()
 		}
 	}
 	fetchParams();
-	if (!m_item->checkPluginParams()) {
+	if (!m_itemCopy->checkPluginParams()) {
 		AwMessageBox::information(this, "Plugin", "A parameter is not valid.");
 		return;
 	}
+	m_item->copy(m_itemCopy);
 	QDialog::accept();
 }
 

@@ -29,7 +29,6 @@
 AwBatchModelItem::AwBatchModelItem(AwProcessPlugin *plugin)
 {
 	m_plugin = plugin; 
-	m_inputType = 0;
 	QString error;
 	m_jsonUi = AwUtilities::json::mapFromJsonString(plugin->settings().value(processio::json_ui).toString(), error);
 	m_jsonDefaults = AwUtilities::json::hashFromJsonString(plugin->settings().value(processio::json_defaults).toString(), error);
@@ -45,8 +44,15 @@ AwBatchModelItem::AwBatchModelItem(AwBatchModelItem *copy)
 	m_plugin = copy->m_plugin;
 	m_pluginName = copy->pluginName();
 	m_args = copy->m_args;
-	m_inputType = copy->m_inputType;
 	m_inputFilesMap = copy->m_inputFilesMap;
+}
+
+void AwBatchModelItem::copy(AwBatchModelItem *source)
+{
+	m_plugin = source->m_plugin;
+	m_pluginName = source->pluginName();
+	m_args = source->m_args;
+	m_inputFilesMap = source->m_inputFilesMap;
 }
 
 QString AwBatchModelItem::getFileForInput(const QString& key, int index)

@@ -20,7 +20,7 @@ private slots:
 	void setFileProperty();
 private:
 	Ui::AwAddEditBatchDialogUi m_ui;
-	AwBatchModelItem *m_item;
+	AwBatchModelItem *m_item, *m_itemCopy;
 	QMap<QString, QWidget *> m_widgets;	// store widgets based on keys defined in json ui
 	QString m_errorString, m_homeDir;
 

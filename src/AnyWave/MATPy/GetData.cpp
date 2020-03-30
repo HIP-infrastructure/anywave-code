@@ -249,7 +249,10 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 	stream << requestedChannels.size();
 	response.send();
 
-	QStringList selected = AwChannel::getLabels(AwDisplay::instance()->selectedChannels());
+	QStringList selected;
+	if (AwSettings::getInstance()->value(aws::gui_active).toBool()) {
+		selected = AwChannel::getLabels(AwDisplay::instance()->selectedChannels());
+	}
 	foreach (AwChannel *c, requestedChannels) {
 		// get selected channels from Display if not using file
 		if (!usingFile) 			

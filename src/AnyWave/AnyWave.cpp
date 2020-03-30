@@ -102,6 +102,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
+	aws->setValue(aws::gui_active, isGUIMode);
 	
 	//Save system path
 	aws->setValue(aws::system_path, QString(qgetenv("PATH")));

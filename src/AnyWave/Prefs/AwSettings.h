@@ -62,6 +62,7 @@ namespace aws {
 	constexpr auto mex_dir = "mex_dir";
 
 	// general
+	constexpr auto gui_active = "gui_active";
 	constexpr auto matlab_present = "matlab_present";
 	constexpr auto system_path = "system_path";
 	constexpr auto recent_files = "recent_files";

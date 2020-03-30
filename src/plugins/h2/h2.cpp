@@ -46,8 +46,8 @@ H2Plugin::H2Plugin()
 	name = QString(tr("h2"));
 	description = QString(tr("Computes H2/R2 on several pairs of channels"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
-	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/json/ui.json");
-	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/json/default.json");
+	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/h2/ui.json");
+	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/h2/default.json");
 }
 
 H2Plugin::~H2Plugin()
