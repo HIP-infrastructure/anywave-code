@@ -18,11 +18,16 @@
 #include "AwBIDSParser.h"
 #include "Marker/AwExtractTriggers.h"
 #include <AwCore.h>
+#include <utils/bids.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
 QStringList AwBIDSManager::m_dataFileSuffixes = { "_eeg", "_meg", "_ieeg" };
+namespace bids {
+	constexpr auto participant_tsv = "participant_tsv";
+	constexpr auto parsing_path = "parsing_path";
+}
 
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
@@ -715,6 +720,7 @@ AwBIDSManager::AwBIDSManager()
 {
 	m_ui = nullptr;
 	m_mustValidateModifications = false;
+	m_dataContainers = { AwBIDSItem::meg, AwBIDSItem::eeg, AwBIDSItem::ieeg };
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -726,8 +732,42 @@ QString AwBIDSManager::getParsingPath()
 {
 	if (!isBIDSActive())
 		return QString();
-	return m_settings["parsing_path"].toString();
+	return m_settings[bids::parsing_path].toString();
 }
+
+//void AwBIDSManager::setRootDir(const QString& path)
+//{
+//	// check if root dir is the same as current one. If so, do nothing.
+//	if (path == m_rootDir)
+//		return;
+//
+//	if (path.isEmpty())
+//		return;
+//	// check that the folder exists
+//	QDir dir(path);
+//	if (!dir.exists()) {
+//		throw AwException("Root directory does not exist.", "AwBIDSManager::setRootDir");
+//		return;
+//	}
+//
+//	if (isBIDSActive()) {
+//		if (AwMessageBox::information(NULL, tr("BIDS warning"), tr("a BIDS folder is already open.\nClose it and open the new one?"),
+//			QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+//			return;
+//	}
+//	closeBIDS();
+//	m_rootDir = path;
+//
+//	AwBIDSParser parser;
+//	parser.parse();
+//	m_nodes = parser.nodes();
+//	m_hashNodes = parser.hash();
+//
+//	// instantiate UI if needed
+//	if (m_ui == nullptr)
+//		m_ui = new AwBIDSGUI;
+//	m_ui->refresh();
+//}
 
 void AwBIDSManager::setRootDir(const QString& path)
 {
@@ -740,22 +780,31 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// check that the folder exists
 	QDir dir(path);
 	if (!dir.exists()) {
-		throw AwException("Root directory does not exist.", "AwBIDSManager::setRootDir");
+		AwMessageBox::information(nullptr, "BIDS", QString("The BIDS folder %1 does not exist.").arg(path));
 		return;
 	}
 
-	if (isBIDSActive()) {
-		if (AwMessageBox::information(NULL, tr("BIDS warning"), tr("a BIDS folder is already open.\nClose it and open the new one?"), 
-			QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-			return;
-	}
+	//if (isBIDSActive()) {
+	//	if (AwMessageBox::information(NULL, tr("BIDS warning"), tr("a BIDS folder is already open.\nClose it and open the new one?"), 
+	//		QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+	//		return;
+	//}
 	closeBIDS();
 	m_rootDir = path;
 
-	AwBIDSParser parser;
-	parser.parse();
-	m_nodes = parser.nodes();
-	m_hashNodes = parser.hash();
+	// We will use QStandardItem to represent the nodes of the BIDS tree.
+	// Those nodes will be set aftewards as childrent of the tree view in the GUI.
+	// The treeview model will take ownership of the items, no DO NOT DELETE them here or in the closeBIDS() method.
+	parse(); 
+
+	// get participants columns
+	if (m_settings.contains(bids::participant_tsv)) {
+		m_participantsColumns = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
+	}
+	//AwBIDSParser parser;
+	//parser.parse();
+	//m_nodes = parser.nodes();
+	//m_hashNodes = parser.hash();
 	
 	// instantiate UI if needed
 	if (m_ui == nullptr)
@@ -763,69 +812,197 @@ void AwBIDSManager::setRootDir(const QString& path)
 	m_ui->refresh();
 }
 
+//void AwBIDSManager::closeBIDS()
+//{
+//	if (!isBIDSActive())
+//		return;
+//	while (!m_nodes.isEmpty())
+//		delete m_nodes.takeFirst();
+//	m_rootDir.clear();
+//	m_modifications.clear();
+//	m_mustValidateModifications = false;
+//	m_currentSubject = nullptr;
+//	m_hashNodes.clear();
+//	m_IDToSubject.clear();
+//	emit BIDSClosed();
+//}
+
 void AwBIDSManager::closeBIDS()
 {
 	if (!isBIDSActive())
 		return;
-	while (!m_nodes.isEmpty())
-		delete m_nodes.takeFirst();
+	m_hashItemFiles.clear();
+	if (m_ui)
+		m_ui->closeBIDS();
+	//while (!m_items.isEmpty())
+	//	delete m_items.takeLast();
+
+	//while (!m_nodes.isEmpty())
+	//	delete m_nodes.takeFirst();
 	m_rootDir.clear();
 	m_modifications.clear();
 	m_mustValidateModifications = false;
 	m_currentSubject = nullptr;
-	m_hashNodes.clear();
-	m_IDToSubject.clear();
+//	m_hashNodes.clear();
+//	m_IDToSubject.clear();
 	emit BIDSClosed();
 }
 
-void AwBIDSManager::modifyUpdateJson(const QStringList& branches)
+void AwBIDSManager::parse()
 {
-	auto filePath = QString("%1/tobeparsed.json").arg(getParsingPath());
-	auto json = AwUtilities::json::readJsonFile(filePath);
-	QJsonObject root;
-	if (json.isEmpty()) 
-		json.setObject(root);
-	else
-		root = json.object();
+	m_hashItemFiles.clear();
+	while (!m_items.isEmpty())
+		delete m_items.takeLast();
+	if (m_rootDir.isEmpty())
+		return;
 
-	bool isDone = false;
-	QJsonArray array;
-	// check if object contains Updated
-	if (root.contains("Updated")) {
-		array = root["Updated"].toArray();
-		for (auto i : array) {
-			if (i.isObject()) {
-				auto obj = i.toObject();
-				auto subjID = obj["sub"];
-				if (subjID.toString() == m_currentSubject->ID()) { // our subject is already present in the json file => end.
-					isDone = true;
-				}
+	QDir dir(m_rootDir);
+	// check for files
+	// get participant tsv
+	auto list = dir.entryInfoList(QDir::Files);
+	for (auto l : list) {
+		auto file = l.fileName();
+		if (file.contains("participants.tsv"))
+			m_settings[bids::participant_tsv] = l.filePath();
+	}
+
+	// launch recursive parsing
+	recursiveParsing(m_rootDir, nullptr);
+
+}
+
+void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentItem)
+{
+	QDir dir(dirPath);
+	auto subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+	if (parentItem == nullptr) {
+		// build regexp to find subjects
+		QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
+		QRegularExpressionMatch match;
+		for (auto subDir : subDirs) {
+			auto name = subDir.fileName();
+			match = re.match(name);
+			auto fullPath = subDir.absoluteFilePath();
+			if (match.hasMatch()) {
+				// found a subject
+				auto item = new AwBIDSItem(name);
+				m_items << item;
+				item->setData(fullPath, AwBIDSItem::PathRole);
+				item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
+				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+				recursiveParsing(fullPath, item);
 			}
 		}
 	}
 	else {
-		root["Updated"] = array;
+		// find files only if current item is eeg, meg or ieeg
+		auto type = parentItem->data(AwBIDSItem::TypeRole).toInt();
+		if (m_dataContainers.contains(type)) {
+			auto list = dir.entryInfoList(QDir::Files);
+			for (auto f : list) {
+				auto fileName = f.fileName();
+				auto fullPath = f.absoluteFilePath();
+
+				auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(fullPath);
+				if (reader != nullptr) {
+					auto fileItem = new AwBIDSItem(fileName, parentItem);
+					fileItem->setData(fullPath, AwBIDSItem::PathRole);
+					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+					parentItem->addFile(fullPath);
+					reader->plugin()->deleteInstance(reader);
+				}
+			}
+			// in a data container (eeg, meg, ieeg) there could be a subfolder (for MEG 4DNI data for example)
+			// check for sub dirs
+			for (auto subDir : subDirs) {
+				auto name = subDir.fileName();
+				auto fullPath = subDir.absoluteFilePath();
+				// this is a MEG special case, in which a subdir may exists but must end with _meg
+				if (name.endsWith("_meg")) { //set the type role of the sub item to be the same as the data container.
+					// That will permit the child file item will have the correct data type.
+					auto item = new AwBIDSItem(name, parentItem);
+					item->setData(type, AwBIDSItem::TypeRole);
+					item->setData(fullPath, AwBIDSItem::PathRole);
+					item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+					recursiveParsing(fullPath, item);
+				}
+			}
+		}
+		else {
+			// check for child node (sub dirs)
+			for (auto subDir : subDirs) {
+				auto name = subDir.fileName();
+				auto fullPath = subDir.absoluteFilePath();
+				auto item = new AwBIDSItem(name, parentItem);
+				item->setData(fullPath, AwBIDSItem::PathRole);
+				// check the type 
+				if (name.startsWith("ses-"))
+					item->setData(AwBIDSItem::Session, AwBIDSItem::TypeRole);
+				else if (name == "meg")
+					item->setData(AwBIDSItem::meg, AwBIDSItem::TypeRole);
+				else if (name == "ieeg")
+					item->setData(AwBIDSItem::ieeg, AwBIDSItem::TypeRole);
+				else if (name == "eeg")
+					item->setData(AwBIDSItem::eeg, AwBIDSItem::TypeRole);
+				else
+					item->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
+				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+				recursiveParsing(fullPath, item);
+			}
+		}
 	}
+}
 
-	if (isDone)
-		return;
+void AwBIDSManager::modifyUpdateJson(const QStringList& branches)
+{
+	//auto filePath = QString("%1/tobeparsed.json").arg(getParsingPath());
+	//auto json = AwUtilities::json::readJsonFile(filePath);
+	//QJsonObject root;
+	//if (json.isEmpty()) 
+	//	json.setObject(root);
+	//else
+	//	root = json.object();
 
-	// all updated arrays parsed and our subject is not present in them. Add it!
-	QJsonObject updatedSubject;
-	updatedSubject["sub"] = m_currentSubject->ID();
-	QJsonArray updatedBranches;
-	for (auto b : branches)
-		updatedBranches.append(b);
-	updatedSubject["branch"] = updatedBranches;
-	updatedSubject["updated_by"] = QString("AnyWave");
-	array.append(updatedSubject);
+	//bool isDone = false;
+	//QJsonArray array;
+	//// check if object contains Updated
+	//if (root.contains("Updated")) {
+	//	array = root["Updated"].toArray();
+	//	for (auto i : array) {
+	//		if (i.isObject()) {
+	//			auto obj = i.toObject();
+	//			auto subjID = obj["sub"];
+	//			if (subjID.toString() == m_currentSubject->ID()) { // our subject is already present in the json file => end.
+	//				isDone = true;
+	//			}
+	//		}
+	//	}
+	//}
+	//else {
+	//	root["Updated"] = array;
+	//}
 
-	// save new file
-	QFile file(filePath);
-	if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-		file.write(json.toJson());
-		file.close();
-	}
+	//if (isDone)
+	//	return;
+
+	//// all updated arrays parsed and our subject is not present in them. Add it!
+	//QJsonObject updatedSubject;
+	//updatedSubject["sub"] = m_currentSubject->ID();
+	//QJsonArray updatedBranches;
+	//for (auto b : branches)
+	//	updatedBranches.append(b);
+	//updatedSubject["branch"] = updatedBranches;
+	//updatedSubject["updated_by"] = QString("AnyWave");
+	//array.append(updatedSubject);
+
+	//// save new file
+	//QFile file(filePath);
+	//if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+	//	file.write(json.toJson());
+	//	file.close();
+	//}
 }
 
 void AwBIDSManager::updateEventsTsv(const QString& itemPath)
@@ -994,13 +1171,15 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 	else
 		return QString();
 
-	// find the child node in current subject which contains the file
-	auto node = m_currentSubject->findNode(QFileInfo(dataFilePath).fileName(), m_currentSubject);
-	if (node == nullptr)
-		return QString();
+	//// find the child node in current subject which contains the file
+	//auto node = m_currentSubject->findNode(QFileInfo(dataFilePath).fileName(), m_currentSubject);
+	//if (node == nullptr)
+	//	return QString();
 
 	// remove the extension
-	auto base = QFileInfo(dataFilePath).baseName();
+	QFileInfo fi(dataFilePath);
+	auto base = fi.baseName();
+	auto dirPath = fi.absolutePath();
 
 	for (auto e : m_dataFileSuffixes) {
 		if (base.contains(e)) {
@@ -1008,43 +1187,88 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 			break;
 		}
 	}
-	QString res = QString("%1/%2%3").arg(node->fullPath()).arg(base).arg(suffix);
+//	QString res = QString("%1/%2%3").arg(node->fullPath()).arg(base).arg(suffix);
+	QString res = QString("%1/%2%3").arg(dirPath).arg(base).arg(suffix);
 	if (QFile::exists(res))
 		return res;
 	return QString();
 }
 
-AwBIDSNode *AwBIDSManager::findSubject(const QString& dataFilePath)
+//AwBIDSNode *AwBIDSManager::findSubject(const QString& dataFilePath)
+//{
+//	m_currentSubject = nullptr;
+//	if (!isBIDSActive())
+//		return nullptr;
+//	QFileInfo fi(dataFilePath);
+//	auto n = m_hashNodes[fi.fileName()];
+//	if (n) {
+//		auto parent = n->parent();
+//		while (parent) {
+//			n = parent;
+//			parent = n->parent();
+//		}
+//		m_settings["BIDS_FilePath"] = dataFilePath;
+//	}
+//	m_currentSubject = n;
+//	return m_currentSubject;
+//}
+
+AwBIDSItem *AwBIDSManager::findSubject(const QString& dataFilePath)
 {
 	m_currentSubject = nullptr;
 	if (!isBIDSActive())
 		return nullptr;
-	QFileInfo fi(dataFilePath);
-	auto n = m_hashNodes[fi.fileName()];
-	if (n) {
-		auto parent = n->parent();
-		while (parent) {
-			n = parent;
-			parent = n->parent();
-		}
-		m_settings["BIDS_FilePath"] = dataFilePath;
-	}
-	m_currentSubject = n;
+
+	if (m_hashItemFiles.contains(dataFilePath))
+		m_currentSubject = m_hashItemFiles.value(dataFilePath);
+
+	//QFileInfo fi(dataFilePath);
+	//auto n = m_hashNodes[fi.fileName()];
+	//if (n) {
+	//	auto parent = n->parent();
+	//	while (parent) {
+	//		n = parent;
+	//		parent = n->parent();
+	//	}
+	//	m_settings["BIDS_FilePath"] = dataFilePath;
+	//}
+	//m_currentSubject = n;
 	return m_currentSubject;
 }
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
-	if (!isBIDSActive())
-		return;
+	//if (!isBIDSActive())
+	//	return;
 	// check if the new file is in a BIDS structure or not
 	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
+	if (!isBIDSActive() && !root.isEmpty()) {
+		if (AwMessageBox::question(nullptr, "BIDS", "The file open is located inside a BIDS structure.\nOpen the BIDS aswell?",
+			QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+			closeBIDS();
+			setRootDir(root);
+			// find the corresponding subject node
+			findSubject(reader->fullPath());
+			return;
+		}
+	}
 	if (root.isEmpty()) {
 		closeBIDS(); // close current BIDS
 		return;
 	}
+	// check if root is already the current BIDS
+	if (root != m_rootDir) {
+		if (AwMessageBox::question(nullptr, "BIDS", "The file open is located inside another BIDS structure.\nSwitch to the other BIDS?",
+			QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+			closeBIDS();
+			setRootDir(root);
+			// find the corresponding subject node
+			findSubject(reader->fullPath());
+			return;
+		}
+	}
 	// find the corresponding subject node
-	m_currentSubject = findSubject(reader->fullPath());
+	findSubject(reader->fullPath());
 }
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)

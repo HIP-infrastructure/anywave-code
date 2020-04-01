@@ -29,7 +29,8 @@
 #include "ui_AwBIDSGUI.h"
 #include <qstandarditemmodel.h>
 class AwBIDSManager;
-#include "AwBIDSNode.h"
+//#include "AwBIDSNode.h"
+#include "AwBIDSItem.h"
 
 class AwBIDSGUI : public QWidget
 {
@@ -39,19 +40,23 @@ public:
 	AwBIDSGUI(QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUI();
 
-	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2};
-	enum ItemTypes { Subject, Session, ieeg, eeg, meg, Folder, DataFile };
 	void refresh();
+	void closeBIDS() { m_model->clear(); }
 signals:
 	void dataFileClicked(const QString&);
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
+	void handleClick(const QModelIndex& index);
+
 protected:
 	AwBIDSManager * m_bids;
 	// keep a copy of models for the TreeView
 	QStandardItemModel *m_model;
 
-	void initModel(const AwBIDSNodes& subjects, QStandardItem *parent);
+//	void initModel(const AwBIDSNodes& subjects, QStandardItem *parent);
+	void initModel(const AwBIDSItems& subjects);
+	void recursiveFill(AwBIDSItem *item);
+	QString createToolTipFromJson(const QString& jsonPath);
 private:
 	Ui::AwBIDSGUIUi m_ui;		
 };

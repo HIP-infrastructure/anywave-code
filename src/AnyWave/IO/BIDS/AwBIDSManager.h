@@ -25,10 +25,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include <qobject.h>
-#include "AwBIDSNode.h"
 #include "AwBIDSGUI.h"
 #include <AwFileIO.h>
 #include <AwCommandLine.h>
+#include "AwBIDSItem.h"
+#include <QFileIconProvider>
 
 class AwFileIO;
 // command line parsing
@@ -61,7 +62,7 @@ public:
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
 	void closeBIDS();
-	AwBIDSNodes& subjects() { return m_nodes; }
+	AwBIDSItems subjects() { return m_items; }
 	QString buildPath(const QString& dataFilePath, int derivativesKind);
 	
 	void toBIDS(const AwArguments& args);
@@ -85,7 +86,7 @@ public:
 	void updateChannelsTsv(const QString& path);
 	void updateEventsTsv(const QString& path);
 	/** try to find the subject in which the data file is stored. **/
-	AwBIDSNode *findSubject(const QString& dataFilePath);
+	AwBIDSItem *findSubject(const QString& dataFilePath);
 	/** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
 	QString getTSVFile(const QString& dataFilePath, int tsvType);
 	/** Get the BIDS path to the current open file **/
@@ -95,11 +96,17 @@ signals:
 	void BIDSClosed();
 protected:
 	AwBIDSManager();
+	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
+	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
 
-	QHash<QString, QVariant> m_settings;
-	QHash<QString, AwBIDSNode *> m_hashNodes;
+	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
+	AwBIDSItems m_items;
+	QVariantMap m_settings;
+	QList<int> m_dataContainers;
+	QFileIconProvider m_fileIconProvider;
+	QStringList m_participantsColumns;
 
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 
@@ -112,8 +119,9 @@ protected:
 	QMap<int, QString> m_knownDerivativesPaths;
 	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
 	// keep the subject associated with the current open file in AnyWave
-	AwBIDSNode *m_currentSubject;
-	AwBIDSNodes m_nodes;
-	QHash<QString, AwBIDSNode *> m_IDToSubject;
+	AwBIDSItem *m_currentSubject;
+//	AwBIDSNode *m_currentSubject;
+//	AwBIDSNodes m_nodes;
+//	QHash<QString, AwBIDSNode *> m_IDToSubject;
 	bool m_mustValidateModifications;
 };
