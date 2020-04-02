@@ -42,18 +42,21 @@ public:
 
 	void refresh();
 	void closeBIDS() { m_model->clear(); }
+	void showColumns(const QStringList& cols);
 signals:
 	void dataFileClicked(const QString&);
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);
-
+	void changeBIDS(); // called when Change button is clicked
+	void openBIDSOptions(); // called when Change button is clicked
 protected:
-	AwBIDSManager * m_bids;
+	AwBIDSManager *m_bids;
 	// keep a copy of models for the TreeView
 	QStandardItemModel *m_model;
+	AwBIDSItems m_items;	// copy of items list from bids manager
+	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
 
-//	void initModel(const AwBIDSNodes& subjects, QStandardItem *parent);
 	void initModel(const AwBIDSItems& subjects);
 	void recursiveFill(AwBIDSItem *item);
 	QString createToolTipFromJson(const QString& jsonPath);

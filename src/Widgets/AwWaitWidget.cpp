@@ -1,5 +1,6 @@
 #include <widget/AwWaitWidget.h>
 #include "ui_AwWaitWidget.h"
+#include <QtConcurrent>
 
 AwWaitWidget::AwWaitWidget(const QString& title, QWidget *parent) : QDialog(parent)
 {
@@ -12,6 +13,16 @@ AwWaitWidget::AwWaitWidget(const QString& title, QWidget *parent) : QDialog(pare
 AwWaitWidget::~AwWaitWidget()
 {
 	delete ui;
+}
+
+template<typename F>
+void AwWaitWidget::run(F function)
+{
+	show();
+	QFutureWatcher<void> watcher;
+	QFuture<void> future = QtConcurrent::run(function);
+	watcher.setFuture(future);
+	connect(&watcher, SIGNAL(finished()), this, SLOT(close()));
 }
 
 void AwWaitWidget::initProgress(int min, int max)

@@ -51,6 +51,7 @@ namespace aws {
 	constexpr auto work_dir = "work_dir";
 	constexpr auto log_dir = "log_dir";
 	constexpr auto setup_dir = "setup_dir";
+	constexpr auto settings_dir = "settings_dir";
 	// common dirs
 	constexpr auto home_dir = "home_dir";
 	constexpr auto python_module_dir = "python_module_dir";

@@ -19,15 +19,13 @@
 #include "Marker/AwExtractTriggers.h"
 #include <AwCore.h>
 #include <utils/bids.h>
+#include <widget/AwWaitWidget.h>
+#include <QtConcurrent>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
 QStringList AwBIDSManager::m_dataFileSuffixes = { "_eeg", "_meg", "_ieeg" };
-namespace bids {
-	constexpr auto participant_tsv = "participant_tsv";
-	constexpr auto parsing_path = "parsing_path";
-}
 
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
@@ -795,12 +793,28 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// We will use QStandardItem to represent the nodes of the BIDS tree.
 	// Those nodes will be set aftewards as childrent of the tree view in the GUI.
 	// The treeview model will take ownership of the items, no DO NOT DELETE them here or in the closeBIDS() method.
-	parse(); 
+	m_hashItemFiles.clear();
+
+	auto func = std::bind(&AwBIDSManager::parse, this);
+	//QFutureWatcher<void> watcher;
+	//QFuture<void> future = QtConcurrent::run(func);
+	AwWaitWidget wait("Parsing");
+	wait.setText("Parsing BIDS Structure...");
+	wait.run(func);
+	//connect(&watcher, SIGNAL(finished()), &wait, SLOT(close()));
+	//watcher.setFuture(future);
+	//watcher.waitForFinished();
+	
+	
+
+
+
+	//parse(); 
 
 	// get participants columns
-	if (m_settings.contains(bids::participant_tsv)) {
-		m_participantsColumns = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
-	}
+	if (m_settings.contains(bids::participant_tsv)) 
+		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
+
 	//AwBIDSParser parser;
 	//parser.parse();
 	//m_nodes = parser.nodes();
@@ -850,12 +864,6 @@ void AwBIDSManager::closeBIDS()
 
 void AwBIDSManager::parse()
 {
-	m_hashItemFiles.clear();
-	while (!m_items.isEmpty())
-		delete m_items.takeLast();
-	if (m_rootDir.isEmpty())
-		return;
-
 	QDir dir(m_rootDir);
 	// check for files
 	// get participant tsv

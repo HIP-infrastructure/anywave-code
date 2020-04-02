@@ -1372,6 +1372,15 @@
     <ClCompile Include="Batch\AwBatchFileInputWidget.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUIOptionsDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSGUIOptionsDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1911,6 +1920,12 @@
     <CustomBuild Include="Batch\AwBatchFileInputWidget.h">
       <Filter>Batch</Filter>
     </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSGUIOptionsDialog.ui">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2136,6 +2151,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwBatchFileInputWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBIDSGUIOptionsDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

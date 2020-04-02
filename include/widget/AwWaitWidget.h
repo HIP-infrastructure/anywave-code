@@ -37,6 +37,8 @@ class AW_WIDGETS_EXPORT AwWaitWidget : public QDialog
 public:
 	AwWaitWidget(const QString& title, QWidget *parent = Q_NULLPTR);
 	~AwWaitWidget();
+	template<typename F>
+	void run(F function);
 protected:
 	void changeEvent(QEvent *);
 public slots:

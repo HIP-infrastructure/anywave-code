@@ -326,6 +326,22 @@ char *AwUtilities::QStringToChar(const QString& str)
 
 
 
+QString AwUtilities::base64Encode(const QString& str)
+{
+	const char *s = str.toStdString().c_str();
+	QByteArray ba(s);
+	return QString(ba.toBase64());
+}
+
+QString AwUtilities::base64Decode(const QString& str)
+{
+	const char *s = str.toStdString().c_str();
+	QByteArray ba64(s);
+	QString data = QString::fromLatin1(QByteArray::fromBase64(ba64).data());
+	return data;
+}
+
+
 quint32 AwUtilities::endianness::fromBigEndian(const uchar *src)
 {
 	return 0

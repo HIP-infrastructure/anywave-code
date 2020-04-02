@@ -491,6 +491,7 @@ void AnyWave::createUserDirs()
 	QString matlabPluginDir = pluginDir + "/MATLAB";
 	QString pythonPluginDir = pluginDir + "/Python";
 	QString batchDir = homeDir + "/AnyWave/Batch/";
+	QString settingsDir = homeDir + "/AnyWave/Settings";
 
 	// convert workingDir to native filesystem syntax.
 	// Used by 'outside' plugins like MATLAB code.
@@ -526,6 +527,8 @@ void AnyWave::createUserDirs()
 		aws->setValue(aws::log_dir, logDir);
 	if (checkAndCreateFolder(homeDir, "Work"))
 		aws->setValue(aws::work_dir,  workingDir);
+	if (checkAndCreateFolder(homeDir, "Settings"))
+		aws->setValue(aws::settings_dir, settingsDir);
 
 	// set application specific folders for plugins
 	auto appDir = QDir(qApp->applicationDirPath());

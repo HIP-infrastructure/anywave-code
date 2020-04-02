@@ -36,6 +36,13 @@ class AwFileIO;
 using AwArgument = QPair<QString, QString>;
 using AwTSVDict = QMap<QString, QStringList>;
 
+namespace bids {
+	constexpr auto participant_tsv = "participant_tsv";		// participants.tsv file path
+	constexpr auto participant_cols = "participant_cols";	// columns found in participants.tsv
+	constexpr auto parsing_path = "parsing_path";
+}
+
+
 class AwBIDSManager : public QObject
 {
 	Q_OBJECT
@@ -91,6 +98,7 @@ public:
 	QString getTSVFile(const QString& dataFilePath, int tsvType);
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
+	QVariantMap& settings() { return m_settings; }
 signals:
 	void log(const QString& message);
 	void BIDSClosed();
@@ -106,7 +114,7 @@ protected:
 	QVariantMap m_settings;
 	QList<int> m_dataContainers;
 	QFileIconProvider m_fileIconProvider;
-	QStringList m_participantsColumns;
+	//QStringList m_participantsColumns;
 
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 

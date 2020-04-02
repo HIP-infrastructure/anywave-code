@@ -28,7 +28,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="leDIR"/>
+       <widget class="QLineEdit" name="leDIR">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="buttonSelect">
@@ -52,6 +56,55 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonOptions">
+       <property name="maximumSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Click here to change display options</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../../resources/AnyWave.qrc">
+         <normaloff>:/images/ox_eye_32.png</normaloff>:/images/ox_eye_32.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QTreeView" name="treeView">
@@ -79,6 +132,8 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../../../../resources/AnyWave.qrc"/>
+ </resources>
  <connections/>
 </ui>

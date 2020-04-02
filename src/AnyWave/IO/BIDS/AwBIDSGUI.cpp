@@ -2,6 +2,9 @@
 #include "AwBIDSManager.h"
 #include "AwBIDSItem.h"
 #include <utils/json.h>
+#include <QFileDialog>
+#include <widget/AwMessageBox.h>
+#include "AwBIDSGUIOptionsDialog.h"
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
@@ -9,19 +12,52 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	m_bids = AwBIDSManager::instance();
 	m_ui.leDIR->setText(m_bids->rootDir());
 	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
-	m_ui.treeView->setHeaderHidden(true);
-	m_ui.treeView->setToolTip("Double click on a data file to open it.");
+	//m_ui.treeView->setHeaderHidden(true);
 	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
 	connect(m_ui.treeView, &QTreeView::clicked, this, &AwBIDSGUI::handleClick);
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_model = new QStandardItemModel(this);
+	m_model->setHorizontalHeaderLabels({ "Directory" });
 	m_ui.treeView->setModel(m_model);
+	m_ui.treeView->setUniformRowHeights(true);
+	connect(m_ui.buttonSelect, &QPushButton::clicked, this, &AwBIDSGUI::changeBIDS);
+	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openBIDSOptions);
+
 }
 
 
 AwBIDSGUI::~AwBIDSGUI()
 {
 }
+
+void AwBIDSGUI::openBIDSOptions()
+{
+	AwBIDSGUIOptionsDialog dlg;
+	if (dlg.exec() == QDialog::Accepted)
+		;
+}
+
+void AwBIDSGUI::changeBIDS()
+{
+	auto dir = QFileDialog::getExistingDirectory(this, "BIDS dir", "Select a new BIDS directory");
+	if (dir.isEmpty())
+		return;
+	if (AwMessageBox::question(this, "Confirm BIDS Change", "Opening a new BIDS will close the active.\nOpen anywave?", QMessageBox::Yes | QMessageBox::No) ==
+		QMessageBox::No)
+		return;
+	m_bids->setRootDir(dir);
+}
+
+void AwBIDSGUI::showColumns(const QStringList& cols)
+{
+	m_extraColumns = cols;
+	for (auto item : m_items) {
+		item->removeColumns(1, cols.size());
+
+	}
+}
+
+
 
 void AwBIDSGUI::handleClick(const QModelIndex& index)
 {
@@ -106,11 +142,14 @@ void AwBIDSGUI::initModel(const AwBIDSItems& items)
 		return;
 
 	
-	auto rootItem = m_model->invisibleRootItem();
+	//auto rootItem = m_model->invisibleRootItem();
+	//m_model->setHorizontalHeaderLabels({ "coucou" });
 	for (auto item : items) {
-		rootItem->appendRow(item);
+		//rootItem->appendRow(item);
+		m_model->appendRow(item);
 		recursiveFill(item);
 	}
+	m_items = items;
 }
 
 void AwBIDSGUI::recursiveFill(AwBIDSItem *item)
