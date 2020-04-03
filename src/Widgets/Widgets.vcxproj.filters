@@ -220,12 +220,6 @@
     <ClCompile Include="AwWaitWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwWaitWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwWaitWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwComboCMap.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -397,6 +391,18 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwVideoPlayer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwWaitRunner.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwWaitWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwWaitWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwWaitRunner.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AwAmplitudeWidget.ui">
@@ -483,9 +489,6 @@
     <CustomBuild Include="AwWaitWidget.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\include\widget\AwWaitWidget.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\include\widget\AwComboCMap.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -566,6 +569,9 @@
     </CustomBuild>
     <CustomBuild Include="AwVideoPlayer.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwWaitWidget.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

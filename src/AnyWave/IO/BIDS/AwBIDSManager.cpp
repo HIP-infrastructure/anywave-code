@@ -781,45 +781,22 @@ void AwBIDSManager::setRootDir(const QString& path)
 		AwMessageBox::information(nullptr, "BIDS", QString("The BIDS folder %1 does not exist.").arg(path));
 		return;
 	}
-
-	//if (isBIDSActive()) {
-	//	if (AwMessageBox::information(NULL, tr("BIDS warning"), tr("a BIDS folder is already open.\nClose it and open the new one?"), 
-	//		QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-	//		return;
-	//}
 	closeBIDS();
 	m_rootDir = path;
-
 	// We will use QStandardItem to represent the nodes of the BIDS tree.
 	// Those nodes will be set aftewards as childrent of the tree view in the GUI.
 	// The treeview model will take ownership of the items, no DO NOT DELETE them here or in the closeBIDS() method.
 	m_hashItemFiles.clear();
-
-	auto func = std::bind(&AwBIDSManager::parse, this);
-	//QFutureWatcher<void> watcher;
-	//QFuture<void> future = QtConcurrent::run(func);
+	
 	AwWaitWidget wait("Parsing");
 	wait.setText("Parsing BIDS Structure...");
-	wait.run(func);
-	//connect(&watcher, SIGNAL(finished()), &wait, SLOT(close()));
-	//watcher.setFuture(future);
-	//watcher.waitForFinished();
-	
-	
-
-
-
-	//parse(); 
+	connect(this, &AwBIDSManager::finished, &wait, &QDialog::accept);
+	wait.run(std::bind(&AwBIDSManager::parse, this));  // bind a void method without parameters. The method must emit finished signals when finished.
 
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv)) 
 		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
 
-	//AwBIDSParser parser;
-	//parser.parse();
-	//m_nodes = parser.nodes();
-	//m_hashNodes = parser.hash();
-	
 	// instantiate UI if needed
 	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
@@ -848,17 +825,12 @@ void AwBIDSManager::closeBIDS()
 	m_hashItemFiles.clear();
 	if (m_ui)
 		m_ui->closeBIDS();
-	//while (!m_items.isEmpty())
-	//	delete m_items.takeLast();
 
-	//while (!m_nodes.isEmpty())
-	//	delete m_nodes.takeFirst();
 	m_rootDir.clear();
 	m_modifications.clear();
 	m_mustValidateModifications = false;
 	m_currentSubject = nullptr;
-//	m_hashNodes.clear();
-//	m_IDToSubject.clear();
+	m_participantsData.clear();
 	emit BIDSClosed();
 }
 
@@ -877,6 +849,12 @@ void AwBIDSManager::parse()
 	// launch recursive parsing
 	recursiveParsing(m_rootDir, nullptr);
 
+	// get participants columns
+	if (m_settings.contains(bids::participant_tsv))
+		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
+	// loading participants data
+	m_participantsData = AwUtilities::bids::loadTsv(m_settings.value(bids::participant_tsv).toString());
+	emit finished();
 }
 
 void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentItem)
