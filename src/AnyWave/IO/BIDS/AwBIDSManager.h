@@ -40,6 +40,7 @@ namespace bids {
 	constexpr auto participant_tsv = "participant_tsv";		// participants.tsv file path
 	constexpr auto participant_cols = "participant_cols";	// columns found in participants.tsv
 	constexpr auto parsing_path = "parsing_path";
+	constexpr auto gui_extra_cols = "gui_extra_cols";
 }
 
 
@@ -99,6 +100,7 @@ public:
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
 	QVariantMap& settings() { return m_settings; }
+	inline QStringList participantValues(const QString& participantKey) { return m_participantsData.value(participantKey).toStringList(); }
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
@@ -131,8 +133,5 @@ protected:
 	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSItem *m_currentSubject;
-//	AwBIDSNode *m_currentSubject;
-//	AwBIDSNodes m_nodes;
-//	QHash<QString, AwBIDSNode *> m_IDToSubject;
 	bool m_mustValidateModifications;
 };

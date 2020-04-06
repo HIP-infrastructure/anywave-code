@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>483</width>
-    <height>265</height>
+    <width>390</width>
+    <height>227</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,30 +26,9 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>subject display format</string>
+      <string>Display extra columns</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Preview:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="editPreview">
-          <property name="text">
-           <string>sub-ID</string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="1">
       <item>
        <layout class="QGridLayout" name="columnsLayout"/>
       </item>

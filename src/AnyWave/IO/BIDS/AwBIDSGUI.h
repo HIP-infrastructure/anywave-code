@@ -29,8 +29,11 @@
 #include "ui_AwBIDSGUI.h"
 #include <qstandarditemmodel.h>
 class AwBIDSManager;
-//#include "AwBIDSNode.h"
 #include "AwBIDSItem.h"
+
+#include "Prefs/AwSettings.h"
+#include <utils/AwUtilities.h>
+#include <utils/json.h>
 
 class AwBIDSGUI : public QWidget
 {
@@ -41,7 +44,7 @@ public:
 	~AwBIDSGUI();
 
 	void refresh();
-	void closeBIDS() { m_model->clear(); }
+	void closeBIDS(); 
 	void showColumns(const QStringList& cols);
 signals:
 	void dataFileClicked(const QString&);

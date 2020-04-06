@@ -5,24 +5,76 @@
 #include <QFileDialog>
 #include <widget/AwMessageBox.h>
 #include "AwBIDSGUIOptionsDialog.h"
+#include <utils/bids.h>
+#include <AwException.h>
+#include <QJsonObject>
+
+constexpr auto HEADER_COL1 = "Directory";
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
 	m_ui.setupUi(this);
 	m_bids = AwBIDSManager::instance();
 	m_ui.leDIR->setText(m_bids->rootDir());
-	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
-	//m_ui.treeView->setHeaderHidden(true);
+	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
 	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
 	connect(m_ui.treeView, &QTreeView::clicked, this, &AwBIDSGUI::handleClick);
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_model = new QStandardItemModel(this);
-	m_model->setHorizontalHeaderLabels({ "Directory" });
+	m_model->setColumnCount(1);
 	m_ui.treeView->setModel(m_model);
 	m_ui.treeView->setUniformRowHeights(true);
 	connect(m_ui.buttonSelect, &QPushButton::clicked, this, &AwBIDSGUI::changeBIDS);
 	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openBIDSOptions);
+	auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
+	QString jsonPath = QString("%1/bids.json").arg(settingsDir);
+	// do nothing if the file does not exist
+	if (QFile::exists(jsonPath)) {
+		QJsonDocument doc;
+		QJsonObject root;
+		try {
+			doc = AwUtilities::json::readJsonFile(jsonPath);
+			root = doc.object();
+		}
+		catch (const AwException& e)
+		{
+			return;
+		}
+		// check for bids.json file in Settings
+		if (!root.isEmpty() && root.contains(m_bids->rootDir())) {
+			auto hash = root[m_bids->rootDir()].toObject().toVariantHash();
+			if (hash.contains(bids::gui_extra_cols))
+				m_extraColumns = hash.value(bids::gui_extra_cols).toStringList();
+		}
+	}
+}
 
+void AwBIDSGUI::closeBIDS()
+{
+	m_model->clear();
+	// check for existing bids.json
+	auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
+	QString jsonPath = QString("%1/bids.json").arg(settingsDir);
+	// do nothing if the file does not exist
+	QJsonDocument doc;
+	QJsonObject root;
+	if (QFile::exists(jsonPath)) {
+		try {
+			doc = AwUtilities::json::readJsonFile(jsonPath);
+			root = doc.object();
+		}
+		catch (const AwException& e)
+		{
+			return;
+		}
+	}
+	QVariantMap map;
+	map[bids::gui_extra_cols] = m_extraColumns;
+	root.insert(m_bids->rootDir(), QJsonObject::fromVariantMap(map));
+	doc.setObject(root);
+	auto jsonString = doc.toJson(QJsonDocument::Indented);
+
+	AwUtilities::json::saveToJsonFile(jsonString, jsonPath);
 }
 
 
@@ -32,9 +84,9 @@ AwBIDSGUI::~AwBIDSGUI()
 
 void AwBIDSGUI::openBIDSOptions()
 {
-	AwBIDSGUIOptionsDialog dlg;
-	if (dlg.exec() == QDialog::Accepted)
-		;
+	AwBIDSGUIOptionsDialog dlg(m_extraColumns);
+	if (dlg.exec() == QDialog::Accepted) 
+		showColumns(dlg.columns());
 }
 
 void AwBIDSGUI::changeBIDS()
@@ -50,10 +102,36 @@ void AwBIDSGUI::changeBIDS()
 
 void AwBIDSGUI::showColumns(const QStringList& cols)
 {
-	m_extraColumns = cols;
-	for (auto item : m_items) {
-		item->removeColumns(1, cols.size());
+	// reset to one column.
+	auto colCount = m_model->columnCount();
+	while (m_model->columnCount() > 1)
+		m_model->removeColumn(1);
 
+	m_extraColumns = cols;
+	int colIndex = 1;
+	auto participantsColumns = m_bids->settings().value(bids::participant_cols).toStringList();
+	// remove first col (id)
+	participantsColumns.takeFirst();
+	for (auto c : cols) {
+		auto i = participantsColumns.indexOf(c); 
+		Q_ASSERT(i != -1);
+		auto headerItem = new QStandardItem(c);
+		headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
+		m_model->setHorizontalHeaderItem(colIndex, headerItem);
+		// insert item in new column
+		for (auto item : m_items) {
+			auto key = item->text();
+			if (!key.isEmpty()) {
+				auto values = m_bids->participantValues(key);
+				if (!values.isEmpty()) {
+					auto colItem = new QStandardItem(values.at(i));  
+					colItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
+					m_model->setItem(item->row(), colIndex, colItem);
+				}
+			}
+
+		}
+		colIndex++;
 	}
 }
 
@@ -130,10 +208,14 @@ void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 }
 
 
+
+
 void AwBIDSGUI::refresh()
 {
 	m_model->clear();
 	initModel(m_bids->subjects());
+	if (!m_extraColumns.isEmpty())
+		showColumns(m_extraColumns);
 }
 
 void AwBIDSGUI::initModel(const AwBIDSItems& items)
@@ -141,12 +223,13 @@ void AwBIDSGUI::initModel(const AwBIDSItems& items)
 	if (items.isEmpty())
 		return;
 
-	
-	//auto rootItem = m_model->invisibleRootItem();
-	//m_model->setHorizontalHeaderLabels({ "coucou" });
+	auto rootItem = m_model->invisibleRootItem();
+	auto headerItem = new QStandardItem("Directory");
+	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
+	m_model->setHorizontalHeaderItem(0, headerItem);
 	for (auto item : items) {
-		//rootItem->appendRow(item);
-		m_model->appendRow(item);
+		rootItem->appendRow(item);
+		//m_model->appendRow(item);
 		recursiveFill(item);
 	}
 	m_items = items;

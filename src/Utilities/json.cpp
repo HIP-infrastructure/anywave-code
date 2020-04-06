@@ -29,6 +29,7 @@
 #include <qjsonobject.h>
 #include <qjsonarray.h>
 #include <QTextStream>
+#include <AwException.h>
 
 QString  AwUtilities::json::hashToJsonString(const QVariantHash& hash)
 {
@@ -107,6 +108,7 @@ QJsonDocument AwUtilities::json::readJsonFile(const QString& filePath)
 	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
 	file.close();
 	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
+		throw AwException(error.errorString(), "AwUtilities::json::readJsonFile");
 		return QJsonDocument();
 	}
 	return doc;
@@ -128,4 +130,22 @@ QString AwUtilities::json::fromJsonFileToString(const QString& filePath)
 	if (!doc.isEmpty() && !doc.isNull())
 		return QString(doc.toJson(QJsonDocument::JsonFormat::Compact));
 	return QString();
+}
+
+bool AwUtilities::json::saveToJsonFile(const QJsonDocument& jsonDocument, const QString& filePath)
+{
+	QString jsonString = jsonDocument.toJson(QJsonDocument::JsonFormat::Indented);
+	return saveToJsonFile(jsonString, filePath);
+}
+
+bool AwUtilities::json::saveToJsonFile(const QString& jsonString, const QString& filePath)
+{
+	QFile file(filePath);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		return false;
+	}
+	QTextStream stream(&file);
+	stream << jsonString;
+	file.close();
+	return true;
 }

@@ -803,21 +803,6 @@ void AwBIDSManager::setRootDir(const QString& path)
 	m_ui->refresh();
 }
 
-//void AwBIDSManager::closeBIDS()
-//{
-//	if (!isBIDSActive())
-//		return;
-//	while (!m_nodes.isEmpty())
-//		delete m_nodes.takeFirst();
-//	m_rootDir.clear();
-//	m_modifications.clear();
-//	m_mustValidateModifications = false;
-//	m_currentSubject = nullptr;
-//	m_hashNodes.clear();
-//	m_IDToSubject.clear();
-//	emit BIDSClosed();
-//}
-
 void AwBIDSManager::closeBIDS()
 {
 	if (!isBIDSActive())

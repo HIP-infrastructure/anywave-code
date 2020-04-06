@@ -9,13 +9,17 @@ class AwBIDSGUIOptionsDialog : public QDialog
 	Q_OBJECT
 
 public:
-	AwBIDSGUIOptionsDialog(QWidget *parent = Q_NULLPTR);
+	AwBIDSGUIOptionsDialog(const QStringList& extraColumns,QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUIOptionsDialog();
+
+	inline QStringList& columns() { return m_selectecColumns; }
+public slots:
+	void accept() override;
 private slots:
-	void updateSubPreview();
-	void resetSubPreview();
+	void reset();
 private:
 	Ui::AwBIDSGUIOptionsDialogUi m_ui;
 	QVariantMap m_settings;
 	QList<QCheckBox *> m_columnsWigets;
+	QStringList m_selectecColumns;
 };
