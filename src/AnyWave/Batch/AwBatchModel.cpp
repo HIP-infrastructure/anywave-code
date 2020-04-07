@@ -77,7 +77,7 @@ void AwBatchTableModel::update()
 	endResetModel();
 }
 
-void AwBatchTableModel::add(AwBatchModelItem *item)
+void AwBatchTableModel::add(AwBatchItem *item)
 {
 	beginResetModel();
 	m_items << item;

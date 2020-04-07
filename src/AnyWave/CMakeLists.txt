@@ -5,6 +5,9 @@ add_definitions("-DAW_DISABLE_EPOCHING")
 
 SET(AnyWave_SRCS
 ./AnyWave.cpp  
+	./AwMapping.cpp
+	./AwBatch.cpp
+	./AwMATLAB.cpp
     ./AwExportDial.cpp  
     ./AwNoGUI.cpp  
     ./AwUpdater.cpp  
@@ -12,8 +15,9 @@ SET(AnyWave_SRCS
     ./main.cpp  
 	./AwFileOpenSave.cpp
 	./Batch/AwAddEditBatchDialog.cpp
-	./Batch/AwBatchDialog.cpp
-	./Batch/AwBatchModelItem.cpp
+	./Batch/AwBatchManager.cpp
+	./Batch/AwBatchGUI.cpp
+	./Batch/AwBatchItem.cpp
 	./Batch/AwBatchModel.cpp
     ./CL/CommandLineParser.cpp
     ./CL/AwCommandLogger.cpp
@@ -167,8 +171,9 @@ SET(AnyWave_SRCS
     #./Epoch/AwStatsModel.cpp)
 
 SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
-	./Batch/AwBatchDialog.h
-	./Batch/AwBatchModelItem.h
+	./Batch/AwBatchGUI.h
+	./Batch/AwBatchManager.h
+	./Batch/AwBatchItem.h
 	./Batch/AwBatchModel.h
 	./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
@@ -310,7 +315,7 @@ QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
 SET(FORMS ./AnyWave.ui  
     ./AwExportDial.ui  
 	./Batch/AwAddEditBatchDialog.ui
-	./Batch/AwBatchDialog.ui
+	./Batch/AwBatchGUI.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
     ./Carto/AwMappingWidget.ui  

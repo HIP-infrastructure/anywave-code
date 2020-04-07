@@ -1,7 +1,7 @@
 #include "AwAddEditBatchDialog.h"
 #include "Plugin/AwPluginManager.h"
 #include <AwProcessInterface.h>
-#include "AwBatchModelItem.h"
+#include "AwBatchItem.h"
 #include <utils/json.h>
 #include <QDoubleSpinBox>
 #include <QComboBox>
@@ -13,12 +13,12 @@
 #include "Prefs/AwSettings.h"
 #include "AwBatchFileInputWidget.h"
 
-AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *parent)
+AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchItem *item, QWidget *parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
 	m_item = item;
-	m_itemCopy = new AwBatchModelItem(item);
+	m_itemCopy = new AwBatchItem(item);
 	setWindowTitle(QString("%1 parameters").arg(item->pluginName()));
 	// init wigets
 	setupParamsUi();

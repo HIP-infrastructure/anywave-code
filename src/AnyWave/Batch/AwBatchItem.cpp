@@ -23,10 +23,10 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include "AwBatchModelItem.h"
+#include "AwBatchItem.h"
 #include <utils/json.h>
 
-AwBatchModelItem::AwBatchModelItem(AwProcessPlugin *plugin)
+AwBatchItem::AwBatchItem(AwProcessPlugin *plugin)
 {
 	m_plugin = plugin; 
 	QString error;
@@ -39,7 +39,7 @@ AwBatchModelItem::AwBatchModelItem(AwProcessPlugin *plugin)
 	m_args = m_jsonDefaults;
 }
 
-AwBatchModelItem::AwBatchModelItem(AwBatchModelItem *copy)
+AwBatchItem::AwBatchItem(AwBatchItem *copy)
 {
 	m_plugin = copy->m_plugin;
 	m_pluginName = copy->pluginName();
@@ -47,7 +47,7 @@ AwBatchModelItem::AwBatchModelItem(AwBatchModelItem *copy)
 	m_inputFilesMap = copy->m_inputFilesMap;
 }
 
-void AwBatchModelItem::copy(AwBatchModelItem *source)
+void AwBatchItem::copy(AwBatchItem *source)
 {
 	m_plugin = source->m_plugin;
 	m_pluginName = source->pluginName();
@@ -55,7 +55,7 @@ void AwBatchModelItem::copy(AwBatchModelItem *source)
 	m_inputFilesMap = source->m_inputFilesMap;
 }
 
-QString AwBatchModelItem::getFileForInput(const QString& key, int index)
+QString AwBatchItem::getFileForInput(const QString& key, int index)
 {
 	auto list = m_inputFilesMap.value(key);
 	if (list.isEmpty() || index >= list.size() || index < 0)
@@ -63,12 +63,12 @@ QString AwBatchModelItem::getFileForInput(const QString& key, int index)
 	return list.at(index);
 }
 
-QStringList AwBatchModelItem::getFilesForInput(const QString& key)
+QStringList AwBatchItem::getFilesForInput(const QString& key)
 {
 	return m_inputFilesMap.value(key);
 }
 
-bool AwBatchModelItem::checkPluginParams()
+bool AwBatchItem::checkPluginParams()
 {
 	auto instance = m_plugin->newInstance();
 	QString error;

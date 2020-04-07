@@ -23,32 +23,24 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "AnyWave.h"
+#include "Batch/AwBatchManager.h"
+#include <qdockwidget.h>
 
-#include <QDialog>
-#include "ui_AwBatchDialog.h"
-
-class AwProcessPlugin;
-class AwBatchItem;
-
-class AwBatchDialog : public QDialog
+void AnyWave::on_actionCreate_batch_script_triggered()
 {
-	Q_OBJECT
-
-public:
-	AwBatchDialog(QWidget *parent = Q_NULLPTR);
-	~AwBatchDialog();
-
-public slots:
-	void addItem();
-	void editItem(AwBatchItem *item);
-	void removeOperations();
-	void duplicateOperations();
-	void accept() override;
-private slots:
-	void itemClick(const QModelIndex& index);
-private:
-	Ui::AwBatchDialogUi m_ui;
-	QMap<QString, AwProcessPlugin *> m_plugins;
-	QList< AwBatchItem *> m_items;
-};
+	auto batchM = AwBatchManager::instance(); 
+	batchM->setParent(this);
+	// create dock widget if needed
+	auto dock = m_dockWidgets.value("Batch");
+	if (dock == nullptr) {
+		dock = new QDockWidget(tr("Batch Processing"), this);
+		m_dockWidgets["Batch"] = dock;
+		dock->setWidget(batchM->ui());
+		addDockWidget(Qt::LeftDockWidgetArea, dock);
+		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		menuView_->addAction(dock->toggleViewAction());
+		//connect(AwBIDSManager::instance(), &AwBIDSManager::BIDSClosed, dock, &QDockWidget::hide);
+	}
+	dock->show();
+}

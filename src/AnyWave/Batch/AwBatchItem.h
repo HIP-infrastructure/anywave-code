@@ -28,14 +28,14 @@
 #include <QStringList>
 #include <AwProcessInterface.h>
 
-class AwBatchModelItem
+class AwBatchItem
 {
 public:
-	explicit AwBatchModelItem(AwProcessPlugin *plugin); 
-	explicit AwBatchModelItem(AwBatchModelItem *copy);
+	explicit AwBatchItem(AwProcessPlugin *plugin);
+	explicit AwBatchItem(AwBatchItem *copy);
 	enum Inputs { Directory, Files, None };
 
-	void copy(AwBatchModelItem *source);
+	void copy(AwBatchItem *source);
 	inline QString& pluginName() { return m_plugin->name; }
 	QVariantHash& jsonParameters() { return m_args; }
 	void setJsonParameters(const QVariantHash& args) { m_args = args; }
@@ -57,4 +57,4 @@ protected:
 	QMap<QString, QStringList> m_inputFilesMap;	// hold a list of files for a specific key.
 };
 
-using AwBatchItems = QList<AwBatchModelItem *>;
+using AwBatchItems = QList<AwBatchItem *>;

@@ -8,8 +8,11 @@
 #include <utils/bids.h>
 #include <AwException.h>
 #include <QJsonObject>
+#include <QJsonDocument>
+#include <QMenu>
+#include "Process/AwProcessManager.h"
+#include "Prefs/AwSettings.h"
 
-constexpr auto HEADER_COL1 = "Directory";
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
@@ -24,6 +27,7 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	m_model->setColumnCount(1);
 	m_ui.treeView->setModel(m_model);
 	m_ui.treeView->setUniformRowHeights(true);
+	m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_ui.buttonSelect, &QPushButton::clicked, this, &AwBIDSGUI::changeBIDS);
 	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openBIDSOptions);
 	auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
@@ -47,6 +51,8 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 				m_extraColumns = hash.value(bids::gui_extra_cols).toStringList();
 		}
 	}
+	
+	createContextMenus();
 }
 
 void AwBIDSGUI::closeBIDS()
@@ -81,6 +87,57 @@ void AwBIDSGUI::closeBIDS()
 AwBIDSGUI::~AwBIDSGUI()
 {
 }
+
+
+void AwBIDSGUI::contextMenuRequested(const QPoint& point)
+{
+	QModelIndexList indexes = m_ui.treeView->selectionModel()->selectedIndexes();
+	if (indexes.isEmpty()) // no selection
+		return;
+
+	m_menu->exec(m_ui.treeView->mapToGlobal(point));
+}
+
+
+void AwBIDSGUI::createContextMenus()
+{
+	connect(m_ui.treeView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuRequested(const QPoint&)));
+	m_menu = new QMenu(m_ui.treeView);
+	auto menuProcessing = m_menu->addMenu("Add to processing operations");
+	// get batchable processes
+	auto processes = AwProcessManager::instance()->getBatchableProcesses();
+	for (auto p : processes) {
+		auto action = menuProcessing->addAction(QString("compute %1").arg(p->name));
+		// set the plugin's name as data
+		action->setData(p->name);
+		connect(action, &QAction::triggered, this, &AwBIDSGUI::addToProcessing);
+	}
+}
+
+void AwBIDSGUI::addToProcessing()
+{
+	auto action = (QAction *)sender();
+	if (action == nullptr)
+		return;
+
+	QStringList files;
+	// get selected items 
+	auto indexes = m_ui.treeView->selectionModel()->selectedIndexes();
+	for (auto index : indexes) {
+		if (index.column() == 0) {
+			auto item = static_cast<AwBIDSItem *>(m_model->itemFromIndex(index));
+			if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile)
+				files << item->data(AwBIDSItem::PathRole).toString();
+			else {
+				auto dataFileItems = item->getDataFileItems();
+				for (auto dataFileItem : dataFileItems)
+					files << dataFileItem->data(AwBIDSItem::PathRole).toString();
+			}
+		}
+	}
+	emit newProcessBatchOperationAdded(action->data().toString(), files);
+}
+
 
 void AwBIDSGUI::openBIDSOptions()
 {
@@ -166,6 +223,8 @@ void AwBIDSGUI::handleClick(const QModelIndex& index)
 					item->setToolTip(createToolTipFromJson(jsonPath));
 				}
 			}
+			else
+				item->setToolTip(toolTip);
 		}
 	}
 }

@@ -30,10 +30,7 @@
 #include <qstandarditemmodel.h>
 class AwBIDSManager;
 #include "AwBIDSItem.h"
-
-#include "Prefs/AwSettings.h"
-#include <utils/AwUtilities.h>
-#include <utils/json.h>
+class QMenu;
 
 class AwBIDSGUI : public QWidget
 {
@@ -48,13 +45,18 @@ public:
 	void showColumns(const QStringList& cols);
 signals:
 	void dataFileClicked(const QString&);
+	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);
 	void changeBIDS(); // called when Change button is clicked
 	void openBIDSOptions(); // called when Change button is clicked
+	// context menu slots
+	void contextMenuRequested(const QPoint& pos);
+	void addToProcessing();
 protected:
 	AwBIDSManager *m_bids;
+	QMenu *m_menu;	// context menu
 	// keep a copy of models for the TreeView
 	QStandardItemModel *m_model;
 	AwBIDSItems m_items;	// copy of items list from bids manager
@@ -63,6 +65,7 @@ protected:
 	void initModel(const AwBIDSItems& subjects);
 	void recursiveFill(AwBIDSItem *item);
 	QString createToolTipFromJson(const QString& jsonPath);
+	void createContextMenus();
 private:
 	Ui::AwBIDSGUIUi m_ui;		
 };

@@ -332,7 +332,7 @@ void AnyWave::openBIDS(const QString& path)
 	else
 		AwBIDSManager::instance()->setRootDir(path);
 	// instantiate dock widget if needed
-	auto dock = m_dockWidgets["BIDS"];
+	auto dock = m_dockWidgets.value("BIDS");
 	if (dock == NULL) {
 		dock = new QDockWidget(tr("BIDS"), this);
 		m_dockWidgets["BIDS"] = dock;

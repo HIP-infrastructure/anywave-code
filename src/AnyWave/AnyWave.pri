@@ -3,9 +3,10 @@
 # ------------------------------------------------------
 
 
-HEADERS += ./Batch/AwBatchDialog.h \
+HEADERS += ./Batch/AwBatchGUI.h \
+	./Batch/AwBatchManager.h \
      ./Batch/AwBatchModel.h \
-     ./Batch/AwBatchModelIem.h \
+     ./Batch/AwBatchIem.h \
      ./Batch/AwAddEditBatchDialog.h \
      ./Data/AwDataChunk.h \
     ./Data/AwMemoryMapper.h \
@@ -146,15 +147,19 @@ HEADERS += ./Batch/AwBatchDialog.h \
     ./CL/CommandLineParser.h \
     ./CL/AwCommandLogger.h
 SOURCES += ./AnyWave.cpp \
+	./AwMapping.cpp \
+	./AwBatch.cpp \
+	./AwMATLAB.cpp \
     ./AwExportDial.cpp \
     ./AwFileOpenSave.cpp \
     ./AwOpenFileDialog.cpp \
     ./AwUpdater.cpp \
     ./main.cpp \
-    ./Batch/AwBatchDialog.cpp \
+    ./Batch/AwBatchGUI.cpp \
+	./Batch/AwBatchManager.cpp \
     ./Batch/AwBatchModel.cpp \
     ./Batch/AwAddEditBatchDialog.cpp \
-	./Batch/AwBatchModelItem.cpp \
+	./Batch/AwBatchItem.cpp \
     ./Data/AwDataChunk.cpp \
     ./Data/AwDataConnection.cpp \
     ./Data/AwDataServer.cpp \

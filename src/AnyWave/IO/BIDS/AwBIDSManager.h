@@ -2,9 +2,9 @@
 // 
 //                 Université d’Aix Marseille (AMU) - 
 //                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Copyright © 2020 AMU, INSERM
 // 
-//  This library is free software; you can redistribute it and/or
+//  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 3 of the License, or (at your option) any later version.
@@ -63,7 +63,6 @@ public:
 	static bool isBIDS(const QString& path);
 	static QString detectBIDSFolderFromPath(const QString& path);
 	
-
 	void newFile(AwFileIO *reader);
 	void setRootDir(const QString& path);
 	inline QString& rootDir() { return m_rootDir; }
@@ -119,7 +118,6 @@ protected:
 	QVariantMap m_settings;
 	QList<int> m_dataContainers;
 	QFileIconProvider m_fileIconProvider;
-	//QStringList m_participantsColumns;
 	QVariantHash m_participantsData; // hold the columns value for each participant in participants.tsvs
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 

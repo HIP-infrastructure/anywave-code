@@ -22,7 +22,7 @@ AwBatchRunner::AwBatchRunner(AwBuiltInPlugin *plugin, const AwBatchItems& items)
 {
 	// duplicate items
 	for (auto item : items)
-		m_items << new AwBatchModelItem(item);
+		m_items << new AwBatchItem(item);
 	auto plm = AwProcessLogManager::instance();
 	plm->connectProcess(this);
 }

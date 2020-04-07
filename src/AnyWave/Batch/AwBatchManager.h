@@ -25,30 +25,22 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <QDialog>
-#include "ui_AwBatchDialog.h"
+#include <QObject>
+#include "AwBatchGUI.h"
 
-class AwProcessPlugin;
-class AwBatchItem;
-
-class AwBatchDialog : public QDialog
+class AwBatchManager : public QObject
 {
 	Q_OBJECT
 
 public:
-	AwBatchDialog(QWidget *parent = Q_NULLPTR);
-	~AwBatchDialog();
-
-public slots:
-	void addItem();
-	void editItem(AwBatchItem *item);
-	void removeOperations();
-	void duplicateOperations();
-	void accept() override;
-private slots:
-	void itemClick(const QModelIndex& index);
-private:
-	Ui::AwBatchDialogUi m_ui;
-	QMap<QString, AwProcessPlugin *> m_plugins;
-	QList< AwBatchItem *> m_items;
+	~AwBatchManager();
+	// utilities static methods
+	static AwBatchManager *instance();
+	static bool isInstantiated() { return m_instance != nullptr; }
+	// GUI Specific
+	QWidget *ui() { return m_ui; }
+protected:
+	AwBatchManager();
+	AwBatchGUI *m_ui;
+	static AwBatchManager *m_instance;
 };

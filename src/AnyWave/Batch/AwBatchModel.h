@@ -27,13 +27,11 @@
 
 #include <QAbstractTableModel>
 #include <QItemDelegate>
-#include "AwBatchModelItem.h"
+#include "AwBatchItem.h"
 
 constexpr int BATCH_COLUMNS =2;
 constexpr int BATCH_PLUGIN = 0;
 constexpr int BATCH_PARAMETERS = 1;
-
-using AwBatchItems = QList<AwBatchModelItem *>;
 
 class AwBatchTableModel : public QAbstractTableModel
 {
@@ -52,7 +50,7 @@ public:
 	bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
 	void clear();
-	void add(AwBatchModelItem *item);
+	void add(AwBatchItem *item);
 	void update();
 	AwBatchItems& items() { return m_items; }
 protected:

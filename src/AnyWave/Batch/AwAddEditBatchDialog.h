@@ -2,14 +2,14 @@
 
 #include <QDialog>
 #include "ui_AwAddEditBatchDialog.h"
-class AwBatchModelItem;
+class AwBatchItem;
 
 class AwAddEditBatchDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	AwAddEditBatchDialog(AwBatchModelItem *item, QWidget *parent = Q_NULLPTR);
+	AwAddEditBatchDialog(AwBatchItem *item, QWidget *parent = Q_NULLPTR);
 	~AwAddEditBatchDialog();
 public slots:
 	void accept() override;
@@ -20,7 +20,7 @@ private slots:
 	void setFileProperty();
 private:
 	Ui::AwAddEditBatchDialogUi m_ui;
-	AwBatchModelItem *m_item, *m_itemCopy;
+	AwBatchItem *m_item, *m_itemCopy;
 	QMap<QString, QWidget *> m_widgets;	// store widgets based on keys defined in json ui
 	QString m_errorString, m_homeDir;
 

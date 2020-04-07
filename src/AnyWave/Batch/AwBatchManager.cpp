@@ -23,32 +23,25 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#include "AwBatchManager.h"
 
-#include <QDialog>
-#include "ui_AwBatchDialog.h"
+AwBatchManager *AwBatchManager::m_instance = nullptr;
 
-class AwProcessPlugin;
-class AwBatchItem;
 
-class AwBatchDialog : public QDialog
+AwBatchManager *AwBatchManager::instance()
 {
-	Q_OBJECT
+	if (!m_instance)
+		m_instance = new AwBatchManager;
+	return m_instance;
+}
 
-public:
-	AwBatchDialog(QWidget *parent = Q_NULLPTR);
-	~AwBatchDialog();
+AwBatchManager::AwBatchManager()
+	: QObject(nullptr)
+{
+	m_ui = new AwBatchGUI;
+}
 
-public slots:
-	void addItem();
-	void editItem(AwBatchItem *item);
-	void removeOperations();
-	void duplicateOperations();
-	void accept() override;
-private slots:
-	void itemClick(const QModelIndex& index);
-private:
-	Ui::AwBatchDialogUi m_ui;
-	QMap<QString, AwProcessPlugin *> m_plugins;
-	QList< AwBatchItem *> m_items;
-};
+AwBatchManager::~AwBatchManager()
+{
+	delete m_ui;
+}

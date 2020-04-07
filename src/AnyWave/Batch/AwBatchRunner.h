@@ -26,7 +26,7 @@
 #pragma once
 
 #include <AwProcessInterface.h>
-#include "AwBatchModelItem.h"
+#include "AwBatchItem.h"
 
 class AwBatchRunner : public AwBuiltInProcess
 {
