@@ -76,7 +76,8 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 		process->pdi.input.settings[processio::plugin_names] = list;
 	}
 	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
-		process->pdi.input.addChannels(asRecorded, true);
+		if (!asRecorded.isEmpty())
+			process->pdi.input.addChannels(asRecorded, true);
 	}
 	if (!process->pdi.areInputChannelSet()) { // no input channels specified => ok set to AnyChannels (1-n)
 		process->pdi.addInputChannel(-1, 1, 0);
@@ -108,7 +109,8 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 			res += AwChannel::getChannelsOfType(sources, t);
 		}
 	}
-	process->pdi.input.addChannels(res, true);
+	if (res.isEmpty())
+		process->pdi.input.addChannels(res, true);
 	return true;
 }
 
@@ -266,6 +268,10 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
 		AwDataServer::getInstance()->setMainReader(reader);
 		AwDataServer::getInstance()->openConnection(process);
+	}
+	else {   // no input file but requires to build pdi anyway
+		buildPDI(process);
+
 	}
 	return process;
 }

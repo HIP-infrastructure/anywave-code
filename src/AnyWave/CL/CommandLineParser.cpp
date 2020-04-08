@@ -10,7 +10,7 @@
 //
 // --toBIDS : Convert a file or folder to BIDS by converting the data format if necessary and creating the .json files 
 // Options for --toBIDS:
-//	--bids_modality <modality> : MANDATORY. [ ieeg meg eeg ]
+//	--bids_modality <modality>  : MANDATORY. [ ieeg meg eeg ]
 //  --bids_sub <subj>			: MANDATORY. The BIDS subject
 //	--bids_task <task>			: MANDATORY. The BIDS task
 //	--bids_ses <sessions>		: OPTIONAL. The BIDS session.
@@ -107,6 +107,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(serverOpt);
 	parser.addOption(serverPortOpt);
 	   	  
+
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
 		throw exception;

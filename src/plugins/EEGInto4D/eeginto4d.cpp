@@ -136,12 +136,11 @@ EEGInto4DPlugin::EEGInto4DPlugin()
 	name = tr("EEG4DNi");
 	description = tr("Load an EEG File and add its channels into a 4DNI file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
-	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 }
 
 EEGInto4D::EEGInto4D() 
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins);
 }
 
@@ -149,6 +148,11 @@ EEGInto4D::~EEGInto4D()
 {
 	while (!m_eegChannels.isEmpty())
 		delete m_eegChannels.takeFirst();
+}
+
+bool EEGInto4D::batchParameterCheck(const QVariantHash& args)
+{
+	return true;
 }
 
 bool EEGInto4D::showUi()
@@ -185,6 +189,10 @@ bool EEGInto4D::showUi()
 		return true;
 	}
 
+	auto args = pdi.input.args();
+	args["eeg_file"] = ui.eegFile;
+	args["meg_file"] = ui.megFile;
+	pdi.input.setArguments(args);
 	return false;
 }
 
@@ -488,12 +496,41 @@ void EEGInto4D::alignFilePointer(QFile& file)
 	}
 }
 
+
+void EEGInto4D::runFromCommandLine()
+{
+	bool ades_found = false, meg_found = false;
+	for (auto plugin : pdi.input.readers) {
+		if (!ades_found) {
+			if (plugin->name == "AnyWave ADES Format") {
+				ades_found = true;
+				m_eegPlugin = plugin;
+			}
+		}
+		if (!meg_found) {
+			if (plugin->name == "4DNI Reader") {
+				meg_found = true;
+				m_megPlugin = plugin;
+			}
+		}
+		if (ades_found && meg_found)
+			break;
+	}
+
+	run();
+}
+
+
 void EEGInto4D::run()
 {
 	m_eegReader = m_eegPlugin->newInstance();
 	m_eegReader->setPlugin(m_eegPlugin);
 	m_megReader = m_megPlugin->newInstance();
 	m_megReader->setPlugin(m_megPlugin);
+
+	auto args = pdi.input.args();
+	m_adesFile = args.value("eeg_file").toString();
+	m_megFile = args.value("meg_file").toString();
 
 	try {
 
@@ -539,37 +576,49 @@ void EEGInto4D::run()
 		//// Create a folder to put injected data files 
 		//// Folder will be named results
 		QFileInfo fi(m_megFile);
-		auto destDir = QString("%1/results").arg(fi.absolutePath());
+		auto srcFileName = fi.fileName();
+		QString destFileName = srcFileName;
+		// use a tmp dir to inject
+		QString tmpDir = QString("%1/results").arg(fi.absolutePath());
+		auto outputDir = args.value("output_dir").toString();
+		if (outputDir.isEmpty())
+			outputDir = fi.absolutePath();
+		auto outputFile = args.value("output_file").toString();
+		QString tmpOutputFile;
+		if (!outputFile.isEmpty())
+			destFileName = outputFile;
+		tmpOutputFile = QString("%1/%2").arg(tmpDir).arg(destFileName);
+
+		auto newConfigPath = QString("%1/config").arg(tmpDir);
 		auto srcConfigPath = QString("%1/config").arg(fi.absolutePath());
-		auto fileName = fi.fileName();
-		auto srcMrkPath = QString("%1.mrk").arg(m_megFile);
-		auto destMrkPath = QString("%1/%2.mrk").arg(destDir).arg(fileName);
-		auto srcBadPath = QString("%1.bad").arg(m_megFile);
-		auto destBadPath = QString("%1/%2.bad").arg(destDir).arg(fileName);
-		QDir dir;
-		dir.mkpath(destDir);
-		auto destFileName = QString("%1/%2_EEG").arg(destDir).arg(fileName);
-		auto newConfigPath = QString("%1/config").arg(destDir);
-		if (QFile::exists(destFileName))
-			QFile::remove(destFileName);
-		if (QFile::exists(newConfigPath))
-			QFile::remove(newConfigPath);
-		// copy config file to results dir
-		if (!QFile::copy(srcConfigPath, newConfigPath)) 
-			throw AwException(QString("Faild to copy config file to results dir."));
-		if (QFile::exists(srcMrkPath))
-			QFile::copy(srcMrkPath, destMrkPath);
-		if (QFile::exists(srcBadPath))
-			QFile::copy(srcBadPath, destBadPath);
 		
+		auto srcMrkPath = QString("%1/%2.mrk").arg(fi.absolutePath()).arg(srcFileName);
+		auto destMrkPath = QString("%1/%2.mrk").arg(tmpDir).arg(destFileName);
+		auto srcBadPath = QString("%1/%2.bad").arg(fi.absolutePath()).arg(srcFileName);
+		auto destBadPath = QString("%1/%2.bad").arg(tmpDir).arg(destFileName);
+		
+		// create temp dir, go in it and remove existing files.
+		QDir dir;
+		dir.mkpath(tmpDir);
+		dir.setCurrent(tmpDir);
+		auto list = dir.entryInfoList(QDir::Files);
+		for (auto file : list) 
+			QFile::remove(file.absoluteFilePath());
+		// copy .mrk and .bad to tmp dir
+		QFile::copy(srcBadPath, destBadPath);
+		QFile::copy(srcMrkPath, destMrkPath);
+
+		// copy config to tmp dir
+		if (!QFile::copy(srcConfigPath, newConfigPath)) 
+			throw AwException(QString("Fail to copy config file to tmp dir."));
 		// use rewrite 4D code to rewrite MEG file to _EEG (converting int samples to float).
 		QFile srcFile(m_megFile);
 		if (!srcFile.open(QIODevice::ReadOnly)) 
 			throw AwException(tr("Error opening MEG file for reading."));
 
-		QFile newFile(destFileName);
+		QFile newFile(tmpOutputFile);
 		if (!newFile.open(QIODevice::ReadWrite)) 
-			throw AwException(QString("Error opening %1 file for writing.").arg(destFileName));
+			throw AwException(QString("Error opening %1 file for writing.").arg(tmpOutputFile));
 		
 		QDataStream src_stream(&srcFile);
 		QDataStream dest_stream(&newFile);
@@ -623,7 +672,8 @@ void EEGInto4D::run()
 		sendMessage("Done.");
 		newFile.close();
 
-		m_megFile = destFileName;
+		// swich to newly generated file
+		m_megFile = tmpOutputFile;
 		m_megReader->cleanUpAndClose();
 		if (!changeEEGLabelsIn4D(m_eegChannels)) 
 			throw AwException(tr("Error: Failed changing EEG labels in MEG file."));
@@ -633,6 +683,7 @@ void EEGInto4D::run()
 			throw AwException(QString("Failed to open %1").arg(m_megFile));
 		// get the labels of all channels in MEG file
 		auto allLabels = AwChannel::getLabels(m_megReader->infos.channels());
+		m_megReader->cleanUpAndClose();
 
 		QStringList eegLabels = AwChannel::getLabels(m_eegChannels);
 		sendMessage("Reading EEG file...");
@@ -640,11 +691,10 @@ void EEGInto4D::run()
 			throw AwException("Error reading data from EEG file.");
 		
 		// re open new file in w mode
-		newFile.setFileName(destFileName);
+		newFile.setFileName(tmpOutputFile);
 		if (!newFile.open(QIODevice::ReadWrite))
 			throw AwException("Failed to open again MEG file in w mode.");
 		dest_stream.setDevice(&newFile);
-
 
 		sendMessage("Done.");
 		newFile.seek(0);
@@ -665,8 +715,21 @@ void EEGInto4D::run()
 				dest_stream << value;
 			}
 		}
-		sendMessage("All done.");
+		sendMessage("Done.");
 		newFile.close();
+		sendMessage("Moving files to the output dir...");
+		// now copy all the files from tmp dir to real output_dir
+		list = dir.entryInfoList(QDir::Files);
+		for (auto file : list) {
+			auto src = file.absoluteFilePath();
+			auto dest = QString("%1/%2").arg(outputDir).arg(file.fileName());
+			if (QFile::exists(dest)) {
+				QFile file(dest);
+				file.rename(dest + ".bak");
+			}
+			bool status = QFile::copy(src, dest);
+		}
+		dir.removeRecursively();
 	}
 	catch (const AwException& e) {
 		sendMessage(e.errorString());
@@ -678,6 +741,9 @@ void EEGInto4D::run()
 	}
 	m_megPlugin->deleteInstance(m_megReader);
 	m_eegPlugin->deleteInstance(m_eegReader);
+
+
+
 }
 
 float EEGInto4D::swapFloat(float val)

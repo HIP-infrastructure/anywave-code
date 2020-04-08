@@ -23,8 +23,7 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#ifndef EEGINTO4D_H
-#define EEGINTO4D_H
+#pragma once
 
 
 #include "eeginto4d_global.h"
@@ -39,11 +38,9 @@ public:
 	EEGInto4D();
 	~EEGInto4D();
 	bool showUi();
-	void run();
-
-Q_PROPERTY(QString megFile READ megFile WRITE setMEGFile)
-Q_PROPERTY(QString adesFile READ adesFile WRITE setADESFile)
-
+	void run() override;
+	void runFromCommandLine() override;
+	bool batchParameterCheck(const QVariantHash& args) override;
 private:
 	AwFileIO *m_megReader, *m_eegReader;
 	AwFileIOPlugin *m_megPlugin, *m_eegPlugin;
@@ -64,15 +61,9 @@ private:
 class EEGINTO4D_EXPORT EEGInto4DPlugin : public AwProcessPlugin
 {
 	Q_OBJECT
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 	Q_PLUGIN_METADATA(IID AwProcessPlugin_IID)
-#endif
 	Q_INTERFACES(AwProcessPlugin)
 public:
 	EEGInto4DPlugin();
-
-	EEGInto4D *newInstance() { return new EEGInto4D; }
+	AW_INSTANTIATE_PROCESS(EEGInto4D);
 };
-
-
-#endif // EEGINTO4D_H
