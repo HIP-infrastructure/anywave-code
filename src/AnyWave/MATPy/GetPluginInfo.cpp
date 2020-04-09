@@ -31,6 +31,7 @@
 #include "AwTCPResponse.h"
 #include "Prefs/AwSettings.h"
 #include "ICA/AwICAManager.h"
+#include <AwKeys.h>
 
 void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *process)
 {

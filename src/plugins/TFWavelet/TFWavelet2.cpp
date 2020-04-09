@@ -1,5 +1,6 @@
 #include "TFWavelet2.h"
 #include "settingsui.h"
+#include <AwKeys.h>
 
 TFWavelet2Plugin::TFWavelet2Plugin()
 {

@@ -26,6 +26,7 @@
 #include "fileconverter.h"
 #include "settings.h"
 #include <filter/AwFiltering.h>
+#include <AwKeys.h>
 
 FileConverterPlugin::FileConverterPlugin()
 {

@@ -46,7 +46,7 @@
 #include "Debug/AwDebugLog.h"
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwFileInfo.h>
-
+#include <AwKeys.h>
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()

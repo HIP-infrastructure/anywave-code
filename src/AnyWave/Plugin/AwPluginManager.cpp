@@ -54,6 +54,8 @@
 #include "Epoch/AwAvgSignalItem.h"
 #endif
 
+#include <AwKeys.h>
+
 // statics
 AwPluginManager *AwPluginManager::m_instance = 0;
 
@@ -236,6 +238,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
 		 QString jsonUiPath = QString("%1/ui.json").arg(pluginPath);
 		 QString jsonDefaultsPath = QString("%1/default.json").arg(pluginPath);
+		 QString jsonArgs = QString("%1/args.json").arg(pluginPath);
 		 if (!QFile::exists(descPath))
 			 continue;
 		 QFile file(descPath);
@@ -319,9 +322,13 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
 			 if (QFile::exists(jsonUiPath))
-				 setJsonUi(plugin, jsonUiPath);
+				 // setJsonUi(plugin, jsonUiPath);
+				 setJsonSettings(plugin, processio::json_ui, jsonArgs);
 			 if (QFile::exists(jsonDefaultsPath))
-				 setJsonDefaults(plugin, jsonDefaultsPath);
+				 setJsonSettings(plugin, processio::json_defaults, jsonArgs);
+			 // setJsonDefaults(plugin, jsonDefaultsPath);
+			 if (QFile::exists(jsonArgs))
+				 setJsonSettings(plugin, processio::json_args, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
@@ -340,12 +347,23 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
 			 if (QFile::exists(jsonUiPath))
-				 setJsonUi(plugin, jsonUiPath);
+				// setJsonUi(plugin, jsonUiPath);
+				 setJsonSettings(plugin, processio::json_ui, jsonArgs);
 			 if (QFile::exists(jsonDefaultsPath))
-				 setJsonDefaults(plugin, jsonDefaultsPath);
+				 setJsonSettings(plugin, processio::json_defaults, jsonArgs);
+				// setJsonDefaults(plugin, jsonDefaultsPath);
+			 if (QFile::exists(jsonArgs))
+				 setJsonSettings(plugin, processio::json_args, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 	 }
+}
+
+void AwPluginManager::setJsonSettings(AwScriptPlugin *plugin, const QString& key, const QString& jsonPath)
+{
+	auto jsonString = AwUtilities::json::fromJsonFileToString(jsonPath);
+	if (!jsonString.isEmpty())
+		plugin->setSettings(key, jsonString);
 }
 
 void AwPluginManager::setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonPath)
@@ -397,14 +415,6 @@ void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QStr
 		auto token = s.toLower();
 		if (m_MATPyPluginFlagsMap.contains(token))
 			f |= m_MATPyPluginFlagsMap.value(token);
-		//if (token == "nodatarequired")
-		//	f |= Aw::ProcessFlags::ProcessDoesntRequireData;
-		//else if (token == "hidden")
-		//	f |= Aw::ProcessFlags::PluginIsHidden;
-		//else if (token == "accepttimeselections")
-		//	f |= Aw::ProcessFlags::PluginAcceptsTimeSelections;
-		//else if (token == "ignorechannelselections")
-		//	f |= Aw::ProcessInput::ProcessIgnoresChannelSelection;
 	}
 	plugin->setFlags(f);
 }
@@ -754,3 +764,19 @@ void AwPluginManager::loadFilterPlugin(AwFilterPlugin *plugin)
 	m_pluginList += plugin;
 }
 
+///
+/// Check for process plugin that are CommandLine compatible.
+/// Search for json_args key and add the json string if found to the result list.
+///
+QStringList AwPluginManager::getBatchableArguments()
+{
+	QStringList res;
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
+			auto settings = p->settings();
+			if (settings.contains(processio::json_args)) 
+				res << settings.value(processio::json_args).toString();
+		}
+	}
+	return res;
+}

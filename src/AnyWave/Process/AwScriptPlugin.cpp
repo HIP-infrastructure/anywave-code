@@ -26,6 +26,7 @@
 #include "AwScriptPlugin.h"
 #include <QFile>
 #include <QTextStream>
+#include <AwKeys.h>
 
 void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
 {

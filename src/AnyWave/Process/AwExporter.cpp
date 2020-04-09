@@ -28,6 +28,7 @@
 #include <filter/AwFiltering.h>
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
+#include <AwKeys.h>
 
 
 AwExporterPlugin::AwExporterPlugin()

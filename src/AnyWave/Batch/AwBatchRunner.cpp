@@ -11,6 +11,8 @@
 #include <AwCore.h>
 #include "Data/AwDataServer.h"
 
+#include <AwKeys.h>
+
 AwBatchRunnerPlugin::AwBatchRunnerPlugin()
 {
 	name = "Batch Runner";

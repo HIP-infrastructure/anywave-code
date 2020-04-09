@@ -30,6 +30,7 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include "Prefs/AwSettings.h"
+#include <AwKeys.h>
 
 // PROCESS
 AwPythonScriptProcess *AwPythonScriptPlugin::newInstance()

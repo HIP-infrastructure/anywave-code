@@ -30,6 +30,7 @@
 #include <utils/json.h>
 #include <QJsonDocument>
 #include "Montage/AwMontageManager.h"
+#include <AwKeys.h>
 
 void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *process)
 {

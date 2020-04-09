@@ -122,6 +122,9 @@ public:
 	AwProcessPlugin *getProcessPluginByName(const QString& name) { return m_processFactory.getPluginByName(name); }
 	AwFilterPlugin *getFilterPluginByName(const QString& name) { return m_filterFactory.getPluginByName(name); }
 
+	// gather json args strings from all plugin that are command line compatible
+	QStringList getBatchableArguments();
+
 	AwFileIO *getReaderToOpenFile(const QString& file);
 
 signals:
@@ -145,6 +148,7 @@ private:
 	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 	void setJsonUi(AwScriptPlugin *plugin, const QString& jsonUiPath);
 	void setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonDefaultsPath);
+	void setJsonSettings(AwScriptPlugin *plugin, const QString& key, const QString& jsonDefaultsPath);
 	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);

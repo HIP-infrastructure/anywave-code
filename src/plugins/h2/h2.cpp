@@ -36,7 +36,7 @@
 #include <QtConcurrent>
 #include <AwFileIO.h>
 #include <utils/json.h>
-
+#include <AwKeys.h>
 
 H2Plugin::H2Plugin()
 {

@@ -31,36 +31,6 @@
 #include <filter/AwFilterSettings.h>
 #include <AwCommandLine.h>
 
-
-////
-//// process contains input and ouput objects that are used to communicate parameters.
-//// basic types for settings are stored in a Hash table named settings.
-////
-//// parameter name								 descritpion
-//// data_path								full path to data file
-//// data_dir								full path to the folder containing the data file
-//// file_duration							file duration in seconds
-//// bad_labels								electodes marked as bad
-//// current_pos_in_file					current position in file in seconds from the beginning
-//// working_dir							full path to the temporary directory created when a process is launched.
-//// plugin_dir								full path to the current plugin directory. Useless for classic C++ plugins.
-
-namespace processio {
-	constexpr auto data_path = "data_path";
-	constexpr auto data_dir = "data_dir";
-	constexpr auto file_duration = "file_duration";
-	constexpr auto bad_labels = "bad_labels";
-	constexpr auto current_pos_in_file = "current_pos_in_file";
-	constexpr auto working_dir = "working_dir";
-	constexpr auto plugin_dir = "plugin_dir";
-	constexpr auto plugin_names = "plugin_names";
-	constexpr auto ica_file = "ica_file";
-	constexpr auto json_ui = "json_ui";
-	constexpr auto json_defaults = "json_def";
-}
-
-
-
 /** AwProcessIO defines object used as input or output by AwProcess **/
 class AW_PROCESS_EXPORT AwProcessIO
 {

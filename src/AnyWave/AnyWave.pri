@@ -315,7 +315,7 @@ SOURCES += ./AnyWave.cpp \
     ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
-    ./Batch/AwBatchDialog.ui \
+    ./Batch/AwBatchGUI.ui \
     ./Batch/AwAddEditBatchDialog.ui \
     ./ICA/AwICAPanel.ui \
     ./ICA/AwPanelItem.ui \

@@ -24,6 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "automarking.h"
+#include <AwKeys.h>
 #include <widget/AwMessageBox.h>
 
 AutoMarkingPlugin::AutoMarkingPlugin()

@@ -91,6 +91,7 @@ void NI4DFileReader::alignFilePointer(QFile& file)
 void NI4DFileReader::cleanUpAndClose()
 {
 	AwFileIO::cleanUpAndClose();
+	m_file.flush();
 	m_file.close();
 	QList<my_channel_data *> values = m_hashChannelsData.values();
 	while (!values.isEmpty())	{

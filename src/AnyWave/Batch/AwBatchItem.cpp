@@ -25,6 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwBatchItem.h"
 #include <utils/json.h>
+#include <AwKeys.h>
 
 AwBatchItem::AwBatchItem(AwProcessPlugin *plugin)
 {

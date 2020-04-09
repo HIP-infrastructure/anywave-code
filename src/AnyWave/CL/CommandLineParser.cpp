@@ -4,7 +4,8 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
 #include "AwCommandLogger.h"
-
+#include "Plugin/AwPluginManager.h"
+#include <utils/json.h>
 //
 // options descriptions
 //
@@ -106,14 +107,69 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which listen.", QString());
 	parser.addOption(serverOpt);
 	parser.addOption(serverPortOpt);
-	   	  
 
+	// get extra arg from plugins
+	auto jsonCollection = AwPluginManager::getInstance()->getBatchableArguments();
+	QStringList parameterNames;
+	QStringList flagNames;
+	for (auto json : jsonCollection) {
+		QString error;
+		auto map = AwUtilities::json::mapFromJsonString(json, error);
+		if (error.isEmpty()) {
+			if (map.contains("parameters")) {
+				auto keys = map.value("parameters").toStringList();
+				for (auto k : keys) {
+					if (!parameterNames.contains(k))
+						parameterNames << k;
+				}
+			}
+			if (map.contains("flags")) {
+				auto flags = map.value("flags").toStringList();
+				for (auto f : flags) {
+					if (!flagNames.contains(f))
+						flagNames << f;
+				}
+			}
+		}
+	}
+	QMap<QString, QCommandLineOption *> mapParams;
+	QMap<QString, QCommandLineOption *> mapFlags;
+	for (auto param : parameterNames) {
+		auto option = new QCommandLineOption(param, "plugin argument", param, QString());
+		mapParams.insert(param, option);
+		parser.addOption(*option);
+	}
+	for (auto flag : flagNames) {
+		auto option = new QCommandLineOption(flag, "plugin argument", flag);
+		mapFlags.insert(flag, option);
+		parser.addOption(*option);
+	}
+	   	  
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
 		throw exception;
 	}
 
 	AwArguments arguments;
+
+	//// add plugin options
+	for (auto k : mapParams.keys()) {
+		auto option = mapParams.value(k);
+		if (parser.isSet(*option)) {
+			arguments[k] = parser.value(*option);
+		}
+	}
+	for (auto k : mapFlags.keys()) {
+		auto option = mapFlags.value(k);
+		if (parser.isSet(*option)) {
+			arguments[k] = true;
+		}
+	}
+	for (auto v : mapParams.values())
+		delete v;
+	for (auto v : mapFlags.values())
+		delete v;
+
 	//// parse common options
 
 	// output_format 

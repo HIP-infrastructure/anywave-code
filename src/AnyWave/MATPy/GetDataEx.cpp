@@ -38,7 +38,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-
+#include <AwKeys.h>
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
 {

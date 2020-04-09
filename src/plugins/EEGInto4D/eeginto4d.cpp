@@ -725,7 +725,9 @@ void EEGInto4D::run()
 			auto dest = QString("%1/%2").arg(outputDir).arg(file.fileName());
 			if (QFile::exists(dest)) {
 				QFile file(dest);
-				file.rename(dest + ".bak");
+				if (!file.rename(dest + ".bak")) {
+					throw AwException(QString("Could not rename %1").arg(dest));
+				 }
 			}
 			bool status = QFile::copy(src, dest);
 		}
@@ -741,9 +743,6 @@ void EEGInto4D::run()
 	}
 	m_megPlugin->deleteInstance(m_megReader);
 	m_eegPlugin->deleteInstance(m_eegReader);
-
-
-
 }
 
 float EEGInto4D::swapFloat(float val)

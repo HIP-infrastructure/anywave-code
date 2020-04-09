@@ -36,6 +36,7 @@
 #include <utils/json.h>
 #include "Prefs/AwSettings.h"
 #include <AwFileInfo.h>
+#include <AwKeys.h>
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
 {
@@ -120,48 +121,50 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	const QString origin = "AwCommandLineManager::createNewProcess()";
 	// get plugin name from json argumetns
 	if (!args.contains("run_process")) {
-		throw AwException("missing json argument.", origin);
+		throw AwException("missing --run argument.", origin);
 		return Q_NULLPTR;
 	}
-	// check for json file
-	QJsonDocument doc;
-	QJsonObject obj;
+
+	// check run arguments (could be a  json file, a json string or a the name of a plugin
 	QString json = args["run_process"].toString();
-	// get json file or parse the string
+	QString pluginName;
+	// a file?
+	QVariantHash hash;
 	if (QFile::exists(json)) {
-		doc = AwUtilities::json::readJsonFile(json);
-		if (doc.isEmpty() || doc.isNull()) {
+		hash = AwUtilities::json::fromJsonFileToHash(json);
+		if (hash.isEmpty() || !hash.contains("plugin")) {
 			throw AwException("json file is invalid.", origin);
-			return Q_NULLPTR;
+			return nullptr;
+		}
+		pluginName = hash.value("plugin").toString();
+	}
+	else {  // testing for a json string
+		QString error;
+		hash = AwUtilities::json::hashFromJsonString(json, error);
+		if (!hash.isEmpty()) { // got a json string
+			if (!hash.contains("plugin")) {
+				throw AwException(QString("json string is invalid: %1").arg(error), origin);
+				return nullptr;
+			}
+			pluginName = hash.value("plugin").toString();
+		}
+		else { // not a json string, so a plugin name?
+			pluginName = json;
 		}
 	}
-	else {
-		doc = QJsonDocument::fromJson(json.toUtf8());
-		if (doc.isEmpty() || doc.isNull()) {
-			throw AwException("json string is invalid.", origin);
-			return Q_NULLPTR;
-		}
-	}
-	obj = doc.object();
 
 	auto pm = AwPluginManager::getInstance();
-	QString pluginName = obj["plugin"].toString();
 	auto plugin = pm->getProcessPluginByName(pluginName);
-
 	if (plugin == Q_NULLPTR) {
 		throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
 		return Q_NULLPTR;
 	}
-
 	AwFileIO *reader = Q_NULLPTR;
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 
-	QString inputFile;
-	if (args.contains("input_file"))
-		inputFile = args["input_file"].toString();
-	if (obj.contains("input_file"))
-		inputFile = obj["input_file"].toString();
+	args.unite(hash);
 
+	QString inputFile = args.value(cl::input_file).toString();
 
 	if (!doNotRequiresData && inputFile.isEmpty()) {
 		throw AwException(QString("input_file must be specified."), origin);
@@ -187,35 +190,32 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		process->pdi.input.settings[processio::data_path] = inputFile;
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file
-	if (obj.contains("marker_file")) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(obj["marker_file"].toString());
-		obj["marker_file"] = fullPath;
+	if (args.contains(cl::marker_file)) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(args.value(cl::marker_file).toString());
+		args[cl::marker_file] = fullPath;
 	}
-	if (obj.contains("montage_file")) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(obj["montage_file"].toString());
-		obj["montage_file"] = fullPath;
+	if (args.contains(cl::montage_file)) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(args.value(cl::montage_file).toString());
+		args[cl::montage_file] = fullPath;
 	}
-
-	// Unite arguments and json !
-	args.unite(doc.object().toVariantHash());
 
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
 		QString tmp = QString("%1.bad").arg(inputFile);
 		if (QFile::exists(tmp)) {
-			args["bad_file"] = tmp;
+			args[cl::bad_file] = tmp;
 			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::loadBad(tmp);
 		}
 		AwChannelList montage;
 		tmp = QString("%1.mtg").arg(inputFile);
-		if (!args.contains("montage_file"))
+		if (!args.contains(cl::montage_file))
 			if (QFile::exists(tmp))
-				args["montage_file"] = tmp;
-		if (args.contains("montage_file")) { // did we finally got a montage file?
-				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args["montage_file"].toString(), 
+				args[cl::montage_file] = tmp;
+		if (args.contains(cl::montage_file)) { // did we finally got a montage file?
+				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args.value(cl::montage_file).toString(),
 					process->pdi.input.settings[processio::bad_labels].toStringList());
 				if (montage.isEmpty()) { // error when loading and/or applying mtg file
-					throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
+					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(cl::montage_file).toString()), origin);
 					return process;
 				}
 		}
@@ -233,21 +233,21 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		
 		tmp = QString("%1.mrk").arg(inputFile);
 		// detect only if marker_file option is not specified by the user
-		if (!args.contains("marker_file"))
+		if (!args.contains(cl::marker_file))
 			if (QFile::exists(tmp))
-				args["marker_file"] = tmp;
+				args[cl::marker_file] = tmp;
 		// if marker file is found => load markers and use them for the process
-		if (args.contains("marker_file"))
-			process->pdi.input.setNewMarkers(AwMarker::load(args["marker_file"].toString()));
+		if (args.contains(cl::marker_file))
+			process->pdi.input.setNewMarkers(AwMarker::load(args.value(cl::marker_file).toString()));
 		else
 			process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
 
 		// handle skipping markers and/or use specific markers
 		QStringList skippedLabels, usedLabels;
-		if (args.contains("skip_markers"))
-			skippedLabels = args["skip_markers"].toStringList();
-		if (args.contains("use_markers"))
-			usedLabels = args["use_markers"].toStringList();
+		if (args.contains(cl::skip_markers))
+			skippedLabels = args.value(cl::skip_markers).toStringList();
+		if (args.contains(cl::use_markers))
+			usedLabels = args.value(cl::use_markers).toStringList();
 
 		bool skipMarkers = !skippedLabels.isEmpty();
 		bool useMarkers = !usedLabels.isEmpty();

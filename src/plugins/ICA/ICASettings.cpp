@@ -2,15 +2,12 @@
 #include <QMessageBox>
 #include <AwCore.h>
 #include <math.h>
+#include <AwKeys.h>
 
-//ICASettings::ICASettings(const QString& dataPath, const AwChannelList& channels, const AwMarkerList& markers, 
-//						 const QStringList& algos, QWidget *parent)
-//	: QDialog(parent)
+
 ICASettings::ICASettings(AwProcess *process, QWidget *parent) : QDialog(parent)
 {
 	m_ui.setupUi(this);
-//	m_ui.comboAlgo->addItems(algos);
-
 	m_channels = process->pdi.input.channels();
 	m_modes = AwChannel::getTypesAsString(m_channels);
 	// remove unwanted modalities
@@ -21,7 +18,7 @@ ICASettings::ICASettings(AwProcess *process, QWidget *parent) : QDialog(parent)
 	m_modes.removeAll("REFERENCE");
 	m_modes.removeAll("GRAD");
 	m_ui.comboModality->addItems(m_modes);
-//	m_labels = AwMarker::getUniqueLabels(markers);
+
 	m_labels = AwMarker::getUniqueLabels(process->pdi.input.markers());
 	if (m_labels.isEmpty()) {
 		m_ui.checkIgnoreMarker->setEnabled(false);
@@ -58,12 +55,12 @@ void ICASettings::accept()
 	
 	args["modality"] = m_modes.at(m_ui.comboModality->currentIndex());
 	if (args["is_ignoring_markers"].toBool()) 
-		args["skip_markers"] = QStringList(m_labels.at(m_ui.comboIgnoredMarkers->currentIndex()));
+		args[cl::skip_markers] = QStringList(m_labels.at(m_ui.comboIgnoredMarkers->currentIndex()));
 	if (args["is_using_markers"].toBool())
-		args["use_markers"] = QStringList(m_labels.at(m_ui.comboUseMarkers->currentIndex()));
+		args[cl::use_markers] = QStringList(m_labels.at(m_ui.comboUseMarkers->currentIndex()));
 
-	args["lp"] = m_ui.spinLPF->value();
-	args["hp"] = m_ui.spinHPF->value();
+	args[cl::lp] = m_ui.spinLPF->value();
+	args[cl::hp] = m_ui.spinHPF->value();
 	args["comp"] = m_ui.spinNC->value();
 
 	// get channels matching modality

@@ -3,6 +3,7 @@
 #include "GraphSetModel.h"
 #include <qfiledialog.h>
 #include "H2Graphs.h"
+#include <AwKeys.h>
 
 GraphManagerWidget::GraphManagerWidget(AwGUIProcess *process, QWidget *parent)
 	: AwProcessGUIWidget(process, parent)
