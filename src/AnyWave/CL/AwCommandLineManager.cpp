@@ -127,41 +127,41 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 
 	// check run arguments (could be a  json file, a json string or a the name of a plugin
 	QString json = args["run_process"].toString();
-	QString pluginName;
-	// a file?
+	QString pluginName = json;
+	auto pm = AwPluginManager::getInstance();
+	auto plugin = pm->getProcessPluginByName(pluginName);
 	QVariantHash hash;
-	if (QFile::exists(json)) {
-		hash = AwUtilities::json::fromJsonFileToHash(json);
-		if (hash.isEmpty() || !hash.contains("plugin")) {
-			throw AwException("json file is invalid.", origin);
-			return nullptr;
-		}
-		pluginName = hash.value("plugin").toString();
-	}
-	else {  // testing for a json string
-		QString error;
-		hash = AwUtilities::json::hashFromJsonString(json, error);
-		if (!hash.isEmpty()) { // got a json string
-			if (!hash.contains("plugin")) {
-				throw AwException(QString("json string is invalid: %1").arg(error), origin);
+	if (plugin == nullptr) {
+		// no plugin found with that name.
+		// a file?
+		if (QFile::exists(json)) {
+			hash = AwUtilities::json::fromJsonFileToHash(json);
+			if (hash.isEmpty() || !hash.contains("plugin")) {
+				throw AwException("json file is invalid.", origin);
 				return nullptr;
 			}
 			pluginName = hash.value("plugin").toString();
 		}
-		else { // not a json string, so a plugin name?
-			pluginName = json;
+		else {  // testing for a json string
+			QString error;
+			hash = AwUtilities::json::hashFromJsonString(json, error);
+			if (!hash.isEmpty()) { // got a json string
+				if (!hash.contains("plugin")) {
+					throw AwException(QString("json string is invalid: %1").arg(error), origin);
+					return nullptr;
+				}
+				pluginName = hash.value("plugin").toString();
+			}
+		}
+		plugin = pm->getProcessPluginByName(pluginName);
+		if (plugin == Q_NULLPTR) {
+			throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
+			return Q_NULLPTR;
 		}
 	}
 
-	auto pm = AwPluginManager::getInstance();
-	auto plugin = pm->getProcessPluginByName(pluginName);
-	if (plugin == Q_NULLPTR) {
-		throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
-		return Q_NULLPTR;
-	}
 	AwFileIO *reader = Q_NULLPTR;
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
-
 	args.unite(hash);
 
 	QString inputFile = args.value(cl::input_file).toString();

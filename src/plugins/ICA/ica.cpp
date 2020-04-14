@@ -58,6 +58,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
 	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/ica/json/ui.json");
 	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/ica/json/default.json");
+	m_settings[processio::json_args] = AwUtilities::json::fromJsonFileToString(":/ica/json/args.json");
 }
 
 ICA::~ICA()
@@ -255,12 +256,18 @@ int ICA::initParameters()
 	n = nSamples;
 
 	QString dir;
-	if (args.contains("output_dir"))
-		dir = args.value("output_dir").toString();
+	if (args.contains(cl::output_dir))
+		dir = args.value(cl::output_dir).toString();
 	else
 		dir = pdi.input.settings[processio::data_dir].toString();
+
+	// default file prefix is the basename of the data file.
 	QFileInfo fi(pdi.input.settings[processio::data_path].toString());
 	m_fileName = QString("%1/%2").arg(dir).arg(fi.fileName());
+	// output_prefix will override this
+	if (args.contains(cl::output_prefix))
+		m_fileName = args.value(cl::output_prefix).toString();
+
 	QString mod = args.value("modality").toString();
 	m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	return 0;

@@ -1,0 +1,3 @@
+{
+"parameters" : [ "eeg_file", "meg_file" ]
+}

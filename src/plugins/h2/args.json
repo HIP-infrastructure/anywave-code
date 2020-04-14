@@ -1,0 +1,3 @@
+{
+"parameters" : [ "time_window", "step", "max_lag", "algorithm", "downsampling_factor" ]
+}

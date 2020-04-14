@@ -1,0 +1,4 @@
+{
+  "flags": [ "downsampling", "infomax_extended", "skip_bad" ],
+  "parameters": [ "comp", "modality" ]
+}

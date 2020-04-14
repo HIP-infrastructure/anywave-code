@@ -104,7 +104,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(runProcessOpt);
 	// Dedicated data server mode for plugins
 	QCommandLineOption serverOpt("server", "start an instance of anywave and listen to client connections.");
-	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which listen.", QString());
+	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which to listen.", QString());
 	parser.addOption(serverOpt);
 	parser.addOption(serverPortOpt);
 
@@ -140,7 +140,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		parser.addOption(*option);
 	}
 	for (auto flag : flagNames) {
-		auto option = new QCommandLineOption(flag, "plugin argument", flag);
+		auto option = new QCommandLineOption(flag, "plugin argument flag", flag, QString());
 		mapFlags.insert(flag, option);
 		parser.addOption(*option);
 	}
@@ -159,10 +159,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 			arguments[k] = parser.value(*option);
 		}
 	}
+	// flags are special arguments for which value must be true or false (yes or no is also accepted)
+	QStringList flagsValues = { "yes", "no", "true", "false" };
 	for (auto k : mapFlags.keys()) {
 		auto option = mapFlags.value(k);
 		if (parser.isSet(*option)) {
-			arguments[k] = true;
+			auto value = parser.value(*option).toLower().simplified();
+			if (flagsValues.contains(value))
+				arguments[k] = value == "true" || value == "yes";
 		}
 	}
 	for (auto v : mapParams.values())

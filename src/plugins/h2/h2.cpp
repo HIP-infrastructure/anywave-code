@@ -31,7 +31,6 @@
 #include <AwCore.h>
 #include <aw_armadillo.h>
 #include <qmessagebox.h>
-
 #include <QFileDialog>
 #include <QtConcurrent>
 #include <AwFileIO.h>
@@ -48,6 +47,7 @@ H2Plugin::H2Plugin()
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/h2/ui.json");
 	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/h2/default.json");
+	m_settings[processio::json_args] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
 }
 
 H2Plugin::~H2Plugin()
@@ -66,7 +66,6 @@ H2::H2() : AwProcess()
 	m_step = 1;	// pas de 1s
 	m_scaleProgress = 0;
 	m_ui = NULL;
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
 	// we have localization support, so provide the prefix for all the language files.
 	m_langFilePrefix = ":/h2";
 	m_downSample = 0.;
@@ -442,16 +441,16 @@ void H2::runFromCommandLine()
 	}
 
 	QString dir;
-	if (args.contains("output_dir"))
-		dir = args["output_dir"].toString();
+	if (args.contains(cl::output_dir))
+		dir = args.value(cl::output_dir).toString();
 	else
 		dir = pdi.input.settings[processio::data_dir].toString();
 	sendMessage("Saving to MATLAB file...");
-	float lp = args["lp"].toDouble();
-	float hp = args["hp"].toDouble();
+	float lp = args.value(cl::lp).toDouble();
+	float hp = args.value(cl::hp).toDouble();
 
-	if (args.contains("output_prefix")) {
-		QString pref = args["output_prefix"].toString();
+	if (args.contains(cl::output_prefix)) {
+		QString pref = args.value(cl::output_prefix).toString();
 		baseMATLABFile = QString("%1_%2").arg(pref).arg(baseMATLABFile);
 	}
 	else {

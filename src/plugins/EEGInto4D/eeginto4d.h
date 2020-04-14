@@ -56,6 +56,7 @@ private:
 	void alignFilePointer(QFile& file);
 	qint64 offsetFilePointer(const QFile& file);
 	float swapFloat(float value);
+	void moveResultingFiles(const QString & srcDir, const QString & destDir);
 };
 
 class EEGINTO4D_EXPORT EEGInto4DPlugin : public AwProcessPlugin

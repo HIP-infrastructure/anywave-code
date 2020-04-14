@@ -1,0 +1,5 @@
+{
+"input_keys" : [ "meg_file", "eeg_file"],
+"meg_file" : ["MEG File", "check"],
+"eeg_file" : ["EEG File", "check"]
+}
