@@ -27,6 +27,7 @@
 
 #include <QWidget>
 #include "ui_AwBatchGUI.h"
+#include "IO/BIDS/AwBIDSItem.h"
 class AwProcessPlugin;
 class AwBatchItem;
 
@@ -37,6 +38,8 @@ class AwBatchGUI : public QWidget
 public:
 	AwBatchGUI(QWidget *parent = Q_NULLPTR);
 	~AwBatchGUI();
+	/** addOperation is called from BIDS Manager to insert batch operations based on file selection in the BIDS GUI **/
+	void addOperation(const QString& pluginName, const AwBIDSItems& items);
 public slots:
 	void addItem();
 	void editItem(AwBatchItem *item);

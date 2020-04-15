@@ -12,6 +12,8 @@
 #include <QMenu>
 #include "Process/AwProcessManager.h"
 #include "Prefs/AwSettings.h"
+#include "Batch/AwBatchManager.h"
+#include "Batch/AwBatchGUI.h"
 
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
@@ -135,7 +137,9 @@ void AwBIDSGUI::addToProcessing()
 			}
 		}
 	}
-	emit newProcessBatchOperationAdded(action->data().toString(), files);
+	// wake up batch manager if necessary and show up the GUI in the dockwidget
+	emit batchManagerNeeded();
+//	AwBatchManager::instance()->ui()->addOperation(action->data().toString(), files);
 }
 
 

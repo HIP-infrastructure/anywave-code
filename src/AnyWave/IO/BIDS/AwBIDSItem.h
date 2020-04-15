@@ -32,7 +32,8 @@ class AwBIDSItem : public QStandardItem
 public:
 	AwBIDSItem(const QString& text, AwBIDSItem *parent = nullptr);
 	enum Types { Subject, Session, ieeg, meg, eeg, Folder, DataFile };
-	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2 };
+	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2, RelativePathRole = Qt::UserRole + 3,
+		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5	};
 	inline QList<AwBIDSItem *>& children() { return m_children; }
 	inline QStringList& files() { return m_files; }
 	inline void addFile(const QString& filePath) { m_files.append(filePath); }

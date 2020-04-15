@@ -1285,9 +1285,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSParser.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSParser.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSNode.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
@@ -1907,9 +1904,6 @@
     </CustomBuild>
     <CustomBuild Include="Widgets\AwVideoSettingsDial.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSParser.h">
-      <Filter>IO\BIDS</Filter>
     </CustomBuild>
     <CustomBuild Include="MATPy\AwPidManager.h">
       <Filter>MATPy</Filter>

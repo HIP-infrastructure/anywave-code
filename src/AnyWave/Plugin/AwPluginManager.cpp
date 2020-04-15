@@ -93,6 +93,17 @@ AwPluginManager::AwPluginManager()
 	loadPlugins();
 	loadUserPlugins();
 	setObjectName("AwPluginManager");
+	// parse process plugins which are command line compatible
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
+			QString error;
+			p->setBatchUi(AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_ui).toString(), error));
+			p->setBatchDefaults(AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_defaults).toString(), error));
+			p->addArgs(AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_args).toString(), error));
+			if (!error.isEmpty())
+				emit log(QString("batch configuration error for %1 : %2").arg(p->name).arg(error));
+		}
+	}
 }
 
 //

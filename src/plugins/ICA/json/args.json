@@ -1,4 +1,8 @@
 {
-  "flags": [ "downsampling", "infomax_extended", "skip_bad" ],
-  "parameters": [ "comp", "modality" ]
+  "flags" : [ "downsampling", "infomax_extended", "skip_bad" ],
+  "parameters" : [ "comp", "modality" ],
+  "inputs" : 
+  {
+	"input_file" : "all"
+  }
 }

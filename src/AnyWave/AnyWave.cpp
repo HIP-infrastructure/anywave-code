@@ -27,7 +27,6 @@
 #include <QFileDialog>
 #include <QStatusBar>
 #include <QNetworkInterface>
-//#include <QSplashScreen>
 #include <QDesktopServices>
 #include "AnyWave.h"
 #include "Process/AwProcessManager.h"
@@ -60,7 +59,6 @@
 #include "Source/AwSourceManager.h"
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
-//#include <AwMatlabInterface.h>
 #include <AwMEGSensorManager.h>
 #include <widget/AwMarkerInspector.h>
 #include <layout/AwLayoutManager.h>
@@ -70,7 +68,7 @@
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
-//#include "Batch/AwBatchDialog.h"
+
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"

@@ -862,6 +862,8 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 				item->setData(fullPath, AwBIDSItem::PathRole);
 				item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
 				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+				// set the relative path role
+				item->setData(name, AwBIDSItem::RelativePathRole);
 				recursiveParsing(fullPath, item);
 			}
 		}
@@ -869,6 +871,7 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 	else {
 		// find files only if current item is eeg, meg or ieeg
 		auto type = parentItem->data(AwBIDSItem::TypeRole).toInt();
+		auto parentRelativePath = parentItem->data(AwBIDSItem::RelativePathRole).toString();
 		if (m_dataContainers.contains(type)) {
 			auto list = dir.entryInfoList(QDir::Files);
 			for (auto f : list) {
@@ -880,6 +883,9 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					auto fileItem = new AwBIDSItem(fileName, parentItem);
 					fileItem->setData(fullPath, AwBIDSItem::PathRole);
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+					fileItem->setData(type, AwBIDSItem::DataTypeRole);
+					// build relative path using parent's one
+					fileItem->setData(QString("%1/%2").arg(parentRelativePath).arg(fileName), AwBIDSItem::RelativePathRole);
 					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
 					parentItem->addFile(fullPath);
 					reader->plugin()->deleteInstance(reader);
@@ -896,6 +902,9 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					auto item = new AwBIDSItem(name, parentItem);
 					item->setData(type, AwBIDSItem::TypeRole);
 					item->setData(fullPath, AwBIDSItem::PathRole);
+					// build relative path using parent's one
+					item->setData(type, AwBIDSItem::DataTypeRole);
+					item->setData(QString("%1/%2").arg(parentRelativePath).arg(name), AwBIDSItem::RelativePathRole);
 					item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 					recursiveParsing(fullPath, item);
 				}
@@ -908,6 +917,7 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 				auto fullPath = subDir.absoluteFilePath();
 				auto item = new AwBIDSItem(name, parentItem);
 				item->setData(fullPath, AwBIDSItem::PathRole);
+				item->setData(QString("%1/%2").arg(parentRelativePath).arg(name), AwBIDSItem::RelativePathRole);
 				// check the type 
 				if (name.startsWith("ses-"))
 					item->setData(AwBIDSItem::Session, AwBIDSItem::TypeRole);

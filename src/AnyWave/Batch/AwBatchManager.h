@@ -38,7 +38,7 @@ public:
 	static AwBatchManager *instance();
 	static bool isInstantiated() { return m_instance != nullptr; }
 	// GUI Specific
-	QWidget *ui() { return m_ui; }
+	AwBatchGUI *ui() { return m_ui; }
 protected:
 	AwBatchManager();
 	AwBatchGUI *m_ui;

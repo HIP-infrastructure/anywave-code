@@ -46,6 +46,7 @@ public:
 signals:
 	void dataFileClicked(const QString&);
 	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
+	void batchManagerNeeded();
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);

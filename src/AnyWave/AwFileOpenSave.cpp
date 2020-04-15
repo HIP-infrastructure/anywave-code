@@ -328,6 +328,7 @@ void AnyWave::openBIDS(const QString& path)
 	if (!AwBIDSManager::isInstantiated()) {
 		AwBIDSManager::instance()->setRootDir(path);
 		connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
+		connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), 	this, SLOT(on_actionCreate_batch_script_triggered()));
 	}
 	else
 		AwBIDSManager::instance()->setRootDir(path);

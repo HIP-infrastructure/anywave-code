@@ -152,12 +152,23 @@ public:
 	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
 	virtual void deleteInstance(AwBaseProcess *process) { delete process;  }
 	void addLanguageTranslation(const QString& resourceFile);
-	inline QHash<QString, QVariant>& settings() { return m_settings; }
+	inline QVariantHash& settings() { return m_settings; }
 	void setSettings(const QString& key, const QVariant& value) { m_settings[key] = value; }
+	/** Command Line specific **/
+	inline QVariantHash& args() { return m_args; }
+	void setArg(const QString& key, QVariant& value) { m_args[key] = value; }
+	void addArgs(const QVariantHash& args) { m_args.unite(args); }
+	inline QVariantHash& ui() { return m_ui; }
+	inline QVariantHash& defaults() { return m_defaults; }
+	inline bool hasDeclaredArgs() { return !m_args.isEmpty(); }
+	inline bool isBatchGUICompatible() { return m_flags & Aw::ProcessFlags::CanRunFromCommandLine && !m_ui.isEmpty() && !m_defaults.isEmpty(); }
+	void setBatchUi(const QVariantHash& hash) { m_ui = hash; }
+	void setBatchDefaults(const QVariantHash& hash) { m_defaults = hash; }
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
 	QVariantHash m_settings;
+	QVariantHash m_args, m_ui, m_defaults; // command line specific
 };
 
 class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess
