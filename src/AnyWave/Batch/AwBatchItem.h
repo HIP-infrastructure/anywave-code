@@ -27,6 +27,7 @@
 
 #include <QStringList>
 #include <AwProcessInterface.h>
+#include "IO/BIDS/AwBIDSItem.h"
 
 class AwBatchItem
 {
@@ -37,23 +38,23 @@ public:
 
 	void copy(AwBatchItem *source);
 	inline QString& pluginName() { return m_plugin->name; }
-	QVariantHash& jsonParameters() { return m_args; }
-	void setJsonParameters(const QVariantHash& args) { m_args = args; }
+	QVariantHash& params() { return m_params; }
+	QVariantHash& pluginBatchSettings() { return m_plugin->batchHash(); }
+	void setParams(const QVariantHash& args) { m_params = args; }
 	AwProcessPlugin *plugin() { return m_plugin; }
-	inline bool isEmpty() { return m_args.isEmpty(); }
+//	inline bool isEmpty() { return m_settings.isEmpty(); }
 	bool checkPluginParams();
-	QVariantMap& jsonUi() { return m_jsonUi; }
 	QString getFileForInput(const QString& key, int index);
 	QStringList getFilesForInput(const QString& key);
 	QMap<QString, QStringList>& inputsMap() { return m_inputFilesMap; }
-	QVariantHash& jsonDefaults() { return m_jsonDefaults; }
 	void addFiles(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
+	void addFilesFromBIDS(AwBIDSItems& items);
+	AwBIDSItem *getBIDSFileItem(const AwBIDSItems& item, int type);
+	QStringList getFiles(const QString& key) { return m_inputFilesMap.value(key); }
 protected:
 	QString m_pluginName;		// name of the plugin
-	QVariantHash m_args;
+	QVariantHash m_params;	    // current parameters
 	AwProcessPlugin *m_plugin;
-	QVariantMap m_jsonUi;
-	QVariantHash m_jsonDefaults;
 	QMap<QString, QStringList> m_inputFilesMap;	// hold a list of files for a specific key.
 };
 

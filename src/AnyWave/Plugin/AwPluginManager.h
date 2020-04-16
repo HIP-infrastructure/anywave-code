@@ -156,6 +156,7 @@ private:
 	void loadProcessPlugin(AwProcessPlugin *plugin);
 	void loadDisplayPlugin(AwDisplayPlugin *plugin);
 	void loadFilterPlugin(AwFilterPlugin *plugin);
+	void processJsonFiles();
 
 	// Plugins
 	static AwPluginManager *m_instance;

@@ -1,3 +1,8 @@
 {
-"parameters" : [ "eeg_file", "meg_file" ]
+"parameters" : [ "eeg_file", "meg_file" ],
+"inputs" :
+{
+	"eeg_file" : "eeg",
+	"meg_file" : "meg"
+	}	
 }

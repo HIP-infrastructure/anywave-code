@@ -100,6 +100,8 @@ public:
 	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
 	QVariantMap& settings() { return m_settings; }
 	inline QStringList participantValues(const QString& participantKey) { return m_participantsData.value(participantKey).toStringList(); }
+	/** Create the output_dir fullpath when processing on item. **/
+	QString buildOutputDir(const QString& pluginName, AwBIDSItem *item);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:

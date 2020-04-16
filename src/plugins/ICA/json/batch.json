@@ -1,0 +1,34 @@
+{
+  "parameters": [ "modality", "comp" ],
+  "flags": [ "infomax_extended", "skip_bad", "downsampling" ],
+  "inputs": {
+    "input_file": "any file"
+  },
+  "outputs": {
+    "output_file" :  ".mat"
+  },
+  "batch_ui": {
+    "hp": [ "High Pass", "double" ],
+    "lp": [ "Low Pas", "double" ],
+    "comp": [ "Components", "int" ],
+    "modality": [ "Modality", "list" ],
+    "downsampling": [ "Downsampling data", "boolean" ],
+    "skip_markers": [ "Avoid markers", "stringlist" ],
+    "use_markers": [ "Use markers", "stringlist" ],
+    "infomax_extended": [ "Infomax extended mode", "boolean" ],
+    "skip_bad": [ "Skip bad channels", "boolean" ],
+    "fields_ordering": [ "comp", "hp", "lp", "modality", "skip_bad", "downsampling", "infomax_extended", "skip_markers", "use_markers" ]
+  },
+  "batch_defaults": {
+    "input_file" :  "File",
+    "hp": 0,
+    "lp": 0,
+    "comp": 50,
+    "modality": [ "MEG", "EEG", "SEEG", "EMG" ],
+    "downsampling": false,
+    "skip_markers": "",
+    "use_markers": "",
+    "infomax_extended": false,
+    "skip_bad": true
+  }
+}

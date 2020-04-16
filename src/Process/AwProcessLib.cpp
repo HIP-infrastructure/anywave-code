@@ -173,6 +173,12 @@ void AwProcessPlugin::addLanguageTranslation(const QString& resourceFile)
 		delete translator;
 }
 
+
+bool AwProcessPlugin::hasDeclaredArgs()
+{
+	return m_batchHash.contains("parameters");
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // AwProcessDataInterface
 

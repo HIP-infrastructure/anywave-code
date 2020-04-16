@@ -14,6 +14,7 @@
 #include "Prefs/AwSettings.h"
 #include "Batch/AwBatchManager.h"
 #include "Batch/AwBatchGUI.h"
+#include <AwKeys.h>
 
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
@@ -105,14 +106,19 @@ void AwBIDSGUI::createContextMenus()
 {
 	connect(m_ui.treeView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuRequested(const QPoint&)));
 	m_menu = new QMenu(m_ui.treeView);
-	auto menuProcessing = m_menu->addMenu("Add to processing operations");
+	auto menuProcessing = m_menu->addMenu("Processing");
 	// get batchable processes
 	auto processes = AwProcessManager::instance()->getBatchableProcesses();
 	for (auto p : processes) {
-		auto action = menuProcessing->addAction(QString("compute %1").arg(p->name));
-		// set the plugin's name as data
-		action->setData(p->name);
-		connect(action, &QAction::triggered, this, &AwBIDSGUI::addToProcessing);
+		// DO NOT TAKE Process with more than input_file as INPUTS
+		auto batchSettings = p->batchHash();
+		auto inputs = batchSettings.value(cl::batch_inputs).toHash();
+		if (inputs.contains(cl::input_file)) {
+			auto action = menuProcessing->addAction(QString("compute %1").arg(p->name));
+			// set the plugin's name as data
+			action->setData(p->name);
+			connect(action, &QAction::triggered, this, &AwBIDSGUI::addToProcessing);
+		}
 	}
 }
 
@@ -125,21 +131,22 @@ void AwBIDSGUI::addToProcessing()
 	QStringList files;
 	// get selected items 
 	auto indexes = m_ui.treeView->selectionModel()->selectedIndexes();
+	AwBIDSItems items;
 	for (auto index : indexes) {
 		if (index.column() == 0) {
 			auto item = static_cast<AwBIDSItem *>(m_model->itemFromIndex(index));
 			if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile)
-				files << item->data(AwBIDSItem::PathRole).toString();
+				items << item;
 			else {
 				auto dataFileItems = item->getDataFileItems();
 				for (auto dataFileItem : dataFileItems)
-					files << dataFileItem->data(AwBIDSItem::PathRole).toString();
+					items << dataFileItem;
 			}
 		}
 	}
 	// wake up batch manager if necessary and show up the GUI in the dockwidget
 	emit batchManagerNeeded();
-//	AwBatchManager::instance()->ui()->addOperation(action->data().toString(), files);
+	AwBatchManager::instance()->ui()->addOperation(action->data().toString(), items);
 }
 
 

@@ -155,20 +155,16 @@ public:
 	inline QVariantHash& settings() { return m_settings; }
 	void setSettings(const QString& key, const QVariant& value) { m_settings[key] = value; }
 	/** Command Line specific **/
-	inline QVariantHash& args() { return m_args; }
-	void setArg(const QString& key, QVariant& value) { m_args[key] = value; }
-	void addArgs(const QVariantHash& args) { m_args.unite(args); }
-	inline QVariantHash& ui() { return m_ui; }
-	inline QVariantHash& defaults() { return m_defaults; }
-	inline bool hasDeclaredArgs() { return !m_args.isEmpty(); }
-	inline bool isBatchGUICompatible() { return m_flags & Aw::ProcessFlags::CanRunFromCommandLine && !m_ui.isEmpty() && !m_defaults.isEmpty(); }
-	void setBatchUi(const QVariantHash& hash) { m_ui = hash; }
-	void setBatchDefaults(const QVariantHash& hash) { m_defaults = hash; }
+	inline QVariantHash& batchHash() { return m_batchHash; }
+	void setBatch(const QString& key, const QVariant& value) { m_batchHash[key] = value; }
+	void addBatchHash(const QVariantHash& hash) { m_batchHash.unite(hash); }
+	inline bool hasDeclaredArgs();
+	inline bool isBatchGUICompatible() { return m_flags & Aw::ProcessFlags::CanRunFromCommandLine && !m_batchHash.isEmpty(); }
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
 	QVariantHash m_settings;
-	QVariantHash m_args, m_ui, m_defaults; // command line specific
+	QVariantHash m_batchHash; // command line specific
 };
 
 class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess

@@ -30,21 +30,41 @@
 AwBatchItem::AwBatchItem(AwProcessPlugin *plugin)
 {
 	m_plugin = plugin; 
-	QString error;
-	m_jsonUi = AwUtilities::json::mapFromJsonString(plugin->settings().value(processio::json_ui).toString(), error);
-	m_jsonDefaults = AwUtilities::json::hashFromJsonString(plugin->settings().value(processio::json_defaults).toString(), error);
-	auto inputs = m_jsonUi.value("input_keys").toStringList();
-	for (auto input : inputs) 
-		m_inputFilesMap.insert(input, QStringList());	
-	// default arguments are json defaults
-	m_args = m_jsonDefaults;
+	auto batchSettings = plugin->batchHash();
+
+	batchSettings.value("input_keys").toStringList();
+	auto hash = m_plugin->batchHash();
+	if (hash.contains("inputs")) {
+		auto inputs = hash.value("inputs").toHash();
+		for (auto key : inputs.keys())
+			m_inputFilesMap.insert(key, QStringList());
+	}
+	else {
+		m_inputFilesMap.insert("input_file", QStringList());
+	}
+	// now fill params with defaults values
+	auto defaults = batchSettings.value(cl::batch_defaults).toHash();
+	auto ui = batchSettings.value(cl::batch_ui).toHash();
+	for (auto key : ui.keys()) {
+		auto keyValue = ui.value(key).toString().toLower();
+		if (keyValue == "string" || keyValue == "stringlist")
+			m_params[key] = defaults.value(key).toString();
+		else if (keyValue == "double")
+			m_params[key] = defaults.value(key).toDouble();
+		else if (keyValue == "int")
+			m_params[key] = defaults.value(key).toInt();
+		else if (keyValue == "boolean")
+			m_params[key] = defaults.value(key).toBool();
+		else if (keyValue == "list")
+			m_params[key] = defaults.value(key).toStringList().first();
+	}
 }
 
 AwBatchItem::AwBatchItem(AwBatchItem *copy)
 {
 	m_plugin = copy->m_plugin;
 	m_pluginName = copy->pluginName();
-	m_args = copy->m_args;
+	m_params = copy->m_params;
 	m_inputFilesMap = copy->m_inputFilesMap;
 }
 
@@ -52,8 +72,47 @@ void AwBatchItem::copy(AwBatchItem *source)
 {
 	m_plugin = source->m_plugin;
 	m_pluginName = source->pluginName();
-	m_args = source->m_args;
+	m_params = source->m_params;
 	m_inputFilesMap = source->m_inputFilesMap;
+}
+
+AwBIDSItem *AwBatchItem::getBIDSFileItem(const AwBIDSItems& items, int type)
+{
+	if (items.isEmpty())
+		return nullptr;
+	if (type == -1)
+		return items.first();
+
+	for (auto item : items) {
+		auto itemType = item->data(AwBIDSItem::DataTypeRole).toInt();
+		if (itemType == type)
+			return item;
+	}
+}
+
+void AwBatchItem::addFilesFromBIDS(AwBIDSItems& items)
+{
+	auto batchSettings = m_plugin->batchHash();
+	auto inputs = batchSettings.value(cl::batch_inputs).toHash();
+	for (auto k : inputs.keys()) {
+		auto value = inputs.value(k).toString();
+		AwBIDSItem *item;
+		int fileItemType = -1;
+		if (value == "eeg file")
+			fileItemType = AwBIDSItem::eeg;
+		else if (value == "meg file")
+			fileItemType = AwBIDSItem::eeg;
+		else if (value == "ieeg file")
+			fileItemType = AwBIDSItem::ieeg;
+		item = getBIDSFileItem(items, fileItemType);
+		if (item) {
+			auto files = m_inputFilesMap.value(k);
+			files << item->data(AwBIDSItem::PathRole).toString();
+			m_inputFilesMap[k] = files;
+			items.removeAll(item);
+		}
+	}
+
 }
 
 QString AwBatchItem::getFileForInput(const QString& key, int index)
@@ -73,7 +132,7 @@ bool AwBatchItem::checkPluginParams()
 {
 	auto instance = m_plugin->newInstance();
 	QString error;
-	auto res = instance->batchParameterCheck(this->m_args);
+	auto res = instance->batchParameterCheck(this->m_params);
 	m_plugin->deleteInstance(instance);
 	return res;
 }

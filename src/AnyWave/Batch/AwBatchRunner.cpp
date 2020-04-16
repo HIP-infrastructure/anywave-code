@@ -144,7 +144,7 @@ void AwBatchRunner::run()
 		auto pluginName = item->pluginName();
 		QString error;
 
-		auto dict = item->jsonParameters();
+		auto dict = item->params();
 
 		AwBaseProcess *process = nullptr;
 		auto inputs = item->inputsMap();

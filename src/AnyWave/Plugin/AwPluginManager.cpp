@@ -93,17 +93,7 @@ AwPluginManager::AwPluginManager()
 	loadPlugins();
 	loadUserPlugins();
 	setObjectName("AwPluginManager");
-	// parse process plugins which are command line compatible
-	for (auto p : m_processes) {
-		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
-			QString error;
-			p->setBatchUi(AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_ui).toString(), error));
-			p->setBatchDefaults(AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_defaults).toString(), error));
-			p->addArgs(AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_args).toString(), error));
-			if (!error.isEmpty())
-				emit log(QString("batch configuration error for %1 : %2").arg(p->name).arg(error));
-		}
-	}
+	processJsonFiles();
 }
 
 //
@@ -111,6 +101,25 @@ AwPluginManager::AwPluginManager()
 //
 AwPluginManager::~AwPluginManager()
 {
+}
+
+void AwPluginManager::processJsonFiles()
+{
+	// parse process plugins which are command line compatible
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
+			QString error;
+			// parsing  args.json if exists to get inputs keys
+			auto hash = AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_batch).toString(), error);
+			if (!hash.contains("inputs")) {
+				// no inputs key in batch.json or no batch.json => considering input to be input_file : "file" (AnyWave default)
+				QVariantHash inputs;
+				inputs.insert(cl::input_file, QString("file"));
+				hash.insert("inputs", inputs);
+			}
+			p->addBatchHash(hash);
+		}
+	}
 }
 
 //
@@ -247,8 +256,6 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 bool isMATLABScript = QFile::exists(matlabCode);
 		 bool isPythonScript = QFile::exists(pythonCode);
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
-		 QString jsonUiPath = QString("%1/ui.json").arg(pluginPath);
-		 QString jsonDefaultsPath = QString("%1/default.json").arg(pluginPath);
 		 QString jsonArgs = QString("%1/args.json").arg(pluginPath);
 		 if (!QFile::exists(descPath))
 			 continue;
@@ -332,14 +339,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
-			 if (QFile::exists(jsonUiPath))
-				 // setJsonUi(plugin, jsonUiPath);
-				 setJsonSettings(plugin, processio::json_ui, jsonArgs);
-			 if (QFile::exists(jsonDefaultsPath))
-				 setJsonSettings(plugin, processio::json_defaults, jsonArgs);
-			 // setJsonDefaults(plugin, jsonDefaultsPath);
 			 if (QFile::exists(jsonArgs))
-				 setJsonSettings(plugin, processio::json_args, jsonArgs);
+				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
@@ -357,14 +358,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
-			 if (QFile::exists(jsonUiPath))
-				// setJsonUi(plugin, jsonUiPath);
-				 setJsonSettings(plugin, processio::json_ui, jsonArgs);
-			 if (QFile::exists(jsonDefaultsPath))
-				 setJsonSettings(plugin, processio::json_defaults, jsonArgs);
-				// setJsonDefaults(plugin, jsonDefaultsPath);
 			 if (QFile::exists(jsonArgs))
-				 setJsonSettings(plugin, processio::json_args, jsonArgs);
+				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 	 }
@@ -375,20 +370,6 @@ void AwPluginManager::setJsonSettings(AwScriptPlugin *plugin, const QString& key
 	auto jsonString = AwUtilities::json::fromJsonFileToString(jsonPath);
 	if (!jsonString.isEmpty())
 		plugin->setSettings(key, jsonString);
-}
-
-void AwPluginManager::setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonPath)
-{
-	auto jsonString = AwUtilities::json::fromJsonFileToString(jsonPath);
-	if (!jsonString.isEmpty())
-		plugin->setSettings(processio::json_defaults, jsonString);
-}
-
-void AwPluginManager::setJsonUi(AwScriptPlugin *plugin, const QString& jsonPath)
-{
-	auto jsonString = AwUtilities::json::fromJsonFileToString(jsonPath);
-	if (!jsonString.isEmpty())
-		plugin->setSettings(processio::json_ui, jsonString);
 }
 
 void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
@@ -785,8 +766,8 @@ QStringList AwPluginManager::getBatchableArguments()
 	for (auto p : m_processes) {
 		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
 			auto settings = p->settings();
-			if (settings.contains(processio::json_args)) 
-				res << settings.value(processio::json_args).toString();
+			if (settings.contains(processio::json_batch)) 
+				res << settings.value(processio::json_batch).toString();
 		}
 	}
 	return res;

@@ -30,6 +30,7 @@
 #include "AwBatchRunner.h"
 #include <AwKeys.h>
 #include <QMenu>
+#include "IO/BIDS/AwBIDSManager.h"
 
 AwBatchGUI::AwBatchGUI(QWidget *parent)
 	: QWidget(parent)
@@ -70,56 +71,32 @@ void AwBatchGUI::addOperation(const QString& pluginName, const AwBIDSItems& item
 	if (plugin == nullptr)
 		return;
 
-	auto copiedList = items;
-	while (!copiedList.isEmpty()) {
-		auto batchItem = new AwBatchItem(plugin);
-		// get args for the item
-		auto args = batchItem->jsonParameters();
-		auto ui = batchItem->jsonUi();
-		// a json ui and json default dict is optional : some plugin are batchable but don't have a json ui/default to be compatible with Batch GUI
-		if (ui.isEmpty()) { // the plugin has no Batch GUI Compatibility, consider it as a regular batchable plugin which requires input_file key as input.
-			args[cl::input_file] = copiedList.takeFirst()->data(AwBIDSItem::PathRole).toString();
-
-		}
-		else {
-			auto inputKeys = ui.value("input_keys").toStringList();
-			// consider plugin input keys:
-			// if only one input key => create an operation by items.
-			// if several input keys, parse items in the list order to fullfill input keys requirement.
-			if (inputKeys.isEmpty()) {
-				delete batchItem;
-				continue;
-			}
-		}
-	}
 	for (auto item : items) {
 		auto batchItem = new AwBatchItem(plugin);
-		// get args for the item
-		auto args = batchItem->jsonParameters();
-		auto ui = batchItem->jsonUi();
-		// a json ui and json default dict is optional : some plugin are batchable but don't have a json ui/default to be compatible with Batch GUI
-		if (ui.isEmpty()) { // the plugin has no Batch GUI Compatibility, consider it as a regular batchable plugin which requires input_file key as input.
-			args[cl::input_file] = item->data(AwBIDSItem::PathRole).toString();
-		}
-		else {
-			auto inputKeys = ui.value("input_keys").toStringList();
-			// consider plugin input keys:
-			// if only one input key => create an operation by items.
-			// if several input keys, parse items in the list order to fullfill input keys requirement.
-			if (inputKeys.isEmpty()) {
-				delete batchItem;
-				continue;
-			}
-			for (auto inputKey : inputKeys) {
+		auto params = batchItem->params();
+		QStringList files;
+		files << item->data(AwBIDSItem::PathRole).toString();
+		batchItem->addFiles(cl::input_file, files);
+		params[cl::output_dir] = AwBIDSManager::instance()->buildOutputDir(plugin->name, item);
+	}
 
-			}
-		}
+	auto copiedList = items;
+
+	while (!copiedList.isEmpty()) {
+		auto batchItem = new AwBatchItem(plugin);
+		batchItem->addFilesFromBIDS(copiedList);
+		// insert output dir in parameters
+		auto params = batchItem->params();
+		//params[cl::output_dir] = 
+	}
+
+
 
 		// add the output_dir key coming from the item itself.
 		// assuming BIDS GUI has set up the ouputdir accordingly using the plugin name.
-		args[cl::output_dir] = item->data(AwBIDSItem::OutputDirRole).toString();
+	//	args[cl::output_dir] = item->data(AwBIDSItem::OutputDirRole).toString();
 
-	}
+
 	auto item = new AwBatchItem(m_plugins.value(pluginName));
 //	item->addFiles(files);
 

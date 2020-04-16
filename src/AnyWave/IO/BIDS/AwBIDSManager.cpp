@@ -1175,6 +1175,14 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 	return QString();
 }
 
+QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * item)
+{
+	// generate full derivatives path depending on plugin name and file item to be processed.
+	auto relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
+	QString outputPath = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(pluginName).arg(relativePath);
+	return outputPath;
+}
+
 //AwBIDSNode *AwBIDSManager::findSubject(const QString& dataFilePath)
 //{
 //	m_currentSubject = nullptr;
