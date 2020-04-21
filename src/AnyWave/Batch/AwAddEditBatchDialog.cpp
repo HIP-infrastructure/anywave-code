@@ -21,14 +21,21 @@ AwAddEditBatchDialog::AwAddEditBatchDialog(AwBatchItem *item, QWidget *parent)
 	m_item = item;
 	m_itemCopy = new AwBatchItem(item);
 	setWindowTitle(QString("%1 parameters").arg(item->pluginName()));
-	// init wigets
-	setupParamsUi();
+	//// init wigets
+	//setupParamsUi();
 	m_homeDir = "/";
 }
 
 AwAddEditBatchDialog::~AwAddEditBatchDialog()
 {
 	delete m_itemCopy;
+}
+
+int AwAddEditBatchDialog::exec()
+{
+	// init wigets
+	setupParamsUi();
+	return QDialog::exec();
 }
 
 void AwAddEditBatchDialog::setupParamsUi()
@@ -44,33 +51,38 @@ void AwAddEditBatchDialog::setupParamsUi()
 	auto defaults = batchSettings.value(cl::batch_defaults).toHash();
 	auto ui = batchSettings.value(cl::batch_ui).toHash();
 	auto inputs = batchSettings.value(cl::batch_inputs).toHash();
-	/// Input layout
-	auto inputLayout = m_ui.groupInput->layout();
-	if (inputLayout)
-		delete inputLayout;
-	inputLayout = new QHBoxLayout(m_ui.groupInput);
-	
-	auto keys = inputs.keys();
-	if (keys.size() == 0)
+
+	if (m_item->isLocked()) 
 		m_ui.groupInput->hide();
-	if (keys.size() == 1) {
-		auto key = keys.first();
-		auto key_label = defaults.value(key).toString();
-		auto widget = new AwBatchFileInputWidget(false);
-		widget->checkFilesAndFillList(m_item->getFiles(key), false);
-		m_widgets.insert(keys.first(), widget);
-		inputLayout->addWidget(widget);
-	}
-	if (keys.size() > 1) {
-		auto widget = new QTabWidget;
-		inputLayout->addWidget(widget);
-		widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		for (auto k : keys) {
-			auto key_label = defaults.value(k).toString();
-			auto fileWidget = new AwBatchFileInputWidget();
-			fileWidget->checkFilesAndFillList(m_item->getFiles(k), false);
-			widget->addTab(fileWidget, key_label);
-			m_widgets.insert(k, fileWidget);
+	else {
+		/// Input layout
+		auto inputLayout = m_ui.groupInput->layout();
+		if (inputLayout)
+			delete inputLayout;
+		inputLayout = new QHBoxLayout(m_ui.groupInput);
+
+		auto keys = inputs.keys();
+		if (keys.size() == 0)
+			m_ui.groupInput->hide();
+		if (keys.size() == 1) {
+			auto key = keys.first();
+			auto key_label = defaults.value(key).toString();
+			auto widget = new AwBatchFileInputWidget(false);
+			widget->checkFilesAndFillList(m_item->getInputs(key), false);
+			m_widgets.insert(keys.first(), widget);
+			inputLayout->addWidget(widget);
+		}
+		if (keys.size() > 1) {
+			auto widget = new QTabWidget;
+			inputLayout->addWidget(widget);
+			widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+			for (auto k : keys) {
+				auto key_label = defaults.value(k).toString();
+				auto fileWidget = new AwBatchFileInputWidget();
+				fileWidget->checkFilesAndFillList(m_item->getInputs(k), false);
+				widget->addTab(fileWidget, key_label);
+				m_widgets.insert(k, fileWidget);
+			}
 		}
 	}
 	//// Parameters layout
@@ -303,10 +315,9 @@ void AwAddEditBatchDialog::browseInputDir()
 
 void AwAddEditBatchDialog::fetchFiles()
 {
-	auto inputMap = m_item->inputsMap();
-	for (auto k : inputMap.keys()) {
+	for (auto k : m_item->inputs().keys()) {
 		AwBatchFileInputWidget *w = static_cast<AwBatchFileInputWidget *>(m_widgets.value(k));
-		m_itemCopy->addFiles(k, w->getFiles());
+		m_itemCopy->setInputs(k, w->getFiles());
 	}
 }
 
@@ -314,7 +325,7 @@ void AwAddEditBatchDialog::accept()
 {
 	fetchFiles();
 	// check that all input keys have the same number of files 
-	auto inputs = m_itemCopy->inputsMap();
+	auto inputs = m_itemCopy->inputs();
 	if (!inputs.isEmpty()) {
 		bool ok = true;
 		auto inputKeys = inputs.keys();

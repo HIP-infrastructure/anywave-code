@@ -11,8 +11,10 @@
 #include <QJsonDocument>
 #include <QMenu>
 #include "Process/AwProcessManager.h"
+#include "Plugin/AwPluginManager.h"
 #include "Prefs/AwSettings.h"
 #include "Batch/AwBatchManager.h"
+#include "Batch/AwBatchItem.h"
 #include "Batch/AwBatchGUI.h"
 #include <AwKeys.h>
 
@@ -146,7 +148,24 @@ void AwBIDSGUI::addToProcessing()
 	}
 	// wake up batch manager if necessary and show up the GUI in the dockwidget
 	emit batchManagerNeeded();
-	AwBatchManager::instance()->ui()->addOperation(action->data().toString(), items);
+	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(action->data().toString());
+	if (plugin == nullptr)
+		return;
+	auto batchItem = new AwBatchItem(plugin);
+	auto inputs = batchItem->inputs();
+	auto outputs = batchItem->outputs();
+	QStringList inputFiles;
+	QStringList outputDirs;
+	QStringList outputFiles;
+	for (auto bidsItem : items) {
+		inputFiles.append(bidsItem->data(AwBIDSItem::PathRole).toString());
+		outputDirs.append(m_bids->buildOutputDir(plugin->name, bidsItem));
+		outputFiles.append(m_bids->buildOutputFileName(plugin->name, bidsItem));
+	}
+	batchItem->setInputs(cl::input_file, inputFiles);
+	batchItem->setOutputs(cl::output_dir, outputDirs);
+	batchItem->setOutputs(cl::output_file, outputFiles);
+	AwBatchManager::instance()->ui()->addNewItem(batchItem);
 }
 
 

@@ -13,6 +13,7 @@ public:
 	~AwAddEditBatchDialog();
 public slots:
 	void accept() override;
+	int exec() override;
 private slots:
 	void saveProfile();
 	void applyProfile();

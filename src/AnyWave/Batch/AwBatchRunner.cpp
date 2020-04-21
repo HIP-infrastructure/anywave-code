@@ -147,15 +147,21 @@ void AwBatchRunner::run()
 		auto dict = item->params();
 
 		AwBaseProcess *process = nullptr;
-		auto inputs = item->inputsMap();
+		auto inputs = item->inputs();
+		auto outputs = item->outputs(); // may be empty
+
+		// input keys must have the same number of items.
+		// output keys are optional. But if there are output keys, their number must be equal to the number of inputs. 
+
 		auto input_keys = inputs.keys();
-		// we assume all input keys have the same number of files.
-		
+		// we assume all input keys have the same number of files and this is also the case for output keys.
+
 		int input_file_index = 0;
 		for (int i = 0; i < inputs.value(input_keys.first()).size(); i++) {
-			for (auto k : input_keys) {
+			for (auto k : input_keys) 
 				dict[k] = inputs.value(k).at(input_file_index);
-			}
+			for (auto k : outputs.keys())
+				dict[k] = outputs.value(k).at(input_file_index);
 			try {
 				process = createAndInitProcess(dict, pluginName);
 			}

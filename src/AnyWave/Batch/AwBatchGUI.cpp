@@ -57,6 +57,7 @@ AwBatchGUI::AwBatchGUI(QWidget *parent)
 	connect(m_ui.tableView, &QTableView::clicked, this, &AwBatchGUI::itemClick);
 	connect(m_ui.buttonRemove, &QPushButton::clicked, this, &AwBatchGUI::removeOperations);
 	connect(m_ui.buttonDuplicate, &QPushButton::clicked, this, &AwBatchGUI::duplicateOperations);
+	connect(m_ui.buttonRun, &QPushButton::clicked, this, &AwBatchGUI::runOperations);
 
 }
 
@@ -67,39 +68,6 @@ AwBatchGUI::~AwBatchGUI()
 
 void AwBatchGUI::addOperation(const QString& pluginName, const AwBIDSItems& items)
 {
-	auto plugin = m_plugins.value(pluginName);
-	if (plugin == nullptr)
-		return;
-
-	for (auto item : items) {
-		auto batchItem = new AwBatchItem(plugin);
-		auto params = batchItem->params();
-		QStringList files;
-		files << item->data(AwBIDSItem::PathRole).toString();
-		batchItem->addFiles(cl::input_file, files);
-		params[cl::output_dir] = AwBIDSManager::instance()->buildOutputDir(plugin->name, item);
-	}
-
-	auto copiedList = items;
-
-	while (!copiedList.isEmpty()) {
-		auto batchItem = new AwBatchItem(plugin);
-		batchItem->addFilesFromBIDS(copiedList);
-		// insert output dir in parameters
-		auto params = batchItem->params();
-		//params[cl::output_dir] = 
-	}
-
-
-
-		// add the output_dir key coming from the item itself.
-		// assuming BIDS GUI has set up the ouputdir accordingly using the plugin name.
-	//	args[cl::output_dir] = item->data(AwBIDSItem::OutputDirRole).toString();
-
-
-	auto item = new AwBatchItem(m_plugins.value(pluginName));
-//	item->addFiles(files);
-
 
 }
 
@@ -123,6 +91,14 @@ void AwBatchGUI::duplicateOperations()
 	}
 }
 
+void AwBatchGUI::runOperations()
+{
+	m_items = static_cast<AwBatchTableModel *>(m_ui.tableView->model())->items();
+	auto plugin = new AwBatchRunnerPlugin;
+	auto runner = new AwBatchRunner(plugin, m_items);
+	AwProcessManager::instance()->runBuiltInProcess(runner);
+}
+
 void AwBatchGUI::itemClick(const QModelIndex& index)
 {
 	if (!index.isValid())
@@ -133,16 +109,22 @@ void AwBatchGUI::itemClick(const QModelIndex& index)
 		editItem(model->items().at(index.row()));
 }
 
+
+void AwBatchGUI::addNewItem(AwBatchItem *item)
+{
+	auto dlg = new AwAddEditBatchDialog(item);
+	if (dlg->exec() == QDialog::Accepted)
+		static_cast<AwBatchTableModel *>(m_ui.tableView->model())->add(item);
+	else
+		delete item;
+	delete dlg;
+}
+
+///
+/// add a new item once the user clicked on the add button
+///
 void AwBatchGUI::addItem()
 {
-	//auto name = m_ui.comboPlugin->currentText();
-	//auto item = new AwBatchItem(m_plugins[name]);
-	//auto dlg = new AwAddEditBatchDialog(item);
-	//if (dlg->exec() == QDialog::Accepted)
-	//	static_cast<AwBatchTableModel *>(m_ui.tableView->model())->add(item);
-	//else
-	//	delete item;
-	//delete dlg;
 	QAction *act = static_cast<QAction *>(sender());
 	if (act == nullptr)
 		return;

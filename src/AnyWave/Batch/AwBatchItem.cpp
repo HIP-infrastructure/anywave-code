@@ -58,6 +58,7 @@ AwBatchItem::AwBatchItem(AwProcessPlugin *plugin)
 		else if (keyValue == "list")
 			m_params[key] = defaults.value(key).toStringList().first();
 	}
+	m_locked = false;
 }
 
 AwBatchItem::AwBatchItem(AwBatchItem *copy)
@@ -76,44 +77,45 @@ void AwBatchItem::copy(AwBatchItem *source)
 	m_inputFilesMap = source->m_inputFilesMap;
 }
 
-AwBIDSItem *AwBatchItem::getBIDSFileItem(const AwBIDSItems& items, int type)
-{
-	if (items.isEmpty())
-		return nullptr;
-	if (type == -1)
-		return items.first();
+//AwBIDSItem *AwBatchItem::getBIDSFileItem(const AwBIDSItems& items, int type)
+//{
+//	if (items.isEmpty())
+//		return nullptr;
+//	if (type == -1)
+//		return items.first();
+//
+//	for (auto item : items) {
+//		auto itemType = item->data(AwBIDSItem::DataTypeRole).toInt();
+//		if (itemType == type)
+//			return item;
+//	}
+//	return nullptr;
+//}
 
-	for (auto item : items) {
-		auto itemType = item->data(AwBIDSItem::DataTypeRole).toInt();
-		if (itemType == type)
-			return item;
-	}
-}
-
-void AwBatchItem::addFilesFromBIDS(AwBIDSItems& items)
-{
-	auto batchSettings = m_plugin->batchHash();
-	auto inputs = batchSettings.value(cl::batch_inputs).toHash();
-	for (auto k : inputs.keys()) {
-		auto value = inputs.value(k).toString();
-		AwBIDSItem *item;
-		int fileItemType = -1;
-		if (value == "eeg file")
-			fileItemType = AwBIDSItem::eeg;
-		else if (value == "meg file")
-			fileItemType = AwBIDSItem::eeg;
-		else if (value == "ieeg file")
-			fileItemType = AwBIDSItem::ieeg;
-		item = getBIDSFileItem(items, fileItemType);
-		if (item) {
-			auto files = m_inputFilesMap.value(k);
-			files << item->data(AwBIDSItem::PathRole).toString();
-			m_inputFilesMap[k] = files;
-			items.removeAll(item);
-		}
-	}
-
-}
+//void AwBatchItem::addFilesFromBIDS(AwBIDSItems& items)
+//{
+//	auto batchSettings = m_plugin->batchHash();
+//	auto inputs = batchSettings.value(cl::batch_inputs).toHash();
+//	for (auto k : inputs.keys()) {
+//		auto value = inputs.value(k).toString();
+//		AwBIDSItem *item;
+//		int fileItemType = -1;
+//		if (value == "eeg file")
+//			fileItemType = AwBIDSItem::eeg;
+//		else if (value == "meg file")
+//			fileItemType = AwBIDSItem::eeg;
+//		else if (value == "ieeg file")
+//			fileItemType = AwBIDSItem::ieeg;
+//		item = getBIDSFileItem(items, fileItemType);
+//		if (item) {
+//			auto files = m_inputFilesMap.value(k);
+//			files << item->data(AwBIDSItem::PathRole).toString();
+//			m_inputFilesMap[k] = files;
+//			items.removeAll(item);
+//		}
+//	}
+//
+//}
 
 QString AwBatchItem::getFileForInput(const QString& key, int index)
 {

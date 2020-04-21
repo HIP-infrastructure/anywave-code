@@ -96,6 +96,7 @@ public:
 	AwBIDSItem *findSubject(const QString& dataFilePath);
 	/** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
 	QString getTSVFile(const QString& dataFilePath, int tsvType);
+	QString buildOutputFileName(const QString & pluginName, AwBIDSItem * item);
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
 	QVariantMap& settings() { return m_settings; }

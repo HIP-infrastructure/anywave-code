@@ -153,8 +153,8 @@ int ICA::initParameters()
 
 	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[processio::data_path].toString()).arg(args["modality"].toString()));
 
-	m_lpf = args.value("lp").toDouble();
-	m_hpf = args.value("hp").toDouble();
+	m_lpf = args.value(cl::lp).toDouble();
+	m_hpf = args.value(cl::hp).toDouble();
 	AwFilterSettings filterSettings;
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	filterSettings.apply(m_channels);
@@ -253,21 +253,30 @@ int ICA::initParameters()
 	m = m_channels.size();
 	n = nSamples;
 
+	// if output_file exists => use it as the full path to result file
+	if (args.contains(cl::output_file))
+		m_fileName = args.value(cl::output_file).toString();
+	else {
+		// default file name is the basename of the data file.
+		QFileInfo fi(pdi.input.settings[processio::data_path].toString());
+		m_fileName = fi.fileName();
+	}
+
 	QString dir;
 	if (args.contains(cl::output_dir))
 		dir = args.value(cl::output_dir).toString();
 	else
 		dir = pdi.input.settings[processio::data_dir].toString();
 
-	// default file prefix is the basename of the data file.
-	QFileInfo fi(pdi.input.settings[processio::data_path].toString());
-	m_fileName = QString("%1/%2").arg(dir).arg(fi.fileName());
 	// output_prefix will override this
 	if (args.contains(cl::output_prefix))
-		m_fileName = args.value(cl::output_prefix).toString();
+		m_fileName = QString("%1%2").arg(args.value(cl::output_prefix).toString()).arg(m_fileName);
 
 	QString mod = args.value("modality").toString();
 	m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
+	// generate full path
+	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
+
 	return 0;
 }
 

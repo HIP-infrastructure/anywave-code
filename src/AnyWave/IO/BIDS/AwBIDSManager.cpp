@@ -1175,11 +1175,44 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 	return QString();
 }
 
+
+///
+/// based in the item relative path, generate a derivatices file name based on the plugin  name.
+///
+QString AwBIDSManager::buildOutputFileName(const QString& pluginName, AwBIDSItem * item)
+{
+	auto relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
+	QFileInfo fi(relativePath);
+	auto fileName = fi.fileName();
+	// check special case of meg file contained in a directory
+	if (item->data(AwBIDSItem::DataTypeRole).toInt() == AwBIDSItem::meg) {
+		if (!fileName.contains("_meg")) {
+			fileName = item->parent()->data(AwBIDSItem::RelativePathRole).toString();
+			fi.setFile(fileName);
+			fileName = fi.fileName();
+		}
+	}
+	QString suffix = QString("_%1").arg(pluginName.toLower());
+	if (fileName.contains("_meg"))
+		fileName = fileName.remove("_meg");
+	else if (fileName.contains("_eeg"))
+		fileName = fileName.remove("_eeg");
+	else if (fileName.contains("_ieeg"))
+		fileName = fileName.remove("_ieeg");
+	fileName += suffix;
+	return fileName;
+}
+
 QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * item)
 {
 	// generate full derivatives path depending on plugin name and file item to be processed.
 	auto relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
-	QString outputPath = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(pluginName).arg(relativePath);
+	QFileInfo fi(relativePath);
+
+	QString outputPath = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(pluginName.toLower()).arg(fi.path());
+	// create directory path  if necesseray
+	QDir dir;
+	dir.mkpath(outputPath);
 	return outputPath;
 }
 

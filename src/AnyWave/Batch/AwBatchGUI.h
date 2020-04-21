@@ -45,6 +45,8 @@ public slots:
 	void editItem(AwBatchItem *item);
 	void removeOperations();
 	void duplicateOperations();
+	void runOperations();
+	void addNewItem(AwBatchItem * item);
 private slots:
 	void itemClick(const QModelIndex& index);
 private:

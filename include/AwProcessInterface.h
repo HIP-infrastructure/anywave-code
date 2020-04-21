@@ -159,7 +159,7 @@ public:
 	void setBatch(const QString& key, const QVariant& value) { m_batchHash[key] = value; }
 	void addBatchHash(const QVariantHash& hash) { m_batchHash.unite(hash); }
 	inline bool hasDeclaredArgs();
-	inline bool isBatchGUICompatible() { return m_flags & Aw::ProcessFlags::CanRunFromCommandLine && !m_batchHash.isEmpty(); }
+	bool isBatchGUICompatible(); 
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;

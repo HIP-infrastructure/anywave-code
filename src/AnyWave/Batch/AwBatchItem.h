@@ -34,28 +34,41 @@ class AwBatchItem
 public:
 	explicit AwBatchItem(AwProcessPlugin *plugin);
 	explicit AwBatchItem(AwBatchItem *copy);
-	enum Inputs { Directory, Files, None };
+	//enum Inputs { Directory, Files, None };
 
 	void copy(AwBatchItem *source);
+	void lock() {
+		m_locked = true;
+	}	// this will lock inputs and outputs so the user could not change them
+	inline bool isLocked() { return m_locked; }
 	inline QString& pluginName() { return m_plugin->name; }
 	QVariantHash& params() { return m_params; }
 	QVariantHash& pluginBatchSettings() { return m_plugin->batchHash(); }
 	void setParams(const QVariantHash& args) { m_params = args; }
 	AwProcessPlugin *plugin() { return m_plugin; }
-//	inline bool isEmpty() { return m_settings.isEmpty(); }
 	bool checkPluginParams();
 	QString getFileForInput(const QString& key, int index);
 	QStringList getFilesForInput(const QString& key);
-	QMap<QString, QStringList>& inputsMap() { return m_inputFilesMap; }
-	void addFiles(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
-	void addFilesFromBIDS(AwBIDSItems& items);
-	AwBIDSItem *getBIDSFileItem(const AwBIDSItems& item, int type);
-	QStringList getFiles(const QString& key) { return m_inputFilesMap.value(key); }
+	QMap<QString, QStringList>& inputs() { return m_inputFilesMap; }
+	QMap<QString, QStringList>& outputs() { return m_outputFilesMap; }
+
+	QStringList getInputs(const QString& key)  { return m_inputFilesMap.value(key); }
+	QStringList getOutputs(const QString& key) { return m_inputFilesMap.value(key); }
+
+
+
+	void setInputs(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
+	void setOutputs(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
+
+//	void addFilesFromBIDS(AwBIDSItems& items);
+	//AwBIDSItem *getBIDSFileItem(const AwBIDSItems& item, int type);
 protected:
 	QString m_pluginName;		// name of the plugin
 	QVariantHash m_params;	    // current parameters
 	AwProcessPlugin *m_plugin;
-	QMap<QString, QStringList> m_inputFilesMap;	// hold a list of files for a specific key.
+	QMap<QString, QStringList> m_inputFilesMap;	    // hold a list of files for a specific key.
+	QMap<QString, QStringList> m_outputFilesMap;	// hold a list of files for a specific key.
+	bool m_locked;
 };
 
 using AwBatchItems = QList<AwBatchItem *>;
