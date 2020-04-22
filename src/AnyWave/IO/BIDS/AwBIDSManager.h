@@ -96,13 +96,15 @@ public:
 	AwBIDSItem *findSubject(const QString& dataFilePath);
 	/** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
 	QString getTSVFile(const QString& dataFilePath, int tsvType);
-	QString buildOutputFileName(const QString & pluginName, AwBIDSItem * item);
+	
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
 	QVariantMap& settings() { return m_settings; }
 	inline QStringList participantValues(const QString& participantKey) { return m_participantsData.value(participantKey).toStringList(); }
 	/** Create the output_dir fullpath when processing on item. **/
 	QString buildOutputDir(const QString& pluginName, AwBIDSItem *item);
+	/** Create the default output filename of a file item **/
+	QString buildOutputFileName(AwBIDSItem * item);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
@@ -111,8 +113,9 @@ signals:
 	void finished();	// compatibily with threading operations
 protected:
 	AwBIDSManager();
-
 	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
+	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
+
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
 
@@ -122,7 +125,7 @@ protected:
 	QList<int> m_dataContainers;
 	QFileIconProvider m_fileIconProvider;
 	QVariantHash m_participantsData; // hold the columns value for each participant in participants.tsvs
-	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
+
 
 	QString getParsingPath();
 	void modifyUpdateJson(const QStringList& branches);
@@ -130,7 +133,7 @@ protected:
 	QMap<int, QString> m_modifications;
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
-	QMap<int, QString> m_knownDerivativesPaths;
+	//QMap<int, QString> m_knownDerivativesPaths;
 	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSItem *m_currentSubject;

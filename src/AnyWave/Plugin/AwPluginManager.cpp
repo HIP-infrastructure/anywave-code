@@ -772,3 +772,19 @@ QStringList AwPluginManager::getBatchableArguments()
 	}
 	return res;
 }
+
+///
+/// browse reader plugins and get the file extension they can handle.
+/// Returns extension without . (dot)
+QStringList AwPluginManager::getReadableFileExtensions()
+{
+	QStringList res;
+	for (auto reader : m_readers) {
+		for (auto extension : reader->fileExtensions) {
+			auto ext = extension.remove("*.");
+			if (!res.contains(ext))
+				res.append(ext);
+		}
+	}
+	return res;
+}

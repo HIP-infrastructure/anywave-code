@@ -151,7 +151,10 @@ void AwAddEditBatchDialog::setupParamsUi()
 			auto label = new QLabel(QString("%1:").arg(key_label));
 			gridLayout->addWidget(label, row, 0, 1, 1);
 			auto edit = new QComboBox;
-			edit->addItems(params.value(k).toStringList());
+			auto items = defaults.value(k).toStringList();
+			edit->addItems(items);
+			auto currentItem = params.value(k).toString();
+			edit->setCurrentIndex(items.indexOf(currentItem));
 			gridLayout->addWidget(edit, row, 1, 1, 1);
 			row++;
 			m_widgets.insert(k, edit);
@@ -323,28 +326,30 @@ void AwAddEditBatchDialog::fetchFiles()
 
 void AwAddEditBatchDialog::accept()
 {
-	fetchFiles();
-	// check that all input keys have the same number of files 
-	auto inputs = m_itemCopy->inputs();
-	if (!inputs.isEmpty()) {
-		bool ok = true;
-		auto inputKeys = inputs.keys();
-		int firstSize = inputs.value(inputKeys.first()).size();
+	if (!m_itemCopy->isLocked()) {
+		fetchFiles();
+		// check that all input keys have the same number of files 
+		auto inputs = m_itemCopy->inputs();
+		if (!inputs.isEmpty()) {
+			bool ok = true;
+			auto inputKeys = inputs.keys();
+			int firstSize = inputs.value(inputKeys.first()).size();
 
-		for (int i = 1; i < inputKeys.size(); i++) {
-			int size = inputs.value(inputKeys.at(i)).size();
-			if (size != firstSize) {
-				ok = false;
-				break;
+			for (int i = 1; i < inputKeys.size(); i++) {
+				int size = inputs.value(inputKeys.at(i)).size();
+				if (size != firstSize) {
+					ok = false;
+					break;
+				}
 			}
-		}
-		if (!ok) {
-			AwMessageBox::information(this, "Input Files", "The number of files set is different between input parameters.");
-			return;
-		}
-		if (firstSize == 0) {
-			AwMessageBox::information(this, "Input Files", "Add at least one file as input to run the batch.");
-			return;
+			if (!ok) {
+				AwMessageBox::information(this, "Input Files", "The number of files set is different between input parameters.");
+				return;
+			}
+			if (firstSize == 0) {
+				AwMessageBox::information(this, "Input Files", "Add at least one file as input to run the batch.");
+				return;
+			}
 		}
 	}
 	fetchParams();

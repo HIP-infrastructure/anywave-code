@@ -37,9 +37,8 @@ public:
 	cube& lagMatrix() { return m_lagMatrix; }
 	/* Visualize the graph */
 	void visualize();
-	GraphSet *newMeanGraphSet();
-	void setCorrelationMatrix(const cube& matrix) { m_corrMatrix = matrix; }
-	void setLagMatrix(const cube& matrix) { m_lagMatrix = matrix; }
+	void newMeanGraphSet();
+	inline bool isMean() { return m_isMean; }
 protected:
 	cube m_corrMatrix;
 	cube m_lagMatrix;
@@ -49,5 +48,7 @@ protected:
 	QVector<double> m_timePositions;	// contains the position in second for each iteration.
 	QString m_error;
 	GraphWindow *m_graphWindow;	
+	GraphSet *m_meanGraphSet;
+	bool m_isMean;	// true if the graph set is a mean graph set.
 	bool m_isEmpty;	// true until load is called and successful.
 };

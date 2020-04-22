@@ -157,14 +157,18 @@ void AwBIDSGUI::addToProcessing()
 	QStringList inputFiles;
 	QStringList outputDirs;
 	QStringList outputFiles;
+	QStringList outputSuffixes;
 	for (auto bidsItem : items) {
 		inputFiles.append(bidsItem->data(AwBIDSItem::PathRole).toString());
 		outputDirs.append(m_bids->buildOutputDir(plugin->name, bidsItem));
-		outputFiles.append(m_bids->buildOutputFileName(plugin->name, bidsItem));
+		outputFiles.append(m_bids->buildOutputFileName(bidsItem));
+		outputSuffixes.append(QString("_%1").arg(plugin->name));
 	}
 	batchItem->setInputs(cl::input_file, inputFiles);
 	batchItem->setOutputs(cl::output_dir, outputDirs);
 	batchItem->setOutputs(cl::output_file, outputFiles);
+	batchItem->setOutputs(cl::output_suffix, outputSuffixes);
+	batchItem->lock();
 	AwBatchManager::instance()->ui()->addNewItem(batchItem);
 }
 

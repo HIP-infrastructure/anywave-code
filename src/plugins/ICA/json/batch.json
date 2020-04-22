@@ -9,7 +9,7 @@
   },
   "batch_ui": {
     "hp": [ "High Pass", "double" ],
-    "lp": [ "Low Pas", "double" ],
+    "lp": [ "Low Pass", "double" ],
     "comp": [ "Components", "int" ],
     "modality": [ "Modality", "list" ],
     "downsampling": [ "Downsampling data", "boolean" ],

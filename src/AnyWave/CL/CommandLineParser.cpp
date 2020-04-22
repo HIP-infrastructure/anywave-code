@@ -6,6 +6,7 @@
 #include "AwCommandLogger.h"
 #include "Plugin/AwPluginManager.h"
 #include <utils/json.h>
+#include <AwKeys.h>
 //
 // options descriptions
 //
@@ -64,6 +65,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputFormatO("output_format", "specify the file format to create. (vhdr, edf, MATLAB, ADES)", "output_format", QString());
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
 	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
+	QCommandLineOption outputSuffixO("output_suffix", "specify the suffix to use for output_fle.", "output_suffix", QString());
 
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
@@ -71,6 +73,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(outputFormatO);
 	parser.addOption(outputDirO);
 	parser.addOption(outputPrefixO);
+	parser.addOption(outputSuffixO);
 	// common filters flags
 	QCommandLineOption filterHPO("hp", "specify the High Pass filter (Hz).", "hp", QString());
 	QCommandLineOption filterLPO("lp", "specify the Low Pass filter (Hz).", "lp", QString());
@@ -185,34 +188,39 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	availableWriters["matlab"] = QString("MATLAB Output Plugin");
 	availableWriters["ades"] = QString("AnyWave ADES Format");
 	// output dir
-	auto oDir = parser.value(outputDirO);
-	if (!oDir.isEmpty()) 
-		arguments["output_dir"] = oDir;
+	QString tmp;
+	tmp = parser.value(outputDirO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_dir] = tmp;
 	// input dir
-	auto iDir = parser.value(inputDirO);
-	if (!iDir.isEmpty())
-		arguments["input_dir"] = iDir;
+	tmp = parser.value(inputDirO);
+	if (!tmp.isEmpty())
+		arguments[cl::input_dir] = tmp;
 	// output_prefix
-	auto oPrefix = parser.value(outputPrefixO);
-	if (!oPrefix.isEmpty())
-		arguments["output_prefix"] = oPrefix;
+	tmp = parser.value(outputPrefixO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_prefix] = tmp;
+	// output_suffix
+	tmp = parser.value(outputSuffixO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_suffix] = tmp;
 	// hp/lp/notch
 	auto fHP = parser.value(filterHPO);
 	auto fLP = parser.value(filterLPO);
 	auto fNotch = parser.value(filterNotchO);
 	if (!fNotch.isEmpty())
-		arguments["notch"] = fNotch;
+		arguments[cl::notch] = fNotch;
 	if (!fHP.isEmpty())
-		arguments["hp"] = fHP;
+		arguments[cl::hp] = fHP;
 	if (!fLP.isEmpty())
-		arguments["lp"] = fLP;
+		arguments[cl::lp] = fLP;
 
-	auto inputF = parser.value(inputFileO);
-	if (!inputF.isEmpty())
-		arguments["input_file"] = inputF;
-	auto outputF = parser.value(outputFileO);
-	if (!outputF.isEmpty()) 
-		arguments["output_file"] = outputF;
+	tmp = parser.value(inputFileO);
+	if (!tmp.isEmpty())
+		arguments[cl::input_file] = tmp;
+	tmp = parser.value(outputFileO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_file] = tmp;
 	   
 	if (isFormatOption) {
 		if (!outputAcceptedFormats.contains(format)) {

@@ -12,7 +12,7 @@ H2GraphsPlugin::H2GraphsPlugin()
 
 H2Graphs::H2Graphs()
 {
-	m_widget = NULL;
+	m_widget = nullptr;
 	m_instance = this;
 }
 
@@ -24,7 +24,8 @@ H2Graphs *H2Graphs::instance()
 H2Graphs::~H2Graphs()
 {
 	if (m_widget)
-		delete m_widget;
+		//delete m_widget;
+		m_widget->deleteLater();
 }
 
 void H2Graphs::run(const QStringList& args)

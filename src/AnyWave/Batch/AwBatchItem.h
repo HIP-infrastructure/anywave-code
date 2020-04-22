@@ -34,7 +34,6 @@ class AwBatchItem
 public:
 	explicit AwBatchItem(AwProcessPlugin *plugin);
 	explicit AwBatchItem(AwBatchItem *copy);
-	//enum Inputs { Directory, Files, None };
 
 	void copy(AwBatchItem *source);
 	void lock() {
@@ -51,17 +50,10 @@ public:
 	QStringList getFilesForInput(const QString& key);
 	QMap<QString, QStringList>& inputs() { return m_inputFilesMap; }
 	QMap<QString, QStringList>& outputs() { return m_outputFilesMap; }
-
 	QStringList getInputs(const QString& key)  { return m_inputFilesMap.value(key); }
 	QStringList getOutputs(const QString& key) { return m_inputFilesMap.value(key); }
-
-
-
 	void setInputs(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
-	void setOutputs(const QString& key, const QStringList& files) { m_inputFilesMap[key] = files; }
-
-//	void addFilesFromBIDS(AwBIDSItems& items);
-	//AwBIDSItem *getBIDSFileItem(const AwBIDSItems& item, int type);
+	void setOutputs(const QString& key, const QStringList& files) { m_outputFilesMap[key] = files; }
 protected:
 	QString m_pluginName;		// name of the plugin
 	QVariantHash m_params;	    // current parameters

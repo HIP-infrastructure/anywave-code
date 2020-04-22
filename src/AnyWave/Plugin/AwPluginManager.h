@@ -124,6 +124,8 @@ public:
 
 	// gather json args strings from all plugin that are command line compatible
 	QStringList getBatchableArguments();
+	/** gather file extensions of all reader plugins. **/
+	QStringList getReadableFileExtensions();
 
 	AwFileIO *getReaderToOpenFile(const QString& file);
 

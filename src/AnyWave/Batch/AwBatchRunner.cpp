@@ -51,13 +51,13 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
-	if (!doNotRequiresData && !dict.contains("input_file")) {
+	if (!doNotRequiresData && !dict.contains(cl::input_file)) {
 		throw AwException(QString("error: input_dir not specified."));
 		return process;
 	}
 	process->pdi.input.setArguments(dict);
-	if (dict.contains("input_file")) {
-		auto file = dict.value("input_file").toString();
+	if (dict.contains(cl::input_file)) {
+		auto file = dict.value(cl::input_file).toString();
 		auto reader = pm->getReaderToOpenFile(file);
 		if (reader == nullptr) {
 			throw AwException(QString("plugin: %1 file: %2 no reader plugin found.").arg(pluginName).arg(file));
@@ -181,10 +181,19 @@ void AwBatchRunner::run()
 				sendMessage(QString("%1\n").arg(dict.value(k).toString()));
 
 			process->pdi.input.setArguments(dict);
-			QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-			process->runFromCommandLine();
-			sendMessage(QString("process %1 has finished").arg(pluginName));
 			auto reader = process->pdi.input.reader();
+			QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+			// if the process has a reader => input_file set and the process must connect to a data server using the specified reader.
+			if (reader) {
+				auto ds = AwDataServer::getInstance()->duplicate(reader);
+				ds->openConnection(process);
+				process->runFromCommandLine();
+				delete ds;
+			}
+			else {
+				process->runFromCommandLine();
+			}
+			sendMessage(QString("process %1 has finished").arg(pluginName));
 			process->plugin()->deleteInstance(process);
 			input_file_index++;
 		} 

@@ -273,7 +273,10 @@ int ICA::initParameters()
 		m_fileName = QString("%1%2").arg(args.value(cl::output_prefix).toString()).arg(m_fileName);
 
 	QString mod = args.value("modality").toString();
-	m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
+	if (args.contains(cl::output_suffix))
+		m_fileName += QString("_%1_%2Hz_%3Hz_%4c%5.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(cl::output_suffix).toString());
+	else // default suffix is _ica
+	    m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	// generate full path
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
 

@@ -51,7 +51,6 @@ private:
 	QList<GraphSensorItem *> m_sensorsItem;
 	GraphColorMap *m_cmapItem;
 	QGraphicsScene *m_scene;
-	GraphSet *m_meanGraph;
 	AwBaseSignalView *m_signalView;
 	QHash<QString, AwChannel *> m_timeCoursesChannels;
 

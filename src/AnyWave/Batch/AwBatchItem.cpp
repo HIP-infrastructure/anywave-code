@@ -31,8 +31,6 @@ AwBatchItem::AwBatchItem(AwProcessPlugin *plugin)
 {
 	m_plugin = plugin; 
 	auto batchSettings = plugin->batchHash();
-
-	batchSettings.value("input_keys").toStringList();
 	auto hash = m_plugin->batchHash();
 	if (hash.contains("inputs")) {
 		auto inputs = hash.value("inputs").toHash();
@@ -46,7 +44,7 @@ AwBatchItem::AwBatchItem(AwProcessPlugin *plugin)
 	auto defaults = batchSettings.value(cl::batch_defaults).toHash();
 	auto ui = batchSettings.value(cl::batch_ui).toHash();
 	for (auto key : ui.keys()) {
-		auto keyValue = ui.value(key).toString().toLower();
+		auto keyValue = ui.value(key).toStringList().last().toLower();
 		if (keyValue == "string" || keyValue == "stringlist")
 			m_params[key] = defaults.value(key).toString();
 		else if (keyValue == "double")
@@ -67,6 +65,7 @@ AwBatchItem::AwBatchItem(AwBatchItem *copy)
 	m_pluginName = copy->pluginName();
 	m_params = copy->m_params;
 	m_inputFilesMap = copy->m_inputFilesMap;
+	m_locked = copy->m_locked;
 }
 
 void AwBatchItem::copy(AwBatchItem *source)
@@ -75,6 +74,7 @@ void AwBatchItem::copy(AwBatchItem *source)
 	m_pluginName = source->pluginName();
 	m_params = source->m_params;
 	m_inputFilesMap = source->m_inputFilesMap;
+	m_locked = source->m_locked;
 }
 
 //AwBIDSItem *AwBatchItem::getBIDSFileItem(const AwBIDSItems& items, int type)

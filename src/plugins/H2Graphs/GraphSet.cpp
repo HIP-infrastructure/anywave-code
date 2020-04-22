@@ -4,8 +4,10 @@
 
 GraphSet::GraphSet()
 {
-	m_graphWindow = Q_NULLPTR;
+	m_meanGraphSet = nullptr;
+	m_graphWindow = nullptr;
 	m_isEmpty = true;
+	m_isMean = false;
 }
 
 GraphSet::~GraphSet()
@@ -14,6 +16,8 @@ GraphSet::~GraphSet()
 		m_graphWindow->close();
 		delete m_graphWindow;
 	}
+	if (m_meanGraphSet)
+		delete m_meanGraphSet;
 }
 
 int GraphSet::load(const QString& fileName)
@@ -47,18 +51,25 @@ int GraphSet::load(const QString& fileName)
 	return 0;
 }
 
-GraphSet *GraphSet::newMeanGraphSet()
+void GraphSet::newMeanGraphSet()
 {
-	auto gs = new GraphSet();
-	cube matrix = arma::cube(m_corrMatrix.n_rows, m_corrMatrix.n_cols, 1);
-	cube lagMatrix = arma::cube(m_lagMatrix.n_rows, m_lagMatrix.n_cols, 1);
-	matrix.fill(0.);
+	if (m_meanGraphSet) {
+		m_meanGraphSet->visualize();
+		return;
+	}
+	
+	m_meanGraphSet = new GraphSet();
+	m_meanGraphSet->m_isMean = true;
+	m_meanGraphSet->m_corrMatrix = arma::cube(m_corrMatrix.n_rows, m_corrMatrix.n_cols, 1);
+	m_meanGraphSet->m_lagMatrix = arma::cube(m_lagMatrix.n_rows, m_lagMatrix.n_cols, 1);
+	m_meanGraphSet->m_corrMatrix.fill(0.);
+	m_meanGraphSet->m_lagMatrix.fill(0.);
 
 	auto nIterations = totalIterations();
 	for (uword i = 0; i < m_corrMatrix.n_rows; i++) {  // X
 		for (uword j = i + 1; j < m_corrMatrix.n_cols; j++) { // Y
 			double mean_value = 0.;
-			int mean_lag = 0;
+			double mean_lag = 0.;
 			// mean X/Y pair through all iterations. keep the maximum value and corresponding lag of a pair.
 			for (auto iteration = 0; iteration < nIterations; iteration++) {
 				double xy_value = m_corrMatrix(i, j, iteration);
@@ -69,26 +80,29 @@ GraphSet *GraphSet::newMeanGraphSet()
 				mean_value += std::max(xy_value, yx_value);
 				mean_lag += lag;
 			}
-			matrix(i, j, 0) = mean_value / nIterations;
-			lagMatrix(i, j, 0) = std::floor(mean_lag / nIterations);
+			m_meanGraphSet->m_corrMatrix(i, j, 0) = mean_value / nIterations;
+			m_meanGraphSet->m_lagMatrix(i, j, 0) = mean_lag / nIterations;
 		}
 	}
-	gs->setCorrelationMatrix(matrix);
-	gs->setLagMatrix(lagMatrix);
-	gs->band = band;
-	gs->labels = labels;
-	gs->maxLag = maxLag;
-	gs->m_nSections = 1;
-	gs->hp = hp;
-	gs->lp = lp;
+	//m_meanGraphSet->setCorrelationMatrix(matrix);
+	//m_meanGraphSet->setLagMatrix(lagMatrix);
+	m_meanGraphSet->band = band;
+	m_meanGraphSet->labels = labels;
+	m_meanGraphSet->maxLag = maxLag;
+	m_meanGraphSet->m_nSections = 1;
+	m_meanGraphSet->hp = hp;
+	m_meanGraphSet->lp = lp;
 	QVector<int> sections = { 0 };
 	QVector<int> iterations = { 1 };
-	gs->m_iterations = iterations;
-	gs->m_sections = sections;
+	m_meanGraphSet->m_iterations = iterations;
+	m_meanGraphSet->m_sections = sections;
 	QVector<double> timePositions = { 0. };
-	gs->m_timePositions = timePositions;
-	gs->m_isEmpty = false;
-	return gs;
+	m_meanGraphSet->m_timePositions = timePositions;
+	m_meanGraphSet->m_isEmpty = false;
+	m_meanGraphSet->samplingRate = this->samplingRate;
+
+	m_meanGraphSet->visualize();
+	return;
 }
 
 

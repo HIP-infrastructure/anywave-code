@@ -719,6 +719,7 @@ AwBIDSManager::AwBIDSManager()
 	m_ui = nullptr;
 	m_mustValidateModifications = false;
 	m_dataContainers = { AwBIDSItem::meg, AwBIDSItem::eeg, AwBIDSItem::ieeg };
+	m_fileExtensions = AwPluginManager::getInstance()->getReadableFileExtensions();
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -732,40 +733,6 @@ QString AwBIDSManager::getParsingPath()
 		return QString();
 	return m_settings[bids::parsing_path].toString();
 }
-
-//void AwBIDSManager::setRootDir(const QString& path)
-//{
-//	// check if root dir is the same as current one. If so, do nothing.
-//	if (path == m_rootDir)
-//		return;
-//
-//	if (path.isEmpty())
-//		return;
-//	// check that the folder exists
-//	QDir dir(path);
-//	if (!dir.exists()) {
-//		throw AwException("Root directory does not exist.", "AwBIDSManager::setRootDir");
-//		return;
-//	}
-//
-//	if (isBIDSActive()) {
-//		if (AwMessageBox::information(NULL, tr("BIDS warning"), tr("a BIDS folder is already open.\nClose it and open the new one?"),
-//			QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-//			return;
-//	}
-//	closeBIDS();
-//	m_rootDir = path;
-//
-//	AwBIDSParser parser;
-//	parser.parse();
-//	m_nodes = parser.nodes();
-//	m_hashNodes = parser.hash();
-//
-//	// instantiate UI if needed
-//	if (m_ui == nullptr)
-//		m_ui = new AwBIDSGUI;
-//	m_ui->refresh();
-//}
 
 void AwBIDSManager::setRootDir(const QString& path)
 {
@@ -876,6 +843,13 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 			auto list = dir.entryInfoList(QDir::Files);
 			for (auto f : list) {
 				auto fileName = f.fileName();
+				auto ext = f.completeSuffix();
+				// speed up file recongnition avoiding file extensions not known by plugins.
+				// SPECIAL CASE : MEG 4DNI that has no extension. So check before that the file as an extension.
+				if (!ext.isEmpty()) 
+					if (!m_fileExtensions.contains(ext))
+						continue;
+
 				auto fullPath = f.absoluteFilePath();
 
 				auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(fullPath);
@@ -1152,11 +1126,6 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 	else
 		return QString();
 
-	//// find the child node in current subject which contains the file
-	//auto node = m_currentSubject->findNode(QFileInfo(dataFilePath).fileName(), m_currentSubject);
-	//if (node == nullptr)
-	//	return QString();
-
 	// remove the extension
 	QFileInfo fi(dataFilePath);
 	auto base = fi.baseName();
@@ -1168,7 +1137,6 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 			break;
 		}
 	}
-//	QString res = QString("%1/%2%3").arg(node->fullPath()).arg(base).arg(suffix);
 	QString res = QString("%1/%2%3").arg(dirPath).arg(base).arg(suffix);
 	if (QFile::exists(res))
 		return res;
@@ -1179,7 +1147,7 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 ///
 /// based in the item relative path, generate a derivatices file name based on the plugin  name.
 ///
-QString AwBIDSManager::buildOutputFileName(const QString& pluginName, AwBIDSItem * item)
+QString AwBIDSManager::buildOutputFileName(AwBIDSItem * item)
 {
 	auto relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
 	QFileInfo fi(relativePath);
@@ -1192,14 +1160,10 @@ QString AwBIDSManager::buildOutputFileName(const QString& pluginName, AwBIDSItem
 			fileName = fi.fileName();
 		}
 	}
-	QString suffix = QString("_%1").arg(pluginName.toLower());
-	if (fileName.contains("_meg"))
-		fileName = fileName.remove("_meg");
-	else if (fileName.contains("_eeg"))
-		fileName = fileName.remove("_eeg");
-	else if (fileName.contains("_ieeg"))
-		fileName = fileName.remove("_ieeg");
-	fileName += suffix;
+	for (auto suffix : m_dataFileSuffixes) {
+		if (fileName.contains(suffix))
+			fileName = fileName.remove(suffix);
+	}
 	return fileName;
 }
 
@@ -1216,25 +1180,6 @@ QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * it
 	return outputPath;
 }
 
-//AwBIDSNode *AwBIDSManager::findSubject(const QString& dataFilePath)
-//{
-//	m_currentSubject = nullptr;
-//	if (!isBIDSActive())
-//		return nullptr;
-//	QFileInfo fi(dataFilePath);
-//	auto n = m_hashNodes[fi.fileName()];
-//	if (n) {
-//		auto parent = n->parent();
-//		while (parent) {
-//			n = parent;
-//			parent = n->parent();
-//		}
-//		m_settings["BIDS_FilePath"] = dataFilePath;
-//	}
-//	m_currentSubject = n;
-//	return m_currentSubject;
-//}
-
 AwBIDSItem *AwBIDSManager::findSubject(const QString& dataFilePath)
 {
 	m_currentSubject = nullptr;
@@ -1244,24 +1189,11 @@ AwBIDSItem *AwBIDSManager::findSubject(const QString& dataFilePath)
 	if (m_hashItemFiles.contains(dataFilePath))
 		m_currentSubject = m_hashItemFiles.value(dataFilePath);
 
-	//QFileInfo fi(dataFilePath);
-	//auto n = m_hashNodes[fi.fileName()];
-	//if (n) {
-	//	auto parent = n->parent();
-	//	while (parent) {
-	//		n = parent;
-	//		parent = n->parent();
-	//	}
-	//	m_settings["BIDS_FilePath"] = dataFilePath;
-	//}
-	//m_currentSubject = n;
 	return m_currentSubject;
 }
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
-	//if (!isBIDSActive())
-	//	return;
 	// check if the new file is in a BIDS structure or not
 	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
 	if (!isBIDSActive() && !root.isEmpty()) {
@@ -1430,9 +1362,9 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 		return AwChannelList();
 	}
 
-	auto types = dict["type"];
-	auto names = dict["name"];
-	auto status = dict["status"];
+	auto types = dict.value("type");
+	auto names = dict.value("name");
+	auto status = dict.value("status");
 
 	for (int i = 0; i < names.size(); i++) {
 		auto channel = new AwChannel();
