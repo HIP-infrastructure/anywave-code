@@ -1,4 +1,12 @@
 #include "GraphSetModel.h"
+#include <AwCore.h>
+
+GraphSetModel::~GraphSetModel()
+{
+	beginResetModel();
+	AW_DESTROY_LIST(m_graphSets);
+	endResetModel();
+}
 
 //
 // rowCount

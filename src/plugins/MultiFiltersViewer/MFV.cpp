@@ -40,6 +40,13 @@ MFV::MFV()
 	pdi.setInputFlags(Aw::ProcessInput::ProcessRequiresChannelSelection);
 	// Limit the usage to 3 channels max
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 3);
+	m_widget = nullptr;
+}
+
+MFV::~MFV()
+{
+	if (m_widget)
+		delete m_widget;
 }
 
 

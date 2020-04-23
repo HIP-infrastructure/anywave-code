@@ -5,6 +5,7 @@
 #include "H2Graphs.h"
 #include <AwKeys.h>
 
+
 GraphManagerWidget::GraphManagerWidget(AwGUIProcess *process, QWidget *parent)
 	: AwProcessGUIWidget(process, parent)
 {
@@ -19,8 +20,7 @@ GraphManagerWidget::GraphManagerWidget(AwGUIProcess *process, QWidget *parent)
 
 GraphManagerWidget::~GraphManagerWidget()
 {
-	while (!m_graphSets.isEmpty())
-		delete m_graphSets.takeFirst();
+
 }
 
 

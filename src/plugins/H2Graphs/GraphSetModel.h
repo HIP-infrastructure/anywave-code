@@ -16,6 +16,7 @@ class GraphSetModel : public QAbstractTableModel
 public:
 	GraphSetModel(QObject *parent = Q_NULLPTR) :
 		QAbstractTableModel(parent) {}
+	~GraphSetModel();
 	
 	QVariant data(const QModelIndex& index, int role) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

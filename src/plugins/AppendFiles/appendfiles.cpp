@@ -182,6 +182,14 @@ void AppendFiles::run()
 			r->readDataFromChannels(position, duration, sourceChannels);
 			sendMessage("Done.");
 			left -= duration;
+			// check for MEG data that must be reconverted to T
+			for (auto c : sourceChannels) {
+				if (c->isMEG() || c->isGRAD() || c->isReference()) {
+					auto start = c->data();
+					for (auto i = 0; i < c->dataSize(); i++)
+						start[i] *= 1e-12;
+				}
+			}
 			sendMessage(QString("Writing data to %1...").arg(m_ui->outputFile));
 			m_writer->writeData(&sourceChannels);
 			position += duration;

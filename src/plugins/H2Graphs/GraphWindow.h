@@ -31,6 +31,8 @@ public slots:
 	void hideSensors(bool hide);
 	void showMeanGraph();
 	void showTimeCourses();
+protected:
+	void closeEvent(QCloseEvent *event);  
 signals:
 	void sendCommand(int, QVariantList);
 private:

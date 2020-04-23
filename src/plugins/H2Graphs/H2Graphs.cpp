@@ -24,8 +24,7 @@ H2Graphs *H2Graphs::instance()
 H2Graphs::~H2Graphs()
 {
 	if (m_widget)
-		//delete m_widget;
-		m_widget->deleteLater();
+		delete m_widget;
 }
 
 void H2Graphs::run(const QStringList& args)

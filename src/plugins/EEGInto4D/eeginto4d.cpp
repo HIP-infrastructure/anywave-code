@@ -139,9 +139,7 @@ EEGInto4DPlugin::EEGInto4DPlugin()
 	description = tr("inject eeg channel from ADES EEG file into existing 4DNI MEG file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
-	m_settings[processio::json_ui] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/ui.json");
-	m_settings[processio::json_defaults] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/default.json");
-	m_settings[processio::json_args] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/args.json");
+	m_settings[processio::json_batch] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/args.json");
 }
 
 EEGInto4D::EEGInto4D()

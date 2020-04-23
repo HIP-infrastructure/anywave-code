@@ -3958,6 +3958,20 @@ Cube<eT>::replace(const eT old_val, const eT new_val)
 
 
 
+template<typename eT>
+inline
+const Cube<eT>&
+Cube<eT>::clean(const typename get_pod_type<eT>::result threshold)
+  {
+  arma_extra_debug_sigprint();
+  
+  arrayops::clean(memptr(), n_elem, threshold);
+  
+  return *this;
+  }
+
+
+
 //! fill the cube with the specified value
 template<typename eT>
 inline
@@ -4931,6 +4945,54 @@ uword
 Cube<eT>::size() const
   {
   return n_elem;
+  }
+
+
+
+template<typename eT>
+inline
+eT&
+Cube<eT>::front()
+  {
+  arma_debug_check( (n_elem == 0), "Cube::front(): cube is empty" );
+  
+  return access::rw(mem[0]);
+  }
+
+
+
+template<typename eT>
+inline
+const eT&
+Cube<eT>::front() const
+  {
+  arma_debug_check( (n_elem == 0), "Cube::front(): cube is empty" );
+  
+  return mem[0];
+  }
+
+
+
+template<typename eT>
+inline
+eT&
+Cube<eT>::back()
+  {
+  arma_debug_check( (n_elem == 0), "Cube::back(): cube is empty" );
+  
+  return access::rw(mem[n_elem-1]);
+  }
+
+
+
+template<typename eT>
+inline
+const eT&
+Cube<eT>::back() const
+  {
+  arma_debug_check( (n_elem == 0), "Cube::back(): cube is empty" );
+  
+  return mem[n_elem-1];
   }
 
 

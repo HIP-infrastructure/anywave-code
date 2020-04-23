@@ -713,11 +713,11 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
 		AwGUIProcess *p = static_cast<AwGUIProcess *>(process);
+		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
 			ds->openConnection(p);
-			connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)));
 			connect(p, SIGNAL(sendMarker(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 			connect(p, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
 			connect(p, SIGNAL(closed()), p, SLOT(stop()));

@@ -12,10 +12,8 @@ GraphSet::GraphSet()
 
 GraphSet::~GraphSet()
 {
-	if (m_graphWindow) {
-		m_graphWindow->close();
+	if (m_graphWindow) 
 		delete m_graphWindow;
-	}
 	if (m_meanGraphSet)
 		delete m_meanGraphSet;
 }
@@ -84,8 +82,6 @@ void GraphSet::newMeanGraphSet()
 			m_meanGraphSet->m_lagMatrix(i, j, 0) = mean_lag / nIterations;
 		}
 	}
-	//m_meanGraphSet->setCorrelationMatrix(matrix);
-	//m_meanGraphSet->setLagMatrix(lagMatrix);
 	m_meanGraphSet->band = band;
 	m_meanGraphSet->labels = labels;
 	m_meanGraphSet->maxLag = maxLag;

@@ -99,6 +99,8 @@ class subview : public Base<eT, subview<eT> >
   
   inline void replace(const eT old_val, const eT new_val);
   
+  inline void clean(const pod_type threshold);
+  
   inline void fill(const eT val);
   inline void zeros();
   inline void ones();
@@ -120,6 +122,12 @@ class subview : public Base<eT, subview<eT> >
   inline eT&         at(const uword in_row, const uword in_col);
   inline eT          at(const uword in_row, const uword in_col) const;
   
+  inline eT&         front();
+  inline eT          front() const;
+  
+  inline eT&         back();
+  inline eT          back() const;
+  
   arma_inline       eT* colptr(const uword in_col);
   arma_inline const eT* colptr(const uword in_col) const;
   
@@ -128,6 +136,7 @@ class subview : public Base<eT, subview<eT> >
   
   inline arma_warn_unused bool is_vec()    const;
   inline arma_warn_unused bool is_finite() const;
+  inline arma_warn_unused bool is_zero(const pod_type tol = 0) const;
   
   inline arma_warn_unused bool has_inf() const;
   inline arma_warn_unused bool has_nan() const;
@@ -282,7 +291,6 @@ class subview : public Base<eT, subview<eT> >
     typedef eT&                       reference;
     
     arma_aligned Mat<eT>* M;
-    arma_aligned eT*      current_ptr;
     arma_aligned uword    current_row;
     arma_aligned uword    current_col;
     
@@ -317,7 +325,6 @@ class subview : public Base<eT, subview<eT> >
     typedef const eT&                 reference;
     
     arma_aligned const Mat<eT>* M;
-    arma_aligned const eT*      current_ptr;
     arma_aligned       uword    current_row;
     arma_aligned       uword    current_col;
     

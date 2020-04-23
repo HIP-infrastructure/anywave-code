@@ -68,7 +68,7 @@ GraphWindow::GraphWindow(GraphSet *gs, QWidget *parent)
 	connect(m_ui.sbThreshold, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &GraphWindow::setNewThreshold);
 	connect(m_ui.buttonMean, &QPushButton::clicked, this, &GraphWindow::showMeanGraph);
 	connect(m_ui.buttonTimeCourses, &QPushButton::clicked, this, &GraphWindow::showTimeCourses);
-	m_signalView = Q_NULLPTR;
+	m_signalView = nullptr;
 	m_currentSection = -1;
 	if (gs->isMean())
 		m_ui.buttonMean->setEnabled(false);
@@ -76,9 +76,17 @@ GraphWindow::GraphWindow(GraphSet *gs, QWidget *parent)
 
 GraphWindow::~GraphWindow()
 {
+	if (m_timer) 
+		m_timer->stop();
 	if (m_signalView)
 		delete m_signalView;
+}
+
+
+void GraphWindow::closeEvent(QCloseEvent *event)
+{
 	emit sendCommand(AwProcessCommand::RemoveLastHighlightedSection, QVariantList());
+	event->accept(); 
 }
 
 
@@ -121,7 +129,7 @@ void GraphWindow::updateTimeCourses(int section)
 
 void GraphWindow::showTimeCourses()
 {
-	if (m_signalView == Q_NULLPTR) {
+	if (m_signalView == nullptr) {
 		m_signalView = new AwBaseSignalView();
 		m_signalView->setFlags(AwBaseSignalView::NoMarkerBar | AwBaseSignalView::ViewAllChannels | AwBaseSignalView::HidePositionInFile);
 		m_signalView->setBaseSize(QSize(800, 300)); 
@@ -166,9 +174,6 @@ void GraphWindow::showTimeCourses()
 
 void GraphWindow::showMeanGraph()
 {
-	//if (m_meanGraph == Q_NULLPTR)
-	//	m_meanGraph = m_graphSet->newMeanGraphSet();
-	//m_meanGraph->visualize();
 	m_graphSet->newMeanGraphSet();
 }
 

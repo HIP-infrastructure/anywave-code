@@ -329,6 +329,8 @@ class Cube : public BaseCube< eT, Cube<eT> >
   
   inline const Cube& replace(const eT old_val, const eT new_val);
   
+  inline const Cube& clean(const pod_type threshold);
+  
   inline const Cube& fill(const eT val);
   
   inline const Cube& zeros();
@@ -407,6 +409,12 @@ class Cube : public BaseCube< eT, Cube<eT> >
   inline void  clear();
   inline bool  empty() const;
   inline uword size()  const;
+  
+  inline       eT& front();
+  inline const eT& front() const;
+  
+  inline       eT& back();
+  inline const eT& back() const;
   
   inline void swap(Cube& B);
   

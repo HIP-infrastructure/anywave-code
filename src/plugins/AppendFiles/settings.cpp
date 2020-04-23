@@ -47,6 +47,8 @@ void settings::addFiles()
 	if (files.isEmpty())
 		return;
 
+	QFileInfo fi(files.first());
+	m_dirPath = fi.absolutePath();
 	// check for input files
 	int row = ui.tableWidgetIN->rowCount();
 	foreach (QString file, files) {
