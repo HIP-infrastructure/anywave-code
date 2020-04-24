@@ -57,7 +57,7 @@ AwAmplitudeButton::AwAmplitudeButton(QWidget *parent)
 	connect(m_am, SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
 
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		auto menu = new QMenu(AwChannel::types().value(i), m_menu);
+		auto menu = new QMenu(AwChannel::types.value(i), m_menu);
 		createActionGroup(menu, i);
 		m_menu->addMenu(menu);
 	}

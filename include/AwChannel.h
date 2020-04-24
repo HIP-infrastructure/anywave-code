@@ -32,7 +32,7 @@
 #include <QSemaphore>
 #include <QVector>
 #include <AwMarker.h>
-#define AW_CHANNEL_TYPES	13
+constexpr auto AW_CHANNEL_TYPES = 13;
 /*!
  * \brief
  * This class defines the AwChannel object.
@@ -55,6 +55,11 @@ public:
 		EEG = 0, SEEG = 0x01, MEG = 0x02, EMG = 0x03, ECG = 0x04, Reference = 0x05, Trigger = 0x06, Other = 0x07,
 		ICA = 0x08, Source = 0x09, GRAD = 0xA, ECoG = 0xB, EOG = 0xC};
 	enum SourceType { Real, Virtual };   
+
+	/** a vector containing the int value of each channel types **/
+	static const QVector<int> intTypes;
+	/** types is a string list of all managed channel types **/
+	static const QStringList types;
 
 	/** Default constructor **/
 	explicit AwChannel();
@@ -228,6 +233,8 @@ public:
 	static QList<AwChannel *> duplicateChannels(const QList<AwChannel *>& list);
 	static QList<AwChannel *> getChannelsWithLabels(const QList<AwChannel *>& list, const QStringList& labels);
 	static QList<AwChannel *> getChannelsWithLabel(const QList<AwChannel *>& list, const QString& label);
+	/** Gather channel of similar type in a list. Add the different lists in a hash table. **/
+	static QHash<int, QList<AwChannel *>> sortByTypes(const QList<AwChannel *>& list);
 	/** Get the labels as a list from the channels. Fullname flag will return the full labels (ie. with the reference channel) **/
 	static QStringList getLabels(const QList<AwChannel *>& list, bool fullName = false);
 	static QList<AwChannel *> cloneList(const QList<AwChannel *>& list, bool cloneData = false);
@@ -239,8 +246,8 @@ public:
 	static void setFilters(const  QList<AwChannel *>& list, float hp, float lp, float notch = 0.);
 	/** Compute the abs(max-min) for each channels and return the mean value **/
 	static float meanRangeValue(const QList<AwChannel *>& list);
-	/** Build a string list containing all the available types of channels **/
-	static QStringList types();
+	///** Build a string list containing all the available types of channels **/
+	//static QStringList types();
 	/** Get the unit string of a channel type **/
 	static QString unitForType(int type);
 	/** Get default amplitude value for a channel type **/

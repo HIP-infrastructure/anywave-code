@@ -6,7 +6,7 @@ AwNewViewDial::AwNewViewDial(QWidget *parent)
 {
 	m_ui.setupUi(this);
 	// add check boxes for all types of channels available.
-	auto labels = AwChannel::types();
+	auto labels = AwChannel::types;
 	int row = 0, col = 0;
 	for (int i = 0; i < labels.size(); i++) {
 		auto l = labels.at(i);

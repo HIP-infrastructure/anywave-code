@@ -113,6 +113,9 @@
     <Filter Include="Batch">
       <UniqueIdentifier>{fad4582d-3dc6-447f-a72d-bded135f70b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Process\PSD">
+      <UniqueIdentifier>{a1e9f0f5-9cf7-407c-8217-b80ff75cf2a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1279,12 +1282,6 @@
     <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSParser.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSParser.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSNode.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
@@ -1404,6 +1401,24 @@
     </ClCompile>
     <ClCompile Include="Batch\AwBatchGUI.cpp">
       <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\PSD\AwPSD.cpp">
+      <Filter>Process\PSD</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwPSD.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwPSD.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwPSDGUI.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwPSDGUI.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\PSD\AwPSDGUI.cpp">
+      <Filter>Process\PSD</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1956,6 +1971,15 @@
     <CustomBuild Include="Batch\AwBatchGUI.ui">
       <Filter>Batch</Filter>
     </CustomBuild>
+    <CustomBuild Include="Process\PSD\AwPSD.h">
+      <Filter>Process\PSD</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\PSD\AwPSDGUI.ui">
+      <Filter>Process\PSD</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\PSD\AwPSDGUI.h">
+      <Filter>Process\PSD</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
@@ -2191,6 +2215,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\AwKeys.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwPSDGUI.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
