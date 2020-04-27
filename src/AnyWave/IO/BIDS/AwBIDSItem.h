@@ -31,7 +31,7 @@ class AwBIDSItem : public QStandardItem
 {
 public:
 	AwBIDSItem(const QString& text, AwBIDSItem *parent = nullptr);
-	enum Types { Subject, Session, ieeg, meg, eeg, Folder, DataFile };
+	enum Types { Subject, Session, ieeg, meg, eeg, Folder, DataFile, ica, h2 };
 	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2, RelativePathRole = Qt::UserRole + 3,
 		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5	};
 	inline QList<AwBIDSItem *>& children() { return m_children; }
@@ -39,8 +39,8 @@ public:
 	inline void addFile(const QString& filePath) { m_files.append(filePath); }
 	void addChild(AwBIDSItem *child) { m_children.append(child); }
 	QList<AwBIDSItem *> getDataFileItems();
+	inline AwBIDSItem* bidsParent() { return m_parent; }
 protected:
-	//AwBIDSNode * m_sub;
 	AwBIDSItem *m_parent; // nullptr if the item IS the subject.
 	QList<AwBIDSItem *> m_children;
 	QStringList m_files;	// an item may contain data files 

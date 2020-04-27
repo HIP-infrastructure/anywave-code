@@ -27,6 +27,9 @@ AwBIDSManager *AwBIDSManager::m_instance = 0;
 
 QStringList AwBIDSManager::m_dataFileSuffixes = { "_eeg", "_meg", "_ieeg" };
 
+// global variables
+static QStringList derivativesFolders = { "ica", "h2" };
+static QVector<int> derivativesTypes = { AwBIDSItem::ica, AwBIDSItem::h2 };
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
@@ -786,6 +789,62 @@ void AwBIDSManager::closeBIDS()
 	emit BIDSClosed();
 }
 
+void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
+{
+	auto itemParent = item->bidsParent();
+	// use bidsParent() here not parent().
+	// parent() is the default methode for QStandardItem and it will return nullptr at this step because the file item
+	// has not yet been inserted in the treeview model. So it hasn't got any parent.
+	if (itemParent == nullptr)
+		return;
+
+	auto relativePath = itemParent->data(AwBIDSItem::RelativePathRole).toString();
+	QFileInfo fi(relativePath);
+	auto fileName = fi.fileName();
+	// check special case of meg file contained in a directory
+	if (item->data(AwBIDSItem::DataTypeRole).toInt() == AwBIDSItem::meg) {
+		if (!fileName.contains("_meg")) {
+			fileName = relativePath;
+			fi.setFile(fileName);
+			fileName = fi.fileName();
+		}
+	}
+	for (auto suffix : m_dataFileSuffixes) {
+		if (fileName.contains(suffix))
+			fileName = fileName.remove(suffix);
+	}
+	QString path;
+	// relative path must exist in derivatives for the different supported plugins
+	int index = 0;
+	for (auto folder : derivativesFolders) {
+		path = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(folder).arg(relativePath);
+		// if path exists; check for files
+		QDir dir(path);
+		if (!dir.exists())
+			continue;
+		// create a child container using the derivative plugin name
+		// ica, h2, ...
+		AwBIDSItem *container = nullptr;
+		auto list = dir.entryInfoList(QDir::Files);
+		for (auto file : list) {
+			if (file.fileName().startsWith(fileName)) {
+				if (container == nullptr) {
+					container = new AwBIDSItem(folder, item);
+					container->setData(path, AwBIDSItem::PathRole);
+					container->setData(derivativesTypes.at(index), AwBIDSItem::TypeRole);
+					container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+				}
+				auto fileItem = new AwBIDSItem(file.fileName(), container);
+				auto fullPath = QString("%1/%2").arg(path).arg(file.fileName());
+				fileItem->setData(fullPath, AwBIDSItem::PathRole);
+				fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+				fileItem->setData(AwBIDSItem::ica, AwBIDSItem::DataTypeRole);
+				fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+			}
+		}
+	}
+}
+
 void AwBIDSManager::parse()
 {
 	QDir dir(m_rootDir);
@@ -858,6 +917,8 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					fileItem->setData(fullPath, AwBIDSItem::PathRole);
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(type, AwBIDSItem::DataTypeRole);
+					// search for derivatives for this item 
+					setDerivativesForItem(fileItem);
 					// build relative path using parent's one
 					fileItem->setData(QString("%1/%2").arg(parentRelativePath).arg(fileName), AwBIDSItem::RelativePathRole);
 					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);

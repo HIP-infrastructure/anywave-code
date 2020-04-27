@@ -50,7 +50,6 @@ class AwBIDSManager : public QObject
 public:
 	enum Modifications { ChannelsTsv, EventsTsv };
 	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
-	enum Derivatives { ICA };
 
 	// destructor
 	~AwBIDSManager();
@@ -115,6 +114,7 @@ protected:
 	AwBIDSManager();
 	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
+	void setDerivativesForItem(AwBIDSItem *item);
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
@@ -125,7 +125,7 @@ protected:
 	QList<int> m_dataContainers;
 	QFileIconProvider m_fileIconProvider;
 	QVariantHash m_participantsData; // hold the columns value for each participant in participants.tsvs
-
+	QHash<AwBIDSItem *, QVariant> m_derivativesItems;
 
 	QString getParsingPath();
 	void modifyUpdateJson(const QStringList& branches);
