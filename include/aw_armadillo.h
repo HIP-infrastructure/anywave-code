@@ -6,9 +6,9 @@
 
 #define ARMA_USE_BLAS
 #define ARMA_DONT_USE_WRAPPER
-#if defined(MKL)
-#define ARMA_USE_MKL_ALLOC
-#endif
 
 #include <armadillo>
 using namespace arma;
+#if defined(MKL)
+#define ARMA_USE_MKL_ALLOC
+#endif

@@ -1,7 +1,7 @@
 #pragma once
 #include <QStringList>
 #include <QVector>
-#include <aw_armadillo.h>
+#include <armadillo>
 using namespace arma;
 class GraphWindow;
 

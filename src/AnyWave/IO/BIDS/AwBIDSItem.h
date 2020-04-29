@@ -31,7 +31,7 @@ class AwBIDSItem : public QStandardItem
 {
 public:
 	AwBIDSItem(const QString& text, AwBIDSItem *parent = nullptr);
-	enum Types { Subject, Session, ieeg, meg, eeg, Folder, DataFile, ica, h2 };
+	enum Types { Subject, Session, ieeg, meg, eeg, Folder, anat, DataFile, ica, h2 };
 	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2, RelativePathRole = Qt::UserRole + 3,
 		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5	};
 	inline QList<AwBIDSItem *>& children() { return m_children; }

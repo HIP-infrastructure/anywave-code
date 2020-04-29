@@ -137,7 +137,9 @@ void AwBIDSGUI::addToProcessing()
 	for (auto index : indexes) {
 		if (index.column() == 0) {
 			auto item = static_cast<AwBIDSItem *>(m_model->itemFromIndex(index));
-			if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile)
+			auto itemType = item->data(AwBIDSItem::TypeRole).toInt();
+			auto dataType = item->data(AwBIDSItem::DataTypeRole).toInt();
+			if (itemType == AwBIDSItem::DataFile && dataType != AwBIDSItem::anat)
 				items << item;
 			else {
 				auto dataFileItems = item->getDataFileItems();
@@ -243,7 +245,7 @@ void AwBIDSGUI::handleClick(const QModelIndex& index)
 		auto path = item->data(AwBIDSItem::PathRole).toString();
 		// regexp to capture file extension including dot
 		QRegularExpression reg("(\\.[^.]+)$");
-		if (path.contains("_eeg") || path.contains("_ieeg") || path.contains("_meg")) {
+		if (path.contains("_eeg") || path.contains("_ieeg") || path.contains("_meg") || path.endsWith("nii")) {
 			auto jsonPath = path.remove(reg) + ".json";
 			auto toolTip = createToolTipFromJson(jsonPath);
 			if (toolTip.isEmpty()) {  // createToolTip failed, probably because a meg data file which does not contain the tag _meg
@@ -277,6 +279,16 @@ QString AwBIDSGUI::createToolTipFromJson(const QString& jsonPath)
 		toolTip += QString("Sampling Frequency: %1Hz\n").arg(dict.value("SamplingFrequency").toDouble());
 	if (dict.contains("RecordingDuration"))
 		toolTip += QString("File Duration: %1s\n").arg(dict.value("RecordingDuration").toDouble());
+	if (dict.contains("InstitutionName"))
+		toolTip += QString("Institution Name: %1\n").arg(dict.value("InstitutionName").toString());
+	if (dict.contains("Modality"))
+		toolTip += QString("Modality: %1\n").arg(dict.value("Modality").toString());
+	if (dict.contains("SliceThickness"))
+		toolTip += QString("Slice Thickness: %1\n").arg(dict.value("SliceThickness").toDouble());
+	if (dict.contains("SeriesNumber"))
+		toolTip += QString("Series Number: %1\n").arg(dict.value("SeriesNumber").toInt());
+	if (dict.contains("SeriesDescription"))
+		toolTip += QString("Series Description: %1\n").arg(dict.value("SeriesDescription").toString());
 
 	toolTip.chop(1); // remove last \n
 	return toolTip;  
@@ -295,9 +307,16 @@ void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 		return;
 
 	// only open DataFile type items
-	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile)
+	auto type = item->data(AwBIDSItem::TypeRole).toInt();
+	auto dataType = item->data(AwBIDSItem::DataTypeRole).toInt();
+	if (type != AwBIDSItem::DataFile)
+		return;
+
+	if (dataType != AwBIDSItem::anat)
 		// open the file 
-		emit dataFileClicked(item->data(AwBIDSItem::PathRole).toString());				
+		emit dataFileClicked(item->data(AwBIDSItem::PathRole).toString());		
+	else if (dataType == AwBIDSItem::anat)
+		emit imageFileClicked(item->data(AwBIDSItem::PathRole).toString());
 }
 
 

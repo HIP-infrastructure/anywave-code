@@ -721,8 +721,10 @@ AwBIDSManager::AwBIDSManager()
 {
 	m_ui = nullptr;
 	m_mustValidateModifications = false;
-	m_dataContainers = { AwBIDSItem::meg, AwBIDSItem::eeg, AwBIDSItem::ieeg };
+	m_dataContainers = { AwBIDSItem::meg, AwBIDSItem::eeg, AwBIDSItem::ieeg, AwBIDSItem::anat };
 	m_fileExtensions = AwPluginManager::getInstance()->getReadableFileExtensions();
+	// add anat niftfi format extension
+	m_fileExtensions.append("nii");
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -911,6 +913,16 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 
 				auto fullPath = f.absoluteFilePath();
 
+				// test for .nii anat image
+				if (fullPath.endsWith(".nii")) {
+					auto fileItem = new AwBIDSItem(fileName, parentItem);
+					fileItem->setData(fullPath, AwBIDSItem::PathRole);
+					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+					fileItem->setData(type, AwBIDSItem::DataTypeRole);
+					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+					continue;
+				}
+
 				auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(fullPath);
 				if (reader != nullptr) {
 					auto fileItem = new AwBIDSItem(fileName, parentItem);
@@ -962,6 +974,8 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					item->setData(AwBIDSItem::ieeg, AwBIDSItem::TypeRole);
 				else if (name == "eeg")
 					item->setData(AwBIDSItem::eeg, AwBIDSItem::TypeRole);
+				else if (name == "anat")
+					item->setData(AwBIDSItem::anat, AwBIDSItem::TypeRole);
 				else
 					item->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
 				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);

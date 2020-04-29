@@ -84,7 +84,7 @@
 // #define ARMA_USE_TBB_ALLOC
 //// Uncomment the above line if you want to use Intel TBB scalable_malloc() and scalable_free() instead of standard malloc() and free()
 
-// #define ARMA_USE_MKL_ALLOC
+#define ARMA_USE_MKL_ALLOC
 //// Uncomment the above line if you want to use Intel MKL mkl_malloc() and mkl_free() instead of standard malloc() and free()
 
 // #define ARMA_USE_MKL_TYPES
@@ -112,7 +112,7 @@
 #endif
 
 #if !defined(ARMA_64BIT_WORD)
-// #define ARMA_64BIT_WORD
+ #define ARMA_64BIT_WORD
 //// Uncomment the above line if you require matrices/vectors capable of holding more than 4 billion elements.
 //// Your machine and compiler must have support for 64 bit integers (eg. via "long" or "long long").
 //// Note that ARMA_64BIT_WORD is automatically enabled when a C++11 compiler is detected and std::size_t has 64 bits.
@@ -302,5 +302,5 @@
 // ARMA_AUX_LIBS lists the libraries required by Armadillo on this system, and
 // ARMA_AUX_INCDIRS lists the include directories required by Armadillo on this system.
 // Do not use these unless you know what you are doing.
-#define ARMA_AUX_LIBS
+#define ARMA_AUX_LIBS 
 #define ARMA_AUX_INCDIRS

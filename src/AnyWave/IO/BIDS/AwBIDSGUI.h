@@ -45,6 +45,7 @@ public:
 	void showColumns(const QStringList& cols);
 signals:
 	void dataFileClicked(const QString&);
+	void imageFileClicked(const QString&);
 	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
 	void batchManagerNeeded();
 protected slots:

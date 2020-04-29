@@ -11,20 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{79AFAD8F-FAFD-44C2-821F-F76B347854E0}</ProjectGuid>
+    <ProjectGuid>{998231E2-95EB-4D82-B54A-64727BB9C69C}</ProjectGuid>
     <Keyword>QtVS_v302</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
-    <ProjectName>H2</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v141</PlatformToolset>
+    <UseIntelTBB>true</UseIntelTBB>
+    <UseIntelMKL>Parallel</UseIntelMKL>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v141</PlatformToolset>
+    <UseIntelTBB>true</UseIntelTBB>
+    <UseIntelMKL>Parallel</UseIntelMKL>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -50,11 +53,11 @@
   </ImportGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>5.10</QtInstall>
-    <QtModules>core;gui;svg;widgets;concurrent</QtModules>
+    <QtModules>core;gui;widgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>5.10</QtInstall>
-    <QtModules>core;gui;svg;widgets;concurrent</QtModules>
+    <QtModules>core;gui;widgets</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -66,15 +69,15 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PreprocessorDefinitions>H2_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ICA_LIB;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(AWROOT)\include;$(AWROOT)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AwCorelibd.lib;AwWidgetslibd.lib;AwProcessLibd.lib;AwGraphicsLibd.lib;AwMATLABLibd.lib;AwMathLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwFilteringLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCorelibd.lib;AwWidgetslibd.lib;AwProcessLibd.lib;AwMATLABLibd.lib;AwFilteringLibd.lib;AwMathLibd.lib;AwUtilitiesLibd.lib;AwLayoutLibd.lib;AwReadWriteLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -83,38 +86,37 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <PreprocessorDefinitions>H2_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ICA_LIB;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(AWROOT)\include;$(AWROOT)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwMATLABLib.lib;AwMathLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwFilteringLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwMATLABLib.lib;AwFilteringLib.lib;AwMathLib.lib;AwUtilitiesLib.lib;AwLayoutLib.lib;AwReadWriteLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="h2.cpp" />
-    <ClCompile Include="H2ChannelPair.cpp" />
-    <ClCompile Include="H2ChannelPairItem.cpp" />
-    <ClCompile Include="h2ui.cpp" />
+    <QtMoc Include="ica.h" />
+    <ClInclude Include="infomax_algo.h" />
+    <ClInclude Include="r250.h" />
+    <ClInclude Include="randlcg.h" />
+    <QtMoc Include="ICASettings.h" />
+    <ClInclude Include="ica_global.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="h2.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="H2ChannelPair.h" />
-    <ClInclude Include="H2Params.h" />
-    <QtMoc Include="h2ui.h" />
-    <QtMoc Include="H2ChannelPairItem.h" />
-    <ClInclude Include="h2_global.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="h2ui.ui" />
+    <ClCompile Include="ica.cpp" />
+    <ClCompile Include="ICASettings.cpp" />
+    <ClCompile Include="infomax_algo.cpp" />
+    <ClCompile Include="r250.c" />
+    <ClCompile Include="randlcg.c" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="ICASettings.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
