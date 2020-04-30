@@ -933,7 +933,7 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					setDerivativesForItem(fileItem);
 					// build relative path using parent's one
 					fileItem->setData(QString("%1/%2").arg(parentRelativePath).arg(fileName), AwBIDSItem::RelativePathRole);
-					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+					fileItem->setData(QIcon(":/images/AnyWave_icon.png"), Qt::DecorationRole);
 					parentItem->addFile(fullPath);
 					reader->plugin()->deleteInstance(reader);
 				}

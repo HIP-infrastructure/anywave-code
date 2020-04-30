@@ -83,6 +83,10 @@ AwSettings::AwSettings(QObject *parent)
 	bool checkForUpdates = settings.value("general/checkForUpdates", true).toBool();
 	m_settings[aws::check_updates] = checkForUpdates;
 
+	// third party sotfwares
+	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
+	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
+
 	m_matlabInterface = NULL;
 	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
 

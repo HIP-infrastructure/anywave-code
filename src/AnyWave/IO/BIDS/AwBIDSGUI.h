@@ -56,9 +56,12 @@ protected slots:
 	// context menu slots
 	void contextMenuRequested(const QPoint& pos);
 	void addToProcessing();
+	void showNiftiFiles();
 protected:
 	AwBIDSManager *m_bids;
 	QMenu *m_menu;	// context menu
+	QMenu *m_menuProcessing;
+	QAction *m_showNifti;
 	// keep a copy of models for the TreeView
 	QStandardItemModel *m_model;
 	AwBIDSItems m_items;	// copy of items list from bids manager
@@ -68,6 +71,8 @@ protected:
 	void recursiveFill(AwBIDSItem *item);
 	QString createToolTipFromJson(const QString& jsonPath);
 	void createContextMenus();
+	void openITKSNAP(QStandardItem *item);
+	void openNiftiFile(const QString& file);
 private:
 	Ui::AwBIDSGUIUi m_ui;		
 };

@@ -16,7 +16,9 @@
 #include "Batch/AwBatchManager.h"
 #include "Batch/AwBatchItem.h"
 #include "Batch/AwBatchGUI.h"
+#include "Prefs/AwSettings.h"
 #include <AwKeys.h>
+#include <QProcess>
 
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
@@ -100,6 +102,27 @@ void AwBIDSGUI::contextMenuRequested(const QPoint& point)
 	if (indexes.isEmpty()) // no selection
 		return;
 
+	// 
+	bool enableBatchProcess = false;
+	QStringList niftiFiles;
+	for (auto index : indexes) {
+		if (index.column() == 0) {
+			auto item = m_model->itemFromIndex(index);
+			auto type = item->data(AwBIDSItem::TypeRole).toInt();
+			auto dataType = item->data(AwBIDSItem::DataTypeRole).toInt();
+			if (dataType == AwBIDSItem::anat && type == AwBIDSItem::DataFile) {
+				niftiFiles.append(item->data(AwBIDSItem::PathRole).toString());
+			}
+			else if (type == AwBIDSItem::DataFile)
+				enableBatchProcess = true;
+		}
+	}
+	m_showNifti->setData(QStringList());
+	if (!niftiFiles.isEmpty()) 
+		m_showNifti->setData(niftiFiles);
+	m_showNifti->setEnabled(!niftiFiles.isEmpty());
+	m_menuProcessing->setEnabled(enableBatchProcess);
+
 	m_menu->exec(m_ui.treeView->mapToGlobal(point));
 }
 
@@ -108,7 +131,9 @@ void AwBIDSGUI::createContextMenus()
 {
 	connect(m_ui.treeView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(contextMenuRequested(const QPoint&)));
 	m_menu = new QMenu(m_ui.treeView);
-	auto menuProcessing = m_menu->addMenu("Processing");
+	m_showNifti = m_menu->addAction("View in ITK-SNAP");
+	connect(m_showNifti, &QAction::triggered, this, &AwBIDSGUI::showNiftiFiles);
+	m_menuProcessing = m_menu->addMenu("Batch Process");
 	// get batchable processes
 	auto processes = AwProcessManager::instance()->getBatchableProcesses();
 	for (auto p : processes) {
@@ -116,12 +141,23 @@ void AwBIDSGUI::createContextMenus()
 		auto batchSettings = p->batchHash();
 		auto inputs = batchSettings.value(cl::batch_inputs).toHash();
 		if (inputs.contains(cl::input_file)) {
-			auto action = menuProcessing->addAction(QString("compute %1").arg(p->name));
+			auto action = m_menuProcessing->addAction(QString("compute %1").arg(p->name));
 			// set the plugin's name as data
 			action->setData(p->name);
 			connect(action, &QAction::triggered, this, &AwBIDSGUI::addToProcessing);
 		}
 	}
+	
+}
+
+void AwBIDSGUI::showNiftiFiles()
+{
+	auto action = (QAction *)sender();
+	if (action != m_showNifti)
+		return;
+	auto files = action->data().toStringList();
+	for (auto f : files)
+		openNiftiFile(f);
 }
 
 void AwBIDSGUI::addToProcessing()
@@ -228,8 +264,6 @@ void AwBIDSGUI::showColumns(const QStringList& cols)
 	}
 }
 
-
-
 void AwBIDSGUI::handleClick(const QModelIndex& index)
 {
 	// get the item
@@ -315,11 +349,33 @@ void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 	if (dataType != AwBIDSItem::anat)
 		// open the file 
 		emit dataFileClicked(item->data(AwBIDSItem::PathRole).toString());		
-	else if (dataType == AwBIDSItem::anat)
-		emit imageFileClicked(item->data(AwBIDSItem::PathRole).toString());
+	else if (dataType == AwBIDSItem::anat) 
+		openITKSNAP(item);
 }
 
+void AwBIDSGUI::openNiftiFile(const QString& file)
+{
+	auto settings = AwSettings::getInstance();
+	auto itk = settings->value(aws::itk_snap).toString();
+	if (QFile::exists(itk)) {
+		auto fullPath = settings->value(aws::system_path).toString();
+		QProcess process(this);
+		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
+		env.remove("PATH");
+		env.insert("PATH", fullPath);
+		process.setProcessEnvironment(env);
+		QStringList arguments = { file };
+		process.startDetached(itk, arguments);
+	}
+}
 
+void AwBIDSGUI::openITKSNAP(QStandardItem *item)
+{
+	auto type = item->data(AwBIDSItem::TypeRole).toInt();
+	auto dataType = item->data(AwBIDSItem::DataTypeRole).toInt();
+	if (type == AwBIDSItem::DataFile && dataType == AwBIDSItem::anat) 
+		openNiftiFile(item->data(AwBIDSItem::PathRole).toString());
+}
 
 
 void AwBIDSGUI::refresh()
@@ -354,100 +410,3 @@ void AwBIDSGUI::recursiveFill(AwBIDSItem *item)
 		recursiveFill(child);
 	}
 }
-
-
-//void AwBIDSGUI::initModel(const AwBIDSNodes& nodes, QStandardItem *parent)
-//{
-//	if (nodes.isEmpty())
-//		return;
-//
-//	QFileIconProvider fi;
-//
-//	QStandardItem *item = nullptr;
-//	for (auto node : nodes) {
-//		// check node type
-//		switch (node->type()) {
-//		case AwBIDSNode::subject:
-//			item = new QStandardItem(node->ID());
-//			item->setToolTip(tr("subject"));
-//			// custom data
-//			item->setData(node->fullPath(), AwBIDSGUI::PathRole);
-//			item->setData(AwBIDSGUI::Subject, AwBIDSGUI::TypeRole);
-//			item->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//			// subject are always root items =>
-//			parent->appendRow(item);
-//			initModel(node->children(), item);
-//			break;
-//		case AwBIDSNode::session:
-//			item = new QStandardItem(node->ID());
-//			item->setToolTip(tr("session"));
-//			// custom data
-//			item->setData(node->fullPath(), AwBIDSGUI::PathRole);
-//			item->setData(AwBIDSGUI::Session, AwBIDSGUI::TypeRole);
-//			item->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//			parent->appendRow(item);
-//			initModel(node->children(), item);
-//			break;
-//		case AwBIDSNode::ieeg:
-//			item = new QStandardItem("ieeg");
-//			item->setData(AwBIDSGUI::ieeg, AwBIDSGUI::TypeRole);
-//			item->setData(node->fullPath(), AwBIDSGUI::PathRole);
-//			item->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//			parent->appendRow(item);
-//			for (auto file : node->files()) {
-//				auto childItem = new QStandardItem(file);
-//				childItem->setToolTip("SEEG data file");
-//				childItem->setData(QString("%1/%2").arg(node->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//				childItem->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//				childItem->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//				item->appendRow(childItem);
-//			}
-//			break;
-//		case AwBIDSNode::meg:
-//			item = new QStandardItem("meg");
-//			item->setData(AwBIDSGUI::meg, AwBIDSGUI::TypeRole);
-//			item->setData(node->fullPath(), AwBIDSGUI::PathRole);
-//			item->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//			parent->appendRow(item);
-//			for (auto file : node->files()) {
-//				auto childItem = new QStandardItem(file);
-//				childItem->setToolTip("MEG data file");
-//				childItem->setData(QString("%1/%2").arg(node->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//				childItem->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//				childItem->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//				item->appendRow(childItem);
-//			}
-//			break;
-//		case AwBIDSNode::eeg:
-//			item = new QStandardItem("eeg");
-//			item->setData(AwBIDSGUI::eeg, AwBIDSGUI::TypeRole);
-//			item->setData(node->fullPath(), AwBIDSGUI::PathRole);
-//			item->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//			parent->appendRow(item);
-//			for (auto file : node->files()) {
-//				auto childItem = new QStandardItem(file);
-//				childItem->setToolTip("SEEG data file");
-//				childItem->setData(QString("%1/%2").arg(node->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//				childItem->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//				childItem->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//				item->appendRow(childItem);
-//			}
-//			break;
-//		case AwBIDSNode::Folder:
-//			item = new QStandardItem(node->ID());
-//			item->setData(AwBIDSGUI::Folder, AwBIDSGUI::TypeRole);
-//			item->setData(node->fullPath(), AwBIDSGUI::PathRole);
-//			item->setData(fi.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//			parent->appendRow(item);
-//			for (auto file : node->files()) {
-//				auto childItem = new QStandardItem(file);
-//				childItem->setToolTip("SEEG data file");
-//				childItem->setData(QString("%1/%2").arg(node->fullPath()).arg(file), AwBIDSGUI::PathRole);
-//				childItem->setData(AwBIDSGUI::DataFile, AwBIDSGUI::TypeRole);
-//				childItem->setData(fi.icon(QFileIconProvider::File), Qt::DecorationRole);
-//				item->appendRow(childItem);
-//			}
-//			break;
-//		}
-//	}
-//}

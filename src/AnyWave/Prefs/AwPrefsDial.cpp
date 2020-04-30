@@ -84,7 +84,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	checkBoxUpdates->setChecked(aws->value(aws::check_updates).toBool());
 
 	//// language
-	comboLanguage->setDisabled(true);
+	//comboLanguage->setDisabled(true);
 	//QDir dir(aws->langPath);
 	//QStringList files = dir.entryList(QStringList("anywave_*.qm"));
 	//if (files.isEmpty()) // if no language files are found, disable the language option
@@ -123,7 +123,8 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	lineEditMCR->hide();
 	buttonSelectMCR->hide();
     
-    lineEditGARDEL->setText(qsettings.value("GARDEL/path").toString());
+    editGARDEL->setText(qsettings.value("GARDEL/path").toString());
+	editITK->setText(qsettings.value("ITK-SNAP/path").toString());
 
 	// COMPILED PLUGIN. Windows do not required environments variables to be set but Linux and Mac OS X do.
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
@@ -236,14 +237,18 @@ void AwPrefsDial::accept()
 	if (!lineEditMCR->text().isEmpty())
 		qsettings.setValue("matlab/mcr_path", lineEditMCR->text());
 #endif
-	QString Gardel = lineEditGARDEL->text();
+	QString Gardel = editGARDEL->text();
 	if (QFile::exists(Gardel))
 		qsettings.setValue("GARDEL/path", Gardel);
+	QString itk = editITK->text();
+	if (QFile::exists(itk))
+		qsettings.setValue("ITK-SNAP/path", itk);
 
 	//// change language
 	//QString lang = comboLanguage->itemData(comboLanguage->currentIndex()).toString();
 	//aws->loadLanguage(lang);
-
+	aws->setValue(aws::itk_snap, itk);
+	aws->setValue(aws::gardel, Gardel);
 	// CPU CORES
 	aws->setValue(aws::max_cpu_cores, sliderCPU->value());
     QThreadPool::globalInstance()->setMaxThreadCount(sliderCPU->value());
@@ -418,12 +423,20 @@ void AwPrefsDial::changeMarkerFontText(const QFont &font)
 }
 
 
+void AwPrefsDial::pickITK()
+{
+	QString path = QFileDialog::getOpenFileName(this, tr("ITK-SNAP"), "/");
+	if (path.isEmpty())
+		return;
+	editITK->setText(path);
+}
+
 void AwPrefsDial::pickGARDEL()
 {
 	QString path = QFileDialog::getOpenFileName(this, tr("GARDEL"), "/");
 	if (path.isEmpty())
 		return;
-	lineEditGARDEL->setText(path);
+	editGARDEL->setText(path);
 }
 
 

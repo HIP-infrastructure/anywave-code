@@ -81,6 +81,8 @@ namespace aws {
 	constexpr auto max_cpu_cores = "max_cpu_cores";
 	constexpr auto max_recent_files = "max_recent_files";
 	constexpr auto predefined_marker_file = "predefined_marker_file";
+	constexpr auto itk_snap = "itk_snap";
+	constexpr auto gardel = "gardel";
 };
 
 ///
