@@ -95,6 +95,11 @@ AwBIDSGUI::~AwBIDSGUI()
 {
 }
 
+void AwBIDSGUI::showItem(QStandardItem *item)
+{
+	m_ui.treeView->expand(m_model->indexFromItem(item));
+}
+
 
 void AwBIDSGUI::contextMenuRequested(const QPoint& point)
 {

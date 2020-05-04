@@ -92,7 +92,7 @@ public:
 	void updateChannelsTsv(const QString& path);
 	void updateEventsTsv(const QString& path);
 	/** try to find the subject in which the data file is stored. **/
-	AwBIDSItem *findSubject(const QString& dataFilePath);
+	//AwBIDSItem *findSubject(const QString& dataFilePath);
 	/** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
 	QString getTSVFile(const QString& dataFilePath, int tsvType);
 	
@@ -115,6 +115,7 @@ protected:
 	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 	void setDerivativesForItem(AwBIDSItem *item);
+	void findItem(const QString& filePath);
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
@@ -137,5 +138,6 @@ protected:
 	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSItem *m_currentSubject;
+	AwBIDSItem *m_currentOpenItem;
 	bool m_mustValidateModifications;
 };

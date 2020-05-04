@@ -44,7 +44,7 @@ public:
 private:
 	AwFileIO *m_megReader, *m_eegReader;
 	AwFileIOPlugin *m_megPlugin, *m_eegPlugin;
-	QString m_adesFile, m_megFile;
+	QString m_eegFile, m_megFile;
 	AwChannelList m_eegChannels;
 	QString megFile() { return m_megFile; }
 	void setMEGFile(QString file) { m_megFile = file; }

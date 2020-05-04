@@ -217,20 +217,26 @@ void AnyWave::openFile(const QString &path)
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 	ds->setParent(this);
 
-	// if BIDS is already active, check if the file path is coming from an existing BIDS node:
-	bool BIDSCheck = false;
-	if (AwBIDSManager::isInstantiated()) {
-		auto BM = AwBIDSManager::instance();
-		if (BM->isBIDSActive() && BM->findSubject(filePath) != nullptr)
-			BIDSCheck = true;
+	// check if file belongs to a BIDS structure:
+	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	if (!root.isEmpty()) {
+		openBIDS(root);
+		AwBIDSManager::instance()->newFile(m_currentReader);
 	}
-	if (!BIDSCheck) {
-		QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
-		if (!root.isEmpty()) {
-			openBIDS(root);
-			AwBIDSManager::instance()->newFile(m_currentReader);
-		}
-	}
+	//// if BIDS is already active, check if the file path is coming from an existing BIDS node:
+	//bool BIDSCheck = false;
+	//if (AwBIDSManager::isInstantiated()) {
+	//	auto BM = AwBIDSManager::instance();
+	//	if (BM->isBIDSActive() && BM->findSubject(filePath) != nullptr)
+	//		BIDSCheck = true;
+	//}
+	//if (!BIDSCheck) {
+	//	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	//	if (!root.isEmpty()) {
+	//		openBIDS(root);
+	//		AwBIDSManager::instance()->newFile(m_currentReader);
+	//	}
+	//}
 
 	// read flt file before loading the montage.
 	if (!AwSettings::getInstance()->filterSettings().initWithFile(m_openFileName)) {

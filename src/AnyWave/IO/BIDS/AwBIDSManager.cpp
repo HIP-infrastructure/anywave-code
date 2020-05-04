@@ -704,7 +704,6 @@ int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader)
 		throw(AwException("EDFIO Plugin is missing", "BIDSManager::convertToEDF"));
 		return -1;
 	}
-
 	return convertFile(reader, plugin, file);
 }
 
@@ -720,6 +719,8 @@ AwBIDSManager *AwBIDSManager::instance()
 AwBIDSManager::AwBIDSManager()
 {
 	m_ui = nullptr;
+	m_currentSubject = nullptr;
+	m_currentOpenItem = nullptr;
 	m_mustValidateModifications = false;
 	m_dataContainers = { AwBIDSItem::meg, AwBIDSItem::eeg, AwBIDSItem::ieeg, AwBIDSItem::anat };
 	m_fileExtensions = AwPluginManager::getInstance()->getReadableFileExtensions();
@@ -787,6 +788,7 @@ void AwBIDSManager::closeBIDS()
 	m_modifications.clear();
 	m_mustValidateModifications = false;
 	m_currentSubject = nullptr;
+	m_currentOpenItem = nullptr;
 	m_participantsData.clear();
 	emit BIDSClosed();
 }
@@ -926,9 +928,13 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 				auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(fullPath);
 				if (reader != nullptr) {
 					auto fileItem = new AwBIDSItem(fileName, parentItem);
-					fileItem->setData(fullPath, AwBIDSItem::PathRole);
+					fileItem->setData(QDir::toNativeSeparators(fullPath), AwBIDSItem::PathRole);
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(type, AwBIDSItem::DataTypeRole);
+					// add the item to the hash table
+					// use native separators
+
+					m_hashItemFiles.insert(QDir::toNativeSeparators(fullPath), fileItem);
 					// search for derivatives for this item 
 					setDerivativesForItem(fileItem);
 					// build relative path using parent's one
@@ -1255,17 +1261,28 @@ QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * it
 	return outputPath;
 }
 
-AwBIDSItem *AwBIDSManager::findSubject(const QString& dataFilePath)
+void AwBIDSManager::findItem(const QString& filePath)
 {
-	m_currentSubject = nullptr;
+	m_currentOpenItem = nullptr;
 	if (!isBIDSActive())
-		return nullptr;
-
-	if (m_hashItemFiles.contains(dataFilePath))
-		m_currentSubject = m_hashItemFiles.value(dataFilePath);
-
-	return m_currentSubject;
+		return;
+	if (m_hashItemFiles.contains(QDir::toNativeSeparators(filePath)))
+		m_currentOpenItem = m_hashItemFiles.value(QDir::toNativeSeparators(filePath));
+	m_ui->showItem(m_currentOpenItem);
 }
+
+//AwBIDSItem *AwBIDSManager::findSubject(const QString& dataFilePath)
+//{
+//	m_currentSubject = nullptr;
+//	if (!isBIDSActive())
+//		return nullptr;
+//
+//	if (m_hashItemFiles.contains(dataFilePath))
+//		m_currentSubject = m_hashItemFiles.value(dataFilePath);
+//
+//
+//	return m_currentSubject;
+//}
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
@@ -1277,7 +1294,9 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 			closeBIDS();
 			setRootDir(root);
 			// find the corresponding subject node
-			findSubject(reader->fullPath());
+		//	findSubject(reader->fullPath());
+			findItem(reader->fullPath());
+
 			return;
 		}
 	}
@@ -1292,12 +1311,12 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 			closeBIDS();
 			setRootDir(root);
 			// find the corresponding subject node
-			findSubject(reader->fullPath());
+			findItem(reader->fullPath());
 			return;
 		}
 	}
 	// find the corresponding subject node
-	findSubject(reader->fullPath());
+	findItem(reader->fullPath());
 }
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)

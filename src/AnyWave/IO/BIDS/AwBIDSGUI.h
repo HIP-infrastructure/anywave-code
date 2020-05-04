@@ -43,6 +43,7 @@ public:
 	void refresh();
 	void closeBIDS(); 
 	void showColumns(const QStringList& cols);
+	void showItem(QStandardItem *item);
 signals:
 	void dataFileClicked(const QString&);
 	void imageFileClicked(const QString&);

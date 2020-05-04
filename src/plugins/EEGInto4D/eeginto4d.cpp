@@ -173,42 +173,51 @@ bool EEGInto4D::batchParameterCheck(const QVariantHash& args)
 
 bool EEGInto4D::showUi()
 {
-	bool ades_found = false, meg_found = false;
+	bool eeg_found = false, meg_found = false;
 	settings ui;
 
-	foreach(AwFileIOPlugin *reader, pdi.input.readers) {
-		if (!ades_found) {
-			if (reader->name == "AnyWave ADES Format") {
-				ades_found = true;
-				m_eegPlugin = ui.eegPlugin = reader;
-			}
-		}
+	//foreach(AwFileIOPlugin *reader, pdi.input.readers) {
+	//	if (!ades_found) {
+	//		if (reader->name == "AnyWave ADES Format") {
+	//			ades_found = true;
+	//			m_eegPlugin = ui.eegPlugin = reader;
+	//		}
+	//	}
+	//	if (!meg_found) {
+	//		if (reader->name == "4DNI Reader") {
+	//			meg_found = true;
+	//			m_megPlugin = ui.megPlugin = reader;
+	//		}
+	//	}
+	//	if (ades_found && meg_found)
+	//		break;
+	//}
+
+	// find at least 4DNi plugin
+	for (auto reader : pdi.input.readers) {
 		if (!meg_found) {
 			if (reader->name == "4DNI Reader") {
 				meg_found = true;
-				m_megPlugin = ui.megPlugin = reader;
+				break;
 			}
 		}
-		if (ades_found && meg_found)
-			break;
 	}
 
 
-	if (!ades_found || !meg_found) {
-		AwMessageBox::critical(NULL, tr("Missing reader plugins"), tr("This plugin requires the ADES Reader and the 4DNI Reader"));
+	//if (!ades_found || !meg_found) {
+	if (!meg_found) {
+		AwMessageBox::critical(NULL, tr("Missing reader plugins"), tr("This plugin requires the 4DNI Reader plugin"));
 		return false;
 	}
 
 	if (ui.exec() == QDialog::Accepted) {
-		m_adesFile = ui.eegFile;
+		auto args = pdi.input.args();
+		m_eegFile = ui.eegFile;
 		m_megFile = ui.megFile;
+		args["eeg_file"] = ui.eegFile;
+		args["meg_file"] = ui.megFile;
 		return true;
 	}
-
-	auto args = pdi.input.args();
-	args["eeg_file"] = ui.eegFile;
-	args["meg_file"] = ui.megFile;
-	pdi.input.setArguments(args);
 	return false;
 }
 
@@ -515,23 +524,36 @@ void EEGInto4D::alignFilePointer(QFile& file)
 
 void EEGInto4D::runFromCommandLine()
 {
-	bool ades_found = false, meg_found = false;
+	bool eeg_found = false, meg_found = false;
+	auto eegFile = pdi.input.args().value("eeg_file").toString();
 	for (auto plugin : pdi.input.readers) {
-		if (!ades_found) {
-			if (plugin->name == "AnyWave ADES Format") {
-				ades_found = true;
+		if (!eeg_found) {
+			auto reader = plugin->newInstance();
+			if (reader->canRead(eegFile)) {
+				eeg_found = true;
 				m_eegPlugin = plugin;
+				plugin->deleteInstance(reader);
 			}
 		}
+
+		//	if (plugin->name == "AnyWave ADES Format") {
+		//		ades_found = true;
+		//		m_eegPlugin = plugin;
+		//	}
+		//}
+
 		if (!meg_found) {
 			if (plugin->name == "4DNI Reader") {
 				meg_found = true;
 				m_megPlugin = plugin;
 			}
 		}
-		if (ades_found && meg_found)
+		if (eeg_found && meg_found)
 			break;
 	}
+	// found a plugin for eeg file
+	if (m_eegPlugin == nullptr && m_megPlugin == nullptr)
+		sendMessage("Missing EEG reader or MEG reader plugin.");
 
 	run();
 }
