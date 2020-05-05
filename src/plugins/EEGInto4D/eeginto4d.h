@@ -46,10 +46,10 @@ private:
 	AwFileIOPlugin *m_megPlugin, *m_eegPlugin;
 	QString m_eegFile, m_megFile;
 	AwChannelList m_eegChannels;
-	QString megFile() { return m_megFile; }
-	void setMEGFile(QString file) { m_megFile = file; }
-	QString adesFile() { return m_adesFile; }
-	void setADESFile(QString file) { m_adesFile = file; }
+//	QString megFile() { return m_megFile; }
+//	void setMEGFile(QString file) { m_megFile = file; }
+//	QString adesFile() { return m_adesFile; }
+//	void setADESFile(QString file) { m_adesFile = file; }
 	bool changeEEGLabelsIn4D(const AwChannelList& eegChannels);
 
 	// base on current file position, returns the number of bytes to add to get an aligned position to 8 bytes.

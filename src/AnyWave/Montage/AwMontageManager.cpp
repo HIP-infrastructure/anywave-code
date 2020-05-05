@@ -43,6 +43,7 @@
 #include <montage/AwMontage.h>
 #include <AwCore.h>
 #include <AwFileInfo.h>
+#include "IO/BIDS/AwBIDSManager.h"
 // statics init and definitions
 AwMontageManager *AwMontageManager::m_instance = 0;
 
@@ -169,7 +170,17 @@ void AwMontageManager::addNewSources(int type)
 
 int AwMontageManager::loadICA()
 {
+	// default dir path = the directory containing the data file
 	QString dir = AwSettings::getInstance()->fileInfo()->dirPath();
+	// check if we are in a BIDS and then check for derivatives ica folder
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive()) {
+			auto icaDir = bm->getDerivativePath(AwBIDSItem::ica);
+			if (!icaDir.isEmpty())
+				dir = icaDir;
+		}
+	}
 	QString filter("ICA matrices (*.mat *.h5)");
 	QString path;
 #ifdef Q_OS_MAC

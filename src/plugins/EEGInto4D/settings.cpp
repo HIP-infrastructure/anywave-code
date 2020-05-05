@@ -17,7 +17,7 @@ settings::~settings()
 
 void settings::browseEEG()
 {
-	QString file = QFileDialog::getOpenFileName(this, tr("Choose EEG file"), m_dirPath, "*.ades");
+	QString file = QFileDialog::getOpenFileName(this, tr("Choose EEG file"), m_dirPath, "*.*");
 	if (file.isEmpty())
 		return;
 	m_eegOk = true;
@@ -42,20 +42,20 @@ void settings::browseMEG()
 void settings::accept()
 {
 	if (m_eegOk && m_megOk) {
-		AwFileIO *reader = eegPlugin->newInstance();
-		if (reader->openFile(eegFile) != AwFileIO::NoError) {
-			QMessageBox::critical(this, tr("ADES File"), tr("Cannot open this file."));
-			eegPlugin->deleteInstance(reader);
-			return;
-		}
-		eegPlugin->deleteInstance(reader);
-		reader = megPlugin->newInstance();
-		if (reader->openFile(megFile) != AwFileIO::NoError) {
-			QMessageBox::critical(this, tr("MEG File"), tr("Cannot open this file."));
-			megPlugin->deleteInstance(reader);
-			return;
-		}
-		megPlugin->deleteInstance(reader);
+		//AwFileIO *reader = eegPlugin->newInstance();
+		//if (reader->openFile(eegFile) != AwFileIO::NoError) {
+		//	QMessageBox::critical(this, tr("ADES File"), tr("Cannot open this file."));
+		//	eegPlugin->deleteInstance(reader);
+		//	return;
+		//}
+		//eegPlugin->deleteInstance(reader);
+		//reader = megPlugin->newInstance();
+		//if (reader->openFile(megFile) != AwFileIO::NoError) {
+		//	QMessageBox::critical(this, tr("MEG File"), tr("Cannot open this file."));
+		//	megPlugin->deleteInstance(reader);
+		//	return;
+		//}
+		//megPlugin->deleteInstance(reader);
 		QDialog::accept();
 	}
 }

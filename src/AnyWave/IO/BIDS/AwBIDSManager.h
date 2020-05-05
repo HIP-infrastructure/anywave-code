@@ -50,7 +50,7 @@ class AwBIDSManager : public QObject
 public:
 	enum Modifications { ChannelsTsv, EventsTsv };
 	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
-
+	enum derivatives { ica, h2, gardel };
 	// destructor
 	~AwBIDSManager();
 	// utilities static methods
@@ -69,7 +69,8 @@ public:
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
 	void closeBIDS();
 	AwBIDSItems subjects() { return m_items; }
-	QString buildPath(const QString& dataFilePath, int derivativesKind);
+//	QString buildPath(const QString& dataFilePath, int derivativesKind);
+
 	
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
@@ -97,13 +98,15 @@ public:
 	QString getTSVFile(const QString& dataFilePath, int tsvType);
 	
 	/** Get the BIDS path to the current open file **/
-	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
+	QString getCurrentBIDSPath();
 	QVariantMap& settings() { return m_settings; }
 	inline QStringList participantValues(const QString& participantKey) { return m_participantsData.value(participantKey).toStringList(); }
 	/** Create the output_dir fullpath when processing on item. **/
 	QString buildOutputDir(const QString& pluginName, AwBIDSItem *item);
 	/** Create the default output filename of a file item **/
 	QString buildOutputFileName(AwBIDSItem * item);
+	/** Get derivatives folder for current open item **/
+	QString getDerivativePath(int type);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:

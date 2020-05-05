@@ -50,6 +50,8 @@ namespace processio {
 	constexpr auto plugin_names = "plugin_names";
 	constexpr auto ica_file = "ica_file";
 	constexpr auto json_batch = "json_batch";
+	constexpr auto bids_file_path = "bids_file_path";
+	constexpr auto bids_root_dir = "bids_root_dir";
 }
 
 namespace cl {

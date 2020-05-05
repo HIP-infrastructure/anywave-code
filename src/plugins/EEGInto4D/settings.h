@@ -15,7 +15,7 @@ public:
 
 	QString megFile;
 	QString eegFile;
-	AwFileIOPlugin *megPlugin, *eegPlugin;
+//	AwFileIOPlugin *megPlugin, *eegPlugin;
 public slots:
 	void browseMEG();
 	void browseEEG();

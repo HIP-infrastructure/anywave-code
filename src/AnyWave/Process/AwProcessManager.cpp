@@ -687,6 +687,14 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
 				if (process->pdi.input.markers().isEmpty())
 					process->pdi.input.addMarker(new AwMarker("global", 0, process->pdi.input.settings[processio::file_duration].toDouble()));
+			if (AwBIDSManager::isInstantiated()) {
+				auto BM = AwBIDSManager::instance();
+				if (BM->isBIDSActive()) {
+					process->pdi.input.addArgument(processio::bids_file_path, BM->getCurrentBIDSPath());
+					process->pdi.input.addArgument(processio::bids_root_dir, BM->rootDir());
+				}
+
+			}
 		}
 	}
 	else {
@@ -694,21 +702,10 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		return;
 	}
 
-	if (AwBIDSManager::isInstantiated()) {
-		auto BM = AwBIDSManager::instance();
-		if (BM->isBIDSActive()) 
-			process->pdi.input.addArgument(QString("BIDS_FilePath"), BM->getCurrentBIDSPath());
-
-	}
-
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 	plm->connectProcess(process);
-
 	AwDataServer *ds = 	AwDataServer::getInstance();
-
-	// set current language
-//	process->setLocale(AwSettings::getInstance()->language());
 
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess

@@ -194,10 +194,11 @@ bool EEGInto4D::showUi()
 	//}
 
 	// find at least 4DNi plugin
-	for (auto reader : pdi.input.readers) {
+	for (auto plugin : pdi.input.readers) {
 		if (!meg_found) {
-			if (reader->name == "4DNI Reader") {
+			if (plugin->name == "4DNI Reader") {
 				meg_found = true;
+				m_megPlugin = plugin;
 				break;
 			}
 		}
@@ -212,8 +213,8 @@ bool EEGInto4D::showUi()
 
 	if (ui.exec() == QDialog::Accepted) {
 		auto args = pdi.input.args();
-		m_eegFile = ui.eegFile;
-		m_megFile = ui.megFile;
+//		m_eegFile = ui.eegFile;
+//		m_megFile = ui.megFile;
 		args["eeg_file"] = ui.eegFile;
 		args["meg_file"] = ui.megFile;
 		return true;
@@ -555,19 +556,43 @@ void EEGInto4D::runFromCommandLine()
 	if (m_eegPlugin == nullptr && m_megPlugin == nullptr)
 		sendMessage("Missing EEG reader or MEG reader plugin.");
 
+	// chech that MEG file could be open
+	auto reader = m_megPlugin->newInstance();
+	auto megFile = pdi.input.args().value("meg_file").toString();
+	if (reader->canRead(megFile) != AwFileIO::NoError) {
+		sendMessage(QString("File %1 could not be open by 4DNI reader.").arg(megFile));
+		m_megPlugin->deleteInstance(reader);
+		return;
+	}
+	m_megPlugin->deleteInstance(reader);
 	run();
 }
 
 
 void EEGInto4D::run()
 {
-	m_eegReader = m_eegPlugin->newInstance();
-	m_eegReader->setPlugin(m_eegPlugin);
 	m_megReader = m_megPlugin->newInstance();
 	m_megReader->setPlugin(m_megPlugin);
 	auto args = pdi.input.args();
-	m_adesFile = args.value("eeg_file").toString();
+	m_eegFile = args.value("eeg_file").toString();
 	m_megFile = args.value("meg_file").toString();
+	// search for a plugin capable of reading eeg file
+	bool found = false;
+	for (auto plugin : pdi.input.readers) {
+		auto reader = plugin->newInstance();
+		if (reader->canRead(m_eegFile) == AwFileIO::NoError) {
+			found = true;
+			m_eegPlugin = plugin;
+			m_eegReader = reader;
+			m_eegReader->setPlugin(plugin);
+			break;
+		}
+		else {
+			plugin->deleteInstance(reader);
+		}
+	}
+
+
 	// use a tmp dir to inject
 	QTemporaryDir tmpDir;
 	if (!tmpDir.isValid()) {
@@ -577,8 +602,8 @@ void EEGInto4D::run()
 
 	try {
 		// assume opening files will be ok as we already checked that in settings::accept()
-		if (m_eegReader->openFile(m_adesFile) != AwFileIO::NoError) {
-			throw(AwException(QString("Failed to open %1").arg(m_adesFile)));
+		if (m_eegReader->openFile(m_eegFile) != AwFileIO::NoError) {
+			throw(AwException(QString("Failed to open %1").arg(m_eegFile)));
 		}
 		// 
 		m_eegChannels = AwChannel::extractChannelsOfType(m_eegReader->infos.channels(), AwChannel::EEG);

@@ -28,8 +28,10 @@ AwBIDSManager *AwBIDSManager::m_instance = 0;
 QStringList AwBIDSManager::m_dataFileSuffixes = { "_eeg", "_meg", "_ieeg" };
 
 // global variables
-static QStringList derivativesFolders = { "ica", "h2" };
-static QVector<int> derivativesTypes = { AwBIDSItem::ica, AwBIDSItem::h2 };
+static QStringList derivativesFolders = { "ica", "h2", "gardel" };
+static QVector<int> derivativesTypes = { AwBIDSItem::ica, AwBIDSItem::h2, AwBIDSItem::gardel };
+constexpr auto GardelElectrodeFile = "ElectrodesAllCoordinates.txt";
+constexpr auto GardelMeshFile = "mesh.stl";
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
@@ -793,6 +795,19 @@ void AwBIDSManager::closeBIDS()
 	emit BIDSClosed();
 }
 
+QString AwBIDSManager::getDerivativePath(int derivativeType)
+{
+	if (m_currentOpenItem == nullptr)
+		return QString();
+	// browse children of current file item
+	for (auto child : m_currentOpenItem->children()) {
+		// we expect to find container (folder) with matching derivatives types
+		if (derivativeType == child->data(AwBIDSItem::TypeRole).toInt())
+			return child->data(AwBIDSItem::PathRole).toString();
+	}
+	return QString();
+}
+
 void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 {
 	auto itemParent = item->bidsParent();
@@ -821,7 +836,7 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 	// relative path must exist in derivatives for the different supported plugins
 	int index = 0;
 	for (auto folder : derivativesFolders) {
-		path = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(folder).arg(relativePath);
+		auto path = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(folder).arg(relativePath);
 		// if path exists; check for files
 		QDir dir(path);
 		if (!dir.exists())
@@ -829,22 +844,54 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 		// create a child container using the derivative plugin name
 		// ica, h2, ...
 		AwBIDSItem *container = nullptr;
-		auto list = dir.entryInfoList(QDir::Files);
-		for (auto file : list) {
-			if (file.fileName().startsWith(fileName)) {
+		auto files = dir.entryList(QDir::Files);
+		auto derivativeType = derivativesTypes.at(index++);
+
+		switch (derivativeType) {
+		case AwBIDSItem::ica:
+		case AwBIDSItem::h2: // browse the file list and check for matching files
+			for (auto file : files) {
+				if (file.startsWith(fileName) && file.endsWith(".mat")) {
+					if (container == nullptr) {
+						container = new AwBIDSItem(folder, item);
+						container->setData(path, AwBIDSItem::PathRole);
+						container->setData(derivativesTypes.at(index), AwBIDSItem::TypeRole);
+						container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+					}
+					auto fileItem = new AwBIDSItem(file, container);
+					auto fullPath = QString("%1/%2").arg(path).arg(file);
+					fileItem->setData(fullPath, AwBIDSItem::PathRole);
+					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+					fileItem->setData(derivativeType, AwBIDSItem::DataTypeRole);
+					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+				}
+			}
+			break;
+		case AwBIDSItem::gardel:
+			if (files.contains("mesh.stl") && files.contains("ElectrodesAllCoordinates.txt")) {
 				if (container == nullptr) {
 					container = new AwBIDSItem(folder, item);
 					container->setData(path, AwBIDSItem::PathRole);
 					container->setData(derivativesTypes.at(index), AwBIDSItem::TypeRole);
 					container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 				}
-				auto fileItem = new AwBIDSItem(file.fileName(), container);
-				auto fullPath = QString("%1/%2").arg(path).arg(file.fileName());
+				// add mesh and electrodes files
+				QString fileName = GardelMeshFile;
+				auto fileItem = new AwBIDSItem(fileName, container);
+				auto fullPath = QString("%1/%2").arg(path).arg(fileName);
 				fileItem->setData(fullPath, AwBIDSItem::PathRole);
 				fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-				fileItem->setData(AwBIDSItem::ica, AwBIDSItem::DataTypeRole);
+				fileItem->setData(derivativeType, AwBIDSItem::DataTypeRole);
+				fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+				fileName = GardelElectrodeFile;
+				fullPath = QString("%1/%2").arg(path).arg(fileName);
+				fileItem = new AwBIDSItem(fileName, container);
+				fileItem->setData(fullPath, AwBIDSItem::PathRole);
+				fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+				fileItem->setData(derivativeType, AwBIDSItem::DataTypeRole);
 				fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
 			}
+			break;
 		}
 	}
 }
@@ -894,6 +941,8 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 				// set the relative path role
 				item->setData(name, AwBIDSItem::RelativePathRole);
+				// search for derivatives for this item 
+				setDerivativesForItem(item);
 				recursiveParsing(fullPath, item);
 			}
 		}
@@ -1224,6 +1273,13 @@ QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
 	return QString();
 }
 
+QString AwBIDSManager::getCurrentBIDSPath()
+{
+	if (m_currentOpenItem == nullptr)
+		return QString();
+	return m_currentOpenItem->data(AwBIDSItem::PathRole).toString();
+}
+
 
 ///
 /// based in the item relative path, generate a derivatices file name based on the plugin  name.
@@ -1271,19 +1327,6 @@ void AwBIDSManager::findItem(const QString& filePath)
 	m_ui->showItem(m_currentOpenItem);
 }
 
-//AwBIDSItem *AwBIDSManager::findSubject(const QString& dataFilePath)
-//{
-//	m_currentSubject = nullptr;
-//	if (!isBIDSActive())
-//		return nullptr;
-//
-//	if (m_hashItemFiles.contains(dataFilePath))
-//		m_currentSubject = m_hashItemFiles.value(dataFilePath);
-//
-//
-//	return m_currentSubject;
-//}
-
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
 	// check if the new file is in a BIDS structure or not
@@ -1318,6 +1361,7 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 	// find the corresponding subject node
 	findItem(reader->fullPath());
 }
+
 
 void AwBIDSManager::saveTsvFile(const QString& path, const QMap<QString, QStringList>& dict, const QStringList& orderedColumns)
 {

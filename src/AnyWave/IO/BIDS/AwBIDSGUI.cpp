@@ -402,7 +402,6 @@ void AwBIDSGUI::initModel(const AwBIDSItems& items)
 	m_model->setHorizontalHeaderItem(0, headerItem);
 	for (auto item : items) {
 		rootItem->appendRow(item);
-		//m_model->appendRow(item);
 		recursiveFill(item);
 	}
 	m_items = items;
