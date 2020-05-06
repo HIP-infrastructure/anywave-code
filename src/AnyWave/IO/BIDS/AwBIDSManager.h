@@ -124,6 +124,7 @@ protected:
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
 
 	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
+	QHash<QString, int> m_derivativesHash; // map a derivatives subdir with a derivatives type
 	AwBIDSItems m_items;
 	QVariantMap m_settings;
 	QList<int> m_dataContainers;

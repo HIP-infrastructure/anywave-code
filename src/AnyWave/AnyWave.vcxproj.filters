@@ -1420,6 +1420,15 @@
     <ClCompile Include="Process\PSD\AwPSDGUI.cpp">
       <Filter>Process\PSD</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSProxyModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSProxyModel.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSProxyModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">
@@ -1979,6 +1988,9 @@
     </CustomBuild>
     <CustomBuild Include="Process\PSD\AwPSDGUI.h">
       <Filter>Process\PSD</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSProxyModel.h">
+      <Filter>IO\BIDS</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
