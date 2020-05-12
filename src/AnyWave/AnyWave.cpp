@@ -532,14 +532,14 @@ void AnyWave::createUserDirs()
 	aws->setValue(aws::app_dir, appPath);
 #ifdef Q_OS_MAC
 	// set python module path on mac it's in the application bundle
-	settings[aws::python_module_dir] = appPath + "/../Python";
+	aws->setValue(aws::python_module_dir, appPath + "/../Python");
 	// no change to plugin dir
 	appDir.cdUp();
 	appDir.cdUp();
 	appDir.cdUp();
 	appDir.cd("Anywave_Plugins");
 	//aws->setSeawsttings("pythonModulePath", appPath + "/../Python");
-	aws-setValue(aws::app_plugins_dir, appDir.absolutePath());
+	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
 
 #else
 	aws->setValue(aws::python_module_dir, appPath + "/Python");

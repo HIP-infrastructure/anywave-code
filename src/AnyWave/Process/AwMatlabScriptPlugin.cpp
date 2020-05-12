@@ -68,7 +68,7 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 		QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->value(aws::system_path).toString());
 		p->setSystemPath(fullPath);
 #else
-		p->setSystemPath(AwSettings::getInstance()->getString("systemPath"));
+		p->setSystemPath(AwSettings::getInstance()->value(aws::system_path).toString());
 #endif
 	}
 	return p;

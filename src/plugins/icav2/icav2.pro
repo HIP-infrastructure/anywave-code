@@ -3,15 +3,21 @@
 # Project created by QtCreator 2018-01-23T14:33:21
 #
 #-------------------------------------------------
+
 include(../../common.pri)
 include(../plugins.pri)
-TARGET = H2Graphs
+TARGET = ICA
 TEMPLATE = lib
-CONFIG += plugin qwt
+CONFIG += plugin
 DESTDIR = $$PLUGIN_DIR
 QT += widgets
 
-# The following define makes your compiler emit warnings if you use
+macx {
+QMAKE_POST_LINK = \
+  install_name_tool -change AwCore.framework/Versions/1/AwCore @rpath/AwCore.framework/Versions/1/AwCore $${DESTDIR}/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
+}
+
+# The following define makes your compiler emit warnings if you use/Users/bruno/dev/aw-gitlab/src/plugins/EGIReader/EGIReader.h
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
@@ -22,31 +28,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-LIBS += -lAwProcess -lAwMath -lAwWidgets -lAwGraphics -lAwMATLAB
-
-macx {
+unix:!macx{
+LIBS += -lopenblas
+}
+macx{
 LIBS += -framework Accelerate
 }
-
-unix:!macx {
-  LIBS += -lopenblas
-}
+LIBS += -lAwProcess -lAwWidgets -lAwFilter -lAwMath -lAwMATLAB -lAwRW -lAwLayout -lAwUtilities
 
 FORMS += \
-    GraphManagerWidget.ui GraphWindow.ui
+    ICASettings.ui
 
 HEADERS += \
-    GraphArrow.h GraphArrowBase.h GraphArrowDir.h \
-    GraphArrowLag.h GraphColorMap.h GraphLegend.h GraphManagerWidget.h \
-   GraphSensorItem.h GraphSet.h GraphSetModel.h GraphWindow.h H2Graphs.h
+    ica.h \
+    ICASettings.h \
+    infomax_algo.h
 
 SOURCES += \
-GraphArrow.cpp GraphArrowBase.cpp GraphArrowDir.cpp \
-GraphArrowLag.cpp GraphColorMap.cpp GraphLegend.cpp GraphManagerWidget.cpp \
-GraphSensorItem.cpp GraphSet.cpp GraphSetModel.cpp GraphWindow.cpp H2Graphs.cpp
+    ica.cpp \
+    ICASettings.cpp \
+    infomax_algo.cpp \
+    r250.c \
+    randlcg.c
 
-RESOURCES += Graphs.qrc 
-
-
+RESOURCES += Resource.qrc
 
 

@@ -1,8 +1,9 @@
 #pragma once
 #include <QStringList>
 #include <QVector>
-#include <armadillo>
-using namespace arma;
+//#include <armadillo>
+//using namespace arma;
+#include <aw_armadillo.h>
 class GraphWindow;
 
 class GraphSet

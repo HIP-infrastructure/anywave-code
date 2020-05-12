@@ -5,9 +5,9 @@
 #-------------------------------------------------
 include(../../common.pri)
 include(../plugins.pri)
-TARGET = H2Graphs
+TARGET = MFV
 TEMPLATE = lib
-CONFIG += plugin qwt
+CONFIG += plugin
 DESTDIR = $$PLUGIN_DIR
 QT += widgets
 
@@ -22,30 +22,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-LIBS += -lAwProcess -lAwMath -lAwWidgets -lAwGraphics -lAwMATLAB
-
-macx {
-LIBS += -framework Accelerate
-}
-
-unix:!macx {
-  LIBS += -lopenblas
-}
-
-FORMS += \
-    GraphManagerWidget.ui GraphWindow.ui
-
-HEADERS += \
-    GraphArrow.h GraphArrowBase.h GraphArrowDir.h \
-    GraphArrowLag.h GraphColorMap.h GraphLegend.h GraphManagerWidget.h \
-   GraphSensorItem.h GraphSet.h GraphSetModel.h GraphWindow.h H2Graphs.h
-
-SOURCES += \
-GraphArrow.cpp GraphArrowBase.cpp GraphArrowDir.cpp \
-GraphArrowLag.cpp GraphColorMap.cpp GraphLegend.cpp GraphManagerWidget.cpp \
-GraphSensorItem.cpp GraphSet.cpp GraphSetModel.cpp GraphWindow.cpp H2Graphs.cpp
-
-RESOURCES += Graphs.qrc 
+LIBS += -lAwProcess -lAwWidgets -lAwGraphics
+FORMS +=  MFVGUI.ui 
+HEADERS +=  MFV.h MFVGUI.h MFVTableModel.h
+SOURCES +=  MFVGUI.cpp MFV.cpp MFVTableModel.cpp
 
 
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3) 
+cmake_minimum_required(VERSION 3.6) 
 project(AnyWave)
 # detecting compiler
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
@@ -31,7 +31,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # PATH to resources
 SET(AW_RES_DIR ${CMAKE_SOURCE_DIR}/resources)
-
 
 IF(APPLE)
   SET(PLUGIN_OUT ${PROJECT_BINARY_DIR}/Anywave_Plugins)
@@ -84,7 +83,8 @@ if(MATIO_FOUND)
     message(STATUS "Found Matio lib: ${MATIO_LIBRARIES}")
 endif()
 
-# search for MKL
+if(NOT APPLE)
+# search for MKL only on Linux
 find_package(MKL)
 if(NOT MKL_FOUND)
     find_package(OpenBLAS REQUIRED)
@@ -100,6 +100,7 @@ else()
     SET(BLAS_LIBRARIES ${MKL_LIBRARIES})
     message(STATUS "MLK libs : ${MKL_LIBRARIES}")
 endif()
+endif()
 
 add_definitions(-DNDEBUG)
 # Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
@@ -114,8 +115,11 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
+IF(NOT APPLE)
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ELSE()
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF()
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)

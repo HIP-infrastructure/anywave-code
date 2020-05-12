@@ -131,7 +131,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	labelMCR->show();
 	lineEditMCR->show();
 	buttonSelectMCR->show();
-	lineEditMCR->setText(settings.value("matlab/mcr_path").toString());
+	lineEditMCR->setText(qsettings.value("matlab/mcr_path").toString());
 #endif
 
 	QString python = qsettings.value("py/interpreter", QString()).toString();
@@ -213,7 +213,7 @@ void AwPrefsDial::accept()
 		qsettings.setValue("matlab/detected", false);
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->settings().value(settings::home_dir).toString());
+		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->value(aws::home_dir).toString());
 		if (QFile::exists(scriptPath))
 			QFile::remove(scriptPath);
 #endif

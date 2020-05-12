@@ -73,7 +73,7 @@ PYTHON_ROOT = /home/bruno/anaconda2
 }
 
 macx {
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.10
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
 # add rpath to frameworks for all targets
 QMAKE_RPATHDIR += /Library/Frameworks
 QMAKE_RPATHDIR += @executable_path/../Frameworks

@@ -3,9 +3,8 @@
 # Project created by QtCreator 2018-01-23T14:33:21
 #
 #-------------------------------------------------
-
-include(config.pri)
-
+include(../../common.pri)
+include(../plugins.pri)
 TARGET = H2
 TEMPLATE = lib
 CONFIG += plugin
@@ -38,7 +37,7 @@ unix:!macx {
 FORMS += \
     h2ui.ui
 
-RESOURCES += Resources.qrc
+RESOURCES += Resource.qrc
 
 HEADERS += \
     h2.h \
