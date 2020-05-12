@@ -744,8 +744,7 @@ void EEGInto4D::run()
 			throw AwException(QString("Failed to open %1").arg(m_megFile));
 		// get the labels of all channels in MEG file
 		auto allLabels = AwChannel::getLabels(m_megReader->infos.channels());
-		m_megReader->cleanUpAndClose();
-
+	
 		QStringList eegLabels = AwChannel::getLabels(m_eegChannels);
 		sendMessage("Reading EEG file...");
 		if (m_eegReader->readDataFromChannels(0, m_eegReader->infos.totalDuration(), m_eegChannels) == 0) {
@@ -778,6 +777,7 @@ void EEGInto4D::run()
 				dest_stream << value;
 			}
 		}
+		m_megReader->cleanUpAndClose();
 		sendMessage("Done.");
 		newFile.close();
 		moveResultingFiles(tmpDir.path(), outputDir);
@@ -815,5 +815,10 @@ void EEGInto4D::moveResultingFiles(const QString& srcDir, const QString& destDir
 		if (QFile::exists(dest)) 
 			QFile::remove(dest);
 		bool status = QFile::copy(src, dest);
+		if (!status) {
+			sendMessage("Coult not overide existing file.\nMaking a new file.");
+			QString("%1/%2_new").arg(destDir).arg(file.fileName());
+			QFile::copy(src, dest);
+		}
 	}
 }

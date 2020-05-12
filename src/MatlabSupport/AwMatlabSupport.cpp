@@ -30,7 +30,7 @@
 #include <QtCore>
 
 
-#define AW_MATLAB_OUTPUT_BUFFER_SIZE	1024 * 20	// 20Kbytes buffer
+constexpr auto AW_MATLAB_OUTPUT_BUFFER_SIZE = 1024 * 20;	// 20Kbytes buffer
 
 /** run()
 - path: path to the script to be executed.
