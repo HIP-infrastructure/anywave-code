@@ -27,6 +27,7 @@
 
 #include <AwGlobal.h>
 #include <QObject>
+#include <AwVersion.h>
 
 /// Base classes for all plugins
 ///
@@ -53,12 +54,13 @@ protected:
 class AwPluginBase : public QObject
 {
 public:
-	explicit AwPluginBase() { }
+	explicit AwPluginBase() { minorVersion = AW_MINOR_VERSION; majorVersion = AW_MAJOR_VERSION; }
 // name must be unique and short.
 // description must contains a brief description of the plugin
 // version is not mandatory 
 // category is optional : used to inset the plugin launcher into a specific part of the AnyWave GUI
 	QString name, description, version, category;
+	int minorVersion, majorVersion;	// set up when building
 // Category can be:
 // File: My menu description => for plugin that only acts on files (conversion or export)
 // View: My menu description => for plugin that only display graphics 

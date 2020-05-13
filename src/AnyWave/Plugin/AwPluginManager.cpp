@@ -395,6 +395,16 @@ void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const
 	plugin->setInputFlags(f);
 }
 
+bool AwPluginManager::checkPluginVersion(QObject * plugin)
+{
+	auto tmp =  static_cast<AwPluginBase *>(plugin);
+	if (!tmp)
+		return false;
+	if (tmp->minorVersion < AW_MINOR_VERSION || tmp->majorVersion < AW_MAJOR_VERSION)
+		return false;
+	return true;
+}
+
 void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
 {
 	if (flags.isEmpty())
@@ -441,6 +451,10 @@ void AwPluginManager::loadUserPlugins()
 		if (plugin == NULL)	{
 			emit log("Failed to load " + m_pluginsDir.absoluteFilePath(FileName));
 			emit log(loader.errorString());
+		}
+		if (!checkPluginVersion(plugin)) {
+			emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
+			continue;
 		}
 		if (plugin) {
 			AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
@@ -615,7 +629,11 @@ void AwPluginManager::loadPlugins()
 			emit log(loader.errorString());
 			continue;
 		}
-		else {
+		if (!checkPluginVersion(plugin)) {
+			emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
+			continue;
+		}
+		if (plugin) {
 			// get plugin type
 			AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
 			if (fio) { // FileIO specific (plugin can be reader and writer at the same time
