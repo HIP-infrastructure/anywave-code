@@ -38,7 +38,8 @@ public:
 		ica = 8, h2 = 16, gardel = 32
 	};
 	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2, RelativePathRole = Qt::UserRole + 3,
-		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5, DerivativesRole = Qt::UserRole + 6 };
+		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5, DerivativesRole = Qt::UserRole + 6, 
+		HiddenRole = Qt::UserRole + 7 };
 	inline QList<AwBIDSItem *>& children() { return m_children; }
 	inline QStringList& files() { return m_files; }
 	inline void addFile(const QString& filePath) { m_files.append(filePath); }

@@ -50,7 +50,7 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	initProcess(p);
 	AwMATPyServer *server = AwMATPyServer::instance();
 	AwPidManager::instance()->createNewPid(p);
-	server->start();
+	//server->start();
 
 
 	//// connect the process to the matlab server
@@ -76,6 +76,7 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 
 void AwMatlabScriptProcess::run()
 {
+	AwMATPyServer::instance()->start();
 	AwMatlabInterface *mi = NULL;
 	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
 	if (isCompiled) { // this is a MATLAB compiled standalone plugin.

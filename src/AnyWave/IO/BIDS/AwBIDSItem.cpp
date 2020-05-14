@@ -5,6 +5,8 @@ AwBIDSItem::AwBIDSItem(const QString& text, AwBIDSItem *subject) : QStandardItem
 	m_parent = subject;
 	if (m_parent)
 		m_parent->addChild(this);
+	// set hidden false by defaukt
+	setData(false, AwBIDSItem::HiddenRole);
 }
 
 ///

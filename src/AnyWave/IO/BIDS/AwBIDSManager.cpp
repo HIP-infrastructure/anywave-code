@@ -874,7 +874,7 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 	}
 	// ica 
 	if (derivativesMask & AwBIDSItem::ica && itemParent) {
-		auto path = QString("%1/derivatives/ica/%3").arg(m_rootDir).arg(relativePath);
+		auto path = QString("%1/derivatives/ica/%2").arg(m_rootDir).arg(relativePath);
 		QDir dir(path);
 		if (dir.exists()) {
 			AwBIDSItem *container = nullptr;
@@ -899,7 +899,7 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 	}
 	// h2 
 	if (derivativesMask & AwBIDSItem::h2 && itemParent) {
-		auto path = QString("%1/derivatives/h2/%3").arg(m_rootDir).arg(relativePath);
+		auto path = QString("%1/derivatives/h2/%2").arg(m_rootDir).arg(relativePath);
 		QDir dir(path);
 		if (dir.exists()) {
 			AwBIDSItem *container = nullptr;

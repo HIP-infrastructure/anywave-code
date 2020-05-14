@@ -1126,9 +1126,6 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSSubject.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSSubject.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSSubject.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
@@ -1142,12 +1139,6 @@
       <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSTools.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSSession.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwFileItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
@@ -1281,9 +1272,6 @@
     </ClCompile>
     <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSNode.cpp">
-      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\OpenNewFile.cpp">
       <Filter>MATPy</Filter>
@@ -1881,9 +1869,6 @@
     <CustomBuild Include="IO\BIDS\AwBIDSManager.h">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSSubject.h">
-      <Filter>IO\BIDS</Filter>
-    </CustomBuild>
     <CustomBuild Include="IO\BIDS\AwBIDSGUI.h">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
@@ -2159,12 +2144,6 @@
     <ClInclude Include="GeneratedFiles\ui_AwBIDSGUI.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSSession.h">
-      <Filter>IO\BIDS</Filter>
-    </ClInclude>
-    <ClInclude Include="IO\BIDS\AwFileItem.h">
-      <Filter>IO\BIDS</Filter>
-    </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSItem.h">
       <Filter>IO\BIDS</Filter>
     </ClInclude>
@@ -2200,9 +2179,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwVideoSettingsDial.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSNode.h">
-      <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwICABatchDialog.h">
       <Filter>Generated Files</Filter>

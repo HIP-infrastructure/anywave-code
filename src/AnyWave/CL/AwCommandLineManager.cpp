@@ -110,7 +110,7 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 			res += AwChannel::getChannelsOfType(sources, t);
 		}
 	}
-	if (res.isEmpty())
+	if (!res.isEmpty())
 		process->pdi.input.addChannels(res, true);
 	return true;
 }

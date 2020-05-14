@@ -114,9 +114,13 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 	}
 	
 	if (usingLabels && usingTypes) {
-		if (!usingFile) 
+		if (!usingFile) {
 			// get labels from current montage.
-			requestedChannels = AwChannel::getChannelsWithLabels(AwMontageManager::instance()->channels(), labels);
+			auto tmp = AwMontageManager::instance()->channels();
+			if (tmp.isEmpty()) 
+				tmp = process->pdi.input.channels();
+			requestedChannels = AwChannel::getChannelsWithLabels(tmp, labels);
+		}
 		else 
 			requestedChannels = AwChannel::getChannelsWithLabels(reader->infos.channels(), labels);
 		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
@@ -145,9 +149,12 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 		}
 	}
 	else if (usingLabels && !usingTypes) {
-		if (!usingFile)
-			// get labels from current montage.
-			requestedChannels = AwChannel::getChannelsWithLabels(AwMontageManager::instance()->channels(), labels);
+		if (!usingFile) {
+			auto tmp = AwMontageManager::instance()->channels();
+			if (tmp.isEmpty())
+				tmp = process->pdi.input.channels();
+			requestedChannels = AwChannel::getChannelsWithLabels(tmp, labels);
+		}
 		else
 			requestedChannels = AwChannel::getChannelsWithLabels(reader->infos.channels(), labels);
 		if (requestedChannels.isEmpty()) { // no channels found in montage which match requested labels.
@@ -162,9 +169,11 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 	}
 	else if (usingTypes && !usingLabels) {
 		AwChannelList channels;
-		if (!usingFile)
-			// get labels from current montage.
-			requestedChannels = AwMontageManager::instance()->channels();
+		if (!usingFile) {
+			auto tmp = AwMontageManager::instance()->channels();
+			if (tmp.isEmpty())
+				tmp = process->pdi.input.channels();
+		}
 		else
 			requestedChannels = reader->infos.channels();
 		for (auto t : types)

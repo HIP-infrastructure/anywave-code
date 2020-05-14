@@ -19,7 +19,7 @@
 #include "Prefs/AwSettings.h"
 #include <AwKeys.h>
 #include <QProcess>
-
+#include "AwBIDSProxyModel.h"
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
@@ -32,7 +32,9 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_model = new QStandardItemModel(this);
 	m_model->setColumnCount(1);
-	m_ui.treeView->setModel(m_model);
+	auto filterModel = new AwBIDSProxyModel(this);
+	filterModel->setSourceModel(m_model);
+	m_ui.treeView->setModel(filterModel);
 	m_ui.treeView->setUniformRowHeights(true);
 	m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_ui.buttonSelect, &QPushButton::clicked, this, &AwBIDSGUI::changeBIDS);

@@ -34,6 +34,7 @@
 #ifdef Q_OS_WIN
 #include "zip.h"
 #endif
+#include <AwVersion.h>
 //////////////////////////////////////////////////////////////////////////////////////////
 /// Downloader
 
@@ -186,13 +187,11 @@ void AwUpdater::checkForUpdate()
 
 	if (!aws->value(aws::check_updates).toBool())
 		return;
-	QString version = aws->value(aws::major_version).toString();
-	QString minor = aws->value(aws::minor_version).toString();
+	//QString version = aws->value(aws::major_version).toString();
+	//QString minor = aws->value(aws::minor_version).toString();
+	auto major = AW_MAJOR_VERSION;
+	auto minor = AW_MINOR_VERSION;
 	bool isINSVersion = aws->value(aws::ins_version).toBool();
-
-	if (version.isEmpty() || minor.isEmpty())
-		return;
-
 
 #ifdef Q_OS_MACOS
 	platform = "Mac";
@@ -205,9 +204,9 @@ void AwUpdater::checkForUpdate()
 #endif 
 	QUrl url;
 	if (!isINSVersion)
-		url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
+		url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(major).arg(minor));
 	else
-		url = QUrl(QString("http://139.124.150.47/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
+		url = QUrl(QString("http://139.124.150.47/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(major).arg(minor));
 	QNetworkRequest request(url);
 	m_webAccess.get(request);
 

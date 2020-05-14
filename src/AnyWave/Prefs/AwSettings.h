@@ -72,8 +72,8 @@ namespace aws {
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";
-	constexpr auto major_version = "major_version";
-	constexpr auto minor_version = "minor_version";
+	//constexpr auto major_version = "major_version";
+	//constexpr auto minor_version = "minor_version";
 	constexpr auto update_url = "update_url";
 	constexpr auto ica_file = "ica_file";
 	constexpr auto last_captured_file = "last_captured_file";
