@@ -107,6 +107,10 @@ public:
 	QString buildOutputFileName(AwBIDSItem * item);
 	/** Get derivatives folder for current open item **/
 	QString getDerivativePath(int type);
+	/** Get the derivative folder path for a file item and a derivative modality **/
+	QString getDerivativePath(AwBIDSItem *item, int type);
+	/** Generates derivative prefix based on bids file item **/
+	QString getDerivativePrefixName(AwBIDSItem *item);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
@@ -124,7 +128,8 @@ protected:
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
 
 	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
-	QHash<QString, int> m_derivativesHash; // map a derivatives subdir with a derivatives type
+	//QHash<QString, int> m_derivativesHash; // map a derivatives subdir with a derivatives type
+	QHash<int, QString> m_derivativesNames;
 	AwBIDSItems m_items;
 	QVariantMap m_settings;
 	QList<int> m_dataContainers;
@@ -138,8 +143,7 @@ protected:
 	QMap<int, QString> m_modifications;
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
-	//QMap<int, QString> m_knownDerivativesPaths;
-	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
+	QStringList m_fileExtensions, m_modalities;
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSItem *m_currentSubject;
 	AwBIDSItem *m_currentOpenItem;

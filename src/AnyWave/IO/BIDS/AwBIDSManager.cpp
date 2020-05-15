@@ -30,6 +30,7 @@ QStringList AwBIDSManager::m_dataFileSuffixes = { "_eeg", "_meg", "_ieeg" };
 constexpr auto GardelElectrodeFile = "ElectrodesAllCoordinates.txt";
 constexpr auto GardelMeshFile = "mesh.stl";
 
+
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
 	AwDebugLog::instance()->connectComponent(QString("BIDSManager"), this, QString("toBIDS"));
@@ -727,9 +728,10 @@ AwBIDSManager::AwBIDSManager()
 	m_fileExtensions.append("nii");
 
 	// derivatives folders to parse 
-	m_derivativesHash.insert("ica", AwBIDSItem::ica);
-	m_derivativesHash.insert("h2", AwBIDSItem::h2);
-	m_derivativesHash.insert("gardel", AwBIDSItem::gardel);
+	m_derivativesNames.insert(AwBIDSItem::ica, "ica");
+	m_derivativesNames.insert(AwBIDSItem::h2, "h2");
+	m_derivativesNames.insert(AwBIDSItem::gardel, "gardel");
+	m_modalities = QStringList( { "anat", "meg", "eeg", "ieeg" });
 }
 
 AwBIDSManager::~AwBIDSManager()
@@ -797,17 +799,74 @@ void AwBIDSManager::closeBIDS()
 	emit BIDSClosed();
 }
 
+///
+/// input : file item
+/// get the bids file name.
+/// Removes the modality suffix (_meg, _ieeg, _eeg)
+/// Handle special case of meg data file located inside a run container.
+QString AwBIDSManager::getDerivativePrefixName(AwBIDSItem *item)
+{
+	QString res = item->data(Qt::DisplayRole).toString();
+	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile) {
+		for (auto suffix : m_dataFileSuffixes) {
+			if (res.endsWith(suffix)) 
+				return res.remove(suffix);
+		}
+		// no modality detected in filename => meg 4D run or other MEG file format.
+
+		// the file name does not contain the modality (_meg, _eeg, _ieeg) => check parent container name
+		auto parent = item->bidsParent();
+		if (parent) {
+			res = parent->data(Qt::DisplayRole).toString();
+			for (auto suffix : m_dataFileSuffixes) {
+				if (res.endsWith(suffix))
+					return res.remove(suffix);
+			}
+		}
+	}
+	return res;
+}
+
+QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
+{
+	QString res;
+	if (item) {
+		// we assume item is a file item. Get it's parent container
+		auto parent = item->bidsParent();
+		if (parent) {
+			// get the parent name which should match a modality (meg, eeg, ieeg, anat)
+			auto name = parent->data(Qt::DisplayRole).toString();
+			auto relativePath = parent->data(AwBIDSItem::RelativePathRole).toString();
+
+			if (m_modalities.contains(name))
+				res = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(m_derivativesNames.value(derivativeType)).arg(relativePath);
+			else {
+				// meg file item may be inside a run container not directly the meg container (meg/run_meg)
+				auto grandParent = parent->bidsParent();
+				if (grandParent) {
+					name = grandParent->data(Qt::DisplayRole).toString();
+					relativePath = grandParent->data(AwBIDSItem::RelativePathRole).toString();
+					if (m_modalities.contains(name))
+						res = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(m_derivativesNames.value(derivativeType)).arg(relativePath);
+				}
+			}
+		}
+	}
+	return res;
+}
+
 QString AwBIDSManager::getDerivativePath(int derivativeType)
 {
-	if (m_currentOpenItem == nullptr)
-		return QString();
-	// browse children of current file item
-	for (auto child : m_currentOpenItem->children()) {
-		// we expect to find container (folder) with matching derivatives types
-		if (derivativeType == child->data(AwBIDSItem::TypeRole).toInt())
-			return child->data(AwBIDSItem::PathRole).toString();
-	}
-	return QString();
+	//if (m_currentOpenItem == nullptr)
+	//	return QString();
+	//// browse children of current file item
+	//for (auto child : m_currentOpenItem->children()) {
+	//	// we expect to find container (folder) with matching derivatives types
+	//	if (derivativeType == child->data(AwBIDSItem::TypeRole).toInt())
+	//		return child->data(AwBIDSItem::PathRole).toString();
+	//}
+	//return QString();
+	return getDerivativePath(m_currentOpenItem, derivativeType);
 }
 
 void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
@@ -817,7 +876,7 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 		return;
 
 	QString relativePath;	// relative path to the item.
-	auto itemParent = item->bidsParent();
+	auto parentItem = item->bidsParent();
 
 	if (derivativesMask & AwBIDSItem::gardel) {
 		relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
@@ -826,69 +885,61 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 		if (dir.exists()) {
 			AwBIDSItem *container = nullptr;
 			auto files = dir.entryList(QDir::Files);
-			if (files.contains(GardelMeshFile) && files.contains(GardelElectrodeFile)) {
+			if (!files.isEmpty()) {
 				container = new AwBIDSItem("gardel", item);
 				container->setData(path, AwBIDSItem::PathRole);
 				container->setData(AwBIDSItem::gardel, AwBIDSItem::TypeRole);
 				container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-
-				// add mesh and electrodes files
-				QString fileName = GardelMeshFile;
-				auto fileItem = new AwBIDSItem(fileName, container);
-				auto fullPath = QString("%1/%2").arg(path).arg(fileName);
-				fileItem->setData(fullPath, AwBIDSItem::PathRole);
-				fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-				fileItem->setData(AwBIDSItem::gardel, AwBIDSItem::DataTypeRole);
-				fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
-				fileName = GardelElectrodeFile;
-				fullPath = QString("%1/%2").arg(path).arg(fileName);
-				fileItem = new AwBIDSItem(fileName, container);
-				fileItem->setData(fullPath, AwBIDSItem::PathRole);
-				fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-				fileItem->setData(AwBIDSItem::gardel, AwBIDSItem::DataTypeRole);
-				fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
 			}
-		}
-	}
-	QString fileName;  // fileName is the file name of a file item, reconstructed in case of MEG data file stored in a run container.
-
-	if (derivativesMask & AwBIDSItem::ica || derivativesMask & AwBIDSItem::h2) {
-		// item must not be a subject
-		if (itemParent) {
-			relativePath = itemParent->data(AwBIDSItem::RelativePathRole).toString();
-			QFileInfo fi(relativePath);
-			auto fileName = fi.fileName();
-			// check special case of meg file contained in a directory
-			if (item->data(AwBIDSItem::DataTypeRole).toInt() == AwBIDSItem::meg) {
-				if (!fileName.contains("_meg")) {
-					fileName = relativePath;
-					fi.setFile(fileName);
-					fileName = fi.fileName();
+			QStringList montages;
+			for (auto file : files) {
+				auto fullPath = QString("%1/%2").arg(path).arg(file);
+				
+				if (file == GardelElectrodeFile) {
+					// add electrode file path to gardel container
+					container->setData(fullPath, AwBIDSItem::GardelElectrodePathRole);
 				}
+				if (file == GardelMeshFile) {
+					// add a file child to the container
+					auto fileItem = new AwBIDSItem(file, container);
+					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+					fileItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
+					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+					// add also the path to the container
+					container->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
+				}
+				// check for .mtg
+				if (file.endsWith(".mtg"))
+					montages << fullPath;
 			}
-			for (auto suffix : m_dataFileSuffixes) {
-				if (fileName.contains(suffix))
-					fileName = fileName.remove(suffix);
-			}
+			if (!montages.isEmpty())
+				container->setData(montages, AwBIDSItem::GardelMontagesRole);
 		}
 	}
-	// ica 
-	if (derivativesMask & AwBIDSItem::ica && itemParent) {
-		auto path = QString("%1/derivatives/ica/%2").arg(m_rootDir).arg(relativePath);
-		QDir dir(path);
+
+	QString derivativePath; 
+	QString derivativeName;
+
+	// check for cases related to meg data. MEG file may be inside a meg container
+	if (derivativesMask & AwBIDSItem::ica  && parentItem) {
+		derivativePath = getDerivativePath(item, AwBIDSItem::ica);
+		QDir dir(derivativePath);
 		if (dir.exists()) {
 			AwBIDSItem *container = nullptr;
 			auto files = dir.entryList(QDir::Files);
+			auto fileItemName = getDerivativePrefixName(item);
+
 			for (auto file : files) {
-				if (file.startsWith(fileName) && file.endsWith(".mat")) {
+				if (file.startsWith(fileItemName) && file.endsWith(".mat")) {
 					if (container == nullptr) {
 						container = new AwBIDSItem("ica", item);
-						container->setData(path, AwBIDSItem::PathRole);
-						container->setData(AwBIDSItem::ica, AwBIDSItem::TypeRole);
+						container->setData(derivativePath, AwBIDSItem::PathRole);
+						container->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
+						container->setData(AwBIDSItem::ica, AwBIDSItem::DataTypeRole);
 						container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 					}
 					auto fileItem = new AwBIDSItem(file, container);
-					auto fullPath = QString("%1/%2").arg(path).arg(file);
+					auto fullPath = QString("%1/%2").arg(derivativePath).arg(file);
 					fileItem->setData(fullPath, AwBIDSItem::PathRole);
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(AwBIDSItem::ica, AwBIDSItem::DataTypeRole);
@@ -898,22 +949,24 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 		}
 	}
 	// h2 
-	if (derivativesMask & AwBIDSItem::h2 && itemParent) {
-		auto path = QString("%1/derivatives/h2/%2").arg(m_rootDir).arg(relativePath);
-		QDir dir(path);
+	if (derivativesMask & AwBIDSItem::h2  && parentItem) {
+		derivativePath = getDerivativePath(item, AwBIDSItem::h2);
+		QDir dir(derivativePath);
 		if (dir.exists()) {
 			AwBIDSItem *container = nullptr;
 			auto files = dir.entryList(QDir::Files);
+			auto fileItemName = getDerivativePrefixName(item);
 			for (auto file : files) {
-				if (file.startsWith(fileName) && file.endsWith(".mat")) {
+				if (file.startsWith(fileItemName) && file.endsWith(".mat")) {
 					if (container == nullptr) {
 						container = new AwBIDSItem("h2", item);
-						container->setData(path, AwBIDSItem::PathRole);
-						container->setData(AwBIDSItem::h2, AwBIDSItem::TypeRole);
+						container->setData(derivativePath, AwBIDSItem::PathRole);
+						container->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
+						container->setData(AwBIDSItem::h2, AwBIDSItem::DataTypeRole);
 						container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 					}
 					auto fileItem = new AwBIDSItem(file, container);
-					auto fullPath = QString("%1/%2").arg(path).arg(file);
+					auto fullPath = QString("%1/%2").arg(derivativePath).arg(file);
 					fileItem->setData(fullPath, AwBIDSItem::PathRole);
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(AwBIDSItem::h2, AwBIDSItem::DataTypeRole);
@@ -971,18 +1024,20 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 				item->setData(name, AwBIDSItem::RelativePathRole);
 				// set the possible derivatives mask
 				item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+				// no derivatives should exist at subject level
 				// search for derivatives for this item 
-				setDerivativesForItem(item);
+				//setDerivativesForItem(item);
 				recursiveParsing(fullPath, item);
 			}
 		}
 	}
 	else {
-		// find files only if current item is eeg, meg or ieeg
 		auto type = parentItem->data(AwBIDSItem::TypeRole).toInt();
 		auto parentRelativePath = parentItem->data(AwBIDSItem::RelativePathRole).toString();
-		if (m_dataContainers.contains(type)) {
+		if (m_dataContainers.contains(type)) {  // look for files only in data containers (eeg, ieeg, meg, anat)
 			auto list = dir.entryInfoList(QDir::Files);
+			// check for derivatives at container level (GARDEL for example)
+			setDerivativesForItem(parentItem);
 			for (auto f : list) {
 				auto fileName = f.fileName();
 				auto ext = f.completeSuffix();

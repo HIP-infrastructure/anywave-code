@@ -1,5 +1,8 @@
 #include "AwBIDSItem.h"
 
+// modalities
+static QStringList modalities = { "anat", "meg", "eeg", "ieeg" };
+
 AwBIDSItem::AwBIDSItem(const QString& text, AwBIDSItem *subject) : QStandardItem(text)
 {
 	m_parent = subject;
