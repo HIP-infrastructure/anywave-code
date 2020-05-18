@@ -136,8 +136,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EDFIO", "src\plugins\EDFIO\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Deltamed_Reader", "D:\Dev\aw-deltamed\Deltamed_Reader.vcxproj", "{4F1A39CD-5D1A-4589-B24F-9FAE4A20F15E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rewrite4DNI", "D:\Dev\aw-rewrite4D\AwRewrite4DNI.vcxproj", "{211CE931-E804-42F4-86EB-A9E8923C1984}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexCommon", "src\Mex\MexCommon\MexCommon.vcxproj", "{9AE5F964-3B15-4F9B-902C-FDB39FE73A64}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexAddMarkers", "src\Mex\MexAddMarkers\MexAddMarkers.vcxproj", "{D6ABA77E-9779-438B-83DD-5117198DE08D}"
@@ -251,6 +249,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2Graphs", "src\plugins\H2G
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "icav2", "src\plugins\icav2\icav2.vcxproj", "{998231E2-95EB-4D82-B54A-64727BB9C69C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rewrite4DNI", "src\plugins\Rewrite4D\AwRewrite4DNI.vcxproj", "{211CE931-E804-42F4-86EB-A9E8923C1984}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -524,16 +524,6 @@ Global
 		{4F1A39CD-5D1A-4589-B24F-9FAE4A20F15E}.Release|Win32.Build.0 = Release|Win32
 		{4F1A39CD-5D1A-4589-B24F-9FAE4A20F15E}.Release|x64.ActiveCfg = Release|x64
 		{4F1A39CD-5D1A-4589-B24F-9FAE4A20F15E}.Release|x64.Build.0 = Release|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.ActiveCfg = Debug|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.Build.0 = Debug|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.ActiveCfg = Debug|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.Build.0 = Debug|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Any CPU.ActiveCfg = Release|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.ActiveCfg = Release|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.Build.0 = Release|Win32
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.ActiveCfg = Release|x64
-		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.Build.0 = Release|x64
 		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64}.Debug|Win32.ActiveCfg = Debug|x64
 		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64}.Debug|x64.ActiveCfg = Debug|x64
@@ -782,12 +772,22 @@ Global
 		{998231E2-95EB-4D82-B54A-64727BB9C69C}.Release|Win32.ActiveCfg = Release|x64
 		{998231E2-95EB-4D82-B54A-64727BB9C69C}.Release|x64.ActiveCfg = Release|x64
 		{998231E2-95EB-4D82-B54A-64727BB9C69C}.Release|x64.Build.0 = Release|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.ActiveCfg = Debug|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|Win32.Build.0 = Debug|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.ActiveCfg = Debug|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Debug|x64.Build.0 = Debug|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Any CPU.ActiveCfg = Release|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.ActiveCfg = Release|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|Win32.Build.0 = Release|Win32
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.ActiveCfg = Release|x64
+		{211CE931-E804-42F4-86EB-A9E8923C1984}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal
