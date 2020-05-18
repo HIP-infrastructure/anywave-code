@@ -857,16 +857,38 @@ QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
 
 QString AwBIDSManager::getDerivativePath(int derivativeType)
 {
-	//if (m_currentOpenItem == nullptr)
-	//	return QString();
-	//// browse children of current file item
-	//for (auto child : m_currentOpenItem->children()) {
-	//	// we expect to find container (folder) with matching derivatives types
-	//	if (derivativeType == child->data(AwBIDSItem::TypeRole).toInt())
-	//		return child->data(AwBIDSItem::PathRole).toString();
-	//}
-	//return QString();
 	return getDerivativePath(m_currentOpenItem, derivativeType);
+}
+
+
+QVariant AwBIDSManager::gardelProperty(int property)
+{
+	QVariant res;
+	auto parent = m_currentOpenItem->bidsParent();
+	if (!parent)
+		return res;
+	// check if parent is ieeg
+	if (parent->data(AwBIDSItem::TypeRole).toInt() != AwBIDSItem::ieeg)
+		return res;
+	auto grandParent = parent->bidsParent();
+	if (!grandParent)
+		return res;
+	return  grandParent->data(property);
+}
+
+QString AwBIDSManager::getGardelMesh()
+{
+	return gardelProperty(AwBIDSItem::GardelMeshPathRole).toString();
+}
+
+QString AwBIDSManager::getGardelElectrodes()
+{
+	return gardelProperty(AwBIDSItem::GardelElectrodePathRole).toString();
+}
+
+QStringList AwBIDSManager::getGardelMontages()
+{
+	return gardelProperty(AwBIDSItem::GardelMontagesRole).toStringList();
 }
 
 void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
@@ -891,6 +913,7 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 				container->setData(AwBIDSItem::gardel, AwBIDSItem::TypeRole);
 				container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 			}
+
 			QStringList montages;
 			for (auto file : files) {
 				auto fullPath = QString("%1/%2").arg(path).arg(file);
@@ -898,6 +921,9 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 				if (file == GardelElectrodeFile) {
 					// add electrode file path to gardel container
 					container->setData(fullPath, AwBIDSItem::GardelElectrodePathRole);
+					// set also the same properties to the parent item. That way it will be easier for a cousin item to get GARDEL results.
+					if (parentItem)
+						parentItem->setData(fullPath, AwBIDSItem::GardelElectrodePathRole);
 				}
 				if (file == GardelMeshFile) {
 					// add a file child to the container
@@ -905,15 +931,21 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
 					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+					fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
 					// add also the path to the container
 					container->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
+					if (parentItem)
+						parentItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
 				}
 				// check for .mtg
 				if (file.endsWith(".mtg"))
 					montages << fullPath;
 			}
-			if (!montages.isEmpty())
+			if (!montages.isEmpty()) {
 				container->setData(montages, AwBIDSItem::GardelMontagesRole);
+				if (parentItem)
+					parentItem->setData(montages, AwBIDSItem::GardelMontagesRole);
+			}
 		}
 	}
 
@@ -1055,7 +1087,7 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					fileItem->setData(fullPath, AwBIDSItem::PathRole);
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(type, AwBIDSItem::DataTypeRole);
-					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+					fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
 					continue;
 				}
 
@@ -1116,8 +1148,10 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					item->setData(AwBIDSItem::ieeg, AwBIDSItem::TypeRole);
 				else if (name == "eeg")
 					item->setData(AwBIDSItem::eeg, AwBIDSItem::TypeRole);
-				else if (name == "anat")
+				else if (name == "anat") {
 					item->setData(AwBIDSItem::anat, AwBIDSItem::TypeRole);
+					item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+				}
 				else
 					item->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
 				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);

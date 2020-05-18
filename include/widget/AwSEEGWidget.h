@@ -74,7 +74,6 @@ protected:
 	QHash<QString, QStringList *> m_electrodesLabels;
 	double m_meshBounds[6];
 	double m_a, m_l;
-//	QStringList m_selectedElectrodes;	// hold all selected electrodes (picked with the mouse).
 	Ui::AwSEEGWidgetUi *m_ui;
 	// VTK Objects
 	AwVTKWidget *m_widget;

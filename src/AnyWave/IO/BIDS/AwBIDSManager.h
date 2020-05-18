@@ -84,6 +84,7 @@ public:
 	// Access to some tsv files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
+	AwChannelList getChannelsTsvMontage();
 	/** returns a map table: keys are the columns label **/
 	AwTSVDict loadTsvFile(const QString& path);
 	/** returns the columns header of a tsv file **/
@@ -107,6 +108,13 @@ public:
 	QString buildOutputFileName(AwBIDSItem * item);
 	/** Get derivatives folder for current open item **/
 	QString getDerivativePath(int type);
+	/** GARDEL properties **/
+	/** get montages gardel did generate. **/
+	QStringList getGardelMontages();
+	/** Get mesh file GARDEL did generate **/
+	QString getGardelMesh();
+	/** Get Electrode file GARDEL did generate **/
+	QString getGardelElectrodes();
 	/** Get the derivative folder path for a file item and a derivative modality **/
 	QString getDerivativePath(AwBIDSItem *item, int type);
 	/** Generates derivative prefix based on bids file item **/
@@ -123,6 +131,7 @@ protected:
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);
+	QVariant gardelProperty(int property);
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)

@@ -253,7 +253,7 @@ AwMontageManager::AwMontageManager()
 		m_quickMontages << key;
 		m_quickMontagesHT.insert(key, m_path + "/" + files.value(i));
 	}
-	qSort(m_quickMontages.begin(), m_quickMontages.end());
+	std::sort(m_quickMontages.begin(), m_quickMontages.end());
 
 	// connect to filter settings
 	connect(&aws->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
@@ -274,15 +274,25 @@ void AwMontageManager::scanForMontagesInDirectory(const QString& dir)
 	m_localQuickMontages.clear();
 	m_localQuickMontagesHT.clear();
 
-	// init hash table
-	for (int i = 0; i < files.count(); i++)	{
-		QString key = files.value(i);
-		key = key.remove(".mtg", Qt::CaseInsensitive);
+	for (auto file : files) {
+		auto key = file.remove(".mtg");
 		m_localQuickMontages << key;
-		m_localQuickMontagesHT.insert(key, dir + "/" + files.value(i));
+		m_localQuickMontagesHT.insert(key, QString("%1/%2").arg(dir).arg(file));
 	}
-	
-	qSort(m_localQuickMontages.begin(), m_localQuickMontages.end());
+	// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive()) {
+			auto montages = bm->getGardelMontages();
+			for (auto montage : montages) {
+				QFileInfo fi(montage);
+				auto key = fi.fileName().remove(".mtg");
+				m_localQuickMontages << key;
+				m_localQuickMontagesHT.insert(key, montage);
+			}
+		}
+	}
+	std::sort(m_localQuickMontages.begin(), m_localQuickMontages.end());
 	emit quickMontagesUpdated();
 }
 
@@ -451,6 +461,43 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	// check for local montages.
 	scanForMontagesInDirectory(fi.absolutePath());
 
+	// get bids channels tsv if we are in BIDS mode
+	// consider it the default montage.
+	// also get bad channels from tsv and use them.
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive()) {
+			auto defaultTsvMontage = bm->getChannelsTsvMontage();
+			if (!defaultTsvMontage.isEmpty()) {
+				AW_DESTROY_LIST(m_channels);
+				m_channels = defaultTsvMontage;
+				// check for bad channels
+				AwChannelList tmp;
+				m_badChannelLabels.clear();
+				for (auto c : defaultTsvMontage) {
+					// update corresponding as recorded bad status
+					auto asRecorded = m_asRecorded.value(c->name());
+					if (asRecorded) {
+						asRecorded->setBad(c->isBad());
+						if (c->isBad()) {
+							m_badChannelLabels.append(c->name());
+						}
+						else {  // not found in as recorded => should never happened
+							tmp << c;
+						}
+					}
+				}
+				saveBadChannels();
+				if (!tmp.isEmpty()) {
+					for (auto t : tmp) {
+						m_channels.removeAll(t);
+						delete t;
+					}
+				}
+			}
+		}
+	}
+
 	// check for .montage file
 	m_montagePath = reader->getSideFile(".mtg");
 	if (QFile::exists(m_montagePath))  {
@@ -459,7 +506,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		}
 	}
 
-	updateMontageFromChannelsTsv(reader);
+//	updateMontageFromChannelsTsv(reader);
 
 	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
 	if (AwSettings::getInstance()->filterSettings().isEmpty()) {

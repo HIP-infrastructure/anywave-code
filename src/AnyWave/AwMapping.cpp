@@ -35,6 +35,8 @@
 #include "Data/AwDataServer.h"
 #include "Prefs/AwSettings.h"
 #include "Widgets/AwCursorMarkerToolBar.h"
+#include "IO/BIDS/AwBIDSManager.h"
+
 //
 // runMapping()
 //
@@ -152,10 +154,21 @@ void AnyWave::runMapping()
 	}
 
 	if (!seegChannels.isEmpty()) {  // we've got SEEG channels, check for mesh and electrode files
-		AwFileInfo afi(m_currentReader);
+		// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.
+		QString mesh, electrodes;
+		if (AwBIDSManager::isInstantiated()) {
+			auto bm = AwBIDSManager::instance();
+			if (bm->isBIDSActive()) {
+				mesh = bm->getGardelMesh();
+				electrodes = bm->getGardelElectrodes();
+			}
+		}
+		else {
+			AwFileInfo afi(m_currentReader);
 
-		QString mesh = afi.getFeature(AwFileInfo::MeshFile).toString();
-		QString electrodes = afi.getFeature(AwFileInfo::SEEGElectrodeFile).toString();
+			mesh = afi.getFeature(AwFileInfo::MeshFile).toString();
+			electrodes = afi.getFeature(AwFileInfo::SEEGElectrodeFile).toString();
+		}
 
 		if (!mesh.isEmpty() && !electrodes.isEmpty()) {
 			if (m_SEEGViewer == NULL) {
@@ -193,8 +206,8 @@ void AnyWave::stopMapping()
 {
 	// check if dock widgets are active
 	bool MEGOK = true;
-	auto dockMEG = static_cast<AwDockMapping *>(m_dockWidgets["meg_mapping"]);
-	auto dockEEG = static_cast<AwDockMapping *>(m_dockWidgets["eeg_mapping"]);
+	auto dockMEG = static_cast<AwDockMapping *>(m_dockWidgets.value("meg_mapping"));
+	auto dockEEG = static_cast<AwDockMapping *>(m_dockWidgets.value("eeg_mapping"));
 	if (!dockMEG)
 		MEGOK = false;
 	else if (dockMEG->isClosed())
