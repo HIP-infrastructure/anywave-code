@@ -11,7 +11,6 @@ TEMPLATE = lib
 CONFIG += plugin
 DEFINES += AW_BUILD_LAYOUT_LIB
 DESTDIR = $$LIB_DIR
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.10
 
 #FRAMEWORK_HEADERS.version = Versions
 #FRAMEWORK_HEADERS.files =     ../../include/layout/AwLayout.h  ../../include/layout/AwLayoutManager.h ../../include/AwGlobal.h
@@ -34,13 +33,13 @@ SOURCES += \
 HEADERS += ../../include/layout/AwLayout.h  ../../include/layout/AwLayoutManager.h
 
 macx {
-    LIBS += -framework AwCore
+    LIBS += -framework AwCore -lAwRW
    QMAKE_LFLAGS_PLUGIN += -Wl,-install_name,@rpath/lib$${TARGET}.$${QMAKE_EXTENSION_SHLIB}
 
 }
 
 unix:!macx{
- LIBS += -lAwCore
+ LIBS += -lAwCore -lAwRW
 }
 
 unix {
