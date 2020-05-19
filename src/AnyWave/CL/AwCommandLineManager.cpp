@@ -268,6 +268,9 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
 		AwDataServer::getInstance()->setMainReader(reader);
 		AwDataServer::getInstance()->openConnection(process);
+
+		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
+
 	}
 	else {   // no input file but requires to build pdi anyway
 		buildPDI(process);

@@ -354,16 +354,16 @@ void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
 	if (!BM->isBIDSActive())
 		return;
 
-	auto events_tsv = BM->getTSVFile(filePath, AwBIDSManager::EventsTsv);
+//	auto events_tsv = BM->getTSVFile(filePath, AwBIDSManager::EventsTsv);
 
-	if (events_tsv.isEmpty()) 
-		return;
+//	if (events_tsv.isEmpty()) 
+//		return;
 	
 	// keep a copy of the path to events.tsv file
-	m_eventsTsv = events_tsv;
+//	m_eventsTsv = events_tsv;
 	// append markers loaded from Events.tsv to current markers (duplicates are removed just after);
-	m_markers += BM->getMarkersFromEventsTsv(events_tsv);
-	removeDuplicates();
+//	m_markers += BM->getMarkersFromEventsTsv(events_tsv);
+//	removeDuplicates();
 }
 
 void AwMarkerManager::quit()

@@ -67,10 +67,10 @@ public:
 	inline QString& rootDir() { return m_rootDir; }
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
+	QString createTsvPath(AwBIDSItem * item, int tsvType);
 	void closeBIDS();
-	AwBIDSItems subjects() { return m_items; }
-//	QString buildPath(const QString& dataFilePath, int derivativesKind);
 
+	AwBIDSItems subjects() { return m_items; }
 	
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
@@ -84,7 +84,12 @@ public:
 	// Access to some tsv files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
+
+	/** montage specific **/
+	/** Load a montage from channels.tsv file **/
 	AwChannelList getChannelsTsvMontage();
+	/** Update channels.tsv file from bad file **/
+	void updateChannelsTsvBadChannels(const QStringList& badLabels);
 	/** returns a map table: keys are the columns label **/
 	AwTSVDict loadTsvFile(const QString& path);
 	/** returns the columns header of a tsv file **/
@@ -95,8 +100,8 @@ public:
 	void updateEventsTsv(const QString& path);
 	/** try to find the subject in which the data file is stored. **/
 	//AwBIDSItem *findSubject(const QString& dataFilePath);
-	/** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
-	QString getTSVFile(const QString& dataFilePath, int tsvType);
+	///** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
+	//QString getTSVFile(const QString& dataFilePath, int tsvType);
 	
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath();
@@ -117,8 +122,8 @@ public:
 	QString getGardelElectrodes();
 	/** Get the derivative folder path for a file item and a derivative modality **/
 	QString getDerivativePath(AwBIDSItem *item, int type);
-	/** Generates derivative prefix based on bids file item **/
-	QString getDerivativePrefixName(AwBIDSItem *item);
+	/** Get the filename prefix by removing the modality **/
+	QString getPrefixName(AwBIDSItem *item); 
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
@@ -132,12 +137,12 @@ protected:
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);
 	QVariant gardelProperty(int property);
+	void findTsvFilesForItem(AwBIDSItem *item);
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
 
 	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
-	//QHash<QString, int> m_derivativesHash; // map a derivatives subdir with a derivatives type
 	QHash<int, QString> m_derivativesNames;
 	AwBIDSItems m_items;
 	QVariantMap m_settings;

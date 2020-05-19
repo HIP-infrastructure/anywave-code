@@ -801,16 +801,18 @@ void AwBIDSManager::closeBIDS()
 
 ///
 /// input : file item
-/// get the bids file name.
+/// get the file prefix name without the modality : sub-id_task-rest and not sub-id_task-rest_ieeg.vhdr
 /// Removes the modality suffix (_meg, _ieeg, _eeg)
 /// Handle special case of meg data file located inside a run container.
-QString AwBIDSManager::getDerivativePrefixName(AwBIDSItem *item)
+QString AwBIDSManager::getPrefixName(AwBIDSItem *item)
 {
 	QString res = item->data(Qt::DisplayRole).toString();
 	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile) {
 		for (auto suffix : m_dataFileSuffixes) {
-			if (res.endsWith(suffix)) 
-				return res.remove(suffix);
+			if (res.contains(suffix)) {
+				QRegularExpression exp(QString("(%1).*").arg(suffix));
+				return res.remove(exp);
+			}
 		}
 		// no modality detected in filename => meg 4D run or other MEG file format.
 
@@ -819,8 +821,10 @@ QString AwBIDSManager::getDerivativePrefixName(AwBIDSItem *item)
 		if (parent) {
 			res = parent->data(Qt::DisplayRole).toString();
 			for (auto suffix : m_dataFileSuffixes) {
-				if (res.endsWith(suffix))
-					return res.remove(suffix);
+				if (res.contains(suffix)) {
+					QRegularExpression exp(QString("(%1).*").arg(suffix));
+					return res.remove(exp);
+				}
 			}
 		}
 	}
@@ -874,6 +878,25 @@ QVariant AwBIDSManager::gardelProperty(int property)
 	if (!grandParent)
 		return res;
 	return  grandParent->data(property);
+}
+
+void AwBIDSManager::findTsvFilesForItem(AwBIDSItem * item)
+{
+	// item must be a data file
+	if (item->data(AwBIDSItem::TypeRole).toInt() != AwBIDSItem::DataFile)
+		return;
+	auto prefixName = getPrefixName(item);
+	// build tsv names
+	// channels
+	auto tmp = QString("%1_channels.tsv").arg(prefixName);
+	auto path = QString("%1/%2/%3").arg(m_rootDir).arg(item->data(AwBIDSItem::RelativePathRole).toString()).arg(tmp);
+	if (QFile::exists(path))
+		item->setData(path, AwBIDSItem::ChannelsTsvRole);
+	// events
+	tmp = QString("%1_events.tsv").arg(prefixName);
+	path = QString("%1/%2/%3").arg(m_rootDir).arg(item->data(AwBIDSItem::RelativePathRole).toString()).arg(tmp);
+	if (QFile::exists(path))
+		item->setData(path, AwBIDSItem::EventsTsvRole);
 }
 
 QString AwBIDSManager::getGardelMesh()
@@ -959,7 +982,7 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 		if (dir.exists()) {
 			AwBIDSItem *container = nullptr;
 			auto files = dir.entryList(QDir::Files);
-			auto fileItemName = getDerivativePrefixName(item);
+			auto fileItemName = getPrefixName(item);
 
 			for (auto file : files) {
 				if (file.startsWith(fileItemName) && file.endsWith(".mat")) {
@@ -987,7 +1010,7 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 		if (dir.exists()) {
 			AwBIDSItem *container = nullptr;
 			auto files = dir.entryList(QDir::Files);
-			auto fileItemName = getDerivativePrefixName(item);
+			auto fileItemName = getPrefixName(item);
 			for (auto file : files) {
 				if (file.startsWith(fileItemName) && file.endsWith(".mat")) {
 					if (container == nullptr) {
@@ -1108,6 +1131,8 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					// build relative path using parent's one
 					fileItem->setData(QString("%1/%2").arg(parentRelativePath).arg(fileName), AwBIDSItem::RelativePathRole);
 					fileItem->setData(QIcon(":/images/AnyWave_icon.png"), Qt::DecorationRole);
+					// search for events and channels tsv files
+					findTsvFilesForItem(fileItem);
 					parentItem->addFile(fullPath);
 					reader->plugin()->deleteInstance(reader);
 				}
@@ -1364,35 +1389,35 @@ int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const Q
 }
 
 
-QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
-{
-	if (m_currentSubject == nullptr || !isBIDSActive())
-		return QString();
-
-	QString suffix;
-	if (type == AwBIDSManager::EventsTsv)
-		suffix = "_events.tsv";
-	else if (type == AwBIDSManager::ChannelsTsv)
-		suffix = "_channels.tsv";
-	else
-		return QString();
-
-	// remove the extension
-	QFileInfo fi(dataFilePath);
-	auto base = fi.baseName();
-	auto dirPath = fi.absolutePath();
-
-	for (auto e : m_dataFileSuffixes) {
-		if (base.contains(e)) {
-			base.remove(e);
-			break;
-		}
-	}
-	QString res = QString("%1/%2%3").arg(dirPath).arg(base).arg(suffix);
-	if (QFile::exists(res))
-		return res;
-	return QString();
-}
+//QString AwBIDSManager::getTSVFile(const QString& dataFilePath, int type)
+//{
+//	if (m_currentSubject == nullptr || !isBIDSActive())
+//		return QString();
+//
+//	QString suffix;
+//	if (type == AwBIDSManager::EventsTsv)
+//		suffix = "_events.tsv";
+//	else if (type == AwBIDSManager::ChannelsTsv)
+//		suffix = "_channels.tsv";
+//	else
+//		return QString();
+//
+//	// remove the extension
+//	QFileInfo fi(dataFilePath);
+//	auto base = fi.baseName();
+//	auto dirPath = fi.absolutePath();
+//
+//	for (auto e : m_dataFileSuffixes) {
+//		if (base.contains(e)) {
+//			base.remove(e);
+//			break;
+//		}
+//	}
+//	QString res = QString("%1/%2%3").arg(dirPath).arg(base).arg(suffix);
+//	if (QFile::exists(res))
+//		return res;
+//	return QString();
+//}
 
 QString AwBIDSManager::getCurrentBIDSPath()
 {
@@ -1602,19 +1627,36 @@ AwMarkerList AwBIDSManager::getMarkersFromEventsTsv(const QString& path)
 	return res;
 }
 
+AwChannelList AwBIDSManager::getChannelsTsvMontage()
+{
+	AwChannelList res;
+	if (m_currentOpenItem == nullptr)
+		return res;
+
+	auto channelTsvFile = m_currentOpenItem->data(AwBIDSItem::ChannelsTsvRole).toString();
+	if (channelTsvFile.isEmpty())
+		return res;
+	try {
+		res = getMontageFromChannelsTsv(channelTsvFile);
+	}
+	catch (const AwException& e) {
+		return res;
+	}
+	return res;
+}
+
+void AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
+{
+	if (m_currentOpenItem == nullptr)
+		return;
+
+}
 
 AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 {
 	AwTSVDict dict;
 	AwChannelList res;
-	try {
-		dict = loadTsvFile(path);
-	}
-	catch (const AwException& e)
-	{
-		throw e;
-		return AwChannelList();
-	}
+	dict = loadTsvFile(path);
 	auto keys = dict.keys();
 	if (keys.isEmpty() || !keys.contains("name") || !keys.contains("units") || !keys.contains("type")) {
 		throw AwException("channels.tsv file is bad.", "AwBIDSManager::getMontageFromChannelsTsv()");

@@ -426,9 +426,13 @@ void AwMontageManager::clear()
 
 void AwMontageManager::closeFile()
 {
-	if (AwBIDSManager::isInstantiated())
-		if (AwBIDSManager::instance()->isBIDSActive())
-			checkForBIDSMods();
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive())
+			bm->updateChannelsTsvBadChannels(m_badChannelLabels);
+			//checkForBIDSMods();
+	}
+			
 	clear();
 	m_montagePath = "";
 	m_badPath = "";
@@ -549,73 +553,73 @@ void AwMontageManager::checkForBIDSMods()
 ///
 void AwMontageManager::updateMontageFromChannelsTsv(AwFileIO *reader)
 {
-	// clear current BIDS subject
-	m_channelsTsv.clear();
-	auto filePath = QFileInfo(reader->fullPath()).fileName();
-	auto BM = AwBIDSManager::instance();
+	//// clear current BIDS subject
+	//m_channelsTsv.clear();
+	//auto filePath = QFileInfo(reader->fullPath()).fileName();
+	//auto BM = AwBIDSManager::instance();
 
-	if (!BM->isBIDSActive())
-		return;
+	//if (!BM->isBIDSActive())
+	//	return;
 
-	auto channels_tsv = BM->getTSVFile(reader->fullPath(), AwBIDSManager::ChannelsTsv);
-	
-	if (channels_tsv.isEmpty())
-		return;
+	//auto channels_tsv = BM->getTSVFile(reader->fullPath(), AwBIDSManager::ChannelsTsv);
+	//
+	//if (channels_tsv.isEmpty())
+	//	return;
 
-	m_channelsTsv = channels_tsv;
-	AwChannelList list;
-	try {
-		list = BM->getMontageFromChannelsTsv(channels_tsv);
-	}
-	catch (const AwException& e) {
-		return;
-	}
+	//m_channelsTsv = channels_tsv;
+	//AwChannelList list;
+	//try {
+	//	list = BM->getMontageFromChannelsTsv(channels_tsv);
+	//}
+	//catch (const AwException& e) {
+	//	return;
+	//}
 
-	if (list.isEmpty())
-		return;
+	//if (list.isEmpty())
+	//	return;
 
-	// current montage is empty? => apply the montage found in channels.tsv
-	if (m_channels.isEmpty()) {
-		m_channels = AwChannel::duplicateChannels(list);
-		return;
-	}
+	//// current montage is empty? => apply the montage found in channels.tsv
+	//if (m_channels.isEmpty()) {
+	//	m_channels = AwChannel::duplicateChannels(list);
+	//	return;
+	//}
 
-	//  clear bad channels previously loaded 
-	m_badChannelLabels.clear();
+	////  clear bad channels previously loaded 
+	//m_badChannelLabels.clear();
 
-	// build a multi map for current montage to retreive channels by name.
-	QMultiMap<QString, AwChannel *> globalMap;
-	for (auto c : m_channels)
-		globalMap.insert(c->name(), c);
+	//// build a multi map for current montage to retreive channels by name.
+	//QMultiMap<QString, AwChannel *> globalMap;
+	//for (auto c : m_channels)
+	//	globalMap.insert(c->name(), c);
 
-	// reset as recorded channels to GOOD state
-	for (auto c : m_asRecorded.values())
-		c->setBad(false);
-	// now change type or bad status based on TSV
-	AwChannelList badChannels;
-	for (auto c : list) {
-		auto asRecorded = m_asRecorded.value(c->name());
-		if (asRecorded) {
-			asRecorded->setBad(c->isBad());
-			asRecorded->setType(c->type());
-			if (c->isBad())
-				m_badChannelLabels << c->name();
-			auto montageChannels = globalMap.values(c->name());
-			for (auto montageChannel : montageChannels) {
-				montageChannel->setType(c->type());
-				if (asRecorded->isBad()) {
-					badChannels << montageChannel;
-				}
-			}
-		}
-	}
-	for (auto bad : badChannels) {
-		m_channels.removeAll(bad);
-		delete bad;
-	}
-	// be sure that .bad file is equivalent to tsv file in term of bad channels.
-	m_badPath = reader->fullPath() + ".bad";
-	saveBadChannels();
+	//// reset as recorded channels to GOOD state
+	//for (auto c : m_asRecorded.values())
+	//	c->setBad(false);
+	//// now change type or bad status based on TSV
+	//AwChannelList badChannels;
+	//for (auto c : list) {
+	//	auto asRecorded = m_asRecorded.value(c->name());
+	//	if (asRecorded) {
+	//		asRecorded->setBad(c->isBad());
+	//		asRecorded->setType(c->type());
+	//		if (c->isBad())
+	//			m_badChannelLabels << c->name();
+	//		auto montageChannels = globalMap.values(c->name());
+	//		for (auto montageChannel : montageChannels) {
+	//			montageChannel->setType(c->type());
+	//			if (asRecorded->isBad()) {
+	//				badChannels << montageChannel;
+	//			}
+	//		}
+	//	}
+	//}
+	//for (auto bad : badChannels) {
+	//	m_channels.removeAll(bad);
+	//	delete bad;
+	//}
+	//// be sure that .bad file is equivalent to tsv file in term of bad channels.
+	//m_badPath = reader->fullPath() + ".bad";
+	//saveBadChannels();
 }
 
 ///
