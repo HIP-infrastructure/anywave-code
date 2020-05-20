@@ -331,17 +331,17 @@ void AwMarkerManager::setFilename(const QString& path)
 
 void AwMarkerManager::checkForBIDSMods()
 {
-	if (m_eventsTsv.isEmpty())
-		return;
-	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
-		return;
-	if (m_markersModified) {
-		if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-			return;
-		auto BM = AwBIDSManager::instance();
-		BM->updateEventsTsv(m_eventsTsv);
-		m_eventsTsv.clear();
-	}
+	//if (m_eventsTsv.isEmpty())
+	//	return;
+	//if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
+	//	return;
+	//if (m_markersModified) {
+	//	if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+	//		return;
+	//	auto BM = AwBIDSManager::instance();
+	//	BM->updateEventsTsv(m_eventsTsv);
+	//	m_eventsTsv.clear();
+	//}
 }
 
 void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)

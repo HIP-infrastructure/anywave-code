@@ -34,5 +34,6 @@ namespace AwUtilities // put utility functions inside a namespace
 		QString AW_UTILITIES_EXPORT getSessionLabel(const QString& data);
 		QStringList AW_UTILITIES_EXPORT getTsvColumns(const QString& tsvFile);
 		QVariantHash AW_UTILITIES_EXPORT loadTsv(const QString& tsvFile);
+		QMap<int, QString> AW_UTILITIES_EXPORT columnsFromLine(const QString& line);
 	}
 }

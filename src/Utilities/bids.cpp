@@ -53,3 +53,18 @@ QVariantHash AwUtilities::bids::loadTsv(const QString& tsvFile)
 	}
 	return res;
 }
+
+
+///
+/// get the columns label and index from the first read line of a tsv file.
+/// Input is the first line read in the line.
+QMap<int, QString>  AwUtilities::bids::columnsFromLine(const QString & line)
+{
+	QMap<int, QString> res;
+	auto tokens = line.split("\t");
+	int i = 0;
+	for (auto token : tokens) 
+		res.insert(i++, token);
+	
+	return res;
+}

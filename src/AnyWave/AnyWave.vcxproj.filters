@@ -1138,9 +1138,6 @@
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSTools.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
@@ -2137,9 +2134,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwSelectTriggerChannelDialog.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSTools.h">
-      <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwBIDSGUI.h">
       <Filter>Generated Files</Filter>

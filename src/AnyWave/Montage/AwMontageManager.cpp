@@ -429,7 +429,9 @@ void AwMontageManager::closeFile()
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
 		if (bm->isBIDSActive())
-			bm->updateChannelsTsvBadChannels(m_badChannelLabels);
+			if (bm->updateChannelsTsvBadChannels(m_badChannelLabels) != 0 && !bm->lastError().isEmpty()) {
+				AwMessageBox::information(nullptr, "BIDS", bm->lastError());
+			}
 			//checkForBIDSMods();
 	}
 			
@@ -471,6 +473,8 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
 		if (bm->isBIDSActive()) {
+			// BEWARE: getChannelsTsvMontage() will build a montage based on what found in TSV file.
+			// but TSV file does not contain all the information an AwChannel (miss the sampling rate at first)
 			auto defaultTsvMontage = bm->getChannelsTsvMontage();
 			if (!defaultTsvMontage.isEmpty()) {
 				AW_DESTROY_LIST(m_channels);
@@ -482,13 +486,18 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 					// update corresponding as recorded bad status
 					auto asRecorded = m_asRecorded.value(c->name());
 					if (asRecorded) {
+						// copy information from as recorded
+						c->setSamplingRate(asRecorded->samplingRate());
+						c->setGain(asRecorded->gain());
+						c->setUnit(asRecorded->unit());
 						asRecorded->setBad(c->isBad());
+						asRecorded->setType(c->type());
 						if (c->isBad()) {
 							m_badChannelLabels.append(c->name());
 						}
-						else {  // not found in as recorded => should never happened
-							tmp << c;
-						}
+					}
+					else {  // not found in as recorded => should never happened
+						tmp << c;
 					}
 				}
 				saveBadChannels();
@@ -503,6 +512,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	}
 
 	// check for .montage file
+	// BEWARE: if a .mtg exists, it will override the default TSV montage
 	m_montagePath = reader->getSideFile(".mtg");
 	if (QFile::exists(m_montagePath))  {
 		if (!loadMontage(m_montagePath)) {

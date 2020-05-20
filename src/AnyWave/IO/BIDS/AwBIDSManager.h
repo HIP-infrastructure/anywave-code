@@ -69,7 +69,7 @@ public:
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
 	QString createTsvPath(AwBIDSItem * item, int tsvType);
 	void closeBIDS();
-
+	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems subjects() { return m_items; }
 	
 	void toBIDS(const AwArguments& args);
@@ -78,30 +78,31 @@ public:
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
 
+
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
 	
-	// Access to some tsv files
+	// TSV files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
-
 	/** montage specific **/
 	/** Load a montage from channels.tsv file **/
 	AwChannelList getChannelsTsvMontage();
+	/** Build a channels.tsv file **/
+	int createChannelsTsv(const QString& filePath, const AwChannelList& channels);
 	/** Update channels.tsv file from bad file **/
-	void updateChannelsTsvBadChannels(const QStringList& badLabels);
+	int updateChannelsTsvBadChannels(const QStringList& badLabels);
+	/** markers specific **/
+	int updateEventsTsv(const AwMarkerList& markers);
+
 	/** returns a map table: keys are the columns label **/
 	AwTSVDict loadTsvFile(const QString& path);
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);
 	/** Create a TSV file based on a dictionnary **/
 	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
-	void updateChannelsTsv(const QString& path);
-	void updateEventsTsv(const QString& path);
-	/** try to find the subject in which the data file is stored. **/
-	//AwBIDSItem *findSubject(const QString& dataFilePath);
-	///** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
-	//QString getTSVFile(const QString& dataFilePath, int tsvType);
+//	void updateChannelsTsv(const QString& path);
+//	void updateEventsTsv(const QString& path);
 	
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath();
@@ -123,7 +124,7 @@ public:
 	/** Get the derivative folder path for a file item and a derivative modality **/
 	QString getDerivativePath(AwBIDSItem *item, int type);
 	/** Get the filename prefix by removing the modality **/
-	QString getPrefixName(AwBIDSItem *item); 
+	QString getPrefixName(AwBIDSItem *item, bool absolutePath = false);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
@@ -157,6 +158,7 @@ protected:
 	QMap<int, QString> m_modifications;
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
+	QString m_errorString;
 	QStringList m_fileExtensions, m_modalities;
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSItem *m_currentSubject;

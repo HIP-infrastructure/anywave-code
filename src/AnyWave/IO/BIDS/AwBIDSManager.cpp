@@ -6,7 +6,7 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <QDirIterator>
-#include "AwBIDSTools.h"
+//#include "AwBIDSTools.h"
 #include "AwFileItem.h"
 #include "Plugin/AwPluginManager.h"
 #include <widget/AwMessageBox.h>
@@ -21,6 +21,11 @@
 #include <utils/bids.h>
 #include <widget/AwWaitWidget.h>
 #include <QtConcurrent>
+
+// TSV COLUMNS
+constexpr auto tsv_event_trial_type = "trial_type";
+constexpr auto tsv_event_duration = "duration";
+constexpr auto tsv_event_onset = "onset";
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
@@ -478,7 +483,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	// generate events.tsv only if we have markers
 	if (!reader->infos.blocks().first()->markers().isEmpty()) {
 		// create events.tsv (not fixed by the draft at this time)
-		QStringList events_headers = { "onset", "duration", "trial_type" };
+		QStringList events_headers = { "onset", "duration", tsv_event_trial_type };
 		QFile eventFile(events_tsv);
 		QTextStream stream_events(&eventFile);
 		if (eventFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -726,6 +731,7 @@ AwBIDSManager::AwBIDSManager()
 	m_fileExtensions = AwPluginManager::getInstance()->getReadableFileExtensions();
 	// add anat niftfi format extension
 	m_fileExtensions.append("nii");
+	m_fileExtensions.append("nii.mgz");
 
 	// derivatives folders to parse 
 	m_derivativesNames.insert(AwBIDSItem::ica, "ica");
@@ -804,9 +810,9 @@ void AwBIDSManager::closeBIDS()
 /// get the file prefix name without the modality : sub-id_task-rest and not sub-id_task-rest_ieeg.vhdr
 /// Removes the modality suffix (_meg, _ieeg, _eeg)
 /// Handle special case of meg data file located inside a run container.
-QString AwBIDSManager::getPrefixName(AwBIDSItem *item)
+QString AwBIDSManager::getPrefixName(AwBIDSItem *item, bool absolutePath)
 {
-	QString res = item->data(Qt::DisplayRole).toString();
+	QString res = absolutePath ? item->data(AwBIDSItem::RelativePathRole).toString() : item->data(Qt::DisplayRole).toString();
 	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile) {
 		for (auto suffix : m_dataFileSuffixes) {
 			if (res.contains(suffix)) {
@@ -885,16 +891,16 @@ void AwBIDSManager::findTsvFilesForItem(AwBIDSItem * item)
 	// item must be a data file
 	if (item->data(AwBIDSItem::TypeRole).toInt() != AwBIDSItem::DataFile)
 		return;
-	auto prefixName = getPrefixName(item);
+	auto prefixName = getPrefixName(item, true);
 	// build tsv names
 	// channels
 	auto tmp = QString("%1_channels.tsv").arg(prefixName);
-	auto path = QString("%1/%2/%3").arg(m_rootDir).arg(item->data(AwBIDSItem::RelativePathRole).toString()).arg(tmp);
+	auto path = QString("%1/%2").arg(m_rootDir).arg(tmp);
 	if (QFile::exists(path))
 		item->setData(path, AwBIDSItem::ChannelsTsvRole);
 	// events
 	tmp = QString("%1_events.tsv").arg(prefixName);
-	path = QString("%1/%2/%3").arg(m_rootDir).arg(item->data(AwBIDSItem::RelativePathRole).toString()).arg(tmp);
+	path = QString("%1/%2").arg(m_rootDir).arg(tmp);
 	if (QFile::exists(path))
 		item->setData(path, AwBIDSItem::EventsTsvRole);
 }
@@ -1236,74 +1242,151 @@ void AwBIDSManager::modifyUpdateJson(const QStringList& branches)
 	//}
 }
 
-void AwBIDSManager::updateEventsTsv(const QString& itemPath)
+
+//int AwBIDSManager::createEventsTsv(const QString& filePath, const AwMarkerList& markers)
+//{
+//	m_errorString.clear();
+//	QFile file(filePath);
+//	QTextStream stream(&file);
+//
+//}
+
+//void AwBIDSManager::updateEventsTsv(const QString& itemPath)
+//{
+//	if (AwMessageBox::question(0, tr("EVENTS.TSV"), tr("The modified markers will be appended to current events.tsv file. Proceed?"),
+//		QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+//		return;
+//	AwTSVDict dict;
+//	try {
+//		dict = loadTsvFile(itemPath);
+//	}
+//	catch (const AwException& e) {
+//		AwMessageBox::information(0, tr("BIDS"), e.errorString());
+//		return;
+//	}
+//	if (dict.isEmpty())
+//		return;
+//	auto markers = AwMarkerManager::instance()->getMarkers();
+//	// get REQUIRED columns
+//	auto onset = dict["onset"];
+//	auto duration = dict["duration"];
+//	auto trial_type = dict["trial_type"];
+//	// get optional columns if any
+//	auto responses = dict["response_time"];
+//	auto stim_file = dict["stim_file"];
+//	auto HED = dict["HED"];
+//
+//	for (auto m : markers) {
+//		if (!responses.isEmpty())   // column is already present => so complete it for new markers
+//			responses << "n/a";
+//		if (!stim_file.isEmpty())
+//			stim_file << "n/a";
+//		if (!HED.isEmpty())
+//			HED << "n/a";
+//		onset << QString("%1").arg(m->start());
+//		duration << QString("%1").arg(m->duration());
+//		trial_type << m->label();
+//	}
+//	dict["onset"] = onset;
+//	dict["duration"] = duration;
+//	dict["trial_type"] = trial_type;
+//	if (!HED.isEmpty())
+//		dict["HED"] = HED;
+//	if (!responses.isEmpty())
+//		dict["response_time"] = responses;
+//	if (!stim_file.isEmpty())
+//		dict["stim_file"] = stim_file;
+//	QStringList columns = { "onset", "duration", "trial_type" };
+//	saveTsvFile(itemPath, dict, columns);
+//
+//	QStringList branches = { "raw" };
+//	modifyUpdateJson(branches);
+//}
+
+
+int AwBIDSManager::updateEventsTsv(const AwMarkerList& markers)
 {
-	if (AwMessageBox::question(0, tr("EVENTS.TSV"), tr("The modified markers will be appended to current events.tsv file. Proceed?"),
-		QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-		return;
-	AwTSVDict dict;
-	try {
-		dict = loadTsvFile(itemPath);
+	m_errorString.clear();
+	if (m_currentOpenItem == nullptr || markers.isEmpty())
+		return -1;
+	auto tsvPath = m_currentOpenItem->data(AwBIDSItem::EventsTsvRole).toString();
+	QFile file;
+	QTextStream stream(&file);
+	// if the events.tsv does not exist, create it.
+	if (tsvPath.isEmpty() || !QFile::exists(tsvPath)) {
+		tsvPath = getPrefixName(m_currentOpenItem, true);
+		tsvPath = QString("%1_events.tsv").arg(tsvPath);
+		file.setFileName(tsvPath);
+		if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+			m_errorString = QString("Could not create %1").arg(tsvPath);
+			return -1;
+		}
+		// default columns
+		stream << "onset" << "\t" << "duration" << "\t" << tsv_event_trial_type << endl;
+		for (auto m : markers) 
+			stream << QString("%1").arg(m->start()) << "\t" << QString("%1").arg(m->duration()) << "\t" << m->label() << "\t" << endl;
+		file.close();
+		return 0;
 	}
-	catch (const AwException& e) {
-		AwMessageBox::information(0, tr("BIDS"), e.errorString());
-		return;
+	// the file exists, update it
+   // read the first line to get columns
+	file.setFileName(tsvPath);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		m_errorString = QString("Could not open %1 for reading.").arg(tsvPath);
+		return -1;
 	}
-	if (dict.isEmpty())
-		return;
-	auto markers = AwMarkerManager::instance()->getMarkers();
-	// get REQUIRED columns
-	auto onset = dict["onset"];
-	auto duration = dict["duration"];
-	auto trial_type = dict["trial_type"];
-	// get optional columns if any
-	auto responses = dict["response_time"];
-	auto stim_file = dict["stim_file"];
-	auto HED = dict["HED"];
-
+	auto line = stream.readLine();
+	auto cols = AwUtilities::bids::columnsFromLine(line);
+	file.close();
+	// make a backup in case of...
+	QString bak = tsvPath + ".bak";
+	QFile::copy(tsvPath, bak);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		m_errorString = QString("Could not open %1 for writing.").arg(tsvPath);
+		return -1;
+	}
+	// rewrite first line
+	stream << line << endl;
 	for (auto m : markers) {
-		if (!responses.isEmpty())   // column is already present => so complete it for new markers
-			responses << "n/a";
-		if (!stim_file.isEmpty())
-			stim_file << "n/a";
-		if (!HED.isEmpty())
-			HED << "n/a";
-		onset << QString("%1").arg(m->start());
-		duration << QString("%1").arg(m->duration());
-		trial_type << m->label();
+		for (auto i = 0; i < cols.size(); i++) {
+			auto colLabel = cols.value(i);
+			if (colLabel == tsv_event_trial_type)
+				stream << m->label();
+			else if (colLabel == tsv_event_onset)
+				stream << QString("%1").arg(m->start());
+			else if (colLabel == tsv_event_duration)
+				stream << QString("%1").arg(m->duration());
+			else
+				stream << "n/a";
+			if (i < cols.size())
+				stream << "\t";
+		}
+		stream << endl;
 	}
-	dict["onset"] = onset;
-	dict["duration"] = duration;
-	dict["trial_type"] = trial_type;
-	if (!HED.isEmpty())
-		dict["HED"] = HED;
-	if (!responses.isEmpty())
-		dict["response_time"] = responses;
-	if (!stim_file.isEmpty())
-		dict["stim_file"] = stim_file;
-	QStringList columns = { "onset", "duration", "trial_type" };
-	saveTsvFile(itemPath, dict, columns);
-
-	QStringList branches = { "raw" };
-	modifyUpdateJson(branches);
+	file.close();
+	QFile::remove(bak);
+	return 0;
 }
 
-///
-/// updateChannelsTsv
-/// Keep the order and update bad/good status
-/// Warning: this method can display a Message box.
-void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
+
+int AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
 {
+	m_errorString.clear();
+	if (m_currentOpenItem == nullptr || badLabels.isEmpty())
+		return -1;
+	auto tsvPath = m_currentOpenItem->data(AwBIDSItem::ChannelsTsvRole).toString();
+	if (!QFile::exists(tsvPath))
+		return -1;
 	// try to copy tsv file as tsv.bak
-	QString bak = itemPath + ".bak";
-	QFile::copy(itemPath, bak);
+	QString bak = tsvPath + ".bak";
+	QFile::copy(tsvPath, bak);
 	QFile sourceFile(bak);
-	QFile destFile(itemPath);
-	
+	QFile destFile(tsvPath);
 	if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
-		return;
+		m_errorString = QString("Could not open %1 for reading.").arg(tsvPath);
+		return -1;
 	}
+	
 	QTextStream sourceStream(&sourceFile);
 	QString line = sourceStream.readLine();
 	QStringList columns = line.split('\t');
@@ -1311,47 +1394,107 @@ void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
 	auto indexStatus = columns.indexOf("status");
 	// check that columns contains at leats name and status
 	if (indexName == -1 || indexStatus == -1) {
-		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
 		sourceFile.close();
-		return;
+		QFile::remove(bak);
+		m_errorString = QString("Channels.tsv: columns 'status' and/or 'name' are missing");
+		return -1;
 	}
-
 	if (!destFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-		QFile::copy(bak, itemPath);
-		AwMessageBox::information(0, tr("BIDS"), QString("Could not update %1.").arg(itemPath));
+		QFile::copy(bak, tsvPath);
+		QFile::remove(bak);
 		sourceFile.close();
-		return;
+		m_errorString = QString("Could not open %1 for writing.").arg(tsvPath);
+		return -1;
 	}
 	QTextStream destStream(&destFile);
 	destStream << line << endl;
-	auto MM = AwMontageManager::instance();
+	//auto MM = AwMontageManager::instance();
 	while (!sourceStream.atEnd()) {
 		line = sourceStream.readLine();
 		QStringList cols = line.split('\t');
 		if (cols.size() != columns.size())
 			break;
 		auto name = cols.value(indexName);
-		auto asRecordedChannel = MM->asRecordedChannel(name);
-		if (asRecordedChannel == Q_NULLPTR) {
-			destStream << line << endl;
-			continue;
-		} 
-		else {
-			QString status = asRecordedChannel->isBad() ? "bad" : "good";
-			cols.replace(indexStatus, status);
-			for (auto i = 0; i < cols.size(); i++) {
-				destStream << cols.value(i);
-				if (i + 1 < cols.size())
-					destStream << '\t';
-			}
-			destStream << endl;
+		auto status = badLabels.contains(name) ? "bad" : "good";
+		cols.replace(indexStatus, status);
+		for (auto i = 0; i < cols.size(); i++) {
+			destStream << cols.value(i);
+			if (i + 1 < cols.size())
+				destStream << '\t';
 		}
+		destStream << endl;
 	}
 	sourceFile.close();
 	destFile.close();
-	QFile::copy(bak, itemPath);
+	QFile::copy(bak, tsvPath);
 	QFile::remove(bak);
+	return 0;
 }
+
+///
+/// updateChannelsTsv
+/// Keep the order and update bad/good status
+/// Warning: this method can display a Message box.
+//void AwBIDSManager::updateChannelsTsv(const QString& itemPath)
+//{
+//	// try to copy tsv file as tsv.bak
+//	QString bak = itemPath + ".bak";
+//	QFile::copy(itemPath, bak);
+//	QFile sourceFile(bak);
+//	QFile destFile(itemPath);
+//	
+//	if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+//		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
+//		return;
+//	}
+//	QTextStream sourceStream(&sourceFile);
+//	QString line = sourceStream.readLine();
+//	QStringList columns = line.split('\t');
+//	auto indexName = columns.indexOf("name");
+//	auto indexStatus = columns.indexOf("status");
+//	// check that columns contains at leats name and status
+//	if (indexName == -1 || indexStatus == -1) {
+//		AwMessageBox::information(0, tr("BIDS"), QString("Could not read %1. No update possible.").arg(itemPath));
+//		sourceFile.close();
+//		return;
+//	}
+//
+//	if (!destFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+//		QFile::copy(bak, itemPath);
+//		AwMessageBox::information(0, tr("BIDS"), QString("Could not update %1.").arg(itemPath));
+//		sourceFile.close();
+//		return;
+//	}
+//	QTextStream destStream(&destFile);
+//	destStream << line << endl;
+//	auto MM = AwMontageManager::instance();
+//	while (!sourceStream.atEnd()) {
+//		line = sourceStream.readLine();
+//		QStringList cols = line.split('\t');
+//		if (cols.size() != columns.size())
+//			break;
+//		auto name = cols.value(indexName);
+//		auto asRecordedChannel = MM->asRecordedChannel(name);
+//		if (asRecordedChannel == Q_NULLPTR) {
+//			destStream << line << endl;
+//			continue;
+//		} 
+//		else {
+//			QString status = asRecordedChannel->isBad() ? "bad" : "good";
+//			cols.replace(indexStatus, status);
+//			for (auto i = 0; i < cols.size(); i++) {
+//				destStream << cols.value(i);
+//				if (i + 1 < cols.size())
+//					destStream << '\t';
+//			}
+//			destStream << endl;
+//		}
+//	}
+//	sourceFile.close();
+//	destFile.close();
+//	QFile::copy(bak, itemPath);
+//	QFile::remove(bak);
+//}
 
 
 int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file)
@@ -1482,10 +1625,7 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 			QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
 			closeBIDS();
 			setRootDir(root);
-			// find the corresponding subject node
-		//	findSubject(reader->fullPath());
 			findItem(reader->fullPath());
-
 			return;
 		}
 	}
@@ -1599,32 +1739,69 @@ AwTSVDict AwBIDSManager::loadTsvFile(const QString& path)
 
 AwMarkerList AwBIDSManager::getMarkersFromEventsTsv(const QString& path)
 {
-	AwTSVDict dict;
 	AwMarkerList res;
-	try {
-		dict = loadTsvFile(path);
-	}
-	catch (const AwException& e)
-	{
-		throw e;
+	QFile file(path);
+	QTextStream stream(&file);
+	m_errorString.clear();
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		m_errorString = QString("Could not open %1 for reading.").arg(path);
 		return res;
 	}
-	auto keys = dict.keys();
-	if (keys.isEmpty() || !keys.contains("onset") || !keys.contains("duration")) {
-		throw AwException("events.tsv file is bad.", "AwBIDSManager::getMarkersFromEventsTsv()");
+	auto line = stream.readLine();
+	auto cols = AwUtilities::bids::columnsFromLine(line);
+	auto labels = cols.values();
+	if (!labels.contains(tsv_event_duration) || !labels.contains(tsv_event_onset) || !labels.contains(tsv_event_trial_type)) {
+		m_errorString = QString("required columns are missing in file %1").arg(path);
+		file.close();
 		return res;
 	}
-	auto onsets = dict["onset"];
-	auto durations = dict["duration"];
-	auto labels = dict["trial_type"]; // this is optional so check if it is present in current fils.
-	if (labels.isEmpty()) {
-		for (auto onset : onsets)
-			labels << "unknown";
+	while (!stream.atEnd()) {
+		line = stream.readLine();
+		auto tokens = line.split("\t");
+		// we assume line contains all the columns otherwise skip it
+		if (tokens.size() != cols.size())
+			continue;
+		auto marker = new AwMarker();
+		for (auto i = 0; i < cols.size(); i++) {
+			auto label = cols.value(i);
+			if (label == tsv_event_trial_type)
+				marker->setLabel(tokens.at(i));
+			else if (label == tsv_event_onset)
+				marker->setStart(tokens.at(i).toDouble());
+			else if (label == tsv_event_duration)
+				marker->setDuration(tokens.at(i).toDouble());
+		}
+		res << marker;
 	}
-	for (int i = 0; i < onsets.size(); i++) {
-		res << new AwMarker(labels.value(i), onsets.value(i).toDouble(), durations.value(i).toDouble());
-	}
+	file.close();
 	return res;
+
+	//AwTSVDict dict;
+	//AwMarkerList res;
+	//try {
+	//	dict = loadTsvFile(path);
+	//}
+	//catch (const AwException& e)
+	//{
+	//	throw e;
+	//	return res;
+	//}
+	//auto keys = dict.keys();
+	//if (keys.isEmpty() || !keys.contains("onset") || !keys.contains("duration")) {
+	//	throw AwException("events.tsv file is bad.", "AwBIDSManager::getMarkersFromEventsTsv()");
+	//	return res;
+	//}
+	//auto onsets = dict["onset"];
+	//auto durations = dict["duration"];
+	//auto labels = dict["trial_type"]; // this is optional so check if it is present in current fils.
+	//if (labels.isEmpty()) {
+	//	for (auto onset : onsets)
+	//		labels << "unknown";
+	//}
+	//for (int i = 0; i < onsets.size(); i++) {
+	//	res << new AwMarker(labels.value(i), onsets.value(i).toDouble(), durations.value(i).toDouble());
+	//}
+	//return res;
 }
 
 AwChannelList AwBIDSManager::getChannelsTsvMontage()
@@ -1645,12 +1822,7 @@ AwChannelList AwBIDSManager::getChannelsTsvMontage()
 	return res;
 }
 
-void AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
-{
-	if (m_currentOpenItem == nullptr)
-		return;
 
-}
 
 AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 {
