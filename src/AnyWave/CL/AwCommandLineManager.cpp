@@ -37,6 +37,7 @@
 #include "Prefs/AwSettings.h"
 #include <AwFileInfo.h>
 #include <AwKeys.h>
+#include "IO/BIDS/AwBIDSManager.h"
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
 {
@@ -270,7 +271,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		AwDataServer::getInstance()->openConnection(process);
 
 		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
-
+		AwBIDSManager::initBIDSFromCommandLineFile(inputFile);
 	}
 	else {   // no input file but requires to build pdi anyway
 		buildPDI(process);

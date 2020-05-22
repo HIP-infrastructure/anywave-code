@@ -41,6 +41,7 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
 #include <AwFileInfo.h>
+#include "Debug/AwDebugLog.h"
 
 
 // statics
@@ -66,6 +67,7 @@ AwMarkerManager::AwMarkerManager()
 	connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
 	connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
 	connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
+	AwDebugLog::instance()->connectComponent(QString("Marker Manager"), this);
 
 	m_needSorting = true;
 	m_markersModified = false;
@@ -314,6 +316,10 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 	emit modificationsDone();
 }
 
+//
+// called when a file is open.
+// Loads .mrk file and also connect to BIDS to get the markers inside events.tsv file.
+// Prepares the Marker UI.
 void AwMarkerManager::setFilename(const QString& path)
 {
 	m_filePath = path + ".mrk";
@@ -327,21 +333,22 @@ void AwMarkerManager::setFilename(const QString& path)
 			showDockUI();
 		}
 	}
+	// if the file is a BIDS => get events.tsv markers and unite them
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		m_markers += bm->getMarkersTsv();
+		removeDuplicates();
+	}
 }
 
 void AwMarkerManager::checkForBIDSMods()
 {
-	//if (m_eventsTsv.isEmpty())
-	//	return;
-	//if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
-	//	return;
-	//if (m_markersModified) {
-	//	if (QMessageBox::question(0, tr("BIDS"), tr("Update events.tsv file?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-	//		return;
-	//	auto BM = AwBIDSManager::instance();
-	//	BM->updateEventsTsv(m_eventsTsv);
-	//	m_eventsTsv.clear();
-	//}
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive())
+			if (bm->updateEventsTsv(m_markers) != 0)
+				emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
+	}
 }
 
 void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
@@ -376,7 +383,14 @@ void AwMarkerManager::quit()
 
 void AwMarkerManager::closeFile()
 {
-	checkForBIDSMods();
+	//checkForBIDSMods();
+	// if BIDS is active => update or create events.tsv file
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive())
+			if (bm->updateEventsTsv(m_markers) != 0)
+				emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
+	}
 	// ask MarkerManagerSettings to clear
 	m_ui->cleanUp();
 	clear();

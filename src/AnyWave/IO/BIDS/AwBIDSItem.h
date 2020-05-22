@@ -31,6 +31,7 @@ class AwBIDSItem : public QStandardItem
 {
 public:
 	AwBIDSItem(const QString& text, AwBIDSItem *parent = nullptr);
+
 	enum Types {
 		Subject = 0, Session = 1,  Folder = 2, DataFile = 3, anat = 4, meg = 5, eeg = 6, ieeg = 7,
 		// flags to use with DerivativesRole

@@ -169,9 +169,6 @@ private:
 	// Source/ICA specific
 	void clearICA();
 	void clearSource(int type);
-	// BIDS support
-	void updateMontageFromChannelsTsv(AwFileIO *reader);
-	void checkForBIDSMods();
 
 	QString m_channelsTsv; // full path to BIDS channels.tsv file
 };

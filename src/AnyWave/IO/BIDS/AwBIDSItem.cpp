@@ -12,6 +12,7 @@ AwBIDSItem::AwBIDSItem(const QString& text, AwBIDSItem *subject) : QStandardItem
 	setData(false, AwBIDSItem::HiddenRole);
 }
 
+
 ///
 /// gather children item that are Data files.
 /// Must be called in a container item (sub, ses, meg, eeg, ieeg, etc.)

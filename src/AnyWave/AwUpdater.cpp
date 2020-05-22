@@ -187,8 +187,6 @@ void AwUpdater::checkForUpdate()
 
 	if (!aws->value(aws::check_updates).toBool())
 		return;
-	//QString version = aws->value(aws::major_version).toString();
-	//QString minor = aws->value(aws::minor_version).toString();
 	auto major = AW_MAJOR_VERSION;
 	auto minor = AW_MINOR_VERSION;
 	bool isINSVersion = aws->value(aws::ins_version).toBool();

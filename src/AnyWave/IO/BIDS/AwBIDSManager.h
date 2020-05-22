@@ -72,12 +72,13 @@ public:
 	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems subjects() { return m_items; }
 	
+	// command line methods
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
 	int MEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader);
 	int convertToVHDR(const QString& file, AwFileIO *reader);
-
+	static void initBIDSFromCommandLineFile(const QString& filePath);
 
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
@@ -85,11 +86,12 @@ public:
 	// TSV files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
+	AwMarkerList getMarkersTsv();
 	/** montage specific **/
 	/** Load a montage from channels.tsv file **/
 	AwChannelList getChannelsTsvMontage();
 	/** Build a channels.tsv file **/
-	int createChannelsTsv(const QString& filePath, const AwChannelList& channels);
+	//int createChannelsTsv(const QString& filePath, const AwChannelList& channels);
 	/** Update channels.tsv file from bad file **/
 	int updateChannelsTsvBadChannels(const QStringList& badLabels);
 	/** markers specific **/
@@ -99,11 +101,9 @@ public:
 	AwTSVDict loadTsvFile(const QString& path);
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);
-	/** Create a TSV file based on a dictionnary **/
-	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
-//	void updateChannelsTsv(const QString& path);
-//	void updateEventsTsv(const QString& path);
-	
+//	/** Create a TSV file based on a dictionnary **/
+//	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
+
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath();
 	QVariantMap& settings() { return m_settings; }
@@ -139,6 +139,7 @@ protected:
 	void findItem(const QString& filePath);
 	QVariant gardelProperty(int property);
 	void findTsvFilesForItem(AwBIDSItem *item);
+	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
@@ -163,5 +164,5 @@ protected:
 	// keep the subject associated with the current open file in AnyWave
 	AwBIDSItem *m_currentSubject;
 	AwBIDSItem *m_currentOpenItem;
-	bool m_mustValidateModifications;
+	bool m_guiMode; // true if AnyWave is running in normal mode with GUI. False if running in batch mode.
 };
