@@ -1131,11 +1131,13 @@
     <ClCompile Include="ICA\AwMappingButton.cpp" />
     <ClCompile Include="ICA\AwPanelItem.cpp" />
     <ClCompile Include="IO\ADES\ADESIO.cpp" />
+    <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSProxyModel.cpp" />
+    <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp" />
     <ClCompile Include="IO\HDF5\HDF5IO.cpp" />
     <ClCompile Include="IO\HDF5\structs.cpp" />
     <ClCompile Include="IO\JSON\AwJSON.cpp" />

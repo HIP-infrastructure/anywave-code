@@ -1414,6 +1414,12 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSProxyModel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Data\AwDataConnection.h">

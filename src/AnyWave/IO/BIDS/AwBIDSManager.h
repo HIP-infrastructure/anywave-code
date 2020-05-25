@@ -34,13 +34,24 @@
 class AwFileIO;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
-using AwTSVDict = QMap<QString, QStringList>;
+//using AwTSVDict = QMap<QString, QStringList>;
+
 
 namespace bids {
 	constexpr auto participant_tsv = "participant_tsv";		// participants.tsv file path
 	constexpr auto participant_cols = "participant_cols";	// columns found in participants.tsv
 	constexpr auto parsing_path = "parsing_path";
 	constexpr auto gui_extra_cols = "gui_extra_cols";
+	// TSV COLUMNS
+	// events
+	constexpr auto tsv_event_trial_type = "trial_type";
+	constexpr auto tsv_event_duration = "duration";
+	constexpr auto tsv_event_onset = "onset";
+	// channels
+	constexpr auto tsv_channel_units = "units";
+	constexpr auto tsv_channel_name = "name";
+	constexpr auto tsv_channel_type = "type";
+	constexpr auto tsv_channel_status = "status";
 }
 
 
@@ -76,8 +87,8 @@ public:
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
 	int MEGtoBIDS(const AwArguments& args);
-	int convertToEDF(const QString& file, AwFileIO *reader);
-	int convertToVHDR(const QString& file, AwFileIO *reader);
+	int convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
+	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
 	static void initBIDSFromCommandLineFile(const QString& filePath);
 
 	// BIDS GUI Specific
@@ -97,13 +108,8 @@ public:
 	/** markers specific **/
 	int updateEventsTsv(const AwMarkerList& markers);
 
-	/** returns a map table: keys are the columns label **/
-	AwTSVDict loadTsvFile(const QString& path);
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);
-//	/** Create a TSV file based on a dictionnary **/
-//	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
-
 	/** Get the BIDS path to the current open file **/
 	QString getCurrentBIDSPath();
 	QVariantMap& settings() { return m_settings; }
@@ -134,12 +140,13 @@ signals:
 protected:
 	AwBIDSManager();
 	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
-	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
+	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);
 	QVariant gardelProperty(int property);
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
+	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)

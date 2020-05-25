@@ -90,6 +90,7 @@ void AwMontage::save(const QString& path, const AwChannelList& channels)
 }
 
 
+
 AwChannelList AwMontage::load(const QString& path)
 {
 	AwChannelList res;
@@ -211,18 +212,24 @@ bool AwMontage::loadMontage(const QString& mtgFile)
 	return true;
 }
 
-void AwMontage::loadBadChannels()
+QStringList AwMontage::loadBadChannels(const QString & filePath)
 {
-	QFile file(m_badChannelPath);
+	QStringList res;
+	QFile file(filePath);
 	QTextStream stream(&file);
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		m_badChannelLabels.clear();
 		while (!stream.atEnd())
-			m_badChannelLabels << stream.readLine().trimmed();
+			res << stream.readLine().trimmed();
 		file.close();
 	}
-	// reset as recorded channels bad status
+	return res;
+}
 
+
+void AwMontage::loadBadChannels()
+{
+	m_badChannelLabels = AwMontage::loadBadChannels(m_badChannelPath);
+	// reset as recorded channels bad status
 	for (auto chan : m_asRecorded)
 		chan->setBad(false);
 	for (auto label : m_badChannelLabels) {

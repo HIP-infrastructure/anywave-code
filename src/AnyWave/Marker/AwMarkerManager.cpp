@@ -326,51 +326,29 @@ void AwMarkerManager::setFilename(const QString& path)
 	m_ui->setEnabled(true);
 	if (QFile::exists(m_filePath))	{
 		m_markers = loadMarkers(m_filePath);
-		updateMarkersFromEventsTsv(path);
 		if (!m_markers.isEmpty()) {
-			//removeDuplicates();
 			m_ui->setMarkers(m_markers);
 			showDockUI();
 		}
 	}
-	// if the file is a BIDS => get events.tsv markers and unite them
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		m_markers += bm->getMarkersTsv();
-		removeDuplicates();
-	}
+	//// if the file is a BIDS => get events.tsv markers and unite them
+	//if (AwBIDSManager::isInstantiated()) {
+	//	auto bm = AwBIDSManager::instance();
+	//	m_markers += bm->getMarkersTsv();
+	//	removeDuplicates();
+	//}
 }
 
 void AwMarkerManager::checkForBIDSMods()
 {
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive())
-			if (bm->updateEventsTsv(m_markers) != 0)
-				emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
+		if (bm->isBIDSActive()) {
+			if (AwMessageBox::question(nullptr, "BID", "Update events.tsv file?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+				if (bm->updateEventsTsv(m_markers) != 0)
+					emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
+		}
 	}
-}
-
-void AwMarkerManager::updateMarkersFromEventsTsv(const QString& filePath)
-{
-	if (!AwBIDSManager::isInstantiated()) // BIDS manager is not alive.
-		return;
-
-	auto BM = AwBIDSManager::instance();
-
-	if (!BM->isBIDSActive())
-		return;
-
-//	auto events_tsv = BM->getTSVFile(filePath, AwBIDSManager::EventsTsv);
-
-//	if (events_tsv.isEmpty()) 
-//		return;
-	
-	// keep a copy of the path to events.tsv file
-//	m_eventsTsv = events_tsv;
-	// append markers loaded from Events.tsv to current markers (duplicates are removed just after);
-//	m_markers += BM->getMarkersFromEventsTsv(events_tsv);
-//	removeDuplicates();
 }
 
 void AwMarkerManager::quit()

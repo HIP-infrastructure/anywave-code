@@ -785,3 +785,28 @@ AwMarkerList AwMarker::load(const QString& path)
 	file.close();
 	return markers;
 }
+
+void AwMarker::removeDoublons(QList<AwMarker*>& markers)
+{
+	AwMarkerList res;
+	if (markers.isEmpty())
+		return;
+
+	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+	
+	AwMarker *marker = markers.first();
+	res << marker;
+	for (int i = 1; i < markers.size(); i++) {
+		AwMarker *m = markers.at(i);
+		if (m->label() != marker->label() || m->start() != marker->start() || m->duration() != marker->duration()) {
+			res << m;
+			marker = m;
+		}
+		else {
+			markers.removeAll(m);
+			delete m;
+		}
+
+	}
+    markers = res;
+}
