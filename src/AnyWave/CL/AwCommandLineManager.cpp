@@ -271,7 +271,7 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		AwDataServer::getInstance()->openConnection(process);
 
 		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
-		AwBIDSManager::initBIDSFromCommandLineFile(inputFile);
+		AwBIDSManager::initCommandLineOperation(inputFile);
 	}
 	else {   // no input file but requires to build pdi anyway
 		buildPDI(process);

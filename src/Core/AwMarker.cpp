@@ -788,25 +788,38 @@ AwMarkerList AwMarker::load(const QString& path)
 
 void AwMarker::removeDoublons(QList<AwMarker*>& markers)
 {
-	AwMarkerList res;
+	AwMarkerList res, removed;
 	if (markers.isEmpty())
 		return;
 
 	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
-	
-	AwMarker *marker = markers.first();
-	res << marker;
-	for (int i = 1; i < markers.size(); i++) {
-		AwMarker *m = markers.at(i);
-		if (m->label() != marker->label() || m->start() != marker->start() || m->duration() != marker->duration()) {
-			res << m;
-			marker = m;
-		}
+	const float tol = 0.005;
+	// use multi map to detect markers with similar labels
+	QMultiMap<QString, AwMarker *> map;
+	for (auto m : markers) {
+		if (!map.contains(m->label()))
+			map.insert(m->label(), m);
 		else {
-			markers.removeAll(m);
-			delete m;
+			auto values = map.values(m->label());
+			bool keep = true;
+			for (auto v : values) { // get existing marker with same labels and compare position and duration
+				auto position = std::abs(v->start() - m->start());
+				auto duration = std::abs(v->duration() - m->duration());
+				if (position <= tol && duration <= tol) {
+					// not the same position and/or duration => keep it
+					keep = false;
+					break;
+				}
+			}
+			if (keep) {
+				map.insert(m->label(), m);
+			}
+			else
+				removed << m;
 		}
-
 	}
-    markers = res;
+	for (auto m : removed) {
+		markers.removeAll(m);
+		delete m;
+	}
 }

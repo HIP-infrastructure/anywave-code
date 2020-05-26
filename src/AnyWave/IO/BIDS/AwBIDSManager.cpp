@@ -19,6 +19,7 @@
 #include <utils/bids.h>
 #include <widget/AwWaitWidget.h>
 #include <QtConcurrent>
+#include <montage/AwMontage.h>
 
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
@@ -72,7 +73,22 @@ QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 	return QString();
 }
 
-void AwBIDSManager::initBIDSFromCommandLineFile(const QString & filePath)
+void AwBIDSManager::finishCommandLineOperation()
+{
+	if (m_instance == nullptr)
+		return;
+	if (m_instance->m_currentOpenItem) {
+		// get .bad file
+		auto badFile = QString("%1.bad").arg(m_instance->m_currentOpenItem->data(AwBIDSItem::PathRole).toString());
+		if (QFile::exists(badFile)) {
+			m_instance->updateChannelsTsvBadChannels(AwMontage::loadBadChannels(badFile));
+		}
+	}
+	// delete instancce
+	delete m_instance;
+}
+
+void AwBIDSManager::initCommandLineOperation(const QString & filePath)
 {
 	auto rootDir = AwBIDSManager::detectBIDSFolderFromPath(filePath);
 	if (rootDir.isEmpty())

@@ -28,6 +28,7 @@
 #include <QFile>
 #include "AwCommandLogger.h"
 #include <AwException.h>
+#include "IO/BIDS/AwBIDSManager.h"
 
 void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
@@ -53,8 +54,8 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
 	process->runFromCommandLine();
+	AwBIDSManager::finishCommandLineOperation();
 	logger.sendLog(QString("Done."));
-	//reader->plugin()->deleteInstance(reader);
 	process->plugin()->deleteInstance(process);
 }
 

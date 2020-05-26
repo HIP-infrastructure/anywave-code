@@ -117,24 +117,25 @@ void AwMarkerManager::removeDuplicates()
 {
 	if (m_markers.isEmpty())
 		return;
-	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+	AwMarker::removeDoublons(m_markers);
+	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 
-	AwMarkerList sorted;
-	AwMarker *marker = m_markers.first();
-	sorted << marker;
-	for (int i = 1; i < m_markers.size(); i++) {
-		AwMarker *m = m_markers.at(i);
-		if (m->label() != marker->label() || m->start() != marker->start() || m->duration() != marker->duration()) {
-			sorted << m;
-			marker = m;
-		}
-		else {
-			m_markers.removeAll(m);
-			delete m;
-		}
-		
-	}
-	m_markers = sorted;
+	//AwMarkerList sorted;
+	//AwMarker *marker = m_markers.first();
+	//sorted << marker;
+	//for (int i = 1; i < m_markers.size(); i++) {
+	//	AwMarker *m = m_markers.at(i);
+	//	if (m->label() != marker->label() || m->start() != marker->start() || m->duration() != marker->duration()) {
+	//		sorted << m;
+	//		marker = m;
+	//	}
+	//	else {
+	//		m_markers.removeAll(m);
+	//		delete m;
+	//	}
+	//	
+	//}
+	//m_markers = sorted;
 	
 }
 

@@ -89,7 +89,8 @@ public:
 	int MEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
 	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
-	static void initBIDSFromCommandLineFile(const QString& filePath);
+	static void initCommandLineOperation(const QString& filePath);
+	static void finishCommandLineOperation();
 
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
