@@ -806,16 +806,13 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers)
 				auto position = std::abs(v->start() - m->start());
 				auto duration = std::abs(v->duration() - m->duration());
 				if (position <= tol && duration <= tol) {
-					// not the same position and/or duration => keep it
 					keep = false;
+					removed << m;
 					break;
 				}
 			}
-			if (keep) {
+			if (keep) 
 				map.insert(m->label(), m);
-			}
-			else
-				removed << m;
 		}
 	}
 	for (auto m : removed) {
