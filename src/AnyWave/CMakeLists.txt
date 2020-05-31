@@ -55,10 +55,6 @@ SET(AnyWave_SRCS
     ./IO/BIDS/AwBIDSGUI.cpp  
     ./IO/BIDS/AwBIDSItem.cpp  
     ./IO/BIDS/AwBIDSManager.cpp  
-    ./IO/BIDS/AwBIDSSession.cpp  
-    ./IO/BIDS/AwBIDSSubject.cpp  
-    ./IO/BIDS/AwBIDSTools.cpp  
-    ./IO/BIDS/AwFileItem.cpp  
 	./IO/MEMIO/MEMIO.cpp
     ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
@@ -204,11 +200,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./IO/HDF5/HDF5IO.h  
     ./IO/MATLAB/MATLABIO.h  
     ./IO/BIDS/AwBIDSItem.h  
-    ./IO/BIDS/AwBIDSSession.h  
-    ./IO/BIDS/AwBIDSTools.h  
-    ./IO/BIDS/AwFileItem.h  
     ./IO/BIDS/AwBIDSManager.h  
-    ./IO/BIDS/AwBIDSSubject.h  
     ./IO/BIDS/AwBIDSGUI.h  
 	./IO/MEMIO/MEMIO.h
     ./Marker/AwExtractTriggers.h  
@@ -316,6 +308,7 @@ SET(FORMS ./AnyWave.ui
     ./AwExportDial.ui  
 	./Batch/AwAddEditBatchDialog.ui
 	./Batch/AwBatchGUI.ui
+	./IO/BIDS/AwBIDSGUI.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
     ./Carto/AwMappingWidget.ui  
