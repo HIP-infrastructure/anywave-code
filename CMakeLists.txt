@@ -164,9 +164,8 @@ endif()
 # END OF MATLAB SUPPORT
 
 # PYTHON
-SET(Python_ADDITIONAL_VERSIONS 2.7)
-find_package(Python2 COMPONENTS Development)
-if (Python2_FOUND)
+find_package (Python COMPONENTS Development)
+if (Python_FOUND)
 find_package(PythonLibs)
 if (PYTHONLIBS_FOUND)
   find_package(NumPy)
