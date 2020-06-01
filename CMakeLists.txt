@@ -164,7 +164,7 @@ endif()
 # END OF MATLAB SUPPORT
 
 # PYTHON
-find_package (Python COMPONENTS Development)
+find_package (Python COMPONENTS Interpreter Development)
 if (Python_FOUND)
 find_package(PythonLibs)
 if (PYTHONLIBS_FOUND)
