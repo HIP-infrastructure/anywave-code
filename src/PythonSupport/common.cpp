@@ -218,6 +218,26 @@ void TCPRequest::clear()
 	m_data.clear();
 }
 
+bool TCPRequest::sendSimpleRequest()
+{
+    if (m_status != TCPRequest::connected) {
+		PyErr_SetString(AnyWaveError, "Error while sending request to AnyWave: not connected.");
+		return false;
+	}
+	int dataSize = sizeof(int); // data size + request ID size
+	// always send the pid first then size and data.
+	*m_streamSize << m_pidValue;
+	*m_streamSize << dataSize << m_requestID;
+	m_socket.write(m_size);
+	*m_streamData << QString();
+	m_socket.write(m_data);
+	if (!m_socket.waitForBytesWritten()) {
+		PyErr_SetString(AnyWaveError, "Error while sending request to AnyWave.");
+		return false;
+	}
+	return true;
+}
+
 bool TCPRequest::sendRequest(const QString& jsonString)
 {
 	if (m_status != TCPRequest::connected) {
