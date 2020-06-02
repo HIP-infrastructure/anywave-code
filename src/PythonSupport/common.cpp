@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universit dAix Marseille (AMU) - 
+//                 Institut National de la Sant et de la Recherche Mdicale (INSERM)
+//                 Copyright  2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet  Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -216,6 +216,27 @@ void TCPRequest::clear()
 {
 	m_size.clear();
 	m_data.clear();
+}
+
+bool TCPRequest::sendRequest()
+{
+    QString tmp;
+    	if (m_status != TCPRequest::connected) {
+		PyErr_SetString(AnyWaveError, "Error while sending request to AnyWave: not connected.");
+		return false;
+	}
+	int dataSize = tmp.size() + sizeof(int); // data size + request ID size
+	// always send the pid first then size and data.
+	*m_streamSize << m_pidValue;
+	*m_streamSize << dataSize << m_requestID;
+	m_socket.write(m_size);
+	*m_streamData << tmp;
+	m_socket.write(m_data);
+	if (!m_socket.waitForBytesWritten()) {
+		PyErr_SetString(AnyWaveError, "Error while sending request to AnyWave.");
+		return false;
+	}
+	return true;
 }
 
 bool TCPRequest::sendRequest(QString& jsonString)
