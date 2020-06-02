@@ -30,10 +30,6 @@
 
 extern PyObject *AnyWaveError;
 
-//void sendRequest(QTcpSocket *, const QByteArray& );
-//QByteArray initRequest(int request);
-//int waitForResponse(QTcpSocket *);
-
 /** parse a whole dictionnary and convert it to JSON format. **/
 QString dictToJson(PyObject *dict);
 
@@ -55,6 +51,7 @@ public:
 	QDataStream *response() { return m_streamResponse; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
 	bool sendRequest(const QString& jsonString);
+	bool sendSimpleRequest();
 	bool getResponse();
 	void clear();
 
