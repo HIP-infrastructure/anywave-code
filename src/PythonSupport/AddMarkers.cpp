@@ -80,7 +80,7 @@ PyObject* parse_markers(PyObject *list)
         if (!channels.isEmpty()) {
             m->setTargetChannels(channels);
         }
-        
+
         markers << m;
 	}
 	auto res = send_markers(markers);
@@ -108,7 +108,7 @@ PyObject *send_markers(const AwMarkerList& markers)
         stream << marker->targetChannels();
 		stream << marker->color();
     }
-	if (!request.sendRequest(QString()) 
+	if (!request.sendSimpleRequest()) 
 			return NULL;
 	return Py_None;
 }
