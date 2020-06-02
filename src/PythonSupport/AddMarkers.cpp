@@ -109,7 +109,7 @@ PyObject *send_markers(const AwMarkerList& markers)
 		stream << marker->color();
     }
 	if (!request.sendRequest())
-			return NULL;
+	   return NULL;
 	return Py_None;
 }
 
