@@ -108,7 +108,7 @@ PyObject *send_markers(const AwMarkerList& markers)
         stream << marker->targetChannels();
 		stream << marker->color();
     }
-	if (!request.sendRequest()) 
+	if (!request.sendRequest(QString()) 
 			return NULL;
 	return Py_None;
 }
