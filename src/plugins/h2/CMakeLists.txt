@@ -17,7 +17,7 @@ H2ChannelPairItem.h)
 
 SET(UIS h2ui.ui)
 
-qt5_add_resources(RES ${CMAKE_SOURCE_DIR}/Resource.qrc)
+qt5_add_resources(RES Resource.qrc)
 
 qt5_wrap_cpp(H2_MOCS ${MOCS})
 QT5_WRAP_UI(H2_UIS ${UIS})
