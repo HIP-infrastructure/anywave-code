@@ -10,7 +10,7 @@ PyObject *getPluginInfo(PyObject *sef, PyObject *args)
 	TCPRequest request(AwRequest::GetPluginInfo);
 	if (request.status() == TCPRequest::failed) 
 		return NULL;
-	if (!request.sendRequest()) 
+	if (!request.sendSimpleRequest()) 
 		return NULL;
 	if (!request.getResponse())
 		return NULL;

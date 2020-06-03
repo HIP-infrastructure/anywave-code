@@ -19,6 +19,9 @@ SET(AnyWave_SRCS
 	./Batch/AwBatchGUI.cpp
 	./Batch/AwBatchItem.cpp
 	./Batch/AwBatchModel.cpp
+	./Batch/AwBatchFileInputWidget.cpp
+	./Batch/AwBatchDialog.cpp
+	./Batch/AwBatchRunner.cpp
     ./CL/CommandLineParser.cpp
     ./CL/AwCommandLogger.cpp
     ./CL/AwCommandLineManager.cpp
@@ -55,10 +58,9 @@ SET(AnyWave_SRCS
     ./IO/BIDS/AwBIDSGUI.cpp  
     ./IO/BIDS/AwBIDSItem.cpp  
     ./IO/BIDS/AwBIDSManager.cpp  
-    ./IO/BIDS/AwBIDSSession.cpp  
-    ./IO/BIDS/AwBIDSSubject.cpp  
-    ./IO/BIDS/AwBIDSTools.cpp  
-    ./IO/BIDS/AwFileItem.cpp  
+	./IO/BIDS/AwBIDSGUIOptionsDialog.cpp
+	./IO/BIDS/AwBIDSConvert.cpp
+	./IO/BIDS/AwBIDSTsv.cpp
 	./IO/MEMIO/MEMIO.cpp
     ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
@@ -77,7 +79,6 @@ SET(AnyWave_SRCS
     ./MATPy/AwMATPyServer.cpp  
     ./MATPy/AwPidManager.cpp  
     ./MATPy/AwRequestServer.cpp  
-    ./MATPy/AwResponse.cpp  
     ./MATPy/GetData.cpp  
     ./MATPy/GetFileInfo.cpp  
     ./MATPy/GetICAPanelCapture.cpp  
@@ -156,25 +157,15 @@ SET(AnyWave_SRCS
     ./Prefs/AwSettings.cpp  
     ./Source/AwSourceChannel.cpp  
     ./Source/AwSourceManager.cpp)  
-    #./Epoch/AwAverageDialog.cpp  
-    #./Epoch/AwAverageItemWidget.cpp  
-    #./Epoch/AwAvgSignalItem.cpp  
-    #./Epoch/AwAvgWorker.cpp  
-    #./Epoch/AwEditStatsDialog.cpp  
-    #./Epoch/AwEpochAverageWidget.cpp  
-    #./Epoch/AwEpochCreateUi.cpp  
-    #./Epoch/AwEpochManager.cpp  
-    #./Epoch/AwEpochModel.cpp  
-    #./Epoch/AwEpochVisuWidget.cpp  
-    #./Epoch/AwStatChartWidget.cpp  
-	#./Epoch/AwEpochMosaicWidget.cpp
-    #./Epoch/AwStatsModel.cpp)
 
 SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
+	./Batch/AwBatchDialog.h
 	./Batch/AwBatchGUI.h
 	./Batch/AwBatchManager.h
 	./Batch/AwBatchItem.h
 	./Batch/AwBatchModel.h
+	./Batch/AwBatchFileInputWidget.h
+	./Batch/AwBatchRunner.h
 	./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
 	./Data/AwMemoryMapper.h  
@@ -204,12 +195,9 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./IO/HDF5/HDF5IO.h  
     ./IO/MATLAB/MATLABIO.h  
     ./IO/BIDS/AwBIDSItem.h  
-    ./IO/BIDS/AwBIDSSession.h  
-    ./IO/BIDS/AwBIDSTools.h  
-    ./IO/BIDS/AwFileItem.h  
     ./IO/BIDS/AwBIDSManager.h  
-    ./IO/BIDS/AwBIDSSubject.h  
     ./IO/BIDS/AwBIDSGUI.h  
+	./IO/BIDS/AwBIDSGUIOptionsDialog.h
 	./IO/MEMIO/MEMIO.h
     ./Marker/AwExtractTriggers.h  
     ./Marker/AwMarkersExportWidget.h  
@@ -295,19 +283,6 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Prefs/AwPrefsDial.h  
     ./Source/AwSourceChannel.h  
     ./Source/AwSourceManager.h)  
-    #./Epoch/AwEpochManager.h  
-    #./Epoch/AwEpochCreateUi.h  
-    #./Epoch/AwEpochModel.h  
-    #./Epoch/AwEpochVisuWidget.h  
-    #./Epoch/AwEpochAverageWidget.h  
-    #./Epoch/AwAverageDialog.h  
-   # ./Epoch/AwAverageItemWidget.h  
-   # ./Epoch/AwAvgWorker.h  
-   # ./Epoch/AwAvgSignalItem.h  
-   # ./Epoch/AwEditStatsDialog.h  
-   # ./Epoch/AwStatsModel.h  
-   #	./Epoch/AwEpochMosaicWidget.h
-   #   ./Epoch/AwStatChartWidget.h)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
@@ -316,6 +291,10 @@ SET(FORMS ./AnyWave.ui
     ./AwExportDial.ui  
 	./Batch/AwAddEditBatchDialog.ui
 	./Batch/AwBatchGUI.ui
+	./Batch/AwBatchFileInputWidget.ui
+	./Batch/AwBatchDialog.ui
+	./IO/BIDS/AwBIDSGUI.ui
+	./IO/BIDS/AwBIDSGUIOptionsDialog.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
     ./Carto/AwMappingWidget.ui  
@@ -357,21 +336,8 @@ SET(FORMS ./AnyWave.ui
     ./Widgets/AwSelectTriggerChannelDialog.ui  
 	./Widgets/AwVideoSettingsDial.ui
     ./Prefs/AwPrefsDial.ui)  
- #   ./Epoch/AwEpochCreateUi.ui  
- #   ./Epoch/AwEpochVisuWidget.ui  
- #   ./Epoch/AwEpochAverageWidget.ui  
- #   ./Epoch/AwAverageDialog.ui  
- #   ./Epoch/AwAverageItemWidget.ui 
-#	./Epoch/AwEpochMosaicWidget.ui
-#    ./Epoch/AwEditStatsDialog.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
-
-# translations
-SET(Languages ${AW_RES_DIR}/anywave_fr.ts
-${AW_RES_DIR}/awreadwritelib_fr.ts
-${AW_RES_DIR}/awwidgetlib_fr.ts)
-qt5_create_translation(AnyWaveTS ${Languages})
 
 SET(AW_LIBS AwCore AwMontage
 AwGraphics
@@ -390,7 +356,7 @@ AwEpoch
 AwMATLAB)
 
 
-ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC} ${AnyWave_TS})
+ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
 QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
 SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml)
 #TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})

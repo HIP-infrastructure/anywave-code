@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universit dAix Marseille (AMU) - 
+//                 Institut National de la Sant et de la Recherche Mdicale (INSERM)
+//                 Copyright  2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet  Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "common.h"
@@ -40,7 +40,7 @@ PyObject *sendMessage(PyObject *self, PyObject *args)
 		return NULL;
 	QDataStream& stream = *request.stream();
 	stream << Py3StringToQString(args);
-	if (!request.sendRequest())
+	if (!request.sendSimpleRequest())
 		return NULL;
 	return Py_None;
 }

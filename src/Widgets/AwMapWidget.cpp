@@ -87,7 +87,7 @@ AwMapWidget::AwMapWidget(QWidget *parent, int flags) : QVTK_CLASS(parent)
 
 	// instantiate renderer
 	m_renderer = vtkSmartPointer<vtkRenderer>::New();
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 	m_window->AddRenderer(m_renderer);
 	SetRenderWindow(m_window.Get());
@@ -474,7 +474,7 @@ void AwMapWidget::buildColorMap()
 	m_mainMapper->SetLookupTable(m_lut);
 	if (!(m_flags & AwMapWidget::NoColorMap))
 		m_cmActor->SetLookupTable(m_lut);
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window->Render();
 #else
 	GetRenderWindow()->Render();
@@ -498,7 +498,7 @@ void AwMapWidget::selectSensors(const QStringList& labels)
 			color = m_white;
 		m_labelActors.at(i)->GetProperty()->SetColor(color);
 	}
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window->Render();
 #else
 	GetRenderWindow()->Render();
@@ -525,7 +525,7 @@ void AwMapWidget::showSensors(bool flag)
 			m_renderer->RemoveActor(m_labelActors.at(i));
 		}
 	}
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window->Render();
 #else
 	GetRenderWindow()->Render();
@@ -549,7 +549,7 @@ void AwMapWidget::showContours(bool flag)
 		m_renderer->RemoveActor(m_contourActor);
 		m_contoursOn = false;
 	}
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window->Render();
 #else
 	GetRenderWindow()->Render();
@@ -572,7 +572,7 @@ void AwMapWidget::showColorMap(bool flag)
 		m_renderer->RemoveActor2D(m_cmActor);
 	else
 		m_renderer->AddActor2D(m_cmActor);
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window->Render();
 #else
 	GetRenderWindow()->Render();

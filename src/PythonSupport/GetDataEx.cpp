@@ -23,16 +23,18 @@
 //    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-#include <Python.h>
+#include <AwProcess.h>
+#include "common.h"
+#include <QDataStream>
+#include "Channel.h"
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL	anywave_ARRAY_API
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
-#include "common.h"
-#include "Channel.h"
-#include <AwProcess.h>
 #include <qjsonobject.h>
 #include <qjsonarray.h>
+
+extern PyObject *AnyWaveError;
 
 
 PyObject *getDataEx(PyObject *self, PyObject *args)
@@ -54,6 +56,7 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 
 	// Reading response..
 	QDataStream& in = *request.response();
+
 	int nChannels = 0;
 	in >> nChannels;
 	if (nChannels == 0) {

@@ -4,6 +4,7 @@
 #include <vtkSTLReader.h>
 #include <vtkSmartPointer.h>
 #include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
 #include <vtkCylinderSource.h>
 #include <vtkSphereSource.h>
 #include <vtkGlyph3D.h>

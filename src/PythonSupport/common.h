@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universit dAix Marseille (AMU) - 
+//                 Institut National de la Sant et de la Recherche Mdicale (INSERM)
+//                 Copyright  2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,13 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet  Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <QTcpSocket>
 #undef slots  // Python 3 header uses slots keyword which is also a Qt keyword...
 #include <Python.h>
-#include <qdatastream.h>
 
-extern PyObject *AnyWaveError;
-
-//void sendRequest(QTcpSocket *, const QByteArray& );
-//QByteArray initRequest(int request);
-//int waitForResponse(QTcpSocket *);
 
 /** parse a whole dictionnary and convert it to JSON format. **/
 QString dictToJson(PyObject *dict);
@@ -51,11 +45,13 @@ public:
 	enum Status { connected, failed, undefined };
 
 	inline int status() { return m_status; }
-//	inline QTcpSocket *socket() { return m_socket; }
+
 	QDataStream *stream() { return m_streamData; }
 	QDataStream *response() { return m_streamResponse; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
-	bool sendRequest(QString& jsonString = QString());
+	bool sendRequest(const QString& jsonString);
+	bool sendSimpleRequest();
+
 	bool getResponse();
 	void clear();
 
