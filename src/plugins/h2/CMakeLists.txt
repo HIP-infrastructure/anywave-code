@@ -5,18 +5,17 @@ set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 SET(SRCS
-${CMAKE_SOURCE_DIR}/h2.cpp
-${CMAKE_SOURCE_DIR}/h2ui.cpp
-${CMAKE_SOURCE_DIR}/H2ChannelPairItem.cpp
-${CMAKE_SOURCE_DIR}/H2ChannelPair.cpp) 
+h2.cpp
+h2ui.cpp
+H2ChannelPairItem.cpp
+H2ChannelPair.cpp) 
 
 SET(MOCS
-${CMAKE_SOURCE_DIR}/h2.h
-${CMAKE_SOURCE_DIR}/h2ui.h
-${CMAKE_SOURCE_DIR}/H2ChannelPairItem.h)
+h2.h
+h2ui.h
+H2ChannelPairItem.h)
 
-SET(UIS
-${CMAKE_SOURCE_DIR}/h2ui.ui)
+SET(UIS h2ui.ui)
 
 qt5_add_resources(RES ${CMAKE_SOURCE_DIR}/Resource.qrc)
 
