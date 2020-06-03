@@ -242,7 +242,7 @@ bool TCPRequest::sendSimpleRequest()
 }
 
 
-bool TCPRequest::sendRequest(QString& jsonString)
+bool TCPRequest::sendRequest(const QString& jsonString)
 {
 	if (m_status != TCPRequest::connected) {
 		PyErr_SetString(AnyWaveError, "Error while sending request to AnyWave: not connected.");
