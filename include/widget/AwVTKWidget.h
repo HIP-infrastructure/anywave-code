@@ -6,7 +6,7 @@
 #include <vtkAutoInit.h>
 #endif
 #include <vtkSmartPointer.h>
-#undefine VTK8
+#undef VTK8
 #if VTK_MAJOR_VERSION >= 8
 #define VTK8
 #endif
