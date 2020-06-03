@@ -40,7 +40,7 @@
 
 #include <vtkVersion.h>
 #if VTK_MAJOR_VERSION >= 7
-#include <QVTKOpenGLWidget.h>
+#include <QVTKWidget.h>
 #include <vtkOpenGLRenderWindow.h>
 #endif
 
