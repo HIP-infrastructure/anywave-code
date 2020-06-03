@@ -78,9 +78,20 @@ void NI4DFileReader::alignFilePointer()
 	}
 }
 
+void NI4DFileReader::alignFilePointer(QFile& file)
+{
+	qint64 current = file.pos();
+	qint64 offset;
+	if (current % 8 != 0) {
+		offset = 8 - current % 8;
+		file.seek(current + offset);
+	}
+}
+
 void NI4DFileReader::cleanUpAndClose()
 {
 	AwFileIO::cleanUpAndClose();
+	m_file.flush();
 	m_file.close();
 	QList<my_channel_data *> values = m_hashChannelsData.values();
 	while (!values.isEmpty())	{
@@ -514,21 +525,55 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 
 NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 {
-	// On prend le dossier ou se trouve le fichier et on y cherche un fichier nomme "config".
-	// Si pas de fichier config present on considere que le fichier n'est pas au format 4D
 	QFileInfo fi(path);
 	QDir dir = fi.absoluteDir();
-	QStringList filters;	
 
-	filters << "*";
-	dir.setFilter(QDir::Files);
-	dir.setNameFilters(filters);
+	auto files = dir.entryList(QDir::Files);
+	if (files.contains("config")) {
+		QFile file(path);
+		QDataStream stream(&file);
+		stream.setVersion(QDataStream::Qt_4_4);
+		if (file.open(QIODevice::ReadOnly)) {
+			file.seek(file.size() - 8);
+			qint64 headerPos;
+			stream >> headerPos;
+			file.seek(headerPos);
+			alignFilePointer(file);
 
-	QStringList fileList = dir.entryList();
-	for (int i = 0; i < fileList.size(); i++) 	{
-		if (fileList.at(i) == "config")
-			return AwFileIO::NoError;
+			dftk_header_data hdr;
+			stream >> hdr.version;
+			stream.readRawData((char *)&hdr.file_type, 5);
+			stream.skipRawData(1);
+			stream >> hdr.data_format;
+
+			QVector<qint16> expectedDataFormat = { 1, 2, 3, 4 };
+			if (expectedDataFormat.contains(hdr.data_format)) {
+				// get acq_mode
+				stream >> hdr.acq_mode;
+				if (expectedDataFormat.contains(hdr.acq_mode)) {
+					// one last check : AnyWave does not support epoched data, so if the 4DNi file is epoched, consider it as wrong.
+					if (!fi.fileName().startsWith("e,")) {
+						file.close();
+						return AwFileIO::NoError;
+					}
+				}
+			}
+		}
+		file.close();
 	}
+
+
+	//QStringList filters;	
+
+	//filters << "*";
+	//dir.setFilter(QDir::Files);
+	//dir.setNameFilters(filters);
+
+	//QStringList fileList = dir.entryList();
+	//for (int i = 0; i < fileList.size(); i++) 	{
+	//	if (fileList.at(i) == "config")
+	//		return AwFileIO::NoError;
+	//}
 	return AwFileIO::WrongFormat;
 }
 

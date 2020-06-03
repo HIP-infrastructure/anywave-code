@@ -33,6 +33,7 @@
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
 #include "ICA/AwICAPanel.h"
+#include <AwFileInfo.h>
 
 void AwRequestServer::handleGetICAPanelCapture(QTcpSocket *client, AwScriptProcess *p)
 {

@@ -31,6 +31,7 @@
 #include <QDir>
 #include "Prefs/AwSettings.h"
 #include "Debug/AwDebugLog.h"
+#include <utils/json.h>
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 #include <QSettings>
@@ -49,7 +50,7 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	initProcess(p);
 	AwMATPyServer *server = AwMATPyServer::instance();
 	AwPidManager::instance()->createNewPid(p);
-	server->start();
+	//server->start();
 
 
 	//// connect the process to the matlab server
@@ -64,10 +65,10 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 		p->setCompiled();
 #ifdef Q_OS_WIN
 		QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
-		QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->getString("systemPath"));
+		QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->value(aws::system_path).toString());
 		p->setSystemPath(fullPath);
 #else
-		p->setSystemPath(AwSettings::getInstance()->getString("systemPath"));
+		p->setSystemPath(AwSettings::getInstance()->value(aws::system_path).toString());
 #endif
 	}
 	return p;
@@ -75,6 +76,7 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 
 void AwMatlabScriptProcess::run()
 {
+	AwMATPyServer::instance()->start();
 	AwMatlabInterface *mi = NULL;
 	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
 	if (isCompiled) { // this is a MATLAB compiled standalone plugin.
@@ -90,7 +92,8 @@ void AwMatlabScriptProcess::run()
 		else
 			arguments << mcrPath;
 #endif
-		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid); //<< pdi.input.args()["json_args"].toString().simplified();
+		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::hashToJsonString(pdi.input.args()).simplified();
+		pdi.input.args().value("json_args").toString().simplified();
 		QProcess plugin(this);
 		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 		env.remove("PATH");
@@ -103,10 +106,10 @@ void AwMatlabScriptProcess::run()
 	else	{
 		AwSettings *aws = AwSettings::getInstance();
 		mi = aws->matlabInterface();
-		if (aws->getBool("isMatlabPresent")) {
+		if (aws->value(aws::matlab_present).toBool()) {
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-			mi->run(m_path, aws->getString("matlabPluginDir") + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), pdi.input.args()["json_args"].toString());
+			mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::hashToJsonString(pdi.input.args()).simplified());
 		}
 	}
 }

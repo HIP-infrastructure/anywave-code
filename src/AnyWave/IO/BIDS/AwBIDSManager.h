@@ -2,9 +2,9 @@
 // 
 //                 Université d’Aix Marseille (AMU) - 
 //                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Copyright © 2020 AMU, INSERM
 // 
-//  This library is free software; you can redistribute it and/or
+//  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 3 of the License, or (at your option) any later version.
@@ -25,15 +25,35 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include <qobject.h>
-#include "AwBIDSNode.h"
 #include "AwBIDSGUI.h"
 #include <AwFileIO.h>
 #include <AwCommandLine.h>
+#include "AwBIDSItem.h"
+#include <QFileIconProvider>
 
 class AwFileIO;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
-using AwTSVDict = QMap<QString, QStringList>;
+//using AwTSVDict = QMap<QString, QStringList>;
+
+
+namespace bids {
+	constexpr auto participant_tsv = "participant_tsv";		// participants.tsv file path
+	constexpr auto participant_cols = "participant_cols";	// columns found in participants.tsv
+	constexpr auto parsing_path = "parsing_path";
+	constexpr auto gui_extra_cols = "gui_extra_cols";
+	// TSV COLUMNS
+	// events
+	constexpr auto tsv_event_trial_type = "trial_type";
+	constexpr auto tsv_event_duration = "duration";
+	constexpr auto tsv_event_onset = "onset";
+	// channels
+	constexpr auto tsv_channel_units = "units";
+	constexpr auto tsv_channel_name = "name";
+	constexpr auto tsv_channel_type = "type";
+	constexpr auto tsv_channel_status = "status";
+}
+
 
 class AwBIDSManager : public QObject
 {
@@ -41,8 +61,7 @@ class AwBIDSManager : public QObject
 public:
 	enum Modifications { ChannelsTsv, EventsTsv };
 	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
-	enum Derivatives { ICA };
-
+	enum derivatives { ica, h2, gardel };
 	// destructor
 	~AwBIDSManager();
 	// utilities static methods
@@ -54,54 +73,93 @@ public:
 	static bool isBIDS(const QString& path);
 	static QString detectBIDSFolderFromPath(const QString& path);
 	
-
 	void newFile(AwFileIO *reader);
 	void setRootDir(const QString& path);
 	inline QString& rootDir() { return m_rootDir; }
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
+	QString createTsvPath(AwBIDSItem * item, int tsvType);
 	void closeBIDS();
-	AwBIDSNodes& subjects() { return m_nodes; }
-	QString buildPath(const QString& dataFilePath, int derivativesKind);
+	inline QString& lastError() { return m_errorString; }
+	AwBIDSItems subjects() { return m_items; }
 	
+	// command line methods
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
 	int MEGtoBIDS(const AwArguments& args);
-	int convertToEDF(const QString& file, AwFileIO *reader);
-	int convertToVHDR(const QString& file, AwFileIO *reader);
+	int convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
+	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
+	static void initCommandLineOperation(const QString& filePath);
+	static void finishCommandLineOperation();
 
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
 	
-	// Access to some tsv files
+	// TSV files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
-	/** returns a map table: keys are the columns label **/
-	AwTSVDict loadTsvFile(const QString& path);
+	AwMarkerList getMarkersTsv();
+	/** montage specific **/
+	/** Load a montage from channels.tsv file **/
+	AwChannelList getChannelsTsvMontage();
+	/** Build a channels.tsv file **/
+	//int createChannelsTsv(const QString& filePath, const AwChannelList& channels);
+	/** Update channels.tsv file from bad file **/
+	int updateChannelsTsvBadChannels(const QStringList& badLabels);
+	/** markers specific **/
+	int updateEventsTsv(const AwMarkerList& markers);
+
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);
-	/** Create a TSV file based on a dictionnary **/
-	void saveTsvFile(const QString& path, const AwTSVDict& dict, const QStringList& orderedColumns);
-	void updateChannelsTsv(const QString& path);
-	void updateEventsTsv(const QString& path);
-	/** try to find the subject in which the data file is stored. **/
-	AwBIDSNode *findSubject(const QString& dataFilePath);
-	/** Get the companion tsv file of a data file. Returns empty string if the file does not exist **/
-	QString getTSVFile(const QString& dataFilePath, int tsvType);
 	/** Get the BIDS path to the current open file **/
-	QString getCurrentBIDSPath() { return m_settings["BIDS_FilePath"].toString(); }
+	QString getCurrentBIDSPath();
+	QVariantMap& settings() { return m_settings; }
+	inline QStringList participantValues(const QString& participantKey) { return m_participantsData.value(participantKey).toStringList(); }
+	/** Create the output_dir fullpath when processing on item. **/
+	QString buildOutputDir(const QString& pluginName, AwBIDSItem *item);
+	/** Create the default output filename of a file item **/
+	QString buildOutputFileName(AwBIDSItem * item);
+	/** Get derivatives folder for current open item **/
+	QString getDerivativePath(int type);
+	/** GARDEL properties **/
+	/** get montages gardel did generate. **/
+	QStringList getGardelMontages();
+	/** Get mesh file GARDEL did generate **/
+	QString getGardelMesh();
+	/** Get Electrode file GARDEL did generate **/
+	QString getGardelElectrodes();
+	/** Get the derivative folder path for a file item and a derivative modality **/
+	QString getDerivativePath(AwBIDSItem *item, int type);
+	/** Get the filename prefix by removing the modality **/
+	QString getPrefixName(AwBIDSItem *item, bool absolutePath = false);
+public slots:
+	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
 	void log(const QString& message);
 	void BIDSClosed();
+	void finished();	// compatibily with threading operations
 protected:
 	AwBIDSManager();
+	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
+	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
+	void setDerivativesForItem(AwBIDSItem *item);
+	void findItem(const QString& filePath);
+	QVariant gardelProperty(int property);
+	void findTsvFilesForItem(AwBIDSItem *item);
+	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
+	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
+
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)
 
-	QHash<QString, QVariant> m_settings;
-	QHash<QString, AwBIDSNode *> m_hashNodes;
-
-	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file);
+	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
+	QHash<int, QString> m_derivativesNames;
+	AwBIDSItems m_items;
+	QVariantMap m_settings;
+	QList<int> m_dataContainers;
+	QFileIconProvider m_fileIconProvider;
+	QVariantHash m_participantsData; // hold the columns value for each participant in participants.tsvs
+	QHash<AwBIDSItem *, QVariant> m_derivativesItems;
 
 	QString getParsingPath();
 	void modifyUpdateJson(const QStringList& branches);
@@ -109,11 +167,10 @@ protected:
 	QMap<int, QString> m_modifications;
 	AwBIDSGUI *m_ui;
 	QString m_rootDir;
-	QMap<int, QString> m_knownDerivativesPaths;
-	QStringList m_fileExtensions;	// contains all file extensions that reader plugins can handle.
+	QString m_errorString;
+	QStringList m_fileExtensions, m_modalities;
 	// keep the subject associated with the current open file in AnyWave
-	AwBIDSNode *m_currentSubject;
-	AwBIDSNodes m_nodes;
-	QHash<QString, AwBIDSNode *> m_IDToSubject;
-	bool m_mustValidateModifications;
+	AwBIDSItem *m_currentSubject;
+	AwBIDSItem *m_currentOpenItem;
+	bool m_guiMode; // true if AnyWave is running in normal mode with GUI. False if running in batch mode.
 };

@@ -49,9 +49,12 @@
 #include "Process/AwTriggerEraser.h"
 #include "Process/AwMATLABMarkersExporter.h"
 #include "Debug/AwDebugLog.h"
+#include <utils/json.h>
 #ifdef AW_EPOCHING
 #include "Epoch/AwAvgSignalItem.h"
 #endif
+
+#include <AwKeys.h>
 
 // statics
 AwPluginManager *AwPluginManager::m_instance = 0;
@@ -68,10 +71,29 @@ AwPluginManager *AwPluginManager::getInstance()
 //
 AwPluginManager::AwPluginManager()
 {
+
+	// init input flags map for MATLAB/Python plugins
+	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessInput::GetAllMarkers);
+	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessInput::GetAsRecordedChannels);
+	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessInput::GetDurationMarkers);
+	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessInput::GetCurrentMontage);
+	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessInput::ProcessRequiresChannelSelection);
+	m_MATPyInputFlagsMap.insert("userselectedmarkers", Aw::ProcessInput::UserSelectedMarkers);
+
+	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
+	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	m_MATPyPluginFlagsMap.insert("processdoesntrequiredata", Aw::ProcessFlags::ProcessDoesntRequireData);
+	// for compatibilty
+	m_MATPyPluginFlagsMap.insert("nodatarequired", Aw::ProcessFlags::ProcessDoesntRequireData);
+
+	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
+
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
 	loadPlugins();
 	loadUserPlugins();
 	setObjectName("AwPluginManager");
+	processJsonFiles();
 }
 
 //
@@ -79,6 +101,25 @@ AwPluginManager::AwPluginManager()
 //
 AwPluginManager::~AwPluginManager()
 {
+}
+
+void AwPluginManager::processJsonFiles()
+{
+	// parse process plugins which are command line compatible
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
+			QString error;
+			// parsing  args.json if exists to get inputs keys
+			auto hash = AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_batch).toString(), error);
+			if (!hash.contains("inputs")) {
+				// no inputs key in batch.json or no batch.json => considering input to be input_file : "file" (AnyWave default)
+				QVariantHash inputs;
+				inputs.insert(cl::input_file, QString("file"));
+				hash.insert("inputs", inputs);
+			}
+			p->addBatchHash(hash);
+		}
+	}
 }
 
 //
@@ -215,6 +256,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 bool isMATLABScript = QFile::exists(matlabCode);
 		 bool isPythonScript = QFile::exists(pythonCode);
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
+		 QString jsonArgs = QString("%1/args.json").arg(pluginPath);
 		 if (!QFile::exists(descPath))
 			 continue;
 		 QFile file(descPath);
@@ -282,7 +324,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 file.close();
 		 // now instantiante objects depending on plugin type
 		 // check for MATLAB connection before
-		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->getBool("isMatlabPresent");
+		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
 		 if (isMATLABScript || isMATLABCompiled) {
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
 			 plugin->type = type;
@@ -297,6 +339,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			 if (QFile::exists(jsonArgs))
+				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
@@ -313,9 +357,19 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->setPluginDir(pluginPath);
 			 plugin->category = category;
 			 setFlagsForScriptPlugin(plugin, flags);
+			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			 if (QFile::exists(jsonArgs))
+				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 	 }
+}
+
+void AwPluginManager::setJsonSettings(AwScriptPlugin *plugin, const QString& key, const QString& jsonPath)
+{
+	auto jsonString = AwUtilities::json::fromJsonFileToString(jsonPath);
+	if (!jsonString.isEmpty())
+		plugin->setSettings(key, jsonString);
 }
 
 void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
@@ -330,13 +384,25 @@ void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const
 	}
 	else
 		tokens << flags;
+
+	// compared flags strings to hash table
 	int f = 0;
 	for (auto s : tokens) {
 		auto token = s.toLower();
-		if (token == "getallmarkers")
-			f |= Aw::ProcessInput::GetAllMarkers;
+		if (m_MATPyInputFlagsMap.contains(token))
+			f |= m_MATPyInputFlagsMap.value(token);
 	}
 	plugin->setInputFlags(f);
+}
+
+bool AwPluginManager::checkPluginVersion(QObject * plugin)
+{
+	auto tmp =  static_cast<AwPluginBase *>(plugin);
+	if (!tmp)
+		return false;
+	if (tmp->minorVersion < AW_MINOR_VERSION || tmp->majorVersion < AW_MAJOR_VERSION)
+		return false;
+	return true;
 }
 
 void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
@@ -349,14 +415,8 @@ void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QStr
 	int f = 0;
 	for (auto s : tokens) {
 		auto token = s.toLower();
-		if (token == "nodatarequired")
-			f |= Aw::ProcessFlags::ProcessDoesntRequireData;
-		else if (token == "hidden")
-			f |= Aw::ProcessFlags::PluginIsHidden;
-		else if (token == "accepttimeselections")
-			f |= Aw::ProcessFlags::PluginAcceptsTimeSelections;
-		else if (token == "ignorechannelselections")
-			f |= Aw::ProcessInput::ProcessIgnoresChannelSelection;
+		if (m_MATPyPluginFlagsMap.contains(token))
+			f |= m_MATPyPluginFlagsMap.value(token);
 	}
 	plugin->setFlags(f);
 }
@@ -369,10 +429,11 @@ void AwPluginManager::loadUserPlugins()
 {
 	// Plugins found in user directory will override plugins located in AnyWave/Plugins application directory.
 	AwSettings *aws = AwSettings::getInstance();
-	auto pluginDir = aws->getString("pluginDir");
-	auto matlabPluginDir = aws->getString("matlabPluginDir");
-	auto pythonPluginDir = aws->getString("pythonPluginDir");
-	auto montageDir = aws->getString("montageDir");
+	
+	auto pluginDir = aws->value(aws::plugins_dir).toString();
+	auto matlabPluginDir = aws->value(aws::matlab_plugins_dir).toString();
+	auto pythonPluginDir = aws->value(aws::python_plugins_dir).toString();
+	auto montageDir = aws->value(aws::montage_dir).toString();
 	if (pluginDir.isEmpty()) // No Plugins dir in 'user documents\AnyWave\'
 		return;
 	if (!matlabPluginDir.isEmpty())
@@ -390,6 +451,10 @@ void AwPluginManager::loadUserPlugins()
 		if (plugin == NULL)	{
 			emit log("Failed to load " + m_pluginsDir.absoluteFilePath(FileName));
 			emit log(loader.errorString());
+		}
+		if (!checkPluginVersion(plugin)) {
+			emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
+			continue;
 		}
 		if (plugin) {
 			AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
@@ -499,10 +564,10 @@ void AwPluginManager::loadUserPlugins()
 void AwPluginManager::loadPlugins()
 {
 	AwSettings *aws = AwSettings::getInstance();
-	m_pluginsDir = QDir(aws->getString("appPluginDir"));
-	auto matlabPluginDir = aws->getString("appMatlabPluginDir");
-	auto pythonPluginDir = aws->getString("appPythonPluginDir");
-
+	
+	m_pluginsDir = aws->value(aws::app_plugins_dir).toString();
+	auto matlabPluginDir = aws->value(aws::app_matlab_plugins_dir).toString();
+	auto pythonPluginDir = aws->value(aws::app_python_plugins_dir).toString();
 	checkForScriptPlugins(matlabPluginDir);
 	checkForScriptPlugins(pythonPluginDir);
 
@@ -564,7 +629,11 @@ void AwPluginManager::loadPlugins()
 			emit log(loader.errorString());
 			continue;
 		}
-		else {
+		if (!checkPluginVersion(plugin)) {
+			emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
+			continue;
+		}
+		if (plugin) {
 			// get plugin type
 			AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
 			if (fio) { // FileIO specific (plugin can be reader and writer at the same time
@@ -610,7 +679,7 @@ void AwPluginManager::loadFileIOReaderPlugin(AwFileIOPlugin *plugin)
 		emit log("Reader plugin " + plugin->name + " already exists.Previous version unloaded.");
 		delete p;
 	}
-	auto montageDir = AwSettings::getInstance()->getString("montageDir");
+	auto montageDir = AwSettings::getInstance()->value(aws::montage_dir).toString();
 	m_readerFactory.addPlugin(plugin->name, plugin);
 	m_readers += plugin;
 	m_pluginList += plugin;
@@ -705,3 +774,35 @@ void AwPluginManager::loadFilterPlugin(AwFilterPlugin *plugin)
 	m_pluginList += plugin;
 }
 
+///
+/// Check for process plugin that are CommandLine compatible.
+/// Search for json_args key and add the json string if found to the result list.
+///
+QStringList AwPluginManager::getBatchableArguments()
+{
+	QStringList res;
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
+			auto settings = p->settings();
+			if (settings.contains(processio::json_batch)) 
+				res << settings.value(processio::json_batch).toString();
+		}
+	}
+	return res;
+}
+
+///
+/// browse reader plugins and get the file extension they can handle.
+/// Returns extension without . (dot)
+QStringList AwPluginManager::getReadableFileExtensions()
+{
+	QStringList res;
+	for (auto reader : m_readers) {
+		for (auto extension : reader->fileExtensions) {
+			auto ext = extension.remove("*.");
+			if (!res.contains(ext))
+				res.append(ext);
+		}
+	}
+	return res;
+}

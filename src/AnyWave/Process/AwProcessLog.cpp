@@ -35,7 +35,7 @@ AwProcessLog::AwProcessLog(AwBaseProcess *process, QObject *parent)
 {
 	m_process = process;
 	// get log directory and create a file with date and time.
-	auto logDir = AwSettings::getInstance()->getString("logDir");
+	auto logDir = AwSettings::getInstance()->value(aws::log_dir).toString();
 	if (logDir.isEmpty()) {
 		closeLog();
 		return;

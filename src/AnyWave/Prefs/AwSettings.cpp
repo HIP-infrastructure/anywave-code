@@ -27,6 +27,7 @@
 #include <QSettings>
 #include <QWidget>
 #include <AwFileIO.h>
+#include <AwFileInfo.h>
 #include <QDir>
 #include <QApplication>
 #include <qthreadpool.h>
@@ -42,7 +43,7 @@ AwSettings::AwSettings(QObject *parent)
 {
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
-	m_settings["recentFilesMax"] = (int)15;
+	m_settings[aws::max_recent_files] = (int)15;
 	m_currentReader = NULL;
 
 	// load previously saved recent files
@@ -64,53 +65,57 @@ AwSettings::AwSettings(QObject *parent)
 	}
 	settings.endArray();
 
-	m_settings["recentFiles"] = recentFiles;
-	m_settings["recentBIDS"] = recentBIDS;
-	m_settings["isMatlabPresent"] = false;
+	m_settings[aws::recent_files] = recentFiles;
+	m_settings[aws::recent_bids] = recentBIDS;
+	m_settings[aws::matlab_present] = false;
 
 	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
-	m_settings["isAutoTriggerParsingOn"] = isAutoTriggerParsingOn;
+	m_settings[aws::auto_trigger_parsing] = isAutoTriggerParsingOn;
 
 	//// languages
-	loadLanguage();
+//	loadLanguage();
 	// Cpu cores
 	auto totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
-	m_settings["totalCPUCores"] = totalCPUCores;
+	m_settings[aws::total_cpu_cores] = totalCPUCores;
 	auto maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
-	m_settings["maxCPUCores"] = maxCPUCores;
+	m_settings[aws::max_cpu_cores] = maxCPUCores;
 
 	bool checkForUpdates = settings.value("general/checkForUpdates", true).toBool();
-	m_settings["checkForUpdates"] = checkForUpdates;
+	m_settings[aws::check_updates] = checkForUpdates;
+
+	// third party sotfwares
+	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
+	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
 
 	m_matlabInterface = NULL;
-	m_settings["predefinedMarkerFile"] = QString("marker_tool.mrk");
+	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
 
 	m_fileInfo = Q_NULLPTR;
 
 	auto appPath = QCoreApplication::applicationDirPath();
-	m_settings["appDirPath"] = appPath;
+	m_settings[aws::app_dir] = appPath;
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-	m_settings["appResourcePath"] = appPath;
+	m_settings[aws::app_resource_dir] = appPath;
 #endif
 #ifdef Q_OS_MAC
-	m_settings["appResourcePath"] = QString("%1/../Resources").arg(appPath);
+	m_settings[aws::app_resource_dir] = QString("%1/../Resources").arg(appPath);
 #endif
 
-	m_settings["INS_Version"] = false;
+	m_settings[aws::ins_version] = false;
 	// check for a version.txt in resources
-	QString versionFile = QString("%1/version.txt").arg(m_settings["appResourcePath"].toString());
+	//QString versionFile = QString("%1/version.txt").arg(m_settings["appResourcePath"].toString());
 	QString insVersionFile = QString("%1/ins.txt").arg(m_settings["appResourcePath"].toString());
-	if (QFile::exists(versionFile)) {
-		QFile file(versionFile);
-		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-			m_settings["majorVersion"] =  file.readLine();
-			m_settings["minorVersion"] =  file.readLine();
-			file.close();
-		}
-	}
+	//if (QFile::exists(versionFile)) {
+	//	QFile file(versionFile);
+	//	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+	//		m_settings[aws::major_version] =  file.readLine();
+	//		m_settings[aws::minor_version] =  file.readLine();
+	//		file.close();
+	//	}
+	//}
 	// check for a file called ins.txt
 	if (QFile::exists(insVersionFile))
-		m_settings["INS_Version"] = true;
+		m_settings[aws::ins_version] = true;
 }
 
 AwSettings::~AwSettings()
@@ -118,14 +123,14 @@ AwSettings::~AwSettings()
 	// save recent files
 	QSettings settings;
 	settings.beginWriteArray("recentFiles");
-	auto recentFiles = m_settings["recentFiles"].toStringList();
+	auto recentFiles = m_settings.value(aws::recent_files).toStringList();
 	for (int i = 0; i < recentFiles.size(); i++)	{
 		settings.setArrayIndex(i);
 		settings.setValue("filePath", recentFiles.at(i));
 	}
 	settings.endArray();
 	// save recent BIDS
-	auto recentBIDS = m_settings["recentBIDS"].toStringList();
+	auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
 	settings.beginWriteArray("recentBIDS");
 	for (int i = 0; i < recentBIDS.size(); i++) {
 		settings.setArrayIndex(i);
@@ -136,64 +141,74 @@ AwSettings::~AwSettings()
 		delete m_fileInfo;
 }
 
+QVariant AwSettings::value(const QString& key)
+{
+	return m_settings.value(key);
+}
+
+void AwSettings::setValue(const QString& key, const QVariant& value)
+{
+	m_settings[key] = value;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// LANGUAGE
 
-void AwSettings::loadLanguage()
-{
-	QSettings settings;
-	m_language = settings.value("general/locale", QString("en")).toString();
-	QLocale locale = QLocale(m_language);
-	QLocale::setDefault(locale);
-	// create language path
-	langPath = QApplication::applicationDirPath();
-	langPath.append("/languages");
-	QString languageName = QLocale::languageToString(locale.language());
-	QString anywaveFile = langPath + "/" + QString("anywave_%1.qm").arg(m_language);
-	QString qtFile = langPath + "/" + QString("qt_%1.qm").arg(m_language);
-	QString graphicsFile = langPath + "/" + QString("awgraphicslib_%1.qm").arg(m_language);
-	QString widgetsFile = langPath + "/" + QString("awwidgetslib_%1.qm").arg(m_language);
-	// load translators
-	if (translator.load(anywaveFile))
-		qApp->installTranslator(&translator);
-	if (translatorQt.load(qtFile))
-		qApp->installTranslator(&translatorQt);
-	if (translatorGraphics.load(graphicsFile))
-		qApp->installTranslator(&translatorGraphics);
-	if (translatorWidgets.load(widgetsFile))
-		qApp->installTranslator(&translatorWidgets);
-}
+//void AwSettings::loadLanguage()
+//{
+//	QSettings settings;
+//	m_language = settings.value("general/locale", QString("en")).toString();
+//	QLocale locale = QLocale(m_language);
+//	QLocale::setDefault(locale);
+//	// create language path
+//	langPath = QApplication::applicationDirPath();
+//	langPath.append("/languages");
+//	QString languageName = QLocale::languageToString(locale.language());
+//	QString anywaveFile = langPath + "/" + QString("anywave_%1.qm").arg(m_language);
+//	QString qtFile = langPath + "/" + QString("qt_%1.qm").arg(m_language);
+//	QString graphicsFile = langPath + "/" + QString("awgraphicslib_%1.qm").arg(m_language);
+//	QString widgetsFile = langPath + "/" + QString("awwidgetslib_%1.qm").arg(m_language);
+//	//// load translators
+//	//if (translator.load(anywaveFile))
+//	//	qApp->installTranslator(&translator);
+//	//if (translatorQt.load(qtFile))
+//	//	qApp->installTranslator(&translatorQt);
+//	//if (translatorGraphics.load(graphicsFile))
+//	//	qApp->installTranslator(&translatorGraphics);
+//	//if (translatorWidgets.load(widgetsFile))
+//	//	qApp->installTranslator(&translatorWidgets);
+//}
 
-void AwSettings::loadLanguage(const QString& lang)
-{
-	if (m_language != lang) {
-		QSettings settings;
-		m_language = lang;
-		QLocale locale = QLocale(m_language);
-		QLocale::setDefault(locale);
-		switchTranslator(translator, QString("anywave_%1.qm").arg(m_language));
-		switchTranslator(translatorQt, QString("qt_%1.qm").arg(m_language));
-		switchTranslator(translatorGraphics, QString("awgraphicslib_%1.qm").arg(m_language));
-		switchTranslator(translatorWidgets, QString("awwidgetslib_%1.qm").arg(m_language));
-		settings.setValue("general/locale", lang);
-	}
-}
+//void AwSettings::loadLanguage(const QString& lang)
+//{
+//	if (m_language != lang) {
+//		QSettings settings;
+//		m_language = lang;
+//		QLocale locale = QLocale(m_language);
+//		QLocale::setDefault(locale);
+//		switchTranslator(translator, QString("anywave_%1.qm").arg(m_language));
+//		switchTranslator(translatorQt, QString("qt_%1.qm").arg(m_language));
+//		switchTranslator(translatorGraphics, QString("awgraphicslib_%1.qm").arg(m_language));
+//		switchTranslator(translatorWidgets, QString("awwidgetslib_%1.qm").arg(m_language));
+//		settings.setValue("general/locale", lang);
+//	}
+//}
 
-void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
-{
-	// remove the old translator
-	qApp->removeTranslator(&translator);
-	// load the new one and save it to preferences
-	if (translator.load(file)) 
-		qApp->installTranslator(&translator);
-}
+//void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
+//{
+//	// remove the old translator
+//	qApp->removeTranslator(&translator);
+//	// load the new one and save it to preferences
+//	if (translator.load(file)) 
+//		qApp->installTranslator(&translator);
+//}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// LANGUAGE END
 
 void AwSettings::closeFile()
 { 
-	setSettings("currentIcaFile", QString());
+	m_settings[aws::ica_file] = QString();
 	if (m_fileInfo)
 		m_filterSettings.save(QString("%1.flt").arg(m_fileInfo->filePath()));
 }
@@ -261,36 +276,36 @@ QString AwSettings::shortenFilePath(const QString& path)
 
 void AwSettings::addRecentFilePath(const QString& path)
 {
-	auto recentFiles = m_settings["recentFiles"].toStringList();
+	auto recentFiles = m_settings.value(aws::recent_files).toStringList();
 
 	if (recentFiles.contains(path))
 		return;
 	
-	if (recentFiles.size() == m_settings["recentFilesMax"].toInt())
+	if (recentFiles.size() == m_settings.value(aws::max_recent_files).toInt())
 		recentFiles.removeLast();
 
 	recentFiles.insert(0, path);
-	m_settings["recentFiles"] = recentFiles;
+	m_settings[aws::recent_files] = recentFiles;
 
 	emit recentFilesUpdated(recentFiles);
 }
 
 void AwSettings::addRecentBIDS(const QString& path)
 {
-	auto recentBIDS = m_settings["recentBIDS"].toStringList();
+	auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
 	if (recentBIDS.contains(path))
 		return;
-	if (recentBIDS.size() == m_settings["recentFilesMax"].toInt())
+	if (recentBIDS.size() == m_settings.value(aws::max_recent_files).toInt())
 		recentBIDS.removeLast();
 
 	recentBIDS.insert(0, path);
-	m_settings["recentBIDS"] = recentBIDS;
+	m_settings[aws::recent_bids] = recentBIDS;
 	emit recentBIDSUpdated(recentBIDS);
 }
 
 void AwSettings::removeRecentFilePath(const QString& path)
 {
-	auto recentFiles = m_settings["recentFiles"].toStringList();
+	auto recentFiles = m_settings.value(aws::recent_files).toStringList();
 	if (!recentFiles.contains(path))
 		return;
 
@@ -298,13 +313,13 @@ void AwSettings::removeRecentFilePath(const QString& path)
 	QStringList result;
 	foreach (QString s, recentFiles)
 		result << shortenFilePath(s);
-	m_settings["recentFiles"] = result;
+	m_settings[aws::recent_files] = result;
 	emit recentFilesUpdated(result);
 }
 
 void AwSettings::removeRecentBIDS(const QString& path)
 {
-	auto recentBIDS = m_settings["recentBIDS"].toStringList();
+	auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
 	if (!recentBIDS.contains(path))
 		return;
 
@@ -312,7 +327,7 @@ void AwSettings::removeRecentBIDS(const QString& path)
 	QStringList result;
 	for (auto s : recentBIDS)
 		result << shortenFilePath(s);
-	m_settings["recentBIDS"] = result;
+	m_settings[aws::recent_bids] = result;
 	emit recentBIDSUpdated(result);
 }
 
@@ -331,8 +346,8 @@ QStringList& AwSettings::topoLayouts()
 
 void AwSettings::savePredefinedMarkers(const AwMarkerList& markers)
 {
-	auto markerRulesDir = m_settings["markerRulesDir"].toString();
-	auto file = m_settings["predefinedMarkerFile"].toString();
+	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
+	auto file = m_settings.value(aws::predefined_marker_file).toString();
 	if (markerRulesDir.isEmpty())
 		return;
 	if (markers.isEmpty()) {
@@ -344,8 +359,8 @@ void AwSettings::savePredefinedMarkers(const AwMarkerList& markers)
 
 AwMarkerList AwSettings::loadPredefinedMarkers()
 {
-	auto markerRulesDir = m_settings["markerRulesDir"].toString();
-	auto file = m_settings["predefinedMarkerFile"].toString();
+	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
+	auto file = m_settings.value(aws::predefined_marker_file).toString();
 	if (markerRulesDir.isEmpty())
 		return AwMarkerList();
 	return AwMarker::load(file);

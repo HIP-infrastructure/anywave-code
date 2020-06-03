@@ -71,6 +71,7 @@ public slots:
 	void pickMatlabFolder();
 	void pickMCRFolder();
 	void pickGARDEL();
+	void pickITK();
 	void pickPython();
 signals:
 	void screenCalibrationChanged(float xPixPerCm, float yPixPerCm);

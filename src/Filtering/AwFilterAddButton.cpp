@@ -4,8 +4,7 @@
 AwFilterAddButton::AwFilterAddButton(QWidget *parent) : QPushButton(parent)
 {
 	m_menu = new QMenu(this);
-	auto  channels = AwChannel::types();
-	for (auto c : channels) {
+	for (auto c : AwChannel::types) {
 		auto action = m_menu->addAction(c);
 		connect(action, &QAction::triggered, this, &AwFilterAddButton::addNewFilter);
 		action->setData(AwChannel::stringToType(c));

@@ -27,7 +27,6 @@
 #include <QFileDialog>
 #include <QStatusBar>
 #include <QNetworkInterface>
-#include <QSplashScreen>
 #include <QDesktopServices>
 #include "AnyWave.h"
 #include "Process/AwProcessManager.h"
@@ -60,11 +59,8 @@
 #include "Source/AwSourceManager.h"
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
-#include <AwFileIO.h>
-#include <AwMatlabInterface.h>
 #include <AwMEGSensorManager.h>
 #include <widget/AwMarkerInspector.h>
-#include <widget/AwSEEGViewer.h>
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
@@ -72,6 +68,7 @@
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
+
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -101,8 +98,11 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 
 	AwSettings *aws = AwSettings::getInstance();
 	aws->setParent(this);
+	aws->setValue(aws::gui_active, isGUIMode);
+	
 	//Save system path
-	aws->setSettings("systemPath", QString(qgetenv("PATH")));
+	aws->setValue(aws::system_path, QString(qgetenv("PATH")));
+
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 
@@ -118,21 +118,21 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	createUserDirs();
 	
 	if (isGUIMode) {
-		QStringList recentFiles = aws->getStringList("recentFiles");
+		QStringList recentFiles = aws->value(aws::recent_files).toStringList();
 		if (!recentFiles.isEmpty()) {
 			updateRecentFiles(recentFiles);
 		}
-		QStringList recentBIDS = aws->getStringList("recentBIDS");
+		QStringList recentBIDS = aws->value(aws::recent_bids).toStringList();
 		if (!recentBIDS.isEmpty()) {
 			updateRecentBIDS(recentBIDS);
 		}
 	}
 
-	QSettings settings;
+	QSettings qsettings;
 	m_SEEGViewer = NULL;
 	// init settings
-    settings.setValue("general/secureMode", false);
-	settings.setValue("general/buildDate", QString(__DATE__));
+    qsettings.setValue("general/secureMode", false);
+	qsettings.setValue("general/buildDate", QString(__DATE__));
 	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
 	initMatlab();
 	// Plugins
@@ -249,8 +249,8 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList *)), m_display, SLOT(addVirtualChannels(AwChannelList *)));
 		connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
 			m_display, SLOT(executeCommand(int, const QVariantList&)));
-		connect(m_display, SIGNAL(selectedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setSelectedChannels(const AwChannelList&)));
-		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setDisplayedChannels(const AwChannelList&)));
+		//connect(m_display, SIGNAL(selectedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setSelectedChannels(const AwChannelList&)));
+		//connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setDisplayedChannels(const AwChannelList&)));
 		// Display and Montage manager
 		connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
 		// Settings and Display
@@ -260,7 +260,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	// Process Manager and Marker Manager
 	connect(process_manager, SIGNAL(newMarkersAvailable(const AwMarkerList&)), marker_manager, SLOT(addMarkers(const AwMarkerList&)));
 	// Process Manager and Montage Manager
-	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), process_manager, SLOT(setMontageChannels(const AwChannelList&)));
+//	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), process_manager, SLOT(setMontageChannels(const AwChannelList&)));
 	// Marker Manager and AnyWave
 	connect(marker_manager, SIGNAL(modificationsDone()), this, SLOT(setModified()));
 	// Montage Manager and AnyWave
@@ -326,7 +326,7 @@ void AnyWave::changeEvent(QEvent *e)
 			{
 				QString locale = QLocale::system().name();
 				locale.truncate(locale.lastIndexOf('_'));
-				AwSettings::getInstance()->loadLanguage(locale);
+			//	AwSettings::getInstance()->loadLanguage(locale);
 			}
 			break;
 		}
@@ -432,8 +432,6 @@ void AnyWave::quit()
 	writeSettings();
 }
 
-
-
 bool AnyWave::checkAndCreateFolder(const QString& root, const QString& name)
 {
 	QDir folder(root);
@@ -452,6 +450,7 @@ void AnyWave::createUserDirs()
 {
 	QString homeDir;
 	AwSettings *aws = AwSettings::getInstance();
+	
 	QStringList dirs;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)  // Qt 4
 #if defined(Q_OS_WIN)
@@ -474,7 +473,7 @@ void AnyWave::createUserDirs()
 	}
 	else {
 		homeDir = dirs.first();
-		aws->setSettings("homeDir", homeDir);
+		aws->setValue(aws::home_dir, homeDir);
 	}
 #endif
 	QString montageDir = homeDir + "/AnyWave/Montages/";
@@ -485,6 +484,8 @@ void AnyWave::createUserDirs()
 	QString pluginDir = homeDir + "/AnyWave/Plugins";
 	QString matlabPluginDir = pluginDir + "/MATLAB";
 	QString pythonPluginDir = pluginDir + "/Python";
+	QString batchDir = homeDir + "/AnyWave/Batch/";
+	QString settingsDir = homeDir + "/AnyWave/Settings";
 
 	// convert workingDir to native filesystem syntax.
 	// Used by 'outside' plugins like MATLAB code.
@@ -501,46 +502,55 @@ void AnyWave::createUserDirs()
 	homeDir += "/AnyWave";
 
 	if (checkAndCreateFolder(homeDir, "Montages"))
-		aws->setSettings("montageDir", montageDir);
+		aws->setValue(aws::montage_dir, montageDir);
 	if (checkAndCreateFolder(homeDir, "Markers"))
-		aws->setSettings("markerRulesDir", markerRulesDir);
+		aws->setValue(aws::marker_rules_dir , markerRulesDir);
 	if (checkAndCreateFolder(homeDir, "Plugins"))
-		aws->setSettings("pluginDir", pluginDir);
+		aws->setValue(aws::plugins_dir , pluginDir);
 	if (checkAndCreateFolder(pluginDir, "MATLAB"))
-		aws->setSettings("matlabPluginDir", matlabPluginDir);
+		aws->setValue(aws::matlab_plugins_dir , matlabPluginDir);
+	if (checkAndCreateFolder(homeDir, "Batch"))
+		aws->setValue(aws::batch_dir , batchDir);
 	// add a dep folder in MATLAB => the place to put all dependencies for the plugin
 	checkAndCreateFolder(matlabPluginDir, "dep");
 	if (checkAndCreateFolder(pluginDir, "Python"))
-		aws->setSettings("pythonPluginDir", pythonPluginDir);
+		aws->setValue(aws::python_plugins_dir , pythonPluginDir);
 	if (checkAndCreateFolder(homeDir, "Setups"))
-		aws->setSettings("displaySetupDir", setupDir);
+		aws->setValue(aws::setup_dir, setupDir);
 	if (checkAndCreateFolder(homeDir, "Log"))
-		aws->setSettings("logDir", logDir);
+		aws->setValue(aws::log_dir, logDir);
 	if (checkAndCreateFolder(homeDir, "Work"))
-		aws->setSettings("workingDir", workingDir);
+		aws->setValue(aws::work_dir,  workingDir);
+	if (checkAndCreateFolder(homeDir, "Settings"))
+		aws->setValue(aws::settings_dir, settingsDir);
 
 	// set application specific folders for plugins
 	auto appDir = QDir(qApp->applicationDirPath());
 
 	QString appPluginPath;
 	auto appPath = appDir.absolutePath();
+	aws->setValue(aws::app_dir, appPath);
 #ifdef Q_OS_MAC
+	// set python module path on mac it's in the application bundle
+	aws->setValue(aws::python_module_dir, appPath + "/../Python");
+	// no change to plugin dir
 	appDir.cdUp();
 	appDir.cdUp();
 	appDir.cdUp();
 	appDir.cd("Anywave_Plugins");
-	aws->setSettings("pythonModulePath", appPath + "/../Python");
+	//aws->setSeawsttings("pythonModulePath", appPath + "/../Python");
+	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
+
 #else
+	aws->setValue(aws::python_module_dir, appPath + "/Python");
 	appDir.cd("Plugins");
-	aws->setSettings("pythonModulePath", appPath + "/Python");
+	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
 #endif
-	appPluginPath = appDir.absolutePath();
-	aws->setSettings("appPluginDir", appPluginPath);
-	aws->setSettings("appMatlabPluginDir", appPluginPath + "/MATLAB");
-	aws->setSettings("appPythonPluginDir", appPluginPath + "/Python");
+	auto appPluginDir = aws->value(aws::app_plugins_dir).toString();
+	aws->setValue(aws::app_matlab_plugins_dir, appPluginDir + "/MATLAB");
+	aws->setValue(aws::app_python_plugins_dir, appPluginDir + "/Python");
 	// Mex path
-	aws->setSettings("mexPath", appPluginPath + "/MATLAB/AnyWave");
-	
+	aws->setValue(aws::mex_dir, appPluginDir + "/MATLAB/AnyWave");
 }
 
 //
@@ -724,235 +734,6 @@ void AnyWave::openNewAnyWave()
 #endif
 }
 
-
-void AnyWave::runGARDEL()
-{
-	QSettings settings;
-	// get Gardel executable path
-	QString path = settings.value("GARDEL/path").toString();
-	bool launch = false;
-	QProcess process;
-	QFileInfo fi(path);
-	QStringList args;
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-	QString mcr_path = settings.value("matlab/mcr_path").toString();
-	if (!path.isEmpty() && !mcr_path.isEmpty())
-		launch = true;
-#else // Windows
-	if (!path.isEmpty())
-		launch = true;
-#endif
-
-#if defined(Q_OS_MAC)
-	if (launch) {
-        qDebug() << path << args;
-		QProcess process(this);
-		args << mcr_path;
-		process.startDetached(path, args);
-	}
-#endif
-#ifdef Q_OS_LINUX
-	if (launch) {
-		QProcess process(this);
-		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-		env.insert("LD_LIBRARY_PATH", "/usr/lib/x86_64-linux-gnu");
-		process.setProcessEnvironment(env);
-		process.startDetached(path);
-	}
-#endif
-#ifdef Q_OS_WIN // Windows
-	if (launch) {
-		QString fullPath = AwSettings::getInstance()->getString("systemPath");
-		QProcess process(this);
-		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-		qputenv("PATH", fullPath.toLatin1());
-		process.setProcessEnvironment(env);
-		process.startDetached(path);
-	}
-#endif
-
-}
-
-//
-// runMapping()
-//
-void AnyWave::runMapping()
-{
-	bool isMEGOK = true;
-	bool isEEGOK = true;
-	bool isSEEGOK = true;
-
-	auto dockMEG = m_dockWidgets["meg_mapping"];
-	auto dockEEG = m_dockWidgets["eeg_mapping"];
-
-	if (dockMEG) { // MEG mapping was already created
-		dockMEG->show();
-		auto realDockMEG = static_cast<AwDockMapping *>(dockMEG);
-		realDockMEG->openConnection();
-		// reconnect signals and slots
-		connect(m_display, SIGNAL(clickedAtLatency(float)), realDockMEG, SLOT(newMappingAtPosition(float)));
-		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), realDockMEG, SLOT(newMappingSelection(float, float)));
-		m_display->setMappingModeOn(true);
-	}
-	else { // check for available layouts, and create MEG Mapping objects
-		AwLayoutManager *lm = AwLayoutManager::instance();
-		// check if file reader can provide layouts.
-		AwLayout *l2D = lm->layoutFromFile(m_currentReader, AwLayout::L2D|AwLayout::MEG);
-		AwLayout *l3D = lm->layoutFromFile(m_currentReader, AwLayout::L3D|AwLayout::MEG);
-		if (l2D == NULL) {  // no layout from file
-			l2D = lm->guessLayout(m_currentReader, AwLayout::L2D|AwLayout::MEG);
-		}
-		if (l3D == NULL) {
-			l3D = lm->guessLayout(m_currentReader, AwLayout::L3D|AwLayout::MEG);
-		}
-		if (l2D || l3D) { // at least one layout was found => build topo
-			auto dock = new AwDockMapping(AwChannel::MEG, tr("MEG Mapping"), l2D, l3D, this);
-			m_dockWidgets["meg_mapping"] = dock;
-			//m_dockMEG2->setFeatures(QDockWidget::AllDockWidgetFeatures);
-			dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-			//m_dockMEG2->show();
-			addDockWidget(Qt::LeftDockWidgetArea, dock);
-			dock->setFloating(true);
-			// connections
-			connect(m_display, SIGNAL(clickedAtLatency(float)), dock, SLOT(newMappingAtPosition(float)));
-			connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), dock, SLOT(newMappingSelection(float, float)));
-			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
-			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
-			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			auto selectedChannels = m_display->selectedChannels();
-			dock->setSelectedChannels(selectedChannels);
-			dock->setBadLabels(AwMontageManager::instance()->badLabels());
-			m_display->setMappingModeOn(true);
-			// adjust starting position of widget to be almost centered in the main window
-			QRect geo = this->geometry();
-			int centerx = (geo.x() + geo.width() / 4);
-			int centery = (geo.y() + geo.height() / 4);
-			dock->move(centerx, centery);
-			dock->show();
-		}
-		else 
-			isMEGOK = false;
-	}
-
-	// EEG
-	if (dockEEG) { // MEG mapping was already created
-		dockEEG->show();
-		auto realDock = static_cast<AwDockMapping *>(dockMEG);
-		realDock->openConnection();
-		// reconnect signals and slots
-		connect(m_display, SIGNAL(clickedAtLatency(float)), realDock, SLOT(newMappingAtPosition(float)));
-		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), realDock, SLOT(newMappingSelection(float, float)));
-		m_display->setMappingModeOn(true);
-	}
-	else { // check for avaible layouts, and create MEG Mapping objects
-		AwLayoutManager *lm = AwLayoutManager::instance();
-		// check if file reader can provide layouts.
-		AwLayout *l2D = lm->layoutFromFile(m_currentReader, AwLayout::L2D|AwLayout::EEG);
-		AwLayout *l3D = lm->layoutFromFile(m_currentReader, AwLayout::L3D|AwLayout::EEG);
-		if (l2D == NULL) {  // no layout from file
-			l2D = lm->guessLayout(m_currentReader, AwLayout::L2D|AwLayout::EEG);
-		}
-		if (l3D == NULL) {
-			l3D = lm->guessLayout(m_currentReader, AwLayout::L3D|AwLayout::EEG);
-		}
-		if (l2D || l3D) { // at least one layout was found => build topo
-			auto dock = new AwDockMapping(AwChannel::EEG, tr("EEG Mapping"), l2D, l3D, this);
-			m_dockWidgets["eeg_mapping"] = dock;
-			dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-			addDockWidget(Qt::LeftDockWidgetArea, dock);
-			dock->setFloating(true);
-			// connections
-			connect(m_display, SIGNAL(clickedAtLatency(float)), dock, SLOT(newMappingAtPosition(float)));
-			connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), dock, SLOT(newMappingSelection(float, float)));
-			connect(dock, SIGNAL(mappingClosed()), this, SLOT(stopMapping()));
-			connect(m_display, SIGNAL(selectedChannelsChanged(AwChannelList&)), dock, SLOT(setSelectedChannels(AwChannelList&)));
-			connect(dock, SIGNAL(selectedLabelsChanged(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-			auto selectedChannels = m_display->selectedChannels();
-			dock->setSelectedChannels(selectedChannels);
-			dock->setBadLabels(AwMontageManager::instance()->badLabels());
-			m_display->setMappingModeOn(true);
-			// adjust starting position of widget to be almost centered in the main window
-			QRect geo = this->geometry();
-			int centerx = (geo.x() + geo.width() / 2);
-			int centery = (geo.y() + geo.height() / 2);
-			dock->move(centerx, centery);
-			dock->show();
-		}
-		else 
-			isEEGOK = false;
-	}
-
-	// check for SEEG channels from as recorded channels in the Montage
-	AwChannelList seegChannels;
-	for (auto c : m_display->displayedChannels()) {
-		if (c->isSEEG())
-			seegChannels << c;
-	}
-
-	if (!seegChannels.isEmpty()) {  // we've got SEEG channels, check for mesh and electrode files
-		AwFileInfo afi(m_currentReader);
-
-		QString mesh = afi.getFeature(AwFileInfo::MeshFile).toString();
-		QString electrodes = afi.getFeature(AwFileInfo::SEEGElectrodeFile).toString();
-
-		if (!mesh.isEmpty() && !electrodes.isEmpty()) {
-			if (m_SEEGViewer == NULL) {
-				m_SEEGViewer = new AwSEEGViewer(this);
-				connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient *)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient *)));
-				connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
-				connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
-				connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
-				connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-				connect(&AwSettings::getInstance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
-					SLOT(setNewFilters(const AwFilterSettings&)));
-			}
-			// the viewer will automatically duplicate channel objects.
-			m_SEEGViewer->setSEEGChannels(seegChannels);
-			m_SEEGViewer->loadElectrodes(electrodes);
-			m_SEEGViewer->loadMesh(mesh);
-
-			m_display->setMappingModeOn(true);
-			m_SEEGViewer->setMappingMode(true);
-			m_SEEGViewer->widget()->show();
-		}
-
-	}
-
-	// disable cursor toolbar when mapping is active.
-	m_cursorToolBar->setEnabled(false);
-}
-
-//
-// stopMapping()
-//
-//void AnyWave::stopCarto(int type)
-void AnyWave::stopMapping()
-{
-	// check if dock widgets are active
-	bool MEGOK = true;
-	auto dockMEG =static_cast<AwDockMapping *>(m_dockWidgets["meg_mapping"]);
-	auto dockEEG = static_cast<AwDockMapping *>(m_dockWidgets["eeg_mapping"]);
-	if (!dockMEG)
-		MEGOK = false;
-	else if (dockMEG->isClosed())
-		MEGOK = false;
-
-	bool EEGOK = true;
-	if (!dockEEG)
-		EEGOK = false;
-	else if (dockEEG->isClosed())
-		EEGOK = false;
-
-	bool SEEGActive = false;
-	if (m_SEEGViewer)
-		SEEGActive = m_SEEGViewer->isMappingActive();
-
-	if (!EEGOK && !MEGOK && !SEEGActive) {
-		m_cursorToolBar->setEnabled(true);
-		m_display->setMappingModeOn(false);
-	}
-}
-
 // Display info after values have been written to trigger channel
 void AnyWave::displayReaderTriggerStatus(bool ok, int number)
 {
@@ -973,161 +754,6 @@ void AnyWave::displayReaderTriggerStatus(bool ok, int number)
 
 	box.setText(message);
 	box.exec();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// MATLAB specific
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-bool AnyWave::searchForMatlab()
-{
-	QString matlabPath;
-	QSettings settings;
-	bool isDetected = settings.value("matlab/detected", false).toBool();
-	bool needRestart = false;
-	// check if AnyWave has already detected Matlab
-	// the every first time AnyWave is launched, matlab is surely not detected.
-	// the detected flag can be reset to false when the user changes preferences settings about Matlab
-#ifdef Q_OS_WIN
-	if (!isDetected)	{
-		QString programFiles = qgetenv("PROGRAMFILES");
-		QDir programDir(programFiles);
-		programDir.cd("MATLAB");
-		if (programDir.exists())		{
-			QStringList files = programDir.entryList(QDir::AllDirs);
-			QString release;
-			for (auto s : files)
-				if (s.startsWith("R"))				{
-					release = s;
-					break;
-				}
-				if (!release.isEmpty())				{
-					matlabPath = programDir.absolutePath() + "/" + release;
-					settings.setValue("matlab/path", matlabPath);
-					settings.setValue("matlab/detected", true);
-					isDetected = true;
-				}
-		}
-	}
-#endif
-#ifdef Q_OS_MAC
-	if (!isDetected) // not yet detected => searching for Matlab
-	{
-		QDir dir("/Applications");
-		QStringList files = dir.entryList(QDir::AllDirs);
-		QString release;
-		for (auto s : files) {
-			if (s.contains("MATLAB_R"))			{
-				release = s;
-				break;
-			}
-		}
-		if (!release.isEmpty())		{
-			matlabPath = "/Applications/" + release;
-			settings.setValue("matlab/path", matlabPath);
-			// set detected flag
-			settings.setValue("matlab/detected", true);
-			isDetected = true;
-	//		settings.setValue("matlab/require_restart", true);
-			needRestart = true;
-            AwSettings::getInstance()->createMatlabShellScript(matlabPath);
-		}
-	}
-#endif
-#ifdef Q_OS_LINUX
-	if (!isDetected) // not yet detected => searching for Matlab
-	{
-		QDir dir("/usr/local/bin");  // On Linux we look for a symlink called matlab in /usr/local/bin
-		QStringList files = dir.entryList(QDir::Files);
-		QString release;
-		for (auto s : files) {
-			if (s.contains("matlab")) {
-				release = s;
-				break;
-			}
-		}
-		if (!release.isEmpty())	{
-			// matlab is a symbol link, so get the target of the link
-			emit log("Linux: detected matlab in /usr/local/bin/" + release);
-			matlabPath = QFile::symLinkTarget("/usr/local/bin/" + release);
-			QDir matlabDir(matlabPath);
-			matlabDir.cdUp();
-			matlabDir.cdUp();
-			matlabPath = matlabDir.absolutePath();
-			emit log("Matlab Path is " + matlabPath);
-			settings.setValue("matlab/path", matlabPath);
-			// set detected flag
-			settings.setValue("matlab/detected", true);
-			isDetected = true;
-//			settings.setValue("matlab/require_restart", true);
-			needRestart = true;
-            AwSettings::getInstance()->createMatlabShellScript(matlabPath);
-		}
-	}
-#endif
-	if (isDetected) {
-		if (needRestart)
-			AwMessageBox::information(this, tr("MATLAB"), tr("MATLAB was detected. Restart AnyWave to activate MATLAB plugins."));
-		return true;
-	}
-	// not detected. Save the flag.
-	else 
-		settings.setValue("matlab/detected", false);
-	return false;
-}
-
-void AnyWave::initMatlab()
-{
-	QSettings settings;
-	// Searching for Matlab
-	if (searchForMatlab())	{
-		// matlab detected on the computer
-		// matlab installed and activated => trying to load the AwMatlabSupport plugin
-		QString matlabPath = settings.value("matlab/path", QString()).toString();
-		emit log("Trying to load MatlabSupport Module...");
-		// trying to load AwMatlabSupport plugin
-		QString moduleName;
-		QString modulePath;
-#ifdef Q_OS_WIN
-		matlabPath += "/bin/win64";
-		QCoreApplication::addLibraryPath(matlabPath);
-    	// Windows only need the path to point where matlab dll resides to find them.
-		qputenv("PATH", matlabPath.toLatin1());
-		moduleName = "AwMatlabSupport.dll";
-		modulePath = qApp->applicationDirPath() + "/" + moduleName;
-#endif
-
-#ifdef Q_OS_MAC
-		moduleName = "libAwMatlabSupport.dylib";
-        modulePath = qApp->applicationDirPath() + "/../Frameworks/" + moduleName;
-#endif
-#ifdef Q_OS_LINUX
-		moduleName = "libAwMatlabSupport.so";
-		modulePath = qApp->applicationDirPath() + "/lib/" + moduleName;
-		qputenv("LD_LIBRARY_PATH", "/usr/local/MATLAB/R2018b/bin/glnxa64");
-#endif
-		QPluginLoader loader(modulePath);
-		QObject *module = loader.instance();
-		//AwSettings::getInstance()->setMatlabPresent((module != NULL));
-		if (module) {
-			AwSettings::getInstance()->setSettings("isMatlabPresent", true);
-			AwMatlabInterface *mi = qobject_cast<AwMatlabInterface *>(module);
-			AwSettings::getInstance()->setMatlabInterface(mi);
-			mi->setParent(this);
-			emit log("MatlabSupport module loaded.");
-			// Now that the module was loaded, we need the set the PATH on Mac and Linux systems.
-			// On Unices, matlab is spawned from a csh and so the matlab command must be in the PATH.
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-			QString path = qgetenv("PATH") + ":" + matlabPath + "/bin";
-			qputenv("PATH", path.toLatin1());
-#endif
-		}
-		else {
-			emit log("MatlabSupport module not loaded.");
-			emit log(loader.errorString());
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1193,6 +819,10 @@ void AnyWave::on_actionMarkers_triggered()
 {
 	AwMarkerManager::instance()->showDockUI();
 }
+
+
+
+
 
 //
 // File->Quit

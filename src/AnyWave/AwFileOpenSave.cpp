@@ -26,6 +26,7 @@
 #include "Debug/AwDebugLog.h"
 #include "Display/AwVideoManager.h"
 #include <widget/AwVideoPlayer.h>
+#include <AwFileInfo.h>
 //
 // Menu File->Open
 // 
@@ -90,7 +91,7 @@ void AnyWave::openFile(const QString &path)
 {
 	AwFileIOPlugin *iread;
 	QString filter;
-	AwSettings *settings = AwSettings::getInstance();
+	auto aws = AwSettings::getInstance();
 	AwDataServer *data_server = AwDataServer::getInstance();
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	QString filePath = path;
@@ -184,7 +185,7 @@ void AnyWave::openFile(const QString &path)
 		}
 
 	// set global settings with new current reader
-	settings->setReader(m_currentReader, fullDataFilePath);
+	aws->setReader(m_currentReader, fullDataFilePath);
 	m_currentReader->setFullPath(fullDataFilePath);
 
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
@@ -199,7 +200,6 @@ void AnyWave::openFile(const QString &path)
 	title += tr("Duration: ") + AwUtilities::time::timeToString(m_currentReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
-//	m_currentReader->infos.setFileName(m_openFileName);
 	data_server->setMainReader(m_currentReader);
 	actionMontage->setEnabled(true);
 	actionSave->setEnabled(true);
@@ -217,20 +217,26 @@ void AnyWave::openFile(const QString &path)
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 	ds->setParent(this);
 
-	// if BIDS is already active, check if the file path is coming from an existing BIDS node:
-	bool BIDSCheck = false;
-	if (AwBIDSManager::isInstantiated()) {
-		auto BM = AwBIDSManager::instance();
-		if (BM->isBIDSActive() && BM->findSubject(filePath) != nullptr)
-			BIDSCheck = true;
+	// check if file belongs to a BIDS structure:
+	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	if (!root.isEmpty()) {
+		openBIDS(root);
+		AwBIDSManager::instance()->newFile(m_currentReader);
 	}
-	if (!BIDSCheck) {
-		QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
-		if (!root.isEmpty()) {
-			openBIDS(root);
-			AwBIDSManager::instance()->newFile(m_currentReader);
-		}
-	}
+	//// if BIDS is already active, check if the file path is coming from an existing BIDS node:
+	//bool BIDSCheck = false;
+	//if (AwBIDSManager::isInstantiated()) {
+	//	auto BM = AwBIDSManager::instance();
+	//	if (BM->isBIDSActive() && BM->findSubject(filePath) != nullptr)
+	//		BIDSCheck = true;
+	//}
+	//if (!BIDSCheck) {
+	//	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	//	if (!root.isEmpty()) {
+	//		openBIDS(root);
+	//		AwBIDSManager::instance()->newFile(m_currentReader);
+	//	}
+	//}
 
 	// read flt file before loading the montage.
 	if (!AwSettings::getInstance()->filterSettings().initWithFile(m_openFileName)) {
@@ -248,13 +254,13 @@ void AnyWave::openFile(const QString &path)
 		action->setEnabled(true);
 
 	if (!m_currentReader->triggerChannels().isEmpty()) {
-		if (settings->getBool("isAutoTriggerParsingOn")) {
+		if (aws->value(aws::auto_trigger_parsing).toBool()) {
 			AwTriggerParsingDialog dlg;
 			if (dlg.exec() == QDialog::Accepted)
 				AwProcessManager::instance()->startProcess(QString("Trigger Parser"));
 
 			if (dlg.neverAskAgain())
-				settings->setAutoTriggerParsingOn(false);
+				aws->setValue(aws::auto_trigger_parsing, false);
 		}
 	}
 
@@ -270,7 +276,7 @@ void AnyWave::openFile(const QString &path)
 	AwAmplitudeManager::instance()->setFilename(m_openFileName);
 
 	if (openWithDialog)
-		settings->addRecentFilePath(filePath);
+		aws->addRecentFilePath(filePath);
 
 	if (m_currentReader->hasVideoFile()) {
 		m_dockWidgets["video"]->show();
@@ -283,9 +289,9 @@ void AnyWave::openRecentFile()
 {
 	QAction *action = qobject_cast<QAction *>(QObject::sender());
 	AwSettings *aws = AwSettings::getInstance();
-
+	
 	qint32 index = action->data().toInt();
-	QString file = aws->getStringList("recentFiles").value(index);
+	QString file = aws->value(aws::recent_files).toStringList().value(index);
 	// Open the file
 	if (QFile::exists(file))
 		openFile(file);
@@ -302,7 +308,7 @@ void AnyWave::openRecentBIDS()
 	AwSettings *aws = AwSettings::getInstance();
 
 	qint32 index = action->data().toInt();
-	QString dir = aws->getStringList("recentBIDS").value(index);
+	QString dir = aws->value(aws::recent_bids).toStringList().value(index);
 
 	if (QDir(dir).exists())
 		openBIDS(dir);
@@ -328,11 +334,12 @@ void AnyWave::openBIDS(const QString& path)
 	if (!AwBIDSManager::isInstantiated()) {
 		AwBIDSManager::instance()->setRootDir(path);
 		connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
+		connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), 	this, SLOT(on_actionCreate_batch_script_triggered()));
 	}
 	else
 		AwBIDSManager::instance()->setRootDir(path);
 	// instantiate dock widget if needed
-	auto dock = m_dockWidgets["BIDS"];
+	auto dock = m_dockWidgets.value("BIDS");
 	if (dock == NULL) {
 		dock = new QDockWidget(tr("BIDS"), this);
 		m_dockWidgets["BIDS"] = dock;
@@ -366,7 +373,7 @@ void AnyWave::importMrkFile()
 
 void AnyWave::exportToSVG()
 {
-	auto dir = AwSettings::getInstance()->getString("workingDir");
+	auto dir = AwSettings::getInstance()->value(aws::work_dir).toString();
 	QString svgFile = QFileDialog::getSaveFileName(0, tr("Export to svg format"), dir, tr("Svg File (*.svg)"));
 	if (svgFile.isEmpty())
 		return;
@@ -384,7 +391,7 @@ void AnyWave::exportToSVG()
 
 void AnyWave::exportToPDF()
 {
-	auto dir = AwSettings::getInstance()->getString("workingDir");
+	auto dir = AwSettings::getInstance()->value(aws::work_dir).toString();
 	QString pdfFile = QFileDialog::getSaveFileName(0, tr("Save display to PDF"), dir, tr("PDF File (*.pdf)"));
 	if (pdfFile.isEmpty())
 		return;

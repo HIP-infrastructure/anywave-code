@@ -30,7 +30,7 @@
 #include <QtCore>
 
 
-#define AW_MATLAB_OUTPUT_BUFFER_SIZE	1024 * 20	// 20Kbytes buffer
+constexpr auto AW_MATLAB_OUTPUT_BUFFER_SIZE = 1024 * 20;	// 20Kbytes buffer
 
 /** run()
 - path: path to the script to be executed.
@@ -52,7 +52,7 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 		engEvalString(m_eng, "evalin('base', 'global host')");
 		engEvalString(m_eng, "evalin('base', 'global pid')");
 		engEvalString(m_eng, "evalin('base', 'global port')");
-		engEvalString(m_eng, "evalin('base', 'global json_args')");
+		engEvalString(m_eng, "evalin('base', 'global args')");
 		// send pid
 		command = "evalin('base', 'pid = " + QString::number(pid) + "')";
 		engEvalString(m_eng, command.toLatin1().data());
@@ -64,9 +64,9 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 
 		if (!jsonArgs.isEmpty())
 			// send json args
-			command = "evalin('base', 'json_args =  jsondecode(''" + jsonArgs.simplified() + "'')')";
+			command = "evalin('base', 'args =  jsondecode(''" + jsonArgs.simplified() + "'')')";
 		else
-			command = QString("evalin('base', 'json_args = ''''''')");
+			command = QString("evalin('base', 'args = ''''''')");
 
 		engEvalString(m_eng, command.toLatin1().data());
 	

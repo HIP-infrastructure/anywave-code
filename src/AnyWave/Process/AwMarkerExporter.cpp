@@ -31,12 +31,13 @@ AwMarkerExporterPlugin::AwMarkerExporterPlugin() : AwProcessPlugin()
 	description = QString(tr("Export data to a file"));
 	version = "1.0";
 	type = AwProcessPlugin::Background;
+	setFlags(Aw::ProcessFlags::ProcessSkipInputCheck);
 }
 
 AwMarkerExporter::AwMarkerExporter() : AwProcess()
 {
 	// no input checking for Process Manager
-	m_flags |= Aw::ProcessFlags::ProcessSkipInputCheck;
+	//m_flags |= Aw::ProcessFlags::ProcessSkipInputCheck;
 	concatenate = false;
 	m_plugin = new AwMarkerExporterPlugin;
 }

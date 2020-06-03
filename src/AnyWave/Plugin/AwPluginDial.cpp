@@ -28,7 +28,7 @@
 #include <QHeaderView>
 #include <AwFileIO.h>
 #include <AwProcessInterface.h>
-#include <Filter/AwFilterPlugin.h>
+#include <filter/AwFilterPlugin.h>
 #include <graphics/AwGraphicInterface.h>
 #include "Plugin/AwPluginManager.h"
 

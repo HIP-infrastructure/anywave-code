@@ -45,8 +45,8 @@
 #include "AwProcessLogManager.h"
 #include "Debug/AwDebugLog.h"
 #include "IO/BIDS/AwBIDSManager.h"
-
-
+#include <AwFileInfo.h>
+#include <AwKeys.h>
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -65,6 +65,8 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	setObjectName("AwProcessManager");
 	m_processesWidget = new AwProcessesWidget();
 	m_dock = NULL;
+	auto plm = AwProcessLogManager::instance();
+	plm->setParent(this);
 }
 
 AwProcessManager::~AwProcessManager()
@@ -113,6 +115,22 @@ void AwProcessManager::closeFile()
 	for (auto gp : m_GUIProcesses)
 		gp->stop();
 }
+
+
+QList<AwProcessPlugin *> AwProcessManager::getBatchableProcesses()
+{
+	QList<AwProcessPlugin *> list;
+	for (auto p : m_processes) {
+		if (p->isBatchGUICompatible()) {
+			//auto settings = p->settings();
+			//if (settings.contains(processio::json_ui) && settings.contains(processio::json_defaults))
+				list << p;
+		}
+	}
+	return list;
+}
+
+
 
 AwBaseProcess *AwProcessManager::newProcessFromPluginName(const QString &name)
 {
@@ -338,10 +356,11 @@ void AwProcessManager::addProcess(AwProcessPlugin *plugin)
  */
 AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 {
-	AwSettings *settings = AwSettings::getInstance();
+	auto aws = AwSettings::getInstance();
+	
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
-	auto workingDir = settings->getString("workingDir");
+	auto workingDir = aws->value(aws::work_dir).toString();
 	// create a folder in local Anywave's directories for the plugin
 	// Check if working exists 
 	// if working is empty it means AnyWave could not create user's directories.
@@ -355,14 +374,14 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 			process->pdi.input.settings[processio::working_dir] = workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	auto fi = settings->fileInfo();
+	auto fi = aws->fileInfo();
 	// if fi == NULL that means no file are currently open by AnyWave.
 	if (fi) {
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(fi->currentReader());
 		process->pdi.input.settings[processio::data_dir] = fi->dirPath();
 		process->pdi.input.settings[processio::data_path] = QString("%1/%2").arg(fi->dirPath()).arg(fi->fileName());
-		process->pdi.input.filterSettings = settings->filterSettings();
+		process->pdi.input.filterSettings = aws->filterSettings();
 		process->pdi.input.settings[processio::file_duration] = fi->currentReader()->infos.totalDuration();
 	}
 	return process;
@@ -401,7 +420,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	int type = p->plugin()->type;
 
 	// set the MATLAB interface for the plugin if MATLAB support is available
-	if (AwSettings::getInstance()->getBool("isMatlabPresent"))
+	if (AwSettings::getInstance()->value(aws::matlab_present).toBool())
 		p->pdi.setMI(AwSettings::getInstance()->matlabInterface());
 
 	// Check for process of type DisplayBackground
@@ -460,7 +479,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	bool selection = !selectedChannels.isEmpty();
 	int inputF = p->pdi.inputFlags();
 
-	p->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->getString("currentIcaFile");
+	p->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->value(aws::ica_file).toString();
 
 	bool requireSelection = inputF & Aw::ProcessInput::ProcessRequiresChannelSelection;
 	bool ignoreSelection = inputF & Aw::ProcessInput::ProcessIgnoresChannelSelection; 
@@ -560,6 +579,71 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 }
 
 
+  void AwProcessManager::runBuiltInProcess(AwBuiltInProcess *process)
+  {
+	  AwProcessLogManager *plm = AwProcessLogManager::instance();
+	  plm->setParent(this);
+	  plm->connectProcess(process);
+	  bool isFileOpen = AwSettings::getInstance()->currentReader() != nullptr;
+
+	  bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
+	  if (skipDataFile)
+		  process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	  if (!skipDataFile && !isFileOpen) {
+		  AwMessageBox::critical(nullptr, "Process Input",
+			  "This process requires an open file.");
+		  delete process;
+	  }
+	  if (process->plugin()->flags() & Aw::ProcessFlags::ProcessHasInputUi) {
+		  if (!process->showUi()) {
+			  delete process;
+			  return; 
+		  }
+	  }
+	  auto selectedChannels = AwDisplay::instance()->selectedChannels();
+	  if (process->inputFlags() & Aw::ProcessInput::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
+		  AwMessageBox::critical(NULL, tr("Process Input"),
+			  tr("This process is designed to get selected channels as input but no channel is selected."));
+		  delete process;
+		  return;
+	  }
+
+	  AwDataServer *ds = AwDataServer::getInstance();
+
+	  // create the process thread and move process object in it.
+	  QThread *processThread = new QThread;
+	  process->moveToThread(processThread);
+
+	  connect(process, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+	  connect(process, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
+	  connect(process, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
+
+	  if (!skipDataFile) {
+		  // Markers API
+		  AwMarkerManager *mm = AwMarkerManager::instance();
+		  connect(process, SIGNAL(sendMarker(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
+		  connect(process, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
+		  connect(process, SIGNAL(dataConnectionRequested(AwDataClient *)), ds, SLOT(openConnection(AwDataClient *)));
+		  // connect the process as a client of a DataServer thread.
+		  AwDataServer::getInstance()->openConnection(process);
+	  }
+	  // instantiate a new AwProcessesWidget if needed
+	  if (m_processesWidget == NULL)
+		  m_processesWidget = new AwProcessesWidget();
+	  m_processesWidget->addWidget(new AwProcessWidget(process));
+
+
+	  connect(process, SIGNAL(finished()), this, SLOT(handleProcessTermination()));
+	  connect(process, SIGNAL(aborted()), this, SLOT(handleProcessTermination()));
+	  connect(process, SIGNAL(idle()), this, SLOT(handleProcessTermination()));
+	  m_runningProcesses << process;
+	  process->init();
+	  m_dock->show();
+	  // start process thread
+	  processThread->start();
+	  QMetaObject::invokeMethod(process, "start", Qt::QueuedConnection);
+  }
+
 /*!
  * \brief
  * Start the process.
@@ -603,6 +687,14 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
 				if (process->pdi.input.markers().isEmpty())
 					process->pdi.input.addMarker(new AwMarker("global", 0, process->pdi.input.settings[processio::file_duration].toDouble()));
+			if (AwBIDSManager::isInstantiated()) {
+				auto BM = AwBIDSManager::instance();
+				if (BM->isBIDSActive()) {
+					process->pdi.input.addArgument(processio::bids_file_path, BM->getCurrentBIDSPath());
+					process->pdi.input.addArgument(processio::bids_root_dir, BM->rootDir());
+				}
+
+			}
 		}
 	}
 	else {
@@ -610,30 +702,19 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		return;
 	}
 
-	if (AwBIDSManager::isInstantiated()) {
-		auto BM = AwBIDSManager::instance();
-		if (BM->isBIDSActive()) 
-			process->pdi.input.addArgument(QString("BIDS_FilePath"), BM->getCurrentBIDSPath());
-
-	}
-
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 	plm->connectProcess(process);
-
 	AwDataServer *ds = 	AwDataServer::getInstance();
-
-	// set current language
-	process->setLocale(AwSettings::getInstance()->language());
 
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
 		AwGUIProcess *p = static_cast<AwGUIProcess *>(process);
+		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
 			ds->openConnection(p);
-			connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)));
 			connect(p, SIGNAL(sendMarker(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 			connect(p, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
 			connect(p, SIGNAL(closed()), p, SLOT(stop()));

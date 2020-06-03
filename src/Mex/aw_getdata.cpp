@@ -100,9 +100,14 @@ mxArray *request_data()
         delete socket;
         return output;
     }
-    else {
-        output = mxCreateStructMatrix(1, nChannels, nfields, fields);
-    }
+	if (nChannels == -1) {
+		QString errorString;
+		in >> errorString;
+		mexErrMsgIdAndTxt("AnyWave:aw_getdata", errorString.toStdString().c_str());
+		return output;
+	}
+    output = mxCreateStructMatrix(1, nChannels, nfields, fields);
+
     
     // get channels 
     for (int i = 0; i < nChannels; i++) {

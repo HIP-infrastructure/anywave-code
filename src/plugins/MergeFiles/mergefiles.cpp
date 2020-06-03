@@ -7,12 +7,12 @@ MergeFilePlugin::MergeFilePlugin()
 	name = "Merge Files";
 	description = tr("Merge two files in one (ADES).");
 	category = "Process:File Operation:Merge Files";
-	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 MergeFile::MergeFile()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+//	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetWriterPlugins);
 	m_adesPlugin = NULL;
 }

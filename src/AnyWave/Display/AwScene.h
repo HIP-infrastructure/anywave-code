@@ -49,7 +49,7 @@ public slots:
 	void setChannelAsBad(const QString& label);
 	void setSelectionAsMontage() override;
 private slots:
-	void launchProcess();
+//	void launchProcess();
 };
 
 #endif

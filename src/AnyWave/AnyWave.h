@@ -161,6 +161,7 @@ public slots:
 	void editVideoSyncSettings();
 
 private slots:
+	void on_actionCreate_batch_script_triggered();
 	void on_actionSave_as_triggered();
 	void on_actionMarkers_triggered();
 	void on_actionHelp_triggered();

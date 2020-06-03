@@ -56,7 +56,8 @@ public:
 	/** Sauvegarde un montage dans le chemin spécifié. **/
 	bool saveMontage(const QString& path);
 	AwChannelList channels() { return static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage(); }
-	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
+//	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
+	AwChannelList& asRecordedChannels() { return m_asRecordedChannels; }
 	inline QStringList badLabels() { return m_badChannelsLabels; }
 protected:
 	void closeEvent(QCloseEvent *e);
@@ -113,7 +114,8 @@ private slots:
 	
 private:
 	Ui::MontageDialClass m_ui;
-	QHash<QString, AwChannel *> m_asRecorded;	
+//	QHash<QString, AwChannel *> m_asRecorded;	
+	QHash<QString, AwChannel *> m_hashAsRecorded;
 	AwChannelList m_asRecordedChannels;
 	///< copy of the list from Montage Manager.
 

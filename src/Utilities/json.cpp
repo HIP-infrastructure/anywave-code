@@ -28,8 +28,35 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qjsonarray.h>
+#include <QTextStream>
+#include <AwException.h>
 
-QVariantHash AwUtilities::json::hashFromJson(const QString& jsonString, QString& errorString)
+QString  AwUtilities::json::hashToJsonString(const QVariantHash& hash)
+{
+
+	auto object = QJsonObject::fromVariantHash(hash);
+	QJsonDocument doc(object);
+	return QString(doc.toJson(QJsonDocument::Compact));
+}
+
+QVariantMap AwUtilities::json::mapFromJsonString(const QString& jsonString, QString& errorString)
+{
+	QJsonDocument doc;
+	QVariantMap map;
+	if (!jsonString.isEmpty()) {
+		QJsonParseError err;
+		doc = QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+		if (doc.isNull() || err.error != QJsonParseError::NoError) {
+			errorString = err.errorString();
+			return map;
+		}
+		return doc.object().toVariantMap();
+	}
+	return map;
+}
+
+
+QVariantHash AwUtilities::json::hashFromJsonString(const QString& jsonString, QString& errorString)
 {
 	QJsonDocument doc;
 	QVariantHash hash;
@@ -45,6 +72,30 @@ QVariantHash AwUtilities::json::hashFromJson(const QString& jsonString, QString&
 	return hash;
 }
 
+QJsonDocument  AwUtilities::json::jsonStringToDocument(const QString& jsonString, QString& errorString)
+{
+	QJsonDocument doc;
+	if (jsonString.isEmpty())
+		return doc;
+	QJsonParseError err;
+	doc = QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+	if (doc.isNull() || err.error != QJsonParseError::NoError) {
+		errorString = err.errorString();
+		return doc;
+	}
+	return doc;
+}
+
+bool  AwUtilities::json::jsonStringToFile(const QString& jsonString, const QString& filePath)
+{
+	QFile file(filePath);
+	QTextStream stream(&file);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+		return false;
+	stream << jsonString;
+	file.close();
+	return true;
+}
 
 
 QJsonDocument AwUtilities::json::readJsonFile(const QString& filePath)
@@ -57,7 +108,44 @@ QJsonDocument AwUtilities::json::readJsonFile(const QString& filePath)
 	QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &error);
 	file.close();
 	if (doc.isNull() || doc.isEmpty() || error.error != QJsonParseError::NoError) {
+		throw AwException(error.errorString(), "AwUtilities::json::readJsonFile");
 		return QJsonDocument();
 	}
 	return doc;
+}
+
+QVariantHash AwUtilities::json::fromJsonFileToHash(const QString& filePath)
+{
+	auto doc = readJsonFile(filePath);
+	if (!doc.isEmpty() && !doc.isNull())
+		return doc.object().toVariantHash();
+
+	return QVariantHash();
+}
+
+
+QString AwUtilities::json::fromJsonFileToString(const QString& filePath)
+{
+	auto doc = readJsonFile(filePath);
+	if (!doc.isEmpty() && !doc.isNull())
+		return QString(doc.toJson(QJsonDocument::JsonFormat::Compact));
+	return QString();
+}
+
+bool AwUtilities::json::saveToJsonFile(const QJsonDocument& jsonDocument, const QString& filePath)
+{
+	QString jsonString = jsonDocument.toJson(QJsonDocument::JsonFormat::Indented);
+	return saveToJsonFile(jsonString, filePath);
+}
+
+bool AwUtilities::json::saveToJsonFile(const QString& jsonString, const QString& filePath)
+{
+	QFile file(filePath);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		return false;
+	}
+	QTextStream stream(&file);
+	stream << jsonString;
+	file.close();
+	return true;
 }

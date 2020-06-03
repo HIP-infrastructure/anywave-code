@@ -30,6 +30,7 @@
 #include <QThread>
 #include <QTranslator>
 #include <QApplication>
+#include <AwKeys.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 // AwProcess
@@ -173,10 +174,36 @@ void AwProcessPlugin::addLanguageTranslation(const QString& resourceFile)
 		delete translator;
 }
 
+
+bool AwProcessPlugin::hasDeclaredArgs()
+{
+	return m_batchHash.contains("parameters");
+}
+
+bool AwProcessPlugin::isBatchGUICompatible()
+{
+	auto defaults = m_batchHash.value(cl::batch_defaults).toHash();
+	auto ui = m_batchHash.value(cl::batch_ui).toHash();
+	auto inputs = m_batchHash.value(cl::batch_inputs).toHash();
+
+	bool ok = !defaults.isEmpty() && !ui.isEmpty() && !inputs.isEmpty();
+
+	return m_flags & Aw::ProcessFlags::CanRunFromCommandLine && ok; 
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // AwProcessDataInterface
 
 void AwProcessDataInterface::addInputChannel(int type, int min, int max)
 {
 	m_inputChannels[type] = QPair<int, int>(min, max);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// builtin proces
+AwBuiltInProcess::AwBuiltInProcess(AwBuiltInPlugin *plugin)
+{
+	m_plugin = plugin;
+	plugin->setParent(this);
 }

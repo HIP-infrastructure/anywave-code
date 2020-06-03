@@ -23,10 +23,10 @@ AwMontage::AwMontage(AwFileIO *reader)
 			m_channels << c->duplicate();
 	}
 	auto m_badChannelPath = reader->getSideFile("*.bad");
-	if (!m_badChannelPath.isEmpty())
+	if (!m_badChannelPath.isEmpty() && QFile::exists(m_badChannelPath))
 		loadBadChannels();
 	auto mtgFile = reader->getSideFile("*.mtg");
-	if (!mtgFile.isEmpty()) 
+	if (!mtgFile.isEmpty() && QFile::exists(mtgFile)) 
 		load(mtgFile);
 	// remove null channels if any
 	foreach(AwChannel *c, m_channels)
@@ -88,6 +88,7 @@ void AwMontage::save(const QString& path, const AwChannelList& channels)
 	doc.save(stream, 3);
 	file.close();
 }
+
 
 
 AwChannelList AwMontage::load(const QString& path)
@@ -181,12 +182,12 @@ bool AwMontage::loadMontage(const QString& mtgFile)
 			continue;
 		}
 		if (!m_asRecordedHash.contains(c->name())) {
-			auto asRecorded = m_asRecordedHash[c->name()];
+			auto asRecorded = m_asRecordedHash.value(c->name());
 			if (asRecorded->isBad())
 				continue;
 			if (c->hasReferences() && c->referenceName() != "AVG") {
 				if (m_asRecordedHash.contains(c->referenceName())) {
-					if (m_asRecordedHash[c->referenceName()]->isBad())
+					if (m_asRecordedHash.value(c->referenceName())->isBad())
 						continue;
 				}
 				else
@@ -211,28 +212,34 @@ bool AwMontage::loadMontage(const QString& mtgFile)
 	return true;
 }
 
-void AwMontage::loadBadChannels()
+QStringList AwMontage::loadBadChannels(const QString & filePath)
 {
-	QFile file(m_badChannelPath);
+	QStringList res;
+	QFile file(filePath);
 	QTextStream stream(&file);
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		m_badChannelLabels.clear();
 		while (!stream.atEnd())
-			m_badChannelLabels << stream.readLine().trimmed();
+			res << stream.readLine().trimmed();
 		file.close();
 	}
-	// reset as recorded channels bad status
+	return res;
+}
 
+
+void AwMontage::loadBadChannels()
+{
+	m_badChannelLabels = AwMontage::loadBadChannels(m_badChannelPath);
+	// reset as recorded channels bad status
 	for (auto chan : m_asRecorded)
 		chan->setBad(false);
 	for (auto label : m_badChannelLabels) {
-		AwChannel *chan = m_asRecordedHash[label];
+		AwChannel *chan = m_asRecordedHash.value(label);
 		if (chan)
 			chan->setBad(true);
 	}
 	foreach(AwChannel *chan, m_channels) {
 		if (m_asRecordedHash.contains(chan->name())) {
-			auto asRecorded = m_asRecordedHash[chan->name()];
+			auto asRecorded = m_asRecordedHash.value(chan->name());
 			if (asRecorded->isBad()) {
 				m_channels.removeAll(chan);
 				delete chan;

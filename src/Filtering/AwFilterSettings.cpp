@@ -277,7 +277,7 @@ void AwFilterSettings::load(const QString& path)
 	m_hash.clear();
 	// types that can be filtered:
 	// all types of channels can be filtered
-	auto types = AwChannel::types();
+	auto types = AwChannel::types;
 	QJsonObject root = doc.object();
 	for (auto t : types) {
 		if (root.contains(t) && root[t].isArray()) {

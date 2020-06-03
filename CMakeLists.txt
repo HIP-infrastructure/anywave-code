@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3) 
+cmake_minimum_required(VERSION 3.6) 
 project(AnyWave)
 # detecting compiler
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
@@ -31,7 +31,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # PATH to resources
 SET(AW_RES_DIR ${CMAKE_SOURCE_DIR}/resources)
-
 
 IF(APPLE)
   SET(PLUGIN_OUT ${PROJECT_BINARY_DIR}/Anywave_Plugins)
@@ -84,11 +83,11 @@ if(MATIO_FOUND)
     message(STATUS "Found Matio lib: ${MATIO_LIBRARIES}")
 endif()
 
-# search for MKL
+if(NOT APPLE)
+# search for MKL only on Linux
 find_package(MKL)
 if(NOT MKL_FOUND)
     find_package(OpenBLAS REQUIRED)
-    SET(USE_MKL FALSE CACHE BOOL "Using MKL libraries")
     SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
 else()
     message(STATUS "MKL Found.")
@@ -99,6 +98,7 @@ else()
     INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
     SET(BLAS_LIBRARIES ${MKL_LIBRARIES})
     message(STATUS "MLK libs : ${MKL_LIBRARIES}")
+endif()
 endif()
 
 add_definitions(-DNDEBUG)
@@ -114,8 +114,11 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
+IF(NOT APPLE)
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ELSE()
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF()
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
@@ -161,9 +164,8 @@ endif()
 # END OF MATLAB SUPPORT
 
 # PYTHON
-SET(Python_ADDITIONAL_VERSIONS 2.7)
-find_package(Python2 COMPONENTS Development)
-if (Python2_FOUND)
+find_package (Python COMPONENTS Interpreter Development)
+if (Python_FOUND)
 find_package(PythonLibs)
 if (PYTHONLIBS_FOUND)
   find_package(NumPy)
@@ -189,12 +191,10 @@ add_subdirectory(src/plugins/CTF_Reader)
 add_dependencies(CTFReader AwCore AwReadWrite)
 add_subdirectory(src/plugins/Micromed_Reader)
 add_dependencies(MicromedReader AwCore AwReadWrite)
-add_subdirectory(src/plugins/ICA)
+add_subdirectory(src/plugins/icav2)
 add_dependencies(ICA AwCore AwProcess)
 add_subdirectory(src/plugins/FileConverter)
 add_dependencies(FileConverter AwCore AwProcess AwFiltering)
-add_subdirectory(src/plugins/ANT_Reader)
-add_dependencies(ANTReader AwCore AwReadWrite)
 add_subdirectory(src/plugins/AutoMarking)
 add_dependencies(AutoMarking AwCore AwProcess)
 add_subdirectory(src/plugins/AppendFiles)
@@ -209,6 +209,13 @@ add_subdirectory(src/plugins/FIFIO)
 add_dependencies(FIFFIO AwCore AwReadWrite)
 add_subdirectory(src/plugins/EEGInto4D)
 add_dependencies(EEGInto4D AwCore AwReadWrite AwUtilities)
+add_subdirectory(src/plugins/TFWavelet)
+add_subdirectory(src/plugins/Rewrite4D)
+add_subdirectory(src/plugins/MultiFiltersViewer)
+add_subdirectory(src/plugins/h2)
+add_subdirectory(src/plugins/H2Graphs)
+add_subdirectory(src/plugins/EEPIO)
+
 
 
 # Install

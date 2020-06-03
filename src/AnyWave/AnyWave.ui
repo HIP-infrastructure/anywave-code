@@ -151,6 +151,8 @@
     <property name="title">
      <string>Processes</string>
     </property>
+    <addaction name="actionCreate_batch_script"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -448,6 +450,11 @@
   <action name="actionICA_Batching">
    <property name="text">
     <string>ICA Batching</string>
+   </property>
+  </action>
+  <action name="actionCreate_batch_script">
+   <property name="text">
+    <string>Batch Processing</string>
    </property>
   </action>
  </widget>

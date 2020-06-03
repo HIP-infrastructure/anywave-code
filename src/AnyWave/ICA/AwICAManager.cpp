@@ -127,7 +127,7 @@ int AwICAManager::loadComponents(const QString& icaFile)
 	if (m_comps[type])
 		delete m_comps[type];
 	m_comps[type] = comp;
-	AwSettings::getInstance()->setSettings("currentIcaFile", icaFile);
+	AwSettings::getInstance()->setValue(aws::ica_file, icaFile);
 	emit componentsFiltersLoaded(comp->lpFilter(), comp->hpFilter());
 	emit componentsLoaded();
 	return 0;

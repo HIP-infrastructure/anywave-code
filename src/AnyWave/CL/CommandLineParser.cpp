@@ -4,13 +4,15 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
 #include "AwCommandLogger.h"
-
+#include "Plugin/AwPluginManager.h"
+#include <utils/json.h>
+#include <AwKeys.h>
 //
 // options descriptions
 //
 // --toBIDS : Convert a file or folder to BIDS by converting the data format if necessary and creating the .json files 
 // Options for --toBIDS:
-//	--bids_modality <modality> : MANDATORY. [ ieeg meg eeg ]
+//	--bids_modality <modality>  : MANDATORY. [ ieeg meg eeg ]
 //  --bids_sub <subj>			: MANDATORY. The BIDS subject
 //	--bids_task <task>			: MANDATORY. The BIDS task
 //	--bids_ses <sessions>		: OPTIONAL. The BIDS session.
@@ -63,6 +65,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputFormatO("output_format", "specify the file format to create. (vhdr, edf, MATLAB, ADES)", "output_format", QString());
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
 	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
+	QCommandLineOption outputSuffixO("output_suffix", "specify the suffix to use for output_fle.", "output_suffix", QString());
 
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
@@ -70,6 +73,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(outputFormatO);
 	parser.addOption(outputDirO);
 	parser.addOption(outputPrefixO);
+	parser.addOption(outputSuffixO);
 	// common filters flags
 	QCommandLineOption filterHPO("hp", "specify the High Pass filter (Hz).", "hp", QString());
 	QCommandLineOption filterLPO("lp", "specify the Low Pass filter (Hz).", "lp", QString());
@@ -103,9 +107,46 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(runProcessOpt);
 	// Dedicated data server mode for plugins
 	QCommandLineOption serverOpt("server", "start an instance of anywave and listen to client connections.");
-	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which listen.", QString());
+	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which to listen.", QString());
 	parser.addOption(serverOpt);
 	parser.addOption(serverPortOpt);
+
+	// get extra arg from plugins
+	auto jsonCollection = AwPluginManager::getInstance()->getBatchableArguments();
+	QStringList parameterNames;
+	QStringList flagNames;
+	for (auto json : jsonCollection) {
+		QString error;
+		auto map = AwUtilities::json::mapFromJsonString(json, error);
+		if (error.isEmpty()) {
+			if (map.contains("parameters")) {
+				auto keys = map.value("parameters").toStringList();
+				for (auto k : keys) {
+					if (!parameterNames.contains(k))
+						parameterNames << k;
+				}
+			}
+			if (map.contains("flags")) {
+				auto flags = map.value("flags").toStringList();
+				for (auto f : flags) {
+					if (!flagNames.contains(f))
+						flagNames << f;
+				}
+			}
+		}
+	}
+	QMap<QString, QCommandLineOption *> mapParams;
+	QMap<QString, QCommandLineOption *> mapFlags;
+	for (auto param : parameterNames) {
+		auto option = new QCommandLineOption(param, "plugin argument", param, QString());
+		mapParams.insert(param, option);
+		parser.addOption(*option);
+	}
+	for (auto flag : flagNames) {
+		auto option = new QCommandLineOption(flag, "plugin argument flag", flag, QString());
+		mapFlags.insert(flag, option);
+		parser.addOption(*option);
+	}
 	   	  
 	if (!parser.parse(args)) {
 		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
@@ -113,6 +154,29 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	}
 
 	AwArguments arguments;
+
+	//// add plugin options
+	for (auto k : mapParams.keys()) {
+		auto option = mapParams.value(k);
+		if (parser.isSet(*option)) {
+			arguments[k] = parser.value(*option);
+		}
+	}
+	// flags are special arguments for which value must be true or false (yes or no is also accepted)
+	QStringList flagsValues = { "yes", "no", "true", "false" };
+	for (auto k : mapFlags.keys()) {
+		auto option = mapFlags.value(k);
+		if (parser.isSet(*option)) {
+			auto value = parser.value(*option).toLower().simplified();
+			if (flagsValues.contains(value))
+				arguments[k] = value == "true" || value == "yes";
+		}
+	}
+	for (auto v : mapParams.values())
+		delete v;
+	for (auto v : mapFlags.values())
+		delete v;
+
 	//// parse common options
 
 	// output_format 
@@ -124,34 +188,39 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	availableWriters["matlab"] = QString("MATLAB Output Plugin");
 	availableWriters["ades"] = QString("AnyWave ADES Format");
 	// output dir
-	auto oDir = parser.value(outputDirO);
-	if (!oDir.isEmpty()) 
-		arguments["output_dir"] = oDir;
+	QString tmp;
+	tmp = parser.value(outputDirO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_dir] = tmp;
 	// input dir
-	auto iDir = parser.value(inputDirO);
-	if (!iDir.isEmpty())
-		arguments["input_dir"] = iDir;
+	tmp = parser.value(inputDirO);
+	if (!tmp.isEmpty())
+		arguments[cl::input_dir] = tmp;
 	// output_prefix
-	auto oPrefix = parser.value(outputPrefixO);
-	if (!oPrefix.isEmpty())
-		arguments["output_prefix"] = oPrefix;
+	tmp = parser.value(outputPrefixO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_prefix] = tmp;
+	// output_suffix
+	tmp = parser.value(outputSuffixO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_suffix] = tmp;
 	// hp/lp/notch
 	auto fHP = parser.value(filterHPO);
 	auto fLP = parser.value(filterLPO);
 	auto fNotch = parser.value(filterNotchO);
 	if (!fNotch.isEmpty())
-		arguments["notch"] = fNotch;
+		arguments[cl::notch] = fNotch;
 	if (!fHP.isEmpty())
-		arguments["hp"] = fHP;
+		arguments[cl::hp] = fHP;
 	if (!fLP.isEmpty())
-		arguments["lp"] = fLP;
+		arguments[cl::lp] = fLP;
 
-	auto inputF = parser.value(inputFileO);
-	if (!inputF.isEmpty())
-		arguments["input_file"] = inputF;
-	auto outputF = parser.value(outputFileO);
-	if (!outputF.isEmpty()) 
-		arguments["output_file"] = outputF;
+	tmp = parser.value(inputFileO);
+	if (!tmp.isEmpty())
+		arguments[cl::input_file] = tmp;
+	tmp = parser.value(outputFileO);
+	if (!tmp.isEmpty())
+		arguments[cl::output_file] = tmp;
 	   
 	if (isFormatOption) {
 		if (!outputAcceptedFormats.contains(format)) {

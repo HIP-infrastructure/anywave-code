@@ -110,6 +110,12 @@
     <Filter Include="Signal">
       <UniqueIdentifier>{cabb318c-61b6-4997-920d-200e0b613cd1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Batch">
+      <UniqueIdentifier>{fad4582d-3dc6-447f-a72d-bded135f70b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Process\PSD">
+      <UniqueIdentifier>{a1e9f0f5-9cf7-407c-8217-b80ff75cf2a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -1117,15 +1123,6 @@
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSSubject.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSSubject.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSSubject.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUI.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1133,15 +1130,6 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSTools.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSSession.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwFileItem.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
@@ -1276,18 +1264,6 @@
     <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSParser.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSParser.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSParser.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSNode.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
     <ClCompile Include="MATPy\OpenNewFile.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
@@ -1320,6 +1296,120 @@
     </ClCompile>
     <ClCompile Include="ICA\AwICABatchDialog.cpp">
       <Filter>ICA</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchDialog.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchModel.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwAddEditBatchDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwAddEditBatchDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwAddEditBatchDialog.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchRunner.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchRunner.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchRunner.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchFileInputWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchFileInputWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchFileInputWidget.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUIOptionsDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSGUIOptionsDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchManager.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchItem.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchGUI.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchGUI.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMapping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwBatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMATLAB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch\AwBatchGUI.cpp">
+      <Filter>Batch</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\PSD\AwPSD.cpp">
+      <Filter>Process\PSD</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwPSD.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwPSD.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwPSDGUI.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwPSDGUI.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\PSD\AwPSDGUI.cpp">
+      <Filter>Process\PSD</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSProxyModel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSProxyModel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp">
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1773,9 +1863,6 @@
     <CustomBuild Include="IO\BIDS\AwBIDSManager.h">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSSubject.h">
-      <Filter>IO\BIDS</Filter>
-    </CustomBuild>
     <CustomBuild Include="IO\BIDS\AwBIDSGUI.h">
       <Filter>IO\BIDS</Filter>
     </CustomBuild>
@@ -1821,9 +1908,6 @@
     <CustomBuild Include="Widgets\AwVideoSettingsDial.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSParser.h">
-      <Filter>IO\BIDS</Filter>
-    </CustomBuild>
     <CustomBuild Include="MATPy\AwPidManager.h">
       <Filter>MATPy</Filter>
     </CustomBuild>
@@ -1835,6 +1919,54 @@
     </CustomBuild>
     <CustomBuild Include="ICA\AwICABatchDialog.h">
       <Filter>ICA</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchDialog.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchDialog.ui">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchModel.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwAddEditBatchDialog.ui">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwAddEditBatchDialog.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchRunner.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchFileInputWidget.ui">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchFileInputWidget.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSGUIOptionsDialog.ui">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
+      <Filter>IO\BIDS</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchManager.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchGUI.h">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Batch\AwBatchGUI.ui">
+      <Filter>Batch</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\PSD\AwPSD.h">
+      <Filter>Process\PSD</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\PSD\AwPSDGUI.ui">
+      <Filter>Process\PSD</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Process\PSD\AwPSDGUI.h">
+      <Filter>Process\PSD</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1997,17 +2129,8 @@
     <ClInclude Include="GeneratedFiles\ui_AwSelectTriggerChannelDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSTools.h">
-      <Filter>IO\BIDS</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwBIDSGUI.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSSession.h">
-      <Filter>IO\BIDS</Filter>
-    </ClInclude>
-    <ClInclude Include="IO\BIDS\AwFileItem.h">
-      <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSItem.h">
       <Filter>IO\BIDS</Filter>
@@ -2045,10 +2168,31 @@
     <ClInclude Include="GeneratedFiles\ui_AwVideoSettingsDial.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="IO\BIDS\AwBIDSNode.h">
-      <Filter>IO\BIDS</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwICABatchDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBatchDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwAddEditBatchDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBatchFileInputWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBIDSGUIOptionsDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Batch\AwBatchItem.h">
+      <Filter>Batch</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwBatchGUI.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\AwKeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_AwPSDGUI.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

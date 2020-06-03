@@ -36,10 +36,9 @@
 #include "AwDisplaySetup.h"
 #include "AwViewSetup.h"
 #include <graphics/AwMarkerChannelItem.h>
-#if QT_VERSION >  QT_VERSION_CHECK(4, 8, 0)
 #include <qgraphicsview.h>
 #include <QGraphicsSceneMouseEvent>
-#endif
+
 
 AwScene::AwScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : AwGraphicsScene(settings, phys, parent)
 {
@@ -78,32 +77,32 @@ void AwScene::setSelectionAsMontage()
 
 }
 
-void AwScene::launchProcess()
-{
-	QAction *act = qobject_cast<QAction *>(sender());
-
-	if (act == NULL)
-		return;
-
-	// Instantiate process
-	AwProcessManager *process_manager = AwProcessManager::instance();
-	// the plugin may be of type DisplayBackground, so force it to be Background only to launch the process.
-	AwBaseProcess *process = process_manager->newProcessFromPluginName(act->text());
-	if (process == NULL)
-		return;
-
-	AwMarker input = act->data().value<AwMarker>();
-	AwMarkerList inputList;
-	// duplicate marker object
-	AwMarker *newMarker = new AwMarker(input);
-	inputList << newMarker;
-	
-	// set markers to compute data on
-	process->pdi.input.setNewMarkers(inputList);
-	// do not delete markers after computation
-	// start process
-	process_manager->runProcess(process);
-}
+//void AwScene::launchProcess()
+//{
+//	QAction *act = qobject_cast<QAction *>(sender());
+//
+//	if (act == NULL)
+//		return;
+//
+//	// Instantiate process
+//	AwProcessManager *process_manager = AwProcessManager::instance();
+//	// the plugin may be of type DisplayBackground, so force it to be Background only to launch the process.
+//	AwBaseProcess *process = process_manager->newProcessFromPluginName(act->text());
+//	if (process == NULL)
+//		return;
+//
+//	AwMarker input = act->data().value<AwMarker>();
+//	AwMarkerList inputList;
+//	// duplicate marker object
+//	AwMarker *newMarker = new AwMarker(input);
+//	inputList << newMarker;
+//	
+//	// set markers to compute data on
+//	process->pdi.input.setNewMarkers(inputList);
+//	// do not delete markers after computation
+//	// start process
+//	process_manager->runProcess(process);
+//}
 
 //
 //

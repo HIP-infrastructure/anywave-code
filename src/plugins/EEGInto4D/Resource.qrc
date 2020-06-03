@@ -1,0 +1,8 @@
+﻿<RCC>
+  <qresource prefix="/eeginto4d">
+    <file>default.json</file>
+    <file>ui.json</file>
+    <file>args.json</file>
+  </qresource>
+</RCC>
+

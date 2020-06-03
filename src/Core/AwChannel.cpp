@@ -28,9 +28,12 @@
 #include <QtMath>
 #include <QRegularExpression>
 
-static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
+//static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
 static QStringList UnitTypes = { "µV", "µV" , "pT", "µV", "µV" , "pT", "n/a", "n/a", "unit", "unit", "pT/m", "µV", "unit" };
 static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
+
+const QVector<int> AwChannel::intTypes = { 0, 1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13 };
+const QStringList AwChannel::types = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -409,14 +412,14 @@ void AwChannel::setDataReady(bool flag)
 
 int AwChannel::stringToType(const QString& s)
 {
-	auto index = ChannelTypes.indexOf(s.toUpper());
+	auto index = types.indexOf(s.toUpper());
 	return index;
 }
 
-QStringList AwChannel::types()
-{
-	return ChannelTypes;
-}
+//QStringList AwChannel::types()
+//{
+//	return ChannelTypes;
+//}
 
 
 QString AwChannel::unitForType(int type)
@@ -435,7 +438,7 @@ QString AwChannel::typeToString(int t)
 {
 	if (t >= AW_CHANNEL_TYPES)
 		return QString();
-	return ChannelTypes.at(t);
+	return types.at(t);
 }
 
 
@@ -502,6 +505,17 @@ QList<AwChannel *> AwChannel::getChannelsWithLabels(const QList<AwChannel *>& li
 		}
 	}
  	return res;
+}
+
+QHash<int, QList<AwChannel *>> AwChannel::sortByTypes(const QList<AwChannel *>& channels)
+{
+	QHash<int, QList<AwChannel *>> res;
+	for (auto type : intTypes) {
+		auto list = AwChannel::getChannelsOfType(channels, type);
+		if (!list.isEmpty()) 
+			res.insert(type, list);
+	}
+	return res;
 }
 
 QList<AwChannel *> AwChannel::getChannelsWithLabel(const QList<AwChannel *>& list, const QString& label)
@@ -613,11 +627,11 @@ QList<AwChannel *> AwChannel::sortByName(const QList<AwChannel *>& list)
 	return res;
 }
 
-QList<AwChannel *> AwChannel::sortByType(const QList<AwChannel *>& list, const QStringList& types)
+QList<AwChannel *> AwChannel::sortByType(const QList<AwChannel *>& list, const QStringList& typesList)
 {
 	// get all types
-	auto allTypes = AwChannel::types();
-	auto requestedTypes = types;
+	auto allTypes = AwChannel::types;
+	auto requestedTypes = typesList;
 	if (requestedTypes.isEmpty()) 
 		// if no types specified, build a default list with EEG, SEEG, ECOG, MEG, GRAD, EMG, ECG, Trigger, Other)
 		requestedTypes <<  "EEG" << "SEEG" << "ECOG" << "MEG" << "GRAD" << "EMG" << "ECG" << "TRIGGER" << "OTHER";

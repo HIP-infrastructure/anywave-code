@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/h2">
+        <file>args.json</file>
+    </qresource>
+</RCC>

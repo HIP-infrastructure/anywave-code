@@ -46,7 +46,7 @@ AwAmplitudeWidget::AwAmplitudeWidget(QWidget *parent)
 	m_ui->comboLevels->addItem(tr("All Gain Levels"));
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
 		m_indexes[i] = m_am->getScale(i).indexOf(m_am->amplitude(i));
-		m_ui->comboLevels->addItem(AwChannel::types().value(i), i);
+		m_ui->comboLevels->addItem(AwChannel::types.value(i), i);
 	}
 	connect(m_ui->comboLevels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLevelForChannel(int)));
 }

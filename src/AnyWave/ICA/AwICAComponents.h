@@ -9,8 +9,9 @@
 #include <QMutex>
 #include <filter/AwFilterSettings.h>
 
-#include <armadillo>
-using namespace arma;
+
+#include <aw_armadillo.h>
+//using namespace arma;
 
 
 class AwPanelItem;

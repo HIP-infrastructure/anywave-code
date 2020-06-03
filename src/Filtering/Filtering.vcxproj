@@ -26,6 +26,7 @@
     <ClCompile Include="AwFilterModel.cpp" />
     <ClCompile Include="AwFilterPlugin.cpp" />
     <ClCompile Include="AwFilterSettings.cpp" />
+    <ClCompile Include="AwFilterSettingsStore.cpp" />
     <ClCompile Include="AwFilterTableView.cpp" />
     <ClCompile Include="DspFilters\Bessel.cpp" />
     <ClCompile Include="DspFilters\Biquad.cpp" />
@@ -123,6 +124,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_CONCURRENT_LIB -DFILTERING_LIB -DAW_BUILD_FILTER_LIB -DAW_MAKE_DLL -DQT_WIDGETS_LIB -DQT_GUI_LIB -DNOMINMAX  "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtConcurrent" "-I$(DEV_ROOT)\win64\armadillo-7.800.2\include" "-I$(AWROOT)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\include\filter\AwFilterPlugin.h" />
+    <ClInclude Include="..\..\include\filter\AwFilterSettingsStore.h" />
     <ClInclude Include="GeneratedFiles\ui_AwFilterGUI.h" />
     <CustomBuild Include="AwFilterModel.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

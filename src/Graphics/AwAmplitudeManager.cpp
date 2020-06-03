@@ -149,7 +149,7 @@ void AwAmplitudeManager::save()
 	QTextStream stream(&file);
 	stream << "[Levels]" << endl;
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++) 
-		stream << QString("%1=%2").arg(AwChannel::types().value(i)).arg(m_amplitude[i]) << endl;
+		stream << QString("%1=%2").arg(AwChannel::types.value(i)).arg(m_amplitude[i]) << endl;
 	file.close();
 }
 
@@ -159,7 +159,7 @@ void AwAmplitudeManager::load()
 	settings.setIniCodec(QTextCodec::codecForName("UTF-8"));
 	settings.beginGroup("Levels");
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++)  {
-		m_amplitude[i] = (float)settings.value(AwChannel::types().value(i)).toDouble();
+		m_amplitude[i] = (float)settings.value(AwChannel::types.value(i)).toDouble();
 		// check if amplitudes are present in scales, if not add the value to the scale
 		if (m_amplitudes[i].indexOf(m_amplitude[i]) == -1) {
 			m_amplitudes[i].append(m_amplitude[i]);

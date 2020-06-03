@@ -27,10 +27,10 @@
 
 #include <QWidget>
 #include "ui_AwBIDSGUI.h"
-//#include "AwBIDSSubject.h"
 #include <qstandarditemmodel.h>
 class AwBIDSManager;
-#include "AwBIDSNode.h"
+#include "AwBIDSItem.h"
+class QMenu;
 
 class AwBIDSGUI : public QWidget
 {
@@ -40,19 +40,40 @@ public:
 	AwBIDSGUI(QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUI();
 
-	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2};
-	enum ItemTypes { Subject, Session, ieeg, eeg, meg, Folder, DataFile };
 	void refresh();
+	void closeBIDS(); 
+	void showColumns(const QStringList& cols);
+	void showItem(QStandardItem *item);
 signals:
 	void dataFileClicked(const QString&);
+	void imageFileClicked(const QString&);
+	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
+	void batchManagerNeeded();
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
+	void handleClick(const QModelIndex& index);
+	void changeBIDS(); // called when Change button is clicked
+	void openBIDSOptions(); // called when Change button is clicked
+	// context menu slots
+	void contextMenuRequested(const QPoint& pos);
+	void addToProcessing();
+	void showNiftiFiles();
 protected:
-	AwBIDSManager * m_bids;
+	AwBIDSManager *m_bids;
+	QMenu *m_menu;	// context menu
+	QMenu *m_menuProcessing;
+	QAction *m_showNifti;
 	// keep a copy of models for the TreeView
 	QStandardItemModel *m_model;
+	AwBIDSItems m_items;	// copy of items list from bids manager
+	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
 
-	void initModel(const AwBIDSNodes& subjects, QStandardItem *parent);
+	void initModel(const AwBIDSItems& subjects);
+	void recursiveFill(AwBIDSItem *item);
+	QString createToolTipFromJson(const QString& jsonPath);
+	void createContextMenus();
+	void openITKSNAP(QStandardItem *item);
+	void openNiftiFile(const QString& file);
 private:
 	Ui::AwBIDSGUIUi m_ui;		
 };

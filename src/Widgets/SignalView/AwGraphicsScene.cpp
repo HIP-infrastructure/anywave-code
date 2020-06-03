@@ -979,8 +979,7 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	QAction *action = menuSelection->addAction(tr("Select all channels"));
 	connect(action, &QAction::triggered, this, &AwGraphicsScene::selectAllChannels);
 
-	auto channelTypes = AwChannel::types();
-	for (auto t : channelTypes) {
+	for (auto t : AwChannel::types) {
 		action = menuSelection->addAction(QString(tr("Select %1 channels").arg(t)));
 		action->setData(AwChannel::stringToType(t));
 		connect(action, &QAction::triggered, this, &AwGraphicsScene::selectChannelsOfType);

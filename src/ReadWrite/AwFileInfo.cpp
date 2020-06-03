@@ -1,6 +1,10 @@
 #include <AwFileInfo.h>
 #include <qfileinfo.h>
 
+constexpr auto GardelElectrodeFile = "ElectrodesAllCoordinates.txt";
+constexpr auto GardelMeshFile = "mesh.stl";
+
+
 AwFileInfo::AwFileInfo(AwFileIO *reader, const QString& fullPath)
 {
 	m_reader = reader;
@@ -35,14 +39,14 @@ QVariant AwFileInfo::getFeature(int feature)
 	switch (feature) {
 	case AwFileInfo::SEEGElectrodeFile: 
 	{
-		QString path = QString("%1/electrodes.txt").arg(m_dirPath);
+		QString path = QString("%1/%2").arg(m_dirPath).arg(GardelElectrodeFile);
 		if (QFile::exists(path))
 			return path;
 	}
 		break;
 	case AwFileInfo::MeshFile:
 	{
-		QString path = QString("%1/mesh.stl").arg(m_dirPath);
+		QString path = QString("%1/%2").arg(m_dirPath).arg(GardelMeshFile);
 		if (QFile::exists(path))
 			return path;
 	}

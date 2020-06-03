@@ -29,6 +29,7 @@
 #include <QWidget>
 namespace Ui {class AwWaitWidgetUi;};
 #include <QDialog>
+#include <thread>
 
 class AW_WIDGETS_EXPORT AwWaitWidget : public QDialog
 {
@@ -37,16 +38,26 @@ class AW_WIDGETS_EXPORT AwWaitWidget : public QDialog
 public:
 	AwWaitWidget(const QString& title, QWidget *parent = Q_NULLPTR);
 	~AwWaitWidget();
-protected:
-	void changeEvent(QEvent *);
+	template <typename F>
+	void run(F function);
 public slots:
 	void setText(const QString& text);
 	void setCurrentProgress(int value);
 	void initProgress(int min, int max);
 	/** WaitWidget should never be closed by reject action **/
 	void reject() override {} 
+	void accept() override;
+	int exec() override;
 private:
 	Ui::AwWaitWidgetUi *ui;
+	std::thread *m_thread;
 };
+
+template<typename F>
+void AwWaitWidget::run(F function)
+{
+	m_thread = new std::thread(function);
+	exec();
+}
 
 #endif // AWWAITWIDGET_H

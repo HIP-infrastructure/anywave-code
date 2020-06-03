@@ -51,8 +51,7 @@ class AUTOMARKING_EXPORT AutoMarkingPlugin : public AwProcessPlugin
 	Q_INTERFACES(AwProcessPlugin)
 public:
 	AutoMarkingPlugin();
-
-	AutoMarking *newInstance() { return new AutoMarking; }
+	AW_INSTANTIATE_PROCESS(AutoMarking)
 
 };
 

@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QHash>
 #include <AwCore.h>
+#include <utils/json.h>
+#include <AwKeys.h>
 
 // 4DNI data format
 #define SHORT	1
@@ -20,7 +22,7 @@ typedef struct
 	char reserved[32];
 } dftk_device_header;
 
-typedef struct 
+typedef struct
 {
 	char chan_name[16];
 	quint16 chan_no;
@@ -85,7 +87,7 @@ typedef struct
 
 typedef struct
 {
-	quint16 version; 
+	quint16 version;
 	char site[32];
 	char DAP_Hostname[16];
 	quint16 sys_type;
@@ -114,7 +116,7 @@ typedef struct
 	dftk_device_header hdr;
 	float inductance;
 	Xfm transform;
-	quint16 xform_flag;		
+	quint16 xform_flag;
 	quint16 total_loops;
 	char reserved[32];
 } dftk_meg_device_data;
@@ -133,58 +135,90 @@ typedef struct
 EEGInto4DPlugin::EEGInto4DPlugin()
 {
 	type = AwProcessPlugin::Background;
-	name = tr("EEG4DNi");
-	description = tr("Load an EEG File and add its channels into a 4DNI file.");
+	name = tr("EEGInto4D");
+	description = tr("inject eeg channel from ADES EEG file into existing 4DNI MEG file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
-	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
+	m_settings[processio::json_batch] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/args.json");
 }
 
-EEGInto4D::EEGInto4D() 
+EEGInto4D::EEGInto4D()
 {
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins);
+	m_eegPlugin = nullptr;
+	m_megPlugin = nullptr;
+	m_eegReader = nullptr;
+	m_megReader = nullptr;
 }
 
 EEGInto4D::~EEGInto4D()
 {
 	while (!m_eegChannels.isEmpty())
 		delete m_eegChannels.takeFirst();
+	if (m_eegPlugin && m_eegReader) {
+		m_eegReader->cleanUpAndClose();
+		m_eegPlugin->deleteInstance(m_eegReader);
+	}
+	if (m_megPlugin && m_megReader) {
+		m_megReader->cleanUpAndClose();
+		m_megPlugin->deleteInstance(m_megReader);
+	}
+
+}
+
+bool EEGInto4D::batchParameterCheck(const QVariantHash& args)
+{
+	return true;
 }
 
 bool EEGInto4D::showUi()
 {
-	bool ades_found = false, meg_found = false;
+	bool eeg_found = false, meg_found = false;
 	settings ui;
-	
-	foreach (AwFileIOPlugin *reader,  pdi.input.readers) {
-		if (!ades_found) {
-			if (reader->name == "AnyWave ADES Format") {
-				ades_found = true;
-				m_eegPlugin = ui.eegPlugin = reader;
-			}
-		}
+
+	//foreach(AwFileIOPlugin *reader, pdi.input.readers) {
+	//	if (!ades_found) {
+	//		if (reader->name == "AnyWave ADES Format") {
+	//			ades_found = true;
+	//			m_eegPlugin = ui.eegPlugin = reader;
+	//		}
+	//	}
+	//	if (!meg_found) {
+	//		if (reader->name == "4DNI Reader") {
+	//			meg_found = true;
+	//			m_megPlugin = ui.megPlugin = reader;
+	//		}
+	//	}
+	//	if (ades_found && meg_found)
+	//		break;
+	//}
+
+	// find at least 4DNi plugin
+	for (auto plugin : pdi.input.readers) {
 		if (!meg_found) {
-			if (reader->name == "4DNI Reader") {
+			if (plugin->name == "4DNI Reader") {
 				meg_found = true;
-				m_megPlugin = ui.megPlugin = reader;
+				m_megPlugin = plugin;
+				break;
 			}
 		}
-		if (ades_found && meg_found)
-			break;
 	}
 
 
-	if (!ades_found || !meg_found) {
-		AwMessageBox::critical(NULL, tr("Missing reader plugins"), tr("This plugin requires the ADES Reader and the 4DNI Reader"));
+	//if (!ades_found || !meg_found) {
+	if (!meg_found) {
+		AwMessageBox::critical(NULL, tr("Missing reader plugins"), tr("This plugin requires the 4DNI Reader plugin"));
 		return false;
 	}
 
 	if (ui.exec() == QDialog::Accepted) {
-		m_adesFile = ui.eegFile;
-		m_megFile = ui.megFile;
+		auto args = pdi.input.args();
+//		m_eegFile = ui.eegFile;
+//		m_megFile = ui.megFile;
+		args["eeg_file"] = ui.eegFile;
+		args["meg_file"] = ui.megFile;
 		return true;
 	}
-
 	return false;
 }
 
@@ -316,7 +350,7 @@ bool EEGInto4D::changeEEGLabelsIn4D(const AwChannelList& eegChannels)
 			newCi->label = QString::fromLatin1(channel.chan_name);
 			newCi->pos = posConfig;
 			configEEGChanInfos.insert(channel.chan_no, newCi);
-		
+
 			dftk_eeg_device_data eeg_dev;
 			stream_config >> eeg_dev.impedance;
 			stream_config.skipRawData(4);
@@ -342,8 +376,8 @@ bool EEGInto4D::changeEEGLabelsIn4D(const AwChannelList& eegChannels)
 		config.close();
 		return false;
 	}
-	   
-	
+
+
 	// browse MEG file for EEG chan and save their position and index!
 	QFile srcFile(m_megFile);
 	QDataStream src_stream(&srcFile);
@@ -488,24 +522,94 @@ void EEGInto4D::alignFilePointer(QFile& file)
 	}
 }
 
+
+void EEGInto4D::runFromCommandLine()
+{
+	bool eeg_found = false, meg_found = false;
+	auto eegFile = pdi.input.args().value("eeg_file").toString();
+	for (auto plugin : pdi.input.readers) {
+		if (!eeg_found) {
+			auto reader = plugin->newInstance();
+			if (reader->canRead(eegFile)) {
+				eeg_found = true;
+				m_eegPlugin = plugin;
+				plugin->deleteInstance(reader);
+			}
+		}
+
+		//	if (plugin->name == "AnyWave ADES Format") {
+		//		ades_found = true;
+		//		m_eegPlugin = plugin;
+		//	}
+		//}
+
+		if (!meg_found) {
+			if (plugin->name == "4DNI Reader") {
+				meg_found = true;
+				m_megPlugin = plugin;
+			}
+		}
+		if (eeg_found && meg_found)
+			break;
+	}
+	// found a plugin for eeg file
+	if (m_eegPlugin == nullptr && m_megPlugin == nullptr)
+		sendMessage("Missing EEG reader or MEG reader plugin.");
+
+	// chech that MEG file could be open
+	auto reader = m_megPlugin->newInstance();
+	auto megFile = pdi.input.args().value("meg_file").toString();
+	if (reader->canRead(megFile) != AwFileIO::NoError) {
+		sendMessage(QString("File %1 could not be open by 4DNI reader.").arg(megFile));
+		m_megPlugin->deleteInstance(reader);
+		return;
+	}
+	m_megPlugin->deleteInstance(reader);
+	run();
+}
+
+
 void EEGInto4D::run()
 {
-	m_eegReader = m_eegPlugin->newInstance();
-	m_eegReader->setPlugin(m_eegPlugin);
 	m_megReader = m_megPlugin->newInstance();
 	m_megReader->setPlugin(m_megPlugin);
+	auto args = pdi.input.args();
+	m_eegFile = args.value("eeg_file").toString();
+	m_megFile = args.value("meg_file").toString();
+	// search for a plugin capable of reading eeg file
+	bool found = false;
+	for (auto plugin : pdi.input.readers) {
+		auto reader = plugin->newInstance();
+		if (reader->canRead(m_eegFile) == AwFileIO::NoError) {
+			found = true;
+			m_eegPlugin = plugin;
+			m_eegReader = reader;
+			m_eegReader->setPlugin(plugin);
+			break;
+		}
+		else {
+			plugin->deleteInstance(reader);
+		}
+	}
+
+
+	// use a tmp dir to inject
+	QTemporaryDir tmpDir;
+	if (!tmpDir.isValid()) {
+		sendMessage(QString("Could not create temp dir : %1").arg(tmpDir.errorString()));
+		return;
+	}
 
 	try {
-
 		// assume opening files will be ok as we already checked that in settings::accept()
-		if (m_eegReader->openFile(m_adesFile) != AwFileIO::NoError) {
-			throw AwException(QString("Failed to open %1").arg(m_adesFile));
+		if (m_eegReader->openFile(m_eegFile) != AwFileIO::NoError) {
+			throw(AwException(QString("Failed to open %1").arg(m_eegFile)));
 		}
 		// 
 		m_eegChannels = AwChannel::extractChannelsOfType(m_eegReader->infos.channels(), AwChannel::EEG);
-		if (m_eegChannels.isEmpty()) 
+		if (m_eegChannels.isEmpty())
 			throw AwException("No EEG channels in EEG file!");
-		
+
 		// Skip NULL EEG Channels
 		foreach(AwChannel *c, m_eegChannels) {
 			if (c->name().toLower().startsWith("nul")) {
@@ -515,62 +619,67 @@ void EEGInto4D::run()
 		}
 
 		// open MEG file and check for channels, sampling rate, data length
-		if (m_megReader->openFile(m_megFile) != AwFileIO::NoError) 
+		if (m_megReader->openFile(m_megFile) != AwFileIO::NoError)
 			throw AwException(QString("Failed to open %1").arg(m_megFile));
-		
 
 		// check if MEG contains enough EEG channels for the injection.
 		auto eegChannelsinMeg = AwChannel::getChannelsOfType(m_megReader->infos.channels(), AwChannel::EEG);
-		if (m_eegChannels.size() > eegChannelsinMeg.size()) 
+		if (m_eegChannels.size() > eegChannelsinMeg.size())
 			throw AwException(QString("The number of EEG channels in MEG is insufficient to inject EEG channels from EEG file."));
-		
+
 		// check if sampling rate are the same
 		// trick: comparing two float values mais be odd..
 		const int eegSR = (int)std::floor(m_eegChannels.first()->samplingRate());
 		const int megSR = (int)std::floor(eegChannelsinMeg.first()->samplingRate());
 		if (eegSR != megSR)
 			throw AwException(QString("The sampling rate differs between the two files."));
-		
+
 		// check if data length for EEG is not too big
-		if (m_eegReader->infos.totalSamples() > m_megReader->infos.totalSamples()) 
+		if (m_eegReader->infos.totalSamples() > m_megReader->infos.totalSamples())
 			throw AwException(QString("EEG data length is too big."));
-		
+
 		////
 		//// Create a folder to put injected data files 
 		//// Folder will be named results
 		QFileInfo fi(m_megFile);
-		auto destDir = QString("%1/results").arg(fi.absolutePath());
+		auto srcFileName = fi.fileName();
+		QString destFileName = srcFileName;
+		auto outputDir = args.value("output_dir").toString();
+		if (outputDir.isEmpty())
+			outputDir = fi.absolutePath();
+		auto outputFile = args.value("output_file").toString();
+		QString tmpOutputFile;
+		if (!outputFile.isEmpty())
+			destFileName = outputFile;
+		tmpOutputFile = QString("%1/%2").arg(tmpDir.path()).arg(destFileName);
+
+		auto newConfigPath = QString("%1/config").arg(tmpDir.path());
 		auto srcConfigPath = QString("%1/config").arg(fi.absolutePath());
-		auto fileName = fi.fileName();
-		auto srcMrkPath = QString("%1.mrk").arg(m_megFile);
-		auto destMrkPath = QString("%1/%2.mrk").arg(destDir).arg(fileName);
-		auto srcBadPath = QString("%1.bad").arg(m_megFile);
-		auto destBadPath = QString("%1/%2.bad").arg(destDir).arg(fileName);
-		QDir dir;
-		dir.mkpath(destDir);
-		auto destFileName = QString("%1/%2_EEG").arg(destDir).arg(fileName);
-		auto newConfigPath = QString("%1/config").arg(destDir);
-		if (QFile::exists(destFileName))
-			QFile::remove(destFileName);
-		if (QFile::exists(newConfigPath))
-			QFile::remove(newConfigPath);
-		// copy config file to results dir
-		if (!QFile::copy(srcConfigPath, newConfigPath)) 
-			throw AwException(QString("Faild to copy config file to results dir."));
-		if (QFile::exists(srcMrkPath))
-			QFile::copy(srcMrkPath, destMrkPath);
-		if (QFile::exists(srcBadPath))
-			QFile::copy(srcBadPath, destBadPath);
-		
+
+		auto srcMrkPath = QString("%1/%2.mrk").arg(fi.absolutePath()).arg(srcFileName);
+		auto destMrkPath = QString("%1/%2.mrk").arg(tmpDir.path()).arg(destFileName);
+		auto srcBadPath = QString("%1/%2.bad").arg(fi.absolutePath()).arg(srcFileName);
+		auto destBadPath = QString("%1/%2.bad").arg(tmpDir.path()).arg(destFileName);
+
+		// copy .mrk and .bad to tmp dir
+		QFile::copy(srcBadPath, destBadPath);
+		QFile::copy(srcMrkPath, destMrkPath);
+
+		// copy config to tmp dir
+		if (!QFile::copy(srcConfigPath, newConfigPath))
+			throw AwException(QString("Fail to copy config file to tmp dir."));
 		// use rewrite 4D code to rewrite MEG file to _EEG (converting int samples to float).
 		QFile srcFile(m_megFile);
-		if (!srcFile.open(QIODevice::ReadOnly)) 
+		if (!srcFile.open(QIODevice::ReadOnly)) {
 			throw AwException(tr("Error opening MEG file for reading."));
+		}
 
-		QFile newFile(destFileName);
-		if (!newFile.open(QIODevice::ReadWrite)) 
-			throw AwException(QString("Error opening %1 file for writing.").arg(destFileName));
-		
+		QFile newFile(tmpOutputFile);
+		if (!newFile.open(QIODevice::ReadWrite)) {
+			srcFile.close();
+			throw AwException(QString("Error opening %1 file for writing.").arg(tmpOutputFile));
+		}
+
 		QDataStream src_stream(&srcFile);
 		QDataStream dest_stream(&newFile);
 		src_stream.setVersion(QDataStream::Qt_4_4);
@@ -622,29 +731,32 @@ void EEGInto4D::run()
 		dest_stream << (qint16)3; // 3 is float data
 		sendMessage("Done.");
 		newFile.close();
+		srcFile.close();
 
-		m_megFile = destFileName;
+		// swich to newly generated file
+		m_megFile = tmpOutputFile;
 		m_megReader->cleanUpAndClose();
-		if (!changeEEGLabelsIn4D(m_eegChannels)) 
+		if (!changeEEGLabelsIn4D(m_eegChannels))
 			throw AwException(tr("Error: Failed changing EEG labels in MEG file."));
 		// the source MEG file head has been modified already, with new EEG labels inserted using ADES source file.
 		// reopen it with the Reader plugin
-		if (m_megReader->openFile(m_megFile) != AwFileIO::NoError) 
+		if (m_megReader->openFile(m_megFile) != AwFileIO::NoError)
 			throw AwException(QString("Failed to open %1").arg(m_megFile));
 		// get the labels of all channels in MEG file
 		auto allLabels = AwChannel::getLabels(m_megReader->infos.channels());
-
+	
 		QStringList eegLabels = AwChannel::getLabels(m_eegChannels);
 		sendMessage("Reading EEG file...");
-		if (m_eegReader->readDataFromChannels(0, m_eegReader->infos.totalDuration(), m_eegChannels) == 0) 
+		if (m_eegReader->readDataFromChannels(0, m_eegReader->infos.totalDuration(), m_eegChannels) == 0) {
+
 			throw AwException("Error reading data from EEG file.");
-		
+		}
+
 		// re open new file in w mode
-		newFile.setFileName(destFileName);
+		newFile.setFileName(tmpOutputFile);
 		if (!newFile.open(QIODevice::ReadWrite))
 			throw AwException("Failed to open again MEG file in w mode.");
 		dest_stream.setDevice(&newFile);
-
 
 		sendMessage("Done.");
 		newFile.seek(0);
@@ -665,19 +777,16 @@ void EEGInto4D::run()
 				dest_stream << value;
 			}
 		}
-		sendMessage("All done.");
+		m_megReader->cleanUpAndClose();
+		sendMessage("Done.");
 		newFile.close();
+		moveResultingFiles(tmpDir.path(), outputDir);
 	}
 	catch (const AwException& e) {
 		sendMessage(e.errorString());
-		m_eegReader->cleanUpAndClose();
-		m_megReader->cleanUpAndClose();
-		m_megPlugin->deleteInstance(m_megReader);
-		m_eegPlugin->deleteInstance(m_eegReader);
 		return;
 	}
-	m_megPlugin->deleteInstance(m_megReader);
-	m_eegPlugin->deleteInstance(m_eegReader);
+
 }
 
 float EEGInto4D::swapFloat(float val)
@@ -692,4 +801,24 @@ float EEGInto4D::swapFloat(float val)
 	returnFloat[3] = floatToConvert[0];
 
 	return ret;
+}
+
+void EEGInto4D::moveResultingFiles(const QString& srcDir, const QString& destDir)
+{
+	sendMessage("Moving files to the output dir...");
+	QDir dir(srcDir);
+	// now copy all the files from tmp dir to real output_dir
+	auto list = dir.entryInfoList(QDir::Files);
+	for (auto file : list) {
+		auto src = file.absoluteFilePath();
+		auto dest = QString("%1/%2").arg(destDir).arg(file.fileName());
+		if (QFile::exists(dest)) 
+			QFile::remove(dest);
+		bool status = QFile::copy(src, dest);
+		if (!status) {
+			sendMessage("Coult not overide existing file.\nMaking a new file.");
+			QString("%1/%2_new").arg(destDir).arg(file.fileName());
+			QFile::copy(src, dest);
+		}
+	}
 }

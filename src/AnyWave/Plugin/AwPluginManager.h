@@ -122,6 +122,11 @@ public:
 	AwProcessPlugin *getProcessPluginByName(const QString& name) { return m_processFactory.getPluginByName(name); }
 	AwFilterPlugin *getFilterPluginByName(const QString& name) { return m_filterFactory.getPluginByName(name); }
 
+	// gather json args strings from all plugin that are command line compatible
+	QStringList getBatchableArguments();
+	/** gather file extensions of all reader plugins. **/
+	QStringList getReadableFileExtensions();
+
 	AwFileIO *getReaderToOpenFile(const QString& file);
 
 signals:
@@ -143,13 +148,18 @@ private:
 	void loadUserPlugins();
 	void checkForScriptPlugins(const QString& startingPath);
 	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
+	void setJsonUi(AwScriptPlugin *plugin, const QString& jsonUiPath);
+	void setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonDefaultsPath);
+	void setJsonSettings(AwScriptPlugin *plugin, const QString& key, const QString& jsonDefaultsPath);
 	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
+	bool checkPluginVersion(QObject *plugin);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);
 	void loadFileIOWriterPlugin(AwFileIOPlugin *plugin);
 	void loadProcessPlugin(AwProcessPlugin *plugin);
 	void loadDisplayPlugin(AwDisplayPlugin *plugin);
 	void loadFilterPlugin(AwFilterPlugin *plugin);
+	void processJsonFiles();
 
 	// Plugins
 	static AwPluginManager *m_instance;
@@ -166,6 +176,8 @@ private:
 	ProcessPluginFactory m_processFactory;
 	FilterPluginFactory m_filterFactory;
 	QMutex m_mutex;
+	QMap<QString, int> m_MATPyInputFlagsMap;	// hold input flags for the process object instance.
+	QMap<QString, int> m_MATPyPluginFlagsMap;	// hold general flags for the plugin object.
 
 	// Python plugins list (names)
 	QStringList m_pythonPlugins;

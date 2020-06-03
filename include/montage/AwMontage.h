@@ -38,6 +38,7 @@ public:
 	static AwChannelList load(const QString& path);
 	static void save(const QString& path, const AwChannelList& channels);
 	inline AwChannelList& channels() { return m_channels; }
+	static QStringList loadBadChannels(const QString& filePath);
 protected:
 	void loadBadChannels();
 	bool loadMontage(const QString& mtgFile);

@@ -811,7 +811,7 @@ QWidget *AwChannelListDelegateAsRecorded::createEditor(QWidget *parent, const QS
 {
 	if (index.column() == AW_ASRECORDED_COLUMN_TYPE)	{
 		QComboBox *editor = new QComboBox(parent);
-		editor->addItems(AwChannel::types());
+		editor->addItems(AwChannel::types);
 		editor->setFocusPolicy(Qt::StrongFocus);	
 		// Des qu'une type est choisi dans la combo box on ferme celle ci et on commit le changement de données.
 		connect(editor, SIGNAL(activated(int)), this, SLOT(commitAndCloseComboBox()));

@@ -3,7 +3,14 @@
 # ------------------------------------------------------
 
 
-HEADERS += ./Data/AwDataChunk.h \
+HEADERS += ./Batch/AwBatchGUI.h \
+	./Batch/AwBatchManager.h \
+     ./Batch/AwBatchModel.h \
+     ./Batch/AwBatchItem.h \
+     ./Batch/AwAddEditBatchDialog.h \
+      ./Batch/AwBatchFileInputWidget.h \
+    ./Batch/AwBatchRunner.h \
+     ./Data/AwDataChunk.h \
     ./Data/AwMemoryMapper.h \
     ./Data/AwDataConnection.h \
     ./Data/AwDataServer.h \
@@ -32,13 +39,10 @@ HEADERS += ./Data/AwDataChunk.h \
     ./IO/HDF5/HDF5IO.h \
     ./IO/MATLAB/MATLABIO.h \
     ./IO/BIDS/AwBIDSItem.h \
-    ./IO/BIDS/AwBIDSSession.h \
     ./IO/BIDS/AwBIDSTools.h \
-    ./IO/BIDS/AwFileItem.h \
     ./IO/BIDS/AwBIDSManager.h \
-    ./IO/BIDS/AwBIDSSubject.h \
     ./IO/BIDS/AwBIDSGUI.h \
-    ./IO/BIDS/AwBIDSParser.h \
+     ./IO/BIDS/AwBIDSGUIOptionsDialog.h \
     ./IO/MEMIO/MEMIO.h \
     ./IO/JSON/AwJSON.h \
     ./Marker/AwExtractTriggers.h \
@@ -142,11 +146,21 @@ HEADERS += ./Data/AwDataChunk.h \
     ./CL/CommandLineParser.h \
     ./CL/AwCommandLogger.h
 SOURCES += ./AnyWave.cpp \
+	./AwMapping.cpp \
+	./AwBatch.cpp \
+	./AwMATLAB.cpp \
     ./AwExportDial.cpp \
     ./AwFileOpenSave.cpp \
     ./AwOpenFileDialog.cpp \
     ./AwUpdater.cpp \
     ./main.cpp \
+    ./Batch/AwBatchGUI.cpp \
+	./Batch/AwBatchManager.cpp \
+    ./Batch/AwBatchModel.cpp \
+    ./Batch/AwAddEditBatchDialog.cpp \
+	./Batch/AwBatchItem.cpp \
+     ./Batch/AwBatchFileInputWidget.cpp \
+     ./Batch/AwBatchRunner.cpp \
     ./Data/AwDataChunk.cpp \
     ./Data/AwDataConnection.cpp \
     ./Data/AwDataServer.cpp \
@@ -178,12 +192,8 @@ SOURCES += ./AnyWave.cpp \
     ./IO/BIDS/AwBIDSGUI.cpp \
     ./IO/BIDS/AwBIDSItem.cpp \
     ./IO/BIDS/AwBIDSManager.cpp \
-    ./IO/BIDS/AwBIDSSession.cpp \
-    ./IO/BIDS/AwBIDSSubject.cpp \
     ./IO/BIDS/AwBIDSTools.cpp \
-    ./IO/BIDS/AwBIDSNode.cpp \
-    ./IO/BIDS/AwBIDSParser.cpp \
-    ./IO/BIDS/AwFileItem.cpp \
+     ./IO/BIDS/AwBIDSGUIOptionsDialog.cpp \
     ./IO/MEMIO/MEMIO.cpp \
     ./IO/JSON/AwJSON.cpp \
     ./Marker/AwDockAddMarker.cpp \
@@ -218,6 +228,8 @@ SOURCES += ./AnyWave.cpp \
     ./MATPy/SendMessage.cpp \
     ./MATPy/SetBeamFormer.cpp \
     ./MATPy/OpenNewFile.cpp \
+    ./MATPy/RunAnyWave.cpp \
+    ./MATPy/GetProperties.cpp \
     ./Montage/AwChannelListModel.cpp \
     ./Montage/AwECoGDialog.cpp \
     ./Montage/AwECoGGrid.cpp \
@@ -300,6 +312,9 @@ SOURCES += ./AnyWave.cpp \
     ./CL/CommandLineParser.cpp
 FORMS += ./AnyWave.ui \
     ./AwExportDial.ui \
+    ./Batch/AwBatchGUI.ui \
+    ./Batch/AwAddEditBatchDialog.ui \
+    ./Batch/AwBatchFileInputWidget.ui \
     ./ICA/AwICAPanel.ui \
     ./ICA/AwPanelItem.ui \
     ./Carto/AwMappingWidget.ui \
@@ -310,6 +325,7 @@ FORMS += ./AnyWave.ui \
     ./Display/AwSaveAsNewSetupDialog.ui \
     ./Filter/AwFilterToolBar.ui \
     ./IO/BIDS/AwBIDSGUI.ui \
+     ./IO/BIDS/AwBIDSGUIOptionsDialog.ui \
     ./Marker/AwMarkerManagerSettings.ui \
     ./Marker/AwMarkerRuleManageDial.ui \
     ./Marker/AwMarkerRuleWidget.ui \

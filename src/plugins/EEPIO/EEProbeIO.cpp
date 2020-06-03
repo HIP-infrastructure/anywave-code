@@ -1,6 +1,7 @@
 #include "EEProbeIO.h"
 #include "cnt/cnt_private.h"
 #include "eep/eepio.h"
+#include <math.h>
 
 EEPIO::EEPIO(const QString& fileName) : AwFileIO(fileName)
 {

@@ -35,6 +35,9 @@
 #include <AwCore.h>
 #include <utils/json.h>
 #include "Prefs/AwSettings.h"
+#include <AwFileInfo.h>
+#include <AwKeys.h>
+#include "IO/BIDS/AwBIDSManager.h"
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
 {
@@ -75,13 +78,13 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 		process->pdi.input.settings[processio::plugin_names] = list;
 	}
 	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
-		process->pdi.input.addChannels(asRecorded, true);
+		if (!asRecorded.isEmpty())
+			process->pdi.input.addChannels(asRecorded, true);
 	}
 	if (!process->pdi.areInputChannelSet()) { // no input channels specified => ok set to AnyChannels (1-n)
 		process->pdi.addInputChannel(-1, 1, 0);
 	}
-	//process->pdi.input.icaPath = AwSettings::getInstance()->getString("currentIcaFile");
-	process->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->getString("currentIcaFile");
+	process->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->value(aws::ica_file).toString();
 	// input channels are set
 	auto types = process->pdi.getInputChannels();
 	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
@@ -108,7 +111,8 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList&
 			res += AwChannel::getChannelsOfType(sources, t);
 		}
 	}
-	process->pdi.input.addChannels(res, true);
+	if (!res.isEmpty())
+		process->pdi.input.addChannels(res, true);
 	return true;
 }
 
@@ -118,48 +122,50 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	const QString origin = "AwCommandLineManager::createNewProcess()";
 	// get plugin name from json argumetns
 	if (!args.contains("run_process")) {
-		throw AwException("missing json argument.", origin);
+		throw AwException("missing --run argument.", origin);
 		return Q_NULLPTR;
 	}
-	// check for json file
-	QJsonDocument doc;
-	QJsonObject obj;
+
+	// check run arguments (could be a  json file, a json string or a the name of a plugin
 	QString json = args["run_process"].toString();
-	// get json file or parse the string
-	if (QFile::exists(json)) {
-		doc = AwUtilities::json::readJsonFile(json);
-		if (doc.isEmpty() || doc.isNull()) {
-			throw AwException("json file is invalid.", origin);
-			return Q_NULLPTR;
-		}
-	}
-	else {
-		doc = QJsonDocument::fromJson(json.toUtf8());
-		if (doc.isEmpty() || doc.isNull()) {
-			throw AwException("json string is invalid.", origin);
-			return Q_NULLPTR;
-		}
-	}
-	obj = doc.object();
-
+	QString pluginName = json;
 	auto pm = AwPluginManager::getInstance();
-	QString pluginName = obj["plugin"].toString();
 	auto plugin = pm->getProcessPluginByName(pluginName);
-
-	if (plugin == Q_NULLPTR) {
-		throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
-		return Q_NULLPTR;
+	QVariantHash hash;
+	if (plugin == nullptr) {
+		// no plugin found with that name.
+		// a file?
+		if (QFile::exists(json)) {
+			hash = AwUtilities::json::fromJsonFileToHash(json);
+			if (hash.isEmpty() || !hash.contains("plugin")) {
+				throw AwException("json file is invalid.", origin);
+				return nullptr;
+			}
+			pluginName = hash.value("plugin").toString();
+		}
+		else {  // testing for a json string
+			QString error;
+			hash = AwUtilities::json::hashFromJsonString(json, error);
+			if (!hash.isEmpty()) { // got a json string
+				if (!hash.contains("plugin")) {
+					throw AwException(QString("json string is invalid: %1").arg(error), origin);
+					return nullptr;
+				}
+				pluginName = hash.value("plugin").toString();
+			}
+		}
+		plugin = pm->getProcessPluginByName(pluginName);
+		if (plugin == Q_NULLPTR) {
+			throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
+			return Q_NULLPTR;
+		}
 	}
 
 	AwFileIO *reader = Q_NULLPTR;
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
+	args.unite(hash);
 
-	QString inputFile;
-	if (args.contains("input_file"))
-		inputFile = args["input_file"].toString();
-	if (obj.contains("input_file"))
-		inputFile = obj["input_file"].toString();
-
+	QString inputFile = args.value(cl::input_file).toString();
 
 	if (!doNotRequiresData && inputFile.isEmpty()) {
 		throw AwException(QString("input_file must be specified."), origin);
@@ -172,57 +178,46 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		reader = pm->getReaderToOpenFile(inputFile);
 		if (reader == Q_NULLPTR) {
 			throw AwException(QString("no reader can open %1").arg(inputFile), origin);
-			return Q_NULLPTR;
+			return process;
 		}
+		process->pdi.input.setReader(reader);
 		if (reader->openFile(inputFile) != AwFileIO::NoError) {
 			throw AwException(QString("Could not open %1").arg(inputFile), origin);
-			reader->plugin()->deleteInstance(reader);
-			return Q_NULLPTR;
+			return process;
 		}
 		AwFileInfo fi(reader, inputFile);
 		process->pdi.input.settings[processio::data_dir] = fi.dirPath();
 		process->pdi.input.settings[processio::file_duration] = reader->infos.totalDuration();
 		process->pdi.input.settings[processio::data_path] = inputFile;
-
-		//process->pdi.input.dataFolder = fi.dirPath();
-		//process->pdi.input.fileDuration = reader->infos.totalDuration();
-		//process->pdi.input.dataPath = inputFile;
-		process->pdi.input.setReader(reader);
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file
-	if (obj.contains("marker_file")) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(obj["marker_file"].toString());
-		obj["marker_file"] = fullPath;
+	if (args.contains(cl::marker_file)) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(args.value(cl::marker_file).toString());
+		args[cl::marker_file] = fullPath;
 	}
-	if (obj.contains("montage_file")) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(obj["montage_file"].toString());
-		obj["montage_file"] = fullPath;
+	if (args.contains(cl::montage_file)) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(args.value(cl::montage_file).toString());
+		args[cl::montage_file] = fullPath;
 	}
-
-	// Unite arguments and json !
-	args.unite(doc.object().toVariantHash());
-
-	// add the json string also for MATLAB/Python plugin
-	args["json_args"] = QString(doc.toJson());
 
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
 		QString tmp = QString("%1.bad").arg(inputFile);
 		if (QFile::exists(tmp)) {
-			args["bad_file"] = tmp;
+			args[cl::bad_file] = tmp;
 			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::loadBad(tmp);
 		}
 		AwChannelList montage;
 		tmp = QString("%1.mtg").arg(inputFile);
-		if (!args.contains("montage_file"))
+		if (!args.contains(cl::montage_file))
 			if (QFile::exists(tmp))
-				args["montage_file"] = tmp;
-		if (args.contains("montage_file")) { // did we finally got a montage file?
-				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args["montage_file"].toString(), 
+				args[cl::montage_file] = tmp;
+		if (args.contains(cl::montage_file)) { // did we finally got a montage file?
+				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args.value(cl::montage_file).toString(),
 					process->pdi.input.settings[processio::bad_labels].toStringList());
 				if (montage.isEmpty()) { // error when loading and/or applying mtg file
-					throw AwException(QString("error: %1 file could not be applied.").arg(args["montage_file"].toString()), origin);
-					return Q_NULLPTR;
+					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(cl::montage_file).toString()), origin);
+					return process;
 				}
 		}
 		else  { // no montage specified or detected
@@ -232,27 +227,28 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		}
 		if (!buildPDI(process, montage, reader->infos.channels())) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
-			return Q_NULLPTR;
+			AW_DESTROY_LIST(montage);
+			return process;
 		}
 		AW_DESTROY_LIST(montage);
 		
 		tmp = QString("%1.mrk").arg(inputFile);
 		// detect only if marker_file option is not specified by the user
-		if (!args.contains("marker_file"))
+		if (!args.contains(cl::marker_file))
 			if (QFile::exists(tmp))
-				args["marker_file"] = tmp;
+				args[cl::marker_file] = tmp;
 		// if marker file is found => load markers and use them for the process
-		if (args.contains("marker_file"))
-			process->pdi.input.setNewMarkers(AwMarker::load(args["marker_file"].toString()));
+		if (args.contains(cl::marker_file))
+			process->pdi.input.setNewMarkers(AwMarker::load(args.value(cl::marker_file).toString()));
 		else
 			process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
 
 		// handle skipping markers and/or use specific markers
 		QStringList skippedLabels, usedLabels;
-		if (args.contains("skip_markers"))
-			skippedLabels = args["skip_markers"].toStringList();
-		if (args.contains("use_markers"))
-			usedLabels = args["use_markers"].toStringList();
+		if (args.contains(cl::skip_markers))
+			skippedLabels = args.value(cl::skip_markers).toStringList();
+		if (args.contains(cl::use_markers))
+			usedLabels = args.value(cl::use_markers).toStringList();
 
 		bool skipMarkers = !skippedLabels.isEmpty();
 		bool useMarkers = !usedLabels.isEmpty();
@@ -273,6 +269,13 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
 		AwDataServer::getInstance()->setMainReader(reader);
 		AwDataServer::getInstance()->openConnection(process);
+
+		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
+		AwBIDSManager::initCommandLineOperation(inputFile);
+	}
+	else {   // no input file but requires to build pdi anyway
+		buildPDI(process);
+
 	}
 	return process;
 }

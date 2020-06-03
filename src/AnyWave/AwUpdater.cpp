@@ -34,6 +34,7 @@
 #ifdef Q_OS_WIN
 #include "zip.h"
 #endif
+#include <AwVersion.h>
 //////////////////////////////////////////////////////////////////////////////////////////
 /// Downloader
 
@@ -50,7 +51,7 @@ void AwDownloader::error(const QString& message)
 void AwDownloader::download()
 {
 	QUrl url;
-	bool isINSVersion = AwSettings::getInstance()->getBool("INS_Version");
+	bool isINSVersion = AwSettings::getInstance()->value(aws::ins_version).toBool();
 	QString baseURL;
 	if (isINSVersion)
 		baseURL = QString("http://139.124.150.47/AnyWave");
@@ -182,16 +183,13 @@ AwUpdater::AwUpdater(QObject *parent) : QObject(parent)
 void AwUpdater::checkForUpdate()
 {
 	QString platform; 
+	auto aws = AwSettings::getInstance();
 
-	if (!AwSettings::getInstance()->getBool("checkForUpdates"))
+	if (!aws->value(aws::check_updates).toBool())
 		return;
-	QString version = AwSettings::getInstance()->getString("majorVersion");
-	QString minor = AwSettings::getInstance()->getString("minorVersion");
-	bool isINSVersion = AwSettings::getInstance()->getBool("INS_Version");
-
-	if (version.isEmpty() || minor.isEmpty())
-		return;
-
+	auto major = AW_MAJOR_VERSION;
+	auto minor = AW_MINOR_VERSION;
+	bool isINSVersion = aws->value(aws::ins_version).toBool();
 
 #ifdef Q_OS_MACOS
 	platform = "Mac";
@@ -204,9 +202,9 @@ void AwUpdater::checkForUpdate()
 #endif 
 	QUrl url;
 	if (!isINSVersion)
-		url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
+		url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(major).arg(minor));
 	else
-		url = QUrl(QString("http://139.124.150.47/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(version).arg(minor));
+		url = QUrl(QString("http://139.124.150.47/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(major).arg(minor));
 	QNetworkRequest request(url);
 	m_webAccess.get(request);
 
@@ -214,11 +212,12 @@ void AwUpdater::checkForUpdate()
 
 void AwUpdater::handleResult(QNetworkReply *reply)
 {
+	auto aws = AwSettings::getInstance();
 	QByteArray data = reply->readAll();
 	QString response = QString(data);
 	if (response.toLower() != "no update") {
 		url = response;
-		AwSettings::getInstance()->setSettings("updateUrl", response);
+		aws->setValue(aws::update_url, response);
 		// Notify user that the process has finished normally
 		QSystemTrayIcon *sysTray = AwSettings::getInstance()->sysTray();
 		sysTray->show();

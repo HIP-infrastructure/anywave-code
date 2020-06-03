@@ -28,27 +28,34 @@
 #include <QFile>
 #include "AwCommandLogger.h"
 #include <AwException.h>
+#include "IO/BIDS/AwBIDSManager.h"
 
 void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
 	AwCommandLogger logger("runProcess", "cl_run");
-
-	AwBaseProcess *process;
+	AwBaseProcess *process = nullptr;
+	
 	try {
 		process = AwCommandLineManager::createAndInitNewProcess(arguments);
 	}
 	catch (const AwException& e) {
 		logger.sendLog(e.errorString());
+		if (process) {
+			auto reader = process->pdi.input.reader();
+			if (reader)
+				reader->plugin()->deleteInstance(reader);
+			process->plugin()->deleteInstance(process);
+		}
 		return;
 	}
-
+	auto reader = process->pdi.input.reader();
 	applyFilters(process->pdi.input.channels(), arguments);
 	process->pdi.input.setArguments(arguments);
 	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
 	process->runFromCommandLine();
+	AwBIDSManager::finishCommandLineOperation();
 	logger.sendLog(QString("Done."));
-	delete process->pdi.input.reader();
-	delete process;
+	process->plugin()->deleteInstance(process);
 }
 

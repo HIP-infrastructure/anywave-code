@@ -41,6 +41,7 @@
 #include <filter/AwFiltering.h>
 #include "Prefs/AwSettings.h"
 #include <AwCore.h>
+#include <AwKeys.h>
 
 #if QT_VERSION > QT_VERSION_CHECK(4, 8, 0)
 #include <QtConcurrent>

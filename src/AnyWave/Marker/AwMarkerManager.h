@@ -91,6 +91,7 @@ signals:
 	void displayedMarkersChanged(const AwMarkerList& markers);
 	void modificationsDone();
 	void markersRemoved();
+	void log(const QString& message);
 private:
 	AwMarkerManagerSettings *m_ui;
 	QDockWidget *m_dock;

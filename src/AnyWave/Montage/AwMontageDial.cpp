@@ -53,7 +53,17 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	m_ui.setupUi(this);
 	
 	AwMontageManager *mm = AwMontageManager::instance();
-	m_asRecorded = mm->cloneAsRecordedChannels();
+//	m_asRecorded = mm->cloneAsRecordedChannels();
+
+	// cloning as recorded channels 
+	for (auto c : mm->asRecordedChannels()) {
+		if (c == nullptr)
+			continue;
+		auto duplicated = c->duplicate();
+		m_asRecordedChannels << duplicated;
+		m_hashAsRecorded.insert(duplicated->name(), duplicated);
+	}
+
 	m_badChannelsLabels = mm->badLabels();
 	m_path = mm->path();
 
@@ -88,7 +98,7 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	AsRecordedProxyModel *sortModelAsRecorded = new AsRecordedProxyModel(this);
 	// Set the sort mode to UserRole, to give the possibility to sort the Bad column.
 	sortModelAsRecorded->setSortRole(Qt::UserRole);
-	m_asRecordedChannels = AwChannel::sortByName(m_asRecorded.values());
+	m_asRecordedChannels = AwChannel::sortByName(m_asRecordedChannels);
 	AwChannelListModelAsRecorded *modelAsRecorded = new AwChannelListModelAsRecorded(m_asRecordedChannels, this);
 	connect(modelAsRecorded, &AwChannelListModelAsRecorded::badChannelSet, this, &AwMontageDial::setBadChannel);
 	connect(modelAsRecorded, &AwChannelListModelAsRecorded::badChannelUnset, this, &AwMontageDial::unsetBadChannel);
@@ -146,9 +156,7 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 
 AwMontageDial::~AwMontageDial()
 {
-	for (auto c : m_asRecorded.values()) 
-		delete c;
-	
+	AW_DESTROY_LIST(m_asRecordedChannels);
 }	
 
 // EVENTS
@@ -164,6 +172,17 @@ void AwMontageDial::loadMontage()
 	if (path.isEmpty())
 		return;
 	AwChannelList channels = AwMontageManager::instance()->load(path);
+
+	for (auto c : AwMontageManager::instance()->asRecordedChannels()) {
+
+		// just set the type of as recorded channel in case the new montage changed it.
+		if (c == nullptr)
+			continue;
+		auto asRecorded = m_hashAsRecorded.value(c->name());
+		if (asRecorded)
+			asRecorded->setType(c->type());
+	}
+
 	removeBadChannels(channels);
 	if (channels.isEmpty())
 		return;
@@ -293,10 +312,10 @@ void AwMontageDial::updateButtonAddByTypes()
 void AwMontageDial::sortLabelsByTypes()
 {
 	m_labelsByTypes.clear();
-	auto asRecordedChannels = m_asRecorded.values();
-	for (auto c : m_asRecorded) {
+//	auto asRecordedChannels = m_asRecorded.values();
+	for (auto c : m_asRecordedChannels) {
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-			auto channels = AwChannel::getChannelsOfType(asRecordedChannels, i);
+			auto channels = AwChannel::getChannelsOfType(m_asRecordedChannels, i);
 			if (!channels.isEmpty()) {
 				auto labels = AwChannel::getLabels(channels);
 				labels.sort();
@@ -312,7 +331,7 @@ void AwMontageDial::addDroppedChannels(const QStringList& labels, int beginRow)
 {
 	AwChannelList montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
 	for (auto l : labels) {
-		auto asRecorded = m_asRecorded[l];
+		auto asRecorded = m_hashAsRecorded[l];
 		montage.insert(beginRow++, new AwChannel(asRecorded));
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
@@ -329,7 +348,7 @@ void AwMontageDial::addChannelsByTypes()
 
 	AwChannelList channels;
 	for (auto l : labels) {
-		auto asRecorded = m_asRecorded[l];
+		auto asRecorded = m_hashAsRecorded[l];
 		if (asRecorded)
 			if (!asRecorded->isBad())
 				channels << new AwChannel(asRecorded);
@@ -341,18 +360,19 @@ void AwMontageDial::addChannelsByTypes()
 
 void AwMontageDial::computeSEEGMontageFromEEGChannels()
 {
-	int res = QMessageBox::question(this, tr("EEG as SEEG channels"), tr("Transform all EEG channels to SEEG and add them as bipolar?"), 
+	int res = QMessageBox::question(this, tr("EEG as SEEG channels"), tr("Transform all EEG channels to SEEG?"), 
 		QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
 	if (res == QMessageBox::No)
 		return;
-
-	auto asRecordedChannels = m_asRecorded.values();
 	// Transform EEG into SEEG is As Recorded
-	for (auto c : AwChannel::getChannelsOfType(asRecordedChannels, AwChannel::EEG)) 
+	for (auto c : AwChannel::getChannelsOfType(m_asRecordedChannels, AwChannel::EEG)) 
 			c->setType(AwChannel::SEEG);
-	
-	sortLabelsByTypes();
-	makeSEEGBipolar();
+	// change also current montage
+	AwChannelList montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
+	for (auto c : montage)
+		if (c->isEEG())
+			c->setType(AwChannel::SEEG);
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
 }
 
 
@@ -366,12 +386,15 @@ void AwMontageDial::removeBadChannels(AwChannelList& channels)
 
 void AwMontageDial::makeECOGBipolar()
 {
-	auto channels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::ECoG);
+	auto channels = AwChannel::getChannelsOfType(m_asRecordedChannels, AwChannel::ECoG);
 	removeBadChannels(channels);
 	if (channels.isEmpty()) {
 		AwMessageBox::information(this, tr("ECoG Bipolar"), tr("Could not make a bipolar montage (no ECoG channels in data file.)"));
 		return;
 	}
+	auto response = AwMessageBox::question(this, tr("ECoG Bipolar"), "Add ECoG montage to the current montage?)", QMessageBox::Yes|QMessageBox::No);
+	if (response == QMessageBox::No)
+		return;
 	// remove channels from montage
 	// keep a copy of original montage
 	AwChannelList dup = AwChannel::duplicateChannels(channels);
@@ -392,7 +415,10 @@ void AwMontageDial::makeECOGBipolar()
 			}
 		}
 		AwChannel::sortByName(dup);
-		static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
+		// add to the current montage !
+		auto montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
+		montage += dup;
+		static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
 	}
 	else {
 		AW_DESTROY_LIST(dup);
@@ -401,97 +427,123 @@ void AwMontageDial::makeECOGBipolar()
 
 void AwMontageDial::setAVGRefMontage()
 {
-	auto channels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::EEG);
-	removeBadChannels(channels);
-	if (channels.isEmpty()) {
-		AwMessageBox::information(this, tr("EEG AVG"), tr("Could not make a EEG AVG Ref. montage (no EEG channels in data file.)"));
-		return;
-	}
-	// make a montage with ONLY SEEG as bipolar, remove all other channels.
-	auto dup = AwChannel::duplicateChannels(channels);
-	for (auto c : dup)
+	auto montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
+	for (auto c : montage) {
+		if (!c->isEEG())
+			continue;
 		c->setReferenceName("AVG");
-	AwChannel::sortByName(dup);
-	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
+	}
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
 }
 
 void AwMontageDial::setSEEGAVGRefMontage()
 {
-	auto channels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::SEEG);
-	removeBadChannels(channels);
-	if (channels.isEmpty()) {
-		AwMessageBox::information(this, tr("SEEG AVG"), tr("Could not make a SEEG AVG Ref. montage (no SEEG channels in data file.)"));
-		return;
-	}
-	// make a montage with ONLY SEEG as bipolar, remove all other channels.
-	auto dup = AwChannel::duplicateChannels(channels);
-	for (auto c : dup)
+	auto montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
+	for (auto c : montage) {
+		if (!c->isSEEG())
+			continue;
 		c->setReferenceName("AVG");
-	AwChannel::sortByName(dup);
-	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
+	}
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
 }
 
 void AwMontageDial::makeSEEGBipolar()
 {
-	auto seegChannels = AwChannel::getChannelsOfType(m_asRecorded.values(), AwChannel::SEEG);
-	removeBadChannels(seegChannels);
-	if (seegChannels.isEmpty()) {
-		AwMessageBox::information(this, tr("SEEG Bipolar"), tr("Could not make a bipolar montage (no SEEG channels in data file.)"));
-		return;
-	}
-	// make a montage with ONLY SEEG as bipolar, remove all other channels.
-	auto dup = AwChannel::duplicateChannels(seegChannels);
-	// clear montage
-	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->clearMontage();
+	auto montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
 
-	// expect characters from a to z  AND _.'
-	QRegularExpression exp("([A-Z_.]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
-	QRegularExpressionMatch match;
-	for (auto c : dup) {
+	QRegularExpression exp("(\\d+)$");
+	QRegularExpression expZeros("^(0+)");
+	QRegularExpressionMatch match, matchZero;
+	for (auto c : montage) {
+		if (!c->isSEEG())
+			continue;
 		match = exp.match(c->name());
 		if (match.hasMatch()) {
-			auto elec = match.captured(1);
-			auto elecCopy = elec;
-			auto number = match.captured(2);
-			// some electodes may have preceding zeros before pad number
-			while (number.startsWith("0")) {
-				elec += "0";
-				number.remove(0, 1);
+			QString zeros;
+			auto baseName = c->name();
+			baseName = baseName.remove(exp);
+			auto number = match.captured(1);
+			// fing leading zeros
+			matchZero = expZeros.match(number);
+			if (matchZero.hasMatch()) {
+				zeros = matchZero.captured(1);
+				number = number.remove(expZeros);
 			}
-			// next electrode could be weird 
-			// example : X09 and X10 not X010
-			// try to guess the possible reference
-			bool refFound = false;
-			auto nextNumber = number.toInt() + 1;
-			auto ref = QString("%1%2").arg(elec).arg(nextNumber);
-			if (m_asRecorded.contains(ref))
-				if (!m_badChannelsLabels.contains(ref))
-					c->setReferenceName(ref);
-			else {
-				ref = QString("%1%2").arg(elecCopy).arg(nextNumber);
-				if (m_asRecorded.contains(ref))
-					if (!m_badChannelsLabels.contains(ref))
-						c->setReferenceName(ref);
-			}
+			int n = number.toInt() + 1;
+
+
+			// find the reference without considering zeros in number
+			QString ref = QString("%1%2").arg(baseName).arg(n);
+			if (!m_hashAsRecorded.contains(ref))
+				ref = QString("%1%2%3").arg(baseName).arg(zeros).arg(n);
+			if (m_hashAsRecorded.contains(ref) && !m_badChannelsLabels.contains(ref))
+				c->setReferenceName(ref);
+				
 		}
 	}
 
-	// check for remaining monopolar channels
-	foreach (AwChannel *c,  dup) {
-		if (!c->hasReferences()) {
-			dup.removeAll(c);
-			delete c;
-		}
+	//// expect characters from a to z  AND _.'
+	//QRegularExpression exp("([A-Z_.]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
+	//QRegularExpressionMatch match;
+	//for (auto c : dup) {
+	//	match = exp.match(c->name());
+	//	if (match.hasMatch()) {
+	//		auto elec = match.captured(1);
+	//		auto elecCopy = elec;
+	//		auto number = match.captured(2);
+	//		// some electodes may have preceding zeros before pad number
+	//		while (number.startsWith("0")) {
+	//			elec += "0";
+	//			number.remove(0, 1);
+	//		}
+	//		// next electrode could be weird 
+	//		// example : X09 and X10 not X010
+	//		// try to guess the possible reference
+	//		bool refFound = false;
+	//		auto nextNumber = number.toInt() + 1;
+	//		auto ref = QString("%1%2").arg(elec).arg(nextNumber);
+	//		if (m_hashAsRecorded.contains(ref))
+	//			if (!m_badChannelsLabels.contains(ref))
+	//				c->setReferenceName(ref);
+	//		else {
+	//			ref = QString("%1%2").arg(elecCopy).arg(nextNumber);
+	//			if (m_hashAsRecorded.contains(ref))
+	//				if (!m_badChannelsLabels.contains(ref))
+	//					c->setReferenceName(ref);
+	//		}
+	//	}
+	//}
+
+	//// check for remaining monopolar channels
+	//foreach (AwChannel *c,  dup) {
+	//	if (!c->hasReferences()) {
+	//		dup.removeAll(c);
+	//		delete c;
+	//	}
+	//}
+	//AwChannel::sortByName(dup);
+	//static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
+
+	auto response = AwMessageBox::question(this, "SEEG Bipolar", "Remove resting monopolar channels?", QMessageBox::Yes | QMessageBox::No);
+	if (response == QMessageBox::Yes) {
+		AwChannelList tmp;
+		for (auto c : montage)
+			if (c->isSEEG() && !c->hasReferences())
+				tmp << c;
+		for (auto c : tmp)
+			montage.removeAll(c);
+		AW_DESTROY_LIST(tmp);
+
 	}
-	AwChannel::sortByName(dup);
-	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
+
+	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
 }
 
 void AwMontageDial::unsetBadChannel(const QString& label)
 {
 	m_badChannelsLabels.removeAll(label);
-	if (m_asRecorded.contains(label))
-		m_asRecorded[label]->setBad(false);
+	if (m_hashAsRecorded.contains(label))
+		m_hashAsRecorded[label]->setBad(false);
 }
 
 //
@@ -512,8 +564,8 @@ void AwMontageDial::setBadChannel(const QString& electrodeLabel)
 		delete channels.takeFirst();
 
 	m_badChannelsLabels << electrodeLabel;
-	if (m_asRecorded.contains(electrodeLabel))
-		m_asRecorded[electrodeLabel]->setBad(true);
+	if (m_hashAsRecorded.contains(electrodeLabel))
+		m_hashAsRecorded[electrodeLabel]->setBad(true);
 }
 
 
@@ -524,8 +576,8 @@ void AwMontageDial::updateChannelsType(const QStringList& labels, int type)
 		if (labels.contains(c->name())) {
 			c->setType(type);
 			c->clearRefName();
-			if (m_asRecorded.contains(c->name()))
-				m_asRecorded[c->name()]->setType(type);
+			if (m_hashAsRecorded.contains(c->name()))
+				m_hashAsRecorded[c->name()]->setType(type);
 		}
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(channels);
@@ -566,7 +618,7 @@ void AwMontageDial::resetToAsRecorded()
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->clearMontage();
 	channels.clear();
-	for (auto c : m_asRecorded.values()) {
+	for (auto c : m_asRecordedChannels) {
 		if (!c->isVirtual() && !c->isBad())
 			channels << new AwChannel(c);
 	}
@@ -607,7 +659,7 @@ void AwMontageDial::addChannelsToMontage()
 	for (auto i : selectedIndexes) {
 		if (i.column() == AW_ASRECORDED_COLUMN_NAME) {
 			name = m_ui.tvChannelsAsRecorded->model()->data(i, Qt::DisplayRole).toString();
-			AwChannel *channel = m_asRecorded[name];
+			auto channel = m_hashAsRecorded[name];
 			if (channel) {
 				if (channel->isBad())
 					continue;

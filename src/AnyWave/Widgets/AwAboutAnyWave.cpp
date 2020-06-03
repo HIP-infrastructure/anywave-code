@@ -42,7 +42,7 @@ AwAboutAnyWave::AwAboutAnyWave(QWidget *parent)
 	labelVtkVersion->setText(QString(VTK_VERSION));
 	buttonGetLastVersion->hide();
 	labelUpdateAvailable->setText("No update available.");
-	auto updateUrl = AwSettings::getInstance()->getString("updateUrl");
+	auto updateUrl = AwSettings::getInstance()->value(aws::update_url).toString();
 	if (!updateUrl.isEmpty()) {
 		buttonGetLastVersion->show();
 		labelUpdateAvailable->setText("A new version is available");
@@ -63,7 +63,7 @@ void AwAboutAnyWave::openLicense()
 
 void AwAboutAnyWave::getLatestUpdate()
 {
-	QDesktopServices::openUrl(QUrl(AwSettings::getInstance()->getString("updateUrl")));
+	QDesktopServices::openUrl(QUrl(AwSettings::getInstance()->value(aws::update_url).toString()));
 }
 
 

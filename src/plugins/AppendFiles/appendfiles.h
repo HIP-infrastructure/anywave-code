@@ -57,7 +57,7 @@ Q_OBJECT
 public:
 	AppendFilesPlugin();
 
-	AppendFiles *newInstance() { return new AppendFiles; }
+	AW_INSTANTIATE_PROCESS(AppendFiles)
 
 };
 

@@ -40,8 +40,7 @@ public:
 	static AwBaseProcess *createAndInitNewProcess(AwArguments& args);
 	/** apply filters that might be defined in arguments to channels **/
 	static void applyFilters(const AwChannelList& channels, const AwArguments& args);
-protected:
 	/** Similar to buildPDI in Process Manager, excepts it will handle for batch mode processes. **/
 	/** montage is the montage detected or set in the arguments, as recorded are the channels in the data file. **/
-	static bool buildPDI(AwBaseProcess *process, const AwChannelList& montage, const AwChannelList& asRecorded);
+	static bool buildPDI(AwBaseProcess *process, const AwChannelList& montage = AwChannelList(), const AwChannelList& asRecorded = AwChannelList());
 };

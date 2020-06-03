@@ -785,3 +785,38 @@ AwMarkerList AwMarker::load(const QString& path)
 	file.close();
 	return markers;
 }
+
+void AwMarker::removeDoublons(QList<AwMarker*>& markers)
+{
+	AwMarkerList res, removed;
+	if (markers.isEmpty())
+		return;
+
+	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+	const float tol = 0.005;
+	// use multi map to detect markers with similar labels
+	QMultiMap<QString, AwMarker *> map;
+	for (auto m : markers) {
+		if (!map.contains(m->label()))
+			map.insert(m->label(), m);
+		else {
+			auto values = map.values(m->label());
+			bool keep = true;
+			for (auto v : values) { // get existing marker with same labels and compare position and duration
+				auto position = std::abs(v->start() - m->start());
+				auto duration = std::abs(v->duration() - m->duration());
+				if (position <= tol && duration <= tol) {
+					keep = false;
+					removed << m;
+					break;
+				}
+			}
+			if (keep) 
+				map.insert(m->label(), m);
+		}
+	}
+	for (auto m : removed) {
+		markers.removeAll(m);
+		delete m;
+	}
+}

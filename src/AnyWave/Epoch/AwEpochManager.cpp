@@ -35,6 +35,7 @@
 #include "Montage/AwMontageManager.h"
 #include <widget/AwWaitWidget.h>
 #include "Data/AwMemoryMapper.h"
+#include <AwFileInfo.h>
 
 
 /////////////////////////////////////////////////////////////////////

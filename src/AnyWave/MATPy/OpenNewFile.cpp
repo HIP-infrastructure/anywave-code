@@ -18,7 +18,7 @@ void AwRequestServer::handleOpenNewFile(QTcpSocket *client, AwScriptProcess *pro
 	int status = 0;
 
 	QString error;
-	auto dict = AwUtilities::json::hashFromJson(json, error);
+	auto dict = AwUtilities::json::hashFromJsonString(json, error);
 
 	if (dict.isEmpty()) {
 		emit log(QString("error in json parsing: %1").arg(error));

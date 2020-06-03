@@ -34,9 +34,11 @@
 #include <filter/AwFilterSettings.h>
 #include "Prefs/AwSettings.h"
 #include <AwCore.h>
-
+#include "Plugin/AwPluginManager.h"
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QJsonArray>
-
+#include <AwKeys.h>
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
 {
@@ -51,92 +53,127 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	QString json;
 	in >> json;
 	int status = 0;
-	AwMarkerList markers;
 	QDataStream& stream = *response.stream();
-
 	bool rawData = false;
 	int downsampling = 1;
 	AwChannelList requestedChannels;
-	AwMarkerList input_markers;
+	AwMarkerList input_markers, markers;
 	auto reader = AwSettings::getInstance()->currentReader();
-	//float fileDuration = process == nullptr ? reader->infos.totalDuration() : process->pdi.input.fileDuration;
-	float fileDuration = process->pdi.input.settings[processio::file_duration].toDouble();
-	float start = 0., duration = 0.;
+	float fileDuration = process->pdi.input.settings.value(processio::file_duration).toDouble();
+	float start = 0., duration = fileDuration;
+	AwFileIO *localReader = nullptr;
 
-	if (json.isEmpty()) {
-		if (process)
-			requestedChannels = process->pdi.input.channels();
-		else
+	if (json.isEmpty()) { // no args set 
+		// get input channels of process
+		requestedChannels = process->pdi.input.channels();
+		if (requestedChannels.isEmpty())
 			requestedChannels = reader->infos.channels();
 
 		input_markers << new AwMarker("global", 0., fileDuration);
 	}
 	else {
 		QString error;
-		auto dict = AwUtilities::json::hashFromJson(json, error);
-		if (dict.isEmpty()) {
+		auto doc = AwUtilities::json::jsonStringToDocument(json, error);
+		if (doc.isEmpty() || doc.isNull()) {
 			emit log(QString("error in json parsing: %1").arg(error));
-			stream << (qint64)0;;
+			stream << (qint64)-1 << error;
 			response.send();
 			return;
 		}
-		QStringList use_markers, skip_markers, labels, types;
-		QString pickFrom;
+		auto dict = doc.object();
+		QStringList use_markers, skip_markers, labels, types, pickFrom;
+		QString file;
+		bool usingFile = false;
+
+		if (dict.contains("data_file")) {
+			file = dict.value("data_file").toString();
+			localReader = AwPluginManager::getInstance()->getReaderToOpenFile(file);
+			if (localReader == nullptr) {
+				stream << (qint64)-1 << QString("file: %1 could not be open.").arg(file);
+				response.send();
+				return;
+			}
+			else {
+				usingFile = true;
+				requestedChannels = localReader->infos.channels();
+			}
+		}
+
+		// check for marker file
+		if (dict.contains("marker_file")) {
+			auto mrkFile = dict.value("marker_file").toString();
+			markers = AwMarker::load(mrkFile);
+			if (markers.isEmpty()) {
+				emit log(QString("Loading of %1 failed.").arg(mrkFile));
+			}
+		}
+
+		if (markers.isEmpty() && usingFile) {
+			// try to load the default .mrk that comes with the data file
+			auto mrkFile = localReader->getSideFile(".mrk");
+			if (QFile::exists(mrkFile)) 
+				markers = AwMarker::load(mrkFile);
+		}
 
 		AwFilterSettings filterSettings;
 		// check for start/Duration or use markers options
-		if (dict.contains("use_markers"))
-			use_markers = dict["use_markers"].toStringList();
-		if (dict.contains("skip_markers"))
-			skip_markers = dict["skip_markers"].toStringList();
+		if (dict.contains("use_markers")) {
+			auto tmp = dict.value("use_markers").toArray();
+			for (auto t : tmp)
+				use_markers << t.toString();
+		}
+		if (dict.contains("skip_markers")) {
+			auto tmp = dict.value("skip_markers").toArray();
+			for (auto t : tmp)
+				skip_markers << t.toString();
+		}
 		// check for channel labels
-		if (dict.contains("channel_labels"))
-			labels = dict["channel_labels"].toStringList();
+		if (dict.contains("labels")) {
+			auto tmp = dict.value("labels").toArray();
+			for (auto t : tmp)
+				labels << t.toString().simplified();
+		}
 		// check for channel types
-		if (dict.contains("channel_types"))
-			types = dict["channel_types"].toStringList();
+		if (dict.contains("types")) {
+			auto tmp = dict.value("types").toArray();
+			for (auto t : tmp)
+				types << t.toString().simplified();
+		}
+		// check for pick_from
+		if (dict.contains("pick_channels_from")) {
+			auto tmp = dict.value("pick_channels_from").toArray();
+			for (auto t : tmp)
+				pickFrom << t.toString().simplified();
+		}
+
 		bool usingMarkers = !use_markers.isEmpty();
 		bool skippingMarkers = !skip_markers.isEmpty();
 		if (dict.contains("start"))
-			start = dict["start"].toDouble();
+			start = dict.value("start").toDouble();
 		if (dict.contains("duration"))
-			duration = dict["duration"].toDouble();
-		if (dict.contains("pick_channels_from"))
-			pickFrom = dict["pick_channels_from"].toString().toLower();
+			duration = dict.value("duration").toDouble();
 		if (dict.contains("raw_data"))
-			rawData = dict["raw_data"].toBool();
+			rawData = dict.value("raw_data").toBool();
 		if (dict.contains("downsampling_factor"))
-			downsampling = dict["downsampling_factor"].toInt();
+			downsampling = dict.value("downsampling_factor").toInt();
 		// get filters
 		QVector<float> filters;
 		if (dict.contains("filters")) {
-			auto array = dict["filters"].toJsonArray();
-			for (auto f : array) {
-				filters << f.toDouble();
-			}
+			auto tmp = dict.value("filters").toArray();
+			for (auto t : tmp)
+				filters << t.toDouble();
 		}
-		AwMarkerList markers = AwMarkerManager::instance()->getMarkersThread();
+
+
+
+		markers = AwMarkerManager::instance()->getMarkersThread();
 		// parsing input is done, now preparing input markers
 		if (!usingMarkers && !skippingMarkers)
 			input_markers << new AwMarker("input", start, duration);
 		if (usingMarkers || skippingMarkers) {
 			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
 		}
-		// preparing input channels
-		if (pickFrom.isEmpty()) {
-			if (process == nullptr)
-				requestedChannels = reader->infos.channels();
-			else
-				requestedChannels = process->pdi.input.channels();
-		}
-		else if (pickFrom.toLower() == "montage")
-			requestedChannels = AwMontageManager::instance()->channels();
-		else if (pickFrom.toLower() == "as recorded") {
-			if (process == nullptr)
-				requestedChannels = reader->infos.channels();
-			else
-				requestedChannels = process->pdi.input.reader()->infos.channels();
-		}
+
 
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
@@ -167,8 +204,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		}
 		// apply filters
 		if (!filters.isEmpty()) {
-			float notch = filters.size() == 3 ? filters.value(2) : 0.;
-			AwChannel::setFilters(requestedChannels, filters.value(0), filters.value(1), notch);
+			emit log(QString("Filters set : %1 %2").arg(filters.at(0)).arg(filters.at(1)));
+			float notch = filters.size() == 3 ? filters.at(2) : 0.;
+			AwChannel::setFilters(requestedChannels, filters.at(0), filters.at(1), notch);
 		}
 	}
 	// remove possible bad channels 
