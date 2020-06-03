@@ -311,47 +311,6 @@ void AwSEEGWidget::loadElectrodes(const QString& file)
 	}
 	elecFile.close();
 
-	//// check first line (must start with "Electrodes" string)
-	//QString line = stream.readLine();
-	//if (line.isEmpty() || !line.toLower().startsWith("electrode")) {
-	//	throw AwException("Electode file format is incorrect.", "AwSEEGWidget::loadElectrodes");
-	//	elecFile.close();
-	//	return;
-	//}
-	//while (!stream.atEnd()) {
-	//	line = stream.readLine();
-	//	if (line.toLower().startsWith("#")) // skip commented lines.
-	//		continue;
-	//	QStringList tokens = line.split('\t');
-	//	if (tokens.size() >= 5) {
-	//		double x, y, z;
-	//		x = tokens.at(2).toDouble();
-	//		y = tokens.at(3).toDouble();
-	//		z = tokens.at(4).toDouble();
-	//		QString baseLabel =  tokens.at(0);
-	//		if (!m_electrodesLabels.contains(baseLabel)) 
-	//			m_electrodesLabels.insert(baseLabel, new QStringList());
-
-	//		QString label = tokens.at(0) + tokens.at(1);
-	//		QStringList *labels = m_electrodesLabels.value(baseLabel);
-	//		labels->append(label);
-	//		
-	//		vtkSmartPointer<vtkSphereSource> sphere = vtkSmartPointer<vtkSphereSource>::New();
-	//		sphere->SetRadius(1.0);
-	//		sphere->SetCenter(x, y, z);
-	//		sphere->Update();
-	//		AwSEEGPad *pad = new AwSEEGPad(sphere->GetOutput());
-	//		pad->center[0] = x;
-	//		pad->center[1] = y;
-	//		pad->center[2] = z;
-	//		pad->label = label;
-	//		if (!m_hPads.contains(label))
-	//			m_hPads.insert(label, pad);
-	//		m_electrodes.append(pad);
-	//		m_widget->renderer()->AddActor(pad->actor);
-	//	}
-	//}
-
 	// generate bipolar virtual sphere to use in bipolar montages.
 	for (QStringList* labels : m_electrodesLabels.values()) {
 		AwSEEGPad *firstPad = m_hPads.value(labels->first());
