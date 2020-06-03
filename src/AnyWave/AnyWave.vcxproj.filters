@@ -1123,12 +1123,6 @@
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSSubject.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSSubject.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUI.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -1407,9 +1401,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSProxyModel.cpp">
       <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSProxyModel.cpp">
-      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSProxyModel.cpp">
       <Filter>Generated Files\Release</Filter>
@@ -1976,9 +1967,6 @@
     </CustomBuild>
     <CustomBuild Include="Process\PSD\AwPSDGUI.h">
       <Filter>Process\PSD</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSProxyModel.h">
-      <Filter>IO\BIDS</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
