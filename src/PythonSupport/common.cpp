@@ -104,7 +104,7 @@ QJsonObject dictToJsonObject(PyObject *dict)
 			json[k] = array;
 		}
 		else if (PyLong_Check(value))
-			json[k] = PyLong_AsLong(value);
+			json[k] = (int)PyLong_AsLong(value);
 		else if (PyFloat_Check(value))
 			json[k] = PyFloat_AsDouble(value);
 		else if (PyDict_Check(value))
