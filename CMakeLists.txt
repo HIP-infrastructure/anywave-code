@@ -195,8 +195,6 @@ add_subdirectory(src/plugins/icav2)
 add_dependencies(ICA AwCore AwProcess)
 add_subdirectory(src/plugins/FileConverter)
 add_dependencies(FileConverter AwCore AwProcess AwFiltering)
-add_subdirectory(src/plugins/ANT_Reader)
-add_dependencies(ANTReader AwCore AwReadWrite)
 add_subdirectory(src/plugins/AutoMarking)
 add_dependencies(AutoMarking AwCore AwProcess)
 add_subdirectory(src/plugins/AppendFiles)
@@ -211,6 +209,13 @@ add_subdirectory(src/plugins/FIFIO)
 add_dependencies(FIFFIO AwCore AwReadWrite)
 add_subdirectory(src/plugins/EEGInto4D)
 add_dependencies(EEGInto4D AwCore AwReadWrite AwUtilities)
+add_subdirectory(src/plugins/TFWavelet)
+add_subdirectory(src/plugins/Rewrite4D)
+add_subdirectory(src/plugins/MultiFiltersViewer)
+add_subdirectory(src/plugins/h2)
+add_subdirectory(src/plugins/H2graphs)
+add_subdirectory(src/plugins/EEPIO)
+
 
 
 # Install
