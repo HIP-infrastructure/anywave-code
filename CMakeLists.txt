@@ -213,7 +213,7 @@ add_subdirectory(src/plugins/TFWavelet)
 add_subdirectory(src/plugins/Rewrite4D)
 add_subdirectory(src/plugins/MultiFiltersViewer)
 add_subdirectory(src/plugins/h2)
-add_subdirectory(src/plugins/H2graphs)
+add_subdirectory(src/plugins/H2Graphs)
 add_subdirectory(src/plugins/EEPIO)
 
 

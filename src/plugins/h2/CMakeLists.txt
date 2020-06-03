@@ -1,12 +1,8 @@
 # H2
 project(H2)
-SET(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Svg REQUIRED)
-SET(CMAKE_INSTALL_RPATH ${AW_LIB_DIR})
+add_definitions(-DQT_PLUGIN)
+set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 SET(SRCS
 ${CMAKE_SOURCE_DIR}/h2.cpp
@@ -35,6 +31,7 @@ IF(APPLE)
 ELSE()
     target_link_libraries(H2 ${AW_LIBRARIES} ${BLAS_LIBRARIES} $(RES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg Qt5::Concurrent)
 ENDIF()
+
 INSTALL(TARGETS H2 DESTINATION ${AW_PLUGINS_DIR})
 
 
