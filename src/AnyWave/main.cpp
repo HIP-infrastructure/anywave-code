@@ -42,8 +42,7 @@
 #if VTK_MAJOR_VERSION >= 8
 #include <QVTKOpenGLWidget.h>
 #include <vtkOpenGLRenderWindow.h>
-#else
-	#include "toto.h"
+#include <QSurfaceFormat.h>
 #endif
 
 #include <qstylefactory.h>
