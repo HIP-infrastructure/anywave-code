@@ -13,7 +13,14 @@ libcnt/rej.cpp
 libcnt/riff.cpp
 libcnt/riff64.cpp
 libcnt/seg.cpp
-libcnt/trg.cpp)
+libcnt/trg.cpp
+v4/eep.cpp
+libeep/eepio.cpp
+libeep/eepmem.cpp
+libeep/eepmisc.cpp
+libeep/eepraw.cpp
+libeep/val.cpp
+libeep/var_string.cpp)
 
 
 SET(MOCS EEProbeIO.h )
