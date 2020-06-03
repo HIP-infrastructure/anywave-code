@@ -39,8 +39,8 @@
 #endif
 
 #include <vtkVersion.h>
-#if VTK_MAJOR_VERSION >= 7
-#include <QVTKWidget.h>
+#if VTK_MAJOR_VERSION >= 8
+#include <QVTKOpenGLWidget.h>
 #include <vtkOpenGLRenderWindow.h>
 #endif
 
@@ -51,7 +51,7 @@
 
 int main(int argc, char *argv[])
 {
-#if VTK_MAJOR_VERSION >= 7
+#if VTK_MAJOR_VERSION >= 8
 	// init surface map for further use in VTK 8.1
 	vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
