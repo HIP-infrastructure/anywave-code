@@ -6,10 +6,12 @@
 #include <vtkAutoInit.h>
 #endif
 #include <vtkSmartPointer.h>
-#ifndef VTK8_SUPPORT
-#define VTK8_SUPPORT (VTK_MAJOR_VERSION >= 8 && QT_VERSION >= QT_VERSION_CHECK(5,5,0))
+#undefine VTK8
+#if VTK_MAJOR_VERSION >= 8
+#define VTK8
 #endif
-#if VTK8_SUPPORT
+
+#if VTK8
 #include <QVTKOpenGLWidget.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #define QVTK_CLASS QVTKOpenGLWidget		
@@ -30,13 +32,13 @@ public:
 	AwVTKWidget(QWidget *parent = 0);
 
 	vtkSmartPointer<vtkRenderer> renderer() { return m_renderer; }
-#if VTK8_SUPPORT
+#if VTK8
 	inline vtkSmartPointer<vtkGenericOpenGLRenderWindow> window() { return m_window; }
 #else
 	inline vtkSmartPointer<vtkRenderWindow> window() { return m_window; }
 #endif
 protected:
-#if VTK8_SUPPORT
+#if VTK8
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> m_window;
 #else
 	vtkSmartPointer<vtkRenderWindow> m_window;
