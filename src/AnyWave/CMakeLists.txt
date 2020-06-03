@@ -58,6 +58,9 @@ SET(AnyWave_SRCS
     ./IO/BIDS/AwBIDSGUI.cpp  
     ./IO/BIDS/AwBIDSItem.cpp  
     ./IO/BIDS/AwBIDSManager.cpp  
+	./IO/BIDS/AwBIDSGUIOptionsDialog.cpp
+	./IO/BIDS/AwBIDSConvert.cpp
+	./IO/BIDS/AwBIDSTsv.cpp
 	./IO/MEMIO/MEMIO.cpp
     ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
@@ -194,6 +197,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./IO/BIDS/AwBIDSItem.h  
     ./IO/BIDS/AwBIDSManager.h  
     ./IO/BIDS/AwBIDSGUI.h  
+	./IO/BIDS/AwBIDSGUIOptionsDialog.h
 	./IO/MEMIO/MEMIO.h
     ./Marker/AwExtractTriggers.h  
     ./Marker/AwMarkersExportWidget.h  
@@ -290,6 +294,7 @@ SET(FORMS ./AnyWave.ui
 	./Batch/AwBatchFileInputWidget.ui
 	./Batch/AwBatchDialog.ui
 	./IO/BIDS/AwBIDSGUI.ui
+	./IO/BIDS/AwBIDSGUIOptionsDialog.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
     ./Carto/AwMappingWidget.ui  
