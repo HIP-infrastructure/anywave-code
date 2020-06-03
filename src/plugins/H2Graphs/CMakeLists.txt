@@ -20,12 +20,10 @@ QT5_ADD_RESOURCES(${RES})
 add_library(H2Graphs SHARED ${SRCS} ${H2G_MOCS} ${H2G_UIS})
 qt5_use_modules(H2Graphs Core Gui Widgets Svg)
 
-IF(APPLE)
-	target_link_libraries(H2Graphs ${AW_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
-ELSE()
-    target_link_libraries(H2Graphs ${AW_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
-ENDIF()
-INSTALL(TARGETS H2Graphs DESTINATION ${AW_PLUGINS_DIR})
+target_link_libraries(H2Graphs ${AW_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
+
+INSTALL(TARGETS AutoMarking DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
+
 
 
 
