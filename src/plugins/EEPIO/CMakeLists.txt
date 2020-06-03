@@ -4,7 +4,7 @@ add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
-SET(SRCS EEProbeIO.cpp libeep.cpp  
+SET(SRCS EEProbeIO.cpp 
 libcnt/cnt.cpp  
 libcnt/cntutils.cpp
 libcnt/evt.cpp
