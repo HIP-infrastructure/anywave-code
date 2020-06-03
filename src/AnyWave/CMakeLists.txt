@@ -283,7 +283,7 @@ SET(FORMS ./AnyWave.ui
     ./AwExportDial.ui  
 	./Batch/AwAddEditBatchDialog.ui
 	./Batch/AwBatchGUI.ui
-	/Batch/AwBatchFileInputWidget.ui
+	./Batch/AwBatchFileInputWidget.ui
 	./IO/BIDS/AwBIDSGUI.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
