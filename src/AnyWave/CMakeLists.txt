@@ -202,7 +202,6 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Marker/AwMarkerManager.h  
     ./Marker/AwMarkerListModel.h  
     ./Marker/AwDockAddMarker.h  
-    ./MATPy/AwResponse.h  
     ./MATPy/AwPidManager.h  
     ./MATPy/AwRequestServer.h  
     ./MATPy/AwMATPyServer.h  
