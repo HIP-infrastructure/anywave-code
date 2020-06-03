@@ -39,6 +39,8 @@ extern PyObject *m_pid;			// process ID
 extern PyObject *m_server_port;	// server port number
 extern int m_pidValue;
 
+extern PyObject *AnyWaveError;
+
 #define WAIT_TIME_OUT   3000000   // 300s socket time out
 
 static QJsonObject dictToJsonObject(PyObject *dict);
