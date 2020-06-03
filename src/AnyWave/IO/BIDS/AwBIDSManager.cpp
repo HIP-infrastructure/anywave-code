@@ -6,7 +6,6 @@
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <QDirIterator>
-#include "AwFileItem.h"
 #include "Plugin/AwPluginManager.h"
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
@@ -14,7 +13,6 @@
 #include "Debug/AwDebugLog.h"
 #include <QJsonArray>
 #include <utils/json.h>
-#include "AwBIDSParser.h"
 #include <AwCore.h>
 #include <utils/bids.h>
 #include <widget/AwWaitWidget.h>
