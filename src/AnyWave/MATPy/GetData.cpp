@@ -33,7 +33,6 @@
 #include "Data/AwDataServer.h"
 #include "Display/AwDisplay.h"
 #include <filter/AwFiltering.h>
-#include <Filter/AwFilterSettingsStore.h>
 #include "AwTCPResponse.h"
 #include "Prefs/AwSettings.h"
 
