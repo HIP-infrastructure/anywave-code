@@ -9,11 +9,10 @@
 
 #if VTK_MAJOR_VERSION >= 8
 #define VTK8
-#else
-	#include "toto.h"
-	#endif
+#endif
 
-#if VTK8
+
+#if defined(VTK8)
 #include <QVTKOpenGLWidget.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #define QVTK_CLASS QVTKOpenGLWidget		
@@ -34,13 +33,13 @@ public:
 	AwVTKWidget(QWidget *parent = 0);
 
 	vtkSmartPointer<vtkRenderer> renderer() { return m_renderer; }
-#if VTK8
+#if defined(VTK8)
 	inline vtkSmartPointer<vtkGenericOpenGLRenderWindow> window() { return m_window; }
 #else
 	inline vtkSmartPointer<vtkRenderWindow> window() { return m_window; }
 #endif
 protected:
-#if VTK8
+#if defined(VTK8)
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> m_window;
 #else
 	vtkSmartPointer<vtkRenderWindow> m_window;
