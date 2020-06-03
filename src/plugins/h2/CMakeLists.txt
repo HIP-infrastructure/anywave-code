@@ -26,13 +26,8 @@ QT5_WRAP_UI(H2_UIS ${UIS})
 add_library(H2 SHARED ${SRCS} ${H2_MOCS} ${H2_UIS})
 qt5_use_modules(H2 Core Gui Widgets Concurrent Svg)
 
-IF(APPLE)
-	target_link_libraries(H2 ${AW_LIBRARIES} ${ACCELERATE_LIBRARY} $(RES} z Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg Qt5::Concurrent)
-ELSE()
-    target_link_libraries(H2 ${AW_LIBRARIES} ${BLAS_LIBRARIES} $(RES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg Qt5::Concurrent)
-ENDIF()
-
-INSTALL(TARGETS H2 DESTINATION ${AW_PLUGINS_DIR})
+target_link_libraries(H2 ${AW_LIBRARIES} ${BLAS_LIBRARIES} $(RES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg Qt5::Concurrent)
+INSTALL(TARGETS H2 DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
 
 
 
