@@ -95,6 +95,8 @@ SET(AnyWave_SRCS
     ./MATPy/GetPluginIO.cpp  
 	./MATPy/OpenNewFile.cpp
     ./MATPy/AwTCPResponse.cpp
+	./MATPy/RunAnyWave.cpp
+	./MATPy/GetProperties.cpp
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
