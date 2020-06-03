@@ -19,6 +19,7 @@ SET(AnyWave_SRCS
 	./Batch/AwBatchGUI.cpp
 	./Batch/AwBatchItem.cpp
 	./Batch/AwBatchModel.cpp
+	./Batch/AwBatchFileInputWidget.cpp
     ./CL/CommandLineParser.cpp
     ./CL/AwCommandLogger.cpp
     ./CL/AwCommandLineManager.cpp
@@ -157,6 +158,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
 	./Batch/AwBatchManager.h
 	./Batch/AwBatchItem.h
 	./Batch/AwBatchModel.h
+	/Batch/AwBatchFileInputWidget.h
 	./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
 	./Data/AwMemoryMapper.h  
@@ -281,6 +283,7 @@ SET(FORMS ./AnyWave.ui
     ./AwExportDial.ui  
 	./Batch/AwAddEditBatchDialog.ui
 	./Batch/AwBatchGUI.ui
+	/Batch/AwBatchFileInputWidget.ui
 	./IO/BIDS/AwBIDSGUI.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
