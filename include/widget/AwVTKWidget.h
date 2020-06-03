@@ -6,10 +6,12 @@
 #include <vtkAutoInit.h>
 #endif
 #include <vtkSmartPointer.h>
-#undef VTK8
+
 #if VTK_MAJOR_VERSION >= 8
 #define VTK8
-#endif
+#else
+	#include "toto.h"
+	#endif
 
 #if VTK8
 #include <QVTKOpenGLWidget.h>
