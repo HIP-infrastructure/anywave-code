@@ -1,15 +1,9 @@
 # H2 GRAPHS
 project(H2Graphs)
-SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+add_definitions(-DQT_PLUGIN)
+set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Svg REQUIRED)
-find_package(Qwt REQUIRED)
-INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
-LINK_DIRECTORIES(${QWT_LIBRARY})
-SET(CMAKE_INSTALL_RPATH ${AW_LIB_DIR})
 SET(SRCS GraphArrow.cpp GraphWindow.cpp GraphArrowBase.cpp GraphArrowDir.cpp GraphArrowLag.cpp GraphColorMap.cpp
 GraphLegend.cpp GraphSet.cpp GraphSetModel.cpp H2Graphs.cpp GraphSensorItem.cpp GraphManagerWidget.cpp)
 
