@@ -56,8 +56,9 @@ PyObject *getDataEx(PyObject *self, PyObject *args)
 
 	// Reading response..
 	QDataStream& in = *request.response();
+
 	int nChannels = 0;
-	in >> nChannels;
+	in >> (int)nChannels;
 	if (nChannels == 0) {
 		return Py_None;
 	}
