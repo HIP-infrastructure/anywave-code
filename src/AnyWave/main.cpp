@@ -42,7 +42,7 @@
 #if VTK_MAJOR_VERSION >= 8
 #include <QVTKOpenGLWidget.h>
 #include <vtkOpenGLRenderWindow.h>
-#include <QSurfaceFormat.h>
+#include <QSurfaceFormat>
 #endif
 
 #include <qstylefactory.h>
