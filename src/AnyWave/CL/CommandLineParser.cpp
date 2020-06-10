@@ -66,6 +66,11 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
 	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
 	QCommandLineOption outputSuffixO("output_suffix", "specify the suffix to use for output_fle.", "output_suffix", QString());
+	// markers
+	QCommandLineOption useMarkersO("use_markers", "specify the markers on which process the data.", "use_markers", QString());
+	QCommandLineOption skipMarkersO("skip_markers", "specify the markers to skip.", "skip_markers", QString());
+	parser.addOption(useMarkersO);
+	parser.addOption(skipMarkersO);
 
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
@@ -187,8 +192,17 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	availableWriters["edf"] = QString("EDF/BDF IO");
 	availableWriters["matlab"] = QString("MATLAB Output Plugin");
 	availableWriters["ades"] = QString("AnyWave ADES Format");
-	// output dir
+
 	QString tmp;
+	// use_markers
+	tmp = parser.value(useMarkersO);
+	if (!tmp.isEmpty())
+		arguments[cl::use_markers] = QStringList(tmp);
+	// skip_markers
+	tmp = parser.value(skipMarkersO);
+	if (!tmp.isEmpty())
+		arguments[cl::skip_markers] = QStringList(tmp);
+	// output dir
 	tmp = parser.value(outputDirO);
 	if (!tmp.isEmpty())
 		arguments[cl::output_dir] = tmp;
