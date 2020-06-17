@@ -93,7 +93,7 @@ void AwMatlabScriptProcess::run()
 			arguments << mcrPath;
 #endif
 		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::hashToJsonString(pdi.input.args()).simplified();
-		pdi.input.args().value("json_args").toString().simplified();
+		//pdi.input.args().value("json_args").toString().simplified();
 		QProcess plugin(this);
 		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 		env.remove("PATH");

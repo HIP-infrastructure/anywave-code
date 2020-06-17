@@ -658,9 +658,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="Carto\AwMappingClient.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
@@ -726,9 +723,6 @@
     </ClCompile>
     <ClCompile Include="Process\AwProcessWidget.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPidManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwRequestServer.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -1240,9 +1234,6 @@
     <ClCompile Include="CL\AwRunProcess.cpp">
       <Filter>CL</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_SignalInfo.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="MATPy\AwGetMarkersEx.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
@@ -1287,15 +1278,6 @@
     </ClCompile>
     <ClCompile Include="Data\AwDataSet.cpp">
       <Filter>Data</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwICABatchDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwICABatchDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="ICA\AwICABatchDialog.cpp">
-      <Filter>ICA</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchDialog.cpp">
       <Filter>Generated Files\Debug</Filter>
@@ -1399,17 +1381,20 @@
     <ClCompile Include="Process\PSD\AwPSDGUI.cpp">
       <Filter>Process\PSD</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSProxyModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSProxyModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp">
       <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwPidManager.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwPidManager.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1671,9 +1656,6 @@
     <CustomBuild Include="AwExportDial.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\resources\AnyWave.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Carto\AwMappingClient.h">
       <Filter>Carto</Filter>
     </CustomBuild>
@@ -1908,17 +1890,8 @@
     <CustomBuild Include="Widgets\AwVideoSettingsDial.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
-    <CustomBuild Include="MATPy\AwPidManager.h">
-      <Filter>MATPy</Filter>
-    </CustomBuild>
     <CustomBuild Include="Data\AwDataSet.h">
       <Filter>Data</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICABatchDialog.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICABatchDialog.h">
-      <Filter>ICA</Filter>
     </CustomBuild>
     <CustomBuild Include="Batch\AwBatchDialog.h">
       <Filter>Batch</Filter>
@@ -1967,6 +1940,12 @@
     </CustomBuild>
     <CustomBuild Include="Process\PSD\AwPSDGUI.h">
       <Filter>Process\PSD</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MATPy\AwPidManager.h">
+      <Filter>MATPy</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\resources\AnyWave.qrc">
+      <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -2168,9 +2147,6 @@
     <ClInclude Include="GeneratedFiles\ui_AwVideoSettingsDial.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwICABatchDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_AwBatchDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -2197,14 +2173,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\resources\eeg_sensors_locations.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="..\..\resources\eeg_sensors_2D.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
+    <Image Include="icon1.ico" />
     <Image Include="..\..\resources\images\AddToMontage48x48.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -2238,19 +2207,13 @@
     <Image Include="..\..\resources\images\start32x32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\logo_Inserm.png">
+    <Image Include="..\..\resources\images\INSERM_logo.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\Qt_logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\images\logo_amu.png">
+    <Image Include="..\..\resources\images\logo_amu_rvb.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\VTK_logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\images\AnyWave_icon.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\matlablogo.jpg">
@@ -2262,10 +2225,10 @@
     <Image Include="..\..\resources\images\ox_eye_32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\ox_arrow_down_32.png">
+    <Image Include="..\..\resources\images\plus_sign_24x24.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\ox_arrow_up_32.png">
+    <Image Include="..\..\resources\images\minus_sign_24x24.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\ox_document_save_as_32.png">
@@ -2286,33 +2249,35 @@
     <Image Include="..\..\resources\images\system_run_32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\AnyWave_logo.png">
+    <Image Include="..\..\resources\images\AnyWave_icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\Built_with_Qt_logo.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\list-icon_32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icon1.ico" />
+    <Image Include="..\..\resources\images\importICA32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\logo_ins.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\GARDEL_32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\armadillo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\Capture32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\QTS.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\resources\anywave_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\awreadwritelib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\awwidgetlib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\AwCoreLib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="anywave_fr.ts">
-      <Filter>Translation Files</Filter>
-    </None>
-    <None Include="anywave_en.ts">
-      <Filter>Translation Files</Filter>
-    </None>
     <None Include="cpp.hint" />
     <None Include="GeneratedFiles\Debug\AwEpochManager.moc">
       <Filter>Generated Files\Debug</Filter>
