@@ -72,9 +72,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwEpochSignalView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochAverager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="AwAvgEpoch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
