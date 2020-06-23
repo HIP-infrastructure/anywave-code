@@ -539,7 +539,8 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 	if (skip && !use) {
         auto tmp = AwMarker::getMarkersWithLabels(markers, skipped);
         skippedMarkers = AwMarker::merge(tmp);
-		res = invertMarkerSelection(skippedMarkers, "selection", totalDuration);
+		if (!skippedMarkers.isEmpty())
+			res = invertMarkerSelection(skippedMarkers, "selection", totalDuration);
 	}
 	else if (!skip && use) {
         auto tmp = AwMarker::getMarkersWithLabels(markers, used);
@@ -550,6 +551,12 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
         skippedMarkers = AwMarker::merge(tmp);
         tmp = AwMarker::getMarkersWithLabels(markers, used);
         usedMarkers = AwMarker::merge(tmp);
+		if (skippedMarkers.isEmpty() && !usedMarkers.isEmpty())
+			return usedMarkers;
+		if (!skippedMarkers.isEmpty() && usedMarkers.isEmpty())
+			return skippedMarkers;
+		if (skippedMarkers.isEmpty() && usedMarkers.isEmpty())
+			return res;
 		// browse used markers and test if they overlap rejected/skipped ones.
 		for (int i = 0; i < skippedMarkers.size(); i++) {
 			auto m = skippedMarkers.at(i);

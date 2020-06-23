@@ -249,8 +249,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList *)), m_display, SLOT(addVirtualChannels(AwChannelList *)));
 		connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
 			m_display, SLOT(executeCommand(int, const QVariantList&)));
-		//connect(m_display, SIGNAL(selectedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setSelectedChannels(const AwChannelList&)));
-		//connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), process_manager, SLOT(setDisplayedChannels(const AwChannelList&)));
 		// Display and Montage manager
 		connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
 		// Settings and Display
@@ -259,8 +257,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 
 	// Process Manager and Marker Manager
 	connect(process_manager, SIGNAL(newMarkersAvailable(const AwMarkerList&)), marker_manager, SLOT(addMarkers(const AwMarkerList&)));
-	// Process Manager and Montage Manager
-//	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), process_manager, SLOT(setMontageChannels(const AwChannelList&)));
 	// Marker Manager and AnyWave
 	connect(marker_manager, SIGNAL(modificationsDone()), this, SLOT(setModified()));
 	// Montage Manager and AnyWave
