@@ -76,8 +76,7 @@ void AwMarkerItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 	if (isSelected()) {
 		QColor c = pen.color();
-		c.darker();
-		pen.setColor(c);
+		pen.setColor(c.darker());
 	}
 
 	// Positioning Labels

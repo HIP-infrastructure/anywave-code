@@ -126,8 +126,11 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		return Q_NULLPTR;
 	}
 
+	// always add the path to anywave app
+	args[cl::aw_path] = QCoreApplication::applicationFilePath();
+
 	// check run arguments (could be a  json file, a json string or a the name of a plugin
-	QString json = args["run_process"].toString();
+	QString json = args.value("run_process").toString();
 	QString pluginName = json;
 	auto pm = AwPluginManager::getInstance();
 	auto plugin = pm->getProcessPluginByName(pluginName);

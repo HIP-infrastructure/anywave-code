@@ -7,6 +7,7 @@
 #include "Plugin/AwPluginManager.h"
 #include <utils/json.h>
 #include <AwKeys.h>
+#include "Prefs/AwSettings.h"
 //
 // options descriptions
 //
@@ -66,12 +67,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
 	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
 	QCommandLineOption outputSuffixO("output_suffix", "specify the suffix to use for output_fle.", "output_suffix", QString());
+	QCommandLineOption logDirO("log_dir", "specify the folder where log files will be created.", "log_dir", QString());
 	// markers
 	QCommandLineOption useMarkersO("use_markers", "specify the markers on which process the data.", "use_markers", QString());
 	QCommandLineOption skipMarkersO("skip_markers", "specify the markers to skip.", "skip_markers", QString());
 	parser.addOption(useMarkersO);
 	parser.addOption(skipMarkersO);
 
+	parser.addOption(logDirO);
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
 	parser.addOption(outputFileO);
@@ -194,6 +197,10 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	availableWriters["ades"] = QString("AnyWave ADES Format");
 
 	QString tmp;
+	// log_dir
+	tmp = parser.value(logDirO);
+	if (!tmp.isEmpty())
+		AwSettings::getInstance()->setValue(aws::log_dir, tmp);
 	// use_markers
 	tmp = parser.value(useMarkersO);
 	if (!tmp.isEmpty())

@@ -26,43 +26,43 @@
 
 #include "common.h"
 #include <AwProcess.h>
-extern PyObject *m_module;			// the module
-extern PyObject *AnyWaveError;
-#include <QDataStream>
+#include <QProcess>
+#include <QTcpServer>
 
-PyObject *openNewFile(PyObject *self, PyObject *args)
+
+extern PyObject* AnyWaveError;
+
+PyObject *launchAnyWave(PyObject *self, PyObject *args)
 {
 	if (!PyDict_Check(args)) {
 		PyErr_SetString(AnyWaveError, "parameter must be a dict.");
 		return NULL;
 	}
 
-	TCPRequest request(AwRequest::OpenNewFile);
-	if (request.status() == TCPRequest::failed) 
-		return NULL;
-	if (!request.sendRequest(dictToJson(args))) 
-		return NULL;
-	if (!request.getResponse())
-		return NULL;
-	
-	QDataStream& out = *request.response();
-	// AnyWave returns status and new server_port
-	int  status,  port;
-	out >> status >> port;
-	if (status == -1) { // failed : the file could not be open
-		PyErr_SetString(AnyWaveError, "AnyWave could not open the file.");
-		return NULL;
-	}
+	// spawn a new instance of AnyWave with arguments:
+	// 
+	QString path = "AnyWave.exe";
+	PyObject *p = PyDict_GetItemString(args, "path");
+	if (p) 
+		path = Py3StringToQString(p);
+	QString file = Py3StringToQString(PyDict_GetItemString(args, "file"));
+	QString serverPort;
 
-	auto dict = PyModule_GetDict(m_module);
-	if (dict == NULL) {
-		PyErr_SetString(AnyWaveError, "Module error: could not get __dict__.");
-		return NULL;
-	}
-	if (PyDict_SetItemString(dict, "server_port", QStringToPy3String(QString::number(port)))) {
-		PyErr_SetString(AnyWaveError, "Module error: failed to set 'server_port'.");
-		return NULL;
-	}
+	QTcpServer server;
+	if (server.listen(QHostAddress::Any, 0))
+		serverPort = QString("--server_port %1").arg(server.serverPort());
+
+
+	QStringList arguments = { "--server", serverPort, QString("--input_file %1").arg(file) };
+
+	QProcess process;
+	process.setProgram(path);
+	process.setArguments(arguments);
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+	process.startDetached(path);
+#else
+	process.startDetached();
+#endif
 
 	return Py_None;
 }

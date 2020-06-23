@@ -1,45 +1,78 @@
-## Get ready to build using Ubuntu 18.04
+## Get ready to build AnyWave
 
+Install or build dependencies:  
+The examples below are for ubuntu systems but it should build also on other distros if you pick up the corresponding packages names.
+
+1. CMake   
+
+cmake is required to build, if you want to build a compatible version of cmake do:
 ```bash
-sudo apt-get -y update && apt-get -y install git cmake qtbase5-dev
-    qt5-default libvtk7-qt-dev libopenblas-base libopenblas-dev qtmultimedia5-dev libqt5x11extras5-dev
-    libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev
-    build-essential libpython3.6-dev python3-numpy 
-```
-You should be able to adapt the script above for your own distribution.   
-Note that cmake v3 is required and some distributions (CentOS) only provides CMake 2.8.   
-You may have to add extra source repositories to get cmake3.
-
-## Packages required for Ubuntu 16.xx
-
-```bash
-sudo apt-get -y update && apt-get -y install git cmake qtbase5-dev libqt5dbus5 
-    qt5-default libvtk6-qt-dev libopenblas-base libopenblas-dev qtmultimedia5-dev libqt5x11extras5-dev
-    libmatio-dev tcsh libfftw3-dev libqwt-qt5-dev qttools5-dev-tools libqt5svg5-dev libxt-dev libhdf5-dev
-    build-essential libpython2.7-dev python2.7 python-numpy libproj-dev libqt5x11extras5 libqt5multimedia5
+$ curl -L -O 'https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.sh' && \
+    chmod a+x cmake-3.13.2-Linux-x86_64.sh 
+$ sudo ./cmake-3.13.2-Linux-x86_64.sh --prefix=/usr --skip-license
 ```
 
-WARNING: On Ubuntu 16.04 some Qt5 packages are not availabel (Qt5Charts Qt5Declarative). 
-Download and install Qt 5.9 or earlier from Qt5 website before building AnyWave.
-
-## Get the code
+2. Qt5 libs and tools
 ```bash
-git clone https://gitlab.thevirtualbrain.org/anywave/AnyWave.git 
-cd AnyWave
-```
-## Build with CMake
-```bash
-mkdir build && cd build
-cmake ..
-sudo make install
+$ sudo apt-get install -y   libdbus-1-3 qt5-default qt5-qmake  qtbase5-dev-tools  libqt5opengl5 libqt5x11extras5
 ```
 
-By default the installation path is /usr/local/AnyWave but you can change the prefix path using:   
+3. Git
 ```bash
-cmake .. -DCMAKE_PREFIX_PATH=/home/user
+$ sudo apt-get install -y   git
 ```
-The application will then be installed in /home/user/AnyWave   
-The binaries are built using RPATH to the CMAKE_PREFIX_PATH and a link called anywave will be created in /usr/bin    
+
+4. building tools
+   
+```bash
+$ sudo apt-get install -y   build-essentials
+```
+
+5. Qwt  
+ ```bash
+$ sudo apt-get install -y  libqwt-qt5-dev
+```
+
+6. openblas
+ ```bash
+$ sudo apt-get install -y  libopenblas-dev
+```
+
+7. VTK
+ ```bash
+$ sudo apt-get -y update && apt-get install -y \ 
+libxt-dev libqt5x11extras5-dev qttools5-dev
+$ git clone https://github.com/Kitware/VTK.git vtk
+$ cd vtk && git checkout v8.2.0 && cd .. 
+$ mkdir build && cd build
+$  cmake ../vtk -DCMAKE_INSTALL_PREFIX=/usr/local -DModule_vtkGUISupportQt=ON \
+  -DModule_vtkGUISupportQtOpenGL=ON -DModule_vtkRenderingQt=ON -DModule_vtkViewsQt=ON -DVTK_RENDERING_BACKEND=OpenGL -DVTK_QT_VERSION=5  \
+  -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON 
+ $ make
+ $ sudo make install
+ ```
+
+8. libmatio
+```bash
+$ sudo apt-get -y update && apt-get install -y \ 
+ libmatio-dev
+ ```
+ 
+9. fftw
+```bash
+$ sudo apt-get -y update && apt-get install -y \ 
+  libfftw3-dev
+```
+10. AnyWave
+```bash
+$ sudo  apt-get -y update && apt-get install -y \
+  libqt5svg5-dev qtdeclarative5-dev  qtmultimedia5-dev libopenblas-dev python3-dev python3-numpy
+$ git clone https://gitlab.dynamap.tvb-ins.fr/anywave/anywave.git
+$ cd anywave
+$ mkdir build && cd build && cmake ../anywave && make
+$ sudo make install 
+```
+
 
 # MATLAB
 MATLAB support should be automatic if you have MATLAB installed in /usr/local/MATLAB  

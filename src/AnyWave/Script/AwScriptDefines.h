@@ -24,15 +24,15 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include <QtGlobal>
-#if QT_VERSION >= QT_VERSION_CHECK(5,8,0)
-#include <qjsengine.h>
-#include <qjsvalue.h>
-#define QSVALUE QJSValue
-#define QSENGINE QJSEngine
-#else
-#include <QScriptValue>
-class QScriptEngine;
-#define QSVALUE QScriptValue
-#define QSENGINE QScriptEngine
-#endif
+//#include <QtGlobal>
+//#if QT_VERSION >= QT_VERSION_CHECK(5,8,0)
+//#include <qjsengine.h>
+//#include <qjsvalue.h>
+//#define QSVALUE QJSValue
+//#define QSENGINE QJSEngine
+//#else
+//#include <QScriptValue>
+//class QScriptEngine;
+//#define QSVALUE QScriptValue
+//#define QSENGINE QScriptEngine
+//#endif

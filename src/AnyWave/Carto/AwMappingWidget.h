@@ -30,6 +30,8 @@
 #include "ui_AwMappingWidget.h"
 #include <AwChannel.h>
 class AwLayout;
+
+
 class AwMappingWidget : public QWidget
 {
 	Q_OBJECT
@@ -53,7 +55,7 @@ public slots:
 signals:
 	void selectedLabelsChanged(const QStringList& labels);
 private:
-	Ui::AwMappingWidgetUi2 ui;
+	Ui::AwMappingWidgetUi ui;
 	AwLayout *m_l2D, *m_l3D;
 	QStringList m_selectedLabels;
 	int m_type;	// type of Mapping (EEG or MEG)

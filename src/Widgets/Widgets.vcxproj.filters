@@ -370,14 +370,8 @@
     <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp">
       <Filter>SEEGViewer</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwSelectInputDataWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="AwSelectInputDataWidget.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwGetValueDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="AwGetValueDialog.cpp">
       <Filter>Source Files</Filter>
@@ -395,6 +389,18 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_AwWaitWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwGetValueDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwGetValueDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AwSelectInputDataWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AwSelectInputDataWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
@@ -549,14 +555,8 @@
     <CustomBuild Include="AwSelectInputDataWidget.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\include\widget\AwSelectInputDataWidget.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="AwGetValueDialog.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\include\widget\AwGetValueDialog.h">
-      <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\include\widget\AwVideoPlayer.h">
       <Filter>Header Files</Filter>
@@ -565,6 +565,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\include\widget\AwWaitWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwGetValueDialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\widget\AwSelectInputDataWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

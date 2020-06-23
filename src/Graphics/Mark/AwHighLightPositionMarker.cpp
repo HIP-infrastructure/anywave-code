@@ -80,8 +80,7 @@ void AwHighLightPositionMarker::paint(QPainter *painter, const QStyleOptionGraph
 	QBrush brush;
 
 	QColor blue = QColor(Qt::blue);
-	blue.lighter();
-	brush.setColor(blue);
+	brush.setColor(blue.lighter());
 	brush.setStyle(Qt::SolidPattern);
 	QPen pen = QPen(blue);
 	pen.setWidth(1);

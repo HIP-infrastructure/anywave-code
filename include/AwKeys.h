@@ -74,4 +74,5 @@ namespace cl {
 	constexpr auto batch_inputs = "inputs";
 	constexpr auto batch_parameters = "parameters";
 	constexpr auto batch_flags = "flags";
+	constexpr auto aw_path = "anywave_path";
 }

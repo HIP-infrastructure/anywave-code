@@ -202,7 +202,7 @@ void AwUpdater::checkForUpdate()
 #endif 
 	QUrl url;
 	if (!isINSVersion)
-		url = QUrl(QString("http://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(major).arg(minor));
+		url = QUrl(QString("https://meg.univ-amu.fr/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(major).arg(minor));
 	else
 		url = QUrl(QString("http://139.124.150.47/AnyWave/AnyWave_version.php?platform=%1&version=%2&minor=%3").arg(platform).arg(major).arg(minor));
 	QNetworkRequest request(url);
