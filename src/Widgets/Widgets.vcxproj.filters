@@ -148,9 +148,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwViewSettingsUi.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_AwViewSettings.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -403,6 +400,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwSelectInputDataWidget.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AwAmplitudeWidget.ui">
@@ -446,9 +446,6 @@
     </CustomBuild>
     <CustomBuild Include="SignalView\AwViewSettingsUi.h">
       <Filter>SignalView</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\resources\AnyWave.qrc">
-      <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\include\widget\SignalView\AwViewSettings.h">
       <Filter>SignalView</Filter>
@@ -573,6 +570,9 @@
     <CustomBuild Include="..\..\include\widget\AwSelectInputDataWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\resources\AnyWave.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AwAmplitudeWidget.h">
@@ -640,30 +640,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\resources\Resources\images\ox_arrow_down_32.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\Resources\images\ox_arrow_up_32.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\Resources\images\back32x32.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\Resources\images\end32x32.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\Resources\images\fwd32x32.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\Resources\images\ox_eye_32.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\Resources\images\start32x32.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\images\pw.png">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <None Include="awwidgetslib_fr.ts">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="awwidgetslib_en.ts">
+      <Filter>Translation Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Image Include="..\..\resources\images\AddToMontage48x48.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -697,19 +681,13 @@
     <Image Include="..\..\resources\images\start32x32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\logo_Inserm.png">
+    <Image Include="..\..\resources\images\INSERM_logo.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\Qt_logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\images\logo_amu.png">
+    <Image Include="..\..\resources\images\logo_amu_rvb.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\VTK_logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\images\AnyWave_icon.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\matlablogo.jpg">
@@ -745,7 +723,10 @@
     <Image Include="..\..\resources\images\system_run_32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\AnyWave_logo.png">
+    <Image Include="..\..\resources\images\AnyWave_icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\Built_with_Qt_logo.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\list-icon_32.png">
@@ -754,36 +735,20 @@
     <Image Include="..\..\resources\images\importICA32x32.png">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\resources\amplitudes.txt">
+    <Image Include="..\..\resources\images\logo_ins.png">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="..\..\resources\eeg_sensors_locations.txt">
+    </Image>
+    <Image Include="..\..\resources\images\GARDEL_32x32.png">
       <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="..\..\resources\eeg_sensors_2D.txt">
+    </Image>
+    <Image Include="..\..\resources\images\armadillo.png">
       <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\resources\anywave_fr.qm">
+    </Image>
+    <Image Include="..\..\resources\images\Capture32x32.png">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\awreadwritelib_fr.qm">
+    </Image>
+    <Image Include="..\..\resources\images\QTS.png">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\awwidgetlib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\AwCoreLib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="awwidgetslib_fr.ts">
-      <Filter>Translation Files</Filter>
-    </None>
-    <None Include="awwidgetslib_en.ts">
-      <Filter>Translation Files</Filter>
-    </None>
+    </Image>
   </ItemGroup>
 </Project>

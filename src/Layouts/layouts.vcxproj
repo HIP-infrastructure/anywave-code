@@ -38,19 +38,19 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\resources\layouts.qrc">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\braincaptms64.lay;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\biosemi64.lay;..\..\resources\layouts\elekta102.lay;..\..\resources\layouts\egi257.lay;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\braincaptms64.lay;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\biosemi64.lay;..\..\resources\layouts\elekta102.lay;..\..\resources\layouts\egi257.lay;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\braincaptms64.lay;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\biosemi64.lay;..\..\resources\layouts\elekta102.lay;..\..\resources\layouts\egi257.lay;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\braincaptms64.lay;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath);..\..\resources\layouts\layouts.txt;..\..\resources\layouts\4D248.lay;..\..\resources\layouts\elec1010.lay;..\..\resources\layouts\EEG1005.lay;..\..\resources\layouts\EEG1020.lay;..\..\resources\layouts\biosemi16.lay;..\..\resources\layouts\biosemi32.lay;..\..\resources\layouts\biosemi160.lay;..\..\resources\layouts\4D248_.lay;..\..\resources\layouts\biosemi64.lay;..\..\resources\layouts\elekta102.lay;..\..\resources\layouts\egi257.lay;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
@@ -95,7 +95,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="..\..\resources\layouts\braincaptms64.lay">
+    <None Include="..\..\resources\layouts\biosemi64.lay">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -113,7 +113,19 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="..\..\resources\layouts\egi257.lay">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\..\resources\layouts\elec1010.lay">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\..\resources\layouts\elekta102.lay">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
