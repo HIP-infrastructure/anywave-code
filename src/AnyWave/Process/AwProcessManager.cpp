@@ -383,6 +383,13 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 		process->pdi.input.settings[processio::data_path] = QString("%1/%2").arg(fi->dirPath()).arg(fi->fileName());
 		process->pdi.input.filterSettings = aws->filterSettings();
 		process->pdi.input.settings[processio::file_duration] = fi->currentReader()->infos.totalDuration();
+		// copy all this to args to make them accessible from MATLAB/Python
+		auto args = process->pdi.input.args();
+		args[processio::data_dir] = fi->dirPath();
+		args[processio::data_path] = QString("%1/%2").arg(fi->dirPath()).arg(fi->fileName());
+		args[processio::file_duration] = fi->currentReader()->infos.totalDuration();
+		args[cl::aw_path] = QCoreApplication::applicationFilePath();
+		args[processio::working_dir] = process->pdi.input.settings.value(processio::working_dir);
 	}
 	return process;
 }
@@ -679,10 +686,17 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	if (initProcessIO(process)) {
 		if (!skipDataFile) {
 			process->pdi.input.settings[processio::data_path] = AwSettings::getInstance()->fileInfo()->filePath();
+			// make it also an argument for MATLAB/Python plugins
+			process->pdi.input.addArgument(processio::data_path, AwSettings::getInstance()->fileInfo()->filePath());
 			process->pdi.input.settings[processio::data_dir] = AwSettings::getInstance()->fileInfo()->dirPath();
+			process->pdi.input.addArgument(processio::data_dir, AwSettings::getInstance()->fileInfo()->dirPath());
+			// add  application path to arguments
+			process->pdi.input.addArgument(cl::aw_path, QCoreApplication::applicationFilePath());
 			process->pdi.input.setReader(m_currentReader);
 			process->pdi.input.settings[processio::file_duration] = m_currentReader->infos.totalDuration();
+			process->pdi.input.addArgument(processio::file_duration, m_currentReader->infos.totalDuration());
 			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::instance()->badLabels();
+			process->pdi.input.addArgument(processio::bad_labels, AwMontageManager::instance()->badLabels());
 			// verify that plugin which accepts time selection get at least the whole selection as input
 			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
 				if (process->pdi.input.markers().isEmpty())

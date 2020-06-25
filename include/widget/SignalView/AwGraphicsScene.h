@@ -148,6 +148,7 @@ protected slots:
 	void setChannelAsBad();
 	void gotoChannel(QAction *act);
 	void launchQTSPlugin();
+	void insertPredefinedMarker();
 protected:
 	float timeAtPos(const QPointF& pos);
 	float xPosFromTime(float time);

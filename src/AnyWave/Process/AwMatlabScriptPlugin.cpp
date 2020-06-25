@@ -50,17 +50,6 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	initProcess(p);
 	AwMATPyServer *server = AwMATPyServer::instance();
 	AwPidManager::instance()->createNewPid(p);
-	//server->start();
-
-
-	//// connect the process to the matlab server
-	//AwMATPyServer *server = AwMATPyServer::instance(); // instantiate MATPYServer 
-	//// Get or Create AwPidManager
-	//AwPidManager *pidm = AwPidManager::instance();
-	//AwPidManager::instance()->createNewPid(p);  // set pid to process
-	//AwMATPyServer::instance()->start();	// start listening for network requests
-
-	
 	if (isCompiled()) {
 		p->setCompiled();
 #ifdef Q_OS_WIN

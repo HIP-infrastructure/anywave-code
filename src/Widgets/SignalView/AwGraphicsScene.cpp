@@ -724,13 +724,27 @@ void AwGraphicsScene::setChannelAsBad()
 	emit badChannelSet(act->data().toString());
 }
 
+void AwGraphicsScene::insertPredefinedMarker()
+{
+	QAction* act = (QAction*)sender();
+	if (act == nullptr)
+		return;
+	int index = act->data().toInt();
+	auto marker = m_markingSettings->list.at(index);
+	// set correct position :
+	marker->setStart(m_mappingMarker.start());
+	emit markerInserted(new AwMarker(marker));
+}
+
 void AwGraphicsScene::addCustomMarkerFromList()
 {
 	QAction *act = (QAction *)sender();
 
 	int index = act->data().toInt();
-	m_currentMarkerItem->marker()->setLabel(m_markingSettings->list.at(index)->label());
-	m_currentMarkerItem->marker()->setValue(m_markingSettings->list.at(index)->value());
+	if (m_currentMarkerItem) {
+		m_currentMarkerItem->marker()->setLabel(m_markingSettings->list.at(index)->label());
+		m_currentMarkerItem->marker()->setValue(m_markingSettings->list.at(index)->value());
+	}
 }
 
 void AwGraphicsScene::cursorToMarker()
@@ -946,9 +960,20 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	menu_view->addAction(act);
 
 	if (m_mouseMode == AwGraphicsScene::Mapping) {
-		QAction *action = new QAction(tr("Mark the last mapping position/selection"), menuDisplay);
+		menuDisplay->addSeparator();
+		auto subMenu = menuDisplay->addMenu("Mark");
+		QAction *action = subMenu->addAction("Mark the last mapping position/selection");
 		connect(action, SIGNAL(triggered()), this, SLOT(cursorToMarker()));
-		menuDisplay->addAction(action);
+		// prepare contextual menu if the user choosed to use predefined markers
+		if (m_markingSettings->isUsingList && !m_markingSettings->list.isEmpty()) {
+			int index = 0;
+			for (auto m : m_markingSettings->list) {
+				QAction* action = subMenu->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
+				action->setData(index); // store the index of item in list in action custom data.
+				index++;
+				connect(action, SIGNAL(triggered()), this, SLOT(insertPredefinedMarker()));
+			}
+		}
 		menuDisplay->addSeparator();
 	}
 
@@ -1038,6 +1063,7 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 		delete menuDisplay;
 		return;
 	}
+
 	if (itemType == AW_GRAPHICS_ITEM_MARKER_TYPE) {
 		AwGraphicsMarkerItem *mitem = qgraphicsitem_cast<AwGraphicsMarkerItem *>(item);
 		// insert the action to the first position in default context menu.

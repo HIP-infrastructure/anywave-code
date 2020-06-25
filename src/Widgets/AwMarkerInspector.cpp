@@ -42,6 +42,7 @@ AwMarkerInspector::AwMarkerInspector(const AwMarkerList& markers, const QStringL
 	// by default markers are globals so hide targeted channels list
 	m_ui->listWidgetTargets->hide();
 	m_ui->buttonAddChannels->hide();
+	m_ui->buttonClearTargets->hide();
 	// by default no key binding used
 	m_ui->labelBrowse->hide();
 	m_ui->radioLabels->hide();
