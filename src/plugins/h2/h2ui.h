@@ -50,6 +50,7 @@ public:
 	QString directory;
 	AwMarkerList markers;
 	QStringList usedLabels, skippedLabels;
+	bool saveInOneFile;
 public slots:
 	void accept() override;
 	int exec() override;

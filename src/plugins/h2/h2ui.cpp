@@ -169,6 +169,8 @@ void H2UI::accept()
 		break;
 	}
 
+	saveInOneFile = radioSaveInOneFile->isChecked();
+
 	// check for settings file in working directory
 	if (!directory.isEmpty()) {
 		QString fileName = QString("%1/settings.json").arg(directory);
