@@ -252,8 +252,9 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 QString pluginPath = dir.absolutePath() + "/" + folder;
 		 QString exePluginPath; // can handle the path to standalone executable plugins
 		 QString pythonCode = QString("%1/__main__.py").arg(pluginPath);
-		 QString matlabCode = QString("%1/main.m").arg(pluginPath);
-		 bool isMATLABScript = QFile::exists(matlabCode);
+		 QString matlabCodeM = QString("%1/main.m").arg(pluginPath);
+		 QString matlabCodeApp = QString("%1/main.mlapp").arg(pluginPath);
+		 bool isMATLABScript = QFile::exists(matlabCodeM) || QFile::exists(matlabCodeApp);
 		 bool isPythonScript = QFile::exists(pythonCode);
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
 		 QString jsonArgs = QString("%1/args.json").arg(pluginPath);

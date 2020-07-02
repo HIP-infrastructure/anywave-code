@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <AwFileIO.h>
 #include <AwCore.h>
+#include <QRegularExpression>
 
 AwMontage::AwMontage(AwFileIO *reader)
 {
@@ -223,6 +224,72 @@ QStringList AwMontage::loadBadChannels(const QString & filePath)
 		file.close();
 	}
 	return res;
+}
+
+/// <summary>
+///  From a channel list, create a list containing only bipolar channels.
+/// </summary>
+/// <param name="channels"></param>
+/// <returns> list of new channels montaged as bipolar. Channels are duplicated from original list.</returns>
+AwChannelList AwMontage::createSEEGBipolarMontage(const AwChannelList& channels, const QStringList& badLabels)
+{
+	// store channels by their names
+	QMap<QString, AwChannel*> hash;
+	for (auto c : channels)
+		hash.insert(c->name(), c);
+
+	AwChannelList res;
+	QRegularExpression exp("(\\d+)$");
+	QRegularExpression expZeros("^(0+)");
+	QRegularExpressionMatch match, matchZero;
+	for (auto c : channels) {
+		if (badLabels.contains(c->name()))
+			continue;
+		match = exp.match(c->name());
+		if (match.hasMatch()) {
+			QString zeros;
+			auto baseName = c->name();
+			baseName = baseName.remove(exp);
+			auto number = match.captured(1);
+			// find leading zeros
+			matchZero = expZeros.match(number);
+			if (matchZero.hasMatch()) {
+				zeros = matchZero.captured(1);
+				number = number.remove(expZeros);
+			}
+			int n = number.toInt() + 1;
+
+			// find the reference without considering zeros in number
+			QString ref = QString("%1%2").arg(baseName).arg(n);
+			if (!hash.contains(ref))
+				ref = QString("%1%2%3").arg(baseName).arg(zeros).arg(n);
+			if (hash.contains(ref) && !badLabels.contains(ref)) {
+				c->setReferenceName(ref);
+				res << c->duplicate();
+			}
+		}
+	}
+	return res;
+}
+
+/// <summary>
+/// remove bad channels in the list passed as first paremeter based on the list of the bad labels.
+/// the channels are removed and destroyed.
+/// </summary>
+/// <param name="channels">list of channels</param>
+/// <param name="badLabels">list of bad labels</param>
+void AwMontage::removeBadChannels(AwChannelList& channels, const QStringList& badLabels)
+{
+	if (badLabels.isEmpty())
+		return;
+	AwChannelList tmp;
+	for (auto c : channels) {
+		if (badLabels.contains(c->name()))
+			tmp << c;
+	}
+	for (auto c : tmp)
+		channels.removeAll(c);
+	qDeleteAll(tmp);
 }
 
 

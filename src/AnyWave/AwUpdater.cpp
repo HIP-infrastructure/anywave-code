@@ -56,7 +56,7 @@ void AwDownloader::download()
 	if (isINSVersion)
 		baseURL = QString("http://139.124.150.47/AnyWave");
 	else
-		baseURL = QString("http://meg.univ-amu.fr/AnyWave");
+		baseURL = QString("https://meg.univ-amu.fr/AnyWave");
 
 #ifdef Q_OS_WIN
 	url = QUrl(QString("%1/AnyWave_win64.zip").arg(baseURL));

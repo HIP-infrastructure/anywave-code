@@ -35,7 +35,7 @@ public:
 	AwScriptProcess() : AwProcess() { m_isCompiled = false;  m_pid = -1; }
 	void setScriptPath(const QString& path) { m_path = path; }
 	inline void setPid(int pid) { m_pid = pid; }
-	inline int pid() { return m_pid; }
+	inline int pid() const { return m_pid; }
 	void setCompiled(bool flag = true) { m_isCompiled = flag; }
 	/** calls to runFromCommandLine redirected to run() : command line run options. **/
 	void runFromCommandLine() override { run(); }

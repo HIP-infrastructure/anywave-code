@@ -44,28 +44,34 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 {
 	emit log("processing aw_getdataex/getdataex()");
 	AwTCPResponse response(client);
+	QDataStream fromClient(client);
+	fromClient.setVersion(QDataStream::Qt_4_4);
+	QDataStream& toClient = *response.stream();
+	QString jsonString;
 
-	// get parameters from client
-	QDataStream in(client);
-	in.setVersion(QDataStream::Qt_4_4);
+	AwFileIO* reader = process->pdi.input.reader();
+	if (reader == nullptr) {
+		emit log("ERROR: null reader pointer. Nothing done.");
+		toClient << (qint64)-1 << QString("Error in AnyWave");
+		response.send();
+		return;
+	}
 
-	// expecting a string containing json encoded structure or empty string for default behavior.
 	QString json;
-	in >> json;
+	fromClient >> json;
 	int status = 0;
-	QDataStream& stream = *response.stream();
 	bool rawData = false;
+	bool skipBad = true;	// default is to remove bad channels.
 	int downsampling = 1;
 	AwChannelList requestedChannels;
 	AwMarkerList input_markers, markers;
-	auto reader = AwSettings::getInstance()->currentReader();
+	
 	float fileDuration = process->pdi.input.settings.value(processio::file_duration).toDouble();
 	float start = 0., duration = fileDuration;
 	AwFileIO *localReader = nullptr;
-
+	requestedChannels = process->pdi.input.channels();
 	if (json.isEmpty()) { // no args set 
 		// get input channels of process
-		requestedChannels = process->pdi.input.channels();
 		if (requestedChannels.isEmpty())
 			requestedChannels = reader->infos.channels();
 
@@ -73,23 +79,25 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	}
 	else {
 		QString error;
-		auto doc = AwUtilities::json::jsonStringToDocument(json, error);
-		if (doc.isEmpty() || doc.isNull()) {
-			emit log(QString("error in json parsing: %1").arg(error));
-			stream << (qint64)-1 << error;
+		auto cfg = AwUtilities::json::mapFromJsonString(json, error);
+		if (cfg.isEmpty()) {
+			emit log(QString("ERROR: %1").arg(error));
+			toClient << (qint64)-1 << error;
 			response.send();
 			return;
 		}
-		auto dict = doc.object();
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
 		QString file;
 		bool usingFile = false;
 
-		if (dict.contains("data_file")) {
-			file = dict.value("data_file").toString();
+		if (cfg.contains("skip_bad_channels"))
+			skipBad = cfg.value("skip_bad_channels").toBool();
+
+		if (cfg.contains("data_file")) {
+			file = cfg.value("data_file").toString();
 			localReader = AwPluginManager::getInstance()->getReaderToOpenFile(file);
 			if (localReader == nullptr) {
-				stream << (qint64)-1 << QString("file: %1 could not be open.").arg(file);
+				toClient << (qint64)-1 << QString("file: %1 could not be open.").arg(file);
 				response.send();
 				return;
 			}
@@ -100,8 +108,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		}
 
 		// check for marker file
-		if (dict.contains("marker_file")) {
-			auto mrkFile = dict.value("marker_file").toString();
+		if (cfg.contains("marker_file")) {
+			auto mrkFile = cfg.value("marker_file").toString();
 			markers = AwMarker::load(mrkFile);
 			if (markers.isEmpty()) {
 				emit log(QString("Loading of %1 failed.").arg(mrkFile));
@@ -117,55 +125,48 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 
 		AwFilterSettings filterSettings;
 		// check for start/Duration or use markers options
-		if (dict.contains("use_markers")) {
-			auto tmp = dict.value("use_markers").toArray();
-			for (auto t : tmp)
-				use_markers << t.toString();
-		}
-		if (dict.contains("skip_markers")) {
-			auto tmp = dict.value("skip_markers").toArray();
-			for (auto t : tmp)
-				skip_markers << t.toString();
-		}
+		if (cfg.contains("use_markers")) 
+			use_markers = cfg.value("use_markers").toStringList();
+		if (cfg.contains("skip_markers")) 
+			skip_markers = cfg.value("skip_markers").toStringList();
+
 		// check for channel labels
-		if (dict.contains("labels")) {
-			auto tmp = dict.value("labels").toArray();
-			for (auto t : tmp)
-				labels << t.toString().simplified();
-		}
+		if (cfg.contains("labels")) 
+			labels = cfg.value("labels").toStringList();
+
 		// check for channel types
-		if (dict.contains("types")) {
-			auto tmp = dict.value("types").toArray();
-			for (auto t : tmp)
-				types << t.toString().simplified();
-		}
-		// check for pick_from
-		if (dict.contains("pick_channels_from")) {
-			auto tmp = dict.value("pick_channels_from").toArray();
-			for (auto t : tmp)
-				pickFrom << t.toString().simplified();
+		if (cfg.contains("types"))
+			types = cfg.value("types").toStringList();
+		
+		// check for channel source
+		if (cfg.contains("channels_source")) {
+			auto source = cfg.value("channels_source").toString().simplified();
+			if (source == "montage") {
+				auto montage = AwMontageManager::instance()->channels();
+				if (!montage.isEmpty())
+					requestedChannels = montage;
+			}
+			else if (source == "as recorded")
+				requestedChannels = reader->infos.channels();
 		}
 
 		bool usingMarkers = !use_markers.isEmpty();
 		bool skippingMarkers = !skip_markers.isEmpty();
-		if (dict.contains("start"))
-			start = dict.value("start").toDouble();
-		if (dict.contains("duration"))
-			duration = dict.value("duration").toDouble();
-		if (dict.contains("raw_data"))
-			rawData = dict.value("raw_data").toBool();
-		if (dict.contains("downsampling_factor"))
-			downsampling = dict.value("downsampling_factor").toInt();
+		if (cfg.contains("start"))
+			start = cfg.value("start").toDouble();
+		if (cfg.contains("duration"))
+			duration = cfg.value("duration").toDouble();
+		if (cfg.contains("raw_data"))
+			rawData = cfg.value("raw_data").toBool();
+		if (cfg.contains("downsampling_factor"))
+			downsampling = cfg.value("downsampling_factor").toInt();
 		// get filters
 		QVector<float> filters;
-		if (dict.contains("filters")) {
-			auto tmp = dict.value("filters").toArray();
-			for (auto t : tmp)
-				filters << t.toDouble();
+		if (cfg.contains("filters")) {
+			auto list = cfg.value("filters").toList();
+			for (auto item : list)
+				filters << item.toDouble();
 		}
-
-
-
 		markers = AwMarkerManager::instance()->getMarkersThread();
 		// parsing input is done, now preparing input markers
 		if (!usingMarkers && !skippingMarkers)
@@ -173,8 +174,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		if (usingMarkers || skippingMarkers) {
 			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
 		}
-
-
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
 			// Beware of channels refs (we should accept "A1-A2" and consider it as A1 with A2 as reference).
@@ -210,7 +209,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		}
 	}
 	// remove possible bad channels 
-	AwMontageManager::instance()->removeBadChannels(requestedChannels);
+	if (skipBad)
+		AwMontageManager::instance()->removeBadChannels(requestedChannels);
 	requestedChannels = AwChannel::duplicateChannels(requestedChannels);
 
 	// reading data
@@ -227,38 +227,37 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		emit log("Done.");
 	}
 	AW_DESTROY_LIST(input_markers);
-	stream << requestedChannels.size();
+	toClient << requestedChannels.size();
 	response.send();
 	for (auto c : requestedChannels) {
-		stream << c->name();
-		stream << AwChannel::typeToString(c->type());
-		stream << c->referenceName();
-		stream << c->samplingRate();
-		stream << c->highFilter();
-		stream << c->lowFilter();
-		stream << c->notch();
-		stream << c->dataSize();
+		toClient << c->name();
+		toClient << AwChannel::typeToString(c->type());
+		toClient << c->referenceName();
+		toClient << c->samplingRate();
+		toClient << c->highFilter();
+		toClient << c->lowFilter();
+		toClient << c->notch();
+		toClient << c->dataSize();
 		response.send();
 		if (c->dataSize()) {
 			bool finished = false;
 			qint64 chunkSize = 1000000;	// chunk of 100 000 samples
 			qint64 nSamplesSent = 0;
 			qint64 nSamplesLeft = c->dataSize();
-
 			while (!finished) {
 				if (nSamplesLeft == 0) {
 					chunkSize = 0;
-					stream << chunkSize;
+					toClient << chunkSize;
 					response.send();
 					finished = true;
 					continue;
 				}
 				if (nSamplesLeft < chunkSize)
 					chunkSize = nSamplesLeft;
-				stream << chunkSize;
+				toClient << chunkSize;
 				emit log("Sending chunk of data (size is " + QString::number(chunkSize) + " samples)");
 				for (int i = 0; i < chunkSize; i++)
-					stream << c->data()[i + nSamplesSent];
+					toClient << c->data()[i + nSamplesSent];
 				nSamplesSent += chunkSize;
 				response.send();
 				nSamplesLeft -= chunkSize;

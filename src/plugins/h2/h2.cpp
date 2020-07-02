@@ -175,8 +175,16 @@ int H2::initialize()
 	}
 
 	// Merge input markers, that will implicilty duplicate them even if no merge is done.
-	if (!pdi.input.markers().isEmpty()) 
-		m_markers = AwMarker::merge(pdi.input.markers());
+	if (!pdi.input.markers().isEmpty()) {
+		// remove single markers
+		m_markers = AwMarker::getMarkersWithDuration(pdi.input.markers());
+		m_markers = AwMarker::merge(m_markers);
+		// if no duration markers => make one global
+		if (m_markers.isEmpty()) {
+			m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
+			sendMessage("no markers with duration set as input. Created one global marker on whole data.");
+		}
+	}
 	else
 		m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
 

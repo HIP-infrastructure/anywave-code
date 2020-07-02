@@ -62,7 +62,7 @@ void AnyWave::runMapping()
 		AwLayoutManager *lm = AwLayoutManager::instance();
 		// check if file reader can provide layouts.
 		AwLayout *l2D = lm->layoutFromFile(m_currentReader, AwLayout::L2D | AwLayout::MEG);
-		AwLayout *l3D = lm->layoutFromFile(m_currentReader, AwLayout::L3D | AwLayout::MEG);
+		AwLayout *l3D = lm->layoutFromFile(m_currentReader, AwLayout::L3D | AwLayout::MEG); 
 		if (l2D == NULL) {  // no layout from file
 			l2D = lm->guessLayout(m_currentReader, AwLayout::L2D | AwLayout::MEG);
 		}

@@ -203,6 +203,8 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		args[cl::montage_file] = fullPath;
 	}
 
+
+
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
 		QString tmp = QString("%1.bad").arg(inputFile);
@@ -215,18 +217,50 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		if (!args.contains(cl::montage_file))
 			if (QFile::exists(tmp))
 				args[cl::montage_file] = tmp;
-		if (args.contains(cl::montage_file)) { // did we finally got a montage file?
+
+		bool skipBad = true;
+		if (args.contains(cl::skip_bad_channels))
+			skipBad = args.value(cl::skip_bad_channels).toBool();
+
+		bool montageCreateSet = false;
+		QString montageCreateOption;
+		if (args.contains(cl::create_montage)) {
+			montageCreateOption = args.value(cl::create_montage).toString();
+			montageCreateSet = true;
+		}
+
+		if (montageCreateSet) {
+			if (montageCreateOption == cl::bipolar_ieeg) {
+				if (skipBad)
+					montage = AwMontage::createSEEGBipolarMontage(reader->infos.channels(), process->pdi.input.settings[processio::bad_labels].toStringList());
+				else
+					montage = AwMontage::createSEEGBipolarMontage(reader->infos.channels());
+				if (montage.isEmpty()) {
+					throw AwException(QString("error: bipolar seeg montage could not be done. Check --create_montage <montage> option."), origin);
+					return process;
+				}
+			}
+			else { // monopolar or none result in just the as recorded montage 
+				montage = AwChannel::duplicateChannels(reader->infos.channels());
+				if (skipBad)
+					AwMontage::removeBadChannels(montage, process->pdi.input.settings[processio::bad_labels].toStringList());
+			}
+		}
+		else {
+			if (args.contains(cl::montage_file)) { // did we finally got a montage file?
 				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args.value(cl::montage_file).toString(),
 					process->pdi.input.settings[processio::bad_labels].toStringList());
 				if (montage.isEmpty()) { // error when loading and/or applying mtg file
 					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(cl::montage_file).toString()), origin);
 					return process;
 				}
-		}
-		else  { // no montage specified or detected
-
-			// applying default file montage
-			montage = AwChannel::duplicateChannels(reader->infos.channels());
+			}
+			else { // no montage specified or detected
+				// applying default file montage
+				montage = AwChannel::duplicateChannels(reader->infos.channels());
+				if (skipBad)
+					AwMontage::removeBadChannels(montage, process->pdi.input.settings[processio::bad_labels].toStringList());
+			}
 		}
 		if (!buildPDI(process, montage, reader->infos.channels())) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
@@ -234,17 +268,6 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			return process;
 		}
 		AW_DESTROY_LIST(montage);
-		
-		tmp = QString("%1.mrk").arg(inputFile);
-		// detect only if marker_file option is not specified by the user
-		if (!args.contains(cl::marker_file))
-			if (QFile::exists(tmp))
-				args[cl::marker_file] = tmp;
-		// if marker file is found => load markers and use them for the process
-		if (args.contains(cl::marker_file))
-			process->pdi.input.setNewMarkers(AwMarker::load(args.value(cl::marker_file).toString()));
-		else
-			process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
 
 		// handle skipping markers and/or use specific markers
 		QStringList skippedLabels, usedLabels;
@@ -253,13 +276,38 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		if (args.contains(cl::use_markers))
 			usedLabels = args.value(cl::use_markers).toStringList();
 
-		bool skipMarkers = !skippedLabels.isEmpty();
-		bool useMarkers = !usedLabels.isEmpty();
-		if (skipMarkers || useMarkers) {
-			auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels, 
-				process->pdi.input.settings[processio::file_duration].toDouble());
-			if (!markers.isEmpty()) {
-				process->pdi.input.setNewMarkers(markers);
+		bool inputMarkerAllDataSet = false;
+		// check special flag/value for --use_markers "all_data" that will override any input markers by one global marker on the whole data
+		if (!usedLabels.isEmpty()) 
+			inputMarkerAllDataSet = usedLabels.first().simplified().toLower() == "all_data";
+
+		
+		tmp = QString("%1.mrk").arg(inputFile);
+		// detect only if marker_file option is not specified by the user
+		if (!args.contains(cl::marker_file))
+			if (QFile::exists(tmp))
+				args[cl::marker_file] = tmp;
+		
+		if (inputMarkerAllDataSet)
+			process->pdi.input.setNewMarkers(AwMarkerList({ new AwMarker("global", 0., reader->infos.totalDuration()) }));
+		else {
+			// if marker file is found => load markers and use them for the process
+			if (args.contains(cl::marker_file))
+				process->pdi.input.setNewMarkers(AwMarker::load(args.value(cl::marker_file).toString()));
+			else
+				process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
+		}
+
+		// apply used and skip markers filtering only if the flag --use_markers all_data was not set
+		if (!inputMarkerAllDataSet) {
+			bool skipMarkers = !skippedLabels.isEmpty();
+			bool useMarkers = !usedLabels.isEmpty();
+			if (skipMarkers || useMarkers) {
+				auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels,
+					process->pdi.input.settings[processio::file_duration].toDouble());
+				if (!markers.isEmpty()) {
+					process->pdi.input.setNewMarkers(markers);
+				}
 			}
 		}
 

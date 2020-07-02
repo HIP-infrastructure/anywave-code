@@ -53,7 +53,6 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	m_ui.setupUi(this);
 	
 	AwMontageManager *mm = AwMontageManager::instance();
-//	m_asRecorded = mm->cloneAsRecordedChannels();
 
 	// cloning as recorded channels 
 	for (auto c : mm->asRecordedChannels()) {
@@ -463,67 +462,21 @@ void AwMontageDial::makeSEEGBipolar()
 			auto baseName = c->name();
 			baseName = baseName.remove(exp);
 			auto number = match.captured(1);
-			// fing leading zeros
+			// find leading zeros
 			matchZero = expZeros.match(number);
 			if (matchZero.hasMatch()) {
 				zeros = matchZero.captured(1);
 				number = number.remove(expZeros);
 			}
 			int n = number.toInt() + 1;
-
-
 			// find the reference without considering zeros in number
 			QString ref = QString("%1%2").arg(baseName).arg(n);
 			if (!m_hashAsRecorded.contains(ref))
 				ref = QString("%1%2%3").arg(baseName).arg(zeros).arg(n);
 			if (m_hashAsRecorded.contains(ref) && !m_badChannelsLabels.contains(ref))
 				c->setReferenceName(ref);
-				
 		}
 	}
-
-	//// expect characters from a to z  AND _.'
-	//QRegularExpression exp("([A-Z_.]+'?)(\\d+)$", QRegularExpression::CaseInsensitiveOption);
-	//QRegularExpressionMatch match;
-	//for (auto c : dup) {
-	//	match = exp.match(c->name());
-	//	if (match.hasMatch()) {
-	//		auto elec = match.captured(1);
-	//		auto elecCopy = elec;
-	//		auto number = match.captured(2);
-	//		// some electodes may have preceding zeros before pad number
-	//		while (number.startsWith("0")) {
-	//			elec += "0";
-	//			number.remove(0, 1);
-	//		}
-	//		// next electrode could be weird 
-	//		// example : X09 and X10 not X010
-	//		// try to guess the possible reference
-	//		bool refFound = false;
-	//		auto nextNumber = number.toInt() + 1;
-	//		auto ref = QString("%1%2").arg(elec).arg(nextNumber);
-	//		if (m_hashAsRecorded.contains(ref))
-	//			if (!m_badChannelsLabels.contains(ref))
-	//				c->setReferenceName(ref);
-	//		else {
-	//			ref = QString("%1%2").arg(elecCopy).arg(nextNumber);
-	//			if (m_hashAsRecorded.contains(ref))
-	//				if (!m_badChannelsLabels.contains(ref))
-	//					c->setReferenceName(ref);
-	//		}
-	//	}
-	//}
-
-	//// check for remaining monopolar channels
-	//foreach (AwChannel *c,  dup) {
-	//	if (!c->hasReferences()) {
-	//		dup.removeAll(c);
-	//		delete c;
-	//	}
-	//}
-	//AwChannel::sortByName(dup);
-	//static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(dup);
-
 	auto response = AwMessageBox::question(this, "SEEG Bipolar", "Remove resting monopolar channels?", QMessageBox::Yes | QMessageBox::No);
 	if (response == QMessageBox::Yes) {
 		AwChannelList tmp;

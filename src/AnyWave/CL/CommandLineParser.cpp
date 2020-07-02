@@ -73,6 +73,12 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption skipMarkersO("skip_markers", "specify the markers to skip.", "skip_markers", QString());
 	parser.addOption(useMarkersO);
 	parser.addOption(skipMarkersO);
+	// skip_bad_channels
+	QCommandLineOption skipBadChannelsO("skip_bad_channels", "specify if bad channels are removed from data (default is yes).", cl::skip_bad_channels, QString());
+	parser.addOption(skipBadChannelsO);
+	// montages
+	QCommandLineOption createMontageO("create_montage", "specify the montage to create based on channels present in data file.", "create_montage", QString());
+	parser.addOption(createMontageO);
 
 	parser.addOption(logDirO);
 	parser.addOption(inputFileO);
@@ -197,6 +203,20 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	availableWriters["ades"] = QString("AnyWave ADES Format");
 
 	QString tmp;
+	// skip_bad_channels
+	tmp = parser.value(skipBadChannelsO).toLower().simplified();
+	if (!tmp.isEmpty()) {
+		if (flagsValues.contains(tmp))
+			arguments[cl::skip_bad_channels] = tmp == "yes" || tmp == "true";
+	}
+	// create_montage
+	tmp = parser.value(createMontageO);
+	if (!tmp.isEmpty()) {
+		tmp = tmp.simplified().toLower();
+		bool ok = tmp == cl::bipolar_ieeg || tmp == cl::monopolar || tmp == cl::none;
+		if (ok)
+			arguments[cl::create_montage] = tmp;
+	}
 	// log_dir
 	tmp = parser.value(logDirO);
 	if (!tmp.isEmpty())

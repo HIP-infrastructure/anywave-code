@@ -34,11 +34,15 @@ class AW_MONTAGE_EXPORT AwMontage
 public:
 	explicit AwMontage(AwFileIO *reader);
 	~AwMontage();
-
+	enum MontageTypes { bipolar, monopolar };
 	static AwChannelList load(const QString& path);
 	static void save(const QString& path, const AwChannelList& channels);
 	inline AwChannelList& channels() { return m_channels; }
+	/** load bad channel file and return the labels **/
 	static QStringList loadBadChannels(const QString& filePath);
+	/** from a channel list, create a list containing bipolar channels **/
+	static AwChannelList createSEEGBipolarMontage(const AwChannelList& channels, const QStringList& badLabels = QStringList());
+	static void removeBadChannels(AwChannelList& channels, const QStringList& badLabels);
 protected:
 	void loadBadChannels();
 	bool loadMontage(const QString& mtgFile);

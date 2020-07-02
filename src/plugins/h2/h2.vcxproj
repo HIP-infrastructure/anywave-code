@@ -91,7 +91,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwMATLABLib.lib;AwMathLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwFilteringLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(AWROOT)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

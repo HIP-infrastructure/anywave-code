@@ -32,6 +32,8 @@
 #include "Montage/AwMontageManager.h"
 #include <AwKeys.h>
 
+constexpr auto data_path = "data_path";
+
 void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing aw_get_prop()/anywave.get_prop()...");
@@ -54,8 +56,8 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 	QVariantHash hash;
 	for (auto key : keys) {
 		auto k = key.trimmed().toLower();
-		if (k == "file")
-			hash["file"] = reader->fullPath();
+		if (k == "data_path")
+			hash["data_path"] = reader->fullPath();
 		else if (k == "as_recorded_channels_count")
 			hash["as_recorded_channels_count"] = reader->infos.channels().count();
 		else if (k == "marker_file") {
@@ -69,7 +71,6 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 				hash["montage_file"] = montageFile;
 		}
 		else if (k == "data_dir") {					// current data directory
-			
 			hash[processio::data_dir] = process->pdi.input.settings[processio::data_dir];
 		}
 		else if (k == "plugin_dir") {				// current plugin directory
@@ -87,7 +88,10 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 		else if (k == "total_duration") {
 			hash["total_duration"] = reader->infos.totalDuration();
 		}
-
+		else if (k == "channel_selection") {
+			if (dedicatedDS)
+				hash["channel_selection"] = AwChannel::getLabels(process->pdi.input.channels(), true);
+		}
 	}
 	auto tmp = QString(QJsonDocument::fromVariant(hash).toJson(QJsonDocument::Compact));
 	toClient << tmp;

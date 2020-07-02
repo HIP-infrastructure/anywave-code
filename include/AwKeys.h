@@ -75,4 +75,10 @@ namespace cl {
 	constexpr auto batch_parameters = "parameters";
 	constexpr auto batch_flags = "flags";
 	constexpr auto aw_path = "anywave_path";
+	constexpr auto skip_bad_channels = "skip_bad_channels";
+	constexpr auto create_montage = "create_montage";
+	// possible values for create_montage key
+	constexpr auto bipolar_ieeg = "bipolar_ieeg";
+	constexpr auto monopolar = "monopolar";
+	constexpr auto none = "none";
 }

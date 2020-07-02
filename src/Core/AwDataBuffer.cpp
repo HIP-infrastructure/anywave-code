@@ -2,6 +2,7 @@
 #include <qthread.h>
 #include <math.h>
 
+
 AwDataBuffer::AwDataBuffer(AwChannelList *channels, QObject *parent) : QObject(parent)
 {
 	if (channels != NULL) {

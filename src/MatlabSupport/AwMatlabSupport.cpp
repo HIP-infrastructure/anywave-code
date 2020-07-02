@@ -104,10 +104,13 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 		engEvalString(m_eng, command.toLatin1().data());
 		// add a variable named aw_pid which is the index of the process in AwMatlabServer
 		command = "cd " + path;
+
 		engEvalString(m_eng, command.toLatin1().data());
 		// launch main function with aw_pid parameter
 		// the function is evaluated by the 'base' workspace (required for GUI intensive applications)
-		command = "evalin('base','main')";
+		//// search for main.m or main.mlapp
+		//if (QFile::exists(QString("%1/main.m").arg(path)))
+			command = "evalin('base','main')";
 		engEvalString(m_eng, command.toLatin1().data());
 		emit progressChanged(QString(buffer));
 		engClose(m_eng);
