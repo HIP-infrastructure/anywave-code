@@ -2,7 +2,6 @@
 project(MicromedReader)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 SET(SRCS
 ${CMAKE_SOURCE_DIR}/src/plugins/Micromed_Reader/micromedreader.cpp) 
@@ -14,7 +13,7 @@ qt5_wrap_cpp(Micromed_MOCS ${MOCS})
 add_library(MicromedReader SHARED ${SRCS} ${Micromed_MOCS})
 qt5_use_modules(MicromedReader Core)
 target_link_libraries(MicromedReader AwCore AwReadWrite Qt5::Core)
-INSTALL(TARGETS MicromedReader DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
+INSTALL(TARGETS MicromedReader DESTINATION ${PLUGIN_INSTALL_DIR})
 
 
 

@@ -14,7 +14,7 @@ AwVTKWidget::AwVTKWidget(QWidget *parent) : QVTK_CLASS(parent)
 #endif
 	// instantiate renderer
 	m_renderer = vtkSmartPointer<vtkRenderer>::New();
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 	m_window->SetGlobalMaximumNumberOfMultiSamples(0);
 	SetRenderWindow(m_window);

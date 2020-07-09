@@ -57,15 +57,11 @@ int main(int argc, char *argv[])
 	vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
 #endif
-
-	QApplication app(argc, argv);
-	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-//#ifdef Q_OS_WIN
-//	QApplication::setStyle(QStyleFactory::create("windowsvista"));
-//#endif
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+	QApplication app(argc, argv);
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);

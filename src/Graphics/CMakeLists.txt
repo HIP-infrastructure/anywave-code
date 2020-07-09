@@ -52,4 +52,10 @@ QT5_WRAP_UI(UI ${FORMS})
 add_library(AwGraphics SHARED ${AwGraphicsLib_SRCS} ${MOC} ${UI})
 qt5_use_modules(AwGraphics Core Gui Widgets)
 TARGET_LINK_LIBRARIES(AwGraphics AwCore AwUtilities Qt5::Core Qt5::Gui Qt5::Widgets ${QWT_LIBRARIES})
+
+IF (APPLE)
+INSTALL(TARGETS AwGraphics DESTINATION  ${LIB_INSTALL_DIR})
+ELSE()
 INSTALL(TARGETS AwGraphics DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
+ENDIF()
+
