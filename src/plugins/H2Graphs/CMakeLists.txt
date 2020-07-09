@@ -2,7 +2,9 @@
 project(H2Graphs)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+LINK_DIRECTORIES(${QWT_LIBRARY})
 
 SET(SRCS GraphArrow.cpp GraphWindow.cpp GraphArrowBase.cpp GraphArrowDir.cpp GraphArrowLag.cpp GraphColorMap.cpp
 GraphLegend.cpp GraphSet.cpp GraphSetModel.cpp H2Graphs.cpp GraphSensorItem.cpp GraphManagerWidget.cpp)

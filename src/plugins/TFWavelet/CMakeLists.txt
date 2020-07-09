@@ -5,7 +5,7 @@ add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
 LINK_DIRECTORIES(${QWT_LIBRARY})
-
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 SET(SRCS display_settings.cpp settingsui.cpp TFPicker.cpp TFPlot.cpp tf_settings.cpp TFWavelet2.cpp TFWidget.cpp)
 
 SET(MOCS display_settings.h settingsui.h TFPicker.h TFPlot.h tf_settings.h TFWavelet2.h TFWidget.h)

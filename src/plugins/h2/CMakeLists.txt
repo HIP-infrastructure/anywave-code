@@ -2,7 +2,7 @@
 project(H2)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 SET(SRCS
 h2.cpp
 h2ui.cpp)

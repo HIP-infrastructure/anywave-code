@@ -9,6 +9,8 @@
 #define ARMA_USE_LAPACK
 #include <armadillo>
 using namespace arma;
+#if defined(Q_OS_WIN)
 #if defined(MKL)
 #define ARMA_USE_MKL_ALLOC
+#endif
 #endif

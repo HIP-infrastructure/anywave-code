@@ -58,19 +58,19 @@ MESSAGE(STATUS "Qt version is ${Qt5Core_VERSION}")
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
-#SET(ARMADILLO_INCLUDE ${CMAKE_SOURCE_DIR}/armadillo/include)
-SET(ARMADILLO_INCLUDE /users/bruno/armadillo-9.400.4/include)
+SET(ARMADILLO_INCLUDE ${CMAKE_SOURCE_DIR}/armadillo/include)
+#SET(ARMADILLO_INCLUDE /users/bruno/armadillo-9.400.4/include)
 
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+#INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 find_package(Qwt REQUIRED)
-INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
-LINK_DIRECTORIES(${QWT_LIBRARY})
+#INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+#LINK_DIRECTORIES(${QWT_LIBRARY})
 message(STATUS "Qwt folders are ${QWT_INCLUDE_DIR} ${QWT_LIBRARY}")
-include_directories(${ARMADILLO_INCLUDE_DIRS})
+#include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 ## use the static libs of HDF5
 FIND_PACKAGE(HDF5 REQUIRED COMPONENTS C HL)
-INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+#INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 #LINK_DIRECTORIES(${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 message(STATUS "HDF5 are ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}")
 
@@ -84,28 +84,31 @@ endif()
 
 # search for MKL 
 find_package(MKL)
-if(NOT MKL_FOUND)
+if(NOT MKL_FOUND AND APPLE)
+    SET(BLAS_LIBRARIES "-framework Accelerate")
+ENDIF()
+IF(NOT MKL_FOUND AND NOT APPLE)
     find_package(OpenBLAS REQUIRED)
     SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
-else()
+ENDIF()
+
+IF(MKL_FOUND)
    message(STATUS "MKL Found.")
-   LINK_DIRECTORIES(${MKL_LIB_DIRS})
+   #LINK_DIRECTORIES(${MKL_LIB_DIRS})
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
    SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-   INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
-   SET(CMAKE_EXE_LINKER_FLAGS )
+   #INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
    SET(BLAS_LIBRARIES "-lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl")
    message(STATUS "MLK libs : ${MKL_LIBRARIES}")
-   add_definitions(-DMKL)
+   message(STATUS "link flags: ${BLAS_LIBRARIES}")
 endif()
 
-
-add_definitions(-DNDEBUG)
 # Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_BLAS -DARMA_USE_LAPACK -DAW_DISABLE_EPOCHING")
-if(USE_MKL)
-    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DMKL")
-endif()
+IF(USE_MKL)
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DMKL")
+ENDIF()
+
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
@@ -136,6 +139,7 @@ IF(APPLE)
    SET(MEX_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins/MATLAB/AnyWave")
    SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
 ELSE()
+   SET(MEX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins/MATLAB/AnyWave")
    SET(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins")
 ENDIF()
 
@@ -174,7 +178,7 @@ if (Matlab_FOUND)
   message(STATUS "MATLAB Support added. Root dir is ${Matlab_ROOT_DIR}")
   add_subdirectory(src/MatlabSupport)
 # Build mex files
-#  add_subdirectory(src/Mex)      # REACTIVATE ME AT THE END
+  add_subdirectory(src/Mex)      # REACTIVATE ME AT THE END
 endif()
 # END OF MATLAB SUPPORT
 

@@ -73,7 +73,7 @@ endif()
     ############################ RTL layer ##########################
 
 # search for tbb first
-find_library(MKL_RTL_LIBRARY iomp5 HINTS ${MKL_ROOT}/lib ${MKL_ROOT}/lib/intel64)
+find_library(MKL_RTL_LIBRARY iomp5 HINTS ${INTEL_ROOT}/lib ${INTEL_ROOT}/lib/intel64)
 
 if (MKL_RTL_LIBRARY)
    message("Found mkl rtl library: ${MKL_RTL_LIBRARY}")

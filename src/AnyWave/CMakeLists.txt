@@ -356,6 +356,9 @@ AwMATLAB
 #AwEpoch
 AwMATLAB)
 
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+
 SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml)
 IF(UNIX AND NOT APPLE)
     QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)

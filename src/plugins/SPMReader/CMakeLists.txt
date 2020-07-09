@@ -3,7 +3,7 @@ project(SPMReader)
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 add_definitions(-DSPMREADER_EXPORT)
-
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
 SET(SRCS SPMReader.cpp) 

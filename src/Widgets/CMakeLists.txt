@@ -1,6 +1,9 @@
 # AwWidgetLib
 project(AwWidget)
 add_definitions("-DAW_BUILD_WIDGETS_LIB")
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+LINK_DIRECTORIES(${QWT_LIBRARY})
 QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.qrc)
 
 SET(HEADERS ../../include/widget/AwMessageBox.h  

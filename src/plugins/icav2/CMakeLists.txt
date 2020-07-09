@@ -2,6 +2,9 @@
 project(ICA)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
+SET(ARMADILLO_INCLUDE /users/bruno/armadillo-9.400.4/include)
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+
 SET(SRCS
    ICASettings.cpp
    infomax_algo.cpp
