@@ -531,9 +531,10 @@ void AnyWave::createUserDirs()
 	aws->setValue(aws::python_module_dir, appPath + "/../Python");
 	// no change to plugin dir
 	appDir.cdUp();
-	appDir.cdUp();
-	appDir.cdUp();
-	appDir.cd("Anywave_Plugins");
+	//appDir.cdUp();
+	//appDir.cdUp();
+	//appDir.cd("Anywave_Plugins");
+	appDir.cd("Plugins");
 	//aws->setSeawsttings("pythonModulePath", appPath + "/../Python");
 	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
 

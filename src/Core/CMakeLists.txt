@@ -1,14 +1,14 @@
 # CoreLib
 project(AwCore)
+
 add_definitions("-DAW_BUILD_CORE_LIB")
 
-SET(HEADERS     ../../include/AwChannel.h  
+SET(HEADERS     
     ../../include/AwDataClient.h 
-    ../../include/AwMarker.h 
     ../../include/AwMEGSensorManager.h 
     ../../include/AwSensor.h 
-    ../../include/AwDataBuffer.h 
-    ../../include/AwVirtualChannel.h)
+    ../../include/AwDataBuffer.h)
+
 SET(SRC     AwChannel.cpp 
     AwDataClient.cpp 
     AwMarker.cpp 
@@ -17,11 +17,19 @@ SET(SRC     AwChannel.cpp
     AwDataBuffer.cpp)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
-
 add_library(AwCore SHARED ${MOC} ${SRC})
+
 qt5_use_modules(AwCore Core)
 TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
+
+IF (APPLE)
+INSTALL(TARGETS AwCore DESTINATION  ${LIB_INSTALL_DIR})
+ELSE()
 INSTALL(TARGETS AwCore DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
+ENDIF()
+
+
+
 
 
 

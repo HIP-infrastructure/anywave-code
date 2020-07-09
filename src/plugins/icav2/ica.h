@@ -48,12 +48,7 @@ private:
 	int runica_matlab(int nc);
 	int run_acsobiro(int nc);
 	void saveToFile();
-	///* Prepare matlab input file for MATLAB ica code. */
-	//void createInputFile();
-	///* Launch matlab plugin to compute ICA. */
-	//void launchMatlabPlugin();
-
-	int m_modality;
+    int m_modality;
 	QString m_ignoredMarkerLabel;
 	bool m_ignoreMarkers;
 	bool m_ignoreBadChannels;
@@ -72,9 +67,7 @@ private:
 class ICA_EXPORT ICAPlugin : public AwProcessPlugin
 {
     Q_OBJECT
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 	Q_PLUGIN_METADATA(IID AwProcessPlugin_IID)
-#endif
     Q_INTERFACES(AwProcessPlugin)
 public:
     ICAPlugin();

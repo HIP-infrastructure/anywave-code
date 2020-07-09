@@ -4,6 +4,7 @@ add_definitions("-DAW_BUILD_WIDGETS_LIB")
 QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.qrc)
 
 SET(HEADERS ../../include/widget/AwMessageBox.h  
+    ../../include/widget/AwSelectInputDataWidget.h
     ../../include/widget/AwWait.h  
 	../../include/widget/AwGetValueDialog.h  
     ./Aw2DGrid.h  
@@ -45,7 +46,8 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwInputMarkerWidget.h
 	../../include/widget/AwVideoPlayer.h)
 
-SET(SRC ./Aw2DGrid.cpp  
+SET(SRC  ./AwSelectInputDataWidget.cpp
+     ./Aw2DGrid.cpp  
     ./AwGetValueDialog.cpp
     ./AwAddPredefinedMarker.cpp  
     ./AwAddTargetChannels.cpp  
@@ -89,7 +91,8 @@ SET(SRC ./Aw2DGrid.cpp
 QT5_WRAP_CPP(MOC ${HEADERS})
 
 
-SET(FORMS ./AwAmplitudeWidget.ui 
+SET(FORMS  ./AwSelectInputDataWidget.ui
+     ./AwAmplitudeWidget.ui 
 	./AwGetValueDialog.ui
     ./AwMarkerInspector.ui  
     ./AwAddPredefinedMarker.ui  
@@ -112,5 +115,11 @@ ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
 QT5_USE_MODULES(AwWidget Core Widgets PrintSupport Multimedia MultimediaWidgets)
 TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
   Qt5::MultimediaWidgets ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
+
+IF (APPLE)
+INSTALL(TARGETS AwWidget DESTINATION  ${LIB_INSTALL_DIR})
+ELSE()
 INSTALL(TARGETS AwWidget DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
+ENDIF()
+
 
