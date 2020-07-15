@@ -46,7 +46,7 @@ $ git clone https://github.com/Kitware/VTK.git vtk
 $ cd vtk && git checkout v8.2.0 && cd .. 
 $ mkdir build && cd build
 $  cmake ../vtk -DCMAKE_INSTALL_PREFIX=/usr/local -DModule_vtkGUISupportQt=ON \
-  -DModule_vtkGUISupportQtOpenGL=ON -DModule_vtkRenderingQt=ON -DModule_vtkViewsQt=ON -DVTK_RENDERING_BACKEND=OpenGL -DVTK_QT_VERSION=5  \
+  -DModule_vtkGUISupportQtOpenGL=ON -DModule_vtkRenderingQt=ON -DModule_vtkViewsQt=ON -DVTK_RENDERING_BACKEND=OpenGL2 -DVTK_QT_VERSION=5  \
   -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON 
  $ make
  $ sudo make install
