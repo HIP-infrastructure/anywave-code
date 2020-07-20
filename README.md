@@ -25,7 +25,7 @@ $ sudo apt-get install -y   git
 4. building tools
    
 ```bash
-$ sudo apt-get install -y   build-essentials
+$ sudo apt-get install -y   build-essential
 ```
 
 5. Qwt  
