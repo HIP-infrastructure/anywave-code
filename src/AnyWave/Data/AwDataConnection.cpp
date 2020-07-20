@@ -531,6 +531,9 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 
 		computeVirtualChannels();
 
+		// We allow here to filter the virtual channels
+		AwFiltering::filter(m_virtualChannels);
+
 		// check for channels that need montaging
 		for(auto channel :  m_loadingList) {
 			if (channel->hasReferences())
