@@ -16,7 +16,7 @@ static QMutex TFMutex;
 
 TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	: AwProcessGUIWidget(process, parent)
-{
+{  
 	m_ui.setupUi(this);
 	m_signalView = new AwBaseSignalView();
 	m_signalView->setFlags(AwBaseSignalView::NoMarkerBar|AwBaseSignalView::ViewAllChannels|AwBaseSignalView::EnableMarking);
@@ -351,7 +351,7 @@ void compute_tf(TFParam *p)
 	//FFT of original signal to get complex values.
 	//Multiply these values by the gaussian function computed.
 	//Apply inverse FFT again on these values
-	//Transform value into log(1 + (module² / max(module²)))
+	//Transform value into log(1 + (moduleï¿½ / max(moduleï¿½)))
 
 	// real number of samples
 	quint32 nsamples = c->dataSize();
