@@ -79,7 +79,7 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwFileInfo.h>
 
-#define AW_HELP_URL "http://meg.univ-amu.fr/wiki/AnyWave"
+#define AW_HELP_URL "https://meg.univ-amu.fr/wiki/AnyWave"
 
 
 AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
