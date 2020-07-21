@@ -121,13 +121,6 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	m_menu->addAction(m_removeAllLabel);
 	connect(m_removeAllLabel, SIGNAL(triggered()), this, SLOT(removeAllLabels()));
 
-	// SPECIAL DEBUG/TEST Features
-#ifndef NDEBUG
-	m_menu->addSeparator();
-	action = new QAction("Cut Around", this);
-	m_menu->addAction(action);
-	connect(action, SIGNAL(triggered()), this, SLOT(cutAround()));
-#endif
 	m_markerDir = AwSettings::getInstance()->value(aws::marker_rules_dir).toString();
 
 	// always add a rule set as "No Rule" at first index
@@ -292,33 +285,6 @@ void AwMarkerManagerSettings::updateStats()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
-
-#ifndef NDEBUG
-void AwMarkerManagerSettings::cutAround()
-{
-	// get selected indexes in tvMarkers
-	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-
-	if (indexes.isEmpty())
-		return;
-
-	AwMarkerList currentMarkers = m_model->markers();
-
-	AwMarkerList markers; 
-	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-	for (auto i : indexes) {
-		if (i.column() == 0) {
-			int source_index = proxy->mapToSource(i).row();
-			AwMarker *m = currentMarkers.at(source_index);
-			markers << m;
-		}
-	}
-
-	AwMarkerList newMarkers = AwMarker::cutAroundMarkers(currentMarkers, markers);
-	setMarkers(newMarkers);
-}
-#endif
-
 
 void AwMarkerManagerSettings::showColumn(bool flag)
 {

@@ -9,7 +9,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 # gcc
    MESSAGE(STATUS "GCC compiler detected")
-   add_definitions("-w -fPIC -O3 -fpermissive -fopenmp") # g++ flags
+   add_definitions("-w -fPIC -O3 -fpermissive -fopenmp -DNDEBUG") # g++ flags
    SET(GCC ON)
 endif()
 
