@@ -3,9 +3,7 @@
   <ItemGroup>
     <ClCompile Include="AwLayout.cpp" />
     <ClCompile Include="AwLayoutManager.cpp" />
-    <ClCompile Include="GeneratedFiles\qrc_layouts.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\layout\AwLayout.h" />
@@ -24,9 +22,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\resources\layouts.qrc">
+    <QtRcc Include="..\..\resources\layouts.qrc">
       <Filter>Resource Files</Filter>
-    </CustomBuild>
+    </QtRcc>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\resources\layouts\layouts.txt">

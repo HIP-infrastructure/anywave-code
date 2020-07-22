@@ -132,6 +132,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexAddMarkers", "src\Mex\MexAddMarkers\MexAddMarkers.vcxproj", "{D6ABA77E-9779-438B-83DD-5117198DE08D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetCapture", "src\Mex\MexGetCapture\MexGetCapture.vcxproj", "{B37D508A-1996-4C26-AA68-50D7BB1AD9D3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetData", "src\Mex\MexGetData\MexGetData.vcxproj", "{6E97C6E3-9E8E-4404-A895-5A0EF5F259CD}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -139,18 +142,36 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetData", "src\Mex\MexGe
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetMarkers", "src\Mex\MexGetMarkers\MewGetMarkers.vcxproj", "{B28F5A22-FC67-43E5-8DD1-B87A710A3D89}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetPluginInfo", "src\Mex\MexGetPluginInfo\MexGetPluginInfo.vcxproj", "{878F8923-3071-43EF-9AEA-2AF5F5C312F2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetTriggers", "src\Mex\MexGetTriggers\MexGetTriggers.vcxproj", "{94384C4E-F4FC-4D1C-A28A-24F6A25FF871}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexIsProcessTerminated", "src\Mex\MexIsProcessTerminated\MexIsProcessTerminated.vcxproj", "{AEBA7D82-38BE-45F4-88D8-DC3D989E1B2A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexSendCommand", "src\Mex\MexSendCommand\MexSendCommand.vcxproj", "{B8F092B6-C40C-41D2-8D96-FD5860ABA553}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexSendMessage", "src\Mex\MexSendMessage\MexSendMessage.vcxproj", "{C03E9340-C4D2-427D-A34D-098A703CDD1A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetFileInfo", "src\Mex\MexGetFileInfo\MexGetFileInfo.vcxproj", "{D4B90137-308B-4693-909A-651003ACE77B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetPluginIO", "src\Mex\MexGetPluginIO\MexGetPluginIO.vcxproj", "{0400C7FE-7EE0-4944-9E59-2FE8BF0F4333}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -186,6 +207,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SignalInfos", "src\plugins\SignalInfos\SignalInfos.vcxproj", "{ADE9199F-976C-4132-B55E-C22A71644CEF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MexGetMarkersEx", "src\Mex\MexGetMarkersEx\MexGetMarkersEx.vcxproj", "{652458E8-25E1-4722-A03A-73F63709D2AA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9AE5F964-3B15-4F9B-902C-FDB39FE73A64} = {9AE5F964-3B15-4F9B-902C-FDB39FE73A64}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FIFFIO", "src\plugins\FIFIO\FIFIO.vcxproj", "{AA5D5822-A35D-4C97-AFCD-48C2C75CBD40}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -664,7 +688,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

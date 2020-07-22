@@ -38,12 +38,12 @@
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="meg4dreader.h">
+    <QtMoc Include="meg4dreader.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="montages.qrc">
+    </QtMoc>
+    <QtRcc Include="montages.qrc">
       <Filter>Resource Files</Filter>
-    </CustomBuild>
+    </QtRcc>
   </ItemGroup>
   <ItemGroup>
     <None Include="MEG2DLayout.xyz">
@@ -72,15 +72,9 @@
     <ClCompile Include="meg4dreader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_meg4dreader.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_meg4dreader.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_montages.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
+    
+    
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="meg4dreader_global.h">
