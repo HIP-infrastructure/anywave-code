@@ -299,6 +299,8 @@ QString AwBIDSManager::getDerivativePath(int derivativeType)
 QVariant AwBIDSManager::gardelProperty(int property)
 {
 	QVariant res;
+	if (m_currentOpenItem == nullptr)
+		return res;
 	auto parent = m_currentOpenItem->bidsParent();
 	if (!parent)
 		return res;
