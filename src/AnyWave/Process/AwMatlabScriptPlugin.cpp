@@ -72,6 +72,8 @@ void AwMatlabScriptProcess::run()
 		QStringList arguments;
 		AwDebugLog::instance()->connectComponent("MATLAB Compiled Plugins", this);
 		emit log(QString("System PATH for %1 is %2").arg(this->plugin()->name).arg(m_systemPath));
+
+		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 		QSettings settings;
 
@@ -80,11 +82,19 @@ void AwMatlabScriptProcess::run()
 			emit progressChanged(tr("MATLAB Runtime is not installed or path to it is not set!"));
 		else
 			arguments << mcrPath;
+
+#endif
+#if defined(Q_OS_MAC)
+		auto appDir = QCoreApplication::applicationDirPath();
+		// build DYLD_FALLBACK
+		QString fallBack = QString("%1/../Frameworks").arg(appDir);
+		env.insert("DYLD_FALLBACK_LIBRARY_PATH", fallBack);
+		env.insert("DYLD_FALLBACK_FRAMEWORK_PATH", fallBack);
 #endif
 		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::hashToJsonString(pdi.input.args()).simplified();
 		//pdi.input.args().value("json_args").toString().simplified();
 		QProcess plugin(this);
-		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
+		
 		env.remove("PATH");
 		env.insert("PATH", m_systemPath);
 		plugin.setProcessEnvironment(env);
