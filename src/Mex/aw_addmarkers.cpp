@@ -23,6 +23,8 @@
 //    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
+
+#define AW_USE_CORE_STATIC
 #include "common.h"
 #include <AwMarker.h>
 #include <AwProcess.h>
