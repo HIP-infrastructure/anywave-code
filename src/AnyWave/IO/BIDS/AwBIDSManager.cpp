@@ -544,6 +544,11 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(type, AwBIDSItem::DataTypeRole);
 					fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
+
+					// set a display role without some bids keys/values to shorten the file name
+					auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
+					tmp = AwUtilities::bids::removeBidsKey("ses", tmp);
+					fileItem->setData(tmp, Qt::DisplayRole);
 					continue;
 				}
 
@@ -557,6 +562,11 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					fileItem->setData(AwBIDSItem::ica | AwBIDSItem::h2, AwBIDSItem::DerivativesRole);
 					// add the item to the hash table
 					// use native separators
+
+					// set a display role without some bids keys/values to shorten the file name
+					auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
+					tmp = AwUtilities::bids::removeBidsKey("ses", tmp);
+					fileItem->setData(tmp, Qt::DisplayRole);
 
 					m_hashItemFiles.insert(QDir::toNativeSeparators(fullPath), fileItem);
 					// search for derivatives for this item 
@@ -845,42 +855,6 @@ QStringList AwBIDSManager::readTsvColumns(const QString& path)
 	}
 	return QStringList();
 }
-
-//AwTSVDict AwBIDSManager::loadTsvFile(const QString& path)
-//{
-//	QFile file(path);
-//	AwTSVDict  res;
-//	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-//		QTextStream stream(&file);
-//		// get columns
-//		auto columns = stream.readLine().split('\t');
-//		QStringList wholeList;
-//		while (!stream.atEnd()) {
-//			wholeList << stream.readLine();
-//		}
-//		QMultiMap<QString, QString> globalMap;
-//		// now parse each lines and extract values
-//		for (int i = 0; i < wholeList.size(); i++) {
-//			// check that number of columns in line matches the number of columns of header line.
-//			auto items = wholeList.value(i).split('\t');
-//			if (items.size() != columns.size()) {
-//				throw AwException("Error in tsv file. Wrong number of column items.", "AwBIDSManager::loadTsvFile()");
-//				return res;
-//			}
-//			for (int j = 0; j < columns.size(); j++) 
-//				globalMap.insert(columns.value(j), items.value(j));
-//			
-//		}
-//		// now rebuild a dict based on global multi map
-//		for (auto col : columns) {
-//			res[col] = globalMap.values(col);
-//		}
-//	}
-//	else {
-//		throw AwException(QString("Failed to open %1").arg(path), "AwBIDSManager::loadTsvFile()");
-//	}
-//	return res;
-//}
 
 AwMarkerList AwBIDSManager::getMarkersFromEventsTsv(const QString& path)
 {

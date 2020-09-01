@@ -504,7 +504,7 @@ AwFileIO::FileStatus BrainVisionIO::writeMarkers()
 
 	QTextStream stream(&fileMarker);
 
-	stream << "Brain Vision Data Exchange Marker File, Version 1.0" << endl;
+	stream << "Brain Vision Data Exchange Marker File Version 1.0" << endl;
 	stream << "[Common Infos]" << endl;
 	stream << "DataFile=" << m_binFileName << endl;
 	stream << endl << "[Marker Infos]" << endl;
