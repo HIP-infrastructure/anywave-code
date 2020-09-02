@@ -10,11 +10,11 @@
     <x>0</x>
     <y>0</y>
     <width>390</width>
-    <height>227</height>
+    <height>157</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>AwBIDSGUIOptionsDialog</string>
+   <string>Display options</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>

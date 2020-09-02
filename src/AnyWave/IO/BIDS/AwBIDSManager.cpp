@@ -82,7 +82,6 @@ void AwBIDSManager::finishCommandLineOperation()
 			m_instance->updateChannelsTsvBadChannels(AwMontage::loadBadChannels(badFile));
 		}
 	}
-	// delete instancce
 	delete m_instance;
 }
 
@@ -478,8 +477,48 @@ void AwBIDSManager::parse()
 	}
 
 	// launch recursive parsing
-	recursiveParsing(m_rootDir, nullptr);
+//	recursiveParsing(m_rootDir, nullptr);
 
+	// try to implement a multi threaded parsing for each subject
+	// first: detect all subjects
+	// build a qt concurrent map to parse them all
+	//QDir dir(m_rootDir);
+	auto subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
+	QRegularExpressionMatch match;
+	using mapItem = QPair<QString, AwBIDSItem*>;
+	QList<mapItem> mapItems;
+	for (auto subDir : subDirs) {
+		auto name = subDir.fileName();
+		match = re.match(name);
+		auto fullPath = subDir.absoluteFilePath();
+		if (match.hasMatch()) {
+			// found a subject
+			auto item = new AwBIDSItem(name);
+			m_items << item;
+			item->setData(fullPath, AwBIDSItem::PathRole);
+			item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
+			item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+			// set the relative path role
+			item->setData(name, AwBIDSItem::RelativePathRole);
+			// set the possible derivatives mask
+			item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+			// no derivatives should exist at subject level
+			// search for derivatives for this item 
+			//setDerivativesForItem(item);
+		//	recursiveParsing(fullPath, item);
+			mapItems.append(mapItem(fullPath, item));
+		}
+	}
+	//QFuture<void> res = QtConcurrent::mapped(mapItems, std::bind(&AwBIDSManager::recursiveParsing, this));
+	//auto f = [this](const mapItem& a) {
+	//	return recursiveParsing(a.first, a.second);
+	//};
+	QFuture<void> res = QtConcurrent::map(mapItems, [this](const mapItem& a) {
+		return recursiveParsing(a.first, a.second);
+		});
+
+	res.waitForFinished();
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv))
 		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
