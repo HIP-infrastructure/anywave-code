@@ -67,7 +67,7 @@ $ sudo apt-get -y update && apt-get install -y \
 ```bash
 $ sudo  apt-get -y update && apt-get install -y \
   libqt5svg5-dev qtdeclarative5-dev  qtmultimedia5-dev libopenblas-dev python3-dev python3-numpy
-$ git clone https://gitlab.dynamap.tvb-ins.fr/anywave/anywave.git
+$ git clone https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave.git
 $ cd anywave
 $ mkdir build && cd build && cmake ../anywave && make
 $ sudo make install 
