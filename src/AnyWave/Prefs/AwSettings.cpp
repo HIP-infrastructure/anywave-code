@@ -151,61 +151,6 @@ void AwSettings::setValue(const QString& key, const QVariant& value)
 	m_settings[key] = value;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// LANGUAGE
-
-//void AwSettings::loadLanguage()
-//{
-//	QSettings settings;
-//	m_language = settings.value("general/locale", QString("en")).toString();
-//	QLocale locale = QLocale(m_language);
-//	QLocale::setDefault(locale);
-//	// create language path
-//	langPath = QApplication::applicationDirPath();
-//	langPath.append("/languages");
-//	QString languageName = QLocale::languageToString(locale.language());
-//	QString anywaveFile = langPath + "/" + QString("anywave_%1.qm").arg(m_language);
-//	QString qtFile = langPath + "/" + QString("qt_%1.qm").arg(m_language);
-//	QString graphicsFile = langPath + "/" + QString("awgraphicslib_%1.qm").arg(m_language);
-//	QString widgetsFile = langPath + "/" + QString("awwidgetslib_%1.qm").arg(m_language);
-//	//// load translators
-//	//if (translator.load(anywaveFile))
-//	//	qApp->installTranslator(&translator);
-//	//if (translatorQt.load(qtFile))
-//	//	qApp->installTranslator(&translatorQt);
-//	//if (translatorGraphics.load(graphicsFile))
-//	//	qApp->installTranslator(&translatorGraphics);
-//	//if (translatorWidgets.load(widgetsFile))
-//	//	qApp->installTranslator(&translatorWidgets);
-//}
-
-//void AwSettings::loadLanguage(const QString& lang)
-//{
-//	if (m_language != lang) {
-//		QSettings settings;
-//		m_language = lang;
-//		QLocale locale = QLocale(m_language);
-//		QLocale::setDefault(locale);
-//		switchTranslator(translator, QString("anywave_%1.qm").arg(m_language));
-//		switchTranslator(translatorQt, QString("qt_%1.qm").arg(m_language));
-//		switchTranslator(translatorGraphics, QString("awgraphicslib_%1.qm").arg(m_language));
-//		switchTranslator(translatorWidgets, QString("awwidgetslib_%1.qm").arg(m_language));
-//		settings.setValue("general/locale", lang);
-//	}
-//}
-
-//void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
-//{
-//	// remove the old translator
-//	qApp->removeTranslator(&translator);
-//	// load the new one and save it to preferences
-//	if (translator.load(file)) 
-//		qApp->installTranslator(&translator);
-//}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// LANGUAGE END
-
 void AwSettings::closeFile()
 { 
 	m_settings[aws::ica_file] = QString();
@@ -219,7 +164,8 @@ void AwSettings::closeFile()
 
 void AwSettings::createMatlabShellScript(const QString& path)
 {
-	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(m_settings["homeDir"].toString());
+	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(.value(aws::home_dir).toString());
+	
 	QFile scriptFile(scriptPath);
 	QTextStream stream(&scriptFile);
 
