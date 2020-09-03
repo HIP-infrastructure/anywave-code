@@ -1,1 +1,1 @@
-#add_subdirectory(src/plugins/deltamedreader)
+add_subdirectory(src/plugins/deltamedreader)
