@@ -85,11 +85,11 @@ void AwMatlabScriptProcess::run()
 
 #endif
 #if defined(Q_OS_MAC)
-		auto appDir = QCoreApplication::applicationDirPath();
-		// build DYLD_FALLBACK
-		QString fallBack = QString("%1/../Frameworks").arg(appDir);
-		env.insert("DYLD_FALLBACK_LIBRARY_PATH", fallBack);
-		env.insert("DYLD_FALLBACK_FRAMEWORK_PATH", fallBack);
+		//auto appDir = QCoreApplication::applicationDirPath();
+		//// build DYLD_FALLBACK
+		//QString fallBack = QString("%1/../Frameworks").arg(appDir);
+		//env.insert("DYLD_FALLBACK_LIBRARY_PATH", fallBack);
+		//env.insert("DYLD_FALLBACK_FRAMEWORK_PATH", fallBack);
 #endif
 		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::hashToJsonString(pdi.input.args()).simplified();
 		//pdi.input.args().value("json_args").toString().simplified();
