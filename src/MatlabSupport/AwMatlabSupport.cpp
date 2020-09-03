@@ -91,7 +91,7 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 	//	engEvalString(m_eng, dyld.toLatin1().data()); 
 	//	awPath.cdUp();
 	//	awPath.cdUp();
-	//	awPath.cd("Plugins/MATLAB/AnyWave");
+		awPath.cd("Plugins/MATLAB/AnyWave");
 #endif
 #ifdef Q_OS_LINUX
         //QString ld = QString("setenv('LD_LIBRARY_PATH', '/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:%1/lib')").arg(awPath.absolutePath());
