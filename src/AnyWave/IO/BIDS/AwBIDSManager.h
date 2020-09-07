@@ -138,6 +138,7 @@ signals:
 	void log(const QString& message);
 	void BIDSClosed();
 	void finished();	// compatibily with threading operations
+	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
 	void recursiveParsing(const QString& dir, AwBIDSItem *parent);

@@ -223,20 +223,6 @@ void AnyWave::openFile(const QString &path)
 		openBIDS(root);
 		AwBIDSManager::instance()->newFile(m_currentReader);
 	}
-	//// if BIDS is already active, check if the file path is coming from an existing BIDS node:
-	//bool BIDSCheck = false;
-	//if (AwBIDSManager::isInstantiated()) {
-	//	auto BM = AwBIDSManager::instance();
-	//	if (BM->isBIDSActive() && BM->findSubject(filePath) != nullptr)
-	//		BIDSCheck = true;
-	//}
-	//if (!BIDSCheck) {
-	//	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
-	//	if (!root.isEmpty()) {
-	//		openBIDS(root);
-	//		AwBIDSManager::instance()->newFile(m_currentReader);
-	//	}
-	//}
 
 	// read flt file before loading the montage.
 	if (!AwSettings::getInstance()->filterSettings().initWithFile(m_openFileName)) {
@@ -310,8 +296,11 @@ void AnyWave::openRecentBIDS()
 	qint32 index = action->data().toInt();
 	QString dir = aws->value(aws::recent_bids).toStringList().value(index);
 
-	if (QDir(dir).exists())
+
+	if (QDir(dir).exists()) {
+		closeFile();
 		openBIDS(dir);
+	}
 	else {
 		AwMessageBox::information(this, tr("File error"), tr("The path to this BIDS structure is not valid anymore."));
 		aws->removeRecentBIDS(dir);
@@ -323,8 +312,10 @@ void AnyWave::openBIDS()
 	QString dir = QFileDialog::getExistingDirectory(this, "/");
 	if (dir.isEmpty())
 		return;
-	if (AwBIDSManager::isBIDS(dir))
+	if (AwBIDSManager::isBIDS(dir)) {
+		closeFile();
 		openBIDS(dir);
+	}
 	else 
 		AwMessageBox::information(this, tr("BIDS"), tr("The selected folder is not a BIDS folder."));
 }

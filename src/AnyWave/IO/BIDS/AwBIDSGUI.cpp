@@ -19,6 +19,7 @@
 #include "Prefs/AwSettings.h"
 #include <AwKeys.h>
 #include <QProcess>
+#include <QtConcurrent>
 //#include "AwBIDSProxyModel.h"
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
@@ -26,14 +27,14 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	m_ui.setupUi(this);
 	m_bids = AwBIDSManager::instance();
 	m_ui.leDIR->setText(m_bids->rootDir());
-	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+	//m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
 	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
 	connect(m_ui.treeView, &QTreeView::clicked, this, &AwBIDSGUI::handleClick);
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_model = new QStandardItemModel(this);
 	m_model->setColumnCount(1);
-	//auto filterModel = new AwBIDSProxyModel(this);
-	//filterModel->setSourceModel(m_model);
+
 	m_ui.treeView->setModel(m_model);
 	m_ui.treeView->setUniformRowHeights(true);
 	m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -90,6 +91,7 @@ void AwBIDSGUI::closeBIDS()
 	auto jsonString = doc.toJson(QJsonDocument::Indented);
 
 	AwUtilities::json::saveToJsonFile(jsonString, jsonPath);
+	m_extraColumns.clear();
 }
 
 
@@ -391,6 +393,7 @@ void AwBIDSGUI::refresh()
 	initModel(m_bids->subjects());
 	if (!m_extraColumns.isEmpty())
 		showColumns(m_extraColumns);
+
 }
 
 void AwBIDSGUI::initModel(const AwBIDSItems& items)
@@ -402,6 +405,7 @@ void AwBIDSGUI::initModel(const AwBIDSItems& items)
 	auto headerItem = new QStandardItem("Directory");
 	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
 	m_model->setHorizontalHeaderItem(0, headerItem);
+
 	for (auto item : items) {
 		rootItem->appendRow(item);
 		recursiveFill(item);

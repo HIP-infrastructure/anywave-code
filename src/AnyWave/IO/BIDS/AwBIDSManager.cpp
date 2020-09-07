@@ -200,6 +200,8 @@ void AwBIDSManager::setRootDir(const QString& path)
 	
 	AwWaitWidget wait("Parsing");
 	wait.setText("Parsing BIDS Structure...");
+	//wait.initProgress(1, 100);
+	//connect(this, &AwBIDSManager::parsingProgressChanged, &wait, &AwWaitWidget::setCurrentProgress);
 	connect(this, &AwBIDSManager::finished, &wait, &QDialog::accept);
 	wait.run(std::bind(&AwBIDSManager::parse, this));  // bind a void method without parameters. The method must emit finished signals when finished.
 
@@ -226,6 +228,7 @@ void AwBIDSManager::closeBIDS()
 	m_currentSubject = nullptr;
 	m_currentOpenItem = nullptr;
 	m_participantsData.clear();
+	m_items.clear();
 	emit BIDSClosed();
 }
 
@@ -487,6 +490,7 @@ void AwBIDSManager::parse()
 	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
 	QRegularExpressionMatch match;
 	using mapItem = QPair<QString, AwBIDSItem*>;
+//	std::vector<std::thread> threads;
 	QList<mapItem> mapItems;
 	for (auto subDir : subDirs) {
 		auto name = subDir.fileName();
@@ -508,17 +512,20 @@ void AwBIDSManager::parse()
 			//setDerivativesForItem(item);
 		//	recursiveParsing(fullPath, item);
 			mapItems.append(mapItem(fullPath, item));
+
+	//		threads.push_back(std::thread([this, item, fullPath]() { return recursiveParsing(fullPath, item); }));
 		}
 	}
-	//QFuture<void> res = QtConcurrent::mapped(mapItems, std::bind(&AwBIDSManager::recursiveParsing, this));
-	//auto f = [this](const mapItem& a) {
-	//	return recursiveParsing(a.first, a.second);
-	//};
-	QFuture<void> res = QtConcurrent::map(mapItems, [this](const mapItem& a) {
-		return recursiveParsing(a.first, a.second);
-		});
 
+	//QFutureWatcher<void> watcher;
+	//connect(&watcher, &QFutureWatcher<void>::progressValueChanged, this, &AwBIDSManager::parsingProgressChanged);
+	QFuture<void> res = QtConcurrent::map(mapItems, [this](const mapItem& a) {
+		recursiveParsing(a.first, a.second);
+		});
+//	watcher.setFuture(res);
 	res.waitForFinished();
+	//std::for_each(threads.begin(), threads.end(), [](std::thread& t) {	t.join(); });
+
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv))
 		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
@@ -605,6 +612,13 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					// set a display role without some bids keys/values to shorten the file name
 					auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
 					tmp = AwUtilities::bids::removeBidsKey("ses", tmp);
+					// remove modality from file name
+					if (tmp.contains("_eeg"))
+						tmp = tmp.remove("_eeg");
+					else if (tmp.contains("_ieeg"))
+						tmp = tmp.remove("_ieeg");
+					else if (tmp.contains("_meg"))
+						tmp = tmp.remove("_meg");
 					fileItem->setData(tmp, Qt::DisplayRole);
 
 					m_hashItemFiles.insert(QDir::toNativeSeparators(fullPath), fileItem);
