@@ -161,39 +161,65 @@ void parse_markers(const mxArray *struct_markers)
 
 void send_markers(AwMarkerList& markers)
 {
-    QTcpSocket* socket = connect();   
-    if (!socket)   {
-        mexErrMsgTxt("Unable to connect to host.");
-        delete socket;
+    TCPRequest request(AwRequest::AddMarkers);
+    if (request.status() != TCPRequest::connected) {
+        mexErrMsgTxt("Failed to connect to AnyWave.");
         return;
     }
-    int request = AwRequest::AddMarkers;
-    QByteArray size;
-    QDataStream stream_size(&size, QIODevice::WriteOnly);
     QByteArray data;
-    QDataStream stream_data(&data, QIODevice::WriteOnly);
-    stream_size.setVersion(QDataStream::Qt_4_4);
-    stream_data.setVersion(QDataStream::Qt_4_4);
-    
-    stream_size << getPid();
-    stream_data << request;    
-    stream_data << markers.size();
-    for (int i = 0; i < markers.size(); i++)
-    {
-        AwMarker *marker = markers.at(i);
-        // add marker
-        stream_data << marker->label();
-        stream_data << marker->start();
-        stream_data << marker->duration();
-        stream_data << marker->value();
-        stream_data << marker->targetChannels();
-		stream_data << marker->color();
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_4_4);
+    stream << markers.size();
+
+    for (auto marker : markers)
+        stream << marker->label() << marker->start() << marker->duration() << marker->value() << marker->targetChannels() << marker->color();
+    if (!request.send(data)) {
+        mexErrMsgTxt("sending markers failed.");
+        return;
     }
-    
-    stream_size << data.size();
-    socket->write(size);
-    socket->write(data);
-    socket->waitForBytesWritten();
+
+
+//    QDataStream* stream = request.stream();
+//
+///*    int request = AwRequest::AddMarkers;
+//    QByteArray size;
+//    QDataStream stream_size(&size, QIODevice::WriteOnly);
+//    QByteArray data;
+//    QDataStream stream_data(&data, QIODevice::WriteOnly);
+//    stream_size.setVersion(QDataStream::Qt_4_4);
+//    stream_data.setVersion(QDataStream::Qt_4_4);
+//    
+//    stream_size << getPid();
+//    stream_data << request;  */  
+//   // stream_data << markers.size();
+//
+//    *stream << markers.size();
+//
+//    for (auto marker : markers)
+//        *stream << marker->label() << marker->start() << marker->duration() << marker->value() << marker->targetChannels() << marker->color();
+//    if (!request.sendRequest()) {
+//        mexErrMsgTxt("sending request failed.");
+//        return;
+//    }
+
+
+  //  for (int i = 0; i < markers.size(); i++)
+  //  {
+  //      AwMarker *marker = markers.at(i);
+  //      // add marker
+  //      *stream
+  //      stream_data << marker->label();
+  //      stream_data << marker->start();
+  //      stream_data << marker->duration();
+  //      stream_data << marker->value();
+  //      stream_data << marker->targetChannels();
+		//stream_data << marker->color();
+  //  }
+  //  
+  //  stream_size << data.size();
+  //  socket->write(size);
+   // socket->write(data);
+   // socket->waitForBytesWritten();
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])

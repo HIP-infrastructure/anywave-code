@@ -151,25 +151,37 @@ void AwRequestServer::handleNewConnection()
 
 void AwRequestServer::dataReceived()
 {
-	QMutexLocker lock(&m_mutex);
+//	emit log("dataReceived called before mutex");
+//	QMutexLocker lock(&m_mutex);
+//	emit log("dataReceived called after mutex");
 
 	// who is sending data?
 	QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
+	if (client == nullptr) {
+		emit log("null socket client detected.... Aborting");
+		return;
+	}
 
+//	emit log("dataReceived waiting for 8 bytes to be available");
 	while (client->bytesAvailable() < sizeof(int) * 2)
 		client->waitForReadyRead();
+//	emit log("dataReceived at least 8 bytes received.\nReading pid and data size");
 
 	int pid, size;
+	
 	QDataStream stream(client);
 	stream.setVersion(QDataStream::Qt_4_4);
 	stream >> pid >> size;
+//	emit log(QString("dataReceived got pid %1 and size is  %2 bytes").arg(pid).arg(size));
+//	emit log(QString("dataReceived waiting for %1 bytes to be available").arg(size));
 	while (client->bytesAvailable() < size)
-		client->waitForReadyRead();
+		client->waitForReadyRead(-1);
+
+//	emit log("dataReceived got all bytes. Reading request id...");
 
 	int request;
 	stream >> request;
-	// handling requests
-	emit log("Request received");
+	emit log(QString("dataReceived request id is %1").arg(request));
 	handleRequest(request, client, pid);
 }
 

@@ -537,7 +537,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 				stream << "ECG" << "\t" << "microV" << "\t";
 				countECG++;
 			}
-			else if (c->type() == AwChannel::SEEG || (c->type() == AwChannel::EEG && mod == "seeg")) {
+			else if (c->type() == AwChannel::SEEG || (c->type() == AwChannel::EEG && mod == "ieeg")) {
 				stream << "SEEG" << "\t" << "microV" << "\t";
 				countSEEG++;
 			}

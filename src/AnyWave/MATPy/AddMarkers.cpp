@@ -3,11 +3,14 @@
 #include <QDataStream>
 #include <QTcpSocket>
 #include "Marker/AwMarkerManager.h"
+#include "AwTCPResponse.h"
 
 void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 {
-	emit log("Processing add markers...");
+	//QMutexLocker locker(&m_mutex);
+	emit log("Processing aw_addmarkers/anywave.addmarker() ...");
 
+	//AwTCPResponse response(client);
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
@@ -23,11 +26,7 @@ void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 	m_markers.clear();
 	
 	for (int i = 0; i < numberOfMarkers; i++)	{
-		in >> label;
-		in >> start >> duration;
-		in >> value;
-		in >> targets;
-		in >> color;
+		in >> label >> start >> duration >> value >> targets >> color;
 		AwMarker *m = new AwMarker(label, start, duration);
 		m->setValue(value);
 		if (!targets.isEmpty())
@@ -39,12 +38,12 @@ void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 		}
 		m_markers << m;
 	}
+	emit log(QString("sending %1 markers...").arg(m_markers.size()));
+	emit markersAdded(&m_markers);
 
-	// add markers
-//	emit markersAdded(&m_markers);
-	p->addMarkers(&m_markers);
-	while (!m_markers.isEmpty())
-		delete m_markers.takeFirst();
+//	p->addMarkers(&m_markers);
+//	while (!m_markers.isEmpty())
+//		delete m_markers.takeFirst();
 
 	emit log("Done.");
 }

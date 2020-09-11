@@ -41,6 +41,7 @@ public:
 	QDataStream *stream() { return m_streamData; }
 	/** Send a request to the host - data can be empty if the request does not require parameters. */
 	bool sendRequest();
+	bool send(const QByteArray& data);
 	int getResponse();
 	void clear();
 
