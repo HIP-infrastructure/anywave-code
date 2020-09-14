@@ -58,9 +58,13 @@ int main(int argc, char *argv[])
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
+//#if defined(Q_OS_MAC)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//#endif
 #endif
+#if defined(Q_OS_MAC)
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
 	QApplication app(argc, argv);
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);

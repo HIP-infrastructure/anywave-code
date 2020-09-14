@@ -120,6 +120,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 	m_channels = channels;
 	m_maxSR = channels.first()->samplingRate();
 	
+	int index = 0;
 	foreach (AwChannel *c, channels) {
 		AwDisplayPlugin *dp;
 		if (c->displayPluginName().isEmpty()) 
@@ -144,6 +145,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		item->setPlugin((QObject *)dp);
 		item->showBaseline(m_settings->showZeroLine);
 		item->showLabel(m_settings->showSensors);
+		item->setIndex(index++);
 		this->addItem(item);
 		m_signalItems << item;
 		item->repaint();
@@ -1000,30 +1002,40 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	menuDisplay->addSeparator();
 
 	// Channel Selection
-	QMenu *menuSelection = menuDisplay->addMenu(tr("Selection"));
-	QAction *action = menuSelection->addAction(tr("Select all channels"));
+	QMenu *menuSelection = menuDisplay->addMenu(tr("Select"));
+	QAction *action = menuSelection->addAction(tr("all channels"));
 	connect(action, &QAction::triggered, this, &AwGraphicsScene::selectAllChannels);
 
 	for (auto t : AwChannel::types) {
-		action = menuSelection->addAction(QString(tr("Select %1 channels").arg(t)));
+		action = menuSelection->addAction(QString(tr("%1 channels").arg(t)));
 		action->setData(AwChannel::stringToType(t));
 		connect(action, &QAction::triggered, this, &AwGraphicsScene::selectChannelsOfType);
 	}
 
+
 	auto selectedChannels = this->selectedChannels();
 	if (!selectedChannels.isEmpty())	{
-		QAction *actInvertSelection = new QAction(tr("Invert selection"), menuSelection);
-		connect(actInvertSelection, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
-		menuSelection->addAction(actInvertSelection);
-		QAction *actClearSelection = new QAction(tr("Clear selection"), menuSelection);
-		connect(actClearSelection, SIGNAL(triggered()), this, SLOT(clearChannelSelection()));
-		menuSelection->addAction(actClearSelection);
-		QAction *actSelectionAsBad = new QAction(tr("Mark selected channels as bad"), menuSelection);
-		connect(actSelectionAsBad, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
-		menuSelection->addAction(actSelectionAsBad);
-		QAction *actToMontage = new QAction(tr("Set selection as the new Montage"), menuSelection);
-		connect(actToMontage, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
-		menuSelection->addAction(actToMontage);
+		menuDisplay->addSeparator();
+		auto action = menuDisplay->addAction("Invert Selection");
+		connect(action, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
+		action = menuDisplay->addAction("Clear Selection");
+		connect(action, SIGNAL(triggered()), this, SLOT(clearChannelSelection()));
+		action = menuDisplay->addAction("Mark Selection As Bad");
+		connect(action, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
+		action = menuDisplay->addAction("Use Selection As New Montage");
+		connect(action, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
+		//QAction *actInvertSelection = new QAction(tr("Invert selection"), menuSelection);
+		//connect(actInvertSelection, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
+		//menuSelection->addAction(actInvertSelection);
+		//QAction *actClearSelection = new QAction(tr("Clear selection"), menuSelection);
+		//connect(actClearSelection, SIGNAL(triggered()), this, SLOT(clearChannelSelection()));
+		//menuSelection->addAction(actClearSelection);
+		//QAction *actSelectionAsBad = new QAction(tr("Mark selected channels as bad"), menuSelection);
+		//connect(actSelectionAsBad, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
+		//menuSelection->addAction(actSelectionAsBad);
+		//QAction *actToMontage = new QAction(tr("Set selection as the new Montage"), menuSelection);
+		//connect(actToMontage, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
+		//menuSelection->addAction(actToMontage);
 	}
 	// End of Channel Selection
 	menuDisplay->addSeparator();

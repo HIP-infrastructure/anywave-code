@@ -54,8 +54,8 @@
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Plugins\MATLAB\AnyWave</OutDir>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtInstall>5.15_static</QtInstall>
     <QtModules>core;network</QtModules>
+    <QtInstall>msvc2019_64</QtInstall>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>msvc2019_64</QtInstall>
@@ -103,8 +103,10 @@
       <OutputFile>$(OutDir)\aw_addmarkers.mexw64</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2015a\extern\lib\win64\microsoft;$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>MexCommon.lib;libmx.lib;libmat.lib;libmex.lib;AwCoreStatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>../configure.def</ModuleDefinitionFile>
+      <AdditionalDependencies>MexCommon.lib;libmx.lib;libmat.lib;libmex.lib;AwCoreLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalOptions>/EXPORT:mexFunction %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <QtMoc>
     </QtMoc>

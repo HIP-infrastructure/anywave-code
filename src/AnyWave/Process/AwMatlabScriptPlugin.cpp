@@ -84,6 +84,11 @@ void AwMatlabScriptProcess::run()
 			arguments << mcrPath;
 
 #endif
+
+#if defined(Q_OS_WIN)
+		auto appDir = QCoreApplication::applicationDirPath();
+		m_systemPath = QString("%1;%2").arg(appDir).arg(m_systemPath);
+#endif
 #if defined(Q_OS_MAC)
 		//auto appDir = QCoreApplication::applicationDirPath();
 		//// build DYLD_FALLBACK

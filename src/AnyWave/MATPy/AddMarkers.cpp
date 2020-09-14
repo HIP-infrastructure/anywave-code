@@ -10,7 +10,6 @@ void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 	//QMutexLocker locker(&m_mutex);
 	emit log("Processing aw_addmarkers/anywave.addmarker() ...");
 
-	//AwTCPResponse response(client);
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
@@ -24,8 +23,9 @@ void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 	in >> numberOfMarkers;
 
 	m_markers.clear();
-	
-	for (int i = 0; i < numberOfMarkers; i++)	{
+	emit log(QString("%1 markers sent by the plugin.").arg(numberOfMarkers));
+	emit log("Reading markers...");
+	for (int i = 0; i < numberOfMarkers; i++) {
 		in >> label >> start >> duration >> value >> targets >> color;
 		AwMarker *m = new AwMarker(label, start, duration);
 		m->setValue(value);
@@ -38,8 +38,9 @@ void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 		}
 		m_markers << m;
 	}
-	emit log(QString("sending %1 markers...").arg(m_markers.size()));
+	emit log(QString("Received %1 markers.").arg(m_markers.size()));
 	emit markersAdded(&m_markers);
+	emit log("Markers added to AnyWave.");
 
 //	p->addMarkers(&m_markers);
 //	while (!m_markers.isEmpty())

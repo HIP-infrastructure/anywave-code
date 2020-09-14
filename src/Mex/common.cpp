@@ -233,6 +233,7 @@ bool TCPRequest::send(const QByteArray& data)
 	m_socket->write(header);
 	m_socket->waitForBytesWritten();
 	m_socket->write(data);
+//	m_socket->flush();
 	return m_socket->waitForBytesWritten();
 }
 

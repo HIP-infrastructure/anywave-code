@@ -178,7 +178,9 @@ public:
 	int itemType() { return AW_GRAPHICS_ITEM_SIGNAL_TYPE; }
 	inline int type() const { return Type; }
 	AwGraphicsSignalItem(AwChannel *chan, AwDisplayPhysics *phys = NULL) : AwBaseGraphicsSignalItem(chan, phys) 
-	{ setZValue(5); m_flags = 0; m_repaint = false; }
+	{
+		setZValue(5); m_flags = 0; m_repaint = false; m_number = -1; 
+	}
 
 	/** Override this method for specific repaint code in subclass **/
 	virtual void repaint() { 
@@ -190,6 +192,8 @@ public:
 	inline int displayFlags() { return m_flags; }
 	virtual QRectF labelBoundingBox() { return QRectF(0, 0, 0, 0); }
 	void setLabelXOffset(qreal offset);
+	inline void setIndex(int index) { m_number = index; }
+	inline int index() { return m_number; }
 	QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 signals:
 	void selectionChanged(AwGraphicsSignalItem *item, bool selected);
@@ -197,6 +201,7 @@ protected:
 	// override the QGraphicsItem mousePress method to suppress the default selecting scheme.
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) { }
 	int m_flags;
+	int m_number;	// hold the index of the item in the scene (to get the right order of the item in the scene)
 };
 
 Q_DECLARE_METATYPE(AwGraphicsSignalItem *)
