@@ -162,27 +162,49 @@ void AwRequestServer::dataReceived()
 		return;
 	}
 
-//	emit log("dataReceived waiting for 8 bytes to be available");
+	emit log("dataReceived waiting for 8 bytes to be available");
 	while (client->bytesAvailable() < sizeof(int) * 2)
 		client->waitForReadyRead();
-//	emit log("dataReceived at least 8 bytes received.\nReading pid and data size");
+	emit log("dataReceived at least 8 bytes received.\nReading pid and data size");
 
 	int pid, size;
 	
 	QDataStream stream(client);
 	stream.setVersion(QDataStream::Qt_4_4);
 	stream >> pid >> size;
-//	emit log(QString("dataReceived got pid %1 and size is  %2 bytes").arg(pid).arg(size));
-//	emit log(QString("dataReceived waiting for %1 bytes to be available").arg(size));
+	emit log(QString("dataReceived got pid %1 and size is  %2 bytes").arg(pid).arg(size));
+	emit log(QString("dataReceived waiting for %1 bytes to be available").arg(size));
 	while (client->bytesAvailable() < size)
-		client->waitForReadyRead(-1);
+		client->waitForReadyRead();
 
-//	emit log("dataReceived got all bytes. Reading request id...");
+	emit log("dataReceived got all bytes. Reading request id...");
 
 	int request;
 	stream >> request;
 	emit log(QString("dataReceived request id is %1").arg(request));
 	handleRequest(request, client, pid);
+
+
+	//QMutexLocker lock(&m_mutex);
+
+	//// who is sending data?
+	//QTcpSocket* client = qobject_cast<QTcpSocket*>(sender());
+
+	//while (client->bytesAvailable() < sizeof(int) * 2)
+	//	client->waitForReadyRead();
+
+	//int pid, size;
+	//QDataStream stream(client);
+	//stream.setVersion(QDataStream::Qt_4_4);
+	//stream >> pid >> size;
+	//while (client->bytesAvailable() < size)
+	//	client->waitForReadyRead();
+
+	//int request;
+	//stream >> request;
+	//// handling requests
+	//emit log("Request received");
+	//handleRequest(request, client, pid);
 }
 
 void AwRequestServer::clientDisconnected()

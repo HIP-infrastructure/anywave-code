@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>513</width>
-    <height>638</height>
+    <width>270</width>
+    <height>762</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -48,7 +48,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -59,13 +59,9 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Columns:</string>
-          </property>
-         </widget>
-        </item>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetNoConstraint</enum>
+        </property>
         <item>
          <widget class="QCheckBox" name="checkLabel">
           <property name="text">
@@ -122,10 +118,16 @@
       <item>
        <widget class="AwMarkerTableView" name="tvMarkers">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777213</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="toolTip">
          <string>Markers currently shown depending on Display rule used</string>
@@ -175,10 +177,10 @@
         <attribute name="horizontalHeaderCascadingSectionResizes">
          <bool>true</bool>
         </attribute>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>100</number>
-        </attribute>
         <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>0</number>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
          <number>100</number>
         </attribute>
         <attribute name="horizontalHeaderStretchLastSection">
@@ -195,7 +197,7 @@
    <item>
     <widget class="QGroupBox" name="groupBoxDisplayRules">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -264,6 +266,12 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBoxQuickNav">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Quick navigation</string>
      </property>
@@ -317,7 +325,7 @@
       <item row="1" column="1" colspan="2">
        <widget class="QComboBox" name="comboNames">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -330,7 +338,7 @@
       <item row="1" column="3">
        <widget class="QLabel" name="labelNames">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -356,7 +364,7 @@
       <item row="1" column="5">
        <widget class="QPushButton" name="buttonPrevName">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -369,7 +377,7 @@
       <item row="1" column="6">
        <widget class="QPushButton" name="buttonGoName">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -382,7 +390,7 @@
       <item row="1" column="7">
        <widget class="QPushButton" name="buttonNextName">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -402,7 +410,7 @@
       <item row="2" column="1" colspan="2">
        <widget class="QComboBox" name="comboValues">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -415,7 +423,7 @@
       <item row="2" column="3">
        <widget class="QLabel" name="labelValues">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -441,7 +449,7 @@
       <item row="2" column="5">
        <widget class="QPushButton" name="buttonPrevValue">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -454,7 +462,7 @@
       <item row="2" column="6">
        <widget class="QPushButton" name="buttonGoValue">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -467,7 +475,7 @@
       <item row="2" column="7">
        <widget class="QPushButton" name="buttonNextValue">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -485,7 +493,7 @@
      <item>
       <widget class="QPushButton" name="buttonExportWizard">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -498,7 +506,7 @@
      <item>
       <widget class="QPushButton" name="buttonClearTriggerChannel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -527,7 +535,7 @@
      <item>
       <widget class="QPushButton" name="buttonLoad">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -540,7 +548,7 @@
      <item>
       <widget class="QPushButton" name="buttonSave">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>

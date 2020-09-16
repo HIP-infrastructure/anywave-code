@@ -36,7 +36,7 @@
 #include "Widgets/AwMappingToolBar.h"
 #include "Widgets/AwMontageToolBar.h"
 #include "Widgets/AwDockFilter.h"
-#include "Widgets/AwDockMarker.h"
+//#include "Widgets/AwDockMarker.h"
 #include "Widgets/AwDisplayToolBar.h"
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Filter/AwFilterToolBar.h"
@@ -174,10 +174,10 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		auto dock = new QDockWidget(tr("Markers"), this);
 		m_dockWidgets["markers"] = dock;
 		dock->hide();
-		dock->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);
+		dock->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 		dock->setWidget(AwMarkerManager::instance()->ui());
-		dock->widget()->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+		dock->widget()->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
 		resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 		

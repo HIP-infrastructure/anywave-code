@@ -136,7 +136,7 @@
       <OutputFile>$(OutDir)AwMatlabSupport.dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;C:\Program Files\MATLAB\R2015a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;%(AdditionalDependencies) libeng.lib</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;libeng.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -168,7 +168,7 @@
       <OutputFile>$(OutDir)AwMatlabSupport.dll</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;C:\Program Files\MATLAB\R2015a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;%(AdditionalDependencies) libeng.lib</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;libeng.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -176,7 +176,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties lreleaseOptions="" lupdateOnBuild="0" lupdateOptions="" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" Qt5Version_x0020_x64="$(DefaultQtVersion)" RccDir=".\GeneratedFiles" UicDir=".\GeneratedFiles" />
+      <UserProperties lreleaseOptions="" lupdateOnBuild="0" lupdateOptions="" MocDir=".\GeneratedFiles\$(ConfigurationName)" MocOptions="" Qt5Version_x0020_x64="msvc2019_64" RccDir=".\GeneratedFiles" UicDir=".\GeneratedFiles" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

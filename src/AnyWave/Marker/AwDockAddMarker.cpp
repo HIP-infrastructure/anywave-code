@@ -32,10 +32,9 @@ AwDockAddMarker::AwDockAddMarker(const QString& title, QWidget *parent, Qt::Wind
 	:  QDockWidget(title, parent, flags)
 {
 	setFeatures(QDockWidget::AllDockWidgetFeatures);
-	setObjectName("Dock Adding Markers");
+	setObjectName("Adding Markers");
 	setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	setFloating(true);
-	QStringList targets;
 
 	m_inspector = new AwMarkerInspector(AwMarkerManager::instance()->getMarkers(), AwMontageManager::instance()->labels(), this);
 	setWidget(m_inspector);

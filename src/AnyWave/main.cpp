@@ -59,8 +59,11 @@ int main(int argc, char *argv[])
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
 //#if defined(Q_OS_MAC)
-	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 //#endif
+#endif
+#if defined(Q_OS_WIN)
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 #endif
 #if defined(Q_OS_MAC)
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
