@@ -5,7 +5,7 @@
 
 EEPIO::EEPIO(const QString& fileName) : AwFileIO(fileName)
 {
-
+	_libeep_cnt = nullptr;
 }
 
 
@@ -27,8 +27,10 @@ EEPIOPlugin::EEPIOPlugin()
 
 void EEPIO::cleanUpAndClose()
 {
-	if (_libeep_cnt != nullptr)
+	if (_libeep_cnt != nullptr) {
 		free(_libeep_cnt);
+		_libeep_cnt = nullptr;
+	}
 	m_scales.clear();
 }
 

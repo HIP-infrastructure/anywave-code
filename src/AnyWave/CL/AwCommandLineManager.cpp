@@ -203,8 +203,6 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		args[cl::montage_file] = fullPath;
 	}
 
-
-
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
 		QString tmp = QString("%1.bad").arg(inputFile);

@@ -36,7 +36,6 @@
 #include "Widgets/AwMappingToolBar.h"
 #include "Widgets/AwMontageToolBar.h"
 #include "Widgets/AwDockFilter.h"
-//#include "Widgets/AwDockMarker.h"
 #include "Widgets/AwDisplayToolBar.h"
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "Filter/AwFilterToolBar.h"

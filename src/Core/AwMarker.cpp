@@ -543,8 +543,9 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 			res = invertMarkerSelection(skippedMarkers, "selection", totalDuration);
 	}
 	else if (!skip && use) {
-        auto tmp = AwMarker::getMarkersWithLabels(markers, used);
-        res = AwMarker::merge(tmp);
+        //auto tmp = AwMarker::getMarkersWithLabels(markers, used);
+       // res = AwMarker::merge(tmp);  // don't merge input markers is specified by use_markers
+		res = AwMarker::getMarkersWithLabels(markers, used);
 	}
 	else if (skip && use) {
         auto tmp = AwMarker::getMarkersWithLabels(markers, skipped);

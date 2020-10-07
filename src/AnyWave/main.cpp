@@ -81,17 +81,17 @@ int main(int argc, char *argv[])
 	settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 
-#ifdef _WIN32  // On Windows, add the subdir Plugins to the dll search path.
-	QString appPath = QApplication::applicationDirPath() + "/Plugins";
-	wchar_t *dllDir = new wchar_t[appPath.size() + 1];
-	appPath.toWCharArray(dllDir);
-	dllDir[appPath.size()] = '\0';
-	for (int i = 0; i < appPath.size(); i++)	{
-		if (dllDir[i] == '/') 
-			dllDir[i] = '\\';
-	}
-	bool res = SetDllDirectory((LPCWSTR)dllDir);
-#endif
+//#ifdef _WIN32  // On Windows, add the subdir Plugins to the dll search path.
+//	QString appPath = QApplication::applicationDirPath() + "/Plugins";
+//	wchar_t *dllDir = new wchar_t[appPath.size() + 1];
+//	appPath.toWCharArray(dllDir);
+//	dllDir[appPath.size()] = '\0';
+//	for (int i = 0; i < appPath.size(); i++)	{
+//		if (dllDir[i] == '/') 
+//			dllDir[i] = '\\';
+//	}
+//	bool res = SetDllDirectory((LPCWSTR)dllDir);
+//#endif
 
 	// check if arguments 
 	QStringList args = app.arguments();
