@@ -118,25 +118,7 @@ void AwMarkerManager::removeDuplicates()
 	if (m_markers.isEmpty())
 		return;
 	AwMarker::removeDoublons(m_markers);
-	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 
-	//AwMarkerList sorted;
-	//AwMarker *marker = m_markers.first();
-	//sorted << marker;
-	//for (int i = 1; i < m_markers.size(); i++) {
-	//	AwMarker *m = m_markers.at(i);
-	//	if (m->label() != marker->label() || m->start() != marker->start() || m->duration() != marker->duration()) {
-	//		sorted << m;
-	//		marker = m;
-	//	}
-	//	else {
-	//		m_markers.removeAll(m);
-	//		delete m;
-	//	}
-	//	
-	//}
-	//m_markers = sorted;
-	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +184,8 @@ void AwMarkerManager::loadMarkers()
 	}
 
 	// show markers ui
-	m_ui->show();
+	showDockUI();
+
 }
 
 void AwMarkerManager::saveMarkers()
@@ -332,12 +315,6 @@ void AwMarkerManager::setFilename(const QString& path)
 			showDockUI();
 		}
 	}
-	//// if the file is a BIDS => get events.tsv markers and unite them
-	//if (AwBIDSManager::isInstantiated()) {
-	//	auto bm = AwBIDSManager::instance();
-	//	m_markers += bm->getMarkersTsv();
-	//	removeDuplicates();
-	//}
 }
 
 void AwMarkerManager::checkForBIDSMods()

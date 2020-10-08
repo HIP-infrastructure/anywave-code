@@ -104,7 +104,7 @@ AwSettings::AwSettings(QObject *parent)
 	m_settings[aws::ins_version] = false;
 	// check for a version.txt in resources
 	//QString versionFile = QString("%1/version.txt").arg(m_settings["appResourcePath"].toString());
-	QString insVersionFile = QString("%1/ins.txt").arg(m_settings["appResourcePath"].toString());
+	QString insVersionFile = QString("%1/ins.txt").arg(m_settings.value(aws::app_resource_dir).toString());
 	//if (QFile::exists(versionFile)) {
 	//	QFile file(versionFile);
 	//	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {

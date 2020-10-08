@@ -90,6 +90,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	// Accept file drops
 	setAcceptDrops(true);
 
+
 	m_debugLogWidget = NULL;
 	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
@@ -117,6 +118,15 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	createUserDirs();
 	
 	if (isGUIMode) {
+		// create central widget to be a splitter
+		//auto widget = new QSplitter(this);
+		//widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+		//QHBoxLayout* layout = new QHBoxLayout;
+		//layout->setContentsMargins(0, 0, 0, 0);
+		//layout->setSizeConstraint(QLayout::SetDefaultConstraint);
+		//widget->setLayout(layout);
+		setCentralWidget(new QSplitter(this));
+
 		QStringList recentFiles = aws->value(aws::recent_files).toStringList();
 		if (!recentFiles.isEmpty()) {
 			updateRecentFiles(recentFiles);
@@ -173,12 +183,14 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		auto dock = new QDockWidget(tr("Markers"), this);
 		m_dockWidgets["markers"] = dock;
 		dock->hide();
-		dock->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+		dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		dock->setWidget(AwMarkerManager::instance()->ui());
-		dock->widget()->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+		auto w = AwMarkerManager::instance()->ui();
+		w->setMinimumWidth(100);
+		w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+		dock->setWidget(w);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
-		resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
+		resizeDocks({ dock }, { 150 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 		
 		dock = new QDockWidget(tr("Adding Markers Tool"), this);
 		m_dockWidgets["add_markers"] = dock;
@@ -209,7 +221,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 
 	AwMarkerManager *marker_manager = AwMarkerManager::instance();
 	marker_manager->setParent(this);
-	marker_manager->setDock(m_dockWidgets["markers"]);
+	marker_manager->setDock(m_dockWidgets.value("markers"));
 	if (markerInspectorWidget) {
 		connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
 		connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
@@ -294,6 +306,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	}
 	m_lastDirOpen = "/";
 	readSettings();
+
 }
 
 //

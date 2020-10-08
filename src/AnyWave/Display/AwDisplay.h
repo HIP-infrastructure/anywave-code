@@ -79,7 +79,8 @@ private:
 	QToolBar *m_toolBar;
 	AwChannelList m_channels;
 	AwFileIO *m_reader;
-	AwCentralWidget *m_splitterWidget;
+//	AwCentralWidget *m_splitterWidget;
+	QSplitter* m_centralWidget;
 	bool m_dontSynchronize;
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	QScreen *m_screen;

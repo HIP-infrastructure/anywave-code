@@ -52,7 +52,7 @@ public slots:
 	void setRule(const QString& name);
 	void addRule(const QString& name);
 	void modifyRule(const QString& oldName, const QString& newName);
-	void show();
+	//void show();
 	void editCurrentItem();
 	void setMarkerAddingMode(bool on);
 	void highlightMarker(AwMarker *marker);

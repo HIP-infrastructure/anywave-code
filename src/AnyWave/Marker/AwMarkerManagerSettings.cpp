@@ -337,15 +337,15 @@ void AwMarkerManagerSettings::editCurrentItem()
 		tvMarkers->edit(tvMarkers->currentIndex());
 }
 
-void AwMarkerManagerSettings::show()
-{
-	AwFileIO *reader = AwSettings::getInstance()->currentReader();
-	if (!reader->triggerChannels().isEmpty())
-		buttonClearTriggerChannel->setEnabled(true);
-	else
-		buttonClearTriggerChannel->setEnabled(false);
-	QWidget::show();
-}
+//void AwMarkerManagerSettings::show()
+//{
+//	AwFileIO *reader = AwSettings::getInstance()->currentReader();
+//	if (!reader->triggerChannels().isEmpty())
+//		buttonClearTriggerChannel->setEnabled(true);
+//	else
+//		buttonClearTriggerChannel->setEnabled(false);
+//	QWidget::show();
+//}
 
 void AwMarkerManagerSettings::updateMarkerList()
 {

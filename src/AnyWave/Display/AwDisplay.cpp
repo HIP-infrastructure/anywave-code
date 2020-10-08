@@ -71,8 +71,8 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
 	dsManager->setParent(this);
 	m_mainWindow = w;
-	m_setup = NULL;
-	m_reader = NULL;
+	m_setup = nullptr;
+	m_reader = nullptr;
 
 	AwDisplaySetup *setup = dsManager->currentSetup();
 
@@ -81,9 +81,9 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
 	connect(AwMarkerManager::instance(), SIGNAL(goTo(float)), this, SLOT(showPositionInViews(float)));
 	connect(AwICAManager::instance(), SIGNAL(icaComponentsUnloaded()), this, SLOT(removeICAChannels()));
-	m_splitterWidget = new AwCentralWidget(0);
-	w->setCentralWidget(m_splitterWidget);
-
+//	m_splitterWidget = new AwCentralWidget(0);
+//	w->setCentralWidget(m_splitterWidget);
+	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	// create views from setup
 	foreach (AwViewSetup *vs, setup->viewSetups())
 		AwSignalView *view = addSignalView(vs);
@@ -160,8 +160,10 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	if (!m_virtualChannels.isEmpty())
 		view->addVirtualChannels(m_virtualChannels);
 
-	m_splitterWidget->addWidget(view);
-	m_splitterWidget->repaint();
+//	m_splitterWidget->addWidget(view);
+//	m_splitterWidget->repaint();
+	m_centralWidget->addWidget(view);
+	m_centralWidget->repaint();
 	
 	// set flags so that the views inform the Process Manager about changes.
 	for (auto v : m_signalViews)
@@ -187,17 +189,21 @@ void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
 {
 	if (setup == NULL)
 		return;
+
 	if (flags & AwDisplaySetup::ViewOrientation) {
 		switch (m_setup->orientation())
 		{
 		case AwDisplaySetup::Horizontal:
-			m_splitterWidget->setOrientation(Qt::Vertical);
+			//m_splitterWidget->setOrientation(Qt::Vertical);
+			m_centralWidget->setOrientation(Qt::Vertical);
 			break;
 		case AwDisplaySetup::Vertical:
-			m_splitterWidget->setOrientation(Qt::Horizontal);
+			//m_splitterWidget->setOrientation(Qt::Horizontal);
+			m_centralWidget->setOrientation(Qt::Horizontal);
 			break;
 		}
-		m_splitterWidget->repaint();
+		//m_splitterWidget->repaint();
+		m_centralWidget->repaint();
 	}
 
 	m_setup = setup;
@@ -365,7 +371,9 @@ void AwDisplay::captureViews()
 		else 
 			ok = true;
 	}
-	QPixmap image = m_splitterWidget->grab();
+	auto central = static_cast<QSplitter*>(m_mainWindow->centralWidget());
+	//QPixmap image = m_splitterWidget->grab();
+	QPixmap image = central->grab();
 	ok = image.save(file);
 	QApplication::clipboard()->setPixmap(image);
 	QSystemTrayIcon *sysTray = aws->sysTray();
@@ -513,13 +521,15 @@ void AwDisplay::removeView()
 
 void AwDisplay::alignViewsVerticaly()
 {
-	m_splitterWidget->setOrientation(Qt::Horizontal);
+	//m_splitterWidget->setOrientation(Qt::Horizontal);
+	m_centralWidget->setOrientation(Qt::Horizontal);
 	m_setup->setOrientation(AwDisplaySetup::Vertical);
 }
 
 void AwDisplay::alignViewsHorizontaly()
 {
-	m_splitterWidget->setOrientation(Qt::Vertical);
+	//m_splitterWidget->setOrientation(Qt::Vertical);
+	m_centralWidget->setOrientation(Qt::Vertical);
 	m_setup->setOrientation(AwDisplaySetup::Horizontal);
 }
 
@@ -679,9 +689,11 @@ void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
 		view->setChannels(m_channels);
 		if (!m_virtualChannels.isEmpty())
 			view->addVirtualChannels(m_virtualChannels);
-		//m_splitterWidget->addWidget(view->widget());
-		m_splitterWidget->addWidget(view);
-		m_splitterWidget->repaint();
+		
+		//m_splitterWidget->addWidget(view);
+		m_centralWidget->addWidget(view);
+		//m_splitterWidget->repaint();
+		m_centralWidget->repaint();
 		view->setProcessFlags(AwSignalView::UpdateProcess);
 	}
 

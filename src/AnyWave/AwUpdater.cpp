@@ -63,7 +63,7 @@ void AwDownloader::download()
 #endif
 
 #ifdef Q_OS_MAC
-	url = QUrl(QString("%1/AnyWave.dmg").arg(baseURL));
+	url = QUrl(QString("%1/AnyWave.zip").arg(baseURL));
 #endif
 #ifdef Q_OS_LINUX
 	url = QUrl(QString("%1/install_AnyWave.run").arg(baseURL));
@@ -221,9 +221,9 @@ void AwUpdater::handleResult(QNetworkReply *reply)
 		// Notify user that the process has finished normally
 		QSystemTrayIcon *sysTray = AwSettings::getInstance()->sysTray();
 		sysTray->show();
-		sysTray->showMessage("AnyWave updates", QString("A new version is available at %1").arg(response), QSystemTrayIcon::Information, 200000);
+		sysTray->showMessage("AnyWave update", QString("A new version is available at %1").arg(response), QSystemTrayIcon::Information, 200000);
 
-		if (AwMessageBox::question(0, tr("Updates"), tr("Would you like to download the newer version of AnyWave?"), QMessageBox::Yes | QMessageBox::No) ==
+		if (QMessageBox::question(0, tr("Update"), tr("Would you like to download the newer version of AnyWave?"), QMessageBox::Yes | QMessageBox::No) ==
 			QMessageBox::Yes) {
 			m_downloader.download();
 		}
