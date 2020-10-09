@@ -183,10 +183,10 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		auto dock = new QDockWidget(tr("Markers"), this);
 		m_dockWidgets["markers"] = dock;
 		dock->hide();
-		dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+		//dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 		auto w = AwMarkerManager::instance()->ui();
-		w->setMinimumWidth(100);
+		//w->setMinimumWidth(100);
 		w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setWidget(w);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
