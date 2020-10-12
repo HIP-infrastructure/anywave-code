@@ -190,7 +190,7 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		//w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setWidget(w);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
-		resizeDocks({ dock }, { 150 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
+		resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 		
 		dock = new QDockWidget(tr("Adding Markers Tool"), this);
 		m_dockWidgets["add_markers"] = dock;
