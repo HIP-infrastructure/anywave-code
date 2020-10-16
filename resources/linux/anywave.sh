@@ -16,5 +16,5 @@ then
 fi
 
 export QT_QPA_PLATFORM_PLUGIN_PATH=$SCRIPTPATH/lib/plugins/platforms
-$SCRIPTPATH/AnyWaveLinux
+$SCRIPTPATH/AnyWaveLinux $@
 exit

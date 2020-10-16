@@ -83,7 +83,14 @@ endif()
 
 
 # search for MKL 
+#SET(BLA_VENDOR Intel10_64lp)
+#find_package(BLAS)
+#if(BLAS_FOUND)
+#   message(STATUS "Found blas: ${BLAS_LIBRARIES}")
+#endif()
+
 find_package(MKL)
+
 if(NOT MKL_FOUND AND APPLE)
     SET(BLAS_LIBRARIES "-framework Accelerate")
 ENDIF()
@@ -94,13 +101,13 @@ ENDIF()
 
 IF(MKL_FOUND)
    message(STATUS "MKL Found.")
-   #LINK_DIRECTORIES(${MKL_LIB_DIRS})
+#  # LINK_DIRECTORIES(${MKL_LIB_DIRS})
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
    SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-   #INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
-   SET(BLAS_LIBRARIES "-lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl")
-   message(STATUS "MLK libs : ${MKL_LIBRARIES}")
-   message(STATUS "link flags: ${BLAS_LIBRARIES}")
+   INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
+   SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
+  #message(STATUS "MLK libs : ${MKL_LIBRARIES}")
+  # message(STATUS "link flags: ${BLAS_LIBRARIES}")
 endif()
 
 # Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
@@ -260,7 +267,7 @@ include(${CMAKE_SOURCE_DIR}/src/plugins/external_plugins.cmake)
 MESSAGE(STATUS "will also build external plugins")
 ENDIF()
 
-IF(NOT APPLE)
+IF(UNIX AND NOT APPLE)
 # Install
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
 
@@ -275,5 +282,7 @@ INSTALL(FILES ${AW_RES_DIR}/images/AnyWave.png DESTINATION ${CMAKE_INSTALL_PREFI
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
 # include 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
+# symlink
+EXECUTE_PROCESS(COMMAND ln -sf  ${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/bin/anywave)
 ENDIF()
 
