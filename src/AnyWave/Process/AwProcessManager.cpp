@@ -375,6 +375,9 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
 	auto fi = aws->fileInfo();
+	auto args = process->pdi.input.args();
+	args[cl::aw_path] = QCoreApplication::applicationFilePath();
+	args[processio::working_dir] = process->pdi.input.settings.value(processio::working_dir);
 	// if fi == NULL that means no file are currently open by AnyWave.
 	if (fi) {
 		// prepare input settings only if a file is currently open.
@@ -388,8 +391,7 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 		args[processio::data_dir] = fi->dirPath();
 		args[processio::data_path] = QString("%1/%2").arg(fi->dirPath()).arg(fi->fileName());
 		args[processio::file_duration] = fi->currentReader()->infos.totalDuration();
-		args[cl::aw_path] = QCoreApplication::applicationFilePath();
-		args[processio::working_dir] = process->pdi.input.settings.value(processio::working_dir);
+		
 	}
 	return process;
 }

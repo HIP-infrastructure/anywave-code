@@ -68,6 +68,10 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
 	QCommandLineOption outputSuffixO("output_suffix", "specify the suffix to use for output_fle.", "output_suffix", QString());
 	QCommandLineOption logDirO("log_dir", "specify the folder where log files will be created.", "log_dir", QString());
+	QCommandLineOption markerFileO("marker_file", "specify the marker file to use with data file.", "marker_file", QString());
+	parser.addOption(markerFileO);
+	QCommandLineOption montageFileO("montage_file", "specify the montage file to use with data file.", "montage_file", QString());
+	parser.addOption(montageFileO);
 	// markers
 	QCommandLineOption useMarkersO("use_markers", "specify the markers on which process the data.", "use_markers", QString());
 	QCommandLineOption skipMarkersO("skip_markers", "specify the markers to skip.", "skip_markers", QString());
@@ -79,7 +83,6 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	// montages
 	QCommandLineOption createMontageO("create_montage", "specify the montage to create based on channels present in data file.", "create_montage", QString());
 	parser.addOption(createMontageO);
-
 	parser.addOption(logDirO);
 	parser.addOption(inputFileO);
 	parser.addOption(inputDirO);
@@ -221,6 +224,14 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	tmp = parser.value(logDirO);
 	if (!tmp.isEmpty())
 		AwSettings::getInstance()->setValue(aws::log_dir, tmp);
+	// marker_file
+	tmp = parser.value(markerFileO);
+	if (!tmp.isEmpty())
+		arguments[cl::marker_file] = tmp;
+	// montager_file
+	tmp = parser.value(montageFileO);
+	if (!tmp.isEmpty())
+		arguments[cl::montage_file] = tmp;
 	// use_markers
 	tmp = parser.value(useMarkersO);
 	if (!tmp.isEmpty())

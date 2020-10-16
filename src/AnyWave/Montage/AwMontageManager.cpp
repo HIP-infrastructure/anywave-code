@@ -44,6 +44,7 @@
 #include <AwCore.h>
 #include <AwFileInfo.h>
 #include "IO/BIDS/AwBIDSManager.h"
+#include "Debug/AwDebugLog.h"
 // statics init and definitions
 AwMontageManager *AwMontageManager::m_instance = 0;
 
@@ -257,6 +258,8 @@ AwMontageManager::AwMontageManager()
 
 	// connect to filter settings
 	connect(&aws->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
+
+	AwDebugLog::instance()->connectComponent("Montage Manager", this);
 }
 
 // destructeur
@@ -659,7 +662,10 @@ bool AwMontageManager::save(const QString& filename, const AwChannelList& channe
 
 bool AwMontageManager::save(const QString& filename)
 {
-	return save(filename, m_channels);
+    bool res =  save(filename, m_channels);
+	if (!res)
+		emit log(QString("saving %1 failed."));
+	return res;
 }
 
 

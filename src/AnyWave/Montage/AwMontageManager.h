@@ -119,6 +119,9 @@ signals:
 	/** Signal sent every time a montage is saved or a data file is open. **/
 	void quickMontagesUpdated();
 	void badChannelsSet(const QStringList& labels);
+
+	// logging system
+	void log(const QString& message);
 public slots:
 	/** Affiche l'interface de montage. **/
 	void showInterface();

@@ -183,11 +183,11 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		auto dock = new QDockWidget(tr("Markers"), this);
 		m_dockWidgets["markers"] = dock;
 		dock->hide();
-		//dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+		dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 		auto w = AwMarkerManager::instance()->ui();
 		//w->setMinimumWidth(100);
-		//w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+		w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setWidget(w);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
 		resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
@@ -228,7 +228,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 		markerInspectorWidget->setPredefinedMarkers(AwSettings::getInstance()->loadPredefinedMarkers());
 		connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
 	}
-	
 	
 	m_display = NULL;
 	if (isGUIMode) {
