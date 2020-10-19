@@ -47,18 +47,21 @@ int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
 	return 0;
 }
 
-QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args) 
+void aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments) 
 {
 	QCommandLineParser parser;
 	AwCommandLogger logger(QString("Command Line"));
 	const QString origin = "aw::commandLine::doParsing";
-	QMap<int, AwArguments> res;
+	//QMap<int, AwArguments> res;
 	QStringList outputAcceptedFormats = { "vhdr", "edf", "matlab", "ades" };
 	AwException exception("Error while parsing arguments", "aw::commandLine::doParsing()");
 
 	parser.setApplicationDescription("AnyWave");
 	parser.addPositionalArgument("file", "The file to open.");
-
+	
+	// debug mode for python/matlab plugins
+	QCommandLineOption pluginDebugO("plugin_debug", "make AnyWave listen to a specific port to debug plugin socket requests", QString());
+	parser.addOption(pluginDebugO);
 	// Common flags for input/output
 	QCommandLineOption inputFileO("input_file", "specify the input file to open.", "input_file", QString());
 	QCommandLineOption inputDirO("input_dir", "specify the input directory", "input_dir", QString());
@@ -123,9 +126,9 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	parser.addOption(BIDSProcOpt);
 	parser.addOption(runProcessOpt);
 	// Dedicated data server mode for plugins
-	QCommandLineOption serverOpt("server", "start an instance of anywave and listen to client connections.");
-	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which to listen.", QString());
-	parser.addOption(serverOpt);
+	//QCommandLineOption serverOpt("server", "start an instance of anywave and listen to client connections.");
+	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which to listen.", "server_port", QString());
+	//parser.addOption(serverOpt);
 	parser.addOption(serverPortOpt);
 
 	// get extra arg from plugins
@@ -170,7 +173,51 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		throw exception;
 	}
 
-	AwArguments arguments;
+
+	///////////////// BIDS parsing is the priority. If --to_bids is specified then ignored all other options
+	if (parser.isSet(toBIDSOpt)) {
+		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
+			logger.sendLog("toBIDS: Missing subject,task or modality argument");
+			throw(exception);
+		}
+		// Session option is not required
+		QString modality = parser.value(BIDSModalityOpt);
+		QString subj = parser.value(BIDSSubjectOpt);
+		QString task = parser.value(BIDSTaskOpt);
+		QString session = parser.value(BIDSSessionOpt);
+		QString run = parser.value(BIDSRunOpt);
+		QString format = parser.value(BIDSFormatOpt);
+		QString output = parser.value(BIDSSidecarsOpt);
+		QString acq = parser.value(BIDSAcqOpt);
+		QString proc = parser.value(BIDSProcOpt);
+
+		if (subj.isEmpty() || task.isEmpty() || modality.isEmpty()) {
+			logger.sendLog("toBIDS: a required argument is missing (modality, subject, task)");
+			throw(exception);
+		}
+
+		// first argument must be the kind of file to convert (here SEEG)
+		arguments["bids_modality"] = modality;
+		// subject is mandatory and should be the second argument.
+		arguments["bids_subject"] = subj;
+		if (!task.isEmpty())
+			arguments["bids_task"] = task;
+		if (!session.isEmpty())
+			arguments["bids_session"] = session;
+		if (!run.isEmpty())
+			arguments["bids_run"] = run;
+		if (!format.isEmpty())
+			arguments["bids_format"] = format;
+		if (!output.isEmpty())
+			arguments["bids_output"] = output;
+		if (!acq.isEmpty())
+			arguments["bids_acq"] = acq;
+		if (!proc.isEmpty())
+			arguments["bids_proc"] = proc;
+
+		return;
+		//res[aw::commandLine::BIDS] = arguments;
+	}
 
 	//// add plugin options
 	for (auto k : mapParams.keys()) {
@@ -195,6 +242,7 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 		delete v;
 
 	//// parse common options
+	//arguments[cl::plugin_debug] = parser.isSet(MATPyListenO);
 
 	// output_format 
 	auto format = parser.value(outputFormatO).toLower();
@@ -273,7 +321,9 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	tmp = parser.value(outputFileO);
 	if (!tmp.isEmpty())
 		arguments[cl::output_file] = tmp;
-	   
+	tmp = parser.value(serverPortOpt);
+	if (!tmp.isEmpty())
+		arguments["server_port"] = tmp.toInt();
 	if (isFormatOption) {
 		if (!outputAcceptedFormats.contains(format)) {
 			logger.sendLog("specify a valid output_format option: (vhdr, edf, MATLAB, ADES)");
@@ -285,59 +335,21 @@ QMap<int, AwArguments> aw::commandLine::doParsing(const QStringList& args)
 	
 	if (parser.isSet(runProcessOpt)) {
 		arguments["run_process"] = parser.value(runProcessOpt);
-		res[aw::commandLine::RunProcess] = arguments;
+		//res[aw::commandLine::RunProcess] = arguments;
 	}
-	else if (parser.isSet(toBIDSOpt)) {
-		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
-			logger.sendLog("toBIDS: Missing subject,task or modality argument");
-			throw(exception);
-		}
-		// Session option is not required
-		QString modality = parser.value(BIDSModalityOpt);
-		QString subj = parser.value(BIDSSubjectOpt);
-		QString task = parser.value(BIDSTaskOpt);
-		QString session = parser.value(BIDSSessionOpt);
-		QString run = parser.value(BIDSRunOpt);
-		QString format = parser.value(BIDSFormatOpt);
-		QString output = parser.value(BIDSSidecarsOpt);
-		QString acq = parser.value(BIDSAcqOpt);
-		QString proc = parser.value(BIDSProcOpt);
+	
 
-		if (subj.isEmpty() || task.isEmpty() || modality.isEmpty()) {
-			logger.sendLog("toBIDS: a required argument is missing (modality, subject, task)");
-			throw(exception);
-		}
 
-		// first argument must be the kind of file to convert (here SEEG)
-		arguments["bids_modality"] = modality;
-		// subject is mandatory and should be the second argument.
-		arguments["bids_subject"] = subj;
-		if (!task.isEmpty())
-			arguments["bids_task"] = task;
-		if (!session.isEmpty())
-			arguments["bids_session"] = session;
-		if (!run.isEmpty())
-			arguments["bids_run"] = run;
-		if (!format.isEmpty())
-			arguments["bids_format"] = format;
-		if (!output.isEmpty())
-			arguments["bids_output"] = output;
-		if (!acq.isEmpty())
-			arguments["bids_acq"] = acq;
-		if (!proc.isEmpty())
-			arguments["bids_proc"] = proc;
-
-		res[aw::commandLine::BIDS] = arguments;
+	if (parser.isSet(pluginDebugO) && !parser.isSet(serverPortOpt)) {
+		logger.sendLog("plugin_debug option requires server_port option to be set.");
+		throw(exception);
 	}
-	else if (parser.isSet(serverOpt)) {
-		if (!parser.isSet(serverPortOpt) || !parser.isSet(inputFileO)) {
-			logger.sendLog("server: Missing server_port or input_file argument");
-			throw(exception);
-		}
-		arguments["server_port"] = parser.value(serverPortOpt).toInt();
-		res[aw::commandLine::DedicatedDataServerMode] = arguments;
-	}
-	return res;
+	if (parser.isSet(pluginDebugO))
+		arguments[cl::plugin_debug] = true;
+
+	auto positionals = parser.positionalArguments();
+	if (!positionals.isEmpty())
+		arguments["open_file"] = positionals.first();
 }
 
 

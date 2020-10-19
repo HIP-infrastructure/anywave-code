@@ -30,7 +30,7 @@
 namespace aw {
 	namespace commandLine {
 		enum Commands { BIDS, RunProcess, DedicatedDataServerMode };
-		QMap<int, AwArguments> doParsing(const QStringList& args);
+		void doParsing(const QStringList& args, AwArguments& arguments);
 		int doCommandLineOperations(QMap<int, AwArguments>& operations);
 	}
 }

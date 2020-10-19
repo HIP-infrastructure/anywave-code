@@ -61,7 +61,9 @@ namespace aws {
 	constexpr auto app_matlab_plugins_dir = "app_matlab_plugins_dir";
 	constexpr auto app_python_plugins_dir = "app_python_plugins_dir";
 	constexpr auto mex_dir = "mex_dir";
-
+	// plugins
+	constexpr auto plugin_debug_mode = "plugin_debug";
+	constexpr auto server_port = "server_port";
 	// general
 	constexpr auto gui_active = "gui_active";
 	constexpr auto matlab_present = "matlab_present";
@@ -72,8 +74,7 @@ namespace aws {
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";
-	//constexpr auto major_version = "major_version";
-	//constexpr auto minor_version = "minor_version";
+
 	constexpr auto update_url = "update_url";
 	constexpr auto ica_file = "ica_file";
 	constexpr auto last_captured_file = "last_captured_file";

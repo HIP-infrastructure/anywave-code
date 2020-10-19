@@ -77,8 +77,12 @@ namespace cl {
 	constexpr auto aw_path = "anywave_path";
 	constexpr auto skip_bad_channels = "skip_bad_channels";
 	constexpr auto create_montage = "create_montage";
+	// listen mode for plugin debugging
+	constexpr auto plugin_debug = "listen_mode";
+
 	// possible values for create_montage key
 	constexpr auto bipolar_ieeg = "bipolar_ieeg";
 	constexpr auto monopolar = "monopolar";
 	constexpr auto none = "none";
+
 }

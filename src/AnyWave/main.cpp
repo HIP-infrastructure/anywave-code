@@ -81,36 +81,32 @@ int main(int argc, char *argv[])
 	settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 
-//#ifdef _WIN32  // On Windows, add the subdir Plugins to the dll search path.
-//	QString appPath = QApplication::applicationDirPath() + "/Plugins";
-//	wchar_t *dllDir = new wchar_t[appPath.size() + 1];
-//	appPath.toWCharArray(dllDir);
-//	dllDir[appPath.size()] = '\0';
-//	for (int i = 0; i < appPath.size(); i++)	{
-//		if (dllDir[i] == '/') 
-//			dllDir[i] = '\\';
-//	}
-//	bool res = SetDllDirectory((LPCWSTR)dllDir);
-//#endif
-
 	// check if arguments 
 	QStringList args = app.arguments();
-	bool isGui = args.size() <= 2;
+	AwArguments arguments;
+	try {
+		aw::commandLine::doParsing(args, arguments);
+	}
+	catch (const AwException& e) {
+		exit(0);
+	}
+
 	bool openFile = args.size() == 2; // two arguments (first is the application path) means : AnyWave fileToOpen
 	
-	AnyWave window(isGui); // args not empty means something to do in command line mode => no gui mode on 
-	if (!isGui) {
-		QMap<int, AwArguments> arguments;
-		try {
-			arguments = aw::commandLine::doParsing(args);
-		}
-		catch (const AwException& e) {
-			exit(0);
-		}
-		int status = aw::commandLine::doCommandLineOperations(arguments);
-		if (status == 0)
-			exit(0);
-	}
+	AnyWave window(arguments); // args not empty means something to do in command line mode => no gui mode on 
+	//if (!isGui) {
+	//	QMap<int, AwArguments> arguments;
+	//	try {
+	//		arguments = aw::commandLine::doParsing(args);
+	//	}
+	//	catch (const AwException& e) {
+	//		exit(0);
+	//	}
+	//	int status = aw::commandLine::doCommandLineOperations(arguments);
+	//	if (status == 0)
+	//		exit(0);
+	//}
+
 
 	window.showMaximized();
 	if (openFile)

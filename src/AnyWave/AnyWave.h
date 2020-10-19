@@ -33,6 +33,7 @@
 #include <AwMarker.h>
 #include <filter/AwFilterSettings.h>
 #include "AwUpdater.h"
+#include "AwCommandLine.h"
 
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
@@ -62,7 +63,7 @@ class AnyWave : public QMainWindow, private Ui::AnyWaveClass
 
 public:
 	/** Constructeur **/
-	AnyWave(bool GUI = true, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	AnyWave(AwArguments& args, QWidget *parent = 0, Qt::WindowFlags flags = 0);
 
 	/** Destructeur **/
 	~AnyWave();

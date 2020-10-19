@@ -38,7 +38,7 @@
 #include <AwFileIO.h>
 
 
-AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
+AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(parent)
 {
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
@@ -46,7 +46,7 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 	m_ds = nullptr;
 	m_pidCounter = 0;
 
-	if (m_server->listen(QHostAddress::Any, 0)) {
+	if (m_server->listen(QHostAddress::Any, port)) {
 		m_serverPort = m_server->serverPort();
 		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 		AwDataServer::getInstance()->openConnection(this);
@@ -66,7 +66,7 @@ AwRequestServer::AwRequestServer(QObject *parent) : AwDataClient(parent)
 	}
 }
 
-AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwDataClient(parent)
+AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
 {
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
@@ -74,7 +74,7 @@ AwRequestServer::AwRequestServer(const QString& dataPath, QObject *parent) : AwD
 	m_ds = nullptr;
 	m_pidCounter = 0;
 
-	if (m_server->listen(QHostAddress::Any, 0)) {
+	if (m_server->listen(QHostAddress::Any, port)) {
 		m_serverPort = m_server->serverPort();
 		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(m_serverPort), this);
 		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);

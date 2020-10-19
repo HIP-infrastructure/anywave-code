@@ -67,7 +67,7 @@
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
-
+#include <AwKeys.h>
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -81,7 +81,7 @@
 #define AW_HELP_URL "https://meg.univ-amu.fr/wiki/AnyWave"
 
 
-AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
+AnyWave::AnyWave(AwArguments& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
@@ -89,15 +89,29 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 #endif
 	// Accept file drops
 	setAcceptDrops(true);
+	AwSettings* aws = AwSettings::getInstance();
+	aws->setParent(this);
 
+	bool listenMode = args.contains(cl::plugin_debug);
+	if (listenMode) {
+		quint16 server_port = static_cast<quint16>(args["server_port"].toInt());
+		auto server = AwMATPyServer::instance();
+		server->start(server_port);
+		if (server->isListening()) {
+			aws->setValue(aws::plugin_debug_mode, true);
+			aws->setValue(aws::server_port, server_port);
+		}
+		args.remove(cl::plugin_debug);
+		args.remove("server_port");
+	}
+
+	bool isGUIMode = args.size() <= 1;
 
 	m_debugLogWidget = NULL;
 	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
 	m_recentBIDSMenu = menuRecent_BIDS;
 
-	AwSettings *aws = AwSettings::getInstance();
-	aws->setParent(this);
 	aws->setValue(aws::gui_active, isGUIMode);
 	
 	//Save system path
@@ -118,13 +132,6 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	createUserDirs();
 	
 	if (isGUIMode) {
-		// create central widget to be a splitter
-		//auto widget = new QSplitter(this);
-		//widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		//QHBoxLayout* layout = new QHBoxLayout;
-		//layout->setContentsMargins(0, 0, 0, 0);
-		//layout->setSizeConstraint(QLayout::SetDefaultConstraint);
-		//widget->setLayout(layout);
 		setCentralWidget(new QSplitter(this));
 
 		QStringList recentFiles = aws->value(aws::recent_files).toStringList();
@@ -306,6 +313,9 @@ AnyWave::AnyWave(bool isGUIMode, QWidget *parent, Qt::WindowFlags flags) : QMain
 	m_lastDirOpen = "/";
 	readSettings();
 
+	auto file = args.value("open_file").toString();
+	if (!file.isEmpty())
+		openFile(file);
 }
 
 //
