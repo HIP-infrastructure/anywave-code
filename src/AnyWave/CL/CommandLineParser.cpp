@@ -25,33 +25,37 @@
 
 using namespace aw::commandLine;
 
-int aw::commandLine::doCommandLineOperations(QMap<int, AwArguments>& operations)
+int aw::commandLine::doCommandLineOperation(int op, AwArguments& args)
 {
-	if (operations.isEmpty())
-		return -1; // no operations to do.
-	for (auto op : operations.keys()) {
+//	if (operations.isEmpty())
+//		return -1; // no operations to do.
+//	for (auto op : operations.keys()) {
 		switch (op) {
 		case aw::commandLine::BIDS:
-			AwBIDSManager::instance()->toBIDS(operations[op]);
+			AwBIDSManager::instance()->toBIDS(args);
 			break;
 		case aw::commandLine::RunProcess:
-			AwCommandLineManager::runProcess(operations[op]);
+			AwCommandLineManager::runProcess(args);
 			break;
 		case aw::commandLine::DedicatedDataServerMode:
-			AwCommandLineManager::runDedicatedDataServer(operations[op]);
+			AwCommandLineManager::runDedicatedDataServer(args);
 			break;
+		default:
+			return 0;
 		}
-	}
-	// something happend.
+//	}
+	// something happened.
 	AwDebugLog::instance()->closeFile();
 	return 0;
 }
 
-void aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments) 
+int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 {
 	QCommandLineParser parser;
 	AwCommandLogger logger(QString("Command Line"));
 	const QString origin = "aw::commandLine::doParsing";
+	// default operation set to NoOperation
+	int res = aw::commandLine::NoOperation;
 	//QMap<int, AwArguments> res;
 	QStringList outputAcceptedFormats = { "vhdr", "edf", "matlab", "ades" };
 	AwException exception("Error while parsing arguments", "aw::commandLine::doParsing()");
@@ -214,9 +218,8 @@ void aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 			arguments["bids_acq"] = acq;
 		if (!proc.isEmpty())
 			arguments["bids_proc"] = proc;
-
-		return;
 		//res[aw::commandLine::BIDS] = arguments;
+		res = aw::commandLine::BIDS;  
 	}
 
 	//// add plugin options
@@ -333,13 +336,6 @@ void aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		arguments["output_writer"] = availableWriters[format];
 	}
 	
-	if (parser.isSet(runProcessOpt)) {
-		arguments["run_process"] = parser.value(runProcessOpt);
-		//res[aw::commandLine::RunProcess] = arguments;
-	}
-	
-
-
 	if (parser.isSet(pluginDebugO) && !parser.isSet(serverPortOpt)) {
 		logger.sendLog("plugin_debug option requires server_port option to be set.");
 		throw(exception);
@@ -350,6 +346,13 @@ void aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	auto positionals = parser.positionalArguments();
 	if (!positionals.isEmpty())
 		arguments["open_file"] = positionals.first();
+
+	if (parser.isSet(runProcessOpt) && res != aw::commandLine::BIDS) {
+		arguments["run_process"] = parser.value(runProcessOpt);
+		res = aw::commandLine::RunProcess;
+	}
+
+	return res;
 }
 
 

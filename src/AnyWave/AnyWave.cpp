@@ -68,6 +68,7 @@
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
 #include <AwKeys.h>
+#include "CL/CommandLineParser.h"
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -81,7 +82,7 @@
 #define AW_HELP_URL "https://meg.univ-amu.fr/wiki/AnyWave"
 
 
-AnyWave::AnyWave(AwArguments& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
+AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
@@ -91,21 +92,56 @@ AnyWave::AnyWave(AwArguments& args, QWidget *parent, Qt::WindowFlags flags) : QM
 	setAcceptDrops(true);
 	AwSettings* aws = AwSettings::getInstance();
 	aws->setParent(this);
+	
+	createUserDirs(); // must be called before any other manager class instances
 
-	bool listenMode = args.contains(cl::plugin_debug);
+	// searching for a Matlab and load the Matlab support module is necessary.
+	// Must be done before instanciating plugin manager
+	initMatlab();
+	// Plugins
+	AwPluginManager* plugin_manager = AwPluginManager::getInstance();
+	plugin_manager->setParent(this);
+	// Processes
+	AwProcessManager* process_manager = AwProcessManager::instance();
+	process_manager->setParent(this);
+	// Montage
+	AwMontageManager* montage_manager = AwMontageManager::instance();
+	montage_manager->setParent(this);
+   // marker
+	AwMarkerManager* marker_manager = AwMarkerManager::instance();
+	marker_manager->setParent(this);
+
+	AwArguments arguments;
+	int operation = aw::commandLine::NoOperation;
+	try {
+		operation = aw::commandLine::doParsing(args, arguments);
+	}
+	catch (const AwException& e) {
+		exit(0);
+	}
+
+	bool isGUIMode = operation == aw::commandLine::NoOperation;
+
+	bool listenMode = arguments.contains(cl::plugin_debug);
 	if (listenMode) {
-		quint16 server_port = static_cast<quint16>(args["server_port"].toInt());
+		quint16 server_port = static_cast<quint16>(arguments.value("server_port").toInt());
 		auto server = AwMATPyServer::instance();
 		server->start(server_port);
 		if (server->isListening()) {
 			aws->setValue(aws::plugin_debug_mode, true);
 			aws->setValue(aws::server_port, server_port);
 		}
-		args.remove(cl::plugin_debug);
-		args.remove("server_port");
+	}
+	if (!isGUIMode) {
+		int status = aw::commandLine::doCommandLineOperation(operation, arguments);
+		exit(status);
 	}
 
-	bool isGUIMode = args.size() <= 1;
+	//bool isGUIMode = args.size() <= 1;
+	//if (!isGUIMode) {
+	//	int status = aw::commandLine::doCommandLineOperations(args);
+	//	exit(status);
+	//}
 
 	m_debugLogWidget = NULL;
 	// copy menu pointers for recent files and BIDS sub menu.
@@ -129,7 +165,7 @@ AnyWave::AnyWave(AwArguments& args, QWidget *parent, Qt::WindowFlags flags) : QM
 	adl->connectComponent("AnyWave", this);
 	adl->connectComponent("Filters Settings", &aws->filterSettings());
 	adl->connectComponent("Global Settings", aws);
-	createUserDirs();
+	
 	
 	if (isGUIMode) {
 		setCentralWidget(new QSplitter(this));
@@ -149,19 +185,11 @@ AnyWave::AnyWave(AwArguments& args, QWidget *parent, Qt::WindowFlags flags) : QM
 	// init settings
     qsettings.setValue("general/secureMode", false);
 	qsettings.setValue("general/buildDate", QString(__DATE__));
-	// searching for a Matlab and MCR installed versions on the computer only in GUI Mode (the default)
-	initMatlab();
-	// Plugins
-	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
-	plugin_manager->setParent(this);
-	// Processes
-	AwProcessManager *process_manager = AwProcessManager::instance();
-	process_manager->setParent(this);
+
+
 	// As initializing ProcessManager, give it the Process Menu instance !
 	process_manager->setMenu(menuProcesses);
-	// Montage
-	AwMontageManager *montage_manager = AwMontageManager::instance();
-	montage_manager->setParent(this);
+
 	m_currentReader = NULL;
 	actionMontage->setEnabled(false);
 
@@ -215,19 +243,20 @@ AnyWave::AnyWave(AwArguments& args, QWidget *parent, Qt::WindowFlags flags) : QM
 		m_player = new AwVideoPlayer;
 		dock->setWidget(m_player);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
+
+		// Processes
+		auto dockProcess = new QDockWidget(tr("Processes"), this);
+		dockProcess->hide();
+		m_dockWidgets["processes"] = dockProcess;
+		addDockWidget(Qt::LeftDockWidgetArea, dockProcess);
+		dockProcess->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dockProcess->setWidget(AwProcessManager::instance()->processesWidget());
+		AwProcessManager::instance()->setDock(dockProcess);
+
+		/** Set the working dir for LayoutManager **/
+		AwLayoutManager::instance()->setWorkingDir(aws->value(aws::work_dir).toString());
 	}
 
-	// Processes
-	auto dockProcess = new QDockWidget(tr("Processes"), this);
-	dockProcess->hide();
-	m_dockWidgets["processes"] = dockProcess;
-	addDockWidget(Qt::LeftDockWidgetArea, dockProcess);
-	dockProcess->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	dockProcess->setWidget(AwProcessManager::instance()->processesWidget());
-	AwProcessManager::instance()->setDock(dockProcess);
-
-	AwMarkerManager *marker_manager = AwMarkerManager::instance();
-	marker_manager->setParent(this);
 	marker_manager->setDock(m_dockWidgets.value("markers"));
 	if (markerInspectorWidget) {
 		connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
@@ -313,7 +342,9 @@ AnyWave::AnyWave(AwArguments& args, QWidget *parent, Qt::WindowFlags flags) : QM
 	m_lastDirOpen = "/";
 	readSettings();
 
-	auto file = args.value("open_file").toString();
+	auto file = arguments.value("open_file").toString();
+	if (isGUIMode)
+		showMaximized();
 	if (!file.isEmpty())
 		openFile(file);
 }
@@ -507,9 +538,6 @@ void AnyWave::createUserDirs()
 	// convert workingDir to native filesystem syntax.
 	// Used by 'outside' plugins like MATLAB code.
 	workingDir = QDir::toNativeSeparators(workingDir);
-
-	/** Set the working dir for LayoutManager **/
-	AwLayoutManager::instance()->setWorkingDir(workingDir);
 
 	if (!checkAndCreateFolder(homeDir, "AnyWave")) {
 		AwMessageBox::information(this, tr("Documents Folder"), tr("Cannot create user AnyWave folder.\nSome feature may not work properly."));

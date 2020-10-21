@@ -379,7 +379,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		return -1;
 	}
 
-	QString ext = "edf";
+	QString ext = "vhdr";
 	auto outputDir = args["output_dir"].toString();
 
 	// default output dir if the directory where the file is located.
@@ -390,7 +390,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 
 	auto format = args["bids_format"].toString();
 	if (format.isEmpty()) {
-		ext = "edf"; // default output format
+		ext = "vhdr"; // default output format
 	}
 	else {
 		if (format.toLower() == "edf")

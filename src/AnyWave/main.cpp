@@ -83,33 +83,28 @@ int main(int argc, char *argv[])
 
 	// check if arguments 
 	QStringList args = app.arguments();
-	AwArguments arguments;
-	try {
-		aw::commandLine::doParsing(args, arguments);
-	}
-	catch (const AwException& e) {
-		exit(0);
-	}
+	//AwArguments arguments;
+	//int operation = aw::commandLine::NoOperation;
+	//try {
+	//	operation = aw::commandLine::doParsing(args, arguments);
+	//}
+	//catch (const AwException& e) {
+	//	exit(0);
+	//}
+	//bool isGui = operation == aw::commandLine::NoOperation;
 
-	bool openFile = args.size() == 2; // two arguments (first is the application path) means : AnyWave fileToOpen
+	//bool openFile = args.size() == 2; // two arguments (first is the application path) means : AnyWave fileToOpen
 	
-	AnyWave window(arguments); // args not empty means something to do in command line mode => no gui mode on 
+	AnyWave window(args); 
+
 	//if (!isGui) {
-	//	QMap<int, AwArguments> arguments;
-	//	try {
-	//		arguments = aw::commandLine::doParsing(args);
-	//	}
-	//	catch (const AwException& e) {
-	//		exit(0);
-	//	}
-	//	int status = aw::commandLine::doCommandLineOperations(arguments);
-	//	if (status == 0)
-	//		exit(0);
+	//	int status = aw::commandLine::doCommandLineOperation(operation, arguments);
+	//	exit(status);
 	//}
 
 
-	window.showMaximized();
-	if (openFile)
-		window.openFile(args.last());
+//	window.showMaximized();
+//	if (openFile)
+//		window.openFile(args.last());
 	return app.exec();
 }
