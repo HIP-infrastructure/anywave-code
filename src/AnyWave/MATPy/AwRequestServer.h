@@ -57,6 +57,7 @@ signals:
 	void beamformerAvailable(QString path);
 protected:
 	void handleRequest(int request, QTcpSocket *client, int pid);
+	void setDebugMode();
 
 	QTcpServer *m_server;
 	QMutex m_mutex;
@@ -65,6 +66,7 @@ protected:
 	quint16 m_serverPort;
 	AwDataSet *m_ds;
 	int m_pidCounter;
+	bool m_debugMode;
 
 private:
 	void handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process);

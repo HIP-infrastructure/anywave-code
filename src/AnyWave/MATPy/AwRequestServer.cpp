@@ -36,7 +36,7 @@
 #include "Plugin/AwPluginManager.h"
 #include "AwPidManager.h"
 #include <AwFileIO.h>
-
+#include "Prefs/AwSettings.h"
 
 AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(parent)
 {
@@ -110,8 +110,16 @@ AwRequestServer::~AwRequestServer()
 	// is there a decicated data server?
 }
 
+void AwRequestServer::setDebugMode()
+{
+	auto aws = AwSettings::getInstance();
+	m_debugMode = aws->value(aws::plugin_debug_mode).toBool();
+}
+
 void AwRequestServer::setHandlers()
 {
+
+
 	addHandler(this, &AwRequestServer::handleAddMarkers, AwRequest::AddMarkers);		
 	addHandler(this, &AwRequestServer::handleGetPluginInfo, AwRequest::GetPluginInfo);		
 	addHandler(this, &AwRequestServer::handleIsTerminated, AwRequest::IsTerminated);		
@@ -162,26 +170,26 @@ void AwRequestServer::dataReceived()
 		return;
 	}
 
-	emit log("dataReceived waiting for 8 bytes to be available");
+	//emit log("dataReceived waiting for 8 bytes to be available");
 	while (client->bytesAvailable() < sizeof(int) * 2)
 		client->waitForReadyRead();
-	emit log("dataReceived at least 8 bytes received.\nReading pid and data size");
+	//emit log("dataReceived at least 8 bytes received.\nReading pid and data size");
 
 	int pid, size;
 	
 	QDataStream stream(client);
 	stream.setVersion(QDataStream::Qt_4_4);
 	stream >> pid >> size;
-	emit log(QString("dataReceived got pid %1 and size is  %2 bytes").arg(pid).arg(size));
-	emit log(QString("dataReceived waiting for %1 bytes to be available").arg(size));
+	//emit log(QString("dataReceived got pid %1 and size is  %2 bytes").arg(pid).arg(size));
+	//emit log(QString("dataReceived waiting for %1 bytes to be available").arg(size));
 	while (client->bytesAvailable() < size)
 		client->waitForReadyRead();
 
-	emit log("dataReceived got all bytes. Reading request id...");
+	//emit log("dataReceived got all bytes. Reading request id...");
 
 	int request;
 	stream >> request;
-	emit log(QString("dataReceived request id is %1").arg(request));
+	//emit log(QString("dataReceived request id is %1").arg(request));
 	handleRequest(request, client, pid);
 
 
