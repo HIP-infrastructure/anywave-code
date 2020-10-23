@@ -61,6 +61,20 @@ class TCPRequest:
             raise Exception('Error while sending request to AnyWave')
             return False
         return True
+    def sendString(self, str):
+        if self.status is not STATUS_SUCCESS:
+           raise Exception('Sending request while not connected to AnyWave')
+           return False
+        self.streamSize.writeInt32(anywave.pid)
+        self.streamSize.writeInt32(int(len(str) + SIZE_INT))
+        self.streamSize.writeInt32(self.request)
+        self.streamData.writeQString(str)
+        self.socket.write(self.size)
+        self.socket.write(self.data)
+        if not self.socket.waitForBytesWritten():
+            raise Exception('Error while sending request to AnyWave')
+            return False
+        return True
 
     def sendData(self, data):
         # data must be a bytes, not a json string
