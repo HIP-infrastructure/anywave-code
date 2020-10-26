@@ -45,7 +45,7 @@ public:
 	inline bool launchedUsingQST() { return timeSelection.duration() > 0.; }
 	bool isEmpty();
 	inline AwFileIO *reader() { return m_reader; }
-	void setReader(AwFileIO *reader) { m_reader = reader; }
+	void setReader(AwFileIO* reader);
 	void clearChannels();
 	void clearMarkers();
 	void clearWidgets();

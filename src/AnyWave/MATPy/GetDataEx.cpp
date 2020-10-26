@@ -47,15 +47,15 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	QDataStream fromClient(client);
 	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
-	QString jsonString;
+	//QString jsonString;
 
 	AwFileIO* reader = process->pdi.input.reader();
-	if (reader == nullptr) {
-		emit log("ERROR: null reader pointer. Nothing done.");
-		toClient << (qint64)-1 << QString("Error in AnyWave");
-		response.send();
-		return;
-	}
+	//if (reader == nullptr) {
+	//	emit log("ERROR: null reader pointer. Nothing done.");
+	//	toClient << (qint64)-1 << QString("Error in AnyWave");
+	//	response.send();
+	//	return;
+	//}
 
 	QString json;
 	fromClient >> json;
@@ -70,7 +70,16 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	float start = 0., duration = fileDuration;
 	AwFileIO *localReader = nullptr;
 	requestedChannels = process->pdi.input.channels();
-	if (json.isEmpty()) { // no args set 
+	if (json.isEmpty()) { // no args set
+
+		// make sure we are working on a open file :
+		if (reader == nullptr) {
+			emit log("ERROR: null reader pointer. Nothing done.");
+			toClient << QString("AnyWave has no file open.");
+			response.send(-1);
+			return;
+		}
+
 		// get input channels of process
 		if (requestedChannels.isEmpty())
 			requestedChannels = reader->infos.channels();
@@ -82,8 +91,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		auto cfg = AwUtilities::json::mapFromJsonString(json, error);
 		if (cfg.isEmpty()) {
 			emit log(QString("ERROR: %1").arg(error));
-			toClient << (qint64)-1 << error;
-			response.send();
+			toClient << error;
+			response.send(-1);
 			return;
 		}
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
@@ -97,8 +106,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			file = cfg.value("data_file").toString();
 			localReader = AwPluginManager::getInstance()->getReaderToOpenFile(file);
 			if (localReader == nullptr) {
-				toClient << (qint64)-1 << QString("file: %1 could not be open.").arg(file);
-				response.send();
+				toClient << QString("file: %1 could not be open.").arg(file);
+				response.send(-1);
 				return;
 			}
 			else {

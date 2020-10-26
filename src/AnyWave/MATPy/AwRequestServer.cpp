@@ -160,7 +160,7 @@ void AwRequestServer::handleNewConnection()
 void AwRequestServer::dataReceived()
 {
 //	emit log("dataReceived called before mutex");
-//	QMutexLocker lock(&m_mutex);
+	QMutexLocker lock(&m_mutex);
 //	emit log("dataReceived called after mutex");
 
 	// who is sending data?
@@ -191,28 +191,6 @@ void AwRequestServer::dataReceived()
 	stream >> request;
 	//emit log(QString("dataReceived request id is %1").arg(request));
 	handleRequest(request, client, pid);
-
-
-	//QMutexLocker lock(&m_mutex);
-
-	//// who is sending data?
-	//QTcpSocket* client = qobject_cast<QTcpSocket*>(sender());
-
-	//while (client->bytesAvailable() < sizeof(int) * 2)
-	//	client->waitForReadyRead();
-
-	//int pid, size;
-	//QDataStream stream(client);
-	//stream.setVersion(QDataStream::Qt_4_4);
-	//stream >> pid >> size;
-	//while (client->bytesAvailable() < size)
-	//	client->waitForReadyRead();
-
-	//int request;
-	//stream >> request;
-	//// handling requests
-	//emit log("Request received");
-	//handleRequest(request, client, pid);
 }
 
 void AwRequestServer::clientDisconnected()
@@ -238,7 +216,9 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	emit log(tr("Received request ") + QString::number(request));
 	AwScriptProcess *p = nullptr;
 	// get the matchin process if pid is valid
-	if (pid >= 0) {
+	if (m_debugMode && pid < 0)
+		p = newDebugProcess();
+	else if (pid >= 0) {
 		p = AwPidManager::instance()->process(pid);
 		if (!p) {
 			// write a bad status
@@ -251,9 +231,25 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 			return;
 		}
 	}
+	if (p == nullptr) {
+		emit log("Received request but process is null. Skipped.");
+		return;
+	}
 	
 	// WARNING: p can be nullptr if the pid was negative. 
 	// a nullptr p means that we are running in dedicated data server mode : AnyWave was launched by a Python/MATLAB plugin with a specified file.
 	auto h = m_handlers.value(request);
 	h(client, p);
+}
+
+AwScriptProcess* AwRequestServer::newDebugProcess()
+{
+	auto aws = AwSettings::getInstance();
+	auto p = new AwScriptProcess;
+	AwPidManager::instance()->createNewPid(p);
+	// init input for process using AwSettings
+	p->pdi.input.setReader(aws->currentReader());
+	p->pdi.input.addChannels(aws->currentReader()->infos.channels(), true);
+	m_processes << p;
+	return p;
 }
