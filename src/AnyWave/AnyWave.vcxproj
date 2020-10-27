@@ -45,6 +45,7 @@
     <ClCompile Include="CL\DedicatedDataServer.cpp" />
     <ClCompile Include="Data\AwDataChunk.cpp" />
     <ClCompile Include="Data\AwDataConnection.cpp" />
+    <ClCompile Include="Data\AwDataManager.cpp" />
     <ClCompile Include="Data\AwDataServer.cpp" />
     <ClCompile Include="Data\AwDataSet.cpp" />
     <ClCompile Include="Data\AwMemoryMapper.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="Data\AwDataChunk.h" />
     <QtMoc Include="Data\AwDataSet.h">
     </QtMoc>
+    <QtMoc Include="Data\AwDataManager.h" />
     <ClInclude Include="Data\AwMemoryMapper.h" />
     <QtMoc Include="Display\AwVideoManager.h">
     </QtMoc>

@@ -27,6 +27,7 @@
 #include "Display/AwVideoManager.h"
 #include <widget/AwVideoPlayer.h>
 #include <AwFileInfo.h>
+#include "Data/AwDataManager.h"
 //
 // Menu File->Open
 // 
@@ -171,36 +172,41 @@ void AnyWave::openFile(const QString &path)
 		QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
 		return;
 	}
+	auto dataManager = AwDataManager::instance();
+	dataManager->openFile(newReader, filePath);
 
-	// if successfully open : check for special plugin which are designed to open a folder and not a file directly.
-	QString fullDataFilePath;
-	if (m_currentReader->plugin()->flags() & Aw::AwIOFlags::IsDirectory) // the plugin must provide the real full path to data file.
-		fullDataFilePath = m_currentReader->realFilePath();
-	if (fullDataFilePath.isEmpty()) // if not or if we have a classic plugin, get the file path.
-		if (!m_currentReader->fullPath().isEmpty()) // the plugin did not provide the full path, so override it with the path set in the dialog box.
-			fullDataFilePath = m_currentReader->fullPath();
-		else {
-			m_currentReader->setFullPath(filePath);
-			fullDataFilePath = filePath;
-		}
+	//// if successfully open : check for special plugin which are designed to open a folder and not a file directly.
+	//QString fullDataFilePath;
+	//if (m_currentReader->plugin()->flags() & Aw::AwIOFlags::IsDirectory) // the plugin must provide the real full path to data file.
+	//	fullDataFilePath = m_currentReader->realFilePath();
+	//if (fullDataFilePath.isEmpty()) // if not or if we have a classic plugin, get the file path.
+	//	if (!m_currentReader->fullPath().isEmpty()) // the plugin did not provide the full path, so override it with the path set in the dialog box.
+	//		fullDataFilePath = m_currentReader->fullPath();
+	//	else {
+	//		m_currentReader->setFullPath(filePath);
+	//		fullDataFilePath = filePath;
+	//	}
 
 	// set global settings with new current reader
-	aws->setReader(m_currentReader, fullDataFilePath);
-	m_currentReader->setFullPath(fullDataFilePath);
+//	aws->setReader(m_currentReader, fullDataFilePath);
+//	m_currentReader->setFullPath(fullDataFilePath);
 
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
 	m_saveFileName.clear();
 
-	m_openFileName = fullDataFilePath;
-	QFileInfo fi(m_openFileName);
-	m_lastDirOpen = fi.absolutePath();
+//	m_openFileName = fullDataFilePath;
+	auto fileName = dataManager->value(data_mgr::data_path).toString();
+//	QFileInfo fi(fileName);
+//	m_lastDirOpen = fi.absolutePath();
+
+	m_lastDirOpen = dataManager->value(data_mgr::data_dir).toString();
 
 	// Update Window title
-	QString title = QString("AnyWave - ") + fullDataFilePath + QString(tr(" - %2 channels. ").arg(m_currentReader->infos.channelsCount()));
-	title += tr("Duration: ") + AwUtilities::time::timeToString(m_currentReader->infos.totalDuration());
+	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(newReader->infos.channelsCount()));
+	title += tr("Duration: ") + AwUtilities::time::timeToString(newReader->infos.totalDuration());
 	this->setWindowTitle(title);
 
-	data_server->setMainReader(m_currentReader);
+//	data_server->setMainReader(m_currentReader);
 	actionMontage->setEnabled(true);
 	actionSave->setEnabled(true);
 	actionSave_as->setEnabled(true);
@@ -211,7 +217,7 @@ void AnyWave::openFile(const QString &path)
 	actionVisualiseEpoch->setEnabled(true);
 
 	AwProcessManager::instance()->enableMenus();
-	AwProcessManager::instance()->setCurrentReader(m_currentReader);
+//	AwProcessManager::instance()->setCurrentReader(m_currentReader);
 
 	// instantiate DisplaySetupManager object
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
@@ -224,12 +230,12 @@ void AnyWave::openFile(const QString &path)
 		AwBIDSManager::instance()->newFile(m_currentReader);
 	}
 
-	// read flt file before loading the montage.
-	if (!AwSettings::getInstance()->filterSettings().initWithFile(m_openFileName)) {
-		// try to init from the reader channels if the loading of .flt file failed.
-		AwSettings::getInstance()->filterSettings().initWithChannels(m_currentReader->infos.channels());
-	}
-	AwMontageManager::instance()->newMontage(m_currentReader);
+	//// read flt file before loading the montage.
+	//if (!AwSettings::getInstance()->filterSettings().initWithFile(m_openFileName)) {
+	//	// try to init from the reader channels if the loading of .flt file failed.
+	//	AwSettings::getInstance()->filterSettings().initWithChannels(m_currentReader->infos.channels());
+	//}
+	//AwMontageManager::instance()->newMontage(m_currentReader);
 
 	// Activer les QWidgets des toolbars.
 	for (auto widget : m_toolBarWidgets)
@@ -239,7 +245,7 @@ void AnyWave::openFile(const QString &path)
 	for (auto action : m_actions)
 		action->setEnabled(true);
 
-	if (!m_currentReader->triggerChannels().isEmpty()) {
+	if (!newReader->triggerChannels().isEmpty()) {
 		if (aws->value(aws::auto_trigger_parsing).toBool()) {
 			AwTriggerParsingDialog dlg;
 			if (dlg.exec() == QDialog::Accepted)
@@ -251,15 +257,15 @@ void AnyWave::openFile(const QString &path)
 	}
 
 	// LAST step => update Display Manager with new file.
-	m_display->newFile(m_currentReader);
+//	m_display->newFile(m_currentReader);
 
-	// Are there events?
-	if (m_currentReader->infos.blocks().at(0)->markersCount()) {
-		AwMarkerManager::instance()->addMarkers(m_currentReader->infos.blocks().at(0)->markers());
-	}
-	AwMarkerManager::instance()->setFilename(m_openFileName);
+	//// Are there events?
+	//if (m_currentReader->infos.blocks().at(0)->markersCount()) {
+	//	AwMarkerManager::instance()->addMarkers(m_currentReader->infos.blocks().at(0)->markers());
+	//}
+	//AwMarkerManager::instance()->setFilename(m_openFileName);
 	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
-	AwAmplitudeManager::instance()->setFilename(m_openFileName);
+	AwAmplitudeManager::instance()->setFilename(fileName);
 
 	if (openWithDialog)
 		aws->addRecentFilePath(filePath);

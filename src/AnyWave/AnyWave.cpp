@@ -69,6 +69,7 @@
 #include "Widgets/AwVideoSettingsDial.h"
 #include <AwKeys.h>
 #include "CL/CommandLineParser.h"
+#include "Data/AwDataManager.h"
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -136,13 +137,6 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		int status = aw::commandLine::doCommandLineOperation(operation, arguments);
 		exit(status);
 	}
-
-	//bool isGUIMode = args.size() <= 1;
-	//if (!isGUIMode) {
-	//	int status = aw::commandLine::doCommandLineOperations(args);
-	//	exit(status);
-	//}
-
 	m_debugLogWidget = NULL;
 	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
@@ -265,7 +259,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
 	}
 	
-	m_display = NULL;
+	m_display = nullptr;
 	if (isGUIMode) {
 		m_display = new AwDisplay(this);
 		m_display->setParent(this);
@@ -275,6 +269,9 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		connect(m_player, &AwVideoPlayer::changeSyncSettings, this, &AnyWave::editVideoSyncSettings);
 		connect(m_display, &AwDisplay::draggedCursorPositionChanged, m_player, &AwVideoPlayer::setPositionFromSignals);
 	}
+
+	// Data Manager
+	AwDataManager::instance()->setParent(this);
 
 	// AwSourceManager
 	AwSourceManager::instance()->setParent(this);

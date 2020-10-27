@@ -62,6 +62,7 @@ public:
 	void requestData(AwChannelList *channels, AwMarker *marker, bool rowData = false, bool doNotWakeUpClient = false);
 	void requestData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
 	void requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
+	AwChannelList selectChannels(int source, const QStringList& labels = QStringList(), bool skipBad = true);
 	void setConnected(bool flag = true) { m_isConnected = flag; }
 	inline bool isConnected() { return m_isConnected;  }
 	QWaitCondition& waitForData() { return m_wcDataAvailable; }

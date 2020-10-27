@@ -121,319 +121,195 @@
     <ClCompile Include="Data\AwDataConnection.cpp">
       <Filter>Data</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Data\AwDataServer.cpp">
       <Filter>Data</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Debug\AwDebugLog.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Debug\AwDebugLogWidget.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwChannelSelectionDial.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwChannelSelectionModel.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwDisplay.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwDisplaySetup.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwDisplaySetupManager.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwDSMSaveSetupUI.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwNewViewDial.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwSaveAsNewSetupDialog.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwScene.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwSignalView.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
       <Filter>Filter</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="IO\HDF5\structs.cpp">
       <Filter>IO\HDF5</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwDockAddMarker.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerListModel.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerManager.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerManagerSettings.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerRule.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerRuleElement.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerRuleManageDial.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerRuleWidget.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkerTableView.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwNewMarkerRuleDial.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="MATPy\AwMATPyServer.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Montage\AwChannelListModel.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Montage\AwMontageDial.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Montage\AwMontageManager.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Montage\AwMontageTableView.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Plugin\AwPluginDial.cpp">
       <Filter>Plugin</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Plugin\AwPluginManager.cpp">
       <Filter>Plugin</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Prefs\AwPreferences.cpp">
       <Filter>Prefs</Filter>
     </ClCompile>
     <ClCompile Include="Prefs\AwPrefsDial.cpp">
       <Filter>Prefs</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Prefs\AwSettings.cpp">
       <Filter>Prefs</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwConverter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwMatlabScriptPlugin.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwProcessesWidget.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwProcessManager.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwProcessMarkerModel.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwProgressIndicator.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwPythonScriptPlugin.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwScriptPlugin.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwTriggerParser.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\TPUi.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwAboutAnyWave.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwCursorMarkerToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwDisplaySetupToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwDisplayToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwFilePropertiesDialog.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwFilePropertiesModel.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwFileToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwMappingToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwMarkersBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwMontageRefWidget.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwMontageToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwPleaseWaitWidget.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwTriggerParsingDialog.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AnyWave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwExportDial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Carto\AwMappingClient.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="ICA\AwICAManager.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="ICA\AwICAComponents.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
@@ -443,25 +319,15 @@
     <ClCompile Include="ICA\AwICASignalItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="ICA\AwICARejectButton.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="Process\AwProcessLogWindow.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwProcessWidget.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="MATPy\AwRequestServer.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
@@ -483,35 +349,21 @@
     <ClCompile Include="Display\AwViewSetup.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="ICA\AwMappingButton.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
     <ClCompile Include="Carto\AwDockMapping.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Carto\AwMappingWidget.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="ICA\AwICAPanel.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="ICA\AwPanelItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwCentralWidget.cpp">
       <Filter>Display</Filter>
     </ClCompile>
@@ -521,46 +373,30 @@
     <ClCompile Include="Marker\AwExtractTriggers.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwProcessLogManager.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwProcessLog.cpp">
       <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwPickChannelsDial.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="MATPy\GetScreenCapture.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwExporter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwExporterSettings.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwExportSelChannels.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwExporterSelMarkers.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwExporterMarkerModel.cpp">
       <Filter>Process</Filter>
     </ClCompile>
@@ -573,101 +409,63 @@
     <ClCompile Include="Source\AwSourceManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Source\AwSourceChannel.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="AwUpdater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="IO\HDF5\HDF5IO.cpp">
       <Filter>IO\HDF5</Filter>
     </ClCompile>
-    
     <ClCompile Include="IO\ADES\ADESIO.cpp">
       <Filter>IO\ADES</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwEpochManager.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="Epoch\AwEpochCreateUi.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
     <ClCompile Include="Epoch\AwEpochModel.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="Epoch\AwEpochVisuWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwEpochAverageWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwAverageDialog.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwAverageItemWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwAvgWorker.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
     <ClCompile Include="Epoch\AwAvgSignalItem.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="Epoch\AwEditStatsDialog.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwStatsModel.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwStatChartWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Marker\AwMarkersExportWidget.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwMarkerExporter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp">
       <Filter>IO\MATLAB</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="MATPy\GetTriggers.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
@@ -677,28 +475,18 @@
     <ClCompile Include="MATPy\GetData.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwTriggerWriter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwSelectTriggerChannelDialog.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwTriggerEraser.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
@@ -717,18 +505,12 @@
     <ClCompile Include="AwOpenFileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Epoch\AwEpochMosaicWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="IO\MEMIO\MEMIO.cpp">
       <Filter>IO\MEMIO</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Data\AwDataChunk.cpp">
       <Filter>Data</Filter>
     </ClCompile>
@@ -750,44 +532,30 @@
     <ClCompile Include="CL\AwCommandLineManager.cpp">
       <Filter>CL</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="Montage\AwECoGDialog.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Montage\AwECoGTableModel.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
     <ClCompile Include="Montage\AwECoGGrid.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Process\AwLogPlainTextEdit.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
     <ClCompile Include="Process\AwMATLABMarkersExporter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    
     <ClCompile Include="CL\AwRunProcess.cpp">
       <Filter>CL</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\AwGetMarkersEx.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Display\AwVideoManager.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
@@ -806,51 +574,33 @@
     <ClCompile Include="MATPy\AwPidManager.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Data\AwDataSet.cpp">
       <Filter>Data</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Batch\AwBatchDialog.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
     <ClCompile Include="Batch\AwBatchModel.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="Batch\AwAddEditBatchDialog.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    
     <ClCompile Include="Batch\AwBatchRunner.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="Batch\AwBatchFileInputWidget.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="Batch\AwBatchManager.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
     <ClCompile Include="Batch\AwBatchItem.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -866,10 +616,6 @@
     <ClCompile Include="Process\PSD\AwPSD.cpp">
       <Filter>Process\PSD</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="Process\PSD\AwPSDGUI.cpp">
       <Filter>Process\PSD</Filter>
     </ClCompile>
@@ -879,9 +625,9 @@
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
-    
-    
-    
+    <ClCompile Include="Data\AwDataManager.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1433,49 +1179,20 @@
     <QtRcc Include="..\..\resources\AnyWave.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
+    <QtMoc Include="Data\AwDataManager.h">
+      <Filter>Data</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    
-    
-    
-    
-    
-    
     <ClInclude Include="IO\HDF5\structs.h">
       <Filter>IO\HDF5</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
-    
     <ClInclude Include="Prefs\AwPreferences.h">
       <Filter>Prefs</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <ClInclude Include="ICA\AwICAChannel.h">
       <Filter>ICA</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
     <ClInclude Include="resource2.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -1485,35 +1202,21 @@
     <ClInclude Include="Marker\AwExtractTriggers.h">
       <Filter>Marker</Filter>
     </ClInclude>
-    
-    
-    
-    
     <ClInclude Include="Process\AwExporterTypes.h">
       <Filter>Process</Filter>
     </ClInclude>
     <ClInclude Include="Source\AwSourceChannel.h">
       <Filter>Source</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
-    
-    
     <ClInclude Include="..\..\include\aw_armadillo.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    
-    
     <ClInclude Include="IO\BIDS\AwBIDSItem.h">
       <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="MATPy\AwTCPResponse.h">
       <Filter>MATPy</Filter>
     </ClInclude>
-    
     <ClInclude Include="Data\AwDataChunk.h">
       <Filter>Data</Filter>
     </ClInclude>
@@ -1532,23 +1235,15 @@
     <ClInclude Include="CL\CommandLineParser.h">
       <Filter>CL</Filter>
     </ClInclude>
-    
     <ClInclude Include="Montage\AwECoGGrid.h">
       <Filter>Montage</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
     <ClInclude Include="Batch\AwBatchItem.h">
       <Filter>Batch</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\..\include\AwKeys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\..\include\AwVersion.h">
       <Filter>Header Files</Filter>
     </ClInclude>

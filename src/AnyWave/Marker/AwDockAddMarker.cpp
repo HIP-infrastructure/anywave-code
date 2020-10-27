@@ -36,7 +36,7 @@ AwDockAddMarker::AwDockAddMarker(const QString& title, QWidget *parent, Qt::Wind
 	setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	setFloating(true);
 
-	m_inspector = new AwMarkerInspector(AwMarkerManager::instance()->getMarkers(), AwMontageManager::instance()->labels(), this);
+	m_inspector = new AwMarkerInspector(AwMarkerManager::instance()->getMarkers(), AwChannel::getLabels(AwMontageManager::instance()->channels()), this);
 	setWidget(m_inspector);
 }
 

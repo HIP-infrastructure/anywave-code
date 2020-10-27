@@ -110,6 +110,24 @@ struct AW_RW_EXPORT AwVideoSynch {
  * AwBlock | AwDataInfoReader | AwDataInfoWriter 
  */
 
+namespace data_info {
+	constexpr auto data_path = "data_path";
+	constexpr auto data_dir = "data_dir";
+	constexpr auto file_duration = "file_duration";
+	constexpr auto bad_labels = "bad_labels";
+	constexpr auto first_name = "first_name";
+	constexpr auto last_name = "last_name";
+	constexpr auto manufacturer = "manufacturer";
+	constexpr auto time = "time";
+	constexpr auto date = "date";
+	constexpr auto iso_date = "iso_date";
+	constexpr auto total_duration = "total_duration";
+	constexpr auto max_sr = "max_sr";
+	constexpr auto channels_count = "channels_count";
+	constexpr auto samples = "samples";
+}
+
+
 class AW_RW_EXPORT AwDataInfo
 {
 public: 
@@ -123,16 +141,16 @@ public:
 	/** Returns the number of channels present in the file. **/
 	inline qint32 channelsCount() { return m_channels.size(); }	
 	/** Gets the patient's name. It could be an empty string. **/
-	inline QString& firstName() { return m_firstName; }
-	inline QString& lastName() { return m_lastName; }
+	inline QString firstName() { return m_settings.value(data_info::first_name).toString(); }
+	inline QString lastName() { return m_settings.value(data_info::last_name).toString(); }
 	/** Gets the recording date. It could be an empty string. **/
-	inline QString& recordingDate() { return m_date; }
+	inline QString recordingDate() { return m_settings.value(data_info::date).toString(); }
 	/** Gets the recording time. It could be an empty string. **/
-	inline QString& recordingTime() { return m_time; }
+	inline QString recordingTime() { return m_settings.value(data_info::time).toString(); }
 	/** Get the date and time in ISO format **/
-	inline QString& isoDate() { return m_isoDate; }
+	inline QString isoDate() { return m_settings.value(data_info::iso_date).toString(); }
 	/** Get the name of the manufacturer. It could be an empty string. **/
-	inline QString& manufacturer() { return m_manufacturer; }
+	inline QString manufacturer() { return m_settings.value(data_info::manufacturer).toString(); }
 
 	/** Adds a new block and returns the pointer to the newly created object. **/
 	AwBlock *newBlock();
@@ -151,14 +169,14 @@ public:
 	///** Sets the full path to data file. **/
 	//inline void setFileName(const QString& name) { m_fileName = name; }
 	/** Sets the manufacturer name. **/
-	inline void setManufacturer(const QString& man) { m_manufacturer = man; }
+	inline void setManufacturer(const QString& man) { m_settings[data_info::manufacturer] = man; }
 	/** Sets the recording time. **/
-	inline void setTime(const QString& time) { m_time = time; }
+	inline void setTime(const QString& time) { m_settings[data_info::time] = time; }
 	/** Sets the recording date. **/
-	inline void setDate(const QString& date) { m_date = date; }
+	inline void setDate(const QString& date) { m_settings[data_info::date] = date; }
 	/** Sets the patient's name. **/
-	void setFirstName(const QString& firstName) { m_firstName = firstName; }
-	void setLastName(const QString& lastName) { m_lastName = lastName; }
+	void setFirstName(const QString& firstName) { m_settings[data_info::first_name] = firstName; }
+	void setLastName(const QString& lastName) { m_settings[data_info::last_name] = lastName; }
 	inline void setChannels(const AwChannelList& channels) { m_channels = channels; }
 	virtual void clear();
 
@@ -172,18 +190,19 @@ public:
 	This will do nothing if the channel does not exist. **/
 	void changeChannelName(const QString& oldName, const QString& newName);
 	/** set the date and time in ISO format **/
-	void setISODate(const QString& dateTime) { m_isoDate = dateTime; }
+	void setISODate(const QString& dateTime) { m_settings[data_info::iso_date] = dateTime; }
 	/** get the structure for video synchronization **/
 	inline AwVideoSynch& videoSynch() { return m_videoSynch; }
+	inline QVariantMap& settings() { return m_settings; }
 protected:
+	QVariantMap m_settings;
 	AwBlockList m_blocks;
 	AwChannelList m_channels;
-	QString m_firstName, m_lastName;
-	QString m_date;	 // recording date
-	QString m_time;	 // recording time
-	QString m_isoDate;	// new iso date/time string (must be set by the plugin).
-	QString m_manufacturer;
-	//QString m_fileName;	
+//	QString m_firstName, m_lastName;
+//	QString m_date;	 // recording date
+//	QString m_time;	 // recording time
+//	QString m_isoDate;	// new iso date/time string (must be set by the plugin).
+//	QString m_manufacturer;
 	quint32 m_channelsCount;
 	// Hash table to store index of channels and their name.
 	QHash<QString, int> m_labelToIndex;

@@ -41,6 +41,12 @@ AwFileIO::FileStatus AwFileIO::openFile(const QString &path)
 		m_sideFiles[".bad"] = getSideFile(".bad");
 	if (!m_sideFiles.contains(".mtg"))
 		m_sideFiles[".mtg"] = getSideFile(".mtg");
+	infos.settings()[data_info::total_duration] = infos.totalDuration();
+	float sr = 0. ;
+	for (auto c : infos.channels())
+		sr = std::max(c->samplingRate(), sr);
+	infos.settings()[data_info::max_sr] = sr;
+	infos.settings()[data_info::samples] = infos.totalSamples();
 	return AwFileIO::NoError;
 }
 
@@ -117,10 +123,12 @@ void AwBlock::clear()
 // constructor
 AwDataInfo::AwDataInfo()
 {
-	m_firstName = m_lastName = QObject::tr("Unknown");
-	m_manufacturer = QObject::tr("Unknown");
-	m_date = QObject::tr("Not Available");
-	m_time = QObject::tr("Not Available");
+	m_settings[data_info::manufacturer] = QString("n/a");
+	m_settings[data_info::first_name] = QString("n/a");
+	m_settings[data_info::last_name] = QString("n/a");
+	m_settings[data_info::date] = QString("n/a");
+	m_settings[data_info::time] = QString("n/a");
+	m_settings[data_info::iso_date] = QString("n/a");
 	m_channelsCount = 0;
 }
 
@@ -169,6 +177,7 @@ void AwDataInfo::clear()
 	m_channels.clear();
 	m_channelsCount = 0;
 	m_labelToIndex.clear();
+	m_settings.clear();
 }
 
 ///

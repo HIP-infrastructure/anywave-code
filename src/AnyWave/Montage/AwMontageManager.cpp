@@ -45,6 +45,7 @@
 #include <AwFileInfo.h>
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
+#include "Data/AwDataManager.h"
 // statics init and definitions
 AwMontageManager *AwMontageManager::m_instance = 0;
 
@@ -325,62 +326,62 @@ void AwMontageManager::scanForPrebuiltMontages()
 	emit quickMontagesUpdated();
 }
 
-AwChannelList AwMontageManager::channelsWithLabels(const QStringList& labels)
-{
-	AwChannelList channels;
-	foreach (QString label, labels) 
-		channels += channelsWithLabel(label);
+//AwChannelList AwMontageManager::channelsWithLabels(const QStringList& labels)
+//{
+//	AwChannelList channels;
+//	foreach (QString label, labels) 
+//		channels += channelsWithLabel(label);
+//
+//	return channels;
+//}
 
-	return channels;
-}
+//AwChannelList AwMontageManager::channelsWithLabel(const QString& label)
+//{
+//	AwChannelList list;
+//
+//	for (auto c : m_channels) {
+//		if (c->name() == label) {
+//			if (c->isICA()) {
+//				for (auto ica_chan : m_icaAsRecorded) {
+//					if (ica_chan->name() == label) {
+//						list << new AwICAChannel(ica_chan);
+//						break;
+//					}
+//				}
+//			}
+//			else if (c->isVirtual()) {
+//				AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
+//				list << new AwVirtualChannel(vc);
+//			}
+//			else
+//				list << new AwChannel(c);
+//		}
+//	}
+//	return list;
+//}
 
-AwChannelList AwMontageManager::channelsWithLabel(const QString& label)
-{
-	AwChannelList list;
-
-	for (auto c : m_channels) {
-		if (c->name() == label) {
-			if (c->isICA()) {
-				for (auto ica_chan : m_icaAsRecorded) {
-					if (ica_chan->name() == label) {
-						list << new AwICAChannel(ica_chan);
-						break;
-					}
-				}
-			}
-			else if (c->isVirtual()) {
-				AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
-				list << new AwVirtualChannel(vc);
-			}
-			else
-				list << new AwChannel(c);
-		}
-	}
-	return list;
-}
-
-QStringList AwMontageManager::labels()
-{
-	QStringList list;
-	for (auto c : m_channels)
-		if (!list.contains(c->name()))
-			list << c->name();
-	return list;
-}
+//QStringList AwMontageManager::labels()
+//{
+//	QStringList list;
+//	for (auto c : m_channels)
+//		if (!list.contains(c->name()))
+//			list << c->name();
+//	return list;
+//}
 
 //
 // containsChannelOfType(t)
 //
 // Retourne le premier canal de type t present dans la liste des canaux AsRecorded.
 // Retourne NULL si aucun canal trouvé.
-bool AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
-{
-	auto channels = m_asRecorded.values();
-	for (auto c : channels)
-		if (c->type() == t)
-			return true;
-	return false;
-}
+//bool AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
+//{
+//	auto channels = m_asRecorded.values();
+//	for (auto c : channels)
+//		if (c->type() == t)
+//			return true;
+//	return false;
+//}
 
 /// Remove Bad Channels
 /// Remove channel marked as bad in the list.
@@ -408,7 +409,7 @@ void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
 {
 	settings.apply(m_channels);
 	settings.apply(m_asRecorded.values());
-	settings.apply(AwSettings::getInstance()->currentReader()->infos.channels());
+	settings.apply(AwDataManager::instance()->reader()->infos.channels());
 }
 
 void AwMontageManager::quit()
@@ -1037,5 +1038,6 @@ void AwMontageManager::buildNewMontageFromChannels(const AwChannelList& channels
 			delete m_channels.takeFirst();
 		m_channels = newMontage;
 		emit montageChanged(m_channels);
+		save(m_montagePath);
 	}
 }

@@ -28,9 +28,6 @@
 
 #include <QObject>
 #include <QSystemTrayIcon>
-//#include <QTranslator>
-//#include <AwMarker.h>
-//#include <AwFileInfo.h>
 
 class AwFileInfo;
 class AwFileIO;
@@ -113,9 +110,9 @@ public:
 #endif
 	void closeFile();
 
-	inline AwFileIO *currentReader() { return m_currentReader; }
+//	inline AwFileIO *currentReader() { return m_currentReader; }
 
-	void setReader(AwFileIO *reader, const QString& path);
+//	void setReader(AwFileIO *reader, const QString& path);
 
 	inline AwFileInfo *fileInfo() { return m_fileInfo; }
 	inline AwDisplaySetup *displaySetup() { return m_setup; }

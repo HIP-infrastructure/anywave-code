@@ -24,8 +24,9 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMappingClient.h"
-#include "Prefs/AwSettings.h"
+#include "Data/AwDataManager.h"
 #include "Data/AwDataServer.h"
+#include "Prefs/AwSettings.h"
 #include <AwFileIO.h>
 #include <math.h>
 #include <armadillo>
@@ -36,7 +37,7 @@ AwMappingClient::AwMappingClient(int type)
 	m_isAConnectionActive = false;
 
 	// get current reader and extract channels matching type
-	AwFileIO *reader = AwSettings::getInstance()->currentReader();
+	AwFileIO *reader = AwDataManager::instance()->reader();
 	for (auto c : reader->infos.channels()) {
 		if (c->type() == type)	{
 			m_channels << new AwChannel(c);

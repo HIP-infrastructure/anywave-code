@@ -55,7 +55,7 @@
 #include <QScreen>
 #endif
 
-AwDisplay *AwDisplay::m_instance = NULL;
+AwDisplay *AwDisplay::m_instance = nullptr;
 
 AwDisplay *AwDisplay::instance()
 {
@@ -81,8 +81,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
 	connect(AwMarkerManager::instance(), SIGNAL(goTo(float)), this, SLOT(showPositionInViews(float)));
 	connect(AwICAManager::instance(), SIGNAL(icaComponentsUnloaded()), this, SLOT(removeICAChannels()));
-//	m_splitterWidget = new AwCentralWidget(0);
-//	w->setCentralWidget(m_splitterWidget);
+
 	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	// create views from setup
 	foreach (AwViewSetup *vs, setup->viewSetups())

@@ -60,13 +60,13 @@ public:
 	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
 	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
 	QHash<QString, AwChannel *> cloneAsRecordedChannels();
-	bool containsChannelOfType(AwChannel::ChannelType t); 
+//	bool containsChannelOfType(AwChannel::ChannelType t); 
 	/** Get channels from current montage that matches the label. **/
-	AwChannelList channelsWithLabel(const QString& label);
+//	AwChannelList channelsWithLabel(const QString& label);
 	/** Get channels from current montage that matches all the labels in labels **/
-	AwChannelList channelsWithLabels(const QStringList& labels);
+//	AwChannelList channelsWithLabels(const QStringList& labels);
 	/** Get the labels of current channels in montage **/
-	QStringList labels();
+//	QStringList labels();
 
 	/** Get instance pointer **/
 	static AwMontageManager *instance();
