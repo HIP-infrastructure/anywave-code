@@ -35,31 +35,16 @@
 AwFileIO::FileStatus AwFileIO::openFile(const QString &path)
 {
 	m_fullPath = path;  
-	if (!m_sideFiles.contains(".mrk"))
-		m_sideFiles[".mrk"] = getSideFile(".mrk");
-	if (!m_sideFiles.contains(".bad"))
-		m_sideFiles[".bad"] = getSideFile(".bad");
-	if (!m_sideFiles.contains(".mtg"))
-		m_sideFiles[".mtg"] = getSideFile(".mtg");
-	infos.settings()[data_info::total_duration] = infos.totalDuration();
-	float sr = 0. ;
-	for (auto c : infos.channels())
-		sr = std::max(c->samplingRate(), sr);
-	infos.settings()[data_info::max_sr] = sr;
-	infos.settings()[data_info::samples] = infos.totalSamples();
+	//auto duration = infos.totalDuration();
+	//infos.m_settings.insert(data_info::total_duration, QVariant(duration));
+	//float sr = 0. ;
+	//for (auto c : infos.channels())
+	//	sr = std::max(c->samplingRate(), sr);
+	//infos.m_settings[data_info::max_sr] = QVariant::fromValue(sr);
+	//infos.m_settings[data_info::samples] = infos.totalSamples();
 	return AwFileIO::NoError;
 }
 
-QString AwFileIO::getSideFile(const QString& extension)
-{
-	// check in map FIRST !
-	if (m_sideFiles.contains(extension))
-		return m_sideFiles.value(extension);
-
-	QString tmp = QString("%1%2").arg(m_fullPath).arg(extension);
-	m_sideFiles[extension] = tmp;
-	return tmp;
-}
 
 // AwBlock
 // constructor

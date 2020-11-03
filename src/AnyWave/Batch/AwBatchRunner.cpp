@@ -4,13 +4,12 @@
 #include "Montage/AwMontageManager.h"
 #include "Plugin/AwPluginManager.h"
 #include <utils/json.h>
-#include <AwFileInfo.h>
 #include "CL/AwCommandLineManager.h"
 #include <QFile>
 #include <AwException.h>
 #include <AwCore.h>
 #include "Data/AwDataServer.h"
-
+#include "Data/AwDataManager.h"
 #include <AwKeys.h>
 
 AwBatchRunnerPlugin::AwBatchRunnerPlugin()
@@ -39,7 +38,7 @@ void AwBatchRunner::init()
 	 
 }
 
-AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QString& pluginName)
+AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantMap& dict, const QString& pluginName)
 {
 	auto pm = AwPluginManager::getInstance();
 	auto plugin = pm->getProcessPluginByName(pluginName);
@@ -51,13 +50,13 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
-	if (!doNotRequiresData && !dict.contains(cl::input_file)) {
+	if (!doNotRequiresData && !dict.contains(keys::input_file)) {
 		throw AwException(QString("error: input_dir not specified."));
 		return process;
 	}
 	process->pdi.input.setArguments(dict);
-	if (dict.contains(cl::input_file)) {
-		auto file = dict.value(cl::input_file).toString();
+	if (dict.contains(keys::input_file)) {
+		auto file = dict.value(keys::input_file).toString();
 		auto reader = pm->getReaderToOpenFile(file);
 		if (reader == nullptr) {
 			throw AwException(QString("plugin: %1 file: %2 no reader plugin found.").arg(pluginName).arg(file));
@@ -68,21 +67,21 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 			throw AwException(QString("plugin: %1 file: %2 reader could not open the file.").arg(pluginName).arg(file));
 			return process;
 		}
-		AwFileInfo fi(reader, file);
-		process->pdi.input.settings[processio::data_dir] = fi.dirPath();
-		process->pdi.input.settings[processio::file_duration] = reader->infos.totalDuration();
-		process->pdi.input.settings[processio::data_path] = file;
+		auto dm = AwDataManager::instance();
+		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
+		process->pdi.input.settings[keys::data_path] = file;
 		process->pdi.input.setReader(reader);
 		// add extras settings based on input file
-		auto badFile = reader->getSideFile(".bad");
+		auto badFile = reader->infos.badFile();
 		if (QFile::exists(badFile)) {
 			dict["bad_file"] = badFile;
-			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::loadBad(badFile);
+			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::loadBad(badFile);
 		}
 		else
 			dict.remove("bad_file");
 		// montage step : if a montage file if set, use is a input for the process
-		auto mtgFile = reader->getSideFile(".mtg");
+		auto mtgFile = reader->infos.mtgFile();
 		if (QFile::exists(mtgFile))
 			dict["montage_file"] = mtgFile;
 		else
@@ -90,7 +89,7 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 		AwChannelList montage;
 		if (dict.contains("montage_file")) {
 			montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), dict.value("montage_file").toString(),
-				process->pdi.input.settings[processio::bad_labels].toStringList());
+				process->pdi.input.settings[keys::bad_labels].toStringList());
 			if (montage.isEmpty()) {
 				sendMessage(QString("error: %1 file could not be applied.").arg(mtgFile));
 				montage = AwChannel::duplicateChannels(reader->infos.channels());
@@ -105,7 +104,7 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 			AW_DESTROY_LIST(montage);
 		}
 		AW_DESTROY_LIST(montage);
-		auto mrkFile = reader->getSideFile(".mrk");
+		auto mrkFile = reader->infos.mrkFile();
 		if (!dict.contains("marker_file"))
 			if (QFile::exists(mrkFile))
 				dict["marker_file"] = mrkFile;
@@ -123,7 +122,7 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 		bool useMarkers = !usedLabels.isEmpty();
 		if (skipMarkers || useMarkers) {
 			auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels,
-				process->pdi.input.settings[processio::file_duration].toDouble());
+				process->pdi.input.settings.value(keys::file_duration).toFloat());
 			if (!markers.isEmpty()) {
 				process->pdi.input.setNewMarkers(markers);
 			}
@@ -131,7 +130,7 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantHash& dict, const QSt
 		// check if we have input markers after all
 		 // if no markers set as input => add the GLOBAL ONE
 		if (process->pdi.input.markers().isEmpty())
-			process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.settings[processio::file_duration].toDouble()));
+			process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.settings.value(keys::file_duration).toFloat()));
 		AwCommandLineManager::applyFilters(process->pdi.input.channels(), dict);
 	}
 	return process;

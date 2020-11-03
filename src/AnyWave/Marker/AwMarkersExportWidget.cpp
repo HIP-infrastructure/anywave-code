@@ -4,7 +4,7 @@
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
 #include <AwFileIO.h>
-#include <AwFileInfo.h>
+#include "Data/AwDataManager.h"
 
 AwMarkersExportWidget::AwMarkersExportWidget(const AwMarkerList& selection, const AwMarkerList& markers, QWidget *parent)
 	: QDialog(parent)
@@ -17,7 +17,7 @@ AwMarkersExportWidget::AwMarkersExportWidget(const AwMarkerList& selection, cons
 	else
 		m_ui.radioAll->setChecked(true);
 
-	m_ui.lineEditFile->setText(QString("%1/%2").arg(AwSettings::getInstance()->fileInfo()->dirPath()).arg("Export"));
+	m_ui.lineEditFile->setText(QString("%1/%2").arg(AwDataManager::instance()->dataDir()).arg("Export"));
 
 	connect(m_ui.buttonSelectFile, &QPushButton::clicked, this, &AwMarkersExportWidget::selectFile);
 }
@@ -30,7 +30,7 @@ AwMarkersExportWidget::~AwMarkersExportWidget()
 void AwMarkersExportWidget::selectFile()
 {
 	QString filter = m_ui.radioMATLAB->isChecked() ? "*.mat" : "*.ades";
-	QString file = QFileDialog::getSaveFileName(this, "Export to file", AwSettings::getInstance()->fileInfo()->dirPath(), filter);
+	QString file = QFileDialog::getSaveFileName(this, "Export to file", AwDataManager::instance()->dataDir(), filter);
 	if (file.isEmpty())
 		return;
 	m_ui.lineEditFile->setText(file);
@@ -104,7 +104,7 @@ void AwMarkersExportWidget::accept()
 	if (m_ui.radioCurrentMontage->isChecked())
 		m_channels = AwChannel::duplicateChannels(AwMontageManager::instance()->channels());
 	else
-		m_channels = AwChannel::duplicateChannels(AwSettings::getInstance()->currentReader()->infos.channels());
+		m_channels = AwChannel::duplicateChannels(AwDataManager::instance()->rawChannels());
 
 	if (m_ui.radioRawData->isChecked()) {
 		for (auto c : m_channels) {

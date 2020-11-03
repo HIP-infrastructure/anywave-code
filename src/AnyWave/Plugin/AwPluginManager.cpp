@@ -110,14 +110,14 @@ void AwPluginManager::processJsonFiles()
 		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
 			QString error;
 			// parsing  args.json if exists to get inputs keys
-			auto hash = AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_batch).toString(), error);
-			if (!hash.contains("inputs")) {
+			auto map = AwUtilities::json::mapFromJsonString(p->settings().value(keys::json_batch).toString(), error);
+			if (!map.contains("inputs")) {
 				// no inputs key in batch.json or no batch.json => considering input to be input_file : "file" (AnyWave default)
-				QVariantHash inputs;
-				inputs.insert(cl::input_file, QString("file"));
-				hash.insert("inputs", inputs);
+				QVariantMap inputs;
+				inputs.insert(keys::input_file, QString("file"));
+				map.insert("inputs", inputs);
 			}
-			p->addBatchHash(hash);
+			p->addBatchMap(map);
 		}
 	}
 }
@@ -341,7 +341,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
 			 if (QFile::exists(jsonArgs))
-				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
+				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
@@ -360,7 +360,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 setFlagsForScriptPlugin(plugin, flags);
 			 setInputFlagsForScriptPlugin(plugin, inputFlags);
 			 if (QFile::exists(jsonArgs))
-				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
+				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 	 }
@@ -785,8 +785,8 @@ QStringList AwPluginManager::getBatchableArguments()
 	for (auto p : m_processes) {
 		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
 			auto settings = p->settings();
-			if (settings.contains(processio::json_batch)) 
-				res << settings.value(processio::json_batch).toString();
+			if (settings.contains(keys::json_batch)) 
+				res << settings.value(keys::json_batch).toString();
 		}
 	}
 	return res;

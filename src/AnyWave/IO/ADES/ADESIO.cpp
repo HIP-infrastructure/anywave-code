@@ -37,7 +37,7 @@ ADESIOPlugin::ADESIOPlugin() : AwFileIOPlugin()
 	description = QString(tr("Open .ades files"));
 	version = QString("1.0");
 	fileExtensions << "*.ades";
-	m_flags = Aw::HasExtension|Aw::CanRead|Aw::CanWrite;
+	m_flags = FileIO::HasExtension| FileIO::CanRead| FileIO::CanWrite;
 	fileExtension = ".ades";
 }
 
@@ -274,7 +274,7 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		}
 	}
 
-	m_sideFiles[".mrk"] = markerPath;
+	infos.setMrkFile(markerPath);
 	return AwFileIO::openFile(path);
 }
 

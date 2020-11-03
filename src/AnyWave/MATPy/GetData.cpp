@@ -35,7 +35,7 @@
 #include <filter/AwFiltering.h>
 #include "AwTCPResponse.h"
 #include "Prefs/AwSettings.h"
-
+#include "Data/AwDataManager.h"
 
 void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *process)
 {
@@ -90,7 +90,7 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 
 	// Dedicated Data Server if process is nullptr
 	if (process == nullptr)
-		reader = AwSettings::getInstance()->currentReader();
+		reader = AwDataManager::instance()->reader();
 
 	bool usingLabels = !labels.isEmpty();
 	bool usingTypes = !types.isEmpty();
@@ -198,7 +198,7 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 	if (filtersFlag == 1) // apply defined filters
 		filterSettings.apply(requestedChannels);
 	else if (filtersFlag == 0) // apply anywave filters
-		AwSettings::getInstance()->filterSettings().apply(requestedChannels);
+		AwDataManager::instance()->filterSettings().apply(requestedChannels);
 	else if (filtersFlag == 2) {
 		AwChannel::clearFilters(requestedChannels);
 		raw = true;

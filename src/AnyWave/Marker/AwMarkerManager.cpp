@@ -34,15 +34,14 @@
 #include "Plugin/AwPluginManager.h"
 #include "Widgets/AwPleaseWaitWidget.h"
 #include <QMessageBox>
-#include "Prefs/AwSettings.h"
+//#include "Prefs/AwSettings.h"
 #include "Widgets/AwDockMarker.h"
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
-#include <AwFileInfo.h>
 #include "Debug/AwDebugLog.h"
-
+#include "Data/AwDataManager.h"
 
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;
@@ -159,8 +158,7 @@ void AwMarkerManager::loadMarkers()
 		import = true;
 
 	// Set the root directory to be the current data file directory
-	QFileInfo fi(AwSettings::getInstance()->fileInfo()->filePath());
-	QString filename = QFileDialog::getOpenFileName(0, tr("Load Markers"), fi.absolutePath(), "Markers (*.mrk)");
+	QString filename = QFileDialog::getOpenFileName(0, tr("Load Markers"), AwDataManager::instance()->dataDir(), "Markers (*.mrk)");
 
 	if (filename.isEmpty())
 		return;

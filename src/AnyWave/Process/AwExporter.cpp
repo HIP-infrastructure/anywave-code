@@ -180,7 +180,7 @@ void AwExporter::run()
 bool AwExporter::showUi()
 {
 	AwExporterSettings ui;
-	ui.initialPath = QString("%1/NewFile").arg(pdi.input.settings[processio::data_dir].toString());
+	ui.initialPath = QString("%1/NewFile").arg(pdi.input.settings.value(keys::data_dir).toString());
 	QHash<QString, AwFileIOPlugin *> writers;
 	for (auto p : pdi.input.writers) {
 		writers.insert(p->name, p);
@@ -225,7 +225,7 @@ bool AwExporter::showUi()
 			if (QFile::exists(destFile))
 				QFile::remove(destFile);
 			// copy the ICA.Mat fileto be used with the exported file.
-			QFile::copy(pdi.input.settings[processio::ica_file].toString(), destFile);
+			QFile::copy(pdi.input.settings.value(keys::ica_file).toString(), destFile);
 		}
 		else if (!ui.selectedICA.isEmpty()) // only a subset of ICA channels are selected for export
 			m_ICAChannels = ui.selectedICA;
@@ -237,10 +237,10 @@ bool AwExporter::showUi()
 		if (!ui.skippedMarkers.isEmpty() || !ui.usedMarkers.isEmpty()) {
 			m_outputMarkers = AwMarker::duplicate(pdi.input.markers());
 			m_inputMarkers = AwMarker::getInputMarkers(m_outputMarkers, ui.skippedMarkers, ui.usedMarkers, 
-				pdi.input.settings[processio::file_duration].toDouble());
+				pdi.input.settings.value(keys::file_duration).toFloat());
 		}
 		else {
-			m_inputMarkers << new AwMarker("whole data", 0., pdi.input.settings[processio::file_duration].toDouble());
+			m_inputMarkers << new AwMarker("whole data", 0., pdi.input.settings.value(keys::file_duration).toFloat());
 			m_outputMarkers = AwMarker::duplicate(pdi.input.markers());
 		}
 

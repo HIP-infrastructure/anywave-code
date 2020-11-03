@@ -250,6 +250,7 @@
     </QtMoc>
     <QtMoc Include="Batch\AwBatchGUI.h">
     </QtMoc>
+    <ClInclude Include="..\..\include\keys\data.h" />
     <ClInclude Include="Batch\AwBatchItem.h" />
     <ClInclude Include="CL\AwCommandLineManager.h" />
     <QtMoc Include="CL\AwCommandLogger.h">

@@ -45,8 +45,8 @@
 #include "AwProcessLogManager.h"
 #include "Debug/AwDebugLog.h"
 #include "IO/BIDS/AwBIDSManager.h"
-#include <AwFileInfo.h>
 #include <AwKeys.h>
+#include "Data/AwDataManager.h"
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -59,12 +59,12 @@ AwProcessManager *AwProcessManager::instance()
 AwProcessManager::AwProcessManager(QObject *parent)
 	: QObject(parent)
 {
-	m_processMenu = NULL;
-	m_fileMenu = NULL;
-	m_viewMenu = NULL;
+	m_processMenu = nullptr;
+	m_fileMenu = nullptr;
+	m_viewMenu = nullptr;
+	m_dock = nullptr;
 	setObjectName("AwProcessManager");
 	m_processesWidget = new AwProcessesWidget();
-	m_dock = NULL;
 	auto plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 }
@@ -356,8 +356,9 @@ void AwProcessManager::addProcess(AwProcessPlugin *plugin)
  */
 AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 {
+	auto dm = AwDataManager::instance();
 	auto aws = AwSettings::getInstance();
-	
+
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
 	auto workingDir = aws->value(aws::work_dir).toString();
@@ -368,29 +369,29 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 		QDir dir(workingDir);
 		if (!dir.exists()) {
 			if (dir.mkdir(plugin->name))
-				process->pdi.input.settings[processio::working_dir] = workingDir + plugin->name;
+				process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
 		}
 		else
-			process->pdi.input.settings[processio::working_dir] = workingDir + plugin->name;
+			process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	auto fi = aws->fileInfo();
 	auto args = process->pdi.input.args();
-	args[cl::aw_path] = QCoreApplication::applicationFilePath();
-	args[processio::working_dir] = process->pdi.input.settings.value(processio::working_dir);
+	args[keys::aw_path] = QCoreApplication::applicationFilePath();
+	args[keys::working_dir] = process->pdi.input.settings.value(keys::working_dir);
 	// if fi == NULL that means no file are currently open by AnyWave.
-	if (fi) {
+	if (dm->isFileOpen()) {
 		// prepare input settings only if a file is currently open.
-		process->pdi.input.setReader(fi->currentReader());
-		process->pdi.input.settings[processio::data_dir] = fi->dirPath();
-		process->pdi.input.settings[processio::data_path] = QString("%1/%2").arg(fi->dirPath()).arg(fi->fileName());
-		process->pdi.input.filterSettings = aws->filterSettings();
-		process->pdi.input.settings[processio::file_duration] = fi->currentReader()->infos.totalDuration();
+		process->pdi.input.setReader(dm->reader());
+		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
+		process->pdi.input.filterSettings = dm->filterSettings();
+		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
 		// copy all this to args to make them accessible from MATLAB/Python
 		auto args = process->pdi.input.args();
-		args[processio::data_dir] = fi->dirPath();
-		args[processio::data_path] = QString("%1/%2").arg(fi->dirPath()).arg(fi->fileName());
-		args[processio::file_duration] = fi->currentReader()->infos.totalDuration();
+//		args[keys::data_dir] = dm->dataDir();
+//		args[keys::data_path] = dm->dataFilePath();
+//		args[keys::file_duration] = dm->totalDuration();
+		args.unite(dm->settings());
 		
 	}
 	return process;
@@ -458,7 +459,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	 process->pdi.input.timeSelection.setStart(pos);
 	 process->pdi.input.timeSelection.setEnd(end);
-	 process->pdi.input.settings[processio::current_pos_in_file] = pos;
+	 process->pdi.input.settings[keys::current_pos_in_file] = pos;
 
 	 // add an input flag to avoid buildForPDI to consider channels selected by the user and also to skip later call to buildPDI in initProcessIO
 	 process->pdi.setInputFlags(process->pdi.inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
@@ -488,7 +489,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	bool selection = !selectedChannels.isEmpty();
 	int inputF = p->pdi.inputFlags();
 
-	p->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->value(aws::ica_file).toString();
+	p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
 
 	bool requireSelection = inputF & Aw::ProcessInput::ProcessRequiresChannelSelection;
 	bool ignoreSelection = inputF & Aw::ProcessInput::ProcessIgnoresChannelSelection; 
@@ -507,7 +508,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		for (auto plugin : AwPluginManager::getInstance()->processes())
 			//p->pdi.input.processPluginNames.append(plugin->name);
 			list << plugin->name;
-		p->pdi.input.settings[processio::plugin_names] = list;
+		p->pdi.input.settings[keys::plugin_names] = list;
 	}
 	// if input markers are already set (by other features, like Launch Process from Markers GUI..
 	// then set an input flag to warn the plugin about that.
@@ -583,7 +584,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	p->pdi.input.addChannels(res, true);
 	// make sure current filters are set for the channels.
-	AwSettings::getInstance()->filterSettings().apply(p->pdi.input.channels());
+	AwDataManager::instance()->filterSettings().apply(p->pdi.input.channels());
 	return true;
 }
 
@@ -593,7 +594,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	  AwProcessLogManager *plm = AwProcessLogManager::instance();
 	  plm->setParent(this);
 	  plm->connectProcess(process);
-	  bool isFileOpen = AwSettings::getInstance()->currentReader() != nullptr;
+	  bool isFileOpen = AwDataManager::instance()->isFileOpen();
 
 	  bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	  if (skipDataFile)
@@ -602,6 +603,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		  AwMessageBox::critical(nullptr, "Process Input",
 			  "This process requires an open file.");
 		  delete process;
+		  return;
 	  }
 	  if (process->plugin()->flags() & Aw::ProcessFlags::ProcessHasInputUi) {
 		  if (!process->showUi()) {
@@ -671,6 +673,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
  */
 void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& args)
 {
+	auto dm = AwDataManager::instance();
 	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	if (skipDataFile)
 		process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
@@ -687,27 +690,27 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 	if (initProcessIO(process)) {
 		if (!skipDataFile) {
-			process->pdi.input.settings[processio::data_path] = AwSettings::getInstance()->fileInfo()->filePath();
+			process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
 			// make it also an argument for MATLAB/Python plugins
-			process->pdi.input.addArgument(processio::data_path, AwSettings::getInstance()->fileInfo()->filePath());
-			process->pdi.input.settings[processio::data_dir] = AwSettings::getInstance()->fileInfo()->dirPath();
-			process->pdi.input.addArgument(processio::data_dir, AwSettings::getInstance()->fileInfo()->dirPath());
+			process->pdi.input.addArgument(keys::data_path, dm->dataFilePath());
+			process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+			process->pdi.input.addArgument(keys::data_dir, dm->dataDir());
 			// add  application path to arguments
-			process->pdi.input.addArgument(cl::aw_path, QCoreApplication::applicationFilePath());
-			process->pdi.input.setReader(m_currentReader);
-			process->pdi.input.settings[processio::file_duration] = m_currentReader->infos.totalDuration();
-			process->pdi.input.addArgument(processio::file_duration, m_currentReader->infos.totalDuration());
-			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::instance()->badLabels();
-			process->pdi.input.addArgument(processio::bad_labels, AwMontageManager::instance()->badLabels());
+			process->pdi.input.addArgument(keys::aw_path, QCoreApplication::applicationFilePath());
+			process->pdi.input.setReader(dm->reader());
+			process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
+			process->pdi.input.addArgument(keys::file_duration, dm->totalDuration());
+			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
+			process->pdi.input.addArgument(keys::bad_labels, AwMontageManager::instance()->badLabels());
 			// verify that plugin which accepts time selection get at least the whole selection as input
 			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
 				if (process->pdi.input.markers().isEmpty())
-					process->pdi.input.addMarker(new AwMarker("global", 0, process->pdi.input.settings[processio::file_duration].toDouble()));
+					process->pdi.input.addMarker(new AwMarker("global", 0, dm->totalDuration()));
 			if (AwBIDSManager::isInstantiated()) {
 				auto BM = AwBIDSManager::instance();
 				if (BM->isBIDSActive()) {
-					process->pdi.input.addArgument(processio::bids_file_path, BM->getCurrentBIDSPath());
-					process->pdi.input.addArgument(processio::bids_root_dir, BM->rootDir());
+					process->pdi.input.addArgument(keys::bids_file_path, BM->getCurrentBIDSPath());
+					process->pdi.input.addArgument(keys::bids_root_dir, BM->rootDir());
 				}
 
 			}

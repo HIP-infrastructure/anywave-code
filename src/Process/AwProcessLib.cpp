@@ -177,14 +177,14 @@ void AwProcessPlugin::addLanguageTranslation(const QString& resourceFile)
 
 bool AwProcessPlugin::hasDeclaredArgs()
 {
-	return m_batchHash.contains("parameters");
+	return m_batchMap.contains("parameters");
 }
 
 bool AwProcessPlugin::isBatchGUICompatible()
 {
-	auto defaults = m_batchHash.value(cl::batch_defaults).toHash();
-	auto ui = m_batchHash.value(cl::batch_ui).toHash();
-	auto inputs = m_batchHash.value(cl::batch_inputs).toHash();
+	auto defaults = m_batchMap.value(keys::batch_defaults).toHash();
+	auto ui = m_batchMap.value(keys::batch_ui).toHash();
+	auto inputs = m_batchMap.value(keys::batch_inputs).toHash();
 
 	bool ok = !defaults.isEmpty() && !ui.isEmpty() && !inputs.isEmpty();
 

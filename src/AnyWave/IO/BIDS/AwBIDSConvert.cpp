@@ -263,7 +263,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		emit log(QString("found %1 values. done.").arg(extractT._markers.size()));
 	}
 	// merge markers from .mrk file and those found/detected  in the data file.
-	auto markerFile = reader->getSideFile(".mrk");
+	auto markerFile = reader->infos.mrkFile();
 	if (QFile::exists(markerFile)) {
 		emit log(QString("found %1 file, merging the markers...").arg(markerFile));
 		auto mrkMarkers = AwMarker::load(markerFile);
@@ -278,7 +278,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	AW_DESTROY_LIST(markers);
 
 	// check for bad file
-	auto badFile = reader->getSideFile(".bad");
+	auto badFile = reader->infos.badFile();
 	if (QFile::exists(badFile)) {
 		auto badLabels = AwMontage::loadBadChannels(badFile);
 		if (!badLabels.isEmpty()) {
@@ -460,7 +460,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
 	events_tsv = QString("%1_events.tsv").arg(events_tsv);
 
-	auto markerFile = reader->getSideFile(".mrk");
+	auto markerFile = reader->infos.mrkFile();
 	auto markers = AwMarker::duplicate(reader->infos.blocks().first()->markers());
 	if (QFile::exists(markerFile)) {
 		auto temp = AwMarker::load(markerFile);
@@ -499,7 +499,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	AW_DESTROY_LIST(markers);
 	
 	// check for bad file
-	auto badFile = reader->getSideFile(".bad");
+	auto badFile = reader->infos.badFile();
 	if (QFile::exists(badFile)) {
 		auto badLabels = AwMontage::loadBadChannels(badFile);
 		if (!badLabels.isEmpty()) {

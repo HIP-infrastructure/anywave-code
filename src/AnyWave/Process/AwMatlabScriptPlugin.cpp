@@ -96,7 +96,7 @@ void AwMatlabScriptProcess::run()
 		//env.insert("DYLD_FALLBACK_LIBRARY_PATH", fallBack);
 		//env.insert("DYLD_FALLBACK_FRAMEWORK_PATH", fallBack);
 #endif
-		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::hashToJsonString(pdi.input.args()).simplified();
+		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::toJsonString(pdi.input.args()).simplified();
 		//pdi.input.args().value("json_args").toString().simplified();
 		QProcess plugin(this);
 		
@@ -113,7 +113,7 @@ void AwMatlabScriptProcess::run()
 		if (aws->value(aws::matlab_present).toBool()) {
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
             QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-			mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::hashToJsonString(pdi.input.args()).simplified());
+			mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.args()).simplified());
 		}
 	}
 }

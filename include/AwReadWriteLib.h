@@ -113,8 +113,6 @@ struct AW_RW_EXPORT AwVideoSynch {
 namespace data_info {
 	constexpr auto data_path = "data_path";
 	constexpr auto data_dir = "data_dir";
-	constexpr auto file_duration = "file_duration";
-	constexpr auto bad_labels = "bad_labels";
 	constexpr auto first_name = "first_name";
 	constexpr auto last_name = "last_name";
 	constexpr auto manufacturer = "manufacturer";
@@ -125,11 +123,15 @@ namespace data_info {
 	constexpr auto max_sr = "max_sr";
 	constexpr auto channels_count = "channels_count";
 	constexpr auto samples = "samples";
+	constexpr auto marker_file = "marker_file";
+	constexpr auto bad_file = "bad_file";
+	constexpr auto montage_file = "montage_file";
 }
 
 
 class AW_RW_EXPORT AwDataInfo
 {
+	friend class AwFileIO;
 public: 
 	AwDataInfo();
 	virtual ~AwDataInfo();
@@ -178,6 +180,15 @@ public:
 	void setFirstName(const QString& firstName) { m_settings[data_info::first_name] = firstName; }
 	void setLastName(const QString& lastName) { m_settings[data_info::last_name] = lastName; }
 	inline void setChannels(const AwChannelList& channels) { m_channels = channels; }
+
+	// sidecar files
+	void setMrkFile(const QString& file) { m_settings[data_info::marker_file] = file; }
+	void setBadFile(const QString& file) { m_settings[data_info::bad_file] = file; }
+	void setMtgFile(const QString& file) { m_settings[data_info::montage_file] = file; }
+	QString badFile() { return m_settings.value(data_info::bad_file).toString(); }
+	QString mtgFile() { return m_settings.value(data_info::montage_file).toString(); }
+	QString mrkFile() { return m_settings.value(data_info::marker_file).toString(); }
+
 	virtual void clear();
 
 	/** Returns the index of a channel in the file base on the channel's name.
@@ -195,14 +206,9 @@ public:
 	inline AwVideoSynch& videoSynch() { return m_videoSynch; }
 	inline QVariantMap& settings() { return m_settings; }
 protected:
-	QVariantMap m_settings;
+	QMap<QString, QVariant> m_settings;
 	AwBlockList m_blocks;
 	AwChannelList m_channels;
-//	QString m_firstName, m_lastName;
-//	QString m_date;	 // recording date
-//	QString m_time;	 // recording time
-//	QString m_isoDate;	// new iso date/time string (must be set by the plugin).
-//	QString m_manufacturer;
 	quint32 m_channelsCount;
 	// Hash table to store index of channels and their name.
 	QHash<QString, int> m_labelToIndex;

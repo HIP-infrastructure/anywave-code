@@ -48,9 +48,9 @@ void AwAddEditBatchDialog::setupParamsUi()
 	auto params = m_item->params();
 	auto batchSettings = m_item->pluginBatchSettings();
 	// get dicts for ui, defaults, inputs 
-	auto defaults = batchSettings.value(cl::batch_defaults).toHash();
-	auto ui = batchSettings.value(cl::batch_ui).toHash();
-	auto inputs = batchSettings.value(cl::batch_inputs).toHash();
+	auto defaults = batchSettings.value(keys::batch_defaults).toHash();
+	auto ui = batchSettings.value(keys::batch_ui).toHash();
+	auto inputs = batchSettings.value(keys::batch_inputs).toHash();
 
 	if (m_item->isLocked()) 
 		m_ui.groupInput->hide();
@@ -215,7 +215,7 @@ void AwAddEditBatchDialog::setFileProperty()
 void AwAddEditBatchDialog::fetchParams()
 {
 	auto batchSettings = m_item->pluginBatchSettings();
-	auto ui = batchSettings.value(cl::batch_ui).toHash();
+	auto ui = batchSettings.value(keys::batch_ui).toHash();
 	auto params = m_item->params();
 	for (auto k : ui.keys()) {
 		auto list = ui.value(k).toStringList();
@@ -259,8 +259,8 @@ void AwAddEditBatchDialog::setParams()
 {
 	// fill in widgets values based on args dictionnary
 	auto batchSettings = m_item->pluginBatchSettings();
-	auto ui = batchSettings.value(cl::batch_ui).toHash();
-	auto defaults = batchSettings.value(cl::batch_defaults).toHash();
+	auto ui = batchSettings.value(keys::batch_ui).toHash();
+	auto defaults = batchSettings.value(keys::batch_defaults).toHash();
 	auto params = m_item->params();
 	for (auto k : ui.keys()) {
 		auto list = ui.value(k).toStringList();
@@ -368,7 +368,7 @@ void AwAddEditBatchDialog::applyProfile()
 	auto file = QFileDialog::getOpenFileName(this, "Load Batch Profile", dir, "Profiles (*.json)");
 	if (file.isEmpty())
 		return;
-	m_item->setParams(AwUtilities::json::fromJsonFileToHash(file));
+	m_item->setParams(AwUtilities::json::fromJsonFileToMap(file));
 	setParams();
 }
 
@@ -379,5 +379,5 @@ void AwAddEditBatchDialog::saveProfile()
 	if (file.isEmpty())
 		return;
 	fetchParams();
-	AwUtilities::json::jsonStringToFile(AwUtilities::json::hashToJsonString(m_item->params()), file);
+	AwUtilities::json::jsonStringToFile(AwUtilities::json::toJsonString(m_item->params()), file);
 }

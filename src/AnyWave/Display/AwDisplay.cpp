@@ -49,7 +49,7 @@
 #include "AwCentralWidget.h"
 #include "Plugin/AwPluginManager.h"
 #include <QTextStream>
-#include <AwFileInfo.h>
+#include "Data/AwDataManager.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
@@ -234,10 +234,7 @@ void AwDisplay::saveChannelSelections()
 	if (selectedChannels.isEmpty())
 		return;
 	auto selectedLabels = AwChannel::getLabels(selectedChannels);
-	auto fi = AwSettings::getInstance()->fileInfo();
-	if (!fi)
-		return;
-	QString path = fi->filePath() + ".sel";
+	QString path = AwDataManager::instance()->selFilePath();
 	if (QFile::exists(path))
 		QFile::remove(path);
 
@@ -252,7 +249,7 @@ void AwDisplay::saveChannelSelections()
 
 void AwDisplay::loadChannelSelections()
 {
-	QString path = AwSettings::getInstance()->fileInfo()->filePath() + ".sel";
+	QString path = AwDataManager::instance()->selFilePath();
 	QFile file(path);
 	QStringList labels;
 	if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
@@ -354,10 +351,7 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 void AwDisplay::captureViews()
 {
 	auto aws = AwSettings::getInstance();
-	// first, clear the lastCaptureFile set in Settings
-//	aws->setSettings("lastCapturedFile", QString());
-
-	QString dir = aws->fileInfo()->dirPath();
+	QString dir = AwDataManager::instance()->dataDir();
 	int count = 1;
 	QString filename = QString("capture_%1.png").arg(count++);
 	QString file = QString("%1/%2").arg(dir).arg(filename);

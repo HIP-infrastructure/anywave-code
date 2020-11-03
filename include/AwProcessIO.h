@@ -74,7 +74,7 @@ public:
 	QVariantList customData;
 
 	AwFilterSettings filterSettings;
-	QVariantHash settings;
+	QVariantMap settings;
 
 	void lock() { m_mutex.lock(); }
 	void unlock() { m_mutex.unlock(); }

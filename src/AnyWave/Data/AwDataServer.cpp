@@ -30,7 +30,7 @@
 #include "Montage/AwMontageManager.h"
 #include "Process/AwProcessManager.h"
 #include <AwProcessInterface.h>
-
+#include "Debug/AwDebugLog.h"
 
 #include <QThread>
 
@@ -49,9 +49,10 @@ AwDataServer *AwDataServer::getInstance()
 
 AwDataServer::AwDataServer()
 {
-	m_plugin = NULL;
-	m_reader = NULL;
+	m_plugin = nullptr;
+	m_reader = nullptr;
 	m_sem = new QSemaphore(1);
+	AwDebugLog::instance()->connectComponent("Data Server", this);
 }
 
 AwDataServer::~AwDataServer()

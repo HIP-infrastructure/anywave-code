@@ -26,22 +26,21 @@
 #pragma once
 
 
-////
-//// process contains input and ouput objects that are used to communicate parameters.
-//// basic types for settings are stored in a Hash table named settings.
-////
-//// parameter name								 descritpion
-//// data_path								full path to data file
-//// data_dir								full path to the folder containing the data file
-//// file_duration							file duration in seconds
-//// bad_labels								electodes marked as bad
-//// current_pos_in_file					current position in file in seconds from the beginning
-//// working_dir							full path to the temporary directory created when a process is launched.
-//// plugin_dir								full path to the current plugin directory. Useless for classic C++ plugins.
-
-namespace processio {
+namespace keys {
+	constexpr auto max_sr = "max_sr";
+	constexpr auto samples = "samples";
 	constexpr auto data_path = "data_path";
 	constexpr auto data_dir = "data_dir";
+	constexpr auto can_write_triggers = "can_write_triggers";
+	// AnyWave sidecar files
+	constexpr auto montage_file = "montage_file";   // path to .mtg file
+	constexpr auto marker_file = "marker_file";		// path to .mrk file
+	constexpr auto bad_file = "bad_file";			// path to .bad file
+	constexpr auto sel_file = "sel_file";			// path to .sel file (channel selection)
+	constexpr auto flt_file = "flt_file";			// path to .flt file (filters)
+	/// <summary>
+	/// 
+	/// </summary>
 	constexpr auto file_duration = "file_duration";
 	constexpr auto bad_labels = "bad_labels";
 	constexpr auto current_pos_in_file = "current_pos_in_file";
@@ -52,9 +51,6 @@ namespace processio {
 	constexpr auto json_batch = "json_batch";
 	constexpr auto bids_file_path = "bids_file_path";
 	constexpr auto bids_root_dir = "bids_root_dir";
-}
-
-namespace cl {
 	constexpr auto input_file = "input_file";
 	constexpr auto input_dir = "input_dir";
 	constexpr auto hp = "hp";
@@ -64,9 +60,6 @@ namespace cl {
 	constexpr auto output_prefix = "output_prefix";
 	constexpr auto output_suffix = "output_suffix";
 	constexpr auto output_file = "output_file";
-	constexpr auto marker_file = "marker_file";
-	constexpr auto montage_file = "montage_file";
-	constexpr auto bad_file = "bad_file";
 	constexpr auto skip_markers = "skip_markers";
 	constexpr auto use_markers = "use_markers";
 	constexpr auto batch_defaults = "batch_defaults";

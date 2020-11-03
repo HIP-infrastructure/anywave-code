@@ -37,6 +37,7 @@
 #include "AwPidManager.h"
 #include <AwFileIO.h>
 #include "Prefs/AwSettings.h"
+#include "Data/AwDataManager.h"
 
 AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(parent)
 {
@@ -107,7 +108,6 @@ AwRequestServer::~AwRequestServer()
 {
 	m_thread->exit();
 	m_thread->wait();
-	// is there a decicated data server?
 }
 
 void AwRequestServer::setDebugMode()
@@ -118,8 +118,6 @@ void AwRequestServer::setDebugMode()
 
 void AwRequestServer::setHandlers()
 {
-
-
 	addHandler(this, &AwRequestServer::handleAddMarkers, AwRequest::AddMarkers);		
 	addHandler(this, &AwRequestServer::handleGetPluginInfo, AwRequest::GetPluginInfo);		
 	addHandler(this, &AwRequestServer::handleIsTerminated, AwRequest::IsTerminated);		
@@ -216,8 +214,9 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	emit log(tr("Received request ") + QString::number(request));
 	AwScriptProcess *p = nullptr;
 	// get the matchin process if pid is valid
-	if (m_debugMode && pid < 0)
+	if (m_debugMode && pid < 0) {
 		p = newDebugProcess();
+	}
 	else if (pid >= 0) {
 		p = AwPidManager::instance()->process(pid);
 		if (!p) {
@@ -230,6 +229,10 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 			emit log(tr("Done."));
 			return;
 		}
+		// p may be instantiated but if we are in debug mode, the pdi.input may be empty if no reader is active
+		// calling initDebugProcess() may solve this issue
+		if (m_debugMode)
+			initDebugProcess(p);
 	}
 	if (p == nullptr) {
 		emit log("Received request but process is null. Skipped.");
@@ -242,14 +245,24 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 	h(client, p);
 }
 
+void AwRequestServer::initDebugProcess(AwScriptProcess* p)
+{
+	auto dm = AwDataManager::instance();
+	if (dm->isFileOpen()) {
+		p->pdi.input.setReader(AwDataManager::instance()->reader());
+		p->pdi.input.addChannels(AwDataManager::instance()->rawChannels(), true);
+		p->pdi.input.settings = dm->settings();
+	}
+}
+
 AwScriptProcess* AwRequestServer::newDebugProcess()
 {
-	auto aws = AwSettings::getInstance();
 	auto p = new AwScriptProcess;
 	AwPidManager::instance()->createNewPid(p);
-	// init input for process using AwSettings
-	p->pdi.input.setReader(aws->currentReader());
-	p->pdi.input.addChannels(aws->currentReader()->infos.channels(), true);
+	initDebugProcess(p);
+	//// init input for process using AwSettings
+	//p->pdi.input.setReader(AwDataManager::instance()->reader());
+	//p->pdi.input.addChannels(AwDataManager::instance()->rawChannels(), true);
 	m_processes << p;
 	return p;
 }

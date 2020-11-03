@@ -30,12 +30,16 @@
 
 class AwFileIOPlugin;
 
-namespace Aw
+namespace FileIO
 {
 	/** Flags to activate some extra features **/
 
 	enum AwIOFlags { CanRead = 1, CanWrite = 2, HasExtension = 4, TriggerChannelIsWritable = 8, IsDirectory = 16, HasVideoSupport = 32 };
+
+
 }
+
+
 
 class AW_RW_EXPORT AwFileIO : public QObject
 {
@@ -46,21 +50,18 @@ public:
 
 	inline QString& errorMessage() { return m_error; }
 	enum FileStatus { NoError, WrongFormat, FileAccess, BadHeader, WrongParameter };
-	AwDataInfo infos;				///< a AwDataInfoReader giving informations about channels and blocks in data file.
+	AwDataInfo infos;				
 
-	
 	void setPlugin(AwFileIOPlugin *plugin) { m_plugin = plugin; }
 	AwFileIOPlugin *plugin() { return m_plugin;  }
 	/** Returns the current active features for the reader. **/
 	inline int flags() { return m_flags; }
-	/** Returns the side file path based on extension or empty string is none exists **/
-	QString getSideFile(const QString& extension); // getSideFile(".mrk") will return the file path to the marker file.
 
 	// Input 
 	/** Override this method to open the file and fill up the data structure. **/
 	virtual FileStatus openFile(const QString &path);
 	/** Override this method to check if the file can be read by the reader. **/
-	virtual FileStatus canRead(const QString &path) {return AwFileIO::WrongFormat;	}
+	virtual FileStatus canRead(const QString &path) { return AwFileIO::WrongFormat;	}
 	/**  Override this method to read data from the file.
 	start is the position in seconds from the beginning of the file.
 	duration is the amount of data to load, expressed in seconds.
@@ -108,7 +109,6 @@ protected:
 	QString m_error;	// used by methods returning a status after an operation.
 	QString m_fullPath;	// full path to current open file.
 	AwFileIOPlugin *m_plugin;
-	QMap<QString, QString> m_sideFiles;	// map containing path to side files (.mrk, .mtg, .bad etc)
 };
 
 ///*!
@@ -136,11 +136,11 @@ public:
 	inline int flags() { return m_flags; }
 
 	/** Returns true if the file has extension */
-	inline bool hasExtension() { return m_flags &  Aw::HasExtension; }
+	inline bool hasExtension() { return m_flags &  FileIO::HasExtension; }
 	/** Returns true if the plugin can read a file **/
-	inline bool canRead() { return m_flags & Aw::CanRead; }
+	inline bool canRead() { return m_flags & FileIO::CanRead; }
 	/** Returns true if the plugin can write to a file **/
-	inline bool canWrite() { return m_flags & Aw::CanWrite; }
+	inline bool canWrite() { return m_flags & FileIO::CanWrite; }
 	/** Override this method to instantiate an object derived from AwFileReader. **/
 	virtual AwFileIO *newInstance(const QString& filename = QString()) = 0;
 

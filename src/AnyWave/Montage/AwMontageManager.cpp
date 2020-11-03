@@ -42,7 +42,6 @@
 #include <AwException.h>
 #include <montage/AwMontage.h>
 #include <AwCore.h>
-#include <AwFileInfo.h>
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
 #include "Data/AwDataManager.h"
@@ -50,11 +49,17 @@
 AwMontageManager *AwMontageManager::m_instance = 0;
 
 
-AwMontageManager *AwMontageManager::instance()
+AwMontageManager* AwMontageManager::instance()
 {
-	if (!m_instance) 
+	if (!m_instance)
 		m_instance = new AwMontageManager;
 	return m_instance;
+}
+
+
+AwMontageManager* AwMontageManager::newInstance()
+{
+	return new AwMontageManager;
 }
 
 QStringList AwMontageManager::loadBad(const QString& filePath)
@@ -167,13 +172,13 @@ void AwMontageManager::addNewSources(int type)
 	}
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
-	AwSettings::getInstance()->filterSettings().setBounds(type, sm->hp(type), sm->lp(type));
+	AwDataManager::instance()->filterSettings().setBounds(type, sm->hp(type), sm->lp(type));
 }
 
 int AwMontageManager::loadICA()
 {
 	// default dir path = the directory containing the data file
-	QString dir = AwSettings::getInstance()->fileInfo()->dirPath();
+	QString dir = AwDataManager::instance()->dataDir();
 	// check if we are in a BIDS and then check for derivatives ica folder
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
@@ -226,7 +231,7 @@ int AwMontageManager::loadICA(const QString& path)
 			// add ica to as recorded
 			m_asRecorded[channel->name()] = channel;
 		}
-		AwSettings::getInstance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
+		AwDataManager::instance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
 	}
 
 	emit montageChanged(m_channels);
@@ -258,7 +263,7 @@ AwMontageManager::AwMontageManager()
 	std::sort(m_quickMontages.begin(), m_quickMontages.end());
 
 	// connect to filter settings
-	connect(&aws->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
+	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
 
 	AwDebugLog::instance()->connectComponent("Montage Manager", this);
 }
@@ -325,63 +330,6 @@ void AwMontageManager::scanForPrebuiltMontages()
 	qSort(m_quickMontages.begin(), m_quickMontages.end());
 	emit quickMontagesUpdated();
 }
-
-//AwChannelList AwMontageManager::channelsWithLabels(const QStringList& labels)
-//{
-//	AwChannelList channels;
-//	foreach (QString label, labels) 
-//		channels += channelsWithLabel(label);
-//
-//	return channels;
-//}
-
-//AwChannelList AwMontageManager::channelsWithLabel(const QString& label)
-//{
-//	AwChannelList list;
-//
-//	for (auto c : m_channels) {
-//		if (c->name() == label) {
-//			if (c->isICA()) {
-//				for (auto ica_chan : m_icaAsRecorded) {
-//					if (ica_chan->name() == label) {
-//						list << new AwICAChannel(ica_chan);
-//						break;
-//					}
-//				}
-//			}
-//			else if (c->isVirtual()) {
-//				AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
-//				list << new AwVirtualChannel(vc);
-//			}
-//			else
-//				list << new AwChannel(c);
-//		}
-//	}
-//	return list;
-//}
-
-//QStringList AwMontageManager::labels()
-//{
-//	QStringList list;
-//	for (auto c : m_channels)
-//		if (!list.contains(c->name()))
-//			list << c->name();
-//	return list;
-//}
-
-//
-// containsChannelOfType(t)
-//
-// Retourne le premier canal de type t present dans la liste des canaux AsRecorded.
-// Retourne NULL si aucun canal trouvé.
-//bool AwMontageManager::containsChannelOfType(AwChannel::ChannelType t)
-//{
-//	auto channels = m_asRecorded.values();
-//	for (auto c : channels)
-//		if (c->type() == t)
-//			return true;
-//	return false;
-//}
 
 /// Remove Bad Channels
 /// Remove channel marked as bad in the list.
@@ -462,7 +410,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	// check for .bad file
 	m_badChannelLabels.clear();
-	m_badPath = reader->getSideFile(".bad");
+	m_badPath = reader->infos.badFile();
 	if (QFile::exists(m_badPath))
 		loadBadChannels();
 	
@@ -517,9 +465,10 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	// check for .montage file
 	// BEWARE: if a .mtg exists, it will override the default TSV montage
-	m_montagePath = reader->getSideFile(".mtg");
+	m_montagePath = reader->infos.mtgFile();
 	if (QFile::exists(m_montagePath))  {
 		if (!loadMontage(m_montagePath)) {
+
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
 	}
@@ -527,10 +476,10 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 //	updateMontageFromChannelsTsv(reader);
 
 	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
-	if (AwSettings::getInstance()->filterSettings().isEmpty()) {
-		AwSettings::getInstance()->filterSettings().initWithChannels(m_channels);
+	if (AwDataManager::instance()->filterSettings().isEmpty()) {
+		AwDataManager::instance()->filterSettings().initWithChannels(m_channels);
 	}
-	setNewFilters(AwSettings::getInstance()->filterSettings());
+	setNewFilters(AwDataManager::instance()->filterSettings());
 	applyGains();
 
 	// check that none NULL channels are present in asRecorder nor m_channels
@@ -987,7 +936,7 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 		return;
 	}
 	applyGains();
-	setNewFilters(AwSettings::getInstance()->filterSettings());
+	setNewFilters(AwDataManager::instance()->filterSettings());
 	emit montageChanged(m_channels);
 
 }

@@ -78,7 +78,6 @@
 #include "AwOpenFileDialog.h"
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
-#include <AwFileInfo.h>
 
 #define AW_HELP_URL "https://meg.univ-amu.fr/wiki/AnyWave"
 
@@ -105,6 +104,11 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	// Processes
 	AwProcessManager* process_manager = AwProcessManager::instance();
 	process_manager->setParent(this);
+
+	// Data Manager
+	auto dm = AwDataManager::instance();
+	dm->setParent(this);
+	
 	// Montage
 	AwMontageManager* montage_manager = AwMontageManager::instance();
 	montage_manager->setParent(this);
@@ -123,7 +127,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 
 	bool isGUIMode = operation == aw::commandLine::NoOperation;
 
-	bool listenMode = arguments.contains(cl::plugin_debug);
+	bool listenMode = arguments.contains(keys::plugin_debug);
 	if (listenMode) {
 		quint16 server_port = static_cast<quint16>(arguments.value("server_port").toInt());
 		auto server = AwMATPyServer::instance();
@@ -157,9 +161,8 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	adl->setParent(this);
 
 	adl->connectComponent("AnyWave", this);
-	adl->connectComponent("Filters Settings", &aws->filterSettings());
+	adl->connectComponent("Filters Settings", &dm->filterSettings());
 	adl->connectComponent("Global Settings", aws);
-	
 	
 	if (isGUIMode) {
 		setCentralWidget(new QSplitter(this));
@@ -179,12 +182,9 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	// init settings
     qsettings.setValue("general/secureMode", false);
 	qsettings.setValue("general/buildDate", QString(__DATE__));
-
-
 	// As initializing ProcessManager, give it the Process Menu instance !
 	process_manager->setMenu(menuProcesses);
 
-	m_currentReader = NULL;
 	actionMontage->setEnabled(false);
 
 	// PLUGIN MENUS
@@ -206,7 +206,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 			a->setEnabled(false);
 	}
 
-	AwMarkerInspector *markerInspectorWidget = NULL;
+	AwMarkerInspector *markerInspectorWidget = nullptr;
 
 	if (isGUIMode) {
 		auto dock = new QDockWidget(tr("Markers"), this);
@@ -270,8 +270,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		connect(m_display, &AwDisplay::draggedCursorPositionChanged, m_player, &AwVideoPlayer::setPositionFromSignals);
 	}
 
-	// Data Manager
-	AwDataManager::instance()->setParent(this);
+
 
 	// AwSourceManager
 	AwSourceManager::instance()->setParent(this);
@@ -636,7 +635,7 @@ void AnyWave::initToolBarsAndMenu()
 	dockFilters->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dockFilters->setFloating(true);
 	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, dockFilters, &QDockWidget::show);
-	dockFilters->setWidget(AwSettings::getInstance()->filterSettings().ui());
+	dockFilters->setWidget(AwDataManager::instance()->filterSettings().ui());
 	filter_tb->setEnabled(false);
 	m_toolBarWidgets.append(filter_tb);
 

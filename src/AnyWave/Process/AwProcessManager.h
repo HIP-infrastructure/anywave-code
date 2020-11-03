@@ -35,7 +35,7 @@
 #include "Script/AwScriptDefines.h"
 #include <QDockWidget>
 #include <QMutex>
-#include <AwFileIO.h>
+//#include <AwFileIO.h>
 
 
 class QSplashScreen;
@@ -91,7 +91,7 @@ public:
 
 	inline bool processesAreRunning() { return !m_runningProcesses.isEmpty(); }
 	inline bool activeDisplayProcesses() { return !m_activeDisplayProcess.isEmpty(); }
-	inline void setCurrentReader(AwFileIO *reader) { m_currentReader = reader; }
+//	inline void setCurrentReader(AwFileIO *reader) { m_currentReader = reader; }
 	inline void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline QWidget *processesWidget() { return (QWidget *)m_processesWidget; }
 	inline QDockWidget *dock() { return m_dock; }
@@ -150,8 +150,7 @@ private:
 	QStringList m_subProcessMenuNames;	// corresponding menu titles
 	QList<QAction *> m_actions;
 	QHash<QString, QAction *> m_hashProcessAction;
-	QList<AwDisplayProcessRegistration *> m_registeredDisplayProcesses;
-	AwFileIO *m_currentReader;
+	QList<AwDisplayProcessRegistration*> m_registeredDisplayProcesses;
 	AwProcessesWidget *m_processesWidget;
 	static AwProcessManager *m_instance;
 	// Script related

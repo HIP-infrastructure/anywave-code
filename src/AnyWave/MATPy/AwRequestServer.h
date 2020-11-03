@@ -44,7 +44,6 @@ public:
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
-//	void addProcess(AwScriptProcess *process);
 	/** add a request handler **/
 	void addHandler(AwRequestServer* const object, void(AwRequestServer::* const mf)(QTcpSocket *, AwScriptProcess*), int request);
 public slots:
@@ -58,6 +57,7 @@ signals:
 protected:
 	void handleRequest(int request, QTcpSocket *client, int pid);
 	void setDebugMode();
+	void initDebugProcess(AwScriptProcess*);
 	AwScriptProcess* newDebugProcess();
 
 	QTcpServer *m_server;

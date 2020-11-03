@@ -28,13 +28,12 @@
 
 #include <QObject>
 #include <QSystemTrayIcon>
+#include <AwMarker.h>
+#include <QVariantMap>
 
-class AwFileInfo;
 class AwFileIO;
 class AwDisplaySetup;
 class AwMatlabInterface;
-
-#include <filter/AwFilterSettings.h>
 
 // defining keys for settings dictionnary
 namespace aws {
@@ -110,17 +109,11 @@ public:
 #endif
 	void closeFile();
 
-//	inline AwFileIO *currentReader() { return m_currentReader; }
-
-//	void setReader(AwFileIO *reader, const QString& path);
-
-	inline AwFileInfo *fileInfo() { return m_fileInfo; }
 	inline AwDisplaySetup *displaySetup() { return m_setup; }
 	inline void setDisplaySetup(AwDisplaySetup *setup) { m_setup = setup; }
 	inline QSystemTrayIcon *sysTray() { return m_sysTrayIcon; }
 	inline AwMatlabInterface *matlabInterface() { return m_matlabInterface; }
 	inline void setMatlabInterface(AwMatlabInterface *i) { m_matlabInterface = i; }
-	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 	AwFileIO* readerAt(int index);
 	QStringList& topoLayouts(); 
 
@@ -133,17 +126,6 @@ public:
 
 	// predefined markers (Marker Inspector Tool)
 	AwMarkerList loadPredefinedMarkers();
-
-	// language specific
-	/** Load the language chosen by the user or the default locale matching one **/
-//	QString& language() { return m_language;}
-//	void loadLanguage(const QString& lang);
-//	void switchTranslator(QTranslator& translator, const QString& file);
-	//QTranslator translator;			// AnyWave
-	//QTranslator translatorQt;		// Qt
-	//QTranslator translatorGraphics;	// Graphics Lib
-	//QTranslator translatorWidgets;	// Widgets Lib
-	QString langPath;				// path to the folder containing the .qm files
 signals:
 	void markersColorChanged(const QStringList& colors);
 	void screenCalibrationChanged(float x, float y);
@@ -155,11 +137,9 @@ public slots:
 	void setAutoTriggerParsingOn(bool onoff);
 	void savePredefinedMarkers(const AwMarkerList& markers);
 protected:
-	//void loadLanguage();
 	QVariantMap m_settings;
 	
 	QList<AwFileIO *> m_readers;
-	AwFileInfo *m_fileInfo;
 	QStringList m_languages;			// list of available languages
 	QString m_language;					// current language
 	QStringList m_locales;				// locales strings 
@@ -167,15 +147,9 @@ protected:
 	AwFileIO *m_currentReader;
 	AwDisplaySetup *m_setup;
 	QSystemTrayIcon *m_sysTrayIcon;
-	//QTranslator m_anyWaveTranslator;
-	//QTranslator m_readWriteTranslator;
-	//QTranslator m_widgetTranslator;
 	AwMatlabInterface *m_matlabInterface;
-	// unique filter settings object.
-	AwFilterSettings m_filterSettings;
 private:
 	static AwSettings *m_instance;
-	
 };
 
 #endif // AWSETTINGS_H

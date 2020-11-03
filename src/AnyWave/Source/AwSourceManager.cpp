@@ -6,7 +6,7 @@
 #include <QFile>
 #include <math/AwMath.h>
 #include <QFileDialog>
-#include <AwFileInfo.h>
+#include "Data/AwDataManager.h"
 
 // statics init and definitions
 AwSourceManager *AwSourceManager::m_instance = 0;
@@ -89,7 +89,7 @@ void AwSourceManager::closeFile()
 QString AwSourceManager::autoSave(int type, mat& matrix, const QStringList& awLabels, const QStringList& labels, float lp, float hp)
 {
 	QMutexLocker lock(&m_mutex);
-	QString dir = AwSettings::getInstance()->fileInfo()->dirPath();
+	QString dir = AwDataManager::instance()->dataDir();
 	QString path = QString("%1/sources_%2_lp%3_hp%4.bf").arg(dir).arg(AwChannel::typeToString(type)).arg(QString::number(lp)).arg(QString::number(hp));
 	QFile file(path);
 	if (!file.open(QIODevice::ReadWrite)) 

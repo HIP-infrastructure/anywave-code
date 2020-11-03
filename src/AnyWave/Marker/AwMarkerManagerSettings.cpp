@@ -36,7 +36,7 @@
 #include <QFileDialog>
 #include <widget/AwGetValueDialog.h>
 #include <Plugin/AwPluginManager.h>
-#include <AwFileInfo.h>
+#include "Data/AwDataManager.h"
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -600,14 +600,13 @@ void AwMarkerManagerSettings::saveSelectedMarkersToMATLAB()
 	if (indexes.isEmpty())
 		return;
 
-	AwFileInfo afio(AwSettings::getInstance()->currentReader());
-	auto path = QFileDialog::getSaveFileName(0, tr("Save marked data"), afio.dirPath(), "*.mat");
+	auto path = QFileDialog::getSaveFileName(0, tr("Save marked data"), AwDataManager::instance()->value(keys::data_dir).toString(), "*.mat");
 	if (!path.isEmpty()) {
 		AwMarkerList currentMarkers = m_model->markers();
 
 		AwMarkerList markers; // marker to save
 		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-		for (auto i : indexes) {
+		for (auto const& i : indexes) {
 			if (i.column() == 0) {
 				auto m = currentMarkers.at(proxy->mapToSource(i).row());
 				if (m->duration() > 0.)
@@ -643,15 +642,13 @@ void AwMarkerManagerSettings::saveSelectedMarkers()
 	if (indexes.isEmpty())
 		return;
 	
-	AwFileInfo afio(AwSettings::getInstance()->currentReader());
-
-	auto path = QFileDialog::getSaveFileName(0, tr("Save markers"), afio.dirPath(), "*.mrk");
+	auto path = QFileDialog::getSaveFileName(0, tr("Save markers"), AwDataManager::instance()->value(keys::data_dir).toString(), "*.mrk");
 	if (!path.isEmpty()) {
 		AwMarkerList currentMarkers = m_model->markers();
 
 		AwMarkerList markers; // marker to save
 		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-		for (auto i : indexes) {
+		for (auto const& i : indexes) {
 			if (i.column() == 0)
 				markers << currentMarkers.at(proxy->mapToSource(i).row());
 		}
@@ -675,7 +672,7 @@ void AwMarkerManagerSettings::removeMarkers()
 
 	AwMarkerList markers; // marker that has been removed
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-	for (auto i : indexes) {
+	for (auto const& i : indexes) {
 		if (i.column() == 0)
 			markers << currentMarkers.at(proxy->mapToSource(i).row());
 	}
@@ -702,9 +699,7 @@ void AwMarkerManagerSettings::highlightMarker(AwMarker *marker)
 
 void AwMarkerManagerSettings::writeTrigger()
 {
-	AwFileIO *reader = AwSettings::getInstance()->currentReader();
-	bool ok = reader->flags() & Aw::AwIOFlags::TriggerChannelIsWritable &&  !reader->triggerChannels().isEmpty();
-	if (ok) {
+	if (AwDataManager::instance()->value(keys::can_write_triggers).toBool()) {
 		// get selected indexes in tvMarkers
 		QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
 
@@ -715,13 +710,10 @@ void AwMarkerManagerSettings::writeTrigger()
 
 		AwMarkerList markers; // marker that has been removed
 		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-		for (auto i : indexes) {
+		for (auto const& i : indexes) {
 			if (i.column() == 0)
 				markers << currentMarkers.at(proxy->mapToSource(i).row());
 		}
-
-		//emit triggerMarkersToWrite(markers);
-
 		// Create the Process AwTriggerWriter
 		AwBaseProcess *process = AwProcessManager::instance()->newProcessFromPluginName("Trigger Writer");
 		if (process == Q_NULLPTR) {
@@ -737,9 +729,7 @@ void AwMarkerManagerSettings::writeTrigger()
 
 void AwMarkerManagerSettings::clearTrigger()
 {
-	AwFileIO *reader = AwSettings::getInstance()->currentReader();
-	bool ok = reader->flags() & Aw::AwIOFlags::TriggerChannelIsWritable && !reader->triggerChannels().isEmpty();
-	if (ok) {
+	if (AwDataManager::instance()->value(keys::can_write_triggers).toBool()) {
 		if (QMessageBox::question(0, tr("Clear Trigger Channel?"), tr("Do you really want to clear all the data in the trigger channel?"),
 			QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 			return;

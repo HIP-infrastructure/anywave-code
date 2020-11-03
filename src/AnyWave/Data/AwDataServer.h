@@ -57,6 +57,8 @@ public slots:
 	void closeConnection(AwDataClient *client);
 	void closeAllConnections();
 	void manageOutOfMemory();
+signals:
+	void log(const QString& message);
 protected:
 	QList<AwDataConnection *> m_dataConnections;
 	QMap<AwDataClient *, AwDataConnection *> m_clientToConnection;

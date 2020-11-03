@@ -31,7 +31,7 @@ MEMIOPlugin::MEMIOPlugin() : AwFileIOPlugin()
 	description = QString(tr("Read from preloaded data in memory."));
 	version = QString("1.0");
 	fileExtensions << "*.mem";
-	m_flags = Aw::HasExtension | Aw::CanRead;
+	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
 
 MEMIO::MEMIO(const QString& path) : AwFileIO(path)

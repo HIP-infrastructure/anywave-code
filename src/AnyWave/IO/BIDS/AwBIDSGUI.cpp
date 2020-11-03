@@ -148,8 +148,8 @@ void AwBIDSGUI::createContextMenus()
 	for (auto p : processes) {
 		// DO NOT TAKE Process with more than input_file as INPUTS
 		auto batchSettings = p->batchHash();
-		auto inputs = batchSettings.value(cl::batch_inputs).toHash();
-		if (inputs.contains(cl::input_file)) {
+		auto inputs = batchSettings.value(keys::batch_inputs).toHash();
+		if (inputs.contains(keys::input_file)) {
 			auto action = m_menuProcessing->addAction(QString("compute %1").arg(p->name));
 			// set the plugin's name as data
 			action->setData(p->name);
@@ -211,10 +211,10 @@ void AwBIDSGUI::addToProcessing()
 		outputFiles.append(m_bids->buildOutputFileName(bidsItem));
 		outputSuffixes.append(QString("_%1").arg(plugin->name));
 	}
-	batchItem->setInputs(cl::input_file, inputFiles);
-	batchItem->setOutputs(cl::output_dir, outputDirs);
-	batchItem->setOutputs(cl::output_file, outputFiles);
-	batchItem->setOutputs(cl::output_suffix, outputSuffixes);
+	batchItem->setInputs(keys::input_file, inputFiles);
+	batchItem->setOutputs(keys::output_dir, outputDirs);
+	batchItem->setOutputs(keys::output_file, outputFiles);
+	batchItem->setOutputs(keys::output_suffix, outputSuffixes);
 	batchItem->lock();
 	AwBatchManager::instance()->ui()->addNewItem(batchItem);
 }

@@ -54,7 +54,7 @@ void AwProcessIO::setReader(AwFileIO* reader)
 	m_reader = reader;
 	setNewChannels(reader->infos.channels(), true);
 	// init settings based on informations relative to reader instance
-	settings[processio::file_duration] = reader->infos.totalDuration();
+	settings[keys::file_duration] = reader->infos.totalDuration();
 }
 
 void AwProcessIO::setNewChannels(const AwChannelList& channels, bool duplicate)

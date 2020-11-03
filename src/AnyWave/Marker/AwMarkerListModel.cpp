@@ -27,7 +27,8 @@
 #include <Prefs/AwSettings.h>
 #include <utils/gui.h>
 #include <utils/time.h>
-#include <AwFileIO.h>
+//#include <AwFileIO.h>
+#include "Data/AwDataManager.h"
 //
 // rowCount
 //
@@ -194,7 +195,7 @@ bool AwMarkerListModel::setData(const QModelIndex &index, const QVariant &value,
 		else if (col == MARKER_COLUMN_DURATION) {
 			if (value.type() == QVariant::String) {
 				if (value.toString().toLower() == "end")
-					m->setDuration(AwSettings::getInstance()->currentReader()->infos.totalDuration() - m->start());
+					m->setDuration(AwDataManager::instance()->value(keys::file_duration).toFloat() - m->start());
 				else
 					m->setDuration(value.toDouble());
 			}

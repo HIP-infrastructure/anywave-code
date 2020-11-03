@@ -33,6 +33,8 @@ namespace Ui {class AwMarkerInspectorUI; };
 #include <AwMarkingSettings.h>
 #include <QCloseEvent>
 #include <memory>
+
+
 class AW_WIDGETS_EXPORT AwMarkerInspector : public QWidget
 {
 	Q_OBJECT

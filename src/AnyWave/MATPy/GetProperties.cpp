@@ -61,20 +61,20 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 		else if (k == "as_recorded_channels_count")
 			hash["as_recorded_channels_count"] = reader->infos.channels().count();
 		else if (k == "marker_file") {
-			auto markerFile = reader->getSideFile(".mrk");
+			auto markerFile = reader->infos.mrkFile();
 			if (!markerFile.isEmpty() && QFile::exists(markerFile))
 				hash["marker_file"] = markerFile;
 		}
 		else if (k == "montage_file") {
-			auto montageFile = reader->getSideFile(".mtg");
+			auto montageFile = reader->infos.mtgFile();
 			if (!montageFile.isEmpty() && QFile::exists(montageFile))
 				hash["montage_file"] = montageFile;
 		}
 		else if (k == "data_dir") {					// current data directory
-			hash[processio::data_dir] = process->pdi.input.settings[processio::data_dir];
+			hash[keys::data_dir] = process->pdi.input.settings.value(keys::data_dir);
 		}
 		else if (k == "plugin_dir") {				// current plugin directory
-			hash[processio::plugin_dir] = process->pdi.input.settings[processio::plugin_dir];
+			hash[keys::plugin_dir] = process->pdi.input.settings.value(keys::plugin_dir);
 		}
 		else if (k == "montage_labels") {			// list of electrodes in the current montage
 			if (dedicatedDS) 

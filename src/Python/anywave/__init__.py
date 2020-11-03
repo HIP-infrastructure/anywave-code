@@ -11,3 +11,4 @@ port = 59000
 
 from .getdata import get_data
 from .sendmessage import send_message
+from .core.channel import Channel

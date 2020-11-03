@@ -59,7 +59,7 @@ void AwMappingClient::openConnection()
 	if (!m_isAConnectionActive)	{
 		AwDataServer::getInstance()->openConnection(this);
 		m_isAConnectionActive = true;
-		AwFilterSettings *fs = &AwSettings::getInstance()->filterSettings();
+		AwFilterSettings *fs = &AwDataManager::instance()->filterSettings();
 		connect(fs, &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
 		fs->apply(m_channels);
 	}
@@ -69,7 +69,7 @@ void AwMappingClient::closeConnection()
 {
 	AwDataServer::getInstance()->closeConnection(this);
 	m_isAConnectionActive = false;
-	disconnect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
+	disconnect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
 }
 
 void AwMappingClient::setNewFilters(const AwFilterSettings& settings)

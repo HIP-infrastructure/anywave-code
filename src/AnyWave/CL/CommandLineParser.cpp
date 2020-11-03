@@ -85,7 +85,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	parser.addOption(useMarkersO);
 	parser.addOption(skipMarkersO);
 	// skip_bad_channels
-	QCommandLineOption skipBadChannelsO("skip_bad_channels", "specify if bad channels are removed from data (default is yes).", cl::skip_bad_channels, QString());
+	QCommandLineOption skipBadChannelsO("skip_bad_channels", "specify if bad channels are removed from data (default is yes).", keys::skip_bad_channels, QString());
 	parser.addOption(skipBadChannelsO);
 	// montages
 	QCommandLineOption createMontageO("create_montage", "specify the montage to create based on channels present in data file.", "create_montage", QString());
@@ -261,15 +261,15 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	tmp = parser.value(skipBadChannelsO).toLower().simplified();
 	if (!tmp.isEmpty()) {
 		if (flagsValues.contains(tmp))
-			arguments[cl::skip_bad_channels] = tmp == "yes" || tmp == "true";
+			arguments[keys::skip_bad_channels] = tmp == "yes" || tmp == "true";
 	}
 	// create_montage
 	tmp = parser.value(createMontageO);
 	if (!tmp.isEmpty()) {
 		tmp = tmp.simplified().toLower();
-		bool ok = tmp == cl::bipolar_ieeg || tmp == cl::monopolar || tmp == cl::none;
+		bool ok = tmp == keys::bipolar_ieeg || tmp == keys::monopolar || tmp == keys::none;
 		if (ok)
-			arguments[cl::create_montage] = tmp;
+			arguments[keys::create_montage] = tmp;
 	}
 	// log_dir
 	tmp = parser.value(logDirO);
@@ -278,52 +278,52 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	// marker_file
 	tmp = parser.value(markerFileO);
 	if (!tmp.isEmpty())
-		arguments[cl::marker_file] = tmp;
+		arguments[keys::marker_file] = tmp;
 	// montager_file
 	tmp = parser.value(montageFileO);
 	if (!tmp.isEmpty())
-		arguments[cl::montage_file] = tmp;
+		arguments[keys::montage_file] = tmp;
 	// use_markers
 	tmp = parser.value(useMarkersO);
 	if (!tmp.isEmpty())
-		arguments[cl::use_markers] = QStringList(tmp);
+		arguments[keys::use_markers] = QStringList(tmp);
 	// skip_markers
 	tmp = parser.value(skipMarkersO);
 	if (!tmp.isEmpty())
-		arguments[cl::skip_markers] = QStringList(tmp);
+		arguments[keys::skip_markers] = QStringList(tmp);
 	// output dir
 	tmp = parser.value(outputDirO);
 	if (!tmp.isEmpty())
-		arguments[cl::output_dir] = tmp;
+		arguments[keys::output_dir] = tmp;
 	// input dir
 	tmp = parser.value(inputDirO);
 	if (!tmp.isEmpty())
-		arguments[cl::input_dir] = tmp;
+		arguments[keys::input_dir] = tmp;
 	// output_prefix
 	tmp = parser.value(outputPrefixO);
 	if (!tmp.isEmpty())
-		arguments[cl::output_prefix] = tmp;
+		arguments[keys::output_prefix] = tmp;
 	// output_suffix
 	tmp = parser.value(outputSuffixO);
 	if (!tmp.isEmpty())
-		arguments[cl::output_suffix] = tmp;
+		arguments[keys::output_suffix] = tmp;
 	// hp/lp/notch
 	auto fHP = parser.value(filterHPO);
 	auto fLP = parser.value(filterLPO);
 	auto fNotch = parser.value(filterNotchO);
 	if (!fNotch.isEmpty())
-		arguments[cl::notch] = fNotch;
+		arguments[keys::notch] = fNotch;
 	if (!fHP.isEmpty())
-		arguments[cl::hp] = fHP;
+		arguments[keys::hp] = fHP;
 	if (!fLP.isEmpty())
-		arguments[cl::lp] = fLP;
+		arguments[keys::lp] = fLP;
 
 	tmp = parser.value(inputFileO);
 	if (!tmp.isEmpty())
-		arguments[cl::input_file] = tmp;
+		arguments[keys::input_file] = tmp;
 	tmp = parser.value(outputFileO);
 	if (!tmp.isEmpty())
-		arguments[cl::output_file] = tmp;
+		arguments[keys::output_file] = tmp;
 	tmp = parser.value(serverPortOpt);
 	if (!tmp.isEmpty())
 		arguments["server_port"] = tmp.toInt();
@@ -341,7 +341,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		throw(exception);
 	}
 	if (parser.isSet(pluginDebugO))
-		arguments[cl::plugin_debug] = true;
+		arguments[keys::plugin_debug] = true;
 
 	auto positionals = parser.positionalArguments();
 	if (!positionals.isEmpty())

@@ -13,21 +13,21 @@ def get_data(args = None):
         str = json.dumps(args)
     aw.sendString(str)
     aw.waitForResponse()
-    stream = aw.stream()
-    nChannels = stream.readInt32()
-    if nChannels is 0:
+    response = aw.response()
+    nChannels = response.readInt32()
+    if nChannels == 0:
         return res
     for i in range(0, nChannels):
          aw.waitForResponse()
          chan = channel.Channel()
-         chan.name = stream.readQString()
-         chan.type = stream.readQString()
-         chan.ref = stream.readQString()
-         chan.sr = stream.readFloat()
-         chan.hp = stream.readFloat()
-         chan.lp = stream.readFloat()
-         chan.notch = stream.readFloat()
-         nSamples = stream.readInt64()
+         chan.name = response.readQString()
+         chan.type = response.readQString()
+         chan.ref = response.readQString()
+         chan.sr = response.readFloat()
+         chan.hp = response.readFloat()
+         chan.lp = response.readFloat()
+         chan.notch = response.readFloat()
+         nSamples = response.readInt64()
          if nSamples > 0:
              chan.data = numpy.zeros(nSamples, numpy.float32)
              finished = False
@@ -35,12 +35,12 @@ def get_data(args = None):
              chunkSize = 0
              while not finished:
                  aw.waitForResponse()
-                 chunkSize = stream.readInt64()
+                 chunkSize = response.readInt64()
                  if chunkSize is 0:
                      finished = True
                  else:
                      for j in range(0, chunkSize):
-                         chan.data[j + nSamplesRead] = stream.readFloat()
+                         chan.data[j + nSamplesRead] = response.readFloat()
                      nSamplesRead += chunkSize
          res.append(chan)
     return res

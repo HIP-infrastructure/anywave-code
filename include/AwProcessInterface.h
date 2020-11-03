@@ -83,7 +83,7 @@ public:
 	void addMarker(AwMarker *marker);
 
 	/** specific to process which supports command line batching. **/
-	virtual bool batchParameterCheck(const QVariantHash& args) { return true; }
+	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
 signals:
 	// Adding markers to AnyWave
 	void sendMarkers(AwMarkerList *markers);
@@ -152,19 +152,19 @@ public:
 	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
 	virtual void deleteInstance(AwBaseProcess *process) { delete process;  }
 	void addLanguageTranslation(const QString& resourceFile);
-	inline QVariantHash& settings() { return m_settings; }
+	inline QVariantMap& settings() { return m_settings; }
 	void setSettings(const QString& key, const QVariant& value) { m_settings[key] = value; }
 	/** Command Line specific **/
-	inline QVariantHash& batchHash() { return m_batchHash; }
-	void setBatch(const QString& key, const QVariant& value) { m_batchHash[key] = value; }
-	void addBatchHash(const QVariantHash& hash) { m_batchHash.unite(hash); }
+	inline QVariantMap& batchHash() { return m_batchMap; }
+	void setBatch(const QString& key, const QVariant& value) { m_batchMap[key] = value; }
+	void addBatchMap(const QVariantMap& hash) { m_batchMap.unite(hash); }
 	inline bool hasDeclaredArgs();
 	bool isBatchGUICompatible(); 
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
-	QVariantHash m_settings;
-	QVariantHash m_batchHash; // command line specific
+	QVariantMap m_settings;
+	QVariantMap m_batchMap; // command line specific
 };
 
 class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess

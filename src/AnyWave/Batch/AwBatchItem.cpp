@@ -41,8 +41,8 @@ AwBatchItem::AwBatchItem(AwProcessPlugin *plugin)
 		m_inputFilesMap.insert("input_file", QStringList());
 	}
 	// now fill params with defaults values
-	auto defaults = batchSettings.value(cl::batch_defaults).toHash();
-	auto ui = batchSettings.value(cl::batch_ui).toHash();
+	auto defaults = batchSettings.value(keys::batch_defaults).toHash();
+	auto ui = batchSettings.value(keys::batch_ui).toHash();
 	for (auto key : ui.keys()) {
 		auto keyValue = ui.value(key).toStringList().last().toLower();
 		if (keyValue == "string" || keyValue == "stringlist")

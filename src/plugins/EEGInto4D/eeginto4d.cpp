@@ -166,7 +166,7 @@ EEGInto4D::~EEGInto4D()
 
 }
 
-bool EEGInto4D::batchParameterCheck(const QVariantHash& args)
+bool EEGInto4D::batchParameterCheck(const QVariantMap& args)
 {
 	return true;
 }
@@ -175,23 +175,6 @@ bool EEGInto4D::showUi()
 {
 	bool eeg_found = false, meg_found = false;
 	settings ui;
-
-	//foreach(AwFileIOPlugin *reader, pdi.input.readers) {
-	//	if (!ades_found) {
-	//		if (reader->name == "AnyWave ADES Format") {
-	//			ades_found = true;
-	//			m_eegPlugin = ui.eegPlugin = reader;
-	//		}
-	//	}
-	//	if (!meg_found) {
-	//		if (reader->name == "4DNI Reader") {
-	//			meg_found = true;
-	//			m_megPlugin = ui.megPlugin = reader;
-	//		}
-	//	}
-	//	if (ades_found && meg_found)
-	//		break;
-	//}
 
 	// find at least 4DNi plugin
 	for (auto plugin : pdi.input.readers) {

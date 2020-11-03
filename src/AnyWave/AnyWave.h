@@ -79,7 +79,7 @@ protected:
 
 private:
 	QMap<QString, QDockWidget *> m_dockWidgets;
-	AwFileIO *m_currentReader;
+	//AwFileIO *m_currentReader;
 	QString m_openFileName;				// Full path to current open file.
 	QString m_lastDirOpen;				// Keep path to last directory used when opening a file
 	QString m_saveFileName;

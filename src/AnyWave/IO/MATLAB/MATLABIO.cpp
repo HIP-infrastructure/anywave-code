@@ -33,7 +33,7 @@ MATLABIOPlugin::MATLABIOPlugin() : AwFileIOPlugin()
 	description = QString(tr("Export data to MATLAB file"));
 	version = QString("1.0");
 	fileExtension = ".mat";
-	m_flags = Aw::HasExtension|Aw::CanWrite;
+	m_flags = FileIO::HasExtension| FileIO::CanWrite;
 }
 
 MATLABIO::MATLABIO(const QString& path) : AwFileIO(path)

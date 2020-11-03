@@ -52,6 +52,7 @@ signals:
 	void sendingData(AwChannelList *channels);   // signal informant que les donnees sont envoyees au client
 	void endOfData();
 	void outOfMemory();
+	void log(const QString& message);
 private:
 	AwFileIO *m_reader;
 	AwDataServer *m_server;

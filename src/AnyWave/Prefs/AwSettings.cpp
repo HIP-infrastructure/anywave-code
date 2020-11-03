@@ -27,7 +27,6 @@
 #include <QSettings>
 #include <QWidget>
 #include <AwFileIO.h>
-#include <AwFileInfo.h>
 #include <QDir>
 #include <QApplication>
 #include <qthreadpool.h>
@@ -71,9 +70,6 @@ AwSettings::AwSettings(QObject *parent)
 
 	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
 	m_settings[aws::auto_trigger_parsing] = isAutoTriggerParsingOn;
-
-	//// languages
-//	loadLanguage();
 	// Cpu cores
 	auto totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
 	m_settings[aws::total_cpu_cores] = totalCPUCores;
@@ -87,11 +83,8 @@ AwSettings::AwSettings(QObject *parent)
 	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
 	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
 
-	m_matlabInterface = NULL;
+	m_matlabInterface = nullptr;
 	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
-
-	m_fileInfo = Q_NULLPTR;
-
 	auto appPath = QCoreApplication::applicationDirPath();
 	m_settings[aws::app_dir] = appPath;
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
@@ -103,16 +96,7 @@ AwSettings::AwSettings(QObject *parent)
 
 	m_settings[aws::ins_version] = false;
 	// check for a version.txt in resources
-	//QString versionFile = QString("%1/version.txt").arg(m_settings["appResourcePath"].toString());
 	QString insVersionFile = QString("%1/ins.txt").arg(m_settings.value(aws::app_resource_dir).toString());
-	//if (QFile::exists(versionFile)) {
-	//	QFile file(versionFile);
-	//	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-	//		m_settings[aws::major_version] =  file.readLine();
-	//		m_settings[aws::minor_version] =  file.readLine();
-	//		file.close();
-	//	}
-	//}
 	// check for a file called ins.txt
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
@@ -137,8 +121,6 @@ AwSettings::~AwSettings()
 		settings.setValue("BIDSPath", recentBIDS.at(i));
 	}
 	settings.endArray();
-	if (m_fileInfo)
-		delete m_fileInfo;
 }
 
 QVariant AwSettings::value(const QString& key)
@@ -154,8 +136,6 @@ void AwSettings::setValue(const QString& key, const QVariant& value)
 void AwSettings::closeFile()
 { 
 	m_settings[aws::ica_file] = QString();
-	if (m_fileInfo)
-		m_filterSettings.save(QString("%1.flt").arg(m_fileInfo->filePath()));
 }
 
 
@@ -198,15 +178,6 @@ AwFileIO* AwSettings::readerAt(int index)
 	else
 		return NULL;
 }
-
-void AwSettings::setReader(AwFileIO *reader, const QString& path)
-{
-	m_currentReader = reader;
-	if (m_fileInfo) 
-		delete m_fileInfo;
-	m_fileInfo = new AwFileInfo(reader, path);
-}
-
 
 QString AwSettings::shortenFilePath(const QString& path)
 {

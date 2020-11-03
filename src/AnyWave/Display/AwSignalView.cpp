@@ -39,7 +39,8 @@
 #include "AwDisplaySetupManager.h"
 #include "ICA/AwICAManager.h"
 #include <widget/AwMessageBox.h>
-#include "Prefs/AwSettings.h"
+//#include "Prefs/AwSettings.h"
+#include "Data/AwDataManager.h"
 
 AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent, Qt::WindowFlags windowFlags) :
 	AwBaseSignalView(parent, windowFlags, flags, settings)
@@ -63,7 +64,7 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	// using Global Marker Bar representation => connect to MarkerManager
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
 	// filters
-	connect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
+	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
 	m_flags = UpdateProcess;	// by default a view will inform process manager that its contents changed.

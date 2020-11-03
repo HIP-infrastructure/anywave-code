@@ -24,8 +24,10 @@ class TCPRequest:
         self.streamResponse.setVersion(QtCore.QDataStream.Version.Qt_4_4)
         self.connect()
 
-    def stream(self):
-        return self.streamData
+    def response(self):
+        stream = QtCore.QDataStream(self.socket)
+        stream.setVersion(QtCore.QDataStream.Qt_4_4)
+        return stream
 
     def connect(self):
         self.socket.connectToHost(anywave.host, anywave.port)

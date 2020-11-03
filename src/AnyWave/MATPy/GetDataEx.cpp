@@ -47,16 +47,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	QDataStream fromClient(client);
 	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
-	//QString jsonString;
 
 	AwFileIO* reader = process->pdi.input.reader();
-	//if (reader == nullptr) {
-	//	emit log("ERROR: null reader pointer. Nothing done.");
-	//	toClient << (qint64)-1 << QString("Error in AnyWave");
-	//	response.send();
-	//	return;
-	//}
-
 	QString json;
 	fromClient >> json;
 	int status = 0;
@@ -66,7 +58,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AwChannelList requestedChannels;
 	AwMarkerList input_markers, markers;
 	
-	float fileDuration = process->pdi.input.settings.value(processio::file_duration).toDouble();
+	float fileDuration = process->pdi.input.settings.value(keys::file_duration).toDouble();
 	float start = 0., duration = fileDuration;
 	AwFileIO *localReader = nullptr;
 	requestedChannels = process->pdi.input.channels();
@@ -127,7 +119,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 
 		if (markers.isEmpty() && usingFile) {
 			// try to load the default .mrk that comes with the data file
-			auto mrkFile = localReader->getSideFile(".mrk");
+			auto mrkFile = localReader->infos.mrkFile();
 			if (QFile::exists(mrkFile)) 
 				markers = AwMarker::load(mrkFile);
 		}
