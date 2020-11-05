@@ -743,10 +743,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), p, SLOT(setMarkers(const AwMarkerList&)));
 			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), ds, SLOT(openConnection(AwDataClient *)));
 			// copy the actual marker list to the process
-			//p->setMarkers(mm->getMarkers());
 			p->pdi.input.setNewMarkers(mm->getMarkers(), true);
 		}
-		p->init();
+		p->init(); 
 		p->run(args);
 	}
 	else { // AwProcess

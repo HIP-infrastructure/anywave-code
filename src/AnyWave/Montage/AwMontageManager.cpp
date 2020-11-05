@@ -263,7 +263,7 @@ AwMontageManager::AwMontageManager()
 	std::sort(m_quickMontages.begin(), m_quickMontages.end());
 
 	// connect to filter settings
-	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
+//	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
 
 	AwDebugLog::instance()->connectComponent("Montage Manager", this);
 }

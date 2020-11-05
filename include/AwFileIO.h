@@ -35,8 +35,6 @@ namespace FileIO
 	/** Flags to activate some extra features **/
 
 	enum AwIOFlags { CanRead = 1, CanWrite = 2, HasExtension = 4, TriggerChannelIsWritable = 8, IsDirectory = 16, HasVideoSupport = 32 };
-
-
 }
 
 
@@ -44,12 +42,13 @@ namespace FileIO
 class AW_RW_EXPORT AwFileIO : public QObject
 {
 public:
-	AwFileIO(const QString& fileName = QString()) { m_flags = 0;}
-	virtual ~AwFileIO() {}
-
-
-	inline QString& errorMessage() { return m_error; }
 	enum FileStatus { NoError, WrongFormat, FileAccess, BadHeader, WrongParameter };
+
+	AwFileIO(const QString& fileName = QString()) { m_flags = 0;}
+
+	virtual ~AwFileIO() {}
+	inline QString& errorMessage() { return m_error; }
+	
 	AwDataInfo infos;				
 
 	void setPlugin(AwFileIOPlugin *plugin) { m_plugin = plugin; }

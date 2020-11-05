@@ -164,7 +164,7 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		}
 	}
 
-	AwFileIO* reader = nullptr;
+	//AwFileIO* reader = nullptr;
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	args.unite(map);
 
@@ -179,20 +179,22 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	auto dm = AwDataManager::instance();
 
 	if (!inputFile.isEmpty()) {
-		reader = pm->getReaderToOpenFile(inputFile);
-		if (reader == nullptr) {
+		//reader = pm->getReaderToOpenFile(inputFile);
+		auto status = dm->openFile(inputFile);
+		if (status == AwDataManager::NoPluginFound) {
 			throw AwException(QString("no reader can open %1").arg(inputFile), origin);
 			return process;
 		}
-		process->pdi.input.setReader(reader);
-		if (reader->openFile(inputFile) != AwFileIO::NoError) {
+		
+		if (status != AwDataManager::NoError) {
 			throw AwException(QString("Could not open %1").arg(inputFile), origin);
 			return process;
 		}
-		dm->openFile(reader, inputFile);
-		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
-		process->pdi.input.settings[keys::data_path] = inputFile;
+		process->pdi.input.setReader(dm->reader());
+		process->pdi.input.settings.unite(dm->settings());
+		//process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+		//process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
+		//process->pdi.input.settings[keys::data_path] = inputFile;
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file
 	if (args.contains(keys::marker_file)) {
@@ -206,13 +208,13 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
-		QString tmp = reader->infos.badFile();
+		QString tmp = dm->badFilePath();
 		if (QFile::exists(tmp)) {
 			args[keys::bad_file] = tmp;
-			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::loadBad(tmp);
+			process->pdi.input.settings[keys::bad_labels] = dm->badLabels();
 		}
 		AwChannelList montage;
-		tmp = reader->infos.mtgFile();
+		tmp = dm->mtgFilePath();
 		if (!args.contains(keys::montage_file))
 			if (QFile::exists(tmp))
 				args[keys::montage_file] = tmp;
@@ -231,9 +233,9 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		if (montageCreateSet) {
 			if (montageCreateOption == keys::bipolar_ieeg) {
 				if (skipBad)
-					montage = AwMontage::createSEEGBipolarMontage(reader->infos.channels(), process->pdi.input.settings.value(keys::bad_labels).toStringList());
+					montage = AwMontage::createSEEGBipolarMontage(dm->rawChannels(), process->pdi.input.settings.value(keys::bad_labels).toStringList());
 				else
-					montage = AwMontage::createSEEGBipolarMontage(reader->infos.channels());
+					montage = AwMontage::createSEEGBipolarMontage(dm->rawChannels());
 				if (montage.isEmpty()) {
 					throw AwException(QString("error: bipolar seeg montage could not be done. Check --create_montage <montage> option."), origin);
 					return process;
@@ -247,7 +249,7 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		}
 		else {
 			if (args.contains(keys::montage_file)) { // did we finally got a montage file?
-				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args.value(keys::montage_file).toString(),
+				montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
 					process->pdi.input.settings.value(keys::bad_labels).toStringList());
 				if (montage.isEmpty()) { // error when loading and/or applying mtg file
 					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()), origin);
@@ -256,12 +258,12 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			}
 			else { // no montage specified or detected
 				// applying default file montage
-				montage = AwChannel::duplicateChannels(reader->infos.channels());
+				montage = AwChannel::duplicateChannels(dm->rawChannels());
 				if (skipBad)
 					AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
 			}
 		}
-		if (!buildPDI(process, montage, reader->infos.channels())) {
+		if (!buildPDI(process, montage, dm->rawChannels())) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
 			AW_DESTROY_LIST(montage);
 			return process;
@@ -288,13 +290,13 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 				args[keys::marker_file] = tmp;
 
 		if (inputMarkerAllDataSet)
-			process->pdi.input.setNewMarkers(AwMarkerList({ new AwMarker("global", 0., reader->infos.totalDuration()) }));
+			process->pdi.input.setNewMarkers(AwMarkerList({ new AwMarker("global", 0., dm->totalDuration()) }));
 		else {
 			// if marker file is found => load markers and use them for the process
 			if (args.contains(keys::marker_file))
 				process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
 			else
-				process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
+				process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
 		}
 
 		// apply used and skip markers filtering only if the flag --use_markers all_data was not set
@@ -317,8 +319,8 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 
 		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
-		AwDataServer::getInstance()->setMainReader(reader);
-		AwDataServer::getInstance()->openConnection(process);
+	//	AwDataServer::getInstance()->setMainReader(reader);
+		dm->dataServer()->openConnection(process);
 
 		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
 		AwBIDSManager::initCommandLineOperation(inputFile);

@@ -39,7 +39,9 @@
 #endif
 
 // statics
-AwDataServer *AwDataServer::m_instance = NULL;
+AwDataServer *AwDataServer::m_instance = nullptr;
+int AwDataServer::m_instanceCount = 1;
+
 AwDataServer *AwDataServer::getInstance()
 {
 	if (!m_instance)
@@ -47,12 +49,18 @@ AwDataServer *AwDataServer::getInstance()
 	return m_instance;
 }
 
+AwDataServer* AwDataServer::newInstance()
+{
+	return new AwDataServer();
+}
+
 AwDataServer::AwDataServer()
 {
 	m_plugin = nullptr;
 	m_reader = nullptr;
 	m_sem = new QSemaphore(1);
-	AwDebugLog::instance()->connectComponent("Data Server", this);
+	AwDebugLog::instance()->connectComponent(QString("Data Server:%1").arg(m_instanceCount), this);
+	m_instanceCount++;
 }
 
 AwDataServer::~AwDataServer()

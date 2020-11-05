@@ -27,6 +27,8 @@
 #include "Display/AwVideoManager.h"
 #include <widget/AwVideoPlayer.h>
 #include "Data/AwDataManager.h"
+
+
 //
 // Menu File->Open
 // 
@@ -41,8 +43,7 @@ void AnyWave::on_actionOpen_video_triggered()
 	m_player->openFile();
 }
 
-
-   
+ 
 
 //   
 // Save as
@@ -92,7 +93,7 @@ void AnyWave::openFile(const QString &path)
 	AwFileIOPlugin *iread;
 	QString filter;
 	auto aws = AwSettings::getInstance();
-	AwDataServer *data_server = AwDataServer::getInstance();
+	//AwDataServer *data_server = AwDataServer::getInstance();
 	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
 	QString filePath = path;
 	QString ext;
@@ -135,43 +136,50 @@ void AnyWave::openFile(const QString &path)
 		ext = "*." + fInfo.suffix();
 		ext = ext.toLower();
 	}
+	auto dataManager = AwDataManager::instance();
+	int res = dataManager->openFile(filePath);
 
-	AwFileIO *newReader = plugin_manager->getReaderToOpenFile(filePath);
+//	AwFileIO *newReader = plugin_manager->getReaderToOpenFile(filePath);
 
 	// A t on un plugin capable de lire le fichier selectionne ?
-	if (!newReader) {
-		QMessageBox::critical(this, tr("Error Opening File"), tr("No plug-ins can to read this file!\nCheck file formats or file rights."), QMessageBox::Discard);
+	if (res) {
+		if (res == AwDataManager::NoPluginFound) {
+			QMessageBox::critical(this, "Error Opening File", "No reader module is able to open the file.", QMessageBox::Discard);
+			return;
+		}
+		QMessageBox::critical(this, "Error Opening File", "Error when opening file.", QMessageBox::Discard);
 		return;
 	}
 
-	if (newReader->flags() & FileIO::TriggerChannelIsWritable)
-		connect(newReader, SIGNAL(triggerValuesWritten(bool, int)), this, SLOT(displayReaderTriggerStatus(bool, int)));
+	auto reader = dataManager->reader();
+
+	if (reader->flags() & FileIO::TriggerChannelIsWritable)
+		connect(reader, SIGNAL(triggerValuesWritten(bool, int)), this, SLOT(displayReaderTriggerStatus(bool, int)));
 
 	closeFile();
 	
-	int res = newReader->openFile(filePath);
+	//int res = newReader->openFile(filePath);
 
-	if (res != AwFileIO::NoError) {
-		QString resString = newReader->errorMessage();
+	//if (res != AwFileIO::NoError) {
+	//	QString resString = newReader->errorMessage();
 
-		if (resString.isEmpty()) {
-			switch (res) {
-			case AwFileIO::BadHeader:
-				resString = tr("Invalid header information");
-				break;
-			case AwFileIO::FileAccess:
-				resString = tr("Can't open the file.\nCheck rights on file.");
-				break;
-			case AwFileIO::WrongFormat:
-				resString = tr("File format is invalid.\nCheck that extension matches format.");
-				break;
-			}
-		}
-		QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
-		return;
-	}
-	auto dataManager = AwDataManager::instance();
-	dataManager->openFile(newReader, filePath);
+	//	if (resString.isEmpty()) {
+	//		switch (res) {
+	//		case AwFileIO::BadHeader:
+	//			resString = tr("Invalid header information");
+	//			break;
+	//		case AwFileIO::FileAccess:
+	//			resString = tr("Can't open the file.\nCheck rights on file.");
+	//			break;
+	//		case AwFileIO::WrongFormat:
+	//			resString = tr("File format is invalid.\nCheck that extension matches format.");
+	//			break;
+	//		}
+	//	}
+	//	QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
+	//	return;
+	//}
+
 
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
 	m_saveFileName.clear();
@@ -180,8 +188,8 @@ void AnyWave::openFile(const QString &path)
 	m_lastDirOpen = dataManager->value(keys::data_dir).toString();
 
 	// Update Window title
-	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(newReader->infos.channelsCount()));
-	title += tr("Duration: ") + AwUtilities::time::timeToString(newReader->infos.totalDuration());
+	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(dataManager->rawChannels().size()));
+	title += tr("Duration: ") + AwUtilities::time::timeToString(dataManager->totalDuration());
 	this->setWindowTitle(title);
 
 	actionMontage->setEnabled(true);
@@ -214,7 +222,7 @@ void AnyWave::openFile(const QString &path)
 	for (auto action : m_actions)
 		action->setEnabled(true);
 
-	if (!newReader->triggerChannels().isEmpty()) {
+	if (!dataManager->reader()->triggerChannels().isEmpty()) {
 		if (aws->value(aws::auto_trigger_parsing).toBool()) {
 			AwTriggerParsingDialog dlg;
 			if (dlg.exec() == QDialog::Accepted)
@@ -231,10 +239,10 @@ void AnyWave::openFile(const QString &path)
 	if (openWithDialog)
 		aws->addRecentFilePath(filePath);
 
-	if (newReader->hasVideoFile()) {
+	if (dataManager->reader()->hasVideoFile()) {
 		m_dockWidgets["video"]->show();
-		m_player->setVideoSyncSettings(newReader->infos.videoSynch());
-		m_player->setUrl(QUrl::fromLocalFile(newReader->videoPath()));
+		m_player->setVideoSyncSettings(dataManager->reader()->infos.videoSynch());
+		m_player->setUrl(QUrl::fromLocalFile(dataManager->reader()->videoPath()));
 	}
 }
 

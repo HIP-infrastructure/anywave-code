@@ -44,7 +44,7 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
-	m_ds = nullptr;
+	//m_ds = nullptr;
 	m_pidCounter = 0;
 
 	if (m_server->listen(QHostAddress::Any, port)) {
@@ -67,42 +67,42 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	}
 }
 
-AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
-{
-	m_thread = new QThread(this);
-	m_server = new QTcpServer(this);
-	m_serverPort = 0;
-	m_ds = nullptr;
-	m_pidCounter = 0;
-
-	if (m_server->listen(QHostAddress::Any, port)) {
-		m_serverPort = m_server->serverPort();
-		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(m_serverPort), this);
-		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
-		if (reader->openFile(dataPath) != AwFileIO::NoError) {
-			emit log(QString("Unable to open %1").arg(dataPath));
-			m_isListening = false;
-			return;
-		}
-		m_ds = new AwDataSet(reader, this);
-		//m_ds = AwDataServer::getInstance()->duplicate(reader);
-		//m_ds->openConnection(this);
-		m_ds->connect(this);
-		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
-		m_isListening = true;
-	}
-	else 
-		m_isListening = false;
-
-	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
-	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
-
-	setHandlers();
-	if (m_isListening) {
-		moveToThread(m_thread);
-		m_thread->start();
-	}
-}
+//AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
+//{
+//	m_thread = new QThread(this);
+//	m_server = new QTcpServer(this);
+//	m_serverPort = 0;
+//	//m_ds = nullptr;
+//	m_pidCounter = 0;
+//
+//	if (m_server->listen(QHostAddress::Any, port)) {
+//		m_serverPort = m_server->serverPort();
+//		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(m_serverPort), this);
+//		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
+//		if (reader->openFile(dataPath) != AwFileIO::NoError) {
+//			emit log(QString("Unable to open %1").arg(dataPath));
+//			m_isListening = false;
+//			return;
+//		}
+//		m_ds = new AwDataSet(reader, this);
+//		//m_ds = AwDataServer::getInstance()->duplicate(reader);
+//		//m_ds->openConnection(this);
+//		m_ds->connect(this);
+//		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
+//		m_isListening = true;
+//	}
+//	else 
+//		m_isListening = false;
+//
+//	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
+//	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
+//
+//	setHandlers();
+//	if (m_isListening) {
+//		moveToThread(m_thread);
+//		m_thread->start();
+//	}
+//}
 
 AwRequestServer::~AwRequestServer()
 {
@@ -250,8 +250,10 @@ void AwRequestServer::initDebugProcess(AwScriptProcess* p)
 	auto dm = AwDataManager::instance();
 	if (dm->isFileOpen()) {
 		p->pdi.input.setReader(AwDataManager::instance()->reader());
-		p->pdi.input.addChannels(AwDataManager::instance()->rawChannels(), true);
+		p->pdi.input.setNewChannels(AwDataManager::instance()->rawChannels(), true);
 		p->pdi.input.settings = dm->settings();
+		connect(p, SIGNAL(sendMarkers(AwMarkerList*)), dm->markerManager(), SLOT(addMarkers(AwMarkerList*)));
+		connect(p, SIGNAL(sendMarker(AwMarker *)), dm->markerManager(), SLOT(addMarker(AwMarker*)));
 	}
 }
 
@@ -260,9 +262,6 @@ AwScriptProcess* AwRequestServer::newDebugProcess()
 	auto p = new AwScriptProcess;
 	AwPidManager::instance()->createNewPid(p);
 	initDebugProcess(p);
-	//// init input for process using AwSettings
-	//p->pdi.input.setReader(AwDataManager::instance()->reader());
-	//p->pdi.input.addChannels(AwDataManager::instance()->rawChannels(), true);
 	m_processes << p;
 	return p;
 }

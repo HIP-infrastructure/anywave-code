@@ -27,18 +27,24 @@
 
 #include <QObject>
 #include <AwChannel.h>
-
-class AwFileIO;
 #include <filter/AwFilterSettings.h>
 #include <AwKeys.h>
+#include <AwFileIO.h>
+class AwMontageManager;
+class AwMarkerManager;
+class AwDataServer;
+
 
 class AwDataManager : public QObject
 {
 	Q_OBJECT
-	
+		
 public:
 	static AwDataManager* instance();
 	static AwDataManager* newInstance();
+
+	enum Status { NoError = AwFileIO::NoError, FormatError = AwFileIO::WrongFormat, HeaderError = AwFileIO::BadHeader, 
+		FileAccessError = AwFileIO::FileAccess, NoPluginFound };
 
 	inline QVariant value(const QString& key) { return m_settings.value(key); }
 	void closeFile();
@@ -47,6 +53,9 @@ public:
 	const AwChannelList& rawChannels();
 	inline AwFileIO* reader() { return m_reader; }
 	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
+	inline AwMontageManager* montageManager() { return m_montageManager; }
+	inline AwMarkerManager* markerManager() { return m_markerManager; }
+	inline AwDataServer* dataServer() { return m_dataServer; }
 	// convenience methods
 	inline bool isFileOpen() { return m_reader != nullptr; }
 	inline QString dataDir() { return m_settings.value(keys::data_dir).toString(); }
@@ -59,8 +68,9 @@ public:
 	inline QString mtgFilePath() { return m_settings.value(keys::montage_file).toString(); }
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QVariantMap& settings() { return m_settings; }
-public slots:
-	void openFile(AwFileIO* reader, const QString& filePath = QString());
+
+	QStringList badLabels();
+	int openFile(const QString& filePath = QString());
 protected:
 	AwDataManager();
 
@@ -69,4 +79,7 @@ protected:
 	QVariantMap m_settings;
 	AwChannelList m_tmp;
 	static AwDataManager* m_instance;
+	AwMontageManager* m_montageManager;
+	AwMarkerManager* m_markerManager;
+	AwDataServer* m_dataServer;
 };

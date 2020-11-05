@@ -218,7 +218,6 @@ void AwDataConnection::createAVGChannel(AwChannel *channel)
 		m_avg[channel->type()] = chan;
 		prepareAVGChannel(m_avg[channel->type()]);
 	}
-
 }
 
 void AwDataConnection::deleteAVGChannels()
@@ -437,10 +436,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		m_client->setError(QString("start position beyond total duration."));
 		return;
 	}
-
-
-
-
 	// Build a full list of channels to load.
 	// The list is based on channelsToLoad plus channels required for montage.
 	AwChannelList montageChannels;

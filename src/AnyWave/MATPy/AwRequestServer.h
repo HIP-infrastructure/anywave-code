@@ -30,7 +30,7 @@
 class AwScriptProcess;
 #include <AwDataClient.h>
 #include "Data/AwDataSet.h"
-class AwFileIO;
+//class AwFileIO;
 
 
 class AwRequestServer : public AwDataClient
@@ -40,7 +40,7 @@ public:
 	// default constructor
 	explicit AwRequestServer(quint16 port = 0, QObject *parent = 0);
 	// constructor that spawn a dedicated data server for the specified file. if port is specified, listen on that port.
-	AwRequestServer(const QString& dataPath, quint16 port = 0, QObject *parent = 0);
+//	AwRequestServer(const QString& dataPath, quint16 port = 0, QObject *parent = 0);
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
@@ -65,7 +65,7 @@ protected:
 	QThread *m_thread;
 	bool m_isListening;
 	quint16 m_serverPort;
-	AwDataSet *m_ds;
+//	AwDataSet *m_ds;
 	int m_pidCounter;
 	bool m_debugMode;
 	QList<AwScriptProcess*> m_processes;	// this list will contain instanciated process when plugin_debug option is active

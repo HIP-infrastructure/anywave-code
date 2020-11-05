@@ -43,7 +43,7 @@ public:
 	AwMATPyServer* newInstance();
 	// start a thread in which the server will listen and connect to the current data server.
 	bool start(quint16 port = 0);
-	bool start(const QString& filePath, AwScriptProcess *process, quint16 port = 0);
+//	bool start(const QString& filePath, AwScriptProcess *process, quint16 port = 0);
 	void stop();
 	bool isListening();
 	quint16 serverPort(); 

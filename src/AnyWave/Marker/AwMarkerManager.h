@@ -45,6 +45,7 @@ public:
 
 	/** getInstance() **/
 	static AwMarkerManager *instance();
+	static AwMarkerManager* newInstance();
 
 	/** Donne la liste de tous les marqueurs. **/
 	AwMarkerList getMarkers();
@@ -54,7 +55,8 @@ public:
 	/** Get markers from position s1 to position s2 **/
 	AwMarkerList getMarkers(float s1, float s2);
 
-	inline AwMarkerManagerSettings *ui() { return m_ui; }
+//	inline AwMarkerManagerSettings *ui() { return m_ui; }
+	AwMarkerManagerSettings* ui();
 	void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();

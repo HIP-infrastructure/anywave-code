@@ -7,6 +7,7 @@
 #include "Display/AwDisplay.h"
 #include "Marker/AwMarkerManager.h"
 #include <AwKeys.h>
+#include "Plugin/AwPluginManager.h"
 
 AwDataManager* AwDataManager::m_instance = nullptr;
 
@@ -17,16 +18,31 @@ AwDataManager* AwDataManager::instance()
 	return m_instance;
 }
 
+/// <summary>
+/// Instantiante a new object DataManager.
+/// Also create new instances of MontageManager and DataServer
+/// This is designed to be used when opening a new data file in a process or using the command line.
+/// </summary>
+/// <returns></returns>
 AwDataManager* AwDataManager::newInstance()
 {
-	return  new AwDataManager;
+	auto dm = new AwDataManager;
+	dm->m_montageManager = AwMontageManager::newInstance();
+	dm->m_montageManager->setParent(dm);
+	dm->m_dataServer = AwDataServer::newInstance();
+	dm->m_dataServer->setParent(dm);
+
+	return dm;
 }
 
 AwDataManager::AwDataManager() : QObject(nullptr)
 {
 	m_reader = nullptr;
+	m_montageManager = AwMontageManager::instance();
+	m_dataServer = AwDataServer::getInstance();
+	m_markerManager = AwMarkerManager::instance();
+	connect(&m_filterSettings, &AwFilterSettings::settingsChanged, m_montageManager, &AwMontageManager::setNewFilters);
 }
-
 
 void AwDataManager::closeFile()
 {
@@ -35,7 +51,6 @@ void AwDataManager::closeFile()
 		m_reader = nullptr;
 	}
 }
-
 
 const AwChannelList& AwDataManager::rawChannels()
 {
@@ -59,9 +74,30 @@ const AwChannelList& AwDataManager::selectedChannels()
 	return m_tmp;
 }
 
-void AwDataManager::openFile(AwFileIO* reader, const QString& filePath)
+QStringList AwDataManager::badLabels()
+{
+	QStringList list;
+	if (!m_reader)
+		return list;
+	list = m_montageManager->badLabels();
+	if (list.isEmpty()) {
+		if (QFile::exists(this->badFilePath()))
+			list = m_montageManager->loadBad(this->badFilePath());
+	}
+	return list;
+}
+
+int AwDataManager::openFile(const QString& filePath)
 {
 	closeFile();
+	//m_reader = reader;
+	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(filePath);
+	if (reader == nullptr)
+		return -1;
+	int status = reader->openFile(filePath);
+	if (status)   // status >0 means error when opening file, return status code
+		return status;
+	// ok we have a valid reader
 	m_reader = reader;
 	m_settings[keys::can_write_triggers] = m_reader->flags() & FileIO::TriggerChannelIsWritable && !m_reader->triggerChannels().isEmpty();
 	// if successfully open : check for special plugin which are designed to open a folder and not a file directly.
@@ -107,15 +143,16 @@ void AwDataManager::openFile(AwFileIO* reader, const QString& filePath)
 	if (!m_settings.contains(data_info::samples))
 		m_settings[data_info::samples] = reader->infos.totalSamples();
 
-	AwDataServer::getInstance()->setMainReader(m_reader);
+	//AwDataServer::getInstance()->setMainReader(m_reader);
+	m_dataServer->setMainReader(m_reader);
 
 	// read flt file before loading the montage.
 	if (m_filterSettings.initWithFile(fullDataFilePath)) {
 		// try to init from the reader channels if the loading of .flt file failed.
 		m_filterSettings.initWithChannels(m_reader->infos.channels());
 	}
-	AwMontageManager::instance()->newMontage(m_reader);
-	
+	//AwMontageManager::instance()->newMontage(m_reader);
+	m_montageManager->newMontage(m_reader);
 	auto display = AwDisplay::instance();
 	if (display) {
 		// LAST step => update Display Manager with new file.
@@ -124,7 +161,7 @@ void AwDataManager::openFile(AwFileIO* reader, const QString& filePath)
 
 	// Are there events?
 	if (m_reader->infos.blocks().at(0)->markersCount()) 
-		AwMarkerManager::instance()->addMarkers(m_reader->infos.blocks().at(0)->markers());
-	AwMarkerManager::instance()->setFilename(fullDataFilePath);
-
+		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+	m_markerManager->setFilename(fullDataFilePath);
+	return 0;
 }

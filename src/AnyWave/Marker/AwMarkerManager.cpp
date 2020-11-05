@@ -54,23 +54,29 @@ AwMarkerManager *AwMarkerManager::instance()
 	return m_instance;
 }
 
+AwMarkerManager* AwMarkerManager::newInstance()
+{
+	return new AwMarkerManager;
+}
+
 AwMarkerManager::AwMarkerManager()
 {
-	// instantiance UI Widget
-	// The widget will be inserted in a QDockWidget later and its parent will be set
-	m_ui = new AwMarkerManagerSettings(m_markers);
-	
-	// connections
-	connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
-	connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
-	connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
-	connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
-	connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
+	//// instantiance UI Widget
+	//// The widget will be inserted in a QDockWidget later and its parent will be set
+	//m_ui = new AwMarkerManagerSettings(m_markers);
+	//
+	//// connections
+	//connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
+	//connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
+	//connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
+	//connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
+	//connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
+	m_ui = nullptr;
 	AwDebugLog::instance()->connectComponent(QString("Marker Manager"), this);
 
 	m_needSorting = true;
 	m_markersModified = false;
-	m_dock = NULL;
+	m_dock = nullptr;
 	m_markerInspector = new AwMarkerInspector();	
 }
 
@@ -78,6 +84,20 @@ AwMarkerManager::~AwMarkerManager()
 {
 }
 
+
+AwMarkerManagerSettings* AwMarkerManager::ui()
+{
+	if (m_ui == nullptr) {
+		m_ui = new AwMarkerManagerSettings(m_markers);
+		// connections
+		connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
+		connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
+		connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
+		connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
+		connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
+	}
+	return m_ui;
+}
 
 //
 // getMarkers()
@@ -188,6 +208,7 @@ void AwMarkerManager::loadMarkers()
 
 void AwMarkerManager::saveMarkers()
 {
+	QMutexLocker lock(&m_mutex); // threading lock
 	QString filename = QFileDialog::getSaveFileName(0, tr("Save Markers"), "/", "Markers (*.mrk)");
 
 	if (filename.isEmpty())
@@ -210,7 +231,7 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	AwMarkerList markers;
 	// check if sender is a process
 	AwBaseProcess *p = qobject_cast<AwBaseProcess *>(sender());
-	if (p != NULL) {
+	if (p != nullptr) {
 		markers = AwMarker::duplicate(*list);
 	}
 	else 
@@ -223,7 +244,7 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 	m_needSorting = false;
 	m_ui->setMarkers(m_markers);
-	if (p != NULL)
+	if (p != nullptr)
 		p->setMarkersReceived();
 }
 
@@ -232,6 +253,7 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 //
 void AwMarkerManager::addMarkers(const AwMarkerList& list)
 {
+	QMutexLocker lock(&m_mutex); // threading lock
 	AwMarkerList temp_list;
 	foreach (AwMarker *m, list)
 		temp_list << new AwMarker(m);
@@ -337,7 +359,6 @@ void AwMarkerManager::quit()
 
 void AwMarkerManager::closeFile()
 {
-	//checkForBIDSMods();
 	// if BIDS is active => update or create events.tsv file
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();

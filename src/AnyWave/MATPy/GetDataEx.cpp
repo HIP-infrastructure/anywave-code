@@ -39,6 +39,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <AwKeys.h>
+#include "Data/AwDataManager.h"
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
 {
@@ -47,8 +48,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	QDataStream fromClient(client);
 	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
+	AwDataManager* dm = AwDataManager::instance();  // get current data manager which holds informations of current open file
 
-	AwFileIO* reader = process->pdi.input.reader();
+	//AwFileIO* reader = dm->reader();
 	QString json;
 	fromClient >> json;
 	int status = 0;
@@ -61,12 +63,13 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	float fileDuration = process->pdi.input.settings.value(keys::file_duration).toDouble();
 	float start = 0., duration = fileDuration;
 	AwFileIO *localReader = nullptr;
+	
 	requestedChannels = process->pdi.input.channels();
 	if (json.isEmpty()) { // no args set
 
 		// make sure we are working on a open file :
-		if (reader == nullptr) {
-			emit log("ERROR: null reader pointer. Nothing done.");
+		if (!dm->isFileOpen()) {
+			emit log("ERROR: no file open in AnyWave. Nothing done.");
 			toClient << QString("AnyWave has no file open.");
 			response.send(-1);
 			return;
@@ -74,7 +77,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 
 		// get input channels of process
 		if (requestedChannels.isEmpty())
-			requestedChannels = reader->infos.channels();
+			requestedChannels = dm->rawChannels();
 
 		input_markers << new AwMarker("global", 0., fileDuration);
 	}
@@ -87,26 +90,38 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			response.send(-1);
 			return;
 		}
-		QStringList use_markers, skip_markers, labels, types, pickFrom;
-		QString file;
-		bool usingFile = false;
-
-		if (cfg.contains("skip_bad_channels"))
-			skipBad = cfg.value("skip_bad_channels").toBool();
-
-		if (cfg.contains("data_file")) {
-			file = cfg.value("data_file").toString();
-			localReader = AwPluginManager::getInstance()->getReaderToOpenFile(file);
-			if (localReader == nullptr) {
-				toClient << QString("file: %1 could not be open.").arg(file);
+		// if json string is passed and there is no current open file in AnyWave, than the key data_file must exist
+		if (!dm->isFileOpen()) {
+			if (!cfg.contains(keys::data_path)) {
+				error = "ERROR: no file open in AnyWave and the key data_path is not set. Nothing done.";
+				emit log(error);
+				toClient << error;
 				response.send(-1);
 				return;
 			}
-			else {
-				usingFile = true;
-				requestedChannels = localReader->infos.channels();
-			}
+
 		}
+		// if data_path is set, instantiate a new DataManager and make it handle the file
+		if (cfg.contains(keys::data_path)) {
+			auto filePath = cfg.value(keys::data_path).toString();
+			dm = AwDataManager::newInstance();
+			auto res = dm->openFile(filePath);
+			if (res) {
+				error = QString("ERROR: Unable to open file %1.").arg(filePath);
+				emit log(error);
+				toClient << error;
+				response.send(-1);
+				delete dm;
+				return;
+			}
+			requestedChannels = dm->rawChannels();
+		}
+
+		QStringList use_markers, skip_markers, labels, types, pickFrom;
+		QString file;
+
+		if (cfg.contains("skip_bad_channels"))
+			skipBad = cfg.value("skip_bad_channels").toBool();
 
 		// check for marker file
 		if (cfg.contains("marker_file")) {
@@ -117,9 +132,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			}
 		}
 
-		if (markers.isEmpty() && usingFile) {
+		if (markers.isEmpty()) {
 			// try to load the default .mrk that comes with the data file
-			auto mrkFile = localReader->infos.mrkFile();
+			auto mrkFile = dm->mrkFilePath();
 			if (QFile::exists(mrkFile)) 
 				markers = AwMarker::load(mrkFile);
 		}
@@ -140,17 +155,16 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			types = cfg.value("types").toStringList();
 		
 		// check for channel source
-		if (cfg.contains("channels_source")) {
-			auto source = cfg.value("channels_source").toString().simplified();
+		if (cfg.contains(keys::channels_source)) {
+			auto source = cfg.value(keys::channels_source).toString().simplified();
 			if (source == "montage") {
-				auto montage = AwMontageManager::instance()->channels();
-				if (!montage.isEmpty())
-					requestedChannels = montage;
+				requestedChannels = dm->montage();
 			}
-			else if (source == "as recorded")
-				requestedChannels = reader->infos.channels();
+			else if (source == "raw")
+				requestedChannels = dm->rawChannels();
+			else if (source == "selection")
+				requestedChannels = dm->selectedChannels();
 		}
-
 		bool usingMarkers = !use_markers.isEmpty();
 		bool skippingMarkers = !skip_markers.isEmpty();
 		if (cfg.contains("start"))
@@ -211,7 +225,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	}
 	// remove possible bad channels 
 	if (skipBad)
-		AwMontageManager::instance()->removeBadChannels(requestedChannels);
+		dm->montageManager()->removeBadChannels(requestedChannels);
 	requestedChannels = AwChannel::duplicateChannels(requestedChannels);
 
 	// reading data
@@ -266,5 +280,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		}
 	}
 	AW_DESTROY_LIST(requestedChannels);
+
+	// check for data manager used, if not the main one, destroy it
+	if (dm != AwDataManager::instance())
+		delete dm;
 	emit log("Done.");
 }

@@ -111,10 +111,12 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	
 	// Montage
 	AwMontageManager* montage_manager = AwMontageManager::instance();
-	montage_manager->setParent(this);
+	montage_manager->setParent(dm);
    // marker
 	AwMarkerManager* marker_manager = AwMarkerManager::instance();
-	marker_manager->setParent(this);
+	marker_manager->setParent(dm);
+	// data server must be a child of DataManager
+	AwDataServer::getInstance()->setParent(dm);
 
 	AwArguments arguments;
 	int operation = aw::commandLine::NoOperation;
@@ -154,8 +156,8 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 
-	AwDataServer *data_server = AwDataServer::getInstance();
-	data_server->setParent(this);
+	//AwDataServer *data_server = AwDataServer::getInstance();
+	//data_server->setParent(this);
 
 	AwDebugLog *adl = AwDebugLog::instance();
 	adl->setParent(this);
@@ -269,8 +271,6 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		connect(m_player, &AwVideoPlayer::changeSyncSettings, this, &AnyWave::editVideoSyncSettings);
 		connect(m_display, &AwDisplay::draggedCursorPositionChanged, m_player, &AwVideoPlayer::setPositionFromSignals);
 	}
-
-
 
 	// AwSourceManager
 	AwSourceManager::instance()->setParent(this);
@@ -439,7 +439,7 @@ void AnyWave::quit()
 	AwTopoBuilder::destroy();
 
 	// Mappings cleanup
-	auto dockEEG = m_dockWidgets["eeg_mapping"];
+	auto dockEEG = m_dockWidgets.value("eeg_mapping");
 
 	if (dockEEG)	{
 		auto dock = static_cast<AwDockMapping *>(dockEEG);
@@ -449,7 +449,7 @@ void AnyWave::quit()
 		m_dockWidgets.remove("eeg_mapping");
 	}
 
-	auto dockMEG = m_dockWidgets["meg_mapping"];
+	auto dockMEG = m_dockWidgets.value("meg_mapping");
 
 	if (dockMEG)	{
 		auto dock = static_cast<AwDockMapping *>(dockMEG);

@@ -38,9 +38,7 @@ namespace keys {
 	constexpr auto bad_file = "bad_file";			// path to .bad file
 	constexpr auto sel_file = "sel_file";			// path to .sel file (channel selection)
 	constexpr auto flt_file = "flt_file";			// path to .flt file (filters)
-	/// <summary>
-	/// 
-	/// </summary>
+
 	constexpr auto file_duration = "file_duration";
 	constexpr auto bad_labels = "bad_labels";
 	constexpr auto current_pos_in_file = "current_pos_in_file";
@@ -77,5 +75,7 @@ namespace keys {
 	constexpr auto bipolar_ieeg = "bipolar_ieeg";
 	constexpr auto monopolar = "monopolar";
 	constexpr auto none = "none";
+	// keys for MATLAB/Python API
+	constexpr auto channels_source = "channels_source";
 
 }

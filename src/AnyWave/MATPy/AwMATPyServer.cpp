@@ -83,24 +83,24 @@ void AwMATPyServer::deleteDuplicatedInstance(AwMATPyServer *instance)
 	delete instance;
 }
 
-bool AwMATPyServer::start(const QString& dataPath, AwScriptProcess *p, quint16 port)
-{
-	if (m_rs) {
-		delete m_rs;
-		m_rs = nullptr;
-	}
-	AwPidManager::instance()->createNewPid(p);
-	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
-	if (reader == nullptr)
-		return false;
-	m_rs = new AwRequestServer(dataPath, port, p);
-	if (!m_rs->isListening()) { // failed to listen on TCP port
-		delete m_rs;
-		m_rs = nullptr;
-		return false;
-	}
-	return true;
-}
+//bool AwMATPyServer::start(const QString& dataPath, AwScriptProcess *p, quint16 port)
+//{
+//	if (m_rs) {
+//		delete m_rs;
+//		m_rs = nullptr;
+//	}
+//	AwPidManager::instance()->createNewPid(p);
+//	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
+//	if (reader == nullptr)
+//		return false;
+//	m_rs = new AwRequestServer(dataPath, port, p);
+//	if (!m_rs->isListening()) { // failed to listen on TCP port
+//		delete m_rs;
+//		m_rs = nullptr;
+//		return false;
+//	}
+//	return true;
+//}
 
 bool AwMATPyServer::isListening()
 {
