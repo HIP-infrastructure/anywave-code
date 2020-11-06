@@ -585,6 +585,7 @@ void AnyWave::createUserDirs()
 
 #else
 	aws->setValue(aws::python_module_dir, appPath + "/Python");
+	aws->setValue(aws::python_package_dir, appPath + "/Python");
 	appDir.cd("Plugins");
 	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
 #endif

@@ -281,9 +281,11 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 return;
 		 // add extra parameters to descMap
 		 descMap["plugin_dir"] = pluginPath;
+		 descMap["script_path"] = pythonCode;
 		
 		 //
 		 isMATLABCompiled = descMap.contains("compiled plugin");
+		 isPythonCompiled = descMap.contains("compiled python plugin");
 		 // now instantiante objects depending on plugin type
 		 // check for MATLAB connection before
 		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
@@ -292,12 +294,12 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->type = type;
 		//	 plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
 			 plugin->init(descMap);
-			 if (isMATLABCompiled) {
-				 plugin->setAsCompiled(true);
+			// if (isMATLABCompiled) {
+			//	 plugin->setAsCompiled(true);
 			//	 plugin->setScriptPath(exePluginPath);
-			 }
-			 else
-				 plugin->setScriptPath(pluginPath);
+			// }
+			// else
+			//	 plugin->setScriptPath(pluginPath);
 			// plugin->setPluginDir(pluginPath);
 			 //plugin->category = descMap.value("category");
 			// setFlagsForScriptPlugin(plugin, descMap.value("flags"));
@@ -312,12 +314,12 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->type = type;
 			// plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
 			 plugin->init(descMap);
-			 if (isPythonCompiled) {
-				 plugin->setAsCompiled(true);
-				 plugin->setScriptPath(exePluginPath);
-			 }
-			 else
-				 plugin->setScriptPath(pluginPath);
+			 //if (isPythonCompiled) {
+				// plugin->setAsCompiled(true);
+				// plugin->setScriptPath(exePluginPath);
+			 //}
+			 //else
+				// plugin->setScriptPath(pluginPath);
 			 //plugin->setPluginDir(pluginPath);
 			// plugin->category = descMap.value("category");
 			 //setFlagsForScriptPlugin(plugin, descMap.value("flags"));

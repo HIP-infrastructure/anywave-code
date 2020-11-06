@@ -28,6 +28,7 @@
 #include <QTextStream>
 #include <AwKeys.h>
 #include "Plugin/AwPluginManager.h"
+#include "Data/AwDataManager.h"
 
 //void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
 //{
@@ -38,14 +39,18 @@
 
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
-	p->setScriptPath(m_path);
-	p->pdi.input.settings[keys::plugin_dir] = m_pluginDir;
-
+	//p->setScriptPath(m_path);
+	//p->pdi.input.settings[keys::plugin_dir] = m_pluginDir;
+	// set it a copy of all settings from data manager
+	p->pdi.input.settings.unite(AwDataManager::instance()->settings());
+	// merge also settings proper to plugin
+	p->pdi.input.settings.unite(m_settings);
 	// Fixed input as any channels by default
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
 		p->pdi.addInputChannel(-1, 1, 0);
 		p->pdi.setInputFlags(m_inputFlags);
 	}
+	p->setPlugin(this);
 }
 
 void AwScriptPlugin::init(const QMap<QString, QString>& map)
@@ -72,10 +77,12 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 				m_flags |= flagsMap.value(lowerT);
 		}
 	}
-	m_pluginDir = map.value("plugin_dir");
+	// add the desc map from desct.txt has values in the plugin settings map
+	for (auto key : map.keys())
+		m_settings.insert(key, map.value(key));
 }
 
 
-void AwScriptPlugin::checkIOForProcess(AwScriptProcess *p)
-{
-}
+//void AwScriptPlugin::checkIOForProcess(AwScriptProcess *p)
+//{
+//}

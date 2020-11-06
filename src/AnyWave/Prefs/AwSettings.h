@@ -51,6 +51,7 @@ namespace aws {
 	// common dirs
 	constexpr auto home_dir = "home_dir";
 	constexpr auto python_module_dir = "python_module_dir";
+	constexpr auto python_package_dir = "python_package_dir";
 	constexpr auto app_dir = "app_dir";
 	constexpr auto app_resource_dir = "app_resource_dir";
 	constexpr auto app_plugins_dir = "app_plugins_dir";

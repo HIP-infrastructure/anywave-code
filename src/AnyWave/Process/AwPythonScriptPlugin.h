@@ -54,7 +54,7 @@ class AwPythonScriptPlugin : public AwScriptPlugin
 
 public:
 	AwPythonScriptPlugin() : AwScriptPlugin() { m_backend = AwScriptPlugin::Python; }
-
+	//void init(const QMap<QString, QString>& map) override;
 	AwPythonScriptProcess *newInstance();
 };
 
