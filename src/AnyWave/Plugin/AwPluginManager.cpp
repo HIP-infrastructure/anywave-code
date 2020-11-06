@@ -246,7 +246,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 dirs.removeAll("..");
 	 for (auto folder : dirs) {
 		 QString name = folder;
-		 QString desc, processType, category, compiledPath, flags, inputFlags;
+		 QMap<QString, QString> descMap;
+		// QString desc, processType, category, compiledPath, flags, inputFlags;
 		 int type = AwProcessPlugin::Background;	// default type if none defined
 		 bool isMATLABCompiled = false, isPythonCompiled = false;
 		 QString pluginPath = dir.absolutePath() + "/" + folder;
@@ -264,82 +265,43 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 QTextStream stream(&file);
 		 if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 			 continue;
+		 QStringList splitedLine;
 		 while (!stream.atEnd()) {
 			 auto line = stream.readLine();
 			 if (line.startsWith("#"))
 				 continue;
-			 if (line.contains("name")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 name = res.at(1).trimmed();
-			 }
-			 else if (line.contains("description")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 desc = res.at(1).trimmed();
-			 }
-			 else if (line.contains("type")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2) {
-					 processType = res.at(1).trimmed().toLower();
-					 if (processType == "background")
-						 type = AwProcessPlugin::Background;
-					 if (processType == "display")
-						 type = AwProcessPlugin::Display;
-					 if (processType == "displaybackground")
-						 type = AwProcessPlugin::DisplayBackground;
-				 }
-			 }
-			 else if (line.contains("compiled plugin")) { // for backward compatibility, we keep the compiled plugin for MATLAB plugins
-				 QStringList res = line.split("=");
-				 if (res.size() == 2) {
-					 isMATLABCompiled = true;
-					 compiledPath = res.at(1).trimmed();
-					 exePluginPath = QString("%1/%2").arg(pluginPath).arg(compiledPath);
-				 }
-			 }
-			 else if (line.contains("compiled python plugin")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2) {
-					 isPythonCompiled = true;
-					 compiledPath = res.at(1).trimmed();
-					 exePluginPath = QString("%1/%2").arg(pluginPath).arg(compiledPath);
-				 }
-			 }
-			 else if (line.contains("category")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 category = res.at(1).trimmed();
-			 }
-			 else if (line.contains("input_flags")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 inputFlags = res.at(1).trimmed();
-			 }
-			 else if (line.contains("flags")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 flags = res.at(1).trimmed();
-			 }
+			splitedLine = line.split("=");
+			if (splitedLine.size() == 2)
+				descMap[splitedLine.first().trimmed()] = splitedLine.last().trimmed();
 		 }
 		 file.close();
+		 if (descMap.isEmpty())
+			 return;
+		 if (!descMap.contains("name") && !descMap.contains("description"))
+			 return;
+		 // add extra parameters to descMap
+		 descMap["plugin_dir"] = pluginPath;
+		
+		 //
+		 isMATLABCompiled = descMap.contains("compiled plugin");
 		 // now instantiante objects depending on plugin type
 		 // check for MATLAB connection before
 		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
 		 if (isMATLABScript || isMATLABCompiled) {
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
 			 plugin->type = type;
-			 plugin->setNameAndDesc(name, desc);
+		//	 plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
+			 plugin->init(descMap);
 			 if (isMATLABCompiled) {
 				 plugin->setAsCompiled(true);
-				 plugin->setScriptPath(exePluginPath);
+			//	 plugin->setScriptPath(exePluginPath);
 			 }
 			 else
 				 plugin->setScriptPath(pluginPath);
-			 plugin->setPluginDir(pluginPath);
-			 plugin->category = category;
-			 setFlagsForScriptPlugin(plugin, flags);
-			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			// plugin->setPluginDir(pluginPath);
+			 //plugin->category = descMap.value("category");
+			// setFlagsForScriptPlugin(plugin, descMap.value("flags"));
+			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
 				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
@@ -348,17 +310,18 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
 
 			 plugin->type = type;
-			 plugin->setNameAndDesc(name, desc);
+			// plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
+			 plugin->init(descMap);
 			 if (isPythonCompiled) {
 				 plugin->setAsCompiled(true);
 				 plugin->setScriptPath(exePluginPath);
 			 }
 			 else
 				 plugin->setScriptPath(pluginPath);
-			 plugin->setPluginDir(pluginPath);
-			 plugin->category = category;
-			 setFlagsForScriptPlugin(plugin, flags);
-			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			 //plugin->setPluginDir(pluginPath);
+			// plugin->category = descMap.value("category");
+			 //setFlagsForScriptPlugin(plugin, descMap.value("flags"));
+			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
 				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);

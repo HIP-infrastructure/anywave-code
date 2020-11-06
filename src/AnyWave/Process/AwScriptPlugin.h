@@ -39,6 +39,9 @@ public:
 	void setCompiled(bool flag = true) { m_isCompiled = flag; }
 	/** calls to runFromCommandLine redirected to run() : command line run options. **/
 	void runFromCommandLine() override { run(); }
+
+	// Map to hold int values associated with text flags name
+	static QMap<QString, int> pluginFlags;
 protected:
 	QString m_path;	// path to plugin executable file (optional)
 	bool m_isCompiled; // used for MATLAB compiled plugin
@@ -51,7 +54,8 @@ class AwScriptPlugin : public AwProcessPlugin
 public:
 	AwScriptPlugin() : AwProcessPlugin() { type = AwProcessPlugin::Background; m_isCompiled = false;}
 	enum Backends { Python, MATLAB};
-	void setNameAndDesc(const QString& name, const QString& description);
+	void init(const QMap<QString, QString>& map);
+	//void setNameAndDesc(const QString& name, const QString& description);
 	void setScriptPath(const QString& path) { m_path = path; }
 	void setPluginDir(const QString& dir) { m_pluginDir = dir; }
 	void setPluginBackend(int backend) { m_backend = backend; }

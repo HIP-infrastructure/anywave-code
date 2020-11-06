@@ -112,6 +112,9 @@ public:
 	inline AwDisplays& displays() { return m_displays; }
 	inline AwFilters& filters() { return m_filters; }
 
+	QMap<QString, int>& flagsMap() {  return m_MATPyPluginFlagsMap; }
+	QMap<QString, int>& inputFlagsMap() { return m_MATPyInputFlagsMap; 	}
+
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
 

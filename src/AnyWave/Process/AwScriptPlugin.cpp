@@ -27,13 +27,14 @@
 #include <QFile>
 #include <QTextStream>
 #include <AwKeys.h>
+#include "Plugin/AwPluginManager.h"
 
-void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
-{
-	name = n;
-	description = desc;
-	m_inputFlags = 0;
-}
+//void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
+//{
+//	name = n;
+//	description = desc;
+//	m_inputFlags = 0;
+//}
 
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
@@ -46,6 +47,34 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 		p->pdi.setInputFlags(m_inputFlags);
 	}
 }
+
+void AwScriptPlugin::init(const QMap<QString, QString>& map)
+{
+	name = map.value("name");
+	description = map.value("description");
+	m_inputFlags = 0;
+	if (map.contains("input_flags")) {
+		auto inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
+		QStringList tokens = map.value("input_flags").split(":");
+		for (auto t : tokens) {
+			auto lowerT = t.toLower();
+			if (inputFlagsMap.contains(lowerT))
+				m_inputFlags |= inputFlagsMap.value(lowerT);
+		}
+	}
+	m_flags = 0;
+	if (map.contains("flags")) {
+		auto flagsMap = AwPluginManager::getInstance()->flagsMap();
+		QStringList tokens = map.value("flags").split(":");
+		for (auto t : tokens) {
+			auto lowerT = t.toLower();
+			if (flagsMap.contains(lowerT))
+				m_flags |= flagsMap.value(lowerT);
+		}
+	}
+	m_pluginDir = map.value("plugin_dir");
+}
+
 
 void AwScriptPlugin::checkIOForProcess(AwScriptProcess *p)
 {
