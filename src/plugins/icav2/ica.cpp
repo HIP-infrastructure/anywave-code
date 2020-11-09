@@ -56,7 +56,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
     name = QString("ICA");
     description = QString("extract independent components");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
-	m_settings[processio::json_batch] = AwUtilities::json::fromJsonFileToString(":/ica/json/batch.json");
+	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/ica/json/batch.json");
 }
 
 ICA::~ICA()
@@ -72,7 +72,7 @@ bool ICA::showUi()
 		auto args = pdi.input.args();
 		args.unite(ui.args);
 
-		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[processio::data_dir].toString());
+		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[keys::data_dir].toString());
 		QFile test(testFile);
 		if (!test.open(QIODevice::WriteOnly)) {
 			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
@@ -87,7 +87,7 @@ bool ICA::showUi()
 }
 
 
-bool ICA::batchParameterCheck(const QVariantHash& hash)
+bool ICA::batchParameterCheck(const QVariantMap& hash)
 {
 	// this is an exhaustive test as we don't have a file open at this stage.
 	// just checking for some parameters: 
@@ -122,7 +122,7 @@ int ICA::initParameters()
 	}
 
 	m_channels = AwChannel::removeDoublons(m_channels);
-	auto badLabels = pdi.input.settings[processio::bad_labels].toStringList();
+	auto badLabels = pdi.input.settings[keys::bad_labels].toStringList();
 	if (args.contains("skip_bad")) {
 		if (!args.value("skip_bad").toBool())
 			badLabels.clear();
@@ -151,10 +151,10 @@ int ICA::initParameters()
 		return -1;
 	}
 
-	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[processio::data_path].toString()).arg(args["modality"].toString()));
+	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[keys::data_path].toString()).arg(args["modality"].toString()));
 
-	m_lpf = args.value(cl::lp).toDouble();
-	m_hpf = args.value(cl::hp).toDouble();
+	m_lpf = args.value(keys::lp).toDouble();
+	m_hpf = args.value(keys::hp).toDouble();
 	AwFilterSettings filterSettings;
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	filterSettings.apply(m_channels);
@@ -163,7 +163,7 @@ int ICA::initParameters()
 	bool use = args.contains("use_markers");
 	bool skip = args.contains("skip_markers");
 
-	auto fd = pdi.input.settings[processio::file_duration].toDouble();
+	auto fd = pdi.input.settings[keys::file_duration].toDouble();
 	if (use || skip) {
 		auto markers = AwMarker::duplicate(pdi.input.markers());
 		QStringList skippedMarkers, usedMarkers;
@@ -254,27 +254,27 @@ int ICA::initParameters()
 	n = nSamples;
 
 	// if output_file exists => use it as the full path to result file
-	if (args.contains(cl::output_file))
-		m_fileName = args.value(cl::output_file).toString();
+	if (args.contains(keys::output_file))
+		m_fileName = args.value(keys::output_file).toString();
 	else {
 		// default file name is the basename of the data file.
-		QFileInfo fi(pdi.input.settings[processio::data_path].toString());
+		QFileInfo fi(pdi.input.settings[keys::data_path].toString());
 		m_fileName = fi.fileName();
 	}
 
 	QString dir;
-	if (args.contains(cl::output_dir))
-		dir = args.value(cl::output_dir).toString();
+	if (args.contains(keys::output_dir))
+		dir = args.value(keys::output_dir).toString();
 	else
-		dir = pdi.input.settings[processio::data_dir].toString();
+		dir = pdi.input.settings[keys::data_dir].toString();
 
 	// output_prefix will override this
-	if (args.contains(cl::output_prefix))
-		m_fileName = QString("%1%2").arg(args.value(cl::output_prefix).toString()).arg(m_fileName);
+	if (args.contains(keys::output_prefix))
+		m_fileName = QString("%1%2").arg(args.value(keys::output_prefix).toString()).arg(m_fileName);
 
 	QString mod = args.value("modality").toString();
-	if (args.contains(cl::output_suffix))
-		m_fileName += QString("_%1_%2Hz_%3Hz_%4c%5.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(cl::output_suffix).toString());
+	if (args.contains(keys::output_suffix))
+		m_fileName += QString("_%1_%2Hz_%3Hz_%4c%5.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica
 	    m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	// generate full path

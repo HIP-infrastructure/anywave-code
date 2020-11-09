@@ -45,6 +45,7 @@
 AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent, Qt::WindowFlags windowFlags) :
 	AwBaseSignalView(parent, windowFlags, flags, settings)
 {
+	auto dm = AwDataManager::instance();
 	// Base constructor instantiates scene, view, navbar and marker bar objects
 	// replace some objects with subclasses
 	AwScene *scene = new AwScene(m_settings, m_physics, 0);
@@ -64,10 +65,19 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	// using Global Marker Bar representation => connect to MarkerManager
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
 	// filters
-	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
+	connect(&dm->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
 	m_flags = UpdateProcess;	// by default a view will inform process manager that its contents changed.
+
+	// init the view based on current open file
+	if (dm->isFileOpen()) {
+		dm->dataServer()->openConnection(client());
+		setTotalDuration(dm->totalDuration());
+		setRecordedTime(QTime::fromString(dm->value(keys::time).toString(), Qt::TextDate));
+		m_isActive = true;
+		reloadData();
+	}
 }
 
 
@@ -190,11 +200,12 @@ void AwSignalView::closeFile()
 	AwBaseSignalView::clean();
 	m_scene->reset();
 
-	// close connection to previous reader if any
-	if (m_reader) {
-		AwDataServer::getInstance()->closeConnection(client());
-		m_reader = NULL;
-	}
+	//// close connection to previous reader if any
+	//if (m_reader) {
+	//	AwDataServer::getInstance()->closeConnection(client());
+	//	m_reader = NULL;
+	//}
+	AwDataManager::instance()->dataServer()->closeConnection(client());
 
 	// remove virtual channels from main list
 	foreach (AwChannel *c, m_virtualChannels) {
@@ -209,16 +220,27 @@ void AwSignalView::closeFile()
 	m_isActive = false;
 }
 
-//
-// enableView()
-// this method will activate the view as available.
-// connection to data server is established, and widgets are enabled.
-void AwSignalView::enableView(AwFileIO *reader)
+////
+//// enableView()
+//// this method will activate the view as available.
+//// connection to data server is established, and widgets are enabled.
+//void AwSignalView::enableView(AwFileIO *reader)
+//{
+//	m_reader = reader;
+//	AwDataServer::getInstance()->openConnection(client());
+//	setTotalDuration(reader->infos.totalDuration());
+//	setRecordedTime(QTime::fromString(reader->infos.recordingTime(), Qt::TextDate));
+//	
+//	m_isActive = true;
+//	reloadData();
+//}
+
+void AwSignalView::enableView()
 {
-	m_reader = reader;
-	AwDataServer::getInstance()->openConnection(client());
-	setTotalDuration(reader->infos.totalDuration());
-	setRecordedTime(QTime::fromString(reader->infos.recordingTime(), Qt::TextDate));
+	auto dm = AwDataManager::instance();
+	dm->dataServer()->openConnection(client());
+	setTotalDuration(dm->totalDuration());
+	setRecordedTime(QTime::fromString(dm->value(keys::time).toString(), Qt::TextDate));
 	m_isActive = true;
 	reloadData();
 }

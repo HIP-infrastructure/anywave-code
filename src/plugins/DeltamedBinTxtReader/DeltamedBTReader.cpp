@@ -8,7 +8,7 @@ DeltamedBTReaderPlugin::DeltamedBTReaderPlugin() : AwFileIOPlugin()
 	version = QString("1.0");
 	manufacturer = "Deltamed";
 	fileExtensions << "*.txt";
-	m_flags = Aw::HasExtension | Aw::CanRead;
+	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
 
 DeltamedBTReader::DeltamedBTReader(const QString& path) : AwFileIO(path)

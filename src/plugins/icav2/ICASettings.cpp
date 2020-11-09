@@ -55,19 +55,19 @@ void ICASettings::accept()
 	
 	args["modality"] = m_modes.at(m_ui.comboModality->currentIndex());
 	if (args["is_ignoring_markers"].toBool()) 
-		args[cl::skip_markers] = QStringList(m_labels.at(m_ui.comboIgnoredMarkers->currentIndex()));
+		args[keys::skip_markers] = QStringList(m_labels.at(m_ui.comboIgnoredMarkers->currentIndex()));
 	if (args["is_using_markers"].toBool())
-		args[cl::use_markers] = QStringList(m_labels.at(m_ui.comboUseMarkers->currentIndex()));
+		args[keys::use_markers] = QStringList(m_labels.at(m_ui.comboUseMarkers->currentIndex()));
 
-	args[cl::lp] = m_ui.spinLPF->value();
-	args[cl::hp] = m_ui.spinHPF->value();
+	args[keys::lp] = m_ui.spinLPF->value();
+	args[keys::hp] = m_ui.spinHPF->value();
 	args["comp"] = m_ui.spinNC->value();
 
 	// get channels matching modality
 	auto channels = AwChannel::getChannelsOfType(m_channels, AwChannel::stringToType(args["modality"].toString()));
 	channels = AwChannel::removeDoublons(channels);
 	if (m_ui.ignoreBads->isChecked()) { // ignoring bad channels
-		auto badLabels = m_process->pdi.input.settings[processio::bad_labels].toStringList();
+		auto badLabels = m_process->pdi.input.settings[keys::bad_labels].toStringList();
 		foreach (AwChannel *c, channels) {
 			if (badLabels.contains(c->name()))
 				channels.removeAll(c);
@@ -97,7 +97,7 @@ void ICASettings::accept()
 	}
 
 	// get the file duration
-	auto fd = m_process->pdi.input.settings[processio::file_duration].toDouble();
+	auto fd = m_process->pdi.input.settings[keys::file_duration].toDouble();
 	if (use || ignore) {
 		auto markers = AwMarker::duplicate(m_process->pdi.input.markers());
 		QStringList skippedMarkers = args["skip_markers"].toStringList();

@@ -10,7 +10,7 @@ EGIReaderPlugin::EGIReaderPlugin() : AwFileIOPlugin()
 	manufacturer = QString("Philips");
 	version = QString("1.0");
 	fileExtensions  <<  QString("*.mff");
-	m_flags = Aw::HasExtension | Aw::CanRead | Aw::IsDirectory;
+	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;
 }
 
 EGIReader::EGIReader(const QString& fileName) : AwFileIO(fileName)

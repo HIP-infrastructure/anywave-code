@@ -101,6 +101,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	// Plugins
 	AwPluginManager* plugin_manager = AwPluginManager::getInstance();
 	plugin_manager->setParent(this);
+	plugin_manager->load();
 	// Processes
 	AwProcessManager* process_manager = AwProcessManager::instance();
 	process_manager->setParent(this);

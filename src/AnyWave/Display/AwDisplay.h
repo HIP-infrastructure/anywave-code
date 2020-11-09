@@ -78,7 +78,7 @@ private:
 	QStringList m_selectedLabels;			// labels of selected channels.
 	QToolBar *m_toolBar;
 	AwChannelList m_channels;
-	AwFileIO *m_reader;
+//	AwFileIO *m_reader;
 //	AwCentralWidget *m_splitterWidget;
 	QSplitter* m_centralWidget;
 	bool m_dontSynchronize;

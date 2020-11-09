@@ -165,7 +165,7 @@ CTFReader::CTFReader() : AwFileIOPlugin()
   version = QString("1.0");
   manufacturer = "CTF";
   fileExtensions << "*.ds";
-  m_flags = Aw::HasExtension | Aw::CanRead | Aw::IsDirectory;
+  m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;
 }
 
 CTFFileReader::CTFFileReader(const QString& filename) : AwFileIO(filename)

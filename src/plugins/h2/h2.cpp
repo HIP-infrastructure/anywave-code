@@ -45,7 +45,7 @@ H2Plugin::H2Plugin()
 	name = QString(tr("h2"));
 	description = QString(tr("Computes H2/R2 on several pairs of channels"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
-	m_settings[processio::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
+	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
 }
 
 H2Plugin::~H2Plugin()
@@ -108,12 +108,12 @@ bool H2::showUi()
 	// Make it dynamically as a scripted plugin cannot access the main thread UI.
 	if (m_ui == NULL)
 		m_ui = new H2UI;
-	m_ui->dataFolder = pdi.input.settings[processio::data_dir].toString();
+	m_ui->dataFolder = pdi.input.settings[keys::data_dir].toString();
 	m_ui->sbTimeWindow->setValue(m_winSize);
 	m_ui->sbMaxLag->setValue(m_maxLag);
 	m_ui->sbStep->setValue(m_step);
 	m_ui->samplingRate = pdi.input.channels().first()->samplingRate();
-	m_ui->directory = pdi.input.settings[processio::working_dir].toString();
+	m_ui->directory = pdi.input.settings[keys::working_dir].toString();
 	m_ui->markers = pdi.input.markers();
 	if (inputFlags() & Aw::ProcessInput::UserSelectedMarkers)
 		m_ui->widgetInputData->hide();
@@ -123,7 +123,7 @@ bool H2::showUi()
 		m_step = m_ui->sbStep->value();
 		m_method = m_ui->method;
 
-		auto fd = pdi.input.settings[processio::file_duration].toDouble();
+		auto fd = pdi.input.settings[keys::file_duration].toDouble();
 		if (!m_ui->skippedLabels.isEmpty() || !m_ui->usedLabels.isEmpty()) {
 			auto markers = AwMarker::duplicate(pdi.input.markers());
 			auto inputMarkers = AwMarker::getInputMarkers(markers, m_ui->skippedLabels, m_ui->usedLabels, fd);
@@ -403,10 +403,10 @@ void H2::runFromCommandLine()
 	}
 
 	QString dir;
-	if (args.contains(cl::output_dir))
-		dir = args.value(cl::output_dir).toString();
+	if (args.contains(keys::output_dir))
+		dir = args.value(keys::output_dir).toString();
 	else
-		dir = pdi.input.settings[processio::data_dir].toString();
+		dir = pdi.input.settings[keys::data_dir].toString();
 
 	// compute
 	float sr = pdi.input.channels().first()->samplingRate();	// save sampling rate in case we use downsampling
@@ -459,8 +459,8 @@ void H2::runFromCommandLine()
 	//	r->nIterations = r->params.at(0)->h2.size();
 	//}
 	//sendMessage("Saving to MATLAB file...");
-	float lp = args.value(cl::lp).toDouble();
-	float hp = args.value(cl::hp).toDouble();
+	float lp = args.value(keys::lp).toDouble();
+	float hp = args.value(keys::hp).toDouble();
 
 	bool saveOneFile = true;
 	if (args.contains(h2::several_result_files)) {
@@ -469,12 +469,12 @@ void H2::runFromCommandLine()
 	}
 
 
-	if (args.contains(cl::output_prefix)) {
-		QString pref = args.value(cl::output_prefix).toString();
+	if (args.contains(keys::output_prefix)) {
+		QString pref = args.value(keys::output_prefix).toString();
 		baseMATLABFile = QString("%1_").arg(pref);
 	}
 	else {
-		QFileInfo fi(pdi.input.settings[processio::data_path].toString());
+		QFileInfo fi(pdi.input.settings[keys::data_path].toString());
 		baseMATLABFile = QString("%1_").arg(fi.baseName());
 	}
 
@@ -652,8 +652,8 @@ int H2::computeRuns()
 		QString HPString = m_currentBand.hp > 0 ? QString("%1Hz").arg(m_currentBand.hp) : QString("NoHP");
 
 
-		QString dir = pdi.input.settings[processio::data_dir].toString();
-		QString baseFileName = pdi.input.settings.value(processio::data_path).toString();
+		QString dir = pdi.input.settings[keys::data_dir].toString();
+		QString baseFileName = pdi.input.settings.value(keys::data_path).toString();
 
 		if (m_ui->saveInOneFile) {
 			QString file = QString("%1_algo-%2_hp-%3_lp-%4.mat").arg(baseFileName).arg(method).arg(HPString).arg(LPString);
@@ -713,7 +713,7 @@ void H2::saveSignals(const AwChannelList& channels)
 	auto block = writer->infos.newBlock();
 	block->setDuration(channels.first()->dataSize() / channels.first()->samplingRate());
 	block->setSamples(channels.first()->dataSize());
-	QString filePath = QString("%1/%2_%3Hz_%4Hz").arg(pdi.input.settings[processio::data_dir].toString()).arg(m_currentBand.name).arg(m_currentBand.hp).arg(m_currentBand.lp);
+	QString filePath = QString("%1/%2_%3Hz_%4Hz").arg(pdi.input.settings[keys::data_dir].toString()).arg(m_currentBand.name).arg(m_currentBand.hp).arg(m_currentBand.lp);
 	writer->createFile(filePath);
 	writer->writeData(&sources);
 	writer->cleanUpAndClose();

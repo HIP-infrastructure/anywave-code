@@ -50,6 +50,8 @@ void AwDataManager::closeFile()
 		m_filterSettings.save(fltFilePath());
 		m_reader = nullptr;
 	}
+	m_montageManager->closeFile();
+	m_markerManager->closeFile();
 }
 
 const AwChannelList& AwDataManager::rawChannels()
@@ -113,6 +115,9 @@ int AwDataManager::openFile(const QString& filePath)
 		}
 	m_reader->setFullPath(fullDataFilePath);
 	m_settings[keys::data_path] = fullDataFilePath;
+	m_settings[keys::time] = reader->infos.recordingTime();
+	m_settings[keys::date] = reader->infos.recordingDate();
+	m_settings[keys::iso_date] = reader->infos.isoDate();
 
 	QFileInfo fi(fullDataFilePath);
 	m_settings[keys::data_dir] = fi.absolutePath();
@@ -153,15 +158,17 @@ int AwDataManager::openFile(const QString& filePath)
 	}
 	//AwMontageManager::instance()->newMontage(m_reader);
 	m_montageManager->newMontage(m_reader);
+	// Are there events?
+	if (m_reader->infos.blocks().at(0)->markersCount())
+		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+	m_markerManager->setFilename(fullDataFilePath);
+
 	auto display = AwDisplay::instance();
 	if (display) {
 		// LAST step => update Display Manager with new file.
 		display->newFile(m_reader);
 	}
 
-	// Are there events?
-	if (m_reader->infos.blocks().at(0)->markersCount()) 
-		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
-	m_markerManager->setFilename(fullDataFilePath);
+
 	return 0;
 }

@@ -106,6 +106,10 @@ public:
 
   	static AwPluginManager *getInstance();
 
+	/// <summary>
+	/// load() - load all plugins in app and user dirs
+	/// </summary>
+	void load(); 
 	inline AwReaders& readers() { return m_readers;  }
 	inline AwWriters& writers() { return m_writers; }
 	inline AwProcesses& processes() { return m_processes; }
@@ -166,7 +170,7 @@ private:
 
 	// Plugins
 	static AwPluginManager *m_instance;
-	QDir m_pluginsDir;
+	//QDir m_pluginsDir;
 	QList<QObject *> m_pluginList;
 	AwReaders m_readers;
 	AwWriters m_writers;

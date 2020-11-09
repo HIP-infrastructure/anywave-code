@@ -40,7 +40,7 @@ void TFWavelet2::run(const QStringList& args)
 	connectClient(m_widget->signalView()->client());
 	
 	// we want to browse data through all the file
-	m_widget->signalView()->setTotalDuration(pdi.input.settings[processio::file_duration].toDouble());
+	m_widget->signalView()->setTotalDuration(pdi.input.settings[keys::file_duration].toDouble());
 	m_widget->signalView()->setMarkers(pdi.input.markers());
 	// set the channels to be displayed => compute the TF on those channels.
 	m_widget->setChannels(pdi.input.channels());

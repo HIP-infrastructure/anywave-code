@@ -22,7 +22,7 @@ EEPIOPlugin::EEPIOPlugin()
 	manufacturer = QString("ANT Neuro");
 	version = QString("3.3.177");
 	fileExtensions << "*.cnt";
-	m_flags = Aw::HasExtension | Aw::CanRead;
+	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
 
 void EEPIO::cleanUpAndClose()

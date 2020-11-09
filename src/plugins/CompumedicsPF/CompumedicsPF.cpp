@@ -21,7 +21,7 @@ CompumedicsReaderPlugin::CompumedicsReaderPlugin() : AwFileIOPlugin()
 	manufacturer = QString("Compumedics");
 	version = QString("1.0");
 	fileExtensions << QString("*.eeg");
-	m_flags = Aw::HasExtension | Aw::CanRead | Aw::IsDirectory;
+	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;
 }
 
 CompumedicsReader::CompumedicsReader(const QString& fileName) : AwFileIO(fileName)

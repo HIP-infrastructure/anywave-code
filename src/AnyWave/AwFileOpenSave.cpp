@@ -136,6 +136,8 @@ void AnyWave::openFile(const QString &path)
 		ext = "*." + fInfo.suffix();
 		ext = ext.toLower();
 	}
+
+	closeFile();
 	auto dataManager = AwDataManager::instance();
 	int res = dataManager->openFile(filePath);
 
@@ -155,8 +157,6 @@ void AnyWave::openFile(const QString &path)
 
 	if (reader->flags() & FileIO::TriggerChannelIsWritable)
 		connect(reader, SIGNAL(triggerValuesWritten(bool, int)), this, SLOT(displayReaderTriggerStatus(bool, int)));
-
-	closeFile();
 	
 	//int res = newReader->openFile(filePath);
 
@@ -397,7 +397,7 @@ void AnyWave::on_actionLoadICA_triggered()
 
 void AnyWave::closeFile()
 {
-	AwMontageManager::instance()->closeFile();
+//	AwMontageManager::instance()->closeFile();
 	AwAmplitudeManager::instance()->closeFile();
 	// dont stop MATPy Server if anywave was launched with plugin_debug option
 	auto aws = AwSettings::getInstance();
@@ -432,7 +432,7 @@ void AnyWave::closeFile()
 	AwTopoBuilder::destroy();
 	m_display->closeFile();
 	AwProcessManager::instance()->closeFile();
-	AwMarkerManager::instance()->closeFile();
+	//AwMarkerManager::instance()->closeFile();
 	m_currentFileModified = false;
 
 	// reset actions to disabled

@@ -40,7 +40,7 @@ public:
 	void runFromCommandLine() override;
 	bool showUi();
 
-	bool batchParameterCheck(const QVariantHash& args) override;
+	bool batchParameterCheck(const QVariantMap& args) override;
 private:
 	int initParameters();
 	void infomax(int m, int n, int nc);

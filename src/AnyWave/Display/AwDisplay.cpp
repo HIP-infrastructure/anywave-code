@@ -72,7 +72,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	dsManager->setParent(this);
 	m_mainWindow = w;
 	m_setup = nullptr;
-	m_reader = nullptr;
+//	m_reader = nullptr;
 
 	AwDisplaySetup *setup = dsManager->currentSetup();
 
@@ -119,8 +119,8 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 		v->setProcessFlags(AwSignalView::NoProcessUpdate);
 
 	AwSignalView *view = new AwSignalView((AwViewSettings *)setup);
-	if (m_reader) // file already open
-		view->enableView(m_reader);
+	//if (m_reader) // file already open
+	//	view->enableView(m_reader);
 
 	AwProcessManager *pm = AwProcessManager::instance();
 	QList<AwDisplayPlugin *> plugins = AwPluginManager::getInstance()->displays();
@@ -211,7 +211,7 @@ void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
 void AwDisplay::closeFile()
 {
 	saveChannelSelections();
-	m_reader = NULL; // set infos to NULL => data file not ready yet.
+	//m_reader = NULL; // set infos to NULL => data file not ready yet.
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
 	AwDisplaySetupManager::instance()->resetToDefault();
@@ -642,11 +642,13 @@ void AwDisplay::setChannels(const AwChannelList &montage)
 void AwDisplay::newFile(AwFileIO *reader)
 {
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
+	auto path = reader->fullPath();
 	ds->setFilename(reader->fullPath());
-	m_reader = reader;
+	//m_reader = reader;
 	
-	foreach (AwSignalView *v, m_signalViews)
-		v->enableView(reader);
+	foreach(AwSignalView * v, m_signalViews)
+		//v->enableView(reader);
+		v->enableView();
 
 	setChannels(AwMontageManager::instance()->channels());
 	loadChannelSelections();

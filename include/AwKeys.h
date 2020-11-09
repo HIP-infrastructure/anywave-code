@@ -27,6 +27,9 @@
 
 
 namespace keys {
+	constexpr auto time = "time";
+	constexpr auto date = "date";
+	constexpr auto iso_date = "iso_date";
 	constexpr auto max_sr = "max_sr";
 	constexpr auto samples = "samples";
 	constexpr auto data_path = "data_path";

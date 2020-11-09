@@ -210,7 +210,7 @@ void AwMontageDial::moveUp()
 		return;
 	}
 
-	for (auto i : selectedIndexes) {
+	for (auto const& i : selectedIndexes) {
 		if (i.column() == 0) {
 			if (i.row() > 0)
 				channels.move(i.row(), i.row() - 1);
@@ -220,7 +220,7 @@ void AwMontageDial::moveUp()
 
 	// update selection
 	QItemSelection newSelection;
-	for (auto i : selectedIndexes) {
+	for (auto const& i : selectedIndexes) {
 		if (i.column() == 0) {
 			QModelIndex begin = m_ui.tvDisplay->model()->index(i.row() - 1, AW_MONTAGE_COLUMN_NAME);
 			QModelIndex end = m_ui.tvDisplay->model()->index(i.row() - 1, AW_MONTAGE_COLUMN_HPF);
@@ -262,7 +262,7 @@ void AwMontageDial::moveDown()
 		return;
 	}
 
-	for (auto i : selectedIndexes) {
+	for (auto const& i : selectedIndexes) {
 		if (i.column() == 0) {
 			if (i.row() < channels.size() - 1)
 				channels.move(i.row(), i.row() + 1);
@@ -272,7 +272,7 @@ void AwMontageDial::moveDown()
 
 	// update selection
 	QItemSelection newSelection;
-	for (auto i : selectedIndexes) {
+	for (auto const& i : selectedIndexes) {
 		if (i.column() == 0) {
 			QModelIndex begin = m_ui.tvDisplay->model()->index(i.row() + 1, AW_MONTAGE_COLUMN_NAME);
 			QModelIndex end = m_ui.tvDisplay->model()->index(i.row() + 1, AW_MONTAGE_COLUMN_HPF);

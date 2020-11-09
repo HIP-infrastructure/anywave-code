@@ -42,7 +42,7 @@ NI4DReader::NI4DReader() : AwFileIOPlugin()
   version = QString("1.0");
   fileExtensions << "*,*";
   layouts << "4D248" << "4D248_3D";
-  m_flags = Aw::CanRead;
+  m_flags = FileIO::CanRead;
 }
 
 QStringList NI4DReader::montages()
@@ -60,7 +60,7 @@ QStringList NI4DReader::montages()
 NI4DFileReader::NI4DFileReader(const QString& filename) : AwFileIO(filename)
 {
   m_stream.setVersion(QDataStream::Qt_4_4);
-  m_flags = Aw::TriggerChannelIsWritable;
+  m_flags = FileIO::TriggerChannelIsWritable;
 }
 
 

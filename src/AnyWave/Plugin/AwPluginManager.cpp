@@ -71,7 +71,6 @@ AwPluginManager *AwPluginManager::getInstance()
 //
 AwPluginManager::AwPluginManager()
 {
-
 	// init input flags map for MATLAB/Python plugins
 	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessInput::GetAllMarkers);
 	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessInput::ProcessIgnoresChannelSelection);
@@ -90,9 +89,13 @@ AwPluginManager::AwPluginManager()
 	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
 
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
+	setObjectName("AwPluginManager");
+}
+
+void AwPluginManager::load()
+{
 	loadPlugins();
 	loadUserPlugins();
-	setObjectName("AwPluginManager");
 	processJsonFiles();
 }
 
@@ -291,7 +294,9 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
 		 if (isMATLABScript || isMATLABCompiled) {
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
-			 plugin->type = type;
+			 plugin->type = type; 
+			 if (isMATLABCompiled) // build full path to exe file
+				 descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
 		//	 plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
 			 plugin->init(descMap);
 			// if (isMATLABCompiled) {
@@ -415,7 +420,7 @@ void AwPluginManager::loadUserPlugins()
 		QPluginLoader loader(dir.absoluteFilePath(FileName));
 		QObject *plugin = loader.instance();
 		if (plugin == NULL)	{
-			emit log("Failed to load " + m_pluginsDir.absoluteFilePath(FileName));
+			emit log("Failed to load " +  dir.absoluteFilePath(FileName));
 			emit log(loader.errorString());
 		}
 		if (!checkPluginVersion(plugin)) {
@@ -531,7 +536,7 @@ void AwPluginManager::loadPlugins()
 {
 	AwSettings *aws = AwSettings::getInstance();
 	
-	m_pluginsDir = aws->value(aws::app_plugins_dir).toString();
+	auto pluginDir = aws->value(aws::app_plugins_dir).toString();
 	auto matlabPluginDir = aws->value(aws::app_matlab_plugins_dir).toString();
 	auto pythonPluginDir = aws->value(aws::app_python_plugins_dir).toString();
 	checkForScriptPlugins(matlabPluginDir);
@@ -585,13 +590,13 @@ void AwPluginManager::loadPlugins()
 	foreach(AwFilterPlugin *p, m_filters)
 		m_filterFactory.addPlugin(p->name, p);
 
-
 	// Lecture de tous les plugins trouvés
-	foreach(QString FileName, m_pluginsDir.entryList(QDir::Files)) {
-		QPluginLoader loader(m_pluginsDir.absoluteFilePath(FileName));
+	QDir dir(pluginDir);
+	for (auto FileName : dir.entryList(QDir::Files)) {
+		QPluginLoader loader(dir.absoluteFilePath(FileName));
 		QObject *plugin = loader.instance();
 		if (plugin == NULL) {
-			emit log("Failed to load " + m_pluginsDir.absoluteFilePath(FileName));
+			emit log("Failed to load " + dir.absoluteFilePath(FileName));
 			emit log(loader.errorString());
 			continue;
 		}
@@ -605,12 +610,12 @@ void AwPluginManager::loadPlugins()
 			if (fio) { // FileIO specific (plugin can be reader and writer at the same time
 				if (fio->canRead()) {
 					// load another instance 
-					QPluginLoader readerLoader(m_pluginsDir.absoluteFilePath(FileName));
+					QPluginLoader readerLoader(dir.absoluteFilePath(FileName));
 					loadFileIOReaderPlugin(qobject_cast<AwFileIOPlugin *>(readerLoader.instance()));
 				}
 				if (fio->canWrite()) {
 					// load another instance 
-					QPluginLoader writerLoader(m_pluginsDir.absoluteFilePath(FileName));
+					QPluginLoader writerLoader(dir.absoluteFilePath(FileName));
 					loadFileIOWriterPlugin(qobject_cast<AwFileIOPlugin *>(writerLoader.instance()));
 				}
 				continue;
