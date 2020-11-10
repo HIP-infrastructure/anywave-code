@@ -152,7 +152,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	aws->setValue(aws::gui_active, isGUIMode);
 	
 	//Save system path
-	aws->setValue(aws::system_path, QString(qgetenv("PATH")));
+//	aws->setValue(aws::system_path, QString(qgetenv("PATH")));
 
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));

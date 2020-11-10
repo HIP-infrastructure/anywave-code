@@ -134,6 +134,10 @@ int AwDataManager::openFile(const QString& filePath)
 		reader->infos.setMtgFile(QString("%1.mtg").arg(fullDataFilePath));
 	m_settings.unite(m_reader->infos.settings());
 
+	m_settings[keys::flt_file] = QString("%1.flt").arg(fullDataFilePath);
+	m_settings[keys::sel_file] = QString("%1.sel").arg(fullDataFilePath);
+	m_settings[keys::bad_file] = QString("%1.bad").arg(fullDataFilePath);
+
 	auto duration = reader->infos.totalDuration();
 	m_settings.insert(keys::file_duration, QVariant(duration));
 	float sr = 0.;
@@ -156,7 +160,6 @@ int AwDataManager::openFile(const QString& filePath)
 		// try to init from the reader channels if the loading of .flt file failed.
 		m_filterSettings.initWithChannels(m_reader->infos.channels());
 	}
-	//AwMontageManager::instance()->newMontage(m_reader);
 	m_montageManager->newMontage(m_reader);
 	// Are there events?
 	if (m_reader->infos.blocks().at(0)->markersCount())

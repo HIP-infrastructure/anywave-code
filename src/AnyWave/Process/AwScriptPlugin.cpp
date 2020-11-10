@@ -57,6 +57,7 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 {
 	name = map.value("name");
 	description = map.value("description");
+	category = map.value("category");
 	m_inputFlags = 0;
 	if (map.contains("input_flags")) {
 		auto inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();

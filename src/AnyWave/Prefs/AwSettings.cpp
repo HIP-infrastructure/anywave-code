@@ -100,6 +100,9 @@ AwSettings::AwSettings(QObject *parent)
 	// check for a file called ins.txt
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
+
+	//Save system path
+	m_settings[aws::system_path] = QString(qgetenv("PATH"));
 }
 
 AwSettings::~AwSettings()
@@ -265,20 +268,22 @@ void AwSettings::savePredefinedMarkers(const AwMarkerList& markers)
 {
 	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
 	auto file = m_settings.value(aws::predefined_marker_file).toString();
+	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
 	if (markerRulesDir.isEmpty())
 		return;
 	if (markers.isEmpty()) {
-		QFile::remove(file);
+		QFile::remove(path);
 		return;
 	}
-	AwMarker::save(file, markers);
+	AwMarker::save(path, markers);
 }
 
 AwMarkerList AwSettings::loadPredefinedMarkers()
 {
 	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
 	auto file = m_settings.value(aws::predefined_marker_file).toString();
+	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
 	if (markerRulesDir.isEmpty())
 		return AwMarkerList();
-	return AwMarker::load(file);
+	return AwMarker::load(path);
 }

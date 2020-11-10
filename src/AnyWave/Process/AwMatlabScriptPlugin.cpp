@@ -49,6 +49,7 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	p->setPlugin(this);
 	initProcess(p);
 	AwMATPyServer *server = AwMATPyServer::instance();
+	server->start();
 	AwPidManager::instance()->createNewPid(p);
 //	if (isCompiled()) {
 //		p->setCompiled();
@@ -65,10 +66,10 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 
 void AwMatlabScriptProcess::run()
 {
-	AwMATPyServer::instance()->start();
+	
 	AwMatlabInterface *mi = nullptr;
 	bool isCompiled = m_plugin->settings().contains("compiled plugin");
-	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+	QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 
 	// merge args with all settings set as input for the process before when initializing the plugin
 	pdi.input.args().unite(pdi.input.settings);
@@ -76,8 +77,9 @@ void AwMatlabScriptProcess::run()
 		AwSettings* aws = AwSettings::getInstance();
 		mi = aws->matlabInterface();
 		if (aws->value(aws::matlab_present).toBool()) {
+			auto path = pdi.input.settings.value("script_path").toString();
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-		    mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.args()).simplified());
+		    mi->run(path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.args()).simplified());
 		}
 		return;
 	}
@@ -94,14 +96,20 @@ void AwMatlabScriptProcess::run()
 		arguments << mcrPath;
 #endif
 #if defined(Q_OS_WIN)
-	auto appDir = QCoreApplication::applicationDirPath();
-	systemPath = QString("%1;%2").arg(appDir).arg(systemPath);
+	
+	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
+#ifdef QT_DEBUG
+	systemPath = QString("C:\\dev\\anywave-vs2019\\bin\\x64\\Release;%1").arg(systemPath);
+#else
+	systemPath = QString("%1;%2").arg(application).arg(systemPath);
+#endif
 #endif
 	arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) 
 		<< QString::number(m_pid) << AwUtilities::json::toJsonString(pdi.input.args()).simplified();
-	QProcess plugin(this);
+	
 	env.remove("PATH");
 	env.insert("PATH", systemPath);
+	QProcess plugin(this);
 	plugin.setProcessEnvironment(env);
 	plugin.start(m_plugin->settings().value("compiled plugin").toString(), arguments, QIODevice::ReadWrite);
 	plugin.waitForFinished(-1); // wait for plugin to finish. (Wait forever).

@@ -45,15 +45,16 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_selectionIsActive = false;
 	m_isTimeSelectionStarted = false;
 	m_showMarkers = false;
-	m_cursor = NULL;
-	m_mappingCursor = NULL;
-	m_mappingFixedCursor = NULL;
-	m_currentMarkerItem = NULL;
+	m_cursor = nullptr;
+	m_mappingCursor = nullptr;
+	m_mappingFixedCursor = nullptr;
+	m_currentMarkerItem = nullptr;
 	m_mouseMode = AwGraphicsScene::None;
-	m_markingSettings = NULL;
-	m_gotoChannelMenu = NULL;
-	m_selectionRectangle = NULL;
-	m_QTSMenu = NULL;
+	m_markingSettings = nullptr;
+	m_gotoChannelMenu = nullptr;
+	m_selectionRectangle = nullptr;
+	m_QTSMenu = nullptr;
+	m_contextMenuMapping = nullptr;
 }
 
 AwGraphicsScene::~AwGraphicsScene()
@@ -109,6 +110,11 @@ void AwGraphicsScene::updateChannelsData()
 		item->updateData();
 		item->repaint();
 	}
+}
+
+void AwGraphicsScene::addCustomContextMenu(QMenu* menu, int cursorMode)
+{
+	//m_customContextMenus[cursorMode].append(menu);
 }
 
 void AwGraphicsScene::setChannels(AwChannelList& channels)
@@ -965,6 +971,7 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		menuDisplay->addSeparator();
 		auto subMenu = menuDisplay->addMenu("Mark");
 		QAction *action = subMenu->addAction("Mark the last mapping position/selection");
+		
 		connect(action, SIGNAL(triggered()), this, SLOT(cursorToMarker()));
 		// prepare contextual menu if the user choosed to use predefined markers
 		if (m_markingSettings->isUsingList && !m_markingSettings->list.isEmpty()) {
@@ -977,6 +984,8 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 			}
 		}
 		menuDisplay->addSeparator();
+
+		m_contextMenuMapping = subMenu;
 	}
 
 	// add the Go to channel option
@@ -1024,18 +1033,6 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		connect(action, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
 		action = menuDisplay->addAction("Use Selection As New Montage");
 		connect(action, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
-		//QAction *actInvertSelection = new QAction(tr("Invert selection"), menuSelection);
-		//connect(actInvertSelection, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
-		//menuSelection->addAction(actInvertSelection);
-		//QAction *actClearSelection = new QAction(tr("Clear selection"), menuSelection);
-		//connect(actClearSelection, SIGNAL(triggered()), this, SLOT(clearChannelSelection()));
-		//menuSelection->addAction(actClearSelection);
-		//QAction *actSelectionAsBad = new QAction(tr("Mark selected channels as bad"), menuSelection);
-		//connect(actSelectionAsBad, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
-		//menuSelection->addAction(actSelectionAsBad);
-		//QAction *actToMontage = new QAction(tr("Set selection as the new Montage"), menuSelection);
-		//connect(actToMontage, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
-		//menuSelection->addAction(actToMontage);
 	}
 	// End of Channel Selection
 	menuDisplay->addSeparator();
@@ -1065,6 +1062,7 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 	// get item under the mouse
 	QGraphicsItem *item = NULL;
 	int itemType;
+	m_contextMenuMapping = nullptr;
 	QMenu *menuDisplay = defaultContextMenu();
 
 	item = getItemUnderMouse(e->scenePos(), &itemType);

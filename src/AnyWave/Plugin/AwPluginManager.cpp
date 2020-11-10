@@ -284,7 +284,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 return;
 		 // add extra parameters to descMap
 		 descMap["plugin_dir"] = pluginPath;
-		 descMap["script_path"] = pythonCode;
+		 descMap["script_path"] = pluginPath;
 		
 		 //
 		 isMATLABCompiled = descMap.contains("compiled plugin");
@@ -297,6 +297,12 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->type = type; 
 			 if (isMATLABCompiled) // build full path to exe file
 				 descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
+	/*		 else {
+				 if (QFile::exists(matlabCodeApp))
+					 descMap["script_path"] = matlabCodeApp;
+				 if (QFile::exists(matlabCodeM))
+					 descMap["script_path"] = matlabCodeM;
+			 }*/
 		//	 plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
 			 plugin->init(descMap);
 			// if (isMATLABCompiled) {
