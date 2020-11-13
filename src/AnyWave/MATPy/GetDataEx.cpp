@@ -114,7 +114,10 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 				delete dm;
 				return;
 			}
-			requestedChannels = dm->rawChannels();
+			if (!dm->montage().isEmpty())
+				requestedChannels = dm->montage();
+			else
+				requestedChannels = dm->rawChannels();
 		}
 
 		QStringList use_markers, skip_markers, labels, types, pickFrom;

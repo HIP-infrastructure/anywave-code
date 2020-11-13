@@ -8,7 +8,7 @@
 #include "Marker/AwMarkerManager.h"
 #include <AwKeys.h>
 #include "Plugin/AwPluginManager.h"
-
+#include "utils/json.h"
 AwDataManager* AwDataManager::m_instance = nullptr;
 
 AwDataManager* AwDataManager::instance()
@@ -138,7 +138,7 @@ int AwDataManager::openFile(const QString& filePath)
 	m_settings[keys::sel_file] = QString("%1.sel").arg(fullDataFilePath);
 	m_settings[keys::bad_file] = QString("%1.bad").arg(fullDataFilePath);
 
-	auto duration = reader->infos.totalDuration();
+	auto duration = reader->infos.totalDuration(); 
 	m_settings.insert(keys::file_duration, QVariant(duration));
 	float sr = 0.;
 	for (auto c : reader->infos.channels())
@@ -174,4 +174,45 @@ int AwDataManager::openFile(const QString& filePath)
 
 
 	return 0;
+}
+
+
+void AwDataManager::selectChannels(AwDataClient* client, const QString& settings, AwChannelList* channels)
+{
+	QString error;
+	return selectChannels(client, AwUtilities::json::mapFromJsonString(settings, error), channels);
+}
+
+
+void AwDataManager::selectChannels(AwDataClient *client, const QVariantMap& settings, AwChannelList* channels)
+{
+	QMutexLocker lock(&m_mutex);
+	AwChannelList temp;
+	if (settings.isEmpty()) {
+		channels = nullptr;
+		client->m_wcSelectChannelsDone.wakeAll();
+		return;
+	}
+	if (settings.contains(keys::channels_source)) {
+		auto source = settings.value(keys::channels_source).toString().toLower().simplified();
+		if (source == "montage")
+			temp = this->montage();
+		else if (source == "selected")
+			temp = this->selectedChannels();
+		else // consider raw channels here
+			temp = this->rawChannels();
+	}
+	else { // no source specified, use the current montage and if current montage is empty, use raw channels
+		temp = this->montage();
+		if (temp.isEmpty())
+			temp = this->rawChannels();
+	}
+
+	// for  now just implement the channels_sources settings (TO DO : implement all the options (channel labels, channels types, etc...)
+	if (!temp.isEmpty()) {
+		channels = new AwChannelList;
+		for (auto c : temp)
+			channels->append(c->duplicate());
+	}
+	client->m_wcSelectChannelsDone.wakeAll();
 }

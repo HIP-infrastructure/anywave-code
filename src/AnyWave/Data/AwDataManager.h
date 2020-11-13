@@ -30,10 +30,12 @@
 #include <filter/AwFilterSettings.h>
 #include <AwKeys.h>
 #include <AwFileIO.h>
+#include <AwChannel.h>
+#include <QMutex>
 class AwMontageManager;
 class AwMarkerManager;
 class AwDataServer;
-
+class AwDataClient;
 
 class AwDataManager : public QObject
 {
@@ -69,6 +71,13 @@ public:
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QVariantMap& settings() { return m_settings; }
 
+public slots:
+	// selectChannels will generate a list of channels to be used when requested data.
+	// it allows to select the channels to load depending on a list of key/values set in a variant map.
+	void selectChannels(AwDataClient *client, const QVariantMap& settings, AwChannelList *channels);
+	// convenience version of selectChannel that handle a json string as settings.
+	void selectChannels(AwDataClient* client, const QString& settings, AwChannelList* channels);
+
 	QStringList badLabels();
 	int openFile(const QString& filePath = QString());
 protected:
@@ -82,4 +91,5 @@ protected:
 	AwMontageManager* m_montageManager;
 	AwMarkerManager* m_markerManager;
 	AwDataServer* m_dataServer;
+	QMutex m_mutex;
 };

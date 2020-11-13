@@ -375,25 +375,31 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 			process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
 	}
 	// not setting process->infos.workingDirectory means it will remain as empty.
-	auto args = process->pdi.input.args();
+	QVariantMap args;
+	//auto args = process->pdi.input.args();
 	args[keys::aw_path] = QCoreApplication::applicationFilePath();
 	args[keys::working_dir] = process->pdi.input.settings.value(keys::working_dir);
 	// if fi == NULL that means no file are currently open by AnyWave.
 	if (dm->isFileOpen()) {
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(dm->reader());
+		if (!dm->montage().isEmpty())
+			process->pdi.input.setNewChannels(dm->montage(), true);
+		else
+			process->pdi.input.setNewChannels(dm->rawChannels(), true);
 		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
 		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
 		process->pdi.input.filterSettings = dm->filterSettings();
 		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
 		// copy all this to args to make them accessible from MATLAB/Python
-		auto args = process->pdi.input.args();
+		//auto args = process->pdi.input.args();
 //		args[keys::data_dir] = dm->dataDir();
 //		args[keys::data_path] = dm->dataFilePath();
 //		args[keys::file_duration] = dm->totalDuration();
 		args.unite(dm->settings());
 		
 	}
+	process->pdi.input.setArguments(args);
 	return process;
 }
 
@@ -690,16 +696,16 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 	if (initProcessIO(process)) {
 		if (!skipDataFile) {
-			process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
-			// make it also an argument for MATLAB/Python plugins
-			process->pdi.input.addArgument(keys::data_path, dm->dataFilePath());
-			process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-			process->pdi.input.addArgument(keys::data_dir, dm->dataDir());
-			// add  application path to arguments
-			process->pdi.input.addArgument(keys::aw_path, QCoreApplication::applicationFilePath());
-			process->pdi.input.setReader(dm->reader());
-			process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
-			process->pdi.input.addArgument(keys::file_duration, dm->totalDuration());
+			//process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
+			//// make it also an argument for MATLAB/Python plugins
+			//process->pdi.input.addArgument(keys::data_path, dm->dataFilePath());
+			//process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+			//process->pdi.input.addArgument(keys::data_dir, dm->dataDir());
+			//// add  application path to arguments
+			//process->pdi.input.addArgument(keys::aw_path, QCoreApplication::applicationFilePath());
+			//process->pdi.input.setReader(dm->reader());
+			//process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
+			//process->pdi.input.addArgument(keys::file_duration, dm->totalDuration());
 			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
 			process->pdi.input.addArgument(keys::bad_labels, AwMontageManager::instance()->badLabels());
 			// verify that plugin which accepts time selection get at least the whole selection as input

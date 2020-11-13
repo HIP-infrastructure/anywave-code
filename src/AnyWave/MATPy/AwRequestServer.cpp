@@ -65,6 +65,7 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 		moveToThread(m_thread);
 		m_thread->start();
 	}
+	m_debugMode = false;
 }
 
 //AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
@@ -250,7 +251,7 @@ void AwRequestServer::initDebugProcess(AwScriptProcess* p)
 	auto dm = AwDataManager::instance();
 	if (dm->isFileOpen()) {
 		p->pdi.input.setReader(AwDataManager::instance()->reader());
-		p->pdi.input.setNewChannels(AwDataManager::instance()->rawChannels(), true);
+		p->pdi.input.setNewChannels(AwDataManager::instance()->montage(), true);
 		p->pdi.input.settings = dm->settings();
 		connect(p, SIGNAL(sendMarkers(AwMarkerList*)), dm->markerManager(), SLOT(addMarkers(AwMarkerList*)));
 		connect(p, SIGNAL(sendMarker(AwMarker *)), dm->markerManager(), SLOT(addMarker(AwMarker*)));

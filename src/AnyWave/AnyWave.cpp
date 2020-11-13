@@ -129,7 +129,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	}
 
 	bool isGUIMode = operation == aw::commandLine::NoOperation;
-
+	aws->setValue(aws::plugin_debug_mode, false);
 	bool listenMode = arguments.contains(keys::plugin_debug);
 	if (listenMode) {
 		quint16 server_port = static_cast<quint16>(arguments.value("server_port").toInt());

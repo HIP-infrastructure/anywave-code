@@ -25,6 +25,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
            
 #include "common.h"
+#ifdef BUILD_STATIC
+#define AW_USE_CORE_STATIC
+#endif
 #include <AwMarker.h>
 #include <AwProcess.h>
 #include <QtMath>

@@ -31,6 +31,7 @@
 #include "Process/AwProcessManager.h"
 #include <AwProcessInterface.h>
 #include "Debug/AwDebugLog.h"
+#include "AwDataManager.h"
 
 #include <QThread>
 
@@ -104,7 +105,9 @@ void AwDataServer::openConnection(AwDataClient *client)
 	if (m_clientToConnection.contains(client))
 		closeConnection(client);
 
+	// Data Manager should be the parent of DataServer, but check it before using it
 	AwDataConnection *dc = new AwDataConnection(this, client);
+	AwDataManager* dm = static_cast<AwDataManager*>(parent());
 	
 	QThread *t = new QThread();
 	dc->moveToThread(t);
@@ -112,6 +115,10 @@ void AwDataServer::openConnection(AwDataClient *client)
 	connect(client, SIGNAL(needData(AwChannelList *, float, float, bool)), dc, SLOT(loadData(AwChannelList *, float, float, bool)));
 	connect(client, SIGNAL(needData(AwChannelList *, AwMarker *,bool)), dc, SLOT(loadData(AwChannelList *, AwMarker *, bool)));
 	connect(client, SIGNAL(needData(AwChannelList *, AwMarkerList *, bool)), dc, SLOT(loadData(AwChannelList *, AwMarkerList *, bool)));
+	if (dm != nullptr)
+		connect(client, SIGNAL(selectChannelsRequested(AwDataClient *, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannels(AwDataClient *,const QVariantMap&, AwChannelList*)));
+
 	connect(dc, SIGNAL(outOfMemory()), this, SLOT(manageOutOfMemory()));
 
 	m_clientToConnection.insert(client, dc);

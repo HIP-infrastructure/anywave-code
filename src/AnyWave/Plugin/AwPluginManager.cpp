@@ -283,7 +283,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 if (!descMap.contains("name") && !descMap.contains("description"))
 			 return;
 		 // add extra parameters to descMap
-		 descMap["plugin_dir"] = pluginPath;
+		 descMap[keys::plugin_dir] = pluginPath;
 		 descMap["script_path"] = pluginPath;
 		
 		 //
