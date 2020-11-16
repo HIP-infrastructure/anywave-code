@@ -36,14 +36,15 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 {
 	emit log("Processing aw_get_prop()/anywave.get_prop()...");
 	AwTCPResponse response(client);
-	QDataStream fromClient(client);
-	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
-	QString jsonString;
+	QVariantMap globalDict;
+	globalDict.unite(process->pdi.input.settings);
+	globalDict.unite(process->pdi.input.args());
+	globalDict.unite(AwDataManager::instance()->settings());
 
-	auto dm = AwDataManager::instance();
+//	auto dm = AwDataManager::instance();
 	// gather all infos in data Manager
-	QVariantMap settings = dm->settings();
+//	QVariantMap settings = dm->settings();
 
 
 	//bool dedicatedDS = m_ds != nullptr;
@@ -96,8 +97,9 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 	//			hash["channel_selection"] = AwChannel::getLabels(process->pdi.input.channels(), true);
 	//	}
 	//}
-	auto tmp = QString(QJsonDocument::fromVariant(settings).toJson(QJsonDocument::Compact));
-	toClient << tmp;
+//	auto tmp = QString(QJsonDocument::fromVariant(settings).toJson(QJsonDocument::Compact));
+//	toClient << tmp;
+	toClient << AwUtilities::json::toJsonString(globalDict);
 	response.send();
 	emit log("Done.");
 }

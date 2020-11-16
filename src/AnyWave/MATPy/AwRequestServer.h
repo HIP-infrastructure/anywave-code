@@ -46,6 +46,8 @@ public:
 	inline quint16 serverPort() { return m_serverPort; }
 	/** add a request handler **/
 	void addHandler(AwRequestServer* const object, void(AwRequestServer::* const mf)(QTcpSocket *, AwScriptProcess*), int request);
+
+	inline void setDebugMode(bool flag) { m_debugMode = flag; }
 public slots:
 	void handleNewConnection();
 	void dataReceived();
@@ -56,7 +58,7 @@ signals:
 	void beamformerAvailable(QString path);
 protected:
 	void handleRequest(int request, QTcpSocket *client, int pid);
-	void setDebugMode();
+	
 	void initDebugProcess(AwScriptProcess*);
 	AwScriptProcess* newDebugProcess();
 
@@ -89,6 +91,7 @@ private:
 	void handleGetTriggers(QTcpSocket *client, AwScriptProcess *process);
 	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
 	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
+	void handleConnectDebug(QTcpSocket* client, AwScriptProcess* process);
 	void unusedHandler(QTcpSocket *client, AwScriptProcess *process) {}
 
 	void setHandlers();

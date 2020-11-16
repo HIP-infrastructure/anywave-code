@@ -83,6 +83,12 @@ void AwMATPyServer::deleteDuplicatedInstance(AwMATPyServer *instance)
 	delete instance;
 }
 
+void AwMATPyServer::setDebugMode(bool flag)
+{
+	if (m_rs)
+		m_rs->setDebugMode(flag);
+}
+
 //bool AwMATPyServer::start(const QString& dataPath, AwScriptProcess *p, quint16 port)
 //{
 //	if (m_rs) {

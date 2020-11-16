@@ -79,10 +79,10 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 		command = QString("addpath(genpath('%1'))").arg(dep);
 		engEvalString(m_eng, command.toLatin1().data()); 
 #ifdef Q_OS_WIN
-		command = "addpath('" + awPath.absolutePath() + "')";
-		envPath = "setenv('PATH', '" + awPath.absolutePath() + "')";
-		engEvalString(m_eng, envPath.toLatin1().data()); // setenv('PATH', 'Path to AnyWave directory');
-		engEvalString(m_eng, command.toLatin1().data()); 
+	//	command = "addpath('" + awPath.absolutePath() + "')";
+		//envPath = "setenv('PATH', '" + awPath.absolutePath() + "')";
+		//engEvalString(m_eng, envPath.toLatin1().data()); // setenv('PATH', 'Path to AnyWave directory');
+		//engEvalString(m_eng, command.toLatin1().data()); 
         awPath.cd("Plugins/MATLAB/AnyWave");
 #endif
 #ifdef Q_OS_MAC

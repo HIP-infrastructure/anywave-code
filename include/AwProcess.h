@@ -30,7 +30,7 @@ namespace AwRequest {
 	enum Requests {
 		AddMarkers, GetMarkers, GetData2, GetPluginInfo, IsTerminated, SendMessage, SendCommand,
 		GetMarkers2, GetData3, GetFileInfo, GetScreenCapture, GetICAPanelCapture, SetBeamFormer, GetTriggers, GetPluginIO,
-		GetDataEx, GetMarkersEx, OpenNewFile, RunAnyWave, GetProperties, Count
+		GetDataEx, GetMarkersEx, OpenNewFile, RunAnyWave, GetProperties, ConnectDebug, Count
 	};
 	enum Commands { GetDataReadFile, GetDataReadSocket };
 };

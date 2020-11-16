@@ -337,6 +337,53 @@ void AwProcessManager::addProcess(AwProcessPlugin *plugin)
 	}
 }
 
+void AwProcessManager::initProcessSettings(AwBaseProcess* process)
+{
+	auto plugin = process->plugin();
+	auto workingDir = AwSettings::getInstance()->value(aws::work_dir).toString();
+	if (plugin != nullptr) {
+		// create a folder in local Anywave's directories for the plugin
+		// Check if working exists 
+		// if working is empty it means AnyWave could not create user's directories.
+		if (!workingDir.isEmpty()) {
+			QDir dir(workingDir);
+			if (!dir.exists()) {
+				if (dir.mkdir(plugin->name))
+					process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
+			}
+			else
+				process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
+		}
+	}
+	// not setting process->infos.workingDirectory means it will remain as empty.
+	QVariantMap args;
+	//auto args = process->pdi.input.args();
+	args[keys::aw_path] = QCoreApplication::applicationFilePath();
+	args[keys::working_dir] = process->pdi.input.settings.value(keys::working_dir);
+	auto dm = AwDataManager::instance();
+	// if fi == NULL that means no file are currently open by AnyWave.
+	if (dm->isFileOpen()) {
+		// prepare input settings only if a file is currently open.
+		process->pdi.input.setReader(dm->reader());
+		if (!dm->montage().isEmpty())
+			process->pdi.input.setNewChannels(dm->montage(), true);
+		else
+			process->pdi.input.setNewChannels(dm->rawChannels(), true);
+		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
+		process->pdi.input.filterSettings = dm->filterSettings();
+		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
+		// copy all this to args to make them accessible from MATLAB/Python
+		//auto args = process->pdi.input.args();
+//		args[keys::data_dir] = dm->dataDir();
+//		args[keys::data_path] = dm->dataFilePath();
+//		args[keys::file_duration] = dm->totalDuration();
+		args.unite(dm->settings());
+
+	}
+	process->pdi.input.setArguments(args);
+}
+
 /*!
  * \brief
  * Instantiate an AwBaseProcess object from its plugin.
@@ -361,45 +408,48 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
-	auto workingDir = aws->value(aws::work_dir).toString();
-	// create a folder in local Anywave's directories for the plugin
-	// Check if working exists 
-	// if working is empty it means AnyWave could not create user's directories.
-	if (!workingDir.isEmpty()) {
-		QDir dir(workingDir);
-		if (!dir.exists()) {
-			if (dir.mkdir(plugin->name))
-				process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
-		}
-		else
-			process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
-	}
-	// not setting process->infos.workingDirectory means it will remain as empty.
-	QVariantMap args;
-	//auto args = process->pdi.input.args();
-	args[keys::aw_path] = QCoreApplication::applicationFilePath();
-	args[keys::working_dir] = process->pdi.input.settings.value(keys::working_dir);
-	// if fi == NULL that means no file are currently open by AnyWave.
-	if (dm->isFileOpen()) {
-		// prepare input settings only if a file is currently open.
-		process->pdi.input.setReader(dm->reader());
-		if (!dm->montage().isEmpty())
-			process->pdi.input.setNewChannels(dm->montage(), true);
-		else
-			process->pdi.input.setNewChannels(dm->rawChannels(), true);
-		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
-		process->pdi.input.filterSettings = dm->filterSettings();
-		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
-		// copy all this to args to make them accessible from MATLAB/Python
-		//auto args = process->pdi.input.args();
-//		args[keys::data_dir] = dm->dataDir();
-//		args[keys::data_path] = dm->dataFilePath();
-//		args[keys::file_duration] = dm->totalDuration();
-		args.unite(dm->settings());
-		
-	}
-	process->pdi.input.setArguments(args);
+
+	initProcessSettings(process);
+//
+//	auto workingDir = aws->value(aws::work_dir).toString();
+//	// create a folder in local Anywave's directories for the plugin
+//	// Check if working exists 
+//	// if working is empty it means AnyWave could not create user's directories.
+//	if (!workingDir.isEmpty()) {
+//		QDir dir(workingDir);
+//		if (!dir.exists()) {
+//			if (dir.mkdir(plugin->name))
+//				process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
+//		}
+//		else
+//			process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
+//	}
+//	// not setting process->infos.workingDirectory means it will remain as empty.
+//	QVariantMap args;
+//	//auto args = process->pdi.input.args();
+//	args[keys::aw_path] = QCoreApplication::applicationFilePath();
+//	args[keys::working_dir] = process->pdi.input.settings.value(keys::working_dir);
+//	// if fi == NULL that means no file are currently open by AnyWave.
+//	if (dm->isFileOpen()) {
+//		// prepare input settings only if a file is currently open.
+//		process->pdi.input.setReader(dm->reader());
+//		if (!dm->montage().isEmpty())
+//			process->pdi.input.setNewChannels(dm->montage(), true);
+//		else
+//			process->pdi.input.setNewChannels(dm->rawChannels(), true);
+//		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+//		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
+//		process->pdi.input.filterSettings = dm->filterSettings();
+//		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
+//		// copy all this to args to make them accessible from MATLAB/Python
+//		//auto args = process->pdi.input.args();
+////		args[keys::data_dir] = dm->dataDir();
+////		args[keys::data_path] = dm->dataFilePath();
+////		args[keys::file_duration] = dm->totalDuration();
+//		args.unite(dm->settings());
+//		
+//	}
+//	process->pdi.input.setArguments(args);
 	return process;
 }
 

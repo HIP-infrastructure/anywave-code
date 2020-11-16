@@ -118,6 +118,7 @@
     <ClCompile Include="MATPy\AwPidManager.cpp" />
     <ClCompile Include="MATPy\AwRequestServer.cpp" />
     <ClCompile Include="MATPy\AwTCPResponse.cpp" />
+    <ClCompile Include="MATPy\DebugConnect.cpp" />
     <ClCompile Include="MATPy\GetData.cpp" />
     <ClCompile Include="MATPy\GetDataEx.cpp" />
     <ClCompile Include="MATPy\GetFileInfo.cpp" />

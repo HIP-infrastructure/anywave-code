@@ -38,6 +38,7 @@
 #include <AwFileIO.h>
 #include "Prefs/AwSettings.h"
 #include "Data/AwDataManager.h"
+#include "Process/AwProcessManager.h"
 
 AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(parent)
 {
@@ -66,6 +67,7 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 		m_thread->start();
 	}
 	m_debugMode = false;
+	//setDebugMode();
 }
 
 //AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
@@ -111,11 +113,11 @@ AwRequestServer::~AwRequestServer()
 	m_thread->wait();
 }
 
-void AwRequestServer::setDebugMode()
-{
-	auto aws = AwSettings::getInstance();
-	m_debugMode = aws->value(aws::plugin_debug_mode).toBool();
-}
+//void AwRequestServer::setDebugMode()
+//{
+//	auto aws = AwSettings::getInstance();
+//	m_debugMode = aws->value(aws::plugin_debug_mode).toBool();
+//}
 
 void AwRequestServer::setHandlers()
 {
@@ -137,6 +139,7 @@ void AwRequestServer::setHandlers()
 	addHandler(this, &AwRequestServer::handleOpenNewFile, AwRequest::OpenNewFile);		
 	addHandler(this, &AwRequestServer::handleRunAnyWave, AwRequest::RunAnyWave);			
 	addHandler(this, &AwRequestServer::handleGetProperties, AwRequest::GetProperties);		
+	addHandler(this, &AwRequestServer::handleConnectDebug, AwRequest::ConnectDebug);
 }
 
 
@@ -249,6 +252,8 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 void AwRequestServer::initDebugProcess(AwScriptProcess* p)
 {
 	auto dm = AwDataManager::instance();
+	AwProcessManager::instance()->initProcessSettings(p);
+
 	if (dm->isFileOpen()) {
 		p->pdi.input.setReader(AwDataManager::instance()->reader());
 		p->pdi.input.setNewChannels(AwDataManager::instance()->montage(), true);
@@ -261,6 +266,7 @@ void AwRequestServer::initDebugProcess(AwScriptProcess* p)
 AwScriptProcess* AwRequestServer::newDebugProcess()
 {
 	auto p = new AwScriptProcess;
+	p->setPlugin(nullptr);
 	AwPidManager::instance()->createNewPid(p);
 	initDebugProcess(p);
 	m_processes << p;

@@ -628,6 +628,9 @@
     <ClCompile Include="Data\AwDataManager.cpp">
       <Filter>Data</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\DebugConnect.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">

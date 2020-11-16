@@ -139,6 +139,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 			aws->setValue(aws::plugin_debug_mode, true);
 			aws->setValue(aws::server_port, server_port);
 		}
+		server->setDebugMode(aws->value(aws::plugin_debug_mode).toBool());
 	}
 	if (!isGUIMode) {
 		int status = aw::commandLine::doCommandLineOperation(operation, arguments);

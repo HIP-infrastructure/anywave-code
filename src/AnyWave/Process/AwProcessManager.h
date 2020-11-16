@@ -76,6 +76,7 @@ public:
 	QList<QAction *>& icaActions() { return m_icaActions; }
 	void runBuiltInProcess(AwBuiltInProcess *process);
 	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList());
+	void initProcessSettings(AwBaseProcess* process);
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
 	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
 	void startProcess(const QString& name, const QStringList& args = QStringList());

@@ -47,6 +47,7 @@ public:
 	void stop();
 	bool isListening();
 	quint16 serverPort(); 
+	void setDebugMode(bool flag);
 
 	// removes a duplicated instance from the list and delete it.
 	void deleteDuplicatedInstance(AwMATPyServer *instance);
