@@ -2,7 +2,7 @@
 
 #include "spectral_global.h"
 #include <AwProcessInterface.h>
-
+class SIWidget;
 
 class SPECTRAL_EXPORT Spectral : public AwGUIProcess
 {
@@ -10,8 +10,11 @@ class SPECTRAL_EXPORT Spectral : public AwGUIProcess
     Q_INTERFACES(AwGUIProcess)
 public:
     Spectral();
+	~Spectral();
 
     void run(const QStringList& args) override;	// main execution entry point of the plugin
+protected:
+	SIWidget* m_widget;
 };
 
 

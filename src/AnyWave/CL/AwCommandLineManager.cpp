@@ -180,7 +180,7 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 
 	if (!inputFile.isEmpty()) {
 		//reader = pm->getReaderToOpenFile(inputFile);
-		auto status = dm->openFile(inputFile);
+		auto status = dm->openFile(inputFile, true);
 		if (status == AwDataManager::NoPluginFound) {
 			throw AwException(QString("no reader can open %1").arg(inputFile), origin);
 			return process;

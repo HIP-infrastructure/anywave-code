@@ -1,8 +1,12 @@
 #include "SIWidget.h"
 #include <aw_armadillo.h>
 #include <sigpack.h>
-#include <math/AwMath.h>
+#ifdef MKL
+#include <fftw.h>
+#endif
+//#include <math/AwMath.h>
 using namespace sp;
+#include <AwProcessInterface.h>
 
 
 SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
@@ -14,6 +18,7 @@ SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
 	//m_signalView->setMinimumHeight(200);
 	//connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute()));
 	m_layoutRow = 0;
+	m_window = SIWidget::Hanning;
 }
 
 SIWidget::~SIWidget()
@@ -22,6 +27,32 @@ SIWidget::~SIWidget()
 
 void SIWidget::compute()
 {
+	auto func = [](const arma::vec& vector, const arma::vec& window) {
+		return psd(vector, window);
+	};
+	uword cols = m_process->pdi.input.channels().count();
+	uword rows = m_process->pdi.input.channels().first()->dataSize();
+	arma::mat matrix = arma::zeros(rows, cols);
+	uword i = 0;
+	for (auto chan : m_process->pdi.input.channels()) {
+		for (uword j = 0; j < chan->dataSize(); j++)
+			matrix(j, i) = (double)chan->data()[j];
+		i++;
+	}
+	arma::vec window = arma::ones(rows);
+	switch (m_window) {
+	case SIWidget::Hanning:
+		window = hanning(rows);
+		break;
+	case SIWidget::Hamming:
+		window = hamming(rows);
+		break;
+	}
+	QList<arma::vec> results;
+	for (uword i = 0; i < cols; i++)
+		results.append(func(matrix.col(i), window));
+
+
 	//auto channels = m_signalView->channels();
 	//int n = 0;
 	//for (auto p : m_plots) {

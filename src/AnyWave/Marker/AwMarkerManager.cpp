@@ -264,7 +264,8 @@ void AwMarkerManager::addMarkers(const AwMarkerList& list)
 	// sort markers
 	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 	m_needSorting = false;
-	m_ui->setMarkers(m_markers);
+	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
+		m_ui->setMarkers(m_markers);
 }
 
 // addMarker(AwMarker *)
@@ -367,7 +368,8 @@ void AwMarkerManager::closeFile()
 				emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
 	}
 	// ask MarkerManagerSettings to clear
-	m_ui->cleanUp();
+	if (m_ui)
+		m_ui->cleanUp();
 	clear();
 	m_filePath = "";
 	m_markersModified = false;

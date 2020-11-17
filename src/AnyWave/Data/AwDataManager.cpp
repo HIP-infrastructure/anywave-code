@@ -89,7 +89,7 @@ QStringList AwDataManager::badLabels()
 	return list;
 }
 
-int AwDataManager::openFile(const QString& filePath)
+int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 {
 	closeFile();
 	//m_reader = reader;
@@ -161,15 +161,18 @@ int AwDataManager::openFile(const QString& filePath)
 		m_filterSettings.initWithChannels(m_reader->infos.channels());
 	}
 	m_montageManager->newMontage(m_reader);
-	// Are there events?
-	if (m_reader->infos.blocks().at(0)->markersCount())
-		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
-	m_markerManager->setFilename(fullDataFilePath);
+	if (!commandLineMode) {
+		// Are there events?
+		if (m_reader->infos.blocks().at(0)->markersCount())
+			m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+		m_markerManager->setFilename(fullDataFilePath);
 
-	auto display = AwDisplay::instance();
-	if (display) {
-		// LAST step => update Display Manager with new file.
-		display->newFile(m_reader);
+
+		auto display = AwDisplay::instance();
+		if (display) {
+			// LAST step => update Display Manager with new file.
+			display->newFile(m_reader);
+		}
 	}
 
 
@@ -183,24 +186,35 @@ void AwDataManager::selectChannels(AwDataClient* client, const QString& settings
 	return selectChannels(client, AwUtilities::json::mapFromJsonString(settings, error), channels);
 }
 
-
+/// <summary>
+/// selectChannels()
+/// called from running proces when needing new input channels.
+/// The settings will define the constraints to get new input channels, like it is done for MATLAB/Python API
+/// channels must be a valid pointer to an empty existing list.
+/// </summary>
+/// <param name="client"></param>
+/// <param name="settings"></param>
+/// <param name="channels"></param>
 void AwDataManager::selectChannels(AwDataClient *client, const QVariantMap& settings, AwChannelList* channels)
 {
 	QMutexLocker lock(&m_mutex);
+	if (channels == nullptr) {
+		client->m_wcSelectChannelsDone.wakeAll();
+		return;
+	}
 	AwChannelList temp;
 	if (settings.isEmpty()) {
-		channels = nullptr;
 		client->m_wcSelectChannelsDone.wakeAll();
 		return;
 	}
 	if (settings.contains(keys::channels_source)) {
 		auto source = settings.value(keys::channels_source).toString().toLower().simplified();
-		if (source == "montage")
-			temp = this->montage();
-		else if (source == "selected")
-			temp = this->selectedChannels();
-		else // consider raw channels here
+		if (source == keys::channels_source_raw)
 			temp = this->rawChannels();
+		else if (source == keys::channels_source_selection)
+			temp = this->selectedChannels();
+		else // default is montage
+			temp = this->montage();
 	}
 	else { // no source specified, use the current montage and if current montage is empty, use raw channels
 		temp = this->montage();
@@ -210,7 +224,6 @@ void AwDataManager::selectChannels(AwDataClient *client, const QVariantMap& sett
 
 	// for  now just implement the channels_sources settings (TO DO : implement all the options (channel labels, channels types, etc...)
 	if (!temp.isEmpty()) {
-		channels = new AwChannelList;
 		for (auto c : temp)
 			channels->append(c->duplicate());
 	}

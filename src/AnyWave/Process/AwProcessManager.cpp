@@ -365,10 +365,10 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
 	if (dm->isFileOpen()) {
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(dm->reader());
-		if (!dm->montage().isEmpty())
-			process->pdi.input.setNewChannels(dm->montage(), true);
-		else
-			process->pdi.input.setNewChannels(dm->rawChannels(), true);
+		//if (!dm->montage().isEmpty())
+		//	process->pdi.input.setNewChannels(dm->montage(), true);
+		//else
+		//	process->pdi.input.setNewChannels(dm->rawChannels(), true);
 		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
 		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
 		process->pdi.input.filterSettings = dm->filterSettings();

@@ -80,5 +80,7 @@ namespace keys {
 	constexpr auto none = "none";
 	// keys for MATLAB/Python API
 	constexpr auto channels_source = "channels_source";
-
+	constexpr auto channels_source_raw = "raw";
+	constexpr auto channels_source_montage = "montage";
+	constexpr auto channels_source_selection = "selection";
 }

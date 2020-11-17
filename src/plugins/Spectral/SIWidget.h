@@ -15,6 +15,7 @@ public:
 	SIWidget(AwGUIProcess *process, QWidget *parent = nullptr);
 	~SIWidget();
 
+	enum Windows { None,  Hanning, Hamming };
 //	void setChannels(const AwChannelList& channels);
 //	AwBaseSignalView *signalView() { return m_signalView; }
 public slots:
@@ -24,4 +25,5 @@ private:
 //	AwBaseSignalView *m_signalView;
 	int m_layoutRow;
 	//QList<QCustomPlot *> m_plots;
+	int m_window; // type of windowing to use, 0 = none
 };

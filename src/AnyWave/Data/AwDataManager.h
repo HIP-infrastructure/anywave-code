@@ -79,7 +79,7 @@ public slots:
 	void selectChannels(AwDataClient* client, const QString& settings, AwChannelList* channels);
 
 	QStringList badLabels();
-	int openFile(const QString& filePath = QString());
+	int openFile(const QString& filePath = QString(), bool commandLineMode = false);
 protected:
 	AwDataManager();
 
