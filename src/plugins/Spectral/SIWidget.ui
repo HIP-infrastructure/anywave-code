@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>747</width>
+    <width>636</width>
     <height>461</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="signalsLayout" rowstretch="0" columnstretch="0"/>
+    <layout class="QGridLayout" name="graphicLayout" rowstretch="0" columnstretch="0"/>
    </item>
    <item>
     <layout class="QGridLayout" name="otherLayout" rowstretch="0" columnstretch="0"/>

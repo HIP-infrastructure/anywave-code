@@ -4,9 +4,17 @@
 #ifdef MKL
 #include <fftw.h>
 #endif
+
+#include <vtkDoubleArray.h>
+#include <vtkChartXY.h>
+#include <vtkTable.h>
+#include <vtkPlot.h>
+//#include <vtkContextView.h>
+#include <vtkContextScene.h>
 //#include <math/AwMath.h>
 using namespace sp;
 #include <AwProcessInterface.h>
+
 
 
 SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
@@ -18,7 +26,9 @@ SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
 	//m_signalView->setMinimumHeight(200);
 	//connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute()));
 	m_layoutRow = 0;
-	m_window = SIWidget::Hanning;
+	m_window = SIWidget::Hanning;	
+	auto widget = new QVTK_CLASS();
+	m_ui.graphicLayout->addWidget(widget);
 }
 
 SIWidget::~SIWidget()
