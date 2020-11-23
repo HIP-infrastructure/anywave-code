@@ -338,17 +338,17 @@ void AwMarkerManager::setFilename(const QString& path)
 	}
 }
 
-void AwMarkerManager::checkForBIDSMods()
-{
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive()) {
-			if (AwMessageBox::question(nullptr, "BID", "Update events.tsv file?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-				if (bm->updateEventsTsv(m_markers) != 0)
-					emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
-		}
-	}
-}
+//void AwMarkerManager::checkForBIDSMods()
+//{
+//	if (AwBIDSManager::isInstantiated()) {
+//		auto bm = AwBIDSManager::instance();
+//		if (bm->isBIDSActive()) {
+//			if (AwMessageBox::question(nullptr, "BID", "Update events.tsv file?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+//				if (bm->updateEventsTsv(m_markers) != 0)
+//					emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
+//		}
+//	}
+//}
 
 void AwMarkerManager::quit()
 {

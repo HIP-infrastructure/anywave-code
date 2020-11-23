@@ -69,8 +69,8 @@ bool ICA::showUi()
 
 	if (ui.exec() == QDialog::Accepted)	{
 		//m_modality = ui.modality;
-		auto args = pdi.input.args();
-		args.unite(ui.args);
+		auto args = pdi.input.settings;
+		//args.unite(ui.args);
 
 		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[keys::data_dir].toString());
 		QFile test(testFile);
@@ -80,7 +80,8 @@ bool ICA::showUi()
 		}
 		test.close();
 		QFile::remove(testFile);
-		pdi.input.setArguments(args);
+		//pdi.input.setArguments(args);
+		pdi.input.settings.unite(ui.args);
 		return true;
 	}
 	return false;
@@ -96,10 +97,10 @@ bool ICA::batchParameterCheck(const QVariantMap& hash)
 
 int ICA::initParameters()
 {
-	auto args = pdi.input.args();
+	auto args = pdi.input.settings;
 
 	m_isDownsamplingActive = true;
-	m_modality = AwChannel::stringToType(args["modality"].toString());
+	m_modality = AwChannel::stringToType(args.value("modality").toString());
 	if (m_modality == -1) {
 		sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
 		return -1;

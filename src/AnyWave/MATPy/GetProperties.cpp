@@ -37,10 +37,10 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 	emit log("Processing aw_get_prop()/anywave.get_prop()...");
 	AwTCPResponse response(client);
 	QDataStream& toClient = *response.stream();
-	QVariantMap globalDict;
-	globalDict.unite(process->pdi.input.settings);
-	globalDict.unite(process->pdi.input.args());
-	globalDict.unite(AwDataManager::instance()->settings());
+	//QVariantMap globalDict;
+	//globalDict.unite(process->pdi.input.settings);
+	//globalDict.unite(process->pdi.input.args());
+	//globalDict.unite(AwDataManager::instance()->settings());
 
 //	auto dm = AwDataManager::instance();
 	// gather all infos in data Manager
@@ -99,7 +99,7 @@ void AwRequestServer::handleGetProperties(QTcpSocket *client, AwScriptProcess *p
 	//}
 //	auto tmp = QString(QJsonDocument::fromVariant(settings).toJson(QJsonDocument::Compact));
 //	toClient << tmp;
-	toClient << AwUtilities::json::toJsonString(globalDict);
+	toClient << AwUtilities::json::toJsonString(process->pdi.input.settings);
 	response.send();
 	emit log("Done.");
 }

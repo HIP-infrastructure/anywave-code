@@ -1,7 +1,7 @@
 #include "AwMATLABMarkersExporter.h"
 #include <matlab/AwMATLAB.h>
 #include <math/AwMath.h>
-
+#include <AwKeys.h>
 
 AwMATLABMarkersExporter::AwMATLABMarkersExporter()
 {
@@ -22,7 +22,7 @@ AwMATLABMarkersExporterPlugin::AwMATLABMarkersExporterPlugin()
 void AwMATLABMarkersExporter::run()
 {
 	// get output_file path
-	QString path = pdi.input.args()["output_file"].toString();
+	QString path = pdi.input.settings.value(keys::output_file).toString();
 
 	// get data
 	sendMessage("Loading data...");

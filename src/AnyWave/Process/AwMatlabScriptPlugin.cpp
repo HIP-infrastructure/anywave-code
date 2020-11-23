@@ -72,14 +72,14 @@ void AwMatlabScriptProcess::run()
 	QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 
 	// merge args with all settings set as input for the process before when initializing the plugin
-	pdi.input.args().unite(pdi.input.settings);
+//	pdi.input.args().unite(pdi.input.settings);
 	if (!isCompiled) {
 		AwSettings* aws = AwSettings::getInstance();
 		mi = aws->matlabInterface();
 		if (aws->value(aws::matlab_present).toBool()) {
 			auto path = pdi.input.settings.value("script_path").toString();
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-		    mi->run(path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.args()).simplified());
+		    mi->run(path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.settings).simplified());
 		}
 		return;
 	}
@@ -105,7 +105,7 @@ void AwMatlabScriptProcess::run()
 #endif
 #endif
 	arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) 
-		<< QString::number(m_pid) << AwUtilities::json::toJsonString(pdi.input.args()).simplified();
+		<< QString::number(m_pid) << AwUtilities::json::toJsonString(pdi.input.settings).simplified();
 	
 	env.remove("PATH");
 	env.insert("PATH", systemPath);

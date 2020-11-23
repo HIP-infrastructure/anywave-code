@@ -54,7 +54,8 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantMap& dict, const QStr
 		throw AwException(QString("error: input_dir not specified."));
 		return process;
 	}
-	process->pdi.input.setArguments(dict);
+	//process->pdi.input.setArguments(dict);
+	process->pdi.input.settings.unite(dict);
 	if (dict.contains(keys::input_file)) {
 		auto file = dict.value(keys::input_file).toString();
 		auto reader = pm->getReaderToOpenFile(file);
@@ -179,7 +180,8 @@ void AwBatchRunner::run()
 			for (auto k : input_keys) 
 				sendMessage(QString("%1\n").arg(dict.value(k).toString()));
 
-			process->pdi.input.setArguments(dict);
+		//	process->pdi.input.setArguments(dict);
+			process->pdi.input.settings.unite(dict);
 			auto reader = process->pdi.input.reader();
 			QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 			// if the process has a reader => input_file set and the process must connect to a data server using the specified reader.

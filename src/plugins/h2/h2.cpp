@@ -370,7 +370,7 @@ void H2::setProgressValue(int value)
 
 void H2::runFromCommandLine()
 {
-	auto args = pdi.input.args();
+	auto args = pdi.input.settings;
 	// get params from args
 	QString m = args.value(h2::algorithm).toString().toLower();
 	// default method is always h2

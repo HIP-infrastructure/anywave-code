@@ -49,9 +49,9 @@ public:
 	void clearChannels();
 	void clearMarkers();
 	void clearWidgets();
-	void setArguments(const AwArguments& arguments) { m_arguments = arguments; }
-	inline AwArguments& args() { return m_arguments; }
-	void addArgument(const QString& key, const QVariant& value) { m_arguments[key] = value; }
+//	void setArguments(const AwArguments& arguments) { m_arguments = arguments; }
+//	inline AwArguments& args() { return m_arguments; }
+//	void addArgument(const QString& key, const QVariant& value) { m_arguments[key] = value; }
 
 	inline AwChannelList& channels() { return m_channels; }
 	inline AwMarkerList& markers() { return m_markers; }
@@ -85,6 +85,6 @@ protected:
 
 	QList<QWidget *> m_widgets;
 	AwFileIO *m_reader;
-	AwArguments m_arguments;	// used for pluing launches from the command line
+//	AwArguments m_arguments;	// used for pluing launches from the command line
 	QMutex m_mutex;
 };

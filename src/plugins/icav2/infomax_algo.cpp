@@ -1158,8 +1158,8 @@ void ICA::infomax(int m, int n, int nc)
 	momentum   = DEFAULT_MOMENTUM;
 	maxsteps   = DEFAULT_MAXSTEPS;
 	
-	auto args = pdi.input.args();
-	extended = args["infomax_extended"].toBool() ? 1 : 0;
+	auto args = pdi.input.settings;
+	extended = args.value("infomax_extended").toBool() ? 1 : 0;
 	//extended   = DEFAULT_EXTENDED;
 	extblocks  = DEFAULT_EXTBLOCKS;
 	pdfsize    = MAX_PDFSIZE;

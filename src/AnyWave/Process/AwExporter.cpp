@@ -54,16 +54,16 @@ AwExporter::~AwExporter()
 
 void AwExporter::runFromCommandLine()
 {
-	auto args = pdi.input.args();
+	auto args = pdi.input.settings;
 	AwFileIO *reader = pdi.input.reader();
-	auto inputFile = args["input_file"].toString();
-	auto outputFile = args["output_file"].toString();
+	auto inputFile = args.value(keys::input_file).toString();
+	auto outputFile = args.value(keys::output_file).toString();
 	// check for the outputs
 	auto writerName = args["output_writer"].toString();
 
 	QString outputPath = outputFile;
-	if (args.contains("output_dir"))
-		outputPath = QString("%1/%2").arg(args["output_dir"].toString()).arg(outputFile);
+	if (args.contains(keys::output_dir))
+		outputPath = QString("%1/%2").arg(args.value(keys::output_dir).toString()).arg(outputFile);
 
 	AwFileIO *writer = Q_NULLPTR;
 	for (auto p : pdi.input.writers) {
@@ -79,15 +79,15 @@ void AwExporter::runFromCommandLine()
 
 	auto endTimePos = reader->infos.totalDuration();
 	AwMarkerList markers;
-	if (args.contains("marker_file"))
-		markers = AwMarker::load(args["marker_file"].toString());
+	if (args.contains(keys::marker_file))
+		markers = AwMarker::load(args.value(keys::marker_file).toString());
 
 	if (markers.isEmpty())
 		m_inputMarkers << new  AwMarker("global", 0, endTimePos);
 	else {
-		if (args.contains("skip_markers") || args.contains("use_markers")) {
-			auto skippedLabels = args["skip_markers"].toStringList();
-			auto usedLabels = args["use_markers"].toStringList();
+		if (args.contains(keys::skip_markers) || args.contains(keys::use_markers)) {
+			auto skippedLabels = args.value(keys::skip_markers).toStringList();
+			auto usedLabels = args.value(keys::use_markers).toStringList();
 			m_outputMarkers = markers;
 			m_inputMarkers = AwMarker::getInputMarkers(m_outputMarkers, skippedLabels, usedLabels, endTimePos);
 		}

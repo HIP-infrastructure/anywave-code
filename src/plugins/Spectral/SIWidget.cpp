@@ -1,20 +1,28 @@
 #include "SIWidget.h"
-#include <aw_armadillo.h>
+
 #include <sigpack.h>
 #ifdef MKL
 #include <fftw.h>
 #endif
 
-#include <vtkDoubleArray.h>
-#include <vtkChartXY.h>
-#include <vtkTable.h>
-#include <vtkPlot.h>
+//#include <vtkDoubleArray.h>
+//#include <vtkChartXY.h>
+//#include <vtkTable.h>
+//#include <vtkPlot.h>
 //#include <vtkContextView.h>
-#include <vtkContextScene.h>
+//#include <vtkContextScene.h>
+//#include <vtkRenderer.h>
+//#include <vtkFloatArray.h>
+//#include <vtkRenderWindow.h>
+//#include <vtkRenderWindowInteractor.h>
 //#include <math/AwMath.h>
 using namespace sp;
 #include <AwProcessInterface.h>
+#include <qwt_plot_curve.h>
+#include <AwKeys.h>
 
+# define VTK_CREATE(type, name) \
+  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
 SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
@@ -27,12 +35,82 @@ SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
 	//connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute()));
 	m_layoutRow = 0;
 	m_window = SIWidget::Hanning;	
-	auto widget = new QVTK_CLASS();
-	m_ui.graphicLayout->addWidget(widget);
+	m_widget = new QwtPlot();
+	m_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	m_ui.graphicLayout->addWidget(m_widget);
+	/// Set up the view
+//	VTK_CREATE(vtkContextView, m_view);
+//	m_view->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
+
+
 }
 
 SIWidget::~SIWidget()
 {
+}
+
+
+void SIWidget::plot(const arma::mat& data)
+{
+	if (data.is_empty())
+		return;
+	auto nElems = data.n_rows / 2;
+	auto nCols = data.n_cols;
+	// get input channel labels
+	auto labels = AwChannel::getLabels(m_process->pdi.input.channels());
+	float max_sr = m_process->pdi.input.settings.value(keys::max_sr).toFloat();
+	vec xVector = linspace<vec>(0., nElems , nElems);
+	m_widget->detachItems();
+	m_widget->setAxisScale(QwtPlot::xBottom, 0., nElems);
+	m_widget->setAxisScale(QwtPlot::yLeft, data.min(), data.max());
+	for (auto c = 0; c < nCols; c++) {
+		auto curve = new QwtPlotCurve(labels.at(c));
+		curve->setRenderHint(QwtPlotItem::RenderAntialiased);
+		curve->setStyle(QwtPlotCurve::Lines);
+		curve->setPen(Qt::red, 0.5, Qt::SolidLine);
+		curve->setSamples(xVector.memptr(), data.colptr(c), nElems);
+		curve->attach(m_widget);
+	}
+	m_widget->replot();
+
+	//VTK_CREATE(vtkTable, table);
+	//VTK_CREATE(vtkFloatArray, xArray);
+	//table->AddColumn(xArray);
+	//xArray->SetName("Frequency (Hz)");
+	//for (auto i = 0; i < nCols; i++) {
+	//	VTK_CREATE(vtkFloatArray, array);
+	//	table->AddColumn(array);
+	//}
+
+	//for (auto i = 0; i < nElems; i++) {
+	//	table->SetValue(i, 0, i);
+	//	int col = 1;
+	//	for (arma::vec vector : data) {
+	//		for (auto value : vector)
+	//			table->SetValue(i, col, value);
+	//	}
+	//}
+	//// Set up the view
+	//VTK_CREATE(vtkContextView, m_view);
+	//m_view->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
+	//// Add multiple line plots, setting the colors etc
+	//vtkSmartPointer<vtkChartXY> chart =
+	//	vtkSmartPointer<vtkChartXY>::New();
+	//m_view->GetScene()->AddItem(chart);
+	//for (auto i = 0; i < nCols; i++) {
+	//	vtkPlot* line = chart->AddPlot(vtkChart::LINE);
+	//	line->SetInputData(table, 0, i + 1);
+	//	line->SetColor(0, 255, 0, 255);
+	//	line->SetWidth(1.0);
+	//}
+
+	//m_view->SetRenderWindow(m_widget->GetRenderWindow());
+
+	//// Start interactor
+	//m_view->GetRenderWindow()->Render();
+	//m_view->GetInteractor()->Initialize();
+	//m_view->GetInteractor()->Start();
+
 }
 
 void SIWidget::compute()
@@ -58,11 +136,16 @@ void SIWidget::compute()
 		window = hamming(rows);
 		break;
 	}
+	// use the same matrix to store results
+
 	QList<arma::vec> results;
-	for (uword i = 0; i < cols; i++)
-		results.append(func(matrix.col(i), window));
+	for (uword i = 0; i < cols; i++) {
+		arma::vec res = 10 * log10(func(matrix.col(i), window));
+		//matrix.col(i) = 10 * log10(func(matrix.col(i), window));
+		matrix.col(i) = res;
+	}
 
-
+	plot(matrix);
 	//auto channels = m_signalView->channels();
 	//int n = 0;
 	//for (auto p : m_plots) {

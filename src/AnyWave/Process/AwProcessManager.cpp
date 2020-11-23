@@ -362,26 +362,27 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
 	args[keys::working_dir] = process->pdi.input.settings.value(keys::working_dir);
 	auto dm = AwDataManager::instance();
 	// if fi == NULL that means no file are currently open by AnyWave.
+
 	if (dm->isFileOpen()) {
+		process->pdi.input.settings.unite(dm->settings());
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(dm->reader());
 		//if (!dm->montage().isEmpty())
 		//	process->pdi.input.setNewChannels(dm->montage(), true);
 		//else
 		//	process->pdi.input.setNewChannels(dm->rawChannels(), true);
-		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
+		//process->pdi.input.settings[keys::data_dir] = dm->dataDir();
+		//process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
 		process->pdi.input.filterSettings = dm->filterSettings();
-		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
+		//process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
 		// copy all this to args to make them accessible from MATLAB/Python
 		//auto args = process->pdi.input.args();
 //		args[keys::data_dir] = dm->dataDir();
 //		args[keys::data_path] = dm->dataFilePath();
 //		args[keys::file_duration] = dm->totalDuration();
-		args.unite(dm->settings());
-
+//		args.unite(dm->settings());
 	}
-	process->pdi.input.setArguments(args);
+	process->pdi.input.settings.unite(args);
 }
 
 /*!
@@ -757,7 +758,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			//process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
 			//process->pdi.input.addArgument(keys::file_duration, dm->totalDuration());
 			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
-			process->pdi.input.addArgument(keys::bad_labels, AwMontageManager::instance()->badLabels());
+			//process->pdi.input.addArgument(keys::bad_labels, AwMontageManager::instance()->badLabels());
 			// verify that plugin which accepts time selection get at least the whole selection as input
 			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
 				if (process->pdi.input.markers().isEmpty())
@@ -765,8 +766,10 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			if (AwBIDSManager::isInstantiated()) {
 				auto BM = AwBIDSManager::instance();
 				if (BM->isBIDSActive()) {
-					process->pdi.input.addArgument(keys::bids_file_path, BM->getCurrentBIDSPath());
-					process->pdi.input.addArgument(keys::bids_root_dir, BM->rootDir());
+					//process->pdi.input.addArgument(keys::bids_file_path, BM->getCurrentBIDSPath());
+					process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
+					//process->pdi.input.addArgument(keys::bids_root_dir, BM->rootDir());
+					process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
 				}
 
 			}

@@ -627,7 +627,8 @@ void AwMarkerManagerSettings::saveSelectedMarkersToMATLAB()
 		}
 		// set markers to compute data on
 		process->pdi.input.setNewMarkers(markers, true);
-		process->pdi.input.addArgument("output_file", path);
+	//	process->pdi.input.addArgument("output_file", path);
+		process->pdi.input.settings.insert(keys::output_file, path);
 		// start process
 		process_manager->runProcess(process);
 	}

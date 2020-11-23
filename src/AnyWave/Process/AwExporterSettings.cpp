@@ -124,7 +124,7 @@ int AwExporterSettings::exec()
 {
 	updateOutputFileExtension(0);
 	comboWriters->addItems(writers);
-	comboDS->setSamplingRate(channels.first()->samplingRate());
+	comboDS->init(channels.first()->samplingRate());
 	filterTableView->setSettings(filterSettings);
 	// init combo markers only with markers which have a duration.
 	AwMarkerList tmp;

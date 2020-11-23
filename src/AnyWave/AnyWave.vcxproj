@@ -1068,7 +1068,7 @@
       <QtUicFileName>ui_%(Filename).h</QtUicFileName>
     </QtUic>
     <Manifest>
-      <AdditionalManifestFiles>%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)\resources\windows\manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

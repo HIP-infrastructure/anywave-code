@@ -107,8 +107,8 @@ private:
 	QString m_filePath;
 	// BIDS support
 	/** check the if Events.tsv file is available for current data file (filePath) **/
-	void updateMarkersFromEventsTsv(const QString& filePath);
-	void checkForBIDSMods();
+//	void updateMarkersFromEventsTsv(const QString& filePath);
+//	void checkForBIDSMods();
 
 	QString m_eventsTsv;
 };
