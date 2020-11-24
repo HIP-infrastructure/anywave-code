@@ -31,7 +31,7 @@ SET(AnyWave_SRCS
     ./Data/AwDataServer.cpp  
 	./Data/AwMemoryMapper.cpp  
 	./Data/AwDataChunk.cpp
-	./Data/AwDataSet.cpp
+    ./Data/AwDataManager.cpp
     ./Carto/AwDockMapping.cpp  
     ./Carto/AwMappingClient.cpp  
     ./Carto/AwMappingWidget.cpp  
@@ -97,6 +97,7 @@ SET(AnyWave_SRCS
     ./MATPy/AwTCPResponse.cpp
 	./MATPy/RunAnyWave.cpp
 	./MATPy/GetProperties.cpp
+    ./MATPy/DebugConnect.cpp
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
@@ -172,7 +173,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Data/AwDataServer.h  
 	./Data/AwMemoryMapper.h  
 	./Data/AwDataChunk.h
-	./Data/AwDataSet.h
+	./Data/AwDataManager.h
     ./Carto/AwDockMapping.h  
     ./Carto/AwMappingWidget.h  
     ./Carto/AwMappingClient.h  

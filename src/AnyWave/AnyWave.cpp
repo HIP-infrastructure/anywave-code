@@ -214,6 +214,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 
 	if (isGUIMode) {
 		auto dock = new QDockWidget(tr("Markers"), this);
+		dock->setObjectName("Markers");
 		m_dockWidgets["markers"] = dock;
 		dock->hide();
 		dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -223,7 +224,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setWidget(w);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
-		resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
+		//resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 		
 		dock = new QDockWidget(tr("Adding Markers Tool"), this);
 		m_dockWidgets["add_markers"] = dock;
@@ -234,6 +235,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		dock->setWidget(markerInspectorWidget);
 
 		dock = new QDockWidget(tr("Video"), this);
+		dock->setObjectName("Video");
 		m_dockWidgets["video"] = dock;
 		dock->hide();
 		dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -244,6 +246,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 
 		// Processes
 		auto dockProcess = new QDockWidget(tr("Processes"), this);
+		dockProcess->setObjectName("Processes");
 		dockProcess->hide();
 		m_dockWidgets["processes"] = dockProcess;
 		addDockWidget(Qt::LeftDockWidgetArea, dockProcess);
@@ -328,7 +331,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		connect(actionComponentsMaps, SIGNAL(triggered()), this, SLOT(reviewComponentsMaps()));
 		// Menu: ICA->Show maps on signals
 		connect(actionShow_map_on_signal, SIGNAL(toggled(bool)), m_display, SLOT(showICAMapOverChannel(bool)));
-		connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
+		//connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
 		connect(actionOpen_New_AnyWave_Application, SIGNAL(triggered()), this, SLOT(openNewAnyWave()));
 		// Populate View Menu to show/hide DockWidgets
 		menuView_->addSeparator();

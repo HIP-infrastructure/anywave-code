@@ -153,7 +153,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(tvMarkers, SIGNAL(clickedRow(int)), this, SLOT(goToMarkerAtRow(int)));
 	connect(comboFilters, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(setRule(const QString&)));
 	connect(m_markerRuleDial, SIGNAL(ruleRemoved(const QString&)), this, SLOT(removeRule(const QString&)));
-	connect(buttonExportWizard, SIGNAL(clicked()), this, SLOT(exportWizard()));
+	//connect(buttonExportWizard, SIGNAL(clicked()), this, SLOT(exportWizard()));
 	connect(buttonEditRules, SIGNAL(clicked()), this, SLOT(editRules()));
 	connect(comboNames, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateNamesStats(const QString&)));
 	connect(comboValues, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateValuesStats(const QString&)));
