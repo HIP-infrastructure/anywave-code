@@ -38,6 +38,7 @@ AwDataManager* AwDataManager::newInstance()
 AwDataManager::AwDataManager() : QObject(nullptr)
 {
 	m_reader = nullptr;
+	m_status = 0;
 	m_montageManager = AwMontageManager::instance();
 	m_dataServer = AwDataServer::getInstance();
 	m_markerManager = AwMarkerManager::instance();
@@ -52,6 +53,7 @@ void AwDataManager::closeFile()
 	}
 	m_montageManager->closeFile();
 	m_markerManager->closeFile();
+	m_status = 0;
 }
 
 const AwChannelList& AwDataManager::rawChannels()
@@ -94,11 +96,16 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	closeFile();
 	//m_reader = reader;
 	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(filePath);
-	if (reader == nullptr)
+	if (reader == nullptr) {
+		//emit finished();
+		m_status = -1;
 		return -1;
-	int status = reader->openFile(filePath);
-	if (status)   // status >0 means error when opening file, return status code
-		return status;
+	}
+	m_status = reader->openFile(filePath);
+	if (m_status) { // status >0 means error when opening file, return status code
+		///emit finished();
+		return m_status;
+	}
 	// ok we have a valid reader
 	m_reader = reader;
 	m_settings[keys::can_write_triggers] = m_reader->flags() & FileIO::TriggerChannelIsWritable && !m_reader->triggerChannels().isEmpty();
@@ -175,8 +182,8 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 		}
 	}
 
-
-	return 0;
+	//emit finished();
+	return m_status;
 }
 
 

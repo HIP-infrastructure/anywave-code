@@ -27,7 +27,7 @@
 #include "Display/AwVideoManager.h"
 #include <widget/AwVideoPlayer.h>
 #include "Data/AwDataManager.h"
-
+//#include <widget/AwWaitWidget.h>
 
 //
 // Menu File->Open
@@ -139,10 +139,22 @@ void AnyWave::openFile(const QString &path)
 
 	closeFile();
 	auto dataManager = AwDataManager::instance();
+
+//	AwWaitWidget wait("Open File");
+//	wait.setText("Opening file and loading markers...");
+//	connect(dataManager, &AwDataManager::finished, &wait, &QDialog::accept);
+//	auto openFileFunction = [dataManager](const QString& path, bool gui) { dataManager->openFile(path, gui); };
+//	auto thread = dataManager->threadedOpenFile(filePath);
+//	wait.exec();
+//	wait.run(openFileFunction(filePath, false));
+//	thread.join();
+	//using namespace std::placeholders;
+	//auto f = std::bind(&AwDataManager::threadedOpenFile, dataManager, _1);
+//	wait.run<AwDataManager,  const QString&>(dataManager, &AwDataManager::threadedOpenFile,  filePath);  // bind a void method without parameters. The method must emit finished signals when finished.
+	
+	
 	int res = dataManager->openFile(filePath);
-
-//	AwFileIO *newReader = plugin_manager->getReaderToOpenFile(filePath);
-
+//	int res = dataManager->status();
 	// A t on un plugin capable de lire le fichier selectionne ?
 	if (res) {
 		if (res == AwDataManager::NoPluginFound) {

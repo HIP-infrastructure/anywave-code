@@ -42,6 +42,9 @@
 #include <AwException.h>
 #include "Debug/AwDebugLog.h"
 #include "Data/AwDataManager.h"
+#include <widget/AwWaitWidget.h>
+#include <thread>
+#include <future>
 
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;
@@ -156,8 +159,7 @@ void AwMarkerManager::setMarkers(const AwMarkerList& markers)
 AwMarkerList AwMarkerManager::loadMarkers(const QString &path)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
-
-	return AwMarker::load(path);
+    return AwMarker::load(path);
 }
 
 
@@ -327,15 +329,31 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 // Prepares the Marker UI.
 void AwMarkerManager::setFilename(const QString& path)
 {
+
 	m_filePath = path + ".mrk";
 	m_ui->setEnabled(true);
-	if (QFile::exists(m_filePath))	{
-		m_markers = loadMarkers(m_filePath);
+	if (QFile::exists(m_filePath)) {
+		AwWaitWidget wait("Makers");
+		wait.setText("Loading markers...");
+		connect(this, SIGNAL(finished()), &wait, SLOT(accept()));
+
+		auto f = [this](const QString& path) { auto markers = this->loadMarkers(path); emit finished();  return markers; };
+		auto future = std::async(f, m_filePath);
+		wait.exec();
+		m_markers = future.get();
 		if (!m_markers.isEmpty()) {
 			m_ui->setMarkers(m_markers);
 			showDockUI();
 		}
 	}
+
+	//if (QFile::exists(m_filePath))	{
+	//	m_markers = loadMarkers(m_filePath);
+	//	if (!m_markers.isEmpty()) {
+	//		m_ui->setMarkers(m_markers);
+	//		showDockUI();
+	//	}
+	//}
 }
 
 //void AwMarkerManager::checkForBIDSMods()

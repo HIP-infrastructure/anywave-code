@@ -32,6 +32,7 @@
 #include <AwFileIO.h>
 #include <AwChannel.h>
 #include <QMutex>
+#include <thread>
 class AwMontageManager;
 class AwMarkerManager;
 class AwDataServer;
@@ -70,7 +71,10 @@ public:
 	inline QString mtgFilePath() { return m_settings.value(keys::montage_file).toString(); }
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QVariantMap& settings() { return m_settings; }
-
+	inline int status() { return m_status; }
+	void threadedOpenFile(const QString& filePath) { openFile(filePath, false); emit finished(); }
+signals:
+	void finished();  // used for threading operations (only when opening file in GUI mode at present)
 public slots:
 	// selectChannels will generate a list of channels to be used when requested data.
 	// it allows to select the channels to load depending on a list of key/values set in a variant map.
@@ -87,6 +91,7 @@ protected:
 	AwFilterSettings m_filterSettings;
 	QVariantMap m_settings;
 	AwChannelList m_tmp;
+	int m_status;	// code returned after a call to openFile
 	static AwDataManager* m_instance;
 	AwMontageManager* m_montageManager;
 	AwMarkerManager* m_markerManager;

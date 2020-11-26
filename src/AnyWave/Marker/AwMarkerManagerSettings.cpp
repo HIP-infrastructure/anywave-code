@@ -56,6 +56,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	tvMarkers->setModel(sortModel);
 	tvMarkers->setItemDelegate(new AwMarkerListDelegate(m_displayedMarkers, this));
 	tvMarkers->setContextMenuPolicy(Qt::CustomContextMenu);
+	tvMarkers->setToolTip(QString("total markers: %1").arg(m_markers.count()));
 
 	// Context Menu for QTableView
 	m_menu = new QMenu(tvMarkers);
@@ -155,17 +156,17 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(m_markerRuleDial, SIGNAL(ruleRemoved(const QString&)), this, SLOT(removeRule(const QString&)));
 	//connect(buttonExportWizard, SIGNAL(clicked()), this, SLOT(exportWizard()));
 	connect(buttonEditRules, SIGNAL(clicked()), this, SLOT(editRules()));
-	connect(comboNames, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateNamesStats(const QString&)));
-	connect(comboValues, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateValuesStats(const QString&)));
+	//connect(comboNames, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateNamesStats(const QString&)));
+	//connect(comboValues, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateValuesStats(const QString&)));
 	// marker navigation
-	connect(buttonPrevName, SIGNAL(clicked()), this, SLOT(prevName()));
-	connect(buttonNextName, SIGNAL(clicked()), this, SLOT(nextName()));
-	connect(buttonGoName, SIGNAL(clicked()), this, SLOT(goToName()));
-	connect(buttonPrevValue, SIGNAL(clicked()), this, SLOT(prevValue()));
-	connect(buttonNextValue, SIGNAL(clicked()), this, SLOT(nextValue()));
-	connect(buttonGoValue, SIGNAL(clicked()), this, SLOT(goToValue()));
+	//connect(buttonPrevName, SIGNAL(clicked()), this, SLOT(prevName()));
+	//connect(buttonNextName, SIGNAL(clicked()), this, SLOT(nextName()));
+	//connect(buttonGoName, SIGNAL(clicked()), this, SLOT(goToName()));
+	//connect(buttonPrevValue, SIGNAL(clicked()), this, SLOT(prevValue()));
+	//connect(buttonNextValue, SIGNAL(clicked()), this, SLOT(nextValue()));
+	//connect(buttonGoValue, SIGNAL(clicked()), this, SLOT(goToValue()));
 	// clean trigger
-	connect(buttonClearTriggerChannel, SIGNAL(clicked()), this, SIGNAL(clearTriggerClicked()));
+	//connect(buttonClearTriggerChannel, SIGNAL(clicked()), this, SIGNAL(clearTriggerClicked()));
 	// save / load
 	connect(buttonLoad, SIGNAL(clicked()), this, SIGNAL(loadMarkersClicked()));
 	connect(buttonSave, SIGNAL(clicked()), this, SIGNAL(saveMarkersClicked()));
@@ -214,12 +215,13 @@ void AwMarkerManagerSettings::applyRule(AwMarkerRule *rule)
 
 	m_model->updateMarkers(m_displayedMarkers);
 	emit markersChanged(m_displayedMarkers);
-	updateStats();
+//	updateStats();
 }
 
 void AwMarkerManagerSettings::setMarkers(const AwMarkerList& markers)
 {
 	m_markers = markers;
+	tvMarkers->setToolTip(QString("total markers: %1").arg(m_markers.count()));
 	applyRule(m_currentRule);
 	// some buttons are disabled when the marker list is empty
 	buttonExportWizard->setEnabled(!m_markers.isEmpty());
@@ -231,57 +233,57 @@ void AwMarkerManagerSettings::cleanUp()
 	m_markers.clear();
 	m_displayedMarkers.clear();
 	m_model->clear();
-	updateStats();
+//	updateStats();
 	// some buttons are disabled when the marker list is empty
 	buttonExportWizard->setEnabled(!m_markers.isEmpty());
 	buttonSave->setEnabled(!m_markers.isEmpty());
 }
 
-void AwMarkerManagerSettings::updateStats()
-{
-	bool enable = !m_displayedMarkers.isEmpty();
-	groupBoxDisplayRules->setEnabled(enable);
-	groupBoxQuickNav->setEnabled(enable);
-
-	if (m_isAddingMarker)
-		return;
-
-	// Total
-	labelTotal->setText(QString(tr("%1 marker(s)")).arg(m_displayedMarkers.size()));
-
-	// populate combo boxes but keep previous name and value selected if any
-	QString prevValue = comboValues->currentText();
-	QString prevName = comboNames->currentText();
-	int prevValueIndex = -1, prevNameIndex = -1;
-	QStringList names;
-	QStringList values;
-
-	comboNames->clear();
-	comboValues->clear();
-	foreach (AwMarker *m, m_displayedMarkers)	{
-		QString value = QString("%1").arg(m->value());
-		if (!names.contains(m->label()))
-			names << m->label();
-		if (!values.contains(value))
-			values << value;
-	}
-	comboNames->setEnabled(!names.isEmpty());
-	comboValues->setEnabled(!values.isEmpty());
-	comboNames->addItems(names);
-	comboValues->addItems(values);
-
-	// reset index to previous selection if any.
-	if (!prevValue.isEmpty()) {
-		prevValueIndex = values.indexOf(prevValue);
-		if (prevValueIndex != -1)
-			comboValues->setCurrentIndex(prevValueIndex);
-	}
-	if (!prevName.isEmpty()) {
-		prevNameIndex = names.indexOf(prevName);
-		if (prevNameIndex != -1)
-			comboNames->setCurrentIndex(prevNameIndex);
-	}
-}
+//void AwMarkerManagerSettings::updateStats()
+//{
+//	bool enable = !m_displayedMarkers.isEmpty();
+//	groupBoxDisplayRules->setEnabled(enable);
+//	groupBoxQuickNav->setEnabled(enable);
+//
+//	if (m_isAddingMarker)
+//		return;
+//
+//	// Total
+//	labelTotal->setText(QString(tr("%1 marker(s)")).arg(m_displayedMarkers.size()));
+//
+//	// populate combo boxes but keep previous name and value selected if any
+//	QString prevValue = comboValues->currentText();
+//	QString prevName = comboNames->currentText();
+//	int prevValueIndex = -1, prevNameIndex = -1;
+//	QStringList names;
+//	QStringList values;
+//
+//	comboNames->clear();
+//	comboValues->clear();
+//	foreach (AwMarker *m, m_displayedMarkers)	{
+//		QString value = QString("%1").arg(m->value());
+//		if (!names.contains(m->label()))
+//			names << m->label();
+//		if (!values.contains(value))
+//			values << value;
+//	}
+//	comboNames->setEnabled(!names.isEmpty());
+//	comboValues->setEnabled(!values.isEmpty());
+//	comboNames->addItems(names);
+//	comboValues->addItems(values);
+//
+//	// reset index to previous selection if any.
+//	if (!prevValue.isEmpty()) {
+//		prevValueIndex = values.indexOf(prevValue);
+//		if (prevValueIndex != -1)
+//			comboValues->setCurrentIndex(prevValueIndex);
+//	}
+//	if (!prevName.isEmpty()) {
+//		prevNameIndex = names.indexOf(prevName);
+//		if (prevNameIndex != -1)
+//			comboNames->setCurrentIndex(prevNameIndex);
+//	}
+//}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
@@ -314,8 +316,8 @@ void AwMarkerManagerSettings::showColumn(bool flag)
 void AwMarkerManagerSettings::setMarkerAddingMode(bool on)
 {
 	m_isAddingMarker = on;
-	if (!on)
-		updateStats();
+	//if (!on)
+	//	updateStats();
 }
 
 void AwMarkerManagerSettings::editCurrentItem()
@@ -351,7 +353,7 @@ void AwMarkerManagerSettings::updateMarkerList()
 {
 	m_displayedMarkers = m_model->markers();
 	emit markersChanged(m_displayedMarkers);
-	updateStats();
+//	updateStats();
 }
 
 
@@ -465,7 +467,7 @@ void AwMarkerManagerSettings::renameAllMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-	updateStats();
+//	updateStats();
 }
 
 void AwMarkerManagerSettings::renameSelectedMarkers()
@@ -477,7 +479,7 @@ void AwMarkerManagerSettings::renameSelectedMarkers()
 	AwMarkerList currentMarkers = m_model->markers();
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 
-	for (auto i : indexes) {
+	for (auto const& i : indexes) {
 		if (i.column() == MARKER_COLUMN_LABEL) {
 			int row = proxy->mapToSource(i).row();
 			//tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
@@ -488,7 +490,7 @@ void AwMarkerManagerSettings::renameSelectedMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-	updateStats();
+//	updateStats();
 }
 
 void AwMarkerManagerSettings::changeValueAllMarkers()
@@ -505,7 +507,7 @@ void AwMarkerManagerSettings::changeValueAllMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-	updateStats();
+//	updateStats();
 }
 
 void AwMarkerManagerSettings::changeValueSelectedMarkers()
@@ -518,7 +520,7 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 	AwMarkerList currentMarkers = m_model->markers();
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 
-	for (auto i : indexes) {
+	for (auto const& i : indexes) {
 		if (i.column() == MARKER_COLUMN_LABEL) {
 			int row = proxy->mapToSource(i).row();
 			//tvMarkers->model()->setData(i, dlg.value(), Qt::EditRole);
@@ -529,7 +531,7 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-	updateStats();
+//	updateStats();
 }
 
 
@@ -544,7 +546,7 @@ void AwMarkerManagerSettings::launchProcess()
 
 	AwMarkerList markers; // marker that has been removed
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-	for (auto i : indexes) {
+	for (auto const& i : indexes) {
 		if (i.column() == 0)
 			markers << currentMarkers.at(proxy->mapToSource(i).row());
 	}
@@ -826,44 +828,44 @@ void AwMarkerManagerSettings::goToValue()
 
 
 
-void AwMarkerManagerSettings::updateNamesStats(const QString &name)
-{
-	qint32 count = 0;
-	m_nameIndex = 0;
-	m_statsNames.clear();
+//void AwMarkerManagerSettings::updateNamesStats(const QString &name)
+//{
+//	qint32 count = 0;
+//	m_nameIndex = 0;
+//	m_statsNames.clear();
+//
+//	foreach (AwMarker *m, m_displayedMarkers) {
+//		if (m->label() == name)	{
+//			count++;
+//			m_statsNames << m;
+//		}
+//	}
+//	labelNames->setText(QString(tr("%1 marker(s)")).arg(count));
+//	
+//	// depending on stats, activate navigation buttons
+//	buttonPrevName->setVisible(count > 1);
+//	buttonNextName->setVisible(count > 1);
+//	buttonGoName->setVisible(count <= 1); 
+//}
 
-	foreach (AwMarker *m, m_displayedMarkers) {
-		if (m->label() == name)	{
-			count++;
-			m_statsNames << m;
-		}
-	}
-	labelNames->setText(QString(tr("%1 marker(s)")).arg(count));
-	
-	// depending on stats, activate navigation buttons
-	buttonPrevName->setVisible(count > 1);
-	buttonNextName->setVisible(count > 1);
-	buttonGoName->setVisible(count <= 1); 
-}
-
-void AwMarkerManagerSettings::updateValuesStats(const QString &value)
-{
-	qint32 count = 0;
-	m_valueIndex = 0;
-	int code = value.toInt();
-	m_statsValues.clear();
-
-	foreach (AwMarker *m, m_displayedMarkers) 	{
-		if (m->value() == code) 	{
-			count++;
-			m_statsValues << m;
-		}
-	}
-
-	labelValues->setText(QString(tr("%1 marker(s)")).arg(count));
-
-	// depending on stats, activate navigation buttons
-	buttonPrevValue->setVisible(count > 1);
-	buttonNextValue->setVisible(count > 1);
-	buttonGoValue->setVisible(count <= 1); 
-}
+//void AwMarkerManagerSettings::updateValuesStats(const QString &value)
+//{
+//	qint32 count = 0;
+//	m_valueIndex = 0;
+//	int code = value.toInt();
+//	m_statsValues.clear();
+//
+//	foreach (AwMarker *m, m_displayedMarkers) 	{
+//		if (m->value() == code) 	{
+//			count++;
+//			m_statsValues << m;
+//		}
+//	}
+//
+//	labelValues->setText(QString(tr("%1 marker(s)")).arg(count));
+//
+//	// depending on stats, activate navigation buttons
+//	buttonPrevValue->setVisible(count > 1);
+//	buttonNextValue->setVisible(count > 1);
+//	buttonGoValue->setVisible(count <= 1); 
+//}

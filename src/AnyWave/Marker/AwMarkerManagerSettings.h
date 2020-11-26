@@ -85,8 +85,8 @@ protected slots:
 	void editRules();
 	void goToMarkerAtRow(int row);
 	void contextMenuRequested(const QPoint&);
-	void updateNamesStats(const QString&);
-	void updateValuesStats(const QString&);
+	//void updateNamesStats(const QString&);
+	//void updateValuesStats(const QString&);
 	/** slot called when an item is modified in TableView **/
 	void updateMarkerList();
 	void prevName();
@@ -98,7 +98,7 @@ protected slots:
 	void showColumn(bool flag);
 
 protected:
-	void updateStats();
+	//void updateStats();
 	// EVENTS
 	void changeEvent(QEvent*);
 

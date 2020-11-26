@@ -40,6 +40,10 @@ public:
 	~AwWaitWidget();
 	template <typename F>
 	void run(F function);
+	template <typename F, typename T>
+	void run(F function, T arg);
+	template<class C,  typename T>
+	void run(C* ptr, void (C::* method)(T), T arg);
 public slots:
 	void setText(const QString& text);
 	void setCurrentProgress(int value);
@@ -57,6 +61,20 @@ template<typename F>
 void AwWaitWidget::run(F function)
 {
 	m_thread = new std::thread(function);
+	exec();
+}
+
+template<typename F, typename T>
+void AwWaitWidget::run(F function, T arg)
+{
+	m_thread = new std::thread(function, arg);
+	exec();
+}
+
+template<class C, typename T>
+void AwWaitWidget::run(C* ptr, void (C::*method)(T), T arg)
+{
+	m_thread = new std::thread(method, ptr, arg);
 	exec();
 }
 

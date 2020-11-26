@@ -73,9 +73,9 @@ protected slots:
 	void removeSelectedPredefinedMarkers();
 	void addTargets();
 	void clearTargets();
-	void changeBinding(bool on);
-	void changeKeyBinding();
-	void changeComboBinding();
+	//void changeBinding(bool on);
+	//void changeKeyBinding();
+	//void changeComboBinding();
 	void changeColor();
 
 private:

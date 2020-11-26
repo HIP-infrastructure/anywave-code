@@ -27,7 +27,6 @@
 #include <Prefs/AwSettings.h>
 #include <utils/gui.h>
 #include <utils/time.h>
-//#include <AwFileIO.h>
 #include "Data/AwDataManager.h"
 //
 // rowCount
@@ -149,16 +148,16 @@ QVariant AwMarkerListModel::data(const QModelIndex &index, int role) const
 			}
 		}
 		// tooltips
-		if (col == MARKER_COLUMN_LABEL)
-			return QString(tr("Marker's label"));
-		if (col == MARKER_COLUMN_CODE)
-			return QString(tr("Code associated with the event. Typically a trigger code at the acquisition."));
-		if (col == MARKER_COLUMN_POS)
-			return QString(tr("Position in seconds from the beginning of the file"));
-		if (col == MARKER_COLUMN_DURATION)
-			return QString(tr("Duration in seconds"));
-		if (col == MARKER_COLUMN_TARGET)
-			return QString(tr("Indicates if a marker targets one or several channels.\nMove the mouse over to see the targeted channel(s)."));
+		//if (col == MARKER_COLUMN_LABEL)
+		//	return QString(tr("Marker's label"));
+		//if (col == MARKER_COLUMN_CODE)
+		//	return QString(tr("Code associated with the event. Typically a trigger code at the acquisition."));
+		//if (col == MARKER_COLUMN_POS)
+		//	return QString(tr("Position in seconds from the beginning of the file"));
+		//if (col == MARKER_COLUMN_DURATION)
+		//	return QString(tr("Duration in seconds"));
+		//if (col == MARKER_COLUMN_TARGET)
+		//	return QString(tr("Indicates if a marker targets one or several channels.\nMove the mouse over to see the targeted channel(s)."));
 		break;
 	case Qt::TextAlignmentRole:
 		return int(Qt::AlignCenter);

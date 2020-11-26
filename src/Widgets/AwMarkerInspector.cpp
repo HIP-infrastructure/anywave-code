@@ -43,12 +43,12 @@ AwMarkerInspector::AwMarkerInspector(const AwMarkerList& markers, const QStringL
 	m_ui->listWidgetTargets->hide();
 	m_ui->buttonAddChannels->hide();
 	m_ui->buttonClearTargets->hide();
-	// by default no key binding used
-	m_ui->labelBrowse->hide();
-	m_ui->radioLabels->hide();
-	m_ui->radioValues->hide();
-	m_ui->comboLabels->hide();
-	m_ui->comboValues->hide();
+	//// by default no key binding used
+	//m_ui->labelBrowse->hide();
+	//m_ui->radioLabels->hide();
+	//m_ui->radioValues->hide();
+	//m_ui->comboLabels->hide();
+	//m_ui->comboValues->hide();
 
 	m_onlySingle = false;
 	m_ui->lineEditName->setText(tr("New Marker"));
@@ -66,11 +66,11 @@ AwMarkerInspector::AwMarkerInspector(const AwMarkerList& markers, const QStringL
 	connect(m_ui->lineEditName, SIGNAL(textEdited(const QString&)), this, SLOT(changeLabel(const QString&)));
 	connect(m_ui->spinValue, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 	connect(m_ui->checkAutoInc, SIGNAL(toggled(bool)), this, SLOT(changeAutoInc(bool)));	
-	connect(m_ui->checkBindingActive, SIGNAL(toggled(bool)), this, SLOT(changeBinding(bool)));
-	connect(m_ui->radioLabels, SIGNAL(clicked()), this, SLOT(changeKeyBinding()));
-	connect(m_ui->radioValues, SIGNAL(clicked()), this, SLOT(changeKeyBinding()));
-	connect(m_ui->comboLabels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComboBinding()));
-	connect(m_ui->comboValues, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComboBinding()));
+	//connect(m_ui->checkBindingActive, SIGNAL(toggled(bool)), this, SLOT(changeBinding(bool)));
+	//connect(m_ui->radioLabels, SIGNAL(clicked()), this, SLOT(changeKeyBinding()));
+	//connect(m_ui->radioValues, SIGNAL(clicked()), this, SLOT(changeKeyBinding()));
+	//connect(m_ui->comboLabels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComboBinding()));
+	//connect(m_ui->comboValues, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComboBinding()));
 
 	// init combo color
 	// default color at first index
@@ -110,52 +110,52 @@ void AwMarkerInspector::setTargets(const AwChannelList& channels)
 void AwMarkerInspector::setMarkers(const AwMarkerList& markers)
 {
 	m_markers = markers;
-	for (auto m :  markers)	{
-		QString value = QString::number(m->value());
-		if (!m_markerLabels.contains(m->label()))
-			m_markerLabels << m->label();
-		if (!m_markerValues.contains(value))
-			m_markerValues << value;
-	}
+	//for (auto m :  markers)	{
+	//	QString value = QString::number(m->value());
+	//	if (!m_markerLabels.contains(m->label()))
+	//		m_markerLabels << m->label();
+	//	if (!m_markerValues.contains(value))
+	//		m_markerValues << value;
+	//}
 
-	if (markers.isEmpty()) {
-		m_ui->comboLabels->setDisabled(true);
-		m_ui->comboValues->setDisabled(true);
-		m_ui->radioLabels->setDisabled(true);
-		m_ui->radioValues->setChecked(true);
-	}
-	
-	if (!m_markerLabels.isEmpty())
-		m_ui->comboLabels->addItems(m_markerLabels);
-	if (!m_markerValues.isEmpty())
-		m_ui->comboValues->addItems(m_markerValues);
+	//if (markers.isEmpty()) {
+	//	m_ui->comboLabels->setDisabled(true);
+	//	m_ui->comboValues->setDisabled(true);
+	//	m_ui->radioLabels->setDisabled(true);
+	//	m_ui->radioValues->setChecked(true);
+	//}
+	//
+	//if (!m_markerLabels.isEmpty())
+	//	m_ui->comboLabels->addItems(m_markerLabels);
+	//if (!m_markerValues.isEmpty())
+	//	m_ui->comboValues->addItems(m_markerValues);
 
-	if (m_markerLabels.isEmpty()) {
-		m_ui->radioLabels->setDisabled(true);
-		m_ui->comboLabels->setDisabled(true);
-		m_ui->radioValues->setChecked(true);
-	}
-	else {
-		m_ui->comboLabels->setDisabled(false);
-		m_ui->radioLabels->setDisabled(false);
-	}
+	//if (m_markerLabels.isEmpty()) {
+	//	m_ui->radioLabels->setDisabled(true);
+	//	m_ui->comboLabels->setDisabled(true);
+	//	m_ui->radioValues->setChecked(true);
+	//}
+	//else {
+	//	m_ui->comboLabels->setDisabled(false);
+	//	m_ui->radioLabels->setDisabled(false);
+	//}
 
-	if (m_markerValues.isEmpty()) {
-		m_ui->radioValues->setDisabled(true);
-		m_ui->comboValues->setDisabled(true);
-		m_ui->radioLabels->setChecked(true);
-	}
-	else {
-		m_ui->radioValues->setDisabled(false);
-		m_ui->comboValues->setDisabled(false);
-	}
+	//if (m_markerValues.isEmpty()) {
+	//	m_ui->radioValues->setDisabled(true);
+	//	m_ui->comboValues->setDisabled(true);
+	//	m_ui->radioLabels->setChecked(true);
+	//}
+	//else {
+	//	m_ui->radioValues->setDisabled(false);
+	//	m_ui->comboValues->setDisabled(false);
+	//}
 
-	if (m_markerLabels.isEmpty() && m_markerValues.isEmpty()) {
-		m_ui->checkBindingActive->setChecked(false);
-		m_ui->checkBindingActive->setDisabled(true);
-	}
-	else 
-		m_ui->checkBindingActive->setDisabled(false);
+	//if (m_markerLabels.isEmpty() && m_markerValues.isEmpty()) {
+	//	m_ui->checkBindingActive->setChecked(false);
+	//	m_ui->checkBindingActive->setDisabled(true);
+	//}
+	//else 
+	//	m_ui->checkBindingActive->setDisabled(false);
 }
 
 void AwMarkerInspector::setSingleOnly(bool flag)
@@ -169,10 +169,10 @@ void AwMarkerInspector::setSingleOnly(bool flag)
 		m_ui->radioSelection->setEnabled(true);
 }
 
-void AwMarkerInspector::changeBinding(bool on)
-{
-	m_settings.usingSpacebar = on;
-}
+//void AwMarkerInspector::changeBinding(bool on)
+//{
+//	m_settings.usingSpacebar = on;
+//}
 
 void AwMarkerInspector::bindOnLabel(const QString& label)
 {
@@ -193,17 +193,17 @@ void AwMarkerInspector::bindOnValue(float value)
 	m_settings.setBoundMarkers(markers);
 }
 
-void AwMarkerInspector::changeKeyBinding()
-{
-	QRadioButton *button = (QRadioButton *)sender();
-	if (button == NULL)
-		return;
-
-	if (button == m_ui->radioLabels) 
-		bindOnLabel( m_ui->comboLabels->currentText());
-	else if (button == m_ui->radioValues)
-		bindOnValue((float)m_ui->comboValues->currentText().toDouble());
-}
+//void AwMarkerInspector::changeKeyBinding()
+//{
+//	QRadioButton *button = (QRadioButton *)sender();
+//	if (button == NULL)
+//		return;
+//
+//	if (button == m_ui->radioLabels) 
+//		bindOnLabel( m_ui->comboLabels->currentText());
+//	else if (button == m_ui->radioValues)
+//		bindOnValue((float)m_ui->comboValues->currentText().toDouble());
+//}
 
 void AwMarkerInspector::changeColor()
 {
@@ -214,18 +214,18 @@ void AwMarkerInspector::changeColor()
 		m_settings.color = QColor(QColor::colorNames().at(index - 1)).name(QColor::HexRgb);
 }
 
-void AwMarkerInspector::changeComboBinding()
-{
-	QComboBox *box = (QComboBox *)sender();
-
-	if (box == NULL)
-		return;
-
-	if (box == m_ui->comboLabels && m_ui->radioLabels->isChecked())
-		bindOnLabel(m_ui->comboLabels->currentText());
-	else if (box == m_ui->comboValues && m_ui->radioValues->isChecked())
-		bindOnValue((float)m_ui->comboValues->currentText().toDouble());
-}
+//void AwMarkerInspector::changeComboBinding()
+//{
+//	QComboBox *box = (QComboBox *)sender();
+//
+//	if (box == NULL)
+//		return;
+//
+//	if (box == m_ui->comboLabels && m_ui->radioLabels->isChecked())
+//		bindOnLabel(m_ui->comboLabels->currentText());
+//	else if (box == m_ui->comboValues && m_ui->radioValues->isChecked())
+//		bindOnValue((float)m_ui->comboValues->currentText().toDouble());
+//}
 
 
 void AwMarkerInspector::changeMarkerType(bool flag)

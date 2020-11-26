@@ -94,6 +94,7 @@ signals:
 	void modificationsDone();
 	void markersRemoved();
 	void log(const QString& message);
+	void finished();	// for threading operations
 private:
 	AwMarkerManagerSettings *m_ui;
 	QDockWidget *m_dock;
