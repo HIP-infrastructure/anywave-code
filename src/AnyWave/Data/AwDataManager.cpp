@@ -54,6 +54,7 @@ void AwDataManager::closeFile()
 	m_montageManager->closeFile();
 	m_markerManager->closeFile();
 	m_status = 0;
+	m_errorString.clear();
 }
 
 const AwChannelList& AwDataManager::rawChannels()
@@ -99,11 +100,13 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	if (reader == nullptr) {
 		//emit finished();
 		m_status = -1;
+		m_errorString = "No reader plugin found to open the file.";
 		return -1;
 	}
 	m_status = reader->openFile(filePath);
 	if (m_status) { // status >0 means error when opening file, return status code
 		///emit finished();
+		m_errorString = reader->errorMessage();
 		return m_status;
 	}
 	// ok we have a valid reader

@@ -157,11 +157,11 @@ void AnyWave::openFile(const QString &path)
 //	int res = dataManager->status();
 	// A t on un plugin capable de lire le fichier selectionne ?
 	if (res) {
-		if (res == AwDataManager::NoPluginFound) {
-			QMessageBox::critical(this, "Error Opening File", "No reader module is able to open the file.", QMessageBox::Discard);
-			return;
-		}
-		QMessageBox::critical(this, "Error Opening File", "Error when opening file.", QMessageBox::Discard);
+		//if (res == AwDataManager::NoPluginFound) {
+		//	QMessageBox::critical(this, "Error Opening File", "No reader module is able to open the file.", QMessageBox::Discard);
+		//	return;
+		//}
+		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
 	}
 

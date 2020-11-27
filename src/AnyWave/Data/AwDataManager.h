@@ -72,7 +72,8 @@ public:
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QVariantMap& settings() { return m_settings; }
 	inline int status() { return m_status; }
-	void threadedOpenFile(const QString& filePath) { openFile(filePath, false); emit finished(); }
+	//void threadedOpenFile(const QString& filePath) { openFile(filePath, false); emit finished(); }
+	inline QString& errorString() { return m_errorString; }
 signals:
 	void finished();  // used for threading operations (only when opening file in GUI mode at present)
 public slots:
@@ -96,5 +97,6 @@ protected:
 	AwMontageManager* m_montageManager;
 	AwMarkerManager* m_markerManager;
 	AwDataServer* m_dataServer;
+	QString m_errorString;
 	QMutex m_mutex;
 };
