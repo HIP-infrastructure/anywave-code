@@ -303,10 +303,10 @@ qint64 ADESIO::readDataFromChannels(float start, float duration, AwChannelList &
 
 	qint64 totalSize = nSamples * nbChannels;
 
-	float *buf = new float[totalSize];
+	float* buf = new float[totalSize];
 	m_binFile.seek(startSample * sizeof(float));
 
-	qint64 read = m_binFile.read((char *)buf, totalSize * sizeof(float));
+	qint64 read = m_binFile.read((char*)buf, totalSize * sizeof(float));
 
 	if (read <= 0) {
 		delete[] buf;

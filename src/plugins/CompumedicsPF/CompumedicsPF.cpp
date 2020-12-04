@@ -26,6 +26,8 @@ CompumedicsReaderPlugin::CompumedicsReaderPlugin() : AwFileIOPlugin()
 
 CompumedicsReader::CompumedicsReader(const QString& fileName) : AwFileIO(fileName)
 {
+	m_fileStartPos = 0;
+	m_samplingRate = 0.;
 }
 
 CompumedicsReader::~CompumedicsReader()
@@ -251,16 +253,12 @@ qint64 CompumedicsReader::readDataFromChannels(float start, float duration, QLis
 	if (channelList.isEmpty())
 		return 0;
 
-	qint64 max_samples = 0;
-	qint64 nSamplesRead = 0;
-
-	//	if (m_dataOrientation == 0) {// multiplexed
 	// number of samples to read
-	qint64 nSamples = (qint64)floor(duration * m_samplingRate);
+	qint64 nSamples = (qint64)floor((double)duration * (double)m_samplingRate);
 	// starting sample in channel.
-	qint64 nStart = (qint64)floor(start * m_samplingRate);
+	qint64 nStart = (qint64)floor((double)start * (double)m_samplingRate);
 	// total number of channels in file.
-	quint32 nbChannels = infos.channelsCount();
+	auto nbChannels = infos.channelsCount();
 	// starting sample in file.
 	qint64 startSample = nStart * nbChannels;
 
@@ -274,9 +272,6 @@ qint64 CompumedicsReader::readDataFromChannels(float start, float duration, QLis
 		nSamples = infos.totalSamples() - nStart;
 
 	qint64 totalSize = nSamples * nbChannels;
-
-	if (duration <= 0)
-		return 0;
 
 	qint64 read = 0;
 	float *buf = new float[totalSize];

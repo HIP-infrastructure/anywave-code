@@ -545,7 +545,7 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 	else if (!skip && use) {
         //auto tmp = AwMarker::getMarkersWithLabels(markers, used);
        // res = AwMarker::merge(tmp);  // don't merge input markers is specified by use_markers
-		res = AwMarker::getMarkersWithLabels(markers, used);
+		res = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, used));
 	}
 	else if (skip && use) {
         auto tmp = AwMarker::getMarkersWithLabels(markers, skipped);
