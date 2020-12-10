@@ -37,6 +37,7 @@
 #include <graphics/AwHighLightMarker.h>
 class AwMarkingSettings;
 class AwGTCMenu;
+class AwPickMarkersDial;
 
 class AW_WIDGETS_EXPORT AwGraphicsScene : public QGraphicsScene
 {
@@ -205,7 +206,7 @@ protected:
 	QStringList m_QTSCompatiblePlugins;	// name of process plugins that can be launched when QTS mode is active.
 	QString m_pluginToLaunch;	// name of process to launch after a QTS
 	QMenu* m_contextMenuMapping;	// pointer to sub menu dedicated to mapping operations (can be null)
-
+	AwPickMarkersDial* m_pickMarkersDial;
 };
 
 

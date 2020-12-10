@@ -11,6 +11,8 @@ class AwPickMarkersDial : public QDialog
 public:
 	AwPickMarkersDial(AwMarkingSettings* settings, QWidget *parent = Q_NULLPTR);
 	~AwPickMarkersDial();
+
+	inline void setSettings(AwMarkingSettings* settings) { m_settings = settings; }
 public slots:
 	void accept() override;
 protected:
