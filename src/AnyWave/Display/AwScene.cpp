@@ -54,14 +54,14 @@ AwScene::~AwScene()
 QMenu* AwScene::defaultContextMenu()
 {
 	auto m = AwGraphicsScene::defaultContextMenu();
-	auto menu = m_contextMenuMapping;
-	if (menu) {
-		auto selectedLabels = AwChannel::getLabels(AwDataManager::instance()->selectedChannels());
-		if (!selectedLabels.isEmpty()) {
-			auto action = menu->addAction("Insert Markers based on selected channels");
-			connect(action, &QAction::triggered, this, &AwScene::insertMarkersBasedOnChannelSelection);
-		}
-	}
+	//auto menu = m_contextMenuMapping;
+	//if (menu) {
+	//	auto selectedLabels = AwChannel::getLabels(AwDataManager::instance()->selectedChannels());
+	//	if (!selectedLabels.isEmpty()) {
+	//		auto action = menu->addAction("Insert Markers based on selected channels");
+	//		connect(action, &QAction::triggered, this, &AwScene::insertMarkersBasedOnChannelSelection);
+	//	}
+	//}
 	return m;
 }
 
@@ -74,11 +74,13 @@ void AwScene::insertMarkersBasedOnChannelSelection()
 {
 	auto selectedLabels = AwChannel::getLabels(AwDataManager::instance()->selectedChannels());
 	if (!selectedLabels.isEmpty()) {
-		for (auto label : selectedLabels) {
+		for (auto const& label : selectedLabels) {
 			auto marker = new AwMarker(label, m_mappingMarker.start(), 0.);
 			emit markerInserted(marker);
 		}
 	}
+
+
 }
 
 void AwScene::setSelectionAsBad()

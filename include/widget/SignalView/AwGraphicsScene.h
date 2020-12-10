@@ -99,6 +99,8 @@ public slots:
 	virtual void updateSettings(AwViewSettings *settings, int flags);
 	virtual void setSelectionAsBad() {}
 	virtual void setSelectionAsMontage() {}
+	// open a GUI when in mapping mode, to select which predefined markers to insert at mapping position.
+	void chooseMarkersToInsert();
 	void setMarkingSettings(AwMarkingSettings *settings);
 	void setPageDuration(float dur) { m_pageDuration = dur; }
 	void updateSelection();

@@ -21,8 +21,8 @@ using namespace sp;
 #include <qwt_plot_curve.h>
 #include <AwKeys.h>
 
-# define VTK_CREATE(type, name) \
-  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+//# define VTK_CREATE(type, name) \
+//  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
 SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)

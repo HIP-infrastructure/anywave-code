@@ -35,6 +35,7 @@
 #include <AwMarkingSettings.h>
 #include <utils/gui.h>
 #include "AwGTCMenu.h"
+#include "AwPickMarkersDial.h"
 
 AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : QGraphicsScene(parent)
 {
@@ -738,10 +739,25 @@ void AwGraphicsScene::insertPredefinedMarker()
 	if (act == nullptr)
 		return;
 	int index = act->data().toInt();
-	auto marker = m_markingSettings->list.at(index);
+	auto marker = m_markingSettings->predefinedMarkers.at(index);
 	// set correct position :
 	marker->setStart(m_mappingMarker.start());
 	emit markerInserted(new AwMarker(marker));
+}
+
+void AwGraphicsScene::chooseMarkersToInsert()
+{
+	AwPickMarkersDial dlg(m_markingSettings);
+	if (dlg.exec() == QDialog::Accepted) {
+		for (auto m : m_markingSettings->getSelectedPredefinedMarkers()) {
+			auto marker = new AwMarker(m);
+			if (m_mouseMode == AwGraphicsScene::Mapping) 
+				marker->setStart(m_mappingMarker.start());
+			if (m_mouseMode == AwGraphicsScene::AddingMarker)
+				marker->setStart(m_positionClicked);
+			emit markerInserted(marker);
+		}
+	}
 }
 
 void AwGraphicsScene::addCustomMarkerFromList()
@@ -750,8 +766,8 @@ void AwGraphicsScene::addCustomMarkerFromList()
 
 	int index = act->data().toInt();
 	if (m_currentMarkerItem) {
-		m_currentMarkerItem->marker()->setLabel(m_markingSettings->list.at(index)->label());
-		m_currentMarkerItem->marker()->setValue(m_markingSettings->list.at(index)->value());
+		m_currentMarkerItem->marker()->setLabel(m_markingSettings->predefinedMarkers.at(index)->label());
+		m_currentMarkerItem->marker()->setValue(m_markingSettings->predefinedMarkers.at(index)->value());
 	}
 }
 
@@ -815,7 +831,7 @@ void AwGraphicsScene::updateMarkers()
 			prev = item;
 		}
 		else { // marker with target channel(s)
-			for (auto target : m_markers.at(i)->targetChannels())	{
+			for (auto const& target : m_markers.at(i)->targetChannels())	{
 				QString dest = target.trimmed(), ref;
 				AwMarker *m = NULL;
 				// check for monopolar target
@@ -942,15 +958,16 @@ void AwGraphicsScene::keyReleaseEvent(QKeyEvent *e)
 		}
 		break;
 	case Qt::Key_Space:
-		if (m_mouseMode == AwGraphicsScene::AddingMarker && m_markingSettings->usingSpacebar) {
-			AwMarker *m = m_markingSettings->spaceBarNext();
-			if (m) {
-				centerViewOnPosition(m->start());
-			}
-			break;
-		}
-		else
-			nextPage();
+		//if (m_mouseMode == AwGraphicsScene::AddingMarker && m_markingSettings->usingSpacebar) {
+		//	AwMarker *m = m_markingSettings->spaceBarNext();
+		//	if (m) {
+		//		centerViewOnPosition(m->start());
+		//	}
+		//	break;
+		//}
+		//else
+		//	nextPage();
+		nextPage();
 		break;
 	}
 }
@@ -974,9 +991,15 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		
 		connect(action, SIGNAL(triggered()), this, SLOT(cursorToMarker()));
 		// prepare contextual menu if the user choosed to use predefined markers
-		if (m_markingSettings->isUsingList && !m_markingSettings->list.isEmpty()) {
+		if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
+			if (m_markingSettings->predefinedMarkers.size() >= 2) {
+				subMenu->addSeparator();
+				auto action = subMenu->addAction("Choose markers to insert");
+				connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
+				subMenu->addSeparator();
+			}
 			int index = 0;
-			for (auto m : m_markingSettings->list) {
+			for (auto m : m_markingSettings->predefinedMarkers) {
 				QAction* action = subMenu->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
 				action->setData(index); // store the index of item in list in action custom data.
 				index++;
@@ -1414,17 +1437,33 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			if (!m_markingSettings->targets.isEmpty())
 				m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
 			// prepare contextual menu if the user choosed to use predefined markers
-			if (m_markingSettings->isUsingList && !m_markingSettings->list.isEmpty()) {
+			if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
 				menu_predefined = new QMenu;
+				if (m_markingSettings->predefinedMarkers.size() >= 2) {
+					auto action = menu_predefined->addAction("Choose markers to insert");
+					connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
+					menu_predefined->addSeparator();
+				}
 				int index = 0;
-				for (auto m : m_markingSettings->list) {
-					QAction *action = new QAction(m->label() + " " + QString::number(m->value()), menu_predefined);
+				for (auto m : m_markingSettings->predefinedMarkers) {
+					QAction* action = menu_predefined->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
 					action->setData(index); // store the index of item in list in action custom data.
 					index++;
 					connect(action, SIGNAL(triggered()), this, SLOT(addCustomMarkerFromList()));
-					menu_predefined->addAction(action);
 				}
 			}
+			//// prepare contextual menu if the user choosed to use predefined markers
+			//if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
+			//	menu_predefined = new QMenu;
+			//	int index = 0;
+			//	for (auto m : m_markingSettings->predefinedMarkers) {
+			//		QAction *action = new QAction(m->label() + " " + QString::number(m->value()), menu_predefined);
+			//		action->setData(index); // store the index of item in list in action custom data.
+			//		index++;
+			//		connect(action, SIGNAL(triggered()), this, SLOT(addCustomMarkerFromList()));
+			//		menu_predefined->addAction(action);
+			//	}
+			//}
 			else if (m_markingSettings->isAutoInc) {
 				m_currentMarkerItem->marker()->setLabel(QString("%1_%2").arg(m_markingSettings->label).arg(m_markingSettings->index++));
 			}

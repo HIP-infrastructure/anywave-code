@@ -174,24 +174,24 @@ void AwMarkerInspector::setSingleOnly(bool flag)
 //	m_settings.usingSpacebar = on;
 //}
 
-void AwMarkerInspector::bindOnLabel(const QString& label)
-{
-	AwMarkerList markers;
-	foreach (AwMarker *m, m_markers)
-		if (m->label() == label)
-			markers << m;
-
-	m_settings.setBoundMarkers(markers);
-}
-
-void AwMarkerInspector::bindOnValue(float value)
-{
-	AwMarkerList markers;
-	for (auto m : m_markers)
-		if (m->value() == value)
-			markers << m;
-	m_settings.setBoundMarkers(markers);
-}
+//void AwMarkerInspector::bindOnLabel(const QString& label)
+//{
+//	AwMarkerList markers;
+//	foreach (AwMarker *m, m_markers)
+//		if (m->label() == label)
+//			markers << m;
+//
+//	m_settings.setBoundMarkers(markers);
+//}
+//
+//void AwMarkerInspector::bindOnValue(float value)
+//{
+//	AwMarkerList markers;
+//	for (auto m : m_markers)
+//		if (m->value() == value)
+//			markers << m;
+//	m_settings.setBoundMarkers(markers);
+//}
 
 //void AwMarkerInspector::changeKeyBinding()
 //{
@@ -286,10 +286,10 @@ void AwMarkerInspector::setPredefinedMarkers(const AwMarkerList& markers)
 {
 	m_ui->table->clearContents();
 	m_ui->table->setRowCount(0);
-	while (!m_settings.list.isEmpty())
-		delete m_settings.list.takeFirst();
+	while (!m_settings.predefinedMarkers.isEmpty())
+		delete m_settings.predefinedMarkers.takeFirst();
 	for (auto m : markers) {
-		m_settings.list.append(m);
+		m_settings.predefinedMarkers.append(m);
 		QTableWidgetItem *itemName = new QTableWidgetItem(m->label());
 		QTableWidgetItem *itemValue = new QTableWidgetItem(QString::number(m->value()));
 		QTableWidgetItem *itemColor;
@@ -309,7 +309,7 @@ void AwMarkerInspector::setPredefinedMarkers(const AwMarkerList& markers)
 
 AwMarkerList& AwMarkerInspector::predefinedMarkers()
 {
-	return m_settings.list;
+	return m_settings.predefinedMarkers;
 }
 
 void AwMarkerInspector::addPredefinedMarker()
@@ -317,7 +317,7 @@ void AwMarkerInspector::addPredefinedMarker()
 	AwAddPredefinedMarker dlg(this);
 	if (dlg.exec() == QDialog::Accepted) {
 		AwMarker *m = dlg.marker();
-		m_settings.list.append(m);
+		m_settings.predefinedMarkers.append(m);
 		QTableWidgetItem *itemName = new QTableWidgetItem(m->label());
 		QTableWidgetItem *itemValue = new QTableWidgetItem(QString::number(m->value()));
 		QTableWidgetItem *itemColor;
@@ -332,7 +332,7 @@ void AwMarkerInspector::addPredefinedMarker()
 		m_ui->table->setItem(m_ui->table->rowCount() - 1, 1, itemValue);
 		m_ui->table->setItem(m_ui->table->rowCount() - 1, 2, itemColor);
 	}
-	emit predefinedMarkersChanged(m_settings.list);
+	emit predefinedMarkersChanged(m_settings.predefinedMarkers);
 }
 
 void AwMarkerInspector::clearPredefinedMarkers()
@@ -342,9 +342,9 @@ void AwMarkerInspector::clearPredefinedMarkers()
 	if (QMessageBox::question(this, tr("Clear predefined markers"), tr("Clear the list?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes) {
 		m_ui->table->clearContents();
 		m_ui->table->setRowCount(0);
-		while (!m_settings.list.isEmpty())
-			delete m_settings.list.takeFirst();
-		emit predefinedMarkersChanged(m_settings.list);
+		while (!m_settings.predefinedMarkers.isEmpty())
+			delete m_settings.predefinedMarkers.takeFirst();
+		emit predefinedMarkersChanged(m_settings.predefinedMarkers);
 	}
 }
 
@@ -358,12 +358,12 @@ void AwMarkerInspector::removeSelectedPredefinedMarkers()
 			if (!rows.contains(item->row()))
 				rows << item->row();
 		foreach (int row, rows) {
-			markers << m_settings.list.at(row);
+			markers << m_settings.predefinedMarkers.at(row);
 			m_ui->table->removeRow(row);
 		}
 				
 		foreach (AwMarker *m, markers) {
-			m_settings.list.removeOne(m);
+			m_settings.predefinedMarkers.removeOne(m);
 			delete m;
 		}
 	}

@@ -61,19 +61,9 @@
     <ClCompile Include="AwTimeScaleCombo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
-    
-    
     <ClCompile Include="Aw2DGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwTopoWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,148 +76,90 @@
     <ClCompile Include="SignalView\AwGoToLatencyDial.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="SignalView\AwGraphicsScene.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
     <ClCompile Include="SignalView\AwGraphicsView.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="SignalView\AwNavigationBar.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="SignalView\AwViewSettingsUi.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwMarkerInspector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwAddPredefinedMarker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwAddTargetChannels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="AwMarkingSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwTopoWidgetSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwWaitWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwComboCMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwTopoLabelImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SEEGViewer\AwSEEGViewer.cpp">
       <Filter>SEEGViewer</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp">
       <Filter>SEEGViewer</Filter>
     </ClCompile>
     <ClCompile Include="AwMarkAroundWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwMessageBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SignalView\AwGTCMenu.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="AwComboColor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AwDownSamplingWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="InputMarker\AwInputMarkerTableView.cpp">
       <Filter>InputMarker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="InputMarker\InputMarkerModel.cpp">
       <Filter>InputMarker</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="InputMarker\AwInputMarkerWidget.cpp">
       <Filter>InputMarker</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="AwComboMarker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="AwSpectroWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
     <ClCompile Include="SignalView\AwBaseSignalView.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    
-    
-    
     <ClCompile Include="AwComboDS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="AwVTKWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
     <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp">
       <Filter>SEEGViewer</Filter>
     </ClCompile>
@@ -237,18 +169,12 @@
     <ClCompile Include="AwGetValueDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
     <ClCompile Include="AwVideoPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
-    
-    
+    <ClCompile Include="SignalView\AwPickMarkersDial.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AwAmplitudeWidget.ui">
@@ -419,37 +345,23 @@
     <QtRcc Include="..\..\resources\AnyWave.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
+    <QtUic Include="SignalView\AwPickMarkersDial.ui">
+      <Filter>SignalView</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
-    
     <ClInclude Include="Aw2DGrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <ClInclude Include="..\..\include\widget\AwWait.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
     <ClInclude Include="..\..\include\widget\AwMessageBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
     <ClInclude Include="SEEGViewer\AwSEEGInteractor.h">
       <Filter>SEEGViewer</Filter>
     </ClInclude>
-    
-    
-    
   </ItemGroup>
   <ItemGroup>
     <None Include="awwidgetslib_fr.ts">
@@ -562,5 +474,10 @@
     <Image Include="..\..\resources\images\QTS.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="SignalView\AwPickMarkersDial.h">
+      <Filter>SignalView</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

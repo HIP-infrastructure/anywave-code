@@ -29,6 +29,7 @@
 #include <AwMarker.h>
 #include <QObject>
 
+
 class AW_WIDGETS_EXPORT AwMarkingSettings : public QObject
 {
 	Q_OBJECT
@@ -45,6 +46,9 @@ public:
 		autoTargetChannel = false;
 		m_spaceBarIndex = 0;
 	}
+	void setPredefinedMarkers(const AwMarkerList& markers);
+	AwMarkerList getSelectedPredefinedMarkers();
+
 	int type;						// current marker type
 	bool isUsingList;				// true if we are using a predefined list of markers
 	QString label;					// marker label
@@ -53,12 +57,13 @@ public:
 	bool isTargettingChannels;		// true if marking is targeting predefined channels
 	QStringList targets;			// labels of predefined targets
 	int index;						// used while auto incrementing
-	AwMarkerList list;				// The predefined list of markers
+	AwMarkerList predefinedMarkers;	// The predefined list of markers
+	QVector<int> selectedPredefinedMarkers;
 	bool autoTargetChannel;			// true if the channel under the mouse will be used as target
 	bool usingSpacebar;				// true if using spacebar binding
 	QString color;					// color to set for the marker
-	AwMarker *spaceBarNext();
-	void setBoundMarkers(AwMarkerList& markers);
+//	AwMarker *spaceBarNext();
+//	void setBoundMarkers(AwMarkerList& markers);
 protected:
 	int m_spaceBarIndex;				// current index in boundMarkers 
 	AwMarkerList m_boundMarkers;		// List of markers used with spacebar 

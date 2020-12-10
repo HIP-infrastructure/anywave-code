@@ -58,6 +58,7 @@
     <ClCompile Include="SignalView\AwGraphicsView.cpp" />
     <ClCompile Include="SignalView\AwGTCMenu.cpp" />
     <ClCompile Include="SignalView\AwNavigationBar.cpp" />
+    <ClCompile Include="SignalView\AwPickMarkersDial.cpp" />
     <ClCompile Include="SignalView\AwViewSettings.cpp" />
     <ClCompile Include="SignalView\AwViewSettingsUi.cpp" />
   </ItemGroup>
@@ -66,6 +67,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="SignalView\AwPickMarkersDial.h" />
     <QtMoc Include="..\..\include\widget\AwVideoPlayer.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwWaitWidget.h">
@@ -156,6 +158,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="SignalView\AwPickMarkersDial.ui" />
     <QtUic Include="SignalView\AwViewSettingsUi.ui">
     </QtUic>
   </ItemGroup>
