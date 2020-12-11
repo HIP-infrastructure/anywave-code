@@ -259,6 +259,8 @@ add_subdirectory(src/plugins/MultiFiltersViewer)
 add_subdirectory(src/plugins/h2)
 add_subdirectory(src/plugins/H2Graphs)
 add_subdirectory(src/plugins/EEPIO)
+add_subdirectory(src/plugins/CompumedicsPF)
+add_subdirectory(src/plugins/DeltamedBinTxtReader)
 
 # external plugins (must be locater in plugins sub folder)
 #find_file(EXTERNAL_PLUGINS NAMES external_plugins.cmake PATHS  ${CMAKE_SOURCE_DIRECTORY} NO_DEFAULT_PATH)

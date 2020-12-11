@@ -38,6 +38,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/SignalView/AwBaseMarkerBar.h  
     ./SignalView/AwViewSettingsUi.h  
     ./SignalView/AwGoToLatencyDial.h  
+    ./SignalView/AwPickMarkersDial.h 
     ../../include/widget/SignalView/AwGraphicsScene.h  
     ../../include/widget/SignalView/AwGraphicsView.h  
     ../../include/widget/SignalView/AwNavigationBar.h  
@@ -84,6 +85,7 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SignalView/AwNavigationBar.cpp  
     ./SignalView/AwViewSettings.cpp  
     ./SignalView/AwViewSettingsUi.cpp  
+    ./SignalView/AwPickMarkersDial.cpp 
     ./SEEGViewer/AwSEEGInteractor.cpp  
     ./SEEGViewer/AwSEEGViewer.cpp  
     ./SEEGViewer/AwSEEGWidget.cpp  
@@ -108,6 +110,7 @@ SET(FORMS  ./AwSelectInputDataWidget.ui
     ./SignalView/AwGoToLatencyDial.ui  
     ./SignalView/AwNavigationBarv2.ui  
     ./SignalView/AwViewSettingsUi.ui  
+    ./SignalView/AwPickMarkersDial.ui 
     ./SEEGViewer/AwSEEGWidget.ui  
 	./AwVideoPlayer.ui
     ./InputMarker/AwInputMarkerWidget.ui)
