@@ -29,7 +29,7 @@ AwFileIO::FileStatus DeltamedBTReader::canRead(const QString &path)
 	settings.beginGroup("INFORMATION");
 	QString coherence = settings.value("Version").toString();
 	QString organization = settings.value("Organisation").toString();
-	if (organization.toUpper() == "DELTAMED" && coherence.toUpper() == "COHERENCE")
+	if (organization.toUpper().contains("DELTAMED") && coherence.toUpper().contains("COHERENCE"))
 		return AwFileIO::NoError;
 
 	return AwFileIO::WrongFormat;
