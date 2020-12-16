@@ -136,6 +136,7 @@ IF(APPLE)
    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
   # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='@executable_path/../Frameworks'")
   #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+   SET(APPLE_ID "Apple Development: thechewie13@gmail.com (MY3J8AN9H6)")
 ENDIF()
 
 IF(APPLE)

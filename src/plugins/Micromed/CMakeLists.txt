@@ -4,10 +4,10 @@ add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
 SET(SRCS
-${CMAKE_SOURCE_DIR}/src/plugins/Micromed/Micromed.cpp) 
+${CMAKE_SOURCE_DIR}/src/plugins/Micromed/micromedreader.cpp) 
 
  SET(MOCS
-   ${CMAKE_SOURCE_DIR}/src/plugins/Micromed/Micromed.h)
+   ${CMAKE_SOURCE_DIR}/src/plugins/Micromed/micromedreader.h)
 
 qt5_wrap_cpp(Micromed_MOCS ${MOCS})
 add_library(MicromedReader SHARED ${SRCS} ${Micromed_MOCS})

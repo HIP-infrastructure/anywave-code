@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -202,6 +202,7 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 						break;
 					}
 					else { // plugin found could not open the file => destroy it and continue browsing.				
+						emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
 						plugin->deleteInstance(reader);
 						reader = NULL;
 					}
@@ -218,6 +219,7 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 				break;
 			}
 			else { // plugin found could not open the file => destroy it and continue browsing.				
+			    emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
 				plugin->deleteInstance(reader);
 				reader = NULL;
 			}
@@ -596,7 +598,7 @@ void AwPluginManager::loadPlugins()
 	foreach(AwFilterPlugin *p, m_filters)
 		m_filterFactory.addPlugin(p->name, p);
 
-	// Lecture de tous les plugins trouvés
+	// Lecture de tous les plugins trouvï¿½s
 	QDir dir(pluginDir);
 	for (auto FileName : dir.entryList(QDir::Files)) {
 		QPluginLoader loader(dir.absoluteFilePath(FileName));
