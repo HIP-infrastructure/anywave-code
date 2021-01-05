@@ -52,16 +52,16 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(EXTRA_LIBS)\qwt\include;$(SolutionDir)\armadillo\include;$(SolutionDir)\include;$(SolutionDir)\sigpack;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EXTRA_LIBS)\qwt\include;$(SolutionDir)\armadillo\include;$(SolutionDir)\include;$(SolutionDir)\sigpack;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;qwtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwWidgetsLibd.lib;qwtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\armadillo\include;$(SolutionDir)\include;$(SolutionDir)\sigpack;$(EXTRA_LIBS)\vtk\include\vtk-8.2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\armadillo\include;$(SolutionDir)\include;$(SolutionDir)\sigpack;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -111,12 +111,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <QtMoc Include="SIWidget.h" />
+    <QtMoc Include="InputMarkersDial.h" />
     <ClInclude Include="spectral_global.h" />
     <QtMoc Include="Spectral.h" />
+    <ClCompile Include="InputMarkersDial.cpp" />
     <ClCompile Include="SIWidget.cpp" />
     <ClCompile Include="Spectral.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="InputMarkersDial.ui" />
     <QtUic Include="SIWidget.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

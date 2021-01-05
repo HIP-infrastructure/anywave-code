@@ -2,13 +2,15 @@
 #include "SIWidget.h"
 #include <QMessageBox>
 #include <AwKeys.h>
+#include "InputMarkersDial.h"
 
 SpectralPlugin::SpectralPlugin()
 {
-	name = QString(tr("Signal Spectral Information"));
+	name = QString(tr("Spectral Informations"));
 	description = QString(tr("Show spectral informations."));
 	type = AwProcessPlugin::GUI;
-	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
+//	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	
 }
 
 Spectral::Spectral()
@@ -17,6 +19,7 @@ Spectral::Spectral()
 	// Limit the usage to 3 channels max
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 0, 0);
 	m_widget = nullptr;
+	setInputFlags(Aw::ProcessInput::GetDurationMarkers);
 }
 
 Spectral::~Spectral()
@@ -27,6 +30,29 @@ Spectral::~Spectral()
 
 void Spectral::run(const QStringList& args)
 {
+	auto fd = pdi.input.settings.value(keys::file_duration).toFloat();
+	// check for input markers (only duration markers is assumed here)
+	if (!pdi.input.markers().isEmpty()) {
+		InputMarkersDial dlg(pdi.input.markers());
+		if (dlg.exec() == QDialog::Accepted) {
+			if (!dlg.m_skippedLabels.isEmpty() || !dlg.m_usedLabels.isEmpty()) {
+				auto markers = AwMarker::duplicate(pdi.input.markers());
+				auto inputMarkers = AwMarker::getInputMarkers(markers, dlg.m_skippedLabels, dlg.m_usedLabels, fd);
+				if (inputMarkers.isEmpty()) {
+					pdi.input.clearMarkers();
+					pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+				}
+				else {
+					pdi.input.clearMarkers();
+					pdi.input.setNewMarkers(inputMarkers);
+				}
+			}
+		}
+		else return;
+	}
+	else {
+		pdi.input.addMarker(new AwMarker("global", 0., fd));
+	}
 	m_widget = new SIWidget(this);
 	// register our widget to auto close the plugin when the user closes the widget
 	registerGUIWidget(m_widget);

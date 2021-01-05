@@ -39,14 +39,23 @@
     <ClCompile Include="SIWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InputMarkersDial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="SIWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="InputMarkersDial.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="SIWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="InputMarkersDial.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

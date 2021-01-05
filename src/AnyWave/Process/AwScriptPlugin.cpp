@@ -30,13 +30,6 @@
 #include "Plugin/AwPluginManager.h"
 #include "Data/AwDataManager.h"
 
-//void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
-//{
-//	name = n;
-//	description = desc;
-//	m_inputFlags = 0;
-//}
-
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
 	//p->setScriptPath(m_path);
@@ -48,7 +41,7 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 	// Fixed input as any channels by default
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
 		p->pdi.addInputChannel(-1, 1, 0);
-		p->pdi.setInputFlags(m_inputFlags);
+		p->setInputFlags(m_inputFlags);
 	}
 	p->setPlugin(this);
 }
@@ -79,11 +72,6 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 		}
 	}
 	// add the desc map from desct.txt has values in the plugin settings map
-	for (auto key : map.keys())
+	for (auto const& key : map.keys())
 		m_settings.insert(key, map.value(key));
 }
-
-
-//void AwScriptPlugin::checkIOForProcess(AwScriptProcess *p)
-//{
-//}

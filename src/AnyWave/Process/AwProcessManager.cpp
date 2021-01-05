@@ -519,7 +519,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 process->pdi.input.settings[keys::current_pos_in_file] = pos;
 
 	 // add an input flag to avoid buildForPDI to consider channels selected by the user and also to skip later call to buildPDI in initProcessIO
-	 process->pdi.setInputFlags(process->pdi.inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	 process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
 
 	 if (buildPDIForProcess(process, channels))
@@ -544,7 +544,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	
 	AwChannelList inputChannels;
 	bool selection = !selectedChannels.isEmpty();
-	int inputF = p->pdi.inputFlags();
+	int inputF = p->inputFlags();
 
 	p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
 
@@ -801,8 +801,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			connect(p, SIGNAL(connectionClosed(AwDataClient *)), ds, SLOT(closeConnection(AwDataClient *)));
 			connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), p, SLOT(setMarkers(const AwMarkerList&)));
 			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), ds, SLOT(openConnection(AwDataClient *)));
-			// copy the actual marker list to the process
-			p->pdi.input.setNewMarkers(mm->getMarkers(), true);
+//			// copy the actual marker list to the process
+//			p->pdi.input.setNewMarkers(mm->getMarkers(), true);
 		}
 		p->init(); 
 		p->run(args);

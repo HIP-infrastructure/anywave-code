@@ -39,8 +39,7 @@ FileConverterPlugin::FileConverterPlugin()
 
 FileConverter::FileConverter()
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins|Aw::ProcessInput::GetWriterPlugins);
+	setInputFlags(Aw::ProcessInput::GetReaderPlugins|Aw::ProcessInput::GetWriterPlugins);
 }
 
 FileConverter::~FileConverter()

@@ -40,7 +40,7 @@ CorrelationPlugin::CorrelationPlugin()
 Correlation::Correlation()
 {
 	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers);
+	setInputFlags(Aw::ProcessInput::GetAllMarkers);
 	pdi.addInputChannel(-1, 2, 0);
 	m_ui = NULL;
 }

@@ -43,7 +43,7 @@
 
 ICA::ICA()
 {
-	pdi.setInputFlags(Aw::ProcessInput::GetAsRecordedChannels|Aw::ProcessInput::GetProcessPluginNames |Aw::ProcessInput::GetDurationMarkers| Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	setInputFlags(Aw::ProcessInput::GetAsRecordedChannels|Aw::ProcessInput::GetProcessPluginNames |Aw::ProcessInput::GetDurationMarkers| Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
 	m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;

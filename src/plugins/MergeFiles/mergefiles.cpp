@@ -12,9 +12,8 @@ MergeFilePlugin::MergeFilePlugin()
 
 MergeFile::MergeFile()
 {
-//	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetWriterPlugins);
-	m_adesPlugin = NULL;
+	setInputFlags(Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetWriterPlugins);
+	m_adesPlugin = nullptr;
 }
 
 MergeFile::~MergeFile()

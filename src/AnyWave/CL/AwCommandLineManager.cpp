@@ -61,7 +61,8 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 
 bool AwCommandLineManager::buildPDI(AwBaseProcess* process, const AwChannelList& montage, const AwChannelList& asRecorded)
 {
-	int inputF = process->pdi.inputFlags();
+	//int inputF = process->pdi.inputFlags();
+	int inputF = process->inputFlags();
 	if (inputF & Aw::ProcessInput::GetReaderPlugins) {
 		for (auto plugin : AwPluginManager::getInstance()->readers())
 			process->pdi.input.readers.append(plugin);

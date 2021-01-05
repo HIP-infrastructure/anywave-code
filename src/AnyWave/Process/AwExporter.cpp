@@ -43,7 +43,7 @@ AwExporterPlugin::AwExporterPlugin()
 AwExporter::AwExporter() : AwProcess()
 {
 	//setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
-	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::GetWriterPlugins | Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetCurrentMontage
+	setInputFlags(Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::GetWriterPlugins | Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetCurrentMontage
 		| Aw::ProcessInput::ProcessIgnoresChannelSelection);
 	m_decimateFactor = 1;
 }
