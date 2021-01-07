@@ -18,7 +18,23 @@
 //#define QVTK_CLASS  QVTKWidget		
 //#endif
 #include <aw_armadillo.h>
-#include <qwt_plot.h>
+//#include <qwt_plot.h>
+#include <AwChannel.h>
+
+// data structure to hold all fft iterations for a channel
+class FFTIterations
+{
+public:
+	FFTIterations(AwChannel* chan) { channel = chan; m_iterationIndex = 0; }
+	void setNumberOfIterations(uword count, uword timeWindowPts) { m_iterations = arma::zeros(count, timeWindowPts); }
+	void appendIteration(const arma::vec& iteration);
+
+	inline mat& results() { return m_iterations; }
+protected:
+	AwChannel* channel;
+	arma::mat m_iterations;	// each row of iterations are ONE fft iteration
+	uword m_iterationIndex;
+};
 
 class SIWidget : public AwProcessGUIWidget
 {
@@ -35,7 +51,8 @@ private:
 	void plot(const arma::mat& data);
 
 	Ui::SIWidgetUi  m_ui;
-	int m_layoutRow;
+	//int m_layoutRow;
 	int m_window; // type of windowing to use, 0 = none
-	QwtPlot* m_widget;
+	//QwtPlot* m_widget;
+	QMap<AwChannel*, FFTIterations*> m_results;
 };
