@@ -1,10 +1,10 @@
 #include "SIWidget.h"
-
+#include "FFTIterations.h"
 #include <sigpack.h>
 #ifdef MKL
 #include <fftw3.h>
 #endif
-
+#include "PlotWidget.h"
 using namespace sp;
 #include <AwProcessInterface.h>
 #include <qwt_plot_curve.h>
@@ -14,28 +14,13 @@ using namespace sp;
 //# define VTK_CREATE(type, name) \
 //  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
-void FFTIterations::appendIteration(const arma::vec& iter)
-{
-	m_iterations.row(m_iterationIndex++) = iter;
-}
 
 
 SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
 	: AwProcessGUIWidget(process, parent)
 {
 	m_ui.setupUi(this);
-	//m_signalView = new AwBaseSignalView();
-	//m_signalView->setFlags(AwBaseSignalView::NoMarkerBar | AwBaseSignalView::ViewAllChannels | AwBaseSignalView::EnableMarking);
-	//m_signalView->setMinimumHeight(200);
-	//connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute()));
-//	m_layoutRow = 0;
 	m_window = SIWidget::Hanning;	
-//	m_widget = new QwtPlot();
-//	m_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//	m_ui.graphicLayout->addWidget(m_widget);
-	/// Set up the view
-//	VTK_CREATE(vtkContextView, m_view);
-//	m_view->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
 	connect(m_ui.buttonCompute, &QPushButton::clicked, this, &SIWidget::compute);
 	m_ui.comboWindow->addItem("None", -1);
 	m_ui.comboWindow->addItem("Hanning", m_window);
@@ -45,6 +30,12 @@ SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
 
 SIWidget::~SIWidget()
 {
+	for (auto plot : m_plotWidgets)
+		plot->close();
+
+	qDeleteAll(m_plotWidgets);
+	auto iters = m_results.values();
+	qDeleteAll(iters);
 }
 
 
@@ -113,6 +104,10 @@ void SIWidget::plot(const arma::mat& data)
 
 void SIWidget::compute()
 {
+	auto iters = m_results.values();
+	qDeleteAll(iters);
+	m_results.clear();
+
 	uword nfft, noverlap;
 	auto fs = m_process->pdi.input.settings.value(keys::max_sr).toFloat();
 	nfft = (uword)std::floor(m_ui.spinWindow->value() * fs);
@@ -143,6 +138,15 @@ void SIWidget::compute()
 			start += noverlap;
 		}
 	}
+
+	// temp vector to hold data for a time window
+	vec timeWindowSignal = zeros(nfft);
+	//vec data = zeros(nPts); // copy of chunk data
+	vec iteration = zeros(nIterationPnts);
+	// fft plan that will be used for all fft transformations
+	fftw_complex* fftx = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * nfft);
+	fftw_plan plan = fftw_plan_dft_r2c_1d(nfft, timeWindowSignal.memptr(), fftx, FFTW_ESTIMATE);
+	double fact = 2. / nfft;
 	
 	// now read data for each chunks and compute fft iterations
 	for (auto m : goodMarkers) {
@@ -154,130 +158,58 @@ void SIWidget::compute()
 		vec window;
 		switch (m_window) {
 		case SIWidget::Hanning:
-			window = hanning(nPts);
+			window = hanning(nfft);
 			break;
 		case SIWidget::Hamming:
-			window = hamming(nPts);
+			window = hamming(nfft);
 			break;
 		}
 		if (m_window != SIWidget::None) {
 			// normalize window with its RMS
-			window /= arma::sqrt(arma::sum(window.for_each([](vec::elem_type& val) { val *= val; })));
+			auto squared = window;
+			squared.for_each([](vec::elem_type& val) { val *= val; });
+			auto sqr_mean = std::sqrt(arma::mean(squared));
+			window.for_each([sqr_mean](vec::elem_type& val) { val /= sqr_mean; });
 		}
 		
-		// temp vector to hold data for a channel
-		vec timeWindowSignal = zeros(nfft);
-		vec data = zeros(nPts); // copy of chunk data
-		vec iteration = zeros(nIterationPnts);
-		// fft plan that will be used for all fft transformations
-		fftw_complex* fftx = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * nfft);
-		fftw_plan plan = fftw_plan_dft_r2c_1d(nfft, timeWindowSignal.memptr(), fftx, FFTW_ESTIMATE);
 		for (auto channel : m_process->pdi.input.channels()) {
-			auto fftIter = new FFTIterations(channel);
-			fftIter->setNumberOfIterations(nIterations, nIterationPnts);
-			m_results.insert(channel, fftIter);
-			for (auto i = 0; i < channel->dataSize(); i++)
-				data(i) = (double)channel->data()[i];
-			if (m_window != SIWidget::None)
-				data = data * window;
-			// iterate
+			FFTIterations* fftIter = nullptr;
+			if (m_results.contains(channel))
+				fftIter = m_results.value(channel);
+			else {
+				fftIter = new FFTIterations(channel);
+				fftIter->setNumberOfIterations(nIterations, nIterationPnts);
+				m_results.insert(channel, fftIter);
+			}
+
 			uword start = 0;
 			while (start + nfft < channel->dataSize()) {
 				for (auto i = 0; i < nfft; i++)
-					timeWindowSignal(i) = data(i + start);
+					timeWindowSignal(i) = channel->data()[i + start];
+				if (m_window != SIWidget::None)
+					timeWindowSignal = timeWindowSignal % window;
+
 				fftw_execute_dft_r2c(plan, timeWindowSignal.memptr(), fftx);
 				uword j = 0;
-				for (auto i = 1; i < nfft / 2; i++)
+				for (auto i = 1; i < nfft / 2; i++) {
+					fftx[i][0] *= fact;
+					fftx[i][1] *= fact;
 					iteration(j++) = fftx[i][0] * fftx[i][0] + fftx[i][1] * fftx[i][1];
+				}
 				fftIter->appendIteration(iteration);
 				start += noverlap;
 			}
 		}
-		fftw_free(fftx);
+	}
+	fftw_destroy_plan(plan);
+	fftw_free(fftx);
+	for (auto res : m_results.values()) {
+		res->computePxx();
 	}
 
-	//auto func = [](const arma::vec& vector, const arma::vec& window) {
-	//	return psd(vector, window);
-	//};
-	//uword cols = m_process->pdi.input.channels().count();
-	//uword rows = m_process->pdi.input.channels().first()->dataSize();
-	//arma::mat matrix = arma::zeros(rows, cols);
-	//uword i = 0;
-	//for (auto chan : m_process->pdi.input.channels()) {
-	//	for (uword j = 0; j < chan->dataSize(); j++)
-	//		matrix(j, i) = (double)chan->data()[j];
-	//	i++;
-	//}
-	//arma::vec window = arma::ones(rows);
-	//switch (m_window) {
-	//case SIWidget::Hanning:
-	//	window = hanning(rows);
-	//	break;
-	//case SIWidget::Hamming:
-	//	window = hamming(rows);
-	//	break;
-	//}
-	//// use the same matrix to store results
-
-	//QList<arma::vec> results;
-	//for (uword i = 0; i < cols; i++) {
-	//	arma::vec res = 10 * log10(func(matrix.col(i), window));
-	//	//matrix.col(i) = 10 * log10(func(matrix.col(i), window));
-	//	matrix.col(i) = res;
-	//}
-
-	//plot(matrix);
-	//auto channels = m_signalView->channels();
-	//int n = 0;
-	//for (auto p : m_plots) {
-	//	auto graph = p->graph();
-	//	auto channel = channels.value(n);
-	//	float sr = channel->samplingRate();
-	//	int NFFT = (int)std::floor(sr);
-	//	vec data = AwMath::channelToVec(channel);
-	//	vec S = 10 * log10(pwelch(data, NFFT, NFFT / 2));
-	//	QVector<double> x(S.n_elem / 2), y(S.n_elem / 2);
-	//	for (auto i = 0; i < S.n_elem / 2; i++) {
-	//		x[i] = i;
-	//		y[i] = S(i);
-	//	}
-	//	graph->setData(x, y);
-	//	graph->rescaleAxes();
-	//	auto ticker = p->xAxis->ticker();
-	//	ticker->setTickCount(4);
-	//	
-	//	p->replot();
-	//	n++;
-	//}
+	auto plot = new PlotWidget(m_results.values());
+	m_plotWidgets << plot;
+	plot->show();
 }
 
 
-//void SIWidget::setChannels(const AwChannelList& channels)
-//{
-//	// build layout for scroll area
-//	QGridLayout *signalsLayout = m_ui.signalsLayout;
-//	QGridLayout *layout = m_ui.otherLayout;
-//
-//	int row = 0;
-//	int col = 0;
-//	signalsLayout->addWidget(m_signalView, row, col);
-//	signalsLayout->setRowStretch(1, 0);
-//
-//	// Build params for computation and add plot to the layout
-//	for (auto c : channels) {
-//		QCustomPlot *plot = new QCustomPlot(this);
-//		plot->setMinimumHeight(200);
-//		plot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//		auto graph = plot->addGraph();
-//		plot->plotLayout()->insertRow(0);
-//		QCPTextElement *title = new QCPTextElement(plot, QString("%1 PSD").arg(c->fullName()), QFont("sans", 16, QFont::Normal));
-//		plot->plotLayout()->addElement(0, 0, title);
-//		graph->setName("Power Spectral Density");
-//		plot->xAxis->setLabel("Frequency (Hz)");
-//		plot->yAxis->setLabel(QString(QString::fromLatin1("Power (%1²/Hz)")).arg(c->unit()));
-//		layout->addWidget(plot, row, col++);
-//		m_plots << plot;
-//	}
-//	m_signalView->setChannels(channels);
-//	repaint();
-//}

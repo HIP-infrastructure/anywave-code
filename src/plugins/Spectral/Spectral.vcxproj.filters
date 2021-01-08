@@ -34,12 +34,21 @@
     <ClCompile Include="Spectral.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClInclude Include="FFTIterations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SIWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputMarkersDial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlotWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FFTIterations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,12 +59,18 @@
     <QtMoc Include="InputMarkersDial.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="PlotWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="SIWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="InputMarkersDial.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="PlotWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

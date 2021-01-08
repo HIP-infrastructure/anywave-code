@@ -45,8 +45,8 @@
 #include <QSurfaceFormat>
 #endif
 
-#include <qstylefactory.h>
-#include <qtextstream.h>
+//#include <qstylefactory.h>
+//#include <qtextstream.h>
 #include "CL/CommandLineParser.h"
 
 
@@ -83,30 +83,7 @@ int main(int argc, char *argv[])
 	settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 
-	// check if arguments 
-	QStringList args = app.arguments();
-	//AwArguments arguments;
-	//int operation = aw::commandLine::NoOperation;
-	//try {
-	//	operation = aw::commandLine::doParsing(args, arguments);
-	//}
-	//catch (const AwException& e) {
-	//	exit(0);
-	//}
-	//bool isGui = operation == aw::commandLine::NoOperation;
-
-	//bool openFile = args.size() == 2; // two arguments (first is the application path) means : AnyWave fileToOpen
-	
-	AnyWave window(args); 
-
-	//if (!isGui) {
-	//	int status = aw::commandLine::doCommandLineOperation(operation, arguments);
-	//	exit(status);
-	//}
-
-
-//	window.showMaximized();
-//	if (openFile)
-//		window.openFile(args.last());
+	// check if arguments
+	AnyWave window(app.arguments());
 	return app.exec();
 }

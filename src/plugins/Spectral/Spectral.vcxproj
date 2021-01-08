@@ -55,8 +55,8 @@
       <AdditionalIncludeDirectories>$(EXTRA_LIBS)\qwt\include;$(SolutionDir)\armadillo\include;$(SolutionDir)\include;$(SolutionDir)\sigpack;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwWidgetsLibd.lib;qwtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwWidgetsLibd.lib;qwtd.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -88,7 +88,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>SPECTRAL_LIB;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPECTRAL_LIB;MKL;QCUSTOMPLOT_USE_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,14 +112,19 @@
   <ItemGroup>
     <QtMoc Include="SIWidget.h" />
     <QtMoc Include="InputMarkersDial.h" />
+    <QtMoc Include="PlotWidget.h" />
+    <ClInclude Include="FFTIterations.h" />
     <ClInclude Include="spectral_global.h" />
     <QtMoc Include="Spectral.h" />
+    <ClCompile Include="FFTIterations.cpp" />
     <ClCompile Include="InputMarkersDial.cpp" />
+    <ClCompile Include="PlotWidget.cpp" />
     <ClCompile Include="SIWidget.cpp" />
     <ClCompile Include="Spectral.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="InputMarkersDial.ui" />
+    <QtUic Include="PlotWidget.ui" />
     <QtUic Include="SIWidget.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

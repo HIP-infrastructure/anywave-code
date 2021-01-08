@@ -7,9 +7,9 @@
 SpectralPlugin::SpectralPlugin()
 {
 	name = QString(tr("Spectral Informations"));
+	category = "Process:Signal:PSD";
 	description = QString(tr("Show spectral informations."));
 	type = AwProcessPlugin::GUI;
-//	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	
 }
 
