@@ -73,8 +73,5 @@ void Spectral::run(const QStringList& args)
 		else
 			return; 
 	}
-	
-//	requestData(&pdi.input.channels(), 0., -1, true);
-	//m_widget->compute();
 	m_widget->show();
 }

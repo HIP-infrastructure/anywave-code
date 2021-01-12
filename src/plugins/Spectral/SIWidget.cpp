@@ -22,6 +22,7 @@ SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
 	m_ui.setupUi(this);
 	m_window = SIWidget::Hanning;	
 	connect(m_ui.buttonCompute, &QPushButton::clicked, this, &SIWidget::compute);
+	connect(m_ui.buttonShowPlots, &QPushButton::clicked, this, &SIWidget::showPlots);
 	m_ui.comboWindow->addItem("None", -1);
 	m_ui.comboWindow->addItem("Hanning", m_window);
 	m_ui.comboWindow->addItem("Hamming", SIWidget::Hamming);
@@ -39,67 +40,10 @@ SIWidget::~SIWidget()
 }
 
 
-void SIWidget::plot(const arma::mat& data)
+void SIWidget::showPlots()
 {
-	//if (data.is_empty())
-	//	return;
-	//auto nElems = data.n_rows / 2;
-	//auto nCols = data.n_cols;
-	//// get input channel labels
-	//auto labels = AwChannel::getLabels(m_process->pdi.input.channels());
-	//float max_sr = m_process->pdi.input.settings.value(keys::max_sr).toFloat();
-	//vec xVector = linspace<vec>(0., nElems , nElems);
-	//m_widget->detachItems();
-	//m_widget->setAxisScale(QwtPlot::xBottom, 0., nElems);
-	//m_widget->setAxisScale(QwtPlot::yLeft, data.min(), data.max());
-	//for (auto c = 0; c < nCols; c++) {
-	//	auto curve = new QwtPlotCurve(labels.at(c));
-	//	curve->setRenderHint(QwtPlotItem::RenderAntialiased);
-	//	curve->setStyle(QwtPlotCurve::Lines);
-	//	curve->setPen(Qt::red, 0.5, Qt::SolidLine);
-	//	curve->setSamples(xVector.memptr(), data.colptr(c), nElems);
-	//	curve->attach(m_widget);
-	//}
-	//m_widget->replot();
-
-	//VTK_CREATE(vtkTable, table);
-	//VTK_CREATE(vtkFloatArray, xArray);
-	//table->AddColumn(xArray);
-	//xArray->SetName("Frequency (Hz)");
-	//for (auto i = 0; i < nCols; i++) {
-	//	VTK_CREATE(vtkFloatArray, array);
-	//	table->AddColumn(array);
-	//}
-
-	//for (auto i = 0; i < nElems; i++) {
-	//	table->SetValue(i, 0, i);
-	//	int col = 1;
-	//	for (arma::vec vector : data) {
-	//		for (auto value : vector)
-	//			table->SetValue(i, col, value);
-	//	}
-	//}
-	//// Set up the view
-	//VTK_CREATE(vtkContextView, m_view);
-	//m_view->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
-	//// Add multiple line plots, setting the colors etc
-	//vtkSmartPointer<vtkChartXY> chart =
-	//	vtkSmartPointer<vtkChartXY>::New();
-	//m_view->GetScene()->AddItem(chart);
-	//for (auto i = 0; i < nCols; i++) {
-	//	vtkPlot* line = chart->AddPlot(vtkChart::LINE);
-	//	line->SetInputData(table, 0, i + 1);
-	//	line->SetColor(0, 255, 0, 255);
-	//	line->SetWidth(1.0);
-	//}
-
-	//m_view->SetRenderWindow(m_widget->GetRenderWindow());
-
-	//// Start interactor
-	//m_view->GetRenderWindow()->Render();
-	//m_view->GetInteractor()->Initialize();
-	//m_view->GetInteractor()->Start();
-
+	for (auto plot : m_plotWidgets)
+		plot->show();
 }
 
 void SIWidget::compute()
@@ -210,6 +154,7 @@ void SIWidget::compute()
 	auto plot = new PlotWidget(m_results.values());
 	m_plotWidgets << plot;
 	plot->show();
+	m_ui.buttonShowPlots->setEnabled(true);
 }
 
 

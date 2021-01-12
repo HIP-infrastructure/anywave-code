@@ -45,8 +45,6 @@
 #include <QSurfaceFormat>
 #endif
 
-//#include <qstylefactory.h>
-//#include <qtextstream.h>
 #include "CL/CommandLineParser.h"
 
 
@@ -62,11 +60,7 @@ int main(int argc, char *argv[])
 	QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 //#endif
 #endif
-//#if defined(Q_OS_WIN)
-//#include <shellscalingapi.h>
-////	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
-//	SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
-//#endif
+
 #if defined(Q_OS_MAC)
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif

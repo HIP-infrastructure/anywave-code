@@ -152,14 +152,8 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 
 	aws->setValue(aws::gui_active, isGUIMode);
 	
-	//Save system path
-//	aws->setValue(aws::system_path, QString(qgetenv("PATH")));
-
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
-
-	//AwDataServer *data_server = AwDataServer::getInstance();
-	//data_server->setParent(this);
 
 	AwDebugLog *adl = AwDebugLog::instance();
 	adl->setParent(this);
@@ -224,7 +218,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 		dock->setWidget(w);
 		addDockWidget(Qt::LeftDockWidgetArea, dock);
-		//resizeDocks({ dock }, { 0 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
+		resizeDocks({ dock }, { 150 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 		
 		dock = new QDockWidget(tr("Adding Markers Tool"), this);
 		m_dockWidgets["add_markers"] = dock;

@@ -2,24 +2,8 @@
 
 #include <QWidget>
 #include "ui_SIWidget.h"
-//#include <widget/SignalView/AwBaseSignalView.h>
 #include <process/AwProcessGUIWidget.h>
-//#define QCUSTOMPLOT_USE_LIBRARY
-//#include "qcustomplot.h"
-//#include <vtkSmartPointer.h>
-//#include <vtkContextView.h>
-//#include <vtkContextScene.h>
-//#if VTK_MAJOR_VERSION >= 8
-//#include <QVTKOpenGLWidget.h>
-//#include <vtkGenericOpenGLRenderWindow.h>  
-//#define QVTK_CLASS QVTKOpenGLWidget		
-//#else
-//#include <QVTKWidget.h>
-//#define QVTK_CLASS  QVTKWidget		
-//#endif
 #include <aw_armadillo.h>
-//#include <qwt_plot.h>
-//#include <AwChannel.h>
 
 class FFTIterations;
 class AwChannel;
@@ -36,13 +20,11 @@ public:
 	enum Windows { None,  Hanning, Hamming };
 public slots:
 	void compute();
+	void showPlots();
 private:
-	void plot(const arma::mat& data);
-
 	Ui::SIWidgetUi  m_ui;
 	//int m_layoutRow;
 	int m_window; // type of windowing to use, 0 = none
-	//QwtPlot* m_widget;
 	QMap<AwChannel*, FFTIterations*> m_results;
 	QList<PlotWidget*> m_plotWidgets;
 };
