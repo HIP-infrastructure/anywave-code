@@ -9,12 +9,12 @@ class FFTIterations;
 class AwChannel;
 class PlotWidget;
 
-class SIWidget : public AwProcessGUIWidget
+class SIWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	SIWidget(AwGUIProcess *process, QWidget *parent = nullptr);
+	SIWidget(AwProcess *process, QWidget *parent = nullptr);
 	~SIWidget();
 
 	enum Windows { None,  Hanning, Hamming };
@@ -22,9 +22,11 @@ public slots:
 	void compute();
 	void showPlots();
 private:
+	void clear();
+
 	Ui::SIWidgetUi  m_ui;
-	//int m_layoutRow;
 	int m_window; // type of windowing to use, 0 = none
 	QMap<AwChannel*, FFTIterations*> m_results;
 	QList<PlotWidget*> m_plotWidgets;
+	AwProcess* m_process;
 };

@@ -747,18 +747,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 	if (initProcessIO(process)) {
 		if (!skipDataFile) {
-			//process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
-			//// make it also an argument for MATLAB/Python plugins
-			//process->pdi.input.addArgument(keys::data_path, dm->dataFilePath());
-			//process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-			//process->pdi.input.addArgument(keys::data_dir, dm->dataDir());
-			//// add  application path to arguments
-			//process->pdi.input.addArgument(keys::aw_path, QCoreApplication::applicationFilePath());
-			//process->pdi.input.setReader(dm->reader());
-			//process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
-			//process->pdi.input.addArgument(keys::file_duration, dm->totalDuration());
 			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
-			//process->pdi.input.addArgument(keys::bad_labels, AwMontageManager::instance()->badLabels());
 			// verify that plugin which accepts time selection get at least the whole selection as input
 			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
 				if (process->pdi.input.markers().isEmpty())
@@ -766,9 +755,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			if (AwBIDSManager::isInstantiated()) {
 				auto BM = AwBIDSManager::instance();
 				if (BM->isBIDSActive()) {
-					//process->pdi.input.addArgument(keys::bids_file_path, BM->getCurrentBIDSPath());
 					process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
-					//process->pdi.input.addArgument(keys::bids_root_dir, BM->rootDir());
 					process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
 				}
 
@@ -900,8 +887,8 @@ void AwProcessManager::unregisterProcessForDisplay(AwProcess *process)
 void AwProcessManager::removeGUIProcess()
 {
 	AwGUIProcess *process = (AwGUIProcess *)sender();
-	Q_ASSERT(process != NULL);
-	m_GUIProcesses.removeAll(process);
+	if (process != nullptr)
+		m_GUIProcesses.removeAll(process);
 }
 
 void AwProcessManager::enableMenus()

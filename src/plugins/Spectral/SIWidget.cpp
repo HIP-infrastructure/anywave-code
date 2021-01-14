@@ -3,54 +3,62 @@
 #include <sigpack.h>
 #ifdef MKL
 #include <fftw3.h>
+#else
+#include "fftw/fftw3.h"
 #endif
 #include "PlotWidget.h"
 using namespace sp;
 #include <AwProcessInterface.h>
-#include <qwt_plot_curve.h>
+#include "Spectral.h"
+
 #include <AwKeys.h>
 #include <QPushButton>
 #include <QMessageBox>
-//# define VTK_CREATE(type, name) \
-//  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
-
-SIWidget::SIWidget(AwGUIProcess *process, QWidget *parent)
-	: AwProcessGUIWidget(process, parent)
+SIWidget::SIWidget(QWidget *parent)
+	: QDialog(parent)
 {
 	m_ui.setupUi(this);
-	m_window = SIWidget::Hanning;	
-	connect(m_ui.buttonCompute, &QPushButton::clicked, this, &SIWidget::compute);
-	connect(m_ui.buttonShowPlots, &QPushButton::clicked, this, &SIWidget::showPlots);
+	
+	windowType = Spectral::Hanning;
+	//connect(m_ui.buttonCompute, &QPushButton::clicked, this, &SIWidget::compute);
+//	connect(m_ui.buttonShowPlots, &QPushButton::clicked, this, &SIWidget::showPlots);
 	m_ui.comboWindow->addItem("None", -1);
-	m_ui.comboWindow->addItem("Hanning", m_window);
-	m_ui.comboWindow->addItem("Hamming", SIWidget::Hamming);
+	m_ui.comboWindow->addItem("Hanning", windowType);
+	m_ui.comboWindow->addItem("Hamming", Spectral::Hamming);
 	m_ui.comboWindow->setCurrentIndex(1);
 }
 
 SIWidget::~SIWidget()
 {
-	for (auto plot : m_plotWidgets)
-		plot->close();
-
-	qDeleteAll(m_plotWidgets);
-	auto iters = m_results.values();
-	qDeleteAll(iters);
+	//for (auto plot : m_plotWidgets)
+	//	plot->close();
+	//
+	//qDeleteAll(m_plotWidgets);
+	//clear();
 }
 
-
-void SIWidget::showPlots()
+void SIWidget::clear()
 {
-	for (auto plot : m_plotWidgets)
-		plot->show();
+	//auto values = m_results.values();
+
+	//while (!values.isEmpty())
+	//	delete values.takeFirst();
+	//m_results.clear();
+}
+
+void SIWidget::accept()
+{
+	timeWindow = m_ui.spinWindow->value();
+	overlap = m_ui.spinOverlap->value();
+	windowType = m_ui.comboWindow->currentData().toInt();
+	QDialog::accept();
 }
 
 void SIWidget::compute()
 {
-	auto iters = m_results.values();
-	qDeleteAll(iters);
-	m_results.clear();
+	clear();
 
 	uword nfft, noverlap;
 	auto fs = m_process->pdi.input.settings.value(keys::max_sr).toFloat();
