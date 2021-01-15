@@ -519,11 +519,130 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 process->pdi.input.settings[keys::current_pos_in_file] = pos;
 
 	 // add an input flag to avoid buildForPDI to consider channels selected by the user and also to skip later call to buildPDI in initProcessIO
-	 process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	 process->setInputFlags(process->inputFlags() | Aw::ProcessInput::IgnoreChannelSelection);
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
 
 	 if (buildPDIForProcess(process, channels))
 		  runProcess(process);
+ }
+
+
+ int AwProcessManager::buildProcessPDI(AwProcess* p, AwDataManager *dm)
+ {
+	 QMutexLocker lock(&m_mutex);
+	 AwDataManager* dataManager = dm;
+	 if (dataManager == nullptr) // no data manager instance specified means use the global instance
+		 dataManager = AwDataManager::instance();
+	 int inputF = p->inputFlags();
+	 auto selectedChannels = dataManager->selectedChannels();
+	 bool selection = !selectedChannels.isEmpty();
+	 bool getBadChannels = inputF & Aw::ProcessInput::DontSkipBadChannels;
+	 bool getMontageChannels = inputF & Aw::ProcessInput::GetMontageChannels;
+	 bool getAsRecorded = inputF & Aw::ProcessInput::GetAsRecordedChannels;
+	 bool requireSelection = inputF & Aw::ProcessInput::RequireChannelSelection;
+	 bool ignoreSelection = inputF & Aw::ProcessInput::IgnoreChannelSelection;
+	 bool acceptSelection  = inputF & Aw::ProcessInput::IgnoreChannelSelection;
+	 AwChannelList inputChannels;
+	 bool done = false;
+	 int status = 0;
+	 
+	 // processing channels
+	 do {
+		 // require and ignore channel selection are mutual exclusive. 
+		 // So we assume if one of the two flags is set the other is not.
+		 if (requireSelection && selection) {
+			 inputChannels = selectedChannels;
+			 break;
+		 }
+		 if (requireSelection && !selection) {
+			 // default behavior is to get current montage
+			 inputChannels = dataManager->montage();
+			 m_errorString = "Channel selection required but no channels were selected.";
+			 status = -1;
+			 break;
+		 }
+		 if (acceptSelection && selection) { // plugin accept selection and there is one, so ok get the selection
+			 inputChannels = selectedChannels;
+			 break;
+		 }
+		 if (getMontageChannels) {
+			 inputChannels = dataManager->montage();
+			 break;
+		 }
+		 if (getAsRecorded) {
+			 inputChannels = dataManager->montageManager()->asRecordedChannels();
+			 if (!getBadChannels)
+				 dataManager->montageManager()->removeBadChannels(inputChannels);
+			 break;
+		 }
+		 // if not input flags for channel input are set, the default behavior is to provide the current selection and if no selection
+		 // the current montage
+		 if (selection) {
+			 inputChannels = selectedChannels;
+			 break;
+		 }
+		 else {
+			 inputChannels = dataManager->montage();
+			 break;
+		 }
+		 done = true;
+	 } while (!done);
+	 if (status != 0)
+		 return status;
+	 // inputChannels is supposed not to be empty at this stage.
+
+	 // check for specific channel types and number set as input for the process
+	 if (p->pdi.areInputChannelSet()) {
+		 auto types = p->pdi.getInputChannels();
+		 std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
+		 AwChannelList res;
+		 for (auto t : types) {
+			 QPair<int, int> min_max = p->pdi.getInputChannelMinMax(t);
+			 int min = min_max.first;
+			 int max = min_max.second;
+			 QString channelType = "Any Channels";
+			 if (t != -1)
+				 channelType = AwChannel::typeToString(t);
+			 // check for correct min and max
+			 if (min > inputChannels.size()) {
+				// AwMessageBox::critical(0, "Process input", QString("Process requires at least %1 channel(s) of type %2").arg(min).arg(channelType),
+				//	 QMessageBox::Discard);
+				// return false;
+				 m_errorString = QString("Process requires a minimum of %1 channel of type %2").arg(min).arg(channelType);
+				 return -1;
+			 }
+			 if (min_max.second > 0 && min_max.second < inputChannels.size()) {
+				 AwMessageBox::critical(0, "Process input", QString("Too many channels selected as input. The process accepts %1 channels max.").arg(max).arg(channelType),
+					 QMessageBox::Discard);
+				 m_errorString = QString("Too many channels set as input. Maximum number of channels is %2.").arg(max);
+				 return -1;
+			 }
+			 if (t == -1)
+				 res += inputChannels;
+			 else {
+				 res += AwChannel::getChannelsOfType(inputChannels, t);
+			 }
+		 }
+		 inputChannels = res;
+	 }
+	 p->pdi.input.addChannels(inputChannels, true);
+	 // make sure current filters are set for the channels.
+	 dm->filterSettings().apply(p->pdi.input.channels());
+
+	 // now processing markers
+	 if (inputF & Aw::ProcessInput::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
+		 auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
+		 if (!markers.isEmpty())
+			 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+	 }
+	 if (inputF & Aw::ProcessInput::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
+		 auto markers = AwMarkerManager::instance()->getMarkers();
+		 if (!markers.isEmpty())
+			 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+	 }
+
+	 p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
+	 return 0;
  }
 
 
@@ -548,8 +667,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
 
-	bool requireSelection = inputF & Aw::ProcessInput::ProcessRequiresChannelSelection;
-	bool ignoreSelection = inputF & Aw::ProcessInput::ProcessIgnoresChannelSelection; 
+	bool requireSelection = inputF & Aw::ProcessInput::RequireChannelSelection;
+	bool ignoreSelection = inputF & Aw::ProcessInput::IgnoreChannelSelection; 
 	// of course, requireSelection and ignoreSelection are mutual exclusive.
 
 	if (inputF & Aw::ProcessInput::GetReaderPlugins) {
@@ -582,6 +701,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		if (!markers.isEmpty())
 			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 	}
+
 	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
 		p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
 	}
@@ -655,7 +775,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	  bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	  if (skipDataFile)
-		  process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
+		  process->setInputFlags(process->inputFlags() | Aw::ProcessInput::IgnoreChannelSelection);
 	  if (!skipDataFile && !isFileOpen) {
 		  AwMessageBox::critical(nullptr, "Process Input",
 			  "This process requires an open file.");
@@ -669,7 +789,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		  }
 	  }
 	  auto selectedChannels = AwDisplay::instance()->selectedChannels();
-	  if (process->inputFlags() & Aw::ProcessInput::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
+	  if (process->inputFlags() & Aw::ProcessInput::RequireChannelSelection && selectedChannels.isEmpty()) {
 		  AwMessageBox::critical(NULL, tr("Process Input"),
 			  tr("This process is designed to get selected channels as input but no channel is selected."));
 		  delete process;
@@ -733,11 +853,11 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	auto dm = AwDataManager::instance();
 	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	if (skipDataFile)
-		process->setInputFlags(process->inputFlags() | Aw::ProcessInput::ProcessIgnoresChannelSelection);
+		process->setInputFlags(process->inputFlags() | Aw::ProcessInput::IgnoreChannelSelection);
 
 	if (!skipDataFile) {
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
-		if (process->inputFlags() & Aw::ProcessInput::ProcessRequiresChannelSelection && selectedChannels.isEmpty()) {
+		if (process->inputFlags() & Aw::ProcessInput::RequireChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
 			process->plugin()->deleteInstance(process);

@@ -54,9 +54,16 @@ namespace Aw
 	}
 	namespace ProcessInput {
 		enum AwProcessInputs {
-			ProcessIgnoresChannelSelection = 1, GetAllMarkers = 2, GetDurationMarkers = 4, GetReaderPlugins = 8,
-			GetWriterPlugins = 16, GetAsRecordedChannels = 32, GetCurrentMontage = 64,	GetProcessPluginNames = 128,
-			ProcessRequiresChannelSelection = 256, UserSelectedMarkers = 512
+			IgnoreChannelSelection = 0x1, GetAllMarkers = 0x2, GetDurationMarkers = 0x4, GetReaderPlugins = 0x8,
+			GetWriterPlugins = 0x10, GetAsRecordedChannels = 0x20, GetCurrentMontage = 0x40, GetProcessPluginNames = 0x80,
+			RequireChannelSelection = 0x100, UserSelectedMarkers = 0x200, AcceptChannelSelection = 0x400, DontSkipBadChannels = 0x800,
+			GetMontageChannels = 0x1000
 		};
+
+		// UserSelectedMarkers is set by AnyWave not at the level plugin.
+		// this flag is set whenever the plugin has the flag : PluginAcceptsTimeSelections set.
+		// and the user has selected markers from the GUI interface and then launch the process.
+		// Only in this case, AnyWave will set the UserSelectedMarkers flag to indicate that the process was launched
+		// using a selection of markers.
 	}
 }

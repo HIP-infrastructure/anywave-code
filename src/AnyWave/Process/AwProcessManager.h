@@ -92,11 +92,12 @@ public:
 
 	inline bool processesAreRunning() { return !m_runningProcesses.isEmpty(); }
 	inline bool activeDisplayProcesses() { return !m_activeDisplayProcess.isEmpty(); }
-//	inline void setCurrentReader(AwFileIO *reader) { m_currentReader = reader; }
 	inline void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline QWidget *processesWidget() { return (QWidget *)m_processesWidget; }
 	inline QDockWidget *dock() { return m_dock; }
+	inline QString& lastErrorString() { return m_errorString; }
 
+	int buildProcessPDI(AwProcess *process, AwDataManager *dm = nullptr);
 
 public slots:
 	void startProcessFromMenu();
@@ -153,6 +154,7 @@ private:
 	QHash<QString, QAction *> m_hashProcessAction;
 	QList<AwDisplayProcessRegistration*> m_registeredDisplayProcesses;
 	AwProcessesWidget *m_processesWidget;
+	QString m_errorString;
 	static AwProcessManager *m_instance;
 	// Script related
 	QMutex m_mutex;

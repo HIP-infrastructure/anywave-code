@@ -73,12 +73,13 @@ AwPluginManager::AwPluginManager()
 {
 	// init input flags map for MATLAB/Python plugins
 	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessInput::GetAllMarkers);
-	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessInput::IgnoreChannelSelection);
+	m_MATPyInputFlagsMap.insert("acceptchannelselection", Aw::ProcessInput::AcceptChannelSelection);
 	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessInput::GetAsRecordedChannels);
 	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessInput::GetDurationMarkers);
 	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessInput::GetCurrentMontage);
-	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessInput::ProcessRequiresChannelSelection);
-	m_MATPyInputFlagsMap.insert("userselectedmarkers", Aw::ProcessInput::UserSelectedMarkers);
+	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessInput::RequireChannelSelection);
+	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessInput::AcceptChannelSelection);
 
 	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
 	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);

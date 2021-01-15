@@ -42,9 +42,8 @@ AwExporterPlugin::AwExporterPlugin()
 
 AwExporter::AwExporter() : AwProcess()
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
 	setInputFlags(Aw::ProcessInput::GetAllMarkers| Aw::ProcessInput::GetWriterPlugins | Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetCurrentMontage
-		| Aw::ProcessInput::ProcessIgnoresChannelSelection);
+		| Aw::ProcessInput::IgnoreChannelSelection);
 	m_decimateFactor = 1;
 }
 

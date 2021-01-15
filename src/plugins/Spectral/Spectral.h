@@ -2,7 +2,9 @@
 
 #include "spectral_global.h"
 #include <AwProcessInterface.h>
+
 class SIWidget;
+class FFTIterations;
 
 class SPECTRAL_EXPORT Spectral : public AwProcess
 {
@@ -13,14 +15,16 @@ public:
 	~Spectral();
 	enum Windows { None, Hanning, Hamming };
 
-  //  void run(const QStringList& args) override;	// main execution entry point of the plugin
 	bool showUi() override;
 	void run() override;
 	void runFromCommandLine() override;
 protected:
 	int initialize();
+	void compute();
 
 	SIWidget* m_widget;
+	AwMarkerList m_goodMarkers; // markers kept as valid for input data.
+	QMap<AwChannel*, FFTIterations*> m_results;
 };
 
 

@@ -62,7 +62,7 @@
 class AW_PROCESS_EXPORT AwProcessDataInterface
 {
 public:
-	AwProcessDataInterface() { m_mi = nullptr; /*m_inputFlags = 0;*/ }
+	AwProcessDataInterface() { m_mi = nullptr;  }
 	~AwProcessDataInterface() {}
 	enum inputs { AnyChannels = -1 };
 
@@ -76,9 +76,6 @@ public:
 	bool areInputChannelSet() { return !m_inputChannels.isEmpty(); }
 	QList<int> getInputChannels() { return m_inputChannels.keys(); }
 	inline QPair<int, int> getInputChannelMinMax(int type) { return m_inputChannels.value(type); }
-	/** Specify the input flags for the process **/
-//	void setInputFlags(int flags) { m_inputFlags = flags; }
-//	inline int inputFlags() { return m_inputFlags; }
 
 	inline bool hasOutput() { return !output.isEmpty(); }
 	inline bool hasOutputWidgets() { return !output.widgets().isEmpty(); }
@@ -87,8 +84,6 @@ public:
 protected:		
 	AwMatlabInterface *m_mi;
 	QMap<int, QPair<int, int>> m_inputChannels;  // if empty => accept any channels (1-n)
-//	int m_inputFlags;
-
 };
 
 

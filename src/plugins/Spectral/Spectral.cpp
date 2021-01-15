@@ -3,6 +3,14 @@
 #include <QMessageBox>
 #include <AwKeys.h>
 #include "InputMarkersDial.h"
+#include <sigpack.h>
+#ifdef MKL
+#include <fftw3.h>
+#else
+#include "fftw/fftw3.h"
+#endif
+#include "FFTIterations.h"
+using namespace sp;
 
 SpectralPlugin::SpectralPlugin()
 {
@@ -17,7 +25,7 @@ Spectral::Spectral()
 {
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 0, 0);
 	m_widget = nullptr;
-	setInputFlags(Aw::ProcessInput::GetDurationMarkers);
+	setInputFlags(Aw::ProcessInput::GetDurationMarkers|Aw::ProcessInput::GetSelectedChannels|Aw::ProcessInput::GetRawChannels);
 }
 
 Spectral::~Spectral()
@@ -28,7 +36,7 @@ Spectral::~Spectral()
 
 int Spectral::initialize()
 {
-	clean();
+	//clean();
 
 }
 
@@ -72,42 +80,151 @@ bool Spectral::showUi()
 	pdi.input.settings["time_window"] = dlg.timeWindow;
 	pdi.input.settings["overlap"] = dlg.overlap;
 	pdi.input.settings["window"] = dlg.windowType;
+	//// check input channel
+	auto channels = pdi.input.channels();
+	if (channels.isEmpty()) {
+		auto answer = QMessageBox::information(nullptr, "Power Spectral Density", "No channels selected, run for all channels?",
+			QMessageBox::Yes | QMessageBox::No);
+		if (answer == QMessageBox::Yes) {
+			QVariantMap cfg;
+			AwChannelList result;
+			cfg.insert(keys::channels_source, keys::channels_source_raw);
+			selectChannels(cfg, &result);
+			if (result.isEmpty())
+				return;
+			pdi.input.setNewChannels(result);
+		}
+		else
+			return false;
+	}
+
 	return true;
 }
 
-void Spectral::run(const QStringList& args)
+void Spectral::compute()
 {
-	auto fd = pdi.input.settings.value(keys::file_duration).toFloat();
-	// check for input markers (only duration markers is assumed here)
-	if (!pdi.input.markers().isEmpty()) {
-		InputMarkersDial dlg(pdi.input.markers());
-		if (dlg.exec() == QDialog::Accepted) {
-			if (!dlg.m_skippedLabels.isEmpty() || !dlg.m_usedLabels.isEmpty()) {
-				auto markers = AwMarker::duplicate(pdi.input.markers());
-				auto inputMarkers = AwMarker::getInputMarkers(markers, dlg.m_skippedLabels, dlg.m_usedLabels, fd);
-				if (inputMarkers.isEmpty()) {
-					pdi.input.clearMarkers();
-					pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-				}
-				else {
-					pdi.input.clearMarkers();
-					pdi.input.setNewMarkers(inputMarkers);
-				}
-			}
+	uword nfft, noverlap;
+	auto fs = pdi.input.settings.value(keys::max_sr).toFloat();
+	double timeWindow = pdi.input.settings.value("time_window").toDouble();
+	double overlap = pdi.input.settings.value("overlap").toDouble();
+	int windowType = pdi.input.settings.value("window").toInt();
+	nfft = (uword)std::floor(timeWindow * fs);
+	noverlap = (uword)std::floor(overlap * fs);
+	// loop over markers
+	AwMarkerList badMarkers, goodMarkers;
+	foreach(AwMarker * m, pdi.input.markers()) {
+		uword nPts = (uword)std::floor(m->duration() * fs);
+		if (nPts < nfft)
+			badMarkers << m;
+		else
+			goodMarkers << m;
+	}
+	if (!badMarkers.isEmpty()) {
+		//if (QMessageBox::question(0, "Data input",
+		//	"Some markers will be skipped because their length is too short regarding the time window specified.\nProceed anyway?") == QMessageBox::No)
+		//	return;
+		sendMessage("Some markers will be skipped because their length is too short regarding the time window specified.");
+	}
+	if (goodMarkers.isEmpty()) {
+		sendMessage("No marked data set as input. Aborting...");
+		return;
+	}
+
+	// pre calculate the number of fft iterations through all markers for a channel
+	uword nIterations = 0;
+	uword nIterationPnts = nfft / 2 - 1;
+	for (auto m : goodMarkers) {
+		uword nPts = (uword)std::floor(m->duration() * fs);
+		uword start = 0;
+		while (start + nfft < nPts) {
+			nIterations++;
+			start += noverlap;
+		}
+	}
+
+	// temp vector to hold data for a time window
+	vec timeWindowSignal = zeros(nfft);
+	//vec data = zeros(nPts); // copy of chunk data
+	vec iteration = zeros(nIterationPnts);
+	// fft plan that will be used for all fft transformations
+	fftw_complex* fftx = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * nfft);
+	fftw_plan plan = fftw_plan_dft_r2c_1d(nfft, timeWindowSignal.memptr(), fftx, FFTW_ESTIMATE);
+	double fact = 2. / nfft;
+
+	// now read data for each chunks and compute fft iterations
+	for (auto m : goodMarkers) {
+		// get RAW data for all channels
+		auto& channels = pdi.input.channels();
+		requestData(&pdi.input.channels(), m, true);
+		uword nPts = (uword)channels.first()->dataSize();
+		// prepare window
+		vec window;
+		switch (windowType) {
+		case Spectral::Hanning:
+			window = hanning(nfft);
+			break;
+		case Spectral::Hamming:
+			window = hamming(nfft);
+			break;
+		}
+		if (windowType != Spectral::None) {
+			// normalize window with its RMS
+			auto squared = window;
+			squared.for_each([](vec::elem_type& val) { val *= val; });
+			auto sqr_mean = std::sqrt(arma::mean(squared));
+			window.for_each([sqr_mean](vec::elem_type& val) { val /= sqr_mean; });
+		}
+
+		for (auto channel : pdi.input.channels()) {
+			FFTIterations* fftIter = nullptr;
+			if (m_results.contains(channel))
+				fftIter = m_results.value(channel);
 			else {
-				if (QMessageBox::question(nullptr, "Data Length", "Compute on whole data?", QMessageBox::Yes | QMessageBox::No) ==
-					QMessageBox::No)
-					return;
-				pdi.input.clearMarkers();
-				pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+				fftIter = new FFTIterations(channel);
+				fftIter->setNumberOfIterations(nIterations, nIterationPnts);
+				m_results.insert(channel, fftIter);
+			}
+
+			uword start = 0;
+			while (start + nfft < channel->dataSize()) {
+				for (auto i = 0; i < nfft; i++)
+					timeWindowSignal(i) = channel->data()[i + start];
+				if (windowType != Spectral::None)
+					timeWindowSignal = timeWindowSignal % window;
+
+				fftw_execute_dft_r2c(plan, timeWindowSignal.memptr(), fftx);
+				uword j = 0;
+				for (auto i = 1; i < nfft / 2; i++) {
+					fftx[i][0] *= fact;
+					fftx[i][1] *= fact;
+					iteration(j++) = fftx[i][0] * fftx[i][0] + fftx[i][1] * fftx[i][1];
+				}
+				fftIter->appendIteration(iteration);
+				start += noverlap;
 			}
 		}
-		else return;
 	}
-	else {
-		pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+	fftw_destroy_plan(plan);
+	fftw_free(fftx);
+	for (auto res : m_results.values()) {
+		res->computePxx();
 	}
-	m_widget = new SIWidget(this);
+}
+
+void Spectral::runFromCommandLine()
+{
+	if (initialize() != 0) {
+		sendMessage("Something went wrong while initialising. Aborting...");
+		return;
+	}
+	compute();
+
+
+}
+
+void Spectral::run()
+{
+
 	// register our widget to auto close the plugin when the user closes the widget
 //	registerGUIWidget(m_widget);
 	//// check input channel

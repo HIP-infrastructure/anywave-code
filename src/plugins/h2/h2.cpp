@@ -57,7 +57,8 @@ H2::H2() : AwProcess()
 {
 	// Inputs
 	pdi.addInputChannel(-1, 2, 0);
-	setInputFlags(Aw::ProcessInput::ProcessRequiresChannelSelection | Aw::ProcessInput::GetDurationMarkers | Aw::ProcessInput::GetWriterPlugins);
+	setInputFlags(Aw::ProcessInput::AcceptChannelSelection | Aw::ProcessInput::GetDurationMarkers 
+		| Aw::ProcessInput::GetWriterPlugins);
 	m_winSize = 2; // 2s
 	m_maxLag = (float)0.1;	// 0.1s lag
 	m_nCells = 10;  // 10 cellules

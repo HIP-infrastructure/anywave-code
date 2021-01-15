@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QWidget>
+#include <QDialog>
 #include "ui_SIWidget.h"
 #include <process/AwProcessGUIWidget.h>
 #include <aw_armadillo.h>
@@ -8,25 +8,28 @@
 class FFTIterations;
 class AwChannel;
 class PlotWidget;
+class Spectral;
 
-class SIWidget : public QWidget
+class SIWidget : public QDialog
 {
 	Q_OBJECT
 
 public:
-	SIWidget(AwProcess *process, QWidget *parent = nullptr);
+	SIWidget(QWidget *parent = nullptr);
 	~SIWidget();
 
-	enum Windows { None,  Hanning, Hamming };
+
 public slots:
 	void compute();
 	void showPlots();
+	void accept();
+
+	double timeWindow, overlap;
+	int windowType;
 private:
 	void clear();
 
 	Ui::SIWidgetUi  m_ui;
-	int m_window; // type of windowing to use, 0 = none
 	QMap<AwChannel*, FFTIterations*> m_results;
 	QList<PlotWidget*> m_plotWidgets;
-	AwProcess* m_process;
 };
