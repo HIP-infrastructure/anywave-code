@@ -642,12 +642,13 @@ int AwMATLABFile::readStrings(const QString& name, QStringList& strings)
 	matvar_t **array = (matvar_t **)var->data;
 	for (size_t i = 0; i < var->dims[0] * var->dims[1]; i++) {
 		matvar_t *item = array[i];
-		if (item->class_type == MAT_C_CHAR && item->data_type == MAT_T_UINT8) {
-			char dummy[256];
-			size_t length = std::min(size_t(255), item->dims[0] * item->dims[1]);
-			memcpy(dummy, (char *)item->data, length);
-			dummy[length] = '\0';
-			list << QString::fromLatin1(dummy);
+		if (item->class_type == MAT_C_CHAR /*&& item->data_type == MAT_T_UINT8*/) {
+			//char dummy[256];
+			//size_t length = std::min(size_t(255), item->dims[0] * item->dims[1]);
+			//memcpy(dummy, (char *)item->data, length);
+			//dummy[length] = '\0';
+			//list << QString::fromLatin1(dummy);
+			list << QString(static_cast<char*>(item->data));
 		}
 	}
 	Mat_VarFree(var);
