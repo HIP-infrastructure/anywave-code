@@ -97,7 +97,7 @@ public:
 	inline QDockWidget *dock() { return m_dock; }
 	inline QString& lastErrorString() { return m_errorString; }
 
-	int buildProcessPDI(AwProcess *process, AwDataManager *dm = nullptr);
+	int buildProcessPDI(AwBaseProcess* process, AwDataManager *dm = nullptr);
 
 public slots:
 	void startProcessFromMenu();

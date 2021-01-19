@@ -505,6 +505,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		return true;
 
 	return buildPDIForProcess(p);
+//	return buildProcessPDI(p);
 }
 
  void AwProcessManager::launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end)
@@ -527,7 +528,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
  }
 
 
- int AwProcessManager::buildProcessPDI(AwProcess* p, AwDataManager *dm)
+ int AwProcessManager::buildProcessPDI(AwBaseProcess* p, AwDataManager *dm)
  {
 	 QMutexLocker lock(&m_mutex);
 	 AwDataManager* dataManager = dm;
@@ -605,9 +606,6 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 				 channelType = AwChannel::typeToString(t);
 			 // check for correct min and max
 			 if (min > inputChannels.size()) {
-				// AwMessageBox::critical(0, "Process input", QString("Process requires at least %1 channel(s) of type %2").arg(min).arg(channelType),
-				//	 QMessageBox::Discard);
-				// return false;
 				 m_errorString = QString("Process requires a minimum of %1 channel of type %2").arg(min).arg(channelType);
 				 return -1;
 			 }
@@ -642,6 +640,23 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 }
 
 	 p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
+
+	 // handle other flags
+	 if (inputF & Aw::ProcessInput::GetReaderPlugins) {
+		 for (auto plugin : AwPluginManager::getInstance()->readers())
+			 p->pdi.input.readers.append(plugin);
+	 }
+	 if (inputF & Aw::ProcessInput::GetWriterPlugins) {
+		 for (auto plugin : AwPluginManager::getInstance()->writers())
+			 p->pdi.input.writers.append(plugin);
+	 }
+	 if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
+		 QStringList list;
+		 for (auto plugin : AwPluginManager::getInstance()->processes())
+			 list << plugin->name;
+		 p->pdi.input.settings[keys::plugin_names] = list;
+	 }
+
 	 return 0;
  }
 
@@ -883,6 +898,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		}
 	}
 	else {
+		AwMessageBox::critical(nullptr, "Process init", m_errorString);
 		process->plugin()->deleteInstance(process);
 		return;
 	}

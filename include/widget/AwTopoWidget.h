@@ -65,7 +65,11 @@ public:
 	void redraw();
 	inline QPixmap& pixmap() { return m_pixmap; }
 protected:
-	void changeEvent(QEvent*);
+	void changeEvent(QEvent*) override;
+	void resizeEvent(QResizeEvent*) override;
+	void buildTopo();
+	void setLatency(float lat);
+	void setLatency(float start, float end);
 signals:
 	void topoChanged(AwTopoWidget *w, const QStringList& labels, double *values);
 	void selectedLabelsChanged(const QStringList& labels);
@@ -85,11 +89,6 @@ public slots:
 	void setColorMap(int cmap) { m_cmap = cmap; redraw(); }
 	void setComputationFlags(const QString& flags);	// display a flag indicating that the mapping was computing using a special method (PCA, etc..)
 	void resetComputationFlags();
-protected:
-	void resizeEvent(QResizeEvent *e);
-	void buildTopo();
-	void setLatency(float lat);
-	void setLatency(float start, float end);
 protected slots:
 	void showCL();
 	void changeNumberOfContours(bool flag);
@@ -106,7 +105,7 @@ private:
 	int m_cmap;	// colormap used to draw topography.
 	QwtPlotSpectrogram *m_spectro;
 	QwtPlot *m_plot;
-	bool m_showContours, m_showSensors, m_showLabels;
+	bool m_showContours, m_showSensors, m_showLabels, m_redrawing;
 	int m_nContours;	// number of contour lines to be displayed.
 	QStringList m_selectedLabels;
 	QStringList m_badLabels;
