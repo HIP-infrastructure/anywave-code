@@ -23,7 +23,7 @@ public slots:
 	void compute();
 	void showPlots();
 	void accept();
-
+public:
 	double timeWindow, overlap;
 	int windowType;
 private:

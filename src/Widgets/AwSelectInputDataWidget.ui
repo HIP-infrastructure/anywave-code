@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
-    <height>184</height>
+    <width>576</width>
+    <height>219</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,15 +17,21 @@
    <item>
     <widget class="QGroupBox" name="groupBoxMarkers">
      <property name="title">
-      <string>Skip data using markers</string>
+      <string>List of markers to SKIP</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QLabel" name="label_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>Select:</string>
+           <string>Pick marker to skip:</string>
           </property>
          </widget>
         </item>
@@ -41,8 +47,14 @@
         </item>
         <item>
          <widget class="QPushButton" name="buttonSkip">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>Skip</string>
+           <string>Add to list</string>
           </property>
          </widget>
         </item>
@@ -62,7 +74,14 @@
        </layout>
       </item>
       <item row="1" column="0" colspan="2">
-       <widget class="QListWidget" name="listWidgetSkip"/>
+       <widget class="QListWidget" name="listWidgetSkip">
+        <property name="toolTip">
+         <string>Markers in this list will  be skipped</string>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0">
        <spacer name="horizontalSpacer_8">
@@ -90,15 +109,21 @@
    <item>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Use only marked data</string>
+      <string>List of markers to USE as input</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <widget class="QLabel" name="label_5">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>Select:</string>
+           <string>Pick marker to use:</string>
           </property>
          </widget>
         </item>
@@ -115,7 +140,7 @@
         <item>
          <widget class="QPushButton" name="buttonUse">
           <property name="text">
-           <string>Use</string>
+           <string>Add to list</string>
           </property>
          </widget>
         </item>
@@ -148,7 +173,15 @@
        </spacer>
       </item>
       <item row="1" column="0" colspan="2">
-       <widget class="QListWidget" name="listWidgetUse"/>
+       <widget class="QListWidget" name="listWidgetUse">
+        <property name="toolTip">
+         <string>Markers in this list will be used as input.
+Their position and duration may be modified depending on the list of markers to skip.</string>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1">
        <widget class="QPushButton" name="buttonClearUse">

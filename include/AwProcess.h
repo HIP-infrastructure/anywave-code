@@ -56,14 +56,34 @@ namespace Aw
 		enum AwProcessInputs {
 			IgnoreChannelSelection = 0x1, GetAllMarkers = 0x2, GetDurationMarkers = 0x4, GetReaderPlugins = 0x8,
 			GetWriterPlugins = 0x10, GetAsRecordedChannels = 0x20, GetCurrentMontage = 0x40, GetProcessPluginNames = 0x80,
-			RequireChannelSelection = 0x100, UserSelectedMarkers = 0x200, AcceptChannelSelection = 0x400, DontSkipBadChannels = 0x800,
-			GetMontageChannels = 0x1000
+			UserSelectedChannels = 0x100, UserSelectedMarkers = 0x200, AcceptChannelSelection = 0x400, DontSkipBadChannels = 0x800,
+			RequireChannelSelection = 0x1000
 		};
-
-		// UserSelectedMarkers is set by AnyWave not at the level plugin.
-		// this flag is set whenever the plugin has the flag : PluginAcceptsTimeSelections set.
-		// and the user has selected markers from the GUI interface and then launch the process.
-		// Only in this case, AnyWave will set the UserSelectedMarkers flag to indicate that the process was launched
-		// using a selection of markers.
 	}
 }
+
+///
+/// How input flags work
+/// 
+/// At process level:
+/// AcceptChannelSelection: the process may accept the current channel selection as input.
+/// This flag is not compatible with IgnoreChannelSelection.
+/// If the flag is set AND a channel selection is active, then the process will have the selected channels as input.
+/// and all other flags about channels are ignored. 
+/// 
+/// IgnoreChannelSelection : means the process don't care at all about selected channels.
+/// So the process manager won't use selected channels as input for the process.
+/// 
+/// RequireChannelSelection: the process require that the user first select some channels before launching the process.
+/// the selected channels will be used as input and other input channel flags will be ignored.
+/// 
+/// GetCurrentMontage : the process requires the current montage as input.
+/// 
+/// GetAsRecordedChannels: the process requires current as recorded channels as input (the channels coming from the data file).
+/// 
+/// UserSelectedChannels : this flag MUST NOT be set when building a process plugin. This flag will be set by AnyWave when
+/// preparing to launch the plugin. 
+/// It's a particular case, when the user used the QST feature of the GUI and selected a rectangle on the signals.
+/// So a duration marker corresponding to the quick selection will be set as input and the channels behind the quick selection
+/// will also be set as input. Then the flag UserSelectedChannels is set to inform the process object about its launch condition.
+/// 

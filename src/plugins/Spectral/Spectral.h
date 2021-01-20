@@ -20,6 +20,7 @@ public:
 	void runFromCommandLine() override;
 protected:
 	int initialize();
+	void clean();
 	void compute();
 
 	SIWidget* m_widget;

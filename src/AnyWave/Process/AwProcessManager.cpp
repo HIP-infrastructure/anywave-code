@@ -411,46 +411,7 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	process->setPlugin(plugin);
 
 	initProcessSettings(process);
-//
-//	auto workingDir = aws->value(aws::work_dir).toString();
-//	// create a folder in local Anywave's directories for the plugin
-//	// Check if working exists 
-//	// if working is empty it means AnyWave could not create user's directories.
-//	if (!workingDir.isEmpty()) {
-//		QDir dir(workingDir);
-//		if (!dir.exists()) {
-//			if (dir.mkdir(plugin->name))
-//				process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
-//		}
-//		else
-//			process->pdi.input.settings[keys::working_dir] = workingDir + plugin->name;
-//	}
-//	// not setting process->infos.workingDirectory means it will remain as empty.
-//	QVariantMap args;
-//	//auto args = process->pdi.input.args();
-//	args[keys::aw_path] = QCoreApplication::applicationFilePath();
-//	args[keys::working_dir] = process->pdi.input.settings.value(keys::working_dir);
-//	// if fi == NULL that means no file are currently open by AnyWave.
-//	if (dm->isFileOpen()) {
-//		// prepare input settings only if a file is currently open.
-//		process->pdi.input.setReader(dm->reader());
-//		if (!dm->montage().isEmpty())
-//			process->pdi.input.setNewChannels(dm->montage(), true);
-//		else
-//			process->pdi.input.setNewChannels(dm->rawChannels(), true);
-//		process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-//		process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
-//		process->pdi.input.filterSettings = dm->filterSettings();
-//		process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
-//		// copy all this to args to make them accessible from MATLAB/Python
-//		//auto args = process->pdi.input.args();
-////		args[keys::data_dir] = dm->dataDir();
-////		args[keys::data_path] = dm->dataFilePath();
-////		args[keys::file_duration] = dm->totalDuration();
-//		args.unite(dm->settings());
-//		
-//	}
-//	process->pdi.input.setArguments(args);
+
 	return process;
 }
 
@@ -504,15 +465,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	if (p->flags() & Aw::ProcessFlags::ProcessSkipInputCheck)
 		return true;
 
-	return buildPDIForProcess(p);
-//	return buildProcessPDI(p);
+//	return buildPDIForProcess(p);
+	return buildProcessPDI(p) == 0;
 }
 
  void AwProcessManager::launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end)
  {
 
 	 AwBaseProcess *process = newProcessFromPluginName(name);
-	  if (process == NULL)
+	  if (process == nullptr)
 		 return;
 
 	 process->pdi.input.timeSelection.setStart(pos);
@@ -538,11 +499,11 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 auto selectedChannels = dataManager->selectedChannels();
 	 bool selection = !selectedChannels.isEmpty();
 	 bool getBadChannels = inputF & Aw::ProcessInput::DontSkipBadChannels;
-	 bool getMontageChannels = inputF & Aw::ProcessInput::GetMontageChannels;
+	 bool getMontageChannels = inputF & Aw::ProcessInput::GetCurrentMontage;
 	 bool getAsRecorded = inputF & Aw::ProcessInput::GetAsRecordedChannels;
 	 bool requireSelection = inputF & Aw::ProcessInput::RequireChannelSelection;
 	 bool ignoreSelection = inputF & Aw::ProcessInput::IgnoreChannelSelection;
-	 bool acceptSelection  = inputF & Aw::ProcessInput::IgnoreChannelSelection;
+	 bool acceptSelection  = inputF & Aw::ProcessInput::AcceptChannelSelection;
 	 AwChannelList inputChannels;
 	 bool done = false;
 	 int status = 0;
@@ -625,7 +586,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 }
 	 p->pdi.input.addChannels(inputChannels, true);
 	 // make sure current filters are set for the channels.
-	 dm->filterSettings().apply(p->pdi.input.channels());
+	 dataManager->filterSettings().apply(p->pdi.input.channels());
 
 	 // now processing markers
 	 if (inputF & Aw::ProcessInput::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
