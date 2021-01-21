@@ -5,7 +5,7 @@
 
 AwMATLABMarkersExporter::AwMATLABMarkersExporter()
 {
-	setInputFlags(Aw::ProcessInput::GetCurrentMontage | Aw::ProcessInput::IgnoreChannelSelection);
+	setInputFlags(Aw::ProcessIO::GetCurrentMontage | Aw::ProcessIO::IgnoreChannelSelection);
 }
 
 

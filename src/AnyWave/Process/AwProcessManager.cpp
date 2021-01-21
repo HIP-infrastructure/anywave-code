@@ -481,7 +481,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 process->pdi.input.settings[keys::current_pos_in_file] = pos;
 
 	 // add an input flag to avoid buildForPDI to consider channels selected by the user and also to skip later call to buildPDI in initProcessIO
-	 process->setInputFlags(process->inputFlags() | Aw::ProcessInput::IgnoreChannelSelection);
+	 process->setInputFlags(process->inputFlags() | Aw::ProcessIO::IgnoreChannelSelection);
 	 process->setFlags(process->flags() | Aw::ProcessFlags::ProcessSkipInputCheck);
 
 	 if (buildPDIForProcess(process, channels))
@@ -498,12 +498,12 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 int inputF = p->inputFlags();
 	 auto selectedChannels = dataManager->selectedChannels();
 	 bool selection = !selectedChannels.isEmpty();
-	 bool getBadChannels = inputF & Aw::ProcessInput::DontSkipBadChannels;
-	 bool getMontageChannels = inputF & Aw::ProcessInput::GetCurrentMontage;
-	 bool getAsRecorded = inputF & Aw::ProcessInput::GetAsRecordedChannels;
-	 bool requireSelection = inputF & Aw::ProcessInput::RequireChannelSelection;
-	 bool ignoreSelection = inputF & Aw::ProcessInput::IgnoreChannelSelection;
-	 bool acceptSelection  = inputF & Aw::ProcessInput::AcceptChannelSelection;
+	 bool getBadChannels = inputF & Aw::ProcessIO::DontSkipBadChannels;
+	 bool getMontageChannels = inputF & Aw::ProcessIO::GetCurrentMontage;
+	 bool getAsRecorded = inputF & Aw::ProcessIO::GetAsRecordedChannels;
+	 bool requireSelection = inputF & Aw::ProcessIO::RequireChannelSelection;
+	 bool ignoreSelection = inputF & Aw::ProcessIO::IgnoreChannelSelection;
+	 bool acceptSelection  = inputF & Aw::ProcessIO::AcceptChannelSelection;
 	 AwChannelList inputChannels;
 	 bool done = false;
 	 int status = 0;
@@ -514,6 +514,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		 // So we assume if one of the two flags is set the other is not.
 		 if (requireSelection && selection) {
 			 inputChannels = selectedChannels;
+			 inputF |= Aw::ProcessIO::UserSelectedChannels;
+			 p->setInputFlags(inputF);
 			 break;
 		 }
 		 if (requireSelection && !selection) {
@@ -525,6 +527,8 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		 }
 		 if (acceptSelection && selection) { // plugin accept selection and there is one, so ok get the selection
 			 inputChannels = selectedChannels;
+			 inputF |= Aw::ProcessIO::UserSelectedChannels;
+			 p->setInputFlags(inputF);
 			 break;
 		 }
 		 if (getMontageChannels) {
@@ -589,12 +593,12 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 dataManager->filterSettings().apply(p->pdi.input.channels());
 
 	 // now processing markers
-	 if (inputF & Aw::ProcessInput::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
+	 if (inputF & Aw::ProcessIO::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
 		 auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
 		 if (!markers.isEmpty())
 			 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 	 }
-	 if (inputF & Aw::ProcessInput::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
+	 if (inputF & Aw::ProcessIO::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
 		 auto markers = AwMarkerManager::instance()->getMarkers();
 		 if (!markers.isEmpty())
 			 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
@@ -603,15 +607,15 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
 
 	 // handle other flags
-	 if (inputF & Aw::ProcessInput::GetReaderPlugins) {
+	 if (inputF & Aw::ProcessIO::GetReaderPlugins) {
 		 for (auto plugin : AwPluginManager::getInstance()->readers())
 			 p->pdi.input.readers.append(plugin);
 	 }
-	 if (inputF & Aw::ProcessInput::GetWriterPlugins) {
+	 if (inputF & Aw::ProcessIO::GetWriterPlugins) {
 		 for (auto plugin : AwPluginManager::getInstance()->writers())
 			 p->pdi.input.writers.append(plugin);
 	 }
-	 if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
+	 if (inputF & Aw::ProcessIO::GetProcessPluginNames) {
 		 QStringList list;
 		 for (auto plugin : AwPluginManager::getInstance()->processes())
 			 list << plugin->name;
@@ -643,19 +647,19 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
 
-	bool requireSelection = inputF & Aw::ProcessInput::RequireChannelSelection;
-	bool ignoreSelection = inputF & Aw::ProcessInput::IgnoreChannelSelection; 
+	bool requireSelection = inputF & Aw::ProcessIO::RequireChannelSelection;
+	bool ignoreSelection = inputF & Aw::ProcessIO::IgnoreChannelSelection;
 	// of course, requireSelection and ignoreSelection are mutual exclusive.
 
-	if (inputF & Aw::ProcessInput::GetReaderPlugins) {
+	if (inputF & Aw::ProcessIO::GetReaderPlugins) {
 		for (auto plugin : AwPluginManager::getInstance()->readers())
 			p->pdi.input.readers.append(plugin);	
 	}
-	if (inputF & Aw::ProcessInput::GetWriterPlugins) {
+	if (inputF & Aw::ProcessIO::GetWriterPlugins) {
 		for (auto plugin : AwPluginManager::getInstance()->writers())
 			p->pdi.input.writers.append(plugin);
 	}
-	if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
+	if (inputF & Aw::ProcessIO::GetProcessPluginNames) {
 		QStringList list;
 		for (auto plugin : AwPluginManager::getInstance()->processes())
 			//p->pdi.input.processPluginNames.append(plugin->name);
@@ -666,22 +670,22 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	// then set an input flag to warn the plugin about that.
 	// Also we handle GetDurationMarkers and GetAllMarkers only if no markers already exist as input (Launch Process feature from Markers GUI may add markers as input for the process.)
 	if (!p->pdi.input.markers().isEmpty())
-		p->setInputFlags(p->inputFlags() | Aw::ProcessInput::UserSelectedMarkers);
-	if (inputF & Aw::ProcessInput::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
+		p->setInputFlags(p->inputFlags() | Aw::ProcessIO::UserSelectedMarkers);
+	if (inputF & Aw::ProcessIO::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
 		auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
 		if (!markers.isEmpty())
 			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 	}
-	if (inputF & Aw::ProcessInput::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
+	if (inputF & Aw::ProcessIO::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
 		auto markers = AwMarkerManager::instance()->getMarkers();
 		if (!markers.isEmpty())
 			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 	}
 
-	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
+	if (inputF & Aw::ProcessIO::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
 		p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
 	}
-	if (inputF & Aw::ProcessInput::GetCurrentMontage) { // skip requireSelection flag here and get a copy of channels present in the file.
+	if (inputF & Aw::ProcessIO::GetCurrentMontage) { // skip requireSelection flag here and get a copy of channels present in the file.
 		p->pdi.input.addChannels(montageChannels, true);
 	}
 
@@ -751,7 +755,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 
 	  bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	  if (skipDataFile)
-		  process->setInputFlags(process->inputFlags() | Aw::ProcessInput::IgnoreChannelSelection);
+		  process->setInputFlags(process->inputFlags() | Aw::ProcessIO::IgnoreChannelSelection);
 	  if (!skipDataFile && !isFileOpen) {
 		  AwMessageBox::critical(nullptr, "Process Input",
 			  "This process requires an open file.");
@@ -765,7 +769,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 		  }
 	  }
 	  auto selectedChannels = AwDisplay::instance()->selectedChannels();
-	  if (process->inputFlags() & Aw::ProcessInput::RequireChannelSelection && selectedChannels.isEmpty()) {
+	  if (process->inputFlags() & Aw::ProcessIO::RequireChannelSelection && selectedChannels.isEmpty()) {
 		  AwMessageBox::critical(NULL, tr("Process Input"),
 			  tr("This process is designed to get selected channels as input but no channel is selected."));
 		  delete process;
@@ -829,11 +833,11 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	auto dm = AwDataManager::instance();
 	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	if (skipDataFile)
-		process->setInputFlags(process->inputFlags() | Aw::ProcessInput::IgnoreChannelSelection);
+		process->setInputFlags(process->inputFlags() | Aw::ProcessIO::IgnoreChannelSelection);
 
 	if (!skipDataFile) {
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
-		if (process->inputFlags() & Aw::ProcessInput::RequireChannelSelection && selectedChannels.isEmpty()) {
+		if (process->inputFlags() & Aw::ProcessIO::RequireChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
 			process->plugin()->deleteInstance(process);
@@ -1145,10 +1149,10 @@ void AwProcessManager::handleProcessTermination()
 	}
 
 	if (process->isIdle())	{
-		if (process->flags() & Aw::ProcessFlags::ProcessHasOutputUi) {
+		if (process->flags() & Aw::ProcessFlags::HasOutputUi) {
 			process->prepareOutputUi();
 
-			foreach (QWidget *w, process->pdi.output.widgets()) {
+			foreach (QWidget *w, process->pdi.output.widgets()) { // get widgets instances back to main gui thread
 				w->moveToThread(thread());
 				w->show();
 			}

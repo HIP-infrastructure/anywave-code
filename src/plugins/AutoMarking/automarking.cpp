@@ -38,7 +38,7 @@ AutoMarkingPlugin::AutoMarkingPlugin()
 
 AutoMarking::AutoMarking()
 {
-	setInputFlags(Aw::ProcessInput::GetAllMarkers);
+	setInputFlags(Aw::ProcessIO::GetAllMarkers);
 }
 
 AutoMarking::~AutoMarking()

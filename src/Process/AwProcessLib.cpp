@@ -127,7 +127,7 @@ void AwProcess::start()
 		return;
 	}
 
-	if (m_flags & Aw::ProcessFlags::ProcessHasOutputUi) {
+	if (m_flags & Aw::ProcessFlags::HasOutputUi) {
 		m_status = AwProcess::Idle;	
 		emit idle();
 		return;

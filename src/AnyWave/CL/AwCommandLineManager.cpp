@@ -63,22 +63,22 @@ bool AwCommandLineManager::buildPDI(AwBaseProcess* process, const AwChannelList&
 {
 	//int inputF = process->pdi.inputFlags();
 	int inputF = process->inputFlags();
-	if (inputF & Aw::ProcessInput::GetReaderPlugins) {
+	if (inputF & Aw::ProcessIO::GetReaderPlugins) {
 		for (auto plugin : AwPluginManager::getInstance()->readers())
 			process->pdi.input.readers.append(plugin);
 	}
-	if (inputF & Aw::ProcessInput::GetWriterPlugins) {
+	if (inputF & Aw::ProcessIO::GetWriterPlugins) {
 		for (auto plugin : AwPluginManager::getInstance()->writers())
 			process->pdi.input.writers.append(plugin);
 	}
-	if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
+	if (inputF & Aw::ProcessIO::GetProcessPluginNames) {
 		QStringList list;
 		for (auto plugin : AwPluginManager::getInstance()->processes())
 			//process->pdi.input.processPluginNames.append(plugin->name);
 			list << plugin->name;
 		process->pdi.input.settings[keys::plugin_names] = list;
 	}
-	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
+	if (inputF & Aw::ProcessIO::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
 		if (!asRecorded.isEmpty())
 			process->pdi.input.addChannels(asRecorded, true);
 	}

@@ -104,7 +104,7 @@ void AwProcessWidget::setIdle()
 	m_ui.labelMessage->setText(tr("Idle"));
 	m_logWindow->appendLog(tr("Running time = ") + AwUtilities::time::hmsTime(m_process->executionTime()));
 
-	if (m_process->flags() & Aw::ProcessFlags::ProcessHasOutputUi)
+	if (m_process->flags() & Aw::ProcessFlags::HasOutputUi)
 		m_ui.buttonShowResults->show();
 }
 

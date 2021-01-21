@@ -57,8 +57,8 @@ H2::H2() : AwProcess()
 {
 	// Inputs
 	pdi.addInputChannel(-1, 2, 0);
-	setInputFlags(Aw::ProcessInput::AcceptChannelSelection | Aw::ProcessInput::GetDurationMarkers 
-		| Aw::ProcessInput::GetWriterPlugins);
+	setInputFlags(Aw::ProcessIO::AcceptChannelSelection | Aw::ProcessIO::GetDurationMarkers
+		| Aw::ProcessIO::GetWriterPlugins);
 	m_winSize = 2; // 2s
 	m_maxLag = (float)0.1;	// 0.1s lag
 	m_nCells = 10;  // 10 cellules
@@ -116,7 +116,7 @@ bool H2::showUi()
 	m_ui->samplingRate = pdi.input.channels().first()->samplingRate();
 	m_ui->directory = pdi.input.settings[keys::working_dir].toString();
 	m_ui->markers = pdi.input.markers();
-	if (inputFlags() & Aw::ProcessInput::UserSelectedMarkers)
+	if (inputFlags() & Aw::ProcessIO::UserSelectedMarkers)
 		m_ui->widgetInputData->hide();
 	if (m_ui->exec() == QDialog::Accepted)	{
 		m_maxLag = m_ui->sbMaxLag->value();
@@ -534,7 +534,7 @@ void H2::run()
 	}
 	if (m_runs.isEmpty()) {
 		sendMessage("No run to compute. Check parameters and data selections length.");
-		m_flags &= ~Aw::ProcessFlags::ProcessHasOutputUi;
+		m_flags &= ~Aw::ProcessFlags::HasOutputUi;
 		return;
 	}
 	computeRuns();

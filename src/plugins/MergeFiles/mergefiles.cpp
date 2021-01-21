@@ -12,7 +12,7 @@ MergeFilePlugin::MergeFilePlugin()
 
 MergeFile::MergeFile()
 {
-	setInputFlags(Aw::ProcessInput::GetReaderPlugins | Aw::ProcessInput::GetWriterPlugins);
+	setInputFlags(Aw::ProcessIO::GetReaderPlugins | Aw::ProcessIO::GetWriterPlugins);
 	m_adesPlugin = nullptr;
 }
 

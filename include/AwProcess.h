@@ -47,13 +47,14 @@ namespace AwProcessCommand
 namespace Aw
 {
 	namespace ProcessFlags {
-		enum AwProcessFlags {
-			ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02, ProcessHasOutputUi = 0x04,
-			ProcessDoesntRequireData = 0x08, ProcessSkipInputCheck = 0x10, PluginIsHidden = 0x20, CanRunFromCommandLine = 0x40
+		enum flags {
+			ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02,
+			ProcessDoesntRequireData = 0x04, ProcessSkipInputCheck = 0x08, PluginIsHidden = 0x10, CanRunFromCommandLine = 0x20,
+			HasOutputUi = 0x40, HasInputUi = 0x80
 		};
 	}
-	namespace ProcessInput {
-		enum AwProcessInputs {
+	namespace ProcessIO {
+		enum flags {
 			IgnoreChannelSelection = 0x1, GetAllMarkers = 0x2, GetDurationMarkers = 0x4, GetReaderPlugins = 0x8,
 			GetWriterPlugins = 0x10, GetAsRecordedChannels = 0x20, GetCurrentMontage = 0x40, GetProcessPluginNames = 0x80,
 			UserSelectedChannels = 0x100, UserSelectedMarkers = 0x200, AcceptChannelSelection = 0x400, DontSkipBadChannels = 0x800,

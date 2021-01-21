@@ -144,7 +144,7 @@ EEGInto4DPlugin::EEGInto4DPlugin()
 
 EEGInto4D::EEGInto4D()
 {
-	setInputFlags(Aw::ProcessInput::GetReaderPlugins);
+	setInputFlags(Aw::ProcessIO::GetReaderPlugins);
 	m_eegPlugin = nullptr;
 	m_megPlugin = nullptr;
 	m_eegReader = nullptr;

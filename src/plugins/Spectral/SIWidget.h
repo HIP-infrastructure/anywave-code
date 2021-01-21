@@ -2,13 +2,13 @@
 
 #include <QDialog>
 #include "ui_SIWidget.h"
-#include <process/AwProcessGUIWidget.h>
-#include <aw_armadillo.h>
+//#include <process/AwProcessGUIWidget.h>
+//#include <aw_armadillo.h>
 
-class FFTIterations;
-class AwChannel;
-class PlotWidget;
-class Spectral;
+//class FFTIterations;
+//class AwChannel;
+//class PlotWidget;
+//class Spectral;
 
 class SIWidget : public QDialog
 {
@@ -20,16 +20,16 @@ public:
 
 
 public slots:
-	void compute();
-	void showPlots();
+	//void compute();
+	//void showPlots();
 	void accept();
 public:
 	double timeWindow, overlap;
-	int windowType;
+	QString windowing;
 private:
 	void clear();
 
 	Ui::SIWidgetUi  m_ui;
-	QMap<AwChannel*, FFTIterations*> m_results;
-	QList<PlotWidget*> m_plotWidgets;
+//	QMap<AwChannel*, FFTIterations*> m_results;
+//	QList<PlotWidget*> m_plotWidgets;
 };

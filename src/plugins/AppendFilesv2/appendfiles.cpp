@@ -38,7 +38,7 @@ AppendFilesPlugin::AppendFilesPlugin()
 
 AppendFiles::AppendFiles()
 {
-	setInputFlags(Aw::ProcessInput::GetReaderPlugins|Aw::ProcessInput::GetWriterPlugins|Aw::ProcessInput::GetAllMarkers);
+	setInputFlags(Aw::ProcessIO::GetReaderPlugins|Aw::ProcessIO::GetWriterPlugins|Aw::ProcessIO::GetAllMarkers);
 }
 
 AppendFiles::~AppendFiles()

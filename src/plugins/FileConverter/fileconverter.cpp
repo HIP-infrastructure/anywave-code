@@ -39,7 +39,7 @@ FileConverterPlugin::FileConverterPlugin()
 
 FileConverter::FileConverter()
 {
-	setInputFlags(Aw::ProcessInput::GetReaderPlugins|Aw::ProcessInput::GetWriterPlugins);
+	setInputFlags(Aw::ProcessIO::GetReaderPlugins|Aw::ProcessIO::GetWriterPlugins);
 }
 
 FileConverter::~FileConverter()
