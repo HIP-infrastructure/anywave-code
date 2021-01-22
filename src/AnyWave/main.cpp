@@ -50,6 +50,12 @@
 
 int main(int argc, char *argv[])
 {
+#ifdef _WIN32
+	if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
+#endif
 #if VTK_MAJOR_VERSION >= 8
 	// init surface map for further use in VTK 8.1
 	vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
@@ -79,5 +85,7 @@ int main(int argc, char *argv[])
 
 	// check if arguments
 	AnyWave window(app.arguments());
+	if (window.status() != 0)
+		return -1;
 	return app.exec();
 }

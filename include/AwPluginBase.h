@@ -61,6 +61,9 @@ public:
 // category is optional : used to inset the plugin launcher into a specific part of the AnyWave GUI
 	QString name, description, version, category;
 	int minorVersion, majorVersion;	// set up when building
+	inline QString& helpUrl() { return m_helpUrl; }
+protected:
+	QString m_helpUrl;  // optional : fill it with a url location to get help about the plugin.
 // Category can be:
 // File: My menu description => for plugin that only acts on files (conversion or export)
 // View: My menu description => for plugin that only display graphics 

@@ -85,6 +85,7 @@
 AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
+	m_status = 0;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
 	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
 #endif
@@ -125,7 +126,10 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		operation = aw::commandLine::doParsing(args, arguments);
 	}
 	catch (const AwException& e) {
-		exit(0);
+		std::cout << e.errorString().toStdString();
+		m_status = -1;
+		quit();
+		return;
 	}
 
 	bool isGUIMode = operation == aw::commandLine::NoOperation;
@@ -142,8 +146,9 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		server->setDebugMode(aws->value(aws::plugin_debug_mode).toBool());
 	}
 	if (!isGUIMode) {
-		int status = aw::commandLine::doCommandLineOperation(operation, arguments);
-		exit(status);
+		m_status = aw::commandLine::doCommandLineOperation(operation, arguments);
+		//exit(status);
+		return;
 	}
 	m_debugLogWidget = NULL;
 	// copy menu pointers for recent files and BIDS sub menu.
@@ -195,7 +200,17 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 			menuView_->insertMenu(actionPlugins, process_manager->viewMenu());
 		for (auto a : process_manager->icaActions())
 			menuICA->addAction(a);
-
+		// getting help urls from process plugins
+		for (auto plugin : plugin_manager->processes()) {
+			QMenu *menuPluginHelp = nullptr;
+			if (!plugin->helpUrl().isEmpty()) {
+				if (menuPluginHelp == nullptr)
+					menuPluginHelp = menuHelp->addMenu("Plugins");
+				auto action = menuPluginHelp->addAction(plugin->name);
+				action->setData(plugin->helpUrl());
+				connect(action, &QAction::triggered, this, &AnyWave::openPluginHelpUrl);
+			}
+		}
 		// END OF ADDING PLUGINGS MENUS
 
 		m_actions << actionMontage << actionMarkers << actionCarto3D << actionFileProperties << actionComponentsMaps << actionShow_map_on_signal << actionShow_Mappings << actionCreateEpoch
@@ -422,11 +437,10 @@ void AnyWave::quit()
 {
 	AwDebugLog::instance()->closeFile();
 
-	for (auto w : m_openWidgets)
-		w->close();
+	//for (auto w : m_openWidgets)
+	//	w->close();
 	AwSettings::getInstance()->closeFile();
 	// stop MATPy server if running
-	//delete AwMATPyServer::instance();
 	if (AwMATPyServer::isRunning()) {
 		AwMATPyServer::instance()->stop();
 		delete AwMATPyServer::instance();
@@ -831,10 +845,13 @@ void AnyWave::on_actionPreferences_triggered()
 //
 void AnyWave::on_actionDebug_Logs_triggered()
 {
-	if (!m_debugLogWidget) {
-		m_debugLogWidget = new AwDebugLogWidget();
-		m_openWidgets.append(m_debugLogWidget);
-	}
+	//if (!m_debugLogWidget) {
+	//	m_debugLogWidget = new AwDebugLogWidget();
+	//	m_openWidgets.append(m_debugLogWidget);
+	//}
+	//m_debugLogWidget->show();
+	if (!m_debugLogWidget)
+		m_debugLogWidget = new AwDebugLogWidget(this);
 	m_debugLogWidget->show();
 }
 
@@ -875,9 +892,17 @@ void AnyWave::on_actionQuit_triggered()
 }
 
 // Help
-void AnyWave::on_actionHelp_triggered()
+void AnyWave::on_actionHelpAnyWave_triggered()
 {
 	QDesktopServices::openUrl(QUrl::fromLocalFile(AW_HELP_URL));
+}
+
+void AnyWave::openPluginHelpUrl()
+{
+	QAction* action = static_cast<QAction*>(sender());
+	if (action) {
+		QDesktopServices::openUrl(QUrl::fromLocalFile(action->data().toString()));
+	}
 }
 
 ///
@@ -886,9 +911,9 @@ void AnyWave::on_actionHelp_triggered()
 void AnyWave::readSettings()
 {
 	QSettings settings;
-	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
+//	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
 	QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
-	restoreState(stateData);
+//	restoreState(stateData);
 	restoreGeometry(geometryData);
 }
 
@@ -899,7 +924,7 @@ void AnyWave::writeSettings()
 {
 	QSettings settings;
 	// Write the values to disk in categories.
-	settings.setValue("state/mainWindowState", saveState());
+//	settings.setValue("state/mainWindowState", saveState());
 	settings.setValue("geometry/mainWindowGeometry", saveGeometry());
 }
 
@@ -914,3 +939,5 @@ void AnyWave::editVideoSyncSettings()
 		m_player->setVideoSyncSettings(synch);
 	}
 }
+
+

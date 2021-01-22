@@ -168,6 +168,7 @@ private:
 	void loadFilterPlugin(AwFilterPlugin *plugin);
 	void processJsonFiles();
 
+
 	// Plugins
 	static AwPluginManager *m_instance;
 	//QDir m_pluginsDir;

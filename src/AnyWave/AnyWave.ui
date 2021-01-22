@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1175</width>
-    <height>482</height>
+    <height>475</height>
    </rect>
   </property>
   <property name="font">
@@ -151,7 +151,6 @@
      <string>About</string>
     </property>
     <addaction name="actionAbout_AnyWave"/>
-    <addaction name="actionHelp"/>
    </widget>
    <widget class="QMenu" name="menuProcesses">
     <property name="title">
@@ -160,6 +159,12 @@
     <addaction name="actionCreate_batch_script"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelpAnyWave"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView_"/>
@@ -167,6 +172,7 @@
    <addaction name="menuMapping"/>
    <addaction name="menuEpoch"/>
    <addaction name="menuProcesses"/>
+   <addaction name="menuHelp"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -461,6 +467,16 @@
   <action name="actionCreate_batch_script">
    <property name="text">
     <string>Batch Processing</string>
+   </property>
+  </action>
+  <action name="actionHelpAnyWave">
+   <property name="text">
+    <string>AnyWave</string>
+   </property>
+  </action>
+  <action name="actionHelpPlugins">
+   <property name="text">
+    <string>Plugins</string>
    </property>
   </action>
  </widget>

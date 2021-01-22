@@ -37,6 +37,7 @@ AwDebugLogWidget::AwDebugLogWidget(QWidget *parent, Qt::WindowFlags flags)
 	m_ui.comboLogType->addItems(comps);
 	m_ui.comboLogType->setCurrentIndex(0);
 	connect(adl, &AwDebugLog::newLog, this, &AwDebugLogWidget::refresh);
+	setWindowFlag(Qt::Window);
 }
 
 AwDebugLogWidget::~AwDebugLogWidget()

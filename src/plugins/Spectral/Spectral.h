@@ -27,7 +27,6 @@ protected:
 	void clean();
 	void compute();
 
-	SIWidget* m_widget;
 	double m_timeWindow, m_overlap;
 	int m_windowing;	// Non, Hamming or Hanning  default is Hanning
 	AwMarkerList m_goodMarkers; // markers kept as valid for input data.

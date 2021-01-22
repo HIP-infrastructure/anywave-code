@@ -126,6 +126,8 @@ void AwPluginManager::processJsonFiles()
 	}
 }
 
+
+
 //
 // showPluginsDial()
 // Displays the dialog showing loaded plugins

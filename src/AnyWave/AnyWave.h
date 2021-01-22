@@ -69,6 +69,7 @@ public:
 	~AnyWave();
 
 	inline AwDisplay *displayManager() { return m_display; }
+	inline int status() { return m_status; }
 protected:
 	void closeEvent(QCloseEvent *e);
 	void dragMoveEvent(QDragMoveEvent *e);
@@ -78,6 +79,7 @@ protected:
 	void changeEvent(QEvent *e);
 
 private:
+	int m_status;
 	QMap<QString, QDockWidget *> m_dockWidgets;
 	//AwFileIO *m_currentReader;
 	QString m_openFileName;				// Full path to current open file.
@@ -91,12 +93,12 @@ private:
 	QStatusBar *m_sBar;
 	AwCursorMarkerToolBar *m_cursorToolBar;
 	AwDebugLogWidget *m_debugLogWidget;
-	// current language
-	QString m_language;
-	QStringList m_languages;
-	QTranslator m_AwTranslator;
-	QTranslator m_RWTranslator;
-	QTranslator m_widgetTranslator;
+	//// current language
+	//QString m_language;
+	//QStringList m_languages;
+	//QTranslator m_AwTranslator;
+	//QTranslator m_RWTranslator;
+	//QTranslator m_widgetTranslator;
 	// internal objects
 	AwDisplay *m_display;				// Pointer to main AwDisplay object.
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
@@ -162,15 +164,17 @@ public slots:
 	void editVideoSyncSettings();
 
 private slots:
+	// slot for plugin helps
+	void openPluginHelpUrl();
 	void on_actionCreate_batch_script_triggered();
 	void on_actionSave_as_triggered();
 	void on_actionMarkers_triggered();
-	void on_actionHelp_triggered();
 	void on_actionQuit_triggered();
 	void on_actionMontage_triggered();
 	void on_actionOpen_triggered();
 	void on_actionPreferences_triggered();
 	void on_actionShow_Mappings_triggered();
+	void on_actionHelpAnyWave_triggered();
 	void on_actionAbout_AnyWave_triggered();
 	void on_actionDebug_Logs_triggered();
 	void on_actionLoadICA_triggered();

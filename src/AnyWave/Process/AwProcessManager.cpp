@@ -367,20 +367,7 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
 		process->pdi.input.settings.unite(dm->settings());
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(dm->reader());
-		//if (!dm->montage().isEmpty())
-		//	process->pdi.input.setNewChannels(dm->montage(), true);
-		//else
-		//	process->pdi.input.setNewChannels(dm->rawChannels(), true);
-		//process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-		//process->pdi.input.settings[keys::data_path] = dm->dataFilePath();
 		process->pdi.input.filterSettings = dm->filterSettings();
-		//process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
-		// copy all this to args to make them accessible from MATLAB/Python
-		//auto args = process->pdi.input.args();
-//		args[keys::data_dir] = dm->dataDir();
-//		args[keys::data_path] = dm->dataFilePath();
-//		args[keys::file_duration] = dm->totalDuration();
-//		args.unite(dm->settings());
 	}
 	process->pdi.input.settings.unite(args);
 }
@@ -922,7 +909,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		}
 
 		// instantiate a new AwProcessesWidget if needed
-		if (m_processesWidget == NULL)
+		if (m_processesWidget == nullptr)
 			m_processesWidget = new AwProcessesWidget();
 		m_processesWidget->addWidget(new AwProcessWidget(p));
 
@@ -1131,6 +1118,9 @@ void AwProcessManager::handleProcessTermination()
 		process->thread()->deleteLater();
 		process->plugin()->deleteInstance(process); 
 		process = NULL;
+#ifndef NDEBUG
+		qDebug() << "handleProcessTermination() process was aborted. Done." << endl;
+#endif
 		return;
 	}
 
@@ -1167,6 +1157,9 @@ void AwProcessManager::handleProcessTermination()
 		}
 		if (!process->pdi.output.markers().isEmpty())
 			AwMarkerManager::instance()->addMarkers(AwMarker::duplicate(process->pdi.output.markers()));
+#ifndef NDEBUG
+		qDebug() << "handleProcessTermination() process is now idle. Done." << endl;
+#endif
 		return;
 	}
 
@@ -1198,6 +1191,9 @@ void AwProcessManager::handleProcessTermination()
 		process->thread()->deleteLater();
 		process->plugin()->deleteInstance(process); 
 		process = NULL;
+#ifndef NDEBUG
+		qDebug() << "handleProcessTermination() process is finished. Done." << endl;
+#endif
 		return;		
 	}
 

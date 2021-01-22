@@ -21,13 +21,13 @@ SpectralPlugin::SpectralPlugin()
 	category = "Process:Signal:Power Spectral Density";
 	description = QString(tr("Compute and show spectral informations."));
 	type = AwProcessPlugin::Background;
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine | Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	m_helpUrl = "https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_spectral";
 }
 
 Spectral::Spectral()
 {
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 0);
-	m_widget = nullptr;
 	// global flags
 	setFlags(Aw::ProcessFlags::HasOutputUi);
 	setInputFlags(Aw::ProcessIO::GetDurationMarkers | Aw::ProcessIO::AcceptChannelSelection
@@ -36,8 +36,6 @@ Spectral::Spectral()
 
 Spectral::~Spectral()
 {
-	if (m_widget)
-		delete m_widget;
 }
 
 int Spectral::stringToWindowingType(const QString& str)
