@@ -371,9 +371,12 @@ void AwMarkerManager::setFilename(const QString& path)
 void AwMarkerManager::quit()
 {
 	closeFile();
-	m_ui->close();
-	delete m_ui;
-	delete m_markerInspector;
+	if (m_ui) {
+		m_ui->close();
+		delete m_ui;
+	}
+	if (m_markerInspector)
+		delete m_markerInspector;
 }
 
 void AwMarkerManager::closeFile()

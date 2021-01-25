@@ -62,14 +62,13 @@ class AnyWave : public QMainWindow, private Ui::AnyWaveClass
 
 public:
 	/** Constructeur **/
-	//AnyWave(AwArguments& args, bool GUIMode = true, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+
 	AnyWave(const QStringList& args, QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
 	/** Destructeur **/
 	~AnyWave();
 
 	inline AwDisplay *displayManager() { return m_display; }
-	inline int status() { return m_status; }
 protected:
 	void closeEvent(QCloseEvent *e);
 	void dragMoveEvent(QDragMoveEvent *e);
@@ -79,9 +78,7 @@ protected:
 	void changeEvent(QEvent *e);
 
 private:
-	int m_status;
 	QMap<QString, QDockWidget *> m_dockWidgets;
-	//AwFileIO *m_currentReader;
 	QString m_openFileName;				// Full path to current open file.
 	QString m_lastDirOpen;				// Keep path to last directory used when opening a file
 	QString m_saveFileName;
@@ -93,12 +90,6 @@ private:
 	QStatusBar *m_sBar;
 	AwCursorMarkerToolBar *m_cursorToolBar;
 	AwDebugLogWidget *m_debugLogWidget;
-	//// current language
-	//QString m_language;
-	//QStringList m_languages;
-	//QTranslator m_AwTranslator;
-	//QTranslator m_RWTranslator;
-	//QTranslator m_widgetTranslator;
 	// internal objects
 	AwDisplay *m_display;				// Pointer to main AwDisplay object.
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer

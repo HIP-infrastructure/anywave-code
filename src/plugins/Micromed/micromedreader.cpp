@@ -37,6 +37,7 @@ MicromedReaderPlugin::MicromedReaderPlugin() : AwFileIOPlugin()
 
 MicromedReader::MicromedReader(const QString& filename) : AwFileIO(filename)
 {
+
 }
 
 MicromedReader::~MicromedReader()

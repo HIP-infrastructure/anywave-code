@@ -13,16 +13,17 @@
 #include "PlotWidget.h"
 
 using namespace sp;
-
+#include <utils/json.h>
 
 SpectralPlugin::SpectralPlugin()
 {
-	name = QString(tr("Spectral Informations"));
+	name = QString("Spectral");
 	category = "Process:Signal:Power Spectral Density";
 	description = QString(tr("Compute and show spectral informations."));
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine | Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	m_helpUrl = "https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_spectral";
+	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/args.json");
 }
 
 Spectral::Spectral()
@@ -32,6 +33,9 @@ Spectral::Spectral()
 	setFlags(Aw::ProcessFlags::HasOutputUi);
 	setInputFlags(Aw::ProcessIO::GetDurationMarkers | Aw::ProcessIO::AcceptChannelSelection
 		| Aw::ProcessIO::GetCurrentMontage);
+	m_timeWindow = 1.;
+	m_overlap = 0.5;
+	m_windowing = Spectral::Hanning;
 }
 
 Spectral::~Spectral()

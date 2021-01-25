@@ -85,7 +85,8 @@
 AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
-	m_status = 0;
+	m_display = nullptr;
+	m_SEEGViewer = nullptr;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
 	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
 #endif
@@ -122,14 +123,14 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 
 	AwArguments arguments;
 	int operation = aw::commandLine::NoOperation;
+
 	try {
 		operation = aw::commandLine::doParsing(args, arguments);
 	}
 	catch (const AwException& e) {
-		std::cout << e.errorString().toStdString();
-		m_status = -1;
+		std::cerr << e.errorString().toStdString();
 		quit();
-		return;
+		exit(0);
 	}
 
 	bool isGUIMode = operation == aw::commandLine::NoOperation;
@@ -146,11 +147,12 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		server->setDebugMode(aws->value(aws::plugin_debug_mode).toBool());
 	}
 	if (!isGUIMode) {
-		m_status = aw::commandLine::doCommandLineOperation(operation, arguments);
-		//exit(status);
-		return;
+		if (operation != aw::commandLine::NoOperation && operation != aw::commandLine::ParsingError)
+			aw::commandLine::doCommandLineOperation(operation, arguments);
+		quit();
+		exit(0);
 	}
-	m_debugLogWidget = NULL;
+	m_debugLogWidget = nullptr;
 	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
 	m_recentBIDSMenu = menuRecent_BIDS;
@@ -181,7 +183,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	}
 
 	QSettings qsettings;
-	m_SEEGViewer = NULL;
+
 	// init settings
     qsettings.setValue("general/secureMode", false);
 	qsettings.setValue("general/buildDate", QString(__DATE__));
@@ -364,10 +366,10 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 //
 AnyWave::~AnyWave()
 {
-	delete m_meshManager;
-	delete m_layoutManager;
-	while (!m_openWidgets.empty()) 
-		delete m_openWidgets.takeFirst();
+	if (m_meshManager)
+		delete m_meshManager;
+	if (m_layoutManager)
+		delete m_layoutManager;
 }
 
 // EVENTS

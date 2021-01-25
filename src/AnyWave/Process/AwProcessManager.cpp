@@ -122,8 +122,6 @@ QList<AwProcessPlugin *> AwProcessManager::getBatchableProcesses()
 	QList<AwProcessPlugin *> list;
 	for (auto p : m_processes) {
 		if (p->isBatchGUICompatible()) {
-			//auto settings = p->settings();
-			//if (settings.contains(processio::json_ui) && settings.contains(processio::json_defaults))
 				list << p;
 		}
 	}

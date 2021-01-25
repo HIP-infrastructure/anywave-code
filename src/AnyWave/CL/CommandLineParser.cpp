@@ -27,23 +27,20 @@ using namespace aw::commandLine;
 
 int aw::commandLine::doCommandLineOperation(int op, AwArguments& args)
 {
-//	if (operations.isEmpty())
-//		return -1; // no operations to do.
-//	for (auto op : operations.keys()) {
-		switch (op) {
-		case aw::commandLine::BIDS:
-			AwBIDSManager::instance()->toBIDS(args);
-			break;
-		case aw::commandLine::RunProcess:
-			AwCommandLineManager::runProcess(args);
-			break;
-		case aw::commandLine::DedicatedDataServerMode:
-			AwCommandLineManager::runDedicatedDataServer(args);
-			break;
-		default:
-			return 0;
-		}
-//	}
+	switch (op) {
+	case aw::commandLine::BIDS:
+		AwBIDSManager::instance()->toBIDS(args);
+		break;
+	case aw::commandLine::RunProcess:
+		AwCommandLineManager::runProcess(args);
+		break;
+	case aw::commandLine::DedicatedDataServerMode:
+		AwCommandLineManager::runDedicatedDataServer(args);
+		break;
+	default:
+		return 0;
+	}
+
 	// something happened.
 	AwDebugLog::instance()->closeFile();
 	return 0;

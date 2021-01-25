@@ -180,7 +180,6 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	auto dm = AwDataManager::instance();
 
 	if (!inputFile.isEmpty()) {
-		//reader = pm->getReaderToOpenFile(inputFile);
 		auto status = dm->openFile(inputFile, true);
 		if (status == AwDataManager::NoPluginFound) {
 			throw AwException(QString("no reader can open %1").arg(inputFile), origin);
@@ -193,9 +192,6 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		}
 		process->pdi.input.setReader(dm->reader());
 		process->pdi.input.settings.unite(dm->settings());
-		//process->pdi.input.settings[keys::data_dir] = dm->dataDir();
-		//process->pdi.input.settings[keys::file_duration] = dm->totalDuration();
-		//process->pdi.input.settings[keys::data_path] = inputFile;
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file
 	if (args.contains(keys::marker_file)) {
@@ -264,12 +260,17 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 					AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
 			}
 		}
-		if (!buildPDI(process, montage, dm->rawChannels())) {
+
+		dm->montageManager()->setChannels(montage);
+
+		//if (!buildPDI(process, montage, dm->rawChannels())) {
+		if (AwProcessManager::instance()->buildProcessPDI(process) != 0) {
+		//A_DESTROY_LIST(montage);
 			throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
-			AW_DESTROY_LIST(montage);
+			
 			return process;
 		}
-		AW_DESTROY_LIST(montage);
+		//AW_DESTROY_LIST(montage);
 
 		// handle skipping markers and/or use specific markers
 		QStringList skippedLabels, usedLabels;

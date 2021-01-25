@@ -85,7 +85,5 @@ int main(int argc, char *argv[])
 
 	// check if arguments
 	AnyWave window(app.arguments());
-	if (window.status() != 0)
-		return -1;
 	return app.exec();
 }
