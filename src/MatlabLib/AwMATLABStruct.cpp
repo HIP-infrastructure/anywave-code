@@ -14,6 +14,18 @@ AwMATLABStruct::AwMATLABStruct(matvar_t *var, bool isChild)
 	}
 }
 
+AwMATLABStruct::AwMATLABStruct(const QString& name, const char **fieldsNames, int nFields, int rank, size_t dims[2])
+{
+	m_var = Mat_VarCreateStruct(name.toStdString().c_str(), rank, dims, fieldsNames, nFields);
+	if (m_var == nullptr)
+		throw(AwException("Failed when creating structure."));
+	m_isChild = false;
+
+	for (int i = 0; i < nFields; i++)
+		m_fieldsNames << QString::fromLatin1(fieldsNames[i]);
+}
+
+
 AwMATLABStruct::~AwMATLABStruct()
 {
 	if (!m_isChild)
@@ -138,13 +150,69 @@ int AwMATLABStruct::readString(const QString& fieldName, QString& string, size_t
 		throw AwException(m_error, origin);
 		return -1;
 	}
-	char dummy[256];
-	size_t length = std::min(size_t(255), field_matvar->dims[0] * field_matvar->dims[1]);
-	memcpy(dummy, (char *)field_matvar->data, length);
-	dummy[length] = '\0';
-	string = QString::fromLatin1(dummy);
+	//char dummy[256];
+	//size_t length = std::min(size_t(255), field_matvar->dims[0] * field_matvar->dims[1]);
+	//memcpy(dummy, (char *)field_matvar->data, length);
+	//dummy[length] = '\0';
+	//string = QString::fromLatin1(dummy);
+	string = QString(static_cast<char*>(field_matvar->data));
 	return 0;
 }
+
+
+int AwMATLABStruct::insertString(const QString& fieldName, const QString& string, size_t index)
+{
+	QByteArray stringData = string.toUtf8();
+	//const char* data = string.toStdString().c_str();
+	std::string field = fieldName.toStdString();
+	//const char* field = fieldName.toStdString().c_str();
+	size_t dims[2] = { 1, (size_t)string.size() };
+	matvar_t* var = Mat_VarCreate(field.data(), MAT_C_CHAR, MAT_T_UTF8, 2, dims, (void *)stringData.data(), 0);
+	if (!var) {
+		m_error = QString("Could not create variable for field %1").arg(fieldName);
+		throw AwException(m_error);
+		return -1;
+	}
+
+	if (Mat_VarSetStructFieldByName(m_var, field.data(), index, var))
+		return 0;
+	m_error = QString("Could not set fieldname %1 variable.").arg(fieldName);
+	return -1;
+}
+
+int AwMATLABStruct::insertMatrix(const QString& fieldName,  mat& matrix, size_t index)
+{
+	//const char* field = fieldName.toStdString().c_str();
+	std::string field = fieldName.toStdString();
+	size_t matrixDims[2] = { size_t(matrix.n_rows), size_t(matrix.n_cols) };
+	matvar_t* var = Mat_VarCreate(field.data(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, matrix.memptr(), 0);
+	if (var == nullptr) {
+		m_error = QString("Could not create variable for field  %1").arg(fieldName);
+		throw AwException(m_error);
+		return -1;
+	}
+	if (Mat_VarSetStructFieldByName(m_var, field.data(), index, var))
+		return 0;
+	m_error = QString("Could not set fieldname %1 variable.").arg(fieldName);
+	return -1;
+}
+
+int AwMATLABStruct::insertVector(const QString& fieldName, vec& matrix, size_t index)
+{
+	std::string field = fieldName.toStdString();
+	size_t matrixDims[2] = { size_t(matrix.n_rows), size_t(matrix.n_cols) };
+	matvar_t* var = Mat_VarCreate(field.data(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, matrix.memptr(), 0);
+	if (var == nullptr) {
+		m_error = QString("Could not create variable for field  %1").arg(fieldName);
+		throw AwException(m_error);
+		return -1;
+	}
+	if (Mat_VarSetStructFieldByName(m_var, field.data(), index, var))
+		return 0;
+	m_error = QString("Could not set fieldname %1 variable.").arg(fieldName);
+	return -1;
+}
+
 
 int AwMATLABStruct::readScalar(const QString& fieldName, double *value, size_t index)
 {

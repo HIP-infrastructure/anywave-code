@@ -26,6 +26,7 @@ protected:
 	int initialize();
 	void clean();
 	void compute();
+	void saveResults();
 
 	double m_timeWindow, m_overlap;
 	int m_windowing;	// Non, Hamming or Hanning  default is Hanning

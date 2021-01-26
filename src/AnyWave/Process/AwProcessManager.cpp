@@ -454,6 +454,56 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	return buildProcessPDI(p) == 0;
 }
 
+/// <summary>
+/// set new input markers list accordingly with use_markers and skip_markers keys 
+/// </summary>
+/// <param name="p">Process instance</param>
+/// <returns>flags</returns>
+int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
+{
+	auto fd = p->pdi.input.settings.value(keys::file_duration).toFloat();
+
+	// filter markers  considering the optional arguments use_markers and skip_markers
+   // init markers based on input.settings arguments (if any)
+	QStringList usedMarkers, skippedMarkers;
+	bool useMarkers = false, skipMarkers = false;
+	bool allDataFlag = false;
+	if (p->pdi.input.settings.contains(keys::use_markers)) {
+		usedMarkers = p->pdi.input.settings.value(keys::use_markers).toStringList();
+		useMarkers = true;
+		// handle special case : if use_markers contains all_data
+		// that will force the input to be only one marker marking all the data.
+		// other marker flags will be ignored
+		if (usedMarkers.first().simplified().toLower() == "all_data") {
+			p->pdi.input.clearMarkers();
+			// add a whole marker to the marker list
+			p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+			allDataFlag = true;
+		}
+	}
+	if (p->pdi.input.settings.contains(keys::skip_markers)) {
+		skippedMarkers = p->pdi.input.settings.value(keys::skip_markers).toStringList();
+		skipMarkers = true;
+	}
+
+	if (!allDataFlag) {
+		if (skipMarkers || useMarkers) {
+			auto markers = AwMarker::duplicate(p->pdi.input.markers());
+			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
+			if (inputMarkers.isEmpty()) {
+				p->pdi.input.clearMarkers();
+				p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+			}
+			else {
+				p->pdi.input.clearMarkers();
+				p->pdi.input.setNewMarkers(inputMarkers);
+			}
+		}
+		return 0;
+	}
+	return 1;
+}
+
  void AwProcessManager::launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end)
  {
 
@@ -577,13 +627,70 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	 // make sure current filters are set for the channels.
 	 dataManager->filterSettings().apply(p->pdi.input.channels());
 
-	 // now processing markers
-	 if (inputF & Aw::ProcessIO::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
-		 auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
-		 if (!markers.isEmpty())
-			 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+	 int flags = applyUseSkipMarkersKeys(p);
+
+	// // markers
+	// auto fd = p->pdi.input.settings.value(keys::file_duration).toFloat();
+
+	// // filter markers  considering the optional arguments use_markers and skip_markers
+	//// init markers based on input.settings arguments (if any)
+	// QStringList usedMarkers, skippedMarkers;
+	// bool useMarkers = false, skipMarkers = false;
+	// bool allDataFlag = false;
+	// if (p->pdi.input.settings.contains(keys::use_markers)) {
+	//	 usedMarkers = p->pdi.input.settings.value(keys::use_markers).toStringList();
+	//	 useMarkers = true;
+	//	 // handle special case : if use_markers contains all_data
+	//	 // that will force the input to be only one marker marking all the data.
+	//	 // other marker flags will be ignored
+	//	 if (usedMarkers.first().simplified().toLower() == "all_data") {
+	//		 p->pdi.input.clearMarkers();
+	//		 // add a whole marker to the marker list
+	//		 p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+	//		 allDataFlag = true;
+	//	 }
+	// }
+	// if (p->pdi.input.settings.contains(keys::skip_markers)) {
+	//	 skippedMarkers = p->pdi.input.settings.value(keys::skip_markers).toStringList();
+	//	 skipMarkers = true;
+	// }
+
+	// if (!allDataFlag) {
+	//	 if (skipMarkers || useMarkers) {
+	//		 auto markers = AwMarker::duplicate(p->pdi.input.markers());
+	//		 auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
+	//		 if (inputMarkers.isEmpty()) {
+	//			 p->pdi.input.clearMarkers();
+	//			 p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+	//		 }
+	//		 else {
+	//			 p->pdi.input.clearMarkers();
+	//			 p->pdi.input.setNewMarkers(inputMarkers);
+	//		 }
+	//	 }
+	// }
+
+
+	// bool allDataFlag = p->pdi.input.settings.contains(keys::use_markers) && 
+	 bool allDataFlag = flags == 1;
+
+	 // now processing markers. 
+	 // GetDurationMarkers flag will be applied to markers previously set by use_markers and/or skip_markers keys.
+	 // And if not it will be applied to the whole markers from the file.
+	 if (inputF & Aw::ProcessIO::GetDurationMarkers && !allDataFlag) {
+		 if (p->pdi.input.markers().isEmpty()) {
+			 auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
+			 if (!markers.isEmpty())
+				 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+		 }
+		 else {
+			 auto markers = AwMarker::duplicate(AwMarker::getMarkersWithDuration(p->pdi.input.markers()));
+			 p->pdi.input.setNewMarkers(markers);
+		 }
 	 }
-	 if (inputF & Aw::ProcessIO::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
+	 // GetAllMarkers will be applied on the whole markers ONLY if no use_markers nor skip_markers keys were not set
+	 // Indeed, this flag will do nothing on markers that had already been filtered by the skip_markers/use_markers keys
+	 if (inputF & Aw::ProcessIO::GetAllMarkers && p->pdi.input.markers().isEmpty() && !allDataFlag) {
 		 auto markers = AwMarkerManager::instance()->getMarkers();
 		 if (!markers.isEmpty())
 			 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
@@ -752,6 +859,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 			  delete process;
 			  return; 
 		  }
+		  applyUseSkipMarkersKeys(process);
 	  }
 	  auto selectedChannels = AwDisplay::instance()->selectedChannels();
 	  if (process->inputFlags() & Aw::ProcessIO::RequireChannelSelection && selectedChannels.isEmpty()) {
@@ -887,6 +995,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				p->plugin()->deleteInstance(p); 
 				return;
 			}
+			applyUseSkipMarkersKeys(p);
 		}
 		// create the process thread and move process object in it.
 		QThread *processThread = new QThread;

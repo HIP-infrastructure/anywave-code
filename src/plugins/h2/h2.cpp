@@ -24,7 +24,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "h2.h"
-#include <AwFileIO.h>
+//#include <AwFileIO.h>
 #include <filter/AwFiltering.h>
 #include <utils/time.h>
 #include <math/AwMath.h>
@@ -33,7 +33,7 @@
 #include <qmessagebox.h>
 #include <QFileDialog>
 #include <QtConcurrent>
-#include <AwFileIO.h>
+//#include <AwFileIO.h>
 #include <utils/json.h>
 #include <AwKeys.h>
 

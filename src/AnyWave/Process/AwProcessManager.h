@@ -129,6 +129,7 @@ protected:
 	bool buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources = AwChannelList());
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);
+	int applyUseSkipMarkersKeys(AwBaseProcess* process);
 	
 private:
 	/* Warn the user that the process is about to be launched with all channels as input. */

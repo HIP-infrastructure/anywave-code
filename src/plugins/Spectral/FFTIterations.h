@@ -15,7 +15,7 @@ public:
 	AwChannel* channel() { return m_channel; }
 protected:
 	AwChannel* m_channel;
-	arma::mat m_iterations;	// each row of iterations are ONE fft iteration
+	arma::mat m_iterations;	// each cols of iterations are ONE fft iteration
 	arma::vec m_pxx;
 	uword m_iterationIndex;
 };

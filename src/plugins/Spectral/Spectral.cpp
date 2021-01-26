@@ -14,6 +14,8 @@
 
 using namespace sp;
 #include <utils/json.h>
+#include <matlab/AwMATLAB.h>
+#include <matlab/AwMATLABStruct.h>
 
 SpectralPlugin::SpectralPlugin()
 {
@@ -71,36 +73,6 @@ int Spectral::initialize()
 		sendMessage("No channels set as input. Aborting.");
 		return -1;
 	}
-	auto fd = pdi.input.settings.value(keys::file_duration).toFloat();
-
-	// init markers based on input.settings arguments (if any)
-	QStringList usedMarkers, skippedMarkers;
-	bool useMarkers = false, skipMarkers = false;
-	if (pdi.input.settings.contains(keys::use_markers)) {
-		usedMarkers = pdi.input.settings.value(keys::use_markers).toStringList();
-		useMarkers = true;
-	}
-	if (pdi.input.settings.contains(keys::skip_markers)) {
-		skippedMarkers = pdi.input.settings.value(keys::skip_markers).toStringList();
-		skipMarkers = true;
-	}
-	if (skipMarkers || useMarkers) {
-		auto markers = AwMarker::duplicate(pdi.input.markers());
-		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
-		if (inputMarkers.isEmpty()) {
-			pdi.input.clearMarkers();
-			pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-		}
-		else {
-			pdi.input.clearMarkers();
-			pdi.input.setNewMarkers(inputMarkers);
-		}
-	}
-
-	// we expect markers to be present, at least one global marker but we never know...
-	if (pdi.input.markers().isEmpty()) 
-		pdi.input.addMarker(new AwMarker("global", 0., pdi.input.settings.value(keys::file_duration).toFloat()));
-	
 	// check for required arguments and set default 
 	m_windowing = Spectral::Hanning;
 	if (!pdi.input.settings.contains("time_window")) {
@@ -141,65 +113,13 @@ bool Spectral::showUi()
 					QMessageBox::No)
 					return false;
 		}
-		//	pdi.input.clearMarkers();
-		//	pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-		//	if (!dlg.m_skippedLabels.isEmpty() || !dlg.m_usedLabels.isEmpty()) {
-		//		
-		//		auto markers = AwMarker::duplicate(pdi.input.markers());
-		//		auto inputMarkers = AwMarker::getInputMarkers(markers, dlg.m_skippedLabels, dlg.m_usedLabels, fd);
-		//		if (inputMarkers.isEmpty()) {
-		//			pdi.input.clearMarkers();
-		//			pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-		//		}
-		//		else {
-		//			pdi.input.clearMarkers();
-		//			pdi.input.setNewMarkers(inputMarkers);
-		//		}
-		//	}
-		//	else {
-		//		if (QMessageBox::question(nullptr, "Data Length", "Compute on whole data?", QMessageBox::Yes | QMessageBox::No) ==
-		//			QMessageBox::No)
-		//			return;
-		//		pdi.input.clearMarkers();
-		//		pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-		//	}
-		//}
-		//else 
-		//	return false;
 	}
-//	else {
-//		pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-//	}
-	//m_widget = new SIWidget(this);
 	SIWidget dlg;
 	if (dlg.exec() != QDialog::Accepted)
 		return false;
 	pdi.input.settings["time_window"] = dlg.timeWindow;
 	pdi.input.settings["overlap"] = dlg.overlap;
 	pdi.input.settings["windowing"] = dlg.windowing;
-	
-	////// check input channel
-	//auto channels = pdi.input.channels();
-	//if (channels.isEmpty()) {
-	//	auto answer = QMessageBox::information(nullptr, "Power Spectral Density", "No channels selected, run for all channels?",
-	//		QMessageBox::Yes | QMessageBox::No);
-	//	if (answer == QMessageBox::Yes) {
-	//		QVariantMap cfg;
-	//		AwChannelList result;
-	//		cfg.insert(keys::channels_source, keys::channels_source_raw);
-	//		selectChannels(cfg, &result);
-	//		if (result.isEmpty())
-	//			return;
-	//		pdi.input.setNewChannels(result);
-	//	}
-	//	else
-	//		return false;
-	//}
-
-	// we assume the input channels have been set by AnyWave regarding our input flags
-	// we should have the user selection OR the as recorded channels included the bad ones.
-
-
 	return true;
 }
 
@@ -207,9 +127,6 @@ void Spectral::compute()
 {
 	uword nfft, noverlap;
 	auto fs = pdi.input.settings.value(keys::max_sr).toFloat();
-//	double timeWindow = pdi.input.settings.value("time_window").toDouble();
-//	double overlap = pdi.input.settings.value("overlap").toDouble();
-//	int windowType = pdi.input.settings.value("window").toInt();
 	nfft = (uword)std::floor(m_timeWindow * fs);
 	noverlap = (uword)std::floor(m_overlap * fs);
 	// loop over markers
@@ -222,9 +139,6 @@ void Spectral::compute()
 			goodMarkers << m;
 	}
 	if (!badMarkers.isEmpty()) {
-		//if (QMessageBox::question(0, "Data input",
-		//	"Some markers will be skipped because their length is too short regarding the time window specified.\nProceed anyway?") == QMessageBox::No)
-		//	return;
 		sendMessage("Some markers will be skipped because their length is too short regarding the time window specified.");
 	}
 	if (goodMarkers.isEmpty()) {
@@ -323,40 +237,72 @@ void Spectral::runFromCommandLine()
 	}
 	compute();
 	// save results to file
-
+	saveResults();
 }
 
 void Spectral::run()
 {
-
-//	// register our widget to auto close the plugin when the user closes the widget
-////	registerGUIWidget(m_widget);
-//	//// check input channel
-//	auto channels = pdi.input.channels();
-//	if (channels.isEmpty()) {
-//		auto answer = QMessageBox::information(nullptr, "Power Spectral Density", "No channels selected, run for all channels?",
-//			QMessageBox::Yes | QMessageBox::No);
-//		if (answer == QMessageBox::Yes) {
-//			QVariantMap cfg;
-//			AwChannelList result;
-//			cfg.insert(keys::channels_source, keys::channels_source_raw);
-//			selectChannels(cfg, &result);
-//			if (result.isEmpty())
-//				return;
-//			pdi.input.setNewChannels(result);
-//		}
-//		else
-//			return; 
-//	}
-//	m_widget->show();
 	if (initialize() != 0) {
 		sendMessage("Something went wrong while initialising. Aborting...");
 		return;
 	}
 	compute();
+
 }
 
 void Spectral::prepareOutputUi()
 {
 	pdi.output.widgets().append(new PlotWidget(m_results.values()));
+}
+
+void Spectral::saveResults()
+{
+	auto args = pdi.input.settings;
+	QString baseFilename = args.value(keys::output_dir).toString();
+	if (args.contains(keys::output_prefix)) {
+		QString pref = args.value(keys::output_prefix).toString();
+		baseFilename = QString("%1/%2_").arg(baseFilename).arg(pref);
+	}
+	else 
+		baseFilename = QString("%1/spectrum_").arg(baseFilename);
+	
+	auto fs = pdi.input.settings.value(keys::max_sr).toFloat();
+	auto nfft = (uword)std::floor(m_timeWindow * fs);
+	auto noverlap = (uword)std::floor(m_overlap * fs);
+
+	baseFilename += QString("fftwindow-%1_").arg(nfft);
+	baseFilename += QString("fftoverlap-%1_").arg(noverlap);
+	if (args.contains("windowing"))
+		baseFilename += QString("window-%1").arg(args.value("windowing").toString());
+	else {
+		baseFilename += "window-hanning";
+		args["windowing"] = QString("hanning");
+	}
+	if (args.contains(keys::output_suffix)) 
+		baseFilename += QString("_%1").arg(args.value(keys::output_suffix).toString());
+	
+	baseFilename += ".mat";
+	AwMATLABFile file;
+	try {
+		file.create(baseFilename);
+		file.writeScalar("fft_window", (int)nfft);
+		file.writeScalar("fft_overlap", (int)noverlap);
+		file.writeString("windowing", args.value("windowing").toString());
+		const char* fields[] = { "channel", "fft_iterations", "pxx" };
+		size_t dim[2] = { 1, (size_t)m_results.keys().size() };
+		AwMATLABStruct s("psd", fields, 3, 2, dim);
+		int count = 0;
+		for (auto result : m_results.values()) {
+			s.insertString("channel", result->channel()->name(), count);
+			s.insertMatrix("fft_iterations", result->results(), count);
+			s.insertVector("pxx", result->pxx(), count);
+			count++;
+		}
+		file.writeStruct(s);
+		file.close();
+	}
+	catch (const AwException& e) {
+		sendMessage(QString("Failed to write MATLAB file: %1 in %2").arg(e.errorString()).arg(e.origin()));
+		return;
+	}
 }
