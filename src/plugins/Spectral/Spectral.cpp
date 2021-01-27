@@ -247,7 +247,7 @@ void Spectral::run()
 		return;
 	}
 	compute();
-
+	saveResults();
 }
 
 void Spectral::prepareOutputUi()
@@ -288,14 +288,15 @@ void Spectral::saveResults()
 		file.writeScalar("fft_window", (int)nfft);
 		file.writeScalar("fft_overlap", (int)noverlap);
 		file.writeString("windowing", args.value("windowing").toString());
-		const char* fields[] = { "channel", "fft_iterations", "pxx" };
+		const char* fields[] = { "channel", "fft_iterations", "psd" };
 		size_t dim[2] = { 1, (size_t)m_results.keys().size() };
 		AwMATLABStruct s("psd", fields, 3, 2, dim);
 		int count = 0;
 		for (auto result : m_results.values()) {
 			s.insertString("channel", result->channel()->name(), count);
 			s.insertMatrix("fft_iterations", result->results(), count);
-			s.insertVector("pxx", result->pxx(), count);
+			vec psd = 10 * log10(result->pxx());
+			s.insertVector("psd", psd, count);
 			count++;
 		}
 		file.writeStruct(s);
