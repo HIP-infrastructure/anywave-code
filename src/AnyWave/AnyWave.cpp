@@ -307,6 +307,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList *)), m_display, SLOT(addVirtualChannels(AwChannelList *)));
 		connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
 			m_display, SLOT(executeCommand(int, const QVariantList&)));
+		connect(process_manager, SIGNAL(displayCommand(const QVariantMap&)), m_display, SLOT(handleCommand(const QVariantMap&)));
 		// Display and Montage manager
 		connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
 		// Settings and Display

@@ -39,8 +39,9 @@ namespace AwProcessCommand
 {
 	enum Commands {
 		AddHighlightedSection, RemoveLastHighlightedSection, ShowOnlySelectedChannels,
-		SelectChannels, ShowAllChannels, LaunchProcess, CenterOnPos, LoadICA, UpdateMarkers, AddVideoCursor, RemoveCursor
+		SelectChannels, ShowAllChannels, LaunchProcess, CenterOnPos, LoadICA, UpdateMarkers, AddVideoCursor, RemoveCursor, HighlightChannels
 	};
+	constexpr auto command = "command";
 }
 
 

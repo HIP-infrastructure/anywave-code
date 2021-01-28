@@ -170,7 +170,7 @@ void AwGraphicsScene::updateVisibleItemsHashTable()
 {
 	m_hashNameToItem.clear();
 	QStringList labels;
-	foreach(AwGraphicsSignalItem *i, m_visibleSignalItems) {
+	for (AwGraphicsSignalItem *i : m_visibleSignalItems) {
 		m_hashNameToItem.insert(i->channel()->name(), i);
 		if (!labels.contains(i->channel()->name()))
 			labels << i->channel()->name();
@@ -649,6 +649,30 @@ void AwGraphicsScene::addHighLigthMarker(const QString& text, float pos, float d
 	update();
 }
 
+void AwGraphicsScene::undoHighlightChannels()
+{
+	for (auto i : m_hashNameToItem.values())
+		i->setGraphicsEffect(nullptr);
+	update();
+}
+
+
+void AwGraphicsScene::highlightChannels(const QStringList& labels)
+{
+	for (auto const &label : labels) {
+		auto items = m_hashNameToItem.values(label);
+
+		for (auto i : items) {
+			auto effect = new QGraphicsColorizeEffect;
+			effect->setColor(Qt::yellow);
+			i->setGraphicsEffect(effect);
+			views().first()->ensureVisible(i);
+		}
+	}
+	update();
+	QTimer::singleShot(800, this, SLOT(undoHighlightChannels()));
+}
+
 void AwGraphicsScene::removeHighLigthMarker()
 {
 	if (m_hmarkers.isEmpty())
@@ -750,7 +774,6 @@ void AwGraphicsScene::insertPredefinedMarker()
 
 void AwGraphicsScene::chooseMarkersToInsert()
 {
-//	AwPickMarkersDial dlg(m_markingSettings);
 	if (m_pickMarkersDial == nullptr)
 		m_pickMarkersDial = new AwPickMarkersDial(m_markingSettings);
 	else
@@ -780,16 +803,11 @@ void AwGraphicsScene::addCustomMarkerFromList()
 	auto predefined = m_markingSettings->predefinedMarkers.at(index);
 	predefined->setStart(m_positionClicked);
 	emit markerInserted(new AwMarker(predefined));
-	//if (m_currentMarkerItem) {
-	//	m_currentMarkerItem->marker()->setLabel(m_markingSettings->predefinedMarkers.at(index)->label());
-	//	m_currentMarkerItem->marker()->setValue(m_markingSettings->predefinedMarkers.at(index)->value());
-	//}
 }
 
 void AwGraphicsScene::cursorToMarker()
 {
 	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) {
-		//emit markerInserted(&m_mappingMarker);
 		emit markerInserted(new AwMarker(&m_mappingMarker));
 	}
 }

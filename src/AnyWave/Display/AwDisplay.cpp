@@ -72,10 +72,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	dsManager->setParent(this);
 	m_mainWindow = w;
 	m_setup = nullptr;
-//	m_reader = nullptr;
-
 	AwDisplaySetup *setup = dsManager->currentSetup();
-
 	// Display Setup Manager connections
 	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(changeCurrentSetup(AwDisplaySetup *)));
 	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
@@ -119,9 +116,6 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 		v->setProcessFlags(AwSignalView::NoProcessUpdate);
 
 	AwSignalView *view = new AwSignalView((AwViewSettings *)setup);
-	//if (m_reader) // file already open
-	//	view->enableView(m_reader);
-
 	AwProcessManager *pm = AwProcessManager::instance();
 	QList<AwDisplayPlugin *> plugins = AwPluginManager::getInstance()->displays();
 	QList<AwProcessPlugin *> QTSplugins = pm->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
@@ -159,8 +153,6 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	if (!m_virtualChannels.isEmpty())
 		view->addVirtualChannels(m_virtualChannels);
 
-//	m_splitterWidget->addWidget(view);
-//	m_splitterWidget->repaint();
 	m_centralWidget->addWidget(view);
 	m_centralWidget->repaint();
 	
@@ -294,6 +286,65 @@ void AwDisplay::setVideoPosition(float position)
 		if (position > v->currentEndPosition() || position < v->positionInFile()) 
 			v->setPositionInFile(position);
 		v->scene()->setCursorPosition("Video", v->positionInFile(), position);
+	}
+}
+
+void AwDisplay::handleCommand(const QVariantMap& map)
+{
+	int command = map.value(AwProcessCommand::command).toInt();
+	switch (command) {
+	case AwProcessCommand::AddHighlightedSection:
+	{
+		float pos = map.value("position").toFloat();
+		float dur = map.value("duration").toFloat();
+		QString text = map.value("text").toString();
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->addHighLigthMarker(text, pos, dur);
+	}
+	break;
+	case AwProcessCommand::RemoveLastHighlightedSection:
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->removeHighLigthMarker();
+		break;
+	case AwProcessCommand::ShowOnlySelectedChannels:
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->displaySelectedChannelsOnly();
+		break;
+	case AwProcessCommand::ShowAllChannels:
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->displayAllChannels();
+		break;
+	case AwProcessCommand::CenterOnPos:
+	{
+		float pos = map.value("position").toFloat();
+		for (AwSignalView* v : m_signalViews)
+			v->centerViewOnPosition(pos);
+	}
+	break;
+	case AwProcessCommand::UpdateMarkers:
+		for (AwSignalView* v : m_signalViews)
+			v->updateMarkers();
+		break;
+	case  AwProcessCommand::AddVideoCursor:
+		for (AwSignalView* v : m_signalViews) {
+			auto cursor = v->scene()->addCursor("Video");
+			cursor->setWidth(5.0);
+		}
+		break;
+	case AwProcessCommand::RemoveCursor:
+	{
+		QString name = map.value("name").toString();
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->removeCursor(name);
+	}
+		break;
+	case AwProcessCommand::HighlightChannels:
+	{
+		QStringList channels = map.value("channels").toStringList();
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->highlightChannels(channels);
+	}
+		break;
 	}
 }
 

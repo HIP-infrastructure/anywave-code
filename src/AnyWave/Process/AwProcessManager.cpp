@@ -876,6 +876,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	  process->moveToThread(processThread);
 
 	  connect(process, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+	  connect(process, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 	  connect(process, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
 	  connect(process, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
 
@@ -970,6 +971,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
 		AwGUIProcess *p = static_cast<AwGUIProcess *>(process);
 		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
@@ -1002,6 +1004,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		p->moveToThread(processThread);
 
 		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 		connect(p, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
 		connect(p, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
 		
@@ -1311,9 +1314,49 @@ void AwProcessManager::handleProcessTermination()
 
 void AwProcessManager::errorMessage(const QString& message)
 {
-	AwProcess *process = (AwProcess *)sender();
+	AwProcess *process = static_cast<AwProcess *>(sender());
 	if (process)
 		AwMessageBox::critical(0, process->plugin()->name, message);
+}
+
+void AwProcessManager::executeCommand(const QVariantMap& map)
+{
+	QMutexLocker lock(&m_mutex);
+	int command;
+	if (!map.contains(AwProcessCommand::command))
+		return;
+	command = map.value(AwProcessCommand::command).toInt();
+	switch (command)
+	{
+	case AwProcessCommand::LaunchProcess:
+		// get process name
+		if (!map.contains("process"))
+			break;
+		else {
+			auto name = map.value("process").toString();
+			QStringList args;
+			// check for args for process
+			if (map.contains("args"))
+				args = map.value("args").toStringList();
+			startProcess(name, args);
+		}
+		break;
+	case AwProcessCommand::AddHighlightedSection:
+		// to be adapted 
+		break;
+	case AwProcessCommand::RemoveLastHighlightedSection:
+	case AwProcessCommand::ShowAllChannels:
+	case AwProcessCommand::ShowOnlySelectedChannels:
+	case AwProcessCommand::SelectChannels:
+	case AwProcessCommand::CenterOnPos:
+	case AwProcessCommand::UpdateMarkers:
+		// to be adapted 
+		break;
+	case AwProcessCommand::HighlightChannels:
+		// relay the map to display to handle
+		emit displayCommand(map);
+		break;
+	}
 }
 
 void AwProcessManager::executeCommand(int command, QVariantList args)

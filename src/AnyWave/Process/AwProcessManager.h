@@ -105,6 +105,7 @@ public slots:
 	void startDisplayProcesses(AwChannelList& channels);
 	void stopProcess(AwProcess *process);
 	void executeCommand(int command, QVariantList args);
+	void executeCommand(const QVariantMap&);
 	void manageMemoryError();
 	void errorMessage(const QString& message);
 	void enableMenus();
@@ -122,6 +123,10 @@ signals:
 	// signals for specific interpreted commands
 	void displayCommandRequested(int command, const QVariantList& args);
 	void aboutToQuit(); // sent to processes when AnyWave is closing
+
+	// signals relative to command sent by processes
+	// transmit the command to Display object
+	void displayCommand(const QVariantMap&);
 protected:
 	void addProcess(AwProcessPlugin *plugin);
 	void addProcessToMenu(AwProcessPlugin *plugin);

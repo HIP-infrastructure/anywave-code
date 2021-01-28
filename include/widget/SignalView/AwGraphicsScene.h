@@ -136,6 +136,8 @@ public slots:
 	void addHighLigthMarker(const QString& text, float pos, float dur);
 	void removeHighLigthMarker();
 	void highlightMarker(AwMarker *m);
+	void highlightChannels(const QStringList& labels);
+	void undoHighlightChannels();
 	void setCursorMode(bool OnOff);
 	void setMarkingMode(bool flag);
 	void setMappingMode(bool on);

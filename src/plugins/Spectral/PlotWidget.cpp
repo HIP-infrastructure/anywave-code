@@ -1,17 +1,17 @@
 #include "PlotWidget.h"
 
 
-PlotWidget::PlotWidget(const FFTs& ffts, QWidget *parent)
-	: QWidget(parent)
+PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
+	: AwProcessOutputWidget(p, parent)
 {
 	ui.setupUi(this);
 
 	// add a row with text explanation beyond the plot
-	QCPTextElement* title = new QCPTextElement(ui.widget);
-	title->setText("Click on a signal to select it. The signal will be shown on AnyWave.\n");
-	title->setFont(QFont("sans", 12, QFont::Bold));
+	m_textBox = new QCPTextElement(ui.widget);
+	m_textBox->setText("Click on a signal to select it. The signal will be shown on AnyWave.\n");
+	m_textBox->setFont(QFont("sans", 12, QFont::Bold));
 	ui.widget->plotLayout()->insertRow(1);
-	ui.widget->plotLayout()->addElement(1, 0, title);
+	ui.widget->plotLayout()->addElement(1, 0, m_textBox);
 	m_FFTs = ffts;
 	// prepare x axis (Freq. Hz)
 	auto length = ffts.first()->pxx().n_elem;
@@ -41,10 +41,22 @@ PlotWidget::PlotWidget(const FFTs& ffts, QWidget *parent)
 	// set axes ranges, so we see all data:
 	ui.widget->xAxis->setRange(1, length + 1);
 	ui.widget->yAxis->setRange(min, max);
-	
+	connect(ui.widget, SIGNAL(plottableClick(QCPAbstractPlottable*, int, QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*, int)));
 }
 
 PlotWidget::~PlotWidget()
 {
 
+}
+
+
+void PlotWidget::graphClicked(QCPAbstractPlottable* plottable, int dataIndex)
+{
+	Q_UNUSED(dataIndex);
+	m_textBox->setText(QString("Channel %1 selected").arg(plottable->name()));
+	QStringList labels = { plottable->name() };
+	QVariantMap map;
+	map["command"] = AwProcessCommand::HighlightChannels;
+	map["channels"] = labels;
+	emit sendCommand(map);
 }

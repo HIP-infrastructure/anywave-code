@@ -252,7 +252,7 @@ void Spectral::run()
 
 void Spectral::prepareOutputUi()
 {
-	pdi.output.widgets().append(new PlotWidget(m_results.values()));
+	pdi.output.widgets().append(new PlotWidget(m_results.values(), this));
 }
 
 void Spectral::saveResults()

@@ -90,6 +90,7 @@ signals:
 	void sendMarker(AwMarker *marker);
 	// Send command
 	void sendCommand(int command, QVariantList args);
+	void sendCommand(const QVariantMap&);
 
 	void dataConnectionRequested(AwDataClient *client);
 	void newDisplayPlugin(AwDisplayPlugin *plugin);
