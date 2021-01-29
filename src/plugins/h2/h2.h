@@ -33,8 +33,6 @@
 #include "H2Params.h"
 #include <matlab/AwMATLAB.h>
 class H2MainGui;
-//#include <armadillo>
-//using namespace arma;
 
 namespace Global {
 	namespace Method {
@@ -86,8 +84,6 @@ public:
 	float maxLag() { return m_maxLag; }
 	void setMaxLag(float ml) { m_maxLag = ml; }
 
-//	QString matlabFile() { return m_MatlabBaseFilePath; }
-//	void setMatlabFile(QString file) { m_MatlabBaseFilePath = file; }
 	// Launch H2 on specific event on a channel.
 	QString markerTrigger() { return m_markerTrigger; }
 	void setTriggerMarker(QString trigger) { m_markerTrigger = trigger; }

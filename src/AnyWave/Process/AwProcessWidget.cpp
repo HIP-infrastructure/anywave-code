@@ -25,6 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessWidget.h"
 #include <utils/time.h>
+#include <process/AwProcessOutputWidget.h>
 
 AwProcessWidget::AwProcessWidget(AwProcess *process, QWidget *parent)
 	: QWidget(parent)
@@ -183,10 +184,10 @@ void AwProcessWidget::stop()
 	}
 	if (m_process->isIdle()) {
 		if (m_process->pdi.hasOutputWidgets()) {
-			foreach(QWidget * w, m_process->pdi.output.widgets()) {
+			for (auto w : m_process->pdi.output.widgets()) {
 				w->close();
 			}
-			m_process->pdi.output.clearWidgets();
+	//		m_process->pdi.output.clearWidgets();
 		}
 		m_process->stop();
 	}

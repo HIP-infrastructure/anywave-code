@@ -16,6 +16,7 @@ using namespace sp;
 #include <utils/json.h>
 #include <matlab/AwMATLAB.h>
 #include <matlab/AwMATLABStruct.h>
+#include <QtConcurrent>
 
 SpectralPlugin::SpectralPlugin()
 {
@@ -33,8 +34,8 @@ Spectral::Spectral()
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 0);
 	// global flags
 	setFlags(Aw::ProcessFlags::HasOutputUi);
-	setInputFlags(Aw::ProcessIO::GetDurationMarkers | Aw::ProcessIO::AcceptChannelSelection
-		| Aw::ProcessIO::GetCurrentMontage);
+	setInputModifiers(Aw::ProcessIO::modifiers::AcceptChannelSelection);
+	setInputFlags(Aw::ProcessIO::GetDurationMarkers | Aw::ProcessIO::GetCurrentMontage);
 	m_timeWindow = 1.;
 	m_overlap = 0.5;
 	m_windowing = Spectral::Hanning;
@@ -100,18 +101,25 @@ int Spectral::initialize()
 bool Spectral::showUi()
 {
 	auto fd = pdi.input.settings.value(keys::file_duration).toFloat();
+	bool manuallySelectedMarkers = modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers;
+
 	// check for input markers (only duration markers is assumed here)
-	if (!pdi.input.markers().isEmpty()) {
+	if (!pdi.input.markers().isEmpty() && !manuallySelectedMarkers) {
 		InputMarkersDial dlg(pdi.input.markers());
 		if (dlg.exec() == QDialog::Accepted) {
 			if (!dlg.m_skippedLabels.isEmpty())
 				pdi.input.settings[keys::skip_markers] = dlg.m_skippedLabels;
 			if (!dlg.m_usedLabels.isEmpty())
 				pdi.input.settings[keys::use_markers] = dlg.m_usedLabels;
-			if (dlg.m_skippedLabels.isEmpty() && dlg.m_usedLabels.isEmpty())
+			if (dlg.m_skippedLabels.isEmpty() && dlg.m_usedLabels.isEmpty()) {
 				if (QMessageBox::question(nullptr, "Data Length", "Compute on whole data?", QMessageBox::Yes | QMessageBox::No) ==
 					QMessageBox::No)
 					return false;
+				else {
+					pdi.input.clearMarkers();
+					pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+				}
+			}
 		}
 	}
 	SIWidget dlg;
@@ -160,7 +168,6 @@ void Spectral::compute()
 
 	// temp vector to hold data for a time window
 	vec timeWindowSignal = zeros(nfft);
-	//vec data = zeros(nPts); // copy of chunk data
 	vec iteration = zeros(nIterationPnts);
 	// fft plan that will be used for all fft transformations
 	fftw_complex* fftx = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * nfft);
@@ -191,7 +198,7 @@ void Spectral::compute()
 			auto sqr_mean = std::sqrt(arma::mean(squared));
 			window.for_each([sqr_mean](vec::elem_type& val) { val /= sqr_mean; });
 		}
-
+#ifndef COMPUTE_MP
 		for (auto channel : pdi.input.channels()) {
 			FFTIterations* fftIter = nullptr;
 			if (m_results.contains(channel))
@@ -227,6 +234,54 @@ void Spectral::compute()
 	for (auto res : m_results.values()) {
 		res->computePxx();
 	}
+#else
+		int windowType = m_windowing;
+		QList< FFTIterations*> list; // iterations to be done for all channels
+		for (auto channel : pdi.input.channels()) {
+			FFTIterations* fftIter = nullptr;
+			if (m_results.contains(channel))
+				fftIter = m_results.value(channel);
+			else {
+				fftIter = new FFTIterations(channel);
+				fftIter->setNumberOfIterations(nIterations, nIterationPnts);
+				m_results.insert(channel, fftIter);
+			}
+			list.append(fftIter);
+		}
+
+		auto  compute = [window, nfft, noverlap, nIterationPnts, fact, plan, windowType](FFTIterations* iter) {
+			vec timeWindowSignal = zeros(nfft);
+			vec iteration = zeros(nIterationPnts);
+			fftw_complex* fftx = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * nfft);
+			uword start = 0;
+			while (start + nfft < iter->channel()->dataSize()) {
+				for (auto i = 0; i < nfft; i++)
+					timeWindowSignal(i) = iter->channel()->data()[i + start];
+				if (windowType != Spectral::None)
+					timeWindowSignal = timeWindowSignal % window;
+
+				fftw_execute_dft_r2c(plan, timeWindowSignal.memptr(), fftx);
+				uword j = 0;
+				for (auto i = 1; i < nfft / 2; i++) {
+					fftx[i][0] *= fact;
+					fftx[i][1] *= fact;
+					iteration(j++) = fftx[i][0] * fftx[i][0] + fftx[i][1] * fftx[i][1];
+				}
+				iter->appendIteration(iteration);
+				start += noverlap;
+			}
+			fftw_free(fftx);
+		};
+		QFuture<void> res = QtConcurrent::map(list, compute);
+		res.waitForFinished();
+		sendMessage("Done.");
+	}
+	fftw_destroy_plan(plan);
+	fftw_free(fftx);
+	for (auto res : m_results.values()) {
+		res->computePxx();
+	}
+#endif
 }
 
 void Spectral::runFromCommandLine()

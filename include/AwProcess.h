@@ -56,11 +56,16 @@ namespace Aw
 	}
 	namespace ProcessIO {
 		enum flags {
-			IgnoreChannelSelection = 0x1, GetAllMarkers = 0x2, GetDurationMarkers = 0x4, GetReaderPlugins = 0x8,
-			GetWriterPlugins = 0x10, GetAsRecordedChannels = 0x20, GetCurrentMontage = 0x40, GetProcessPluginNames = 0x80,
-			UserSelectedChannels = 0x100, UserSelectedMarkers = 0x200, AcceptChannelSelection = 0x400, DontSkipBadChannels = 0x800,
-			RequireChannelSelection = 0x1000
+			GetAllMarkers = 0x1, GetDurationMarkers = 0x2, GetReaderPlugins = 0x4,
+			GetWriterPlugins = 0x8, GetAsRecordedChannels = 0x10, GetCurrentMontage = 0x20, GetProcessPluginNames = 0x40,
+			DontSkipBadChannels = 0x80
 		};
+		namespace modifiers {
+			enum modifierFlags {
+				UserSelectedChannels = 0x1, UserSelectedMarkers = 0x2, RequireChannelSelection = 0x4, IgnoreChannelSelection = 0x8,
+				AcceptChannelSelection = 0x10, QSTMode = 0x20
+			};
+		}
 	}
 }
 

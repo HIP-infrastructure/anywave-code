@@ -24,7 +24,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "h2.h"
-//#include <AwFileIO.h>
 #include <filter/AwFiltering.h>
 #include <utils/time.h>
 #include <math/AwMath.h>
@@ -33,7 +32,6 @@
 #include <qmessagebox.h>
 #include <QFileDialog>
 #include <QtConcurrent>
-//#include <AwFileIO.h>
 #include <utils/json.h>
 #include <AwKeys.h>
 
@@ -57,8 +55,8 @@ H2::H2() : AwProcess()
 {
 	// Inputs
 	pdi.addInputChannel(-1, 2, 0);
-	setInputFlags(Aw::ProcessIO::AcceptChannelSelection | Aw::ProcessIO::GetDurationMarkers
-		| Aw::ProcessIO::GetWriterPlugins);
+	setInputFlags(Aw::ProcessIO::GetDurationMarkers	| Aw::ProcessIO::GetWriterPlugins);
+	setInputModifiers(Aw::ProcessIO::modifiers::AcceptChannelSelection);
 	m_winSize = 2; // 2s
 	m_maxLag = (float)0.1;	// 0.1s lag
 	m_nCells = 10;  // 10 cellules
@@ -66,7 +64,6 @@ H2::H2() : AwProcess()
 	m_scaleProgress = 0;
 	m_ui = NULL;
 	// we have localization support, so provide the prefix for all the language files.
-	m_langFilePrefix = ":/h2";
 	m_downSample = 0.;
 	m_method = Global::Method::h2;
 	m_currentBand.name = "n/a";
@@ -116,7 +113,7 @@ bool H2::showUi()
 	m_ui->samplingRate = pdi.input.channels().first()->samplingRate();
 	m_ui->directory = pdi.input.settings[keys::working_dir].toString();
 	m_ui->markers = pdi.input.markers();
-	if (inputFlags() & Aw::ProcessIO::UserSelectedMarkers)
+	if (modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers)
 		m_ui->widgetInputData->hide();
 	if (m_ui->exec() == QDialog::Accepted)	{
 		m_maxLag = m_ui->sbMaxLag->value();

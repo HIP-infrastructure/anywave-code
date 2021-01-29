@@ -170,8 +170,6 @@
     <ClCompile Include="Process\AwTriggerEraser.cpp" />
     <ClCompile Include="Process\AwTriggerParser.cpp" />
     <ClCompile Include="Process\AwTriggerWriter.cpp" />
-    <ClCompile Include="Process\PSD\AwPSD.cpp" />
-    <ClCompile Include="Process\PSD\AwPSDGUI.cpp" />
     <ClCompile Include="Process\TPUi.cpp" />
     <ClCompile Include="Source\AwSourceChannel.cpp" />
     <ClCompile Include="Source\AwSourceManager.cpp" />
@@ -301,10 +299,6 @@
     <QtMoc Include="Process\AwLogPlainTextEdit.h">
     </QtMoc>
     <QtMoc Include="Process\AwMATLABMarkersExporter.h">
-    </QtMoc>
-    <QtMoc Include="Process\PSD\AwPSD.h">
-    </QtMoc>
-    <QtMoc Include="Process\PSD\AwPSDGUI.h">
     </QtMoc>
     <ClInclude Include="Source\AwSourceChannel.h" />
     <QtMoc Include="Source\AwSourceManager.h">
@@ -826,8 +820,6 @@
     <QtUic Include="Widgets\AwVideoSettingsDial.ui">
     </QtUic>
     <QtUic Include="IO\BIDS\AwBIDSGUIOptionsDialog.ui">
-    </QtUic>
-    <QtUic Include="Process\PSD\AwPSDGUI.ui">
     </QtUic>
   </ItemGroup>
   <ItemGroup>

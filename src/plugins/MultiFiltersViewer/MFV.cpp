@@ -37,7 +37,7 @@ MFVPlugin::MFVPlugin()
 MFV::MFV()
 {
 	// this plugin requires a user selection
-	setInputFlags(Aw::ProcessIO::RequireChannelSelection);
+	setInputModifiers(Aw::ProcessIO::modifiers::RequireChannelSelection);
 	// Limit the usage to 3 channels max
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 5);
 	m_widget = nullptr;

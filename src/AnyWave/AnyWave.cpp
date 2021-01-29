@@ -433,7 +433,7 @@ void AnyWave::dropEvent(QDropEvent *e)
 
 void AnyWave::applyNewLanguage()
 {
-	AwProcessManager::instance()->retranslate();
+//	AwProcessManager::instance()->retranslate();
 }
 
 void AnyWave::quit()

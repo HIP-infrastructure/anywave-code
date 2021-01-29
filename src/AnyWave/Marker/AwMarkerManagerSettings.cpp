@@ -558,6 +558,7 @@ void AwMarkerManagerSettings::launchProcess()
 	if (plugin) {
 		auto process = AwProcessManager::instance()->newProcess(plugin);
 		process->pdi.input.setNewMarkers(markers, true);
+		process->addModifiers(Aw::ProcessIO::modifiers::UserSelectedMarkers);
 		AwProcessManager::instance()->runProcess(process);
 	}
 }

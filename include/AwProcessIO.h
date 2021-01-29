@@ -31,11 +31,12 @@
 #include <filter/AwFilterSettings.h>
 #include <AwCommandLine.h>
 
+
 /** AwProcessIO defines object used as input or output by AwProcess **/
 class AW_PROCESS_EXPORT AwProcessIO
 {
 public:
-	AwProcessIO() { m_reader = NULL; }
+	AwProcessIO() { m_reader = nullptr; }
 	~AwProcessIO();
 
 	inline bool containsChannels() { return !m_channels.isEmpty(); }
@@ -49,13 +50,11 @@ public:
 	void clearChannels();
 	void clearMarkers();
 	void clearWidgets();
-//	void setArguments(const AwArguments& arguments) { m_arguments = arguments; }
-//	inline AwArguments& args() { return m_arguments; }
-//	void addArgument(const QString& key, const QVariant& value) { m_arguments[key] = value; }
+
 
 	inline AwChannelList& channels() { return m_channels; }
 	inline AwMarkerList& markers() { return m_markers; }
-	inline QList<QWidget *>& widgets() { return m_widgets; }
+	inline QList<QWidget*>& widgets() { return m_widgets; }
 	/** Set a new list of channels. Previous channels will be deleted!!. duplicate indicates that the list will be duplicated and then set as the new list. **/
 	void setNewChannels(const AwChannelList& channels, bool duplicate = false);
 	/** Set a new list of markers. Previous markers will be deleted!!  duplicate indicates that the list will be duplicated and then set as the new list. **/
@@ -64,7 +63,7 @@ public:
 	void addMarkers(const AwMarkerList& markers, bool duplicate = false);
 	void addMarker(AwMarker *marker);
 	/** apend widgets **/
-	void addWidget(QWidget *widget);
+	void addWidget(QWidget* widget);
 	/** Append channels **/
 	void addChannels(const AwChannelList& channels, bool duplicate = false);
 	void addChannel(AwChannel *channel);
@@ -83,8 +82,7 @@ protected:
 	// markers will contain input markers for the process.
 	AwMarkerList m_markers;
 
-	QList<QWidget *> m_widgets;
+	QList<QWidget*> m_widgets;
 	AwFileIO *m_reader;
-//	AwArguments m_arguments;	// used for pluing launches from the command line
 	QMutex m_mutex;
 };

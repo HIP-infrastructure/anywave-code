@@ -26,12 +26,12 @@
 #include "AwProcessIO.h"
 #include <AwCore.h>
 #include <AwKeys.h>
-
+#include <QWidget>
 
 AwProcessIO::~AwProcessIO()
 {
 	clearMarkers();
-	clearWidgets();
+	clearChannels();
 }
 
 bool AwProcessIO::isEmpty()
@@ -52,7 +52,6 @@ bool AwProcessIO::isEmpty()
 void AwProcessIO::setReader(AwFileIO* reader)
 {
 	m_reader = reader;
-	//setNewChannels(reader->infos.channels(), true);
 	// init settings based on informations relative to reader instance
 	settings[keys::file_duration] = reader->infos.totalDuration();
 }
@@ -95,9 +94,11 @@ void AwProcessIO::addChannel(AwChannel *channel)
 	m_channels << channel;
 }
 
-void AwProcessIO::addWidget(QWidget *widget)
+void AwProcessIO::addWidget(QWidget* widget)
 {
 	m_widgets << widget;
+	// make sure the widget has no parent
+	widget->setParent(nullptr);
 }
 
 

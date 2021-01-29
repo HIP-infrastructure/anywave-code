@@ -25,14 +25,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AWPROCESSLIB_H
 #define AWPROCESSLIB_H
-#include <AwProcess.h>
-#include <QElapsedTimer>
-#include <QDate>
-#include <QWaitCondition>
-#include <AwChannel.h>
-#include <AwMarker.h>
 #include <AwProcessIO.h>
 #include <AwMatlabInterface.h>
+#include <AwGlobal.h>
 
 /*!
  * \brief

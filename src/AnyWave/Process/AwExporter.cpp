@@ -42,8 +42,9 @@ AwExporterPlugin::AwExporterPlugin()
 
 AwExporter::AwExporter() : AwProcess()
 {
-	setInputFlags(Aw::ProcessIO::GetAllMarkers| Aw::ProcessIO::GetWriterPlugins | Aw::ProcessIO::GetReaderPlugins | Aw::ProcessIO::GetCurrentMontage
-		| Aw::ProcessIO::IgnoreChannelSelection);
+	setInputFlags(Aw::ProcessIO::GetAllMarkers | Aw::ProcessIO::GetWriterPlugins | Aw::ProcessIO::GetReaderPlugins
+		| Aw::ProcessIO::GetCurrentMontage);
+	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	m_decimateFactor = 1;
 }
 

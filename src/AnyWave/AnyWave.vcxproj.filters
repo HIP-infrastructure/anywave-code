@@ -113,9 +113,6 @@
     <Filter Include="Batch">
       <UniqueIdentifier>{fad4582d-3dc6-447f-a72d-bded135f70b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Process\PSD">
-      <UniqueIdentifier>{a1e9f0f5-9cf7-407c-8217-b80ff75cf2a9}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -612,12 +609,6 @@
     </ClCompile>
     <ClCompile Include="Batch\AwBatchGUI.cpp">
       <Filter>Batch</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\PSD\AwPSD.cpp">
-      <Filter>Process\PSD</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\PSD\AwPSDGUI.cpp">
-      <Filter>Process\PSD</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp">
       <Filter>IO\BIDS</Filter>
@@ -1167,15 +1158,6 @@
     <QtUic Include="Batch\AwBatchGUI.ui">
       <Filter>Batch</Filter>
     </QtUic>
-    <QtMoc Include="Process\PSD\AwPSD.h">
-      <Filter>Process\PSD</Filter>
-    </QtMoc>
-    <QtUic Include="Process\PSD\AwPSDGUI.ui">
-      <Filter>Process\PSD</Filter>
-    </QtUic>
-    <QtMoc Include="Process\PSD\AwPSDGUI.h">
-      <Filter>Process\PSD</Filter>
-    </QtMoc>
     <QtMoc Include="MATPy\AwPidManager.h">
       <Filter>MATPy</Filter>
     </QtMoc>

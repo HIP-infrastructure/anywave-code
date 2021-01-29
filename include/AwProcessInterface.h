@@ -34,7 +34,7 @@
 #include <QTranslator>
 #include <AwGlobal.h>
 class AwProcessPlugin;
-
+class AwProcessOutputWidget;
 
 
 
@@ -64,10 +64,12 @@ public:
 	inline int flags() { return m_flags; }
 	inline void setFlags(int flags) { m_flags = flags; }
 	inline int inputFlags() { return m_inputFlags; }
+	inline int modifiersFlags() { return m_modifiersFlags; }
 	inline void setInputFlags(int flags) { m_inputFlags = flags; }
+	inline void setInputModifiers(int flags) { m_modifiersFlags = flags; }
+	inline void addModifiers(int flags) { m_modifiersFlags |= flags; }
 	inline int runMode() { return m_runMode; }
 	void setRunMode(int mode) { m_runMode = mode; }
-	void setLocale(const QString& lang) { m_locale = lang; loadLanguage(); }
 	
 	/** Initializing process before starting it **/
 	virtual void init() {}
@@ -103,15 +105,11 @@ protected:
 	int m_runMode;
 	int m_flags;		// general flags for process
 	int m_inputFlags;	// Input flags;
+	int m_modifiersFlags;
 	bool m_endOfData, m_abort;
-	AwProcessPlugin *m_plugin;	
-	QMutex m_lock;
-	// language support
-	QString m_langFilePrefix;	// must hold the language prefix file for the process. Example : "h2";
-	QString m_locale;			// contains the current locale set by AnyWave
-	QTranslator m_translator;
-	void loadLanguage();
+	AwProcessPlugin *m_plugin;
 	// thread specific
+	QMutex m_lock;
 	QWaitCondition m_wcMarkersReceived;
 	QMutex m_mutexMarkersReceived;
 };
@@ -152,7 +150,7 @@ public:
 	virtual AwBaseProcess *newInstance() = 0;
 	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
 	virtual void deleteInstance(AwBaseProcess *process) { delete process;  }
-	void addLanguageTranslation(const QString& resourceFile);
+
 	inline QVariantMap& settings() { return m_settings; }
 	void setSettings(const QString& key, const QVariant& value) { m_settings[key] = value; }
 	/** Command Line specific **/
