@@ -37,7 +37,7 @@ class MFV_EXPORT MFV : public AwGUIProcess
 public:
 	MFV();
 	~MFV();
-	void run(const QStringList& args) override; // main execution entry point of the plugin
+	void run() override; // main execution entry point of the plugin
 protected:
 	MFVGUI *m_widget;
 };

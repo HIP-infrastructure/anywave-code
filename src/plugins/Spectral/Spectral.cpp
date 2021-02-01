@@ -301,6 +301,7 @@ void Spectral::run()
 		sendMessage("Something went wrong while initialising. Aborting...");
 		return;
 	}
+	pdi.input.settings[keys::output_dir] = pdi.input.settings.value(keys::data_dir);
 	compute();
 	saveResults();
 }
@@ -314,6 +315,7 @@ void Spectral::saveResults()
 {
 	auto args = pdi.input.settings;
 	QString baseFilename = args.value(keys::output_dir).toString();
+
 	if (args.contains(keys::output_prefix)) {
 		QString pref = args.value(keys::output_prefix).toString();
 		baseFilename = QString("%1/%2_").arg(baseFilename).arg(pref);

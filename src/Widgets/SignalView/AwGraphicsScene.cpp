@@ -666,7 +666,7 @@ void AwGraphicsScene::highlightChannels(const QStringList& labels)
 			auto effect = new QGraphicsColorizeEffect;
 			effect->setColor(Qt::yellow);
 			i->setGraphicsEffect(effect);
-			views().first()->ensureVisible(i);
+			views().first()->ensureVisible(i, 0, 50);
 		}
 	}
 	update();

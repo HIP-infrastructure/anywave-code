@@ -83,4 +83,6 @@ namespace keys {
 	constexpr auto channels_source_raw = "raw";
 	constexpr auto channels_source_montage = "montage";
 	constexpr auto channels_source_selection = "selection";
+	// process launched by launch process command
+	constexpr auto args = "args";
 }

@@ -111,8 +111,8 @@ public slots:
 	void enableMenus();
 //	void retranslate();
 	void launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end);
-protected slots:
-	void removeGUIProcess();
+//protected slots:
+//	void removeGUIProcess();
 signals:
 	void newMarkersAvailable(const AwMarkerList &markers);
 	void processFinished(AwProcess *process);
@@ -149,7 +149,7 @@ private:
 	QList<AwProcess *> m_activeInternals;
 	QList<AwProcess *> m_activeDisplayProcess;
 	QList<AwProcess *> m_runningProcesses;
-	QList<AwGUIProcess *> m_GUIProcesses;
+	QList<AwBaseProcess*> m_GUIProcesses;
 	QMenu *m_processMenu;	// reflects the menu populated with process that belong to the Process category
 	QMenu *m_fileMenu;		// reflects the menu populated with process that belong to the File category
 	QMenu *m_viewMenu;		// reflects the menu populated with process that belong to the View category

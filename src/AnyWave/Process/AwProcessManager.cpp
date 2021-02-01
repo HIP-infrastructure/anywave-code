@@ -96,26 +96,16 @@ void AwProcessManager::closeFile()
 		stopProcess(p);
 	
 	// clean currently running processes
-	for  (AwProcess *p : m_runningProcesses) { 
-		//if (p->isRunning())	{
-		//	p->abort();
-		//}
-		//if (p->isIdle()) {
-		//	if (p->pdi.hasOutputWidgets())
-		//		for (auto w : p->pdi.output.widgets())	{
-		//			w->close();
-		//		}
-		//	p->pdi.output.clearWidgets();
-		//}
+	for  (AwProcess *p : m_runningProcesses) 
 		p->stop();
-	}
-
-	if (m_processesWidget)
-		m_processesWidget->clear();
 
 	// GUI processess
 	for (auto gp : m_GUIProcesses)
 		gp->stop();
+
+	if (m_processesWidget)
+		m_processesWidget->clear();
+
 }
 
 
@@ -526,14 +516,12 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	 process->addModifiers(Aw::ProcessIO::modifiers::QSTMode|Aw::ProcessIO::modifiers::UserSelectedChannels|Aw::ProcessIO::modifiers::UserSelectedMarkers);
 	 if (buildProcessPDI(process) == 0)
 		 runProcess(process);
-//	 if (buildPDIForProcess(process, channels))
-//		  runProcess(process);
  }
 
 
  int AwProcessManager::buildProcessPDI(AwBaseProcess* p, AwDataManager *dm)
  {
-	 QMutexLocker lock(&m_mutex);
+//	 QMutexLocker lock(&m_mutex);
 	 AwDataManager* dataManager = dm;
 	 if (dataManager == nullptr) // no data manager instance specified means use the global instance
 		 dataManager = AwDataManager::instance();
@@ -904,6 +892,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	if (skipDataFile)
 		process->addModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 
+	// insert args in process settings
+	process->pdi.input.settings[keys::args] = args;
+
 	if (!skipDataFile) {
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
 		if (process->modifiersFlags() & Aw::ProcessIO::modifiers::RequireChannelSelection && selectedChannels.isEmpty()) {
@@ -940,28 +931,29 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 	plm->connectProcess(process);
-	AwDataServer *ds = 	AwDataServer::getInstance();
 
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
-		AwGUIProcess *p = static_cast<AwGUIProcess *>(process);
+		AwProcess* p = static_cast<AwProcess*>(process);
 		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
 		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
-			ds->openConnection(p);
+			dm->dataServer()->openConnection(process);
 			connect(p, SIGNAL(sendMarker(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 			connect(p, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
-			connect(p, SIGNAL(closed()), p, SLOT(stop()));
-			connect(this, SIGNAL(aboutToQuit()), p, SLOT(stop()));
-			connect(p, SIGNAL(aboutToBeDestroyed()), this, SLOT(removeGUIProcess()));
-			connect(p, SIGNAL(connectionClosed(AwDataClient *)), ds, SLOT(closeConnection(AwDataClient *)));
+			connect(p, SIGNAL(connectionClosed(AwDataClient *)), dm->dataServer(), SLOT(closeConnection(AwDataClient *)));
 			connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), p, SLOT(setMarkers(const AwMarkerList&)));
-			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), ds, SLOT(openConnection(AwDataClient *)));
+			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), dm->dataServer(), SLOT(openConnection(AwDataClient *)));
+			connect(p, SIGNAL(finished()), this, SLOT(handleProcessTermination()));
 		}
-		p->init(); 
-		p->run(args);
+		m_GUIProcesses << process;
+		p->init();
+#ifndef NDEBUG
+		qDebug() << "GUI Process " << process->plugin()->name << " has been started." << endl;
+#endif
+		p->run();
 	}
 	else { // AwProcess
 		AwProcess *p = static_cast<AwProcess *>(process);
@@ -986,9 +978,10 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			connect(p, SIGNAL(sendMarker(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 			connect(p, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
-			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), ds, SLOT(openConnection(AwDataClient *)));
+			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), dm->dataServer(), SLOT(openConnection(AwDataClient *)));
 			// connect the process as a client of a DataServer thread.
-			AwDataServer::getInstance()->openConnection(p);
+			//AwDataServer::getInstance()->openConnection(p);
+			dm->dataServer()->openConnection(p);
 		}
 
 		// instantiate a new AwProcessesWidget if needed
@@ -1055,31 +1048,12 @@ void AwProcessManager::unregisterProcessForDisplay(AwProcess *process)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
 
-void AwProcessManager::removeGUIProcess()
-{
-	AwGUIProcess *process = (AwGUIProcess *)sender();
-	if (process != nullptr)
-		m_GUIProcesses.removeAll(process);
-}
-
 void AwProcessManager::enableMenus()
 {
-	foreach (QAction *act, m_actions)
+	for  (QAction *act : m_actions)
 		act->setEnabled(true);
 }
 
-//void AwProcessManager::retranslate()
-//{
-//#if QT_VERSION < 5
-//	m_processMenu->setTitle(QApplication::translate("AwProcessManager", "Processes", 0, QApplication::UnicodeUTF8));
-//	if (m_fileMenu)
-//		m_fileMenu->setTitle(QApplication::translate("AwProcessManager", "Export", 0, QApplication::UnicodeUTF8));
-//#else
-//	m_processMenu->setTitle(QApplication::translate("AwProcessManager", "Processes", 0));
-//	if (m_fileMenu)
-//		m_fileMenu->setTitle(QApplication::translate("AwProcessManager", "Export", 0));
-//#endif
-//}
 
 ///
 /// startDisplayProcesses()
@@ -1168,9 +1142,7 @@ void AwProcessManager::stopProcess(AwProcess *process)
 
 void AwProcessManager::handleProcessTermination()
 {
-	AwProcess *process = (AwProcess *)sender();
-	QList<QString> keys;
-	QList<QVariant> vals;
+	AwProcess *process = static_cast<AwProcess *>(sender());
 
 	if (!process)
 		return;
@@ -1214,11 +1186,20 @@ void AwProcessManager::handleProcessTermination()
 	if (process->runMode() == AwProcessPlugin::Display) {
 		// Display process might have some virtual channels to update after they have finished.
 		emit processHasFinishedOnDisplay();
-		foreach (AwChannel *c, process->pdi.output.channels())
+		for  (AwChannel *c : process->pdi.output.channels())
 			if (c->isVirtual())	{
 				AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
 				vc->update();
 			}
+	}
+	if (process->runMode() == AwProcessPlugin::GUI) {
+		m_GUIProcesses.removeAll(process);
+		AwDataManager::instance()->dataServer()->closeConnection(process);
+		process->deleteLater();  // MUST use deleteLater here because process is a QObject that must finish to handle its event loop before being deleted.
+#ifndef NDEBUG
+		qDebug() << "handleProcessTermination() GUI process is finished. Done." << endl;
+#endif
+		return;
 	}
 
 	if (process->isIdle())	{
@@ -1267,16 +1248,14 @@ void AwProcessManager::handleProcessTermination()
 		if (!output->isEmpty())
 				emit channelsRemovedForProcess(output);
 
-		
 		// remove process from currently running list
 		m_runningProcesses.removeAll(process);
-		AwDataServer::getInstance()->closeConnection(process);
+		AwDataManager::instance()->dataServer()->closeConnection(process);
 
 		process->thread()->exit(0);
 		process->thread()->wait();
 		process->thread()->deleteLater();
 		process->plugin()->deleteInstance(process); 
-		//process->deleteLater();
 		process = NULL;
 #ifndef NDEBUG
 		qDebug() << "handleProcessTermination() process is finished. Done." << endl;
@@ -1307,10 +1286,10 @@ void AwProcessManager::executeCommand(const QVariantMap& map)
 	{
 	case AwProcessCommand::LaunchProcess:
 		// get process name
-		if (!map.contains("process"))
+		if (!map.contains("process_name"))
 			break;
 		else {
-			auto name = map.value("process").toString();
+			auto name = map.value("process_name").toString();
 			QStringList args;
 			// check for args for process
 			if (map.contains("args"))

@@ -38,7 +38,7 @@ public:
 	~H2Graphs();
 
 	static H2Graphs *instance();
-	void run(const QStringList& args) override;	// main execution entry point of the plugin
+	void run() override;	// main execution entry point of the plugin
 protected:
 	GraphManagerWidget * m_widget;
 	static H2Graphs *m_instance;

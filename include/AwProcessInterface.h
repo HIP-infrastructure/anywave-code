@@ -166,26 +166,6 @@ protected:
 	QVariantMap m_batchMap; // command line specific
 };
 
-class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess
-{
-	Q_OBJECT
-public:
-	AwGUIProcess() : AwBaseProcess() {}
-
-	/** Register a new AwProcessGUIWidget that will close/kill the process when the user closes the widget **/
-	void registerGUIWidget(AwProcessGUIWidget *widget);
-	/* Implement this method in the derived object. */
-	virtual void run(const QStringList& args = QStringList()) {  }
-
-public slots:
-	void stop() { emit aboutToBeDestroyed(); m_plugin->deleteInstance(this); }
-signals:
-	void aboutToBeDestroyed();
-	void closed();
-	
-	void connectionClosed(AwDataClient *client);
-};
-
 class AW_PROCESS_EXPORT AwProcess : public AwBaseProcess
 {
 	Q_OBJECT
@@ -236,6 +216,28 @@ protected:
 	QElapsedTimer m_timer;
 	QWaitCondition *m_wcDataReady; // pointer to global WaitCondition located in proxy data client
 	QThread *m_thread;
+};
+
+class AW_PROCESS_EXPORT AwGUIProcess : public AwProcess
+{
+	Q_OBJECT
+public:
+	AwGUIProcess() : AwProcess() {}
+
+	/** Register a new AwProcessGUIWidget that will close/kill the process when the user closes the widget **/
+	void registerGUIWidget(AwProcessGUIWidget* widget);
+
+	// override stop() slots for specific GUI usage
+public slots:
+	// GUI Process when stopped just have to emit finished(). Unline AwProcess, they have no idle or aborted states.
+	void stop() override {
+		m_status = AwProcess::Finished;
+		emit finished();  }
+signals:
+	//	void aboutToBeDestroyed();
+	void closed();
+
+	void connectionClosed(AwDataClient* client);
 };
 
 

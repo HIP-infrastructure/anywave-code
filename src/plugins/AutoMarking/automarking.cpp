@@ -47,7 +47,7 @@ AutoMarking::~AutoMarking()
 		delete m_widget;
 }
 
-void AutoMarking::run(const QStringList& args)
+void AutoMarking::run()
 {
 	if (pdi.input.markers().isEmpty()) {
 		QMessageBox::critical(0, tr("No Markers"), tr("At least one marker should be present."));

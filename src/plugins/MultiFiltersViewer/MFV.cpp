@@ -50,7 +50,7 @@ MFV::~MFV()
 }
 
 
-void MFV::run(const QStringList& args)
+void MFV::run()
 {
 	m_widget = new MFVGUI(this);
 	// register our widget to auto close the plugin when the user closes the widget

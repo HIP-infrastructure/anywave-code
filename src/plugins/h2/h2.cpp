@@ -536,11 +536,17 @@ void H2::run()
 	}
 	computeRuns();
 	if (!m_resultFiles.isEmpty()) {
-		QVariantList args;
-		args << QString("Correlation Graphs");
-		for (auto f : m_resultFiles)
-			args << f;
-		emit sendCommand(AwProcessCommand::LaunchProcess, args);
+		QVariantMap map;
+		map["command"] = AwProcessCommand::LaunchProcess;
+		map["process_name"] = QString("Correlation Graphs");
+		QStringList args = { m_resultFiles };
+		map["args"] = args;
+		emit sendCommand(map);
+		//QVariantList args;
+		//args << QString("Correlation Graphs");
+		//for (auto f : m_resultFiles)
+		//	args << f;
+		//emit sendCommand(AwProcessCommand::LaunchProcess, args);
 	}
 }
 
