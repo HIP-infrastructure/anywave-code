@@ -15,8 +15,11 @@ public:
 	~PlotWidget();
 protected slots:
 	void graphClicked(QCPAbstractPlottable*, int);
+	void updateClicked();
+	void resetClicked();
 private:
 	Ui::PlotWidget ui;
 	FFTs m_FFTs;
 	QCPTextElement* m_textBox;
+	double m_xmin, m_xmax;
 };

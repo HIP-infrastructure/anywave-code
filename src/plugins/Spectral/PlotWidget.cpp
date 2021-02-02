@@ -8,7 +8,7 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 
 	// add a row with text explanation beyond the plot
 	m_textBox = new QCPTextElement(ui.widget);
-	m_textBox->setText("Click on a signal to select it. The signal will be shown on AnyWave.\n");
+	m_textBox->setText("Click on a signal and it will be shown on AnyWave.\nUse the mousewheel to zoom on x axis.");
 	m_textBox->setFont(QFont("sans", 12, QFont::Bold));
 	ui.widget->plotLayout()->insertRow(1);
 	ui.widget->plotLayout()->addElement(1, 0, m_textBox);
@@ -39,9 +39,16 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 		decorator->setPen(QColor(Qt::red));
 	}
 	// set axes ranges, so we see all data:
+	m_xmin = 1;
+	m_xmax = length + 1;
 	ui.widget->xAxis->setRange(1, length + 1);
 	ui.widget->yAxis->setRange(min, max);
+	ui.widget->axisRect()->setRangeZoom(Qt::Horizontal);
 	connect(ui.widget, SIGNAL(plottableClick(QCPAbstractPlottable*, int, QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*, int)));
+	//ui.sbMin->setValue(1);
+	//ui.sbMax->setValue(length + 1);
+	//connect(ui.buttonUpdate, &QPushButton::clicked, this, &PlotWidget::updateClicked);
+	//connect(ui.buttonReset, &QPushButton::clicked, this, &PlotWidget::resetClicked);
 }
 
 PlotWidget::~PlotWidget()
@@ -49,6 +56,16 @@ PlotWidget::~PlotWidget()
 
 }
 
+
+void PlotWidget::updateClicked()
+{
+
+}
+
+void PlotWidget::resetClicked()
+{
+
+}
 
 void PlotWidget::graphClicked(QCPAbstractPlottable* plottable, int dataIndex)
 {

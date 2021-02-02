@@ -521,7 +521,6 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 
  int AwProcessManager::buildProcessPDI(AwBaseProcess* p, AwDataManager *dm)
  {
-//	 QMutexLocker lock(&m_mutex);
 	 AwDataManager* dataManager = dm;
 	 if (dataManager == nullptr) // no data manager instance specified means use the global instance
 		 dataManager = AwDataManager::instance();
@@ -532,9 +531,9 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	 bool getBadChannels = inputF & Aw::ProcessIO::DontSkipBadChannels;
 	 bool getMontageChannels = inputF & Aw::ProcessIO::GetCurrentMontage;
 	 bool getAsRecorded = inputF & Aw::ProcessIO::GetAsRecordedChannels;
-	 bool requireSelection = inputF & Aw::ProcessIO::modifiers::RequireChannelSelection;
-	 bool ignoreSelection = inputF & Aw::ProcessIO::modifiers::IgnoreChannelSelection;
-	 bool acceptSelection  = inputF & Aw::ProcessIO::modifiers::AcceptChannelSelection;
+	 bool requireSelection = modifiersF & Aw::ProcessIO::modifiers::RequireChannelSelection;
+	 bool ignoreSelection = modifiersF & Aw::ProcessIO::modifiers::IgnoreChannelSelection;
+	 bool acceptSelection  = modifiersF & Aw::ProcessIO::modifiers::AcceptChannelSelection;
 	 AwChannelList inputChannels;
 	 bool done = false;
 	 int status = 0;
@@ -980,7 +979,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			connect(p, SIGNAL(sendMarkers(AwMarkerList *)), mm, SLOT(addMarkers(AwMarkerList *)));
 			connect(p, SIGNAL(dataConnectionRequested(AwDataClient *)), dm->dataServer(), SLOT(openConnection(AwDataClient *)));
 			// connect the process as a client of a DataServer thread.
-			//AwDataServer::getInstance()->openConnection(p);
 			dm->dataServer()->openConnection(p);
 		}
 
