@@ -59,15 +59,15 @@
 
 AwMapWidget::AwMapWidget(QWidget *parent, int flags) : QVTK_CLASS(parent)
 {
-#if VTK_MAJOR_VERSION < 8
- 	VTK_MODULE_INIT(vtkRenderingOpenGL);
-	VTK_MODULE_INIT(vtkInteractionStyle);
-	VTK_MODULE_INIT(vtkRenderingFreeType);
-#else
+//#if VTK_MAJOR_VERSION < 8
+// 	VTK_MODULE_INIT(vtkRenderingOpenGL);
+//	VTK_MODULE_INIT(vtkInteractionStyle);
+//	VTK_MODULE_INIT(vtkRenderingFreeType);
+//#else
 	VTK_MODULE_INIT(vtkRenderingOpenGL2);
     VTK_MODULE_INIT(vtkInteractionStyle);
     VTK_MODULE_INIT(vtkRenderingFreeType);
-#endif
+//#endif
 
 	m_flags = flags;
 	m_map = NULL;
