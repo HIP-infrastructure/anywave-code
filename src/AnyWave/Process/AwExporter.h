@@ -38,17 +38,15 @@ public:
 	AwExporter();
 	~AwExporter();
 
-	bool showUi();
-	void run();
-	void runFromCommandLine();
+	bool showUi() override;
+	void run() override;
+	void runFromCommandLine() override;
 protected:
 	AwChannelList m_channels;		// channels to export
 	AwChannelList m_ICAChannels;	// ICA Channels to export
 	AwFileIOPlugin *m_ioPlugin;
 	QString m_path;
 	bool m_exportICAChannels;			// this flag indicates that the data contains ICA virtual channels
-	bool m_relabelChannels;
-	int m_decimateFactor;
 	AwMarkerList m_inputMarkers, m_outputMarkers;
 };
 

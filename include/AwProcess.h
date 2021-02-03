@@ -63,8 +63,17 @@ namespace Aw
 		namespace modifiers {
 			enum modifierFlags {
 				UserSelectedChannels = 0x1, UserSelectedMarkers = 0x2, RequireChannelSelection = 0x4, IgnoreChannelSelection = 0x8,
-				AcceptChannelSelection = 0x10, QSTMode = 0x20
+				AcceptChannelSelection = 0x10, QSTMode = 0x20, DontFilterUseSkipMarkersOptions = 0x40, UseOrSkipMarkersApplied = 0x80
 			};
+			// UserSelectedChannels is set by AnyWave if the plugin accepts channel selection AND the user has selected channels before running the process.
+			// UserSelectedMarkers is set by AnyWave if the PluginAcceptsTimeSelections is set AND the user launched the plugin using selected markers in GUI.
+			// RequireChannelSelection : if set by proces then the user MUST select channels before launching the process.
+			// IgnoreChannelSelection: if set by process, tells anywave not to take into account the selected channels when launching the process.
+			// AcceptChannelSelection: informs that the process may accept user channel selection, but it's optional.
+			// QSTMode: set by  AnyWave when the process was started using the QST Feature.
+			// DontFilterUseSkipMarkersOptions: if set, tell anywave not to filter markers with --use_markers and --skip_markers keys.
+			//     The process will have to filter the input markers by itself.
+			// UseOrSkipMarkersApplied: set by anywave (in command line mode mostly) to inform that the --use_markers and/or --skip_markers options have been processed.
 		}
 	}
 }

@@ -211,6 +211,7 @@ signals:
 	void criticalMessage(QString message);
 	void outOfMemory();		// emitted when memory allocation failed.
 protected:
+
 	int m_status;
 	qint64 m_executionTime;
 	QElapsedTimer m_timer;

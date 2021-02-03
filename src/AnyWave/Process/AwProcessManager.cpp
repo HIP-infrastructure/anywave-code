@@ -482,15 +482,17 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 		if (skipMarkers || useMarkers) {
 			auto markers = AwMarker::duplicate(p->pdi.input.markers());
 			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
+			// Set modified markers !!!
+			p->pdi.input.setModifiedMarkers(markers);
 			if (inputMarkers.isEmpty()) {
 				p->pdi.input.clearMarkers();
 				p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
 			}
-			else {
-				p->pdi.input.clearMarkers();
+			else 
 				p->pdi.input.setNewMarkers(inputMarkers);
-			}
 		}
+		// inform process we handled use or skip options on markers
+		p->addModifiers(Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied);
 		return 0;
 	}
 	return 1;
@@ -534,6 +536,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	 bool requireSelection = modifiersF & Aw::ProcessIO::modifiers::RequireChannelSelection;
 	 bool ignoreSelection = modifiersF & Aw::ProcessIO::modifiers::IgnoreChannelSelection;
 	 bool acceptSelection  = modifiersF & Aw::ProcessIO::modifiers::AcceptChannelSelection;
+	 bool ignoreUseSkip = modifiersF & Aw::ProcessIO::modifiers::DontFilterUseSkipMarkersOptions;
 	 AwChannelList inputChannels;
 	 bool done = false;
 	 int status = 0;
@@ -643,7 +646,8 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 
 	 // now processing markers. 
 	 // Markers GUI may have already set markers as input : Check the user selected markers flag
-	 if (!(p->modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers)) {
+	 if (!(p->modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers) && !ignoreUseSkip) {
+
 		 int flags = applyUseSkipMarkersKeys(p);
 
 		 bool allDataFlag = flags == 1;
@@ -961,7 +965,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				p->plugin()->deleteInstance(p); 
 				return;
 			}
-			applyUseSkipMarkersKeys(p);
+			//applyUseSkipMarkersKeys(p);
+			if (!(p->modifiersFlags() & Aw::ProcessIO::modifiers::DontFilterUseSkipMarkersOptions))
+				applyUseSkipMarkersKeys(p);
 		}
 		// create the process thread and move process object in it.
 		QThread *processThread = new QThread;
@@ -1023,6 +1029,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		qDebug() << "Process " << process->plugin()->name << " has been started." << endl;
 #endif
 }
+
 void AwProcessManager::registerProcessForDisplay(AwProcess *process)
 {
 	m_activeDisplayProcess << process;

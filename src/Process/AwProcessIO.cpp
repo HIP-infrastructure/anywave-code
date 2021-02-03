@@ -32,6 +32,7 @@ AwProcessIO::~AwProcessIO()
 {
 	clearMarkers();
 	clearChannels();
+	qDeleteAll(m_modifiedMarkers);
 }
 
 bool AwProcessIO::isEmpty()
@@ -72,6 +73,12 @@ void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
 	if (markers.isEmpty())
 		return;
 	m_markers = duplicate ? AwMarker::duplicate(markers) : markers;
+}
+
+void AwProcessIO::setModifiedMarkers(const AwMarkerList& markers)
+{
+	qDeleteAll(m_modifiedMarkers);
+	m_modifiedMarkers = markers;
 }
 
 void AwProcessIO::addChannels(const AwChannelList& channels, bool duplicate)
