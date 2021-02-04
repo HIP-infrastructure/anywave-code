@@ -26,7 +26,6 @@
 #ifndef AW_EXPORTER_H
 #define AW_EXPORTER_H
 #include <AwProcessInterface.h>
-#include <AwFileIO.h>
 #include <QtCore>
 #include <QDataStream>
 
@@ -44,8 +43,6 @@ public:
 protected:
 	AwChannelList m_channels;		// channels to export
 	AwChannelList m_ICAChannels;	// ICA Channels to export
-	AwFileIOPlugin *m_ioPlugin;
-	QString m_path;
 	bool m_exportICAChannels;			// this flag indicates that the data contains ICA virtual channels
 	AwMarkerList m_inputMarkers, m_outputMarkers;
 };

@@ -26,4 +26,4 @@
 #pragma once
 
 
-#define AW_DESTROY_LIST(L) while(!(L).isEmpty()) delete (L).takeFirst();
+#define AW_DESTROY_LIST(L) while(!(L).isEmpty()) delete (L).takeFirst(); 

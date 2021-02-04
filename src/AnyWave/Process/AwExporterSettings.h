@@ -32,13 +32,14 @@
 #include <AwMarker.h>
 #include <filter/AwFilterSettings.h>
 
+class AwProcess;
 using namespace Ui;
 class AwExporterSettings : public QDialog, public AwExporterSettingsUi
 {
 	Q_OBJECT
 
 public:
-	AwExporterSettings(QWidget *parent = 0);
+	AwExporterSettings(AwProcess* process, QWidget* parent = 0);
 	~AwExporterSettings();
 
 	QStringList writers, extensions;			// all the available writers and their extensions
@@ -63,11 +64,13 @@ protected slots:
 	void pickupFile();
 	void selectChannels();
 	void selectICAChannels();
-	void addSkipLabel();
-	void addUseLabel();
-	void clearSkip();
-	void clearUse();
+//	void addSkipLabel();
+//	void addUseLabel();
+//	void clearSkip();
+//	void clearUse();
 	void updateOutputFileExtension(int);
+protected:
+	AwProcess* m_process;
 };
 
 #endif // AWEXPORTERSETTINGS_H

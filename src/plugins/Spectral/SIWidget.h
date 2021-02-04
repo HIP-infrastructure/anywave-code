@@ -20,9 +20,7 @@ public:
 
 
 public slots:
-	//void compute();
-	//void showPlots();
-	void accept();
+	void accept() override;
 public:
 	double timeWindow, overlap;
 	QString windowing;
@@ -30,6 +28,4 @@ private:
 	void clear();
 
 	Ui::SIWidgetUi  m_ui;
-//	QMap<AwChannel*, FFTIterations*> m_results;
-//	QList<PlotWidget*> m_plotWidgets;
 };

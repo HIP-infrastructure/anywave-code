@@ -468,6 +468,7 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		// remove used markers from the list
 		for (auto m : inputMarkers)
 			markers.removeAll(m);
+
 		// revert selection using usedCut markers
 		auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
 		// reshape intersected markers using XOR

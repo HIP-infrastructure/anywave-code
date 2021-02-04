@@ -484,6 +484,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
 			// Set modified markers !!!
 			p->pdi.input.setModifiedMarkers(markers);
+			p->addModifiers(Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied);
 			if (inputMarkers.isEmpty()) {
 				p->pdi.input.clearMarkers();
 				p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
@@ -492,7 +493,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 				p->pdi.input.setNewMarkers(inputMarkers);
 		}
 		// inform process we handled use or skip options on markers
-		p->addModifiers(Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied);
+		
 		return 0;
 	}
 	return 1;

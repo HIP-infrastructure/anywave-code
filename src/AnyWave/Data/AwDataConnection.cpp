@@ -313,7 +313,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 		}
 	}
 	//cleaning up
-	for (auto chunk : chunks)
+	for (auto &chunk : chunks)
 		AW_DESTROY_LIST(chunk)
 
 	if (!doNotWakeupClient)

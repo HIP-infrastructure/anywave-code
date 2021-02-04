@@ -24,7 +24,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessIO.h"
-#include <AwCore.h>
 #include <AwKeys.h>
 #include <QWidget>
 
@@ -111,15 +110,15 @@ void AwProcessIO::addWidget(QWidget* widget)
 
 void AwProcessIO::clearChannels()
 {
-	AW_DESTROY_LIST(m_channels);
+	qDeleteAll(m_channels);
 }
 
 void AwProcessIO::clearMarkers()
 {
-	AW_DESTROY_LIST(m_markers);
+	qDeleteAll(m_markers);
 }
 
 void AwProcessIO::clearWidgets()
 {
-	AW_DESTROY_LIST(m_widgets);
+	qDeleteAll(m_widgets);
 }
