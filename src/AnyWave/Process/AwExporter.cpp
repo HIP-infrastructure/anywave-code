@@ -86,8 +86,7 @@ void AwExporter::runFromCommandLine()
 	float endTimePos = args.value(keys::file_duration).toFloat();
 	auto markers = pdi.input.markers();
 
-	// duplicate input channels before set them to writer as writer object takes ownership of channels and will destroy them 
-	writer->infos.setChannels(AwChannel::duplicateChannels(pdi.input.channels()));
+
 	AwBlock* block = writer->infos.newBlock();
 	AwMarker global("global", 0., endTimePos);
 	if (modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied) {
@@ -108,7 +107,7 @@ void AwExporter::runFromCommandLine()
 	   AwFiltering::downSample(pdi.input.channels(), decimateFactor);
 	//	// apply filters set in the UI
 	  //	pdi.input.filterSettings.apply(m_channels);
-		AwFiltering::filter(m_channels);
+		AwFiltering::filter(pdi.input.channels());
 		sendMessage("Done.");
 	}
 	else {
@@ -116,6 +115,10 @@ void AwExporter::runFromCommandLine()
 		requestData(&pdi.input.channels(), &m_inputMarkers);
 		sendMessage("Done.");
 	}
+
+	// set channels to the writer object AFTER loading and/or not downsampling
+	// duplicate input channels before set them to writer as writer object takes ownership of channels and will destroy them 
+	writer->infos.setChannels(AwChannel::duplicateChannels(pdi.input.channels()));
 
 	block->setSamples(pdi.input.channels().first()->dataSize());
 	block->setDuration((float)pdi.input.channels().first()->dataSize() / pdi.input.channels().first()->samplingRate());

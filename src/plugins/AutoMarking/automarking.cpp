@@ -55,7 +55,6 @@ void AutoMarking::run()
 		return;
 	}
 
-	//m_widget = new AwAutoMarkWidget(m_markers, pdi.input.fileDuration);
 	m_widget = new AwMarkAroundWidget;
 	m_widget->setTotalDuration(pdi.input.settings.value(keys::file_duration).toFloat());
 	m_widget->setMarkers(pdi.input.markers());

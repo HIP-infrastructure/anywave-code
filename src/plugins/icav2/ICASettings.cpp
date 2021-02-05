@@ -19,23 +19,14 @@ ICASettings::ICASettings(AwProcess *process, QWidget *parent) : QDialog(parent)
 	m_modes.removeAll("GRAD");
 	m_ui.comboModality->addItems(m_modes);
 
-	m_labels = AwMarker::getUniqueLabels(process->pdi.input.markers());
-	if (m_labels.isEmpty()) {
-		m_ui.checkIgnoreMarker->setEnabled(false);
-		m_ui.comboIgnoredMarkers->setEnabled(false);
-	    m_ui.checkIgnoreMarker->setEnabled(false);
-		m_ui.checkUseMarkers->setEnabled(false);
-	}
-	else {
-		m_ui.comboIgnoredMarkers->addItems(m_labels);
-		m_ui.comboUseMarkers->addItems(m_labels);
-	}
+	if (!process->pdi.input.markers().isEmpty())
+		m_ui.inputDataWidget->setMarkers(process->pdi.input.markers());
+	else
+		m_ui.inputDataWidget->hide();
 	connect(m_ui.cbAll, SIGNAL(toggled(bool)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(updateMaxNumOfIC()));
 	m_ui.labelTotalIC->hide();
-	//downSampling = true;
-	//infomaxExtended = false;
 	m_process = process;
 }
 
@@ -47,24 +38,23 @@ ICASettings::~ICASettings()
 
 void ICASettings::accept()
 {
-	args["skip_bad"] = m_ui.ignoreBads->isChecked();
-	bool ignore = m_ui.checkIgnoreMarker->isChecked() && m_ui.checkIgnoreMarker->isEnabled();
-	args["is_ignoring_markers"] = ignore;
-	bool use = m_ui.checkUseMarkers->isChecked() && m_ui.checkUseMarkers->isEnabled();
-	args["is_using_markers"] = use;
-	
+	args[keys::skip_bad_channels] = m_ui.ignoreBads->isChecked();
 	args["modality"] = m_modes.at(m_ui.comboModality->currentIndex());
-	if (args["is_ignoring_markers"].toBool()) 
-		args[keys::skip_markers] = QStringList(m_labels.at(m_ui.comboIgnoredMarkers->currentIndex()));
-	if (args["is_using_markers"].toBool())
-		args[keys::use_markers] = QStringList(m_labels.at(m_ui.comboUseMarkers->currentIndex()));
+	int modality = AwChannel::stringToType(args.value("modality").toString());
 
 	args[keys::lp] = m_ui.spinLPF->value();
 	args[keys::hp] = m_ui.spinHPF->value();
 	args["comp"] = m_ui.spinNC->value();
 
+	QStringList usedMarkers = m_ui.inputDataWidget->usedMarkers();
+	QStringList skippedMarkers = m_ui.inputDataWidget->skippedMarkers();
+	if (!usedMarkers.isEmpty())
+		args[keys::use_markers] = usedMarkers;
+	if (!skippedMarkers.isEmpty())
+		args[keys::skip_markers] = skippedMarkers;
+
 	// get channels matching modality
-	auto channels = AwChannel::getChannelsOfType(m_channels, AwChannel::stringToType(args["modality"].toString()));
+	auto channels = AwChannel::getChannelsOfType(m_channels, modality);
 	channels = AwChannel::removeDoublons(channels);
 	if (m_ui.ignoreBads->isChecked()) { // ignoring bad channels
 		auto badLabels = m_process->pdi.input.settings[keys::bad_labels].toStringList();
@@ -73,7 +63,6 @@ void ICASettings::accept()
 				channels.removeAll(c);
 		}
 	}
-
 
 	// check if num of components is <= number of channels
 	if (m_ui.spinNC->value() > channels.size()) {
@@ -86,43 +75,6 @@ void ICASettings::accept()
 		return;
 	}
 
-	float dataDuration = 0.;
-
-	// if use and ignore check that markers are different
-	if (use && ignore) {
-		if (m_labels.at(m_ui.comboIgnoredMarkers->currentIndex()) == m_labels.at(m_ui.comboUseMarkers->currentIndex())) {
-			QMessageBox::critical(this, "Markers", "Markers to use and skip must be different.");
-			return;
-		}
-	}
-
-	// get the file duration
-	auto fd = m_process->pdi.input.settings[keys::file_duration].toDouble();
-	if (use || ignore) {
-		auto markers = AwMarker::duplicate(m_process->pdi.input.markers());
-		QStringList skippedMarkers = args["skip_markers"].toStringList();
-		QStringList usedMarkers = args["use_markers"].toStringList();
-			
-		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
-		if (inputMarkers.isEmpty()) 
-			dataDuration = fd;
-		else {
-			for (auto m : inputMarkers) 
-				dataDuration += m->duration();
- 		}
-		AW_DESTROY_LIST(markers);
-	}
-	else 
-		dataDuration = fd;
-
-	qint64 nSamples = (qint64)floor(dataDuration * m_process->pdi.input.reader()->infos.channels().first()->samplingRate());
-	if (sqrt(nSamples / 30.) < m_ui.spinNC->value()) {
-		int res =QMessageBox::question(this, "Components", "The number of samples for the number of components requested may be insufficient.\nContinue?",
-			QMessageBox::Yes | QMessageBox::No);
-		if (res == QMessageBox::No)
-			return;
-	}
-
 	if (m_ui.spinLPF->value() == 0. && m_ui.spinHPF->value() == 0.)	{
 		int res = QMessageBox::question(this, tr("Filters"), tr("Are you sure you want to compute ICA components on raw data (no filters)?"), 
 		QMessageBox::Yes|QMessageBox::No);
@@ -130,9 +82,11 @@ void ICASettings::accept()
 			return;
 	}
 
-	//algo = m_ui.comboAlgo->currentIndex();
 	args["infomax_extended"] = m_ui.cbInfomaxExtended->isChecked();
-	args["downsampling"] = !m_ui.checkBoxDS->isChecked() && m_ui.spinLPF->value() > 0.;
+	if (m_ui.checkBoxDS->isChecked())
+		args["downsampling"] = true;
+
+	m_process->pdi.input.settings.unite(args);
 	return QDialog::accept();
 }
 

@@ -26,8 +26,6 @@
 #ifndef AW_EXPORTER_H
 #define AW_EXPORTER_H
 #include <AwProcessInterface.h>
-#include <QtCore>
-#include <QDataStream>
 
 class AwExporter : public AwProcess
 {

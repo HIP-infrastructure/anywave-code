@@ -37,19 +37,9 @@ class ICASettings : public QDialog
 	Q_OBJECT
 
 public:
-	//ICASettings(const QString& datapath, const AwChannelList& channels, const AwMarkerList& markers, const QStringList& algos, QWidget *parent = 0);
 	ICASettings(AwProcess *process, QWidget *parent = 0);
 	~ICASettings();
 
-	//bool ignoreBadChannels;
-	//bool ignoreMarkers, useMarkers;
-	//QString skipMarker, useMarker;
-	//int modality;
-	//float hpf, lpf;
-	//int components;
-	//int algo;
-	//bool downSampling;
-	//bool infomaxExtended;
 	AwArguments args;
 public slots:
 	void accept();

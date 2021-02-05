@@ -43,8 +43,10 @@
 
 ICA::ICA()
 {
-	setInputFlags(Aw::ProcessIO::GetAsRecordedChannels|Aw::ProcessIO::GetProcessPluginNames |Aw::ProcessIO::GetDurationMarkers);
+	setInputFlags(Aw::ProcessIO::GetAsRecordedChannels | Aw::ProcessIO::DontSkipBadChannels |
+		Aw::ProcessIO::GetProcessPluginNames |Aw::ProcessIO::GetDurationMarkers);
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
+	pdi.addInputChannel(-1, 1, 0);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
 	m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;
@@ -81,7 +83,6 @@ bool ICA::showUi()
 		}
 		test.close();
 		QFile::remove(testFile);
-		//pdi.input.setArguments(args);
 		pdi.input.settings.unite(ui.args);
 		return true;
 	}
@@ -100,7 +101,7 @@ int ICA::initParameters()
 {
 	auto args = pdi.input.settings;
 
-	m_isDownsamplingActive = true;
+	m_isDownsamplingActive = false;
 	m_modality = AwChannel::stringToType(args.value("modality").toString());
 	if (m_modality == -1) {
 		sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
@@ -125,8 +126,8 @@ int ICA::initParameters()
 
 	m_channels = AwChannel::removeDoublons(m_channels);
 	auto badLabels = pdi.input.settings[keys::bad_labels].toStringList();
-	if (args.contains("skip_bad")) {
-		if (!args.value("skip_bad").toBool())
+	if (args.contains(keys::skip_bad_channels)) {
+		if (!args.value(keys::skip_bad_channels).toBool())
 			badLabels.clear();
 	}
 	m_samplingRate = m_channels.first()->samplingRate();
@@ -161,35 +162,35 @@ int ICA::initParameters()
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	filterSettings.apply(m_channels);
 
-	// check if we have to use specific markers or skipped some
-	bool use = args.contains("use_markers");
-	bool skip = args.contains("skip_markers");
+	//// check if we have to use specific markers or skipped some
+	//bool use = args.contains("use_markers");
+	//bool skip = args.contains("skip_markers");
 
-	auto fd = pdi.input.settings[keys::file_duration].toDouble();
-	if (use || skip) {
-		auto markers = AwMarker::duplicate(pdi.input.markers());
-		QStringList skippedMarkers, usedMarkers;
-		if (use)
-			usedMarkers = args.value("use_markers").toStringList();
-		if (skip)
-			skippedMarkers = args.value("skip_markers").toStringList();
+	//auto fd = pdi.input.settings[keys::file_duration].toDouble();
+	//if (use || skip) {
+	//	auto markers = AwMarker::duplicate(pdi.input.markers());
+	//	QStringList skippedMarkers, usedMarkers;
+	//	if (use)
+	//		usedMarkers = args.value("use_markers").toStringList();
+	//	if (skip)
+	//		skippedMarkers = args.value("skip_markers").toStringList();
 
-		auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
-		if (inputMarkers.isEmpty()) {
-			pdi.input.clearMarkers();
-			pdi.input.addMarker(new AwMarker("whole data", 0., fd));
-		}
-		else
-		{
-			pdi.input.clearMarkers();
-			pdi.input.setNewMarkers(inputMarkers);
-		}
-		AW_DESTROY_LIST(markers);
-	}
-	else {  // no markers to use or skip => compute on the whole data
-		pdi.input.clearMarkers();
-		pdi.input.addMarker(new AwMarker("whole data", 0., fd));
-	}
+	//	auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
+	//	if (inputMarkers.isEmpty()) {
+	//		pdi.input.clearMarkers();
+	//		pdi.input.addMarker(new AwMarker("whole data", 0., fd));
+	//	}
+	//	else
+	//	{
+	//		pdi.input.clearMarkers();
+	//		pdi.input.setNewMarkers(inputMarkers);
+	//	}
+	//	AW_DESTROY_LIST(markers);
+	//}
+	//else {  // no markers to use or skip => compute on the whole data
+	//	pdi.input.clearMarkers();
+	//	pdi.input.addMarker(new AwMarker("whole data", 0., fd));
+	//}
 
 
     // Watch for memory exception
