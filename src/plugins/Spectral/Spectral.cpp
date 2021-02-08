@@ -5,7 +5,7 @@
 #include "InputMarkersDial.h"
 #include <sigpack.h>
 #ifdef MKL
-#include <fftw3.h>
+#include <fftw/fftw3.h>
 #else
 #include "fftw/fftw3.h"
 #endif

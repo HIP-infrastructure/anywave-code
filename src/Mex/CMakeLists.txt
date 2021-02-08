@@ -1,30 +1,34 @@
 
 include_directories(${Matlab_INCLUDE_DIRS})
 
-SET(QT_DIR ${QT_STATIC_DIR})
+#SET(QT_STATIC_DIR ${QT_STATIC_DIR})
 set (QT_STATIC_SUFFIX "lib/cmake")
  message(STATUS "Found qt5 dir: ${QT_DIR}")
-find_path(QT_DIR HINTS "${QT_DIR}" PATH_SUFFIXES "${QT_STATIC_SUFFIX}")
-if (NOT QT_DIR)
+find_path(QT_STATIC_DIR HINTS "${QT_STATIC_DIR}" PATH_SUFFIXES "${QT_STATIC_SUFFIX}")
+if (NOT QT_STATIC_DIR)
    message(FATAL_ERROR "Could not find static Qt5 dir")
 else()
-   message(STATUS "Found static Qt5 dir: ${QT_DIR}")
+   message(STATUS "Found static Qt5 dir: ${QT_STATIC_DIR}")
 endif()
 
-set (CMAKE_PREFIX_PATH ${QT_DIR})
+set (CMAKE_PREFIX_PATH ${QT_STATIC_DIR})
 #find_package(Qt5Core REQUIRED)
 #find_package(Qt5Network REQUIRED)
 
 # common mex lib
 add_library(mexcommon common.cpp)
 #qt5_use_modules(mexcommon Core Network)
-message(STATUS "qt static include dirs:${QT_DIR}/include/QtCore ${QT_DIR}/include/QtNetwork")
-include_directories(${QT_DIR}/include ${QT_DIR}/include/QtCore ${QT_DIR}/include/QtNetwork)
+message(STATUS "qt static include dirs:${QT_STATIC_DIR}/include/QtCore ${QT_STATIC_DIR}/include/QtNetwork")
+include_directories(${QT_STATIC_DIR}/include ${QT_STATIC_DIR}/include/QtCore ${QT_STATIC_DIR}/include/QtNetwork)
 
-SET(QT_STATIC_LIBS ${QT_DIR}/lib/libqt5core.a  ${QT_DIR}/lib/libqt5network.a ${QT_DIR}/lib/libqtpcre2.a)
-
+if(APPLE)
+SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libQt5Core.a  ${QT_STATIC_DIR}/lib/libQt5Network.a ${QT_STATIC_DIR}/lib/libqtpcre2.a)
 TARGET_LINK_LIBRARIES(mexcommon ${QT_STATIC_LIBS} "-framework IOKit -framework AppKit -framework SystemConfiguration -framework Security -lz"
     "-framework GSS") 
+else()
+SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libQt5Core.a  ${QT_STATIC_DIR}/lib/libQt5Network.a)
+TARGET_LINK_LIBRARIES(mexcommon ${QT_STATIC_LIBS})
+endif()
 
 
 #matlab_add_mex(NAME aw_getprop SRC aw_getproperties.cpp LINK_TO mexcommon AwCore)
@@ -42,6 +46,7 @@ matlab_add_mex(NAME aw_getcapture SRC aw_getcapture.cpp LINK_TO mexcommon ${QT_S
 matlab_add_mex(NAME aw_captureicapanel SRC aw_captureicapanel.cpp LINK_TO mexcommon ${QT_STATIC_LIBS}) 
 matlab_add_mex(NAME AwSendMessage SRC AwSendMessage.cpp LINK_TO mexcommon ${QT_STATIC_LIBS})
 matlab_add_mex(NAME AwIsProcessTerminated SRC AwIsProcessTerminated.cpp LINK_TO mexcommon ${QT_STATIC_LIBS})
+
 IF(NOT APPLE)
 #SET_TARGET_PROPERTIES(aw_getprop PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 SET_TARGET_PROPERTIES(aw_getdata PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
