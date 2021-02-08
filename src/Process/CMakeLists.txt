@@ -2,12 +2,13 @@
 project(AwProcess)
 add_definitions("-DAW_BUILD_PROCESS_LIB")
 
-SET(SRC AwProcessIO.cpp AwProcessLib.cpp AwProcessGUIWidget.cpp)
+SET(SRC AwProcessIO.cpp AwProcessLib.cpp AwProcessGUIWidget.cpp AwProcessOutputWidget.cpp)
 SET(HEADERS ../../include/AwProcess.h
 ../../include/AwProcessInterface.h
 ../../include/AwProcessIO.h
 ../../include/AwProcessLib.h
-../../include/process/AwProcessGUIWidget.h)
+../../include/process/AwProcessGUIWidget.h
+../../include/process/AwProcessOutputWidget.h)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 
