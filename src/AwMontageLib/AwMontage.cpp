@@ -290,6 +290,7 @@ void AwMontage::removeBadChannels(AwChannelList& channels, const QStringList& ba
 	for (auto c : tmp)
 		channels.removeAll(c);
 	qDeleteAll(tmp);
+	tmp.clear();
 }
 
 

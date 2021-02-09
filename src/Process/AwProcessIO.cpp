@@ -25,13 +25,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessIO.h"
 #include <AwKeys.h>
+#include <AwCore.h>
 #include <QWidget>
 
 AwProcessIO::~AwProcessIO()
 {
 	clearMarkers();
 	clearChannels();
-	qDeleteAll(m_modifiedMarkers);
+	AW_DESTROY_LIST(m_modifiedMarkers);
 }
 
 bool AwProcessIO::isEmpty()
@@ -76,7 +77,7 @@ void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
 
 void AwProcessIO::setModifiedMarkers(const AwMarkerList& markers)
 {
-	qDeleteAll(m_modifiedMarkers);
+	AW_DESTROY_LIST(m_modifiedMarkers);
 	m_modifiedMarkers = markers;
 }
 
@@ -110,15 +111,15 @@ void AwProcessIO::addWidget(QWidget* widget)
 
 void AwProcessIO::clearChannels()
 {
-	qDeleteAll(m_channels);
+	AW_DESTROY_LIST(m_channels);
 }
 
 void AwProcessIO::clearMarkers()
 {
-	qDeleteAll(m_markers);
+	AW_DESTROY_LIST(m_markers);
 }
 
 void AwProcessIO::clearWidgets()
 {
-	qDeleteAll(m_widgets);
+	AW_DESTROY_LIST(m_widgets);
 }
