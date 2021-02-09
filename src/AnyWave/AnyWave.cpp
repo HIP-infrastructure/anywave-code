@@ -100,15 +100,6 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	AwArguments arguments;
 	int operation = aw::commandLine::NoOperation;
 
-	try {
-		operation = aw::commandLine::doParsing(args, arguments);
-	}
-	catch (const AwException& e) {
-		std::cerr << e.errorString().toStdString();
-		quit();
-		exit(0);
-	}
-	bool isGUIMode = operation == aw::commandLine::NoOperation;
 	AwDebugLog* adl = AwDebugLog::instance();
 	adl->setParent(this);
 	adl->connectComponent("AnyWave", this);
@@ -136,6 +127,16 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	marker_manager->setParent(dm);
 	// data server must be a child of DataManager
 	AwDataServer::getInstance()->setParent(dm);
+
+	try {
+		operation = aw::commandLine::doParsing(args, arguments);
+	}
+	catch (const AwException& e) {
+		std::cerr << e.errorString().toStdString();
+		quit();
+		exit(0);
+	}
+	bool isGUIMode = operation == aw::commandLine::NoOperation;
 
 	//AwArguments arguments;
 	//int operation = aw::commandLine::NoOperation;
