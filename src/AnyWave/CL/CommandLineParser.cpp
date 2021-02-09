@@ -136,7 +136,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	auto jsonCollection = AwPluginManager::getInstance()->getBatchableArguments();
 	QStringList parameterNames;
 	QStringList flagNames;
-	for (auto json : jsonCollection) {
+	for (auto const& json : jsonCollection) {
 		QString error;
 		auto map = AwUtilities::json::mapFromJsonString(json, error);
 		if (error.isEmpty()) {
