@@ -136,6 +136,9 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	auto jsonCollection = AwPluginManager::getInstance()->getBatchableArguments();
 	QStringList parameterNames;
 	QStringList flagNames;
+	if (jsonCollection.isEmpty()) {
+		logger.sendLog("couille");
+	}
 	for (auto json : jsonCollection) {
 		QString error;
 		auto map = AwUtilities::json::mapFromJsonString(json, error);
@@ -159,6 +162,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	QMap<QString, QCommandLineOption *> mapParams;
 	QMap<QString, QCommandLineOption *> mapFlags;
 	for (auto param : parameterNames) {
+		logger.sendLog(QString("plugin argument added: %1").arg(param));
 		auto option = new QCommandLineOption(param, "plugin argument", param, QString());
 		mapParams.insert(param, option);
 		parser.addOption(*option);
