@@ -159,8 +159,11 @@ void AwSettings::createMatlabShellScript(const QString& path)
 		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
 #elif defined(Q_OS_LINUX)
-		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/AnyWave/lib:$MATLAB/bin/glnxa64" << endl;
-		stream << "export LD_LIBRARY_PATH" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86-64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/bin/glnxa64" << endl;
+		stream << "if [[ -f $MATLAB/bin/glnxa64/libexpat.1.so ]] then " << endl;
+		stream << "mv $MATLAB/bin/glnxa64/libexpat.1.so $MATLAB/bin/glnxa64/libexpat.1.so.NOFIND" << end;
+		stream << "fi" << endl;
+ 		stream << "export LD_LIBRARY_PATH" << endl;
 #endif
 		scriptFile.close();
 		emit log(QString("Sucessfully created file %1.").arg(scriptPath));
