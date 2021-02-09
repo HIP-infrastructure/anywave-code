@@ -189,7 +189,7 @@ endif()
 # Here is the trick
 ## update the environment with VIRTUAL_ENV variable (mimic the activate script)
 #set (ENV{VIRTUAL_ENV} ${PY_VENV_DIR})
-message(STATUS "Python venv is ${PY_VENV_DIR}")
+#message(STATUS "Python venv is ${PY_VENV_DIR}")
 ## change the context of the search
 #set (Python3_FIND_VIRTUALENV ONLY)
 ## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)

@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2020 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2020 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AnyWave.h"
@@ -156,7 +156,7 @@ void AnyWave::initMatlab()
 #ifdef Q_OS_LINUX
 		moduleName = "libAwMatlabSupport.so";
 		modulePath = qApp->applicationDirPath() + "/lib/" + moduleName;
-		qputenv("LD_LIBRARY_PATH", "/usr/local/MATLAB/R2018b/bin/glnxa64");
+		//qputenv("LD_LIBRARY_PATH", "/usr/local/MATLAB/R2018b/bin/glnxa64");
 #endif
 		QPluginLoader loader(modulePath);
 		QObject *module = loader.instance();
