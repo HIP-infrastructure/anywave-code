@@ -271,7 +271,7 @@ INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTIN
 # desktop
 INSTALL(FILES ${AW_RES_DIR}/linux/anywave.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
 # icon
-INSTALL(FILES ${AW_RES_DIR}/images/AnyWave.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/apps)
+INSTALL(FILES ${AW_RES_DIR}/images/AnyWave_icon.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/apps)
 # cmake
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
 # include 
