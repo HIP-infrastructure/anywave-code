@@ -1,4 +1,5 @@
 #!/bin/bash
+mkdir -p anywave-amd64/usr/local/AnyWave
 sudo cp -r /usr/local/AnyWave/* anywave-amd64/usr/local/AnyWave
 dpkg-deb --build anywave-amd64
 
