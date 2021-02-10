@@ -158,13 +158,12 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	}
 	QMap<QString, QCommandLineOption *> mapParams;
 	QMap<QString, QCommandLineOption *> mapFlags;
-	for (auto param : parameterNames) {
-		logger.sendLog(QString("plugin argument added: %1").arg(param));
+	for (auto const& param : parameterNames) {
 		auto option = new QCommandLineOption(param, "plugin argument", param, QString());
 		mapParams.insert(param, option);
 		parser.addOption(*option);
 	}
-	for (auto flag : flagNames) {
+	for (auto const& flag : flagNames) {
 		auto option = new QCommandLineOption(flag, "plugin argument flag", flag, QString());
 		mapFlags.insert(flag, option);
 		parser.addOption(*option);

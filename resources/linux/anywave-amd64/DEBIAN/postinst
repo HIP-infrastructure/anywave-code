@@ -1,0 +1,5 @@
+#!/bin/bash
+ln -fs  /usr/local/AnyWave/start_aw.sh /usr/bin/anywave
+if [[ -d /usr/share/applications ]]; then
+   cp /usr/local/AnyWave/share/applications/anywave.desktop /usr/share/applications
+fi

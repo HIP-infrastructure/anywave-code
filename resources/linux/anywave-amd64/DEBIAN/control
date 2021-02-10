@@ -1,0 +1,13 @@
+Package: anywave
+Version: 1.0
+Section: custom
+Priority: optional
+Architecture: amd64
+Essential: no
+Homepage: https://meg.univ-amu.fr/wiki/AnyWave
+Maintainer: gitlab-dynamap.timone.univ-amu.fr
+Description: AnyWave : a software for visualizing and processing EEG/SEEG/MEG/XMG data.
+Depends: libqt5charts5 (>=5.12), libqt5network5 (>=5.12), libqt5concurrent5 (>=5.12),
+  libqt5dbus5 (>=5.12), libqt5multimediawidgets5 (>=5.12), libqt5printsupport5 (>= 5.12),
+  libqt5qml5 (>= 5.12), libmatio9, libvtk7.1p-qt, libqwt-qt5-6, libqt5xml5 (>=5.12), libqcustomplot2.0
+
