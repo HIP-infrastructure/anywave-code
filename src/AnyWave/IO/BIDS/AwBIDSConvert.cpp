@@ -7,6 +7,7 @@
 #include <AwException.h>
 #include "Marker/AwExtractTriggers.h"
 #include <AwCore.h>
+#include <AwKeys.h>
 #include <montage/AwMontage.h>
 
 
@@ -272,6 +273,22 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		emit log(QString("%1 markers total.").arg(markers.size()));
 	}
 
+	if (args.contains(keys::skip_markers)) {
+		auto labels = args.value(keys::skip_markers).toStringList();
+		AwMarkerList tmp = AwMarker::getMarkersWithLabels(markers, labels);
+		for (auto t : tmp) {
+			emit log(QString("Skipped marker %1").arg(t->label()));
+			markers.removeAll(t);
+			delete t;
+		}
+	}
+	if (args.contains(keys::use_markers)) {
+		auto labels = args.value(keys::use_markers).toStringList();
+		AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
+		AW_DESTROY_LIST(markers);
+		markers = tmp;
+	}
+
 	if (createEventsTsv(events_tsv, markers) == -1 && !m_errorString.isEmpty()) {
 		emit log(m_errorString);
 	}
@@ -467,6 +484,23 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		markers += temp;
 		AwMarker::removeDoublons(markers);
 	}
+
+	if (args.contains(keys::skip_markers)) {
+		auto labels = args.value(keys::skip_markers).toStringList();
+		AwMarkerList tmp = AwMarker::getMarkersWithLabels(markers, labels);
+		for (auto t : tmp) {
+			emit log(QString("Skipped marker %1").arg(t->label()));
+			markers.removeAll(t);
+			delete t;
+		}
+	}
+	if (args.contains(keys::use_markers)) {
+		auto labels = args.value(keys::use_markers).toStringList();
+		AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
+		AW_DESTROY_LIST(markers);
+		markers = tmp;
+	}
+
 	// create events.tsv file
 	// do this after file conversion because the conversion will merge channels from .mrk file and channels inside the data file.
 	if (createEventsTsv(events_tsv, markers) == -1 && !m_errorString.isEmpty()) {
