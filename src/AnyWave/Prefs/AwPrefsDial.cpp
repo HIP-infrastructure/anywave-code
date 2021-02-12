@@ -125,6 +125,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
     
     editGARDEL->setText(qsettings.value("GARDEL/path").toString());
 	editITK->setText(qsettings.value("ITK-SNAP/path").toString());
+	radioTriggerParserOn->setChecked(aws->value(aws::auto_trigger_parsing).toBool());
 
 	// COMPILED PLUGIN. Windows do not required environments variables to be set but Linux and Mac OS X do.
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
@@ -204,6 +205,7 @@ void AwPrefsDial::accept()
 	AwSettings *aws = AwSettings::getInstance();
 	
 	saveTimeHMS(radioHMSOn->isChecked());
+	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
 
 	qsettings.setValue("py/interpreter", lineEditPythonPath->text());
 
