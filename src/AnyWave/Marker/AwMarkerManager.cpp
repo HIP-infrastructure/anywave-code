@@ -327,13 +327,16 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 // called when a file is open.
 // Loads .mrk file and also connect to BIDS to get the markers inside events.tsv file.
 // Prepares the Marker UI.
-void AwMarkerManager::setFilename(const QString& path)
+//void AwMarkerManager::setFilename(const QString& path)
+void AwMarkerManager::init()
 {
+	auto dm = AwDataManager::instance();
+//	m_filePath = path + ".mrk";
+	m_filePath = dm->mrkFilePath();
 
-	m_filePath = path + ".mrk";
 	m_ui->setEnabled(true);
 	if (QFile::exists(m_filePath)) {
-		AwWaitWidget wait("Makers");
+		AwWaitWidget wait("Markers");
 		wait.setText("Loading markers...");
 		connect(this, SIGNAL(finished()), &wait, SLOT(accept()));
 
@@ -346,27 +349,7 @@ void AwMarkerManager::setFilename(const QString& path)
 			showDockUI();
 		}
 	}
-
-	//if (QFile::exists(m_filePath))	{
-	//	m_markers = loadMarkers(m_filePath);
-	//	if (!m_markers.isEmpty()) {
-	//		m_ui->setMarkers(m_markers);
-	//		showDockUI();
-	//	}
-	//}
 }
-
-//void AwMarkerManager::checkForBIDSMods()
-//{
-//	if (AwBIDSManager::isInstantiated()) {
-//		auto bm = AwBIDSManager::instance();
-//		if (bm->isBIDSActive()) {
-//			if (AwMessageBox::question(nullptr, "BID", "Update events.tsv file?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-//				if (bm->updateEventsTsv(m_markers) != 0)
-//					emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
-//		}
-//	}
-//}
 
 void AwMarkerManager::quit()
 {

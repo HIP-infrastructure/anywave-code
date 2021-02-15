@@ -67,6 +67,7 @@ namespace aws {
 	constexpr auto system_path = "system_path";
 	constexpr auto recent_files = "recent_files";
 	constexpr auto recent_bids = "recent_bids";
+	constexpr auto username = "username";
 	constexpr auto auto_trigger_parsing = "auto_trigger_parsing";
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
@@ -141,9 +142,9 @@ protected:
 	QVariantMap m_settings;
 	
 	QList<AwFileIO *> m_readers;
-	QStringList m_languages;			// list of available languages
-	QString m_language;					// current language
-	QStringList m_locales;				// locales strings 
+	//QStringList m_languages;			// list of available languages
+	//QString m_language;					// current language
+	//QStringList m_locales;				// locales strings 
 
 	AwFileIO *m_currentReader;
 	AwDisplaySetup *m_setup;

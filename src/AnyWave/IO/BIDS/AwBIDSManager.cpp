@@ -18,7 +18,7 @@
 #include <widget/AwWaitWidget.h>
 #include <QtConcurrent>
 #include <montage/AwMontage.h>
-
+#include "Prefs/AwSettings.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
@@ -855,6 +855,20 @@ QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * it
 	return outputPath;
 }
 
+void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
+{
+	// build the path corresponding to the current file in derivatives
+	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	QFileInfo fi(relativePath);
+	auto userName = AwSettings::getInstance()->value(aws::username).toString();
+
+	QString path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	QDir dir;
+	dir.mkpath(path);
+
+
+}
+
 void AwBIDSManager::findItem(const QString& filePath)
 {
 	m_currentOpenItem = nullptr;
@@ -863,7 +877,12 @@ void AwBIDSManager::findItem(const QString& filePath)
 	if (m_hashItemFiles.contains(QDir::toNativeSeparators(filePath)))
 		m_currentOpenItem = m_hashItemFiles.value(QDir::toNativeSeparators(filePath));
 	m_ui->showItem(m_currentOpenItem);
+
+	// check for user in derivatives/anywave
+	initAnyWaveDerivativesForFile(filePath);
 }
+
+
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {

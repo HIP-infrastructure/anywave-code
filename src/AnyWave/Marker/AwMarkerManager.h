@@ -62,7 +62,8 @@ public:
 	void closeFile();
 	void quit();
 	/** setFilename will initizalize Markers Ui and try to import previously saved marker file. **/
-	void setFilename(const QString& path);
+	//void setFilename(const QString& path);
+	void init();
 
 	void removeDuplicates();
 public slots:

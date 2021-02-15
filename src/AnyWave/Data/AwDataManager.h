@@ -45,6 +45,7 @@ class AwDataManager : public QObject
 public:
 	static AwDataManager* instance();
 	static AwDataManager* newInstance();
+	friend class AwBIDSManager;
 
 	enum Status { NoError = AwFileIO::NoError, FormatError = AwFileIO::WrongFormat, HeaderError = AwFileIO::BadHeader, 
 		FileAccessError = AwFileIO::FileAccess, NoPluginFound };
@@ -72,7 +73,7 @@ public:
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QVariantMap& settings() { return m_settings; }
 	inline int status() { return m_status; }
-	//void threadedOpenFile(const QString& filePath) { openFile(filePath, false); emit finished(); }
+
 	inline QString& errorString() { return m_errorString; }
 signals:
 	void finished();  // used for threading operations (only when opening file in GUI mode at present)

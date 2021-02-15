@@ -139,28 +139,9 @@ void AnyWave::openFile(const QString &path)
 
 	closeFile();
 	auto dataManager = AwDataManager::instance();
-
-//	AwWaitWidget wait("Open File");
-//	wait.setText("Opening file and loading markers...");
-//	connect(dataManager, &AwDataManager::finished, &wait, &QDialog::accept);
-//	auto openFileFunction = [dataManager](const QString& path, bool gui) { dataManager->openFile(path, gui); };
-//	auto thread = dataManager->threadedOpenFile(filePath);
-//	wait.exec();
-//	wait.run(openFileFunction(filePath, false));
-//	thread.join();
-	//using namespace std::placeholders;
-	//auto f = std::bind(&AwDataManager::threadedOpenFile, dataManager, _1);
-//	wait.run<AwDataManager,  const QString&>(dataManager, &AwDataManager::threadedOpenFile,  filePath);  // bind a void method without parameters. The method must emit finished signals when finished.
-	
 	
 	int res = dataManager->openFile(filePath);
-//	int res = dataManager->status();
-	// A t on un plugin capable de lire le fichier selectionne ?
 	if (res) {
-		//if (res == AwDataManager::NoPluginFound) {
-		//	QMessageBox::critical(this, "Error Opening File", "No reader module is able to open the file.", QMessageBox::Discard);
-		//	return;
-		//}
 		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
 	}
@@ -170,29 +151,6 @@ void AnyWave::openFile(const QString &path)
 	if (reader->flags() & FileIO::TriggerChannelIsWritable)
 		connect(reader, SIGNAL(triggerValuesWritten(bool, int)), this, SLOT(displayReaderTriggerStatus(bool, int)));
 	
-	//int res = newReader->openFile(filePath);
-
-	//if (res != AwFileIO::NoError) {
-	//	QString resString = newReader->errorMessage();
-
-	//	if (resString.isEmpty()) {
-	//		switch (res) {
-	//		case AwFileIO::BadHeader:
-	//			resString = tr("Invalid header information");
-	//			break;
-	//		case AwFileIO::FileAccess:
-	//			resString = tr("Can't open the file.\nCheck rights on file.");
-	//			break;
-	//		case AwFileIO::WrongFormat:
-	//			resString = tr("File format is invalid.\nCheck that extension matches format.");
-	//			break;
-	//		}
-	//	}
-	//	QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
-	//	return;
-	//}
-
-
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
 	m_saveFileName.clear();
 
