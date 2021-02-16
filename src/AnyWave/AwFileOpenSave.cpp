@@ -27,7 +27,6 @@
 #include "Display/AwVideoManager.h"
 #include <widget/AwVideoPlayer.h>
 #include "Data/AwDataManager.h"
-//#include <widget/AwWaitWidget.h>
 
 //
 // Menu File->Open
@@ -141,7 +140,7 @@ void AnyWave::openFile(const QString &path)
 	auto dataManager = AwDataManager::instance();
 	
 	int res = dataManager->openFile(filePath);
-	if (res) {
+	if (res == -1) {
 		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
 	}
@@ -177,11 +176,15 @@ void AnyWave::openFile(const QString &path)
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 	ds->setParent(this);
 
-	// check if file belongs to a BIDS structure:
-	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
-	if (!root.isEmpty()) {
-		openBIDS(root);
-		AwBIDSManager::instance()->newFile(dataManager->reader());
+	//// check if file belongs to a BIDS structure:
+	//QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	//if (!root.isEmpty()) {
+	//	openBIDS(root);
+	//	AwBIDSManager::instance()->newFile(dataManager->reader());
+	//}
+
+	if (res == 1) {  // Data Manager just detected a BIDS file
+		openBIDS(dataManager->bidsDir());
 	}
 
 	// Activer les QWidgets des toolbars.
@@ -204,7 +207,7 @@ void AnyWave::openFile(const QString &path)
 	}
 
 	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
-	AwAmplitudeManager::instance()->setFilename(fileName);
+	AwAmplitudeManager::instance()->setFilename(dataManager->levelFilePath());
 
 	if (openWithDialog)
 		aws->addRecentFilePath(filePath);
@@ -267,13 +270,13 @@ void AnyWave::openBIDS()
 
 void AnyWave::openBIDS(const QString& path)
 {
-	if (!AwBIDSManager::isInstantiated()) {
+//	if (!AwBIDSManager::isInstantiated()) {
 		AwBIDSManager::instance()->setRootDir(path);
 		connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
 		connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), 	this, SLOT(on_actionCreate_batch_script_triggered()));
-	}
-	else
-		AwBIDSManager::instance()->setRootDir(path);
+//	}
+//	else
+//		AwBIDSManager::instance()->setRootDir(path);
 	// instantiate dock widget if needed
 	auto dock = m_dockWidgets.value("BIDS");
 	if (dock == NULL) {

@@ -47,7 +47,8 @@ public:
 	inline AwDisplaySetup* currentSetup() { return m_currentSetup; }
 	inline QStringList& loadedSetups() { return m_loadedSetups; }
 	QToolBar *toolBar();
-	void setFilename(const QString& path);
+//	void setFilename(const QString& path);
+	void  init(); //called when a file is open
 public slots:
 	/** change Display Setup Path (should be called only once when AnyWave starts **/
 	void changeSetupDir(const QString& path) { m_setupDir = path; }

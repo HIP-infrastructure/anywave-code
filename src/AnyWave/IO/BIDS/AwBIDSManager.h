@@ -152,6 +152,7 @@ protected:
 	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
 
 	void initAnyWaveDerivativesForFile(const QString& filePath);
+	void moveSidecarFilesToDerivatives(const QString&, const QString&);
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)

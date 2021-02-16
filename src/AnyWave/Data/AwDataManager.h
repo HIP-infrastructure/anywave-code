@@ -60,6 +60,7 @@ public:
 	inline AwMontageManager* montageManager() { return m_montageManager; }
 	inline AwMarkerManager* markerManager() { return m_markerManager; }
 	inline AwDataServer* dataServer() { return m_dataServer; }
+	void applyFilters(const AwChannelList& channels);
 	// convenience methods
 	inline bool isFileOpen() { return m_reader != nullptr; }
 	inline QString dataDir() { return m_settings.value(keys::data_dir).toString(); }
@@ -67,14 +68,19 @@ public:
 	inline QString dataFilePath() { return m_settings.value(keys::data_path).toString(); }
 	inline bool canWriteTriggers() { return m_settings.value(keys::can_write_triggers).toBool(); }
 	inline QString selFilePath() { return m_settings.value(keys::sel_file).toString(); }
+	inline QString levelFilePath() { return m_settings.value(keys::lvl_file).toString(); }
 	inline QString badFilePath() { return m_settings.value(keys::bad_file).toString(); }
 	inline QString fltFilePath() { return m_settings.value(keys::flt_file).toString(); }
 	inline QString mtgFilePath() { return m_settings.value(keys::montage_file).toString(); }
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
+	inline QString dispFilePath() { return m_settings.value(keys::disp_file).toString(); }
+	QString bidsDir();
 	inline QVariantMap& settings() { return m_settings; }
 	inline int status() { return m_status; }
 
 	inline QString& errorString() { return m_errorString; }
+
+	void setNewRootDirForSideFiles(const QString& dir);
 signals:
 	void finished();  // used for threading operations (only when opening file in GUI mode at present)
 public slots:

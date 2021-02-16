@@ -10,7 +10,6 @@
 #include <AwKeys.h>
 #include <montage/AwMontage.h>
 
-
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
 	AwDebugLog::instance()->connectComponent(QString("BIDSManager"), this, QString("toBIDS"));
@@ -103,6 +102,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		emit log(QString("Could not open the file %1").arg(filePath));
 		return -1;
 	}
+
 	auto outputDir = args["output_dir"].toString();
 	bool headshapeExists = false;
 

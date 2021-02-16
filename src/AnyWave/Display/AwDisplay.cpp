@@ -690,15 +690,14 @@ void AwDisplay::setChannels(const AwChannelList &montage)
 	emit displayedChannelsChanged(completeList);
 }
 
-void AwDisplay::newFile(AwFileIO *reader)
+//void AwDisplay::newFile(AwFileIO *reader)
+void AwDisplay::newFile()
 {
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
-	auto path = reader->fullPath();
-	ds->setFilename(reader->fullPath());
-	//m_reader = reader;
+//	auto path = reader->fullPath();
+//	ds->setFilename(reader->fullPath());
 	
-	foreach(AwSignalView * v, m_signalViews)
-		//v->enableView(reader);
+	for (AwSignalView * v : m_signalViews)
 		v->enableView();
 
 	setChannels(AwMontageManager::instance()->channels());
