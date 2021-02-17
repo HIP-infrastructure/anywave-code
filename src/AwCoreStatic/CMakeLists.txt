@@ -13,6 +13,7 @@ else()
 endif()
 
 set (CMAKE_PREFIX_PATH ${QT_STATIC_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${QT_STATIC_DIR}}/lib/cmake")
 IF(APPLE)
 SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libQt5Core.a  ${QT_STATIC_DIR}/lib/libQt5Network.a ${QT_STATIC_DIR}/lib/libqtpcre2.a)
 ELSE()
