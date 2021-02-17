@@ -103,6 +103,9 @@ AwSettings::AwSettings(QObject *parent)
 
 	//Save system path
 	m_settings[aws::system_path] = QString(qgetenv("PATH"));
+
+	// get username
+	m_settings[aws::username] = qgetenv("USERNAME");
 }
 
 AwSettings::~AwSettings()

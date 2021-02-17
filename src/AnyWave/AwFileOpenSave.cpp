@@ -27,7 +27,6 @@
 #include "Display/AwVideoManager.h"
 #include <widget/AwVideoPlayer.h>
 #include "Data/AwDataManager.h"
-//#include <widget/AwWaitWidget.h>
 
 //
 // Menu File->Open
@@ -139,28 +138,9 @@ void AnyWave::openFile(const QString &path)
 
 	closeFile();
 	auto dataManager = AwDataManager::instance();
-
-//	AwWaitWidget wait("Open File");
-//	wait.setText("Opening file and loading markers...");
-//	connect(dataManager, &AwDataManager::finished, &wait, &QDialog::accept);
-//	auto openFileFunction = [dataManager](const QString& path, bool gui) { dataManager->openFile(path, gui); };
-//	auto thread = dataManager->threadedOpenFile(filePath);
-//	wait.exec();
-//	wait.run(openFileFunction(filePath, false));
-//	thread.join();
-	//using namespace std::placeholders;
-	//auto f = std::bind(&AwDataManager::threadedOpenFile, dataManager, _1);
-//	wait.run<AwDataManager,  const QString&>(dataManager, &AwDataManager::threadedOpenFile,  filePath);  // bind a void method without parameters. The method must emit finished signals when finished.
-	
 	
 	int res = dataManager->openFile(filePath);
-//	int res = dataManager->status();
-	// A t on un plugin capable de lire le fichier selectionne ?
-	if (res) {
-		//if (res == AwDataManager::NoPluginFound) {
-		//	QMessageBox::critical(this, "Error Opening File", "No reader module is able to open the file.", QMessageBox::Discard);
-		//	return;
-		//}
+	if (res == -1) {
 		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
 	}
@@ -170,29 +150,6 @@ void AnyWave::openFile(const QString &path)
 	if (reader->flags() & FileIO::TriggerChannelIsWritable)
 		connect(reader, SIGNAL(triggerValuesWritten(bool, int)), this, SLOT(displayReaderTriggerStatus(bool, int)));
 	
-	//int res = newReader->openFile(filePath);
-
-	//if (res != AwFileIO::NoError) {
-	//	QString resString = newReader->errorMessage();
-
-	//	if (resString.isEmpty()) {
-	//		switch (res) {
-	//		case AwFileIO::BadHeader:
-	//			resString = tr("Invalid header information");
-	//			break;
-	//		case AwFileIO::FileAccess:
-	//			resString = tr("Can't open the file.\nCheck rights on file.");
-	//			break;
-	//		case AwFileIO::WrongFormat:
-	//			resString = tr("File format is invalid.\nCheck that extension matches format.");
-	//			break;
-	//		}
-	//	}
-	//	QMessageBox::critical(this, tr("Error Opening File"), resString, QMessageBox::Discard);
-	//	return;
-	//}
-
-
 	// nouveau fichier ouvert => on remet a zero le saveFileName.
 	m_saveFileName.clear();
 
@@ -219,11 +176,15 @@ void AnyWave::openFile(const QString &path)
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 	ds->setParent(this);
 
-	// check if file belongs to a BIDS structure:
-	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
-	if (!root.isEmpty()) {
-		openBIDS(root);
-		AwBIDSManager::instance()->newFile(dataManager->reader());
+	//// check if file belongs to a BIDS structure:
+	//QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	//if (!root.isEmpty()) {
+	//	openBIDS(root);
+	//	AwBIDSManager::instance()->newFile(dataManager->reader());
+	//}
+
+	if (res == 1) {  // Data Manager just detected a BIDS file
+		openBIDS(dataManager->bidsDir());
 	}
 
 	// Activer les QWidgets des toolbars.
@@ -246,7 +207,7 @@ void AnyWave::openFile(const QString &path)
 	}
 
 	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
-	AwAmplitudeManager::instance()->setFilename(fileName);
+	AwAmplitudeManager::instance()->setFilename(dataManager->levelFilePath());
 
 	if (openWithDialog)
 		aws->addRecentFilePath(filePath);
@@ -309,13 +270,13 @@ void AnyWave::openBIDS()
 
 void AnyWave::openBIDS(const QString& path)
 {
-	if (!AwBIDSManager::isInstantiated()) {
+//	if (!AwBIDSManager::isInstantiated()) {
 		AwBIDSManager::instance()->setRootDir(path);
 		connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
 		connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), 	this, SLOT(on_actionCreate_batch_script_triggered()));
-	}
-	else
-		AwBIDSManager::instance()->setRootDir(path);
+//	}
+//	else
+//		AwBIDSManager::instance()->setRootDir(path);
 	// instantiate dock widget if needed
 	auto dock = m_dockWidgets.value("BIDS");
 	if (dock == NULL) {

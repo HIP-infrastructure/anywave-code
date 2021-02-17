@@ -34,6 +34,7 @@ namespace keys {
 	constexpr auto samples = "samples";
 	constexpr auto data_path = "data_path";
 	constexpr auto data_dir = "data_dir";
+	constexpr auto data_file = "data_file";
 	constexpr auto can_write_triggers = "can_write_triggers";
 	// AnyWave sidecar files
 	constexpr auto montage_file = "montage_file";   // path to .mtg file
@@ -41,6 +42,9 @@ namespace keys {
 	constexpr auto bad_file = "bad_file";			// path to .bad file
 	constexpr auto sel_file = "sel_file";			// path to .sel file (channel selection)
 	constexpr auto flt_file = "flt_file";			// path to .flt file (filters)
+	constexpr auto lvl_file = "lvl_file";			// path to .levels (amplitude)
+	constexpr auto disp_file = "disp_file";			// path to .display file (display setup)
+	constexpr auto bids_dir = "bids_dir";			// set when in BIDS mode => path to anywave derivatices for the current open file
 
 	constexpr auto file_duration = "file_duration";
 	constexpr auto bad_labels = "bad_labels";

@@ -18,7 +18,8 @@
 #include <widget/AwWaitWidget.h>
 #include <QtConcurrent>
 #include <montage/AwMontage.h>
-
+#include "Prefs/AwSettings.h"
+#include "Data/AwDataManager.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
@@ -855,6 +856,79 @@ QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * it
 	return outputPath;
 }
 
+
+
+
+void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
+{
+	// build the path corresponding to the current file in derivatives
+	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	QFileInfo fi(relativePath);
+	auto userName = AwSettings::getInstance()->value(aws::username).toString();
+
+	QString path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	QDir dir;
+	dir.mkpath(path);
+	
+	// get filename
+	auto dm = AwDataManager::instance();
+	auto fileName = dm->value(keys::data_file).toString();
+	auto basePath = QString("%1/%2/%3").arg(m_rootDir).arg(relativePath).arg(fileName);
+
+	// get .mrk if any
+	auto srcFile = dm->mrkFilePath();
+	auto destFile = QString("%1/%2.mrk").arg(path).arg(fileName);
+	bool fileExists = QFile::exists(srcFile);
+	bool destExists = QFile::exists(destFile);
+	if (fileExists && !destExists) {
+		QFile::copy(srcFile, destFile);
+		QFile::remove(srcFile);
+	}
+	if (fileExists && destExists) {
+		// avoid loosing markers: load the both file in memory, remove doublon and save it.
+		auto srcMarkers = AwMarker::load(srcFile);
+		srcMarkers += AwMarker::load(destFile);
+		AwMarker::removeDoublons(srcMarkers);
+		QFile::remove(destFile);
+		AwMarker::save(destFile, srcMarkers);
+		QFile::remove(srcFile);
+	}
+
+	// move mtg file if any
+	srcFile = dm->mtgFilePath();
+	destFile = QString("%1/%2.mtg").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->value(keys::disp_file).toString();
+	destFile = QString("%1/%2.display").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->value(keys::lvl_file).toString();
+	destFile = QString("%1/%2.levels").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->badFilePath();
+	destFile = QString("%1/%2.bad").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->value(keys::flt_file).toString();
+	destFile = QString("%1/%2.flt").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+
+	AwDataManager::instance()->setNewRootDirForSideFiles(path);
+}
+
+void AwBIDSManager::moveSidecarFilesToDerivatives(const QString& src, const QString& dest)
+{
+	bool fileExists = QFile::exists(src);
+	bool destExists = QFile::exists(dest);
+	if (fileExists && !destExists) {
+		QFile::copy(src, dest);
+		QFile::remove(src);
+	}
+	if (fileExists && destExists) {
+		QFile::remove(dest);
+		QFile::copy(src, dest);
+		QFile::remove(src);
+	}
+}
+
 void AwBIDSManager::findItem(const QString& filePath)
 {
 	m_currentOpenItem = nullptr;
@@ -863,20 +937,28 @@ void AwBIDSManager::findItem(const QString& filePath)
 	if (m_hashItemFiles.contains(QDir::toNativeSeparators(filePath)))
 		m_currentOpenItem = m_hashItemFiles.value(QDir::toNativeSeparators(filePath));
 	m_ui->showItem(m_currentOpenItem);
+
+	// check for user in derivatives/anywave
+	initAnyWaveDerivativesForFile(filePath);
 }
+
+
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
 	// check if the new file is in a BIDS structure or not
 	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
-	if (!isBIDSActive() && !root.isEmpty()) {
-		if (AwMessageBox::question(nullptr, "BIDS", "The file open is located inside a BIDS structure.\nOpen the BIDS aswell?",
-			QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+
+	// open BIDS dont ask anymore ( 16/02/2021)
+	//if (!isBIDSActive() && !root.isEmpty()) {
+	//	if (AwMessageBox::question(nullptr, "BIDS", "The file open is located inside a BIDS structure.\nOpen the BIDS as well?",
+	//		QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+	if (!root.isEmpty()) {
 			closeBIDS();
 			setRootDir(root);
 			findItem(reader->fullPath());
 			return;
-		}
+		//}
 	}
 	if (root.isEmpty()) {
 		closeBIDS(); // close current BIDS

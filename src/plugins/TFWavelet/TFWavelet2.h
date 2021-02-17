@@ -15,7 +15,7 @@ public:
 	~TFWavelet2();
 	enum Wavelet { Gabor, Morlay};
 
-	void run(const QStringList& args);	// main execution entry point of the plugin
+	void run() override;	// main execution entry point of the plugin
 public slots:
 	void addMarker(AwMarker *m) {
 		emit sendMarker(m); pdi.input.addMarker(m); m_widget->signalView()->setMarkers(pdi.input.markers()); m_widget->updateBaselineOptions();

@@ -58,7 +58,8 @@ public:
 	AwChannelList selectedChannels();
 	inline QToolBar *toolBar() { return m_toolBar; }
 
-	void newFile(AwFileIO *reader);
+	//void newFile(AwFileIO *reader);
+	void newFile(); // called when a file is open
 	void closeFile();
 	void quit();
 	void setAddMarkerDock(QDockWidget *dock);

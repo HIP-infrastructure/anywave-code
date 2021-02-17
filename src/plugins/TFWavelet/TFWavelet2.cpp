@@ -24,7 +24,7 @@ TFWavelet2::~TFWavelet2()
 }
 
 
-void TFWavelet2::run(const QStringList& args)
+void TFWavelet2::run()
 {
 	// open settings ui at first
 	// init freq max to be sampling rate / 2

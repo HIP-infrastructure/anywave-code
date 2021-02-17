@@ -35,6 +35,7 @@
 #include <QSettings>
 #include "Widgets/AwDisplaySetupToolBar.h"
 #include "AwDSMSaveSetupUI.h"
+#include "Data/AwDataManager.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Static
@@ -97,12 +98,20 @@ AwDisplaySetupManager::~AwDisplaySetupManager()
 
 QToolBar *AwDisplaySetupManager::toolBar() { return m_toolBar->toolBar(); }
 
+//
+//void AwDisplaySetupManager::setFilename(const QString &path)
+//{
+////	m_setupPath = path + ".display";
+//
+//	if (QFile::exists(m_setupPath))
+//		loadSetup(m_setupPath);
+//}
 
-void AwDisplaySetupManager::setFilename(const QString &path)
+void AwDisplaySetupManager::init()
 {
-	m_setupPath = path + ".display";
+	m_setupPath = AwDataManager::instance()->dispFilePath();
 
-	if (QFile::exists(m_setupPath))
+	if (QFile::exists(m_setupPath)) 
 		loadSetup(m_setupPath);
 }
 

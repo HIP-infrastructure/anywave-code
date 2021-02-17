@@ -138,6 +138,8 @@ void AwMontageManager::clearICA()
 			m_channels.removeAll(c);
 			delete c;
 		}
+	// warn views about new montage
+	emit montageChanged(m_channels);
 }
 
 void AwMontageManager::clearSource(int type)
@@ -156,6 +158,8 @@ void AwMontageManager::clearSource(int type)
 			m_channels.removeAll(c);
 			delete c;
 		}
+	// warn views about new montage
+	emit montageChanged(m_channels);
 }
 
 void AwMontageManager::addNewSources(int type)
@@ -261,9 +265,6 @@ AwMontageManager::AwMontageManager()
 		m_quickMontagesHT.insert(key, m_path + "/" + files.value(i));
 	}
 	std::sort(m_quickMontages.begin(), m_quickMontages.end());
-
-	// connect to filter settings
-//	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMontageManager::setNewFilters);
 
 	AwDebugLog::instance()->connectComponent("Montage Manager", this);
 }
@@ -384,7 +385,6 @@ void AwMontageManager::closeFile()
 			if (bm->updateChannelsTsvBadChannels(m_badChannelLabels) != 0 && !bm->lastError().isEmpty()) {
 				AwMessageBox::information(nullptr, "BIDS", bm->lastError());
 			}
-			//checkForBIDSMods();
 	}
 			
 	clear();
@@ -410,14 +410,17 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	// check for .bad file
 	m_badChannelLabels.clear();
-	m_badPath = reader->infos.badFile();
+//	m_badPath = reader->infos.badFile();
+	m_badPath = AwDataManager::instance()->badFilePath();
 	if (QFile::exists(m_badPath))
 		loadBadChannels();
 	
 
-	QFileInfo fi(reader->fullPath());
+//	QFileInfo fi(reader->fullPath());
 	// check for local montages.
-	scanForMontagesInDirectory(fi.absolutePath());
+//	scanForMontagesInDirectory(fi.absolutePath());
+	scanForMontagesInDirectory(AwDataManager::instance()->dataDir());
+	scanForMontagesInDirectory(AwDataManager::instance()->bidsDir());
 
 	// get bids channels tsv if we are in BIDS mode
 	// consider it the default montage.
@@ -465,7 +468,10 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	// check for .montage file
 	// BEWARE: if a .mtg exists, it will override the default TSV montage
-	m_montagePath = reader->infos.mtgFile();
+	auto dm = AwDataManager::instance();
+	m_montagePath = dm->mtgFilePath();
+
+//	m_montagePath = reader->infos.mtgFile();
 	if (QFile::exists(m_montagePath))  {
 		if (!loadMontage(m_montagePath)) {
 

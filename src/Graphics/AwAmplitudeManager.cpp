@@ -217,7 +217,7 @@ void AwAmplitudeManager::setAmplitude(int type, float value)
 void AwAmplitudeManager::setFilename(const QString &path)
 {
 	// name the amplitude path based on data file path passed as parameter
-	m_filePath = path + ".levels";
+	m_filePath = path;
 	
 	if (QFile::exists(m_filePath))
 		load();

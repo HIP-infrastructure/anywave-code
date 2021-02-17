@@ -20,15 +20,15 @@
 #include <AwKeys.h>
 #include <QProcess>
 #include <QtConcurrent>
-//#include "AwBIDSProxyModel.h"
+
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
 	m_ui.setupUi(this);
 	m_bids = AwBIDSManager::instance();
 	m_ui.leDIR->setText(m_bids->rootDir());
-	//m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
-	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
+	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	m_ui.treeView->resizeColumnToContents(0);
 	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
 	connect(m_ui.treeView, &QTreeView::clicked, this, &AwBIDSGUI::handleClick);
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -114,7 +114,7 @@ void AwBIDSGUI::contextMenuRequested(const QPoint& point)
 	// 
 	bool enableBatchProcess = false;
 	QStringList niftiFiles;
-	for (auto index : indexes) {
+	for (auto const& index : indexes) {
 		if (index.column() == 0) {
 			auto item = m_model->itemFromIndex(index);
 			auto type = item->data(AwBIDSItem::TypeRole).toInt();
@@ -179,7 +179,7 @@ void AwBIDSGUI::addToProcessing()
 	// get selected items 
 	auto indexes = m_ui.treeView->selectionModel()->selectedIndexes();
 	AwBIDSItems items;
-	for (auto index : indexes) {
+	for (auto const& index : indexes) {
 		if (index.column() == 0) {
 			auto item = static_cast<AwBIDSItem *>(m_model->itemFromIndex(index));
 			auto itemType = item->data(AwBIDSItem::TypeRole).toInt();

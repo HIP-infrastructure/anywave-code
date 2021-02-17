@@ -457,14 +457,14 @@ void AnyWave::quit()
 {
 	AwDebugLog::instance()->closeFile();
 
-	//for (auto w : m_openWidgets)
-	//	w->close();
 	AwSettings::getInstance()->closeFile();
 	// stop MATPy server if running
 	if (AwMATPyServer::isRunning()) {
 		AwMATPyServer::instance()->stop();
 		delete AwMATPyServer::instance();
 	}
+
+	AwDataManager::instance()->closeFile();
 
 	AwMontageManager::instance()->quit();
 	AwAmplitudeManager::instance()->quit();
@@ -931,9 +931,9 @@ void AnyWave::openPluginHelpUrl()
 void AnyWave::readSettings()
 {
 	QSettings settings;
-//	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
+	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
 	QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
-//	restoreState(stateData);
+	restoreState(stateData);
 	restoreGeometry(geometryData);
 }
 
@@ -944,7 +944,7 @@ void AnyWave::writeSettings()
 {
 	QSettings settings;
 	// Write the values to disk in categories.
-//	settings.setValue("state/mainWindowState", saveState());
+	settings.setValue("state/mainWindowState", saveState());
 	settings.setValue("geometry/mainWindowGeometry", saveGeometry());
 }
 
