@@ -4,19 +4,21 @@ project(AwCoreStatic)
 add_definitions("-DAW_USE_CORE_STATIC")
 #SET(QT_DIR ${QT_STATIC_DIR})
 set (QT_STATIC_SUFFIX "lib/cmake")
- message(STATUS "Found static qt5 dir: ${QT_STATIC_DIR}")
+
 find_path(QT_STATIC_DIR HINTS "${QT_STATIC_DIR}" PATH_SUFFIXES "${QT_STATIC_SUFFIX}")
 if (NOT QT_STATIC_SUFFIX)
    message(FATAL_ERROR "Could not find static Qt5 dir")
 else()
-   message(STATUS "Found static Qt5 dir: ${QT_DIR}")
+   message(STATUS "Found static Qt5 dir: ${QT_STATIC_DIR}")
 endif()
 
 set (CMAKE_PREFIX_PATH ${QT_STATIC_DIR})
-
-SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libqt5core.a  ${QT_STATIC_DIR}/lib/libqt5network.a ${QT_STATIC_DIR}/lib/libqtpcre2.a)
+IF(APPLE)
+SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libQt5Core.a  ${QT_STATIC_DIR}/lib/libQt5Network.a ${QT_STATIC_DIR}/lib/libqtpcre2.a)
+ELSE()
+SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libQt5Core.a  ${QT_STATIC_DIR}/lib/libQt5Network.a)
 include_directories(${QT_STATIC_DIR}/include ${QT_STATIC_DIR}/include/QtCore ${QT_STATIC_DIR}/include/QtNetwork)
-
+ENDIF()
 
 
 SET(HEADERS     
@@ -43,6 +45,7 @@ TARGET_LINK_LIBRARIES(AwCoreStatic ${QT_STATIC_LIBS} "-framework IOKit -framewor
     "-framework GSS") 
 INSTALL(TARGETS AwCoreStatic DESTINATION  ${LIB_INSTALL_DIR})
 ELSE()
+TARGET_LINK_LIBRARIES(AwCoreStatic ${QT_STATIC_LIBS} "-lm") 
 INSTALL(TARGETS AwCoreStatic DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
 ENDIF()
 
