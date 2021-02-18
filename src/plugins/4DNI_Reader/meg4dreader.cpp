@@ -295,8 +295,10 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 	m_file.close(); // on ferme le fichier actuel pour le r�ouvrir apres
 	QDir dir = fi.absoluteDir();
 	m_file.setFileName(dir.absolutePath() + "/config");
-	if (!m_file.open(QIODevice::ReadOnly))
+	if (!m_file.open(QIODevice::ReadOnly)) { 
+		m_error = QString("Could not open config file: %1").arg(m_file.errorString());
 		return AwFileIO::FileAccess;
+	}
 
 	dftk_config_data cfg;
 	m_stream >> cfg.version;

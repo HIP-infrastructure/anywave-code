@@ -1,41 +1,32 @@
 
 include_directories(${Matlab_INCLUDE_DIRS})
 
-
-
-IF(QT_STATIC_DIR)
-message(STATUS "Building static mex files.")  
+SET(QT_DIR ${QT_STATIC_DIR})
 set (QT_STATIC_SUFFIX "lib/cmake")
-find_path(QT_STATIC_DIR HINTS "${QT_STATIC_DIR}" PATH_SUFFIXES "${QT_STATIC_SUFFIX}")
-if (NOT QT_STATIC_SUFFIX)
+ message(STATUS "Found qt5 dir: ${QT_DIR}")
+find_path(QT_DIR HINTS "${QT_DIR}" PATH_SUFFIXES "${QT_STATIC_SUFFIX}")
+if (NOT QT_DIR)
    message(FATAL_ERROR "Could not find static Qt5 dir")
 else()
-   message(STATUS "Found static Qt5 dir: ${QT_STATIC_DIR}")
+   message(STATUS "Found static Qt5 dir: ${QT_DIR}")
 endif()
 
-set (CMAKE_PREFIX_PATH ${QT_STATIC_DIR})
-set(CMAKE_MODULE_PATH ${QT_STATIC_DIR}}/lib/cmake ${CMAKE_MODULE_PATH})
+set (CMAKE_PREFIX_PATH ${QT_DIR})
+#find_package(Qt5Core REQUIRED)
+#find_package(Qt5Network REQUIRED)
 
-#SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libqt5core.a  ${QT_STATIC_DIR}/lib/libqt5network.a ${QT_STATIC_DIR}/lib/libqtpcre2.a)
-#include_directories(${QT_STATIC_DIR}/include ${QT_STATIC_DIR}/include/QtCore ${QT_STATIC_DIR}/include/QtNetwork)
+# common mex lib
+add_library(mexcommon common.cpp)
+#qt5_use_modules(mexcommon Core Network)
+message(STATUS "qt static include dirs:${QT_DIR}/include/QtCore ${QT_DIR}/include/QtNetwork")
+include_directories(${QT_DIR}/include ${QT_DIR}/include/QtCore ${QT_DIR}/include/QtNetwork)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Network)
-add_library(mexcommon STATIC common.cpp)
-
-if(APPLE)
+SET(QT_STATIC_LIBS ${QT_DIR}/lib/libqt5core.a  ${QT_DIR}/lib/libqt5network.a ${QT_DIR}/lib/libqtpcre2.a)
 
 TARGET_LINK_LIBRARIES(mexcommon ${QT_STATIC_LIBS} "-framework IOKit -framework AppKit -framework SystemConfiguration -framework Security -lz"
     "-framework GSS") 
-else()
-
-#SET(QT_STATIC_LIBS ${QT_STATIC_DIR}/lib/libQt5Core.a  ${QT_STATIC_DIR}/lib/libQt5Network.a)
-#TARGET_LINK_LIBRARIES(mexcommon Qt5Core Qt5Network "-lm")
-
-target_link_libraries(mexcommon Qt5::Core Qt5::Network)
-endif()
 
 
-#if(APPLE)
 #matlab_add_mex(NAME aw_getprop SRC aw_getproperties.cpp LINK_TO mexcommon AwCore)
 matlab_add_mex(NAME aw_getdata SRC aw_getdata.cpp LINK_TO mexcommon ${QT_STATIC_LIBS})
 matlab_add_mex(NAME aw_getdata_ex SRC aw_getdataex.cpp LINK_TO mexcommon ${QT_STATIC_LIBS})
@@ -51,50 +42,6 @@ matlab_add_mex(NAME aw_getcapture SRC aw_getcapture.cpp LINK_TO mexcommon ${QT_S
 matlab_add_mex(NAME aw_captureicapanel SRC aw_captureicapanel.cpp LINK_TO mexcommon ${QT_STATIC_LIBS}) 
 matlab_add_mex(NAME AwSendMessage SRC AwSendMessage.cpp LINK_TO mexcommon ${QT_STATIC_LIBS})
 matlab_add_mex(NAME AwIsProcessTerminated SRC AwIsProcessTerminated.cpp LINK_TO mexcommon ${QT_STATIC_LIBS})
-#ELSE(APPLE)
-#matlab_add_mex(NAME aw_getdata SRC aw_getdata.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_getdata_ex SRC aw_getdataex.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_getmarkers SRC aw_getmarkers.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_getmarkers_ex SRC aw_getmarkers_ex.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_addmarkers SRC aw_addmarkers.cpp LINK_TO mexcommon Qt5Core Qt5Network AwCoreStatic)
-#matlab_add_mex(NAME aw_getplugininfo SRC aw_getplugininfo.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_getpluginio SRC aw_getpluginio.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_getfileinfo SRC aw_getfileinfo.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_sendcommand SRC aw_sendcommand.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_gettriggers SRC aw_gettriggers.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_getcapture SRC aw_getcapture.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME aw_captureicapanel SRC aw_captureicapanel.cpp LINK_TO mexcommon Qt5Core Qt5Network) 
-#matlab_add_mex(NAME AwSendMessage SRC AwSendMessage.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#matlab_add_mex(NAME AwIsProcessTerminated SRC AwIsProcessTerminated.cpp LINK_TO mexcommon Qt5Core Qt5Network)
-#ENDIF(APPLE)
-
-ELSE()
-
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Network REQUIRED)
-
- message(STATUS "Building mex files using shared libs.")
- add_library(mexcommon common.cpp)
- qt5_use_modules(mexcommon Core Network)
- target_link_libraries(mexcommon Qt5::Core Qt5::Network)
- 
- # build using shared libs
-matlab_add_mex(NAME aw_getdata SRC aw_getdata.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_getdata_ex SRC aw_getdataex.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_getmarkers SRC aw_getmarkers.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_getmarkers_ex SRC aw_getmarkers_ex.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_addmarkers SRC aw_addmarkers.cpp LINK_TO mexcommon Qt5::Core AwCore)
-matlab_add_mex(NAME aw_getplugininfo SRC aw_getplugininfo.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_getpluginio SRC aw_getpluginio.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_getfileinfo SRC aw_getfileinfo.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_sendcommand SRC aw_sendcommand.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_gettriggers SRC aw_gettriggers.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_getcapture SRC aw_getcapture.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME aw_captureicapanel SRC aw_captureicapanel.cpp LINK_TO mexcommon Qt5::Core) 
-matlab_add_mex(NAME AwSendMessage SRC AwSendMessage.cpp LINK_TO mexcommon Qt5::Core)
-matlab_add_mex(NAME AwIsProcessTerminated SRC AwIsProcessTerminated.cpp LINK_TO mexcommon Qt5::Core)
-ENDIF()
-
 IF(NOT APPLE)
 #SET_TARGET_PROPERTIES(aw_getprop PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 SET_TARGET_PROPERTIES(aw_getdata PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
@@ -128,8 +75,6 @@ SET_TARGET_PROPERTIES(aw_captureicapanel PROPERTIES INSTALL_RPATH @executable_pa
 SET_TARGET_PROPERTIES(AwSendMessage PROPERTIES INSTALL_RPATH @executable_path/../Frameworks)
 SET_TARGET_PROPERTIES(AwIsProcessTerminated PROPERTIES INSTALL_RPATH @executable_path/../Frameworks)
 ENDIF()
-
-
 #INSTALL(TARGETS aw_getprop DESTINATION  ${MEX_INSTALL_DIR})
 INSTALL(TARGETS aw_getdata DESTINATION  ${MEX_INSTALL_DIR})
 INSTALL(TARGETS aw_getdata_ex DESTINATION  ${MEX_INSTALL_DIR})
