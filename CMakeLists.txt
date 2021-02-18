@@ -3,7 +3,7 @@ project(AnyWave)
 # detecting compiler
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
    MESSAGE(STATUS "Apple clang compiler detected")
-   add_definitions("-w -fPIC -O3 -fpermissive") # clang flags
+   add_definitions("-w -fPIC -O3 -fpermissive -mmacosx-version-min=10.13") # clang flags
    #SET(CLANG ON)
 # apple clang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
