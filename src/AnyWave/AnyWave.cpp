@@ -914,14 +914,14 @@ void AnyWave::on_actionQuit_triggered()
 // Help
 void AnyWave::on_actionHelpAnyWave_triggered()
 {
-	QDesktopServices::openUrl(QUrl::fromLocalFile(AW_HELP_URL));
+	QDesktopServices::openUrl(QUrl(AW_HELP_URL));
 }
 
 void AnyWave::openPluginHelpUrl()
 {
 	QAction* action = static_cast<QAction*>(sender());
 	if (action) {
-		QDesktopServices::openUrl(QUrl::fromLocalFile(action->data().toString()));
+		QDesktopServices::openUrl(QUrl(action->data().toString()));
 	}
 }
 

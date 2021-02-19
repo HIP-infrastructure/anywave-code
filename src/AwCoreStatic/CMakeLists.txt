@@ -45,10 +45,10 @@ add_library(AwCoreStatic ${MOC} ${SRC})
 IF (APPLE)
 TARGET_LINK_LIBRARIES(AwCoreStatic ${QT_STATIC_LIBS} "-framework IOKit -framework AppKit -framework SystemConfiguration -framework Security -lz"
     "-framework GSS") 
-INSTALL(TARGETS AwCoreStatic DESTINATION  ${LIB_INSTALL_DIR})
+#INSTALL(TARGETS AwCoreStatic DESTINATION  ${LIB_INSTALL_DIR})
 ELSE()
 TARGET_LINK_LIBRARIES(AwCoreStatic ${QT_STATIC_LIBS} "-lm") 
-INSTALL(TARGETS AwCoreStatic DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
+#INSTALL(TARGETS AwCoreStatic DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
 ENDIF()
 
 

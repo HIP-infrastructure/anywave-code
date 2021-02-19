@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.6) 
 project(AnyWave)
+
+
 # detecting compiler
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
    MESSAGE(STATUS "Apple clang compiler detected")
+   SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
    add_definitions("-w -fPIC -O3 -fpermissive -mmacosx-version-min=10.13") # clang flags
    #SET(CLANG ON)
 # apple clang
