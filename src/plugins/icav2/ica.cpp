@@ -162,6 +162,11 @@ int ICA::initParameters()
 	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
 	filterSettings.apply(m_channels);
 
+	if (!(modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied)) {
+		pdi.input.clearMarkers();
+		pdi.input.addMarker(new AwMarker("global", 0., args.value(keys::file_duration).toFloat()));
+	}
+
 	//// check if we have to use specific markers or skipped some
 	//bool use = args.contains("use_markers");
 	//bool skip = args.contains("skip_markers");
