@@ -22,8 +22,9 @@ include_directories(${CMAKE_SOURCE_DIR}/../include)
 include_directories(${Matlab_INCLUDE_DIRS})
 
 if(NOT APPLE)
-set(MEX_INSTALL_DIR /usr/local/AnyWave/Plugins/MATLAB/AnyWave)
+    set(MEX_INSTALL_DIR /usr/local/AnyWave/Plugins/MATLAB/AnyWave)
 else(NOT APPLE)
+    set(MEX_INSTALL_DIR ${CMAKE_SOURCE_DIR}../build/AnyWave.app/Contents/Plugins/MATLAB/AnyWave)
 endif(NOT APPLE)
 
 if(QT_STATIC_DIR) 
@@ -73,9 +74,6 @@ endif(APPLE)
 
 #target_link_libraries(AwCoreStatic ${T_LIBS})
 #target_link_libraries(mexcommon ${T_LIBS} mx)
-
-
-
 
 matlab_add_mex(NAME aw_getdata SRC  ${CMAKE_SOURCE_DIR}/../src/Mex/aw_getdata.cpp LINK_TO mexcommon)
 matlab_add_mex(NAME aw_getdata_ex SRC ${CMAKE_SOURCE_DIR}/../src/Mex/aw_getdataex.cpp LINK_TO mexcommon)
@@ -127,3 +125,17 @@ matlab_add_mex(NAME aw_getdata SRC  ${CMAKE_SOURCE_DIR}/../src/Mex/aw_getdata.cp
 INSTALL(TARGETS aw_getdata DESTINATION  ${MEX_INSTALL_DIR})
 
 endif(QT_STATIC_DIR)
+
+# Shared lib module to connect to Matlab
+set(AwMatlabSupport_MOC_H ${CMAKE_SOURCE_DIR}/../src/MatlabSupport/AwMatlabSupport.h)
+QT5_WRAP_CPP(AwMatlabSupport_MOC_SRCS ${AwMatlabSupport_MOC_H})
+
+add_library(AwMatlabSupport SHARED ${CMAKE_SOURCE_DIR}/../src/MatlabSupportAwMatlabSupport.cpp ${AwMatlabSupport_MOC_SRCS})
+qt5_use_modules(AwMatlabSupport Core)
+target_link_libraries(AwMatlabSupport ${Matlab_MX_LIBRARY}  ${Matlab_ENG_LIBRARY} Qt5::Core)
+
+IF (APPLE)
+INSTALL(TARGETS AwMatlabSupport DESTINATION  ${LIB_INSTALL_DIR})
+ELSE()
+INSTALL(TARGETS AwMatlabSupport DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
+ENDIF()

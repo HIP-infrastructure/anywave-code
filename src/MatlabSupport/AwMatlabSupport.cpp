@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMatlabSupport.h"
@@ -95,9 +95,9 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 #endif
 #ifdef Q_OS_LINUX
         //QString ld = QString("setenv('LD_LIBRARY_PATH', '/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:%1/lib')").arg(awPath.absolutePath());
-        QByteArray ld = qgetenv("LD_LIBRARY_PATH");
-        QString setld = QString("setenv('%1')").arg(QString(ld));
-        engEvalString(m_eng, setld.toLatin1().data());
+        //QByteArray ld = qgetenv("LD_LIBRARY_PATH");
+        //QString setld = QString("setenv('%1')").arg(QString(ld));
+        //engEvalString(m_eng, setld.toLatin1().data());
         awPath.cd("Plugins/MATLAB/AnyWave");
 #endif
 		command = "addpath('" + awPath.absolutePath() + "')";

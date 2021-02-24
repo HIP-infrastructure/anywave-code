@@ -148,9 +148,9 @@ ENDIF()
 # AnyWave SDK libraries
 add_subdirectory(src/Core)
 # add core static
-if(BUILD_STATIC_CORE AND QT_STATIC_DIR)
-add_subdirectory(src/AwCoreStatic)
-endif()
+#if(BUILD_STATIC_CORE AND QT_STATIC_DIR)
+#add_subdirectory(src/AwCoreStatic)
+#endif()
 #add_subdirectory(src/AwEpochLib)
 add_subdirectory(src/AwMontageLib)
 add_subdirectory(src/Filtering)
@@ -176,16 +176,16 @@ add_dependencies(AwMontage AwCore AwReadWrite)
 # header files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION ${PROJECT_BINARY_DIR}/include)
 
-find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY)
+#find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY)
 
 # MATLAB SUPPORT
 #if (Matlab_FOUND AND BUILD_STATIC_CORE AND QT_STATIC_DIR)
-if(Matlab_FOUND)
-  message(STATUS "MATLAB Support added. Root dir is ${Matlab_ROOT_DIR}")
-  add_subdirectory(src/MatlabSupport)
+#if(Matlab_FOUND)
+#  message(STATUS "MATLAB Support added. Root dir is ${Matlab_ROOT_DIR}")
+#  add_subdirectory(src/MatlabSupport)
 # Build mex files
-  add_subdirectory(src/Mex)      # REACTIVATE ME AT THE END
-endif()
+#  add_subdirectory(src/Mex)      # REACTIVATE ME AT THE END
+#endif()
 # END OF MATLAB SUPPORT
 
 # PYTHON
