@@ -2,7 +2,7 @@
 include_directories(${Matlab_INCLUDE_DIRS})
 
 SET(QT_DIR ${QT_STATIC_DIR})
-set (QT_STATIC_SUFFIX "lib/cmake")
+set (QT_STATIC_SUFFIX "lib/cmake/Qt5")
  message(STATUS "Found qt5 dir: ${QT_DIR}")
 find_path(QT_DIR HINTS "${QT_DIR}" PATH_SUFFIXES "${QT_STATIC_SUFFIX}")
 if (NOT QT_DIR)
@@ -21,11 +21,16 @@ add_library(mexcommon common.cpp)
 message(STATUS "qt static include dirs:${QT_DIR}/include/QtCore ${QT_DIR}/include/QtNetwork")
 include_directories(${QT_DIR}/include ${QT_DIR}/include/QtCore ${QT_DIR}/include/QtNetwork)
 
-SET(QT_STATIC_LIBS ${QT_DIR}/lib/libqt5core.a  ${QT_DIR}/lib/libqt5network.a ${QT_DIR}/lib/libqtpcre2.a)
+SET(QT_STATIC_LIBS ${QT_DIR}/lib/libQt5Core.a  ${QT_DIR}/lib/libQt5Network.a ${QT_DIR}/lib/libqtpcre2.a)
 
+if(APPLE)
 TARGET_LINK_LIBRARIES(mexcommon ${QT_STATIC_LIBS} "-framework IOKit -framework AppKit -framework SystemConfiguration -framework Security -lz"
     "-framework GSS") 
-
+else()
+TARGET_LINK_LIBRARIES(mexcommon ${QT_STATIC_LIBS} 
+"-Wl,--no-undefined -lz -lm -ldl -lglib-2.0 -pthread" 
+"-licui18n -licuuc -licudata")
+endif()
 
 #matlab_add_mex(NAME aw_getprop SRC aw_getproperties.cpp LINK_TO mexcommon AwCore)
 matlab_add_mex(NAME aw_getdata SRC aw_getdata.cpp LINK_TO mexcommon ${QT_STATIC_LIBS})
