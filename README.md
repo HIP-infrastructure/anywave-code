@@ -2,4 +2,4 @@
 
 [The wiki](https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/home) contains all the help you may need
 
-To build your own application on Linux, follow this [GUIDE](wiki/Build_AnyWave)
+To build your own application on Linux, follow this [GUIDE](https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/Build_AnyWave)
