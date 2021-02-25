@@ -30,6 +30,7 @@
 AwProcessLogWindow::AwProcessLogWindow(QWidget *parent, Qt::WindowFlags flags)
 	: QWidget(parent, flags)
 {
+	setWindowFlags(Qt::Window);
 	m_ui.setupUi(this);
 }
 

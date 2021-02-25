@@ -27,7 +27,6 @@
 #include <QSettings>
 #include <QWidget>
 #include <AwFileIO.h>
-#include <AwFileInfo.h>
 #include <QDir>
 #include <QApplication>
 #include <qthreadpool.h>
@@ -71,9 +70,6 @@ AwSettings::AwSettings(QObject *parent)
 
 	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
 	m_settings[aws::auto_trigger_parsing] = isAutoTriggerParsingOn;
-
-	//// languages
-//	loadLanguage();
 	// Cpu cores
 	auto totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
 	m_settings[aws::total_cpu_cores] = totalCPUCores;
@@ -87,11 +83,8 @@ AwSettings::AwSettings(QObject *parent)
 	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
 	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
 
-	m_matlabInterface = NULL;
+	m_matlabInterface = nullptr;
 	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
-
-	m_fileInfo = Q_NULLPTR;
-
 	auto appPath = QCoreApplication::applicationDirPath();
 	m_settings[aws::app_dir] = appPath;
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
@@ -103,19 +96,16 @@ AwSettings::AwSettings(QObject *parent)
 
 	m_settings[aws::ins_version] = false;
 	// check for a version.txt in resources
-	//QString versionFile = QString("%1/version.txt").arg(m_settings["appResourcePath"].toString());
-	QString insVersionFile = QString("%1/ins.txt").arg(m_settings["appResourcePath"].toString());
-	//if (QFile::exists(versionFile)) {
-	//	QFile file(versionFile);
-	//	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-	//		m_settings[aws::major_version] =  file.readLine();
-	//		m_settings[aws::minor_version] =  file.readLine();
-	//		file.close();
-	//	}
-	//}
+	QString insVersionFile = QString("%1/ins.txt").arg(m_settings.value(aws::app_resource_dir).toString());
 	// check for a file called ins.txt
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
+
+	//Save system path
+	m_settings[aws::system_path] = QString(qgetenv("PATH"));
+
+	// get username
+	m_settings[aws::username] = qgetenv("USERNAME");
 }
 
 AwSettings::~AwSettings()
@@ -136,9 +126,6 @@ AwSettings::~AwSettings()
 		settings.setArrayIndex(i);
 		settings.setValue("BIDSPath", recentBIDS.at(i));
 	}
-	settings.endArray();
-	if (m_fileInfo)
-		delete m_fileInfo;
 }
 
 QVariant AwSettings::value(const QString& key)
@@ -151,66 +138,9 @@ void AwSettings::setValue(const QString& key, const QVariant& value)
 	m_settings[key] = value;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// LANGUAGE
-
-//void AwSettings::loadLanguage()
-//{
-//	QSettings settings;
-//	m_language = settings.value("general/locale", QString("en")).toString();
-//	QLocale locale = QLocale(m_language);
-//	QLocale::setDefault(locale);
-//	// create language path
-//	langPath = QApplication::applicationDirPath();
-//	langPath.append("/languages");
-//	QString languageName = QLocale::languageToString(locale.language());
-//	QString anywaveFile = langPath + "/" + QString("anywave_%1.qm").arg(m_language);
-//	QString qtFile = langPath + "/" + QString("qt_%1.qm").arg(m_language);
-//	QString graphicsFile = langPath + "/" + QString("awgraphicslib_%1.qm").arg(m_language);
-//	QString widgetsFile = langPath + "/" + QString("awwidgetslib_%1.qm").arg(m_language);
-//	//// load translators
-//	//if (translator.load(anywaveFile))
-//	//	qApp->installTranslator(&translator);
-//	//if (translatorQt.load(qtFile))
-//	//	qApp->installTranslator(&translatorQt);
-//	//if (translatorGraphics.load(graphicsFile))
-//	//	qApp->installTranslator(&translatorGraphics);
-//	//if (translatorWidgets.load(widgetsFile))
-//	//	qApp->installTranslator(&translatorWidgets);
-//}
-
-//void AwSettings::loadLanguage(const QString& lang)
-//{
-//	if (m_language != lang) {
-//		QSettings settings;
-//		m_language = lang;
-//		QLocale locale = QLocale(m_language);
-//		QLocale::setDefault(locale);
-//		switchTranslator(translator, QString("anywave_%1.qm").arg(m_language));
-//		switchTranslator(translatorQt, QString("qt_%1.qm").arg(m_language));
-//		switchTranslator(translatorGraphics, QString("awgraphicslib_%1.qm").arg(m_language));
-//		switchTranslator(translatorWidgets, QString("awwidgetslib_%1.qm").arg(m_language));
-//		settings.setValue("general/locale", lang);
-//	}
-//}
-
-//void AwSettings::switchTranslator(QTranslator& translator, const QString& file)
-//{
-//	// remove the old translator
-//	qApp->removeTranslator(&translator);
-//	// load the new one and save it to preferences
-//	if (translator.load(file)) 
-//		qApp->installTranslator(&translator);
-//}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// LANGUAGE END
-
 void AwSettings::closeFile()
 { 
 	m_settings[aws::ica_file] = QString();
-	if (m_fileInfo)
-		m_filterSettings.save(QString("%1.flt").arg(m_fileInfo->filePath()));
 }
 
 
@@ -219,7 +149,8 @@ void AwSettings::closeFile()
 
 void AwSettings::createMatlabShellScript(const QString& path)
 {
-	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(m_settings["homeDir"].toString());
+	QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(m_settings.value(aws::home_dir).toString());
+	
 	QFile scriptFile(scriptPath);
 	QTextStream stream(&scriptFile);
 
@@ -230,8 +161,11 @@ void AwSettings::createMatlabShellScript(const QString& path)
 		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
 #elif defined(Q_OS_LINUX)
-		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/AnyWave/lib:$MATLAB/bin/glnxa64" << endl;
-		stream << "export LD_LIBRARY_PATH" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/bin/glnxa64" << endl;
+		stream << "if [[ -f $MATLAB/bin/glnxa64/libexpat.1.so ]]; then " << endl;
+		stream << "mv $MATLAB/bin/glnxa64/libexpat.1.so $MATLAB/bin/glnxa64/libexpat.1.so.NOFIND" << endl;
+		stream << "fi" << endl;
+ 		stream << "export LD_LIBRARY_PATH" << endl;
 #endif
 		scriptFile.close();
 		emit log(QString("Sucessfully created file %1.").arg(scriptPath));
@@ -252,15 +186,6 @@ AwFileIO* AwSettings::readerAt(int index)
 	else
 		return NULL;
 }
-
-void AwSettings::setReader(AwFileIO *reader, const QString& path)
-{
-	m_currentReader = reader;
-	if (m_fileInfo) 
-		delete m_fileInfo;
-	m_fileInfo = new AwFileInfo(reader, path);
-}
-
 
 QString AwSettings::shortenFilePath(const QString& path)
 {
@@ -348,20 +273,22 @@ void AwSettings::savePredefinedMarkers(const AwMarkerList& markers)
 {
 	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
 	auto file = m_settings.value(aws::predefined_marker_file).toString();
+	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
 	if (markerRulesDir.isEmpty())
 		return;
 	if (markers.isEmpty()) {
-		QFile::remove(file);
+		QFile::remove(path);
 		return;
 	}
-	AwMarker::save(file, markers);
+	AwMarker::save(path, markers);
 }
 
 AwMarkerList AwSettings::loadPredefinedMarkers()
 {
 	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
 	auto file = m_settings.value(aws::predefined_marker_file).toString();
+	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
 	if (markerRulesDir.isEmpty())
 		return AwMarkerList();
-	return AwMarker::load(file);
+	return AwMarker::load(path);
 }

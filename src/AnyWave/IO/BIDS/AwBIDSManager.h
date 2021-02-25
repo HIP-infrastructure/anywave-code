@@ -36,6 +36,7 @@ class AwFileIO;
 using AwArgument = QPair<QString, QString>;
 //using AwTSVDict = QMap<QString, QStringList>;
 
+constexpr auto aw_derivatives_folder = "derivatives/anywave";
 
 namespace bids {
 	constexpr auto participant_tsv = "participant_tsv";		// participants.tsv file path
@@ -138,6 +139,7 @@ signals:
 	void log(const QString& message);
 	void BIDSClosed();
 	void finished();	// compatibily with threading operations
+	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
 	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
@@ -148,6 +150,9 @@ protected:
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
 	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
+
+	void initAnyWaveDerivativesForFile(const QString& filePath);
+	void moveSidecarFilesToDerivatives(const QString&, const QString&);
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)

@@ -19,21 +19,22 @@
 #include "Prefs/AwSettings.h"
 #include <AwKeys.h>
 #include <QProcess>
-//#include "AwBIDSProxyModel.h"
+#include <QtConcurrent>
+
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
 	m_ui.setupUi(this);
 	m_bids = AwBIDSManager::instance();
 	m_ui.leDIR->setText(m_bids->rootDir());
-	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	m_ui.treeView->resizeColumnToContents(0);
 	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
 	connect(m_ui.treeView, &QTreeView::clicked, this, &AwBIDSGUI::handleClick);
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_model = new QStandardItemModel(this);
 	m_model->setColumnCount(1);
-	//auto filterModel = new AwBIDSProxyModel(this);
-	//filterModel->setSourceModel(m_model);
+
 	m_ui.treeView->setModel(m_model);
 	m_ui.treeView->setUniformRowHeights(true);
 	m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -90,6 +91,7 @@ void AwBIDSGUI::closeBIDS()
 	auto jsonString = doc.toJson(QJsonDocument::Indented);
 
 	AwUtilities::json::saveToJsonFile(jsonString, jsonPath);
+	m_extraColumns.clear();
 }
 
 
@@ -112,7 +114,7 @@ void AwBIDSGUI::contextMenuRequested(const QPoint& point)
 	// 
 	bool enableBatchProcess = false;
 	QStringList niftiFiles;
-	for (auto index : indexes) {
+	for (auto const& index : indexes) {
 		if (index.column() == 0) {
 			auto item = m_model->itemFromIndex(index);
 			auto type = item->data(AwBIDSItem::TypeRole).toInt();
@@ -146,8 +148,8 @@ void AwBIDSGUI::createContextMenus()
 	for (auto p : processes) {
 		// DO NOT TAKE Process with more than input_file as INPUTS
 		auto batchSettings = p->batchHash();
-		auto inputs = batchSettings.value(cl::batch_inputs).toHash();
-		if (inputs.contains(cl::input_file)) {
+		auto inputs = batchSettings.value(keys::batch_inputs).toHash();
+		if (inputs.contains(keys::input_file)) {
 			auto action = m_menuProcessing->addAction(QString("compute %1").arg(p->name));
 			// set the plugin's name as data
 			action->setData(p->name);
@@ -177,7 +179,7 @@ void AwBIDSGUI::addToProcessing()
 	// get selected items 
 	auto indexes = m_ui.treeView->selectionModel()->selectedIndexes();
 	AwBIDSItems items;
-	for (auto index : indexes) {
+	for (auto const& index : indexes) {
 		if (index.column() == 0) {
 			auto item = static_cast<AwBIDSItem *>(m_model->itemFromIndex(index));
 			auto itemType = item->data(AwBIDSItem::TypeRole).toInt();
@@ -209,10 +211,10 @@ void AwBIDSGUI::addToProcessing()
 		outputFiles.append(m_bids->buildOutputFileName(bidsItem));
 		outputSuffixes.append(QString("_%1").arg(plugin->name));
 	}
-	batchItem->setInputs(cl::input_file, inputFiles);
-	batchItem->setOutputs(cl::output_dir, outputDirs);
-	batchItem->setOutputs(cl::output_file, outputFiles);
-	batchItem->setOutputs(cl::output_suffix, outputSuffixes);
+	batchItem->setInputs(keys::input_file, inputFiles);
+	batchItem->setOutputs(keys::output_dir, outputDirs);
+	batchItem->setOutputs(keys::output_file, outputFiles);
+	batchItem->setOutputs(keys::output_suffix, outputSuffixes);
 	batchItem->lock();
 	AwBatchManager::instance()->ui()->addNewItem(batchItem);
 }
@@ -391,6 +393,7 @@ void AwBIDSGUI::refresh()
 	initModel(m_bids->subjects());
 	if (!m_extraColumns.isEmpty())
 		showColumns(m_extraColumns);
+
 }
 
 void AwBIDSGUI::initModel(const AwBIDSItems& items)
@@ -402,6 +405,7 @@ void AwBIDSGUI::initModel(const AwBIDSItems& items)
 	auto headerItem = new QStandardItem("Directory");
 	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
 	m_model->setHorizontalHeaderItem(0, headerItem);
+
 	for (auto item : items) {
 		rootItem->appendRow(item);
 		recursiveFill(item);

@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=AnyWave
 Exec=/usr/bin/anywave
-Icon=AnyWave
+Icon=/usr/local/AnyWave/share/icons/apps/AnyWave_icon.png
 Type=Application
 Categories=Scientific;Utility;

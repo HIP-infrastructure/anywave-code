@@ -8,7 +8,7 @@ DeltamedBTReaderPlugin::DeltamedBTReaderPlugin() : AwFileIOPlugin()
 	version = QString("1.0");
 	manufacturer = "Deltamed";
 	fileExtensions << "*.txt";
-	m_flags = Aw::HasExtension | Aw::CanRead;
+	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
 
 DeltamedBTReader::DeltamedBTReader(const QString& path) : AwFileIO(path)
@@ -29,7 +29,7 @@ AwFileIO::FileStatus DeltamedBTReader::canRead(const QString &path)
 	settings.beginGroup("INFORMATION");
 	QString coherence = settings.value("Version").toString();
 	QString organization = settings.value("Organisation").toString();
-	if (organization.toUpper() == "DELTAMED" && coherence.toUpper() == "COHERENCE")
+	if (organization.toUpper().contains("DELTAMED") && coherence.toUpper().contains("COHERENCE"))
 		return AwFileIO::NoError;
 
 	return AwFileIO::WrongFormat;

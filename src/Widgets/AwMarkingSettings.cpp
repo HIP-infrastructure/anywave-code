@@ -25,19 +25,34 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include <AwMarkingSettings.h>
 
-AwMarker *AwMarkingSettings::spaceBarNext()
+
+void AwMarkingSettings::setPredefinedMarkers(const AwMarkerList& markers)
 {
-	if (m_spaceBarIndex >= m_boundMarkers.size())
-		m_spaceBarIndex = 0;
-
-	if (m_boundMarkers.isEmpty())
-		return NULL;
-
-	return m_boundMarkers.at(m_spaceBarIndex++);
+	this->predefinedMarkers = markers;
+	this->selectedPredefinedMarkers.clear();
 }
 
-void AwMarkingSettings::setBoundMarkers(AwMarkerList& markers)
+AwMarkerList AwMarkingSettings::getSelectedPredefinedMarkers()
 {
-	m_boundMarkers = markers;
-	m_spaceBarIndex = 0;
+	AwMarkerList res;
+	for (auto selected : this->selectedPredefinedMarkers)
+		res.append(this->predefinedMarkers.at(selected));
+	return res;
 }
+
+//AwMarker *AwMarkingSettings::spaceBarNext()
+//{
+//	if (m_spaceBarIndex >= m_boundMarkers.size())
+//		m_spaceBarIndex = 0;
+//
+//	if (m_boundMarkers.isEmpty())
+//		return NULL;
+//
+//	return m_boundMarkers.at(m_spaceBarIndex++);
+//}
+//
+//void AwMarkingSettings::setBoundMarkers(AwMarkerList& markers)
+//{
+//	m_boundMarkers = markers;
+//	m_spaceBarIndex = 0;
+//}

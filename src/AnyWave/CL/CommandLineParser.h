@@ -29,8 +29,10 @@
 #include "AwCommandLine.h"
 namespace aw {
 	namespace commandLine {
-		enum Commands { BIDS, RunProcess, DedicatedDataServerMode };
-		QMap<int, AwArguments> doParsing(const QStringList& args);
-		int doCommandLineOperations(QMap<int, AwArguments>& operations);
+		// Commands or operations defined what to do in batch mode. NoOperation specify no batch command to run but some specific arguments to handle in GUI mode
+		// for example : --plugin_debug with --server_port will launch the Gui normally but activate the plugin debug mode
+		enum Commands { NoOperation, BIDS, RunProcess, DedicatedDataServerMode, ParsingError };
+		int doParsing(const QStringList& args, AwArguments& arguments);
+		int doCommandLineOperation(int operation, AwArguments& operations);
 	}
 }

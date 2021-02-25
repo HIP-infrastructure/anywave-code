@@ -45,27 +45,32 @@
 #include <QSurfaceFormat>
 #endif
 
-#include <qstylefactory.h>
-#include <qtextstream.h>
 #include "CL/CommandLineParser.h"
 
 
 int main(int argc, char *argv[])
 {
+#ifdef _WIN32
+	if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
+#endif
 #if VTK_MAJOR_VERSION >= 8
 	// init surface map for further use in VTK 8.1
 	vtkOpenGLRenderWindow::SetGlobalMaximumNumberOfMultiSamples(0);
 	QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
 #endif
-
-	QApplication app(argc, argv);
-	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
-	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-//#ifdef Q_OS_WIN
-//	QApplication::setStyle(QStyleFactory::create("windowsvista"));
+//#if defined(Q_OS_MAC)
+	QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 //#endif
+#endif
+
+#if defined(Q_OS_MAC)
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
+	QApplication app(argc, argv);
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);
@@ -78,39 +83,7 @@ int main(int argc, char *argv[])
 	settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 
-#ifdef _WIN32  // On Windows, add the subdir Plugins to the dll search path.
-	QString appPath = QApplication::applicationDirPath() + "/Plugins";
-	wchar_t *dllDir = new wchar_t[appPath.size() + 1];
-	appPath.toWCharArray(dllDir);
-	dllDir[appPath.size()] = '\0';
-	for (int i = 0; i < appPath.size(); i++)	{
-		if (dllDir[i] == '/') 
-			dllDir[i] = '\\';
-	}
-	bool res = SetDllDirectory((LPCWSTR)dllDir);
-#endif
-
-	// check if arguments 
-	QStringList args = app.arguments();
-	bool isGui = args.size() <= 2;
-	bool openFile = args.size() == 2; // two arguments (first is the application path) means : AnyWave fileToOpen
-	
-	AnyWave window(isGui); // args not empty means something to do in command line mode => no gui mode on 
-	if (!isGui) {
-		QMap<int, AwArguments> arguments;
-		try {
-			arguments = aw::commandLine::doParsing(args);
-		}
-		catch (const AwException& e) {
-			exit(0);
-		}
-		int status = aw::commandLine::doCommandLineOperations(arguments);
-		if (status == 0)
-			exit(0);
-	}
-
-	window.showMaximized();
-	if (openFile)
-		window.openFile(args.last());
+	// check if arguments
+	AnyWave window(app.arguments());
 	return app.exec();
 }

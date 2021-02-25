@@ -1,0 +1,5 @@
+anywave (1.0-0ubuntu1) focal; urgent=low
+
+* Initial release as deb package for Ubuntu
+
+-- Bruno Colombet <bruno.colombet@univ-amu.fr>

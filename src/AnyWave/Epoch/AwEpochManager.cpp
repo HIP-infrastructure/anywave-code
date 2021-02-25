@@ -27,7 +27,6 @@
 #include "Marker/AwMarkerManager.h"
 #include "AwEpochCreateUi.h"
 #include <AwFileIO.h>
-#include "Prefs/AwSettings.h"
 #include <qdir.h>
 #include "Data/AwDataServer.h"
 #include "AwAverageDialog.h"
@@ -35,8 +34,7 @@
 #include "Montage/AwMontageManager.h"
 #include <widget/AwWaitWidget.h>
 #include "Data/AwMemoryMapper.h"
-#include <AwFileInfo.h>
-
+#include "Data/AwDataManager.h"
 
 /////////////////////////////////////////////////////////////////////
 /// worker object to do the offline filtering
@@ -60,7 +58,7 @@ OfflineFilterWorker::~OfflineFilterWorker()
 
 void OfflineFilterWorker::run()
 {
-	m_reader = AwMemoryMapper::buildDataServerWithPreloadedData(AwSettings::getInstance()->currentReader(),
+	m_reader = AwMemoryMapper::buildDataServerWithPreloadedData(AwDataManager::instance()->reader(),
 		m_channels, m_artefacts);
 	emit finished();
 }
@@ -88,8 +86,8 @@ void AwEpochManager::destroy()
 AwEpochManager::AwEpochManager()
 {
 	// Get the current reader information (total duration)
-	m_totalDuration = AwSettings::getInstance()->currentReader()->infos.totalDuration();
-	m_dataPath = AwSettings::getInstance()->fileInfo()->filePath();
+	m_totalDuration = AwDataManager::instance()->totalDuration();
+	m_dataPath = AwDataManager::instance()->dataFilePath();
 	m_offlineDataServer = Q_NULLPTR;
 	load();
 	m_reviewWidget = NULL;
@@ -157,7 +155,7 @@ void AwEpochManager::loadEpochFile(const QString& path)
 		int nEpochs = jsonCondition["number of epochs"].toInt();
 		flags = jsonCondition["rejected"].toArray();
 		// get channels of matching modality from the current reader.
-		auto channels = AwSettings::getInstance()->currentReader()->infos.channels();
+		auto channels = AwDataManager::instance()->rawChannels();
 		channels = AwChannel::getChannelsOfType(channels, modality);
 		// remove bad channels.
 		AwMontageManager::instance()->removeBadChannels(channels);

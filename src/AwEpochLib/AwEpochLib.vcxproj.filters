@@ -72,15 +72,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AwEpochSignalView.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="AwEpochAverager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochAverager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochAverager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="AwAvgEpoch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -107,9 +98,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\include\epoch\AwEpochSignalView.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\include\epoch\AwEpochAverager.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

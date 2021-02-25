@@ -59,15 +59,15 @@
 
 AwMapWidget::AwMapWidget(QWidget *parent, int flags) : QVTK_CLASS(parent)
 {
-#if VTK_MAJOR_VERSION < 7
- 	VTK_MODULE_INIT(vtkRenderingOpenGL);
-	VTK_MODULE_INIT(vtkInteractionStyle);
-	VTK_MODULE_INIT(vtkRenderingFreeType);
-#else
+//#if VTK_MAJOR_VERSION < 8
+// 	VTK_MODULE_INIT(vtkRenderingOpenGL);
+//	VTK_MODULE_INIT(vtkInteractionStyle);
+//	VTK_MODULE_INIT(vtkRenderingFreeType);
+//#else
 	VTK_MODULE_INIT(vtkRenderingOpenGL2);
     VTK_MODULE_INIT(vtkInteractionStyle);
     VTK_MODULE_INIT(vtkRenderingFreeType);
-#endif
+//#endif
 
 	m_flags = flags;
 	m_map = NULL;
@@ -137,7 +137,6 @@ void AwMapWidget::updateMap(float lat, arma::fvec& values, const QStringList& la
 	m_data = QVector<float>(values.n_elem);
 	for (arma::uword i = 0; i < values.n_elem; i++)
 		m_data << values(i);
-//	m_data = values;
 	buildTopo(labels);
 }
 
@@ -289,7 +288,7 @@ void AwMapWidget::initVtk()
 	}
 	
 	m_renderer->AddActor(actor);
-//	GetRenderWindow()->AddRenderer(m_renderer);
+
 	if (!(m_flags & AwMapWidget::NoInteraction))	{
 		// insert AnyWave style to handle mouse and keyboard.
 		vtkSmartPointer<AwInteractorStyle> style = vtkSmartPointer<AwInteractorStyle>::New();
@@ -297,7 +296,7 @@ void AwMapWidget::initVtk()
 		style->setWidget(this);
 		style->setActor(m_sensorsActor);
 		style->SetDefaultRenderer(m_renderer);
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 		m_window->GetInteractor()->SetInteractorStyle(style);
 #else
 		GetInteractor()->SetInteractorStyle(style);
@@ -434,7 +433,7 @@ void AwMapWidget::buildContours()
 	m_contourMapper->SetScalarRange(rangeContour[0], rangeContour[1]);
 	m_contourMapper->SetLookupTable(m_mainMapper->GetLookupTable()); // use the same lut than main mapper (mesh).
 	m_contourActor->SetMapper(m_contourMapper);
-#if VTK8_SUPPORT
+#if VTK_MAJOR_VERSION >= 8
 	m_window->Render();
 #else
 	GetRenderWindow()->Render();

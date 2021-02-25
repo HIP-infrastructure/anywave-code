@@ -58,7 +58,8 @@ public:
 	AwChannelList selectedChannels();
 	inline QToolBar *toolBar() { return m_toolBar; }
 
-	void newFile(AwFileIO *reader);
+	//void newFile(AwFileIO *reader);
+	void newFile(); // called when a file is open
 	void closeFile();
 	void quit();
 	void setAddMarkerDock(QDockWidget *dock);
@@ -78,8 +79,7 @@ private:
 	QStringList m_selectedLabels;			// labels of selected channels.
 	QToolBar *m_toolBar;
 	AwChannelList m_channels;
-	AwFileIO *m_reader;
-	AwCentralWidget *m_splitterWidget;
+	QSplitter* m_centralWidget;
 	bool m_dontSynchronize;
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	QScreen *m_screen;
@@ -102,6 +102,7 @@ signals:
 public slots:
 	void updateSetup(AwDisplaySetup *setup, int flags);
 	void executeCommand(int command, const QVariantList& args);
+	void handleCommand(const QVariantMap& map);
 	void synchronizeMappingCursorPos(float position);
 	void addNewSignalView();
 	void removeView();

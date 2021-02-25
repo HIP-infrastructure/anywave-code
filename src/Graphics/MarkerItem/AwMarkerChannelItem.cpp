@@ -106,8 +106,7 @@ void AwMarkerChannelItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 
 	if (isSelected())	{
 		QColor c = pen.color();
-		c.darker();
-		pen.setColor(c);
+		pen.setColor(c.darker());
 	}
 
 		// use default color or user defined color

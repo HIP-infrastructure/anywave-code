@@ -37,7 +37,7 @@ ADESIOPlugin::ADESIOPlugin() : AwFileIOPlugin()
 	description = QString(tr("Open .ades files"));
 	version = QString("1.0");
 	fileExtensions << "*.ades";
-	m_flags = Aw::HasExtension|Aw::CanRead|Aw::CanWrite;
+	m_flags = FileIO::HasExtension| FileIO::CanRead| FileIO::CanWrite;
 	fileExtension = ".ades";
 }
 
@@ -274,7 +274,7 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		}
 	}
 
-	m_sideFiles[".mrk"] = markerPath;
+	infos.setMrkFile(markerPath);
 	return AwFileIO::openFile(path);
 }
 
@@ -303,10 +303,10 @@ qint64 ADESIO::readDataFromChannels(float start, float duration, AwChannelList &
 
 	qint64 totalSize = nSamples * nbChannels;
 
-	float *buf = new float[totalSize];
+	float* buf = new float[totalSize];
 	m_binFile.seek(startSample * sizeof(float));
 
-	qint64 read = m_binFile.read((char *)buf, totalSize * sizeof(float));
+	qint64 read = m_binFile.read((char*)buf, totalSize * sizeof(float));
 
 	if (read <= 0) {
 		delete[] buf;

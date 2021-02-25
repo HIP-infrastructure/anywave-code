@@ -39,13 +39,10 @@
 #include "Source/AwSourceManager.h"
 #include <QtCore>
 #include <filter/AwFiltering.h>
-#include "Prefs/AwSettings.h"
+#include "AwDataManager.h"
 #include <AwCore.h>
 #include <AwKeys.h>
-
-#if QT_VERSION > QT_VERSION_CHECK(4, 8, 0)
 #include <QtConcurrent>
-#endif
 
 #define AW_DC_OFFLINE_FILTERING_PADDING		5  // 5s padding around the data for a kind of offline filtering.
 
@@ -82,6 +79,7 @@ AwDataConnection::AwDataConnection(AwDataServer *server, AwDataClient *client, A
 		m_avg[i] = NULL;
 		m_ICASourcesLoaded[i] = false;
 	}
+	connect(this, &AwDataConnection::log, server, &AwDataServer::log);
 }
 
 AwDataConnection::~AwDataConnection()
@@ -220,7 +218,6 @@ void AwDataConnection::createAVGChannel(AwChannel *channel)
 		m_avg[channel->type()] = chan;
 		prepareAVGChannel(m_avg[channel->type()]);
 	}
-
 }
 
 void AwDataConnection::deleteAVGChannels()
@@ -254,7 +251,7 @@ void AwDataConnection::computeSourceChannels(AwSourceChannelList& channels)
 {
 	int type = channels.first()->subType();
 	AwSourceManager *sm = AwSourceManager::instance();
-	AwSettings::getInstance()->filterSettings().apply(sm->realChannels(type));
+	AwDataManager::instance()->filterSettings().apply(sm->realChannels(type));
 	readWithOfflineFiltering(m_positionInFile, m_duration, sm->realChannels(type));
 	sm->computeSources(channels);
 
@@ -265,7 +262,7 @@ void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
 	if (comps)	{
 		// load source channels
-		AwSettings::getInstance()->filterSettings().apply(comps->sources());
+		AwDataManager::instance()->filterSettings().apply(comps->sources());
 		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
 		comps->computeComponents(channels);
 	}
@@ -316,7 +313,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 		}
 	}
 	//cleaning up
-	for (auto chunk : chunks)
+	for (auto &chunk : chunks)
 		AW_DESTROY_LIST(chunk)
 
 	if (!doNotWakeupClient)
@@ -357,6 +354,14 @@ qint64 AwDataConnection::readWithOfflineFiltering(float start, float duration, c
 	// start and duration may have invalide values (the user may want to see values at different time and the start and value may not be correctly updated before the call to this slot).
 	if (start < 0 || duration <= 0)
 		return 0;
+
+	// check for a reader object
+	if (m_reader == nullptr)
+		m_reader = AwDataManager::instance()->reader();
+	if (m_reader == nullptr) {
+		emit log(QString("No reader object instantiated."));
+		return 0;
+	}
 
 	// assuming the channels are in loadingList.
 	// check for channels with filtering options
@@ -410,6 +415,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker,
 //
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, float duration, bool rawData, bool doNotWakeUpClient)
 {
+	if (m_reader == nullptr)  // check if we point to a valid reader. It could happen that a data server is launched before a valid file reader is created.
+		m_reader = m_server->reader();
 #ifndef NDEBUG
 	if (channelsToLoad->isEmpty())
 		qDebug() << Q_FUNC_INFO << "Channel list is empty() ! " << endl;
@@ -429,8 +436,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		m_client->setError(QString("start position beyond total duration."));
 		return;
 	}
-
-
 	// Build a full list of channels to load.
 	// The list is based on channelsToLoad plus channels required for montage.
 	AwChannelList montageChannels;
@@ -531,6 +536,9 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 
 		computeVirtualChannels();
 
+		// We allow here to filter the virtual channels
+		AwFiltering::filter(m_virtualChannels);
+
 		// check for channels that need montaging
 		for(auto channel :  m_loadingList) {
 			if (channel->hasReferences())
@@ -555,8 +563,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			
 			foreach (AwProcess *p, internals) {
 				auto channels = p->pdi.input.channels() + *channelsToLoad;
-				p->pdi.input.settings[processio::current_pos_in_file] = start;
-				p->pdi.input.settings[processio::file_duration] = duration;
+				p->pdi.input.settings[keys::current_pos_in_file] = start;
+				p->pdi.input.settings[keys::file_duration] = duration;
 				p->pdi.input.setNewChannels(channels);
 				QMetaObject::invokeMethod(p, "start", Qt::QueuedConnection);
 				// wait for process to finished before launching other one

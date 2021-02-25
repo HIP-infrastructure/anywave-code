@@ -52,7 +52,7 @@ void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *p
 		emit log("Done.");
 	}
 	else {
-		file = process->pdi.input.settings[processio::data_path].toString();
+		file = process->pdi.input.settings.value(keys::data_path).toString();
 
 		for (auto c : process->pdi.input.channels()) {
 			labels << c->name();
@@ -62,8 +62,8 @@ void AwRequestServer::handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *p
 		}
 
 		total_duration = process->pdi.input.reader()->infos.totalDuration();
-		temp_dir = QDir::toNativeSeparators(process->pdi.input.settings[processio::working_dir].toString());
-		plug_dir = QDir::toNativeSeparators(process->pdi.input.settings[processio::plugin_dir].toString());
+		temp_dir = QDir::toNativeSeparators(process->pdi.input.settings.value(keys::working_dir).toString());
+		plug_dir = QDir::toNativeSeparators(process->pdi.input.settings.value(keys::plugin_dir).toString());
 
 		ica_file = QDir::toNativeSeparators(AwSettings::getInstance()->value(aws::ica_file).toString());
 		stream << file << labels << refs << max_sr << total_duration << temp_dir << plug_dir << ica_file << AwICAManager::instance()->getRejectedLabels();

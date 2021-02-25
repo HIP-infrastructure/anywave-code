@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AwMappingWidgetUi2</class>
- <widget class="QWidget" name="AwMappingWidgetUi2">
+ <class>AwMappingWidgetUi</class>
+ <widget class="QWidget" name="AwMappingWidgetUi">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -262,7 +262,7 @@
   <connection>
    <sender>button3D</sender>
    <signal>clicked(bool)</signal>
-   <receiver>AwMappingWidgetUi2</receiver>
+   <receiver>AwMappingWidgetUi</receiver>
    <slot>to3D(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -278,7 +278,7 @@
   <connection>
    <sender>buttonBoth</sender>
    <signal>clicked(bool)</signal>
-   <receiver>AwMappingWidgetUi2</receiver>
+   <receiver>AwMappingWidgetUi</receiver>
    <slot>showBoth(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -294,7 +294,7 @@
   <connection>
    <sender>button2D</sender>
    <signal>clicked(bool)</signal>
-   <receiver>AwMappingWidgetUi2</receiver>
+   <receiver>AwMappingWidgetUi</receiver>
    <slot>to2D(bool)</slot>
    <hints>
     <hint type="sourcelabel">

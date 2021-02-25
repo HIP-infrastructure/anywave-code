@@ -7,5 +7,5 @@ then
 	echo Executing matlab.sh
 	. $HOME/AnyWave/matlab.sh
 fi
-$SCRIPTPATH/AnyWaveLinux
+$SCRIPTPATH/AnyWaveLinux $@
 exit

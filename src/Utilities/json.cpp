@@ -31,10 +31,18 @@
 #include <QTextStream>
 #include <AwException.h>
 
-QString  AwUtilities::json::hashToJsonString(const QVariantHash& hash)
+QString  AwUtilities::json::toJsonString(const QVariantHash& hash)
 {
 
 	auto object = QJsonObject::fromVariantHash(hash);
+	QJsonDocument doc(object);
+	return QString(doc.toJson(QJsonDocument::Compact));
+}
+
+QString  AwUtilities::json::toJsonString(const QVariantMap& map)
+{
+
+	auto object = QJsonObject::fromVariantMap(map);
 	QJsonDocument doc(object);
 	return QString(doc.toJson(QJsonDocument::Compact));
 }
@@ -121,6 +129,15 @@ QVariantHash AwUtilities::json::fromJsonFileToHash(const QString& filePath)
 		return doc.object().toVariantHash();
 
 	return QVariantHash();
+}
+
+QVariantMap AwUtilities::json::fromJsonFileToMap(const QString& filePath)
+{
+	auto doc = readJsonFile(filePath);
+	if (!doc.isEmpty() && !doc.isNull())
+		return doc.object().toVariantMap();
+
+	return QVariantMap();
 }
 
 

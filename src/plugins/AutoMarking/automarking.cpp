@@ -38,7 +38,7 @@ AutoMarkingPlugin::AutoMarkingPlugin()
 
 AutoMarking::AutoMarking()
 {
-	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers);
+	setInputFlags(Aw::ProcessIO::GetAllMarkers);
 }
 
 AutoMarking::~AutoMarking()
@@ -47,7 +47,7 @@ AutoMarking::~AutoMarking()
 		delete m_widget;
 }
 
-void AutoMarking::run(const QStringList& args)
+void AutoMarking::run()
 {
 	if (pdi.input.markers().isEmpty()) {
 		QMessageBox::critical(0, tr("No Markers"), tr("At least one marker should be present."));
@@ -55,9 +55,8 @@ void AutoMarking::run(const QStringList& args)
 		return;
 	}
 
-	//m_widget = new AwAutoMarkWidget(m_markers, pdi.input.fileDuration);
 	m_widget = new AwMarkAroundWidget;
-	m_widget->setTotalDuration(pdi.input.settings[processio::file_duration].toDouble());
+	m_widget->setTotalDuration(pdi.input.settings.value(keys::file_duration).toFloat());
 	m_widget->setMarkers(pdi.input.markers());
 	connect(m_widget, SIGNAL(closed()), this, SIGNAL(closed()));
 	connect(m_widget, SIGNAL(newMarkersCreated(const AwMarkerList&)), this, SLOT(newMarkers(const AwMarkerList&)));

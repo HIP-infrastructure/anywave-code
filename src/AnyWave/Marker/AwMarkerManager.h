@@ -45,6 +45,7 @@ public:
 
 	/** getInstance() **/
 	static AwMarkerManager *instance();
+	static AwMarkerManager* newInstance();
 
 	/** Donne la liste de tous les marqueurs. **/
 	AwMarkerList getMarkers();
@@ -54,13 +55,15 @@ public:
 	/** Get markers from position s1 to position s2 **/
 	AwMarkerList getMarkers(float s1, float s2);
 
-	inline AwMarkerManagerSettings *ui() { return m_ui; }
+//	inline AwMarkerManagerSettings *ui() { return m_ui; }
+	AwMarkerManagerSettings* ui();
 	void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();
 	void quit();
 	/** setFilename will initizalize Markers Ui and try to import previously saved marker file. **/
-	void setFilename(const QString& path);
+	//void setFilename(const QString& path);
+	void init();
 
 	void removeDuplicates();
 public slots:
@@ -92,6 +95,7 @@ signals:
 	void modificationsDone();
 	void markersRemoved();
 	void log(const QString& message);
+	void finished();	// for threading operations
 private:
 	AwMarkerManagerSettings *m_ui;
 	QDockWidget *m_dock;
@@ -105,8 +109,8 @@ private:
 	QString m_filePath;
 	// BIDS support
 	/** check the if Events.tsv file is available for current data file (filePath) **/
-	void updateMarkersFromEventsTsv(const QString& filePath);
-	void checkForBIDSMods();
+//	void updateMarkersFromEventsTsv(const QString& filePath);
+//	void checkForBIDSMods();
 
 	QString m_eventsTsv;
 };

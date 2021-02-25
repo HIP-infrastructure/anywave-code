@@ -103,7 +103,7 @@
 
 #ifdef Q_OS_WIN
 #ifdef MKL
-#include "mkl.h"
+#include <mkl.h>
 #define dscal_ dscal
 #define ddot_ ddot
 #define idamax_ idamax
@@ -131,6 +131,7 @@ extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 #endif
 
 
+// on Mac with clang, always use Accelerate Framework for blas routines even if MKL is installed
 #ifdef Q_OS_MAC
 extern "C" int idamax_(int *, double *, int *);
 extern "C" void dcopy_(int *, double *, int *, double *, int *);
@@ -139,6 +140,14 @@ extern "C" void daxpy_(int *, double *, double *, int *, double *, int *);
 //extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 extern "C" void dscal_(int *, double *, double *, int *);
 extern "C" void dswap_(int *, double *, int *, double *, int *);
+//extern "C" void dgetri_(int*, double*, int*, int*, double*, int*, int*);
+//extern "C" void dgetrf_(int*, int*, double*, int*, int*, int*);
+//extern "C" double ddot_(int*, double*, int*, double*, int *);
+//extern "C" void dsyev_(char*, char*, int*, double*, int*, double*, double*, int*, int*);		
+//extern "C" void dsyrk_(char*, char*, int*, int*, double*, double*, int*, double*, double*, int*);
+//extern "C" void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int *);
+//extern "C" void dgemv_(char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
+//extern "C" void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
 #endif
 
 #ifdef Q_OS_LINUX
@@ -1149,8 +1158,8 @@ void ICA::infomax(int m, int n, int nc)
 	momentum   = DEFAULT_MOMENTUM;
 	maxsteps   = DEFAULT_MAXSTEPS;
 	
-	auto args = pdi.input.args();
-	extended = args["infomax_extended"].toBool() ? 1 : 0;
+	auto args = pdi.input.settings;
+	extended = args.value("infomax_extended").toBool() ? 1 : 0;
 	//extended   = DEFAULT_EXTENDED;
 	extblocks  = DEFAULT_EXTBLOCKS;
 	pdfsize    = MAX_PDFSIZE;

@@ -29,6 +29,6 @@
 
 void AwProcessGUIWidget::closeEvent(QCloseEvent *event)
 {
+	QWidget::closeEvent(event);
 	emit closed();
-	event->accept();
 }

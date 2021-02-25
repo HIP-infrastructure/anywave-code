@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -71,15 +71,15 @@ AwPluginManager *AwPluginManager::getInstance()
 //
 AwPluginManager::AwPluginManager()
 {
-
 	// init input flags map for MATLAB/Python plugins
-	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessInput::GetAllMarkers);
-	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessInput::ProcessIgnoresChannelSelection);
-	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessInput::GetAsRecordedChannels);
-	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessInput::GetDurationMarkers);
-	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessInput::GetCurrentMontage);
-	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessInput::ProcessRequiresChannelSelection);
-	m_MATPyInputFlagsMap.insert("userselectedmarkers", Aw::ProcessInput::UserSelectedMarkers);
+	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessIO::GetAllMarkers);
+	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
+	m_MATPyInputFlagsMap.insert("acceptchannelselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
+	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessIO::GetAsRecordedChannels);
+	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessIO::GetDurationMarkers);
+	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessIO::GetCurrentMontage);
+	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessIO::modifiers::RequireChannelSelection);
+	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 
 	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
 	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
@@ -90,9 +90,13 @@ AwPluginManager::AwPluginManager()
 	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
 
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
+	setObjectName("AwPluginManager");
+}
+
+void AwPluginManager::load()
+{
 	loadPlugins();
 	loadUserPlugins();
-	setObjectName("AwPluginManager");
 	processJsonFiles();
 }
 
@@ -110,17 +114,19 @@ void AwPluginManager::processJsonFiles()
 		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
 			QString error;
 			// parsing  args.json if exists to get inputs keys
-			auto hash = AwUtilities::json::hashFromJsonString(p->settings().value(processio::json_batch).toString(), error);
-			if (!hash.contains("inputs")) {
+			auto map = AwUtilities::json::mapFromJsonString(p->settings().value(keys::json_batch).toString(), error);
+			if (!map.contains("inputs")) {
 				// no inputs key in batch.json or no batch.json => considering input to be input_file : "file" (AnyWave default)
-				QVariantHash inputs;
-				inputs.insert(cl::input_file, QString("file"));
-				hash.insert("inputs", inputs);
+				QVariantMap inputs;
+				inputs.insert(keys::input_file, QString("file"));
+				map.insert("inputs", inputs);
 			}
-			p->addBatchHash(hash);
+			p->addBatchMap(map);
 		}
 	}
 }
+
+
 
 //
 // showPluginsDial()
@@ -199,6 +205,7 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 						break;
 					}
 					else { // plugin found could not open the file => destroy it and continue browsing.				
+						emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
 						plugin->deleteInstance(reader);
 						reader = NULL;
 					}
@@ -215,6 +222,7 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 				break;
 			}
 			else { // plugin found could not open the file => destroy it and continue browsing.				
+			    emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
 				plugin->deleteInstance(reader);
 				reader = NULL;
 			}
@@ -246,14 +254,16 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 dirs.removeAll("..");
 	 for (auto folder : dirs) {
 		 QString name = folder;
-		 QString desc, processType, category, compiledPath, flags, inputFlags;
+		 QMap<QString, QString> descMap;
+		// QString desc, processType, category, compiledPath, flags, inputFlags;
 		 int type = AwProcessPlugin::Background;	// default type if none defined
 		 bool isMATLABCompiled = false, isPythonCompiled = false;
 		 QString pluginPath = dir.absolutePath() + "/" + folder;
 		 QString exePluginPath; // can handle the path to standalone executable plugins
 		 QString pythonCode = QString("%1/__main__.py").arg(pluginPath);
-		 QString matlabCode = QString("%1/main.m").arg(pluginPath);
-		 bool isMATLABScript = QFile::exists(matlabCode);
+		 QString matlabCodeM = QString("%1/main.m").arg(pluginPath);
+		 QString matlabCodeApp = QString("%1/main.mlapp").arg(pluginPath);
+		 bool isMATLABScript = QFile::exists(matlabCodeM) || QFile::exists(matlabCodeApp);
 		 bool isPythonScript = QFile::exists(pythonCode);
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
 		 QString jsonArgs = QString("%1/args.json").arg(pluginPath);
@@ -263,103 +273,75 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 QTextStream stream(&file);
 		 if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 			 continue;
+		 QStringList splitedLine;
 		 while (!stream.atEnd()) {
 			 auto line = stream.readLine();
 			 if (line.startsWith("#"))
 				 continue;
-			 if (line.contains("name")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 name = res.at(1).trimmed();
-			 }
-			 else if (line.contains("description")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 desc = res.at(1).trimmed();
-			 }
-			 else if (line.contains("type")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2) {
-					 processType = res.at(1).trimmed().toLower();
-					 if (processType == "background")
-						 type = AwProcessPlugin::Background;
-					 if (processType == "display")
-						 type = AwProcessPlugin::Display;
-					 if (processType == "displaybackground")
-						 type = AwProcessPlugin::DisplayBackground;
-				 }
-			 }
-			 else if (line.contains("compiled plugin")) { // for backward compatibility, we keep the compiled plugin for MATLAB plugins
-				 QStringList res = line.split("=");
-				 if (res.size() == 2) {
-					 isMATLABCompiled = true;
-					 compiledPath = res.at(1).trimmed();
-					 exePluginPath = QString("%1/%2").arg(pluginPath).arg(compiledPath);
-				 }
-			 }
-			 else if (line.contains("compiled python plugin")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2) {
-					 isPythonCompiled = true;
-					 compiledPath = res.at(1).trimmed();
-					 exePluginPath = QString("%1/%2").arg(pluginPath).arg(compiledPath);
-				 }
-			 }
-			 else if (line.contains("category")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 category = res.at(1).trimmed();
-			 }
-			 else if (line.contains("input_flags")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 inputFlags = res.at(1).trimmed();
-			 }
-			 else if (line.contains("flags")) {
-				 QStringList res = line.split("=");
-				 if (res.size() == 2)
-					 flags = res.at(1).trimmed();
-			 }
+			splitedLine = line.split("=");
+			if (splitedLine.size() == 2)
+				descMap[splitedLine.first().trimmed()] = splitedLine.last().trimmed();
 		 }
 		 file.close();
+		 if (descMap.isEmpty())
+			 return;
+		 if (!descMap.contains("name") && !descMap.contains("description"))
+			 return;
+		 // add extra parameters to descMap
+		 descMap[keys::plugin_dir] = pluginPath;
+		 descMap["script_path"] = pluginPath;
+		
+		 //
+		 isMATLABCompiled = descMap.contains("compiled plugin");
+		 isPythonCompiled = descMap.contains("compiled python plugin");
 		 // now instantiante objects depending on plugin type
 		 // check for MATLAB connection before
 		 isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
 		 if (isMATLABScript || isMATLABCompiled) {
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
-			 plugin->type = type;
-			 plugin->setNameAndDesc(name, desc);
-			 if (isMATLABCompiled) {
-				 plugin->setAsCompiled(true);
-				 plugin->setScriptPath(exePluginPath);
-			 }
-			 else
-				 plugin->setScriptPath(pluginPath);
-			 plugin->setPluginDir(pluginPath);
-			 plugin->category = category;
-			 setFlagsForScriptPlugin(plugin, flags);
-			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			 plugin->type = type; 
+			 if (isMATLABCompiled) // build full path to exe file
+				 descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
+	/*		 else {
+				 if (QFile::exists(matlabCodeApp))
+					 descMap["script_path"] = matlabCodeApp;
+				 if (QFile::exists(matlabCodeM))
+					 descMap["script_path"] = matlabCodeM;
+			 }*/
+		//	 plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
+			 plugin->init(descMap);
+			// if (isMATLABCompiled) {
+			//	 plugin->setAsCompiled(true);
+			//	 plugin->setScriptPath(exePluginPath);
+			// }
+			// else
+			//	 plugin->setScriptPath(pluginPath);
+			// plugin->setPluginDir(pluginPath);
+			 //plugin->category = descMap.value("category");
+			// setFlagsForScriptPlugin(plugin, descMap.value("flags"));
+			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
-				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
+				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 		 if (isPythonScript || isPythonCompiled) {
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
 
 			 plugin->type = type;
-			 plugin->setNameAndDesc(name, desc);
-			 if (isPythonCompiled) {
-				 plugin->setAsCompiled(true);
-				 plugin->setScriptPath(exePluginPath);
-			 }
-			 else
-				 plugin->setScriptPath(pluginPath);
-			 plugin->setPluginDir(pluginPath);
-			 plugin->category = category;
-			 setFlagsForScriptPlugin(plugin, flags);
-			 setInputFlagsForScriptPlugin(plugin, inputFlags);
+			// plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
+			 plugin->init(descMap);
+			 //if (isPythonCompiled) {
+				// plugin->setAsCompiled(true);
+				// plugin->setScriptPath(exePluginPath);
+			 //}
+			 //else
+				// plugin->setScriptPath(pluginPath);
+			 //plugin->setPluginDir(pluginPath);
+			// plugin->category = descMap.value("category");
+			 //setFlagsForScriptPlugin(plugin, descMap.value("flags"));
+			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
-				 setJsonSettings(plugin, processio::json_batch, jsonArgs);
+				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
 		 }
 	 }
@@ -449,7 +431,7 @@ void AwPluginManager::loadUserPlugins()
 		QPluginLoader loader(dir.absoluteFilePath(FileName));
 		QObject *plugin = loader.instance();
 		if (plugin == NULL)	{
-			emit log("Failed to load " + m_pluginsDir.absoluteFilePath(FileName));
+			emit log("Failed to load " +  dir.absoluteFilePath(FileName));
 			emit log(loader.errorString());
 		}
 		if (!checkPluginVersion(plugin)) {
@@ -565,7 +547,7 @@ void AwPluginManager::loadPlugins()
 {
 	AwSettings *aws = AwSettings::getInstance();
 	
-	m_pluginsDir = aws->value(aws::app_plugins_dir).toString();
+	auto pluginDir = aws->value(aws::app_plugins_dir).toString();
 	auto matlabPluginDir = aws->value(aws::app_matlab_plugins_dir).toString();
 	auto pythonPluginDir = aws->value(aws::app_python_plugins_dir).toString();
 	checkForScriptPlugins(matlabPluginDir);
@@ -619,13 +601,13 @@ void AwPluginManager::loadPlugins()
 	foreach(AwFilterPlugin *p, m_filters)
 		m_filterFactory.addPlugin(p->name, p);
 
-
-	// Lecture de tous les plugins trouvés
-	foreach(QString FileName, m_pluginsDir.entryList(QDir::Files)) {
-		QPluginLoader loader(m_pluginsDir.absoluteFilePath(FileName));
+	// Lecture de tous les plugins trouvï¿½s
+	QDir dir(pluginDir);
+	for (auto FileName : dir.entryList(QDir::Files)) {
+		QPluginLoader loader(dir.absoluteFilePath(FileName));
 		QObject *plugin = loader.instance();
 		if (plugin == NULL) {
-			emit log("Failed to load " + m_pluginsDir.absoluteFilePath(FileName));
+			emit log("Failed to load " + dir.absoluteFilePath(FileName));
 			emit log(loader.errorString());
 			continue;
 		}
@@ -639,12 +621,12 @@ void AwPluginManager::loadPlugins()
 			if (fio) { // FileIO specific (plugin can be reader and writer at the same time
 				if (fio->canRead()) {
 					// load another instance 
-					QPluginLoader readerLoader(m_pluginsDir.absoluteFilePath(FileName));
+					QPluginLoader readerLoader(dir.absoluteFilePath(FileName));
 					loadFileIOReaderPlugin(qobject_cast<AwFileIOPlugin *>(readerLoader.instance()));
 				}
 				if (fio->canWrite()) {
 					// load another instance 
-					QPluginLoader writerLoader(m_pluginsDir.absoluteFilePath(FileName));
+					QPluginLoader writerLoader(dir.absoluteFilePath(FileName));
 					loadFileIOWriterPlugin(qobject_cast<AwFileIOPlugin *>(writerLoader.instance()));
 				}
 				continue;
@@ -784,8 +766,8 @@ QStringList AwPluginManager::getBatchableArguments()
 	for (auto p : m_processes) {
 		if (p->flags() & Aw::ProcessFlags::CanRunFromCommandLine) {
 			auto settings = p->settings();
-			if (settings.contains(processio::json_batch)) 
-				res << settings.value(processio::json_batch).toString();
+			if (settings.contains(keys::json_batch)) 
+				res << settings.value(keys::json_batch).toString();
 		}
 	}
 	return res;

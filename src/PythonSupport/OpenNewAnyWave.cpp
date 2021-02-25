@@ -27,7 +27,8 @@
 #include "common.h"
 #include <AwProcess.h>
 extern PyObject *m_module;			// the module
-
+extern PyObject *AnyWaveError;
+#include <QDataStream>
 
 PyObject *openNewFile(PyObject *self, PyObject *args)
 {

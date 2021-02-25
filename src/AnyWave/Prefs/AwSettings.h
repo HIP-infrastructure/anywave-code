@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AWSETTINGS_H
@@ -28,16 +28,12 @@
 
 #include <QObject>
 #include <QSystemTrayIcon>
-//#include <QTranslator>
-//#include <AwMarker.h>
-//#include <AwFileInfo.h>
+#include <AwMarker.h>
+#include <QVariantMap>
 
-class AwFileInfo;
 class AwFileIO;
 class AwDisplaySetup;
 class AwMatlabInterface;
-
-#include <filter/AwFilterSettings.h>
 
 // defining keys for settings dictionnary
 namespace aws {
@@ -55,25 +51,28 @@ namespace aws {
 	// common dirs
 	constexpr auto home_dir = "home_dir";
 	constexpr auto python_module_dir = "python_module_dir";
+	constexpr auto python_package_dir = "python_package_dir";
 	constexpr auto app_dir = "app_dir";
 	constexpr auto app_resource_dir = "app_resource_dir";
 	constexpr auto app_plugins_dir = "app_plugins_dir";
 	constexpr auto app_matlab_plugins_dir = "app_matlab_plugins_dir";
 	constexpr auto app_python_plugins_dir = "app_python_plugins_dir";
 	constexpr auto mex_dir = "mex_dir";
-
+	// plugins
+	constexpr auto plugin_debug_mode = "plugin_debug";
+	constexpr auto server_port = "server_port";
 	// general
 	constexpr auto gui_active = "gui_active";
 	constexpr auto matlab_present = "matlab_present";
 	constexpr auto system_path = "system_path";
 	constexpr auto recent_files = "recent_files";
 	constexpr auto recent_bids = "recent_bids";
+	constexpr auto username = "username";
 	constexpr auto auto_trigger_parsing = "auto_trigger_parsing";
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";
-	//constexpr auto major_version = "major_version";
-	//constexpr auto minor_version = "minor_version";
+
 	constexpr auto update_url = "update_url";
 	constexpr auto ica_file = "ica_file";
 	constexpr auto last_captured_file = "last_captured_file";
@@ -112,17 +111,11 @@ public:
 #endif
 	void closeFile();
 
-	inline AwFileIO *currentReader() { return m_currentReader; }
-
-	void setReader(AwFileIO *reader, const QString& path);
-
-	inline AwFileInfo *fileInfo() { return m_fileInfo; }
 	inline AwDisplaySetup *displaySetup() { return m_setup; }
 	inline void setDisplaySetup(AwDisplaySetup *setup) { m_setup = setup; }
 	inline QSystemTrayIcon *sysTray() { return m_sysTrayIcon; }
 	inline AwMatlabInterface *matlabInterface() { return m_matlabInterface; }
 	inline void setMatlabInterface(AwMatlabInterface *i) { m_matlabInterface = i; }
-	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 	AwFileIO* readerAt(int index);
 	QStringList& topoLayouts(); 
 
@@ -135,17 +128,6 @@ public:
 
 	// predefined markers (Marker Inspector Tool)
 	AwMarkerList loadPredefinedMarkers();
-
-	// language specific
-	/** Load the language chosen by the user or the default locale matching one **/
-//	QString& language() { return m_language;}
-//	void loadLanguage(const QString& lang);
-//	void switchTranslator(QTranslator& translator, const QString& file);
-	//QTranslator translator;			// AnyWave
-	//QTranslator translatorQt;		// Qt
-	//QTranslator translatorGraphics;	// Graphics Lib
-	//QTranslator translatorWidgets;	// Widgets Lib
-	QString langPath;				// path to the folder containing the .qm files
 signals:
 	void markersColorChanged(const QStringList& colors);
 	void screenCalibrationChanged(float x, float y);
@@ -157,27 +139,19 @@ public slots:
 	void setAutoTriggerParsingOn(bool onoff);
 	void savePredefinedMarkers(const AwMarkerList& markers);
 protected:
-	//void loadLanguage();
 	QVariantMap m_settings;
 	
 	QList<AwFileIO *> m_readers;
-	AwFileInfo *m_fileInfo;
-	QStringList m_languages;			// list of available languages
-	QString m_language;					// current language
-	QStringList m_locales;				// locales strings 
+	//QStringList m_languages;			// list of available languages
+	//QString m_language;					// current language
+	//QStringList m_locales;				// locales strings 
 
 	AwFileIO *m_currentReader;
 	AwDisplaySetup *m_setup;
 	QSystemTrayIcon *m_sysTrayIcon;
-	//QTranslator m_anyWaveTranslator;
-	//QTranslator m_readWriteTranslator;
-	//QTranslator m_widgetTranslator;
 	AwMatlabInterface *m_matlabInterface;
-	// unique filter settings object.
-	AwFilterSettings m_filterSettings;
 private:
 	static AwSettings *m_instance;
-	
 };
 
 #endif // AWSETTINGS_H

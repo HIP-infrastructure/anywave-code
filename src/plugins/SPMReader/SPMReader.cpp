@@ -9,7 +9,7 @@ SPMReaderPlugin::SPMReaderPlugin() : AwFileIOPlugin()
 	manufacturer = "SPM";
 	version = QString("1.0");
 	fileExtensions << "*.mat";
-	m_flags = Aw::HasExtension | Aw::CanRead;
+	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
 
 SPMReader::SPMReader(const QString& fileName) : AwFileIO(fileName)

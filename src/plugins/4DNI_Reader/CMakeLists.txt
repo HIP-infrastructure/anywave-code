@@ -17,15 +17,8 @@ QT5_ADD_RESOURCES(4DNI_QRC ${CMAKE_SOURCE_DIR}/src/plugins/4DNI_Reader/montages.
 add_library(4DNIReader SHARED ${SRCS} ${4DNI_MOCS} ${4DNI_QRC})
 qt5_use_modules(4DNIReader Core)
 
-IF(APPLE)
-   target_link_libraries(4DNIReader AwCore AwReadWriteLib AwUtilities Qt5::Core)
-   INSTALL(TARGETS 4DNIReader DESTINATION ${CMAKE_INSTALL_PREFIX}/Anywave_Plugins)
-ELSE() # link with openmp lib on Linux
-   target_link_libraries(4DNIReader AwCore AwReadWrite AwUtilities Qt5::Core gomp)
-   INSTALL(TARGETS 4DNIReader DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
-ENDIF()
-
-
+target_link_libraries(4DNIReader AwCore AwReadWrite AwUtilities Qt5::Core)
+INSTALL(TARGETS 4DNIReader DESTINATION ${PLUGIN_INSTALL_DIR})
 
 
 

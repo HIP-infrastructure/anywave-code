@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>880</width>
-    <height>565</height>
+    <width>821</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>H² parameters</string>
+   <string>h²/r² parameters</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="C:/dev/AnyWaveGitlab/resources/AnyWave.qrc">
+   <iconset resource="../../../../AnyWaveGitlab/resources/AnyWave.qrc">
     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
   </property>
   <property name="sizeGripEnabled">
@@ -23,8 +23,8 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_5">
+   <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -63,8 +63,8 @@ p, li { white-space: pre-wrap; }
      </layout>
     </widget>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -79,68 +79,6 @@ p, li { white-space: pre-wrap; }
           <string>Computation parameters</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="3">
-           <widget class="QDoubleSpinBox" name="sbTimeWindow">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="suffix">
-             <string>s</string>
-            </property>
-            <property name="minimum">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>999999999999999993220948674361627976461708441944064.000000000000000</double>
-            </property>
-            <property name="value">
-             <double>2.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="5">
-           <widget class="QDoubleSpinBox" name="sbMaxLag">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="suffix">
-             <string>s</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>0.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>100000000000000009190283508143378238084034459715684532224.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="7">
            <widget class="QDoubleSpinBox" name="sbStep">
             <property name="sizePolicy">
@@ -178,6 +116,22 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Maximum lag:</string>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="6">
            <widget class="QLabel" name="label_4">
             <property name="sizePolicy">
@@ -194,8 +148,8 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QLabel" name="label_3">
+          <item row="0" column="2">
+           <widget class="QLabel" name="label">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -203,7 +157,7 @@ p, li { white-space: pre-wrap; }
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Maximum lag:</string>
+             <string>Time window:</string>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -226,6 +180,40 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
+          <item row="0" column="5">
+           <widget class="QDoubleSpinBox" name="sbMaxLag">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>70</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="suffix">
+             <string>s</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>100000000000000009190283508143378238084034459715684532224.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="1">
            <widget class="QComboBox" name="comboMethod">
             <item>
@@ -240,19 +228,31 @@ p, li { white-space: pre-wrap; }
             </item>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label">
+          <item row="0" column="3">
+           <widget class="QDoubleSpinBox" name="sbTimeWindow">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text">
-             <string>Time window:</string>
+            <property name="maximumSize">
+             <size>
+              <width>70</width>
+              <height>16777215</height>
+             </size>
             </property>
-            <property name="scaledContents">
-             <bool>true</bool>
+            <property name="suffix">
+             <string>s</string>
+            </property>
+            <property name="minimum">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999999999993220948674361627976461708441944064.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>2.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -268,10 +268,53 @@ p, li { white-space: pre-wrap; }
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Data input</string>
+          <string>Input/Output</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_4">
-          <item row="1" column="0">
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Downsample the data before computing</string>
+            </property>
+            <property name="text">
+             <string>Downsampling Factor:</string>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="comboDS">
+            <item>
+             <property name="text">
+              <string>x1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>x2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>x4</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>x8</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="3">
            <widget class="AwSelectInputDataWidget" name="widgetInputData" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -279,80 +322,28 @@ p, li { white-space: pre-wrap; }
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <layout class="QGridLayout" name="gridLayout_4"/>
            </widget>
           </item>
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label_5">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Downsampling:</string>
-              </property>
-              <property name="scaledContents">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="comboDS">
-              <item>
-               <property name="text">
-                <string>x1</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>x2</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>x4</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>x8</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+          <item row="2" column="0" colspan="2">
+           <widget class="QRadioButton" name="radioButton">
+            <property name="text">
+             <string>Save each section in a file</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QRadioButton" name="radioSaveInOneFile">
+            <property name="text">
+             <string>Save all in one file</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </item>
@@ -368,19 +359,6 @@ p, li { white-space: pre-wrap; }
         <string>Frequency Bands</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="0">
-         <widget class="QCheckBox" name="checkBroad">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Broad</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QCheckBox" name="checkAnyWave">
           <property name="sizePolicy">
@@ -397,8 +375,21 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="8" column="1">
-         <widget class="QDoubleSpinBox" name="spinGamma2HP">
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="checkBroad">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Broad</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="spinBroadHP">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -417,8 +408,36 @@ p, li { white-space: pre-wrap; }
           <property name="suffix">
            <string>Hz</string>
           </property>
-          <property name="decimals">
-           <number>2</number>
+          <property name="maximum">
+           <double>9999999999999999635896294965248.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QDoubleSpinBox" name="spinBroadLP">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="suffix">
+           <string>Hz</string>
           </property>
           <property name="maximum">
            <double>9999999999999999635896294965248.000000000000000</double>
@@ -427,7 +446,64 @@ p, li { white-space: pre-wrap; }
            <double>0.000000000000000</double>
           </property>
           <property name="value">
-           <double>55.000000000000000</double>
+           <double>45.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="checkDelta">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>delta</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="spinDeltaHP">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="suffix">
+           <string>Hz</string>
+          </property>
+          <property name="maximum">
+           <double>9999999999999999635896294965248.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -462,8 +538,8 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
-         <widget class="QCheckBox" name="checkGamma2">
+        <item row="4" column="0">
+         <widget class="QCheckBox" name="checkTheta">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -471,183 +547,7 @@ p, li { white-space: pre-wrap; }
            </sizepolicy>
           </property>
           <property name="text">
-           <string>gamma2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="7" column="2">
-         <widget class="QDoubleSpinBox" name="spinGammaLP">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="suffix">
-           <string>Hz</string>
-          </property>
-          <property name="maximum">
-           <double>9999999999999999635896294965248.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>45.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QCheckBox" name="checkDelta">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>delta</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QDoubleSpinBox" name="spinAlphaHP">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="suffix">
-           <string>Hz</string>
-          </property>
-          <property name="maximum">
-           <double>9999999999999999635896294965248.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>8.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QCheckBox" name="checkGamma">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>gamma</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QDoubleSpinBox" name="spinBetaHP">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="suffix">
-           <string>Hz</string>
-          </property>
-          <property name="maximum">
-           <double>9999999999999999635896294965248.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>15.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QCheckBox" name="checkBeta">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>beta</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QDoubleSpinBox" name="spinDeltaHP">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="suffix">
-           <string>Hz</string>
-          </property>
-          <property name="maximum">
-           <double>9999999999999999635896294965248.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
+           <string>theta</string>
           </property>
          </widget>
         </item>
@@ -720,21 +620,8 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QCheckBox" name="checkTheta">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>theta</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QDoubleSpinBox" name="spinGammaHP">
+        <item row="5" column="1">
+         <widget class="QDoubleSpinBox" name="spinAlphaHP">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -760,12 +647,56 @@ p, li { white-space: pre-wrap; }
            <double>0.000000000000000</double>
           </property>
           <property name="value">
-           <double>30.000000000000000</double>
+           <double>8.000000000000000</double>
           </property>
          </widget>
         </item>
         <item row="5" column="2">
          <widget class="QDoubleSpinBox" name="spinAlphaLP">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="suffix">
+           <string>Hz</string>
+          </property>
+          <property name="maximum">
+           <double>9999999999999999635896294965248.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>15.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QCheckBox" name="checkBeta">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>beta</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QDoubleSpinBox" name="spinBetaHP">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -826,6 +757,128 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item row="7" column="0">
+         <widget class="QCheckBox" name="checkGamma">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>gamma</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QDoubleSpinBox" name="spinGammaHP">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="suffix">
+           <string>Hz</string>
+          </property>
+          <property name="maximum">
+           <double>9999999999999999635896294965248.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>30.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="2">
+         <widget class="QDoubleSpinBox" name="spinGammaLP">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="suffix">
+           <string>Hz</string>
+          </property>
+          <property name="maximum">
+           <double>9999999999999999635896294965248.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>45.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QCheckBox" name="checkGamma2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>gamma2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
+         <widget class="QDoubleSpinBox" name="spinGamma2HP">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="suffix">
+           <string>Hz</string>
+          </property>
+          <property name="decimals">
+           <number>2</number>
+          </property>
+          <property name="maximum">
+           <double>9999999999999999635896294965248.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>55.000000000000000</double>
+          </property>
+         </widget>
+        </item>
         <item row="8" column="2">
          <widget class="QDoubleSpinBox" name="spinGamma2LP">
           <property name="enabled">
@@ -857,65 +910,16 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="spinBroadHP">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
+        <item row="9" column="0">
+         <widget class="QCheckBox" name="checkRipple">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="suffix">
-           <string>Hz</string>
-          </property>
-          <property name="maximum">
-           <double>9999999999999999635896294965248.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QDoubleSpinBox" name="spinBroadLP">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="suffix">
-           <string>Hz</string>
-          </property>
-          <property name="maximum">
-           <double>9999999999999999635896294965248.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>45.000000000000000</double>
+          <property name="text">
+           <string>ripple</string>
           </property>
          </widget>
         </item>
@@ -984,19 +988,6 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="value">
            <double>250.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
-         <widget class="QCheckBox" name="checkRipple">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>ripple</string>
           </property>
          </widget>
         </item>
@@ -1086,8 +1077,8 @@ p, li { white-space: pre-wrap; }
      </item>
     </layout>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_6">
+   <item row="2" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
@@ -1095,7 +1086,7 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>341</width>
          <height>20</height>
         </size>
        </property>
@@ -1129,7 +1120,7 @@ p, li { white-space: pre-wrap; }
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Cancel</string>
+        <string>Close</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
@@ -1149,7 +1140,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="C:/dev/AnyWaveGitlab/resources/AnyWave.qrc"/>
+  <include location="../../../../AnyWaveGitlab/resources/AnyWave.qrc"/>
  </resources>
  <connections>
   <connection>

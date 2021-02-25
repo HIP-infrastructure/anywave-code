@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef AW_MARKINGSETTINGS_H
@@ -28,6 +28,7 @@
 #include <AwGlobal.h>
 #include <AwMarker.h>
 #include <QObject>
+#include <QVector>
 
 class AW_WIDGETS_EXPORT AwMarkingSettings : public QObject
 {
@@ -45,6 +46,9 @@ public:
 		autoTargetChannel = false;
 		m_spaceBarIndex = 0;
 	}
+	void setPredefinedMarkers(const AwMarkerList& markers);
+	AwMarkerList getSelectedPredefinedMarkers();
+
 	int type;						// current marker type
 	bool isUsingList;				// true if we are using a predefined list of markers
 	QString label;					// marker label
@@ -53,12 +57,13 @@ public:
 	bool isTargettingChannels;		// true if marking is targeting predefined channels
 	QStringList targets;			// labels of predefined targets
 	int index;						// used while auto incrementing
-	AwMarkerList list;				// The predefined list of markers
+	AwMarkerList predefinedMarkers;	// The predefined list of markers
+	QVector<int> selectedPredefinedMarkers;
 	bool autoTargetChannel;			// true if the channel under the mouse will be used as target
 	bool usingSpacebar;				// true if using spacebar binding
 	QString color;					// color to set for the marker
-	AwMarker *spaceBarNext();
-	void setBoundMarkers(AwMarkerList& markers);
+//	AwMarker *spaceBarNext();
+//	void setBoundMarkers(AwMarkerList& markers);
 protected:
 	int m_spaceBarIndex;				// current index in boundMarkers 
 	AwMarkerList m_boundMarkers;		// List of markers used with spacebar 

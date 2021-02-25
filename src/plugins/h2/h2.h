@@ -33,8 +33,6 @@
 #include "H2Params.h"
 #include <matlab/AwMATLAB.h>
 class H2MainGui;
-//#include <armadillo>
-//using namespace arma;
 
 namespace Global {
 	namespace Method {
@@ -46,6 +44,17 @@ typedef struct {
 	QString name;
 	float hp, lp;
 } FreqBand;
+
+
+namespace h2 {
+	constexpr auto several_result_files = "several_result_files";
+	constexpr auto time_window = "time_window";
+	constexpr auto max_lag = "max_lag";
+	constexpr auto step = "step";
+	constexpr auto algorithm = "algorithm";
+	constexpr auto downsampling_factor = "downsampling_factor";
+}
+
 
 class H2_EXPORT H2 : public AwProcess
 {
@@ -75,8 +84,6 @@ public:
 	float maxLag() { return m_maxLag; }
 	void setMaxLag(float ml) { m_maxLag = ml; }
 
-	QString matlabFile() { return m_MatlabBaseFilePath; }
-	void setMatlabFile(QString file) { m_MatlabBaseFilePath = file; }
 	// Launch H2 on specific event on a channel.
 	QString markerTrigger() { return m_markerTrigger; }
 	void setTriggerMarker(QString trigger) { m_markerTrigger = trigger; }
@@ -85,7 +92,7 @@ public:
 	float postTriggerTime() { return m_postTrigger; }
 	void setPostTriggerTime(float time) { m_postTrigger = time; }
 
-	int saveToMatlab(const QString& fileName);
+	int saveToMatlab(const QString& fileName, H2_run *run = nullptr);
 public slots: // used to expose method to qml script
 	void setFreqBand(QString name, float hp, float lp);
 private slots:

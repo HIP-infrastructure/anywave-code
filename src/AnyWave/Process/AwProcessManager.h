@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This software is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,14 +35,14 @@
 #include "Script/AwScriptDefines.h"
 #include <QDockWidget>
 #include <QMutex>
-#include <AwFileIO.h>
+
 
 
 class QSplashScreen;
 class QScriptEngine;
 class AwScriptProcessFileInput;
 class AwProcessesWidget;
-
+class AwDataManager;
 
 class AwDisplayProcessRegistration 
 {
@@ -76,6 +76,7 @@ public:
 	QList<QAction *>& icaActions() { return m_icaActions; }
 	void runBuiltInProcess(AwBuiltInProcess *process);
 	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList());
+	void initProcessSettings(AwBaseProcess* process);
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
 	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
 	void startProcess(const QString& name, const QStringList& args = QStringList());
@@ -91,11 +92,12 @@ public:
 
 	inline bool processesAreRunning() { return !m_runningProcesses.isEmpty(); }
 	inline bool activeDisplayProcesses() { return !m_activeDisplayProcess.isEmpty(); }
-	inline void setCurrentReader(AwFileIO *reader) { m_currentReader = reader; }
 	inline void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline QWidget *processesWidget() { return (QWidget *)m_processesWidget; }
 	inline QDockWidget *dock() { return m_dock; }
+	inline QString& lastErrorString() { return m_errorString; }
 
+	int buildProcessPDI(AwBaseProcess* process, AwDataManager *dm = nullptr);
 
 public slots:
 	void startProcessFromMenu();
@@ -103,13 +105,14 @@ public slots:
 	void startDisplayProcesses(AwChannelList& channels);
 	void stopProcess(AwProcess *process);
 	void executeCommand(int command, QVariantList args);
+	void executeCommand(const QVariantMap&);
 	void manageMemoryError();
 	void errorMessage(const QString& message);
 	void enableMenus();
-	void retranslate();
+//	void retranslate();
 	void launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end);
-protected slots:
-	void removeGUIProcess();
+//protected slots:
+//	void removeGUIProcess();
 signals:
 	void newMarkersAvailable(const AwMarkerList &markers);
 	void processFinished(AwProcess *process);
@@ -120,13 +123,18 @@ signals:
 	// signals for specific interpreted commands
 	void displayCommandRequested(int command, const QVariantList& args);
 	void aboutToQuit(); // sent to processes when AnyWave is closing
+
+	// signals relative to command sent by processes
+	// transmit the command to Display object
+	void displayCommand(const QVariantMap&);
 protected:
 	void addProcess(AwProcessPlugin *plugin);
 	void addProcessToMenu(AwProcessPlugin *plugin);
 	bool initProcessIO(AwBaseProcess *p);
-	bool buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources = AwChannelList());
+//	bool buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources = AwChannelList());
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);
+	int applyUseSkipMarkersKeys(AwBaseProcess* process);
 	
 private:
 	/* Warn the user that the process is about to be launched with all channels as input. */
@@ -141,7 +149,7 @@ private:
 	QList<AwProcess *> m_activeInternals;
 	QList<AwProcess *> m_activeDisplayProcess;
 	QList<AwProcess *> m_runningProcesses;
-	QList<AwGUIProcess *> m_GUIProcesses;
+	QList<AwBaseProcess*> m_GUIProcesses;
 	QMenu *m_processMenu;	// reflects the menu populated with process that belong to the Process category
 	QMenu *m_fileMenu;		// reflects the menu populated with process that belong to the File category
 	QMenu *m_viewMenu;		// reflects the menu populated with process that belong to the View category
@@ -150,9 +158,9 @@ private:
 	QStringList m_subProcessMenuNames;	// corresponding menu titles
 	QList<QAction *> m_actions;
 	QHash<QString, QAction *> m_hashProcessAction;
-	QList<AwDisplayProcessRegistration *> m_registeredDisplayProcesses;
-	AwFileIO *m_currentReader;
+	QList<AwDisplayProcessRegistration*> m_registeredDisplayProcesses;
 	AwProcessesWidget *m_processesWidget;
+	QString m_errorString;
 	static AwProcessManager *m_instance;
 	// Script related
 	QMutex m_mutex;

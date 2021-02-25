@@ -55,18 +55,10 @@
     <ClCompile Include="AwSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDataBuffer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDataBuffer.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDataClient.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDataClient.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
+    
+    
+    
+    
     <ClCompile Include="AwChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -98,11 +90,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\include\AwDataBuffer.h">
+    <QtMoc Include="..\..\include\AwDataBuffer.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\include\AwDataClient.h">
+    </QtMoc>
+    <QtMoc Include="..\..\include\AwDataClient.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
+    </QtMoc>
   </ItemGroup>
 </Project>

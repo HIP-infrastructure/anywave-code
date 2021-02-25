@@ -45,8 +45,9 @@ void AwProcessesWidget::clear()
 		QListWidgetItem *item = listWidget->item(i);
 		AwProcessWidget *pw = (AwProcessWidget *)listWidget->itemWidget(item);
 		pw->clear();
-		delete item;
+		//delete item;
 	}
+	listWidget->clear();
 }
 
 void AwProcessesWidget::addWidget(AwProcessWidget *pw)

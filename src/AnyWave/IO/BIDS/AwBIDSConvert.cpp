@@ -7,8 +7,8 @@
 #include <AwException.h>
 #include "Marker/AwExtractTriggers.h"
 #include <AwCore.h>
+#include <AwKeys.h>
 #include <montage/AwMontage.h>
-
 
 void AwBIDSManager::toBIDS(const AwArguments& args)
 {
@@ -102,6 +102,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		emit log(QString("Could not open the file %1").arg(filePath));
 		return -1;
 	}
+
 	auto outputDir = args["output_dir"].toString();
 	bool headshapeExists = false;
 
@@ -263,7 +264,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		emit log(QString("found %1 values. done.").arg(extractT._markers.size()));
 	}
 	// merge markers from .mrk file and those found/detected  in the data file.
-	auto markerFile = reader->getSideFile(".mrk");
+	auto markerFile = reader->infos.mrkFile();
 	if (QFile::exists(markerFile)) {
 		emit log(QString("found %1 file, merging the markers...").arg(markerFile));
 		auto mrkMarkers = AwMarker::load(markerFile);
@@ -272,13 +273,29 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		emit log(QString("%1 markers total.").arg(markers.size()));
 	}
 
+	if (args.contains(keys::skip_markers)) {
+		auto labels = args.value(keys::skip_markers).toStringList();
+		AwMarkerList tmp = AwMarker::getMarkersWithLabels(markers, labels);
+		for (auto t : tmp) {
+			emit log(QString("Skipped marker %1").arg(t->label()));
+			markers.removeAll(t);
+			delete t;
+		}
+	}
+	if (args.contains(keys::use_markers)) {
+		auto labels = args.value(keys::use_markers).toStringList();
+		AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
+		AW_DESTROY_LIST(markers);
+		markers = tmp;
+	}
+
 	if (createEventsTsv(events_tsv, markers) == -1 && !m_errorString.isEmpty()) {
 		emit log(m_errorString);
 	}
 	AW_DESTROY_LIST(markers);
 
 	// check for bad file
-	auto badFile = reader->getSideFile(".bad");
+	auto badFile = reader->infos.badFile();
 	if (QFile::exists(badFile)) {
 		auto badLabels = AwMontage::loadBadChannels(badFile);
 		if (!badLabels.isEmpty()) {
@@ -379,7 +396,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		return -1;
 	}
 
-	QString ext = "edf";
+	QString ext = "vhdr";
 	auto outputDir = args["output_dir"].toString();
 
 	// default output dir if the directory where the file is located.
@@ -390,7 +407,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 
 	auto format = args["bids_format"].toString();
 	if (format.isEmpty()) {
-		ext = "edf"; // default output format
+		ext = "vhdr"; // default output format
 	}
 	else {
 		if (format.toLower() == "edf")
@@ -460,13 +477,30 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
 	events_tsv = QString("%1_events.tsv").arg(events_tsv);
 
-	auto markerFile = reader->getSideFile(".mrk");
+	auto markerFile = reader->infos.mrkFile();
 	auto markers = AwMarker::duplicate(reader->infos.blocks().first()->markers());
 	if (QFile::exists(markerFile)) {
 		auto temp = AwMarker::load(markerFile);
 		markers += temp;
 		AwMarker::removeDoublons(markers);
 	}
+
+	if (args.contains(keys::skip_markers)) {
+		auto labels = args.value(keys::skip_markers).toStringList();
+		AwMarkerList tmp = AwMarker::getMarkersWithLabels(markers, labels);
+		for (auto t : tmp) {
+			emit log(QString("Skipped marker %1").arg(t->label()));
+			markers.removeAll(t);
+			delete t;
+		}
+	}
+	if (args.contains(keys::use_markers)) {
+		auto labels = args.value(keys::use_markers).toStringList();
+		AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
+		AW_DESTROY_LIST(markers);
+		markers = tmp;
+	}
+
 	// create events.tsv file
 	// do this after file conversion because the conversion will merge channels from .mrk file and channels inside the data file.
 	if (createEventsTsv(events_tsv, markers) == -1 && !m_errorString.isEmpty()) {
@@ -499,7 +533,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	AW_DESTROY_LIST(markers);
 	
 	// check for bad file
-	auto badFile = reader->getSideFile(".bad");
+	auto badFile = reader->infos.badFile();
 	if (QFile::exists(badFile)) {
 		auto badLabels = AwMontage::loadBadChannels(badFile);
 		if (!badLabels.isEmpty()) {
@@ -537,7 +571,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 				stream << "ECG" << "\t" << "microV" << "\t";
 				countECG++;
 			}
-			else if (c->type() == AwChannel::SEEG || (c->type() == AwChannel::EEG && mod == "seeg")) {
+			else if (c->type() == AwChannel::SEEG || (c->type() == AwChannel::EEG && mod == "ieeg")) {
 				stream << "SEEG" << "\t" << "microV" << "\t";
 				countSEEG++;
 			}

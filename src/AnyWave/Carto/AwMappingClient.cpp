@@ -24,8 +24,9 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMappingClient.h"
-#include "Prefs/AwSettings.h"
+#include "Data/AwDataManager.h"
 #include "Data/AwDataServer.h"
+#include "Prefs/AwSettings.h"
 #include <AwFileIO.h>
 #include <math.h>
 #include <armadillo>
@@ -36,7 +37,7 @@ AwMappingClient::AwMappingClient(int type)
 	m_isAConnectionActive = false;
 
 	// get current reader and extract channels matching type
-	AwFileIO *reader = AwSettings::getInstance()->currentReader();
+	AwFileIO *reader = AwDataManager::instance()->reader();
 	for (auto c : reader->infos.channels()) {
 		if (c->type() == type)	{
 			m_channels << new AwChannel(c);
@@ -58,7 +59,7 @@ void AwMappingClient::openConnection()
 	if (!m_isAConnectionActive)	{
 		AwDataServer::getInstance()->openConnection(this);
 		m_isAConnectionActive = true;
-		AwFilterSettings *fs = &AwSettings::getInstance()->filterSettings();
+		AwFilterSettings *fs = &AwDataManager::instance()->filterSettings();
 		connect(fs, &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
 		fs->apply(m_channels);
 	}
@@ -68,7 +69,7 @@ void AwMappingClient::closeConnection()
 {
 	AwDataServer::getInstance()->closeConnection(this);
 	m_isAConnectionActive = false;
-	disconnect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
+	disconnect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwMappingClient::setNewFilters);
 }
 
 void AwMappingClient::setNewFilters(const AwFilterSettings& settings)

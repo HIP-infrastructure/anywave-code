@@ -35,10 +35,13 @@ public:
 	AwScriptProcess() : AwProcess() { m_isCompiled = false;  m_pid = -1; }
 	void setScriptPath(const QString& path) { m_path = path; }
 	inline void setPid(int pid) { m_pid = pid; }
-	inline int pid() { return m_pid; }
+	inline int pid() const { return m_pid; }
 	void setCompiled(bool flag = true) { m_isCompiled = flag; }
 	/** calls to runFromCommandLine redirected to run() : command line run options. **/
 	void runFromCommandLine() override { run(); }
+
+	// Map to hold int values associated with text flags name
+	static QMap<QString, int> pluginFlags;
 protected:
 	QString m_path;	// path to plugin executable file (optional)
 	bool m_isCompiled; // used for MATLAB compiled plugin
@@ -51,7 +54,8 @@ class AwScriptPlugin : public AwProcessPlugin
 public:
 	AwScriptPlugin() : AwProcessPlugin() { type = AwProcessPlugin::Background; m_isCompiled = false;}
 	enum Backends { Python, MATLAB};
-	void setNameAndDesc(const QString& name, const QString& description);
+	void init(const QMap<QString, QString>& map);
+	//void setNameAndDesc(const QString& name, const QString& description);
 	void setScriptPath(const QString& path) { m_path = path; }
 	void setPluginDir(const QString& dir) { m_pluginDir = dir; }
 	void setPluginBackend(int backend) { m_backend = backend; }
@@ -62,7 +66,6 @@ public:
 protected:
 	bool m_isCompiled;
 	int m_inputFlags;	// input flags to set when instantiating the process.
-	void checkIOForProcess(AwScriptProcess *p);
 	QString m_path;			// path to script or executable file
 	QString m_pluginDir;	// path to the directory where the plugin is installed.
 	int m_backend;	// either Python or MATLAB

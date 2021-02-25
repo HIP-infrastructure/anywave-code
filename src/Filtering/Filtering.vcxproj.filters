@@ -99,46 +99,23 @@
     <ClCompile Include="AwFilterSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterModel.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterModel.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterSettings.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterSettings.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterGUI.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterGUI.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterTableView.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterTableView.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
+    
+    
+    
+    
+    
+    
+    
     <ClCompile Include="AwFilterTableView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterAddButton.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
     <ClCompile Include="AwFilterAddButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterAddButton.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
     <ClCompile Include="AwFilterPlugin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AwFilterSettingsStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -218,9 +195,7 @@
     <ClInclude Include="..\..\include\filter\AwFiltering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwFilterGUI.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
+    
     <ClInclude Include="..\..\include\filter\AwFilterPlugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -229,23 +204,23 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="AwFilterModel.h">
+    <QtMoc Include="AwFilterModel.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\include\filter\AwFilterSettings.h">
+    </QtMoc>
+    <QtMoc Include="..\..\include\filter\AwFilterSettings.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwFilterGUI.h">
+    </QtMoc>
+    <QtMoc Include="AwFilterGUI.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwFilterGUI.ui">
+    </QtMoc>
+    <QtUic Include="AwFilterGUI.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\include\filter\AwFilterTableView.h">
+    </QtUic>
+    <QtMoc Include="..\..\include\filter\AwFilterTableView.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwFilterAddButton.h">
+    </QtMoc>
+    <QtMoc Include="AwFilterAddButton.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
+    </QtMoc>
   </ItemGroup>
 </Project>

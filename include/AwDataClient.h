@@ -54,14 +54,17 @@ class AW_CORE_EXPORT AwDataClient : public QObject
 	Q_OBJECT
 	friend class AwDataConnection;
 	friend class AwDataBuffer;
+	friend class AwDataManager;
 public:
 	AwDataClient(QObject *parent = NULL);
-	virtual ~AwDataClient() { }
+//	virtual ~AwDataClient() { }
 
 	inline bool endOfData() { return m_endOfData; }
 	void requestData(AwChannelList *channels, AwMarker *marker, bool rowData = false, bool doNotWakeUpClient = false);
 	void requestData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
 	void requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
+
+	void selectChannels(const QVariantMap&, AwChannelList* channels);
 	void setConnected(bool flag = true) { m_isConnected = flag; }
 	inline bool isConnected() { return m_isConnected;  }
 	QWaitCondition& waitForData() { return m_wcDataAvailable; }
@@ -72,9 +75,10 @@ signals:
 	void needData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
 	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false, bool doNotWakeUpClient = false);
 	void needData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
+	void selectChannelsRequested(AwDataClient *,const QVariantMap& settings, AwChannelList* channels);
 protected:
-	QWaitCondition m_wcDataAvailable;
-	QMutex m_mutexDataAvailable;
+	QWaitCondition m_wcDataAvailable, m_wcSelectChannelsDone;
+	QMutex m_mutexDataAvailable, m_mutexSelectChannels;
 	bool m_endOfData, m_isConnected, m_errorOccured;
 	QString m_errorString;	// hold a string containing a message describing the error
 };

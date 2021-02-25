@@ -11,6 +11,7 @@
 #include <filter/AwFiltering.h>
 #include <widget/AwWait.h>
 #include "AwPanelItem.h"
+#include "Data/AwDataManager.h"
 
 
 AwICAComponents::AwICAComponents(int type, QObject *parent)
@@ -21,7 +22,7 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
-	connect(&AwSettings::getInstance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwICAComponents::setNewFilters);
+	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwICAComponents::setNewFilters);
 }
 
 AwICAComponents::~AwICAComponents()
@@ -178,28 +179,31 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 	}
 
 	// force current filter settings to match those store in the ICA file.
-	AwSettings::getInstance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, 0.);
-	AwSettings::getInstance()->filterSettings().apply(m_sources);
-	float sr = m_sources.at(0)->samplingRate();
-
+	AwDataManager::instance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, 0.);
+	AwDataManager::instance()->filterSettings().apply(m_sources);
+	auto dm = AwDataManager::instance();
+	//float sr = m_sources.at(0)->samplingRate();
+	float sr = dm->value(data_info::max_sr).toFloat();
+	// get reader 
+	auto reader = dm->reader();
 	// get layout
 	AwLayout *l = NULL, *l3D = NULL;
 	if (m_type == AwChannel::MEG) {
-		l = AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L2D | AwLayout::MEG);
-		l3D = AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L3D | AwLayout::MEG);
+		l = AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L2D | AwLayout::MEG);
+		l3D = AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L3D | AwLayout::MEG);
 	}
 	else {
-		l = AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L2D | AwLayout::EEG);
-		l3D = AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L3D | AwLayout::EEG);
+		l = AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L2D | AwLayout::EEG);
+		l3D = AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L3D | AwLayout::EEG);
 	}
 
 	if (l == NULL && m_type == AwChannel::MEG) {
-		l = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L2D | AwLayout::MEG);
-		l3D = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L3D | AwLayout::MEG);
+		l = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L2D | AwLayout::MEG);
+		l3D = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L3D | AwLayout::MEG);
 	}
 	else if (l == NULL && m_type == AwChannel::EEG) {
-		l = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L2D | AwLayout::EEG);
-		l3D = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L3D | AwLayout::EEG);
+		l = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L2D | AwLayout::EEG);
+		l3D = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L3D | AwLayout::EEG);
 	}
 	// unmixing matrix is ncomp x nchannels.
 	// each line is a component topography
@@ -280,28 +284,32 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 		}
 	}
 	// force current filter settings to match those store in the ICA file.
-	AwSettings::getInstance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, 0.);
-	AwSettings::getInstance()->filterSettings().apply(m_sources);
-	float sr = m_sources.at(0)->samplingRate();
+	AwDataManager::instance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, 0.);
+	AwDataManager::instance()->filterSettings().apply(m_sources);
+	auto dm = AwDataManager::instance();
+	//float sr = m_sources.at(0)->samplingRate();
+	float sr = dm->value(data_info::max_sr).toFloat();
+	// get reader 
+	auto reader = dm->reader();
 
 	// get layout
 	AwLayout *l = NULL, *l3D = NULL;
 	if (m_type == AwChannel::MEG) {
-		l = AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L2D|AwLayout::MEG);
-		l3D =  AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L3D|AwLayout::MEG);
+		l = AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L2D|AwLayout::MEG);
+		l3D =  AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L3D|AwLayout::MEG);
 	}
 	else {
-		l = AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L2D|AwLayout::EEG);
-		l3D = AwLayoutManager::instance()->layoutFromFile(AwSettings::getInstance()->currentReader(), AwLayout::L3D|AwLayout::EEG);
+		l = AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L2D|AwLayout::EEG);
+		l3D = AwLayoutManager::instance()->layoutFromFile(reader, AwLayout::L3D|AwLayout::EEG);
 	}
 
 	if (l == NULL && m_type == AwChannel::MEG) {
-		l = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L2D|AwLayout::MEG);
-		l3D = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L3D|AwLayout::MEG);
+		l = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L2D|AwLayout::MEG);
+		l3D = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L3D|AwLayout::MEG);
 	}
 	else if (l == NULL && m_type == AwChannel::EEG) {
-		l = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L2D|AwLayout::EEG);
-		l3D = AwLayoutManager::instance()->guessLayout(AwSettings::getInstance()->currentReader(), AwLayout::L3D|AwLayout::EEG);
+		l = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L2D|AwLayout::EEG);
+		l3D = AwLayoutManager::instance()->guessLayout(reader, AwLayout::L3D|AwLayout::EEG);
 	}
 
 	// unmixing matrix is ncomp x nchannels.

@@ -106,11 +106,18 @@ public:
 
   	static AwPluginManager *getInstance();
 
+	/// <summary>
+	/// load() - load all plugins in app and user dirs
+	/// </summary>
+	void load(); 
 	inline AwReaders& readers() { return m_readers;  }
 	inline AwWriters& writers() { return m_writers; }
 	inline AwProcesses& processes() { return m_processes; }
 	inline AwDisplays& displays() { return m_displays; }
 	inline AwFilters& filters() { return m_filters; }
+
+	QMap<QString, int>& flagsMap() {  return m_MATPyPluginFlagsMap; }
+	QMap<QString, int>& inputFlagsMap() { return m_MATPyInputFlagsMap; 	}
 
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
@@ -161,9 +168,10 @@ private:
 	void loadFilterPlugin(AwFilterPlugin *plugin);
 	void processJsonFiles();
 
+
 	// Plugins
 	static AwPluginManager *m_instance;
-	QDir m_pluginsDir;
+	//QDir m_pluginsDir;
 	QList<QObject *> m_pluginList;
 	AwReaders m_readers;
 	AwWriters m_writers;

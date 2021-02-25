@@ -41,7 +41,7 @@ GraphWindow::GraphWindow(GraphSet *gs, QWidget *parent)
 	: QWidget(parent)
 {
 	m_ui.setupUi(this);
-	connect(this, &GraphWindow::sendCommand, H2Graphs::instance(), &H2Graphs::sendCommand);
+	connect(this, SIGNAL(sendCommand(int, QVariantList)), H2Graphs::instance(), SIGNAL(sendCommand(int, QVariantList)));
 	// change window title
 	setWindowTitle(QString("%1:%2Hz-%3Hz:%4").arg(gs->band).arg(gs->hp).arg(gs->lp).arg(gs->method));
 	m_labels = gs->labels;

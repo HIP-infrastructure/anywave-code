@@ -50,6 +50,6 @@ class AwMatlabScriptPlugin : public AwScriptPlugin
 public:
 	AwMatlabScriptPlugin() : AwScriptPlugin() { m_backend = AwScriptPlugin::MATLAB; }
 
-	AwMatlabScriptProcess *newInstance();
+	AwMatlabScriptProcess* newInstance();
 };
 #endif // AWMATLABSCRIPTPLUGIN_H

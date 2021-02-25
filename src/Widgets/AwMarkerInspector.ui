@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
-    <height>756</height>
+    <width>506</width>
+    <height>597</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,28 +33,15 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Marker type</string>
+      <string>Marker properties</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QRadioButton" name="radioSelection">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Selection</string>
-          </property>
-         </widget>
-        </item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
          <widget class="QRadioButton" name="radioSingle">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -68,15 +55,102 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkPredefined">
+         <widget class="QRadioButton" name="radioSelection">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Selection</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0">
+        <item>
+         <widget class="QLabel" name="labelName">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Label:</string>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditName">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelValue">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>Use predefined markers</string>
+           <string>Value:</string>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="buddy">
+           <cstring>spinValue</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spinValue">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="minimum">
+           <double>-1.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000000000000000013287555072.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>-1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -94,6 +168,19 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkAutoInc">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Auto increment</string>
           </property>
          </widget>
         </item>
@@ -116,9 +203,39 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_13">
+     <item>
+      <widget class="QCheckBox" name="checkPredefined">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Use predefined markers</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_11">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QGroupBox" name="groupBoxPredefined">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -156,11 +273,11 @@
         <attribute name="horizontalHeaderCascadingSectionResizes">
          <bool>false</bool>
         </attribute>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>200</number>
-        </attribute>
         <attribute name="horizontalHeaderMinimumSectionSize">
          <number>30</number>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>200</number>
         </attribute>
         <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
          <bool>false</bool>
@@ -180,7 +297,7 @@
         <item>
          <widget class="QPushButton" name="buttonAddMarker">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -206,7 +323,7 @@
         <item>
          <widget class="QPushButton" name="buttonRemoveSelection">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -219,7 +336,7 @@
         <item>
          <widget class="QPushButton" name="buttonClearList">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -237,13 +354,13 @@
    <item>
     <widget class="QGroupBox" name="groupBoxSettings">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Properties</string>
+      <string>Target type</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
@@ -346,9 +463,9 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="buttonClearTargets">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -364,7 +481,7 @@
         <item>
          <widget class="QPushButton" name="buttonAddChannels">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -379,287 +496,8 @@
         </item>
        </layout>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="QLabel" name="labelName">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Label:</string>
-          </property>
-          <property name="scaledContents">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEditName">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="checkAutoInc">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Auto increment</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_7">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <widget class="QLabel" name="labelValue">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Value:</string>
-          </property>
-          <property name="scaledContents">
-           <bool>true</bool>
-          </property>
-          <property name="buddy">
-           <cstring>spinValue</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="spinValue">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimum">
-           <double>-1.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>1000000000000000013287555072.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>-1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
      </layout>
     </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBoxShortcuts">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>Keyboard shortcuts</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <item>
-         <widget class="QCheckBox" name="checkBindingActive">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Use the spacebar</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_10">
-        <item>
-         <widget class="QLabel" name="labelBrowse">
-          <property name="text">
-           <string>Browse through:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
-        <item>
-         <widget class="QRadioButton" name="radioLabels">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Marker's label:</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboLabels">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_12">
-        <item>
-         <widget class="QRadioButton" name="radioValues">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Marker's value:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboValues">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_9">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
@@ -675,8 +513,8 @@
    <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>57</x>
-     <y>369</y>
+     <x>77</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>66</x>
@@ -691,8 +529,8 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>229</x>
-     <y>373</y>
+     <x>297</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>173</x>
@@ -707,12 +545,12 @@
    <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>370</y>
+     <x>107</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
-     <x>332</x>
-     <y>599</y>
+     <x>527</x>
+     <y>647</y>
     </hint>
    </hints>
   </connection>
@@ -723,12 +561,12 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>202</x>
-     <y>368</y>
+     <x>297</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
-     <x>312</x>
-     <y>597</y>
+     <x>527</x>
+     <y>647</y>
     </hint>
    </hints>
   </connection>
@@ -739,12 +577,12 @@
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>45</y>
+     <x>146</x>
+     <y>116</y>
     </hint>
     <hint type="destinationlabel">
-     <x>305</x>
-     <y>74</y>
+     <x>314</x>
+     <y>200</y>
     </hint>
    </hints>
   </connection>
@@ -755,8 +593,8 @@
    <slot>addPredefinedMarker()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>64</x>
-     <y>302</y>
+     <x>84</x>
+     <y>364</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
@@ -771,8 +609,8 @@
    <slot>clearPredefinedMarkers()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
-     <y>303</y>
+     <x>527</x>
+     <y>364</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -787,8 +625,8 @@
    <slot>removeSelectedPredefinedMarkers()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
-     <y>306</y>
+     <x>399</x>
+     <y>364</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -803,8 +641,8 @@
    <slot>changeUsePredefined(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>42</y>
+     <x>146</x>
+     <y>116</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -819,8 +657,8 @@
    <slot>addTargets()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>283</x>
-     <y>591</y>
+     <x>527</x>
+     <y>647</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -835,8 +673,8 @@
    <slot>changeTargetChannels(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>223</x>
-     <y>367</y>
+     <x>297</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -851,8 +689,8 @@
    <slot>changeTargetChannels(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>35</x>
-     <y>369</y>
+     <x>55</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>5</x>
@@ -861,174 +699,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>checkBindingActive</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>radioLabels</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>77</x>
-     <y>722</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>92</x>
-     <y>782</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBindingActive</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>comboLabels</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>130</x>
-     <y>724</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>191</x>
-     <y>772</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBindingActive</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>labelBrowse</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>112</x>
-     <y>724</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>64</x>
-     <y>751</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBindingActive</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>radioValues</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>68</x>
-     <y>722</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>47</x>
-     <y>804</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBindingActive</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>comboValues</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>78</x>
-     <y>723</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>174</x>
-     <y>807</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBindingActive</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>AwMarkerInspectorUI</receiver>
-   <slot>changeUseShortcut(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>141</x>
-     <y>725</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>365</x>
-     <y>837</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioLabels</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>AwMarkerInspectorUI</receiver>
-   <slot>changeKeyBinding()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>69</x>
-     <y>772</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>4</x>
-     <y>865</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioValues</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>AwMarkerInspectorUI</receiver>
-   <slot>changeKeyBinding()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>62</x>
-     <y>798</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>8</x>
-     <y>834</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>comboLabels</sender>
-   <signal>currentIndexChanged(QString)</signal>
-   <receiver>AwMarkerInspectorUI</receiver>
-   <slot>changeComboBinding()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>155</x>
-     <y>772</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>369</x>
-     <y>792</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>comboValues</sender>
-   <signal>currentIndexChanged(QString)</signal>
-   <receiver>AwMarkerInspectorUI</receiver>
-   <slot>changeComboBinding()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>146</x>
-     <y>804</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>343</x>
-     <y>826</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton</sender>
+   <sender>buttonClearTargets</sender>
    <signal>clicked()</signal>
    <receiver>AwMarkerInspectorUI</receiver>
    <slot>clearTargets()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
-     <y>602</y>
+     <x>356</x>
+     <y>647</y>
     </hint>
     <hint type="destinationlabel">
      <x>370</x>
@@ -1043,8 +721,8 @@
    <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>142</x>
-     <y>365</y>
+     <x>193</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>129</x>
@@ -1055,32 +733,32 @@
   <connection>
    <sender>radioAutoDetect</sender>
    <signal>toggled(bool)</signal>
-   <receiver>pushButton</receiver>
+   <receiver>buttonClearTargets</receiver>
    <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
-     <y>365</y>
+     <x>193</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
-     <x>204</x>
-     <y>598</y>
+     <x>356</x>
+     <y>647</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>radioGlobal</sender>
    <signal>toggled(bool)</signal>
-   <receiver>pushButton</receiver>
+   <receiver>buttonClearTargets</receiver>
    <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>102</x>
-     <y>369</y>
+     <x>107</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
-     <x>204</x>
-     <y>591</y>
+     <x>356</x>
+     <y>647</y>
     </hint>
    </hints>
   </connection>
@@ -1091,12 +769,12 @@
    <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>166</x>
-     <y>368</y>
+     <x>193</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
-     <x>296</x>
-     <y>598</y>
+     <x>527</x>
+     <y>647</y>
     </hint>
    </hints>
   </connection>
@@ -1107,8 +785,8 @@
    <slot>changeTargetChannels(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>143</x>
-     <y>370</y>
+     <x>193</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>1</x>

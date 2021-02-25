@@ -30,26 +30,32 @@ endif()
 
 if (NOT MKL_ROOT)
    message("MKL not found ! Define MKL_ROOT variable.")
+else()
+   message("MKL found at ${MKL_ROOT}")
 endif()
 
 # Find include dir
 find_path(MKL_INCLUDE_DIR mkl.h
     PATHS ${MKL_ROOT}/include)
 
+if(UNIX AND NOT APPLE)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .so)
-
+else()
+set(CMAKE_FIND_LIBRARY_SUFFIXES .dylib)
+endif()
 
 # MKL is composed by four layers: Interface, Threading, Computational and RTL
 
-find_library(MKL_INTERFACE_LIBRARY mkl_intel_lp64
-       PATHS ${MKL_ROOT}/lib/intel64/)
+#find_library(MKL_INTERFACE_LIBRARY mkl_intel_lp64
+#       PATHS ${MKL_ROOT}/lib/intel64/)
+
+find_library(MKL_INTERFACE_LIBRARY mkl_intel_lp64 HINTS ${MKL_ROOT}/lib ${MKL_ROOT}/lib/intel64)
 
 if (MKL_INTERFACE_LIBRARY)
    message("Found mkl Interface library ${MKL_INTERFACE_LIBRARY}")
 endif()
 
-
-find_library(MKL_THREADING_LIBRARY mkl_intel_thread PATHS ${MKL_ROOT}/lib/intel64/)
+find_library(MKL_THREADING_LIBRARY mkl_intel_thread HINTS ${MKL_ROOT}/lib ${MKL_ROOT}/lib/intel64)
 
 if (MKL_THREADING_LIBRARY)
    message("Found mkl threading library ${MKL_THREADING_LIBRARY}")
@@ -58,21 +64,23 @@ endif()
 
     ####################### Computational layer #####################
 find_library(MKL_CORE_LIBRARY mkl_core
-       PATHS ${MKL_ROOT}/lib/intel64/)
+       HINTS ${MKL_ROOT}/lib ${MKL_ROOT}/lib/intel64/)
 
 if (MKL_CORE_LIBRARY)
    message("Found mkl core library: ${MKL_CORE_LIBRARY}")
 endif()
 
     ############################ RTL layer ##########################
-find_library(MKL_RTL_LIBRARY iomp5 PATHS ${INTEL_ROOT}/lib/intel64/)
+
+# search for tbb first
+find_library(MKL_RTL_LIBRARY iomp5 HINTS ${INTEL_ROOT}/lib ${INTEL_ROOT}/lib/intel64)
 
 if (MKL_RTL_LIBRARY)
    message("Found mkl rtl library: ${MKL_RTL_LIBRARY}")
 endif()
 
 set(MKL_LIBRARY ${MKL_INTERFACE_LIBRARY} ${MKL_THREADING_LIBRARY} ${MKL_CORE_LIBRARY} ${MKL_RTL_LIBRARY})
-set(MKL_LIB_DIRS ${INTEL_ROOT}/lib/intel64 ${MKL_ROOT}/lib/intel64)
+set(MKL_LIB_DIRS ${INTEL_ROOT}/lib ${MKL_ROOT}/lib)
 
 find_package_handle_standard_args(MKL REQUIRED_VARS MKL_INCLUDE_DIR MKL_LIB_DIRS MKL_LIBRARY)
 

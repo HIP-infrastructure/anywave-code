@@ -98,7 +98,7 @@ FIFFIOPlugin::FIFFIOPlugin() : AwFileIOPlugin()
 	manufacturer = QString::fromLatin1("Elekta");
 	version = QString::fromLatin1("1.0");
 	fileExtensions << QString::fromLatin1("*.fif");
-	m_flags = Aw::HasExtension | Aw::CanRead | Aw::CanWrite;
+	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::CanWrite;
 	fileExtension = ".fif";
 }
 

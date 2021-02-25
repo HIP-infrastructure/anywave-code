@@ -139,12 +139,12 @@ EEGInto4DPlugin::EEGInto4DPlugin()
 	description = tr("inject eeg channel from ADES EEG file into existing 4DNI MEG file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
-	m_settings[processio::json_batch] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/args.json");
+	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/args.json");
 }
 
 EEGInto4D::EEGInto4D()
 {
-	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins);
+	setInputFlags(Aw::ProcessIO::GetReaderPlugins);
 	m_eegPlugin = nullptr;
 	m_megPlugin = nullptr;
 	m_eegReader = nullptr;
@@ -166,7 +166,7 @@ EEGInto4D::~EEGInto4D()
 
 }
 
-bool EEGInto4D::batchParameterCheck(const QVariantHash& args)
+bool EEGInto4D::batchParameterCheck(const QVariantMap& args)
 {
 	return true;
 }
@@ -175,23 +175,6 @@ bool EEGInto4D::showUi()
 {
 	bool eeg_found = false, meg_found = false;
 	settings ui;
-
-	//foreach(AwFileIOPlugin *reader, pdi.input.readers) {
-	//	if (!ades_found) {
-	//		if (reader->name == "AnyWave ADES Format") {
-	//			ades_found = true;
-	//			m_eegPlugin = ui.eegPlugin = reader;
-	//		}
-	//	}
-	//	if (!meg_found) {
-	//		if (reader->name == "4DNI Reader") {
-	//			meg_found = true;
-	//			m_megPlugin = ui.megPlugin = reader;
-	//		}
-	//	}
-	//	if (ades_found && meg_found)
-	//		break;
-	//}
 
 	// find at least 4DNi plugin
 	for (auto plugin : pdi.input.readers) {
@@ -212,7 +195,7 @@ bool EEGInto4D::showUi()
 	}
 
 	if (ui.exec() == QDialog::Accepted) {
-		auto args = pdi.input.args();
+		auto args = pdi.input.settings;
 //		m_eegFile = ui.eegFile;
 //		m_megFile = ui.megFile;
 		args["eeg_file"] = ui.eegFile;
@@ -526,7 +509,7 @@ void EEGInto4D::alignFilePointer(QFile& file)
 void EEGInto4D::runFromCommandLine()
 {
 	bool eeg_found = false, meg_found = false;
-	auto eegFile = pdi.input.args().value("eeg_file").toString();
+	auto eegFile = pdi.input.settings.value("eeg_file").toString();
 	for (auto plugin : pdi.input.readers) {
 		if (!eeg_found) {
 			auto reader = plugin->newInstance();
@@ -558,7 +541,7 @@ void EEGInto4D::runFromCommandLine()
 
 	// chech that MEG file could be open
 	auto reader = m_megPlugin->newInstance();
-	auto megFile = pdi.input.args().value("meg_file").toString();
+	auto megFile = pdi.input.settings.value("meg_file").toString();
 	if (reader->canRead(megFile) != AwFileIO::NoError) {
 		sendMessage(QString("File %1 could not be open by 4DNI reader.").arg(megFile));
 		m_megPlugin->deleteInstance(reader);
@@ -573,7 +556,7 @@ void EEGInto4D::run()
 {
 	m_megReader = m_megPlugin->newInstance();
 	m_megReader->setPlugin(m_megPlugin);
-	auto args = pdi.input.args();
+	auto args = pdi.input.settings;
 	m_eegFile = args.value("eeg_file").toString();
 	m_megFile = args.value("meg_file").toString();
 	// search for a plugin capable of reading eeg file

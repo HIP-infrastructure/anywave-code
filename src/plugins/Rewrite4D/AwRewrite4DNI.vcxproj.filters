@@ -41,24 +41,12 @@
     <ClCompile Include="rewriteui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ChooseMarker.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_rewrite4d.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_rewriteui.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ChooseMarker.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_rewrite4d.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_rewriteui.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
+    
+    
+    
+    
+    
+    
     <ClCompile Include="rewrite4d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -67,28 +55,24 @@
     <ClInclude Include="rewrite4d_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_ChooseMarker.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_rewriteui.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
+    
+    
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="ChooseMarker.h">
+    <QtMoc Include="ChooseMarker.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="rewrite4d.h">
+    </QtMoc>
+    <QtMoc Include="rewrite4d.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="rewriteui.h">
+    </QtMoc>
+    <QtMoc Include="rewriteui.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ChooseMarker.ui">
+    </QtMoc>
+    <QtUic Include="ChooseMarker.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="rewriteui.ui">
+    </QtUic>
+    <QtUic Include="rewriteui.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
+    </QtUic>
   </ItemGroup>
 </Project>

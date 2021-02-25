@@ -66,20 +66,20 @@ void GraphSet::newMeanGraphSet()
 	auto nIterations = totalIterations();
 	for (uword i = 0; i < m_corrMatrix.n_rows; i++) {  // X
 		for (uword j = i + 1; j < m_corrMatrix.n_cols; j++) { // Y
-			double mean_value = 0.;
-			double mean_lag = 0.;
+			double xy = 0., yx = 0.;
+			double lagxy = 0., lagyx = 0.;
 			// mean X/Y pair through all iterations. keep the maximum value and corresponding lag of a pair.
 			for (auto iteration = 0; iteration < nIterations; iteration++) {
-				double xy_value = m_corrMatrix(i, j, iteration);
-				double yx_value = m_corrMatrix(j, i, iteration);
-				double xy_lag = m_lagMatrix(i, j, iteration);
-				double yx_lag = m_lagMatrix(j, i, iteration);
-				double lag = xy_value >= yx_value ? xy_lag : yx_lag;
-				mean_value += std::max(xy_value, yx_value);
-				mean_lag += lag;
+				xy += m_corrMatrix(i, j, iteration);
+				yx += m_corrMatrix(j, i, iteration);
+				lagxy += m_lagMatrix(i, j, iteration);
+				lagyx += m_lagMatrix(j, i, iteration);
 			}
-			m_meanGraphSet->m_corrMatrix(i, j, 0) = mean_value / nIterations;
-			m_meanGraphSet->m_lagMatrix(i, j, 0) = mean_lag / nIterations;
+			m_meanGraphSet->m_corrMatrix(i, j, 0) = xy / nIterations;
+			m_meanGraphSet->m_corrMatrix(j, i, 0) = yx / nIterations;
+			m_meanGraphSet->m_lagMatrix(i, j, 0) = lagxy / nIterations;
+			m_meanGraphSet->m_lagMatrix(j, i, 0) = lagyx / nIterations;
+
 		}
 	}
 	m_meanGraphSet->band = band;

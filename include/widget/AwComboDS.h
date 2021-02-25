@@ -33,7 +33,8 @@ class AW_WIDGETS_EXPORT AwComboDS : public QComboBox
 	Q_OBJECT
 public:
 	AwComboDS(QWidget *parent) : QComboBox(parent) {}
-	void setSamplingRate(float sr);
+	/** init the list by specifying a sampling rate in Hz**/
+	void init(float sr);
 	float getSamplingRate();
 	int getDecimateFactor();
 protected:

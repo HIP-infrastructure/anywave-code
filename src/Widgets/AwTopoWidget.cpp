@@ -60,7 +60,7 @@ AwTopoWidget::AwTopoWidget(QWidget *parent, AwLayout *layout, int flags)
 	ui = new Ui::AwTopoWidgetUi();
 	ui->setupUi(this);
 	setLayout(layout);
-	m_grid = NULL;
+	m_grid = nullptr;
 	m_res = 200;	// resolution of interpolation grid
 	m_cmap = AwColorMap::Parula;
 
@@ -88,11 +88,12 @@ AwTopoWidget::AwTopoWidget(QWidget *parent, AwLayout *layout, int flags)
 	m_latency = -1;
 	setFlags(flags);
 
-	m_size = qMin(ui->labelImage->geometry().width(), ui->labelImage->geometry().height());
+	m_size = std::min(ui->labelImage->geometry().width(), ui->labelImage->geometry().height());
 	m_pad = m_size * 0.05; // 5% for each ear
 	m_head_size = m_size - 2 * m_pad;
 	ui->labelImage->setPadSize(m_pad, m_head_size);
 	m_sensor_radius = m_head_size * 0.01;
+	m_redrawing = false;
 }
 
 AwTopoWidget::AwTopoWidget(const QString& title, QWidget *parent, AwLayout *layout, int flags) : QWidget(parent)
@@ -100,7 +101,7 @@ AwTopoWidget::AwTopoWidget(const QString& title, QWidget *parent, AwLayout *layo
 	ui = new Ui::AwTopoWidgetUi();
 	ui->setupUi(this);
 	setLayout(layout);
-	m_grid = NULL;
+	m_grid = nullptr;
 	m_res = 200;	// resolution of interpolation grid
 	m_cmap = AwColorMap::Parula;
 
@@ -127,12 +128,13 @@ AwTopoWidget::AwTopoWidget(const QString& title, QWidget *parent, AwLayout *layo
 	m_nContours = 5;
 	m_latency = -1;
 	setFlags(flags);
-	m_size = qMin(ui->labelImage->geometry().width(), ui->labelImage->geometry().height());
+	m_size = std::min(ui->labelImage->geometry().width(), ui->labelImage->geometry().height());
 	m_pad = m_size * 0.05; // 5% for each ear
 	m_head_size = m_size - 2 * m_pad;
 	ui->labelImage->setPadSize(m_pad, m_head_size);
 	m_sensor_radius = m_head_size * 0.01;
 	setWindowTitle(title);
+	m_redrawing = false;
 }
 
 AwTopoWidget::~AwTopoWidget()
@@ -141,6 +143,7 @@ AwTopoWidget::~AwTopoWidget()
 		delete m_grid;
 	while (!m_pixelSensors.isEmpty())
 		delete m_pixelSensors.takeFirst();
+	delete ui;
 }
 
 void AwTopoWidget::setLabel(const QString& label)
@@ -163,7 +166,7 @@ void AwTopoWidget::changeEvent(QEvent *e)
 void AwTopoWidget::setLayout(AwLayout *layout)
 {
 	m_layout = layout;
-	if (layout == NULL) 
+	if (layout == nullptr) 
 		return;
 	// extract min and max X and Y values from current layout
 	m_smin_x = m_layout->sensors().first()->x();
@@ -189,12 +192,12 @@ void AwTopoWidget::setLayout(AwLayout *layout)
 
 void AwTopoWidget::resizeEvent(QResizeEvent *e)
 {
-	if (m_layout == NULL)
+	if (m_layout == nullptr || m_redrawing)
 		return;
 
 	// get the actual size of QLabel image in the widget
 	QRect geo = ui->labelImage->geometry();
-	m_size = qMin(geo.width(), geo.height());
+	m_size = std::min(geo.width(), geo.height());
 	m_pad = m_size * 0.05; // 5% for each ear
 	m_head_size = m_size - 2 * m_pad;
 	ui->labelImage->setPadSize(m_pad, m_head_size);
@@ -204,7 +207,7 @@ void AwTopoWidget::resizeEvent(QResizeEvent *e)
 	while (!m_pixelSensors.isEmpty())
 		delete m_pixelSensors.takeFirst();
 
-	foreach (AwSensor *s, m_layout->sensors()) {
+	for  (AwSensor *s : m_layout->sensors()) {
 		qreal xi = (s->x() - m_smin_x)/(m_smax_x - m_smin_x) * m_head_size;
 		qreal yi = m_head_size - (s->y() - m_smin_y)/(m_smax_y - m_smin_y) * m_head_size;
 		// build a sensor with coordinates relative to current head.
@@ -217,11 +220,126 @@ void AwTopoWidget::resizeEvent(QResizeEvent *e)
 		new_s->setCoordinates(coord);
 		m_pixelSensors << new_s;
 	}
-	redraw();
+	this->redraw();
+	QWidget::resizeEvent(e);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// END OF EVENTS
+
+void AwTopoWidget::redraw()
+{
+	if (m_grid == nullptr)
+		return;
+
+	// do not display anything if size is too small
+	if (m_size < 100)
+		return;
+
+	m_redrawing = true;
+
+	m_image = QImage(m_size, m_size, QImage::Format_ARGB32);
+	m_image.fill(QColor(255, 255, 255, 0));
+
+	QPainter painter, painterSpectro;
+	painter.begin(&m_image);
+
+	QPen outlinePen(QColor(0, 0, 0));
+	outlinePen.setWidth(2);
+	painter.setPen(outlinePen);
+	// draw head limit
+	painter.drawEllipse(QRectF(m_pad, m_pad, m_head_size, m_head_size));
+	// draw nose
+	painter.setBrush(QBrush(Qt::white));
+	QPolygonF nose;
+	nose << QPointF(m_size / 2, 1) << QPointF(m_size / 2 + m_pad, m_pad) << QPointF(m_size / 2 - m_pad, m_pad);
+	painter.drawConvexPolygon(nose);
+
+	QPolygonF ear;
+	ear << QPointF(0, m_size / 2 + m_pad) << QPointF(0, m_size / 2 - m_pad) << QPointF(m_pad, m_size / 2 - m_pad) << QPointF(m_pad, m_size / 2 + m_pad);
+	painter.drawConvexPolygon(ear);
+	painter.drawConvexPolygon(ear.translated(m_size - m_pad, 0.0));
+
+	painter.setBrush(Qt::NoBrush);
+
+	// define the region to overlay the Qwt Spectro map
+	painter.setClipRegion(QRegion(m_pad, m_pad, m_head_size, m_head_size, QRegion::Ellipse));
+
+	QwtPlotRenderer renderer;
+	m_plot->setFixedSize(QSize(qCeil(m_head_size), qCeil(m_head_size)));
+	m_plot->setAxisScale(QwtPlot::xBottom, 0, m_grid->res);
+	m_plot->setAxisScale(QwtPlot::yLeft, 0, m_grid->res);
+	m_plot->enableAxis(QwtPlot::xBottom, false);
+	m_plot->enableAxis(QwtPlot::yLeft, false);
+
+	QImage imageSpectro(qCeil(m_head_size), qCeil(m_head_size), QImage::Format_ARGB32);
+	imageSpectro.fill(QColor(255, 255, 255, 0));
+	painterSpectro.begin(&imageSpectro);
+	m_spectro->setDisplayMode(QwtPlotSpectrogram::ImageMode);
+	m_spectro->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+	m_spectro->setColorMap(AwQwtColorMap::newMap(m_cmap));
+	m_spectro->invalidateCache();
+	m_plot->replot();
+	renderer.setDiscardFlag(QwtPlotRenderer::DiscardBackground);
+	renderer.setDiscardFlag(QwtPlotRenderer::DiscardCanvasBackground);
+	renderer.setDiscardFlag(QwtPlotRenderer::DiscardCanvasFrame);
+	renderer.render(m_plot, &painterSpectro, painterSpectro.viewport());
+
+	// contour lines
+	if (m_showContours) {
+		m_spectro->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
+		QList<double> levels;
+		double step = (m_grid->max_zi - m_grid->min_zi) / m_nContours;
+		for (int i = 0; i < m_nContours; i++) {
+			levels << m_grid->min_zi + i * step;
+		}
+		m_spectro->setContourLevels(levels);
+		m_spectro->invalidateCache();
+		m_plot->replot();
+		renderer.render(m_plot, &painterSpectro, painterSpectro.viewport());
+	}
+
+	// Paint sensors
+	if (m_showSensors) {
+		QBrush bSensors(QColor(255, 255, 255));
+		QBrush bSelected(QColor(255, 0, 0));
+
+		// compute sensor size based on head size (1% of total size)
+		//qreal radius = head_size * 0.01;
+		// compute font size based on radius
+		QFont font("Arial", 2 * m_sensor_radius);
+		painterSpectro.setFont(font);
+
+		foreach(AwSensor * s, m_pixelSensors) {
+			// check if sensor is selected
+			if (m_selectedLabels.contains(s->label()))
+				painterSpectro.setBrush(bSelected);
+			else
+				painterSpectro.setBrush(bSensors);
+
+			painterSpectro.drawEllipse(QPointF(s->x(), s->y()), m_sensor_radius, m_sensor_radius);
+
+			// plot label
+			if (m_showLabels)
+				painterSpectro.drawText(QPointF(s->x() - m_sensor_radius, s->y() - m_sensor_radius), s->label());
+		}
+	}
+
+	painterSpectro.end();
+	painter.drawImage(m_pad, m_pad, imageSpectro);
+	painter.end();
+	ui->labelImage->setPixmap(QPixmap::fromImage(m_image));
+	repaint();
+
+	// auto paint to pixmap but only the mapping and the label
+	int flags = m_flags;
+	setFlags(AwTopoWidget::ShowLabel);
+	repaint();
+	m_pixmap = QPixmap(size());
+	render(&m_pixmap);
+	setFlags(flags);
+	m_redrawing = false;
+}
 
 const QRect& AwTopoWidget::imageGeometry() const 
 {
@@ -309,7 +427,7 @@ void AwTopoWidget::setLatency(float start, float end)
 
 void AwTopoWidget::updateMap(float start, float end, const QVector<double>& values, const QStringList& labels)
 {
-	if (m_layout == NULL)
+	if (m_layout == nullptr)
 		return;
 
 	setLatency(start, end);
@@ -329,7 +447,7 @@ void AwTopoWidget::updateMap(float start, float end, const QVector<double>& valu
 
 void AwTopoWidget::updateMap(float start, float end, const QVector<float>& values, const QStringList& labels)
 {
-	if (m_layout == NULL)
+	if (m_layout == nullptr)
 		return;
 	QVector<double> val(values.size());
 	for (int i = 0; i < values.size(); i++)
@@ -339,7 +457,7 @@ void AwTopoWidget::updateMap(float start, float end, const QVector<float>& value
 
 void AwTopoWidget::updateMap(float lat, arma::fvec& values, const QStringList& labels)
 {
-	if (m_layout == NULL)
+	if (m_layout == nullptr)
 		return;
 
 	setLatency(lat);
@@ -359,7 +477,7 @@ void AwTopoWidget::updateMap(float lat, arma::fvec& values, const QStringList& l
 
 void AwTopoWidget::updateMap(float lat, const QVector<double>& values, const QStringList& labels)
 {
-	if (m_layout == NULL)
+	if (m_layout == nullptr)
 		return;
 
 	setLatency(lat);
@@ -379,7 +497,7 @@ void AwTopoWidget::updateMap(float lat, const QVector<double>& values, const QSt
 
 void AwTopoWidget::updateMap(float lat, const QVector<float>& values, const QStringList& labels)
 {
-	if (m_layout == NULL)
+	if (m_layout == nullptr)
 		return;
 	QVector<double> val(values.size());
 	for (int i = 0; i < values.size(); i++)
@@ -419,116 +537,7 @@ void AwTopoWidget::buildTopo()
 #endif
 }
 
-void AwTopoWidget::redraw()
-{
-	if (m_grid == NULL)
-		return;
-	
-	// do not display anything if size is too small
-	if (m_size < 100)
-		return;
 
-	m_image = QImage(m_size, m_size, QImage::Format_ARGB32);
-	m_image.fill(QColor(255, 255, 255, 0));
-
-	QPainter painter, painterSpectro;
-	painter.begin(&m_image);
-
-	QPen outlinePen(QColor(0, 0, 0));
-	outlinePen.setWidth(2);
-	painter.setPen(outlinePen);
-	// draw head limit
-	painter.drawEllipse(QRectF(m_pad, m_pad, m_head_size, m_head_size));
-	// draw nose
-	painter.setBrush(QBrush(Qt::white));
-	QPolygonF nose;
-	nose << QPointF(m_size / 2, 1) << QPointF( m_size / 2 + m_pad, m_pad) << QPointF(m_size / 2 - m_pad, m_pad) ;
-	painter.drawConvexPolygon(nose);
-
-	QPolygonF ear;
-	ear << QPointF(0, m_size / 2 + m_pad) << QPointF(0, m_size / 2 - m_pad) << QPointF(m_pad, m_size / 2 - m_pad) << QPointF(m_pad, m_size / 2 + m_pad);
-	painter.drawConvexPolygon(ear);
-	painter.drawConvexPolygon(ear.translated(m_size - m_pad, 0.0));
-
-	painter.setBrush(Qt::NoBrush);
-
-	// define the region to overlay the Qwt Spectro map
-	painter.setClipRegion(QRegion(m_pad, m_pad, m_head_size, m_head_size, QRegion::Ellipse));
-
-	QwtPlotRenderer renderer;
-	m_plot->setFixedSize(QSize(qCeil(m_head_size), qCeil(m_head_size)));
-	m_plot->setAxisScale(QwtPlot::xBottom, 0, m_grid->res);
-	m_plot->setAxisScale(QwtPlot::yLeft, 0, m_grid->res);
-	m_plot->enableAxis(QwtPlot::xBottom, false);
-	m_plot->enableAxis(QwtPlot::yLeft, false);
-
-	QImage imageSpectro(qCeil(m_head_size), qCeil(m_head_size), QImage::Format_ARGB32);
-	imageSpectro.fill(QColor(255,255,255,0));
-	painterSpectro.begin(&imageSpectro);
-	m_spectro->setDisplayMode(QwtPlotSpectrogram::ImageMode);
-	m_spectro->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
-	m_spectro->setColorMap(AwQwtColorMap::newMap(m_cmap));
-	m_spectro->invalidateCache();
-	m_plot->replot();
-	renderer.setDiscardFlag(QwtPlotRenderer::DiscardBackground) ;
-	renderer.setDiscardFlag(QwtPlotRenderer::DiscardCanvasBackground);
-	renderer.setDiscardFlag(QwtPlotRenderer::DiscardCanvasFrame );
-	renderer.render(m_plot, &painterSpectro, painterSpectro.viewport());
-
-	// contour lines
-	if (m_showContours) {
-		m_spectro->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
-		QList<double> levels;
-		double step = (m_grid->max_zi - m_grid->min_zi) / m_nContours;
-		for (int i = 0; i < m_nContours; i++) {
-			levels << m_grid->min_zi + i  * step;
-		}
-		m_spectro->setContourLevels(levels);
-		m_spectro->invalidateCache();
-		m_plot->replot();
-		renderer.render(m_plot, &painterSpectro, painterSpectro.viewport());
-	}
-
-	// Paint sensors
-	if (m_showSensors) {
-		QBrush bSensors(QColor(255, 255, 255));
-		QBrush bSelected(QColor(255, 0, 0));
-		
-		// compute sensor size based on head size (1% of total size)
-		//qreal radius = head_size * 0.01;
-		// compute font size based on radius
-		QFont font("Arial", 2 * m_sensor_radius);
-		painterSpectro.setFont(font);
-
-		foreach(AwSensor *s, m_pixelSensors) {
-			// check if sensor is selected
-			if (m_selectedLabels.contains(s->label())) 
-				painterSpectro.setBrush(bSelected);
-			else
-				painterSpectro.setBrush(bSensors);
-
-			painterSpectro.drawEllipse(QPointF(s->x(), s->y()), m_sensor_radius, m_sensor_radius);
-
-			// plot label
-			if (m_showLabels)
-				painterSpectro.drawText(QPointF(s->x() - m_sensor_radius, s->y() - m_sensor_radius), s->label());
-		}
-	}
-
-	painterSpectro.end();
-	painter.drawImage(m_pad, m_pad, imageSpectro);
-	painter.end();
-	ui->labelImage->setPixmap(QPixmap::fromImage(m_image));
-	repaint();
-
-	// auto paint to pixmap but only the mapping and the label
-	int flags = m_flags;
-	setFlags(AwTopoWidget::ShowLabel);
-	repaint();
-	m_pixmap = QPixmap(size());
-	render(&m_pixmap);
-	setFlags(flags);
-}
 
 void AwTopoWidget::setComputationFlags(const QString& flags)
 {
@@ -591,14 +600,13 @@ void AwTopoWidget::draw2(AwTopoWidget *widget, Aw2DGrid *grid)
 	data->setInterval(Qt::XAxis, QwtInterval(0, m_grid->res));
 	data->setInterval(Qt::YAxis, QwtInterval(0, m_grid->res));
 	ui->labelImage->setData(data);
-	redraw();
-	
+	redraw();	
 }
 
 void AwTopoWidget::selectSensors(const QStringList& labels)
 {
 	m_selectedLabels = labels;
-	redraw();
+   redraw();
 }
 
 void AwTopoWidget::updateBadSensors(const QStringList& labels)
@@ -611,113 +619,3 @@ void AwTopoWidget::openUI()
 	AwTopoWidgetSettings ui(this, NULL);
 	ui.exec();
 }
-
-//void AwTopoWidget::draw()
-//{
-//	if (m_grid == NULL)
-//		return;
-//
-//	// get the actual size of widget
-//	QRect geo = geometry();
-//	int min = qMin(geo.width(), geo.height());
-//
-//	if (min < 200)
-//		min = 200;
-//	if (min > 200)
-//	{
-//		m_image = QImage(min, min, QImage::Format_ARGB32);
-//		m_labelImage->setPixmap(QPixmap::fromImage(m_image));
-//	}
-//
-//	m_image.fill(QColor(255, 255, 255, 0));
-//	QPainter painter(&m_image);
-//	/* draw to qimage inside circle */
-//	int w = m_image.width();
-//	int h = m_image.height();
-//	int pad = 10;
-//	int iw=w-2*pad, ih=h-2*pad, iiw=w-4*pad, iih=h-4*pad;
-//	float bw = iiw * 1.0f / m_res, bh = iih * 1.0f / m_res;
-//	QPainterPath clipPath;
-//	clipPath.addEllipse(pad, pad, iw, ih);
-//	painter.setClipPath(clipPath);
-//	painter.setPen(Qt::NoPen);
-//	AwColorMapValues cm = AwColorMap::valuesForMap(m_cmap);
-//	QRectF box(0.0f, 0.0f, bw, bh);
-//
-//	double *zi = m_grid->zi();
-//	double min_z = m_grid->minz();
-//	double max_z = m_grid->maxz();
-//
-//    double dz = ((-min_z)>max_z) ? -min_z : max_z;
-//	double r, g, b, v;
-//	double *rgb1, *rgb2;
-//	int k;
-//	for (int i = 0; i < m_res; i++)
-//	{
-//		for (int j = 0; j < m_res; j++)
-//		{
-//			v = zi[i * m_res + j] / dz + 0.5f;
-//			if (isnan(v))
-//				continue;
-//			if (v < 0.0)
-//				v = 0.0;
-//			if (v > 1.0)
-//				v = 0.9999;
-//			k = qFloor(v*cm.count());
-//			rgb1 = cm.colorAt(k>=cm.count()?cm.count():k);
-//			rgb2 = k==cm.count() ? rgb1 : cm.colorAt(k+1);
-//			r = rgb1[0];// + (rgb2[0] - rgb1[0]) * (v - k);
-//			g = rgb1[1];// + (rgb2[1] - rgb1[1]) * (v - k);
-//			b = rgb1[2];// + (rgb2[2] - rgb1[2]) * (v - k);
-//			int ri=255, gi=255, bi=255;
-//			if (v > 0.5)
-//				gi = bi = 255 - (v-0.5)*2*255;
-//			else
-//				ri = gi = 255 - (0.5-v)*2*255;
-//			//qDebug() << zi[i*res+j] << w/res*j << h/res*i << w/res << h/res << r << g << b;
-//			if (r>1) r=1;
-//			box.moveTo(bw*j+pad*2, bh*i+pad*2);
-//		//	painter.fillRect(box, QBrush(QColor(ri, gi, bi)));
-//			painter.fillRect(box, QBrush(AwColorMap::rgbToColor(r,g ,b)));
-//		}
-//	}
-//
-//	painter.setRenderHint(QPainter::HighQualityAntialiasing);
-//	painter.setPen(QColor(0, 0, 0));
-//
-//	double *xi = m_grid->xi();
-//	double *yi = m_grid->yi();
-//	double *x = m_grid->x();
-//	double *y = m_grid->y();
-//	double min_x = m_grid->minx();
-//	double max_x = m_grid->maxx();
-//	double min_y = m_grid->miny();
-//	double max_y = m_grid->maxy();
-//	int np = m_grid->np();
-//	
-//	for (int i = 0; i < np; i++) {
-//		int xi = (x[i] - min_x)/(max_x - min_x)*iiw + 2*pad;
-//		int yi = iih - (y[i] - min_y)/(max_y - min_y)*iih + 2*pad;
-//		painter.drawEllipse(xi, yi, 3, 3);
-//	}
-//
-//	painter.setClipPath(clipPath, Qt::NoClip);
-//	
-//	QPen outlinePen(QColor(0, 0, 0));
-//	outlinePen.setWidth(2);
-//	painter.setPen(outlinePen);
-//	painter.drawEllipse(pad, pad, iw, ih);
-//	
-//	painter.setBrush(Qt::NoBrush);
-//	QPolygonF nose;
-//	nose << QPointF(w/2, 1) << QPointF(w/2+pad, pad) << QPointF(w/2-pad, pad) ;
-//	painter.drawConvexPolygon(nose);
-//
-//	QPolygonF ear;
-//	ear << QPointF(0, h/2+pad) << QPointF(0, h/2-pad) << QPointF(pad, h/2-pad) << QPointF(pad, h/2+pad);
-//	painter.drawConvexPolygon(ear);
-//	painter.drawConvexPolygon(ear.translated(w-pad, 0.0));
-//
-//	m_labelImage->setPixmap(QPixmap::fromImage(m_image));
-//	repaint();
-//}

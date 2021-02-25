@@ -225,7 +225,7 @@ EDFIOPlugin::EDFIOPlugin() : AwFileIOPlugin()
 	manufacturer = QString::fromLatin1("EDF Group");
 	version = QString::fromLatin1("1.0");
 	fileExtensions << QString::fromLatin1("*.edf") << QString::fromLatin1("*.bdf"); // for reading
-	m_flags = Aw::HasExtension | Aw::CanRead | Aw::CanWrite;
+	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::CanWrite;
 	fileExtension = ".edf"; // for writing
 }
 
@@ -952,22 +952,37 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 	// Build AnyWave list of channels
 	float max_sr = 0.;
 	
+	auto types = AwChannel::types;
 	for (i = 0; i < m_edfhdr.edfsignals - m_edfhdr.nr_annot_chns; i++) {
 		AwChannel channel;
-		channel.setName(QString(m_header.signalparam[i].label).trimmed());
-		channel.setType(AwChannel::EEG);
+		if (!m_edfhdr.edfplus) {
+			channel.setName(QString(m_header.signalparam[i].label).trimmed());
+			channel.setType(AwChannel::EEG);
+		}
+		else {
+			QString label(m_header.signalparam[i].label);
+			label = label.trimmed();
+			auto tokens = label.split(" ");
+			if (tokens.size() > 1) {
+				auto type = AwChannel::stringToType(tokens.first());
+				if (type != -1)
+					channel.setType(type);
+				label = label.remove(tokens.first()).trimmed();
+				channel.setName(label);
+			}
+		}
 		float samplingRate = m_header.signalparam[i].smp_in_datarecord / (m_header.datarecord_duration / 1E7);
 		if (samplingRate > max_sr)
 			max_sr = samplingRate;
 		channel.setSamplingRate(samplingRate);
 
-		// try to guess electrode type using label
-		if (channel.name().contains("ECG"))
-			channel.setType(AwChannel::ECG);
-		if (channel.name().contains("EMG"))
-			channel.setType(AwChannel::EMG);
-		if (channel.name().startsWith("STATUS"))
-			channel.setType(AwChannel::Trigger);
+		//// try to guess electrode type using label
+		//if (channel.name().contains("ECG"))
+		//	channel.setType(AwChannel::ECG);
+		//if (channel.name().contains("EMG"))
+		//	channel.setType(AwChannel::EMG);
+		//if (channel.name().startsWith("STATUS"))
+		//	channel.setType(AwChannel::Trigger);
 		auto chan = infos.addChannel(&channel);
 		m_labels << chan->name();
 	}

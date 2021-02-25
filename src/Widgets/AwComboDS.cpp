@@ -1,13 +1,13 @@
 #include <widget/AwComboDS.h>
 
 
-void AwComboDS::setSamplingRate(float sr)
+void AwComboDS::init(float sr)
 {
 	clear();
-	addItem(QString("x1 (%1Hz)").arg(sr));
-	addItem(QString("x2 (%1Hz->%2Hz)").arg(sr).arg(sr / 2));
-	addItem(QString("x4 (%1Hz->%2Hz)").arg(sr).arg(sr / 4));
-	addItem(QString("x8 (%1Hz->%2Hz)").arg(sr).arg(sr / 8));
+	addItem(QString("x1 (%1Hz)").arg(sr), int(1));
+	addItem(QString("x2 (%1Hz->%2Hz)").arg(sr).arg(sr / 2), int(2));
+	addItem(QString("x4 (%1Hz->%2Hz)").arg(sr).arg(sr / 4), int(4));
+	addItem(QString("x8 (%1Hz->%2Hz)").arg(sr).arg(sr / 8), int(8));
 	m_samplingRate = sr;
 }
 
@@ -34,5 +34,6 @@ float AwComboDS::getSamplingRate()
 
 int AwComboDS::getDecimateFactor()
 {
-	return currentIndex() + 1;
+//	return currentIndex() + 1;
+	return currentData().toInt();
 }

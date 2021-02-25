@@ -35,7 +35,7 @@
 #include <AwCore.h>
 #include <utils/json.h>
 #include "Prefs/AwSettings.h"
-#include <AwFileInfo.h>
+#include "Data/AwDataManager.h"
 #include <AwKeys.h>
 #include "IO/BIDS/AwBIDSManager.h"
 
@@ -44,11 +44,11 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 	float hp = 0., lp = 0., notch = 0.;
 	// check for optional filter settings
 	if (args.contains("hp"))
-		hp = args["hp"].toDouble();
+		hp = args["hp"].toFloat();
 	if (args.contains("lp"))
-		lp = args["lp"].toDouble();
+		lp = args["lp"].toFloat();
 	if (args.contains("notch"))
-		notch = args["notch"].toDouble();
+		notch = args["notch"].toFloat();
 	if (lp || notch || hp) {
 		for (auto c : channels) {
 			c->setLowFilter(lp);
@@ -59,65 +59,66 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 }
 
 
-bool AwCommandLineManager::buildPDI(AwBaseProcess *process, const AwChannelList& montage, const AwChannelList& asRecorded)
-{
-	int inputF = process->pdi.inputFlags();
-	if (inputF & Aw::ProcessInput::GetReaderPlugins) {
-		for (auto plugin : AwPluginManager::getInstance()->readers())
-			process->pdi.input.readers.append(plugin);
-	}
-	if (inputF & Aw::ProcessInput::GetWriterPlugins) {
-		for (auto plugin : AwPluginManager::getInstance()->writers())
-			process->pdi.input.writers.append(plugin);
-	}
-	if (inputF & Aw::ProcessInput::GetProcessPluginNames) {
-		QStringList list;
-		for (auto plugin : AwPluginManager::getInstance()->processes())
-			//process->pdi.input.processPluginNames.append(plugin->name);
-			list << plugin->name;
-		process->pdi.input.settings[processio::plugin_names] = list;
-	}
-	if (inputF & Aw::ProcessInput::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
-		if (!asRecorded.isEmpty())
-			process->pdi.input.addChannels(asRecorded, true);
-	}
-	if (!process->pdi.areInputChannelSet()) { // no input channels specified => ok set to AnyChannels (1-n)
-		process->pdi.addInputChannel(-1, 1, 0);
-	}
-	process->pdi.input.settings[processio::ica_file] = AwSettings::getInstance()->value(aws::ica_file).toString();
-	// input channels are set
-	auto types = process->pdi.getInputChannels();
-	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
-	AwChannelList res;
-	AwChannelList sources = montage;
-	if (sources.isEmpty())
-		sources = asRecorded;
-	for (auto t : types) {
+//bool AwCommandLineManager::buildPDI(AwBaseProcess* process, const AwChannelList& montage, const AwChannelList& asRecorded)
+//{
+//	//int inputF = process->pdi.inputFlags();
+//	int inputF = process->inputFlags();
+//	if (inputF & Aw::ProcessIO::GetReaderPlugins) {
+//		for (auto plugin : AwPluginManager::getInstance()->readers())
+//			process->pdi.input.readers.append(plugin);
+//	}
+//	if (inputF & Aw::ProcessIO::GetWriterPlugins) {
+//		for (auto plugin : AwPluginManager::getInstance()->writers())
+//			process->pdi.input.writers.append(plugin);
+//	}
+//	if (inputF & Aw::ProcessIO::GetProcessPluginNames) {
+//		QStringList list;
+//		for (auto plugin : AwPluginManager::getInstance()->processes())
+//			//process->pdi.input.processPluginNames.append(plugin->name);
+//			list << plugin->name;
+//		process->pdi.input.settings[keys::plugin_names] = list;
+//	}
+//	if (inputF & Aw::ProcessIO::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
+//		if (!asRecorded.isEmpty())
+//			process->pdi.input.addChannels(asRecorded, true);
+//	}
+//	if (!process->pdi.areInputChannelSet()) { // no input channels specified => ok set to AnyChannels (1-n)
+//		process->pdi.addInputChannel(-1, 1, 0);
+//	}
+//	process->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(aws::ica_file).toString();
+//	// input channels are set
+//	auto types = process->pdi.getInputChannels();
+//	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
+//	AwChannelList res;
+//	AwChannelList sources = montage;
+//	if (sources.isEmpty())
+//		sources = asRecorded;
+//	for (auto t : types) {
+//
+//		QPair<int, int> min_max = process->pdi.getInputChannelMinMax(t);
+//		int min = min_max.first;
+//		int max = min_max.second;
+//
+//		// check for correct min and max
+//		if (min > sources.size()) {
+//			return false;
+//		}
+//		if (min_max.second > 0 && min_max.second < sources.size()) {
+//			return false;
+//		}
+//		if (t == -1)
+//			res += sources;
+//		else {
+//			res += AwChannel::getChannelsOfType(sources, t);
+//		}
+//	}
+//	if (!res.isEmpty())
+//		process->pdi.input.addChannels(res, true);
+//	return true;
+//}
 
-		QPair<int, int> min_max = process->pdi.getInputChannelMinMax(t);
-		int min = min_max.first;
-		int max = min_max.second;
 
-		// check for correct min and max
-		if (min > sources.size()) {
-			return false;
-		}
-		if (min_max.second > 0 && min_max.second < sources.size()) {
-			return false;
-		}
-		if (t == -1)
-			res += sources;
-		else {
-			res += AwChannel::getChannelsOfType(sources, t);
-		}
-	}
-	if (!res.isEmpty())
-		process->pdi.input.addChannels(res, true);
-	return true;
-}
-
-
-AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
+AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 {
 	const QString origin = "AwCommandLineManager::createNewProcess()";
 	// get plugin name from json argumetns
@@ -127,31 +128,31 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	}
 
 	// check run arguments (could be a  json file, a json string or a the name of a plugin
-	QString json = args["run_process"].toString();
+	QString json = args.value("run_process").toString();
 	QString pluginName = json;
 	auto pm = AwPluginManager::getInstance();
 	auto plugin = pm->getProcessPluginByName(pluginName);
-	QVariantHash hash;
+	QVariantMap map;
 	if (plugin == nullptr) {
 		// no plugin found with that name.
 		// a file?
 		if (QFile::exists(json)) {
-			hash = AwUtilities::json::fromJsonFileToHash(json);
-			if (hash.isEmpty() || !hash.contains("plugin")) {
+			map = AwUtilities::json::fromJsonFileToMap(json);
+			if (map.isEmpty() || !map.contains("plugin")) {
 				throw AwException("json file is invalid.", origin);
 				return nullptr;
 			}
-			pluginName = hash.value("plugin").toString();
+			pluginName = map.value("plugin").toString();
 		}
 		else {  // testing for a json string
 			QString error;
-			hash = AwUtilities::json::hashFromJsonString(json, error);
-			if (!hash.isEmpty()) { // got a json string
-				if (!hash.contains("plugin")) {
+			map = AwUtilities::json::mapFromJsonString(json, error);
+			if (!map.isEmpty()) { // got a json string
+				if (!map.contains("plugin")) {
 					throw AwException(QString("json string is invalid: %1").arg(error), origin);
 					return nullptr;
 				}
-				pluginName = hash.value("plugin").toString();
+				pluginName = map.value("plugin").toString();
 			}
 		}
 		plugin = pm->getProcessPluginByName(pluginName);
@@ -161,121 +162,279 @@ AwBaseProcess *AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		}
 	}
 
-	AwFileIO *reader = Q_NULLPTR;
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
-	args.unite(hash);
-
-	QString inputFile = args.value(cl::input_file).toString();
+	args.unite(map);
+	// always add the path to anywave app
+	args[keys::aw_path] = QCoreApplication::applicationFilePath();
+	QString inputFile = args.value(keys::input_file).toString();
 
 	if (!doNotRequiresData && inputFile.isEmpty()) {
 		throw AwException(QString("input_file must be specified."), origin);
-		return Q_NULLPTR;
+		return nullptr;
 	}
+	// instantiate process
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
 
+	process->pdi.input.settings.unite(args);
+
+	AwCommandLineManager::initProcessPDI(process);
+
+	
+
+	//auto dm = AwDataManager::instance();
+
+	//if (!inputFile.isEmpty()) {
+	//	auto status = dm->openFile(inputFile, true);
+	//	if (status == AwDataManager::NoPluginFound) {
+	//		throw AwException(QString("no reader can open %1").arg(inputFile), origin);
+	//		return process;
+	//	}
+	//	
+	//	if (status != AwDataManager::NoError) {
+	//		throw AwException(QString("Could not open %1").arg(inputFile), origin);
+	//		return process;
+	//	}
+	//	process->pdi.input.setReader(dm->reader());
+	//	process->pdi.input.settings.unite(dm->settings());
+	//}
+	//// check for special case, marker_file, montage_file set in json must be relative to data file
+	//if (args.contains(keys::marker_file)) {
+	//	QString fullPath = QString("%1/%2").arg(process->pdi.input.settings.value(keys::data_dir).toString()).arg(args.value(keys::marker_file).toString());
+	//	args[keys::marker_file] = fullPath;
+	//}
+	//if (args.contains(keys::montage_file)) {
+	//	QString fullPath = QString("%1/%2").arg(process->pdi.input.settings.value(keys::data_dir).toString()).arg(args.value(keys::montage_file).toString());
+	//	args[keys::montage_file] = fullPath;
+	//}
+
+	//if (!inputFile.isEmpty()) {
+	//	// check for BAD file
+	//	QString tmp = dm->badFilePath();
+	//	if (QFile::exists(tmp)) {
+	//		args[keys::bad_file] = tmp;
+	//		process->pdi.input.settings[keys::bad_labels] = dm->badLabels();
+	//	}
+	//	AwChannelList montage;
+	//	tmp = dm->mtgFilePath();
+	//	if (!args.contains(keys::montage_file))
+	//		if (QFile::exists(tmp))
+	//			args[keys::montage_file] = tmp;
+
+	//	bool skipBad = true;
+	//	if (args.contains(keys::skip_bad_channels))
+	//		skipBad = args.value(keys::skip_bad_channels).toBool();
+
+	//	bool montageCreateSet = false;
+	//	QString montageCreateOption;
+	//	if (args.contains(keys::create_montage)) {
+	//		montageCreateOption = args.value(keys::create_montage).toString();
+	//		montageCreateSet = true;
+	//	}
+
+	//	if (montageCreateSet) {
+	//		if (montageCreateOption == keys::bipolar_ieeg) {
+	//			if (skipBad)
+	//				montage = AwMontage::createSEEGBipolarMontage(dm->rawChannels(), process->pdi.input.settings.value(keys::bad_labels).toStringList());
+	//			else
+	//				montage = AwMontage::createSEEGBipolarMontage(dm->rawChannels());
+	//			if (montage.isEmpty()) {
+	//				throw AwException(QString("error: bipolar seeg montage could not be done. Check --create_montage <montage> option."), origin);
+	//				return process;
+	//			}
+	//		}
+	//		else { // monopolar or none result in just the as recorded montage 
+	//			montage = AwChannel::duplicateChannels(dm->rawChannels());
+	//			if (skipBad)
+	//				AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+	//		}
+	//	}
+	//	else {
+	//		if (args.contains(keys::montage_file)) { // did we finally got a montage file?
+	//			montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
+	//				process->pdi.input.settings.value(keys::bad_labels).toStringList());
+	//			if (montage.isEmpty()) { // error when loading and/or applying mtg file
+	//				throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()), origin);
+	//				return process;
+	//			}
+	//		}
+	//		else { // no montage specified or detected
+	//			// applying default file montage
+	//			montage = AwChannel::duplicateChannels(dm->rawChannels());
+	//			if (skipBad)
+	//				AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+	//		}
+	//	}
+
+	//	dm->montageManager()->setChannels(montage);
+	//	// preload markers under different conditions:
+	//	tmp = QString("%1.mrk").arg(inputFile);
+	//	// detect only if marker_file option is not specified by the user
+	//	if (!args.contains(keys::marker_file))
+	//		if (QFile::exists(tmp))
+	//			args[keys::marker_file] = tmp;
+	//	// if marker file is found => load markers and use them for the process
+	//	if (args.contains(keys::marker_file))
+	//		process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
+	//	else
+	//		process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
+
+	//	//if (!buildPDI(process, montage, dm->rawChannels())) {
+	//	// buildProcessPDI will do the input channels and input markers filtering considering all options set
+	//	process->pdi.input.settings.unite(args);
+	//	// handle output_dir
+	//	if (!process->pdi.input.settings.contains(keys::output_dir)) {
+	//		// no output_dir specified => set output_dir as current data dir
+	//		process->pdi.input.settings[keys::output_dir] = process->pdi.input.settings.value(keys::data_dir).toString();
+	//	}
+	//	if (AwProcessManager::instance()->buildProcessPDI(process) != 0) {
+	//	//A_DESTROY_LIST(montage);
+	//		throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
+	//		
+	//		return process;
+	//	}
+
+	//	// apply filter on channels depending on hp lp notch keys that may have been specified in the command line options
+	//	AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
+
+	//	// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
+	////	AwDataServer::getInstance()->setMainReader(reader);
+	//	dm->dataServer()->openConnection(process);
+
+	//	// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
+	//	AwBIDSManager::initCommandLineOperation(inputFile);
+	//}
+	//else {   // no input file but requires to build pdi anyway
+	//	//buildPDI(process);
+	//	AwProcessManager::instance()->buildProcessPDI(process);
+	//}
+	return process;
+}
+
+int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
+{
+	auto dm = AwDataManager::instance();
+	auto args = process->pdi.input.settings;
+	QString inputFile = args.value(keys::input_file).toString();
+
 	if (!inputFile.isEmpty()) {
-		reader = pm->getReaderToOpenFile(inputFile);
-		if (reader == Q_NULLPTR) {
-			throw AwException(QString("no reader can open %1").arg(inputFile), origin);
-			return process;
+		auto status = dm->openFile(inputFile, true);
+		if (status == AwDataManager::NoPluginFound) {
+			throw AwException(QString("no reader can open %1").arg(inputFile));
+			return -1;
 		}
-		process->pdi.input.setReader(reader);
-		if (reader->openFile(inputFile) != AwFileIO::NoError) {
-			throw AwException(QString("Could not open %1").arg(inputFile), origin);
-			return process;
+
+		if (status != AwDataManager::NoError) {
+			throw AwException(QString("Could not open %1").arg(inputFile));
+			return -1;
 		}
-		AwFileInfo fi(reader, inputFile);
-		process->pdi.input.settings[processio::data_dir] = fi.dirPath();
-		process->pdi.input.settings[processio::file_duration] = reader->infos.totalDuration();
-		process->pdi.input.settings[processio::data_path] = inputFile;
+		process->pdi.input.setReader(dm->reader());
+		process->pdi.input.settings.unite(dm->settings());
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file
-	if (args.contains(cl::marker_file)) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(args.value(cl::marker_file).toString());
-		args[cl::marker_file] = fullPath;
+	if (args.contains(keys::marker_file)) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings.value(keys::data_dir).toString()).arg(args.value(keys::marker_file).toString());
+		args[keys::marker_file] = fullPath;
 	}
-	if (args.contains(cl::montage_file)) {
-		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings[processio::data_dir].toString()).arg(args.value(cl::montage_file).toString());
-		args[cl::montage_file] = fullPath;
+	if (args.contains(keys::montage_file)) {
+		QString fullPath = QString("%1/%2").arg(process->pdi.input.settings.value(keys::data_dir).toString()).arg(args.value(keys::montage_file).toString());
+		args[keys::montage_file] = fullPath;
 	}
 
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
-		QString tmp = QString("%1.bad").arg(inputFile);
+		QString tmp = dm->badFilePath();
 		if (QFile::exists(tmp)) {
-			args[cl::bad_file] = tmp;
-			process->pdi.input.settings[processio::bad_labels] = AwMontageManager::loadBad(tmp);
+			args[keys::bad_file] = tmp;
+			process->pdi.input.settings[keys::bad_labels] = dm->badLabels();
 		}
 		AwChannelList montage;
-		tmp = QString("%1.mtg").arg(inputFile);
-		if (!args.contains(cl::montage_file))
+		tmp = dm->mtgFilePath();
+		if (!args.contains(keys::montage_file))
 			if (QFile::exists(tmp))
-				args[cl::montage_file] = tmp;
-		if (args.contains(cl::montage_file)) { // did we finally got a montage file?
-				montage = AwMontageManager::instance()->loadAndApplyMontage(reader->infos.channels(), args.value(cl::montage_file).toString(),
-					process->pdi.input.settings[processio::bad_labels].toStringList());
-				if (montage.isEmpty()) { // error when loading and/or applying mtg file
-					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(cl::montage_file).toString()), origin);
-					return process;
+				args[keys::montage_file] = tmp;
+
+		bool skipBad = true;
+		if (args.contains(keys::skip_bad_channels))
+			skipBad = args.value(keys::skip_bad_channels).toBool();
+
+		bool montageCreateSet = false;
+		QString montageCreateOption;
+		if (args.contains(keys::create_montage)) {
+			montageCreateOption = args.value(keys::create_montage).toString();
+			montageCreateSet = true;
+		}
+
+		if (montageCreateSet) {
+			if (montageCreateOption == keys::bipolar_ieeg) {
+				if (skipBad)
+					montage = AwMontage::createSEEGBipolarMontage(dm->rawChannels(), process->pdi.input.settings.value(keys::bad_labels).toStringList());
+				else
+					montage = AwMontage::createSEEGBipolarMontage(dm->rawChannels());
+				if (montage.isEmpty()) {
+					throw AwException(QString("error: bipolar seeg montage could not be done. Check --create_montage <montage> option."));
+					return -1;
 				}
+			}
+			else { // monopolar or none result in just the as recorded montage 
+				montage = AwChannel::duplicateChannels(dm->rawChannels());
+				if (skipBad)
+					AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+			}
 		}
-		else  { // no montage specified or detected
-
-			// applying default file montage
-			montage = AwChannel::duplicateChannels(reader->infos.channels());
-		}
-		if (!buildPDI(process, montage, reader->infos.channels())) {
-			throw AwException(QString("input channels cannot be set").arg(inputFile), origin);
-			AW_DESTROY_LIST(montage);
-			return process;
-		}
-		AW_DESTROY_LIST(montage);
-		
-		tmp = QString("%1.mrk").arg(inputFile);
-		// detect only if marker_file option is not specified by the user
-		if (!args.contains(cl::marker_file))
-			if (QFile::exists(tmp))
-				args[cl::marker_file] = tmp;
-		// if marker file is found => load markers and use them for the process
-		if (args.contains(cl::marker_file))
-			process->pdi.input.setNewMarkers(AwMarker::load(args.value(cl::marker_file).toString()));
-		else
-			process->pdi.input.setNewMarkers(reader->infos.blocks().first()->markers(), true);
-
-		// handle skipping markers and/or use specific markers
-		QStringList skippedLabels, usedLabels;
-		if (args.contains(cl::skip_markers))
-			skippedLabels = args.value(cl::skip_markers).toStringList();
-		if (args.contains(cl::use_markers))
-			usedLabels = args.value(cl::use_markers).toStringList();
-
-		bool skipMarkers = !skippedLabels.isEmpty();
-		bool useMarkers = !usedLabels.isEmpty();
-		if (skipMarkers || useMarkers) {
-			auto markers = AwMarker::applySelectionFilter(process->pdi.input.markers(), skippedLabels, usedLabels, 
-				process->pdi.input.settings[processio::file_duration].toDouble());
-			if (!markers.isEmpty()) {
-				process->pdi.input.setNewMarkers(markers);
+		else {
+			if (args.contains(keys::montage_file)) { // did we finally got a montage file?
+				montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
+					process->pdi.input.settings.value(keys::bad_labels).toStringList());
+				if (montage.isEmpty()) { // error when loading and/or applying mtg file
+					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()));
+					return -1;
+				}
+			}
+			else { // no montage specified or detected
+				// applying default file montage
+				montage = AwChannel::duplicateChannels(dm->rawChannels());
+				if (skipBad)
+					AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
 			}
 		}
 
-		// check if we have input markers after all
-		  // if no markers set as input => add the GLOBAL ONE
-		if (process->pdi.input.markers().isEmpty())
-			process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.settings[processio::file_duration].toDouble()));
-		
+		dm->montageManager()->setChannels(montage);
+		// preload markers under different conditions:
+		tmp = QString("%1.mrk").arg(inputFile);
+		// detect only if marker_file option is not specified by the user
+		if (!args.contains(keys::marker_file))
+			if (QFile::exists(tmp))
+				args[keys::marker_file] = tmp;
+		// if marker file is found => load markers and use them for the process
+		if (args.contains(keys::marker_file))
+			process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
+		else
+			process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
+
+		// handle output_dir
+		if (!process->pdi.input.settings.contains(keys::output_dir)) {
+			// no output_dir specified => set output_dir as current data dir
+			process->pdi.input.settings[keys::output_dir] = process->pdi.input.settings.value(keys::data_dir).toString();
+		}
+
+		// INIT PDI   CHANNELS AND MARKERS BASED ON FLAGS
+		if (AwProcessManager::instance()->buildProcessPDI(process) != 0) {
+			throw AwException(QString("input channels cannot be set").arg(inputFile));
+			return -1;
+		}
+
+		// apply filter on channels depending on hp lp notch keys that may have been specified in the command line options
 		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
+
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
-		AwDataServer::getInstance()->setMainReader(reader);
-		AwDataServer::getInstance()->openConnection(process);
+		dm->dataServer()->openConnection(process);
 
 		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
 		AwBIDSManager::initCommandLineOperation(inputFile);
 	}
 	else {   // no input file but requires to build pdi anyway
-		buildPDI(process);
-
+		AwProcessManager::instance()->buildProcessPDI(process);
 	}
-	return process;
+	return 0;
 }

@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #ifndef PROCESS_INTERFACE_H_
@@ -33,8 +33,9 @@
 #include <process/AwProcessGUIWidget.h>
 #include <QTranslator>
 #include <AwGlobal.h>
+#include <QElapsedTimer>
 class AwProcessPlugin;
-
+class AwProcessOutputWidget;
 
 
 
@@ -64,10 +65,12 @@ public:
 	inline int flags() { return m_flags; }
 	inline void setFlags(int flags) { m_flags = flags; }
 	inline int inputFlags() { return m_inputFlags; }
+	inline int modifiersFlags() { return m_modifiersFlags; }
 	inline void setInputFlags(int flags) { m_inputFlags = flags; }
+	inline void setInputModifiers(int flags) { m_modifiersFlags = flags; }
+	inline void addModifiers(int flags) { m_modifiersFlags |= flags; }
 	inline int runMode() { return m_runMode; }
 	void setRunMode(int mode) { m_runMode = mode; }
-	void setLocale(const QString& lang) { m_locale = lang; loadLanguage(); }
 	
 	/** Initializing process before starting it **/
 	virtual void init() {}
@@ -83,13 +86,14 @@ public:
 	void addMarker(AwMarker *marker);
 
 	/** specific to process which supports command line batching. **/
-	virtual bool batchParameterCheck(const QVariantHash& args) { return true; }
+	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
 signals:
 	// Adding markers to AnyWave
 	void sendMarkers(AwMarkerList *markers);
 	void sendMarker(AwMarker *marker);
 	// Send command
 	void sendCommand(int command, QVariantList args);
+	void sendCommand(const QVariantMap&);
 
 	void dataConnectionRequested(AwDataClient *client);
 	void newDisplayPlugin(AwDisplayPlugin *plugin);
@@ -102,15 +106,11 @@ protected:
 	int m_runMode;
 	int m_flags;		// general flags for process
 	int m_inputFlags;	// Input flags;
+	int m_modifiersFlags;
 	bool m_endOfData, m_abort;
-	AwProcessPlugin *m_plugin;	
-	QMutex m_lock;
-	// language support
-	QString m_langFilePrefix;	// must hold the language prefix file for the process. Example : "h2";
-	QString m_locale;			// contains the current locale set by AnyWave
-	QTranslator m_translator;
-	void loadLanguage();
+	AwProcessPlugin *m_plugin;
 	// thread specific
+	QMutex m_lock;
 	QWaitCondition m_wcMarkersReceived;
 	QMutex m_mutexMarkersReceived;
 };
@@ -151,40 +151,20 @@ public:
 	virtual AwBaseProcess *newInstance() = 0;
 	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
 	virtual void deleteInstance(AwBaseProcess *process) { delete process;  }
-	void addLanguageTranslation(const QString& resourceFile);
-	inline QVariantHash& settings() { return m_settings; }
+
+	inline QVariantMap& settings() { return m_settings; }
 	void setSettings(const QString& key, const QVariant& value) { m_settings[key] = value; }
 	/** Command Line specific **/
-	inline QVariantHash& batchHash() { return m_batchHash; }
-	void setBatch(const QString& key, const QVariant& value) { m_batchHash[key] = value; }
-	void addBatchHash(const QVariantHash& hash) { m_batchHash.unite(hash); }
+	inline QVariantMap& batchHash() { return m_batchMap; }
+	void setBatch(const QString& key, const QVariant& value) { m_batchMap[key] = value; }
+	void addBatchMap(const QVariantMap& hash) { m_batchMap.unite(hash); }
 	inline bool hasDeclaredArgs();
 	bool isBatchGUICompatible(); 
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
-	QVariantHash m_settings;
-	QVariantHash m_batchHash; // command line specific
-};
-
-class AW_PROCESS_EXPORT AwGUIProcess : public AwBaseProcess
-{
-	Q_OBJECT
-public:
-	AwGUIProcess() : AwBaseProcess() {}
-
-	/** Register a new AwProcessGUIWidget that will close/kill the process when the user closes the widget **/
-	void registerGUIWidget(AwProcessGUIWidget *widget);
-	/* Implement this method in the derived object. */
-	virtual void run(const QStringList& args = QStringList()) {  }
-
-public slots:
-	void stop() { emit aboutToBeDestroyed(); m_plugin->deleteInstance(this); }
-signals:
-	void aboutToBeDestroyed();
-	void closed();
-	
-	void connectionClosed(AwDataClient *client);
+	QVariantMap m_settings;
+	QVariantMap m_batchMap; // command line specific
 };
 
 class AW_PROCESS_EXPORT AwProcess : public AwBaseProcess
@@ -232,11 +212,34 @@ signals:
 	void criticalMessage(QString message);
 	void outOfMemory();		// emitted when memory allocation failed.
 protected:
+
 	int m_status;
 	qint64 m_executionTime;
 	QElapsedTimer m_timer;
 	QWaitCondition *m_wcDataReady; // pointer to global WaitCondition located in proxy data client
 	QThread *m_thread;
+};
+
+class AW_PROCESS_EXPORT AwGUIProcess : public AwProcess
+{
+	Q_OBJECT
+public:
+	AwGUIProcess() : AwProcess() {}
+
+	/** Register a new AwProcessGUIWidget that will close/kill the process when the user closes the widget **/
+	void registerGUIWidget(AwProcessGUIWidget* widget);
+
+	// override stop() slots for specific GUI usage
+public slots:
+	// GUI Process when stopped just have to emit finished(). Unline AwProcess, they have no idle or aborted states.
+	void stop() override {
+		m_status = AwProcess::Finished;
+		emit finished();  }
+signals:
+	//	void aboutToBeDestroyed();
+	void closed();
+
+	void connectionClosed(AwDataClient* client);
 };
 
 

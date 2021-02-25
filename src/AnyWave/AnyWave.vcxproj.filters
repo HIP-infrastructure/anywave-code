@@ -113,145 +113,52 @@
     <Filter Include="Batch">
       <UniqueIdentifier>{fad4582d-3dc6-447f-a72d-bded135f70b3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Process\PSD">
-      <UniqueIdentifier>{a1e9f0f5-9cf7-407c-8217-b80ff75cf2a9}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
       <Filter>Data</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDataConnection.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDataConnection.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Data\AwDataServer.cpp">
       <Filter>Data</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDataServer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDataServer.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\AwDebugLog.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDebugLog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDebugLog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\AwDebugLogWidget.cpp">
       <Filter>Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDebugLogWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDebugLogWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwChannelSelectionDial.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwChannelSelectionDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwChannelSelectionDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwChannelSelectionModel.cpp">
       <Filter>Display</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwChannelSelectionModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwChannelSelectionModel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwDisplay.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDisplay.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDisplay.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwDisplaySetup.cpp">
       <Filter>Display</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDisplaySetup.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDisplaySetup.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwDisplaySetupManager.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDisplaySetupManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDisplaySetupManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwDSMSaveSetupUI.cpp">
       <Filter>Display</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDSMSaveSetupUI.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDSMSaveSetupUI.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwNewViewDial.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwNewViewDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwNewViewDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwSaveAsNewSetupDialog.cpp">
       <Filter>Display</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwSaveAsNewSetupDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwSaveAsNewSetupDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwScene.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwScene.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwScene.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwSignalView.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwSignalView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwSignalView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
       <Filter>Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilterToolBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilterToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="IO\HDF5\structs.cpp">
       <Filter>IO\HDF5</Filter>
@@ -259,155 +166,53 @@
     <ClCompile Include="Marker\AwDockAddMarker.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDockAddMarker.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDockAddMarker.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwMarkerListModel.cpp">
       <Filter>Marker</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerListModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerListModel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkerManager.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwMarkerManagerSettings.cpp">
       <Filter>Marker</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerManagerSettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerManagerSettings.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkerRule.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerRule.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerRule.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwMarkerRuleElement.cpp">
       <Filter>Marker</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerRuleElement.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerRuleElement.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkerRuleManageDial.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerRuleManageDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerRuleManageDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwMarkerRuleWidget.cpp">
       <Filter>Marker</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerRuleWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerRuleWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkerTableView.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerTableView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerTableView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwNewMarkerRuleDial.cpp">
       <Filter>Marker</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwNewMarkerRuleDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwNewMarkerRuleDial.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\AwMATPyServer.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMATPyServer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMATPyServer.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Montage\AwChannelListModel.cpp">
       <Filter>Montage</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwChannelListModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwChannelListModel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Montage\AwMontageDial.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMontageDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMontageDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Montage\AwMontageManager.cpp">
       <Filter>Montage</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMontageManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMontageManager.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Montage\AwMontageTableView.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMontageTableView.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMontageTableView.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Plugin\AwPluginDial.cpp">
       <Filter>Plugin</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPluginDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPluginDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Plugin\AwPluginManager.cpp">
       <Filter>Plugin</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPluginManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPluginManager.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Prefs\AwPreferences.cpp">
       <Filter>Prefs</Filter>
@@ -415,275 +220,92 @@
     <ClCompile Include="Prefs\AwPrefsDial.cpp">
       <Filter>Prefs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPrefsDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPrefsDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Prefs\AwSettings.cpp">
       <Filter>Prefs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwSettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwSettings.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwConverter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwConverter.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwConverter.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwMatlabScriptPlugin.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMatlabScriptPlugin.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMatlabScriptPlugin.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwProcessesWidget.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessesWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessesWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwProcessManager.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessManager.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwProcessMarkerModel.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessMarkerModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessMarkerModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwProgressIndicator.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProgressIndicator.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProgressIndicator.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwPythonScriptPlugin.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPythonScriptPlugin.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPythonScriptPlugin.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwScriptPlugin.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwScriptPlugin.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwScriptPlugin.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwTriggerParser.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwTriggerParser.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwTriggerParser.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\TPUi.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_TPUi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_TPUi.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwAboutAnyWave.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwAboutAnyWave.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwAboutAnyWave.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Widgets\AwCursorMarkerToolBar.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwCursorMarkerToolBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwCursorMarkerToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwDisplaySetupToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDisplaySetupToolBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDisplaySetupToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Widgets\AwDisplayToolBar.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDisplayToolBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDisplayToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwFilePropertiesDialog.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilePropertiesDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilePropertiesDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Widgets\AwFilePropertiesModel.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFilePropertiesModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFilePropertiesModel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwFileToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwFileToolBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwFileToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Widgets\AwMappingToolBar.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMappingToolBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMappingToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwMarkersBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkersBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkersBar.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Widgets\AwMontageRefWidget.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMontageRefWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMontageRefWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwMontageToolBar.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMontageToolBar.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMontageToolBar.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Widgets\AwPleaseWaitWidget.cpp">
       <Filter>Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPleaseWaitWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPleaseWaitWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwTriggerParsingDialog.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwTriggerParsingDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwTriggerParsingDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="AnyWave.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AnyWave.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AnyWave.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="AwExportDial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwExportDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwExportDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_AnyWave.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="Carto\AwMappingClient.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMappingClient.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMappingClient.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwICAManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwICAManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="ICA\AwICAManager.cpp">
       <Filter>ICA</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwICAComponents.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwICAComponents.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="ICA\AwICAComponents.cpp">
       <Filter>ICA</Filter>
@@ -694,47 +316,14 @@
     <ClCompile Include="ICA\AwICASignalItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwICARejectButton.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwICARejectButton.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="ICA\AwICARejectButton.cpp">
       <Filter>ICA</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwICASignalItem.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwICASignalItem.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessLogWindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessLogWindow.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwProcessLogWindow.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwProcessWidget.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPidManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwRequestServer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwRequestServer.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\AwRequestServer.cpp">
       <Filter>MATPy</Filter>
@@ -757,62 +346,20 @@
     <ClCompile Include="Display\AwViewSetup.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwViewSetup.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwViewSetup.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMappingButton.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMappingButton.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="ICA\AwMappingButton.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
     <ClCompile Include="Carto\AwDockMapping.cpp">
       <Filter>Carto</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDockMapping.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDockMapping.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Carto\AwMappingWidget.cpp">
       <Filter>Carto</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMappingWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMappingWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwICAPanel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwICAPanel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="ICA\AwICAPanel.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPanelItem.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPanelItem.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="ICA\AwPanelItem.cpp">
       <Filter>ICA</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwCentralWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwCentralWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwCentralWidget.cpp">
       <Filter>Display</Filter>
@@ -823,20 +370,8 @@
     <ClCompile Include="Marker\AwExtractTriggers.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessLogManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessLogManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwProcessLogManager.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwProcessLog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwProcessLog.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwProcessLog.cpp">
       <Filter>Process</Filter>
@@ -844,56 +379,20 @@
     <ClCompile Include="Marker\AwPickChannelsDial.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPickChannelsDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPickChannelsDial.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="MATPy\GetScreenCapture.cpp">
       <Filter>MATPy</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwExporter.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwExporter.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwExporter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwExporterSettings.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwExporterSettings.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwExporterSettings.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwExportSelChannels.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwExportSelChannels.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwExportSelChannels.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwExporterSelMarkers.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwExporterSelMarkers.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwExporterSelMarkers.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwExporterMarkerModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwExporterMarkerModel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwExporterMarkerModel.cpp">
       <Filter>Process</Filter>
@@ -907,155 +406,53 @@
     <ClCompile Include="Source\AwSourceManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwSourceManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwSourceManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Source\AwSourceChannel.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="AwUpdater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwUpdater.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwUpdater.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_HDF5IO.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="IO\HDF5\HDF5IO.cpp">
       <Filter>IO\HDF5</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_HDF5IO.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="IO\ADES\ADESIO.cpp">
       <Filter>IO\ADES</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ADESIO.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ADESIO.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwEpochManager.cpp">
       <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochCreateUi.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochCreateUi.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Epoch\AwEpochCreateUi.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwEpochModel.cpp">
       <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochVisuWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochVisuWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Epoch\AwEpochVisuWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochAverageWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochAverageWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwEpochAverageWidget.cpp">
       <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwAverageDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwAverageDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Epoch\AwAverageDialog.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwAverageItemWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwAverageItemWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwAverageItemWidget.cpp">
       <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwAvgWorker.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwAvgWorker.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Epoch\AwAvgWorker.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwAvgSignalItem.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwAvgSignalItem.cpp">
       <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwAvgSignalItem.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEditStatsDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEditStatsDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Epoch\AwEditStatsDialog.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwStatsModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwStatsModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwStatsModel.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwStatChartWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwStatChartWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwStatChartWidget.cpp">
       <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkersExportWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkersExportWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkersExportWidget.cpp">
       <Filter>Marker</Filter>
@@ -1063,20 +460,8 @@
     <ClCompile Include="Process\AwMarkerExporter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMarkerExporter.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMarkerExporter.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp">
       <Filter>IO\MATLAB</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MATLABIO.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MATLABIO.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\GetTriggers.cpp">
       <Filter>MATPy</Filter>
@@ -1087,47 +472,17 @@
     <ClCompile Include="MATPy\GetData.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwTriggerWriter.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwTriggerWriter.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwTriggerWriter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwSelectTriggerChannelDialog.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwSelectTriggerChannelDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwSelectTriggerChannelDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwTriggerEraser.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwTriggerEraser.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwTriggerEraser.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp">
       <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUI.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSGUI.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp">
       <Filter>IO\BIDS</Filter>
@@ -1147,29 +502,11 @@
     <ClCompile Include="AwOpenFileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwOpenFileDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwOpenFileDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Epoch\AwEpochMosaicWidget.cpp">
       <Filter>Epoch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwEpochMosaicWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwEpochMosaicWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\MEMIO\MEMIO.cpp">
       <Filter>IO\MEMIO</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_MEMIO.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_MEMIO.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Data\AwDataChunk.cpp">
       <Filter>Data</Filter>
@@ -1192,26 +529,8 @@
     <ClCompile Include="CL\AwCommandLineManager.cpp">
       <Filter>CL</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwCommandLogger.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwCommandLogger.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwECoGDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwECoGDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Montage\AwECoGDialog.cpp">
       <Filter>Montage</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwECoGTableModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwECoGTableModel.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Montage\AwECoGTableModel.cpp">
       <Filter>Montage</Filter>
@@ -1219,47 +538,20 @@
     <ClCompile Include="Montage\AwECoGGrid.cpp">
       <Filter>Montage</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwLogPlainTextEdit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwLogPlainTextEdit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwLogPlainTextEdit.cpp">
       <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwMATLABMarkersExporter.cpp">
-      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwMATLABMarkersExporter.cpp">
       <Filter>Process</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwMATLABMarkersExporter.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="CL\AwRunProcess.cpp">
       <Filter>CL</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_SignalInfo.cpp">
-      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\AwGetMarkersEx.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwVideoManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwVideoManager.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwVideoManager.cpp">
       <Filter>Display</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwVideoSettingsDial.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwVideoSettingsDial.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Widgets\AwVideoSettingsDial.cpp">
       <Filter>Widgets</Filter>
@@ -1279,29 +571,8 @@
     <ClCompile Include="MATPy\AwPidManager.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwDataSet.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwDataSet.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Data\AwDataSet.cpp">
       <Filter>Data</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwICABatchDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwICABatchDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="ICA\AwICABatchDialog.cpp">
-      <Filter>ICA</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Batch\AwBatchDialog.cpp">
       <Filter>Batch</Filter>
@@ -1309,65 +580,23 @@
     <ClCompile Include="Batch\AwBatchModel.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwAddEditBatchDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwAddEditBatchDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Batch\AwAddEditBatchDialog.cpp">
       <Filter>Batch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchRunner.cpp">
-      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Batch\AwBatchRunner.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchRunner.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchFileInputWidget.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchFileInputWidget.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Batch\AwBatchFileInputWidget.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSGUIOptionsDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSGUIOptionsDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp">
       <Filter>IO\BIDS</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchManager.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchManager.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Batch\AwBatchManager.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
     <ClCompile Include="Batch\AwBatchItem.cpp">
       <Filter>Batch</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBatchGUI.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBatchGUI.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="AwMapping.cpp">
       <Filter>Source Files</Filter>
@@ -1381,699 +610,573 @@
     <ClCompile Include="Batch\AwBatchGUI.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    <ClCompile Include="Process\PSD\AwPSD.cpp">
-      <Filter>Process\PSD</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPSD.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPSD.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwPSDGUI.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwPSDGUI.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\PSD\AwPSDGUI.cpp">
-      <Filter>Process\PSD</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_AwBIDSProxyModel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_AwBIDSProxyModel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="Data\AwDataManager.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\DebugConnect.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="Data\AwDataConnection.h">
+    <QtMoc Include="Data\AwDataConnection.h">
       <Filter>Data</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Data\AwDataServer.h">
+    </QtMoc>
+    <QtMoc Include="Data\AwDataServer.h">
       <Filter>Data</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Debug\AwDebugLog.h">
+    </QtMoc>
+    <QtMoc Include="Debug\AwDebugLog.h">
       <Filter>Debug</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Debug\AwDebugLogWidget.h">
+    </QtMoc>
+    <QtMoc Include="Debug\AwDebugLogWidget.h">
       <Filter>Debug</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Debug\AwDebugLogWidget.ui">
+    </QtMoc>
+    <QtUic Include="Debug\AwDebugLogWidget.ui">
       <Filter>Debug</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwChannelSelectionDial.h">
+    </QtUic>
+    <QtMoc Include="Display\AwChannelSelectionDial.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwChannelSelectionDial.ui">
+    </QtMoc>
+    <QtUic Include="Display\AwChannelSelectionDial.ui">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwChannelSelectionModel.h">
+    </QtUic>
+    <QtMoc Include="Display\AwChannelSelectionModel.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwDisplay.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwDisplay.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwDisplaySetup.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwDisplaySetup.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwDisplaySetupManager.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwDisplaySetupManager.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwDSMSaveSetupUI.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwDSMSaveSetupUI.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwDSMSaveSetupUI.ui">
+    </QtMoc>
+    <QtUic Include="Display\AwDSMSaveSetupUI.ui">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwNewViewDial.h">
+    </QtUic>
+    <QtMoc Include="Display\AwNewViewDial.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwNewViewDial.ui">
+    </QtMoc>
+    <QtUic Include="Display\AwNewViewDial.ui">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwSaveAsNewSetupDialog.h">
+    </QtUic>
+    <QtMoc Include="Display\AwSaveAsNewSetupDialog.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwSaveAsNewSetupDialog.ui">
+    </QtMoc>
+    <QtUic Include="Display\AwSaveAsNewSetupDialog.ui">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwScene.h">
+    </QtUic>
+    <QtMoc Include="Display\AwScene.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwSignalView.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwSignalView.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Filter\AwFilterToolBar.h">
+    </QtMoc>
+    <QtMoc Include="Filter\AwFilterToolBar.h">
       <Filter>Filter</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Filter\AwFilterToolBar.ui">
+    </QtMoc>
+    <QtUic Include="Filter\AwFilterToolBar.ui">
       <Filter>Filter</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwDockAddMarker.h">
+    </QtUic>
+    <QtMoc Include="Marker\AwDockAddMarker.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerListModel.h">
+    </QtMoc>
+    <QtMoc Include="Marker\AwMarkerListModel.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerManager.h">
+    </QtMoc>
+    <QtMoc Include="Marker\AwMarkerManager.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerManagerSettings.h">
+    </QtMoc>
+    <QtMoc Include="Marker\AwMarkerManagerSettings.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerManagerSettings.ui">
+    </QtMoc>
+    <QtUic Include="Marker\AwMarkerManagerSettings.ui">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerRule.h">
+    </QtUic>
+    <QtMoc Include="Marker\AwMarkerRule.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerRuleElement.h">
+    </QtMoc>
+    <QtMoc Include="Marker\AwMarkerRuleElement.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerRuleManageDial.h">
+    </QtMoc>
+    <QtMoc Include="Marker\AwMarkerRuleManageDial.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerRuleManageDial.ui">
+    </QtMoc>
+    <QtUic Include="Marker\AwMarkerRuleManageDial.ui">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerRuleWidget.h">
+    </QtUic>
+    <QtMoc Include="Marker\AwMarkerRuleWidget.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerRuleWidget.ui">
+    </QtMoc>
+    <QtUic Include="Marker\AwMarkerRuleWidget.ui">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkerTableView.h">
+    </QtUic>
+    <QtMoc Include="Marker\AwMarkerTableView.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwNewMarkerRuleDial.h">
+    </QtMoc>
+    <QtMoc Include="Marker\AwNewMarkerRuleDial.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwNewMarkerRuleDial.ui">
+    </QtMoc>
+    <QtUic Include="Marker\AwNewMarkerRuleDial.ui">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MATPy\AwMATPyServer.h">
+    </QtUic>
+    <QtMoc Include="MATPy\AwMATPyServer.h">
       <Filter>MATPy</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwChannelListModel.h">
+    </QtMoc>
+    <QtMoc Include="Montage\AwChannelListModel.h">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwMontageDial.h">
+    </QtMoc>
+    <QtMoc Include="Montage\AwMontageDial.h">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwMontageDial.ui">
+    </QtMoc>
+    <QtUic Include="Montage\AwMontageDial.ui">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwMontageManager.h">
+    </QtUic>
+    <QtMoc Include="Montage\AwMontageManager.h">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwMontageTableView.h">
+    </QtMoc>
+    <QtMoc Include="Montage\AwMontageTableView.h">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Plugin\AwPluginDial.h">
+    </QtMoc>
+    <QtMoc Include="Plugin\AwPluginDial.h">
       <Filter>Plugin</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Plugin\AwPluginDial.ui">
+    </QtMoc>
+    <QtUic Include="Plugin\AwPluginDial.ui">
       <Filter>Plugin</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Plugin\AwPluginManager.h">
+    </QtUic>
+    <QtMoc Include="Plugin\AwPluginManager.h">
       <Filter>Plugin</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Prefs\AwPrefsDial.h">
+    </QtMoc>
+    <QtMoc Include="Prefs\AwPrefsDial.h">
       <Filter>Prefs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Prefs\AwPrefsDial.ui">
+    </QtMoc>
+    <QtUic Include="Prefs\AwPrefsDial.ui">
       <Filter>Prefs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Prefs\AwSettings.h">
+    </QtUic>
+    <QtMoc Include="Prefs\AwSettings.h">
       <Filter>Prefs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwConverter.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwConverter.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwMatlabScriptPlugin.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwMatlabScriptPlugin.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessesWidget.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwProcessesWidget.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessesWidget.ui">
+    </QtMoc>
+    <QtUic Include="Process\AwProcessesWidget.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessManager.h">
+    </QtUic>
+    <QtMoc Include="Process\AwProcessManager.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessMarkerModel.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwProcessMarkerModel.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProgressIndicator.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwProgressIndicator.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwPythonScriptPlugin.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwPythonScriptPlugin.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwScriptPlugin.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwScriptPlugin.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwTriggerParser.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwTriggerParser.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\TPUi.h">
+    </QtMoc>
+    <QtMoc Include="Process\TPUi.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\TPUi.ui">
+    </QtMoc>
+    <QtUic Include="Process\TPUi.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwAboutAnyWave.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwAboutAnyWave.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwAboutAnyWave.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwAboutAnyWave.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwCursorMarkerToolBar.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwCursorMarkerToolBar.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwCursorMarkerToolBar.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwCursorMarkerToolBar.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwDisplaySetupToolBar.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwDisplaySetupToolBar.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwDisplaySetupToolBar.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwDisplaySetupToolBar.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwDisplayToolBar.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwDisplayToolBar.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwDisplayToolBarv2.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwDisplayToolBarv2.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwFilePropertiesDialog.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwFilePropertiesDialog.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwFilePropertiesDialog.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwFilePropertiesDialog.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwFilePropertiesModel.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwFilePropertiesModel.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwFileToolBar.h">
+    </QtMoc>
+    <QtMoc Include="Widgets\AwFileToolBar.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwFileToolBar.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwFileToolBar.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwMappingToolBar.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwMappingToolBar.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwMappingToolBar.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwMappingToolBar.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwMarkersBar.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwMarkersBar.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwMontageRefWidget.h">
+    </QtMoc>
+    <QtMoc Include="Widgets\AwMontageRefWidget.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwMontageToolBar.h">
+    </QtMoc>
+    <QtMoc Include="Widgets\AwMontageToolBar.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwMontageToolBar.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwMontageToolBar.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwPleaseWaitWidget.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwPleaseWaitWidget.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwPleaseWaitWidget.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwPleaseWaitWidget.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwTriggerParsingDialog.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwTriggerParsingDialog.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwTriggerParsingDialog.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwTriggerParsingDialog.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AnyWave.h">
+    </QtUic>
+    <QtMoc Include="AnyWave.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AnyWave.ui">
+    </QtMoc>
+    <QtUic Include="AnyWave.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwExportDial.h">
+    </QtUic>
+    <QtMoc Include="AwExportDial.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwExportDial.ui">
+    </QtMoc>
+    <QtUic Include="AwExportDial.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\resources\AnyWave.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Carto\AwMappingClient.h">
+    </QtUic>
+    <QtMoc Include="Carto\AwMappingClient.h">
       <Filter>Carto</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICAManager.h">
+    </QtMoc>
+    <QtMoc Include="ICA\AwICAManager.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICAComponents.h">
+    </QtMoc>
+    <QtMoc Include="ICA\AwICAComponents.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICASignalItem.h">
+    </QtMoc>
+    <QtMoc Include="ICA\AwICASignalItem.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICARejectButton.h">
+    </QtMoc>
+    <QtMoc Include="ICA\AwICARejectButton.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessLogWindow.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwProcessLogWindow.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessLogWindow.ui">
+    </QtMoc>
+    <QtUic Include="Process\AwProcessLogWindow.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessWidget.h">
+    </QtUic>
+    <QtMoc Include="Process\AwProcessWidget.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessWidget.ui">
+    </QtMoc>
+    <QtUic Include="Process\AwProcessWidget.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MATPy\AwRequestServer.h">
+    </QtUic>
+    <QtMoc Include="MATPy\AwRequestServer.h">
       <Filter>MATPy</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwViewSetup.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwViewSetup.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwMappingButton.h">
+    </QtMoc>
+    <QtMoc Include="ICA\AwMappingButton.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Carto\AwDockMapping.h">
+    </QtMoc>
+    <QtMoc Include="Carto\AwDockMapping.h">
       <Filter>Carto</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Carto\AwMappingWidget.h">
+    </QtMoc>
+    <QtMoc Include="Carto\AwMappingWidget.h">
       <Filter>Carto</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Carto\AwMappingWidget.ui">
+    </QtMoc>
+    <QtUic Include="Carto\AwMappingWidget.ui">
       <Filter>Carto</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICAPanel.ui">
+    </QtUic>
+    <QtUic Include="ICA\AwICAPanel.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICAPanel.h">
+    </QtUic>
+    <QtMoc Include="ICA\AwICAPanel.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwPanelItem.ui">
+    </QtMoc>
+    <QtUic Include="ICA\AwPanelItem.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwPanelItem.h">
+    </QtUic>
+    <QtMoc Include="ICA\AwPanelItem.h">
       <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwCentralWidget.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwCentralWidget.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessLogManager.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwProcessLogManager.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwProcessLog.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwProcessLog.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwPickChannelsDial.h">
+    </QtMoc>
+    <QtMoc Include="Marker\AwPickChannelsDial.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwPickChannelsDial.ui">
+    </QtMoc>
+    <QtUic Include="Marker\AwPickChannelsDial.ui">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExporter.h">
+    </QtUic>
+    <QtMoc Include="Process\AwExporter.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExporterSettings.ui">
+    </QtMoc>
+    <QtUic Include="Process\AwExporterSettings.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExporterSettings.h">
+    </QtUic>
+    <QtMoc Include="Process\AwExporterSettings.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExportSelChannels.ui">
+    </QtMoc>
+    <QtUic Include="Process\AwExportSelChannels.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExportSelChannels.h">
+    </QtUic>
+    <QtMoc Include="Process\AwExportSelChannels.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExporterSelMarkers.ui">
+    </QtMoc>
+    <QtUic Include="Process\AwExporterSelMarkers.ui">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExporterSelMarkers.h">
+    </QtUic>
+    <QtMoc Include="Process\AwExporterSelMarkers.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwExporterMarkerModel.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwExporterMarkerModel.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Source\AwSourceManager.h">
+    </QtMoc>
+    <QtMoc Include="Source\AwSourceManager.h">
       <Filter>Source</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwUpdater.h">
+    </QtMoc>
+    <QtMoc Include="AwUpdater.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\HDF5\HDF5IO.h">
+    </QtMoc>
+    <QtMoc Include="IO\HDF5\HDF5IO.h">
       <Filter>IO\HDF5</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\ADES\ADESIO.h">
+    </QtMoc>
+    <QtMoc Include="IO\ADES\ADESIO.h">
       <Filter>IO\ADES</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochManager.h">
+    </QtMoc>
+    <QtMoc Include="Epoch\AwEpochManager.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochCreateUi.ui">
+    </QtMoc>
+    <QtUic Include="Epoch\AwEpochCreateUi.ui">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochCreateUi.h">
+    </QtUic>
+    <QtMoc Include="Epoch\AwEpochCreateUi.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochModel.h">
+    </QtMoc>
+    <QtMoc Include="Epoch\AwEpochModel.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochVisuWidget.ui">
+    </QtMoc>
+    <QtUic Include="Epoch\AwEpochVisuWidget.ui">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochVisuWidget.h">
+    </QtUic>
+    <QtMoc Include="Epoch\AwEpochVisuWidget.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochAverageWidget.ui">
+    </QtMoc>
+    <QtUic Include="Epoch\AwEpochAverageWidget.ui">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochAverageWidget.h">
+    </QtUic>
+    <QtMoc Include="Epoch\AwEpochAverageWidget.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwAverageDialog.ui">
+    </QtMoc>
+    <QtUic Include="Epoch\AwAverageDialog.ui">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwAverageDialog.h">
+    </QtUic>
+    <QtMoc Include="Epoch\AwAverageDialog.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwAverageItemWidget.ui">
+    </QtMoc>
+    <QtUic Include="Epoch\AwAverageItemWidget.ui">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwAverageItemWidget.h">
+    </QtUic>
+    <QtMoc Include="Epoch\AwAverageItemWidget.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwAvgWorker.h">
+    </QtMoc>
+    <QtMoc Include="Epoch\AwAvgWorker.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwAvgSignalItem.h">
+    </QtMoc>
+    <QtMoc Include="Epoch\AwAvgSignalItem.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEditStatsDialog.ui">
+    </QtMoc>
+    <QtUic Include="Epoch\AwEditStatsDialog.ui">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEditStatsDialog.h">
+    </QtUic>
+    <QtMoc Include="Epoch\AwEditStatsDialog.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwStatsModel.h">
+    </QtMoc>
+    <QtMoc Include="Epoch\AwStatsModel.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwStatChartWidget.h">
+    </QtMoc>
+    <QtMoc Include="Epoch\AwStatChartWidget.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkersExportWidget.ui">
+    </QtMoc>
+    <QtUic Include="Marker\AwMarkersExportWidget.ui">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Marker\AwMarkersExportWidget.h">
+    </QtUic>
+    <QtMoc Include="Marker\AwMarkersExportWidget.h">
       <Filter>Marker</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwMarkerExporter.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwMarkerExporter.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\MATLAB\MATLABIO.h">
+    </QtMoc>
+    <QtMoc Include="IO\MATLAB\MATLABIO.h">
       <Filter>IO\MATLAB</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwTriggerWriter.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwTriggerWriter.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwSelectTriggerChannelDialog.h">
+    </QtMoc>
+    <QtMoc Include="Widgets\AwSelectTriggerChannelDialog.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwTriggerEraser.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwTriggerEraser.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwSelectTriggerChannelDialog.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwSelectTriggerChannelDialog.ui">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSManager.h">
+    </QtUic>
+    <QtMoc Include="IO\BIDS\AwBIDSManager.h">
       <Filter>IO\BIDS</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSGUI.h">
+    </QtMoc>
+    <QtMoc Include="IO\BIDS\AwBIDSGUI.h">
       <Filter>IO\BIDS</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSGUI.ui">
+    </QtMoc>
+    <QtUic Include="IO\BIDS\AwBIDSGUI.ui">
       <Filter>IO\BIDS</Filter>
-    </CustomBuild>
-    <CustomBuild Include="AwOpenFileDialog.h">
+    </QtUic>
+    <QtMoc Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochMosaicWidget.ui">
+    </QtMoc>
+    <QtUic Include="Epoch\AwEpochMosaicWidget.ui">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Epoch\AwEpochMosaicWidget.h">
+    </QtUic>
+    <QtMoc Include="Epoch\AwEpochMosaicWidget.h">
       <Filter>Epoch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\MEMIO\MEMIO.h">
+    </QtMoc>
+    <QtMoc Include="IO\MEMIO\MEMIO.h">
       <Filter>IO\MEMIO</Filter>
-    </CustomBuild>
-    <CustomBuild Include="CL\AwCommandLogger.h">
+    </QtMoc>
+    <QtMoc Include="CL\AwCommandLogger.h">
       <Filter>CL</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwECoGDialog.ui">
+    </QtMoc>
+    <QtUic Include="Montage\AwECoGDialog.ui">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwECoGDialog.h">
+    </QtUic>
+    <QtMoc Include="Montage\AwECoGDialog.h">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Montage\AwECoGTableModel.h">
+    </QtMoc>
+    <QtMoc Include="Montage\AwECoGTableModel.h">
       <Filter>Montage</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwLogPlainTextEdit.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwLogPlainTextEdit.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\AwMATLABMarkersExporter.h">
+    </QtMoc>
+    <QtMoc Include="Process\AwMATLABMarkersExporter.h">
       <Filter>Process</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Display\AwVideoManager.h">
+    </QtMoc>
+    <QtMoc Include="Display\AwVideoManager.h">
       <Filter>Display</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwVideoSettingsDial.ui">
+    </QtMoc>
+    <QtUic Include="Widgets\AwVideoSettingsDial.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Widgets\AwVideoSettingsDial.h">
+    </QtUic>
+    <QtMoc Include="Widgets\AwVideoSettingsDial.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
-    <CustomBuild Include="MATPy\AwPidManager.h">
-      <Filter>MATPy</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Data\AwDataSet.h">
+    </QtMoc>
+    <QtMoc Include="Data\AwDataSet.h">
       <Filter>Data</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICABatchDialog.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="ICA\AwICABatchDialog.h">
-      <Filter>ICA</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchDialog.h">
+    </QtMoc>
+    <QtMoc Include="Batch\AwBatchDialog.h">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchDialog.ui">
+    </QtMoc>
+    <QtUic Include="Batch\AwBatchDialog.ui">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchModel.h">
+    </QtUic>
+    <QtMoc Include="Batch\AwBatchModel.h">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwAddEditBatchDialog.ui">
+    </QtMoc>
+    <QtUic Include="Batch\AwAddEditBatchDialog.ui">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwAddEditBatchDialog.h">
+    </QtUic>
+    <QtMoc Include="Batch\AwAddEditBatchDialog.h">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchRunner.h">
+    </QtMoc>
+    <QtMoc Include="Batch\AwBatchRunner.h">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchFileInputWidget.ui">
+    </QtMoc>
+    <QtUic Include="Batch\AwBatchFileInputWidget.ui">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchFileInputWidget.h">
+    </QtUic>
+    <QtMoc Include="Batch\AwBatchFileInputWidget.h">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSGUIOptionsDialog.ui">
+    </QtMoc>
+    <QtUic Include="IO\BIDS\AwBIDSGUIOptionsDialog.ui">
       <Filter>IO\BIDS</Filter>
-    </CustomBuild>
-    <CustomBuild Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
+    </QtUic>
+    <QtMoc Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
       <Filter>IO\BIDS</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchManager.h">
+    </QtMoc>
+    <QtMoc Include="Batch\AwBatchManager.h">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchGUI.h">
+    </QtMoc>
+    <QtMoc Include="Batch\AwBatchGUI.h">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Batch\AwBatchGUI.ui">
+    </QtMoc>
+    <QtUic Include="Batch\AwBatchGUI.ui">
       <Filter>Batch</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\PSD\AwPSD.h">
-      <Filter>Process\PSD</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\PSD\AwPSDGUI.ui">
-      <Filter>Process\PSD</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Process\PSD\AwPSDGUI.h">
-      <Filter>Process\PSD</Filter>
-    </CustomBuild>
+    </QtUic>
+    <QtMoc Include="MATPy\AwPidManager.h">
+      <Filter>MATPy</Filter>
+    </QtMoc>
+    <QtRcc Include="..\..\resources\AnyWave.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <QtMoc Include="Data\AwDataManager.h">
+      <Filter>Data</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_AwDebugLogWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwChannelSelectionDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwDSMSaveSetupUI.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwNewViewDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwSaveAsNewSetupDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwFilterToolBar.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="IO\HDF5\structs.h">
       <Filter>IO\HDF5</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMarkerManagerSettings.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMarkerRuleManageDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMarkerRuleWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwNewMarkerRuleDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMontageDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwPluginDial.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Prefs\AwPreferences.h">
       <Filter>Prefs</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwPrefsDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwProcessesWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_TPUi.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwAboutAnyWave.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwCursorMarkerToolBar.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwDisplaySetupToolBar.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwDisplayToolBarv2.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwFilePropertiesDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwFileToolBar.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMappingToolBar.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMontageToolBar.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwPleaseWaitWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwTriggerParsingDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AnyWave.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwExportDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="ICA\AwICAChannel.h">
       <Filter>ICA</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwProcessLogWindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwProcessWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMappingWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwICAPanel.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwPanelItem.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="resource2.h">
       <Filter>Generated Files</Filter>
@@ -2084,52 +1187,13 @@
     <ClInclude Include="Marker\AwExtractTriggers.h">
       <Filter>Marker</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwPickChannelsDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwExporterSettings.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwExportSelChannels.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwExporterSelMarkers.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="Process\AwExporterTypes.h">
       <Filter>Process</Filter>
     </ClInclude>
     <ClInclude Include="Source\AwSourceChannel.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEpochCreateUi.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEpochVisuWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEpochAverageWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwAverageDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwAverageItemWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEditStatsDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwMarkersExportWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\aw_armadillo.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwSelectTriggerChannelDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwBIDSGUI.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSItem.h">
@@ -2137,9 +1201,6 @@
     </ClInclude>
     <ClInclude Include="MATPy\AwTCPResponse.h">
       <Filter>MATPy</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwEpochMosaicWidget.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Data\AwDataChunk.h">
       <Filter>Data</Filter>
@@ -2159,52 +1220,24 @@
     <ClInclude Include="CL\CommandLineParser.h">
       <Filter>CL</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwECoGDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="Montage\AwECoGGrid.h">
       <Filter>Montage</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwVideoSettingsDial.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwICABatchDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwBatchDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwAddEditBatchDialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwBatchFileInputWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwBIDSGUIOptionsDialog.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="Batch\AwBatchItem.h">
       <Filter>Batch</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwBatchGUI.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\AwKeys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_AwPSDGUI.h">
+    <ClInclude Include="..\..\include\AwVersion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\keys\data.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\resources\eeg_sensors_locations.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="..\..\resources\eeg_sensors_2D.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
+    <Image Include="icon1.ico" />
     <Image Include="..\..\resources\images\AddToMontage48x48.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -2238,19 +1271,13 @@
     <Image Include="..\..\resources\images\start32x32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\logo_Inserm.png">
+    <Image Include="..\..\resources\images\INSERM_logo.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\Qt_logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\images\logo_amu.png">
+    <Image Include="..\..\resources\images\logo_amu_rvb.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\VTK_logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\images\AnyWave_icon.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\matlablogo.jpg">
@@ -2262,10 +1289,10 @@
     <Image Include="..\..\resources\images\ox_eye_32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\ox_arrow_down_32.png">
+    <Image Include="..\..\resources\images\plus_sign_24x24.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\ox_arrow_up_32.png">
+    <Image Include="..\..\resources\images\minus_sign_24x24.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\ox_document_save_as_32.png">
@@ -2286,33 +1313,35 @@
     <Image Include="..\..\resources\images\system_run_32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\resources\images\AnyWave_logo.png">
+    <Image Include="..\..\resources\images\AnyWave_icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\Built_with_Qt_logo.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\resources\images\list-icon_32.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icon1.ico" />
+    <Image Include="..\..\resources\images\importICA32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\logo_ins.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\GARDEL_32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\armadillo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\Capture32x32.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\images\QTS.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\resources\anywave_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\awreadwritelib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\awwidgetlib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\..\resources\AwCoreLib_fr.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="anywave_fr.ts">
-      <Filter>Translation Files</Filter>
-    </None>
-    <None Include="anywave_en.ts">
-      <Filter>Translation Files</Filter>
-    </None>
     <None Include="cpp.hint" />
     <None Include="GeneratedFiles\Debug\AwEpochManager.moc">
       <Filter>Generated Files\Debug</Filter>

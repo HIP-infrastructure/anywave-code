@@ -27,26 +27,51 @@
 #include <QFile>
 #include <QTextStream>
 #include <AwKeys.h>
-
-void AwScriptPlugin::setNameAndDesc(const QString& n, const QString& desc)
-{
-	name = n;
-	description = desc;
-	m_inputFlags = 0;
-}
+#include "Plugin/AwPluginManager.h"
+#include "Data/AwDataManager.h"
 
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
-	p->setScriptPath(m_path);
-	p->pdi.input.settings[processio::plugin_dir] = m_pluginDir;
-
+	//p->setScriptPath(m_path);
+	//p->pdi.input.settings[keys::plugin_dir] = m_pluginDir;
+	// set it a copy of all settings from data manager
+	p->pdi.input.settings.unite(AwDataManager::instance()->settings());
+	// merge also settings proper to plugin
+	p->pdi.input.settings.unite(m_settings);
 	// Fixed input as any channels by default
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
 		p->pdi.addInputChannel(-1, 1, 0);
-		p->pdi.setInputFlags(m_inputFlags);
+		p->setInputFlags(m_inputFlags);
 	}
+	p->setPlugin(this);
 }
 
-void AwScriptPlugin::checkIOForProcess(AwScriptProcess *p)
+void AwScriptPlugin::init(const QMap<QString, QString>& map)
 {
+	name = map.value("name");
+	description = map.value("description");
+	category = map.value("category");
+	m_inputFlags = 0;
+	if (map.contains("input_flags")) {
+		auto inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
+		QStringList tokens = map.value("input_flags").split(":");
+		for (auto t : tokens) {
+			auto lowerT = t.toLower();
+			if (inputFlagsMap.contains(lowerT))
+				m_inputFlags |= inputFlagsMap.value(lowerT);
+		}
+	}
+	m_flags = 0;
+	if (map.contains("flags")) {
+		auto flagsMap = AwPluginManager::getInstance()->flagsMap();
+		QStringList tokens = map.value("flags").split(":");
+		for (auto t : tokens) {
+			auto lowerT = t.toLower();
+			if (flagsMap.contains(lowerT))
+				m_flags |= flagsMap.value(lowerT);
+		}
+	}
+	// add the desc map from desct.txt has values in the plugin settings map
+	for (auto const& key : map.keys())
+		m_settings.insert(key, map.value(key));
 }

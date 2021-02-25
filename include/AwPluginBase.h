@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2020 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2020 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #pragma once
@@ -61,6 +61,9 @@ public:
 // category is optional : used to inset the plugin launcher into a specific part of the AnyWave GUI
 	QString name, description, version, category;
 	int minorVersion, majorVersion;	// set up when building
+	inline QString& helpUrl() { return m_helpUrl; }
+protected:
+	QString m_helpUrl;  // optional : fill it with a url location to get help about the plugin.
 // Category can be:
 // File: My menu description => for plugin that only acts on files (conversion or export)
 // View: My menu description => for plugin that only display graphics 
@@ -68,4 +71,4 @@ public:
 
 };
 
-#define AW_INSTANTIATE_PLUGIN(P) P* newInstance()) { auto r = new P; r->setPlugin(this); return r; }
+//#define AW_INSTANTIATE_PLUGIN(P) P* newInstance() { auto r = new P; r->setPlugin(this); return r; }

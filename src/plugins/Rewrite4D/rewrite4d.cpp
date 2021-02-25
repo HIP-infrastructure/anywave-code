@@ -70,8 +70,7 @@ Rewrite4DPlugin::Rewrite4DPlugin()
 
 Rewrite4D::Rewrite4D()
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers);
+	setInputFlags(Aw::ProcessIO::GetAllMarkers);
 }
 
 Rewrite4D::~Rewrite4D()

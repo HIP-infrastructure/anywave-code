@@ -54,7 +54,8 @@ public:
 
 	QString& error() { return m_error; }
 	QString& fileName() { return m_fileName; }
-	// WRITE
+
+	int writeStruct(AwMATLABStruct& s);
 	int writeScalar(const QString& name, double value);
 	int writeScalar(const QString& name, float value);
 	int writeScalar(const QString& name, qint32 value);

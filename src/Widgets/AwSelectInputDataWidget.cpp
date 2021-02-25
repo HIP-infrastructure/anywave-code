@@ -1,5 +1,6 @@
 #include <widget/AwSelectInputDataWidget.h>
 #include "ui_AwSelectInputDataWidget.h"
+#include <QMessageBox>
 
 AwSelectInputDataWidget::AwSelectInputDataWidget(QWidget *parent)
 	: QWidget(parent)
@@ -37,6 +38,11 @@ QStringList AwSelectInputDataWidget::skippedMarkers()
 void AwSelectInputDataWidget::addSkipLabel()
 {
 	auto item = m_ui->comboSkip->currentText();
+	// check if labels is NOT on the other list
+	if (m_useLabels.contains(item)) {
+		QMessageBox::information(this, "Markers", "This marker is already set in the other list.");
+		return;
+	}
 	if (!m_skipLabels.contains(item)) {
 		m_skipLabels << item;
 		m_ui->listWidgetSkip->addItem(item);
@@ -47,6 +53,11 @@ void AwSelectInputDataWidget::addSkipLabel()
 void AwSelectInputDataWidget::addUseLabel()
 {
 	auto item = m_ui->comboUse->currentText();
+	// check if labels is NOT on the other list
+	if (m_skipLabels.contains(item)) {
+		QMessageBox::information(this, "Markers", "This marker is already set in the other list.");
+		return;
+	}
 	if (!m_useLabels.contains(item)) {
 		m_useLabels << item;
 		m_ui->listWidgetUse->addItem(item);

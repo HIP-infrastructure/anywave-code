@@ -66,7 +66,11 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	changeMarkerFontText(markerFont(AwMarker::Single));
 
 	// Auto trigger parsing
-	radioTriggerParserOn->setChecked(aws->value(aws::auto_trigger_parsing).toBool());
+	bool autoTrigger = aws->value(aws::auto_trigger_parsing).toBool();
+	if (autoTrigger)
+		radioTriggerParserOn->setChecked(true);
+	else
+		radioTriggerParserOff->setChecked(true);
 
 	// Time representation
 	if ((isTimeHMS()))
@@ -82,24 +86,6 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 
 	// check for updates when starting
 	checkBoxUpdates->setChecked(aws->value(aws::check_updates).toBool());
-
-	//// language
-	//comboLanguage->setDisabled(true);
-	//QDir dir(aws->langPath);
-	//QStringList files = dir.entryList(QStringList("anywave_*.qm"));
-	//if (files.isEmpty()) // if no language files are found, disable the language option
-	//	comboLanguage->setDisabled(true);
-	//QString savedLocale = qsettings.value("general/locale", QString("en")).toString();
-	//for (int i = 0; i < files.size(); i++) {
-	//	QString locale;
-	//	locale = files[i];
-	//	locale.truncate(locale.lastIndexOf('.'));
-	//	locale.remove(0, locale.indexOf('_') + 1);
-	//	QString lang = QLocale::languageToString(QLocale(locale).language());
-	//	comboLanguage->addItem(lang, locale);
-	//	if (locale == savedLocale)
-	//		comboLanguage->setCurrentIndex(i);
-	//}
 
 	plainTextEdit->setVisible(false);
 	// MATLAB
@@ -125,6 +111,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
     
     editGARDEL->setText(qsettings.value("GARDEL/path").toString());
 	editITK->setText(qsettings.value("ITK-SNAP/path").toString());
+	radioTriggerParserOn->setChecked(aws->value(aws::auto_trigger_parsing).toBool());
 
 	// COMPILED PLUGIN. Windows do not required environments variables to be set but Linux and Mac OS X do.
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
@@ -199,11 +186,14 @@ void AwPrefsDial::accept()
 
 	// CPU CORES
 	qsettings.setValue("general/cpu_cores", spinCPU->value());
+	
+	
 
 	//// misc. parameters
 	AwSettings *aws = AwSettings::getInstance();
 	
 	saveTimeHMS(radioHMSOn->isChecked());
+	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
 
 	qsettings.setValue("py/interpreter", lineEditPythonPath->text());
 
@@ -244,19 +234,17 @@ void AwPrefsDial::accept()
 	if (QFile::exists(itk))
 		qsettings.setValue("ITK-SNAP/path", itk);
 
-	//// change language
-	//QString lang = comboLanguage->itemData(comboLanguage->currentIndex()).toString();
-	//aws->loadLanguage(lang);
 	aws->setValue(aws::itk_snap, itk);
 	aws->setValue(aws::gardel, Gardel);
 	// CPU CORES
 	aws->setValue(aws::max_cpu_cores, sliderCPU->value());
     QThreadPool::globalInstance()->setMaxThreadCount(sliderCPU->value());
 	// Check for updates
-	auto check = checkBoxUpdates->isChecked();
-	aws->setValue(aws::check_updates, check);
-	qsettings.setValue("general/checkForUpdates", check);
-
+	aws->setValue(aws::check_updates, checkBoxUpdates->isChecked());
+	qsettings.setValue("general/checkForUpdates", checkBoxUpdates->isChecked());
+	// auto detect triggers
+	qsettings.setValue("Preferences/autoTriggerParsing", radioTriggerParserOn->isChecked());
+	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
 	QDialog::accept();
 }
 

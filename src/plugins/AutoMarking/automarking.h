@@ -37,7 +37,7 @@ public:
 	AutoMarking();
 	~AutoMarking();
 	
-	void run(const QStringList& args) override;	// main execution entry point of the plugin
+	void run() override;	// main execution entry point of the plugin
 public slots:
 	void newMarkers(const AwMarkerList& markers);
 private:

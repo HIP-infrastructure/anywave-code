@@ -54,7 +54,7 @@ AwFilterBounds& AwFilterBounds::operator=(const AwFilterBounds& other)
 
 AwFilterSettings::AwFilterSettings()
 {
-	m_ui = NULL;
+	m_ui = nullptr;
 }
 
 AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
@@ -62,12 +62,12 @@ AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
 	m_hash = settings.m_hash;
 	m_bounds = settings.m_bounds;
 	m_filterBounds = settings.m_filterBounds;
-	m_ui = NULL;
+	m_ui = nullptr;
 }
 
 AwFilterSettings::~AwFilterSettings()
 {
-	if (m_ui != NULL) {
+	if (m_ui != nullptr) {
 		m_ui->close();
 		delete m_ui;
 	}
@@ -328,8 +328,9 @@ void AwFilterSettings::load(const QString& path)
 
 QWidget *AwFilterSettings::ui()
 {
-	if (m_ui == NULL) {
+	if (m_ui ==  nullptr) {
 		m_ui = new AwFilterGUI(*this);
+		m_ui->updateSettings(*this);
 		connect(m_ui, &AwFilterGUI::applyClicked, this, &AwFilterSettings::setNewSettings);
 	}
 	return m_ui;

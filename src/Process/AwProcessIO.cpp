@@ -24,12 +24,15 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessIO.h"
+#include <AwKeys.h>
 #include <AwCore.h>
+#include <QWidget>
 
 AwProcessIO::~AwProcessIO()
 {
 	clearMarkers();
-	clearWidgets();
+	clearChannels();
+	AW_DESTROY_LIST(m_modifiedMarkers);
 }
 
 bool AwProcessIO::isEmpty()
@@ -47,6 +50,13 @@ bool AwProcessIO::isEmpty()
 }
 
 
+void AwProcessIO::setReader(AwFileIO* reader)
+{
+	m_reader = reader;
+	// init settings based on informations relative to reader instance
+	settings[keys::file_duration] = reader->infos.totalDuration();
+}
+
 void AwProcessIO::setNewChannels(const AwChannelList& channels, bool duplicate)
 {
 	while (!m_channels.isEmpty())
@@ -63,6 +73,12 @@ void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
 	if (markers.isEmpty())
 		return;
 	m_markers = duplicate ? AwMarker::duplicate(markers) : markers;
+}
+
+void AwProcessIO::setModifiedMarkers(const AwMarkerList& markers)
+{
+	AW_DESTROY_LIST(m_modifiedMarkers);
+	m_modifiedMarkers = markers;
 }
 
 void AwProcessIO::addChannels(const AwChannelList& channels, bool duplicate)
@@ -85,9 +101,11 @@ void AwProcessIO::addChannel(AwChannel *channel)
 	m_channels << channel;
 }
 
-void AwProcessIO::addWidget(QWidget *widget)
+void AwProcessIO::addWidget(QWidget* widget)
 {
 	m_widgets << widget;
+	// make sure the widget has no parent
+	widget->setParent(nullptr);
 }
 
 

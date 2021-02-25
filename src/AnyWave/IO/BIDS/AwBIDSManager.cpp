@@ -18,7 +18,8 @@
 #include <widget/AwWaitWidget.h>
 #include <QtConcurrent>
 #include <montage/AwMontage.h>
-
+#include "Prefs/AwSettings.h"
+#include "Data/AwDataManager.h"
 // statics
 AwBIDSManager *AwBIDSManager::m_instance = 0;
 
@@ -82,7 +83,6 @@ void AwBIDSManager::finishCommandLineOperation()
 			m_instance->updateChannelsTsvBadChannels(AwMontage::loadBadChannels(badFile));
 		}
 	}
-	// delete instancce
 	delete m_instance;
 }
 
@@ -201,6 +201,8 @@ void AwBIDSManager::setRootDir(const QString& path)
 	
 	AwWaitWidget wait("Parsing");
 	wait.setText("Parsing BIDS Structure...");
+	//wait.initProgress(1, 100);
+	//connect(this, &AwBIDSManager::parsingProgressChanged, &wait, &AwWaitWidget::setCurrentProgress);
 	connect(this, &AwBIDSManager::finished, &wait, &QDialog::accept);
 	wait.run(std::bind(&AwBIDSManager::parse, this));  // bind a void method without parameters. The method must emit finished signals when finished.
 
@@ -227,6 +229,7 @@ void AwBIDSManager::closeBIDS()
 	m_currentSubject = nullptr;
 	m_currentOpenItem = nullptr;
 	m_participantsData.clear();
+	m_items.clear();
 	emit BIDSClosed();
 }
 
@@ -299,6 +302,8 @@ QString AwBIDSManager::getDerivativePath(int derivativeType)
 QVariant AwBIDSManager::gardelProperty(int property)
 {
 	QVariant res;
+	if (m_currentOpenItem == nullptr)
+		return res;
 	auto parent = m_currentOpenItem->bidsParent();
 	if (!parent)
 		return res;
@@ -476,7 +481,51 @@ void AwBIDSManager::parse()
 	}
 
 	// launch recursive parsing
-	recursiveParsing(m_rootDir, nullptr);
+//	recursiveParsing(m_rootDir, nullptr);
+
+	// try to implement a multi threaded parsing for each subject
+	// first: detect all subjects
+	// build a qt concurrent map to parse them all
+	//QDir dir(m_rootDir);
+	auto subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
+	QRegularExpressionMatch match;
+	using mapItem = QPair<QString, AwBIDSItem*>;
+//	std::vector<std::thread> threads;
+	QList<mapItem> mapItems;
+	for (auto subDir : subDirs) {
+		auto name = subDir.fileName();
+		match = re.match(name);
+		auto fullPath = subDir.absoluteFilePath();
+		if (match.hasMatch()) {
+			// found a subject
+			auto item = new AwBIDSItem(name);
+			m_items << item;
+			item->setData(fullPath, AwBIDSItem::PathRole);
+			item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
+			item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+			// set the relative path role
+			item->setData(name, AwBIDSItem::RelativePathRole);
+			// set the possible derivatives mask
+			item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+			// no derivatives should exist at subject level
+			// search for derivatives for this item 
+			//setDerivativesForItem(item);
+		//	recursiveParsing(fullPath, item);
+			mapItems.append(mapItem(fullPath, item));
+
+	//		threads.push_back(std::thread([this, item, fullPath]() { return recursiveParsing(fullPath, item); }));
+		}
+	}
+
+	//QFutureWatcher<void> watcher;
+	//connect(&watcher, &QFutureWatcher<void>::progressValueChanged, this, &AwBIDSManager::parsingProgressChanged);
+	QFuture<void> res = QtConcurrent::map(mapItems, [this](const mapItem& a) {
+		recursiveParsing(a.first, a.second);
+		});
+//	watcher.setFuture(res);
+	res.waitForFinished();
+	//std::for_each(threads.begin(), threads.end(), [](std::thread& t) {	t.join(); });
 
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv))
@@ -542,6 +591,11 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 					fileItem->setData(type, AwBIDSItem::DataTypeRole);
 					fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
+
+					// set a display role without some bids keys/values to shorten the file name
+					auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
+					tmp = AwUtilities::bids::removeBidsKey("ses", tmp);
+					fileItem->setData(tmp, Qt::DisplayRole);
 					continue;
 				}
 
@@ -555,6 +609,18 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem *parentI
 					fileItem->setData(AwBIDSItem::ica | AwBIDSItem::h2, AwBIDSItem::DerivativesRole);
 					// add the item to the hash table
 					// use native separators
+
+					// set a display role without some bids keys/values to shorten the file name
+					auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
+					tmp = AwUtilities::bids::removeBidsKey("ses", tmp);
+					// remove modality from file name
+					if (tmp.contains("_eeg"))
+						tmp = tmp.remove("_eeg");
+					else if (tmp.contains("_ieeg"))
+						tmp = tmp.remove("_ieeg");
+					else if (tmp.contains("_meg"))
+						tmp = tmp.remove("_meg");
+					fileItem->setData(tmp, Qt::DisplayRole);
 
 					m_hashItemFiles.insert(QDir::toNativeSeparators(fullPath), fileItem);
 					// search for derivatives for this item 
@@ -790,6 +856,79 @@ QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * it
 	return outputPath;
 }
 
+
+
+
+void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
+{
+	// build the path corresponding to the current file in derivatives
+	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	QFileInfo fi(relativePath);
+	auto userName = AwSettings::getInstance()->value(aws::username).toString();
+
+	QString path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	QDir dir;
+	dir.mkpath(path);
+	
+	// get filename
+	auto dm = AwDataManager::instance();
+	auto fileName = dm->value(keys::data_file).toString();
+	auto basePath = QString("%1/%2/%3").arg(m_rootDir).arg(relativePath).arg(fileName);
+
+	// get .mrk if any
+	auto srcFile = dm->mrkFilePath();
+	auto destFile = QString("%1/%2.mrk").arg(path).arg(fileName);
+	bool fileExists = QFile::exists(srcFile);
+	bool destExists = QFile::exists(destFile);
+	if (fileExists && !destExists) {
+		QFile::copy(srcFile, destFile);
+		QFile::remove(srcFile);
+	}
+	if (fileExists && destExists) {
+		// avoid loosing markers: load the both file in memory, remove doublon and save it.
+		auto srcMarkers = AwMarker::load(srcFile);
+		srcMarkers += AwMarker::load(destFile);
+		AwMarker::removeDoublons(srcMarkers);
+		QFile::remove(destFile);
+		AwMarker::save(destFile, srcMarkers);
+		QFile::remove(srcFile);
+	}
+
+	// move mtg file if any
+	srcFile = dm->mtgFilePath();
+	destFile = QString("%1/%2.mtg").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->value(keys::disp_file).toString();
+	destFile = QString("%1/%2.display").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->value(keys::lvl_file).toString();
+	destFile = QString("%1/%2.levels").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->badFilePath();
+	destFile = QString("%1/%2.bad").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+	srcFile = dm->value(keys::flt_file).toString();
+	destFile = QString("%1/%2.flt").arg(path).arg(fileName);
+	moveSidecarFilesToDerivatives(srcFile, destFile);
+
+	AwDataManager::instance()->setNewRootDirForSideFiles(path);
+}
+
+void AwBIDSManager::moveSidecarFilesToDerivatives(const QString& src, const QString& dest)
+{
+	bool fileExists = QFile::exists(src);
+	bool destExists = QFile::exists(dest);
+	if (fileExists && !destExists) {
+		QFile::copy(src, dest);
+		QFile::remove(src);
+	}
+	if (fileExists && destExists) {
+		QFile::remove(dest);
+		QFile::copy(src, dest);
+		QFile::remove(src);
+	}
+}
+
 void AwBIDSManager::findItem(const QString& filePath)
 {
 	m_currentOpenItem = nullptr;
@@ -798,20 +937,28 @@ void AwBIDSManager::findItem(const QString& filePath)
 	if (m_hashItemFiles.contains(QDir::toNativeSeparators(filePath)))
 		m_currentOpenItem = m_hashItemFiles.value(QDir::toNativeSeparators(filePath));
 	m_ui->showItem(m_currentOpenItem);
+
+	// check for user in derivatives/anywave
+	initAnyWaveDerivativesForFile(filePath);
 }
+
+
 
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
 	// check if the new file is in a BIDS structure or not
 	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
-	if (!isBIDSActive() && !root.isEmpty()) {
-		if (AwMessageBox::question(nullptr, "BIDS", "The file open is located inside a BIDS structure.\nOpen the BIDS aswell?",
-			QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+
+	// open BIDS dont ask anymore ( 16/02/2021)
+	//if (!isBIDSActive() && !root.isEmpty()) {
+	//	if (AwMessageBox::question(nullptr, "BIDS", "The file open is located inside a BIDS structure.\nOpen the BIDS as well?",
+	//		QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+	if (!root.isEmpty()) {
 			closeBIDS();
 			setRootDir(root);
 			findItem(reader->fullPath());
 			return;
-		}
+		//}
 	}
 	if (root.isEmpty()) {
 		closeBIDS(); // close current BIDS
@@ -843,42 +990,6 @@ QStringList AwBIDSManager::readTsvColumns(const QString& path)
 	}
 	return QStringList();
 }
-
-//AwTSVDict AwBIDSManager::loadTsvFile(const QString& path)
-//{
-//	QFile file(path);
-//	AwTSVDict  res;
-//	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-//		QTextStream stream(&file);
-//		// get columns
-//		auto columns = stream.readLine().split('\t');
-//		QStringList wholeList;
-//		while (!stream.atEnd()) {
-//			wholeList << stream.readLine();
-//		}
-//		QMultiMap<QString, QString> globalMap;
-//		// now parse each lines and extract values
-//		for (int i = 0; i < wholeList.size(); i++) {
-//			// check that number of columns in line matches the number of columns of header line.
-//			auto items = wholeList.value(i).split('\t');
-//			if (items.size() != columns.size()) {
-//				throw AwException("Error in tsv file. Wrong number of column items.", "AwBIDSManager::loadTsvFile()");
-//				return res;
-//			}
-//			for (int j = 0; j < columns.size(); j++) 
-//				globalMap.insert(columns.value(j), items.value(j));
-//			
-//		}
-//		// now rebuild a dict based on global multi map
-//		for (auto col : columns) {
-//			res[col] = globalMap.values(col);
-//		}
-//	}
-//	else {
-//		throw AwException(QString("Failed to open %1").arg(path), "AwBIDSManager::loadTsvFile()");
-//	}
-//	return res;
-//}
 
 AwMarkerList AwBIDSManager::getMarkersFromEventsTsv(const QString& path)
 {

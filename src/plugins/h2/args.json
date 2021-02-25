@@ -1,5 +1,6 @@
 {
   "parameters": [  "time_window", "step", "max_lag", "algorithm", "downsampling_factor" ],
+  "flags" : [ "several_result_files"],
   "inputs": {
     "input_file": "any file"
   },
@@ -16,7 +17,8 @@
     "use_markers": [ "Use markers", "stringlist" ],
     "downsampling_factor": [ "Downsampling factor", "int" ],
     "algorithm": [ "Method", "list" ],
-    "fields_ordering": [ "algorithm", "time_window", "step", "max_lag", "hp", "lp", "downsampling_factor", "skip_markers", "use_markers" ]
+	"several_result_files" : ["Separated result files", "boolean"],
+    "fields_ordering": [ "algorithm", "time_window", "step", "max_lag", "hp", "lp", "downsampling_factor", "skip_markers", "use_markers", "several_result_files" ]
   },
   "batch_defaults": {
     "input_file" :  "File",
@@ -28,6 +30,7 @@
     "algorithm": [ "h2", "r2" ],
     "downsampling_factor": 1,
     "skip_markers": "",
-    "use_markers": ""
+    "use_markers": "",
+	"several_result_files" : false
   }
 }

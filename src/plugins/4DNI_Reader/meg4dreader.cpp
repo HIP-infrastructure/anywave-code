@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "meg4dreader.h"
@@ -42,7 +42,7 @@ NI4DReader::NI4DReader() : AwFileIOPlugin()
   version = QString("1.0");
   fileExtensions << "*,*";
   layouts << "4D248" << "4D248_3D";
-  m_flags = Aw::CanRead;
+  m_flags = FileIO::CanRead;
 }
 
 QStringList NI4DReader::montages()
@@ -60,7 +60,7 @@ QStringList NI4DReader::montages()
 NI4DFileReader::NI4DFileReader(const QString& filename) : AwFileIO(filename)
 {
   m_stream.setVersion(QDataStream::Qt_4_4);
-  m_flags = Aw::TriggerChannelIsWritable;
+  m_flags = FileIO::TriggerChannelIsWritable;
 }
 
 
@@ -292,11 +292,13 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 	}
 
 	// Process config file
-	m_file.close(); // on ferme le fichier actuel pour le réouvrir apres
+	m_file.close(); // on ferme le fichier actuel pour le rï¿½ouvrir apres
 	QDir dir = fi.absoluteDir();
 	m_file.setFileName(dir.absolutePath() + "/config");
-	if (!m_file.open(QIODevice::ReadOnly))
+	if (!m_file.open(QIODevice::ReadOnly)) { 
+		m_error = QString("Could not open config file: %1").arg(m_file.errorString());
 		return AwFileIO::FileAccess;
+	}
 
 	dftk_config_data cfg;
 	m_stream >> cfg.version;
@@ -373,7 +375,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 		m_stream.skipRawData(36);
 
 		// Recupere la structure my_channel_data associee au canal.
-		// Si elle n'existe pas, on ne fait rien, ça veut dire que le canal decrit dans le fichier config n'est pas dans le fichier de donnees.
+		// Si elle n'existe pas, on ne fait rien, ï¿½a veut dire que le canal decrit dans le fichier config n'est pas dans le fichier de donnees.
 		
 		my_channel_data *my_chan = m_hashChannelsData.value(channel->chan_no);
 		
@@ -527,9 +529,15 @@ NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 {
 	QFileInfo fi(path);
 	QDir dir = fi.absoluteDir();
+	QString dirPath = dir.absolutePath();
+	QString configPath = QString("%1/config").arg(dirPath);
 
-	auto files = dir.entryList(QDir::Files);
-	if (files.contains("config")) {
+	//auto files = dir.entryList(QDir::Files);
+	// m_error = QString("Files found in %1:\n").arg(dir.absolutePath());
+	//for (auto const& f : files) {
+//		m_error += f + "\n";
+//	}
+//	if (files.contains("config")) {
 		QFile file(path);
 		QDataStream stream(&file);
 		stream.setVersion(QDataStream::Qt_4_4);
@@ -557,10 +565,22 @@ NI4DFileReader::FileStatus NI4DFileReader::canRead(const QString &path)
 						return AwFileIO::NoError;
 					}
 				}
+				else {
+					m_error += QString("\nconfig file contains invalid acq mode. Expected 1, 2, 3, 4 got %1").arg(hdr.acq_mode);
+				}
 			}
+			else {
+				m_error += QString("\nconfig file contains invalid data format. Expected 1, 2, 3, 4 got %1").arg(hdr.data_format);
+			}
+			file.close();
 		}
-		file.close();
-	}
+		else {
+			m_error += QString("\ncould not open the config file for reading. :%1").arg(file.errorString());
+		}
+//	}
+//	else {
+//		m_error += "\nno config file found";
+//	}
 
 
 	//QStringList filters;	
@@ -723,7 +743,7 @@ qint64 NI4DFileReader::readDataFromChannels(float start, float duration, QList<A
 				for (qint64 i = 0; i < c->dataSize(); i++) {
 					// copy to channel
 					float val = (float)buffer[index + i * nChannelsTotal];
-					if (c->isEEG() || c->isECG() || c->isECG() || c->isSEEG()) // switch to µV
+					if (c->isEEG() || c->isECG() || c->isECG() || c->isSEEG()) // switch to ï¿½V
 						val *= 1E6;
 					else if (c->isMEG() || c->isReference())
 						val *= 1e12;

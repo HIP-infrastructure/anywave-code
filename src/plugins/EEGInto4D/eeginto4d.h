@@ -40,7 +40,7 @@ public:
 	bool showUi();
 	void run() override;
 	void runFromCommandLine() override;
-	bool batchParameterCheck(const QVariantHash& args) override;
+	bool batchParameterCheck(const QVariantMap& args) override;
 private:
 	AwFileIO *m_megReader, *m_eegReader;
 	AwFileIOPlugin *m_megPlugin, *m_eegPlugin;

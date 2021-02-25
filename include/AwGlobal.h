@@ -30,11 +30,16 @@
 // for now, shared libs will only be built on Windows
 
  // CORE
+// handle static build
+#if defined(AW_BUILD_CORE_STATIC) || defined(AW_USE_CORE_STATIC)
+#define AW_CORE_EXPORT 
+#else
  #ifdef AW_BUILD_CORE_LIB
- #define AW_CORE_EXPORT Q_DECL_EXPORT
- #else
- #define AW_CORE_EXPORT Q_DECL_IMPORT
- #endif
+#define AW_CORE_EXPORT Q_DECL_EXPORT
+#else 
+#define AW_CORE_EXPORT Q_DECL_IMPORT
+#endif
+#endif
 
  // EPOCH Lib MACRO
  #ifdef AW_BUILD_EPOCH_LIB

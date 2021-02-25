@@ -1,9 +1,13 @@
 # AwWidgetLib
 project(AwWidget)
 add_definitions("-DAW_BUILD_WIDGETS_LIB")
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+LINK_DIRECTORIES(${QWT_LIBRARY})
 QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.qrc)
 
 SET(HEADERS ../../include/widget/AwMessageBox.h  
+    ../../include/widget/AwSelectInputDataWidget.h
     ../../include/widget/AwWait.h  
 	../../include/widget/AwGetValueDialog.h  
     ./Aw2DGrid.h  
@@ -34,6 +38,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/SignalView/AwBaseMarkerBar.h  
     ./SignalView/AwViewSettingsUi.h  
     ./SignalView/AwGoToLatencyDial.h  
+    ./SignalView/AwPickMarkersDial.h 
     ../../include/widget/SignalView/AwGraphicsScene.h  
     ../../include/widget/SignalView/AwGraphicsView.h  
     ../../include/widget/SignalView/AwNavigationBar.h  
@@ -45,7 +50,8 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwInputMarkerWidget.h
 	../../include/widget/AwVideoPlayer.h)
 
-SET(SRC ./Aw2DGrid.cpp  
+SET(SRC  ./AwSelectInputDataWidget.cpp
+     ./Aw2DGrid.cpp  
     ./AwGetValueDialog.cpp
     ./AwAddPredefinedMarker.cpp  
     ./AwAddTargetChannels.cpp  
@@ -79,6 +85,7 @@ SET(SRC ./Aw2DGrid.cpp
     ./SignalView/AwNavigationBar.cpp  
     ./SignalView/AwViewSettings.cpp  
     ./SignalView/AwViewSettingsUi.cpp  
+    ./SignalView/AwPickMarkersDial.cpp 
     ./SEEGViewer/AwSEEGInteractor.cpp  
     ./SEEGViewer/AwSEEGViewer.cpp  
     ./SEEGViewer/AwSEEGWidget.cpp  
@@ -89,7 +96,8 @@ SET(SRC ./Aw2DGrid.cpp
 QT5_WRAP_CPP(MOC ${HEADERS})
 
 
-SET(FORMS ./AwAmplitudeWidget.ui 
+SET(FORMS  ./AwSelectInputDataWidget.ui
+     ./AwAmplitudeWidget.ui 
 	./AwGetValueDialog.ui
     ./AwMarkerInspector.ui  
     ./AwAddPredefinedMarker.ui  
@@ -102,6 +110,7 @@ SET(FORMS ./AwAmplitudeWidget.ui
     ./SignalView/AwGoToLatencyDial.ui  
     ./SignalView/AwNavigationBarv2.ui  
     ./SignalView/AwViewSettingsUi.ui  
+    ./SignalView/AwPickMarkersDial.ui 
     ./SEEGViewer/AwSEEGWidget.ui  
 	./AwVideoPlayer.ui
     ./InputMarker/AwInputMarkerWidget.ui)
@@ -112,5 +121,11 @@ ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
 QT5_USE_MODULES(AwWidget Core Widgets PrintSupport Multimedia MultimediaWidgets)
 TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
   Qt5::MultimediaWidgets ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
+
+IF (APPLE)
+INSTALL(TARGETS AwWidget DESTINATION  ${LIB_INSTALL_DIR})
+ELSE()
 INSTALL(TARGETS AwWidget DESTINATION  ${CMAKE_INSTALL_PREFIX}/lib)
+ENDIF()
+
 

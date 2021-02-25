@@ -221,6 +221,19 @@ bool TCPRequest::sendRequest()
 	*m_streamSize << dataSize << m_requestID;
 	m_socket->write(m_size);
 	m_socket->write(m_data);
+	return m_socket->waitForBytesWritten(-1);
+}
+
+bool TCPRequest::send(const QByteArray& data)
+{
+	QByteArray header;
+	QDataStream stream(&header, QIODevice::WriteOnly);
+	stream.setVersion(QDataStream::Qt_4_4);
+	stream << m_pid << data.size() << m_requestID;
+	m_socket->write(header);
+	m_socket->waitForBytesWritten();
+	m_socket->write(data);
+//	m_socket->flush();
 	return m_socket->waitForBytesWritten();
 }
 

@@ -73,10 +73,13 @@ FileSignalBlock* SignalFile::signalBlock()
 				m_file.read((char *)fsb->optionalHeader.data(), fsb->optionalHeaderSize);
 
 			}
+			rVal = fsb;
+			rVal->fileOffsetForHeader = headerLocationInFile;
+			rVal->fileOffsetForData = m_file.pos();
 		}
-		rVal = fsb;
-		rVal->fileOffsetForHeader = headerLocationInFile;
-		rVal->fileOffsetForData = m_file.pos();
+		//rVal = fsb;
+		//rVal->fileOffsetForHeader = headerLocationInFile;
+		//rVal->fileOffsetForData = m_file.pos();
 	}
 	catch (...) {
 		delete fsb;

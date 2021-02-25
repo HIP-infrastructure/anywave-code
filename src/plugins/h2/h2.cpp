@@ -24,7 +24,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "h2.h"
-#include <AwFileIO.h>
 #include <filter/AwFiltering.h>
 #include <utils/time.h>
 #include <math/AwMath.h>
@@ -33,7 +32,6 @@
 #include <qmessagebox.h>
 #include <QFileDialog>
 #include <QtConcurrent>
-#include <AwFileIO.h>
 #include <utils/json.h>
 #include <AwKeys.h>
 
@@ -45,7 +43,7 @@ H2Plugin::H2Plugin()
 	name = QString(tr("h2"));
 	description = QString(tr("Computes H2/R2 on several pairs of channels"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
-	m_settings[processio::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
+	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
 }
 
 H2Plugin::~H2Plugin()
@@ -57,7 +55,8 @@ H2::H2() : AwProcess()
 {
 	// Inputs
 	pdi.addInputChannel(-1, 2, 0);
-	pdi.setInputFlags(Aw::ProcessInput::ProcessRequiresChannelSelection | Aw::ProcessInput::GetDurationMarkers | Aw::ProcessInput::GetWriterPlugins);
+	setInputFlags(Aw::ProcessIO::GetDurationMarkers	| Aw::ProcessIO::GetWriterPlugins);
+	setInputModifiers(Aw::ProcessIO::modifiers::AcceptChannelSelection);
 	m_winSize = 2; // 2s
 	m_maxLag = (float)0.1;	// 0.1s lag
 	m_nCells = 10;  // 10 cellules
@@ -65,7 +64,6 @@ H2::H2() : AwProcess()
 	m_scaleProgress = 0;
 	m_ui = NULL;
 	// we have localization support, so provide the prefix for all the language files.
-	m_langFilePrefix = ":/h2";
 	m_downSample = 0.;
 	m_method = Global::Method::h2;
 	m_currentBand.name = "n/a";
@@ -108,14 +106,14 @@ bool H2::showUi()
 	// Make it dynamically as a scripted plugin cannot access the main thread UI.
 	if (m_ui == NULL)
 		m_ui = new H2UI;
-	m_ui->dataFolder = pdi.input.settings[processio::data_dir].toString();
+	m_ui->dataFolder = pdi.input.settings[keys::data_dir].toString();
 	m_ui->sbTimeWindow->setValue(m_winSize);
 	m_ui->sbMaxLag->setValue(m_maxLag);
 	m_ui->sbStep->setValue(m_step);
 	m_ui->samplingRate = pdi.input.channels().first()->samplingRate();
-	m_ui->directory = pdi.input.settings[processio::working_dir].toString();
+	m_ui->directory = pdi.input.settings[keys::working_dir].toString();
 	m_ui->markers = pdi.input.markers();
-	if (inputFlags() & Aw::ProcessInput::UserSelectedMarkers)
+	if (modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers)
 		m_ui->widgetInputData->hide();
 	if (m_ui->exec() == QDialog::Accepted)	{
 		m_maxLag = m_ui->sbMaxLag->value();
@@ -123,7 +121,7 @@ bool H2::showUi()
 		m_step = m_ui->sbStep->value();
 		m_method = m_ui->method;
 
-		auto fd = pdi.input.settings[processio::file_duration].toDouble();
+		auto fd = pdi.input.settings[keys::file_duration].toDouble();
 		if (!m_ui->skippedLabels.isEmpty() || !m_ui->usedLabels.isEmpty()) {
 			auto markers = AwMarker::duplicate(pdi.input.markers());
 			auto inputMarkers = AwMarker::getInputMarkers(markers, m_ui->skippedLabels, m_ui->usedLabels, fd);
@@ -133,7 +131,7 @@ bool H2::showUi()
 				}
 				else {
 					pdi.input.clearMarkers();
-					pdi.input.addMarker(new AwMarker("whole data", 0., fd));
+					pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
 				}
 			}
 			else {
@@ -175,8 +173,16 @@ int H2::initialize()
 	}
 
 	// Merge input markers, that will implicilty duplicate them even if no merge is done.
-	if (!pdi.input.markers().isEmpty()) 
-		m_markers = AwMarker::merge(pdi.input.markers());
+	if (!pdi.input.markers().isEmpty()) {
+		// remove single markers
+		m_markers = AwMarker::getMarkersWithDuration(pdi.input.markers());
+		m_markers = AwMarker::merge(m_markers);
+		// if no duration markers => make one global
+		if (m_markers.isEmpty()) {
+			m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
+			sendMessage("no markers with duration set as input. Created one global marker on whole data.");
+		}
+	}
 	else
 		m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
 
@@ -240,10 +246,9 @@ int H2::initialize()
 	return 0;
 }
 
-int H2::saveToMatlab(const QString& fileName)
+int H2::saveToMatlab(const QString& fileName, H2_run *run)
 {
 	AwMATLABFile file;
-
 	// write the method used to compute
 	QString method = m_method == Global::Method::h2 ? QString("h2") : QString("r2");
 	// write current frequency band used to compute
@@ -264,9 +269,15 @@ int H2::saveToMatlab(const QString& fileName)
 	uword sx = first_run->channels.size();
 	uword sy = sx;
 	uword sz = 0;
-	for (auto r : m_runs)
-		sz += r->nIterations;
 
+	QList<H2_run*> runs; // local list to handle the case where we're only saving one run
+	if (run)
+		runs << run;
+	else
+		runs = m_runs;
+
+	for (auto r : runs)
+		sz += r->nIterations;
 	cube h2mat(sx, sy, sz, arma::fill::zeros);
 	cube lagmat(sx, sy, sz, arma::fill::zeros);
 	quint32 sectionOffset = 0;
@@ -276,7 +287,8 @@ int H2::saveToMatlab(const QString& fileName)
 	QVector<int> channel_indexes(sz);
 	QVector<double> time_vector_s(sz);
 	int time_index = 0;
-	for (auto r : m_runs) {
+
+	for (auto r : runs) {
 		for (auto p : r->params) {
 			double *h2_data = p->h2.data();
 			int *lag_data = p->lag.data();
@@ -356,9 +368,9 @@ void H2::setProgressValue(int value)
 
 void H2::runFromCommandLine()
 {
-	auto args = pdi.input.args();
+	auto args = pdi.input.settings;
 	// get params from args
-	QString m = args["algorithm"].toString().toLower();
+	QString m = args.value(h2::algorithm).toString().toLower();
 	// default method is always h2
 	QString algo = "h2";
 	if (m == "r2") {
@@ -366,15 +378,15 @@ void H2::runFromCommandLine()
 		algo = "r2";
 	}
 	QString baseMATLABFile = algo;
-	if (!args.contains("time_window") || !args.contains("max_lag") || !args.contains("step")) {
+	if (!args.contains(h2::time_window) || !args.contains(h2::max_lag) || !args.contains(h2::step)) {
 		sendMessage("Missing crucial parameters for computation. Aborted.");
 		return;
 	}
 
-	m_winSize = args["time_window"].toDouble();
-	m_maxLag = args["max_lag"].toDouble();
-	m_step = args["step"].toDouble();
-	int decimateFactor = args["downsampling_factor"].toInt();
+	m_winSize = args[h2::time_window].toDouble();
+	m_maxLag = args[h2::max_lag].toDouble();
+	m_step = args[h2::step].toDouble();
+	int decimateFactor = args.value(h2::downsampling_factor).toInt();
 	if (decimateFactor < 1)
 		decimateFactor = 1;
 
@@ -387,6 +399,12 @@ void H2::runFromCommandLine()
 		sendMessage("No run to compute. Check time window and step parameters against data size.");
 		return;
 	}
+
+	QString dir;
+	if (args.contains(keys::output_dir))
+		dir = args.value(keys::output_dir).toString();
+	else
+		dir = pdi.input.settings[keys::data_dir].toString();
 
 	// compute
 	float sr = pdi.input.channels().first()->samplingRate();	// save sampling rate in case we use downsampling
@@ -432,38 +450,65 @@ void H2::runFromCommandLine()
 			for (auto c : pdi.input.channels())
 				c->setSamplingRate(sr);
 		}
+		run->nIterations = run->params.first()->h2.size();
 	}
-	// compute number of iterations for each run
-	for (auto r : m_runs) {
-		r->nIterations = r->params.at(0)->h2.size();
+	//// compute number of iterations for each run
+	//for (auto r : m_runs) {
+	//	r->nIterations = r->params.at(0)->h2.size();
+	//}
+	//sendMessage("Saving to MATLAB file...");
+	float lp = args.value(keys::lp).toDouble();
+	float hp = args.value(keys::hp).toDouble();
+
+	bool saveOneFile = true;
+	if (args.contains(h2::several_result_files)) {
+		if (args.value(h2::several_result_files).toBool())
+			saveOneFile = false;
 	}
 
-	QString dir;
-	if (args.contains(cl::output_dir))
-		dir = args.value(cl::output_dir).toString();
-	else
-		dir = pdi.input.settings[processio::data_dir].toString();
-	sendMessage("Saving to MATLAB file...");
-	float lp = args.value(cl::lp).toDouble();
-	float hp = args.value(cl::hp).toDouble();
 
-	if (args.contains(cl::output_prefix)) {
-		QString pref = args.value(cl::output_prefix).toString();
-		baseMATLABFile = QString("%1_%2").arg(pref).arg(baseMATLABFile);
+	if (args.contains(keys::output_prefix)) {
+		QString pref = args.value(keys::output_prefix).toString();
+		baseMATLABFile = QString("%1_").arg(pref);
 	}
 	else {
-		QFileInfo fi(pdi.input.settings[processio::data_path].toString());
-		baseMATLABFile = QString("%1_%2").arg(fi.baseName()).arg(baseMATLABFile);
+		QFileInfo fi(pdi.input.settings[keys::data_path].toString());
+		baseMATLABFile = QString("%1_").arg(fi.baseName());
 	}
-	baseMATLABFile = QString("%1_%2Hz_%3Hz").arg(baseMATLABFile).arg(hp).arg(lp);
-	QString file = QString("%1/%2.mat").arg(dir).arg(baseMATLABFile);
 
-	m_currentBand.name = "Batch Mode";
-	m_currentBand.lp = lp;
-	m_currentBand.hp = hp;
-	if (saveToMatlab(file) == -1) {
-		sendMessage("Error when writing to MATLAB file.");
-		return;
+	if (saveOneFile) {
+		sendMessage("Saving to MATLAB file...");
+		baseMATLABFile = QString("%1_algo-%2_hp-%3_lp-%4").arg(baseMATLABFile).arg(algo).arg(hp).arg(lp);
+		QString file = QString("%1/%2.mat").arg(dir).arg(baseMATLABFile);
+
+		m_currentBand.name = "Batch Mode";
+		m_currentBand.lp = lp;
+		m_currentBand.hp = hp;
+		if (saveToMatlab(file) == -1) {
+			sendMessage("Error when writing to MATLAB file.");
+			return;
+		}
+	}
+	else {
+		QMap<QString, int> map;
+		for (auto run : m_runs) {
+			auto label = run->marker->label();
+			if (!map.contains(label)) {
+				map.insert(label, 1);
+			}
+			else {
+				auto i = map.value(label);
+				map.insert(label, ++i);
+			}
+			baseMATLABFile = QString("%1_algo-%2_hp-%3_lp-%4_sec-%5_num-%6").arg(baseMATLABFile).arg(algo).arg(hp).arg(lp).arg(label).arg(map.value(label));
+			QString file = QString("%1/%2.mat").arg(dir).arg(baseMATLABFile);
+			m_currentBand.name = "Batch Mode";
+			m_currentBand.lp = lp;
+			m_currentBand.hp = hp;
+			if (saveToMatlab(file, run) == -1) {
+				sendMessage(QString("Error when writing %1 file.").arg(baseMATLABFile));
+			}
+		}
 	}
 	sendMessage("Done.");
 }
@@ -486,16 +531,22 @@ void H2::run()
 	}
 	if (m_runs.isEmpty()) {
 		sendMessage("No run to compute. Check parameters and data selections length.");
-		m_flags &= ~Aw::ProcessFlags::ProcessHasOutputUi;
+		m_flags &= ~Aw::ProcessFlags::HasOutputUi;
 		return;
 	}
 	computeRuns();
 	if (!m_resultFiles.isEmpty()) {
-		QVariantList args;
-		args << QString("Correlation Graphs");
-		for (auto f : m_resultFiles)
-			args << f;
-		emit sendCommand(AwProcessCommand::LaunchProcess, args);
+		QVariantMap map;
+		map["command"] = AwProcessCommand::LaunchProcess;
+		map["process_name"] = QString("Correlation Graphs");
+		QStringList args = { m_resultFiles };
+		map["args"] = args;
+		emit sendCommand(map);
+		//QVariantList args;
+		//args << QString("Correlation Graphs");
+		//for (auto f : m_resultFiles)
+		//	args << f;
+		//emit sendCommand(AwProcessCommand::LaunchProcess, args);
 	}
 }
 
@@ -589,12 +640,14 @@ int H2::computeRuns()
 			// if downsampling, reset sampling rate for the next run
 			for (auto c : dup)
 				c->setSamplingRate(sr);
+
+			run->nIterations = run->params.first()->h2.size();
 		}
-		// check for correctly computer H2  (if the selection is not long enough there might be no iterations 
-		// compute number of iterations for each run
-		for (auto r : m_runs) {
-			r->nIterations = r->params.at(0)->h2.size();
-		}
+		//// check for correctly computer H2  (if the selection is not long enough there might be no iterations 
+		//// compute number of iterations for each run
+		//for (auto r : m_runs) {
+		//	r->nIterations = r->params.at(0)->h2.size();
+		//}
 		// AUTO SAVING TO MATLAB
 		// Insert the method into the filename
 		QString method = m_method == Global::Method::h2 ? QString("H2") : QString("R2");
@@ -603,12 +656,40 @@ int H2::computeRuns()
 		QString HPString = m_currentBand.hp > 0 ? QString("%1Hz").arg(m_currentBand.hp) : QString("NoHP");
 
 
-		QString file = QString("%1_%2_%3_%4_%5.mat").arg(pdi.input.settings[processio::data_path].toString()).arg(method).arg(m_currentBand.name).arg(HPString).arg(LPString);
-		sendMessage("Saving to MATLAB file...");
-		int status = saveToMatlab(file);
-		if (status == 0) {
-			m_resultFiles << file;
-			sendMessage("Done.");
+		QString dir = pdi.input.settings[keys::data_dir].toString();
+		QString baseFileName = pdi.input.settings.value(keys::data_path).toString();
+
+		if (m_ui->saveInOneFile) {
+			QString file = QString("%1_algo-%2_hp-%3_lp-%4.mat").arg(baseFileName).arg(method).arg(HPString).arg(LPString);
+			sendMessage("Saving to MATLAB file...");
+			int status = saveToMatlab(file);
+			if (status == 0) {
+				m_resultFiles << file;
+				sendMessage("Done.");
+			}
+		}
+		else {
+			QMap<QString, int> map;
+			for (auto run : m_runs) {
+				auto label = run->marker->label();
+				if (!map.contains(label)) {
+					map.insert(label, 1);
+				}
+				else {
+					auto i = map.value(label);
+					map.insert(label, ++i);
+				}
+				baseFileName = QString("%1_algo-%2_hp-%3_lp-%4_sec-%5_num-%6").arg(baseFileName).arg(method).arg(HPString).arg(LPString).arg(label).arg(map.value(label));
+				sendMessage(QString("Saving %1...").arg(baseFileName));
+				if (saveToMatlab(baseFileName, run) == -1) {
+					sendMessage(QString("Error when writing %1 file.").arg(baseFileName));
+				}
+				else {
+					sendMessage("Done.");
+					m_resultFiles << baseFileName;
+				}
+
+			}
 		}
 	}
 
@@ -636,7 +717,7 @@ void H2::saveSignals(const AwChannelList& channels)
 	auto block = writer->infos.newBlock();
 	block->setDuration(channels.first()->dataSize() / channels.first()->samplingRate());
 	block->setSamples(channels.first()->dataSize());
-	QString filePath = QString("%1/%2_%3Hz_%4Hz").arg(pdi.input.settings[processio::data_dir].toString()).arg(m_currentBand.name).arg(m_currentBand.hp).arg(m_currentBand.lp);
+	QString filePath = QString("%1/%2_%3Hz_%4Hz").arg(pdi.input.settings[keys::data_dir].toString()).arg(m_currentBand.name).arg(m_currentBand.hp).arg(m_currentBand.lp);
 	writer->createFile(filePath);
 	writer->writeData(&sources);
 	writer->cleanUpAndClose();

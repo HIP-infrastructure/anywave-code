@@ -68,3 +68,17 @@ QMap<int, QString>  AwUtilities::bids::columnsFromLine(const QString & line)
 	
 	return res;
 }
+
+
+/// <summary>
+/// remove a key/value bids pair from a bids filename. The goal is to reformat the filename for display role in a QStandardItemModel
+/// </summary>
+/// <param name="key">the key to remove (sub, ses, run, ..)</param>
+/// <returns>return the string without the key/value</returns>
+QString AwUtilities::bids::removeBidsKey(const QString& key, const QString& name)
+{
+	QString exp = QString("(%1-.+?(?=_).)").arg(key);
+	QRegularExpression re(exp);
+	auto res = name;
+	return res.remove(re);
+}

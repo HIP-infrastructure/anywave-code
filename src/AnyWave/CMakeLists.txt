@@ -4,7 +4,7 @@ project(AnyWave)
 add_definitions("-DAW_DISABLE_EPOCHING")
 
 SET(AnyWave_SRCS
-./AnyWave.cpp  
+    ./AnyWave.cpp  
 	./AwMapping.cpp
 	./AwBatch.cpp
 	./AwMATLAB.cpp
@@ -31,7 +31,7 @@ SET(AnyWave_SRCS
     ./Data/AwDataServer.cpp  
 	./Data/AwMemoryMapper.cpp  
 	./Data/AwDataChunk.cpp
-	./Data/AwDataSet.cpp
+    ./Data/AwDataManager.cpp
     ./Carto/AwDockMapping.cpp  
     ./Carto/AwMappingClient.cpp  
     ./Carto/AwMappingWidget.cpp  
@@ -97,6 +97,7 @@ SET(AnyWave_SRCS
     ./MATPy/AwTCPResponse.cpp
 	./MATPy/RunAnyWave.cpp
 	./MATPy/GetProperties.cpp
+    ./MATPy/DebugConnect.cpp
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
@@ -172,7 +173,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Data/AwDataServer.h  
 	./Data/AwMemoryMapper.h  
 	./Data/AwDataChunk.h
-	./Data/AwDataSet.h
+	./Data/AwDataManager.h
     ./Carto/AwDockMapping.h  
     ./Carto/AwMappingWidget.h  
     ./Carto/AwMappingClient.h  
@@ -353,19 +354,30 @@ AwMath
 AwMapping
 AwFiltering 
 AwMATLAB 
-AwEpoch
+#AwEpoch
 AwMATLAB)
 
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 
-ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
-QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
 SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml)
+IF(UNIX AND NOT APPLE)
+    ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
+    QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
+    TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z)
+    add_dependencies(AnyWaveLinux ${AW_LIBS})
+    INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
+ELSE()
+    ADD_EXECUTABLE(AnyWaveMac ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
+    QT5_USE_MODULES(AnyWaveMac Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
+    TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z)
+    add_dependencies(AnyWaveMac ${AW_LIBS})
+    INSTALL(TARGETS AnyWaveMac DESTINATION ${APP_INSTALL_DIR})
+ENDIF()
+
 #TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
 
-TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z)
-add_dependencies(AnyWaveLinux ${AW_LIBS})
 
-INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
 
 
 

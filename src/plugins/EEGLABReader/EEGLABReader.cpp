@@ -9,7 +9,7 @@ EEGLABReaderPlugin::EEGLABReaderPlugin() : AwFileIOPlugin()
 	manufacturer = "EEGLAB";
 	version = QString("1.0");
 	fileExtensions << "*.set";
-	m_flags = Aw::HasExtension | Aw::CanRead;
+	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
 
 EEGLABReader::EEGLABReader(const QString& fileName) : AwFileIO(fileName)

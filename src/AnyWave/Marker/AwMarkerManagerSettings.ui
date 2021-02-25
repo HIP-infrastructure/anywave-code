@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>513</width>
-    <height>638</height>
+    <width>552</width>
+    <height>715</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -24,8 +24,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>16777215</width>
-    <height>16777215</height>
+    <width>16777212</width>
+    <height>16777212</height>
    </size>
   </property>
   <property name="font">
@@ -35,7 +35,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Markers Manager</string>
+   <string>Markers</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -43,7 +43,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="sizeConstraint">
-    <enum>QLayout::SetDefaultConstraint</enum>
+    <enum>QLayout::SetMinimumSize</enum>
    </property>
    <item>
     <widget class="QGroupBox" name="groupBox">
@@ -57,15 +57,29 @@
       <string/>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Columns:</string>
-          </property>
-         </widget>
-        </item>
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
         <item>
          <widget class="QCheckBox" name="checkLabel">
           <property name="text">
@@ -122,13 +136,19 @@
       <item>
        <widget class="AwMarkerTableView" name="tvMarkers">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777213</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
-         <string>Markers currently shown depending on Display rule used</string>
+         <string notr="true">Markers currently shown depending on Display rule used</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -137,7 +157,7 @@
          <enum>QFrame::Plain</enum>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+         <enum>QAbstractScrollArea::AdjustIgnored</enum>
         </property>
         <property name="autoScroll">
          <bool>true</bool>
@@ -175,10 +195,10 @@
         <attribute name="horizontalHeaderCascadingSectionResizes">
          <bool>true</bool>
         </attribute>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>100</number>
-        </attribute>
         <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>0</number>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
          <number>100</number>
         </attribute>
         <attribute name="horizontalHeaderStretchLastSection">
@@ -204,10 +224,13 @@
       <string>Display options</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
       <item>
        <widget class="QLabel" name="label">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -263,251 +286,23 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBoxQuickNav">
-     <property name="title">
-      <string>Quick navigation</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Number of markers:</string>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="labelTotal">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(0, 85, 255);</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>52</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>By name:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QComboBox" name="comboNames">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="labelNames">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>18</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="5">
-       <widget class="QPushButton" name="buttonPrevName">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Prev.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
-       <widget class="QPushButton" name="buttonGoName">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Center On</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="7">
-       <widget class="QPushButton" name="buttonNextName">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Next</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>By value:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QComboBox" name="comboValues">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QComboBox::AdjustToContents</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QLabel" name="labelValues">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4">
-       <spacer name="horizontalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>18</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="2" column="5">
-       <widget class="QPushButton" name="buttonPrevValue">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Prev.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="6">
-       <widget class="QPushButton" name="buttonGoValue">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Center On</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="7">
-       <widget class="QPushButton" name="buttonNextValue">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Next</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>6</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
      <item>
       <widget class="QPushButton" name="buttonExportWizard">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="text">
         <string>Export Wizard</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonClearTriggerChannel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Overwrite currently open file's trigger channel with zeros.</string>
-       </property>
-       <property name="text">
-        <string>Clear Trigger Channel</string>
        </property>
       </widget>
      </item>
@@ -527,7 +322,7 @@
      <item>
       <widget class="QPushButton" name="buttonLoad">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -540,7 +335,7 @@
      <item>
       <widget class="QPushButton" name="buttonSave">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>

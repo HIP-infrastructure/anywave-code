@@ -26,75 +26,53 @@
     <ClCompile Include="correlation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_correlation.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_correlation.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
+    
     <ClCompile Include="outputwidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_outputwidget.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_outputwidget.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
+    
     <ClCompile Include="settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_settings.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_settings.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
+    
     <ClCompile Include="maingui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_maingui.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_maingui.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
+    
+    
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="correlation.h">
+    <QtMoc Include="correlation.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="outputwidget.h">
+    </QtMoc>
+    <QtMoc Include="outputwidget.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="outputwidget.ui">
+    </QtMoc>
+    <QtUic Include="outputwidget.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="settings.h">
+    </QtUic>
+    <QtMoc Include="settings.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="settings.ui">
+    </QtMoc>
+    <QtUic Include="settings.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="maingui.h">
+    </QtUic>
+    <QtMoc Include="maingui.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="maingui.ui">
+    </QtMoc>
+    <QtUic Include="maingui.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="correlation_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_outputwidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_settings.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_maingui.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
+    
+    
+    
   </ItemGroup>
 </Project>

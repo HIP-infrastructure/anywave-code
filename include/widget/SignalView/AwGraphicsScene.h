@@ -37,6 +37,7 @@
 #include <graphics/AwHighLightMarker.h>
 class AwMarkingSettings;
 class AwGTCMenu;
+class AwPickMarkersDial;
 
 class AW_WIDGETS_EXPORT AwGraphicsScene : public QGraphicsScene
 {
@@ -45,7 +46,7 @@ public:
 	AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent = 0);
 	~AwGraphicsScene();
 
-	enum Mode { Cursor, Mapping, AddingMarker, None, QTS, DraggingCursor };
+	enum Mode { Cursor, Mapping, AddingMarker, None, QTS, DraggingCursor, Count };
 	inline float pageDuration() { return m_pageDuration; }
 	inline AwChannelList& channels() { return m_channels; }
 	AwChannelList selectedChannels();
@@ -69,6 +70,8 @@ public:
 	AwCursorItem *addCursor(const QString& name, const QString& color = "#FF0000", float width = 2.);
 	void removeCursor(const QString& name);
 	void setCursorPosition(const QString& cursorName, float posInFile, float position);
+
+	void addCustomContextMenu(QMenu* menu, int condition);
 signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
@@ -97,6 +100,8 @@ public slots:
 	virtual void updateSettings(AwViewSettings *settings, int flags);
 	virtual void setSelectionAsBad() {}
 	virtual void setSelectionAsMontage() {}
+	// open a GUI when in mapping mode, to select which predefined markers to insert at mapping position.
+	void chooseMarkersToInsert();
 	void setMarkingSettings(AwMarkingSettings *settings);
 	void setPageDuration(float dur) { m_pageDuration = dur; }
 	void updateSelection();
@@ -131,6 +136,8 @@ public slots:
 	void addHighLigthMarker(const QString& text, float pos, float dur);
 	void removeHighLigthMarker();
 	void highlightMarker(AwMarker *m);
+	void highlightChannels(const QStringList& labels);
+	void undoHighlightChannels();
 	void setCursorMode(bool OnOff);
 	void setMarkingMode(bool flag);
 	void setMappingMode(bool on);
@@ -148,11 +155,12 @@ protected slots:
 	void setChannelAsBad();
 	void gotoChannel(QAction *act);
 	void launchQTSPlugin();
+	void insertPredefinedMarker();
 protected:
 	float timeAtPos(const QPointF& pos);
 	float xPosFromTime(float time);
 	QGraphicsItem * getItemUnderMouse(QPointF pos, int *itemType);
-	QMenu *defaultContextMenu();
+	virtual QMenu *defaultContextMenu();
 	void updateGotoChannelMenu(const QStringList& labels);
 	void clearMarkers();
 	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = NULL, int offsetLabel = 0);
@@ -199,6 +207,8 @@ protected:
 	AwDisplayPluginSignalItem m_signalItemPlugin;
 	QStringList m_QTSCompatiblePlugins;	// name of process plugins that can be launched when QTS mode is active.
 	QString m_pluginToLaunch;	// name of process to launch after a QTS
+	QMenu* m_contextMenuMapping;	// pointer to sub menu dedicated to mapping operations (can be null)
+	AwPickMarkersDial* m_pickMarkersDial;
 };
 
 

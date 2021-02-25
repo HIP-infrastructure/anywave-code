@@ -46,7 +46,8 @@ public:
 	inline int processFlags() { return m_processFlags; }
 	void applyNewSetup(AwViewSetup *setup);	// apply a new setup
 	void setCursorPosition(float pos);
-	void enableView(AwFileIO *reader);
+	//svoid enableView(AwFileIO *reader);
+	void enableView();
 	void closeFile();
 	void quit();
 	inline void setProcessFlags(int flags) { m_processFlags = flags; }
@@ -79,7 +80,7 @@ protected:
 	void applyChannelFilters();
 private:
 	void updateAmplitudes();
-	AwFileIO *m_reader;
+	//AwFileIO *m_reader;
 	bool m_isActive;
 	AwChannelList m_virtualChannels;
 	int m_processFlags;							// flags for the view

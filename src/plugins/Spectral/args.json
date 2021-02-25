@@ -1,0 +1,23 @@
+{
+  "parameters": [  "time_window", "overlap", "windowing" ],
+  "inputs": {
+    "input_file": "any file"
+  },
+  "outputs": {
+    "output_file" :  ".mat"
+  },
+  "batch_ui": {
+    "time_window": [ "FFT window (s)", "double" ],
+    "overlap ": [ "Overlap of fft window (s)", "double" ],
+    "windowing": [ "Type of window to apply", "stringlist" ],
+    "fields_ordering": [ "time_window", "overlap", "windowing" ]
+  },
+  "batch_defaults": {
+    "input_file" :  "File",
+    "time_window": 1,
+	"overlap" : 0.5,
+	"windowing" : ["Hanning", "Hamming", "None"],
+    "skip_markers": "",
+    "use_markers": ""
+  }
+}

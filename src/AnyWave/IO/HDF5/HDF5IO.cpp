@@ -34,7 +34,7 @@ AHDF5IOPlugin::AHDF5IOPlugin() : AwFileIOPlugin()
 	version = QString("1.0");
 	fileExtensions << "*.ah5";
 	fileExtension = ".ah5";
-	m_flags = Aw::HasExtension|Aw::CanRead|Aw::CanWrite;
+	m_flags = FileIO::HasExtension| FileIO::CanRead| FileIO::CanWrite;
 }
 
 AHDF5IO::AHDF5IO(const QString& path) : AwFileIO(path)

@@ -34,15 +34,17 @@
 #include "Plugin/AwPluginManager.h"
 #include "Widgets/AwPleaseWaitWidget.h"
 #include <QMessageBox>
-#include "Prefs/AwSettings.h"
+//#include "Prefs/AwSettings.h"
 #include "Widgets/AwDockMarker.h"
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
-#include <AwFileInfo.h>
 #include "Debug/AwDebugLog.h"
-
+#include "Data/AwDataManager.h"
+#include <widget/AwWaitWidget.h>
+#include <thread>
+#include <future>
 
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;
@@ -55,23 +57,29 @@ AwMarkerManager *AwMarkerManager::instance()
 	return m_instance;
 }
 
+AwMarkerManager* AwMarkerManager::newInstance()
+{
+	return new AwMarkerManager;
+}
+
 AwMarkerManager::AwMarkerManager()
 {
-	// instantiance UI Widget
-	// The widget will be inserted in a QDockWidget later and its parent will be set
-	m_ui = new AwMarkerManagerSettings(m_markers);
-	
-	// connections
-	connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
-	connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
-	connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
-	connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
-	connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
+	//// instantiance UI Widget
+	//// The widget will be inserted in a QDockWidget later and its parent will be set
+	//m_ui = new AwMarkerManagerSettings(m_markers);
+	//
+	//// connections
+	//connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
+	//connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
+	//connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
+	//connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
+	//connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
+	m_ui = nullptr;
 	AwDebugLog::instance()->connectComponent(QString("Marker Manager"), this);
 
 	m_needSorting = true;
 	m_markersModified = false;
-	m_dock = NULL;
+	m_dock = nullptr;
 	m_markerInspector = new AwMarkerInspector();	
 }
 
@@ -79,6 +87,20 @@ AwMarkerManager::~AwMarkerManager()
 {
 }
 
+
+AwMarkerManagerSettings* AwMarkerManager::ui()
+{
+	if (m_ui == nullptr) {
+		m_ui = new AwMarkerManagerSettings(m_markers);
+		// connections
+		connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
+		connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
+		connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
+		connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
+		connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
+	}
+	return m_ui;
+}
 
 //
 // getMarkers()
@@ -118,25 +140,7 @@ void AwMarkerManager::removeDuplicates()
 	if (m_markers.isEmpty())
 		return;
 	AwMarker::removeDoublons(m_markers);
-	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 
-	//AwMarkerList sorted;
-	//AwMarker *marker = m_markers.first();
-	//sorted << marker;
-	//for (int i = 1; i < m_markers.size(); i++) {
-	//	AwMarker *m = m_markers.at(i);
-	//	if (m->label() != marker->label() || m->start() != marker->start() || m->duration() != marker->duration()) {
-	//		sorted << m;
-	//		marker = m;
-	//	}
-	//	else {
-	//		m_markers.removeAll(m);
-	//		delete m;
-	//	}
-	//	
-	//}
-	//m_markers = sorted;
-	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,8 +159,7 @@ void AwMarkerManager::setMarkers(const AwMarkerList& markers)
 AwMarkerList AwMarkerManager::loadMarkers(const QString &path)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
-
-	return AwMarker::load(path);
+    return AwMarker::load(path);
 }
 
 
@@ -177,8 +180,7 @@ void AwMarkerManager::loadMarkers()
 		import = true;
 
 	// Set the root directory to be the current data file directory
-	QFileInfo fi(AwSettings::getInstance()->fileInfo()->filePath());
-	QString filename = QFileDialog::getOpenFileName(0, tr("Load Markers"), fi.absolutePath(), "Markers (*.mrk)");
+	QString filename = QFileDialog::getOpenFileName(0, tr("Load Markers"), AwDataManager::instance()->dataDir(), "Markers (*.mrk)");
 
 	if (filename.isEmpty())
 		return;
@@ -202,11 +204,13 @@ void AwMarkerManager::loadMarkers()
 	}
 
 	// show markers ui
-	m_ui->show();
+	showDockUI();
+
 }
 
 void AwMarkerManager::saveMarkers()
 {
+	QMutexLocker lock(&m_mutex); // threading lock
 	QString filename = QFileDialog::getSaveFileName(0, tr("Save Markers"), "/", "Markers (*.mrk)");
 
 	if (filename.isEmpty())
@@ -229,7 +233,7 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	AwMarkerList markers;
 	// check if sender is a process
 	AwBaseProcess *p = qobject_cast<AwBaseProcess *>(sender());
-	if (p != NULL) {
+	if (p != nullptr) {
 		markers = AwMarker::duplicate(*list);
 	}
 	else 
@@ -242,7 +246,7 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 	m_needSorting = false;
 	m_ui->setMarkers(m_markers);
-	if (p != NULL)
+	if (p != nullptr)
 		p->setMarkersReceived();
 }
 
@@ -251,6 +255,7 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 //
 void AwMarkerManager::addMarkers(const AwMarkerList& list)
 {
+	QMutexLocker lock(&m_mutex); // threading lock
 	AwMarkerList temp_list;
 	foreach (AwMarker *m, list)
 		temp_list << new AwMarker(m);
@@ -261,7 +266,8 @@ void AwMarkerManager::addMarkers(const AwMarkerList& list)
 	// sort markers
 	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 	m_needSorting = false;
-	m_ui->setMarkers(m_markers);
+	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
+		m_ui->setMarkers(m_markers);
 }
 
 // addMarker(AwMarker *)
@@ -321,33 +327,26 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 // called when a file is open.
 // Loads .mrk file and also connect to BIDS to get the markers inside events.tsv file.
 // Prepares the Marker UI.
-void AwMarkerManager::setFilename(const QString& path)
+//void AwMarkerManager::setFilename(const QString& path)
+void AwMarkerManager::init()
 {
-	m_filePath = path + ".mrk";
+	auto dm = AwDataManager::instance();
+//	m_filePath = path + ".mrk";
+	m_filePath = dm->mrkFilePath();
+
 	m_ui->setEnabled(true);
-	if (QFile::exists(m_filePath))	{
-		m_markers = loadMarkers(m_filePath);
+	if (QFile::exists(m_filePath)) {
+		AwWaitWidget wait("Markers");
+		wait.setText("Loading markers...");
+		connect(this, SIGNAL(finished()), &wait, SLOT(accept()));
+
+		auto f = [this](const QString& path) { auto markers = this->loadMarkers(path); emit finished();  return markers; };
+		auto future = std::async(f, m_filePath);
+		wait.exec();
+		m_markers = future.get();
 		if (!m_markers.isEmpty()) {
 			m_ui->setMarkers(m_markers);
 			showDockUI();
-		}
-	}
-	//// if the file is a BIDS => get events.tsv markers and unite them
-	//if (AwBIDSManager::isInstantiated()) {
-	//	auto bm = AwBIDSManager::instance();
-	//	m_markers += bm->getMarkersTsv();
-	//	removeDuplicates();
-	//}
-}
-
-void AwMarkerManager::checkForBIDSMods()
-{
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive()) {
-			if (AwMessageBox::question(nullptr, "BID", "Update events.tsv file?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-				if (bm->updateEventsTsv(m_markers) != 0)
-					emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
 		}
 	}
 }
@@ -355,14 +354,16 @@ void AwMarkerManager::checkForBIDSMods()
 void AwMarkerManager::quit()
 {
 	closeFile();
-	m_ui->close();
-	delete m_ui;
-	delete m_markerInspector;
+	if (m_ui) {
+		m_ui->close();
+		delete m_ui;
+	}
+	if (m_markerInspector)
+		delete m_markerInspector;
 }
 
 void AwMarkerManager::closeFile()
 {
-	//checkForBIDSMods();
 	// if BIDS is active => update or create events.tsv file
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
@@ -371,7 +372,8 @@ void AwMarkerManager::closeFile()
 				emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
 	}
 	// ask MarkerManagerSettings to clear
-	m_ui->cleanUp();
+	if (m_ui)
+		m_ui->cleanUp();
 	clear();
 	m_filePath = "";
 	m_markersModified = false;

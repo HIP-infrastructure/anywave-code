@@ -39,8 +39,7 @@ FileConverterPlugin::FileConverterPlugin()
 
 FileConverter::FileConverter()
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	pdi.setInputFlags(Aw::ProcessInput::GetReaderPlugins|Aw::ProcessInput::GetWriterPlugins);
+	setInputFlags(Aw::ProcessIO::GetReaderPlugins|Aw::ProcessIO::GetWriterPlugins);
 }
 
 FileConverter::~FileConverter()
@@ -53,7 +52,7 @@ bool FileConverter::showUi()
 	m_ui = new settings(pdi.input.readers, pdi.input.writers);
 
 	// check for previous settings
-	QString settingsFile = pdi.input.settings[processio::working_dir].toString() + "/paths.txt";
+	QString settingsFile = pdi.input.settings.value(keys::working_dir).toString() + "/paths.txt";
 	if (QFile::exists(settingsFile)) {
 		QFile file(settingsFile);
 		if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {

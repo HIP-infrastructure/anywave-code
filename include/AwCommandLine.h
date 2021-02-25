@@ -3,4 +3,4 @@
 #include <QString>
 #include <QVariant>
 // command line parsing
-using AwArguments = QHash<QString, QVariant>;
+using AwArguments = QVariantMap;

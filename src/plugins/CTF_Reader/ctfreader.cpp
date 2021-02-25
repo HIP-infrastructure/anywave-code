@@ -165,7 +165,7 @@ CTFReader::CTFReader() : AwFileIOPlugin()
   version = QString("1.0");
   manufacturer = "CTF";
   fileExtensions << "*.ds";
-  m_flags = Aw::HasExtension | Aw::CanRead | Aw::IsDirectory;
+  m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;
 }
 
 CTFFileReader::CTFFileReader(const QString& filename) : AwFileIO(filename)
@@ -200,21 +200,27 @@ QStringList CTFFileReader::getFiles(const QString& path)
 CTFFileReader::FileStatus CTFFileReader::canRead(const QString &path)
 {
 
-	auto files = getFiles(path);
+//auto files = getFiles(path);
+
+	QDir dir(path);
+	auto files = dir.entryList(QDir::Files);
+
 	if (files.isEmpty())
 		return AwFileIO::WrongFormat;
 
 
-	QString res4;
+	QString res4, meg4;
 	for (auto file : files) {
-		if (file.endsWith(".res4")) {
+		if (file.endsWith(".res4"))
 			res4 = file;
-			break;
-		}
+		else if (file.endsWith(".meg4"))
+			meg4 = file;
 	}
-	if (res4.isEmpty()) 
+	if (res4.isEmpty() || meg4.isEmpty()) {
+		m_error = "Missing .res4 or .meg4 file in folder.";
 		return AwFileIO::WrongFormat;
-	m_res4Path = res4;
+	}
+	m_res4Path = QString("%1/%2").arg(dir.absolutePath()).arg(res4);
 
 	m_file.close();
 	m_file.setFileName(m_res4Path);
@@ -231,24 +237,29 @@ CTFFileReader::FileStatus CTFFileReader::canRead(const QString &path)
 CTFFileReader::FileStatus CTFFileReader::openFile(const QString &path)
 {
 	m_file.close();
-	auto files = getFiles(path);
-	if (files.isEmpty())
-		return AwFileIO::WrongFormat;
+	QDir dir(path);
+	auto files = dir.entryList(QDir::Files);
 
-	// check for .res4 and .megfile
+	if (files.isEmpty()) {
+		m_error = "No files in .ds folder.";
+		return AwFileIO::WrongFormat;
+	}
+
+
 	QString res4, meg4;
 	for (auto file : files) {
-		if (file.endsWith(".res4")) 
+		if (file.endsWith(".res4"))
 			res4 = file;
-		if (file.endsWith(".meg4"))
+		else if (file.endsWith(".meg4"))
 			meg4 = file;
 	}
-	if (res4.isEmpty() || meg4.isEmpty())
+	if (res4.isEmpty() || meg4.isEmpty()) {
+		m_error = "Missing .res4 or .meg4 file in folder.";
 		return AwFileIO::WrongFormat;
-
-	
-	m_res4Path = res4;
+	}
+	m_res4Path = QString("%1/%2").arg(dir.absolutePath()).arg(res4);
 	m_file.setFileName(m_res4Path);
+	meg4 = QString("%1/%2").arg(dir.absolutePath()).arg(meg4);
 
 	if (!m_file.open(QIODevice::ReadOnly))
 		return AwFileIO::FileAccess;
@@ -471,7 +482,10 @@ CTFFileReader::FileStatus CTFFileReader::openFile(const QString &path)
 	m_file.close();
 	// ouvrir le fichier meg4
 	m_file.setFileName(meg4);
-	m_file.open(QIODevice::ReadOnly);
+	if (!m_file.open(QIODevice::ReadOnly)) {
+		m_error = QString("Could not open %1. Access denied.").arg(meg4);
+		return AwFileIO::FileAccess;
+	}
 	m_stream.setDevice(&m_file);
 	return AwFileIO::openFile(path);
 }
@@ -483,11 +497,27 @@ qint64 CTFFileReader::readDataFromChannels(float start, float duration, AwChanne
 
 	quint32 nbTotalChannels = infos.channelsCount();
 	int nChannels = channelList.size();
-	qint64 nSamples = (qint64) floor(duration * m_sampleRate);
-	if (nSamples == 1)
+
+	// number of samples to read
+	qint64 nSamples = (qint64)floor(duration * m_sampleRate);
+	// starting sample in channel.
+	qint64 nStart = (qint64)floor(start * m_sampleRate);
+	// total number of channels in file.
+	quint32 nbChannels = infos.channelsCount();
+	// starting sample in file.
+	qint64 startSample = nStart * nbChannels;
+
+	if (nSamples <= 0)
 		return 0;
 
-	qint64 startSample = (quint32)(start * m_sampleRate);
+	if (nStart > infos.totalSamples())
+		return 0;
+
+	if (nStart + nSamples > infos.totalSamples())
+		nSamples = infos.totalSamples() - nStart;
+
+
+	//qint64 startSample = (quint32)(start * m_sampleRate);
 	qint64 trialStart = startSample / m_samplesByTrial;
 	qint64 offsetTrial;
 	qint64 offsetTime;

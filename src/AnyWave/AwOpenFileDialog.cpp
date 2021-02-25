@@ -38,7 +38,7 @@ AwOpenFileDialog::AwOpenFileDialog(QWidget *parent, const QString& caption, cons
 		for (auto extension : plugin->fileExtensions) {
 			filterString += extension + " ";
 			// only check directory extension if the plugin is set to open a directory(bundle).
-			if (plugin->flags() & Aw::AwIOFlags::IsDirectory)
+			if (plugin->flags() & FileIO::IsDirectory)
 				m_extensions.append(extension.remove("*"));
 		}
 	setNameFilter(filterString);

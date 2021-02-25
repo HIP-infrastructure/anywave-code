@@ -25,6 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwProcessWidget.h"
 #include <utils/time.h>
+#include <process/AwProcessOutputWidget.h>
 
 AwProcessWidget::AwProcessWidget(AwProcess *process, QWidget *parent)
 	: QWidget(parent)
@@ -44,9 +45,9 @@ AwProcessWidget::AwProcessWidget(AwProcess *process, QWidget *parent)
 	connect(m_ui.buttonShowLog, SIGNAL(clicked()), this, SLOT(showLog()));
 	
 	m_logUpdated = false;
-	m_logWindow = new AwProcessLogWindow();
+	m_logWindow = new AwProcessLogWindow(this);
 	m_logWindow->hide();
-	m_timer = NULL;
+	m_timer = nullptr;
 	m_isActive = true;
 #ifdef Q_OS_MAC
 	QMargins margins = layout()->contentsMargins();
@@ -69,6 +70,8 @@ AwProcessWidget::AwProcessWidget(AwProcess *process, QWidget *parent)
 AwProcessWidget::~AwProcessWidget()
 {
 	clear();
+//	m_logWindow->close();
+//	delete m_logWindow;
 }
 
 void AwProcessWidget::changeEvent(QEvent *e)
@@ -82,11 +85,12 @@ void AwProcessWidget::changeEvent(QEvent *e)
 /// clear() - close the log window and destroy it.
 void AwProcessWidget::clear()
 {
-	if (m_logWindow) {
-		m_logWindow->close();
-		delete m_logWindow;
-		m_logWindow = NULL;
+	if (m_timer)	{
+		m_timer->stop();
+		delete m_timer;
+		m_timer = nullptr;
 	}
+	m_logWindow->close();
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
@@ -104,7 +108,7 @@ void AwProcessWidget::setIdle()
 	m_ui.labelMessage->setText(tr("Idle"));
 	m_logWindow->appendLog(tr("Running time = ") + AwUtilities::time::hmsTime(m_process->executionTime()));
 
-	if (m_process->flags() & Aw::ProcessFlags::ProcessHasOutputUi)
+	if (m_process->flags() & Aw::ProcessFlags::HasOutputUi)
 		m_ui.buttonShowResults->show();
 }
 
@@ -119,7 +123,7 @@ void AwProcessWidget::setFinished()
 	m_ui.progress->hide();
 	QString message;
 	if (m_process->wasAborted())
-		message = tr("Aborted by user");
+		message = tr("User Aborted.");
 	else
 		message = tr("Running time = ") + AwUtilities::time::hmsTime(m_process->executionTime());
 
@@ -179,11 +183,12 @@ void AwProcessWidget::stop()
 		return;
 	}
 	if (m_process->isIdle()) {
-		if (m_process->pdi.hasOutputWidgets())
-			m_process->pdi.output.clearWidgets();
-			foreach (QWidget *w, m_process->pdi.output.widgets())	{
+		if (m_process->pdi.hasOutputWidgets()) {
+			for (auto w : m_process->pdi.output.widgets()) {
 				w->close();
 			}
+	//		m_process->pdi.output.clearWidgets();
+		}
 		m_process->stop();
 	}
 	else
@@ -196,7 +201,7 @@ void AwProcessWidget::showLog()
 	{
 		m_timer->stop();
 		delete m_timer;
-		m_timer = NULL;
+		m_timer = nullptr;
 	}
 	m_ui.buttonShowLog->setStyleSheet("QPushButton{color: black}");
 	m_ui.buttonShowLog->repaint();

@@ -39,8 +39,7 @@ CorrelationPlugin::CorrelationPlugin()
 
 Correlation::Correlation()
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
-	pdi.setInputFlags(Aw::ProcessInput::GetAllMarkers);
+	setInputFlags(Aw::ProcessIO::GetAllMarkers);
 	pdi.addInputChannel(-1, 2, 0);
 	m_ui = NULL;
 }
@@ -132,7 +131,7 @@ void Correlation::run()
 		}
 	}
 	if (!m_results.isEmpty()) {
-		setFlags(flags() | Aw::ProcessFlags::ProcessHasOutputUi);
+		setFlags(flags() | Aw::ProcessFlags::HasOutputUi);
 	}
 }
 

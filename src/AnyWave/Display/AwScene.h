@@ -49,7 +49,10 @@ public slots:
 	void setChannelAsBad(const QString& label);
 	void setSelectionAsMontage() override;
 private slots:
-//	void launchProcess();
+	// slot to handle custom context menu : Mapping mode, insert a marker for each selected channels at the mapping position.
+	void insertMarkersBasedOnChannelSelection();
+protected:
+	QMenu* defaultContextMenu() override;
 };
 
 #endif

@@ -32,12 +32,14 @@ namespace AwUtilities // put utility functions inside a namespace
 	namespace json {
 		// from a json string returns a variant hash : empty if error. errorString contains the error description
 		QVariantHash AW_UTILITIES_EXPORT hashFromJsonString(const QString& jsonString, QString& errorString);
-		QString AW_UTILITIES_EXPORT hashToJsonString(const QVariantHash& hash);
+		QString AW_UTILITIES_EXPORT toJsonString(const QVariantHash& hash);
+		QString AW_UTILITIES_EXPORT toJsonString(const QVariantMap& hash);
 		QVariantMap AW_UTILITIES_EXPORT mapFromJsonString(const QString& jsonString, QString& errorString);
 		QJsonDocument AW_UTILITIES_EXPORT readJsonFile(const QString& file);
 		QJsonDocument AW_UTILITIES_EXPORT jsonStringToDocument(const QString& jsonString, QString& errorString);
 		bool AW_UTILITIES_EXPORT jsonStringToFile(const QString& jsonString, const QString& filePath);
 		QVariantHash AW_UTILITIES_EXPORT fromJsonFileToHash(const QString& file);
+		QVariantMap AW_UTILITIES_EXPORT fromJsonFileToMap(const QString& file);
 		QString AW_UTILITIES_EXPORT fromJsonFileToString(const QString& file);
 		bool AW_UTILITIES_EXPORT saveToJsonFile(const QString& jsonString, const QString& file);
 		bool AW_UTILITIES_EXPORT saveToJsonFile(const QJsonDocument& jsonDocument, const QString& file);

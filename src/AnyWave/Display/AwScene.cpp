@@ -38,6 +38,7 @@
 #include <graphics/AwMarkerChannelItem.h>
 #include <qgraphicsview.h>
 #include <QGraphicsSceneMouseEvent>
+#include "Data/AwDataManager.h"
 
 
 AwScene::AwScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : AwGraphicsScene(settings, phys, parent)
@@ -50,8 +51,37 @@ AwScene::~AwScene()
 {
 }
 
+QMenu* AwScene::defaultContextMenu()
+{
+	auto m = AwGraphicsScene::defaultContextMenu();
+	//auto menu = m_contextMenuMapping;
+	//if (menu) {
+	//	auto selectedLabels = AwChannel::getLabels(AwDataManager::instance()->selectedChannels());
+	//	if (!selectedLabels.isEmpty()) {
+	//		auto action = menu->addAction("Insert Markers based on selected channels");
+	//		connect(action, &QAction::triggered, this, &AwScene::insertMarkersBasedOnChannelSelection);
+	//	}
+	//}
+	return m;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
+/// 
+/// 
+/// 
+void AwScene::insertMarkersBasedOnChannelSelection()
+{
+	auto selectedLabels = AwChannel::getLabels(AwDataManager::instance()->selectedChannels());
+	if (!selectedLabels.isEmpty()) {
+		for (auto const& label : selectedLabels) {
+			auto marker = new AwMarker(label, m_mappingMarker.start(), 0.);
+			emit markerInserted(marker);
+		}
+	}
+
+
+}
 
 void AwScene::setSelectionAsBad()
 {
@@ -68,13 +98,35 @@ void AwScene::setSelectionAsBad()
 void AwScene::setSelectionAsMontage()
 {
 	AwChannelList channels;
-	for (auto i : selectedItems()) {
-		AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
-		if (sitem)
-			channels << sitem->channel();
-	}
-	AwMontageManager::instance()->buildNewMontageFromChannels(channels);
+	// lambda function to sort selected items
+	auto f = [](QGraphicsItem* a, QGraphicsItem* b)
+	{
+		auto sitem_a = qgraphicsitem_cast<AwGraphicsSignalItem*>(a);
+		auto sitem_b = qgraphicsitem_cast<AwGraphicsSignalItem*>(b);
+		return sitem_a->index() < sitem_b->index();
+	};
 
+	auto items = selectedItems();
+	//// debug
+	//for (auto i : items) {
+	//	auto sitem = qgraphicsitem_cast<AwGraphicsSignalItem*>(i);
+	//	qDebug() << QString("selected item %1: index is %2").arg(sitem->channel()->name()).arg(sitem->index()) << endl;
+	//}
+ //	//
+	std::sort(std::begin(items), std::end(items), f);
+
+	//for (auto i : items) {
+	//	auto sitem = qgraphicsitem_cast<AwGraphicsSignalItem*>(i);
+	//	qDebug() << QString("selected item %1: index is %2").arg(sitem->channel()->name()).arg(sitem->index()) << endl;
+	//}
+
+	//for (auto i : selectedItems()) {
+	//	AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
+		
+	for (auto item : items) 
+		channels << qgraphicsitem_cast<AwGraphicsSignalItem *>(item)->channel();
+	
+	AwMontageManager::instance()->buildNewMontageFromChannels(channels);
 }
 
 //void AwScene::launchProcess()

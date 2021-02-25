@@ -30,9 +30,9 @@
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include "Montage/AwMontageManager.h"
-#include <AwFileInfo.h>
 #include <widget/AwSEEGViewer.h>
 #include "Data/AwDataServer.h"
+#include "Data/AwDataManager.h"
 #include "Prefs/AwSettings.h"
 #include "Widgets/AwCursorMarkerToolBar.h"
 #include "IO/BIDS/AwBIDSManager.h"
@@ -61,13 +61,13 @@ void AnyWave::runMapping()
 	else { // check for available layouts, and create MEG Mapping objects
 		AwLayoutManager *lm = AwLayoutManager::instance();
 		// check if file reader can provide layouts.
-		AwLayout *l2D = lm->layoutFromFile(m_currentReader, AwLayout::L2D | AwLayout::MEG);
-		AwLayout *l3D = lm->layoutFromFile(m_currentReader, AwLayout::L3D | AwLayout::MEG);
+		AwLayout *l2D = lm->layoutFromFile(AwDataManager::instance()->reader(), AwLayout::L2D | AwLayout::MEG);
+		AwLayout *l3D = lm->layoutFromFile(AwDataManager::instance()->reader(), AwLayout::L3D | AwLayout::MEG);
 		if (l2D == NULL) {  // no layout from file
-			l2D = lm->guessLayout(m_currentReader, AwLayout::L2D | AwLayout::MEG);
+			l2D = lm->guessLayout(AwDataManager::instance()->reader(), AwLayout::L2D | AwLayout::MEG);
 		}
 		if (l3D == NULL) {
-			l3D = lm->guessLayout(m_currentReader, AwLayout::L3D | AwLayout::MEG);
+			l3D = lm->guessLayout(AwDataManager::instance()->reader(), AwLayout::L3D | AwLayout::MEG);
 		}
 		if (l2D || l3D) { // at least one layout was found => build topo
 			auto dock = new AwDockMapping(AwChannel::MEG, tr("MEG Mapping"), l2D, l3D, this);
@@ -111,13 +111,13 @@ void AnyWave::runMapping()
 	else { // check for avaible layouts, and create MEG Mapping objects
 		AwLayoutManager *lm = AwLayoutManager::instance();
 		// check if file reader can provide layouts.
-		AwLayout *l2D = lm->layoutFromFile(m_currentReader, AwLayout::L2D | AwLayout::EEG);
-		AwLayout *l3D = lm->layoutFromFile(m_currentReader, AwLayout::L3D | AwLayout::EEG);
+		AwLayout *l2D = lm->layoutFromFile(AwDataManager::instance()->reader(), AwLayout::L2D | AwLayout::EEG);
+		AwLayout *l3D = lm->layoutFromFile(AwDataManager::instance()->reader(), AwLayout::L3D | AwLayout::EEG);
 		if (l2D == NULL) {  // no layout from file
-			l2D = lm->guessLayout(m_currentReader, AwLayout::L2D | AwLayout::EEG);
+			l2D = lm->guessLayout(AwDataManager::instance()->reader(), AwLayout::L2D | AwLayout::EEG);
 		}
 		if (l3D == NULL) {
-			l3D = lm->guessLayout(m_currentReader, AwLayout::L3D | AwLayout::EEG);
+			l3D = lm->guessLayout(AwDataManager::instance()->reader(), AwLayout::L3D | AwLayout::EEG);
 		}
 		if (l2D || l3D) { // at least one layout was found => build topo
 			auto dock = new AwDockMapping(AwChannel::EEG, tr("EEG Mapping"), l2D, l3D, this);
@@ -164,10 +164,10 @@ void AnyWave::runMapping()
 			}
 		}
 		else {
-			AwFileInfo afi(m_currentReader);
+			//AwFileInfo afi(m_currentReader);
 
-			mesh = afi.getFeature(AwFileInfo::MeshFile).toString();
-			electrodes = afi.getFeature(AwFileInfo::SEEGElectrodeFile).toString();
+			//mesh = afi.getFeature(AwFileInfo::MeshFile).toString();
+			//electrodes = afi.getFeature(AwFileInfo::SEEGElectrodeFile).toString();
 		}
 
 		if (!mesh.isEmpty() && !electrodes.isEmpty()) {
@@ -178,7 +178,7 @@ void AnyWave::runMapping()
 				connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
 				connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
 				connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-				connect(&AwSettings::getInstance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
+				connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
 					SLOT(setNewFilters(const AwFilterSettings&)));
 			}
 			// the viewer will automatically duplicate channel objects.

@@ -49,13 +49,13 @@
 #include "AwCentralWidget.h"
 #include "Plugin/AwPluginManager.h"
 #include <QTextStream>
-#include <AwFileInfo.h>
+#include "Data/AwDataManager.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
 #endif
 
-AwDisplay *AwDisplay::m_instance = NULL;
+AwDisplay *AwDisplay::m_instance = nullptr;
 
 AwDisplay *AwDisplay::instance()
 {
@@ -71,19 +71,15 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
 	dsManager->setParent(this);
 	m_mainWindow = w;
-	m_setup = NULL;
-	m_reader = NULL;
-
+	m_setup = nullptr;
 	AwDisplaySetup *setup = dsManager->currentSetup();
-
 	// Display Setup Manager connections
 	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(changeCurrentSetup(AwDisplaySetup *)));
 	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
 	connect(AwMarkerManager::instance(), SIGNAL(goTo(float)), this, SLOT(showPositionInViews(float)));
 	connect(AwICAManager::instance(), SIGNAL(icaComponentsUnloaded()), this, SLOT(removeICAChannels()));
-	m_splitterWidget = new AwCentralWidget(0);
-	w->setCentralWidget(m_splitterWidget);
 
+	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	// create views from setup
 	foreach (AwViewSetup *vs, setup->viewSetups())
 		AwSignalView *view = addSignalView(vs);
@@ -120,9 +116,6 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 		v->setProcessFlags(AwSignalView::NoProcessUpdate);
 
 	AwSignalView *view = new AwSignalView((AwViewSettings *)setup);
-	if (m_reader) // file already open
-		view->enableView(m_reader);
-
 	AwProcessManager *pm = AwProcessManager::instance();
 	QList<AwDisplayPlugin *> plugins = AwPluginManager::getInstance()->displays();
 	QList<AwProcessPlugin *> QTSplugins = pm->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
@@ -160,8 +153,8 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	if (!m_virtualChannels.isEmpty())
 		view->addVirtualChannels(m_virtualChannels);
 
-	m_splitterWidget->addWidget(view);
-	m_splitterWidget->repaint();
+	m_centralWidget->addWidget(view);
+	m_centralWidget->repaint();
 	
 	// set flags so that the views inform the Process Manager about changes.
 	for (auto v : m_signalViews)
@@ -187,17 +180,21 @@ void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
 {
 	if (setup == NULL)
 		return;
+
 	if (flags & AwDisplaySetup::ViewOrientation) {
 		switch (m_setup->orientation())
 		{
 		case AwDisplaySetup::Horizontal:
-			m_splitterWidget->setOrientation(Qt::Vertical);
+			//m_splitterWidget->setOrientation(Qt::Vertical);
+			m_centralWidget->setOrientation(Qt::Vertical);
 			break;
 		case AwDisplaySetup::Vertical:
-			m_splitterWidget->setOrientation(Qt::Horizontal);
+			//m_splitterWidget->setOrientation(Qt::Horizontal);
+			m_centralWidget->setOrientation(Qt::Horizontal);
 			break;
 		}
-		m_splitterWidget->repaint();
+		//m_splitterWidget->repaint();
+		m_centralWidget->repaint();
 	}
 
 	m_setup = setup;
@@ -206,7 +203,7 @@ void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
 void AwDisplay::closeFile()
 {
 	saveChannelSelections();
-	m_reader = NULL; // set infos to NULL => data file not ready yet.
+	//m_reader = NULL; // set infos to NULL => data file not ready yet.
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
 	AwDisplaySetupManager::instance()->resetToDefault();
@@ -229,10 +226,7 @@ void AwDisplay::saveChannelSelections()
 	if (selectedChannels.isEmpty())
 		return;
 	auto selectedLabels = AwChannel::getLabels(selectedChannels);
-	auto fi = AwSettings::getInstance()->fileInfo();
-	if (!fi)
-		return;
-	QString path = fi->filePath() + ".sel";
+	QString path = AwDataManager::instance()->selFilePath();
 	if (QFile::exists(path))
 		QFile::remove(path);
 
@@ -247,7 +241,7 @@ void AwDisplay::saveChannelSelections()
 
 void AwDisplay::loadChannelSelections()
 {
-	QString path = AwSettings::getInstance()->fileInfo()->filePath() + ".sel";
+	QString path = AwDataManager::instance()->selFilePath();
 	QFile file(path);
 	QStringList labels;
 	if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
@@ -292,6 +286,65 @@ void AwDisplay::setVideoPosition(float position)
 		if (position > v->currentEndPosition() || position < v->positionInFile()) 
 			v->setPositionInFile(position);
 		v->scene()->setCursorPosition("Video", v->positionInFile(), position);
+	}
+}
+
+void AwDisplay::handleCommand(const QVariantMap& map)
+{
+	int command = map.value(AwProcessCommand::command).toInt();
+	switch (command) {
+	case AwProcessCommand::AddHighlightedSection:
+	{
+		float pos = map.value("position").toFloat();
+		float dur = map.value("duration").toFloat();
+		QString text = map.value("text").toString();
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->addHighLigthMarker(text, pos, dur);
+	}
+	break;
+	case AwProcessCommand::RemoveLastHighlightedSection:
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->removeHighLigthMarker();
+		break;
+	case AwProcessCommand::ShowOnlySelectedChannels:
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->displaySelectedChannelsOnly();
+		break;
+	case AwProcessCommand::ShowAllChannels:
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->displayAllChannels();
+		break;
+	case AwProcessCommand::CenterOnPos:
+	{
+		float pos = map.value("position").toFloat();
+		for (AwSignalView* v : m_signalViews)
+			v->centerViewOnPosition(pos);
+	}
+	break;
+	case AwProcessCommand::UpdateMarkers:
+		for (AwSignalView* v : m_signalViews)
+			v->updateMarkers();
+		break;
+	case  AwProcessCommand::AddVideoCursor:
+		for (AwSignalView* v : m_signalViews) {
+			auto cursor = v->scene()->addCursor("Video");
+			cursor->setWidth(5.0);
+		}
+		break;
+	case AwProcessCommand::RemoveCursor:
+	{
+		QString name = map.value("name").toString();
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->removeCursor(name);
+	}
+		break;
+	case AwProcessCommand::HighlightChannels:
+	{
+		QStringList channels = map.value("channels").toStringList();
+		for (AwSignalView* v : m_signalViews)
+			v->scene()->highlightChannels(channels);
+	}
+		break;
 	}
 }
 
@@ -349,10 +402,7 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 void AwDisplay::captureViews()
 {
 	auto aws = AwSettings::getInstance();
-	// first, clear the lastCaptureFile set in Settings
-//	aws->setSettings("lastCapturedFile", QString());
-
-	QString dir = aws->fileInfo()->dirPath();
+	QString dir = AwDataManager::instance()->dataDir();
 	int count = 1;
 	QString filename = QString("capture_%1.png").arg(count++);
 	QString file = QString("%1/%2").arg(dir).arg(filename);
@@ -365,7 +415,9 @@ void AwDisplay::captureViews()
 		else 
 			ok = true;
 	}
-	QPixmap image = m_splitterWidget->grab();
+	auto central = static_cast<QSplitter*>(m_mainWindow->centralWidget());
+	//QPixmap image = m_splitterWidget->grab();
+	QPixmap image = central->grab();
 	ok = image.save(file);
 	QApplication::clipboard()->setPixmap(image);
 	QSystemTrayIcon *sysTray = aws->sysTray();
@@ -513,13 +565,15 @@ void AwDisplay::removeView()
 
 void AwDisplay::alignViewsVerticaly()
 {
-	m_splitterWidget->setOrientation(Qt::Horizontal);
+	//m_splitterWidget->setOrientation(Qt::Horizontal);
+	m_centralWidget->setOrientation(Qt::Horizontal);
 	m_setup->setOrientation(AwDisplaySetup::Vertical);
 }
 
 void AwDisplay::alignViewsHorizontaly()
 {
-	m_splitterWidget->setOrientation(Qt::Vertical);
+	//m_splitterWidget->setOrientation(Qt::Vertical);
+	m_centralWidget->setOrientation(Qt::Vertical);
 	m_setup->setOrientation(AwDisplaySetup::Horizontal);
 }
 
@@ -636,14 +690,15 @@ void AwDisplay::setChannels(const AwChannelList &montage)
 	emit displayedChannelsChanged(completeList);
 }
 
-void AwDisplay::newFile(AwFileIO *reader)
+//void AwDisplay::newFile(AwFileIO *reader)
+void AwDisplay::newFile()
 {
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
-	ds->setFilename(reader->fullPath());
-	m_reader = reader;
+//	auto path = reader->fullPath();
+//	ds->setFilename(reader->fullPath());
 	
-	foreach (AwSignalView *v, m_signalViews)
-		v->enableView(reader);
+	for (AwSignalView * v : m_signalViews)
+		v->enableView();
 
 	setChannels(AwMontageManager::instance()->channels());
 	loadChannelSelections();
@@ -679,9 +734,11 @@ void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
 		view->setChannels(m_channels);
 		if (!m_virtualChannels.isEmpty())
 			view->addVirtualChannels(m_virtualChannels);
-		//m_splitterWidget->addWidget(view->widget());
-		m_splitterWidget->addWidget(view);
-		m_splitterWidget->repaint();
+		
+		//m_splitterWidget->addWidget(view);
+		m_centralWidget->addWidget(view);
+		//m_splitterWidget->repaint();
+		m_centralWidget->repaint();
 		view->setProcessFlags(AwSignalView::UpdateProcess);
 	}
 

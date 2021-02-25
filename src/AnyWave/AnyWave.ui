@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1003</width>
-    <height>434</height>
+    <width>1175</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="font">
@@ -29,6 +29,12 @@
     <normaloff>:/images/AnyWave_logo.jpg</normaloff>:/images/AnyWave_logo.jpg</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <property name="leftMargin">
      <number>0</number>
@@ -48,7 +54,7 @@
        <number>6</number>
       </property>
       <property name="sizeConstraint">
-       <enum>QLayout::SetNoConstraint</enum>
+       <enum>QLayout::SetDefaultConstraint</enum>
       </property>
      </layout>
     </item>
@@ -59,8 +65,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1003</width>
-     <height>21</height>
+     <width>1175</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -145,7 +151,6 @@
      <string>About</string>
     </property>
     <addaction name="actionAbout_AnyWave"/>
-    <addaction name="actionHelp"/>
    </widget>
    <widget class="QMenu" name="menuProcesses">
     <property name="title">
@@ -154,6 +159,12 @@
     <addaction name="actionCreate_batch_script"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelpAnyWave"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView_"/>
@@ -161,6 +172,7 @@
    <addaction name="menuMapping"/>
    <addaction name="menuEpoch"/>
    <addaction name="menuProcesses"/>
+   <addaction name="menuHelp"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -455,6 +467,16 @@
   <action name="actionCreate_batch_script">
    <property name="text">
     <string>Batch Processing</string>
+   </property>
+  </action>
+  <action name="actionHelpAnyWave">
+   <property name="text">
+    <string>AnyWave</string>
+   </property>
+  </action>
+  <action name="actionHelpPlugins">
+   <property name="text">
+    <string>Plugins</string>
    </property>
   </action>
  </widget>

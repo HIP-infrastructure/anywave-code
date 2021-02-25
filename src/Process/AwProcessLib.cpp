@@ -39,13 +39,14 @@ AwBaseProcess::AwBaseProcess() : AwDataClient(0)
 {
 	m_flags = 0x00000000; 
 	m_inputFlags = 0x000000;
+	m_modifiersFlags = 0;
 	m_runMode = 0;
 	m_plugin = NULL;
 	m_endOfData = m_abort = false;
 }
 
 AwBaseProcess::~AwBaseProcess() { 
-	qApp->removeTranslator(&m_translator); 
+	
 }
 
 
@@ -64,17 +65,6 @@ bool AwBaseProcess::isAborted()
 void AwBaseProcess::connectClient(AwDataClient *client)
 {
 	emit dataConnectionRequested(client);
-}
-
-///
-/// loadLanguage()
-/// try to load the language file based on the prefix file provided by the plugin
-/// and the current selected language.
-void AwBaseProcess::loadLanguage()
-{
-	QString file = QString("%1_%2.qm").arg(m_langFilePrefix).arg(m_locale);
-	if (m_translator.load((file)))
-		qApp->installTranslator(&m_translator);
 }
 
 void AwBaseProcess::addMarkers(AwMarkerList *markers)
@@ -127,7 +117,7 @@ void AwProcess::start()
 		return;
 	}
 
-	if (m_flags & Aw::ProcessFlags::ProcessHasOutputUi) {
+	if (m_flags & Aw::ProcessFlags::HasOutputUi) {
 		m_status = AwProcess::Idle;	
 		emit idle();
 		return;
@@ -165,26 +155,16 @@ void AwGUIProcess::registerGUIWidget(AwProcessGUIWidget *widget)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // AwProcessPlugin
 
-void AwProcessPlugin::addLanguageTranslation(const QString& resourceFile)
-{
-	QTranslator *translator = new QTranslator;
-	if (translator->load(resourceFile))
-		qApp->installTranslator(translator);
-	else
-		delete translator;
-}
-
-
 bool AwProcessPlugin::hasDeclaredArgs()
 {
-	return m_batchHash.contains("parameters");
+	return m_batchMap.contains("parameters");
 }
 
 bool AwProcessPlugin::isBatchGUICompatible()
 {
-	auto defaults = m_batchHash.value(cl::batch_defaults).toHash();
-	auto ui = m_batchHash.value(cl::batch_ui).toHash();
-	auto inputs = m_batchHash.value(cl::batch_inputs).toHash();
+	auto defaults = m_batchMap.value(keys::batch_defaults).toHash();
+	auto ui = m_batchMap.value(keys::batch_ui).toHash();
+	auto inputs = m_batchMap.value(keys::batch_inputs).toHash();
 
 	bool ok = !defaults.isEmpty() && !ui.isEmpty() && !inputs.isEmpty();
 

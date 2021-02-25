@@ -43,6 +43,7 @@ public:
 	~AwDataServer();
 	inline int activeConnections() { return m_dataConnections.size(); }
 	static AwDataServer *getInstance();
+	static AwDataServer* newInstance();
 
 	void setMainReader(AwFileIO *reader);
 	inline AwFileIO *reader() { return m_reader; }
@@ -57,6 +58,8 @@ public slots:
 	void closeConnection(AwDataClient *client);
 	void closeAllConnections();
 	void manageOutOfMemory();
+signals:
+	void log(const QString& message);
 protected:
 	QList<AwDataConnection *> m_dataConnections;
 	QMap<AwDataClient *, AwDataConnection *> m_clientToConnection;
@@ -64,6 +67,7 @@ protected:
 	AwFileIOPlugin *m_plugin;
 	QSemaphore *m_sem;	// general semaphore for connected clients.
 	static AwDataServer *m_instance;
+	static int m_instanceCount;
 };
 
 #endif

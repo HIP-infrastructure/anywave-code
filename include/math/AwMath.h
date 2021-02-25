@@ -29,7 +29,7 @@
 #include <aw_armadillo.h>
 #include <AwGlobal.h>
 #include <AwChannel.h>
-
+#include <QMutex>
 namespace AwMath {
 	fmat AW_MATH_EXPORT channelsToFMat(const AwChannelList& channels);
 	mat AW_MATH_EXPORT channelsToMat(const AwChannelList& channels);
@@ -40,8 +40,8 @@ namespace AwMath {
 	///** Spectogram MATLAB port. **/
 	//void AW_MATH_EXPORT spectrogram(fvec& X, vec& window, int noverlap, mat& s);
 	//void AW_MATH_EXPORT spectrogram(vec& X, vec& window, int noverlap, mat& s);
-
-
+	vec AW_MATH_EXPORT psd(arma::colvec& signal, int windowSize, int overlap);
+	static QMutex FFTMutex;
 }
 
 #endif

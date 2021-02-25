@@ -31,11 +31,12 @@
 #include <filter/AwFilterSettings.h>
 #include <AwCommandLine.h>
 
+
 /** AwProcessIO defines object used as input or output by AwProcess **/
 class AW_PROCESS_EXPORT AwProcessIO
 {
 public:
-	AwProcessIO() { m_reader = NULL; }
+	AwProcessIO() { m_reader = nullptr; }
 	~AwProcessIO();
 
 	inline bool containsChannels() { return !m_channels.isEmpty(); }
@@ -45,26 +46,27 @@ public:
 	inline bool launchedUsingQST() { return timeSelection.duration() > 0.; }
 	bool isEmpty();
 	inline AwFileIO *reader() { return m_reader; }
-	void setReader(AwFileIO *reader) { m_reader = reader; }
+	void setReader(AwFileIO* reader);
 	void clearChannels();
 	void clearMarkers();
 	void clearWidgets();
-	void setArguments(const AwArguments& arguments) { m_arguments = arguments; }
-	inline AwArguments& args() { return m_arguments; }
-	void addArgument(const QString& key, const QVariant& value) { m_arguments[key] = value; }
+
 
 	inline AwChannelList& channels() { return m_channels; }
 	inline AwMarkerList& markers() { return m_markers; }
-	inline QList<QWidget *>& widgets() { return m_widgets; }
+	inline AwMarkerList& modifiedMarkers() { return m_modifiedMarkers; }
+	inline QList<QWidget*>& widgets() { return m_widgets; }
 	/** Set a new list of channels. Previous channels will be deleted!!. duplicate indicates that the list will be duplicated and then set as the new list. **/
 	void setNewChannels(const AwChannelList& channels, bool duplicate = false);
 	/** Set a new list of markers. Previous markers will be deleted!!  duplicate indicates that the list will be duplicated and then set as the new list. **/
 	void setNewMarkers(const AwMarkerList& markers, bool duplicate = false);
+	/** Set the resulting marker list after filtering input markers with use_markers or skip_markers **/
+	void setModifiedMarkers(const AwMarkerList& markers);
 	/** Append markers **/
 	void addMarkers(const AwMarkerList& markers, bool duplicate = false);
 	void addMarker(AwMarker *marker);
 	/** apend widgets **/
-	void addWidget(QWidget *widget);
+	void addWidget(QWidget* widget);
 	/** Append channels **/
 	void addChannels(const AwChannelList& channels, bool duplicate = false);
 	void addChannel(AwChannel *channel);
@@ -74,7 +76,7 @@ public:
 	QVariantList customData;
 
 	AwFilterSettings filterSettings;
-	QVariantHash settings;
+	QVariantMap settings;
 
 	void lock() { m_mutex.lock(); }
 	void unlock() { m_mutex.unlock(); }
@@ -82,9 +84,9 @@ protected:
 	AwChannelList m_channels;
 	// markers will contain input markers for the process.
 	AwMarkerList m_markers;
+	AwMarkerList m_modifiedMarkers;	// this list contains markers filtered by --use_markers and --skip_markers options
 
-	QList<QWidget *> m_widgets;
+	QList<QWidget*> m_widgets;
 	AwFileIO *m_reader;
-	AwArguments m_arguments;	// used for pluing launches from the command line
 	QMutex m_mutex;
 };

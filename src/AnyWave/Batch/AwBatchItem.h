@@ -41,9 +41,9 @@ public:
 	}	// this will lock inputs and outputs so the user could not change them
 	inline bool isLocked() { return m_locked; }
 	inline QString& pluginName() { return m_plugin->name; }
-	QVariantHash& params() { return m_params; }
-	QVariantHash& pluginBatchSettings() { return m_plugin->batchHash(); }
-	void setParams(const QVariantHash& args) { m_params = args; }
+	QVariantMap& params() { return m_params; }
+	QVariantMap& pluginBatchSettings() { return m_plugin->batchHash(); }
+	void setParams(const QVariantMap& args) { m_params = args; }
 	AwProcessPlugin *plugin() { return m_plugin; }
 	bool checkPluginParams();
 	QString getFileForInput(const QString& key, int index);
@@ -56,7 +56,7 @@ public:
 	void setOutputs(const QString& key, const QStringList& files) { m_outputFilesMap[key] = files; }
 protected:
 	QString m_pluginName;		// name of the plugin
-	QVariantHash m_params;	    // current parameters
+	QVariantMap m_params;	    // current parameters
 	AwProcessPlugin *m_plugin;
 	QMap<QString, QStringList> m_inputFilesMap;	    // hold a list of files for a specific key.
 	QMap<QString, QStringList> m_outputFilesMap;	// hold a list of files for a specific key.

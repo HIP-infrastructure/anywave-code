@@ -2,8 +2,6 @@
   <qresource prefix="/">
     <file>images/AddToMontage48x48.png</file>
     <file>images/back32x32.png</file>
-    <file>images/filters-256.png</file>
-    <file>images/no-filter128.png</file>
     <file>images/carto_32x32.png</file>
     <file>images/cursor_mode.png</file>
     <file>images/display-settings.png</file>
@@ -36,6 +34,5 @@
     <file>images/armadillo.png</file>
     <file>images/Capture32x32.png</file>
     <file>images/QTS.png</file>
-    <file>images/histogram.png</file>
   </qresource>
 </RCC>

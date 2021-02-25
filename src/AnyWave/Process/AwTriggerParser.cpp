@@ -40,7 +40,7 @@ AwTriggerParserPlugin::AwTriggerParserPlugin()
 AwTriggerParser::AwTriggerParser() : AwProcess()
 {
 	// INPUT PARAMS
-	pdi.setInputFlags(Aw::ProcessInput::ProcessIgnoresChannelSelection);
+	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	pdi.addInputChannel(AwChannel::Trigger, 1, 0);
 
 	m_maskValue = 0;

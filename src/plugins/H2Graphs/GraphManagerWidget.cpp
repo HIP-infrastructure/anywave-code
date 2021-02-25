@@ -60,7 +60,7 @@ void GraphManagerWidget::addGraphSet(const QString& file)
 
 void GraphManagerWidget::loadFile()
 {
-	QString file = QFileDialog::getOpenFileName(this, "Load file", H2Graphs::instance()->pdi.input.settings[processio::data_dir].toString(), "Matlab Files (*.mat)");
+	QString file = QFileDialog::getOpenFileName(this, "Load file", H2Graphs::instance()->pdi.input.settings[keys::data_dir].toString(), "Matlab Files (*.mat)");
 	if (file.isEmpty())
 		return;
 	addGraphSet(file);

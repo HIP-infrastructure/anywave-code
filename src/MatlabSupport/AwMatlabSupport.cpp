@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
+//                 Universitï¿½ dï¿½Aix Marseille (AMU) - 
+//                 Institut National de la Santï¿½ et de la Recherche Mï¿½dicale (INSERM)
+//                 Copyright ï¿½ 2013 AMU, INSERM
 // 
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 //
 //
 //
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
+//    Author: Bruno Colombet ï¿½ Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
 //
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwMatlabSupport.h"
@@ -79,35 +79,38 @@ void AwMatlabSupport::run(const QString& path, const QString& dep, int pid, quin
 		command = QString("addpath(genpath('%1'))").arg(dep);
 		engEvalString(m_eng, command.toLatin1().data()); 
 #ifdef Q_OS_WIN
-		command = "addpath('" + awPath.absolutePath() + "')";
-		envPath = "setenv('PATH', '" + awPath.absolutePath() + "')";
-		engEvalString(m_eng, envPath.toLatin1().data()); // setenv('PATH', 'Path to AnyWave directory');
-		engEvalString(m_eng, command.toLatin1().data()); 
+	//	command = "addpath('" + awPath.absolutePath() + "')";
+		//envPath = "setenv('PATH', '" + awPath.absolutePath() + "')";
+		//engEvalString(m_eng, envPath.toLatin1().data()); // setenv('PATH', 'Path to AnyWave directory');
+		//engEvalString(m_eng, command.toLatin1().data()); 
         awPath.cd("Plugins/MATLAB/AnyWave");
 #endif
 #ifdef Q_OS_MAC
 		awPath.cdUp();
-		QString dyld = QString("setenv('DYLD_LIBRARY_PATH', '%1/dylibs')").arg(awPath.absolutePath());
-		engEvalString(m_eng, dyld.toLatin1().data()); 
-		awPath.cdUp();
-		awPath.cdUp();
-		awPath.cd("Anywave_Plugins/MATLAB/AnyWave");
+		//QString dyld = QString("setenv('DYLD_LIBRARY_PATH', '%1/dylibs')").arg(awPath.absolutePath());
+	//	engEvalString(m_eng, dyld.toLatin1().data()); 
+	//	awPath.cdUp();
+	//	awPath.cdUp();
+		awPath.cd("Plugins/MATLAB/AnyWave");
 #endif
 #ifdef Q_OS_LINUX
         //QString ld = QString("setenv('LD_LIBRARY_PATH', '/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:%1/lib')").arg(awPath.absolutePath());
-        QByteArray ld = qgetenv("LD_LIBRARY_PATH");
-        QString setld = QString("setenv('%1')").arg(QString(ld));
-        engEvalString(m_eng, setld.toLatin1().data());
+        //QByteArray ld = qgetenv("LD_LIBRARY_PATH");
+        //QString setld = QString("setenv('%1')").arg(QString(ld));
+        //engEvalString(m_eng, setld.toLatin1().data());
         awPath.cd("Plugins/MATLAB/AnyWave");
 #endif
 		command = "addpath('" + awPath.absolutePath() + "')";
 		engEvalString(m_eng, command.toLatin1().data());
 		// add a variable named aw_pid which is the index of the process in AwMatlabServer
 		command = "cd " + path;
+
 		engEvalString(m_eng, command.toLatin1().data());
 		// launch main function with aw_pid parameter
 		// the function is evaluated by the 'base' workspace (required for GUI intensive applications)
-		command = "evalin('base','main')";
+		//// search for main.m or main.mlapp
+		//if (QFile::exists(QString("%1/main.m").arg(path)))
+			command = "evalin('base','main')";
 		engEvalString(m_eng, command.toLatin1().data());
 		emit progressChanged(QString(buffer));
 		engClose(m_eng);

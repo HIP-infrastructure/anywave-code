@@ -28,9 +28,11 @@
 #include <QFileDialog>
 #include <widget/AwMessageBox.h>
 #include "AwExportSelChannels.h"
+#include <widget/AwSelectInputDataWidget.h>
+#include <AwProcessInterface.h>
 
 
-AwExporterSettings::AwExporterSettings(QWidget *parent)
+AwExporterSettings::AwExporterSettings(AwProcess *p, QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
@@ -39,12 +41,19 @@ AwExporterSettings::AwExporterSettings(QWidget *parent)
 	connect(buttonSelectChannels, SIGNAL(clicked()), this, SLOT(selectChannels()));
 	connect(buttonSelectICA, SIGNAL(clicked()), this, SLOT(selectICAChannels()));
 	connect(comboWriters, SIGNAL(currentIndexChanged(int)), this, SLOT(updateOutputFileExtension(int)));
-	connect(buttonSkip, &QPushButton::clicked, this, &AwExporterSettings::addSkipLabel);
-	connect(buttonUse, &QPushButton::clicked, this, &AwExporterSettings::addUseLabel);
-	connect(buttonClearUse, &QPushButton::clicked, this, &AwExporterSettings::clearUse);
-	connect(buttonClearSkip, &QPushButton::clicked, this, &AwExporterSettings::clearSkip);
+	//connect(buttonSkip, &QPushButton::clicked, this, &AwExporterSettings::addSkipLabel);
+	//connect(buttonUse, &QPushButton::clicked, this, &AwExporterSettings::addUseLabel);
+	//connect(buttonClearUse, &QPushButton::clicked, this, &AwExporterSettings::clearUse);
+	//connect(buttonClearSkip, &QPushButton::clicked, this, &AwExporterSettings::clearSkip);
 	filterTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	filterTableView->resizeColumnsToContents();
+	m_process = p;
+	bool markersManuallySelected = p->modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers;
+	if (markersManuallySelected)
+		inputDataWidget->hide();
+	else 
+		inputDataWidget->setMarkers(p->pdi.input.markers());
+
 }
 
 AwExporterSettings::~AwExporterSettings()
@@ -57,37 +66,37 @@ void AwExporterSettings::updateOutputFileExtension(int index)
 	lineEditFile->setText(QString("%1%2").arg(initialPath).arg(extensions.at(index)));
 }
 
-void AwExporterSettings::addSkipLabel()
-{
-	auto item = comboSkip->currentText();
-	if (!skippedMarkers.contains(item)) {
-		skippedMarkers << item;
-		listWidgetSkip->addItem(item);
-		listWidgetSkip->update();
-	}
-}
+//void AwExporterSettings::addSkipLabel()
+//{
+//	//auto item = comboSkip->currentText();
+//	//if (!skippedMarkers.contains(item)) {
+//	//	skippedMarkers << item;
+//	//	listWidgetSkip->addItem(item);
+//	//	listWidgetSkip->update();
+//	//}
+//}
 
-void AwExporterSettings::addUseLabel()
-{
-	auto item = comboUse->currentText();
-	if (!usedMarkers.contains(item)) {
-		usedMarkers << item;
-		listWidgetUse->addItem(item);
-		listWidgetUse->update();
-	}
-}
+//void AwExporterSettings::addUseLabel()
+//{
+//	//auto item = comboUse->currentText();
+//	//if (!usedMarkers.contains(item)) {
+//	//	usedMarkers << item;
+//	//	listWidgetUse->addItem(item);
+//	//	listWidgetUse->update();
+//	//}
+//}
 
-void AwExporterSettings::clearUse()
-{
-	listWidgetUse->clear();
-	usedMarkers.clear();
-}
+//void AwExporterSettings::clearUse()
+//{
+//	//listWidgetUse->clear();
+//	//usedMarkers.clear();
+//}
 
-void AwExporterSettings::clearSkip()
-{
-	listWidgetSkip->clear();
-	skippedMarkers.clear();
-}
+//void AwExporterSettings::clearSkip()
+//{
+//	//listWidgetSkip->clear();
+//	//skippedMarkers.clear();
+//}
 
 void AwExporterSettings::selectICAChannels()
 {
@@ -124,7 +133,7 @@ int AwExporterSettings::exec()
 {
 	updateOutputFileExtension(0);
 	comboWriters->addItems(writers);
-	comboDS->setSamplingRate(channels.first()->samplingRate());
+	comboDS->init(channels.first()->samplingRate());
 	filterTableView->setSettings(filterSettings);
 	// init combo markers only with markers which have a duration.
 	AwMarkerList tmp;
@@ -132,13 +141,13 @@ int AwExporterSettings::exec()
 		if (m->duration() > 0.)
 			tmp << m;
 	}
-	if (!tmp.isEmpty()) {
-		comboSkip->setMarkers(tmp);
-		comboUse->setMarkers(tmp);
-	}
-	else {
-		groupBoxMarkers->setDisabled(true);
-	}
+	//if (!tmp.isEmpty()) {
+	//	comboSkip->setMarkers(tmp);
+	//	comboUse->setMarkers(tmp);
+	//}
+	//else {
+	//	groupBoxMarkers->setDisabled(true);
+	//}
 	return QDialog::exec();
 }
 
@@ -158,6 +167,8 @@ void AwExporterSettings::accept()
 	exportICA = checkBoxICA->isChecked();
 	decimateFactor = comboDS->getDecimateFactor();
 	filterSettings = filterTableView->settings();
+	usedMarkers = inputDataWidget->usedMarkers();
+	skippedMarkers = inputDataWidget->skippedMarkers();
 //	renameLabels = checkRelabel->isChecked();
 	QDialog::accept();
 }

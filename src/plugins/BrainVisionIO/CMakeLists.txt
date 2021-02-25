@@ -2,7 +2,9 @@
 project(BrainVisionIO)
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
+IF(NOT APPLE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF()
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
 SET(SRCS
@@ -16,7 +18,7 @@ SET(MOCS
  add_library(BrainVisionIO SHARED ${SRCS} ${BrainVision_MOCS})
  qt5_use_modules(BrainVisionIO Core)
  target_link_libraries(BrainVisionIO AwCore AwReadWrite Qt5::Core)
-INSTALL(TARGETS BrainVisionIO DESTINATION ${CMAKE_INSTALL_PREFIX}/Plugins)
+INSTALL(TARGETS BrainVisionIO DESTINATION ${PLUGIN_INSTALL_DIR})
 
 
 

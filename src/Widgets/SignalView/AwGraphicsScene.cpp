@@ -35,6 +35,7 @@
 #include <AwMarkingSettings.h>
 #include <utils/gui.h>
 #include "AwGTCMenu.h"
+#include "AwPickMarkersDial.h"
 
 AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : QGraphicsScene(parent)
 {
@@ -45,15 +46,17 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_selectionIsActive = false;
 	m_isTimeSelectionStarted = false;
 	m_showMarkers = false;
-	m_cursor = NULL;
-	m_mappingCursor = NULL;
-	m_mappingFixedCursor = NULL;
-	m_currentMarkerItem = NULL;
+	m_cursor = nullptr;
+	m_mappingCursor = nullptr;
+	m_mappingFixedCursor = nullptr;
+	m_currentMarkerItem = nullptr;
 	m_mouseMode = AwGraphicsScene::None;
-	m_markingSettings = NULL;
-	m_gotoChannelMenu = NULL;
-	m_selectionRectangle = NULL;
-	m_QTSMenu = NULL;
+	m_markingSettings = nullptr;
+	m_gotoChannelMenu = nullptr;
+	m_selectionRectangle = nullptr;
+	m_QTSMenu = nullptr;
+	m_contextMenuMapping = nullptr;
+	m_pickMarkersDial = nullptr;
 }
 
 AwGraphicsScene::~AwGraphicsScene()
@@ -66,6 +69,8 @@ AwGraphicsScene::~AwGraphicsScene()
 		removeItem(cursor);
 		delete cursor;
 	}
+	if (m_pickMarkersDial)
+		delete m_pickMarkersDial;
 }
 
 void AwGraphicsScene::setQTSPlugins(const QStringList& plugins)
@@ -111,6 +116,11 @@ void AwGraphicsScene::updateChannelsData()
 	}
 }
 
+void AwGraphicsScene::addCustomContextMenu(QMenu* menu, int cursorMode)
+{
+	//m_customContextMenus[cursorMode].append(menu);
+}
+
 void AwGraphicsScene::setChannels(AwChannelList& channels)
 {
 	if (channels.isEmpty())
@@ -120,6 +130,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 	m_channels = channels;
 	m_maxSR = channels.first()->samplingRate();
 	
+	int index = 0;
 	foreach (AwChannel *c, channels) {
 		AwDisplayPlugin *dp;
 		if (c->displayPluginName().isEmpty()) 
@@ -144,6 +155,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		item->setPlugin((QObject *)dp);
 		item->showBaseline(m_settings->showZeroLine);
 		item->showLabel(m_settings->showSensors);
+		item->setIndex(index++);
 		this->addItem(item);
 		m_signalItems << item;
 		item->repaint();
@@ -158,7 +170,7 @@ void AwGraphicsScene::updateVisibleItemsHashTable()
 {
 	m_hashNameToItem.clear();
 	QStringList labels;
-	foreach(AwGraphicsSignalItem *i, m_visibleSignalItems) {
+	for (AwGraphicsSignalItem *i : m_visibleSignalItems) {
 		m_hashNameToItem.insert(i->channel()->name(), i);
 		if (!labels.contains(i->channel()->name()))
 			labels << i->channel()->name();
@@ -637,6 +649,30 @@ void AwGraphicsScene::addHighLigthMarker(const QString& text, float pos, float d
 	update();
 }
 
+void AwGraphicsScene::undoHighlightChannels()
+{
+	for (auto i : m_hashNameToItem.values())
+		i->setGraphicsEffect(nullptr);
+	update();
+}
+
+
+void AwGraphicsScene::highlightChannels(const QStringList& labels)
+{
+	for (auto const &label : labels) {
+		auto items = m_hashNameToItem.values(label);
+
+		for (auto i : items) {
+			auto effect = new QGraphicsColorizeEffect;
+			effect->setColor(Qt::yellow);
+			i->setGraphicsEffect(effect);
+			views().first()->ensureVisible(i, 0, 50);
+		}
+	}
+	update();
+	QTimer::singleShot(800, this, SLOT(undoHighlightChannels()));
+}
+
 void AwGraphicsScene::removeHighLigthMarker()
 {
 	if (m_hmarkers.isEmpty())
@@ -724,19 +760,54 @@ void AwGraphicsScene::setChannelAsBad()
 	emit badChannelSet(act->data().toString());
 }
 
+void AwGraphicsScene::insertPredefinedMarker()
+{
+	QAction* act = (QAction*)sender();
+	if (act == nullptr)
+		return;
+	int index = act->data().toInt();
+	auto marker = m_markingSettings->predefinedMarkers.at(index);
+	// set correct position :
+	marker->setStart(m_mappingMarker.start());
+	emit markerInserted(new AwMarker(marker));
+}
+
+void AwGraphicsScene::chooseMarkersToInsert()
+{
+	if (m_pickMarkersDial == nullptr)
+		m_pickMarkersDial = new AwPickMarkersDial(m_markingSettings);
+	else
+		m_pickMarkersDial->setSettings(m_markingSettings);
+
+	if (m_pickMarkersDial->exec() == QDialog::Accepted) {
+		for (auto m : m_markingSettings->getSelectedPredefinedMarkers()) {
+			auto marker = new AwMarker(m);
+			if (m_mouseMode == AwGraphicsScene::Mapping) 
+				marker->setStart(m_mappingMarker.start());
+			if (m_mouseMode == AwGraphicsScene::AddingMarker)
+				marker->setStart(m_positionClicked);
+			emit markerInserted(marker);
+		}
+	}
+
+}
+
 void AwGraphicsScene::addCustomMarkerFromList()
 {
 	QAction *act = (QAction *)sender();
 
 	int index = act->data().toInt();
-	m_currentMarkerItem->marker()->setLabel(m_markingSettings->list.at(index)->label());
-	m_currentMarkerItem->marker()->setValue(m_markingSettings->list.at(index)->value());
+
+	if (m_markingSettings->predefinedMarkers.isEmpty())
+		return;
+	auto predefined = m_markingSettings->predefinedMarkers.at(index);
+	predefined->setStart(m_positionClicked);
+	emit markerInserted(new AwMarker(predefined));
 }
 
 void AwGraphicsScene::cursorToMarker()
 {
 	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) {
-		//emit markerInserted(&m_mappingMarker);
 		emit markerInserted(new AwMarker(&m_mappingMarker));
 	}
 }
@@ -793,7 +864,7 @@ void AwGraphicsScene::updateMarkers()
 			prev = item;
 		}
 		else { // marker with target channel(s)
-			for (auto target : m_markers.at(i)->targetChannels())	{
+			for (auto const& target : m_markers.at(i)->targetChannels())	{
 				QString dest = target.trimmed(), ref;
 				AwMarker *m = NULL;
 				// check for monopolar target
@@ -920,15 +991,16 @@ void AwGraphicsScene::keyReleaseEvent(QKeyEvent *e)
 		}
 		break;
 	case Qt::Key_Space:
-		if (m_mouseMode == AwGraphicsScene::AddingMarker && m_markingSettings->usingSpacebar) {
-			AwMarker *m = m_markingSettings->spaceBarNext();
-			if (m) {
-				centerViewOnPosition(m->start());
-			}
-			break;
-		}
-		else
-			nextPage();
+		//if (m_mouseMode == AwGraphicsScene::AddingMarker && m_markingSettings->usingSpacebar) {
+		//	AwMarker *m = m_markingSettings->spaceBarNext();
+		//	if (m) {
+		//		centerViewOnPosition(m->start());
+		//	}
+		//	break;
+		//}
+		//else
+		//	nextPage();
+		nextPage();
 		break;
 	}
 }
@@ -946,10 +1018,30 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	menu_view->addAction(act);
 
 	if (m_mouseMode == AwGraphicsScene::Mapping) {
-		QAction *action = new QAction(tr("Mark the last mapping position/selection"), menuDisplay);
-		connect(action, SIGNAL(triggered()), this, SLOT(cursorToMarker()));
-		menuDisplay->addAction(action);
 		menuDisplay->addSeparator();
+		auto subMenu = menuDisplay->addMenu("Mark");
+		QAction *action = subMenu->addAction("Mark the last mapping position/selection");
+		
+		connect(action, SIGNAL(triggered()), this, SLOT(cursorToMarker()));
+		// prepare contextual menu if the user choosed to use predefined markers
+		if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
+			if (m_markingSettings->predefinedMarkers.size() >= 2) {
+				subMenu->addSeparator();
+				auto action = subMenu->addAction("Choose markers to insert");
+				connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
+				subMenu->addSeparator();
+			}
+			int index = 0;
+			for (auto m : m_markingSettings->predefinedMarkers) {
+				QAction* action = subMenu->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
+				action->setData(index); // store the index of item in list in action custom data.
+				index++;
+				connect(action, SIGNAL(triggered()), this, SLOT(insertPredefinedMarker()));
+			}
+		}
+		menuDisplay->addSeparator();
+
+		m_contextMenuMapping = subMenu;
 	}
 
 	// add the Go to channel option
@@ -975,30 +1067,28 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	menuDisplay->addSeparator();
 
 	// Channel Selection
-	QMenu *menuSelection = menuDisplay->addMenu(tr("Selection"));
-	QAction *action = menuSelection->addAction(tr("Select all channels"));
+	QMenu *menuSelection = menuDisplay->addMenu(tr("Select"));
+	QAction *action = menuSelection->addAction(tr("all channels"));
 	connect(action, &QAction::triggered, this, &AwGraphicsScene::selectAllChannels);
 
 	for (auto t : AwChannel::types) {
-		action = menuSelection->addAction(QString(tr("Select %1 channels").arg(t)));
+		action = menuSelection->addAction(QString(tr("%1 channels").arg(t)));
 		action->setData(AwChannel::stringToType(t));
 		connect(action, &QAction::triggered, this, &AwGraphicsScene::selectChannelsOfType);
 	}
 
+
 	auto selectedChannels = this->selectedChannels();
 	if (!selectedChannels.isEmpty())	{
-		QAction *actInvertSelection = new QAction(tr("Invert selection"), menuSelection);
-		connect(actInvertSelection, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
-		menuSelection->addAction(actInvertSelection);
-		QAction *actClearSelection = new QAction(tr("Clear selection"), menuSelection);
-		connect(actClearSelection, SIGNAL(triggered()), this, SLOT(clearChannelSelection()));
-		menuSelection->addAction(actClearSelection);
-		QAction *actSelectionAsBad = new QAction(tr("Mark selected channels as bad"), menuSelection);
-		connect(actSelectionAsBad, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
-		menuSelection->addAction(actSelectionAsBad);
-		QAction *actToMontage = new QAction(tr("Set selection as the new Montage"), menuSelection);
-		connect(actToMontage, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
-		menuSelection->addAction(actToMontage);
+		menuDisplay->addSeparator();
+		auto action = menuDisplay->addAction("Invert Selection");
+		connect(action, SIGNAL(triggered()), this, SLOT(invertChannelSelection()));
+		action = menuDisplay->addAction("Clear Selection");
+		connect(action, SIGNAL(triggered()), this, SLOT(clearChannelSelection()));
+		action = menuDisplay->addAction("Mark Selection As Bad");
+		connect(action, SIGNAL(triggered()), this, SLOT(setSelectionAsBad()));
+		action = menuDisplay->addAction("Use Selection As New Montage");
+		connect(action, SIGNAL(triggered()), this, SLOT(setSelectionAsMontage()));
 	}
 	// End of Channel Selection
 	menuDisplay->addSeparator();
@@ -1028,6 +1118,7 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 	// get item under the mouse
 	QGraphicsItem *item = NULL;
 	int itemType;
+	m_contextMenuMapping = nullptr;
 	QMenu *menuDisplay = defaultContextMenu();
 
 	item = getItemUnderMouse(e->scenePos(), &itemType);
@@ -1038,6 +1129,7 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 		delete menuDisplay;
 		return;
 	}
+
 	if (itemType == AW_GRAPHICS_ITEM_MARKER_TYPE) {
 		AwGraphicsMarkerItem *mitem = qgraphicsitem_cast<AwGraphicsMarkerItem *>(item);
 		// insert the action to the first position in default context menu.
@@ -1331,7 +1423,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 	switch (m_mouseMode) {
 	case AddingMarker:
 		if (m_markingSettings->type == AwMarker::Single || m_isTimeSelectionStarted) {
-			QMenu *menu_predefined = NULL;
+			QMenu* menu_predefined = nullptr;
 			bool forceTarget = false;
 			QString target;
 			m_currentMarkerItem->marker()->setColor(m_markingSettings->color);
@@ -1355,10 +1447,10 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			// check if auto target is on
 			if (m_markingSettings->autoTargetChannel) {
 				// check for item under the mouse
-				QGraphicsItem *item = NULL;
+				QGraphicsItem* item = NULL;
 				// take a rect under the mouse
 				QRect mousePos(pos.x() - 5, pos.y() + 5, 10, 10);
-				QList<QGraphicsItem *> items = this->items(mousePos, Qt::IntersectsItemShape, Qt::DescendingOrder);
+				QList<QGraphicsItem*> items = this->items(mousePos, Qt::IntersectsItemShape, Qt::DescendingOrder);
 				if (items.size() > 1) {
 					for (int i = 1; i < items.size(); i++) {
 						// get Signal Item
@@ -1369,7 +1461,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 					}
 				}
 				if (item) {
-					AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(item);
+					AwGraphicsSignalItem* sitem = qgraphicsitem_cast<AwGraphicsSignalItem*>(item);
 					QStringList list = { sitem->channel()->fullName() };
 					m_currentMarkerItem->marker()->setTargetChannels(list);
 				}
@@ -1378,33 +1470,50 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			if (!m_markingSettings->targets.isEmpty())
 				m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
 			// prepare contextual menu if the user choosed to use predefined markers
-			if (m_markingSettings->isUsingList && !m_markingSettings->list.isEmpty()) {
+			if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
 				menu_predefined = new QMenu;
+				if (m_markingSettings->predefinedMarkers.size() >= 2) {
+					auto action = menu_predefined->addAction("Choose markers to insert");
+					connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
+					menu_predefined->addSeparator();
+				}
 				int index = 0;
-				for (auto m : m_markingSettings->list) {
-					QAction *action = new QAction(m->label() + " " + QString::number(m->value()), menu_predefined);
+				for (auto m : m_markingSettings->predefinedMarkers) {
+					QAction* action = menu_predefined->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
 					action->setData(index); // store the index of item in list in action custom data.
 					index++;
 					connect(action, SIGNAL(triggered()), this, SLOT(addCustomMarkerFromList()));
-					menu_predefined->addAction(action);
 				}
 			}
+			//// prepare contextual menu if the user choosed to use predefined markers
+			//if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
+			//	menu_predefined = new QMenu;
+			//	int index = 0;
+			//	for (auto m : m_markingSettings->predefinedMarkers) {
+			//		QAction *action = new QAction(m->label() + " " + QString::number(m->value()), menu_predefined);
+			//		action->setData(index); // store the index of item in list in action custom data.
+			//		index++;
+			//		connect(action, SIGNAL(triggered()), this, SLOT(addCustomMarkerFromList()));
+			//		menu_predefined->addAction(action);
+			//	}
+			//}
 			else if (m_markingSettings->isAutoInc) {
 				m_currentMarkerItem->marker()->setLabel(QString("%1_%2").arg(m_markingSettings->label).arg(m_markingSettings->index++));
 			}
 			if (menu_predefined) {
 				menu_predefined->exec(e->screenPos());
-			    if (m_markingSettings->isTargettingChannels)
+				if (m_markingSettings->isTargettingChannels)
 					m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
 				delete menu_predefined;
-
 			}
-			emit markerInserted(m_currentMarkerItem->marker());
-			// instantiate a new marker
-			m_currentMarkerItem->setMarker(new AwMarker());
-			m_currentMarkerItem->marker()->setDuration(0);
-			m_currentMarkerItem->marker()->setStart(m_positionClicked);
-			m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
+			else { // no context menu => classic insertion using current marker item
+				emit markerInserted(m_currentMarkerItem->marker());
+				// instantiate a new marker
+				m_currentMarkerItem->setMarker(new AwMarker());
+				m_currentMarkerItem->marker()->setDuration(0);
+				m_currentMarkerItem->marker()->setStart(m_positionClicked);
+				m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
+			}
 			if (m_isTimeSelectionStarted)
 				m_isTimeSelectionStarted = false;
 		} else { // not ending a single or a time selection but starting a time selection
@@ -1583,6 +1692,8 @@ void AwGraphicsScene::setMappingMode(bool on)
 		m_mappingFixedCursor = NULL;
 		m_mouseMode = AwGraphicsScene::None;
 	}
+	if (m_pickMarkersDial)
+		m_pickMarkersDial->close();
 	update();
 }
 
@@ -1602,6 +1713,9 @@ void AwGraphicsScene::setQTSMode(bool flag)
 	}
 	else
 		m_mouseMode = AwGraphicsScene::None;
+
+	if (m_pickMarkersDial)
+		m_pickMarkersDial->close();
 }
 
 ///
@@ -1647,6 +1761,8 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 			m_currentMarkerItem = NULL;
 		}
 	}
+	if (m_pickMarkersDial)
+		m_pickMarkersDial->close();
 	update();
 }
 

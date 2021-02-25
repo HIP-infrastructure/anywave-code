@@ -74,7 +74,7 @@ void AwBatchGUI::addOperation(const QString& pluginName, const AwBIDSItems& item
 void AwBatchGUI::removeOperations()
 {
 	auto indexes = m_ui.tableView->selectionModel()->selectedRows();
-	for (auto index : indexes) {
+	for (auto const& index : indexes) {
 		m_ui.tableView->model()->removeRow(index.row());
 	}
 }
@@ -84,7 +84,7 @@ void AwBatchGUI::duplicateOperations()
 	auto indexes = m_ui.tableView->selectionModel()->selectedRows();
 	auto model = static_cast<AwBatchTableModel *>(m_ui.tableView->model());
 	auto items = model->items();
-	for (auto index : indexes) {
+	for (auto const& index : indexes) {
 		if (index.column() == 0) {
 			model->add(new AwBatchItem(items.at(index.row())));
 		}

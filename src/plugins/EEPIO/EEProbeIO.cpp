@@ -5,7 +5,7 @@
 
 EEPIO::EEPIO(const QString& fileName) : AwFileIO(fileName)
 {
-
+	_libeep_cnt = nullptr;
 }
 
 
@@ -22,13 +22,15 @@ EEPIOPlugin::EEPIOPlugin()
 	manufacturer = QString("ANT Neuro");
 	version = QString("3.3.177");
 	fileExtensions << "*.cnt";
-	m_flags = Aw::HasExtension | Aw::CanRead;
+	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
 
 void EEPIO::cleanUpAndClose()
 {
-	if (_libeep_cnt != nullptr)
+	if (_libeep_cnt != nullptr) {
 		free(_libeep_cnt);
+		_libeep_cnt = nullptr;
+	}
 	m_scales.clear();
 }
 
