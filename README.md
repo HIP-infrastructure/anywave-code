@@ -1,3 +1,3 @@
-Welcome to AnyWave gitlab repository
+Welcome to the AnyWave gitlab repository!
 
 [The wiki]()contains all the help you may need
