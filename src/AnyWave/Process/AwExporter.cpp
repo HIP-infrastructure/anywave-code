@@ -40,6 +40,7 @@ AwExporterPlugin::AwExporterPlugin()
 {
 	name = QString("File Exporter");
 	description = QString(tr("Export data to a file"));
+	category = "Process:File Operation:Export To File";
 	version = "1.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);

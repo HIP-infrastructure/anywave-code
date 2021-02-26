@@ -30,7 +30,7 @@
 #include <QMenuBar>
 #include "AwPluginDial.h"
 #include "Process/AwTriggerParser.h"
-#include "Process/AwConverter.h"
+//#include "Process/AwConverter.h"
 #include "Process/AwExporter.h"
 #include <AwProcessInterface.h>
 #include <filter/AwFilterPlugin.h>
@@ -572,7 +572,7 @@ void AwPluginManager::loadPlugins()
 	m_processes += new AwTriggerEraserPlugin;
 
 	// Add Converter plugin
-	m_processes += new AwConverterPlugin;
+//	m_processes += new AwConverterPlugin;
 	 
 	// add MATLAB_MARKERS_EXPORTER
 	m_processes += new AwMATLABMarkersExporterPlugin;

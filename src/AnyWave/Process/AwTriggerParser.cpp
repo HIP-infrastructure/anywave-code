@@ -32,6 +32,7 @@ AwTriggerParserPlugin::AwTriggerParserPlugin()
 {
 	name = QString(tr("Trigger Parser"));
 	description = QString(tr("Extract digital values from trigger channels and make them markers"));
+	category = "Process:Trigger Channels:Detect values";
 	version = "1.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);

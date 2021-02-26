@@ -24,6 +24,15 @@
       <Extensions>ui</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
+    <Filter Include="cca">
+      <UniqueIdentifier>{baa38adf-f7f2-4b75-8594-1c4037c9012d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sobi">
+      <UniqueIdentifier>{4b4f1e5e-5144-4cd8-b216-da670258134c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="matlab_common">
+      <UniqueIdentifier>{f2a588f4-7047-4eba-8151-6eee9f004c06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ica_global.h">
@@ -37,6 +46,69 @@
     </ClInclude>
     <ClInclude Include="randlcg.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\cca.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\cca_data.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\cca_initialize.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\cca_spec.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\cca_terminate.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\cca_types.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\coder_array.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\qr.h">
+      <Filter>cca</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\mtimes.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sobi_coder.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sobi_coder_data.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sobi_coder_initialize.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sobi_coder_terminate.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sobi_coder_types.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\coder_array.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\pinv.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\rt_nonfinite.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\rtGetInf.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\rtGetNaN.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\rtwtypes.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\svd.h">
+      <Filter>matlab_common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +134,57 @@
     </ClCompile>
     <ClCompile Include="randlcg.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\cca.cpp">
+      <Filter>cca</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\cca_data.cpp">
+      <Filter>cca</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\cca_initialize.cpp">
+      <Filter>cca</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\cca_terminate.cpp">
+      <Filter>cca</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\qr.cpp">
+      <Filter>cca</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\run_cca.cpp">
+      <Filter>cca</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\mtimes.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sobi_coder.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sobi_coder_data.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sobi_coder_initialize.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sobi_coder_terminate.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab_common\pinv.cpp">
+      <Filter>matlab_common</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab_common\rt_nonfinite.cpp">
+      <Filter>matlab_common</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab_common\rtGetInf.cpp">
+      <Filter>matlab_common</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab_common\rtGetNaN.cpp">
+      <Filter>matlab_common</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab_common\svd.cpp">
+      <Filter>matlab_common</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\run_sobi.cpp">
+      <Filter>sobi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -28,13 +28,10 @@
 #include "AwMarkerManagerSettings.h"
 #include "AwDockAddMarker.h"
 #include <QFileDialog>
-#include "AwExportDial.h"
-#include "Process/AwConverter.h"
 #include "Process/AwProcessManager.h"
 #include "Plugin/AwPluginManager.h"
 #include "Widgets/AwPleaseWaitWidget.h"
 #include <QMessageBox>
-//#include "Prefs/AwSettings.h"
 #include "Widgets/AwDockMarker.h"
 #include <widget/AwMessageBox.h>
 #include "Montage/AwMontageManager.h"
@@ -64,16 +61,6 @@ AwMarkerManager* AwMarkerManager::newInstance()
 
 AwMarkerManager::AwMarkerManager()
 {
-	//// instantiance UI Widget
-	//// The widget will be inserted in a QDockWidget later and its parent will be set
-	//m_ui = new AwMarkerManagerSettings(m_markers);
-	//
-	//// connections
-	//connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
-	//connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
-	//connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
-	//connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
-	//connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
 	m_ui = nullptr;
 	AwDebugLog::instance()->connectComponent(QString("Marker Manager"), this);
 

@@ -41,6 +41,11 @@
 #include <utils/json.h>
 #include <AwKeys.h>
 
+namespace algos {
+	constexpr auto ICA_infomax = 0;
+	constexpr auto ICA_cca = 1;
+}
+
 ICA::ICA()
 {
 	setInputFlags(Aw::ProcessIO::GetAsRecordedChannels | Aw::ProcessIO::DontSkipBadChannels |
@@ -50,6 +55,8 @@ ICA::ICA()
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
 	m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;
+	m_hpf = m_lpf = 0.;
+	m_nComp = 0;
 }
 
 ICAPlugin::ICAPlugin() : AwProcessPlugin()
@@ -100,6 +107,10 @@ bool ICA::batchParameterCheck(const QVariantMap& hash)
 int ICA::initParameters()
 {
 	auto args = pdi.input.settings;
+	QMap<QString, int> algos;
+	algos.insert("infomax", 0);
+	algos.insert("cca", 1);
+	algos.insert("sobi", 2);
 
 	m_isDownsamplingActive = false;
 	m_modality = AwChannel::stringToType(args.value("modality").toString());
@@ -166,37 +177,6 @@ int ICA::initParameters()
 		pdi.input.clearMarkers();
 		pdi.input.addMarker(new AwMarker("global", 0., args.value(keys::file_duration).toFloat()));
 	}
-
-	//// check if we have to use specific markers or skipped some
-	//bool use = args.contains("use_markers");
-	//bool skip = args.contains("skip_markers");
-
-	//auto fd = pdi.input.settings[keys::file_duration].toDouble();
-	//if (use || skip) {
-	//	auto markers = AwMarker::duplicate(pdi.input.markers());
-	//	QStringList skippedMarkers, usedMarkers;
-	//	if (use)
-	//		usedMarkers = args.value("use_markers").toStringList();
-	//	if (skip)
-	//		skippedMarkers = args.value("skip_markers").toStringList();
-
-	//	auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
-	//	if (inputMarkers.isEmpty()) {
-	//		pdi.input.clearMarkers();
-	//		pdi.input.addMarker(new AwMarker("whole data", 0., fd));
-	//	}
-	//	else
-	//	{
-	//		pdi.input.clearMarkers();
-	//		pdi.input.setNewMarkers(inputMarkers);
-	//	}
-	//	AW_DESTROY_LIST(markers);
-	//}
-	//else {  // no markers to use or skip => compute on the whole data
-	//	pdi.input.clearMarkers();
-	//	pdi.input.addMarker(new AwMarker("whole data", 0., fd));
-	//}
-
 
     // Watch for memory exception
 	try {
@@ -288,6 +268,13 @@ int ICA::initParameters()
 	// generate full path
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
 
+	// check algo
+	m_algo = 0; // default to infomax
+	if (args.contains("algorithm")) {
+		auto algoName = args.value("algorithm").toString().toLower().simplified();
+		m_algo = algos.value(algoName);
+	}
+
 	return 0;
 }
 
@@ -296,7 +283,18 @@ void ICA::runFromCommandLine()
 {
 	if (initParameters() == 0) {
 		try {
-			infomax(m, n, m_nComp);
+			switch (m_algo) {
+			case 0:
+				infomax(m, n, m_nComp);
+				break;
+			case 1: // cca
+				run_cca(m, n);
+				break;
+			case 2:
+				run_sobi(m, n);
+				break;
+			}
+			
 		}
 		catch (std::bad_alloc& ba) {
 			sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
@@ -312,7 +310,17 @@ void ICA::run()
 		return;
 
 	try {
-		infomax(m, n, m_nComp);
+		switch (m_algo) {
+		case 0:
+			infomax(m, n, m_nComp);
+			break;
+		case 1: // cca
+			run_cca(m, n);
+			break;
+		case 2:
+			run_sobi(m, n);
+			break;
+		}
 	}
 	catch (std::bad_alloc& ba) {
 		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");

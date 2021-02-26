@@ -45,6 +45,7 @@ public slots:
 	void accept();
 protected slots:
 	void updateMaxNumOfIC();
+	void changeAlgo(int);
 private:
 	Ui::ICASettingsUI m_ui;
 	AwChannelList m_channels;

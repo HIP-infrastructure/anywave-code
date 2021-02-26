@@ -30,6 +30,7 @@ AwTriggerEraserPlugin::AwTriggerEraserPlugin()
 {
 	name = QString("Trigger Eraser");
 	description = QString(tr("Erase a trigger channel"));
+	category = "Trigger Channels:Erase";
 	version = "1.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::PluginIsHidden | Aw::ProcessFlags::ProcessHasInputUi);

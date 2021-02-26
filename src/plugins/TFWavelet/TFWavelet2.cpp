@@ -6,6 +6,7 @@ TFWavelet2Plugin::TFWavelet2Plugin()
 {
 	name = QString(tr("Time Frequency using Wavelets"));
 	description = QString(tr("Display T/F of selected channels."));
+	category = "Process:Signal:Time Frequency";
 	type = AwProcessPlugin::GUI;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }

@@ -44,6 +44,8 @@ public:
 private:
 	int initParameters();
 	void infomax(int m, int n, int nc);
+	void run_cca(int m, int n);
+	void run_sobi(int m, int n);
 	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
 	int runica_matlab(int nc);
 	int run_acsobiro(int nc);
