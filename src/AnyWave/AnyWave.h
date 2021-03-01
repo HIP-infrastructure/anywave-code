@@ -115,6 +115,7 @@ private:
 	void applyNewLanguage();
 	void writeSettings();
 	void readSettings();
+	void initPluginsHelpMenu();
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 	void createMatlabShellScript(const QString& path);

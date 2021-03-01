@@ -44,6 +44,7 @@
 namespace algos {
 	constexpr auto ICA_infomax = 0;
 	constexpr auto ICA_cca = 1;
+	constexpr auto ICA_sobi = 2;
 }
 
 ICA::ICA()
@@ -53,7 +54,7 @@ ICA::ICA()
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	pdi.addInputChannel(-1, 1, 0);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
-	m_algoNames << "Infomax";
+	//m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;
 	m_hpf = m_lpf = 0.;
 	m_nComp = 0;
@@ -67,6 +68,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
     description = QString("extract independent components");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/ica/json/batch.json");
+	m_helpUrl = "ICA::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_ica";
 }
 
 ICA::~ICA()
@@ -108,9 +110,9 @@ int ICA::initParameters()
 {
 	auto args = pdi.input.settings;
 	QMap<QString, int> algos;
-	algos.insert("infomax", 0);
-	algos.insert("cca", 1);
-	algos.insert("sobi", 2);
+	algos.insert("infomax", algos::ICA_infomax);
+	algos.insert("cca", algos::ICA_cca);
+	algos.insert("sobi", algos::ICA_sobi);
 
 	m_isDownsamplingActive = false;
 	m_modality = AwChannel::stringToType(args.value("modality").toString());
@@ -153,7 +155,20 @@ int ICA::initParameters()
 	m_nComp = m_channels.size();
 
 	if (args.contains("comp"))
-		m_nComp = args["comp"].toInt();
+		m_nComp = args.value("comp").toInt();
+
+	// check algo
+	// some algos have a fixed number of components (no PCA)
+	m_algo = 0; // default to infomax
+	QString algo = "infomax";
+	if (args.contains("algorithm")) {
+		auto algoName = args.value("algorithm").toString().toLower().simplified();
+		m_algo = algos.value(algoName);
+		if (m_algo)
+			algo = algoName;
+	}
+	if (m_algo == algos::ICA_cca || m_algo == algos::ICA_sobi) 
+		m_nComp = m_channels.size();
 
 	if (m_nComp > m_channels.size()) {
 		sendMessage("The specified number of components is greater dans the number of available channels in data. Aborted.");
@@ -262,19 +277,11 @@ int ICA::initParameters()
 
 	QString mod = args.value("modality").toString();
 	if (args.contains(keys::output_suffix))
-		m_fileName += QString("_%1_%2Hz_%3Hz_%4c%5.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
+		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica
-	    m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
+	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5_ica.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	// generate full path
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
-
-	// check algo
-	m_algo = 0; // default to infomax
-	if (args.contains("algorithm")) {
-		auto algoName = args.value("algorithm").toString().toLower().simplified();
-		m_algo = algos.value(algoName);
-	}
-
 	return 0;
 }
 
@@ -284,13 +291,13 @@ void ICA::runFromCommandLine()
 	if (initParameters() == 0) {
 		try {
 			switch (m_algo) {
-			case 0:
+			case algos::ICA_infomax:
 				infomax(m, n, m_nComp);
 				break;
-			case 1: // cca
+			case algos::ICA_cca: // cca
 				run_cca(m, n);
 				break;
-			case 2:
+			case algos::ICA_sobi:
 				run_sobi(m, n);
 				break;
 			}
@@ -311,13 +318,13 @@ void ICA::run()
 
 	try {
 		switch (m_algo) {
-		case 0:
+		case algos::ICA_infomax:
 			infomax(m, n, m_nComp);
 			break;
-		case 1: // cca
+		case algos::ICA_cca: // cca
 			run_cca(m, n);
 			break;
-		case 2:
+		case algos::ICA_sobi:
 			run_sobi(m, n);
 			break;
 		}

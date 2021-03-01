@@ -122,7 +122,7 @@ while encore
    angles=sign(angles(1))*angles;
    c=sqrt(0.5+angles(1)/2);
    sr=0.5*(angles(2)-1j*angles(3))/c; 
-   sc=conj(sr);
+   sc=conj(sr);ù
    oui = abs(sr)> epsil ;
    encore= encore | oui ;
    if oui  % Update the M and V matrices 

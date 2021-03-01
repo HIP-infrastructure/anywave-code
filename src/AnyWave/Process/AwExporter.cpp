@@ -44,6 +44,7 @@ AwExporterPlugin::AwExporterPlugin()
 	version = "1.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
+	m_helpUrl = "Save to file::File Operations::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_exporter";
 }
 
 AwExporter::AwExporter() : AwProcess()
@@ -106,8 +107,7 @@ void AwExporter::runFromCommandLine()
 	   sendMessage("Done.");
 	   sendMessage("Downsampling...");
 	   AwFiltering::downSample(pdi.input.channels(), decimateFactor);
-	//	// apply filters set in the UI
-	  //	pdi.input.filterSettings.apply(m_channels);
+		// apply filters set in the UI
 		AwFiltering::filter(pdi.input.channels());
 		sendMessage("Done.");
 	}

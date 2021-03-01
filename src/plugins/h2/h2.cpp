@@ -44,6 +44,7 @@ H2Plugin::H2Plugin()
 	description = QString(tr("Computes H2/R2 on several pairs of channels"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
+	m_helpUrl = "h2/r2::Correlation::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_h2";
 }
 
 H2Plugin::~H2Plugin()

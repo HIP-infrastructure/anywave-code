@@ -23,6 +23,7 @@
     <ClCompile Include="AwBatch.cpp" />
     <ClCompile Include="AwExportDial.cpp" />
     <ClCompile Include="AwFileOpenSave.cpp" />
+    <ClCompile Include="AwHelpMenu.cpp" />
     <ClCompile Include="AwMapping.cpp" />
     <ClCompile Include="AwMATLAB.cpp" />
     <ClCompile Include="AwOpenFileDialog.cpp" />

@@ -35,6 +35,7 @@ FileConverterPlugin::FileConverterPlugin()
 	description = tr("Converts files to another format.");
 	category = "Process:File Operation:Convert Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi);
+	m_helpUrl = "File Exporter::File Operations::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_file_exporter";
 }
 
 FileConverter::FileConverter()

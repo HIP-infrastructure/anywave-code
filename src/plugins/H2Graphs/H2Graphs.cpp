@@ -9,6 +9,7 @@ H2GraphsPlugin::H2GraphsPlugin()
 	description = "Show correlation graphs.";
 	category = "Process:Correlation:Correlation Graphs";
 	type = AwProcessPlugin::GUI;
+	m_helpUrl = "h2/r2 Graphs::Correlation::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_h2Graphs";
 }
 
 H2Graphs::H2Graphs()

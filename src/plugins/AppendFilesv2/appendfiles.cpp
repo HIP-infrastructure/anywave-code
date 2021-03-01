@@ -34,6 +34,7 @@ AppendFilesPlugin::AppendFilesPlugin()
 	description = tr("Append compatible files into one.");
 	category = "Process:File Operation:Append Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData| Aw::ProcessFlags::ProcessHasInputUi);
+	m_helpUrl = "Append Files::File Operations::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_append_files";
 }
 
 AppendFiles::AppendFiles()

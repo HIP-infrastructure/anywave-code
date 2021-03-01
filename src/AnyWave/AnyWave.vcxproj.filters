@@ -622,6 +622,9 @@
     <ClCompile Include="MATPy\DebugConnect.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="AwHelpMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">

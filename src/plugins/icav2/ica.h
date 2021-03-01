@@ -61,7 +61,7 @@ private:
 	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate;
 	AwChannelList m_channels;
-	QStringList m_algoNames;
+	//QStringList m_algoNames;
 	arma::mat m_unmixing;
 	arma::mat m_mixing;
 };

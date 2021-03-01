@@ -5,6 +5,7 @@ add_definitions("-DAW_DISABLE_EPOCHING")
 
 SET(AnyWave_SRCS
     ./AnyWave.cpp  
+	./AwHelpMenu.cpp
 	./AwMapping.cpp
 	./AwBatch.cpp
 	./AwMATLAB.cpp

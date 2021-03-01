@@ -25,7 +25,7 @@ SpectralPlugin::SpectralPlugin()
 	description = QString(tr("Compute and show spectral informations."));
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine | Aw::ProcessFlags::PluginAcceptsTimeSelections);
-	m_helpUrl = "https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_spectral";
+	m_helpUrl = "Power Spectral Density::Signal Processing::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_spectral";
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/args.json");
 }
 

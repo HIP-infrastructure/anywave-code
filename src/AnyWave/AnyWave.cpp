@@ -220,16 +220,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		for (auto a : process_manager->icaActions())
 			menuICA->addAction(a);
 		// getting help urls from process plugins
-		for (auto plugin : plugin_manager->processes()) {
-			QMenu *menuPluginHelp = nullptr;
-			if (!plugin->helpUrl().isEmpty()) {
-				if (menuPluginHelp == nullptr)
-					menuPluginHelp = menuHelp->addMenu("Plugins");
-				auto action = menuPluginHelp->addAction(plugin->name);
-				action->setData(plugin->helpUrl());
-				connect(action, &QAction::triggered, this, &AnyWave::openPluginHelpUrl);
-			}
-		}
+		initPluginsHelpMenu();
 		// END OF ADDING PLUGINGS MENUS
 
 		m_actions << actionMontage << actionMarkers << actionCarto3D << actionFileProperties << actionComponentsMaps << actionShow_map_on_signal << actionShow_Mappings << actionCreateEpoch
@@ -865,11 +856,6 @@ void AnyWave::on_actionPreferences_triggered()
 //
 void AnyWave::on_actionDebug_Logs_triggered()
 {
-	//if (!m_debugLogWidget) {
-	//	m_debugLogWidget = new AwDebugLogWidget();
-	//	m_openWidgets.append(m_debugLogWidget);
-	//}
-	//m_debugLogWidget->show();
 	if (!m_debugLogWidget)
 		m_debugLogWidget = new AwDebugLogWidget(this);
 	m_debugLogWidget->show();
@@ -898,10 +884,6 @@ void AnyWave::on_actionMarkers_triggered()
 {
 	AwMarkerManager::instance()->showDockUI();
 }
-
-
-
-
 
 //
 // File->Quit
