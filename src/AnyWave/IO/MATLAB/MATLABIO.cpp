@@ -29,7 +29,7 @@
 
 MATLABIOPlugin::MATLABIOPlugin() : AwFileIOPlugin()
 {
-	name = QString("MATLAB Output Plugin");
+	name = QString("MATLAB Format");
 	description = QString(tr("Export data to MATLAB file"));
 	version = QString("1.0");
 	fileExtension = ".mat";

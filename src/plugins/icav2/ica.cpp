@@ -54,7 +54,6 @@ ICA::ICA()
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	pdi.addInputChannel(-1, 1, 0);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
-	//m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;
 	m_hpf = m_lpf = 0.;
 	m_nComp = 0;
@@ -80,10 +79,7 @@ bool ICA::showUi()
 	ICASettings ui(this);
 
 	if (ui.exec() == QDialog::Accepted)	{
-		//m_modality = ui.modality;
 		auto args = pdi.input.settings;
-		//args.unite(ui.args);
-
 		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[keys::data_dir].toString());
 		QFile test(testFile);
 		if (!test.open(QIODevice::WriteOnly)) {

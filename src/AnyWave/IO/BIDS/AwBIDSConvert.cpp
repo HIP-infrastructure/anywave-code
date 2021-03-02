@@ -512,7 +512,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		// rename file to match BIDS recommandation
 		QString pluginName;
 		if (ext == "edf")
-			pluginName = "EDF/BDF IO";
+			pluginName = "EDF Format";
 		else if (ext == "vhdr")
 			pluginName = "Brainvision Analyser Format";
 
@@ -670,7 +670,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers)
 {
 	// get the EDFIO plugin
-	auto plugin = AwPluginManager::getInstance()->getReaderPluginByName("EDF/BDF IO");
+	auto plugin = AwPluginManager::getInstance()->getReaderPluginByName("EDF Format");
 	if (plugin == NULL) {
 		throw(AwException("EDFIO Plugin is missing", "BIDSManager::convertToEDF"));
 		return -1;

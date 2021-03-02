@@ -220,7 +220,7 @@ int edflib_is_duration_number(char *str)
 
 EDFIOPlugin::EDFIOPlugin() : AwFileIOPlugin()
 {
-	name = QString("EDF/BDF IO");
+	name = QString("EDF Format");
 	description = QString(tr("read/write EDF/BDF/EDF+/BDF+ files"));
 	manufacturer = QString::fromLatin1("EDF Group");
 	version = QString::fromLatin1("1.0");

@@ -67,7 +67,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	QCommandLineOption inputFileO("input_file", "specify the input file to open.", "input_file", QString());
 	QCommandLineOption inputDirO("input_dir", "specify the input directory", "input_dir", QString());
 	QCommandLineOption outputFileO("output_file", "specify the file to create.", "output_file", QString());
-	QCommandLineOption outputFormatO("output_format", "specify the file format to create. (vhdr, edf, MATLAB, ADES)", "output_format", QString());
+	QCommandLineOption outputFormatO("output_format", "specify the file format to create. (vhdr, edf, MATLAB, ADES, fiff)", "output_format", QString());
 	QCommandLineOption outputDirO("output_dir", "specify the folder where to place the output file.", "output_dir", QString());
 	QCommandLineOption outputPrefixO("output_prefix", "specify the prefix to use for output_fle.", "output_prefix", QString());
 	QCommandLineOption outputSuffixO("output_suffix", "specify the suffix to use for output_fle.", "output_suffix", QString());
@@ -249,9 +249,10 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	bool isFormatOption = !format.isEmpty();
 	QMap<QString, QString> availableWriters;
 	availableWriters["vhdr"] = QString("Brainvision Analyser Format");
-	availableWriters["edf"] = QString("EDF/BDF IO");
-	availableWriters["matlab"] = QString("MATLAB Output Plugin");
+	availableWriters["edf"] = QString("EDF Format");
+	availableWriters["matlab"] = QString("MATLAB Format");
 	availableWriters["ades"] = QString("AnyWave ADES Format");
+	availableWriters["fiff"] = QString("FIFF Format");
 
 	QString tmp;
 	// skip_bad_channels
@@ -330,7 +331,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 			throw(exception);
 		}
 		arguments["output_format"] = format;
-		arguments["output_writer"] = availableWriters[format];
+		arguments["output_writer"] = availableWriters.value(format);
 	}
 	
 	if (parser.isSet(pluginDebugO) && !parser.isSet(serverPortOpt)) {

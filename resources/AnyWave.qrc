@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>json/file_exporter.json</file>
     <file>images/AddToMontage48x48.png</file>
     <file>images/back32x32.png</file>
     <file>images/carto_32x32.png</file>

@@ -29,9 +29,9 @@
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
 #include <AwKeys.h>
+#include <utils/json.h>
 
 namespace Exporter {
-	constexpr auto output_writer = "output_writer";
 	constexpr auto decimate_factor = "decimate_factor";
 };
 
@@ -44,6 +44,7 @@ AwExporterPlugin::AwExporterPlugin()
 	version = "1.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
+	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/json/file_exporter.json");
 	m_helpUrl = "Save to file::File Operations::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_exporter";
 }
 
@@ -61,13 +62,20 @@ AwExporter::~AwExporter()
 void AwExporter::runFromCommandLine()
 {
 	auto args = pdi.input.settings;
+	// check for required options
+	if (!args.contains(keys::output_file)) {
+		sendMessage("output_file option is missing.");
+		return;
+	}
+	if (!args.contains("output_writer"))  // default to ADES
+		args["output_writer"] = QString("anywave ades format");
+
 	auto outputFile = args.value(keys::output_file).toString();
 	// check for the outputs
-	auto writerName = args.value(Exporter::output_writer).toString();
+	auto writerName = args.value("output_writer").toString().toLower().simplified();
 	int decimateFactor = 1;
 	if (args.contains(Exporter::decimate_factor))
 		decimateFactor = args.value(Exporter::decimate_factor).toInt();
-
 
 	QString outputPath = outputFile;
 	if (args.contains(keys::output_dir))
@@ -75,11 +83,12 @@ void AwExporter::runFromCommandLine()
 
 	AwFileIO *writer = Q_NULLPTR;
 	for (auto p : pdi.input.writers) {
-		if (p->name == writerName) {
+		if (p->name.toLower().simplified() == writerName) {
 			writer = p->newInstance();
 			break;
 		}
 	 }
+
 	if (writer == Q_NULLPTR) {
 		sendMessage(QString("Plugin %1 not found.").arg(writerName));
 		return;
@@ -175,7 +184,7 @@ bool AwExporter::showUi()
 		else
 			m_channels = ui.selectedChannels;
 
-		pdi.input.settings[Exporter::output_writer] = ui.writer;
+		pdi.input.settings["output_writer"] = ui.writer;
 		
 		if (QFile::exists(ui.filePath)) {
 			if (AwMessageBox::information(0, tr("File"), tr("the file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
