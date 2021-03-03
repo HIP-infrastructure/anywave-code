@@ -39,7 +39,7 @@ H2Plugin::H2Plugin()
 {
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
-	category = "Process:Correlation:Multi-channels Correlation";
+	category = "Process:Correlation:H2/R2 connectivity";
 	name = QString(tr("h2"));
 	description = QString(tr("Computes H2/R2 on several pairs of channels"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);

@@ -159,11 +159,17 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	QMap<QString, QCommandLineOption *> mapParams;
 	QMap<QString, QCommandLineOption *> mapFlags;
 	for (auto const& param : parameterNames) {
+		// avoid duplicating plugin parameters with same name
+		if (mapParams.contains(param))
+			continue;
 		auto option = new QCommandLineOption(param, "plugin argument", param, QString());
 		mapParams.insert(param, option);
 		parser.addOption(*option);
 	}
 	for (auto const& flag : flagNames) {
+		// avoid duplicating plugin flags with same name
+		if (mapFlags.contains(flag))
+			continue;
 		auto option = new QCommandLineOption(flag, "plugin argument flag", flag, QString());
 		mapFlags.insert(flag, option);
 		parser.addOption(*option);
@@ -215,7 +221,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 			arguments["bids_acq"] = acq;
 		if (!proc.isEmpty())
 			arguments["bids_proc"] = proc;
-		//res[aw::commandLine::BIDS] = arguments;
 		res = aw::commandLine::BIDS;  
 	}
 
@@ -240,9 +245,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		delete v;
 	for (auto v : mapFlags.values())
 		delete v;
-
-	//// parse common options
-	//arguments[cl::plugin_debug] = parser.isSet(MATPyListenO);
 
 	// output_format 
 	auto format = parser.value(outputFormatO).toLower();
