@@ -37,7 +37,7 @@ void GraphManagerWidget::visualize()
 	if (selectedItems.isEmpty())
 		return;
 
-	for (auto item : selectedItems) {
+	for (auto  && item : selectedItems) {
 		if (item.column() == 0)
 			m_graphSets.at(item.row())->visualize();
 	}

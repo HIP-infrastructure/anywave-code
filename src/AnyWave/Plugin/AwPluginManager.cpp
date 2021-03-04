@@ -191,10 +191,10 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 	// browse plugins
 	bool plugin_found = false;
 	AwFileIO *reader = NULL;
-	foreach (AwFileIOPlugin *plugin, m_readers)	{
+	for  (AwFileIOPlugin *plugin : m_readers)	{
 		// check for plugin with file extensions
 		if (plugin->hasExtension()) {
-			foreach (QString extension, plugin->fileExtensions) {
+			for (QString& extension : plugin->fileExtensions) {
 				if (extension == ext) {
 					reader = newReader(plugin);
 

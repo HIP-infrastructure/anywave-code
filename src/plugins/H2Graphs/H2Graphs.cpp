@@ -6,8 +6,8 @@ H2Graphs *H2Graphs::m_instance = Q_NULLPTR;
 H2GraphsPlugin::H2GraphsPlugin()
 {
 	name = "Correlation Graphs";
-	description = "Show correlation graphs.";
-	category = "Process:Correlation:Correlation Graphs";
+	description = "Visualise h2/r2 connectivity graph.";
+	category = "Process:Correlation:h2/r2 Connectiviy Graphs";
 	type = AwProcessPlugin::GUI;
 	m_helpUrl = "h2/r2 Graphs::Correlation::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_h2Graphs";
 }

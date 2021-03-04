@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>--run "h2" --input_file D:\Data\h2\180110B-DEX_0000.eeg --time_window 4 --max_lag 0.1 --step 1 --hp 1 --lp 45 --use_markers "h2" --algorithm r2</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--input_file d:\data\h2\sub-p3_ses-postimp_task-ccep_acq-h1hz1ma250us_run-01_ieeg.vhdr --run h2 --time_window 4 --max_lag 0.1 --step 1 --use_markers "h2"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
