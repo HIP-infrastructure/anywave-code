@@ -318,7 +318,6 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 void AwMarkerManager::init()
 {
 	auto dm = AwDataManager::instance();
-//	m_filePath = path + ".mrk";
 	m_filePath = dm->mrkFilePath();
 
 	m_ui->setEnabled(true);

@@ -12,8 +12,9 @@ class AW_WIDGETS_EXPORT AwSelectInputDataWidget : public QWidget
 public:
 	AwSelectInputDataWidget(QWidget *parent = Q_NULLPTR);
 	~AwSelectInputDataWidget();
+	enum Filters { AllMarkers, WithDuration, UniqueLabels, WithDurationAndUniqueLabels };
 
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwMarkerList& markers, int filter = AwSelectInputDataWidget::WithDurationAndUniqueLabels);
 	QStringList skippedMarkers();
 	QStringList usedMarkers();
 protected slots:

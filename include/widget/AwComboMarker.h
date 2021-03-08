@@ -37,14 +37,6 @@ class AW_WIDGETS_EXPORT AwComboMarker : public QComboBox
 {
 	Q_OBJECT
 public:
-	AwComboMarker(QWidget *parent);
-	/** Filtering flags: default is Unique Labels only and no selection on duration. **/
-	enum filters { ExcludeNoDuration = 1 };
-	void setFilter(int type);
+	explicit AwComboMarker(QWidget *parent = nullptr) : QComboBox(parent) {}
 	void setMarkers(const AwMarkerList& markers);
-protected:
-	void filter();
-
-	AwMarkerList m_markers, m_saved;
-	int m_filter;	// default filter will be UniqueLabels
 };

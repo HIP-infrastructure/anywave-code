@@ -19,10 +19,26 @@ AwSelectInputDataWidget::~AwSelectInputDataWidget()
 }
 
 
-void AwSelectInputDataWidget::setMarkers(const AwMarkerList& markers)
+void AwSelectInputDataWidget::setMarkers(const AwMarkerList& markers, int filters)
 {
-	m_ui->comboSkip->setMarkers(markers);
-	m_ui->comboUse->setMarkers(markers);
+	AwMarkerList tmp = markers;
+	switch (filters) {
+	case AwSelectInputDataWidget::WithDuration:
+		tmp = AwMarker::getMarkersWithDuration(markers);
+		break;
+	case AwSelectInputDataWidget::UniqueLabels:
+		tmp = AwMarker::getMarkersWithUniqueLabels(markers);
+		break;
+	case AwSelectInputDataWidget::WithDurationAndUniqueLabels:
+		tmp = AwMarker::getMarkersWithDuration(markers);
+		tmp = AwMarker::getMarkersWithUniqueLabels(tmp);
+		break;
+	default:
+		break;
+	}
+
+	m_ui->comboSkip->setMarkers(tmp);
+	m_ui->comboUse->setMarkers(tmp);
 }
 
 QStringList AwSelectInputDataWidget::usedMarkers()

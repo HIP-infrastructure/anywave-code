@@ -26,34 +26,9 @@
 #include <widget/AwComboMarker.h>
 
 
-AwComboMarker::AwComboMarker(QWidget *parent) : QComboBox(parent)
-{
-	m_filter = 0;
-}
-
 void AwComboMarker::setMarkers(const AwMarkerList& markers)
 {
-	m_saved = markers;
-	m_markers.clear();
-	filter();
-}
-
-void AwComboMarker::filter()
-{
 	clear();
-	m_markers = m_saved;
-	if (m_filter & AwComboMarker::ExcludeNoDuration) {
-		foreach(AwMarker *m, m_markers) {
-			if (m->duration() <= 0.)
-				m_markers.removeAll(m);
-		}
-	}
-	addItems(AwMarker::getUniqueLabels(m_markers));
-	update();
+	addItems(AwMarker::getAllLabels(markers));
 }
 
-void AwComboMarker::setFilter(int type) 
-{
-	m_filter = type;
-	filter();
-}

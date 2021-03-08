@@ -68,10 +68,14 @@ public:
 	static QStringList getAllLabels(const QList<AwMarker *>& markers);
 	/* Get all markers with a duration, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithDuration(const QList<AwMarker *>& markers);
+	/* Get all markers sorted by unique label */
+	static QList<AwMarker*> getMarkersWithUniqueLabels(const QList<AwMarker*>& markers);
 	/* Get all markers with a label, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabel(const QList<AwMarker *>& markers, const QString& label);
 	/* Get all markers with specified labels, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabels(const QList<AwMarker *>& markers, const QStringList& labels); 
+	/* Get markers between positions */
+	static QList<AwMarker *> getMarkersBetween(const QList<AwMarker *>& markers, float pos1, float pos2);
 	/** Rename all markers in a list. **/
 	static QList<AwMarker *>& rename(QList<AwMarker *>& markers, const QString& newLabel);
 	/** Load a marker file and returns the markers */ 

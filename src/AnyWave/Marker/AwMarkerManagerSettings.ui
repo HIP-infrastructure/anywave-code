@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>552</width>
-    <height>715</height>
+    <height>687</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -303,6 +303,13 @@
        </property>
        <property name="text">
         <string>Export Wizard</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonStats">
+       <property name="text">
+        <string>Advanced Stats.</string>
        </property>
       </widget>
      </item>

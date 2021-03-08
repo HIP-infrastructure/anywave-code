@@ -60,11 +60,12 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	connect(m_ui.checkBaseline, &QCheckBox::toggled, this, &TFWidget::toggleBaselineCorrection);
 
 	// markers for baseline
-	auto markers = m_process->pdi.input.markers();
+	auto markers = AwMarker::getMarkersWithDuration(process->pdi.input.markers());
+
 	m_ui.checkBaseline->setDisabled(markers.isEmpty());
 	m_ui.comboMarkers->setDisabled(markers.isEmpty());
 	m_ui.comboMarkers->setMarkers(markers);
-	m_ui.comboMarkers->setFilter(AwComboMarker::ExcludeNoDuration);
+
 	m_baselineComputed = false;
 	m_min = m_max = 0;
 	m_colorMapWidget = nullptr;
@@ -98,9 +99,8 @@ void TFWidget::toggleBaselineCorrection(bool flag)
 
 void TFWidget::updateBaselineOptions()
 {
-	auto markers = m_process->pdi.input.markers();
+	auto markers = AwMarker::getMarkersWithDuration(m_process->pdi.input.markers());
 	m_ui.comboMarkers->setMarkers(markers);
-	m_ui.comboMarkers->setFilter(AwComboMarker::ExcludeNoDuration);
 	bool disabled = m_ui.comboMarkers->count() == 0;
 	m_ui.checkBaseline->setDisabled(disabled);
 	m_ui.comboMarkers->setDisabled(disabled);

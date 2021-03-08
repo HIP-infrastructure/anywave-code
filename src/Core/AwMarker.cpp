@@ -28,6 +28,10 @@
 #include <QFile>
 #include <QTextStream>
 #include <AwCore.h>
+#include <algorithm>
+#include <execution>
+
+constexpr auto MARKERS_THRESHOLD = 5000;  // threshold for multi threading algo on markers
 
 //
 // AwMarker
@@ -146,7 +150,7 @@ int AwMarker::save(const QString& path, const AwMarkerList& markers)
 		return -1;
 
 	stream << "// AnyWave Marker File" << endl;
-	foreach (AwMarker *m, markers) {
+	for  (AwMarker *m : markers) {
 		QString label = m->label();
 		if (label.isEmpty())
 			label = "No Label";
@@ -178,9 +182,14 @@ AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 
 AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 {
-	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+	if (markers.size() <= MARKERS_THRESHOLD)
+		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+	else
+		std::sort(std::execution::par, markers.begin(), markers.end(), AwMarkerLessThan);
 	return markers;
 }
+
+
 
 AwMarkerList& AwMarker::rename(AwMarkerList& markers, const QString& label)
 {
@@ -207,7 +216,7 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 	while (!copiedList.isEmpty()) {
 		auto first = copiedList.takeFirst();
 		auto itsc = AwMarker::intersect(copiedList, first->start(), first->end());
-		auto intersections = AwMarker::sort(itsc);
+		auto &intersections = AwMarker::sort(itsc);
 		if (intersections.isEmpty()) {
 			res << first;
 		}
@@ -673,6 +682,30 @@ AwMarkerList AwMarker::getMarkersWithLabel(const AwMarkerList& markers, const QS
 }
 
 
+AwMarkerList AwMarker::getMarkersBetween(const AwMarkerList& markers, float pos1, float pos2)
+{
+	AwMarkerList _markers = markers;
+	AwMarker::sort(_markers);
+	return AwMarker::intersect(_markers, pos1, pos2);
+}
+
+
+AwMarkerList AwMarker::getMarkersWithUniqueLabels(const AwMarkerList& markers)
+{
+	AwMarkerList res, tmp;
+	if (markers.isEmpty())
+		return res;
+	tmp = markers;
+	while (!tmp.isEmpty()) {
+		QString label = tmp.first()->label();
+		res << tmp.first();
+		if (tmp.size() <= MARKERS_THRESHOLD)
+			tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+		else
+			tmp.erase(std::remove_if(std::execution::par, tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+	}
+	return res;
+}
 
 ///
 /// getUniqueLabels()
@@ -680,10 +713,17 @@ AwMarkerList AwMarker::getMarkersWithLabel(const AwMarkerList& markers, const QS
 QStringList AwMarker::getUniqueLabels(const QList<AwMarker *>& markers)
 {
 	QStringList res;
+	if (markers.isEmpty())
+		return res;
 
-	foreach (AwMarker *m, markers)	{
-		if (!res.contains(m->label()))
-			res << m->label();
+	AwMarkerList l_markers = markers;
+	while (!l_markers.isEmpty()) {
+		QString label = l_markers.first()->label();
+		if (l_markers.size() <= MARKERS_THRESHOLD)
+			l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
+		else
+			l_markers.erase(std::remove_if(std::execution::par, l_markers.begin(), l_markers.end(), [label](AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
+		res << label;
 	}
 	return res;
 }
@@ -824,8 +864,6 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers)
 						removed << v;
 					}
 				}
-				//for (auto r : removed)
-				//	values.removeAll(r);
 				if (!values.isEmpty())
 					m = values.takeFirst();
 			}
@@ -835,28 +873,4 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers)
 		markers.removeAll(m);
 		delete m;
 	}
-
-	//for (auto m : markers) {
-	//	if (!map.contains(m->label()))
-	//		map.insert(m->label(), m);
-	//	else {
-	//		auto values = map.values(m->label());
-	//		bool keep = true;
-	//		for (auto v : values) { // get existing marker with same labels and compare position and duration
-	//			auto position = std::abs(v->start() - m->start());
-	//			auto duration = std::abs(v->duration() - m->duration());
-	//			if (position <= tol && duration <= tol) {
-	//				keep = false;
-	//				removed << m;
-	//				break;
-	//			}
-	//		}
-	//		if (keep) 
-	//			map.insert(m->label(), m);
-	//	}
-	//}
-	//for (auto m : removed) {
-	//	markers.removeAll(m);
-	//	delete m;
-	//}
 }
