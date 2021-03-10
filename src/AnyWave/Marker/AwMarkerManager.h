@@ -83,10 +83,11 @@ public slots:
 signals:
 	void goTo(float pos);
 	void displayedMarkersChanged(const AwMarkerList& markers);
-	void modificationsDone();
-	void markersRemoved();
+//	void modificationsDone();
+//	void markersRemoved();
 	void log(const QString& message);
 	void finished();	// for threaded operations
+	void updateStats();	// emitted each time the global markers list changes
 private:
 	AwMarkerManagerSettings *m_ui;
 	QDockWidget *m_dock;

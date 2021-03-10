@@ -138,19 +138,6 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	}
 	bool isGUIMode = operation == aw::commandLine::NoOperation;
 
-	//AwArguments arguments;
-	//int operation = aw::commandLine::NoOperation;
-
-	//try {
-	//	operation = aw::commandLine::doParsing(args, arguments);
-	//}
-	//catch (const AwException& e) {
-	//	std::cerr << e.errorString().toStdString();
-	//	quit();
-	//	exit(0);
-	//}
-
-	//bool isGUIMode = operation == aw::commandLine::NoOperation;
 	aws->setValue(aws::plugin_debug_mode, false);
 	bool listenMode = arguments.contains(keys::plugin_debug);
 	if (listenMode) {
@@ -179,10 +166,6 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 
-	//AwDebugLog *adl = AwDebugLog::instance();
-	//adl->setParent(this);
-
-	//adl->connectComponent("AnyWave", this);
 	adl->connectComponent("Filters Settings", &dm->filterSettings());
 	adl->connectComponent("Global Settings", aws);
 	

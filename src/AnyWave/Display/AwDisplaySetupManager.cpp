@@ -98,14 +98,7 @@ AwDisplaySetupManager::~AwDisplaySetupManager()
 
 QToolBar *AwDisplaySetupManager::toolBar() { return m_toolBar->toolBar(); }
 
-//
-//void AwDisplaySetupManager::setFilename(const QString &path)
-//{
-////	m_setupPath = path + ".display";
-//
-//	if (QFile::exists(m_setupPath))
-//		loadSetup(m_setupPath);
-//}
+
 
 void AwDisplaySetupManager::init()
 {

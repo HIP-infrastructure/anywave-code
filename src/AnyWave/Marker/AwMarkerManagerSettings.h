@@ -34,6 +34,8 @@
 #include <QSortFilterProxyModel>
 
 using namespace Ui;
+class AwStatsWidget;
+class AwMarkerManager;
 
 class AwMarkerManagerSettings : public QWidget, public MarkersManagerSettingsClass
 {
@@ -52,10 +54,10 @@ public slots:
 	void setRule(const QString& name);
 	void addRule(const QString& name);
 	void modifyRule(const QString& oldName, const QString& newName);
-	//void show();
 	void editCurrentItem();
 	void setMarkerAddingMode(bool on);
 	void highlightMarker(AwMarker *marker);
+	void openStats();
 
 signals:
 	/** Sent whenever displayed markers changed, depending on filtering rules **/
@@ -67,6 +69,7 @@ signals:
 	void loadMarkersClicked();
 	void saveMarkersClicked();
 	void clearTriggerClicked();
+
 
 protected slots:
 	void renameAllMarkers();
@@ -118,6 +121,8 @@ protected:
 	QMenu *m_menu;
 	QAction *m_removeAllLabel, *m_selectAllLabel;	// keep pointer for specific action Remove all "MARKER" and Select all "MARKER"
 	bool m_isAddingMarker;
+	AwStatsWidget* m_statsWidget;
+	AwMarkerManager* m_mm;  // global instance of Marker Manager
 };
 
 #endif // MARKERS_MANAGER_SETTINGS_H

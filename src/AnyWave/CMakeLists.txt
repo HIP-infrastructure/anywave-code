@@ -76,6 +76,7 @@ SET(AnyWave_SRCS
     ./Marker/AwMarkerTableView.cpp  
     ./Marker/AwNewMarkerRuleDial.cpp  
     ./Marker/AwPickChannelsDial.cpp  
+	./Marker/AwStatsWidget.cpp
     ./MATPy/AddMarkers.cpp  
     ./MATPy/AwMATPyServer.cpp  
     ./MATPy/AwPidManager.cpp  
@@ -216,6 +217,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Marker/AwMarkerManager.h  
     ./Marker/AwMarkerListModel.h  
     ./Marker/AwDockAddMarker.h  
+	./Marker/AwStatsWidget.h
     ./MATPy/AwPidManager.h  
     ./MATPy/AwRequestServer.h  
     ./MATPy/AwMATPyServer.h  
@@ -315,6 +317,7 @@ SET(FORMS ./AnyWave.ui
     ./Marker/AwNewMarkerRuleDial.ui  
     ./Marker/AwPickChannelsDial.ui  
     ./Marker/AwMarkersExportWidget.ui  
+	./Marker/AwStatsWidget.ui
     ./Montage/AwMontageDial.ui  
 	./Montage/AwECoGDialog.ui
     ./Plugin/AwPluginDial.ui  

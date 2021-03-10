@@ -28,6 +28,9 @@
 #include <AwGlobal.h>
 #include <QStringList>
 #include <QMetaType>
+
+constexpr auto MARKERS_THREAD_THRESHOLD = 5000;  // threshold for multi threading algo on markers
+
 /*!
  * \brief
  * This class defines the AwMarker object.
@@ -64,6 +67,8 @@ public:
 	static QStringList getUniqueLabels(const QList<AwMarker *>& markers);
 	/** Count the number of markers with a specified label **/
 	static QList<QPair<QString, int> > count(const QList<AwMarker *>& markers);
+	/** Computes histogram **/
+	static QHash<QString, int> computeHistogram(const QList<AwMarker*>& markers);
 	/** Gets all markers labels **/
 	static QStringList getAllLabels(const QList<AwMarker *>& markers);
 	/* Get all markers with a duration, markers are not duplicated. */

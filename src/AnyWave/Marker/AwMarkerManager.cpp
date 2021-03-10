@@ -42,6 +42,7 @@
 #include <widget/AwWaitWidget.h>
 #include <thread>
 #include <future>
+#include <algorithm>
 
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;
@@ -97,10 +98,8 @@ AwMarkerManagerSettings* AwMarkerManager::ui()
 AwMarkerList AwMarkerManager::getMarkers()
 {
 	if (m_needSorting)
-		qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
-
+		AwMarker::sort(m_markers);
 	m_needSorting = false;
-
 	return m_markers;
 }
 
@@ -108,8 +107,7 @@ AwMarkerList AwMarkerManager::getMarkersThread()
 {
 	QMutexLocker locker(&m_mutex);
 	if (m_needSorting)
-		qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
-
+		AwMarker::sort(m_markers);
 	return AwMarker::duplicate(m_markers);
 }
 
@@ -141,6 +139,7 @@ void AwMarkerManager::setMarkers(const AwMarkerList& markers)
 	emit displayedMarkersChanged(m_displayedMarkers);
 	// auto save markers
 	saveMarkers(m_filePath);
+	emit updateStats();
 }
 
 AwMarkerList AwMarkerManager::loadMarkers(const QString &path)
@@ -185,14 +184,14 @@ void AwMarkerManager::loadMarkers()
 	if (!markers.isEmpty())	{
 		for (auto m : markers)
 			m_markers << m;
-		qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+		AwMarker::sort(m_markers);
 		m_needSorting = false;
 		m_ui->setMarkers(m_markers);
 	}
 
 	// show markers ui
 	showDockUI();
-
+	emit updateStats();
 }
 
 void AwMarkerManager::saveMarkers()
@@ -221,20 +220,21 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	// check if sender is a process
 	AwBaseProcess *p = qobject_cast<AwBaseProcess *>(sender());
 	if (p != nullptr) {
-		markers = AwMarker::duplicate(*list);
+		m_markers += AwMarker::duplicate(*list);
 	}
 	else 
-		markers = *list;
+		m_markers += *list;
 
-	emit modificationsDone();
-	m_markers += markers;
+//	emit modificationsDone();
 
 	// sort markers
-	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+	AwMarker::sort(m_markers);
 	m_needSorting = false;
 	m_ui->setMarkers(m_markers);
 	if (p != nullptr)
 		p->setMarkersReceived();
+	emit updateStats();
 }
 
 //
@@ -243,18 +243,21 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 void AwMarkerManager::addMarkers(const AwMarkerList& list)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
-	AwMarkerList temp_list;
-	foreach (AwMarker *m, list)
-		temp_list << new AwMarker(m);
-	emit modificationsDone();
-	foreach (AwMarker *m, temp_list)
-		m_markers << m;
+	m_markers += AwMarker::duplicate(list);
+	//AwMarkerList temp_list;
+	//foreach (AwMarker *m, list)
+	//	temp_list << new AwMarker(m);
+	////emit modificationsDone();
+	//foreach (AwMarker *m, temp_list)
+	//	m_markers << m;
 
 	// sort markers
-	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+	AwMarker::sort(m_markers);
 	m_needSorting = false;
 	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
 		m_ui->setMarkers(m_markers);
+	emit updateStats();
 }
 
 // addMarker(AwMarker *)
@@ -269,45 +272,43 @@ void AwMarkerManager::addMarker(AwMarker *m)
 		m_markers << m;
 
 	// sort markers
-	qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
+	AwMarker::sort(m_markers);
 	m_needSorting = false;
 	m_ui->setMarkers(m_markers);
 
 	if (p != NULL)
 		p->setMarkersReceived();
-	emit modificationsDone();
+	//emit modificationsDone();
+	emit updateStats();
 }
 
 
 void AwMarkerManager::removeAllUserMarkers()
 {
-	AwMarkerList temp = m_markers;
-	foreach (AwMarker *m, m_markers) {
-			m_markers.removeOne(m);
-//			delete m;
-	}
+//	AwMarkerList temp = m_markers;
+//	foreach (AwMarker *m, m_markers) {
+//			m_markers.removeOne(m);
+////			delete m;
+//	}
+
+	m_markers.erase(m_markers.begin(), m_markers.end());
+
 	m_ui->setMarkers(m_markers);
 	saveMarkers(m_filePath);
-	emit markersRemoved();
-	while (!temp.isEmpty())
-		delete temp.takeFirst();
-	emit modificationsDone();
+//	emit markersRemoved();
+	emit updateStats();
+	//while (!temp.isEmpty())
+	//	delete temp.takeFirst();
+//	emit modificationsDone();
 }
 
 void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 {
-	AwMarkerList temp;
-	for (auto m : markers) {
-		m_markers.removeAll(m);
-		temp << m;
-	}
-
+	m_markers.erase(std::remove_if(m_markers.begin(), m_markers.end(), [markers](AwMarker* m) { return markers.contains(m); }), m_markers.end());
 	m_ui->setMarkers(m_markers);
 	saveMarkers(m_filePath);
-	while (!temp.isEmpty())
-		delete temp.takeFirst();
-	emit markersRemoved();
-	emit modificationsDone();
+	emit updateStats();
 }
 
 //
@@ -351,12 +352,12 @@ void AwMarkerManager::quit()
 void AwMarkerManager::closeFile()
 {
 	// if BIDS is active => update or create events.tsv file
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive())
-			if (bm->updateEventsTsv(m_markers) != 0)
-				emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
-	}
+	//if (AwBIDSManager::isInstantiated()) {
+	//	auto bm = AwBIDSManager::instance();
+	//	if (bm->isBIDSActive())
+	//		if (bm->updateEventsTsv(m_markers) != 0)
+	//			emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
+	//}
 	// ask MarkerManagerSettings to clear
 	if (m_ui)
 		m_ui->cleanUp();

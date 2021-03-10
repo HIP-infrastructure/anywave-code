@@ -625,6 +625,9 @@
     <ClCompile Include="AwHelpMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Marker\AwStatsWidget.cpp">
+      <Filter>Marker</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1170,6 +1173,9 @@
     <QtMoc Include="Data\AwDataManager.h">
       <Filter>Data</Filter>
     </QtMoc>
+    <QtMoc Include="Marker\AwStatsWidget.h">
+      <Filter>Marker</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IO\HDF5\structs.h">
@@ -1355,5 +1361,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AnyWave.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="Marker\AwStatsWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>

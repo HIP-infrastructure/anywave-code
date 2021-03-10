@@ -34,7 +34,7 @@
 class AwFileIO;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
-//using AwTSVDict = QMap<QString, QStringList>;
+
 
 constexpr auto aw_derivatives_folder = "derivatives/anywave";
 
@@ -103,8 +103,6 @@ public:
 	/** montage specific **/
 	/** Load a montage from channels.tsv file **/
 	AwChannelList getChannelsTsvMontage();
-	/** Build a channels.tsv file **/
-	//int createChannelsTsv(const QString& filePath, const AwChannelList& channels);
 	/** Update channels.tsv file from bad file **/
 	int updateChannelsTsvBadChannels(const QStringList& badLabels);
 	/** markers specific **/

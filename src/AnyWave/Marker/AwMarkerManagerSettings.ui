@@ -309,7 +309,7 @@
      <item>
       <widget class="QPushButton" name="buttonStats">
        <property name="text">
-        <string>Advanced Stats.</string>
+        <string>More Details</string>
        </property>
       </widget>
      </item>

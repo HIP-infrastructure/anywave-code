@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <execution>
 
-constexpr auto MARKERS_THRESHOLD = 5000;  // threshold for multi threading algo on markers
+
 
 //
 // AwMarker
@@ -182,7 +182,7 @@ AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 
 AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 {
-	if (markers.size() <= MARKERS_THRESHOLD)
+	if (markers.size() <= MARKERS_THREAD_THRESHOLD)
 		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
 	else
 		std::sort(std::execution::par, markers.begin(), markers.end(), AwMarkerLessThan);
@@ -689,6 +689,27 @@ AwMarkerList AwMarker::getMarkersBetween(const AwMarkerList& markers, float pos1
 	return AwMarker::intersect(_markers, pos1, pos2);
 }
 
+QHash<QString, int> AwMarker::computeHistogram(const AwMarkerList& markers)
+{
+	QHash<QString, int> res;
+	if (markers.isEmpty())
+		return res;
+	AwMarkerList tmp = markers;
+	while (!tmp.isEmpty()) {
+		QString label = tmp.first()->label();
+		AwMarkerList::iterator it;
+		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
+			it = std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
+		else
+			it = std::remove_if(std::execution::par, tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
+		int count = 0;
+		for (AwMarkerList::iterator i = it; i < tmp.end(); i++)
+			count++;
+		tmp.erase(it, tmp.end());
+		res.insert(label, count);
+	}
+	return res;
+}
 
 AwMarkerList AwMarker::getMarkersWithUniqueLabels(const AwMarkerList& markers)
 {
@@ -699,7 +720,7 @@ AwMarkerList AwMarker::getMarkersWithUniqueLabels(const AwMarkerList& markers)
 	while (!tmp.isEmpty()) {
 		QString label = tmp.first()->label();
 		res << tmp.first();
-		if (tmp.size() <= MARKERS_THRESHOLD)
+		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
 			tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
 		else
 			tmp.erase(std::remove_if(std::execution::par, tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
@@ -719,7 +740,7 @@ QStringList AwMarker::getUniqueLabels(const QList<AwMarker *>& markers)
 	AwMarkerList l_markers = markers;
 	while (!l_markers.isEmpty()) {
 		QString label = l_markers.first()->label();
-		if (l_markers.size() <= MARKERS_THRESHOLD)
+		if (l_markers.size() <= MARKERS_THREAD_THRESHOLD)
 			l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
 		else
 			l_markers.erase(std::remove_if(std::execution::par, l_markers.begin(), l_markers.end(), [label](AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
