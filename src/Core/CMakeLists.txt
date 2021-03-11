@@ -22,6 +22,8 @@ add_library(AwCore SHARED ${MOC} ${SRC})
 qt5_use_modules(AwCore Core)
 TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
 
+target_compile_features(AwCore PRIVATE cxx_std_17)
+
 IF (APPLE)
 INSTALL(TARGETS AwCore DESTINATION  ${LIB_INSTALL_DIR})
 ELSE()

@@ -5,14 +5,29 @@ set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 IF(APPLE)
 SET(ARMADILLO_INCLUDE /users/bruno/armadillo-9.400.4/include)
 ENDIF()
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ./matlab_common)
 
 SET(SRCS
    ICASettings.cpp
    infomax_algo.cpp
    ica.cpp
    r250.c
-   randlcg.c)
+   randlcg.c 
+   matlab_common/pinv.cpp
+   matlab_common/rt_nonfinite.cpp
+   matlab_common/rtGetInf.cpp
+   matlab_common/rtGetNaN.cpp
+   matlab_common/svd.cpp
+   cca/cca_data.cpp 
+   cca/cca_initialize.cpp
+   cca/cca_terminate.cpp
+   cca/cca.cpp
+   cca/qr.cpp
+   cca/run_cca.cpp
+   sobi/mtimes.cpp
+   sobi/run_sobi.cpp
+   sobi/sobi_coder_data.cpp)
+
    
  SET(MOCS ICASettings.h
     ica.h)

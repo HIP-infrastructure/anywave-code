@@ -82,9 +82,9 @@ void AwStatsWidget::refresh()
 	// prepare x axis with marker labels
 	QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
 	QMap<double, QString> ticks;
-	auto& keys = m_histogram.keys();
+	QStringList keys = m_histogram.keys();
 	std::sort(keys.begin(), keys.end());
-	auto& values = m_histogram.values();
+	auto values = m_histogram.values();
 	double v = 1.;
 	for (auto& k : keys) {
 		ticks.insert(v, k);
