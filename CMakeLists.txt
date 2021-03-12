@@ -176,7 +176,13 @@ add_dependencies(AwMontage AwCore AwReadWrite)
 # header files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION ${PROJECT_BINARY_DIR}/include)
 
-#find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY)
+find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY)
+# if matlab is detected, then build the shared lib to connect to MATLAB app
+# However this required to build all the mexfiles of the MATLAB API
+# This has to be done separatly, using the sub project in matlab sub folder.
+if(Matlab_FOUND)
+   add_subdirectory(src/MatlabSupport)
+endif(Matlab_FOUND)
 
 # MATLAB SUPPORT
 #if (Matlab_FOUND AND BUILD_STATIC_CORE AND QT_STATIC_DIR)
