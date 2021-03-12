@@ -136,10 +136,10 @@ struct lh_st {
  */
 static long
 lh_hash(
-    register const unsigned char *k,
-    register size_t length)
+     const unsigned char *k,
+     size_t length)
 {
-    register long a,b,c,len;
+     long a,b,c,len;
 
     /* some abbreviations */
 #define ub4 long
@@ -695,7 +695,7 @@ val_rc_t val_destroy(val_t *val)
     return VAL_OK;
 }
 
-/* register a value */
+/*  a value */
 val_rc_t val_reg(val_t *val, const char *name, int type, const char *desc, void *storage)
 {
     val_object_t *obj;

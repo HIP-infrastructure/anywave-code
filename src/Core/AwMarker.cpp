@@ -29,8 +29,9 @@
 #include <QTextStream>
 #include <AwCore.h>
 #include <algorithm>
+#ifndef Q_OS_MAC
 #include <execution>
-
+#endif
 
 
 //
@@ -182,10 +183,14 @@ AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 
 AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 {
+#ifdef Q_OS_MAC
+	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+#else
 	if (markers.size() <= MARKERS_THREAD_THRESHOLD)
 		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
 	else
 		std::sort(std::execution::par, markers.begin(), markers.end(), AwMarkerLessThan);
+#endif
 	return markers;
 }
 
@@ -698,10 +703,14 @@ QHash<QString, int> AwMarker::computeHistogram(const AwMarkerList& markers)
 	while (!tmp.isEmpty()) {
 		QString label = tmp.first()->label();
 		AwMarkerList::iterator it;
+#ifdef Q_OS_MAC
+		it = std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
+#else
 		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
 			it = std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
 		else
 			it = std::remove_if(std::execution::par, tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
+#endif
 		int count = 0;
 		for (AwMarkerList::iterator i = it; i < tmp.end(); i++)
 			count++;
@@ -720,10 +729,14 @@ AwMarkerList AwMarker::getMarkersWithUniqueLabels(const AwMarkerList& markers)
 	while (!tmp.isEmpty()) {
 		QString label = tmp.first()->label();
 		res << tmp.first();
+#ifdef Q_OS_MAC
+		tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+#else
 		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
 			tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
 		else
 			tmp.erase(std::remove_if(std::execution::par, tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+#endif
 	}
 	return res;
 }
@@ -740,10 +753,14 @@ QStringList AwMarker::getUniqueLabels(const QList<AwMarker *>& markers)
 	AwMarkerList l_markers = markers;
 	while (!l_markers.isEmpty()) {
 		QString label = l_markers.first()->label();
+#ifdef Q_OS_MAC
+		l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
+#else
 		if (l_markers.size() <= MARKERS_THREAD_THRESHOLD)
 			l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
 		else
 			l_markers.erase(std::remove_if(std::execution::par, l_markers.begin(), l_markers.end(), [label](AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
+#endif
 		res << label;
 	}
 	return res;

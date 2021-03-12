@@ -96,7 +96,7 @@ int bitc(sraw_t x)
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
   };
 
-  register int y = x;
+  int y = x;
 
   /* positive number which needs the same number of bits */
   if (y < 0) y = -(y+1);

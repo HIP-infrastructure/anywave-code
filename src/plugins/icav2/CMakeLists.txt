@@ -26,7 +26,8 @@ SET(SRCS
    cca/run_cca.cpp
    sobi/mtimes.cpp
    sobi/run_sobi.cpp
-   sobi/sobi_coder_data.cpp)
+   sobi/sobi_coder_data.cpp
+   sobi/sobi_coder.cpp)
 
    
  SET(MOCS ICASettings.h
