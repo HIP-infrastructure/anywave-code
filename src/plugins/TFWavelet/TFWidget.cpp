@@ -152,15 +152,15 @@ void TFWidget::compute()
 	for (auto plot : m_plots)
 		plot->setMinMax(m_min, m_max);
 
-	QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	auto range = m_max - m_min;
-	auto step = std::abs(range / 4);
-	QwtInterval zInterval(m_min, m_max);
-	rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
-	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
-	m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
-	m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-	m_colorMapWidget->repaint();
+	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
+	//auto range = m_max - m_min;
+	//auto step = std::abs(range / 4);
+	//QwtInterval zInterval(m_min, m_max);
+	//rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
+	//QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
+	//m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
+	//m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
+	//m_colorMapWidget->repaint();
 
 	repaint();
 }
@@ -176,15 +176,15 @@ void TFWidget::updatePlots()
 	}
 	for (auto plot : m_plots)
 		plot->setMinMax(m_min, m_max);
-	QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	auto range = m_max - m_min;
-	auto step = std::abs(range / 4);
-	QwtInterval zInterval(m_min, m_max);
-	rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
-	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
-	m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
-	m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-	m_colorMapWidget->repaint();
+	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
+	//auto range = m_max - m_min;
+	//auto step = std::abs(range / 4);
+	//QwtInterval zInterval(m_min, m_max);
+	//rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
+	//QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
+	//m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
+	//m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
+	//m_colorMapWidget->repaint();
 }
 
 void TFWidget::setChannels(const AwChannelList& channels)
@@ -234,7 +234,7 @@ void TFWidget::setChannels(const AwChannelList& channels)
 	}
 	auto nPlotRows = row - 1;
 	// add color map widget to the right column and span it to all the rows used by TF plots
-	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
+//	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
 	connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute()));
 	m_signalView->setChannels(channels);
 	m_channels = channels;
@@ -250,7 +250,9 @@ void TFWidget::setMarkers(const AwMarkerList& markers)
 
 void TFWidget::showColorMapScale(bool flag)
 {
-	m_colorMapWidget->setVisible(flag);
+//	m_colorMapWidget->setVisible(flag);
+	for (auto p : m_plots)
+		p->showColorMapScale(flag);
 	repaint();
 }
 
@@ -265,7 +267,9 @@ void TFWidget::showFreqScale(bool flag)
 void TFWidget::switchLogScale(bool flag)
 {
 	m_displaySettings.logScale = flag;
-	updatePlots();
+//	updatePlots();
+	for (auto p : m_plots)
+		p->updateDisplaySettings();
 }
 
 void TFWidget::changeColorMap(int index)
@@ -273,7 +277,9 @@ void TFWidget::changeColorMap(int index)
 	QComboBox *cb = (QComboBox *)sender();
 	Q_ASSERT(cb != NULL);
 	m_displaySettings.colorMap = cb->currentData(Qt::UserRole).toInt();
-	updatePlots();
+	//updatePlots();
+	for (auto p : m_plots)
+		p->updateDisplaySettings();
 }
 
 void TFWidget::changeNormalization(int index)
@@ -295,13 +301,15 @@ void TFWidget::changeNormalization(int index)
 void TFWidget::changeZScale(int index)
 {
 	m_displaySettings.zInterval = m_ui.cbZScale->currentData().toInt();
-	updatePlots();
+	//updatePlots();
+	for (auto p : m_plots)
+		p->updateDisplaySettings();
 }
 
 void TFWidget::changeGain(int value)
 {
 	m_displaySettings.gain = (100 - (float)value) / 100;
-	updatePlots();
+	//updatePlots();
 }
 
 void TFWidget::highlightSampleInterval(float start, float duration)
