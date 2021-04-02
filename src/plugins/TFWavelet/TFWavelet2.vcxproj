@@ -61,7 +61,7 @@
   </ImportGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;TFWAVELET2_LIB;MKL;QWT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;TFWAVELET2_LIB;MKL;QWT_DLL;QCUSTOMPLOT_USE_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\qwt\include;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -73,9 +73,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwGraphicsLibd.lib;AwWidgetsLibd.lib;qwtd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwGraphicsLibd.lib;AwWidgetsLibd.lib;qwtd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
@@ -91,7 +91,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;TFWAVELET2_LIB;MKL;QWT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;TFWAVELET2_LIB;MKL;QWT_DLL;QCUSTOMPLOT_USE_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\qwt\include;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -102,9 +102,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\qwt\lib;$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\qwt\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qcustomplot\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwWidgetsLib.lib;qwt.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwWidgetsLib.lib;qwt.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
@@ -121,14 +121,17 @@
   <ItemGroup>
     <ClCompile Include="display_settings.cpp" />
     <ClCompile Include="settingsui.cpp" />
+    <ClCompile Include="TFColorMapWidget.cpp" />
     <ClCompile Include="TFPicker.cpp" />
     <ClCompile Include="TFPlot.cpp" />
+    <ClCompile Include="TFQCustomPlot.cpp" />
     <ClCompile Include="TFWavelet2.cpp" />
     <ClCompile Include="TFWidget.cpp" />
     <ClCompile Include="tf_settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display_settings.h" />
+    <QtMoc Include="TFColorMapWidget.h" />
     <ClInclude Include="tfparam.h" />
     <QtMoc Include="TFPicker.h">
     </QtMoc>
@@ -136,6 +139,7 @@
     </QtMoc>
     <QtMoc Include="TFWavelet2.h">
     </QtMoc>
+    <QtMoc Include="TFQCustomPlot.h" />
     <ClInclude Include="tfwavelet2_global.h" />
     <QtMoc Include="TFWidget.h">
     </QtMoc>
@@ -148,6 +152,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="TFColorMapWidget.ui" />
     <QtUic Include="TFWidget.ui">
     </QtUic>
   </ItemGroup>

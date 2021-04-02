@@ -29,7 +29,6 @@
 class QWidget;
 class AwDisplaySetup;
 class AwViewSettings;
-class AwFileIO;
 class AwViewSetup;
 #include <widget/SignalView/AwBaseSignalView.h>
 #include <filter/AwFilterSettings.h>
@@ -80,7 +79,6 @@ protected:
 	void applyChannelFilters();
 private:
 	void updateAmplitudes();
-	//AwFileIO *m_reader;
 	bool m_isActive;
 	AwChannelList m_virtualChannels;
 	int m_processFlags;							// flags for the view

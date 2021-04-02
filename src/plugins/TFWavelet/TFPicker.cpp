@@ -32,11 +32,11 @@
 #include <QtMath>
 
 
-TFPicker::TFPicker(QwtPlotCanvas *canvas, QwtScaleWidget *scaleWidget) : QwtPlotPicker(canvas)
+TFPicker::TFPicker(QwtPlotCanvas *canvas /*, QwtScaleWidget *scaleWidget*/) : QwtPlotPicker(canvas)
 {
-	m_yScaleWidget = scaleWidget;
+	//m_yScaleWidget = scaleWidget;
 	connect(this, SIGNAL(selected(const QRectF&)), this, SLOT(prepareSelection(const QRectF&)));
-
+	m_plot = static_cast<QwtPlot*>(canvas->plot());
 }
 
 TFPicker::~TFPicker()
@@ -52,8 +52,10 @@ void TFPicker::setFreqScaleInterval(float min, float max)
 QwtText TFPicker::trackerText(const QPoint &pos) const
 {
 	QString output;
-	QwtScaleMap map = m_yScaleWidget->scaleDraw()->scaleMap();
-	double value = map.invTransform(pos.y());
+	//auto scaleDraw = m_plot->axisScaleDraw(QwtPlot::yLeft);
+	//auto map = scaleDraw->scaleMap();
+	//double value = map.invTransform(pos.y());
+	double value = m_plot->invTransform(QwtPlot::yLeft, pos.y());
 	output.sprintf("%.2f Hz", value);
 	QwtText text(output);
 	QBrush bg(Qt::SolidPattern);
@@ -61,19 +63,32 @@ QwtText TFPicker::trackerText(const QPoint &pos) const
 	text.setBackgroundBrush(bg);
 	text.setColor(Qt::black);
 	return text;
+
+	//QwtScaleMap map = m_yScaleWidget->scaleDraw()->scaleMap();
+	//double value = map.invTransform(pos.y());
+	//output.sprintf("%.2f Hz", value);
+	//QwtText text(output);
+	//QBrush bg(Qt::SolidPattern);
+	//bg.setColor(Qt::white);
+	//text.setBackgroundBrush(bg);
+	//text.setColor(Qt::black);
+	//return text;
 }
 
 void TFPicker::prepareSelection(const QRectF &rect)
 {
 	QRectF select = rect;
 	// Get plot scales intervals
-	QwtPlotCanvas *c = (QwtPlotCanvas *)canvas();
-	QwtInterval sampleInterv = c->plot()->axisInterval(QwtPlot::xBottom);
-	QwtInterval freqInterv = c->plot()->axisInterval(QwtPlot::yLeft);
+//	QwtPlotCanvas *c = (QwtPlotCanvas *)canvas();
+	//QwtInterval sampleInterv = c->plot()->axisInterval(QwtPlot::xBottom);
+	//QwtInterval freqInterv = c->plot()->axisInterval(QwtPlot::yLeft);
+
+//	QwtInterval sampleInterv = m_plot->axisInterval(QwtPlot::xBottom);
+//	QwtInterval freqInterv = m_plot->axisInterval(QwtPlot::yLeft);
 
 	// prepare sample selection
-	int start = qCeil(select.x());
-	int dur = qCeil(select.width());
+	int start = static_cast<int>(std::ceil(select.x()));
+	int dur = static_cast<int>(std::ceil(select.width()));
 	emit samplesSelected(start, dur);
 
 	// ensure that Y is between 0 and max

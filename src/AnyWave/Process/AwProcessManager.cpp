@@ -674,11 +674,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 				 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 		 }
 	 }
-
 	 p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
-
-
-
 	 return 0;
  }
 

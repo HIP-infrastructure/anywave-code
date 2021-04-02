@@ -33,6 +33,7 @@
 #include <qwt_scale_widget.h>
 #include <math.h>
 #include <QtMath>
+#include "TFColorMapWidget.h"
 
 TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QWidget *parent) : QwtPlot(parent)
 {	
@@ -48,7 +49,9 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
     m_spectro->setRenderThreadCount(0); // use system specific thread count
 	ds->colorMap =  AwColorMap::Parula;
 	m_spectro->attach(this);
-	plotLayout()->setAlignCanvasToScales(true);
+	//plotLayout()->setAlignCanvasToScales(true);
+	plotLayout()->setAlignCanvasToScales(false);
+	plotLayout()->setCanvasMargin(0);
 	setAutoReplot(false);
 	m_matrix = new QwtMatrixRasterData;
 	m_matrix->setResampleMode(QwtMatrixRasterData::BilinearInterpolation);
@@ -73,8 +76,14 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	m_freqScaleWidget->setTitle(freqText);
 	// default to Log scale transformation
 	m_freqScaleWidget->setTransformation(new QwtLogTransform());
-	
-	//// building the colormap widget
+
+	// default to log scale for freq
+	setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine(10));
+	axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Floating, true);
+
+	// building the colormap widget
+	m_colorMapWidget = new TFColorMapWidget;
+
 	//m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 	//m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
 	//m_colorMapWidget->setBorderDist(1, 1);
@@ -83,13 +92,10 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	//m_colorMapWidget->setColorBarEnabled(true);
 	//m_colorMapWidget->setColorBarWidth(25);
 	//m_colorMapWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-	//m_colorMapWidget->hide();
-
-	// default to log scale for freq
-	setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine());
+	m_colorMapWidget->hide();
 	
 	// building picker
-	m_picker = new TFPicker((QwtPlotCanvas *)canvas(), m_freqScaleWidget);
+	m_picker = new TFPicker((QwtPlotCanvas*)canvas());
 	m_picker->setStateMachine(new QwtPickerDragRectMachine);
 	m_picker->setRubberBand(QwtPicker::RectRubberBand);
 	m_picker->setTrackerMode(QwtPicker::AlwaysOn);
@@ -130,6 +136,7 @@ void TFPlot::setNewData(float position, TFParam *param)
 	m_rawMat = param->data;
 	m_baselineMat = param->baselineData;
 	applyNormalization();
+	
 }
 
 void TFPlot::showFreqScale(bool flag)
@@ -148,25 +155,37 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 	m_settings->freq_max = max;
 	m_settings->step = step;
 
-	QVector<float> freqs = m_settings->freqs;
-	double fmin = freqs.at(0);
-	double fmax = freqs.at(freqs.size() - 1);
-	QList<double> leftTicks[QwtScaleDiv::NTickTypes];
-	auto start = fmin;
-	int interval = (int)std::floor((fmax + fmin) / 8);
-	while (start  < fmax) {
-		leftTicks[QwtScaleDiv::MajorTick] << start;
-		start += interval;
-	}
-	leftTicks[QwtScaleDiv::MajorTick] << fmax;
-	QwtScaleDiv divL(leftTicks[QwtScaleDiv::MajorTick].first(), leftTicks[QwtScaleDiv::MajorTick].last(), leftTicks);
-	m_freqScaleWidget->scaleDraw()->setScaleDiv(divL);
-	m_picker->setFreqScaleInterval(fmin, fmax);
-	setAxisScale(QwtPlot::yLeft, fmin, fmax);
-	setAxisAutoScale(QwtPlot::yLeft);
-	axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Floating, true);
-	plotLayout()->setAlignCanvasToScales(true);
+	QList<double> rTicks[QwtScaleDiv::NTickTypes];
+	auto s = std::abs((max - min))  / 4;
+
+	rTicks[QwtScaleDiv::MajorTick] << min << std::floor(min + 1. * s) << std::floor(min + 2. * s) << std::floor(min + 3. * s) << max;
+	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
+	m_freqScaleWidget->scaleDraw()->setScaleDiv(divR);
 	m_freqScaleWidget->repaint();
+
+	setAxisScale(QwtPlot::yLeft, min, max, step);
+	m_picker->setFreqScaleInterval(min, max);
+	replot();
+
+	//QVector<float> freqs = m_settings->freqs;
+	//double fmin = freqs.at(0);
+	//double fmax = freqs.at(freqs.size() - 1);
+	//QList<double> leftTicks[QwtScaleDiv::NTickTypes];
+	//auto start = fmin;
+	//int interval = (int)std::floor((fmax + fmin) / 8);
+	//while (start  < fmax) {
+	//	leftTicks[QwtScaleDiv::MajorTick] << start;
+	//	start += interval;
+	//}
+	//leftTicks[QwtScaleDiv::MajorTick] << fmax;
+	//QwtScaleDiv divL(leftTicks[QwtScaleDiv::MajorTick].first(), leftTicks[QwtScaleDiv::MajorTick].last(), leftTicks);
+	//m_freqScaleWidget->scaleDraw()->setScaleDiv(divL);
+	//m_picker->setFreqScaleInterval(fmin, fmax);
+	//setAxisScale(QwtPlot::yLeft, fmin, fmax);
+	//setAxisAutoScale(QwtPlot::yLeft);
+	//axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Floating, true);
+	//plotLayout()->setAlignCanvasToScales(true);
+	//m_freqScaleWidget->repaint();
 }
 
 
@@ -191,15 +210,17 @@ void TFPlot::updateDisplaySettings()
 	if (m_displaySettings->logScale != m_displayCopy.logScale) {
 		m_displayCopy.logScale = m_displaySettings->logScale;
 		if (m_displayCopy.logScale) {
-			setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine());
+			setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine(10));
+			setAxisScale(QwtPlot::yLeft, m_settings->freq_min, 	m_settings->freq_max, m_settings->step);
 			m_freqScaleWidget->setTransformation(new QwtLogTransform());
 		}
 		else {
 			setAxisScaleEngine(QwtPlot::yLeft, new QwtLinearScaleEngine());
 			m_freqScaleWidget->setTransformation(new QwtNullTransform());
-			
+			setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max, m_settings->step);
 		}
-		updateZScale();
+		//updateZScale();
+		updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
 	}
 }
 
@@ -275,12 +296,15 @@ void TFPlot::updateZScale()
 	}
 	setAxisScale(QwtPlot::yRight, ZInterval.minValue(), ZInterval.maxValue());
 	m_matrix->setInterval(Qt::ZAxis, ZInterval);
+
+	m_colorMapWidget->setMinMax(m_min, m_max);
+
 	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
 	//rTicks[QwtScaleDiv::MajorTick] << ZInterval.minValue() << (ZInterval.maxValue() - ZInterval.minValue()) / 2 << ZInterval.maxValue();
 	//QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
 	//m_colorMapWidget->setColorMap(ZInterval, AwQwtColorMap::newMap(m_displaySettings->colorMap));
 	//m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-	updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
+//	updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
 	//m_colorMapWidget->repaint();
 	m_spectro->invalidateCache();
 	replot();

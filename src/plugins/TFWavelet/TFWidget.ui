@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1334</width>
-    <height>583</height>
+    <width>1104</width>
+    <height>654</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,11 +22,11 @@
     <layout class="QGridLayout" name="signalsLayout" rowstretch="0" columnstretch="0"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_9">
+    <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,1">
      <item>
       <widget class="QGroupBox" name="groupBoxCompute">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -281,7 +281,7 @@
      <item>
       <widget class="QGroupBox" name="groupBoxDisplay">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -289,39 +289,64 @@
        <property name="title">
         <string>Display Settings</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Normalization:</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Colormap:</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,1,0,0">
           <item row="3" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Freq. scale:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="QDoubleSpinBox" name="spinMaxZ">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::NoButtons</enum>
+            </property>
+            <property name="maximum">
+             <double>100000000000000005366162204393472.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QDoubleSpinBox" name="spinMinZ">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::NoButtons</enum>
+            </property>
+            <property name="maximum">
+             <double>10000000000000000470601344959054695891559601407866630764278709534898249531392.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Normalization:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Colormap:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
            <widget class="QCheckBox" name="checkBoxColormapScale">
             <property name="text">
              <string>Show colormap scale</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="5" column="2" colspan="2">
            <widget class="QCheckBox" name="checkBoxLogScale">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -337,21 +362,14 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Freq. scale:</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Min Z Value:</string>
+            </property>
+           </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="cbNorm"/>
-          </item>
-          <item row="3" column="1">
+          <item row="4" column="2" colspan="2">
            <widget class="QCheckBox" name="checkBoxFreqScale">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -370,29 +388,33 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cbZScale"/>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Max Z Value:</string>
+            </property>
+           </widget>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="3">
+           <widget class="QSlider" name="gainSlider">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
            <widget class="QComboBox" name="cbColormap"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cbNorm"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cbZScale"/>
           </item>
          </layout>
         </item>
        </layout>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>

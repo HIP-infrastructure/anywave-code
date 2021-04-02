@@ -430,6 +430,8 @@ void AnyWave::applyNewLanguage()
 void AnyWave::quit()
 {
 	AwDebugLog::instance()->closeFile();
+	if (m_display)
+		m_display->closeFile();
 
 	AwSettings::getInstance()->closeFile();
 	// stop MATPy server if running
@@ -469,7 +471,7 @@ void AnyWave::quit()
 		m_display->quit();
 	if (m_SEEGViewer) {
 		delete m_SEEGViewer;
-		m_SEEGViewer = NULL;
+		m_SEEGViewer = nullptr;
 	}
 	AwProcessManager::instance()->quit();
 	AwMarkerManager::instance()->quit();

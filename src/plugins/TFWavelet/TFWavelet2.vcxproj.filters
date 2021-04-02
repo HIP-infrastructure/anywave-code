@@ -31,16 +31,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <ClCompile Include="display_settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -62,6 +52,12 @@
     <ClCompile Include="TFWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TFQCustomPlot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TFColorMapWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display_settings.h">
@@ -76,8 +72,6 @@
     <ClInclude Include="tfwavelet2_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="settingsui.h">
@@ -99,6 +93,17 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="TFWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtMoc Include="TFQCustomPlot.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TFColorMapWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="TFColorMapWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

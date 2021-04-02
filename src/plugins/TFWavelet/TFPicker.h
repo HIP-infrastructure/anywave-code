@@ -40,7 +40,7 @@ class TFPicker : public QwtPlotPicker
 {
 	Q_OBJECT
 public:
-	TFPicker(QwtPlotCanvas *canvas, QwtScaleWidget *widget);
+	TFPicker(QwtPlotCanvas *canvas /*, QwtScaleWidget *widget*/);
 	~TFPicker();
 	QwtText trackerText(const QPoint &pos) const;
 	void setFreqScaleInterval(float min, float max);
@@ -51,7 +51,8 @@ signals:
 protected:
 	QwtInterval m_freqInterval;
 	QColor m_trackerColor;
-	QwtScaleWidget *m_yScaleWidget;
+//	QwtScaleWidget *m_yScaleWidget;
+	QwtPlot* m_plot;
 protected slots:
 	void prepareSelection(const QRectF& rect);
 

@@ -10,6 +10,8 @@
 #include <aw_armadillo.h>
 #include "tfparam.h"
 
+class TFColorMapWidget;
+
 class TFPlot : public QwtPlot // public QObject
 {
 	Q_OBJECT
@@ -17,7 +19,7 @@ public:
 	TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QWidget *parent = Q_NULLPTR);
 	~TFPlot();
 
-	inline QWidget *leftWidget() { return (QWidget *)m_freqScaleWidget; }
+	inline QWidget* leftWidget() { return (QWidget*) m_freqScaleWidget;  }
 	inline QWidget *rightWidget() { return (QWidget *)m_colorMapWidget; }
 	inline double min() { return m_min; }
 	inline double max() { return m_max; }
@@ -35,14 +37,13 @@ private slots:
 	void select(int start, int duration);
 	void select(int start, int duration, float fmin, int lrow, int hrow);
 protected:
-	void updateZScale();
-
 	AwChannel * m_channel;
 	float m_positionInData;
 	QwtPlotSpectrogram *m_spectro;
 	QwtMatrixRasterData *m_matrix;
 	QwtScaleWidget *m_freqScaleWidget;
-	QwtScaleWidget *m_colorMapWidget;
+//	QwtScaleWidget *m_colorMapWidget;
+	TFColorMapWidget* m_colorMapWidget;
 	QwtInterval ZInterval;
 	QVector<double> m_valueMatrix;
 	TFSettings *m_settings;
@@ -55,4 +56,5 @@ protected:
 	void applyNormalization();
 	void applyColorMap();
 	void refresh();
+	void updateZScale();
 };

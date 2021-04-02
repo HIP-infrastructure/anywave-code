@@ -568,21 +568,21 @@ void AwMarkerManagerSettings::removeAllLabels()
 	if (AwMessageBox::question(this, tr("Remove Markers"), QString(tr("Do you really want to remove all %1?").arg(label))) == QMessageBox::No)
 		return;
 
-	m_displayedMarkers = m_model->markers();
+	AwMarkerList currentMarkers = m_model->markers();
 	AwMarkerList::iterator it;
 #ifdef Q_OS_MAC
-	it = std::remove_if(m_displayedMarkers.begin(), m_displayedMarkers.end(),
+	it = std::remove_if(currentMarkers.begin(), currentMarkers.end(),
 			[label](AwMarker* m) { return m->label() == label; });
 #else
-	if (MARKERS_THREAD_THRESHOLD <= m_displayedMarkers.size())
-		it = std::remove_if(m_displayedMarkers.begin(), m_displayedMarkers.end(),
+	if (MARKERS_THREAD_THRESHOLD <= currentMarkers.size())
+		it = std::remove_if(currentMarkers.begin(), currentMarkers.end(),
 			[label](AwMarker* m) { return m->label() == label; });
 	else
-		it = std::remove_if(std::execution::par, m_displayedMarkers.begin(), m_displayedMarkers.end(),
+		it = std::remove_if(std::execution::par, currentMarkers.begin(), currentMarkers.end(),
 			[label](AwMarker* m) { return m->label() == label; });
 #endif
 	AwMarkerList markers;
-	for (AwMarkerList::iterator i = it; i < m_displayedMarkers.end(); i++)
+	for (AwMarkerList::iterator i = it; i < currentMarkers.end(); i++)
 		markers << *i;
 	//AwMarkerList markers;
 	//for  (AwMarker *m : m_displayedMarkers) {

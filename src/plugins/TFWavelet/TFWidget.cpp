@@ -41,7 +41,7 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_ui.cbNorm->setCurrentIndex(0);
 	connect(m_ui.cbNorm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeNormalization(int)));
 	// Z Scale
-	m_ui.cbZScale->addItem("Max to Max", DisplaySettings::MaxToMax);
+	m_ui.cbZScale->addItem("-Max to Max", DisplaySettings::MaxToMax);
 	m_ui.cbZScale->addItem("Min to Max", DisplaySettings::MinToMax);
 	m_ui.cbZScale->addItem("Zero to Max", DisplaySettings::ZeroToMax);
 	m_ui.cbZScale->setCurrentIndex(1);
@@ -197,18 +197,18 @@ void TFWidget::setChannels(const AwChannelList& channels)
 	layout->setRowStretch(1, 0);
 	layout->setColumnStretch(1, 1);
 
-	if (m_colorMapWidget == nullptr) {
-		// building the colormap widget
-		m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale, this);
-		m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
-		m_colorMapWidget->setBorderDist(1, 1);
-		m_colorMapWidget->setSpacing(5);
-		m_colorMapWidget->setMargin(5);
-		m_colorMapWidget->setColorBarEnabled(true);
-		//m_colorMapWidget->setColorBarWidth(25);
-		m_colorMapWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		m_colorMapWidget->hide();
-	}
+	//if (m_colorMapWidget == nullptr) {
+	//	// building the colormap widget
+	//	m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale, this);
+	//	m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
+	//	m_colorMapWidget->setBorderDist(1, 1);
+	//	m_colorMapWidget->setSpacing(5);
+	//	m_colorMapWidget->setMargin(5);
+	//	m_colorMapWidget->setColorBarEnabled(true);
+	//	//m_colorMapWidget->setColorBarWidth(25);
+	//	m_colorMapWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	//	m_colorMapWidget->hide();
+	//}
 
 	// Build params for computation and add plot to the layout
 	for (auto c : channels) {
@@ -221,8 +221,9 @@ void TFWidget::setChannels(const AwChannelList& channels)
 		TFPlot *plot = new TFPlot(m_settings, &m_displaySettings, c);
 		m_plots << plot;
 		layout->addWidget(plot, row, 1);
-		layout->addWidget(plot->leftWidget(), row++, 0);
-		//layout->addWidget(plot->rightWidget(), row++, 2);
+		layout->addWidget(plot->leftWidget(), row, 0);
+		layout->addWidget(plot->rightWidget(), row++, 2);
+		
 
 		connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
 		connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));

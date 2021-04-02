@@ -176,7 +176,7 @@ int AwMarker::save(const QString& path, const AwMarkerList& markers)
 AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 {
 	AwMarkerList res;
-	foreach (AwMarker *m, markers)
+	for (AwMarker *m : markers)
 		res << new AwMarker(m);
 	return res;
 }
