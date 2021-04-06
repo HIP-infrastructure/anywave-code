@@ -362,7 +362,10 @@
         <item row="5" column="0" colspan="2">
          <widget class="QCheckBox" name="checkBoxColormapScale">
           <property name="text">
-           <string>Show colormap scale</string>
+           <string>Show Colormap Options</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>

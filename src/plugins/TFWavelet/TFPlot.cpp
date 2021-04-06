@@ -38,7 +38,9 @@
 TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QWidget *parent) : QwtPlot(parent)
 {	
 	// Set minimum heigth to 200
-	setMinimumSize(QSize(0, 200));
+	setMinimumSize(QSize(50, 200));
+	setFrameStyle(QFrame::NoFrame);
+	setLineWidth(0);
 
 	m_channel = channel;
 	m_positionInData = 0.;
@@ -49,8 +51,8 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
     m_spectro->setRenderThreadCount(0); // use system specific thread count
 	ds->colorMap =  AwColorMap::Parula;
 	m_spectro->attach(this);
-	//plotLayout()->setAlignCanvasToScales(true);
-	plotLayout()->setAlignCanvasToScales(false);
+	plotLayout()->setAlignCanvasToScales(true);
+	//plotLayout()->setAlignCanvasToScales(false);
 	plotLayout()->setCanvasMargin(0);
 	setAutoReplot(false);
 	m_matrix = new QwtMatrixRasterData;
@@ -83,6 +85,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 
 	// building the colormap widget
 	m_colorMapWidget = new TFColorMapWidget(m_displaySettings, this);
+	connect(m_colorMapWidget, &TFColorMapWidget::newZInterval, this, &TFPlot::updateZInterval);
 
 	//m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 	//m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
@@ -92,7 +95,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	//m_colorMapWidget->setColorBarEnabled(true);
 	//m_colorMapWidget->setColorBarWidth(25);
 	//m_colorMapWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-	m_colorMapWidget->hide();
+	// m_colorMapWidget->hide();
 	
 	// building picker
 	m_picker = new TFPicker((QwtPlotCanvas*)canvas());
@@ -109,6 +112,12 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 TFPlot::~TFPlot()
 {
 }
+
+QSize TFPlot::sizeHint() const
+{
+	return QSize(400, 800);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
@@ -296,8 +305,9 @@ void TFPlot::updateZScale()
 	}
 	setAxisScale(QwtPlot::yRight, ZInterval.minValue(), ZInterval.maxValue());
 	m_matrix->setInterval(Qt::ZAxis, ZInterval);
-
-	m_colorMapWidget->setMinMax(ZInterval);
+	auto Interval = m_colorMapWidget->setMinMax(ZInterval);
+	m_matrix->setInterval(Qt::ZAxis, Interval);
+	m_colorMapWidget->setMinMax(Interval);
 
 	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
 	//rTicks[QwtScaleDiv::MajorTick] << ZInterval.minValue() << (ZInterval.maxValue() - ZInterval.minValue()) / 2 << ZInterval.maxValue();
@@ -324,5 +334,15 @@ void TFPlot::applyColorMap()
 	//m_colorMapWidget->repaint();
 	m_spectro->invalidateCache();
 	m_colorMapWidget->updateColorMap();
+	replot();
+}
+
+void TFPlot::updateZInterval(const QwtInterval& interval)
+{
+	// check that interval is correct
+	if (interval.maxValue() <= interval.minValue())
+		return;
+	m_matrix->setInterval(Qt::ZAxis, interval);
+	m_spectro->invalidateCache();
 	replot();
 }

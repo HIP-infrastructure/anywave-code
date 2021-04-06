@@ -24,12 +24,14 @@ public:
 	inline double min() { return m_min; }
 	inline double max() { return m_max; }
 	void setMinMax(double min, double max);
+	QSize sizeHint() const override;
 public slots:
 	void setNewData(float position, TFParam *param);
 	void updateDisplaySettings();
 	void showFreqScale(bool flag);
 	void showColorMapScale(bool flag);
 	void updateFreqScale(float min, float max, float step);
+	void updateZInterval(const QwtInterval& ZInterval);
 signals:
 	void selectionDone(float pos, float duration);
 	void selectionMade(AwChannel *channel, float pos, int start, int dur, float fmin, int lrow, int hrow);
