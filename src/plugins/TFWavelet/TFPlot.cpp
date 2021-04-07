@@ -39,7 +39,6 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 {	
 	// Set minimum heigth to 200
 	setMinimumSize(QSize(50, 200));
-	setFrameStyle(QFrame::NoFrame);
 	setLineWidth(0);
 
 	m_channel = channel;
@@ -85,6 +84,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 
 	// building the colormap widget
 	m_colorMapWidget = new TFColorMapWidget(m_displaySettings, this);
+	connect(m_colorMapWidget, SIGNAL(applyMinMaxToAll(double, double)), this, SIGNAL(applyMinMaxToAll(double, double)));
 	connect(m_colorMapWidget, &TFColorMapWidget::newZInterval, this, &TFPlot::updateZInterval);
 
 	//m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
@@ -116,6 +116,12 @@ TFPlot::~TFPlot()
 QSize TFPlot::sizeHint() const
 {
 	return QSize(400, 800);
+}
+
+void TFPlot::setMinMaxZScale(double min, double max)
+{
+	m_colorMapWidget->forceMinMax(min, max);
+
 }
 
 
@@ -300,14 +306,14 @@ void TFPlot::updateZScale()
 		break;
 	case DisplaySettings::MaxToMax:
 		//ZInterval = QwtInterval(-max, m_max * m_displaySettings->gain);
-		ZInterval = QwtInterval(-max, m_max);
+		ZInterval = QwtInterval(-max, max);
 		break;
 	}
 	setAxisScale(QwtPlot::yRight, ZInterval.minValue(), ZInterval.maxValue());
 	m_matrix->setInterval(Qt::ZAxis, ZInterval);
-	auto Interval = m_colorMapWidget->setMinMax(ZInterval);
+	auto Interval = m_colorMapWidget->setDataZInterval(ZInterval);
 	m_matrix->setInterval(Qt::ZAxis, Interval);
-	m_colorMapWidget->setMinMax(Interval);
+	//m_colorMapWidget->setMinMax(Interval);
 
 	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
 	//rTicks[QwtScaleDiv::MajorTick] << ZInterval.minValue() << (ZInterval.maxValue() - ZInterval.minValue()) / 2 << ZInterval.maxValue();
@@ -320,12 +326,12 @@ void TFPlot::updateZScale()
 	replot();
 }
 
-void TFPlot::setMinMax(double min, double max)
-{
-	m_min = min;
-	m_max = max;
-	updateZScale();
-}
+//void TFPlot::setMinMax(double min, double max)
+//{
+//	m_min = min;
+//	m_max = max;
+//	updateZScale();
+//}
 
 void TFPlot::applyColorMap()
 {

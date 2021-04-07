@@ -37,14 +37,17 @@ public:
 	TFColorMapWidget(DisplaySettings *settings, QWidget*parent = Q_NULLPTR);
 	~TFColorMapWidget();
 
-	QwtInterval setMinMax(const QwtInterval& ZInterval);
+	QwtInterval setDataZInterval(const QwtInterval& ZInterval);
+	void forceMinMax(double min, double max);
 	void updateColorMap();
 signals:
 	void newZInterval(const QwtInterval& interval);
+	void applyMinMaxToAll(double, double);
 public slots:
 	void lock();
 	void reset();
 	void changeMaxGain(int);
+	void applyToAllMaps();
 
 private:
 	Ui::TFColorMapWidget m_ui;

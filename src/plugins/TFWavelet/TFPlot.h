@@ -23,8 +23,10 @@ public:
 	inline QWidget *rightWidget() { return (QWidget *)m_colorMapWidget; }
 	inline double min() { return m_min; }
 	inline double max() { return m_max; }
-	void setMinMax(double min, double max);
+//	void setMinMax(double min, double max);
 	QSize sizeHint() const override;
+
+	void setMinMaxZScale(double min, double max);
 public slots:
 	void setNewData(float position, TFParam *param);
 	void updateDisplaySettings();
@@ -33,6 +35,7 @@ public slots:
 	void updateFreqScale(float min, float max, float step);
 	void updateZInterval(const QwtInterval& ZInterval);
 signals:
+	void applyMinMaxToAll(double, double);
 	void selectionDone(float pos, float duration);
 	void selectionMade(AwChannel *channel, float pos, int start, int dur, float fmin, int lrow, int hrow);
 private slots:

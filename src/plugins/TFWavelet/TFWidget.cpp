@@ -146,11 +146,11 @@ void TFWidget::compute()
 	for (TFParam *p : m_tfComputations) {
 		auto plot = m_plots.at(i++);
 		plot->setNewData(m_signalView->positionInFile(), p);
-		m_min = std::min(plot->min(), m_min);
-		m_max = std::max(plot->max(), m_max);
+//		m_min = std::min(plot->min(), m_min);
+//		m_max = std::max(plot->max(), m_max);
 	}
-	for (auto plot : m_plots)
-		plot->setMinMax(m_min, m_max);
+//	for (auto plot : m_plots)
+//		plot->setMinMax(m_min, m_max);
 
 	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
 	//auto range = m_max - m_min;
@@ -167,24 +167,24 @@ void TFWidget::compute()
 
 void TFWidget::updatePlots() 
 {
-	m_min = m_max = 0.;
-	for (auto p : m_plots) {
-		p->updateDisplaySettings();
-		// update plots data and compute global color map min and max.
-		m_min = std::min(p->min(), m_min);
-		m_max = std::max(p->max(), m_max);
-	}
-	for (auto plot : m_plots)
-		plot->setMinMax(m_min, m_max);
-	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	//auto range = m_max - m_min;
-	//auto step = std::abs(range / 4);
-	//QwtInterval zInterval(m_min, m_max);
-	//rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
-	//QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
-	//m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
-	//m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-	//m_colorMapWidget->repaint();
+	//m_min = m_max = 0.;
+	//for (auto p : m_plots) {
+	//	p->updateDisplaySettings();
+	//	// update plots data and compute global color map min and max.
+	//	m_min = std::min(p->min(), m_min);
+	//	m_max = std::max(p->max(), m_max);
+	//}
+	//for (auto plot : m_plots)
+	//	plot->setMinMax(m_min, m_max);
+	////QList<double> rTicks[QwtScaleDiv::NTickTypes];
+	////auto range = m_max - m_min;
+	////auto step = std::abs(range / 4);
+	////QwtInterval zInterval(m_min, m_max);
+	////rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
+	////QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
+	////m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
+	////m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
+	////m_colorMapWidget->repaint();
 }
 
 void TFWidget::setChannels(const AwChannelList& channels)
@@ -225,13 +225,17 @@ void TFWidget::setChannels(const AwChannelList& channels)
 		layout->addWidget(plot->rightWidget(), row++, 2);
 		
 
-		connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
-		connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));
-		connect(m_ui.checkBoxLogScale, SIGNAL(toggled(bool)), this, SLOT(switchLogScale(bool)));
+		//connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
+		//connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));
+		//connect(m_ui.checkBoxLogScale, SIGNAL(toggled(bool)), this, SLOT(switchLogScale(bool)));
 		connect(plot, SIGNAL(selectionDone(float, float)), this, SLOT(highlightSampleInterval(float, float)));
 		connect(plot, SIGNAL(selectionMade(AwChannel *, float, int, int, float, int, int)), this, SIGNAL(selectionMade(AwChannel *, float, int, int, float, int, int)));
 		connect(this, SIGNAL(freqScaleChanged(float, float, float)), plot, SLOT(updateFreqScale(float, float, float)));
+		connect(plot, SIGNAL(applyMinMaxToAll(double, double)), this, SLOT(applyMinMaxToAllPlots(double, double)));
 	}
+	connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
+	connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));
+	connect(m_ui.checkBoxLogScale, SIGNAL(toggled(bool)), this, SLOT(switchLogScale(bool)));
 	auto nPlotRows = row - 1;
 	// add color map widget to the right column and span it to all the rows used by TF plots
 //	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
@@ -295,7 +299,9 @@ void TFWidget::changeNormalization(int index)
 		m_displaySettings.normalization = DisplaySettings::ZScore;
 		break;
 	}
-	updatePlots();
+//	updatePlots();
+	for (auto p : m_plots)
+		p->updateDisplaySettings();
 }
 
 void TFWidget::changeZScale(int index)
@@ -306,11 +312,22 @@ void TFWidget::changeZScale(int index)
 		p->updateDisplaySettings();
 }
 
-void TFWidget::changeGain(int value)
+void TFWidget::applyMinMaxToAllPlots(double min, double max)
 {
-	m_displaySettings.gain = (100 - (float)value) / 100;
-	//updatePlots();
+	TFPlot* plot = static_cast<TFPlot*>(sender());
+	if (plot == nullptr)
+		return;
+	for (auto p : m_plots) {
+		if (plot != p)
+			p->setMinMaxZScale(min, max);
+	}
 }
+
+//void TFWidget::changeGain(int value)
+//{
+//	m_displaySettings.gain = (100 - (float)value) / 100;
+//	//updatePlots();
+//}
 
 void TFWidget::highlightSampleInterval(float start, float duration)
 {

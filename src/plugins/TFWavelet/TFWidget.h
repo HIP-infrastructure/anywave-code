@@ -32,7 +32,8 @@ private slots:
 	void changeColorMap(int index);
 	void changeNormalization(int index);
 	void changeZScale(int index);
-	void changeGain(int value);
+	void applyMinMaxToAllPlots(double, double);
+	//void changeGain(int value);
 	void compute();
 	void recompute();
 	void highlightSampleInterval(float start, float duration);
