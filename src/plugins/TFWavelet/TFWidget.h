@@ -23,6 +23,7 @@ public:
 	AwBaseSignalView *signalView() { return m_signalView; }
 	void setChannels(const AwChannelList& channels);
 	void updateBaselineOptions();
+	void applyMinMaxToAllPlots(double, double);
 signals:
 	void computeClicked();
 	void freqScaleChanged(float min, float max, float step);
@@ -32,7 +33,7 @@ private slots:
 	void changeColorMap(int index);
 	void changeNormalization(int index);
 	void changeZScale(int index);
-	void applyMinMaxToAllPlots(double, double);
+	
 	//void changeGain(int value);
 	void compute();
 	void recompute();
@@ -41,6 +42,8 @@ private slots:
 	void showFreqScale(bool);
 	void showColorMapScale(bool);
 	void toggleBaselineCorrection(bool flag);
+	void lockZRange();
+	void unlockZRange();
 private:
 	Ui::TFWidgetUi m_ui;
 	AwBaseSignalView *m_signalView;
@@ -50,7 +53,7 @@ private:
 	DisplaySettings m_displaySettings;
 	QList<TFParam *> m_tfComputations, m_baselineComputations;
 	QList<TFPlot *> m_plots;
-	bool m_baselineComputed;
+	bool m_baselineComputed, m_zRangeLocked;
 	AwChannelList m_channels;
 	AwMarkerList m_baselineMarkers;
 };

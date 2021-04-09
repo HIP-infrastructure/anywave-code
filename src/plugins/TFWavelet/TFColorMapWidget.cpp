@@ -66,17 +66,18 @@ TFColorMapWidget::TFColorMapWidget(DisplaySettings *settings, QWidget *parent)
 	m_ui.slider->setMinimum(0);
 	m_ui.slider->setMaximum(100);
 	m_ui.slider->setValue(0);
-	m_ui.spinMin->setMinimum(std::numeric_limits<double>::min());
-	m_ui.spinMin->setMaximum(std::numeric_limits<double>::max());
-	m_ui.spinMax->setMinimum(std::numeric_limits<double>::min());
-	m_ui.spinMax->setMaximum(std::numeric_limits<double>::max());
+//	m_ui.spinMin->setMinimum(std::numeric_limits<double>::min());
+//	m_ui.spinMin->setMaximum(std::numeric_limits<double>::max());
+//	m_ui.spinMax->setMinimum(std::numeric_limits<double>::min());
+//	m_ui.spinMax->setMaximum(std::numeric_limits<double>::max());
 	connect(m_ui.slider, SIGNAL(valueChanged(int)), this, SLOT(changeMaxGain(int)));
-	connect(m_ui.buttonLock, &QPushButton::clicked, this, &TFColorMapWidget::lock);
+	//connect(m_ui.buttonLock, &QPushButton::clicked, this, &TFColorMapWidget::lock);
 	//connect(m_ui.spinMin, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
 	//	[=](double d) { forceMinMax(d, m_colorMapSettings.max());  });
 	//connect(m_ui.spinMax, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
 	//	[=](double d) { forceMinMax(m_colorMapSettings.min(), d);   });
-	connect(m_ui.buttonApplyAll, &QPushButton::clicked, this, &TFColorMapWidget::applyToAllMaps);
+//	connect(m_ui.buttonApplyAll, &QPushButton::clicked, this, &TFColorMapWidget::applyToAllMaps);
+	m_locked = false;
 }
 
 TFColorMapWidget::~TFColorMapWidget()
@@ -84,81 +85,94 @@ TFColorMapWidget::~TFColorMapWidget()
 }
 
 
-QwtInterval TFColorMapWidget::setDataZInterval(const QwtInterval& ZInterval)
+void TFColorMapWidget::setDataZInterval(const QwtInterval& ZInterval)
 {
-	m_colorMapSettings.setDataRange(ZInterval);
-	updateColorMap();
-	if (!m_colorMapSettings.isLocked()) {
-		m_ui.spinMax->setValue(m_colorMapSettings.max());
-		m_ui.spinMin->setValue(m_colorMapSettings.min());
-	}
-	return QwtInterval(m_colorMapSettings.min(), m_colorMapSettings.max());
-}
-
-void TFColorMapWidget::forceMinMax(double min, double max)
-{
-	if (!m_colorMapSettings.isLocked()) {
-		m_ui.spinMax->setValue(min);
-		m_ui.spinMin->setValue(max);
+//	m_colorMapSettings.setDataRange(ZInterval);
+//	m_ui.spinMin->setValue(m_colorMapSettings.min());
+//	m_ui.spinMax->setValue(m_colorMapSettings.max());
+//	return QwtInterval(m_colorMapSettings.min(), m_colorMapSettings.max());
+	m_realMax = ZInterval.maxValue();
+	m_realMin = ZInterval.minValue();
+	if (!m_locked) {
+		m_min = m_realMin;
+		m_max = m_realMax;
+	//	m_ui.spinMin->setValue(m_min);
+		m_ui.lineZMin->setText(QString().setNum(m_min, 'g', 2));
+		m_ui.lineZMax->setText(QString().setNum(m_max, 'g', 2));
+	//	m_ui.spinMax->setValue(m_max);
 	}
 	changeMaxGain(m_ui.slider->value());
 }
 
-void TFColorMapWidget::updateColorMap()
-{
-	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	//auto min = m_colorMapSettings.min();
-	//auto max = m_colorMapSettings.max();
-	//auto s = std::abs(max - min) / 4;
+//void TFColorMapWidget::forceMinMax(double min, double max)
+//{
+//	if (!m_colorMapSettings.isLocked()) {
+//		m_ui.spinMax->setValue(min);
+//		m_ui.spinMin->setValue(max);
+//	}
+//	changeMaxGain(m_ui.slider->value());
+//}
 
-	//rTicks[QwtScaleDiv::MajorTick] << min << std::floor(min + 1. * s) << std::floor(min + 2. * s) << std::floor(min + 3. * s) << max;
-	//rTicks[QwtScaleDiv::MajorTick] << min << max;
-	//QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
-	//m_scaleWidget->scaleDraw()->setScaleDiv(divR);
-	//m_scaleWidget->setColorMap(QwtInterval(min, max), AwQwtColorMap::newMap(m_settings->colorMap));
-	//m_scaleWidget->repaint();
+//void TFColorMapWidget::updateColorMap()
+//{
+//	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
+//	//auto min = m_colorMapSettings.min();
+//	//auto max = m_colorMapSettings.max();
+//	//auto s = std::abs(max - min) / 4;
+//
+//	//rTicks[QwtScaleDiv::MajorTick] << min << std::floor(min + 1. * s) << std::floor(min + 2. * s) << std::floor(min + 3. * s) << max;
+//	//rTicks[QwtScaleDiv::MajorTick] << min << max;
+//	//QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
+//	//m_scaleWidget->scaleDraw()->setScaleDiv(divR);
+//	//m_scaleWidget->setColorMap(QwtInterval(min, max), AwQwtColorMap::newMap(m_settings->colorMap));
+//	//m_scaleWidget->repaint();
+//}
+
+void TFColorMapWidget::lockZScale(double min, double max)
+{
+	m_locked = true;
+	m_min = min;
+	m_max = max; 
+	changeMaxGain(m_ui.slider->value());
 }
 
-void TFColorMapWidget::applyToAllMaps()
-{
-	emit applyMinMaxToAll(m_colorMapSettings.min(), m_colorMapSettings.max());
-}
+//void TFColorMapWidget::lock()
+//{
+//	if (m_colorMapSettings.isLocked()) {
+//		// unlock
+//		m_ui.buttonLock->setText("Lock");
+//		m_colorMapSettings.reset();
+//		m_colorMapSettings.setLock(false);
+//	}
+//	else {
+//		m_ui.buttonLock->setText("Unlock");
+//		m_colorMapSettings.setLock(true);
+//	}
+////	m_ui.slider->setEnabled(!m_colorMapSettings.isLocked());
+//	m_ui.spinMin->setEnabled(!m_colorMapSettings.isLocked());
+//	m_ui.spinMax->setEnabled(!m_colorMapSettings.isLocked());
+//}
 
-void TFColorMapWidget::lock()
-{
-	if (m_colorMapSettings.isLocked()) {
-		// unlock
-		m_ui.buttonLock->setText("Lock");
-		m_colorMapSettings.reset();
-		m_colorMapSettings.setLock(false);
-	}
-	else {
-		m_ui.buttonLock->setText("Unlock");
-		m_colorMapSettings.setLock(true);
-	}
-//	m_ui.slider->setEnabled(!m_colorMapSettings.isLocked());
-	m_ui.spinMin->setEnabled(!m_colorMapSettings.isLocked());
-	m_ui.spinMax->setEnabled(!m_colorMapSettings.isLocked());
-}
-
-void TFColorMapWidget::reset()
-{
-	m_colorMapSettings.reset();
-//	m_ui.slider->setEnabled(true);
-//	m_ui.slider->setValue(0);
-	m_ui.spinMin->setEnabled(true);
-	m_ui.spinMin->setValue(m_colorMapSettings.realMin());
-	m_ui.spinMax->setEnabled(true);
-	m_ui.spinMax->setValue(m_colorMapSettings.realMax());
-}
+//void TFColorMapWidget::reset()
+//{
+//	m_colorMapSettings.reset();
+////	m_ui.slider->setEnabled(true);
+////	m_ui.slider->setValue(0);
+//	m_ui.spinMin->setEnabled(true);
+//	m_ui.spinMin->setValue(m_colorMapSettings.realMin());
+//	m_ui.spinMax->setEnabled(true);
+//	m_ui.spinMax->setValue(m_colorMapSettings.realMax());
+//}
 
 void TFColorMapWidget::changeMaxGain(int percent)
 {
-	double maxGain = m_colorMapSettings.realMax() * ( 100 - static_cast<double>(percent)) / 100.;
+	//double maxGain = m_colorMapSettings.max() * ( 100 - static_cast<double>(percent)) / 100.;
+	double maxGain = m_max * (100 - static_cast<double>(percent)) / 100.;
 	// ensure max is alway > min
-	if (maxGain <= m_colorMapSettings.min())
+	if (maxGain <= m_min)
 		return;
- 	m_colorMapSettings.setMax(maxGain);
+	emit ZMaxGainChanged(maxGain);
+// 	m_colorMapSettings.setMax(maxGain);
 //	updateColorMap();
-	emit newZInterval(QwtInterval(m_colorMapSettings.min(), m_colorMapSettings.max()));
+//	emit newZInterval(QwtInterval(m_colorMapSettings.min(), m_colorMapSettings.max()));
 }

@@ -67,14 +67,46 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_ui.comboMarkers->setMarkers(markers);
 
 	m_baselineComputed = false;
+	m_zRangeLocked = false;
 	m_min = m_max = 0;
 	m_colorMapWidget = nullptr;
+
+	// extra init
+	m_ui.spinZMin->setMinimum(std::numeric_limits<double>::min());
+	m_ui.spinZMin->setMaximum(std::numeric_limits<double>::max());
+	m_ui.spinZMax->setMinimum(std::numeric_limits<double>::min());
+	m_ui.spinZMax->setMaximum(std::numeric_limits<double>::max());
+	connect(m_ui.buttonApply, &QPushButton::clicked, this, &TFWidget::lockZRange);
+	connect(m_ui.buttonReset, &QPushButton::clicked, this, &TFWidget::unlockZRange);
 }
 
 TFWidget::~TFWidget()
 {
 }
 
+
+void TFWidget::lockZRange()
+{
+	m_zRangeLocked = true;
+	m_ui.cbNorm->setEnabled(false);
+	m_ui.cbZScale->setEnabled(false);
+	m_ui.buttonApply->setEnabled(false);
+	double min = m_ui.spinZMin->value();
+	double max = m_ui.spinZMax->value();
+	applyMinMaxToAllPlots(min, max);
+}
+
+void TFWidget::unlockZRange()
+{
+	m_zRangeLocked = false;
+	m_ui.cbNorm->setEnabled(true);
+	m_ui.cbZScale->setEnabled(true);
+	m_ui.buttonApply->setEnabled(true);
+	for (auto p : m_plots)
+		p->resetZScale();
+	m_ui.spinZMin->setValue(m_min);
+	m_ui.spinZMax->setValue(m_max);
+}
 
 void TFWidget::toggleBaselineCorrection(bool flag)
 {
@@ -146,8 +178,12 @@ void TFWidget::compute()
 	for (TFParam *p : m_tfComputations) {
 		auto plot = m_plots.at(i++);
 		plot->setNewData(m_signalView->positionInFile(), p);
-//		m_min = std::min(plot->min(), m_min);
-//		m_max = std::max(plot->max(), m_max);
+		m_min = std::min(plot->min(), m_min);
+		m_max = std::max(plot->max(), m_max);
+	}
+	if (!m_zRangeLocked) {
+		m_ui.spinZMin->setValue(m_min);
+		m_ui.spinZMax->setValue(m_max);
 	}
 //	for (auto plot : m_plots)
 //		plot->setMinMax(m_min, m_max);
@@ -314,13 +350,14 @@ void TFWidget::changeZScale(int index)
 
 void TFWidget::applyMinMaxToAllPlots(double min, double max)
 {
-	TFPlot* plot = static_cast<TFPlot*>(sender());
-	if (plot == nullptr)
-		return;
-	for (auto p : m_plots) {
-		if (plot != p)
-			p->setMinMaxZScale(min, max);
-	}
+	//TFPlot* plot = static_cast<TFPlot*>(sender());
+	//if (plot == nullptr)
+	//	return;
+	//for (auto p : m_plots) {
+	//	if (plot != p)
+	//		p->setMinMaxZScale(min, max);
+	//}
+
 }
 
 //void TFWidget::changeGain(int value)

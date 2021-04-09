@@ -51,7 +51,6 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	ds->colorMap =  AwColorMap::Parula;
 	m_spectro->attach(this);
 	plotLayout()->setAlignCanvasToScales(true);
-	//plotLayout()->setAlignCanvasToScales(false);
 	plotLayout()->setCanvasMargin(0);
 	setAutoReplot(false);
 	m_matrix = new QwtMatrixRasterData;
@@ -85,7 +84,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	// building the colormap widget
 	m_colorMapWidget = new TFColorMapWidget(m_displaySettings, this);
 	connect(m_colorMapWidget, SIGNAL(applyMinMaxToAll(double, double)), this, SIGNAL(applyMinMaxToAll(double, double)));
-	connect(m_colorMapWidget, &TFColorMapWidget::newZInterval, this, &TFPlot::updateZInterval);
+	connect(m_colorMapWidget, &TFColorMapWidget::ZMaxGainChanged, this, &TFPlot::updateGainZInterval);
 
 	//m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 	//m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
@@ -118,12 +117,10 @@ QSize TFPlot::sizeHint() const
 	return QSize(400, 800);
 }
 
-void TFPlot::setMinMaxZScale(double min, double max)
+void TFPlot::updateGainZInterval(double max)
 {
-	m_colorMapWidget->forceMinMax(min, max);
-
+	updateZInterval(QwtInterval(m_min, max));
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
@@ -181,36 +178,18 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 	setAxisScale(QwtPlot::yLeft, min, max, step);
 	m_picker->setFreqScaleInterval(min, max);
 	replot();
-
-	//QVector<float> freqs = m_settings->freqs;
-	//double fmin = freqs.at(0);
-	//double fmax = freqs.at(freqs.size() - 1);
-	//QList<double> leftTicks[QwtScaleDiv::NTickTypes];
-	//auto start = fmin;
-	//int interval = (int)std::floor((fmax + fmin) / 8);
-	//while (start  < fmax) {
-	//	leftTicks[QwtScaleDiv::MajorTick] << start;
-	//	start += interval;
-	//}
-	//leftTicks[QwtScaleDiv::MajorTick] << fmax;
-	//QwtScaleDiv divL(leftTicks[QwtScaleDiv::MajorTick].first(), leftTicks[QwtScaleDiv::MajorTick].last(), leftTicks);
-	//m_freqScaleWidget->scaleDraw()->setScaleDiv(divL);
-	//m_picker->setFreqScaleInterval(fmin, fmax);
-	//setAxisScale(QwtPlot::yLeft, fmin, fmax);
-	//setAxisAutoScale(QwtPlot::yLeft);
-	//axisScaleEngine(QwtPlot::yLeft)->setAttribute(QwtScaleEngine::Floating, true);
-	//plotLayout()->setAlignCanvasToScales(true);
-	//m_freqScaleWidget->repaint();
 }
 
 
 void TFPlot::updateDisplaySettings()
 {
 	if (m_displaySettings->normalization != m_displayCopy.normalization) {
+		//m_colorMapWidget->reset();
 		m_displayCopy.normalization = m_displaySettings->normalization;
 		applyNormalization();
 	}
 	if (m_displaySettings->zInterval != m_displayCopy.zInterval) {
+		//m_colorMapWidget->reset();
 		m_displayCopy.zInterval = m_displaySettings->zInterval;
 		updateZScale();
 	}
@@ -218,10 +197,6 @@ void TFPlot::updateDisplaySettings()
 		m_displayCopy.colorMap = m_displaySettings->colorMap;
 		applyColorMap();
 	}
-	//if (m_displaySettings->gain != m_displayCopy.gain) {
-	//	m_displayCopy.gain = m_displaySettings->gain;
-	//	updateZScale();
-	//}
 	if (m_displaySettings->logScale != m_displayCopy.logScale) {
 		m_displayCopy.logScale = m_displaySettings->logScale;
 		if (m_displayCopy.logScale) {
@@ -293,54 +268,41 @@ void TFPlot::applyNormalization()
 
 void TFPlot::updateZScale()
 {
-	// apply gain
 	double max = std::max(std::abs(m_min), std::abs(m_max));
 	switch (m_displaySettings->zInterval) {
 	case DisplaySettings::MinToMax:
-		//ZInterval = QwtInterval(m_min, m_max * m_displaySettings->gain);
 		ZInterval = QwtInterval(m_min, m_max);
 		break;
 	case DisplaySettings::ZeroToMax:
-		//ZInterval = QwtInterval(0, m_max * m_displaySettings->gain);
 		ZInterval = QwtInterval(0, m_max);
 		break;
 	case DisplaySettings::MaxToMax:
-		//ZInterval = QwtInterval(-max, m_max * m_displaySettings->gain);
 		ZInterval = QwtInterval(-max, max);
 		break;
 	}
+	if (ZInterval.maxValue() <= ZInterval.minValue())
+		return;
 	setAxisScale(QwtPlot::yRight, ZInterval.minValue(), ZInterval.maxValue());
 	m_matrix->setInterval(Qt::ZAxis, ZInterval);
-	auto Interval = m_colorMapWidget->setDataZInterval(ZInterval);
-	m_matrix->setInterval(Qt::ZAxis, Interval);
-	//m_colorMapWidget->setMinMax(Interval);
-
-	//QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	//rTicks[QwtScaleDiv::MajorTick] << ZInterval.minValue() << (ZInterval.maxValue() - ZInterval.minValue()) / 2 << ZInterval.maxValue();
-	//QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
-	//m_colorMapWidget->setColorMap(ZInterval, AwQwtColorMap::newMap(m_displaySettings->colorMap));
-	//m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-//	updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
-	//m_colorMapWidget->repaint();
+	m_colorMapWidget->setDataZInterval(ZInterval);
+	m_realMin = ZInterval.minValue();
+	m_realMax = ZInterval.maxValue();
 	m_spectro->invalidateCache();
 	replot();
 }
 
-//void TFPlot::setMinMax(double min, double max)
-//{
-//	m_min = min;
-//	m_max = max;
-//	updateZScale();
-//}
-
 void TFPlot::applyColorMap()
 {
 	m_spectro->setColorMap(AwQwtColorMap::newMap(m_displaySettings->colorMap));
-	//m_colorMapWidget->setColorMap(ZInterval, AwQwtColorMap::newMap(m_displaySettings->colorMap));
-	//m_colorMapWidget->repaint();
 	m_spectro->invalidateCache();
-	m_colorMapWidget->updateColorMap();
 	replot();
+}
+
+void TFPlot::resetZScale()
+{
+	m_min = m_realMin;
+	m_max = m_realMax;
+	m_colorMapWidget->reset();
 }
 
 void TFPlot::updateZInterval(const QwtInterval& interval)
