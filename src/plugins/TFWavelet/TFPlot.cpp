@@ -285,10 +285,32 @@ void TFPlot::updateZScale()
 	setAxisScale(QwtPlot::yRight, ZInterval.minValue(), ZInterval.maxValue());
 	m_matrix->setInterval(Qt::ZAxis, ZInterval);
 	m_colorMapWidget->setDataZInterval(ZInterval);
-	m_realMin = ZInterval.minValue();
-	m_realMax = ZInterval.maxValue();
+//	m_realMin = ZInterval.minValue();
+//	m_realMax = ZInterval.maxValue();
+	m_min = ZInterval.minValue();
+	m_max = ZInterval.maxValue();
 	m_spectro->invalidateCache();
 	replot();
+}
+
+void TFPlot::setDataMatrix(const mat& matrix, float position)
+{
+	QVector<double> vec(matrix.n_rows * matrix.n_cols);
+	double* data = vec.data();
+	m_positionInData = position;
+	m_min = matrix.min();
+	m_max = matrix.max();
+	for (auto r = 0; r < matrix.n_rows; r++)
+		for (auto c = 0; c < matrix.n_cols; c++)
+			*data++ = matrix(r, c);
+
+	m_matrix->setValueMatrix(vec, m_mat.n_cols);
+	m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
+	m_matrix->setInterval(Qt::YAxis, QwtInterval(1, m_matrix->numRows()));
+	setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
+	m_spectro->setData(m_matrix);
+	m_spectro->invalidateCache();
+//	replot();
 }
 
 void TFPlot::applyColorMap()

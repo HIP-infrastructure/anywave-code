@@ -10,6 +10,7 @@
 #include "display_settings.h"
 #include <aw_armadillo.h>
 #include "tfparam.h"
+#include <aw_armadillo.h>
 
 class TFWidget : public AwProcessGUIWidget
 {
@@ -36,6 +37,7 @@ private slots:
 	
 	//void changeGain(int value);
 	void compute();
+	void compute2();
 	void recompute();
 	void highlightSampleInterval(float start, float duration);
 	void updatePlots();
@@ -45,15 +47,21 @@ private slots:
 	void lockZRange();
 	void unlockZRange();
 private:
+	arma::mat computeFunction(AwChannel*);
+	void applyNormalisation();
+	void setZScale();
+
 	Ui::TFWidgetUi m_ui;
 	AwBaseSignalView *m_signalView;
 	QwtScaleWidget *m_colorMapWidget; // global color map
-	double m_min, m_max;
+	double m_min, m_max, m_zmin, m_zmax;
 	TFSettings *m_settings;
 	DisplaySettings m_displaySettings;
 	QList<TFParam *> m_tfComputations, m_baselineComputations;
 	QList<TFPlot *> m_plots;
-	bool m_baselineComputed, m_zRangeLocked;
+	bool m_baselineComputed, m_zRangeLocked, m_computeBaseline;
 	AwChannelList m_channels;
 	AwMarkerList m_baselineMarkers;
+	QList<arma::mat> m_baselines, m_data;
+	QList<QPair<mat, mat>> m_results;
 };

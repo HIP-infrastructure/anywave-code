@@ -28,6 +28,7 @@ public:
 
 	//void setMinMaxZScale(double min, double max);
 	void resetZScale();
+	void setDataMatrix(const mat& data, float position);
 public slots:
 	void setNewData(float position, TFParam *param);
 	void updateDisplaySettings();
