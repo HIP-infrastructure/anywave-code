@@ -38,6 +38,7 @@ public:
 	~TFColorMapWidget();
 
 	void setDataZInterval(const QwtInterval& ZInterval);
+	void setZInterval(const QwtInterval& interval);
 //	void forceMinMax(double min, double max);
 //	void updateColorMap();
 
@@ -47,8 +48,10 @@ signals:
 //	void newZInterval(const QwtInterval& interval);
 	void ZMaxGainChanged(double);
 //	void applyMinMaxToAll(double, double);
+	void ZGainChanged(double);
 public slots:
 	void changeMaxGain(int);
+	void changeZGain(int);
 
 private:
 	Ui::TFColorMapWidget m_ui;

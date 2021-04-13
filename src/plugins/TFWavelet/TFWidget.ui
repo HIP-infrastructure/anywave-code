@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1113</width>
-    <height>662</height>
+    <width>1104</width>
+    <height>248</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,12 +17,12 @@
    <iconset resource="../../../resources/AnyWave.qrc">
     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QGridLayout" name="signalsLayout" rowstretch="0" columnstretch="0"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0,0">
      <item>
       <widget class="QGroupBox" name="groupBoxCompute">
        <property name="sizePolicy">
@@ -529,13 +529,26 @@
           <property name="sizeHint" stdset="0">
            <size>
             <width>20</width>
-            <height>40</height>
+            <height>44</height>
            </size>
           </property>
          </spacer>
         </item>
        </layout>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

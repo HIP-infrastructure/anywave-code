@@ -42,7 +42,8 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	setLineWidth(0);
 
 	m_channel = channel;
-	m_positionInData = 0.;
+	m_positionInData = 0;
+	m_zgain = 0;
 	enableAxis(QwtPlot::yRight, false);
 	enableAxis(QwtPlot::yLeft, false);
 	enableAxis(QwtPlot::xBottom, false);
@@ -83,8 +84,8 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 
 	// building the colormap widget
 	m_colorMapWidget = new TFColorMapWidget(m_displaySettings, this);
-	connect(m_colorMapWidget, SIGNAL(applyMinMaxToAll(double, double)), this, SIGNAL(applyMinMaxToAll(double, double)));
-	connect(m_colorMapWidget, &TFColorMapWidget::ZMaxGainChanged, this, &TFPlot::updateGainZInterval);
+//	connect(m_colorMapWidget, SIGNAL(applyMinMaxToAll(double, double)), this, SIGNAL(applyMinMaxToAll(double, double)));
+	connect(m_colorMapWidget, &TFColorMapWidget::ZGainChanged, this, &TFPlot::updateGainZInterval);
 
 	//m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 	//m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
@@ -117,9 +118,12 @@ QSize TFPlot::sizeHint() const
 	return QSize(400, 800);
 }
 
-void TFPlot::updateGainZInterval(double max)
+void TFPlot::updateGainZInterval(double gain)
 {
-	updateZInterval(QwtInterval(m_min, max));
+	//updateZInterval(QwtInterval(m_min, max));
+	m_zgain = gain;
+	updateZInterval(m_ZInterval);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,10 +148,10 @@ void TFPlot::select(int start, int duration)
 //void TFPlot::setNewData(float position, const QVector<double>& data, int row, int col)
 void TFPlot::setNewData(float position, TFParam *param)
 {
-	m_positionInData = position;
-	m_rawMat = param->data;
-	m_baselineMat = param->baselineData;
-	applyNormalization();
+	//m_positionInData = position;
+	//m_rawMat = param->data;
+	//m_baselineMat = param->baselineData;
+	//applyNormalization();
 	
 }
 
@@ -183,16 +187,16 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 
 void TFPlot::updateDisplaySettings()
 {
-	if (m_displaySettings->normalization != m_displayCopy.normalization) {
-		//m_colorMapWidget->reset();
-		m_displayCopy.normalization = m_displaySettings->normalization;
-		applyNormalization();
-	}
-	if (m_displaySettings->zInterval != m_displayCopy.zInterval) {
-		//m_colorMapWidget->reset();
-		m_displayCopy.zInterval = m_displaySettings->zInterval;
-		updateZScale();
-	}
+	//if (m_displaySettings->normalization != m_displayCopy.normalization) {
+	//	//m_colorMapWidget->reset();
+	//	m_displayCopy.normalization = m_displaySettings->normalization;
+	//	applyNormalization();
+	//}
+	//if (m_displaySettings->zInterval != m_displayCopy.zInterval) {
+	//	//m_colorMapWidget->reset();
+	//	m_displayCopy.zInterval = m_displaySettings->zInterval;
+	//	updateZScale();
+	//}
 	if (m_displaySettings->colorMap != m_displayCopy.colorMap) {
 		m_displayCopy.colorMap = m_displaySettings->colorMap;
 		applyColorMap();
@@ -216,85 +220,97 @@ void TFPlot::updateDisplaySettings()
 
 void TFPlot::applyNormalization()
 {
-	m_mat = mat(m_rawMat.memptr(), m_rawMat.n_rows, m_rawMat.n_cols, true);
-	QVector<double> matrix(m_mat.n_rows * m_mat.n_cols);
-	double *data = matrix.data();
+	//m_mat = mat(m_rawMat.memptr(), m_rawMat.n_rows, m_rawMat.n_cols, true);
+	//QVector<double> matrix(m_mat.n_rows * m_mat.n_cols);
+	//double *data = matrix.data();
 
-	switch (m_displaySettings->normalization) {
-	case DisplaySettings::N10log10Divisive:
-		// check for baseline correction
-		if (!m_baselineMat.is_empty()) {
-			for (auto i = 0; i < m_mat.n_rows; i++)
-				m_mat.row(i) = 10 * log10(m_mat.row(i) / arma::mean(m_baselineMat.row(i)));
-		}
-		else {
-			for (auto i = 0; i < m_mat.n_rows; i++)
-				m_mat.row(i) = 10 * log10(m_mat.row(i) / arma::mean(m_mat.row(i)));
-		}
-		break;
-	case DisplaySettings::NoNorm:
-		break;
-	case DisplaySettings::ZScore:
-		if (!m_baselineMat.is_empty()) {
-			for (auto i = 0; i < m_mat.n_rows; i++) {
-				m_mat.row(i) -= arma::mean(m_baselineMat.row(i));
-				m_mat.row(i) /= arma::stddev(m_baselineMat.row(i));
-			}
-		}
-		else {
-			for (auto i = 0; i < m_mat.n_rows; i++) {
-				m_mat.row(i) -= arma::mean(m_mat.row(i));
-				m_mat.row(i) /= arma::stddev(m_mat.row(i));
-			}
-		}
-		break;
-	}
-	// store min and max
-	m_min = m_mat.min();
-	m_max = m_mat.max();
-	for (auto r = 0; r < m_mat.n_rows; r++)
-		for (auto c = 0; c < m_mat.n_cols; c++)
-			*data++ = m_mat(r, c);
+	//switch (m_displaySettings->normalization) {
+	//case DisplaySettings::N10log10Divisive:
+	//	// check for baseline correction
+	//	if (!m_baselineMat.is_empty()) {
+	//		for (auto i = 0; i < m_mat.n_rows; i++)
+	//			m_mat.row(i) = 10 * log10(m_mat.row(i) / arma::mean(m_baselineMat.row(i)));
+	//	}
+	//	else {
+	//		for (auto i = 0; i < m_mat.n_rows; i++)
+	//			m_mat.row(i) = 10 * log10(m_mat.row(i) / arma::mean(m_mat.row(i)));
+	//	}
+	//	break;
+	//case DisplaySettings::NoNorm:
+	//	break;
+	//case DisplaySettings::ZScore:
+	//	if (!m_baselineMat.is_empty()) {
+	//		for (auto i = 0; i < m_mat.n_rows; i++) {
+	//			m_mat.row(i) -= arma::mean(m_baselineMat.row(i));
+	//			m_mat.row(i) /= arma::stddev(m_baselineMat.row(i));
+	//		}
+	//	}
+	//	else {
+	//		for (auto i = 0; i < m_mat.n_rows; i++) {
+	//			m_mat.row(i) -= arma::mean(m_mat.row(i));
+	//			m_mat.row(i) /= arma::stddev(m_mat.row(i));
+	//		}
+	//	}
+	//	break;
+	//}
+	//// store min and max
+	//m_min = m_mat.min();
+	//m_max = m_mat.max();
+	//for (auto r = 0; r < m_mat.n_rows; r++)
+	//	for (auto c = 0; c < m_mat.n_cols; c++)
+	//		*data++ = m_mat(r, c);
 
-	m_matrix->setValueMatrix(matrix, m_mat.n_cols);
-	m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
-	m_matrix->setInterval(Qt::YAxis, QwtInterval(1, m_matrix->numRows()));
-	setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
-	m_spectro->setData(m_matrix);
+	//m_matrix->setValueMatrix(matrix, m_mat.n_cols);
+	//m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
+	//m_matrix->setInterval(Qt::YAxis, QwtInterval(1, m_matrix->numRows()));
+	//setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
+	//m_spectro->setData(m_matrix);
 
-	// update z interval based on the Scale chosen
-	updateZScale();
+	//// update z interval based on the Scale chosen
+	//updateZScale();
 }
 
 void TFPlot::updateZScale()
 {
-	double max = std::max(std::abs(m_min), std::abs(m_max));
-	switch (m_displaySettings->zInterval) {
-	case DisplaySettings::MinToMax:
-		ZInterval = QwtInterval(m_min, m_max);
-		break;
-	case DisplaySettings::ZeroToMax:
-		ZInterval = QwtInterval(0, m_max);
-		break;
-	case DisplaySettings::MaxToMax:
-		ZInterval = QwtInterval(-max, max);
-		break;
-	}
-	if (ZInterval.maxValue() <= ZInterval.minValue())
-		return;
-	setAxisScale(QwtPlot::yRight, ZInterval.minValue(), ZInterval.maxValue());
-	m_matrix->setInterval(Qt::ZAxis, ZInterval);
-	m_colorMapWidget->setDataZInterval(ZInterval);
-//	m_realMin = ZInterval.minValue();
-//	m_realMax = ZInterval.maxValue();
-	m_min = ZInterval.minValue();
-	m_max = ZInterval.maxValue();
-	m_spectro->invalidateCache();
-	replot();
+//	double max = std::max(std::abs(m_min), std::abs(m_max));
+//	switch (m_displaySettings->zInterval) {
+//	case DisplaySettings::MinToMax:
+//		m_ZInterval = QwtInterval(m_min, m_max);
+//		break;
+//	case DisplaySettings::ZeroToMax:
+//		m_ZInterval = QwtInterval(0, m_max);
+//		break;
+//	case DisplaySettings::MaxToMax:
+//		m_ZInterval = QwtInterval(-max, max);
+//		break;
+//	}
+//	if (m_ZInterval.maxValue() <= m_ZInterval.minValue())
+//		return;
+//	setAxisScale(QwtPlot::yRight, m_ZInterval.minValue(), m_ZInterval.maxValue());
+//	m_matrix->setInterval(Qt::ZAxis, m_ZInterval);
+//	m_colorMapWidget->setDataZInterval(m_ZInterval);
+////	m_realMin = ZInterval.minValue();
+////	m_realMax = ZInterval.maxValue();
+//	m_min = m_ZInterval.minValue();
+//	m_max = m_ZInterval.maxValue();
+//	m_spectro->invalidateCache();
+//	replot();
 }
 
 void TFPlot::setDataMatrix(const mat& matrix, float position)
 {
+	//QVector<double> matrix(m_mat.n_rows * m_mat.n_cols);
+	//double *data = matrix.data();
+		//for (auto r = 0; r < m_mat.n_rows; r++)
+	//	for (auto c = 0; c < m_mat.n_cols; c++)
+	//		*data++ = m_mat(r, c);
+
+	//m_matrix->setValueMatrix(matrix, m_mat.n_cols);
+	//m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
+	//m_matrix->setInterval(Qt::YAxis, QwtInterval(1, m_matrix->numRows()));
+	//setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
+	//m_spectro->setData(m_matrix);
+
 	QVector<double> vec(matrix.n_rows * matrix.n_cols);
 	double* data = vec.data();
 	m_positionInData = position;
@@ -304,14 +320,16 @@ void TFPlot::setDataMatrix(const mat& matrix, float position)
 		for (auto c = 0; c < matrix.n_cols; c++)
 			*data++ = matrix(r, c);
 
-	m_matrix->setValueMatrix(vec, m_mat.n_cols);
-	m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
-	m_matrix->setInterval(Qt::YAxis, QwtInterval(1, m_matrix->numRows()));
+	m_matrix->setValueMatrix(vec, matrix.n_cols);
+	m_matrix->setInterval(Qt::XAxis, QwtInterval(0, m_matrix->numColumns()));
+	m_matrix->setInterval(Qt::YAxis, QwtInterval(0, m_matrix->numRows()));
 	setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
+//	m_matrix->setInterval(Qt::ZAxis, QwtInterval(m_min, m_max));
 	m_spectro->setData(m_matrix);
-	m_spectro->invalidateCache();
+//	m_spectro->invalidateCache();
 //	replot();
 }
+
 
 void TFPlot::applyColorMap()
 {
@@ -330,9 +348,21 @@ void TFPlot::resetZScale()
 void TFPlot::updateZInterval(const QwtInterval& interval)
 {
 	// check that interval is correct
-	if (interval.maxValue() <= interval.minValue())
+
+
+	m_ZInterval = interval;
+	if (interval.maxValue() <= interval.minValue() || interval.minValue() < m_min || interval.maxValue() > m_max) {
+		m_ZInterval.setMaxValue(m_max);
+		m_ZInterval.setMinValue(m_min);
+	}
+	// apply z gain
+	double value = m_ZInterval.maxValue() * (100 - m_zgain) / 100.;
+	if (value <= interval.minValue())
 		return;
-	m_matrix->setInterval(Qt::ZAxis, interval);
+	QwtInterval newInterval = m_ZInterval;
+	newInterval.setMaxValue(value);
+	m_matrix->setInterval(Qt::ZAxis, newInterval);
 	m_spectro->invalidateCache();
 	replot();
+	m_colorMapWidget->setZInterval(m_ZInterval);
 }

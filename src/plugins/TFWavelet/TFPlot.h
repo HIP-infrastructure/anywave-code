@@ -29,6 +29,7 @@ public:
 	//void setMinMaxZScale(double min, double max);
 	void resetZScale();
 	void setDataMatrix(const mat& data, float position);
+	void updateZScale();
 public slots:
 	void setNewData(float position, TFParam *param);
 	void updateDisplaySettings();
@@ -52,17 +53,18 @@ protected:
 	QwtScaleWidget *m_freqScaleWidget;
 //	QwtScaleWidget *m_colorMapWidget;
 	TFColorMapWidget* m_colorMapWidget;
-	QwtInterval ZInterval;
+	QwtInterval m_ZInterval;
 	QVector<double> m_valueMatrix;
 	TFSettings *m_settings;
 	DisplaySettings *m_displaySettings;
 	DisplaySettings m_displayCopy;
 	TFPicker *m_picker;
+	double m_zgain;
 	double m_min, m_max, m_realMin, m_realMax;
 	mat m_mat, m_rawMat, m_baselineMat;
 
 	void applyNormalization();
 	void applyColorMap();
 	void refresh();
-	void updateZScale();
+
 };

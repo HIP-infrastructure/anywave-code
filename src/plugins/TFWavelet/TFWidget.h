@@ -60,8 +60,8 @@ private:
 	QList<TFParam *> m_tfComputations, m_baselineComputations;
 	QList<TFPlot *> m_plots;
 	bool m_baselineComputed, m_zRangeLocked, m_computeBaseline;
-	AwChannelList m_channels;
+	AwChannelList m_channels; 
 	AwMarkerList m_baselineMarkers;
-	QList<arma::mat> m_baselines, m_data;
+	QList<arma::mat> m_baselines, m_rawTF, m_normalizedTF;
 	QList<QPair<mat, mat>> m_results;
 };
