@@ -47,6 +47,7 @@
 
 #include "CL/CommandLineParser.h"
 
+constexpr auto version = "21.04.14";
 
 int main(int argc, char *argv[])
 {
@@ -78,12 +79,13 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("INSERM U1106");
 	QCoreApplication::setOrganizationDomain("INS.org");
 	QCoreApplication::setApplicationName("AnyWave");
+	app.setApplicationVersion(version);
 
 	QSettings settings(QSettings::SystemScope, "INSERM U1106", "AnyWave");
 	settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
 
-	// check if arguments
+	// command line arguments parsing is done while building anywave.
 	AnyWave window(app.arguments());
 	return app.exec();
 }

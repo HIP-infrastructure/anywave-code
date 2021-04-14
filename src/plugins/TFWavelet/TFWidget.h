@@ -7,6 +7,7 @@
 #include <widget/SignalView/AwBaseSignalView.h>
 #include "tf_settings.h"
 #include "TFPlot.h"
+#include "TFQCustomPlot.h"
 #include "display_settings.h"
 #include <aw_armadillo.h>
 #include "tfparam.h"
@@ -64,4 +65,5 @@ private:
 	AwMarkerList m_baselineMarkers;
 	QList<arma::mat> m_baselines, m_rawTF, m_normalizedTF;
 	QList<QPair<mat, mat>> m_results;
+	TFQCustomPlot* m_qcplot;
 };

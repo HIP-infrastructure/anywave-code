@@ -272,9 +272,17 @@ void TFWidget::setChannels(const AwChannelList& channels)
 		// add TF plot widget to the layout
 		TFPlot *plot = new TFPlot(m_settings, &m_displaySettings, c);
 		m_plots << plot;
+
+		// DEBUG CODE using QCustomPlot
+		if (row == 1) {
+			m_qcplot = new TFQCustomPlot(m_settings, &m_displaySettings, c);
+			layout->addWidget(m_qcplot, row, 1);
+			row++;
+		}
 		layout->addWidget(plot, row, 1);
 		layout->addWidget(plot->leftWidget(), row, 0);
 		layout->addWidget(plot->rightWidget(), row++, 2);
+
 		
 
 		//connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
@@ -838,6 +846,8 @@ void TFWidget::applyNormalisation()
 		vmin(i) = r.min();
 		vmax(i) = r.max();
 		m_normalizedTF << r;
+		if (i == 0)
+			m_qcplot->setNewData(r, m_signalView->positionInFile());
 		m_plots.at(i++)->setDataMatrix(r, m_signalView->positionInFile());
 	}
 	m_min = vmin.min();

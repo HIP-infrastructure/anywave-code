@@ -27,6 +27,12 @@
 
 
 namespace keys {
+	constexpr auto gui_mode = "gui_mode";
+	constexpr auto operation = "operation";
+	// permitted operations in batch mode
+	constexpr auto BIDS_operation = "bids";
+	constexpr auto run_operation = "run";
+	//
 	constexpr auto time = "time";
 	constexpr auto date = "date";
 	constexpr auto iso_date = "iso_date";
