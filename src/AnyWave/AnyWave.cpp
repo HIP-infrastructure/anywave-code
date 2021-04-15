@@ -135,8 +135,8 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		operation = aw::commandLine::doParsing(args, arguments);
 	}
 	catch (const AwException& e) {
-		std::cerr << e.errorString().toStdString();
-		//quit();
+		std::cerr << e.errorString().toStdString() << std::endl;
+		quit();
 		exit(0);
 	}
 	if (operation == aw::commandLine::NoOperation) {
