@@ -38,7 +38,7 @@ private slots:
 	
 	//void changeGain(int value);
 	void compute();
-	void compute2();
+	void compute2(float, float);
 	void recompute();
 	void highlightSampleInterval(float start, float duration);
 	void updatePlots();
@@ -66,4 +66,6 @@ private:
 	QList<arma::mat> m_baselines, m_rawTF, m_normalizedTF;
 	QList<QPair<mat, mat>> m_results;
 	TFQCustomPlot* m_qcplot;
+	AwChannelList m_computationChannels;
+	float m_pos, m_duration;
 };

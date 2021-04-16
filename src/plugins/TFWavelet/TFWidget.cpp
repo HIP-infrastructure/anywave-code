@@ -10,6 +10,10 @@
 #include <graphics/AwQwtColorMap.h>
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
+//#include "matlab/coder_array.h"
+//#include "matlab/wavelet_dyn_morlet_preprocess.h"
+//#include "matlab/wavelet_dyn_morlet_freqlist.h"
+
 
 static void compute_tf(TFParam *p);
 static QMutex TFMutex;
@@ -22,8 +26,6 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_signalView->setFlags(AwBaseSignalView::NoMarkerBar|AwBaseSignalView::ViewAllChannels|AwBaseSignalView::EnableMarking);
 	m_signalView->setMinimumHeight(200);
 	m_settings = settings;
-
-
 	// init display settings
 	// Colormap
 	AwCMapNamesAndTypes names_types = AwColorMap::namesAndTypes();
@@ -79,10 +81,13 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	//m_ui.spinZMax->setMaximum(std::numeric_limits<double>::max());
 	connect(m_ui.buttonApply, &QPushButton::clicked, this, &TFWidget::lockZRange);
 	connect(m_ui.buttonReset, &QPushButton::clicked, this, &TFWidget::unlockZRange);
+
+	m_pos = m_duration = 0.0;
 }
 
 TFWidget::~TFWidget()
 {
+	m_computationChannels.erase(m_computationChannels.begin(), m_computationChannels.end());
 }
 
 
@@ -243,6 +248,9 @@ void TFWidget::setChannels(const AwChannelList& channels)
 {
 	// build layout for scroll area
 	QGridLayout *layout = m_ui.signalsLayout;
+	m_computationChannels.erase(m_computationChannels.begin(), m_computationChannels.end());
+	m_computationChannels = AwChannel::clone(channels);
+
 
 	int row = 0;
 	layout->addWidget(m_signalView, row++, 1);
@@ -301,7 +309,7 @@ void TFWidget::setChannels(const AwChannelList& channels)
 //	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
 	m_channels = channels;
 	m_signalView->setChannels(channels);
-	connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute2()));
+	connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute2(float, float)));
 //	connect(m_signalView, &AwBaseSignalView::positionChanged, this, &TFWidget::compute2);
 	repaint();
 }
@@ -447,13 +455,23 @@ void TFWidget::recompute()
 	m_settings->useDIFF = m_ui.checkBoxDIFF->isChecked();
 	m_settings->useBaselineCorrection = m_ui.checkBaseline->isChecked() && m_ui.checkBaseline->isEnabled();
 	m_settings->baselineMarker = m_ui.comboMarkers->currentText();
-	compute2();
+	//compute2();
 	emit freqScaleChanged(m_settings->freq_min, m_settings->freq_max, m_settings->step);
 	repaint();
 }
 
-void TFWidget::compute2()
+void TFWidget::compute2(float pos, float duration)
 {
+	if (m_computationChannels.isEmpty())
+		return;
+
+	if (pos == m_pos && m_duration == duration)
+		return;
+	m_pos = pos;
+	m_duration = duration;
+	Q_ASSERT(pos >= 0 && duration > 0);
+
+	m_process->requestData(&m_computationChannels, pos, duration);
 	m_signalView->scene()->removeHighLigthMarker();
 
 	std::function<arma::mat(AwChannel*)> comp = [this](AwChannel* channel) {
@@ -611,10 +629,169 @@ void TFWidget::compute2()
 		//}
 	}
 	m_rawTF.clear();
-	QFuture<arma::mat> future = QtConcurrent::mapped(m_channels, comp);
-	future.waitForFinished();
-	for (auto &r : future)
-		m_rawTF << r;
+
+	// sequential computation using MATLAB Coder code
+	// other version using armadillo
+	for (auto c : m_computationChannels) {
+
+		double Fs = static_cast<double>(c->samplingRate());
+		double xi = static_cast<double>(m_settings->xi);
+		double wt_len = xi / (2 * M_PI * m_settings->freq_min);
+		vec freqlist(m_settings->freqs.size());
+		for (auto i = 0; i < m_settings->freqs.size(); i++)
+			freqlist(i) = m_settings->freqs.at(i);
+
+		uword padding = static_cast<uword>(3 * std::ceil(wt_len * Fs));
+		uword nsamples = c->dataSize();
+		uword n = nsamples + 2 * padding;
+		vec x(n);
+		for (auto i = 0; i < padding; i++)
+			x(i) = c->data()[0];
+		for (auto i = 0; i < c->dataSize(); i++)
+			x(i + padding ) = c->data()[i];
+		for (auto i = 0; i < padding; i++)
+			x(c->dataSize() - 1 + padding) = c->data()[c->dataSize() -1];
+		if (m_settings->useDIFF) {
+			vec tmp = diff(x);
+			x = vec(tmp.n_elem + 1);
+			x(0) = tmp(0);
+			for (uword i = 1; i < x.n_elem; i++)
+				x(i) = tmp(i - 1);
+		}
+		double sigma2 = 1.;
+		vec omega(n);
+		for (uword i = 0; i < n / 2; i++)
+			omega(i) = i * Fs / n;
+		double c = -std::ceil(n / 2);
+		double j;
+		for (uword i = n / 2, j = 0; i < n; i++, j = 1)
+			omega(i) = (c + j) * Fs / n;
+		//vec tmp1 = regspace(0, n / 2);
+		//vec tmp2 = regspace(-std::ceil(n / 2), -1);
+		//vec omega = join_vert(tmp1, tmp2);
+		//omega = omega * Fs / n;
+
+		// MATLAB
+		// fftx = fft(x);
+		// MATLAB
+		cx_vec fftx(n);
+		fftw_complex* out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * n);
+		fftw_plan plan = fftw_plan_dft_r2c_1d(n, x.memptr(), out, FFTW_ESTIMATE);
+		fftw_execute(plan);
+		fftw_destroy_plan(plan);
+		for (auto i = 0; i < fftx.n_elem; i++) {
+			fftx(i) = cx_double(out[i][0], out[i][1]);
+		}
+		// MATLAB
+		// tolerance = 0.5;
+		// mincenterfreq = 2 * tolerance * sqrt(sigma2) * Fs * xi. / n;
+		// maxcenterfreq = Fs * xi / (xi + tolerance / sqrt(sigma2));
+		// MATLAB
+		double tolerance = 0.5;
+		double mincenterfreq = 2. * tolerance * std::sqrt(sigma2) * Fs * xi / n;
+		double maxcenterfreq = Fs * xi / (xi + tolerance / std::sqrt(sigma2));
+
+		// MATLAB
+		// s_array = xi. / freqlist;
+		// minscale = xi. / maxcenterfreq;
+		// maxscale = xi. / mincenterfreq;
+		// nscale = length(freqlist);
+		// wt = zeros(n, nscale);
+		//scaleindices = find(s_array(:)'>=minscale & s_array(:)' <= maxscale);
+		// MATLAB
+		vec s_array = xi / freqlist;
+		double minscale = xi / maxcenterfreq;
+		double maxscale = xi / mincenterfreq;
+		auto nscale = freqlist.n_elem;
+
+		mat wt(nsamples, nscale);  // real matrix to directly store the modulus value
+		wt.fill(0.);
+		uvec scaleindices = arma::find(s_array >= minscale && s_array <= maxscale);
+
+		cx_vec in(n);
+		
+		vec ifftxPsi(nsamples); // WARNING: here were a taking over the padding and also computing modulus (no complex values)
+
+		fftw_plan plan_c2c = fftw_plan_dft_1d(n, (fftw_complex*)in.memptr(), out, FFTW_BACKWARD , FFTW_ESTIMATE);
+
+		for (auto i = 0; i < scaleindices.n_elem; i++) {
+			uword kscale = scaleindices(i);
+			double s = s_array(kscale);
+			vec freq = s * omega - xi;
+		//	Psi = realpow(4. * pi.*sigma2, 1 / 4) * sqrt(s) * exp(-sigma2 / 2 * freq.*freq);
+			freq.for_each([](vec::elem_type& val) { val = val * val; });
+			vec Psi(n);
+			double tmp = pow(4 * M_PI * sigma2, 0.25) * std::sqrt(s);
+			for (auto i = 0; i < n; i++) {
+				Psi(i) = tmp * exp(-sigma2 / freq(i) * freq(i));
+			}
+		//	vec Psi = pow(4 * M_PI * sigma2, 1 / 4) * std::sqrt(s) * exp(-sigma2 / 2 * freq);
+
+		//	vec Psi(n);
+
+		//	wt(1:n, kscale) = abs(ifft(fftx.*Psi)). ^ 2;
+			in = fftx % Psi;
+			//fftw_plan plan_c2c = fftw_plan_dft_1d(n, (fftw_complex *)temp, (fftw_complex *)ifftxPsi, FFTW_BACKWARD, FFTW_ESTIMATE);
+			fftw_execute(plan_c2c);
+			for (auto i = 0; i < nsamples; i++) {
+				ifftxPsi(i) = std::sqrt(out[i + padding][0] * out[i + padding][0] + out[i + padding][1] * out[i + padding][1]);
+			}
+
+			wt.col(kscale) = ifftxPsi;
+		}
+		fftw_free(out);
+
+		//mat res = arma::abs(wt);
+		//res.shed_rows(res.n_rows - padding - 1, res.n_rows - 1);
+		//res.shed_rows(0, padding - 1);
+		m_rawTF << wt.t();
+		// nscale = length(freqlist);
+		// wt = zeros(n, nscale);
+		// scaleindices = find(s_array(:)'>=minscale & s_array(:)' <= maxscale);
+ 		//coder::array<double, 2U> data;
+		//coder::array<double, 2U> data_preproc;
+		//data.set_size(1, c->dataSize());
+		//for (int idx0 = 0; idx0 < 1; idx0++) {
+		//	for (int idx1 = 0; idx1 < data.size(1); idx1++) {
+		//		// Set the value of the array element.
+		//		// Change this value to the value that the application requires.
+		//		data[idx1] = c->data()[idx1];
+		//	}
+		//}
+		//double srate = static_cast<double>(c->samplingRate());
+		//double doDiff = 0;
+		//double xi = static_cast<double>(m_settings->xi);
+		//if (m_settings->useDIFF)
+		//	doDiff = 1.;
+		//// prepare signal data (padding of 3s)
+		//wavelet_dyn_morlet_preprocess(data, srate, doDiff, xi, m_settings->freq_min, 3., data_preproc);
+		//// compute
+		//coder::array<double, 2U> freqlist;
+		//coder::array<double, 2U> wt;
+		//freqlist.set_size(1, m_settings->freqs.size());
+		//for (int idx0 = 0; idx0 < 1; idx0++) {
+		//	for (int idx1 = 0; idx1 < freqlist.size(1); idx1++) {
+		//		// Set the value of the array element.
+		//		// Change this value to the value that the application requires.
+		//		freqlist[idx1] = m_settings->freqs.at(idx1);
+		//	}
+		//}
+		//wavelet_dyn_morlet_freqlist(data_preproc, srate, freqlist, xi, wt);
+
+		//// avoid padded data
+		//mat tmp = mat(wt.data(), wt.size(0), wt.size(1)).t();
+		//double wt_len = xi / (2 * M_PI * m_settings->freq_min);
+		//uword padding = static_cast<uword>( 3 * std::ceil(wt_len * srate));
+		//tmp.shed_cols(tmp.n_cols - padding - 1, tmp.n_cols - 1);
+		//tmp.shed_cols(0, padding - 1);
+		//m_rawTF << tmp;
+	}
+
+	// threaded computation using original C++ code
+	//QFuture<arma::mat> future = QtConcurrent::mapped(m_channels, comp);
+	//future.waitForFinished();
+	//for (auto &r : future)
+	//	m_rawTF << r;
 
 	m_results.clear();
 	for (auto i = 0; i < m_rawTF.size(); i++) {

@@ -29,6 +29,9 @@
       <Extensions>ui</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
+    <Filter Include="matlab">
+      <UniqueIdentifier>{247bbfcf-df35-4cce-8cf6-7183946907cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="display_settings.cpp">
@@ -58,6 +61,36 @@
     <ClCompile Include="TFColorMapWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="matlab\wavelet_dyn_morlet_preprocess.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\log2.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\rt_nonfinite.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\rtGetInf.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\rtGetNaN.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\StandaloneFFTW3Interface.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist_data.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist_initialize.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist_terminate.cpp">
+      <Filter>matlab</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display_settings.h">
@@ -71,6 +104,39 @@
     </ClInclude>
     <ClInclude Include="tfwavelet2_global.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\wavelet_dyn_morlet_preprocess.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\log2.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\rt_nonfinite.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\rtGetInf.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\rtGetNaN.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\StandaloneFFTW3Interface.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_data.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_initialize.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_terminate.h">
+      <Filter>matlab</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_types.h">
+      <Filter>matlab</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -106,5 +172,8 @@
     <QtUic Include="TFColorMapWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="arma.natvis" />
   </ItemGroup>
 </Project>

@@ -542,15 +542,16 @@ QList<AwChannel *> AwChannel::duplicateChannels(const QList<AwChannel *>& list)
 	return res;
 }
 
-QList<AwChannel *> AwChannel::cloneList(const QList<AwChannel *>& list, bool cloneData)
+QList<AwChannel *> AwChannel::clone(const QList<AwChannel *>& list, bool cloneData)
 {
 	AwChannelList res;
-	foreach(AwChannel *c, list) {
-		AwChannel *newChan = c->duplicate();
-		if (cloneData && c->dataSize())  {
-			newChan->newData(c->dataSize());
-			memcpy(newChan->data(), c->data(), c->dataSize() * sizeof(float));
+	for (auto c : list) {
+		auto newC = c->duplicate();
+		if (cloneData && c->dataSize()) {
+			newC->newData(c->dataSize());
+			std::memcpy(newC->data(), c->data(), c->dataSize() * sizeof(float));
 		}
+		res << newC;
 	}
 	return res;
 }

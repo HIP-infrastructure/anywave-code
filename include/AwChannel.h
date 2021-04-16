@@ -237,7 +237,7 @@ public:
 	static QHash<int, QList<AwChannel *>> sortByTypes(const QList<AwChannel *>& list);
 	/** Get the labels as a list from the channels. Fullname flag will return the full labels (ie. with the reference channel) **/
 	static QStringList getLabels(const QList<AwChannel *>& list, bool fullName = false);
-	static QList<AwChannel *> cloneList(const QList<AwChannel *>& list, bool cloneData = false);
+	static QList<AwChannel *> clone(const QList<AwChannel *>& list, bool cloneData = false);
 	/* Release memory for data of all the channels in a list. */
 	static void clearData(const  QList<AwChannel *>& list);
 	/* Cut all the filters on channels. */

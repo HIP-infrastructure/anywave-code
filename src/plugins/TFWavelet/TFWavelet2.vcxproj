@@ -120,6 +120,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="display_settings.cpp" />
+    <ClCompile Include="matlab\log2.cpp" />
+    <ClCompile Include="matlab\rtGetInf.cpp" />
+    <ClCompile Include="matlab\rtGetNaN.cpp" />
+    <ClCompile Include="matlab\rt_nonfinite.cpp" />
+    <ClCompile Include="matlab\StandaloneFFTW3Interface.cpp" />
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist.cpp" />
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist_data.cpp" />
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist_initialize.cpp" />
+    <ClCompile Include="matlab\wavelet_dyn_morlet_freqlist_terminate.cpp" />
+    <ClCompile Include="matlab\wavelet_dyn_morlet_preprocess.cpp" />
     <ClCompile Include="settingsui.cpp" />
     <ClCompile Include="TFColorMapWidget.cpp" />
     <ClCompile Include="TFPicker.cpp" />
@@ -132,6 +142,17 @@
   <ItemGroup>
     <ClInclude Include="display_settings.h" />
     <QtMoc Include="TFColorMapWidget.h" />
+    <ClInclude Include="matlab\log2.h" />
+    <ClInclude Include="matlab\rtGetInf.h" />
+    <ClInclude Include="matlab\rtGetNaN.h" />
+    <ClInclude Include="matlab\rt_nonfinite.h" />
+    <ClInclude Include="matlab\StandaloneFFTW3Interface.h" />
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist.h" />
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_data.h" />
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_initialize.h" />
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_terminate.h" />
+    <ClInclude Include="matlab\wavelet_dyn_morlet_freqlist_types.h" />
+    <ClInclude Include="matlab\wavelet_dyn_morlet_preprocess.h" />
     <ClInclude Include="tfparam.h" />
     <QtMoc Include="TFPicker.h">
     </QtMoc>
@@ -155,6 +176,9 @@
     <QtUic Include="TFColorMapWidget.ui" />
     <QtUic Include="TFWidget.ui">
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="arma.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
