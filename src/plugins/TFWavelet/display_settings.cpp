@@ -29,8 +29,8 @@
 DisplaySettings::DisplaySettings()
 {
 	colorMap =  AwColorMap::Parula;
-	gain = 1;
 	normalization = DisplaySettings::NoNorm;
 	zInterval = DisplaySettings::MinToMax;
 	logScale = true;	// default to log scale for frequencies
+	values = DisplaySettings::Modulus; 
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1104</width>
-    <height>248</height>
+    <height>282</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,12 +17,12 @@
    <iconset resource="../../../resources/AnyWave.qrc">
     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
     <layout class="QGridLayout" name="signalsLayout" rowstretch="0" columnstretch="0"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_22">
      <item>
       <widget class="QGroupBox" name="groupBoxCompute">
        <property name="sizePolicy">
@@ -113,7 +113,7 @@
           <item>
            <widget class="QDoubleSpinBox" name="sbMin">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -145,7 +145,7 @@
           <item>
            <widget class="QDoubleSpinBox" name="sbMax">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -171,7 +171,7 @@
           <item>
            <widget class="QDoubleSpinBox" name="sbStep">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -189,6 +189,19 @@
              <double>1.000000000000000</double>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -289,57 +302,64 @@
        <property name="title">
         <string>Display Settings</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
+       <layout class="QHBoxLayout" name="horizontalLayout_21">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_13">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
+           <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <item>
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Colormap:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="cbColormap"/>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QLabel" name="label_2">
-                <property name="text">
-                 <string>Normalization:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="cbNorm"/>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QLabel" name="label_3">
-                <property name="text">
-                 <string>Z scale:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="cbZScale"/>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="checkBoxColormapScale">
+             <widget class="QLabel" name="label">
               <property name="text">
-               <string>Show advanced TF options</string>
+               <string>Colormap:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cbColormap"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Normalization:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cbNorm"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Z scale:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cbZScale"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Values:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioModulus">
+              <property name="text">
+               <string>modulus</string>
               </property>
               <property name="checked">
                <bool>true</bool>
@@ -347,192 +367,203 @@
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="QCheckBox" name="checkBoxLogScale">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Log. scale</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkBoxFreqScale">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>Show or hide the left Frequency scale.</string>
-                </property>
-                <property name="text">
-                 <string>Show Freq. scale</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QRadioButton" name="radioModulus2">
+              <property name="text">
+               <string>modulus ²</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
           <item>
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+           <widget class="QCheckBox" name="checkBoxColormapScale">
+            <property name="text">
+             <string>Show more Z Scale options</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_10">
-              <item>
-               <widget class="QLabel" name="label_4">
-                <property name="text">
-                 <string>Global Z Range</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="0,0,0,0,1">
-              <property name="sizeConstraint">
-               <enum>QLayout::SetDefaultConstraint</enum>
+             <widget class="QCheckBox" name="checkBoxLogScale">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
-              <item>
-               <widget class="QLabel" name="label_10">
-                <property name="text">
-                 <string>Z Min:</string>
-                </property>
-               </widget>
-              </item>
-              <item alignment="Qt::AlignHCenter">
-               <widget class="QLineEdit" name="lineZMin">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>60</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_11">
-                <property name="text">
-                 <string>Z Max:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineZMax">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>60</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="buttonApply">
-                <property name="text">
-                 <string>Apply</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+              <property name="text">
+               <string>Log. scale</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_12">
-              <item>
-               <spacer name="horizontalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QPushButton" name="buttonReset">
-                <property name="text">
-                 <string>RESET</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QCheckBox" name="checkBoxFreqScale">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Show or hide the left Frequency scale.</string>
+              </property>
+              <property name="text">
+               <string>Show Freq. scale</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonReplot">
+            <property name="text">
+             <string>Replot</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Global Z Range</string>
+              </property>
+             </widget>
             </item>
             <item>
-             <spacer name="verticalSpacer_3">
+             <spacer name="horizontalSpacer_3">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
-                <height>40</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
              </spacer>
             </item>
            </layout>
           </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="0,0,0,0,1">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Z Min:</string>
+              </property>
+             </widget>
+            </item>
+            <item alignment="Qt::AlignHCenter">
+             <widget class="QLineEdit" name="lineZMin">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Z Max:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineZMax">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonApply">
+              <property name="text">
+               <string>Lock Z Scale</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonReset">
+              <property name="text">
+               <string>RESET</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>44</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
@@ -544,8 +575,8 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>17</width>
+         <height>178</height>
         </size>
        </property>
       </spacer>

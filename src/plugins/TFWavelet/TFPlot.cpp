@@ -58,7 +58,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	m_matrix->setResampleMode(QwtMatrixRasterData::BilinearInterpolation);
 	m_settings = settings;
 	m_displaySettings = ds;
-	m_displayCopy.gain = ds->gain;
+//	m_displayCopy.gain = ds->gain;
 	m_displayCopy.colorMap = ds->colorMap;
 	m_displayCopy.logScale = ds->logScale;
 	m_displayCopy.zInterval = ds->zInterval;
@@ -324,6 +324,7 @@ void TFPlot::setDataMatrix(const mat& matrix, float position)
 	m_matrix->setInterval(Qt::XAxis, QwtInterval(0, m_matrix->numColumns()));
 	m_matrix->setInterval(Qt::YAxis, QwtInterval(0, m_matrix->numRows()));
 	setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
+	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max);
 //	m_matrix->setInterval(Qt::ZAxis, QwtInterval(m_min, m_max));
 	m_spectro->setData(m_matrix);
 //	m_spectro->invalidateCache();
@@ -348,19 +349,15 @@ void TFPlot::resetZScale()
 void TFPlot::updateZInterval(const QwtInterval& interval)
 {
 	// check that interval is correct
-
-
 	m_ZInterval = interval;
-	if (interval.maxValue() <= interval.minValue() || interval.minValue() < m_min || interval.maxValue() > m_max) {
-		m_ZInterval.setMaxValue(m_max);
-		m_ZInterval.setMinValue(m_min);
-	}
+
 	// apply z gain
-	double value = m_ZInterval.maxValue() * (100 - m_zgain) / 100.;
-	if (value <= interval.minValue())
-		return;
+	double maxValue = m_ZInterval.maxValue();
+	if (m_zgain < 100)
+		maxValue = m_ZInterval.maxValue() * (100 - m_zgain) / 100.;
+
 	QwtInterval newInterval = m_ZInterval;
-	newInterval.setMaxValue(value);
+	newInterval.setMaxValue(maxValue);
 	m_matrix->setInterval(Qt::ZAxis, newInterval);
 	m_spectro->invalidateCache();
 	replot();
