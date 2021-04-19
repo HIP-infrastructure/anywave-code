@@ -8,7 +8,7 @@
 #include "TFPicker.h"
 #include <AwChannel.h>
 #include <aw_armadillo.h>
-#include "tfparam.h"
+
 
 class TFColorMapWidget;
 
@@ -31,7 +31,6 @@ public:
 	void setDataMatrix(const mat& data, float position);
 	void updateZScale();
 public slots:
-	void setNewData(float position, TFParam *param);
 	void updateDisplaySettings();
 	void showFreqScale(bool flag);
 	void showColorMapScale(bool flag);

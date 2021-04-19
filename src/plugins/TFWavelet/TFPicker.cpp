@@ -29,14 +29,16 @@
 #include <qwt_scale_engine.h>
 #include <qwt_scale_draw.h>
 #include <qwt_scale_widget.h>
-#include <QtMath>
+//#include <QtMath>
+#include <cmath>
 
 
-TFPicker::TFPicker(QwtPlotCanvas *canvas /*, QwtScaleWidget *scaleWidget*/) : QwtPlotPicker(canvas)
+TFPicker::TFPicker(QwtPlotCanvas *canvas /*, QwtScaleWidget *scaleWidget*/, TFSettings *settings) : QwtPlotPicker(canvas)
 {
 	//m_yScaleWidget = scaleWidget;
 	connect(this, SIGNAL(selected(const QRectF&)), this, SLOT(prepareSelection(const QRectF&)));
 	m_plot = static_cast<QwtPlot*>(canvas->plot());
+	m_settings = settings;
 }
 
 TFPicker::~TFPicker()
@@ -56,36 +58,19 @@ QwtText TFPicker::trackerText(const QPoint &pos) const
 	//auto map = scaleDraw->scaleMap();
 	//double value = map.invTransform(pos.y());
 	double value = m_plot->invTransform(QwtPlot::yLeft, pos.y());
-	output.sprintf("%.2f Hz", value);
+	//value += (m_settings->freq_min - 1);
+	output.sprintf("%d Hz", static_cast<int>(std::ceil(value)));
 	QwtText text(output);
 	QBrush bg(Qt::SolidPattern);
 	bg.setColor(Qt::white);
 	text.setBackgroundBrush(bg);
 	text.setColor(Qt::black);
 	return text;
-
-	//QwtScaleMap map = m_yScaleWidget->scaleDraw()->scaleMap();
-	//double value = map.invTransform(pos.y());
-	//output.sprintf("%.2f Hz", value);
-	//QwtText text(output);
-	//QBrush bg(Qt::SolidPattern);
-	//bg.setColor(Qt::white);
-	//text.setBackgroundBrush(bg);
-	//text.setColor(Qt::black);
-	//return text;
 }
 
 void TFPicker::prepareSelection(const QRectF &rect)
 {
 	QRectF select = rect;
-	// Get plot scales intervals
-//	QwtPlotCanvas *c = (QwtPlotCanvas *)canvas();
-	//QwtInterval sampleInterv = c->plot()->axisInterval(QwtPlot::xBottom);
-	//QwtInterval freqInterv = c->plot()->axisInterval(QwtPlot::yLeft);
-
-//	QwtInterval sampleInterv = m_plot->axisInterval(QwtPlot::xBottom);
-//	QwtInterval freqInterv = m_plot->axisInterval(QwtPlot::yLeft);
-
 	// prepare sample selection
 	int start = static_cast<int>(std::ceil(select.x()));
 	int dur = static_cast<int>(std::ceil(select.width()));

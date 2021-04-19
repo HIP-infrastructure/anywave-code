@@ -58,7 +58,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	m_matrix->setResampleMode(QwtMatrixRasterData::BilinearInterpolation);
 	m_settings = settings;
 	m_displaySettings = ds;
-//	m_displayCopy.gain = ds->gain;
+
 	m_displayCopy.colorMap = ds->colorMap;
 	m_displayCopy.logScale = ds->logScale;
 	m_displayCopy.zInterval = ds->zInterval;
@@ -69,7 +69,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	m_freqScaleWidget->setContentsMargins(0, 0, 0, 0);
 	m_freqScaleWidget->setBorderDist(1, 1);
 	m_freqScaleWidget->setSpacing(5);
-	m_freqScaleWidget->setMargin(5);
+	m_freqScaleWidget->setMargin(0);
 	m_freqScaleWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 	QwtText freqText(QObject::tr("Freq. (Hz)"));
 	freqText.setColor(Qt::black);
@@ -84,7 +84,6 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 
 	// building the colormap widget
 	m_colorMapWidget = new TFColorMapWidget(m_displaySettings, this);
-//	connect(m_colorMapWidget, SIGNAL(applyMinMaxToAll(double, double)), this, SIGNAL(applyMinMaxToAll(double, double)));
 	connect(m_colorMapWidget, &TFColorMapWidget::ZGainChanged, this, &TFPlot::updateGainZInterval);
 
 	//m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
@@ -98,7 +97,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	// m_colorMapWidget->hide();
 	
 	// building picker
-	m_picker = new TFPicker((QwtPlotCanvas*)canvas());
+	m_picker = new TFPicker((QwtPlotCanvas*)canvas(), m_settings);
 	m_picker->setStateMachine(new QwtPickerDragRectMachine);
 	m_picker->setRubberBand(QwtPicker::RectRubberBand);
 	m_picker->setTrackerMode(QwtPicker::AlwaysOn);
@@ -120,10 +119,8 @@ QSize TFPlot::sizeHint() const
 
 void TFPlot::updateGainZInterval(double gain)
 {
-	//updateZInterval(QwtInterval(m_min, max));
 	m_zgain = gain;
 	updateZInterval(m_ZInterval);
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,17 +140,6 @@ void TFPlot::select(int start, int duration)
 
 /// END SLOTS
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//void TFPlot::setNewData(float position, const QVector<double>& data, int row, int col)
-void TFPlot::setNewData(float position, TFParam *param)
-{
-	//m_positionInData = position;
-	//m_rawMat = param->data;
-	//m_baselineMat = param->baselineData;
-	//applyNormalization();
-	
-}
 
 void TFPlot::showFreqScale(bool flag)
 {
@@ -179,7 +165,7 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 	m_freqScaleWidget->scaleDraw()->setScaleDiv(divR);
 	m_freqScaleWidget->repaint();
 
-	setAxisScale(QwtPlot::yLeft, min, max, step);
+//	setAxisScale(QwtPlot::yLeft, min, max, step);
 	m_picker->setFreqScaleInterval(min, max);
 	replot();
 }
@@ -187,16 +173,6 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 
 void TFPlot::updateDisplaySettings()
 {
-	//if (m_displaySettings->normalization != m_displayCopy.normalization) {
-	//	//m_colorMapWidget->reset();
-	//	m_displayCopy.normalization = m_displaySettings->normalization;
-	//	applyNormalization();
-	//}
-	//if (m_displaySettings->zInterval != m_displayCopy.zInterval) {
-	//	//m_colorMapWidget->reset();
-	//	m_displayCopy.zInterval = m_displaySettings->zInterval;
-	//	updateZScale();
-	//}
 	if (m_displaySettings->colorMap != m_displayCopy.colorMap) {
 		m_displayCopy.colorMap = m_displaySettings->colorMap;
 		applyColorMap();
@@ -213,61 +189,8 @@ void TFPlot::updateDisplaySettings()
 			m_freqScaleWidget->setTransformation(new QwtNullTransform());
 			setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max, m_settings->step);
 		}
-		//updateZScale();
 		updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
 	}
-}
-
-void TFPlot::applyNormalization()
-{
-	//m_mat = mat(m_rawMat.memptr(), m_rawMat.n_rows, m_rawMat.n_cols, true);
-	//QVector<double> matrix(m_mat.n_rows * m_mat.n_cols);
-	//double *data = matrix.data();
-
-	//switch (m_displaySettings->normalization) {
-	//case DisplaySettings::N10log10Divisive:
-	//	// check for baseline correction
-	//	if (!m_baselineMat.is_empty()) {
-	//		for (auto i = 0; i < m_mat.n_rows; i++)
-	//			m_mat.row(i) = 10 * log10(m_mat.row(i) / arma::mean(m_baselineMat.row(i)));
-	//	}
-	//	else {
-	//		for (auto i = 0; i < m_mat.n_rows; i++)
-	//			m_mat.row(i) = 10 * log10(m_mat.row(i) / arma::mean(m_mat.row(i)));
-	//	}
-	//	break;
-	//case DisplaySettings::NoNorm:
-	//	break;
-	//case DisplaySettings::ZScore:
-	//	if (!m_baselineMat.is_empty()) {
-	//		for (auto i = 0; i < m_mat.n_rows; i++) {
-	//			m_mat.row(i) -= arma::mean(m_baselineMat.row(i));
-	//			m_mat.row(i) /= arma::stddev(m_baselineMat.row(i));
-	//		}
-	//	}
-	//	else {
-	//		for (auto i = 0; i < m_mat.n_rows; i++) {
-	//			m_mat.row(i) -= arma::mean(m_mat.row(i));
-	//			m_mat.row(i) /= arma::stddev(m_mat.row(i));
-	//		}
-	//	}
-	//	break;
-	//}
-	//// store min and max
-	//m_min = m_mat.min();
-	//m_max = m_mat.max();
-	//for (auto r = 0; r < m_mat.n_rows; r++)
-	//	for (auto c = 0; c < m_mat.n_cols; c++)
-	//		*data++ = m_mat(r, c);
-
-	//m_matrix->setValueMatrix(matrix, m_mat.n_cols);
-	//m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
-	//m_matrix->setInterval(Qt::YAxis, QwtInterval(1, m_matrix->numRows()));
-	//setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
-	//m_spectro->setData(m_matrix);
-
-	//// update z interval based on the Scale chosen
-	//updateZScale();
 }
 
 void TFPlot::updateZScale()
@@ -299,18 +222,6 @@ void TFPlot::updateZScale()
 
 void TFPlot::setDataMatrix(const mat& matrix, float position)
 {
-	//QVector<double> matrix(m_mat.n_rows * m_mat.n_cols);
-	//double *data = matrix.data();
-		//for (auto r = 0; r < m_mat.n_rows; r++)
-	//	for (auto c = 0; c < m_mat.n_cols; c++)
-	//		*data++ = m_mat(r, c);
-
-	//m_matrix->setValueMatrix(matrix, m_mat.n_cols);
-	//m_matrix->setInterval(Qt::XAxis, QwtInterval(1, m_matrix->numColumns()));
-	//m_matrix->setInterval(Qt::YAxis, QwtInterval(1, m_matrix->numRows()));
-	//setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
-	//m_spectro->setData(m_matrix);
-
 	QVector<double> vec(matrix.n_rows * matrix.n_cols);
 	double* data = vec.data();
 	m_positionInData = position;
@@ -324,11 +235,11 @@ void TFPlot::setDataMatrix(const mat& matrix, float position)
 	m_matrix->setInterval(Qt::XAxis, QwtInterval(0, m_matrix->numColumns()));
 	m_matrix->setInterval(Qt::YAxis, QwtInterval(0, m_matrix->numRows()));
 	setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
-	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max);
-//	m_matrix->setInterval(Qt::ZAxis, QwtInterval(m_min, m_max));
+
+	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max + m_settings->freq_min - 1);
+//	setAxisScale(QwtPlot::yLeft, 1, matrix.n_rows, 1.);
 	m_spectro->setData(m_matrix);
-//	m_spectro->invalidateCache();
-//	replot();
+	replot();
 }
 
 

@@ -73,9 +73,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwGraphicsLibd.lib;AwWidgetsLibd.lib;qwtd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwGraphicsLibd.lib;AwWidgetsLibd.lib;qwtd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
@@ -102,9 +102,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\qwt\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qcustomplot\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\qwt\lib;$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwWidgetsLib.lib;qwt.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwWidgetsLib.lib;qwt.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>

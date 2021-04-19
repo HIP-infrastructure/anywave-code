@@ -7,10 +7,8 @@
 #include <widget/SignalView/AwBaseSignalView.h>
 #include "tf_settings.h"
 #include "TFPlot.h"
-#include "TFQCustomPlot.h"
 #include "display_settings.h"
 #include <aw_armadillo.h>
-#include "tfparam.h"
 #include <aw_armadillo.h>
 
 class TFWidget : public AwProcessGUIWidget
