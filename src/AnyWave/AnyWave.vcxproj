@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
+    <ClCompile Include="AwComponents.cpp" />
     <ClCompile Include="AwExportDial.cpp" />
     <ClCompile Include="AwFileOpenSave.cpp" />
     <ClCompile Include="AwHelpMenu.cpp" />
@@ -277,6 +278,7 @@
     </QtMoc>
     <QtMoc Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
     </QtMoc>
+    <QtMoc Include="AwComponents.h" />
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
     <QtMoc Include="IO\MEMIO\MEMIO.h">
     </QtMoc>

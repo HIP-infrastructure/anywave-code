@@ -55,6 +55,7 @@ AwFilterBounds& AwFilterBounds::operator=(const AwFilterBounds& other)
 AwFilterSettings::AwFilterSettings()
 {
 	m_ui = nullptr;
+	m_uiDocked = false;
 }
 
 AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
@@ -67,9 +68,10 @@ AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
 
 AwFilterSettings::~AwFilterSettings()
 {
-	if (m_ui != nullptr) {
+	if (m_ui != nullptr && !m_uiDocked) {
 		m_ui->close();
 		delete m_ui;
+		m_ui = nullptr;
 	}
 }
 

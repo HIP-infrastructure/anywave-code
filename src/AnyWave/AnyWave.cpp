@@ -83,7 +83,6 @@
 
 
 AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
-//AnyWave::AnyWave(const QVariantMap& arguments, QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
 	
@@ -95,60 +94,61 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	// Accept file drops
 	setAcceptDrops(true);
 	AwSettings* aws = AwSettings::getInstance();
-	aws->setParent(this);
+	aws->init();
+//	aws->setParent(this);
 	
-	createUserDirs(); // must be called before any other manager class instances
+//	createUserDirs(); // must be called before any other manager class instances
 
 	//AwArguments arguments;
 	QVariantMap arguments;
 	int operation = aw::commandLine::NoOperation;
 
 	AwDebugLog* adl = AwDebugLog::instance();
-	adl->setParent(this);
-	adl->connectComponent("AnyWave", this);
+//	adl->setParent(this);
+//	adl->connectComponent("AnyWave", this);
 
 	// searching for a Matlab and load the Matlab support module is necessary.
 	// Must be done before instanciating plugin manager
-	initMatlab();
+//	initMatlab();
 	// Plugins
 	AwPluginManager* plugin_manager = AwPluginManager::getInstance();
-	plugin_manager->setParent(this);
-	plugin_manager->load();
+//	plugin_manager->setParent(this);
+//	plugin_manager->load();
 	// Processes
 	AwProcessManager* process_manager = AwProcessManager::instance();
-	process_manager->setParent(this);
+//	process_manager->setParent(this);
 
 	// Data Manager
 	auto dm = AwDataManager::instance();
-	dm->setParent(this);
+//	dm->setParent(this);
 	
 	// Montage
 	AwMontageManager* montage_manager = AwMontageManager::instance();
-	montage_manager->setParent(dm);
+//	montage_manager->setParent(dm);
    // marker
 	AwMarkerManager* marker_manager = AwMarkerManager::instance();
-	marker_manager->setParent(dm);
+//	marker_manager->setParent(dm);
 	// data server must be a child of DataManager
-	AwDataServer::getInstance()->setParent(dm);
+//	AwDataServer::getInstance()->setParent(dm);
 
-	try {
-		operation = aw::commandLine::doParsing(args, arguments);
-	}
-	catch (const AwException& e) {
-		std::cerr << e.errorString().toStdString() << std::endl;
-		quit();
-		exit(0);
-	}
-	if (operation == aw::commandLine::NoOperation) {
-		quit();
-		exit(0);
-	}
-	bool isGUIMode = arguments.value(keys::gui_mode).toBool();
-	if (!isGUIMode && operation == aw::commandLine::BatchOperation) {
-		aw::commandLine::doCommandLineOperation(arguments);
-		quit();
-		exit(0);
-	}
+//	try {
+//		operation = aw::commandLine::doParsing(args, arguments);
+//	}
+//	catch (const AwException& e) {
+//		std::cerr << e.errorString().toStdString() << std::endl;
+//		quit();
+//		exit(0);
+//	}
+//	if (operation == aw::commandLine::NoOperation) {
+//		quit();
+//		exit(0);
+//	}
+//	bool isGUIMode = arguments.value(keys::gui_mode).toBool();
+//	if (!isGUIMode && operation == aw::commandLine::BatchOperation) {
+//		aw::commandLine::doCommandLineOperation(arguments);
+//		quit();
+//		exit(0);
+//	}
 	//bool isGUIMode = operation == aw::commandLine::NoOperation;
 
 	aws->setValue(aws::plugin_debug_mode, false);
@@ -174,7 +174,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	m_recentFilesMenu = menuRecent_files;
 	m_recentBIDSMenu = menuRecent_BIDS;
 
-	aws->setValue(aws::gui_active, isGUIMode);
+//	aws->setValue(aws::gui_active, isGUIMode);
 	
 	//if (isGUIMode)
 		setWindowIcon(QIcon(":images/AnyWave_icon.png"));
@@ -195,11 +195,11 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 		}
 //	}
 
-	QSettings qsettings;
+	//QSettings qsettings;
 
-	// init settings
-    qsettings.setValue("general/secureMode", false);
-	qsettings.setValue("general/buildDate", QString(__DATE__));
+	//// init settings
+ //   qsettings.setValue("general/secureMode", false);
+	//qsettings.setValue("general/buildDate", QString(__DATE__));
 	// As initializing ProcessManager, give it the Process Menu instance !
 	process_manager->setMenu(menuProcesses);
 
@@ -297,7 +297,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	connect(AwSourceManager::instance(), SIGNAL(newSourcesCreated(int)), AwMontageManager::instance(), SLOT(addNewSources(int)));
 
 	// MATPyServer
-	AwMATPyServer::instance()->setParent(this);
+//	AwMATPyServer::instance()->setParent(this);
 
 	// AwMeshManager
 	m_meshManager = AwMeshManager::instance();
@@ -659,6 +659,7 @@ void AnyWave::initToolBarsAndMenu()
 	dockFilters->setFloating(true);
 	connect(filter_tb, &AwFilterToolBar::filterButtonClicked, dockFilters, &QDockWidget::show);
 	dockFilters->setWidget(AwDataManager::instance()->filterSettings().ui());
+	AwDataManager::instance()->filterSettings().setUiDocked();
 	filter_tb->setEnabled(false);
 	m_toolBarWidgets.append(filter_tb);
 

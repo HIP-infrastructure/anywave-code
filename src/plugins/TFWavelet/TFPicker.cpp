@@ -59,7 +59,7 @@ QwtText TFPicker::trackerText(const QPoint &pos) const
 	//double value = map.invTransform(pos.y());
 	double value = m_plot->invTransform(QwtPlot::yLeft, pos.y());
 	//value += (m_settings->freq_min - 1);
-	output.sprintf("%d Hz", static_cast<int>(std::ceil(value)));
+	output.sprintf("%d Hz", static_cast<int>(std::floor(value)));
 	QwtText text(output);
 	QBrush bg(Qt::SolidPattern);
 	bg.setColor(Qt::white);

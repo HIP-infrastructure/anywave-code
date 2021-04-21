@@ -27,8 +27,6 @@
 #define AW_MATLAB_INTERFACE_H_
 #include <QObject>
 
-
-
 class AwMatlabInterface : public QObject
 {
 public:

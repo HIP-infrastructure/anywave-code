@@ -63,6 +63,27 @@ int aw::commandLine::doCommandLineOperation(AwArguments& args)
 	return 0;
 }
 
+int aw::commandLine::doLowLevelParsing(const QStringList& args, AwArguments& arguments)
+{
+	AwCommandLogger logger(QString("Command Line"));
+	QCommandLineParser parser;
+	const QString origin = "aw::commandLine::doParsing";
+	// default to no gui mode
+	arguments[keys::gui_mode] = false;
+	parser.setApplicationDescription("AnyWave");
+	auto versionOption = parser.addVersionOption();
+	if (!parser.parse(args)) {
+		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
+		return -1;
+	}
+
+	if (parser.isSet(versionOption)) {
+		std::cout << QCoreApplication::applicationVersion().toStdString() << std::endl;
+		return aw::commandLine::NoOperation;
+	}
+	return aw::commandLine::GUI;
+}
+
 
 
 
@@ -71,10 +92,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	QCommandLineParser parser;
 	AwCommandLogger logger(QString("Command Line"));
 	const QString origin = "aw::commandLine::doParsing";
-	// default operation set to NoOperation
-	//int res = aw::commandLine::NoOperation;
-	//QMap<int, AwArguments> res;
-
 	// default to no gui mode
 	arguments[keys::gui_mode] = false;
 
@@ -152,9 +169,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	parser.addOption(BIDSProcOpt);
 	parser.addOption(runProcessOpt);
 	// Dedicated data server mode for plugins
-	//QCommandLineOption serverOpt("server", "start an instance of anywave and listen to client connections.");
 	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which to listen.", "server_port", QString());
-	//parser.addOption(serverOpt);
 	parser.addOption(serverPortOpt);
 
 	// get extra arg from plugins
@@ -205,11 +220,10 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		throw exception;
 	}
 
-	if (parser.isSet(versionOption)) {
-	//	logger.sendLog(QCoreApplication::applicationVersion());
-		std::cout << QCoreApplication::applicationVersion().toStdString() << std::endl;
-		return aw::commandLine::NoOperation;
-	}
+	//if (parser.isSet(versionOption)) {
+	//	std::cout << QCoreApplication::applicationVersion().toStdString() << std::endl;
+	//	return aw::commandLine::NoOperation;
+	//}
 	///////////////// BIDS parsing is the priority. If --to_bids is specified then ignored all other options
 	if (parser.isSet(toBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
@@ -381,10 +395,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	if (!positionals.isEmpty())
 		arguments["open_file"] = positionals.first();
 
-	//if (parser.isSet(runProcessOpt) && res != aw::commandLine::BIDS) {
-	//	arguments["run_process"] = parser.value(runProcessOpt);
-	//	res = aw::commandLine::RunProcess;
-	//}
 	if (parser.isSet(runProcessOpt)) {
 		arguments["run_process"] = parser.value(runProcessOpt);
 		arguments[keys::operation] = keys::run_operation;

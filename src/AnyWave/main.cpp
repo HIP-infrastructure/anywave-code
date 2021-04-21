@@ -46,6 +46,8 @@
 #endif
 
 #include "CL/CommandLineParser.h"
+#include "AwComponents.h"
+#include <iostream>
 
 constexpr auto version = "21.04.14";
 
@@ -72,6 +74,8 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 	QApplication app(argc, argv);
+	QVariantMap arguments;
+
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);
@@ -84,6 +88,34 @@ int main(int argc, char *argv[])
 	QSettings settings(QSettings::SystemScope, "INSERM U1106", "AnyWave");
 	settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
+	AwComponents components;
+	if (components.init() != 0) {
+		std::cerr << "Error while initialising AnyWave components" << std::endl;
+		return -1;
+	}
+	if (argc > 1) {
+		int operation = aw::commandLine::doLowLevelParsing(app.arguments(), arguments);
+		if (operation == aw::commandLine::NoOperation)
+			return 0;
+		if (operation == -1)
+			return -1;
+
+		try {
+			operation = aw::commandLine::doParsing(app.arguments(), arguments);
+		}
+		catch (const AwException& e) {
+			std::cerr << e.errorString().toStdString() << std::endl;
+			//		quit();
+			//		exit(0);
+			return -1;
+		}
+		if (operation == aw::commandLine::NoOperation)
+			return 0;
+		if (operation == aw::commandLine::BatchOperation) {
+			aw::commandLine::doCommandLineOperation(arguments);
+			return 0;
+		}
+	}
 
 	// command line arguments parsing is done while building anywave.
 	AnyWave window(app.arguments());

@@ -83,6 +83,7 @@ public:
 	QVector<float> filters(int type) const { return m_hash[type]; }
 
 	QWidget *ui();
+	void setUiDocked() { m_uiDocked = true; }
 signals:
 	void settingsChanged(const AwFilterSettings& settings);
 	/** DebugLog complience **/
@@ -101,5 +102,6 @@ protected:
 	// However, we must use the setFilterBounds method instead of setBounds. setFilterBounds will call setBounds so the checking of frequency bands will operate
 	// as previously.
 	AwFilterGUI *m_ui;
+	bool m_uiDocked;
 };
 

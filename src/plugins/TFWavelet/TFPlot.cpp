@@ -34,6 +34,27 @@
 #include <math.h>
 #include <QtMath>
 #include "TFColorMapWidget.h"
+#include <qwt_plot_zoomer.h>
+
+class MyZoomer : public QwtPlotZoomer
+{
+public:
+	MyZoomer(QwtPlotCanvas* canvas) :
+		QwtPlotZoomer(canvas)
+	{
+		setTrackerMode(AlwaysOn);
+	}
+
+	virtual QwtText trackerTextF(const QPointF& pos) const
+	{
+		QColor bg(Qt::white);
+		bg.setAlpha(200);
+
+		QwtText text = QwtPlotZoomer::trackerTextF(pos);
+		text.setBackgroundBrush(QBrush(bg));
+		return text;
+	}
+};
 
 TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QWidget *parent) : QwtPlot(parent)
 {	
@@ -51,7 +72,7 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
     m_spectro->setRenderThreadCount(0); // use system specific thread count
 	ds->colorMap =  AwColorMap::Parula;
 	m_spectro->attach(this);
-	plotLayout()->setAlignCanvasToScales(true);
+	plotLayout()->setAlignCanvasToScales(false);
 	plotLayout()->setCanvasMargin(0);
 	setAutoReplot(false);
 	m_matrix = new QwtMatrixRasterData;
@@ -95,6 +116,12 @@ TFPlot::TFPlot(TFSettings *settings, DisplaySettings *ds, AwChannel *channel, QW
 	//m_colorMapWidget->setColorBarWidth(25);
 	//m_colorMapWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 	// m_colorMapWidget->hide();
+
+	//QwtPlotZoomer* zoomer = new MyZoomer((QwtPlotCanvas*)canvas());
+	//zoomer->setMousePattern(QwtEventPattern::MouseSelect2,
+	//	Qt::RightButton, Qt::ControlModifier);
+	//zoomer->setMousePattern(QwtEventPattern::MouseSelect3,
+	//	Qt::RightButton);
 	
 	// building picker
 	m_picker = new TFPicker((QwtPlotCanvas*)canvas(), m_settings);
@@ -158,14 +185,13 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 	m_settings->step = step;
 
 	QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	auto s = std::abs((max - min))  / 4;
+	auto s = (std::abs((max - min)) + 1)  / 4;
 
 	rTicks[QwtScaleDiv::MajorTick] << min << std::floor(min + 1. * s) << std::floor(min + 2. * s) << std::floor(min + 3. * s) << max;
 	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
 	m_freqScaleWidget->scaleDraw()->setScaleDiv(divR);
 	m_freqScaleWidget->repaint();
 
-//	setAxisScale(QwtPlot::yLeft, min, max, step);
 	m_picker->setFreqScaleInterval(min, max);
 	replot();
 }
@@ -236,8 +262,10 @@ void TFPlot::setDataMatrix(const mat& matrix, float position)
 	m_matrix->setInterval(Qt::YAxis, QwtInterval(0, m_matrix->numRows()));
 	setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
 
-	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max + m_settings->freq_min - 1);
+//	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max + m_settings->freq_min - 1);
+	
 //	setAxisScale(QwtPlot::yLeft, 1, matrix.n_rows, 1.);
+	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max);
 	m_spectro->setData(m_matrix);
 	replot();
 }

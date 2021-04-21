@@ -35,5 +35,6 @@ namespace aw {
 		int doParsing(const QStringList& args, AwArguments& arguments);
 	//	int doCommandLineOperation(int operation, AwArguments& operations);
 		int doCommandLineOperation(AwArguments& operations);
+		int doLowLevelParsing(const QStringList& args, AwArguments& arguments);
 	}
 }

@@ -102,6 +102,7 @@ public:
 		return m_instance;
 	}
 
+	void init();
 	QVariant value(const QString& key);
 	void setValue(const QString& key, const QVariant& value);
 	
