@@ -82,7 +82,7 @@ public:
 	QString createTsvPath(AwBIDSItem * item, int tsvType);
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
-	AwBIDSItems subjects() { return m_items; }
+	AwBIDSItems items() { return m_items; }
 	
 	// command line methods
 	void toBIDS(const AwArguments& args);
@@ -140,7 +140,7 @@ signals:
 	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
-	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
+	AwBIDSItems recursiveParsing2(const QString& dirPath, AwBIDSItem* parentItem);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);

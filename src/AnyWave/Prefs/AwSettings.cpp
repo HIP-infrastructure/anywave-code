@@ -110,21 +110,23 @@ AwSettings::AwSettings(QObject *parent)
 
 AwSettings::~AwSettings()
 {
-	// save recent files
-	QSettings settings;
-	settings.beginWriteArray("recentFiles");
-	auto recentFiles = m_settings.value(aws::recent_files).toStringList();
-	for (int i = 0; i < recentFiles.size(); i++)	{
-		settings.setArrayIndex(i);
-		settings.setValue("filePath", recentFiles.at(i));
-	}
-	settings.endArray();
-	// save recent BIDS
-	auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
-	settings.beginWriteArray("recentBIDS");
-	for (int i = 0; i < recentBIDS.size(); i++) {
-		settings.setArrayIndex(i);
-		settings.setValue("BIDSPath", recentBIDS.at(i));
+	if (m_settings.value(aws::gui_active).toBool()) {
+		// save recent files
+		QSettings settings;
+		settings.beginWriteArray("recentFiles");
+		auto recentFiles = m_settings.value(aws::recent_files).toStringList();
+		for (int i = 0; i < recentFiles.size(); i++) {
+			settings.setArrayIndex(i);
+			settings.setValue("filePath", recentFiles.at(i));
+		}
+		settings.endArray();
+		// save recent BIDS
+		auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
+		settings.beginWriteArray("recentBIDS");
+		for (int i = 0; i < recentBIDS.size(); i++) {
+			settings.setArrayIndex(i);
+			settings.setValue("BIDSPath", recentBIDS.at(i));
+		}
 	}
 }
 

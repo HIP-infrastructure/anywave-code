@@ -73,6 +73,10 @@ AwMarkerManager::AwMarkerManager()
 
 AwMarkerManager::~AwMarkerManager()
 {
+	//if (m_ui) 
+	//	delete m_ui;                    // ui must have become a child of AnyWave so it will be destroyed when AnyWave is destroyed
+	//if (m_markerInspector)
+	//	delete m_markerInspector;
 }
 
 
@@ -224,11 +228,7 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	}
 	else 
 		m_markers += *list;
-
-//	emit modificationsDone();
-
 	// sort markers
-	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 	AwMarker::sort(m_markers);
 	m_needSorting = false;
 	m_ui->setMarkers(m_markers);
@@ -244,15 +244,8 @@ void AwMarkerManager::addMarkers(const AwMarkerList& list)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 	m_markers += AwMarker::duplicate(list);
-	//AwMarkerList temp_list;
-	//foreach (AwMarker *m, list)
-	//	temp_list << new AwMarker(m);
-	////emit modificationsDone();
-	//foreach (AwMarker *m, temp_list)
-	//	m_markers << m;
 
 	// sort markers
-	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 	AwMarker::sort(m_markers);
 	m_needSorting = false;
 	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
@@ -279,7 +272,6 @@ void AwMarkerManager::addMarker(AwMarker *m)
 
 	if (p != NULL)
 		p->setMarkersReceived();
-	//emit modificationsDone();
 	emit updateStats();
 }
 
@@ -296,11 +288,7 @@ void AwMarkerManager::removeAllUserMarkers()
 
 	m_ui->setMarkers(m_markers);
 	saveMarkers(m_filePath);
-//	emit markersRemoved();
 	emit updateStats();
-	//while (!temp.isEmpty())
-	//	delete temp.takeFirst();
-//	emit modificationsDone();
 }
 
 void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
@@ -338,26 +326,9 @@ void AwMarkerManager::init()
 	}
 }
 
-void AwMarkerManager::quit()
-{
-	closeFile();
-	if (m_ui) {
-		m_ui->close();
-		delete m_ui;
-	}
-	if (m_markerInspector)
-		delete m_markerInspector;
-}
 
 void AwMarkerManager::closeFile()
 {
-	// if BIDS is active => update or create events.tsv file
-	//if (AwBIDSManager::isInstantiated()) {
-	//	auto bm = AwBIDSManager::instance();
-	//	if (bm->isBIDSActive())
-	//		if (bm->updateEventsTsv(m_markers) != 0)
-	//			emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
-	//}
 	// ask MarkerManagerSettings to clear
 	if (m_ui)
 		m_ui->cleanUp();

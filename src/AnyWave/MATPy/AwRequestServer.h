@@ -40,7 +40,7 @@ public:
 	// default constructor
 	explicit AwRequestServer(quint16 port = 0, QObject *parent = 0);
 	// constructor that spawn a dedicated data server for the specified file. if port is specified, listen on that port.
-//	AwRequestServer(const QString& dataPath, quint16 port = 0, QObject *parent = 0);
+
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }

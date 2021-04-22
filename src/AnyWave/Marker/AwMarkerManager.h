@@ -56,7 +56,6 @@ public:
 	void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();
-	void quit();
 	void init();
 	void removeDuplicates();
 public slots:

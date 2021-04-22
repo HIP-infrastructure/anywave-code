@@ -47,16 +47,21 @@ AwDataManager::AwDataManager() : QObject(nullptr)
 	connect(&m_filterSettings, &AwFilterSettings::settingsChanged, m_montageManager, &AwMontageManager::setNewFilters);
 }
 
+AwDataManager::~AwDataManager()
+{
+}
+
 void AwDataManager::closeFile()
 {
+	m_status = 0;
+	m_errorString.clear();
 	if (m_reader) {
 		m_filterSettings.save(m_settings.value(keys::flt_file).toString());
 		m_reader = nullptr;
 	}
 	m_montageManager->closeFile();
 	m_markerManager->closeFile();
-	m_status = 0;
-	m_errorString.clear();
+
 }
 
 const AwChannelList& AwDataManager::rawChannels()

@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 	if (AttachConsole(ATTACH_PARENT_PROCESS)) {
 		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
+	//	freopen("CONOUT$", "w", stderr);
 	}
 #endif
 #if VTK_MAJOR_VERSION >= 8
@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	if (argc > 1) {
+		components.setGuiEnabled(false);
 		int operation = aw::commandLine::doLowLevelParsing(app.arguments(), arguments);
 		if (operation == aw::commandLine::NoOperation)
 			return 0;
@@ -105,8 +106,6 @@ int main(int argc, char *argv[])
 		}
 		catch (const AwException& e) {
 			std::cerr << e.errorString().toStdString() << std::endl;
-			//		quit();
-			//		exit(0);
 			return -1;
 		}
 		if (operation == aw::commandLine::NoOperation)
@@ -116,7 +115,7 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 	}
-
+	components.setGuiEnabled(true);
 	// command line arguments parsing is done while building anywave.
 	AnyWave window(app.arguments());
 	return app.exec();

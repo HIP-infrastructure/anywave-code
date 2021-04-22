@@ -46,6 +46,7 @@ public:
 	static AwDataManager* instance();
 	static AwDataManager* newInstance();
 	friend class AwBIDSManager;
+	~AwDataManager();
 
 	enum Status { NoError = AwFileIO::NoError, FormatError = AwFileIO::WrongFormat, HeaderError = AwFileIO::BadHeader, 
 		FileAccessError = AwFileIO::FileAccess, NoPluginFound };

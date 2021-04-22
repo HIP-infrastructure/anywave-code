@@ -67,8 +67,7 @@ AwMATPyServer::AwMATPyServer()
 AwMATPyServer::~AwMATPyServer()
 {
 	// destroy possible duplicated instances
-	if (m_rs)
-		delete m_rs;
+	stop();
 	AW_DESTROY_LIST(m_duplicatedInstances);
 }
 

@@ -78,7 +78,7 @@ int aw::commandLine::doLowLevelParsing(const QStringList& args, AwArguments& arg
 	}
 
 	if (parser.isSet(versionOption)) {
-		std::cout << QCoreApplication::applicationVersion().toStdString() << std::endl;
+		std::cout << QCoreApplication::applicationVersion().toStdString(); 
 		return aw::commandLine::NoOperation;
 	}
 	return aw::commandLine::GUI;
