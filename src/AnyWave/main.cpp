@@ -49,7 +49,7 @@
 #include "AwComponents.h"
 #include <iostream>
 
-constexpr auto version = "21.04.14";
+constexpr auto version = "21.04.23";
 
 int main(int argc, char *argv[])
 {
@@ -90,22 +90,18 @@ int main(int argc, char *argv[])
 	settings.setValue("general/buildDate", QString(__DATE__));
 	AwComponents components;
 	if (components.init() != 0) {
-		std::cerr << "Error while initialising AnyWave components" << std::endl;
+		std::cout << "Error while initialising AnyWave components";
 		return -1;
 	}
 	if (argc > 1) {
 		components.setGuiEnabled(false);
-		int operation = aw::commandLine::doLowLevelParsing(app.arguments(), arguments);
-		if (operation == aw::commandLine::NoOperation)
-			return 0;
-		if (operation == -1)
-			return -1;
+		int operation = -1;
 
 		try {
 			operation = aw::commandLine::doParsing(app.arguments(), arguments);
 		}
 		catch (const AwException& e) {
-			std::cerr << e.errorString().toStdString() << std::endl;
+			std::cout << e.errorString().toStdString();
 			return -1;
 		}
 		if (operation == aw::commandLine::NoOperation)

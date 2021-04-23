@@ -149,7 +149,6 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	}
 	m_status = reader->openFile(filePath);
 	if (m_status) { // status >0 means error when opening file, return status code
-		///emit finished();
 		m_errorString = reader->errorMessage();
 		return m_status;
 	}
@@ -197,12 +196,14 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 		reader->infos.setMtgFile(m_settings.value(keys::montage_file).toString());
 
 	// check if file belongs to a BIDS structure
-	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
-	if (!root.isEmpty()) {
-		AwBIDSManager::instance()->newFile(reader);
-		// BIDS Manager will override all sidecars files paths
-		m_settings[keys::bids_dir] = root;
-		m_status = 1;  // set status to 1 to warn AnyWave that we detected a BIDS file
+	if (!commandLineMode) {
+		QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+		if (!root.isEmpty()) {
+			AwBIDSManager::instance()->newFile(reader);
+			// BIDS Manager will override all sidecars files paths
+			m_settings[keys::bids_dir] = root;
+			m_status = 1;  // set status to 1 to warn AnyWave that we detected a BIDS file
+		}
 	}
 
 	m_settings.unite(m_reader->infos.settings());

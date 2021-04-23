@@ -122,7 +122,9 @@ void AwBIDSManager::initCommandLineOperation(const QString & filePath)
 	item->setData(subjectDir, AwBIDSItem::RelativePathRole);
 	// set the possible derivatives mask
 	m_instance->recursiveParsing2(fullPath, item);
-	m_instance->m_currentOpenItem = m_instance->m_hashItemFiles.value(filePath);
+	m_instance->m_currentOpenItem = item;
+
+
 
 }
 
@@ -671,69 +673,69 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 	return res;
 }
 
-int AwBIDSManager::updateEventsTsv(const AwMarkerList& markers)
-{
-	m_errorString.clear();
-	if (m_currentOpenItem == nullptr || markers.isEmpty())
-		return -1;
-	auto tsvPath = m_currentOpenItem->data(AwBIDSItem::EventsTsvRole).toString();
-	QFile file;
-	QTextStream stream(&file);
-	// if the events.tsv does not exist, create it.
-	if (tsvPath.isEmpty() || !QFile::exists(tsvPath)) {
-		tsvPath = getPrefixName(m_currentOpenItem, true);
-		tsvPath = QString("%1_events.tsv").arg(tsvPath);
-		file.setFileName(tsvPath);
-		if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-			m_errorString = QString("Could not create %1").arg(tsvPath);
-			return -1;
-		}
-		// default columns
-		stream << "onset" << "\t" << "duration" << "\t" << bids::tsv_event_trial_type << endl;
-		for (auto m : markers) 
-			stream << QString("%1").arg(m->start()) << "\t" << QString("%1").arg(m->duration()) << "\t" << m->label() << "\t" << endl;
-		file.close();
-		return 0;
-	}
-	// the file exists, update it
-   // read the first line to get columns
-	file.setFileName(tsvPath);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		m_errorString = QString("Could not open %1 for reading.").arg(tsvPath);
-		return -1;
-	}
-	auto line = stream.readLine();
-	auto cols = AwUtilities::bids::columnsFromLine(line);
-	file.close();
-	// make a backup in case of...
-	QString bak = tsvPath + ".bak";
-	QFile::copy(tsvPath, bak);
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-		m_errorString = QString("Could not open %1 for writing.").arg(tsvPath);
-		return -1;
-	}
-	// rewrite first line
-	stream << line << endl;
-	for (auto m : markers) {
-		for (auto i = 0; i < cols.size(); i++) {
-			auto colLabel = cols.value(i);
-			if (colLabel == bids::tsv_event_trial_type)
-				stream << m->label();
-			else if (colLabel == bids::tsv_event_onset)
-				stream << QString("%1").arg(m->start());
-			else if (colLabel == bids::tsv_event_duration)
-				stream << QString("%1").arg(m->duration());
-			else
-				stream << "n/a";
-			if (i < cols.size())
-				stream << "\t";
-		}
-		stream << endl;
-	}
-	file.close();
-	QFile::remove(bak);
-	return 0;
-}
+//int AwBIDSManager::updateEventsTsv(const AwMarkerList& markers)
+//{
+//	m_errorString.clear();
+//	if (m_currentOpenItem == nullptr || markers.isEmpty())
+//		return -1;
+//	auto tsvPath = m_currentOpenItem->data(AwBIDSItem::EventsTsvRole).toString();
+//	QFile file;
+//	QTextStream stream(&file);
+//	// if the events.tsv does not exist, create it.
+//	if (tsvPath.isEmpty() || !QFile::exists(tsvPath)) {
+//		tsvPath = getPrefixName(m_currentOpenItem, true);
+//		tsvPath = QString("%1_events.tsv").arg(tsvPath);
+//		file.setFileName(tsvPath);
+//		if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+//			m_errorString = QString("Could not create %1").arg(tsvPath);
+//			return -1;
+//		}
+//		// default columns
+//		stream << "onset" << "\t" << "duration" << "\t" << bids::tsv_event_trial_type << endl;
+//		for (auto m : markers) 
+//			stream << QString("%1").arg(m->start()) << "\t" << QString("%1").arg(m->duration()) << "\t" << m->label() << "\t" << endl;
+//		file.close();
+//		return 0;
+//	}
+//	// the file exists, update it
+//   // read the first line to get columns
+//	file.setFileName(tsvPath);
+//	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+//		m_errorString = QString("Could not open %1 for reading.").arg(tsvPath);
+//		return -1;
+//	}
+//	auto line = stream.readLine();
+//	auto cols = AwUtilities::bids::columnsFromLine(line);
+//	file.close();
+//	// make a backup in case of...
+//	QString bak = tsvPath + ".bak";
+//	QFile::copy(tsvPath, bak);
+//	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+//		m_errorString = QString("Could not open %1 for writing.").arg(tsvPath);
+//		return -1;
+//	}
+//	// rewrite first line
+//	stream << line << endl;
+//	for (auto m : markers) {
+//		for (auto i = 0; i < cols.size(); i++) {
+//			auto colLabel = cols.value(i);
+//			if (colLabel == bids::tsv_event_trial_type)
+//				stream << m->label();
+//			else if (colLabel == bids::tsv_event_onset)
+//				stream << QString("%1").arg(m->start());
+//			else if (colLabel == bids::tsv_event_duration)
+//				stream << QString("%1").arg(m->duration());
+//			else
+//				stream << "n/a";
+//			if (i < cols.size())
+//				stream << "\t";
+//		}
+//		stream << endl;
+//	}
+//	file.close();
+//	QFile::remove(bak);
+//	return 0;
+//}
 
 
 int AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)

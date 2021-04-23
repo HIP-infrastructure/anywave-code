@@ -63,30 +63,6 @@ int aw::commandLine::doCommandLineOperation(AwArguments& args)
 	return 0;
 }
 
-int aw::commandLine::doLowLevelParsing(const QStringList& args, AwArguments& arguments)
-{
-	AwCommandLogger logger(QString("Command Line"));
-	QCommandLineParser parser;
-	const QString origin = "aw::commandLine::doParsing";
-	// default to no gui mode
-	arguments[keys::gui_mode] = false;
-	parser.setApplicationDescription("AnyWave");
-	auto versionOption = parser.addVersionOption();
-	if (!parser.parse(args)) {
-		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
-		return -1;
-	}
-
-	if (parser.isSet(versionOption)) {
-		std::cout << QCoreApplication::applicationVersion().toStdString(); 
-		return aw::commandLine::NoOperation;
-	}
-	return aw::commandLine::GUI;
-}
-
-
-
-
 int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 {
 	QCommandLineParser parser;
@@ -220,10 +196,11 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		throw exception;
 	}
 
-	//if (parser.isSet(versionOption)) {
-	//	std::cout << QCoreApplication::applicationVersion().toStdString() << std::endl;
-	//	return aw::commandLine::NoOperation;
-	//}
+	if (parser.isSet(versionOption)) {
+		std::cout << QCoreApplication::applicationVersion().toStdString();
+		return aw::commandLine::NoOperation;
+	}
+
 	///////////////// BIDS parsing is the priority. If --to_bids is specified then ignored all other options
 	if (parser.isSet(toBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {

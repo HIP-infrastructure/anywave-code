@@ -33,8 +33,6 @@ namespace aw {
 		// for example : --plugin_debug with --server_port will launch the Gui normally but activate the plugin debug mode
 		enum Commands { NoOperation, BatchOperation, GUI, ParsingError };
 		int doParsing(const QStringList& args, AwArguments& arguments);
-	//	int doCommandLineOperation(int operation, AwArguments& operations);
 		int doCommandLineOperation(AwArguments& operations);
-		int doLowLevelParsing(const QStringList& args, AwArguments& arguments);
 	}
 }

@@ -93,6 +93,7 @@ public:
 	static void initCommandLineOperation(const QString& filePath);
 	static void finishCommandLineOperation();
 
+
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
 	
@@ -106,7 +107,7 @@ public:
 	/** Update channels.tsv file from bad file **/
 	int updateChannelsTsvBadChannels(const QStringList& badLabels);
 	/** markers specific **/
-	int updateEventsTsv(const AwMarkerList& markers);
+//	int updateEventsTsv(const AwMarkerList& markers);
 
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);

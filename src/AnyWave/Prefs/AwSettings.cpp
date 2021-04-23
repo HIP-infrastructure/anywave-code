@@ -43,69 +43,7 @@ AwSettings::AwSettings(QObject *parent)
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
 	m_settings[aws::max_recent_files] = (int)15;
-	m_currentReader = NULL;
-
-//	// load previously saved recent files
-//	QSettings settings;
-//
-//	// load recent files
-//	int size = settings.beginReadArray("recentFiles");
-//	QStringList recentFiles, recentBIDS;
-//	for (int i = 0; i < size; i++)	{
-//		settings.setArrayIndex(i);
-//		recentFiles << settings.value("filePath").toString();
-//	}
-//	settings.endArray();
-//	// load recend BIDS
-//	size = settings.beginReadArray("recentBIDS");
-//	for (int i = 0; i < size; i++) {
-//		settings.setArrayIndex(i);
-//		recentBIDS << settings.value("BIDSPath").toString();
-//	}
-//	settings.endArray();
-//
-//	m_settings[aws::recent_files] = recentFiles;
-//	m_settings[aws::recent_bids] = recentBIDS;
-//	m_settings[aws::matlab_present] = false;
-//
-//	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
-//	m_settings[aws::auto_trigger_parsing] = isAutoTriggerParsingOn;
-//	// Cpu cores
-//	auto totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
-//	m_settings[aws::total_cpu_cores] = totalCPUCores;
-//	auto maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
-//	m_settings[aws::max_cpu_cores] = maxCPUCores;
-//
-//	bool checkForUpdates = settings.value("general/checkForUpdates", true).toBool();
-//	m_settings[aws::check_updates] = checkForUpdates;
-//
-//	// third party sotfwares
-//	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
-//	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
-//
-//	m_matlabInterface = nullptr;
-//	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
-//	auto appPath = QCoreApplication::applicationDirPath();
-//	m_settings[aws::app_dir] = appPath;
-//#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-//	m_settings[aws::app_resource_dir] = appPath;
-//#endif
-//#ifdef Q_OS_MAC
-//	m_settings[aws::app_resource_dir] = QString("%1/../Resources").arg(appPath);
-//#endif
-//
-//	m_settings[aws::ins_version] = false;
-//	// check for a version.txt in resources
-//	QString insVersionFile = QString("%1/ins.txt").arg(m_settings.value(aws::app_resource_dir).toString());
-//	// check for a file called ins.txt
-//	if (QFile::exists(insVersionFile))
-//		m_settings[aws::ins_version] = true;
-//
-//	//Save system path
-//	m_settings[aws::system_path] = QString(qgetenv("PATH"));
-//
-//	// get username
-//	m_settings[aws::username] = qgetenv("USERNAME");
+	m_currentReader = nullptr;
 }
 
 AwSettings::~AwSettings()

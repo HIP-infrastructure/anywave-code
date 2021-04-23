@@ -187,6 +187,9 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 	QString inputFile = args.value(keys::input_file).toString();
 
 	if (!inputFile.isEmpty()) {
+		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
+		AwBIDSManager::initCommandLineOperation(inputFile);
+
 		auto status = dm->openFile(inputFile, true);
 		if (status == AwDataManager::NoPluginFound) {
 			throw AwException(QString("no reader can open %1").arg(inputFile));
@@ -203,16 +206,6 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 	// check for special case, marker_file, montage_file set in json must be relative to data file
 
 	// --marker_file and --montage_file must be absolute paths
-
-	//if (args.contains(keys::marker_file)) {
-	//	QString fullPath = QString("%1/%2").arg(process->pdi.input.settings.value(keys::data_dir).toString()).arg(args.value(keys::marker_file).toString());
-	//	args[keys::marker_file] = fullPath;
-	//}
-	//if (args.contains(keys::montage_file)) {
-	//	QString fullPath = QString("%1/%2").arg(process->pdi.input.settings.value(keys::data_dir).toString()).arg(args.value(keys::montage_file).toString());
-	//	args[keys::montage_file] = fullPath;
-	//}
-
 	if (!inputFile.isEmpty()) {
 		// check for BAD file
 		QString tmp = dm->badFilePath();
@@ -302,9 +295,6 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
 		dm->dataServer()->openConnection(process);
-
-		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
-		AwBIDSManager::initCommandLineOperation(inputFile);
 	}
 	else {   // no input file but requires to build pdi anyway
 		AwProcessManager::instance()->buildProcessPDI(process);

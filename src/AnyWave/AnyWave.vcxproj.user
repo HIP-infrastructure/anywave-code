@@ -2,8 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--run d:\data\debug\bids\h2.json  --input_file //dynaserv/Test_DataBase/bids_dataset\sub-e8615551e369\ses-01\ieeg\sub-e8615551e369_ses-01_task-seizure_run-01_ieeg.vhdr --output_dir //dynaserv/Test_DataBase/bids_dataset\derivatives\h2\sub-e8615551e369\ses-01\ieeg --output_file sub-e8615551e369_ses-01_task-seizure_run-01 --log_dir d:\debug\log</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
