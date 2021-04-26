@@ -360,12 +360,11 @@ void AnyWave::on_actionLoadICA_triggered()
 
 void AnyWave::closeFile()
 {
-//	AwMontageManager::instance()->closeFile();
 	AwAmplitudeManager::instance()->closeFile();
 	// dont stop MATPy Server if anywave was launched with plugin_debug option
-	auto aws = AwSettings::getInstance();
-	if (!aws->value(aws::plugin_debug_mode).toBool())
-		AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
+	//auto aws = AwSettings::getInstance();
+	//if (!aws->value(aws::plugin_debug_mode).toBool())
+	//	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
 	if (AwVideoManager::isInstantiated())
 		delete AwVideoManager::instance();
@@ -380,7 +379,6 @@ void AnyWave::closeFile()
 		dockEEG->close();
 		delete dockEEG;
 		m_dockWidgets.remove("eeg_mapping");
-		//m_dockEEG = NULL;
 	}
 
 	if (dockMEG) {
@@ -388,7 +386,6 @@ void AnyWave::closeFile()
 		dockMEG->close();
 		delete dockMEG;
 		m_dockWidgets.remove("meg_mapping");
-		//m_dockMEG = NULL;
 	}
 
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/

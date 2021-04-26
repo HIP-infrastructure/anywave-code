@@ -272,10 +272,10 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		auto mrkMarkers = AwMarker::load(markerFile);
 		markers += mrkMarkers;
 		AwMarker::removeDoublons(markers);
-		// auto save original markers
-		AwMarker::save(originalMarkers, markers);
 		emit log(QString("%1 markers total.").arg(markers.size()));
 	}
+	// auto save original markers
+	AwMarker::save(originalMarkers, markers);
 
 	if (args.contains(keys::skip_markers)) {
 		auto labels = args.value(keys::skip_markers).toStringList();
@@ -494,9 +494,9 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		auto temp = AwMarker::load(markerFile);
 		markers += temp;
 		AwMarker::removeDoublons(markers);
-		// auto save original markers
-		AwMarker::save(originalMarkers, markers);
 	}
+	// auto save original markers
+	AwMarker::save(originalMarkers, markers);
 
 	if (args.contains(keys::skip_markers)) {
 		auto labels = args.value(keys::skip_markers).toStringList();

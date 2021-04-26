@@ -82,7 +82,7 @@
 #define AW_HELP_URL "https://meg.univ-amu.fr/wiki/AnyWave"
 
 
-AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
+AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
 	
@@ -95,51 +95,28 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	setAcceptDrops(true);
 	AwSettings* aws = AwSettings::getInstance();
 	aws->init();
-//	aws->setParent(this);
-	
-//	createUserDirs(); // must be called before any other manager class instances
-
-	//AwArguments arguments;
 	QVariantMap arguments;
 	int operation = aw::commandLine::NoOperation;
 
 	AwDebugLog* adl = AwDebugLog::instance();
-//	adl->setParent(this);
-//	adl->connectComponent("AnyWave", this);
-
-	// searching for a Matlab and load the Matlab support module is necessary.
-	// Must be done before instanciating plugin manager
-//	initMatlab();
 	// Plugins
 	AwPluginManager* plugin_manager = AwPluginManager::getInstance();
-//	plugin_manager->setParent(this);
-//	plugin_manager->load();
 	// Processes
 	AwProcessManager* process_manager = AwProcessManager::instance();
-//	process_manager->setParent(this);
-
 	// Data Manager
 	auto dm = AwDataManager::instance();
-//	dm->setParent(this);
-	
 	// Montage
 	AwMontageManager* montage_manager = AwMontageManager::instance();
-//	montage_manager->setParent(dm);
    // marker
 	AwMarkerManager* marker_manager = AwMarkerManager::instance();
 
-	aws->setValue(aws::plugin_debug_mode, false);
-	bool listenMode = arguments.contains(keys::plugin_debug);
-	if (listenMode) {
-		quint16 server_port = static_cast<quint16>(arguments.value("server_port").toInt());
+	if (args.contains(keys::plugin_debug)) {
+		quint16 server_port = static_cast<quint16>(args.value(keys::server_port).toInt());
 		auto server = AwMATPyServer::instance();
 		server->start(server_port);
-		if (server->isListening()) {
-			aws->setValue(aws::plugin_debug_mode, true);
-			aws->setValue(aws::server_port, server_port);
-		}
-		server->setDebugMode(aws->value(aws::plugin_debug_mode).toBool());
+		server->setDebugMode(true);
 	}
+
 	m_debugLogWidget = nullptr;
 	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
@@ -160,12 +137,6 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	if (!recentBIDS.isEmpty()) {
 		updateRecentBIDS(recentBIDS);
 	}
-
-	//QSettings qsettings;
-
-	//// init settings
- //   qsettings.setValue("general/secureMode", false);
-	//qsettings.setValue("general/buildDate", QString(__DATE__));
 	// As initializing ProcessManager, give it the Process Menu instance !
 	process_manager->setMenu(menuProcesses);
 
@@ -252,9 +223,6 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	AwSourceManager::instance()->setParent(this);
 	connect(AwSourceManager::instance(), SIGNAL(newSourcesCreated(int)), AwMontageManager::instance(), SLOT(addNewSources(int)));
 
-	// MATPyServer
-//	AwMATPyServer::instance()->setParent(this);
-
 	// AwMeshManager
 	m_meshManager = AwMeshManager::instance();
 	// AwMeshManager
@@ -309,7 +277,7 @@ AnyWave::AnyWave(const QStringList& args, QWidget *parent, Qt::WindowFlags flags
 	m_lastDirOpen = "/";
 	readSettings();
 
-	auto file = arguments.value("open_file").toString();
+	auto file = args.value("open_file").toString();
 	showMaximized();
 	if (!file.isEmpty())
 		openFile(file);

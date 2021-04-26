@@ -33,7 +33,7 @@ class TCPRequest:
         self.socket.connectToHost(anywave.host, anywave.port)
         if not self.socket.waitForConnected():
            self.status = STATUS_FAILED
-           error = "Unable to connect to AnyWave :" + self.socket.errorString()
+           error = "Unable to connect to AnyWave: " + self.socket.errorString()
            raise Exception(error)
         self.status = STATUS_SUCCESS
 

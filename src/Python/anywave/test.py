@@ -5,4 +5,7 @@ channels = anywave.get_data()
 print(channels[0].data)
 args = { 'types' : [ 'eeg']}
 channels = anywave.get_data(args)
-print(channels[0].data)
+if channels:
+    print(channels[0].data)
+else:
+    print("no data returned")

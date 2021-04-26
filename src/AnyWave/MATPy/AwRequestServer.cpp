@@ -45,7 +45,6 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
-	//m_ds = nullptr;
 	m_pidCounter = 0;
 
 	if (m_server->listen(QHostAddress::Any, port)) {
@@ -67,7 +66,6 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 		m_thread->start();
 	}
 	m_debugMode = false;
-	//setDebugMode();
 }
 
 //AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
@@ -112,12 +110,6 @@ AwRequestServer::~AwRequestServer()
 	m_thread->exit();
 	m_thread->wait();
 }
-
-//void AwRequestServer::setDebugMode()
-//{
-//	auto aws = AwSettings::getInstance();
-//	m_debugMode = aws->value(aws::plugin_debug_mode).toBool();
-//}
 
 void AwRequestServer::setHandlers()
 {

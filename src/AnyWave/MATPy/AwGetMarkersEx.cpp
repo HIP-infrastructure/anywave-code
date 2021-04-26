@@ -37,10 +37,11 @@ void AwRequestServer::handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *p)
 {
 	emit log("processing aw_getmarkersex/getmarkersex()");
 	AwTCPResponse response(client);
-	 
+	
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
+	QDataStream& toClient = *response.stream();
 
 	// expecting a string containing json encoded structure or empty string for default behavior.
 	QString json;

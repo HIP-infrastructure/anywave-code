@@ -9,6 +9,7 @@
 #include <AwKeys.h>
 #include "Prefs/AwSettings.h"
 #include <iostream>
+
 //
 // options descriptions
 //
@@ -201,53 +202,8 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		return aw::commandLine::NoOperation;
 	}
 
-	///////////////// BIDS parsing is the priority. If --to_bids is specified then ignored all other options
-	if (parser.isSet(toBIDSOpt)) {
-		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
-			logger.sendLog("toBIDS: Missing subject,task or modality argument");
-			throw(exception);
-		}
-		// Session option is not required
-		QString modality = parser.value(BIDSModalityOpt);
-		QString subj = parser.value(BIDSSubjectOpt);
-		QString task = parser.value(BIDSTaskOpt);
-		QString session = parser.value(BIDSSessionOpt);
-		QString run = parser.value(BIDSRunOpt);
-		QString format = parser.value(BIDSFormatOpt);
-		QString output = parser.value(BIDSSidecarsOpt);
-		QString acq = parser.value(BIDSAcqOpt);
-		QString proc = parser.value(BIDSProcOpt);
-
-		if (subj.isEmpty() || task.isEmpty() || modality.isEmpty()) {
-			logger.sendLog("toBIDS: a required argument is missing (modality, subject, task)");
-			throw(exception);
-		}
-
-		// first argument must be the kind of file to convert (here SEEG)
-		arguments["bids_modality"] = modality;
-		// subject is mandatory and should be the second argument.
-		arguments["bids_subject"] = subj;
-		if (!task.isEmpty())
-			arguments["bids_task"] = task;
-		if (!session.isEmpty())
-			arguments["bids_session"] = session;
-		if (!run.isEmpty())
-			arguments["bids_run"] = run;
-		if (!format.isEmpty())
-			arguments["bids_format"] = format;
-		if (!output.isEmpty())
-			arguments["bids_output"] = output;
-		if (!acq.isEmpty())
-			arguments["bids_acq"] = acq;
-		if (!proc.isEmpty())
-			arguments["bids_proc"] = proc;
-		// res = aw::commandLine::BIDS;  
-		arguments[keys::operation] = keys::BIDS_operation;
-		return aw::commandLine::BatchOperation;
- 	}
-
 	//// add plugin options
-	for (auto k : mapParams.keys()) {
+	for (auto const& k : mapParams.keys()) {
 		auto option = mapParams.value(k);
 		if (parser.isSet(*option)) {
 			arguments[k] = parser.value(*option);
@@ -366,17 +322,64 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	if (parser.isSet(pluginDebugO)) {
 		arguments[keys::plugin_debug] = true;
 		arguments[keys::gui_mode] = true;
+		arguments[keys::server_port] = parser.value(serverPortOpt).toInt();
 	}
 
-	auto positionals = parser.positionalArguments();
-	if (!positionals.isEmpty())
-		arguments["open_file"] = positionals.first();
+	///////////////// BIDS parsing is the priority. If --to_bids is specified then ignored all other options
+	if (parser.isSet(toBIDSOpt)) {
+		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
+			logger.sendLog("toBIDS: Missing subject,task or modality argument");
+			throw(exception);
+		}
+		// Session option is not required
+		QString modality = parser.value(BIDSModalityOpt);
+		QString subj = parser.value(BIDSSubjectOpt);
+		QString task = parser.value(BIDSTaskOpt);
+		QString session = parser.value(BIDSSessionOpt);
+		QString run = parser.value(BIDSRunOpt);
+		QString format = parser.value(BIDSFormatOpt);
+		QString output = parser.value(BIDSSidecarsOpt);
+		QString acq = parser.value(BIDSAcqOpt);
+		QString proc = parser.value(BIDSProcOpt);
+
+		if (subj.isEmpty() || task.isEmpty() || modality.isEmpty()) {
+			logger.sendLog("toBIDS: a required argument is missing (modality, subject, task)");
+			throw(exception);
+		}
+
+		// first argument must be the kind of file to convert (here SEEG)
+		arguments["bids_modality"] = modality;
+		// subject is mandatory and should be the second argument.
+		arguments["bids_subject"] = subj;
+		if (!task.isEmpty())
+			arguments["bids_task"] = task;
+		if (!session.isEmpty())
+			arguments["bids_session"] = session;
+		if (!run.isEmpty())
+			arguments["bids_run"] = run;
+		if (!format.isEmpty())
+			arguments["bids_format"] = format;
+		if (!output.isEmpty())
+			arguments["bids_output"] = output;
+		if (!acq.isEmpty())
+			arguments["bids_acq"] = acq;
+		if (!proc.isEmpty())
+			arguments["bids_proc"] = proc;
+		// res = aw::commandLine::BIDS;  
+		arguments[keys::operation] = keys::BIDS_operation;
+		return aw::commandLine::BatchOperation;
+	}
+
 
 	if (parser.isSet(runProcessOpt)) {
 		arguments["run_process"] = parser.value(runProcessOpt);
 		arguments[keys::operation] = keys::run_operation;
 		return aw::commandLine::BatchOperation;
 	}
+
+	auto positionals = parser.positionalArguments();
+	if (!positionals.isEmpty())
+		arguments["open_file"] = positionals.first();
 
 	arguments[keys::gui_mode] = true;
 	return aw::commandLine::GUI;

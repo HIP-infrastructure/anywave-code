@@ -61,8 +61,7 @@ class AnyWave : public QMainWindow, private Ui::AnyWaveClass
 	Q_OBJECT
 
 public:
-	AnyWave(const QStringList& args, QWidget* parent = 0, Qt::WindowFlags flags = 0);
-	//AnyWave(const QVariantMap& args, QWidget* parent = 0, Qt::WindowFlags flags = 0);
+	AnyWave(const QVariantMap& args, QWidget* parent = 0, Qt::WindowFlags flags = 0);
 	~AnyWave();
 
 	inline AwDisplay *displayManager() { return m_display; }

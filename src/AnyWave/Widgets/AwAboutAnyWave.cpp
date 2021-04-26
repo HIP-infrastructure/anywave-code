@@ -29,16 +29,15 @@
 #include <QUrl>
 #include <vtkVersion.h>
 #include "Prefs/AwSettings.h"
+#include <AwVersion.h>
 
 AwAboutAnyWave::AwAboutAnyWave(QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
 	
-	QSettings settings;
-	QString BuildDate = settings.value("general/buildDate", "No build info").toString();
 	labelQtVersion->setText(QT_VERSION_STR);
-	labelBuildDate->setText(QString("Build: %1").arg(BuildDate));
+	labelBuildDate->setText(QString("version %1.%2").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION));
 	labelVtkVersion->setText(QString(VTK_VERSION));
 	buttonGetLastVersion->hide();
 	labelUpdateAvailable->setText("No update available.");

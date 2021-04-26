@@ -83,6 +83,7 @@ namespace keys {
 	constexpr auto create_montage = "create_montage";
 	// listen mode for plugin debugging
 	constexpr auto plugin_debug = "listen_mode";
+	constexpr auto server_port = "server_port";
 
 	// possible values for create_montage key
 	constexpr auto bipolar_ieeg = "bipolar_ieeg";

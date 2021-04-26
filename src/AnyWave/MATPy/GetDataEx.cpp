@@ -182,7 +182,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		QVector<float> filters;
 		if (cfg.contains("filters")) {
 			auto list = cfg.value("filters").toList();
-			for (auto item : list)
+			for (auto const &item : list)
 				filters << item.toDouble();
 		}
 		markers = AwMarkerManager::instance()->getMarkersThread();

@@ -48,8 +48,7 @@
 #include "CL/CommandLineParser.h"
 #include "AwComponents.h"
 #include <iostream>
-
-constexpr auto version = "21.04.23";
+#include <AwVersion.h>
 
 int main(int argc, char *argv[])
 {
@@ -83,7 +82,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("INSERM U1106");
 	QCoreApplication::setOrganizationDomain("INS.org");
 	QCoreApplication::setApplicationName("AnyWave");
-	app.setApplicationVersion(version);
+	app.setApplicationVersion(QString("%1.%2").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION));
 
 	QSettings settings(QSettings::SystemScope, "INSERM U1106", "AnyWave");
 	settings.setValue("general/secureMode", false);
@@ -104,15 +103,15 @@ int main(int argc, char *argv[])
 			std::cout << e.errorString().toStdString();
 			return -1;
 		}
-		if (operation == aw::commandLine::NoOperation)
+		if (operation == aw::commandLine::NoOperation)  // if parsing returns NoOperation that means that nothing more should be processed neither the GUI should be
+														// launched.
 			return 0;
 		if (operation == aw::commandLine::BatchOperation) {
 			aw::commandLine::doCommandLineOperation(arguments);
 			return 0;
 		}
 	}
-	components.setGuiEnabled(true);
-	// command line arguments parsing is done while building anywave.
-	AnyWave window(app.arguments());
+	components.setGuiEnabled(true);  // if we get there, launch GUI even after some command line options have been processed (mostly -plugin_debug and -server_port)
+	AnyWave window(arguments);
 	return app.exec();
 }

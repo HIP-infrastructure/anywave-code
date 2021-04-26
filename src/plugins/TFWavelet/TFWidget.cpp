@@ -88,6 +88,10 @@ void TFWidget::lockZRange()
 	m_ui.buttonApply->setEnabled(false);
 	m_ui.radioModulus->setEnabled(false);
 	m_ui.radioModulus2->setEnabled(false);
+
+	m_zmin = min;
+	m_zmax = max;
+	setZScale();
 }
 
 void TFWidget::unlockZRange()
