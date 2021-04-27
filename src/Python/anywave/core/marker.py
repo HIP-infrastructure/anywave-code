@@ -7,3 +7,9 @@ class Marker:
         value = 0.
         targets = []
 
+    def print(self):
+        print("label=", self.label)
+        print("position=", self.position)
+        print("duration=", self.duration)
+        print("value=", self.value)
+        print("targets=", self.targets)

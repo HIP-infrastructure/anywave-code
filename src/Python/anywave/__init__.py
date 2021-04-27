@@ -8,8 +8,13 @@ import sys
 host = '127.0.0.1'
 pid = -1
 port = 59000
+properties = dict()
 
 from .getdata import get_data
+from .getmarkers import get_markers
 from .sendmessage import send_message
+from .getprops import get_props
+from .debug_connect import debug_connect
+from .sendmarkers import send_markers
 from .core.channel import Channel
 from .core.marker import Marker

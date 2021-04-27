@@ -44,6 +44,9 @@ class TCPRequest:
         stream = QtCore.QDataStream(self.socket)
         stream.setVersion(QtCore.QDataStream.Qt_4_4)
         status = stream.readInt32()
+        if status is - 1:
+            error = stream.readQString()
+            raise Exception(error)
         # get size of data
         while self.socket.bytesAvailable() < 4:
             if not self.socket.waitForReadyRead(self.WAIT_TIME_OUT):
@@ -53,9 +56,6 @@ class TCPRequest:
         while self.socket.bytesAvailable() < size:
              if not self.socket.waitForReadyRead(self.WAIT_TIME_OUT):
                     size = -1
-        if status is -1:
-            error = stream.readQString()
-            raise Exception(error)
         if size is -1:
             raise Exception('Data waiting timed out.')
         return size
@@ -65,9 +65,10 @@ class TCPRequest:
         if not self.status == STATUS_SUCCESS:
             raise Exception('not connected to AnyWave')
             return False
-        self.streamSize << anywave.pid << int(SIZE_INT) << self.request
+        self.streamSize.writeInt32(anywave.pid)
+        self.streamSize.writeInt32(SIZE_INT)
+        self.streamSize.writeInt32(self.request)
         self.socket.write(self.size)
-        self.socket.flush()
         if not self.socket.waitForBytesWritten():
             raise Exception('Error while sending request to AnyWave')
             return False
@@ -81,11 +82,12 @@ class TCPRequest:
             raise Exception('Sending request while not connected to AnyWave')
             return False
         str = json_dumps(args)
-        self.streamSize << anywave.pid << str.size() + SIZE_INT << self.request
+        self.streamSize.writeInt32(anywave.pid)
+        self.streamSize.writeInt32(int(len(str) + SIZE_INT))
+        self.streamSize.writeInt32(self.request)
+        self.streamData.writeQString(json)
         self.socket.write(self.size)
-        self.streamData << json
         self.socket.write(self.data)
-        self.socket.flush()
         if not self.socket.waitForBytesWritten():
             raise Exception('Error while sending request to AnyWave')
             return False
@@ -124,7 +126,6 @@ class TCPRequest:
         self.streamData.writeBytes(data)
         self.socket.write(self.size)
         self.socket.write(self.data)
-        #self.socket.flush()
         if not self.socket.waitForBytesWritten():
             raise Exception('Error while sending request to AnyWave')
             return False
