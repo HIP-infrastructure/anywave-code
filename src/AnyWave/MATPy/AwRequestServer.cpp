@@ -68,47 +68,11 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	m_debugMode = false;
 }
 
-//AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
-//{
-//	m_thread = new QThread(this);
-//	m_server = new QTcpServer(this);
-//	m_serverPort = 0;
-//	//m_ds = nullptr;
-//	m_pidCounter = 0;
-//
-//	if (m_server->listen(QHostAddress::Any, port)) {
-//		m_serverPort = m_server->serverPort();
-//		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(m_serverPort), this);
-//		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
-//		if (reader->openFile(dataPath) != AwFileIO::NoError) {
-//			emit log(QString("Unable to open %1").arg(dataPath));
-//			m_isListening = false;
-//			return;
-//		}
-//		m_ds = new AwDataSet(reader, this);
-//		//m_ds = AwDataServer::getInstance()->duplicate(reader);
-//		//m_ds->openConnection(this);
-//		m_ds->connect(this);
-//		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
-//		m_isListening = true;
-//	}
-//	else 
-//		m_isListening = false;
-//
-//	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
-//	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
-//
-//	setHandlers();
-//	if (m_isListening) {
-//		moveToThread(m_thread);
-//		m_thread->start();
-//	}
-//}
-
 AwRequestServer::~AwRequestServer()
 {
 	m_thread->exit();
 	m_thread->wait();
+	m_processes.erase(m_processes.begin(), m_processes.end());
 }
 
 void AwRequestServer::setHandlers()
@@ -132,6 +96,7 @@ void AwRequestServer::setHandlers()
 	addHandler(this, &AwRequestServer::handleRunAnyWave, AwRequest::RunAnyWave);			
 	addHandler(this, &AwRequestServer::handleGetProperties, AwRequest::GetProperties);		
 	addHandler(this, &AwRequestServer::handleConnectDebug, AwRequest::ConnectDebug);
+	addHandler(this, &AwRequestServer::handleSendMarkers, AwRequest::SendMarkers);
 }
 
 
@@ -202,13 +167,22 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		emit log(QString("received unknown request: %2. Nothing done.").arg(request));
 		return;
 	}
+	AwScriptProcess* p = nullptr;
+	if (request == AwRequest::ConnectDebug) {
+		emit log(QString("Debug connection: create a fake process for debuging purposes"));
+		p = newDebugProcess();
+		auto h = m_handlers.value(request);
+		h(client, p);
+		emit log(QString("Debug connection: ok"));
+		return;
+	}
 
 	QByteArray size;
 	QDataStream stream_size(&size, QIODevice::WriteOnly);
 	stream_size.setVersion(QDataStream::Qt_4_4);
 	int status = 0;
 	emit log(tr("Received request ") + QString::number(request));
-	AwScriptProcess *p = nullptr;
+
 	// get the matchin process if pid is valid
 	if (m_debugMode && pid < 0) {
 		p = newDebugProcess();
@@ -227,8 +201,8 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		}
 		// p may be instantiated but if we are in debug mode, the pdi.input may be empty if no reader is active
 		// calling initDebugProcess() may solve this issue
-		if (m_debugMode)
-			initDebugProcess(p);
+		//if (m_debugMode)
+		//	initDebugProcess(p);
 	}
 	if (p == nullptr) {
 		emit log("Received request but process is null. Skipped.");

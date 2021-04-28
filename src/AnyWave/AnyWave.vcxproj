@@ -136,6 +136,7 @@
     <ClCompile Include="MATPy\OpenNewFile.cpp" />
     <ClCompile Include="MATPy\RunAnyWave.cpp" />
     <ClCompile Include="MATPy\SendCommand.cpp" />
+    <ClCompile Include="MATPy\SendMarkers.cpp" />
     <ClCompile Include="MATPy\SendMessage.cpp" />
     <ClCompile Include="MATPy\SetBeamFormer.cpp" />
     <ClCompile Include="Montage\AwChannelListModel.cpp" />

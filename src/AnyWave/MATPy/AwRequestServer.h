@@ -30,7 +30,6 @@
 class AwScriptProcess;
 #include <AwDataClient.h>
 #include "Data/AwDataSet.h"
-//class AwFileIO;
 
 
 class AwRequestServer : public AwDataClient
@@ -67,7 +66,6 @@ protected:
 	QThread *m_thread;
 	bool m_isListening;
 	quint16 m_serverPort;
-//	AwDataSet *m_ds;
 	int m_pidCounter;
 	bool m_debugMode;
 	QList<AwScriptProcess*> m_processes;	// this list will contain instanciated process when plugin_debug option is active
@@ -92,6 +90,7 @@ private:
 	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
 	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
 	void handleConnectDebug(QTcpSocket* client, AwScriptProcess* process);
+	void handleSendMarkers(QTcpSocket* client, AwScriptProcess* process);
 	void unusedHandler(QTcpSocket *client, AwScriptProcess *process) {}
 
 	void setHandlers();

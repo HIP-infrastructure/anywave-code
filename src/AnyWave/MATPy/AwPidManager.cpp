@@ -50,7 +50,6 @@ AwPidManager *AwPidManager::instance()
 void AwPidManager::removePid()
 {
 	AwScriptProcess *p = (AwScriptProcess *)sender();
-
 	if (p) 
 		m_pids.remove(p->pid());
 }
