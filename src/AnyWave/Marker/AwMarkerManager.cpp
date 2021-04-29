@@ -144,13 +144,15 @@ void AwMarkerManager::removeOfflimits()
 	}
 	// start from the last elements
 	auto it = m_markers.end();
-
+	auto current = m_markers.end();
 	while (true) {
 		AwMarker* m = *--it;
 		if (m->start() <=  end) 
 			break;
+		current--;
 	}
-	m_markers.erase(it, m_markers.end());
+	if (current < m_markers.end())
+		m_markers.erase(current, m_markers.end());
 
 }
 

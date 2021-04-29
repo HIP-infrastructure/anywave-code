@@ -11,3 +11,9 @@ class Channel:
         hp = 0.
         notch = 0.
         data = numpy.empty(1, numpy.float32)
+
+    def full_name(self):
+        if self.ref == '':
+            return self.name
+        return self.name + '-' + self.ref
+

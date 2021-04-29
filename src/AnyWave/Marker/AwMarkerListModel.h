@@ -59,8 +59,7 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 	Qt::ItemFlags flags(const QModelIndex &index = QModelIndex()) const;
 
-	// Methodes propres au modele
-//	void setMarkerList(const AwMarkerList& markers);
+	// Methodes propres au model
 	void updateMarkers(const AwMarkerList& markers);
 	void update();  // indique au model que certains éléments de la liste on changé leurs données.
 	AwMarkerList& markers() { return m_markers; }
