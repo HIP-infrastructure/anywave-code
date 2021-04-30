@@ -252,12 +252,17 @@ void AwComponents::createUserDirs()
 #ifdef Q_OS_MAC
 	// set python module path on mac it's in the application bundle
 	aws->setValue(aws::python_module_dir, appPath + "/../Python");
+	aws->setValue(aws::matlab_API_dir, appPath + "/../matlab");
+	aws->setValue(aws::python_venv_dir, appPath + "/../Python/venv");
+	aws->setValue(aws::python_packages_dir, appPath + "/../Python/packages");
 	// no change to plugin dir
 	appDir.cdUp();
 	appDir.cd("Plugins");
 	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
 
 #else
+	aws->setValue(aws::matlab_API_dir, appPath + "/matlab");
+	aws->setValue(aws::python_venv_dir, appPath + "/Python/venv");
 	aws->setValue(aws::python_module_dir, appPath + "/Python");
 	aws->setValue(aws::python_package_dir, appPath + "/Python");
 	appDir.cd("Plugins");
@@ -267,7 +272,7 @@ void AwComponents::createUserDirs()
 	aws->setValue(aws::app_matlab_plugins_dir, appPluginDir + "/MATLAB");
 	aws->setValue(aws::app_python_plugins_dir, appPluginDir + "/Python");
 	// Mex path
-	aws->setValue(aws::mex_dir, appPluginDir + "/MATLAB/AnyWave");
+	aws->setValue(aws::matlab_mex_dir, appPluginDir + "/MATLAB/AnyWave");
 }
 
 void AwComponents::initMatlab()

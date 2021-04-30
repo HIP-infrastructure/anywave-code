@@ -36,13 +36,15 @@
 AwSettings *AwSettings::m_instance = 0;
 
 #define LINE_PX	200
+constexpr int max_recent_files = 15;
 
 AwSettings::AwSettings(QObject *parent)
 	: QObject(parent)
 {
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
-	m_settings[aws::max_recent_files] = (int)15;
+	m_settings[aws::max_recent_files] = max_recent_files;
+	m_settings[aws::matlab_present] = false;
 	m_currentReader = nullptr;
 }
 
@@ -91,7 +93,6 @@ void AwSettings::init()
 
 	m_settings[aws::recent_files] = recentFiles;
 	m_settings[aws::recent_bids] = recentBIDS;
-	m_settings[aws::matlab_present] = false;
 
 	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
 	m_settings[aws::auto_trigger_parsing] = isAutoTriggerParsingOn;
@@ -108,7 +109,7 @@ void AwSettings::init()
 	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
 	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
 
-	m_matlabInterface = nullptr;
+	//m_matlabInterface = nullptr;
 	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
 	auto appPath = QCoreApplication::applicationDirPath();
 	m_settings[aws::app_dir] = appPath;

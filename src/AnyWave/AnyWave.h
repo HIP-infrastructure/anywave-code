@@ -99,7 +99,6 @@ private:
 	// flags
 	bool m_currentFileModified;
 	// methods
-	void createUserDirs();
 	void initToolBarsAndMenu();
 	void closeFile();
 	bool checkForModified();

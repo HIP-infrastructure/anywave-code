@@ -32,8 +32,6 @@
 
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
-	//p->setScriptPath(m_path);
-	//p->pdi.input.settings[keys::plugin_dir] = m_pluginDir;
 	// set it a copy of all settings from data manager
 	p->pdi.input.settings.unite(AwDataManager::instance()->settings());
 	// merge also settings proper to plugin

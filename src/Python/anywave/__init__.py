@@ -18,3 +18,4 @@ from .debug_connect import debug_connect
 from .sendmarkers import send_markers
 from .core.channel import Channel
 from .core.marker import Marker
+from .init import init
