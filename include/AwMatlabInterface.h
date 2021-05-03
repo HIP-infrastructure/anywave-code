@@ -34,6 +34,7 @@ namespace matlab_interface {
 	constexpr auto matlab_api_dir = "matlab_api_dir";
 	constexpr auto matlab_mex_dir = "matlab_mex_dir";
 	constexpr auto python_exe = "python_exe";
+	constexpr auto python_venv_dir = "python_venv_dir";
 	constexpr auto matlab_plugin_dir = "matlab_plugin_dir";
 	
 }

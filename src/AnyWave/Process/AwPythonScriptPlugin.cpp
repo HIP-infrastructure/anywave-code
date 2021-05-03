@@ -105,7 +105,7 @@ void AwPythonScriptProcess::run()
 	if (!venPath.isEmpty()) {
 #ifdef Q_OS_WIN
 		venPath += "\\Scripts";
-		python = QString("%1\\pythonw.exe").arg(venPath);
+		python = QString("%1\\python.exe").arg(venPath);
 		venPath = QDir::toNativeSeparators(venPath);
 		systemPath = QString("%1;%2").arg(venPath).arg(systemPath);
 #endif
@@ -121,7 +121,7 @@ void AwPythonScriptProcess::run()
 		venPath = AwSettings::getInstance()->value(aws::python_venv_dir).toString();
 #ifdef Q_OS_WIN
 		venPath += "\\Scripts";
-		python = QString("%1\\pythonw.exe").arg(venPath);
+		python = QString("%1\\python.exe").arg(venPath);
 		venPath = QDir::toNativeSeparators(venPath);
 		systemPath = QString("%1;%2").arg(venPath).arg(systemPath);
 #endif

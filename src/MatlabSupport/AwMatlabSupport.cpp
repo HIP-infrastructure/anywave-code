@@ -28,9 +28,20 @@
 #include <QDir>
 #include <QSettings>
 #include <QtCore>
-
+#include "MatlabDataArray.hpp"
 
 constexpr auto AW_MATLAB_OUTPUT_BUFFER_SIZE = 1024 * 20;	// 20Kbytes buffer
+
+
+void AwMatlabSupport::printFromBuf(const std::shared_ptr<SBuf> buf)
+{
+	//Get text from buf
+	auto text_ = buf->str();
+	if (!text_.empty())
+		emit progressChanged(QString::fromStdU16String(text_));
+/*	std::cout << "*" << convertUTF16StringToUTF8String(text_)
+		<< "*" << std::endl*/;
+}
 
 /** run()
 - path: path to the script to be executed.
@@ -39,85 +50,200 @@ constexpr auto AW_MATLAB_OUTPUT_BUFFER_SIZE = 1024 * 20;	// 20Kbytes buffer
 **/
 void AwMatlabSupport::run(const QVariantMap& settings)
 {
-	m_eng = engOpen(nullptr); 
+	//	m_eng = engOpen(nullptr); 
+
 	emit progressChanged("Opening MATLAB Connection...");
-	if (m_eng != nullptr) {
+	try {
+		m_matlabPtr = matlab::engine::startMATLAB();
 		emit progressChanged("Connection to MATLAB established.");
-		char *buffer = new char[AW_MATLAB_OUTPUT_BUFFER_SIZE + 1];
-		buffer[AW_MATLAB_OUTPUT_BUFFER_SIZE] = '\0';
 		QString command;
-		QString envPath;
 		std::string tmp;
-		quint16 port = static_cast<quint16>(settings.value(matlab_interface::port).toUInt());
+		matlab::data::String matlabString;
+		auto outBuf = std::make_shared<SBuf>();
+		auto errBuf = std::make_shared<SBuf>();
+		// Create matlab data array factory
+		matlab::data::ArrayFactory factory;
 		int pid = settings.value(matlab_interface::pid).toInt();
+		quint16 port = static_cast<quint16>(settings.value(matlab_interface::port).toUInt());
+		// Create data variable
+		m_matlabPtr->setVariable(u"pid", factory.createScalar<int>(pid), matlab::engine::WorkspaceType::GLOBAL);
+
+		m_matlabPtr->setVariable(u"port", factory.createScalar<int>(port), matlab::engine::WorkspaceType::GLOBAL);
+
+		m_matlabPtr->setVariable(u"host", factory.createCharArray("127.0.0.1"), matlab::engine::WorkspaceType::GLOBAL);
 		QString args = settings.value(matlab_interface::json).toString();
-		
-		// set global variables host, pid, port and json_args
-		engEvalString(m_eng, "evalin('base', 'global host')");
-		engEvalString(m_eng, "evalin('base', 'global pid')");
-		engEvalString(m_eng, "evalin('base', 'global port')");
-		engEvalString(m_eng, "evalin('base', 'global args')");
-		// send pid
-		command = "evalin('base', 'pid = " + QString::number(pid) + "')";
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		// send port
-		command = QString("evalin('base', 'port = %1')").arg(port);
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		// send host
-		engEvalString(m_eng, "evalin('base', 'host = ''127.0.0.1''')");
-
 		if (!args.isEmpty()) {
-			// send json args
-			command = QString("evalin('base', 'args=jsondecode(''%1'')')").arg(args.simplified());
+			tmp = args.toStdString();
+			m_matlabPtr->setVariable(u"args", factory.createCharArray(tmp), matlab::engine::WorkspaceType::GLOBAL);
+			command = QString("args=jsondecode(args);");
+			emit progressChanged("evaluating args = jsondecode(args);");
+			//mp = command.toStdString();
+			matlabString = command.toStdU16String();
+			// matlab::engine::convertUTF8StringToUTF16String(tmp);
+			m_matlabPtr->eval(matlabString, outBuf, errBuf);
+			printFromBuf(outBuf);
+			printFromBuf(errBuf);
 		}
-		else
-			command = QString("evalin('base', 'args = []')");
+		else {
+			m_matlabPtr->setVariable(u"args", factory.createCharArray(""), matlab::engine::WorkspaceType::GLOBAL);
+			emit progressChanged("args is empty.");
+		}
 
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-
-		// add path to MATLAB
-		// mex files
+		
 		QString mexDir = settings.value(matlab_interface::matlab_mex_dir).toString();
-		command = QString("evalin('base', 'mexDir='%1')").arg(mexDir);
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		command = QString("evalin('base', 'addpath(mexDir)')");
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		// now set current dir to be the plugin dir
+		matlabString = mexDir.toStdU16String();
+		//m_matlabPtr->feval<void>(u"addpath", tmp);
+		m_matlabPtr->feval(u"addpath", factory.createCharArray(matlabString), outBuf, errBuf);
+		//m_matlabPtr->eval(matlabString, outBuf, errBuf);
+		printFromBuf(outBuf);
+		printFromBuf(errBuf);
+		//m_matlabPtr->eval(u"path", outBuf, errBuf);
+		//printFromBuf(outBuf);
+		//printFromBuf(errBuf);
+	
+		
 		QString pluginPath = settings.value(matlab_interface::matlab_plugin_dir).toString();
-		command = QString("evalin('base', 'cd %1')").arg(pluginPath);
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		// init Python
-		QString pyExec = settings.value(matlab_interface::python_exe).toString();
-	//	QString pyPackageDir = settings.value(matlab_interface::python_package_dir).toString();
+		matlabString = pluginPath.toStdU16String();
+		m_matlabPtr->feval(u"addpath", factory.createCharArray(matlabString), outBuf, errBuf);
+		//emit progressChanged("evaluating cd plugin_path");
+		//command = QString("cd '%1'").arg(QDir::toNativeSeparators(pluginPath));
+		//matlabString = command.toStdU16String();
+		//m_matlabPtr->eval(matlabString, outBuf, errBuf);
+		printFromBuf(outBuf);
+		printFromBuf(errBuf);
 		QString matlabApiDir = settings.value(matlab_interface::matlab_api_dir).toString();
-		command = QString("evalin('base', 'pyExec='%1')").arg(pyExec);
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		//command = QString("evalin('base', 'pyenv(''Version'', pyExec))'");
-		//tmp = command.toStdString();
-		//engEvalString(m_eng, tmp.data());
-		//command = QString("evalin('base', 'pyPackageDir=''%1'')").arg(pyPackageDir);
-		//tmp = command.toStdString();
-		//engEvalString(m_eng, tmp.data());
-		//command = QString("evalin('base', 'insert(py.sys.path, int64(0), pyPackageDir);'");
-		//tmp = command.toStdString();
-		//engEvalString(m_eng, tmp.data());
-		command = QString("evalin('base', 'matlabApiDir=''%1'')").arg(matlabApiDir);
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		command = QString("evalin('base', 'addpath(matlabApiDir)')");
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		command = QString("evalin('base', 'init_python(%1, %2, pyExec)'").arg(pid).arg(port);
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		engOutputBuffer(m_eng, buffer, AW_MATLAB_OUTPUT_BUFFER_SIZE);
+		//command = QString("addpath(genpath('%1'))").arg(QDir::toNativeSeparators(matlabApiDir));
+		matlabString = matlabApiDir.toStdU16String();
+		m_matlabPtr->feval(u"addpath", factory.createCharArray(matlabString), outBuf, errBuf);
+		printFromBuf(outBuf);
+		printFromBuf(errBuf);
+
+		emit progressChanged("init python");
+		// add all python paths
+		// set 
+		QString pyVenc = settings.value(matlab_interface::python_venv_dir).toString();
+		matlabString = pyVenc.toStdU16String();
+		m_matlabPtr->setVariable(u"pyVenvDir", factory.createCharArray(matlabString), matlab::engine::WorkspaceType::BASE);
+		m_matlabPtr->eval(u"addpath(genpath(pyVenvDir));", outBuf, errBuf);
+		QString pyExec = settings.value(matlab_interface::python_exe).toString();
+		//command = QString("init_python(%1, %2, '%3')").arg(pid).arg(port).arg(QDir::toNativeSeparators(pyExec));
+		matlabString = pyExec.toStdU16String();
+		m_matlabPtr->setVariable(u"pyExec", factory.createCharArray(matlabString), matlab::engine::WorkspaceType::BASE);
+		m_matlabPtr->eval(u"pyExec", outBuf, errBuf);
+		printFromBuf(outBuf);
+		printFromBuf(errBuf);
+		m_matlabPtr->eval(u"pyenv('Version', pyExec)", outBuf, errBuf);
+		printFromBuf(outBuf);
+		printFromBuf(errBuf);
+	//	m_matlabPtr->eval(u"py.anywave.pid", outBuf, errBuf);
+		//m_matlabPtr->eval(u"py.anywave.pid = py.int(pid);", outBuf, errBuf);
+		//printFromBuf(outBuf);
+		//printFromBuf(errBuf);
+		return;
+
+
+		tmp = pyExec.toStdString();
+		std::vector<matlab::data::Array> params = {
+			factory.createScalar<int>(pid), factory.createScalar<int>(port), factory.createCharArray(tmp)
+		}; 
+		const size_t numReturned = 0;
+		m_matlabPtr->feval(u"init_python", numReturned, params);
+		//printFromBuf(outBuf);
+		//printFromBuf(errBuf);
+		emit progressChanged("python init done.");
+		emit progressChanged("running main()");
+	//	m_matlabPtr->eval(u"main()", outBuf, errBuf);
+	//	m_matlabPtr->feval(u"main", {}, outBuf, errBuf);
+		printFromBuf(outBuf);
+		printFromBuf(errBuf);
+		//emit progressChanged(command);
+		//m_matlabPtr->eval(command.toStdU16String(), outBuf
+	}
+	catch (const matlab::engine::EngineException& e)
+	{
+		emit progressChanged(QString("MATLAB Support error: %1").arg(QString(e.what())));
+		return;
+	}
+	//if (m_eng != nullptr) {
+	//	emit progressChanged("Connection to MATLAB established.");
+	//	char *buffer = new char[AW_MATLAB_OUTPUT_BUFFER_SIZE + 1];
+	//	buffer[AW_MATLAB_OUTPUT_BUFFER_SIZE] = '\0';
+	//	engOutputBuffer(m_eng, buffer, AW_MATLAB_OUTPUT_BUFFER_SIZE);
+	//	QString command;
+	//	QString envPath;
+	//	std::string tmp;
+	//	quint16 port = static_cast<quint16>(settings.value(matlab_interface::port).toUInt());
+	//	int pid = settings.value(matlab_interface::pid).toInt();
+	//	QString args = settings.value(matlab_interface::json).toString();
+	//	
+	//	// set global variables host, pid, port and json_args
+	//	engEvalString(m_eng, "evalin('base', 'global host')");
+	//	engEvalString(m_eng, "evalin('base', 'global pid')");
+	//	engEvalString(m_eng, "evalin('base', 'global port')");
+	//	engEvalString(m_eng, "evalin('base', 'global args')");
+	//	// send pid
+	//	command = "evalin('base', 'pid = " + QString::number(pid) + "')";
+	//	emit progressChanged(command);
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	// send port
+	//	command = QString("evalin('base', 'port = %1')").arg(port);
+	//	emit progressChanged(command);
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	// send host
+	//	engEvalString(m_eng, "evalin('base', 'host = ''127.0.0.1''')");
+
+	//	if (!args.isEmpty()) {
+	//		// send json args
+	//		command = QString("evalin('base', 'args=jsondecode(''%1'')')").arg(args.simplified());
+	//		emit progressChanged(command);
+	//	}
+	//	else {
+	//		command = QString("evalin('base', 'args = []')");
+	//		emit progressChanged(command);
+	//	}
+
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+
+	//	// add path to MATLAB
+	//	// mex files
+	//	QString mexDir = settings.value(matlab_interface::matlab_mex_dir).toString();
+	//	command = QString("evalin('base', 'mexDir=''%1'')").arg(mexDir);
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(command);
+	//	command = QString("evalin('base', 'addpath(genpath(mexDir))')");
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(command);
+	//	// now set current dir to be the plugin dir
+	//	QString pluginPath = settings.value(matlab_interface::matlab_plugin_dir).toString();
+	//	command = QString("evalin('base', 'cd %1')").arg(pluginPath);
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(command);
+	//	// init Python
+	//	QString pyExec = settings.value(matlab_interface::python_exe).toString();
+	//	QString matlabApiDir = settings.value(matlab_interface::matlab_api_dir).toString();
+	//	command = QString("evalin('base', 'pyExec=''%1'')").arg(pyExec);
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(command);
+	//	command = QString("evalin('base', 'matlabApiDir=''%1'')").arg(matlabApiDir);
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(command);
+	//	command = QString("evalin('base', 'addpath(genpath(matlabApiDir))')");
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(command);
+	//	command = QString("evalin('base', 'init_python(%1, %2, pyExec)'").arg(pid).arg(port);
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(command);
+		
 
 		// add path to AnyWave parent folder
 //		QDir awPath(QCoreApplication::applicationDirPath());
@@ -162,13 +288,16 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 //		// the function is evaluated by the 'base' workspace (required for GUI intensive applications)
 //		//// search for main.m or main.mlapp
 //		//if (QFile::exists(QString("%1/main.m").arg(path)))
-		command = "evalin('base','main')";
-		tmp = command.toStdString();
-		engEvalString(m_eng, tmp.data());
-		emit progressChanged(QString(buffer));
-		engClose(m_eng);
-		delete[] buffer;
-	}
-	else
-		emit progressChanged(tr("Failed to connect to MATLAB!"));
+
+
+
+	//	command = "evalin('base','main')";
+	//	tmp = command.toStdString();
+	//	engEvalString(m_eng, tmp.data());
+	//	emit progressChanged(QString(buffer));
+	//	engClose(m_eng);
+	//	delete[] buffer;
+	//}
+	//else
+	//	emit progressChanged(tr("Failed to connect to MATLAB!"));
 }

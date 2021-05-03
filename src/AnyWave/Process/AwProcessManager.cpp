@@ -65,7 +65,7 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	m_viewMenu = nullptr;
 	m_dock = nullptr;
 	setObjectName("AwProcessManager");
-	m_processesWidget = nullptr;
+	m_processesWidget = new AwProcessesWidget;
 	auto plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 }
@@ -73,8 +73,8 @@ AwProcessManager::AwProcessManager(QObject *parent)
 AwProcessManager::~AwProcessManager()
 {
 	//delete m_processesWidget;
-	if (m_processesWidget)
-		delete m_processesWidget;
+//	if (m_processesWidget)
+//		delete m_processesWidget;
 }
 
 void AwProcessManager::setMenu(QMenu *menu)

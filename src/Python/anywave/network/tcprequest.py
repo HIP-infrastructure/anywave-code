@@ -53,7 +53,7 @@ class TCPRequest:
         stream = QtCore.QDataStream(self.socket)
         stream.setVersion(QtCore.QDataStream.Qt_4_4)
         status = stream.readInt32()
-        if status is - 1:
+        if status == -1:
             error = stream.readQString()
             raise Exception(error)
         # get size of data
@@ -65,7 +65,7 @@ class TCPRequest:
         while self.socket.bytesAvailable() < size:
             if not self.socket.waitForReadyRead(self.WAIT_TIME_OUT):
                 size = -1
-        if size is -1:
+        if size == -1:
             raise Exception('Data waiting timed out.')
         return size
 
@@ -88,12 +88,12 @@ class TCPRequest:
         # args must be a dict
         if self.status is not STATUS_SUCCESS:
             raise Exception('Sending request while not connected to AnyWave')
-        str = json_dumps(args)
+        json_string = json.loads(args)
         self.clear()
         self.streamSize.writeInt32(anywave.pid)
-        self.streamSize.writeInt32(int(len(str) + SIZE_INT))
+        self.streamSize.writeInt32(int(len(json_string) + SIZE_INT))
         self.streamSize.writeInt32(self.request)
-        self.streamData.writeQString(json)
+        self.streamData.writeQString(json_string)
         self.socket.write(self.size)
         self.socket.write(self.data)
         if not self.socket.waitForBytesWritten():
@@ -101,7 +101,7 @@ class TCPRequest:
         return True
 
     # sendString() will only send a string to AnyWave
-    # the string cand be a text message or a json string depending on the command
+    # the string can be a text message or a json string depending on the command
     def sendString(self, str):
         if self.status is not STATUS_SUCCESS:
             raise Exception('Sending request while not connected to AnyWave')

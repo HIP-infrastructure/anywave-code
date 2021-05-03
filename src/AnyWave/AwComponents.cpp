@@ -288,10 +288,14 @@ void AwComponents::initMatlab()
 		QString moduleName;
 		QString modulePath;
 #ifdef Q_OS_WIN
-		matlabPath += "/bin/win64";
-		QCoreApplication::addLibraryPath(matlabPath);
+		//matlabPath += "/bin/win64";
+		//  set paths where to look for dlls
+		QString paths = QString("%1\\bin\\win64;%2\\extern\\bin\\win64").arg(QDir::toNativeSeparators(matlabPath)).arg(QDir::toNativeSeparators(matlabPath));
 		// Windows only need the path to point where matlab dll resides to find them.
-		qputenv("PATH", matlabPath.toLatin1());
+		// 
+		// // DEBUG 
+		std::string tmp = paths.toStdString();
+		qputenv("PATH", tmp.data());
 		moduleName = "AwMatlabSupport.dll";
 		modulePath = qApp->applicationDirPath() + "/" + moduleName;
 #endif
