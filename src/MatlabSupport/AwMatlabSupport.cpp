@@ -33,12 +33,15 @@
 constexpr auto AW_MATLAB_OUTPUT_BUFFER_SIZE = 1024 * 20;	// 20Kbytes buffer
 
 
-void AwMatlabSupport::printFromBuf(const std::shared_ptr<SBuf> buf)
+void AwMatlabSupport::printFromBuf(const std::shared_ptr<SBuf>& buf)
 {
+	using namespace matlab::engine;
 	//Get text from buf
-	auto text_ = buf->str();
-	if (!text_.empty())
-		emit progressChanged(QString::fromStdU16String(text_));
+	String output_ = buf.get()->str();
+	std::string s = convertUTF16StringToUTF8String(output_);
+	QString message = QString::fromStdString(s);
+	if (!message.isEmpty())
+		emit progressChanged(message);
 /*	std::cout << "*" << convertUTF16StringToUTF8String(text_)
 		<< "*" << std::endl*/;
 }
@@ -53,62 +56,45 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 	//	m_eng = engOpen(nullptr); 
 
 	emit progressChanged("Opening MATLAB Connection...");
+	typedef std::basic_stringbuf<char16_t> StringBuf;
+	
 	try {
 		m_matlabPtr = matlab::engine::startMATLAB();
 		emit progressChanged("Connection to MATLAB established.");
 		QString command;
 		std::string tmp;
 		matlab::data::String matlabString;
-		auto outBuf = std::make_shared<SBuf>();
-		auto errBuf = std::make_shared<SBuf>();
+		std::shared_ptr<StringBuf> outBuf = std::make_shared<StringBuf>();
+		std::shared_ptr<StringBuf> errBuf = std::make_shared<StringBuf>();
 		// Create matlab data array factory
 		matlab::data::ArrayFactory factory;
 		int pid = settings.value(matlab_interface::pid).toInt();
 		quint16 port = static_cast<quint16>(settings.value(matlab_interface::port).toUInt());
-		// Create data variable
+		// Create global variables
 		m_matlabPtr->setVariable(u"pid", factory.createScalar<int>(pid), matlab::engine::WorkspaceType::GLOBAL);
-
 		m_matlabPtr->setVariable(u"port", factory.createScalar<int>(port), matlab::engine::WorkspaceType::GLOBAL);
-
 		m_matlabPtr->setVariable(u"host", factory.createCharArray("127.0.0.1"), matlab::engine::WorkspaceType::GLOBAL);
 		QString args = settings.value(matlab_interface::json).toString();
 		if (!args.isEmpty()) {
 			tmp = args.toStdString();
 			m_matlabPtr->setVariable(u"args", factory.createCharArray(tmp), matlab::engine::WorkspaceType::GLOBAL);
-			command = QString("args=jsondecode(args);");
-			emit progressChanged("evaluating args = jsondecode(args);");
-			//mp = command.toStdString();
-			matlabString = command.toStdU16String();
-			// matlab::engine::convertUTF8StringToUTF16String(tmp);
-			m_matlabPtr->eval(matlabString, outBuf, errBuf);
+			m_matlabPtr->eval(u"args=jsondecode(args);", outBuf, errBuf);
 			printFromBuf(outBuf);
 			printFromBuf(errBuf);
 		}
 		else {
-			m_matlabPtr->setVariable(u"args", factory.createCharArray(""), matlab::engine::WorkspaceType::GLOBAL);
+			m_matlabPtr->setVariable(u"args", factory.createEmptyArray(), matlab::engine::WorkspaceType::GLOBAL);
 			emit progressChanged("args is empty.");
 		}
 
-		
 		QString mexDir = settings.value(matlab_interface::matlab_mex_dir).toString();
 		matlabString = mexDir.toStdU16String();
-		//m_matlabPtr->feval<void>(u"addpath", tmp);
 		m_matlabPtr->feval(u"addpath", factory.createCharArray(matlabString), outBuf, errBuf);
-		//m_matlabPtr->eval(matlabString, outBuf, errBuf);
 		printFromBuf(outBuf);
 		printFromBuf(errBuf);
-		//m_matlabPtr->eval(u"path", outBuf, errBuf);
-		//printFromBuf(outBuf);
-		//printFromBuf(errBuf);
-	
-		
 		QString pluginPath = settings.value(matlab_interface::matlab_plugin_dir).toString();
 		matlabString = pluginPath.toStdU16String();
 		m_matlabPtr->feval(u"addpath", factory.createCharArray(matlabString), outBuf, errBuf);
-		//emit progressChanged("evaluating cd plugin_path");
-		//command = QString("cd '%1'").arg(QDir::toNativeSeparators(pluginPath));
-		//matlabString = command.toStdU16String();
-		//m_matlabPtr->eval(matlabString, outBuf, errBuf);
 		printFromBuf(outBuf);
 		printFromBuf(errBuf);
 		QString matlabApiDir = settings.value(matlab_interface::matlab_api_dir).toString();
@@ -117,47 +103,10 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 		m_matlabPtr->feval(u"addpath", factory.createCharArray(matlabString), outBuf, errBuf);
 		printFromBuf(outBuf);
 		printFromBuf(errBuf);
-
-		emit progressChanged("init python");
-		// add all python paths
-		// set 
-		QString pyVenc = settings.value(matlab_interface::python_venv_dir).toString();
-		matlabString = pyVenc.toStdU16String();
-		m_matlabPtr->setVariable(u"pyVenvDir", factory.createCharArray(matlabString), matlab::engine::WorkspaceType::BASE);
-		m_matlabPtr->eval(u"addpath(genpath(pyVenvDir));", outBuf, errBuf);
-		QString pyExec = settings.value(matlab_interface::python_exe).toString();
-		//command = QString("init_python(%1, %2, '%3')").arg(pid).arg(port).arg(QDir::toNativeSeparators(pyExec));
-		matlabString = pyExec.toStdU16String();
-		m_matlabPtr->setVariable(u"pyExec", factory.createCharArray(matlabString), matlab::engine::WorkspaceType::BASE);
-		m_matlabPtr->eval(u"pyExec", outBuf, errBuf);
-		printFromBuf(outBuf);
-		printFromBuf(errBuf);
-		m_matlabPtr->eval(u"pyenv('Version', pyExec)", outBuf, errBuf);
-		printFromBuf(outBuf);
-		printFromBuf(errBuf);
-	//	m_matlabPtr->eval(u"py.anywave.pid", outBuf, errBuf);
-		//m_matlabPtr->eval(u"py.anywave.pid = py.int(pid);", outBuf, errBuf);
-		//printFromBuf(outBuf);
-		//printFromBuf(errBuf);
-		return;
-
-
-		tmp = pyExec.toStdString();
-		std::vector<matlab::data::Array> params = {
-			factory.createScalar<int>(pid), factory.createScalar<int>(port), factory.createCharArray(tmp)
-		}; 
-		const size_t numReturned = 0;
-		m_matlabPtr->feval(u"init_python", numReturned, params);
-		//printFromBuf(outBuf);
-		//printFromBuf(errBuf);
-		emit progressChanged("python init done.");
 		emit progressChanged("running main()");
-	//	m_matlabPtr->eval(u"main()", outBuf, errBuf);
-	//	m_matlabPtr->feval(u"main", {}, outBuf, errBuf);
+		m_matlabPtr->eval(u"main");
 		printFromBuf(outBuf);
 		printFromBuf(errBuf);
-		//emit progressChanged(command);
-		//m_matlabPtr->eval(command.toStdU16String(), outBuf
 	}
 	catch (const matlab::engine::EngineException& e)
 	{

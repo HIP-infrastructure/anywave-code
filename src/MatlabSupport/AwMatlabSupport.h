@@ -28,7 +28,6 @@
 
 #include "awmatlabsupport_global.h"
 #include <AwMatlabInterface.h>
-//#include <engine.h>
 #include "MatlabEngine.hpp"
 using SBuf = std::basic_stringbuf<char16_t>;
 
@@ -43,9 +42,8 @@ public:
 signals:
 	void progressChanged(const QString&);
 private:
-//	Engine *m_eng;
 	std::unique_ptr<matlab::engine::MATLABEngine> m_matlabPtr;
-	void printFromBuf(const std::shared_ptr<SBuf> buf);
+	void printFromBuf(const std::shared_ptr<SBuf>& buf);
 };
 
 #endif // AWMATLABSUPPORT_H

@@ -11,7 +11,7 @@ def get_data(args=None):
     res = []
     if args is None:
         pass
-    else:   
+    else:
         tmp = json.dumps(args)
     aw.sendString(tmp)
     aw.waitForResponse()

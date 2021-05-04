@@ -108,8 +108,9 @@ void  TCPRequest::sendData(const QByteArray& data)
 	// write the total size of data in size: total size is in fact  data size + size of request value (int)
 	// first 4 bytes of size QBytesArray MUST BE the pid number of process.
 	*m_streamSize << MATLAB_Interface::pid << int(data.size() + sizeof(int)) << m_request;
+	*m_streamData << data;
 	m_socket.write(m_size);
-	m_socket.write(data);
+	m_socket.write(m_data);
 	
 	if (!m_socket.waitForBytesWritten()) {
 		m_errorString = "Error while sending data to AnyWave.";

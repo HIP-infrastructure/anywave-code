@@ -6,13 +6,12 @@ from PyQt5 import QtCore
 def send_markers(markers):
     MAX_MARKERS_AT_ONCE = 1000
     if type(markers) is not list:
-        raise Exception('arguments of send_markers must be a tuple of Markers')
+        raise Exception('arguments of send_markers must be a list of Markers')
     aw = tcp.TCPRequest(requests.SEND_MARKERS_REQUEST)
     nMarkers = int(len(markers))
     data = QtCore.QByteArray()
     streamData = QtCore.QDataStream(data, QtCore.QIODevice.WriteOnly)
     streamData.setVersion(QtCore.QDataStream.Version.Qt_4_4)
-    start = 0
     counter = 0
     while True:
         n = min(MAX_MARKERS_AT_ONCE, nMarkers)

@@ -1,6 +1,7 @@
 class Marker:
     """description of class"""
-    def __init__(self, label='', position = 0., value = 0., duration = 0., colour = "#000000"):
+
+    def __init__(self, label='', position=0., value=0., duration=0., colour="#000000"):
         self.label = label
         self.position = position
         self.duration = duration
