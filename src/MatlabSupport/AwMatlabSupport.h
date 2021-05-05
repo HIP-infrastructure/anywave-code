@@ -28,8 +28,7 @@
 
 #include "awmatlabsupport_global.h"
 #include <AwMatlabInterface.h>
-#include "MatlabEngine.hpp"
-using SBuf = std::basic_stringbuf<char16_t>;
+
 
 class AWMATLABSUPPORT_EXPORT AwMatlabSupport : public AwMatlabInterface
 {
@@ -41,9 +40,7 @@ public:
 	void run(const QVariantMap& settings) override;
 signals:
 	void progressChanged(const QString&);
-private:
-	std::unique_ptr<matlab::engine::MATLABEngine> m_matlabPtr;
-	void printFromBuf(const std::shared_ptr<SBuf>& buf);
+
 };
 
 #endif // AWMATLABSUPPORT_H

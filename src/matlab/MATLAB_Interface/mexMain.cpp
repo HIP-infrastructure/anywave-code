@@ -33,11 +33,24 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	ArrayFactory factory;
 
 	if (inputs.empty()) 
-		error("Requires at least one argument");
+		error("anywave: Requires at least one argument");
 
 	if (inputs[0].getType() != ArrayType::CHAR) 
-		error("First input must be a string");
-	
+		error("anywave: First input must be a string");
+
+	// get port and pid!!!
+	auto pid = m_matlabPtr->getVariable(u"pid", matlab::engine::WorkspaceType::BASE);
+	if (!pid.isEmpty()) {
+		TypedArray<double> p = pid;
+
+		MATLAB_Interface::pid = static_cast<int>(p[0]);
+	}
+	auto port = m_matlabPtr->getVariable(u"port", matlab::engine::WorkspaceType::BASE);
+	if (!port.isEmpty()) {
+		TypedArray<double> p = port;
+		MATLAB_Interface::port = static_cast<int>(p[0]);
+	}
+
 	// dispatch anywave requests based on the first input parameter that must a string
 	std::string command = matlab::data::CharArray(inputs[0]).toAscii();
 	int request = functions[command];
@@ -120,15 +133,8 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 
 	//std::ostringstream printf_stream;
 	for (auto i = 0; i < fieldNames.size(); i++) {
-		
-		//std::string field = fieldNames[i];
-		//printf_stream << "field: " << field << '\n' << "index is " << i << '\n';
-
 		map[fieldNames[i]] = i;
-	}
-	//printf(std::move(printf_stream));
-
-		 
+	} 
 	bool ok = map["label"] != -1 && map["position"] != -1;
 	if (!ok)
 		error("send_markers: struct must contain label and position fields.");

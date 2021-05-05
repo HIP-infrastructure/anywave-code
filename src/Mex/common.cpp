@@ -83,8 +83,10 @@ QTcpSocket *connect()
     socket->connectToHost(host, port);
     if (!socket->waitForConnected())
     {
-        mexErrMsgTxt("Unable to connect to host.");
-        mexErrMsgTxt(socket->errorString().toLatin1().data());
+		QString error = QString("Unable to connect to host (%1:%2): %3").arg(host).arg(port).arg(socket->errorString());
+		std::string error_ = error.toStdString();
+        mexErrMsgTxt(error_.data());
+        //mexErrMsgTxt(socket->errorString().toLatin1().data());
         delete socket;
         return NULL;
     }

@@ -71,21 +71,9 @@ void AwMatlabScriptProcess::run()
 			QVariantMap settings;
 			settings[matlab_interface::matlab_plugin_dir] = path;
 			settings[matlab_interface::matlab_mex_dir] = aws->value(aws::matlab_mex_dir);
-			settings[matlab_interface::matlab_api_dir] = aws->value(aws::matlab_API_dir);
-			settings[matlab_interface::python_venv_dir] = aws->value(aws::python_venv_dir);
 			settings[matlab_interface::json] = AwUtilities::json::toJsonString(pdi.input.settings);
-			QString pyExec = aws->value(aws::python_venv_dir).toString();
-#ifdef Q_OS_WIN
-			pyExec = QString("%1/Scripts/python.exe").arg(pyExec);
-#else
-			pyExec = QString("%1/bin/python").arg(pyExec);
-#endif
-			settings[matlab_interface::python_exe] = pyExec;
 			settings[matlab_interface::pid] = m_pid;
 			settings[matlab_interface::port] = AwMATPyServer::instance()->serverPort();
-		  //  mi->run(path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", 
-				//m_pid, AwMATPyServer::instance()->serverPort(), 
-				//AwUtilities::json::toJsonString(pdi.input.settings).simplified());
 			mi->run(settings);
 		}
 		return;
@@ -102,6 +90,8 @@ void AwMatlabScriptProcess::run()
 	else
 		arguments << mcrPath;
 #endif
+
+
 #if defined(Q_OS_WIN)
 	
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
