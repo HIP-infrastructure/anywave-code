@@ -71,22 +71,23 @@ AwPluginManager *AwPluginManager::getInstance()
 AwPluginManager::AwPluginManager()
 {
 	// init input flags map for MATLAB/Python plugins
-	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessIO::GetAllMarkers);
-	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
-	m_MATPyInputFlagsMap.insert("acceptchannelselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
+//	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessIO::GetAllMarkers);
+//	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
+	m_MATPyModifiersFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
+	m_MATPyModifiersFlagsMap.insert("acceptchannelselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessIO::GetAsRecordedChannels);
-	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessIO::GetDurationMarkers);
+//	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessIO::GetDurationMarkers);
 	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessIO::GetCurrentMontage);
-	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessIO::modifiers::RequireChannelSelection);
-	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
+	m_MATPyModifiersFlagsMap.insert("processrequireschannelselection", Aw::ProcessIO::modifiers::RequireChannelSelection);
+//	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 
 	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
-	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
+//	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	m_MATPyPluginFlagsMap.insert("processdoesntrequiredata", Aw::ProcessFlags::ProcessDoesntRequireData);
 	// for compatibilty
 	m_MATPyPluginFlagsMap.insert("nodatarequired", Aw::ProcessFlags::ProcessDoesntRequireData);
 
-	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
+//	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
 
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
 	setObjectName("AwPluginManager");
@@ -301,24 +302,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->type = type; 
 			 if (isMATLABCompiled) // build full path to exe file
 				 descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
-	/*		 else {
-				 if (QFile::exists(matlabCodeApp))
-					 descMap["script_path"] = matlabCodeApp;
-				 if (QFile::exists(matlabCodeM))
-					 descMap["script_path"] = matlabCodeM;
-			 }*/
-		//	 plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
+
 			 plugin->init(descMap);
-			// if (isMATLABCompiled) {
-			//	 plugin->setAsCompiled(true);
-			//	 plugin->setScriptPath(exePluginPath);
-			// }
-			// else
-			//	 plugin->setScriptPath(pluginPath);
-			// plugin->setPluginDir(pluginPath);
-			 //plugin->category = descMap.value("category");
-			// setFlagsForScriptPlugin(plugin, descMap.value("flags"));
-			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
 				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
@@ -327,18 +312,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
 
 			 plugin->type = type;
-			// plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
 			 plugin->init(descMap);
-			 //if (isPythonCompiled) {
-				// plugin->setAsCompiled(true);
-				// plugin->setScriptPath(exePluginPath);
-			 //}
-			 //else
-				// plugin->setScriptPath(pluginPath);
-			 //plugin->setPluginDir(pluginPath);
-			// plugin->category = descMap.value("category");
-			 //setFlagsForScriptPlugin(plugin, descMap.value("flags"));
-			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
 				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);

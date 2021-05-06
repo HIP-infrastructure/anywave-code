@@ -634,6 +634,9 @@
     <ClCompile Include="MATPy\SendMarkers.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="Plugin\AwMATPyCreator.cpp">
+      <Filter>Plugin</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1185,6 +1188,9 @@
     <QtMoc Include="AwComponents.h">
       <Filter>Source Files</Filter>
     </QtMoc>
+    <QtMoc Include="Plugin\AwMATPyCreator.h">
+      <Filter>Plugin</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IO\HDF5\structs.h">
@@ -1373,6 +1379,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Marker\AwStatsWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Plugin\AwMATPyCreator.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

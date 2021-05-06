@@ -20,6 +20,8 @@ MexFunction::MexFunction()
 	functions["get_data"] = AwRequest::GetDataEx;
 	functions["get_markers"] = AwRequest::GetMarkersEx;
 	functions["send_markers"] = AwRequest::SendMarkers;
+	functions["send_message"] = AwRequest::SendMessage;
+	functions["send_text"] = AwRequest::SendMessage;
 }
 
 /// <summary>
@@ -38,21 +40,58 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	if (inputs[0].getType() != ArrayType::CHAR) 
 		error("anywave: First input must be a string");
 
-	// get port and pid!!!
-	auto pid = m_matlabPtr->getVariable(u"pid", matlab::engine::WorkspaceType::BASE);
-	if (!pid.isEmpty()) {
-		TypedArray<double> p = pid;
-
-		MATLAB_Interface::pid = static_cast<int>(p[0]);
-	}
-	auto port = m_matlabPtr->getVariable(u"port", matlab::engine::WorkspaceType::BASE);
-	if (!port.isEmpty()) {
-		TypedArray<double> p = port;
-		MATLAB_Interface::port = static_cast<int>(p[0]);
-	}
-
+	// check for init command that should initialize port, pid and args from arguments passed to main() function.
+	// used for compiled plugins
 	// dispatch anywave requests based on the first input parameter that must a string
 	std::string command = matlab::data::CharArray(inputs[0]).toAscii();
+
+	if (command == "init") {
+		// expect argument 1 to be a cell array
+		if (inputs.size() != 2)
+			error("anywave: init() requires one argument (varargin).");
+		if (inputs[1].getType() != ArrayType::CELL)
+			error("anywave: init() requires cell array argument.");
+		CellArray cellArray = inputs[1];
+
+		// check if empty cell array => do nothing
+		if (cellArray.getDimensions()[1] == 0)
+			return;
+		if (cellArray.getDimensions()[1] != 3)
+			error("anywave: init() cell array must contain three items: host, port, pid .");
+		// cell array should contain :  host, port, pid (string)
+		CharArray stringHost = cellArray[0][0];
+		std::string host = stringHost.toAscii();
+		
+		CharArray stringPort = cellArray[0][1];
+		std::string port = stringPort.toAscii();
+		double portValue = std::stod(port);
+		CharArray stringPid = cellArray[0][2];
+		std::string pid = stringPid.toAscii();
+		double pidValue = std::stod(pid);
+	
+		m_matlabPtr->setVariable(u"host", factory.createCharArray(stringHost.toAscii()), matlab::engine::WorkspaceType::BASE);
+		m_matlabPtr->setVariable(u"port", factory.createScalar<double>(portValue), matlab::engine::WorkspaceType::BASE);
+		m_matlabPtr->setVariable(u"pid", factory.createScalar<double>(pidValue), matlab::engine::WorkspaceType::BASE);
+
+		// DONE !!!
+		return;
+	}
+	else {
+		// get port and pid!!!
+		auto pid = m_matlabPtr->getVariable(u"pid", matlab::engine::WorkspaceType::BASE);
+		if (!pid.isEmpty()) {
+			TypedArray<double> p = pid;
+
+			MATLAB_Interface::pid = static_cast<int>(p[0]);
+		}
+		auto port = m_matlabPtr->getVariable(u"port", matlab::engine::WorkspaceType::BASE);
+		if (!port.isEmpty()) {
+			TypedArray<double> p = port;
+			MATLAB_Interface::port = static_cast<int>(p[0]);
+		}
+	}
+
+
 	int request = functions[command];
 	switch (request)
 	{
@@ -67,6 +106,9 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 		break;
 	case AwRequest::SendMarkers:
 		send_markers(outputs, inputs);
+		break;
+	case AwRequest::SendMessage:
+		send_message(outputs, inputs);
 		break;
 	default:
 		error("Unknown command");
@@ -94,6 +136,25 @@ void MexFunction::printf(const std::string& message)
 	ArrayFactory factory;
 	m_matlabPtr->feval(u"fprintf", 0, std::vector<Array>
 		({ factory.createScalar(message) }));
+}
+
+
+void MexFunction::send_message(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs)
+{
+	if (inputs.size() != 2) 
+		error(std::string("send_message: requires 1 argument to be a string."));
+	if (inputs[1].getType() != ArrayType::CHAR)
+		error(std::string("send_message: argument must be a string."));
+	CharArray ca = inputs[1];
+
+	try {
+		TCPRequest aw(AwRequest::SendMessage);
+		aw.sendString(QString::fromStdString(ca.toAscii()));
+	}
+	catch (const QString& what) {
+		std::string message = QString("send_markers: %1").arg(what).toStdString();
+		error(message);
+	}
 }
 
 void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs)

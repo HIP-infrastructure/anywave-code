@@ -749,4 +749,7 @@ void AnyWave::editVideoSyncSettings()
 	}
 }
 
-
+void AnyWave::on_actionCreate_new_MATLAB_plugin_triggered()
+{
+	;
+}

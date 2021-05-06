@@ -118,6 +118,7 @@ public:
 
 	QMap<QString, int>& flagsMap() {  return m_MATPyPluginFlagsMap; }
 	QMap<QString, int>& inputFlagsMap() { return m_MATPyInputFlagsMap; 	}
+	QMap<QString, int>& modifiersFlagsMap() { return m_MATPyModifiersFlagsMap; }
 
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
@@ -186,6 +187,7 @@ private:
 	QMutex m_mutex;
 	QMap<QString, int> m_MATPyInputFlagsMap;	// hold input flags for the process object instance.
 	QMap<QString, int> m_MATPyPluginFlagsMap;	// hold general flags for the plugin object.
+	QMap<QString, int> m_MATPyModifiersFlagsMap;	// hold general flags for the plugin object.
 
 	// Python plugins list (names)
 	QStringList m_pythonPlugins;

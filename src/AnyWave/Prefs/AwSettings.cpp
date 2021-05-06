@@ -129,9 +129,11 @@ void AwSettings::init()
 
 	//Save system path
 	m_settings[aws::system_path] = QString(qgetenv("PATH"));
-
+#if defined(Q_OS_WIN)
 	// get username
 	m_settings[aws::username] = qgetenv("USERNAME");
+#else
+#endif
 }
 
 QVariant AwSettings::value(const QString& key)

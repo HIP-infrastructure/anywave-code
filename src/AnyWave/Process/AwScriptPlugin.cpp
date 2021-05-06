@@ -69,6 +69,16 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 				m_flags |= flagsMap.value(lowerT);
 		}
 	}
+	m_modifiersFlags = 0;
+	if (map.contains("modifiers_flags")) {
+		auto modsMap = AwPluginManager::getInstance()->modifiersFlagsMap();
+		QStringList tokens = map.value("flags").split(":");
+		for (auto t : tokens) {
+			auto lowerT = t.toLower();
+			if (modsMap.contains(lowerT))
+				m_modifiersFlags |= modsMap.value(lowerT);
+		}
+	}
 	// add the desc map from desct.txt has values in the plugin settings map
 	for (auto const& key : map.keys())
 		m_settings.insert(key, map.value(key));
