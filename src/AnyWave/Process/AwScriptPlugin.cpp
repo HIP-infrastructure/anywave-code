@@ -40,6 +40,7 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
 		p->pdi.addInputChannel(-1, 1, 0);
 		p->setInputFlags(m_inputFlags);
+
 	}
 	p->setPlugin(this);
 }
@@ -51,7 +52,7 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	category = map.value("category");
 	m_inputFlags = 0;
 	if (map.contains("input_flags")) {
-		auto inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
+		const auto &inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
 		QStringList tokens = map.value("input_flags").split(":");
 		for (auto t : tokens) {
 			auto lowerT = t.toLower();
@@ -61,7 +62,7 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	}
 	m_flags = 0;
 	if (map.contains("flags")) {
-		auto flagsMap = AwPluginManager::getInstance()->flagsMap();
+		const auto &flagsMap = AwPluginManager::getInstance()->flagsMap();
 		QStringList tokens = map.value("flags").split(":");
 		for (auto t : tokens) {
 			auto lowerT = t.toLower();
@@ -71,7 +72,7 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	}
 	m_modifiersFlags = 0;
 	if (map.contains("modifiers_flags")) {
-		auto modsMap = AwPluginManager::getInstance()->modifiersFlagsMap();
+		const auto &modsMap = AwPluginManager::getInstance()->modifiersFlagsMap();
 		QStringList tokens = map.value("flags").split(":");
 		for (auto t : tokens) {
 			auto lowerT = t.toLower();

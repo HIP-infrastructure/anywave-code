@@ -70,6 +70,7 @@
 #include <AwKeys.h>
 #include "CL/CommandLineParser.h"
 #include "Data/AwDataManager.h"
+#include "Plugin/AwMATPyCreator.h"
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -751,5 +752,6 @@ void AnyWave::editVideoSyncSettings()
 
 void AnyWave::on_actionCreate_new_MATLAB_plugin_triggered()
 {
-	;
+	AwMATPyCreator creator;
+	creator.exec();
 }

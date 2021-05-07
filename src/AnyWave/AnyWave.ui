@@ -159,7 +159,6 @@
     <addaction name="actionCreate_batch_script"/>
     <addaction name="separator"/>
     <addaction name="actionCreate_new_MATLAB_plugin"/>
-    <addaction name="actionCreate_new_Python_plugin"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -487,7 +486,7 @@
   </action>
   <action name="actionCreate_new_MATLAB_plugin">
    <property name="text">
-    <string>Create new MATLAB plugin</string>
+    <string>Create new MATLAB or Python plugin</string>
    </property>
   </action>
   <action name="actionCreate_new_Python_plugin">

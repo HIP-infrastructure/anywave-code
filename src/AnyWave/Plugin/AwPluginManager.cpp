@@ -179,7 +179,6 @@ QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
 }
 
 
-
 AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 {
 	QMutexLocker lock(&m_mutex);	// threading lock
@@ -252,7 +251,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 QStringList dirs = dir.entryList(QDir::Dirs);
 	 dirs.removeAll(".");
 	 dirs.removeAll("..");
-	 for (auto folder : dirs) {
+	 for (const auto &folder : dirs) {
 		 QString name = folder;
 		 QMap<QString, QString> descMap;
 		// QString desc, processType, category, compiledPath, flags, inputFlags;
@@ -327,29 +326,6 @@ void AwPluginManager::setJsonSettings(AwScriptPlugin *plugin, const QString& key
 		plugin->setSettings(key, jsonString);
 }
 
-void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
-{
-	if (flags.isEmpty())
-		return;
-	QStringList tokens;
-	if (flags.contains(":")) {
-		tokens = flags.split(":");
-		if (tokens.isEmpty())
-			return;
-	}
-	else
-		tokens << flags;
-
-	// compared flags strings to hash table
-	int f = 0;
-	for (auto s : tokens) {
-		auto token = s.toLower();
-		if (m_MATPyInputFlagsMap.contains(token))
-			f |= m_MATPyInputFlagsMap.value(token);
-	}
-	plugin->setInputFlags(f);
-}
-
 bool AwPluginManager::checkPluginVersion(QObject * plugin)
 {
 	auto tmp =  static_cast<AwPluginBase *>(plugin);
@@ -358,22 +334,6 @@ bool AwPluginManager::checkPluginVersion(QObject * plugin)
 	if (tmp->minorVersion < AW_MINOR_VERSION || tmp->majorVersion < AW_MAJOR_VERSION)
 		return false;
 	return true;
-}
-
-void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
-{
-	if (flags.isEmpty())
-		return;
-	QStringList tokens = flags.split(":");
-	if (tokens.isEmpty())
-		return;
-	int f = 0;
-	for (auto s : tokens) {
-		auto token = s.toLower();
-		if (m_MATPyPluginFlagsMap.contains(token))
-			f |= m_MATPyPluginFlagsMap.value(token);
-	}
-	plugin->setFlags(f);
 }
 
 ///
@@ -560,20 +520,19 @@ void AwPluginManager::loadPlugins()
 #endif
 
 	// Parse plugin to plugin's factory
-	foreach(AwFileIOPlugin *p, m_readers)
+	for (AwFileIOPlugin *p : m_readers)
 		m_readerFactory.addPlugin(p->name, p);
-	foreach(AwFileIOPlugin *p, m_writers)
+	for (AwFileIOPlugin *p : m_writers)
 		m_writerFactory.addPlugin(p->name, p);
-	foreach(AwProcessPlugin *p, m_processes)
+	for (AwProcessPlugin *p : m_processes)
 		m_processFactory.addPlugin(p->name, p);
-	foreach(AwDisplayPlugin *p, m_displays)
+	for (AwDisplayPlugin *p : m_displays)
 		m_displayFactory.addPlugin(p->name, p);
-	foreach(AwFilterPlugin *p, m_filters)
+	for (AwFilterPlugin *p : m_filters)
 		m_filterFactory.addPlugin(p->name, p);
 
-	// Lecture de tous les plugins trouv�s
 	QDir dir(pluginDir);
-	for (auto FileName : dir.entryList(QDir::Files)) {
+	for (const auto &FileName : dir.entryList(QDir::Files)) {
 		QPluginLoader loader(dir.absoluteFilePath(FileName));
 		QObject *plugin = loader.instance();
 		if (plugin == NULL) {

@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include "ui_AwMATPyCreator.h"
-//class QRadioButton;
+
 class AwMATPyCreator : public QDialog
 {
 	Q_OBJECT
@@ -15,7 +15,6 @@ public:
 public slots:
 	void accept() override;
 private:
-	Ui::AwMATPyCreator m_ui;
-//	QList<QRadioButton*> m_buttons;
+	Ui::AwMATPyCreatorUi m_ui;
 	int makePlugin(const QVariantMap&);
 };

@@ -72,9 +72,6 @@ AwProcessManager::AwProcessManager(QObject *parent)
 
 AwProcessManager::~AwProcessManager()
 {
-	//delete m_processesWidget;
-//	if (m_processesWidget)
-//		delete m_processesWidget;
 }
 
 void AwProcessManager::setMenu(QMenu *menu)
@@ -383,14 +380,9 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
  */
 AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 {
-	auto dm = AwDataManager::instance();
-	auto aws = AwSettings::getInstance();
-
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
-
 	initProcessSettings(process);
-
 	return process;
 }
 
@@ -444,7 +436,6 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	if (p->flags() & Aw::ProcessFlags::ProcessSkipInputCheck)
 		return true;
 
-//	return buildPDIForProcess(p);
 	return buildProcessPDI(p) == 0;
 }
 

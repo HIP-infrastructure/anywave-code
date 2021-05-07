@@ -9,18 +9,6 @@ AwMATPyCreator::AwMATPyCreator(QWidget *parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
-
-	//// associate flags with radio buttons
-	//m_ui.radioAcceptSelection->setProperty("flag", Aw::ProcessIO::modifiers::AcceptChannelSelection);
-	//m_buttons << m_ui.radioAcceptSelection;
-	//m_ui.radioRequireSelection->setProperty("flag", Aw::ProcessIO::modifiers::RequireChannelSelection);
-	//m_buttons << m_ui.radioRequireSelection;
-	//m_ui.radioIgnoreSelection->setProperty("flag", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
-	//m_buttons << m_ui.radioIgnoreSelection;
-	//m_ui.radioGetMontage->setProperty("flag", Aw::ProcessIO::GetCurrentMontage);
-	//m_buttons << m_ui.radioGetMontage;
-	//m_ui.radioGetRaw->setProperty("flag", Aw::ProcessIO::GetAsRecordedChannels);
-	//m_buttons << m_ui.radioGetRaw;
 }
 
 AwMATPyCreator::~AwMATPyCreator()
@@ -40,35 +28,20 @@ void AwMATPyCreator::accept()
 	QVariantMap settings;
 	settings["name"] = name;
 	settings["desc"] = description;
-	int mod_flags = 0;
-	if (m_ui.radioAcceptSelection->isChecked())
-		mod_flags |= Aw::ProcessIO::modifiers::AcceptChannelSelection;
-	if (m_ui.radioRequireSelection->isChecked())
-		mod_flags |= Aw::ProcessIO::modifiers::RequireChannelSelection;
-	if (m_ui.radioIgnoreSelection->isChecked())
-		mod_flags |= Aw::ProcessIO::modifiers::IgnoreChannelSelection;
-	settings["mod_flags"] = mod_flags;
-	int input_flags = 0;
-	if (m_ui.radioGetMontage->isChecked())
-		input_flags |= Aw::ProcessIO::GetCurrentMontage;
-	if (m_ui.radioGetRaw->isChecked())
-		input_flags |= Aw::ProcessIO::GetAsRecordedChannels;
-
-	settings["input_flags"] = input_flags;
-
-
 	settings["type"] = QString("Python");
 	if (m_ui.radioMATLAB->isChecked())
 		settings["type"] = "MATLAB";
-	int flags = 0;
-	if (m_ui.checkNoData->isChecked())
-		flags |= Aw::ProcessFlags::ProcessDoesntRequireData;
 
-	if (m_ui.checkCommandLine->isChecked())
-		flags |= Aw::ProcessFlags::CanRunFromCommandLine;
-
-	settings["flags"] = flags;
-	makePlugin(settings);
+	int status = makePlugin(settings);
+	if (status == AwMATPyCreator::FailedtoCreate) {
+		QMessageBox::critical(this, "Creating plugin", "Failed to create the folder for plugin.");
+		return;
+	}
+	if (status == AwMATPyCreator::AlreadyExists) {
+		QMessageBox::critical(this, "Creating plugin", "A plugin with this name already exists.");
+		return;
+	}
+	QDialog::accept();
 }
 
 int AwMATPyCreator::makePlugin(const QVariantMap& settings)
@@ -85,9 +58,9 @@ int AwMATPyCreator::makePlugin(const QVariantMap& settings)
 	else
 		dir.setCurrent(pythonPluginDir);
 	auto folders = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	QString name = settings["name"].toString();
+	QString name = settings.value("name").toString();
 	for (const auto& f : folders) {
-		if (f.compare(name, Qt::CaseInsensitive))
+		if (f.compare(name, Qt::CaseInsensitive) == 0)
 			return AwMATPyCreator::AlreadyExists;
 	}
 	dir.mkdir(name);
@@ -99,6 +72,32 @@ int AwMATPyCreator::makePlugin(const QVariantMap& settings)
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		stream << "name= " << name << endl;
 		stream << "description= " << settings["desc"].toString() << endl;
+		stream << "input_flags=";
+		// input flags
+		if (m_ui.radioGetMontage->isChecked())
+			stream << "getcurrentmontage" << endl;
+		else
+			stream << "getasrecordedchannels" << endl;
+		stream << "flags=";
+		QStringList flags;
+		if (m_ui.checkNoData->isChecked())
+			flags  << "nodatarequired";
+		if (m_ui.checkCommandLine->isChecked())
+			flags << "canrunfromcommandline";
+		for (int i = 0; i < flags.size(); i++) {
+			if (i > 0)
+				stream << ":";
+			stream << flags.at(i);
+		}
+		stream << endl;
+		stream << "modifiers_flags=";
+		if (m_ui.radioAcceptSelection->isChecked())
+			stream << "acceptchannelselection" << endl;
+		if (m_ui.radioRequireSelection->isChecked())
+			stream << "processrequireschannelselection" << endl;
+		if (m_ui.radioIgnoreSelection->isChecked())
+			stream << "processignoreschannelselection" << endl;
+
 	//	stream << "input_flags=";
 		file.close();
 	}
@@ -112,6 +111,15 @@ int AwMATPyCreator::makePlugin(const QVariantMap& settings)
 			stream << "end" << endl;
 			file.close();
 		} 
+	}
+	else {
+		file.setFileName(QString("%1/%2").arg(dir.absolutePath()).arg("__main__.py"));
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			stream << "import sys" << endl;
+			stream << "import anywave" << endl;
+			stream << "anywave.init(sys.argv)" << endl;
+			file.close();
+		}
 	}
 	return AwMATPyCreator::Ok;
 }

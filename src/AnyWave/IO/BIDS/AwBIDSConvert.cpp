@@ -627,8 +627,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		return -1;
 	}
 
-
-
 	QString manufacturer = reader->plugin()->manufacturer;
 	if (manufacturer.isEmpty())
 		manufacturer = "n/a";
