@@ -58,7 +58,7 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 		matlab::data::ArrayFactory factory;
 		int pid = settings.value(matlab_interface::pid).toInt();
 		quint16 port = static_cast<quint16>(settings.value(matlab_interface::port).toUInt());
-		// Create global variables
+		// Create matlab variables
 		std::string host = "127.0.0.1";
 		double dpid = static_cast<double>(pid);
 		double dport = static_cast<double>(port);

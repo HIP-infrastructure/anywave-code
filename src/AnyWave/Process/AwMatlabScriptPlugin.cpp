@@ -78,6 +78,7 @@ void AwMatlabScriptProcess::run()
 		}
 		return;
 	}
+
 	auto systemPath = AwSettings::getInstance()->value(aws::system_path).toString();
 	// compiled plugin need some variables init
 	QStringList arguments;

@@ -76,7 +76,7 @@ Source: ".\bin\x64\Release\Plugins\SPMReader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEGLABReader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CompumedicsPF.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\Spectral.dll"; DestDir: "{app}\Plugins";
-Source: ".\bin\x64\Release\Plugins\Delphos.dll"; DestDir: "{app}\Plugins";
+
 Source: ".\redist\vc_redist.x64.exe"; DestDir: "{app}"; Flags: deleteafterinstall
 Source: ".\bin\x64\Release\Python\*.*"; DestDir: "{app}\Python\"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\QtPlugins\*.*"; DestDir: "{app}\QtPlugins\"; Flags: recursesubdirs

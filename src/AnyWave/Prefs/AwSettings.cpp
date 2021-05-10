@@ -46,6 +46,13 @@ AwSettings::AwSettings(QObject *parent)
 	m_settings[aws::max_recent_files] = max_recent_files;
 	m_settings[aws::matlab_present] = false;
 	m_currentReader = nullptr;
+	//Save system path
+	m_settings[aws::system_path] = QString(qgetenv("PATH"));
+#if defined(Q_OS_WIN)
+	// get username
+	m_settings[aws::username] = qgetenv("USERNAME");
+#else
+#endif
 }
 
 AwSettings::~AwSettings()
@@ -127,13 +134,13 @@ void AwSettings::init()
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
 
-	//Save system path
-	m_settings[aws::system_path] = QString(qgetenv("PATH"));
-#if defined(Q_OS_WIN)
-	// get username
-	m_settings[aws::username] = qgetenv("USERNAME");
-#else
-#endif
+//	//Save system path
+//	m_settings[aws::system_path] = QString(qgetenv("PATH"));
+//#if defined(Q_OS_WIN)
+//	// get username
+//	m_settings[aws::username] = qgetenv("USERNAME");
+//#else
+//#endif
 }
 
 QVariant AwSettings::value(const QString& key)

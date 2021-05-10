@@ -392,7 +392,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 
 AwFileIO::FileStatus BrainVisionIO::canRead(const QString &path)
 {
-	QStringList acceptedHeaders = { "Brain Vision Data Exchange Header File", "BrainVision Data Exchange Header File" };
+	QStringList acceptedHeaders = { "Brain Vision Data Exchange Header File Version 1.0", "BrainVision Data Exchange Header File Version 1.0" };
 	QFile file(path);
 	QTextStream stream(&file);
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
