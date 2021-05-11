@@ -176,13 +176,6 @@ void AnyWave::openFile(const QString &path)
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 	ds->setParent(this);
 
-	//// check if file belongs to a BIDS structure:
-	//QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
-	//if (!root.isEmpty()) {
-	//	openBIDS(root);
-	//	AwBIDSManager::instance()->newFile(dataManager->reader());
-	//}
-
 	if (res == 1) {  // Data Manager just detected a BIDS file
 		openBIDS(dataManager->bidsDir());
 	}
@@ -270,13 +263,10 @@ void AnyWave::openBIDS()
 
 void AnyWave::openBIDS(const QString& path)
 {
-//	if (!AwBIDSManager::isInstantiated()) {
-		AwBIDSManager::instance()->setRootDir(path);
-		connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
-		connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), 	this, SLOT(on_actionCreate_batch_script_triggered()));
-//	}
-//	else
-//		AwBIDSManager::instance()->setRootDir(path);
+	AwBIDSManager::instance()->setRootDir(path);
+	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
+	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
+
 	// instantiate dock widget if needed
 	auto dock = m_dockWidgets.value("BIDS");
 	if (dock == NULL) {
@@ -370,12 +360,11 @@ void AnyWave::on_actionLoadICA_triggered()
 
 void AnyWave::closeFile()
 {
-//	AwMontageManager::instance()->closeFile();
 	AwAmplitudeManager::instance()->closeFile();
 	// dont stop MATPy Server if anywave was launched with plugin_debug option
-	auto aws = AwSettings::getInstance();
-	if (!aws->value(aws::plugin_debug_mode).toBool())
-		AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
+	//auto aws = AwSettings::getInstance();
+	//if (!aws->value(aws::plugin_debug_mode).toBool())
+	//	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
 	if (AwVideoManager::isInstantiated())
 		delete AwVideoManager::instance();
@@ -390,7 +379,6 @@ void AnyWave::closeFile()
 		dockEEG->close();
 		delete dockEEG;
 		m_dockWidgets.remove("eeg_mapping");
-		//m_dockEEG = NULL;
 	}
 
 	if (dockMEG) {
@@ -398,7 +386,6 @@ void AnyWave::closeFile()
 		dockMEG->close();
 		delete dockMEG;
 		m_dockWidgets.remove("meg_mapping");
-		//m_dockMEG = NULL;
 	}
 
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/

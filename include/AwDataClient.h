@@ -57,7 +57,6 @@ class AW_CORE_EXPORT AwDataClient : public QObject
 	friend class AwDataManager;
 public:
 	AwDataClient(QObject *parent = NULL);
-//	virtual ~AwDataClient() { }
 
 	inline bool endOfData() { return m_endOfData; }
 	void requestData(AwChannelList *channels, AwMarker *marker, bool rowData = false, bool doNotWakeUpClient = false);

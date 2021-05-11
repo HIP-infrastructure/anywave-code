@@ -61,11 +61,7 @@ class AnyWave : public QMainWindow, private Ui::AnyWaveClass
 	Q_OBJECT
 
 public:
-	/** Constructeur **/
-
-	AnyWave(const QStringList& args, QWidget* parent = 0, Qt::WindowFlags flags = 0);
-
-	/** Destructeur **/
+	AnyWave(const QVariantMap& args, QWidget* parent = 0, Qt::WindowFlags flags = 0);
 	~AnyWave();
 
 	inline AwDisplay *displayManager() { return m_display; }
@@ -103,7 +99,6 @@ private:
 	// flags
 	bool m_currentFileModified;
 	// methods
-	void createUserDirs();
 	void initToolBarsAndMenu();
 	void closeFile();
 	bool checkForModified();
@@ -171,6 +166,7 @@ private slots:
 	void on_actionDebug_Logs_triggered();
 	void on_actionLoadICA_triggered();
 	void on_actionOpen_video_triggered();
+	void on_actionCreate_new_MATLAB_plugin_triggered();
 	void loadBeamformer();
 	void reviewComponentsMaps();
 	void showFileProperties();

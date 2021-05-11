@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
+    <ClCompile Include="AwComponents.cpp" />
     <ClCompile Include="AwExportDial.cpp" />
     <ClCompile Include="AwFileOpenSave.cpp" />
     <ClCompile Include="AwHelpMenu.cpp" />
@@ -135,6 +136,7 @@
     <ClCompile Include="MATPy\OpenNewFile.cpp" />
     <ClCompile Include="MATPy\RunAnyWave.cpp" />
     <ClCompile Include="MATPy\SendCommand.cpp" />
+    <ClCompile Include="MATPy\SendMarkers.cpp" />
     <ClCompile Include="MATPy\SendMessage.cpp" />
     <ClCompile Include="MATPy\SetBeamFormer.cpp" />
     <ClCompile Include="Montage\AwChannelListModel.cpp" />
@@ -144,6 +146,7 @@
     <ClCompile Include="Montage\AwMontageDial.cpp" />
     <ClCompile Include="Montage\AwMontageManager.cpp" />
     <ClCompile Include="Montage\AwMontageTableView.cpp" />
+    <ClCompile Include="Plugin\AwMATPyCreator.cpp" />
     <ClCompile Include="Plugin\AwPluginDial.cpp" />
     <ClCompile Include="Plugin\AwPluginManager.cpp" />
     <ClCompile Include="Prefs\AwPreferences.cpp" />
@@ -277,6 +280,7 @@
     </QtMoc>
     <QtMoc Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
     </QtMoc>
+    <QtMoc Include="AwComponents.h" />
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
     <QtMoc Include="IO\MEMIO\MEMIO.h">
     </QtMoc>
@@ -303,6 +307,7 @@
     </QtMoc>
     <QtMoc Include="Process\AwMATLABMarkersExporter.h">
     </QtMoc>
+    <QtMoc Include="Plugin\AwMATPyCreator.h" />
     <ClInclude Include="Source\AwSourceChannel.h" />
     <QtMoc Include="Source\AwSourceManager.h">
     </QtMoc>
@@ -519,6 +524,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="Plugin\AwMATPyCreator.ui" />
     <QtUic Include="Plugin\AwPluginDial.ui">
     </QtUic>
   </ItemGroup>
@@ -914,7 +920,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\ICA;.\Process;.\Script;.\Display;.\Carto;.\Epoch;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\ICA;.\Process;.\Script;.\Display;.\Carto;.\Epoch;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -950,7 +956,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -958,7 +964,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(EXTRA_LIBS)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(EXTRA_LIBS)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -992,7 +998,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\ICA;.\Process;.\Script;.\Display;.\Carto;.\Epoch;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\ICA;.\Process;.\Script;.\Display;.\Carto;.\Epoch;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -1027,8 +1033,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(EXTRA_LIBS)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(EXTRA_LIBS)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -1036,6 +1042,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>false</OpenMPSupport>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

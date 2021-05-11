@@ -410,15 +410,11 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	// check for .bad file
 	m_badChannelLabels.clear();
-//	m_badPath = reader->infos.badFile();
 	m_badPath = AwDataManager::instance()->badFilePath();
 	if (QFile::exists(m_badPath))
 		loadBadChannels();
 	
-
-//	QFileInfo fi(reader->fullPath());
 	// check for local montages.
-//	scanForMontagesInDirectory(fi.absolutePath());
 	scanForMontagesInDirectory(AwDataManager::instance()->dataDir());
 	scanForMontagesInDirectory(AwDataManager::instance()->bidsDir());
 
@@ -428,7 +424,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
 		if (bm->isBIDSActive()) {
-			// BEWARE: getChannelsTsvMontage() will build a montage based on what found in TSV file.
+			// BEWARE: getChannelsTsvMontage() will build a montage based on what is found in TSV file.
 			// but TSV file does not contain all the information an AwChannel (miss the sampling rate at first)
 			auto defaultTsvMontage = bm->getChannelsTsvMontage();
 			if (!defaultTsvMontage.isEmpty()) {
@@ -471,16 +467,12 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	auto dm = AwDataManager::instance();
 	m_montagePath = dm->mtgFilePath();
 
-//	m_montagePath = reader->infos.mtgFile();
 	if (QFile::exists(m_montagePath))  {
 		if (!loadMontage(m_montagePath)) {
 
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
 	}
-
-//	updateMontageFromChannelsTsv(reader);
-
 	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
 	if (AwDataManager::instance()->filterSettings().isEmpty()) {
 		AwDataManager::instance()->filterSettings().initWithChannels(m_channels);

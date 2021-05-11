@@ -31,8 +31,8 @@ namespace aw {
 	namespace commandLine {
 		// Commands or operations defined what to do in batch mode. NoOperation specify no batch command to run but some specific arguments to handle in GUI mode
 		// for example : --plugin_debug with --server_port will launch the Gui normally but activate the plugin debug mode
-		enum Commands { NoOperation, BIDS, RunProcess, DedicatedDataServerMode, ParsingError };
+		enum Commands { NoOperation, BatchOperation, GUI, ParsingError };
 		int doParsing(const QStringList& args, AwArguments& arguments);
-		int doCommandLineOperation(int operation, AwArguments& operations);
+		int doCommandLineOperation(AwArguments& operations);
 	}
 }

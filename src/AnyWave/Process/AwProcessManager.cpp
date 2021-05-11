@@ -65,14 +65,13 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	m_viewMenu = nullptr;
 	m_dock = nullptr;
 	setObjectName("AwProcessManager");
-	m_processesWidget = new AwProcessesWidget();
+	m_processesWidget = new AwProcessesWidget;
 	auto plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 }
 
 AwProcessManager::~AwProcessManager()
 {
-	delete m_processesWidget;
 }
 
 void AwProcessManager::setMenu(QMenu *menu)
@@ -381,14 +380,9 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
  */
 AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 {
-	auto dm = AwDataManager::instance();
-	auto aws = AwSettings::getInstance();
-
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
-
 	initProcessSettings(process);
-
 	return process;
 }
 
@@ -442,7 +436,6 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	if (p->flags() & Aw::ProcessFlags::ProcessSkipInputCheck)
 		return true;
 
-//	return buildPDIForProcess(p);
 	return buildProcessPDI(p) == 0;
 }
 
@@ -674,11 +667,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 				 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 		 }
 	 }
-
 	 p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
-
-
-
 	 return 0;
  }
 

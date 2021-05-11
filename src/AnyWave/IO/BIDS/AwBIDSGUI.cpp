@@ -390,7 +390,7 @@ void AwBIDSGUI::openITKSNAP(QStandardItem *item)
 void AwBIDSGUI::refresh()
 {
 	m_model->clear();
-	initModel(m_bids->subjects());
+	initModel(m_bids->items());
 	if (!m_extraColumns.isEmpty())
 		showColumns(m_extraColumns);
 

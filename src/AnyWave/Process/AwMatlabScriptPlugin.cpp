@@ -51,16 +51,6 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	AwMATPyServer *server = AwMATPyServer::instance();
 	server->start();
 	AwPidManager::instance()->createNewPid(p);
-//	if (isCompiled()) {
-//		p->setCompiled();
-//#ifdef Q_OS_WIN
-//		QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
-//		QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->value(aws::system_path).toString());
-//		p->setSystemPath(fullPath);
-//#else
-//		p->setSystemPath(AwSettings::getInstance()->value(aws::system_path).toString());
-//#endif
-//	}
 	return p;
 }
 
@@ -72,17 +62,23 @@ void AwMatlabScriptProcess::run()
 	QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 
 	// merge args with all settings set as input for the process before when initializing the plugin
-//	pdi.input.args().unite(pdi.input.settings);
 	if (!isCompiled) {
 		AwSettings* aws = AwSettings::getInstance();
 		mi = aws->matlabInterface();
 		if (aws->value(aws::matlab_present).toBool()) {
 			auto path = pdi.input.settings.value("script_path").toString();
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-		    mi->run(path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.settings).simplified());
+			QVariantMap settings;
+			settings[matlab_interface::matlab_plugin_dir] = path;
+			settings[matlab_interface::matlab_mex_dir] = aws->value(aws::matlab_mex_dir);
+			settings[matlab_interface::json] = AwUtilities::json::toJsonString(pdi.input.settings);
+			settings[matlab_interface::pid] = m_pid;
+			settings[matlab_interface::port] = AwMATPyServer::instance()->serverPort();
+			mi->run(settings);
 		}
 		return;
 	}
+
 	auto systemPath = AwSettings::getInstance()->value(aws::system_path).toString();
 	// compiled plugin need some variables init
 	QStringList arguments;
@@ -95,6 +91,8 @@ void AwMatlabScriptProcess::run()
 	else
 		arguments << mcrPath;
 #endif
+
+
 #if defined(Q_OS_WIN)
 	
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());

@@ -135,7 +135,7 @@ class AW_PROCESS_EXPORT AwProcessPlugin : public AwPluginBase
 {
 public:
 	// default constructor
-	AwProcessPlugin() : AwPluginBase() { m_flags = 0x00000000; }
+	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; }
 	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY.
 - Display type indicates that the plugin will process only displayed data.
 - Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
@@ -147,6 +147,10 @@ public:
 	
 	void setFlags(int flags) { m_flags |= flags; }
 	inline int flags() { return m_flags; }
+	inline int modifiersFlags() { return m_modifiersFlags; }
+	inline int inputFlags() { return m_inputFlags; }
+	void setModifiersFlags(int f) { m_modifiersFlags = f; }
+	void setInputFlags(int f) { m_inputFlags = f; }
 	/** creates a new instance of AwProcess object. You MUST implement this pure virtual method to instanciante the process you defined for the plugin. **/
 	virtual AwBaseProcess *newInstance() = 0;
 	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
@@ -163,6 +167,8 @@ public:
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
+	int m_modifiersFlags;
+	int m_inputFlags;
 	QVariantMap m_settings;
 	QVariantMap m_batchMap; // command line specific
 };

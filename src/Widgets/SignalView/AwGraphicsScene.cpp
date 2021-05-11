@@ -57,6 +57,7 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_QTSMenu = nullptr;
 	m_contextMenuMapping = nullptr;
 	m_pickMarkersDial = nullptr;
+	m_maxSR = 0.;
 }
 
 AwGraphicsScene::~AwGraphicsScene()
@@ -102,7 +103,7 @@ void AwGraphicsScene::registerDisplayPlugin(AwDisplayPlugin *plugin)
 
 void AwGraphicsScene::updateSignals()
 {
-	foreach (AwGraphicsSignalItem *item, m_signalItems)
+	for (AwGraphicsSignalItem *item : m_signalItems)
 		item->repaint();
 	update();
 }
@@ -110,7 +111,7 @@ void AwGraphicsScene::updateSignals()
 
 void AwGraphicsScene::updateChannelsData()
 {
-	foreach(AwGraphicsSignalItem *item, m_signalItems) {
+	for (AwGraphicsSignalItem *item : m_signalItems) {
 		item->updateData();
 		item->repaint();
 	}
@@ -131,7 +132,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 	m_maxSR = channels.first()->samplingRate();
 	
 	int index = 0;
-	foreach (AwChannel *c, channels) {
+	for (AwChannel *c : channels) {
 		AwDisplayPlugin *dp;
 		if (c->displayPluginName().isEmpty()) 
 			dp = &m_signalItemPlugin;
@@ -211,15 +212,13 @@ void AwGraphicsScene::updateSignalItemSelection(AwGraphicsSignalItem *item, bool
 		m_selectedSignalItems << item;
 	else
 		m_selectedSignalItems.removeAll(item);
-
 }
 
 
 void AwGraphicsScene::applyNewSettings(AwViewSettings *settings)
 {
 	m_settings = settings;
-
-	foreach (AwGraphicsSignalItem *i, m_signalItems)	{
+	for (AwGraphicsSignalItem *i : m_signalItems)	{
 		i->showLabel(settings->showSensors);
 		i->showBaseline(settings->showZeroLine);
 	}
@@ -307,6 +306,7 @@ void AwGraphicsScene::clean()
 	m_channels.clear();
 	clearChannels();
 	m_markerItemsDisplayed.clear();
+	m_selectedSignalItems.clear();
 	m_currentPosInFile = m_startPosition;
 	update();
 }

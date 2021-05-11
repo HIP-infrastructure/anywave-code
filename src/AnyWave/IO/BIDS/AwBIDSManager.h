@@ -82,7 +82,7 @@ public:
 	QString createTsvPath(AwBIDSItem * item, int tsvType);
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
-	AwBIDSItems subjects() { return m_items; }
+	AwBIDSItems items() { return m_items; }
 	
 	// command line methods
 	void toBIDS(const AwArguments& args);
@@ -92,6 +92,7 @@ public:
 	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
 	static void initCommandLineOperation(const QString& filePath);
 	static void finishCommandLineOperation();
+
 
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
@@ -106,7 +107,7 @@ public:
 	/** Update channels.tsv file from bad file **/
 	int updateChannelsTsvBadChannels(const QStringList& badLabels);
 	/** markers specific **/
-	int updateEventsTsv(const AwMarkerList& markers);
+//	int updateEventsTsv(const AwMarkerList& markers);
 
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);
@@ -140,7 +141,7 @@ signals:
 	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
-	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
+	AwBIDSItems recursiveParsing2(const QString& dirPath, AwBIDSItem* parentItem);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);

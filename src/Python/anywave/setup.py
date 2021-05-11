@@ -15,7 +15,7 @@ setuptools.setup(
 	install_requires=['numpy', 'PyQt5'],
 	classifiers = [
 		"Programming Language :: Pyhton :: 3",
-		"License :: OSI Approved :: lGPL3",
+		"License :: OSI Approved :: GPL3",
 		"Operating System :: OS Independent",
 	],
 	python_requires = '>=3.6',

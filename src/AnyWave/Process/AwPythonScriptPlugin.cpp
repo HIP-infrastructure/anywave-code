@@ -34,14 +34,6 @@
 
 // PROCESS
 
-//void AwPythonScriptPlugin::init(const QMap<QString, QString>& map)
-//{
-//	AwScriptPlugin::init(map);
-//	if (map.contains("virtual_env")) 
-//		m_settings["virtual_env"] = map.value("virtual_env");
-//}
-
-
 AwPythonScriptProcess *AwPythonScriptPlugin::newInstance()
 {
 	AwPythonScriptProcess *p = new AwPythonScriptProcess;
@@ -99,94 +91,54 @@ void AwPythonScriptProcess::init()
 void AwPythonScriptProcess::run()
 {
 	QStringList arguments;
-	//QString initpy;
-	//QString dataPath = pdi.input.settings.value(keys::data_path).toString();
-	//dataPath = QDir::toNativeSeparators(dataPath);
-	//auto pythonModulePath = AwSettings::getInstance()->value(aws::python_module_dir).toString();
-	//initpy = pythonModulePath + "/init.py";
-	//initpy = QDir::toNativeSeparators(initpy);
-	//auto anywaveModulePath = QDir::toNativeSeparators(pythonModulePath);
-	//bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
-	//if (isCompiled)
-	//	emit progressChanged(tr("Launching Python plugin..."));
-	//else
-	//	emit progressChanged(tr("Launching Python script..."));
-	//// Building the command line arguments:
-	//QString scriptPath = m_path + "/__main__.py";
-	//scriptPath = QDir::toNativeSeparators(scriptPath);
-
-	//if (!isCompiled)
-	//	arguments << initpy;
-
-	// prepare parameters to pass to plugin python code
-	// arguments will be : 
-	// script_path to execute or "none" in case a compiled plugin  
-	// path to anywave python package within anywave app
-	// pid of process 
-	// server port to connect to.
 	auto scriptPath = m_plugin->settings().value("script_path").toString();
 	if (scriptPath.isEmpty())
-		scriptPath = "none";
-	arguments << scriptPath << AwSettings::getInstance()->value(aws::python_package_dir).toString() << QString::number(m_pid)
+		return;
+	arguments << scriptPath  << QString::number(m_pid)
 		<< QString::number(AwMATPyServer::instance()->serverPort());
 
-	// default python will be the one defined in preferences (not a smart choice, USE VENV!!!)
-	QSettings settings;
-	QString python = settings.value("py/interpreter").toString();
+	QString python;
 
 	auto systemPath = AwSettings::getInstance()->value(aws::system_path).toString();
 	// prepare the path to Python Virtual Environment if one is set
 	auto venPath = m_plugin->settings().value("virtual_env").toString();
 	if (!venPath.isEmpty()) {
 #ifdef Q_OS_WIN
-		venPath += "\\Scritps";
-		python = QString("%1\\pythonw.exe").arg(venPath);
+		venPath += "\\Scripts";
+		python = QString("%1\\python.exe").arg(venPath);
+		venPath = QDir::toNativeSeparators(venPath);
+		systemPath = QString("%1;%2").arg(venPath).arg(systemPath);
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 		venPath += "/bin";
 		python = QString("%1/python").arg(venPath);
+		venPath = QDir::toNativeSeparators(venPath);
+		systemPath = QString("%1:%2").arg(venPath).arg(systemPath);
 #endif
+	}
+	else {
+		// no virtual env defined in plugin, use the default anywave venv
+		venPath = AwSettings::getInstance()->value(aws::python_venv_dir).toString();
+#ifdef Q_OS_WIN
+		venPath += "\\Scripts";
+		python = QString("%1\\python.exe").arg(venPath);
 		venPath = QDir::toNativeSeparators(venPath);
 		systemPath = QString("%1;%2").arg(venPath).arg(systemPath);
-		
+#endif
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+		venPath += "/bin";
+		python = QString("%1/python").arg(venPath);
+		venPath = QDir::toNativeSeparators(venPath);
+		systemPath = QString("%1:%2").arg(venPath).arg(systemPath);
+#endif		
 	}
-	//arguments << anywaveModulePath << QString::number(m_pid) << QString::number(AwMATPyServer::instance()->serverPort()) << dataPath << scriptPath;
-
 	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-
-	//env.insert("PATH", AwSettings::getInstance()->systemPath()); // Very important to define the full system path in the process environment.
-	//env.insert("PATH", qApp->applicationDirPath());
-	//QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
-	//QString fullPath;
-	//auto systemPath = AwSettings::getInstance()->value(aws::system_path).toString();
-//#ifdef Q_OS_MAC
-//	auto LDPATH = QString("%1/../Frameworks").arg(application);
-//   	env.insert("DYLD_LIBRARY_PATH", LDPATH);
-//	fullPath = QString("%1:%2").arg(application).arg(systemPath);
-//#endif
-//#ifdef Q_OS_LINUX
-//    env.insert("LD_LIBRARY_PATH",  QString("%1/lib").arg(qApp->applicationDirPath()));
-//	fullPath = QString("%1:%2").arg(application).arg(systemPath);
-//#endif
-//#ifdef Q_OS_WIN
-//	//fullPath = QString("%1;%2").arg(application).arg(systemPath);
-//	// path should be : virtual env first, than system path
-//
-//#endif
 	env.remove("PATH");
-	//env.insert("PATH", fullPath);
 	env.insert("PATH", systemPath);
 	m_python.setProcessEnvironment(env);
 	connect(&m_python, SIGNAL(readyReadStandardOutput()), this, SLOT(pythonOutput()));
 	connect(&m_python, SIGNAL(readyReadStandardError()), this, SLOT(pythonError()));
 	connect(&m_python, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
-	//QSettings settings;
-	//QString python = settings.value("py/interpreter").toString();
-
-	//if (!isCompiled)
-	//	m_python.start(python, arguments, QIODevice::ReadWrite);
-	//else
-	//	m_python.start(m_path, arguments, QIODevice::ReadWrite);
 
 	// test if we have a compiled (pyinstaller) package to run on just a regular python code
 	bool isCompiled = m_plugin->settings().contains("compiled python plugin");
@@ -200,5 +152,5 @@ void AwPythonScriptProcess::run()
 		emit progressChanged("waitForStarted() failed.");
 
 	m_python.waitForFinished(-1); // wait for plugin to finish. (Wait forever).
-	emit progressChanged(tr("Python script has finished."));
+	emit progressChanged("Python process has finished.");
 }

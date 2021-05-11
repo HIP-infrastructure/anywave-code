@@ -73,6 +73,10 @@ AwMarkerManager::AwMarkerManager()
 
 AwMarkerManager::~AwMarkerManager()
 {
+	//if (m_ui) 
+	//	delete m_ui;                    // ui must have become a child of AnyWave so it will be destroyed when AnyWave is destroyed
+	//if (m_markerInspector)
+	//	delete m_markerInspector;
 }
 
 
@@ -124,7 +128,31 @@ void AwMarkerManager::removeDuplicates()
 {
 	if (m_markers.isEmpty())
 		return;
-	AwMarker::removeDoublons(m_markers);
+	AwMarker::removeDoublons(m_markers, m_needSorting);
+}
+
+void AwMarkerManager::removeOfflimits()
+{
+	if (m_markers.isEmpty())
+		return;
+	float end = AwDataManager::instance()->totalDuration();
+	if (end <= 0.)
+		return;
+	if (m_needSorting) {
+		AwMarker::sort(m_markers);
+		m_needSorting = false;
+	}
+	// start from the last elements
+	auto it = m_markers.end();
+	auto current = m_markers.end();
+	while (true) {
+		AwMarker* m = *--it;
+		if (m->start() <=  end) 
+			break;
+		current--;
+	}
+	if (current < m_markers.end())
+		m_markers.erase(current, m_markers.end());
 
 }
 
@@ -173,6 +201,7 @@ void AwMarkerManager::loadMarkers()
 
 	AwMarkerList markers = loadMarkers(filename);
 
+
 	if (markers.isEmpty()) {
 		AwMessageBox::information(0, tr("Marker file"), tr("The marker file is empty or invalid"));
 		return;
@@ -184,8 +213,10 @@ void AwMarkerManager::loadMarkers()
 	if (!markers.isEmpty())	{
 		for (auto m : markers)
 			m_markers << m;
-		AwMarker::sort(m_markers);
-		m_needSorting = false;
+		m_needSorting = true;
+		removeOfflimits();
+		//AwMarker::sort(m_markers);
+		//m_needSorting = false;
 		m_ui->setMarkers(m_markers);
 	}
 
@@ -224,13 +255,11 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	}
 	else 
 		m_markers += *list;
-
-//	emit modificationsDone();
-
 	// sort markers
-	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
-	AwMarker::sort(m_markers);
-	m_needSorting = false;
+	m_needSorting = true;
+	removeOfflimits();
+	//AwMarker::sort(m_markers);
+	//m_needSorting = false;
 	m_ui->setMarkers(m_markers);
 	if (p != nullptr)
 		p->setMarkersReceived();
@@ -244,17 +273,12 @@ void AwMarkerManager::addMarkers(const AwMarkerList& list)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 	m_markers += AwMarker::duplicate(list);
-	//AwMarkerList temp_list;
-	//foreach (AwMarker *m, list)
-	//	temp_list << new AwMarker(m);
-	////emit modificationsDone();
-	//foreach (AwMarker *m, temp_list)
-	//	m_markers << m;
 
 	// sort markers
-	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
-	AwMarker::sort(m_markers);
-	m_needSorting = false;
+	m_needSorting = true;
+	removeOfflimits();
+//	AwMarker::sort(m_markers);
+//	m_needSorting = false;
 	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
 		m_ui->setMarkers(m_markers);
 	emit updateStats();
@@ -273,34 +297,27 @@ void AwMarkerManager::addMarker(AwMarker *m)
 
 	// sort markers
 	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
-	AwMarker::sort(m_markers);
-	m_needSorting = false;
+	m_needSorting = true;
+	removeOfflimits();
+	//AwMarker::sort(m_markers);
+	//m_needSorting = false;
 	m_ui->setMarkers(m_markers);
 
 	if (p != NULL)
 		p->setMarkersReceived();
-	//emit modificationsDone();
 	emit updateStats();
 }
 
-
+/// <summary>
+/// removeAllUserMarkers() 
+/// called only when importing marker from GUI and select the Import options
+/// </summary>
 void AwMarkerManager::removeAllUserMarkers()
 {
-//	AwMarkerList temp = m_markers;
-//	foreach (AwMarker *m, m_markers) {
-//			m_markers.removeOne(m);
-////			delete m;
-//	}
-
 	m_markers.erase(m_markers.begin(), m_markers.end());
 
 	m_ui->setMarkers(m_markers);
-	saveMarkers(m_filePath);
-//	emit markersRemoved();
 	emit updateStats();
-	//while (!temp.isEmpty())
-	//	delete temp.takeFirst();
-//	emit modificationsDone();
 }
 
 void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
@@ -315,7 +332,6 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 // called when a file is open.
 // Loads .mrk file and also connect to BIDS to get the markers inside events.tsv file.
 // Prepares the Marker UI.
-//void AwMarkerManager::setFilename(const QString& path)
 void AwMarkerManager::init()
 {
 	auto dm = AwDataManager::instance();
@@ -330,34 +346,21 @@ void AwMarkerManager::init()
 		auto f = [this](const QString& path) { auto markers = this->loadMarkers(path); emit finished();  return markers; };
 		auto future = std::async(f, m_filePath);
 		wait.exec();
-		m_markers = future.get();
+		m_markers += future.get();   // keep markers that are coming from the data file !
+		m_needSorting = true;
+		removeOfflimits();
+		removeDuplicates();
 		if (!m_markers.isEmpty()) {
+			// avoid markers that out of data bounds (do not load marker that could be positionned after the end of data)
 			m_ui->setMarkers(m_markers);
 			showDockUI();
 		}
 	}
 }
 
-void AwMarkerManager::quit()
-{
-	closeFile();
-	if (m_ui) {
-		m_ui->close();
-		delete m_ui;
-	}
-	if (m_markerInspector)
-		delete m_markerInspector;
-}
 
 void AwMarkerManager::closeFile()
 {
-	// if BIDS is active => update or create events.tsv file
-	//if (AwBIDSManager::isInstantiated()) {
-	//	auto bm = AwBIDSManager::instance();
-	//	if (bm->isBIDSActive())
-	//		if (bm->updateEventsTsv(m_markers) != 0)
-	//			emit log(QString("Error while updating event.tsv file: %1").arg(bm->lastError()));
-	//}
 	// ask MarkerManagerSettings to clear
 	if (m_ui)
 		m_ui->cleanUp();

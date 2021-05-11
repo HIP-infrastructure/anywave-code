@@ -81,7 +81,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 
 	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	// create views from setup
-	foreach (AwViewSetup *vs, setup->viewSetups())
+	for (AwViewSetup *vs : setup->viewSetups())
 		AwSignalView *view = addSignalView(vs);
 
 	w->update();
@@ -210,22 +210,22 @@ void AwDisplay::closeFile()
 	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
 		v->closeFile();
-	m_allSelectedChannels.clear();
 }
 
 void AwDisplay::quit()
 {
-	saveChannelSelections();
+	//saveChannelSelections();
+	//closeFile();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
 }
 
 void AwDisplay::saveChannelSelections()
 {
-	auto selectedChannels = this->selectedChannels();
-	if (selectedChannels.isEmpty())
+	auto channels = selectedChannels();
+	if (channels.isEmpty())
 		return;
-	auto selectedLabels = AwChannel::getLabels(selectedChannels);
+	auto selectedLabels = AwChannel::getLabels(channels);
 	QString path = AwDataManager::instance()->selFilePath();
 	if (QFile::exists(path))
 		QFile::remove(path);
@@ -233,7 +233,7 @@ void AwDisplay::saveChannelSelections()
 	QFile file(path);
 	if (file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate)) {
 		QTextStream stream(&file);
-		for (auto label : selectedLabels)
+		for (auto const &label : selectedLabels)
 			stream << label << endl;
 		file.close();
 	}
@@ -722,13 +722,13 @@ void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
 	m_setup = newSetup;
 
 	// remove all the current views
-	foreach (AwSignalView *v, m_signalViews) {
-		v->setParent(NULL);
+	for (AwSignalView *v : m_signalViews) {
+		v->setParent(nullptr);
 		delete v;
 	}
 	m_signalViews.clear();
 
-	foreach (AwViewSetup *vs, newSetup->viewSetups()) 	{
+	for (AwViewSetup *vs : newSetup->viewSetups()) 	{
 		AwSignalView *view = addSignalView(vs);
 		view->setProcessFlags(AwSignalView::NoProcessUpdate);
 		view->setChannels(m_channels);
@@ -750,12 +750,12 @@ void AwDisplay::addMarkerModeChanged(bool on)
 	if (on)	{
 		cursorModeChanged(false);
 
-		foreach (AwSignalView *v, m_signalViews)
+		for (AwSignalView *v : m_signalViews)
 			v->scene()->setMarkingMode(true);
 		AwMarkerManager::instance()->showDockUI();
 	}
 	else	{
-		foreach (AwSignalView *v, m_signalViews)
+		for (AwSignalView *v : m_signalViews)
 			v->scene()->setMarkingMode(false);
 		m_dockAddMarker->hide();
 		emit resetMarkerMode();
@@ -764,13 +764,13 @@ void AwDisplay::addMarkerModeChanged(bool on)
 
 void AwDisplay::cursorModeChanged(bool on)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->setCursorMode(on);
 }
 
 void AwDisplay::setQTSMode(bool on)
 {
-	foreach(AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->setQTSMode(on);
 }
 
@@ -785,13 +785,13 @@ AwChannelList AwDisplay::selectedChannels()
 
 void AwDisplay::setMappingModeOn(bool on)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->setMappingMode(on);
 }
 
 
 void AwDisplay::updateMarkersColor(const QStringList& colors)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->updateMarkers();
 }

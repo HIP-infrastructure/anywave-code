@@ -55,6 +55,7 @@ AwFilterBounds& AwFilterBounds::operator=(const AwFilterBounds& other)
 AwFilterSettings::AwFilterSettings()
 {
 	m_ui = nullptr;
+	m_uiDocked = false;
 }
 
 AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
@@ -67,9 +68,10 @@ AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
 
 AwFilterSettings::~AwFilterSettings()
 {
-	if (m_ui != nullptr) {
+	if (m_ui != nullptr && !m_uiDocked) {
 		m_ui->close();
 		delete m_ui;
+		m_ui = nullptr;
 	}
 }
 
@@ -242,7 +244,8 @@ void AwFilterSettings::save(const QString& path)
 	QFile file(path);
 	QString origin("AwFilterSettings::save");
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		throw AwException(QString("Failed to open %1 for writing.").arg(path), origin);
+	//	throw AwException(QString("Failed to open %1 for writing.").arg(path), origin);
+		emit log(QString("Failed to write %1.").arg(path));
 		return;
 	}
 	QJsonObject root;

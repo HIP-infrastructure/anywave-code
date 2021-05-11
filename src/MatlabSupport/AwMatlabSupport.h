@@ -28,7 +28,6 @@
 
 #include "awmatlabsupport_global.h"
 #include <AwMatlabInterface.h>
-#include <engine.h>
 
 
 class AWMATLABSUPPORT_EXPORT AwMatlabSupport : public AwMatlabInterface
@@ -38,11 +37,10 @@ class AWMATLABSUPPORT_EXPORT AwMatlabSupport : public AwMatlabInterface
 	Q_PLUGIN_METADATA(IID AwMatlabInterface_IID)
 public:
 	/** run a matlab script **/
-	void run(const QString& path, const QString& dep, int pid, quint16 serverPort, const QString& json = QString()) override;
+	void run(const QVariantMap& settings) override;
 signals:
 	void progressChanged(const QString&);
-private:
-	Engine *m_eng;
+
 };
 
 #endif // AWMATLABSUPPORT_H

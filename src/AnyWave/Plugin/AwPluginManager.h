@@ -118,6 +118,7 @@ public:
 
 	QMap<QString, int>& flagsMap() {  return m_MATPyPluginFlagsMap; }
 	QMap<QString, int>& inputFlagsMap() { return m_MATPyInputFlagsMap; 	}
+	QMap<QString, int>& modifiersFlagsMap() { return m_MATPyModifiersFlagsMap; }
 
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
@@ -154,11 +155,11 @@ private:
 	void loadPlugins();
 	void loadUserPlugins();
 	void checkForScriptPlugins(const QString& startingPath);
-	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
+//	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 	void setJsonUi(AwScriptPlugin *plugin, const QString& jsonUiPath);
 	void setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonDefaultsPath);
 	void setJsonSettings(AwScriptPlugin *plugin, const QString& key, const QString& jsonDefaultsPath);
-	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
+//	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 	bool checkPluginVersion(QObject *plugin);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);
@@ -186,6 +187,7 @@ private:
 	QMutex m_mutex;
 	QMap<QString, int> m_MATPyInputFlagsMap;	// hold input flags for the process object instance.
 	QMap<QString, int> m_MATPyPluginFlagsMap;	// hold general flags for the plugin object.
+	QMap<QString, int> m_MATPyModifiersFlagsMap;	// hold general flags for the plugin object.
 
 	// Python plugins list (names)
 	QStringList m_pythonPlugins;

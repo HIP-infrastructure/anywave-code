@@ -11,8 +11,6 @@
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
 
-static void compute_tf(TFParam *p);
-static QMutex TFMutex;
 
 TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	: AwProcessGUIWidget(process, parent)
@@ -22,8 +20,6 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_signalView->setFlags(AwBaseSignalView::NoMarkerBar|AwBaseSignalView::ViewAllChannels|AwBaseSignalView::EnableMarking);
 	m_signalView->setMinimumHeight(200);
 	m_settings = settings;
-
-
 	// init display settings
 	// Colormap
 	AwCMapNamesAndTypes names_types = AwColorMap::namesAndTypes();
@@ -41,14 +37,11 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_ui.cbNorm->setCurrentIndex(0);
 	connect(m_ui.cbNorm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeNormalization(int)));
 	// Z Scale
-	m_ui.cbZScale->addItem("Max to Max", DisplaySettings::MaxToMax);
+	m_ui.cbZScale->addItem("-Max to Max", DisplaySettings::MaxToMax);
 	m_ui.cbZScale->addItem("Min to Max", DisplaySettings::MinToMax);
 	m_ui.cbZScale->addItem("Zero to Max", DisplaySettings::ZeroToMax);
 	m_ui.cbZScale->setCurrentIndex(1);
 	connect(m_ui.cbZScale, SIGNAL(currentIndexChanged(int)), this, SLOT(changeZScale(int)));
-
-	// gains
-//	connect(m_ui.sliderGain, SIGNAL(valueChanged(int)), this, SLOT(changeGain(int)));
 
 	// init compute settings
 	m_ui.sbXi->setValue(m_settings->xi);
@@ -67,13 +60,55 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	m_ui.comboMarkers->setMarkers(markers);
 
 	m_baselineComputed = false;
+	m_computeBaseline = false;
+	m_zRangeLocked = false;
 	m_min = m_max = 0;
-	m_colorMapWidget = nullptr;
+	connect(m_ui.buttonApply, &QPushButton::clicked, this, &TFWidget::lockZRange);
+	connect(m_ui.buttonReset, &QPushButton::clicked, this, &TFWidget::unlockZRange);
+	connect(m_ui.radioModulus2, &QRadioButton::toggled, this, &TFWidget::changeModulus);
+	m_pos = -1;
 }
 
 TFWidget::~TFWidget()
 {
 }
+
+
+void TFWidget::lockZRange()
+{
+	double min = m_ui.lineZMin->text().toDouble();
+	double max = m_ui.lineZMax->text().toDouble();
+
+	if (max <= min)
+		return;
+
+	m_zRangeLocked = true;
+	m_ui.cbNorm->setEnabled(false);
+	m_ui.cbZScale->setEnabled(false);
+	m_ui.buttonApply->setEnabled(false);
+	m_ui.radioModulus->setEnabled(false);
+	m_ui.radioModulus2->setEnabled(false);
+
+	m_zmin = min;
+	m_zmax = max;
+	setZScale();
+}
+
+void TFWidget::unlockZRange()
+{
+	m_zRangeLocked = false;
+	m_ui.cbNorm->setEnabled(true);
+	m_ui.cbZScale->setEnabled(true);
+	m_ui.buttonApply->setEnabled(true);
+	m_ui.lineZMin->setText(QString().setNum(m_min, 'g', 2));
+	m_ui.lineZMax->setText(QString().setNum(m_max, 'g', 2));
+	m_ui.cbNorm->setEnabled(true);
+	m_ui.cbZScale->setEnabled(true);
+	m_ui.radioModulus->setEnabled(true);
+	m_ui.radioModulus2->setEnabled(true);
+	setZScale();
+}
+
 
 
 void TFWidget::toggleBaselineCorrection(bool flag)
@@ -87,13 +122,13 @@ void TFWidget::toggleBaselineCorrection(bool flag)
 		if (markers == m_baselineMarkers) { // baseline was already computed before
 			m_baselineComputed = true;
 			int i = 0;
-			for (TFParam *p : m_tfComputations)	  // restor baseline data in the computation list.
-				p->baselineData = m_baselineComputations.at(i++)->data;
+			//for (TFParam *p : m_tfComputations)	  // restor baseline data in the computation list.
+			//	p->baselineData = m_baselineComputations.at(i++)->data;
 		}
 	}
 	else {
-		for (TFParam *p : m_tfComputations)
-			p->baselineData.clear();
+		//for (TFParam *p : m_tfComputations)
+		//	p->baselineData.clear();
 	}
 }
 
@@ -106,137 +141,51 @@ void TFWidget::updateBaselineOptions()
 	m_ui.comboMarkers->setDisabled(disabled);
 }
 
-void TFWidget::compute()
-{
-	m_signalView->scene()->removeHighLigthMarker();
-
-	if (m_settings->useBaselineCorrection && !m_baselineComputed) {
-		// gather markers with same label
-		m_baselineMarkers = AwMarker::getMarkersWithLabel(m_process->pdi.input.markers(), m_settings->baselineMarker);
-		if (!m_baselineMarkers.isEmpty()) {
-			AwChannelList baselineChannels;
-			AW_DESTROY_LIST(m_baselineComputations);
-			for (auto c : m_channels) {
-				auto chan = new AwChannel(c);
-				TFParam *p = new TFParam();
-				p->settings = m_settings;
-				p->settings->useDIFF = false;  // on baseline computation, do not use special options like DIFF
-				p->x = chan;
-				baselineChannels << chan;
-				m_baselineComputations << p;
-			}
-			m_process->requestData(&baselineChannels, &m_baselineMarkers);
-			QFuture<void> future = QtConcurrent::map(m_baselineComputations, compute_tf);
-			future.waitForFinished();
-
-			for (auto i = 0; i < m_tfComputations.size(); i++) {
-				m_tfComputations.at(i)->baselineData = m_baselineComputations.at(i)->data;
-			}
-			m_baselineComputed = true;
-			AW_DESTROY_LIST(baselineChannels);
-		}
-	}
-	
-	QFuture<void> future = QtConcurrent::map(m_tfComputations, compute_tf);
-	future.waitForFinished();
-	int i = 0;
-
-	// update plots data and compute global color map min and max.
-	m_min = m_max = 0.;
-	for (TFParam *p : m_tfComputations) {
-		auto plot = m_plots.at(i++);
-		plot->setNewData(m_signalView->positionInFile(), p);
-		m_min = std::min(plot->min(), m_min);
-		m_max = std::max(plot->max(), m_max);
-	}
-	for (auto plot : m_plots)
-		plot->setMinMax(m_min, m_max);
-
-	QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	auto range = m_max - m_min;
-	auto step = std::abs(range / 4);
-	QwtInterval zInterval(m_min, m_max);
-	rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
-	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
-	m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
-	m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-	m_colorMapWidget->repaint();
-
-	repaint();
-}
-
-void TFWidget::updatePlots() 
-{
-	m_min = m_max = 0.;
-	for (auto p : m_plots) {
-		p->updateDisplaySettings();
-		// update plots data and compute global color map min and max.
-		m_min = std::min(p->min(), m_min);
-		m_max = std::max(p->max(), m_max);
-	}
-	for (auto plot : m_plots)
-		plot->setMinMax(m_min, m_max);
-	QList<double> rTicks[QwtScaleDiv::NTickTypes];
-	auto range = m_max - m_min;
-	auto step = std::abs(range / 4);
-	QwtInterval zInterval(m_min, m_max);
-	rTicks[QwtScaleDiv::MajorTick] << m_min << m_min + 1 * step << m_min + 2 * step << m_min + 3 * step << m_max;
-	QwtScaleDiv divR(rTicks[QwtScaleDiv::MajorTick].first(), rTicks[QwtScaleDiv::MajorTick].last(), rTicks);
-	m_colorMapWidget->setColorMap(zInterval, AwQwtColorMap::newMap(m_displaySettings.colorMap));
-	m_colorMapWidget->scaleDraw()->setScaleDiv(divR);
-	m_colorMapWidget->repaint();
-}
 
 void TFWidget::setChannels(const AwChannelList& channels)
 {
 	// build layout for scroll area
 	QGridLayout *layout = m_ui.signalsLayout;
-
 	int row = 0;
 	layout->addWidget(m_signalView, row++, 1);
 	layout->setRowStretch(1, 0);
 	layout->setColumnStretch(1, 1);
 
-	if (m_colorMapWidget == nullptr) {
-		// building the colormap widget
-		m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale, this);
-		m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
-		m_colorMapWidget->setBorderDist(1, 1);
-		m_colorMapWidget->setSpacing(5);
-		m_colorMapWidget->setMargin(5);
-		m_colorMapWidget->setColorBarEnabled(true);
-		//m_colorMapWidget->setColorBarWidth(25);
-		m_colorMapWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		m_colorMapWidget->hide();
-	}
+	//if (m_colorMapWidget == nullptr) {
+	//	// building the colormap widget
+	//	m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale, this);
+	//	m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
+	//	m_colorMapWidget->setBorderDist(1, 1);
+	//	m_colorMapWidget->setSpacing(5);
+	//	m_colorMapWidget->setMargin(5);
+	//	m_colorMapWidget->setColorBarEnabled(true);
+	//	//m_colorMapWidget->setColorBarWidth(25);
+	//	m_colorMapWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	//	m_colorMapWidget->hide();
+	//}
 
 	// Build params for computation and add plot to the layout
 	for (auto c : channels) {
-		TFParam *p = new TFParam();
-		p->settings = m_settings;
-		p->x = c;
-		m_tfComputations << p;
-
 		// add TF plot widget to the layout
 		TFPlot *plot = new TFPlot(m_settings, &m_displaySettings, c);
 		m_plots << plot;
 		layout->addWidget(plot, row, 1);
-		layout->addWidget(plot->leftWidget(), row++, 0);
-		//layout->addWidget(plot->rightWidget(), row++, 2);
-
-		connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
-		connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));
-		connect(m_ui.checkBoxLogScale, SIGNAL(toggled(bool)), this, SLOT(switchLogScale(bool)));
+		layout->addWidget(plot->leftWidget(), row, 0);
+		layout->addWidget(plot->rightWidget(), row++, 2);
 		connect(plot, SIGNAL(selectionDone(float, float)), this, SLOT(highlightSampleInterval(float, float)));
 		connect(plot, SIGNAL(selectionMade(AwChannel *, float, int, int, float, int, int)), this, SIGNAL(selectionMade(AwChannel *, float, int, int, float, int, int)));
 		connect(this, SIGNAL(freqScaleChanged(float, float, float)), plot, SLOT(updateFreqScale(float, float, float)));
 	}
-	auto nPlotRows = row - 1;
+	connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
+	connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));
+	connect(m_ui.checkBoxLogScale, SIGNAL(toggled(bool)), this, SLOT(switchLogScale(bool)));
+	//auto nPlotRows = row - 1;
 	// add color map widget to the right column and span it to all the rows used by TF plots
-	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
-	connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute()));
-	m_signalView->setChannels(channels);
+//	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
 	m_channels = channels;
+	m_signalView->setChannels(channels);
+	connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute2(float, float)));
+	connect(m_ui.buttonReplot, &QPushButton::clicked, this, [this]() { compute2(m_pos, -1); });
 	repaint();
 }
 
@@ -249,7 +198,8 @@ void TFWidget::setMarkers(const AwMarkerList& markers)
 
 void TFWidget::showColorMapScale(bool flag)
 {
-	m_colorMapWidget->setVisible(flag);
+	for (auto p : m_plots)
+		p->showColorMapScale(flag);
 	repaint();
 }
 
@@ -264,7 +214,8 @@ void TFWidget::showFreqScale(bool flag)
 void TFWidget::switchLogScale(bool flag)
 {
 	m_displaySettings.logScale = flag;
-	updatePlots();
+	for (auto p : m_plots)
+		p->updateDisplaySettings();
 }
 
 void TFWidget::changeColorMap(int index)
@@ -272,7 +223,9 @@ void TFWidget::changeColorMap(int index)
 	QComboBox *cb = (QComboBox *)sender();
 	Q_ASSERT(cb != NULL);
 	m_displaySettings.colorMap = cb->currentData(Qt::UserRole).toInt();
-	updatePlots();
+
+	for (auto p : m_plots)
+		p->updateDisplaySettings();
 }
 
 void TFWidget::changeNormalization(int index)
@@ -288,19 +241,25 @@ void TFWidget::changeNormalization(int index)
 		m_displaySettings.normalization = DisplaySettings::ZScore;
 		break;
 	}
-	updatePlots();
+	applyNormalisation();
+	if (!m_zRangeLocked) {
+		m_ui.lineZMin->setText(QString().setNum(m_zmin, 'g', 2));
+		m_ui.lineZMax->setText(QString().setNum(m_zmax, 'g', 2));
+	}
 }
+
+
 
 void TFWidget::changeZScale(int index)
 {
 	m_displaySettings.zInterval = m_ui.cbZScale->currentData().toInt();
-	updatePlots();
+	setZScale();
 }
 
-void TFWidget::changeGain(int value)
+void TFWidget::changeModulus(bool flag)
 {
-	m_displaySettings.gain = (100 - (float)value) / 100;
-	updatePlots();
+	m_displaySettings.values = flag ? DisplaySettings::Modulus2 : DisplaySettings::Modulus;
+	applyNormalisation();
 }
 
 void TFWidget::highlightSampleInterval(float start, float duration)
@@ -332,169 +291,252 @@ void TFWidget::recompute()
 	m_settings->useDIFF = m_ui.checkBoxDIFF->isChecked();
 	m_settings->useBaselineCorrection = m_ui.checkBaseline->isChecked() && m_ui.checkBaseline->isEnabled();
 	m_settings->baselineMarker = m_ui.comboMarkers->currentText();
-	compute();
+	compute2(m_pos, -1);
 	emit freqScaleChanged(m_settings->freq_min, m_settings->freq_max, m_settings->step);
 	repaint();
 }
 
-
-
-
-// compute function 
-void compute_tf(TFParam *p)
+void TFWidget::compute2(float pos, float duration)
 {
-	AwChannel *c = p->x;
-	if (c->dataSize() == 0)
+	// do nothing is position is unchanged
+
+	// special case : duration = -1.0  => force to recompute all
+	if (pos == m_pos && duration != -1)
 		return;
 
-	//Base of algorithm
-	//FFT of original signal to get complex values.
-	//Multiply these values by the gaussian function computed.
-	//Apply inverse FFT again on these values
-	//Transform value into log(1 + (module� / max(module�)))
+	m_pos = pos;
+	m_signalView->scene()->removeHighLigthMarker();
 
-	// real number of samples
-	quint32 nsamples = c->dataSize();
-	float sr = c->samplingRate();
-	float sigma2 = 1;
-	float *x = c->data();
-	double *freq;
-	double *Psi;
-	double **psi_array;
-	double **wt;
-	float min_center_freq;
-	float max_center_freq;
-	double *s_array;
-	double min_scale, max_scale;
-	// compute padding for data
-	// Epsilon = 2pif0omega
-	double wavelet_length = p->settings->xi / (2 * M_PI  * p->settings->freq_min);
+	if (m_settings->useBaselineCorrection && !m_baselineComputed) {
+		// gather markers with same label
+		m_baselineMarkers = AwMarker::getMarkersWithLabel(m_process->pdi.input.markers(), m_settings->baselineMarker);
+		if (!m_baselineMarkers.isEmpty()) {
+			// create temp channel list by duplicating current channels list
+			AwChannelList temp;
+			for (auto c : m_channels) 
+				temp << c->duplicate();
+			m_computeBaseline = true;
+			m_process->requestData(&temp, &m_baselineMarkers);
 
-	int padding = 3 * qCeil(wavelet_length * c->samplingRate());
-	quint32 n = nsamples + 2 * padding; // padding on each side
-	quint32 half_n = n / 2;
-
-	// traduction du code MATLAB
-	// omega = [(0:n/2) (-ceil(n/2)+1:-1)].*Fs/n; % CGB added ceil: TO BE CHECKED
-	// omega = omega(:);
-	double *omega = new double[n];
-	for (int i = 0; i < half_n; i++)
-		omega[i] = i * (sr / n);
-	for (int i = half_n; i < n; i++)
-		omega[i] = -((half_n - (i + 1)) * (sr / n));
-
-	double *in;
-	fftw_complex *fftx;
-	// FFT(x)
-	in = (double *)fftw_malloc(sizeof(double) * n);
-	fftx = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n);
-	TFMutex.lock();
-	fftw_plan plan = fftw_plan_dft_r2c_1d(n, in, fftx, FFTW_ESTIMATE);
-	TFMutex.unlock();
-	memset(in, 0, n * sizeof(double));
-
-	// pad before and after the signal with zeros
-	for (quint32 i = 0; i < nsamples; i++)
-		in[i + padding] = x[i];
-
-	// applying DIFF
-	if (p->settings->useDIFF)
-		for (int i = 1; i < n - 1; i++)
-			in[i - 1] = in[i] - in[i - 1];
-
-	fftw_execute_dft_r2c(plan, in, fftx);
-	TFMutex.lock();
-	fftw_destroy_plan(plan);
-	TFMutex.unlock();
-	fftw_free(in);
-	switch (p->settings->wavelet)
-	{
-	case TFWavelet2::Gabor:
-		min_center_freq = (2 * p->settings->tolerance * sqrt(sigma2) * sr * p->settings->xi) / n;
-		max_center_freq = (sr * p->settings->xi / (p->settings->xi + p->settings->tolerance / sqrt(sigma2)));
-		if (p->settings->freqs.isEmpty()) {
-			float nvoice = 12;
-			int exp;
-			for (double i = frexp(min_center_freq, &exp); i < frexp(max_center_freq, &exp); i += 1 / nvoice)
-				p->settings->freqs << i * i;
+			// sequential
+			m_baselines.clear();
+			for (auto channel : temp) {
+				m_baselines << computeFunction(channel);
+			}
+			m_computeBaseline = false;
+			m_baselineComputed = true;
 		}
-		s_array = new double[p->settings->freqs.size()];
-		for (int i = 0; i < p->settings->freqs.size(); i++)
-			s_array[i] = p->settings->xi / p->settings->freqs.at(i);
-		min_scale = p->settings->xi / max_center_freq;
-		max_scale = p->settings->xi / min_center_freq;
-		break;
-	default:
-		break;
 	}
-	// MATLAB: 
-	// nscale = length(freqlist);
-	// wt = zeros(n,nscale);
-	// The matrix is n columns and nscale lines 
-	int nscale = p->settings->freqs.size();
-//	QVector<double> matrix(nscale * nsamples);
+	m_rawTF.clear();
 
-	p->data = zeros(nscale, nsamples);
+	// sequential computation using armadillo code based on MATLAB code
+	for (auto c : m_channels) {
+		m_rawTF << computeFunction(c);
+	}
+
+	m_results.clear();
+	for (auto i = 0; i < m_rawTF.size(); i++) {
+		QPair<mat, mat> pair;
+		if (m_baselines.size() > i)
+			pair.second = m_baselines.at(i);
+		else
+			pair.second = mat();
+		pair.first = m_rawTF.at(i);
+		m_results << pair;
+	}
+
+	// apply normalisation :
+	applyNormalisation();
+}
+
+arma::mat TFWidget::computeFunction(AwChannel * chan)
+{
+	// armadillo version based on MATLAB code
+	double Fs = static_cast<double>(chan->samplingRate());
+	double xi = static_cast<double>(m_settings->xi);
+	double wt_len = xi / (2 * M_PI * m_settings->freq_min);
+	vec freqlist(m_settings->freqs.size());
+	for (auto i = 0; i < m_settings->freqs.size(); i++)
+		freqlist(i) = m_settings->freqs.at(i);
+
+	uword padding = static_cast<uword>(3 * std::ceil(wt_len * Fs));
+	uword nsamples = static_cast<uword>(chan->dataSize());
+	uword n = nsamples + 2 * padding;
+	vec x(n);
+	for (auto i = 0; i < padding; i++)
+		x(i) = chan->data()[0];
+	for (auto i = 0; i < chan->dataSize(); i++)
+		x(i + padding) = chan->data()[i];
+	for (auto i = chan->dataSize(); i < chan->dataSize() + padding; i++)
+		x(i + padding) = chan->data()[chan->dataSize() - 1];
+	if (m_settings->useDIFF) {
+		vec tmp = diff(x);
+		x = vec(tmp.n_elem + 1);
+		x(0) = tmp(0);
+		for (uword i = 1; i < x.n_elem; i++)
+			x(i) = tmp(i - 1);
+	}
+	double mi = x.min();
+	double ma = x.max();
+	double sigma2 = 1.;
+	vec omega(n);
+	for (uword i = 0; i < n / 2; i++)
+		omega(i) = i * Fs / n;
+	double c = -std::ceil(n / 2);
+	double j;
+	for (uword i = n / 2, j = 0; i < n; i++, j = 1)
+		omega(i) = (c + j) * Fs / n;
 
 	// MATLAB
-	//scaleindices=find(s_array(:)'>=minscale & s_array(:)'<=maxscale);
-	QVector<int> scale_indices;
-	for (int i = 0; i < nscale; i++) {
-		if (s_array[i] >= min_scale && s_array[i] <= max_scale)
-			scale_indices << i;
-	}
-	//MATLAB
-	//for kscale=scaleindices
-	// s=s_array(kscale);
-	freq = new double[n];
-	Psi = new double[n];
-	fftw_complex *c_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n);
-	fftw_complex *c_out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n);
-	TFMutex.lock();
-	fftw_plan plan_c2c = fftw_plan_dft_1d(n, c_in, c_out, FFTW_BACKWARD, FFTW_ESTIMATE);
-	TFMutex.unlock();
-	double m2max = 0;
-	for (auto index : scale_indices) {
-		double s = s_array[index];
-		switch (p->settings->wavelet)
-		{
-		case TFWavelet2::Gabor:
-			for (int i = 0; i < n; i++) {
-				freq[i] = (s * omega[i]) - p->settings->xi;
-				Psi[i] = pow(4 * M_PI * sigma2, (double)(1 / 4)) * sqrt(s) * exp(-sigma2 / 2 * freq[i] * freq[i]);
-			}
-			break;
-		default:
-			break;
+	// fftx = fft(x);
+	// MATLAB
+	cx_vec fftx(n);
+	fftx.fill(0);
+	fftw_plan plan = fftw_plan_dft_r2c_1d(n, x.memptr(), (fftw_complex*)fftx.memptr(), FFTW_ESTIMATE);
+	fftw_execute_dft_r2c(plan, x.memptr(), (fftw_complex*)fftx.memptr());
+	fftw_destroy_plan(plan);
+	// MATLAB
+	// tolerance = 0.5;
+	// mincenterfreq = 2 * tolerance * sqrt(sigma2) * Fs * xi. / n;
+	// maxcenterfreq = Fs * xi / (xi + tolerance / sqrt(sigma2));
+	// MATLAB
+	double tolerance = 0.5;
+	double mincenterfreq = 2. * tolerance * std::sqrt(sigma2) * Fs * xi / n;
+	double maxcenterfreq = Fs * xi / (xi + tolerance / std::sqrt(sigma2));
+
+	// MATLAB
+	// s_array = xi. / freqlist;
+	// minscale = xi. / maxcenterfreq;
+	// maxscale = xi. / mincenterfreq;
+	// nscale = length(freqlist);
+	// wt = zeros(n, nscale);
+	//scaleindices = find(s_array(:)'>=minscale & s_array(:)' <= maxscale);
+	// MATLAB
+	vec s_array = xi / freqlist;
+	double minscale = xi / maxcenterfreq;
+	double maxscale = xi / mincenterfreq;
+	auto nscale = freqlist.n_elem;
+
+	mat wt(nsamples, nscale);  // real matrix to directly store the modulus value
+	wt.fill(0.);
+	uvec scaleindices = arma::find(s_array >= minscale && s_array <= maxscale);
+	cx_vec in(n);
+	cx_vec ifftxPsi(n);
+	fftw_plan plan_c2c = fftw_plan_dft_1d(n, (fftw_complex*)in.memptr(), (fftw_complex*)ifftxPsi.memptr(), FFTW_BACKWARD, FFTW_ESTIMATE);
+	for (auto i = 0; i < scaleindices.n_elem; i++) {
+		uword kscale = scaleindices(i);
+		double s = s_array(kscale);
+		vec freq = s * omega - xi;
+		vec Psi(n);
+		double tmp = pow(4 * M_PI * sigma2, 0.25) * std::sqrt(s);
+		for (auto i = 0; i < n; i++)
+			Psi(i) = tmp * exp(-sigma2 / 2 * freq(i) * freq(i));
+
+		in = fftx % Psi;
+		fftw_execute(plan_c2c);
+		vec modulus = abs(ifftxPsi);
+
+		for (auto i = 0; i < nsamples; i++) {
+			wt(i, kscale) = modulus(i + padding);
 		}
-
-		// Multiplying complex values by Gaussian function
-		for (int i = 0; i < n; i++) {
-			c_in[i][0] = Psi[i] * fftx[i][0];
-			c_in[i][1] = Psi[i] * fftx[i][1];
-		}
-		// compute ifft(fftx.*Psi)
-		fftw_execute_dft(plan_c2c, c_in, c_out);
-
-		// fill matrix
-//		double *data = matrix.data();
-//		auto data = p->data.memptr();
-
-		//for (int i = 0, j = padding; i < nsamples; i++)
-		//	data[index * nsamples + i] = c_out[i + j][0] * c_out[i + j][0] + c_out[i + j][1] * c_out[i + j][1];
-		for (int i = 0, j = padding; i < nsamples; i++)
-			p->data(index, i) = c_out[i + j][0] * c_out[i + j][0] + c_out[i + j][1] * c_out[i + j][1];
-
 	}
-	fftw_free(c_in);
-	fftw_free(c_out);
-	fftw_free(fftx);
-	TFMutex.lock();
 	fftw_destroy_plan(plan_c2c);
-	TFMutex.unlock();
-	delete[] Psi;
-	delete[] freq;
-	delete[] s_array;
-	delete[] omega;
+	return wt.t();
+}
 
+void TFWidget::applyNormalisation()
+{
+	int norm = m_displaySettings.normalization;
+	int values = m_displaySettings.values;
+	
+	std::function<arma::mat(const QPair<mat, mat>&)> applyNorm = [norm, values](const QPair<mat, mat>& result) {
+		mat data = mat(result.first);
+		if (values == DisplaySettings::Modulus2) 
+			data.for_each([](mat::elem_type& val) { val *= val; });
+
+		mat baseline = result.second;
+		switch (norm) {
+			case DisplaySettings::N10log10Divisive:
+				if (!baseline.is_empty()) {
+					for (auto i = 0; i < data.n_rows; i++)
+						data.row(i) = 10 * log10(data.row(i) / arma::mean(baseline.row(i)));
+				}
+				else {
+					for (auto i = 0; i < data.n_rows; i++)
+						data.row(i) = 10 * log10(data.row(i) / arma::mean(data.row(i)));
+				}
+				break;
+			case DisplaySettings::NoNorm:
+				break;
+			case DisplaySettings::ZScore:
+				if (!baseline.is_empty()) {
+					for (auto i = 0; i < data.n_rows; i++) {
+						data.row(i) -= arma::mean(baseline.row(i));
+						data.row(i) /= arma::stddev(baseline.row(i));
+					}
+				}
+				else {
+					for (auto i = 0; i < data.n_rows; i++) {
+						data.row(i) -= arma::mean(data.row(i));
+						data.row(i) /= arma::stddev(data.row(i));
+					}
+				}
+				break;
+		}
+		return data;
+	};
+
+	QFuture<arma::mat> future = QtConcurrent::mapped(m_results, applyNorm);
+	future.waitForFinished();
+	Q_ASSERT(future.resultCount() == m_plots.size());
+	int i = 0;
+	vec vmin(future.resultCount()), vmax(future.resultCount());
+	m_normalizedTF.clear();
+	for (auto &r : future) {
+		vmin(i) = r.min();
+		vmax(i) = r.max();
+		m_normalizedTF << r;
+		m_plots.at(i++)->setDataMatrix(r, m_signalView->positionInFile());
+	}
+	m_min = vmin.min();
+	m_max = vmax.max();
+	if (!m_zRangeLocked) {
+		m_zmin = m_min;
+		m_zmax = m_max;
+		m_ui.lineZMin->setText(QString().setNum(m_zmin, 'g', 2));
+		m_ui.lineZMax->setText(QString().setNum(m_zmax, 'g', 2));
+	}
+	setZScale();
+}
+
+void TFWidget::setZScale()
+{
+	int i = 0;
+
+	for (auto p : m_plots) {
+		QwtInterval ZInterval;
+		if (m_zRangeLocked) {
+			ZInterval.setMinValue(m_zmin);
+			ZInterval.setMaxValue(m_zmax);
+		}
+		else {
+		
+			double min = m_normalizedTF.at(i).min();
+			double max = m_normalizedTF.at(i).max();
+			double abs_max = std::max(std::abs(min), std::abs(max));
+			i++;
+			switch (m_displaySettings.zInterval) {
+			case DisplaySettings::MinToMax:
+				ZInterval = QwtInterval(min, max);
+				break;
+			case DisplaySettings::ZeroToMax:
+				ZInterval = QwtInterval(0, max);
+				break;
+			case DisplaySettings::MaxToMax:
+				ZInterval = QwtInterval(-abs_max, abs_max);
+				break;
+			}
+		}
+		p->updateZInterval(ZInterval);
+	}
 }

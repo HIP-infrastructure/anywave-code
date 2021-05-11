@@ -32,8 +32,6 @@
 
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
-	//p->setScriptPath(m_path);
-	//p->pdi.input.settings[keys::plugin_dir] = m_pluginDir;
 	// set it a copy of all settings from data manager
 	p->pdi.input.settings.unite(AwDataManager::instance()->settings());
 	// merge also settings proper to plugin
@@ -42,6 +40,7 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
 		p->pdi.addInputChannel(-1, 1, 0);
 		p->setInputFlags(m_inputFlags);
+
 	}
 	p->setPlugin(this);
 }
@@ -53,7 +52,7 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	category = map.value("category");
 	m_inputFlags = 0;
 	if (map.contains("input_flags")) {
-		auto inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
+		const auto &inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
 		QStringList tokens = map.value("input_flags").split(":");
 		for (auto t : tokens) {
 			auto lowerT = t.toLower();
@@ -63,12 +62,22 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	}
 	m_flags = 0;
 	if (map.contains("flags")) {
-		auto flagsMap = AwPluginManager::getInstance()->flagsMap();
+		const auto &flagsMap = AwPluginManager::getInstance()->flagsMap();
 		QStringList tokens = map.value("flags").split(":");
 		for (auto t : tokens) {
 			auto lowerT = t.toLower();
 			if (flagsMap.contains(lowerT))
 				m_flags |= flagsMap.value(lowerT);
+		}
+	}
+	m_modifiersFlags = 0;
+	if (map.contains("modifiers_flags")) {
+		const auto &modsMap = AwPluginManager::getInstance()->modifiersFlagsMap();
+		QStringList tokens = map.value("flags").split(":");
+		for (auto t : tokens) {
+			auto lowerT = t.toLower();
+			if (modsMap.contains(lowerT))
+				m_modifiersFlags |= modsMap.value(lowerT);
 		}
 	}
 	// add the desc map from desct.txt has values in the plugin settings map

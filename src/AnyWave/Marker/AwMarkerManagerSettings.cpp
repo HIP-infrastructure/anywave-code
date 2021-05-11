@@ -569,27 +569,10 @@ void AwMarkerManagerSettings::removeAllLabels()
 		return;
 
 	m_displayedMarkers = m_model->markers();
-	AwMarkerList::iterator it;
-#ifdef Q_OS_MAC
-	it = std::remove_if(m_displayedMarkers.begin(), m_displayedMarkers.end(),
-			[label](AwMarker* m) { return m->label() == label; });
-#else
-	if (MARKERS_THREAD_THRESHOLD <= m_displayedMarkers.size())
-		it = std::remove_if(m_displayedMarkers.begin(), m_displayedMarkers.end(),
-			[label](AwMarker* m) { return m->label() == label; });
-	else
-		it = std::remove_if(std::execution::par, m_displayedMarkers.begin(), m_displayedMarkers.end(),
-			[label](AwMarker* m) { return m->label() == label; });
-#endif
 	AwMarkerList markers;
-	for (AwMarkerList::iterator i = it; i < m_displayedMarkers.end(); i++)
-		markers << *i;
-	//AwMarkerList markers;
-	//for  (AwMarker *m : m_displayedMarkers) {
-	//	if (m->label() == label)
-	//		markers << m;
-	//}
 
+	std::remove_copy_if(m_displayedMarkers.begin(), m_displayedMarkers.end(), std::back_inserter(markers),
+		[label](AwMarker* m) { return m->label() != label; });
 
     emit markersRemoved(markers);
 	m_displayedMarkers = m_model->markers();

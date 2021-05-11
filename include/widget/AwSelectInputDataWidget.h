@@ -22,6 +22,8 @@ protected slots:
 	void addUseLabel();
 	void clearUse();
 	void clearSkip();
+	void changeSkipStatus(bool flag);
+	void changeUseStatus(bool flag);
 private:
 	QStringList m_skipLabels, m_useLabels;
 	Ui::AwSelectInputDataWidgetUi *m_ui;

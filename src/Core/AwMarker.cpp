@@ -176,7 +176,7 @@ int AwMarker::save(const QString& path, const AwMarkerList& markers)
 AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 {
 	AwMarkerList res;
-	foreach (AwMarker *m, markers)
+	for (AwMarker *m : markers)
 		res << new AwMarker(m);
 	return res;
 }
@@ -873,42 +873,36 @@ AwMarkerList AwMarker::load(const QString& path)
 	return markers;
 }
 
-void AwMarker::removeDoublons(QList<AwMarker*>& markers)
+void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 {
 	AwMarkerList res, removed;
 	if (markers.isEmpty())
 		return;
-
-	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
-	const float tol = 0.005;
+	if (sortList)
+		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
 	// use multi map to detect markers with similar labels
 	QMultiHash<QString, AwMarker *> map;
 	for (auto m : markers)
 		map.insert(m->label(), m);
 	auto uniqueKeys = map.uniqueKeys();
+	
 	for (auto const& k : uniqueKeys) {
-		auto values = map.values(k);
+		AwMarkerList values = map.values(k);
 		if (values.size() > 1) {
 			std::sort(values.begin(), values.end(), AwMarkerLessThan);
 			auto m = values.takeFirst();
-			while (!values.isEmpty()) {
-				for (auto v : values) {
-					auto position = std::abs(v->start() - m->start());
-					if (position > tol) {
-						break;
-					}
-					auto duration = std::abs(v->duration() - m->duration());
-					if (position <= tol && duration <= tol) {
-						removed << v;
-					}
-				}
-				if (!values.isEmpty())
-					m = values.takeFirst();
+			auto f = [m](AwMarker* m1) { 
+				const float tol = 0.005;
+				float pos = std::abs(m1->start() - m->start());
+				float dur = std::abs(m1->duration() - m->duration());
+				return pos <= tol && dur <= tol;
+			};
+			auto it = std::remove_if(values.begin(), values.end(), f);
+			for (auto &i = it; i < values.end(); i++) {
+				removed << *i;
 			}
 		}
 	}
-	for (auto m : removed) {
-		markers.removeAll(m);
-		delete m;
-	}
+	for (auto m : removed) 
+		markers.erase(std::remove_if(markers.begin(), markers.end(), [m](AwMarker* m1) { return m1 == m; }));
 }

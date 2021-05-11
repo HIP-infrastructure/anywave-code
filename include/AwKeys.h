@@ -27,6 +27,12 @@
 
 
 namespace keys {
+	constexpr auto gui_mode = "gui_mode";
+	constexpr auto operation = "operation";
+	// permitted operations in batch mode
+	constexpr auto BIDS_operation = "bids";
+	constexpr auto run_operation = "run";
+	//
 	constexpr auto time = "time";
 	constexpr auto date = "date";
 	constexpr auto iso_date = "iso_date";
@@ -77,6 +83,7 @@ namespace keys {
 	constexpr auto create_montage = "create_montage";
 	// listen mode for plugin debugging
 	constexpr auto plugin_debug = "listen_mode";
+	constexpr auto server_port = "server_port";
 
 	// possible values for create_montage key
 	constexpr auto bipolar_ieeg = "bipolar_ieeg";

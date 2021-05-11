@@ -56,9 +56,9 @@ public:
 	void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();
-	void quit();
 	void init();
 	void removeDuplicates();
+	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
 public slots:
 	void showDockUI();
 	/** Rajoute un marqueur directement dans la liste **/
@@ -83,8 +83,6 @@ public slots:
 signals:
 	void goTo(float pos);
 	void displayedMarkersChanged(const AwMarkerList& markers);
-//	void modificationsDone();
-//	void markersRemoved();
 	void log(const QString& message);
 	void finished();	// for threaded operations
 	void updateStats();	// emitted each time the global markers list changes

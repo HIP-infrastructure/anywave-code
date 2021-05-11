@@ -25,9 +25,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #include "AwRequestServer.h"
 #include "AwTCPResponse.h"
-#include "AwPidManager.h"
 #include <utils/json.h>
 #include "Data/AwDataManager.h"
+#include <Process/AwScriptPlugin.h>
 
 void AwRequestServer::handleConnectDebug(QTcpSocket* client, AwScriptProcess* process)
 {
@@ -35,6 +35,7 @@ void AwRequestServer::handleConnectDebug(QTcpSocket* client, AwScriptProcess* pr
 	AwTCPResponse response(client);
 	QDataStream& toClient = *response.stream();
 
+	// the server has created a fake process, so get its pid
 	auto args = AwUtilities::json::toJsonString(process->pdi.input.settings);
 	toClient << process->pid() << args;
 	response.send();
