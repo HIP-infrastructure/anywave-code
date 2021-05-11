@@ -8,7 +8,7 @@ QT5_WRAP_CPP(AwMatlabSupport_MOC_SRCS ${AwMatlabSupport_MOC_H})
 
 add_library(AwMatlabSupport SHARED AwMatlabSupport.cpp ${AwMatlabSupport_MOC_SRCS})
 qt5_use_modules(AwMatlabSupport Core)
-target_link_libraries(AwMatlabSupport ${Matlab_MX_LIBRARY}  ${Matlab_ENG_LIBRARY} Qt5::Core)
+target_link_libraries(AwMatlabSupport ${Matlab_DATAARRAY_LIBRARY}  ${Matlab_ENGINE_LIBRARY} Qt5::Core)
 
 IF (APPLE)
 INSTALL(TARGETS AwMatlabSupport DESTINATION  ${LIB_INSTALL_DIR})

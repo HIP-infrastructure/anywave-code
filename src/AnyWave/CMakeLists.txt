@@ -5,6 +5,7 @@ add_definitions("-DAW_DISABLE_EPOCHING")
 
 SET(AnyWave_SRCS
     ./AnyWave.cpp  
+    ./AwComponents.cpp
 	./AwHelpMenu.cpp
 	./AwMapping.cpp
 	./AwBatch.cpp
@@ -100,6 +101,7 @@ SET(AnyWave_SRCS
 	./MATPy/RunAnyWave.cpp
 	./MATPy/GetProperties.cpp
     ./MATPy/DebugConnect.cpp
+    ./MATPy/SendMarkers.cpp
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
@@ -109,6 +111,7 @@ SET(AnyWave_SRCS
     ./Montage/AwECoGTableModel.cpp 
     ./Plugin/AwPluginDial.cpp  
     ./Plugin/AwPluginManager.cpp  
+    ./Plugin/AwMATPYCreator.cpp
     ./Process/AwConverter.cpp  
     ./Process/AwExporter.cpp  
     ./Process/AwExporterMarkerModel.cpp  
@@ -163,7 +166,9 @@ SET(AnyWave_SRCS
     ./Source/AwSourceChannel.cpp  
     ./Source/AwSourceManager.cpp)  
 
-SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
+SET(HEADERS 	
+    ./AwComponents.h
+    ./Batch/AwAddEditBatchDialog.h
 	./Batch/AwBatchDialog.h
 	./Batch/AwBatchGUI.h
 	./Batch/AwBatchManager.h
@@ -229,6 +234,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Montage/AwECoGTableModel.h 
     ./Plugin/AwPluginManager.h  
     ./Plugin/AwPluginDial.h  
+    ./Plugin/AwMATPYCreator.h
     ./Process/AwExporterTypes.h  
     ./Process/AwMarkerExporter.h  
     ./Process/AwTriggerWriter.h  
@@ -321,6 +327,7 @@ SET(FORMS ./AnyWave.ui
     ./Montage/AwMontageDial.ui  
 	./Montage/AwECoGDialog.ui
     ./Plugin/AwPluginDial.ui  
+    ./Plugin/AwMATPYCreator.ui
     ./Process/AwProcessesWidget.ui  
     ./Process/AwProcessFromMarkersDial.ui  
     ./Process/TPUi.ui  
@@ -375,6 +382,7 @@ IF(UNIX AND NOT APPLE)
 ELSE()
     ADD_EXECUTABLE(AnyWaveMac ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
     QT5_USE_MODULES(AnyWaveMac Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
+    MESSAGE(STATUS "Mac qwt: ${QWT_LIBRARIES}")
     TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} 
        ${BLAS_LIBRARIES} z qcustomplot)
     add_dependencies(AnyWaveMac ${AW_LIBS})

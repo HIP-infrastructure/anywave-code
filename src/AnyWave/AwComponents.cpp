@@ -254,7 +254,6 @@ void AwComponents::createUserDirs()
 	aws->setValue(aws::python_module_dir, appPath + "/../Python");
 	aws->setValue(aws::matlab_API_dir, appPath + "/../matlab");
 	aws->setValue(aws::python_venv_dir, appPath + "/../Python/venv");
-	aws->setValue(aws::python_packages_dir, appPath + "/../Python/packages");
 	// no change to plugin dir
 	appDir.cdUp();
 	appDir.cd("Plugins");

@@ -8,11 +8,14 @@ LINK_DIRECTORIES(${QWT_LIBRARY})
 INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
 #MESSAGE("MKL INC: ${MKL_INCLUDE_DIRS}")
-SET(SRCS display_settings.cpp settingsui.cpp TFPicker.cpp TFPlot.cpp tf_settings.cpp TFWavelet2.cpp TFWidget.cpp)
+SET(SRCS display_settings.cpp settingsui.cpp TFPicker.cpp 
+  TFPlot.cpp tf_settings.cpp TFWavelet2.cpp TFWidget.cpp
+  TFColorMapWidget.cpp)
 
-SET(MOCS display_settings.h settingsui.h TFPicker.h TFPlot.h tf_settings.h TFWavelet2.h TFWidget.h)
+SET(MOCS display_settings.h settingsui.h TFPicker.h TFPlot.h tf_settings.h TFWavelet2.h 
+   TFWidget.h TFColorMapWidget.h)
 
-SET(UIS TFWidget.ui settingsui.ui)
+SET(UIS TFWidget.ui settingsui.ui TFColorMapWidget.ui)
 
 qt5_wrap_cpp(TFW_MOCS ${MOCS})
 QT5_WRAP_UI(TFW_UIS ${UIS})
