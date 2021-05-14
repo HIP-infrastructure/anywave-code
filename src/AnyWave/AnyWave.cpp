@@ -80,7 +80,7 @@
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
 
-#define AW_HELP_URL "https://meg.univ-amu.fr/wiki/AnyWave"
+#define AW_HELP_URL "https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/home"
 
 
 AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
@@ -309,7 +309,6 @@ void AnyWave::changeEvent(QEvent *e)
 			{
 				QString locale = QLocale::system().name();
 				locale.truncate(locale.lastIndexOf('_'));
-			//	AwSettings::getInstance()->loadLanguage(locale);
 			}
 			break;
 		}
@@ -355,7 +354,7 @@ void AnyWave::dropEvent(QDropEvent *e)
 
 void AnyWave::applyNewLanguage()
 {
-//	AwProcessManager::instance()->retranslate();
+
 }
 
 void AnyWave::quit()
@@ -365,15 +364,7 @@ void AnyWave::quit()
 		m_display->closeFile();
 
 	AwSettings::getInstance()->closeFile();
-	//// stop MATPy server if running
-	//if (AwMATPyServer::isRunning()) {
-	//	AwMATPyServer::instance()->stop();
-	//	delete AwMATPyServer::instance();
-	//}
-
 	AwDataManager::instance()->closeFile();
-
-//	AwMontageManager::instance()->quit();
 	AwAmplitudeManager::instance()->quit();
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
@@ -404,8 +395,6 @@ void AnyWave::quit()
 		delete m_SEEGViewer;
 		m_SEEGViewer = nullptr;
 	}
-//	AwProcessManager::instance()->quit();
-//	AwMarkerManager::instance()->quit();
 #ifdef AW_EPOCHING
 	if (AwEpochManager::instanceExists()) {
 		AwEpochManager::instance()->closeFile();

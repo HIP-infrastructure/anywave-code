@@ -200,5 +200,7 @@ void H2UI::accept()
 			file.close();
 		}
 	}
+
+	
 	QDialog::accept();
 }

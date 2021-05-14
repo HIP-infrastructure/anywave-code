@@ -183,7 +183,7 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 {
 	auto dm = AwDataManager::instance();
-	auto args = process->pdi.input.settings;
+	auto &args = process->pdi.input.settings;
 	QString inputFile = args.value(keys::input_file).toString();
 
 	if (!inputFile.isEmpty()) {

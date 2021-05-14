@@ -50,6 +50,7 @@ private:
 	void changeMappingCursorFontText(const QFont& font);
 	void changeMarkerFontText(const QFont& font);
 	QString fontToLabel(const QFont& font);
+	bool detectPython(const QString& path);
 
 	QRect screen;
 	QStringList m_markerTypes;

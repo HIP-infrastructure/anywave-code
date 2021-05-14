@@ -74,37 +74,6 @@ void AwRequestServer::handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *p)
 			for (auto const& item : list)
 				values << item.toFloat();
 		}
-		//QJsonParseError err;
-		//QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8(), &err);
-		//if (doc.isNull() || err.error != QJsonParseError::NoError) {
-		//	emit log(QString("error in json parsing: %1").arg(err.errorString()));
-		//	status = -1;
-		//}
-		//if (status == -1) {
-		//	emit log("ERROR: json parsing error.");
-		//	toClient << QString("AnyWave has no file open.");
-		//	response.send(-1);
-		//	//*stream << (qint64)0;
-		//	response.send(-1);
-		//	return;
-		//}
-		//auto root = doc.object();
-		//if (root.contains("labels") && root["labels"].isArray()) {
-		//	for (auto l : root["labels"].toArray())
-		//		labels << l.toString();
-		//}
-		//if (root.contains("channels") && root["channels"].isArray()) {
-		//	for (auto l : root["channels"].toArray())
-		//		channels << l.toString();
-		//}
-		//if (root.contains("options") && root["options"].isArray()) {
-		//	for (auto l : root["options"].toArray())
-		//		options << l.toString();
-		//}
-		//if (root.contains("values") && root["values"].isArray()) {
-		//	for (auto l : root["values"].toArray())
-		//		values << l.toDouble();
-		//}
 	}
 	
 	if (!labels.isEmpty()) {

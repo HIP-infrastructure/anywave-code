@@ -95,9 +95,7 @@ void AwExporter::runFromCommandLine()
 	}
 
 	float endTimePos = args.value(keys::file_duration).toFloat();
-	auto markers = pdi.input.markers();
-
-
+	auto &markers = pdi.input.markers();
 	AwBlock* block = writer->infos.newBlock();
 	AwMarker global("global", 0., endTimePos);
 	if (modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied) {
@@ -215,10 +213,17 @@ bool AwExporter::showUi()
 
 		pdi.input.setNewChannels(AwChannel::duplicateChannels(m_channels));
 
-		if (!ui.skippedMarkers.isEmpty())
+		bool updateUseSkip = false;
+		if (!ui.skippedMarkers.isEmpty()) {
 			pdi.input.settings[keys::skip_markers] = ui.skippedMarkers;
-		if (!ui.usedMarkers.isEmpty())
+			updateUseSkip = true;
+		}
+		if (!ui.usedMarkers.isEmpty()) {
 			pdi.input.settings[keys::use_markers] = ui.usedMarkers;
+			updateUseSkip = true;
+		}
+		if (updateUseSkip)
+			applyUseSkipMarkersKeys();
 
 		if (ui.decimateFactor > 1)
 			pdi.input.settings[Exporter::decimate_factor] = ui.decimateFactor;

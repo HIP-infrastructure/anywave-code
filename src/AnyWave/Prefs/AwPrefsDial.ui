@@ -41,7 +41,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -897,7 +897,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Python interpreter:</string>
+              <string>Python path to interpreter or virtual env:</string>
              </property>
             </widget>
            </item>
@@ -923,7 +923,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Select File</string>
+              <string>Select Folder</string>
              </property>
             </widget>
            </item>

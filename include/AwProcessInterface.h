@@ -71,6 +71,8 @@ public:
 	inline void addModifiers(int flags) { m_modifiersFlags |= flags; }
 	inline int runMode() { return m_runMode; }
 	void setRunMode(int mode) { m_runMode = mode; }
+	/** This method will prepare input markers for the process based on skip_markers/use_markers keys in settings. **/
+	int applyUseSkipMarkersKeys();
 	
 	/** Initializing process before starting it **/
 	virtual void init() {}

@@ -141,6 +141,10 @@ bool H2::showUi()
 			}
 			AW_DESTROY_LIST(markers);
 		}
+		else {
+			pdi.input.clearMarkers();
+			pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+		}
 
 		return true;
 	}

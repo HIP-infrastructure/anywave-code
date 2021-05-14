@@ -27,27 +27,6 @@
 
 using namespace aw::commandLine;
 
-//int aw::commandLine::doCommandLineOperation(int op, AwArguments& args)
-//{
-//	switch (op) {
-//	case aw::commandLine::BIDS:
-//		AwBIDSManager::instance()->toBIDS(args);
-//		break;
-//	case aw::commandLine::RunProcess:
-//		AwCommandLineManager::runProcess(args);
-//		break;
-//	case aw::commandLine::DedicatedDataServerMode:
-//		AwCommandLineManager::runDedicatedDataServer(args);
-//		break;
-//	default:
-//		return 0;
-//	}
-//
-//	// something happened.
-//	AwDebugLog::instance()->closeFile();
-//	return 0;
-//}
-
 int aw::commandLine::doCommandLineOperation(AwArguments& args)
 {
 	if (args.contains(keys::operation)) {
@@ -365,7 +344,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 			arguments["bids_acq"] = acq;
 		if (!proc.isEmpty())
 			arguments["bids_proc"] = proc;
-		// res = aw::commandLine::BIDS;  
 		arguments[keys::operation] = keys::BIDS_operation;
 		return aw::commandLine::BatchOperation;
 	}

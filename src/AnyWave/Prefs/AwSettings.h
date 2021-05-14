@@ -50,8 +50,6 @@ namespace aws {
 	constexpr auto settings_dir = "settings_dir";
 	// common dirs
 	constexpr auto home_dir = "home_dir";
-	constexpr auto python_module_dir = "python_module_dir";
-	constexpr auto python_package_dir = "python_package_dir";
 	constexpr auto app_dir = "app_dir";
 	constexpr auto app_resource_dir = "app_resource_dir";
 	constexpr auto app_plugins_dir = "app_plugins_dir";
@@ -59,8 +57,6 @@ namespace aws {
 	constexpr auto app_python_plugins_dir = "app_python_plugins_dir";
 	constexpr auto matlab_mex_dir = "mex_dir";
 	constexpr auto matlab_API_dir = "matlab_API_dir";	// the folder containing APi functions for matlab plugins (Starting with 2104)
-	constexpr auto python_venv_dir = "python_venv_dir";	// the folder containing Python venv used to run plugins
-	constexpr auto python_py_init_file = "python_pyinit";	// full path to __init__.py file 
 	// plugins
 	constexpr auto plugin_debug_mode = "plugin_debug";
 	constexpr auto server_port = "server_port";
@@ -72,6 +68,10 @@ namespace aws {
 	constexpr auto recent_bids = "recent_bids";
 	constexpr auto username = "username";
 	constexpr auto auto_trigger_parsing = "auto_trigger_parsing";
+	// python
+	constexpr auto python_exe = "python_exe";
+	constexpr auto python_venv_dir = "python_venv_dir";
+	constexpr auto python_detected = "python_detected";
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";

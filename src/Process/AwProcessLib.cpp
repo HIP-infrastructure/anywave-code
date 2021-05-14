@@ -1,3 +1,4 @@
+#include "..\..\include\AwProcessInterface.h"
 /////////////////////////////////////////////////////////////////////////////////////////
 // 
 //                 Université d’Aix Marseille (AMU) - 
@@ -60,6 +61,52 @@ bool AwBaseProcess::isAborted()
 {
 	QMutexLocker locker(&m_lock);
 	return m_abort;
+}
+
+int AwBaseProcess::applyUseSkipMarkersKeys()
+{
+	auto fd = pdi.input.settings.value(keys::file_duration).toFloat();
+
+	// filter markers  considering the optional arguments use_markers and skip_markers
+   // init markers based on input.settings arguments (if any)
+	QStringList usedMarkers, skippedMarkers;
+	bool useMarkers = false, skipMarkers = false;
+	bool allDataFlag = false;
+	if (pdi.input.settings.contains(keys::use_markers)) {
+		usedMarkers = pdi.input.settings.value(keys::use_markers).toStringList();
+		useMarkers = true;
+		// handle special case : if use_markers contains all_data
+		// that will force the input to be only one marker marking all the data.
+		// other marker flags will be ignored
+		if (usedMarkers.first().simplified().toLower() == "all_data") {
+			pdi.input.clearMarkers();
+			// add a whole marker to the marker list
+			pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+			allDataFlag = true;
+		}
+	}
+	if (pdi.input.settings.contains(keys::skip_markers)) {
+		skippedMarkers = pdi.input.settings.value(keys::skip_markers).toStringList();
+		skipMarkers = true;
+	}
+
+	if (!allDataFlag) {
+		if (skipMarkers || useMarkers) {
+			auto markers = AwMarker::duplicate(pdi.input.markers());
+			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
+			// Set modified markers !!!
+			pdi.input.setModifiedMarkers(markers);
+			addModifiers(Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied);
+			if (inputMarkers.isEmpty()) {
+				pdi.input.clearMarkers();
+				pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+			}
+			else
+				pdi.input.setNewMarkers(inputMarkers);
+		}
+		return 0;
+	}
+	return 1;
 }
 
 void AwBaseProcess::connectClient(AwDataClient *client)

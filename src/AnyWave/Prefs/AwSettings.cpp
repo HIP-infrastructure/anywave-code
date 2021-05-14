@@ -134,13 +134,20 @@ void AwSettings::init()
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
 
-//	//Save system path
-//	m_settings[aws::system_path] = QString(qgetenv("PATH"));
-//#if defined(Q_OS_WIN)
-//	// get username
-//	m_settings[aws::username] = qgetenv("USERNAME");
-//#else
-//#endif
+	QString pythonExe = settings.value("general/python_interpreter", QString()).toString();
+	QString pythonVenv = settings.value("general/python_venv", QString()).toString();
+	m_settings[aws::python_detected] = false;
+	if (!pythonVenv.isEmpty()) {
+		m_settings[aws::python_venv_dir] = pythonVenv;
+		m_settings[aws::python_exe] = pythonExe;
+		m_settings[aws::python_detected] = true;
+	}
+	else {
+		if (pythonExe.isEmpty()) {
+			m_settings[aws::python_exe] = pythonExe;
+			m_settings[aws::python_detected] = true;
+		}
+	}
 }
 
 QVariant AwSettings::value(const QString& key)

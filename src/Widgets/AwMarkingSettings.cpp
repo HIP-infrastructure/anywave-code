@@ -39,20 +39,3 @@ AwMarkerList AwMarkingSettings::getSelectedPredefinedMarkers()
 		res.append(this->predefinedMarkers.at(selected));
 	return res;
 }
-
-//AwMarker *AwMarkingSettings::spaceBarNext()
-//{
-//	if (m_spaceBarIndex >= m_boundMarkers.size())
-//		m_spaceBarIndex = 0;
-//
-//	if (m_boundMarkers.isEmpty())
-//		return NULL;
-//
-//	return m_boundMarkers.at(m_spaceBarIndex++);
-//}
-//
-//void AwMarkingSettings::setBoundMarkers(AwMarkerList& markers)
-//{
-//	m_boundMarkers = markers;
-//	m_spaceBarIndex = 0;
-//}

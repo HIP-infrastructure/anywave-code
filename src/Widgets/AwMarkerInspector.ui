@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>506</width>
+    <width>512</width>
     <height>597</height>
    </rect>
   </property>
@@ -83,7 +83,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0">
         <item>
          <widget class="QLabel" name="labelName">
           <property name="sizePolicy">
@@ -103,10 +103,16 @@
         <item>
          <widget class="QLineEdit" name="lineEditName">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Name the marker</string>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -183,6 +189,19 @@
            <string>Auto increment</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <spacer name="horizontalSpacer_5">
@@ -498,6 +517,19 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
