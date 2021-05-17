@@ -18,6 +18,9 @@
     <ClInclude Include="micromedreader_global.h" />
     <QtMoc Include="micromedreader.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{817A6953-9111-448A-A097-93D28612B721}</ProjectGuid>
     <Keyword>QtVS_v303</Keyword>

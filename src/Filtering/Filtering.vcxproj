@@ -88,6 +88,9 @@
     <QtUic Include="AwFilterGUI.ui">
     </QtUic>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7DCAA1FD-64F2-4CC7-9D47-327D8FE2237E}</ProjectGuid>
     <Keyword>QtVS_v303</Keyword>

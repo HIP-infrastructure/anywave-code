@@ -18,11 +18,14 @@ protected:
     void get_markers(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs);
     void send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs);
     void send_message(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs);
+    void get_properties(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs);
 
     // 
     void error(const std::string&);
     void printf(std::ostringstream stream);
     void printf(const std::string& message);
+
+    void getPidPort();
 
     std::shared_ptr<matlab::engine::MATLABEngine> m_matlabPtr;
 };

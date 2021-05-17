@@ -101,4 +101,7 @@
   <ItemGroup>
     <Natvis Include="arma.natvis" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
 </Project>

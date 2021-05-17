@@ -107,6 +107,9 @@
     <ClInclude Include="..\..\include\AwProcessIO.h" />
     <ClInclude Include="..\..\include\AwProcessLib.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C6AA3ED4-5F91-4754-99CB-6F2DD34D2CE4}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>
