@@ -41,7 +41,9 @@ AwSettings::AwSettings(QObject *parent)
 #if defined(Q_OS_WIN)
 	// get username
 	m_settings[aws::username] = qgetenv("USERNAME");
-#else
+#endif
+#if defined(Q_OS_LINUX)
+    m_settings[aws::username] = qgetenv("USER");
 #endif
 }
 
@@ -170,10 +172,11 @@ void AwSettings::createMatlabShellScript(const QString& path)
 		stream << "#!/bin/bash" << endl;
 		stream << "MATLAB=" << path << endl;
 #ifdef Q_OS_MAC
-		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
+		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/extern/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
 #elif defined(Q_OS_LINUX)
-		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/bin/glnxa64" << endl;
+		stream << "export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/extern/bin/glnxa64" << endl;
 		stream << "if [[ -f $MATLAB/bin/glnxa64/libexpat.1.so ]]; then " << endl;
 		stream << "mv $MATLAB/bin/glnxa64/libexpat.1.so $MATLAB/bin/glnxa64/libexpat.1.so.NOFIND" << endl;
 		stream << "fi" << endl;

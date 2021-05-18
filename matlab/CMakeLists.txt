@@ -17,6 +17,7 @@ else(Matlab_FOUND)
 message(STATUS "MATLAB not found. Skipping MATLAB Support.")
 return()
 endif(Matlab_FOUND)
+MESSAGE(STATUS "Building old mex files...")
 
 include_directories(${CMAKE_SOURCE_DIR}/../include)
 include_directories(${Matlab_INCLUDE_DIRS})
@@ -27,22 +28,10 @@ else(NOT APPLE)
     set(MEX_INSTALL_DIR ${CMAKE_SOURCE_DIR}../build/AnyWave.app/Contents/Plugins/MATLAB/AnyWave)
 endif(NOT APPLE)
 
-if(QT_STATIC_DIR) 
+#if(QT_STATIC_DIR) 
 # build AwCore lib static
-add_definitions("-DAW_USE_CORE_STATIC -fPIC -O2")
-#SET(QT_DIR ${QT_STATIC_DIR})
-#set (QT_STATIC_SUFFIX "lib/cmake/Qt5")
-#find_path(QT_DIR HINTS "${QT_DIR}" PATH_SUFFIXES "${QT_STATIC_SUFFIX}")
-#if (NOT QT_DIR)
-#   message(FATAL_ERROR "Could not find static Qt5 dir")
-#else()
-#   message(STATUS "Found static Qt5 dir: ${QT_DIR}")
-#endif()
-
-#set (CMAKE_PREFIX_PATH ${QT_DIR})
-
-#include_directories(${QT_DIR}/include ${QT_DIR}/include/QtCore ${QT_DIR}/include/QtNetwork)
-
+#add_definitions("-DAW_USE_CORE_STATIC -fPIC -O2")
+add_definitions("-fPIC -O3")
 find_package(Qt5 COMPONENTS Core REQUIRED)
 
 SET(HEADERS     

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.6) 
 project(AnyWave)
 
+
 # detecting compiler
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
    MESSAGE(STATUS "Apple clang compiler detected")
@@ -9,7 +10,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
    #SET(CLANG ON)
 # apple clang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-# gcc
    MESSAGE(STATUS "GCC compiler detected")
    add_definitions("-w -fPIC -O3 -fpermissive -fopenmp -DNDEBUG") # g++ flags
    SET(GCC ON)
@@ -146,11 +146,6 @@ ENDIF()
 
 # AnyWave SDK libraries
 add_subdirectory(src/Core)
-# add core static
-#if(BUILD_STATIC_CORE AND QT_STATIC_DIR)
-#add_subdirectory(src/AwCoreStatic)
-#endif()
-#add_subdirectory(src/AwEpochLib)
 add_subdirectory(src/AwMontageLib)
 add_subdirectory(src/Filtering)
 add_subdirectory(src/Utilities)
@@ -183,46 +178,8 @@ if(Matlab_FOUND)
    add_subdirectory(src/MatlabSupport)
 endif(Matlab_FOUND)
 
-# MATLAB SUPPORT
-#if (Matlab_FOUND AND BUILD_STATIC_CORE AND QT_STATIC_DIR)
-#if(Matlab_FOUND)
-#  message(STATUS "MATLAB Support added. Root dir is ${Matlab_ROOT_DIR}")
-#  add_subdirectory(src/MatlabSupport)
-# Build mex files
-#  add_subdirectory(src/Mex)      # REACTIVATE ME AT THE END
-#endif()
-# END OF MATLAB SUPPORT
-
-# PYTHON
-# PY_VENV_DIR must be passed to cmake as parameter -DPY_VENV_DIR=Path
-# Here is the trick
-## update the environment with VIRTUAL_ENV variable (mimic the activate script)
-#set (ENV{VIRTUAL_ENV} ${PY_VENV_DIR})
-#message(STATUS "Python venv is ${PY_VENV_DIR}")
-## change the context of the search
-#set (Python3_FIND_VIRTUALENV ONLY)
-## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
-## Launch a new search
-#find_package(Python3 COMPONENTS Interpreter Development NumPy)
-#if (Python3_FOUND AND Python3_NumPy_FOUND)
-
-#   message(STATUS "Python 3 support added")
-#   add_subdirectory(src/PythonSupport)   # REACTIVATE ME AT THE END
-#endif()
-#if (Python_FOUND)
-#find_package(PythonLibs)
-#if (PYTHONLIBS_FOUND)
-#  find_package(NumPy)
-#  if (PYTHON_NUMPY_FOUND)
-#     message(STATUS "Python support added.")
-#     add_subdirectory(src/PythonSupport)
-#  endif()
-#endif()
-#endif()
-
 # AnyWave
 add_subdirectory(src/AnyWave)
-
 
 # plugins
 add_subdirectory(src/plugins/4DNI_Reader)
