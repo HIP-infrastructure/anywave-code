@@ -538,7 +538,7 @@ QList<AwChannel *> AwChannel::clone(const QList<AwChannel *>& list, bool cloneDa
 		auto newC = c->duplicate();
 		if (cloneData && c->dataSize()) {
 			newC->newData(c->dataSize());
-			std::memcpy(newC->data(), c->data(), c->dataSize() * sizeof(float));
+			memcpy(newC->data(), c->data(), c->dataSize() * sizeof(float));
 		}
 		res << newC;
 	}

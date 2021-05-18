@@ -111,7 +111,7 @@ SET(AnyWave_SRCS
     ./Montage/AwECoGTableModel.cpp 
     ./Plugin/AwPluginDial.cpp  
     ./Plugin/AwPluginManager.cpp  
-    ./Plugin/AwMATPYCreator.cpp
+    ./Plugin/AwMATPyCreator.cpp
     ./Process/AwConverter.cpp  
     ./Process/AwExporter.cpp  
     ./Process/AwExporterMarkerModel.cpp  
@@ -234,7 +234,7 @@ SET(HEADERS
     ./Montage/AwECoGTableModel.h 
     ./Plugin/AwPluginManager.h  
     ./Plugin/AwPluginDial.h  
-    ./Plugin/AwMATPYCreator.h
+    ./Plugin/AwMATPyCreator.h
     ./Process/AwExporterTypes.h  
     ./Process/AwMarkerExporter.h  
     ./Process/AwTriggerWriter.h  
@@ -327,7 +327,7 @@ SET(FORMS ./AnyWave.ui
     ./Montage/AwMontageDial.ui  
 	./Montage/AwECoGDialog.ui
     ./Plugin/AwPluginDial.ui  
-    ./Plugin/AwMATPYCreator.ui
+    ./Plugin/AwMATPyCreator.ui
     ./Process/AwProcessesWidget.ui  
     ./Process/AwProcessFromMarkersDial.ui  
     ./Process/TPUi.ui  

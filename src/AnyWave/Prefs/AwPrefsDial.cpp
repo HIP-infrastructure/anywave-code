@@ -182,7 +182,7 @@ void AwPrefsDial::accept()
 	saveTimeHMS(radioHMSOn->isChecked());
 	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
 
-	auto& pythonPath = lineEditPythonPath->text();
+	QString pythonPath = lineEditPythonPath->text();
 	if (!pythonPath.isEmpty()) {
 		if (detectPython(pythonPath))
 			qsettings.setValue("py/interpreter", pythonPath);
@@ -394,12 +394,12 @@ bool AwPrefsDial::detectPython(const QString& path)
 	QDir dir(path);
 	// search for a virtual env
 	QString tmp = path + "/";
-	auto& dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 	if (dirs.contains(venvDir)) {
 		tmp += venvDir;
 		// find activate script and python exe
 		QDir subDir(tmp);
-		auto& files = subDir.entryList(QDir::Files);
+		QStringList files = subDir.entryList(QDir::Files);
 		bool ok = false;
 #ifdef Q_OS_WIN
 		ok = files.contains("activate.bat") && files.contains("python.exe");
@@ -423,7 +423,7 @@ bool AwPrefsDial::detectPython(const QString& path)
 		}
 	}
 	else {  // venv not found, check for interpreter path
-		auto& files = dir.entryList(QDir::Files);
+		QStringList files = dir.entryList(QDir::Files);
 		QSettings qsettings;
 #ifdef Q_OS_WIN
 		if (files.contains("python.exe")) {
