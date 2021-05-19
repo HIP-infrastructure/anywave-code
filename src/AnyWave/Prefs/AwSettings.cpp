@@ -41,8 +41,7 @@ AwSettings::AwSettings(QObject *parent)
 #if defined(Q_OS_WIN)
 	// get username
 	m_settings[aws::username] = qgetenv("USERNAME");
-#endif
-#if defined(Q_OS_LINUX)
+#else
     m_settings[aws::username] = qgetenv("USER");
 #endif
 }

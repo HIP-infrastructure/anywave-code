@@ -22,7 +22,7 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 IF(APPLE)
-
+    SET(MEX_INSTALL_DIR "/users/bruno/dev/anywave-mac/build/AnyWave.app/Plugins/MATLAB/AnyWave")
 ELSE()
     SET(MEX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/AnyWave/Plugins/MATLAB/AnyWave")
 ENDIF()
@@ -44,7 +44,11 @@ qt5_use_modules(anywave Core Network)
 target_link_libraries(anywave ${Matlab_DATAARRAY_LIBRARY}  ${Matlab_MEX_LIBRARY} 
     Qt5::Core Qt5::Network)
 set_target_properties(anywave PROPERTIES PREFIX "")
+IF(APPLE)
+set_target_properties(anywave PROPERTIES SUFFIX ".mexmaci64")
+ELSE()
 set_target_properties(anywave PROPERTIES SUFFIX ".mexa64")
+ENDIF()
 INSTALL(TARGETS anywave DESTINATION ${MEX_INSTALL_DIR})
 
 # OLD mex files compatibility
