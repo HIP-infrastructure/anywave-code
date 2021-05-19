@@ -22,7 +22,9 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 IF(APPLE)
-    SET(MEX_INSTALL_DIR "/users/bruno/dev/anywave-mac/build/AnyWave.app/Plugins/MATLAB/AnyWave")
+    SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+    add_definitions("-mmacosx-version-min=10.13") # clang flags
+    SET(MEX_INSTALL_DIR "/users/bruno/dev/anywave-mac/build/AnyWave.app/Contents/Plugins/MATLAB/AnyWave")
 ELSE()
     SET(MEX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/AnyWave/Plugins/MATLAB/AnyWave")
 ENDIF()
