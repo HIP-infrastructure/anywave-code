@@ -26,23 +26,15 @@
     <ClCompile Include="correlation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="outputwidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="maingui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="correlation.h">
@@ -71,8 +63,8 @@
     <ClInclude Include="correlation_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
-    
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

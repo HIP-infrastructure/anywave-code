@@ -41,12 +41,6 @@
     <ClCompile Include="rewriteui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
     <ClCompile Include="rewrite4d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,8 +49,6 @@
     <ClInclude Include="rewrite4d_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ChooseMarker.h">
@@ -74,5 +66,8 @@
     <QtUic Include="rewriteui.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

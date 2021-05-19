@@ -37,13 +37,6 @@ Source: ".\bin\x64\Release\*.pl"; DestDir: "{app}"
 Source: ".\bin\x64\Release\qt.conf"; DestDir: "{app}"
 Source: ".\lib\*.lib"; DestDir: "{app}\lib";
 Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
-Source: ".\bin\x64\Release\Python\*.pyd"; DestDir: "{app}\Python"
-Source: ".\resources\init.py"; DestDir: "{app}\Python"
-Source: ".\bin\x64\Release\AwCoreLib.dll"; DestDir: "{app}\Python"
-Source: ".\bin\x64\Release\Qt5Network.dll"; DestDir: "{app}\Python"
-Source: ".\bin\x64\Release\Qt5Core.dll"; DestDir: "{app}\Python"
-;Source: ".\bin\x64\Release\AwCoreLib.dll"; DestDir: "{app}\Plugins\MATLAB\AnyWave"
-;Source: ".\bin\x64\Release\Qt5Network.dll"; DestDir: "{app}\Plugins\MATLAB\AnyWave"
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\Rewrite4DNI.dll"; DestDir: "{app}\Plugins";

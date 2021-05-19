@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/AwMessageBox.h>
 #include <QFileDialog>
 #include <QStatusBar>
@@ -80,7 +70,7 @@
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
 
-#define AW_HELP_URL "https://meg.univ-amu.fr/wiki/AnyWave"
+#define AW_HELP_URL "https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/home"
 
 
 AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
@@ -309,7 +299,6 @@ void AnyWave::changeEvent(QEvent *e)
 			{
 				QString locale = QLocale::system().name();
 				locale.truncate(locale.lastIndexOf('_'));
-			//	AwSettings::getInstance()->loadLanguage(locale);
 			}
 			break;
 		}
@@ -355,7 +344,7 @@ void AnyWave::dropEvent(QDropEvent *e)
 
 void AnyWave::applyNewLanguage()
 {
-//	AwProcessManager::instance()->retranslate();
+
 }
 
 void AnyWave::quit()
@@ -365,15 +354,7 @@ void AnyWave::quit()
 		m_display->closeFile();
 
 	AwSettings::getInstance()->closeFile();
-	//// stop MATPy server if running
-	//if (AwMATPyServer::isRunning()) {
-	//	AwMATPyServer::instance()->stop();
-	//	delete AwMATPyServer::instance();
-	//}
-
 	AwDataManager::instance()->closeFile();
-
-//	AwMontageManager::instance()->quit();
 	AwAmplitudeManager::instance()->quit();
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
@@ -404,8 +385,6 @@ void AnyWave::quit()
 		delete m_SEEGViewer;
 		m_SEEGViewer = nullptr;
 	}
-//	AwProcessManager::instance()->quit();
-//	AwMarkerManager::instance()->quit();
 #ifdef AW_EPOCHING
 	if (AwEpochManager::instanceExists()) {
 		AwEpochManager::instance()->closeFile();

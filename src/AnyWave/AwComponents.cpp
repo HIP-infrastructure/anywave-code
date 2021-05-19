@@ -1,3 +1,18 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwComponents.h"
 #include "Prefs/AwSettings.h"
 #include <QPluginLoader>
@@ -251,9 +266,7 @@ void AwComponents::createUserDirs()
 	aws->setValue(aws::app_dir, appPath);
 #ifdef Q_OS_MAC
 	// set python module path on mac it's in the application bundle
-	aws->setValue(aws::python_module_dir, appPath + "/../Python");
 	aws->setValue(aws::matlab_API_dir, appPath + "/../matlab");
-	aws->setValue(aws::python_venv_dir, appPath + "/../Python/venv");
 	// no change to plugin dir
 	appDir.cdUp();
 	appDir.cd("Plugins");
@@ -261,9 +274,6 @@ void AwComponents::createUserDirs()
 
 #else
 	aws->setValue(aws::matlab_API_dir, appPath + "/matlab");
-	aws->setValue(aws::python_venv_dir, appPath + "/Python/venv");
-	aws->setValue(aws::python_module_dir, appPath + "/Python");
-	aws->setValue(aws::python_package_dir, appPath + "/Python");
 	appDir.cd("Plugins");
 	aws->setValue(aws::app_plugins_dir, appDir.absolutePath());
 #endif

@@ -1,3 +1,18 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "CommandLineParser.h"
 #include "AwCommandLineManager.h"
 #include <AwException.h>
@@ -26,27 +41,6 @@
 //	--bids_format <file format>	: OPTIONAL. Used with seeg bids_modality. Specify the output file format [ EDF or VHDR ]
 
 using namespace aw::commandLine;
-
-//int aw::commandLine::doCommandLineOperation(int op, AwArguments& args)
-//{
-//	switch (op) {
-//	case aw::commandLine::BIDS:
-//		AwBIDSManager::instance()->toBIDS(args);
-//		break;
-//	case aw::commandLine::RunProcess:
-//		AwCommandLineManager::runProcess(args);
-//		break;
-//	case aw::commandLine::DedicatedDataServerMode:
-//		AwCommandLineManager::runDedicatedDataServer(args);
-//		break;
-//	default:
-//		return 0;
-//	}
-//
-//	// something happened.
-//	AwDebugLog::instance()->closeFile();
-//	return 0;
-//}
 
 int aw::commandLine::doCommandLineOperation(AwArguments& args)
 {
@@ -365,7 +359,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 			arguments["bids_acq"] = acq;
 		if (!proc.isEmpty())
 			arguments["bids_proc"] = proc;
-		// res = aw::commandLine::BIDS;  
 		arguments[keys::operation] = keys::BIDS_operation;
 		return aw::commandLine::BatchOperation;
 	}

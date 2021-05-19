@@ -1373,6 +1373,7 @@
     <None Include="GeneratedFiles\Release\AwEpochManager.moc">
       <Filter>Generated Files\Release</Filter>
     </None>
+    <None Include="AnyWave.licenseheader" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AnyWave.rc" />

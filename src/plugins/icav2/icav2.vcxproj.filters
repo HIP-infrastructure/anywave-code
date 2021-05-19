@@ -197,4 +197,7 @@
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
 </Project>

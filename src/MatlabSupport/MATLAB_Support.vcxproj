@@ -52,6 +52,9 @@
   <ItemGroup>
     <ClInclude Include="awmatlabsupport_global.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8E445800-13AA-419F-B794-8B87ED265211}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>

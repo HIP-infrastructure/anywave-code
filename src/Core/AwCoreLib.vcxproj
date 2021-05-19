@@ -41,6 +41,7 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
     <None Include="cpp.hint" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

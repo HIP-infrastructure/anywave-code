@@ -820,6 +820,7 @@
     </QtUic>
     <QtUic Include="Batch\AwBatchGUI.ui">
     </QtUic>
+    <None Include="AnyWave.licenseheader" />
     <None Include="cpp.hint" />
     <QtUic Include="Epoch\AwEpochMosaicWidget.ui">
     </QtUic>

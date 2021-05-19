@@ -22,6 +22,7 @@ MexFunction::MexFunction()
 	functions["send_markers"] = AwRequest::SendMarkers;
 	functions["send_message"] = AwRequest::SendMessage;
 	functions["send_text"] = AwRequest::SendMessage;
+	functions["get_props"] = AwRequest::GetProperties;
 }
 
 /// <summary>
@@ -69,30 +70,20 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 		std::string pid = stringPid.toAscii();
 		double pidValue = std::stod(pid);
 	
+		// this is for old mex files compatibility
 		m_matlabPtr->setVariable(u"host", factory.createCharArray(stringHost.toAscii()), matlab::engine::WorkspaceType::BASE);
 		m_matlabPtr->setVariable(u"port", factory.createScalar<double>(portValue), matlab::engine::WorkspaceType::BASE);
 		m_matlabPtr->setVariable(u"pid", factory.createScalar<double>(pidValue), matlab::engine::WorkspaceType::BASE);
 
+		MATLAB_Interface::port = static_cast<int>(portValue);
+		MATLAB_Interface::pid = static_cast<int>(pidValue);
+
 		// DONE !!!
 		return;
 	}
-	else {
-		// get port and pid!!!
-		auto pid = m_matlabPtr->getVariable(u"pid", matlab::engine::WorkspaceType::BASE);
-		if (!pid.isEmpty()) {
-			TypedArray<double> p = pid;
-
-			MATLAB_Interface::pid = static_cast<int>(p[0]);
-		}
-		auto port = m_matlabPtr->getVariable(u"port", matlab::engine::WorkspaceType::BASE);
-		if (!port.isEmpty()) {
-			TypedArray<double> p = port;
-			MATLAB_Interface::port = static_cast<int>(p[0]);
-		}
-	}
-
 
 	int request = functions[command];
+
 	switch (request)
 	{
 	case AwRequest::ConnectDebug:
@@ -110,10 +101,29 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	case AwRequest::SendMessage:
 		send_message(outputs, inputs);
 		break;
+	case AwRequest::GetProperties:
+		get_properties(outputs, inputs);
+		break;
 	default:
 		error("Unknown command");
 	}
 	
+}
+
+void MexFunction::getPidPort()
+{
+	// get port and pid!!!
+	auto pid = m_matlabPtr->getVariable(u"pid", matlab::engine::WorkspaceType::BASE);
+	if (!pid.isEmpty()) {
+		TypedArray<double> p = pid;
+
+		MATLAB_Interface::pid = static_cast<int>(p[0]);
+	}
+	auto port = m_matlabPtr->getVariable(u"port", matlab::engine::WorkspaceType::BASE);
+	if (!port.isEmpty()) {
+		TypedArray<double> p = port;
+		MATLAB_Interface::port = static_cast<int>(p[0]);
+	}
 }
 
 void MexFunction::error(const std::string& message)
@@ -420,8 +430,7 @@ void MexFunction::debug_connect(matlab::mex::ArgumentList& outputs, matlab::mex:
 {
 	ArrayFactory factory;
 	std::shared_ptr<matlab::engine::MATLABEngine> matlabPtr = getEngine();
-	//matlabPtr->feval(u"disp", 0, std::vector<Array>{factory.createCharArray("debug connect")});
-
+	
 	// get input arguments #2 which could be the port number
 	MATLAB_Interface::pid = -1;
 	// don't forget that first argument is always the command string
@@ -455,5 +464,32 @@ void MexFunction::debug_connect(matlab::mex::ArgumentList& outputs, matlab::mex:
 		matlabPtr->setVariable(u"json_args", factory.createCharArray(s));
 		matlabPtr->eval(u"args=jsondecode(json_args);");
 
+	}
+	// this is for old mex files compatibility
+	m_matlabPtr->setVariable(u"host", factory.createCharArray("127.0.0.1"), matlab::engine::WorkspaceType::BASE);
+	m_matlabPtr->setVariable(u"port", factory.createScalar<double>(MATLAB_Interface::port), matlab::engine::WorkspaceType::BASE);
+	m_matlabPtr->setVariable(u"pid", factory.createScalar<double>(MATLAB_Interface::pid), matlab::engine::WorkspaceType::BASE);
+}
+
+
+void MexFunction::get_properties(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs)
+{
+	using namespace matlab::data;
+	using matlab::mex::ArgumentList;
+
+	ArrayFactory factory;
+	QString json;
+	try {
+		TCPRequest aw(AwRequest::GetProperties);
+		aw.simpleRequest();
+		aw.waitForResponse();
+		QDataStream& response = aw.response();
+		response >> json;
+		auto res = m_matlabPtr->feval(u"jsondecode", 1, std::vector<Array>({ factory.createCharArray(json.toStdString()) }));
+		outputs[0] = StructArray(res[0]);
+	}
+	catch (const QString& what) {
+		std::string message = QString("get_prop: %1").arg(what).toStdString();
+		error(message);
 	}
 }

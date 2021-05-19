@@ -1,89 +1,18 @@
-/*
- * Copyright (c) 2001-2010, Elekta Oy
- *
- * Redistribution and use of the Software in source and binary forms, with or
- * without modification, are permitted.
- *
- * The Software is provided "as is" without warranties of any kind, either 
- * expressed or implied including, without limitation, warranties that the
- * Software is free of defects, merchantable, fit for a particular purpose. 
- * Developer/user agrees to bear the entire risk in connection with its use and
- * distribution of any and all parts of the Software under this license.
- *
- * $Id: fiff_types.h,v 1.21 2012/03/06 12:21:28 janne Exp $
- * $Log: fiff_types.h,v $
- * Revision 1.21  2012/03/06 12:21:28  janne
- * Updated the copyright message to a permissive version (free distribution and usage rights with release of the fiff_support package).
- *
- * Revision 1.20  2010/05/06 12:37:49  skesti
- * Put typedef of fiff_long_t and fiff_ulong_t behind FIFF_HAS_LONG.
- *
- * Revision 1.19  2010/04/16 12:30:00  mjk
- * Added basic long and unsigned types.
- *
- * Revision 1.18  2009/11/12 12:18:41  skesti
- * Added Aquarius channel values: BIO, SYST, IAS, EXCI.
- *
- * Revision 1.17  2008/04/15 10:59:42  mjk
- * Defines to compile on Apple.
- *
- * Revision 1.16  2008/01/25 08:25:05  jne
- * added FIFFV_COIL_CTF_GRAD
- *
- * Revision 1.15  2007/02/28 08:25:01  jne
- * Some cleaning of comments
- *
- * Revision 1.14  2007/01/09 12:41:40  jne
- * new structs fiffEventBitsRec, fiffHpiCoilRec, fiffHpiSubsysRec
- * new defs FIFFV_XFIT_MAP_SURF_SENSORS, FIFFV_XFIT_MAP_SURF_HEAD, FIFFV_XFIT_MAP_SURF_SPHERE
- *
- * Revision 1.13  2006/05/22  11:24:24  11:24:24  jne (Jukka Nenonen)
- * Added fiffSparseMatrixRec (equivalence fiff_sparse_matrix_t)
- * Added FIFFV_QUAT_CH0...7, FIFFV_ESTIM_ERROR_CH, FIFFV_HEAD_MOVEMENT_CH
- * 
- * Revision 1.12  2005/11/03 14:27:40  skesti
- * Renumbered candela
- *
- * Revision 1.11  2005/07/01  09:11:03  09:11:03  skesti (Sami Kesti)
- * Check in mjk changes
- * 
- * Revision 1.10  2004/05/18 11:52:42  mjk
- * Added some Doxygen tags.
- *
- * Revision 1.9  2003/10/23 08:38:05  mjk
- * Fixed headers to work on Lynxos.
- *
- * Revision 1.8  2003/06/27 14:52:29  mjk
- * Fixed header problem in linux.
- *
- * Revision 1.7  2003/01/23 15:25:55  mjk
- * Fixed FIFFC_DATA_OFFSET and some comments having FIFF_ instead of FIFFV_.
- *
- * Revision 1.6  2002/12/18 15:36:45  mjk
- * Added extractable comments.
- *
- * Revision 1.5  2002/08/23  22:47:40  22:47:40  mjk (Matti Kajola)
- * Rev 1.5.1
- * 
- * Revision 1.4  2002/08/19  11:56:42  11:56:42  mjk (Matti Kajola)
- * Librev 1.5.0
- * 
- * Revision 1.3  2001/09/18  09:36:25  09:36:25  mjk (Matti Kajola)
- * Trying to close 1.4.0.
- * 
- *----------------------------------------------------------------------*/
-/** \file  fiff_types.h
- *  \brief Definitions for describing the objects in a FIFF file.
- *
- * This header file defines all the structures used in the FIFF files,
- * and some structures used by the fiff library. The structures
- * are defind with a name starting with a undescore, and a typedef
- * is used to give the names that are intended to be used in the programs.
- * For the documentation of the records themselves, use the name with
- * the undescore.
- * 
- */
-
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _fiff_types_h
 #define _fiff_types_h
 

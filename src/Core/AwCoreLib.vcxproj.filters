@@ -95,5 +95,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

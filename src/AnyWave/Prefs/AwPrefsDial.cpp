@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwPrefsDial.h"
 #include <QSettings>
 #include "Prefs/AwSettings.h"
@@ -122,15 +112,15 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 #endif
 
 	QString python = qsettings.value("py/interpreter", QString()).toString();
-	if (python.isEmpty()) { // set default path to the interpreter name
-#ifdef Q_OS_WIN
-		python = "python.exe";
-#endif
-#if defined Q_OS_MAC || defined Q_OS_LINUX
-		python = "python";
-#endif
-		qsettings.setValue("py/interpreter", python);
-	}
+//	if (python.isEmpty()) { // set default path to the interpreter name
+//#ifdef Q_OS_WIN
+//		python = "python.exe";
+//#endif
+//#if defined Q_OS_MAC || defined Q_OS_LINUX
+//		python = "python";
+//#endif
+//		qsettings.setValue("py/interpreter", python);
+//	}
 	lineEditPythonPath->setText(python);
 
 	// select tab
@@ -164,7 +154,7 @@ void AwPrefsDial::accept()
 	QSettings qsettings;
 	int w = spinBoxH->value();
 	int h = spinBoxV->value();
-	float xPixPerCm, yPixPerCm;
+	float xPixPerCm = 0., yPixPerCm = 0.;
 	
 	if (h > 0)	{
 		qsettings.setValue("Preferences/screenCalibration/heightMM", h);
@@ -181,21 +171,23 @@ void AwPrefsDial::accept()
 
 	// calibration has been done
 	qsettings.setValue("Preferences/screenCalibration/calibrationDone", true);
-
 	emit screenCalibrationChanged(xPixPerCm, yPixPerCm);
 
 	// CPU CORES
 	qsettings.setValue("general/cpu_cores", spinCPU->value());
 	
-	
-
 	//// misc. parameters
 	AwSettings *aws = AwSettings::getInstance();
 	
 	saveTimeHMS(radioHMSOn->isChecked());
 	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
 
-	qsettings.setValue("py/interpreter", lineEditPythonPath->text());
+	QString pythonPath = lineEditPythonPath->text();
+	if (!pythonPath.isEmpty()) {
+		if (detectPython(pythonPath))
+			qsettings.setValue("py/interpreter", pythonPath);
+	}
+//qsettings.setValue("py/interpreter", lineEditPythonPath->text());
 
 	// if matlab path is empty => consider not using MATLAB plugins anymore.
 	// On Mac and Linux that will be done by deleting the matlab.sh script
@@ -392,6 +384,65 @@ QString AwPrefsDial::fontToLabel(const QFont &font)
 	return res;
 }
 
+bool AwPrefsDial::detectPython(const QString& path)
+{
+#ifdef Q_OS_WIN
+	QString venvDir = "Scripts";
+#else
+	QString venvDir = "bin";
+#endif
+	QDir dir(path);
+	// search for a virtual env
+	QString tmp = path + "/";
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	if (dirs.contains(venvDir)) {
+		tmp += venvDir;
+		// find activate script and python exe
+		QDir subDir(tmp);
+		QStringList files = subDir.entryList(QDir::Files);
+		bool ok = false;
+#ifdef Q_OS_WIN
+		ok = files.contains("activate.bat") && files.contains("python.exe");
+#else
+		ok = files.contains("activate") && files.contains("python");
+#endif
+		if (ok) {
+			// found a venv
+			QSettings qsettings;
+			qsettings.setValue("general/python_venv", path);
+			AwSettings::getInstance()->setValue(aws::python_venv_dir, path);
+			QString pyExec;
+#ifdef Q_OS_WIN
+			pyExec = subDir.absoluteFilePath("python.exe");
+#else
+			pyExec = subDir.absoluteFilePath("python");
+#endif
+			qsettings.setValue("general/python_interpreter", pyExec);
+			AwSettings::getInstance()->setValue(aws::python_exe, pyExec);
+			return true;
+		}
+	}
+	else {  // venv not found, check for interpreter path
+		QStringList files = dir.entryList(QDir::Files);
+		QSettings qsettings;
+#ifdef Q_OS_WIN
+		if (files.contains("python.exe")) {
+			qsettings.setValue("general/python_venv", QString());
+			qsettings.setValue("general/python_interpreter", dir.absoluteFilePath("python.exe"));
+			return true;
+		}
+#else
+		if (files.contains("python")) {
+			qsettings.setValue("general/python_venv", QString());
+			qsettings.setValue("general/python_interpreter", dir.absoluteFilePath("python"));
+			return true;
+		}
+#endif
+	}
+
+	return false;
+}
+
 void AwPrefsDial::changeCursorFontText(const QFont &font)
 {
 	QString label = fontToLabel(font);
@@ -431,12 +482,14 @@ void AwPrefsDial::pickGARDEL()
 void AwPrefsDial::pickPython()
 {
 	QFileDialog dlg;
-	dlg.setFileMode(QFileDialog::ExistingFile);
-	if (dlg.exec() == QFileDialog::Accepted) {
-		lineEditPythonPath->setText(dlg.selectedFiles().at(0));
-		QSettings settings;
-		settings.setValue("py/interpreter", lineEditPythonPath->text());
+	auto dir = dlg.getExistingDirectory(this, "Select the virtual env folder or your Python installation folder");
+	if (dir.isEmpty())
+		return;
+	if (!detectPython(dir)) {
+		QMessageBox::information(this, "Python", "No python environment found.");
+		return;
 	}
+	lineEditPythonPath->setText(dir);
 }
 
 

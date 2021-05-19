@@ -79,4 +79,7 @@
       <Filter>Resource Files</Filter>
     </QtRcc>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
 </Project>
