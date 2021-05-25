@@ -491,7 +491,7 @@ AwFileIO::FileStatus BrainVisionIO::writeMarkers()
 
 	for (qint32 i = 0; i < infos.blocks().at(0)->markersCount(); i++) {
 		AwMarker *m = infos.blocks().at(0)->markers().at(i);
-		auto label = m->label().simplified();
+		auto label = m->label();
 		if (label.contains(',')) {
 			label = label.replace(',', "_");
 		}
