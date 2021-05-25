@@ -137,6 +137,8 @@ void AwDataManager::setNewRootDirForSideFiles(const QString& dir)
 	m_settings[keys::montage_file] = QString("%1/%2.mtg").arg(dir).arg(fileName);
 	m_settings[keys::disp_file] = QString("%1/%2.display").arg(dir).arg(fileName);
 	m_settings[keys::lvl_file] = QString("%1/%2.levels").arg(dir).arg(fileName);
+	// defines the default output_dir (can be overwritten by command line options)
+	m_settings[keys::output_dir] = dir;
 	if (m_reader) {
 		m_reader->infos.setBadFile(m_settings.value(keys::bad_file).toString());
 		m_reader->infos.setMtgFile(m_settings.value(keys::montage_file).toString());
@@ -210,8 +212,12 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	if (tmp.isEmpty())
 		reader->infos.setMtgFile(m_settings.value(keys::montage_file).toString());
 
+	// handle output_dir
+	if (!m_settings.contains(keys::output_dir))
+		// default output_dir is the data dir
+		m_settings[keys::output_dir] = fi.absolutePath();
 	// check if file belongs to a BIDS structure
-	if (!commandLineMode) {
+	if (!commandLineMode) { // detect if the file is in A BIDS => the output_dir will be changed to derivatives path
 		QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
 		if (!root.isEmpty()) {
 			AwBIDSManager::instance()->newFile(reader);
@@ -264,6 +270,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 			display->newFile();
 		}
 	}
+
 	return m_status;
 }
 

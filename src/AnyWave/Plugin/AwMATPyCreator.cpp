@@ -19,6 +19,8 @@
 #include "Prefs/AwSettings.h"
 #include <QDir>
 #include <QTextStream>
+#include <QDesktopServices>
+#include <QUrl>
 
 AwMATPyCreator::AwMATPyCreator(QWidget *parent)
 	: QDialog(parent)
@@ -53,7 +55,7 @@ void AwMATPyCreator::accept()
 		return;
 	}
 	if (status == AwMATPyCreator::AlreadyExists) {
-		QMessageBox::critical(this, "Creating plugin", "A plugin with this name already exists.");
+		QMessageBox::critical(this, "Creating plugin", "A plugin with the same name already exists.");
 		return;
 	}
 	QDialog::accept();
@@ -136,5 +138,6 @@ int AwMATPyCreator::makePlugin(const QVariantMap& settings)
 			file.close();
 		}
 	}
+	QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
 	return AwMATPyCreator::Ok;
 }

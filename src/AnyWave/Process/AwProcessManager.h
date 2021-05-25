@@ -98,10 +98,8 @@ public slots:
 	void manageMemoryError();
 	void errorMessage(const QString& message);
 	void enableMenus();
-//	void retranslate();
 	void launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end);
-//protected slots:
-//	void removeGUIProcess();
+
 signals:
 	void newMarkersAvailable(const AwMarkerList &markers);
 	void processFinished(AwProcess *process);
@@ -120,7 +118,6 @@ protected:
 	void addProcess(AwProcessPlugin *plugin);
 	void addProcessToMenu(AwProcessPlugin *plugin);
 	bool initProcessIO(AwBaseProcess *p);
-//	bool buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources = AwChannelList());
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);
 	int applyUseSkipMarkersKeys(AwBaseProcess* process);

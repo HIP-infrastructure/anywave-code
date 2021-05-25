@@ -522,11 +522,6 @@ void H2::run()
 		QStringList args = { m_resultFiles };
 		map["args"] = args;
 		emit sendCommand(map);
-		//QVariantList args;
-		//args << QString("Correlation Graphs");
-		//for (auto f : m_resultFiles)
-		//	args << f;
-		//emit sendCommand(AwProcessCommand::LaunchProcess, args);
 	}
 }
 
@@ -544,8 +539,14 @@ int H2::computeRuns()
 		QPair<float, float> value = m_ui->bands.value(b);
 		if (b == "AnyWave") {
 			auto filters = pdi.input.filterSettings.filters(dup.first()->type());
-			value.first = filters[0];
-			value.second = filters[1];
+			if (!filters.isEmpty()) {
+				value.first = filters[0];
+				value.second = filters[1];
+			}
+			else {
+				value.first = 0;
+				value.second = 0;
+			}
 		}
 		m_currentBand.name = b;
 		m_currentBand.hp = value.first;
