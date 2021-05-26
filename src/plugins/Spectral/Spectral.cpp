@@ -94,7 +94,8 @@ int Spectral::initialize()
 	}
 	if (pdi.input.settings.contains("windowing")) 
 		m_windowing = stringToWindowingType(pdi.input.settings.value("windowing").toString());
-	
+	if (!pdi.input.settings.contains(keys::output_dir))
+		pdi.input.settings[keys::output_dir] = pdi.input.settings.value(keys::data_dir);
 	return 0;
 }
 

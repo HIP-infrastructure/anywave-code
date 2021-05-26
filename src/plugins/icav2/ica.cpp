@@ -70,14 +70,17 @@ bool ICA::showUi()
 
 	if (ui.exec() == QDialog::Accepted)	{
 		auto args = pdi.input.settings;
-		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[keys::data_dir].toString());
-		QFile test(testFile);
+		QString dir = pdi.input.settings.value(keys::output_dir).toString();
+		// just testing to write a file in the output_dir 
+		// m_filename is wrong here
+		m_fileName = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(dir);
+		QFile test(m_fileName);
 		if (!test.open(QIODevice::WriteOnly)) {
 			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
 			return false;
 		}
 		test.close();
-		QFile::remove(testFile);
+		QFile::remove(m_fileName);
 		pdi.input.settings.unite(ui.args);
 		return true;
 	}
@@ -252,6 +255,7 @@ int ICA::initParameters()
 	}
 
 	QString dir;
+	// should always contain output_dir execpt if launched from command line with no output_dir option
 	if (args.contains(keys::output_dir))
 		dir = args.value(keys::output_dir).toString();
 	else

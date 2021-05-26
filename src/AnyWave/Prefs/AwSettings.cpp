@@ -65,6 +65,7 @@ AwSettings::~AwSettings()
 			settings.setArrayIndex(i);
 			settings.setValue("BIDSPath", recentBIDS.at(i));
 		}
+		settings.endArray();
 	}
 }
 

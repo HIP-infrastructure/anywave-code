@@ -138,9 +138,6 @@ void AwBIDSManager::initCommandLineOperation(const QString & filePath)
 	// set the possible derivatives mask
 	m_instance->recursiveParsing2(fullPath, item);
 	m_instance->m_currentOpenItem = item;
-
-
-
 }
 
 
