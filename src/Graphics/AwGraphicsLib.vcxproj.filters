@@ -61,17 +61,9 @@
     <ClCompile Include="SignalItem\AwSignalItemSettings.cpp">
       <Filter>SignalItem</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="SignalItem\AwSIAmpButton.cpp">
       <Filter>SignalItem</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="Mark\AwHighLightPositionMarker.cpp">
       <Filter>Mark</Filter>
     </ClCompile>
@@ -81,13 +73,9 @@
     <ClCompile Include="MarkerItem\AwMarkerLabelButton.cpp">
       <Filter>MarkerItem</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="MarkerItem\AwMarkerValueButton.cpp">
       <Filter>MarkerItem</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="MarkerItem\AwMappingCursorItem.cpp">
       <Filter>MarkerItem</Filter>
     </ClCompile>
@@ -100,14 +88,9 @@
     <ClCompile Include="MarkerItem\AwHighLightMarker.cpp">
       <Filter>MarkerItem</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="AwAmplitudeManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
     <ClCompile Include="SignalItem\AwLabelItem.cpp">
       <Filter>SignalItem</Filter>
     </ClCompile>
@@ -119,7 +102,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    
     <ClInclude Include="..\..\include\graphics\AwColorMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -198,5 +180,6 @@
     <None Include="awgraphicslib_en.ts">
       <Filter>Translation Files</Filter>
     </None>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

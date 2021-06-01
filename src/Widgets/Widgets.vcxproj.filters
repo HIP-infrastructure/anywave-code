@@ -370,6 +370,7 @@
     <None Include="awwidgetslib_en.ts">
       <Filter>Translation Files</Filter>
     </None>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\resources\images\AddToMontage48x48.png">

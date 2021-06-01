@@ -1,33 +1,28 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <AwMarker.h>
 #include <QStringList>
 #include <QFile>
 #include <QTextStream>
 #include <AwCore.h>
+#include <algorithm>
+#ifndef Q_OS_MAC
+#include <execution>
+#endif
+
 
 //
 // AwMarker
@@ -146,7 +141,7 @@ int AwMarker::save(const QString& path, const AwMarkerList& markers)
 		return -1;
 
 	stream << "// AnyWave Marker File" << endl;
-	foreach (AwMarker *m, markers) {
+	for  (AwMarker *m : markers) {
 		QString label = m->label();
 		if (label.isEmpty())
 			label = "No Label";
@@ -171,16 +166,25 @@ int AwMarker::save(const QString& path, const AwMarkerList& markers)
 AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 {
 	AwMarkerList res;
-	foreach (AwMarker *m, markers)
+	for (AwMarker *m : markers)
 		res << new AwMarker(m);
 	return res;
 }
 
 AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 {
+#ifdef Q_OS_MAC
 	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+#else
+	if (markers.size() <= MARKERS_THREAD_THRESHOLD)
+		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+	else
+		std::sort(std::execution::par, markers.begin(), markers.end(), AwMarkerLessThan);
+#endif
 	return markers;
 }
+
+
 
 AwMarkerList& AwMarker::rename(AwMarkerList& markers, const QString& label)
 {
@@ -207,7 +211,7 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 	while (!copiedList.isEmpty()) {
 		auto first = copiedList.takeFirst();
 		auto itsc = AwMarker::intersect(copiedList, first->start(), first->end());
-		auto intersections = AwMarker::sort(itsc);
+		auto &intersections = AwMarker::sort(itsc);
 		if (intersections.isEmpty()) {
 			res << first;
 		}
@@ -673,6 +677,59 @@ AwMarkerList AwMarker::getMarkersWithLabel(const AwMarkerList& markers, const QS
 }
 
 
+AwMarkerList AwMarker::getMarkersBetween(const AwMarkerList& markers, float pos1, float pos2)
+{
+	AwMarkerList _markers = markers;
+	AwMarker::sort(_markers);
+	return AwMarker::intersect(_markers, pos1, pos2);
+}
+
+QHash<QString, int> AwMarker::computeHistogram(const AwMarkerList& markers)
+{
+	QHash<QString, int> res;
+	if (markers.isEmpty())
+		return res;
+	AwMarkerList tmp = markers;
+	while (!tmp.isEmpty()) {
+		QString label = tmp.first()->label();
+		AwMarkerList::iterator it;
+#ifdef Q_OS_MAC
+		it = std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
+#else
+		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
+			it = std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
+		else
+			it = std::remove_if(std::execution::par, tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
+#endif
+		int count = 0;
+		for (AwMarkerList::iterator i = it; i < tmp.end(); i++)
+			count++;
+		tmp.erase(it, tmp.end());
+		res.insert(label, count);
+	}
+	return res;
+}
+
+AwMarkerList AwMarker::getMarkersWithUniqueLabels(const AwMarkerList& markers)
+{
+	AwMarkerList res, tmp;
+	if (markers.isEmpty())
+		return res;
+	tmp = markers;
+	while (!tmp.isEmpty()) {
+		QString label = tmp.first()->label();
+		res << tmp.first();
+#ifdef Q_OS_MAC
+		tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+#else
+		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
+			tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+		else
+			tmp.erase(std::remove_if(std::execution::par, tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+#endif
+	}
+	return res;
+}
 
 ///
 /// getUniqueLabels()
@@ -680,10 +737,21 @@ AwMarkerList AwMarker::getMarkersWithLabel(const AwMarkerList& markers, const QS
 QStringList AwMarker::getUniqueLabels(const QList<AwMarker *>& markers)
 {
 	QStringList res;
+	if (markers.isEmpty())
+		return res;
 
-	foreach (AwMarker *m, markers)	{
-		if (!res.contains(m->label()))
-			res << m->label();
+	AwMarkerList l_markers = markers;
+	while (!l_markers.isEmpty()) {
+		QString label = l_markers.first()->label();
+#ifdef Q_OS_MAC
+		l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
+#else
+		if (l_markers.size() <= MARKERS_THREAD_THRESHOLD)
+			l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
+		else
+			l_markers.erase(std::remove_if(std::execution::par, l_markers.begin(), l_markers.end(), [label](AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
+#endif
+		res << label;
 	}
 	return res;
 }
@@ -795,68 +863,36 @@ AwMarkerList AwMarker::load(const QString& path)
 	return markers;
 }
 
-void AwMarker::removeDoublons(QList<AwMarker*>& markers)
+void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 {
 	AwMarkerList res, removed;
 	if (markers.isEmpty())
 		return;
-
-	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
-	const float tol = 0.005;
+	if (sortList)
+		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
 	// use multi map to detect markers with similar labels
 	QMultiHash<QString, AwMarker *> map;
 	for (auto m : markers)
 		map.insert(m->label(), m);
 	auto uniqueKeys = map.uniqueKeys();
+	
 	for (auto const& k : uniqueKeys) {
-		auto values = map.values(k);
+		AwMarkerList values = map.values(k);
 		if (values.size() > 1) {
 			std::sort(values.begin(), values.end(), AwMarkerLessThan);
 			auto m = values.takeFirst();
-			while (!values.isEmpty()) {
-				for (auto v : values) {
-					auto position = std::abs(v->start() - m->start());
-					if (position > tol) {
-						break;
-					}
-					auto duration = std::abs(v->duration() - m->duration());
-					if (position <= tol && duration <= tol) {
-						removed << v;
-					}
-				}
-				//for (auto r : removed)
-				//	values.removeAll(r);
-				if (!values.isEmpty())
-					m = values.takeFirst();
+			auto f = [m](AwMarker* m1) { 
+				const float tol = 0.005;
+				float pos = std::abs(m1->start() - m->start());
+				float dur = std::abs(m1->duration() - m->duration());
+				return pos <= tol && dur <= tol;
+			};
+			auto it = std::remove_if(values.begin(), values.end(), f);
+			for (auto &i = it; i < values.end(); i++) {
+				removed << *i;
 			}
 		}
 	}
-	for (auto m : removed) {
-		markers.removeAll(m);
-		delete m;
-	}
-
-	//for (auto m : markers) {
-	//	if (!map.contains(m->label()))
-	//		map.insert(m->label(), m);
-	//	else {
-	//		auto values = map.values(m->label());
-	//		bool keep = true;
-	//		for (auto v : values) { // get existing marker with same labels and compare position and duration
-	//			auto position = std::abs(v->start() - m->start());
-	//			auto duration = std::abs(v->duration() - m->duration());
-	//			if (position <= tol && duration <= tol) {
-	//				keep = false;
-	//				removed << m;
-	//				break;
-	//			}
-	//		}
-	//		if (keep) 
-	//			map.insert(m->label(), m);
-	//	}
-	//}
-	//for (auto m : removed) {
-	//	markers.removeAll(m);
-	//	delete m;
-	//}
+	for (auto m : removed) 
+		markers.erase(std::remove_if(markers.begin(), markers.end(), [m](AwMarker* m1) { return m1 == m; }));
 }

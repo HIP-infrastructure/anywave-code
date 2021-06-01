@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwMarkerManagerSettings.h"
 #include "Prefs/AwSettings.h"
 #include "AwPickChannelsDial.h"
@@ -37,6 +27,12 @@
 #include <widget/AwGetValueDialog.h>
 #include <Plugin/AwPluginManager.h>
 #include "Data/AwDataManager.h"
+#include "AwStatsWidget.h"
+#include "AwMarkerManager.h"
+#include <algorithm>
+#ifndef Q_OS_MAC
+#include <execution>
+#endif
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -45,6 +41,8 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	if (markers.isEmpty())
 		this->setEnabled(false);
 
+	m_statsWidget = nullptr;
+	m_mm = AwMarkerManager::instance();
 	m_markers = markers;
 	m_displayedMarkers = markers;
 
@@ -156,17 +154,6 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	connect(m_markerRuleDial, SIGNAL(ruleRemoved(const QString&)), this, SLOT(removeRule(const QString&)));
 	//connect(buttonExportWizard, SIGNAL(clicked()), this, SLOT(exportWizard()));
 	connect(buttonEditRules, SIGNAL(clicked()), this, SLOT(editRules()));
-	//connect(comboNames, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateNamesStats(const QString&)));
-	//connect(comboValues, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(updateValuesStats(const QString&)));
-	// marker navigation
-	//connect(buttonPrevName, SIGNAL(clicked()), this, SLOT(prevName()));
-	//connect(buttonNextName, SIGNAL(clicked()), this, SLOT(nextName()));
-	//connect(buttonGoName, SIGNAL(clicked()), this, SLOT(goToName()));
-	//connect(buttonPrevValue, SIGNAL(clicked()), this, SLOT(prevValue()));
-	//connect(buttonNextValue, SIGNAL(clicked()), this, SLOT(nextValue()));
-	//connect(buttonGoValue, SIGNAL(clicked()), this, SLOT(goToValue()));
-	// clean trigger
-	//connect(buttonClearTriggerChannel, SIGNAL(clicked()), this, SIGNAL(clearTriggerClicked()));
 	// save / load
 	connect(buttonLoad, SIGNAL(clicked()), this, SIGNAL(loadMarkersClicked()));
 	connect(buttonSave, SIGNAL(clicked()), this, SIGNAL(saveMarkersClicked()));
@@ -174,6 +161,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	// some buttons are disabled when the marker list is empty
 	buttonExportWizard->setEnabled(!m_markers.isEmpty());
 	buttonSave->setEnabled(!m_markers.isEmpty());
+	connect(buttonStats, &QPushButton::clicked, this, &AwMarkerManagerSettings::openStats);
 
 	// Connect check boxes to show/hide columns
 	connect(checkLabel, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
@@ -192,6 +180,8 @@ AwMarkerManagerSettings::~AwMarkerManagerSettings()
 {
 	if (m_currentRule)
 		delete m_currentRule;
+	if (m_statsWidget)
+		delete m_statsWidget;
 }
 
 void AwMarkerManagerSettings::changeEvent(QEvent *e)
@@ -215,7 +205,6 @@ void AwMarkerManagerSettings::applyRule(AwMarkerRule *rule)
 
 	m_model->updateMarkers(m_displayedMarkers);
 	emit markersChanged(m_displayedMarkers);
-//	updateStats();
 }
 
 void AwMarkerManagerSettings::setMarkers(const AwMarkerList& markers)
@@ -233,7 +222,7 @@ void AwMarkerManagerSettings::cleanUp()
 	m_markers.clear();
 	m_displayedMarkers.clear();
 	m_model->clear();
-//	updateStats();
+	//emit updateStats();
 	// some buttons are disabled when the marker list is empty
 	buttonExportWizard->setEnabled(!m_markers.isEmpty());
 	buttonSave->setEnabled(!m_markers.isEmpty());
@@ -316,8 +305,6 @@ void AwMarkerManagerSettings::showColumn(bool flag)
 void AwMarkerManagerSettings::setMarkerAddingMode(bool on)
 {
 	m_isAddingMarker = on;
-	//if (!on)
-	//	updateStats();
 }
 
 void AwMarkerManagerSettings::editCurrentItem()
@@ -339,21 +326,10 @@ void AwMarkerManagerSettings::editCurrentItem()
 		tvMarkers->edit(tvMarkers->currentIndex());
 }
 
-//void AwMarkerManagerSettings::show()
-//{
-//	AwFileIO *reader = AwSettings::getInstance()->currentReader();
-//	if (!reader->triggerChannels().isEmpty())
-//		buttonClearTriggerChannel->setEnabled(true);
-//	else
-//		buttonClearTriggerChannel->setEnabled(false);
-//	QWidget::show();
-//}
-
 void AwMarkerManagerSettings::updateMarkerList()
 {
 	m_displayedMarkers = m_model->markers();
 	emit markersChanged(m_displayedMarkers);
-//	updateStats();
 }
 
 
@@ -444,7 +420,7 @@ void AwMarkerManagerSettings::goToMarkerPos()
 
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 	// if several markers are selected, only consider the first one
-	foreach (QModelIndex index, indexes) {
+	for (QModelIndex &index : indexes) {
 		if (index.column() == MARKER_COLUMN_POS) {
 			int row = proxy->mapToSource(index).row();
 			emit moveRequest(m_model->markers().at(row)->start());
@@ -467,7 +443,6 @@ void AwMarkerManagerSettings::renameAllMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-//	updateStats();
 }
 
 void AwMarkerManagerSettings::renameSelectedMarkers()
@@ -490,7 +465,6 @@ void AwMarkerManagerSettings::renameSelectedMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-//	updateStats();
 }
 
 void AwMarkerManagerSettings::changeValueAllMarkers()
@@ -507,7 +481,6 @@ void AwMarkerManagerSettings::changeValueAllMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-//	updateStats();
 }
 
 void AwMarkerManagerSettings::changeValueSelectedMarkers()
@@ -531,7 +504,7 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-//	updateStats();
+//	emit updateStats();
 }
 
 
@@ -585,12 +558,13 @@ void AwMarkerManagerSettings::removeAllLabels()
 	if (AwMessageBox::question(this, tr("Remove Markers"), QString(tr("Do you really want to remove all %1?").arg(label))) == QMessageBox::No)
 		return;
 
+	m_displayedMarkers = m_model->markers();
 	AwMarkerList markers;
-	foreach (AwMarker *m, m_displayedMarkers) {
-		if (m->label() == label)
-			markers << m;
-	}
-	emit markersRemoved(markers);
+
+	std::remove_copy_if(m_displayedMarkers.begin(), m_displayedMarkers.end(), std::back_inserter(markers),
+		[label](AwMarker* m) { return m->label() != label; });
+
+    emit markersRemoved(markers);
 	m_displayedMarkers = m_model->markers();
 	emit markersChanged(m_displayedMarkers);
 }
@@ -630,7 +604,6 @@ void AwMarkerManagerSettings::saveSelectedMarkersToMATLAB()
 		}
 		// set markers to compute data on
 		process->pdi.input.setNewMarkers(markers, true);
-	//	process->pdi.input.addArgument("output_file", path);
 		process->pdi.input.settings.insert(keys::output_file, path);
 		// start process
 		process_manager->runProcess(process);
@@ -699,6 +672,17 @@ void AwMarkerManagerSettings::highlightMarker(AwMarker *marker)
 	tvMarkers->setFocus();
 	tvMarkers->showRow(row);
 	tvMarkers->selectRow(row);
+}
+
+void AwMarkerManagerSettings::openStats()
+{
+	if (m_statsWidget == nullptr) {
+		m_statsWidget = new AwStatsWidget;
+		connect(m_mm, &AwMarkerManager::updateStats, m_statsWidget, &AwStatsWidget::enableUpdate);
+	}
+
+
+	m_statsWidget->show();
 }
 
 void AwMarkerManagerSettings::writeTrigger()

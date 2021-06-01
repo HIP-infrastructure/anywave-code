@@ -1,34 +1,23 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <AwChannel.h>
 #include <AwVirtualChannel.h>
 #include <QtMath>
 #include <QRegularExpression>
 
-//static QStringList ChannelTypes = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
 static QStringList UnitTypes = { "µV", "µV" , "pT", "µV", "µV" , "pT", "n/a", "n/a", "unit", "unit", "pT/m", "µV", "unit" };
 static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
 
@@ -542,15 +531,16 @@ QList<AwChannel *> AwChannel::duplicateChannels(const QList<AwChannel *>& list)
 	return res;
 }
 
-QList<AwChannel *> AwChannel::cloneList(const QList<AwChannel *>& list, bool cloneData)
+QList<AwChannel *> AwChannel::clone(const QList<AwChannel *>& list, bool cloneData)
 {
 	AwChannelList res;
-	foreach(AwChannel *c, list) {
-		AwChannel *newChan = c->duplicate();
-		if (cloneData && c->dataSize())  {
-			newChan->newData(c->dataSize());
-			memcpy(newChan->data(), c->data(), c->dataSize() * sizeof(float));
+	for (auto c : list) {
+		auto newC = c->duplicate();
+		if (cloneData && c->dataSize()) {
+			newC->newData(c->dataSize());
+			memcpy(newC->data(), c->data(), c->dataSize() * sizeof(float));
 		}
+		res << newC;
 	}
 	return res;
 }

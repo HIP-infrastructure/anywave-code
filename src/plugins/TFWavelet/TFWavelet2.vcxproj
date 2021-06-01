@@ -61,7 +61,7 @@
   </ImportGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;TFWAVELET2_LIB;MKL;QWT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;TFWAVELET2_LIB;MKL;QWT_DLL;QCUSTOMPLOT_USE_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\qwt\include;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -91,7 +91,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;TFWAVELET2_LIB;MKL;QWT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;TFWAVELET2_LIB;MKL;QWT_DLL;QCUSTOMPLOT_USE_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\qwt\include;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -121,6 +121,7 @@
   <ItemGroup>
     <ClCompile Include="display_settings.cpp" />
     <ClCompile Include="settingsui.cpp" />
+    <ClCompile Include="TFColorMapWidget.cpp" />
     <ClCompile Include="TFPicker.cpp" />
     <ClCompile Include="TFPlot.cpp" />
     <ClCompile Include="TFWavelet2.cpp" />
@@ -129,7 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display_settings.h" />
-    <ClInclude Include="tfparam.h" />
+    <QtMoc Include="TFColorMapWidget.h" />
     <QtMoc Include="TFPicker.h">
     </QtMoc>
     <QtMoc Include="TFPlot.h">
@@ -148,8 +149,15 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="TFColorMapWidget.ui" />
     <QtUic Include="TFWidget.ui">
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="arma.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

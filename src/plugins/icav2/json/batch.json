@@ -1,5 +1,5 @@
 {
-  "parameters": [ "modality", "comp" ],
+  "parameters": [ "modality", "comp", "algorithm" ],
   "flags": [ "infomax_extended", "skip_bad", "downsampling" ],
   "inputs": {
     "input_file": "any file"
@@ -17,12 +17,13 @@
     "use_markers": [ "Use markers", "stringlist" ],
     "infomax_extended": [ "Infomax extended mode", "boolean" ],
     "skip_bad": [ "Skip bad channels", "boolean" ],
-    "fields_ordering": [ "comp", "hp", "lp", "modality", "skip_bad", "downsampling", "infomax_extended", "skip_markers", "use_markers" ]
+    "fields_ordering": [ "algorithm", "comp", "hp", "lp", "modality", "skip_bad", "downsampling", "infomax_extended", "skip_markers", "use_markers" ]
   },
   "batch_defaults": {
     "input_file" :  "File",
     "hp": 0,
     "lp": 0,
+	"algorithm": [ "infomax", "cca", "sobi" ],
     "comp": 50,
     "modality": [ "MEG", "EEG", "SEEG", "EMG" ],
     "downsampling": false,

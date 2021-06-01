@@ -1,16 +1,18 @@
-
 from PyQt5 import QtCore, QtNetwork
 import anywave
 import json
+
 """
 """
 # constants
 STATUS_SUCCESS = 0
-STATUS_FAILED  = 1
+STATUS_FAILED = 1
 SIZE_INT = 4
 
+
 class TCPRequest:
-    WAIT_TIME_OUT = 3000000 # 300s socket time out
+    WAIT_TIME_OUT = 3000000  # 300s socket time out
+
     def __init__(self, request):
         self.request = request
         self.socket = QtNetwork.QTcpSocket()
@@ -22,6 +24,7 @@ class TCPRequest:
         self.streamSize.setVersion(QtCore.QDataStream.Version.Qt_4_4)
         self.streamResponse = QtCore.QDataStream(self.socket)
         self.streamResponse.setVersion(QtCore.QDataStream.Version.Qt_4_4)
+        self.status = STATUS_SUCCESS
         self.connect()
 
     def response(self):
@@ -32,10 +35,16 @@ class TCPRequest:
     def connect(self):
         self.socket.connectToHost(anywave.host, anywave.port)
         if not self.socket.waitForConnected():
-           self.status = STATUS_FAILED
-           error = "Unable to connect to AnyWave :" + self.socket.errorString()
-           raise Exception(error)
+            self.status = STATUS_FAILED
+            error = "Unable to connect to AnyWave: " + self.socket.errorString()
+            raise Exception(error)
         self.status = STATUS_SUCCESS
+
+    def clear(self):
+        self.data.clear()
+        self.size.clear()
+        self.streamData.device().reset()
+        self.streamSize.device().reset()
 
     def waitForResponse(self):
         while self.socket.bytesAvailable() < 4:
@@ -44,6 +53,9 @@ class TCPRequest:
         stream = QtCore.QDataStream(self.socket)
         stream.setVersion(QtCore.QDataStream.Qt_4_4)
         status = stream.readInt32()
+        if status == -1:
+            error = stream.readQString()
+            raise Exception(error)
         # get size of data
         while self.socket.bytesAvailable() < 4:
             if not self.socket.waitForReadyRead(self.WAIT_TIME_OUT):
@@ -51,12 +63,9 @@ class TCPRequest:
         size = stream.readInt32()
         # wait for all data to be available
         while self.socket.bytesAvailable() < size:
-             if not self.socket.waitForReadyRead(self.WAIT_TIME_OUT):
-                    size = -1
-        if status is -1:
-            error = stream.readQString()
-            raise Exception(error)
-        if size is -1:
+            if not self.socket.waitForReadyRead(self.WAIT_TIME_OUT):
+                size = -1
+        if size == -1:
             raise Exception('Data waiting timed out.')
         return size
 
@@ -64,13 +73,13 @@ class TCPRequest:
         # arg is a string that could be empty
         if not self.status == STATUS_SUCCESS:
             raise Exception('not connected to AnyWave')
-            return False
-        self.streamSize << anywave.pid << int(SIZE_INT) << self.request
+        self.clear()
+        self.streamSize.writeInt32(anywave.pid)
+        self.streamSize.writeInt32(SIZE_INT)
+        self.streamSize.writeInt32(self.request)
         self.socket.write(self.size)
-        self.socket.flush()
         if not self.socket.waitForBytesWritten():
             raise Exception('Error while sending request to AnyWave')
-            return False
         return True
 
     # sendRequest() send a request with parameters a json string.
@@ -79,24 +88,24 @@ class TCPRequest:
         # args must be a dict
         if self.status is not STATUS_SUCCESS:
             raise Exception('Sending request while not connected to AnyWave')
-            return False
-        str = json_dumps(args)
-        self.streamSize << anywave.pid << str.size() + SIZE_INT << self.request
+        json_string = json.loads(args)
+        self.clear()
+        self.streamSize.writeInt32(anywave.pid)
+        self.streamSize.writeInt32(int(len(json_string) + SIZE_INT))
+        self.streamSize.writeInt32(self.request)
+        self.streamData.writeQString(json_string)
         self.socket.write(self.size)
-        self.streamData << json
         self.socket.write(self.data)
-        self.socket.flush()
         if not self.socket.waitForBytesWritten():
             raise Exception('Error while sending request to AnyWave')
-            return False
         return True
 
     # sendString() will only send a string to AnyWave
-    # the string cand be a text message or a json string depending on the command
+    # the string can be a text message or a json string depending on the command
     def sendString(self, str):
         if self.status is not STATUS_SUCCESS:
-           raise Exception('Sending request while not connected to AnyWave')
-           return False
+            raise Exception('Sending request while not connected to AnyWave')
+        self.clear()
         self.streamSize.writeInt32(anywave.pid)
         self.streamSize.writeInt32(int(len(str) + SIZE_INT))
         self.streamSize.writeInt32(self.request)
@@ -105,18 +114,17 @@ class TCPRequest:
         self.socket.write(self.data)
         if not self.socket.waitForBytesWritten():
             raise Exception('Error while sending request to AnyWave')
-            return False
         return True
+
     # sendData() will send binary data to anywave.
     # data must be bytes
     def sendData(self, data):
         # data must be a bytes, not a json string
         if self.status is not STATUS_SUCCESS:
             raise Exception('Sending request while not connected to AnyWave')
-            return False
         if not isinstance(data, bytes):
             raise Exception('argument must be of type bytes')
-            return False
+        self.clear()
         # use a qbyte array to send the data
         self.streamSize.writeInt32(anywave.pid)
         self.streamSize.writeInt32(int(len(data) + SIZE_INT))
@@ -124,8 +132,6 @@ class TCPRequest:
         self.streamData.writeBytes(data)
         self.socket.write(self.size)
         self.socket.write(self.data)
-        #self.socket.flush()
         if not self.socket.waitForBytesWritten():
             raise Exception('Error while sending request to AnyWave')
-            return False
         return True

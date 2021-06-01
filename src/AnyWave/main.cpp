@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QApplication>
 #include "AnyWave.h"
 #include <AwException.h>
@@ -46,14 +36,16 @@
 #endif
 
 #include "CL/CommandLineParser.h"
-
+#include "AwComponents.h"
+#include <iostream>
+#include <AwVersion.h>
 
 int main(int argc, char *argv[])
 {
 #ifdef _WIN32
 	if (AttachConsole(ATTACH_PARENT_PROCESS)) {
 		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
+	//	freopen("CONOUT$", "w", stderr);
 	}
 #endif
 #if VTK_MAJOR_VERSION >= 8
@@ -71,6 +63,8 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 	QApplication app(argc, argv);
+	QVariantMap arguments;
+
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
     Q_INIT_RESOURCE(amplitudes);
@@ -78,12 +72,36 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("INSERM U1106");
 	QCoreApplication::setOrganizationDomain("INS.org");
 	QCoreApplication::setApplicationName("AnyWave");
+	app.setApplicationVersion(QString("%1.%2").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION));
 
 	QSettings settings(QSettings::SystemScope, "INSERM U1106", "AnyWave");
 	settings.setValue("general/secureMode", false);
 	settings.setValue("general/buildDate", QString(__DATE__));
+	AwComponents components;
+	if (components.init() != 0) {
+		std::cout << "Error while initialising AnyWave components";
+		return -1;
+	}
+	if (argc > 1) {
+		components.setGuiEnabled(false);
+		int operation = -1;
 
-	// check if arguments
-	AnyWave window(app.arguments());
+		try {
+			operation = aw::commandLine::doParsing(app.arguments(), arguments);
+		}
+		catch (const AwException& e) {
+			std::cout << e.errorString().toStdString();
+			return -1;
+		}
+		if (operation == aw::commandLine::NoOperation)  // if parsing returns NoOperation that means that nothing more should be processed neither the GUI should be
+														// launched.
+			return 0;
+		if (operation == aw::commandLine::BatchOperation) {
+			aw::commandLine::doCommandLineOperation(arguments);
+			return 0;
+		}
+	}
+	components.setGuiEnabled(true);  // if we get there, launch GUI even after some command line options have been processed (mostly -plugin_debug and -server_port)
+	AnyWave window(arguments);
 	return app.exec();
 }

@@ -189,6 +189,7 @@
     </QtUic>
     <QtRcc Include="..\..\resources\AnyWave.qrc">
     </QtRcc>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
     <None Include="awwidgetslib_en.ts" />
     <None Include="awwidgetslib_fr.ts" />
     <QtUic Include="InputMarker\AwInputMarkerWidget.ui">

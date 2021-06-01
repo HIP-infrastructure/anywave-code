@@ -26,6 +26,9 @@
   <ItemGroup>
     <ClInclude Include="appendfiles_global.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F48B0098-9831-4272-B999-D75C951BD30E}</ProjectGuid>
     <Keyword>QtVS_v303</Keyword>

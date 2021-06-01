@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2020 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <qobject.h>
 #include "AwBIDSGUI.h"
@@ -34,7 +24,7 @@
 class AwFileIO;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
-//using AwTSVDict = QMap<QString, QStringList>;
+
 
 constexpr auto aw_derivatives_folder = "derivatives/anywave";
 
@@ -82,7 +72,7 @@ public:
 	QString createTsvPath(AwBIDSItem * item, int tsvType);
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
-	AwBIDSItems subjects() { return m_items; }
+	AwBIDSItems items() { return m_items; }
 	
 	// command line methods
 	void toBIDS(const AwArguments& args);
@@ -92,6 +82,7 @@ public:
 	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
 	static void initCommandLineOperation(const QString& filePath);
 	static void finishCommandLineOperation();
+
 
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
@@ -103,12 +94,10 @@ public:
 	/** montage specific **/
 	/** Load a montage from channels.tsv file **/
 	AwChannelList getChannelsTsvMontage();
-	/** Build a channels.tsv file **/
-	//int createChannelsTsv(const QString& filePath, const AwChannelList& channels);
 	/** Update channels.tsv file from bad file **/
 	int updateChannelsTsvBadChannels(const QStringList& badLabels);
 	/** markers specific **/
-	int updateEventsTsv(const AwMarkerList& markers);
+//	int updateEventsTsv(const AwMarkerList& markers);
 
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);
@@ -142,7 +131,7 @@ signals:
 	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
-	void recursiveParsing(const QString& dir, AwBIDSItem *parent);
+	AwBIDSItems recursiveParsing2(const QString& dirPath, AwBIDSItem* parentItem);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);

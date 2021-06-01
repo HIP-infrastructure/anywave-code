@@ -42,11 +42,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  
-  
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
-  </ImportGroup><PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Plugins\</OutDir></PropertyGroup><PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Plugins\</OutDir></PropertyGroup>
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Plugins\</OutDir>
+  </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>msvc2019_64</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
@@ -66,8 +70,9 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PreprocessorDefinitions>ICA_LIB;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(EXTRA_LIBS)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(EXTRA_LIBS)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
@@ -83,8 +88,9 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PreprocessorDefinitions>ICA_LIB;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(EXTRA_LIBS)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(EXTRA_LIBS)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
@@ -94,7 +100,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="matlab_common\coder_array.h" />
+    <ClInclude Include="matlab_common\pinv.h" />
+    <ClInclude Include="matlab_common\rtGetInf.h" />
+    <ClInclude Include="matlab_common\rtGetNaN.h" />
+    <ClInclude Include="matlab_common\rtwtypes.h" />
+    <ClInclude Include="matlab_common\rt_nonfinite.h" />
+    <ClInclude Include="matlab_common\svd.h" />
+    <ClInclude Include="sobi\mtimes.h" />
+    <ClInclude Include="sobi\sobi_coder.h" />
+    <ClInclude Include="sobi\sobi_coder_data.h" />
+    <ClInclude Include="sobi\sobi_coder_initialize.h" />
+    <ClInclude Include="sobi\sobi_coder_terminate.h" />
+    <ClInclude Include="sobi\sobi_coder_types.h" />
     <QtMoc Include="ica.h" />
+    <ClInclude Include="cca\cca.h" />
+    <ClInclude Include="cca\cca_data.h" />
+    <ClInclude Include="cca\cca_initialize.h" />
+    <ClInclude Include="cca\cca_spec.h" />
+    <ClInclude Include="cca\cca_terminate.h" />
+    <ClInclude Include="cca\cca_types.h" />
+    <ClInclude Include="cca\coder_array.h" />
+    <ClInclude Include="cca\qr.h" />
     <ClInclude Include="infomax_algo.h" />
     <ClInclude Include="r250.h" />
     <ClInclude Include="randlcg.h" />
@@ -102,17 +129,37 @@
     <ClInclude Include="ica_global.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cca\cca.cpp" />
+    <ClCompile Include="cca\cca_data.cpp" />
+    <ClCompile Include="cca\cca_initialize.cpp" />
+    <ClCompile Include="cca\cca_terminate.cpp" />
+    <ClCompile Include="cca\qr.cpp" />
+    <ClCompile Include="cca\run_cca.cpp" />
     <ClCompile Include="ica.cpp" />
     <ClCompile Include="ICASettings.cpp" />
     <ClCompile Include="infomax_algo.cpp" />
+    <ClCompile Include="matlab_common\pinv.cpp" />
+    <ClCompile Include="matlab_common\rtGetInf.cpp" />
+    <ClCompile Include="matlab_common\rtGetNaN.cpp" />
+    <ClCompile Include="matlab_common\rt_nonfinite.cpp" />
+    <ClCompile Include="matlab_common\svd.cpp" />
     <ClCompile Include="r250.c" />
     <ClCompile Include="randlcg.c" />
+    <ClCompile Include="sobi\mtimes.cpp" />
+    <ClCompile Include="sobi\run_sobi.cpp" />
+    <ClCompile Include="sobi\sobi_coder.cpp" />
+    <ClCompile Include="sobi\sobi_coder_data.cpp" />
+    <ClCompile Include="sobi\sobi_coder_initialize.cpp" />
+    <ClCompile Include="sobi\sobi_coder_terminate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource.qrc" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ICASettings.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

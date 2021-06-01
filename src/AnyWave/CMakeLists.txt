@@ -5,6 +5,8 @@ add_definitions("-DAW_DISABLE_EPOCHING")
 
 SET(AnyWave_SRCS
     ./AnyWave.cpp  
+    ./AwComponents.cpp
+	./AwHelpMenu.cpp
 	./AwMapping.cpp
 	./AwBatch.cpp
 	./AwMATLAB.cpp
@@ -75,6 +77,7 @@ SET(AnyWave_SRCS
     ./Marker/AwMarkerTableView.cpp  
     ./Marker/AwNewMarkerRuleDial.cpp  
     ./Marker/AwPickChannelsDial.cpp  
+	./Marker/AwStatsWidget.cpp
     ./MATPy/AddMarkers.cpp  
     ./MATPy/AwMATPyServer.cpp  
     ./MATPy/AwPidManager.cpp  
@@ -98,6 +101,7 @@ SET(AnyWave_SRCS
 	./MATPy/RunAnyWave.cpp
 	./MATPy/GetProperties.cpp
     ./MATPy/DebugConnect.cpp
+    ./MATPy/SendMarkers.cpp
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
@@ -107,6 +111,7 @@ SET(AnyWave_SRCS
     ./Montage/AwECoGTableModel.cpp 
     ./Plugin/AwPluginDial.cpp  
     ./Plugin/AwPluginManager.cpp  
+    ./Plugin/AwMATPyCreator.cpp
     ./Process/AwConverter.cpp  
     ./Process/AwExporter.cpp  
     ./Process/AwExporterMarkerModel.cpp  
@@ -161,7 +166,9 @@ SET(AnyWave_SRCS
     ./Source/AwSourceChannel.cpp  
     ./Source/AwSourceManager.cpp)  
 
-SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
+SET(HEADERS 	
+    ./AwComponents.h
+    ./Batch/AwAddEditBatchDialog.h
 	./Batch/AwBatchDialog.h
 	./Batch/AwBatchGUI.h
 	./Batch/AwBatchManager.h
@@ -215,6 +222,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Marker/AwMarkerManager.h  
     ./Marker/AwMarkerListModel.h  
     ./Marker/AwDockAddMarker.h  
+	./Marker/AwStatsWidget.h
     ./MATPy/AwPidManager.h  
     ./MATPy/AwRequestServer.h  
     ./MATPy/AwMATPyServer.h  
@@ -226,6 +234,7 @@ SET(HEADERS 	./Batch/AwAddEditBatchDialog.h
     ./Montage/AwECoGTableModel.h 
     ./Plugin/AwPluginManager.h  
     ./Plugin/AwPluginDial.h  
+    ./Plugin/AwMATPyCreator.h
     ./Process/AwExporterTypes.h  
     ./Process/AwMarkerExporter.h  
     ./Process/AwTriggerWriter.h  
@@ -314,9 +323,11 @@ SET(FORMS ./AnyWave.ui
     ./Marker/AwNewMarkerRuleDial.ui  
     ./Marker/AwPickChannelsDial.ui  
     ./Marker/AwMarkersExportWidget.ui  
+	./Marker/AwStatsWidget.ui
     ./Montage/AwMontageDial.ui  
 	./Montage/AwECoGDialog.ui
     ./Plugin/AwPluginDial.ui  
+    ./Plugin/AwMATPyCreator.ui
     ./Process/AwProcessesWidget.ui  
     ./Process/AwProcessFromMarkersDial.ui  
     ./Process/TPUi.ui  
@@ -364,14 +375,18 @@ SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::
 IF(UNIX AND NOT APPLE)
     ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
     QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-    TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z)
+    TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} 
+       gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z qcustomplot tbb)
     add_dependencies(AnyWaveLinux ${AW_LIBS})
     INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
 ELSE()
     ADD_EXECUTABLE(AnyWaveMac ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
     QT5_USE_MODULES(AnyWaveMac Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-    TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z)
+    MESSAGE(STATUS "Mac qwt: ${QWT_LIBRARIES}")
+    TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} 
+       ${BLAS_LIBRARIES} z qcustomplot)
     add_dependencies(AnyWaveMac ${AW_LIBS})
+    set_target_properties(AnyWaveMac PROPERTIES OUTPUT_NAME "anywavemac")
     INSTALL(TARGETS AnyWaveMac DESTINATION ${APP_INSTALL_DIR})
 ENDIF()
 

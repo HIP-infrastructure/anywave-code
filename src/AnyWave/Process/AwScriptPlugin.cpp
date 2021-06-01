@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwScriptPlugin.h"
 #include <QFile>
 #include <QTextStream>
@@ -32,8 +22,6 @@
 
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
-	//p->setScriptPath(m_path);
-	//p->pdi.input.settings[keys::plugin_dir] = m_pluginDir;
 	// set it a copy of all settings from data manager
 	p->pdi.input.settings.unite(AwDataManager::instance()->settings());
 	// merge also settings proper to plugin
@@ -42,6 +30,7 @@ void AwScriptPlugin::initProcess(AwScriptProcess *p)
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
 		p->pdi.addInputChannel(-1, 1, 0);
 		p->setInputFlags(m_inputFlags);
+
 	}
 	p->setPlugin(this);
 }
@@ -53,7 +42,7 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	category = map.value("category");
 	m_inputFlags = 0;
 	if (map.contains("input_flags")) {
-		auto inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
+		const auto &inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();
 		QStringList tokens = map.value("input_flags").split(":");
 		for (auto t : tokens) {
 			auto lowerT = t.toLower();
@@ -63,12 +52,22 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	}
 	m_flags = 0;
 	if (map.contains("flags")) {
-		auto flagsMap = AwPluginManager::getInstance()->flagsMap();
+		const auto &flagsMap = AwPluginManager::getInstance()->flagsMap();
 		QStringList tokens = map.value("flags").split(":");
 		for (auto t : tokens) {
 			auto lowerT = t.toLower();
 			if (flagsMap.contains(lowerT))
 				m_flags |= flagsMap.value(lowerT);
+		}
+	}
+	m_modifiersFlags = 0;
+	if (map.contains("modifiers_flags")) {
+		const auto &modsMap = AwPluginManager::getInstance()->modifiersFlagsMap();
+		QStringList tokens = map.value("flags").split(":");
+		for (auto t : tokens) {
+			auto lowerT = t.toLower();
+			if (modsMap.contains(lowerT))
+				m_modifiersFlags |= modsMap.value(lowerT);
 		}
 	}
 	// add the desc map from desct.txt has values in the plugin settings map

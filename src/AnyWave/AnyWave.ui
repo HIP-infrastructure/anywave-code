@@ -158,6 +158,8 @@
     </property>
     <addaction name="actionCreate_batch_script"/>
     <addaction name="separator"/>
+    <addaction name="actionCreate_new_MATLAB_plugin"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -465,6 +467,9 @@
    </property>
   </action>
   <action name="actionCreate_batch_script">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Batch Processing</string>
    </property>
@@ -477,6 +482,16 @@
   <action name="actionHelpPlugins">
    <property name="text">
     <string>Plugins</string>
+   </property>
+  </action>
+  <action name="actionCreate_new_MATLAB_plugin">
+   <property name="text">
+    <string>Create new MATLAB or Python plugin</string>
+   </property>
+  </action>
+  <action name="actionCreate_new_Python_plugin">
+   <property name="text">
+    <string>Create new Python plugin</string>
    </property>
   </action>
  </widget>

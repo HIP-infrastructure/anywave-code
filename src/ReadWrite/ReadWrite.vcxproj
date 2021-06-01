@@ -26,6 +26,9 @@
     <ClInclude Include="..\..\include\AwIO.h" />
     <ClInclude Include="..\..\include\AwReadWriteLib.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CA5B6E48-7EBE-4949-AA0B-79267B704C4D}</ProjectGuid>
     <Keyword>QtVS_v303</Keyword>

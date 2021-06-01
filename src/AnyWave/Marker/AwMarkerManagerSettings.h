@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef AW_MARKERS_MANAGER_SETTINGS_H
 #define AW_MARKERS_MANAGER_SETTINGS_H
 
@@ -34,6 +24,8 @@
 #include <QSortFilterProxyModel>
 
 using namespace Ui;
+class AwStatsWidget;
+class AwMarkerManager;
 
 class AwMarkerManagerSettings : public QWidget, public MarkersManagerSettingsClass
 {
@@ -52,10 +44,10 @@ public slots:
 	void setRule(const QString& name);
 	void addRule(const QString& name);
 	void modifyRule(const QString& oldName, const QString& newName);
-	//void show();
 	void editCurrentItem();
 	void setMarkerAddingMode(bool on);
 	void highlightMarker(AwMarker *marker);
+	void openStats();
 
 signals:
 	/** Sent whenever displayed markers changed, depending on filtering rules **/
@@ -67,6 +59,7 @@ signals:
 	void loadMarkersClicked();
 	void saveMarkersClicked();
 	void clearTriggerClicked();
+
 
 protected slots:
 	void renameAllMarkers();
@@ -118,6 +111,8 @@ protected:
 	QMenu *m_menu;
 	QAction *m_removeAllLabel, *m_selectAllLabel;	// keep pointer for specific action Remove all "MARKER" and Select all "MARKER"
 	bool m_isAddingMarker;
+	AwStatsWidget* m_statsWidget;
+	AwMarkerManager* m_mm;  // global instance of Marker Manager
 };
 
 #endif // MARKERS_MANAGER_SETTINGS_H

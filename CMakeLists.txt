@@ -10,14 +10,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
    #SET(CLANG ON)
 # apple clang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-# gcc
    MESSAGE(STATUS "GCC compiler detected")
    add_definitions("-w -fPIC -O3 -fpermissive -fopenmp -DNDEBUG") # g++ flags
    SET(GCC ON)
 endif()
 
 SET(CMAKE_BUILD_TYPE "Release") # build in release mode
-SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # default install path
@@ -91,15 +90,9 @@ IF(NOT MKL_FOUND AND NOT APPLE)
 ENDIF()
 
 IF(MKL_FOUND)
-  # message(STATUS "MKL Found.")
-#  # LINK_DIRECTORIES(${MKL_LIB_DIRS})
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
    SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-  # INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
-  # MESSAGE(STATUS "MKL include dir is: ${MKL_INCLUDE_DIRS}")
    SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
-  #message(STATUS "MLK libs : ${MKL_LIBRARIES}")
-  # message(STATUS "link flags: ${BLAS_LIBRARIES}")
 endif()
 
 # Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
@@ -127,8 +120,6 @@ ENDIF()
 IF(APPLE)
    SET(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-  # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='@executable_path/../Frameworks'")
-  #set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
    SET(APPLE_ID "Apple Development: thechewie13@gmail.com (MY3J8AN9H6)")
 ENDIF()
 
@@ -147,11 +138,6 @@ ENDIF()
 
 # AnyWave SDK libraries
 add_subdirectory(src/Core)
-# add core static
-#if(BUILD_STATIC_CORE AND QT_STATIC_DIR)
-#add_subdirectory(src/AwCoreStatic)
-#endif()
-#add_subdirectory(src/AwEpochLib)
 add_subdirectory(src/AwMontageLib)
 add_subdirectory(src/Filtering)
 add_subdirectory(src/Utilities)
@@ -176,48 +162,16 @@ add_dependencies(AwMontage AwCore AwReadWrite)
 # header files
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION ${PROJECT_BINARY_DIR}/include)
 
-#find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY)
-
-# MATLAB SUPPORT
-#if (Matlab_FOUND AND BUILD_STATIC_CORE AND QT_STATIC_DIR)
-#if(Matlab_FOUND)
-#  message(STATUS "MATLAB Support added. Root dir is ${Matlab_ROOT_DIR}")
-#  add_subdirectory(src/MatlabSupport)
-# Build mex files
-#  add_subdirectory(src/Mex)      # REACTIVATE ME AT THE END
-#endif()
-# END OF MATLAB SUPPORT
-
-# PYTHON
-# PY_VENV_DIR must be passed to cmake as parameter -DPY_VENV_DIR=Path
-# Here is the trick
-## update the environment with VIRTUAL_ENV variable (mimic the activate script)
-#set (ENV{VIRTUAL_ENV} ${PY_VENV_DIR})
-#message(STATUS "Python venv is ${PY_VENV_DIR}")
-## change the context of the search
-#set (Python3_FIND_VIRTUALENV ONLY)
-## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
-## Launch a new search
-#find_package(Python3 COMPONENTS Interpreter Development NumPy)
-#if (Python3_FOUND AND Python3_NumPy_FOUND)
-
-#   message(STATUS "Python 3 support added")
-#   add_subdirectory(src/PythonSupport)   # REACTIVATE ME AT THE END
-#endif()
-#if (Python_FOUND)
-#find_package(PythonLibs)
-#if (PYTHONLIBS_FOUND)
-#  find_package(NumPy)
-#  if (PYTHON_NUMPY_FOUND)
-#     message(STATUS "Python support added.")
-#     add_subdirectory(src/PythonSupport)
-#  endif()
-#endif()
-#endif()
+find_package(Matlab COMPONENTS MX_LIBRARY ENG_LIBRARY)
+# if matlab is detected, then build the shared lib to connect to MATLAB app
+# However this required to build all the mexfiles of the MATLAB API
+# This has to be done separatly, using the sub project in matlab sub folder.
+if(Matlab_FOUND)
+   add_subdirectory(src/MatlabSupport)
+endif(Matlab_FOUND)
 
 # AnyWave
 add_subdirectory(src/AnyWave)
-
 
 # plugins
 add_subdirectory(src/plugins/4DNI_Reader)

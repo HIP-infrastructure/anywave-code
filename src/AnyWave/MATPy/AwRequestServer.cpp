@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwRequestServer.h"
 #include "Process/AwScriptPlugin.h"
 #include <QTcpSocket>
@@ -45,7 +35,6 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	m_thread = new QThread(this);
 	m_server = new QTcpServer(this);
 	m_serverPort = 0;
-	//m_ds = nullptr;
 	m_pidCounter = 0;
 
 	if (m_server->listen(QHostAddress::Any, port)) {
@@ -67,57 +56,14 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 		m_thread->start();
 	}
 	m_debugMode = false;
-	//setDebugMode();
 }
-
-//AwRequestServer::AwRequestServer(const QString& dataPath, quint16 port, QObject *parent) : AwDataClient(parent)
-//{
-//	m_thread = new QThread(this);
-//	m_server = new QTcpServer(this);
-//	m_serverPort = 0;
-//	//m_ds = nullptr;
-//	m_pidCounter = 0;
-//
-//	if (m_server->listen(QHostAddress::Any, port)) {
-//		m_serverPort = m_server->serverPort();
-//		AwDebugLog::instance()->connectComponent(QString("MATPy Listener:%1").arg(m_serverPort), this);
-//		auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
-//		if (reader->openFile(dataPath) != AwFileIO::NoError) {
-//			emit log(QString("Unable to open %1").arg(dataPath));
-//			m_isListening = false;
-//			return;
-//		}
-//		m_ds = new AwDataSet(reader, this);
-//		//m_ds = AwDataServer::getInstance()->duplicate(reader);
-//		//m_ds->openConnection(this);
-//		m_ds->connect(this);
-//		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
-//		m_isListening = true;
-//	}
-//	else 
-//		m_isListening = false;
-//
-//	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
-//	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
-//
-//	setHandlers();
-//	if (m_isListening) {
-//		moveToThread(m_thread);
-//		m_thread->start();
-//	}
-//}
 
 AwRequestServer::~AwRequestServer()
 {
 	m_thread->exit();
 	m_thread->wait();
+	m_processes.erase(m_processes.begin(), m_processes.end());
 }
-
-//void AwRequestServer::setDebugMode()
-//{
-//	auto aws = AwSettings::getInstance();
-//	m_debugMode = aws->value(aws::plugin_debug_mode).toBool();
-//}
 
 void AwRequestServer::setHandlers()
 {
@@ -140,6 +86,7 @@ void AwRequestServer::setHandlers()
 	addHandler(this, &AwRequestServer::handleRunAnyWave, AwRequest::RunAnyWave);			
 	addHandler(this, &AwRequestServer::handleGetProperties, AwRequest::GetProperties);		
 	addHandler(this, &AwRequestServer::handleConnectDebug, AwRequest::ConnectDebug);
+	addHandler(this, &AwRequestServer::handleSendMarkers, AwRequest::SendMarkers);
 }
 
 
@@ -210,13 +157,22 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		emit log(QString("received unknown request: %2. Nothing done.").arg(request));
 		return;
 	}
+	AwScriptProcess* p = nullptr;
+	if (request == AwRequest::ConnectDebug) {
+		emit log(QString("Debug connection: create a fake process for debuging purposes"));
+		p = newDebugProcess();
+		auto h = m_handlers.value(request);
+		h(client, p);
+		emit log(QString("Debug connection: ok"));
+		return;
+	}
 
 	QByteArray size;
 	QDataStream stream_size(&size, QIODevice::WriteOnly);
 	stream_size.setVersion(QDataStream::Qt_4_4);
 	int status = 0;
 	emit log(tr("Received request ") + QString::number(request));
-	AwScriptProcess *p = nullptr;
+
 	// get the matchin process if pid is valid
 	if (m_debugMode && pid < 0) {
 		p = newDebugProcess();
@@ -235,8 +191,8 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		}
 		// p may be instantiated but if we are in debug mode, the pdi.input may be empty if no reader is active
 		// calling initDebugProcess() may solve this issue
-		if (m_debugMode)
-			initDebugProcess(p);
+		//if (m_debugMode)
+		//	initDebugProcess(p);
 	}
 	if (p == nullptr) {
 		emit log("Received request but process is null. Skipped.");

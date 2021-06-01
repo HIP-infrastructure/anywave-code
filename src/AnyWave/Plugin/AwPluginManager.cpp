@@ -1,36 +1,24 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwPluginManager.h"
 #include <QMessageBox>
 #include <QMenu>
 #include <QMenuBar>
 #include "AwPluginDial.h"
 #include "Process/AwTriggerParser.h"
-#include "Process/AwConverter.h"
 #include "Process/AwExporter.h"
 #include <AwProcessInterface.h>
 #include <filter/AwFilterPlugin.h>
@@ -72,22 +60,23 @@ AwPluginManager *AwPluginManager::getInstance()
 AwPluginManager::AwPluginManager()
 {
 	// init input flags map for MATLAB/Python plugins
-	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessIO::GetAllMarkers);
-	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
-	m_MATPyInputFlagsMap.insert("acceptchannelselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
+//	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessIO::GetAllMarkers);
+//	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
+	m_MATPyModifiersFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
+	m_MATPyModifiersFlagsMap.insert("acceptchannelselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessIO::GetAsRecordedChannels);
-	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessIO::GetDurationMarkers);
+//	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessIO::GetDurationMarkers);
 	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessIO::GetCurrentMontage);
-	m_MATPyInputFlagsMap.insert("processrequireschannelselection", Aw::ProcessIO::modifiers::RequireChannelSelection);
-	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
+	m_MATPyModifiersFlagsMap.insert("processrequireschannelselection", Aw::ProcessIO::modifiers::RequireChannelSelection);
+//	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 
 	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
-	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
+//	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	m_MATPyPluginFlagsMap.insert("processdoesntrequiredata", Aw::ProcessFlags::ProcessDoesntRequireData);
 	// for compatibilty
 	m_MATPyPluginFlagsMap.insert("nodatarequired", Aw::ProcessFlags::ProcessDoesntRequireData);
 
-	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
+//	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
 
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
 	setObjectName("AwPluginManager");
@@ -179,7 +168,6 @@ QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
 }
 
 
-
 AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 {
 	QMutexLocker lock(&m_mutex);	// threading lock
@@ -192,10 +180,10 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 	// browse plugins
 	bool plugin_found = false;
 	AwFileIO *reader = NULL;
-	foreach (AwFileIOPlugin *plugin, m_readers)	{
+	for  (AwFileIOPlugin *plugin : m_readers)	{
 		// check for plugin with file extensions
 		if (plugin->hasExtension()) {
-			foreach (QString extension, plugin->fileExtensions) {
+			for (QString& extension : plugin->fileExtensions) {
 				if (extension == ext) {
 					reader = newReader(plugin);
 
@@ -252,7 +240,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 	 QStringList dirs = dir.entryList(QDir::Dirs);
 	 dirs.removeAll(".");
 	 dirs.removeAll("..");
-	 for (auto folder : dirs) {
+	 for (const auto &folder : dirs) {
 		 QString name = folder;
 		 QMap<QString, QString> descMap;
 		// QString desc, processType, category, compiledPath, flags, inputFlags;
@@ -302,24 +290,8 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 plugin->type = type; 
 			 if (isMATLABCompiled) // build full path to exe file
 				 descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
-	/*		 else {
-				 if (QFile::exists(matlabCodeApp))
-					 descMap["script_path"] = matlabCodeApp;
-				 if (QFile::exists(matlabCodeM))
-					 descMap["script_path"] = matlabCodeM;
-			 }*/
-		//	 plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
+
 			 plugin->init(descMap);
-			// if (isMATLABCompiled) {
-			//	 plugin->setAsCompiled(true);
-			//	 plugin->setScriptPath(exePluginPath);
-			// }
-			// else
-			//	 plugin->setScriptPath(pluginPath);
-			// plugin->setPluginDir(pluginPath);
-			 //plugin->category = descMap.value("category");
-			// setFlagsForScriptPlugin(plugin, descMap.value("flags"));
-			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
 				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
@@ -328,18 +300,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
 
 			 plugin->type = type;
-			// plugin->setNameAndDesc(descMap.value("name"), descMap.value("description"));
 			 plugin->init(descMap);
-			 //if (isPythonCompiled) {
-				// plugin->setAsCompiled(true);
-				// plugin->setScriptPath(exePluginPath);
-			 //}
-			 //else
-				// plugin->setScriptPath(pluginPath);
-			 //plugin->setPluginDir(pluginPath);
-			// plugin->category = descMap.value("category");
-			 //setFlagsForScriptPlugin(plugin, descMap.value("flags"));
-			// setInputFlagsForScriptPlugin(plugin, descMap.value("input_flags"));
 			 if (QFile::exists(jsonArgs))
 				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
 			 loadProcessPlugin(plugin);
@@ -354,29 +315,6 @@ void AwPluginManager::setJsonSettings(AwScriptPlugin *plugin, const QString& key
 		plugin->setSettings(key, jsonString);
 }
 
-void AwPluginManager::setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
-{
-	if (flags.isEmpty())
-		return;
-	QStringList tokens;
-	if (flags.contains(":")) {
-		tokens = flags.split(":");
-		if (tokens.isEmpty())
-			return;
-	}
-	else
-		tokens << flags;
-
-	// compared flags strings to hash table
-	int f = 0;
-	for (auto s : tokens) {
-		auto token = s.toLower();
-		if (m_MATPyInputFlagsMap.contains(token))
-			f |= m_MATPyInputFlagsMap.value(token);
-	}
-	plugin->setInputFlags(f);
-}
-
 bool AwPluginManager::checkPluginVersion(QObject * plugin)
 {
 	auto tmp =  static_cast<AwPluginBase *>(plugin);
@@ -385,22 +323,6 @@ bool AwPluginManager::checkPluginVersion(QObject * plugin)
 	if (tmp->minorVersion < AW_MINOR_VERSION || tmp->majorVersion < AW_MAJOR_VERSION)
 		return false;
 	return true;
-}
-
-void AwPluginManager::setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags)
-{
-	if (flags.isEmpty())
-		return;
-	QStringList tokens = flags.split(":");
-	if (tokens.isEmpty())
-		return;
-	int f = 0;
-	for (auto s : tokens) {
-		auto token = s.toLower();
-		if (m_MATPyPluginFlagsMap.contains(token))
-			f |= m_MATPyPluginFlagsMap.value(token);
-	}
-	plugin->setFlags(f);
 }
 
 ///
@@ -571,9 +493,6 @@ void AwPluginManager::loadPlugins()
 	// Add TriggerEraser
 	m_processes += new AwTriggerEraserPlugin;
 
-	// Add Converter plugin
-	m_processes += new AwConverterPlugin;
-	 
 	// add MATLAB_MARKERS_EXPORTER
 	m_processes += new AwMATLABMarkersExporterPlugin;
 
@@ -590,20 +509,19 @@ void AwPluginManager::loadPlugins()
 #endif
 
 	// Parse plugin to plugin's factory
-	foreach(AwFileIOPlugin *p, m_readers)
+	for (AwFileIOPlugin *p : m_readers)
 		m_readerFactory.addPlugin(p->name, p);
-	foreach(AwFileIOPlugin *p, m_writers)
+	for (AwFileIOPlugin *p : m_writers)
 		m_writerFactory.addPlugin(p->name, p);
-	foreach(AwProcessPlugin *p, m_processes)
+	for (AwProcessPlugin *p : m_processes)
 		m_processFactory.addPlugin(p->name, p);
-	foreach(AwDisplayPlugin *p, m_displays)
+	for (AwDisplayPlugin *p : m_displays)
 		m_displayFactory.addPlugin(p->name, p);
-	foreach(AwFilterPlugin *p, m_filters)
+	for (AwFilterPlugin *p : m_filters)
 		m_filterFactory.addPlugin(p->name, p);
 
-	// Lecture de tous les plugins trouv�s
 	QDir dir(pluginDir);
-	for (auto FileName : dir.entryList(QDir::Files)) {
+	for (const auto &FileName : dir.entryList(QDir::Files)) {
 		QPluginLoader loader(dir.absoluteFilePath(FileName));
 		QObject *plugin = loader.instance();
 		if (plugin == NULL) {

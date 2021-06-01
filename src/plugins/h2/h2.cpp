@@ -1,28 +1,3 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
-//
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
-//
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
 #include "h2.h"
 #include <filter/AwFiltering.h>
 #include <utils/time.h>
@@ -39,11 +14,12 @@ H2Plugin::H2Plugin()
 {
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
-	category = "Process:Correlation:Multi-channels Correlation";
+	category = "Process:Correlation:H2/R2 connectivity";
 	name = QString(tr("h2"));
-	description = QString(tr("Computes H2/R2 on several pairs of channels"));
+	description = QString(tr("Computes H2/R2 connectivity"));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
+	m_helpUrl = "h2/r2::Correlation::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_h2";
 }
 
 H2Plugin::~H2Plugin()
@@ -139,6 +115,10 @@ bool H2::showUi()
 				pdi.input.setNewMarkers(inputMarkers);
 			}
 			AW_DESTROY_LIST(markers);
+		}
+		else {
+			pdi.input.clearMarkers();
+			pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
 		}
 
 		return true;
@@ -452,11 +432,7 @@ void H2::runFromCommandLine()
 		}
 		run->nIterations = run->params.first()->h2.size();
 	}
-	//// compute number of iterations for each run
-	//for (auto r : m_runs) {
-	//	r->nIterations = r->params.at(0)->h2.size();
-	//}
-	//sendMessage("Saving to MATLAB file...");
+
 	float lp = args.value(keys::lp).toDouble();
 	float hp = args.value(keys::hp).toDouble();
 
@@ -542,11 +518,6 @@ void H2::run()
 		QStringList args = { m_resultFiles };
 		map["args"] = args;
 		emit sendCommand(map);
-		//QVariantList args;
-		//args << QString("Correlation Graphs");
-		//for (auto f : m_resultFiles)
-		//	args << f;
-		//emit sendCommand(AwProcessCommand::LaunchProcess, args);
 	}
 }
 
@@ -564,8 +535,14 @@ int H2::computeRuns()
 		QPair<float, float> value = m_ui->bands.value(b);
 		if (b == "AnyWave") {
 			auto filters = pdi.input.filterSettings.filters(dup.first()->type());
-			value.first = filters[0];
-			value.second = filters[1];
+			if (!filters.isEmpty()) {
+				value.first = filters[0];
+				value.second = filters[1];
+			}
+			else {
+				value.first = 0;
+				value.second = 0;
+			}
 		}
 		m_currentBand.name = b;
 		m_currentBand.hp = value.first;
@@ -655,14 +632,16 @@ int H2::computeRuns()
 		QString LPString = m_currentBand.lp > 0 ? QString("%1Hz").arg(m_currentBand.lp) : QString("NoLP");
 		QString HPString = m_currentBand.hp > 0 ? QString("%1Hz").arg(m_currentBand.hp) : QString("NoHP");
 
-
-		QString dir = pdi.input.settings[keys::data_dir].toString();
-		QString baseFileName = pdi.input.settings.value(keys::data_path).toString();
+		// output_dir is always set by AnyWave:
+		// the default output_dir is the data file dir when working on a file outside of a BIDS and is the derivatives path when 
+		// working within a BIDS
+		QString dir = pdi.input.settings[keys::output_dir].toString();
+		QString baseFileName = pdi.input.settings.value(keys::data_file).toString();
 
 		if (m_ui->saveInOneFile) {
 			QString file = QString("%1_algo-%2_hp-%3_lp-%4.mat").arg(baseFileName).arg(method).arg(HPString).arg(LPString);
 			sendMessage("Saving to MATLAB file...");
-			int status = saveToMatlab(file);
+			int status = saveToMatlab(QString("%1/%2").arg(dir).arg(file));
 			if (status == 0) {
 				m_resultFiles << file;
 				sendMessage("Done.");
@@ -681,7 +660,7 @@ int H2::computeRuns()
 				}
 				baseFileName = QString("%1_algo-%2_hp-%3_lp-%4_sec-%5_num-%6").arg(baseFileName).arg(method).arg(HPString).arg(LPString).arg(label).arg(map.value(label));
 				sendMessage(QString("Saving %1...").arg(baseFileName));
-				if (saveToMatlab(baseFileName, run) == -1) {
+				if (saveToMatlab(QString("%1/%2").arg(dir).arg(baseFileName), run) == -1) {
 					sendMessage(QString("Error when writing %1 file.").arg(baseFileName));
 				}
 				else {

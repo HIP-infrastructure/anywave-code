@@ -1,28 +1,3 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
-//
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
-//
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
 #include <widget/AwMarkerInspector.h>
 #include "AwAddPredefinedMarker.h"
 #include "AwAddTargetChannels.h"
@@ -43,13 +18,6 @@ AwMarkerInspector::AwMarkerInspector(const AwMarkerList& markers, const QStringL
 	m_ui->listWidgetTargets->hide();
 	m_ui->buttonAddChannels->hide();
 	m_ui->buttonClearTargets->hide();
-	//// by default no key binding used
-	//m_ui->labelBrowse->hide();
-	//m_ui->radioLabels->hide();
-	//m_ui->radioValues->hide();
-	//m_ui->comboLabels->hide();
-	//m_ui->comboValues->hide();
-
 	m_onlySingle = false;
 	m_ui->lineEditName->setText(tr("New Marker"));
 
@@ -66,11 +34,6 @@ AwMarkerInspector::AwMarkerInspector(const AwMarkerList& markers, const QStringL
 	connect(m_ui->lineEditName, SIGNAL(textEdited(const QString&)), this, SLOT(changeLabel(const QString&)));
 	connect(m_ui->spinValue, SIGNAL(valueChanged(double)), this, SLOT(changeValue(double)));
 	connect(m_ui->checkAutoInc, SIGNAL(toggled(bool)), this, SLOT(changeAutoInc(bool)));	
-	//connect(m_ui->checkBindingActive, SIGNAL(toggled(bool)), this, SLOT(changeBinding(bool)));
-	//connect(m_ui->radioLabels, SIGNAL(clicked()), this, SLOT(changeKeyBinding()));
-	//connect(m_ui->radioValues, SIGNAL(clicked()), this, SLOT(changeKeyBinding()));
-	//connect(m_ui->comboLabels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComboBinding()));
-	//connect(m_ui->comboValues, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComboBinding()));
 
 	// init combo color
 	// default color at first index
@@ -110,52 +73,6 @@ void AwMarkerInspector::setTargets(const AwChannelList& channels)
 void AwMarkerInspector::setMarkers(const AwMarkerList& markers)
 {
 	m_markers = markers;
-	//for (auto m :  markers)	{
-	//	QString value = QString::number(m->value());
-	//	if (!m_markerLabels.contains(m->label()))
-	//		m_markerLabels << m->label();
-	//	if (!m_markerValues.contains(value))
-	//		m_markerValues << value;
-	//}
-
-	//if (markers.isEmpty()) {
-	//	m_ui->comboLabels->setDisabled(true);
-	//	m_ui->comboValues->setDisabled(true);
-	//	m_ui->radioLabels->setDisabled(true);
-	//	m_ui->radioValues->setChecked(true);
-	//}
-	//
-	//if (!m_markerLabels.isEmpty())
-	//	m_ui->comboLabels->addItems(m_markerLabels);
-	//if (!m_markerValues.isEmpty())
-	//	m_ui->comboValues->addItems(m_markerValues);
-
-	//if (m_markerLabels.isEmpty()) {
-	//	m_ui->radioLabels->setDisabled(true);
-	//	m_ui->comboLabels->setDisabled(true);
-	//	m_ui->radioValues->setChecked(true);
-	//}
-	//else {
-	//	m_ui->comboLabels->setDisabled(false);
-	//	m_ui->radioLabels->setDisabled(false);
-	//}
-
-	//if (m_markerValues.isEmpty()) {
-	//	m_ui->radioValues->setDisabled(true);
-	//	m_ui->comboValues->setDisabled(true);
-	//	m_ui->radioLabels->setChecked(true);
-	//}
-	//else {
-	//	m_ui->radioValues->setDisabled(false);
-	//	m_ui->comboValues->setDisabled(false);
-	//}
-
-	//if (m_markerLabels.isEmpty() && m_markerValues.isEmpty()) {
-	//	m_ui->checkBindingActive->setChecked(false);
-	//	m_ui->checkBindingActive->setDisabled(true);
-	//}
-	//else 
-	//	m_ui->checkBindingActive->setDisabled(false);
 }
 
 void AwMarkerInspector::setSingleOnly(bool flag)
@@ -169,41 +86,6 @@ void AwMarkerInspector::setSingleOnly(bool flag)
 		m_ui->radioSelection->setEnabled(true);
 }
 
-//void AwMarkerInspector::changeBinding(bool on)
-//{
-//	m_settings.usingSpacebar = on;
-//}
-
-//void AwMarkerInspector::bindOnLabel(const QString& label)
-//{
-//	AwMarkerList markers;
-//	foreach (AwMarker *m, m_markers)
-//		if (m->label() == label)
-//			markers << m;
-//
-//	m_settings.setBoundMarkers(markers);
-//}
-//
-//void AwMarkerInspector::bindOnValue(float value)
-//{
-//	AwMarkerList markers;
-//	for (auto m : m_markers)
-//		if (m->value() == value)
-//			markers << m;
-//	m_settings.setBoundMarkers(markers);
-//}
-
-//void AwMarkerInspector::changeKeyBinding()
-//{
-//	QRadioButton *button = (QRadioButton *)sender();
-//	if (button == NULL)
-//		return;
-//
-//	if (button == m_ui->radioLabels) 
-//		bindOnLabel( m_ui->comboLabels->currentText());
-//	else if (button == m_ui->radioValues)
-//		bindOnValue((float)m_ui->comboValues->currentText().toDouble());
-//}
 
 void AwMarkerInspector::changeColor()
 {
@@ -213,19 +95,6 @@ void AwMarkerInspector::changeColor()
 	else 
 		m_settings.color = QColor(QColor::colorNames().at(index - 1)).name(QColor::HexRgb);
 }
-
-//void AwMarkerInspector::changeComboBinding()
-//{
-//	QComboBox *box = (QComboBox *)sender();
-//
-//	if (box == NULL)
-//		return;
-//
-//	if (box == m_ui->comboLabels && m_ui->radioLabels->isChecked())
-//		bindOnLabel(m_ui->comboLabels->currentText());
-//	else if (box == m_ui->comboValues && m_ui->radioValues->isChecked())
-//		bindOnValue((float)m_ui->comboValues->currentText().toDouble());
-//}
 
 
 void AwMarkerInspector::changeMarkerType(bool flag)
@@ -304,7 +173,7 @@ void AwMarkerInspector::setPredefinedMarkers(const AwMarkerList& markers)
 		m_ui->table->setItem(m_ui->table->rowCount() - 1, 1, itemValue);
 		m_ui->table->setItem(m_ui->table->rowCount() - 1, 2, itemColor);
 	}
-	m_ui->checkPredefined->setChecked(true);
+//	m_ui->checkPredefined->setChecked(true);   // Do not activate the predefined markers automatically
 }
 
 AwMarkerList& AwMarkerInspector::predefinedMarkers()

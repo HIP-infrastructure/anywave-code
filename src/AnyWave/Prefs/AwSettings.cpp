@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Prefs/AwSettings.h"
 #include <QSettings>
 #include <QWidget>
@@ -36,22 +26,58 @@
 AwSettings *AwSettings::m_instance = 0;
 
 #define LINE_PX	200
+constexpr int max_recent_files = 15;
 
 AwSettings::AwSettings(QObject *parent)
 	: QObject(parent)
 {
 	m_sysTrayIcon = new QSystemTrayIcon(this);
 	m_sysTrayIcon->setIcon(QIcon(":images/AnyWave_icon.png"));
-	m_settings[aws::max_recent_files] = (int)15;
-	m_currentReader = NULL;
+	m_settings[aws::max_recent_files] = max_recent_files;
+	m_settings[aws::matlab_present] = false;
+	m_currentReader = nullptr;
+	//Save system path
+	m_settings[aws::system_path] = QString(qgetenv("PATH"));
+#if defined(Q_OS_WIN)
+	// get username
+	m_settings[aws::username] = qgetenv("USERNAME");
+#else
+    m_settings[aws::username] = qgetenv("USER");
+#endif
+}
 
+AwSettings::~AwSettings()
+{
+	if (m_settings.value(aws::gui_active).toBool()) {
+		// save recent files
+		QSettings settings;
+		settings.beginWriteArray("recentFiles");
+		auto recentFiles = m_settings.value(aws::recent_files).toStringList();
+		for (int i = 0; i < recentFiles.size(); i++) {
+			settings.setArrayIndex(i);
+			settings.setValue("filePath", recentFiles.at(i));
+		}
+		settings.endArray();
+		// save recent BIDS
+		auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
+		settings.beginWriteArray("recentBIDS");
+		for (int i = 0; i < recentBIDS.size(); i++) {
+			settings.setArrayIndex(i);
+			settings.setValue("BIDSPath", recentBIDS.at(i));
+		}
+		settings.endArray();
+	}
+}
+
+void AwSettings::init()
+{
 	// load previously saved recent files
 	QSettings settings;
 
 	// load recent files
 	int size = settings.beginReadArray("recentFiles");
 	QStringList recentFiles, recentBIDS;
-	for (int i = 0; i < size; i++)	{
+	for (int i = 0; i < size; i++) {
 		settings.setArrayIndex(i);
 		recentFiles << settings.value("filePath").toString();
 	}
@@ -66,14 +92,13 @@ AwSettings::AwSettings(QObject *parent)
 
 	m_settings[aws::recent_files] = recentFiles;
 	m_settings[aws::recent_bids] = recentBIDS;
-	m_settings[aws::matlab_present] = false;
 
 	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
 	m_settings[aws::auto_trigger_parsing] = isAutoTriggerParsingOn;
 	// Cpu cores
 	auto totalCPUCores = QThreadPool::globalInstance()->maxThreadCount();
 	m_settings[aws::total_cpu_cores] = totalCPUCores;
-	auto maxCPUCores =  settings.value("general/cpu_cores", totalCPUCores).toInt();
+	auto maxCPUCores = settings.value("general/cpu_cores", totalCPUCores).toInt();
 	m_settings[aws::max_cpu_cores] = maxCPUCores;
 
 	bool checkForUpdates = settings.value("general/checkForUpdates", true).toBool();
@@ -83,7 +108,7 @@ AwSettings::AwSettings(QObject *parent)
 	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
 	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
 
-	m_matlabInterface = nullptr;
+	//m_matlabInterface = nullptr;
 	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
 	auto appPath = QCoreApplication::applicationDirPath();
 	m_settings[aws::app_dir] = appPath;
@@ -101,30 +126,19 @@ AwSettings::AwSettings(QObject *parent)
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
 
-	//Save system path
-	m_settings[aws::system_path] = QString(qgetenv("PATH"));
-
-	// get username
-	m_settings[aws::username] = qgetenv("USERNAME");
-}
-
-AwSettings::~AwSettings()
-{
-	// save recent files
-	QSettings settings;
-	settings.beginWriteArray("recentFiles");
-	auto recentFiles = m_settings.value(aws::recent_files).toStringList();
-	for (int i = 0; i < recentFiles.size(); i++)	{
-		settings.setArrayIndex(i);
-		settings.setValue("filePath", recentFiles.at(i));
+	QString pythonExe = settings.value("general/python_interpreter", QString()).toString();
+	QString pythonVenv = settings.value("general/python_venv", QString()).toString();
+	m_settings[aws::python_detected] = false;
+	if (!pythonVenv.isEmpty()) {
+		m_settings[aws::python_venv_dir] = pythonVenv;
+		m_settings[aws::python_exe] = pythonExe;
+		m_settings[aws::python_detected] = true;
 	}
-	settings.endArray();
-	// save recent BIDS
-	auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
-	settings.beginWriteArray("recentBIDS");
-	for (int i = 0; i < recentBIDS.size(); i++) {
-		settings.setArrayIndex(i);
-		settings.setValue("BIDSPath", recentBIDS.at(i));
+	else {
+		if (pythonExe.isEmpty()) {
+			m_settings[aws::python_exe] = pythonExe;
+			m_settings[aws::python_detected] = true;
+		}
 	}
 }
 
@@ -158,10 +172,11 @@ void AwSettings::createMatlabShellScript(const QString& path)
 		stream << "#!/bin/bash" << endl;
 		stream << "MATLAB=" << path << endl;
 #ifdef Q_OS_MAC
-		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/bin/maci64" << endl;
+		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/extern/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
 #elif defined(Q_OS_LINUX)
-		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/bin/glnxa64" << endl;
+		stream << "export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/extern/bin/glnxa64" << endl;
 		stream << "if [[ -f $MATLAB/bin/glnxa64/libexpat.1.so ]]; then " << endl;
 		stream << "mv $MATLAB/bin/glnxa64/libexpat.1.so $MATLAB/bin/glnxa64/libexpat.1.so.NOFIND" << endl;
 		stream << "fi" << endl;

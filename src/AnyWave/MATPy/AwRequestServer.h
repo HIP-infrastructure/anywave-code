@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef AW_REQUEST_SERVER_H
 #define AW_REQUEST_SERVER_H
 #include <QObject>
@@ -30,7 +20,6 @@
 class AwScriptProcess;
 #include <AwDataClient.h>
 #include "Data/AwDataSet.h"
-//class AwFileIO;
 
 
 class AwRequestServer : public AwDataClient
@@ -40,7 +29,7 @@ public:
 	// default constructor
 	explicit AwRequestServer(quint16 port = 0, QObject *parent = 0);
 	// constructor that spawn a dedicated data server for the specified file. if port is specified, listen on that port.
-//	AwRequestServer(const QString& dataPath, quint16 port = 0, QObject *parent = 0);
+
 	~AwRequestServer();
 	inline bool isListening() { return m_isListening; }
 	inline quint16 serverPort() { return m_serverPort; }
@@ -67,7 +56,6 @@ protected:
 	QThread *m_thread;
 	bool m_isListening;
 	quint16 m_serverPort;
-//	AwDataSet *m_ds;
 	int m_pidCounter;
 	bool m_debugMode;
 	QList<AwScriptProcess*> m_processes;	// this list will contain instanciated process when plugin_debug option is active
@@ -92,6 +80,7 @@ private:
 	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
 	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
 	void handleConnectDebug(QTcpSocket* client, AwScriptProcess* process);
+	void handleSendMarkers(QTcpSocket* client, AwScriptProcess* process);
 	void unusedHandler(QTcpSocket *client, AwScriptProcess *process) {}
 
 	void setHandlers();

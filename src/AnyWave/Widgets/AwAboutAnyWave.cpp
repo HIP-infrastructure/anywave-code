@@ -1,44 +1,33 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwAboutAnyWave.h"
 #include <QSettings>
 #include <QDesktopServices>
 #include <QUrl>
 #include <vtkVersion.h>
 #include "Prefs/AwSettings.h"
+#include <AwVersion.h>
 
 AwAboutAnyWave::AwAboutAnyWave(QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
 	
-	QSettings settings;
-	QString BuildDate = settings.value("general/buildDate", "No build info").toString();
 	labelQtVersion->setText(QT_VERSION_STR);
-	labelBuildDate->setText(QString("Build: %1").arg(BuildDate));
+	labelBuildDate->setText(QString("version %1.%2").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION));
 	labelVtkVersion->setText(QString(VTK_VERSION));
 	buttonGetLastVersion->hide();
 	labelUpdateAvailable->setText("No update available.");

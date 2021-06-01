@@ -20,4 +20,7 @@
       <ParseFiles>true</ParseFiles>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
+  </ItemGroup>
 </Project>

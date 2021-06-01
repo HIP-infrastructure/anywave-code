@@ -27,12 +27,23 @@
 #define AW_MATLAB_INTERFACE_H_
 #include <QObject>
 
-
+namespace matlab_interface {
+	constexpr auto pid = "pid";
+	constexpr auto port = "port";
+	constexpr auto json = "json";
+	constexpr auto matlab_api_dir = "matlab_api_dir";
+	constexpr auto matlab_mex_dir = "matlab_mex_dir";
+	constexpr auto python_exe = "python_exe";
+	constexpr auto python_venv_dir = "python_venv_dir";
+	constexpr auto matlab_plugin_dir = "matlab_plugin_dir";
+	
+}
 
 class AwMatlabInterface : public QObject
 {
 public:
-	virtual void run(const QString& path, const QString& dep, int pid, quint16 serverPort, const QString& json) = 0;
+	virtual void run(const QVariantMap& settings) = 0;
+	
 signals:
 	void progressChanged(const QString&);
 };

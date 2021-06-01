@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwMatlabScriptPlugin.h"
 #include "MATPy/AwMATPyServer.h"
 #include "MATPy/AwPidManager.h"
@@ -51,16 +41,6 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	AwMATPyServer *server = AwMATPyServer::instance();
 	server->start();
 	AwPidManager::instance()->createNewPid(p);
-//	if (isCompiled()) {
-//		p->setCompiled();
-//#ifdef Q_OS_WIN
-//		QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
-//		QString fullPath = QString("%1;%2").arg(application).arg(AwSettings::getInstance()->value(aws::system_path).toString());
-//		p->setSystemPath(fullPath);
-//#else
-//		p->setSystemPath(AwSettings::getInstance()->value(aws::system_path).toString());
-//#endif
-//	}
 	return p;
 }
 
@@ -72,17 +52,23 @@ void AwMatlabScriptProcess::run()
 	QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 
 	// merge args with all settings set as input for the process before when initializing the plugin
-//	pdi.input.args().unite(pdi.input.settings);
 	if (!isCompiled) {
 		AwSettings* aws = AwSettings::getInstance();
 		mi = aws->matlabInterface();
 		if (aws->value(aws::matlab_present).toBool()) {
 			auto path = pdi.input.settings.value("script_path").toString();
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-		    mi->run(path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.settings).simplified());
+			QVariantMap settings;
+			settings[matlab_interface::matlab_plugin_dir] = path;
+			settings[matlab_interface::matlab_mex_dir] = aws->value(aws::matlab_mex_dir);
+			settings[matlab_interface::json] = AwUtilities::json::toJsonString(pdi.input.settings);
+			settings[matlab_interface::pid] = m_pid;
+			settings[matlab_interface::port] = AwMATPyServer::instance()->serverPort();
+			mi->run(settings);
 		}
 		return;
 	}
+
 	auto systemPath = AwSettings::getInstance()->value(aws::system_path).toString();
 	// compiled plugin need some variables init
 	QStringList arguments;
@@ -95,6 +81,8 @@ void AwMatlabScriptProcess::run()
 	else
 		arguments << mcrPath;
 #endif
+
+
 #if defined(Q_OS_WIN)
 	
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());

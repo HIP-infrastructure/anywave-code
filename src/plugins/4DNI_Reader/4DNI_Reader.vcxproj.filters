@@ -67,14 +67,12 @@
     <None Include="4DNI_posterior_right.mtg">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="meg4dreader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="meg4dreader_global.h">

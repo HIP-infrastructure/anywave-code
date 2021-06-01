@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClCompile Include="AwLayout.cpp" />
     <ClCompile Include="AwLayoutManager.cpp" />
-    
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\layout\AwLayout.h" />
@@ -65,5 +64,6 @@
     <None Include="..\..\resources\layouts\egi257.lay">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

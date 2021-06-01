@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Marmaduke Woodman – Laboratoire UMR INS INSERM 1106 - michael.woodman@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ica.h"
 #include "ICASettings.h"
 #include <QtMath>
@@ -41,6 +31,12 @@
 #include <utils/json.h>
 #include <AwKeys.h>
 
+namespace algos {
+	constexpr auto ICA_infomax = 0;
+	constexpr auto ICA_cca = 1;
+	constexpr auto ICA_sobi = 2;
+}
+
 ICA::ICA()
 {
 	setInputFlags(Aw::ProcessIO::GetAsRecordedChannels | Aw::ProcessIO::DontSkipBadChannels |
@@ -48,8 +44,9 @@ ICA::ICA()
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	pdi.addInputChannel(-1, 1, 0);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
-	m_algoNames << "Infomax";
 	m_isDownsamplingActive = true;
+	m_hpf = m_lpf = 0.;
+	m_nComp = 0;
 }
 
 ICAPlugin::ICAPlugin() : AwProcessPlugin()
@@ -60,6 +57,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
     description = QString("extract independent components");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/ica/json/batch.json");
+	m_helpUrl = "ICA::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_ica";
 }
 
 ICA::~ICA()
@@ -71,18 +69,18 @@ bool ICA::showUi()
 	ICASettings ui(this);
 
 	if (ui.exec() == QDialog::Accepted)	{
-		//m_modality = ui.modality;
 		auto args = pdi.input.settings;
-		//args.unite(ui.args);
-
-		QString testFile = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(pdi.input.settings[keys::data_dir].toString());
-		QFile test(testFile);
+		QString dir = pdi.input.settings.value(keys::output_dir).toString();
+		// just testing to write a file in the output_dir 
+		// m_filename is wrong here
+		m_fileName = QString("%1/MEG_1Hz_120Hz_50c_ica.mat").arg(dir);
+		QFile test(m_fileName);
 		if (!test.open(QIODevice::WriteOnly)) {
 			QMessageBox::critical(0, "Saving results", QString("Could not create %1").arg(m_fileName));
 			return false;
 		}
 		test.close();
-		QFile::remove(testFile);
+		QFile::remove(m_fileName);
 		pdi.input.settings.unite(ui.args);
 		return true;
 	}
@@ -100,6 +98,10 @@ bool ICA::batchParameterCheck(const QVariantMap& hash)
 int ICA::initParameters()
 {
 	auto args = pdi.input.settings;
+	QMap<QString, int> algos;
+	algos.insert("infomax", algos::ICA_infomax);
+	algos.insert("cca", algos::ICA_cca);
+	algos.insert("sobi", algos::ICA_sobi);
 
 	m_isDownsamplingActive = false;
 	m_modality = AwChannel::stringToType(args.value("modality").toString());
@@ -142,7 +144,20 @@ int ICA::initParameters()
 	m_nComp = m_channels.size();
 
 	if (args.contains("comp"))
-		m_nComp = args["comp"].toInt();
+		m_nComp = args.value("comp").toInt();
+
+	// check algo
+	// some algos have a fixed number of components (no PCA)
+	m_algo = 0; // default to infomax
+	QString algo = "infomax";
+	if (args.contains("algorithm")) {
+		auto algoName = args.value("algorithm").toString().toLower().simplified();
+		m_algo = algos.value(algoName);
+		if (m_algo)
+			algo = algoName;
+	}
+	if (m_algo == algos::ICA_cca || m_algo == algos::ICA_sobi) 
+		m_nComp = m_channels.size();
 
 	if (m_nComp > m_channels.size()) {
 		sendMessage("The specified number of components is greater dans the number of available channels in data. Aborted.");
@@ -166,37 +181,6 @@ int ICA::initParameters()
 		pdi.input.clearMarkers();
 		pdi.input.addMarker(new AwMarker("global", 0., args.value(keys::file_duration).toFloat()));
 	}
-
-	//// check if we have to use specific markers or skipped some
-	//bool use = args.contains("use_markers");
-	//bool skip = args.contains("skip_markers");
-
-	//auto fd = pdi.input.settings[keys::file_duration].toDouble();
-	//if (use || skip) {
-	//	auto markers = AwMarker::duplicate(pdi.input.markers());
-	//	QStringList skippedMarkers, usedMarkers;
-	//	if (use)
-	//		usedMarkers = args.value("use_markers").toStringList();
-	//	if (skip)
-	//		skippedMarkers = args.value("skip_markers").toStringList();
-
-	//	auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
-	//	if (inputMarkers.isEmpty()) {
-	//		pdi.input.clearMarkers();
-	//		pdi.input.addMarker(new AwMarker("whole data", 0., fd));
-	//	}
-	//	else
-	//	{
-	//		pdi.input.clearMarkers();
-	//		pdi.input.setNewMarkers(inputMarkers);
-	//	}
-	//	AW_DESTROY_LIST(markers);
-	//}
-	//else {  // no markers to use or skip => compute on the whole data
-	//	pdi.input.clearMarkers();
-	//	pdi.input.addMarker(new AwMarker("whole data", 0., fd));
-	//}
-
 
     // Watch for memory exception
 	try {
@@ -271,6 +255,7 @@ int ICA::initParameters()
 	}
 
 	QString dir;
+	// should always contain output_dir execpt if launched from command line with no output_dir option
 	if (args.contains(keys::output_dir))
 		dir = args.value(keys::output_dir).toString();
 	else
@@ -282,12 +267,11 @@ int ICA::initParameters()
 
 	QString mod = args.value("modality").toString();
 	if (args.contains(keys::output_suffix))
-		m_fileName += QString("_%1_%2Hz_%3Hz_%4c%5.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
+		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica
-	    m_fileName += QString("_%1_%2Hz_%3Hz_%4c_ica.mat").arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
+	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5_ica.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	// generate full path
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
-
 	return 0;
 }
 
@@ -296,7 +280,18 @@ void ICA::runFromCommandLine()
 {
 	if (initParameters() == 0) {
 		try {
-			infomax(m, n, m_nComp);
+			switch (m_algo) {
+			case algos::ICA_infomax:
+				infomax(m, n, m_nComp);
+				break;
+			case algos::ICA_cca: // cca
+				run_cca(m, n);
+				break;
+			case algos::ICA_sobi:
+				run_sobi(m, n);
+				break;
+			}
+			
 		}
 		catch (std::bad_alloc& ba) {
 			sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
@@ -312,7 +307,17 @@ void ICA::run()
 		return;
 
 	try {
-		infomax(m, n, m_nComp);
+		switch (m_algo) {
+		case algos::ICA_infomax:
+			infomax(m, n, m_nComp);
+			break;
+		case algos::ICA_cca: // cca
+			run_cca(m, n);
+			break;
+		case algos::ICA_sobi:
+			run_sobi(m, n);
+			break;
+		}
 	}
 	catch (std::bad_alloc& ba) {
 		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");

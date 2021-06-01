@@ -99,22 +99,12 @@
     <ClCompile Include="AwFilterSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
-    
-    
     <ClCompile Include="AwFilterTableView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
     <ClCompile Include="AwFilterAddButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
     <ClCompile Include="AwFilterPlugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -195,7 +185,6 @@
     <ClInclude Include="..\..\include\filter\AwFiltering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\..\include\filter\AwFilterPlugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -222,5 +211,8 @@
     <QtMoc Include="AwFilterAddButton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

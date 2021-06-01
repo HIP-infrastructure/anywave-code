@@ -39,8 +39,6 @@
     <ClCompile Include="BrainVisionIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brainvisionio_global.h">
@@ -51,5 +49,8 @@
     <QtMoc Include="BrainVisionIO.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

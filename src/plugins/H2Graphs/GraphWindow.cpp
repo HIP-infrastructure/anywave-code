@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "GraphWindow.h"
 #include "GraphSensorItem.h"
 #include "GraphColorMap.h"
@@ -49,7 +39,8 @@ GraphWindow::GraphWindow(GraphSet *gs, QWidget *parent)
 	m_scene = new QGraphicsScene(this);
 	m_scene->setSceneRect(QRectF(-500, -500, 1000, 1000));
 	m_ui.graphicsView->setScene(m_scene);
-	m_threshold = 0.0;
+	m_threshold = 0.4;
+	m_ui.sbThreshold->setValue(0.4);
 	m_ui.buttonBack->setEnabled(false);
 	m_showValues = true;
 	m_showAsym = false;
@@ -62,6 +53,7 @@ GraphWindow::GraphWindow(GraphSet *gs, QWidget *parent)
 	m_posInFile = gs->positions().first();
 	m_currentIteration = 0;
 	m_totalIterations = gs->totalIterations();
+	m_samplingRate = gs->samplingRate;
 	initGraph();
 	changeViewSize("80");
 	updateGraph();
@@ -185,7 +177,7 @@ void GraphWindow::initGraph()
 	m_sensorsItem.clear();
 
 	m_ui.graphicsView->centerOn(0, 0);
-	qreal radius = qMin(scene->width() / 3, scene->height() / 3) - 30;
+	qreal radius = std::min(scene->width() / 3, scene->height() / 3) - 30;
 	qreal angle = 0;
 	qreal step = 2 * M_PI /  m_labels.size();
 
@@ -206,6 +198,26 @@ void GraphWindow::initGraph()
 	GraphLegend *legend = new GraphLegend();
 	scene->addItem(legend);
 	legend->setPos(-radius - 50, 200);
+
+	//// pre parse the 3D matrices to extract for each pair, which has the maximum h2 value and so set also the lag.
+	//cube matrix = m_graphSet->correlationMatrix();
+	//cube lag = m_graphSet->lagMatrix();
+	//cube test = zeros(3, m_labels.size(), m_totalIterations);
+	//int maxLag = (int)floor((m_graphSet->maxLag / m_samplingRate) * 1000);
+
+	//for (auto iter = 0; iter < m_totalIterations; iter++) {
+	//	for (uword i = 0; i < matrix.n_rows; i++) {  // X
+	//		for (uword j = i + 1; j < matrix.n_cols; j++) { // Y
+	//			double xy_value = matrix(i, j, iter);
+	//			double yx_value = matrix(j, i, iter);
+	//			double xy_lag = lag(i, j, iter);
+	//			double yx_lag = lag(j, i, iter);
+	//			double ah2 = (xy_value - yx_value) / std::max(xy_value, yx_value);
+
+	//		}
+	//	}
+	//}
+
 }
 
 
@@ -225,6 +237,7 @@ void GraphWindow::updateGraph()
 	cube matrix = m_graphSet->correlationMatrix();
 	cube lag = m_graphSet->lagMatrix();
 
+	int maxLag = (int)floor((m_graphSet->maxLag / m_samplingRate) * 1000);
 	for (uword i = 0; i < matrix.n_rows; i ++) {  // X
 		for (uword j = i + 1; j < matrix.n_cols; j++) { // Y
 			double xy_value = matrix(i, j, m_currentIteration);
@@ -233,7 +246,7 @@ void GraphWindow::updateGraph()
 			int yx_lag = (int)lag(j, i, m_currentIteration);
 			xy_lag = (int)floor((xy_lag / m_graphSet->samplingRate) * 1000);
 			yx_lag = (int)floor((yx_lag / m_graphSet->samplingRate) * 1000);
-			int maxLag = (int)floor((m_graphSet->maxLag / m_samplingRate) * 1000);
+			
 			// compute asymetric h2
 			float ah2 = (xy_value - yx_value) / std::max(xy_value, yx_value);
 			GraphArrow *arrow = NULL;

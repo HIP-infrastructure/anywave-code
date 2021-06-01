@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef AWSETTINGS_H
 #define AWSETTINGS_H
 
@@ -50,14 +40,13 @@ namespace aws {
 	constexpr auto settings_dir = "settings_dir";
 	// common dirs
 	constexpr auto home_dir = "home_dir";
-	constexpr auto python_module_dir = "python_module_dir";
-	constexpr auto python_package_dir = "python_package_dir";
 	constexpr auto app_dir = "app_dir";
 	constexpr auto app_resource_dir = "app_resource_dir";
 	constexpr auto app_plugins_dir = "app_plugins_dir";
 	constexpr auto app_matlab_plugins_dir = "app_matlab_plugins_dir";
 	constexpr auto app_python_plugins_dir = "app_python_plugins_dir";
-	constexpr auto mex_dir = "mex_dir";
+	constexpr auto matlab_mex_dir = "mex_dir";
+	constexpr auto matlab_API_dir = "matlab_API_dir";	// the folder containing APi functions for matlab plugins (Starting with 2104)
 	// plugins
 	constexpr auto plugin_debug_mode = "plugin_debug";
 	constexpr auto server_port = "server_port";
@@ -69,6 +58,10 @@ namespace aws {
 	constexpr auto recent_bids = "recent_bids";
 	constexpr auto username = "username";
 	constexpr auto auto_trigger_parsing = "auto_trigger_parsing";
+	// python
+	constexpr auto python_exe = "python_exe";
+	constexpr auto python_venv_dir = "python_venv_dir";
+	constexpr auto python_detected = "python_detected";
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";
@@ -102,6 +95,7 @@ public:
 		return m_instance;
 	}
 
+	void init();
 	QVariant value(const QString& key);
 	void setValue(const QString& key, const QVariant& value);
 	
@@ -140,12 +134,7 @@ public slots:
 	void savePredefinedMarkers(const AwMarkerList& markers);
 protected:
 	QVariantMap m_settings;
-	
 	QList<AwFileIO *> m_readers;
-	//QStringList m_languages;			// list of available languages
-	//QString m_language;					// current language
-	//QStringList m_locales;				// locales strings 
-
 	AwFileIO *m_currentReader;
 	AwDisplaySetup *m_setup;
 	QSystemTrayIcon *m_sysTrayIcon;

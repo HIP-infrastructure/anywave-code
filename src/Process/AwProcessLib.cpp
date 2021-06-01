@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwProcessLib.h"
 #include <QWidget>
 #include <QtDebug>
@@ -60,6 +50,52 @@ bool AwBaseProcess::isAborted()
 {
 	QMutexLocker locker(&m_lock);
 	return m_abort;
+}
+
+int AwBaseProcess::applyUseSkipMarkersKeys()
+{
+	auto fd = pdi.input.settings.value(keys::file_duration).toFloat();
+
+	// filter markers  considering the optional arguments use_markers and skip_markers
+   // init markers based on input.settings arguments (if any)
+	QStringList usedMarkers, skippedMarkers;
+	bool useMarkers = false, skipMarkers = false;
+	bool allDataFlag = false;
+	if (pdi.input.settings.contains(keys::use_markers)) {
+		usedMarkers = pdi.input.settings.value(keys::use_markers).toStringList();
+		useMarkers = true;
+		// handle special case : if use_markers contains all_data
+		// that will force the input to be only one marker marking all the data.
+		// other marker flags will be ignored
+		if (usedMarkers.first().simplified().toLower() == "all_data") {
+			pdi.input.clearMarkers();
+			// add a whole marker to the marker list
+			pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+			allDataFlag = true;
+		}
+	}
+	if (pdi.input.settings.contains(keys::skip_markers)) {
+		skippedMarkers = pdi.input.settings.value(keys::skip_markers).toStringList();
+		skipMarkers = true;
+	}
+
+	if (!allDataFlag) {
+		if (skipMarkers || useMarkers) {
+			auto markers = AwMarker::duplicate(pdi.input.markers());
+			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
+			// Set modified markers !!!
+			pdi.input.setModifiedMarkers(markers);
+			addModifiers(Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied);
+			if (inputMarkers.isEmpty()) {
+				pdi.input.clearMarkers();
+				pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
+			}
+			else
+				pdi.input.setNewMarkers(inputMarkers);
+		}
+		return 0;
+	}
+	return 1;
 }
 
 void AwBaseProcess::connectClient(AwDataClient *client)
@@ -173,6 +209,11 @@ bool AwProcessPlugin::isBatchGUICompatible()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // AwProcessDataInterface
+
+QString AwProcessDataInterface::outputDirectory()
+{
+	return input.settings.value(keys::output_dir).toString();
+}
 
 void AwProcessDataInterface::addInputChannel(int type, int min, int max)
 {

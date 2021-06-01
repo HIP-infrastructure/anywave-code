@@ -55,10 +55,6 @@
     <ClCompile Include="AwSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="AwChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,5 +92,9 @@
     <QtMoc Include="..\..\include\AwDataClient.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+    <None Include="..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>

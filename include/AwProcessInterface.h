@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PROCESS_INTERFACE_H_
 #define PROCESS_INTERFACE_H_
 #include <AwProcess.h>
@@ -71,6 +61,8 @@ public:
 	inline void addModifiers(int flags) { m_modifiersFlags |= flags; }
 	inline int runMode() { return m_runMode; }
 	void setRunMode(int mode) { m_runMode = mode; }
+	/** This method will prepare input markers for the process based on skip_markers/use_markers keys in settings. **/
+	int applyUseSkipMarkersKeys();
 	
 	/** Initializing process before starting it **/
 	virtual void init() {}
@@ -135,7 +127,7 @@ class AW_PROCESS_EXPORT AwProcessPlugin : public AwPluginBase
 {
 public:
 	// default constructor
-	AwProcessPlugin() : AwPluginBase() { m_flags = 0x00000000; }
+	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; }
 	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY.
 - Display type indicates that the plugin will process only displayed data.
 - Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
@@ -147,6 +139,10 @@ public:
 	
 	void setFlags(int flags) { m_flags |= flags; }
 	inline int flags() { return m_flags; }
+	inline int modifiersFlags() { return m_modifiersFlags; }
+	inline int inputFlags() { return m_inputFlags; }
+	void setModifiersFlags(int f) { m_modifiersFlags = f; }
+	void setInputFlags(int f) { m_inputFlags = f; }
 	/** creates a new instance of AwProcess object. You MUST implement this pure virtual method to instanciante the process you defined for the plugin. **/
 	virtual AwBaseProcess *newInstance() = 0;
 	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
@@ -163,6 +159,8 @@ public:
 protected:
 	/** Flags for plugin behavior **/
 	int m_flags;
+	int m_modifiersFlags;
+	int m_inputFlags;
 	QVariantMap m_settings;
 	QVariantMap m_batchMap; // command line specific
 };

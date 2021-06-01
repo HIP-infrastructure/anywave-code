@@ -1,3 +1,18 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
 #include <QTextStream>
@@ -106,7 +121,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	auto outputDir = args["output_dir"].toString();
 	bool headshapeExists = false;
 
-	QString folderName, json, channels_tsv, events_tsv;
+	QString folderName, json, channels_tsv, events_tsv, originalMarkers;
 	folderName = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	if (!session.isEmpty())
 		folderName = QString("%1_ses-%2").arg(folderName).arg(session);
@@ -127,6 +142,8 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	json = QString("%1.json").arg(folderName);
 	channels_tsv = QString("%1_channels.tsv").arg(baseName);
 	events_tsv = QString("%1_events.tsv").arg(baseName);
+	originalMarkers = QString("%1_original.mrk").arg(baseName);
+	
 	// common BIDS code to all MEG formats
 
 	if (kind == AwBIDSManager::Bti4DNI) { // 4DNI specific code
@@ -272,6 +289,8 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 		AwMarker::removeDoublons(markers);
 		emit log(QString("%1 markers total.").arg(markers.size()));
 	}
+	// auto save original markers
+	AwMarker::save(originalMarkers, markers);
 
 	if (args.contains(keys::skip_markers)) {
 		auto labels = args.value(keys::skip_markers).toStringList();
@@ -434,27 +453,31 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 
 	// shape the BIDS file names
-	QString fileName, json, channels_tsv, events_tsv;
+	QString fileName, json, channels_tsv, events_tsv, originalMarkers;
 	fileName = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	json = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	channels_tsv = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	events_tsv = QString("%1/sub-%2").arg(outputDir).arg(subj);
+	originalMarkers = QString("%1/sub-%2").arg(outputDir).arg(subj);
 	if (!session.isEmpty()) {
 		fileName = QString("%1_ses-%2").arg(fileName).arg(session);
 		json = QString("%1_ses-%2").arg(json).arg(session);
 		channels_tsv = QString("%1_ses-%2").arg(channels_tsv).arg(session);
 		events_tsv = QString("%1_ses-%2").arg(events_tsv).arg(session);
+		originalMarkers = QString("%1_ses-%2").arg(originalMarkers).arg(session);
 	}
 	fileName = QString("%1_task-%2").arg(fileName).arg(task);
 	json = QString("%1_task-%2").arg(json).arg(task);
 	channels_tsv = QString("%1_task-%2").arg(channels_tsv).arg(task);
 	events_tsv = QString("%1_task-%2").arg(events_tsv).arg(task);
+	originalMarkers = QString("%1_task-%2").arg(originalMarkers).arg(task);
 	// acq comes after task
 	if (!acq.isEmpty()) {
 		fileName = QString("%1_acq-%2").arg(fileName).arg(acq);
 		json = QString("%1_acq-%2").arg(json).arg(acq);
 		channels_tsv = QString("%1_acq-%2").arg(channels_tsv).arg(acq);
 		events_tsv = QString("%1_acq-%2").arg(events_tsv).arg(acq);
+		originalMarkers = QString("%1_acq-%2").arg(originalMarkers).arg(acq);
 	}
 	// run comes after acq or task
 	if (!run.isEmpty()) {
@@ -462,6 +485,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		json = QString("%1_run-%2").arg(json).arg(run);
 		channels_tsv = QString("%1_run-%2").arg(channels_tsv).arg(run);
 		events_tsv = QString("%1_run-%2").arg(events_tsv).arg(run);
+		originalMarkers = QString("%1_run-%2").arg(originalMarkers).arg(run);
 	}
 	// proc comes after run
 	if (!proc.isEmpty()) {
@@ -469,6 +493,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		json = QString("%1_proc-%2").arg(json).arg(proc);
 		channels_tsv = QString("%1_proc-%2").arg(channels_tsv).arg(proc);
 		events_tsv = QString("%1_proc-%2").arg(events_tsv).arg(proc);
+		originalMarkers = QString("%1_proc-%2").arg(originalMarkers).arg(proc);
 	}
 
 	fileName = QString("%1_%2.%3").arg(fileName).arg(mod).arg(ext);
@@ -476,6 +501,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 
 	channels_tsv = QString("%1_channels.tsv").arg(channels_tsv);
 	events_tsv = QString("%1_events.tsv").arg(events_tsv);
+	originalMarkers = QString("%1_original.mrk").arg(originalMarkers);
 
 	auto markerFile = reader->infos.mrkFile();
 	auto markers = AwMarker::duplicate(reader->infos.blocks().first()->markers());
@@ -484,6 +510,8 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		markers += temp;
 		AwMarker::removeDoublons(markers);
 	}
+	// auto save original markers
+	AwMarker::save(originalMarkers, markers);
 
 	if (args.contains(keys::skip_markers)) {
 		auto labels = args.value(keys::skip_markers).toStringList();
@@ -512,7 +540,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		// rename file to match BIDS recommandation
 		QString pluginName;
 		if (ext == "edf")
-			pluginName = "EDF/BDF IO";
+			pluginName = "EDF Format";
 		else if (ext == "vhdr")
 			pluginName = "Brainvision Analyser Format";
 
@@ -614,8 +642,6 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		return -1;
 	}
 
-
-
 	QString manufacturer = reader->plugin()->manufacturer;
 	if (manufacturer.isEmpty())
 		manufacturer = "n/a";
@@ -670,7 +696,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers)
 {
 	// get the EDFIO plugin
-	auto plugin = AwPluginManager::getInstance()->getReaderPluginByName("EDF/BDF IO");
+	auto plugin = AwPluginManager::getInstance()->getReaderPluginByName("EDF Format");
 	if (plugin == NULL) {
 		throw(AwException("EDFIO Plugin is missing", "BIDSManager::convertToEDF"));
 		return -1;

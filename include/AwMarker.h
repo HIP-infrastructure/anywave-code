@@ -1,33 +1,26 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef AWMARKER_H
 #define AWMARKER_H
 #include <AwGlobal.h>
 #include <QStringList>
 #include <QMetaType>
+
+constexpr auto MARKERS_THREAD_THRESHOLD = 5000;  // threshold for multi threading algo on markers
+
 /*!
  * \brief
  * This class defines the AwMarker object.
@@ -64,14 +57,20 @@ public:
 	static QStringList getUniqueLabels(const QList<AwMarker *>& markers);
 	/** Count the number of markers with a specified label **/
 	static QList<QPair<QString, int> > count(const QList<AwMarker *>& markers);
+	/** Computes histogram **/
+	static QHash<QString, int> computeHistogram(const QList<AwMarker*>& markers);
 	/** Gets all markers labels **/
 	static QStringList getAllLabels(const QList<AwMarker *>& markers);
 	/* Get all markers with a duration, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithDuration(const QList<AwMarker *>& markers);
+	/* Get all markers sorted by unique label */
+	static QList<AwMarker*> getMarkersWithUniqueLabels(const QList<AwMarker*>& markers);
 	/* Get all markers with a label, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabel(const QList<AwMarker *>& markers, const QString& label);
 	/* Get all markers with specified labels, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabels(const QList<AwMarker *>& markers, const QStringList& labels); 
+	/* Get markers between positions */
+	static QList<AwMarker *> getMarkersBetween(const QList<AwMarker *>& markers, float pos1, float pos2);
 	/** Rename all markers in a list. **/
 	static QList<AwMarker *>& rename(QList<AwMarker *>& markers, const QString& newLabel);
 	/** Load a marker file and returns the markers */ 
@@ -99,7 +98,7 @@ public:
 	/** Filters markers: markers can either be specified to be removed or used. **/
 	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Remove doublons : similar markers are removed. The list is updated. **/
-	static void removeDoublons(QList<AwMarker *>& markers);
+	static void removeDoublons(QList<AwMarker*>& markers, bool sortList = true);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
 	/** Returns the marker's type. AwMarker::Single or AwMarker::Selection. **/

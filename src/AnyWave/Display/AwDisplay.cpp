@@ -1,28 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwDisplay.h"
 #include "Prefs/AwPrefsDial.h"
 #include <Prefs/AwSettings.h>
@@ -81,7 +71,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 
 	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	// create views from setup
-	foreach (AwViewSetup *vs, setup->viewSetups())
+	for (AwViewSetup *vs : setup->viewSetups())
 		AwSignalView *view = addSignalView(vs);
 
 	w->update();
@@ -210,22 +200,22 @@ void AwDisplay::closeFile()
 	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
 		v->closeFile();
-	m_allSelectedChannels.clear();
 }
 
 void AwDisplay::quit()
 {
-	saveChannelSelections();
+	//saveChannelSelections();
+	//closeFile();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
 }
 
 void AwDisplay::saveChannelSelections()
 {
-	auto selectedChannels = this->selectedChannels();
-	if (selectedChannels.isEmpty())
+	auto channels = selectedChannels();
+	if (channels.isEmpty())
 		return;
-	auto selectedLabels = AwChannel::getLabels(selectedChannels);
+	auto selectedLabels = AwChannel::getLabels(channels);
 	QString path = AwDataManager::instance()->selFilePath();
 	if (QFile::exists(path))
 		QFile::remove(path);
@@ -233,7 +223,7 @@ void AwDisplay::saveChannelSelections()
 	QFile file(path);
 	if (file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate)) {
 		QTextStream stream(&file);
-		for (auto label : selectedLabels)
+		for (auto const &label : selectedLabels)
 			stream << label << endl;
 		file.close();
 	}
@@ -722,13 +712,13 @@ void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
 	m_setup = newSetup;
 
 	// remove all the current views
-	foreach (AwSignalView *v, m_signalViews) {
-		v->setParent(NULL);
+	for (AwSignalView *v : m_signalViews) {
+		v->setParent(nullptr);
 		delete v;
 	}
 	m_signalViews.clear();
 
-	foreach (AwViewSetup *vs, newSetup->viewSetups()) 	{
+	for (AwViewSetup *vs : newSetup->viewSetups()) 	{
 		AwSignalView *view = addSignalView(vs);
 		view->setProcessFlags(AwSignalView::NoProcessUpdate);
 		view->setChannels(m_channels);
@@ -750,12 +740,12 @@ void AwDisplay::addMarkerModeChanged(bool on)
 	if (on)	{
 		cursorModeChanged(false);
 
-		foreach (AwSignalView *v, m_signalViews)
+		for (AwSignalView *v : m_signalViews)
 			v->scene()->setMarkingMode(true);
 		AwMarkerManager::instance()->showDockUI();
 	}
 	else	{
-		foreach (AwSignalView *v, m_signalViews)
+		for (AwSignalView *v : m_signalViews)
 			v->scene()->setMarkingMode(false);
 		m_dockAddMarker->hide();
 		emit resetMarkerMode();
@@ -764,13 +754,13 @@ void AwDisplay::addMarkerModeChanged(bool on)
 
 void AwDisplay::cursorModeChanged(bool on)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->setCursorMode(on);
 }
 
 void AwDisplay::setQTSMode(bool on)
 {
-	foreach(AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->setQTSMode(on);
 }
 
@@ -785,13 +775,13 @@ AwChannelList AwDisplay::selectedChannels()
 
 void AwDisplay::setMappingModeOn(bool on)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->setMappingMode(on);
 }
 
 
 void AwDisplay::updateMarkersColor(const QStringList& colors)
 {
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->updateMarkers();
 }

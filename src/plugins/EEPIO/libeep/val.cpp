@@ -1,32 +1,18 @@
-/*
-**  OSSP val - Value Access
-**  Copyright (c) 2002-2004 Ralf S. Engelschall <rse@engelschall.com>
-**  Copyright (c) 2002-2004 The OSSP Project <http://www.ossp.org/>
-**  Copyright (c) 2002-2004 Cable & Wireless <http://www.cw.com/>
-**
-**  This file is part of OSSP val, a value access library which
-**  can be found at http://www.ossp.org/pkg/lib/val/.
-**
-**  Permission to use, copy, modify, and distribute this software for
-**  any purpose with or without fee is hereby granted, provided that
-**  the above copyright notice and this permission notice appear in all
-**  copies.
-**
-**  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
-**  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-**  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-**  IN NO EVENT SHALL THE AUTHORS AND COPYRIGHT HOLDERS AND THEIR
-**  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-**  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-**  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-**  USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-**  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-**  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-**  OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-**  SUCH DAMAGE.
-**
-**  val.c: library implementation
-*/
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* include system API headers */
 #include <stdio.h>       /* for "size_t" */
@@ -136,10 +122,10 @@ struct lh_st {
  */
 static long
 lh_hash(
-    register const unsigned char *k,
-    register size_t length)
+     const unsigned char *k,
+     size_t length)
 {
-    register long a,b,c,len;
+     long a,b,c,len;
 
     /* some abbreviations */
 #define ub4 long
@@ -695,7 +681,7 @@ val_rc_t val_destroy(val_t *val)
     return VAL_OK;
 }
 
-/* register a value */
+/*  a value */
 val_rc_t val_reg(val_t *val, const char *name, int type, const char *desc, void *storage)
 {
     val_object_t *obj;

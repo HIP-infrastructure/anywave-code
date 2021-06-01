@@ -1,30 +1,18 @@
-/********************************************************************************
- *                                                                              *
- * this file is part of:                                                        *
- * libeep, the project for reading and writing avr/cnt eeg and related files    *
- *                                                                              *
- ********************************************************************************
- *                                                                              *
- * LICENSE:Copyright (c) 2003-2009,                                             *
- * Advanced Neuro Technology (ANT) B.V., Enschede, The Netherlands              *
- * Max-Planck Institute for Human Cognitive & Brain Sciences, Leipzig, Germany  *
- *                                                                              *
- ********************************************************************************
- *                                                                              *
- * This library is free software; you can redistribute it and/or modify         *
- * it under the terms of the GNU Lesser General Public License as published by  *
- * the Free Software Foundation; either version 3 of the License, or            *
- * (at your option) any later version.                                          *
- *                                                                              *
- * This library is distributed WITHOUT ANY WARRANTY; even the implied warranty  *
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the              *
- * GNU Lesser General Public License for more details.                          *
- *                                                                              *
- * You should have received a copy of the GNU Lesser General Public License     *
- * along with this program. If not, see <http://www.gnu.org/licenses/>          *
- *                                                                              *
- *******************************************************************************/
-
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 
 #include <eep/eepraw.h>
@@ -50,7 +38,7 @@ int _read_64(FILE *f, char *v) {
 #if EEP_BYTE_ORDER == EEP_LITTLE_ENDIAN
   return eepio_fread(v, 8, 1, f);
 #else
-  register char c;
+  char c;
   if (!eepio_fread(v, 8, 1, f)) return 0;
   c = v[0]; v[0] = v[7]; v[7] = c;
   c = v[1]; v[1] = v[6]; v[6] = c;
@@ -64,7 +52,7 @@ int _read_32(FILE *f, char *v) {
 #if EEP_BYTE_ORDER == EEP_LITTLE_ENDIAN
   return eepio_fread(v, 4, 1, f);
 #else
-  register char c;
+  char c;
   if (!eepio_fread(v, 4, 1, f)) return 0;
   c = v[0]; v[0] = v[3]; v[3] = c;
   c = v[1]; v[1] = v[2]; v[2] = c;
@@ -76,7 +64,7 @@ int _read_16(FILE *f, char *v) {
 #if EEP_BYTE_ORDER == EEP_LITTLE_ENDIAN
   return eepio_fread(v, 2, 1, f);
 #else
-  register char c;
+  char c;
   if (!eepio_fread(v, 2, 1, f)) return 0;
   c = v[0]; v[0] = v[1]; v[1] = c;
   return 1;
@@ -200,9 +188,9 @@ int read_f32 (FILE *f, float *v) {
 
 int write_f32(FILE *f, float v)
 {
-  register char *tmp = (char *) &v;
+   char *tmp = (char *) &v;
 #if EEP_FLOAT_ORDER == EEP_BIG_ENDIAN
-  register char c;
+   char c;
   c = tmp[0]; tmp[0] = tmp[3]; tmp[3] = c;
   c = tmp[1]; tmp[1] = tmp[2]; tmp[2] = c;
 #endif
@@ -215,9 +203,9 @@ int read_f64(FILE *f, double *v) {
 
 int write_f64(FILE *f, double v)
 {
-  register char *tmp = (char *) &v;
+   char *tmp = (char *) &v;
 #if EEP_FLOAT_ORDER == EEP_BIG_ENDIAN
-  register char c;
+   char c;
   c = tmp[0]; tmp[0] = tmp[7]; tmp[7] = c;
   c = tmp[1]; tmp[1] = tmp[6]; tmp[6] = c;
   c = tmp[2]; tmp[2] = tmp[5]; tmp[5] = c;
@@ -228,7 +216,7 @@ int write_f64(FILE *f, double v)
 
 void swrite_f32  (char *s, float v)
 {
-  register char *tmp = (char *) &v;
+   char *tmp = (char *) &v;
 #if EEP_FLOAT_ORDER == EEP_BIG_ENDIAN
   s[0] = tmp[3];
   s[1] = tmp[2];
@@ -240,7 +228,7 @@ void swrite_f32  (char *s, float v)
 }
 
 void sread_f32(char *s, float *v) {
-  register char *tmp = (char *) v;
+   char *tmp = (char *) v;
 #if EEP_FLOAT_ORDER == EEP_BIG_ENDIAN
   tmp[0] = s[3];
   tmp[1] = s[2];
@@ -253,7 +241,7 @@ void sread_f32(char *s, float *v) {
 
 void swrite_f64(char *s, double v)
 {
-  register char *tmp = (char *) &v;
+   char *tmp = (char *) &v;
 #if EEP_FLOAT_ORDER == EEP_BIG_ENDIAN
   s[0] = tmp[7];
   s[1] = tmp[6];
@@ -270,8 +258,8 @@ void swrite_f64(char *s, double v)
 
 int vread_s16(FILE *f, sraw_t *buf, int n)
 {
-  register int j, status;
-  register unsigned char *tmp = (unsigned char *) buf;
+   int j, status;
+   unsigned char *tmp = (unsigned char *) buf;
   
   status = eepio_fread(tmp, 2, n, f);
   if (status != n)
@@ -288,9 +276,9 @@ int vread_s16(FILE *f, sraw_t *buf, int n)
 int vwrite_s16(FILE *f, sraw_t *buf, int n)
 {
 
-  register int j;
+   int j;
   int  nr;
-  register unsigned char *tmp = (unsigned char *) buf;
+   unsigned char *tmp = (unsigned char *) buf;
 
   for (j = 0; j < n; j++) {
     tmp[2*j] = (unsigned char) (buf[j]);
@@ -309,15 +297,15 @@ int vwrite_s16(FILE *f, sraw_t *buf, int n)
 
 int vread_f32(FILE *f, float *buf, int n)
 {
-  register char *tmp = (char *) buf;
+   char *tmp = (char *) buf;
 
 #if EEP_FLOAT_ORDER == EEP_LITTLE_ENDIAN
   return eepio_fread(tmp, 4, n, f);
 #else
   
   int status = eepio_fread(tmp, 4, n, f);
-  register int j;
-  register char *w,c;
+   int j;
+   char *w,c;
 
   if (status == n) {
     for (j = 0; j < n; j++) {
@@ -332,12 +320,12 @@ int vread_f32(FILE *f, float *buf, int n)
   
 int vwrite_f32(FILE *f, float *buf, int n)
 {
-  register char *tmp = (char *) buf;
+   char *tmp = (char *) buf;
 
 #if EEP_FLOAT_ORDER == EEP_BIG_ENDIAN
-  register int j;
+   int j;
   int nr;
-  register char *w,c;
+   char *w,c;
 
   for (j = 0; j < n; j++) {
     w = &tmp[j*4];
@@ -361,7 +349,7 @@ int vwrite_f32(FILE *f, float *buf, int n)
 
 int vread_s32(FILE *f, sraw_t *buf, int n)
 {
-  register int j, status;
+   int j, status;
 
   status = eepio_fread(buf, 4, n, f);
   if (status != n)

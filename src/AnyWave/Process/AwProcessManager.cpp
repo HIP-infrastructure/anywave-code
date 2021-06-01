@@ -1,29 +1,18 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Université d’Aix Marseille (AMU) - 
-//                 Institut National de la Santé et de la Recherche Médicale (INSERM)
-//                 Copyright © 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet – Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <AwProcessInterface.h>
 #include "AwProcessManager.h"
 #include "AwProcessesWidget.h"
@@ -65,14 +54,13 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	m_viewMenu = nullptr;
 	m_dock = nullptr;
 	setObjectName("AwProcessManager");
-	m_processesWidget = new AwProcessesWidget();
+	m_processesWidget = new AwProcessesWidget;
 	auto plm = AwProcessLogManager::instance();
 	plm->setParent(this);
 }
 
 AwProcessManager::~AwProcessManager()
 {
-	delete m_processesWidget;
 }
 
 void AwProcessManager::setMenu(QMenu *menu)
@@ -381,14 +369,9 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
  */
 AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 {
-	auto dm = AwDataManager::instance();
-	auto aws = AwSettings::getInstance();
-
 	AwBaseProcess *process = plugin->newInstance();
 	process->setPlugin(plugin);
-
 	initProcessSettings(process);
-
 	return process;
 }
 
@@ -442,7 +425,6 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 	if (p->flags() & Aw::ProcessFlags::ProcessSkipInputCheck)
 		return true;
 
-//	return buildPDIForProcess(p);
 	return buildProcessPDI(p) == 0;
 }
 
@@ -453,50 +435,7 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 /// <returns>flags</returns>
 int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 {
-	auto fd = p->pdi.input.settings.value(keys::file_duration).toFloat();
-
-	// filter markers  considering the optional arguments use_markers and skip_markers
-   // init markers based on input.settings arguments (if any)
-	QStringList usedMarkers, skippedMarkers;
-	bool useMarkers = false, skipMarkers = false;
-	bool allDataFlag = false;
-	if (p->pdi.input.settings.contains(keys::use_markers)) {
-		usedMarkers = p->pdi.input.settings.value(keys::use_markers).toStringList();
-		useMarkers = true;
-		// handle special case : if use_markers contains all_data
-		// that will force the input to be only one marker marking all the data.
-		// other marker flags will be ignored
-		if (usedMarkers.first().simplified().toLower() == "all_data") {
-			p->pdi.input.clearMarkers();
-			// add a whole marker to the marker list
-			p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-			allDataFlag = true;
-		}
-	}
-	if (p->pdi.input.settings.contains(keys::skip_markers)) {
-		skippedMarkers = p->pdi.input.settings.value(keys::skip_markers).toStringList();
-		skipMarkers = true;
-	}
-
-	if (!allDataFlag) {
-		if (skipMarkers || useMarkers) {
-			auto markers = AwMarker::duplicate(p->pdi.input.markers());
-			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
-			// Set modified markers !!!
-			p->pdi.input.setModifiedMarkers(markers);
-			p->addModifiers(Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied);
-			if (inputMarkers.isEmpty()) {
-				p->pdi.input.clearMarkers();
-				p->pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
-			}
-			else 
-				p->pdi.input.setNewMarkers(inputMarkers);
-		}
-		// inform process we handled use or skip options on markers
-		
-		return 0;
-	}
-	return 1;
+	return p->applyUseSkipMarkersKeys();
 }
 
  void AwProcessManager::launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end)
@@ -644,7 +583,6 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	 // make sure current filters are set for the channels.
 	 dataManager->filterSettings().apply(p->pdi.input.channels());
 
-
 	 // now processing markers. 
 	 // Markers GUI may have already set markers as input : Check the user selected markers flag
 	 if (!(p->modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers) && !ignoreUseSkip) {
@@ -674,135 +612,9 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 				 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
 		 }
 	 }
-
 	 p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
-
-
-
 	 return 0;
  }
-
-
- ///
- /// buildPDIForProcess
- /// will setup all the input for a process.
- /// if sources is specified, use those channels as the sources when preparing the input.
- /// if sources is left empty, use the current Montage of AnyWave as the source for preparing the process inputs.
-//  bool AwProcessManager::buildPDIForProcess(AwBaseProcess *p, const AwChannelList& sources)
-//{
-//	if (p->runMode() == AwProcessPlugin::Internal)
-//		return true;
-//
-//	auto selectedChannels = AwDisplay::instance()->selectedChannels();
-//	AwChannelList montageChannels = sources;
-//	if (sources.isEmpty())
-//		montageChannels = AwMontageManager::instance()->channels();
-//	
-//	AwChannelList inputChannels;
-//	bool selection = !selectedChannels.isEmpty();
-//	int inputF = p->inputFlags();
-//	int modifiers = p->modifiersFlags();
-//
-//	p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();
-//
-//	bool requireSelection = modifiers & Aw::ProcessIO::modifiers::RequireChannelSelection;
-//	bool ignoreSelection = modifiers & Aw::ProcessIO::modifiers::IgnoreChannelSelection;
-//	// of course, requireSelection and ignoreSelection are mutual exclusive.
-//
-//	if (inputF & Aw::ProcessIO::GetReaderPlugins) {
-//		for (auto plugin : AwPluginManager::getInstance()->readers())
-//			p->pdi.input.readers.append(plugin);	
-//	}
-//	if (inputF & Aw::ProcessIO::GetWriterPlugins) {
-//		for (auto plugin : AwPluginManager::getInstance()->writers())
-//			p->pdi.input.writers.append(plugin);
-//	}
-//	if (inputF & Aw::ProcessIO::GetProcessPluginNames) {
-//		QStringList list;
-//		for (auto plugin : AwPluginManager::getInstance()->processes())
-//			//p->pdi.input.processPluginNames.append(plugin->name);
-//			list << plugin->name;
-//		p->pdi.input.settings[keys::plugin_names] = list;
-//	}
-//	// if input markers are already set (by other features, like Launch Process from Markers GUI..
-//	// then set an input flag to warn the plugin about that.
-//	// Also we handle GetDurationMarkers and GetAllMarkers only if no markers already exist as input (Launch Process feature from Markers GUI may add markers as input for the process.)
-//	if (!p->pdi.input.markers().isEmpty())
-//		p->addModifiers(Aw::ProcessIO::modifiers::UserSelectedMarkers);
-//	if (inputF & Aw::ProcessIO::GetDurationMarkers && p->pdi.input.markers().isEmpty()) {
-//		auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
-//		if (!markers.isEmpty())
-//			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
-//	}
-//	if (inputF & Aw::ProcessIO::GetAllMarkers && p->pdi.input.markers().isEmpty()) {
-//		auto markers = AwMarkerManager::instance()->getMarkers();
-//		if (!markers.isEmpty())
-//			p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
-//	}
-//
-//	if (inputF & Aw::ProcessIO::GetAsRecordedChannels) { // skip requireSelection flag here and get a copy of channels present in the file.
-//		p->pdi.input.addChannels(AwMontageManager::instance()->asRecordedChannels(), true);
-//	}
-//	if (inputF & Aw::ProcessIO::GetCurrentMontage) { // skip requireSelection flag here and get a copy of channels present in the file.
-//		p->pdi.input.addChannels(montageChannels, true);
-//	}
-//
-//	if (!p->pdi.areInputChannelSet())
-//		return true;
-//
-//	// check if inputChannels is emptry
-//	if (ignoreSelection)
-//		inputChannels = montageChannels;
-//	else {
-//		if (!selection && requireSelection) {
-//			if (confirmProcessWithAllChannels())
-//				inputChannels = montageChannels;
-//			else
-//				return false;
-//		}
-//		else  if (selection) {
-//			inputChannels = selectedChannels;
-//		}
-//		else
-//			inputChannels = montageChannels;
-//	}
-//
-//	// input channels are set
-//	auto types = p->pdi.getInputChannels();
-//	std::sort(types.begin(), types.end()); // sorting the types makes sure that -1 (if present) comes first in the following loop.
-//	AwChannelList res;
-//	for (auto t : types) {
-//		
-//		QPair<int, int> min_max = p->pdi.getInputChannelMinMax(t);
-//		int min = min_max.first;
-//		int max = min_max.second;
-//		QString channelType = "Any Channels";
-//		if (t != -1)
-//			channelType = AwChannel::typeToString(t);
-//		// check for correct min and max
-//		if (min > inputChannels.size()) {
-//			AwMessageBox::critical(0, "Process input", QString("Process requires at least %1 channel(s) of type %2").arg(min).arg(channelType),
-//				QMessageBox::Discard);
-//			return false;
-//		}
-//		if (min_max.second > 0 && min_max.second < inputChannels.size()) {
-//			AwMessageBox::critical(0, "Process input", QString("Too many channels selected as input. The process accepts %1 channels max.").arg(max).arg(channelType),
-//				QMessageBox::Discard);
-//			return false;
-//		}
-//		if (t == -1)
-//			res += inputChannels;
-//		else {
-//			res += AwChannel::getChannelsOfType(inputChannels, t);
-//		}
-//	}
-//
-//	p->pdi.input.addChannels(res, true);
-//	// make sure current filters are set for the channels.
-//	AwDataManager::instance()->filterSettings().apply(p->pdi.input.channels());
-//	return true;
-//}
-
 
   void AwProcessManager::runBuiltInProcess(AwBuiltInProcess *process)
   {
@@ -898,7 +710,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 	// insert args in process settings
 	process->pdi.input.settings[keys::args] = args;
-
+	
 	if (!skipDataFile) {
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
 		if (process->modifiersFlags() & Aw::ProcessIO::modifiers::RequireChannelSelection && selectedChannels.isEmpty()) {
@@ -922,8 +734,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 					process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
 					process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
 				}
-
 			}
+			if (!process->pdi.input.settings.contains(keys::output_dir))
+				process->pdi.input.settings.insert(keys::output_dir, dm->settings().value(keys::output_dir));
 		}
 	}
 	else {

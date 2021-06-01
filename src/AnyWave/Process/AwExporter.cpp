@@ -1,37 +1,27 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-// 
-//                 Universit� d�Aix Marseille (AMU) - 
-//                 Institut National de la Sant� et de la Recherche M�dicale (INSERM)
-//                 Copyright � 2013 AMU, INSERM
-// 
-//  This software is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 3 of the License, or (at your option) any later version.
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
 //
-//  This software is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with This software; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 //
-//
-//
-//    Author: Bruno Colombet � Laboratoire UMR INS INSERM 1106 - Bruno.Colombet@univ-amu.fr
-//
-//////////////////////////////////////////////////////////////////////////////////////////
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwExporter.h"
 #include "AwExporterSettings.h"
 #include <filter/AwFiltering.h>
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
 #include <AwKeys.h>
+#include <utils/json.h>
 
 namespace Exporter {
-	constexpr auto output_writer = "output_writer";
 	constexpr auto decimate_factor = "decimate_factor";
 };
 
@@ -40,9 +30,12 @@ AwExporterPlugin::AwExporterPlugin()
 {
 	name = QString("File Exporter");
 	description = QString(tr("Export data to a file"));
+	category = "Process:File Operation:Export To File";
 	version = "1.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
+	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/json/file_exporter.json");
+	m_helpUrl = "Save to file::File Operations::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_exporter";
 }
 
 AwExporter::AwExporter() : AwProcess()
@@ -59,13 +52,20 @@ AwExporter::~AwExporter()
 void AwExporter::runFromCommandLine()
 {
 	auto args = pdi.input.settings;
+	// check for required options
+	if (!args.contains(keys::output_file)) {
+		sendMessage("output_file option is missing.");
+		return;
+	}
+	if (!args.contains("output_writer"))  // default to ADES
+		args["output_writer"] = QString("anywave ades format");
+
 	auto outputFile = args.value(keys::output_file).toString();
 	// check for the outputs
-	auto writerName = args.value(Exporter::output_writer).toString();
+	auto writerName = args.value("output_writer").toString().toLower().simplified();
 	int decimateFactor = 1;
 	if (args.contains(Exporter::decimate_factor))
 		decimateFactor = args.value(Exporter::decimate_factor).toInt();
-
 
 	QString outputPath = outputFile;
 	if (args.contains(keys::output_dir))
@@ -73,20 +73,19 @@ void AwExporter::runFromCommandLine()
 
 	AwFileIO *writer = Q_NULLPTR;
 	for (auto p : pdi.input.writers) {
-		if (p->name == writerName) {
+		if (p->name.toLower().simplified() == writerName) {
 			writer = p->newInstance();
 			break;
 		}
 	 }
+
 	if (writer == Q_NULLPTR) {
 		sendMessage(QString("Plugin %1 not found.").arg(writerName));
 		return;
 	}
 
 	float endTimePos = args.value(keys::file_duration).toFloat();
-	auto markers = pdi.input.markers();
-
-
+	auto &markers = pdi.input.markers();
 	AwBlock* block = writer->infos.newBlock();
 	AwMarker global("global", 0., endTimePos);
 	if (modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied) {
@@ -105,8 +104,7 @@ void AwExporter::runFromCommandLine()
 	   sendMessage("Done.");
 	   sendMessage("Downsampling...");
 	   AwFiltering::downSample(pdi.input.channels(), decimateFactor);
-	//	// apply filters set in the UI
-	  //	pdi.input.filterSettings.apply(m_channels);
+		// apply filters set in the UI
 		AwFiltering::filter(pdi.input.channels());
 		sendMessage("Done.");
 	}
@@ -174,7 +172,7 @@ bool AwExporter::showUi()
 		else
 			m_channels = ui.selectedChannels;
 
-		pdi.input.settings[Exporter::output_writer] = ui.writer;
+		pdi.input.settings["output_writer"] = ui.writer;
 		
 		if (QFile::exists(ui.filePath)) {
 			if (AwMessageBox::information(0, tr("File"), tr("the file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
@@ -205,10 +203,17 @@ bool AwExporter::showUi()
 
 		pdi.input.setNewChannels(AwChannel::duplicateChannels(m_channels));
 
-		if (!ui.skippedMarkers.isEmpty())
+		bool updateUseSkip = false;
+		if (!ui.skippedMarkers.isEmpty()) {
 			pdi.input.settings[keys::skip_markers] = ui.skippedMarkers;
-		if (!ui.usedMarkers.isEmpty())
+			updateUseSkip = true;
+		}
+		if (!ui.usedMarkers.isEmpty()) {
 			pdi.input.settings[keys::use_markers] = ui.usedMarkers;
+			updateUseSkip = true;
+		}
+		if (updateUseSkip)
+			applyUseSkipMarkersKeys();
 
 		if (ui.decimateFactor > 1)
 			pdi.input.settings[Exporter::decimate_factor] = ui.decimateFactor;

@@ -31,16 +31,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <ClCompile Include="display_settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -62,6 +52,9 @@
     <ClCompile Include="TFWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TFColorMapWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display_settings.h">
@@ -70,14 +63,9 @@
     <ClInclude Include="tf_settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tfparam.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tfwavelet2_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="settingsui.h">
@@ -101,5 +89,19 @@
     <QtUic Include="TFWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtMoc Include="TFColorMapWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="TFColorMapWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="arma.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\AnyWave\AnyWave.licenseheader" />
   </ItemGroup>
 </Project>
