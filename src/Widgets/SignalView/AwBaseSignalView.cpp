@@ -126,10 +126,12 @@ void AwBaseSignalView::makeConnections()
 
 	// amplitude
 	AwAmplitudeWidget *ampWidget = m_navBar->amplitudeWidget();
+	ampWidget->setGainLevels(m_settings->gainLevels);
+
 	connect(ampWidget, SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
 	connect(ampWidget, SIGNAL(amplitudeChanged(int, float)), this, SLOT(setAmplitude(int, float)));
 
-	connect(AwAmplitudeManager::instance(), SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
+//	connect(AwAmplitudeManager::instance(), SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
 }
 
 void AwBaseSignalView::changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNavigationBar *navBar, AwBaseMarkerBar *markBar)
@@ -189,6 +191,7 @@ void AwBaseSignalView::setChannels(const AwChannelList& channels)
 	m_scene->clearChannels();
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
+	m_settings->gainLevels->applyTo(m_montageChannels);
 	reloadData();
 }
 
@@ -197,7 +200,7 @@ void AwBaseSignalView::applyChannelFilters()
 	// clear current channel list
 	m_channels.clear();
 	// rebuilding list applying filters
-	foreach (AwChannel *c, m_montageChannels)	{
+	for (AwChannel *c : m_montageChannels)	{
 		if (m_settings->filters.contains(c->type())) {
 			m_channels << c;
 		}
@@ -315,20 +318,36 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 
 void AwBaseSignalView::setAmplitude(int type, float value)
 {
-	foreach (AwChannel *c, m_channels) {
-		 if (type == c->type())
+	//foreach (AwChannel *c, m_channels) {
+	//	 if (type == c->type())
+	//		c->setGain(value);
+	//	 if (type == AwChannel::EMG && c->isECG())
+	//		 c->setGain(value);
+	//}
+	for (auto c : m_channels) {
+		if (c->type() == type)
 			c->setGain(value);
-		 if (type == AwChannel::EMG && c->isECG())
-			 c->setGain(value);
 	}
 	m_scene->updateSignals();
 }
 
 void AwBaseSignalView::setAmplitudes()
 {
-	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	foreach(AwChannel *c, m_channels) {
-		c->setGain(am->amplitude(c->type()));
+	//AwAmplitudeManager *am = AwAmplitudeManager::instance();
+	//foreach(AwChannel *c, m_channels) {
+	//	c->setGain(am->amplitude(c->type()));
+	//}
+	//m_scene->updateSignals();
+	
+	QList<int> types = AwChannel::getTypes(m_channels);
+	QList<AwGainLevel*> levels;
+	for (auto t : types)
+		levels << m_settings->gainLevels->getGainLevelFor(t);
+	for (auto c : m_channels) {
+		int index = types.indexOf(c->type());
+		if (index != -1) {
+			c->setGain(levels.at(index)->value);
+		}
 	}
 	m_scene->updateSignals();
 }

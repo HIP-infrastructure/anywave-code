@@ -27,6 +27,7 @@
     <ClCompile Include="AwComboDS.cpp" />
     <ClCompile Include="AwComboMarker.cpp" />
     <ClCompile Include="AwDownSamplingWidget.cpp" />
+    <ClCompile Include="AwGainLevels.cpp" />
     <ClCompile Include="AwGetValueDialog.cpp" />
     <ClCompile Include="AwMarkAroundWidget.cpp" />
     <ClCompile Include="AwMarkerInspector.cpp" />
@@ -76,6 +77,7 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwSelectInputDataWidget.h">
     </QtMoc>
+    <QtMoc Include="..\..\include\AwGainLevels.h" />
     <ClInclude Include="SEEGViewer\AwSEEGInteractor.h" />
     <QtMoc Include="InputMarker\InputMarkerModel.h">
     </QtMoc>

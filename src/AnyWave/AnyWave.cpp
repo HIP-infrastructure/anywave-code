@@ -415,7 +415,10 @@ void AnyWave::initToolBarsAndMenu()
 
 	// ToolBar File Operations (from AwFileToolBar)
 	AwFileToolBar *ftb = new AwFileToolBar(this);
-	addToolBar(Qt::TopToolBarArea, ftb->toolBar());
+	auto toolbar = addToolBar("File");
+	toolbar->addWidget(ftb->toolBar());
+	toolbar->setAllowedAreas(Qt::TopToolBarArea);
+//	addToolBar(Qt::TopToolBarArea, ftb->toolBar());
 	connect(ftb, SIGNAL(fileOpenClicked()), this, SLOT(on_actionOpen_triggered()));
 	connect(ftb, SIGNAL(fileSaveClicked()), this, SLOT(on_actionSave_as_triggered()));
 	connect(ftb, SIGNAL(fileICAClicked()), this, SLOT(on_actionLoadICA_triggered()));
@@ -699,11 +702,11 @@ void AnyWave::openPluginHelpUrl()
 /// toolbar positions are saved
 void AnyWave::readSettings()
 {
-	QSettings settings;
-	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
-	QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
-	restoreState(stateData);
-	restoreGeometry(geometryData);
+	//QSettings settings;
+	//QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
+	//QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
+	//restoreState(stateData);
+	//restoreGeometry(geometryData);
 }
 
 ///

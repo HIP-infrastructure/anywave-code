@@ -137,6 +137,7 @@ void AwDataManager::setNewRootDirForSideFiles(const QString& dir)
 	m_settings[keys::montage_file] = QString("%1/%2.mtg").arg(dir).arg(fileName);
 	m_settings[keys::disp_file] = QString("%1/%2.display").arg(dir).arg(fileName);
 	m_settings[keys::lvl_file] = QString("%1/%2.levels").arg(dir).arg(fileName);
+	m_settings[keys::lvl2_file] = QString("%1/%2.lvl").arg(dir).arg(fileName);
 	// defines the default output_dir (can be overwritten by command line options)
 	m_settings[keys::output_dir] = dir;
 	if (m_reader) {
@@ -200,6 +201,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_settings[keys::montage_file] = QString("%1.mtg").arg(fullDataFilePath);
 	m_settings[keys::disp_file] = QString("%1.display").arg(fullDataFilePath);
 	m_settings[keys::lvl_file] = QString("%1.levels").arg(fullDataFilePath);
+	m_settings[keys::lvl2_file] = QString("%1.lvl").arg(fullDataFilePath);
 
 	// get predefined .mrk .bad .mtg if any
 	auto tmp = reader->infos.badFile();

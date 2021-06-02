@@ -1,6 +1,7 @@
 #include <widget/SignalView/AwViewSettings.h>
 #include <AwChannel.h>
 
+
 AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 {
 	showTimeGrid = showSeconds = showSensors = limitChannels = showMarkerLabels = showMarkerValues = true;
@@ -11,6 +12,7 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	secsPerCm = 0.5;
 	markerBarMode = AwViewSettings::ShowMarkerBar;
 	timeMode = AwViewSettings::ShowRelativeTime;
+	gainLevels = new AwGainLevels(this);
 }
 
 AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObject(parent)
@@ -28,4 +30,5 @@ AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObjec
 	showMarkerLabels = source->showMarkerLabels;
 	showMarkerValues = source->showMarkerValues;
 	timeMode = source->timeMode;
+	gainLevels = new AwGainLevels(source->gainLevels, this);
 }

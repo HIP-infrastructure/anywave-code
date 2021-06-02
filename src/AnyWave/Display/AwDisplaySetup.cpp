@@ -21,6 +21,7 @@
 #include "Widgets/AwMarkersBar.h"
 #include "Display/AwDisplay.h"
 #include "Prefs/AwSettings.h"
+#include <AwGainLevels.h>
 
 #define LAST_VERSION	"AnyWaveDisplaySetup2.0"
 
@@ -41,7 +42,6 @@ AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
 	m_synchronize = source->synchronizeViews();
 
 	for (int i = 0; i < viewSetups().size(); i++) {
-		//AwDisplaySetupView *dsv = new AwDisplaySetupView(source->viewSetup(i), this);
 		AwViewSetup *dsv = new AwViewSetup(source->viewSetup(i), this);
 		m_ds << dsv;
 	}
@@ -194,6 +194,16 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					for (int i = 0; i < list.size(); i++)
 						setup->filters << list.at(i).toElement().text().toInt();
 				}
+				else if (e.tagName() == "GainLevels") {
+					QDomNodeList list = n.childNodes();
+					for (int i = 0; i < list.size(); i++) {
+						// get type of channel
+						int type = list.at(i).toElement().text().toInt();
+						auto gl = setup->gainLevels->getGainLevelFor(type);
+						// get gain level value
+						gl->value = (float) list.at(i).toElement().attribute("value").toInt();
+					}
+				}
 				n = n.nextSibling();
 			}
 			m_ds.append(setup);
@@ -238,7 +248,7 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 	root.appendChild(element);
 
 	qint32 count = 0;
-	foreach (AwViewSetup *dsv, m_ds) {
+	for  (AwViewSetup *dsv : m_ds) {
 		QDomElement e;
 
 		element = doc.createElement("View");
@@ -308,13 +318,23 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		root.appendChild(element);
 
 		e = doc.createElement("Filters");
-		foreach (int f, dsv->filters) {
+		for  (int f : dsv->filters) {
 			QDomElement ee = doc.createElement("Filter");
 			
 			ee.appendChild(doc.createTextNode(QString("%1").arg(f)));
 			e.appendChild(ee);
 		}
 		element.appendChild(e);
+
+		e = doc.createElement("GainLevels");
+		for (auto gl : dsv->gainLevels->gainLevels()) {
+			QDomElement ee = doc.createElement("GainLevel");
+			ee.appendChild(doc.createTextNode(QString("%1").arg(gl->type)));
+			ee.setAttribute("value", gl->value);
+			e.appendChild(ee);
+		}
+		element.appendChild(e);
+
 		root.appendChild(element);
 	}
 	doc.save(out, 3);

@@ -458,11 +458,21 @@ QStringList AwChannel::getTypesAsString(const QList<AwChannel *>& list)
 QList<AwChannel *> AwChannel::extractChannelsOfType(const QList<AwChannel *>& list, int type)
 {
 	AwChannelList res;
-	foreach(AwChannel *c, list)
+	for (AwChannel * c: list)
 		if (c->type() == type)
-			res << new AwChannel(c);
+			res << c->duplicate();
 
 	return res;
+}
+
+QList<int> AwChannel::getTypes(const QList<AwChannel*>& list)
+{
+	QList<int> types;
+	for (auto c : list) {
+		if (!types.contains(c->type()))
+			types << c->type();
+	}
+	return types;
 }
 
 //

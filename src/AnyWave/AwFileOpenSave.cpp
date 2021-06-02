@@ -215,6 +215,7 @@ void AnyWave::openFile(const QString &path)
 	}
 
 	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
+	// 	  DEBUGING - 
 	AwAmplitudeManager::instance()->setFilename(dataManager->levelFilePath());
 
 	if (openWithDialog)

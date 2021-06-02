@@ -40,6 +40,7 @@
 #include "Plugin/AwPluginManager.h"
 #include <QTextStream>
 #include "Data/AwDataManager.h"
+#include <AwGainLevels.h>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
@@ -62,6 +63,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	dsManager->setParent(this);
 	m_mainWindow = w;
 	m_setup = nullptr;
+	m_gainLevels = new AwGainLevels(this);
 	AwDisplaySetup *setup = dsManager->currentSetup();
 	// Display Setup Manager connections
 	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(changeCurrentSetup(AwDisplaySetup *)));
@@ -686,6 +688,8 @@ void AwDisplay::newFile()
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 //	auto path = reader->fullPath();
 //	ds->setFilename(reader->fullPath());
+
+//	m_gainLevels->init(AwDataManager::instance()->lvlFilePath());
 	
 	for (AwSignalView * v : m_signalViews)
 		v->enableView();

@@ -885,7 +885,24 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 				const float tol = 0.005;
 				float pos = std::abs(m1->start() - m->start());
 				float dur = std::abs(m1->duration() - m->duration());
-				return pos <= tol && dur <= tol;
+				
+				bool res = pos <= tol && dur <= tol;
+				if (res) { // check that targets are similar
+					QStringList t1 = m1->targetChannels();
+					QStringList t2 = m->targetChannels();
+					if (t1.isEmpty() && t2.isEmpty())
+						return true;
+					if (t1.size() != t2.size())
+						return false;
+					for (int i = 0; i < t1.size(); i++) {
+						QString s1 = t1.at(i);
+						QString s2 = t2.at(i);
+						if (s1.compare(s2, Qt::CaseSensitive) != 0) 
+							return false;
+					}
+					return true;
+				}
+				return res;
 			};
 			auto it = std::remove_if(values.begin(), values.end(), f);
 			for (auto &i = it; i < values.end(); i++) {

@@ -6,7 +6,8 @@
 namespace Ui {class AwAmplitudeWidgetUi;};
 #include <AwChannel.h>
 class AwAmplitudeButton;
-class AwAmplitudeManager;
+//class AwAmplitudeManager;
+#include <AwGainLevels.h>
 
 class AW_WIDGETS_EXPORT AwAmplitudeWidget : public QWidget
 {
@@ -14,7 +15,9 @@ class AW_WIDGETS_EXPORT AwAmplitudeWidget : public QWidget
 
 public:
 	AwAmplitudeWidget(QWidget *parent = 0);
+	//AwAmplitudeWidget(AwGainLevels *gl, QWidget* parent = 0);
 	~AwAmplitudeWidget();
+	void setGainLevels(AwGainLevels* gl);
 public slots:
 	void changeLevelForChannel(int type);
 	void up();
@@ -31,7 +34,8 @@ private:
 	int m_channelType;
 	int m_indexes[AW_CHANNEL_TYPES];	// keep current index of levels scales
 	Ui::AwAmplitudeWidgetUi *m_ui;
-	AwAmplitudeManager *m_am;
+//	AwAmplitudeManager *m_am;
+	AwGainLevels *m_gainLevels;
 };
 
 #endif // AWAMPLITUDEWIDGET_H

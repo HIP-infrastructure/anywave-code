@@ -2,6 +2,7 @@
 #define AWVIEWSETTINGS_H
 #include <AwGlobal.h>
 #include <QObject>
+#include <AwGainLevels.h>
 
 class AW_WIDGETS_EXPORT AwViewSettings : public QObject
 {
@@ -20,6 +21,7 @@ public:
 	int timeMode;	// should be ShowRelativeTime or ShowRecordedTime
 	QList<int> filters;
 	float secsPerCm;
+	AwGainLevels* gainLevels;
 };
 
 #endif

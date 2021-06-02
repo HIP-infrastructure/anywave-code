@@ -175,6 +175,9 @@
     <ClCompile Include="SignalView\AwPickMarkersDial.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
+    <ClCompile Include="AwGainLevels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AwAmplitudeWidget.ui">
@@ -479,6 +482,9 @@
   <ItemGroup>
     <QtMoc Include="SignalView\AwPickMarkersDial.h">
       <Filter>SignalView</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\AwGainLevels.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

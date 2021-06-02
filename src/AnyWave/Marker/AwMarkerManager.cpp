@@ -62,10 +62,6 @@ AwMarkerManager::AwMarkerManager()
 
 AwMarkerManager::~AwMarkerManager()
 {
-	//if (m_ui) 
-	//	delete m_ui;                    // ui must have become a child of AnyWave so it will be destroyed when AnyWave is destroyed
-	//if (m_markerInspector)
-	//	delete m_markerInspector;
 }
 
 
