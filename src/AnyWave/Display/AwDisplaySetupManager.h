@@ -43,12 +43,12 @@ public slots:
 	/** change Display Setup Path (should be called only once when AnyWave starts **/
 	void changeSetupDir(const QString& path) { m_setupDir = path; }
 	/** change the current setup with newSetup **/
-	void changeSetup(const QString& newSetup);
+//	void changeSetup(const QString& newSetup);
 	void saveSettings();
 	void updateSetup(AwDisplaySetup *view, int flags);
-	void saveCurrentSetup();
+//	void saveCurrentSetup();
 	/** Save the current setup as new setup with different name **/
-	void saveAsNew();
+//	void saveAsNew();
 	/** Delete the current setup **/
 	void deleteCurrentSetup();
 	/** Import a setup configuration from file **/

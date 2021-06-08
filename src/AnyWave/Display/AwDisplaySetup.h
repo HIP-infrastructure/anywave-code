@@ -47,9 +47,9 @@ public:
 	void setSynchronized(bool flag);
 	void setSecondsPerCm(float val);
 public slots:
-	bool load();
+//	bool load();
 	bool loadFromFile(const QString& path);
-	bool save();
+//	bool save();
 	bool saveToFile(const QString& path);
 
 

@@ -21,7 +21,7 @@ public:
 	int timeMode;	// should be ShowRelativeTime or ShowRecordedTime
 	QList<int> filters;
 	float secsPerCm;
-	AwGainLevels* gainLevels;
+	AwGainLevels *gainLevels;
 };
 
 #endif

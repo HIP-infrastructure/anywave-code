@@ -474,12 +474,12 @@ void AnyWave::initToolBarsAndMenu()
 
 	addToolBarBreak(Qt::TopToolBarArea);
 
-	// DisplaySetup ToolBar (from AwDisplaySetupManager)
-	AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
-	dsManager->toolBar()->setParent(this);
-	addToolBar(Qt::TopToolBarArea, dsManager->toolBar());
-	dsManager->toolBar()->setEnabled(false);
-	m_toolBarWidgets.append(dsManager->toolBar());
+	//// DisplaySetup ToolBar (from AwDisplaySetupManager)
+	//AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
+	//dsManager->toolBar()->setParent(this);
+	//addToolBar(Qt::TopToolBarArea, dsManager->toolBar());
+	//dsManager->toolBar()->setEnabled(false);
+	//m_toolBarWidgets.append(dsManager->toolBar());
 
 	// ToolBar mapping
 	AwMappingToolBar *mtp = new AwMappingToolBar(this);

@@ -23,7 +23,7 @@
 #include "Prefs/AwSettings.h"
 #include <AwGainLevels.h>
 
-#define LAST_VERSION	"AnyWaveDisplaySetup2.0"
+constexpr auto LAST_VERSION = "AnyWaveDisplaySetup2.0";
 
 AwDisplaySetup::AwDisplaySetup(const QString& name, QObject *parent)
 	: QObject(parent)
@@ -68,7 +68,7 @@ AwViewSetup *AwDisplaySetup::newViewSetup()
 	else
 		s = new AwViewSetup(m_ds.last());
 	m_ds << s;
-	save();
+	//save();
 	return s;
 }
 
@@ -108,12 +108,12 @@ void AwDisplaySetup::setName(const QString& name)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
 
-bool AwDisplaySetup::load()
-{
-	if (m_fullPath.isEmpty())
-		return false;
-	return loadFromFile(m_fullPath);
-}
+//bool AwDisplaySetup::load()
+//{
+//	if (m_fullPath.isEmpty())
+//		return false;
+//	return loadFromFile(m_fullPath);
+//}
 
 bool AwDisplaySetup::loadFromFile(const QString& path)
 {
@@ -201,7 +201,7 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 						int type = list.at(i).toElement().text().toInt();
 						auto gl = setup->gainLevels->getGainLevelFor(type);
 						// get gain level value
-						gl->value = (float) list.at(i).toElement().attribute("value").toInt();
+						gl->value = list.at(i).toElement().attribute("value").toFloat();
 					}
 				}
 				n = n.nextSibling();
@@ -214,12 +214,12 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 	return true;
 }
 
-bool AwDisplaySetup::save()
-{
-	if (m_fullPath.isEmpty())
-		return false;
-	return saveToFile(m_fullPath);
-}
+//bool AwDisplaySetup::save()
+//{
+//	if (m_fullPath.isEmpty())
+//		return false;
+//	return saveToFile(m_fullPath);
+//}
 
 bool AwDisplaySetup::saveToFile(const QString& filename)
 {

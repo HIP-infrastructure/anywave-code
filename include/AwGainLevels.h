@@ -30,6 +30,12 @@ class AwGainLevel
 public:
 	AwGainLevel() { type = 0; value = 0; }
 	AwGainLevel(AwGainLevel* copy) { type = copy->type; value = copy->value; values = copy->values; }
+
+	/** get index in scale for the value, -1 is value is not in the scale.**/
+	int getIndexOfValue(float value);
+	/** add a new value to the scale, returns the index of the value in the scale **/
+	int insertNewValue(float value);
+
 	int type;
 	vec values;   // scale of values
 	float value;  // current value
@@ -50,9 +56,6 @@ public:
 //	void init(const QString& lvlFilePath);
 
 	void applyTo(const AwChannelList& channels);
-
-	void gainLevelsForChannel(int type, vec& levels, float& value);
-	void gainLevelsForChannel(AwChannel* channel, vec& levels, float& value);
 	QList<AwGainLevel*> gainLevels() { return m_levels.values(); }
 	AwGainLevel* getGainLevelFor(int type);
 	  

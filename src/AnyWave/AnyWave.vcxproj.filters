@@ -89,9 +89,6 @@
     <Filter Include="Source">
       <UniqueIdentifier>{aea2612b-9f04-41ce-8dd7-329e100fe02d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Epoch">
-      <UniqueIdentifier>{2d1b87d3-89eb-4823-9083-3690aaab3c04}</UniqueIdentifier>
-    </Filter>
     <Filter Include="IO\MATLAB">
       <UniqueIdentifier>{affe80c4-bee8-4d1e-81df-156092db3e82}</UniqueIdentifier>
     </Filter>
@@ -418,42 +415,6 @@
     <ClCompile Include="IO\ADES\ADESIO.cpp">
       <Filter>IO\ADES</Filter>
     </ClCompile>
-    <ClCompile Include="Epoch\AwEpochManager.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochCreateUi.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochModel.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochVisuWidget.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochAverageWidget.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAverageDialog.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAverageItemWidget.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAvgWorker.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAvgSignalItem.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEditStatsDialog.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwStatsModel.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwStatChartWidget.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwMarkersExportWidget.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
@@ -501,9 +462,6 @@
     </ClCompile>
     <ClCompile Include="AwOpenFileDialog.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochMosaicWidget.cpp">
-      <Filter>Epoch</Filter>
     </ClCompile>
     <ClCompile Include="IO\MEMIO\MEMIO.cpp">
       <Filter>IO\MEMIO</Filter>
@@ -1005,60 +963,6 @@
     <QtMoc Include="IO\ADES\ADESIO.h">
       <Filter>IO\ADES</Filter>
     </QtMoc>
-    <QtMoc Include="Epoch\AwEpochManager.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochCreateUi.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochCreateUi.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochModel.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochVisuWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochVisuWidget.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochAverageWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochAverageWidget.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwAverageDialog.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwAverageDialog.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwAverageItemWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwAverageItemWidget.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAvgWorker.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAvgSignalItem.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEditStatsDialog.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEditStatsDialog.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwStatsModel.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwStatChartWidget.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
     <QtUic Include="Marker\AwMarkersExportWidget.ui">
       <Filter>Marker</Filter>
     </QtUic>
@@ -1094,12 +998,6 @@
     </QtUic>
     <QtMoc Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochMosaicWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochMosaicWidget.h">
-      <Filter>Epoch</Filter>
     </QtMoc>
     <QtMoc Include="IO\MEMIO\MEMIO.h">
       <Filter>IO\MEMIO</Filter>
@@ -1231,9 +1129,6 @@
     </ClInclude>
     <ClInclude Include="Data\AwMemoryMapper.h">
       <Filter>Data</Filter>
-    </ClInclude>
-    <ClInclude Include="Epoch\AwEpochThumbs.h">
-      <Filter>Epoch</Filter>
     </ClInclude>
     <ClInclude Include="IO\JSON\AwJSON.h">
       <Filter>IO\JSON</Filter>

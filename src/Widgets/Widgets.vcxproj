@@ -54,6 +54,7 @@
     <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp" />
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp" />
     <ClCompile Include="SignalView\AwBaseSignalView.cpp" />
+    <ClCompile Include="SignalView\AwGainLevelsWidget.cpp" />
     <ClCompile Include="SignalView\AwGoToLatencyDial.cpp" />
     <ClCompile Include="SignalView\AwGraphicsScene.cpp" />
     <ClCompile Include="SignalView\AwGraphicsView.cpp" />
@@ -78,6 +79,7 @@
     <QtMoc Include="..\..\include\widget\AwSelectInputDataWidget.h">
     </QtMoc>
     <QtMoc Include="..\..\include\AwGainLevels.h" />
+    <QtMoc Include="..\..\include\widget\AwGainLevelsWidget.h" />
     <ClInclude Include="SEEGViewer\AwSEEGInteractor.h" />
     <QtMoc Include="InputMarker\InputMarkerModel.h">
     </QtMoc>
@@ -152,6 +154,7 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="SignalView\AwGainLevelsWidget.ui" />
     <QtUic Include="SignalView\AwGoToLatencyDial.ui">
     </QtUic>
   </ItemGroup>

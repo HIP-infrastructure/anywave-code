@@ -66,19 +66,6 @@
     <ClCompile Include="Display\AwSignalView.cpp" />
     <ClCompile Include="Display\AwVideoManager.cpp" />
     <ClCompile Include="Display\AwViewSetup.cpp" />
-    <ClCompile Include="Epoch\AwAverageDialog.cpp" />
-    <ClCompile Include="Epoch\AwAverageItemWidget.cpp" />
-    <ClCompile Include="Epoch\AwAvgSignalItem.cpp" />
-    <ClCompile Include="Epoch\AwAvgWorker.cpp" />
-    <ClCompile Include="Epoch\AwEditStatsDialog.cpp" />
-    <ClCompile Include="Epoch\AwEpochAverageWidget.cpp" />
-    <ClCompile Include="Epoch\AwEpochCreateUi.cpp" />
-    <ClCompile Include="Epoch\AwEpochManager.cpp" />
-    <ClCompile Include="Epoch\AwEpochModel.cpp" />
-    <ClCompile Include="Epoch\AwEpochMosaicWidget.cpp" />
-    <ClCompile Include="Epoch\AwEpochVisuWidget.cpp" />
-    <ClCompile Include="Epoch\AwStatChartWidget.cpp" />
-    <ClCompile Include="Epoch\AwStatsModel.cpp" />
     <ClCompile Include="Filter\AwFilterToolBar.cpp" />
     <ClCompile Include="ICA\AwICAChannel.cpp" />
     <ClCompile Include="ICA\AwICAComponents.cpp" />
@@ -209,36 +196,10 @@
     </QtMoc>
     <QtMoc Include="AwUpdater.h">
     </QtMoc>
-    <QtMoc Include="Epoch\AwEpochManager.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochCreateUi.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochModel.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochVisuWidget.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochAverageWidget.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAverageDialog.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAverageItemWidget.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAvgWorker.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAvgSignalItem.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEditStatsDialog.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwStatsModel.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwStatChartWidget.h">
-    </QtMoc>
     <ClInclude Include="..\..\include\AwKeys.h" />
     <ClInclude Include="..\..\include\AwVersion.h" />
     <ClInclude Include="..\..\include\aw_armadillo.h" />
     <QtMoc Include="AwOpenFileDialog.h">
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochMosaicWidget.h">
     </QtMoc>
     <QtMoc Include="Batch\AwBatchDialog.h">
     </QtMoc>
@@ -267,7 +228,6 @@
     <ClInclude Include="Data\AwMemoryMapper.h" />
     <QtMoc Include="Display\AwVideoManager.h">
     </QtMoc>
-    <ClInclude Include="Epoch\AwEpochThumbs.h" />
     <QtMoc Include="IO\HDF5\HDF5IO.h">
     </QtMoc>
     <QtMoc Include="IO\ADES\ADESIO.h">
@@ -794,18 +754,6 @@
     </QtUic>
     <QtUic Include="Process\AwExporterSelMarkers.ui">
     </QtUic>
-    <QtUic Include="Epoch\AwEpochCreateUi.ui">
-    </QtUic>
-    <QtUic Include="Epoch\AwEpochVisuWidget.ui">
-    </QtUic>
-    <QtUic Include="Epoch\AwEpochAverageWidget.ui">
-    </QtUic>
-    <QtUic Include="Epoch\AwAverageDialog.ui">
-    </QtUic>
-    <QtUic Include="Epoch\AwAverageItemWidget.ui">
-    </QtUic>
-    <QtUic Include="Epoch\AwEditStatsDialog.ui">
-    </QtUic>
     <QtUic Include="Marker\AwMarkersExportWidget.ui">
     </QtUic>
     <QtUic Include="Widgets\AwSelectTriggerChannelDialog.ui">
@@ -822,10 +770,6 @@
     </QtUic>
     <None Include="AnyWave.licenseheader" />
     <None Include="cpp.hint" />
-    <QtUic Include="Epoch\AwEpochMosaicWidget.ui">
-    </QtUic>
-    <None Include="GeneratedFiles\Debug\AwEpochManager.moc" />
-    <None Include="GeneratedFiles\Release\AwEpochManager.moc" />
     <QtUic Include="Montage\AwECoGDialog.ui">
     </QtUic>
     <QtUic Include="Widgets\AwVideoSettingsDial.ui">
@@ -974,7 +918,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\debug\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLibd.lib;AwMappingLibd.lib;AwGraphicsLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwWidgetsLibd.lib;AwMathLibd.lib;AwLayoutLibd.lib;AwFilteringLibd.lib;AwHDF5Libd.lib;AwEpochLibd.lib;AwMatlablibd.lib;AwMontageLibd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qwtd.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLibd.lib;AwMappingLibd.lib;AwGraphicsLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwWidgetsLibd.lib;AwMathLibd.lib;AwLayoutLibd.lib;AwFilteringLibd.lib;AwHDF5Libd.lib;AwMatlablibd.lib;AwMontageLibd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qwtd.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
@@ -1050,7 +994,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLib.lib;AwGraphicsLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwWidgetsLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwHDF5Lib.lib;AwFilteringLib.lib;AwEpochLib.lib;AwMontageLib.lib;hdf5.lib;hdf5_hl.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;mkl_intel_lp64_dll.lib;tbb.lib;qwt.lib;AwMappingLib.lib;AwMatlablib.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;zip.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLib.lib;AwGraphicsLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwWidgetsLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwHDF5Lib.lib;AwFilteringLib.lib;AwMontageLib.lib;hdf5.lib;hdf5_hl.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;mkl_intel_lp64_dll.lib;tbb.lib;qwt.lib;AwMappingLib.lib;AwMatlablib.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;zip.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <PerUserRedirection>true</PerUserRedirection>
     </Link>
     <QtMoc>

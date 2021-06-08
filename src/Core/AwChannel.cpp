@@ -529,7 +529,7 @@ QList<AwChannel *> AwChannel::getChannelsWithLabel(const QList<AwChannel *>& lis
 QList<AwChannel *> AwChannel::duplicateChannels(const QList<AwChannel *>& list)
 {
 	AwChannelList res;
-	foreach(AwChannel *c, list)  {
+	for (AwChannel *c : list)  {
 		if (c->isVirtual()) {
 			AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
 			res << c->duplicate();

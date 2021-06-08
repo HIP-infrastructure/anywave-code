@@ -176,7 +176,10 @@
       <Filter>SignalView</Filter>
     </ClCompile>
     <ClCompile Include="AwGainLevels.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
+      <Filter>SignalView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -351,6 +354,9 @@
     <QtUic Include="SignalView\AwPickMarkersDial.ui">
       <Filter>SignalView</Filter>
     </QtUic>
+    <QtUic Include="SignalView\AwGainLevelsWidget.ui">
+      <Filter>SignalView</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aw2DGrid.h">
@@ -485,6 +491,9 @@
     </QtMoc>
     <QtMoc Include="..\..\include\AwGainLevels.h">
       <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\widget\AwGainLevelsWidget.h">
+      <Filter>SignalView</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

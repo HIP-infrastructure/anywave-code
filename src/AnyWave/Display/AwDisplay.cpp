@@ -63,8 +63,10 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	dsManager->setParent(this);
 	m_mainWindow = w;
 	m_setup = nullptr;
-	m_gainLevels = new AwGainLevels(this);
+//	m_gainLevels = new AwGainLevels(this);
 	AwDisplaySetup *setup = dsManager->currentSetup();
+
+	
 	// Display Setup Manager connections
 	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(changeCurrentSetup(AwDisplaySetup *)));
 	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
@@ -198,6 +200,7 @@ void AwDisplay::closeFile()
 	//m_reader = NULL; // set infos to NULL => data file not ready yet.
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
+	AwDisplaySetupManager::instance()->saveSettings();
 	AwDisplaySetupManager::instance()->resetToDefault();
 	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
@@ -686,10 +689,23 @@ void AwDisplay::setChannels(const AwChannelList &montage)
 void AwDisplay::newFile()
 {
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
+	ds->init();
 //	auto path = reader->fullPath();
 //	ds->setFilename(reader->fullPath());
 
 //	m_gainLevels->init(AwDataManager::instance()->lvlFilePath());
+
+//	m_setup->loadFromFile(AwDataManager::instance()->dispFilePath());
+
+//	m_signalViews.erase(m_signalViews.begin(), m_signalViews.end());
+
+
+	//// create views from setup
+	//for (AwViewSetup* vs : m_setup->viewSetups()) {
+	//	AwSignalView* v = addSignalView(vs);
+	//	v->enableView();
+	//}
+
 	
 	for (AwSignalView * v : m_signalViews)
 		v->enableView();

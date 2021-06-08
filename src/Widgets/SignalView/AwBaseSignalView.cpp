@@ -187,12 +187,31 @@ void AwBaseSignalView::setTotalDuration(float dur)
 void AwBaseSignalView::setChannels(const AwChannelList& channels)
 {
 	m_montageChannels = channels;
+
+	applyGainLevels();
 	// clear channels present in scene.
 	m_scene->clearChannels();
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
 	m_settings->gainLevels->applyTo(m_montageChannels);
+
 	reloadData();
+}
+
+void AwBaseSignalView::applyGainLevels()
+{
+	m_channelTypes.clear();
+	for (auto c : m_montageChannels) 
+		m_channelTypes.insert(c->type(), c);
+	// set gain levels for channels that are present
+	auto types = m_channelTypes.uniqueKeys();
+	for (auto t : types) {
+		auto gl = m_settings->gainLevels->getGainLevelFor(t);
+		auto channels = m_channelTypes.values(t);
+		for (auto c : channels) 
+			c->setGain(gl->value);
+	}
+	m_navBar->amplitudeWidget()->setGainLevels(m_settings->gainLevels);
 }
 
 void AwBaseSignalView::applyChannelFilters()
@@ -318,36 +337,23 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 
 void AwBaseSignalView::setAmplitude(int type, float value)
 {
-	//foreach (AwChannel *c, m_channels) {
-	//	 if (type == c->type())
-	//		c->setGain(value);
-	//	 if (type == AwChannel::EMG && c->isECG())
-	//		 c->setGain(value);
-	//}
-	for (auto c : m_channels) {
-		if (c->type() == type)
-			c->setGain(value);
-	}
+	auto types = m_channelTypes.uniqueKeys();
+	if (!types.contains(type))
+		return;
+	auto channels = m_channelTypes.values(type);
+	for (auto c : channels) 
+		c->setGain(value);
 	m_scene->updateSignals();
 }
 
 void AwBaseSignalView::setAmplitudes()
 {
-	//AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	//foreach(AwChannel *c, m_channels) {
-	//	c->setGain(am->amplitude(c->type()));
-	//}
-	//m_scene->updateSignals();
-	
-	QList<int> types = AwChannel::getTypes(m_channels);
-	QList<AwGainLevel*> levels;
-	for (auto t : types)
-		levels << m_settings->gainLevels->getGainLevelFor(t);
-	for (auto c : m_channels) {
-		int index = types.indexOf(c->type());
-		if (index != -1) {
-			c->setGain(levels.at(index)->value);
-		}
+	auto types = m_channelTypes.uniqueKeys();
+	for (auto t : types) {
+		auto gl = m_settings->gainLevels->getGainLevelFor(t);
+		auto channels = m_channelTypes.values(t);
+		for (auto c : channels)
+			c->setGain(gl->value);
 	}
 	m_scene->updateSignals();
 }

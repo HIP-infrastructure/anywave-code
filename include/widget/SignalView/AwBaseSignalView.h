@@ -104,6 +104,8 @@ protected:
 	AwChannelList m_montageChannels;		// channels from current montage.
 	AwMarkerList m_markers;
 	AwMarkerList m_visibleMarkers;
+	// hold a vector of bools for each type of channel currently present in the view
+	QVector<bool> m_currentTypes;
 	float m_positionInFile;					// current position of the view in the data (in seconds)
 	float m_pageDuration;
 	float m_totalDuration;
@@ -111,9 +113,11 @@ protected:
 	int m_flags;
 	AwFilterSettings m_filterSettings;
 	QTime m_recordedTime;
+	QMultiMap<int, AwChannel*> m_channelTypes;
 
 	virtual void dataReceived();
 	virtual void applyChannelFilters();
+	virtual void applyGainLevels();
 	void makeConnections();
 	void changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNavigationBar *navBar, AwBaseMarkerBar *markBar);
 	void updateVisibleMarkers();
