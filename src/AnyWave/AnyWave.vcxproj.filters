@@ -1262,12 +1262,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="GeneratedFiles\Debug\AwEpochManager.moc">
-      <Filter>Generated Files\Debug</Filter>
-    </None>
-    <None Include="GeneratedFiles\Release\AwEpochManager.moc">
-      <Filter>Generated Files\Release</Filter>
-    </None>
     <None Include="AnyWave.licenseheader" />
   </ItemGroup>
   <ItemGroup>

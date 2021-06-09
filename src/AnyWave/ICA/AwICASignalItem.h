@@ -29,7 +29,7 @@ class AwICASignalItem : public AwSignalItem
 	Q_OBJECT
 	Q_INTERFACES(AwGraphicsSignalItem)
 public:
-	AwICASignalItem(AwChannel *chan, AwDisplayPhysics *phys = NULL); 
+	AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys = nullptr); 
 	~AwICASignalItem();
 
 	QPainterPath shape() const;
@@ -81,7 +81,7 @@ class AwDisplayPluginICASignalItem : public AwDisplayPlugin
 	Q_INTERFACES(AwDisplayPlugin)
 public:
 	AwDisplayPluginICASignalItem() { name = "ICA SignalItem"; description = "display IC components with topography"; }
-	AwICASignalItem *newInstance(AwChannel *chan, AwDisplayPhysics *phys) { return new AwICASignalItem(chan, phys); }
+	AwICASignalItem *newInstance(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) { return new AwICASignalItem(chan, settings, phys); }
 };
 
 

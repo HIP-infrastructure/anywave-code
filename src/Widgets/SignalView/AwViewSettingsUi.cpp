@@ -1,3 +1,18 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwViewSettingsUi.h"
 #include <widget/SignalView/AwViewSettings.h>
 #include <AwChannel.h>
@@ -54,7 +69,8 @@ int AwViewSettingsUi::exec()
 	checkBaseLine->setChecked(m_settings->showZeroLine);
 	checkOverlay->setChecked(m_settings->stackChannels);
 	checkMarkerLabel->setChecked(m_settings->showMarkerLabels);
-	checkMarkerValue->setChecked(m_settings->showMarkerValues);
+	checkMarkerValue->setChecked(m_settings->showMarkerValues); 
+	checkEEGDisplay->setChecked(m_settings->eegDisplayMode);
 	unselectAllFilters();
 
 	for (auto cb : m_checkBoxes.keys()) {
@@ -96,6 +112,10 @@ void AwViewSettingsUi::accept()
 	if (copiedSettings->showTimeGrid != m_settings->showTimeGrid)
 		flags |= AwViewSettings::ShowTimeGrid;
 
+	m_settings->eegDisplayMode = checkEEGDisplay->isChecked();
+	if (copiedSettings->eegDisplayMode != m_settings->eegDisplayMode)
+		flags |= AwViewSettings::EEGMode;
+
 	m_settings->showSeconds = checkSeconds->isChecked();
 	if (copiedSettings->showSeconds != m_settings->showSeconds)
 		flags |= AwViewSettings::ShowSecondTicks;
@@ -133,7 +153,7 @@ void AwViewSettingsUi::accept()
 		if (cb->isChecked())
 			filters << m_checkBoxes[cb];
 
-	foreach (int f, copiedSettings->filters)
+	for (auto const& f : copiedSettings->filters)
 		if (!filters.contains(f))
 			flags |= AwViewSettings::Filters;
 

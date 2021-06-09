@@ -37,7 +37,6 @@
 #include "Marker/AwMarkerManager.h"
 #include "Marker/AwDockAddMarker.h"
 #include "Data/AwDataServer.h"
-#include <AwAmplitudeManager.h>
 #include "Display/AwDisplaySetupManager.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLogWidget.h"
@@ -355,7 +354,7 @@ void AnyWave::quit()
 
 	AwSettings::getInstance()->closeFile();
 	AwDataManager::instance()->closeFile();
-	AwAmplitudeManager::instance()->quit();
+	
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
 

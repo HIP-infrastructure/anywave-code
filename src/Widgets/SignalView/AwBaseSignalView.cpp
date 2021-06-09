@@ -1,8 +1,22 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/SignalView/AwBaseSignalView.h>
 #include <widget/SignalView/AwNavigationBar.h>
 #include <widget/SignalView/AwBaseMarkerBar.h>
 #include <widget/AwMessageBox.h>
-#include <AwAmplitudeManager.h>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QtGlobal>
@@ -130,8 +144,6 @@ void AwBaseSignalView::makeConnections()
 
 	connect(ampWidget, SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
 	connect(ampWidget, SIGNAL(amplitudeChanged(int, float)), this, SLOT(setAmplitude(int, float)));
-
-//	connect(AwAmplitudeManager::instance(), SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
 }
 
 void AwBaseSignalView::changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNavigationBar *navBar, AwBaseMarkerBar *markBar)
@@ -187,14 +199,11 @@ void AwBaseSignalView::setTotalDuration(float dur)
 void AwBaseSignalView::setChannels(const AwChannelList& channels)
 {
 	m_montageChannels = channels;
-
 	applyGainLevels();
 	// clear channels present in scene.
 	m_scene->clearChannels();
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
-	m_settings->gainLevels->applyTo(m_montageChannels);
-
 	reloadData();
 }
 

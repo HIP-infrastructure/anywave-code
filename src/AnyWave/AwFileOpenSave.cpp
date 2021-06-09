@@ -29,7 +29,6 @@
 #include <widget/AwMessageBox.h>
 #include "Widgets/AwTriggerParsingDialog.h"
 #include "Display/AwDisplay.h"
-#include <AwAmplitudeManager.h>
 #include "Widgets/AwFilePropertiesDialog.h"
 #include <QPrinter>
 #include <QSvgGenerator>
@@ -214,10 +213,6 @@ void AnyWave::openFile(const QString &path)
 		}
 	}
 
-	// ask Amplitude Manager to update the gains AFTER the display had setup the views !
-	// 	  DEBUGING - 
-	AwAmplitudeManager::instance()->setFilename(dataManager->levelFilePath());
-
 	if (openWithDialog)
 		aws->addRecentFilePath(filePath);
 
@@ -376,7 +371,6 @@ void AnyWave::on_actionLoadICA_triggered()
 
 void AnyWave::closeFile()
 {
-	AwAmplitudeManager::instance()->closeFile();
 	// dont stop MATPy Server if anywave was launched with plugin_debug option
 	//auto aws = AwSettings::getInstance();
 	//if (!aws->value(aws::plugin_debug_mode).toBool())

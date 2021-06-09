@@ -25,7 +25,7 @@
 /// Scales are stored as vec (armadillo)
 /// The current gain value for that type of channel is stored as value.
 /// </summary>
-class AwGainLevel
+class AW_WIDGETS_EXPORT AwGainLevel
 {
 public:
 	AwGainLevel() { type = 0; value = 0; }

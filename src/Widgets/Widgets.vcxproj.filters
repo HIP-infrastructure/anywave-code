@@ -47,11 +47,17 @@
     <Filter Include="InputMarker">
       <UniqueIdentifier>{1c04f334-272e-4398-9fed-447b3a2e7d63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MarkItem">
+      <UniqueIdentifier>{7582643d-89e8-4fef-a6a3-aaf0d466a20c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SignalItem">
+      <UniqueIdentifier>{bc413552-1526-43ee-81a2-587411769dc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mark">
+      <UniqueIdentifier>{2d41aa69-1522-43a1-bfb3-76f73d9dd764}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AwAmplitudeButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AwAmplitudeWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -181,6 +187,54 @@
     <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
+    <ClCompile Include="AwGraphicsObjects.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwCursorItem.cpp">
+      <Filter>MarkItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwHighLightMarker.cpp">
+      <Filter>MarkItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMappingCursorItem.cpp">
+      <Filter>MarkItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerChannelItem.cpp">
+      <Filter>MarkItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerItem.cpp">
+      <Filter>MarkItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerLabelButton.cpp">
+      <Filter>MarkItem</Filter>
+    </ClCompile>
+    <ClCompile Include="MarkerItem\AwMarkerValueButton.cpp">
+      <Filter>MarkItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwLabelItem.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSIAmpButton.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSignalItem.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSignalItemSettings.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalItem\AwSignalLabelItem.cpp">
+      <Filter>SignalItem</Filter>
+    </ClCompile>
+    <ClCompile Include="AwColorMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwQwtColorMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mark\AwHighLightPositionMarker.cpp">
+      <Filter>Mark</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AwAmplitudeWidget.ui">
@@ -190,9 +244,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwMapWidget.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwAmplitudeButton.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwAmplitudeWidget.h">
@@ -357,6 +408,9 @@
     <QtUic Include="SignalView\AwGainLevelsWidget.ui">
       <Filter>SignalView</Filter>
     </QtUic>
+    <QtUic Include="SignalItem\AwSignalItemSettings.ui">
+      <Filter>SignalItem</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aw2DGrid.h">
@@ -370,6 +424,39 @@
     </ClInclude>
     <ClInclude Include="SEEGViewer\AwSEEGInteractor.h">
       <Filter>SEEGViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwColorMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwCursorItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwGraphicInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwGraphicsDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwHighLightMarker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwLabelItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwMappingCursorItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwMarkerChannelItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwMarkerItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwQwtColorMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\widget\AwSignalLabelItem.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -494,6 +581,27 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwGainLevelsWidget.h">
       <Filter>SignalView</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\widget\AwGraphicsObjects.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\widget\AwHighLightPositionMarker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MarkerItem\AwMarkerLabelButton.h">
+      <Filter>MarkItem</Filter>
+    </QtMoc>
+    <QtMoc Include="MarkerItem\AwMarkerValueButton.h">
+      <Filter>MarkItem</Filter>
+    </QtMoc>
+    <QtMoc Include="SignalItem\AwSIAmpButton.h">
+      <Filter>SignalItem</Filter>
+    </QtMoc>
+    <QtMoc Include="SignalItem\AwSignalItemSettings.h">
+      <Filter>SignalItem</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\widget\AwSignalItem.h">
+      <Filter>SignalItem</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

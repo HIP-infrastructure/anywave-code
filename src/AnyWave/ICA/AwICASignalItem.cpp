@@ -27,7 +27,7 @@
 #include <widget/SignalView/AwGraphicsScene.h>
 #include <QtWidgets/QVBoxLayout>
 
-AwICASignalItem::AwICASignalItem(AwChannel *chan, AwDisplayPhysics *phys) : AwSignalItem(chan, phys)
+AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwSignalItem(chan, settings, phys)
 {
 	// get the ICA channel
 	m_icaChannel = static_cast<AwICAChannel *>(chan);

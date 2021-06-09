@@ -1,12 +1,27 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/SignalView/AwGraphicsScene.h>
-#include <graphics/AwGraphicInterface.h>
+#include <widget/AwGraphicInterface.h>
 #include <QAction>
 #include <QGraphicsView>
 #include <QMenu>
 #include <QGraphicsSceneContextMenuEvent>
 #include "AwGoToLatencyDial.h"
-#include <graphics/AwHighLightPositionMarker.h>
-#include <graphics/AwMarkerChannelItem.h>
+#include <widget/AwHighLightPositionMarker.h>
+#include <widget/AwMarkerChannelItem.h>
 #include <AwMarkingSettings.h>
 #include <utils/gui.h>
 #include "AwGTCMenu.h"
@@ -56,7 +71,7 @@ void AwGraphicsScene::setQTSPlugins(const QStringList& plugins)
 	m_QTSCompatiblePlugins = plugins;
 	m_QTSMenu = new QMenu();
 	QAction *action;
-	foreach(QString p, plugins) {
+	for (auto const& p : plugins) {
 		action = new QAction(p, m_QTSMenu);
 		connect(action, SIGNAL(triggered()), this, SLOT(launchQTSPlugin()));
 		m_QTSMenu->addAction(action);
@@ -119,7 +134,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		if (c->samplingRate() > m_maxSR)
 			m_maxSR = c->samplingRate();
 
-		AwBaseGraphicsSignalItem *base = dp->newInstance(c, m_physics);
+		AwBaseGraphicsSignalItem *base = dp->newInstance(c, m_settings, m_physics);
 		AwGraphicsSignalItem *item = static_cast<AwGraphicsSignalItem *>(base);
 		QObject::connect(item, &AwGraphicsSignalItem::selectionChanged, this, &AwGraphicsScene::updateSignalItemSelection);
 
@@ -160,12 +175,17 @@ void AwGraphicsScene::updateVisibleItemsHashTable()
 void AwGraphicsScene::updateSettings(AwViewSettings *settings, int flags)
 {
 	if (flags & AwViewSettings::ShowBaseLine)	{
-		foreach (AwGraphicsSignalItem *i, m_signalItems)
+		for (AwGraphicsSignalItem *i : m_signalItems)
 			i->showBaseline(settings->showZeroLine);
 		update();
 	}
+	if (flags & AwViewSettings::EEGMode) {  // when switching EEG display mode, just update the whole scene, the signal items will be repainted
+		for (AwGraphicsSignalItem* i : m_signalItems)
+			i->repaint();
+		update();
+	}
 	if (flags & AwViewSettings::ShowSensors)	{
-		foreach (AwGraphicsSignalItem *i, m_signalItems)
+		for (AwGraphicsSignalItem* i : m_signalItems)
 			i->showLabel(settings->showSensors);
 		update();
 	}

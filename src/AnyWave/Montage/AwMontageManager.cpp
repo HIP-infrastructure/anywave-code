@@ -26,7 +26,6 @@
 #include "Source/AwSourceChannel.h"
 #include "AwAVGChannel.h"
 #include <widget/AwWait.h>
-#include <AwAmplitudeManager.h>
 #include "IO/BIDS/AwBIDSManager.h"
 #include <AwException.h>
 #include <montage/AwMontage.h>
@@ -158,7 +157,6 @@ void AwMontageManager::addNewSources(int type)
 	AwSourceChannelList channels = sm->sources(type);
 	for (auto c : channels) {
 		AwSourceChannel *source = new AwSourceChannel(c);
-		source->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::Source));
 		m_sourceAsRecorded << c;
 		m_channels << source;
 		m_asRecorded[source->name()] = source;
@@ -219,7 +217,6 @@ int AwMontageManager::loadICA(const QString& path)
 		foreach(AwICAChannel *channel, comps[i]->components()) {
 			m_icaAsRecorded << channel;
 			AwICAChannel *newChan = new AwICAChannel(channel);
-			newChan->setGain(AwAmplitudeManager::instance()->amplitude(AwChannel::ICA));
 			m_channels << newChan;
 			// add ica to as recorded
 			m_asRecorded[channel->name()] = channel;
@@ -330,16 +327,6 @@ void AwMontageManager::removeBadChannels(AwChannelList& list)
 	foreach (AwChannel *c, list) {
 		if (c->isBad() || m_badChannelLabels.contains(c->name()))
 			list.removeAll(c);
-	}
-}
-
-
-void AwMontageManager::applyGains()
-{
-	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	for (auto c : m_channels + m_asRecorded.values()) {
-		if (c != NULL)
-			c->setGain(am->amplitude(c->type()));
 	}
 }
 
@@ -467,7 +454,6 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		AwDataManager::instance()->filterSettings().initWithChannels(m_channels);
 	}
 	setNewFilters(AwDataManager::instance()->filterSettings());
-	applyGains();
 
 	// check that none NULL channels are present in asRecorder nor m_channels
 	for (auto k : m_asRecorded.keys()) {
@@ -922,7 +908,7 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 		QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
 		return;
 	}
-	applyGains();
+
 	setNewFilters(AwDataManager::instance()->filterSettings());
 	emit montageChanged(m_channels);
 

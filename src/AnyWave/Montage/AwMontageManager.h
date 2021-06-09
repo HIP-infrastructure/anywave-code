@@ -151,7 +151,6 @@ private:
 	void loadBadChannels();
 	void scanForPrebuiltMontages();
 	void clear();									///> clear current montage;
-	void applyGains();
 	static AwMontageManager *m_instance;
 	// Source/ICA specific
 	void clearICA();
