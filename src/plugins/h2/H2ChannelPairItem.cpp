@@ -1,11 +1,10 @@
 #include "H2ChannelPair.h"
 #include "H2ChannelPairItem.h"
-#include <graphics/AwSignalItem.h>
 #include <qgraphicsscene.h>
 #include <QGraphicsSceneHoverEvent>
 using namespace arma;
 
-H2ChannelPairItem::H2ChannelPairItem(AwChannel *chan, AwDisplayPhysics *phys) : AwSignalItem(chan, phys)
+H2ChannelPairItem::H2ChannelPairItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwSignalItem(chan, settings, phys)
 {
 	// clear flags
 	setItemFlags(0);

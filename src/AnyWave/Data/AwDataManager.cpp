@@ -229,7 +229,8 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 		}
 	}
 
-	m_settings.unite(m_reader->infos.settings());
+	//m_settings.unite(m_reader->infos.settings());
+	AwUniteMaps(m_settings, m_reader->infos.settings());
 
 	auto duration = reader->infos.totalDuration(); 
 	m_settings.insert(keys::file_duration, QVariant(duration));

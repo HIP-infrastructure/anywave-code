@@ -74,7 +74,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AwCorelibd.lib;AwWidgetslibd.lib;AwProcessLibd.lib;AwGraphicsLibd.lib;AwMATLABLibd.lib;AwMathLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwFilteringLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCorelibd.lib;AwWidgetslibd.lib;AwProcessLibd.lib;AwMATLABLibd.lib;AwMathLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwFilteringLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -92,7 +92,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwGraphicsLib.lib;AwMATLABLib.lib;AwMathLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwFilteringLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwMATLABLib.lib;AwMathLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwFilteringLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

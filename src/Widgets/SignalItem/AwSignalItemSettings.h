@@ -19,7 +19,11 @@
 #include <QDialog>
 #include "ui_AwSignalItemSettings.h"
 #include <widget/AwGraphicsObjects.h>
-
+class QSlider;
+class QLineEdit;
+class QLabel;
+class AwGainLevel;
+class AwChannel;
 
 using namespace Ui;
 
@@ -38,11 +42,18 @@ protected slots:
 	//void downLevel();
 	//void upLevel();
 	void changeChannelSettings();
+	void getSliderValue(int value);
+	void getEditValue();
 protected:
 	QStringList m_levels;
 	QVector<float> m_scale; // values of amplitude in the scale.
 	AwChannel *m_copiedChannel;
 	AwGraphicsSignalItem *m_sitem;
+	QSlider* m_gainSlider;
+	QLineEdit* m_gainEdit;
+	QLabel* m_labelUnit;
+	AwGainLevel* m_gainLevel;
+	AwChannel* m_channel;
 };
 
 #endif // SIGNAL_SETTINGS_H

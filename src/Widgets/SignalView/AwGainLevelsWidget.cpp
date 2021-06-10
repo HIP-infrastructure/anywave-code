@@ -26,7 +26,7 @@ AwGainLevelsWidget::AwGainLevelsWidget(AwGainLevels *gl, QWidget* parent) : QWid
 {
 	m_gainLevels = gl;
 	Qt::WindowFlags flags = 0;
-	m_ui.setupUi(this);
+//	m_ui.setupUi(this);
 	
 	flags  |= Qt::Window | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint;
 	setWindowFlags(flags);
@@ -76,6 +76,7 @@ void AwGainLevelsWidget::buildLayout()
 		iteration++;
 	}
 	setLayout(layout);
+	setWindowTitle("Gain Levels");
 }
 
 void AwGainLevelsWidget::getSliderValue(int v)

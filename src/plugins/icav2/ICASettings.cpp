@@ -128,7 +128,8 @@ void ICASettings::accept()
 	if (m_ui.checkBoxDS->isChecked())
 		args["downsampling"] = true;
 
-	m_process->pdi.input.settings.unite(args);
+	//m_process->pdi.input.settings.unite(args);
+	AwUniteMaps(m_process->pdi.input.settings, args);
 	return QDialog::accept();
 }
 

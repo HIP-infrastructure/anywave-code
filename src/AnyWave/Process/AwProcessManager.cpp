@@ -37,6 +37,7 @@
 #include <AwKeys.h>
 #include "Data/AwDataManager.h"
 #include <process/AwProcessOutputWidget.h>
+#include <AwCore.h>
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -342,12 +343,14 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
 	// if fi == NULL that means no file are currently open by AnyWave.
 
 	if (dm->isFileOpen()) {
-		process->pdi.input.settings.unite(dm->settings());
+		//process->pdi.input.settings.unite(dm->settings());
+		AwUniteMaps(process->pdi.input.settings, dm->settings());
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(dm->reader());
 		process->pdi.input.filterSettings = dm->filterSettings();
 	}
-	process->pdi.input.settings.unite(args);
+	//process->pdi.input.settings.unite(args);
+	AwUniteMaps(process->pdi.input.settings, args);
 }
 
 /*!

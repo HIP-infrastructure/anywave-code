@@ -81,7 +81,8 @@ bool ICA::showUi()
 		}
 		test.close();
 		QFile::remove(m_fileName);
-		pdi.input.settings.unite(ui.args);
+		//pdi.input.settings.unite(ui.args);
+		AwUniteMaps(pdi.input.settings, args);
 		return true;
 	}
 	return false;

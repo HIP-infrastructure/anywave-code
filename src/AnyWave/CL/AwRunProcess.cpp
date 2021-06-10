@@ -20,6 +20,7 @@
 #include <AwException.h>
 #include "IO/BIDS/AwBIDSManager.h"
 #include <iostream>
+#include <AwCore.h>
 
 void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
@@ -42,7 +43,8 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	}
 	auto reader = process->pdi.input.reader();
 	applyFilters(process->pdi.input.channels(), arguments);
-	process->pdi.input.settings.unite(arguments);
+	//process->pdi.input.settings.unite(arguments);
+	AwUniteMaps(process->pdi.input.settings, arguments);
 	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
 	process->runFromCommandLine();

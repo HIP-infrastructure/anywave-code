@@ -53,7 +53,7 @@ int aw::commandLine::doCommandLineOperation(AwArguments& args)
 		else
 			return 0;
 		// something happened.
-		AwDebugLog::instance()->closeFile();
+//		AwDebugLog::instance()->closeFile();
 	}
 	return 0;
 }
@@ -61,7 +61,7 @@ int aw::commandLine::doCommandLineOperation(AwArguments& args)
 int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 {
 	QCommandLineParser parser;
-	AwCommandLogger logger(QString("Command Line"));
+//	AwCommandLogger logger(QString("Command Line"));
 	const QString origin = "aw::commandLine::doParsing";
 	// default to no gui mode
 	arguments[keys::gui_mode] = false;
@@ -187,7 +187,8 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	}
 	   	  
 	if (!parser.parse(args)) {
-		logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
+	//	logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
+		exception.setError(parser.errorText());
 		throw exception;
 	}
 
@@ -195,6 +196,14 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		std::cout << QCoreApplication::applicationVersion().toStdString();
 		return aw::commandLine::NoOperation;
 	}
+
+	QString tmp;
+	// log_dir
+	tmp = parser.value(logDirO);
+	if (!tmp.isEmpty())
+		AwSettings::getInstance()->setValue(aws::log_dir, tmp);
+
+	AwCommandLogger logger(QString("Command Line"));
 
 	//// add plugin options
 	for (auto const& k : mapParams.keys()) {
@@ -228,7 +237,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	availableWriters["ades"] = QString("AnyWave ADES Format");
 	availableWriters["fiff"] = QString("FIFF Format");
 
-	QString tmp;
 	// skip_bad_channels
 	tmp = parser.value(skipBadChannelsO).toLower().simplified();
 	if (!tmp.isEmpty()) {
@@ -243,10 +251,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		if (ok)
 			arguments[keys::create_montage] = tmp;
 	}
-	// log_dir
-	tmp = parser.value(logDirO);
-	if (!tmp.isEmpty())
-		AwSettings::getInstance()->setValue(aws::log_dir, tmp);
+
 	// marker_file
 	tmp = parser.value(markerFileO);
 	if (!tmp.isEmpty())

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
-#include "ui_AwGainLevelsWidget.h"
+//#include "ui_AwGainLevelsWidget.h"
 #include <qwidget.h>
 #include <QMap>
 class AwGainLevels;
@@ -34,5 +34,5 @@ protected:
 	AwGainLevels* m_gainLevels;
 	QList<QWidget*> m_sliders, m_values, m_labels;
 	QMap<QWidget*, int> m_widgetsToTypes;
-	Ui::AwGainLevelsWidgetUi m_ui;
+//	Ui::AwGainLevelsWidgetUi m_ui;
 };

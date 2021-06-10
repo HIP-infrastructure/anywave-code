@@ -17,30 +17,37 @@
 #include <qgraphicsscene.h>
 #include <widget/SignalView/AwViewSettings.h>
 #include <QLineEdit>
+#include <AwGainLevels.h>
 
 AwSignalItemSettings::AwSignalItemSettings(AwGraphicsSignalItem *item, QWidget *parent)
 	: AwGraphicsSignalDialog(item, parent)
 {
 	setupUi(this);	
-	m_copiedChannel = new AwChannel(item->channel());
+	m_copiedChannel = nullptr; 
 	m_sitem = item;
+	m_channel = nullptr;
+	m_gainEdit = nullptr;
+	m_gainSlider = nullptr;
+	m_labelUnit = nullptr;
 }
 
 AwSignalItemSettings::~AwSignalItemSettings()
 {
-	delete m_copiedChannel;
+	if (m_copiedChannel)
+		delete m_copiedChannel;
 }
 
 
 int AwSignalItemSettings::exec()
 {
-	AwChannel *chan = m_item->channel();
-	if (!chan)
+	m_channel= m_item->channel();
+	if (!m_channel)
 		QDialog::done(QDialog::Rejected);
+	m_copiedChannel = m_channel->duplicate();
 
 	// init channel name
-	labelChannel->setText(chan->fullName());
-	labelType->setText(AwChannel::typeToString(chan->type()));
+	labelChannel->setText(m_channel->fullName());
+	labelType->setText(AwChannel::typeToString(m_channel->type()));
 
 	// init combobox
 	int i = 0;
@@ -50,112 +57,108 @@ int AwSignalItemSettings::exec()
 		i++;
 	}
 
-	QString color_name = chan->color();
+	QString color_name = m_channel->color();
 	int index = QColor::colorNames().indexOf(color_name);
 	if (index == -1)
 		index =  QColor::colorNames().indexOf("black");
 	cb_Couleur->setCurrentIndex(QColor::colorNames().indexOf(color_name));
 
 	// Init parametres filtrage
-	checkHighPass->setChecked(chan->highFilter() > 0);
-	checkLowPass->setChecked(chan->lowFilter() > 0);
-	checkNotch->setChecked(chan->notch() > 0);
-	sbHigh->setValue(chan->highFilter());
-	sbLow->setValue(chan->lowFilter());
-	sbNotch->setValue(chan->notch());
+	checkHighPass->setChecked(m_channel->highFilter() > 0);
+	checkLowPass->setChecked(m_channel->lowFilter() > 0);
+	checkNotch->setChecked(m_channel->notch() > 0);
+	sbHigh->setValue(m_channel->highFilter());
+	sbLow->setValue(m_channel->lowFilter());
+	sbNotch->setValue(m_channel->notch());
 
 	// create gain levels widget in the dedicated layout
-	auto gl = m_sitem->viewSettings()->gainLevels->getGainLevelFor(chan->type());
+	m_gainLevel = m_sitem->viewSettings()->gainLevels->getGainLevelFor(m_channel->type());
 
-	auto slider = new QSlider;
-	slider->setMaximum(gl->values.n_elem);
-	slider->setValue(gl->getIndexOfValue(gl->value));
-	auto edit = new QLineEdit;
-	edit->setText(QString("%1").arg(gl->value));
-	auto label = new QLabel;
-	label->setText(gl->unit);
-	gainLevelsLayout->addWidget(slider);
-	gainLevelsLayout->addWidget(edit);
-	gainLevelsLayout->addWidget(label);
-
-
-	//m_scale = am->getScale(chan->type());
-	//for (auto item : m_scale) {
-	//	m_levels << QString("%1 %2/cm").arg(item).arg(chan->unit());
-	//}
-	//comboLevels->addItems(m_levels);
-	//index = m_scale.indexOf(chan->gain());
-	//if (index != -1)
-	//	comboLevels->setCurrentIndex(index);
-
-	//connect(buttonDown, &QPushButton::clicked, this, &AwSignalItemSettings::upLevel);
-	//connect(buttonUp, &QPushButton::clicked, this, &AwSignalItemSettings::downLevel);
-	//// instant update for color and gain level.
-	//connect(comboLevels, SIGNAL(currentIndexChanged(int)), this, SLOT(changeChannelSettings()));
+	// create widgets to handle gain level for the channel
+	m_gainSlider = new QSlider(Qt::Horizontal);
+	m_gainSlider->setMaximum(m_gainLevel->values.n_elem);
+	m_gainSlider->setValue(m_gainLevel->getIndexOfValue(m_gainLevel->value));
+	m_gainEdit = new QLineEdit;
+	m_gainEdit->setText(QString("%1").arg(m_gainLevel->value));
+	m_labelUnit = new QLabel;
+	m_labelUnit->setText(m_gainLevel->unit);
+	gainLevelsLayout->addWidget(m_gainSlider);
+	gainLevelsLayout->addWidget(m_gainEdit);
+	gainLevelsLayout->addWidget(m_labelUnit);
+	gainLevelsLayout->setStretch(0, 1);
+	connect(m_gainSlider, &QSlider::valueChanged, this, &AwSignalItemSettings::getSliderValue);
+	connect(m_gainEdit, &QLineEdit::editingFinished, this, &AwSignalItemSettings::getEditValue);
+	// end of gain level
 	connect(cb_Couleur, SIGNAL(currentIndexChanged(int)), this, SLOT(changeChannelSettings()));
 	return QDialog::exec();
 }
 
+void AwSignalItemSettings::getSliderValue(int value)
+{
+	disconnect(m_gainEdit, nullptr, this, nullptr);
+	m_channel->setGain(m_gainLevel->values(value)); // here set directly the gain to the original channel and make it appears in the view
+	m_gainEdit->setText(QString("%1").arg(m_gainLevel->values(value)));
+	connect(m_gainEdit, &QLineEdit::editingFinished, this, &AwSignalItemSettings::getEditValue);
+	m_sitem->repaint();
+	m_sitem->scene()->update();
+}
+
+void AwSignalItemSettings::getEditValue()
+{
+	disconnect(m_gainSlider, nullptr, this, nullptr);
+	float value = m_gainEdit->text().toFloat();
+	int index = m_gainLevel->getIndexOfValue(value);
+	if (index == -1)
+		index = m_gainLevel->insertNewValue(value);
+	m_channel->setGain(value);  // here set directly the gain to the original channel and make it appears in the view
+	m_gainSlider->setValue(index);
+	connect(m_gainSlider, &QSlider::valueChanged, this, &AwSignalItemSettings::getSliderValue);
+	m_sitem->repaint();
+	m_sitem->scene()->update();
+}
+
 void AwSignalItemSettings::reject()
 {
-	auto channel = m_item->channel();
-	channel->setColor(m_copiedChannel->color());
-	channel->setGain(m_copiedChannel->gain());
+	m_channel->setColor(m_copiedChannel->color());
+	m_channel->setGain(m_copiedChannel->gain());
+	// reset filters also
+	m_channel->setLowFilter(m_copiedChannel->lowFilter());
+	m_channel->setHighFilter(m_copiedChannel->highFilter());
+	m_channel->setNotch(m_copiedChannel->notch());
 	QDialog::reject();
 }
 
 void AwSignalItemSettings::accept()
 {
-	AwChannel *chan = m_item->channel();
-
-	chan->setColor(QColor::colorNames().at(cb_Couleur->currentIndex()));
+	m_channel->setColor(QColor::colorNames().at(cb_Couleur->currentIndex()));
 	if (checkLowPass->isChecked())
-		chan->setLowFilter((float)sbLow->value());
+		m_channel->setLowFilter((float)sbLow->value());
 	else
-		chan->setLowFilter(-1);
+		m_channel->setLowFilter(-1);
 	if (checkHighPass->isChecked())
-		chan->setHighFilter((float)sbHigh->value());
+		m_channel->setHighFilter((float)sbHigh->value());
 	else
-		chan->setHighFilter(-1);
+		m_channel->setHighFilter(-1);
 
 	// set params to parents
 	// This way, parent of the channel will also have their settings changed.
 	// The first parent is the same channel in the current montage.
-	AwChannel *parent = chan->parent();
+	AwChannel *parent = m_channel->parent();
 	while (parent)	{
-		parent->setColor(chan->color());
-		parent->setLowFilter(chan->lowFilter());
-		parent->setHighFilter(chan->highFilter());
-		parent->setGain(chan->gain());
-		parent->setColor(chan->color());
+		parent->setColor(m_channel->color());
+		parent->setLowFilter(m_channel->lowFilter());
+		parent->setHighFilter(m_channel->highFilter());
+		parent->setGain(m_channel->gain());
+		parent->setColor(m_channel->color());
 		parent = parent->parent();
 	}
-//	chan->setGain(m_scale.at(comboLevels->currentIndex()));
-
 	QDialog::accept();
 }
 
 
 void AwSignalItemSettings::changeChannelSettings()
 {
-	auto chan = m_item->channel();
-	chan->setColor(QColor::colorNames().at(cb_Couleur->currentIndex()));
-//	chan->setGain(m_scale.at(comboLevels->currentIndex()));
+	m_channel->setColor(QColor::colorNames().at(cb_Couleur->currentIndex()));
 	m_sitem->repaint();
 	m_sitem->scene()->update();
 }
-
-
-//void AwSignalItemSettings::downLevel()
-//{
-//	int index = comboLevels->currentIndex();
-//	if (index > 0) 
-//		comboLevels->setCurrentIndex(index - 1);
-//}
-
-//void AwSignalItemSettings::upLevel()
-//{
-//	int index = comboLevels->currentIndex();
-//	if (index < comboLevels->count())
-//		comboLevels->setCurrentIndex(index + 1);
-//}

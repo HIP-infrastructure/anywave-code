@@ -24,6 +24,7 @@
 #include <QTranslator>
 #include <AwGlobal.h>
 #include <QElapsedTimer>
+#include <AwCore.h>
 class AwProcessPlugin;
 class AwProcessOutputWidget;
 
@@ -153,7 +154,7 @@ public:
 	/** Command Line specific **/
 	inline QVariantMap& batchHash() { return m_batchMap; }
 	void setBatch(const QString& key, const QVariant& value) { m_batchMap[key] = value; }
-	void addBatchMap(const QVariantMap& hash) { m_batchMap.unite(hash); }
+	void addBatchMap(const QVariantMap& hash) { AwUniteMaps(m_batchMap, hash);  /* m_batchMap.unite(hash); */ }
 	inline bool hasDeclaredArgs();
 	bool isBatchGUICompatible(); 
 protected:
