@@ -6,13 +6,10 @@ INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 SET(SRCS
 h2.cpp
 h2ui.cpp)
-#H2ChannelPairItem.cpp
-#H2ChannelPair.cpp) 
 
 SET(MOCS
 h2.h
 h2ui.h)
-#H2ChannelPairItem.h)
 
 SET(UIS h2ui.ui)
 

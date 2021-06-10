@@ -48,7 +48,29 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ./InputMarker/InputMarkerModel.h  
     ../../include/widget/AwInputMarkerTableView.h  
     ../../include/widget/AwInputMarkerWidget.h
-	../../include/widget/AwVideoPlayer.h)
+	../../include/widget/AwVideoPlayer.h
+	../../include/widget/AwGraphicsObjects.h 
+../../include/widget/AwGraphicInterface.h 
+	../../include/AwAmplitudeManager.h 
+    MarkerItem/AwMarkerLabelButton.h 
+    MarkerItem/AwMarkerValueButton.h 
+    SignalItem/AwSIAmpButton.h 
+    SignalItem/AwSignalItemSettings.h 
+    ../../include/widget/AwColorMap.h 
+   ../../include/widget/AwCursorItem.h 
+   ../../include/widget/AwGraphicInterface.h 
+   ../../include/widget/AwGraphicsDefines.h 
+   ../../include/widget/AwGraphicsObjects.h 
+   ../../include/widget/AwHighLightMarker.h 
+   ../../include/widget/AwHighLightPositionMarker.h 
+   ../../include/widget/AwLabelItem.h 
+   ../../include/widget/AwMappingCursorItem.h 
+   ../../include/widget/AwMarkerChannelItem.h 
+   ../../include/widget/AwMarkerItem.h 
+   ../../include/widget/AwQwtColorMap.h 
+   ../../include/widget/AwSignalItem.h 
+   ../../include/widget/AwSignalLabelItem.h)
+	
 
 SET(SRC  ./AwSelectInputDataWidget.cpp
      ./Aw2DGrid.cpp  
@@ -91,7 +113,23 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SEEGViewer/AwSEEGWidget.cpp  
     ./InputMarker/AwInputMarkerTableView.cpp  
     ./InputMarker/AwInputMarkerWidget.cpp  
-    ./InputMarker/InputMarkerModel.cpp)
+    ./InputMarker/InputMarkerModel.cpp
+	Mark/AwHighLightPositionMarker.cpp 
+    MarkerItem/AwCursorItem.cpp 
+    MarkerItem/AwHighLightMarker.cpp 
+    MarkerItem/AwMappingCursorItem.cpp 
+    MarkerItem/AwMarkerChannelItem.cpp 
+    MarkerItem/AwMarkerItem.cpp 
+    MarkerItem/AwMarkerLabelButton.cpp 
+    MarkerItem/AwMarkerValueButton.cpp 
+    SignalItem/AwLabelItem.cpp 
+    SignalItem/AwSIAmpButton.cpp 
+    SignalItem/AwSignalItem.cpp 
+    SignalItem/AwSignalItemSettings.cpp 
+    SignalItem/AwSignalLabelItem.cpp 
+    AwColorMap.cpp 
+    AwGraphicsObjects.cpp 
+    AwQwtColorMap.cpp)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 
@@ -113,7 +151,8 @@ SET(FORMS  ./AwSelectInputDataWidget.ui
     ./SignalView/AwPickMarkersDial.ui 
     ./SEEGViewer/AwSEEGWidget.ui  
 	./AwVideoPlayer.ui
-    ./InputMarker/AwInputMarkerWidget.ui)
+    ./InputMarker/AwInputMarkerWidget.ui
+	SignalItem/AwSignalItemSettings.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
 
