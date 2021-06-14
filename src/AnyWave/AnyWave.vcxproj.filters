@@ -517,9 +517,6 @@
     <ClCompile Include="MATPy\OpenNewFile.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="CL\DedicatedDataServer.cpp">
-      <Filter>CL</Filter>
-    </ClCompile>
     <ClCompile Include="MATPy\GetProperties.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>

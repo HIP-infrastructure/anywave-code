@@ -96,7 +96,6 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	}
 
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
-//	args.unite(map);
 	AwUniteMaps(args, map);
 	// always add the path to anywave app
 	args[keys::aw_path] = QCoreApplication::applicationFilePath();
@@ -109,7 +108,6 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	// instantiate process
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
-//	process->pdi.input.settings.unite(args);
 	AwUniteMaps(process->pdi.input.settings, args);
 	AwCommandLineManager::initProcessPDI(process);
 	return process;
@@ -138,7 +136,6 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			return -1;
 		}
 		process->pdi.input.setReader(dm->reader());
-	//	process->pdi.input.settings.unite(dm->settings());
 		AwUniteMaps(process->pdi.input.settings, dm->settings());
 	}
 	// check for special case, marker_file, montage_file set in json must be relative to data file

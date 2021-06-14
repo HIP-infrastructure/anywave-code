@@ -44,7 +44,6 @@
     <ClCompile Include="CL\AwCommandLogger.cpp" />
     <ClCompile Include="CL\AwRunProcess.cpp" />
     <ClCompile Include="CL\CommandLineParser.cpp" />
-    <ClCompile Include="CL\DedicatedDataServer.cpp" />
     <ClCompile Include="Data\AwDataChunk.cpp" />
     <ClCompile Include="Data\AwDataConnection.cpp" />
     <ClCompile Include="Data\AwDataManager.cpp" />

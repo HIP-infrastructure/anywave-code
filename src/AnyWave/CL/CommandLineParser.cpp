@@ -52,8 +52,6 @@ int aw::commandLine::doCommandLineOperation(AwArguments& args)
 			AwCommandLineManager::runProcess(args);
 		else
 			return 0;
-		// something happened.
-//		AwDebugLog::instance()->closeFile();
 	}
 	return 0;
 }
@@ -61,7 +59,6 @@ int aw::commandLine::doCommandLineOperation(AwArguments& args)
 int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 {
 	QCommandLineParser parser;
-//	AwCommandLogger logger(QString("Command Line"));
 	const QString origin = "aw::commandLine::doParsing";
 	// default to no gui mode
 	arguments[keys::gui_mode] = false;
@@ -187,7 +184,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	}
 	   	  
 	if (!parser.parse(args)) {
-	//	logger.sendLog(QString("parsing error: %1").arg(parser.errorText()));
 		exception.setError(parser.errorText());
 		throw exception;
 	}
