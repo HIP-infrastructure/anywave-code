@@ -89,7 +89,7 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 		gl->values = join_cols(gl->values, b);
 		b = regspace(500, 100, 5000);
 		gl->values = join_cols(gl->values, b);
-		gl->unit = QString::fromLatin1("µV/cm");
+		gl->unit = QString::fromLatin1("ï¿½V/cm");
 		if (type == AwChannel::EEG)
 			gl->value = 150;
 		else if (type == AwChannel::SEEG)
@@ -108,7 +108,7 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 		vec b = regspace(10, 100, 10000);
 		gl->values = join_cols(a, b);
 		gl->unit = QString::fromLatin1("??/cm");
-		gl->value = 350;
+		gl->value = 310;
 	}
 		break;
 	case AwChannel::MEG:
@@ -134,7 +134,7 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 	break;
 	default:
 	{
-		vec a = regspace(0.0011, 0.1, 0.9);
+		vec a = regspace(0.001, 0.1, 0.9);
 		vec b = regspace(1, 2, 9);
 		gl->values = join_cols(a, b);
 		b = regspace(10, 10, 490);
@@ -150,7 +150,6 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 
 void AwGainLevels::clear()
 {
-	m_map.clear();
 	for (auto values : m_levels.values()) 
 		delete values;
 	m_levels.clear();

@@ -353,7 +353,6 @@ SET(FORMS ./AnyWave.ui
 QT5_WRAP_UI(UI ${FORMS})
 
 SET(AW_LIBS AwCore AwMontage
-AwGraphics
 AwWidget
 AwMontage
 AwHDF5

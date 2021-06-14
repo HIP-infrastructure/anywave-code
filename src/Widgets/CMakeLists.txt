@@ -10,6 +10,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwSelectInputDataWidget.h
     ../../include/widget/AwWait.h  
 	../../include/widget/AwGetValueDialog.h  
+    ../../include/AwGainLevels.h  
     ./Aw2DGrid.h  
     ../../include/widget/AwWaitWidget.h  
     ../../include/widget/AwComboCMap.h  
@@ -28,7 +29,6 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwTopoBuilder.h  
     ./AwTopoWidgetSettings.h  
     ../../include/widget/AwAmplitudeWidget.h  
-    ../../include/widget/AwAmplitudeButton.h  
     ../../include/widget/AwMapWidget.h  
     ../../include/widget/AwTopoWidget.h  
     ./AwTimeScaleCombo.h  
@@ -39,6 +39,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ./SignalView/AwViewSettingsUi.h  
     ./SignalView/AwGoToLatencyDial.h  
     ./SignalView/AwPickMarkersDial.h 
+    ../../include/widget/AwGainLevelsWidget.h 
     ../../include/widget/SignalView/AwGraphicsScene.h  
     ../../include/widget/SignalView/AwGraphicsView.h  
     ../../include/widget/SignalView/AwNavigationBar.h  
@@ -84,7 +85,6 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./AwDownSamplingWidget.cpp  
     ./AwMarkAroundWidget.cpp  
     ./AwMarkerInspector.cpp  
-    ./AwAmplitudeButton.cpp  
     ./AwAmplitudeWidget.cpp  
     ./AwMapWidget.cpp  
     ./AwMarkingSettings.cpp  
@@ -108,6 +108,7 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SignalView/AwViewSettings.cpp  
     ./SignalView/AwViewSettingsUi.cpp  
     ./SignalView/AwPickMarkersDial.cpp 
+    ./SignalView/AwGainLevelsWidget.cpp
     ./SEEGViewer/AwSEEGInteractor.cpp  
     ./SEEGViewer/AwSEEGViewer.cpp  
     ./SEEGViewer/AwSEEGWidget.cpp  
@@ -127,6 +128,7 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     SignalItem/AwSignalItem.cpp 
     SignalItem/AwSignalItemSettings.cpp 
     SignalItem/AwSignalLabelItem.cpp 
+    AwGainLevels.cpp
     AwColorMap.cpp 
     AwGraphicsObjects.cpp 
     AwQwtColorMap.cpp)

@@ -16,7 +16,6 @@
 #pragma once
 #include <QObject>
 #include <AwGlobal.h>
-#include <QVariantMap>
 #include <aw_armadillo.h>
 #include <AwChannel.h>
 
@@ -53,21 +52,12 @@ public:
 	AwGainLevels(AwGainLevels *copy, QObject* parent = nullptr);
 	~AwGainLevels();
 
-//	void init(const QString& lvlFilePath);
-
 	void applyTo(const AwChannelList& channels);
-	QList<AwGainLevel*> gainLevels() { return m_levels.values(); }
+	inline QList<AwGainLevel*> gainLevels() { return m_levels.values(); }
 	AwGainLevel* getGainLevelFor(int type);
 	  
-
 	void clear();
 protected:
-	//void load(const QString& path);
-	//void save(const QString& path);
-	
 	AwGainLevel* createDefaultGainLevel(int type);
-
-	QVariantMap m_map;
-//	QString m_lvlPath;
 	QMap<int, AwGainLevel*> m_levels;
 };

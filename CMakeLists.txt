@@ -150,11 +150,10 @@ add_subdirectory(src/Math)
 add_subdirectory(src/MappingLib)
 add_subdirectory(src/MatlabLib)
 # dependencies
-add_dependencies(AwGraphics AwCore)
 add_dependencies(AwFiltering AwCore)
 add_dependencies(AwProcess AwCore)
 add_dependencies(AwReadWrite AwCore)
-add_dependencies(AwWidget AwGraphics AwCore AwMath)
+add_dependencies(AwWidget AwCore AwMath)
 add_dependencies(AwLayout AwCore)
 add_dependencies(AwMontage AwCore AwReadWrite)
 
