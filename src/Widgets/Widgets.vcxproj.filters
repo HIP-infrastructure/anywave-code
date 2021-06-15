@@ -184,9 +184,6 @@
     <ClCompile Include="AwGainLevels.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
-      <Filter>SignalView</Filter>
-    </ClCompile>
     <ClCompile Include="AwGraphicsObjects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -234,6 +231,9 @@
     </ClCompile>
     <ClCompile Include="Mark\AwHighLightPositionMarker.cpp">
       <Filter>Mark</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -68,7 +68,6 @@ AwViewSetup *AwDisplaySetup::newViewSetup()
 	else
 		s = new AwViewSetup(m_ds.last());
 	m_ds << s;
-	//save();
 	return s;
 }
 
@@ -107,13 +106,6 @@ void AwDisplaySetup::setName(const QString& name)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
-
-//bool AwDisplaySetup::load()
-//{
-//	if (m_fullPath.isEmpty())
-//		return false;
-//	return loadFromFile(m_fullPath);
-//}
 
 bool AwDisplaySetup::loadFromFile(const QString& path)
 {
@@ -201,7 +193,7 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 						int type = list.at(i).toElement().text().toInt();
 						auto gl = setup->gainLevels->getGainLevelFor(type);
 						// get gain level value
-						gl->value = list.at(i).toElement().attribute("value").toFloat();
+						gl->setValue(list.at(i).toElement().attribute("value").toFloat());
 					}
 				}
 				n = n.nextSibling();
@@ -213,13 +205,6 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 	file.close();
 	return true;
 }
-
-//bool AwDisplaySetup::save()
-//{
-//	if (m_fullPath.isEmpty())
-//		return false;
-//	return saveToFile(m_fullPath);
-//}
 
 bool AwDisplaySetup::saveToFile(const QString& filename)
 {
@@ -330,7 +315,7 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		for (auto gl : dsv->gainLevels->gainLevels()) {
 			QDomElement ee = doc.createElement("GainLevel");
 			ee.appendChild(doc.createTextNode(QString("%1").arg(gl->type)));
-			ee.setAttribute("value", gl->value);
+			ee.setAttribute("value", gl->value());
 			e.appendChild(ee);
 		}
 		element.appendChild(e);

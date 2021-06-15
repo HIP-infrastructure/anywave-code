@@ -19,7 +19,7 @@
 
 int AwGainLevel::getIndexOfValue(float v)
 {
-	uvec indexes = find(values == v);
+	uvec indexes = find(m_values == v);
 	if (indexes.is_empty())
 		return -1;
 	return indexes(0);
@@ -29,12 +29,15 @@ int AwGainLevel::insertNewValue(float v)
 {
 	int index = getIndexOfValue(v);
 	if (index == -1) {
-		auto size = values.size();
-		values.resize(size + 1);
-		values(size) = v;
-		sort(values);
+		auto size = m_values.size();
+		m_values.resize(size + 1);
+		m_values(size) = v;
+		sort(m_values);
 		index = getIndexOfValue(v);
+		
 	}
+	m_value = v;
+	emit valueChanged(type, m_value);
 	return index;
 }
 
@@ -49,15 +52,12 @@ AwGainLevels::AwGainLevels(AwGainLevels* copy, QObject* parent) : QObject(parent
 	auto keys = copy->m_levels.keys();
 	for (auto const& k : keys) {
 		AwGainLevel* gl = copy->m_levels.value(k);
-		m_levels.insert(k, new AwGainLevel(gl));
+		m_levels.insert(k, new AwGainLevel(gl, this));
 	}
 }
 
 AwGainLevels::~AwGainLevels()
 {
-	auto values = m_levels.values();
-	for (auto v : values)
-		delete v;
 }
 
 
@@ -73,8 +73,11 @@ AwGainLevel* AwGainLevels::getGainLevelFor(int type)
 
 AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 {
-	AwGainLevel* gl = new AwGainLevel;
+	AwGainLevel* gl = new AwGainLevel(this);
 	gl->type = type;
+	vec values;
+	float value;
+	QString unit;
 	switch (type)
 	{
 	case AwChannel::EEG:
@@ -84,31 +87,34 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 	{  // eeg seeg emg ecg will share the same gain scales and units
 		vec a = regspace(0.001, 0.1, 0.9);
 		vec b = regspace(1, 2, 9);
-		gl->values = join_cols(a, b);
+		values = join_cols(a, b);
 		b = regspace(10, 10, 490);
-		gl->values = join_cols(gl->values, b);
+		values = join_cols(values, b);
 		b = regspace(500, 100, 5000);
-		gl->values = join_cols(gl->values, b);
-		gl->unit = QString::fromLatin1("�V/cm");
+		values = join_cols(values, b);
+		unit = QString::fromUtf8("µV/cm");
 		if (type == AwChannel::EEG)
-			gl->value = 150;
+			value = 150;
 		else if (type == AwChannel::SEEG)
-			gl->value = 300;
+			value = 300;
 		else if (type == AwChannel::EMG)
-			gl->value = 400;
+			value = 400;
 		else if (type == AwChannel::ECG)
-			gl->value = 450;
+			value = 450;
 		else
-			gl->value = 200;
+			value = 200;
+		gl->setValues(values);
+		gl->setValue(value);
+		gl->setUnit(unit);
 	}
 	break;
 	case AwChannel::ICA:
 	{
 		vec a = regspace(1, 1, 9);
 		vec b = regspace(10, 100, 10000);
-		gl->values = join_cols(a, b);
-		gl->unit = QString::fromLatin1("??/cm");
-		gl->value = 310;
+		values = join_cols(a, b);
+		unit = QString::fromUtf8("??/cm");
+		value = 310;
 	}
 		break;
 	case AwChannel::MEG:
@@ -117,32 +123,38 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 	{
 		vec a = regspace(0.01, 0.1, 0.9);
 		vec b = regspace(1, 2, 500);
-		gl->values = join_cols(a, b);
+		values = join_cols(a, b);
 		if (type == AwChannel::MEG) {
-			gl->value = 3;
-			gl->unit = QString::fromLatin1("pT/cm");
+			value = 3;
+			unit = QString::fromUtf8("pT/cm");
 		}
 		else if (type == AwChannel::GRAD) {
-			gl->value = 21;
-			gl->unit = QString::fromLatin1("pT/cm/cm");
+			value = 21;
+			unit = QString::fromUtf8("pT/cm/cm");
 		}
 		else {
-			gl->unit = QString::fromLatin1("pT/cm");
-			gl->value = 23;
+			unit = QString::fromUtf8("pT/cm");
+			value = 23;
 		}
+		gl->setValues(values);
+		gl->setValue(value);
+		gl->setUnit(unit);
 	}
 	break;
 	default:
 	{
 		vec a = regspace(0.001, 0.1, 0.9);
 		vec b = regspace(1, 2, 9);
-		gl->values = join_cols(a, b);
+		values = join_cols(a, b);
 		b = regspace(10, 10, 490);
-		gl->values = join_cols(gl->values, b);
+		values = join_cols(values, b);
 		b = regspace(500, 100, 5000);
-		gl->values = join_cols(gl->values, b);
-		gl->unit = QString::fromLatin1("??/cm");
-		gl->value = 100;
+		values = join_cols(values, b);
+		unit = QString::fromUtf8("??/cm");
+		value = 100;
+		gl->setValues(values);
+		gl->setValue(value);
+		gl->setUnit(unit);
 	}
 	}
 	return gl;
@@ -167,7 +179,7 @@ void AwGainLevels::applyTo(const AwChannelList& channels)
 	for (auto c : channels) {
 		int index = types.indexOf(c->type());
 		if (index != -1) 
-			c->setGain(levels.at(index)->value);
+			c->setGain(levels.at(index)->value());
 	}
 }
 

@@ -18,6 +18,8 @@
 #include <qwidget.h>
 #include <QMap>
 class AwGainLevels;
+class QSlider;
+class QLineEdit;
 
 class AwGainLevelsWidget : public QWidget
 {
@@ -27,12 +29,17 @@ public:
 signals:
 	void amplitudeChanged(int, float);
 protected slots:
-	void getSliderValue(int);
-	void getEditValue();
+//	void getSliderValue(int);
+//	void getEditValue();
+	void updateGUI();
+	void updateWidgets(int, float);
 protected:
 	void buildLayout();
 	AwGainLevels* m_gainLevels;
-	QList<QWidget*> m_sliders, m_values, m_labels;
+	QList<QWidget*> m_sliders, m_values, m_labels, m_buttonsUp, m_buttonsDown;
+//	QMap<int, QWidget *> m_sliders, m_values, m_labels, m_buttonsUp, m_buttonsDown;
 	QMap<QWidget*, int> m_widgetsToTypes;
+	QMap<int, QSlider*> m_typeToSlider;
+	QMap<int, QLineEdit*> m_typeToEdit;
 //	Ui::AwGainLevelsWidgetUi m_ui;
 };

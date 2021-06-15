@@ -69,7 +69,13 @@
     <ClCompile Include="SignalItem\AwSignalLabelItem.cpp" />
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp" />
     <ClCompile Include="SignalView\AwBaseSignalView.cpp" />
-    <ClCompile Include="SignalView\AwGainLevelsWidget.cpp" />
+    <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">input</DynamicSource>
+    </ClCompile>
     <ClCompile Include="SignalView\AwGoToLatencyDial.cpp" />
     <ClCompile Include="SignalView\AwGraphicsScene.cpp" />
     <ClCompile Include="SignalView\AwGraphicsView.cpp" />

@@ -76,12 +76,12 @@ int AwSignalItemSettings::exec()
 
 	// create widgets to handle gain level for the channel
 	m_gainSlider = new QSlider(Qt::Horizontal);
-	m_gainSlider->setMaximum(m_gainLevel->values.n_elem);
-	m_gainSlider->setValue(m_gainLevel->getIndexOfValue(m_gainLevel->value));
+	m_gainSlider->setMaximum(m_gainLevel->values().n_elem);
+	m_gainSlider->setValue(m_gainLevel->getIndexOfValue(m_gainLevel->value()));
 	m_gainEdit = new QLineEdit;
-	m_gainEdit->setText(QString("%1").arg(m_gainLevel->value));
+	m_gainEdit->setText(QString("%1").arg(m_gainLevel->value()));
 	m_labelUnit = new QLabel;
-	m_labelUnit->setText(m_gainLevel->unit);
+	m_labelUnit->setText(m_gainLevel->unit());
 	gainLevelsLayout->addWidget(m_gainSlider);
 	gainLevelsLayout->addWidget(m_gainEdit);
 	gainLevelsLayout->addWidget(m_labelUnit);
@@ -96,8 +96,8 @@ int AwSignalItemSettings::exec()
 void AwSignalItemSettings::getSliderValue(int value)
 {
 	disconnect(m_gainEdit, nullptr, this, nullptr);
-	m_channel->setGain(m_gainLevel->values(value)); // here set directly the gain to the original channel and make it appears in the view
-	m_gainEdit->setText(QString("%1").arg(m_gainLevel->values(value)));
+	m_channel->setGain(m_gainLevel->values()(value)); // here set directly the gain to the original channel and make it appears in the view
+	m_gainEdit->setText(QString("%1").arg(m_gainLevel->values()(value)));
 	connect(m_gainEdit, &QLineEdit::editingFinished, this, &AwSignalItemSettings::getEditValue);
 	m_sitem->repaint();
 	m_sitem->scene()->update();

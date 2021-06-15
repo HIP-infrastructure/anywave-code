@@ -66,13 +66,13 @@ void AwSIAmpButton::mouseReleaseEvent(QMouseEvent *e)
 			if (index <= 0)
 				return;
 			index--;
-			m_channel->setGain(gl->values(index));
+			m_channel->setGain(gl->values()(index));
 		}
 		else {
-			if (index > gl->values.size() - 1)
+			if (index > gl->values().size() - 1)
 				return;
 			index++;
-			m_channel->setGain(gl->values(index));
+			m_channel->setGain(gl->values()(index));
 		}
 	}
 	m_item->repaint();

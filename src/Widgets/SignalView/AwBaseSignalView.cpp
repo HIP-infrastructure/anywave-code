@@ -218,7 +218,7 @@ void AwBaseSignalView::applyGainLevels()
 		auto gl = m_settings->gainLevels->getGainLevelFor(t);
 		auto channels = m_channelTypes.values(t);
 		for (auto c : channels) 
-			c->setGain(gl->value);
+			c->setGain(gl->value());
 	}
 	m_navBar->amplitudeWidget()->setGainLevels(m_settings->gainLevels);
 }
@@ -362,7 +362,7 @@ void AwBaseSignalView::setAmplitudes()
 		auto gl = m_settings->gainLevels->getGainLevelFor(t);
 		auto channels = m_channelTypes.values(t);
 		for (auto c : channels)
-			c->setGain(gl->value);
+			c->setGain(gl->value());
 	}
 	m_scene->updateSignals();
 }
