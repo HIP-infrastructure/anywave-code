@@ -65,6 +65,7 @@ protected:
 	int m_mffVersion;
 	// use markers to trace data block timings in seconds.
 //	AwMarkerList m_blockTimings;
+	AwMarkerList m_blockTimings;
 	// File object to handle signalX.bin data file
 	QFile m_binFile;
 };

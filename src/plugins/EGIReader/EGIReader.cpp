@@ -42,8 +42,8 @@ void EGIReader::cleanUpAndClose()
 {
 	while (!m_signalBlocks.isEmpty())
 		delete m_signalBlocks.takeFirst();
-	//while (!m_blockTimings.isEmpty())
-	//	delete m_blockTimings.takeFirst();
+	while (!m_blockTimings.isEmpty())
+		delete m_blockTimings.takeFirst();
 	while (!m_epochs.isEmpty())
 		delete m_epochs.takeFirst();
 	while (!m_categories.isEmpty())
@@ -75,7 +75,7 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 	// total number of channels in file.
 	quint32 nbChannels = infos.channelsCount();
 	// starting sample in file.
-	qint64 startSample = nStart * nbChannels;
+//	qint64 startSample = nStart * nbChannels;
 
 	if (nSamples <= 0)
 		return 0;
@@ -95,8 +95,37 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 		// allocate memory
 		channel->newData(nSamples);
 		// reset ID to hold the index in file
-		m_binFile.seek(dataBlock->fileOffsetForData + dataBlock->offsets[index] + startSample * sizeof(float));
-		m_binFile.read((char*)channel->data(), nSamples * sizeof(float));
+//		m_binFile.seek(dataBlock->fileOffsetForData + dataBlock->offsets[index] + startSample * sizeof(float));
+//		m_binFile.read((char*)channel->data(), nSamples * sizeof(float));
+
+		// get blocks which hold data for the timing section requested
+		auto markers = AwMarker::intersect(m_blockTimings, start, duration);
+		int blockCount = 0;
+		qint64 dataOffset = 0;
+		float dur = duration;
+		for (auto m : markers) {
+			int blockIndex = m_blockTimings.indexOf(m);
+			float* data = channel->data();
+			
+			if (blockIndex == -1)
+				continue;
+			auto block = m_signalBlocks.at(blockIndex);
+			float d = std::min(m->duration(), dur);
+			float s = m->start();
+
+			
+			qint64 startSample = 0;
+			if (blockCount == 0) { // reading the first block, so add the offset of the starting sample 
+				s = start - s;
+				startSample = (qint64)std::floor(s * m_samplingRate);
+			}
+			m_binFile.seek(block->fileOffsetForData + block->offsets[index] + startSample * sizeof(float));
+			int samples = (int)std::floor((d - s) * m_samplingRate);
+			m_binFile.read((char*)&data[dataOffset], samples * sizeof(float));
+			dataOffset += samples;
+			blockCount++;
+			dur -= d;
+		}
 	}
 	return nSamples;
 
@@ -144,20 +173,31 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 		getMFFInfos();
 		SignalFile signalFile(m_eegFile);
 		m_signalBlocks = signalFile.getSignalBlocks();
+		m_blockTimings.erase(m_blockTimings.begin(), m_blockTimings.end());
 
 		if (m_signalBlocks.isEmpty()) {
 			m_error = QString("No signal blocks present in file.");
 			return AwFileIO::WrongFormat;
 		}
-		if (m_signalBlocks.size() != 1) {
-			m_error = "Epoched data are not supported by AnyWave.";
-			return AwFileIO::WrongFormat;
-		}
+		//if (m_signalBlocks.size() != 1) {
+		//	m_error = "Epoched data are not supported by AnyWave.";
+		//	return AwFileIO::WrongFormat;
+		//}
 		auto block = m_signalBlocks.first();
+
 		m_nChannels = block->numberOfSignals;
 		m_samplingRate = block->signalFrequency[0];
 		// get epoch informations
 		getEpochs();
+
+		float pos = 0.;
+		for (auto block : m_signalBlocks) {
+			AwMarker* m = new AwMarker;
+			m->setStart(pos);
+			m->setDuration((float)block->dataBlockSize / ((float)m_nChannels * m_samplingRate));
+			pos += m->duration();
+			m_blockTimings << m;
+		}
 		// For now we won't use categories (I did not get the need of it if categories are supposed to match epochs...
 		// if there are more than one epoch, just use the first one (AnyWave is reading continuous data only).
 		
