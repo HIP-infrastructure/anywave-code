@@ -89,8 +89,13 @@ void AwExporter::runFromCommandLine()
 	AwBlock* block = writer->infos.newBlock();
 	AwMarker global("global", 0., endTimePos);
 	if (modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied) {
-		block->setMarkers(pdi.input.modifiedMarkers());
-		m_inputMarkers = pdi.input.markers();
+		auto merged = AwMarker::merge(pdi.input.markers());
+		auto modified = pdi.input.modifiedMarkers();
+		AwMarker::applyANDOperation(merged, modified);
+		//block->setMarkers(pdi.input.modifiedMarkers());
+		block->setMarkers(modified);
+		pdi.input.setNewMarkers(merged);
+		m_inputMarkers = merged;
 	}
 	else {
 		block->setMarkers(pdi.input.markers());
@@ -166,6 +171,8 @@ bool AwExporter::showUi()
 	ui.filterSettings = pdi.input.filterSettings;
 
 	if (ui.exec() == QDialog::Accepted) {
+		// clear output_dir option as we don't run in command line mode
+		pdi.input.settings.remove(keys::output_dir);
 		pdi.input.settings[keys::output_file] = ui.filePath;
 		if (ui.useCurrentMontage)
 			m_channels = ui.channels;
@@ -212,8 +219,8 @@ bool AwExporter::showUi()
 			pdi.input.settings[keys::use_markers] = ui.usedMarkers;
 			updateUseSkip = true;
 		}
-		if (updateUseSkip)
-			applyUseSkipMarkersKeys();
+		//if (updateUseSkip)
+		//	applyUseSkipMarkersKeys();
 
 		if (ui.decimateFactor > 1)
 			pdi.input.settings[Exporter::decimate_factor] = ui.decimateFactor;

@@ -41,7 +41,7 @@ AwChannel::AwChannel()
 	m_type = AwChannel::EEG;
 	m_unit = AwChannel::unitForType(AwChannel::EEG);
 	m_sourceType = AwChannel::Real;
-	m_data = NULL;
+	m_data = nullptr;
 	m_dataSize = 0;
 	m_gain = 100;
 	m_bad = false;
@@ -52,7 +52,7 @@ AwChannel::AwChannel()
 	m_x = m_y = m_z = m_ox = m_oy = m_oz = 0.0;
 	m_dataReady = false;
 	m_hasCoordinates = false;
-	m_parent = NULL;
+	m_parent = nullptr;
 	m_isSelected = false;
 	m_className = "AwChannel";
 }
@@ -80,7 +80,7 @@ AwChannel::AwChannel(AwChannel *chan)
 	m_notch = chan->notch();
 	m_lowFilter = chan->lowFilter();
 	m_highFilter = chan->highFilter();
-	m_data = NULL; 
+	m_data = nullptr; 
 	m_dataSize = 0;
 	m_referenceName = chan->referenceName();
 	m_dataReady = false;
@@ -669,7 +669,7 @@ AwChannel::~AwChannel()
 {
 	if (m_data)	{
 		delete [] m_data;
-		m_data = NULL;
+		m_data = nullptr;
 	}
 }
 

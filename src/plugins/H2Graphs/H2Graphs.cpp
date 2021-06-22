@@ -21,6 +21,7 @@ H2Graphs *H2Graphs::m_instance = Q_NULLPTR;
 H2GraphsPlugin::H2GraphsPlugin()
 {
 	name = "Correlation Graphs";
+	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
 	description = "Visualise h2/r2 connectivity graph.";
 	category = "Process:Correlation:h2/r2 Connectiviy Graphs";
 	type = AwProcessPlugin::GUI;
@@ -51,8 +52,16 @@ void H2Graphs::run()
 	m_widget = new GraphManagerWidget(this);
 	// register our widget to auto close the plugin when the user closes the widget
 	registerGUIWidget(m_widget);
+	bool ok = true;
+	for (auto f : args) {
+		if (m_widget->addGraphSet(f) != 0) {
+			ok = false;
+			break;
+		}
+	}
+	if (ok)
+		m_widget->show();
+	else {
 
-	for (auto f : args) 
-		m_widget->addGraphSet(f);
-	m_widget->show();
+	}
 }

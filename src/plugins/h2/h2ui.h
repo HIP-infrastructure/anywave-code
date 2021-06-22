@@ -9,13 +9,14 @@ using namespace Ui;
 
 typedef QPair<float, float> band;
 typedef QPair<QDoubleSpinBox *, QDoubleSpinBox *> spinBox;
+class H2;
 
 class H2UI : public QDialog, public H2UIClass
 {
 	Q_OBJECT
 
 public:
-	H2UI(QWidget *parent = 0);
+	H2UI(H2* h2, QWidget *parent = 0);
 	~H2UI();
 	QString dataFolder;
 	QMap<QString, QPair<float, float> > bands;
@@ -33,6 +34,7 @@ protected:
 	QStringList m_bandNames;
 	QList<spinBox> m_spinBoxes;
 	QList<QCheckBox *> m_checkBoxes;
+	H2* m_h2;
 };
 
 #endif // H2UI_H

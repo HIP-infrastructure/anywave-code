@@ -438,6 +438,11 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 /// <returns>flags</returns>
 int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 {
+	int flags = p->modifiersFlags();
+	if (flags & Aw::ProcessIO::modifiers::DontFilterUseSkipMarkersOptions)
+		return 0; 
+	if (flags & Aw::ProcessIO::modifiers::UserSelectedMarkers)
+		return 0;
 	return p->applyUseSkipMarkersKeys();
 }
 
@@ -782,9 +787,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				p->plugin()->deleteInstance(p); 
 				return;
 			}
-			//applyUseSkipMarkersKeys(p);
-			if (!(p->modifiersFlags() & Aw::ProcessIO::modifiers::DontFilterUseSkipMarkersOptions))
-				applyUseSkipMarkersKeys(p);
+			applyUseSkipMarkersKeys(p);
 		}
 		// create the process thread and move process object in it.
 		QThread *processThread = new QThread;

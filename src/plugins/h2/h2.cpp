@@ -52,9 +52,6 @@ H2::~H2()
 	if (m_ui)
 		delete m_ui;
 	emit sendCommand(AwProcessCommand::RemoveLastHighlightedSection, QVariantList());
-
-	while (!m_markers.isEmpty())
-		delete m_markers.takeFirst();
 }
 
 
@@ -81,7 +78,7 @@ bool H2::showUi()
 	// to make the plugin scriptable : DO NOT instantiate UI Objects in the object constructor.
 	// Make it dynamically as a scripted plugin cannot access the main thread UI.
 	if (m_ui == NULL)
-		m_ui = new H2UI;
+		m_ui = new H2UI(this);
 	m_ui->dataFolder = pdi.input.settings[keys::data_dir].toString();
 	m_ui->sbTimeWindow->setValue(m_winSize);
 	m_ui->sbMaxLag->setValue(m_maxLag);
@@ -89,14 +86,15 @@ bool H2::showUi()
 	m_ui->samplingRate = pdi.input.channels().first()->samplingRate();
 	m_ui->directory = pdi.input.settings[keys::working_dir].toString();
 	m_ui->markers = pdi.input.markers();
-	if (modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers)
-		m_ui->widgetInputData->hide();
+	//if (modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers)
+	//	m_ui->widgetInputData->hide();
 	if (m_ui->exec() == QDialog::Accepted)	{
 		m_maxLag = m_ui->sbMaxLag->value();
 		m_winSize = m_ui->sbTimeWindow->value();
 		m_step = m_ui->sbStep->value();
 		m_method = m_ui->method;
-
+		if (modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers)
+			return true;
 		auto fd = pdi.input.settings[keys::file_duration].toDouble();
 		if (!m_ui->skippedLabels.isEmpty() || !m_ui->usedLabels.isEmpty()) {
 			auto markers = AwMarker::duplicate(pdi.input.markers());
@@ -154,17 +152,30 @@ int H2::initialize()
 
 	// Merge input markers, that will implicilty duplicate them even if no merge is done.
 	if (!pdi.input.markers().isEmpty()) {
+		sendMessage("Markers received as input:");
+		int count = 1;
+		for (auto m : pdi.input.markers()) 
+			sendMessage(QString("%1. %2").arg(count++).arg(m->label()));
+		sendMessage("Checking that they all have a duration.");
 		// remove single markers
-		m_markers = AwMarker::getMarkersWithDuration(pdi.input.markers());
-		m_markers = AwMarker::merge(m_markers);
+		m_markers = AwMarker::duplicate(AwMarker::getMarkersWithDuration(pdi.input.markers()));
+		sendMessage("Markers with duration:");
+		//	m_markers = AwMarker::merge(m_markers);
 		// if no duration markers => make one global
 		if (m_markers.isEmpty()) {
+			sendMessage("None => creating a Global marker to compute on the whole data.");
 			m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
-			sendMessage("no markers with duration set as input. Created one global marker on whole data.");
+		}
+		else {
+			count = 1;
+			for (auto m : m_markers)
+				sendMessage(QString("%1. %2").arg(count++).arg(m->label()));
 		}
 	}
-	else
+	else {
+		sendMessage("No markers received as input. Created a Global marker to compute on the whole data.");
 		m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
+	}
 
 	// generer les paires de canaux (on calcule le H2 sur toutes les combinaisons de canal possibles).
 	h2_params *h2_p;
@@ -641,9 +652,10 @@ int H2::computeRuns()
 		if (m_ui->saveInOneFile) {
 			QString file = QString("%1_algo-%2_hp-%3_lp-%4.mat").arg(baseFileName).arg(method).arg(HPString).arg(LPString);
 			sendMessage("Saving to MATLAB file...");
-			int status = saveToMatlab(QString("%1/%2").arg(dir).arg(file));
+			auto filePath = QString("%1/%2").arg(dir).arg(file);
+			int status = saveToMatlab(filePath);
 			if (status == 0) {
-				m_resultFiles << file;
+				m_resultFiles << filePath;
 				sendMessage("Done.");
 			}
 		}
@@ -660,12 +672,13 @@ int H2::computeRuns()
 				}
 				baseFileName = QString("%1_algo-%2_hp-%3_lp-%4_sec-%5_num-%6").arg(baseFileName).arg(method).arg(HPString).arg(LPString).arg(label).arg(map.value(label));
 				sendMessage(QString("Saving %1...").arg(baseFileName));
-				if (saveToMatlab(QString("%1/%2").arg(dir).arg(baseFileName), run) == -1) {
-					sendMessage(QString("Error when writing %1 file.").arg(baseFileName));
+				auto filePath = QString("%1/%2").arg(dir).arg(baseFileName);
+				if (saveToMatlab(filePath, run) == -1) {
+					sendMessage(QString("Error when writing %1 file.").arg(filePath));
 				}
 				else {
 					sendMessage("Done.");
-					m_resultFiles << baseFileName;
+					m_resultFiles << filePath;
 				}
 
 			}
