@@ -204,6 +204,10 @@ void AwUpdater::handleResult(QNetworkReply *reply)
 {
 	auto aws = AwSettings::getInstance();
 	QByteArray data = reply->readAll();
+	if (data.isEmpty()) {
+		reply->deleteLater();
+		return;
+	}
 	QString response = QString(data);
 	if (response.toLower() != "no update") {
 		url = response;
@@ -218,4 +222,5 @@ void AwUpdater::handleResult(QNetworkReply *reply)
 			m_downloader.download();
 		}
 	}
+	reply->deleteLater();
 }

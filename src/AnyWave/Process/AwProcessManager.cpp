@@ -1033,6 +1033,8 @@ void AwProcessManager::handleProcessTermination()
 
 			for  (QWidget *w : process->pdi.output.widgets()) { // get widgets instances back to main gui thread
 				w->moveToThread(thread());
+				// set wflags
+				w->setWindowFlags(w->windowFlags() | Qt::Window | Qt::WindowStaysOnTopHint);
 				w->show();
 			}
 		}

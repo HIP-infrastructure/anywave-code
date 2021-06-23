@@ -1,10 +1,13 @@
 #include "PlotWidget.h"
-
+#include "Spectral.h"
 
 PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 	: AwProcessOutputWidget(p, parent)
 {
 	ui.setupUi(this);
+
+	Spectral* process = qobject_cast<Spectral*>(p);
+	auto fs = process->fs();
 
 	// add a row with text explanation beyond the plot
 	m_textBox = new QCPTextElement(ui.widget);
@@ -17,11 +20,11 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 	auto length = ffts.first()->pxx().n_elem;
 
 	QVector<double> x(length), y(length);
-	for (auto i = 0; i < length; i++) {
-		x[i] = (double)i + 1;
-	}
+	vec arma_x = linspace(0, fs / 2, length);
+	memcpy(x.data(), arma_x.memptr(), length * sizeof(double));
+	
 	ui.widget->xAxis->setLabel("Frequency (Hz)");
-	ui.widget->yAxis->setLabel(QString::fromLatin1("%1²/Hz").arg(ffts.first()->channel()->unit()));
+	ui.widget->yAxis->setLabel(QString::fromUtf8("%1²/Hz").arg(ffts.first()->channel()->unit()));
 	ui.widget->setInteractions(QCP::iSelectPlottables| QCP::iRangeZoom | QCP::iRangeDrag);
 	double min = 0., max = 0.;
 	uword count = 0;
@@ -41,14 +44,11 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 	// set axes ranges, so we see all data:
 	m_xmin = 1;
 	m_xmax = length + 1;
-	ui.widget->xAxis->setRange(1, length + 1);
+	ui.widget->xAxis->setRange(1, fs / 2);
 	ui.widget->yAxis->setRange(min, max);
 	ui.widget->axisRect()->setRangeZoom(Qt::Horizontal);
 	connect(ui.widget, SIGNAL(plottableClick(QCPAbstractPlottable*, int, QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*, int)));
-	//ui.sbMin->setValue(1);
-	//ui.sbMax->setValue(length + 1);
-	//connect(ui.buttonUpdate, &QPushButton::clicked, this, &PlotWidget::updateClicked);
-	//connect(ui.buttonReset, &QPushButton::clicked, this, &PlotWidget::resetClicked);
+
 }
 
 PlotWidget::~PlotWidget()

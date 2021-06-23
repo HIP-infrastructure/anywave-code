@@ -39,6 +39,7 @@ Spectral::Spectral()
 	m_timeWindow = 1.;
 	m_overlap = 0.5;
 	m_windowing = Spectral::Hanning;
+	m_fs = 0.;
 }
 
 Spectral::~Spectral()
@@ -135,13 +136,13 @@ bool Spectral::showUi()
 void Spectral::compute()
 {
 	uword nfft, noverlap;
-	auto fs = pdi.input.settings.value(keys::max_sr).toFloat();
-	nfft = (uword)std::floor(m_timeWindow * fs);
-	noverlap = (uword)std::floor(m_overlap * fs);
+	m_fs = pdi.input.settings.value(keys::max_sr).toFloat();
+	nfft = (uword)std::floor(m_timeWindow * m_fs);
+	noverlap = (uword)std::floor(m_overlap * m_fs);
 	// loop over markers
 	AwMarkerList badMarkers, goodMarkers;
 	for(AwMarker *m : pdi.input.markers()) {
-		uword nPts = (uword)std::floor(m->duration() * fs);
+		uword nPts = (uword)std::floor(m->duration() * m_fs);
 		if (nPts < nfft)
 			badMarkers << m;
 		else
@@ -159,7 +160,7 @@ void Spectral::compute()
 	uword nIterations = 0;
 	uword nIterationPnts = nfft / 2 - 1;
 	for (auto m : goodMarkers) {
-		uword nPts = (uword)std::floor(m->duration() * fs);
+		uword nPts = (uword)std::floor(m->duration() * m_fs);
 		uword start = 0;
 		while (start + nfft < nPts) {
 			nIterations++;
