@@ -72,12 +72,14 @@ void AwDownloader::downloadFinished(QNetworkReply *reply)
 	QString basename;
 	if (reply->error()) {
 		error(QString("Download of %1 failed: %2").arg(url.toEncoded().constData()).arg(reply->errorString()));
+		reply->deleteLater();
 		return;
 	} 
 	QString path = url.path();
 	basename = QFileInfo(path).fileName();
 	if (basename.isEmpty()) {
 		error(QString("no basename for file."));
+		reply->deleteLater();
 		return;
 	}
 
@@ -86,12 +88,14 @@ void AwDownloader::downloadFinished(QNetworkReply *reply)
 	QTemporaryDir dir(QString("%1/AnyWave").arg(downloadPath));
 	if (!dir.isValid()) {
 		error(QString("Could not create a temporary folder to save the update."));
+		reply->deleteLater();
 		return;
 	}
 	QString fullPath = QString("%1/%2").arg(dir.path()).arg(basename);
 	QFile file(fullPath);
 	if (!file.open(QIODevice::WriteOnly)) {
 		error(QString("Failed to create the file %1").arg(fullPath));
+		reply->deleteLater();
 		return;
 	}
 	file.write(reply->readAll());

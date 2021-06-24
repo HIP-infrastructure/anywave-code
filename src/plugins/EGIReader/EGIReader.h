@@ -55,19 +55,20 @@ protected:
 	MIFFFile m_file;
 	QString m_recordTime;
 	// files required ( signalX.bin, infoX.xml info.xml, epochs.xml categories.xml where X is a number from 1 to n)
-	QString m_eegFile, m_infoEEGFile, m_epochsFile, m_infoFile, m_categoriesFile, m_sensorLayoutFile;
+	QString m_eegFile, m_eegFile2, m_infoEEGFile, m_epochsFile, m_infoFile, m_infoFile2, m_categoriesFile, m_sensorLayoutFile;
 	int m_nChannels;
-	int m_samplingRate;
-	Blocks m_signalBlocks;
+	int m_samplingRate, m_samplingRate2;
+	Blocks m_signalBlocks, m_signalBlocks2;
 	Epochs m_epochs;
 	Events m_events;
 	Categories m_categories;
 	int m_mffVersion;
+	QStringList m_signal2Labels;
 	// use markers to trace data block timings in seconds.
-//	AwMarkerList m_blockTimings;
-	AwMarkerList m_blockTimings;
+	AwMarkerList m_blockTimings, m_blockTimings2;
 	// File object to handle signalX.bin data file
-	QFile m_binFile;
+	QFile m_binFile, m_binFile2;
+	QHash<QString, int> m_signal1Indexes, m_signal2Indexes;
 };
 
 class EGIREADER_EXPORT EGIReaderPlugin : public AwFileIOPlugin

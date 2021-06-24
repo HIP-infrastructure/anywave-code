@@ -154,7 +154,7 @@ void AnyWave::openFile(const QString &path)
 	auto dataManager = AwDataManager::instance();
 	
 	int res = dataManager->openFile(filePath);
-	if (res == -1) {
+	if (res != 0) {
 		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
 	}

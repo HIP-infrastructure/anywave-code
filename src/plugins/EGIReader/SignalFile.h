@@ -40,8 +40,6 @@ public:
 
 protected:
 	QFile m_file;
-private:
-	FileSignalBlock *signalBlock();
 };
 
 typedef QList<FileSignalBlock *> Blocks;

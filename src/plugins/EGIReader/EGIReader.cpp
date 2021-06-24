@@ -42,8 +42,12 @@ void EGIReader::cleanUpAndClose()
 {
 	while (!m_signalBlocks.isEmpty())
 		delete m_signalBlocks.takeFirst();
+	while (!m_signalBlocks2.isEmpty())
+		delete m_signalBlocks2.takeFirst();
 	while (!m_blockTimings.isEmpty())
 		delete m_blockTimings.takeFirst();
+	while (!m_blockTimings2.isEmpty())
+		delete m_blockTimings2.takeFirst();
 	while (!m_epochs.isEmpty())
 		delete m_epochs.takeFirst();
 	while (!m_categories.isEmpty())
@@ -51,6 +55,7 @@ void EGIReader::cleanUpAndClose()
 	while (!m_events.isEmpty())
 		delete m_events.takeFirst();
 	m_binFile.close();
+	m_binFile2.close();
 }
 
 AwFileIO::FileStatus EGIReader::canRead(const QString &path)
@@ -84,26 +89,64 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 	if (nStart + nSamples > infos.totalSamples())
 		nSamples = infos.totalSamples() - nStart;
 
-	AwChannelList channels;
-	for (auto channel : channelList) {
-		int index = infos.indexOfChannel(channel->name());
-		if (index == -1)
-			continue;
+	AwChannelList channels = channelList;
+	AwChannelList extraChannels;
+	for (auto chan : channels) {
+		if (m_signal2Indexes.contains(chan->name())) 
+			extraChannels << chan;
+	}
+	for (auto channel : extraChannels) {
+		int index = m_signal2Indexes.value(channel->name());
+		channels.removeAll(channel);
 		// allocate memory
-		float *data = channel->newData(nSamples);
+		float* data = channel->newData(nSamples);
+		auto markers = AwMarker::intersect(m_blockTimings2, start, duration);
+		int blockCount = 0;
+		qint64 dataOffset = 0;
+		auto totalSamples = nSamples;
+		for (auto m : markers) {
+			int blockIndex = m_blockTimings2.indexOf(m);
 
+			if (blockIndex == -1)
+				continue;
+			auto  block = m_signalBlocks2.at(blockIndex);
+			auto samplesToRead = std::min(block->nSamples, totalSamples);
+			m_binFile2.seek(block->fileOffsetForData + block->offsets[index]);
+			if (blockCount == 0) { // reading the first block, so add the offset of the starting sample 
+				if (block->startingSample < nStart) {
+					auto diff = nStart - block->startingSample;
+					samplesToRead -= diff;
+					m_binFile2.seek(m_binFile2.pos() + diff * sizeof(float));
+				}
+			}
+			m_binFile2.read((char*)&data[dataOffset], samplesToRead * sizeof(float));
+			totalSamples -= samplesToRead;
+			dataOffset += samplesToRead;
+			blockCount++;
+		}		
+	}
+
+	for (auto channel : channels) {
+		//int index = infos.indexOfChannel(channel->name());
+		int index = m_signal1Indexes.value(channel->name());
+		//if (index == -1) 
+		//	continue;
+		
+		// allocate memory
+		float* data = channel->newData(nSamples);
 		// get blocks which hold data for the timing section requested
 		auto markers = AwMarker::intersect(m_blockTimings, start, duration);
+
 		int blockCount = 0;
 		qint64 dataOffset = 0;
 		auto totalSamples = nSamples;
 		for (auto m : markers) {
 			int blockIndex = m_blockTimings.indexOf(m);
-			
+
 			if (blockIndex == -1)
 				continue;
-			auto block = m_signalBlocks.at(blockIndex);
 
+			auto block = m_signalBlocks.at(blockIndex);
 			auto samplesToRead = std::min(block->nSamples, totalSamples);
 			m_binFile.seek(block->fileOffsetForData + block->offsets[index]);
 			if (blockCount == 0) { // reading the first block, so add the offset of the starting sample 
@@ -133,11 +176,14 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 
 	// generate full path to access signal.bin and info.xml
 	m_eegFile = QString("%1/%2").arg(m_file.fileName()).arg(eegFiles.first());
+	m_eegFile2 = QString("%1/signal2.bin").arg(m_file.fileName());
 	m_infoEEGFile = QString("%1/%2").arg(m_file.fileName()).arg(eegFiles.at(1));
 	// Epoch file must be present too
 	m_epochsFile = QString("%1/epochs.xml").arg(m_file.fileName());
 	// info.xml must be present too
 	m_infoFile = QString("%1/info.xml").arg(m_file.fileName());
+	m_infoFile2 = QString("%1/info2.xml").arg(m_file.fileName());
+
 	// categories.xml must be present too
 	m_categoriesFile = QString("%1/categories.xml").arg(m_file.fileName());
 	if (!QFile::exists(m_epochsFile)) {
@@ -171,14 +217,11 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 			m_error = QString("No signal blocks present in file.");
 			return AwFileIO::WrongFormat;
 		}
-		//if (m_signalBlocks.size() != 1) {
-		//	m_error = "Epoched data are not supported by AnyWave.";
-		//	return AwFileIO::WrongFormat;
-		//}
 		auto block = m_signalBlocks.first();
 
 		m_nChannels = block->numberOfSignals;
 		m_samplingRate = block->signalFrequency[0];
+
 		// get epoch informations
 		getEpochs();
 
@@ -192,6 +235,29 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 			dur += m->duration();
 			m_blockTimings << m;
 		}
+
+		if (QFile::exists(m_eegFile2)) {
+			m_binFile2.setFileName(m_eegFile2);
+			if (m_binFile2.open(QIODevice::ReadOnly)) {
+				SignalFile signalFile(m_eegFile2);
+				m_signalBlocks2 = signalFile.getSignalBlocks();
+				m_blockTimings2.erase(m_blockTimings2.begin(), m_blockTimings2.end());
+				float pos = 0.;
+				float dur = 0.;
+				for (auto block : m_signalBlocks2) {
+					AwMarker* m = new AwMarker;
+					m->setStart(pos);
+					m->setDuration(block->nSamples / m_samplingRate);
+					pos += m->duration();
+					dur += m->duration();
+					m_blockTimings2 << m;
+				}
+				if (!m_signalBlocks2.isEmpty())
+					m_samplingRate2 = m_signalBlocks2.first()->signalFrequency[0];
+			}
+		}
+
+
 		// For now we won't use categories (I did not get the need of it if categories are supposed to match epochs...
 		// if there are more than one epoch, just use the first one (AnyWave is reading continuous data only).
 		
@@ -216,6 +282,8 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 		m_error = QString("Failed to open %1 for reading.").arg(m_eegFile);
 		return AwFileIO::FileAccess;
 	}
+
+
 
 	return AwFileIO::openFile(path);
 }
@@ -254,6 +322,7 @@ void EGIReader::initDataSet()
 	QString label, number;
 	int type;
 	double x, y, z;
+	int count = 0;
 	for (int i = 0; i < sensors.size(); i++) {
 		auto sensor = sensors.at(i);
 		if (sensor.isElement()) {
@@ -286,12 +355,28 @@ void EGIReader::initDataSet()
 				chan.setSamplingRate(m_samplingRate);
 				chan.setXYZ(x, y, z);
 				infos.addChannel(&chan);
+				m_signal1Indexes.insert(chan.name(), count++);
 			}
 		}
 	}
 	file.close();
+
+	// add extra channels in signal2.bin (if the file exist)
+	count = 0;
+	for (const auto& label : m_signal2Labels) {
+		AwChannel chan;
+		chan.setName(label);
+		chan.setType(AwChannel::Other);
+		if (label.startsWith("ECG"))
+			chan.setType(AwChannel::ECG);
+		if (label.startsWith("EMG"))
+			chan.setType(AwChannel::EMG);
+		chan.setSamplingRate(m_samplingRate2);
+		infos.addChannel(&chan);
+		m_signal2Indexes.insert(label, count++);
+	}
 	// check that channels count match nChannels from EEG Data file
-	if (m_nChannels != infos.channels().size()) {
+	if (m_nChannels != infos.channels().size() - m_signal2Indexes.count()) {
 		m_error = QString("The number of channels read in sensorLayout is different than # channels read from data file.");
 		throw AwException(m_error, QString("EGIReader::initDataSet()"));
 		return;
@@ -453,11 +538,11 @@ void EGIReader::getEpochs()
 				if (tmp.tagName() == "beginTime")
 					item->begin = tmp.text().toInt();
 				else if (tmp.tagName() == "endTime")
-					item->end = tmp.text().toULongLong();
+				item->end = tmp.text().toULongLong();
 				else if (tmp.tagName() == "firstBlock")
-					item->firstBlock = tmp.text().toInt();
+				item->firstBlock = tmp.text().toInt();
 				else if (tmp.tagName() == "lastBlock")
-					item->lastBlock = tmp.text().toInt();
+				item->lastBlock = tmp.text().toInt();
 				child = child.nextSibling();
 			}
 			m_epochs << item;
@@ -546,7 +631,32 @@ void EGIReader::getMFFInfos()
 		return;
 	}
 	m_recordTime = elements.at(0).toElement().text();
+	infos.setISODate(m_recordTime);
 	file.close();
+
+	// check for info2.xml and extract channel informations from that
+	// labels of detected channels will be put in extraChannels string list 
+	if (QFile::exists(m_infoFile2)) {
+		file.setFileName(m_infoFile2);
+		if (file.open(QIODevice::ReadOnly)) {
+			if (doc.setContent(&file, &error, &line, &col)) {
+				root = doc.documentElement();
+				elements = root.elementsByTagName("PNSData");
+				if (!elements.isEmpty()) {
+					auto node = elements.item(0);
+					auto child = node.firstChild();
+					int count = 0;
+					while (!child.isNull()) {
+						element = child.toElement();
+						if (element.tagName() == "pnsSetName") {
+							m_signal2Labels << element.text();
+						}
+						child = child.nextSibling();
+					}
+				}
+			}
+		}
+	}
 }
 
 bool EGIReader::checkInfoXMLForEEG(const QString& fileName)
