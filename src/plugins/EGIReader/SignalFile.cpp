@@ -50,6 +50,7 @@ QList<FileSignalBlock *> SignalFile::getSignalBlocks()
 			auto last = blocks.last();
 			fsb->version = 0;
 			fsb->startingSample = last->startingSample + last->nSamples;
+			fsb->endingSample = fsb->startingSample + fsb->nSamples;
 			fsb->dataBlockSize = last->dataBlockSize;
 			fsb->signalDepth = last->signalDepth;
 			fsb->numberOfSignals = last->numberOfSignals;
@@ -93,7 +94,12 @@ QList<FileSignalBlock *> SignalFile::getSignalBlocks()
 
 		fsb->fileOffsetForData = m_file.pos();
 		fsb->nSamples = fsb->dataBlockSize / (4 * fsb->numberOfSignals);
-		fsb->startingSample = 0;
+		// there could be a block inserted before !
+		if (!blocks.isEmpty())
+			fsb->startingSample = blocks.last()->startingSample + blocks.last()->nSamples;
+		else
+			fsb->startingSample = 0;
+		fsb->endingSample = fsb->nSamples + fsb->startingSample;
 		blockSize = fsb->dataBlockSize;
 		m_file.seek(m_file.pos() + fsb->dataBlockSize);
 		pos = m_file.pos();

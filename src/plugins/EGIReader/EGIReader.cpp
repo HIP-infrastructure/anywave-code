@@ -80,7 +80,7 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 	// total number of channels in file.
 	quint32 nbChannels = infos.channelsCount();
 
-	if (nSamples <= 0)
+	if (nSamples <= 0)	
 		return 0;
 
 	if (nStart > infos.totalSamples())
@@ -89,71 +89,61 @@ qint64 EGIReader::readDataFromChannels(float start, float duration, QList<AwChan
 	if (nStart + nSamples > infos.totalSamples())
 		nSamples = infos.totalSamples() - nStart;
 
+	auto nEnd = nStart + nSamples;
+
 	AwChannelList channels = channelList;
 	AwChannelList extraChannels;
 	for (auto chan : channels) {
 		if (m_signal2Indexes.contains(chan->name())) 
 			extraChannels << chan;
 	}
+	auto markers = AwMarker::intersect(m_blockTimings2, start, start + duration);
 	for (auto channel : extraChannels) {
 		int index = m_signal2Indexes.value(channel->name());
 		channels.removeAll(channel);
 		// allocate memory
 		float* data = channel->newData(nSamples);
-		auto markers = AwMarker::intersect(m_blockTimings2, start, duration);
-		int blockCount = 0;
 		qint64 dataOffset = 0;
 		auto totalSamples = nSamples;
+		int blockCount = 0;
 		for (auto m : markers) {
 			int blockIndex = m_blockTimings2.indexOf(m);
-
-			if (blockIndex == -1)
-				continue;
-			auto  block = m_signalBlocks2.at(blockIndex);
-			auto samplesToRead = std::min(block->nSamples, totalSamples);
-			m_binFile2.seek(block->fileOffsetForData + block->offsets[index]);
-			if (blockCount == 0) { // reading the first block, so add the offset of the starting sample 
-				if (block->startingSample < nStart) {
-					auto diff = nStart - block->startingSample;
-					samplesToRead -= diff;
+			Q_ASSERT(blockIndex != -1);
+			auto b = m_signalBlocks2.at(blockIndex);
+			auto samplesToRead = std::min(b->nSamples, totalSamples);
+			m_binFile2.seek(b->fileOffsetForData + b->offsets[index]);
+			if (blockCount == 0) {
+				if (b->startingSample < nStart) {
+					auto diff = nStart - b->startingSample;
 					m_binFile2.seek(m_binFile2.pos() + diff * sizeof(float));
+					samplesToRead = std::min(b->nSamples - diff, totalSamples);
 				}
 			}
 			m_binFile2.read((char*)&data[dataOffset], samplesToRead * sizeof(float));
 			totalSamples -= samplesToRead;
 			dataOffset += samplesToRead;
 			blockCount++;
-		}		
+		}
 	}
-
+	markers = AwMarker::intersect(m_blockTimings, start, start + duration);
 	for (auto channel : channels) {
-		//int index = infos.indexOfChannel(channel->name());
 		int index = m_signal1Indexes.value(channel->name());
-		//if (index == -1) 
-		//	continue;
-		
 		// allocate memory
 		float* data = channel->newData(nSamples);
-		// get blocks which hold data for the timing section requested
-		auto markers = AwMarker::intersect(m_blockTimings, start, duration);
-
-		int blockCount = 0;
 		qint64 dataOffset = 0;
 		auto totalSamples = nSamples;
+		int blockCount = 0;
 		for (auto m : markers) {
 			int blockIndex = m_blockTimings.indexOf(m);
-
-			if (blockIndex == -1)
-				continue;
-
-			auto block = m_signalBlocks.at(blockIndex);
-			auto samplesToRead = std::min(block->nSamples, totalSamples);
-			m_binFile.seek(block->fileOffsetForData + block->offsets[index]);
-			if (blockCount == 0) { // reading the first block, so add the offset of the starting sample 
-				if (block->startingSample < nStart) {
-					auto diff = nStart - block->startingSample;
-					samplesToRead -= diff;
+			Q_ASSERT(blockIndex != -1);
+			auto b = m_signalBlocks.at(blockIndex);
+			auto samplesToRead = std::min(b->nSamples, totalSamples);
+			m_binFile.seek(b->fileOffsetForData + b->offsets[index]);
+			if (blockCount == 0) {
+				if (b->startingSample < nStart) {
+					auto diff = nStart - b->startingSample;
 					m_binFile.seek(m_binFile.pos() + diff * sizeof(float));
+					samplesToRead = std::min(b->nSamples - diff, totalSamples);
 				}
 			}
 			m_binFile.read((char*)&data[dataOffset], samplesToRead * sizeof(float));

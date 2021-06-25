@@ -78,7 +78,7 @@ void AwTopoBuilder::computeTopo(AwTopoWidget *widget, const QStringList& labels,
 #ifndef NDEBUG
 	qDebug() << Q_FUNC_INFO << "called" << endl;
 #endif
-	if (widget->layout() == NULL) 
+	if (widget->layout() == nullptr) 
 		return;
 
 	m_sensors.clear();

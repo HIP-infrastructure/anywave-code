@@ -23,7 +23,7 @@ class FileSignalBlock : public SignalBlock
 {
 public:
 	FileSignalBlock() : SignalBlock() { fileOffsetForHeader = fileOffsetForData = -1; }
-	qint64 fileOffsetForHeader, fileOffsetForData, nSamples, startingSample;
+	qint64 fileOffsetForHeader, fileOffsetForData, nSamples, startingSample, endingSample;
 	int optEGIType;
 	qint64 optNBlocks;
 	qint64 optNSamples;

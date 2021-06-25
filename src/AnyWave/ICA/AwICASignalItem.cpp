@@ -33,7 +33,7 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDi
 	m_icaChannel = static_cast<AwICAChannel *>(chan);
 
 	m_is2DMapComputed = m_is3DMapComputed = false;
-	m_mapWidget = NULL;
+	m_mapWidget = nullptr;
 
 	m_topoProxyWidget = new QGraphicsProxyWidget(this);
 	m_topoWidget = new AwTopoWidget(0, m_icaChannel->layout2D());
@@ -54,13 +54,12 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDi
 	m_topoSettingsProxyWidget->setWidget(m_buttonTopoSettings);
 
 	// check if a topo should be displayed
-	if (m_icaChannel->layout2D() == NULL) {// No layout => hide widget don't compute topography
+	if (m_icaChannel->layout2D() == nullptr) {// No layout => hide widget don't compute topography
 		m_topoProxyWidget->hide();
 		m_topoSettingsProxyWidget->hide();
 		m_isMapAvailable = false;
 	}
 	else {
-//		m_topoWidget->updateMap(0., m_icaChannel->topoValues(), m_icaChannel->labels());
 		m_isMapAvailable = true;
 	}
 
