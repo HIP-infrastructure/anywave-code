@@ -30,7 +30,7 @@ public:
 	~AwSEEGViewer();
 	inline AwSEEGWidget *widget() { return m_widget; }
 	inline bool isMappingActive() { return m_mappingIsActive; }
-//	void setFilters(float LP, float HP);
+
 	void dataReceived(AwChannelList *channels);
 signals:
 	void newDataConnection(AwDataClient *);

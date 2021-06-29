@@ -180,6 +180,19 @@ void AnyWave::runMapping()
 			m_SEEGViewer->setMappingMode(true);
 			m_SEEGViewer->widget()->show();
 		}
+#ifdef _DEBUG
+		if (m_SEEGViewer == NULL) {
+			m_SEEGViewer = new AwSEEGViewer(this);
+			connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient*)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient*)));
+			connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
+			connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
+			connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
+			connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+			connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
+				SLOT(setNewFilters(const AwFilterSettings&)));
+			m_SEEGViewer->widget()->show();
+	}
+#endif
 
 	}
 

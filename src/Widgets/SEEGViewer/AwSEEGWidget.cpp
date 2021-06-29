@@ -36,6 +36,8 @@
 #include <AwException.h>
 #include "AwSEEGInteractor.h"
 
+#include "vtkPialReader.h"
+
 #define L	30	// 10 cm maximum radius for bubbles
 
 constexpr auto ELECTRODE_SECTION = "MRI_FS";
@@ -164,9 +166,10 @@ void AwSEEGWidget::closeEvent(QCloseEvent *e)
 
 void AwSEEGWidget::loadMesh()
 {
-	QString file = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "/", "*.stl");
-	if (!file.isEmpty())
-		openMesh(file);
+	//QString file = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "/", "*.*");
+	//if (!file.isEmpty())
+	//	openMesh(file);
+	openMesh("D:/data/lh.pial");
 }
 
 void AwSEEGWidget::changeFastRendering(bool on)
@@ -200,17 +203,32 @@ void AwSEEGWidget::openMesh(const QString& file)
 {
 	if (file.isEmpty())
 		return;
-
-	vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();
-	reader->SetFileName(file.toStdString().c_str());
-	reader->Update();
-	m_mesh = reader->GetOutput();
 	m_smoothMesh = vtkSmartPointer<vtkPolyDataNormals>::New();
+	if (file.endsWith(".pial")) {
+		vtkSmartPointer<vtkPialReader> reader = vtkSmartPointer<vtkPialReader>::New();
+		std::string str = file.toStdString();
+		reader->SetFileName(str.c_str());
+		reader->Update();
+		m_mesh = reader->GetOutput();
 #if VTK_MAJOR_VERSION < 6
-    m_smoothMesh->SetInput(reader->GetOutput());
+		m_smoothMesh->SetInput(reader->GetOutput());
 #else
-    m_smoothMesh->SetInputData(reader->GetOutput());
+		m_smoothMesh->SetInputData(reader->GetOutput());
 #endif
+	}
+	else {
+
+		vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();
+		reader->SetFileName(file.toStdString().c_str());
+		reader->Update();
+		m_mesh = reader->GetOutput();
+#if VTK_MAJOR_VERSION < 6
+		m_smoothMesh->SetInput(reader->GetOutput());
+#else
+		m_smoothMesh->SetInputData(reader->GetOutput());
+#endif
+	}
+
 	m_smoothMesh->ComputeCellNormalsOn();
 	m_smoothMesh->ComputePointNormalsOn();
 	m_smoothMesh->ConsistencyOn();

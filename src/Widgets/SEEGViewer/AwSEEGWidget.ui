@@ -95,6 +95,13 @@
              </spacer>
             </item>
             <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>Load Pial</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="buttonLoadMesh">
               <property name="text">
                <string>Load Mesh</string>

@@ -235,6 +235,9 @@
     <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SEEGViewer\vtkPialReader.cpp">
+      <Filter>SEEGViewer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AwAmplitudeWidget.ui">
@@ -457,6 +460,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\widget\AwSignalLabelItem.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SEEGViewer\vtkPialReader.h">
+      <Filter>SEEGViewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

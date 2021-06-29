@@ -62,6 +62,7 @@
     <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp" />
     <ClCompile Include="SEEGViewer\AwSEEGViewer.cpp" />
     <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp" />
+    <ClCompile Include="SEEGViewer\vtkPialReader.cpp" />
     <ClCompile Include="SignalItem\AwLabelItem.cpp" />
     <ClCompile Include="SignalItem\AwSIAmpButton.cpp" />
     <ClCompile Include="SignalItem\AwSignalItem.cpp" />
@@ -90,6 +91,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SEEGViewer\vtkPialReader.h" />
     <QtMoc Include="SignalItem\AwSignalItemSettings.h" />
     <QtMoc Include="SignalItem\AwSIAmpButton.h" />
     <QtMoc Include="SignalView\AwPickMarkersDial.h" />
