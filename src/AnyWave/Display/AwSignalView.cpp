@@ -289,7 +289,6 @@ void AwSignalView::setChannels(const AwChannelList& channels)
 		delete m_montageChannels.takeFirst();
 	m_montageChannels = AwChannel::duplicateChannels(channels);
 	applyGainLevels();
-//	m_settings->gainLevels->applyTo(m_montageChannels);
 	if (!m_isActive)
 		return;
 	// Before sending channels to scene, apply filter.

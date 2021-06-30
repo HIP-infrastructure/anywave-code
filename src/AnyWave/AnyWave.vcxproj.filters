@@ -110,6 +110,9 @@
     <Filter Include="Batch">
       <UniqueIdentifier>{fad4582d-3dc6-447f-a72d-bded135f70b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3DViewer">
+      <UniqueIdentifier>{88896aab-51fb-4d2c-a9ce-2a449abd5915}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -591,6 +594,18 @@
     </ClCompile>
     <ClCompile Include="Plugin\AwMATPyCreator.cpp">
       <Filter>Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\AwSEEGInteractor.cpp">
+      <Filter>3DViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\AwSEEGViewer.cpp">
+      <Filter>3DViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\AwSEEGWidget.cpp">
+      <Filter>3DViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\vtkPialReader.cpp">
+      <Filter>3DViewer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1086,6 +1101,12 @@
     <QtMoc Include="Plugin\AwMATPyCreator.h">
       <Filter>Plugin</Filter>
     </QtMoc>
+    <QtMoc Include="3DViewer\AwSEEGViewer.h">
+      <Filter>3DViewer</Filter>
+    </QtMoc>
+    <QtMoc Include="3DViewer\AwSEEGWidget.h">
+      <Filter>3DViewer</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IO\HDF5\structs.h">
@@ -1150,6 +1171,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\keys\data.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3DViewer\AwSEEGInteractor.h">
+      <Filter>3DViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="3DViewer\vtkPialReader.h">
+      <Filter>3DViewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1270,6 +1297,9 @@
     </QtUic>
     <QtUic Include="Plugin\AwMATPyCreator.ui">
       <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="3DViewer\AwSEEGWidget.ui">
+      <Filter>3DViewer</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

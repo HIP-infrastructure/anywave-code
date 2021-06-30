@@ -311,7 +311,7 @@ QString AwBIDSManager::getDerivativePath(int derivativeType)
 }
 
 
-QVariant AwBIDSManager::gardelProperty(int property)
+QVariant AwBIDSManager::BIDSProperty(int property)
 {
 	QVariant res;
 	if (m_currentOpenItem == nullptr)
@@ -347,19 +347,24 @@ void AwBIDSManager::findTsvFilesForItem(AwBIDSItem * item)
 		item->setData(path, AwBIDSItem::EventsTsvRole);
 }
 
-QString AwBIDSManager::getGardelMesh()
+//QString AwBIDSManager::getGardelMesh()
+//{
+//	return gardelProperty(AwBIDSItem::GardelMeshPathRole).toString();
+//}
+
+QStringList AwBIDSManager::freesurferMeshes()
 {
-	return gardelProperty(AwBIDSItem::GardelMeshPathRole).toString();
+	return BIDSProperty(AwBIDSItem::FreesurferMeshesRole).toStringList();
 }
 
 QString AwBIDSManager::getGardelElectrodes()
 {
-	return gardelProperty(AwBIDSItem::GardelElectrodePathRole).toString();
+	return BIDSProperty(AwBIDSItem::GardelElectrodePathRole).toString();
 }
 
 QStringList AwBIDSManager::getGardelMontages()
 {
-	return gardelProperty(AwBIDSItem::GardelMontagesRole).toStringList();
+	return BIDSProperty(AwBIDSItem::GardelMontagesRole).toStringList();
 }
 
 void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
@@ -370,6 +375,35 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 
 	QString relativePath;	// relative path to the item.
 	auto parentItem = item->bidsParent();
+
+	if (derivativesMask & AwBIDSItem::freesurfer) {
+		relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
+		auto subjName = item->subjectName();
+		auto path = QString("%1/derivatives/freesurfer/%2/surf").arg(m_rootDir).arg(subjName);
+		QDir dir(path);
+		if (dir.exists()) {
+			AwBIDSItem* container = nullptr;
+			auto files = dir.entryList(QDir::Files);
+			if (!files.isEmpty()) {
+				container = new AwBIDSItem("freesurfer", item);
+				container->setData(path, AwBIDSItem::PathRole);
+				container->setData(AwBIDSItem::freesurfer, AwBIDSItem::TypeRole);
+				container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+			}
+			QStringList meshes;
+			for (auto file : files) {
+				auto fullPath = QString("%1/%2").arg(path).arg(file);
+				if (file.endsWith(".pial")) {
+					meshes << fullPath;
+				}
+			}
+			if (!meshes.isEmpty()) {
+				container->setData(meshes, AwBIDSItem::FreesurferMeshesRole);
+				if (parentItem)
+					parentItem->setData(meshes, AwBIDSItem::FreesurferMeshesRole);
+			}
+		}
+	}
 
 	if (derivativesMask & AwBIDSItem::gardel) {
 		relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
@@ -396,18 +430,18 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 					if (parentItem)
 						parentItem->setData(fullPath, AwBIDSItem::GardelElectrodePathRole);
 				}
-				if (file == GardelMeshFile) {
-					// add a file child to the container
-					auto fileItem = new AwBIDSItem(file, container);
-					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-					fileItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
-					fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
-					// add also the path to the container
-					container->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-					if (parentItem)
-						parentItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-				}
+				//if (file == GardelMeshFile) {
+				//	// add a file child to the container
+				//	auto fileItem = new AwBIDSItem(file, container);
+				//	fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
+				//	fileItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
+				//	fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
+				//	fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
+				//	// add also the path to the container
+				//	container->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
+				//	if (parentItem)
+				//		parentItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
+				//}
 				// check for .mtg
 				if (file.endsWith(".mtg"))
 					montages << fullPath;
@@ -550,7 +584,7 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 				// set the relative path role
 				item->setData(name, AwBIDSItem::RelativePathRole);
 				// set the possible derivatives mask
-				item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+				item->setData(AwBIDSItem::gardel|AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
 				mapItems.append(mapItem(fullPath, item));
 			}
 		}
@@ -599,6 +633,8 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 					fileItem->setData(tmp, Qt::DisplayRole);
 					continue;
 				}
+
+				// optimize by setting only readers which can open edf or vhdr files
 
 				auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(fullPath);
 				if (reader != nullptr) {
@@ -673,7 +709,7 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 					item->setData(AwBIDSItem::eeg, AwBIDSItem::TypeRole);
 				else if (name == "anat") {
 					item->setData(AwBIDSItem::anat, AwBIDSItem::TypeRole);
-					item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+					item->setData(AwBIDSItem::gardel|AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
 				}
 				else
 					item->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);

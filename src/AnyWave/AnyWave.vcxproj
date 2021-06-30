@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="3DViewer\AwSEEGInteractor.cpp" />
+    <ClCompile Include="3DViewer\AwSEEGViewer.cpp" />
+    <ClCompile Include="3DViewer\AwSEEGWidget.cpp" />
+    <ClCompile Include="3DViewer\vtkPialReader.cpp" />
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
     <ClCompile Include="AwComponents.cpp" />
@@ -215,6 +219,10 @@
     <QtMoc Include="Batch\AwBatchGUI.h">
     </QtMoc>
     <ClInclude Include="..\..\include\keys\data.h" />
+    <ClInclude Include="3DViewer\AwSEEGInteractor.h" />
+    <QtMoc Include="3DViewer\AwSEEGViewer.h" />
+    <QtMoc Include="3DViewer\AwSEEGWidget.h" />
+    <ClInclude Include="3DViewer\vtkPialReader.h" />
     <ClInclude Include="Batch\AwBatchItem.h" />
     <ClInclude Include="CL\AwCommandLineManager.h" />
     <QtMoc Include="CL\AwCommandLogger.h">
@@ -438,6 +446,7 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="3DViewer\AwSEEGWidget.ui" />
     <QtUic Include="Debug\AwDebugLogWidget.ui">
     </QtUic>
   </ItemGroup>

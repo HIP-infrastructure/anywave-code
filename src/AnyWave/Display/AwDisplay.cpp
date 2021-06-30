@@ -197,20 +197,18 @@ void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
 void AwDisplay::closeFile()
 {
 	saveChannelSelections();
-	//m_reader = NULL; // set infos to NULL => data file not ready yet.
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
 	AwDisplaySetupManager::instance()->saveSettings();
-	AwDisplaySetupManager::instance()->resetToDefault();
+	//AwDisplaySetupManager::instance()->resetToDefault();
 	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
 		v->closeFile();
+	AwDisplaySetupManager::instance()->resetToDefault();
 }
 
 void AwDisplay::quit()
 {
-	//saveChannelSelections();
-	//closeFile();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
 }

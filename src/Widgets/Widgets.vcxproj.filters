@@ -36,9 +36,6 @@
     <Filter Include="SignalView">
       <UniqueIdentifier>{3a310313-058c-40ce-83ae-f18361b403c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SEEGViewer">
-      <UniqueIdentifier>{2d0d5d6a-b0b9-475d-86d6-8a12e0c319df}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Translation Files">
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
@@ -121,12 +118,6 @@
     <ClCompile Include="AwTopoLabelImage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SEEGViewer\AwSEEGViewer.cpp">
-      <Filter>SEEGViewer</Filter>
-    </ClCompile>
-    <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp">
-      <Filter>SEEGViewer</Filter>
-    </ClCompile>
     <ClCompile Include="AwMarkAroundWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -165,9 +156,6 @@
     </ClCompile>
     <ClCompile Include="AwVTKWidget.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp">
-      <Filter>SEEGViewer</Filter>
     </ClCompile>
     <ClCompile Include="AwSelectInputDataWidget.cpp">
       <Filter>Source Files</Filter>
@@ -234,9 +222,6 @@
     </ClCompile>
     <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SEEGViewer\vtkPialReader.cpp">
-      <Filter>SEEGViewer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -327,12 +312,6 @@
     <QtUic Include="AwTopoWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="..\..\include\widget\AwSEEGViewer.h">
-      <Filter>SEEGViewer</Filter>
-    </QtMoc>
-    <QtUic Include="SEEGViewer\AwSEEGWidget.ui">
-      <Filter>SEEGViewer</Filter>
-    </QtUic>
     <QtUic Include="AwMarkAroundWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -374,9 +353,6 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwComboDS.h">
       <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwSEEGWidget.h">
-      <Filter>SEEGViewer</Filter>
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwVTKWidget.h">
       <Filter>Header Files</Filter>
@@ -425,9 +401,6 @@
     <ClInclude Include="..\..\include\widget\AwMessageBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SEEGViewer\AwSEEGInteractor.h">
-      <Filter>SEEGViewer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\widget\AwColorMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -460,9 +433,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\widget\AwSignalLabelItem.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SEEGViewer\vtkPialReader.h">
-      <Filter>SEEGViewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

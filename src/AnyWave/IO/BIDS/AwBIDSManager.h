@@ -114,8 +114,9 @@ public:
 	/** GARDEL properties **/
 	/** get montages gardel did generate. **/
 	QStringList getGardelMontages();
-	/** Get mesh file GARDEL did generate **/
-	QString getGardelMesh();
+	///** Get mesh file GARDEL did generate **/
+	//QString getGardelMesh();
+	QStringList freesurferMeshes();
 	/** Get Electrode file GARDEL did generate **/
 	QString getGardelElectrodes();
 	/** Get the derivative folder path for a file item and a derivative modality **/
@@ -135,7 +136,7 @@ protected:
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);
-	QVariant gardelProperty(int property);
+	QVariant BIDSProperty(int property);
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
 	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);

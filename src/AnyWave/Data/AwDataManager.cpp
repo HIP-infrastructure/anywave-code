@@ -168,7 +168,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_status = reader->openFile(filePath);
 	if (m_status) { // status >0 means error when opening file, return status code
 		m_errorString = reader->errorMessage();
-		return m_status;
+		return -1;
 	}
 	// ok we have a valid reader
 	m_reader = reader;
@@ -200,8 +200,8 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_settings[keys::marker_file] = QString("%1.mrk").arg(fullDataFilePath);
 	m_settings[keys::montage_file] = QString("%1.mtg").arg(fullDataFilePath);
 	m_settings[keys::disp_file] = QString("%1.display").arg(fullDataFilePath);
-	m_settings[keys::lvl_file] = QString("%1.levels").arg(fullDataFilePath);
-	m_settings[keys::lvl2_file] = QString("%1.lvl").arg(fullDataFilePath);
+	//m_settings[keys::lvl_file] = QString("%1.levels").arg(fullDataFilePath);
+	//m_settings[keys::lvl2_file] = QString("%1.lvl").arg(fullDataFilePath);
 
 	// get predefined .mrk .bad .mtg if any
 	auto tmp = reader->infos.badFile();

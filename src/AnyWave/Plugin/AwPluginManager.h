@@ -144,11 +144,9 @@ private:
 	void loadPlugins();
 	void loadUserPlugins();
 	void checkForScriptPlugins(const QString& startingPath);
-//	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 	void setJsonUi(AwScriptPlugin *plugin, const QString& jsonUiPath);
 	void setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonDefaultsPath);
 	void setJsonSettings(AwScriptPlugin *plugin, const QString& key, const QString& jsonDefaultsPath);
-//	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 	bool checkPluginVersion(QObject *plugin);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);

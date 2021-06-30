@@ -59,10 +59,6 @@
     <ClCompile Include="MarkerItem\AwMarkerLabelButton.cpp" />
     <ClCompile Include="MarkerItem\AwMarkerValueButton.cpp" />
     <ClCompile Include="Mark\AwHighLightPositionMarker.cpp" />
-    <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp" />
-    <ClCompile Include="SEEGViewer\AwSEEGViewer.cpp" />
-    <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp" />
-    <ClCompile Include="SEEGViewer\vtkPialReader.cpp" />
     <ClCompile Include="SignalItem\AwLabelItem.cpp" />
     <ClCompile Include="SignalItem\AwSIAmpButton.cpp" />
     <ClCompile Include="SignalItem\AwSignalItem.cpp" />
@@ -91,7 +87,6 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SEEGViewer\vtkPialReader.h" />
     <QtMoc Include="SignalItem\AwSignalItemSettings.h" />
     <QtMoc Include="SignalItem\AwSIAmpButton.h" />
     <QtMoc Include="SignalView\AwPickMarkersDial.h" />
@@ -121,7 +116,6 @@
     <ClInclude Include="..\..\include\widget\AwSignalLabelItem.h" />
     <QtMoc Include="MarkerItem\AwMarkerLabelButton.h" />
     <QtMoc Include="MarkerItem\AwMarkerValueButton.h" />
-    <ClInclude Include="SEEGViewer\AwSEEGInteractor.h" />
     <QtMoc Include="InputMarker\InputMarkerModel.h">
     </QtMoc>
     <QtMoc Include="SignalView\AwGTCMenu.h">
@@ -129,8 +123,6 @@
     <QtMoc Include="..\..\include\widget\AwComboCMap.h">
     </QtMoc>
     <QtMoc Include="AwTopoLabelImage.h">
-    </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwSEEGViewer.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwMarkAroundWidget.h">
     </QtMoc>
@@ -148,8 +140,6 @@
     </QtMoc>
     <ClInclude Include="..\..\include\widget\AwMessageBox.h" />
     <QtMoc Include="..\..\include\widget\AwSpectroWidget.h">
-    </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwSEEGWidget.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwVTKWidget.h">
     </QtMoc>
@@ -219,8 +209,6 @@
     <QtUic Include="AwWaitWidget.ui">
     </QtUic>
     <QtUic Include="AwTopoWidget.ui">
-    </QtUic>
-    <QtUic Include="SEEGViewer\AwSEEGWidget.ui">
     </QtUic>
     <QtUic Include="AwMarkAroundWidget.ui">
     </QtUic>

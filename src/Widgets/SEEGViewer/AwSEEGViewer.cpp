@@ -28,6 +28,7 @@ AwSEEGViewer::AwSEEGViewer(QObject *parent) : AwDataClient(parent)
 	m_latency = 0.;
 	m_cacheLength = BUFFER_SIZE_S;
 	m_cacheLoaded = false;
+	m_mode = AwSEEGViewer::Undefined;
 }
 
 AwSEEGViewer::~AwSEEGViewer()
@@ -73,29 +74,75 @@ void AwSEEGViewer::clean()
 		delete m_seegChannels.takeFirst();
 }
 
+void AwSEEGViewer::changeMode(int mode)
+{
+	if (m_mode == mode)
+		return;
+	if (m_mode == AwSEEGViewer::Mapping)
+		stopMappingMode();
+	if (m_mode == AwSEEGViewer::Connectivity)
+		stopConnectivityMode();
+	if (mode == AwSEEGViewer::Mapping) 
+		setMappingMode();
+	else if (mode == AwSEEGViewer::Connectivity) 
+		setConnectivityMode();
+	else
+		m_mode = AwSEEGViewer::Undefined;
+}
+
+void AwSEEGViewer::stopConnectivityMode()
+{
+
+}
+
+void AwSEEGViewer::stopMappingMode()
+{
+	m_widget->reset();
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS
 
 void AwSEEGViewer::handleWidgetClosed()
 {
-	if (m_mappingIsActive) {
-		m_mappingIsActive = false;
+	//if (m_mappingIsActive) {
+	//	m_mappingIsActive = false;
+	//	emit mappingStopped();
+	//}
+	if (m_mode == AwSEEGViewer::Mapping)
 		emit mappingStopped();
-	}
 }
 
-void AwSEEGViewer::setMappingMode(bool active)
+//void AwSEEGViewer::setMappingMode(bool active)
+//{
+//	m_mappingIsActive = active;
+//	if (!active) {
+//		m_widget->reset();
+//	}
+//}
+
+void AwSEEGViewer::setMappingMode()
 {
-	m_mappingIsActive = active;
-	if (!active) {
-		m_widget->reset();
-	}
+	if (m_widget->electrodesLoaded())
+		m_mode = AwSEEGViewer::Mapping;
+	else
+		m_mode = AwSEEGViewer::Undefined;
+}
+
+void AwSEEGViewer::setConnectivityMode()
+{
 }
 
 void AwSEEGViewer::loadMesh(const QString& file)
 {
 	m_widget->openMesh(file);
 //	m_widget->show();
+}
+
+void AwSEEGViewer::addMeshes(const QStringList& meshes)
+{
+	m_widget->addMeshes(meshes);
 }
 
 void AwSEEGViewer::loadElectrodes(const QString& file)
@@ -114,7 +161,8 @@ void AwSEEGViewer::setSEEGChannels(const AwChannelList& channels)
 
 void AwSEEGViewer::updateMappingAt(float latency)
 {
-	if (!m_mappingIsActive)
+//	if (!m_mappingIsActive)
+	if (m_mode != AwSEEGViewer::Mapping)
 		return;
 	m_latency = latency;
 	if (!m_cacheLoaded) {

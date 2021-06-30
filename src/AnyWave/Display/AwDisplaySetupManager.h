@@ -37,25 +37,18 @@ public:
 	inline AwDisplaySetup* currentSetup() { return m_currentSetup; }
 	inline QStringList& loadedSetups() { return m_loadedSetups; }
 	QToolBar *toolBar();
-//	void setFilename(const QString& path);
 	void  init(); //called when a file is open
 public slots:
 	/** change Display Setup Path (should be called only once when AnyWave starts **/
 	void changeSetupDir(const QString& path) { m_setupDir = path; }
-	/** change the current setup with newSetup **/
-//	void changeSetup(const QString& newSetup);
 	void saveSettings();
 	void updateSetup(AwDisplaySetup *view, int flags);
-//	void saveCurrentSetup();
-	/** Save the current setup as new setup with different name **/
-//	void saveAsNew();
 	/** Delete the current setup **/
 	void deleteCurrentSetup();
 	/** Import a setup configuration from file **/
 	void loadSetup(const QString& path);
 	/** Reset to default setup **/
 	void resetToDefault();
-//	void retranslate();
 signals:
 	void newSetupSelected(AwDisplaySetup *setup);
 	void setupChanged(AwDisplaySetup *setup, int flags);

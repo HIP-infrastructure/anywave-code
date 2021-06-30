@@ -35,7 +35,7 @@
 #include <widget/AwSEEGViewer.h>
 #include <AwException.h>
 #include "AwSEEGInteractor.h"
-
+#include <QRegularExpression>
 #include "vtkPialReader.h"
 
 #define L	30	// 10 cm maximum radius for bubbles
@@ -69,8 +69,8 @@ AwSEEGPad::AwSEEGPad(double *c, double radius)
 	memcpy(center, c, 3 * sizeof(double));
 }
 
-//#include <qdebug.h>
-AwSEEGWidget::AwSEEGWidget(const QString& meshFile, QWidget *parent)
+
+AwSEEGWidget::AwSEEGWidget(QWidget *parent)
 	: QWidget(parent)
 {
 	m_widget = new AwVTKWidget(this);
@@ -84,7 +84,7 @@ AwSEEGWidget::AwSEEGWidget(const QString& meshFile, QWidget *parent)
 	m_meshActor->SetPickable(false);
 	m_electrodesRenderer =  vtkSmartPointer<vtkRenderer>::New();
 	m_widget->renderer()->AddActor(m_meshActor);
-
+	m_electrodesLoaded = false;
 	// An interactor
 	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
 		vtkSmartPointer<vtkRenderWindowInteractor>::New();
@@ -107,7 +107,7 @@ AwSEEGWidget::AwSEEGWidget(const QString& meshFile, QWidget *parent)
 	}
 
 	m_widget->window()->Render();
-	openMesh(meshFile);
+//	openMesh(meshFile);
 }
 
 AwSEEGWidget::~AwSEEGWidget()
@@ -166,10 +166,27 @@ void AwSEEGWidget::closeEvent(QCloseEvent *e)
 
 void AwSEEGWidget::loadMesh()
 {
-	//QString file = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "/", "*.*");
-	//if (!file.isEmpty())
-	//	openMesh(file);
-	openMesh("D:/data/lh.pial");
+	QString file = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "/", "*.*");
+	if (!file.isEmpty())
+		openMesh(file);
+}
+
+void AwSEEGWidget::addMeshes(const QStringList& meshes)
+{
+	QRegularExpression ext("(*.)\\.[^.]+$");
+	for (auto const& mesh : meshes) {
+		QFileInfo fi(mesh);
+		auto name = fi.fileName();
+		name.remove(ext);
+		vtkSmartPointer<vtkPialReader> reader = vtkSmartPointer<vtkPialReader>::New();
+		if (!m_meshes.contains(name)) {
+			std::string str = mesh.toStdString();
+			reader->SetFileName(str.c_str());
+			reader->Update();
+			m_meshes.insert(name, reader->GetOutput());
+		}
+	}
+	updateMeshes();
 }
 
 void AwSEEGWidget::changeFastRendering(bool on)
@@ -271,6 +288,7 @@ void AwSEEGWidget::clearElectrodes()
 		delete m_electrodesLabels.value(k);
 	}
 	m_electrodesLabels.clear();
+	m_electrodesLoaded = false;
 }
 
 void  AwSEEGWidget::clearBalls()
@@ -306,7 +324,7 @@ void AwSEEGWidget::loadElectrodes(const QString& file)
 	m_hPads.clear();
 
 	QString line;
-	// skip all until section is foudn
+	// skip all until section is found
 	while (!stream.atEnd()) {
 		line = stream.readLine();
 		if (line.trimmed() == ELECTRODE_SECTION) 
@@ -369,6 +387,7 @@ void AwSEEGWidget::loadElectrodes(const QString& file)
 
 	}
 	generateElectrodesLabels();
+	m_electrodesLoaded = true;
 	m_widget->window()->Render();
 }
 
@@ -399,6 +418,29 @@ void AwSEEGWidget::generateElectrodesLabels()
 		textActor->AddPosition(pad->center);
 		m_labelActors.append(textActor);
 	}
+}
+
+void AwSEEGWidget::updateMeshes()
+{
+	constexpr int maxCols = 3;
+	auto layout = m_ui->layoutMeshes;
+	QGridLayout *newLayout = new QGridLayout;
+	QStringList keys = m_meshes.keys();
+	keys.sort();
+	int col = 0, row = 0;
+	for (const QString& key : keys) {
+		QCheckBox* check = new QCheckBox();
+		check->setText(key);
+		check->setChecked(true);
+		connect(check, &QCheckBox::toggled, this, &AwSEEGWidget::updateDisplayedMeshes);
+		newLayout->addWidget(check, row, col);
+	}
+
+}
+
+void AwSEEGWidget::updateDisplayedMeshes(bool flag)
+{
+
 }
 
 /**
