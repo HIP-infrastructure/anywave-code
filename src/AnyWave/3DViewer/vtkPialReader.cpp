@@ -42,33 +42,27 @@ int vtkPialReader::RequestData(vtkInformation* vtkNotUsed(request),
 			vtkErrorMacro("Cannot open file " << this->FileName);
 			return 0;
 		}
-	//	magic = 16711679
 		int magic = read3bytes();
 		int nPoints = 0;
 		int nQuad = 0;
 		int nTriangles = 0;
 		vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 		vtkSmartPointer<vtkCellArray> vertices = vtkSmartPointer<vtkCellArray>::New();
-		//vtkIdType *pid;
 		if (magic == QUAD_FILE_MAGIC_NUMBER || magic == NEW_QUAD_FILE_MAGIC_NUMBER) {
 			nPoints = read3bytes();
 			nQuad = read3bytes();
-			//pid = new vtkIdType[nPoints];
+			points->SetNumberOfPoints(nPoints);
 			if (magic == QUAD_FILE_MAGIC_NUMBER) {
 				qint16 xyz[3];
 				int count = 0;
 				for (int i = 0; i < nPoints ; i++) {
-					//m_file.read((char*)xyz, 3 * sizeof(qint16));
 					m_stream >> xyz[0] >> xyz[1] >> xyz[2];
-				//	pid[count++] = points->InsertNextPoint(xyz[0] / 100., xyz[1] / 100., xyz[2] / 100.);
 					points->SetPoint(i, xyz[0] / 100., xyz[1] / 100., xyz[2] / 100.);
 				}
 			}
 			else {
 				float xyz[3];
-				//int count = 0;
 				for (int i = 0; i < nPoints; i++) {
-					//m_file.read((char*)xyz, 3 * sizeof(float));
 					m_stream >> xyz[0] >> xyz[1] >> xyz[2];
 					points->SetPoint(i, xyz[0], xyz[1], xyz[2]);
 				}
@@ -81,35 +75,26 @@ int vtkPialReader::RequestData(vtkInformation* vtkNotUsed(request),
 				vertices->InsertNextCell(4, indexes);
 			}
 			output->SetPoints(points);
-			output->SetVerts(vertices);
+			output->SetPolys(vertices);
 
 			m_file.close();
-			//delete[] pid;
 			return VTK_OK;
 		}
 		else if (magic == TRIANGLE_FILE_MAGIC_NUMBER) {
 			m_file.readLine();
 			m_file.readLine();
 			m_stream >> nPoints;
-			//m_file.read((char*)&nPoints, sizeof(int));
-			//m_file.read((char*)&nTriangles, sizeof(int));
 			m_stream >> nTriangles;
 			if (std::floor(std::abs(nPoints)) != nPoints || std::floor(std::abs(nTriangles)) != nTriangles) {
 				m_file.reset();
 				read3bytes();
 				m_file.readLine();
-				//m_file.read((char*)&nPoints, sizeof(int));
-				//m_file.read((char*)&nTriangles, sizeof(int));
 				m_stream >> nPoints >> nTriangles;
 			}
-			//pid = new vtkIdType[(size_t)nPoints];
 			float xyz[3];
 			points->SetNumberOfPoints(nPoints);
-			//size_t count = 0;
 			for (int i = 0; i < nPoints; i++) {
-				//m_file.read((char*)xyz, 3 * sizeof(float));
 				m_stream >> xyz[0] >> xyz[1] >> xyz[2];
-			//	pid[count++] = points->InsertNextPoint(xyz[0], xyz[1], xyz[2]);
 				points->SetPoint(i, xyz[0], xyz[1], xyz[2]);
 			}
 			// read cells (triangles)
@@ -120,13 +105,10 @@ int vtkPialReader::RequestData(vtkInformation* vtkNotUsed(request),
 				vertices->InsertCellPoint(indexes[0]);
 				vertices->InsertCellPoint(indexes[1]);
 				vertices->InsertCellPoint(indexes[2]);
-				//for (int n = 0; n < 3; n++) 
-				//	vertices->InsertCellPoint(read3bytes());
 			}
 			output->SetPoints(points);
-			output->SetVerts(vertices);
+			output->SetPolys(vertices);
 			m_file.close();
-			//delete[] pid;
 			return VTK_OK;
 		}
 		else {

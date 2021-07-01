@@ -88,6 +88,25 @@ AwDisplay::~AwDisplay()
 {
 }
 
+bool AwDisplay::containsChannels(int type)
+{
+	for (auto c : m_channels) {
+		if (c->type() == type)
+			return true;
+	}
+	return false;
+}
+
+AwChannelList AwDisplay::getChannels(int type)
+{
+	AwChannelList res;
+	for (auto c : m_channels) {
+		if (c->type() == type)
+			res << c;
+	}
+	return res;
+}
+
 
 void AwDisplay::setAddMarkerDock(QDockWidget *dock)
 {
@@ -200,15 +219,17 @@ void AwDisplay::closeFile()
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
 	AwDisplaySetupManager::instance()->saveSettings();
-	//AwDisplaySetupManager::instance()->resetToDefault();
+	AwDisplaySetupManager::instance()->resetToDefault();
 	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
 		v->closeFile();
-	AwDisplaySetupManager::instance()->resetToDefault();
+//	AwDisplaySetupManager::instance()->resetToDefault();
 }
 
 void AwDisplay::quit()
 {
+	saveChannelSelections();
+	AwDisplaySetupManager::instance()->saveSettings();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
 }

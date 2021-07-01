@@ -145,10 +145,26 @@ void AnyWave::runMapping()
 
 	// check if SEEG Viewer can start
 	auto viewer = AwSEEGViewer::start();
+	if (!viewer) {// viewer not ready because we are not in BIDS or required file (GARDEL Electrodes) was not found. 
+		// check if SEEG channels exist
+		if (m_display->containsChannels(AwChannel::SEEG))
+			viewer = AwSEEGViewer::instance();
+
+	}
 	if (viewer) {
 		connect(viewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
+		connect(viewer, SIGNAL(newDataConnection(AwDataClient*)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient*)));
+		connect(m_display, SIGNAL(clickedAtLatency(float)), viewer, SLOT(updateMappingAt(float)));
+		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), viewer, SLOT(setSEEGChannels(const AwChannelList&)));
+		connect(viewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+		connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), viewer,
+						SLOT(setNewFilters(const AwFilterSettings&)));
+		viewer->setSEEGChannels(m_display->getChannels(AwChannel::SEEG));
+		viewer->setMappingMode();
 		m_display->setMappingModeOn(true);
+		viewer->widget()->show();
 	}
+
 
 	//if (!seegChannels.isEmpty()) {  // we've got SEEG channels, check for mesh and electrode files
 	//	// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.

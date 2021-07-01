@@ -391,9 +391,10 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 				container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 			}
 			QStringList meshes;
+			QStringList acceptedFiles = { "lh.pial", "rh.pial", "lh.white", "rh.white" };
 			for (auto file : files) {
 				auto fullPath = QString("%1/%2").arg(path).arg(file);
-				if (file.endsWith(".pial")) {
+				if (acceptedFiles.contains(file)) {
 					meshes << fullPath;
 				}
 			}

@@ -354,6 +354,12 @@ void AwMarkerManager::closeFile()
 	m_markersModified = false;
 }
 
+void AwMarkerManager::quit()
+{
+	disconnect(this, nullptr, nullptr, nullptr);
+	closeFile();
+}
+
 // 
 // clear()
 //

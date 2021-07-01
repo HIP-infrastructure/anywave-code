@@ -28,6 +28,7 @@ public:
 	static bool isInstantiated();
 	static AwSEEGViewer* instance();
 	static AwSEEGViewer* start();
+	static void quit();
 	
 	~AwSEEGViewer();
 

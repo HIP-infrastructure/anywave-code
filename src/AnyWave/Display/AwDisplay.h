@@ -59,6 +59,8 @@ public:
 	AwChannelList displayedChannels();	// Return the channels currently displayed in the views
 	static AwDisplay *instance();
 	static void setInstance(AwDisplay *d);
+	bool containsChannels(int type);
+	AwChannelList getChannels(int type);
 private:
 	QDockWidget *m_dockAddMarker;
 	FileType fileType;

@@ -66,6 +66,15 @@ AwDataManager::~AwDataManager()
 {
 }
 
+
+void AwDataManager::quit()
+{
+	if (m_reader) 
+		m_filterSettings.save(m_settings.value(keys::flt_file).toString());
+	m_montageManager->quit();
+	m_markerManager->quit();
+}
+
 void AwDataManager::closeFile()
 {
 	m_status = 0;

@@ -339,6 +339,7 @@ void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
 
 void AwMontageManager::quit()
 {
+	disconnect(this, nullptr, nullptr, nullptr);
 	closeFile();
 }
 

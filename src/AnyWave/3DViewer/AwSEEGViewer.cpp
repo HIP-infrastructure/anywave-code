@@ -14,11 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwSEEGViewer.h"
-#include "Data/AwDataServer.h"
-#include "Data/AwDataManager.h"
-#include "Display/AwDisplay.h"
 #include "IO/BIDS/AwBIDSManager.h"
-
 #include <QFile>
 #define BUFFER_SIZE_S	30  // size of data cache in seconds
 
@@ -27,16 +23,8 @@ bool AwSEEGViewer::isInstantiated() { return m_instance != nullptr; }
 
 AwSEEGViewer* AwSEEGViewer::instance()
 {
-	if (m_instance == nullptr) {
+	if (m_instance == nullptr) 
 		m_instance = new AwSEEGViewer();
-		connect(m_instance, SIGNAL(newDataConnection(AwDataClient*)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient*)));
-		connect(AwDisplay::instance(), SIGNAL(clickedAtLatency(float)), m_instance, SLOT(updateMappingAt(float)));
-		//		connect(m_instance, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
-		// 
-		connect(AwDisplay::instance(), SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_instance, SLOT(setSEEGChannels(const AwChannelList&)));
-		connect(m_instance->widget(), SIGNAL(selectedElectrodes(const QStringList&)), AwDisplay::instance(), SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-		connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_instance, SLOT(setNewFilters(const AwFilterSettings&)));
-	}
 	return m_instance;
 }
 
@@ -53,16 +41,26 @@ AwSEEGViewer* AwSEEGViewer::start()
 				viewer = AwSEEGViewer::instance();
 				viewer->loadElectrodes(elec);
 				viewer->addMeshes(meshes);
+				viewer->m_widget->show();
 			}
 		}
 	}
 	return viewer;
 }
 
+void AwSEEGViewer::quit()
+{
+	if (m_instance) {
+		delete m_instance;
+		m_instance = nullptr;
+	}
+}
+
 
 AwSEEGViewer::AwSEEGViewer(QObject *parent) : AwDataClient(parent)
 {
 	m_widget = new AwSEEGWidget();
+	m_widget->setWindowFlags(m_widget->windowFlags() | Qt::WindowStaysOnTopHint);
 	m_widget->m_viewer = this;
 	connect(m_widget, SIGNAL(closed()), this, SLOT(handleWidgetClosed()));
 	m_mappingIsActive = false;
@@ -154,6 +152,8 @@ void AwSEEGViewer::handleWidgetClosed()
 	//}
 	if (m_mode == AwSEEGViewer::Mapping)
 		emit mappingStopped();
+
+	AwSEEGViewer::quit();
 }
 
 //void AwSEEGViewer::setMappingMode(bool active)

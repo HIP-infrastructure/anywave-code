@@ -60,6 +60,7 @@
 #include "CL/CommandLineParser.h"
 #include "Data/AwDataManager.h"
 #include "Plugin/AwMATPyCreator.h"
+#include "3DViewer/AwSEEGViewer.h"
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -349,12 +350,10 @@ void AnyWave::applyNewLanguage()
 void AnyWave::quit()
 {
 	AwDebugLog::instance()->closeFile();
-	if (m_display)
-		m_display->closeFile();
+	AwProcessManager::instance()->quit();
+	AwSettings::getInstance()->quit();
+	AwDataManager::instance()->quit();
 
-	AwSettings::getInstance()->closeFile();
-	AwDataManager::instance()->closeFile();
-	
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
 
@@ -380,10 +379,9 @@ void AnyWave::quit()
 	}
 	if (m_display)
 		m_display->quit();
-	if (m_SEEGViewer) {
-		delete m_SEEGViewer;
-		m_SEEGViewer = nullptr;
-	}
+
+	if (AwSEEGViewer::isInstantiated())
+		AwSEEGViewer::quit();
 #ifdef AW_EPOCHING
 	if (AwEpochManager::instanceExists()) {
 		AwEpochManager::instance()->closeFile();

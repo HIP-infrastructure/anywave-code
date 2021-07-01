@@ -42,6 +42,7 @@ public:
 		FileAccessError = AwFileIO::FileAccess, NoPluginFound };
 
 	inline QVariant value(const QString& key) { return m_settings.value(key); }
+	void quit();
 	void closeFile();
 	const AwChannelList& selectedChannels();
 	const AwChannelList& montage();

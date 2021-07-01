@@ -72,6 +72,7 @@ signals:
 protected:
 	void clearElectrodes();
 	void clearBalls();
+	void clearMeshes();
 	void updateMap();
 	void closeEvent(QCloseEvent *e);
 
@@ -86,9 +87,9 @@ protected:
 	QList<AwSEEGPad *> m_electrodes, m_bipolarElectrodes, m_balls; 
 	vtkSmartPointer<vtkPolyDataMapper> m_meshMapper;
 	vtkSmartPointer<vtkActor> m_meshActor;
-	vtkSmartPointer<vtkRenderer> m_electrodesRenderer;
-	vtkSmartPointer<vtkPolyData> m_mesh;
-	vtkSmartPointer<vtkPolyDataNormals> m_smoothMesh;
+//	vtkSmartPointer<vtkRenderer> m_electrodesRenderer;
+//	vtkSmartPointer<vtkPolyData> m_mesh;
+//	vtkSmartPointer<vtkPolyDataNormals> m_smoothMesh;
 	QList<vtkSmartPointer<vtkFollower> > m_labelActors;
 	QHash<QString, QStringList *> m_electrodesLabels;
 	double m_meshBounds[6];
@@ -96,7 +97,9 @@ protected:
 	Ui::AwSEEGWidgetUi *m_ui;
 	// VTK Objects
 	AwVTKWidget *m_widget;
-	QHash<QString, vtkPolyData*> m_meshes;
-	QHash<QString, vtkPolyDataNormals*> m_smoothMeshes;
+	QHash<QString, vtkSmartPointer<vtkPolyData>> m_meshes;
+	//QHash<QString, vtkSmartPointer<vtkPolyDataNormals>> m_smoothMeshes;
+	QList<vtkSmartPointer<vtkPolyDataMapper>> m_mappers;
+	QList<vtkSmartPointer<vtkActor>> m_actors;
 	bool m_electrodesLoaded;
 };
