@@ -50,7 +50,7 @@ public:
 
 	void setSelectedActor(vtkActor *actor);
 	inline bool electrodesLoaded() { return m_electrodesLoaded;  }
-	vtkActor *meshActor() { return m_meshActor; }
+//	vtkActor *meshActor() { return m_meshActor; }
 public slots:
 	void loadElectrodes();
 	void loadElectrodes(const QString& file);
@@ -66,6 +66,7 @@ public slots:
 	void reset();
 protected slots:
 	void updateDisplayedMeshes(bool);
+	void updateOpacity(int);
 signals:
 	void closed();
 	void selectedElectrodes(const QStringList& labels);
@@ -85,21 +86,18 @@ protected:
 	// m_bipolarElectodes = virtual bipolard electrodes computed when loading the electrode file.
 	// m_balls = virtual electrodes used in mapping mode to represent amplitude values.
 	QList<AwSEEGPad *> m_electrodes, m_bipolarElectrodes, m_balls; 
-	vtkSmartPointer<vtkPolyDataMapper> m_meshMapper;
-	vtkSmartPointer<vtkActor> m_meshActor;
-//	vtkSmartPointer<vtkRenderer> m_electrodesRenderer;
-//	vtkSmartPointer<vtkPolyData> m_mesh;
-//	vtkSmartPointer<vtkPolyDataNormals> m_smoothMesh;
-	QList<vtkSmartPointer<vtkFollower> > m_labelActors;
 	QHash<QString, QStringList *> m_electrodesLabels;
 	double m_meshBounds[6];
 	double m_a, m_l;
 	Ui::AwSEEGWidgetUi *m_ui;
 	// VTK Objects
+	//vtkSmartPointer<vtkPolyDataMapper> m_meshMapper;
+	//vtkSmartPointer<vtkActor> m_meshActor;
+	QList<vtkSmartPointer<vtkFollower> > m_labelActors;
 	AwVTKWidget *m_widget;
 	QHash<QString, vtkSmartPointer<vtkPolyData>> m_meshes;
-	//QHash<QString, vtkSmartPointer<vtkPolyDataNormals>> m_smoothMeshes;
 	QList<vtkSmartPointer<vtkPolyDataMapper>> m_mappers;
 	QList<vtkSmartPointer<vtkActor>> m_actors;
+	QList<QWidget*> m_checkBoxes, m_sliders;
 	bool m_electrodesLoaded;
 };

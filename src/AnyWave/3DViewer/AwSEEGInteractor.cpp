@@ -38,12 +38,14 @@ void AwSEEGInteractor::OnLeftButtonDown()
 	collection->InitTraversal();
 	for (int i = 0; i < collection->GetNumberOfItems(); i++) {
 		auto actor = collection->GetNextActor();
-		if (actor == m_widget->meshActor())
-			continue;
-		else {
-			m_widget->setSelectedActor(actor);
-			break;
-		}
+		//if (actor == m_widget->meshActor())
+		//	continue;
+		//else {
+		//	m_widget->setSelectedActor(actor);
+		//	break;
+		//}
+		m_widget->setSelectedActor(actor);
+		break;
 	}
 	// Forward events
 	vtkInteractorStyleTrackballCamera::OnLeftButtonDown();

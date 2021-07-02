@@ -78,13 +78,6 @@ AwSEEGWidget::AwSEEGWidget(QWidget *parent)
 	m_ui = new Ui::AwSEEGWidgetUi();
 	m_ui->setupUi(this);
 	m_ui->mainLayout->replaceWidget(m_ui->widget, m_widget);
-	//m_meshMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	//m_meshActor =  vtkSmartPointer<vtkActor>::New();
-	//m_meshActor->SetMapper(m_meshMapper);
-	//m_meshActor->GetProperty()->SetOpacity(0.2);
-	//m_meshActor->SetPickable(false);
-//	m_electrodesRenderer =  vtkSmartPointer<vtkRenderer>::New();
-	//m_widget->renderer()->AddActor(m_meshActor);
 	m_electrodesLoaded = false;
 	// An interactor
 	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
@@ -106,9 +99,7 @@ AwSEEGWidget::AwSEEGWidget(QWidget *parent)
 		m_widget->renderer()->SetMaximumNumberOfPeels(50);
 		m_widget->renderer()->SetOcclusionRatio(0.2);
 	}
-
 	m_widget->window()->Render();
-//	openMesh(meshFile);
 }
 
 AwSEEGWidget::~AwSEEGWidget()
@@ -166,6 +157,34 @@ void AwSEEGWidget::closeEvent(QCloseEvent *e)
 	emit closed();
 }
 
+void AwSEEGWidget::updateDisplayedMeshes(bool flag)
+{
+	QWidget* w = qobject_cast<QWidget*>(sender());
+	if (!w)
+		return;
+	int index = m_checkBoxes.indexOf(w);
+	Q_ASSERT(index != -1);
+	auto actor = m_actors.at(index);
+	if (!flag) 
+		m_widget->renderer()->RemoveActor(actor);
+	else
+		m_widget->renderer()->AddActor(actor);
+	m_widget->window()->Render();
+}
+
+void AwSEEGWidget::updateOpacity(int value)
+{
+	QWidget *w = qobject_cast<QWidget *>(sender());
+	if (!w)
+		return;
+
+	int index = m_sliders.indexOf(w);
+	Q_ASSERT(index != -1);
+	auto actor = m_actors.at(index);
+	actor->GetProperty()->SetOpacity((double)(value) / 100.);
+	m_widget->window()->Render();
+}
+
 void AwSEEGWidget::loadMesh()
 {
 	QString file = QFileDialog::getOpenFileName(this, tr("Load Mesh"), "/", "*.*");
@@ -175,42 +194,53 @@ void AwSEEGWidget::loadMesh()
 
 void AwSEEGWidget::updateMeshes()
 {
+	vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
+	camera->SetPosition(0, 0, 400);
+	camera->SetFocalPoint(0, 0, 0);
+	m_widget->renderer()->SetActiveCamera(camera);
+
 	constexpr int maxCols = 2;
 	auto layout = m_ui->layoutMeshes;
-//	QGridLayout* newLayout = new QGridLayout;
 	QStringList keys = m_meshes.keys();
 	keys.sort();
 	int col = 0, row = 0;
+	clearMeshes();
+	m_widget->renderer()->ResetCameraClippingRange();
 	for (const QString& key : keys) {
 		QCheckBox* check = new QCheckBox();
 		check->setText(key);
 		check->setChecked(true);
 		connect(check, &QCheckBox::toggled, this, &AwSEEGWidget::updateDisplayedMeshes);
 		layout->addWidget(check, row, col++);
-		if (col == maxCols) {
-			col = 0;
-			row++;
-		}
-	}
-	auto meshes = m_meshes.values();
-	clearMeshes();
-	for (auto m : meshes) {
-		
-		auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-		auto actor = vtkSmartPointer<vtkActor>::New();
-		mapper->SetInputData(m);
+		m_checkBoxes << check;
+		QSlider* slider = new QSlider(Qt::Horizontal);
+		slider->setMaximum(100);
+		slider->setMinimum(0);
+		slider->setValue(65);
+		connect(slider, &QSlider::valueChanged, this, &AwSEEGWidget::updateOpacity);
+		layout->addWidget(slider, row, col);
+		m_sliders << slider,
+		row++;
+		col = 0;
+		//if (col == maxCols) {
+		//	col = 0;
+		//	row++;
+		//}
+		auto mesh = m_meshes.value(key);
+	//	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+		vtkNew<vtkPolyDataMapper> mapper;
+		//auto actor = vtkSmartPointer<vtkActor>::New();
+		vtkNew<vtkActor> actor;
+		mapper->SetInputData(mesh);
+		mapper->Update();
 		actor->SetMapper(mapper);
-		//actor->GetProperty()->SetOpacity(0.2);
+		actor->GetProperty()->SetOpacity(0.65);
 		actor->SetPickable(false);
 		m_mappers << mapper;
 		m_actors << actor;
 		m_widget->renderer()->AddActor(actor);
 	}
-	vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
-	camera->SetPosition(0, 0, 90);
-	camera->SetFocalPoint(0, 0, 0);
-	m_widget->renderer()->SetActiveCamera(camera);
-	m_widget->renderer()->ResetCameraClippingRange();	
+
 	m_widget->window()->Render();
 	m_widget->repaint();
 }
@@ -227,22 +257,24 @@ void AwSEEGWidget::clearMeshes()
 void AwSEEGWidget::addMeshes(const QStringList& meshes)
 {
 	QRegularExpression ext("(*.)\\.[^.]+$");
+	vtkSmartPointer<vtkPialReader> reader = vtkSmartPointer<vtkPialReader>::New();
+	vtkSmartPointer<vtkPolyDataNormals> smooth = vtkSmartPointer<vtkPolyDataNormals>::New();
 	for (auto const& mesh : meshes) {
 		QFileInfo fi(mesh);
 		auto name = fi.fileName();
 		name.remove(ext);
-		vtkSmartPointer<vtkPialReader> reader = vtkSmartPointer<vtkPialReader>::New();
 		if (!m_meshes.contains(name)) {
 			std::string str = mesh.toStdString();
 			reader->SetFileName(str.c_str());
 			reader->Update();
-			vtkSmartPointer<vtkPolyDataNormals> smooth = vtkSmartPointer<vtkPolyDataNormals>::New();
 			smooth->SetInputData(reader->GetOutput());
 			smooth->ComputeCellNormalsOn();
+			smooth->ComputePointNormalsOn();
 			smooth->ConsistencyOn();
 			smooth->SetFeatureAngle(60);
 			smooth->Update();
-			m_meshes.insert(name, smooth->GetOutput());
+			vtkSmartPointer<vtkPolyData> m = smooth->GetOutput();
+			m_meshes.insert(name, m);
 		}
 	}
 	updateMeshes();
@@ -480,10 +512,7 @@ void AwSEEGWidget::generateElectrodesLabels()
 }
 
 
-void AwSEEGWidget::updateDisplayedMeshes(bool flag)
-{
 
-}
 
 /**
 compute mapping of SEEG electrodes:
