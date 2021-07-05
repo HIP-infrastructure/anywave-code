@@ -143,6 +143,12 @@ void AnyWave::runMapping()
 	//		seegChannels << c;
 	//}
 
+	// a viewer is already running?
+	if (AwSEEGViewer::isInstantiated()) {
+		AwDataManager::instance()->dataServer()->closeConnection(AwSEEGViewer::instance());
+		AwSEEGViewer::quit();
+	}
+
 	// check if SEEG Viewer can start
 	auto viewer = AwSEEGViewer::start();
 	if (!viewer) {// viewer not ready because we are not in BIDS or required file (GARDEL Electrodes) was not found. 
@@ -153,7 +159,8 @@ void AnyWave::runMapping()
 	}
 	if (viewer) {
 		connect(viewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
-		connect(viewer, SIGNAL(newDataConnection(AwDataClient*)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient*)));
+	//	connect(viewer, SIGNAL(newDataConnection(AwDataClient*)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient*)));
+		AwDataManager::instance()->dataServer()->openConnection(viewer);
 		connect(m_display, SIGNAL(clickedAtLatency(float)), viewer, SLOT(updateMappingAt(float)));
 		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), viewer, SLOT(setSEEGChannels(const AwChannelList&)));
 		connect(viewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
@@ -162,7 +169,7 @@ void AnyWave::runMapping()
 		viewer->setSEEGChannels(m_display->getChannels(AwChannel::SEEG));
 		viewer->setMappingMode();
 		m_display->setMappingModeOn(true);
-		viewer->widget()->show();
+		viewer->show();
 	}
 
 
@@ -226,9 +233,13 @@ void AnyWave::stopMapping()
 	else if (dockEEG->isClosed())
 		EEGOK = false;
 
+	if (AwSEEGViewer::isInstantiated()) {
+		AwDataManager::instance()->dataServer()->closeConnection(AwSEEGViewer::instance());
+		AwSEEGViewer::quit();
+	}
 	bool SEEGActive = false;
-	if (m_SEEGViewer)
-		SEEGActive = m_SEEGViewer->isMappingActive();
+	//if (m_SEEGViewer)
+	//	SEEGActive = m_SEEGViewer->isMappingActive();
 
 	if (!EEGOK && !MEGOK && !SEEGActive) {
 		m_cursorToolBar->setEnabled(true);

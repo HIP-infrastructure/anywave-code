@@ -37,9 +37,11 @@
 #include "AwSEEGInteractor.h"
 #include <QRegularExpression>
 #include "vtkPialReader.h"
+#include <QLabel>
+#include <QSlider>
 
-
-#define L	30	// 10 cm maximum radius for balls
+//#define L	30	// 10 cm maximum radius for balls
+constexpr double L = 30.;
 
 constexpr auto ELECTRODE_SECTION = "MRI_FS";
 
@@ -77,6 +79,7 @@ AwSEEGWidget::AwSEEGWidget(QWidget *parent)
 	m_widget = new AwVTKWidget(this);
 	m_ui = new Ui::AwSEEGWidgetUi();
 	m_ui->setupUi(this);
+	setWindowTitle("SEEG Viewer");
 	m_ui->mainLayout->replaceWidget(m_ui->widget, m_widget);
 	m_electrodesLoaded = false;
 	// An interactor
@@ -99,15 +102,19 @@ AwSEEGWidget::AwSEEGWidget(QWidget *parent)
 		m_widget->renderer()->SetMaximumNumberOfPeels(50);
 		m_widget->renderer()->SetOcclusionRatio(0.2);
 	}
+	vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
+	camera->SetPosition(0, 0, 400);
+	camera->SetFocalPoint(0, 0, 0);
+	m_widget->renderer()->SetActiveCamera(camera);
 	m_widget->window()->Render();
 }
 
 AwSEEGWidget::~AwSEEGWidget()
 {
-	delete m_ui;
 	clearElectrodes();
 	clearBalls();
 	clearMeshes();
+	delete m_ui;
 }
 
 void AwSEEGWidget::setSelectedActor(vtkActor *actor)
@@ -138,18 +145,10 @@ void AwSEEGWidget::setSelectedActor(vtkActor *actor)
 	
 }
 
-void AwSEEGWidget::reset()
+void AwSEEGWidget::setBIDSDriven(bool flag)
 {
-	vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
-	camera->SetPosition(0, 0, 400);
-	camera->SetFocalPoint(0, 0, 0);
-	m_widget->renderer()->SetActiveCamera(camera);
-	clearBalls();
-	for (auto pad : m_electrodes) {
-		m_widget->renderer()->AddActor(pad->actor);
-	}
-	m_widget->window()->Render();
-	setWindowTitle("SEEG Viewer");
+	m_ui->buttonLoadElectrodes->setVisible(!flag);
+	m_ui->buttonLoadMesh->setVisible(!flag);
 }
 
 void AwSEEGWidget::closeEvent(QCloseEvent *e)
@@ -194,76 +193,61 @@ void AwSEEGWidget::loadMesh()
 
 void AwSEEGWidget::updateMeshes()
 {
-	vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
-	camera->SetPosition(0, 0, 400);
-	camera->SetFocalPoint(0, 0, 0);
-	m_widget->renderer()->SetActiveCamera(camera);
-
 	constexpr int maxCols = 2;
 	auto layout = m_ui->layoutMeshes;
-	QStringList keys = m_meshes.keys();
-	keys.sort();
 	int col = 0, row = 0;
-	clearMeshes();
-	m_widget->renderer()->ResetCameraClippingRange();
-	for (const QString& key : keys) {
+	int index = 0;
+	for (const QString& key : m_meshLabels) {
 		QCheckBox* check = new QCheckBox();
 		check->setText(key);
 		check->setChecked(true);
 		connect(check, &QCheckBox::toggled, this, &AwSEEGWidget::updateDisplayedMeshes);
 		layout->addWidget(check, row, col++);
 		m_checkBoxes << check;
+		layout->addWidget(new QLabel("Alpha: "), row, col++);
 		QSlider* slider = new QSlider(Qt::Horizontal);
 		slider->setMaximum(100);
 		slider->setMinimum(0);
-		slider->setValue(65);
+		slider->setValue(30);
 		connect(slider, &QSlider::valueChanged, this, &AwSEEGWidget::updateOpacity);
 		layout->addWidget(slider, row, col);
 		m_sliders << slider,
 		row++;
 		col = 0;
-		//if (col == maxCols) {
-		//	col = 0;
-		//	row++;
-		//}
-		auto mesh = m_meshes.value(key);
-	//	auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-		vtkNew<vtkPolyDataMapper> mapper;
-		//auto actor = vtkSmartPointer<vtkActor>::New();
-		vtkNew<vtkActor> actor;
-		mapper->SetInputData(mesh);
-		mapper->Update();
+		auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+		auto actor = vtkSmartPointer<vtkActor>::New();
+		mapper->SetInputData(m_meshes.at(index++));
 		actor->SetMapper(mapper);
-		actor->GetProperty()->SetOpacity(0.65);
+		actor->GetProperty()->SetOpacity(0.3);
 		actor->SetPickable(false);
-		m_mappers << mapper;
 		m_actors << actor;
 		m_widget->renderer()->AddActor(actor);
 	}
-
 	m_widget->window()->Render();
-	m_widget->repaint();
+	repaint();
 }
 
 
 void AwSEEGWidget::clearMeshes()
 {
-	for (auto actor : m_actors) 
+	for (auto actor : m_actors)
 		m_widget->renderer()->RemoveActor(actor);
 	m_actors.clear();
-	m_mappers.clear();
 }
 
-void AwSEEGWidget::addMeshes(const QStringList& meshes)
+void AwSEEGWidget::setMeshes(const QStringList& meshes)
 {
-	QRegularExpression ext("(*.)\\.[^.]+$");
-	vtkSmartPointer<vtkPialReader> reader = vtkSmartPointer<vtkPialReader>::New();
-	vtkSmartPointer<vtkPolyDataNormals> smooth = vtkSmartPointer<vtkPolyDataNormals>::New();
+	QRegularExpression ext("\\.(pial)+$");
+	// get bounds of every meshes
+	double bounds[6] = { 0., 0., 0., 0., 0., 0. }, temp[6];
 	for (auto const& mesh : meshes) {
 		QFileInfo fi(mesh);
 		auto name = fi.fileName();
 		name.remove(ext);
-		if (!m_meshes.contains(name)) {
+		if (!m_meshLabels.contains(name)) {
+			vtkSmartPointer<vtkPialReader> reader = vtkSmartPointer<vtkPialReader>::New();
+			vtkSmartPointer<vtkPolyDataNormals> smooth = vtkSmartPointer<vtkPolyDataNormals>::New();
+			m_meshLabels << name;
 			std::string str = mesh.toStdString();
 			reader->SetFileName(str.c_str());
 			reader->Update();
@@ -273,10 +257,19 @@ void AwSEEGWidget::addMeshes(const QStringList& meshes)
 			smooth->ConsistencyOn();
 			smooth->SetFeatureAngle(60);
 			smooth->Update();
-			vtkSmartPointer<vtkPolyData> m = smooth->GetOutput();
-			m_meshes.insert(name, m);
+			auto mesh = smooth->GetOutput();
+			mesh->GetBounds(temp);
+			bounds[0] = std::min(bounds[0], temp[0]);
+			bounds[1] = std::max(bounds[1], temp[1]);
+			bounds[2] = std::min(bounds[2], temp[2]);
+			bounds[3] = std::max(bounds[3], temp[3]);
+			bounds[4] = std::min(bounds[4], temp[4]);
+			bounds[5] = std::max(bounds[5], temp[5]);
+			m_meshes.append(smooth->GetOutput());
 		}
 	}
+	m_l = sqrt(vtkMath::Distance2BetweenPoints(&bounds[0], &bounds[3]));
+	m_a = 1 / L * ((m_l / 3) - 1);
 	updateMeshes();
 }
 
@@ -297,15 +290,6 @@ void AwSEEGWidget::changeFastRendering(bool on)
 	m_widget->window()->Render();
 }
 
-void AwSEEGWidget::changeSmoothRendering(bool on)
-{
-	//if (!on)
-	//	m_meshMapper->SetInputData(m_mesh);
-	//else {
-	//	m_meshMapper->SetInputData(m_smoothMesh->GetOutput());
-	//}
-    m_widget->window()->Render();
-}
 
 void AwSEEGWidget::openMesh(const QString& file)
 {
@@ -479,7 +463,10 @@ void AwSEEGWidget::loadElectrodes(const QString& file)
 	}
 	generateElectrodesLabels();
 	m_electrodesLoaded = true;
+	for (auto pad : m_electrodes) 
+		m_widget->renderer()->AddActor(pad->actor);
 	m_widget->window()->Render();
+	repaint();
 }
 
 void AwSEEGWidget::generateElectrodesLabels()

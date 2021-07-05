@@ -50,20 +50,19 @@ public:
 
 	void setSelectedActor(vtkActor *actor);
 	inline bool electrodesLoaded() { return m_electrodesLoaded;  }
-//	vtkActor *meshActor() { return m_meshActor; }
+	void update3DScene() { m_widget->window()->Render(); }
+	void setBIDSDriven(bool flag = true);
 public slots:
 	void loadElectrodes();
 	void loadElectrodes(const QString& file);
 	void changeMeshOpacity(int value);
 	void openMesh(const QString& file);
 	void loadMesh();
-	void addMeshes(const QStringList& meshes);
+	void setMeshes(const QStringList& meshes);
 	void changeFastRendering(bool on);
-	void changeSmoothRendering(bool on);
 	void computeMap(AwChannelList& channels, float latency, qint64 sample);
 	void showElectrodesLabels(bool on);
 	/** reset to initial state with loaded mesh and electrodes. **/
-	void reset();
 protected slots:
 	void updateDisplayedMeshes(bool);
 	void updateOpacity(int);
@@ -91,13 +90,11 @@ protected:
 	double m_a, m_l;
 	Ui::AwSEEGWidgetUi *m_ui;
 	// VTK Objects
-	//vtkSmartPointer<vtkPolyDataMapper> m_meshMapper;
-	//vtkSmartPointer<vtkActor> m_meshActor;
 	QList<vtkSmartPointer<vtkFollower> > m_labelActors;
 	AwVTKWidget *m_widget;
-	QHash<QString, vtkSmartPointer<vtkPolyData>> m_meshes;
-	QList<vtkSmartPointer<vtkPolyDataMapper>> m_mappers;
 	QList<vtkSmartPointer<vtkActor>> m_actors;
+	QStringList m_meshLabels;
+	QList<vtkSmartPointer<vtkPolyData>> m_meshes;
 	QList<QWidget*> m_checkBoxes, m_sliders;
 	bool m_electrodesLoaded;
 };

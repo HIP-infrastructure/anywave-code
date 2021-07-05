@@ -32,6 +32,8 @@ public:
 	
 	~AwSEEGViewer();
 
+	void show();
+
 	inline AwSEEGWidget *widget() { return m_widget; }
 	inline bool isMappingActive() { return m_mappingIsActive; }
 	enum Modes { Undefined, Mapping, Connectivity };
@@ -45,7 +47,7 @@ public:
 	inline int mode() { return m_mode; }
 	inline bool isMappingModeActive() { return m_mode == AwSEEGViewer::Mapping; }
 signals:
-	void newDataConnection(AwDataClient *);
+//	void newDataConnection(AwDataClient *);
 	void mappingStopped();
 public slots:
 	void loadMesh(const QString& file);

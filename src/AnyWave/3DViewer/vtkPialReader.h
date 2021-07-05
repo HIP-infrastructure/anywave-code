@@ -10,7 +10,12 @@ public:
 	void PrintSelf(ostream& os, vtkIndent indent) override;
 
 	static vtkPialReader* New();
-	void SetFileName(const char* name) { FileName = name; }
+	void SetFileName(const char* name)
+	{ 
+		FileName = name; 
+		if (m_file.isOpen()) 
+			m_file.close(); 
+	}
 protected:
 	vtkPialReader();
 	~vtkPialReader();

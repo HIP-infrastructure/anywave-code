@@ -41,7 +41,8 @@ AwSEEGViewer* AwSEEGViewer::start()
 				viewer = AwSEEGViewer::instance();
 				viewer->loadElectrodes(elec);
 				viewer->addMeshes(meshes);
-				viewer->m_widget->show();
+				viewer->widget()->setBIDSDriven(true);
+				viewer->show();
 			}
 		}
 	}
@@ -50,7 +51,7 @@ AwSEEGViewer* AwSEEGViewer::start()
 
 void AwSEEGViewer::quit()
 {
-	if (m_instance) {
+	if (m_instance != nullptr) {
 		delete m_instance;
 		m_instance = nullptr;
 	}
@@ -75,6 +76,12 @@ AwSEEGViewer::~AwSEEGViewer()
 {
 	clean();
 	delete m_widget;
+}
+
+void AwSEEGViewer::show()
+{
+	m_widget->show();
+	m_widget->update3DScene();
 }
 
 void AwSEEGViewer::setNewFilters(const AwFilterSettings& settings)
@@ -137,7 +144,7 @@ void AwSEEGViewer::stopConnectivityMode()
 
 void AwSEEGViewer::stopMappingMode()
 {
-	m_widget->reset();
+	emit mappingStopped();
 }
 
 
@@ -146,23 +153,9 @@ void AwSEEGViewer::stopMappingMode()
 
 void AwSEEGViewer::handleWidgetClosed()
 {
-	//if (m_mappingIsActive) {
-	//	m_mappingIsActive = false;
-	//	emit mappingStopped();
-	//}
 	if (m_mode == AwSEEGViewer::Mapping)
 		emit mappingStopped();
-
-	AwSEEGViewer::quit();
 }
-
-//void AwSEEGViewer::setMappingMode(bool active)
-//{
-//	m_mappingIsActive = active;
-//	if (!active) {
-//		m_widget->reset();
-//	}
-//}
 
 void AwSEEGViewer::setMappingMode()
 {
@@ -184,7 +177,7 @@ void AwSEEGViewer::loadMesh(const QString& file)
 
 void AwSEEGViewer::addMeshes(const QStringList& meshes)
 {
-	m_widget->addMeshes(meshes);
+	m_widget->setMeshes(meshes);
 }
 
 void AwSEEGViewer::loadElectrodes(const QString& file)
@@ -198,7 +191,7 @@ void AwSEEGViewer::setSEEGChannels(const AwChannelList& channels)
 	// clean up and auto. duplicates channels
 	clean();
 	m_seegChannels = AwChannel::duplicateChannels(channels);
-	emit newDataConnection(this);
+//	emit newDataConnection(this);
 }
 
 void AwSEEGViewer::updateMappingAt(float latency)
