@@ -78,6 +78,7 @@
     <ClCompile Include="ICA\AwICASignalItem.cpp" />
     <ClCompile Include="ICA\AwMappingButton.cpp" />
     <ClCompile Include="ICA\AwPanelItem.cpp" />
+    <ClCompile Include="ICA\AwSEEGMap.cpp" />
     <ClCompile Include="IO\ADES\ADESIO.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp" />
@@ -248,6 +249,7 @@
     <QtMoc Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
     </QtMoc>
     <QtMoc Include="AwComponents.h" />
+    <QtMoc Include="ICA\AwSEEGMap.h" />
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
     <QtMoc Include="IO\MEMIO\MEMIO.h">
     </QtMoc>

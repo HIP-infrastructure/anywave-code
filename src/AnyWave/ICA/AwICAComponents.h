@@ -26,11 +26,10 @@
 
 
 #include <aw_armadillo.h>
-//using namespace arma;
-
 
 class AwPanelItem;
 class AwICAPanel;
+class AwSEEGMap;
 class AwICAComponents : public QObject
 {
 	Q_OBJECT
@@ -55,6 +54,9 @@ public:
 	inline AwICAPanel *getPanelWidget() { return m_panel; }
 	inline int type() { return m_type; }
 	inline QStringList& labels() { return m_labels; }
+	inline const fmat& mixing() { return m_mixing; }
+	inline const fmat& unmixing() { return m_unmixing; }
+	void showSEEGMap();
 public slots:
 	void showPanel();
 	void setNewFilters(const AwFilterSettings& settings);
@@ -84,6 +86,7 @@ private:
 	// Thread safe specific
 	QMutex m_mutex;
 	AwICAPanel *m_panel;
+	AwSEEGMap* m_seegMap;
 };
 
 #endif // AWICACOMPONENTS_H

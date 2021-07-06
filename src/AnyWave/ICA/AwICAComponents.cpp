@@ -27,13 +27,15 @@
 #include <widget/AwWait.h>
 #include "AwPanelItem.h"
 #include "Data/AwDataManager.h"
+#include "AwSEEGMap.h"
 
 
 AwICAComponents::AwICAComponents(int type, QObject *parent)
 	: QObject(parent)
 {
 	m_type = type;
-	m_panel = NULL;
+	m_panel = nullptr;
+	m_seegMap = nullptr;
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
@@ -48,7 +50,12 @@ AwICAComponents::~AwICAComponents()
 	}
 	while (!m_sources.isEmpty())
 		delete m_sources.takeFirst();
+	if (m_seegMap) {
+		m_seegMap->close();
+		delete m_seegMap;
+	}
 }
+
 
 void AwICAComponents::setNewFilters(const AwFilterSettings& settings)
 {
@@ -252,7 +259,7 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 	if (m_panel) {
 		m_panel->close();
 		delete m_panel;
-		m_panel = NULL;
+		m_panel = nullptr;
 	}
 
 	int row, col;
@@ -357,12 +364,18 @@ int AwICAComponents::loadComponents(AwHDF5& file)
 QList<AwPanelItem *> AwICAComponents::createPanelItems()
 {
 	QList<AwPanelItem *> items;
-	foreach (AwICAChannel *chan, m_icaChannels) {
-		AwPanelItem *item = new AwPanelItem(chan);
-		items << item;
-	}
+	for (AwICAChannel *chan : m_icaChannels) 
+		items << new AwPanelItem(chan);
 	return items;
 }
+
+void AwICAComponents::showSEEGMap()
+{
+	if (m_seegMap == nullptr)
+		m_seegMap = new AwSEEGMap(this);
+	m_seegMap->show();
+}
+
 
 void AwICAComponents::showPanel()
 {

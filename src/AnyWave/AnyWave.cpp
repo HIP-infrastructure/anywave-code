@@ -43,7 +43,6 @@
 #include "Debug/AwDebugLog.h"
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
-#include "ICA/AwICAPanel.h"
 #include "Source/AwSourceManager.h"
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
@@ -546,14 +545,37 @@ bool AnyWave::checkForRunningProcesses()
 // Components Maps
 void AnyWave::reviewComponentsMaps()
 {
-	if (AwICAManager::instance()->getComponents(AwChannel::MEG) != NULL) 
-		AwICAManager::instance()->getComponents(AwChannel::MEG)->showPanel();
+	AwICAComponents* comp = nullptr;
+	auto icaMan = AwICAManager::instance();
 
-	if (AwICAManager::instance()->getComponents(AwChannel::EEG) != NULL) 
-		AwICAManager::instance()->getComponents(AwChannel::EEG)->showPanel();
-	
-	if (AwICAManager::instance()->getComponents(AwChannel::EMG) != NULL) 
-		AwICAManager::instance()->getComponents(AwChannel::EMG)->showPanel();
+	comp = icaMan->getComponents(AwChannel::MEG);
+	if (comp)
+		comp->showPanel();
+	comp = icaMan->getComponents(AwChannel::EEG);
+	if (comp)
+		comp->showPanel();
+
+	comp = icaMan->getComponents(AwChannel::EMG);
+	if (comp)
+		comp->showPanel();
+	comp = icaMan->getComponents(AwChannel::SEEG);
+	if (comp) 
+		comp->showSEEGMap();
+
+
+	//if (AwICAManager::instance()->getComponents(AwChannel::MEG) != NULL) 
+	//	AwICAManager::instance()->getComponents(AwChannel::MEG)->showPanel();
+
+	//if (AwICAManager::instance()->getComponents(AwChannel::EEG) != NULL) 
+	//	AwICAManager::instance()->getComponents(AwChannel::EEG)->showPanel();
+	//
+	//if (AwICAManager::instance()->getComponents(AwChannel::EMG) != NULL) 
+	//	AwICAManager::instance()->getComponents(AwChannel::EMG)->showPanel();
+
+	//if (AwICAManager::instance()->getComponents(AwChannel::SEEG) != NULL)
+		//AwICAManager::instance()->getComponents(AwChannel::SEEG)->showPanel();
+
+
 }
 
 void AnyWave::doEpoch()
