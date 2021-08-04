@@ -115,3 +115,4 @@ void AwSEEGMap::mouseMove(QMouseEvent* evt)
 		setToolTip(QString("Channel %1 - Value: %2").arg(m_components->labels().at(yy)).arg(z));
 	}
 }
+

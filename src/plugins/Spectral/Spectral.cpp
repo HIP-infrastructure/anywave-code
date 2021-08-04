@@ -18,11 +18,13 @@ using namespace sp;
 #include <matlab/AwMATLABStruct.h>
 #include <QtConcurrent>
 
+
 SpectralPlugin::SpectralPlugin()
 {
 	name = QString("Spectral");
+	version = "1.0.1";
 	category = "Process:Signal:Power Spectral Density";
-	description = QString(tr("Compute and show spectral informations."));
+	description = QString(tr("Compute and show Power Spectral Density."));
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine | Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	m_helpUrl = "Power Spectral Density::Signal Processing::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_spectral";
@@ -352,7 +354,7 @@ void Spectral::saveResults()
 		AwMATLABStruct s("psd", fields, 3, 2, dim);
 		int count = 0;
 		for (auto result : m_results.values()) {
-			s.insertString("channel", result->channel()->name(), count);
+			s.insertString("channel", result->channel()->fullName(), count);
 			s.insertMatrix("fft_iterations", result->results(), count);
 			vec psd = 10 * log10(result->pxx());
 			s.insertVector("psd", psd, count);

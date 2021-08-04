@@ -24,6 +24,8 @@
 #include <filter/AwFilterSettings.h>
 #include "AwUpdater.h"
 
+
+
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
 // Mapping
@@ -39,6 +41,7 @@ class AwMeshManager;
 class AwLayoutManager;
 class AwSEEGViewer;
 class AwVideoPlayer;
+class AwUpdateManager;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AnyWave
@@ -84,6 +87,7 @@ private:
 	// updater 
 	AwUpdater m_updater;
 	AwDownloader m_downloader;
+	AwUpdateManager* m_updateManager;
 	// VIDEO Widget
 	AwVideoPlayer *m_player;
 	// flags

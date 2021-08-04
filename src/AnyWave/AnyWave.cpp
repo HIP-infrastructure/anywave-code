@@ -60,6 +60,7 @@
 #include "Data/AwDataManager.h"
 #include "Plugin/AwMATPyCreator.h"
 #include "3DViewer/AwSEEGViewer.h"
+#include "Updater/AwUpdateManager.h"
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -263,6 +264,8 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 		menuView_->addAction(v->toggleViewAction());
 	retranslateUi(this);	// force translation to be applied.
 	m_updater.checkForUpdate();
+
+	m_updateManager = new AwUpdateManager(this);
 
 	m_lastDirOpen = "/";
 	readSettings();

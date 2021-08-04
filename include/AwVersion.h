@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
-constexpr int AW_MAJOR_VERSION = 2107;
-constexpr int AW_MINOR_VERSION = 6;
+constexpr int AW_MAJOR_VERSION = 2;
+constexpr int AW_MINOR_VERSION = 0;
+constexpr int AW_FIX_VERSION = 0;
 

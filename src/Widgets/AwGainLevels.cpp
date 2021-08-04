@@ -113,10 +113,13 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 		vec a = regspace(1, 1, 9);
 		vec b = regspace(10, 100, 10000);
 		values = join_cols(a, b);
-		unit = QString::fromUtf8("??/cm");
+		unit = QString::fromUtf8("undefined/cm");
 		value = 310;
+		gl->setValues(values);
+		gl->setValue(value);
+		gl->setUnit(unit);
 	}
-		break;
+	break;
 	case AwChannel::MEG:
 	case AwChannel::GRAD:
 	case AwChannel::Reference:

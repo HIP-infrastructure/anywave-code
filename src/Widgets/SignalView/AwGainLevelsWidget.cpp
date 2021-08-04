@@ -22,16 +22,6 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-//class AwGainLineEdit : public QLineEdit
-//{
-//	Q_OBJECT
-//public:
-//	AwGainLineEdit(QWidget* parent = nullptr) : QLineEdit(parent) {}
-//
-//	void setValue(float v) { setText(QString("%1").arg(v)); }
-//};
-
-
 AwGainLevelsWidget::AwGainLevelsWidget(AwGainLevels *gl, QWidget* parent) : QWidget(parent)
 {
 	m_gainLevels = gl;

@@ -113,6 +113,9 @@
     <Filter Include="3DViewer">
       <UniqueIdentifier>{88896aab-51fb-4d2c-a9ce-2a449abd5915}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Updater">
+      <UniqueIdentifier>{28d04abc-c7d2-41ce-97aa-5026f47a626f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
@@ -609,6 +612,9 @@
     </ClCompile>
     <ClCompile Include="ICA\AwSEEGMap.cpp">
       <Filter>ICA</Filter>
+    </ClCompile>
+    <ClCompile Include="Updater\AwUpdateManager.cpp">
+      <Filter>Updater</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1112,6 +1118,9 @@
     </QtMoc>
     <QtMoc Include="ICA\AwSEEGMap.h">
       <Filter>ICA</Filter>
+    </QtMoc>
+    <QtMoc Include="Updater\AwUpdateManager.h">
+      <Filter>Updater</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

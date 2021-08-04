@@ -72,12 +72,16 @@
     <PlatformToolset>v142</PlatformToolset>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseIntelTBB>true</UseIntelTBB>
+    <UseInteloneTBB>true</UseInteloneTBB>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseIntelTBB>true</UseIntelTBB>
+    <UseInteloneTBB>true</UseInteloneTBB>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -177,7 +181,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLibd.lib;AwGraphicsLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwMathLibd.lib;AwWidgetsLibd.lib;AwMATLABlibd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qwtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLibd.lib;AwGraphicsLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwMathLibd.lib;AwWidgetsLibd.lib;AwMATLABlibd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;qwtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
@@ -233,7 +237,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLib.lib;AwGraphicsLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwMathLib.lib;AwWidgetsLib.lib;AwMATLABLib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb.lib;qwt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLib.lib;AwGraphicsLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwMathLib.lib;AwWidgetsLib.lib;AwMATLABLib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;qwt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
