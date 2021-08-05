@@ -616,6 +616,12 @@
     <ClCompile Include="Updater\AwUpdateManager.cpp">
       <Filter>Updater</Filter>
     </ClCompile>
+    <ClCompile Include="Updater\AwUpdaterGui.cpp">
+      <Filter>Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="Updater\AwDownloadGui.cpp">
+      <Filter>Updater</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1122,6 +1128,12 @@
     <QtMoc Include="Updater\AwUpdateManager.h">
       <Filter>Updater</Filter>
     </QtMoc>
+    <QtMoc Include="Updater\AwUpdaterGui.h">
+      <Filter>Updater</Filter>
+    </QtMoc>
+    <QtMoc Include="Updater\AwDownloadGui.h">
+      <Filter>Updater</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IO\HDF5\structs.h">
@@ -1315,6 +1327,12 @@
     </QtUic>
     <QtUic Include="3DViewer\AwSEEGWidget.ui">
       <Filter>3DViewer</Filter>
+    </QtUic>
+    <QtUic Include="Updater\AwUpdaterGui.ui">
+      <Filter>Updater</Filter>
+    </QtUic>
+    <QtUic Include="Updater\AwDownloadGui.ui">
+      <Filter>Updater</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

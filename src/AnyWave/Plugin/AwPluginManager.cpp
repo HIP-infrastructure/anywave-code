@@ -167,6 +167,57 @@ QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
 	return res;
 }
 
+int AwPluginManager::unloadPlugin(const QString& name)
+{
+	// Parse plugin to plugin's factory
+	for (AwFileIOPlugin* p : m_readers) {
+		if (p->name == name) {
+			m_readerFactory.removePlugin(name);
+			m_readers.removeAll(p);
+			m_pluginList.removeAll(p);
+			delete p;
+			return 0;
+		}
+	}
+	for (AwFileIOPlugin* p : m_writers) {
+		if (p->name == name) {
+			m_writerFactory.removePlugin(name);
+			m_writers.removeAll(p);
+			m_pluginList.removeAll(p);
+			delete p;
+			return 0;
+		}
+	}
+	for (AwProcessPlugin* p : m_processes) {
+		if (p->name == name) {
+			m_processFactory.removePlugin(name);
+			m_processes.removeAll(p);
+			m_pluginList.removeAll(p);
+			delete p;
+			return 0;
+		}
+	}
+	for (AwDisplayPlugin* p : m_displays) {
+		if (p->name == name) {
+			m_displayFactory.removePlugin(name);
+			m_displays.removeAll(p);
+			m_pluginList.removeAll(p);
+			delete p;
+			return 0;
+		}
+	}
+	for (AwFilterPlugin* p : m_filters) {
+		if (p->name == name) {
+			m_filterFactory.removePlugin(name);
+			m_filters.removeAll(p);
+			m_pluginList.removeAll(p);
+			delete p;
+			return 0;
+		}
+	}
+	return -1;
+}
+
 
 AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 {

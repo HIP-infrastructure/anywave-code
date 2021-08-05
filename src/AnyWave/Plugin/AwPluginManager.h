@@ -112,6 +112,8 @@ public:
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
 
+	int unloadPlugin(const QString& name);
+
 	// plugins related methods
 	AwDisplayPlugin *getDisplayPluginByName(const QString& name) { return m_displayFactory.getPluginByName(name); }
 	AwFileIOPlugin *getReaderPluginByName(const QString& name) { return m_readerFactory.getPluginByName(name); }

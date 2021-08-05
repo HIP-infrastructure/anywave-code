@@ -5,6 +5,10 @@
 #include "Plugin/AwPluginManager.h"
 #include <AwProcessInterface.h>
 #include <widget/AwMessageBox.h>
+#include "AwUpdaterGui.h"
+#include "AwDownloadGui.h"
+#include <QStandardPaths>
+#include <QProcess>
 
 Component::Component()
 {
@@ -19,14 +23,15 @@ Component::Component(const Component& copy)
 	updateAvailable = copy.updateAvailable;
 	type = copy.type;
 	url = copy.url;
+	installedVersion = copy.installedVersion;
+	requirement = copy.requirement;
 }
 
 AwUpdateManager::AwUpdateManager(QObject *parent) : QObject(parent)
 {
-	connect(&m_networkManager, &QNetworkAccessManager::finished, this,
-		&AwUpdateManager::fileDownloaded);
 	// check for updates only if the option is enabled in the global settings
 	auto aws = AwSettings::getInstance();
+
 	if (aws->value(aws::check_updates).toBool())
 		checkForUpdates();
 }
@@ -34,19 +39,21 @@ AwUpdateManager::AwUpdateManager(QObject *parent) : QObject(parent)
 AwUpdateManager::~AwUpdateManager()
 {
 	clearComponents();
+	//if (m_downloadGui)
+	//	delete m_downloadGui;
 }
 
 void AwUpdateManager::clearComponents()
 {
 	while (!m_components.isEmpty())
 		delete m_components.takeLast();
-	while (!m_installedComponents.isEmpty())
-		delete m_installedComponents.takeLast();
 }
 
 void AwUpdateManager::checkForUpdates()
 {
 	clearComponents();
+	connect(&m_networkManager, &QNetworkAccessManager::finished, this,
+		&AwUpdateManager::fileDownloaded);
 	// get json file
 	QString updateUrl = "https://meg.univ-amu.fr/AnyWave/updates/updates.json";
 	QUrl url(updateUrl);
@@ -65,6 +72,11 @@ void AwUpdateManager::fileDownloaded(QNetworkReply* reply)
 	m_data = reply->readAll();
 	reply->deleteLater();
 	emit downloaded();
+}
+
+void AwUpdateManager::error(QNetworkReply::NetworkError error)
+{
+
 }
 
 void AwUpdateManager::loadJSON()
@@ -96,43 +108,62 @@ void AwUpdateManager::loadJSON()
 			comp->version = map.value("version").toString();
 			comp->type = map.value("type").toString() == "core" ? AwUpdateManager::Core : AwUpdateManager::Plugin;
 			comp->url = QUrl(map.value("url").toString());
+			if (map.contains("requirement")) 
+				comp->requirement = map.value("requirement").toString();
+			comp->fileName = map.value("filename").toString();
+
 			m_components << comp;
 		}
 	}
 	if (checkForComponentsUpdates()) {
 		int ans = AwMessageBox::question(nullptr, "AnyWave Updates", "Do you want to see available updates?", QMessageBox::Yes | QMessageBox::No);
 		if (ans == QMessageBox::Yes) {
-
+			AwUpdaterGui gui(this);
+			if (gui.exec() == QDialog::Accepted) {
+				m_selectedComponents = gui.selectedComponents();
+				m_currentIndex = 0;
+				disconnect(&m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
+				connect(&m_networkManager, &QNetworkAccessManager::finished, this,
+					&AwUpdateManager::componentDownloaded);
+				m_downloadGui = std::make_unique<AwDownloadGui>();
+				m_downloadGui.get()->show();
+				installUpdates();
+			}
 		}
+	}
+	else {
+		AwMessageBox::information(nullptr, "AnyWave Updates", "There are no updates available.");
 	}
 }
 
 bool AwUpdateManager::checkForComponentsUpdates()
 {
 	bool updates = false;
+	QString anywaveVersion = QString("%1.%2.%3").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION).arg(AW_FIX_VERSION);
 	for (auto c : m_components) {
 		if (c->name == "AnyWave") {
-			QString version = QString("%1.%2.%3").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION).arg(AW_FIX_VERSION);
-			Component* installed = new Component(*c);
-			installed->version = version;
-			m_installedComponents << installed;
-			if (AwUpdateManager::compareVersion(c->version, version) > 0) 
+			c->installedVersion = anywaveVersion;
+			if (AwUpdateManager::compareVersion(c->version, anywaveVersion) > 0) {
 				updates = true;
+				c->updateAvailable = true;
+			}
 		}
 		else {
 			// get the plugin matching the name
 			auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(c->name);
 			if (plugin) {
-				Component* installed = new Component(*c);
-				installed->version = plugin->version;
-				m_installedComponents << installed;
-				if (AwUpdateManager::compareVersion(c->version, plugin->version) > 0) {
-					updates = true;
+				// check requirement for plugin
+				if (AwUpdateManager::compareVersion(c->requirement, anywaveVersion) <= 0) {  // anywave version is ok for the plugin
+					c->installedVersion = plugin->version;
+					if (AwUpdateManager::compareVersion(c->version, plugin->version) > 0) {
+						updates = true;
+						c->updateAvailable = true;
+					}
 				}
 			}
 		}
 	}
-	return false;
+	return updates;
 }
 
 int AwUpdateManager::compareVersion(const QString& v1, const QString& v2)
@@ -151,4 +182,57 @@ int AwUpdateManager::compareVersion(const QString& v1, const QString& v2)
 			return -1;
 	}
 	return 0;
+}
+
+
+void AwUpdateManager::installUpdates()
+{
+	if (m_currentIndex == m_selectedComponents.size()) {
+		m_downloadGui.get()->close();
+		return;
+	}
+	auto c = m_selectedComponents.at(m_currentIndex);
+	QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+	Q_ASSERT(!downloadsFolder.isEmpty());
+	QString filePath = QString("%1/%2").arg(downloadsFolder).arg(c->fileName);
+	m_file.setFileName(filePath);
+	if (!m_file.open(QIODevice::WriteOnly)) {
+		AwMessageBox::critical(nullptr, "Error", QString("Fatal error: could not create file %1").arg(filePath));
+		return;
+	}
+
+	m_downloadGui->setText(QString("Downloading %1...").arg(c->name));
+	QNetworkRequest request(c->url);
+	m_reply = m_networkManager.get(request);
+	connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
+	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), m_downloadGui.get(), SLOT(updateDownloadProgress(qint64, qint64)));
+	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(updateDownloadProgress(qint64, qint64)));
+
+}
+
+
+void AwUpdateManager::componentDownloaded(QNetworkReply *reply)
+{
+	reply->deleteLater();
+	m_file.close();
+	// install the update
+	auto c = m_selectedComponents.at(m_currentIndex);
+	if (c->name == "AnyWave") {
+		QProcess::startDetached(m_file.fileName());
+		exit(0);
+	}
+
+	// plugin
+	auto pm = AwPluginManager::getInstance();
+	if (pm->unloadPlugin(c->name) == 0) {
+
+	}
+
+	m_currentIndex++;
+	installUpdates();
+}
+
+void AwUpdateManager::updateDownloadProgress(qint64, qint64)
+{
+	m_file.write(m_reply->readAll());
 }

@@ -2,7 +2,8 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-
+#include <QFile>
+class AwDownloadGui;
 
 class Component
 {
@@ -12,9 +13,11 @@ public:
 
 	QString name;
 	int type;
-	QString version;
+	QString version, installedVersion;
 	QUrl url;
 	bool updateAvailable;
+	QString requirement;
+	QString fileName;
 };
 
 class AwUpdateManager : public QObject
@@ -27,18 +30,28 @@ public:
 
 	void checkForUpdates();
 	static int compareVersion(const QString& v1, const QString& v2);
+	inline QList<Component*>& components() { return m_components; }
 signals:
 	void updatesAvailable();
 	void downloaded();
 private slots:
 	void loadJSON();
 	void fileDownloaded(QNetworkReply*);
+	void error(QNetworkReply::NetworkError error);
+	void componentDownloaded(QNetworkReply*);
+	void updateDownloadProgress(qint64, qint64);
 private:
 	void download(const QUrl& url);
 	void clearComponents();
 	bool checkForComponentsUpdates();
+	void installUpdates();
 
+	int m_currentIndex;
 	QNetworkAccessManager m_networkManager;
+	QNetworkReply* m_reply;
 	QByteArray m_data;
-	QList<Component*> m_components, m_installedComponents;
+	QList<Component*> m_components, m_selectedComponents;
+	std::unique_ptr<AwDownloadGui> m_downloadGui;
+	//AwDownloadGui *m_downloadGui;
+	QFile m_file;
 };
