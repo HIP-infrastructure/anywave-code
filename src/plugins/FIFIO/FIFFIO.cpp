@@ -84,7 +84,7 @@ void fiff_coord_trans(float r[3],       /**< Vector to be transformed (in situ) 
 FIFFIOPlugin::FIFFIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("FIFF Format");
-	description = QString(tr("read/write .fif files"));
+	description = QString(tr("read/write .fif file"));
 	manufacturer = QString::fromLatin1("Elekta");
 	version = QString::fromLatin1("1.0");
 	fileExtensions << QString::fromLatin1("*.fif");

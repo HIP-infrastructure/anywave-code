@@ -32,7 +32,6 @@
     <ClCompile Include="AwMapping.cpp" />
     <ClCompile Include="AwMATLAB.cpp" />
     <ClCompile Include="AwOpenFileDialog.cpp" />
-    <ClCompile Include="AwUpdater.cpp" />
     <ClCompile Include="Batch\AwAddEditBatchDialog.cpp" />
     <ClCompile Include="Batch\AwBatchDialog.cpp" />
     <ClCompile Include="Batch\AwBatchFileInputWidget.cpp" />
@@ -203,8 +202,6 @@
     <QtMoc Include="Widgets\AwVideoSettingsDial.h">
     </QtMoc>
     <QtMoc Include="Widgets\AwSelectTriggerChannelDialog.h">
-    </QtMoc>
-    <QtMoc Include="AwUpdater.h">
     </QtMoc>
     <ClInclude Include="..\..\include\AwKeys.h" />
     <ClInclude Include="..\..\include\AwVersion.h" />

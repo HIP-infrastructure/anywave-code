@@ -34,7 +34,7 @@ CompumedicsReaderPlugin::CompumedicsReaderPlugin() : AwFileIOPlugin()
 	name = QString("Profusion Reader");
 	description = QString("Read .eeg Profusion recordings");
 	manufacturer = QString("Compumedics");
-	version = QString("1.0");
+	version = QString("1.0.0");
 	fileExtensions << QString("*.eeg");
 	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;
 }

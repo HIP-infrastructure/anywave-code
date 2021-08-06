@@ -167,55 +167,129 @@ QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
 	return res;
 }
 
-int AwPluginManager::unloadPlugin(const QString& name)
+QObject *AwPluginManager::loadPlugin(const QString& path)
 {
-	// Parse plugin to plugin's factory
+	QPluginLoader *loader = new QPluginLoader(path, this);
+	loader->setLoadHints(0);
+	QObject* plugin = loader->instance();
+
+	if (plugin == nullptr) {
+		emit log(QString("Error loading %1: ").arg(path).arg(loader->errorString()));
+		delete loader;
+		return nullptr;
+	}
+	if (!checkPluginVersion(plugin)) {
+		emit log(QString("Outdated version for plugin %1. Skipped.").arg(path));
+		delete loader;
+		return nullptr;
+	}
+	if (plugin) {
+		// get plugin type
+		AwFileIOPlugin* fio = qobject_cast<AwFileIOPlugin*>(plugin);
+		if (fio) { // FileIO specific (plugin can be reader and writer at the same time
+			if (fio->canRead()) {
+				fio = qobject_cast<AwFileIOPlugin*>(plugin);
+				loadFileIOReaderPlugin(fio);
+			}
+			if (fio->canWrite()) {
+				fio = qobject_cast<AwFileIOPlugin*>(plugin);
+				loadFileIOWriterPlugin(fio);
+			}
+			m_pluginNames.insert(fio->name, plugin);
+			m_loaders.insert(plugin, loader);
+			return plugin;
+		}
+		AwProcessPlugin* iprocess = qobject_cast<AwProcessPlugin*>(plugin);
+		if (iprocess) {
+			iprocess->name = iprocess->name;
+			loadProcessPlugin(iprocess);
+			m_pluginNames.insert(iprocess->name, plugin);
+			m_loaders.insert(plugin, loader);
+			return plugin;
+		}
+		AwDisplayPlugin* idisplay = qobject_cast<AwDisplayPlugin*>(plugin);
+		if (idisplay) {
+			loadDisplayPlugin(idisplay);
+			m_pluginNames.insert(idisplay->name, plugin);
+			m_loaders.insert(plugin, loader);
+			return plugin;
+		}
+		auto ifilter = qobject_cast<AwFilterPlugin*>(plugin);
+		if (ifilter) {
+			loadFilterPlugin(ifilter);
+			m_pluginNames.insert(ifilter->name, plugin);
+			m_loaders.insert(plugin, loader);
+			return plugin;
+		}
+	}
+	return nullptr;
+}
+
+int AwPluginManager::unloadPlugin(const QString& filePath, const QString& name)
+{
+	QObject* plugin = nullptr;
+
 	for (AwFileIOPlugin* p : m_readers) {
 		if (p->name == name) {
 			m_readerFactory.removePlugin(name);
 			m_readers.removeAll(p);
 			m_pluginList.removeAll(p);
-			delete p;
-			return 0;
+			plugin = p;
+			break;
 		}
 	}
-	for (AwFileIOPlugin* p : m_writers) {
-		if (p->name == name) {
-			m_writerFactory.removePlugin(name);
-			m_writers.removeAll(p);
-			m_pluginList.removeAll(p);
-			delete p;
-			return 0;
+	if (!plugin) {
+		for (AwFileIOPlugin* p : m_writers) {
+			if (p->name == name) {
+				m_writerFactory.removePlugin(name);
+				m_writers.removeAll(p);
+				m_pluginList.removeAll(p);
+				plugin = p;
+				break;
+			}
 		}
 	}
-	for (AwProcessPlugin* p : m_processes) {
-		if (p->name == name) {
-			m_processFactory.removePlugin(name);
-			m_processes.removeAll(p);
-			m_pluginList.removeAll(p);
-			delete p;
-			return 0;
+	if (!plugin) {
+		for (AwProcessPlugin* p : m_processes) {
+			if (p->name == name) {
+				m_processFactory.removePlugin(name);
+				m_processes.removeAll(p);
+				m_pluginList.removeAll(p);
+				plugin = p;
+				break;
+			}
 		}
 	}
-	for (AwDisplayPlugin* p : m_displays) {
-		if (p->name == name) {
-			m_displayFactory.removePlugin(name);
-			m_displays.removeAll(p);
-			m_pluginList.removeAll(p);
-			delete p;
-			return 0;
+	if (plugin) {
+		for (AwDisplayPlugin* p : m_displays) {
+			if (p->name == name) {
+				m_displayFactory.removePlugin(name);
+				m_displays.removeAll(p);
+				m_pluginList.removeAll(p);
+				plugin = p;
+				break;
+			}
 		}
 	}
-	for (AwFilterPlugin* p : m_filters) {
-		if (p->name == name) {
-			m_filterFactory.removePlugin(name);
-			m_filters.removeAll(p);
-			m_pluginList.removeAll(p);
-			delete p;
-			return 0;
+	if (plugin) {
+		for (AwFilterPlugin* p : m_filters) {
+			if (p->name == name) {
+				m_filterFactory.removePlugin(name);
+				m_filters.removeAll(p);
+				m_pluginList.removeAll(p);
+				plugin = p;
+				break;
+			}
 		}
 	}
-	return -1;
+	if (plugin) {
+		auto loader = m_loaders.value(plugin);
+		m_loaders.remove(plugin);
+		loader->unload();
+		delete loader;
+		return 0;
+	}
+	return -1;  // the plugin is not loaded (error while loading it at startup or simply non existent plugin)
 }
 
 
@@ -400,115 +474,117 @@ void AwPluginManager::loadUserPlugins()
 	// plugin dir exists, so check for plugins 
 	QDir dir(pluginDir);
 	// Browsing plugins
-	foreach (QString FileName, dir.entryList(QDir::Files)) {
-		QPluginLoader loader(dir.absoluteFilePath(FileName));
-		QObject *plugin = loader.instance();
-		if (plugin == NULL)	{
-			emit log("Failed to load " +  dir.absoluteFilePath(FileName));
-			emit log(loader.errorString());
-		}
-		if (!checkPluginVersion(plugin)) {
-			emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
-			continue;
-		}
-		if (plugin) {
-			AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
-			if (fio == NULL)
-				continue;
-			if (fio->canRead()) {
-				AwFileIOPlugin *p = m_readerFactory.getPluginByName(fio->name);
-				if (p) {
-					m_readers.removeAll(p);
-					m_pluginList.removeAll(p);
-					m_readerFactory.removePlugin(fio->name);
-					delete p;
-					emit log("Reader plugin " + fio->name + " already exists.Previous version unloaded.");
-				}
-				m_pluginList += plugin;
-				// check if reader plugin has montages
-				if (!fio->montages().isEmpty() &&  !montageDir.isEmpty()) {
-					// create montage by copying montages provided to the user montages' directory
-					QStringList montages = fio->montages();
-					foreach(QString montage, montages) {
-						// remove the ":/" from the original montage filename.
-						QString source_path = montage;
-						//QString dest_path = AwSettings::getInstance()->montageDirectory() + montage.remove(":/");
-						QString dest_path = montageDir + montage.remove(":/");
-						// if file already exists, skip the copye
-						if (QFile::exists(dest_path))
-							continue;
+	for (const QString& FileName : dir.entryList(QDir::Files)) {
+		loadPlugin(dir.absoluteFilePath(FileName));
 
-						// copying montage file which is embedded in reader to default montage directory of AnyWave
-						QFile source(source_path);
-						if (source.open(QIODevice::ReadOnly | QIODevice::Text)) {
-							QTextStream stream_source(&source);
-							// remove the ":/" from the original montage filename.
-							QFile dest(dest_path);
-							if (dest.open(QIODevice::WriteOnly | QIODevice::Text)) {
-								QTextStream stream_dest(&dest);
-								while (!stream_source.atEnd())
-									stream_dest << stream_source.readLine();
-								dest.close();
+		//QPluginLoader loader(dir.absoluteFilePath(FileName));
+		//QObject *plugin = loader.instance();
+		//if (plugin == nullptr)	{
+		//	emit log("Failed to load " +  dir.absoluteFilePath(FileName));
+		//	emit log(loader.errorString());
+		//}
+		//if (!checkPluginVersion(plugin)) {
+		//	emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
+		//	continue;
+		//}
+		//if (plugin) {
+		//	AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
+		//	if (fio == NULL)
+		//		continue;
+		//	if (fio->canRead()) {
+		//		AwFileIOPlugin *p = m_readerFactory.getPluginByName(fio->name);
+		//		if (p) {
+		//			m_readers.removeAll(p);
+		//			m_pluginList.removeAll(p);
+		//			m_readerFactory.removePlugin(fio->name);
+		//			delete p;
+		//			emit log("Reader plugin " + fio->name + " already exists.Previous version unloaded.");
+		//		}
+		//		m_pluginList += plugin;
+		//		// check if reader plugin has montages
+		//		if (!fio->montages().isEmpty() &&  !montageDir.isEmpty()) {
+		//			// create montage by copying montages provided to the user montages' directory
+		//			QStringList montages = fio->montages();
+		//			foreach(QString montage, montages) {
+		//				// remove the ":/" from the original montage filename.
+		//				QString source_path = montage;
+		//				//QString dest_path = AwSettings::getInstance()->montageDirectory() + montage.remove(":/");
+		//				QString dest_path = montageDir + montage.remove(":/");
+		//				// if file already exists, skip the copye
+		//				if (QFile::exists(dest_path))
+		//					continue;
 
-							}
-							source.close();
-						}
-					}
-				}
-				m_readerFactory.addPlugin(fio->name, fio);
-				m_readers += fio;
-				m_pluginList += plugin;	
-				continue;
-			}
-			
-			if (fio->canWrite()) {
-				AwFileIOPlugin *p = m_writerFactory.getPluginByName(fio->name);
-				if (p) {
-					m_writers.removeAll(p);
-					m_pluginList.removeAll(p);
-					m_writerFactory.removePlugin(fio->name);
-					delete p;
-					emit log("Writer plugin " + fio->name + " already exists.Previous version unloaded.");
-				}
-				m_writerFactory.addPlugin(fio->name, fio);
-				m_writers += fio;
-				m_pluginList += plugin;
-				continue;
-			}
+		//				// copying montage file which is embedded in reader to default montage directory of AnyWave
+		//				QFile source(source_path);
+		//				if (source.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		//					QTextStream stream_source(&source);
+		//					// remove the ":/" from the original montage filename.
+		//					QFile dest(dest_path);
+		//					if (dest.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		//						QTextStream stream_dest(&dest);
+		//						while (!stream_source.atEnd())
+		//							stream_dest << stream_source.readLine();
+		//						dest.close();
 
-			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
-			if (iprocess) {
-				loadProcessPlugin(iprocess);
-				continue;
-			}
-			AwDisplayPlugin *idisplay = qobject_cast<AwDisplayPlugin *>(plugin);
-			if (idisplay) {
-				AwDisplayPlugin *p = m_displayFactory.getPluginByName(idisplay->name);
-				if (p) {
-					m_displays.removeAll(p);
-					m_pluginList.removeAll(p);
-					m_displayFactory.removePlugin(idisplay->name);
-					delete p;
-					emit log("Display plugin " +  idisplay->name + " already exists.Previous version unloaded.");
-				}
-				m_displayFactory.addPlugin(idisplay->name, idisplay);
-				m_displays += idisplay;
-				m_pluginList += plugin;
-				continue;					
-			}
+		//					}
+		//					source.close();
+		//				}
+		//			}
+		//		}
+		//		m_readerFactory.addPlugin(fio->name, fio);
+		//		m_readers += fio;
+		//		m_pluginList += plugin;	
+		//		continue;
+		//	}
+		//	
+		//	if (fio->canWrite()) {
+		//		AwFileIOPlugin *p = m_writerFactory.getPluginByName(fio->name);
+		//		if (p) {
+		//			m_writers.removeAll(p);
+		//			m_pluginList.removeAll(p);
+		//			m_writerFactory.removePlugin(fio->name);
+		//			delete p;
+		//			emit log("Writer plugin " + fio->name + " already exists.Previous version unloaded.");
+		//		}
+		//		m_writerFactory.addPlugin(fio->name, fio);
+		//		m_writers += fio;
+		//		m_pluginList += plugin;
+		//		continue;
+		//	}
 
-			auto iFilter = qobject_cast<AwFilterPlugin *>(plugin);
-			if (iFilter) {
-				auto p = m_filterFactory.getPluginByName(iFilter->name);
-				if (p) {
-					m_filters.removeAll(p);
-					m_pluginList.removeAll(p);
-					m_filterFactory.removePlugin(iFilter->name);
-					delete p;
-					emit log("Filter plugin " + iFilter->name + " already exists.Previous version unloaded.");
-				}
-			}
-		}
+		//	AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
+		//	if (iprocess) {
+		//		loadProcessPlugin(iprocess);
+		//		continue;
+		//	}
+		//	AwDisplayPlugin *idisplay = qobject_cast<AwDisplayPlugin *>(plugin);
+		//	if (idisplay) {
+		//		AwDisplayPlugin *p = m_displayFactory.getPluginByName(idisplay->name);
+		//		if (p) {
+		//			m_displays.removeAll(p);
+		//			m_pluginList.removeAll(p);
+		//			m_displayFactory.removePlugin(idisplay->name);
+		//			delete p;
+		//			emit log("Display plugin " +  idisplay->name + " already exists.Previous version unloaded.");
+		//		}
+		//		m_displayFactory.addPlugin(idisplay->name, idisplay);
+		//		m_displays += idisplay;
+		//		m_pluginList += plugin;
+		//		continue;					
+		//	}
+
+		//	auto iFilter = qobject_cast<AwFilterPlugin *>(plugin);
+		//	if (iFilter) {
+		//		auto p = m_filterFactory.getPluginByName(iFilter->name);
+		//		if (p) {
+		//			m_filters.removeAll(p);
+		//			m_pluginList.removeAll(p);
+		//			m_filterFactory.removePlugin(iFilter->name);
+		//			delete p;
+		//			emit log("Filter plugin " + iFilter->name + " already exists.Previous version unloaded.");
+		//		}
+		//	}
+		//}
 	}
 }
 
@@ -527,12 +603,14 @@ void AwPluginManager::loadPlugins()
 	checkForScriptPlugins(pythonPluginDir);
 
 	// Ajout de plugins integres directement dans l'appli.
-	m_writers += new ADESIOPlugin;
-	m_readers += new ADESIOPlugin;
+	auto adesPlugin = new ADESIOPlugin;
+	m_writers += adesPlugin;
+	m_readers += adesPlugin;
+	
+	//m_writers += new AHDF5IOPlugin;
+	//m_readers += new AHDF5IOPlugin;
 
-	m_writers += new AHDF5IOPlugin;
-	m_readers += new AHDF5IOPlugin;
-	m_readers += new MEMIOPlugin;
+	//m_readers += new MEMIOPlugin;
 	m_writers += new MATLABIOPlugin;
 
 	// Ajout du plugin TriggerParser
@@ -573,50 +651,7 @@ void AwPluginManager::loadPlugins()
 
 	QDir dir(pluginDir);
 	for (const auto &FileName : dir.entryList(QDir::Files)) {
-		QPluginLoader loader(dir.absoluteFilePath(FileName));
-		QObject *plugin = loader.instance();
-		if (plugin == NULL) {
-			emit log("Failed to load " + dir.absoluteFilePath(FileName));
-			emit log(loader.errorString());
-			continue;
-		}
-		if (!checkPluginVersion(plugin)) {
-			emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
-			continue;
-		}
-		if (plugin) {
-			// get plugin type
-			AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
-			if (fio) { // FileIO specific (plugin can be reader and writer at the same time
-				if (fio->canRead()) {
-					// load another instance 
-					QPluginLoader readerLoader(dir.absoluteFilePath(FileName));
-					loadFileIOReaderPlugin(qobject_cast<AwFileIOPlugin *>(readerLoader.instance()));
-				}
-				if (fio->canWrite()) {
-					// load another instance 
-					QPluginLoader writerLoader(dir.absoluteFilePath(FileName));
-					loadFileIOWriterPlugin(qobject_cast<AwFileIOPlugin *>(writerLoader.instance()));
-				}
-				continue;
-			}
-			AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
-			if (iprocess) {
-				iprocess->name = iprocess->name;
-				loadProcessPlugin(iprocess);
-				continue;
-			}
-			AwDisplayPlugin *idisplay = qobject_cast<AwDisplayPlugin *>(plugin);
-			if (idisplay) {
-				loadDisplayPlugin(idisplay);
-				continue;
-			}
-			auto ifilter = qobject_cast<AwFilterPlugin *>(plugin);
-			if (ifilter) {
-				loadFilterPlugin(ifilter);
-				continue;
-			}
-		}
+		loadPlugin(dir.absoluteFilePath(FileName));
 	}
 }
 

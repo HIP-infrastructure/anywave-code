@@ -151,8 +151,8 @@ typedef struct {
 CTFReader::CTFReader() : AwFileIOPlugin()
 {
   name = QString("CTF Reader");
-  description = QString(tr("Read CTF .ds"));
-  version = QString("1.0");
+  description = QString(tr("Read CTF .ds bundle"));
+  version = QString("1.0.0");
   manufacturer = "CTF";
   fileExtensions << "*.ds";
   m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;

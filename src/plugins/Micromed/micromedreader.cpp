@@ -18,8 +18,8 @@
 MicromedReaderPlugin::MicromedReaderPlugin() : AwFileIOPlugin()
 {
 	name = QString("Micromed Reader");
-	description = QString(tr("read .trc"));
-	version = QString("1.0");
+	version = "1.0.0";
+	description = QString(tr("read .trc file"));
 	fileExtensions << "*.trc";
 	manufacturer = "Micromed";
 	m_flags |= FileIO::HasExtension| FileIO::CanRead;

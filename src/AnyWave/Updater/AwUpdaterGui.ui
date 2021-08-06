@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Available components</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../resources/AnyWave.qrc">
+    <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
+  </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
   </property>
@@ -32,7 +36,7 @@
      <item>
       <widget class="QPushButton" name="buttonUnselect">
        <property name="text">
-        <string>Unselect</string>
+        <string>Clear Selection</string>
        </property>
       </widget>
      </item>
@@ -58,7 +62,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Install updates</string>
+        <string>Install Components</string>
        </property>
       </widget>
      </item>
@@ -67,7 +71,9 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../../../resources/AnyWave.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonInstall</sender>

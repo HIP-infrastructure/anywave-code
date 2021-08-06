@@ -22,9 +22,6 @@
 #include <QTranslator>
 #include <AwMarker.h>
 #include <filter/AwFilterSettings.h>
-#include "AwUpdater.h"
-
-
 
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
@@ -84,9 +81,6 @@ private:
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
-	// updater 
-	AwUpdater m_updater;
-	AwDownloader m_downloader;
 	AwUpdateManager* m_updateManager;
 	// VIDEO Widget
 	AwVideoPlayer *m_player;

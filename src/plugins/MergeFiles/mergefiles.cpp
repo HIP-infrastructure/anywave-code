@@ -20,7 +20,8 @@ MergeFilePlugin::MergeFilePlugin()
 {
 	type = AwProcessPlugin::Background;
 	name = "Merge Files";
-	description = tr("Merge two files in one (ADES).");
+	version = "1.0.0";
+	description = "Join files vertically to ADES file format";
 	category = "Process:File Operation:Merge Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi);
 }

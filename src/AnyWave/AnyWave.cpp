@@ -51,7 +51,6 @@
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
-#include "AwUpdater.h"
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
@@ -259,13 +258,13 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	//connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
 	connect(actionOpen_New_AnyWave_Application, SIGNAL(triggered()), this, SLOT(openNewAnyWave()));
 	// Populate View Menu to show/hide DockWidgets
+
 	menuView_->addSeparator();
 	for (auto v : m_dockWidgets.values())
 		menuView_->addAction(v->toggleViewAction());
 	retranslateUi(this);	// force translation to be applied.
-	m_updater.checkForUpdate();
-
 	m_updateManager = new AwUpdateManager(this);
+	
 
 	m_lastDirOpen = "/";
 	readSettings();
@@ -564,21 +563,6 @@ void AnyWave::reviewComponentsMaps()
 	comp = icaMan->getComponents(AwChannel::SEEG);
 	if (comp) 
 		comp->showSEEGMap();
-
-
-	//if (AwICAManager::instance()->getComponents(AwChannel::MEG) != NULL) 
-	//	AwICAManager::instance()->getComponents(AwChannel::MEG)->showPanel();
-
-	//if (AwICAManager::instance()->getComponents(AwChannel::EEG) != NULL) 
-	//	AwICAManager::instance()->getComponents(AwChannel::EEG)->showPanel();
-	//
-	//if (AwICAManager::instance()->getComponents(AwChannel::EMG) != NULL) 
-	//	AwICAManager::instance()->getComponents(AwChannel::EMG)->showPanel();
-
-	//if (AwICAManager::instance()->getComponents(AwChannel::SEEG) != NULL)
-		//AwICAManager::instance()->getComponents(AwChannel::SEEG)->showPanel();
-
-
 }
 
 void AnyWave::doEpoch()

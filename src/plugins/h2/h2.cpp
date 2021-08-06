@@ -15,8 +15,9 @@ H2Plugin::H2Plugin()
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	category = "Process:Correlation:H2/R2 connectivity";
-	name = QString(tr("h2"));
-	description = QString(tr("Computes H2/R2 connectivity"));
+	name = QString("h2");
+	version = "1.0.0";
+	description = QString(tr("Compute H2/R2 connectivity graphs."));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
 	m_helpUrl = "h2/r2::Correlation::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_h2";

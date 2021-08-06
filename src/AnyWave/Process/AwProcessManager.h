@@ -89,6 +89,7 @@ public:
 	int buildProcessPDI(AwBaseProcess* process, AwDataManager *dm = nullptr);
 
 public slots:
+	void addPlugin(QObject* plugin);
 	void startProcessFromMenu();
 	void handleProcessTermination();
 	void startDisplayProcesses(AwChannelList& channels);

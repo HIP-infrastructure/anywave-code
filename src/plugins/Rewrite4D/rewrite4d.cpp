@@ -52,7 +52,8 @@ Rewrite4DPlugin::Rewrite4DPlugin()
 {
 	type = AwProcessPlugin::Background;
 	name = tr("Modify and copy 4DNI data file");
-	description = tr("Apply filters and/or overwrite data to a new 4DNI file.");
+	version = "1.0.0";
+	description = "Rewrite data in a existing 4DNI MEG file.";
 	category = "File:(4DNI MEG File Format) Write to a new file";
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }

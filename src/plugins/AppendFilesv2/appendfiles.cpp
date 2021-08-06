@@ -6,7 +6,8 @@ AppendFilesPlugin::AppendFilesPlugin()
 {
 	type = AwProcessPlugin::Background;
 	name = "Append Files";
-	description = tr("Append compatible files into one.");
+	description = tr("Concatenate files.");
+	version = "1.0.0";
 	category = "Process:File Operation:Append Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData| Aw::ProcessFlags::ProcessHasInputUi);
 	m_helpUrl = "Append Files::File Operations::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_append_files";

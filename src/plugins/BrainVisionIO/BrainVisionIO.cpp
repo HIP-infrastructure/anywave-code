@@ -3,9 +3,9 @@
 BrainVisionIOPlugin::BrainVisionIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("Brainvision Analyser Format");
-	description = QString(tr("read/write .vhdr files"));
+	description = QString(tr("Read/Write .vhdr file"));
 	manufacturer = QString::fromLatin1("Brain Products GmbH");
-	version = QString::fromLatin1("1.0");
+	version = "1.0.0";
 	fileExtensions << QString::fromLatin1("*.vhdr");
 	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::CanWrite;
 	fileExtension = ".vhdr";

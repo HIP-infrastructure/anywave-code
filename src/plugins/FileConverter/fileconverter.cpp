@@ -22,7 +22,8 @@ FileConverterPlugin::FileConverterPlugin()
 {
 	type = AwProcessPlugin::Background;
 	name = "File Converter";
-	description = tr("Converts files to another format.");
+	version = "1.0.0";
+	description = tr("Export data to file.");
 	category = "Process:File Operation:Convert Files";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi);
 	m_helpUrl = "File Exporter::File Operations::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_file_exporter";

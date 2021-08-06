@@ -33,7 +33,7 @@ EEPIO::~EEPIO()
 EEPIOPlugin::EEPIOPlugin()
 {
 	name = QString("EEProbe IO");
-	description = QString("Read .cnt files");
+	description = QString("Read EEProbe .cnt file");
 	manufacturer = QString("ANT Neuro");
 	version = QString("3.3.177");
 	fileExtensions << "*.cnt";

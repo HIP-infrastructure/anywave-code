@@ -24,8 +24,8 @@
 ADESIOPlugin::ADESIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("AnyWave ADES Format");
-	description = QString(tr("Open .ades files"));
-	version = QString("1.0");
+	description = QString(tr("Read/Write .ades files"));
+	version = QString("1.0.0");
 	fileExtensions << "*.ades";
 	m_flags = FileIO::HasExtension| FileIO::CanRead| FileIO::CanWrite;
 	fileExtension = ".ades";

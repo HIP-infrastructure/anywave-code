@@ -20,7 +20,8 @@
 MFVPlugin::MFVPlugin()
 {
 	name = QString("Multi Filters Viewer");
-	description = QString("Compare Signals Filters");
+	version = "1.0.0";
+	description = QString("Visualise signals with different filtering options.");
 	type = AwProcessPlugin::GUI;
 	m_helpUrl = "Multi Filters Viewer::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_mfv";
 }

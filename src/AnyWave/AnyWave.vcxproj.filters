@@ -412,9 +412,6 @@
     <ClCompile Include="Source\AwSourceChannel.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="AwUpdater.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="IO\HDF5\HDF5IO.cpp">
       <Filter>IO\HDF5</Filter>
     </ClCompile>
@@ -980,9 +977,6 @@
     </QtMoc>
     <QtMoc Include="Source\AwSourceManager.h">
       <Filter>Source</Filter>
-    </QtMoc>
-    <QtMoc Include="AwUpdater.h">
-      <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="IO\HDF5\HDF5IO.h">
       <Filter>IO\HDF5</Filter>

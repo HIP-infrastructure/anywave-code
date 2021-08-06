@@ -21,8 +21,9 @@ H2Graphs *H2Graphs::m_instance = Q_NULLPTR;
 H2GraphsPlugin::H2GraphsPlugin()
 {
 	name = "Correlation Graphs";
+	version = "1.0.0";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData);
-	description = "Visualise h2/r2 connectivity graph.";
+	description = "Visualise h2/r2 connectivity graphs.";
 	category = "Process:Correlation:h2/r2 Connectiviy Graphs";
 	type = AwProcessPlugin::GUI;
 	m_helpUrl = "h2/r2 Graphs::Correlation::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_h2Graphs";

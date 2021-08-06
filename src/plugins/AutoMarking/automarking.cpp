@@ -21,8 +21,9 @@ AutoMarkingPlugin::AutoMarkingPlugin()
 {
 	type = AwProcessPlugin::GUI;
 	name = "Epoch Maker";
-	description = tr("Automatically add markers around an existing marker.");
-	category = "Process:Markers:Epoch Maker";
+	version = "1.0.0";
+	description = tr("Create epoch as markers.");
+	category = "Process:Markers:Create Epochs";
 }
 
 

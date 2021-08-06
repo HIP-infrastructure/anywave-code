@@ -20,9 +20,9 @@
 EEGLABReaderPlugin::EEGLABReaderPlugin() : AwFileIOPlugin()
 {
 	name = QString("EEGLAB Reader");
-	description = QString(tr("Reads EEGLAB .set files"));
+	description = QString(tr("Read EEGLAB .set file"));
 	manufacturer = "EEGLAB";
-	version = QString("1.0");
+	version = QString("1.0.0");
 	fileExtensions << "*.set";
 	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }

@@ -29,9 +29,9 @@ namespace Exporter {
 AwExporterPlugin::AwExporterPlugin()
 {
 	name = QString("File Exporter");
-	description = QString(tr("Export data to a file"));
+	description = QString("Export data to a file");
 	category = "Process:File Operation:Export To File";
-	version = "1.0";
+	version = "1.0.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/json/file_exporter.json");

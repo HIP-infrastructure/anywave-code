@@ -9,6 +9,7 @@
 #include "AwDownloadGui.h"
 #include <QStandardPaths>
 #include <QProcess>
+#include "Process/AwProcessManager.h"
 
 Component::Component()
 {
@@ -31,7 +32,8 @@ AwUpdateManager::AwUpdateManager(QObject *parent) : QObject(parent)
 {
 	// check for updates only if the option is enabled in the global settings
 	auto aws = AwSettings::getInstance();
-
+	auto pm = AwProcessManager::instance();
+	connect(this, &AwUpdateManager::newPluginLoaded, pm, &AwProcessManager::addPlugin);
 	if (aws->value(aws::check_updates).toBool())
 		checkForUpdates();
 }
@@ -39,8 +41,6 @@ AwUpdateManager::AwUpdateManager(QObject *parent) : QObject(parent)
 AwUpdateManager::~AwUpdateManager()
 {
 	clearComponents();
-	//if (m_downloadGui)
-	//	delete m_downloadGui;
 }
 
 void AwUpdateManager::clearComponents()
@@ -76,7 +76,16 @@ void AwUpdateManager::fileDownloaded(QNetworkReply* reply)
 
 void AwUpdateManager::error(QNetworkReply::NetworkError error)
 {
+	if (error == QNetworkReply::NoError)
+		return;
 
+	switch (error)
+	{
+	case QNetworkReply::ConnectionRefusedError:
+		m_error = "Connection refused.";
+		break;
+
+	}
 }
 
 void AwUpdateManager::loadJSON()
@@ -103,7 +112,6 @@ void AwUpdateManager::loadJSON()
 		for (auto const& c : components) {
 			auto map = c.toMap();
 			Component* comp = new Component;
-
 			comp->name = map.value("name").toString();
 			comp->version = map.value("version").toString();
 			comp->type = map.value("type").toString() == "core" ? AwUpdateManager::Core : AwUpdateManager::Plugin;
@@ -161,6 +169,10 @@ bool AwUpdateManager::checkForComponentsUpdates()
 					}
 				}
 			}
+			else { // the plugin is not installed yet
+				c->installedVersion = "Not installed";
+				c->updateAvailable = true;
+			}
 		}
 	}
 	return updates;
@@ -204,7 +216,7 @@ void AwUpdateManager::installUpdates()
 	m_downloadGui->setText(QString("Downloading %1...").arg(c->name));
 	QNetworkRequest request(c->url);
 	m_reply = m_networkManager.get(request);
-	connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
+	connect(m_reply, &QNetworkReply::errorOccurred, this, &AwUpdateManager::error);
 	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), m_downloadGui.get(), SLOT(updateDownloadProgress(qint64, qint64)));
 	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(updateDownloadProgress(qint64, qint64)));
 
@@ -222,12 +234,16 @@ void AwUpdateManager::componentDownloaded(QNetworkReply *reply)
 		exit(0);
 	}
 
+	auto aws = AwSettings::getInstance();
 	// plugin
 	auto pm = AwPluginManager::getInstance();
-	if (pm->unloadPlugin(c->name) == 0) {
-
-	}
-
+	QString pluginPath = QString("%1/%2").arg(aws->value(aws::app_plugins_dir).toString()).arg(c->fileName);
+	bool exists = pm->unloadPlugin(pluginPath, c->name) == 0;
+	QFile::remove(pluginPath);
+	QFile::copy(m_file.fileName(), pluginPath);
+	auto plugin = pm->loadPlugin(pluginPath);
+	if (!exists)
+		emit newPluginLoaded(plugin);
 	m_currentIndex++;
 	installUpdates();
 }

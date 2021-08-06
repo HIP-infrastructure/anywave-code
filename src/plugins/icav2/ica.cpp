@@ -53,8 +53,9 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";
+	version = "2.0.0";
     name = QString("ICA");
-    description = QString("extract independent components");
+    description = QString("Compute ICA");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/ica/json/batch.json");
 	m_helpUrl = "ICA::https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/plugin_ica";

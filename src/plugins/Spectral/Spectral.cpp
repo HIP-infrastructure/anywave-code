@@ -22,7 +22,7 @@ using namespace sp;
 SpectralPlugin::SpectralPlugin()
 {
 	name = QString("Spectral");
-	version = "1.0.0";
+	version = "1.0.1";
 	category = "Process:Signal:Power Spectral Density";
 	description = QString(tr("Compute and show Power Spectral Density."));
 	type = AwProcessPlugin::Background;

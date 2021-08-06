@@ -21,9 +21,9 @@
 EGIReaderPlugin::EGIReaderPlugin() : AwFileIOPlugin()
 {
 	name = QString("EGI Reader");
-	description = QString("Read .mff EGI recordings");
+	description = QString("Read .mff bundle");
 	manufacturer = QString("Philips");
-	version = QString("1.0");
+	version = QString("1.0.0");
 	fileExtensions  <<  QString("*.mff");
 	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;
 }

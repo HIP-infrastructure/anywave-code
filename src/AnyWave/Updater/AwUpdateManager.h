@@ -34,6 +34,7 @@ public:
 signals:
 	void updatesAvailable();
 	void downloaded();
+	void newPluginLoaded(QObject*);
 private slots:
 	void loadJSON();
 	void fileDownloaded(QNetworkReply*);
@@ -52,6 +53,6 @@ private:
 	QByteArray m_data;
 	QList<Component*> m_components, m_selectedComponents;
 	std::unique_ptr<AwDownloadGui> m_downloadGui;
-	//AwDownloadGui *m_downloadGui;
+	QString m_error;
 	QFile m_file;
 };
