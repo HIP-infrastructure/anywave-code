@@ -11,7 +11,7 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 
 	// add a row with text explanation beyond the plot
 	m_textBox = new QCPTextElement(ui.widget);
-	m_textBox->setText("Click on a signal and it will be shown on AnyWave.\nUse the mousewheel to zoom on x axis.");
+	m_textBox->setText("Click the left button on a signal and it will be highlighted in AnyWave.\nUse the mousewheel to zoom on x axis.");
 	m_textBox->setFont(QFont("sans", 12, QFont::Bold));
 	ui.widget->plotLayout()->insertRow(1);
 	ui.widget->plotLayout()->addElement(1, 0, m_textBox);
@@ -24,7 +24,7 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 	memcpy(x.data(), arma_x.memptr(), length * sizeof(double));
 	
 	ui.widget->xAxis->setLabel("Frequency (Hz)");
-	ui.widget->yAxis->setLabel(ffts.first()->channel()->unitString() + QString::fromLatin1("²/Hz"));
+	ui.widget->yAxis->setLabel("dB");
 	ui.widget->setInteractions(QCP::iSelectPlottables| QCP::iRangeZoom | QCP::iRangeDrag);
 	double min = 0., max = 0.;
 	uword count = 0;
