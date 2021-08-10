@@ -285,7 +285,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 					chan.setReferenceName(tokens.at(1));
 				if (tokens2.size() < 4) {
 					// no unit specified => considering µV
-					chan.setUnit(QString::fromLatin1("µV"));
+				//	chan.setUnit(QString::fromLatin1("µV"));
 					chan.setType(AwChannel::EEG);
 				}
 				else {
@@ -302,7 +302,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 					else
 						chan.setType(AwChannel::Other);
 										
-					chan.setUnit(unit);
+				//	chan.setUnit(unit);
 
 				}
 

@@ -24,7 +24,7 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 	memcpy(x.data(), arma_x.memptr(), length * sizeof(double));
 	
 	ui.widget->xAxis->setLabel("Frequency (Hz)");
-	ui.widget->yAxis->setLabel(QString::fromUtf8("%1²/Hz").arg(ffts.first()->channel()->unit()));
+	ui.widget->yAxis->setLabel(ffts.first()->channel()->unitString() + QString::fromLatin1("²/Hz"));
 	ui.widget->setInteractions(QCP::iSelectPlottables| QCP::iRangeZoom | QCP::iRangeDrag);
 	double min = 0., max = 0.;
 	uword count = 0;

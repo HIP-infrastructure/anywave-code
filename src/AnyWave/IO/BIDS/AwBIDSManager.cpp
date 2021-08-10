@@ -64,13 +64,16 @@ bool AwBIDSManager::isBIDS(const QString& path)
 QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 {
 	// search for a dataset_description.json file which MUST be present at the root level
-
 	QFileInfo fi(path);
 	if (!fi.exists()) 
 		return QString();
 
 	// look in current path
 	auto dirPath = fi.absolutePath();
+	// check if we are in a derivatives branch of an existing BIDS
+	if (dirPath.contains("derivatives"))
+		return QString();
+
 	if (QFile::exists(QString("%1/dataset_description.json").arg(dirPath))) 
 		return QString();
 
@@ -347,11 +350,6 @@ void AwBIDSManager::findTsvFilesForItem(AwBIDSItem * item)
 		item->setData(path, AwBIDSItem::EventsTsvRole);
 }
 
-//QString AwBIDSManager::getGardelMesh()
-//{
-//	return gardelProperty(AwBIDSItem::GardelMeshPathRole).toString();
-//}
-
 QStringList AwBIDSManager::freesurferMeshes()
 {
 	return BIDSProperty(AwBIDSItem::FreesurferMeshesRole).toStringList();
@@ -431,18 +429,6 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 					if (parentItem)
 						parentItem->setData(fullPath, AwBIDSItem::GardelElectrodePathRole);
 				}
-				//if (file == GardelMeshFile) {
-				//	// add a file child to the container
-				//	auto fileItem = new AwBIDSItem(file, container);
-				//	fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-				//	fileItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-				//	fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
-				//	fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
-				//	// add also the path to the container
-				//	container->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-				//	if (parentItem)
-				//		parentItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-				//}
 				// check for .mtg
 				if (file.endsWith(".mtg"))
 					montages << fullPath;
@@ -1125,8 +1111,8 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 			auto label = cols.value(i);
 			if (label == bids::tsv_channel_name)
 				channel->setName(tokens.at(i));
-			else if (label == bids::tsv_channel_units)
-				channel->setUnit(tokens.at(i));
+			//else if (label == bids::tsv_channel_units)
+			//	channel->setUnit(tokens.at(i));
 			else if (label == bids::tsv_channel_type) {
 				auto type = tokens.at(i);
 				if (type == "MEGMAG")

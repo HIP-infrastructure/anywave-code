@@ -50,9 +50,6 @@
     <Filter Include="IO\ADES">
       <UniqueIdentifier>{7cb55d3b-502d-455e-b764-bf8d238b7bad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IO\HDF5">
-      <UniqueIdentifier>{f69bc45e-3d04-4f4c-8b97-b070512f5f2b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Marker">
       <UniqueIdentifier>{89142d20-eb71-464e-a930-9658185c18bf}</UniqueIdentifier>
     </Filter>
@@ -162,9 +159,6 @@
     </ClCompile>
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
       <Filter>Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\HDF5\structs.cpp">
-      <Filter>IO\HDF5</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwDockAddMarker.cpp">
       <Filter>Marker</Filter>
@@ -411,9 +405,6 @@
     </ClCompile>
     <ClCompile Include="Source\AwSourceChannel.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\HDF5\HDF5IO.cpp">
-      <Filter>IO\HDF5</Filter>
     </ClCompile>
     <ClCompile Include="IO\ADES\ADESIO.cpp">
       <Filter>IO\ADES</Filter>
@@ -978,9 +969,6 @@
     <QtMoc Include="Source\AwSourceManager.h">
       <Filter>Source</Filter>
     </QtMoc>
-    <QtMoc Include="IO\HDF5\HDF5IO.h">
-      <Filter>IO\HDF5</Filter>
-    </QtMoc>
     <QtMoc Include="IO\ADES\ADESIO.h">
       <Filter>IO\ADES</Filter>
     </QtMoc>
@@ -1130,9 +1118,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IO\HDF5\structs.h">
-      <Filter>IO\HDF5</Filter>
-    </ClInclude>
     <ClInclude Include="Prefs\AwPreferences.h">
       <Filter>Prefs</Filter>
     </ClInclude>

@@ -29,10 +29,10 @@ public:
 	enum Components { Core, Plugin };
 
 	void checkForUpdates();
+	bool updatesAvailable() { return m_updatesAvailable; }
 	static int compareVersion(const QString& v1, const QString& v2);
 	inline QList<Component*>& components() { return m_components; }
 signals:
-	void updatesAvailable();
 	void downloaded();
 	void newPluginLoaded(QObject*);
 private slots:
@@ -55,4 +55,5 @@ private:
 	std::unique_ptr<AwDownloadGui> m_downloadGui;
 	QString m_error;
 	QFile m_file;
+	bool m_updatesAvailable;
 };

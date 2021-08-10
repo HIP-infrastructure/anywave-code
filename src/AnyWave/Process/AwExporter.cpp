@@ -119,6 +119,29 @@ void AwExporter::runFromCommandLine()
 		sendMessage("Done.");
 	}
 
+	// apply scaling factor to data
+	float scale = 1.0;
+	for (auto chan : pdi.input.channels()) {
+		switch (chan->unit()) {
+		case AwChannel::picoT:
+		case AwChannel::picoTpermeter:
+			scale = 1e-12;
+			break;
+		case AwChannel::V:
+			scale = 1e-6;
+			break;
+		case AwChannel::milliV:
+			scale = 1e-3;
+			break;
+		default:
+			scale = 1.0;
+		}
+		if (scale != 1.0) {
+			for (auto start = 0; start < chan->dataSize(); start++)
+				chan->data()[start] *= scale;
+		}
+	}
+
 	// set channels to the writer object AFTER loading and/or not downsampling
 	// duplicate input channels before set them to writer as writer object takes ownership of channels and will destroy them 
 	writer->infos.setChannels(AwChannel::duplicateChannels(pdi.input.channels()));
@@ -219,8 +242,6 @@ bool AwExporter::showUi()
 			pdi.input.settings[keys::use_markers] = ui.usedMarkers;
 			updateUseSkip = true;
 		}
-		//if (updateUseSkip)
-		//	applyUseSkipMarkersKeys();
 
 		if (ui.decimateFactor > 1)
 			pdi.input.settings[Exporter::decimate_factor] = ui.decimateFactor;

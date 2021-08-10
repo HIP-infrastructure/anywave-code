@@ -33,9 +33,8 @@ AwUpdateManager::AwUpdateManager(QObject *parent) : QObject(parent)
 	// check for updates only if the option is enabled in the global settings
 	auto aws = AwSettings::getInstance();
 	auto pm = AwProcessManager::instance();
+	m_updatesAvailable = false;
 	connect(this, &AwUpdateManager::newPluginLoaded, pm, &AwProcessManager::addPlugin);
-	if (aws->value(aws::check_updates).toBool())
-		checkForUpdates();
 }
 
 AwUpdateManager::~AwUpdateManager()
@@ -124,24 +123,23 @@ void AwUpdateManager::loadJSON()
 		}
 	}
 	if (checkForComponentsUpdates()) {
-		int ans = AwMessageBox::question(nullptr, "AnyWave Updates", "Do you want to see available updates?", QMessageBox::Yes | QMessageBox::No);
-		if (ans == QMessageBox::Yes) {
-			AwUpdaterGui gui(this);
-			if (gui.exec() == QDialog::Accepted) {
-				m_selectedComponents = gui.selectedComponents();
-				m_currentIndex = 0;
-				disconnect(&m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
-				connect(&m_networkManager, &QNetworkAccessManager::finished, this,
-					&AwUpdateManager::componentDownloaded);
-				m_downloadGui = std::make_unique<AwDownloadGui>();
-				m_downloadGui.get()->show();
-				installUpdates();
-			}
+		AwUpdaterGui gui(this);
+		if (gui.exec() == QDialog::Accepted) {
+			m_selectedComponents = gui.selectedComponents();
+			m_currentIndex = 0;
+			disconnect(&m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
+			connect(&m_networkManager, &QNetworkAccessManager::finished, this,
+				&AwUpdateManager::componentDownloaded);
+			m_downloadGui = std::make_unique<AwDownloadGui>();
+			m_downloadGui.get()->show();
+			installUpdates();
+			m_updatesAvailable = false;
 		}
 	}
-	else {
-		AwMessageBox::information(nullptr, "AnyWave Updates", "There are no updates available.");
-	}
+	//else {
+	//	m_updatesAvailable = false;
+	//	//AwMessageBox::information(nullptr, "AnyWave Updates", "Everything is up to date.");
+	//}
 }
 
 bool AwUpdateManager::checkForComponentsUpdates()

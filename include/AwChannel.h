@@ -44,6 +44,7 @@ public:
 	enum ChannelType {
 		EEG = 0, SEEG = 0x01, MEG = 0x02, EMG = 0x03, ECG = 0x04, Reference = 0x05, Trigger = 0x06, Other = 0x07,
 		ICA = 0x08, Source = 0x09, GRAD = 0xA, ECoG = 0xB, EOG = 0xC};
+	enum ChannelUnit { V, microV, milliV, T, picoT, Tpermeter, picoTpermeter, undefinedUnit };
 	enum SourceType { Real, Virtual };   
 
 	/** a vector containing the int value of each channel types **/
@@ -86,7 +87,8 @@ public:
 	/** Reduce the number of samples by decimating the data **/
 	void decimate(int decimation);
 	/** Returns the unit string. If no unit is specified, returns an empty string.**/
-	inline QString& unit() { return m_unit; }
+//	inline QString& unit() { return m_unit; }
+	inline int unit() { return m_unit; }
 	/** Returns the x coordinate. **/
 	inline double x() { return m_x; }
 	/** Returns the y coordinate.. **/
@@ -147,6 +149,7 @@ public:
 	inline bool isICA() { return m_type == AwChannel::ICA && m_sourceType == AwChannel::Virtual; }
 	inline bool isRealICA() { return m_type == AwChannel::ICA && m_sourceType == AwChannel::Real; }
 	inline bool isSource() { return m_type == AwChannel::Source; }
+	QString unitString();
 
 	/** Returns true if channel is virtual. **/
 	inline bool isVirtual() { return m_sourceType == AwChannel::Virtual; }
@@ -167,9 +170,10 @@ public:
 	void setDisplayPluginName(const QString& name);
 
 	/** Sets the unit string for the channel. i.e. "�V" for EEG channels. **/
-	void setUnit(const char *u);
+//	void setUnit(const char *u);
 	/** Sets unit QString for the channel. i.e. "pT" for MEG channels. **/
-    void setUnit(const QString& u);
+ //   void setUnit(const QString& u);
+	void setUnit(int unit);
 	/** Sets the gain for the channel, in units by cm. **/
 	void setGain(float factor);
 	/** Sets the data sampling rate. **/
@@ -240,9 +244,11 @@ public:
 	///** Build a string list containing all the available types of channels **/
 	//static QStringList types();
 	/** Get the unit string of a channel type **/
-	static QString unitForType(int type);
+	//static QString unitForType(int type);
+	static QString unitString(int unit);
+	static int unitForType(int type);
 	/** Get default amplitude value for a channel type **/
-	static float defaultAmplitudeForType(int type);
+	//static float defaultAmplitudeForType(int type);
 	static QList<AwChannel *> sortByName(const QList<AwChannel * > & list);
 	static QList<AwChannel *> sortByType(const QList<AwChannel * > & list, const QStringList& types = QStringList());
 	/** remove doublons from a list. Doublons are checked based on name of channels. **/
@@ -256,7 +262,8 @@ protected:
 	QString m_name; 
 	float *m_data;
 	qint64 m_dataSize;
-	QString m_unit;			// Unit� du signal (�V, fT, etc.)
+	//QString m_unit;			// Unit� du signal (�V, fT, etc.)
+	int m_unit;
 	// xyz coordinates
 	double m_x;				
 	double m_y;

@@ -142,7 +142,7 @@ void GraphWindow::showTimeCourses()
 				label = QString("%1->%2").arg(m_graphSet->labels.value(i)).arg(m_graphSet->labels.value(j));
 				// XY Pair
 				AwChannel *channel = new AwChannel;
-				channel->setUnit(m_graphSet->method);
+				//channel->setUnit(m_graphSet->method);
 				channel->setSamplingRate(m_graphSet->samplingRate);
 				channel->setGain(1.);
 				channel->setName(label);

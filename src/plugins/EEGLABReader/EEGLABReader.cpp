@@ -117,7 +117,7 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 				AwChannel channel;
 				channel.setName(QString("EEG%1").arg(i+1));
 				channel.setSamplingRate(m_sr);
-				channel.setGain(AwChannel::defaultAmplitudeForType(channel.type()));
+			//	channel.setGain(AwChannel::defaultAmplitudeForType(channel.type()));
 				infos.addChannel(&channel);
 			}
 		}

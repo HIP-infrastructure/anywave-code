@@ -85,8 +85,6 @@
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp" />
-    <ClCompile Include="IO\HDF5\HDF5IO.cpp" />
-    <ClCompile Include="IO\HDF5\structs.cpp" />
     <ClCompile Include="IO\JSON\AwJSON.cpp" />
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp" />
     <ClCompile Include="IO\MEMIO\MEMIO.cpp" />
@@ -239,8 +237,6 @@
     <ClInclude Include="Data\AwMemoryMapper.h" />
     <QtMoc Include="Display\AwVideoManager.h">
     </QtMoc>
-    <QtMoc Include="IO\HDF5\HDF5IO.h">
-    </QtMoc>
     <QtMoc Include="IO\ADES\ADESIO.h">
     </QtMoc>
     <QtMoc Include="IO\MATLAB\MATLABIO.h">
@@ -337,7 +333,6 @@
     </QtMoc>
     <QtMoc Include="ICA\AwICARejectButton.h">
     </QtMoc>
-    <ClInclude Include="IO\HDF5\structs.h" />
     <ClInclude Include="Prefs\AwPreferences.h" />
     <QtMoc Include="Widgets\AwTriggerParsingDialog.h">
     </QtMoc>

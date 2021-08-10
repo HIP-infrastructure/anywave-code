@@ -226,8 +226,8 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 			float value = m_channel->data()[sampleIndex];
 
 			QString tt = m_sensorName + ":" + AwChannel::typeToString(m_channel->type());
-			tt += "\nValue: " + QString::number(value) + m_channel->unit();
-			tt += "\nAmplitude Scale: " + QString::number(gain) + m_channel->unit() + "/cm";
+			tt += QString("\nValue: %1%2").arg(value).arg(m_channel->unitString());
+			tt += QString("\nAmplitude Scale: %1%2/cm").arg(gain).arg(m_channel->unitString());
 			tt += "\nSampling Rate: " + QString::number(m_channel->samplingRate()) + "Hz";
 			if (m_channel->lowFilter() > 0)
 				tt += "\nLow Pass Filter: " + QString::number(m_channel->lowFilter()) + "Hz";

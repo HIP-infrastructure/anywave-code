@@ -127,18 +127,21 @@ void AwMarkerManager::removeOfflimits()
 		AwMarker::sort(m_markers);
 		m_needSorting = false;
 	}
-	// start from the last elements
-	auto it = m_markers.end();
-	auto current = m_markers.end();
-	while (true) {
-		AwMarker* m = *--it;
-		if (m->start() <=  end) 
-			break;
-		current--;
-	}
-	if (current < m_markers.end())
-		m_markers.erase(current, m_markers.end());
 
+	// start from the last markers and check it does not end AFTER the data length.
+	int index = m_markers.size() - 1;
+	auto current_it = m_markers.end();
+
+	while (index >= 0) {
+		AwMarker* m = m_markers.at(index);
+		if (m->end() < end)
+			break;
+		current_it--;
+		index--;
+	}
+
+	if (current_it < m_markers.end())
+		m_markers.erase(current_it, m_markers.end());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -262,8 +265,7 @@ void AwMarkerManager::addMarkers(const AwMarkerList& list)
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
-//	AwMarker::sort(m_markers);
-//	m_needSorting = false;
+
 	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
 		m_ui->setMarkers(m_markers);
 	emit updateStats();

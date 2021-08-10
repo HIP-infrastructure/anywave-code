@@ -264,7 +264,9 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 		menuView_->addAction(v->toggleViewAction());
 	retranslateUi(this);	// force translation to be applied.
 	m_updateManager = new AwUpdateManager(this);
-	
+	connect(m_updateManager, SIGNAL(newPluginLoaded(QObject*)), this, SLOT(initPluginsHelpMenu()));
+	if (aws->value(aws::check_updates).toBool())
+		m_updateManager->checkForUpdates();
 
 	m_lastDirOpen = "/";
 	readSettings();
@@ -635,7 +637,7 @@ void AnyWave::showProcessDock()
 // About AnyWave()
 void AnyWave::on_actionAbout_AnyWave_triggered()
 {
-	AwAboutAnyWave widget;
+	AwAboutAnyWave widget(m_updateManager);
 	widget.exec();
 }
 
