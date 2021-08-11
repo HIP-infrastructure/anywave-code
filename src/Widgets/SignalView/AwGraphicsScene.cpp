@@ -348,12 +348,12 @@ void AwGraphicsScene::displaySelectedChannelsOnly()
 ///
 void AwGraphicsScene::displayAllChannels()
 {
-	foreach (AwGraphicsSignalItem *item, m_visibleSignalItems)
+	for (AwGraphicsSignalItem *item : m_visibleSignalItems)
 		this->removeItem(item);
 
 	m_visibleSignalItems = m_signalItems;
 
-	foreach (AwGraphicsSignalItem *item, m_signalItems)
+	for (AwGraphicsSignalItem *item : m_signalItems)
 		this->addItem(item);
 	updateVisibleItemsHashTable();
 	emit numberOfDisplayedChannelsChanged(m_visibleSignalItems.size());
@@ -787,18 +787,6 @@ void AwGraphicsScene::chooseMarkersToInsert()
 
 }
 
-void AwGraphicsScene::addCustomMarkerFromList()
-{
-	QAction *act = (QAction *)sender();
-
-	int index = act->data().toInt();
-
-	if (m_markingSettings->predefinedMarkers.isEmpty())
-		return;
-	auto predefined = m_markingSettings->predefinedMarkers.at(index);
-	predefined->setStart(m_positionClicked);
-	emit markerInserted(new AwMarker(predefined));
-}
 
 void AwGraphicsScene::cursorToMarker()
 {
@@ -1389,6 +1377,31 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
 }
 
 
+void AwGraphicsScene::addCustomMarkerFromList()
+{
+	QAction* act = (QAction*)sender();
+
+	int index = act->data().toInt();
+
+	if (m_markingSettings->predefinedMarkers.isEmpty())
+		return;
+	auto predefined = m_markingSettings->predefinedMarkers.at(index);
+
+	m_currentMarkerItem->marker()->setLabel(predefined->label());
+	m_currentMarkerItem->marker()->setValue(predefined->value());
+	m_currentMarkerItem->marker()->setColor(predefined->color());
+	if (m_markingSettings->isTargettingChannels)
+		m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
+
+	emit markerInserted(new AwMarker(m_currentMarkerItem->marker()));
+	m_isTimeSelectionStarted = false;
+	m_currentMarkerItem->marker()->setDuration(0);
+	m_currentMarkerItem->marker()->setStart(m_positionClicked);
+	m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
+}
+
+
+
 ///
 /// mouseRelease()
 ///
@@ -1442,7 +1455,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			// check if auto target is on
 			if (m_markingSettings->autoTargetChannel) {
 				// check for item under the mouse
-				QGraphicsItem* item = NULL;
+				QGraphicsItem* item = nullptr;
 				// take a rect under the mouse
 				QRect mousePos(pos.x() - 5, pos.y() + 5, 10, 10);
 				QList<QGraphicsItem*> items = this->items(mousePos, Qt::IntersectsItemShape, Qt::DescendingOrder);
@@ -1480,25 +1493,19 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 					connect(action, SIGNAL(triggered()), this, SLOT(addCustomMarkerFromList()));
 				}
 			}
-			//// prepare contextual menu if the user choosed to use predefined markers
-			//if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
-			//	menu_predefined = new QMenu;
-			//	int index = 0;
-			//	for (auto m : m_markingSettings->predefinedMarkers) {
-			//		QAction *action = new QAction(m->label() + " " + QString::number(m->value()), menu_predefined);
-			//		action->setData(index); // store the index of item in list in action custom data.
-			//		index++;
-			//		connect(action, SIGNAL(triggered()), this, SLOT(addCustomMarkerFromList()));
-			//		menu_predefined->addAction(action);
-			//	}
-			//}
 			else if (m_markingSettings->isAutoInc) {
 				m_currentMarkerItem->marker()->setLabel(QString("%1_%2").arg(m_markingSettings->label).arg(m_markingSettings->index++));
 			}
 			if (menu_predefined) {
-				menu_predefined->exec(e->screenPos());
-				if (m_markingSettings->isTargettingChannels)
-					m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
+				if (menu_predefined->exec(e->screenPos()) == nullptr) { // no actions taken in the menu => do reset marker insertion
+					m_currentMarkerItem->setMarker(new AwMarker());
+					m_currentMarkerItem->marker()->setDuration(0);
+					m_currentMarkerItem->marker()->setStart(m_positionClicked);
+					m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
+					m_isTimeSelectionStarted = false;
+					//if (m_markingSettings->isTargettingChannels)
+					//	m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
+				}
 				delete menu_predefined;
 			}
 			else { // no context menu => classic insertion using current marker item

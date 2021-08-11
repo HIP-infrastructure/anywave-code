@@ -29,18 +29,42 @@ int AwGainLevel::insertNewValue(float v)
 {
 	int index = getIndexOfValue(v);
 	if (index == -1) {
-		auto size = m_values.size();
-		m_values.resize(size + 1);
-		m_values(size) = v;
-		sort(m_values);
-		index = getIndexOfValue(v);
+		vec tmp = { v };
+		m_values = arma::join_cols(m_values, tmp);
+		//auto size = m_values.size();
+		//m_values.resize(size + 1);
+		//m_values(size) = v;
+		m_values = sort(m_values);
 		
+		index = getIndexOfValue(v);
+		Q_ASSERT(index != -1);
 	}
 	m_value = v;
+	m_index = index;
 	emit valueChanged(type, m_value);
 	return index;
 }
 
+
+int AwGainLevel::up()
+{
+	if (m_index == m_values.size() - 1)
+		return m_index;
+	m_index++;
+	m_value = m_values(m_index);
+	emit valueChanged(this->type, m_value);
+	return m_index;
+}
+
+int AwGainLevel::down()
+{
+	if (m_index == 0)
+		return m_index;
+	m_index--;
+	m_value = m_values(m_index);
+	emit valueChanged(this->type, m_value);
+	return m_index;
+}
 
 AwGainLevels::AwGainLevels(QObject* parent) : QObject(parent)
 {
@@ -113,7 +137,7 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 		vec a = regspace(1, 1, 9);
 		vec b = regspace(10, 100, 10000);
 		values = join_cols(a, b);
-		unit = QString::fromUtf8("undefined/cm");
+		unit = QString("??/cm");
 		value = 310;
 		gl->setValues(values);
 		gl->setValue(value);

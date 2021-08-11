@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>512</width>
-    <height>597</height>
+    <height>603</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -284,7 +284,7 @@
          <enum>QAbstractItemView::SelectRows</enum>
         </property>
         <property name="columnCount">
-         <number>2</number>
+         <number>0</number>
         </property>
         <attribute name="horizontalHeaderVisible">
          <bool>true</bool>
@@ -307,8 +307,6 @@
         <attribute name="verticalHeaderVisible">
          <bool>false</bool>
         </attribute>
-        <column/>
-        <column/>
        </widget>
       </item>
       <item>

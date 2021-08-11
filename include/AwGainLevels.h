@@ -28,19 +28,27 @@ class AW_WIDGETS_EXPORT AwGainLevel : public QObject
 {
 	Q_OBJECT
 public:
-	AwGainLevel(QObject *parent = nullptr) : QObject(parent) { type = 0; m_value = 0; }
-	AwGainLevel(AwGainLevel* copy, QObject *parent = nullptr) : QObject(parent) { type = copy->type; m_value = copy->m_value; m_values = copy->m_values; }
+	AwGainLevel(QObject* parent = nullptr) : QObject(parent) { type = 0; m_value = 0; m_index = 0; }
+	AwGainLevel(AwGainLevel* copy, QObject *parent = nullptr) : QObject(parent) { 
+		type = copy->type; m_value = copy->m_value; m_values = copy->m_values; m_index = copy->m_index;
+	}
 
 	/** get index in scale for the value, -1 is value is not in the scale.**/
 	int getIndexOfValue(float value);
+	inline int index() { return m_index; }
 	/** add a new value to the scale, returns the index of the value in the scale **/
 	int insertNewValue(float value);
+	/** go foward in scale (decrease the gain level) **/
+	int up();
+	/** go backward in scale (increase the gain level) **/
+	int down();
+
 	int type;
 
 	void setValues(const vec& values) { m_values = values; }
 	inline vec& values() { return m_values; }
 	inline float value() { return m_value; }
-	void setValue(float v) { m_value = v; emit valueChanged(type, v); }
+	void setValue(float v) { insertNewValue(v); }
 	inline QString& unit() { return m_unit; }
 	void setUnit(const QString& u) { m_unit = u; }
 signals:
@@ -49,6 +57,7 @@ protected:
 	
 	vec m_values;   // scale of values
 	float m_value;  // current value
+	int m_index;
 	QString m_unit;	// units
 };
 

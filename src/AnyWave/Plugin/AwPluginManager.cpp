@@ -25,7 +25,7 @@
 #include <graphics/AwGraphicInterface.h>
 #include <graphics/AwGraphicsObjects.h>
 #include "IO/ADES/ADESIO.h"
-#include "IO/HDF5/HDF5IO.h"
+//#include "IO/HDF5/HDF5IO.h"
 #include "IO/MATLAB/MATLABIO.h"
 #include "IO/MEMIO/MEMIO.h"
 #include <graphics/AwSignalItem.h>

@@ -26,7 +26,6 @@ AwGainLevelsWidget::AwGainLevelsWidget(AwGainLevels *gl, QWidget* parent) : QWid
 {
 	m_gainLevels = gl;
 	Qt::WindowFlags flags = 0;
-//	m_ui.setupUi(this);
 	
 	flags  |= Qt::Window | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint;
 	setWindowFlags(flags);
@@ -46,6 +45,7 @@ void AwGainLevelsWidget::buildLayout()
 	QGridLayout* layout = new QGridLayout;
 	// first create all the widgets for every gain levels
 	int iteration = 0;
+	QPushButton* button;
 	for (auto gl : m_gainLevels->gainLevels()) {
 		// label
 		auto text = AwChannel::typeToString(gl->type);
@@ -56,9 +56,7 @@ void AwGainLevelsWidget::buildLayout()
 		auto buttonUp = new QPushButton;
 		buttonUp->setMinimumSize(QSize(32, 32));
 		buttonUp->setMaximumSize(QSize(32, 32));
-		QIcon icon;
-		icon.addFile(QString::fromUtf8(":/images/plus_sign_24x24.png"));
-		buttonUp->setIcon(icon);
+		buttonUp->setIcon(QIcon(":/images/plus_sign_24x24.png"));
 		buttonUp->setIconSize(QSize(32, 32));
 		buttonUp->setFlat(true);
 		connect(buttonUp, &QPushButton::clicked, this, &AwGainLevelsWidget::updateGUI);
@@ -74,7 +72,6 @@ void AwGainLevelsWidget::buildLayout()
 		slider->setValue(0);
 		if (index != -1)
 			slider->setValue(index);
-		//connect(slider, &QSlider::valueChanged, this, &AwGainLevelsWidget::getSliderValue);
 		connect(slider, &QSlider::valueChanged, this, &AwGainLevelsWidget::updateGUI);
 		layout->addWidget(slider, iteration , 2);
 		m_sliders << slider;
@@ -85,9 +82,7 @@ void AwGainLevelsWidget::buildLayout()
 		auto buttonDown = new QPushButton;
 		buttonDown->setMinimumSize(QSize(32, 32));
 		buttonDown->setMaximumSize(QSize(32, 32));
-		icon = QIcon();
-		icon.addFile(QString::fromUtf8(":/images/minus_sign_24x24.png"));
-		buttonDown->setIcon(icon);
+		buttonDown->setIcon(QIcon(":/images/minus_sign_24x24.png"));
 		buttonDown->setIconSize(QSize(32, 32));
 		buttonDown->setFlat(true);
 		m_buttonsDown << buttonDown;
@@ -179,26 +174,19 @@ void AwGainLevelsWidget::updateGUI()
 	auto gl = m_gainLevels->getGainLevelFor(m_widgetsToTypes.value(widget));
 
 	if (edit) {
-		gl->setValue(edit->text().toFloat());
+		//gl->setValue(edit->text().toFloat());
+		gl->insertNewValue(edit->text().toFloat());
 	}
 	else if (slider) {
-		gl->setValue(gl->values()(slider->value()));
+		gl->insertNewValue(gl->values()(slider->value()));
 	}
 	else { // button
 		// which button? up or down?
 		bool up = m_buttonsUp.indexOf(button) != -1;
-		auto index = gl->getIndexOfValue(gl->value());
-		if (index != -1) {
-			if (up) {
-				if (index > 0) {
-					gl->setValue(gl->values()(--index));
-				}
-			}
-			else {
-				if (index < gl->values().size())
-					gl->setValue(gl->values()(++index));
-			}
-		}
+		if (up)
+			gl->down();
+		else
+			gl->up();
 	}
 	emit amplitudeChanged(gl->type, gl->value());
 }
@@ -214,7 +202,8 @@ void AwGainLevelsWidget::updateWidgets(int type, float value)
 	// update slider and edit line
 	QSlider* slider = m_typeToSlider.value(type);
 	disconnect(slider, nullptr, this, nullptr);
-	slider->setValue(gl->getIndexOfValue(value));
+	slider->setMaximum(gl->values().size() - 1);
+	slider->setValue(gl->index());
 	connect(slider, &QSlider::valueChanged, this, &AwGainLevelsWidget::updateGUI);
 	QLineEdit* edit = m_typeToEdit.value(type);
 	disconnect(edit, nullptr, this, nullptr);

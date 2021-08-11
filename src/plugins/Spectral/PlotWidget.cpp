@@ -11,7 +11,7 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 
 	// add a row with text explanation beyond the plot
 	m_textBox = new QCPTextElement(ui.widget);
-	m_textBox->setText("Click the left button on a signal and it will be highlighted in AnyWave.\nUse the mousewheel to zoom on x axis.");
+	m_textBox->setText("Click on a curve and the matching channel will be highlighted in AnyWave.\nUse the mousewheel to zoom on x axis.");
 	m_textBox->setFont(QFont("sans", 12, QFont::Bold));
 	ui.widget->plotLayout()->insertRow(1);
 	ui.widget->plotLayout()->addElement(1, 0, m_textBox);
