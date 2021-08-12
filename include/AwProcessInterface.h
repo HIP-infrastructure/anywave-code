@@ -27,7 +27,7 @@
 #include <AwCore.h>
 class AwProcessPlugin;
 class AwProcessOutputWidget;
-
+class AwEvent;
 
 
 /*!
@@ -92,9 +92,13 @@ signals:
 	void newDisplayPlugin(AwDisplayPlugin *plugin);
 	// log message for the debug log system
 	void log(const QString& log);
+	// send event to anywave (components abled to process events)
+	void sendEvent(QSharedPointer<AwEvent> e);
 public slots:
 	virtual void stop() {}
 	void abort();
+	/** processEvent() process event received **/
+	virtual void processEvent(QSharedPointer<AwEvent>) {}
 protected:
 	int m_runMode;
 	int m_flags;		// general flags for process

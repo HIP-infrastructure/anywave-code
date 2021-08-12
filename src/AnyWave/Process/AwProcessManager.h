@@ -100,6 +100,7 @@ public slots:
 	void errorMessage(const QString& message);
 	void enableMenus();
 	void launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end);
+	void processEvent(QSharedPointer<AwEvent>);
 
 signals:
 	void newMarkersAvailable(const AwMarkerList &markers);

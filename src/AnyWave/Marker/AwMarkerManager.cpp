@@ -260,8 +260,8 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 void AwMarkerManager::addMarkers(const AwMarkerList& list)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
-	m_markers += AwMarker::duplicate(list);
 
+	m_markers += AwMarker::duplicate(list);
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();

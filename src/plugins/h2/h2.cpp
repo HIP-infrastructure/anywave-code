@@ -9,6 +9,7 @@
 #include <QtConcurrent>
 #include <utils/json.h>
 #include <AwKeys.h>
+#include <AwEvent.h>
 
 H2Plugin::H2Plugin()
 {
@@ -524,12 +525,18 @@ void H2::run()
 	}
 	computeRuns();
 	if (!m_resultFiles.isEmpty()) {
-		QVariantMap map;
-		map["command"] = AwProcessCommand::LaunchProcess;
-		map["process_name"] = QString("Correlation Graphs");
+		//QVariantMap map;
+		//map["command"] = AwProcessCommand::LaunchProcess;
+		//map["process_name"] = QString("Correlation Graphs");
+		//QStringList args = { m_resultFiles };
+		//map["args"] = args;
+		//emit sendCommand(map);
+		QSharedPointer<AwEvent> e = QSharedPointer<AwEvent>(new AwEvent());
+		e->setId(AwEvent::StartProcess);
+		e->addValue("process_name", QString("Correlation Graphs"));
 		QStringList args = { m_resultFiles };
-		map["args"] = args;
-		emit sendCommand(map);
+		e->addValue("args", args);
+		emit sendEvent(e);
 	}
 }
 

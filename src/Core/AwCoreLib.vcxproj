@@ -22,13 +22,17 @@
     <ClCompile Include="AwChannel.cpp" />
     <ClCompile Include="AwDataBuffer.cpp" />
     <ClCompile Include="AwDataClient.cpp" />
+    <ClCompile Include="AwEvent.cpp" />
     <ClCompile Include="AwMarker.cpp" />
     <ClCompile Include="AwMEGSensorManager.cpp" />
     <ClCompile Include="AwSensor.cpp" />
+    <ClCompile Include="AwEventManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\AwChannel.h" />
     <ClInclude Include="..\..\include\AwCore.h" />
+    <QtMoc Include="..\..\include\AwEventManager.h" />
+    <ClInclude Include="..\..\include\AwEvent.h" />
     <ClInclude Include="..\..\include\AwException.h" />
     <ClInclude Include="..\..\include\AwFilteringOptions.h" />
     <ClInclude Include="..\..\include\AwMarker.h" />

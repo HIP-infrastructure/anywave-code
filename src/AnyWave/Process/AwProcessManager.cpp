@@ -38,6 +38,8 @@
 #include "Data/AwDataManager.h"
 #include <process/AwProcessOutputWidget.h>
 #include <AwCore.h>
+#include <AwEvent.h>
+#include <AwEventManager.h>
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -475,6 +477,8 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
  }
 
 
+
+
  int AwProcessManager::buildProcessPDI(AwBaseProcess* p, AwDataManager *dm)
  {
 	 AwDataManager* dataManager = dm;
@@ -766,8 +770,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
 		AwProcess* p = static_cast<AwProcess*>(process);
-		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+//		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+//		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
@@ -799,8 +804,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		QThread *processThread = new QThread;
 		p->moveToThread(processThread);
 
-		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+		//connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+		//connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)), Qt::UniqueConnection);
 		connect(p, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
 		connect(p, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
 		
@@ -1106,6 +1112,22 @@ void AwProcessManager::errorMessage(const QString& message)
 	AwProcess *process = static_cast<AwProcess *>(sender());
 	if (process)
 		AwMessageBox::critical(0, process->plugin()->name, message);
+}
+
+void AwProcessManager::processEvent(QSharedPointer<AwEvent> e)
+{
+	QMutexLocker lock(&m_mutex);
+	// make sure the event received is compatible
+	int id = e->id();
+	switch (id) {
+	case AwEvent::StartProcess:
+		auto data = e->data();
+		if (data.contains("process_name")) {
+			QStringList args = data.value("args").toStringList();
+			startProcess(data.value("process_name").toString(), args);
+		}
+		break;
+	}
 }
 
 void AwProcessManager::executeCommand(const QVariantMap& map)

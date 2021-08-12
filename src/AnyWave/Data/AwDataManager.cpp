@@ -209,8 +209,6 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_settings[keys::marker_file] = QString("%1.mrk").arg(fullDataFilePath);
 	m_settings[keys::montage_file] = QString("%1.mtg").arg(fullDataFilePath);
 	m_settings[keys::disp_file] = QString("%1.display").arg(fullDataFilePath);
-	//m_settings[keys::lvl_file] = QString("%1.levels").arg(fullDataFilePath);
-	//m_settings[keys::lvl2_file] = QString("%1.lvl").arg(fullDataFilePath);
 
 	// get predefined .mrk .bad .mtg if any
 	auto tmp = reader->infos.badFile();
@@ -272,10 +270,10 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_montageManager->newMontage(m_reader);
 	if (!commandLineMode) {
 		// Are there events?
-		if (m_reader->infos.blocks().at(0)->markersCount())
+		if (m_reader->infos.blocks().at(0)->markersCount()) 
 			m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
-		//m_markerManager->setFilename(fullDataFilePath);
-		m_markerManager->init();
+		
+		m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
 		auto display = AwDisplay::instance();
 		if (display) {
 			// LAST step => update Display Manager with new file.
