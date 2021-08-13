@@ -37,20 +37,24 @@ AwEventManager::AwEventManager()
 }
 
 
+void AwEventManager::connectReceiver(QObject* receiver, const QVector<int>& ids)
+{
+	for (auto id : ids)
+		connectReceiver(receiver, id);
+}
+
 void AwEventManager::connectReceiver(QObject* receiver, int id)
 {
 	if (m_receivers.contains(id))
 		return;
 	m_receivers.insert(id, receiver);
-	connect(receiver, SIGNAL(sendEvent(AwEvent*)), this, SLOT(processEvent(AwEvent*)));
-
-	//connect(this, SIGNAL(eventReceived(AwEvent*)), receiver, SLOT(processEvent(AwEvent*)));
+	connect(receiver, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), this, SLOT(processEvent(QSharedPointer<AwEvent>)));
 }
 
 void AwEventManager::processEvent(QSharedPointer<AwEvent> e)
 {
-	QMutexLocker lock(&m_mutex);
-
+//	QMutexLocker lock(&m_mutex);   Dont use a thread locker because event manager is running in the main anywave thread :
+	// consecutive events send by plugins could deadlock here.
 	auto const& receivers = m_receivers.values(e->id());
 	if (receivers.isEmpty())
 		return;

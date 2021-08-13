@@ -13,28 +13,33 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#pragma once
-#include <AwGlobal.h>
-#include <QObject>
-#include <QMap>
-#include <QMutex>
-#include <QSharedPointer>
-class AwEvent;
+#include "AwDisplay.h"
+#include "AwDisplaySetup.h"
+#include "AwViewSetup.h"
 
-class AW_CORE_EXPORT AwEventManager : public QObject
+// this source file only contains code to handle events
+
+void AwDisplay::processEvent(QSharedPointer<AwEvent> e)
 {
-	Q_OBJECT
-public:
-	static AwEventManager* instance();
+	auto data = e->data();
+	// pass event to the views
+	for (AwSignalView* v : m_signalViews)
+		v->processEvent(e);
 
-public slots:  // use slots to connect and process events to be able to process them using treadeds (plugins are running in threads)
-	void connectReceiver(QObject*, int);
-	void connectReceiver(QObject*, const QVector<int>& ids);
-	void processEvent(QSharedPointer<AwEvent>);
-protected:
-	AwEventManager();
-	static AwEventManager* m_instance;
-
-	QMultiMap<int, QObject*> m_receivers;
-	QMutex m_mutex;
-};
+	// handle event that relies on display manager itself
+	switch (e->id())
+	{
+	case AwEvent::AddNewView:
+	{
+		QStringList filters = data.value("filters").toStringList();
+		AwViewSetup* ns = m_setup->newViewSetup();
+		if (filters.size()) {
+			ns->filters.clear();
+			for (const QString& f : filters) 
+				ns->filters.append(AwChannel::stringToType(f));
+		}
+		addSignalView(ns);
+	}
+	break;
+	}
+}

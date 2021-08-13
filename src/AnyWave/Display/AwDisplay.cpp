@@ -40,7 +40,8 @@
 #include "Plugin/AwPluginManager.h"
 #include <QTextStream>
 #include "Data/AwDataManager.h"
-#include <AwGainLevels.h>
+#include <AwEvent.h>
+#include <AwEventManager.h>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
@@ -63,10 +64,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	dsManager->setParent(this);
 	m_mainWindow = w;
 	m_setup = nullptr;
-//	m_gainLevels = new AwGainLevels(this);
 	AwDisplaySetup *setup = dsManager->currentSetup();
-
-	
 	// Display Setup Manager connections
 	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(changeCurrentSetup(AwDisplaySetup *)));
 	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
@@ -81,6 +79,8 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	w->update();
 	m_dontSynchronize = false;
 	AwDisplay::setInstance(this);
+	QVector<int> ids = { AwEvent::ShowChannels, AwEvent::AddNewView };
+	AwEventManager::instance()->connectReceiver(this, ids);
 }
 
 
@@ -198,15 +198,12 @@ void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
 		switch (m_setup->orientation())
 		{
 		case AwDisplaySetup::Horizontal:
-			//m_splitterWidget->setOrientation(Qt::Vertical);
 			m_centralWidget->setOrientation(Qt::Vertical);
 			break;
 		case AwDisplaySetup::Vertical:
-			//m_splitterWidget->setOrientation(Qt::Horizontal);
 			m_centralWidget->setOrientation(Qt::Horizontal);
 			break;
 		}
-		//m_splitterWidget->repaint();
 		m_centralWidget->repaint();
 	}
 
@@ -223,7 +220,6 @@ void AwDisplay::closeFile()
 	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
 		v->closeFile();
-//	AwDisplaySetupManager::instance()->resetToDefault();
 }
 
 void AwDisplay::quit()

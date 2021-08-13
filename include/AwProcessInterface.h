@@ -77,6 +77,7 @@ public:
 	void setMarkersReceived();	// must be called by the markers receiver to inform the process that the markers have been successfully received
 	void addMarkers(AwMarkerList *markers);
 	void addMarker(AwMarker *marker);
+	void sendEventAsynch(QSharedPointer<AwEvent> e);
 
 	/** specific to process which supports command line batching. **/
 	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
@@ -108,7 +109,7 @@ protected:
 	AwProcessPlugin *m_plugin;
 	// thread specific
 	QMutex m_lock;
-	QWaitCondition m_wcMarkersReceived;
+	QWaitCondition m_wcMarkersReceived, m_wcEventProcessed;
 	QMutex m_mutexMarkersReceived;
 };
 

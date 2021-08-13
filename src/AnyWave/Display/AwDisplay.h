@@ -93,6 +93,7 @@ signals:
 	void draggedCursorPositionChanged(float pos);
 	void QTSModeEnded();
 public slots:
+	void processEvent(QSharedPointer<AwEvent>);
 	void updateSetup(AwDisplaySetup *setup, int flags);
 	void executeCommand(int command, const QVariantList& args);
 	void handleCommand(const QVariantMap& map);

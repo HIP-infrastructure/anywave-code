@@ -24,6 +24,7 @@
 #include <filter/AwFilterSettings.h>
 #include <QMessageBox>
 #include <AwCore.h>
+#include <AwEvent.h>
 
 // use layout manager to store a layout in the matlab file
 #include <layout/AwLayoutManager.h>
@@ -328,10 +329,21 @@ void ICA::run()
 	if (!isAborted()) {
 		saveToFile();
 
-		// tell AnyWave to load ICA components
-		QVariantList args;
-		args.append(m_fileName);
-		emit sendCommand(AwProcessCommand::LoadICA, args);
+		//// tell AnyWave to load ICA components
+		//QVariantList args;
+		//args.append(m_fileName);
+		//emit sendCommand(AwProcessCommand::LoadICA, args);
+		QSharedPointer<AwEvent> e = QSharedPointer<AwEvent>(new AwEvent());
+		e->setId(AwEvent::LoadICAMatFile);
+		QStringList args = { m_fileName };
+		e->addValue("args", args);
+		emit sendEvent(e);
+		// also send an event to open a signal view to visualise ICA components
+		QSharedPointer<AwEvent> e2 = QSharedPointer<AwEvent>(new AwEvent());
+		e2->setId(AwEvent::AddNewView);
+		QStringList filters = { AwChannel::typeToString(AwChannel::ICA) };
+		e2->addValue("filters", filters);
+		emit sendEvent(e2);
 	}
 }
 

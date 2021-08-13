@@ -251,7 +251,7 @@ void AwGraphicsScene::setPositionInFile(float pos)
 		m_currentMarkerItem->setPositionInFile(m_currentPosInFile);
 	updateMarkers();
 	if (!m_hmarkers.isEmpty()) { 
-		foreach (AwHighLightMarker *hm, m_hmarkers) {
+		for (AwHighLightMarker *hm : m_hmarkers) {
 			hm->setPositionInFile(m_currentPosInFile - m_startPosition);
 			hm->updatePosition();
 		}

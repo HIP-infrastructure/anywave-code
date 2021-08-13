@@ -610,6 +610,9 @@
     <ClCompile Include="Updater\AwDownloadGui.cpp">
       <Filter>Updater</Filter>
     </ClCompile>
+    <ClCompile Include="Display\AwDisplayEvents.cpp">
+      <Filter>Display</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1298,9 +1301,6 @@
     <ResourceCompile Include="AnyWave.rc" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="Marker\AwStatsWidget.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="Plugin\AwMATPyCreator.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -1312,6 +1312,9 @@
     </QtUic>
     <QtUic Include="Updater\AwDownloadGui.ui">
       <Filter>Updater</Filter>
+    </QtUic>
+    <QtUic Include="Marker\AwStatsWidget.ui">
+      <Filter>Marker</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

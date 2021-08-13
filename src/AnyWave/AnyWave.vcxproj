@@ -59,6 +59,7 @@
     <ClCompile Include="Display\AwChannelSelectionDial.cpp" />
     <ClCompile Include="Display\AwChannelSelectionModel.cpp" />
     <ClCompile Include="Display\AwDisplay.cpp" />
+    <ClCompile Include="Display\AwDisplayEvents.cpp" />
     <ClCompile Include="Display\AwDisplaySetup.cpp" />
     <ClCompile Include="Display\AwDisplaySetupManager.cpp" />
     <ClCompile Include="Display\AwDSMSaveSetupUI.cpp" />

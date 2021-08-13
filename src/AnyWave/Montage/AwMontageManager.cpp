@@ -528,6 +528,21 @@ void AwMontageManager::saveCurrentMontage()
 	save(m_montagePath);
 }
 
+void AwMontageManager::processEvent(QSharedPointer<AwEvent> e)
+{
+	auto data = e->data();
+	switch (e->id())
+	{
+	case AwEvent::LoadICAMatFile:
+	{
+		QStringList args = data.value("args").toStringList();
+		Q_ASSERT(args.size());
+		loadICA(args.first());
+	}
+		break;
+	}
+}
+
 //
 // showInterface()
 //

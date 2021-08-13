@@ -875,39 +875,45 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 	for (auto m : markers)
 		map.insert(m->label(), m);
 	auto uniqueKeys = map.uniqueKeys();
+
+	auto compareMarkers = [](AwMarker* m, AwMarker *m1) {
+		const float tol = 0.005;
+		float pos = std::abs(m1->start() - m->start());
+		float dur = std::abs(m1->duration() - m->duration());
+
+		bool res = pos <= tol && dur <= tol;
+		if (res) { // check that targets are similar
+			QStringList t1 = m1->targetChannels();
+			QStringList t2 = m->targetChannels();
+			if (t1.isEmpty() && t2.isEmpty())
+				return true;
+			if (t1.size() != t2.size())
+				return false;
+			for (int i = 0; i < t1.size(); i++) {
+				QString s1 = t1.at(i);
+				QString s2 = t2.at(i);
+				if (s1.compare(s2, Qt::CaseSensitive) != 0)
+					return false;
+			}
+			return true;
+		}
+		return res;
+	};
 	
 	for (auto const& k : uniqueKeys) {
 		AwMarkerList values = map.values(k);
 		if (values.size() > 1) {
 			std::sort(values.begin(), values.end(), AwMarkerLessThan);
-			auto m = values.takeFirst();
-			auto f = [m](AwMarker* m1) { 
-				const float tol = 0.005;
-				float pos = std::abs(m1->start() - m->start());
-				float dur = std::abs(m1->duration() - m->duration());
-				
-				bool res = pos <= tol && dur <= tol;
-				if (res) { // check that targets are similar
-					QStringList t1 = m1->targetChannels();
-					QStringList t2 = m->targetChannels();
-					if (t1.isEmpty() && t2.isEmpty())
-						return true;
-					if (t1.size() != t2.size())
-						return false;
-					for (int i = 0; i < t1.size(); i++) {
-						QString s1 = t1.at(i);
-						QString s2 = t2.at(i);
-						if (s1.compare(s2, Qt::CaseSensitive) != 0) 
-							return false;
-					}
-					return true;
+			int index = 0;
+			do {
+				auto m = values.at(index);
+				auto m1 = values.at(index + 1);
+				if (compareMarkers(m, m1)) {
+					if (!removed.contains(m1))
+						removed.append(m1);
 				}
-				return res;
-			};
-			auto it = std::remove_if(values.begin(), values.end(), f);
-			for (auto &i = it; i < values.end(); i++) {
-				removed << *i;
-			}
+				index++;
+			} while (index < values.size() - 1);
 		}
 	}
 	for (auto m : removed) 

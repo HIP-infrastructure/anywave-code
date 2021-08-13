@@ -450,3 +450,15 @@ void AwBaseSignalView::openFilterGUI()
 		m_filterSettings.initWithChannels(m_channels);
 	ui->show();
 }
+
+void AwBaseSignalView::processEvent(QSharedPointer<AwEvent> e)
+{
+	auto data = e->data();
+	switch (e->id()) {
+	case AwEvent::ShowChannels:
+		break;
+	case AwEvent::HighlightTimeSelection:
+
+		break;
+	}
+}

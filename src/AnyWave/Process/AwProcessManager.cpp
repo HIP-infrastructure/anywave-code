@@ -806,7 +806,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 		//connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
 		//connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
-		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)), Qt::UniqueConnection);
+		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
 		connect(p, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
 		connect(p, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
 		
@@ -1119,13 +1119,20 @@ void AwProcessManager::processEvent(QSharedPointer<AwEvent> e)
 	QMutexLocker lock(&m_mutex);
 	// make sure the event received is compatible
 	int id = e->id();
+	auto data = e->data();
 	switch (id) {
 	case AwEvent::StartProcess:
-		auto data = e->data();
 		if (data.contains("process_name")) {
 			QStringList args = data.value("args").toStringList();
 			startProcess(data.value("process_name").toString(), args);
 		}
+		break;
+	case AwEvent::LoadICAMatFile:
+	{
+		QStringList args = data.value("args").toStringList();
+		if (args.size())
+			AwMontageManager::instance()->loadICA(args.first());
+	}
 		break;
 	}
 }

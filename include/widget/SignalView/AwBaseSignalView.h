@@ -25,6 +25,8 @@
 #include <widget/AwMarkerInspector.h>
 #include <filter/AwFilterSettings.h>
 #include <QTime>
+#include <AwEvent.h>
+
 
 class AW_WIDGETS_EXPORT AwBaseSignalView : public QWidget
 {
@@ -91,6 +93,7 @@ public slots:
 	void showMarkersLabels(bool flag);
 	void stackChannels(bool flag);
 	void openFilterGUI();
+	virtual void processEvent(QSharedPointer<AwEvent>);
 signals:
 	void settingsChanged(AwViewSettings *settings, int flags);
 	void positionChanged(float position);	// send when the position in file changed.

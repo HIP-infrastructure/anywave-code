@@ -171,7 +171,7 @@ protected:
 	AwMarkerList m_selectedMarkers;			// current selected markers
 	AwMarkerList m_markers;	// current markers in the scene
 	AwMarker m_mappingMarker;	// marker used to store the current mapping position and duration
-	QList<AwGraphicsMarkerItem *> m_markerItemsDisplayed;
+	QList<AwGraphicsMarkerItem*> m_markerItemsDisplayed;
 	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;
 	QMap<QString, AwCursorItem *> m_cursors;
