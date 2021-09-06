@@ -12,10 +12,13 @@ SET(AnyWave_SRCS
 	./AwMATLAB.cpp
     ./AwExportDial.cpp  
     ./AwNoGUI.cpp  
-    ./AwUpdater.cpp  
     ./AwOpenFileDialog.cpp
     ./main.cpp  
 	./AwFileOpenSave.cpp
+    ./3DViewer/AwSEEGViewer.cpp
+    ./3DViewer/AwSEEGWidget.cpp
+    ./3DViewer/AwSEEGInteractor.cpp
+    ./3DViewer/vtkPialReader.cpp
 	./Batch/AwAddEditBatchDialog.cpp
 	./Batch/AwBatchManager.cpp
 	./Batch/AwBatchGUI.cpp
@@ -52,10 +55,9 @@ SET(AnyWave_SRCS
     ./Display/AwSignalView.cpp  
     ./Display/AwViewSetup.cpp  
     ./Display/AwVideoManager.cpp  
+    ./Display/AwDisplayEvents.cpp
     ./Filter/AwFilterToolBar.cpp  
-    ./IO/ADES/ADESIO.cpp  
-    ./IO/HDF5/HDF5IO.cpp  
-    ./IO/HDF5/structs.cpp  
+    ./IO/ADES/ADESIO.cpp   
     ./IO/MATLAB/MATLABIO.cpp  
     ./IO/BIDS/AwBIDSGUI.cpp  
     ./IO/BIDS/AwBIDSItem.cpp  
@@ -137,6 +139,9 @@ SET(AnyWave_SRCS
     ./Process/TPUi.cpp  
     ./Process/AwLogPlainTextEdit.cpp
     ./Process/AwMATLABMarkersExporter.cpp 
+    ./Updater/AwDownloadGui.cpp
+    ./Updater/AwUpdateManager.cpp
+    ./Updater/AwUpdaterGui.cpp
     ./Widgets/AwAboutAnyWave.cpp  
     ./Widgets/AwCursorMarkerToolBar.cpp  
     ./Widgets/AwDisplaySetupToolBar.cpp  
@@ -159,7 +164,8 @@ SET(AnyWave_SRCS
     ./ICA/AwICARejectButton.cpp  
     ./ICA/AwICASignalItem.cpp  
     ./ICA/AwMappingButton.cpp  
-    ./ICA/AwPanelItem.cpp  
+    ./ICA/AwPanelItem.cpp
+    ./ICA/AwSEEGMap.cpp  
     ./Prefs/AwPreferences.cpp  
     ./Prefs/AwPrefsDial.cpp  
     ./Prefs/AwSettings.cpp  
@@ -168,6 +174,10 @@ SET(AnyWave_SRCS
 
 SET(HEADERS 	
     ./AwComponents.h
+    ./3DViewer/AwSEEGViewer.h
+    ./3DViewer/AwSEEGWidget.h
+    ./3DViewer/AwSEEGInteractor.h
+    ./3DViewer/vtkPialReader.h
     ./Batch/AwAddEditBatchDialog.h
 	./Batch/AwBatchDialog.h
 	./Batch/AwBatchGUI.h
@@ -201,8 +211,6 @@ SET(HEADERS
     ./Display/AwVideoManager.h  
     ./Filter/AwFilterToolBar.h  
     ./IO/ADES/ADESIO.h  
-    ./IO/HDF5/structs.h  
-    ./IO/HDF5/HDF5IO.h  
     ./IO/MATLAB/MATLABIO.h  
     ./IO/BIDS/AwBIDSItem.h  
     ./IO/BIDS/AwBIDSManager.h  
@@ -260,7 +268,10 @@ SET(HEADERS
     ./Process/AwMatlabScriptPlugin.h  
     ./Process/AwConverter.h  
     ./Process/AwLogPlainTextEdit.h 
-    ./Process/AwMATLABMarkersExporter.h 
+    ./Process/AwMATLABMarkersExporter.h
+    ./Updater/AwDownloadGui.h
+    ./Updater/AwUpdateManager.h
+    ./Updater/AwUpdaterGui.h
     ./Widgets/AwSelectTriggerChannelDialog.h  
     ./Widgets/AwTriggerParsingDialog.h  
     ./Widgets/AwPleaseWaitWidget.h  
@@ -284,8 +295,8 @@ SET(HEADERS
     ./ICA/AwICAComponents.h  
     ./ICA/AwICASignalItem.h  
     ./ICA/AwICARejectButton.h  
+    ./ICA/AwSEEGMap.h  
     ./AwOpenFileDialog.h
-    ./AwUpdater.h  
     ./AwExportDial.h  
     ./AnyWave.h  
     ./CL/AwCommandLogger.h
@@ -300,6 +311,7 @@ QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
 
 SET(FORMS ./AnyWave.ui  
     ./AwExportDial.ui  
+    ./3DViewer/AwSEEGWidget.ui
 	./Batch/AwAddEditBatchDialog.ui
 	./Batch/AwBatchGUI.ui
 	./Batch/AwBatchFileInputWidget.ui
@@ -336,6 +348,8 @@ SET(FORMS ./AnyWave.ui
     ./Process/AwExporterSettings.ui  
     ./Process/AwExportSelChannels.ui  
     ./Process/AwExporterSelMarkers.ui  
+    ./Updater/AwDownloadGui.ui
+    ./Updater/AwUpdaterGui.ui
     ./Widgets/AwAboutAnyWave.ui  
     ./Widgets/AwCursorMarkerToolBar.ui  
     ./Widgets/AwDisplaySetupToolBar.ui  
@@ -363,8 +377,6 @@ AwLayout
 AwMath 
 AwMapping
 AwFiltering 
-AwMATLAB 
-#AwEpoch
 AwMATLAB)
 
 INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})

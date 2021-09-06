@@ -6,7 +6,7 @@ project(AnyWave)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
    MESSAGE(STATUS "Apple clang compiler detected")
    SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
-   add_definitions("-w -fPIC -O3 -fpermissive -mmacosx-version-min=10.13") # clang flags
+   add_definitions("-w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13") # clang flags
    #SET(CLANG ON)
 # apple clang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -15,7 +15,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
    SET(GCC ON)
 endif()
 
-SET(CMAKE_BUILD_TYPE "Release") # build in release mode
+SET(CMAKE_BUILD_TYPE Release) # build in release mode
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -28,6 +28,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+#INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

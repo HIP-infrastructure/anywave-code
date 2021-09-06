@@ -55,7 +55,6 @@ void AwAboutAnyWave::openLicense()
 
 void AwAboutAnyWave::getLatestUpdate()
 {
-	//QDesktopServices::openUrl(QUrl(AwSettings::getInstance()->value(aws::update_url).toString()));
 	m_um->checkForUpdates();
 	if (!m_um->updatesAvailable()) 
 		AwMessageBox::information(this, "Updates", "Everything is up to date.");

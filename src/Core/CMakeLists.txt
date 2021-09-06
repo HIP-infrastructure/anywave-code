@@ -5,6 +5,8 @@ add_definitions("-DAW_BUILD_CORE_LIB")
 
 SET(HEADERS     
     ../../include/AwDataClient.h 
+    ../../include/AwEvent.h 
+    ../../include/AwEventManager.h 
     ../../include/AwMEGSensorManager.h 
     ../../include/AwSensor.h 
     ../../include/AwDataBuffer.h)
@@ -14,7 +16,9 @@ SET(SRC     AwChannel.cpp
     AwMarker.cpp 
     AwMEGSensorManager.cpp 
     AwSensor.cpp 
-    AwDataBuffer.cpp)
+    AwDataBuffer.cpp
+    AwEvent.cpp
+    AwEventManager.cpp)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 add_library(AwCore SHARED ${MOC} ${SRC})

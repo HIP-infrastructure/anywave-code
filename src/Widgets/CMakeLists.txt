@@ -43,16 +43,12 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/SignalView/AwGraphicsScene.h  
     ../../include/widget/SignalView/AwGraphicsView.h  
     ../../include/widget/SignalView/AwNavigationBar.h  
-    ./SEEGViewer/AwSEEGInteractor.h  
-    ../../include/widget/AwSEEGViewer.h  
-    ../../include/widget/AwSEEGWidget.h  
     ./InputMarker/InputMarkerModel.h  
     ../../include/widget/AwInputMarkerTableView.h  
     ../../include/widget/AwInputMarkerWidget.h
 	../../include/widget/AwVideoPlayer.h
 	../../include/widget/AwGraphicsObjects.h 
 ../../include/widget/AwGraphicInterface.h 
-	../../include/AwAmplitudeManager.h 
     MarkerItem/AwMarkerLabelButton.h 
     MarkerItem/AwMarkerValueButton.h 
     SignalItem/AwSIAmpButton.h 
@@ -109,9 +105,6 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SignalView/AwViewSettingsUi.cpp  
     ./SignalView/AwPickMarkersDial.cpp 
     ./SignalView/AwGainLevelsWidget.cpp
-    ./SEEGViewer/AwSEEGInteractor.cpp  
-    ./SEEGViewer/AwSEEGViewer.cpp  
-    ./SEEGViewer/AwSEEGWidget.cpp  
     ./InputMarker/AwInputMarkerTableView.cpp  
     ./InputMarker/AwInputMarkerWidget.cpp  
     ./InputMarker/InputMarkerModel.cpp
@@ -151,7 +144,6 @@ SET(FORMS  ./AwSelectInputDataWidget.ui
     ./SignalView/AwNavigationBarv2.ui  
     ./SignalView/AwViewSettingsUi.ui  
     ./SignalView/AwPickMarkersDial.ui 
-    ./SEEGViewer/AwSEEGWidget.ui  
 	./AwVideoPlayer.ui
     ./InputMarker/AwInputMarkerWidget.ui
 	SignalItem/AwSignalItemSettings.ui)
@@ -160,7 +152,7 @@ QT5_WRAP_UI(UI ${FORMS})
 
 ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
 QT5_USE_MODULES(AwWidget Core Widgets PrintSupport Multimedia MultimediaWidgets)
-TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
+TARGET_LINK_LIBRARIES(AwWidget AwCore AwMath AwMapping AwUtilities AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
   Qt5::MultimediaWidgets ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
 
 IF (APPLE)

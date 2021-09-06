@@ -133,13 +133,13 @@ void AwUpdateManager::loadJSON()
 			m_downloadGui = std::make_unique<AwDownloadGui>();
 			m_downloadGui.get()->show();
 			installUpdates();
-			m_updatesAvailable = false;
+		//	m_updatesAvailable = false;
 		}
 	}
-	//else {
-	//	m_updatesAvailable = false;
+	else {
+		m_updatesAvailable = false;
 	//	//AwMessageBox::information(nullptr, "AnyWave Updates", "Everything is up to date.");
-	//}
+	}
 }
 
 bool AwUpdateManager::checkForComponentsUpdates()
@@ -228,10 +228,15 @@ void AwUpdateManager::componentDownloaded(QNetworkReply *reply)
 	// install the update
 	auto c = m_selectedComponents.at(m_currentIndex);
 	if (c->name == "AnyWave") {
+	#ifdef Q_OS_WIN
 		QProcess::startDetached(m_file.fileName());
 		exit(0);
+	#endif
+	#ifdef Q_OS_MAC
+		QProcess::startDetached("open", {m_file.fileName()});
+		exit(0);
+	#endif
 	}
-
 	auto aws = AwSettings::getInstance();
 	// plugin
 	auto pm = AwPluginManager::getInstance();
