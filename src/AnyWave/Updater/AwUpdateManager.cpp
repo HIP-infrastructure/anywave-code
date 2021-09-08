@@ -34,7 +34,9 @@ AwUpdateManager::AwUpdateManager(QObject *parent) : QObject(parent)
 	auto aws = AwSettings::getInstance();
 	auto pm = AwProcessManager::instance();
 	m_updatesAvailable = false;
+	m_quiet = true;
 	connect(this, &AwUpdateManager::newPluginLoaded, pm, &AwProcessManager::addPlugin);
+	connect(this, &AwUpdateManager::installComplete, this, &AwUpdateManager::showInstalledComponents);
 }
 
 AwUpdateManager::~AwUpdateManager()
@@ -48,9 +50,10 @@ void AwUpdateManager::clearComponents()
 		delete m_components.takeLast();
 }
 
-void AwUpdateManager::checkForUpdates()
+void AwUpdateManager::checkForUpdates(bool quiet)
 {
 	clearComponents();
+	m_quiet = quiet;
 	connect(&m_networkManager, &QNetworkAccessManager::finished, this,
 		&AwUpdateManager::fileDownloaded);
 	// get json file
@@ -123,6 +126,7 @@ void AwUpdateManager::loadJSON()
 		}
 	}
 	if (checkForComponentsUpdates()) {
+
 		AwUpdaterGui gui(this);
 		if (gui.exec() == QDialog::Accepted) {
 			m_selectedComponents = gui.selectedComponents();
@@ -137,8 +141,9 @@ void AwUpdateManager::loadJSON()
 		}
 	}
 	else {
-		m_updatesAvailable = false;
-	//	//AwMessageBox::information(nullptr, "AnyWave Updates", "Everything is up to date.");
+		//m_updatesAvailable = false;
+		if (!m_quiet)
+			AwMessageBox::information(nullptr, "AnyWave Updates", "Everything is up to date.");
 	}
 }
 
@@ -199,6 +204,7 @@ void AwUpdateManager::installUpdates()
 {
 	if (m_currentIndex == m_selectedComponents.size()) {
 		m_downloadGui.get()->close();
+		emit installComplete();
 		return;
 	}
 	auto c = m_selectedComponents.at(m_currentIndex);
@@ -254,4 +260,9 @@ void AwUpdateManager::componentDownloaded(QNetworkReply *reply)
 void AwUpdateManager::updateDownloadProgress(qint64, qint64)
 {
 	m_file.write(m_reply->readAll());
+}
+
+void AwUpdateManager::showInstalledComponents()
+{
+	AwMessageBox::information(nullptr, "Updates", "Components updated successfully");
 }

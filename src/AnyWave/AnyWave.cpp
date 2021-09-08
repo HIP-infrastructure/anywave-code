@@ -266,7 +266,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	m_updateManager = new AwUpdateManager(this);
 	connect(m_updateManager, SIGNAL(newPluginLoaded(QObject*)), this, SLOT(initPluginsHelpMenu()));
 	if (aws->value(aws::check_updates).toBool())
-		m_updateManager->checkForUpdates();
+		m_updateManager->checkForUpdates(true);
 
 	m_lastDirOpen = "/";
 	readSettings();
