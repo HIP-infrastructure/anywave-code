@@ -4,6 +4,7 @@
 #include <QNetworkReply>
 #include <QFile>
 class AwDownloadGui;
+#include <memory>
 
 class Component
 {

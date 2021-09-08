@@ -10,6 +10,8 @@
 #include <QStandardPaths>
 #include <QProcess>
 #include "Process/AwProcessManager.h"
+#include <cmath>
+
 
 Component::Component()
 {
@@ -220,7 +222,9 @@ void AwUpdateManager::installUpdates()
 	m_downloadGui->setText(QString("Downloading %1...").arg(c->name));
 	QNetworkRequest request(c->url);
 	m_reply = m_networkManager.get(request);
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
 	connect(m_reply, &QNetworkReply::errorOccurred, this, &AwUpdateManager::error);
+#endif
 	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), m_downloadGui.get(), SLOT(updateDownloadProgress(qint64, qint64)));
 	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(updateDownloadProgress(qint64, qint64)));
 

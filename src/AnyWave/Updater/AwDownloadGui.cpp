@@ -1,4 +1,5 @@
 #include "AwDownloadGui.h"
+#include <cmath>
 
 AwDownloadGui::AwDownloadGui(QWidget *parent)
 	: QDialog(parent)

@@ -248,7 +248,7 @@ void AwMarkerInspector::removeSelectedPredefinedMarkers()
 	QStringList names;
 	AwMarkerList markers;
 	for (int i = 0; i < m_ui->table->rowCount(); i++) {
-		if (selectionModel->isRowSelected(i)) {
+		if (selectionModel->isRowSelected(i, QModelIndex())) {
 			markers << m_settings.predefinedMarkers.at(i);
 			m_ui->table->removeRow(i);
 		}

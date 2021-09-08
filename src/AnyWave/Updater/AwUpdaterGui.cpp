@@ -67,7 +67,7 @@ void AwUpdaterGui::accept()
 	auto selectionModel = m_ui.tableWidget->selectionModel();
 	QStringList names;
 	for (int i = 0; i < m_ui.tableWidget->rowCount(); i++) {
-		if (selectionModel->isRowSelected(i)) {
+		if (selectionModel->isRowSelected(i, QModelIndex())) {
 			auto item = m_ui.tableWidget->item(i, 0);
 			names << item->text();
 		}

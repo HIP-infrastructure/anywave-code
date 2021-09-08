@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <AwEventManager.h>
 #include <AwEvent.h>
+#include <QVector>
 
 // statics
 
