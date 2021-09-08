@@ -246,6 +246,10 @@ void AwUpdateManager::componentDownloaded(QNetworkReply *reply)
 		QProcess::startDetached("open", {m_file.fileName()});
 		exit(0);
 	#endif
+	#ifdef Q_OS_LINUX
+		QProcess::startDetached("nautilus",  {m_file.fileName()});
+		exit(0);
+	#endif
 	}
 	auto aws = AwSettings::getInstance();
 	// plugin
