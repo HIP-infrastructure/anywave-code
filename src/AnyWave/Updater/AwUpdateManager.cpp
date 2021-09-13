@@ -63,7 +63,7 @@ void AwUpdateManager::checkForUpdates(bool quiet)
 	auto aws = AwSettings::getInstance();
 	if (aws->value(aws::ins_version).toBool()) {
 		// get the update.json in app dir
-		QString jsonFile = QString("%1/update.json").arg(aws->value(aws::app_dir).toString());
+		QString jsonFile = QString("%1/update.json").arg(aws->value(aws::app_resource_dir).toString());
 		auto map = AwUtilities::json::fromJsonFileToMap(jsonFile);
 		updateUrl = map.value("url").toString();
 	}
