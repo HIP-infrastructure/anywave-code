@@ -60,6 +60,13 @@ void AwUpdateManager::checkForUpdates(bool quiet)
 		&AwUpdateManager::fileDownloaded);
 	// get json file
 	QString updateUrl = "https://meg.univ-amu.fr/AnyWave/updates/updates.json";
+	auto aws = AwSettings::getInstance();
+	if (aws->value(aws::ins_version).toBool()) {
+		// get the update.json in app dir
+		QString jsonFile = QString("%1/update.json").arg(aws->value(aws::app_dir).toString());
+		auto map = AwUtilities::json::fromJsonFileToMap(jsonFile);
+		updateUrl = map.value("url").toString();
+	}
 	QUrl url(updateUrl);
 	download(url);
 	connect(this, &AwUpdateManager::downloaded, this, &AwUpdateManager::loadJSON);
