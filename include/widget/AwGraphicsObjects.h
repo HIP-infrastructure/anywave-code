@@ -33,12 +33,16 @@ public:
 	void setSecsPerCm(float secsPerCm);
 	inline void setXPixPerSec(float xPixPerSec) { m_xPixPerSec = xPixPerSec; }
 	inline void setPageDuration(float dur) { m_pageDuration = dur; }
+	/** Compute x axis scaling for a fixed page duration **/
+	void setFixedPageDuration(float dur, int pageWidth);
 
 	inline float xPixPerCm() { return m_xPixPerCm; }
 	inline float yPixPerCm() { return m_yPixPerCm; }
 	inline float xPixPerSec() { return m_xPixPerSec; }
 	inline float pageDuration() { return m_pageDuration; }
 	inline float secsPerCm() { return m_secsPerCm; }
+
+	float pixelDuration();
 
 protected:
 	float m_xPixPerCm;

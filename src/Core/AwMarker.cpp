@@ -473,16 +473,41 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		for (auto m : inputMarkers)
 			markers.removeAll(m);
 
-		// revert selection using usedCut markers
-		auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
-		// reshape intersected markers using XOR
-		auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
-		// now cut all the markers.
-		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
-		AW_DESTROY_LIST(markers)
-		AW_DESTROY_LIST(reshaped)
-		AW_DESTROY_LIST(revertSelection)
-		markers = cutMarkers;
+		float newPosition = 0.;
+		AwMarkerList updatedMarkers;
+		for (auto m : inputMarkers) {
+			auto intersection = AwMarker::intersect(markers, m->start(), m->end());
+		//	m->setStart(newPosition);
+			if (intersection.size()) {
+				auto modifiedMarkers = AwMarker::duplicate(intersection);
+				for (auto modified : modifiedMarkers) {
+					// reshape intersected markers if  necessary
+					// if markers starts BEFORE, realign it to be in the input marker
+					if (modified->start() < m->start()) {
+						if (modified->duration())
+							modified->setDuration(m->start() - modified->start());
+						modified->setStart(m->start());
+					}
+					// be sure the marker don't expand after the input marker
+					modified->setEnd(std::min(m->end(), modified->end()));
+				}
+				updatedMarkers += modifiedMarkers;
+			}
+		}
+		AW_DESTROY_LIST(markers);
+		markers = updatedMarkers;
+		
+
+		//// revert selection using usedCut markers
+		//auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
+		//// reshape intersected markers using XOR
+		//auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
+		//// now cut all the markers.
+		//auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
+		//AW_DESTROY_LIST(markers)
+		//AW_DESTROY_LIST(reshaped)
+		//AW_DESTROY_LIST(revertSelection)
+		//markers = cutMarkers;
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);

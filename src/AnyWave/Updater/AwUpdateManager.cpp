@@ -67,8 +67,6 @@ void AwUpdateManager::checkForUpdates(bool quiet)
 		auto map = AwUtilities::json::fromJsonFileToMap(jsonFile);
 		updateUrl = map.value("url").toString();
 	}
-	QUrl url(updateUrl);
-	download(url);
 	connect(this, &AwUpdateManager::downloaded, this, &AwUpdateManager::loadJSON);
 }
 

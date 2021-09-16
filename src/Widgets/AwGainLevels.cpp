@@ -31,11 +31,8 @@ int AwGainLevel::insertNewValue(float v)
 	if (index == -1) {
 		vec tmp = { v };
 		m_values = arma::join_cols(m_values, tmp);
-		//auto size = m_values.size();
-		//m_values.resize(size + 1);
-		//m_values(size) = v;
 		m_values = sort(m_values);
-		
+
 		index = getIndexOfValue(v);
 		Q_ASSERT(index != -1);
 	}
@@ -135,7 +132,7 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 	case AwChannel::ICA:
 	{
 		vec a = regspace(1, 1, 9);
-		vec b = regspace(10, 100, 10000);
+		vec b = regspace(10, 1, 100000);
 		values = join_cols(a, b);
 		unit = QString("??/cm");
 		value = 310;
@@ -149,19 +146,19 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 	case AwChannel::Reference:
 	{
 		vec a = regspace(0.01, 0.1, 0.9);
-		vec b = regspace(1, 2, 500);
+		vec b = regspace(1, 1, 5000);
 		values = join_cols(a, b);
 		if (type == AwChannel::MEG) {
 			value = 3;
 			unit = QString::fromUtf8("pT/cm");
 		}
 		else if (type == AwChannel::GRAD) {
-			value = 21;
+			value = 200;
 			unit = QString::fromUtf8("pT/cm/cm");
 		}
 		else {
 			unit = QString::fromUtf8("pT/cm");
-			value = 23;
+			value = 200;
 		}
 		gl->setValues(values);
 		gl->setValue(value);

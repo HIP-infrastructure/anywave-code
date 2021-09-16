@@ -61,9 +61,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
 	void resizeEvent(QResizeEvent *e);
-
 	AwMarker *findMarkerBetween(float low, float high);
-	AwMarkerList findMarkersBetween(float low, float high);
 
 	AwMarker *m_markerUnderMouse;	// pointer to the current marker under the mouse when the user clicks in the bar. Can be NULL is no marker is under the mouse.
 	AwMarkerList m_markers, m_allMarkers;

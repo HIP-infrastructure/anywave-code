@@ -28,7 +28,7 @@
 AwDisplayPhysics::AwDisplayPhysics()
 {
 	QSettings settings;
-	m_xPixPerCm = settings.value("display/xPixPerCm").toDouble();
+	m_xPixPerCm = settings.value("display/xPixPerCm", 0.).toDouble();
 	m_yPixPerCm = settings.value("display/yPixPerCm").toDouble();
 
 	m_xPixPerCm = 0;
@@ -67,6 +67,7 @@ AwDisplayPhysics::AwDisplayPhysics()
 	}
 	m_xPixPerSec = m_secsPerCm = 0.;
 	m_pageDuration = 0;
+	m_fixedPageDuration = false;
 }
 
 void AwDisplayPhysics::setSecsPerCm(float secsPerCm)
@@ -75,6 +76,24 @@ void AwDisplayPhysics::setSecsPerCm(float secsPerCm)
 	m_xPixPerSec = m_xPixPerCm / secsPerCm;
 }
 
+void AwDisplayPhysics::setFixedPageDuration(float dur, int width)
+{
+	m_xPixPerSec = (float)width / dur;
+	m_fixedPageDuration = true;
+}
+
+float AwDisplayPhysics::pixelDuration()
+{
+	if (!m_fixedPageDuration)
+		return  (1. / m_xPixPerCm) * m_secsPerCm;
+	return 1. / m_xPixPerSec;
+}
+
+void AwDisplayPhysics::unsetFixedPageDuration()
+{
+	m_fixedPageDuration = false;
+	m_xPixPerSec = m_xPixPerCm / m_secsPerCm;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 // AwGraphicsItem

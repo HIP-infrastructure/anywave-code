@@ -273,7 +273,10 @@ void AwBaseSignalView::updateVisibleMarkers()
 
 void AwBaseSignalView::setMarkers(const AwMarkerList& markers)
 {
+	if (markers.isEmpty())
+		return;
 	m_markers = markers;
+	m_markerBar->setAllMarkers(markers);
 	updateVisibleMarkers();
 }
 
@@ -331,12 +334,18 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		else
 			reload = true;
 	}
+
+	if (flags & AwViewSettings::ShowMarkers)
+		m_scene->showMarkers(m_settings->showMarkers);
 	
 	if (flags & AwViewSettings::MarkerBarMode)
 		if (settings->markerBarMode == AwViewSettings::ShowMarkerBar)
 			m_markerBar->show();
 		else
 			m_markerBar->hide();
+
+	if (flags & AwViewSettings::TimeScaleMode) 
+		reload = true;
 
 	if (flags & AwViewSettings::SecPerCm)
 		reload = true;

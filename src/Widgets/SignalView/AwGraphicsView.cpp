@@ -31,6 +31,7 @@ AwGraphicsView::AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings,
 	applySettings(settings);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_secsPerCm = settings->secsPerCm;
+	m_timeScaleMode = settings->timeScaleMode;
 }	
 
 void AwGraphicsView::setTimeShift(float shift)
@@ -43,9 +44,17 @@ void AwGraphicsView::setTimeShift(float shift)
 void AwGraphicsView::computePageDuration()
 {
 	float w = (float)viewport()->rect().width();
-	m_pageDuration = (w / m_physics->xPixPerCm()) * m_settings->secsPerCm;
-	m_physics->setPageDuration(m_pageDuration);
-	m_physics->setXPixPerSec(w / m_pageDuration);
+	if (m_timeScaleMode == AwViewSettings::PaperLike) {
+		m_pageDuration = (w / m_physics->xPixPerCm()) * m_settings->secsPerCm;
+		m_physics->setXPixPerSec(w / m_pageDuration);
+		m_physics->setPageDuration(m_pageDuration);
+	}
+	else {
+		m_pageDuration = m_settings->fixedPageDuration;
+		//m_physics->setXPixPerSec(w / m_pageDuration);
+		m_physics->setPageDuration(m_pageDuration);
+		m_physics->setFixedPageDuration(m_pageDuration, w);
+	}
 }
 
 
@@ -53,7 +62,13 @@ void AwGraphicsView::resizeEvent(QResizeEvent *event)
 {
 	float duration = m_pageDuration;
 	// update page duration
-	computePageDuration();
+	if (m_settings->timeScaleMode == AwViewSettings::PaperLike)
+		computePageDuration();
+	else {
+		float w = (float)viewport()->rect().width();
+		m_physics->setPageDuration(m_pageDuration);
+		m_physics->setFixedPageDuration(m_pageDuration, w);
+	}
 	layoutItems();
 
 	// don't send signal if duration is the same.
@@ -425,7 +440,7 @@ void AwGraphicsView::layoutItems()
 
 void AwGraphicsView::applySettings(AwViewSettings *settings)
 {
-	if (settings == NULL)
+	if (settings == nullptr)
 		return;
 	m_settings = settings;
 	m_secsPerCm = settings->secsPerCm;
@@ -453,6 +468,22 @@ void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 			computePageDuration();
 			m_secsPerCm = m_settings->secsPerCm;
 			emit pageDurationChanged(m_pageDuration);
+		}
+	}
+
+	if (flags & AwViewSettings::TimeScaleMode) {
+		if (m_settings->timeScaleMode != m_timeScaleMode) {
+			m_timeScaleMode = settings->timeScaleMode;
+			if (m_timeScaleMode == AwViewSettings::PaperLike) {
+				m_physics->setSecsPerCm(settings->secsPerCm);
+				computePageDuration();
+				m_secsPerCm = m_settings->secsPerCm;
+				emit pageDurationChanged(m_pageDuration);
+			}
+			else {
+				computePageDuration();
+				emit pageDurationChanged(m_pageDuration);
+			}
 		}
 	}
 

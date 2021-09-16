@@ -91,7 +91,18 @@ void AwExporter::runFromCommandLine()
 	if (modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied) {
 		auto merged = AwMarker::merge(pdi.input.markers());
 		auto modified = pdi.input.modifiedMarkers();
-		AwMarker::applyANDOperation(merged, modified);
+		if (modified.size()) {
+			// concatenante all the markers : shift them left in time to match the concatenation of input markers
+			float pos = 0.;
+			for (auto m : merged) {
+				auto intersection = AwMarker::intersect(modified, m->start(), m->end());
+				float shift = m->start() - pos;
+				for (auto inter : intersection) 
+					inter->setStart(inter->start() - shift);
+				pos += m->duration();
+			}
+		}
+		//AwMarker::applyANDOperation(merged, modified);
 		//block->setMarkers(pdi.input.modifiedMarkers());
 		block->setMarkers(modified);
 		pdi.input.setNewMarkers(merged);

@@ -28,6 +28,9 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	markerBarMode = AwViewSettings::ShowMarkerBar;
 	timeMode = AwViewSettings::ShowRelativeTime;
 	eegDisplayMode = true; // display EEG channels upside down
+	timeScaleMode = AwViewSettings::PaperLike;
+	fixedPageDuration = 0;
+	showMarkers = false;
 	gainLevels = new AwGainLevels(this);
 }
 
@@ -48,4 +51,7 @@ AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObjec
 	timeMode = source->timeMode;
 	eegDisplayMode = source->eegDisplayMode;
 	gainLevels = new AwGainLevels(source->gainLevels, this);
+	timeScaleMode = source->timeScaleMode;
+	showMarkers = source->showMarkers;
+	fixedPageDuration = source->fixedPageDuration;
 }

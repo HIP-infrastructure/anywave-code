@@ -30,14 +30,19 @@ public:
 		ShowMarkerLabel = 0x8, ShowMarkerValue = 0xA, ShowBaseLine = 0x20, ShowTimeGrid = 0x40, 
 		ShowSecondTicks = 0x80, ShowSensors = 0x100, Overlay = 0x200, MarkerBarMode = 0x400, 
 		SecPerCm = 0x800, ShowMarkerBar = 0x1000, HideMarkerBar = 0x2000, ShowRelativeTime = 0x4000, ShowRecordedTime = 0x8000, 
-	    EEGMode = 0x10000 };
+	    EEGMode = 0x10000, ShowMarkers = 0x20000, TimeScaleMode = 0x40000 };
+	enum TimeScale { PaperLike, FixedPageDuration };
 
 	int maxChannels, markerBarMode;
 	bool limitChannels, showMarkerLabels, showMarkerValues, showZeroLine, showTimeGrid, showSeconds, showSensors, stackChannels;
 	int timeMode;	// should be ShowRelativeTime or ShowRecordedTime
+	int timeScaleMode;
+	float fixedPageDuration;
+	bool showMarkers; // true to display the markers in the signal view
 	bool eegDisplayMode;
 	QList<int> filters;
 	float secsPerCm;
+
 	AwGainLevels *gainLevels;
 };
 

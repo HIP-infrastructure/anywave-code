@@ -40,6 +40,8 @@ AwViewSettingsUi::AwViewSettingsUi(AwViewSettings *settings, QWidget *parent)
 			col = 0;
 		}
 	}
+	// hide page duration at startup
+	spinPageDuration->hide();
 }
 
 void AwViewSettingsUi::selectAllFilters()
@@ -71,6 +73,10 @@ int AwViewSettingsUi::exec()
 	checkMarkerLabel->setChecked(m_settings->showMarkerLabels);
 	checkMarkerValue->setChecked(m_settings->showMarkerValues); 
 	checkEEGDisplay->setChecked(m_settings->eegDisplayMode);
+	checkShowMarkers->setChecked(m_settings->showMarkers);
+	radioPageDuration->setChecked(m_settings->timeScaleMode != AwViewSettings::PaperLike);
+
+
 	unselectAllFilters();
 
 	for (auto cb : m_checkBoxes.keys()) {
@@ -108,6 +114,19 @@ void AwViewSettingsUi::accept()
 	AwViewSettings *copiedSettings = new AwViewSettings(m_settings, this);
 
 	// comparing new setup with copied one
+	m_settings->showMarkers = checkShowMarkers->isChecked();
+	if (copiedSettings->showMarkers != m_settings->showMarkers)
+		flags |= AwViewSettings::ShowMarkers;
+	if (radioPageDuration->isChecked()) {
+		m_settings->timeScaleMode = AwViewSettings::FixedPageDuration;
+		m_settings->fixedPageDuration = spinPageDuration->value();
+	}
+	else
+		m_settings->timeScaleMode = AwViewSettings::PaperLike;
+
+	if (m_settings->timeScaleMode != copiedSettings->timeScaleMode) 
+		flags |= AwViewSettings::TimeScaleMode;
+
 	m_settings->showTimeGrid = checkTime->isChecked();
 	if (copiedSettings->showTimeGrid != m_settings->showTimeGrid)
 		flags |= AwViewSettings::ShowTimeGrid;

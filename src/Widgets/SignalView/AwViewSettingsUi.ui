@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>682</width>
-    <height>479</height>
+    <width>859</width>
+    <height>504</height>
    </rect>
   </property>
   <property name="font">
@@ -70,19 +70,6 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="checkSeconds">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Show time values</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QCheckBox" name="checkTime">
            <property name="sizePolicy">
@@ -106,6 +93,19 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QCheckBox" name="checkSeconds">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Show time values</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -121,7 +121,17 @@
          <string>Markers</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="checkMarkerValue">
+           <property name="text">
+            <string>Show value</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
           <widget class="QCheckBox" name="checkMarkerLabel">
            <property name="text">
             <string>Show label</string>
@@ -131,13 +141,10 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="checkMarkerValue">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkShowMarkers">
            <property name="text">
-            <string>Show value</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
+            <string>Show in signal view</string>
            </property>
           </widget>
          </item>
@@ -304,6 +311,77 @@
         </layout>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Time Scale</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QRadioButton" name="radioButton">
+           <property name="text">
+            <string>Paper like</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QRadioButton" name="radioPageDuration">
+             <property name="text">
+              <string>Fixed page duration</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinPageDuration">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="suffix">
+              <string>s</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="singleStep">
+              <number>4</number>
+             </property>
+             <property name="value">
+              <number>30</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -418,8 +496,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>536</x>
-     <y>406</y>
+     <x>767</x>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>204</x>
@@ -434,8 +512,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>617</x>
-     <y>406</y>
+     <x>848</x>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>134</x>
@@ -450,12 +528,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>541</x>
-     <y>87</y>
+     <x>822</x>
+     <y>83</y>
     </hint>
     <hint type="destinationlabel">
-     <x>598</x>
-     <y>120</y>
+     <x>822</x>
+     <y>112</y>
     </hint>
    </hints>
   </connection>
@@ -488,6 +566,22 @@
     <hint type="destinationlabel">
      <x>228</x>
      <y>118</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioPageDuration</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinPageDuration</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>420</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>453</x>
+     <y>219</y>
     </hint>
    </hints>
   </connection>

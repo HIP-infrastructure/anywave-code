@@ -46,7 +46,7 @@ void AwMarkersBar::contextMenuEvent(QContextMenuEvent *e)
 			if (!plugins.isEmpty()) 	{
 				m_markerUnderMouse = found;
 				processMenu = new QMenu(tr("Processes"), m_menu);
-				foreach(AwProcessPlugin *p, plugins) {
+				for (AwProcessPlugin *p : plugins) {
 					QAction *act = new QAction(p->name, processMenu);
 					act->setData(QVariant(p->name));
 					connect(act, SIGNAL(triggered()), this, SLOT(launchProcess()));

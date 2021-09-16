@@ -190,6 +190,16 @@ void AwNavigationBar::updateSettings(AwViewSettings *settings, int flags)
 			ui->comboSecsPerCm->setCurrentIndex(index);
 		connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
 	}
+	if (flags & AwViewSettings::TimeScaleMode) {
+		if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
+			ui->comboSecsPerCm->hide();
+			ui->labelSecsPerCm->hide();
+		}
+		else {
+			ui->comboSecsPerCm->show();
+			ui->labelSecsPerCm->show();
+		}
+	}
 }
 
 /** change current settings and relay that to all other involved objects **/
