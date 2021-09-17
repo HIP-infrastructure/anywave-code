@@ -95,7 +95,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>SPECTRAL_LIB;MKL;QCUSTOMPLOT_USE_LIBRARY;COMPUTE_MP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPECTRAL_LIB;MKL;QCUSTOMPLOT_USE_LIBRARY;COMPUTE_MP;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,7 +109,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>SPECTRAL_LIB;QCUSTOMPLOT_USE_LIBRARY;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPECTRAL_LIB;QCUSTOMPLOT_USE_LIBRARY;MKL;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

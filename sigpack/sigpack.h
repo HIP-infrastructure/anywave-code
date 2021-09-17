@@ -28,7 +28,7 @@
 
 
 #ifndef ARMA_INCLUDES
-#include <armadillo>
+#include <aw_armadillo.h>
 #endif
 
 #ifndef SIGPACK_H

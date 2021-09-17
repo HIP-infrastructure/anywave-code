@@ -75,7 +75,7 @@ int AwViewSettingsUi::exec()
 	checkEEGDisplay->setChecked(m_settings->eegDisplayMode);
 	checkShowMarkers->setChecked(m_settings->showMarkers);
 	radioPageDuration->setChecked(m_settings->timeScaleMode != AwViewSettings::PaperLike);
-
+	spinPageDuration->setValue(m_settings->fixedPageDuration);
 
 	unselectAllFilters();
 
@@ -195,7 +195,7 @@ void AwViewSettingsUi::accept()
 		m_settings->timeMode = AwViewSettings::ShowRecordedTime;
 
 	if (copiedSettings->timeMode != m_settings->timeMode)
-		flags |= m_settings->timeMode;
+		flags |= AwViewSettings::TimeRepresentation;
 
 	if (flags)
 		emit settingsChanged(m_settings, flags);

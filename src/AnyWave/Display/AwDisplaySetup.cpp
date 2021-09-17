@@ -176,7 +176,7 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 				}
 				else if (e.tagName() == "MarkersBar")
 					if (e.text().toLower() == "show")
-						setup->markerBarMode= AwViewSettings::ShowMarkerBar;
+						setup->markerBarMode = AwViewSettings::ShowMarkerBar;
 					else
 						setup->markerBarMode = AwViewSettings::HideMarkerBar;
 				else if (e.tagName() == "Filters") {
@@ -196,6 +196,10 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 						gl->setValue(list.at(i).toElement().attribute("value").toFloat());
 					}
 				}
+				else if (e.tagName() == "TimeScaleMode")
+					setup->timeScaleMode = e.text().toInt();
+				else if (e.tagName() == "TimeScaleFixedPageDuration")
+					setup->fixedPageDuration = e.text().toFloat();
 				n = n.nextSibling();
 			}
 			m_ds.append(setup);
@@ -318,6 +322,13 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 			ee.setAttribute("value", gl->value());
 			e.appendChild(ee);
 		}
+		element.appendChild(e);
+
+		e = doc.createElement("TimeScaleMode");
+		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->timeScaleMode)));
+		element.appendChild(e);
+		e = doc.createElement("TimeScaleFixedPageDuration");
+		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->fixedPageDuration)));
 		element.appendChild(e);
 
 		root.appendChild(element);

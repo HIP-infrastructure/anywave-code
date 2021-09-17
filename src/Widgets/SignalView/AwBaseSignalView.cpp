@@ -37,6 +37,10 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	m_physics = new AwDisplayPhysics;
 	m_physics->setSecsPerCm(m_settings->secsPerCm);
+	if (m_settings->timeMode == AwViewSettings::FixedPageDuration) {
+		m_physics->setFixedPageDuration(m_settings->fixedPageDuration, 0.);
+		m_physics->setPageDuration(m_settings->fixedPageDuration);
+	}
 	m_scene = new AwGraphicsScene(m_settings, m_physics, 0);
 	m_view = new AwGraphicsView(m_scene, m_settings, m_physics, 0);
 	m_navBar = new AwNavigationBar(this, flags);

@@ -35,6 +35,7 @@ public:
 	inline void setPageDuration(float dur) { m_pageDuration = dur; }
 	/** Compute x axis scaling for a fixed page duration **/
 	void setFixedPageDuration(float dur, int pageWidth);
+	void unsetFixedPageDuration();
 
 	inline float xPixPerCm() { return m_xPixPerCm; }
 	inline float yPixPerCm() { return m_yPixPerCm; }
@@ -50,6 +51,7 @@ protected:
 	float m_xPixPerSec;
 	float m_pageDuration;
 	float m_secsPerCm;
+	bool m_fixedPageDuration;
 };
 
 

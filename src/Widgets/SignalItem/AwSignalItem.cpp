@@ -241,7 +241,8 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 void AwSignalItem::updateData()
 {
-	m_pixelLengthInSecs = (1 / m_physics->xPixPerCm()) * m_physics->secsPerCm();
+//	m_pixelLengthInSecs = (1 / m_physics->xPixPerCm()) * m_physics->secsPerCm();
+	m_pixelLengthInSecs = m_physics->pixelDuration();
 	m_pixelLengthInSamples = (int)(m_pixelLengthInSecs * m_channel->samplingRate());
 	repaint();
 }

@@ -29,7 +29,7 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	timeMode = AwViewSettings::ShowRelativeTime;
 	eegDisplayMode = true; // display EEG channels upside down
 	timeScaleMode = AwViewSettings::PaperLike;
-	fixedPageDuration = 0;
+	fixedPageDuration = 30;
 	showMarkers = false;
 	gainLevels = new AwGainLevels(this);
 }

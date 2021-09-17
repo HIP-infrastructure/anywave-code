@@ -705,23 +705,6 @@ void AwDisplay::newFile()
 {
 	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
 	ds->init();
-//	auto path = reader->fullPath();
-//	ds->setFilename(reader->fullPath());
-
-//	m_gainLevels->init(AwDataManager::instance()->lvlFilePath());
-
-//	m_setup->loadFromFile(AwDataManager::instance()->dispFilePath());
-
-//	m_signalViews.erase(m_signalViews.begin(), m_signalViews.end());
-
-
-	//// create views from setup
-	//for (AwViewSetup* vs : m_setup->viewSetups()) {
-	//	AwSignalView* v = addSignalView(vs);
-	//	v->enableView();
-	//}
-
-	
 	for (AwSignalView * v : m_signalViews)
 		v->enableView();
 
@@ -759,14 +742,10 @@ void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
 		view->setChannels(m_channels);
 		if (!m_virtualChannels.isEmpty())
 			view->addVirtualChannels(m_virtualChannels);
-		
-		//m_splitterWidget->addWidget(view);
 		m_centralWidget->addWidget(view);
-		//m_splitterWidget->repaint();
 		m_centralWidget->repaint();
 		view->setProcessFlags(AwSignalView::UpdateProcess);
 	}
-
 	updateSetup(m_setup, AwDisplaySetup::ViewOrientation);
 }
 

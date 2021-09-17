@@ -43,6 +43,7 @@ public slots:
 	void setMarkers(const AwMarkerList& markers);
 	/** setAllMarkers is required for Global mode **/
 	void setAllMarkers(const AwMarkerList& markers);
+
 protected slots:
 	void hideMarkers() { emit showMarkersClicked(false); }
 	void showMarkers() { emit showMarkersClicked(true); }

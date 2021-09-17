@@ -106,6 +106,7 @@ void AwNavigationBar::openSettingsUi()
 {
 	AwViewSettingsUi dlg(m_settings, this);
 	QObject::connect(&dlg, SIGNAL(settingsChanged(AwViewSettings *, int)), this, SIGNAL(settingsChanged(AwViewSettings *, int)));
+	QObject::connect(&dlg, SIGNAL(settingsChanged(AwViewSettings*, int)), this, SLOT(updateSettings(AwViewSettings*, int)));
 	dlg.exec();
 }
 
@@ -178,6 +179,17 @@ void AwNavigationBar::updateNumberOfSelectedChannels(int n)
 
 void AwNavigationBar::updateSettings(AwViewSettings *settings, int flags)
 {
+	if (flags & AwViewSettings::TimeScaleMode) {
+		if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
+			ui->comboSecsPerCm->hide();
+			ui->labelSecsPerCm->hide();
+		}
+		else {
+			ui->comboSecsPerCm->show();
+			ui->labelSecsPerCm->show();
+		}
+		return;
+	}
 	if (flags & AwViewSettings::SecPerCm)	{
 		disconnect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
 		// update SecondsPerCm
@@ -189,16 +201,6 @@ void AwNavigationBar::updateSettings(AwViewSettings *settings, int flags)
 		if (index != -1)
 			ui->comboSecsPerCm->setCurrentIndex(index);
 		connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
-	}
-	if (flags & AwViewSettings::TimeScaleMode) {
-		if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
-			ui->comboSecsPerCm->hide();
-			ui->labelSecsPerCm->hide();
-		}
-		else {
-			ui->comboSecsPerCm->show();
-			ui->labelSecsPerCm->show();
-		}
 	}
 }
 

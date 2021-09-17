@@ -20,6 +20,7 @@
 #include <utils/gui.h>
 #include <AwCore.h>
 
+
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	: QFrame(parent)
 {
@@ -84,6 +85,7 @@ void AwBaseMarkerBar::setAllMarkers(const AwMarkerList& markers)
 	m_globalRepaintNeeded = true;
 	repaint();
 }
+
 
 void AwBaseMarkerBar::switchToClassic()
 {
