@@ -17,9 +17,10 @@ public:
 	void run() override;
 private:
 	settings *m_ui;
-	AwFileIO *m_writer;
+	//AwFileIO *m_writer;
+	QSharedPointer<AwFileIO> m_writer;
 	QMap<QString, AwFileIOPlugin*> m_writers;  // carefull: writers here are instances of plugin objects, not AwFileIO instances
-	QMap<QString, AwFileIO*> m_readers;
+	QList<QSharedPointer<AwFileIO>> m_readers;
 };
 
 class APPENDFILES_EXPORT AppendFilesPlugin : public AwProcessPlugin

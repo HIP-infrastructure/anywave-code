@@ -45,7 +45,7 @@ protected:
 	void computePageDuration();
 	AwViewSettings *m_settings;
 	AwDisplayPhysics *m_physics;
-	qreal m_pageDuration;
+	qreal m_pageDuration, m_previousPageDuration;
 	// posInFile = current pos in file in the data, timeOffset = grid time shift (mostly used for average).
 	float m_posInFile, m_timeOffset, m_secsPerCm, m_startPosition;
 	int m_timeScaleMode;

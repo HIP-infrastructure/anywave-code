@@ -52,7 +52,8 @@ public slots:
 	void updatePositionInFile(float pos);
 	void updateSettings(AwViewSettings *settings, int flags);
 	void setNewSettings(AwViewSettings *settings);
-	void changeSecsPerCm();
+	void changeSecsPerCm(int index);
+	void changeFixedPageDuration(int index);
 	void openSettingsUi();
 	/** change current settings and relay changed to connected objects **/
 	void changeSettings(AwViewSettings *settings, int flags);
@@ -75,7 +76,7 @@ protected:
 	int m_flags;
 	AwViewSettings *m_settings;
 	// horizontal scale values
-	QVector<float> m_timeScale;
+	QVector<float> m_timeScales[2];
 	// ui
 	AwViewSettingsUi *m_settingsUi;
 	Ui::AwNavigationBarClass *ui;

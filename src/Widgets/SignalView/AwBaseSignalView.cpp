@@ -26,26 +26,28 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	: QWidget(parent, f) 
 {
 	m_flags = flags;
-	if (settings == NULL)
+	if (settings == nullptr)
 		m_settings = new AwViewSettings(this);
 	else
 		m_settings = settings;
 	m_positionInFile = 0;
 	m_pageDuration = 0;
-	m_startPosition = 0.;
-	setFocusPolicy(Qt::StrongFocus);
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	m_physics = new AwDisplayPhysics;
 	m_physics->setSecsPerCm(m_settings->secsPerCm);
-	if (m_settings->timeMode == AwViewSettings::FixedPageDuration) {
-		m_physics->setFixedPageDuration(m_settings->fixedPageDuration, 0.);
+	if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
+		m_pageDuration = settings->fixedPageDuration;
 		m_physics->setPageDuration(m_settings->fixedPageDuration);
 	}
+	m_startPosition = 0.;
+	
+	setFocusPolicy(Qt::StrongFocus);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 	m_scene = new AwGraphicsScene(m_settings, m_physics, 0);
 	m_view = new AwGraphicsView(m_scene, m_settings, m_physics, 0);
 	m_navBar = new AwNavigationBar(this, flags);
 	m_markerBar = new AwBaseMarkerBar(m_physics, this);
-	m_markerInspector = NULL;
+	m_markerInspector = nullptr;
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->setContentsMargins(3, 3, 3, 3);
 	layout->addWidget(m_view);
@@ -241,10 +243,15 @@ void AwBaseSignalView::applyChannelFilters()
 
 void AwBaseSignalView::updatePageDuration(float duration)
 {
-	float dur = m_pageDuration;
-	m_pageDuration = duration;
-	if (m_pageDuration > dur)
+	if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
+		float dur = m_pageDuration;
+		m_pageDuration = duration;
+		if (m_pageDuration > dur)
+			reloadData();
+	}
+	else {
 		reloadData();
+	}
 }
 
 AwChannelList AwBaseSignalView::selectedChannels()
@@ -329,7 +336,7 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		// filter channels
 		m_channels.clear();
 		m_scene->clearChannels();
-		foreach (AwChannel *c, m_montageChannels)
+		for (AwChannel *c : m_montageChannels)
 			if (settings->filters.contains(c->type()))
 				m_channels << c;
 		m_scene->setChannels(m_channels);
@@ -348,8 +355,13 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		else
 			m_markerBar->hide();
 
-	if (flags & AwViewSettings::TimeScaleMode) 
+	if (flags & AwViewSettings::TimeScaleMode) {
 		reload = true;
+	}
+	if (flags & AwViewSettings::PageDuration) {
+		m_pageDuration = settings->fixedPageDuration;
+		reload = true;
+	}
 
 	if (flags & AwViewSettings::SecPerCm)
 		reload = true;

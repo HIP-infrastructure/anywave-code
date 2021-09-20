@@ -48,6 +48,7 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_contextMenuMapping = nullptr;
 	m_pickMarkersDial = nullptr;
 	m_maxSR = 0.;
+	applyNewSettings(settings);
 }
 
 AwGraphicsScene::~AwGraphicsScene()
@@ -189,7 +190,16 @@ void AwGraphicsScene::updateSettings(AwViewSettings *settings, int flags)
 			i->showLabel(settings->showSensors);
 		update();
 	}
-
+	if (flags & AwViewSettings::TimeScaleMode) {
+		if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
+			m_pageDuration = settings->fixedPageDuration;
+		}
+		if (m_cursor)
+			m_cursor->updatePosition();
+		if (m_mappingCursor)
+			m_mappingCursor->updatePosition();
+		updateMarkers();
+	}
 	if (flags & AwViewSettings::SecPerCm)	{
 		if (m_cursor)
 			m_cursor->updatePosition();
@@ -210,13 +220,15 @@ void AwGraphicsScene::updateSignalItemSelection(AwGraphicsSignalItem *item, bool
 }
 
 
-void AwGraphicsScene::applyNewSettings(AwViewSettings *settings)
+void AwGraphicsScene::applyNewSettings(AwViewSettings* settings)
 {
 	m_settings = settings;
-	for (AwGraphicsSignalItem *i : m_signalItems)	{
+	for (AwGraphicsSignalItem* i : m_signalItems) {
 		i->showLabel(settings->showSensors);
 		i->showBaseline(settings->showZeroLine);
 	}
+	if (settings->timeScaleMode == AwViewSettings::FixedPageDuration)
+		m_pageDuration = settings->fixedPageDuration;
 }
 
 void AwGraphicsScene::refresh()

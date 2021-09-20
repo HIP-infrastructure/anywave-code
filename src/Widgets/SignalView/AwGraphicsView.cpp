@@ -26,7 +26,7 @@ AwGraphicsView::AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings,
 	setDragMode(NoDrag);
 	setViewportUpdateMode(NoViewportUpdate);
 	setFocusPolicy(Qt::StrongFocus);
-	m_pageDuration = m_posInFile = m_timeOffset = 0.;
+	m_previousPageDuration = m_pageDuration = m_posInFile = m_timeOffset = 0.;
 	m_physics = phys;
 	applySettings(settings);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -55,30 +55,40 @@ void AwGraphicsView::computePageDuration()
 		m_physics->setPageDuration(m_pageDuration);
 		m_physics->setFixedPageDuration(m_pageDuration, w);
 	}
+	if (m_pageDuration == 0.)
+		return;
+	//if (m_previousPageDuration == 0. || m_previousPageDuration != m_pageDuration) {
+	//	m_previousPageDuration = m_pageDuration;
+	//	emit pageDurationChanged(m_pageDuration);
+	//}
+	emit pageDurationChanged(m_pageDuration);
 }
 
 
 void AwGraphicsView::resizeEvent(QResizeEvent *event)
 {
-	float duration = m_pageDuration;
-	// update page duration
-	if (m_settings->timeScaleMode == AwViewSettings::PaperLike)
-		computePageDuration();
-	else {
-		float w = (float)viewport()->rect().width();
-		m_physics->setPageDuration(m_pageDuration);
-		m_physics->setFixedPageDuration(m_pageDuration, w);
-	}
+	//float duration = m_pageDuration;
+	computePageDuration();
+	//// update page duration
+	//if (m_settings->timeScaleMode == AwViewSettings::PaperLike)
+	//	computePageDuration();
+	//else {
+	//	//float w = (float)viewport()->rect().width();
+	//	//m_physics->setPageDuration(m_pageDuration);
+	//	//m_physics->setFixedPageDuration(m_pageDuration, w);
+	//	computePageDuration();
+	//}
 	layoutItems();
 
-	// don't send signal if duration is the same.
-	if (duration != m_pageDuration)
-		emit pageDurationChanged(m_pageDuration);
+	//// don't send signal if duration is the same.
+	//if (duration != m_pageDuration)
+	//	emit pageDurationChanged(m_pageDuration);
 
 	AwGraphicsScene *gs = (AwGraphicsScene *)scene();
 	gs->refresh();
 	resetCachedContent();
 	repaint();
+	scene()->update();
 }
 
 void AwGraphicsView::scrollContentsBy(int dx, int dy)
@@ -448,7 +458,7 @@ void AwGraphicsView::applySettings(AwViewSettings *settings)
 	m_secsPerCm = settings->secsPerCm;
 	m_physics->setSecsPerCm(settings->secsPerCm);
 	computePageDuration();
-	emit pageDurationChanged(m_pageDuration);
+//	emit pageDurationChanged(m_pageDuration);
 	resetCachedContent();
 	repaint();
 	layoutItems();
@@ -486,6 +496,14 @@ void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 				computePageDuration();
 				emit pageDurationChanged(m_pageDuration);
 			}
+			resetCachedContent();
+			repaint();
+		}
+	}
+	// we can have to update the page duration while already switched to this mode
+	if (flags & AwViewSettings::PageDuration) {
+		if (m_settings->fixedPageDuration != m_pageDuration) {
+			computePageDuration(); // not really recompute but propagate page duration to Physics in order to get the good pixel to sample transform
 			resetCachedContent();
 			repaint();
 		}

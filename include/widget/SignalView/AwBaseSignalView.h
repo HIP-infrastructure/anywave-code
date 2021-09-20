@@ -40,7 +40,6 @@ public:
 		Default = 0, NoNavBar = 1, NoHScrollBar = 2, NoSettingsButton = 4, EnableMarking = 8, NoMarkerBar = 16, ViewAllChannels = 32,
 		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512, HidePositionInFile = 1024
 	};
-
 	void setFlags(int flags);
 	void setScene(AwGraphicsScene *scene);
 	void setView(AwGraphicsView *view);
@@ -132,6 +131,7 @@ protected:
 	AwFilterSettings m_filterSettings;
 	QTime m_recordedTime;
 	QMultiMap<int, AwChannel*> m_channelTypes;
+	bool m_isActive;
 
 	virtual void dataReceived();
 	virtual void applyChannelFilters();

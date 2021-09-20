@@ -127,6 +127,9 @@ void AwViewSettingsUi::accept()
 	if (m_settings->timeScaleMode != copiedSettings->timeScaleMode) 
 		flags |= AwViewSettings::TimeScaleMode;
 
+	if (m_settings->fixedPageDuration != copiedSettings->fixedPageDuration)
+		flags |= AwViewSettings::PageDuration;
+
 	m_settings->showTimeGrid = checkTime->isChecked();
 	if (copiedSettings->showTimeGrid != m_settings->showTimeGrid)
 		flags |= AwViewSettings::ShowTimeGrid;

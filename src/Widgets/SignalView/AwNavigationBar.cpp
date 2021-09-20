@@ -36,7 +36,17 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 	m_settings = NULL;
 	m_settingsUi = NULL;
 	ui->buttonMarker->hide();
-	connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
+	m_timeScales[0] = { 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1., 2., 3. ,4., 5. };
+	m_timeScales[1] = { 10, 20, 30, 40, 50 };
+
+	for (auto v : m_timeScales[0])
+		ui->comboSecsPerCm->addItem(QString::number(v));
+
+	for (auto v : m_timeScales[1])
+		ui->comboPageDuration->addItem(QString::number(v));
+
+	connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm(int)));
+	connect(ui->comboPageDuration, SIGNAL(currentIndexChanged(int)), this, SLOT(changeFixedPageDuration(int)));
 	connect(ui->buttonViewSettings, SIGNAL(clicked()), this, SLOT(openSettingsUi()));
 	connect(ui->buttonStart, SIGNAL(clicked()), this, SIGNAL(startOfDataClicked()));
 	connect(ui->buttonEnd, SIGNAL(clicked()), this, SIGNAL(endOfDataClicked()));
@@ -47,8 +57,11 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 	connect(ui->buttonFilter, &QPushButton::clicked, this, &AwNavigationBar::filterButtonClicked);
 	setFlags(flags);
 	// create horizontal scale
-	for (int i = 0; i < ui->comboSecsPerCm->count(); i++)
-		m_timeScale.append(ui->comboSecsPerCm->itemText(i).toDouble());
+	//for (int i = 0; i < ui->comboSecsPerCm->count(); i++)
+	//	m_timeScale.append(ui->comboSecsPerCm->itemText(i).toDouble());
+
+
+
 }
 
 void AwNavigationBar::setFlags(int flags)
@@ -113,9 +126,9 @@ void AwNavigationBar::openSettingsUi()
 void AwNavigationBar::updatePageDuration(float dur)
 {
 	// As slider in scrollbar can only be change with integer values, we'll be using a scaling of 1000 on second value to match millisecond precision
-	ui->horizontalScrollBar->setPageStep((int)qFloor(dur * 1000));
+	ui->horizontalScrollBar->setPageStep((int)std::floor(dur * 1000));
 	ui->horizontalScrollBar->setMinimum(0);
-	ui->horizontalScrollBar->setMaximum((int)qFloor((m_totalDuration - dur) * 1000));
+	ui->horizontalScrollBar->setMaximum((int)std::floor((m_totalDuration - dur) * 1000));
 	// applying a single step which vary depending on page duration
 	if (dur > 1) // page duration is more than 1s
 		ui->horizontalScrollBar->setSingleStep(1000); // step is 1s.
@@ -183,25 +196,47 @@ void AwNavigationBar::updateSettings(AwViewSettings *settings, int flags)
 		if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
 			ui->comboSecsPerCm->hide();
 			ui->labelSecsPerCm->hide();
+			ui->labelFixedDuration->show();
+			ui->comboPageDuration->show();
+			disconnect(ui->comboPageDuration, SIGNAL(currentIndexChanged(int)), this, SLOT(changeFixedPageDuration(int)));
+			int index = m_timeScales[1].indexOf(settings->fixedPageDuration);
+			if (index != -1)
+				ui->comboPageDuration->setCurrentIndex(index);
+			connect(ui->comboPageDuration, SIGNAL(currentIndexChanged(int)), this, SLOT(changeFixedPageDuration(int)));
+
+			updatePageDuration(settings->fixedPageDuration);
 		}
 		else {
 			ui->comboSecsPerCm->show();
 			ui->labelSecsPerCm->show();
+			ui->labelFixedDuration->hide();
+			ui->comboPageDuration->hide();
 		}
 		return;
 	}
+	if (flags & AwViewSettings::PageDuration) {
+		disconnect(ui->comboPageDuration, SIGNAL(currentIndexChanged(int)), this, SLOT(changeFixedPageDuration(int)));
+		int index = m_timeScales[1].indexOf(settings->fixedPageDuration);
+		if (index != -1)
+			ui->comboPageDuration->setCurrentIndex(index);
+		connect(ui->comboPageDuration, SIGNAL(currentIndexChanged(int)), this, SLOT(changeFixedPageDuration(int)));
+	}
 	if (flags & AwViewSettings::SecPerCm)	{
-		disconnect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
-		// update SecondsPerCm
-		QStringList list;
-		for (qint32 i = 0; i < ui->comboSecsPerCm->count(); i++)
-			list << ui->comboSecsPerCm->itemText(i);
-		QString secPerSecond = QString("%1").arg(settings->secsPerCm);
-		int index = list.indexOf(secPerSecond);
+		disconnect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm(int)));
+		//// update SecondsPerCm
+		//QStringList list;
+		//for (qint32 i = 0; i < ui->comboSecsPerCm->count(); i++)
+		//	list << ui->comboSecsPerCm->itemText(i);
+		//QString secPerSecond = QString("%1").arg(settings->secsPerCm);
+		//int index = list.indexOf(secPerSecond);
+		//if (index != -1)
+		//	ui->comboSecsPerCm->setCurrentIndex(index);
+		int index = m_timeScales[0].indexOf(settings->secsPerCm);
 		if (index != -1)
 			ui->comboSecsPerCm->setCurrentIndex(index);
-		connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
+		connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm(int)));
 	}
+
 }
 
 /** change current settings and relay that to all other involved objects **/
@@ -214,43 +249,62 @@ void AwNavigationBar::changeSettings(AwViewSettings *settings, int flags)
 void AwNavigationBar::setNewSettings(AwViewSettings *settings)
 {
 	m_settings = settings;
-	disconnect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
-	QStringList list;
-	for (qint32 i = 0; i <  ui->comboSecsPerCm->count(); i++)
-	list <<  ui->comboSecsPerCm->itemText(i);
-	QString secPerSecond = QString("%1").arg(settings->secsPerCm);
-	int index = list.indexOf(secPerSecond);
+	disconnect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm(int)));
+	//QStringList list;
+	//for (qint32 i = 0; i <  ui->comboSecsPerCm->count(); i++)
+	//list <<  ui->comboSecsPerCm->itemText(i);
+	//QString secPerSecond = QString("%1").arg(settings->secsPerCm);
+	//int index = list.indexOf(secPerSecond);
+	//if (index != -1)
+	//	ui->comboSecsPerCm->setCurrentIndex(index);
+	int index = m_timeScales[0].indexOf(m_settings->secsPerCm);
 	if (index != -1)
 		ui->comboSecsPerCm->setCurrentIndex(index);
-	connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm()));
+	connect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm(int)));
+	updateSettings(settings, AwViewSettings::TimeScaleMode);
 }
 
 
-void AwNavigationBar::changeSecsPerCm()
+void AwNavigationBar::changeSecsPerCm(int index)
 {
-	QString text = ui->comboSecsPerCm->currentText();
-	float value = (float)text.toDouble();
-	if (value <= 0.)
-		return;
+	//QString text = ui->comboSecsPerCm->currentText();
+	//float value = (float)text.toDouble();
+	//if (value <= 0.)
+	//	return;
 
-	struct {
-		bool operator()(float a, float b) const
-		{
-			return a > b;
-		}
-	} customLess;
-	// check if value is already in time scale
-	if (!m_timeScale.contains(value)) {
-		m_timeScale.append(value);
-		std::sort(m_timeScale.begin(), m_timeScale.end(), customLess);
-		ui->comboSecsPerCm->clear();
-		for(auto v : m_timeScale)
-			ui->comboSecsPerCm->addItem(QString("%1").arg(v));
-		ui->comboSecsPerCm->setCurrentIndex(m_timeScale.indexOf(value));
-	}
 
-	if (m_settings->secsPerCm != value) {
-		m_settings->secsPerCm = value;
+	//struct {
+	//	bool operator()(float a, float b) const
+	//	{
+	//		return a > b;
+	//	}
+	//} customLess;
+	//// check if value is already in time scale
+	//if (!m_timeScale.contains(value)) {
+	//	m_timeScale.append(value);
+	//	std::sort(m_timeScale.begin(), m_timeScale.end(), customLess);
+	//	ui->comboSecsPerCm->clear();
+	//	for(auto v : m_timeScale)
+	//		ui->comboSecsPerCm->addItem(QString("%1").arg(v));
+	//	ui->comboSecsPerCm->setCurrentIndex(m_timeScale.indexOf(value));
+	//}
+
+	//if (m_settings->secsPerCm != value) {
+	//	m_settings->secsPerCm = value;
+	//	emit settingsChanged(m_settings, AwViewSettings::SecPerCm);
+	//}
+	float newValue = m_timeScales[0].at(index);
+	if (newValue != m_settings->secsPerCm) {
+		m_settings->secsPerCm = newValue;
 		emit settingsChanged(m_settings, AwViewSettings::SecPerCm);
+	}
+}
+
+void AwNavigationBar::changeFixedPageDuration(int index)
+{
+	float newValue = m_timeScales[1].at(index);
+	if (newValue != m_settings->fixedPageDuration) {
+		m_settings->fixedPageDuration = newValue;
+		emit settingsChanged(m_settings, AwViewSettings::PageDuration);
 	}
 }
