@@ -13,7 +13,7 @@ class settings : public QDialog
 	Q_OBJECT
 
 public:
-	settings(const QList<QSharedPointer<AwFileIO>>& readers, const QStringList& writers, QWidget *parent = nullptr);
+	settings(const QList<AwFileIOPlugin *>& readers, const QStringList& writers, QWidget *parent = nullptr);
 	~settings();
 
 	//AwFileIOPlugin *selectedWriter;
@@ -34,7 +34,7 @@ protected slots:
 	void changeOutputFile();
 private:
 //	QList<AwFileIOPlugin *> m_readers;
-	QList<QSharedPointer<AwFileIO>> m_readers;
+	QList<AwFileIOPlugin*> m_readers;
 //	QList<AwFileIOPlugin *> m_writers;
 //	QList<AwFileIO *> m_tempReaders;
 //	QMap<QString, AwFileIO*> m_readers;

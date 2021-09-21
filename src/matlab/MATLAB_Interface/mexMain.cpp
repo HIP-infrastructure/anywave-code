@@ -178,7 +178,7 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 		error(std::string("send_markers: argument must be a struct array."));
 
 	// expected fields in struct
-	std::vector<std::string> expectedFields = { "label", "position", "duration", "colour", "targets", "value" };
+	std::vector<std::string> expectedFields = { "label", "position", "duration", "color", "targets", "value" };
 	StructArray S = std::move(inputs[1]);
 
 	auto fields = S.getFieldNames();
@@ -190,7 +190,7 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 	map["duration"] = -1;
 	map["targets"] = -1;
 	map["value"] = -1;
-	map["colour"] = -1;
+	map["color"] = -1;
 
 	// fields must be:
 	// - label => string
@@ -239,8 +239,8 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 				std::string s = field_label.toAscii();
 				label = QString::fromStdString(s);
 				stream << label;
-				if (map["colour"] != -1) {
-					CharArray c = S[counter]["colour"];
+				if (map["color"] != -1) {
+					CharArray c = S[counter]["color"];
 					colour = QString::fromStdString(c.toAscii());
 				}
 				stream << colour;
@@ -273,9 +273,16 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 			aw.waitForResponse();
 			nMarkers -= n;
 			counter += n;
-			if (nMarkers == 0)
+			if (nMarkers == 0) {
+				// finished sending markers =>inform anywave by sending 0 as number of markers
+				data.clear();
+				stream.device()->reset();
+				stream << (int)0;
+				aw.sendData(data);
 				break;
+			}
 		}
+
 	}
 	catch (const QString& what) {
 		std::string message = QString("send_markers: %1").arg(what).toStdString();

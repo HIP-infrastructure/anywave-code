@@ -205,4 +205,9 @@ protected:
 	AwVideoSynch m_videoSynch;
 };
 
+namespace AwIO
+{
+	void AW_RW_EXPORT rescaleDataToExport(const AwChannelList& channels);
+}
+
 #endif // AWREADWRITELIB_H

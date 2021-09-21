@@ -3,7 +3,7 @@
 #include <QFileDialog>
 #include <widget/AwMessageBox.h>
 
-settings::settings(const QList<QSharedPointer<AwFileIO>>& readers, const QStringList& writers, QWidget *parent)
+settings::settings(const QList<AwFileIOPlugin*>& readers, const QStringList& writers, QWidget *parent)
 	:  QDialog(parent)
 {
 	ui.setupUi(this);
@@ -31,17 +31,18 @@ void settings::changeCurrentWriter(int index)
 
 void settings::addFiles()
 {
-	QStringList files = QFileDialog::getOpenFileNames(this, tr("Select files"), m_dirPath, m_inputFileFilters);
-	if (files.isEmpty())
+	QStringList selection = QFileDialog::getOpenFileNames(this, tr("Select files"), m_dirPath, m_inputFileFilters);
+	if (selection.isEmpty())
 		return;
 
-	QFileInfo fi(files.first());
+	QFileInfo fi(selection.first());
     m_dirPath = fi.absolutePath();
 
 	int row = ui.tableWidgetIN->rowCount();
-	for (auto file : files) {
+	for (auto file : selection) {
 		bool readerFound = false;
-		for (auto reader : m_readers) {
+		for (auto plugin : m_readers) {
+			QSharedPointer<AwFileIO> reader(plugin->newInstance());
 			if (reader->canRead(file) == AwFileIO::NoError) {
 				ui.tableWidgetIN->insertRow(row);
 				auto item = new QTableWidgetItem(file);
@@ -55,7 +56,6 @@ void settings::addFiles()
 		}
 		if (!readerFound) {
 			AwMessageBox::critical(this, "File error", QString("No plugin can read the file %1").arg(file));
-
 		}
 	}
 
@@ -100,7 +100,7 @@ void settings::accept()
 	//	}
 	//}
 
-	if (m_files.size() < 2) {
+	if (files.size() < 2) {
 		QMessageBox::information(this, "Input files", "Some files could not be open and the total number of readable files is less than 2.");
 		return;
 	}

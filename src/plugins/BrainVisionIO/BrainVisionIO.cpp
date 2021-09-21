@@ -453,6 +453,7 @@ qint64 BrainVisionIO::writeData(QList<AwChannel*> *channels)
 	if (channels->isEmpty())
 		return 0;
 
+	AwIO::rescaleDataToExport(*channels);
 	qint64 length = channels->at(0)->dataSize();
 	int nbChannel = channels->size();
 

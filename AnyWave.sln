@@ -264,8 +264,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MATLAB_Interface", "src\mat
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AwHDF5Lib", "src\HDF5\AwHDF5Lib.vcxproj", "{30134E4D-061E-41BE-BC92-6AF0E635D54F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NeuroWorksIO", "..\plugins\NeuroWorksIO\NeuroWorksIO.vcxproj", "{B5D947B4-BC42-4FAE-A456-1352681A1808}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -658,12 +656,6 @@ Global
 		{30134E4D-061E-41BE-BC92-6AF0E635D54F}.Release|x64.Build.0 = Release|x64
 		{30134E4D-061E-41BE-BC92-6AF0E635D54F}.Release|x86.ActiveCfg = Release|Win32
 		{30134E4D-061E-41BE-BC92-6AF0E635D54F}.Release|x86.Build.0 = Release|Win32
-		{B5D947B4-BC42-4FAE-A456-1352681A1808}.Debug|x64.ActiveCfg = Debug|x64
-		{B5D947B4-BC42-4FAE-A456-1352681A1808}.Debug|x64.Build.0 = Debug|x64
-		{B5D947B4-BC42-4FAE-A456-1352681A1808}.Debug|x86.ActiveCfg = Debug|x64
-		{B5D947B4-BC42-4FAE-A456-1352681A1808}.Release|x64.ActiveCfg = Release|x64
-		{B5D947B4-BC42-4FAE-A456-1352681A1808}.Release|x64.Build.0 = Release|x64
-		{B5D947B4-BC42-4FAE-A456-1352681A1808}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -723,10 +715,9 @@ Global
 		{894D21C4-7EFD-4B08-8160-CA304FBC785F} = {29F479E7-AB9C-4CB1-A69C-F93615B73422}
 		{D5A9C240-7BD8-4534-A38F-41F53F3F921B} = {A9C8D770-8CD3-40D5-992B-6A8159B97967}
 		{30134E4D-061E-41BE-BC92-6AF0E635D54F} = {25911352-E3F2-4A19-BC82-08AF92073F2E}
-		{B5D947B4-BC42-4FAE-A456-1352681A1808} = {29F479E7-AB9C-4CB1-A69C-F93615B73422}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

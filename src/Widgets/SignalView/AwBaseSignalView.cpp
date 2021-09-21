@@ -34,8 +34,8 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	m_pageDuration = 0;
 	m_physics = new AwDisplayPhysics;
 	m_physics->setSecsPerCm(m_settings->secsPerCm);
-	if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
-		m_pageDuration = settings->fixedPageDuration;
+	if (m_settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
+		m_pageDuration = m_settings->fixedPageDuration;
 		m_physics->setPageDuration(m_settings->fixedPageDuration);
 	}
 	m_startPosition = 0.;
