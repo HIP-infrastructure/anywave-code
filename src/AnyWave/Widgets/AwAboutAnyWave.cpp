@@ -31,13 +31,6 @@ AwAboutAnyWave::AwAboutAnyWave(AwUpdateManager *um, QWidget *parent)
 	labelQtVersion->setText(QT_VERSION_STR);
 	labelBuildDate->setText(QString("version %1.%2.%3").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION).arg(AW_FIX_VERSION));
 	labelVtkVersion->setText(QString(VTK_VERSION));
-//	buttonGetLastVersion->hide();
-	//labelUpdateAvailable->setText("No update available.");
-	//auto updateUrl = AwSettings::getInstance()->value(aws::update_url).toString();
-	//if (!updateUrl.isEmpty()) {
-	//	buttonGetLastVersion->show();
-	//	labelUpdateAvailable->setText("A new version is available");
-	//}
 	m_um = um;
 	connect(buttonGetLastVersion, SIGNAL(clicked()), this, SLOT(getLatestUpdate()));
 }

@@ -41,7 +41,6 @@ bool compareNames(AwChannel * c1, AwChannel *c2);
 AwChannel::AwChannel()
 {
 	m_type = AwChannel::EEG;
-//	m_unit = AwChannel::unitForType(AwChannel::EEG);
 	m_unit = AwChannel::microV;
 	m_sourceType = AwChannel::Real;
 	m_data = nullptr;
@@ -443,17 +442,19 @@ QString AwChannel::unitString(int unit)
 {
 	switch (unit) {
 	case AwChannel::microV:
-		return QString::fromUtf8("µV");
+		return QString::fromLatin1("µV");
 	case AwChannel::milliV:
-		return QString::fromUtf8("mV");
+		return QString::fromLatin1("mV");
 	case AwChannel::picoT:
-		return QString::fromUtf8("pT");
+		return QString::fromLatin1("pT");
 	case AwChannel::picoTpermeter:
-		return QString::fromUtf8("pT/m");
+		return QString::fromLatin1("pT/m");
 	case AwChannel::V:
-		return QString::fromUtf8("V");
+		return QString::fromLatin1("V");
+	case AwChannel::T:
+		return QString::fromLatin1("T");
 	default:
-		return QString::fromUtf8("n/d");
+		return QString::fromLatin1("n/d");
 	}
 }
 

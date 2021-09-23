@@ -49,8 +49,8 @@ signals:
 	void displayedChannelsUpdated(AwChannelList& channels);	// sent each time the view receives new data to display.
 	void badChannelSet(const QString& label);
 public slots:
-	void reloadData();	// request a reloading for current channels in the view.
-	void refresh();		// check if the view needs to reload data and refresh current display.
+	void reloadData() override;		// request a reloading for current channels in the view.
+	void refresh();					// check if the view needs to reload data and refresh current display.
 	void updatePositionInFile(float pos);
 	void synchronizeOnPosition(float position);
 	void showPosition(float position);

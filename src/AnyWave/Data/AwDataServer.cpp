@@ -170,8 +170,8 @@ void AwDataServer::closeAllConnections()
 		delete dc->thread();
 		delete dc;
 	}
-	for (auto client : m_clientToConnection.keys())
-		client->setConnected(false);
+	//for (auto client : m_clientToConnection.keys())
+	//	client->setConnected(false);
 
 	m_clientToConnection.clear();
 	m_dataConnections.clear();

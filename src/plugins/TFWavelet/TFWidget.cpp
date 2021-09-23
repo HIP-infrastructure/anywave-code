@@ -151,19 +151,6 @@ void TFWidget::setChannels(const AwChannelList& channels)
 	layout->setRowStretch(1, 0);
 	layout->setColumnStretch(1, 1);
 
-	//if (m_colorMapWidget == nullptr) {
-	//	// building the colormap widget
-	//	m_colorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale, this);
-	//	m_colorMapWidget->setContentsMargins(0, 0, 0, 0);
-	//	m_colorMapWidget->setBorderDist(1, 1);
-	//	m_colorMapWidget->setSpacing(5);
-	//	m_colorMapWidget->setMargin(5);
-	//	m_colorMapWidget->setColorBarEnabled(true);
-	//	//m_colorMapWidget->setColorBarWidth(25);
-	//	m_colorMapWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	//	m_colorMapWidget->hide();
-	//}
-
 	// Build params for computation and add plot to the layout
 	for (auto c : channels) {
 		// add TF plot widget to the layout
@@ -179,9 +166,6 @@ void TFWidget::setChannels(const AwChannelList& channels)
 	connect(m_ui.checkBoxFreqScale, SIGNAL(toggled(bool)), this, SLOT(showFreqScale(bool)));
 	connect(m_ui.checkBoxColormapScale, SIGNAL(toggled(bool)), this, SLOT(showColorMapScale(bool)));
 	connect(m_ui.checkBoxLogScale, SIGNAL(toggled(bool)), this, SLOT(switchLogScale(bool)));
-	//auto nPlotRows = row - 1;
-	// add color map widget to the right column and span it to all the rows used by TF plots
-//	layout->addWidget(m_colorMapWidget, 1, 2, nPlotRows, 1);
 	m_channels = channels;
 	m_signalView->setChannels(channels);
 	connect(m_signalView, SIGNAL(dataLoaded(float, float)), this, SLOT(compute2(float, float)));

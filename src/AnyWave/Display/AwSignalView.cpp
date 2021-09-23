@@ -29,7 +29,6 @@
 #include "AwDisplaySetupManager.h"
 #include "ICA/AwICAManager.h"
 #include <widget/AwMessageBox.h>
-//#include "Prefs/AwSettings.h"
 #include "Data/AwDataManager.h"
 
 AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent, Qt::WindowFlags windowFlags) :

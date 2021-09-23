@@ -576,7 +576,7 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 		stream << "Ch" << i + 1 << "=" << infos.channels().at(i)->name();
 		if (infos.channels().at(i)->hasReferences())
 			stream << "-" << infos.channels().at(i)->referenceName();
-		stream << ",,1," << infos.channels().at(i)->unit() << endl;
+		stream << ",,1," << infos.channels().at(i)->unitString() << endl;
 	}
 
 	hdr.close();

@@ -171,14 +171,14 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 {
 	ArrayFactory factory;
 
-	const int MARKERS_AT_ONCE = 1000;
+	//const int MARKERS_AT_ONCE = 1000;
 	if (inputs.size() != 2)
 		error(std::string("send_markers: requires 1 argument to be a struct array."));
 	if (inputs[1].getType() != ArrayType::STRUCT)
 		error(std::string("send_markers: argument must be a struct array."));
 
 	// expected fields in struct
-	std::vector<std::string> expectedFields = { "label", "position", "duration", "color", "targets", "value" };
+	std::vector<std::string> expectedFields = { "label", "position", "duration", "color", "channels", "value" };
 	StructArray S = std::move(inputs[1]);
 
 	auto fields = S.getFieldNames();
@@ -188,7 +188,7 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 	map["label"] = -1;
 	map["position"] = -1;
 	map["duration"] = -1;
-	map["targets"] = -1;
+	map["channels"] = -1;
 	map["value"] = -1;
 	map["color"] = -1;
 
@@ -218,6 +218,10 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 		error("send_markers: field position must be a double.");
 	
 	try {
+		// Here we send ALL the markers at once in the same QByteArray
+		// My attempt to send markers by chunks is not working as everytime we send data to AnyWave
+		// if will trigger the dataReceived() SLOT and then initiate a new 'command'.
+		// TODO: reimplement the way we can communicate with AnyWave using chunks in ONE command
 		TCPRequest aw(AwRequest::SendMarkers);
 		QByteArray data;
 		QDataStream stream(&data, QIODevice::WriteOnly);
@@ -225,63 +229,106 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 		int nMarkers = S.getNumberOfElements();
 		size_t counter = 0;
 		QString label, colour;
-		
-		while (true) {
-			int n = std::min(MARKERS_AT_ONCE, nMarkers);
-			data.clear();
-			stream.device()->reset();
-			stream << n;
-			for (auto i = 0; i < n; i++) {
-				QStringList targets;
-				float position = 0., duration = 0., value = 0.;
 
-				CharArray field_label = S[i + counter]["label"];
-				std::string s = field_label.toAscii();
-				label = QString::fromStdString(s);
-				stream << label;
-				if (map["color"] != -1) {
-					CharArray c = S[counter]["color"];
-					colour = QString::fromStdString(c.toAscii());
-				}
-				stream << colour;
-				TypedArray<double> pos = S[i + counter]["position"];
-				position = static_cast<float>(pos[0]);
-				stream << position;
-				if (map["duration"] != -1) {
-					const TypedArray<double> d = S[i + counter]["duration"];
-					duration = static_cast<float>(d[0]);
-				}
-				stream << duration;
-				if (map["value"] != -1) {
-					TypedArray<double> v = S[i + counter]["value"];
-					value = static_cast<float>(v[0]);
-				}
-				stream << value;
-				if (map["targets"] != -1) {
-					if (S[i + counter]["targets"].getType() == ArrayType::CELL) {
-						CellArray ctargets = S[i + counter]["targets"];
-						for (auto j = 0; j < ctargets.getNumberOfElements(); j++) {
-							const CharArray t = ctargets[0][j];
-							QString target = QString::fromStdString(t.toAscii());
-							targets << target;
-						}
+		stream << nMarkers;
+		for (auto i = 0; i < nMarkers; i++) {
+			QStringList targets;
+			float position = 0., duration = 0., value = 0.;
+
+			CharArray field_label = S[i + counter]["label"];
+			std::string s = field_label.toAscii();
+			label = QString::fromStdString(s);
+			stream << label;
+			if (map["color"] != -1) {
+				CharArray c = S[i + counter]["color"];
+				std::string s = c.toAscii();
+				colour = QString::fromStdString(s);
+			}
+			stream << colour;
+			TypedArray<double> pos = S[i + counter]["position"];
+			position = static_cast<float>(pos[0]);
+			stream << position;
+			if (map["duration"] != -1) {
+				const TypedArray<double> d = S[i + counter]["duration"];
+				duration = static_cast<float>(d[0]);
+			}
+			stream << duration;
+			if (map["value"] != -1) {
+				TypedArray<double> v = S[i + counter]["value"];
+				value = static_cast<float>(v[0]);
+			}
+			stream << value;
+			if (map["channels"] != -1) {
+				if (S[i + counter]["channels"].getType() == ArrayType::CELL) {
+					CellArray ctargets = S[i + counter]["channels"];
+					for (auto j = 0; j < ctargets.getNumberOfElements(); j++) {
+						const CharArray t = ctargets[0][j];
+						QString target = QString::fromStdString(t.toAscii());
+						targets << target;
 					}
 				}
-				stream << targets;
 			}
-			aw.sendData(data);
-			aw.waitForResponse();
-			nMarkers -= n;
-			counter += n;
-			if (nMarkers == 0) {
-				// finished sending markers =>inform anywave by sending 0 as number of markers
-				data.clear();
-				stream.device()->reset();
-				stream << (int)0;
-				aw.sendData(data);
-				break;
-			}
+			stream << targets;
 		}
+		aw.sendData(data);
+		aw.waitForResponse();
+
+		//while (true) {
+		//	int n = std::min(MARKERS_AT_ONCE, nMarkers);
+		//	data.clear();
+		//	stream.device()->reset();
+		//	stream << n;
+		//	for (auto i = 0; i < n; i++) {
+		//		QStringList targets;
+		//		float position = 0., duration = 0., value = 0.;
+
+		//		CharArray field_label = S[i + counter]["label"];
+		//		std::string s = field_label.toAscii();
+		//		label = QString::fromStdString(s);
+		//		stream << label;
+		//		if (map["color"] != -1) {
+		//			CharArray c = S[counter]["color"];
+		//			colour = QString::fromStdString(c.toAscii());
+		//		}
+		//		stream << colour;
+		//		TypedArray<double> pos = S[i + counter]["position"];
+		//		position = static_cast<float>(pos[0]);
+		//		stream << position;
+		//		if (map["duration"] != -1) {
+		//			const TypedArray<double> d = S[i + counter]["duration"];
+		//			duration = static_cast<float>(d[0]);
+		//		}
+		//		stream << duration;
+		//		if (map["value"] != -1) {
+		//			TypedArray<double> v = S[i + counter]["value"];
+		//			value = static_cast<float>(v[0]);
+		//		}
+		//		stream << value;
+		//		if (map["channels"] != -1) {
+		//			if (S[i + counter]["channels"].getType() == ArrayType::CELL) {
+		//				CellArray ctargets = S[i + counter]["channels"];
+		//				for (auto j = 0; j < ctargets.getNumberOfElements(); j++) {
+		//					const CharArray t = ctargets[0][j];
+		//					QString target = QString::fromStdString(t.toAscii());
+		//					targets << target;
+		//				}
+		//			}
+		//		}
+		//		stream << targets;
+		//	}
+		//	aw.sendData(data);
+		//	aw.waitForResponse();
+		//	nMarkers -= n;
+		//	counter += n;
+		//	if (nMarkers == 0) {
+		//		// finished sending markers =>inform anywave by sending 0 as number of markers
+		//		data.clear();
+		//		stream.device()->reset();
+		//		stream << (int)0;
+		//		aw.sendData(data);
+		//		break;
+		//	}
+		//}
 
 	}
 	catch (const QString& what) {
@@ -326,10 +373,10 @@ void MexFunction::get_markers(matlab::mex::ArgumentList& outputs, matlab::mex::A
 			outputs[0] = factory.createEmptyArray();
 			return;
 		}
-		StructArray S = factory.createStructArray({ 1, size_t(nMarkers) }, { "label", "position", "duration", "value", "targets" });
+		StructArray S = factory.createStructArray({ 1, size_t(nMarkers) }, { "label", "position", "duration", "value", "channels" });
 		aw.waitForResponse();
 		for (auto i = 0; i < nMarkers; i++) {
-			response >> label >> position >> duration >> value >> targets;
+			response >> label >> position >> duration >> value >> targets >> color;
 			std::string tmp = label.toStdString();
 			S[i]["label"] = factory.createCharArray(tmp);
 			S[i]["position"] = factory.createScalar<double>(position);
@@ -341,7 +388,7 @@ void MexFunction::get_markers(matlab::mex::ArgumentList& outputs, matlab::mex::A
 				tmp = targets.at(j).toStdString();
 				C[0][j] = factory.createCharArray(tmp);
 			}
-			S[i]["targets"] = C;
+			S[i]["channels"] = C;
 		}
 		outputs[0] = S;
 	}

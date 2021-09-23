@@ -243,15 +243,17 @@ void AwBaseSignalView::applyChannelFilters()
 
 void AwBaseSignalView::updatePageDuration(float duration)
 {
-	if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
-		float dur = m_pageDuration;
-		m_pageDuration = duration;
-		if (m_pageDuration > dur)
-			reloadData();
-	}
-	else {
-		reloadData();
-	}
+	m_pageDuration = duration;
+	//if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
+	//	float dur = m_pageDuration;
+	//	m_pageDuration = duration;
+	//	if (m_pageDuration > dur)
+	//		reloadData();
+	//}
+	//else {
+	//	reloadData();
+	//}
+	reloadData();
 }
 
 AwChannelList AwBaseSignalView::selectedChannels()
@@ -356,6 +358,10 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 			m_markerBar->hide();
 
 	if (flags & AwViewSettings::TimeScaleMode) {
+		if (m_settings->timeScaleMode == AwViewSettings::FixedPageDuration) 
+			m_pageDuration = settings->fixedPageDuration;
+		if (m_settings->timeScaleMode == AwViewSettings::PaperLike) 
+			m_pageDuration = m_view->pageDuration();
 		reload = true;
 	}
 	if (flags & AwViewSettings::PageDuration) {

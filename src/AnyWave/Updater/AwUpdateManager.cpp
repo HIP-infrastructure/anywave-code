@@ -67,6 +67,7 @@ void AwUpdateManager::checkForUpdates(bool quiet)
 		auto map = AwUtilities::json::fromJsonFileToMap(jsonFile);
 		updateUrl = map.value("url").toString();
 	}
+	download(updateUrl);
 	connect(this, &AwUpdateManager::downloaded, this, &AwUpdateManager::loadJSON);
 }
 

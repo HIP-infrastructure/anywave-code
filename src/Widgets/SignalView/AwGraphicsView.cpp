@@ -88,7 +88,9 @@ void AwGraphicsView::resizeEvent(QResizeEvent *event)
 	gs->refresh();
 	resetCachedContent();
 	repaint();
-	scene()->update();
+//	scene()->update();
+	gs->updateChannelsData();
+	gs->update();
 }
 
 void AwGraphicsView::scrollContentsBy(int dx, int dy)
@@ -494,6 +496,7 @@ void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 			}
 			else {
 				computePageDuration();
+				
 				emit pageDurationChanged(m_pageDuration);
 			}
 			resetCachedContent();

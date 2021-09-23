@@ -116,6 +116,7 @@ signals:
 	// signals relative to command sent by processes
 	// transmit the command to Display object
 	void displayCommand(const QVariantMap&);
+	void sendEvent(QSharedPointer<AwEvent>);
 protected:
 	void addProcess(AwProcessPlugin *plugin);
 	void addProcessToMenu(AwProcessPlugin *plugin);

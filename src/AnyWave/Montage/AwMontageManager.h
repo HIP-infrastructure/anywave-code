@@ -107,6 +107,8 @@ signals:
 
 	// logging system
 	void log(const QString& message);
+	// event system
+	void sendEvent(QSharedPointer<AwEvent>);
 public slots:
 	/** Affiche l'interface de montage. **/
 	void showInterface();
