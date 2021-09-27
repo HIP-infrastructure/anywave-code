@@ -376,7 +376,7 @@ void MexFunction::get_markers(matlab::mex::ArgumentList& outputs, matlab::mex::A
 		StructArray S = factory.createStructArray({ 1, size_t(nMarkers) }, { "label", "position", "duration", "value", "channels" });
 		aw.waitForResponse();
 		for (auto i = 0; i < nMarkers; i++) {
-			response >> label >> position >> duration >> value >> targets >> color;
+			response >> label >> position >> duration >> value >> targets;
 			std::string tmp = label.toStdString();
 			S[i]["label"] = factory.createCharArray(tmp);
 			S[i]["position"] = factory.createScalar<double>(position);

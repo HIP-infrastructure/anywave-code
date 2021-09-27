@@ -23,7 +23,7 @@ QT5_WRAP_UI(TFW_UIS ${UIS})
 add_library(TFWavelet SHARED ${SRCS} ${TFW_MOCS} ${TFW_UIS})
 qt5_use_modules(TFWavelet Core Gui Widgets Concurrent)
 
-target_link_libraries(TFWavelet AwProcess AwCore AwGraphics AwWidget Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Concurrent ${QWT_LIBRARIES} ${BLAS_LIBRARIES})
+target_link_libraries(TFWavelet AwProcess AwCore AwWidget Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Concurrent ${QWT_LIBRARIES} ${BLAS_LIBRARIES})
 
 INSTALL(TARGETS TFWavelet DESTINATION ${PLUGIN_INSTALL_DIR})
 
