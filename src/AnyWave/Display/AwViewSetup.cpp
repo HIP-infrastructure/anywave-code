@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwViewSetup.h"
 #include "AwDisplaySetup.h"
-#include <AwChannel.h>
 
 AwViewSetup::AwViewSetup(QObject *parent)
 	: AwViewSettings(parent)

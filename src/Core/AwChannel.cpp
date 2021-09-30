@@ -18,8 +18,10 @@
 #include <QtMath>
 #include <QRegularExpression>
 
-static QStringList UnitTypes = { "µV", "µV" , "pT", "µV", "µV" , "pT", "n/a", "n/a", "unit", "unit", "pT/m", "µV", "unit" };
-static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
+//static QStringList UnitTypes = { QString::fromUtf8("µV"), QString::fromUtf8("µV") , QString::fromUtf8("pT"), 
+//   QString::fromUtf8("µV"), QString::fromUtf8("µV"), QString::fromUtf8("pT"), QString::fromUtf8("n/a"), QString::fromUtf8("n/a"), 
+//	QString::fromUtf8("unit"), QString::fromUtf8("unit"), QString::fromUtf8("pT/m"), QString::fromUtf8("µV"), QString::fromUtf8("unit") };
+//static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
 
 const QVector<int> AwChannel::intTypes = { 0, 1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13 };
 const QStringList AwChannel::types = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
@@ -39,9 +41,9 @@ bool compareNames(AwChannel * c1, AwChannel *c2);
 AwChannel::AwChannel()
 {
 	m_type = AwChannel::EEG;
-	m_unit = AwChannel::unitForType(AwChannel::EEG);
+	m_unit = AwChannel::microV;
 	m_sourceType = AwChannel::Real;
-	m_data = NULL;
+	m_data = nullptr;
 	m_dataSize = 0;
 	m_gain = 100;
 	m_bad = false;
@@ -52,7 +54,7 @@ AwChannel::AwChannel()
 	m_x = m_y = m_z = m_ox = m_oy = m_oz = 0.0;
 	m_dataReady = false;
 	m_hasCoordinates = false;
-	m_parent = NULL;
+	m_parent = nullptr;
 	m_isSelected = false;
 	m_className = "AwChannel";
 }
@@ -80,7 +82,7 @@ AwChannel::AwChannel(AwChannel *chan)
 	m_notch = chan->notch();
 	m_lowFilter = chan->lowFilter();
 	m_highFilter = chan->highFilter();
-	m_data = NULL; 
+	m_data = nullptr; 
 	m_dataSize = 0;
 	m_referenceName = chan->referenceName();
 	m_dataReady = false;
@@ -171,7 +173,8 @@ void AwChannel::setType(int t)
 	m_type = t;
 	m_referenceName = "";
 	m_unit = AwChannel::unitForType(t);
-	m_gain = AwChannel::defaultAmplitudeForType(t);
+
+//	m_gain = AwChannel::defaultAmplitudeForType(t);
 	m_references.clear();
 }
 	 
@@ -288,14 +291,19 @@ void AwChannel::setDisplayPluginName(const QString& name)
 	m_registeredDisplayPlugin = name; 
 }
 
-void AwChannel::setUnit(const char *u)
-{
-	m_unit = QString::fromUtf8(u);
-}
+//void AwChannel::setUnit(const char *u)
+//{
+//	m_unit = QString::fromUtf8(u);
+//}
+//
+//void AwChannel::setUnit(const QString& u)
+//{
+//	m_unit = u;
+//}
 
-void AwChannel::setUnit(const QString& u)
+void AwChannel::setUnit(int unit)
 {
-	m_unit = u;
+	m_unit = unit;
 }
 
 void AwChannel::setGain(float gain)
@@ -411,15 +419,49 @@ int AwChannel::stringToType(const QString& s)
 //}
 
 
-QString AwChannel::unitForType(int type)
+int AwChannel::unitForType(int type)
 {
-	return UnitTypes.value(type);
+//	return UnitTypes.value(type);
+	switch (type) {
+	case AwChannel::EEG:
+	case AwChannel::SEEG:
+	case AwChannel::EMG:
+	case AwChannel::ECG:
+		return AwChannel::microV;
+	case AwChannel::MEG:
+	case AwChannel::Reference:
+		return AwChannel::picoT;
+	case AwChannel::GRAD:
+		return AwChannel::picoTpermeter;
+	default:
+		return AwChannel::undefinedUnit;
+	}
 }
 
-float AwChannel::defaultAmplitudeForType(int type)
+QString AwChannel::unitString(int unit)
 {
-	return DefaultAmplitudeValues.value(type);
+	switch (unit) {
+	case AwChannel::microV:
+		return QString::fromLatin1("µV");
+	case AwChannel::milliV:
+		return QString::fromLatin1("mV");
+	case AwChannel::picoT:
+		return QString::fromLatin1("pT");
+	case AwChannel::picoTpermeter:
+		return QString::fromLatin1("pT/m");
+	case AwChannel::V:
+		return QString::fromLatin1("V");
+	case AwChannel::T:
+		return QString::fromLatin1("T");
+	default:
+		return QString::fromLatin1("n/d");
+	}
 }
+
+//float AwChannel::defaultAmplitudeForType(int type)
+//{
+//	return DefaultAmplitudeValues.value(type);
+//}
 ///
 ///
 ///
@@ -458,11 +500,21 @@ QStringList AwChannel::getTypesAsString(const QList<AwChannel *>& list)
 QList<AwChannel *> AwChannel::extractChannelsOfType(const QList<AwChannel *>& list, int type)
 {
 	AwChannelList res;
-	foreach(AwChannel *c, list)
+	for (AwChannel * c: list)
 		if (c->type() == type)
-			res << new AwChannel(c);
+			res << c->duplicate();
 
 	return res;
+}
+
+QList<int> AwChannel::getTypes(const QList<AwChannel*>& list)
+{
+	QList<int> types;
+	for (auto c : list) {
+		if (!types.contains(c->type()))
+			types << c->type();
+	}
+	return types;
 }
 
 //
@@ -519,7 +571,7 @@ QList<AwChannel *> AwChannel::getChannelsWithLabel(const QList<AwChannel *>& lis
 QList<AwChannel *> AwChannel::duplicateChannels(const QList<AwChannel *>& list)
 {
 	AwChannelList res;
-	foreach(AwChannel *c, list)  {
+	for (AwChannel *c : list)  {
 		if (c->isVirtual()) {
 			AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
 			res << c->duplicate();
@@ -648,6 +700,11 @@ QList<AwChannel *> AwChannel::sortByType(const QList<AwChannel *>& list, const Q
 // END OF STATIC METHODS
 
 
+QString AwChannel::unitString()
+{
+	return AwChannel::unitString(m_unit);
+}
+
 bool AwChannel::isDataReady()
 {
 	return m_dataReady;
@@ -659,7 +716,7 @@ AwChannel::~AwChannel()
 {
 	if (m_data)	{
 		delete [] m_data;
-		m_data = NULL;
+		m_data = nullptr;
 	}
 }
 

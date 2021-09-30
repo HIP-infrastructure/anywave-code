@@ -20,7 +20,7 @@
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include "Montage/AwMontageManager.h"
-#include <widget/AwSEEGViewer.h>
+#include "3DViewer/AwSEEGViewer.h"
 #include "Data/AwDataServer.h"
 #include "Data/AwDataManager.h"
 #include "Prefs/AwSettings.h"
@@ -136,52 +136,76 @@ void AnyWave::runMapping()
 			isEEGOK = false;
 	}
 
-	// check for SEEG channels from as recorded channels in the Montage
-	AwChannelList seegChannels;
-	for (auto c : m_display->displayedChannels()) {
-		if (c->isSEEG())
-			seegChannels << c;
+	//// check for SEEG channels from as recorded channels in the Montage
+	//AwChannelList seegChannels;
+	//for (auto c : m_display->displayedChannels()) {
+	//	if (c->isSEEG())
+	//		seegChannels << c;
+	//}
+
+	// a viewer is already running?
+	if (AwSEEGViewer::isInstantiated()) {
+		AwDataManager::instance()->dataServer()->closeConnection(AwSEEGViewer::instance());
+		AwSEEGViewer::quit();
 	}
 
-	if (!seegChannels.isEmpty()) {  // we've got SEEG channels, check for mesh and electrode files
-		// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.
-		QString mesh, electrodes;
-		if (AwBIDSManager::isInstantiated()) {
-			auto bm = AwBIDSManager::instance();
-			if (bm->isBIDSActive()) {
-				mesh = bm->getGardelMesh();
-				electrodes = bm->getGardelElectrodes();
-			}
-		}
-		else {
-			//AwFileInfo afi(m_currentReader);
-
-			//mesh = afi.getFeature(AwFileInfo::MeshFile).toString();
-			//electrodes = afi.getFeature(AwFileInfo::SEEGElectrodeFile).toString();
-		}
-
-		if (!mesh.isEmpty() && !electrodes.isEmpty()) {
-			if (m_SEEGViewer == NULL) {
-				m_SEEGViewer = new AwSEEGViewer(this);
-				connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient *)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient *)));
-				connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
-				connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
-				connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
-				connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-				connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
-					SLOT(setNewFilters(const AwFilterSettings&)));
-			}
-			// the viewer will automatically duplicate channel objects.
-			m_SEEGViewer->setSEEGChannels(seegChannels);
-			m_SEEGViewer->loadElectrodes(electrodes);
-			m_SEEGViewer->loadMesh(mesh);
-
-			m_display->setMappingModeOn(true);
-			m_SEEGViewer->setMappingMode(true);
-			m_SEEGViewer->widget()->show();
-		}
+	// check if SEEG Viewer can start
+	auto viewer = AwSEEGViewer::start();
+	if (!viewer) {// viewer not ready because we are not in BIDS or required file (GARDEL Electrodes) was not found. 
+		// check if SEEG channels exist
+		if (m_display->containsChannels(AwChannel::SEEG))
+			viewer = AwSEEGViewer::instance();
 
 	}
+	if (viewer) {
+		connect(viewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
+	//	connect(viewer, SIGNAL(newDataConnection(AwDataClient*)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient*)));
+		AwDataManager::instance()->dataServer()->openConnection(viewer);
+		connect(m_display, SIGNAL(clickedAtLatency(float)), viewer, SLOT(updateMappingAt(float)));
+		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), viewer, SLOT(setSEEGChannels(const AwChannelList&)));
+		connect(viewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+		connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), viewer,
+						SLOT(setNewFilters(const AwFilterSettings&)));
+		viewer->setSEEGChannels(m_display->getChannels(AwChannel::SEEG));
+		viewer->setMappingMode();
+		m_display->setMappingModeOn(true);
+		viewer->show();
+	}
+
+
+	//if (!seegChannels.isEmpty()) {  // we've got SEEG channels, check for mesh and electrode files
+	//	// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.
+	//	QString electrodes;
+	//	QStringList meshes;
+	//	if (AwBIDSManager::isInstantiated()) {
+	//		auto bm = AwBIDSManager::instance();
+	//		if (bm->isBIDSActive()) {
+	//			meshes = bm->freesurferMeshes();
+	//			electrodes = bm->getGardelElectrodes();
+	//		}
+	//	}
+		//if (!meshes.isEmpty() && !electrodes.isEmpty()) {
+		//	if (m_SEEGViewer == NULL) {
+		//		m_SEEGViewer = new AwSEEGViewer(this);
+		//		connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient *)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient *)));
+		//		connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
+		//		connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
+		//		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
+		//		connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
+		//		connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
+		//			SLOT(setNewFilters(const AwFilterSettings&)));
+		//	}
+		//	// the viewer will automatically duplicate channel objects.
+		//	m_SEEGViewer->setSEEGChannels(seegChannels);
+		//	m_SEEGViewer->loadElectrodes(electrodes);
+		//	//m_SEEGViewer->loadMesh(mesh);
+		//	m_SEEGViewer->addMeshes(meshes);
+		//	m_display->setMappingModeOn(true);
+		//	//m_SEEGViewer->setMappingMode(true);
+		//	m_SEEGViewer->setMappingMode();
+		//	m_SEEGViewer->widget()->show();
+		//}
+	//}
 
 	// disable cursor toolbar when mapping is active.
 	m_cursorToolBar->setEnabled(false);
@@ -209,9 +233,13 @@ void AnyWave::stopMapping()
 	else if (dockEEG->isClosed())
 		EEGOK = false;
 
+	if (AwSEEGViewer::isInstantiated()) {
+		AwDataManager::instance()->dataServer()->closeConnection(AwSEEGViewer::instance());
+		AwSEEGViewer::quit();
+	}
 	bool SEEGActive = false;
-	if (m_SEEGViewer)
-		SEEGActive = m_SEEGViewer->isMappingActive();
+	//if (m_SEEGViewer)
+	//	SEEGActive = m_SEEGViewer->isMappingActive();
 
 	if (!EEGOK && !MEGOK && !SEEGActive) {
 		m_cursorToolBar->setEnabled(true);

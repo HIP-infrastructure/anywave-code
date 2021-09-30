@@ -66,6 +66,8 @@ protected slots:
 	void renameSelectedMarkers();
 	void changeValueAllMarkers();
 	void changeValueSelectedMarkers();
+	void changeColorSelectedMarkers();
+	void changeColorAllMarkers();
 	void launchProcess();
 	void writeTrigger();
 	void clearTrigger();

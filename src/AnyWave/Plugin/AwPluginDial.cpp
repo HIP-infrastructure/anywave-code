@@ -27,80 +27,83 @@ AwPluginDial::AwPluginDial(QWidget *parent)
 	setupUi(this);
 
 	connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
+	auto pm = AwPluginManager::getInstance();
+	setWindowTitle("Loaded plugins");
+	setWindowIcon(QIcon(":/images/AnyWave_icon.png"));
 
 	// Init TreeWidget
 	// Un item parent pour chaque type de plugins
-	treeWidget->setHeaderLabels({ "Name", "Description" });
+	treeWidget->setHeaderLabels({ "Name", "Version", "Description" });
 	treeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     treeWidget->header()->setSectionResizeMode(1, QHeaderView::Stretch);
 
-	auto writerRoot =  new QTreeWidgetItem(treeWidget);
-	writerRoot->setText(0, tr("Writer"));
-	treeWidget->setItemExpanded(writerRoot, true);
-	writerRoot->setIcon(0, QIcon(":/images/ox_plugin_32.png"));
-
-	auto processRoot = new QTreeWidgetItem(treeWidget);
-	processRoot->setText(0, tr("Process"));
-	treeWidget->setItemExpanded(processRoot, true);
-	processRoot->setIcon(0, QIcon(":/images/system_run_32.png"));
-	
-	auto filterRoot = new QTreeWidgetItem(treeWidget);
-	filterRoot->setText(0, tr("Filter"));
-	treeWidget->setItemExpanded(filterRoot, true);
-	processRoot->setIcon(0, QIcon(":/images/system_run_32.png"));
-
-	auto readerRoot = new QTreeWidgetItem(treeWidget);
-	readerRoot->setText(0, tr("Reader"));
-	treeWidget->setItemExpanded(readerRoot, true);
-	readerRoot->setIcon(0, QIcon(":/images/ox_plugin_32.png"));
-
-	auto displayRoot = new QTreeWidgetItem(treeWidget);
-	displayRoot->setText(0, tr("Display"));
-	treeWidget->setItemExpanded(displayRoot, true);
-	displayRoot->setIcon(0, QIcon(":/images/display-settings.png"));
-	
-	QFont boldFont = writerRoot->font(0);
-    boldFont.setBold(true);
-	writerRoot->setFont(0, boldFont);
-	processRoot->setFont(0, boldFont);
-	filterRoot->setFont(0, boldFont);
-	readerRoot->setFont(0, boldFont);
-	displayRoot->setFont(0, boldFont);
-	
-	setWindowTitle(tr("Loaded Plug-ins"));
-
-	
-	// fill in the table widget
-	auto pm = AwPluginManager::getInstance();
-	for (auto p : pm->readers()) {
-		auto item = new QTreeWidgetItem(readerRoot);
-		item->setText(0, p->name);
-		item->setText(1, p->description);
-		item->setIcon(0, m_featureIcon);
-	}
+	auto ioPlugins = pm->readers();
 	for (auto p : pm->writers()) {
-		auto item = new QTreeWidgetItem(writerRoot);
-		item->setText(0, p->name);
-		item->setText(1, p->description);
-		item->setIcon(0, m_featureIcon);
+		if (!ioPlugins.contains(p))
+			ioPlugins << p;
 	}
-	for (auto p : pm->processes()) {
-		auto item = new QTreeWidgetItem(processRoot);
-		item->setText(0, p->name);
-		item->setText(1, p->description);
-		item->setIcon(0, m_featureIcon);
+
+	if (!ioPlugins.isEmpty()) {
+		auto ioRoot = new QTreeWidgetItem(treeWidget);
+		QFont boldFont = ioRoot->font(0);
+		ioRoot->setText(0, tr("I/O"));
+		ioRoot->setIcon(0, QIcon(":/images/ox_plugin_32.png"));
+		ioRoot->setFont(0, boldFont);
+		for (auto p : ioPlugins) {
+			auto item = new QTreeWidgetItem(ioRoot);
+			item->setText(0, p->name);
+			item->setText(1, p->version);
+			item->setTextAlignment(1, Qt::AlignHCenter);
+			item->setText(2, p->description);
+			item->setIcon(0, m_featureIcon);
+		}
 	}
-	for (auto p : pm->displays()) {
-		auto item = new QTreeWidgetItem(displayRoot);
-		item->setText(0, p->name);
-		item->setText(1, p->description);
-		item->setIcon(0, m_featureIcon);
+	if (!pm->processes().isEmpty()) {
+		auto processRoot = new QTreeWidgetItem(treeWidget);
+		QFont boldFont = processRoot->font(0);
+		processRoot->setText(0, tr("Process"));
+		processRoot->setIcon(0, QIcon(":/images/system_run_32.png"));
+		processRoot->setFont(0, boldFont);
+		for (auto p : pm->processes()) {
+			auto item = new QTreeWidgetItem(processRoot);
+			item->setText(0, p->name);
+			item->setText(1, p->version);
+			item->setTextAlignment(1, Qt::AlignHCenter);
+			item->setText(2, p->description);
+			item->setIcon(0, m_featureIcon);
+		}
 	}
-	for (auto p : pm->filters()) {
-		auto item = new QTreeWidgetItem(filterRoot);
-		item->setText(0, p->name);
-		item->setText(1, p->description);
-		item->setIcon(0, m_featureIcon);
+
+	if (!pm->displays().isEmpty()) {
+		auto displayRoot = new QTreeWidgetItem(treeWidget);
+		QFont boldFont = displayRoot->font(0);
+		displayRoot->setText(0, tr("Display"));
+		displayRoot->setIcon(0, QIcon(":/images/display-settings.png"));
+		displayRoot->setFont(0, boldFont);
+		for (auto p : pm->displays()) {
+			auto item = new QTreeWidgetItem(displayRoot);
+			item->setText(0, p->name);
+			item->setText(1, p->version);
+			item->setTextAlignment(1, Qt::AlignHCenter);
+			item->setText(2, p->description);
+			item->setIcon(0, m_featureIcon);
+		}
+	}
+
+	if (!pm->filters().isEmpty()) {
+		auto filterRoot = new QTreeWidgetItem(treeWidget);
+		QFont boldFont = filterRoot->font(0);
+		filterRoot->setText(0, tr("Filters"));
+		filterRoot->setFont(0, boldFont);
+		filterRoot->setIcon(0, QIcon(":/images/ox_view_filter_32.png"));
+		for (auto p : pm->filters()) {
+			auto item = new QTreeWidgetItem(filterRoot);
+			item->setText(0, p->name);
+			item->setText(1, p->version);
+			item->setTextAlignment(1, Qt::AlignHCenter);
+			item->setText(2, p->description);
+			item->setIcon(0, m_featureIcon);
+		}
 	}
 }
 

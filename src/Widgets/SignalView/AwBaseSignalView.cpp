@@ -1,8 +1,22 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/SignalView/AwBaseSignalView.h>
 #include <widget/SignalView/AwNavigationBar.h>
 #include <widget/SignalView/AwBaseMarkerBar.h>
 #include <widget/AwMessageBox.h>
-#include <AwAmplitudeManager.h>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QtGlobal>
@@ -12,22 +26,28 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	: QWidget(parent, f) 
 {
 	m_flags = flags;
-	if (settings == NULL)
+	if (settings == nullptr)
 		m_settings = new AwViewSettings(this);
 	else
 		m_settings = settings;
 	m_positionInFile = 0;
 	m_pageDuration = 0;
-	m_startPosition = 0.;
-	setFocusPolicy(Qt::StrongFocus);
-	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	m_physics = new AwDisplayPhysics;
 	m_physics->setSecsPerCm(m_settings->secsPerCm);
+	if (m_settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
+		m_pageDuration = m_settings->fixedPageDuration;
+		m_physics->setPageDuration(m_settings->fixedPageDuration);
+	}
+	m_startPosition = 0.;
+	
+	setFocusPolicy(Qt::StrongFocus);
+	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
 	m_scene = new AwGraphicsScene(m_settings, m_physics, 0);
 	m_view = new AwGraphicsView(m_scene, m_settings, m_physics, 0);
 	m_navBar = new AwNavigationBar(this, flags);
 	m_markerBar = new AwBaseMarkerBar(m_physics, this);
-	m_markerInspector = NULL;
+	m_markerInspector = nullptr;
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->setContentsMargins(3, 3, 3, 3);
 	layout->addWidget(m_view);
@@ -126,10 +146,10 @@ void AwBaseSignalView::makeConnections()
 
 	// amplitude
 	AwAmplitudeWidget *ampWidget = m_navBar->amplitudeWidget();
+	ampWidget->setGainLevels(m_settings->gainLevels);
+
 	connect(ampWidget, SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
 	connect(ampWidget, SIGNAL(amplitudeChanged(int, float)), this, SLOT(setAmplitude(int, float)));
-
-	connect(AwAmplitudeManager::instance(), SIGNAL(amplitudesChanged()), this, SLOT(setAmplitudes()));
 }
 
 void AwBaseSignalView::changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNavigationBar *navBar, AwBaseMarkerBar *markBar)
@@ -185,6 +205,7 @@ void AwBaseSignalView::setTotalDuration(float dur)
 void AwBaseSignalView::setChannels(const AwChannelList& channels)
 {
 	m_montageChannels = channels;
+	applyGainLevels();
 	// clear channels present in scene.
 	m_scene->clearChannels();
 	applyChannelFilters();
@@ -192,12 +213,28 @@ void AwBaseSignalView::setChannels(const AwChannelList& channels)
 	reloadData();
 }
 
+void AwBaseSignalView::applyGainLevels()
+{
+	m_channelTypes.clear();
+	for (auto c : m_montageChannels) 
+		m_channelTypes.insert(c->type(), c);
+	// set gain levels for channels that are present
+	auto types = m_channelTypes.uniqueKeys();
+	for (auto t : types) {
+		auto gl = m_settings->gainLevels->getGainLevelFor(t);
+		auto channels = m_channelTypes.values(t);
+		for (auto c : channels) 
+			c->setGain(gl->value());
+	}
+	m_navBar->amplitudeWidget()->setGainLevels(m_settings->gainLevels);
+}
+
 void AwBaseSignalView::applyChannelFilters()
 {
 	// clear current channel list
 	m_channels.clear();
 	// rebuilding list applying filters
-	foreach (AwChannel *c, m_montageChannels)	{
+	for (AwChannel *c : m_montageChannels)	{
 		if (m_settings->filters.contains(c->type())) {
 			m_channels << c;
 		}
@@ -206,10 +243,17 @@ void AwBaseSignalView::applyChannelFilters()
 
 void AwBaseSignalView::updatePageDuration(float duration)
 {
-	float dur = m_pageDuration;
 	m_pageDuration = duration;
-	if (m_pageDuration > dur)
-		reloadData();
+	//if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
+	//	float dur = m_pageDuration;
+	//	m_pageDuration = duration;
+	//	if (m_pageDuration > dur)
+	//		reloadData();
+	//}
+	//else {
+	//	reloadData();
+	//}
+	reloadData();
 }
 
 AwChannelList AwBaseSignalView::selectedChannels()
@@ -242,7 +286,10 @@ void AwBaseSignalView::updateVisibleMarkers()
 
 void AwBaseSignalView::setMarkers(const AwMarkerList& markers)
 {
+	if (markers.isEmpty())
+		return;
 	m_markers = markers;
+	m_markerBar->setAllMarkers(markers);
 	updateVisibleMarkers();
 }
 
@@ -291,7 +338,7 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		// filter channels
 		m_channels.clear();
 		m_scene->clearChannels();
-		foreach (AwChannel *c, m_montageChannels)
+		for (AwChannel *c : m_montageChannels)
 			if (settings->filters.contains(c->type()))
 				m_channels << c;
 		m_scene->setChannels(m_channels);
@@ -300,12 +347,27 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		else
 			reload = true;
 	}
+
+	if (flags & AwViewSettings::ShowMarkers)
+		m_scene->showMarkers(m_settings->showMarkers);
 	
 	if (flags & AwViewSettings::MarkerBarMode)
 		if (settings->markerBarMode == AwViewSettings::ShowMarkerBar)
 			m_markerBar->show();
 		else
 			m_markerBar->hide();
+
+	if (flags & AwViewSettings::TimeScaleMode) {
+		if (m_settings->timeScaleMode == AwViewSettings::FixedPageDuration) 
+			m_pageDuration = settings->fixedPageDuration;
+		if (m_settings->timeScaleMode == AwViewSettings::PaperLike) 
+			m_pageDuration = m_view->pageDuration();
+		reload = true;
+	}
+	if (flags & AwViewSettings::PageDuration) {
+		m_pageDuration = settings->fixedPageDuration;
+		reload = true;
+	}
 
 	if (flags & AwViewSettings::SecPerCm)
 		reload = true;
@@ -315,20 +377,23 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 
 void AwBaseSignalView::setAmplitude(int type, float value)
 {
-	foreach (AwChannel *c, m_channels) {
-		 if (type == c->type())
-			c->setGain(value);
-		 if (type == AwChannel::EMG && c->isECG())
-			 c->setGain(value);
-	}
+	auto types = m_channelTypes.uniqueKeys();
+	if (!types.contains(type))
+		return;
+	auto channels = m_channelTypes.values(type);
+	for (auto c : channels) 
+		c->setGain(value);
 	m_scene->updateSignals();
 }
 
 void AwBaseSignalView::setAmplitudes()
 {
-	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	foreach(AwChannel *c, m_channels) {
-		c->setGain(am->amplitude(c->type()));
+	auto types = m_channelTypes.uniqueKeys();
+	for (auto t : types) {
+		auto gl = m_settings->gainLevels->getGainLevelFor(t);
+		auto channels = m_channelTypes.values(t);
+		for (auto c : channels)
+			c->setGain(gl->value());
 	}
 	m_scene->updateSignals();
 }
@@ -415,4 +480,16 @@ void AwBaseSignalView::openFilterGUI()
 	if (m_filterSettings.isEmpty())
 		m_filterSettings.initWithChannels(m_channels);
 	ui->show();
+}
+
+void AwBaseSignalView::processEvent(QSharedPointer<AwEvent> e)
+{
+	auto data = e->data();
+	switch (e->id()) {
+	case AwEvent::ShowChannels:
+		break;
+	case AwEvent::HighlightTimeSelection:
+
+		break;
+	}
 }

@@ -1,3 +1,18 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/SignalView/AwGraphicsView.h>
 #include <widget/SignalView/AwGraphicsScene.h>
 #include <QtMath>
@@ -11,11 +26,12 @@ AwGraphicsView::AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings,
 	setDragMode(NoDrag);
 	setViewportUpdateMode(NoViewportUpdate);
 	setFocusPolicy(Qt::StrongFocus);
-	m_pageDuration = m_posInFile = m_timeOffset = 0.;
+	m_previousPageDuration = m_pageDuration = m_posInFile = m_timeOffset = 0.;
 	m_physics = phys;
 	applySettings(settings);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_secsPerCm = settings->secsPerCm;
+	m_timeScaleMode = settings->timeScaleMode;
 }	
 
 void AwGraphicsView::setTimeShift(float shift)
@@ -28,27 +44,53 @@ void AwGraphicsView::setTimeShift(float shift)
 void AwGraphicsView::computePageDuration()
 {
 	float w = (float)viewport()->rect().width();
-	m_pageDuration = (w / m_physics->xPixPerCm()) * m_settings->secsPerCm;
-	m_physics->setPageDuration(m_pageDuration);
-	m_physics->setXPixPerSec(w / m_pageDuration);
+	if (m_timeScaleMode == AwViewSettings::PaperLike) {
+		m_pageDuration = (w / m_physics->xPixPerCm()) * m_settings->secsPerCm;
+		m_physics->setXPixPerSec(w / m_pageDuration);
+		m_physics->setPageDuration(m_pageDuration);
+	}
+	else {
+		m_pageDuration = m_settings->fixedPageDuration;
+		//m_physics->setXPixPerSec(w / m_pageDuration);
+		m_physics->setPageDuration(m_pageDuration);
+		m_physics->setFixedPageDuration(m_pageDuration, w);
+	}
+	if (m_pageDuration == 0.)
+		return;
+	//if (m_previousPageDuration == 0. || m_previousPageDuration != m_pageDuration) {
+	//	m_previousPageDuration = m_pageDuration;
+	//	emit pageDurationChanged(m_pageDuration);
+	//}
+	emit pageDurationChanged(m_pageDuration);
 }
 
 
 void AwGraphicsView::resizeEvent(QResizeEvent *event)
 {
-	float duration = m_pageDuration;
-	// update page duration
+	//float duration = m_pageDuration;
 	computePageDuration();
+	//// update page duration
+	//if (m_settings->timeScaleMode == AwViewSettings::PaperLike)
+	//	computePageDuration();
+	//else {
+	//	//float w = (float)viewport()->rect().width();
+	//	//m_physics->setPageDuration(m_pageDuration);
+	//	//m_physics->setFixedPageDuration(m_pageDuration, w);
+	//	computePageDuration();
+	//}
 	layoutItems();
 
-	// don't send signal if duration is the same.
-	if (duration != m_pageDuration)
-		emit pageDurationChanged(m_pageDuration);
+	//// don't send signal if duration is the same.
+	//if (duration != m_pageDuration)
+	//	emit pageDurationChanged(m_pageDuration);
 
 	AwGraphicsScene *gs = (AwGraphicsScene *)scene();
 	gs->refresh();
 	resetCachedContent();
 	repaint();
+//	scene()->update();
+	gs->updateChannelsData();
+	gs->update();
 }
 
 void AwGraphicsView::scrollContentsBy(int dx, int dy)
@@ -82,15 +124,17 @@ void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 	startingOffsetSecond = (nextSecond - posInFile) * m_physics->xPixPerSec();
 	float pixPer100ms = m_physics->xPixPerSec() / 10;
 
-	if (m_settings->secsPerCm < 0.1) { // when the time scale is < 0.5s/cm display the 100ms lines
-		show100ms = true;
-		// compute the starting 100ms line
-		quint32 timeMs = (quint32)floor(std::abs(posInFile)) * 1000;
-		float diff = (posInFile * 1000) - timeMs;
-		next100ms = (int)floor(diff / 100);
-		next100ms *= 100;
-		startingOffset100ms = ((next100ms - diff) / 1000) * m_physics->xPixPerSec();
-		next100ms += 100;
+	if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
+		if (m_settings->secsPerCm < 0.1) { // when the time scale is < 0.5s/cm display the 100ms lines
+			show100ms = true;
+			// compute the starting 100ms line
+			quint32 timeMs = (quint32)floor(std::abs(posInFile)) * 1000;
+			float diff = (posInFile * 1000) - timeMs;
+			next100ms = (int)floor(diff / 100);
+			next100ms *= 100;
+			startingOffset100ms = ((next100ms - diff) / 1000) * m_physics->xPixPerSec();
+			next100ms += 100;
+		}
 	}
 
 	for (float i = startingOffsetSecond; i < rect.width(); i += m_physics->xPixPerSec())
@@ -410,13 +454,13 @@ void AwGraphicsView::layoutItems()
 
 void AwGraphicsView::applySettings(AwViewSettings *settings)
 {
-	if (settings == NULL)
+	if (settings == nullptr)
 		return;
 	m_settings = settings;
 	m_secsPerCm = settings->secsPerCm;
 	m_physics->setSecsPerCm(settings->secsPerCm);
 	computePageDuration();
-	emit pageDurationChanged(m_pageDuration);
+//	emit pageDurationChanged(m_pageDuration);
 	resetCachedContent();
 	repaint();
 	layoutItems();
@@ -426,7 +470,7 @@ void AwGraphicsView::applySettings(AwViewSettings *settings)
 void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 {
 	if (flags & AwViewSettings::ShowSecondTicks || flags & AwViewSettings::ShowTimeGrid 
-		|| flags & AwViewSettings::ShowRecordedTime || flags & AwViewSettings::ShowRelativeTime) {
+		|| flags & AwViewSettings::TimeRepresentation) {
 		resetCachedContent();
 		repaint();
 	}
@@ -438,6 +482,33 @@ void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 			computePageDuration();
 			m_secsPerCm = m_settings->secsPerCm;
 			emit pageDurationChanged(m_pageDuration);
+		}
+	}
+
+	if (flags & AwViewSettings::TimeScaleMode) {
+		if (m_settings->timeScaleMode != m_timeScaleMode) {
+			m_timeScaleMode = settings->timeScaleMode;
+			if (m_timeScaleMode == AwViewSettings::PaperLike) {
+				m_physics->setSecsPerCm(settings->secsPerCm);
+				computePageDuration();
+				m_secsPerCm = m_settings->secsPerCm;
+				emit pageDurationChanged(m_pageDuration);
+			}
+			else {
+				computePageDuration();
+				
+				emit pageDurationChanged(m_pageDuration);
+			}
+			resetCachedContent();
+			repaint();
+		}
+	}
+	// we can have to update the page duration while already switched to this mode
+	if (flags & AwViewSettings::PageDuration) {
+		if (m_settings->fixedPageDuration != m_pageDuration) {
+			computePageDuration(); // not really recompute but propagate page duration to Physics in order to get the good pixel to sample transform
+			resetCachedContent();
+			repaint();
 		}
 	}
 

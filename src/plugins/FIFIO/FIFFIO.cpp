@@ -84,9 +84,9 @@ void fiff_coord_trans(float r[3],       /**< Vector to be transformed (in situ) 
 FIFFIOPlugin::FIFFIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("FIFF Format");
-	description = QString(tr("read/write .fif files"));
+	description = QString(tr("read/write .fif file"));
 	manufacturer = QString::fromLatin1("Elekta");
-	version = QString::fromLatin1("1.0");
+	version = QString::fromLatin1("1.0.1");
 	fileExtensions << QString::fromLatin1("*.fif");
 	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::CanWrite;
 	fileExtension = ".fif";
@@ -512,6 +512,90 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	addEntry(FIFF_BLOCK_START, FIFFT_INT, sizeof(int));
 	writeBlockStart(&tag, FIFFB_MEAS_INFO);
 
+	// tags in meas_info
+	addEntry(FIFF_NCHAN, FIFFT_INT, sizeof(int));
+	// nchan
+	initTag(&tag, FIFF_NCHAN, FIFFT_INT);
+	writeTag(&tag);
+	writeTagData<qint32>(infos.channelsCount());
+	// sfreq
+	addEntry(FIFF_SFREQ, FIFFT_FLOAT, sizeof(float));
+	initTag(&tag, FIFF_SFREQ, FIFFT_FLOAT);
+	writeTag(&tag);
+	writeTagData<float>(sfreq);
+
+	// chinfo
+	for (int i = 0; i < infos.channels().size(); i++) {
+		addEntry(FIFF_CH_INFO, FIFFT_CH_INFO_STRUCT, sizeof(fiffChInfo) * infos.channelsCount());
+		initTag(&tag, FIFF_CH_INFO, FIFFT_CH_INFO_STRUCT);
+		tag.size = sizeof(fiffChInfo) * infos.channelsCount();
+		writeTag(&tag);
+		AwChannel* chan = infos.channels().at(i);
+		fiffChInfoRec chinfo;
+		chinfo.cal = 1.;
+		chinfo.scanNo = i + 1;
+		chinfo.logNo = i;
+		chinfo.range = 1.;
+		chinfo.unit_mul = 0;
+		int length = std::min(chan->name().size(), 15);
+		std::string s = chan->name().toStdString();
+		memcpy(chinfo.ch_name, s.data(), length);
+		chinfo.ch_name[length] = '\0';
+		switch (chan->type()) {
+		case AwChannel::MEG:
+			chinfo.kind = FIFFV_MEG_CH;
+			chinfo.unit = FIFF_UNIT_T;
+			chinfo.chpos.coil_type = FIFFV_MEG_CH;
+			break;
+		case AwChannel::GRAD:
+			chinfo.kind = FIFFV_MEG_CH;
+			chinfo.unit = FIFF_UNIT_T_M;
+			chinfo.chpos.coil_type = FIFFV_MEG_CH;
+			break;
+		case AwChannel::EEG:
+			chinfo.kind = FIFFV_EEG_CH;
+			chinfo.unit = FIFF_UNIT_V;
+			break;
+		case AwChannel::EMG:
+			chinfo.kind = FIFFV_EMG_CH;
+			chinfo.unit = FIFF_UNIT_V;
+			break;
+		case AwChannel::ECG:
+			chinfo.kind = FIFFV_ECG_CH;
+			chinfo.unit = FIFF_UNIT_V;
+			break;
+		case AwChannel::EOG:
+			chinfo.kind = FIFFV_EOG_CH;
+			chinfo.unit = FIFF_UNIT_V;
+			break;
+		case AwChannel::Trigger:
+			chinfo.kind = FIFFV_STIM_CH;
+			chinfo.unit = FIFF_UNIT_NONE;
+			break;
+		default:
+			chinfo.kind = FIFFV_MISC_CH;
+			chinfo.unit = FIFF_UNIT_NONE;
+			break;
+		}
+		chinfo.chpos.r0[0] = chinfo.chpos.r0[1] = chinfo.chpos.r0[2] = 0.;
+		// x unit vector
+		chinfo.chpos.ex[0] = chan->x();
+		chinfo.chpos.ex[1] = chinfo.chpos.ex[2] = 1.;
+		// y unit vector
+		chinfo.chpos.ey[0] = chinfo.chpos.ey[2] = 1.;
+		chinfo.chpos.ey[1] = chan->y();
+		// z unit vector
+		chinfo.chpos.ez[0] = chinfo.chpos.ez[1] = 1;
+		chinfo.chpos.ez[2] = chan->z();
+		// write data
+		m_stream << chinfo.scanNo << chinfo.logNo << chinfo.kind << chinfo.range << chinfo.cal;
+		m_stream << chinfo.chpos.coil_type << chinfo.chpos.r0[0] << chinfo.chpos.r0[1] << chinfo.chpos.r0[2] \
+			<< chinfo.chpos.ex[0] << chinfo.chpos.ex[1] << chinfo.chpos.ex[2] << chinfo.chpos.ey[0] << chinfo.chpos.ey[1] << chinfo.chpos.ey[2] \
+			<< chinfo.chpos.ez[0] << chinfo.chpos.ez[1] << chinfo.chpos.ez[2];
+		m_stream << chinfo.unit << chinfo.unit_mul;
+		m_stream.writeRawData(chinfo.ch_name, 16);
+	}
+
 	// meas_date ??
 	if (!infos.recordingDate().isEmpty() && !infos.recordingTime().isEmpty()) {
 		QDateTime dateTime;
@@ -565,88 +649,89 @@ AwFileIO::FileStatus FIFFIO::createFile(const QString& path, int flags)
 	}
 
 
-	// tags in meas_info
-	addEntry(FIFF_NCHAN, FIFFT_INT, sizeof(int));
-	// nchan
-	initTag(&tag, FIFF_NCHAN, FIFFT_INT);
-	writeTag(&tag);
-	writeTagData<qint32>(infos.channelsCount());
-	// sfreq
-	addEntry(FIFF_SFREQ, FIFFT_FLOAT, sizeof(float));
-	initTag(&tag, FIFF_SFREQ, FIFFT_FLOAT);
-	writeTag(&tag);
-	writeTagData<float>(sfreq);
+	//// tags in meas_info
+	//addEntry(FIFF_NCHAN, FIFFT_INT, sizeof(int));
+	//// nchan
+	//initTag(&tag, FIFF_NCHAN, FIFFT_INT);
+	//writeTag(&tag);
+	//writeTagData<qint32>(infos.channelsCount());
+	//// sfreq
+	//addEntry(FIFF_SFREQ, FIFFT_FLOAT, sizeof(float));
+	//initTag(&tag, FIFF_SFREQ, FIFFT_FLOAT);
+	//writeTag(&tag);
+	//writeTagData<float>(sfreq);
 
-	// chinfo
-	for (int i = 0; i < infos.channels().size(); i++) {
-		addEntry(FIFF_CH_INFO, FIFFT_CH_INFO_STRUCT, sizeof(fiffChInfo) * infos.channelsCount());
-		initTag(&tag, FIFF_CH_INFO, FIFFT_CH_INFO_STRUCT);
-		tag.size = sizeof(fiffChInfo) * infos.channelsCount();
-		writeTag(&tag);
-		AwChannel *chan = infos.channels().at(i);
-		fiffChInfoRec chinfo;
-		chinfo.cal = 1.;
-		chinfo.scanNo = i + 1;
-		chinfo.logNo = i;
-		chinfo.range = 1.;
-		chinfo.unit_mul = 0;
-		int length = std::min(chan->name().size(), 15);
-		memcpy(chinfo.ch_name, chan->name().toLatin1().data(), length);
-		chinfo.ch_name[length] = '\0';
-		switch (chan->type()) {
-		case AwChannel::MEG:
-			chinfo.kind = FIFFV_MEG_CH;
-			chinfo.unit = FIFF_UNIT_T;
-			chinfo.chpos.coil_type = FIFFV_MEG_CH;
-			break;
-		case AwChannel::GRAD:
-			chinfo.kind = FIFFV_MEG_CH;
-			chinfo.unit = FIFF_UNIT_T_M;
-			chinfo.chpos.coil_type = FIFFV_MEG_CH;
-			break;
-		case AwChannel::EEG:
-			chinfo.kind = FIFFV_EEG_CH;
-			chinfo.unit = FIFF_UNIT_V;
-			break;
-		case AwChannel::EMG:
-			chinfo.kind = FIFFV_EMG_CH;
-			chinfo.unit = FIFF_UNIT_V;
-			break;
-		case AwChannel::ECG:
-			chinfo.kind = FIFFV_ECG_CH;
-			chinfo.unit = FIFF_UNIT_V;
-			break;
-		case AwChannel::EOG:
-			chinfo.kind = FIFFV_EOG_CH;
-			chinfo.unit = FIFF_UNIT_V;
-			break;
-		case AwChannel::Trigger:
-			chinfo.kind = FIFFV_STIM_CH;
-			chinfo.unit = FIFF_UNIT_NONE;
-			break;
-		default:
-			chinfo.kind = FIFFV_MISC_CH;
-			chinfo.unit = FIFF_UNIT_NONE;
-			break;
-		}
-		chinfo.chpos.r0[0] = chinfo.chpos.r0[1] = chinfo.chpos.r0[2] = 0.;
-		// x unit vector
-		chinfo.chpos.ex[0] = chan->x();
-		chinfo.chpos.ex[1] =  chinfo.chpos.ex[2] = 1.;
-		// y unit vector
-		chinfo.chpos.ey[0] = chinfo.chpos.ey[2] = 1.;
-		chinfo.chpos.ey[1] = chan->y();
-		// z unit vector
-		chinfo.chpos.ez[0] = chinfo.chpos.ez[1] = 1;
-		chinfo.chpos.ez[2] = chan->z();
-		// write data
-		m_stream << chinfo.scanNo << chinfo.logNo << chinfo.kind << chinfo.range << chinfo.cal;
-		m_stream << chinfo.chpos.coil_type << chinfo.chpos.r0[0] << chinfo.chpos.r0[1] << chinfo.chpos.r0[2] \
-			<< chinfo.chpos.ex[0] << chinfo.chpos.ex[1] << chinfo.chpos.ex[2] << chinfo.chpos.ey[0] << chinfo.chpos.ey[1] << chinfo.chpos.ey[2] \
-			<< chinfo.chpos.ez[0] << chinfo.chpos.ez[1] << chinfo.chpos.ez[2];
-		m_stream << chinfo.unit << chinfo.unit_mul;
-		m_stream.writeRawData(chinfo.ch_name, 16);
-	}
+	//// chinfo
+	//for (int i = 0; i < infos.channels().size(); i++) {
+	//	addEntry(FIFF_CH_INFO, FIFFT_CH_INFO_STRUCT, sizeof(fiffChInfo) * infos.channelsCount());
+	//	initTag(&tag, FIFF_CH_INFO, FIFFT_CH_INFO_STRUCT);
+	//	tag.size = sizeof(fiffChInfo) * infos.channelsCount();
+	//	writeTag(&tag);
+	//	AwChannel *chan = infos.channels().at(i);
+	//	fiffChInfoRec chinfo;
+	//	chinfo.cal = 1.;
+	//	chinfo.scanNo = i + 1;
+	//	chinfo.logNo = i;
+	//	chinfo.range = 1.;
+	//	chinfo.unit_mul = 0;
+	//	int length = std::min(chan->name().size(), 15);
+	//	std::string s = chan->name().toStdString();
+	//	memcpy(chinfo.ch_name, s.data(), length);
+	//	chinfo.ch_name[length] = '\0';
+	//	switch (chan->type()) {
+	//	case AwChannel::MEG:
+	//		chinfo.kind = FIFFV_MEG_CH;
+	//		chinfo.unit = FIFF_UNIT_T;
+	//		chinfo.chpos.coil_type = FIFFV_MEG_CH;
+	//		break;
+	//	case AwChannel::GRAD:
+	//		chinfo.kind = FIFFV_MEG_CH;
+	//		chinfo.unit = FIFF_UNIT_T_M;
+	//		chinfo.chpos.coil_type = FIFFV_MEG_CH;
+	//		break;
+	//	case AwChannel::EEG:
+	//		chinfo.kind = FIFFV_EEG_CH;
+	//		chinfo.unit = FIFF_UNIT_V;
+	//		break;
+	//	case AwChannel::EMG:
+	//		chinfo.kind = FIFFV_EMG_CH;
+	//		chinfo.unit = FIFF_UNIT_V;
+	//		break;
+	//	case AwChannel::ECG:
+	//		chinfo.kind = FIFFV_ECG_CH;
+	//		chinfo.unit = FIFF_UNIT_V;
+	//		break;
+	//	case AwChannel::EOG:
+	//		chinfo.kind = FIFFV_EOG_CH;
+	//		chinfo.unit = FIFF_UNIT_V;
+	//		break;
+	//	case AwChannel::Trigger:
+	//		chinfo.kind = FIFFV_STIM_CH;
+	//		chinfo.unit = FIFF_UNIT_NONE;
+	//		break;
+	//	default:
+	//		chinfo.kind = FIFFV_MISC_CH;
+	//		chinfo.unit = FIFF_UNIT_NONE;
+	//		break;
+	//	}
+	//	chinfo.chpos.r0[0] = chinfo.chpos.r0[1] = chinfo.chpos.r0[2] = 0.;
+	//	// x unit vector
+	//	chinfo.chpos.ex[0] = chan->x();
+	//	chinfo.chpos.ex[1] =  chinfo.chpos.ex[2] = 1.;
+	//	// y unit vector
+	//	chinfo.chpos.ey[0] = chinfo.chpos.ey[2] = 1.;
+	//	chinfo.chpos.ey[1] = chan->y();
+	//	// z unit vector
+	//	chinfo.chpos.ez[0] = chinfo.chpos.ez[1] = 1;
+	//	chinfo.chpos.ez[2] = chan->z();
+	//	// write data
+	//	m_stream << chinfo.scanNo << chinfo.logNo << chinfo.kind << chinfo.range << chinfo.cal;
+	//	m_stream << chinfo.chpos.coil_type << chinfo.chpos.r0[0] << chinfo.chpos.r0[1] << chinfo.chpos.r0[2] \
+	//		<< chinfo.chpos.ex[0] << chinfo.chpos.ex[1] << chinfo.chpos.ex[2] << chinfo.chpos.ey[0] << chinfo.chpos.ey[1] << chinfo.chpos.ey[2] \
+	//		<< chinfo.chpos.ez[0] << chinfo.chpos.ez[1] << chinfo.chpos.ez[2];
+	//	m_stream << chinfo.unit << chinfo.unit_mul;
+	//	m_stream.writeRawData(chinfo.ch_name, 16);
+	//}
 
 	// end of measinfo
 	addEntry(FIFF_BLOCK_END, FIFFT_INT, sizeof(int));
@@ -677,6 +762,9 @@ qint64 FIFFIO::writeData(AwChannelList *channels)
 	fiff_tag_t tag;
 	fiff_dir_entry_t *entry;
 	qint64 dataPosition = 0;
+
+	AwIO::rescaleDataToExport(*channels);
+
 	// create all the data buffers and fill them with data
 	while (nSamplesLeft) {
 		auto samplesInBuffer = std::min(nSamplesLeft, (qint64)1000);
@@ -688,17 +776,6 @@ qint64 FIFFIO::writeData(AwChannelList *channels)
 			for (auto j = 0; j < infos.channelsCount(); j++) {
 				auto chan = channels->at(j);
 				float value = chan->data()[i + dataPosition];
-				switch (chan->type()) {
-				case AwChannel::MEG:
-				case AwChannel::GRAD:
-				case AwChannel::Reference:
-					value *= 1e-12;
-				case AwChannel::EEG:
-				case AwChannel::ECG:
-				case AwChannel::SEEG:
-				case AwChannel::EMG:
-					value *= 1e-6;
-				}
 				m_stream << value;
 			}
 		}
@@ -865,27 +942,32 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 		case FIFFV_MEG_CH:
 			if (chinfo->unit == FIFF_UNIT_T_M) { // this is a gradiometer 
 				c.setType(AwChannel::GRAD);
-				c.setGain(300);
+				c.setUnit(AwChannel::Tpermeter);
+				//c.setGain(300);
 			}
 			else {
 				c.setType(AwChannel::MEG);
-				c.setGain(15);
+				c.setUnit(AwChannel::T);
+				//c.setGain(15);
 			}
 			break;
 		case FIFFV_ECG_CH:
 			c.setType(AwChannel::ECG);
-			c.setGain(350);
+			c.setUnit(AwChannel::V);
+			//c.setGain(350);
 			break;
 		case FIFFV_EMG_CH:
 			c.setType(AwChannel::EMG);
-			c.setGain(200);
+			c.setUnit(AwChannel::V);
+			//c.setGain(200);
 			break;
 		case FIFFV_STIM_CH:
 			c.setType(AwChannel::Trigger);
 			break;
 		case FIFFV_EEG_CH:
 			c.setType(AwChannel::EEG);
-			c.setGain(100);
+			c.setUnit(AwChannel::V);
+			//c.setGain(100);
 			break;
 		default:
 			c.setType(AwChannel::Other);
@@ -976,7 +1058,7 @@ AwFileIO::FileStatus FIFFIO::openFile(const QString &path)
 
 	// adjust time on first sample
 	if (m_firstSample && !dateTime.isNull())
-		dateTime.addSecs(m_firstSample / m_sfreq);
+		dateTime = dateTime.addSecs(m_firstSample / m_sfreq);
 	if (dateTime.isValid() && !dateTime.isNull())  {
 		infos.setDate(dateTime.date().toString(Qt::ISODate));
 		infos.setTime(dateTime.time().toString(Qt::ISODate));

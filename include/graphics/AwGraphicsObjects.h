@@ -23,6 +23,7 @@
 #include <AwChannel.h>
 #include <AwMarker.h>
 class QAction;
+class AwViewSettings;
 
 class AW_GRAPHICS_EXPORT AwDisplayPhysics
 {
@@ -52,7 +53,7 @@ class AW_GRAPHICS_EXPORT AwGraphicsItem : public QObject
 {
 	Q_OBJECT
 public:
-	AwGraphicsItem(AwDisplayPhysics *phys);
+	explicit AwGraphicsItem(AwDisplayPhysics *phys, AwViewSettings *settings);
 	virtual QSize minimumSize() const { return QSize(0, 0); }	// override this method to specilfy the minimum size for a Graphics Item.
 	enum { ItemHasUi = 1 };
 	inline QObject *plugin() { return m_plugin; }
@@ -68,6 +69,7 @@ public:
 	virtual void updateGeometry()  { } // override this method to compute new geometry for the item.
 	// override this method to add custom actions for the item that will be displayed in the context menu.
 	virtual QList<QAction *> customActions() { return QList<QAction *>(); }
+	inline AwViewSettings* viewSettings() { return m_viewSettings; }
 public slots:
 	// executes Ui (if the object has ui)
 	virtual int execUi() { return QDialog::Accepted; }
@@ -82,6 +84,7 @@ protected:
 	int m_flags;
 	QSize m_size;
 	QObject *m_plugin;
+	AwViewSettings* m_viewSettings; // a ref to the current view settings
 };
 
 /// AwGraphicsSignalItem
@@ -90,7 +93,7 @@ protected:
 class AW_GRAPHICS_EXPORT AwBaseGraphicsSignalItem : public AwGraphicsItem
 {
 public:
-	AwBaseGraphicsSignalItem(AwChannel *channel, AwDisplayPhysics *phys);
+	AwBaseGraphicsSignalItem(AwChannel *channel, AwViewSettings* settings, AwDisplayPhysics *phys );
 	virtual int itemType() { return AW_BASE_GRAPHICS_ITEM_TYPE; }
 
 	virtual void showLabel(bool flag) { m_label = flag; }
@@ -115,6 +118,7 @@ protected:
 	AwChannel *m_channel;
 	bool m_repaint;
 	qreal m_labelXOffset;	// offset in pixels for the label
+
 };
 
 /// AwGraphicsSignalDialog
@@ -146,7 +150,7 @@ class AW_GRAPHICS_EXPORT AwGraphicsCursorItem : public AwGraphicsItem, public QG
 public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_CURSOR_TYPE };
 	inline int type() const { return Type; }
-	AwGraphicsCursorItem(float posInFile, float cursorPosition, AwDisplayPhysics *phys = NULL) : AwGraphicsItem(phys)
+	AwGraphicsCursorItem(float posInFile, float cursorPosition, AwDisplayPhysics *phys = nullptr) : AwGraphicsItem(phys, nullptr)
 	{ m_positionInFile = posInFile; m_currentPos = cursorPosition; this->setZValue(20); }
 	inline float currentPos() { return m_currentPos; }
 	/** Defines the absolute position in seconds for the cursor in the scene **/
@@ -167,7 +171,7 @@ public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_SIGNAL_TYPE };
 	int itemType() { return AW_GRAPHICS_ITEM_SIGNAL_TYPE; }
 	inline int type() const { return Type; }
-	AwGraphicsSignalItem(AwChannel *chan, AwDisplayPhysics *phys = NULL) : AwBaseGraphicsSignalItem(chan, phys) 
+	AwGraphicsSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys = nullptr) : AwBaseGraphicsSignalItem(chan, settings, phys) 
 	{
 		setZValue(5); m_flags = 0; m_repaint = false; m_number = -1; 
 	}

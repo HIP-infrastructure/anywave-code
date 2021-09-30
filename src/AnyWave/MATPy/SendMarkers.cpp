@@ -29,14 +29,14 @@ void AwRequestServer::handleSendMarkers(QTcpSocket* client, AwScriptProcess* pro
 	fromClient >> ba;
 	QDataStream stream(&ba, QIODevice::ReadOnly);
 	stream.setVersion(QDataStream::Qt_4_4);
+	m_markers.clear();
 	// get number of markers from client
 	int nMarkers;
 	stream >> nMarkers;
 	QString label, color;
 	float pos, dur, val;
 	QStringList targets;
-	m_markers.clear();
-	for (auto i = 0; i < nMarkers; i++) {
+	for (int i = 0; i < nMarkers; i++) {
 		stream >> label >> color >> pos >> dur >> val >> targets;
 		auto m = new AwMarker(label, pos, dur);
 		m->setValue(val);
@@ -44,7 +44,24 @@ void AwRequestServer::handleSendMarkers(QTcpSocket* client, AwScriptProcess* pro
 		m->setTargetChannels(targets);
 		m_markers << m;
 	}
-	emit markersAdded(&m_markers);
-	response.send();  // send ok status to inform we got the markers
+	response.send();
+	//while (nMarkers) {
+	//	for (auto i = 0; i < nMarkers; i++) {
+	//		stream >> label >> color >> pos >> dur >> val >> targets;
+	//		auto m = new AwMarker(label, pos, dur);
+	//		m->setValue(val);
+	//		m->setColor(color);
+	//		m->setTargetChannels(targets);
+	//		m_markers << m;
+	//	}
+	////	emit markersAdded(&m_markers);
+	//	response.send();  // send ok status to inform we got the markers
+	//	ba.clear();
+	//	fromClient >> ba;
+	//	stream.device()->reset();
+	//	stream >> nMarkers;
+	//}
+	if (m_markers.size())
+		emit markersAdded(&m_markers);
 	emit log("Done.");
 }

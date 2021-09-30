@@ -84,8 +84,10 @@ void AwDebugLog::connectComponent(const QString &name, QObject *component, const
 	if (!m_components.contains(component))
 	{
 		m_components.insert(component, name);
-		if (!fileName.isEmpty())
+		
+		if (!fileName.isEmpty()) 
 			m_logFiles[name] = fileName;
+		
 		connect(component, SIGNAL(log(const QString&)), this, SLOT(addLog(const QString&)));
 	}
 }

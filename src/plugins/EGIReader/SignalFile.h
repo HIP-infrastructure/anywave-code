@@ -23,7 +23,12 @@ class FileSignalBlock : public SignalBlock
 {
 public:
 	FileSignalBlock() : SignalBlock() { fileOffsetForHeader = fileOffsetForData = -1; }
-	qint64 fileOffsetForHeader, fileOffsetForData;
+	qint64 fileOffsetForHeader, fileOffsetForData, nSamples, startingSample, endingSample;
+	int optEGIType;
+	qint64 optNBlocks;
+	qint64 optNSamples;
+	int optNSignals;
+
 	QVector<qint8> optionalHeader;
 };
 
@@ -35,8 +40,6 @@ public:
 
 protected:
 	QFile m_file;
-private:
-	FileSignalBlock *signalBlock();
 };
 
 typedef QList<FileSignalBlock *> Blocks;

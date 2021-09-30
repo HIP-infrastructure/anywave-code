@@ -473,16 +473,41 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		for (auto m : inputMarkers)
 			markers.removeAll(m);
 
-		// revert selection using usedCut markers
-		auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
-		// reshape intersected markers using XOR
-		auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
-		// now cut all the markers.
-		auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
-		AW_DESTROY_LIST(markers)
-		AW_DESTROY_LIST(reshaped)
-		AW_DESTROY_LIST(revertSelection)
-		markers = cutMarkers;
+		float newPosition = 0.;
+		AwMarkerList updatedMarkers;
+		for (auto m : inputMarkers) {
+			auto intersection = AwMarker::intersect(markers, m->start(), m->end());
+		//	m->setStart(newPosition);
+			if (intersection.size()) {
+				auto modifiedMarkers = AwMarker::duplicate(intersection);
+				for (auto modified : modifiedMarkers) {
+					// reshape intersected markers if  necessary
+					// if markers starts BEFORE, realign it to be in the input marker
+					if (modified->start() < m->start()) {
+						if (modified->duration())
+							modified->setDuration(m->start() - modified->start());
+						modified->setStart(m->start());
+					}
+					// be sure the marker don't expand after the input marker
+					modified->setEnd(std::min(m->end(), modified->end()));
+				}
+				updatedMarkers += modifiedMarkers;
+			}
+		}
+		AW_DESTROY_LIST(markers);
+		markers = updatedMarkers;
+		
+
+		//// revert selection using usedCut markers
+		//auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
+		//// reshape intersected markers using XOR
+		//auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
+		//// now cut all the markers.
+		//auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
+		//AW_DESTROY_LIST(markers)
+		//AW_DESTROY_LIST(reshaped)
+		//AW_DESTROY_LIST(revertSelection)
+		//markers = cutMarkers;
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
@@ -875,22 +900,45 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 	for (auto m : markers)
 		map.insert(m->label(), m);
 	auto uniqueKeys = map.uniqueKeys();
+
+	auto compareMarkers = [](AwMarker* m, AwMarker *m1) {
+		const float tol = 0.005;
+		float pos = std::abs(m1->start() - m->start());
+		float dur = std::abs(m1->duration() - m->duration());
+
+		bool res = pos <= tol && dur <= tol;
+		if (res) { // check that targets are similar
+			QStringList t1 = m1->targetChannels();
+			QStringList t2 = m->targetChannels();
+			if (t1.isEmpty() && t2.isEmpty())
+				return true;
+			if (t1.size() != t2.size())
+				return false;
+			for (int i = 0; i < t1.size(); i++) {
+				QString s1 = t1.at(i);
+				QString s2 = t2.at(i);
+				if (s1.compare(s2, Qt::CaseSensitive) != 0)
+					return false;
+			}
+			return true;
+		}
+		return res;
+	};
 	
 	for (auto const& k : uniqueKeys) {
 		AwMarkerList values = map.values(k);
 		if (values.size() > 1) {
 			std::sort(values.begin(), values.end(), AwMarkerLessThan);
-			auto m = values.takeFirst();
-			auto f = [m](AwMarker* m1) { 
-				const float tol = 0.005;
-				float pos = std::abs(m1->start() - m->start());
-				float dur = std::abs(m1->duration() - m->duration());
-				return pos <= tol && dur <= tol;
-			};
-			auto it = std::remove_if(values.begin(), values.end(), f);
-			for (auto &i = it; i < values.end(); i++) {
-				removed << *i;
-			}
+			int index = 0;
+			do {
+				auto m = values.at(index);
+				auto m1 = values.at(index + 1);
+				if (compareMarkers(m, m1)) {
+					if (!removed.contains(m1))
+						removed.append(m1);
+				}
+				index++;
+			} while (index < values.size() - 1);
 		}
 	}
 	for (auto m : removed) 

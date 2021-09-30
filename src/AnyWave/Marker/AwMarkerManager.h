@@ -45,6 +45,7 @@ public:
 	void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();
+	void quit();
 	void init();
 	void removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.

@@ -18,8 +18,8 @@
 MicromedReaderPlugin::MicromedReaderPlugin() : AwFileIOPlugin()
 {
 	name = QString("Micromed Reader");
-	description = QString(tr("read .trc"));
-	version = QString("1.0");
+	version = "1.0.0";
+	description = QString(tr("read .trc file"));
 	fileExtensions << "*.trc";
 	manufacturer = "Micromed";
 	m_flags |= FileIO::HasExtension| FileIO::CanRead;
@@ -1550,33 +1550,33 @@ MicromedReader::FileStatus MicromedReader::openFile(const QString& path)
 		if (chan.name() == "ECG")
 			chan.setType(AwChannel::ECG);
 		
-		switch (electrode.Measurement_Unit)
-		{
-		case -1:
-			chan.setUnit(QString::fromLatin1("nV"));
-			break;
-		case 0:
-			chan.setUnit(QString::fromLatin1("µV"));
-			break;
-		case 1:
-			chan.setUnit(QString::fromLatin1("mV"));
-			break;
-		case 100:
-			chan.setUnit(QString::fromLatin1("%"));
-			chan.setType(AwChannel::Other);
-			break;
-		case 101:
-			chan.setUnit(QString::fromLatin1("bpm"));
-			chan.setType(AwChannel::ECG);
-			break;
-		case 102:
-			chan.setUnit(QString::fromLatin1("Adim"));
-			chan.setType(AwChannel::Other);
-			break;
-		default:
-			chan.setUnit(QString::fromLatin1("µV"));
-			break;
-		}
+		//switch (electrode.Measurement_Unit)
+		//{
+		//case -1:
+		//	chan.setUnit(QString::fromLatin1("nV"));
+		//	break;
+		//case 0:
+		//	chan.setUnit(QString::fromLatin1("µV"));
+		//	break;
+		//case 1:
+		//	chan.setUnit(QString::fromLatin1("mV"));
+		//	break;
+		//case 100:
+		//	chan.setUnit(QString::fromLatin1("%"));
+		//	chan.setType(AwChannel::Other);
+		//	break;
+		//case 101:
+		//	chan.setUnit(QString::fromLatin1("bpm"));
+		//	chan.setType(AwChannel::ECG);
+		//	break;
+		//case 102:
+		//	chan.setUnit(QString::fromLatin1("Adim"));
+		//	chan.setType(AwChannel::Other);
+		//	break;
+		//default:
+		//	chan.setUnit(QString::fromLatin1("µV"));
+		//	break;
+		//}
 		if (electrode.Rate_Coefficient <= 0)
 			electrode.Rate_Coefficient = 1;
 		chan.setSamplingRate(electrode.Rate_Coefficient * m_Head.Rate_Min);

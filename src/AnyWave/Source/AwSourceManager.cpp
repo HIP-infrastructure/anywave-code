@@ -184,13 +184,13 @@ void AwSourceManager::setBeamformer(int type, mat& matrix, const QStringList& aw
 		delete m_channels[source_type].takeFirst();
 
 	int index = 0;
-	foreach (QString s, labels) {
+	for (const QString& s : labels) {
 		AwSourceChannel *schan = new AwSourceChannel();
 		schan->setIndex(index++);
 		schan->setName(s);
 		schan->setSubType(type);
 		schan->setSamplingRate(sr);
-		schan->setUnit("unit/cm");
+	//	schan->setUnit("unit/cm");
 		schan->setLowFilter(lp);
 		schan->setHighFilter(hp);
 		schan->setNotch(0);	// NO NOTCH !!!

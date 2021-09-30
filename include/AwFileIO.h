@@ -34,7 +34,7 @@ class AW_RW_EXPORT AwFileIO : public QObject
 public:
 	enum FileStatus { NoError, WrongFormat, FileAccess, BadHeader, WrongParameter };
 
-	AwFileIO(const QString& fileName = QString()) { m_flags = 0;}
+	AwFileIO(const QString& fileName = QString()) { m_flags = 0; }
 
 	virtual ~AwFileIO() {}
 	inline QString& errorMessage() { return m_error; }

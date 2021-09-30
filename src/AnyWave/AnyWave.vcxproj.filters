@@ -50,9 +50,6 @@
     <Filter Include="IO\ADES">
       <UniqueIdentifier>{7cb55d3b-502d-455e-b764-bf8d238b7bad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IO\HDF5">
-      <UniqueIdentifier>{f69bc45e-3d04-4f4c-8b97-b070512f5f2b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Marker">
       <UniqueIdentifier>{89142d20-eb71-464e-a930-9658185c18bf}</UniqueIdentifier>
     </Filter>
@@ -89,9 +86,6 @@
     <Filter Include="Source">
       <UniqueIdentifier>{aea2612b-9f04-41ce-8dd7-329e100fe02d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Epoch">
-      <UniqueIdentifier>{2d1b87d3-89eb-4823-9083-3690aaab3c04}</UniqueIdentifier>
-    </Filter>
     <Filter Include="IO\MATLAB">
       <UniqueIdentifier>{affe80c4-bee8-4d1e-81df-156092db3e82}</UniqueIdentifier>
     </Filter>
@@ -112,6 +106,12 @@
     </Filter>
     <Filter Include="Batch">
       <UniqueIdentifier>{fad4582d-3dc6-447f-a72d-bded135f70b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3DViewer">
+      <UniqueIdentifier>{88896aab-51fb-4d2c-a9ce-2a449abd5915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Updater">
+      <UniqueIdentifier>{28d04abc-c7d2-41ce-97aa-5026f47a626f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -159,9 +159,6 @@
     </ClCompile>
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
       <Filter>Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\HDF5\structs.cpp">
-      <Filter>IO\HDF5</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwDockAddMarker.cpp">
       <Filter>Marker</Filter>
@@ -409,50 +406,8 @@
     <ClCompile Include="Source\AwSourceChannel.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="AwUpdater.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\HDF5\HDF5IO.cpp">
-      <Filter>IO\HDF5</Filter>
-    </ClCompile>
     <ClCompile Include="IO\ADES\ADESIO.cpp">
       <Filter>IO\ADES</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochManager.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochCreateUi.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochModel.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochVisuWidget.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochAverageWidget.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAverageDialog.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAverageItemWidget.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAvgWorker.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwAvgSignalItem.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEditStatsDialog.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwStatsModel.cpp">
-      <Filter>Epoch</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwStatChartWidget.cpp">
-      <Filter>Epoch</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkersExportWidget.cpp">
       <Filter>Marker</Filter>
@@ -501,9 +456,6 @@
     </ClCompile>
     <ClCompile Include="AwOpenFileDialog.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Epoch\AwEpochMosaicWidget.cpp">
-      <Filter>Epoch</Filter>
     </ClCompile>
     <ClCompile Include="IO\MEMIO\MEMIO.cpp">
       <Filter>IO\MEMIO</Filter>
@@ -558,9 +510,6 @@
     </ClCompile>
     <ClCompile Include="MATPy\OpenNewFile.cpp">
       <Filter>MATPy</Filter>
-    </ClCompile>
-    <ClCompile Include="CL\DedicatedDataServer.cpp">
-      <Filter>CL</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\GetProperties.cpp">
       <Filter>MATPy</Filter>
@@ -636,6 +585,33 @@
     </ClCompile>
     <ClCompile Include="Plugin\AwMATPyCreator.cpp">
       <Filter>Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\AwSEEGInteractor.cpp">
+      <Filter>3DViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\AwSEEGViewer.cpp">
+      <Filter>3DViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\AwSEEGWidget.cpp">
+      <Filter>3DViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="3DViewer\vtkPialReader.cpp">
+      <Filter>3DViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="ICA\AwSEEGMap.cpp">
+      <Filter>ICA</Filter>
+    </ClCompile>
+    <ClCompile Include="Updater\AwUpdateManager.cpp">
+      <Filter>Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="Updater\AwUpdaterGui.cpp">
+      <Filter>Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="Updater\AwDownloadGui.cpp">
+      <Filter>Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="Display\AwDisplayEvents.cpp">
+      <Filter>Display</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -996,68 +972,8 @@
     <QtMoc Include="Source\AwSourceManager.h">
       <Filter>Source</Filter>
     </QtMoc>
-    <QtMoc Include="AwUpdater.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="IO\HDF5\HDF5IO.h">
-      <Filter>IO\HDF5</Filter>
-    </QtMoc>
     <QtMoc Include="IO\ADES\ADESIO.h">
       <Filter>IO\ADES</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochManager.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochCreateUi.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochCreateUi.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwEpochModel.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochVisuWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochVisuWidget.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochAverageWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochAverageWidget.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwAverageDialog.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwAverageDialog.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwAverageItemWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwAverageItemWidget.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAvgWorker.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwAvgSignalItem.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEditStatsDialog.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEditStatsDialog.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwStatsModel.h">
-      <Filter>Epoch</Filter>
-    </QtMoc>
-    <QtMoc Include="Epoch\AwStatChartWidget.h">
-      <Filter>Epoch</Filter>
     </QtMoc>
     <QtUic Include="Marker\AwMarkersExportWidget.ui">
       <Filter>Marker</Filter>
@@ -1094,12 +1010,6 @@
     </QtUic>
     <QtMoc Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtUic Include="Epoch\AwEpochMosaicWidget.ui">
-      <Filter>Epoch</Filter>
-    </QtUic>
-    <QtMoc Include="Epoch\AwEpochMosaicWidget.h">
-      <Filter>Epoch</Filter>
     </QtMoc>
     <QtMoc Include="IO\MEMIO\MEMIO.h">
       <Filter>IO\MEMIO</Filter>
@@ -1191,11 +1101,26 @@
     <QtMoc Include="Plugin\AwMATPyCreator.h">
       <Filter>Plugin</Filter>
     </QtMoc>
+    <QtMoc Include="3DViewer\AwSEEGViewer.h">
+      <Filter>3DViewer</Filter>
+    </QtMoc>
+    <QtMoc Include="3DViewer\AwSEEGWidget.h">
+      <Filter>3DViewer</Filter>
+    </QtMoc>
+    <QtMoc Include="ICA\AwSEEGMap.h">
+      <Filter>ICA</Filter>
+    </QtMoc>
+    <QtMoc Include="Updater\AwUpdateManager.h">
+      <Filter>Updater</Filter>
+    </QtMoc>
+    <QtMoc Include="Updater\AwUpdaterGui.h">
+      <Filter>Updater</Filter>
+    </QtMoc>
+    <QtMoc Include="Updater\AwDownloadGui.h">
+      <Filter>Updater</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IO\HDF5\structs.h">
-      <Filter>IO\HDF5</Filter>
-    </ClInclude>
     <ClInclude Include="Prefs\AwPreferences.h">
       <Filter>Prefs</Filter>
     </ClInclude>
@@ -1232,9 +1157,6 @@
     <ClInclude Include="Data\AwMemoryMapper.h">
       <Filter>Data</Filter>
     </ClInclude>
-    <ClInclude Include="Epoch\AwEpochThumbs.h">
-      <Filter>Epoch</Filter>
-    </ClInclude>
     <ClInclude Include="IO\JSON\AwJSON.h">
       <Filter>IO\JSON</Filter>
     </ClInclude>
@@ -1258,6 +1180,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\keys\data.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="3DViewer\AwSEEGInteractor.h">
+      <Filter>3DViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="3DViewer\vtkPialReader.h">
+      <Filter>3DViewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1367,23 +1295,26 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="GeneratedFiles\Debug\AwEpochManager.moc">
-      <Filter>Generated Files\Debug</Filter>
-    </None>
-    <None Include="GeneratedFiles\Release\AwEpochManager.moc">
-      <Filter>Generated Files\Release</Filter>
-    </None>
     <None Include="AnyWave.licenseheader" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AnyWave.rc" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="Marker\AwStatsWidget.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="Plugin\AwMATPyCreator.ui">
       <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="3DViewer\AwSEEGWidget.ui">
+      <Filter>3DViewer</Filter>
+    </QtUic>
+    <QtUic Include="Updater\AwUpdaterGui.ui">
+      <Filter>Updater</Filter>
+    </QtUic>
+    <QtUic Include="Updater\AwDownloadGui.ui">
+      <Filter>Updater</Filter>
+    </QtUic>
+    <QtUic Include="Marker\AwStatsWidget.ui">
+      <Filter>Marker</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

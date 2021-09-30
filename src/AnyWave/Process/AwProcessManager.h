@@ -89,6 +89,7 @@ public:
 	int buildProcessPDI(AwBaseProcess* process, AwDataManager *dm = nullptr);
 
 public slots:
+	void addPlugin(QObject* plugin);
 	void startProcessFromMenu();
 	void handleProcessTermination();
 	void startDisplayProcesses(AwChannelList& channels);
@@ -99,6 +100,7 @@ public slots:
 	void errorMessage(const QString& message);
 	void enableMenus();
 	void launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end);
+	void processEvent(QSharedPointer<AwEvent>);
 
 signals:
 	void newMarkersAvailable(const AwMarkerList &markers);
@@ -114,6 +116,7 @@ signals:
 	// signals relative to command sent by processes
 	// transmit the command to Display object
 	void displayCommand(const QVariantMap&);
+	void sendEvent(QSharedPointer<AwEvent>);
 protected:
 	void addProcess(AwProcessPlugin *plugin);
 	void addProcessToMenu(AwProcessPlugin *plugin);

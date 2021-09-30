@@ -25,11 +25,11 @@ public:
 	enum Types {
 		Subject = 0, Session = 1,  Folder = 2, DataFile = 3, anat = 4, meg = 5, eeg = 6, ieeg = 7, SourceFolder = 8,
 		// flags to use with DerivativesRole
-		ica = 16, h2 = 32, gardel = 64
+		ica = 16, h2 = 32, gardel = 64, freesurfer = 128
 	};
 	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2, RelativePathRole = Qt::UserRole + 3,
 		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5, DerivativesRole = Qt::UserRole + 6, 
-		HiddenRole = Qt::UserRole + 7, GardelElectrodePathRole = Qt::UserRole + 8, GardelMeshPathRole = Qt::UserRole + 9,
+		HiddenRole = Qt::UserRole + 7, GardelElectrodePathRole = Qt::UserRole + 8, FreesurferMeshesRole = Qt::UserRole + 9,
 		GardelMontagesRole = Qt::UserRole + 10, ChannelsTsvRole = Qt::UserRole + 11, EventsTsvRole = Qt::UserRole + 12 };
 	inline QList<AwBIDSItem *>& children() { return m_children; }
 	inline QStringList& files() { return m_files; }
@@ -38,6 +38,7 @@ public:
 	void addChildren(const QList<AwBIDSItem*>& items) { m_children += items; }
 	QList<AwBIDSItem *> getDataFileItems();
 	inline AwBIDSItem* bidsParent() { return m_parent; }
+	QString subjectName();
 
 protected:
 	AwBIDSItem *m_parent; // nullptr if the item IS the subject.

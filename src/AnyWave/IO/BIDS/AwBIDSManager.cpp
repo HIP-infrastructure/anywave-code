@@ -64,13 +64,16 @@ bool AwBIDSManager::isBIDS(const QString& path)
 QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 {
 	// search for a dataset_description.json file which MUST be present at the root level
-
 	QFileInfo fi(path);
 	if (!fi.exists()) 
 		return QString();
 
 	// look in current path
 	auto dirPath = fi.absolutePath();
+	// check if we are in a derivatives branch of an existing BIDS
+	if (dirPath.contains("derivatives"))
+		return QString();
+
 	if (QFile::exists(QString("%1/dataset_description.json").arg(dirPath))) 
 		return QString();
 
@@ -311,7 +314,7 @@ QString AwBIDSManager::getDerivativePath(int derivativeType)
 }
 
 
-QVariant AwBIDSManager::gardelProperty(int property)
+QVariant AwBIDSManager::BIDSProperty(int property)
 {
 	QVariant res;
 	if (m_currentOpenItem == nullptr)
@@ -347,19 +350,19 @@ void AwBIDSManager::findTsvFilesForItem(AwBIDSItem * item)
 		item->setData(path, AwBIDSItem::EventsTsvRole);
 }
 
-QString AwBIDSManager::getGardelMesh()
+QStringList AwBIDSManager::freesurferMeshes()
 {
-	return gardelProperty(AwBIDSItem::GardelMeshPathRole).toString();
+	return BIDSProperty(AwBIDSItem::FreesurferMeshesRole).toStringList();
 }
 
 QString AwBIDSManager::getGardelElectrodes()
 {
-	return gardelProperty(AwBIDSItem::GardelElectrodePathRole).toString();
+	return BIDSProperty(AwBIDSItem::GardelElectrodePathRole).toString();
 }
 
 QStringList AwBIDSManager::getGardelMontages()
 {
-	return gardelProperty(AwBIDSItem::GardelMontagesRole).toStringList();
+	return BIDSProperty(AwBIDSItem::GardelMontagesRole).toStringList();
 }
 
 void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
@@ -370,6 +373,36 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 
 	QString relativePath;	// relative path to the item.
 	auto parentItem = item->bidsParent();
+
+	if (derivativesMask & AwBIDSItem::freesurfer) {
+		relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
+		auto subjName = item->subjectName();
+		auto path = QString("%1/derivatives/freesurfer/%2/surf").arg(m_rootDir).arg(subjName);
+		QDir dir(path);
+		if (dir.exists()) {
+			AwBIDSItem* container = nullptr;
+			auto files = dir.entryList(QDir::Files);
+			if (!files.isEmpty()) {
+				container = new AwBIDSItem("freesurfer", item);
+				container->setData(path, AwBIDSItem::PathRole);
+				container->setData(AwBIDSItem::freesurfer, AwBIDSItem::TypeRole);
+				container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+			}
+			QStringList meshes;
+			QStringList acceptedFiles = { "lh.pial", "rh.pial", "lh.white", "rh.white" };
+			for (auto file : files) {
+				auto fullPath = QString("%1/%2").arg(path).arg(file);
+				if (acceptedFiles.contains(file)) {
+					meshes << fullPath;
+				}
+			}
+			if (!meshes.isEmpty()) {
+				container->setData(meshes, AwBIDSItem::FreesurferMeshesRole);
+				if (parentItem)
+					parentItem->setData(meshes, AwBIDSItem::FreesurferMeshesRole);
+			}
+		}
+	}
 
 	if (derivativesMask & AwBIDSItem::gardel) {
 		relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
@@ -395,18 +428,6 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 					// set also the same properties to the parent item. That way it will be easier for a cousin item to get GARDEL results.
 					if (parentItem)
 						parentItem->setData(fullPath, AwBIDSItem::GardelElectrodePathRole);
-				}
-				if (file == GardelMeshFile) {
-					// add a file child to the container
-					auto fileItem = new AwBIDSItem(file, container);
-					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-					fileItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-					fileItem->setData(m_fileIconProvider.icon(QFileIconProvider::File), Qt::DecorationRole);
-					fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
-					// add also the path to the container
-					container->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
-					if (parentItem)
-						parentItem->setData(fullPath, AwBIDSItem::GardelMeshPathRole);
 				}
 				// check for .mtg
 				if (file.endsWith(".mtg"))
@@ -550,7 +571,7 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 				// set the relative path role
 				item->setData(name, AwBIDSItem::RelativePathRole);
 				// set the possible derivatives mask
-				item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+				item->setData(AwBIDSItem::gardel|AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
 				mapItems.append(mapItem(fullPath, item));
 			}
 		}
@@ -599,6 +620,8 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 					fileItem->setData(tmp, Qt::DisplayRole);
 					continue;
 				}
+
+				// optimize by setting only readers which can open edf or vhdr files
 
 				auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(fullPath);
 				if (reader != nullptr) {
@@ -673,7 +696,7 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 					item->setData(AwBIDSItem::eeg, AwBIDSItem::TypeRole);
 				else if (name == "anat") {
 					item->setData(AwBIDSItem::anat, AwBIDSItem::TypeRole);
-					item->setData(AwBIDSItem::gardel, AwBIDSItem::DerivativesRole);
+					item->setData(AwBIDSItem::gardel|AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
 				}
 				else
 					item->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
@@ -1088,8 +1111,8 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 			auto label = cols.value(i);
 			if (label == bids::tsv_channel_name)
 				channel->setName(tokens.at(i));
-			else if (label == bids::tsv_channel_units)
-				channel->setUnit(tokens.at(i));
+			//else if (label == bids::tsv_channel_units)
+			//	channel->setUnit(tokens.at(i));
 			else if (label == bids::tsv_channel_type) {
 				auto type = tokens.at(i);
 				if (type == "MEGMAG")

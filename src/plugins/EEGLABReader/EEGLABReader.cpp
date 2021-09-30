@@ -20,9 +20,9 @@
 EEGLABReaderPlugin::EEGLABReaderPlugin() : AwFileIOPlugin()
 {
 	name = QString("EEGLAB Reader");
-	description = QString(tr("Reads EEGLAB .set files"));
+	description = QString(tr("Read EEGLAB .set file"));
 	manufacturer = "EEGLAB";
-	version = QString("1.0");
+	version = QString("1.0.0");
 	fileExtensions << "*.set";
 	m_flags = FileIO::HasExtension | FileIO::CanRead;
 }
@@ -117,7 +117,7 @@ AwFileIO::FileStatus EEGLABReader::openFile(const QString &path)
 				AwChannel channel;
 				channel.setName(QString("EEG%1").arg(i+1));
 				channel.setSamplingRate(m_sr);
-				channel.setGain(AwChannel::defaultAmplitudeForType(channel.type()));
+			//	channel.setGain(AwChannel::defaultAmplitudeForType(channel.type()));
 				infos.addChannel(&channel);
 			}
 		}

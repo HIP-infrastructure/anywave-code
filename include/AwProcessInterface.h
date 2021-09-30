@@ -24,9 +24,10 @@
 #include <QTranslator>
 #include <AwGlobal.h>
 #include <QElapsedTimer>
+#include <AwCore.h>
 class AwProcessPlugin;
 class AwProcessOutputWidget;
-
+class AwEvent;
 
 
 /*!
@@ -76,6 +77,7 @@ public:
 	void setMarkersReceived();	// must be called by the markers receiver to inform the process that the markers have been successfully received
 	void addMarkers(AwMarkerList *markers);
 	void addMarker(AwMarker *marker);
+	void sendEventAsynch(QSharedPointer<AwEvent> e);
 
 	/** specific to process which supports command line batching. **/
 	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
@@ -91,9 +93,13 @@ signals:
 	void newDisplayPlugin(AwDisplayPlugin *plugin);
 	// log message for the debug log system
 	void log(const QString& log);
+	// send event to anywave (components abled to process events)
+	void sendEvent(QSharedPointer<AwEvent> e);
 public slots:
 	virtual void stop() {}
 	void abort();
+	/** processEvent() process event received **/
+	virtual void processEvent(QSharedPointer<AwEvent>) {}
 protected:
 	int m_runMode;
 	int m_flags;		// general flags for process
@@ -103,7 +109,7 @@ protected:
 	AwProcessPlugin *m_plugin;
 	// thread specific
 	QMutex m_lock;
-	QWaitCondition m_wcMarkersReceived;
+	QWaitCondition m_wcMarkersReceived, m_wcEventProcessed;
 	QMutex m_mutexMarkersReceived;
 };
 
@@ -153,7 +159,7 @@ public:
 	/** Command Line specific **/
 	inline QVariantMap& batchHash() { return m_batchMap; }
 	void setBatch(const QString& key, const QVariant& value) { m_batchMap[key] = value; }
-	void addBatchMap(const QVariantMap& hash) { m_batchMap.unite(hash); }
+	void addBatchMap(const QVariantMap& hash) { AwUniteMaps(m_batchMap, hash);  /* m_batchMap.unite(hash); */ }
 	inline bool hasDeclaredArgs();
 	bool isBatchGUICompatible(); 
 protected:

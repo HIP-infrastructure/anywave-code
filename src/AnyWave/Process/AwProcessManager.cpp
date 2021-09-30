@@ -37,6 +37,9 @@
 #include <AwKeys.h>
 #include "Data/AwDataManager.h"
 #include <process/AwProcessOutputWidget.h>
+#include <AwCore.h>
+#include <AwEvent.h>
+#include <AwEventManager.h>
 
 AwProcessManager *AwProcessManager::m_instance = NULL;
 AwProcessManager *AwProcessManager::instance()
@@ -69,6 +72,12 @@ void AwProcessManager::setMenu(QMenu *menu)
 	m_processes = AwPluginManager::getInstance()->processes();
 	for (auto plugin : m_processes)
 		addProcess(plugin);
+}
+
+
+void AwProcessManager::addPlugin(QObject* plugin)
+{
+	addProcess(qobject_cast<AwProcessPlugin*>(plugin));
 }
 
 void AwProcessManager::quit()
@@ -342,12 +351,14 @@ void AwProcessManager::initProcessSettings(AwBaseProcess* process)
 	// if fi == NULL that means no file are currently open by AnyWave.
 
 	if (dm->isFileOpen()) {
-		process->pdi.input.settings.unite(dm->settings());
+		//process->pdi.input.settings.unite(dm->settings());
+		AwUniteMaps(process->pdi.input.settings, dm->settings());
 		// prepare input settings only if a file is currently open.
 		process->pdi.input.setReader(dm->reader());
 		process->pdi.input.filterSettings = dm->filterSettings();
 	}
-	process->pdi.input.settings.unite(args);
+	//process->pdi.input.settings.unite(args);
+	AwUniteMaps(process->pdi.input.settings, args);
 }
 
 /*!
@@ -435,6 +446,11 @@ bool AwProcessManager::initProcessIO(AwBaseProcess *p)
 /// <returns>flags</returns>
 int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 {
+	int flags = p->modifiersFlags();
+	if (flags & Aw::ProcessIO::modifiers::DontFilterUseSkipMarkersOptions)
+		return 0; 
+	if (flags & Aw::ProcessIO::modifiers::UserSelectedMarkers)
+		return 0;
 	return p->applyUseSkipMarkersKeys();
 }
 
@@ -459,6 +475,8 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	 if (buildProcessPDI(process) == 0)
 		 runProcess(process);
  }
+
+
 
 
  int AwProcessManager::buildProcessPDI(AwBaseProcess* p, AwDataManager *dm)
@@ -752,8 +770,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
 		AwProcess* p = static_cast<AwProcess*>(process);
-		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+//		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+//		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
@@ -779,16 +798,15 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 				p->plugin()->deleteInstance(p); 
 				return;
 			}
-			//applyUseSkipMarkersKeys(p);
-			if (!(p->modifiersFlags() & Aw::ProcessIO::modifiers::DontFilterUseSkipMarkersOptions))
-				applyUseSkipMarkersKeys(p);
+			applyUseSkipMarkersKeys(p);
 		}
 		// create the process thread and move process object in it.
 		QThread *processThread = new QThread;
 		p->moveToThread(processThread);
 
-		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+		//connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
+		//connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
+		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
 		connect(p, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
 		connect(p, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
 		
@@ -1027,6 +1045,8 @@ void AwProcessManager::handleProcessTermination()
 
 			for  (QWidget *w : process->pdi.output.widgets()) { // get widgets instances back to main gui thread
 				w->moveToThread(thread());
+				// set wflags
+				w->setWindowFlags(w->windowFlags() | Qt::Window | Qt::WindowStaysOnTopHint);
 				w->show();
 			}
 		}
@@ -1092,6 +1112,29 @@ void AwProcessManager::errorMessage(const QString& message)
 	AwProcess *process = static_cast<AwProcess *>(sender());
 	if (process)
 		AwMessageBox::critical(0, process->plugin()->name, message);
+}
+
+void AwProcessManager::processEvent(QSharedPointer<AwEvent> e)
+{
+	QMutexLocker lock(&m_mutex);
+	// make sure the event received is compatible
+	int id = e->id();
+	auto data = e->data();
+	switch (id) {
+	case AwEvent::StartProcess:
+		if (data.contains("process_name")) {
+			QStringList args = data.value("args").toStringList();
+			startProcess(data.value("process_name").toString(), args);
+		}
+		break;
+	case AwEvent::LoadICAMatFile:
+	{
+		QStringList args = data.value("args").toStringList();
+		if (args.size())
+			AwMontageManager::instance()->loadICA(args.first());
+	}
+		break;
+	}
 }
 
 void AwProcessManager::executeCommand(const QVariantMap& map)

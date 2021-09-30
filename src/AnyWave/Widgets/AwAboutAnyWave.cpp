@@ -20,22 +20,18 @@
 #include <vtkVersion.h>
 #include "Prefs/AwSettings.h"
 #include <AwVersion.h>
+#include "Updater/AwUpdateManager.h"
+#include <widget/AwMessageBox.h>
 
-AwAboutAnyWave::AwAboutAnyWave(QWidget *parent)
+AwAboutAnyWave::AwAboutAnyWave(AwUpdateManager *um, QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
 	
 	labelQtVersion->setText(QT_VERSION_STR);
-	labelBuildDate->setText(QString("version %1.%2").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION));
+	labelBuildDate->setText(QString("version %1.%2.%3").arg(AW_MAJOR_VERSION).arg(AW_MINOR_VERSION).arg(AW_FIX_VERSION));
 	labelVtkVersion->setText(QString(VTK_VERSION));
-	buttonGetLastVersion->hide();
-	labelUpdateAvailable->setText("No update available.");
-	auto updateUrl = AwSettings::getInstance()->value(aws::update_url).toString();
-	if (!updateUrl.isEmpty()) {
-		buttonGetLastVersion->show();
-		labelUpdateAvailable->setText("A new version is available");
-	}
+	m_um = um;
 	connect(buttonGetLastVersion, SIGNAL(clicked()), this, SLOT(getLatestUpdate()));
 }
 
@@ -52,7 +48,9 @@ void AwAboutAnyWave::openLicense()
 
 void AwAboutAnyWave::getLatestUpdate()
 {
-	QDesktopServices::openUrl(QUrl(AwSettings::getInstance()->value(aws::update_url).toString()));
+	m_um->checkForUpdates(false);
+	//if (!m_um->updatesAvailable()) 
+	//	AwMessageBox::information(this, "Updates", "Everything is up to date.");
 }
 
 

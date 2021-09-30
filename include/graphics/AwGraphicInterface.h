@@ -17,6 +17,7 @@
 #define AW_GRAPHIC_INTERFACE_H_
 #include <AwGlobal.h>
 #include <graphics/AwGraphicsObjects.h>
+class AwViewSettings;
 
 class AW_GRAPHICS_EXPORT AwDisplayPlugin : public QObject
 {
@@ -26,9 +27,7 @@ public:
 	QString version;
 	QString description;
 
-	virtual AwBaseGraphicsSignalItem *newInstance(AwChannel *chan, AwDisplayPhysics *phys) = 0;
-//	virtual void deleteInstance(AwBaseGraphicsSignalItem *item) { delete item; item = NULL; }
-//	virtual void deleteInstance(AwBaseGraphicsSignalItem *item) = 0;
+	virtual AwBaseGraphicsSignalItem *newInstance(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) = 0;
 };
 
 class AW_GRAPHICS_EXPORT AwDisplayPlugin2DPlot : public AwGraphics2DPlotItem

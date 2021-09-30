@@ -33,7 +33,7 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="groupMeshOptions">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -46,41 +46,6 @@
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Opacity:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="sliderOpacity">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximum">
-               <number>100</number>
-              </property>
-              <property name="value">
-               <number>40</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="tickPosition">
-               <enum>QSlider::NoTicks</enum>
-              </property>
-             </widget>
-            </item>
             <item>
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
@@ -96,6 +61,12 @@
             </item>
             <item>
              <widget class="QPushButton" name="buttonLoadMesh">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>Load Mesh</string>
               </property>
@@ -113,16 +84,6 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBoxSmooth">
-              <property name="text">
-               <string>Smooth Rendering</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="horizontalSpacer_4">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -136,6 +97,9 @@
              </spacer>
             </item>
            </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="layoutMeshes"/>
           </item>
          </layout>
         </widget>
@@ -252,22 +216,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>sliderOpacity</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>AwSEEGWidgetUi</receiver>
-   <slot>changeMeshOpacity(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>827</x>
-     <y>55</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>210</x>
-     <y>454</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>buttonLoadMesh</sender>
    <signal>clicked()</signal>
    <receiver>AwSEEGWidgetUi</receiver>
@@ -296,22 +244,6 @@
     <hint type="destinationlabel">
      <x>978</x>
      <y>115</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBoxSmooth</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>AwSEEGWidgetUi</receiver>
-   <slot>changeSmoothRendering(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>857</x>
-     <y>74</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>971</x>
-     <y>156</y>
     </hint>
    </hints>
   </connection>

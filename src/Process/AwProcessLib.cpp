@@ -124,6 +124,14 @@ void AwBaseProcess::setMarkersReceived()
 	m_wcMarkersReceived.wakeAll();
 }
 
+void AwBaseProcess::sendEventAsynch(QSharedPointer<AwEvent> e)
+{
+	emit sendEvent(e);
+	m_lock.lock();
+	m_wcEventProcessed.wait(&m_lock);
+	m_lock.unlock();
+}
+
 AwProcess::AwProcess() : AwBaseProcess()
 {
 	m_executionTime = 0;

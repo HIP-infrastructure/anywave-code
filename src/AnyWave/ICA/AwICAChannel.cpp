@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwICAChannel.h"
-#include <AwAmplitudeManager.h>
-
 
 AwICAChannel::AwICAChannel()
 : AwVirtualChannel()
@@ -100,6 +98,4 @@ void AwICAChannel::update()
 void AwICAChannel::setComponentType(int type)
 {
 	m_compType = type;
-	AwAmplitudeManager *am = AwAmplitudeManager::instance();
-	setGain(am->middleValueForScale(type));
 }

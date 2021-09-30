@@ -85,6 +85,7 @@ using AwFilters = QList<AwFilterPlugin *>;
 class AnyWave;
 class MontageManager;
 class AwDisplay;
+class QPluginLoader;
 
 class AwPluginManager : public QObject
 {
@@ -111,6 +112,9 @@ public:
 
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
+
+	int unloadPlugin(const QString& filePath, const QString& name);
+	QObject *loadPlugin(const QString& path);
 
 	// plugins related methods
 	AwDisplayPlugin *getDisplayPluginByName(const QString& name) { return m_displayFactory.getPluginByName(name); }
@@ -144,11 +148,9 @@ private:
 	void loadPlugins();
 	void loadUserPlugins();
 	void checkForScriptPlugins(const QString& startingPath);
-//	void setFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 	void setJsonUi(AwScriptPlugin *plugin, const QString& jsonUiPath);
 	void setJsonDefaults(AwScriptPlugin *plugin, const QString& jsonDefaultsPath);
 	void setJsonSettings(AwScriptPlugin *plugin, const QString& key, const QString& jsonDefaultsPath);
-//	void setInputFlagsForScriptPlugin(AwScriptPlugin *plugin, const QString& flags);
 	bool checkPluginVersion(QObject *plugin);
 
 	void loadFileIOReaderPlugin(AwFileIOPlugin *plugin);
@@ -161,8 +163,9 @@ private:
 
 	// Plugins
 	static AwPluginManager *m_instance;
-	//QDir m_pluginsDir;
 	QList<QObject *> m_pluginList;
+	QMap<QObject*, QPluginLoader*> m_loaders;
+	QMap<QString, QObject*> m_pluginNames;
 	AwReaders m_readers;
 	AwWriters m_writers;
 	AwProcesses m_processes;

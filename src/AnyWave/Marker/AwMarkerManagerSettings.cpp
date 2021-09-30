@@ -80,12 +80,18 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	action = new QAction(tr("Rename selected markers"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(renameSelectedMarkers()));
-	action = new QAction(tr("Change values of all markers"), this);
+	action = new QAction(tr("Change the value of all markers"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(changeValueAllMarkers()));
-	action = new QAction(tr("Change values of selected markers"), this);
+	action = new QAction(tr("Change the value of selected markers"), this);
 	m_menu->addAction(action);
 	connect(action, SIGNAL(triggered()), this, SLOT(changeValueSelectedMarkers()));
+	action = new QAction("Change the color of all markers", this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(changeColorAllMarkers()));
+	action = new QAction("Change the color of selected markers", this);
+	m_menu->addAction(action);
+	connect(action, SIGNAL(triggered()), this, SLOT(changeColorSelectedMarkers()));
 	m_menu->addSeparator();
 	action = new QAction(tr("Edit"), this);
 	m_menu->addAction(action);
@@ -227,52 +233,6 @@ void AwMarkerManagerSettings::cleanUp()
 	buttonExportWizard->setEnabled(!m_markers.isEmpty());
 	buttonSave->setEnabled(!m_markers.isEmpty());
 }
-
-//void AwMarkerManagerSettings::updateStats()
-//{
-//	bool enable = !m_displayedMarkers.isEmpty();
-//	groupBoxDisplayRules->setEnabled(enable);
-//	groupBoxQuickNav->setEnabled(enable);
-//
-//	if (m_isAddingMarker)
-//		return;
-//
-//	// Total
-//	labelTotal->setText(QString(tr("%1 marker(s)")).arg(m_displayedMarkers.size()));
-//
-//	// populate combo boxes but keep previous name and value selected if any
-//	QString prevValue = comboValues->currentText();
-//	QString prevName = comboNames->currentText();
-//	int prevValueIndex = -1, prevNameIndex = -1;
-//	QStringList names;
-//	QStringList values;
-//
-//	comboNames->clear();
-//	comboValues->clear();
-//	foreach (AwMarker *m, m_displayedMarkers)	{
-//		QString value = QString("%1").arg(m->value());
-//		if (!names.contains(m->label()))
-//			names << m->label();
-//		if (!values.contains(value))
-//			values << value;
-//	}
-//	comboNames->setEnabled(!names.isEmpty());
-//	comboValues->setEnabled(!values.isEmpty());
-//	comboNames->addItems(names);
-//	comboValues->addItems(values);
-//
-//	// reset index to previous selection if any.
-//	if (!prevValue.isEmpty()) {
-//		prevValueIndex = values.indexOf(prevValue);
-//		if (prevValueIndex != -1)
-//			comboValues->setCurrentIndex(prevValueIndex);
-//	}
-//	if (!prevName.isEmpty()) {
-//		prevNameIndex = names.indexOf(prevName);
-//		if (prevNameIndex != -1)
-//			comboNames->setCurrentIndex(prevNameIndex);
-//	}
-//}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // SLOTS
@@ -504,9 +464,56 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 	m_displayedMarkers = currentMarkers;
 	m_model->updateMarkers(currentMarkers);
 	emit markersChanged(m_displayedMarkers);
-//	emit updateStats();
 }
 
+
+void AwMarkerManagerSettings::changeColorSelectedMarkers()
+{
+	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
+	AwMarkerList currentMarkers = m_model->markers();
+	QSortFilterProxyModel* proxy = (QSortFilterProxyModel*)tvMarkers->model();
+
+	QColor color;
+	// get color of the first selected item
+	for (auto const& i : indexes) {
+		if (i.column() == MARKER_COLUMN_COLOR) {
+			int row = proxy->mapToSource(i).row();
+			color = QColor(currentMarkers.value(row)->color());
+			break;
+		}
+	}
+
+	color = QColorDialog::getColor(color, this, "Pick color");
+	if (color.isValid()) {
+		auto colorName = color.name(QColor::HexRgb);
+		for (auto const& i : indexes) {
+			if (i.column() == MARKER_COLUMN_COLOR) {
+				int row = proxy->mapToSource(i).row();
+				auto m = currentMarkers.value(row);
+				m->setColor(colorName);
+			}
+		}
+	}
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
+	emit markersChanged(m_displayedMarkers);
+}
+
+void AwMarkerManagerSettings::changeColorAllMarkers()
+{
+	auto color = QColorDialog::getColor(Qt::white, this, "Pick color");
+	if (!color.isValid())
+		return;
+	AwMarkerList currentMarkers = m_model->markers();
+	auto colorName = color.name(QColor::HexRgb);
+	for (auto m : currentMarkers)
+		m->setColor(colorName);
+
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
+	emit markersChanged(m_displayedMarkers);
+
+}
 
 void AwMarkerManagerSettings::launchProcess()
 {

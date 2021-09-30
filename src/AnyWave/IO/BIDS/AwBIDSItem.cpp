@@ -36,6 +36,18 @@ QList<AwBIDSItem *> AwBIDSItem::getDataFileItems()
 	return getChildDataFileItems(this);
 }
 
+QString AwBIDSItem::subjectName()
+{
+	auto parent = m_parent;
+	if (!parent)
+		return this->text();
+	while (parent) {
+		if (parent->bidsParent() == nullptr) 
+			return parent->text();
+		parent = parent->bidsParent();
+	}
+}
+
 ///
 /// recursive search amongst children
 QList<AwBIDSItem *> AwBIDSItem::getChildDataFileItems(AwBIDSItem *parent)

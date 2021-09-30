@@ -157,6 +157,10 @@ void AwSettings::closeFile()
 	m_settings[aws::ica_file] = QString();
 }
 
+void AwSettings::quit()
+{
+	
+}
 
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)

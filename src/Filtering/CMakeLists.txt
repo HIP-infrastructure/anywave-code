@@ -3,8 +3,6 @@ project(AwFiltering)
 add_definitions("-DAW_BUILD_FILTERING_LIB")
 INCLUDE_DIRECTORIES(./DspFilters)
 INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
-
-
 SET(SRC  AwButterWorth.cpp 
     AwFiltering.cpp 
     DspFilters/Bessel.cpp 

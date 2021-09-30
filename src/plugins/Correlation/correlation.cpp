@@ -22,7 +22,8 @@ CorrelationPlugin::CorrelationPlugin()
 {
 	type = AwProcessPlugin::Background;
 	name = "Channels Correlation";
-	description = tr("Compute the correlation matrix between channels.");
+	version = "1.0.0";
+	description = tr("Compute correlation matrix between channels.");
 	category = "Process:Correlation:Channels Correlation";
 	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections | Aw::ProcessFlags::ProcessHasInputUi);
 }

@@ -19,6 +19,8 @@
 #include <QDialog>
 #include "ui_AwAboutAnyWave.h"
 
+class AwUpdateManager;
+
 using namespace Ui;
 
 class AwAboutAnyWave : public QDialog, public AboutAnyWaveClass
@@ -26,12 +28,14 @@ class AwAboutAnyWave : public QDialog, public AboutAnyWaveClass
 	Q_OBJECT
 
 public:
-	AwAboutAnyWave(QWidget *parent = 0);
+	AwAboutAnyWave(AwUpdateManager *, QWidget *parent = 0);
 protected:
 	void changeEvent(QEvent*);
 public slots:
 	void openLicense();
 	void getLatestUpdate();
+private:
+	AwUpdateManager* m_um;
 };
 
 #endif // ABOUT_ANYWAVE_H

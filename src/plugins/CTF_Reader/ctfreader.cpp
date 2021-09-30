@@ -151,8 +151,8 @@ typedef struct {
 CTFReader::CTFReader() : AwFileIOPlugin()
 {
   name = QString("CTF Reader");
-  description = QString(tr("Read CTF .ds"));
-  version = QString("1.0");
+  description = QString(tr("Read CTF .ds bundle"));
+  version = QString("1.0.0");
   manufacturer = "CTF";
   fileExtensions << "*.ds";
   m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::IsDirectory;
@@ -358,43 +358,43 @@ CTFFileReader::FileStatus CTFFileReader::openFile(const QString &path)
 				chan->setType(AwChannel::ECG);
 			if (chan->name().contains("EMG"))
 				chan->setType(AwChannel::EMG);
-			chan->setUnit(QString::fromLatin1("µV"));
-			chan->setGain(150);
+		//	chan->setUnit(QString::fromLatin1("µV"));
+		//	chan->setGain(150);
 			break;
 		case SensorType::eMEGSensor:
 			chan->setType(AwChannel::MEG);
-			chan->setUnit(QString("pT"));
-			chan->setGain(4);
+			//chan->setUnit(QString("pT"));
+			//chan->setGain(4);
 			break;
 		case SensorType::eMEGSensor1:
 		case SensorType::eMEGSensor2:
 		case SensorType::eMEGSensor3:
 			chan->setType(AwChannel::GRAD);
-			chan->setUnit(QString("pT/m"));
-			chan->setGain(4);
+			//chan->setUnit(QString("pT/m"));
+			//chan->setGain(4);
 			break;
 		case SensorType::eMEGReference:
 		case SensorType::eMEGReference1:
 		case SensorType::eMEGReference2:
 		case SensorType::eMEGReference3:
 			chan->setType(AwChannel::Reference);
-			chan->setUnit(QString("pT"));
-			chan->setGain(50);
+			//chan->setUnit(QString("pT"));
+			//chan->setGain(50);
 			break;
 		case SensorType::eStimDigital:
 		case SensorType::eStimRef:
 			chan->setType(AwChannel::Trigger);
-			chan->setUnit(QString("val"));
+		//	chan->setUnit(QString("val"));
 			m_triggers << chan;
 			chan->setGain(100);
 			break;
 		case SensorType::eOtherRef:
 			chan->setType(AwChannel::Other);
-			chan->setUnit(QString("n/a"));
+			//chan->setUnit(QString("n/a"));
 			break;
 		default:
 			chan->setType(AwChannel::Other);
-			chan->setUnit(QString("n/a"));
+			//chan->setUnit(QString("n/a"));
 			break;
 		}
 		m_stream.skipRawData(6);

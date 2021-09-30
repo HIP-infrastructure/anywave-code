@@ -19,8 +19,8 @@
 DeltamedBTReaderPlugin::DeltamedBTReaderPlugin() : AwFileIOPlugin()
 {
 	name = QString("Deltamed bin/txt reader");
-	description = QString(tr("Reads .txt from Coherence"));
-	version = QString("1.0");
+	description = QString(tr("Read .txt file exported by Coherence software"));
+	version = QString("1.0.0");
 	manufacturer = "Deltamed";
 	fileExtensions << "*.txt";
 	m_flags = FileIO::HasExtension | FileIO::CanRead;

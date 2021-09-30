@@ -199,7 +199,8 @@ void AwBatchRunner::run()
 				sendMessage(QString("%1\n").arg(dict.value(k).toString()));
 
 		//	process->pdi.input.setArguments(dict);
-			process->pdi.input.settings.unite(dict);
+		//	process->pdi.input.settings.unite(dict);
+			AwUniteMaps(process->pdi.input.settings, dict);
 			auto reader = process->pdi.input.reader();
 			QObject::connect(process, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 			// if the process has a reader => input_file set and the process must connect to a data server using the specified reader.

@@ -59,16 +59,18 @@ void GraphManagerWidget::visualize()
 }
 
 
-void GraphManagerWidget::addGraphSet(const QString& file)
+int GraphManagerWidget::addGraphSet(const QString& file)
 {
 	GraphSet *ds = new GraphSet;
 	if (ds->load(file) == 0) {
 		m_graphSets << ds;
 		updateTableView();
+		return 0;
 	}
 	else {
-		AwMessageBox::information(this, "Error", ds->errorString());
-		delete ds;
+		//AwMessageBox::information(this, "Error", ds->errorString());
+		//delete ds;
+		return -1;
 	}
 }
 
@@ -78,5 +80,6 @@ void GraphManagerWidget::loadFile()
 	QString file = QFileDialog::getOpenFileName(this, "Load file", H2Graphs::instance()->pdi.input.settings[keys::data_dir].toString(), "Matlab Files (*.mat)");
 	if (file.isEmpty())
 		return;
-	addGraphSet(file);
+	if (addGraphSet(file) != 0) 
+		AwMessageBox::information(this, "Error", "Failed to load .mat file");
 }

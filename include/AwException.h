@@ -30,12 +30,6 @@ public:
 	{
 		return m_message;
 	}
-
-	const char *c_errorString() const throw()
-	{
-		return m_message.toStdString().c_str();
-	}
-
 	const int level() const throw()
 	{
 		return m_level;
@@ -44,6 +38,11 @@ public:
 	const QString& origin() const throw()
 	{
 		return m_from;
+	}
+
+	void setError(const QString& error)
+	{
+		m_message = error;
 	}
 private:
 	int m_level;

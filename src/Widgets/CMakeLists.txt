@@ -10,6 +10,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwSelectInputDataWidget.h
     ../../include/widget/AwWait.h  
 	../../include/widget/AwGetValueDialog.h  
+    ../../include/AwGainLevels.h  
     ./Aw2DGrid.h  
     ../../include/widget/AwWaitWidget.h  
     ../../include/widget/AwComboCMap.h  
@@ -28,7 +29,6 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwTopoBuilder.h  
     ./AwTopoWidgetSettings.h  
     ../../include/widget/AwAmplitudeWidget.h  
-    ../../include/widget/AwAmplitudeButton.h  
     ../../include/widget/AwMapWidget.h  
     ../../include/widget/AwTopoWidget.h  
     ./AwTimeScaleCombo.h  
@@ -39,16 +39,35 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ./SignalView/AwViewSettingsUi.h  
     ./SignalView/AwGoToLatencyDial.h  
     ./SignalView/AwPickMarkersDial.h 
+    ../../include/widget/AwGainLevelsWidget.h 
     ../../include/widget/SignalView/AwGraphicsScene.h  
     ../../include/widget/SignalView/AwGraphicsView.h  
     ../../include/widget/SignalView/AwNavigationBar.h  
-    ./SEEGViewer/AwSEEGInteractor.h  
-    ../../include/widget/AwSEEGViewer.h  
-    ../../include/widget/AwSEEGWidget.h  
     ./InputMarker/InputMarkerModel.h  
     ../../include/widget/AwInputMarkerTableView.h  
     ../../include/widget/AwInputMarkerWidget.h
-	../../include/widget/AwVideoPlayer.h)
+	../../include/widget/AwVideoPlayer.h
+	../../include/widget/AwGraphicsObjects.h 
+../../include/widget/AwGraphicInterface.h 
+    MarkerItem/AwMarkerLabelButton.h 
+    MarkerItem/AwMarkerValueButton.h 
+    SignalItem/AwSIAmpButton.h 
+    SignalItem/AwSignalItemSettings.h 
+    ../../include/widget/AwColorMap.h 
+   ../../include/widget/AwCursorItem.h 
+   ../../include/widget/AwGraphicInterface.h 
+   ../../include/widget/AwGraphicsDefines.h 
+   ../../include/widget/AwGraphicsObjects.h 
+   ../../include/widget/AwHighLightMarker.h 
+   ../../include/widget/AwHighLightPositionMarker.h 
+   ../../include/widget/AwLabelItem.h 
+   ../../include/widget/AwMappingCursorItem.h 
+   ../../include/widget/AwMarkerChannelItem.h 
+   ../../include/widget/AwMarkerItem.h 
+   ../../include/widget/AwQwtColorMap.h 
+   ../../include/widget/AwSignalItem.h 
+   ../../include/widget/AwSignalLabelItem.h)
+	
 
 SET(SRC  ./AwSelectInputDataWidget.cpp
      ./Aw2DGrid.cpp  
@@ -62,7 +81,6 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./AwDownSamplingWidget.cpp  
     ./AwMarkAroundWidget.cpp  
     ./AwMarkerInspector.cpp  
-    ./AwAmplitudeButton.cpp  
     ./AwAmplitudeWidget.cpp  
     ./AwMapWidget.cpp  
     ./AwMarkingSettings.cpp  
@@ -86,12 +104,27 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SignalView/AwViewSettings.cpp  
     ./SignalView/AwViewSettingsUi.cpp  
     ./SignalView/AwPickMarkersDial.cpp 
-    ./SEEGViewer/AwSEEGInteractor.cpp  
-    ./SEEGViewer/AwSEEGViewer.cpp  
-    ./SEEGViewer/AwSEEGWidget.cpp  
+    ./SignalView/AwGainLevelsWidget.cpp
     ./InputMarker/AwInputMarkerTableView.cpp  
     ./InputMarker/AwInputMarkerWidget.cpp  
-    ./InputMarker/InputMarkerModel.cpp)
+    ./InputMarker/InputMarkerModel.cpp
+	Mark/AwHighLightPositionMarker.cpp 
+    MarkerItem/AwCursorItem.cpp 
+    MarkerItem/AwHighLightMarker.cpp 
+    MarkerItem/AwMappingCursorItem.cpp 
+    MarkerItem/AwMarkerChannelItem.cpp 
+    MarkerItem/AwMarkerItem.cpp 
+    MarkerItem/AwMarkerLabelButton.cpp 
+    MarkerItem/AwMarkerValueButton.cpp 
+    SignalItem/AwLabelItem.cpp 
+    SignalItem/AwSIAmpButton.cpp 
+    SignalItem/AwSignalItem.cpp 
+    SignalItem/AwSignalItemSettings.cpp 
+    SignalItem/AwSignalLabelItem.cpp 
+    AwGainLevels.cpp
+    AwColorMap.cpp 
+    AwGraphicsObjects.cpp 
+    AwQwtColorMap.cpp)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 
@@ -111,15 +144,15 @@ SET(FORMS  ./AwSelectInputDataWidget.ui
     ./SignalView/AwNavigationBarv2.ui  
     ./SignalView/AwViewSettingsUi.ui  
     ./SignalView/AwPickMarkersDial.ui 
-    ./SEEGViewer/AwSEEGWidget.ui  
 	./AwVideoPlayer.ui
-    ./InputMarker/AwInputMarkerWidget.ui)
+    ./InputMarker/AwInputMarkerWidget.ui
+	SignalItem/AwSignalItemSettings.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
 
 ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
 QT5_USE_MODULES(AwWidget Core Widgets PrintSupport Multimedia MultimediaWidgets)
-TARGET_LINK_LIBRARIES(AwWidget AwCore AwGraphics AwMath AwMapping AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
+TARGET_LINK_LIBRARIES(AwWidget AwCore AwMath AwMapping AwUtilities AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
   Qt5::MultimediaWidgets ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
 
 IF (APPLE)

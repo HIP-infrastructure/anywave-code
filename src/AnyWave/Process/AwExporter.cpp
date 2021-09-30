@@ -29,9 +29,9 @@ namespace Exporter {
 AwExporterPlugin::AwExporterPlugin()
 {
 	name = QString("File Exporter");
-	description = QString(tr("Export data to a file"));
+	description = QString("Export data to a file");
 	category = "Process:File Operation:Export To File";
-	version = "1.0";
+	version = "1.0.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/json/file_exporter.json");
@@ -89,8 +89,24 @@ void AwExporter::runFromCommandLine()
 	AwBlock* block = writer->infos.newBlock();
 	AwMarker global("global", 0., endTimePos);
 	if (modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied) {
-		block->setMarkers(pdi.input.modifiedMarkers());
-		m_inputMarkers = pdi.input.markers();
+		auto merged = AwMarker::merge(pdi.input.markers());
+		auto modified = pdi.input.modifiedMarkers();
+		if (modified.size()) {
+			// concatenante all the markers : shift them left in time to match the concatenation of input markers
+			float pos = 0.;
+			for (auto m : merged) {
+				auto intersection = AwMarker::intersect(modified, m->start(), m->end());
+				float shift = m->start() - pos;
+				for (auto inter : intersection) 
+					inter->setStart(inter->start() - shift);
+				pos += m->duration();
+			}
+		}
+		//AwMarker::applyANDOperation(merged, modified);
+		//block->setMarkers(pdi.input.modifiedMarkers());
+		block->setMarkers(modified);
+		pdi.input.setNewMarkers(merged);
+		m_inputMarkers = merged;
 	}
 	else {
 		block->setMarkers(pdi.input.markers());
@@ -113,6 +129,29 @@ void AwExporter::runFromCommandLine()
 		requestData(&pdi.input.channels(), &m_inputMarkers);
 		sendMessage("Done.");
 	}
+
+	//// apply scaling factor to data
+	//float scale = 1.0;
+	//for (auto chan : pdi.input.channels()) {
+	//	switch (chan->unit()) {
+	//	case AwChannel::picoT:
+	//	case AwChannel::picoTpermeter:
+	//		scale = 1e-12;
+	//		break;
+	//	case AwChannel::V:
+	//		scale = 1e-6;
+	//		break;
+	//	case AwChannel::milliV:
+	//		scale = 1e-3;
+	//		break;
+	//	default:
+	//		scale = 1.0;
+	//	}
+	//	if (scale != 1.0) {
+	//		for (auto start = 0; start < chan->dataSize(); start++)
+	//			chan->data()[start] *= scale;
+	//	}
+	//}
 
 	// set channels to the writer object AFTER loading and/or not downsampling
 	// duplicate input channels before set them to writer as writer object takes ownership of channels and will destroy them 
@@ -166,6 +205,8 @@ bool AwExporter::showUi()
 	ui.filterSettings = pdi.input.filterSettings;
 
 	if (ui.exec() == QDialog::Accepted) {
+		// clear output_dir option as we don't run in command line mode
+		pdi.input.settings.remove(keys::output_dir);
 		pdi.input.settings[keys::output_file] = ui.filePath;
 		if (ui.useCurrentMontage)
 			m_channels = ui.channels;
@@ -212,8 +253,6 @@ bool AwExporter::showUi()
 			pdi.input.settings[keys::use_markers] = ui.usedMarkers;
 			updateUseSkip = true;
 		}
-		if (updateUseSkip)
-			applyUseSkipMarkersKeys();
 
 		if (ui.decimateFactor > 1)
 			pdi.input.settings[Exporter::decimate_factor] = ui.decimateFactor;

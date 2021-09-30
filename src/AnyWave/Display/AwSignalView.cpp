@@ -29,7 +29,6 @@
 #include "AwDisplaySetupManager.h"
 #include "ICA/AwICAManager.h"
 #include <widget/AwMessageBox.h>
-//#include "Prefs/AwSettings.h"
 #include "Data/AwDataManager.h"
 
 AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent, Qt::WindowFlags windowFlags) :
@@ -52,8 +51,6 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	connect(m_scene, SIGNAL(markerInserted(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 	connect(m_scene, &AwScene::showMarkerUnderMouse, mm, &AwMarkerManager::highlightMarkerInList);
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
-	// using Global Marker Bar representation => connect to MarkerManager
-	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markBar, SLOT(setAllMarkers(const AwMarkerList&)));
 	// filters
 	connect(&dm->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
@@ -190,11 +187,6 @@ void AwSignalView::closeFile()
 	AwBaseSignalView::clean();
 	m_scene->reset();
 
-	//// close connection to previous reader if any
-	//if (m_reader) {
-	//	AwDataServer::getInstance()->closeConnection(client());
-	//	m_reader = NULL;
-	//}
 	AwDataManager::instance()->dataServer()->closeConnection(client());
 
 	// remove virtual channels from main list
@@ -209,21 +201,6 @@ void AwSignalView::closeFile()
 
 	m_isActive = false;
 }
-
-////
-//// enableView()
-//// this method will activate the view as available.
-//// connection to data server is established, and widgets are enabled.
-//void AwSignalView::enableView(AwFileIO *reader)
-//{
-//	m_reader = reader;
-//	AwDataServer::getInstance()->openConnection(client());
-//	setTotalDuration(reader->infos.totalDuration());
-//	setRecordedTime(QTime::fromString(reader->infos.recordingTime(), Qt::TextDate));
-//	
-//	m_isActive = true;
-//	reloadData();
-//}
 
 void AwSignalView::enableView()
 {
@@ -288,6 +265,7 @@ void AwSignalView::setChannels(const AwChannelList& channels)
 	while (!m_montageChannels.isEmpty())
 		delete m_montageChannels.takeFirst();
 	m_montageChannels = AwChannel::duplicateChannels(channels);
+	applyGainLevels();
 	if (!m_isActive)
 		return;
 	// Before sending channels to scene, apply filter.

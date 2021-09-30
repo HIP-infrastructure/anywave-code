@@ -20,8 +20,8 @@
 MATLABIOPlugin::MATLABIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("MATLAB Format");
-	description = QString(tr("Export data to MATLAB file"));
-	version = QString("1.0");
+	description = QString(tr("Write data to .mat file"));
+	version = QString("1.0.0");
 	fileExtension = ".mat";
 	m_flags = FileIO::HasExtension| FileIO::CanWrite;
 }

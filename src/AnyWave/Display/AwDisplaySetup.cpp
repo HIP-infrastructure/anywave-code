@@ -21,8 +21,9 @@
 #include "Widgets/AwMarkersBar.h"
 #include "Display/AwDisplay.h"
 #include "Prefs/AwSettings.h"
+#include <AwGainLevels.h>
 
-#define LAST_VERSION	"AnyWaveDisplaySetup2.0"
+constexpr auto LAST_VERSION = "AnyWaveDisplaySetup2.0";
 
 AwDisplaySetup::AwDisplaySetup(const QString& name, QObject *parent)
 	: QObject(parent)
@@ -41,7 +42,6 @@ AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
 	m_synchronize = source->synchronizeViews();
 
 	for (int i = 0; i < viewSetups().size(); i++) {
-		//AwDisplaySetupView *dsv = new AwDisplaySetupView(source->viewSetup(i), this);
 		AwViewSetup *dsv = new AwViewSetup(source->viewSetup(i), this);
 		m_ds << dsv;
 	}
@@ -68,7 +68,6 @@ AwViewSetup *AwDisplaySetup::newViewSetup()
 	else
 		s = new AwViewSetup(m_ds.last());
 	m_ds << s;
-	save();
 	return s;
 }
 
@@ -107,13 +106,6 @@ void AwDisplaySetup::setName(const QString& name)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
-
-bool AwDisplaySetup::load()
-{
-	if (m_fullPath.isEmpty())
-		return false;
-	return loadFromFile(m_fullPath);
-}
 
 bool AwDisplaySetup::loadFromFile(const QString& path)
 {
@@ -184,7 +176,7 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 				}
 				else if (e.tagName() == "MarkersBar")
 					if (e.text().toLower() == "show")
-						setup->markerBarMode= AwViewSettings::ShowMarkerBar;
+						setup->markerBarMode = AwViewSettings::ShowMarkerBar;
 					else
 						setup->markerBarMode = AwViewSettings::HideMarkerBar;
 				else if (e.tagName() == "Filters") {
@@ -194,6 +186,20 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					for (int i = 0; i < list.size(); i++)
 						setup->filters << list.at(i).toElement().text().toInt();
 				}
+				else if (e.tagName() == "GainLevels") {
+					QDomNodeList list = n.childNodes();
+					for (int i = 0; i < list.size(); i++) {
+						// get type of channel
+						int type = list.at(i).toElement().text().toInt();
+						auto gl = setup->gainLevels->getGainLevelFor(type);
+						// get gain level value
+						gl->setValue(list.at(i).toElement().attribute("value").toFloat());
+					}
+				}
+				else if (e.tagName() == "TimeScaleMode")
+					setup->timeScaleMode = e.text().toInt();
+				else if (e.tagName() == "TimeScaleFixedPageDuration")
+					setup->fixedPageDuration = e.text().toFloat();
 				n = n.nextSibling();
 			}
 			m_ds.append(setup);
@@ -202,13 +208,6 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 	}
 	file.close();
 	return true;
-}
-
-bool AwDisplaySetup::save()
-{
-	if (m_fullPath.isEmpty())
-		return false;
-	return saveToFile(m_fullPath);
 }
 
 bool AwDisplaySetup::saveToFile(const QString& filename)
@@ -238,7 +237,7 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 	root.appendChild(element);
 
 	qint32 count = 0;
-	foreach (AwViewSetup *dsv, m_ds) {
+	for  (AwViewSetup *dsv : m_ds) {
 		QDomElement e;
 
 		element = doc.createElement("View");
@@ -308,13 +307,30 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		root.appendChild(element);
 
 		e = doc.createElement("Filters");
-		foreach (int f, dsv->filters) {
+		for  (int f : dsv->filters) {
 			QDomElement ee = doc.createElement("Filter");
 			
 			ee.appendChild(doc.createTextNode(QString("%1").arg(f)));
 			e.appendChild(ee);
 		}
 		element.appendChild(e);
+
+		e = doc.createElement("GainLevels");
+		for (auto gl : dsv->gainLevels->gainLevels()) {
+			QDomElement ee = doc.createElement("GainLevel");
+			ee.appendChild(doc.createTextNode(QString("%1").arg(gl->type)));
+			ee.setAttribute("value", gl->value());
+			e.appendChild(ee);
+		}
+		element.appendChild(e);
+
+		e = doc.createElement("TimeScaleMode");
+		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->timeScaleMode)));
+		element.appendChild(e);
+		e = doc.createElement("TimeScaleFixedPageDuration");
+		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->fixedPageDuration)));
+		element.appendChild(e);
+
 		root.appendChild(element);
 	}
 	doc.save(out, 3);

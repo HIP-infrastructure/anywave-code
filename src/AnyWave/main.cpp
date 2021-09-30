@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 	if (AttachConsole(ATTACH_PARENT_PROCESS)) {
 		freopen("CONOUT$", "w", stdout);
-	//	freopen("CONOUT$", "w", stderr);
+		freopen("CONOUT$", "w", stderr);
 	}
 #endif
 #if VTK_MAJOR_VERSION >= 8
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 #ifndef Q_OS_WIN
 	Q_INIT_RESOURCE(layouts);
-    Q_INIT_RESOURCE(amplitudes);
+ //   Q_INIT_RESOURCE(amplitudes);
 #endif
 	QCoreApplication::setOrganizationName("INSERM U1106");
 	QCoreApplication::setOrganizationDomain("INS.org");

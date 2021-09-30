@@ -26,7 +26,8 @@
 void AnyWave::initPluginsHelpMenu()
 {
 	QStringList sections;
-	QList<QMenu *> menus;
+	QList<QMenu*> menus; 
+	menuHelp->clear();
 
 	QMenu* menuPluginHelp = nullptr;
 	for (auto plugin : AwPluginManager::getInstance()->processes()) {

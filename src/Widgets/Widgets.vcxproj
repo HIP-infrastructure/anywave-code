@@ -22,19 +22,22 @@
     <ClCompile Include="Aw2DGrid.cpp" />
     <ClCompile Include="AwAddPredefinedMarker.cpp" />
     <ClCompile Include="AwAddTargetChannels.cpp" />
+    <ClCompile Include="AwColorMap.cpp" />
     <ClCompile Include="AwComboCMap.cpp" />
     <ClCompile Include="AwComboColor.cpp" />
     <ClCompile Include="AwComboDS.cpp" />
     <ClCompile Include="AwComboMarker.cpp" />
     <ClCompile Include="AwDownSamplingWidget.cpp" />
+    <ClCompile Include="AwGainLevels.cpp" />
     <ClCompile Include="AwGetValueDialog.cpp" />
+    <ClCompile Include="AwGraphicsObjects.cpp" />
     <ClCompile Include="AwMarkAroundWidget.cpp" />
     <ClCompile Include="AwMarkerInspector.cpp" />
-    <ClCompile Include="AwAmplitudeButton.cpp" />
     <ClCompile Include="AwAmplitudeWidget.cpp" />
     <ClCompile Include="AwMapWidget.cpp" />
     <ClCompile Include="AwMarkingSettings.cpp" />
     <ClCompile Include="AwMessageBox.cpp" />
+    <ClCompile Include="AwQwtColorMap.cpp" />
     <ClCompile Include="AwSelectInputDataWidget.cpp" />
     <ClCompile Include="AwSpectroWidget.cpp" />
     <ClCompile Include="AwTimeScaleCombo.cpp" />
@@ -48,11 +51,28 @@
     <ClCompile Include="InputMarker\AwInputMarkerTableView.cpp" />
     <ClCompile Include="InputMarker\AwInputMarkerWidget.cpp" />
     <ClCompile Include="InputMarker\InputMarkerModel.cpp" />
-    <ClCompile Include="SEEGViewer\AwSEEGInteractor.cpp" />
-    <ClCompile Include="SEEGViewer\AwSEEGViewer.cpp" />
-    <ClCompile Include="SEEGViewer\AwSEEGWidget.cpp" />
+    <ClCompile Include="MarkerItem\AwCursorItem.cpp" />
+    <ClCompile Include="MarkerItem\AwHighLightMarker.cpp" />
+    <ClCompile Include="MarkerItem\AwMappingCursorItem.cpp" />
+    <ClCompile Include="MarkerItem\AwMarkerChannelItem.cpp" />
+    <ClCompile Include="MarkerItem\AwMarkerItem.cpp" />
+    <ClCompile Include="MarkerItem\AwMarkerLabelButton.cpp" />
+    <ClCompile Include="MarkerItem\AwMarkerValueButton.cpp" />
+    <ClCompile Include="Mark\AwHighLightPositionMarker.cpp" />
+    <ClCompile Include="SignalItem\AwLabelItem.cpp" />
+    <ClCompile Include="SignalItem\AwSIAmpButton.cpp" />
+    <ClCompile Include="SignalItem\AwSignalItem.cpp" />
+    <ClCompile Include="SignalItem\AwSignalItemSettings.cpp" />
+    <ClCompile Include="SignalItem\AwSignalLabelItem.cpp" />
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp" />
     <ClCompile Include="SignalView\AwBaseSignalView.cpp" />
+    <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">input</DynamicSource>
+    </ClCompile>
     <ClCompile Include="SignalView\AwGoToLatencyDial.cpp" />
     <ClCompile Include="SignalView\AwGraphicsScene.cpp" />
     <ClCompile Include="SignalView\AwGraphicsView.cpp" />
@@ -67,6 +87,8 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="SignalItem\AwSignalItemSettings.h" />
+    <QtMoc Include="SignalItem\AwSIAmpButton.h" />
     <QtMoc Include="SignalView\AwPickMarkersDial.h" />
     <QtMoc Include="..\..\include\widget\AwVideoPlayer.h">
     </QtMoc>
@@ -76,7 +98,24 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwSelectInputDataWidget.h">
     </QtMoc>
-    <ClInclude Include="SEEGViewer\AwSEEGInteractor.h" />
+    <QtMoc Include="..\..\include\AwGainLevels.h" />
+    <QtMoc Include="..\..\include\widget\AwGainLevelsWidget.h" />
+    <ClInclude Include="..\..\include\widget\AwColorMap.h" />
+    <ClInclude Include="..\..\include\widget\AwCursorItem.h" />
+    <ClInclude Include="..\..\include\widget\AwGraphicInterface.h" />
+    <ClInclude Include="..\..\include\widget\AwGraphicsDefines.h" />
+    <QtMoc Include="..\..\include\widget\AwGraphicsObjects.h" />
+    <ClInclude Include="..\..\include\widget\AwHighLightMarker.h" />
+    <QtMoc Include="..\..\include\widget\AwHighLightPositionMarker.h" />
+    <ClInclude Include="..\..\include\widget\AwLabelItem.h" />
+    <ClInclude Include="..\..\include\widget\AwMappingCursorItem.h" />
+    <ClInclude Include="..\..\include\widget\AwMarkerChannelItem.h" />
+    <ClInclude Include="..\..\include\widget\AwMarkerItem.h" />
+    <ClInclude Include="..\..\include\widget\AwQwtColorMap.h" />
+    <QtMoc Include="..\..\include\widget\AwSignalItem.h" />
+    <ClInclude Include="..\..\include\widget\AwSignalLabelItem.h" />
+    <QtMoc Include="MarkerItem\AwMarkerLabelButton.h" />
+    <QtMoc Include="MarkerItem\AwMarkerValueButton.h" />
     <QtMoc Include="InputMarker\InputMarkerModel.h">
     </QtMoc>
     <QtMoc Include="SignalView\AwGTCMenu.h">
@@ -84,8 +123,6 @@
     <QtMoc Include="..\..\include\widget\AwComboCMap.h">
     </QtMoc>
     <QtMoc Include="AwTopoLabelImage.h">
-    </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwSEEGViewer.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwMarkAroundWidget.h">
     </QtMoc>
@@ -103,8 +140,6 @@
     </QtMoc>
     <ClInclude Include="..\..\include\widget\AwMessageBox.h" />
     <QtMoc Include="..\..\include\widget\AwSpectroWidget.h">
-    </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwSEEGWidget.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwVTKWidget.h">
     </QtMoc>
@@ -133,8 +168,6 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwAmplitudeWidget.h">
     </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwAmplitudeButton.h">
-    </QtMoc>
     <QtMoc Include="..\..\include\widget\AwMapWidget.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwTopoWidget.h">
@@ -150,6 +183,8 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="SignalItem\AwSignalItemSettings.ui" />
+    <QtUic Include="SignalView\AwGainLevelsWidget.ui" />
     <QtUic Include="SignalView\AwGoToLatencyDial.ui">
     </QtUic>
   </ItemGroup>
@@ -174,8 +209,6 @@
     <QtUic Include="AwWaitWidget.ui">
     </QtUic>
     <QtUic Include="AwTopoWidget.ui">
-    </QtUic>
-    <QtUic Include="SEEGViewer\AwSEEGWidget.ui">
     </QtUic>
     <QtUic Include="AwMarkAroundWidget.ui">
     </QtUic>
@@ -422,12 +455,16 @@
     <PlatformToolset>v142</PlatformToolset>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseIntelTBB>true</UseIntelTBB>
+    <UseInteloneTBB>true</UseInteloneTBB>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseIntelTBB>true</UseIntelTBB>
+    <UseInteloneTBB>true</UseInteloneTBB>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -523,7 +560,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;AW_BUILD_WIDGETS_LIB;QWT_DLL;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(EXTRA_LIBS)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -535,7 +572,7 @@
       <OutputFile>$(OutDir)\$(ProjectName)d.dll</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\vtk\debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLibd.lib;AwGraphicsLibd.lib;AwUtilitiesLibd.lib;AwMappingLibd.lib;AwMathLibd.lib;AwLayoutLibd.lib;AwProcessLibd.lib;AwFilteringLibd.lib;AwReadWriteLibd.lib;qwtd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;mkl_intel_lp64_dll.lib;mkl_core_dll.lib;mkl_tbb_thread_dll.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLibd.lib;AwUtilitiesLibd.lib;AwMappingLibd.lib;AwMathLibd.lib;AwLayoutLibd.lib;AwProcessLibd.lib;AwFilteringLibd.lib;AwReadWriteLibd.lib;qwtd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)\lib\$(TargetName)d.lib</ImportLibrary>
     </Link>
     <Lib>
@@ -600,7 +637,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;WIDGETS_LIB;QWT_DLL;AW_BUILD_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(EXTRA_LIBS)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -613,7 +650,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\vtk\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>AwCoreLib.lib;AwGraphicsLib.lib;AwUtilitiesLib.lib;AwMappingLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwProcessLib.lib;AwFilteringLib.lib;qwt.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;mkl_intel_lp64_dll.lib;mkl_core_dll.lib;mkl_tbb_thread_dll.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCoreLib.lib;AwUtilitiesLib.lib;AwMappingLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwProcessLib.lib;AwFilteringLib.lib;qwt.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)\lib\$(TargetName).lib</ImportLibrary>
     </Link>
     <Lib>

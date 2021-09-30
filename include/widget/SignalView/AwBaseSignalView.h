@@ -1,8 +1,23 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <AwGlobal.h>
 #include <AwDataClient.h>
 #include "AwViewSettings.h"
-#include <graphics/AwGraphicsObjects.h>
+#include <widget/AwGraphicsObjects.h>
 #include <widget/SignalView/AwGraphicsScene.h>
 #include <widget/SignalView/AwGraphicsView.h>
 #include <widget/SignalView/AwBaseMarkerBar.h>
@@ -10,6 +25,8 @@
 #include <widget/AwMarkerInspector.h>
 #include <filter/AwFilterSettings.h>
 #include <QTime>
+#include <AwEvent.h>
+
 
 class AW_WIDGETS_EXPORT AwBaseSignalView : public QWidget
 {
@@ -23,7 +40,6 @@ public:
 		Default = 0, NoNavBar = 1, NoHScrollBar = 2, NoSettingsButton = 4, EnableMarking = 8, NoMarkerBar = 16, ViewAllChannels = 32,
 		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512, HidePositionInFile = 1024
 	};
-
 	void setFlags(int flags);
 	void setScene(AwGraphicsScene *scene);
 	void setView(AwGraphicsView *view);
@@ -76,6 +92,7 @@ public slots:
 	void showMarkersLabels(bool flag);
 	void stackChannels(bool flag);
 	void openFilterGUI();
+	virtual void processEvent(QSharedPointer<AwEvent>);
 signals:
 	void settingsChanged(AwViewSettings *settings, int flags);
 	void positionChanged(float position);	// send when the position in file changed.
@@ -104,6 +121,8 @@ protected:
 	AwChannelList m_montageChannels;		// channels from current montage.
 	AwMarkerList m_markers;
 	AwMarkerList m_visibleMarkers;
+	// hold a vector of bools for each type of channel currently present in the view
+	QVector<bool> m_currentTypes;
 	float m_positionInFile;					// current position of the view in the data (in seconds)
 	float m_pageDuration;
 	float m_totalDuration;
@@ -111,9 +130,12 @@ protected:
 	int m_flags;
 	AwFilterSettings m_filterSettings;
 	QTime m_recordedTime;
+	QMultiMap<int, AwChannel*> m_channelTypes;
+	bool m_isActive;
 
 	virtual void dataReceived();
 	virtual void applyChannelFilters();
+	virtual void applyGainLevels();
 	void makeConnections();
 	void changeObjects(AwGraphicsView *v, AwGraphicsScene *s, AwNavigationBar *navBar, AwBaseMarkerBar *markBar);
 	void updateVisibleMarkers();

@@ -42,6 +42,7 @@ public:
 		FileAccessError = AwFileIO::FileAccess, NoPluginFound };
 
 	inline QVariant value(const QString& key) { return m_settings.value(key); }
+	void quit();
 	void closeFile();
 	const AwChannelList& selectedChannels();
 	const AwChannelList& montage();
@@ -60,6 +61,7 @@ public:
 	inline bool canWriteTriggers() { return m_settings.value(keys::can_write_triggers).toBool(); }
 	inline QString selFilePath() { return m_settings.value(keys::sel_file).toString(); }
 	inline QString levelFilePath() { return m_settings.value(keys::lvl_file).toString(); }
+	inline QString lvlFilePath() { return m_settings.value(keys::lvl2_file).toString(); }
 	inline QString badFilePath() { return m_settings.value(keys::bad_file).toString(); }
 	inline QString fltFilePath() { return m_settings.value(keys::flt_file).toString(); }
 	inline QString mtgFilePath() { return m_settings.value(keys::montage_file).toString(); }

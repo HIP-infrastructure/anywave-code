@@ -22,7 +22,6 @@
 #include <QTranslator>
 #include <AwMarker.h>
 #include <filter/AwFilterSettings.h>
-#include "AwUpdater.h"
 
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
@@ -39,6 +38,7 @@ class AwMeshManager;
 class AwLayoutManager;
 class AwSEEGViewer;
 class AwVideoPlayer;
+class AwUpdateManager;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AnyWave
@@ -81,9 +81,7 @@ private:
 	AwSEEGViewer *m_SEEGViewer;			// Pointer to SEEGViewer
 	AwMeshManager *m_meshManager;
 	AwLayoutManager *m_layoutManager;
-	// updater 
-	AwUpdater m_updater;
-	AwDownloader m_downloader;
+	AwUpdateManager* m_updateManager;
 	// VIDEO Widget
 	AwVideoPlayer *m_player;
 	// flags
@@ -100,7 +98,6 @@ private:
 	void applyNewLanguage();
 	void writeSettings();
 	void readSettings();
-	void initPluginsHelpMenu();
 
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 	void createMatlabShellScript(const QString& path);
@@ -141,6 +138,7 @@ public slots:
 	void editVideoSyncSettings();
 
 private slots:
+	void initPluginsHelpMenu();
 	// slot for plugin helps
 	void openPluginHelpUrl();
 	void on_actionCreate_batch_script_triggered();

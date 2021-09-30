@@ -66,6 +66,15 @@ AwDataManager::~AwDataManager()
 {
 }
 
+
+void AwDataManager::quit()
+{
+	if (m_reader) 
+		m_filterSettings.save(m_settings.value(keys::flt_file).toString());
+	m_montageManager->quit();
+	m_markerManager->quit();
+}
+
 void AwDataManager::closeFile()
 {
 	m_status = 0;
@@ -137,6 +146,7 @@ void AwDataManager::setNewRootDirForSideFiles(const QString& dir)
 	m_settings[keys::montage_file] = QString("%1/%2.mtg").arg(dir).arg(fileName);
 	m_settings[keys::disp_file] = QString("%1/%2.display").arg(dir).arg(fileName);
 	m_settings[keys::lvl_file] = QString("%1/%2.levels").arg(dir).arg(fileName);
+	m_settings[keys::lvl2_file] = QString("%1/%2.lvl").arg(dir).arg(fileName);
 	// defines the default output_dir (can be overwritten by command line options)
 	m_settings[keys::output_dir] = dir;
 	if (m_reader) {
@@ -167,7 +177,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_status = reader->openFile(filePath);
 	if (m_status) { // status >0 means error when opening file, return status code
 		m_errorString = reader->errorMessage();
-		return m_status;
+		return -1;
 	}
 	// ok we have a valid reader
 	m_reader = reader;
@@ -199,7 +209,6 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_settings[keys::marker_file] = QString("%1.mrk").arg(fullDataFilePath);
 	m_settings[keys::montage_file] = QString("%1.mtg").arg(fullDataFilePath);
 	m_settings[keys::disp_file] = QString("%1.display").arg(fullDataFilePath);
-	m_settings[keys::lvl_file] = QString("%1.levels").arg(fullDataFilePath);
 
 	// get predefined .mrk .bad .mtg if any
 	auto tmp = reader->infos.badFile();
@@ -227,7 +236,8 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 		}
 	}
 
-	m_settings.unite(m_reader->infos.settings());
+	//m_settings.unite(m_reader->infos.settings());
+	AwUniteMaps(m_settings, m_reader->infos.settings());
 
 	auto duration = reader->infos.totalDuration(); 
 	m_settings.insert(keys::file_duration, QVariant(duration));
@@ -260,10 +270,10 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_montageManager->newMontage(m_reader);
 	if (!commandLineMode) {
 		// Are there events?
-		if (m_reader->infos.blocks().at(0)->markersCount())
+		if (m_reader->infos.blocks().at(0)->markersCount()) 
 			m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
-		//m_markerManager->setFilename(fullDataFilePath);
-		m_markerManager->init();
+		
+		m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
 		auto display = AwDisplay::instance();
 		if (display) {
 			// LAST step => update Display Manager with new file.

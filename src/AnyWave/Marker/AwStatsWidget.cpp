@@ -27,6 +27,14 @@ AwStatsWidget::AwStatsWidget(QWidget *parent)
 	setWindowFlags(Qt::WindowStaysOnTopHint);
 	m_ui.buttonUpdate->setEnabled(false);
 	connect(m_ui.buttonUpdate, &QPushButton::clicked, this, &AwStatsWidget::compute);
+
+	//prepare a table widget to be more readable at first 
+	QStringList headers = { "Label", "Count" };
+	m_ui.table->setColumnCount(2);
+	m_ui.table->setHorizontalHeaderLabels(headers);
+	m_ui.table->horizontalHeader()->setStretchLastSection(true);
+	
+
 	m_barPlot = new QCPBars(m_ui.widget->xAxis, m_ui.widget->yAxis);
 	m_barPlot->setAntialiased(false);
 	//// set dark background gradient:
@@ -94,6 +102,7 @@ void AwStatsWidget::handleMouseMove(QMouseEvent* evt)
 
 void AwStatsWidget::refresh()
 {
+	m_ui.table->clearContents();
 	// prepare x axis with marker labels
 	QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
 	QMap<double, QString> ticks;
@@ -101,9 +110,19 @@ void AwStatsWidget::refresh()
 	std::sort(keys.begin(), keys.end());
 	auto values = m_histogram.values();
 	double v = 1.;
+	int row = 0;
 	for (auto& k : keys) {
-		ticks.insert(v, k);
+	//	ticks.insert(v, k);
+		ticks.insert(v, QString::number(row + 1));
+		m_ui.table->insertRow(row);
+		auto item = new QTableWidgetItem(k);
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui.table->setItem(row, 0, item);
+		item = new QTableWidgetItem(QString::number(m_histogram.value(k)));
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui.table->setItem(row, 1, item);
 		m_barPlot->addData(v++, (double)m_histogram.value(k));
+		row++;
 	}
 	textTicker->addTicks(ticks);
 	m_ui.widget->xAxis->setTicker(textTicker);

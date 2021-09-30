@@ -213,7 +213,7 @@ EDFIOPlugin::EDFIOPlugin() : AwFileIOPlugin()
 	name = QString("EDF Format");
 	description = QString(tr("read/write EDF/BDF/EDF+/BDF+ files"));
 	manufacturer = QString::fromLatin1("EDF Group");
-	version = QString::fromLatin1("1.0");
+	version = QString::fromLatin1("1.0.0");
 	fileExtensions << QString::fromLatin1("*.edf") << QString::fromLatin1("*.bdf"); // for reading
 	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::CanWrite;
 	fileExtension = ".edf"; // for writing
@@ -952,6 +952,7 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 		else {
 			QString label(m_header.signalparam[i].label);
 			label = label.trimmed();
+			channel.setName(label);
 			auto tokens = label.split(" ");
 			if (tokens.size() > 1) {
 				auto type = AwChannel::stringToType(tokens.first());
@@ -1009,6 +1010,8 @@ qint64 EDFIO::writeData(QList<AwChannel *> *channels)
 	if (channels->size() != infos.channelsCount())
 		return 0;
 
+	AwIO::rescaleDataToExport(*channels);
+
 	AwChannel *firstChannel = channels->first();
 	qint64 smp_per_record = (qint64)std::ceil(firstChannel->samplingRate());
 	qint64 samplesLeft = firstChannel->dataSize();
@@ -1061,9 +1064,13 @@ AwFileIO::FileStatus EDFIO::createFile(const QString& path, int flags)
 	edf_set_datarecord_duration(m_handle, duration);  // data record duration
 	for (int i = 0; i < infos.channels().size(); i++) {
 		AwChannel *channel = infos.channels().at(i);
-		edf_set_label(m_handle, i, channel->name().toStdString().c_str());
+		std::string s = channel->name().toStdString();
+		edf_set_label(m_handle, i, s.data());
 		edf_set_digital_maximum(m_handle, i, 32767);
 		edf_set_digital_minimum(m_handle, i, -32768);
+		edf_set_physical_minimum(m_handle, i, -10000);
+		edf_set_physical_maximum(m_handle, i, 10000);
+		edf_set_physical_dimension(m_handle, i, "?");
 		if (channel->isEEG() || channel->isECG() || channel->isECG() || channel->isSEEG()) {
 			edf_set_physical_minimum(m_handle, i, -8000.0);
 			edf_set_physical_maximum(m_handle, i, 8000.0);
@@ -1074,12 +1081,6 @@ AwFileIO::FileStatus EDFIO::createFile(const QString& path, int flags)
 			edf_set_physical_maximum(m_handle, i, 1e-10);
 			edf_set_physical_dimension(m_handle, i, "T");
 		}
-		else {
-			edf_set_physical_minimum(m_handle, i, -10000);
-			edf_set_physical_maximum(m_handle, i, 10000);
-			edf_set_physical_dimension(m_handle, i, "?");
-		}
-
 		// very misnamed function, the samplefrequency is in fact the number of sample per data record.
 		edf_set_samplefrequency(m_handle, i, nsamples);
 	}

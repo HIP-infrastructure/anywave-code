@@ -39,6 +39,7 @@ namespace keys {
 	constexpr auto sel_file = "sel_file";			// path to .sel file (channel selection)
 	constexpr auto flt_file = "flt_file";			// path to .flt file (filters)
 	constexpr auto lvl_file = "lvl_file";			// path to .levels (amplitude)
+	constexpr auto lvl2_file = "lvl2_file";			// path to .levels (amplitude)
 	constexpr auto disp_file = "disp_file";			// path to .display file (display setup)
 	constexpr auto bids_dir = "bids_dir";			// set when in BIDS mode => path to anywave derivatices for the current open file
 

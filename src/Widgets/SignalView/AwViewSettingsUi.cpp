@@ -1,3 +1,18 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwViewSettingsUi.h"
 #include <widget/SignalView/AwViewSettings.h>
 #include <AwChannel.h>
@@ -25,6 +40,8 @@ AwViewSettingsUi::AwViewSettingsUi(AwViewSettings *settings, QWidget *parent)
 			col = 0;
 		}
 	}
+	// hide page duration at startup
+	spinPageDuration->hide();
 }
 
 void AwViewSettingsUi::selectAllFilters()
@@ -54,7 +71,12 @@ int AwViewSettingsUi::exec()
 	checkBaseLine->setChecked(m_settings->showZeroLine);
 	checkOverlay->setChecked(m_settings->stackChannels);
 	checkMarkerLabel->setChecked(m_settings->showMarkerLabels);
-	checkMarkerValue->setChecked(m_settings->showMarkerValues);
+	checkMarkerValue->setChecked(m_settings->showMarkerValues); 
+	checkEEGDisplay->setChecked(m_settings->eegDisplayMode);
+	checkShowMarkers->setChecked(m_settings->showMarkers);
+	radioPageDuration->setChecked(m_settings->timeScaleMode != AwViewSettings::PaperLike);
+	spinPageDuration->setValue(m_settings->fixedPageDuration);
+
 	unselectAllFilters();
 
 	for (auto cb : m_checkBoxes.keys()) {
@@ -92,9 +114,29 @@ void AwViewSettingsUi::accept()
 	AwViewSettings *copiedSettings = new AwViewSettings(m_settings, this);
 
 	// comparing new setup with copied one
+	m_settings->showMarkers = checkShowMarkers->isChecked();
+	if (copiedSettings->showMarkers != m_settings->showMarkers)
+		flags |= AwViewSettings::ShowMarkers;
+	if (radioPageDuration->isChecked()) {
+		m_settings->timeScaleMode = AwViewSettings::FixedPageDuration;
+		m_settings->fixedPageDuration = spinPageDuration->value();
+	}
+	else
+		m_settings->timeScaleMode = AwViewSettings::PaperLike;
+
+	if (m_settings->timeScaleMode != copiedSettings->timeScaleMode) 
+		flags |= AwViewSettings::TimeScaleMode;
+
+	if (m_settings->fixedPageDuration != copiedSettings->fixedPageDuration)
+		flags |= AwViewSettings::PageDuration;
+
 	m_settings->showTimeGrid = checkTime->isChecked();
 	if (copiedSettings->showTimeGrid != m_settings->showTimeGrid)
 		flags |= AwViewSettings::ShowTimeGrid;
+
+	m_settings->eegDisplayMode = checkEEGDisplay->isChecked();
+	if (copiedSettings->eegDisplayMode != m_settings->eegDisplayMode)
+		flags |= AwViewSettings::EEGMode;
 
 	m_settings->showSeconds = checkSeconds->isChecked();
 	if (copiedSettings->showSeconds != m_settings->showSeconds)
@@ -133,7 +175,7 @@ void AwViewSettingsUi::accept()
 		if (cb->isChecked())
 			filters << m_checkBoxes[cb];
 
-	foreach (int f, copiedSettings->filters)
+	for (auto const& f : copiedSettings->filters)
 		if (!filters.contains(f))
 			flags |= AwViewSettings::Filters;
 
@@ -156,7 +198,7 @@ void AwViewSettingsUi::accept()
 		m_settings->timeMode = AwViewSettings::ShowRecordedTime;
 
 	if (copiedSettings->timeMode != m_settings->timeMode)
-		flags |= m_settings->timeMode;
+		flags |= AwViewSettings::TimeRepresentation;
 
 	if (flags)
 		emit settingsChanged(m_settings, flags);

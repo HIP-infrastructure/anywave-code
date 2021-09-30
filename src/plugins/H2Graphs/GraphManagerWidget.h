@@ -30,7 +30,7 @@ public:
 	~GraphManagerWidget();
 
 public slots:
-	void addGraphSet(const QString& matlabFile);
+	int addGraphSet(const QString& matlabFile);
 	void loadFile();
 	void visualize();
 private:

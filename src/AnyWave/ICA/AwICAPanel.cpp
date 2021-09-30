@@ -30,10 +30,11 @@ AwICAPanel::AwICAPanel(int type, QWidget *parent)
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
 	connect(ui->radioAll, SIGNAL(toggled(bool)), this, SLOT(showAllSelected(bool)));
 	connect(AwDisplay::instance(), SIGNAL(selectedChannelsChanged(AwChannelList&)), this, SLOT(updateSelected(AwChannelList&)));
+
 	if (comps) {
 		m_items = comps->createPanelItems();
 		int col = 0, m_rows = 0;
-		foreach(AwPanelItem *item, m_items) {
+		for (AwPanelItem *item : m_items) {
 			ui->gridLayout->addWidget(item, m_rows, col++);
 			if (col > m_columns) {
 				col = 0;

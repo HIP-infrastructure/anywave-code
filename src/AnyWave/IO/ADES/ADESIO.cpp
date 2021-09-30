@@ -24,8 +24,8 @@
 ADESIOPlugin::ADESIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("AnyWave ADES Format");
-	description = QString(tr("Open .ades files"));
-	version = QString("1.0");
+	description = QString(tr("Read/Write .ades files"));
+	version = QString("1.0.0");
 	fileExtensions << "*.ades";
 	m_flags = FileIO::HasExtension| FileIO::CanRead| FileIO::CanWrite;
 	fileExtension = ".ades";
@@ -389,6 +389,20 @@ qint64 ADESIO::writeData(QList<AwChannel*> *channels)
 
 	qint64 dataSize = channels->at(0)->dataSize();
 	quint32 nbChannel = channels->size();
+
+	AwIO::rescaleDataToExport(*channels);
+
+	//// trying to optimize writing time by using a matrix as buffer
+	//// maximum 2Gbytes of ram for the buffer
+
+	//arma::uword max_size = (uword)std::floor(2*1e9);
+	//arma::uword item_size = sizeof(float) * channels->count();
+	//arma::uword max_item = max_size / item_size;
+	//arma::uword nItems = channels->first()->dataSize() * item_size;
+	//arma::uword cols = std::min(max_item, nItems);
+
+	//arma::mat buffer(channels->count(), cols);
+
 
 	for (qint64 i = 0; i < dataSize; i++)
 		for (quint32 j = 0; j < nbChannel; j++)

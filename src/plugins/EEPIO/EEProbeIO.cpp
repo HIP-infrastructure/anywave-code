@@ -33,7 +33,7 @@ EEPIO::~EEPIO()
 EEPIOPlugin::EEPIOPlugin()
 {
 	name = QString("EEProbe IO");
-	description = QString("Read .cnt files");
+	description = QString("Read EEProbe .cnt file");
 	manufacturer = QString("ANT Neuro");
 	version = QString("3.3.177");
 	fileExtensions << "*.cnt";
@@ -94,12 +94,11 @@ AwFileIO::FileStatus EEPIO::openFile(const QString &path)
 		// consider microV as the default unit
 		float gainFactor = 1.0;
 		// check if unit is V or mV
-		if (unit == "V" || unit == "v")
+		if (unit == "V" || unit == "v") 
 			gainFactor = 1e6;
-		if (unit == "mV" || unit == "mv")
+		if (unit == "mV" || unit == "mv") 
 			gainFactor = 1e3;
 
-		channel.setUnit(unit);
 		m_scales.append(eep_get_chan_scale(_libeep_cnt, i) * gainFactor);
 
 		infos.addChannel(&channel);

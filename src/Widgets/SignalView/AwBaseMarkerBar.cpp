@@ -1,9 +1,25 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/SignalView/AwBaseMarkerBar.h>
-#include <graphics/AwGraphicsObjects.h>
+#include <widget/AwGraphicsObjects.h>
 #include <QMouseEvent>
 #include <qpainter.h>
 #include <utils/gui.h>
 #include <AwCore.h>
+
 
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	: QFrame(parent)
@@ -47,67 +63,12 @@ AwBaseMarkerBar::~AwBaseMarkerBar()
 	AW_DESTROY_LIST(m_allMarkers);
 }
 
-///
-/// find a subset of markers which are positionned between time s1 and s2
-/// 
-AwMarkerList AwBaseMarkerBar::findMarkersBetween(float s1, float s2)
-{
-	AwMarkerList result;
-	
-	// parse from current markers list.
-	if (m_markers.isEmpty())
-		return result;
-
-	if (m_markers.size() == 1) { // only one element in list
-		// does this unique element match the range asked
-		AwMarker *m = m_markers.at(0);
-		if (m->start() >= s1 && m->start() <= s2)
-			result << m;
-
-		return result;
-	}
-
-	AwMarker *start =  m_markers.first();
-	qint32 s, e, i = 0;
-
-	while (start->start() + start->duration() < s1 && ++i < m_markers.size())
-		start = m_markers.at(i);
-
-	if (i == m_markers.size())
-		return result;
-	
-	s = i;
-		
-	while (start->start() < s2 && ++i < m_markers.size())
-		start = m_markers.at(i);
-
-	e = i - 1;
-
-	for (i = s; i < e + 1; i++)
-		result << m_markers.at(i);
-
-	return result;
-}
-
-
 AwMarker *AwBaseMarkerBar::findMarkerBetween(float low, float high)
 {
-	AwMarker *found = NULL;
-	
-	foreach (AwMarker *m, m_markers) {
-		// find the marker under the mouse
-		if (m->start() >= low && m->start() <= high) {
-			found = m;
-			break;
-		}
-		else if (m->start() < low)	{
-			if (m->start() + m->duration() >= low)	{
-				found = m;
-				break;
-			}
-		}
-	}
-	return found;
+	AwMarkerList result = AwMarker::intersect(m_markers, low, high);
+	if (result.isEmpty())
+		return nullptr;
+	return result.first();
 }
 
 void AwBaseMarkerBar::setMarkers(const AwMarkerList& markers)
@@ -124,6 +85,7 @@ void AwBaseMarkerBar::setAllMarkers(const AwMarkerList& markers)
 	m_globalRepaintNeeded = true;
 	repaint();
 }
+
 
 void AwBaseMarkerBar::switchToClassic()
 {
@@ -226,70 +188,58 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 
 void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 {
+	if (m_totalDuration <= 0 || m_allMarkers.isEmpty()) {
+		return;
+	}
 	QPainter painter(this);
 	QBrush brushSelection;
 	brushSelection.setStyle(Qt::Dense4Pattern);
 	QPen pen;
 	if (m_mode == AwBaseMarkerBar::Classic) {
-		for (AwMarker *m : m_markers) {
-			QColor color;
-
-			switch (m->type()) {
-			case AwMarker::Single:
+		auto markers = AwMarker::intersect(m_markers, m_positionInFile, m_positionInFile + m_pageDuration);
+		QColor color;
+		for (auto m : markers) {
+			if (!m->duration())
 				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
-				pen.setColor(color);
-				painter.setPen(pen);
-				painter.drawRect(QRectF((m->start() - m_positionInFile) * m_physics->xPixPerSec(), 0, 0, AW_MARKERS_BAR_HEIGHT - 1));
-				break;
-			case AwMarker::Selection:
+			else
 				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
-				pen.setColor(color);
-				brushSelection.setColor(color);
-				painter.setPen(pen);
-				QRectF rect = QRectF((m->start() - m_positionInFile) *  m_physics->xPixPerSec(), 0, m->duration() *  m_physics->xPixPerSec(), AW_MARKERS_BAR_HEIGHT - 1);
-				painter.drawRect(rect);
-				painter.fillRect(rect, brushSelection);
-				break;
-			}
+			pen.setColor(color);
+			painter.setPen(pen);
+			double pos = (m->start() - m_positionInFile)  * m_physics->xPixPerSec();
+			double width = m->duration() * m_physics->xPixPerSec();
+			painter.drawRect(QRectF(pos, 0, width, (double)(AW_MARKERS_BAR_HEIGHT - 1)));
 		}
 	}
 	else { // Global 
-		auto pixPerSec = (float)size().width() / m_totalDuration;
+		auto pixPerSec = (double)size().width() / m_totalDuration;
 		if (m_globalRepaintNeeded) {
-			if (m_totalDuration <= 0)
-				return;
-			
-			m_globalPixmap = QPixmap(this->size());
+			m_globalPixmap = QPixmap(size());
 			m_globalPixmap.fill(palette().color(QPalette::Background));
+			QColor color;
 			QPainter pixPainter(&m_globalPixmap);
-			for (AwMarker *m : m_allMarkers) {
-				QColor color;
-
-				switch (m->type()) {
-				case AwMarker::Single:
+			for (auto m : m_allMarkers) {
+				if (!m->duration())
 					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
-					pen.setColor(color);
-					pixPainter.setPen(pen);
-					pixPainter.drawRect(QRectF(m->start() * pixPerSec, 0, 0, AW_MARKERS_BAR_HEIGHT - 1));
-					break;
-				case AwMarker::Selection:
+				else
 					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
-					pen.setColor(color);
-					brushSelection.setColor(color);
-					pixPainter.setPen(pen);
-					QRectF rect = QRectF(m->start() * pixPerSec, 0, m->duration() * pixPerSec, AW_MARKERS_BAR_HEIGHT - 1);
-					pixPainter.drawRect(rect);
+				pen.setColor(color);
+				pixPainter.setPen(pen);
+				double pos = m->start() * pixPerSec;
+				double width = m->duration() * pixPerSec;
+				brushSelection.setColor(color);
+				QRectF rect = QRectF(pos, 0, width, (double)(AW_MARKERS_BAR_HEIGHT - 1));
+				pixPainter.drawRect(rect);
+				if (m->duration())
 					pixPainter.fillRect(rect, brushSelection);
-					break;
-				}
 			}
 			m_globalRepaintNeeded = false;
 		}
 		painter.drawPixmap(0, 0, m_globalPixmap);
 		QBrush sliderBrush = QBrush(Qt::gray);
 		QColor color(Qt::darkGray);
-		painter.setPen(QPen(color, 1.5));
-		m_sliderRect = QRectF(m_positionInFile * pixPerSec, 1., m_pageDuration * pixPerSec, AW_MARKERS_BAR_HEIGHT - 2);
+		color.setAlpha(128);
+		painter.setPen(QPen(color, 1));
+		m_sliderRect = QRectF((double)m_positionInFile * (double)pixPerSec, 1., (double)m_pageDuration * (double)pixPerSec, (double)AW_MARKERS_BAR_HEIGHT - 2);
 		sliderBrush.setStyle(Qt::Dense4Pattern);
 		painter.drawRect(m_sliderRect);
 		painter.fillRect(m_sliderRect, sliderBrush);

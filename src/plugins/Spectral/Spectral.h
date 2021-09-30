@@ -22,6 +22,7 @@ public:
 	void runFromCommandLine() override;
 	void prepareOutputUi() override;
 	static int stringToWindowingType(const QString&);
+	inline double fs() { return m_fs; }
 protected:
 	int initialize();
 	void clean();
@@ -29,6 +30,7 @@ protected:
 	void saveResults();
 
 	double m_timeWindow, m_overlap;
+	double m_fs; // signal frequency rate
 	int m_windowing;	// Non, Hamming or Hanning  default is Hanning
 	AwMarkerList m_goodMarkers; // markers kept as valid for input data.
 	QMap<AwChannel*, FFTIterations*> m_results;

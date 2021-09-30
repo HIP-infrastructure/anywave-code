@@ -151,7 +151,8 @@ EEGInto4DPlugin::EEGInto4DPlugin()
 {
 	type = AwProcessPlugin::Background;
 	name = tr("EEGInto4D");
-	description = tr("inject eeg channel from ADES EEG file into existing 4DNI MEG file.");
+	version = "1.0.0";
+	description = tr("Inject eeg channels from ADES file into an existing 4DNI MEG file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/eeginto4d/args.json");

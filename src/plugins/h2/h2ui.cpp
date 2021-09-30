@@ -2,12 +2,12 @@
 #include <QFileDialog>
 #include "h2.h"
 
-H2UI::H2UI(QWidget *parent)
+H2UI::H2UI(H2 *h2, QWidget *parent)
 	: QDialog(parent)
 {
 	setupUi(this);
 	samplingRate = 1;
-
+	m_h2 = h2;
 
 	QSettings settings(QSettings::SystemScope, "INSERM U1106", "AnyWave");
 	m_bandNames = QStringList{ QString("delta"), QString("theta"), QString("beta"), QString("alpha"), QString("gamma"),
@@ -74,14 +74,27 @@ int H2UI::exec()
 			}
 		}
 	}
-	widgetInputData->setMarkers(markers);
-	// if markers contains only one marker called whole data => disabled
-	if (markers.isEmpty()) 
-		widgetInputData->setDisabled(true);
-	
-	if (markers.size() == 1) {
-		if (markers.first()->label() == "whole data")
-			widgetInputData->setDisabled(true);	
+
+	// if user already selected markers using the Markers GUI => disabled widgetInputData;
+	bool skipWidgetInputData = false;
+	if (m_h2->modifiersFlags() & Aw::ProcessIO::modifiers::UserSelectedMarkers)
+		skipWidgetInputData = true;
+	if (m_h2->modifiersFlags() & Aw::ProcessIO::modifiers::DontFilterUseSkipMarkersOptions)
+		skipWidgetInputData = true;
+	if (skipWidgetInputData) {
+		widgetInputData->setEnabled(false);
+		widgetInputData->hide();
+	}
+	else {
+		widgetInputData->setMarkers(markers);
+		// if markers contains only one marker called whole data => disabled
+		if (markers.isEmpty())
+			widgetInputData->setDisabled(true);
+
+		if (markers.size() == 1) {
+			if (markers.first()->label() == "whole data")
+				widgetInputData->setDisabled(true);
+		}
 	}
 	return QDialog::exec();
 }

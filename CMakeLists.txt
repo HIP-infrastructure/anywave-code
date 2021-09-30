@@ -6,7 +6,7 @@ project(AnyWave)
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
    MESSAGE(STATUS "Apple clang compiler detected")
    SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
-   add_definitions("-w -fPIC -O3 -fpermissive -mmacosx-version-min=10.13") # clang flags
+   add_definitions("-w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13") # clang flags
    #SET(CLANG ON)
 # apple clang
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -15,7 +15,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
    SET(GCC ON)
 endif()
 
-SET(CMAKE_BUILD_TYPE "Release") # build in release mode
+SET(CMAKE_BUILD_TYPE Release) # build in release mode
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -28,6 +28,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+#INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -141,7 +142,6 @@ add_subdirectory(src/Core)
 add_subdirectory(src/AwMontageLib)
 add_subdirectory(src/Filtering)
 add_subdirectory(src/Utilities)
-add_subdirectory(src/Graphics)
 add_subdirectory(src/Process)
 add_subdirectory(src/Widgets)
 add_subdirectory(src/ReadWrite)
@@ -151,11 +151,10 @@ add_subdirectory(src/Math)
 add_subdirectory(src/MappingLib)
 add_subdirectory(src/MatlabLib)
 # dependencies
-add_dependencies(AwGraphics AwCore)
 add_dependencies(AwFiltering AwCore)
 add_dependencies(AwProcess AwCore)
 add_dependencies(AwReadWrite AwCore)
-add_dependencies(AwWidget AwGraphics AwCore AwMath)
+add_dependencies(AwWidget AwCore AwMath)
 add_dependencies(AwLayout AwCore)
 add_dependencies(AwMontage AwCore AwReadWrite)
 

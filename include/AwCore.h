@@ -14,6 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
-
+#include <QVariantMap>
 
 #define AW_DESTROY_LIST(L) while(!(L).isEmpty()) delete (L).takeFirst(); 
+
+template<class A = QVariantMap>
+void AwUniteMaps(A& map1, const A& map2)
+{
+	auto keys = map2.keys();
+	for (auto k : keys) {
+		if (map1.contains(k)) // do not override any existent key/value
+			continue;
+		map1.insert(k, map2.value(k));
+	}
+}

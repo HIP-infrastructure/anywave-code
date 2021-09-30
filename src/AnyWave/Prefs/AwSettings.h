@@ -105,6 +105,8 @@ public:
 #endif
 	void closeFile();
 
+	void quit();
+
 	inline AwDisplaySetup *displaySetup() { return m_setup; }
 	inline void setDisplaySetup(AwDisplaySetup *setup) { m_setup = setup; }
 	inline QSystemTrayIcon *sysTray() { return m_sysTrayIcon; }

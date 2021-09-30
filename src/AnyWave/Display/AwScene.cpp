@@ -170,7 +170,7 @@ void AwScene::addVirtualChannels(AwChannelList& channels)
 		if (m_settings->filters.contains(c->type())) {
 			AwDisplayPlugin *dp = dp = c->displayPluginName().isEmpty() ? 
 				pm->getDisplayPluginByName("AnyWave SignalItem") : pm->getDisplayPluginByName(c->displayPluginName());;
-			AwGraphicsSignalItem *item = static_cast<AwGraphicsSignalItem *>(dp->newInstance(c, m_physics));
+			AwGraphicsSignalItem *item = static_cast<AwGraphicsSignalItem *>(dp->newInstance(c, m_settings, m_physics));
 
 			item->setPlugin((QObject *)dp);
 			item->showBaseline(m_settings->showZeroLine);

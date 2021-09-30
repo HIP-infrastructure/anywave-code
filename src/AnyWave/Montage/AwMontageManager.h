@@ -23,6 +23,7 @@ class AwAVGChannel;
 #include "ICA/AwICAChannel.h"
 #include "Source/AwSourceChannel.h"
 #include <filter/AwFilterSettings.h>
+#include <AwEvent.h>
 
 /////////////////////////////////////////////////////////////////////////////////
 /// sorting function for AwChannel using labels
@@ -106,10 +107,14 @@ signals:
 
 	// logging system
 	void log(const QString& message);
+	// event system
+	void sendEvent(QSharedPointer<AwEvent>);
 public slots:
 	/** Affiche l'interface de montage. **/
 	void showInterface();
 	void saveCurrentMontage();
+
+	void processEvent(QSharedPointer<AwEvent>);
 
 	/** Load a montage previously saved by user. **/
 	void loadQuickMontage(const QString& name);
@@ -151,7 +156,6 @@ private:
 	void loadBadChannels();
 	void scanForPrebuiltMontages();
 	void clear();									///> clear current montage;
-	void applyGains();
 	static AwMontageManager *m_instance;
 	// Source/ICA specific
 	void clearICA();

@@ -37,14 +37,12 @@
 #include "Marker/AwMarkerManager.h"
 #include "Marker/AwDockAddMarker.h"
 #include "Data/AwDataServer.h"
-#include <AwAmplitudeManager.h>
 #include "Display/AwDisplaySetupManager.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLogWidget.h"
 #include "Debug/AwDebugLog.h"
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICAComponents.h"
-#include "ICA/AwICAPanel.h"
 #include "Source/AwSourceManager.h"
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
@@ -53,7 +51,6 @@
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
-#include "AwUpdater.h"
 #include <widget/AwTopoBuilder.h>
 #include <widget/AwVideoPlayer.h>
 #include "Widgets/AwVideoSettingsDial.h"
@@ -61,6 +58,8 @@
 #include "CL/CommandLineParser.h"
 #include "Data/AwDataManager.h"
 #include "Plugin/AwMATPyCreator.h"
+#include "3DViewer/AwSEEGViewer.h"
+#include "Updater/AwUpdateManager.h"
 
 #ifndef AW_DISABLE_EPOCHING
 #include "Epoch/AwEpochManager.h"
@@ -259,11 +258,15 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	//connect(actionLoad_Mesh, SIGNAL(triggered()), this, SLOT(on_actionLoadMesh_triggered()));
 	connect(actionOpen_New_AnyWave_Application, SIGNAL(triggered()), this, SLOT(openNewAnyWave()));
 	// Populate View Menu to show/hide DockWidgets
+
 	menuView_->addSeparator();
 	for (auto v : m_dockWidgets.values())
 		menuView_->addAction(v->toggleViewAction());
 	retranslateUi(this);	// force translation to be applied.
-	m_updater.checkForUpdate();
+	m_updateManager = new AwUpdateManager(this);
+	connect(m_updateManager, SIGNAL(newPluginLoaded(QObject*)), this, SLOT(initPluginsHelpMenu()));
+	if (aws->value(aws::check_updates).toBool())
+		m_updateManager->checkForUpdates(true);
 
 	m_lastDirOpen = "/";
 	readSettings();
@@ -350,12 +353,10 @@ void AnyWave::applyNewLanguage()
 void AnyWave::quit()
 {
 	AwDebugLog::instance()->closeFile();
-	if (m_display)
-		m_display->closeFile();
+	AwProcessManager::instance()->quit();
+	AwSettings::getInstance()->quit();
+	AwDataManager::instance()->quit();
 
-	AwSettings::getInstance()->closeFile();
-	AwDataManager::instance()->closeFile();
-	AwAmplitudeManager::instance()->quit();
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
 
@@ -381,10 +382,9 @@ void AnyWave::quit()
 	}
 	if (m_display)
 		m_display->quit();
-	if (m_SEEGViewer) {
-		delete m_SEEGViewer;
-		m_SEEGViewer = nullptr;
-	}
+
+	if (AwSEEGViewer::isInstantiated())
+		AwSEEGViewer::quit();
 #ifdef AW_EPOCHING
 	if (AwEpochManager::instanceExists()) {
 		AwEpochManager::instance()->closeFile();
@@ -415,7 +415,10 @@ void AnyWave::initToolBarsAndMenu()
 
 	// ToolBar File Operations (from AwFileToolBar)
 	AwFileToolBar *ftb = new AwFileToolBar(this);
-	addToolBar(Qt::TopToolBarArea, ftb->toolBar());
+	auto toolbar = addToolBar("File");
+	toolbar->addWidget(ftb->toolBar());
+	toolbar->setAllowedAreas(Qt::TopToolBarArea);
+//	addToolBar(Qt::TopToolBarArea, ftb->toolBar());
 	connect(ftb, SIGNAL(fileOpenClicked()), this, SLOT(on_actionOpen_triggered()));
 	connect(ftb, SIGNAL(fileSaveClicked()), this, SLOT(on_actionSave_as_triggered()));
 	connect(ftb, SIGNAL(fileICAClicked()), this, SLOT(on_actionLoadICA_triggered()));
@@ -471,12 +474,12 @@ void AnyWave::initToolBarsAndMenu()
 
 	addToolBarBreak(Qt::TopToolBarArea);
 
-	// DisplaySetup ToolBar (from AwDisplaySetupManager)
-	AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
-	dsManager->toolBar()->setParent(this);
-	addToolBar(Qt::TopToolBarArea, dsManager->toolBar());
-	dsManager->toolBar()->setEnabled(false);
-	m_toolBarWidgets.append(dsManager->toolBar());
+	//// DisplaySetup ToolBar (from AwDisplaySetupManager)
+	//AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
+	//dsManager->toolBar()->setParent(this);
+	//addToolBar(Qt::TopToolBarArea, dsManager->toolBar());
+	//dsManager->toolBar()->setEnabled(false);
+	//m_toolBarWidgets.append(dsManager->toolBar());
 
 	// ToolBar mapping
 	AwMappingToolBar *mtp = new AwMappingToolBar(this);
@@ -546,14 +549,22 @@ bool AnyWave::checkForRunningProcesses()
 // Components Maps
 void AnyWave::reviewComponentsMaps()
 {
-	if (AwICAManager::instance()->getComponents(AwChannel::MEG) != NULL) 
-		AwICAManager::instance()->getComponents(AwChannel::MEG)->showPanel();
+	AwICAComponents* comp = nullptr;
+	auto icaMan = AwICAManager::instance();
 
-	if (AwICAManager::instance()->getComponents(AwChannel::EEG) != NULL) 
-		AwICAManager::instance()->getComponents(AwChannel::EEG)->showPanel();
-	
-	if (AwICAManager::instance()->getComponents(AwChannel::EMG) != NULL) 
-		AwICAManager::instance()->getComponents(AwChannel::EMG)->showPanel();
+	comp = icaMan->getComponents(AwChannel::MEG);
+	if (comp)
+		comp->showPanel();
+	comp = icaMan->getComponents(AwChannel::EEG);
+	if (comp)
+		comp->showPanel();
+
+	comp = icaMan->getComponents(AwChannel::EMG);
+	if (comp)
+		comp->showPanel();
+	comp = icaMan->getComponents(AwChannel::SEEG);
+	if (comp) 
+		comp->showSEEGMap();
 }
 
 void AnyWave::doEpoch()
@@ -626,7 +637,7 @@ void AnyWave::showProcessDock()
 // About AnyWave()
 void AnyWave::on_actionAbout_AnyWave_triggered()
 {
-	AwAboutAnyWave widget;
+	AwAboutAnyWave widget(m_updateManager);
 	widget.exec();
 }
 
@@ -699,11 +710,11 @@ void AnyWave::openPluginHelpUrl()
 /// toolbar positions are saved
 void AnyWave::readSettings()
 {
-	QSettings settings;
-	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
-	QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
-	restoreState(stateData);
-	restoreGeometry(geometryData);
+	//QSettings settings;
+	//QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
+	//QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
+	//restoreState(stateData);
+	//restoreGeometry(geometryData);
 }
 
 ///

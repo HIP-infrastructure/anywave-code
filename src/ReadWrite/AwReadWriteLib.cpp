@@ -25,13 +25,7 @@
 AwFileIO::FileStatus AwFileIO::openFile(const QString &path)
 {
 	m_fullPath = path;  
-	//auto duration = infos.totalDuration();
-	//infos.m_settings.insert(data_info::total_duration, QVariant(duration));
-	//float sr = 0. ;
-	//for (auto c : infos.channels())
-	//	sr = std::max(c->samplingRate(), sr);
-	//infos.m_settings[data_info::max_sr] = QVariant::fromValue(sr);
-	//infos.m_settings[data_info::samples] = infos.totalSamples();
+
 	return AwFileIO::NoError;
 }
 
@@ -196,5 +190,31 @@ void AwDataInfo::changeChannelName(const QString& old, const QString& newName)
 		m_labelToIndex.remove(old);
 		m_channels.at(index)->setName(newName);
 		m_labelToIndex.insert(newName, index);
+	}
+}
+
+void AwIO::rescaleDataToExport(const AwChannelList& channels)
+{
+	// apply scaling factor to data
+	float scale = 1.0;
+	for (auto chan : channels) {
+		switch (chan->unit()) {
+		case AwChannel::picoT:
+		case AwChannel::picoTpermeter:
+			scale = 1e-12;
+			break;
+		case AwChannel::V:
+			scale = 1e-6;
+			break;
+		case AwChannel::milliV:
+			scale = 1e-3;
+			break;
+		default:
+			scale = 1.0;
+		}
+		if (scale != 1.0) {
+			for (auto start = 0; start < chan->dataSize(); start++)
+				chan->data()[start] *= scale;
+		}
 	}
 }

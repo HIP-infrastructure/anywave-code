@@ -17,7 +17,7 @@
 #define AW_MARKERITEM_H
 #include <AwGlobal.h>
 #include <graphics/AwGraphicsObjects.h>
-#include <graphics/AwLabelItem.h>
+#include <widget/AwLabelItem.h>
 
 class AwMarker;
 class QGraphicsScene;

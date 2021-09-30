@@ -58,6 +58,12 @@
     <ClCompile Include="AwChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AwEventManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AwEvent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\AwChannel.h">
@@ -84,12 +90,18 @@
     <ClInclude Include="..\..\include\AwPluginBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\AwEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\include\AwDataBuffer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\include\AwDataClient.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\AwEventManager.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

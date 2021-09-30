@@ -3,9 +3,9 @@
 BrainVisionIOPlugin::BrainVisionIOPlugin() : AwFileIOPlugin()
 {
 	name = QString("Brainvision Analyser Format");
-	description = QString(tr("read/write .vhdr files"));
+	description = QString(tr("Read/Write .vhdr file"));
 	manufacturer = QString::fromLatin1("Brain Products GmbH");
-	version = QString::fromLatin1("1.0");
+	version = "1.0.0";
 	fileExtensions << QString::fromLatin1("*.vhdr");
 	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::CanWrite;
 	fileExtension = ".vhdr";
@@ -285,7 +285,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 					chan.setReferenceName(tokens.at(1));
 				if (tokens2.size() < 4) {
 					// no unit specified => considering µV
-					chan.setUnit(QString::fromLatin1("µV"));
+				//	chan.setUnit(QString::fromLatin1("µV"));
 					chan.setType(AwChannel::EEG);
 				}
 				else {
@@ -302,7 +302,7 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 					else
 						chan.setType(AwChannel::Other);
 										
-					chan.setUnit(unit);
+				//	chan.setUnit(unit);
 
 				}
 
@@ -453,6 +453,7 @@ qint64 BrainVisionIO::writeData(QList<AwChannel*> *channels)
 	if (channels->isEmpty())
 		return 0;
 
+	AwIO::rescaleDataToExport(*channels);
 	qint64 length = channels->at(0)->dataSize();
 	int nbChannel = channels->size();
 
@@ -575,7 +576,7 @@ AwFileIO::FileStatus BrainVisionIO::createFile(const QString &path, int flags)
 		stream << "Ch" << i + 1 << "=" << infos.channels().at(i)->name();
 		if (infos.channels().at(i)->hasReferences())
 			stream << "-" << infos.channels().at(i)->referenceName();
-		stream << ",,1," << infos.channels().at(i)->unit() << endl;
+		stream << ",,1," << infos.channels().at(i)->unitString() << endl;
 	}
 
 	hdr.close();

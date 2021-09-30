@@ -29,6 +29,8 @@
 #include "Montage/AwMontageManager.h"
 #include "Data/AwDataServer.h"
 #include "MATPy/AwMATPyServer.h"
+#include <AwEventManager.h>
+#include <AwEvent.h>
 #include <widget/AwMessageBox.h>
 
 AwComponents::AwComponents(QObject* parent) : QObject(parent)
@@ -71,6 +73,17 @@ int AwComponents::init()
 	AwDataServer::getInstance()->setParent(dm);
 	// MATPy server
 	AwMATPyServer::instance()->setParent(this);
+	// Event Manager => used to send events between plugins and anywave components
+	auto evt_manager = AwEventManager::instance();
+	evt_manager->setParent(this);
+
+	// connect components here that could receive events.
+	// one connection by event id is required
+	// can connect to receive multiple ids at once using a vector of int containing ids
+	// 
+	// connect components that could received and process events
+	evt_manager->connectReceiver(process_manager, AwEvent::StartProcess);
+	evt_manager->connectReceiver(montage_manager, AwEvent::LoadICAMatFile);
 	return 0;
 }
 

@@ -1,7 +1,7 @@
 #ifndef H2_CHANNEL_ITEM_PAIR_H
 #define H2_CHANNEL_ITEM_PAIR_H
 
-#include <graphics/AwSignalItem.h>
+#include <widget/AwSignalItem.h>
 #include <armadillo>
 class H2ChannelPair;
 #include <QGraphicsRectItem>
@@ -11,7 +11,7 @@ class H2ChannelPairItem : public AwSignalItem
 	Q_OBJECT
 	Q_INTERFACES(AwGraphicsSignalItem)
 public:
-	H2ChannelPairItem(AwChannel *chan, AwDisplayPhysics *phys = NULL); 
+	H2ChannelPairItem(AwChannel *chan, AwViewSettings *settings,  AwDisplayPhysics *phys = nullptr); 
 
 	QPainterPath shape() const;
 	QRectF boundingRect() const;
@@ -48,7 +48,7 @@ class H2ChannelPairItemPlugin : public AwDisplayPlugin
 	Q_INTERFACES(AwDisplayPlugin)
 public:
 	H2ChannelPairItemPlugin() { name = "H2_ChannelItem"; description = "display H2 variations of a pair of channels"; }
-	H2ChannelPairItem *newInstance(AwChannel *chan, AwDisplayPhysics *phys) { return new H2ChannelPairItem(chan, phys); }
+	H2ChannelPairItem *newInstance(AwChannel *chan, AwViewSettings *settings,  AwDisplayPhysics *phys) { return new H2ChannelPairItem(chan, settings, phys); }
 };
 
 

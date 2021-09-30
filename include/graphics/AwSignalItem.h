@@ -32,7 +32,7 @@ class AW_GRAPHICS_EXPORT AwSignalItem : public AwGraphicsSignalItem
 	Q_OBJECT
 	Q_INTERFACES(AwGraphicsSignalItem)
 public:
-	AwSignalItem(AwChannel *chan, AwDisplayPhysics *phys = NULL); 
+	AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys = nullptr); 
 
 	QPainterPath shape() const;
 	QRectF boundingRect() const;
@@ -84,7 +84,7 @@ class AW_GRAPHICS_EXPORT AwDisplayPluginSignalItem : public AwDisplayPlugin
 	Q_INTERFACES(AwDisplayPlugin)
 public:
 	AwDisplayPluginSignalItem() { name = "AnyWave SignalItem"; description = "Display signals"; }
-	AwSignalItem *newInstance(AwChannel *chan, AwDisplayPhysics *phys) { return new AwSignalItem(chan, phys); }
+	AwSignalItem *newInstance(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) { return new AwSignalItem(chan, settings, phys); }
 };
 
 #endif

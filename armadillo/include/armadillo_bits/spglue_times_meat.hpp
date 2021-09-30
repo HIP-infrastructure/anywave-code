@@ -108,11 +108,8 @@ spglue_times::apply_noalias(SpMat<eT>& c, const SpMat<eT>& x, const SpMat<eT>& y
   //SpMat<typename T1::elem_type> c(x_n_rows, y_n_cols); // Initializes col_ptrs to 0.
   c.zeros(x_n_rows, y_n_cols);
   
-  //if( (x.n_elem == 0) || (y.n_elem == 0) )
-  if( (x.n_nonzero == 0) || (y.n_nonzero == 0) )
-    {
-    return;
-    }
+  //if( (x.n_elem == 0) || (y.n_elem == 0) )  { return; }
+  if( (x.n_nonzero == 0) || (y.n_nonzero == 0) )  { return; }
   
   // Auxiliary storage which denotes when items have been found.
   podarray<uword> index(x_n_rows);
@@ -261,7 +258,7 @@ spglue_times::apply_noalias(SpMat<eT>& c, const SpMat<eT>& x, const SpMat<eT>& y
       }
 
     // Now sort the indices.
-    if (cur_index != 0)
+    if(cur_index != 0)
       {
       op_sort::direct_sort_ascending(sorted_indices.memptr(), cur_index);
 
@@ -315,7 +312,7 @@ spglue_times_misc::sparse_times_dense(Mat<typename T1::elem_type>& out, const T1
     const SpMat<eT>& A = UA.M;
     const   Mat<eT>& B = UB.M;
     
-    if((B.is_vec() == false) && B.is_diagmat())
+    if( (resolves_to_vector<T2>::no) && (B.is_vec() == false) && B.is_diagmat() )
       {
       const SpMat<eT> tmp(diagmat(B));
       
@@ -405,7 +402,7 @@ spglue_times_misc::dense_times_sparse(Mat<typename T1::elem_type>& out, const T1
     const   Mat<eT>& A = UA.M;
     const SpMat<eT>& B = UB.M;
     
-    if((A.is_vec() == false) && A.is_diagmat())
+    if( (resolves_to_vector<T1>::no) && (A.is_vec() == false) && A.is_diagmat() )
       {
       const SpMat<eT> tmp(diagmat(A));
       

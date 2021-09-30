@@ -1,3 +1,18 @@
+// AnyWave
+// Copyright (C) 2013-2021  INS UMR 1106
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/AwMarkerInspector.h>
 #include "AwAddPredefinedMarker.h"
 #include "AwAddTargetChannels.h"
@@ -20,14 +35,12 @@ AwMarkerInspector::AwMarkerInspector(const AwMarkerList& markers, const QStringL
 	m_ui->buttonClearTargets->hide();
 	m_onlySingle = false;
 	m_ui->lineEditName->setText(tr("New Marker"));
-
-	// predefined markers
-	QTableWidgetItem *itemName = new QTableWidgetItem(tr("Label"));
-	QTableWidgetItem *itemValue = new QTableWidgetItem(tr("Value"));
-	QTableWidgetItem *itemColor = new QTableWidgetItem(tr("Color"));
-	m_ui->table->setHorizontalHeaderItem(0, itemName);
-	m_ui->table->setHorizontalHeaderItem(1, itemValue);
-	m_ui->table->setHorizontalHeaderItem(2, itemColor);
+	m_ui->table->setColumnCount(3);
+	//// predefined markers
+	QStringList headers = { "Label", "Value", "Color" };
+	m_ui->table->verticalHeader()->setVisible(false);
+	m_ui->table->setHorizontalHeaderLabels(headers);
+	m_ui->table->horizontalHeader()->setStretchLastSection(true);
 
 	connect(m_ui->radioSingle, SIGNAL(clicked(bool)), this, SLOT(changeMarkerType(bool)));
 	connect(m_ui->radioSelection, SIGNAL(clicked(bool)), this, SLOT(changeMarkerType(bool)));
@@ -157,23 +170,29 @@ void AwMarkerInspector::setPredefinedMarkers(const AwMarkerList& markers)
 	m_ui->table->setRowCount(0);
 	while (!m_settings.predefinedMarkers.isEmpty())
 		delete m_settings.predefinedMarkers.takeFirst();
+	int row = 0;
 	for (auto m : markers) {
 		m_settings.predefinedMarkers.append(m);
-		QTableWidgetItem *itemName = new QTableWidgetItem(m->label());
-		QTableWidgetItem *itemValue = new QTableWidgetItem(QString::number(m->value()));
-		QTableWidgetItem *itemColor;
-		if (m->color().isEmpty())
-			itemColor = new QTableWidgetItem("Default");
-		else {
-			itemColor = new QTableWidgetItem(m->color());
-			itemColor->setData(Qt::DecorationRole, m->color());
+		int col = 0;
+		m_ui->table->insertRow(row);
+		auto item = new QTableWidgetItem(m->label());
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui->table->setItem(row, col++, item);
+		item = new QTableWidgetItem(QString::number(m->value()));
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui->table->setItem(row, col++, item);
+		QString color;
+		if (m->color().isEmpty()) {
+			item = new QTableWidgetItem("Default");
 		}
-		m_ui->table->insertRow(m_ui->table->rowCount());
-		m_ui->table->setItem(m_ui->table->rowCount() - 1, 0, itemName);
-		m_ui->table->setItem(m_ui->table->rowCount() - 1, 1, itemValue);
-		m_ui->table->setItem(m_ui->table->rowCount() - 1, 2, itemColor);
+		else {
+			item = new QTableWidgetItem(m->color());
+			item->setData(Qt::DecorationRole, m->color());
+		}
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui->table->setItem(row, col++, item);
+		row++;
 	}
-//	m_ui->checkPredefined->setChecked(true);   // Do not activate the predefined markers automatically
 }
 
 AwMarkerList& AwMarkerInspector::predefinedMarkers()
@@ -186,20 +205,26 @@ void AwMarkerInspector::addPredefinedMarker()
 	AwAddPredefinedMarker dlg(this);
 	if (dlg.exec() == QDialog::Accepted) {
 		AwMarker *m = dlg.marker();
+		int row = m_ui->table->rowCount();
 		m_settings.predefinedMarkers.append(m);
-		QTableWidgetItem *itemName = new QTableWidgetItem(m->label());
-		QTableWidgetItem *itemValue = new QTableWidgetItem(QString::number(m->value()));
-		QTableWidgetItem *itemColor;
-		if (m->color().isEmpty())
-			itemColor = new QTableWidgetItem("Default");
-		else {
-			itemColor = new QTableWidgetItem(m->color());
-			itemColor->setData(Qt::DecorationRole, m->color());
+		m_ui->table->insertRow(row);
+		auto item = new QTableWidgetItem(m->label());
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui->table->setItem(row, 0, item);
+		item = new QTableWidgetItem(QString::number(m->value()));
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui->table->setItem(row, 1, item);
+
+		QString color = m->color();
+		if (color.isEmpty()) {
+			item = new QTableWidgetItem("Default");
 		}
-		m_ui->table->insertRow(m_ui->table->rowCount());
-		m_ui->table->setItem(m_ui->table->rowCount() - 1, 0, itemName);
-		m_ui->table->setItem(m_ui->table->rowCount() - 1, 1, itemValue);
-		m_ui->table->setItem(m_ui->table->rowCount() - 1, 2, itemColor);
+		else {
+			item = new QTableWidgetItem(color);
+			item->setData(Qt::DecorationRole, m->color());
+		}
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui->table->setItem(row, 2, item);
 	}
 	emit predefinedMarkersChanged(m_settings.predefinedMarkers);
 }
@@ -219,22 +244,18 @@ void AwMarkerInspector::clearPredefinedMarkers()
 
 void AwMarkerInspector::removeSelectedPredefinedMarkers()
 {
-	QList<QTableWidgetItem *> selection = m_ui->table->selectedItems();
-	if (!selection.isEmpty()) {
-		AwMarkerList markers;
-		QVector<int> rows;
-		foreach (QTableWidgetItem *item, selection) // get selected rows
-			if (!rows.contains(item->row()))
-				rows << item->row();
-		foreach (int row, rows) {
-			markers << m_settings.predefinedMarkers.at(row);
-			m_ui->table->removeRow(row);
+	auto selectionModel = m_ui->table->selectionModel();
+	QStringList names;
+	AwMarkerList markers;
+	for (int i = 0; i < m_ui->table->rowCount(); i++) {
+		if (selectionModel->isRowSelected(i, QModelIndex())) {
+			markers << m_settings.predefinedMarkers.at(i);
+			m_ui->table->removeRow(i);
 		}
-				
-		foreach (AwMarker *m, markers) {
-			m_settings.predefinedMarkers.removeOne(m);
-			delete m;
-		}
+	}
+	for (auto m : markers) {
+		m_settings.predefinedMarkers.removeOne(m);
+		delete m;
 	}
 }
 
