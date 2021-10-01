@@ -50,12 +50,17 @@
 %  A. Cichocki and S. Amari, 
 %  Adaptive Blind Signal and Image Processing, Wiley,  2003.
 
-function [mixing, unmixing]=sobi_coder(data)
+function [mixing, unmixing]=sobi_coder(data, ncomps)
 
 % Authors note: For non-ideal data, use at least p=100 the time-delayed covariance matrices.
 DEFAULT_LAGS = 100;
 
 [m,N]=size(data);
+
+if m > ncomps
+    data = pca(data, ncomps);
+    [m,N] = size(data);
+end
 
 %n=m; % Source detection (hum...)
  p=min(DEFAULT_LAGS,ceil(N/3)); % Number of time delayed correlation matrices to be diagonalized 

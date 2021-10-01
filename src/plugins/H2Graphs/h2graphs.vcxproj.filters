@@ -62,6 +62,9 @@
     <ClCompile Include="H2Graphs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="H2SelectPairsDial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphArrow.h">
@@ -105,6 +108,9 @@
     <QtMoc Include="H2Graphs.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="H2SelectPairsDial.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Graphs.qrc">
@@ -116,6 +122,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="GraphManagerWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="H2SelectPairsDial.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

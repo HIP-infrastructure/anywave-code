@@ -25,7 +25,7 @@
 #include <qfiledialog.h>
 #include <AwProcess.h>
 #include "H2Graphs.h"
-
+#include "H2SelectPairsDial.h"
 
 GraphWindow::GraphWindow(GraphSet *gs, QWidget *parent)
 	: QWidget(parent)
@@ -121,47 +121,61 @@ void GraphWindow::updateTimeCourses(int section)
 
 void GraphWindow::showTimeCourses()
 {
-	if (m_signalView == nullptr) {
-		m_signalView = new AwBaseSignalView();
-		m_signalView->setFlags(AwBaseSignalView::NoMarkerBar | AwBaseSignalView::ViewAllChannels | AwBaseSignalView::HidePositionInFile);
-		m_signalView->setBaseSize(QSize(800, 300)); 
-		m_signalView->setWindowIcon(QIcon(":/images/AnyWave_icon.png"));
-		auto settings = m_signalView->settings();
-		settings->limitChannels = true;
-		settings->maxChannels = 2;
-		settings->showZeroLine = true;
-		m_signalView->changeSettings(settings, AwViewSettings::LimitNumberOfChannels | AwViewSettings::ShowBaseLine);
-	
-		// init channels for the view
-		AwChannelList channels;
-		// create a list of X->Y channels and Y->X channels.
-		auto purple = QColor(Qt::magenta).name();
-		QString label;
-		for (int i = 0; i < m_graphSet->labels.size() - 1; i++)
-			for (int j = i + 1; j < m_graphSet->labels.size(); j++) {
-				label = QString("%1->%2").arg(m_graphSet->labels.value(i)).arg(m_graphSet->labels.value(j));
-				// XY Pair
-				AwChannel *channel = new AwChannel;
-				//channel->setUnit(m_graphSet->method);
-				channel->setSamplingRate(m_graphSet->samplingRate);
-				channel->setGain(1.);
-				channel->setName(label);
-				channel->setColor(purple);
-				m_timeCoursesChannels.insert(channel->name(), channel);
-				channels << channel;
-				// YX Pair
-				label = QString("%1->%2").arg(m_graphSet->labels.value(j)).arg(m_graphSet->labels.value(i));
-				channel = new AwChannel(channel);
-				channel->setName(label);
-				channels << channel;
-				m_timeCoursesChannels.insert(channel->name(), channel);
-			}
+	H2SelectPairsDial dlg(m_graphSet->labels, m_pairs);
+	if (dlg.exec() != QDialog::Accepted)
+		return;
+	m_pairs = dlg.pairs();
+	plotTimeCourses();
+	// build a widget to get selected pairs.
 
-		m_signalView->setChannels(channels);
-		// update time courses for current section 
-		updateTimeCourses(m_graphSet->sections().value(m_currentIteration));
-	}
-	m_signalView->show();
+
+
+	//if (m_signalView == nullptr) {
+	//	m_signalView = new AwBaseSignalView();
+	//	m_signalView->setFlags(AwBaseSignalView::NoMarkerBar | AwBaseSignalView::ViewAllChannels | AwBaseSignalView::HidePositionInFile);
+	//	m_signalView->setBaseSize(QSize(800, 300)); 
+	//	m_signalView->setWindowIcon(QIcon(":/images/AnyWave_icon.png"));
+	//	auto settings = m_signalView->settings();
+	//	settings->limitChannels = true;
+	//	settings->maxChannels = 2;
+	//	settings->showZeroLine = true;
+	//	m_signalView->changeSettings(settings, AwViewSettings::LimitNumberOfChannels | AwViewSettings::ShowBaseLine);
+	//
+	//	// init channels for the view
+	//	AwChannelList channels;
+	//	// create a list of X->Y channels and Y->X channels.
+	//	auto purple = QColor(Qt::magenta).name();
+	//	QString label;
+	//	for (int i = 0; i < m_graphSet->labels.size() - 1; i++)
+	//		for (int j = i + 1; j < m_graphSet->labels.size(); j++) {
+	//			label = QString("%1->%2").arg(m_graphSet->labels.value(i)).arg(m_graphSet->labels.value(j));
+	//			// XY Pair
+	//			AwChannel *channel = new AwChannel;
+	//			//channel->setUnit(m_graphSet->method);
+	//			channel->setSamplingRate(m_graphSet->samplingRate);
+	//			channel->setGain(1.);
+	//			channel->setName(label);
+	//			channel->setColor(purple);
+	//			m_timeCoursesChannels.insert(channel->name(), channel);
+	//			channels << channel;
+	//			// YX Pair
+	//			label = QString("%1->%2").arg(m_graphSet->labels.value(j)).arg(m_graphSet->labels.value(i));
+	//			channel = new AwChannel(channel);
+	//			channel->setName(label);
+	//			channels << channel;
+	//			m_timeCoursesChannels.insert(channel->name(), channel);
+	//		}
+
+	//	m_signalView->setChannels(channels);
+	//	// update time courses for current section 
+	//	updateTimeCourses(m_graphSet->sections().value(m_currentIteration));
+	//}
+	//m_signalView->show();
+}
+
+void GraphWindow::plotTimeCourses()
+{
+
 }
 
 void GraphWindow::showMeanGraph()

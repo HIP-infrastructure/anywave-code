@@ -70,10 +70,11 @@ private:
 	QGraphicsScene *m_scene;
 	AwBaseSignalView *m_signalView;
 	QHash<QString, AwChannel *> m_timeCoursesChannels;
-
+	QStringList m_pairs; // list of selected pair of channels
 	void initGraph();
 	void updateGraph();
 	void updateTimeCourses(int section);
+	void plotTimeCourses();
 };
 
 
