@@ -71,6 +71,7 @@ private:
 	AwBaseSignalView *m_signalView;
 	QHash<QString, AwChannel *> m_timeCoursesChannels;
 	QStringList m_pairs; // list of selected pair of channels
+	QList<QWidget*> m_plots;
 	void initGraph();
 	void updateGraph();
 	void updateTimeCourses(int section);
