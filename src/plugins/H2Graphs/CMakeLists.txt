@@ -7,22 +7,24 @@ INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
 LINK_DIRECTORIES(${QWT_LIBRARY})
 
 SET(SRCS GraphArrow.cpp GraphWindow.cpp GraphArrowBase.cpp GraphArrowDir.cpp GraphArrowLag.cpp GraphColorMap.cpp
-GraphLegend.cpp GraphSet.cpp GraphSetModel.cpp H2Graphs.cpp GraphSensorItem.cpp GraphManagerWidget.cpp)
+GraphLegend.cpp GraphSet.cpp GraphSetModel.cpp H2Graphs.cpp GraphSensorItem.cpp GraphManagerWidget.cpp H2SelectPairsDial.cpp)
 
 SET(MOCS GraphArrow.h GraphWindow.h GraphArrowBase.h GraphArrowDir.h GraphArrowLag.h GraphColorMap.h
-GraphLegend.h GraphSet.h GraphSetModel.h H2Graphs.h GraphSensorItem.h GraphManagerWidget.h)
+GraphLegend.h GraphSet.h GraphSetModel.h H2Graphs.h GraphSensorItem.h GraphManagerWidget.h H2SelectPairsDial.h)
 
-SET(UIS GraphManagerWidget.ui GraphWindow.ui)
+SET(UIS GraphManagerWidget.ui GraphWindow.ui H2SelectPairsDial.ui)
 SET(RES Graphs.qrc)
 
 qt5_wrap_cpp(H2G_MOCS ${MOCS})
 QT5_WRAP_UI(H2G_UIS ${UIS})
 QT5_ADD_RESOURCES(${RES})
 
+add_definitions(-DQCUSTOMPLOT_USE_LIBRARY)
+
 add_library(H2Graphs SHARED ${SRCS} ${H2G_MOCS} ${H2G_UIS})
 qt5_use_modules(H2Graphs Core Gui Widgets Svg)
 
-target_link_libraries(H2Graphs AwCore AwProcess AwWidget AwMATLAB Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
+target_link_libraries(H2Graphs AwCore AwProcess AwWidget AwMATLAB qcustomplot Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
 INSTALL(TARGETS H2Graphs DESTINATION ${PLUGIN_INSTALL_DIR})
 
 
