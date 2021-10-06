@@ -94,8 +94,8 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(Qt_LIBPATH_);$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwWidgetsLib.lib;qwt.lib;AwMATLABLib.lib;AwGraphicsLib.lib;AwReadWriteLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(Qt_LIBPATH_);$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwWidgetsLib.lib;qwt.lib;AwMATLABLib.lib;AwGraphicsLib.lib;AwReadWriteLib.lib;qcustomplotlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
