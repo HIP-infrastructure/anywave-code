@@ -65,6 +65,9 @@
     <ClCompile Include="H2SelectPairsDial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GraphWindowPlots.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphArrow.h">

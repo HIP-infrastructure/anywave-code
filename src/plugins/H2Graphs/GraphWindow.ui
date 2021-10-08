@@ -168,8 +168,11 @@
             </item>
             <item>
              <widget class="QPushButton" name="buttonTimeCourses">
+              <property name="toolTip">
+               <string>Visualise the evolution of values in time for a pair of channels</string>
+              </property>
               <property name="text">
-               <string>Show Time Courses</string>
+               <string>Plot Values In Time</string>
               </property>
              </widget>
             </item>

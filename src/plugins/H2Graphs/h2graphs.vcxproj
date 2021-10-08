@@ -110,6 +110,7 @@
     <ClCompile Include="GraphSet.cpp" />
     <ClCompile Include="GraphSetModel.cpp" />
     <ClCompile Include="GraphWindow.cpp" />
+    <ClCompile Include="GraphWindowPlots.cpp" />
     <ClCompile Include="H2Graphs.cpp" />
     <ClCompile Include="H2SelectPairsDial.cpp" />
   </ItemGroup>

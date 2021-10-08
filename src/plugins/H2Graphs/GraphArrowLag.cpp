@@ -40,22 +40,16 @@ GraphArrowLag::~GraphArrowLag()
 
 void GraphArrowLag::updatePosition()
 {
-#ifndef NDEBUG
-	qDebug() << "H2ArrowLag::updatePosition() start" << endl;
-#endif
 	prepareGeometryChange();
 	QLineF h2(m_startItem->pos(), m_endItem->pos());
 	qreal angle = qAcos(h2.dx() / h2.length());
 	if (h2.dy() >= 0)
 		angle = (2 * Pi) - angle;
 
-#ifndef NDEBUG
-	qDebug() << "angle is " << (angle * 180) / Pi << " degrees" << endl;
-#endif
-
 	QLineF line = h2.translated(sin(angle) * 5, cos(angle) * 5);
 
 	QLineF halfLine = QLineF(line.pointAt(0.5), line.p2());
+
 	// size will be changed depending on lag value.
 	qreal new_size = (halfLine.length() * qAbs(m_lag)) / m_maxLag;
 	if (new_size < 20)
@@ -76,10 +70,6 @@ void GraphArrowLag::updatePosition()
 	}
 	m_textItem->setPos(halfLine.p2());
 	setLine(halfLine);
-
-#ifndef NDEBUG
-	qDebug() << "H2ArrowLag::updatePosition() end" << endl;
-#endif
 }
 
 void GraphArrowLag::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -90,20 +80,13 @@ void GraphArrowLag::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 	if (m_lag == 0)
 		return;
 
-#ifndef NDEBUG
-	qDebug() << "H2ArrowLag::paint() start" << endl;
-#endif
-	
 	QPen p = pen();
 	p.setColor(m_color);
 	painter->setPen(p);
 	painter->setBrush(m_color);
 	painter->drawLine(line());
 
-	if (m_showArrowHead)
+	 if (m_showArrowHead)
 		painter->drawPolygon(m_arrowHead);
-	
-#ifndef NDEBUG
-	qDebug() << "H2ArrowLag::paint() end" << endl;
-#endif
+
 }
