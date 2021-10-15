@@ -3,13 +3,13 @@
 // course requirements at degree granting institutions only.  Not for
 // government, commercial, or other organizational use.
 //
-// sobi_coder.h
+// xdhseqr.h
 //
-// Code generation for function 'sobi_coder'
+// Code generation for function 'xdhseqr'
 //
 
-#ifndef SOBI_CODER_H
-#define SOBI_CODER_H
+#ifndef XDHSEQR_H
+#define XDHSEQR_H
 
 // Include files
 #include "rtwtypes.h"
@@ -19,9 +19,14 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void sobi_coder(coder::array<double, 2U> &data, double ncomps,
-                       coder::array<double, 2U> &mixing,
-                       coder::array<double, 2U> &unmixing);
+namespace coder {
+namespace internal {
+namespace reflapack {
+int eml_dlahqr(::coder::array<double, 2U> &h, ::coder::array<double, 2U> &z);
+
+}
+} // namespace internal
+} // namespace coder
 
 #endif
-// End of code generation (sobi_coder.h)
+// End of code generation (xdhseqr.h)

@@ -3,13 +3,13 @@
 // course requirements at degree granting institutions only.  Not for
 // government, commercial, or other organizational use.
 //
-// sobi_coder.h
+// sort.h
 //
-// Code generation for function 'sobi_coder'
+// Code generation for function 'sort'
 //
 
-#ifndef SOBI_CODER_H
-#define SOBI_CODER_H
+#ifndef SORT_H
+#define SORT_H
 
 // Include files
 #include "rtwtypes.h"
@@ -19,9 +19,12 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void sobi_coder(coder::array<double, 2U> &data, double ncomps,
-                       coder::array<double, 2U> &mixing,
-                       coder::array<double, 2U> &unmixing);
+namespace coder {
+namespace internal {
+void sort(::coder::array<creal_T, 1U> &x, ::coder::array<int, 1U> &idx);
+
+}
+} // namespace coder
 
 #endif
-// End of code generation (sobi_coder.h)
+// End of code generation (sort.h)

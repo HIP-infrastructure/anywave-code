@@ -3,13 +3,13 @@
 // course requirements at degree granting institutions only.  Not for
 // government, commercial, or other organizational use.
 //
-// sobi_coder.h
+// eigStandard.h
 //
-// Code generation for function 'sobi_coder'
+// Code generation for function 'eigStandard'
 //
 
-#ifndef SOBI_CODER_H
-#define SOBI_CODER_H
+#ifndef EIGSTANDARD_H
+#define EIGSTANDARD_H
 
 // Include files
 #include "rtwtypes.h"
@@ -19,9 +19,12 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void sobi_coder(coder::array<double, 2U> &data, double ncomps,
-                       coder::array<double, 2U> &mixing,
-                       coder::array<double, 2U> &unmixing);
+namespace coder {
+void eigStandard(const ::coder::array<double, 2U> &A,
+                 ::coder::array<creal_T, 2U> &V,
+                 ::coder::array<creal_T, 2U> &D);
+
+}
 
 #endif
-// End of code generation (sobi_coder.h)
+// End of code generation (eigStandard.h)

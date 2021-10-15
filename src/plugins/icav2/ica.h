@@ -18,6 +18,7 @@
 #include <AwProcessInterface.h>
 #include "ica_global.h"
 #include <aw_armadillo.h>
+#include "ICAAlgorithm.h"
 
 class ICA_EXPORT ICA : public AwProcess
 {
@@ -31,11 +32,12 @@ public:
 	bool showUi();
 
 	bool batchParameterCheck(const QVariantMap& args) override;
+	QList<QSharedPointer<ICAAlgorithm>>& algorithms() { return m_algorithms; }
 private:
 	int initParameters();
 	void infomax(int m, int n, int nc);
 	void run_cca(int m, int n);
-	void run_sobi(int m, int n);
+	void run_sobi(int m, int n, int nc);
 	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
 	int runica_matlab(int nc);
 	int run_acsobiro(int nc);
@@ -54,6 +56,8 @@ private:
 	//QStringList m_algoNames;
 	arma::mat m_unmixing;
 	arma::mat m_mixing;
+
+	QList<QSharedPointer<ICAAlgorithm>> m_algorithms;
 };
 
 class ICA_EXPORT ICAPlugin : public AwProcessPlugin

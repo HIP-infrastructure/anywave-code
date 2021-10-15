@@ -3,13 +3,13 @@
 // course requirements at degree granting institutions only.  Not for
 // government, commercial, or other organizational use.
 //
-// sobi_coder.h
+// schur.h
 //
-// Code generation for function 'sobi_coder'
+// Code generation for function 'schur'
 //
 
-#ifndef SOBI_CODER_H
-#define SOBI_CODER_H
+#ifndef SCHUR_H
+#define SCHUR_H
 
 // Include files
 #include "rtwtypes.h"
@@ -19,9 +19,11 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void sobi_coder(coder::array<double, 2U> &data, double ncomps,
-                       coder::array<double, 2U> &mixing,
-                       coder::array<double, 2U> &unmixing);
+namespace coder {
+void schur(const ::coder::array<double, 2U> &A, ::coder::array<double, 2U> &V,
+           ::coder::array<double, 2U> &T);
+
+}
 
 #endif
-// End of code generation (sobi_coder.h)
+// End of code generation (schur.h)

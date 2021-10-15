@@ -31,6 +31,7 @@
 #include <layout/AwLayout.h>
 #include <utils/json.h>
 #include <AwKeys.h>
+#include "ICAInfomax.h"
 
 namespace algos {
 	constexpr auto ICA_infomax = 0;
@@ -48,13 +49,14 @@ ICA::ICA()
 	m_isDownsamplingActive = true;
 	m_hpf = m_lpf = 0.;
 	m_nComp = 0;
+	m_algorithms << QSharedPointer<ICAAlgorithm>(new ICAInfomax);
 }
 
 ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";
-	version = "2.0.0";
+	version = "2.1.0";
     name = QString("ICA");
     description = QString("Compute ICA");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
@@ -291,7 +293,7 @@ void ICA::runFromCommandLine()
 				run_cca(m, n);
 				break;
 			case algos::ICA_sobi:
-				run_sobi(m, n);
+				run_sobi(m, n, m_nComp);
 				break;
 			}
 			
@@ -318,7 +320,7 @@ void ICA::run()
 			run_cca(m, n);
 			break;
 		case algos::ICA_sobi:
-			run_sobi(m, n);
+			run_sobi(m, n, m_nComp);
 			break;
 		}
 	}

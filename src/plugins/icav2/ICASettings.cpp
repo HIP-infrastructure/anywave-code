@@ -18,9 +18,10 @@
 #include <AwCore.h>
 #include <math.h>
 #include <AwKeys.h>
+#include "ica.h"
 
 
-ICASettings::ICASettings(AwProcess *process, QWidget *parent) : QDialog(parent)
+ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 {
 	m_ui.setupUi(this);
 	m_channels = process->pdi.input.channels();
@@ -43,13 +44,22 @@ ICASettings::ICASettings(AwProcess *process, QWidget *parent) : QDialog(parent)
 	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(updateMaxNumOfIC()));
 	m_ui.labelTotalIC->hide();
 	m_process = process;
-
+	m_algos = process->algorithms();
+	for (auto algo : m_algos) {
+		m_ui.comboAlgo->addItem(algo->name());
+		//if (algo->getGUI() != nullptr) {
+		//	m_ui.groupBoxExtras->layout()->replaceWidget(m_ui.widgetExtras, algo->getGUI());
+		//}
+	}
+	m_extraGUIWidget = nullptr;
 	// adding SEVERAL algos from MATLAB
-	m_ui.comboAlgo->addItem("infomax");
-	m_ui.comboAlgo->addItem("cca");
-	m_ui.comboAlgo->addItem("sobi");
-	m_ui.comboAlgo->setCurrentIndex(0);
+	//m_ui.comboAlgo->addItem("infomax");
+	//m_ui.comboAlgo->addItem("cca");
+	//m_ui.comboAlgo->addItem("sobi");
+
+	//m_ui.comboAlgo->setCurrentIndex(0);
 	connect(m_ui.comboAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(changeAlgo(int)));
+	m_ui.comboAlgo->setCurrentIndex(0);
 
 }
 
@@ -58,22 +68,36 @@ ICASettings::~ICASettings()
 
 }
 
-void ICASettings::changeAlgo(int algo)
+void ICASettings::changeAlgo(int index)
 {
-	switch (algo) {
-	case 0: // infomax
-		m_ui.groupInfomax->show();
-		m_ui.groupBoxOutput->setEnabled(true);
-		break;
-	case 1: // cca
-		m_ui.groupInfomax->hide();
-		m_ui.groupBoxOutput->setEnabled(false);
-		break;
-	case 2: // sobi
-		m_ui.groupInfomax->hide();
-		m_ui.groupBoxOutput->setEnabled(false);
-		break;
+	//switch (algo) {
+	//case 0: // infomax
+	//	m_ui.groupInfomax->show();
+	//	m_ui.groupBoxOutput->setEnabled(true);
+	//	break;
+	//case 1: // cca
+	//	m_ui.groupInfomax->hide();
+	//	m_ui.groupBoxOutput->setEnabled(false);
+	//	break;
+	//case 2: // sobi
+	//	m_ui.groupInfomax->hide();
+	//	m_ui.groupBoxOutput->setEnabled(false);
+	//	break;
+	//}
+	Q_ASSERT(index < m_algos.size());
+	QSharedPointer<ICAAlgorithm> algo = m_algos.at(index);
+	auto gui = algo->getGUI();
+	if (gui) {
+		m_ui.groupBoxExtras->show();
+		m_ui.groupBoxExtras->layout()->removeWidget(m_extraGUIWidget);
+		m_ui.groupBoxExtras->layout()->addWidget(gui);
+		m_extraGUIWidget = gui;
 	}
+	else 
+		m_ui.groupBoxExtras->hide();
+	//if (algo->getGUI() != nullptr) {
+//	m_ui.groupBoxExtras->layout()->replaceWidget(m_ui.widgetExtras, algo->getGUI());
+//}
 }
 
 

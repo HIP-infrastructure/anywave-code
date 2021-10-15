@@ -18,7 +18,7 @@
 #include "coder_array.h"
 #include "sobi_coder.h"
 
-void ICA::run_sobi(int m, int n)
+void ICA::run_sobi(int m, int n, int m_nComp)
 {
 	coder::array<double, 2U> data;
 	coder::array<double, 2U> mixing;
@@ -34,7 +34,7 @@ void ICA::run_sobi(int m, int n)
 	// saving memory by clearing loaded data
 	for (AwChannel* c : m_channels)
 		c->clearData();
-	sobi_coder(data, mixing, unmixing);
+	sobi_coder(data, m_nComp,  mixing, unmixing);
 	m_mixing = arma::mat(mixing.data(), mixing.size(0), mixing.size(1));
 	m_unmixing = arma::mat(unmixing.data(), unmixing.size(0), unmixing.size(1));
 }

@@ -3,13 +3,13 @@
 // course requirements at degree granting institutions only.  Not for
 // government, commercial, or other organizational use.
 //
-// sobi_coder.h
+// pca.h
 //
-// Code generation for function 'sobi_coder'
+// Code generation for function 'pca'
 //
 
-#ifndef SOBI_CODER_H
-#define SOBI_CODER_H
+#ifndef PCA_H
+#define PCA_H
 
 // Include files
 #include "rtwtypes.h"
@@ -19,9 +19,9 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void sobi_coder(coder::array<double, 2U> &data, double ncomps,
-                       coder::array<double, 2U> &mixing,
-                       coder::array<double, 2U> &unmixing);
+void pca(const coder::array<double, 2U> &data, double ncomps,
+         coder::array<double, 2U> &data_pca,
+         coder::array<double, 2U> &eigenvectors);
 
 #endif
-// End of code generation (sobi_coder.h)
+// End of code generation (pca.h)

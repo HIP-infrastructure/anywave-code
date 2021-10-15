@@ -57,9 +57,13 @@ DEFAULT_LAGS = 100;
 
 [m,N]=size(data);
 
+eigenvectors = [];
+pca_applied = false;
 if m > ncomps
-    data = pca(data, ncomps);
-    [m,N] = size(data);
+    pca_applied = true;
+    [pca_data, eigenvectors] = pca(data, ncomps);
+    [m,N] = size(pca_data);
+    data = pca_data;
 end
 
 %n=m; % Source detection (hum...)
@@ -127,7 +131,7 @@ while encore
    angles=sign(angles(1))*angles;
    c=sqrt(0.5+angles(1)/2);
    sr=0.5*(angles(2)-1j*angles(3))/c; 
-   sc=conj(sr);ù
+   sc=conj(sr);
    oui = abs(sr)> epsil ;
    encore= encore | oui ;
    if oui  % Update the M and V matrices 
@@ -153,5 +157,7 @@ end%% while
 %
 mixing = pinv(Q)*V; 
 unmixing = pinv(mixing);
+if pca_applied
+    unmixing = unmixing * eigenvectors(:,1:ncomps);
 end
 

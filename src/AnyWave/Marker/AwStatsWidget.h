@@ -26,6 +26,8 @@ class AwStatsWidget : public QWidget
 public:
 	AwStatsWidget(QWidget *parent = Q_NULLPTR);
 	~AwStatsWidget();
+
+	void setUpdateEnabled(bool flag) { m_ui.buttonUpdate->setEnabled(flag); }
 signals:
 	void finished();  // emit when histogram is updated
 public slots:

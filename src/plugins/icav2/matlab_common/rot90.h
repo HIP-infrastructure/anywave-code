@@ -3,13 +3,13 @@
 // course requirements at degree granting institutions only.  Not for
 // government, commercial, or other organizational use.
 //
-// sobi_coder.h
+// rot90.h
 //
-// Code generation for function 'sobi_coder'
+// Code generation for function 'rot90'
 //
 
-#ifndef SOBI_CODER_H
-#define SOBI_CODER_H
+#ifndef ROT90_H
+#define ROT90_H
 
 // Include files
 #include "rtwtypes.h"
@@ -19,9 +19,12 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void sobi_coder(coder::array<double, 2U> &data, double ncomps,
-                       coder::array<double, 2U> &mixing,
-                       coder::array<double, 2U> &unmixing);
+namespace coder {
+void rot90(const ::coder::array<double, 1U> &A, ::coder::array<double, 2U> &B);
+
+void rot90(const ::coder::array<double, 2U> &A, ::coder::array<double, 1U> &B);
+
+} // namespace coder
 
 #endif
-// End of code generation (sobi_coder.h)
+// End of code generation (rot90.h)

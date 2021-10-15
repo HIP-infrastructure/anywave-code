@@ -33,7 +33,7 @@ Root: HKCR; Subkey: "AnyWave\shell\open\command"; ValueType: string; ValueName: 
 
 [Files]
 Source: ".\bin\x64\Release\*.dll"; DestDir: "{app}"
-Source: ".\bin\x64\Release\*.json"; DestDir: "{app}"
+Source: ".\bin\x64\Release\update.json"; DestDir: "{app}"
 Source: ".\bin\x64\Release\*.exe"; DestDir: "{app}"
 Source: ".\bin\x64\Release\*.html"; DestDir: "{app}"
 Source: ".\bin\x64\Release\ins.txt"; DestDir: "{app}"

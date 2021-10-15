@@ -3,13 +3,13 @@
 // course requirements at degree granting institutions only.  Not for
 // government, commercial, or other organizational use.
 //
-// sobi_coder.h
+// xzggbal.h
 //
-// Code generation for function 'sobi_coder'
+// Code generation for function 'xzggbal'
 //
 
-#ifndef SOBI_CODER_H
-#define SOBI_CODER_H
+#ifndef XZGGBAL_H
+#define XZGGBAL_H
 
 // Include files
 #include "rtwtypes.h"
@@ -19,9 +19,15 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void sobi_coder(coder::array<double, 2U> &data, double ncomps,
-                       coder::array<double, 2U> &mixing,
-                       coder::array<double, 2U> &unmixing);
+namespace coder {
+namespace internal {
+namespace reflapack {
+void xzggbal(::coder::array<creal_T, 2U> &A, int *ilo, int *ihi,
+             ::coder::array<int, 1U> &rscale);
+
+}
+} // namespace internal
+} // namespace coder
 
 #endif
-// End of code generation (sobi_coder.h)
+// End of code generation (xzggbal.h)
