@@ -18,7 +18,7 @@
 #include <AwProcessInterface.h>
 #include "ica_global.h"
 #include <aw_armadillo.h>
-#include "ICAAlgorithm.h"
+class ICAAlgorithm;
 
 class ICA_EXPORT ICA : public AwProcess
 {
@@ -26,21 +26,21 @@ class ICA_EXPORT ICA : public AwProcess
 public:
 	ICA();
 	~ICA();
-	enum Algos { Infomax, FASTICA, acsobiro };
+//	enum Algos { Infomax, FASTICA, acsobiro };
 	void run() override;
 	void runFromCommandLine() override;
 	bool showUi();
 
 	bool batchParameterCheck(const QVariantMap& args) override;
-	QList<QSharedPointer<ICAAlgorithm>>& algorithms() { return m_algorithms; }
+	QList<ICAAlgorithm*>& algorithms() { return m_algorithms; }
 private:
 	int initParameters();
-	void infomax(int m, int n, int nc);
+//	void infomax(int m, int n, int nc);
 	void run_cca(int m, int n);
 	void run_sobi(int m, int n, int nc);
-	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
-	int runica_matlab(int nc);
-	int run_acsobiro(int nc);
+//	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
+//	int runica_matlab(int nc);
+//	int run_acsobiro(int nc);
 	void saveToFile();
     int m_modality;
 	QString m_ignoredMarkerLabel;
@@ -48,7 +48,7 @@ private:
 	bool m_ignoreBadChannels;
 	int m_nComp;
 	bool m_isDownsamplingActive;
-	int m_algo;
+//	int m_algo;
 	QString m_fileName;
 	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate;
@@ -57,7 +57,8 @@ private:
 	arma::mat m_unmixing;
 	arma::mat m_mixing;
 
-	QList<QSharedPointer<ICAAlgorithm>> m_algorithms;
+	QList<ICAAlgorithm *> m_algorithms;
+	ICAAlgorithm * m_selectedAlgo;
 };
 
 class ICA_EXPORT ICAPlugin : public AwProcessPlugin

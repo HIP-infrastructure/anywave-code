@@ -31,7 +31,7 @@
 #include <layout/AwLayout.h>
 #include <utils/json.h>
 #include <AwKeys.h>
-#include "ICAInfomax.h"
+#include "infomax/ICAInfomax.h"
 
 namespace algos {
 	constexpr auto ICA_infomax = 0;
@@ -49,7 +49,9 @@ ICA::ICA()
 	m_isDownsamplingActive = true;
 	m_hpf = m_lpf = 0.;
 	m_nComp = 0;
-	m_algorithms << QSharedPointer<ICAAlgorithm>(new ICAInfomax);
+	auto algo = new ICAInfomax(this);
+	connect(algo, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	m_algorithms << algo;
 }
 
 ICAPlugin::ICAPlugin() : AwProcessPlugin()
@@ -66,6 +68,8 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 
 ICA::~ICA()
 {
+	while (!m_algorithms.isEmpty())
+		delete m_algorithms.takeLast();
 }
 
 bool ICA::showUi()
@@ -103,10 +107,13 @@ bool ICA::batchParameterCheck(const QVariantMap& hash)
 int ICA::initParameters()
 {
 	auto args = pdi.input.settings;
-	QMap<QString, int> algos;
-	algos.insert("infomax", algos::ICA_infomax);
-	algos.insert("cca", algos::ICA_cca);
-	algos.insert("sobi", algos::ICA_sobi);
+	//QMap<QString, int> algos;
+	//algos.insert("infomax", algos::ICA_infomax);
+	//algos.insert("cca", algos::ICA_cca);
+	//algos.insert("sobi", algos::ICA_sobi);
+	QStringList algoNames;
+	for (auto const& algo : m_algorithms)
+		algoNames << algo->name();
 
 	m_isDownsamplingActive = false;
 	m_modality = AwChannel::stringToType(args.value("modality").toString());
@@ -153,16 +160,22 @@ int ICA::initParameters()
 
 	// check algo
 	// some algos have a fixed number of components (no PCA)
-	m_algo = 0; // default to infomax
-	QString algo = "infomax";
+	//m_algo = 0; // default to infomax
+	//QString algo = "infomax";
+	m_selectedAlgo = m_algorithms.first();
 	if (args.contains("algorithm")) {
 		auto algoName = args.value("algorithm").toString().toLower().simplified();
-		m_algo = algos.value(algoName);
-		if (m_algo)
-			algo = algoName;
+		int index = algoNames.indexOf(algoName);
+		if (index == -1) 
+			sendMessage("The specified algorithm does not exist. Switching to default Infomax.");
+		else
+			m_selectedAlgo = m_algorithms.at(index);
+	//	m_algo = algos.value(algoName);
+	//	if (m_algo)
+	//		algo = algoName;
 	}
-	if (m_algo == algos::ICA_cca || m_algo == algos::ICA_sobi) 
-		m_nComp = m_channels.size();
+	//if (m_algo == algos::ICA_cca || m_algo == algos::ICA_sobi) 
+	//	m_nComp = m_channels.size();
 
 	if (m_nComp > m_channels.size()) {
 		sendMessage("The specified number of components is greater dans the number of available channels in data. Aborted.");
@@ -272,9 +285,9 @@ int ICA::initParameters()
 
 	QString mod = args.value("modality").toString();
 	if (args.contains(keys::output_suffix))
-		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
+		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica
-	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5_ica.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
+	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5_ica.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	// generate full path
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
 	return 0;
@@ -283,46 +296,37 @@ int ICA::initParameters()
 
 void ICA::runFromCommandLine()
 {
-	if (initParameters() == 0) {
-		try {
-			switch (m_algo) {
-			case algos::ICA_infomax:
-				infomax(m, n, m_nComp);
-				break;
-			case algos::ICA_cca: // cca
-				run_cca(m, n);
-				break;
-			case algos::ICA_sobi:
-				run_sobi(m, n, m_nComp);
-				break;
-			}
-			
+	try {
+		if (initParameters() == 0) {
+
+			m_selectedAlgo->setChannels(m_channels);
+			m_selectedAlgo->setNumberOfComponents(m_nComp);
+			m_selectedAlgo->run();
+			m_mixing = m_selectedAlgo->mixing();
+			m_unmixing = m_selectedAlgo->unmixing();
+			saveToFile();
 		}
-		catch (std::bad_alloc& ba) {
-			sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
-			return;
-		}
-		saveToFile();
+	}
+	catch (std::bad_alloc& ba) {
+		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+		return;
 	}
 }
 
 void ICA::run()
 {
-	if (initParameters() == -1)
-		return;
-
 	try {
-		switch (m_algo) {
-		case algos::ICA_infomax:
-			infomax(m, n, m_nComp);
-			break;
-		case algos::ICA_cca: // cca
-			run_cca(m, n);
-			break;
-		case algos::ICA_sobi:
-			run_sobi(m, n, m_nComp);
-			break;
-		}
+		if (initParameters() == -1)
+			return;
+		m_selectedAlgo->setChannels(m_channels);
+		m_selectedAlgo->setNumberOfComponents(m_nComp);
+		// check for extra settings in current algo
+		auto map = m_selectedAlgo->getExtraSettings();
+		if (!map.isEmpty())
+			AwUniteMaps(pdi.input.settings, map);
+		m_selectedAlgo->run();
+		m_mixing = m_selectedAlgo->mixing();
+		m_unmixing = m_selectedAlgo->unmixing();
 	}
 	catch (std::bad_alloc& ba) {
 		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
@@ -330,11 +334,7 @@ void ICA::run()
 	}
 	if (!isAborted()) {
 		saveToFile();
-
 		//// tell AnyWave to load ICA components
-		//QVariantList args;
-		//args.append(m_fileName);
-		//emit sendCommand(AwProcessCommand::LoadICA, args);
 		QSharedPointer<AwEvent> e = QSharedPointer<AwEvent>(new AwEvent());
 		e->setId(AwEvent::LoadICAMatFile);
 		QStringList args = { m_fileName };

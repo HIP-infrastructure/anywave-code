@@ -75,20 +75,9 @@
      <property name="title">
       <string>Extra parameters</string>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupInfomax">
-     <property name="title">
-      <string>Infomax parameters</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="cbInfomaxExtended">
-        <property name="text">
-         <string>Compute extended ICA</string>
-        </property>
-       </widget>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QHBoxLayout" name="extrasLayout"/>
       </item>
      </layout>
     </widget>

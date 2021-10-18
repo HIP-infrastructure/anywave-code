@@ -44,7 +44,7 @@ private:
 	QStringList m_modes;
 	QStringList m_labels;
 	ICA *m_process;
-	QList<QSharedPointer<ICAAlgorithm>> m_algos;
+	QList<ICAAlgorithm *> m_algos;
 	QWidget* m_extraGUIWidget;
 };
 

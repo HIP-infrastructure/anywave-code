@@ -74,7 +74,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PreprocessorDefinitions>ICA_LIB;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -92,7 +92,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PreprocessorDefinitions>ICA_LIB;MKL;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -104,8 +104,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ICAAlgorithm.h" />
-    <ClInclude Include="ICAInfomax.h" />
+    <QtMoc Include="ICAAlgorithm.h" />
+    <ClInclude Include="infomax\ICAInfomax.h" />
+    <ClInclude Include="infomax\infomax_algo.h" />
+    <ClInclude Include="infomax\r250.h" />
+    <ClInclude Include="infomax\randlcg.h" />
     <ClInclude Include="matlab_common\coder_array.h" />
     <ClInclude Include="matlab_common\pinv.h" />
     <ClInclude Include="matlab_common\rot90.h" />
@@ -161,17 +164,18 @@
     <ClCompile Include="cca\qr.cpp" />
     <ClCompile Include="cca\run_cca.cpp" />
     <ClCompile Include="ica.cpp" />
-    <ClCompile Include="ICAInfomax.cpp" />
+    <ClCompile Include="ICAAlgorithm.cpp" />
     <ClCompile Include="ICASettings.cpp" />
-    <ClCompile Include="infomax_algo.cpp" />
+    <ClCompile Include="infomax\ICAInfomax.cpp" />
+    <ClCompile Include="infomax\infomax_algo.cpp" />
+    <ClCompile Include="infomax\r250.c" />
+    <ClCompile Include="infomax\randlcg.c" />
     <ClCompile Include="matlab_common\pinv.cpp" />
     <ClCompile Include="matlab_common\rot90.cpp" />
     <ClCompile Include="matlab_common\rtGetInf.cpp" />
     <ClCompile Include="matlab_common\rtGetNaN.cpp" />
     <ClCompile Include="matlab_common\rt_nonfinite.cpp" />
     <ClCompile Include="matlab_common\svd.cpp" />
-    <ClCompile Include="r250.c" />
-    <ClCompile Include="randlcg.c" />
     <ClCompile Include="sobi\eigStandard.cpp" />
     <ClCompile Include="sobi\mtimes.cpp" />
     <ClCompile Include="sobi\pca.cpp" />

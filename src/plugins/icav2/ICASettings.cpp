@@ -19,7 +19,7 @@
 #include <math.h>
 #include <AwKeys.h>
 #include "ica.h"
-
+#include "ICAAlgorithm.h"
 
 ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 {
@@ -58,8 +58,10 @@ ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 	//m_ui.comboAlgo->addItem("sobi");
 
 	//m_ui.comboAlgo->setCurrentIndex(0);
+	m_ui.groupBoxExtras->hide();
 	connect(m_ui.comboAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(changeAlgo(int)));
 	m_ui.comboAlgo->setCurrentIndex(0);
+	changeAlgo(0);
 
 }
 
@@ -85,12 +87,13 @@ void ICASettings::changeAlgo(int index)
 	//	break;
 	//}
 	Q_ASSERT(index < m_algos.size());
-	QSharedPointer<ICAAlgorithm> algo = m_algos.at(index);
+	auto algo = m_algos.at(index);
 	auto gui = algo->getGUI();
 	if (gui) {
+		if (m_extraGUIWidget)
+			m_ui.extrasLayout->removeWidget(m_extraGUIWidget);
+		m_ui.extrasLayout->addWidget(gui);
 		m_ui.groupBoxExtras->show();
-		m_ui.groupBoxExtras->layout()->removeWidget(m_extraGUIWidget);
-		m_ui.groupBoxExtras->layout()->addWidget(gui);
 		m_extraGUIWidget = gui;
 	}
 	else 
@@ -148,7 +151,7 @@ void ICASettings::accept()
 			return;
 	}
 
-	args["infomax_extended"] = m_ui.cbInfomaxExtended->isChecked();
+//	args["infomax_extended"] = m_ui.cbInfomaxExtended->isChecked();
 	if (m_ui.checkBoxDS->isChecked())
 		args["downsampling"] = true;
 
