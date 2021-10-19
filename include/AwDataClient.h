@@ -53,6 +53,10 @@ public:
 	void requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 
 	void selectChannels(const QVariantMap&, AwChannelList* channels);
+	void selectChannelsAsynch(const QVariantMap&, AwChannelList* channels);
+	void selectChannels(const QString&, AwChannelList* channels);
+	void selectChannelsAsynch(const QString&, AwChannelList* channels);
+
 	void setConnected(bool flag = true) { m_isConnected = flag; }
 	inline bool isConnected() { return m_isConnected;  }
 	QWaitCondition& waitForData() { return m_wcDataAvailable; }

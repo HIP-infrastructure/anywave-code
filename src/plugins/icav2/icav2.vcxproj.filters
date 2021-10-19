@@ -193,6 +193,9 @@
     <QtMoc Include="ICAAlgorithm.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="sobi\ICASobi.h">
+      <Filter>sobi</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ica.cpp">
@@ -229,9 +232,6 @@
       <Filter>sobi</Filter>
     </ClCompile>
     <ClCompile Include="sobi\sobi_coder_terminate.cpp">
-      <Filter>sobi</Filter>
-    </ClCompile>
-    <ClCompile Include="sobi\run_sobi.cpp">
       <Filter>sobi</Filter>
     </ClCompile>
     <ClCompile Include="sobi\pca.cpp">
@@ -317,6 +317,9 @@
     </ClCompile>
     <ClCompile Include="infomax\randlcg.c">
       <Filter>infomax</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\ICASobi.cpp">
+      <Filter>sobi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -32,6 +32,8 @@
 #include <utils/json.h>
 #include <AwKeys.h>
 #include "infomax/ICAInfomax.h"
+#include "sobi/ICASobi.h"
+
 
 namespace algos {
 	constexpr auto ICA_infomax = 0;
@@ -49,9 +51,11 @@ ICA::ICA()
 	m_isDownsamplingActive = true;
 	m_hpf = m_lpf = 0.;
 	m_nComp = 0;
-	auto algo = new ICAInfomax(this);
-	connect(algo, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-	m_algorithms << algo;
+	auto infomax = new ICAInfomax(this);
+	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	auto sobi = new ICASobi(this);
+	connect(sobi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	m_algorithms << infomax << sobi;
 }
 
 ICAPlugin::ICAPlugin() : AwProcessPlugin()
@@ -70,10 +74,18 @@ ICA::~ICA()
 {
 	while (!m_algorithms.isEmpty())
 		delete m_algorithms.takeLast();
+	while (!m_montage.isEmpty())
+		delete m_montage.takeLast();
 }
 
 bool ICA::showUi()
 {
+	// request montage to DataManager
+	QVariantMap settings;
+	settings[keys::channels_source] = keys::channels_source_montage;
+	// Use the synchronous call here as we are not yet running in a separate thread
+	selectChannels(settings, &m_montage);
+
 	ICASettings ui(this);
 
 	if (ui.exec() == QDialog::Accepted)	{
@@ -96,6 +108,11 @@ bool ICA::showUi()
 	return false;
 }
 
+void ICA::init()
+{
+
+}
+
 
 bool ICA::batchParameterCheck(const QVariantMap& hash)
 {
@@ -107,10 +124,6 @@ bool ICA::batchParameterCheck(const QVariantMap& hash)
 int ICA::initParameters()
 {
 	auto args = pdi.input.settings;
-	//QMap<QString, int> algos;
-	//algos.insert("infomax", algos::ICA_infomax);
-	//algos.insert("cca", algos::ICA_cca);
-	//algos.insert("sobi", algos::ICA_sobi);
 	QStringList algoNames;
 	for (auto const& algo : m_algorithms)
 		algoNames << algo->name();
@@ -160,8 +173,6 @@ int ICA::initParameters()
 
 	// check algo
 	// some algos have a fixed number of components (no PCA)
-	//m_algo = 0; // default to infomax
-	//QString algo = "infomax";
 	m_selectedAlgo = m_algorithms.first();
 	if (args.contains("algorithm")) {
 		auto algoName = args.value("algorithm").toString().toLower().simplified();
@@ -170,13 +181,7 @@ int ICA::initParameters()
 			sendMessage("The specified algorithm does not exist. Switching to default Infomax.");
 		else
 			m_selectedAlgo = m_algorithms.at(index);
-	//	m_algo = algos.value(algoName);
-	//	if (m_algo)
-	//		algo = algoName;
 	}
-	//if (m_algo == algos::ICA_cca || m_algo == algos::ICA_sobi) 
-	//	m_nComp = m_channels.size();
-
 	if (m_nComp > m_channels.size()) {
 		sendMessage("The specified number of components is greater dans the number of available channels in data. Aborted.");
 		return -1;

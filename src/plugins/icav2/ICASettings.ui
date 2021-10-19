@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>549</width>
-    <height>687</height>
+    <width>340</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -219,7 +219,28 @@
      <property name="title">
       <string>Data Input</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QRadioButton" name="radioAsRecorded">
+          <property name="text">
+           <string>Use as recorded channels</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioCurrentMontage">
+          <property name="text">
+           <string>Use current Montage</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,1">
         <item>
@@ -261,6 +282,20 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QCheckBox" name="checkSEEGElectrode">
+          <property name="text">
+           <string>Restrict to electrode:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboSEEGElectrode"/>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="AwSelectInputDataWidget" name="inputDataWidget" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -279,7 +314,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Ignore channels marked as bad</string>
+         <string>Ignore bad channels</string>
         </property>
         <property name="checked">
          <bool>true</bool>

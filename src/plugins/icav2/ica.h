@@ -26,34 +26,30 @@ class ICA_EXPORT ICA : public AwProcess
 public:
 	ICA();
 	~ICA();
-//	enum Algos { Infomax, FASTICA, acsobiro };
+
 	void run() override;
 	void runFromCommandLine() override;
-	bool showUi();
+	bool showUi() override;
+	void init() override;
 
 	bool batchParameterCheck(const QVariantMap& args) override;
 	QList<ICAAlgorithm*>& algorithms() { return m_algorithms; }
+	inline AwChannelList& montage() { return m_montage; }
 private:
 	int initParameters();
-//	void infomax(int m, int n, int nc);
-	void run_cca(int m, int n);
-	void run_sobi(int m, int n, int nc);
-//	void runica(double *data, double *weights, int chans, int samples, double *bias, int *signs);
-//	int runica_matlab(int nc);
-//	int run_acsobiro(int nc);
 	void saveToFile();
+
+	void run_cca(int m, int n);
     int m_modality;
 	QString m_ignoredMarkerLabel;
 	bool m_ignoreMarkers;
 	bool m_ignoreBadChannels;
 	int m_nComp;
 	bool m_isDownsamplingActive;
-//	int m_algo;
 	QString m_fileName;
 	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate;
-	AwChannelList m_channels;
-	//QStringList m_algoNames;
+	AwChannelList m_channels, m_montage; // now we handle also the computation on current montage
 	arma::mat m_unmixing;
 	arma::mat m_mixing;
 

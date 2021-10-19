@@ -79,8 +79,11 @@ signals:
 public slots:
 	// selectChannels will generate a list of channels to be used when requested data.
 	// it allows to select the channels to load depending on a list of key/values set in a variant map.
-	void selectChannels(AwDataClient *client, const QVariantMap& settings, AwChannelList *channels);
+	void selectChannelsAsynch(AwDataClient *client, const QVariantMap& settings, AwChannelList *channels);
 	// convenience version of selectChannel that handle a json string as settings.
+	void selectChannelsAsynch(AwDataClient* client, const QString& settings, AwChannelList* channels);
+	// synchronous version
+	void selectChannels(AwDataClient* client, const QVariantMap& settings, AwChannelList* channels);
 	void selectChannels(AwDataClient* client, const QString& settings, AwChannelList* channels);
 
 	QStringList badLabels();
