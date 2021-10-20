@@ -532,7 +532,7 @@ QMimeData *AwChannelListModelAsRecorded::mimeData(const QModelIndexList &indexes
 	QByteArray encodedData;
 	QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
-	for (auto index :  indexes)	{
+	for (auto const& index :  indexes)	{
 		if (index.isValid()) {
 			if (index.column() == AW_ASRECORDED_COLUMN_NAME) { // put only electrode's name (column 0)
 				stream << data(index, Qt::DisplayRole).toString();
@@ -807,7 +807,6 @@ QWidget *AwChannelListDelegateAsRecorded::createEditor(QWidget *parent, const QS
 
 		return editor;
 	}
-
 	return QItemDelegate::createEditor(parent, option, index);
 }
 
@@ -818,7 +817,6 @@ void AwChannelListDelegateAsRecorded::setModelData(QWidget *editor, QAbstractIte
 		model->setData(index,cb->currentText(), Qt::EditRole);
 		return;
 	}
-
 	QItemDelegate::setModelData(editor, model, index);
 }
 

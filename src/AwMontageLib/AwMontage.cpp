@@ -59,7 +59,7 @@ AwMontage::~AwMontage()
 }
 
 
-void AwMontage::save(const QString& path, const AwChannelList& channels)
+void AwMontage::save(const QString& path, const AwChannelList& channels, const AwChannelList& asRecordedChannels)
 {
 	QFile file(path);
 
@@ -101,13 +101,24 @@ void AwMontage::save(const QString& path, const AwChannelList& channels)
 		child.setAttribute("notch", chan->notch());
 		element.appendChild(child);
 	}
+	if (asRecordedChannels.size()) {
+		auto asRecordedRoot = doc.createElement("AsRecordedChannels");
+		root.appendChild(asRecordedRoot);
+		for (auto chan : asRecordedChannels) {
+			element = doc.createElement("Channel");
+			element.setAttribute("name", chan->name());
+			element.setAttribute("type", AwChannel::typeToString(chan->type()));
+			asRecordedRoot.appendChild(element);
+		}
+	}
+
 	doc.save(stream, 3);
 	file.close();
 }
 
 
 
-AwChannelList AwMontage::load(const QString& path)
+AwChannelList AwMontage::load(const QString& path, QMap<QString, int> *asRecordedChannels)
 {
 	AwChannelList res;
 	QFile file(path);
@@ -143,38 +154,45 @@ AwChannelList AwMontage::load(const QString& path)
 		float lp = -1, hp = -1, notch = -1;
 		int type = AwChannel::Other;
 		QDomNode child;
-		if (element.tagName() != "Channel") {
-			node = node.nextSibling();
-			continue;
-		}
-
-		name = element.attribute("name");
-		child = element.firstChild();
-		while (!child.isNull()) {
-			QDomElement ee = child.toElement();
-			auto tagName = ee.tagName();
-			if (tagName == "type")
-				type = AwChannel::stringToType(ee.text());
-			else if (tagName == "color")
-				color = ee.text();
-			else if (tagName == "reference")
-				ref = ee.text();
-			else if (tagName == "filters") {
-				lp = ee.attribute("lowPass", "-1.").toDouble();
-				hp = ee.attribute("highPass", "-1.").toDouble();
-				notch = ee.attribute("notch", "-1.").toDouble();
+		if (element.tagName() == "Channel") {
+			name = element.attribute("name");
+			child = element.firstChild();
+			while (!child.isNull()) {
+				QDomElement ee = child.toElement();
+				auto tagName = ee.tagName();
+				if (tagName == "type")
+					type = AwChannel::stringToType(ee.text());
+				else if (tagName == "color")
+					color = ee.text();
+				else if (tagName == "reference")
+					ref = ee.text();
+				else if (tagName == "filters") {
+					lp = ee.attribute("lowPass", "-1.").toDouble();
+					hp = ee.attribute("highPass", "-1.").toDouble();
+					notch = ee.attribute("notch", "-1.").toDouble();
+				}
+				child = child.nextSibling();
 			}
-			child = child.nextSibling();
+			auto channel = new AwChannel;
+			channel->setName(name);
+			channel->setType(type);
+			channel->setReferenceName(ref);
+			channel->setLowFilter(lp);
+			channel->setHighFilter(hp);
+			channel->setNotch(notch);
+			channel->setColor(color);
+			res << channel;
 		}
-		auto channel = new AwChannel;
-		channel->setName(name);
-		channel->setType(type);
-		channel->setReferenceName(ref);
-		channel->setLowFilter(lp);
-		channel->setHighFilter(hp);
-		channel->setNotch(notch);
-		channel->setColor(color);
-		res << channel;
+		else if (element.tagName() == "AsRecordedChannels" && asRecordedChannels) {
+			child = element.firstChild();
+			while (!child.isNull()) {
+				auto item = child.toElement();
+				QString name = item.attribute("name");
+				int type = AwChannel::stringToType(item.attribute("type"));
+				asRecordedChannels->insert(name, type);
+				child = child.nextSibling();
+			}
+		}
 		node = node.nextSibling();
 	}
 	return res;
