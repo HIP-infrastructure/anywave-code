@@ -285,11 +285,13 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 }
 
 
-void AwDataManager::selectChannels(AwDataClient* client, const QString& settings, AwChannelList* channels)
+void AwDataManager::selectChannelsAsynch(AwDataClient* client, const QString& settings, AwChannelList* channels)
 {
 	QString error;
-	return selectChannels(client, AwUtilities::json::mapFromJsonString(settings, error), channels);
+	return selectChannelsAsynch(client, AwUtilities::json::mapFromJsonString(settings, error), channels);
 }
+
+
 
 /// <summary>
 /// selectChannels()
@@ -300,7 +302,7 @@ void AwDataManager::selectChannels(AwDataClient* client, const QString& settings
 /// <param name="client"></param>
 /// <param name="settings"></param>
 /// <param name="channels"></param>
-void AwDataManager::selectChannels(AwDataClient *client, const QVariantMap& settings, AwChannelList* channels)
+void AwDataManager::selectChannelsAsynch(AwDataClient *client, const QVariantMap& settings, AwChannelList* channels)
 {
 	QMutexLocker lock(&m_mutex);
 	if (channels == nullptr) {
@@ -333,4 +335,44 @@ void AwDataManager::selectChannels(AwDataClient *client, const QVariantMap& sett
 			channels->append(c->duplicate());
 	}
 	client->m_wcSelectChannelsDone.wakeAll();
+}
+
+void AwDataManager::selectChannels(AwDataClient* client, const QString& settings, AwChannelList* channels)
+{
+	QString error;
+	return selectChannels(client, AwUtilities::json::mapFromJsonString(settings, error), channels);
+}
+
+void AwDataManager::selectChannels(AwDataClient* client, const QVariantMap& settings, AwChannelList* channels)
+{
+	if (channels == nullptr) {
+		
+		return;
+	}
+	AwChannelList temp;
+	if (settings.isEmpty()) {
+	
+		return;
+	}
+	if (settings.contains(keys::channels_source)) {
+		auto source = settings.value(keys::channels_source).toString().toLower().simplified();
+		if (source == keys::channels_source_raw)
+			temp = this->rawChannels();
+		else if (source == keys::channels_source_selection)
+			temp = this->selectedChannels();
+		else // default is montage
+			temp = this->montage();
+	}
+	else { // no source specified, use the current montage and if current montage is empty, use raw channels
+		temp = this->montage();
+		if (temp.isEmpty())
+			temp = this->rawChannels();
+	}
+
+	// for  now just implement the channels_sources settings (TO DO : implement all the options (channel labels, channels types, etc...)
+	if (!temp.isEmpty()) {
+		for (auto c : temp)
+			channels->append(c->duplicate());
+	}
+	
 }

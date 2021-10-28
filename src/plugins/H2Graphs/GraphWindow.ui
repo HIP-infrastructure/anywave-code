@@ -14,7 +14,7 @@
    <string>H2GraphWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="C:/dev/AnyWaveGitlab/resources/AnyWave.qrc">
+   <iconset resource="../../../resources/AnyWave.qrc">
     <normaloff>:/images/AnyWave_icon.png</normaloff>:/images/AnyWave_icon.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -168,8 +168,11 @@
             </item>
             <item>
              <widget class="QPushButton" name="buttonTimeCourses">
+              <property name="toolTip">
+               <string>Visualise the evolution of values in time for a pair of channels</string>
+              </property>
               <property name="text">
-               <string>Show Time Courses</string>
+               <string>Plot Values In Time</string>
               </property>
              </widget>
             </item>
@@ -521,7 +524,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="C:/dev/AnyWaveGitlab/resources/AnyWave.qrc"/>
+  <include location="../../../resources/AnyWave.qrc"/>
   <include location="Graphs.qrc"/>
  </resources>
  <connections>

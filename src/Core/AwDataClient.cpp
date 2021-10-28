@@ -60,15 +60,20 @@ void AwDataClient::requestData(AwChannelList *channels, AwMarkerList *markers, b
 	m_mutexDataAvailable.unlock();
 }
 
-void AwDataClient::selectChannels(const QVariantMap& settings, AwChannelList* channels)
+void AwDataClient::selectChannelsAsynch(const QVariantMap& settings, AwChannelList* channels)
 {
-	if (!m_isConnected) {
-		m_errorOccured = true;
-		m_errorString = QString("Trying to select channels but not connected to the data server.");
-		return;
-	}
+	//if (!m_isConnected) {
+	//	m_errorOccured = true;
+	//	m_errorString = QString("Trying to select channels but not connected to the data server.");
+	//	return;
+	//}
 	emit selectChannelsRequested(this, settings, channels);
 	m_mutexSelectChannels.lock();
 	m_wcSelectChannelsDone.wait(&m_mutexSelectChannels);
 	m_mutexSelectChannels.unlock();
+}
+
+void AwDataClient::selectChannels(const QVariantMap& settings, AwChannelList* channels)
+{
+	emit selectChannelsRequested(this, settings, channels);
 }

@@ -25,8 +25,8 @@ public:
 	explicit AwMontage(AwFileIO *reader);
 	~AwMontage();
 	enum MontageTypes { bipolar, monopolar };
-	static AwChannelList load(const QString& path);
-	static void save(const QString& path, const AwChannelList& channels);
+	static AwChannelList load(const QString& path, QMap<QString, int> *asRecordedChannels = nullptr);
+	static void save(const QString& path, const AwChannelList& channels, const AwChannelList& asRecorded = AwChannelList());
 	inline AwChannelList& channels() { return m_channels; }
 	/** load bad channel file and return the labels **/
 	static QStringList loadBadChannels(const QString& filePath);

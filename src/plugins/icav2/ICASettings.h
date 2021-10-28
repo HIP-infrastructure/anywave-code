@@ -21,27 +21,35 @@
 #include <AwProcessInterface.h>
 #include <AwChannel.h>
 #include <AwMarker.h>
+class ICA;
+class ICAAlgorithm;
 
 class ICASettings : public QDialog
 {
 	Q_OBJECT
 
 public:
-	ICASettings(AwProcess *process, QWidget *parent = 0);
+	ICASettings(ICA *plugin, QWidget *parent = 0);
 	~ICASettings();
 
 	AwArguments args;
+	enum ChannelSource { Montage, AsRecorded };
 public slots:
 	void accept();
 protected slots:
 	void updateMaxNumOfIC();
 	void changeAlgo(int);
+	void changeInputChannels();
+	void changeChannelSource(bool flag);
 private:
 	Ui::ICASettingsUI m_ui;
-	AwChannelList m_channels;
-	QStringList m_modes;
+	AwChannelList m_channels, m_montage;
+	QStringList m_modalitiesAsRecorded, m_modalitiesMontage;
 	QStringList m_labels;
-	AwProcess *m_process;
+	int m_channelSource;
+	ICA *m_process;
+	QList<ICAAlgorithm *> m_algos;
+	QWidget* m_extraGUIWidget;
 };
 
 #endif // ICASETTINGS_H

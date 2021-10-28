@@ -17,7 +17,7 @@ H2Plugin::H2Plugin()
 	setFlags(Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	category = "Process:Correlation:H2/R2 connectivity";
 	name = QString("h2");
-	version = "1.0.0";
+	version = "1.0.1";
 	description = QString(tr("Compute H2/R2 connectivity graphs."));
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/h2/args.json");
@@ -467,7 +467,7 @@ void H2::runFromCommandLine()
 
 	if (saveOneFile) {
 		sendMessage("Saving to MATLAB file...");
-		baseMATLABFile = QString("%1_algo-%2_hp-%3_lp-%4").arg(baseMATLABFile).arg(algo).arg(hp).arg(lp);
+		baseMATLABFile = QString("%1algo-%2_hp-%3_lp-%4").arg(baseMATLABFile).arg(algo).arg(hp).arg(lp);
 		QString file = QString("%1/%2.mat").arg(dir).arg(baseMATLABFile);
 
 		m_currentBand.name = "Batch Mode";
@@ -489,7 +489,7 @@ void H2::runFromCommandLine()
 				auto i = map.value(label);
 				map.insert(label, ++i);
 			}
-			baseMATLABFile = QString("%1_algo-%2_hp-%3_lp-%4_sec-%5_num-%6").arg(baseMATLABFile).arg(algo).arg(hp).arg(lp).arg(label).arg(map.value(label));
+			baseMATLABFile = QString("%1algo-%2_hp-%3_lp-%4_sec-%5_num-%6").arg(baseMATLABFile).arg(algo).arg(hp).arg(lp).arg(label).arg(map.value(label));
 			QString file = QString("%1/%2.mat").arg(dir).arg(baseMATLABFile);
 			m_currentBand.name = "Batch Mode";
 			m_currentBand.lp = lp;

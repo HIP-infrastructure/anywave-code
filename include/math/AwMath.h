@@ -32,6 +32,9 @@ namespace AwMath {
 	//void AW_MATH_EXPORT spectrogram(vec& X, vec& window, int noverlap, mat& s);
 	vec AW_MATH_EXPORT psd(arma::colvec& signal, int windowSize, int overlap);
 	static QMutex FFTMutex;
+	namespace ica {
+		mat AW_MATH_EXPORT pca(mat& data, int ncomp);
+	}
 }
 
 #endif

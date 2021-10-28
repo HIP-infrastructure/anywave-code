@@ -368,6 +368,7 @@ void AwMontageManager::closeFile()
 	m_montagePath = "";
 	m_badPath = "";
 	m_asRecorded.clear();
+	m_asRecordedChannels.clear();
 }
 
 void AwMontageManager::newMontage(AwFileIO *reader)
@@ -379,6 +380,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	for (auto c : channels)  {
 		// insert in hash table
 		m_asRecorded[c->name()] = c;
+		m_asRecordedChannels << c;
 		// make a copy a as recorded channel and insert it in channels.
 		// do not insert Reference channels in default montage
 		if (!c->isReference())
@@ -446,9 +448,9 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 
 	if (QFile::exists(m_montagePath))  {
 		if (!loadMontage(m_montagePath)) {
-
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
+
 	}
 	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
 	if (AwDataManager::instance()->filterSettings().isEmpty()) {
@@ -515,11 +517,24 @@ void AwMontageManager::loadBadChannels()
 	}
 	foreach(AwChannel *chan, m_channels) {
 		AwChannel *asRecorded =  m_asRecorded.value(chan->name());
-		if (asRecorded)  
+		if (asRecorded) {
 			if (asRecorded->isBad()) {
 				m_channels.removeAll(chan);
 				delete chan;
+				continue;
 			}
+			// asRecorded chan exist and is NOT bad, then check for the reference channel 
+			// Is there a reference channel?
+			if (!chan->referenceName().isEmpty()) {
+				auto refChan = m_asRecorded.value(chan->referenceName());
+				if (refChan) { // reference exists check if it is bad.
+					if (refChan->isBad()) {
+						m_channels.removeAll(chan);
+						delete chan;
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -588,10 +603,10 @@ void AwMontageManager::showInterface()
 	}
 }
 
-bool AwMontageManager::save(const QString& filename, const AwChannelList& channels)
+bool AwMontageManager::save(const QString& filename, const AwChannelList& channels, const AwChannelList& asRecordedChannels)
 {
 	try {
-		AwMontage::save(filename, channels);
+		AwMontage::save(filename, channels, asRecordedChannels);
 	}
 	catch (const AwException& e) {
 		return false;
@@ -601,7 +616,7 @@ bool AwMontageManager::save(const QString& filename, const AwChannelList& channe
 
 bool AwMontageManager::save(const QString& filename)
 {
-    bool res =  save(filename, m_channels);
+    bool res =  save(filename, m_channels, m_asRecordedChannels);
 	if (!res)
 		emit log(QString("saving %1 failed."));
 	return res;
@@ -633,13 +648,28 @@ AwChannelList AwMontageManager::load(const QString& path)
 {
 
 	AwChannelList channels, res;
+	QMap<QString, int> asRecordedMap;
 	try {
-		channels = AwMontage::load(path);
+		channels = AwMontage::load(path, &asRecordedMap);
 	}
 	catch (const AwException& e)
 	{
 		AwMessageBox::information(0, tr("Error"), e.errorString());
 		return channels;
+	}
+
+	if (asRecordedMap.size()) {
+		// got as recorded info from .mtg file
+		bool changed = false;
+		for (auto const& label : asRecordedMap.keys()) {
+			auto asRecordedChan = m_asRecorded.value(label);
+			if (asRecordedChan) {
+				if (asRecordedChan->type() != asRecordedMap.value(label)) {
+					changed = true;
+					asRecordedChan->setType(asRecordedMap.value(label));
+				}
+			}
+		}
 	}
 
 	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
@@ -659,8 +689,10 @@ AwChannelList AwMontageManager::load(const QString& path)
 			if (c->hasReferences() && c->referenceName() != "AVG") {
 				auto asRecordedRef = m_asRecorded.value(c->referenceName());
 				if (asRecordedRef) {
-					if (asRecorded->isBad())
+					if (asRecorded->isBad()) {
 						continue;
+						// if reference channel is bad , the remove both channel and its reference from montage
+					}
 				}
 				else  // reference not found => remove it
 					c->clearRefName();
@@ -699,7 +731,6 @@ bool AwMontageManager::apply(const QString& path)
 	// deleting current channels.
 	while (!m_channels.isEmpty())
 		delete m_channels.takeLast();
-
 	m_channels = load(path);
 	return true;
 }

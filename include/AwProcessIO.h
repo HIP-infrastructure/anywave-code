@@ -45,6 +45,7 @@ public:
 	inline AwChannelList& channels() { return m_channels; }
 	inline AwMarkerList& markers() { return m_markers; }
 	inline AwMarkerList& modifiedMarkers() { return m_modifiedMarkers; }
+
 	inline QList<QWidget*>& widgets() { return m_widgets; }
 	/** Set a new list of channels. Previous channels will be deleted!!. duplicate indicates that the list will be duplicated and then set as the new list. **/
 	void setNewChannels(const AwChannelList& channels, bool duplicate = false);

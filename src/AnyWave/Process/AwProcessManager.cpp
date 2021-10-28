@@ -770,9 +770,13 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
 		AwProcess* p = static_cast<AwProcess*>(process);
-//		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-//		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
+		// connect the process to the Data Manager to make it able to send requests
+		connect(p, SIGNAL(selectChannelsRequestedAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannelsAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)));
+		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
+
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
@@ -793,6 +797,14 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	}
 	else { // AwProcess
 		AwProcess *p = static_cast<AwProcess *>(process);
+		// connect the process to the Data Manager to make it able to send requests
+		connect(p, SIGNAL(selectChannelsRequestedAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannelsAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)));
+		// connect the process to the Data Manager to make it able to send requests
+		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
+
+
 		if (p->hasInputUi()) {
 			if (!p->showUi()) 	{
 				p->plugin()->deleteInstance(p); 
@@ -804,8 +816,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		QThread *processThread = new QThread;
 		p->moveToThread(processThread);
 
-		//connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-		//connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
 		connect(p, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
 		connect(p, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));

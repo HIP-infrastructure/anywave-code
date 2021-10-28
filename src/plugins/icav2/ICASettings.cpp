@@ -18,21 +18,36 @@
 #include <AwCore.h>
 #include <math.h>
 #include <AwKeys.h>
+#include "ica.h"
+#include "ICAAlgorithm.h"
 
-
-ICASettings::ICASettings(AwProcess *process, QWidget *parent) : QDialog(parent)
+ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 {
 	m_ui.setupUi(this);
+	// the plugin is configured to get as recorded channels as input when launched.
 	m_channels = process->pdi.input.channels();
-	m_modes = AwChannel::getTypesAsString(m_channels);
+	// but we need also the current montage
+	m_montage = process->montage();
+	m_modalitiesAsRecorded = AwChannel::getTypesAsString(m_channels);
 	// remove unwanted modalities
-	m_modes.removeAll("TRIGGER");
-	m_modes.removeAll("ECG");
-	m_modes.removeAll("OTHER");
-	m_modes.removeAll("ICA");
-	m_modes.removeAll("REFERENCE");
-	m_modes.removeAll("GRAD");
-	m_ui.comboModality->addItems(m_modes);
+	m_modalitiesAsRecorded.removeAll("TRIGGER");
+	m_modalitiesAsRecorded.removeAll("ECG");
+	m_modalitiesAsRecorded.removeAll("OTHER");
+	m_modalitiesAsRecorded.removeAll("ICA");
+	m_modalitiesAsRecorded.removeAll("REFERENCE");
+	m_modalitiesAsRecorded.removeAll("GRAD");
+	m_modalitiesMontage = AwChannel::getTypesAsString(m_montage);
+	// remove unwanted modalities
+	m_modalitiesMontage.removeAll("TRIGGER");
+	m_modalitiesMontage.removeAll("ECG");
+	m_modalitiesMontage.removeAll("OTHER");
+	m_modalitiesMontage.removeAll("ICA");
+	m_modalitiesMontage.removeAll("REFERENCE");
+	m_modalitiesMontage.removeAll("GRAD");
+
+	m_channelSource = ICASettings::AsRecorded;
+
+	m_ui.comboModality->addItems(m_modalitiesAsRecorded);
 
 	if (!process->pdi.input.markers().isEmpty())
 		m_ui.inputDataWidget->setMarkers(process->pdi.input.markers());
@@ -41,16 +56,23 @@ ICASettings::ICASettings(AwProcess *process, QWidget *parent) : QDialog(parent)
 	connect(m_ui.cbAll, SIGNAL(toggled(bool)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
 	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(updateMaxNumOfIC()));
+	connect(m_ui.radioAsRecorded, SIGNAL(toggled(bool)), this, SLOT(changeChannelSource(bool)));
 	m_ui.labelTotalIC->hide();
 	m_process = process;
-
-	// adding SEVERAL algos from MATLAB
-	m_ui.comboAlgo->addItem("infomax");
-	m_ui.comboAlgo->addItem("cca");
-	m_ui.comboAlgo->addItem("sobi");
-	m_ui.comboAlgo->setCurrentIndex(0);
+	m_algos = process->algorithms();
+	for (auto algo : m_algos) 
+		m_ui.comboAlgo->addItem(algo->name());
+	
+	m_extraGUIWidget = nullptr;
+	m_ui.groupBoxExtras->hide();
 	connect(m_ui.comboAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(changeAlgo(int)));
+//	m_ui.comboAlgo->setCurrentIndex(0);
+	changeAlgo(0);
 
+	// hide SEEG Restrict mode
+	m_ui.checkSEEGElectrode->hide();
+	m_ui.comboSEEGElectrode->hide();
+	updateMaxNumOfIC();
 }
 
 ICASettings::~ICASettings()
@@ -58,22 +80,41 @@ ICASettings::~ICASettings()
 
 }
 
-void ICASettings::changeAlgo(int algo)
+void ICASettings::changeChannelSource(bool flag)
 {
-	switch (algo) {
-	case 0: // infomax
-		m_ui.groupInfomax->show();
-		m_ui.groupBoxOutput->setEnabled(true);
-		break;
-	case 1: // cca
-		m_ui.groupInfomax->hide();
-		m_ui.groupBoxOutput->setEnabled(false);
-		break;
-	case 2: // sobi
-		m_ui.groupInfomax->hide();
-		m_ui.groupBoxOutput->setEnabled(false);
-		break;
+	disconnect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
+	if (flag) { // AsRecorded 
+		m_channelSource = ICASettings::AsRecorded;
+		m_ui.comboModality->clear();
+		m_ui.comboModality->addItems(m_modalitiesAsRecorded);
 	}
+	else {
+		m_channelSource = ICASettings::Montage;
+		m_ui.comboModality->clear();
+		m_ui.comboModality->addItems(m_modalitiesMontage);
+	}
+	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
+}
+
+void ICASettings::changeAlgo(int index)
+{
+	Q_ASSERT(index < m_algos.size());
+	auto algo = m_algos.at(index);
+	auto gui = algo->getGUI();
+	if (gui) {
+		if (m_extraGUIWidget)
+			m_ui.extrasLayout->removeWidget(m_extraGUIWidget);
+		m_ui.extrasLayout->addWidget(gui);
+		m_ui.groupBoxExtras->show();
+		m_extraGUIWidget = gui;
+	}
+	else 
+		m_ui.groupBoxExtras->hide();
+}
+
+void ICASettings::changeInputChannels()
+{
+
 }
 
 
@@ -81,7 +122,10 @@ void ICASettings::accept()
 {
 	args["algorithm"] = m_ui.comboAlgo->currentText();
 	args[keys::skip_bad_channels] = m_ui.ignoreBads->isChecked();
-	args["modality"] = m_modes.at(m_ui.comboModality->currentIndex());
+	if (m_channelSource == ICASettings::AsRecorded)
+		args["modality"] = m_modalitiesAsRecorded.at(m_ui.comboModality->currentIndex());
+	else
+		args["modality"] = m_modalitiesMontage.at(m_ui.comboModality->currentIndex());
 	int modality = AwChannel::stringToType(args.value("modality").toString());
 
 	args[keys::lp] = m_ui.spinLPF->value();
@@ -96,7 +140,12 @@ void ICASettings::accept()
 		args[keys::skip_markers] = skippedMarkers;
 
 	// get channels matching modality
-	auto channels = AwChannel::getChannelsOfType(m_channels, modality);
+	AwChannelList channels;
+	if (m_channelSource == ICASettings::AsRecorded) 
+		channels = AwChannel::getChannelsOfType(m_channels, modality);
+	else
+		channels = AwChannel::getChannelsOfType(m_montage, modality);
+
 	channels = AwChannel::removeDoublons(channels);
 	if (m_ui.ignoreBads->isChecked()) { // ignoring bad channels
 		auto badLabels = m_process->pdi.input.settings[keys::bad_labels].toStringList();
@@ -124,23 +173,36 @@ void ICASettings::accept()
 			return;
 	}
 
-	args["infomax_extended"] = m_ui.cbInfomaxExtended->isChecked();
 	if (m_ui.checkBoxDS->isChecked())
 		args["downsampling"] = true;
 
-	//m_process->pdi.input.settings.unite(args);
 	AwUniteMaps(m_process->pdi.input.settings, args);
+
+	// IMPORTANT:
+	// if current montage was chosen the replace input channels accordingly
+	if (m_channelSource == ICASettings::Montage)
+		m_process->pdi.input.setNewChannels(m_montage, true);
+
 	return QDialog::accept();
 }
 
 void ICASettings::updateMaxNumOfIC()
 {
-	auto modality = AwChannel::stringToType(m_modes.at(m_ui.comboModality->currentIndex()));
-	AwChannelList list = AwChannel::extractChannelsOfType(m_channels, modality);
+	int modality;
+	AwChannelList list;
+	if (m_channelSource == ICASettings::AsRecorded) {
+		modality = AwChannel::stringToType(m_modalitiesAsRecorded.at(m_ui.comboModality->currentIndex()));
+		list = AwChannel::extractChannelsOfType(m_channels, modality);
+	}
+	else {
+		modality = AwChannel::stringToType(m_modalitiesMontage.at(m_ui.comboModality->currentIndex()));
+		list = AwChannel::extractChannelsOfType(m_montage, modality);
+	}
+	
 	int count = list.size();
 	auto ignoreBadChannels = m_ui.ignoreBads->isChecked();
 	if (ignoreBadChannels) {
-		foreach (AwChannel *c, list) {
+		for (AwChannel *c : list) {
 			if (c->isBad())
 				count--;
 		}
@@ -148,4 +210,13 @@ void ICASettings::updateMaxNumOfIC()
 
 	m_ui.labelTotalIC->setText(QString::number(count));
 	m_ui.spinNC->setValue(count);
+
+	if (modality == AwChannel::SEEG) {
+		m_ui.checkSEEGElectrode->show();
+		m_ui.comboSEEGElectrode->show();
+	}
+	else {
+		m_ui.checkSEEGElectrode->hide();
+		m_ui.comboSEEGElectrode->hide();
+	}
 }

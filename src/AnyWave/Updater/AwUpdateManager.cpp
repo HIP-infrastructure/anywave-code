@@ -183,6 +183,7 @@ bool AwUpdateManager::checkForComponentsUpdates()
 			else { // the plugin is not installed yet
 				c->installedVersion = "Not installed";
 				c->updateAvailable = true;
+				updates = true;
 			}
 		}
 	}

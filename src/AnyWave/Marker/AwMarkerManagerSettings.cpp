@@ -685,11 +685,16 @@ void AwMarkerManagerSettings::openStats()
 {
 	if (m_statsWidget == nullptr) {
 		m_statsWidget = new AwStatsWidget;
-		connect(m_mm, &AwMarkerManager::updateStats, m_statsWidget, &AwStatsWidget::enableUpdate);
+		//	connect(m_mm, &AwMarkerManager::updateStats, m_statsWidget, &AwStatsWidget::enableUpdate);
+		m_statsWidget->show();
 	}
-
-
-	m_statsWidget->show();
+	else {
+		if (!m_statsWidget->isVisible()) {
+			m_statsWidget->compute();
+			m_statsWidget->setUpdateEnabled(false);
+			m_statsWidget->show();
+		}
+	}
 }
 
 void AwMarkerManagerSettings::writeTrigger()

@@ -772,7 +772,6 @@ AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem*
 //	return 0;
 //}
 
-
 int AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
 {
 	m_errorString.clear();
@@ -790,7 +789,6 @@ int AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
 		m_errorString = QString("Could not open %1 for reading.").arg(tsvPath);
 		return -1;
 	}
-	
 	QTextStream sourceStream(&sourceFile);
 	QString line = sourceStream.readLine();
 	QStringList columns = line.split('\t');
@@ -835,15 +833,12 @@ int AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
 	return 0;
 }
 
-
-
 QString AwBIDSManager::getCurrentBIDSPath()
 {
 	if (m_currentOpenItem == nullptr)
 		return QString();
 	return m_currentOpenItem->data(AwBIDSItem::PathRole).toString();
 }
-
 
 ///
 /// based in the item relative path, generate a derivatices file name based on the plugin  name.
@@ -880,9 +875,6 @@ QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * it
 	dir.mkpath(outputPath);
 	return outputPath;
 }
-
-
-
 
 void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 {
@@ -968,8 +960,6 @@ void AwBIDSManager::findItem(const QString& filePath)
 	}
 }
 
-
-
 void AwBIDSManager::newFile(AwFileIO *reader)
 {
 	// check if the new file is in a BIDS structure or not
@@ -986,10 +976,18 @@ void AwBIDSManager::newFile(AwFileIO *reader)
 		return;
 	}
 
+	// if current state is no BIDS open:
+	if (m_rootDir.isEmpty()) {
+		setRootDir(root);
+		// find the corresponding subject node
+		findItem(reader->fullPath());
+		return;
+	}
+
 	// root bids is different, close current BIDS and parse the new one.
 	if (root != m_rootDir) {
-		if (AwMessageBox::question(nullptr, "BIDS", "The file open is located inside another BIDS structure.\nSwitch to the other BIDS?",
-			QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+		if (AwMessageBox::information(nullptr, "BIDS", 
+			"You requested to open a file located inside another BIDS structure.\nThe current BIDS will be closed.")) {
 			closeBIDS();
 			setRootDir(root);
 			// find the corresponding subject node
@@ -1079,8 +1077,6 @@ AwChannelList AwBIDSManager::getChannelsTsvMontage()
 	}
 	return res;
 }
-
-
 
 AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 {
