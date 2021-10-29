@@ -2,7 +2,7 @@
 project(Spectral)
 add_definitions(-DQT_PLUGIN -DMKL)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ${SIGPACK_INCLUDE} ${MKL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ${SIGPACK_INCLUDE})
 
 SET(SRCS
 FFTIterations.cpp InputMarkersDial.cpp PlotWidget.cpp SIWidget.cpp Spectral.cpp)
