@@ -7,9 +7,9 @@ SET(ARMADILLO_INCLUDE /users/bruno/armadillo-9.400.4/include)
 ENDIF()
 INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ./matlab_common)
 
-FILE(SOBI sobi/*.cpp)
-FILE(INFOMAX infomax/*.cpp)
-FILE(MATLAB matlab_common/*.cpp)
+FILE(GLOB SOBI sobi/*.cpp)
+FILE(GLOB INFOMAX infomax/*.cpp)
+FILE(GLOB MATLAB matlab_common/*.cpp)
 
 SET(SRCS
    ICASettings.cpp
