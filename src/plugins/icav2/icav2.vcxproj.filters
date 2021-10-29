@@ -36,6 +36,12 @@
     <Filter Include="infomax">
       <UniqueIdentifier>{fbb59263-43a6-42c0-9e7e-f5cacde3d0d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="json">
+      <UniqueIdentifier>{9d1e284f-51c4-4e2b-830b-5732e9c5f8bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fast_ica">
+      <UniqueIdentifier>{9804f0e1-7b39-4a9f-b35c-c49fb3e508cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ica_global.h">
@@ -182,6 +188,12 @@
     <ClInclude Include="infomax\randlcg.h">
       <Filter>infomax</Filter>
     </ClInclude>
+    <ClInclude Include="fast_ica\ICAFastICA.h">
+      <Filter>fast_ica</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\ICAcca.h">
+      <Filter>cca</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ICASettings.h">
@@ -321,6 +333,12 @@
     <ClCompile Include="sobi\ICASobi.cpp">
       <Filter>sobi</Filter>
     </ClCompile>
+    <ClCompile Include="fast_ica\ICAFastICA.cpp">
+      <Filter>fast_ica</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\ICAcca.cpp">
+      <Filter>cca</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource.qrc">
@@ -334,5 +352,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+    <None Include="json\batch.json">
+      <Filter>json</Filter>
+    </None>
   </ItemGroup>
 </Project>

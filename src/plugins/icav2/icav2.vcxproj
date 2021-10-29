@@ -105,6 +105,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <QtMoc Include="ICAAlgorithm.h" />
+    <ClInclude Include="cca\ICAcca.h" />
+    <ClInclude Include="fast_ica\ICAFastICA.h" />
     <ClInclude Include="infomax\ICAInfomax.h" />
     <ClInclude Include="infomax\infomax_algo.h" />
     <ClInclude Include="infomax\r250.h" />
@@ -162,8 +164,10 @@
     <ClCompile Include="cca\cca_data.cpp" />
     <ClCompile Include="cca\cca_initialize.cpp" />
     <ClCompile Include="cca\cca_terminate.cpp" />
+    <ClCompile Include="cca\ICAcca.cpp" />
     <ClCompile Include="cca\qr.cpp" />
     <ClCompile Include="cca\run_cca.cpp" />
+    <ClCompile Include="fast_ica\ICAFastICA.cpp" />
     <ClCompile Include="ica.cpp" />
     <ClCompile Include="ICAAlgorithm.cpp" />
     <ClCompile Include="ICASettings.cpp" />
@@ -208,6 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+    <None Include="json\batch.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

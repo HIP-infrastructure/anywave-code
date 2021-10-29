@@ -131,11 +131,13 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 	break;
 	case AwChannel::ICA:
 	{
-		vec a = regspace(1, 1, 9);
-		vec b = regspace(10, 1, 100000);
+		vec a = regspace(0.001, 0.1, 0.9);
+		vec b = regspace(1, 2, 9);
 		values = join_cols(a, b);
-		unit = QString("??/cm");
-		value = 310;
+		b = regspace(10, 1, 100000);
+		values = join_cols(a, b);
+		unit = QString("ica/cm");
+		value = 1;
 		gl->setValues(values);
 		gl->setValue(value);
 		gl->setUnit(unit);

@@ -20,6 +20,14 @@
 #include <aw_armadillo.h>
 class ICAAlgorithm;
 
+namespace keys {
+	constexpr auto comp = "comp";
+	constexpr auto use_seeg_electrode = "use_seeg_electrode";
+	constexpr auto modality = "modality";
+	constexpr auto downsampling = "downsampling";
+	constexpr auto algorithm = "algorithm";
+}
+
 class ICA_EXPORT ICA : public AwProcess
 {
 	Q_OBJECT
@@ -46,6 +54,8 @@ private:
 	bool m_ignoreBadChannels;
 	int m_nComp;
 	bool m_isDownsamplingActive;
+	bool m_SEEGElectrodeMode;
+	QString m_SEEGElectrode;
 	QString m_fileName;
 	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate;

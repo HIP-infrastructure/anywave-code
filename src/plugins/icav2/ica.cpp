@@ -33,13 +33,8 @@
 #include <AwKeys.h>
 #include "infomax/ICAInfomax.h"
 #include "sobi/ICASobi.h"
+// #include "fast_ica/ICAFastICA.h"  // removed Fast ICA algo => seems to not converge very often
 
-
-namespace algos {
-	constexpr auto ICA_infomax = 0;
-	constexpr auto ICA_cca = 1;
-	constexpr auto ICA_sobi = 2;
-}
 
 ICA::ICA()
 {
@@ -55,6 +50,9 @@ ICA::ICA()
 	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 	auto sobi = new ICASobi(this);
 	connect(sobi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+//	auto fast_ica = new ICAFastICA(this);
+//	connect(fast_ica, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+//	m_algorithms << infomax << sobi << fast_ica;
 	m_algorithms << infomax << sobi;
 }
 
@@ -118,7 +116,7 @@ bool ICA::batchParameterCheck(const QVariantMap& hash)
 {
 	// this is an exhaustive test as we don't have a file open at this stage.
 	// just checking for some parameters: 
-	return hash.value("comp").toInt() > 1;
+	return hash.value(keys::comp).toInt() > 1;
 }
 
 int ICA::initParameters()
@@ -129,7 +127,7 @@ int ICA::initParameters()
 		algoNames << algo->name();
 
 	m_isDownsamplingActive = false;
-	m_modality = AwChannel::stringToType(args.value("modality").toString());
+	m_modality = AwChannel::stringToType(args.value(keys::modality).toString());
 	if (m_modality == -1) {
 		sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
 		return -1;
@@ -138,7 +136,7 @@ int ICA::initParameters()
 	// BIDS specific:
 	// when launching ICA in batch mode and specifying ieeg as modality:
 	// check for SEEG channels if none present check for EEG.
-	if (args.value("modality").toString().toLower() == "ieeg") {
+	if (args.value(keys::modality).toString().toLower() == "ieeg") {
 		m_modality = AwChannel::SEEG;
 		m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 		if (m_channels.isEmpty()) {
@@ -146,6 +144,18 @@ int ICA::initParameters()
 			m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 		}
 	}
+
+	if (args.contains(keys::use_seeg_electrode) && m_modality == AwChannel::SEEG) {
+		QString label = args.value(keys::use_seeg_electrode).toString();
+		sendMessage(QString("Will compute only on SEEG electrode:%1").arg(label));
+		AwChannelList list;
+		for (auto c : m_channels) {
+			if (c->name().startsWith(label))
+				list << c;
+		}
+		m_channels = list;
+	}
+
 	if (m_channels.isEmpty()) {
 		sendMessage(QString("No channels of type %1 found in file").arg(AwChannel::typeToString(m_modality)));
 		return -1;
@@ -158,8 +168,8 @@ int ICA::initParameters()
 			badLabels.clear();
 	}
 	m_samplingRate = m_channels.first()->samplingRate();
-	if (args.contains("downsampling"))
-		m_isDownsamplingActive = args.value("downsampling").toBool();
+	if (args.contains(keys::downsampling))
+		m_isDownsamplingActive = args.value(keys::downsampling).toBool();
 	// check for bad labels 
 	if (!badLabels.isEmpty()) {
 		foreach(AwChannel *c, m_channels)
@@ -168,8 +178,8 @@ int ICA::initParameters()
 	}
 	m_nComp = m_channels.size();
 
-	if (args.contains("comp"))
-		m_nComp = args.value("comp").toInt();
+	if (args.contains(keys::comp))
+		m_nComp = args.value(keys::comp).toInt();
 
 	// check algo
 	// some algos have a fixed number of components (no PCA)
@@ -288,7 +298,7 @@ int ICA::initParameters()
 	if (args.contains(keys::output_prefix))
 		m_fileName = QString("%1%2").arg(args.value(keys::output_prefix).toString()).arg(m_fileName);
 
-	QString mod = args.value("modality").toString();
+	QString mod = args.value(keys::modality).toString();
 	if (args.contains(keys::output_suffix))
 		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica

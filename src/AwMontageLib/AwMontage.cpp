@@ -326,6 +326,27 @@ void AwMontage::removeBadChannels(AwChannelList& channels, const QStringList& ba
 	tmp.clear();
 }
 
+/// <summary>
+/// getElectrodeLabelAndIndex()
+/// Should be applied to SEEG channel. Extract the base label name and the electrode number. (ie. A1 => A andt 1)
+/// </summary>
+/// <param name="chan"></param>
+/// <param name="label"></param>
+/// <returns></returns>
+int AwMontage::getElectrodeLabelAndIndex(AwChannel* chan, QString& label)
+{
+	QRegularExpression exp("(\\d+)$");
+	QRegularExpressionMatch match;
+
+	match = exp.match(chan->name());
+	if (match.hasMatch()) {
+		label = chan->name();
+		label = label.remove(exp);
+		return match.captured(1).toInt();
+	}
+	return -1; // no electrode number in electrode label.
+}
+
 
 void AwMontage::loadBadChannels()
 {

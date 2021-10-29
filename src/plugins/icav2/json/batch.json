@@ -1,5 +1,5 @@
 {
-  "parameters": [ "modality", "comp", "algorithm" ],
+  "parameters": [ "modality", "comp", "algorithm", "use_seeg_electrode" ],
   "flags": [ "infomax_extended", "skip_bad", "downsampling" ],
   "inputs": {
     "input_file": "any file"
@@ -13,11 +13,12 @@
     "comp": [ "Components", "int" ],
     "modality": [ "Modality", "list" ],
     "downsampling": [ "Downsampling data", "boolean" ],
+    "use_seeg_electrode":  ["Use SEEG electode", "string"],
     "skip_markers": [ "Avoid markers", "stringlist" ],
     "use_markers": [ "Use markers", "stringlist" ],
     "infomax_extended": [ "Infomax extended mode", "boolean" ],
     "skip_bad": [ "Skip bad channels", "boolean" ],
-    "fields_ordering": [ "algorithm", "comp", "hp", "lp", "modality", "skip_bad", "downsampling", "infomax_extended", "skip_markers", "use_markers" ]
+    "fields_ordering": [ "algorithm", "comp", "use_seeg_electrode", "hp", "lp", "modality", "skip_bad", "downsampling", "infomax_extended", "skip_markers", "use_markers" ]
   },
   "batch_defaults": {
     "input_file" :  "File",
@@ -25,6 +26,7 @@
     "lp": 0,
 	"algorithm": [ "infomax", "cca", "sobi" ],
     "comp": 50,
+    "use_seeg_electrode" :  "",
     "modality": [ "MEG", "EEG", "SEEG", "EMG" ],
     "downsampling": false,
     "skip_markers": "",

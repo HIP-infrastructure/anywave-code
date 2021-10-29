@@ -473,8 +473,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>374</x>
-     <y>394</y>
+     <x>248</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>276</x>
@@ -489,8 +489,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>455</x>
-     <y>394</y>
+     <x>329</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>139</x>
@@ -505,12 +505,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>244</x>
-     <y>277</y>
+     <x>282</x>
+     <y>336</y>
     </hint>
     <hint type="destinationlabel">
-     <x>159</x>
-     <y>276</y>
+     <x>181</x>
+     <y>338</y>
     </hint>
    </hints>
   </connection>
@@ -522,11 +522,27 @@
    <hints>
     <hint type="sourcelabel">
      <x>282</x>
-     <y>275</y>
+     <y>336</y>
     </hint>
     <hint type="destinationlabel">
-     <x>301</x>
-     <y>275</y>
+     <x>314</x>
+     <y>334</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkSEEGElectrode</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>comboSEEGElectrode</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>48</x>
+     <y>230</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>229</y>
     </hint>
    </hints>
   </connection>
