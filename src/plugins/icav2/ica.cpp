@@ -33,13 +33,12 @@
 #include <AwKeys.h>
 #include "infomax/ICAInfomax.h"
 #include "sobi/ICASobi.h"
-// #include "fast_ica/ICAFastICA.h"  // removed Fast ICA algo => seems to not converge very often
 
 
 ICA::ICA()
 {
 	setInputFlags(Aw::ProcessIO::GetAsRecordedChannels | Aw::ProcessIO::DontSkipBadChannels |
-		Aw::ProcessIO::GetProcessPluginNames |Aw::ProcessIO::GetDurationMarkers);
+		Aw::ProcessIO::GetProcessPluginNames | Aw::ProcessIO::GetDurationMarkers | Aw::ProcessIO::GetWriterPlugins);
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	pdi.addInputChannel(-1, 1, 0);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
@@ -50,9 +49,6 @@ ICA::ICA()
 	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 	auto sobi = new ICASobi(this);
 	connect(sobi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-//	auto fast_ica = new ICAFastICA(this);
-//	connect(fast_ica, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-//	m_algorithms << infomax << sobi << fast_ica;
 	m_algorithms << infomax << sobi;
 }
 
@@ -127,12 +123,12 @@ int ICA::initParameters()
 		algoNames << algo->name();
 
 	m_isDownsamplingActive = false;
-	m_modality = AwChannel::stringToType(args.value(keys::modality).toString());
-	if (m_modality == -1) {
-		sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
-		return -1;
-	}
-	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+	//m_modality = AwChannel::stringToType(args.value(keys::modality).toString());
+	//if (m_modality == -1) {
+	//	sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
+	//	return -1;
+	//}
+	//m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 	// BIDS specific:
 	// when launching ICA in batch mode and specifying ieeg as modality:
 	// check for SEEG channels if none present check for EEG.
@@ -144,6 +140,14 @@ int ICA::initParameters()
 			m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 		}
 	}
+	else {
+		m_modality = AwChannel::stringToType(args.value(keys::modality).toString());
+		if (m_modality == -1) {
+			sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
+			return -1;
+		}
+	}
+	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 
 	if (args.contains(keys::use_seeg_electrode) && m_modality == AwChannel::SEEG) {
 		QString label = args.value(keys::use_seeg_electrode).toString();
@@ -153,12 +157,11 @@ int ICA::initParameters()
 			if (c->name().startsWith(label))
 				list << c;
 		}
+		if (list.isEmpty()) {
+			sendMessage(QString("use_seeg_electrode: the specified electrode is not present in file or specified montage."));
+			return -1;
+		}
 		m_channels = list;
-	}
-
-	if (m_channels.isEmpty()) {
-		sendMessage(QString("No channels of type %1 found in file").arg(AwChannel::typeToString(m_modality)));
-		return -1;
 	}
 
 	m_channels = AwChannel::removeDoublons(m_channels);
@@ -261,7 +264,7 @@ int ICA::initParameters()
 
 	// check for nan values
 	if (AwMath::isNanInChannels(m_channels)) {
-		sendMessage("A Nan value was detected in the data. Computation aborted.");
+		sendMessage("nan value detected in data. Computation aborted.");
 		return -1;
 	}
 
@@ -299,12 +302,17 @@ int ICA::initParameters()
 		m_fileName = QString("%1%2").arg(args.value(keys::output_prefix).toString()).arg(m_fileName);
 
 	QString mod = args.value(keys::modality).toString();
-	if (args.contains(keys::output_suffix))
+	if (args.contains(keys::output_suffix)) 
 		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica
 	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5_ica.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
 	// generate full path
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
+
+	// check if we have to export components time series
+	if (args.contains(keys::save_comp_traces)) 
+		m_componentsEEGFileName = m_fileName.replace(QRegularExpression("\\.[^.]*$"), ".vhdr");
+	
 	return 0;
 }
 
@@ -320,6 +328,9 @@ void ICA::runFromCommandLine()
 			m_mixing = m_selectedAlgo->mixing();
 			m_unmixing = m_selectedAlgo->unmixing();
 			saveToFile();
+			if (!m_componentsEEGFileName.isEmpty()) {
+				exportComponents();
+			}
 		}
 	}
 	catch (std::bad_alloc& ba) {
@@ -362,6 +373,28 @@ void ICA::run()
 		e2->addValue("filters", filters);
 		emit sendEvent(e2);
 	}
+}
+
+void ICA::exportComponents()
+{
+	Q_ASSERT(!m_componentsEEGFileName.isEmpty());
+	bool found = false; // find brain vision plugin
+	AwFileIOPlugin *plugin = nullptr;
+	for (auto p : pdi.input.writers) {
+		if (p->name == "Brainvision Analyser Format") {
+			found = true;
+			plugin = p;
+			break;
+		}
+	}
+	if (!found)
+		return;
+	auto writer = plugin->newInstance();
+	if (writer->createFile(m_componentsEEGFileName) != AwFileIO::NoError) {
+		sendMessage(QString("Error creating %1 file. No components traces exported").arg(m_componentsEEGFileName));
+		return;
+	}
+
 }
 
 void ICA::saveToFile()

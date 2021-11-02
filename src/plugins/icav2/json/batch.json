@@ -1,6 +1,7 @@
 {
-  "parameters": [ "modality", "comp", "algorithm", "use_seeg_electrode" ],
+  "parameters": [ "modality", "comp", "algorithm", "use_seeg_electrode"],
   "flags": [ "infomax_extended", "skip_bad", "downsampling" ],
+  "switches": ["save_comp_traces"],
   "inputs": {
     "input_file": "any file"
   },
@@ -24,7 +25,7 @@
     "input_file" :  "File",
     "hp": 0,
     "lp": 0,
-	"algorithm": [ "infomax", "cca", "sobi" ],
+	  "algorithm": [ "infomax", "sobi" ],
     "comp": 50,
     "use_seeg_electrode" :  "",
     "modality": [ "MEG", "EEG", "SEEG", "EMG" ],

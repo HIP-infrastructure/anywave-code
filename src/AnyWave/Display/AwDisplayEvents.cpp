@@ -32,12 +32,28 @@ void AwDisplay::processEvent(QSharedPointer<AwEvent> e)
 	case AwEvent::AddNewView:
 	{
 		QStringList filters = data.value("filters").toStringList();
+		// get signal views and check if one of them already display channels of same modality
 		AwViewSetup* ns = m_setup->newViewSetup();
 		if (filters.size()) {
 			ns->filters.clear();
-			for (const QString& f : filters) 
+			for (const QString& f : filters)
 				ns->filters.append(AwChannel::stringToType(f));
 		}
+
+		QList<int> tmp;
+		for (auto f : ns->filters) {
+			for (auto view : m_signalViews) {
+				const auto& filters = view->settings()->filters;
+				if (filters.contains(f)) 
+					// found a view that already displays one of the filters
+					tmp << f;
+			}
+		}
+		if (tmp.size() >= ns->filters.size()) {
+			return;
+		}
+		for (auto t : tmp)
+			ns->filters.removeAll(t);
 		addSignalView(ns);
 	}
 	break;

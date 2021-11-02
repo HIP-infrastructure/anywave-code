@@ -74,7 +74,6 @@ public slots:
 	void setAmplitude(int type, float value);
 	void setAmplitudes();
 	void setPositionInFile(float pos);
-	//void setSelectedChannels(AwChannelList& channels);
 	virtual void reloadData();	// reload data after filtering options or settings changed
 	virtual void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
 	virtual void updateSettings(AwViewSettings *settings, int flags);

@@ -26,6 +26,7 @@ namespace keys {
 	constexpr auto modality = "modality";
 	constexpr auto downsampling = "downsampling";
 	constexpr auto algorithm = "algorithm";
+	constexpr auto save_comp_traces = "save_comp_traces";
 }
 
 class ICA_EXPORT ICA : public AwProcess
@@ -46,6 +47,7 @@ public:
 private:
 	int initParameters();
 	void saveToFile();
+	void exportComponents();
 
 	void run_cca(int m, int n);
     int m_modality;
@@ -56,7 +58,7 @@ private:
 	bool m_isDownsamplingActive;
 	bool m_SEEGElectrodeMode;
 	QString m_SEEGElectrode;
-	QString m_fileName;
+	QString m_fileName, m_componentsEEGFileName;
 	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate;
 	AwChannelList m_channels, m_montage; // now we handle also the computation on current montage

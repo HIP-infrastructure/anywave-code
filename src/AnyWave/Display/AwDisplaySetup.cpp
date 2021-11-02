@@ -51,6 +51,8 @@ AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
 
 AwDisplaySetup::~AwDisplaySetup()
 {
+	while (!m_ds.isEmpty())
+		delete m_ds.takeFirst();
 }
 
 void AwDisplaySetup::setSynchronized(bool flag)

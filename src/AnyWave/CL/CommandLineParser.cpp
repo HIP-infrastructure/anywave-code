@@ -144,6 +144,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	auto jsonCollection = AwPluginManager::getInstance()->getBatchableArguments();
 	QStringList parameterNames;
 	QStringList flagNames;
+	QStringList switches;
 	for (auto const& json : jsonCollection) {
 		QString error;
 		auto map = AwUtilities::json::mapFromJsonString(json, error);
@@ -162,10 +163,18 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 						flagNames << f;
 				}
 			}
+			if (map.contains("switches")) {
+				auto sw = map.value("switches").toStringList();
+				for (auto s : sw) {
+					if (!switches.contains(s))
+						switches << s;
+				}
+			}
 		}
 	}
 	QMap<QString, QCommandLineOption *> mapParams;
 	QMap<QString, QCommandLineOption *> mapFlags;
+	QMap<QString, QCommandLineOption*> mapSwitches;
 	for (auto const& param : parameterNames) {
 		// avoid duplicating plugin parameters with same name
 		if (mapParams.contains(param))
@@ -182,6 +191,16 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		mapFlags.insert(flag, option);
 		parser.addOption(*option);
 	}
+	for (auto const& sw : switches) {
+		// avoid duplicating plugin switches with same name
+		if (mapSwitches.contains(sw))
+			continue;
+		auto option = new QCommandLineOption(sw, "plugin argument switch");
+		mapSwitches.insert(sw, option);
+		parser.addOption(*option);
+	}
+
+
 	   	  
 	if (!parser.parse(args)) {
 		exception.setError(parser.errorText());
@@ -208,12 +227,19 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 			arguments[k] = parser.value(*option);
 		}
 	}
-	// flags are special arguments for which value must be true or false (yes or no is also accepted)
+	for (auto const& sw : switches) {
+		auto option = mapSwitches.value(sw);
+		if (parser.isSet(*option))
+			arguments[sw] = true;
+	}
+	//// flags are special arguments for which value must be true or false (yes or no is also accepted)
 	QStringList flagsValues = { "yes", "no", "true", "false" };
 	for (auto k : mapFlags.keys()) {
 		auto option = mapFlags.value(k);
 		if (parser.isSet(*option)) {
 			auto value = parser.value(*option).toLower().simplified();
+			if (value.isEmpty())
+				value = "true";
 			if (flagsValues.contains(value))
 				arguments[k] = value == "true" || value == "yes";
 		}
@@ -222,6 +248,9 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		delete v;
 	for (auto v : mapFlags.values())
 		delete v;
+	for (auto v : mapSwitches.values())
+		delete v;
+
 
 	// output_format 
 	auto format = parser.value(outputFormatO).toLower();
