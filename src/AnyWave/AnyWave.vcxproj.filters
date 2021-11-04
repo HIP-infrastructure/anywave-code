@@ -220,9 +220,6 @@
     <ClCompile Include="Prefs\AwSettings.cpp">
       <Filter>Prefs</Filter>
     </ClCompile>
-    <ClCompile Include="Process\AwConverter.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwMatlabScriptPlugin.cpp">
       <Filter>Process</Filter>
     </ClCompile>
@@ -755,9 +752,6 @@
     </QtUic>
     <QtMoc Include="Prefs\AwSettings.h">
       <Filter>Prefs</Filter>
-    </QtMoc>
-    <QtMoc Include="Process\AwConverter.h">
-      <Filter>Process</Filter>
     </QtMoc>
     <QtMoc Include="Process\AwMatlabScriptPlugin.h">
       <Filter>Process</Filter>

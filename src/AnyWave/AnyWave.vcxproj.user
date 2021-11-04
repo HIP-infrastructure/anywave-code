@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>--run ica --input_file D:\Data\scales\RolMi0002.vhdr --modality seeg --output_dir d:\data\scales --save_comp_traces --use_seeg_electrode OP</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--plugin_debug --server_port 59000</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -11,9 +11,9 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtLastBackgroundBuild>2021-11-02T11:14:57.8039261Z</QtLastBackgroundBuild>
+    <QtLastBackgroundBuild>2021-11-03T12:17:41.0278182Z</QtLastBackgroundBuild>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtLastBackgroundBuild>2021-10-28T10:04:24.2617392Z</QtLastBackgroundBuild>
+    <QtLastBackgroundBuild>2021-11-04T09:17:24.2424663Z</QtLastBackgroundBuild>
   </PropertyGroup>
 </Project>

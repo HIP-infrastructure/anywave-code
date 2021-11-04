@@ -105,6 +105,9 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	parser.addOption(outputDirO);
 	parser.addOption(outputPrefixO);
 	parser.addOption(outputSuffixO);
+	// new pick_channels option
+	QCommandLineOption pickChannelsO("pick_channels", "pick channels as input", "pick_channels", QString());
+	parser.addOption(pickChannelsO);
 	// common filters flags
 	QCommandLineOption filterHPO("hp", "specify the High Pass filter (Hz).", "hp", QString());
 	QCommandLineOption filterLPO("lp", "specify the Low Pass filter (Hz).", "lp", QString());
@@ -172,8 +175,8 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 			}
 		}
 	}
-	QMap<QString, QCommandLineOption *> mapParams;
-	QMap<QString, QCommandLineOption *> mapFlags;
+	QMap<QString, QCommandLineOption*> mapParams;
+	QMap<QString, QCommandLineOption*> mapFlags;
 	QMap<QString, QCommandLineOption*> mapSwitches;
 	for (auto const& param : parameterNames) {
 		// avoid duplicating plugin parameters with same name
@@ -199,9 +202,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		mapSwitches.insert(sw, option);
 		parser.addOption(*option);
 	}
-
-
-	   	  
+   	  
 	if (!parser.parse(args)) {
 		exception.setError(parser.errorText());
 		throw exception;
@@ -276,12 +277,16 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		if (ok)
 			arguments[keys::create_montage] = tmp;
 	}
+	// pick_channels
+	tmp = parser.value(pickChannelsO);
+	if (!tmp.isEmpty())
+		arguments[keys::pick_channels] = tmp;
 
 	// marker_file
 	tmp = parser.value(markerFileO);
 	if (!tmp.isEmpty())
 		arguments[keys::marker_file] = tmp;
-	// montager_file
+	// montage_file
 	tmp = parser.value(montageFileO);
 	if (!tmp.isEmpty())
 		arguments[keys::montage_file] = tmp;

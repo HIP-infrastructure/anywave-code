@@ -45,8 +45,8 @@ protected slots:
 	void restrictSEEGElectrode(bool flag);
 private:
 	Ui::ICASettingsUI m_ui;
-	AwChannelList m_channels, m_montage;
-	QStringList m_modalitiesAsRecorded, m_modalitiesMontage;
+	AwChannelList m_channels, m_rawChannels;
+	QStringList m_modalitiesMontage, m_modalitiesAsRecorded;
 	QStringList m_labels, m_seegElectrodes;
 	int m_channelSource;
 	ICA *m_process;

@@ -141,7 +141,6 @@
     <ClCompile Include="Prefs\AwPreferences.cpp" />
     <ClCompile Include="Prefs\AwPrefsDial.cpp" />
     <ClCompile Include="Prefs\AwSettings.cpp" />
-    <ClCompile Include="Process\AwConverter.cpp" />
     <ClCompile Include="Process\AwExporter.cpp" />
     <ClCompile Include="Process\AwExporterMarkerModel.cpp" />
     <ClCompile Include="Process\AwExporterSelMarkers.cpp" />
@@ -378,8 +377,6 @@
     <QtMoc Include="Process\AwProcessesWidget.h">
     </QtMoc>
     <QtMoc Include="Process\AwMatlabScriptPlugin.h">
-    </QtMoc>
-    <QtMoc Include="Process\AwConverter.h">
     </QtMoc>
     <QtMoc Include="Prefs\AwSettings.h">
     </QtMoc>

@@ -34,6 +34,7 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 	emit progressChanged("Opening MATLAB Connection...");
 	
 	using namespace matlab::engine;
+	using namespace matlab::data;
 	typedef std::basic_stringbuf<char16_t> StringBuf;
 	std::shared_ptr<StringBuf> output = std::make_shared<StringBuf>();
 	std::shared_ptr<StringBuf> error = std::make_shared<StringBuf>();
@@ -59,10 +60,10 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 		if (!args.isEmpty()) {
 			cppString = args.toStdString();
 			m_matlabPtr->setVariable(u"args", factory.createCharArray(cppString), matlab::engine::WorkspaceType::BASE);
-			m_matlabPtr->eval(u"args=jsondecode(args);", output, error);
+		//	m_matlabPtr->eval(u"args=jsondecode(args);", output, error);
 		}
 		else {
-			m_matlabPtr->setVariable(u"args", factory.createEmptyArray(), matlab::engine::WorkspaceType::BASE);
+			m_matlabPtr->setVariable(u"args", factory.createCharArray(""), matlab::engine::WorkspaceType::BASE);
 			emit progressChanged("args is empty.");
 		}
 
@@ -72,19 +73,34 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 		QString pluginPath = settings.value(matlab_interface::matlab_plugin_dir).toString();
 		cppString = pluginPath.toStdString();
 		m_matlabPtr->feval(u"addpath", factory.createCharArray(cppString), output, error);
-		m_matlabPtr->eval(u"main", output, error);
 
+		m_matlabPtr->eval(u"main", output, error);
+		// create varargin 
+		//cppString = args.toStdString();
+		//CellArray varargin = factory.createCellArray({ 1, 4 });
+		//varargin[0][0] = factory.createCharArray(host);
+		//varargin[0][1] = factory.createScalar<double>(dport);
+		//varargin[0][2] = factory.createScalar<double>(dpid);
+		//varargin[0][3] = factory.createCharArray(cppString);
+		//m_matlabPtr->setVariable(u"test", std::move(varargin), matlab::engine::WorkspaceType::BASE);
+		//m_matlabPtr->feval(u"main", varargin, output, error);
+		//m_matlabPtr->feval(u"disp", factory.createCharArray("varargin"), output, error);
+	
 		String output_ = output.get()->str();
-		emit progressChanged(QString::fromStdU16String(output_));
+		if (output_.size())
+			emit progressChanged(QString::fromStdU16String(output_));
+		String error_ = error.get()->str();
+		if (error_.size())
+			emit progressChanged(QString::fromStdU16String(error_));
+
 	}
 	catch (const matlab::engine::EngineException& e)
 	{
-		emit progressChanged(QString("MATLAB Support error: %1").arg(QString(e.what())));
-		return;
+		emit progressChanged(QString("MATLAB Engine Exception: %1").arg(QString(e.what())));
 	}
 	catch (const matlab::engine::MATLABExecutionException& e)
 	{
-		emit progressChanged(QString("MATLAB Support error: %1").arg(QString(e.what())));
+		emit progressChanged(QString("MATLAB Engine Execution: %1").arg(QString(e.what())));
 
 	}
 	catch (matlab::engine::MATLABSyntaxException& e)

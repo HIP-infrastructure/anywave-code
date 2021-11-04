@@ -20,7 +20,7 @@ AwConverterPlugin::AwConverterPlugin()
 {
 	name = QString("File Format Converter");
 	description = QString(tr("Export data to file"));
-	version = "1.0";
+	version = "1.0.0";
 	type = AwProcessPlugin::Background;
 }
 

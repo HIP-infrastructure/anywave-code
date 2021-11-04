@@ -317,7 +317,7 @@ void AwMontage::removeBadChannels(AwChannelList& channels, const QStringList& ba
 		return;
 	AwChannelList tmp;
 	for (auto c : channels) {
-		if (badLabels.contains(c->name()))
+		if (badLabels.contains(c->name()) || badLabels.contains(c->referenceName()))
 			tmp << c;
 	}
 	for (auto c : tmp)

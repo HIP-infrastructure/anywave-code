@@ -185,21 +185,62 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			}
 		}
 		else {
-			if (args.contains(keys::montage_file)) { // did we finally got a montage file?
-				montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
-					process->pdi.input.settings.value(keys::bad_labels).toStringList());
-				logger.sendLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
-				if (montage.isEmpty()) { // error when loading and/or applying mtg file
-					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()));
-					return -1;
+			// New: test for pick_channels options
+			// --pick_channels "chan1, chan2, ..."
+			bool pickChannels = false;
+			if (args.contains(keys::pick_channels)) {
+				QStringList channels = args.value(keys::pick_channels).toString().split(",");
+				if (channels.isEmpty()) 
+					logger.sendLog(QString("--pick_channels option is invalid. Going back to default montage options."));
+				else {
+					auto rawChannels = dm->rawChannels();
+					QMap<QString, AwChannel*> map;
+					for (auto r : rawChannels)
+						map.insert(r->name(), r);
+					for (auto const& label : channels) {
+						// get raw channel (from as recorded)		
+						QString chanName, refName;
+						if (label.contains('-')) {
+							auto splitted = label.split('-');
+							if (splitted.size() == 2) {
+								chanName = splitted.first().trimmed();
+								refName = splitted.last().trimmed();
+							}
+						}
+						else
+							chanName = label.trimmed();
+						auto asRecordedChannel = map.value(chanName);
+						if (asRecordedChannel) {
+							AwChannel* channel = new AwChannel(asRecordedChannel);
+							if (!refName.isEmpty())
+								channel->setReferenceName(refName);
+							montage << channel;
+						}
+					}
+					if (!montage.isEmpty()) {
+						pickChannels = true;
+						if (skipBad)
+							AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+					}
 				}
 			}
-			else { // no montage specified or detected
-				// applying default file montage
-				montage = AwChannel::duplicateChannels(dm->rawChannels());
-				logger.sendLog(QString("No montage file specified or detected, using as recorded channels"));
-				if (skipBad)
-					AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+			if (!pickChannels) {
+				if (args.contains(keys::montage_file)) { // did we finally got a montage file?
+					montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
+						process->pdi.input.settings.value(keys::bad_labels).toStringList());
+					logger.sendLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
+					if (montage.isEmpty()) { // error when loading and/or applying mtg file
+						throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()));
+						return -1;
+					}
+				}
+				else { // no montage specified or detected
+					// applying default file montage
+					montage = AwChannel::duplicateChannels(dm->rawChannels());
+					logger.sendLog(QString("No montage file specified or detected, using as recorded channels"));
+					if (skipBad)
+						AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+				}
 			}
 		}
 

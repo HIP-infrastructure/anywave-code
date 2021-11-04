@@ -27,16 +27,8 @@ ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 	// the plugin is configured to get as recorded channels as input when launched.
 	m_channels = process->pdi.input.channels();
 	// but we need also the current montage
-	m_montage = process->montage();
-	m_modalitiesAsRecorded = AwChannel::getTypesAsString(m_channels);
-	// remove unwanted modalities
-	m_modalitiesAsRecorded.removeAll("TRIGGER");
-	m_modalitiesAsRecorded.removeAll("ECG");
-	m_modalitiesAsRecorded.removeAll("OTHER");
-	m_modalitiesAsRecorded.removeAll("ICA");
-	m_modalitiesAsRecorded.removeAll("REFERENCE");
-	m_modalitiesAsRecorded.removeAll("GRAD");
-	m_modalitiesMontage = AwChannel::getTypesAsString(m_montage);
+	m_rawChannels = process->rawChannels();
+	m_modalitiesMontage = AwChannel::getTypesAsString(m_channels);
 	// remove unwanted modalities
 	m_modalitiesMontage.removeAll("TRIGGER");
 	m_modalitiesMontage.removeAll("ECG");
@@ -44,9 +36,17 @@ ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 	m_modalitiesMontage.removeAll("ICA");
 	m_modalitiesMontage.removeAll("REFERENCE");
 	m_modalitiesMontage.removeAll("GRAD");
+	m_modalitiesAsRecorded = AwChannel::getTypesAsString(m_rawChannels);
+	// remove unwanted modalities
+	m_modalitiesAsRecorded.removeAll("TRIGGER");
+	m_modalitiesAsRecorded.removeAll("ECG");
+	m_modalitiesAsRecorded.removeAll("OTHER");
+	m_modalitiesAsRecorded.removeAll("ICA");
+	m_modalitiesAsRecorded.removeAll("REFERENCE");
+	m_modalitiesAsRecorded.removeAll("GRAD");
 
+	// default input channels are as recorded ones
 	m_channelSource = ICASettings::AsRecorded;
-
 	m_ui.comboModality->addItems(m_modalitiesAsRecorded);
 
 	if (!process->pdi.input.markers().isEmpty())
@@ -131,9 +131,9 @@ void ICASettings::changeSEEGElectrode(int index)
 	auto label = m_seegElectrodes.at(index);
 	AwChannelList list;
 	if (m_channelSource == ICASettings::AsRecorded)
-		list = m_channels;
+		list = m_rawChannels;
 	else
-		list = m_montage;
+		list = m_channels;
 	int count = 0;
 	for (auto c : list) {
 		if (c->name().startsWith(label))
@@ -173,9 +173,9 @@ void ICASettings::accept()
 	// get channels matching modality
 	AwChannelList channels;
 	if (m_channelSource == ICASettings::AsRecorded) 
-		channels = AwChannel::getChannelsOfType(m_channels, modality);
+		channels = AwChannel::getChannelsOfType(m_rawChannels, modality);
 	else
-		channels = AwChannel::getChannelsOfType(m_montage, modality);
+		channels = AwChannel::getChannelsOfType(m_channels, modality);
 
 	// add new option Restrict to SEEG
 	if (m_ui.checkSEEGElectrode->isChecked() && modality == AwChannel::SEEG) {
@@ -222,9 +222,9 @@ void ICASettings::accept()
 	AwUniteMaps(m_process->pdi.input.settings, args);
 
 	// IMPORTANT:
-	// if current montage was chosen the replace input channels accordingly
-	if (m_channelSource == ICASettings::Montage)
-		m_process->pdi.input.setNewChannels(m_montage, true);
+	// if As Recorded channels are chosen, then replace default input channels by as recorded channels
+	if (m_channelSource == ICASettings::AsRecorded)
+		m_process->pdi.input.setNewChannels(m_rawChannels, true);
 
 	return QDialog::accept();
 }
@@ -235,11 +235,11 @@ void ICASettings::updateMaxNumOfIC()
 	AwChannelList list;
 	if (m_channelSource == ICASettings::AsRecorded) {
 		modality = AwChannel::stringToType(m_modalitiesAsRecorded.at(m_ui.comboModality->currentIndex()));
-		list = AwChannel::extractChannelsOfType(m_channels, modality);
+		list = AwChannel::extractChannelsOfType(m_rawChannels, modality);
 	}
 	else {
 		modality = AwChannel::stringToType(m_modalitiesMontage.at(m_ui.comboModality->currentIndex()));
-		list = AwChannel::extractChannelsOfType(m_montage, modality);
+		list = AwChannel::extractChannelsOfType(m_channels, modality);
 	}
 	if (modality == AwChannel::SEEG) {
 		m_seegElectrodes.clear();

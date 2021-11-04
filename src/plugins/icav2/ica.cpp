@@ -37,7 +37,7 @@
 
 ICA::ICA()
 {
-	setInputFlags(Aw::ProcessIO::GetAsRecordedChannels | Aw::ProcessIO::DontSkipBadChannels |
+	setInputFlags(/*Aw::ProcessIO::GetAsRecordedChannels |*/ Aw::ProcessIO::DontSkipBadChannels |
 		Aw::ProcessIO::GetProcessPluginNames | Aw::ProcessIO::GetDurationMarkers | Aw::ProcessIO::GetWriterPlugins);
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	pdi.addInputChannel(-1, 1, 0);
@@ -66,19 +66,17 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 
 ICA::~ICA()
 {
-	while (!m_algorithms.isEmpty())
-		delete m_algorithms.takeLast();
-	while (!m_montage.isEmpty())
-		delete m_montage.takeLast();
+	qDeleteAll(m_algorithms);
+	qDeleteAll(m_rawChannels);
 }
 
 bool ICA::showUi()
 {
 	// request montage to DataManager
 	QVariantMap settings;
-	settings[keys::channels_source] = keys::channels_source_montage;
+	settings[keys::channels_source] = keys::channels_source_raw;
 	// Use the synchronous call here as we are not yet running in a separate thread
-	selectChannels(settings, &m_montage);
+	selectChannels(settings, &m_rawChannels);
 
 	ICASettings ui(this);
 
@@ -123,12 +121,6 @@ int ICA::initParameters()
 		algoNames << algo->name();
 
 	m_isDownsamplingActive = false;
-	//m_modality = AwChannel::stringToType(args.value(keys::modality).toString());
-	//if (m_modality == -1) {
-	//	sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
-	//	return -1;
-	//}
-	//m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 	// BIDS specific:
 	// when launching ICA in batch mode and specifying ieeg as modality:
 	// check for SEEG channels if none present check for EEG.
@@ -158,7 +150,7 @@ int ICA::initParameters()
 				list << c;
 		}
 		if (list.isEmpty()) {
-			sendMessage(QString("use_seeg_electrode: the specified electrode is not present in file or specified montage."));
+			sendMessage(QString("use_seeg_electrode: the specified electrode is not present in file, specified montage or picked channels."));
 			return -1;
 		}
 		m_channels = list;
@@ -321,7 +313,6 @@ void ICA::runFromCommandLine()
 {
 	try {
 		if (initParameters() == 0) {
-
 			m_selectedAlgo->setChannels(m_channels);
 			m_selectedAlgo->setNumberOfComponents(m_nComp);
 			m_selectedAlgo->run();
@@ -387,14 +378,53 @@ void ICA::exportComponents()
 			break;
 		}
 	}
-	if (!found)
+	if (!found) {
+		sendMessage("Error: Brainvision plugin is not available. Could not export components traces.");
 		return;
-	auto writer = plugin->newInstance();
+	}
+	std::shared_ptr<AwFileIO> writer(plugin->newInstance());
+	writer->infos.setChannels(AwChannel::duplicateChannels(m_channels));
+	AwBlock* block = writer->infos.newBlock();
+	// quick compute file duration
+	float fileDuration = 0;
+	for (auto m : pdi.input.markers())
+		fileDuration += m->duration();
+	block->setDuration(fileDuration);
+	block->setSamples(std::floor(fileDuration * m_channels.first()->samplingRate()));
 	if (writer->createFile(m_componentsEEGFileName) != AwFileIO::NoError) {
 		sendMessage(QString("Error creating %1 file. No components traces exported").arg(m_componentsEEGFileName));
 		return;
 	}
-
+	sendMessage("Saving components time series to vhdr file...");
+	
+	const float duration = 30.;
+	fmat unmixing = conv_to<fmat>::from(m_unmixing);
+	// read each input markers using chunks of 30s duration
+	for (auto m : pdi.input.markers()) {
+		float totalDuration = m->duration();
+		float pos = m->start();
+		float left = totalDuration;
+		
+		while (left) {
+			float toRead = std::min(duration, left);
+			requestData(&m_channels, pos, toRead);  // read and apply filters
+			left -= toRead;
+			pos += toRead;
+			fmat X = AwMath::channelsToFMat(m_channels);
+			fmat components = unmixing * X;
+			X.clear();
+			int index = 0;
+			for (auto c : m_channels) {
+				float* dest = c->newData(components.n_cols);
+				for (uword c = 0; c < components.n_cols; c++)
+					dest[c] = components(index, c);
+				index++;
+			}
+			writer->writeData(&m_channels);
+		}
+	}
+	sendMessage("Components time series exported.");
+	writer->cleanUpAndClose();
 }
 
 void ICA::saveToFile()
