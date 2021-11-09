@@ -37,7 +37,7 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 	using namespace matlab::data;
 	typedef std::basic_stringbuf<char16_t> StringBuf;
 	std::shared_ptr<StringBuf> output = std::make_shared<StringBuf>();
-	std::shared_ptr<StringBuf> error = std::make_shared<StringBuf>();
+	
 	try {
 		std::unique_ptr<matlab::engine::MATLABEngine> m_matlabPtr = matlab::engine::startMATLAB();
 		emit progressChanged("Connection to MATLAB established.");
@@ -69,12 +69,12 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 
 		QString mexDir = settings.value(matlab_interface::matlab_mex_dir).toString();
 		cppString = mexDir.toStdString();
-		m_matlabPtr->feval(u"addpath", factory.createCharArray(cppString), output, error);
+		m_matlabPtr->feval(u"addpath", factory.createCharArray(cppString), output);
 		QString pluginPath = settings.value(matlab_interface::matlab_plugin_dir).toString();
 		cppString = pluginPath.toStdString();
-		m_matlabPtr->feval(u"addpath", factory.createCharArray(cppString), output, error);
+		m_matlabPtr->feval(u"addpath", factory.createCharArray(cppString), output);
 
-		m_matlabPtr->eval(u"main", output, error);
+		m_matlabPtr->eval(u"main", output);
 		// create varargin 
 		//cppString = args.toStdString();
 		//CellArray varargin = factory.createCellArray({ 1, 4 });
@@ -87,11 +87,9 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 		//m_matlabPtr->feval(u"disp", factory.createCharArray("varargin"), output, error);
 	
 		String output_ = output.get()->str();
-		if (output_.size())
-			emit progressChanged(QString::fromStdU16String(output_));
-		String error_ = error.get()->str();
-		if (error_.size())
-			emit progressChanged(QString::fromStdU16String(error_));
+		QString message = QString::fromStdString(convertUTF16StringToUTF8String((output_)));
+		emit progressChanged(message);
+
 
 	}
 	catch (const matlab::engine::EngineException& e)
@@ -101,11 +99,12 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 	catch (const matlab::engine::MATLABExecutionException& e)
 	{
 		emit progressChanged(QString("MATLAB Engine Execution: %1").arg(QString(e.what())));
-
 	}
 	catch (matlab::engine::MATLABSyntaxException& e)
 	{
 		emit progressChanged(QString("MATLAB Syntax Error: %1").arg(QString(e.what())));
 	}
-
+	String output_ = output.get()->str();
+	QString message = QString::fromStdString(convertUTF16StringToUTF8String((output_)));
+	emit progressChanged(message);
 }

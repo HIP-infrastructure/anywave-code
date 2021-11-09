@@ -81,6 +81,7 @@ private:
 	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
 	void handleConnectDebug(QTcpSocket* client, AwScriptProcess* process);
 	void handleSendMarkers(QTcpSocket* client, AwScriptProcess* process);
+	void handleRun(QTcpSocket* client, AwScriptProcess* process);
 	void unusedHandler(QTcpSocket *client, AwScriptProcess *process) {}
 
 	void setHandlers();

@@ -123,6 +123,7 @@
     <ClCompile Include="MATPy\GetTriggers.cpp" />
     <ClCompile Include="MATPy\IsTerminated.cpp" />
     <ClCompile Include="MATPy\OpenNewFile.cpp" />
+    <ClCompile Include="MATPy\Run.cpp" />
     <ClCompile Include="MATPy\RunAnyWave.cpp" />
     <ClCompile Include="MATPy\SendCommand.cpp" />
     <ClCompile Include="MATPy\SendMarkers.cpp" />

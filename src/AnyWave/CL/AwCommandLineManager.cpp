@@ -34,12 +34,12 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 {
 	float hp = 0., lp = 0., notch = 0.;
 	// check for optional filter settings
-	if (args.contains("hp"))
-		hp = args["hp"].toFloat();
-	if (args.contains("lp"))
-		lp = args["lp"].toFloat();
-	if (args.contains("notch"))
-		notch = args["notch"].toFloat();
+	if (args.contains(keys::hp))
+		hp = args.value(keys::hp).toFloat();
+	if (args.contains(keys::lp))
+		lp = args.value(keys::lp).toFloat();
+	if (args.contains(keys::notch))
+		notch = args.value(keys::notch).toFloat();
 	if (lp || notch || hp) {
 		for (auto c : channels) {
 			c->setLowFilter(lp);
@@ -189,40 +189,46 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			// --pick_channels "chan1, chan2, ..."
 			bool pickChannels = false;
 			if (args.contains(keys::pick_channels)) {
-				QStringList channels = args.value(keys::pick_channels).toString().split(",");
-				if (channels.isEmpty()) 
-					logger.sendLog(QString("--pick_channels option is invalid. Going back to default montage options."));
-				else {
-					auto rawChannels = dm->rawChannels();
-					QMap<QString, AwChannel*> map;
-					for (auto r : rawChannels)
-						map.insert(r->name(), r);
-					for (auto const& label : channels) {
-						// get raw channel (from as recorded)		
-						QString chanName, refName;
-						if (label.contains('-')) {
-							auto splitted = label.split('-');
-							if (splitted.size() == 2) {
-								chanName = splitted.first().trimmed();
-								refName = splitted.last().trimmed();
-							}
-						}
-						else
-							chanName = label.trimmed();
-						auto asRecordedChannel = map.value(chanName);
-						if (asRecordedChannel) {
-							AwChannel* channel = new AwChannel(asRecordedChannel);
-							if (!refName.isEmpty())
-								channel->setReferenceName(refName);
-							montage << channel;
-						}
-					}
-					if (!montage.isEmpty()) {
-						pickChannels = true;
-						if (skipBad)
-							AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
-					}
+				montage = AwCommandLineManager::parsePickChannels(args, dm);
+				if (!montage.isEmpty()) {
+					pickChannels = true;
+					if (skipBad)
+						AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
 				}
+				//QStringList channels = args.value(keys::pick_channels).toString().split(",");
+				//if (channels.isEmpty()) 
+				//	logger.sendLog(QString("--pick_channels option is invalid. Going back to default montage options."));
+				//else {
+				//	auto rawChannels = dm->rawChannels();
+				//	QMap<QString, AwChannel*> map;
+				//	for (auto r : rawChannels)
+				//		map.insert(r->name(), r);
+				//	for (auto const& label : channels) {
+				//		// get raw channel (from as recorded)		
+				//		QString chanName, refName;
+				//		if (label.contains('-')) {
+				//			auto splitted = label.split('-');
+				//			if (splitted.size() == 2) {
+				//				chanName = splitted.first().trimmed();
+				//				refName = splitted.last().trimmed();
+				//			}
+				//		}
+				//		else
+				//			chanName = label.trimmed();
+				//		auto asRecordedChannel = map.value(chanName);
+				//		if (asRecordedChannel) {
+				//			AwChannel* channel = new AwChannel(asRecordedChannel);
+				//			if (!refName.isEmpty())
+				//				channel->setReferenceName(refName);
+				//			montage << channel;
+				//		}
+				//	}
+				//	if (!montage.isEmpty()) {
+				//		pickChannels = true;
+				//		if (skipBad)
+				//			AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+				//	}
+				//}
 			}
 			if (!pickChannels) {
 				if (args.contains(keys::montage_file)) { // did we finally got a montage file?
@@ -285,4 +291,67 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		AwProcessManager::instance()->buildProcessPDI(process);
 	}
 	return 0;
+}
+
+AwChannelList AwCommandLineManager::parsePickChannels(const AwArguments& args, AwDataManager* dm)
+{
+	if (!args.contains(keys::pick_channels))
+		return AwChannelList();
+	QStringList channels = args.value(keys::pick_channels).toString().split(",");
+	if (channels.isEmpty())
+		return AwChannelList();
+	AwChannelList montage;
+	
+	auto rawChannels = dm->rawChannels();
+	QMap<QString, AwChannel*> map;
+	for (auto r : rawChannels)
+		map.insert(r->name(), r);
+	for (auto const& label : channels) {
+		// get raw channel (from as recorded)		
+		QString chanName, refName;
+		if (label.contains('-')) {
+			auto splitted = label.split('-');
+			if (splitted.size() == 2) {
+				chanName = splitted.first().trimmed();
+				refName = splitted.last().trimmed();
+			}
+		}
+		else
+			chanName = label.trimmed();
+		auto asRecordedChannel = map.value(chanName);
+		if (asRecordedChannel) {
+			AwChannel* channel = new AwChannel(asRecordedChannel);
+			if (!refName.isEmpty())
+				channel->setReferenceName(refName);
+			montage << channel;
+		}
+	}
+	return montage;
+}
+
+AwChannelList AwCommandLineManager::parseChannelsSource(const AwArguments& args, AwDataManager* dm)
+{
+	AwChannelList res;
+	if (!args.contains(keys::channels_source))
+		return res;
+	auto source = args.value(keys::channels_source).toString().simplified();
+	if (source == "montage") {
+		res = dm->montage();
+	}
+	else if (source == "raw")
+		res = dm->rawChannels();
+	else if (source == "selection")
+		res = dm->selectedChannels();
+	return res;
+}
+
+AwMarkerList AwCommandLineManager::parseMarkerFile(const AwArguments& args)
+{
+	AwMarkerList res;
+	// check for marker file
+	if (args.contains(keys::marker_file)) {
+		auto mrkFile = args.value(keys::marker_file).toString();
+		res = AwMarker::load(mrkFile);
+	}
+	return res;
 }

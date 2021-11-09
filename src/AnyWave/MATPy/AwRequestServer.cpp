@@ -87,6 +87,7 @@ void AwRequestServer::setHandlers()
 	addHandler(this, &AwRequestServer::handleGetProperties, AwRequest::GetProperties);		
 	addHandler(this, &AwRequestServer::handleConnectDebug, AwRequest::ConnectDebug);
 	addHandler(this, &AwRequestServer::handleSendMarkers, AwRequest::SendMarkers);
+	addHandler(this, &AwRequestServer::handleRun, AwRequest::Run);
 }
 
 

@@ -103,8 +103,16 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 
 		if (vararginSize > 3) { // get args
 			CharArray args = cellArray[0][3];
-			m_matlabPtr->setVariable(u"args", args, matlab::engine::WorkspaceType::BASE);
-			m_matlabPtr->eval(u"args=jsondecode(args);", output, output_error);
+			//m_matlabPtr->setVariable(u"args", args, matlab::engine::WorkspaceType::BASE);
+			//m_matlabPtr->eval(u"args=jsondecode(args);", output, output_error);
+			try {
+				auto res = m_matlabPtr->feval(u"jsondecode", 1, std::vector<Array>({ args }));
+				outputs[0] = StructArray(res[0]);
+			}
+			catch (const matlab::engine::MATLABExecutionException& e)
+			{
+				error(e.what());
+			}
 		}
 	
 		// this is for old mex files compatibility

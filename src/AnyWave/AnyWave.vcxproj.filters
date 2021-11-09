@@ -610,6 +610,9 @@
     <ClCompile Include="Display\AwDisplayEvents.cpp">
       <Filter>Display</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\Run.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
