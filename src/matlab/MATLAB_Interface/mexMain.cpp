@@ -8,14 +8,14 @@
 #include <QDataStream>
 #include <format>
 
-using namespace matlab::data;
-using matlab::mex::ArgumentList;
 
 std::map<std::string, int> functions;
-
+using namespace matlab::data;
+using namespace matlab::engine;
 
 MexFunction::MexFunction()
 {
+	//m_matlabPtr = getEngine();
 	m_matlabPtr = getEngine();
 	functions["debug_connect"] = AwRequest::ConnectDebug;
 	functions["get_data"] = AwRequest::GetDataEx;
@@ -24,6 +24,7 @@ MexFunction::MexFunction()
 	functions["send_message"] = AwRequest::SendMessage;
 	functions["send_text"] = AwRequest::SendMessage;
 	functions["get_props"] = AwRequest::GetProperties;
+	functions["run"] = AwRequest::Run;
 }
 
 /// <summary>
@@ -76,13 +77,6 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 				std::string message = QString("get_prop: %1").arg(what).toStdString();
 				error(message);
 			}
-			//auto args = m_matlabPtr->getVariable(u"args");
-			//if (!args.isEmpty()) {
-			//	CharArray ca = args;
-			//	m_matlabPtr->eval(u"args=jsondecode(args);");
-			//}
-			//else 
-			//	m_matlabPtr->eval(u"args=[];");
 			return;
 		}
 		auto vararginSize = cellArray.getDimensions()[1];
@@ -148,6 +142,9 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 		break;
 	case AwRequest::GetProperties:
 		get_properties(outputs, inputs);
+		break;
+	case AwRequest::Run:
+		run(outputs, inputs);
 		break;
 	default:
 		error("Unknown command");
@@ -535,7 +532,7 @@ void MexFunction::debug_connect(matlab::mex::ArgumentList& outputs, matlab::mex:
 	// don't forget that first argument is always the command string
 	bool ok = inputs.size() == 2 && inputs[1].getType() == ArrayType::DOUBLE;
 	if (!ok) {
-		matlabPtr->feval(u"error",
+		m_matlabPtr->feval(u"error",
 			0,
 			std::vector<Array>({ factory.createCharArray("debug_connect: bad arguments. Expected port number.") }));
 	}
@@ -553,23 +550,19 @@ void MexFunction::debug_connect(matlab::mex::ArgumentList& outputs, matlab::mex:
 	catch (const QString& what) {
 		QString error = QString("debug_connect: %1").arg(what);
 		std::string s = error.toStdString();
-		matlabPtr->feval(u"error",
+		m_matlabPtr->feval(u"error",
 			0,
 			std::vector<Array>({ factory.createCharArray(s) }));
 	}
 	MATLAB_Interface::pid = pid;
 	if (!args.isEmpty()) {
-		//matlab::data::MATLABString s = args.toStdU16String();
-		//matlabPtr->setVariable(u"json_args", factory.createCharArray(s));
-		//matlabPtr->eval(u"args=jsondecode(json_args);");
-
 		auto res = m_matlabPtr->feval(u"jsondecode", 1, std::vector<Array>({ factory.createCharArray(args.toStdString()) }));
 		outputs[0] = StructArray(res[0]);
 	}
 	// this is for old mex files compatibility
-	m_matlabPtr->setVariable(u"host", factory.createCharArray("127.0.0.1"), matlab::engine::WorkspaceType::BASE);
-	m_matlabPtr->setVariable(u"port", factory.createScalar<double>(MATLAB_Interface::port), matlab::engine::WorkspaceType::BASE);
-	m_matlabPtr->setVariable(u"pid", factory.createScalar<double>(MATLAB_Interface::pid), matlab::engine::WorkspaceType::BASE);
+	matlabPtr->setVariable(u"host", factory.createCharArray("127.0.0.1"), matlab::engine::WorkspaceType::BASE);
+	matlabPtr->setVariable(u"port", factory.createScalar<double>(MATLAB_Interface::port), matlab::engine::WorkspaceType::BASE);
+	matlabPtr->setVariable(u"pid", factory.createScalar<double>(MATLAB_Interface::pid), matlab::engine::WorkspaceType::BASE);
 }
 
 
@@ -592,5 +585,44 @@ void MexFunction::get_properties(matlab::mex::ArgumentList& outputs, matlab::mex
 	catch (const QString& what) {
 		std::string message = QString("get_prop: %1").arg(what).toStdString();
 		error(message);
+	}
+}
+
+void MexFunction::run(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs)
+{
+	ArrayFactory factory;
+
+	// input may be empty or contain one argument(the cfg structure)
+	QString args;
+	// don't forget that first argument is always the command string
+	if (inputs.size() >= 2) {
+		if (inputs[1].getType() == ArrayType::STRUCT) {
+
+			// ask MATLAB to convert the struct to json
+			auto res = m_matlabPtr->feval(u"jsonencode", 1, std::vector<Array>({ inputs[1] }));
+
+			CharArray s = std::move(res[0]);
+			std::string ss = s.toAscii();
+			args = QString(ss.data());
+		}
+		else
+			error("run: bad arguments. Expected struct.");
+	}
+	int status;
+	try {
+		QString outputArgs;
+		TCPRequest aw(AwRequest::Run);
+		aw.sendString(args);
+		aw.waitForResponse();
+		QDataStream& response = aw.response();
+		response >> outputArgs;
+		if (outputArgs.isEmpty())
+			return;
+		auto res = m_matlabPtr->feval(u"jsondecode", 1, std::vector<Array>({ factory.createCharArray(outputArgs.toStdString()) }));
+		outputs[0] = StructArray(res[0]);
+	}
+	catch (const QString& what) {
+		std::string s = QString("get_data: %1").arg(what).toStdString();
+		error(s);
 	}
 }

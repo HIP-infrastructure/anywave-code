@@ -477,6 +477,8 @@ void H2::runFromCommandLine()
 			sendMessage("Error when writing to MATLAB file.");
 			return;
 		}
+		// new to v2.2.0 of AnyWave => returns output that might be used in MATLAB/Pyton API run()
+		pdi.output.settings["result_file"] = file;
 	}
 	else {
 		QMap<QString, int> map;

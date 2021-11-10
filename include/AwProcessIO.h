@@ -73,7 +73,6 @@ public:
 	void unlock() { m_mutex.unlock(); }
 protected:
 	AwChannelList m_channels;
-	// markers will contain input markers for the process.
 	AwMarkerList m_markers;
 	AwMarkerList m_modifiedMarkers;	// this list contains markers filtered by --use_markers and --skip_markers options
 

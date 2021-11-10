@@ -189,7 +189,8 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			// --pick_channels "chan1, chan2, ..."
 			bool pickChannels = false;
 			if (args.contains(keys::pick_channels)) {
-				montage = AwCommandLineManager::parsePickChannels(args, dm);
+				QStringList channels = args.value(keys::pick_channels).toStringList();
+				montage = AwCommandLineManager::parsePickChannels(channels, dm);
 				if (!montage.isEmpty()) {
 					pickChannels = true;
 					if (skipBad)
@@ -293,11 +294,8 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 	return 0;
 }
 
-AwChannelList AwCommandLineManager::parsePickChannels(const AwArguments& args, AwDataManager* dm)
+AwChannelList AwCommandLineManager::parsePickChannels(const QStringList& channels, AwDataManager* dm)
 {
-	if (!args.contains(keys::pick_channels))
-		return AwChannelList();
-	QStringList channels = args.value(keys::pick_channels).toString().split(",");
 	if (channels.isEmpty())
 		return AwChannelList();
 	AwChannelList montage;
@@ -309,21 +307,27 @@ AwChannelList AwCommandLineManager::parsePickChannels(const AwArguments& args, A
 	for (auto const& label : channels) {
 		// get raw channel (from as recorded)		
 		QString chanName, refName;
+		chanName = label.trimmed();
+		// WARNING: as recorded channels MAY contain names with '-' 
+		auto asRecordedChannel = map.value(chanName);
+		if (asRecordedChannel) {  // find a match
+			montage << new AwChannel(asRecordedChannel);
+			continue;
+		}
+		// don't find a match in as recorded, check if the label contains '-' that may indicate a bipolar reference
 		if (label.contains('-')) {
 			auto splitted = label.split('-');
 			if (splitted.size() == 2) {
 				chanName = splitted.first().trimmed();
 				refName = splitted.last().trimmed();
 			}
-		}
-		else
-			chanName = label.trimmed();
-		auto asRecordedChannel = map.value(chanName);
-		if (asRecordedChannel) {
-			AwChannel* channel = new AwChannel(asRecordedChannel);
-			if (!refName.isEmpty())
-				channel->setReferenceName(refName);
-			montage << channel;
+			asRecordedChannel = map.value(chanName);
+			if (asRecordedChannel) {
+				AwChannel* channel = new AwChannel(asRecordedChannel);
+				if (!refName.isEmpty())
+					channel->setReferenceName(refName);
+				montage << channel;
+			}
 		}
 	}
 	return montage;

@@ -110,6 +110,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="functions.cpp" />
     <ClCompile Include="mexMain.cpp" />
     <ClCompile Include="TCPRequest.cpp" />
     <ClInclude Include="matlab_interface_global.h" />

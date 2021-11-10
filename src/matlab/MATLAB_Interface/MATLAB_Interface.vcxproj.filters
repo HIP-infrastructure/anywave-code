@@ -42,6 +42,9 @@
     <ClCompile Include="mexMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\AnyWave\AnyWave.licenseheader" />

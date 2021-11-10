@@ -35,6 +35,7 @@ public:
 	/** montage is the montage detected or set in the arguments, as recorded are the channels in the data file. **/
 //	static bool buildPDI(AwBaseProcess *process, const AwChannelList& montage = AwChannelList(), const AwChannelList& asRecorded = AwChannelList());
 	static int initProcessPDI(AwBaseProcess *process);
-	static AwChannelList parsePickChannels(const AwArguments& args, AwDataManager* dm);
+	static AwChannelList parsePickChannels(const QStringList& channels, AwDataManager* dm);
 	static AwChannelList parseChannelsSource(const AwArguments& args, AwDataManager* dm);
+	static AwMarkerList parseMarkerFile(const AwArguments& args);
 };
