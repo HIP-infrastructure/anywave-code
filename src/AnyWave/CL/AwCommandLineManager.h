@@ -36,6 +36,6 @@ public:
 //	static bool buildPDI(AwBaseProcess *process, const AwChannelList& montage = AwChannelList(), const AwChannelList& asRecorded = AwChannelList());
 	static int initProcessPDI(AwBaseProcess *process);
 	static AwChannelList parsePickChannels(const QStringList& channels, AwDataManager* dm);
-	static AwChannelList parseChannelsSource(const AwArguments& args, AwDataManager* dm);
+	static AwChannelList getInputChannels(const AwArguments& args, AwDataManager* dm);
 	static AwMarkerList parseMarkerFile(const AwArguments& args);
 };

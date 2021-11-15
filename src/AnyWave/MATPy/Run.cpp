@@ -64,6 +64,30 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 			return;
 		}
 	}
+	// get the plugin
+	QString pluginName = cfg.value("process").toString();
+	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(pluginName);
+	if (plugin == nullptr) {
+		error = QString("ERROR: Unable to find process plugin named %1.").arg(pluginName);
+		emit log(error);
+		toClient << error;
+		response.send(-1);
+		if (dm != AwDataManager::instance())
+			delete dm;
+		return;
+	}
+	bool canRun = plugin->flags() & Aw::ProcessFlags::CanRunFromCommandLine;
+	if (!canRun) {
+		error = QString("ERROR: the process is not compatible (must be able to run using the command line");
+		emit log(error);
+		toClient << error;
+		response.send(-1);
+		if (dm != AwDataManager::instance())
+			delete dm;
+		return;
+	}
+
+
 	// if data_path is set, instantiate a new DataManager and make it handle the file
 	if (cfg.contains(keys::input_file)) {
 		emit log("process on a speficied file, not the currently open data file.");
@@ -88,28 +112,6 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		// get markers from current data file in AnyWave
 		inputMarkers = AwMarkerManager::instance()->getMarkersThread();
 
-	// get the plugin
-	QString pluginName = cfg.value("process").toString();
-	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(pluginName);
-	if (plugin == nullptr) {
-		error = QString("ERROR: Unable to find process plugin named %1.").arg(pluginName);
-		emit log(error);
-		toClient << error;
-		response.send(-1);
-		if (dm != AwDataManager::instance())
-			delete dm;
-		return;
-	}
-	bool canRun = plugin->flags() & Aw::ProcessFlags::CanRunFromCommandLine;
-	if (!canRun) {
-		error = QString("ERROR: the process is not compatible (must be able to run using the command line");
-		emit log(error);
-		toClient << error;
-		response.send(-1);
-		if (dm != AwDataManager::instance())
-			delete dm;
-		return;
-	}
 	emit log(QString("preparing process %1").arg(pluginName));
 	auto process = plugin->newInstance();
 	dm->dataServer()->openConnection(process);
@@ -118,18 +120,21 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	process->pdi.input.settings = cfg;
 	AwUniteMaps(process->pdi.input.settings, dm->settings());
 	process->pdi.input.setReader(dm->reader());
-	// parse special key to select input channels
-	if (cfg.contains(keys::pick_channels)) 
-		inputChannels = AwCommandLineManager::parsePickChannels(cfg.value(keys::pick_channels).toStringList() , dm);
-	
-	if (!inputChannels.isEmpty()) 
-		process->pdi.input.setNewChannels(inputChannels);
-	else { // no pick channels option set or wrong labels 
-		inputChannels = AwCommandLineManager::parseChannelsSource(cfg, dm);
-		if (inputChannels.isEmpty())
-			inputChannels = dm->rawChannels();
-		process->pdi.input.setNewChannels(inputChannels, true); // duplicate channels
+
+	// get input channels
+	inputChannels = AwCommandLineManager::getInputChannels(cfg, dm);
+	if (inputChannels.isEmpty()) {
+		error = QString("ERROR: Unable to determine input channels.");
+		emit log(error);
+		toClient << error;
+		response.send(-1);
+		if (dm != AwDataManager::instance())
+			delete dm;
+		qDeleteAll(inputMarkers);
+		return;
 	}
+	process->pdi.input.setNewChannels(inputChannels, false); // DO NOT duplicate channels as the returned list from getInputChannel already duplicated them
+
 	// apply filters
 	AwCommandLineManager::applyFilters(inputChannels, cfg);
 
@@ -144,8 +149,19 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		use_markers = cfg.value(keys::use_markers).toStringList();
 	if (cfg.contains(keys::skip_markers))
 		skip_markers = cfg.value(keys::skip_markers).toStringList();
+
 	bool usingMarkers = use_markers.size() > 0;
 	bool skippingMarkers = skip_markers.size() > 0;
+
+	// special case use_markers = all_data
+	if (usingMarkers) {
+		auto l = use_markers.first();
+		if (l.contains("all data")) {
+			usingMarkers = false;
+			qDeleteAll(inputMarkers);
+			inputMarkers << new AwMarker("global", 0., dm->totalDuration());
+		}
+	}
 
 	if (usingMarkers || skippingMarkers) {
 		AwMarkerList modifiedMarkers = inputMarkers;

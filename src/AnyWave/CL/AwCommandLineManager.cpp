@@ -333,20 +333,70 @@ AwChannelList AwCommandLineManager::parsePickChannels(const QStringList& channel
 	return montage;
 }
 
-AwChannelList AwCommandLineManager::parseChannelsSource(const AwArguments& args, AwDataManager* dm)
+AwChannelList AwCommandLineManager::getInputChannels(const AwArguments& args, AwDataManager* dm)
 {
 	AwChannelList res;
-	if (!args.contains(keys::channels_source))
-		return res;
-	auto source = args.value(keys::channels_source).toString().simplified();
-	if (source == "montage") {
-		res = dm->montage();
-	}
-	else if (source == "raw")
-		res = dm->rawChannels();
-	else if (source == "selection")
+	if (!args.contains(keys::channels_source)) {
+		// default behavior when no channel_source specified:
+		// 1. try to get the selection (if running in AnyWave in GUI mode).
+		//  if no selection:
+		// 2. get the current montage (if running in command line and there is no montage => raw channels)
 		res = dm->selectedChannels();
-	return res;
+		if (res.isEmpty())
+			res = dm->montage();
+		if (res.isEmpty())
+			res = dm->rawChannels();
+	}
+	else {
+		auto source = args.value(keys::channels_source).toString().simplified();
+		if (source == "montage") {
+			res = dm->montage();
+		}
+		else if (source == "raw")
+			res = dm->rawChannels();
+		else if (source == "selection")
+			res = dm->selectedChannels();
+	}
+	// if still no input channels => force to raw channels
+	if (res.isEmpty())
+		res = dm->rawChannels();
+	if (args.contains(keys::pick_channels)) {
+		AwChannelList inputChannels;
+		QMap<QString, AwChannel*> map;
+		for (auto r : res)
+			map.insert(r->name(), r);
+		QStringList labels = args.value(keys::pick_channels).toStringList();
+		for (auto const& label : labels) {
+			// get raw channel (from as recorded)		
+			QString chanName, refName;
+			chanName = label.trimmed();
+			// WARNING: as recorded channels MAY contain names with '-' 
+			auto asRecordedChannel = map.value(chanName);
+			if (asRecordedChannel) {  // find a match
+				inputChannels << asRecordedChannel->duplicate();
+				continue;
+			}
+			// don't find a match in as recorded, check if the label contains '-' that may indicate a bipolar reference
+			if (label.contains('-')) {
+				auto splitted = label.split('-');
+				if (splitted.size() == 2) {
+					chanName = splitted.first().trimmed();
+					refName = splitted.last().trimmed();
+				}
+				asRecordedChannel = map.value(chanName);
+				if (asRecordedChannel) {
+					AwChannel* channel = asRecordedChannel->duplicate();
+					if (!refName.isEmpty())
+						channel->setReferenceName(refName);
+					inputChannels << channel;
+				}
+			}
+		}
+		if (inputChannels.size())
+			return inputChannels;
+
+	}
+	return AwChannel::duplicateChannels(res);
 }
 
 AwMarkerList AwCommandLineManager::parseMarkerFile(const AwArguments& args)
