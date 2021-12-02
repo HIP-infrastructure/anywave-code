@@ -19,7 +19,7 @@
 #include <qpainter.h>
 #include <utils/gui.h>
 #include <AwCore.h>
-
+#include <AwGlobalMarkers.h>
 
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	: QFrame(parent)
@@ -59,8 +59,7 @@ AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 
 AwBaseMarkerBar::~AwBaseMarkerBar()
 {
-	AW_DESTROY_LIST(m_markers);
-	AW_DESTROY_LIST(m_allMarkers);
+
 }
 
 AwMarker *AwBaseMarkerBar::findMarkerBetween(float low, float high)
@@ -71,21 +70,12 @@ AwMarker *AwBaseMarkerBar::findMarkerBetween(float low, float high)
 	return result.first();
 }
 
-void AwBaseMarkerBar::setMarkers(const AwMarkerList& markers)
+void AwBaseMarkerBar::refresh()
 {
-	AW_DESTROY_LIST(m_markers);
-	m_markers = AwMarker::duplicate(markers); 
-	repaint(); 
-}
-
-void AwBaseMarkerBar::setAllMarkers(const AwMarkerList& markers)
-{
-	AW_DESTROY_LIST(m_allMarkers);
-	m_allMarkers = AwMarker::duplicate(markers);
+	m_markers = *AwGlobalMarkers::instance()->displayed();
 	m_globalRepaintNeeded = true;
 	repaint();
 }
-
 
 void AwBaseMarkerBar::switchToClassic()
 {
@@ -186,11 +176,11 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 	}	
 }
 
-void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
+void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 {
-	if (m_totalDuration <= 0 || m_allMarkers.isEmpty()) {
+	if (m_totalDuration <= 0) 
 		return;
-	}
+	
 	QPainter painter(this);
 	QBrush brushSelection;
 	brushSelection.setStyle(Qt::Dense4Pattern);
@@ -205,7 +195,7 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
 			pen.setColor(color);
 			painter.setPen(pen);
-			double pos = (m->start() - m_positionInFile)  * m_physics->xPixPerSec();
+			double pos = (m->start() - m_positionInFile) * m_physics->xPixPerSec();
 			double width = m->duration() * m_physics->xPixPerSec();
 			painter.drawRect(QRectF(pos, 0, width, (double)(AW_MARKERS_BAR_HEIGHT - 1)));
 		}
@@ -217,7 +207,7 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent *e)
 			m_globalPixmap.fill(palette().color(QPalette::Background));
 			QColor color;
 			QPainter pixPainter(&m_globalPixmap);
-			for (auto m : m_allMarkers) {
+			for (auto m : m_markers) {
 				if (!m->duration())
 					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
 				else
@@ -267,7 +257,6 @@ void AwBaseMarkerBar::setPositionInFile(float pos)
 
 void AwBaseMarkerBar::clean()
 {
-	m_markers.clear();
 	m_pageDuration = 0;
 	m_positionInFile = 0;
 }

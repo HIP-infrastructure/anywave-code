@@ -173,7 +173,8 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	for (auto v : m_signalViews)
 		v->setProcessFlags(AwSignalView::UpdateProcess);
 
-	view->setMarkers(AwMarkerManager::instance()->displayedMarkers());
+//	view->setMarkers(AwMarkerManager::instance()->displayedMarkers());
+	view->getNewMarkers();
 	
 	// QTS
 	QStringList list;

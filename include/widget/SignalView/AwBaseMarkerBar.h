@@ -40,9 +40,10 @@ public slots:
 	void clean();
 	void setPageDuration(float d);
 	void setPositionInFile(float pos);
-	void setMarkers(const AwMarkerList& markers);
+	//void setMarkers(const AwMarkerList& markers);
 	/** setAllMarkers is required for Global mode **/
-	void setAllMarkers(const AwMarkerList& markers);
+	//void setAllMarkers(const AwMarkerList& markers);
+	void refresh();
 
 protected slots:
 	void hideMarkers() { emit showMarkersClicked(false); }
@@ -65,7 +66,8 @@ protected:
 	AwMarker *findMarkerBetween(float low, float high);
 
 	AwMarker *m_markerUnderMouse;	// pointer to the current marker under the mouse when the user clicks in the bar. Can be NULL is no marker is under the mouse.
-	AwMarkerList m_markers, m_allMarkers;
+	//AwMarkerList m_markers, m_allMarkers;
+	AwMarkerList m_markers;
 	AwDisplayPhysics *m_physics;
 	bool m_markersShown;
 	float m_pageDuration, m_positionInFile, m_totalDuration;

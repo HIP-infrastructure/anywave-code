@@ -33,6 +33,8 @@
 #include <future>
 #include <algorithm>
 
+#include <AwGlobalMarkers.h>
+
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;
 
@@ -58,6 +60,9 @@ AwMarkerManager::AwMarkerManager()
 	m_markersModified = false;
 	m_dock = nullptr;
 	m_markerInspector = new AwMarkerInspector();	
+	auto globals = AwGlobalMarkers::instance();
+	globals->setDisplayed(&m_displayedMarkers);
+	globals->setTotal(&m_markers);
 }
 
 AwMarkerManager::~AwMarkerManager()

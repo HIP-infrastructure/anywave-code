@@ -501,6 +501,9 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			break;
 		}
 	}
+#ifndef NDEBUG
+	qDebug() << "4DReader: config file is OK." << endl;
+#endif
 	while (!temp_channels.isEmpty())
 		delete temp_channels.takeFirst();
 
@@ -514,6 +517,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 		if (chan->isTrigger())
 			m_triggers << chan;
 	}
+
 	return AwFileIO::openFile(path);
 }
 

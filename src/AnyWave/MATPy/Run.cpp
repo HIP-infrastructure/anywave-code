@@ -174,8 +174,15 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	emit log("Process has fisnihed");
 	// check if process produced ouput_put arguments (settings)
 	QString outputs;
-	auto const& out = process->pdi.output.settings;
-	if (!out.isEmpty()) 
+	auto out = process->pdi.output.settings;
+	
+	// check out for markers in output
+	auto markers = process->pdi.output.markers();
+	if (markers.size()) {
+		out["markers"] = AwMarker::toVariantMap(markers);
+	}
+
+	if (!out.isEmpty())
 		outputs = AwUtilities::json::toJsonString(out);
 	toClient << outputs;
 	response.send();

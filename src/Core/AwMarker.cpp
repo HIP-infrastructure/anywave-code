@@ -22,7 +22,8 @@
 #ifndef Q_OS_MAC
 #include <execution>
 #endif
-
+#include <qjsondocument.h>
+#include <qjsonobject.h>
 
 //
 // AwMarker
@@ -119,6 +120,29 @@ QString AwMarker::typeToString(int t)
 		return stringTypes.at(index);
 	
 	return QString();
+}
+
+QVariantMap AwMarker::toVariantMap(const AwMarkerList& markers)
+{
+	QString buffer;
+	QTextStream stream(&buffer);
+	stream << "{ [";
+	for (auto m : markers) {
+		stream << "{";
+		stream << "label:" << m->label() << ",";
+		stream << "position:" << m->start() << ",";
+		stream << "duration:" << m->duration() << ",";
+		stream << "color:" << m->color() << ",";
+		stream << "channels:" << "[";
+		for (const auto& t: m->targetChannels()) 
+			stream << t << ",";
+		stream << "]" << "},";
+	}
+	stream << "]}";
+	QJsonDocument doc;
+	QJsonParseError err;
+	doc = QJsonDocument::fromJson(buffer.toUtf8(), &err);
+	return doc.object().toVariantMap();
 }
 
 ///

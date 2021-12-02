@@ -73,6 +73,7 @@ public slots:
 signals:
 	void goTo(float pos);
 	void displayedMarkersChanged(const AwMarkerList& markers);
+
 	void log(const QString& message);
 	void finished();	// for threaded operations
 	void updateStats();	// emitted each time the global markers list changes

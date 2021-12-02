@@ -51,6 +51,8 @@ public:
 
     static int stringToType(const QString& s);
 	static QString typeToString(qint32 t);
+	/** toVariantMap **/
+	static QVariantMap toVariantMap(const QList<AwMarker*>& markers);
 	/** Gets all the marker types available as QString in a list. **/
 	static QStringList markersTypeList();
 	/** Gets a unique instance of marker labels from a list **/

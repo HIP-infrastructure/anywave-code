@@ -45,7 +45,7 @@ int TPUi::exec()
 	if (m_triggers.size() > 1)	{
 		m_ui.groupChannels->show();
 		QVBoxLayout *vbox = new QVBoxLayout;
-		foreach (AwChannel *c, m_triggers) {
+		for (AwChannel *c : m_triggers) {
 			QCheckBox *cb = new QCheckBox(this);
 			m_checks << cb;
 			cb->setText(c->name());
@@ -77,8 +77,10 @@ void TPUi::accept()
 		}
 		for (int i = 0; i < m_checks.size(); i++) {
 			QCheckBox *cb = m_checks.at(i);
-			if (!cb->isChecked())
-				m_triggers.removeAt(i);
+			if (!cb->isChecked()) {
+				delete m_triggers.takeAt(i);
+				//m_triggers.removeAt(i);
+			}
 		}
 	}
 

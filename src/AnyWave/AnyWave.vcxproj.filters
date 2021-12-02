@@ -613,6 +613,9 @@
     <ClCompile Include="MATPy\Run.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">

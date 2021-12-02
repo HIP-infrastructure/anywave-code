@@ -36,6 +36,8 @@ private:
 	AwFileIOPlugin *m_megPlugin, *m_eegPlugin;
 	QString m_eegFile, m_megFile;
 	AwChannelList m_eegChannels;
+
+	int initialize();
 //	QString megFile() { return m_megFile; }
 //	void setMEGFile(QString file) { m_megFile = file; }
 //	QString adesFile() { return m_adesFile; }

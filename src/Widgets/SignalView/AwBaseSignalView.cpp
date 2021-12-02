@@ -20,6 +20,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QtGlobal>
+#include <AwGlobalMarkers.h>
 
 
 AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags, AwViewSettings *settings)
@@ -244,15 +245,6 @@ void AwBaseSignalView::applyChannelFilters()
 void AwBaseSignalView::updatePageDuration(float duration)
 {
 	m_pageDuration = duration;
-	//if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
-	//	float dur = m_pageDuration;
-	//	m_pageDuration = duration;
-	//	if (m_pageDuration > dur)
-	//		reloadData();
-	//}
-	//else {
-	//	reloadData();
-	//}
 	reloadData();
 }
 
@@ -281,16 +273,28 @@ void AwBaseSignalView::updateVisibleMarkers()
 {
 	m_visibleMarkers = AwMarker::intersect(m_markers, m_positionInFile - m_startPosition, m_positionInFile - m_startPosition+ m_pageDuration);
 	m_scene->setMarkers(m_visibleMarkers);
-	m_markerBar->setMarkers(m_visibleMarkers);
+//	m_markerBar->setMarkers(m_visibleMarkers);
+	m_markerBar->refresh();
+}
+
+void AwBaseSignalView::getNewMarkers()
+{
+	auto globals = AwGlobalMarkers::instance();
+	m_markers = *globals->displayed();
+//	m_markerBar->refresh();
+	//if (m_markers.isEmpty())
+	//	return;
+
+	updateVisibleMarkers();
 }
 
 void AwBaseSignalView::setMarkers(const AwMarkerList& markers)
 {
-	if (markers.isEmpty())
-		return;
-	m_markers = markers;
-	m_markerBar->setAllMarkers(markers);
-	updateVisibleMarkers();
+	//if (markers.isEmpty())
+	//	return;
+	//m_markers = markers;
+	//m_markerBar->setAllMarkers(markers);
+	//updateVisibleMarkers();
 }
 
 void AwBaseSignalView::clean()
