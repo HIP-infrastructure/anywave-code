@@ -281,10 +281,6 @@ void AwBaseSignalView::getNewMarkers()
 {
 	auto globals = AwGlobalMarkers::instance();
 	m_markers = *globals->displayed();
-//	m_markerBar->refresh();
-	//if (m_markers.isEmpty())
-	//	return;
-
 	updateVisibleMarkers();
 }
 

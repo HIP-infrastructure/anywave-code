@@ -35,5 +35,6 @@
     <file>images/armadillo.png</file>
     <file>images/Capture32x32.png</file>
     <file>images/QTS.png</file>
+    <file>images/cortex.png</file>
   </qresource>
 </RCC>

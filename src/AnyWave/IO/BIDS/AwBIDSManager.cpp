@@ -139,7 +139,7 @@ void AwBIDSManager::initCommandLineOperation(const QString & filePath)
 	// set the relative path role
 	item->setData(subjectDir, AwBIDSItem::RelativePathRole);
 	// set the possible derivatives mask
-	m_instance->recursiveParsing2(fullPath, item);
+	m_instance->recursiveParsing(fullPath, item);
 	m_instance->m_currentOpenItem = item;
 }
 
@@ -383,13 +383,18 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 			AwBIDSItem* container = nullptr;
 			auto files = dir.entryList(QDir::Files);
 			if (!files.isEmpty()) {
-				container = new AwBIDSItem("freesurfer", item);
-				container->setData(path, AwBIDSItem::PathRole);
+			//	container = new AwBIDSItem("freesurfer", item);
+			//	container->setData(path, AwBIDSItem::PathRole);
+			//	container->setData(AwBIDSItem::freesurfer, AwBIDSItem::TypeRole);
+			//	container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+				container = new AwBIDSItem("cortex", item);
 				container->setData(AwBIDSItem::freesurfer, AwBIDSItem::TypeRole);
-				container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+				container->setData(path, AwBIDSItem::PathRole);
+				container->setData(QIcon(":/images/cortex.png"), Qt::DecorationRole);
+
 			}
 			QStringList meshes;
-			QStringList acceptedFiles = { "lh.pial", "rh.pial", "lh.white", "rh.white" };
+			QStringList acceptedFiles = { "lh.pial", "rh.pial" };
 			for (auto file : files) {
 				auto fullPath = QString("%1/%2").arg(path).arg(file);
 				if (acceptedFiles.contains(file)) {
@@ -500,277 +505,6 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 		}
 	}
 }
-
-//void AwBIDSManager::parse()
-//{
-//	QDir dir(m_rootDir);
-//	// check for files
-//	// get participant tsv
-//	auto list = dir.entryInfoList(QDir::Files);
-//	for (auto l : list) {
-//		auto file = l.fileName();
-//		if (file.contains("participants.tsv"))
-//			m_settings[bids::participant_tsv] = l.filePath();
-//	}
-//	// try to implement a multi threaded parsing for each subject
-//	// first: detect all subjects
-//	// build a qt concurrent map to parse them all
-//	auto subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-//
-//	auto dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-//
-//	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
-//	QRegularExpressionMatch match;
-//	using mapItem = QPair<QString, AwBIDSItem*>;
-//
-//	auto subjects = recursiveParsing2(m_rootDir, nullptr);
-//	if (dirs.contains("sourcedata")) {
-//		QString fullPath = QString("%1/sourcedata").arg(m_rootDir);
-//		auto sourceSubjects = recursiveParsing2(fullPath, nullptr);
-//		// add a source data folder item
-//		auto sourceItem = new AwBIDSItem("sourcedata");
-//		sourceItem->setData(fullPath, AwBIDSItem::PathRole);
-//		sourceItem->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
-//		sourceItem->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//		sourceItem->setData(QString("sourcedata"), AwBIDSItem::RelativePathRole);
-//		sourceItem->addChildren(sourceSubjects);
-//		m_items << sourceItem;
-//	}
-//	m_items << subjects;
-//	// get participants columns
-//	if (m_settings.contains(bids::participant_tsv))
-//		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
-//	// loading participants data
-//	m_participantsData = AwUtilities::bids::loadTsv(m_settings.value(bids::participant_tsv).toString());
-//	emit finished();
-//}
-
-//AwBIDSItems AwBIDSManager::recursiveParsing2(const QString& dirPath, AwBIDSItem* parentItem)
-//{
-//	AwBIDSItems res;
-//	QDir dir(dirPath);
-//	auto subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-//	using mapItem = QPair<QString, AwBIDSItem*>;
-//	QList<mapItem> mapItems;
-//
-//	if (parentItem == nullptr) {
-//		// build regexp to find subjects
-//		QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
-//		QRegularExpressionMatch match;
-//		for (auto subDir : subDirs) {
-//			auto name = subDir.fileName();
-//			match = re.match(name);
-//			auto fullPath = subDir.absoluteFilePath();
-//			if (match.hasMatch()) {
-//				// found a subject
-//				auto item = new AwBIDSItem(name);
-//				res << item;
-//				item->setData(fullPath, AwBIDSItem::PathRole);
-//				item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
-//				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//				// set the relative path role
-//				item->setData(name, AwBIDSItem::RelativePathRole);
-//				// set the possible derivatives mask
-//				item->setData(AwBIDSItem::gardel|AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
-//				mapItems.append(mapItem(fullPath, item));
-//			}
-//		}
-//		if (mapItems.size() < 10) {  // is less than 10 subjects found => parse using sequential methode
-//			for (auto it : mapItems) {
-//				recursiveParsing2(it.first, it.second);
-//			}
-//		}
-//		else {  // use multi threaded method
-//			std::function<AwBIDSItems(const mapItem&)> doParsing = [this](const mapItem& it) {
-//				return recursiveParsing2(it.first, it.second);
-//			};
-//			QFuture<AwBIDSItems> future = QtConcurrent::mapped(mapItems, doParsing);
-//			future.waitForFinished();
-//		}
-//	}
-//	else {
-//		auto type = parentItem->data(AwBIDSItem::TypeRole).toInt();
-//		auto parentRelativePath = parentItem->data(AwBIDSItem::RelativePathRole).toString();
-//		if (m_dataContainers.contains(type)) {  // look for files only in data containers (eeg, ieeg, meg, anat)
-//			auto list = dir.entryInfoList(QDir::Files);
-//			// check for derivatives at container level (GARDEL for example)
-//			setDerivativesForItem(parentItem);
-//			for (auto f : list) {
-//				auto fileName = f.fileName();
-//				auto ext = f.completeSuffix().toLower();
-//				// speed up file recongnition avoiding file extensions not known by plugins.
-//				// SPECIAL CASE : MEG 4DNI that has no extension. So check before that the file as an extension.
-//				if (!ext.isEmpty())
-//					if (!m_fileExtensions.contains(ext))
-//						continue;
-//
-//				auto fullPath = f.absoluteFilePath();
-//
-//				// test for .nii anat image
-//				if (fullPath.endsWith(".nii")) {
-//					auto fileItem = new AwBIDSItem(fileName, parentItem);
-//					fileItem->setData(fullPath, AwBIDSItem::PathRole);
-//					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-//					fileItem->setData(type, AwBIDSItem::DataTypeRole);
-//					fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
-//
-//					// set a display role without some bids keys/values to shorten the file name
-//					auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
-//					tmp = AwUtilities::bids::removeBidsKey("ses", tmp);
-//					fileItem->setData(tmp, Qt::DisplayRole);
-//					continue;
-//				}
-//
-//				// optimize by setting only readers which can open edf or vhdr files
-//
-//				auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(fullPath);
-//				if (reader != nullptr) {
-//					auto fileItem = new AwBIDSItem(fileName, parentItem);
-//					fileItem->setData(QDir::toNativeSeparators(fullPath), AwBIDSItem::PathRole);
-//					fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
-//					fileItem->setData(type, AwBIDSItem::DataTypeRole);
-//					// set possible derivatives associated to the file item
-//					fileItem->setData(AwBIDSItem::ica | AwBIDSItem::h2, AwBIDSItem::DerivativesRole);
-//					// add the item to the hash table
-//					// use native separators
-//
-//					// set a display role without some bids keys/values to shorten the file name
-//					auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
-//					tmp = AwUtilities::bids::removeBidsKey("ses", tmp);
-//					// remove modality from file name
-//					if (tmp.contains("_eeg"))
-//						tmp = tmp.remove("_eeg");
-//					else if (tmp.contains("_ieeg"))
-//						tmp = tmp.remove("_ieeg");
-//					else if (tmp.contains("_meg"))
-//						tmp = tmp.remove("_meg");
-//					fileItem->setData(tmp, Qt::DisplayRole);
-//
-//					m_hashItemFiles.insert(QDir::toNativeSeparators(fullPath), fileItem);
-//					// search for derivatives for this item 
-//					setDerivativesForItem(fileItem);
-//					// build relative path using parent's one
-//					fileItem->setData(QString("%1/%2").arg(parentRelativePath).arg(fileName), AwBIDSItem::RelativePathRole);
-//					fileItem->setData(QIcon(":/images/AnyWave_icon.png"), Qt::DecorationRole);
-//					// search for events and channels tsv files
-//					findTsvFilesForItem(fileItem);
-//					parentItem->addFile(fullPath);
-//					reader->plugin()->deleteInstance(reader);
-//				}
-//			}
-//			// in a data container (eeg, meg, ieeg) there could be a subfolder (for MEG 4DNI data for example)
-//			// check for sub dirs
-//			for (auto subDir : subDirs) {
-//				auto name = subDir.fileName();
-//				auto fullPath = subDir.absoluteFilePath();
-//				// this is a MEG special case, in which a subdir may exists but must end with _meg
-//				if (name.endsWith("_meg")) { //set the type role of the sub item to be the same as the data container.
-//					// That will permit the child file item will have the correct data type.
-//					auto item = new AwBIDSItem(name, parentItem);
-//					item->setData(type, AwBIDSItem::TypeRole);
-//					item->setData(fullPath, AwBIDSItem::PathRole);
-//					// build relative path using parent's one
-//					item->setData(type, AwBIDSItem::DataTypeRole);
-//					item->setData(QString("%1/%2").arg(parentRelativePath).arg(name), AwBIDSItem::RelativePathRole);
-//					item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//					recursiveParsing2(fullPath, item);
-//				}
-//			}
-//		}
-//		else {
-//			// check for child node (sub dirs)
-//			for (auto subDir : subDirs) {
-//				auto name = subDir.fileName();
-//				auto fullPath = subDir.absoluteFilePath();
-//				auto item = new AwBIDSItem(name, parentItem);
-//				item->setData(fullPath, AwBIDSItem::PathRole);
-//				item->setData(QString("%1/%2").arg(parentRelativePath).arg(name), AwBIDSItem::RelativePathRole);
-//				// check the type 
-//				if (name.startsWith("ses-"))
-//					item->setData(AwBIDSItem::Session, AwBIDSItem::TypeRole);
-//				else if (name == "meg")
-//					item->setData(AwBIDSItem::meg, AwBIDSItem::TypeRole);
-//				else if (name == "ieeg")
-//					item->setData(AwBIDSItem::ieeg, AwBIDSItem::TypeRole);
-//				else if (name == "eeg")
-//					item->setData(AwBIDSItem::eeg, AwBIDSItem::TypeRole);
-//				else if (name == "anat") {
-//					item->setData(AwBIDSItem::anat, AwBIDSItem::TypeRole);
-//					item->setData(AwBIDSItem::gardel|AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
-//				}
-//				else
-//					item->setData(AwBIDSItem::Folder, AwBIDSItem::TypeRole);
-//				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//				recursiveParsing2(fullPath, item);
-//			}
-//		}
-//	}
-//	return res;
-//}
-
-//int AwBIDSManager::updateEventsTsv(const AwMarkerList& markers)
-//{
-//	m_errorString.clear();
-//	if (m_currentOpenItem == nullptr || markers.isEmpty())
-//		return -1;
-//	auto tsvPath = m_currentOpenItem->data(AwBIDSItem::EventsTsvRole).toString();
-//	QFile file;
-//	QTextStream stream(&file);
-//	// if the events.tsv does not exist, create it.
-//	if (tsvPath.isEmpty() || !QFile::exists(tsvPath)) {
-//		tsvPath = getPrefixName(m_currentOpenItem, true);
-//		tsvPath = QString("%1_events.tsv").arg(tsvPath);
-//		file.setFileName(tsvPath);
-//		if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-//			m_errorString = QString("Could not create %1").arg(tsvPath);
-//			return -1;
-//		}
-//		// default columns
-//		stream << "onset" << "\t" << "duration" << "\t" << bids::tsv_event_trial_type << endl;
-//		for (auto m : markers) 
-//			stream << QString("%1").arg(m->start()) << "\t" << QString("%1").arg(m->duration()) << "\t" << m->label() << "\t" << endl;
-//		file.close();
-//		return 0;
-//	}
-//	// the file exists, update it
-//   // read the first line to get columns
-//	file.setFileName(tsvPath);
-//	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-//		m_errorString = QString("Could not open %1 for reading.").arg(tsvPath);
-//		return -1;
-//	}
-//	auto line = stream.readLine();
-//	auto cols = AwUtilities::bids::columnsFromLine(line);
-//	file.close();
-//	// make a backup in case of...
-//	QString bak = tsvPath + ".bak";
-//	QFile::copy(tsvPath, bak);
-//	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-//		m_errorString = QString("Could not open %1 for writing.").arg(tsvPath);
-//		return -1;
-//	}
-//	// rewrite first line
-//	stream << line << endl;
-//	for (auto m : markers) {
-//		for (auto i = 0; i < cols.size(); i++) {
-//			auto colLabel = cols.value(i);
-//			if (colLabel == bids::tsv_event_trial_type)
-//				stream << m->label();
-//			else if (colLabel == bids::tsv_event_onset)
-//				stream << QString("%1").arg(m->start());
-//			else if (colLabel == bids::tsv_event_duration)
-//				stream << QString("%1").arg(m->duration());
-//			else
-//				stream << "n/a";
-//			if (i < cols.size())
-//				stream << "\t";
-//		}
-//		stream << endl;
-//	}
-//	file.close();
-//	QFile::remove(bak);
-//	return 0;
-//}
 
 int AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
 {

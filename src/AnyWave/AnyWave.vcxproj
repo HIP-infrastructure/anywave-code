@@ -858,7 +858,7 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtInstall>$(DefaultQtVersion)</QtInstall>
+    <QtInstall>5.15.0</QtInstall>
     <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -1009,7 +1009,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwHDF5lib.lib;AwWidgetsLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwFilteringLib.lib;AwMontageLib.lib;hdf5.lib;hdf5_hl.lib;qwt.lib;AwMappingLib.lib;AwMatlablib.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;zip.lib;qcustomplotlib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwHDF5lib.lib;AwWidgetsLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwFilteringLib.lib;AwMontageLib.lib;hdf5.lib;hdf5_hl.lib;qwt.lib;AwMappingLib.lib;AwMatlablib.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;qcustomplotlib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <PerUserRedirection>true</PerUserRedirection>
     </Link>
     <QtMoc>

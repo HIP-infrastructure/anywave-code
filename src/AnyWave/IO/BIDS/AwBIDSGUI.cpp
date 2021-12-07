@@ -294,6 +294,20 @@ void AwBIDSGUI::handleClick(const QModelIndex& index)
 	auto item = m_model->itemFromIndex(index);
 	if (item == 0)
 		return;
+
+	// check if item is a subject, is so parse it if necessary
+	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject) {
+		if (!item->data(AwBIDSItem::ParsedSubject).toBool()) {
+			AwBIDSItem* bidsItem = static_cast<AwBIDSItem*>(item);
+			bidsItem->addChildren(m_bids->recursiveParsing(item->data(AwBIDSItem::PathRole).toString(), bidsItem));
+			bidsItem->setData(true, AwBIDSItem::ParsedSubject);
+			recursiveFill(bidsItem);
+		}
+		else  // already parsed
+			return;
+	}
+
+
 	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile) {
 		// check for existing tooltip
 		if (!item->toolTip().isEmpty())
