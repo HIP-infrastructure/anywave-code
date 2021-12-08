@@ -42,7 +42,6 @@ signals:
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);
-	void changeBIDS(); // called when Change button is clicked
 	void openBIDSOptions(); // called when Change button is clicked
 	// context menu slots
 	void contextMenuRequested(const QPoint& pos);
@@ -54,13 +53,12 @@ protected:
 	QMenu *m_menuProcessing;
 	QAction *m_showNifti;
 	// keep a copy of models for the TreeView
-	QStandardItemModel *m_model;
+	QStandardItemModel* m_model, *m_propertiesModel;
 	AwBIDSItems m_items;	// copy of items list from bids manager
 	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
-
 	void initModel(const AwBIDSItems& subjects);
 	void recursiveFill(AwBIDSItem *item);
-	QString createToolTipFromJson(const QString& jsonPath);
+	void updatePropertiesTable(QStandardItem*item);
 	void createContextMenus();
 	void openITKSNAP(QStandardItem *item);
 	void openNiftiFile(const QString& file);

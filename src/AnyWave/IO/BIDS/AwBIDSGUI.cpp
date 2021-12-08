@@ -41,19 +41,20 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
 	m_ui.setupUi(this);
 	m_bids = AwBIDSManager::instance();
-	m_ui.leDIR->setText(m_bids->rootDir());
 	m_ui.treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	m_ui.treeView->resizeColumnToContents(0);
+	m_ui.tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 	connect(m_ui.treeView, &QTreeView::doubleClicked, this, &AwBIDSGUI::handleDoubleClick);
 	connect(m_ui.treeView, &QTreeView::clicked, this, &AwBIDSGUI::handleClick);
 	m_ui.treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_model = new QStandardItemModel(this);
 	m_model->setColumnCount(1);
-
+	m_propertiesModel = new QStandardItemModel(0, 2, this);
+	m_propertiesModel->setHorizontalHeaderLabels({ "Properties", "Values" });
 	m_ui.treeView->setModel(m_model);
 	m_ui.treeView->setUniformRowHeights(true);
 	m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_ui.buttonSelect, &QPushButton::clicked, this, &AwBIDSGUI::changeBIDS);
+	m_ui.tableView->setModel(m_propertiesModel);
 	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openBIDSOptions);
 	auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
 	QString jsonPath = QString("%1/bids.json").arg(settingsDir);
@@ -78,6 +79,9 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	}
 	
 	createContextMenus();
+	auto header = m_ui.tableView->horizontalHeader();
+	header->setDefaultAlignment(Qt::AlignHCenter);
+	m_ui.tableView->hide();
 }
 
 void AwBIDSGUI::closeBIDS()
@@ -242,17 +246,6 @@ void AwBIDSGUI::openBIDSOptions()
 		showColumns(dlg.columns());
 }
 
-void AwBIDSGUI::changeBIDS()
-{
-	auto dir = QFileDialog::getExistingDirectory(this, "BIDS dir", "Select a new BIDS directory");
-	if (dir.isEmpty())
-		return;
-	if (AwMessageBox::question(this, "Confirm BIDS Change", "Opening a new BIDS will close the active.\nOpen anywave?", QMessageBox::Yes | QMessageBox::No) ==
-		QMessageBox::No)
-		return;
-	m_bids->setRootDir(dir);
-}
-
 void AwBIDSGUI::showColumns(const QStringList& cols)
 {
 	// reset to one column.
@@ -297,74 +290,67 @@ void AwBIDSGUI::handleClick(const QModelIndex& index)
 
 	// check if item is a subject, is so parse it if necessary
 	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject) {
-		if (!item->data(AwBIDSItem::ParsedSubject).toBool()) {
+		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {  // parse item on the fly when required
 			AwBIDSItem* bidsItem = static_cast<AwBIDSItem*>(item);
 			bidsItem->addChildren(m_bids->recursiveParsing(item->data(AwBIDSItem::PathRole).toString(), bidsItem));
-			bidsItem->setData(true, AwBIDSItem::ParsedSubject);
+			bidsItem->setData(true, AwBIDSItem::ParsedItem);
 			recursiveFill(bidsItem);
+			showItem(item);
 		}
 		else  // already parsed
 			return;
 	}
-
-
 	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile) {
-		// check for existing tooltip
-		if (!item->toolTip().isEmpty())
-			return;
-
-		// get the sidefile json to set a tooltip
-		auto path = item->data(AwBIDSItem::PathRole).toString();
-		// regexp to capture file extension including dot
-		QRegularExpression reg("(\\.[^.]+)$");
-		if (path.contains("_eeg") || path.contains("_ieeg") || path.contains("_meg") || path.endsWith("nii")) {
+		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {
+			// get the sidefile json to set a tooltip
+			auto path = item->data(AwBIDSItem::PathRole).toString();
+			// regexp to capture file extension including dot
+			QRegularExpression reg("(\\.[^.]+)$");
 			auto jsonPath = path.remove(reg) + ".json";
-			auto toolTip = createToolTipFromJson(jsonPath);
-			if (toolTip.isEmpty()) {  // createToolTip failed, probably because a meg data file which does not contain the tag _meg
-				// the file path does not contain a type tag: that could be a 4DNI Meg file INSIDE a run folder
-				// get its parent item
-				auto parent = static_cast<AwBIDSItem *>(item)->parent();
-				Q_ASSERT(parent != nullptr);
+			if (!QFile::exists(jsonPath)) {  // json file not found (we may be inside a MEG folder)
+				auto parent = static_cast<AwBIDSItem*>(item)->parent();
 				auto parentPath = parent->data(AwBIDSItem::PathRole).toString();
 				if (parentPath.contains("_meg")) {
-					auto jsonPath = parentPath + ".json";
-					item->setToolTip(createToolTipFromJson(jsonPath));
+					jsonPath = parentPath + ".json";
 				}
 			}
-			else
-				item->setToolTip(toolTip);
+			// check that we have a josn file
+			if (QFile::exists(jsonPath)) {
+				item->setData(AwUtilities::json::fromJsonFileToString(jsonPath), AwBIDSItem::JsonDict);
+				item->setData(true, AwBIDSItem::ParsedItem);
+				updatePropertiesTable(item);
+			}
 		}
 	}
+	updatePropertiesTable(item);
 }
 
-QString AwBIDSGUI::createToolTipFromJson(const QString& jsonPath)
+
+void AwBIDSGUI::updatePropertiesTable(QStandardItem* item)
 {
-	auto dict = AwUtilities::json::fromJsonFileToHash(jsonPath);
-	QString toolTip;
-	if (dict.contains("Manufacturer"))
-		toolTip += QString("Manufacturer: %1\n").arg(dict.value("Manufacturer").toString());
-	if (dict.contains("SEEGChannelCount"))
-		toolTip += QString("SEEG Channel count: %1\n").arg(dict.value("SEEGChannelCount").toInt());
-	if (dict.contains("EEGChannelCount"))
-		toolTip += QString("EEG Channel count: %1\n").arg(dict.value("EEGChannelCount").toInt());
-	if (dict.contains("SamplingFrequency"))
-		toolTip += QString("Sampling Frequency: %1Hz\n").arg(dict.value("SamplingFrequency").toDouble());
-	if (dict.contains("RecordingDuration"))
-		toolTip += QString("File Duration: %1s\n").arg(dict.value("RecordingDuration").toDouble());
-	if (dict.contains("InstitutionName"))
-		toolTip += QString("Institution Name: %1\n").arg(dict.value("InstitutionName").toString());
-	if (dict.contains("Modality"))
-		toolTip += QString("Modality: %1\n").arg(dict.value("Modality").toString());
-	if (dict.contains("SliceThickness"))
-		toolTip += QString("Slice Thickness: %1\n").arg(dict.value("SliceThickness").toDouble());
-	if (dict.contains("SeriesNumber"))
-		toolTip += QString("Series Number: %1\n").arg(dict.value("SeriesNumber").toInt());
-	if (dict.contains("SeriesDescription"))
-		toolTip += QString("Series Description: %1\n").arg(dict.value("SeriesDescription").toString());
+	m_propertiesModel->removeRows(0, m_propertiesModel->rowCount());
+	QString jsonString = item->data(AwBIDSItem::JsonDict).toString();
+	if (jsonString.isEmpty()) {
+		m_ui.tableView->hide();
+		return;
+	}
+	QString err;
+	QVariantMap dict = AwUtilities::json::mapFromJsonString(jsonString, err);
+	if (!err.isEmpty())
+		return;
 
-	toolTip.chop(1); // remove last \n
-	return toolTip;  
+	// get dict keys and sort them
+	QStringList keys = dict.keys();
+	keys.sort();
+	int row = 0, col = 0;
+	for (auto const& k : keys) {
+		m_propertiesModel->setItem(row, col++, new QStandardItem(k));
+		m_propertiesModel->setItem(row++, col, new QStandardItem(dict.value(k).toString()));
+		col = 0;
+	}
+	m_ui.tableView->show();
 }
+
 
 void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 {

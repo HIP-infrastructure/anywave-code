@@ -31,7 +31,7 @@ public:
 		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5, DerivativesRole = Qt::UserRole + 6, 
 		HiddenRole = Qt::UserRole + 7, GardelElectrodePathRole = Qt::UserRole + 8, FreesurferMeshesRole = Qt::UserRole + 9,
 		GardelMontagesRole = Qt::UserRole + 10, ChannelsTsvRole = Qt::UserRole + 11, EventsTsvRole = Qt::UserRole + 12, 
-		ParsedSubject = Qt::UserRole + 13};
+		ParsedItem = Qt::UserRole + 13, JsonDict = Qt::UserRole + 14};
 	inline QList<AwBIDSItem *>& children() { return m_children; }
 	inline QStringList& files() { return m_files; }
 	inline void addFile(const QString& filePath) { m_files.append(filePath); }

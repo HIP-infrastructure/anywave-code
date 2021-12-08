@@ -69,7 +69,7 @@ AwBIDSItems AwBIDSManager::getSubjectItems(const QString& rootDir)
 			item->setData(name, AwBIDSItem::RelativePathRole);
 			// set the possible derivatives mask
 			item->setData(AwBIDSItem::gardel | AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
-			item->setData(false, AwBIDSItem::ParsedSubject);
+			item->setData(false, AwBIDSItem::ParsedItem);
 			items << item;
 		}
 	}
@@ -137,6 +137,7 @@ AwBIDSItems AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* 
 				fileItem->setData(AwBIDSItem::DataFile, AwBIDSItem::TypeRole);
 				fileItem->setData(type, AwBIDSItem::DataTypeRole);
 				fileItem->setData(QIcon(":/images/ox_eye_32.png"), Qt::DecorationRole);
+				fileItem->setData(false, AwBIDSItem::ParsedItem);
 
 				// set a display role without some bids keys/values to shorten the file name
 				auto tmp = AwUtilities::bids::removeBidsKey("sub", fileName);
@@ -155,6 +156,7 @@ AwBIDSItems AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* 
 				fileItem->setData(type, AwBIDSItem::DataTypeRole);
 				// set possible derivatives associated to the file item
 				fileItem->setData(AwBIDSItem::ica | AwBIDSItem::h2, AwBIDSItem::DerivativesRole);
+				fileItem->setData(false, AwBIDSItem::ParsedItem);
 				// add the item to the hash table
 				// use native separators
 
@@ -201,6 +203,7 @@ AwBIDSItems AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* 
 				item->setData(type, AwBIDSItem::DataTypeRole);
 				item->setData(QString("%1/%2").arg(parentRelativePath).arg(name), AwBIDSItem::RelativePathRole);
 				item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
+				item->setData(false, AwBIDSItem::ParsedItem);
 				recursiveParsing(fullPath, item);
 			}
 		}
