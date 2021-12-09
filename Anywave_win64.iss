@@ -18,7 +18,6 @@ Root: HKCR; Subkey: ".vhdr"; ValueType: string; ValueName: ""; ValueData: "AnyWa
 Root: HKCR; Subkey: ".edf"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".bdf"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".ades"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
-Root: HKCR; Subkey: ".ah5"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".cnt"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".fif"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".mff"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
@@ -48,7 +47,6 @@ Source: ".\bin\x64\Release\Plugins\EEPIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EGIReader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\BrainVisionIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\DeltamedBinTxtReader.dll"; DestDir: "{app}\Plugins";
-Source: ".\bin\x64\Release\Plugins\Correlation.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CTF_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEPIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\FileConverter.dll"; DestDir: "{app}\Plugins";
