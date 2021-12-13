@@ -45,7 +45,6 @@ public:
 	AwScriptPlugin() : AwProcessPlugin() { type = AwProcessPlugin::Background; m_isCompiled = false;}
 	enum Backends { Python, MATLAB};
 	void init(const QMap<QString, QString>& map);
-	//void setNameAndDesc(const QString& name, const QString& description);
 	void setScriptPath(const QString& path) { m_path = path; }
 	void setPluginDir(const QString& dir) { m_pluginDir = dir; }
 	void setPluginBackend(int backend) { m_backend = backend; }

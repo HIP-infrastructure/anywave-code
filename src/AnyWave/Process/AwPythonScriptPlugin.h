@@ -18,6 +18,13 @@
 #include "AwScriptPlugin.h"
 #include <QProcess>
 
+namespace aw {
+	namespace python_plugin
+	{
+		constexpr auto venv = "venv";
+	}
+}
+
 /// AwPythonScriptProcess
 /// An AwProcess in charge of launching a Python script as a process plugin
 class AwPythonScriptProcess : public AwScriptProcess
@@ -44,7 +51,6 @@ class AwPythonScriptPlugin : public AwScriptPlugin
 
 public:
 	AwPythonScriptPlugin() : AwScriptPlugin() { m_backend = AwScriptPlugin::Python; }
-	//void init(const QMap<QString, QString>& map) override;
 	AwPythonScriptProcess *newInstance();
 };
 

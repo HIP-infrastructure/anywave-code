@@ -314,64 +314,6 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 		}
 		aw.sendData(data);
 		aw.waitForResponse();
-
-		//while (true) {
-		//	int n = std::min(MARKERS_AT_ONCE, nMarkers);
-		//	data.clear();
-		//	stream.device()->reset();
-		//	stream << n;
-		//	for (auto i = 0; i < n; i++) {
-		//		QStringList targets;
-		//		float position = 0., duration = 0., value = 0.;
-
-		//		CharArray field_label = S[i + counter]["label"];
-		//		std::string s = field_label.toAscii();
-		//		label = QString::fromStdString(s);
-		//		stream << label;
-		//		if (map["color"] != -1) {
-		//			CharArray c = S[counter]["color"];
-		//			colour = QString::fromStdString(c.toAscii());
-		//		}
-		//		stream << colour;
-		//		TypedArray<double> pos = S[i + counter]["position"];
-		//		position = static_cast<float>(pos[0]);
-		//		stream << position;
-		//		if (map["duration"] != -1) {
-		//			const TypedArray<double> d = S[i + counter]["duration"];
-		//			duration = static_cast<float>(d[0]);
-		//		}
-		//		stream << duration;
-		//		if (map["value"] != -1) {
-		//			TypedArray<double> v = S[i + counter]["value"];
-		//			value = static_cast<float>(v[0]);
-		//		}
-		//		stream << value;
-		//		if (map["channels"] != -1) {
-		//			if (S[i + counter]["channels"].getType() == ArrayType::CELL) {
-		//				CellArray ctargets = S[i + counter]["channels"];
-		//				for (auto j = 0; j < ctargets.getNumberOfElements(); j++) {
-		//					const CharArray t = ctargets[0][j];
-		//					QString target = QString::fromStdString(t.toAscii());
-		//					targets << target;
-		//				}
-		//			}
-		//		}
-		//		stream << targets;
-		//	}
-		//	aw.sendData(data);
-		//	aw.waitForResponse();
-		//	nMarkers -= n;
-		//	counter += n;
-		//	if (nMarkers == 0) {
-		//		// finished sending markers =>inform anywave by sending 0 as number of markers
-		//		data.clear();
-		//		stream.device()->reset();
-		//		stream << (int)0;
-		//		aw.sendData(data);
-		//		break;
-		//	}
-		//}
-
 	}
 	catch (const QString& what) {
 		std::string message = QString("send_markers: %1").arg(what).toStdString();

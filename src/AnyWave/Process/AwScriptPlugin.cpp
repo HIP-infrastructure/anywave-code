@@ -23,10 +23,8 @@
 void AwScriptPlugin::initProcess(AwScriptProcess *p)
 {
 	// set it a copy of all settings from data manager
-//	p->pdi.input.settings.unite(AwDataManager::instance()->settings());
 	AwUniteMaps(p->pdi.input.settings, AwDataManager::instance()->settings());
 	// merge also settings proper to plugin
-//	p->pdi.input.settings.unite(m_settings);
 	AwUniteMaps(p->pdi.input.settings, m_settings);
 	// Fixed input as any channels by default
 	if (!(m_flags & Aw::ProcessFlags::ProcessDoesntRequireData)) {
