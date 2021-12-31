@@ -253,8 +253,13 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		return AwFileIO::FileAccess;
 	}
 
-	QString markerPath = path;
-	markerPath.replace(QString(".ades"), QString(".mrk"));
+	QString markerPath = path + ".mrk";
+//	markerPath.replace(QString(".ades"), QString(".mrk"));
+	// to avoid losing old ".mrk" files, check if they exists and load them
+	QString oldMrkPath = path;
+	oldMrkPath.replace(QString(".ades"), QString(".mrk"));
+
+
 	if (QFile::exists(markerPath)) {
 		AwMarkerList markers = AwMarker::load(markerPath);
 		while (!markers.isEmpty()) {
@@ -262,6 +267,17 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 			block->addMarker(m);
 			delete m;
 		}
+	}
+
+	if (QFile::exists(oldMrkPath)) {
+		auto markers = AwMarker::load(oldMrkPath);
+		while (!markers.isEmpty()) {
+			auto m = markers.takeFirst();
+			block->addMarker(m);
+			delete m;
+		}
+		AwMarker::removeDoublons(block->markers(), true);
+		QFile::remove(oldMrkPath);
 	}
 
 	infos.setMrkFile(markerPath);
@@ -361,8 +377,8 @@ ADESIO::FileStatus ADESIO::createFile(const QString &path, int flags)
 	hdr.close();
 
 	QString binPath = fullPath.replace(QString(".ades"), QString(".dat"));
-	QString markerPath = fullPath.replace(QString(".dat"), QString(".mrk"));
-
+//	QString markerPath = fullPath.replace(QString(".dat"), QString(".mrk"));
+	QString markerPath = fullPath.append(".mrk");
 	// Write markers if any
 	if (infos.blocks().at(0)->markersCount()) { // we consider a continous file (only one block)
 		if (AwMarker::save(markerPath, infos.blocks().at(0)->markers()) == -1)

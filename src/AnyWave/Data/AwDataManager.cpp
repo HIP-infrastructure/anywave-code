@@ -212,7 +212,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 
 	// get predefined .mrk .bad .mtg if any
 	auto tmp = reader->infos.badFile();
-	if (tmp.isEmpty())
+	if (tmp.isEmpty()) 
 		reader->infos.setBadFile(m_settings.value(keys::bad_file).toString());
 	tmp = reader->infos.mrkFile();
 	if (tmp.isEmpty())
@@ -221,6 +221,9 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	if (tmp.isEmpty())
 		reader->infos.setMtgFile(m_settings.value(keys::montage_file).toString());
 
+	m_settings[keys::marker_file] = reader->infos.mrkFile();
+	m_settings[keys::bad_file] = reader->infos.badFile();
+	m_settings[keys::montage_file] = reader->infos.mtgFile();
 	// handle output_dir
 	if (!m_settings.contains(keys::output_dir))
 		// default output_dir is the data dir

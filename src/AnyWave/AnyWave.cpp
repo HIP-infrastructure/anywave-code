@@ -710,11 +710,12 @@ void AnyWave::openPluginHelpUrl()
 /// toolbar positions are saved
 void AnyWave::readSettings()
 {
-	//QSettings settings;
-	//QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
-	//QByteArray geometryData = settings.value("geometry/mainWindowGeometry").toByteArray();
-	//restoreState(stateData);
-	//restoreGeometry(geometryData);
+	QSettings settings("INSERM U1106", "AnyWave");
+//	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
+	//QByteArray geometryData = settings.value("geometry").toByteArray();
+	// restoreState(stateData);
+//	restoreGeometry(settings.value("geometry").toByteArray());
+	restoreState(settings.value("state").toByteArray());
 }
 
 ///
@@ -722,10 +723,11 @@ void AnyWave::readSettings()
 /// toolbar positions are restored
 void AnyWave::writeSettings()
 {
-	QSettings settings;
+	QSettings settings("INSERM U1106", "AnyWave");
 	// Write the values to disk in categories.
-	settings.setValue("state/mainWindowState", saveState());
-	settings.setValue("geometry/mainWindowGeometry", saveGeometry());
+//	settings.setValue("state/mainWindowState", saveState());
+//	settings.setValue("geometry", saveGeometry());
+	settings.setValue("state", saveState());
 }
 
 

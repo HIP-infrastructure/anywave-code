@@ -102,7 +102,6 @@ void AwPythonScriptProcess::run()
 	auto aws = AwSettings::getInstance();
 	auto systemPath = aws->value(aws::system_path).toString();
 	if (!isCompiled) {
-
 		// get venv dir if specified in desc.txt
 		const auto& settings = plugin()->settings();
 		QString venvDir = settings.value(aw::python_plugin::venv).toString();
@@ -113,14 +112,11 @@ void AwPythonScriptProcess::run()
 		if (!venvDir.isEmpty()) {
 #ifdef Q_OS_WIN
 			QString script = QString("%1\\Scripts").arg(venvDir);
-			//QString pythonPath = QString("%1\\Lib\\site-packages\\anywave").arg(venvDir);
 			python = QString("%1\\python.exe").arg(script);
 			python = QDir::toNativeSeparators(python);
 			QString activate = QString("%1\\activate.bat").arg(script);
 			activate = QDir::toNativeSeparators(activate);
 			venvDir = QDir::toNativeSeparators(venvDir);
-			//env.insert("PYTHONPATH", pythonPath);
-			//systemPath = QString("%1;%2").arg(venvDir).arg(systemPath);
 			env.remove("PATH");
 			env.insert("PATH", systemPath);
 			m_python->setProcessEnvironment(env);
