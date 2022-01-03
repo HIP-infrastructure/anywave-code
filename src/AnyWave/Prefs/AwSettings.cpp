@@ -90,6 +90,16 @@ void AwSettings::init()
 	}
 	settings.endArray();
 
+	// get python venvs
+	QStringList venvs;	// list of QString  splitted by ':'
+	size = settings.beginReadArray("venvs");
+	for (int i = 0; i < size; i++) {
+		settings.setArrayIndex(i);
+		QString s = settings.value("venv").toString();
+		if (s.contains("::"))
+			venvs << s;
+	}
+	settings.endArray();
 	m_settings[aws::recent_files] = recentFiles;
 	m_settings[aws::recent_bids] = recentBIDS;
 
@@ -125,21 +135,15 @@ void AwSettings::init()
 	// check for a file called ins.txt
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
+	// Python defaults
+	// default anywave venv => appdir/python/venv
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+	m_settings[aws::python_venv_dir] = QCoreApplication::applicationDirPath() + "/python/venv";
+#endif
+	m_settings[aws::python_use_default] = settings.value("python/use_default", true).toBool();
+	m_settings[aws::python_venv_alias] = settings.value("python/venv_alias", "anywave").toString();
+	m_settings[aws::python_venv_list] = venvs;
 
-	QString pythonExe = settings.value("general/python_interpreter", QString()).toString();
-	QString pythonVenv = settings.value("general/python_venv", QString()).toString();
-	m_settings[aws::python_detected] = false;
-	if (!pythonVenv.isEmpty()) {
-		m_settings[aws::python_venv_dir] = pythonVenv;
-		m_settings[aws::python_exe] = pythonExe;
-		m_settings[aws::python_detected] = true;
-	}
-	else {
-		if (pythonExe.isEmpty()) {
-			m_settings[aws::python_exe] = pythonExe;
-			m_settings[aws::python_detected] = true;
-		}
-	}
 }
 
 QVariant AwSettings::value(const QString& key)

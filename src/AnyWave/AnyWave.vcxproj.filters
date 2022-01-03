@@ -616,6 +616,9 @@
     <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="Prefs\AwAddVenvDial.cpp">
+      <Filter>Prefs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1119,6 +1122,9 @@
     <QtMoc Include="Updater\AwDownloadGui.h">
       <Filter>Updater</Filter>
     </QtMoc>
+    <QtMoc Include="Prefs\AwAddVenvDial.h">
+      <Filter>Prefs</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Prefs\AwPreferences.h">
@@ -1315,6 +1321,9 @@
     </QtUic>
     <QtUic Include="Marker\AwStatsWidget.ui">
       <Filter>Marker</Filter>
+    </QtUic>
+    <QtUic Include="Prefs\AwAddVenvDial.ui">
+      <Filter>Prefs</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

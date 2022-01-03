@@ -211,10 +211,15 @@ void AwFilterSettings::apply(AwChannel *channel) const
 	if (!m_hash.contains(channel->type()))
 		return;
 
-	// Check for ICA/Source if the channel is real or virtual: DO NOT FILTER ICA/Source Virtual Channels.
-	if (channel->isICA() || channel->isSource())
-		if (channel->isVirtual())
-			return;
+	// ALLOW FILTERING OF ICA VIRTUAL CHANNELS (January 2022)
+
+	//// Check for ICA/Source if the channel is real or virtual: DO NOT FILTER ICA/Source Virtual Channels.
+	//if (channel->isICA() || channel->isSource())
+	//	if (channel->isVirtual())
+	//		return;
+
+	// ALLOW FILTERING OF ICA VIRTUAL CHANNELS (January 2022) Uncomment previous lines to disable filtering again
+
 
 	QVector<float> tmp = m_hash[channel->type()];
 	channel->setHighFilter(tmp[0]);

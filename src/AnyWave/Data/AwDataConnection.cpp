@@ -135,9 +135,7 @@ void AwDataConnection::parseChannels(AwChannelList& channels)
 	m_connectionsList.clear();
 
 	// Make SURE here that all dependent channels required have the SAME filter options than the requested ones !
-
-
-	foreach(AwChannel *c, channels)	{
+	for (AwChannel *c : channels)	{
 		if (!c->isVirtual()) {
 			m_realChannels[c->type()].append(c);
 			m_loadingList << c;
@@ -264,7 +262,7 @@ void AwDataConnection::computeVirtualChannels()
 	// COMPUTE VIRTUAL CHANNELS
 	computeVirtuals(m_virtualChannels);
 	// remove connected channels from loading list
-	foreach (AwChannel *c, m_connectionsList) {
+	for  (AwChannel *c : m_connectionsList) {
 		m_loadingList.removeAll(c);
 		// free data of channel in connections list
 		c->clearData(); 
@@ -530,7 +528,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		AwFiltering::filter(m_virtualChannels);
 
 		// check for channels that need montaging
-		for(auto channel :  m_loadingList) {
+		for (auto channel :  m_loadingList) {
 			if (channel->hasReferences())
 				montageChannels << channel;
 		}
