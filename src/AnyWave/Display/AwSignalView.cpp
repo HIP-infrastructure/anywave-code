@@ -26,7 +26,7 @@
 #include <AwFileIO.h>
 #include "ICA/AwICAChannel.h"
 #include "Montage/AwMontageManager.h"
-#include "AwDisplaySetupManager.h"
+//#include "AwDisplaySetupManager.h"
 #include "ICA/AwICAManager.h"
 #include <widget/AwMessageBox.h>
 #include "Data/AwDataManager.h"
@@ -43,14 +43,13 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	markBar->setMode(AwBaseMarkerBar::Global);
 	scene->applyNewSettings(m_settings);
 	changeObjects(view, scene, NULL, markBar);
-	AwDisplaySetupManager *dsm = AwDisplaySetupManager::instance();
+//	AwDisplaySetupManager *dsm = AwDisplaySetupManager::instance();
 	// connections
-	connect(this, SIGNAL(settingsChanged()), dsm, SLOT(saveSettings()));
+//	connect(this, SIGNAL(settingsChanged()), dsm, SLOT(saveSettings()));
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();
 	connect(m_scene, SIGNAL(markerInserted(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 	connect(m_scene, &AwScene::showMarkerUnderMouse, mm, &AwMarkerManager::highlightMarkerInList);
-//	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(getNewMarkers()));
 	// filters
 	connect(&dm->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
@@ -73,11 +72,9 @@ AwSignalView::~AwSignalView()
 {
 	AwDataServer::getInstance()->closeConnection(client());
 	// remove virtual channels from main list
-	foreach(AwChannel *c, m_virtualChannels)
+	for (AwChannel *c : m_virtualChannels)
 		m_channels.removeAll(c);
-
-	while (!m_montageChannels.isEmpty())
-		delete m_montageChannels.takeFirst();
+	qDeleteAll(m_montageChannels);
 }
 
 void AwSignalView::updatePageDuration(float duration)
@@ -191,7 +188,7 @@ void AwSignalView::closeFile()
 	AwDataManager::instance()->dataServer()->closeConnection(client());
 
 	// remove virtual channels from main list
-	foreach (AwChannel *c, m_virtualChannels) {
+	for (AwChannel *c : m_virtualChannels) {
 		if (m_channels.contains(c))
 			m_channels.removeAll(c);
 	}

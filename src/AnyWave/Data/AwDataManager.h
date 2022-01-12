@@ -74,6 +74,7 @@ public:
 	inline QString& errorString() { return m_errorString; }
 
 	void setNewRootDirForSideFiles(const QString& dir);
+
 signals:
 	void finished();  // used for threading operations (only when opening file in GUI mode at present)
 public slots:

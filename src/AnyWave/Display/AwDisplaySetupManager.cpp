@@ -30,7 +30,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Static
 ////////////////////////////////////////////////////////////////////////////////////////////
-AwDisplaySetupManager* AwDisplaySetupManager::m_instance = NULL;
+AwDisplaySetupManager* AwDisplaySetupManager::m_instance = nullptr;
 
 AwDisplaySetupManager* AwDisplaySetupManager::instance()
 {
@@ -52,7 +52,7 @@ AwDisplaySetupManager::AwDisplaySetupManager(QObject *parent)
 
 AwDisplaySetupManager::~AwDisplaySetupManager()
 {
-	delete m_currentSetup;
+
 }
 
 
@@ -75,11 +75,9 @@ void AwDisplaySetupManager::init()
 
 void AwDisplaySetupManager::resetToDefault()
 {
-	AwDisplaySetup *setup = new AwDisplaySetup("Default Setup");
+	QSharedPointer<AwDisplaySetup> setup = QSharedPointer<AwDisplaySetup>(new AwDisplaySetup("Default Setup"));
 	setup->setToDefault();
-	emit newSetupSelected(setup);
-	// set current setup AFTER sending all the signals to update other objects.
-	delete m_currentSetup;
+	emit newSetupSelected(setup.get());
 	m_currentSetup = setup;
 }
 
@@ -107,29 +105,10 @@ void AwDisplaySetupManager::updateSetup(AwDisplaySetup *setup, int flags)
 
 void AwDisplaySetupManager::loadSetup(const QString& path)
 {
-	AwDisplaySetup *newSetup = new AwDisplaySetup();
+	QSharedPointer<AwDisplaySetup> newSetup = QSharedPointer<AwDisplaySetup>(new AwDisplaySetup());
 	if (!newSetup->loadFromFile(path)) // Failed to load the setup
 		newSetup->setToDefault();
 
-	emit newSetupSelected(newSetup);
-	delete m_currentSetup;
+	emit newSetupSelected(newSetup.get());
 	m_currentSetup = newSetup;
-}
-
-void AwDisplaySetupManager::deleteCurrentSetup()
-{
-	// Do not delete Default Setup
-	if (m_currentSetup->name() == "Default Setup")
-		return;
-	
-	int index = -1;
-	if (QFile::remove(m_currentSetup->path()))	{
-		index = m_loadedSetups.indexOf(m_currentSetup->name());
-		if (index != -1) {
-			m_loadedSetups.removeOne(m_currentSetup->name());
-
-			// Removing the setup in tool bar combo box should update anything and change the setup.
-			m_toolBar->removeSetup(m_currentSetup->name());
-		}
-	}
 }

@@ -65,6 +65,7 @@ namespace aws {
 	constexpr auto python_use_default = "python_use_default"; // true if using default system python 
 	constexpr auto python_venv_alias = "python_venv_alias"; // name of venv to use
 	constexpr auto python_venv_list = "python_venv_list"; 
+	constexpr auto python_embeded_venv_dir = "python_embeded_venv_dir";
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";

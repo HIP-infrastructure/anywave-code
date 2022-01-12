@@ -75,6 +75,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 	// create views from setup
 	for (AwViewSetup *vs : setup->viewSetups())
 		AwSignalView *view = addSignalView(vs);
+	
 
 	w->update();
 	m_dontSynchronize = false;
@@ -121,6 +122,74 @@ AwChannelList AwDisplay::displayedChannels()
 		res += v->displayedChannels();
 	return res;
 }
+
+AwSignalView* AwDisplay::addSignalView(AwViewSettings  *settings)
+{
+	// Set other views flag
+	for (auto v : m_signalViews)
+		v->setProcessFlags(AwSignalView::NoProcessUpdate);
+
+	AwSignalView* view = new AwSignalView(settings);
+	AwProcessManager* pm = AwProcessManager::instance();
+	QList<AwDisplayPlugin*> plugins = AwPluginManager::getInstance()->displays();
+	QList<AwProcessPlugin*> QTSplugins = pm->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
+
+	for (auto plugin : plugins)
+		view->addNewDisplayPlugin(plugin);
+
+	m_signalViews << view;
+
+	// connections
+	connect(view, SIGNAL(positionChanged(float)), this, SLOT(synchronizeViews(float)));
+	connect(view, SIGNAL(cursorPositionChanged(float)), this, SLOT(synchronizeCursorPos(float)));
+	connect(view, SIGNAL(mappingPositionChanged(float)), this, SLOT(synchronizeMappingCursorPos(float)));
+	connect(view, SIGNAL(displayedChannelsUpdated(AwChannelList&)), pm, SLOT(startDisplayProcesses(AwChannelList&)));
+	connect(view->scene(), SIGNAL(clickedAtTime(float)), this, SIGNAL(clickedAtLatency(float)));
+	connect(view->scene(), SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
+	connect(view->scene(), &AwGraphicsScene::draggedCursorPositionChanged, this, &AwDisplay::draggedCursorPositionChanged);
+	connect(view, SIGNAL(cursorClicked(float)), this, SLOT(synchronizeOnCursor(float)));
+	connect(view, SIGNAL(markerBarHighlighted(AwMarker*)), this, SLOT(highlightMarker(AwMarker*)));
+
+	connect(AwMarkerManager::instance()->markerInspector(), SIGNAL(settingsChanged(AwMarkingSettings*)),
+		view->scene(), SLOT(setMarkingSettings(AwMarkingSettings*)));
+	view->scene()->setMarkingSettings(&AwMarkerManager::instance()->markerInspector()->settings());
+
+	// Montage to view
+	connect(AwMontageManager::instance(), SIGNAL(badChannelsSet(const QStringList&)), view->scene(), SLOT(unselectChannels(const QStringList&)));
+
+	// close view connect
+	connect(view, SIGNAL(closeViewClicked()), this, SLOT(removeView()));
+
+	// filters changed
+	connect(view->scene(), SIGNAL(channelFiltersChanged()), AwMontageManager::instance(), SLOT(saveCurrentMontage()));
+
+	view->setChannels(m_channels);
+	if (!m_virtualChannels.isEmpty())
+		view->addVirtualChannels(m_virtualChannels);
+
+	m_centralWidget->addWidget(view);
+	m_centralWidget->repaint();
+
+	// set flags so that the views inform the Process Manager about changes.
+	for (auto v : m_signalViews)
+		v->setProcessFlags(AwSignalView::UpdateProcess);
+
+	view->getNewMarkers();
+
+	// QTS
+	QStringList list;
+	for (auto p : QTSplugins)
+		list << p->name;
+
+	view->scene()->setQTSPlugins(list);
+	connect(view->scene(), SIGNAL(processSelectedForLaunch(QString&, AwChannelList&, float, float)),
+		pm, SLOT(launchQTSPlugin(QString&, AwChannelList&, float, float)));
+	connect(view, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));
+	// END OF QTS
+
+	return view;
+}
+
 
 AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 {
@@ -173,7 +242,6 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	for (auto v : m_signalViews)
 		v->setProcessFlags(AwSignalView::UpdateProcess);
 
-//	view->setMarkers(AwMarkerManager::instance()->displayedMarkers());
 	view->getNewMarkers();
 	
 	// QTS
@@ -214,10 +282,11 @@ void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
 void AwDisplay::closeFile()
 {
 	saveChannelSelections();
+	saveViewSettings();
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
-	AwDisplaySetupManager::instance()->saveSettings();
-	AwDisplaySetupManager::instance()->resetToDefault();
+	//AwDisplaySetupManager::instance()->saveSettings();
+	//AwDisplaySetupManager::instance()->resetToDefault();
 	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
 		v->closeFile();
@@ -226,7 +295,8 @@ void AwDisplay::closeFile()
 void AwDisplay::quit()
 {
 	saveChannelSelections();
-	AwDisplaySetupManager::instance()->saveSettings();
+	saveViewSettings();
+	//AwDisplaySetupManager::instance()->saveSettings();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
 }
@@ -263,6 +333,20 @@ void AwDisplay::loadChannelSelections()
 		file.close();
 	}
 
+}
+
+void AwDisplay::loadViewSettings()
+{
+	auto dm = AwDataManager::instance();
+	if (QFile::exists(dm->dispFilePath())) 
+		m_displaySetup.loadFromFile(dm->dispFilePath());
+
+}
+
+void AwDisplay::saveViewSettings()
+{
+	auto dm = AwDataManager::instance();
+	m_displaySetup.saveToFile(dm->dispFilePath());
 }
 
 
@@ -550,9 +634,21 @@ void AwDisplay::addNewSignalView()
 	if (dlg.exec() != QDialog::Accepted)
 		return;
 
-	AwViewSetup *ns = m_setup->newViewSetup();
-	ns->filters = dlg.filters();
-	addSignalView(ns);
+	//AwViewSetup *ns = m_setup->newViewSetup();
+	//ns->filters = dlg.filters();
+	AwViewSettings* settings = new AwViewSettings(this);
+	settings->filters = dlg.filters();
+	addSignalView(settings);
+	m_displaySetup.addViewSettings(settings);
+}
+
+void AwDisplay::removeView(int index)
+{
+	if (index < m_signalViews.size() && index > 0) {
+		auto view = m_signalViews.at(index);
+		view->setParent(nullptr);
+		delete view;
+	}
 }
 
 void AwDisplay::removeView()
@@ -704,11 +800,32 @@ void AwDisplay::setChannels(const AwChannelList &montage)
 //void AwDisplay::newFile(AwFileIO *reader)
 void AwDisplay::newFile()
 {
-	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
-	ds->init();
-	for (AwSignalView * v : m_signalViews)
-		v->enableView();
+//	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
+//	ds->init();
+	//for (AwSignalView* v : m_signalViews)
+	//	v->enableView();
 
+	// load .display file if exists
+	loadViewSettings();
+	// remove all the current views
+	for (AwSignalView* v : m_signalViews) {
+		v->setParent(nullptr);
+		delete v;
+	}
+	m_signalViews.clear();
+
+	if (m_displaySetup.viewSettings().isEmpty()) { // should never happen
+									// init with one defaut view/view settings
+		m_displaySetup.addViewSettings(new AwViewSettings(this));
+	}
+	for (auto settings : m_displaySetup.viewSettings()) {
+		AwSignalView* view = addSignalView(settings);
+
+		view->setProcessFlags(AwSignalView::NoProcessUpdate);
+		m_centralWidget->addWidget(view);
+		m_centralWidget->repaint();
+		view->setProcessFlags(AwSignalView::UpdateProcess);
+	}
 	setChannels(AwMontageManager::instance()->channels());
 	loadChannelSelections();
 }
@@ -739,6 +856,7 @@ void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
 
 	for (AwViewSetup *vs : newSetup->viewSetups()) 	{
 		AwSignalView *view = addSignalView(vs);
+
 		view->setProcessFlags(AwSignalView::NoProcessUpdate);
 		view->setChannels(m_channels);
 		if (!m_virtualChannels.isEmpty())

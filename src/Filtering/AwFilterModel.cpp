@@ -29,9 +29,9 @@ void AwFilterModel::updateSettings(const AwFilterSettings& settings)
 {
 	beginResetModel();
 	m_settings = settings;
-	m_keys.clear();
-	m_keys = m_settings.currentTypes();
-	m_boundsTypes = m_settings.filterBounds().keys();
+	m_channelTypes = m_settings.currentTypes();
+	//m_keys = m_settings.currentTypes();
+//	m_boundsTypes = m_settings.filterBounds().keys();
 	endResetModel();
 }
 
@@ -40,7 +40,8 @@ void AwFilterModel::updateSettings(const AwFilterSettings& settings)
 //
 int AwFilterModel::rowCount(const QModelIndex &parent) const
 {
-	return m_keys.count() + m_boundsTypes.size();
+//	return m_keys.count() + m_boundsTypes.size();
+	return m_channelTypes.count();
 }
 
 //
@@ -63,8 +64,8 @@ Qt::ItemFlags AwFilterModel::flags(const QModelIndex &index) const
 
 	flags |= Qt::ItemIsEnabled;
 
-	if (index.row() >= m_keys.count())  // this is a filter bound setting => not editable
-		return flags;
+	//if (index.row() >= m_keys.count())  // this is a filter bound setting => not editable
+	//	return flags;
 	
 	if (index.column() != FILTER_COLUMN_TYPE)
 		flags |= Qt::ItemIsEditable;
@@ -77,20 +78,23 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 
 	auto col = index.column();
-	bool isFilterBounds = index.row() >= m_keys.size();
-	QVector<float> values;
-	QString type;
-	if (!isFilterBounds) {
-		values = m_settings.filters(m_keys.value(index.row()));
-		type = AwChannel::typeToString(m_keys.value(index.row()));
-	}
-	else {
-		type = m_boundsTypes.value(index.row() - m_keys.size());
-		auto bounds = m_settings.filterBounds().value(type);
-		// set a fake notch filter.
-		values << bounds.bounds[0] << bounds.bounds[1] << 0.;
-	}
-	QString none = tr("None");
+//	bool isFilterBounds = index.row() >= m_keys.size();
+	//QVector<float> values;
+	auto type = m_channelTypes.at(index.row());
+	const auto& values = m_settings.filters(type);
+	const auto& limits = m_settings.limits(type);
+//	m_settings.getBounds();
+	//if (!isFilterBounds) {
+	//	values = m_settings.filters(m_keys.value(index.row()));
+	//	type = AwChannel::typeToString(m_keys.value(index.row()));
+	//}
+	//else {
+	//	type = m_boundsTypes.value(index.row() - m_keys.size());
+	//	auto bounds = m_settings.filterBounds().value(type);
+	//	// set a fake notch filter.
+	//	values << bounds.bounds[0] << bounds.bounds[1] << 0.;
+	//}
+	const QString none = QString("None");
 	
 
 	switch (col) {
@@ -103,6 +107,10 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 			else
 				return none;
 		}
+		else if (role == Qt::BackgroundColorRole && !limits.isEmpty()) {
+				if (limits[0] > values[0])
+					return QColor(Qt::red);
+		}
 		break;
 	case FILTER_COLUMN_LPF:
 		if (role == Qt::UserRole)
@@ -112,6 +120,10 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 				return values[1];
 			else
 				return none;
+		}
+		else if (role == Qt::BackgroundColorRole && !limits.isEmpty()) {
+			if (limits[1] < values[1])
+				return QColor(Qt::red);
 		}
 		break;
 	case FILTER_COLUMN_NOTCH:
@@ -126,14 +138,14 @@ QVariant AwFilterModel::data(const QModelIndex &index, int role) const
 		break;
 	case FILTER_COLUMN_TYPE:
 		if (role == Qt::DisplayRole)
-			return type;
+			return m_settings.getChannelRegisterType(type);
 		break;
 	}
 	if (role == Qt::TextAlignmentRole)
 		return int(Qt::AlignCenter);
-	if (role == Qt::BackgroundColorRole && isFilterBounds) {
-		return QColor(Qt::red);
-	}
+	//if (role == Qt::BackgroundColorRole && isFilterBounds) {
+	//	return QColor(Qt::red);
+	//}
 	return QVariant();
 }
 
@@ -142,7 +154,7 @@ bool AwFilterModel::setData(const QModelIndex &index, const QVariant &value, int
 	if (!index.isValid())
 		return false;
 	auto col = index.column();
-	auto type = m_keys.at(index.row());
+	auto type = m_channelTypes.at(index.row());
 	auto values = m_settings.filters(type);
 	if (col == FILTER_COLUMN_HPF && role == Qt::EditRole) {
 		values[0] =(float)value.toDouble();

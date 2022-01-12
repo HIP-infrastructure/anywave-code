@@ -36,7 +36,7 @@ AwICAManager::AwICAManager(QObject *parent)
 	: QObject(parent)
 {
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++)
-		m_comps[i] = NULL;
+		m_comps[i] = nullptr;
 	m_isFilteringOn = false;	// no ICA filtering by default
 }
 

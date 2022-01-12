@@ -239,13 +239,18 @@ int AwMATLABFile::writeString(const QString& name, const QString& value)
 {
 	CHECK_OPEN_FILE
 	size_t dims[2];
-	char dummy[256];
-	int length = std::min(value.size(), 255);
+	std::string s_ = value.toStdString();
+
+	//char dummy[256];
+	//int length = std::min(value.size(), 255);
+	//dims[0] = 1;
+	//dims[1] = length;
+	//memcpy(dummy, value.toLatin1().data(), length);
+	//dummy[length] = '\0';
+	//matvar_t* var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CHAR, MAT_T_UINT8, 2, dims, dummy, 0);
 	dims[0] = 1;
-	dims[1] = length;
-	memcpy(dummy, value.toLatin1().data(), length);
-	dummy[length] = '\0';
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CHAR, MAT_T_UINT8, 2, dims, dummy, 0);
+	dims[1] = s_.size();
+	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CHAR, MAT_T_UINT8, 2, dims, (void *)s_.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeString");
@@ -635,13 +640,11 @@ int AwMATLABFile::readString(const QString& name, QString& string)
 		return -1;
 	}
     Mat_VarReadDataAll(FILEPTR, var);
-	//char dummy[256];
-	//size_t length = std::min(size_t(255), var->dims[0] * var->dims[1]);
-	//memcpy(dummy, (char *)var->data, length);
-	//dummy[length] = '\0';
-	//string = QString::fromLatin1(dummy);
-
-	string = QString(static_cast<char*>(var->data));
+	std::string s_;
+	size_t size = var->dims[0] * var->dims[1];
+	s_.resize(size);
+	std::memcpy((void *)s_.data(), var->data, size);
+	string = QString::fromStdString(s_);
 	Mat_VarFree(var);
 	return 0;
 }
@@ -667,12 +670,12 @@ int AwMATLABFile::readStrings(const QString& name, QStringList& strings)
 	for (size_t i = 0; i < var->dims[0] * var->dims[1]; i++) {
 		matvar_t *item = array[i];
 		if (item->class_type == MAT_C_CHAR /*&& item->data_type == MAT_T_UINT8*/) {
-			//char dummy[256];
-			//size_t length = std::min(size_t(255), item->dims[0] * item->dims[1]);
-			//memcpy(dummy, (char *)item->data, length);
-			//dummy[length] = '\0';
-			//list << QString::fromLatin1(dummy);
-			list << QString(static_cast<char*>(item->data));
+			std::string s_;
+			size_t size = item->dims[0] * item->dims[1];
+			s_.resize(size);
+			std::memcpy((void*)s_.data(), item->data, size);
+
+			list << QString::fromStdString(s_);
 		}
 	}
 	Mat_VarFree(var);

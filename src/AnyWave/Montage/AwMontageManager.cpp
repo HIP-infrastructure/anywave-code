@@ -163,7 +163,8 @@ void AwMontageManager::addNewSources(int type)
 	}
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
-	AwDataManager::instance()->filterSettings().setBounds(type, sm->hp(type), sm->lp(type));
+	AwDataManager::instance()->filterSettings().registerChannelType(type, "Source");
+	AwDataManager::instance()->filterSettings().setLimits(type, { sm->hp(type), sm->lp(type) });
 }
 
 int AwMontageManager::loadICA()
@@ -221,7 +222,8 @@ int AwMontageManager::loadICA(const QString& path)
 			// add ica to as recorded
 			m_asRecorded[channel->name()] = channel;
 		}
-		AwDataManager::instance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
+		AwDataManager::instance()->filterSettings().registerChannelType(AwChannel::ICA, QString("ICA-%1").arg(AwChannel::typeToString(i)));
+		AwDataManager::instance()->filterSettings().setLimits(AwChannel::ICA, { comps[i]->hpFilter(), comps[i]->lpFilter() });
 	}
 
 	emit montageChanged(m_channels);

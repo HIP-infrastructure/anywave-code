@@ -91,6 +91,7 @@ protected slots:
 	void nextValue();
 	void goToValue();
 	void showColumn(bool flag);
+	void removeDuplicates();
 
 protected:
 	//void updateStats();

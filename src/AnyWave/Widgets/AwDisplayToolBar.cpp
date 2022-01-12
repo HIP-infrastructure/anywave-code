@@ -15,19 +15,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwDisplayToolBar.h"
 #include "Prefs/AwSettings.h"
-#include "Display/AwDisplaySetupManager.h"
+// #include "Display/AwDisplaySetupManager.h"
 
 AwDisplayToolBar::AwDisplayToolBar(QWidget *parent)
 	: QWidget(parent)
 {
 	setupUi(this);
-	AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
-	m_setup = NULL;
+//	AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
+	m_setup = nullptr;
 	connect(checkSynchro, SIGNAL(toggled(bool)), this, SLOT(setSynchronized(bool)));
 	connect(comboAlignment, SIGNAL(currentIndexChanged(int)), this, SLOT(changeAlignment(int)));
 	connect(buttonAddView, SIGNAL(clicked()), this, SLOT(addView()));
-	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(setNewSetup(AwDisplaySetup *)));
-	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
+//	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(setNewSetup(AwDisplaySetup *)));
+//	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
 	connect(buttonCapture, SIGNAL(clicked()), this, SIGNAL(captureClicked())); 
 	// toolbar init
 	m_toolBar = new QToolBar(tr("Display"));
@@ -52,11 +52,11 @@ void AwDisplayToolBar::changeEvent(QEvent *e)
 // SLOTS
 void AwDisplayToolBar::addView()
 {
-	int nViews = m_setup->viewSetups().size();
+//	int nViews = m_setup->viewSetups().size();
 	emit addViewClicked();
 	// check if a new view has been added
-	if (m_setup->viewSetups().size() > nViews)
-		emit setupChanged(m_setup, AwDisplaySetup::ViewNumber);
+//	if (m_setup->viewSetups().size() > nViews)
+//		emit setupChanged(m_setup, AwDisplaySetup::ViewNumber);
 }
 
 void AwDisplayToolBar::changeAlignment(int index)

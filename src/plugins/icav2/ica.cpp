@@ -43,7 +43,7 @@ ICA::ICA()
 	pdi.addInputChannel(-1, 1, 0);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
 	m_isDownsamplingActive = true;
-	m_hpf = m_lpf = 0.;
+	m_hpf = m_lpf = m_notch = 0.;
 	m_nComp = 0;
 	auto infomax = new ICAInfomax(this);
 	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
@@ -56,7 +56,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";
-	version = "2.1.0";
+	version = "2.2.0";
     name = QString("ICA");
     description = QString("Compute ICA");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
@@ -199,10 +199,11 @@ int ICA::initParameters()
 
 	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[keys::data_path].toString()).arg(args["modality"].toString()));
 
-	m_lpf = args.value(keys::lp).toDouble();
-	m_hpf = args.value(keys::hp).toDouble();
+	m_lpf = args.value(keys::lp).toFloat();
+	m_hpf = args.value(keys::hp).toFloat();
+	m_notch = args.value(keys::notch).toFloat();
 	AwFilterSettings filterSettings;
-	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
+	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, m_notch);
 	filterSettings.apply(m_channels);
 
 	if (!(modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied)) {
@@ -295,10 +296,10 @@ int ICA::initParameters()
 
 	QString mod = args.value(keys::modality).toString();
 	if (args.contains(keys::output_suffix)) 
-		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
+		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_notch-%5_comp-%6%7.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_notch).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica
-	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5_ica.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
-	// generate full path
+	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_notch-%5_comp-%6_ica.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_notch).arg(m_nComp);
+	// generate full pathag
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
 
 	// check if we have to export components time series
@@ -455,6 +456,7 @@ void ICA::saveToFile()
 		file.writeString("modality", AwChannel::typeToString(m_modality));
 		file.writeScalar("lpf", (double)m_lpf);
 		file.writeScalar("hpf", (double)m_hpf);
+		file.writeScalar("notch", (double)m_notch);
 		file.writeScalar("sr", (double)m_samplingRate);
 		file.writeMatrix("mixing", m_mixing);
 		file.writeMatrix("unmixing", m_unmixing);

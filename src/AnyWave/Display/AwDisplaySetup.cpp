@@ -42,8 +42,7 @@ AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
 	m_synchronize = source->synchronizeViews();
 
 	for (int i = 0; i < viewSetups().size(); i++) {
-		AwViewSetup *dsv = new AwViewSetup(source->viewSetup(i), this);
-		m_ds << dsv;
+		m_ds << new AwViewSetup(source->viewSetup(i), this);
 	}
 	m_orientation = source->orientation();
 }
@@ -51,8 +50,8 @@ AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
 
 AwDisplaySetup::~AwDisplaySetup()
 {
-	while (!m_ds.isEmpty())
-		delete m_ds.takeFirst();
+	//while (!m_ds.isEmpty())
+	//	delete m_ds.takeFirst();
 }
 
 void AwDisplaySetup::setSynchronized(bool flag)
@@ -80,24 +79,27 @@ void AwDisplaySetup::setToDefault()
 	m_name = "Default Setup";
 	m_synchronize = true;
 	m_orientation = Horizontal;
-	// add a view setup
-	while (!m_ds.isEmpty())
-		delete m_ds.takeFirst();
+	//// add a view setup
+	//while (!m_ds.isEmpty())
+	//	delete m_ds.takeFirst();
+	m_ds.clear();
 	m_ds << new AwViewSetup(this);
+//	m_ds << QSharedPointer<AwViewSetup>(new AwViewSetup(this));
 }
 
 void AwDisplaySetup::setOrientation(int ori)
 {
-	if (ori != AwDisplaySetup::Vertical || ori != AwDisplaySetup::Horizontal ||
-		ori != AwDisplaySetup::Grid)
-		return;
+	//if (ori != AwDisplaySetup::Vertical || ori != AwDisplaySetup::Horizontal ||
+	//	ori != AwDisplaySetup::Grid)
+	//	return;
 
 	m_orientation = ori;
 }
 
 void AwDisplaySetup::deleteViewSetup(int index)
 {
-	delete m_ds.takeAt(index);
+//	delete m_ds.takeAt(index);
+	m_ds.removeAt(index);
 }
 
 void AwDisplaySetup::setName(const QString& name)
@@ -143,8 +145,9 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 		else if (element.tagName() == "SynchronizedViews")
 			m_synchronize = element.text() == "true";
 		else if (element.tagName() == "View") {
-			AwViewSetup *setup = new AwViewSetup(this);
-
+		//	AwViewSetup *setup = new AwViewSetup(this);
+			auto setup = new AwViewSettings(this);
+		
 			QDomNode n = element.firstChild();
 			while (!n.isNull()) {
 				QDomElement e = n.toElement();
@@ -204,7 +207,8 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->fixedPageDuration = e.text().toFloat();
 				n = n.nextSibling();
 			}
-			m_ds.append(setup);
+		//	m_ds.append(setup);
+			m_viewSettings.append(setup);
 		}
 		node = node.nextSibling();
 	}
@@ -239,9 +243,11 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 	root.appendChild(element);
 
 	qint32 count = 0;
-	for  (AwViewSetup *dsv : m_ds) {
+//	for  (AwViewSetup *dsv : m_ds) {
+//	for (auto dsv : m_ds) {
+	for (auto dsv : m_viewSettings) {
 		QDomElement e;
-
+		
 		element = doc.createElement("View");
 		root.appendChild(element);
 

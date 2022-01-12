@@ -20,7 +20,9 @@
 class AW_CORE_EXPORT AwVirtualChannel : public AwChannel
 {
 public:
-	AwVirtualChannel() : AwChannel() { m_sourceType = AwChannel::Virtual; m_className = "AwVirtual"; }
+	AwVirtualChannel() : AwChannel() {
+		m_sourceType = AwChannel::Virtual; m_className = "AwVirtual";
+	}
 	/** Copy constructor **/
 	AwVirtualChannel(AwChannel *chan) : AwChannel(chan) { m_sourceType = AwChannel::Virtual; m_className = "AwVirtual"; }
 	AwVirtualChannel(AwVirtualChannel *chan);

@@ -130,29 +130,6 @@ void AwExporter::runFromCommandLine()
 		sendMessage("Done.");
 	}
 
-	//// apply scaling factor to data
-	//float scale = 1.0;
-	//for (auto chan : pdi.input.channels()) {
-	//	switch (chan->unit()) {
-	//	case AwChannel::picoT:
-	//	case AwChannel::picoTpermeter:
-	//		scale = 1e-12;
-	//		break;
-	//	case AwChannel::V:
-	//		scale = 1e-6;
-	//		break;
-	//	case AwChannel::milliV:
-	//		scale = 1e-3;
-	//		break;
-	//	default:
-	//		scale = 1.0;
-	//	}
-	//	if (scale != 1.0) {
-	//		for (auto start = 0; start < chan->dataSize(); start++)
-	//			chan->data()[start] *= scale;
-	//	}
-	//}
-
 	// set channels to the writer object AFTER loading and/or not downsampling
 	// duplicate input channels before set them to writer as writer object takes ownership of channels and will destroy them 
 	writer->infos.setChannels(AwChannel::duplicateChannels(pdi.input.channels()));
@@ -212,6 +189,9 @@ bool AwExporter::showUi()
 			m_channels = ui.channels;
 		else
 			m_channels = ui.selectedChannels;
+		// fix in case the user unchecked use current montage AND had NOT selected any channels manually.
+		if (m_channels.isEmpty())
+			m_channels = ui.channels;
 
 		pdi.input.settings["output_writer"] = ui.writer;
 		

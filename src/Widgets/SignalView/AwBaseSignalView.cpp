@@ -29,8 +29,10 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	m_flags = flags;
 	if (settings == nullptr)
 		m_settings = new AwViewSettings(this);
-	else
+	else {
 		m_settings = settings;
+		m_settings->setParent(this);
+	}
 	m_positionInFile = 0;
 	m_pageDuration = 0;
 	m_physics = new AwDisplayPhysics;
@@ -93,12 +95,20 @@ void AwBaseSignalView::setFlags(int flags)
 		m_settings->filters.clear();
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 			m_settings->filters << i;
-		//m_settings->filters << AwChannel::EEG << AwChannel::MEG << AwChannel::SEEG << AwChannel::ICA << AwChannel::Source
-		//	<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
 	}
 	m_navBar->setFlags(flags);
 	if (m_flags & AwBaseSignalView::NoNavBar)
 		m_navBar->setVisible(false);
+}
+
+void AwBaseSignalView::setViewSettings(AwViewSettings* settings)
+{
+	if (m_settings == settings)
+		return;
+	delete m_settings;
+	m_settings = settings;
+	m_settings->setParent(this);
+	updateSettings(m_settings, AwViewSettings::AllFlags);
 }
 
 void AwBaseSignalView::makeConnections()

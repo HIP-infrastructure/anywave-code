@@ -43,6 +43,5 @@ public slots:
 	void updateSettings(const AwFilterSettings& settings);
 protected:
 	AwFilterSettings m_settings;
-	QList<int> m_keys;
-	QStringList m_boundsTypes;
+	QList<int> m_channelTypes;
 };

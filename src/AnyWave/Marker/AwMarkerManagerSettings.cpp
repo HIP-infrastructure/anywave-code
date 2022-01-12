@@ -168,6 +168,7 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	buttonExportWizard->setEnabled(!m_markers.isEmpty());
 	buttonSave->setEnabled(!m_markers.isEmpty());
 	connect(buttonStats, &QPushButton::clicked, this, &AwMarkerManagerSettings::openStats);
+	connect(buttonRemoveDuplicates, &QPushButton::clicked, this, &AwMarkerManagerSettings::removeDuplicates);
 
 	// Connect check boxes to show/hide columns
 	connect(checkLabel, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
@@ -558,6 +559,15 @@ void AwMarkerManagerSettings::selectAllLabels()
 	tvMarkers->setFocus();
 }
 
+void AwMarkerManagerSettings::removeDuplicates()
+{
+	auto currentMarkers = m_model->markers();
+	AwMarker::removeDoublons(currentMarkers);
+	m_displayedMarkers = currentMarkers;
+	m_model->updateMarkers(currentMarkers);
+	emit markersChanged(m_displayedMarkers);
+}
+
 /** remove all the markers with the same label **/
 void AwMarkerManagerSettings::removeAllLabels() 
 {
@@ -822,47 +832,3 @@ void AwMarkerManagerSettings::goToValue()
 {
 	emit moveRequest(m_statsValues.at(m_valueIndex)->start());
 }
-
-
-
-//void AwMarkerManagerSettings::updateNamesStats(const QString &name)
-//{
-//	qint32 count = 0;
-//	m_nameIndex = 0;
-//	m_statsNames.clear();
-//
-//	foreach (AwMarker *m, m_displayedMarkers) {
-//		if (m->label() == name)	{
-//			count++;
-//			m_statsNames << m;
-//		}
-//	}
-//	labelNames->setText(QString(tr("%1 marker(s)")).arg(count));
-//	
-//	// depending on stats, activate navigation buttons
-//	buttonPrevName->setVisible(count > 1);
-//	buttonNextName->setVisible(count > 1);
-//	buttonGoName->setVisible(count <= 1); 
-//}
-
-//void AwMarkerManagerSettings::updateValuesStats(const QString &value)
-//{
-//	qint32 count = 0;
-//	m_valueIndex = 0;
-//	int code = value.toInt();
-//	m_statsValues.clear();
-//
-//	foreach (AwMarker *m, m_displayedMarkers) 	{
-//		if (m->value() == code) 	{
-//			count++;
-//			m_statsValues << m;
-//		}
-//	}
-//
-//	labelValues->setText(QString(tr("%1 marker(s)")).arg(count));
-//
-//	// depending on stats, activate navigation buttons
-//	buttonPrevValue->setVisible(count > 1);
-//	buttonNextValue->setVisible(count > 1);
-//	buttonGoValue->setVisible(count <= 1); 
-//}

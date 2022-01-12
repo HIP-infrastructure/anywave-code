@@ -85,7 +85,6 @@ void AwDataManager::closeFile()
 	}
 	m_montageManager->closeFile();
 	m_markerManager->closeFile();
-
 }
 
 const AwChannelList& AwDataManager::rawChannels()
@@ -225,9 +224,8 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_settings[keys::bad_file] = reader->infos.badFile();
 	m_settings[keys::montage_file] = reader->infos.mtgFile();
 	// handle output_dir
-	if (!m_settings.contains(keys::output_dir))
-		// default output_dir is the data dir
-		m_settings[keys::output_dir] = fi.absolutePath();
+	// default output_dir is the data dir
+	m_settings[keys::output_dir] = fi.absolutePath();
 	// check if file belongs to a BIDS structure
 	if (!commandLineMode) { // detect if the file is in A BIDS => the output_dir will be changed to derivatives path
 		QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
@@ -266,9 +264,9 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	catch (const AwException& e) {
 		fltFileOk = false;
 	}
-	if (!fltFileOk) {
+	if (!fltFileOk) 
 		m_filterSettings.initWithChannels(m_reader->infos.channels());
-	}
+	
 	m_filterSettings.apply(m_reader->infos.channels());
 	m_montageManager->newMontage(m_reader);
 	if (!commandLineMode) {
@@ -293,7 +291,6 @@ void AwDataManager::selectChannelsAsynch(AwDataClient* client, const QString& se
 	QString error;
 	return selectChannelsAsynch(client, AwUtilities::json::mapFromJsonString(settings, error), channels);
 }
-
 
 
 /// <summary>

@@ -45,6 +45,7 @@ public:
 	void setView(AwGraphicsView *view);
 	void setNavBar(AwNavigationBar *navBar);
 	void setMarkerBar(AwBaseMarkerBar *markerBar);
+	void setViewSettings(AwViewSettings* settings);
 	inline AwDataClient *client() { return &m_client; }
 	inline float positionInFile() { return m_positionInFile; }
 	inline AwViewSettings *settings() { return m_settings; }

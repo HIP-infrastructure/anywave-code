@@ -161,6 +161,7 @@ void ICASettings::accept()
 
 	args[keys::lp] = m_ui.spinLPF->value();
 	args[keys::hp] = m_ui.spinHPF->value();
+	args[keys::notch] = m_ui.spinNotch->value();
 	args[keys::comp] = m_ui.spinNC->value();
 
 	QStringList usedMarkers = m_ui.inputDataWidget->usedMarkers();

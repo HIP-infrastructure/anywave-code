@@ -230,6 +230,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H2Graphs", "src\plugins\H2G
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "icav2", "src\plugins\icav2\icav2.vcxproj", "{998231E2-95EB-4D82-B54A-64727BB9C69C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2588F5AD-FC20-4628-A249-6C0557DC2BC7} = {2588F5AD-FC20-4628-A249-6C0557DC2BC7}
+		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rewrite4DNI", "src\plugins\Rewrite4D\AwRewrite4DNI.vcxproj", "{211CE931-E804-42F4-86EB-A9E8923C1984}"
 EndProject
@@ -726,7 +730,7 @@ Global
 		{0EB09768-4E92-4286-9F9F-3EE8B3E95592} = {29F479E7-AB9C-4CB1-A69C-F93615B73422}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

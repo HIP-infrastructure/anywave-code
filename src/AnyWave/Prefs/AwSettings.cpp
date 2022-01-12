@@ -138,11 +138,13 @@ void AwSettings::init()
 	// Python defaults
 	// default anywave venv => appdir/python/venv
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-	m_settings[aws::python_venv_dir] = QCoreApplication::applicationDirPath() + "/python/venv";
+	m_settings[aws::python_embeded_venv_dir] = QCoreApplication::applicationDirPath() + "/python/venv/anywave";
 #endif
+	m_settings[aws::python_venv_dir] = settings.value("python/venv_dir", m_settings.value(aws::python_embeded_venv_dir));
 	m_settings[aws::python_use_default] = settings.value("python/use_default", true).toBool();
 	m_settings[aws::python_venv_alias] = settings.value("python/venv_alias", "anywave").toString();
 	m_settings[aws::python_venv_list] = venvs;
+	
 
 }
 

@@ -60,7 +60,7 @@ private:
 	QString m_SEEGElectrode;
 	QString m_fileName, m_componentsEEGFileName;
 	qint64 m, n;
-	float m_lpf, m_hpf, m_samplingRate;
+	float m_lpf, m_hpf, m_samplingRate, m_notch;
 	// the default input will be current montage channels but we also manage raw channels which were the default input before we added the possibility to compute on current montage..
 	AwChannelList m_channels, m_rawChannels; // now we handle also the computation on current montage
 	arma::mat m_unmixing;

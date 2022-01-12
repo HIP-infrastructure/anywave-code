@@ -619,6 +619,12 @@
     <ClCompile Include="Prefs\AwAddVenvDial.cpp">
       <Filter>Prefs</Filter>
     </ClCompile>
+    <ClCompile Include="Prefs\AwPythonSetttings.cpp">
+      <Filter>Prefs</Filter>
+    </ClCompile>
+    <ClCompile Include="Prefs\AwPython.cpp">
+      <Filter>Prefs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -759,9 +765,6 @@
     <QtUic Include="Prefs\AwPrefsDial.ui">
       <Filter>Prefs</Filter>
     </QtUic>
-    <QtMoc Include="Prefs\AwSettings.h">
-      <Filter>Prefs</Filter>
-    </QtMoc>
     <QtMoc Include="Process\AwMatlabScriptPlugin.h">
       <Filter>Process</Filter>
     </QtMoc>
@@ -1125,6 +1128,9 @@
     <QtMoc Include="Prefs\AwAddVenvDial.h">
       <Filter>Prefs</Filter>
     </QtMoc>
+    <QtMoc Include="Prefs\AwSettings.h">
+      <Filter>Process</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Prefs\AwPreferences.h">
@@ -1192,6 +1198,12 @@
     </ClInclude>
     <ClInclude Include="3DViewer\vtkPialReader.h">
       <Filter>3DViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="Prefs\AwPython.h">
+      <Filter>Prefs</Filter>
+    </ClInclude>
+    <ClInclude Include="Prefs\AwPythonSettings.h">
+      <Filter>Prefs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

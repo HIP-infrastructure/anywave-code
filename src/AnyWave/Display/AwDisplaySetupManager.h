@@ -34,7 +34,7 @@ public:
 	~AwDisplaySetupManager();
 
 	static AwDisplaySetupManager* instance();
-	inline AwDisplaySetup* currentSetup() { return m_currentSetup; }
+	inline AwDisplaySetup* currentSetup() { return m_currentSetup.get(); }
 	inline QStringList& loadedSetups() { return m_loadedSetups; }
 	QToolBar *toolBar();
 	void  init(); //called when a file is open
@@ -43,8 +43,6 @@ public slots:
 	void changeSetupDir(const QString& path) { m_setupDir = path; }
 	void saveSettings();
 	void updateSetup(AwDisplaySetup *view, int flags);
-	/** Delete the current setup **/
-	void deleteCurrentSetup();
 	/** Import a setup configuration from file **/
 	void loadSetup(const QString& path);
 	/** Reset to default setup **/
@@ -56,7 +54,7 @@ private:
 	QString m_setupDir;
 	QString m_defaultSetupPath;
 	static AwDisplaySetupManager *m_instance;
-	AwDisplaySetup *m_currentSetup;
+	QSharedPointer<AwDisplaySetup> m_currentSetup;
 	QStringList m_loadedSetups;
 	AwDisplaySetupToolBar *m_toolBar;
 	QString m_setupPath;	// path to autosaved setup

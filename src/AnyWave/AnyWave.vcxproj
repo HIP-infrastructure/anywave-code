@@ -143,6 +143,8 @@
     <ClCompile Include="Prefs\AwAddVenvDial.cpp" />
     <ClCompile Include="Prefs\AwPreferences.cpp" />
     <ClCompile Include="Prefs\AwPrefsDial.cpp" />
+    <ClCompile Include="Prefs\AwPython.cpp" />
+    <ClCompile Include="Prefs\AwPythonSetttings.cpp" />
     <ClCompile Include="Prefs\AwSettings.cpp" />
     <ClCompile Include="Process\AwExporter.cpp" />
     <ClCompile Include="Process\AwExporterMarkerModel.cpp" />
@@ -280,6 +282,8 @@
     </QtMoc>
     <QtMoc Include="Plugin\AwMATPyCreator.h" />
     <QtMoc Include="Prefs\AwAddVenvDial.h" />
+    <ClInclude Include="Prefs\AwPython.h" />
+    <ClInclude Include="Prefs\AwPythonSettings.h" />
     <ClInclude Include="Source\AwSourceChannel.h" />
     <QtMoc Include="Source\AwSourceManager.h">
     </QtMoc>

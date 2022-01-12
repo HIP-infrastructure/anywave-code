@@ -28,6 +28,7 @@
 using namespace AwUtilities::time;
 using namespace AwUtilities::gui;
 #include "AwAddVenvDial.h"
+#include "AwPython.h"
 
 AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	: QDialog(parent)
@@ -121,6 +122,7 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		radioVenv->setChecked(true);
 		radioVenv->clicked(true);
 	}
+
 	// init venvs table view
 	m_venvsModel = new QStandardItemModel(0, 3, this);
 	m_venvsModel->setHorizontalHeaderLabels({ "Status", "Alias", "Path" });
@@ -141,10 +143,8 @@ void AwPrefsDial::addPythonVenv()
 {
 	AwAddVenvDial dlg;
 
-	if (dlg.exec() == QDialog::Accepted) {
+	if (dlg.exec() == QDialog::Accepted) 
 		addVenv(dlg.m_alias, dlg.m_directory);
-	}
-
 }
 
 void AwPrefsDial::setDefaultVenv(const QString& alias)
@@ -188,13 +188,19 @@ void AwPrefsDial::initVenvTable()
 	m_venvsModel->removeRows(0, m_venvsModel->rowCount());
 	QStringList venvs = AwSettings::getInstance()->value(aws::python_venv_list).toStringList();
 
-	// always set the default venv
-	auto checkItem = new QStandardItem("active");
-	checkItem->setCheckable(true);
-	checkItem->setCheckState(Qt::Checked);
-	m_venvsModel->setItem(0, 0, checkItem);
-	m_venvsModel->setItem(0, 1, new QStandardItem("anywave"));
-	m_venvsModel->setItem(0, 2, new QStandardItem("embedded"));
+	// detect if we are running a version containing anywave venv
+	AwPython python;
+	auto pySettings = python.detect(AwSettings::getInstance()->value(aws::python_embeded_venv_dir).toString());
+	if (pySettings.isDetected()) {
+		// always set the default venv
+		auto checkItem = new QStandardItem("active");
+		checkItem->setCheckable(true);
+		checkItem->setCheckState(Qt::Checked);
+		m_venvsModel->setItem(0, 0, checkItem);
+		m_venvsModel->setItem(0, 1, new QStandardItem("anywave"));
+		m_venvsModel->setItem(0, 2, new QStandardItem("embedded"));
+	}
+
 	if (!venvs.isEmpty()) {
 		int row = 1, col = 0;
 		for (auto const& v : venvs) {
@@ -345,7 +351,7 @@ void AwPrefsDial::accept()
 	// save python settings
 	qsettings.setValue("python/use_default", radioDefault->isChecked());
 	qsettings.setValue("python/venv_alias", AwSettings::getInstance()->value(aws::python_venv_alias));
-	// save all venvs if any
+	qsettings.setValue("python/venv_dir", AwSettings::getInstance()->value(aws::python_venv_dir));
 	if (!m_venvsMap.isEmpty()) {
 		qsettings.beginWriteArray("venvs");
 		auto const& keys = m_venvsMap.keys();

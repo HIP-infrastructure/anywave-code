@@ -25,6 +25,7 @@
 #include <AwChannel.h>
 #include <QSplitter>
 #include "AwSignalView.h"
+#include "AwDisplaySetup.h"
 
 class AwMarkerManager;
 class AwDisplaySetup;
@@ -56,6 +57,7 @@ public:
 	void setAddMarkerDock(QDockWidget *dock);
 
 	AwSignalView *addSignalView(AwViewSetup *setup);	// Add a new SignalView 
+	AwSignalView* addSignalView(AwViewSettings* settings);
 	AwChannelList displayedChannels();	// Return the channels currently displayed in the views
 	static AwDisplay *instance();
 	static void setInstance(AwDisplay *d);
@@ -78,9 +80,14 @@ private:
 	QScreen *m_screen;
 #endif
 	static AwDisplay *m_instance;
+//	QList<AwViewSettings*> m_viewSettings;
+	AwDisplaySetup m_displaySetup;
 
 	void saveChannelSelections();
 	void loadChannelSelections();
+	void loadViewSettings();
+	void saveViewSettings();
+	void removeView(int index);
 signals:
 	void newMarker(float pos, float duration);
 	void selectedChannelsChanged(const AwChannelList& selection);
