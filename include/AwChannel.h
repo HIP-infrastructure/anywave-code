@@ -193,6 +193,7 @@ public:
 	/** Sets the Low Pass Filtering value. **/
 	void setLowFilter(float val);
 	void setNotch(float val);		
+	void setFilters(const QVector<float> filters) { m_highFilter = filters[0]; m_lowFilter = filters[1]; m_notch = filters[2]; }
 	void setCustomData(const QVariantList& data) { m_customData = data; }
 	/** Sets the source type which is Real or Virtual. By defaut all channels created are Real. **/
 	void setSourceType(SourceType stype);						

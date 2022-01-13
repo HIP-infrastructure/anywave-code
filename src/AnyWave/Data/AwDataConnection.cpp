@@ -250,7 +250,14 @@ void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
 	if (comps)	{
 		// load source channels
-		AwDataManager::instance()->filterSettings().apply(comps->sources());
+		//AwDataManager::instance()->filterSettings().apply(comps->sources());
+		// do not apply current AnyWave filters on sources but apply filter used when computing ICA
+//		AwFilterSettings fsettings;
+//		fsettings.set(comps->type(), comps->hpFilter(), comps->lpFilter(), comps->notchFilter());
+//		fsettings.apply(comps->sources());
+
+		// When loading ICA.mat file, the sources channels are built and filters are set to be the ones used in computation
+		// So we assume here there is no need to filter again the sources channels.
 		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
 		comps->computeComponents(channels);
 	}
@@ -447,8 +454,9 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	// compute ICA Components and source channels (if any)
 	try {
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-			if (!m_ICAChannels[i].isEmpty())
+			if (!m_ICAChannels[i].isEmpty()) {
 				computeICAComponents(i, m_ICAChannels[i]);
+			}
 		}
 		if (!m_sourceEEGChannels.isEmpty())
 			computeSourceChannels(m_sourceEEGChannels);
@@ -460,6 +468,21 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		setEndOfData();
 		m_client->setError(QString("Error allocating memory to load data."));
 		return;
+	}
+
+	// apply filters to ICA channels after they have been unmixed..
+	if (!rawData) {
+		auto fSettings = AwDataManager::instance()->filterSettings();
+		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+			if (!m_ICAChannels[i].isEmpty()) {
+				AwChannelList list;
+				for (auto icaChan : m_ICAChannels[i]) {
+					icaChan->setFilters(fSettings.filters(AwChannel::ICA));
+					list << icaChan;
+				}
+				AwFiltering::filter(list);
+			}
+		}
 	}
 
 	// Load the channels from file

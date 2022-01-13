@@ -19,16 +19,6 @@
 
 class AwFilterGUI;
 
-class AW_FILTER_EXPORT AwFilterBounds
-{
-public:
-	explicit AwFilterBounds(int t = 0, float hp = 0., float lp = 0.);
-	AwFilterBounds& operator=(const AwFilterBounds& other);
-
-	int type;
-	float bounds[2];
-};
-
 class AW_FILTER_EXPORT AwFilterSettings : public QObject
 {
 	Q_OBJECT
@@ -51,17 +41,10 @@ public:
 	/** set bounds for a specified type of channel **/
 	void setLimits(int type, const QVector<float>& values);
 	QVector<float> limits(int type) const { return m_limits.value(type); }
-//	void setBounds(int type, float hp, float lp);
-//	void setFilterBounds(int type, const AwFilterBounds& bounds);
-//	QHash<QString, AwFilterBounds> filterBounds() const { return m_filterBounds; }
-	/** check for bounds **/
-//	QList<int> checkForBounds();
 	/** apply the current settings to a channel **/
 	void apply(AwChannel *channel) const;
 	/** apply the current settings to a whole list of channels **/
 	void apply(const AwChannelList& channels) const;
-	/** init from previously saved json file for a specified data file **/
-//	bool initWithFile(const QString& filePath);
 	/** init from a list of channels **/
 	void initWithChannels(const AwChannelList& channels);
 	/** reset all filters settings to zero **/
@@ -74,7 +57,7 @@ public:
 	//QList<int> currentTypes() const { return m_hash.keys(); }
 	QList<int> currentTypes() const { return m_filters.keys(); }
 	QVector<float> filters(int type) const { return m_filters.value(type); }
-//	QHash<int, QVector<float>>& getBounds() { return m_bounds; }
+
 	void registerChannelType(int type, const QString& name);
 	QString getChannelRegisterType(int type) const { return m_registeredChannelTypes.value(type); }
 	QWidget *ui();
@@ -88,16 +71,9 @@ public slots:
 protected slots:
 	void setNewSettings(const AwFilterSettings& settings);
 protected:
-//	QHash<int, QVector<float>> m_hash;
 	QMap<int, QVector<float>> m_filters;
 	QMap<QString, QVector<float>> m_hash; // key of hash is linked to registeredChannelTypes
-//	QHash<int, QVector<float>> m_bounds;	// bounds holds the frequency boundaries for virtual channels like ICA/Source.
 	QMap<int, QVector<float>> m_limits; // key of map is linked to registeredChannelTypes
-//	QHash<QString, AwFilterBounds> m_filterBounds;
-	// AwFilterBounds contains the target channel type which should be constrained.
-	// This container is only used to display pertinent infomation in the GUI. 
-	// However, we must use the setFilterBounds method instead of setBounds. setFilterBounds will call setBounds so the checking of frequency bands will operate
-	// as previously.
 	AwFilterGUI *m_ui;
 	bool m_uiDocked;
 	QMap<int, QString> m_registeredChannelTypes;

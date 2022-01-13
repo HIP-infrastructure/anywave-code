@@ -21,24 +21,6 @@
 #include <qfile.h>
 #include "AwFilterGUI.h"
 
-
-AwFilterBounds::AwFilterBounds(int t, float hp, float lp)
-{
-	type = t;
-	bounds[0] = hp;
-	bounds[1] = lp;
-}
-
-AwFilterBounds& AwFilterBounds::operator=(const AwFilterBounds& other)
-{
-	if (this != &other) {
-		this->type = other.type;
-		this->bounds[0] = other.bounds[0];
-		this->bounds[1] = other.bounds[1];
-	}
-	return *this;
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 
 AwFilterSettings::AwFilterSettings()
@@ -52,7 +34,6 @@ AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
 	m_hash = settings.m_hash;
 	m_limits = settings.m_limits;
 	m_filters = settings.m_filters;
-//	m_filterBounds = settings.m_filterBounds;
 	m_ui = nullptr;
 }
 
@@ -73,7 +54,6 @@ AwFilterSettings& AwFilterSettings::operator=(const AwFilterSettings& other)
 		this->m_limits = other.m_limits;
 		this->m_registeredChannelTypes = other.m_registeredChannelTypes;
 		this->m_filters = other.m_filters;
-//		this->m_filterBounds = other.m_filterBounds;
 	}
 	return *this;
 }
@@ -109,13 +89,6 @@ void AwFilterSettings::set(int type, const QVector<float>& values)
 void AwFilterSettings::set(int type, float hp, float lp, float notch)
 {
 	set(type, { hp, lp, notch });
-//	// check if type is already in hash table
-//	QVector<float> tmp = { hp, lp, notch };
-////	tmp[0] = hp; tmp[1] = lp; tmp[2] = notch;
-//	if (m_filters.contains(type))
-//		m_filters.remove(type);
-//	m_filters.insert(type, tmp);
-//	registerChannelType(type, AwChannel::typeToString(type));
 }
 
 void AwFilterSettings::setLimits(int type, const QVector<float>& values)
@@ -125,71 +98,6 @@ void AwFilterSettings::setLimits(int type, const QVector<float>& values)
 		m_limits.remove(type);
 	m_limits.insert(type, values);
 }
-
-
-//void AwFilterSettings::setBounds(int type, float hp, float lp)
-//{
-//	// check if type is already in hash table
-//	QVector<float> tmp = { hp, lp };
-//	//tmp[0] = hp; tmp[1] = lp; 
-//	if (m_bounds.contains(type))
-//		m_bounds.remove(type);
-//	m_bounds.insert(type, tmp);
-//}
-
-//void AwFilterSettings::setFilterBounds(int type, const AwFilterBounds& bounds)
-//{
-//	setBounds(bounds.type, bounds.bounds[0], bounds.bounds[1]);
-//	// build a unique key based on the virtual channel and its sources channels types.
-//	// for example if ICA was computed on MEG channels then generates the key: ICA-MEG
-//	QString key = QString("%1-%2").arg(AwChannel::typeToString(type)).arg(AwChannel::typeToString(bounds.type));
-//
-//	if (m_filterBounds.contains(key))
-//		m_filterBounds.remove(key);
-//	m_filterBounds.insert(key, bounds);
-//	updateGUI();
-//	emit settingsChanged(*this);
-//}
-
-///
-/// returns a list of channels for which filter settings are beyond the bounds
-/// returns an empty list if filters are in the bounds.
-//QList<int> AwFilterSettings::checkForBounds()
-//{
-//	QList<int> res;
-//	if (m_bounds.isEmpty())
-//		return res;
-//	for (auto k : m_bounds.keys()) {
-//		auto values = m_hash[k];
-//		auto bounds = m_bounds[k];
-//		// check only for HP and LP values.
-//		bool ok = values[0] >= bounds[0] && values[0] <= bounds[0] &&
-//			values[1] >= bounds[1] && values[1] <= bounds[1];
-//		if (!ok)
-//			res << k;
-//	}
-//	return res;
-//}
-
-
-///
-/// initWithFile()
-/// try to load .flt file associated with the data file.
-/// If the file does not exist or loading failed, returns false.
-/// returns true if success.
-//bool AwFilterSettings::initWithFile(const QString& filePath)
-//{
-//	QString file = QString("%1.flt").arg(filePath);
-//	try {
-//		load(file);
-//	}
-//	catch (AwException &e)
-//	{
-//		emit log(QString("%1:%2").arg(e.origin()).arg(e.errorString()));
-//		return false;
-//	}
-//	return true;
-//}
 
 void AwFilterSettings::initWithChannels(const AwChannelList& channels)
 {

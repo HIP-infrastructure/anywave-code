@@ -39,7 +39,9 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
-	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwICAComponents::setNewFilters);
+	// DO NOT change the filters for sources channels => the filters are locked to the ones set during computation
+//	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwICAComponents::setNewFilters);
+
 }
 
 AwICAComponents::~AwICAComponents()
@@ -166,11 +168,12 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 		m_panel = NULL;
 	}
 
-	double lpf, hpf;
+	double lpf, hpf, notch;
 	mat unmixingD, mixingD;
 	try {
 		file.readScalar("lpf", &lpf);
 		file.readScalar("hpf", &hpf);
+		file.readScalar("notch", &notch);
 		file.readMatrix("unmixing", unmixingD);
 		file.readMatrix("mixing", mixingD);
 		file.readStrings("labels", m_labels);
@@ -186,6 +189,7 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 	m_mixing = conv_to<fmat>::from(mixingD);
 	m_hpFilter = (float)hpf;
 	m_lpFilter = (float)lpf;
+	m_notchFilter = (float)notch;
 
 	AwMontageManager *mm = AwMontageManager::instance();
 	// build source channels list
@@ -201,10 +205,9 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 	}
 
 	// force current filter settings to match those store in the ICA file.
-	AwDataManager::instance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, 0.);
+	AwDataManager::instance()->filterSettings().set(this->m_type, m_hpFilter, m_lpFilter, m_notchFilter);
 	AwDataManager::instance()->filterSettings().apply(m_sources);
 	auto dm = AwDataManager::instance();
-	//float sr = m_sources.at(0)->samplingRate();
 	float sr = dm->value(data_info::max_sr).toFloat();
 	// get reader 
 	auto reader = dm->reader();

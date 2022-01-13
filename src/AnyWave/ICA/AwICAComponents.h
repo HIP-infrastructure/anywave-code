@@ -49,6 +49,7 @@ public:
 	void buildChannels(const AwChannelList& channels);
 	inline float lpFilter() { return m_lpFilter; }
 	inline float hpFilter() { return m_hpFilter; }
+	inline float notchFilter() { return m_notchFilter; }
 	inline int numberOfComponents() { return m_icaChannels.size(); }
 	QList<AwPanelItem *> createPanelItems();
 	inline AwICAPanel *getPanelWidget() { return m_panel; }
@@ -78,8 +79,7 @@ private:
 	AwICAChannelList m_icaChannels;
 	QHash<QString, int> m_labelToIndex;
 	// filtering applied when computing ICA 
-	float m_hpFilter;   
-	float m_lpFilter; 
+	float m_hpFilter, m_lpFilter, m_notchFilter;
 	QList<int> m_rejectedComponents;	// indexes of all rejected ICA components
 
 	void updateRejectedComponents();
