@@ -123,6 +123,7 @@ public slots:
 	void stopMapping();
 	void displayReaderTriggerStatus(bool ok, int number);
 	void openFile(const QString& path = QString());
+	void openFileFromBIDS(const QString& path);
 	void openBIDS(const QString& path);
 	void updateRecentFiles(const QStringList& files);
 	void updateRecentBIDS(const QStringList& files);

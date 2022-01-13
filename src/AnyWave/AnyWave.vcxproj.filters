@@ -139,16 +139,10 @@
     <ClCompile Include="Display\AwDisplaySetup.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="Display\AwDisplaySetupManager.cpp">
-      <Filter>Display</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwDSMSaveSetupUI.cpp">
       <Filter>Display</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwNewViewDial.cpp">
-      <Filter>Display</Filter>
-    </ClCompile>
-    <ClCompile Include="Display\AwSaveAsNewSetupDialog.cpp">
       <Filter>Display</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwScene.cpp">
@@ -657,9 +651,6 @@
     <QtMoc Include="Display\AwDisplaySetup.h">
       <Filter>Display</Filter>
     </QtMoc>
-    <QtMoc Include="Display\AwDisplaySetupManager.h">
-      <Filter>Display</Filter>
-    </QtMoc>
     <QtMoc Include="Display\AwDSMSaveSetupUI.h">
       <Filter>Display</Filter>
     </QtMoc>
@@ -670,12 +661,6 @@
       <Filter>Display</Filter>
     </QtMoc>
     <QtUic Include="Display\AwNewViewDial.ui">
-      <Filter>Display</Filter>
-    </QtUic>
-    <QtMoc Include="Display\AwSaveAsNewSetupDialog.h">
-      <Filter>Display</Filter>
-    </QtMoc>
-    <QtUic Include="Display\AwSaveAsNewSetupDialog.ui">
       <Filter>Display</Filter>
     </QtUic>
     <QtMoc Include="Display\AwScene.h">

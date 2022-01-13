@@ -353,6 +353,8 @@ void AnyWave::applyNewLanguage()
 void AnyWave::quit()
 {
 	AwDebugLog::instance()->closeFile();
+	if (m_display)
+		m_display->quit();
 	AwProcessManager::instance()->quit();
 	AwSettings::getInstance()->quit();
 	AwDataManager::instance()->quit();
@@ -380,8 +382,7 @@ void AnyWave::quit()
 		m_dockWidgets.remove("meg_mapping");
 		delete dock;
 	}
-	if (m_display)
-		m_display->quit();
+
 
 	if (AwSEEGViewer::isInstantiated())
 		AwSEEGViewer::quit();
@@ -418,7 +419,6 @@ void AnyWave::initToolBarsAndMenu()
 	auto toolbar = addToolBar("File");
 	toolbar->addWidget(ftb->toolBar());
 	toolbar->setAllowedAreas(Qt::TopToolBarArea);
-//	addToolBar(Qt::TopToolBarArea, ftb->toolBar());
 	connect(ftb, SIGNAL(fileOpenClicked()), this, SLOT(on_actionOpen_triggered()));
 	connect(ftb, SIGNAL(fileSaveClicked()), this, SLOT(on_actionSave_as_triggered()));
 	connect(ftb, SIGNAL(fileICAClicked()), this, SLOT(on_actionLoadICA_triggered()));
@@ -468,18 +468,12 @@ void AnyWave::initToolBarsAndMenu()
 	connect(display_tb, SIGNAL(alignHClicked()), m_display, SLOT(alignViewsHorizontaly()));
 	connect(display_tb, SIGNAL(alignVClicked()), m_display, SLOT(alignViewsVerticaly()));
 	connect(display_tb, SIGNAL(captureClicked()), m_display, SLOT(captureViews()));
-	connect(display_tb, SIGNAL(setupChanged(AwDisplaySetup *, int)), m_display, SLOT(updateSetup(AwDisplaySetup *, int)));
+	connect(display_tb, &AwDisplayToolBar::synchronizedClicked, m_display, &AwDisplay::setSynchronized);
+	connect(m_display, &AwDisplay::newDisplaySetupLoaded, display_tb, &AwDisplayToolBar::updateGUI);
 	m_toolBarWidgets.append(display_tb);
 	display_tb->setEnabled(false);
 
 	addToolBarBreak(Qt::TopToolBarArea);
-
-	//// DisplaySetup ToolBar (from AwDisplaySetupManager)
-	//AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
-	//dsManager->toolBar()->setParent(this);
-	//addToolBar(Qt::TopToolBarArea, dsManager->toolBar());
-	//dsManager->toolBar()->setEnabled(false);
-	//m_toolBarWidgets.append(dsManager->toolBar());
 
 	// ToolBar mapping
 	AwMappingToolBar *mtp = new AwMappingToolBar(this);
@@ -711,10 +705,6 @@ void AnyWave::openPluginHelpUrl()
 void AnyWave::readSettings()
 {
 	QSettings settings("INSERM U1106", "AnyWave");
-//	QByteArray stateData = settings.value("state/mainWindowState").toByteArray();
-	//QByteArray geometryData = settings.value("geometry").toByteArray();
-	// restoreState(stateData);
-//	restoreGeometry(settings.value("geometry").toByteArray());
 	restoreState(settings.value("state").toByteArray());
 }
 
@@ -724,9 +714,6 @@ void AnyWave::readSettings()
 void AnyWave::writeSettings()
 {
 	QSettings settings("INSERM U1106", "AnyWave");
-	// Write the values to disk in categories.
-//	settings.setValue("state/mainWindowState", saveState());
-//	settings.setValue("geometry", saveGeometry());
 	settings.setValue("state", saveState());
 }
 

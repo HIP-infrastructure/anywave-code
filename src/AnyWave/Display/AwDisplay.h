@@ -66,7 +66,6 @@ public:
 private:
 	QDockWidget *m_dockAddMarker;
 	FileType fileType;
-	AwDisplaySetup *m_setup;
 	AwGainLevels* m_gainLevels;
 	QMainWindow *m_mainWindow;
 	QList<AwSignalView *> m_signalViews;	// The views displayed.
@@ -80,7 +79,6 @@ private:
 	QScreen *m_screen;
 #endif
 	static AwDisplay *m_instance;
-//	QList<AwViewSettings*> m_viewSettings;
 	AwDisplaySetup m_displaySetup;
 
 	void saveChannelSelections();
@@ -88,6 +86,8 @@ private:
 	void loadViewSettings();
 	void saveViewSettings();
 	void removeView(int index);
+	void updateGUI(); // after loading new display setup
+
 signals:
 	void newMarker(float pos, float duration);
 	void selectedChannelsChanged(const AwChannelList& selection);
@@ -95,13 +95,12 @@ signals:
 	void clickedAtLatency(float latency);
 	void displayedChannelsChanged(const AwChannelList &channels);
 	void resetMarkerMode();
-	void setupChanged(AwDisplaySetup *setup, int flags);
+	void newDisplaySetupLoaded(AwDisplaySetup*);
 	void mappingTimeSelectionDone(float pos, float duration);
 	void draggedCursorPositionChanged(float pos);
 	void QTSModeEnded();
 public slots:
 	void processEvent(QSharedPointer<AwEvent>);
-	void updateSetup(AwDisplaySetup *setup, int flags);
 	void executeCommand(int command, const QVariantList& args);
 	void handleCommand(const QVariantMap& map);
 	void synchronizeMappingCursorPos(float position);
@@ -109,6 +108,7 @@ public slots:
 	void removeView();
 	void alignViewsVerticaly();
 	void alignViewsHorizontaly();
+	void setSynchronized(bool flag) { m_displaySetup.setSynchronized(flag); }
 	void synchronizeViews(float position);
 	void synchronizeOnCursor(float position);	// reposition the views based on the cursor position from a particular view.
 	void setCursorPosition(float position);     // change the cursor position in the view. Can make the view change its position.
@@ -139,7 +139,6 @@ public slots:
 	void addMarkerModeChanged(bool on);
 	void cursorModeChanged(bool on);
 	void setQTSMode(bool on);
-	void changeCurrentSetup(AwDisplaySetup *newSetup);
 	/** Updates markers color **/
 	void updateMarkersColor(const QStringList& colors);
 	void updateDisplay();

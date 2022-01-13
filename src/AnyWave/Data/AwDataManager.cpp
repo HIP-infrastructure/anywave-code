@@ -268,7 +268,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 		m_filterSettings.initWithChannels(m_reader->infos.channels());
 	
 	m_filterSettings.apply(m_reader->infos.channels());
-	m_montageManager->newMontage(m_reader);
+//	m_montageManager->newMontage(m_reader);
 	if (!commandLineMode) {
 		// Are there events?
 		if (m_reader->infos.blocks().at(0)->markersCount()) 
@@ -281,6 +281,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 			display->newFile();
 		}
 	}
+	m_montageManager->newMontage(m_reader);
 
 	return m_status;
 }

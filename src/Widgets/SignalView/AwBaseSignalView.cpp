@@ -296,11 +296,6 @@ void AwBaseSignalView::getNewMarkers()
 
 void AwBaseSignalView::setMarkers(const AwMarkerList& markers)
 {
-	//if (markers.isEmpty())
-	//	return;
-	//m_markers = markers;
-	//m_markerBar->setAllMarkers(markers);
-	//updateVisibleMarkers();
 }
 
 void AwBaseSignalView::clean()

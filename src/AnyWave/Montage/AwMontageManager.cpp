@@ -127,7 +127,7 @@ void AwMontageManager::clearICA()
 			delete c;
 		}
 	// warn views about new montage
-	emit montageChanged(m_channels);
+//	emit montageChanged(m_channels);
 }
 
 void AwMontageManager::clearSource(int type)
@@ -147,7 +147,7 @@ void AwMontageManager::clearSource(int type)
 			delete c;
 		}
 	// warn views about new montage
-	emit montageChanged(m_channels);
+//	emit montageChanged(m_channels);
 }
 
 void AwMontageManager::addNewSources(int type)
@@ -267,15 +267,17 @@ void AwMontageManager::scanForMontagesInDirectory(const QString& dir)
 	QStringList filter("*.mtg");
 	QDir montDir(dir);
 	montDir.setNameFilters(filter);
-	QStringList files = montDir.entryList();
+	auto files = montDir.entryInfoList();
 
 	m_localQuickMontages.clear();
 	m_localQuickMontagesHT.clear();
 
-	for (auto file : files) {
-		auto key = file.remove(".mtg");
-		m_localQuickMontages << key;
-		m_localQuickMontagesHT.insert(key, QString("%1/%2").arg(dir).arg(file));
+	for (const auto& file : files) {
+		auto key = file.fileName().remove(".mtg");
+		if (!m_localQuickMontages.contains(key)) {
+			m_localQuickMontages << key;
+			m_localQuickMontagesHT.insert(key, file.absoluteFilePath());
+		}
 	}
 	// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.
 	if (AwBIDSManager::isInstantiated()) {
@@ -287,6 +289,18 @@ void AwMontageManager::scanForMontagesInDirectory(const QString& dir)
 				auto key = fi.fileName().remove(".mtg");
 				m_localQuickMontages << key;
 				m_localQuickMontagesHT.insert(key, montage);
+			}
+			// scan bids dir
+			QStringList filter("*.mtg");
+			QDir montDir(AwDataManager::instance()->bidsDir());
+			montDir.setNameFilters(filter);
+			auto files = montDir.entryInfoList();
+			for (auto const& file : files) {
+				auto key = file.fileName().remove(".mtg");
+				if (!m_localQuickMontages.contains(key)) {
+					m_localQuickMontages << key;
+					m_localQuickMontagesHT.insert(key, file.absoluteFilePath());
+				}
 			}
 		}
 	}
@@ -397,7 +411,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	
 	// check for local montages.
 	scanForMontagesInDirectory(AwDataManager::instance()->dataDir());
-	scanForMontagesInDirectory(AwDataManager::instance()->bidsDir());
+//	scanForMontagesInDirectory(AwDataManager::instance()->bidsDir());
 
 	// get bids channels tsv if we are in BIDS mode
 	// consider it the default montage.

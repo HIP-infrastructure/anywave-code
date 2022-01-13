@@ -33,15 +33,16 @@ void AwDisplay::processEvent(QSharedPointer<AwEvent> e)
 	{
 		QStringList filters = data.value("filters").toStringList();
 		// get signal views and check if one of them already display channels of same modality
-		AwViewSetup* ns = m_setup->newViewSetup();
+	//	AwViewSetup* ns = m_setup->newViewSetup();
+		auto settings = m_displaySetup.addViewSettings();
 		if (filters.size()) {
-			ns->filters.clear();
+			settings->filters.clear();
 			for (const QString& f : filters)
-				ns->filters.append(AwChannel::stringToType(f));
+				settings->filters.append(AwChannel::stringToType(f));
 		}
 
 		QList<int> tmp;
-		for (auto f : ns->filters) {
+		for (auto f : settings->filters) {
 			for (auto view : m_signalViews) {
 				const auto& filters = view->settings()->filters;
 				if (filters.contains(f)) 
@@ -49,12 +50,12 @@ void AwDisplay::processEvent(QSharedPointer<AwEvent> e)
 					tmp << f;
 			}
 		}
-		if (tmp.size() >= ns->filters.size()) {
+		if (tmp.size() >= settings->filters.size()) {
 			return;
 		}
 		for (auto t : tmp)
-			ns->filters.removeAll(t);
-		addSignalView(ns);
+			settings->filters.removeAll(t);
+		addSignalView(settings);
 	}
 	break;
 	}

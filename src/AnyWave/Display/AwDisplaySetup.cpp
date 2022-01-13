@@ -25,33 +25,15 @@
 
 constexpr auto LAST_VERSION = "AnyWaveDisplaySetup2.0";
 
-AwDisplaySetup::AwDisplaySetup(const QString& name, QObject *parent)
+AwDisplaySetup::AwDisplaySetup(QObject *parent)
 	: QObject(parent)
 {
-	if (name.isEmpty())
-		m_name = "Default Setup";
-	else
-		m_name = name;
 	m_synchronize = true;
 	m_orientation = Horizontal;
 }
 
-AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
-	: QObject(parent)
-{
-	m_synchronize = source->synchronizeViews();
-
-	for (int i = 0; i < viewSetups().size(); i++) {
-		m_ds << new AwViewSetup(source->viewSetup(i), this);
-	}
-	m_orientation = source->orientation();
-}
-
-
 AwDisplaySetup::~AwDisplaySetup()
 {
-	//while (!m_ds.isEmpty())
-	//	delete m_ds.takeFirst();
 }
 
 void AwDisplaySetup::setSynchronized(bool flag)
@@ -59,53 +41,21 @@ void AwDisplaySetup::setSynchronized(bool flag)
 	m_synchronize = flag;
 }
 
-//
-// Generates a new setup for a new view by copying the last view setup attached to the current Display Setup
-AwViewSetup *AwDisplaySetup::newViewSetup()
+AwViewSettings* AwDisplaySetup::addViewSettings()
 {
-	AwViewSetup *s;
-	if (m_ds.isEmpty())
-		s = new AwViewSetup(this);
-	else
-		s = new AwViewSetup(m_ds.last());
-	m_ds << s;
-	return s;
-}
-
-
-void AwDisplaySetup::setToDefault()
-{
-	// make the setup the Default Setup;
-	m_name = "Default Setup";
-	m_synchronize = true;
-	m_orientation = Horizontal;
-	//// add a view setup
-	//while (!m_ds.isEmpty())
-	//	delete m_ds.takeFirst();
-	m_ds.clear();
-	m_ds << new AwViewSetup(this);
-//	m_ds << QSharedPointer<AwViewSetup>(new AwViewSetup(this));
+	auto settings = new AwViewSettings(this);
+	m_viewSettings << settings;
+	return settings;
 }
 
 void AwDisplaySetup::setOrientation(int ori)
 {
-	//if (ori != AwDisplaySetup::Vertical || ori != AwDisplaySetup::Horizontal ||
-	//	ori != AwDisplaySetup::Grid)
-	//	return;
-
 	m_orientation = ori;
 }
 
-void AwDisplaySetup::deleteViewSetup(int index)
+void AwDisplaySetup::removeViewSettings(int index)
 {
-//	delete m_ds.takeAt(index);
-	m_ds.removeAt(index);
-}
-
-void AwDisplaySetup::setName(const QString& name)
-{
-	m_name = name;
-	m_fullPath = QString("%1%2.aws").arg(AwSettings::getInstance()->value(aws::setup_dir).toString()).arg(name);
+	m_viewSettings.removeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,8 +94,13 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 			m_name = element.text();
 		else if (element.tagName() == "SynchronizedViews")
 			m_synchronize = element.text() == "true";
+		else if (element.tagName() == "Orientation") {
+			if (element.text() == "Vertical")
+				m_orientation = AwDisplaySetup::Vertical;
+			else
+				m_orientation = AwDisplaySetup::Horizontal;
+		}
 		else if (element.tagName() == "View") {
-		//	AwViewSetup *setup = new AwViewSetup(this);
 			auto setup = new AwViewSettings(this);
 		
 			QDomNode n = element.firstChild();
@@ -207,7 +162,6 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->fixedPageDuration = e.text().toFloat();
 				n = n.nextSibling();
 			}
-		//	m_ds.append(setup);
 			m_viewSettings.append(setup);
 		}
 		node = node.nextSibling();
@@ -241,10 +195,14 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 	element = doc.createElement("SynchronizedViews");
 	element.appendChild(doc.createTextNode(m_synchronize ? sTrue : sFalse));
 	root.appendChild(element);
+	element = doc.createElement("Orientation");
+	if (m_orientation == AwDisplaySetup::Vertical)
+		element.appendChild(doc.createTextNode("Vertical"));
+	else
+		element.appendChild(doc.createTextNode("Horizontal"));
+	root.appendChild(element);
 
 	qint32 count = 0;
-//	for  (AwViewSetup *dsv : m_ds) {
-//	for (auto dsv : m_ds) {
 	for (auto dsv : m_viewSettings) {
 		QDomElement e;
 		
