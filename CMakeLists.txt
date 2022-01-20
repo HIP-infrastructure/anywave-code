@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.6) 
 project(AnyWave)
 
-
-
 # detecting compiler
 #if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
 #   MESSAGE(STATUS "Apple clang compiler detected")
@@ -19,8 +17,6 @@ project(AnyWave)
 SET(CMAKE_BUILD_TYPE Release) # build in release mode
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-SET(DONT_BUILD_MATLAB_SUPPORT FALSE)
 
 if (APPLE) 
    include(mac.cmake)
