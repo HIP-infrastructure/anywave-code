@@ -19,7 +19,7 @@
 #include <QTextStream>
 #include <AwCore.h>
 #include <algorithm>
-#ifndef Q_OS_MAC
+#ifdef Q_OS_WIN
 #include <execution>
 #endif
 #include <qjsondocument.h>
@@ -197,7 +197,7 @@ AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 
 AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 {
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
 #else
 	if (markers.size() <= MARKERS_THREAD_THRESHOLD)
@@ -207,8 +207,6 @@ AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 #endif
 	return markers;
 }
-
-
 
 AwMarkerList& AwMarker::rename(AwMarkerList& markers, const QString& label)
 {
@@ -742,7 +740,7 @@ QHash<QString, int> AwMarker::computeHistogram(const AwMarkerList& markers)
 	while (!tmp.isEmpty()) {
 		QString label = tmp.first()->label();
 		AwMarkerList::iterator it;
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 		it = std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
 #else
 		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
@@ -768,7 +766,7 @@ AwMarkerList AwMarker::getMarkersWithUniqueLabels(const AwMarkerList& markers)
 	while (!tmp.isEmpty()) {
 		QString label = tmp.first()->label();
 		res << tmp.first();
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 		tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
 #else
 		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
@@ -792,7 +790,7 @@ QStringList AwMarker::getUniqueLabels(const QList<AwMarker *>& markers)
 	AwMarkerList l_markers = markers;
 	while (!l_markers.isEmpty()) {
 		QString label = l_markers.first()->label();
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 		l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
 #else
 		if (l_markers.size() <= MARKERS_THREAD_THRESHOLD)

@@ -11,7 +11,7 @@ SET(HEADERS
     ../../include/AwSensor.h 
     ../../include/AwDataBuffer.h)
 
-SET(SRC     AwChannel.cpp 
+SET(SRC  AwChannel.cpp 
     AwDataClient.cpp 
     AwMarker.cpp 
     AwMEGSensorManager.cpp 
@@ -24,6 +24,7 @@ QT5_WRAP_CPP(MOC ${HEADERS})
 add_library(AwCore SHARED ${MOC} ${SRC})
 
 qt5_use_modules(AwCore Core)
+
 IF(APPLE)
 TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
 ELSE()
