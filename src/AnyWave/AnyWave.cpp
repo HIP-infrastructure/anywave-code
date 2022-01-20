@@ -734,3 +734,8 @@ void AnyWave::on_actionCreate_new_MATLAB_plugin_triggered()
 	AwMATPyCreator creator;
 	creator.exec();
 }
+
+void AnyWave::on_actionCheck_for_available_plugins_triggered()
+{
+	m_updateManager->checkForUpdates(AwUpdateManager::AvailablePlugins, false);
+}
