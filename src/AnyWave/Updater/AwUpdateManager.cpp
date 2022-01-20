@@ -11,6 +11,7 @@
 #include <QProcess>
 #include "Process/AwProcessManager.h"
 #include <cmath>
+#include <AwException.h>
 
 
 Component::Component()
@@ -37,8 +38,12 @@ AwUpdateManager::AwUpdateManager(QObject *parent) : QObject(parent)
 	auto pm = AwProcessManager::instance();
 	m_updatesAvailable = false;
 	m_quiet = true;
+	m_flags = AwUpdateManager::AllUpdates;
 	connect(this, &AwUpdateManager::newPluginLoaded, pm, &AwProcessManager::addPlugin);
 	connect(this, &AwUpdateManager::installComplete, this, &AwUpdateManager::showInstalledComponents);
+	connect(&m_networkManager, &QNetworkAccessManager::finished, this,
+		&AwUpdateManager::fileDownloaded);
+	connect(this, &AwUpdateManager::downloaded, this, &AwUpdateManager::loadJSON);
 }
 
 AwUpdateManager::~AwUpdateManager()
@@ -52,23 +57,48 @@ void AwUpdateManager::clearComponents()
 		delete m_components.takeLast();
 }
 
-void AwUpdateManager::checkForUpdates(bool quiet)
+void AwUpdateManager::checkForUpdates(int flags, bool quiet)
 {
 	clearComponents();
 	m_quiet = quiet;
-	connect(&m_networkManager, &QNetworkAccessManager::finished, this,
-		&AwUpdateManager::fileDownloaded);
+	m_flags = flags;
+	//connect(&m_networkManager, &QNetworkAccessManager::finished, this,
+	//	&AwUpdateManager::fileDownloaded);
 	// get json file
 	QString updateUrl = "https://meg.univ-amu.fr/AnyWave/updates/updates.json";
 	auto aws = AwSettings::getInstance();
 	if (aws->value(aws::ins_version).toBool()) {
 		// get the update.json in app dir
 		QString jsonFile = QString("%1/update.json").arg(aws->value(aws::app_resource_dir).toString());
-		auto map = AwUtilities::json::fromJsonFileToMap(jsonFile);
-		updateUrl = map.value("url").toString();
+		try {
+			auto map = AwUtilities::json::fromJsonFileToMap(jsonFile);
+			updateUrl = map.value("url").toString();
+		}
+		catch (const AwException& e) {
+			if (!m_quiet) {
+				AwMessageBox::critical(nullptr, "json error", e.errorString());
+				return;
+			}
+			return;
+		}
+	}
+	if (!checkConnectionToUrl(updateUrl)) {
+		if (!m_quiet)
+			AwMessageBox::critical(nullptr, "Connection error", "The update server could not be contacted");
+		return;
 	}
 	download(updateUrl);
-	connect(this, &AwUpdateManager::downloaded, this, &AwUpdateManager::loadJSON);
+//	connect(this, &AwUpdateManager::downloaded, this, &AwUpdateManager::loadJSON);
+}
+
+bool AwUpdateManager::checkConnectionToUrl(const QUrl& url)
+{
+	QTcpSocket socket;
+	auto host = url.host();
+	socket.connectToHost(host, 80);
+	if (socket.waitForConnected()) 
+		return true;
+	return false;
 }
 
 void AwUpdateManager::download(const QUrl& url)
@@ -100,7 +130,7 @@ void AwUpdateManager::error(QNetworkReply::NetworkError error)
 
 void AwUpdateManager::loadJSON()
 {
-	disconnect(this, &AwUpdateManager::downloaded, nullptr, nullptr);
+//	disconnect(this, &AwUpdateManager::downloaded, nullptr, nullptr);
 	QString jsonString(m_data), error;
 	QVariantMap map = AwUtilities::json::mapFromJsonString(jsonString, error);
 	if (error.isEmpty()) {
@@ -132,26 +162,30 @@ void AwUpdateManager::loadJSON()
 
 			m_components << comp;
 		}
-	}
-	if (checkForComponentsUpdates()) {
+		if (checkForComponentsUpdates()) {
 
-		AwUpdaterGui gui(this);
-		if (gui.exec() == QDialog::Accepted) {
-			m_selectedComponents = gui.selectedComponents();
-			m_currentIndex = 0;
-			disconnect(&m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
-			connect(&m_networkManager, &QNetworkAccessManager::finished, this,
-				&AwUpdateManager::componentDownloaded);
-			m_downloadGui = std::make_unique<AwDownloadGui>();
-			m_downloadGui.get()->show();
-			installUpdates();
-		//	m_updatesAvailable = false;
+			AwUpdaterGui gui(this);
+			if (gui.exec() == QDialog::Accepted) {
+				m_selectedComponents = gui.selectedComponents();
+				m_currentIndex = 0;
+				disconnect(&m_networkManager, &QNetworkAccessManager::finished, nullptr, nullptr);
+				connect(&m_networkManager, &QNetworkAccessManager::finished, this,
+					&AwUpdateManager::componentDownloaded);
+				m_downloadGui = std::make_unique<AwDownloadGui>();
+				m_downloadGui.get()->show();
+				installUpdates();
+				//	m_updatesAvailable = false;
+			}
+		}
+		else {
+			//m_updatesAvailable = false;
+			if (!m_quiet)
+				AwMessageBox::information(nullptr, "AnyWave Updates", "Everything is up to date.");
 		}
 	}
-	else {
-		//m_updatesAvailable = false;
-		if (!m_quiet)
-			AwMessageBox::information(nullptr, "AnyWave Updates", "Everything is up to date.");
+	else { // error occured
+		AwMessageBox::critical(nullptr, "Error", error);
+		return;
 	}
 }
 

@@ -402,6 +402,11 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 // add extra parameters to descMap
 		 descMap[keys::plugin_dir] = pluginPath;
 		 descMap["script_path"] = pluginPath;
+
+		 // check for version string.
+		 // if no version specified set it to 1.0.0 by default
+		 if (!descMap.contains("version"))
+			 descMap["version"] = QString("1.0.0");
 		
 		 //
 		 isMATLABCompiled = descMap.contains("compiled plugin");

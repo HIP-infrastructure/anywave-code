@@ -13,8 +13,8 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 	// init table widget
 	m_ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows); 
 	m_ui.tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	m_ui.tableWidget->setColumnCount(4);
-	QStringList headers = { "Component", "Type", "Current", "Available" };
+	m_ui.tableWidget->setColumnCount(5);
+	QStringList headers = { "Component", "Type", "Current", "Available", "Requirements"};
 	m_ui.tableWidget->setHorizontalHeaderLabels(headers);
 	m_ui.tableWidget->verticalHeader()->setVisible(false);
 	m_ui.tableWidget->setStyleSheet("QTableView {selection-background-color: green;}");
@@ -39,6 +39,12 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
 		item = new QTableWidgetItem(c->version);
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui.tableWidget->setItem(row, col++, item);
+		if (!c->requirement.isEmpty()) 
+			item = new QTableWidgetItem(c->requirement);
+		else 
+			item = new QTableWidgetItem("None");
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
 		row++;

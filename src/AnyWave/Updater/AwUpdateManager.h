@@ -14,7 +14,7 @@ public:
 
 	QString name;
 	int type;
-	QString version, installedVersion;
+	QString version, installedVersion, requirements;
 	QUrl url;
 	bool updateAvailable;
 	QString requirement;
@@ -27,9 +27,10 @@ class AwUpdateManager : public QObject
 public:
 	AwUpdateManager(QObject *parent = nullptr);
 	~AwUpdateManager();
-	enum Components { Core, Plugin };
+	enum Components { Core, Plugin, MatlabPlugin, PythonPlugin };
+	enum Flags { AllUpdates, AvailablePlugins };
 
-	void checkForUpdates(bool quiet = true);
+	void checkForUpdates(int flags = AwUpdateManager::AllUpdates, bool quiet = true);
 	bool updatesAvailable() { return m_updatesAvailable; }
 	static int compareVersion(const QString& v1, const QString& v2);
 	inline QList<Component*>& components() { return m_components; }
@@ -49,6 +50,7 @@ private:
 	void clearComponents();
 	bool checkForComponentsUpdates();
 	void installUpdates();
+	bool checkConnectionToUrl(const QUrl&);
 
 	int m_currentIndex;
 	QNetworkAccessManager m_networkManager;
@@ -58,5 +60,6 @@ private:
 	std::unique_ptr<AwDownloadGui> m_downloadGui;
 	QString m_error;
 	QFile m_file;
+	int m_flags;
 	bool m_updatesAvailable, m_quiet;
 };
