@@ -18,12 +18,6 @@ SET(CMAKE_BUILD_TYPE Release) # build in release mode
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (APPLE) 
-   include(mac.cmake)
-else(APPLE)
-   include(linux.cmake)
-endif()
-
 # default install path
 #IF(UNIX AND NOT APPLE)
 #SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
@@ -33,11 +27,17 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
-#INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+if (APPLE) 
+   include(mac.cmake)
+else(APPLE)
+   include(linux.cmake)
+endif()
 
 # PATH to resources
 SET(AW_RES_DIR ${CMAKE_SOURCE_DIR}/resources)
@@ -52,6 +52,12 @@ MESSAGE(STATUS "Qt version is ${Qt5Core_VERSION}")
 
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
+IF(NOT VTK_FOUND)
+   MESSAGE(STATUS "vtk required.")
+   RETURN()
+ELSE()
+    MESSAGE(STATUS "VTK ${VTK_MAJOR_VERSION} detected.")
+ENDIF()
 
 SET(ARMADILLO_INCLUDE ${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(SIGPACK_INCLUDE ${CMAKE_SOURCE_DIR}/sigpack)

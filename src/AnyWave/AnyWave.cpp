@@ -37,7 +37,6 @@
 #include "Marker/AwMarkerManager.h"
 #include "Marker/AwDockAddMarker.h"
 #include "Data/AwDataServer.h"
-#include "Display/AwDisplaySetupManager.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLogWidget.h"
 #include "Debug/AwDebugLog.h"

@@ -3,6 +3,9 @@ project(EEPIO)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
+IF(NOT APPLE)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+ENDIF()
 
 SET(SRCS EEProbeIO.cpp 
 libcnt/cnt.cpp  

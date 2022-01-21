@@ -32,7 +32,7 @@ TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
 ELSE()
 TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
 ENDIF()
-#target_compile_features(AwCore PRIVATE cxx_std_17)
+target_compile_features(AwCore PRIVATE cxx_std_17)
 
 IF (APPLE)
 INSTALL(TARGETS AwCore DESTINATION  ${LIB_INSTALL_DIR})
