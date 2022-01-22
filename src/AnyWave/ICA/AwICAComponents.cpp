@@ -168,12 +168,13 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 		m_panel = NULL;
 	}
 
-	double lpf, hpf, notch;
+	double lpf = 0, hpf = 0, notch = 0;
 	mat unmixingD, mixingD;
 	try {
 		file.readScalar("lpf", &lpf);
 		file.readScalar("hpf", &hpf);
-		file.readScalar("notch", &notch);
+		if (file.variableExists("notch"))
+			file.readScalar("notch", &notch);
 		file.readMatrix("unmixing", unmixingD);
 		file.readMatrix("mixing", mixingD);
 		file.readStrings("labels", m_labels);

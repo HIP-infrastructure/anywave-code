@@ -705,6 +705,7 @@ void AnyWave::readSettings()
 {
 	QSettings settings("INSERM U1106", "AnyWave");
 	restoreState(settings.value("state").toByteArray());
+	restoreGeometry(settings.value("geometry").toByteArray());
 }
 
 ///
@@ -714,6 +715,7 @@ void AnyWave::writeSettings()
 {
 	QSettings settings("INSERM U1106", "AnyWave");
 	settings.setValue("state", saveState());
+	settings.setValue("geometry", saveGeometry());
 }
 
 

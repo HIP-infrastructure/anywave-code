@@ -209,22 +209,34 @@ int AwMontageManager::loadICA(const QString& path)
 		AwMessageBox::critical(0, tr("ICA Components"),QString(tr("Failed to import ICA components: %1")).arg(e.errorString()));
 		return -1;
 	}
-	// add ICA components to asRecorded and current montage.
-	AwICAComponents **comps = ica_man->getAllComponents();
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (comps[i] == NULL)
-			continue;
-		count += comps[i]->components().size();
-		foreach(AwICAChannel *channel, comps[i]->components()) {
-			m_icaAsRecorded << channel;
-			AwICAChannel *newChan = new AwICAChannel(channel);
-			m_channels << newChan;
-			// add ica to as recorded
-			m_asRecorded[channel->name()] = channel;
-		}
-		AwDataManager::instance()->filterSettings().registerChannelType(AwChannel::ICA, QString("ICA-%1").arg(AwChannel::typeToString(i)));
-		AwDataManager::instance()->filterSettings().setLimits(AwChannel::ICA, { comps[i]->hpFilter(), comps[i]->lpFilter() });
+
+	AwICAChannelList icaChannels = ica_man->getChannelsOfAllComponents();
+	for (auto channel : icaChannels) {
+		if (m_asRecorded.contains(channel->name()))
+			m_asRecorded.remove(channel->name());
+		m_asRecorded.insert(channel->name(), channel);
+		m_channels << channel->duplicate();
 	}
+
+//	AwDataManager::instance()->filterSettings().registerChannelType(AwChannel::ICA, QString("ICA-%1").arg(AwChannel::typeToString(i)));
+//	AwDataManager::instance()->filterSettings().setLimits(AwChannel::ICA, { comps[i]->hpFilter(), comps[i]->lpFilter() });
+
+	//// add ICA components to asRecorded and current montage.
+	//AwICAComponents **comps = ica_man->getAllComponents();
+	//for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+	//	if (comps[i] == NULL)
+	//		continue;
+	//	count += comps[i]->components().size();
+	//	foreach(AwICAChannel *channel, comps[i]->components()) {
+	//		m_icaAsRecorded << channel;
+	//		AwICAChannel *newChan = new AwICAChannel(channel);
+	//		m_channels << newChan;
+	//		// add ica to as recorded
+	//		m_asRecorded[channel->name()] = channel;
+	//	}
+	//	AwDataManager::instance()->filterSettings().registerChannelType(AwChannel::ICA, QString("ICA-%1").arg(AwChannel::typeToString(i)));
+	//	AwDataManager::instance()->filterSettings().setLimits(AwChannel::ICA, { comps[i]->hpFilter(), comps[i]->lpFilter() });
+	//}
 
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("ICA Components"), QString(tr("%1 components added to the current montage.").arg(count)));
