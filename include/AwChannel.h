@@ -21,6 +21,7 @@
 #include <QVariant>
 #include <QSemaphore>
 #include <QVector>
+#include <QSharedPointer>
 #include <AwMarker.h>
 constexpr auto AW_CHANNEL_TYPES = 13;
 /*!
@@ -248,6 +249,9 @@ public:
 	static QList<AwChannel *> sortByType(const QList<AwChannel * > & list, const QStringList& types = QStringList());
 	/** remove doublons from a list. Doublons are checked based on name of channels. **/
 	static QList<AwChannel *> removeDoublons(const QList<AwChannel *>& list);
+	/** convert to shared pointer list **/
+	static QList<QSharedPointer<AwChannel>> toSharedPointerList(const QList<AwChannel*>& list);
+	static QList<AwChannel*> toChannelList(const QList<QSharedPointer<AwChannel>>& list);
 	QVector<float> toVector();
 protected:
 	quint32 m_ID;					
@@ -286,6 +290,7 @@ protected:
 };
 
 typedef QList<AwChannel *> AwChannelList;  ///< AwChannelList defines a list of AwChannel *
+using AwSharedPointerChannelList = QList<QSharedPointer<AwChannel>>;
 Q_DECLARE_METATYPE(AwChannelList)
-
+Q_DECLARE_METATYPE(AwSharedPointerChannelList)
 #endif

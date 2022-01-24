@@ -113,7 +113,7 @@ signals:
 	void markersReadyToExport(const AwMarkerList& markers);
 	/** Send a log message **/
 	void log(const QString&);
-	void closingFile();
+//	void closingFile();
 public slots:
 	/** Position le flag de fichier modifie */
 	void setModified(bool f = true) { m_currentFileModified = f; }

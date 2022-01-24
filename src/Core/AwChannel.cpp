@@ -115,6 +115,23 @@ AwChannel *AwChannel::duplicate()
 	return newc;
 }
 
+QList<QSharedPointer<AwChannel>> AwChannel::toSharedPointerList(const QList<AwChannel*>& list)
+{
+	AwSharedPointerChannelList res;
+	for (auto channel : list)
+		res << QSharedPointer<AwChannel>(channel);
+
+	return res;
+}
+
+QList<AwChannel*> AwChannel::toChannelList(const QList<QSharedPointer<AwChannel>>& list)
+{
+	AwChannelList res;
+	for (const auto& channel : list)
+		res << channel.get();
+	return res;
+}
+
 QVector<float> AwChannel::toVector()
 {
 	if (m_dataSize == 0)

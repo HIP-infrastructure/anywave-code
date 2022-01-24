@@ -216,12 +216,11 @@ void AwBaseSignalView::setTotalDuration(float dur)
 void AwBaseSignalView::setChannels(const AwChannelList& channels)
 {
 	m_channelSharedPtrs.clear();
-	m_montageChannels.clear();
 	for (auto c : channels) {
 		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c->duplicate());
 		m_channelSharedPtrs << shared;
-		m_montageChannels << shared.get();
 	}
+	m_montageChannels = AwChannel::toChannelList(m_channelSharedPtrs);
 	applyGainLevels();
 	if (!m_isActive)
 		return;
