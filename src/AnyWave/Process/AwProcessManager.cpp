@@ -20,7 +20,6 @@
 #include "Montage/AwMontageManager.h"
 #include "Prefs/AwSettings.h"
 #include "Data/AwDataServer.h"
-#include "Display/AwDisplaySetupManager.h"
 #include "Display/AwDisplaySetup.h"
 #include "Display/AwDisplay.h"
 #include "Marker/AwMarkerManager.h"

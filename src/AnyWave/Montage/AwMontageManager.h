@@ -47,9 +47,11 @@ public:
 	/** Retourne la liste des objets AwChannel du montage courant **/
 	AwChannelList& channels();
 	/** Retourne la liste des AwChannels AsRecorded **/
-	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
-	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
-	QHash<QString, AwChannel *> cloneAsRecordedChannels();
+	//AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
+	AwChannel* asRecordedChannel(const QString& name) { return m_asRecordedSharedPointerMap.value(name).get(); }
+//	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
+	AwChannelList asRecordedChannels() { return AwChannel::toChannelList(m_asRecordedSharedPointerMap.values()); }
+	//QHash<QString, AwChannel *> cloneAsRecordedChannels();
 
 	/** Get instance pointer **/
 	static AwMontageManager *instance();
@@ -135,9 +137,11 @@ public slots:
 	/** Add source channels into current montage **/
 	void addNewSources(int type);
 private:
-	QHash<QString, AwChannel *> m_asRecorded;
+//	QHash<QString, AwChannel *> m_asRecorded;
+	QMap<QString, QSharedPointer<AwChannel>> m_asRecordedSharedPointerMap;
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.
-	AwChannelList m_asRecordedChannels;
+//	AwChannelList m_asRecordedChannels;
+	QList<QSharedPointer<AwChannel>> m_channelsShrdPtrs;
 
 	// ICA/Source specific	
 	AwICAChannelList m_icaAsRecorded;				///< Copy of ICA channels inserted is m_asRecorded.

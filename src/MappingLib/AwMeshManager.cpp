@@ -47,12 +47,12 @@ AwMeshManager *AwMeshManager::instance()
 
 AwMeshManager::AwMeshManager()
 {
-#if VTK_MAJOR_VERSION == 6
-    VTK_MODULE_INIT(vtkRenderingOpenGL);
-    VTK_MODULE_INIT(vtkInteractionStyle);
-    VTK_MODULE_INIT(vtkRenderingFreeType);
+#if VTK_MAJOR_VERSION < 7
+	VTK_MODULE_INIT(vtkRenderingOpenGL);
+	VTK_MODULE_INIT(vtkInteractionStyle);
+	VTK_MODULE_INIT(vtkRenderingFreeType);
 #endif
-#if VTK_MAJOR_VERSION > 6
+#if VTK_MAJOR_VERSION < 9 && VTK_MAJOR_VERSION >= 7
     VTK_MODULE_INIT(vtkRenderingOpenGL2);
     VTK_MODULE_INIT(vtkInteractionStyle);
     VTK_MODULE_INIT(vtkRenderingFreeType);

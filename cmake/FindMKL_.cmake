@@ -28,6 +28,13 @@ if (NOT INTEL_ROOT)
    set(INTEL_ROOT /opt/intel)
 endif()
 
+if (NOT ONEAPI_ROOT AND NOT $ENV{ONEAPI_ROOT} STREQUAL "")
+   set(ONEAPI_ROOT $ENV{ONEAPI_ROOT})
+endif()
+if (NOT ONEAPI_ROOT)
+   set(ONEAPI_ROOT /opt/intel/oneapi)
+endif()
+
 if (NOT MKL_ROOT)
    message("MKL not found ! Define MKL_ROOT variable.")
 else()
@@ -72,11 +79,18 @@ endif()
 
     ############################ RTL layer ##########################
 
+# search iomp5 (ONE API)
+find_library(MKL_RTL_LIBRARY iomp5 HINTS ${ONEAPI_ROOT}/compiler ${ONEAPI_ROOT}/compiler/intel64)
+if (MKL_RTL_LIBRARY)
+   message("Found ONEAPI rtl library: ${MKL_RTL_LIBRARY}")
+else()
+
 # search for tbb first
-find_library(MKL_RTL_LIBRARY iomp5 HINTS ${INTEL_ROOT}/lib ${INTEL_ROOT}/lib/intel64)
+find_library(MKL_RTL_LIBRARY iomp5 HINTS ${INTEL_ROOT}/lib ${INTEL_ROOT}/lib/intel64 ${ONEAPI_ROOT}/lib ${ONEAPI_ROOT}/compiler)
 
 if (MKL_RTL_LIBRARY)
    message("Found mkl rtl library: ${MKL_RTL_LIBRARY}")
+endif()
 endif()
 
 set(MKL_LIBRARY ${MKL_INTERFACE_LIBRARY} ${MKL_THREADING_LIBRARY} ${MKL_CORE_LIBRARY} ${MKL_RTL_LIBRARY})

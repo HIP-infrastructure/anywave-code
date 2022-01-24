@@ -87,6 +87,8 @@ public:
 	int readVec(const QString& name, QVector<double>& vector);
 	int readVec(const QString& name, QVector<qint32>& vector);
 	int readVec(const QString& name, QVector<qint16>& vector);
+	// general methods
+	bool variableExists(const QString& name);
 protected:
     Matio *m_matio;
 	QString m_error, m_fileName;

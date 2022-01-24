@@ -202,7 +202,7 @@ void AnyWave::openFile(const QString &path)
 		ext = ext.toLower();
 	}
 
-	closeFile();
+//	closeFile();
 	auto dataManager = AwDataManager::instance();
 	
 	int res = dataManager->openFile(filePath);
@@ -470,5 +470,5 @@ void AnyWave::closeFile()
 	}
 #endif
 	AwDebugLog::instance()->closeFile();
-	emit closingFile();
+//	emit closingFile();
 }

@@ -755,9 +755,8 @@ void AwDisplay::setChannels(const AwChannelList &montage)
 {
 	m_channels.clear();
 	m_channels = montage;
-	for (auto v : m_signalViews) {
+	for (auto v : m_signalViews) 
 		v->setChannels(montage);
-	}
 
 	// get channel list back from scenes
 	AwChannelList completeList;

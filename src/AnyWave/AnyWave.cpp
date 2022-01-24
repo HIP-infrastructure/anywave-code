@@ -37,7 +37,6 @@
 #include "Marker/AwMarkerManager.h"
 #include "Marker/AwDockAddMarker.h"
 #include "Data/AwDataServer.h"
-#include "Display/AwDisplaySetupManager.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLogWidget.h"
 #include "Debug/AwDebugLog.h"
@@ -706,6 +705,7 @@ void AnyWave::readSettings()
 {
 	QSettings settings("INSERM U1106", "AnyWave");
 	restoreState(settings.value("state").toByteArray());
+	restoreGeometry(settings.value("geometry").toByteArray());
 }
 
 ///
@@ -715,6 +715,7 @@ void AnyWave::writeSettings()
 {
 	QSettings settings("INSERM U1106", "AnyWave");
 	settings.setValue("state", saveState());
+	settings.setValue("geometry", saveGeometry());
 }
 
 
@@ -733,4 +734,9 @@ void AnyWave::on_actionCreate_new_MATLAB_plugin_triggered()
 {
 	AwMATPyCreator creator;
 	creator.exec();
+}
+
+void AnyWave::on_actionCheck_for_available_plugins_triggered()
+{
+	m_updateManager->checkForUpdates(AwUpdateManager::AvailablePlugins, false);
 }

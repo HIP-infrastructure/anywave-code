@@ -30,7 +30,7 @@
 #include "AwStatsWidget.h"
 #include "AwMarkerManager.h"
 #include <algorithm>
-#ifndef Q_OS_MAC
+#ifdef Q_OS_WIN
 #include <execution>
 #endif
 

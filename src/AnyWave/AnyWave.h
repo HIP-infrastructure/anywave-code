@@ -113,7 +113,7 @@ signals:
 	void markersReadyToExport(const AwMarkerList& markers);
 	/** Send a log message **/
 	void log(const QString&);
-	void closingFile();
+//	void closingFile();
 public slots:
 	/** Position le flag de fichier modifie */
 	void setModified(bool f = true) { m_currentFileModified = f; }
@@ -156,6 +156,7 @@ private slots:
 	void on_actionLoadICA_triggered();
 	void on_actionOpen_video_triggered();
 	void on_actionCreate_new_MATLAB_plugin_triggered();
+	void on_actionCheck_for_available_plugins_triggered();
 	void loadBeamformer();
 	void reviewComponentsMaps();
 	void showFileProperties();

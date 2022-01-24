@@ -18,8 +18,9 @@
 #include <widget/AwWaitWidget.h>
 #include <QMouseEvent>
 #include <algorithm>
+#ifdef Q_OS_WIN
 #include <execution>
-
+#endif
 AwStatsWidget::AwStatsWidget(QWidget *parent)
 	: QWidget(parent)
 {

@@ -59,6 +59,7 @@ SET(AnyWave_SRCS
     ./IO/BIDS/AwBIDSGUI.cpp  
     ./IO/BIDS/AwBIDSItem.cpp  
     ./IO/BIDS/AwBIDSManager.cpp  
+    ./IO/BIDS/AwBIDSParsing.cpp
 	./IO/BIDS/AwBIDSGUIOptionsDialog.cpp
 	./IO/BIDS/AwBIDSConvert.cpp
 	./IO/BIDS/AwBIDSTsv.cpp
@@ -101,6 +102,7 @@ SET(AnyWave_SRCS
 	./MATPy/GetProperties.cpp
     ./MATPy/DebugConnect.cpp
     ./MATPy/SendMarkers.cpp
+    ./MATPy/Run.cpp
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
@@ -166,6 +168,9 @@ SET(AnyWave_SRCS
     ./Prefs/AwPreferences.cpp  
     ./Prefs/AwPrefsDial.cpp  
     ./Prefs/AwSettings.cpp  
+    ./Prefs/AwAddVenvDial.cpp
+    ./Prefs/AwPython.cpp
+    ./Prefs/AwPythonSetttings.cpp
     ./Source/AwSourceChannel.cpp  
     ./Source/AwSourceManager.cpp)  
 
@@ -297,6 +302,9 @@ SET(HEADERS
     ./Prefs/AwPreferences.h  
     ./Prefs/AwSettings.h  
     ./Prefs/AwPrefsDial.h  
+    ./Prefs/AwAddVenvDial.h
+    ./Prefs/AwPython.h
+    ./Prefs/AwPythonSettings.h
     ./Source/AwSourceChannel.h  
     ./Source/AwSourceManager.h)  
 
@@ -354,7 +362,8 @@ SET(FORMS ./AnyWave.ui
     ./Widgets/AwTriggerParsingDialog.ui  
     ./Widgets/AwSelectTriggerChannelDialog.ui  
 	./Widgets/AwVideoSettingsDial.ui
-    ./Prefs/AwPrefsDial.ui)  
+    ./Prefs/AwPrefsDial.ui
+    ./Prefs/AwAddVenvDial.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
 
@@ -375,23 +384,29 @@ INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 
 SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml)
-IF(UNIX AND NOT APPLE)
-    ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
-    QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-    TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} 
-       gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z qcustomplot tbb)
-    add_dependencies(AnyWaveLinux ${AW_LIBS})
-    INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
+if(APPLE)
+    include(anywave_mac.cmake)
 ELSE()
-    ADD_EXECUTABLE(AnyWaveMac ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
-    QT5_USE_MODULES(AnyWaveMac Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-    MESSAGE(STATUS "Mac qwt: ${QWT_LIBRARIES}")
-    TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} 
-       ${BLAS_LIBRARIES} z qcustomplot)
-    add_dependencies(AnyWaveMac ${AW_LIBS})
-    set_target_properties(AnyWaveMac PROPERTIES OUTPUT_NAME "anywavemac")
-    INSTALL(TARGETS AnyWaveMac DESTINATION ${APP_INSTALL_DIR})
+    include(anywave_linux.cmake)
 ENDIF()
+
+# IF(UNIX AND NOT APPLE)
+#     ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
+#     QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
+#     TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} 
+#        gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z qcustomplot tbb)
+#     add_dependencies(AnyWaveLinux ${AW_LIBS})
+#     INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
+# ELSE()
+#     ADD_EXECUTABLE(AnyWaveMac ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
+#     QT5_USE_MODULES(AnyWaveMac Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
+#     MESSAGE(STATUS "Mac qwt: ${QWT_LIBRARIES}")
+#     TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} 
+#        ${BLAS_LIBRARIES} z qcustomplot)
+#     add_dependencies(AnyWaveMac ${AW_LIBS})
+#     set_target_properties(AnyWaveMac PROPERTIES OUTPUT_NAME "anywavemac")
+#     INSTALL(TARGETS AnyWaveMac DESTINATION ${APP_INSTALL_DIR})
+# ENDIF()
 
 #TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
 

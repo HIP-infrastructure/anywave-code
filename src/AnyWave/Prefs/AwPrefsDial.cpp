@@ -113,8 +113,8 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	lineEditMCR->setText(qsettings.value("matlab/mcr_path").toString());
 #endif
 
-	bool default = aws->value(aws::python_use_default).toBool();
-	if (default) {
+	bool def = aws->value(aws::python_use_default).toBool();
+	if (def) {
 		radioDefault->setChecked(true);
 		radioDefault->clicked(true);
 	}

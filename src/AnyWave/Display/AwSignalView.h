@@ -41,7 +41,7 @@ public:
 	void quit();
 	inline void setProcessFlags(int flags) { m_processFlags = flags; }
 	void updateChannels();	// apply gains and redisplay channels
-	void setChannels(const AwChannelList& channels);	
+	//void setChannels(const AwChannelList& channels) override;
 	void removeHighLigthMarker();
 	void displaySelectedChannelsOnly();
 signals:
@@ -72,6 +72,7 @@ private:
 	bool m_isActive;
 	AwChannelList m_virtualChannels;
 	int m_processFlags;							// flags for the view
+//	QList<QSharedPointer<AwChannel>> m_channelSharedPtrs;
 };
 
 #endif // AWSIGNALVIEW_H

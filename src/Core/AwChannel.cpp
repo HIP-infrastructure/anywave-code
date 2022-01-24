@@ -115,6 +115,23 @@ AwChannel *AwChannel::duplicate()
 	return newc;
 }
 
+QList<QSharedPointer<AwChannel>> AwChannel::toSharedPointerList(const QList<AwChannel*>& list)
+{
+	AwSharedPointerChannelList res;
+	for (auto channel : list)
+		res << QSharedPointer<AwChannel>(channel);
+
+	return res;
+}
+
+QList<AwChannel*> AwChannel::toChannelList(const QList<QSharedPointer<AwChannel>>& list)
+{
+	AwChannelList res;
+	for (const auto& channel : list)
+		res << channel.get();
+	return res;
+}
+
 QVector<float> AwChannel::toVector()
 {
 	if (m_dataSize == 0)
@@ -571,15 +588,17 @@ QList<AwChannel *> AwChannel::getChannelsWithLabel(const QList<AwChannel *>& lis
 QList<AwChannel *> AwChannel::duplicateChannels(const QList<AwChannel *>& list)
 {
 	AwChannelList res;
-	for (AwChannel *c : list)  {
-		if (c->isVirtual()) {
-			AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
-			res << c->duplicate();
-		}
-		else 
-			res << c->duplicate();
-	}
+	//for (AwChannel *c : list)  {
+	//	if (c->isVirtual()) {
+	//		AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
+	//		res << c->duplicate();
+	//	}
+	//	else 
+	//		res << c->duplicate();
+	//}
 
+	for (auto c : list)
+		res << c->duplicate();
 	return res;
 }
 

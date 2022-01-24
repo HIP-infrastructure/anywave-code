@@ -1,65 +1,63 @@
 cmake_minimum_required(VERSION 3.6) 
 project(AnyWave)
 
-
 # detecting compiler
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-   MESSAGE(STATUS "Apple clang compiler detected")
-   SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
-   add_definitions("-w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13") # clang flags
-   #SET(CLANG ON)
-# apple clang
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-   MESSAGE(STATUS "GCC compiler detected")
-   add_definitions("-w -fPIC -O3 -fpermissive -fopenmp -DNDEBUG") # g++ flags
-   SET(GCC ON)
-endif()
+#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+#   MESSAGE(STATUS "Apple clang compiler detected")
+#   SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+#   add_definitions("-w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13") # clang flags
+#   #SET(CLANG ON)
+## apple clang
+#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+#   MESSAGE(STATUS "GCC compiler detected")
+#   add_definitions("-w -fPIC -O3 -fpermissive -fopenmp -DNDEBUG") # g++ flags
+#   SET(GCC ON)
+#endif()
 
 SET(CMAKE_BUILD_TYPE Release) # build in release mode
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # default install path
-IF(UNIX AND NOT APPLE)
-SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
-ENDIF()
+#IF(UNIX AND NOT APPLE)
+#SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
+#ENDIF()
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
-#INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+if (APPLE) 
+   include(mac.cmake)
+else(APPLE)
+   include(linux.cmake)
+endif()
 
 # PATH to resources
 SET(AW_RES_DIR ${CMAKE_SOURCE_DIR}/resources)
 
 SET(PLUGIN_OUT ${PROJECT_BINARY_DIR}/Plugins)
 
-MESSAGE(STATUS "Building with Qt5")
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Xml REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5PrintSupport REQUIRED)
-find_package(Qt5LinguistTools REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Svg REQUIRED)
-find_package(Qt5Qml REQUIRED)
-find_package(Qt5Multimedia REQUIRED)
-find_package(Qt5MultimediaWidgets REQUIRED)
-if(UNIX AND NOT APPLE)
-find_package(Qt5X11Extras REQUIRED)
-ENDIF()
+#if(UNIX AND NOT APPLE)
+#find_package(Qt5X11Extras REQUIRED)
+#ENDIF()
 
 MESSAGE(STATUS "Qt version is ${Qt5Core_VERSION}")
 
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
+IF(NOT VTK_FOUND)
+   MESSAGE(STATUS "vtk required.")
+   RETURN()
+ELSE()
+    MESSAGE(STATUS "VTK ${VTK_MAJOR_VERSION} detected.")
+ENDIF()
 
 SET(ARMADILLO_INCLUDE ${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(SIGPACK_INCLUDE ${CMAKE_SOURCE_DIR}/sigpack)
@@ -80,22 +78,24 @@ if(MATIO_FOUND)
 endif()
 
 #find_package(MKL)
-set(BLA_VENDOR Intel10_64lp)
-find_package(BLAS)
-if(BLAS_FOUND)
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-   SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-   SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
-ENDIF()
+#set(BLA_VENDOR Intel10_64lp)
+#find_package(BLAS)                           
+#if(MKL_FOUND)
+#   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
+#   SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
+#   SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
+#ENDIF(MKL_FOUND)
 
-if(NOT BLAS_FOUND AND APPLE)
-   MESSAGE(STATUS "Using Accelerate Framework for BLAS")
-   SET(BLAS_LIBRARIES "-framework Accelerate")
-ENDIF()
-IF(NOT BLAS_FOUND AND NOT APPLE)
-    find_package(OpenBLAS REQUIRED)
-    SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
-ENDIF()
+#if(NOT BLAS_FOUND AND APPLE)
+#   MESSAGE(STATUS "Using Accelerate Framework for BLAS")
+#   SET(BLAS_LIBRARIES "-framework Accelerate")
+#ENDIF()
+#IF(NOT BLAS_FOUND AND NOT APPLE)
+#    find_package(OpenBLAS REQUIRED)
+#    SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
+#ENDIF()
+
+
 
 #IF(MKL_FOUND)
 #   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
@@ -117,31 +117,31 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-IF(UNIX AND NOT APPLE)
-   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+#IF(UNIX AND NOT APPLE)
+#   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
-   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='$ORIGIN/lib'")
-ENDIF()
+#   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+#   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='$ORIGIN/lib'")
+#ENDIF()
 
-IF(APPLE)
-   SET(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
-   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-   SET(APPLE_ID "Apple Development: thechewie13@gmail.com (MY3J8AN9H6)")
-ENDIF()
+#IF(APPLE)
+#   SET(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+#   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+#   SET(APPLE_ID "Apple Development: thechewie13@gmail.com (MY3J8AN9H6)")
+#ENDIF()
 
-IF(APPLE)
-   SET(APP_BUNDLE "AnyWave.app")
-   SET(APP_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/MacOS")
-   SET(LIB_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Frameworks")
-   SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
-   SET(MEX_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins/MATLAB/AnyWave")
-   SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
-ELSE()
-   SET(MEX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins/MATLAB/AnyWave")
-   SET(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins")
-ENDIF()
+#IF(APPLE)
+#   SET(APP_BUNDLE "AnyWave.app")
+#   SET(APP_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/MacOS")
+#   SET(LIB_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Frameworks")
+#   SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
+#   SET(MEX_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins/MATLAB/AnyWave")
+#   SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
+#ELSE()
+#   SET(MEX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins/MATLAB/AnyWave")
+#   SET(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins")
+#ENDIF()
 
 
 # AnyWave SDK libraries
@@ -227,22 +227,22 @@ IF(INS)
    ENDIF()
 ENDIF()
 
-IF(UNIX AND NOT APPLE)
+#IF(UNIX AND NOT APPLE)
 # Install
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
+#INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 #License files
-INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTINATION
-	${CMAKE_INSTALL_PREFIX})
+#INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTINATION
+#	${CMAKE_INSTALL_PREFIX})
 # desktop
-INSTALL(FILES ${AW_RES_DIR}/linux/anywave.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
+#INSTALL(FILES ${AW_RES_DIR}/linux/anywave.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
 # icon
-INSTALL(FILES ${AW_RES_DIR}/images/AnyWave_icon.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/apps)
+#INSTALL(FILES ${AW_RES_DIR}/images/AnyWave_icon.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/apps)
 # cmake
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
 # include 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
 # symlink
-EXECUTE_PROCESS(COMMAND ln -sf  ${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/bin/anywave)
-ENDIF()
+#EXECUTE_PROCESS(COMMAND ln -sf  ${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/bin/anywave)
+#ENDIF()
 

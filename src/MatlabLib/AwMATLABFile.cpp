@@ -934,6 +934,11 @@ int AwMATLABFile::readVec(const QString& name, QVector<qint16>& vector)
 	return 0;
 }
 
+bool AwMATLABFile::variableExists(const QString& name)
+{
+	return  Mat_VarReadInfo(FILEPTR, name.toStdString().c_str()) != nullptr;
+}
+
 int AwMATLABFile::readVec(const QString& name, QVector<qint32>& vector)
 {
 	CHECK_OPEN_FILE
