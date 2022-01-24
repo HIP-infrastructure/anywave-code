@@ -15,7 +15,7 @@ SET(SRCS
    ICASettings.cpp
    ica.cpp
    ICAAlgorithm.cpp
-	${SOBI} ${INFOMAX} {MATLAB})
+	${SOBI} ${INFOMAX} ${MATLAB})
 
  SET(MOCS ICASettings.h
     ica.h ICAAlgorithm.h)

@@ -47,10 +47,7 @@ SET(AnyWave_SRCS
     ./Display/AwChannelSelectionModel.cpp  
     ./Display/AwDisplay.cpp  
     ./Display/AwDisplaySetup.cpp  
-    ./Display/AwDisplaySetupManager.cpp  
-    ./Display/AwDSMSaveSetupUI.cpp  
     ./Display/AwNewViewDial.cpp  
-    ./Display/AwSaveAsNewSetupDialog.cpp  
     ./Display/AwScene.cpp  
     ./Display/AwSignalView.cpp  
     ./Display/AwViewSetup.cpp  
@@ -200,10 +197,7 @@ SET(HEADERS
     ./Display/AwCentralWidget.h  
     ./Display/AwSignalView.h  
     ./Display/AwScene.h  
-    ./Display/AwSaveAsNewSetupDialog.h  
     ./Display/AwNewViewDial.h  
-    ./Display/AwDSMSaveSetupUI.h  
-    ./Display/AwDisplaySetupManager.h  
     ./Display/AwDisplaySetup.h  
     ./Display/AwDisplay.h  
     ./Display/AwChannelSelectionModel.h  
@@ -323,9 +317,7 @@ SET(FORMS ./AnyWave.ui
     ./Carto/AwMappingWidget.ui  
     ./Debug/AwDebugLogWidget.ui  
     ./Display/AwChannelSelectionDial.ui  
-    ./Display/AwDSMSaveSetupUI.ui  
     ./Display/AwNewViewDial.ui  
-    ./Display/AwSaveAsNewSetupDialog.ui  
     ./Filter/AwFilterToolBar.ui  
     ./IO/BIDS/AwBIDSGUI.ui  
     ./Marker/AwExportMarkersWizard.ui  
