@@ -47,9 +47,12 @@ ICA::ICA()
 	m_nComp = 0;
 	auto infomax = new ICAInfomax(this);
 	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	m_algorithms << infomax;
+#if defined(Q_OS_WIN)  || defined(Q_OS_LINUX)
 	auto sobi = new ICASobi(this);
 	connect(sobi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-	m_algorithms << infomax << sobi;
+	m_algorithms << sobi;
+#endif
 }
 
 ICAPlugin::ICAPlugin() : AwProcessPlugin()

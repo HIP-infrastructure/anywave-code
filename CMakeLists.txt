@@ -1,27 +1,9 @@
-cmake_minimum_required(VERSION 3.6) 
+cmake_minimum_required(VERSION 3.16)
 project(AnyWave)
-
-# detecting compiler
-#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-#   MESSAGE(STATUS "Apple clang compiler detected")
-#   SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
-#   add_definitions("-w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13") # clang flags
-#   #SET(CLANG ON)
-## apple clang
-#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-#   MESSAGE(STATUS "GCC compiler detected")
-#   add_definitions("-w -fPIC -O3 -fpermissive -fopenmp -DNDEBUG") # g++ flags
-#   SET(GCC ON)
-#endif()
 
 SET(CMAKE_BUILD_TYPE Release) # build in release mode
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# default install path
-#IF(UNIX AND NOT APPLE)
-#SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
-#ENDIF()
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
@@ -44,10 +26,6 @@ SET(AW_RES_DIR ${CMAKE_SOURCE_DIR}/resources)
 
 SET(PLUGIN_OUT ${PROJECT_BINARY_DIR}/Plugins)
 
-#if(UNIX AND NOT APPLE)
-#find_package(Qt5X11Extras REQUIRED)
-#ENDIF()
-
 MESSAGE(STATUS "Qt version is ${Qt5Core_VERSION}")
 
 find_package(VTK REQUIRED)
@@ -62,7 +40,6 @@ ENDIF()
 SET(ARMADILLO_INCLUDE ${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(SIGPACK_INCLUDE ${CMAKE_SOURCE_DIR}/sigpack)
 
-
 find_package(Qwt REQUIRED)
 message(STATUS "Qwt folders are ${QWT_INCLUDE_DIR} ${QWT_LIBRARY}")
 
@@ -70,44 +47,17 @@ message(STATUS "Qwt folders are ${QWT_INCLUDE_DIR} ${QWT_LIBRARY}")
 FIND_PACKAGE(HDF5 REQUIRED COMPONENTS C HL)
 message(STATUS "HDF5 are ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}")
 
-
 find_package(MATIO REQUIRED)
 if(MATIO_FOUND)
     message(STATUS "Found Matio lib: ${MATIO_LIBRARIES}")
     INCLUDE_DIRECTORIES(MATIO_INCLUDE_DIRS)
 endif()
 
-#find_package(MKL)
-#set(BLA_VENDOR Intel10_64lp)
-#find_package(BLAS)                           
-#if(MKL_FOUND)
-#   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-#   SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-#   SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
-#ENDIF(MKL_FOUND)
-
-#if(NOT BLAS_FOUND AND APPLE)
-#   MESSAGE(STATUS "Using Accelerate Framework for BLAS")
-#   SET(BLAS_LIBRARIES "-framework Accelerate")
-#ENDIF()
-#IF(NOT BLAS_FOUND AND NOT APPLE)
-#    find_package(OpenBLAS REQUIRED)
-#    SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
-#ENDIF()
-
-
-
-#IF(MKL_FOUND)
-#   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-#   SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-#   SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
-#endif()
-
 # Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_BLAS -DARMA_USE_LAPACK -DAW_DISABLE_EPOCHING")
 IF(USE_MKL)
      MESSAGE(STATUS "Settings CXX flags for MKL")
-     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DMKL -I${MKL_INCLUDE_DIRS}")
+     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -m64 -DMKL")
 ENDIF()
 
 # use, i.e. don't skip the full RPATH for the build tree
@@ -217,32 +167,3 @@ add_subdirectory(src/plugins/EEPIO)
 add_subdirectory(src/plugins/CompumedicsPF)
 add_subdirectory(src/plugins/DeltamedBinTxtReader)
 add_subdirectory(src/plugins/Spectral)
-
-# external plugins (must be locater in plugins sub folder)
-#find_file(EXTERNAL_PLUGINS NAMES external_plugins.cmake PATHS  ${CMAKE_SOURCE_DIRECTORY} NO_DEFAULT_PATH)
-IF(INS)
-   IF(EXISTS ${CMAKE_SOURCE_DIR}/src/plugins/external_plugins.cmake)
-      include(${CMAKE_SOURCE_DIR}/src/plugins/external_plugins.cmake)
-      MESSAGE(STATUS "will also build external plugins")
-   ENDIF()
-ENDIF()
-
-#IF(UNIX AND NOT APPLE)
-# Install
-#INSTALL(FILES ${CMAKE_SOURCE_DIR}/resources/linux/start_aw.sh PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX})
-
-#License files
-#INSTALL(FILES ${AW_RES_DIR}/Licence_fr.html ${AW_RES_DIR}/License_en.html DESTINATION
-#	${CMAKE_INSTALL_PREFIX})
-# desktop
-#INSTALL(FILES ${AW_RES_DIR}/linux/anywave.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
-# icon
-#INSTALL(FILES ${AW_RES_DIR}/images/AnyWave_icon.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/apps)
-# cmake
-#install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
-# include 
-#install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
-# symlink
-#EXECUTE_PROCESS(COMMAND ln -sf  ${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/bin/anywave)
-#ENDIF()
-

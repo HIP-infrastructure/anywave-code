@@ -14,7 +14,9 @@
 // Include files
 #include "rtwtypes.h"
 #include "coder_array.h"
+#if not defined(Q_OS_MAC) 
 #include "omp.h"
+#endif
 #include <cstddef>
 #include <cstdlib>
 

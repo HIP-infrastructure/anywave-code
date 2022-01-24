@@ -1,7 +1,7 @@
 
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
    MESSAGE(STATUS "GCC compiler detected")
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fPIC -O3 -D_REENTRANT -pipe -std=gnu++1z -DNDEBUG")
+   SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -fPIC -O3 -D_REENTRANT -pipe -std=gnu++1z -DNDEBUG")
 #   add_definitions("-w -fPIC -O3 -D_REENTRANT -pipe -std=gnu++1z -DNDEBUG") # g++ flags
 ELSE()
     MESSAGE(STATUS "gcc compiler not found.")
