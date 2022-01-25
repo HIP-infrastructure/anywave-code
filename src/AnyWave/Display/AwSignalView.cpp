@@ -70,10 +70,6 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 AwSignalView::~AwSignalView()
 {
 	AwDataServer::getInstance()->closeConnection(client());
-	//// remove virtual channels from main list
-	//for (AwChannel *c : m_virtualChannels)
-	//	m_channels.removeAll(c);
-	//qDeleteAll(m_montageChannels);
 }
 
 void AwSignalView::updatePageDuration(float duration)
@@ -248,37 +244,6 @@ void AwSignalView::applyChannelFilters()
 		if (m_settings->filters.contains(c->type()))
 			m_channels << c;
 }
-
-
-//void AwSignalView::setChannels(const AwChannelList& channels)
-//{
-//
-//
-//	// received new montage.
-//	// clear previous channels and duplicates the new ones
-//	// clear channels present in scene.
-//	m_channelSharedPtrs.clear();
-//	m_montageChannels.clear();
-//	for (auto c : channels) {
-//		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c->duplicate());
-//		m_channelSharedPtrs << shared;
-//		m_montageChannels << shared.get();
-//	}
-//	
-//	m_scene->clearChannels();
-//	// copy it
-////	qDeleteAll(m_montageChannels);
-////	m_montageChannels = AwChannel::duplicateChannels(channels);
-////	m_montageChannels = channels;
-//	applyGainLevels();
-//	if (!m_isActive)
-//		return;
-//	// Before sending channels to scene, apply filter.
-//	applyChannelFilters();
-//	m_scene->setChannels(m_channels);
-//	reloadData();
-//}
-//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS

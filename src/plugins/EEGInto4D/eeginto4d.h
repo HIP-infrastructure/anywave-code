@@ -32,18 +32,18 @@ public:
 	void runFromCommandLine() override;
 	bool batchParameterCheck(const QVariantMap& args) override;
 private:
-	AwFileIO *m_megReader, *m_eegReader;
+//	AwFileIO *m_megReader, *m_eegReader;
 	AwFileIOPlugin *m_megPlugin, *m_eegPlugin;
+	QSharedPointer<AwFileIO> m_megReader, m_eegReader;
+//	QSharedPointer<AwFileIOPlugin> m_megPlugin, m_eegPlugin;
 	QString m_eegFile, m_megFile;
 	AwChannelList m_eegChannels;
 
-	int initialize();
-//	QString megFile() { return m_megFile; }
-//	void setMEGFile(QString file) { m_megFile = file; }
-//	QString adesFile() { return m_adesFile; }
-//	void setADESFile(QString file) { m_adesFile = file; }
+//	int initialize();
+	bool relabelAndInject(const QString& megFile, const AwChannelList& eegChannels);
 	bool changeEEGLabelsIn4D(const AwChannelList& eegChannels);
-
+	bool updateEEGLabelsInConfigAndMEGFiles(const QString& config, const QString& megFile, const AwChannelList& eegChannels);
+	bool convertToFloatData(const QString& megFile);
 	// base on current file position, returns the number of bytes to add to get an aligned position to 8 bytes.
 	void alignFilePointer(QFile& file);
 	qint64 offsetFilePointer(const QFile& file);
