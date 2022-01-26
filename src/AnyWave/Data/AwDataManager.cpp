@@ -60,6 +60,7 @@ AwDataManager::AwDataManager() : QObject(nullptr)
 	m_dataServer = AwDataServer::getInstance();
 	m_markerManager = AwMarkerManager::instance();
 	connect(&m_filterSettings, &AwFilterSettings::settingsChanged, m_montageManager, &AwMontageManager::setNewFilters);
+	connect(m_montageManager, &AwMontageManager::montageChanged, &m_filterSettings, &AwFilterSettings::setGuiVisibleItems);
 }
 
 AwDataManager::~AwDataManager()
@@ -157,10 +158,10 @@ void AwDataManager::setNewRootDirForSideFiles(const QString& dir)
 
 void AwDataManager::applyFilters(const AwChannelList& channels)
 {
-	if (m_filterSettings.isEmpty()) {
-		m_filterSettings.initWithChannels(channels);
-	}
-	else
+	//if (m_filterSettings.isEmpty()) {
+	//	m_filterSettings.initWithChannels(channels);
+	//}
+	//else
 		m_filterSettings.apply(channels);
 }
 
@@ -264,8 +265,9 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	catch (const AwException& e) {
 		fltFileOk = false;
 	}
-	if (!fltFileOk) 
-		m_filterSettings.initWithChannels(m_reader->infos.channels());
+	if (!fltFileOk)
+		//m_filterSettings.initWithChannels(m_reader->infos.channels());
+		m_filterSettings.setGuiVisibleItems(m_reader->infos.channels());
 	
 	m_filterSettings.apply(m_reader->infos.channels());
 //	m_montageManager->newMontage(m_reader);

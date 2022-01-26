@@ -56,7 +56,7 @@ public:
 	void quit();
 	void setAddMarkerDock(QDockWidget *dock);
 
-	AwSignalView *addSignalView(AwViewSetup *setup);	// Add a new SignalView 
+//	AwSignalView *addSignalView(AwViewSetup *setup);	// Add a new SignalView 
 	AwSignalView* addSignalView(AwViewSettings* settings);
 	AwChannelList displayedChannels();	// Return the channels currently displayed in the views
 	static AwDisplay *instance();

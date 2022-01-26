@@ -58,8 +58,7 @@ public:
 	void update() { m_scene->update(); }
 	void updateMarkers() { m_scene->updateMarkers(); }
 	inline AwChannelList& displayedChannels() { return m_channels; }
-//	virtual void setChannels(const AwChannelList& channels);
-	void setChannels(const AwChannelList& channels);
+	virtual void setChannels(const AwChannelList& channels);
 	void setTotalDuration(float duration); // total length of data in seconds
 	void makeChannelVisible(int type);
 	void removeVisibleChannel(int type);
@@ -133,7 +132,6 @@ protected:
 	AwFilterSettings m_filterSettings;
 	QTime m_recordedTime;
 	QMultiMap<int, AwChannel*> m_channelTypes;
-	bool m_isActive;
 	QList<QSharedPointer<AwChannel>> m_channelSharedPtrs;
 
 	virtual void dataReceived();

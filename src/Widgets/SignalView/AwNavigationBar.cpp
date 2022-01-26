@@ -223,14 +223,6 @@ void AwNavigationBar::updateSettings(AwViewSettings *settings, int flags)
 	}
 	if (flags & AwViewSettings::SecPerCm)	{
 		disconnect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm(int)));
-		//// update SecondsPerCm
-		//QStringList list;
-		//for (qint32 i = 0; i < ui->comboSecsPerCm->count(); i++)
-		//	list << ui->comboSecsPerCm->itemText(i);
-		//QString secPerSecond = QString("%1").arg(settings->secsPerCm);
-		//int index = list.indexOf(secPerSecond);
-		//if (index != -1)
-		//	ui->comboSecsPerCm->setCurrentIndex(index);
 		int index = m_timeScales[0].indexOf(settings->secsPerCm);
 		if (index != -1)
 			ui->comboSecsPerCm->setCurrentIndex(index);

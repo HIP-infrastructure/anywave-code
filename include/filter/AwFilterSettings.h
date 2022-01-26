@@ -46,7 +46,7 @@ public:
 	/** apply the current settings to a whole list of channels **/
 	void apply(const AwChannelList& channels) const;
 	/** init from a list of channels **/
-	void initWithChannels(const AwChannelList& channels);
+//	void initWithChannels(const AwChannelList& channels);
 	/** reset all filters settings to zero **/
 	void zero();
 	/** save settings to json file **/
@@ -58,9 +58,10 @@ public:
 	QList<int> currentTypes() const { return m_filters.keys(); }
 	QVector<float> filters(int type) const { return m_filters.value(type); }
 
-	void registerChannelType(int type, const QString& name);
-	QString getChannelRegisterType(int type) const { return m_registeredChannelTypes.value(type); }
+	//void registerChannelType(int type, const QString& name);
+//	QString getChannelRegisterType(int type) const { return m_registeredChannelTypes.value(type); }
 	QWidget *ui();
+	inline QList<int> guiVisibleItems() { return m_guiVisibleItems; }
 	void setUiDocked() { m_uiDocked = true; }
 signals:
 	void settingsChanged(const AwFilterSettings& settings);
@@ -68,14 +69,16 @@ signals:
 	void log(const QString& message);
 public slots:
 	void updateGUI();
+	void setGuiVisibleItems(const AwChannelList& channels);
 protected slots:
 	void setNewSettings(const AwFilterSettings& settings);
 protected:
 	QMap<int, QVector<float>> m_filters;
 	QMap<QString, QVector<float>> m_hash; // key of hash is linked to registeredChannelTypes
 	QMap<int, QVector<float>> m_limits; // key of map is linked to registeredChannelTypes
+	QList<int> m_guiVisibleItems;	// types of channel to show in GUI
 	AwFilterGUI *m_ui;
 	bool m_uiDocked;
-	QMap<int, QString> m_registeredChannelTypes;
+//	QMap<int, QString> m_registeredChannelTypes;
 };
 

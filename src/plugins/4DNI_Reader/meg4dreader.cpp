@@ -29,7 +29,7 @@ NI4DReader::NI4DReader() : AwFileIOPlugin()
   name = QString("4DNI Reader");
   description = QString(tr("Read 4DNI MEG file."));
   manufacturer = "4DNI";
-  version = QString("1.0.0");
+  version = QString("1.0.1");
   fileExtensions << "*,*";
   layouts << "4D248" << "4D248_3D";
   m_flags = FileIO::CanRead;

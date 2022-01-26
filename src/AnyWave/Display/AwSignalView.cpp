@@ -55,8 +55,7 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
 	m_flags = UpdateProcess;	// by default a view will inform process manager that its contents changed.
-
-	// init the view based on current open file
+		// init the view based on current open file
 	if (dm->isFileOpen()) {
 		dm->dataServer()->openConnection(client());
 		setTotalDuration(dm->totalDuration());
@@ -64,12 +63,36 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 		m_isActive = true;
 		reloadData();
 	}
+
 }
 
 
 AwSignalView::~AwSignalView()
 {
 	AwDataServer::getInstance()->closeConnection(client());
+}
+
+void AwSignalView::setChannels(const AwChannelList& channels)
+{
+	m_scene->clearChannels();
+	m_channelSharedPtrs.clear();
+	m_channels.clear();
+	m_montageChannels.clear();
+	if (channels.isEmpty())
+		return;
+
+	for (auto c : channels) {
+		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c->duplicate());
+		m_channelSharedPtrs << shared;
+	}
+	m_montageChannels = AwChannel::toChannelList(m_channelSharedPtrs);
+	applyGainLevels();
+	if (!m_isActive)
+		return;
+	// Before sending channels to scene, apply filter.
+	applyChannelFilters();
+	m_scene->setChannels(m_channels);
+	reloadData();
 }
 
 void AwSignalView::updatePageDuration(float duration)
@@ -89,15 +112,6 @@ void AwSignalView::reloadData()
 	if (!m_isActive)
 		return;
 	AwBaseSignalView::reloadData();
-}
-
-void AwSignalView::applyNewSetup(AwViewSetup *setup)
-{
-	m_settings = (AwViewSettings *)setup;
-	m_physics->setSecsPerCm(m_settings->secsPerCm);
-	m_navBar->setNewSettings(m_settings);
-	m_view->applySettings(m_settings);
-	m_scene->applyNewSettings(m_settings);
 }
 
 void AwSignalView::updatePositionInFile(float pos)
@@ -169,7 +183,6 @@ void AwSignalView::quit()
 	AwDataServer::getInstance()->closeConnection(client());
 	// clear channels present in scene.
 	m_scene->clearChannels();
-	qDeleteAll(m_montageChannels);
 }
 
 void AwSignalView::closeFile()
@@ -177,19 +190,7 @@ void AwSignalView::closeFile()
 	// clear channels present in scene.
 	AwBaseSignalView::clean();
 	m_scene->reset();
-
 	AwDataManager::instance()->dataServer()->closeConnection(client());
-
-	// remove virtual channels from main list
-	for (AwChannel *c : m_virtualChannels) {
-		if (m_channels.contains(c))
-			m_channels.removeAll(c);
-	}
-
-	// destroying the main list.
-	while (!m_channels.isEmpty())
-		delete m_channels.takeFirst();
-
 	m_isActive = false;
 }
 
@@ -240,9 +241,10 @@ void AwSignalView::applyChannelFilters()
 {
 	// rebuilt current channel list depending on filters
 	m_channels.clear();
-	for (auto c : m_montageChannels)
+	for (auto c : m_montageChannels) {
 		if (m_settings->filters.contains(c->type()))
 			m_channels << c;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:

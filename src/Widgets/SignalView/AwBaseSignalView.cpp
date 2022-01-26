@@ -216,15 +216,18 @@ void AwBaseSignalView::setTotalDuration(float dur)
 void AwBaseSignalView::setChannels(const AwChannelList& channels)
 {
 	m_channelSharedPtrs.clear();
+	m_scene->clearChannels();
+	m_montageChannels.clear();
+	m_channels.clear();
+	if (channels.isEmpty())
+		return;
+
 	for (auto c : channels) {
 		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c->duplicate());
 		m_channelSharedPtrs << shared;
 	}
 	m_montageChannels = AwChannel::toChannelList(m_channelSharedPtrs);
 	applyGainLevels();
-	if (!m_isActive)
-		return;
-	m_scene->clearChannels();
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
 	reloadData();
@@ -497,8 +500,8 @@ void AwBaseSignalView::setNewFilters(const AwFilterSettings& settings)
 void AwBaseSignalView::openFilterGUI()
 {
 	auto ui = m_filterSettings.ui();
-	if (m_filterSettings.isEmpty())
-		m_filterSettings.initWithChannels(m_channels);
+//	if (m_filterSettings.isEmpty())
+//		m_filterSettings.initWithChannels(m_channels);
 	ui->show();
 }
 

@@ -33,9 +33,8 @@ public:
 
 	enum Flags { NoProcessUpdate = 1, UpdateProcess = 2 };
 	inline int processFlags() { return m_processFlags; }
-	void applyNewSetup(AwViewSetup *setup);	// apply a new setup
+//	void applyNewSetup(AwViewSetup *setup);	// apply a new setup
 	void setCursorPosition(float pos);
-	//svoid enableView(AwFileIO *reader);
 	void enableView();
 	void closeFile();
 	void quit();
@@ -43,6 +42,7 @@ public:
 	void updateChannels();	// apply gains and redisplay channels
 	void removeHighLigthMarker();
 	void displaySelectedChannelsOnly();
+	void setChannels(const AwChannelList&) override;
 signals:
 	void markersGUIRequested();
 	void displayedChannelsUpdated(AwChannelList& channels);	// sent each time the view receives new data to display.
@@ -68,9 +68,9 @@ protected:
 	void applyChannelFilters();
 private:
 	void updateAmplitudes();
-	bool m_isActive;
 	AwChannelList m_virtualChannels;
 	int m_processFlags;							// flags for the view
+	bool m_isActive;
 };
 
 #endif // AWSIGNALVIEW_H

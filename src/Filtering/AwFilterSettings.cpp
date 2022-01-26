@@ -27,6 +27,9 @@ AwFilterSettings::AwFilterSettings()
 {
 	m_ui = nullptr;
 	m_uiDocked = false;
+	// init default filter settings for every type of channels
+	for (auto i : AwChannel::intTypes) 
+		m_filters.insert(i, QVector<float>{0, 0, 0, });
 }
 
 AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
@@ -52,7 +55,8 @@ AwFilterSettings& AwFilterSettings::operator=(const AwFilterSettings& other)
 	if (this != &other) {
 		this->m_hash = other.m_hash;
 		this->m_limits = other.m_limits;
-		this->m_registeredChannelTypes = other.m_registeredChannelTypes;
+		this->m_guiVisibleItems = other.m_guiVisibleItems;
+//		this->m_registeredChannelTypes = other.m_registeredChannelTypes;
 		this->m_filters = other.m_filters;
 	}
 	return *this;
@@ -62,7 +66,9 @@ void AwFilterSettings::clear()
 {
 	m_limits.clear();
 	m_hash.clear();
-//	m_filterBounds.clear();
+	m_filters.clear();
+	for (auto i : AwChannel::intTypes)
+		m_filters.insert(i, QVector<float>{0, 0, 0, });
 }
 
 void AwFilterSettings::zero()
@@ -83,7 +89,7 @@ void AwFilterSettings::set(int type, const QVector<float>& values)
 	if (m_filters.contains(type))
 		m_filters.remove(type);
 	m_filters.insert(type, values);
-	registerChannelType(type, AwChannel::typeToString(type));
+//	registerChannelType(type, AwChannel::typeToString(type));
 }
 
 void AwFilterSettings::set(int type, float hp, float lp, float notch)
@@ -99,27 +105,37 @@ void AwFilterSettings::setLimits(int type, const QVector<float>& values)
 	m_limits.insert(type, values);
 }
 
-void AwFilterSettings::initWithChannels(const AwChannelList& channels)
-{
-	// check for type of channels. Do not initiate filtering, just set the channels that might be filtered by the user afterward.
-
-	// get type of channels
-	auto types = AwChannel::getTypesAsInt(channels);
-	// remove channels we don't want the user can filter (Trigger, Other)
-	types.removeAll(AwChannel::Trigger);
-	types.removeAll(AwChannel::Other);
-	for (int i : types) {
-		this->set(i, 0., 0., 0.);
-	}
-	updateGUI();
-}
+//void AwFilterSettings::initWithChannels(const AwChannelList& channels)
+//{
+//	// check for type of channels. Do not initiate filtering, just set the channels that might be filtered by the user afterward.
+//
+//	// get type of channels
+//	auto types = AwChannel::getTypesAsInt(channels);
+//	// remove channels we don't want the user can filter (Trigger, Other)
+//	types.removeAll(AwChannel::Trigger);
+//	types.removeAll(AwChannel::Other);
+//	for (int i : types) {
+//		this->set(i, 0., 0., 0.);
+//	}
+//	updateGUI();
+//}
 
 void AwFilterSettings::apply(AwChannel *channel) const
 {
 	if (channel == nullptr)
 		return;
-	if (!m_filters.contains(channel->type()))
+
+	auto filters = m_filters.value(channel->type());
+
+	if (filters[0] == 0. && filters[1] == 0. && filters[2] == 0.)
 		return;
+
+	channel->setHighFilter(filters[0]);
+	channel->setLowFilter(filters[1]);
+	channel->setNotch(filters[2]);
+
+	//if (!m_filters.contains(channel->type()))
+	//	return;
 
 	// ALLOW FILTERING OF ICA VIRTUAL CHANNELS (January 2022)
 
@@ -131,10 +147,10 @@ void AwFilterSettings::apply(AwChannel *channel) const
 	// ALLOW FILTERING OF ICA VIRTUAL CHANNELS (January 2022) Uncomment previous lines to disable filtering again
 
 
-	QVector<float> tmp = m_filters.value(channel->type());
-	channel->setHighFilter(tmp[0]);
-	channel->setLowFilter(tmp[1]);
-	channel->setNotch(tmp[2]);
+	//QVector<float> tmp = m_filters.value(channel->type());
+	//channel->setHighFilter(tmp[0]);
+	//channel->setLowFilter(tmp[1]);
+	//channel->setNotch(tmp[2]);
 }
 
 void AwFilterSettings::apply(const AwChannelList& channels) const
@@ -180,7 +196,7 @@ void AwFilterSettings::load(const QString& path)
 		throw AwException(QString("Json error: %1.").arg(error.errorString()), origin);
 		return;
 	}
-	m_filters.clear();
+//	m_filters.clear();
 	// types that can be filtered:
 	// all types of channels can be filtered
 	auto types = AwChannel::types;
@@ -196,9 +212,11 @@ void AwFilterSettings::load(const QString& path)
 			for (auto i = 0; i < array.size(); i++)
 				values[i] = (float)array[i].toDouble();
 			set(t, values);
+			m_guiVisibleItems << AwChannel::stringToType(t);
 		}
 	}
-	if (m_filters.isEmpty()) { // empty hash table means the json format is old/wrong
+//	if (m_filters.isEmpty()) { // empty hash table means the json format is old/wrong
+     if (m_guiVisibleItems.isEmpty()) {
 		//throw AwException(QString("json format is too old or incompatible."), origin);
 		// read old format and convert it.
 		QVector<float> values(3);
@@ -214,14 +232,17 @@ void AwFilterSettings::load(const QString& path)
 					if (k == "EEG") {
 						set(AwChannel::EEG, values);
 						set(AwChannel::SEEG, values);
+						m_guiVisibleItems << AwChannel::EEG << AwChannel::SEEG;
 					}
 					else if (k == "MEG") {
 						set(AwChannel::MEG, values);
 						set(AwChannel::GRAD, values);
+						m_guiVisibleItems << AwChannel::MEG << AwChannel::GRAD;
 					}
 					else if (k == "EMG") {
 						set(AwChannel::EMG, values);
 						set(AwChannel::ECG, values);
+						m_guiVisibleItems << AwChannel::EMG << AwChannel::ECG;
 					}
 				}
 			}
@@ -232,12 +253,12 @@ void AwFilterSettings::load(const QString& path)
 	emit settingsChanged(*this);
 }
 
-void AwFilterSettings::registerChannelType(int type, const QString& name)
-{
-	if (m_registeredChannelTypes.contains(type))
-		m_registeredChannelTypes.remove(type);
-	m_registeredChannelTypes.insert(type, name);
-}
+//void AwFilterSettings::registerChannelType(int type, const QString& name)
+//{
+//	if (m_registeredChannelTypes.contains(type))
+//		m_registeredChannelTypes.remove(type);
+//	m_registeredChannelTypes.insert(type, name);
+//}
 
 QWidget *AwFilterSettings::ui()
 {
@@ -259,12 +280,23 @@ void AwFilterSettings::updateGUI()
 		m_ui->updateSettings(*this);
 }
 
+void AwFilterSettings::setGuiVisibleItems(const AwChannelList& channels)
+{
+	m_guiVisibleItems.clear();
+	for (auto chan : channels) {
+		if (!m_guiVisibleItems.contains(chan->type()))
+			m_guiVisibleItems << chan->type();
+	}
+	updateGUI();
+}
+
 
 void AwFilterSettings::setNewSettings(const AwFilterSettings& settings)
 {
 	m_hash = settings.m_hash;
 	m_limits = settings.m_limits;
 	m_filters = settings.m_filters;
-	m_registeredChannelTypes = settings.m_registeredChannelTypes;
+	m_guiVisibleItems = settings.m_guiVisibleItems;
+//	m_registeredChannelTypes = settings.m_registeredChannelTypes;
 	emit settingsChanged(*this);
 }

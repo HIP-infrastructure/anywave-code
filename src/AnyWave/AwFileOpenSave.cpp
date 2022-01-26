@@ -22,7 +22,6 @@
 #include <QFileDialog>
 #include "AwOpenFileDialog.h"
 #include "IO/BIDS/AwBIDSManager.h"
-//#include "Display/AwDisplaySetupManager.h"
 #include "Montage/AwMontageManager.h"
 #include <utils/time.h>
 #include "Marker/AwMarkerManager.h"
@@ -203,6 +202,8 @@ void AnyWave::openFile(const QString &path)
 	}
 
 //	closeFile();
+	if (m_display)
+		m_display->closeFile();
 	auto dataManager = AwDataManager::instance();
 	
 	int res = dataManager->openFile(filePath);

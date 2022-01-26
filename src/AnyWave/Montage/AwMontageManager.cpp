@@ -190,8 +190,6 @@ void AwMontageManager::addNewSources(int type)
 
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
-	AwDataManager::instance()->filterSettings().registerChannelType(type, "Source");
-	AwDataManager::instance()->filterSettings().setLimits(type, { sm->hp(type), sm->lp(type) });
 }
 
 int AwMontageManager::loadICA()
@@ -276,7 +274,7 @@ int AwMontageManager::loadICA(const QString& path)
 	//	AwDataManager::instance()->filterSettings().registerChannelType(AwChannel::ICA, QString("ICA-%1").arg(AwChannel::typeToString(i)));
 	//	AwDataManager::instance()->filterSettings().setLimits(AwChannel::ICA, { comps[i]->hpFilter(), comps[i]->lpFilter() });
 	//}
-
+	setNewFilters(AwDataManager::instance()->filterSettings());
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("ICA Components"), QString(tr("%1 components added to the current montage.").arg(icaChannels.size())));
 	return 0;
@@ -416,9 +414,6 @@ void AwMontageManager::clear()
 	clearICA();
 	clearSource(AwChannel::MEG);
 	clearSource(AwChannel::EEG);
-
-	//while (!m_channels.isEmpty()) // delete current montage.
-	//	delete m_channels.takeLast();
 	m_channels.clear();
 	m_channelsShrdPtrs.clear();
 }
@@ -436,9 +431,7 @@ void AwMontageManager::closeFile()
 	clear();
 	m_montagePath = "";
 	m_badPath = "";
-//	m_asRecorded.clear();
 	m_asRecordedSharedPointerMap.clear();
-	//m_asRecordedChannels.clear();
 }
 
 void AwMontageManager::newMontage(AwFileIO *reader)
@@ -537,21 +530,11 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		}
 
 	}
-	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
-	if (AwDataManager::instance()->filterSettings().isEmpty()) {
-		AwDataManager::instance()->filterSettings().initWithChannels(m_channels);
-	}
-	setNewFilters(AwDataManager::instance()->filterSettings());
-
-	//// check that none NULL channels are present in asRecorder nor m_channels
-	//for (auto k : m_asRecorded.keys()) {
-	//	if (m_asRecorded.value(k) == Q_NULLPTR)
-	//		m_asRecorded.remove(k);
+	//// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
+	//if (AwDataManager::instance()->filterSettings().isEmpty()) {
+	//	AwDataManager::instance()->filterSettings().initWithChannels(m_channels);
 	//}
-	//foreach(AwChannel *c, m_channels)
-	//	if (c == Q_NULLPTR)
-	//		m_channels.removeAll(c);
-
+	setNewFilters(AwDataManager::instance()->filterSettings());
 	emit montageChanged(m_channels);
 }
 
@@ -682,9 +665,6 @@ void AwMontageManager::showInterface()
 	AwMontageDial ui;
 
 	if (ui.exec() == QDialog::Accepted) {
-		// destroy current montage
-//		while (!m_channels.isEmpty())
-//			delete m_channels.takeFirst();
 		m_channels.clear();
 
 		// Get as recorded channels and check if their types and bad status have changed.
@@ -713,6 +693,7 @@ void AwMontageManager::showInterface()
 				newChannel->setColor(ui.channels().at(i)->color());
 				newChannel->setLowFilter(ui.channels().at(i)->lowFilter());
 				newChannel->setHighFilter(ui.channels().at(i)->highFilter());
+				newChannel->setNotch(ui.channels().at(i)->notch());
 				m_channelsShrdPtrs << newChannel;
 
 			}
@@ -917,7 +898,10 @@ bool AwMontageManager::apply(const QString& path)
 	// deleting current channels.
 //	while (!m_channels.isEmpty())
 //		delete m_channels.takeLast();
-	m_channels = load(path);
+//	m_channels = load(path);
+
+	m_channelsShrdPtrs = AwChannel::toSharedPointerList(load(path));
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 	return true;
 }
 
