@@ -279,30 +279,24 @@ void EEGInto4D::run()
 		if (m_eegReader->readDataFromChannels(0, m_eegReader->infos.totalDuration(), m_eegChannels) == 0) 
 			throw AwException("Error reading data from EEG file.");
 		sendMessage("Done.");
-		
-		
 		m_megReader->cleanUpAndClose();
-		if (!relabelAndInject(tmpOutputFile, m_eegChannels))
-			throw AwException("error while injecting eeg data");
+
+		if (!relabel(tmpOutputFile, m_eegChannels)) {
+			sendMessage("error relabeling channels in meg files.");
+			return;
+		}
+		if (!inject(tmpOutputFile, m_eegChannels)) {
+			sendMessage("error: error during injection.");
+			return;
+		}
 		moveResultingFiles(tmpDir.path(), outputDir);
+		
 	}
 	catch (const AwException& e) {
 		sendMessage(e.errorString());
 		return;
 	}
 
-}
-
-bool EEGInto4D::convertToFloatData(const QString& megPath)
-{
-	QFile file(megPath);
-	QDataStream stream(&file);
-	stream.setVersion(QDataStream::Qt_4_4);
-	if (!file.open(QIODevice::ReadWrite)) 
-		return false;
-	
-
-	return true;
 }
 
 float EEGInto4D::swapFloat(float val)
@@ -325,16 +319,48 @@ void EEGInto4D::moveResultingFiles(const QString& srcDir, const QString& destDir
 	QDir dir(srcDir);
 	// now copy all the files from tmp dir to real output_dir
 	auto list = dir.entryInfoList(QDir::Files);
+	bool status = true;
 	for (auto file : list) {
 		auto src = file.absoluteFilePath();
-		auto dest = QString("%1/%2").arg(destDir).arg(file.fileName());
-		if (QFile::exists(dest)) 
-			QFile::remove(dest);
-		bool status = QFile::copy(src, dest);
-		if (!status) {
-			sendMessage("warning: Could not overide existing file.\nMaking a new file.");
-			dest = QString("%1/%2_new").arg(destDir).arg(file.fileName());
-			QFile::copy(src, dest);
+		auto fileName = file.fileName();
+		if (fileName.endsWith("_new")) {
+			fileName = fileName.remove("_new");
+			QString destFile = QString("%1/%2").arg(destDir).arg(fileName);
+			// QFile::copy cant overwrite so delete the destination file if it exists
+			if (QFile::exists(destFile)) {
+				if (!QFile::remove(destFile)) {
+					sendMessage(QString("warning: could not replace %1 file by the injected version.").arg(destFile));
+				}
+			}
+			status = QFile::copy(file.absoluteFilePath(), destFile);
+			if (!status) {
+				sendMessage("warning: could not overwrite original meg file. please check file access to it.");
+				sendMessage("warning: copied the file as _new");
+				destFile = QString("%1/%2_new").arg(destDir).arg(fileName);
+				if (!QFile::copy(file.absoluteFilePath(), destFile)) {
+					sendMessage("error: could not copy meg file even as _new.");
+					return;
+				}
+			}
+		}
+		if (fileName == "config") {
+			sendMessage("Copying config file to output dir.");
+			QString destFile = QString("%1/%2").arg(destDir).arg(fileName);
+			if (QFile::exists(destFile)) {
+				if (!QFile::remove(destFile)) {
+					sendMessage(QString("warning: could not overwrite existing %1 file.").arg(destFile));
+				}
+				
+			}
+			status = QFile::copy(file.absoluteFilePath(), destFile);
+			if (!status) {
+				sendMessage("warning: could not overwrite original config file. please check file access to it.");
+				sendMessage("warning: copied the file as _new");
+				destFile = QString("%1/config_new").arg(destDir);
+				if (!QFile::copy(file.absoluteFilePath(), destFile)) {
+					sendMessage("error: could not copy even as _new.");
+				}
+			}
 		}
 	}
 }

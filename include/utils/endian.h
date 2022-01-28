@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <AwGlobal.h>
-
+#include <array>
 
 namespace AwUtilities // put utility functions inside a namespace
 {
@@ -23,5 +23,22 @@ namespace AwUtilities // put utility functions inside a namespace
 		quint32 AW_UTILITIES_EXPORT fromBigEndian(const uchar *src);
 		quint16 AW_UTILITIES_EXPORT fromBigEndian16(const uchar *src);
 		quint64 AW_UTILITIES_EXPORT fromBigEndian64(const uchar *src);
+
+
+		template<typename T>
+		void swapEndian(T& val) {
+			union U {
+				T val;
+				std::array<std::uint8_t, sizeof(T)> raw;
+			} src, dst;
+			src.val = val;
+			std::reverse_copy(src.raw.begin(), src.raw.end(), dst.raw.begin());
+			val = dst.val;
+		}
+		template<>
+		void swapEndian<std::uint32_t>(std::uint32_t& value) {
+			std::uint32_t tmp = ((value << 8) & 0xFF00F00) | ((value >> 8) & 0xFF00FF);
+			value = (tmp << 16) | (tmp >> 16);
+		}
 	}
 }

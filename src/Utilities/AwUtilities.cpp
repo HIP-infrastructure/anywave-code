@@ -330,7 +330,7 @@ QString AwUtilities::base64Decode(const QString& str)
 	return data;
 }
 
-
+// convert 32bit value to big endian
 quint32 AwUtilities::endianness::fromBigEndian(const uchar *src)
 {
 	return 0

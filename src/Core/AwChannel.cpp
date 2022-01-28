@@ -459,26 +459,22 @@ QString AwChannel::unitString(int unit)
 {
 	switch (unit) {
 	case AwChannel::microV:
-		return QString::fromLatin1("µV");
+		return QString("µV");
 	case AwChannel::milliV:
-		return QString::fromLatin1("mV");
+		return QString("mV");
 	case AwChannel::picoT:
-		return QString::fromLatin1("pT");
+		return QString("pT");
 	case AwChannel::picoTpermeter:
-		return QString::fromLatin1("pT/m");
+		return QString("pT/m");
 	case AwChannel::V:
-		return QString::fromLatin1("V");
+		return QString("V");
 	case AwChannel::T:
-		return QString::fromLatin1("T");
+		return QString("T");
 	default:
-		return QString::fromLatin1("n/d");
+		return QString("n/d");
 	}
 }
 
-//float AwChannel::defaultAmplitudeForType(int type)
-//{
-//	return DefaultAmplitudeValues.value(type);
-//}
 ///
 ///
 ///
