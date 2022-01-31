@@ -21,7 +21,8 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 	m_ui.tableWidget->horizontalHeader()->setStretchLastSection(true);
 	m_ui.tableWidget->verticalHeader()->hide();
 	int row = 0;
-	for (auto c : m_updateManager->components()) {
+	
+	for (auto const& c : m_updateManager->components()) {
 		int col = 0;
 		if (c->updateAvailable == false)
 			continue;

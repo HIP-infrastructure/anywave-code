@@ -33,7 +33,8 @@ public:
 	void checkForUpdates(int flags = AwUpdateManager::AllUpdates, bool quiet = true);
 	bool updatesAvailable() { return m_updatesAvailable; }
 	static int compareVersion(const QString& v1, const QString& v2);
-	inline QList<Component*>& components() { return m_components; }
+//	inline QList<Component*>& components() { return m_components; }
+	QList<QSharedPointer<Component>>& components() {return m_components;	}
 signals:
 	void downloaded();
 	void newPluginLoaded(QObject*);
@@ -56,7 +57,9 @@ private:
 	QNetworkAccessManager m_networkManager;
 	QNetworkReply* m_reply;
 	QByteArray m_data;
-	QList<Component*> m_components, m_selectedComponents;
+//	QList<Component*> m_components, m_selectedComponents;
+
+	QList<QSharedPointer<Component>> m_components, m_selectedComponents;
 	std::unique_ptr<AwDownloadGui> m_downloadGui;
 	QString m_error;
 	QFile m_file;

@@ -12,7 +12,8 @@
 #include "Process/AwProcessManager.h"
 #include <cmath>
 #include <AwException.h>
-
+#include <QJsonDocument>
+#include <QJsonObject>
 
 Component::Component()
 {
@@ -53,8 +54,8 @@ AwUpdateManager::~AwUpdateManager()
 
 void AwUpdateManager::clearComponents()
 {
-	while (!m_components.isEmpty())
-		delete m_components.takeLast();
+	//while (!m_components.isEmpty())
+	//	delete m_components.takeLast();
 }
 
 void AwUpdateManager::checkForUpdates(int flags, bool quiet)
@@ -95,7 +96,7 @@ bool AwUpdateManager::checkConnectionToUrl(const QUrl& url)
 {
 	QTcpSocket socket;
 	auto host = url.host();
-	socket.connectToHost(host, 80);
+	socket.connectToHost(host, url.port());
 	if (socket.waitForConnected()) 
 		return true;
 	return false;
@@ -133,7 +134,18 @@ void AwUpdateManager::loadJSON()
 //	disconnect(this, &AwUpdateManager::downloaded, nullptr, nullptr);
 	QString jsonString(m_data), error;
 	QVariantMap map = AwUtilities::json::mapFromJsonString(jsonString, error);
-	if (error.isEmpty()) {
+
+//	QJsonDocument document = QJsonDocument::fromJson(m_data);
+//	QVariantMap map = document.object().toVariantMap();
+	if (map.isEmpty()) {
+		if (!m_quiet)
+			AwMessageBox::information(nullptr, "AnyWave Updates", "Could not connect to the update server.");
+		return;
+	}
+
+	//QString jsonString(m_data), error;
+	//QVariantMap map = AwUtilities::json::mapFromJsonString(jsonString, error);
+//	if (error.isEmpty()) {
 		QVariantMap platform;
 #ifdef Q_OS_WIN
 		if (map.contains("windows"))
@@ -149,18 +161,27 @@ void AwUpdateManager::loadJSON()
 #endif
 		auto components = platform.value("components").toList();
 		QStringList names;
+		QMap<QString, int> types = { { "core", AwUpdateManager::Core}, { "plugin", AwUpdateManager::Plugin},
+			{ "matlab plugin", AwUpdateManager::MatlabPlugin},  { "python plugin", AwUpdateManager::PythonPlugin} };
 		for (auto const& c : components) {
 			auto map = c.toMap();
-			Component* comp = new Component;
-			comp->name = map.value("name").toString();
-			comp->version = map.value("version").toString();
-			comp->type = map.value("type").toString() == "core" ? AwUpdateManager::Core : AwUpdateManager::Plugin;
-			comp->url = QUrl(map.value("url").toString());
-			if (map.contains("requirement")) 
-				comp->requirement = map.value("requirement").toString();
-			comp->fileName = map.value("filename").toString();
+			if (map.contains("name") && map.contains("type") && map.contains("version") && map.contains("filename")) {
+				QString type = map.value("type").toString().toLower();
+				if (!types.contains(type))
+					continue;
 
-			m_components << comp;
+				QSharedPointer<Component> comp = QSharedPointer<Component>(new Component);
+				comp->name = map.value("name").toString();
+				comp->version = map.value("version").toString();
+				comp->type = types.value(type);
+
+				comp->url = QUrl(map.value("url").toString());
+				if (map.contains("requirement"))
+					comp->requirement = map.value("requirement").toString();
+				comp->fileName = map.value("filename").toString();
+
+				m_components << comp;
+			}
 		}
 		if (checkForComponentsUpdates()) {
 
@@ -182,11 +203,11 @@ void AwUpdateManager::loadJSON()
 			if (!m_quiet)
 				AwMessageBox::information(nullptr, "AnyWave Updates", "Everything is up to date.");
 		}
-	}
-	else { // error occured
-		AwMessageBox::critical(nullptr, "Error", error);
-		return;
-	}
+//	}
+//	else { // error occured
+//		AwMessageBox::critical(nullptr, "Error", error);
+//		return;
+//	}
 }
 
 bool AwUpdateManager::checkForComponentsUpdates()

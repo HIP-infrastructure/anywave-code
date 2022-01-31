@@ -248,10 +248,7 @@ void EEGInto4D::run()
 		QFileInfo fi(m_megFile);
 		auto srcFileName = fi.fileName();
 		QString destFileName = srcFileName;
-		auto outputFile = args.value("output_file").toString();
 		QString tmpOutputFile;
-		if (!outputFile.isEmpty())
-			destFileName = outputFile;
 		tmpOutputFile = QString("%1/%2").arg(tmpDir.path()).arg(destFileName);
 
 		auto newConfigPath = QString("%1/config").arg(tmpDir.path());

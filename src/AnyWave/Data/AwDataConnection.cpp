@@ -477,7 +477,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			if (!m_ICAChannels[i].isEmpty()) {
 				AwChannelList list;
 				for (auto icaChan : m_ICAChannels[i]) {
-					icaChan->setFilters(fSettings.filters(AwChannel::ICA));
+				//	icaChan->setFilters(fSettings.filters(AwChannel::ICA));  // DO NOT apply GUI Filter settings here!!!!
 					list << icaChan;
 				}
 				AwFiltering::filter(list);
