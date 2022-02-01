@@ -40,6 +40,10 @@ void AwScriptPlugin::init(const QMap<QString, QString>& map)
 	name = map.value("name");
 	description = map.value("description");
 	category = map.value("category");
+	version = map.value("version");
+	if (version.isEmpty())
+		version = "1.0.0"; 	// force a version string
+
 	m_inputFlags = 0;
 	if (map.contains("input_flags")) {
 		const auto &inputFlagsMap = AwPluginManager::getInstance()->inputFlagsMap();

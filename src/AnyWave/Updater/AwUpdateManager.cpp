@@ -12,8 +12,10 @@
 #include "Process/AwProcessManager.h"
 #include <cmath>
 #include <AwException.h>
-#include <QJsonDocument>
-#include <QJsonObject>
+//#include <QJsonDocument>
+//#include <QJsonObject>
+
+#include <QTemporaryDir>
 
 Component::Component()
 {
@@ -161,8 +163,9 @@ void AwUpdateManager::loadJSON()
 #endif
 		auto components = platform.value("components").toList();
 		QStringList names;
-		QMap<QString, int> types = { { "core", AwUpdateManager::Core}, { "plugin", AwUpdateManager::Plugin},
-			{ "matlab plugin", AwUpdateManager::MatlabPlugin},  { "python plugin", AwUpdateManager::PythonPlugin} };
+		//QMap<QString, int> types = { { "core", AwUpdateManager::Core }, { "plugin", AwUpdateManager::Plugin},
+		//	{ "matlab plugin", AwUpdateManager::MatlabPlugin},  { "python plugin", AwUpdateManager::PythonPlugin} };
+		QStringList types = { "core", "plugin", "matlab plugin", "python plugin" };
 		for (auto const& c : components) {
 			auto map = c.toMap();
 			if (map.contains("name") && map.contains("type") && map.contains("version") && map.contains("filename")) {
@@ -173,7 +176,7 @@ void AwUpdateManager::loadJSON()
 				QSharedPointer<Component> comp = QSharedPointer<Component>(new Component);
 				comp->name = map.value("name").toString();
 				comp->version = map.value("version").toString();
-				comp->type = types.value(type);
+				comp->type = type;
 
 				comp->url = QUrl(map.value("url").toString());
 				if (map.contains("requirement"))
@@ -224,7 +227,8 @@ bool AwUpdateManager::checkForComponentsUpdates()
 		}
 		else {
 			// get the plugin matching the name
-			auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(c->name);
+		//	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(c->name);
+			auto plugin = AwPluginManager::getInstance()->getPlugin(c->name);
 			if (plugin) {
 				// check requirement for plugin
 				if (AwUpdateManager::compareVersion(c->requirement, anywaveVersion) <= 0) {  // anywave version is ok for the plugin
@@ -313,18 +317,126 @@ void AwUpdateManager::componentDownloaded(QNetworkReply *reply)
 		exit(0);
 	#endif
 	}
+
 	auto aws = AwSettings::getInstance();
+
 	// plugin
-	auto pm = AwPluginManager::getInstance();
-	QString pluginPath = QString("%1/%2").arg(aws->value(aws::app_plugins_dir).toString()).arg(c->fileName);
-	bool exists = pm->unloadPlugin(pluginPath, c->name) == 0;
-	QFile::remove(pluginPath);
-	QFile::copy(m_file.fileName(), pluginPath);
-	auto plugin = pm->loadPlugin(pluginPath);
-	if (!exists)
-		emit newPluginLoaded(plugin);
+	try {
+		updatePlugin(c);
+	}
+	catch (const AwException& e) 
+	{
+		AwMessageBox::critical(nullptr, "Plugin update", e.errorString());
+		return;
+	}
+
+	//auto pm = AwPluginManager::getInstance();
+	//QString pluginPath = QString("%1/%2").arg(aws->value(aws::app_plugins_dir).toString()).arg(c->fileName);
+	//bool exists = pm->unloadPlugin(pluginPath, c->name) == 0;
+	//QFile::remove(pluginPath);
+	//QFile::copy(m_file.fileName(), pluginPath);
+	//auto plugin = pm->loadPlugin(pluginPath);
+	//if (!exists)
+	//	emit newPluginLoaded(plugin);
 	m_currentIndex++;
 	installUpdates();
+}
+
+void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
+{
+	auto pm = AwPluginManager::getInstance();
+	auto aws = AwSettings::getInstance();
+	QString pluginPath;
+	QString unzipCommand, unzipArgs;
+	QString destPluginPath;
+#ifdef Q_OS_WIN
+	unzipCommand = "powershell";
+	unzipArgs = "-Command";
+#endif
+	QString filePath = m_file.fileName(); // full path to downloaded file (a zip file)
+	// create a temp dir to unzip file
+	QTemporaryDir tmpDir;
+	if (!tmpDir.isValid())
+		throw AwException("Could not create a temporary dir to unzip file.");
+
+	auto plugin = pm->getPlugin(c->name);
+	bool exists = plugin != nullptr;
+	
+	if (exists) {
+		pluginPath = plugin->pluginDir;
+		pm->unloadPlugin(plugin->pluginDir, c->name);
+	}
+	QProcess process;
+	//QStringList args = { unzipArgs, m_file.fileName(), tmpDir.path() };
+#ifdef Q_OS_WIN
+	QStringList args = { unzipArgs, QString("Expand-Archive -Path '%1' -DestinationPath '%2'").arg(m_file.fileName()).arg(tmpDir.path())};
+#endif
+	int status = process.execute(unzipCommand, args);
+	if (status != 0) 
+		throw AwException("error starting unzip command.");
+	QString destPath;
+	if (exists)
+		destPath = plugin->pluginDir;
+	if (c->type == "plugin") {
+		// expect one file .so .dylib .dll
+		if (!exists) 
+			destPath = aws->value(aws::app_plugins_dir).toString();
+		auto list = QDir(tmpDir.path()).entryInfoList(QDir::Files);
+		QString cppPluginExt;
+#ifdef Q_OS_WIN
+		cppPluginExt = ".dll";
+#endif
+#ifdef Q_OS_MAC
+		cppPluginExt = ".dylib";
+#endif
+#ifdef Q_OS_LINUX
+		cppPluginExt = ".so";
+#endif
+		for (auto const& file : list) {
+			QString destFile = QString("%1/2").arg(destPath).arg(file.fileName());
+			if (file.fileName().endsWith(cppPluginExt)) {
+				if (QFile::exists(destFile))
+					QFile::remove(destFile);
+				QFile::copy(file.absoluteFilePath(), destFile);
+				pm->loadPlugin(destFile);
+				break;
+			}
+		}
+		
+	}
+	else if (c->type == "matlab plugin") {
+		// expect a dir containing several files
+		if (!exists)
+			destPath = aws->value(aws::matlab_plugins_dir).toString();
+		auto list = QDir(tmpDir.path()).entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot);
+		const auto& dir = list.first();
+		QString destDir = QString("%1/%2").arg(destPath).arg(dir.fileName());
+		if (QDir().exists(destDir)) {
+			QDir tmp(destDir);
+			tmp.removeRecursively();
+		}
+#ifdef Q_OS_WIN
+		int status = process.execute("powershell", { "-Command", QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(dir.fileName()).arg(destPath)});
+#endif
+		if (status != 0) {
+			throw AwException("error while copying folder to plugin dir");
+		}
+	}
+
+	if (!exists)
+		emit newPluginLoaded(plugin);
+
+	//	QDir dir(plugin->pluginDir);
+	//	dir.removeRecursively();
+	//}
+	//else {
+	//	if (c->type == "plugin")
+	//		pluginPath = QString("%1/%1").arg(aws->value(aws::app_plugins_dir).toString().arg(pluginName));
+	//	else if (c->type == "matlab plugin") 
+	//		pluginPath = QString("%1/%1").arg(aws->value(aws::matlab_plugins_dir).toString().arg(c->fileName));
+	//}
+
+
 }
 
 void AwUpdateManager::updateDownloadProgress(qint64, qint64)

@@ -27,6 +27,7 @@ class AwScriptPlugin;
 class AwFileIOPlugin;
 class AwFilterPlugin;
 class AwFileIO;
+class AwPluginBase;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // plugins factories part
@@ -122,6 +123,8 @@ public:
 	AwFileIOPlugin *getWriterPluginByName(const QString& name) { return m_writerFactory.getPluginByName(name); }
 	AwProcessPlugin *getProcessPluginByName(const QString& name) { return m_processFactory.getPluginByName(name); }
 	AwFilterPlugin *getFilterPluginByName(const QString& name) { return m_filterFactory.getPluginByName(name); }
+
+	AwPluginBase* getPlugin(const QString& name);
 
 	// gather json args strings from all plugin that are command line compatible
 	QStringList getBatchableArguments();

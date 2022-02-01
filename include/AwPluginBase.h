@@ -52,6 +52,7 @@ public:
 	QString name, description, version, category;
 	int minorVersion, majorVersion;	// set up when building
 	inline QString& helpUrl() { return m_helpUrl; }
+	QString pluginDir;	// full path to the plugin
 protected:
 	QString m_helpUrl;  // optional : fill it with a url location to get help about the plugin.
 // Category can be:

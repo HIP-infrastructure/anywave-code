@@ -30,10 +30,7 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 		auto item = new QTableWidgetItem(c->name);
 		item->setTextAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
-		QString type = "core";
-		if (c->type == AwUpdateManager::Plugin)
-			type = "plugin";
-		item = new QTableWidgetItem(type);
+		item = new QTableWidgetItem(c->type);
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
 		item = new QTableWidgetItem(c->installedVersion);
