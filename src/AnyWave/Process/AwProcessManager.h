@@ -87,7 +87,6 @@ public:
 	inline QString& lastErrorString() { return m_errorString; }
 
 	int buildProcessPDI(AwBaseProcess* process, AwDataManager *dm = nullptr);
-
 public slots:
 	void addPlugin(QObject* plugin);
 	void startProcessFromMenu();

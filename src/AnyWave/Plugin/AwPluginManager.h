@@ -116,6 +116,7 @@ public:
 
 	int unloadPlugin(const QString& filePath, const QString& name);
 	QObject *loadPlugin(const QString& path);
+	QObject* loadMATPyPlugin(const QString& path);
 
 	// plugins related methods
 	AwDisplayPlugin *getDisplayPluginByName(const QString& name) { return m_displayFactory.getPluginByName(name); }

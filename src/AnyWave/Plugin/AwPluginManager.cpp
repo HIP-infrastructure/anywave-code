@@ -379,6 +379,87 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 /// SLOTS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+QObject* AwPluginManager::loadMATPyPlugin(const QString& path)
+{
+	QDir dir(path);
+	if (!dir.exists())
+		return nullptr;
+	QMap<QString, QString> descMap;
+	// QString desc, processType, category, compiledPath, flags, inputFlags;
+	int type = AwProcessPlugin::Background;	// default type if none defined
+	bool isMATLABCompiled = false, isPythonCompiled = false;
+	QString name = dir.dirName();
+	QString pluginPath = dir.absolutePath();
+	QString exePluginPath; // can handle the path to standalone executable plugins
+	QString pythonCode = QString("%1/__main__.py").arg(pluginPath);
+	QString matlabCodeM = QString("%1/main.m").arg(pluginPath);
+	QString matlabCodeApp = QString("%1/main.mlapp").arg(pluginPath);
+	bool isMATLABScript = QFile::exists(matlabCodeM) || QFile::exists(matlabCodeApp);
+	bool isPythonScript = QFile::exists(pythonCode);
+	QString descPath = QString("%1/desc.txt").arg(pluginPath);
+	QString jsonArgs = QString("%1/args.json").arg(pluginPath);
+	if (!QFile::exists(descPath))
+		return nullptr;
+	QFile file(descPath);
+	QTextStream stream(&file);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return nullptr;
+	QStringList splitedLine;
+	while (!stream.atEnd()) {
+		auto line = stream.readLine();
+		if (line.startsWith("#"))
+			continue;
+		splitedLine = line.split("=");
+		if (splitedLine.size() == 2)
+			descMap[splitedLine.first().trimmed()] = splitedLine.last().trimmed();
+	}
+	file.close();
+	if (descMap.isEmpty())
+		return nullptr;
+	if (!descMap.contains("name") && !descMap.contains("description"))
+		return nullptr;
+	// add extra parameters to descMap
+	descMap[keys::plugin_dir] = pluginPath;
+	descMap["script_path"] = pluginPath;
+
+	// check for version string.
+	// if no version specified set it to 1.0.0 by default
+	if (!descMap.contains("version"))
+		descMap["version"] = QString("1.0.0");
+
+	//
+	isMATLABCompiled = descMap.contains("compiled plugin");
+	isPythonCompiled = descMap.contains("compiled python plugin");
+	// now instantiante objects depending on plugin type
+	// check for MATLAB connection before
+	isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
+	if (isMATLABScript || isMATLABCompiled) {
+		AwMatlabScriptPlugin* plugin = new AwMatlabScriptPlugin;
+		plugin->type = type;
+		plugin->pluginDir = pluginPath;
+		if (isMATLABCompiled) // build full path to exe file
+			descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
+
+		plugin->init(descMap);
+		if (QFile::exists(jsonArgs))
+			setJsonSettings(plugin, keys::json_batch, jsonArgs);
+		loadProcessPlugin(plugin);
+		return plugin;
+	}
+	if (isPythonScript || isPythonCompiled) {
+		AwPythonScriptPlugin* plugin = new AwPythonScriptPlugin;
+
+		plugin->type = type;
+		plugin->pluginDir = pluginPath;
+		plugin->init(descMap);
+		if (QFile::exists(jsonArgs))
+			setJsonSettings(plugin, keys::json_batch, jsonArgs);
+		loadProcessPlugin(plugin);
+		return plugin;
+	}
+	return nullptr;
+}
+
 void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 {
 	 QDir dir(startingPath);

@@ -5,6 +5,7 @@
 #include <QFile>
 class AwDownloadGui;
 #include <memory>
+#include <qtemporarydir.h>
 
 class Component
 {
@@ -14,7 +15,7 @@ public:
 
 	QString name;
 	QString type;
-	QString version, installedVersion, requirements;
+	QString version, installedVersion, runtime;
 	QUrl url;
 	bool updateAvailable;
 	QString requirement;
@@ -45,6 +46,7 @@ private slots:
 	void componentDownloaded(QNetworkReply*);
 	void updateDownloadProgress(qint64, qint64);
 	void showInstalledComponents();
+	void sslErrors(const QList<QSslError>&);
 private:
 	void download(const QUrl& url);
 	void updatePlugin(QSharedPointer<Component> component);
@@ -57,6 +59,7 @@ private:
 	QNetworkAccessManager m_networkManager;
 	QNetworkReply* m_reply;
 	QByteArray m_data;
+	QTemporaryDir m_tmpDir;
 
 	QList<QSharedPointer<Component>> m_components, m_selectedComponents;
 	std::unique_ptr<AwDownloadGui> m_downloadGui;

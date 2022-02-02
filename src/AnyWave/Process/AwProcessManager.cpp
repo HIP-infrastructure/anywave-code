@@ -73,10 +73,11 @@ void AwProcessManager::setMenu(QMenu *menu)
 		addProcess(plugin);
 }
 
-
 void AwProcessManager::addPlugin(QObject* plugin)
 {
-	addProcess(qobject_cast<AwProcessPlugin*>(plugin));
+	if (plugin == nullptr)
+		return;
+	addProcess(static_cast<AwProcessPlugin*>(plugin));
 }
 
 void AwProcessManager::quit()
@@ -299,6 +300,9 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
  */
 void AwProcessManager::addProcess(AwProcessPlugin *plugin)
 {
+	if (plugin == nullptr)
+		return;
+
 	switch (plugin->type)
 	{
 	case AwProcessPlugin::Display:

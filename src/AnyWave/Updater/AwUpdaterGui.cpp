@@ -14,7 +14,7 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 	m_ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows); 
 	m_ui.tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	m_ui.tableWidget->setColumnCount(5);
-	QStringList headers = { "Component", "Type", "Current", "Available", "Requirements"};
+	QStringList headers = { "Component", "Type", "Current", "Available", "Info."};
 	m_ui.tableWidget->setHorizontalHeaderLabels(headers);
 	m_ui.tableWidget->verticalHeader()->setVisible(false);
 	m_ui.tableWidget->setStyleSheet("QTableView {selection-background-color: green;}");
@@ -39,8 +39,13 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 		item = new QTableWidgetItem(c->version);
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
-		if (!c->requirement.isEmpty()) 
-			item = new QTableWidgetItem(c->requirement);
+		
+		if (!c->runtime.isEmpty()) {
+			if (c->type == "matlab plugin")
+				item = new QTableWidgetItem(QString("MATLAB %1 required").arg(c->runtime));
+			else if (c->type == "python plugin") 
+				item = new QTableWidgetItem(QString("python packages: %1 required").arg(c->runtime));
+		}
 		else 
 			item = new QTableWidgetItem("None");
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
