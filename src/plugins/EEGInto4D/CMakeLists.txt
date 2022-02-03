@@ -6,7 +6,7 @@ add_definitions(-DQT_SHARED)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
 SET(SRCS
-eeginto4d.cpp settings.cpp) 
+eeginto4d.cpp settings.cpp inject.cpp relabel.cpp)  
 
 SET(MOCS
 eeginto4d.h settings.h)
