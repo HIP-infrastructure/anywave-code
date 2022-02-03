@@ -5,6 +5,10 @@ FILE(GLOB SOBI sobi/*.cpp)
 FILE(GLOB INFOMAX infomax/*.cpp)
 FILE(GLOB MATLAB matlab_common/*.cpp)
 
+IF(USE_MKL)
+INCLUDE_DIRECTORIES(${MKL_ROOT}/include)
+ENDIF()
+
 SET(SRCS
    ICASettings.cpp
    ica.cpp

@@ -3,10 +3,15 @@ project(TFWavelet)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
+
+IF(USE_MKL)
+INCLUDE_DIRECTORIES(${MKL_ROOT}/include)
+ENDIF()
+
 INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
 LINK_DIRECTORIES(${QWT_LIBRARY})
 INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
-INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
+
 #MESSAGE("MKL INC: ${MKL_INCLUDE_DIRS}")
 SET(SRCS display_settings.cpp settingsui.cpp TFPicker.cpp 
   TFPlot.cpp tf_settings.cpp TFWavelet2.cpp TFWidget.cpp

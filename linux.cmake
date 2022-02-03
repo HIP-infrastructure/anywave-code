@@ -38,11 +38,13 @@ IF(USE_MKL) # Must be set if the system has oneapi mkl installed
    SET(MKL_THREADING intel_thread)
    SET(MKL_INTERFACE lp64)
    find_package(MKL REQUIRED)
-   INCLUDE_DIRECTORIES(${MKL_INCLUDE})
+   
    MESSAGE(STATUS "MKL Include: ${MKL_INCLUDE}")
    MESSAGE(STATUS "MKL core: ${MKL_CORE}")
    MESSAGE(STATUS "MKL link: ${MKL_THREAD_LIB} ${MKL_SUPP_LINK}")
    MESSAGE(STATUS "MKL link: ${MKL_LIBRARIES}")
+
+   #SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 ${MKL_THREAD_LIB} mkl_intel_lp64 mkl_core mkl_intel_thread ")
    #MESSAGE(STATUS "${MKL_IMPORTED_TARGETS}") #Provides available list of targets based on input)
  #  IF(NOT DEFINED ENV{MKLROOT})
  #      MESSAGE(STATUS "MKLROOT variable not defined. please run vars.sh script to init mkl vars")
@@ -51,7 +53,8 @@ IF(USE_MKL) # Must be set if the system has oneapi mkl installed
  #   SET(MKLROOT $ENV{MKLROOT})
  #  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
    SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
- #  SET(BLAS_LIBRARIES "-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl")
+   #SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lm -ldl")
+   SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lgomp -lm -ldl")
 #   SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
 #   SET(BLAS_LIBRARIES "${MKL_LINK_LINE} ${MKL_THREAD_LIB} ${MKL_SUPP_LINK}")
 #    MESSAGE(STATUS "MKL libraires: ${BLAS_LIBRARIES}")
@@ -60,9 +63,9 @@ IF(USE_MKL) # Must be set if the system has oneapi mkl installed
  #   INCLUDE_DIRECTORIES(${MKLROOT}/include)
 
     # Manual linking
-    SET(BLAS_LIBRARIES "-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl  ${MKL_THREAD_LIB}")
+    #SET(BLAS_LIBRARIES "-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lm -ldl  ${MKL_THREAD_LIB}")
 
-    #MESSAGE(STATUS "BLAS: ${BLAS_LIBRARIES}")
+   # MESSAGE(STATUS "BLAS: ${BLAS_LIBRARIES}")
 ELSE(USE_MKL)
     find_package(OpenBLAS REQUIRED)
     SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
