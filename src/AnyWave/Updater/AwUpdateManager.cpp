@@ -331,7 +331,6 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 	auto pm = AwPluginManager::getInstance();
 	auto processManager = AwProcessManager::instance();
 	auto aws = AwSettings::getInstance();
-	QString pluginPath;
 	QString command, unzipArgs;
 	QString destPluginPath;
 #ifdef Q_OS_WIN
@@ -347,10 +346,11 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 
 	auto plugin = pm->getPlugin(c->name);
 	bool exists = plugin != nullptr;
+	QString destPath;
 	
 	if (exists) {
-		pluginPath = plugin->pluginDir;
-		pm->unloadPlugin(plugin->pluginDir, c->name);
+		destPath = plugin->pluginDir;
+		pm->unloadPlugin(c->name);
 	}
 	QProcess process;
 	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -360,18 +360,8 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 	int status = process.execute(command, args);
 	if (status != 0) 
 		throw AwException("error starting unzip command.");
-	//auto systemPath = aws->value(aws::system_path).toString();
-	//env.remove("PATH");
-	//env.insert("PATH", systemPath);
-	//process.setProcessEnvironment(env);
-	//process.start(command, args);
-	//if (!process.waitForFinished(-1)) 
-	//	throw AwException(process.errorString());
-	
 
-	QString destPath;
-	if (exists)
-		destPath = plugin->pluginDir;
+
 	if (c->type == "plugin") {
 		// expect one file .so .dylib .dll
 		if (!exists) 
@@ -387,16 +377,21 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 #ifdef Q_OS_LINUX
 		cppPluginExt = ".so";
 #endif
-		for (auto const& file : list) {
-			QString destFile = QString("%1/2").arg(destPath).arg(file.fileName());
-			if (file.fileName().endsWith(cppPluginExt)) {
-				if (QFile::exists(destFile))
-					QFile::remove(destFile);
-				QFile::copy(file.absoluteFilePath(), destFile);
-				pm->loadPlugin(destFile);
-				break;
-			}
+		// assuming there is only one file (c++ plugin  is a shared lib)
+		auto const& file = list.first();
+		QString destFile = QString("%1/%2").arg(destPath).arg(file.fileName());
+#ifdef Q_OS_WIN
+		status = process.execute(command, { "-Command", 
+			QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(file.absoluteFilePath()).arg(destFile) });
+#endif
+		if (status != 0) {
+			throw AwException(QString("error while copying %1 to %2").arg(file.absoluteFilePath()).arg(destPath));
 		}
+		auto loadedPlugin = pm->loadPlugin(destFile);
+		if (loadedPlugin == nullptr)
+			throw AwException(QString("error: could not load the plugin from %1.").arg(destFile));
+		if (!exists)
+			processManager->addPlugin(loadedPlugin);
 		
 	}
 	else if (c->type == "matlab plugin" || c->type == "python plugin") {
@@ -413,7 +408,7 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 			tmp.removeRecursively();
 		}
 #ifdef Q_OS_WIN
-		int status = process.execute(command, { "-Command", QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(dir.absoluteFilePath()).arg(destPath)});
+		status = process.execute(command, { "-Command", QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(dir.absoluteFilePath()).arg(destPath)});
 #endif
 		if (status != 0) {
 			throw AwException("error while copying folder to plugin dir");

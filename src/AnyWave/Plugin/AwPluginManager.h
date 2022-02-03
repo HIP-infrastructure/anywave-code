@@ -114,7 +114,7 @@ public:
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
 
-	int unloadPlugin(const QString& filePath, const QString& name);
+	int unloadPlugin(const QString& name);
 	QObject *loadPlugin(const QString& path);
 	QObject* loadMATPyPlugin(const QString& path);
 

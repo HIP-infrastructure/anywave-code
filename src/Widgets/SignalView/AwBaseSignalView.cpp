@@ -222,8 +222,9 @@ void AwBaseSignalView::setChannels(const AwChannelList& channels)
 	if (channels.isEmpty())
 		return;
 
+	// DO NOT CLONE channels in BaseSignalView class
 	for (auto c : channels) {
-		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c->duplicate());
+		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c);
 		m_channelSharedPtrs << shared;
 	}
 	m_montageChannels = AwChannel::toChannelList(m_channelSharedPtrs);
@@ -231,15 +232,6 @@ void AwBaseSignalView::setChannels(const AwChannelList& channels)
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
 	reloadData();
-
-	//m_montageChannels = channels;
-	//applyGainLevels();
-
-	//// clear channels present in scene.
-	//m_scene->clearChannels();
-	//applyChannelFilters();
-	//m_scene->setChannels(m_channels);
-	//reloadData();
 }
 
 void AwBaseSignalView::applyGainLevels()

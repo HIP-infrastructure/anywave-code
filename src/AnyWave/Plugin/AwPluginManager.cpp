@@ -190,11 +190,11 @@ QObject *AwPluginManager::loadPlugin(const QString& path)
 		if (fio) { // FileIO specific (plugin can be reader and writer at the same time
 			fio->pluginDir = pluginDir;
 			if (fio->canRead()) {
-				fio = qobject_cast<AwFileIOPlugin*>(plugin);
+				//fio = qobject_cast<AwFileIOPlugin*>(plugin);
 				loadFileIOReaderPlugin(fio);
 			}
 			if (fio->canWrite()) {
-				fio = qobject_cast<AwFileIOPlugin*>(plugin);
+				//fio = qobject_cast<AwFileIOPlugin*>(plugin);
 				loadFileIOWriterPlugin(fio);
 			}
 			m_pluginNames.insert(fio->name, plugin);
@@ -236,7 +236,7 @@ AwPluginBase* AwPluginManager::getPlugin(const QString& name)
 	return nullptr;
 }
 
-int AwPluginManager::unloadPlugin(const QString& filePath, const QString& name)
+int AwPluginManager::unloadPlugin(const QString& name)
 {
 	QObject* plugin = nullptr;
 	// it could be a matlab or python plugin
@@ -249,6 +249,11 @@ int AwPluginManager::unloadPlugin(const QString& filePath, const QString& name)
 		m_processes.removeAll(static_cast<AwProcessPlugin*>(plugin));
 		m_displays.removeAll(static_cast<AwDisplayPlugin*>(plugin));
 		m_filters.removeAll(static_cast<AwFilterPlugin*>(plugin));
+		m_readerFactory.removePlugin(name);
+		m_displayFactory.removePlugin(name);
+		m_writerFactory.removePlugin(name);
+		m_processFactory.removePlugin(name);
+		m_filterFactory.removePlugin(name);
 	}
 
 	//for (AwFileIOPlugin* p : m_readers) {

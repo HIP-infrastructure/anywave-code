@@ -33,7 +33,6 @@ public:
 
 	enum Flags { NoProcessUpdate = 1, UpdateProcess = 2 };
 	inline int processFlags() { return m_processFlags; }
-//	void applyNewSetup(AwViewSetup *setup);	// apply a new setup
 	void setCursorPosition(float pos);
 	void enableView();
 	void closeFile();
