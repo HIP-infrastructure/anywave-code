@@ -41,11 +41,11 @@ MFVGUI::MFVGUI(AwGUIProcess *process, QWidget *parent)
 
 MFVGUI::~MFVGUI()
 {
-	AW_DESTROY_LIST(m_currentChannels);
+
 }
 
 
-void MFVGUI::setChannels(const AwChannelList& channels)
+void MFVGUI::setChannels(const AwSharedPointerChannelList& channels)
 {
 	m_signalView->setChannels(channels);
 	m_channels = channels;
@@ -68,18 +68,18 @@ void MFVGUI::clear()
 
 void MFVGUI::apply()
 {
-	AW_DESTROY_LIST(m_currentChannels);
+	m_currentChannels.clear();
 	auto sets = static_cast<MFVTableModel *>(m_ui.tableView->model())->filterSets();
-	for (auto c : m_channels) {
+	for (auto const & c : m_channels) {
 		auto dup = c->duplicate();
-		m_currentChannels << dup;
+		m_currentChannels << QSharedPointer<AwChannel>(dup);
 		for (auto s : sets) {
 			dup = c->duplicate();
 			dup->setLowFilter(s->lp());
 			dup->setHighFilter(s->hp());
 			dup->setNotch(s->notch());
 			dup->setColor(s->color());
-			m_currentChannels << dup;
+			m_currentChannels << QSharedPointer<AwChannel>(dup);
 		}
 	}
 	m_signalView->setChannels(m_currentChannels);

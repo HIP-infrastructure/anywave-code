@@ -846,9 +846,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			registerProcessForDisplay(p);
 		// connect the process as well. 
 		else if (p->runMode() == AwProcessPlugin::Internal && !skipDataFile) {
-			AwChannelList *output = &p->pdi.output.channels();
-			if (!output->isEmpty())
-				emit channelsAddedForProcess(output);
+			AwChannelList *outputChannels = &p->pdi.output.channels();
+			if (!outputChannels->isEmpty())
+				emit channelsAddedForProcess(outputChannels);
 			m_activeInternals << p;
 			QAction *act = m_hashProcessAction.value(p->plugin()->name);
 			act->setChecked(true);
@@ -859,9 +859,11 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 		p->init();
 
-		if (!skipDataFile)
-			if (!p->pdi.output.channels().isEmpty())
-				emit channelsAddedForProcess(&p->pdi.output.channels());
+		if (!skipDataFile) {
+			AwChannelList * outputChannels = &p->pdi.output.channels();
+			if (!outputChannels->isEmpty())
+				emit channelsAddedForProcess(outputChannels);
+		}
 
 		m_dock->show();
 

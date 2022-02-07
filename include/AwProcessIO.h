@@ -42,9 +42,11 @@ public:
 	void clearWidgets();
 
 
-	inline AwChannelList& channels() { return m_channels; }
+	AwChannelList& channels() { m_regularChannelList = AwChannel::toChannelList(m_channels);  return m_regularChannelList; }
+	QList<QSharedPointer<AwChannel>>& sharedChannels() { return m_channels; }
 	inline AwMarkerList& markers() { return m_markers; }
 	inline AwMarkerList& modifiedMarkers() { return m_modifiedMarkers; }
+
 
 	inline QList<QWidget*>& widgets() { return m_widgets; }
 	/** Set a new list of channels. Previous channels will be deleted!!. duplicate indicates that the list will be duplicated and then set as the new list. **/
@@ -72,9 +74,11 @@ public:
 	void lock() { m_mutex.lock(); }
 	void unlock() { m_mutex.unlock(); }
 protected:
-	AwChannelList m_channels;
 	AwMarkerList m_markers;
 	AwMarkerList m_modifiedMarkers;	// this list contains markers filtered by --use_markers and --skip_markers options
+
+	QList<QSharedPointer<AwChannel>> m_channels;
+	AwChannelList m_regularChannelList;
 
 	QList<QWidget*> m_widgets;
 	AwFileIO *m_reader;

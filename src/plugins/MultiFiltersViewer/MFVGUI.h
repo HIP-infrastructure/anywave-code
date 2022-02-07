@@ -29,7 +29,7 @@ public:
 	~MFVGUI();
 
 	AwBaseSignalView *signalView() { return m_signalView; }
-	void setChannels(const AwChannelList& channels);
+	void setChannels(const AwSharedPointerChannelList& channels);
 public slots:
 	void add();
 	void clear();
@@ -37,5 +37,5 @@ public slots:
 private:
 	Ui::zH0GUI m_ui;
 	AwBaseSignalView *m_signalView;
-	AwChannelList m_channels, m_currentChannels;
+	AwSharedPointerChannelList m_channels, m_currentChannels;
 };

@@ -69,8 +69,8 @@ void AwTriggerParser::detect()
 	clearMarkers();
 
 	emit progressChanged(tr("Reading data..."));
-//	requestData(&m_triggers, (float)0, (float)-1);
-	requestData(&pdi.input.channels(), 0., -1);
+	AwChannelList inputChannels = pdi.input.channels();
+	requestData(&inputChannels, 0., -1);
 
 	if (endOfData()) {
 		sendMessage("No data could be loaded. Aborted.");

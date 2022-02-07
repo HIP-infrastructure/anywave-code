@@ -270,6 +270,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Deltamed_Reader", "..\plugi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Delphos", "..\plugins\Delphos\Delphos.vcxproj", "{0EB09768-4E92-4286-9F9F-3EE8B3E95592}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "thirdparty", "thirdparty", "{59E519EB-1F7C-4897-9137-D3BD438DAD70}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QCustomPlot", "thirdparty\qcustomplot\QCustomPlot.vcxproj", "{8111FBA7-B218-49DE-8BC4-8DDFCE889501}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -668,6 +672,12 @@ Global
 		{0EB09768-4E92-4286-9F9F-3EE8B3E95592}.Release|x64.ActiveCfg = Release|x64
 		{0EB09768-4E92-4286-9F9F-3EE8B3E95592}.Release|x64.Build.0 = Release|x64
 		{0EB09768-4E92-4286-9F9F-3EE8B3E95592}.Release|x86.ActiveCfg = Release|x64
+		{8111FBA7-B218-49DE-8BC4-8DDFCE889501}.Debug|x64.ActiveCfg = Debug|x64
+		{8111FBA7-B218-49DE-8BC4-8DDFCE889501}.Debug|x64.Build.0 = Debug|x64
+		{8111FBA7-B218-49DE-8BC4-8DDFCE889501}.Debug|x86.ActiveCfg = Debug|x64
+		{8111FBA7-B218-49DE-8BC4-8DDFCE889501}.Release|x64.ActiveCfg = Release|x64
+		{8111FBA7-B218-49DE-8BC4-8DDFCE889501}.Release|x64.Build.0 = Release|x64
+		{8111FBA7-B218-49DE-8BC4-8DDFCE889501}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -728,9 +738,10 @@ Global
 		{30134E4D-061E-41BE-BC92-6AF0E635D54F} = {25911352-E3F2-4A19-BC82-08AF92073F2E}
 		{4F1A39CD-5D1A-4589-B24F-9FAE4A20F15E} = {29F479E7-AB9C-4CB1-A69C-F93615B73422}
 		{0EB09768-4E92-4286-9F9F-3EE8B3E95592} = {29F479E7-AB9C-4CB1-A69C-F93615B73422}
+		{8111FBA7-B218-49DE-8BC4-8DDFCE889501} = {59E519EB-1F7C-4897-9137-D3BD438DAD70}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

@@ -241,7 +241,8 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		}
 
 		// apply filter on channels depending on hp lp notch keys that may have been specified in the command line options
-		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
+		auto inputChannels = process->pdi.input.channels();
+		AwCommandLineManager::applyFilters(inputChannels, args);
 
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
 		dm->dataServer()->openConnection(process);

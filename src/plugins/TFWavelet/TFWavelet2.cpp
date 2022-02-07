@@ -46,7 +46,8 @@ void TFWavelet2::run()
 	m_widget->signalView()->setTotalDuration(pdi.input.settings[keys::file_duration].toDouble());
 	m_widget->signalView()->setMarkers(pdi.input.markers());
 	// set the channels to be displayed => compute the TF on those channels.
-	m_widget->setChannels(pdi.input.channels());
+//	m_widget->setChannels(pdi.input.channels());
+	m_widget->setChannels(pdi.input.sharedChannels()); 
 	connect(m_widget->signalView()->scene(), SIGNAL(markerInserted(AwMarker *)), this, SLOT(addMarker(AwMarker *)));
 
 	m_widget->show();

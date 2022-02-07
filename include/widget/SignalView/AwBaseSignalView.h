@@ -59,6 +59,7 @@ public:
 	void updateMarkers() { m_scene->updateMarkers(); }
 	inline AwChannelList& displayedChannels() { return m_channels; }
 	virtual void setChannels(const AwChannelList& channels);
+	virtual void setChannels(const QList<QSharedPointer<AwChannel>>& channels);
 	void setTotalDuration(float duration); // total length of data in seconds
 	void makeChannelVisible(int type);
 	void removeVisibleChannel(int type);

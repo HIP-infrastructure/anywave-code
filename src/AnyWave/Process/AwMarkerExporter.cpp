@@ -47,6 +47,7 @@ void AwMarkerExporter::run()
 	fvec positions;	// position in second from begining of original file of each epochs
 	int status;
 	// create the file, either MATLAB or ADES
+	AwChannelList inputChannels = pdi.input.channels();
 	if (matlabFormat) {
 		if (m_matlabFile.create(outputFile) != 0) {
 			sendMessage(m_matlabFile.error());
@@ -56,7 +57,8 @@ void AwMarkerExporter::run()
 			sendMessage(m_matlabFile.error());
 			return;
 		}
-		QStringList labels = AwChannel::getLabels(pdi.input.channels());
+		
+		QStringList labels = AwChannel::getLabels(inputChannels);
 		if (m_matlabFile.writeStringCellArray("electrodes", labels) != 0) {
 			sendMessage(m_matlabFile.error());
 			return;
@@ -69,9 +71,9 @@ void AwMarkerExporter::run()
 	int count = 1;
 	for (auto m : pdi.input.markers()) {
 		sendMessage("Getting data...");
-		requestData(&pdi.input.channels(), m);
+		requestData(&inputChannels, m);
 		sendMessage("Data loaded.");
-		matrix = AwMath::channelsToFMat(pdi.input.channels());
+		matrix = AwMath::channelsToFMat(inputChannels);
 		sendMessage("Saving to file...");
 		if (matlabFormat) { // TRANSPOSE the matrix as MATLAB has a column major ordering
 			positions(count - 1) = m->start();
@@ -81,7 +83,7 @@ void AwMarkerExporter::run()
 			}
 		} 
 		else {
-			m_adesFile.infos.setChannels(pdi.input.channels());
+			m_adesFile.infos.setChannels(inputChannels);
 			AwBlock *block = m_adesFile.infos.newBlock();
 			block->setDuration(m->duration());
 			block->setSamples(pdi.input.channels().first()->dataSize());
@@ -91,7 +93,7 @@ void AwMarkerExporter::run()
 				sendMessage(m_adesFile.errorMessage());
 				return;
 			}
-			m_adesFile.writeData(&pdi.input.channels());
+			m_adesFile.writeData(&inputChannels);
 			m_adesFile.cleanUpAndClose();
 		}
 		sendMessage("Done.");

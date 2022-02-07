@@ -42,13 +42,14 @@ void AwMATLABMarkersExporter::run()
 
 	// get data
 	sendMessage("Loading data...");
-	requestData(&pdi.input.channels(), &pdi.input.markers());
+	AwChannelList inputChannels = pdi.input.channels();
+	requestData(&inputChannels, &pdi.input.markers());
 	sendMessage("Done.");
 	sendMessage("Writing to file...");
 	AwMATLABFile file;
 	try {
 		file.create(path);
-		auto channels = pdi.input.channels();
+		auto channels = inputChannels;
 		auto labels = AwChannel::getLabels(channels, true);
 		file.writeStringCellArray("channels", labels);
 		float sampleRate = channels.first()->samplingRate();

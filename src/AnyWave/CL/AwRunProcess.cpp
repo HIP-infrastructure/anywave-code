@@ -42,7 +42,8 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		return;
 	}
 	auto reader = process->pdi.input.reader();
-	applyFilters(process->pdi.input.channels(), arguments);
+	auto inputChannels = process->pdi.input.channels();
+	applyFilters(inputChannels, arguments);
 	AwUniteMaps(process->pdi.input.settings, arguments);
 	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));

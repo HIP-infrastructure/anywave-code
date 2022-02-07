@@ -113,26 +113,28 @@ void AwExporter::runFromCommandLine()
 		m_inputMarkers << &global;  // the trick is to avoid memory leak as we don't destroy m_inputMarkers list.
 	}
 
+	AwChannelList inputChannels = pdi.input.channels();
+
 	if (decimateFactor > 1) {
 		sendMessage("Loading data...");
 		//	AwChannel::clearFilters(m_channels);
-	   requestData(&pdi.input.channels(), &m_inputMarkers, true);
+	   requestData(&inputChannels, &m_inputMarkers, true);
 	   sendMessage("Done.");
 	   sendMessage("Downsampling...");
-	   AwFiltering::downSample(pdi.input.channels(), decimateFactor);
+	   AwFiltering::downSample(inputChannels, decimateFactor);
 		// apply filters set in the UI
-		AwFiltering::filter(pdi.input.channels());
+		AwFiltering::filter(inputChannels);
 		sendMessage("Done.");
 	}
 	else {
 		sendMessage("Loading data...");
-		requestData(&pdi.input.channels(), &m_inputMarkers);
+		requestData(&inputChannels, &m_inputMarkers);
 		sendMessage("Done.");
 	}
 
 	// set channels to the writer object AFTER loading and/or not downsampling
 	// duplicate input channels before set them to writer as writer object takes ownership of channels and will destroy them 
-	writer->infos.setChannels(AwChannel::duplicateChannels(pdi.input.channels()));
+	writer->infos.setChannels(AwChannel::duplicateChannels(inputChannels));
 
 	block->setSamples(pdi.input.channels().first()->dataSize());
 	block->setDuration((float)pdi.input.channels().first()->dataSize() / pdi.input.channels().first()->samplingRate());
@@ -147,7 +149,7 @@ void AwExporter::runFromCommandLine()
 		return;
 	}
 	sendMessage("Writing data...");
-	writer->writeData(&pdi.input.channels());
+	writer->writeData(&inputChannels);
 	sendMessage("Done.");
 	writer->cleanUpAndClose();
 	writer->plugin()->deleteInstance(writer);

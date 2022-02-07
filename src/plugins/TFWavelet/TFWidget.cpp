@@ -142,7 +142,8 @@ void TFWidget::updateBaselineOptions()
 }
 
 
-void TFWidget::setChannels(const AwChannelList& channels)
+//void TFWidget::setChannels(const AwChannelList& channels)
+void TFWidget::setChannels(const QList<QSharedPointer<AwChannel>>& channels)
 {
 	// build layout for scroll area
 	QGridLayout *layout = m_ui.signalsLayout;
@@ -152,9 +153,9 @@ void TFWidget::setChannels(const AwChannelList& channels)
 	layout->setColumnStretch(1, 1);
 
 	// Build params for computation and add plot to the layout
-	for (auto c : channels) {
+	for (auto const &c : channels) {
 		// add TF plot widget to the layout
-		TFPlot *plot = new TFPlot(m_settings, &m_displaySettings, c);
+		TFPlot *plot = new TFPlot(m_settings, &m_displaySettings, c.get());
 		m_plots << plot;
 		layout->addWidget(plot, row, 1);
 		layout->addWidget(plot->leftWidget(), row, 0);
@@ -314,8 +315,8 @@ void TFWidget::compute2(float pos, float duration)
 	m_rawTF.clear();
 
 	// sequential computation using armadillo code based on MATLAB code
-	for (auto c : m_channels) {
-		m_rawTF << computeFunction(c);
+	for (auto const& c : m_channels) {
+		m_rawTF << computeFunction(c.get());
 	}
 
 	m_results.clear();

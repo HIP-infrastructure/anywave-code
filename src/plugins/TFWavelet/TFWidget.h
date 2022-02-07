@@ -21,7 +21,8 @@ public:
 
 	void setMarkers(const AwMarkerList& markers);
 	AwBaseSignalView *signalView() { return m_signalView; }
-	void setChannels(const AwChannelList& channels);
+//	void setChannels(const AwChannelList& channels);
+	void setChannels(const QList<QSharedPointer<AwChannel>>& channels);
 	void updateBaselineOptions();
 
 signals:
@@ -56,7 +57,8 @@ private:
 	DisplaySettings m_displaySettings;
 	QList<TFPlot *> m_plots;
 	bool m_baselineComputed, m_zRangeLocked, m_computeBaseline;
-	AwChannelList m_channels; 
+	//AwChannelList m_channels; 
+	QList<QSharedPointer<AwChannel>> m_channels;
 	AwMarkerList m_baselineMarkers;
 	QList<arma::mat> m_baselines, m_rawTF, m_normalizedTF;
 	QList<QPair<mat, mat>> m_results;
