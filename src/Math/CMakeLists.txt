@@ -1,7 +1,7 @@
 # AwMathLib
 project(AwMath)
 add_definitions("-DAW_BUILD_MATH_LIB")
-
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
 IF(USE_MKL)
    INCLUDE_DIRECTORIES(${MKL_ROOT}/include)

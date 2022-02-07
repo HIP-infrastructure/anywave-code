@@ -40,6 +40,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_interval.h>
 
 Q_DECLARE_METATYPE(QVector<double>);
 #include "ui_AwTopoWidget.h"

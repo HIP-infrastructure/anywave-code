@@ -2,9 +2,9 @@
 project(H2Graphs)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
-INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
-LINK_DIRECTORIES(${QWT_LIBRARY})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
+#INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+#LINK_DIRECTORIES(${QWT_LIBRARY})
 
 SET(SRCS GraphArrow.cpp GraphWindow.cpp GraphArrowBase.cpp GraphArrowDir.cpp GraphArrowLag.cpp GraphColorMap.cpp
 GraphLegend.cpp GraphSet.cpp GraphSetModel.cpp H2Graphs.cpp GraphSensorItem.cpp GraphManagerWidget.cpp H2SelectPairsDial.cpp)
@@ -24,7 +24,7 @@ add_definitions(-DQCUSTOMPLOT_USE_LIBRARY)
 add_library(H2Graphs SHARED ${SRCS} ${H2G_MOCS} ${H2G_UIS})
 qt5_use_modules(H2Graphs Core Gui Widgets Svg)
 
-target_link_libraries(H2Graphs AwCore AwProcess AwWidget AwMATLAB qcustomplot Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARIES})
+target_link_libraries(H2Graphs AwCore AwProcess AwWidget AwMATLAB qcustomplot Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg qwt)
 INSTALL(TARGETS H2Graphs DESTINATION ${PLUGIN_INSTALL_DIR})
 
 

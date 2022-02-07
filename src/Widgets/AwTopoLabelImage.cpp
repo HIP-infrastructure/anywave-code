@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwTopoLabelImage.h"
 #include <qwt_matrix_raster_data.h>
+#include <qwt_interval.h>
 #include <QMouseEvent>
 #include <QtMath>
 

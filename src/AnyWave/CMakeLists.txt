@@ -2,6 +2,7 @@
 project(AnyWave)
 # disable epoching
 add_definitions("-DAW_DISABLE_EPOCHING")
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
 SET(AnyWave_SRCS
     ./AnyWave.cpp  
@@ -390,25 +391,6 @@ ELSE()
     include(anywave_linux.cmake)
 ENDIF()
 
-# IF(UNIX AND NOT APPLE)
-#     ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
-#     QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-#     TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} 
-#        gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z qcustomplot tbb)
-#     add_dependencies(AnyWaveLinux ${AW_LIBS})
-#     INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
-# ELSE()
-#     ADD_EXECUTABLE(AnyWaveMac ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
-#     QT5_USE_MODULES(AnyWaveMac Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-#     MESSAGE(STATUS "Mac qwt: ${QWT_LIBRARIES}")
-#     TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} 
-#        ${BLAS_LIBRARIES} z qcustomplot)
-#     add_dependencies(AnyWaveMac ${AW_LIBS})
-#     set_target_properties(AnyWaveMac PROPERTIES OUTPUT_NAME "anywavemac")
-#     INSTALL(TARGETS AnyWaveMac DESTINATION ${APP_INSTALL_DIR})
-# ENDIF()
-
-#TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
 
 
 

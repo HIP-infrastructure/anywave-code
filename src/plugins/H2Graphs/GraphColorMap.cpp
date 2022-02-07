@@ -16,6 +16,7 @@
 #include "GraphColorMap.h"
 #include <graphics/AwColorMap.h>
 #include <graphics/AwQwtColorMap.h>
+#include <qwt_interval.h>
 
 GraphColorMap::GraphColorMap(const QString& text, QGraphicsItem *parent)
 	: QGraphicsRectItem(parent)

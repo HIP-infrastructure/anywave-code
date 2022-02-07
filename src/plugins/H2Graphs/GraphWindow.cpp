@@ -27,6 +27,7 @@
 #include "H2Graphs.h"
 #include "H2SelectPairsDial.h"
 #include <qcustomplot.h>
+#include <qwt_interval.h>
 
 GraphWindow::GraphWindow(GraphSet *gs, QWidget *parent)
 	: QWidget(parent)

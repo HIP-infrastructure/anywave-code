@@ -2,7 +2,8 @@
 project(AwFiltering)
 add_definitions("-DAW_BUILD_FILTERING_LIB")
 INCLUDE_DIRECTORIES(./DspFilters)
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
+
 SET(SRC  AwButterWorth.cpp 
     AwFiltering.cpp 
     DspFilters/Bessel.cpp 
