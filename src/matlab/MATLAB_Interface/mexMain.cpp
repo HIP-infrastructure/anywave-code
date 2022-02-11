@@ -6,8 +6,9 @@
 #include "MATLAB_Interface.h"
 #include "TCPRequest.h"
 #include <QDataStream>
-#include <format>
-
+#ifdef Q_OS_WIN
+#include <format>   // only msvc supports C++20 format feature....
+#endif
 
 std::map<std::string, int> functions;
 using namespace matlab::data;
@@ -80,10 +81,18 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 			return;
 		}
 		auto vararginSize = cellArray.getDimensions()[1];
-		
+#ifdef Q_OS_WIN
 		if (vararginSize < 3)
 			error(std::format("anywave: init() cell array must contain at least three items: host, port, pid\n. array dimensions are {},{}", 
 				cellArray.getDimensions()[0], cellArray.getDimensions()[1]));
+#else
+		if (vararginSize < 3) {
+			std::string message = "anywave: init() cell array myst contain at least three items: host, port, pid\n array dimensions are ";
+			message += std::to_string(cellArray.getDimensions()[0]) + "," + std::to_string(cellArray.getDimensions()[1]);
+			error(message);
+		}
+#endif
+
 		// cell array should contain :  host, port, pid (string)
 		CharArray stringHost = cellArray[0][0];
 		std::string host = stringHost.toAscii();
@@ -114,9 +123,26 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 		m_matlabPtr->setVariable(u"port", factory.createScalar<double>(portValue), matlab::engine::WorkspaceType::BASE);
 		m_matlabPtr->setVariable(u"pid", factory.createScalar<double>(pidValue), matlab::engine::WorkspaceType::BASE);
 
+
 		MATLAB_Interface::port = static_cast<int>(portValue);
 		MATLAB_Interface::pid = static_cast<int>(pidValue);
 
+		if (vararginSize == 3) {  // this is the case where only server port and pid are provided
+			QString json;
+			try {
+				TCPRequest aw(AwRequest::GetProperties);
+				aw.simpleRequest();
+				aw.waitForResponse();
+				QDataStream& response = aw.response();
+				response >> json;
+				auto res = m_matlabPtr->feval(u"jsondecode", 1, std::vector<Array>({ factory.createCharArray(json.toStdString()) }));
+				outputs[0] = StructArray(res[0]);
+			}
+			catch (const QString& what) {
+				std::string message = QString("get_prop: %1").arg(what).toStdString();
+				error(message);
+			}
+		}
 		// DONE !!!
 		return;
 	}

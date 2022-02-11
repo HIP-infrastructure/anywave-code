@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(matlab_support)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_BUILD_TYPE Release)
 
@@ -27,6 +27,7 @@ IF(APPLE)
     SET(MEX_INSTALL_DIR "/users/bruno/dev/anywave-mac/build/AnyWave.app/Contents/Plugins/MATLAB/AnyWave")
 ELSE()
     SET(MEX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/AnyWave/Plugins/MATLAB/AnyWave")
+    add_definitions("-std=c++20")
 ENDIF()
 
 find_package(Matlab COMPONENTS MX_LIBRARY)

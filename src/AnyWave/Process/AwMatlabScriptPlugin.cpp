@@ -31,6 +31,9 @@
 #include <qcoreapplication.h>
 
 
+
+
+
 // PROCESS
 
 AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
@@ -42,6 +45,12 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	server->start();
 	AwPidManager::instance()->createNewPid(p);
 	return p;
+}
+
+
+void AwMatlabScriptProcess::sendOutput()
+{
+	emit progressChanged(QString(m_process->readAllStandardOutput()));
 }
 
 void AwMatlabScriptProcess::run()
@@ -91,16 +100,27 @@ void AwMatlabScriptProcess::run()
 #else
 	systemPath = QString("%1;%2").arg(application).arg(systemPath);
 #endif
-#endif
-	arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) 
-		<< QString::number(m_pid) << AwUtilities::json::toJsonString(pdi.input.settings).simplified();
-	
 	env.remove("PATH");
 	env.insert("PATH", systemPath);
-	QProcess plugin(this);
-	plugin.setProcessEnvironment(env);
-	plugin.start(m_plugin->settings().value("compiled plugin").toString(), arguments, QIODevice::ReadWrite);
-	plugin.waitForFinished(-1); // wait for plugin to finish. (Wait forever).
+#endif
+    QString jsonArgs = AwUtilities::json::toJsonString(pdi.input.settings).simplified();
+
+	arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) 
+		<< QString::number(m_pid); // << jsonArgs;
+	
+//	env.remove("PATH");
+//	env.insert("PATH", systemPath);
+    emit progressChanged(QString("Running %1 with arguments:").arg(m_plugin->settings().value("compiled plugin").toString()));
+	for (const auto& a : arguments) 
+	    emit progressChanged(a);
+//	QProcess plugin(this);
+	m_process = new QProcess(this);
+	m_process->setReadChannel(QProcess::StandardOutput);
+	m_process->setProcessChannelMode(QProcess::MergedChannels);
+	m_process->setProcessEnvironment(env);
+	connect(m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(sendOutput()));
+	m_process->start(m_plugin->settings().value("compiled plugin").toString(), arguments, QIODevice::ReadWrite);
+	m_process->waitForFinished(-1); // wait for plugin to finish. (Wait forever).
 	emit progressChanged(tr("MATLAB plugin has finished."));
 
 //	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();

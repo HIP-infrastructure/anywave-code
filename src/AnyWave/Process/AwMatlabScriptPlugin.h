@@ -17,6 +17,7 @@
 #define AWMATLABSCRIPTPLUGIN_H
 #include "AwScriptPlugin.h"
 #include <AwMatlabInterface.h>
+#include <QProcess>
 
 /// AwMatlabScriptProcess
 /// An AwProcess in charge of launching matlab scrip as a process plugin
@@ -27,8 +28,11 @@ public:
 	AwMatlabScriptProcess() : AwScriptProcess() {}
 	void run();
 	void setSystemPath(const QString& path) { m_systemPath = path;   }
+protected slots:
+	void sendOutput();
 protected:
 	QString m_systemPath;	// used only to set the environment before launchine Compiled plugins
+	QProcess *m_process;
 };
 
 

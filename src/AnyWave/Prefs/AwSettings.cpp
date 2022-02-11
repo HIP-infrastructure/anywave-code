@@ -184,9 +184,9 @@ void AwSettings::createMatlabShellScript(const QString& path)
 #ifdef Q_OS_MAC
 		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/extern/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) // put AnyWave lib path in first position to avoid conflicts with Qt libs installed in system
 		stream << "export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" << endl;
-		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/extern/bin/glnxa64" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/AnyWave/lib:/usr/lib/x86_64-linux-gnu:$MATLAB/extern/bin/glnxa64" << endl;
 		stream << "if [[ -f $MATLAB/bin/glnxa64/libexpat.1.so ]]; then " << endl;
 		stream << "mv $MATLAB/bin/glnxa64/libexpat.1.so $MATLAB/bin/glnxa64/libexpat.1.so.NOFIND" << endl;
 		stream << "fi" << endl;
