@@ -30,11 +30,12 @@ SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
 
 
 IF(USE_MKL) # Must be set if the system has oneapi mkl installed
-    find_package(MKL)
+    find_package(MKLMac)
     if (MKL_FOUND)
        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
        SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
        SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
+       MESSAGE(STATUS "Using MKL LIBS: ${MKL_LIBRARIES}")
     endif()
 ELSE()
     MESSAGE(STATUS "Using Accelerate Framework for BLAS")

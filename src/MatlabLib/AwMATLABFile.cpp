@@ -112,8 +112,9 @@ int AwMATLABFile::open(const QString& file)
 {
 	close();
 	QString fileName = QDir::toNativeSeparators(file);
-    FILEPTR = Mat_Open(fileName.toUtf8().data(), MAT_ACC_RDONLY);
-    if (FILEPTR == NULL) {
+	std::string str = fileName.toStdString();
+    FILEPTR = Mat_Open(str.data(), MAT_ACC_RDONLY);
+    if (FILEPTR == nullptr) {
 		m_error = "Could not open file for reading.";
 		throw AwException(m_error, "AwMATLABFile::open");
 		return -1;
@@ -128,8 +129,9 @@ int AwMATLABFile::create(const QString& file)
 {
 	close();
 	QString fileName = QDir::toNativeSeparators(file);
-    FILEPTR = Mat_CreateVer(fileName.toUtf8().data(), NULL, MAT_FT_MAT5);
-    if (FILEPTR == NULL) {
+	std::string str = fileName.toStdString();
+    FILEPTR = Mat_CreateVer(str.data(), nullptr, MAT_FT_MAT5);
+    if (FILEPTR == nullptr) {
 		m_error = QString("Could not create file: %1").arg(file);
 		throw AwException(m_error, "AwMATLABFile::create");
 		return -1;

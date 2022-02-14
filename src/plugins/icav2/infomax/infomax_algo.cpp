@@ -147,7 +147,6 @@ extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 #endif
 
 #ifdef Q_OS_LINUX
-#ifdef MKL
 #include <mkl.h>
 #define dscal_ dscal
 #define ddot_ ddot

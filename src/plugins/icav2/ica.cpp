@@ -356,17 +356,22 @@ void ICA::run()
 	if (!isAborted()) {
 		saveToFile();
 		//// tell AnyWave to load ICA components
+		sendMessage("Sending event to AnyWave...");
 		QSharedPointer<AwEvent> e = QSharedPointer<AwEvent>(new AwEvent());
 		e->setId(AwEvent::LoadICAMatFile);
 		QStringList args = { m_fileName };
 		e->addValue("args", args);
+		sendMessage("Open .mat file event");
 		emit sendEvent(e);
+		sendMessage("Done");
 		// also send an event to open a signal view to visualise ICA components
 		QSharedPointer<AwEvent> e2 = QSharedPointer<AwEvent>(new AwEvent());
+		sendMessage("Adding new view for ICA channels");
 		e2->setId(AwEvent::AddNewView);
 		QStringList filters = { AwChannel::typeToString(AwChannel::ICA) };
 		e2->addValue("filters", filters);
 		emit sendEvent(e2);
+		sendMessage("Done");
 	}
 }
 

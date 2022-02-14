@@ -649,9 +649,13 @@ void AwMontageManager::processEvent(QSharedPointer<AwEvent> e)
 	{
 	case AwEvent::LoadICAMatFile:
 	{
+		emit log("Received event to load ICA .mat file");
 		QStringList args = data.value("args").toStringList();
-		Q_ASSERT(args.size());
-		loadICA(args.first());
+		if (args.isEmpty()) 
+		   emit log("Empty args. Skipping.");
+		QString file = args.first();
+		if (QFile::exists(file))
+			loadICA(file);
 	}
 		break;
 	}
