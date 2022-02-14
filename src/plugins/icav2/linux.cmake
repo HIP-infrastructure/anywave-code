@@ -1,11 +1,10 @@
 
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ./matlab_common)
+INCLUDE_DIRECTORIES(./matlab_common)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
 FILE(GLOB SOBI sobi/*.cpp)
 FILE(GLOB INFOMAX infomax/*.cpp)
 FILE(GLOB MATLAB matlab_common/*.cpp)
-
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
 IF(USE_MKL)
 INCLUDE_DIRECTORIES(${MKL_ROOT}/include)

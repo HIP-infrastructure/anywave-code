@@ -1,17 +1,21 @@
-#SET(ARMADILLO_INCLUDE /users/bruno/armadillo-9.400.4/include)
-#INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ./matlab_common)
+INCLUDE_DIRECTORIES(/users/bruno/dev/armadillo-7.800.2/include)
 
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ./matlab_common)
+# On Mac we will use the Accelerate Framework and direct link against it
 
 # dont build sobi algorthm on mac because Clang compiler does not support OpenMP
-FILE(GLOB INFOMAX infomax/*.cpp)
-FILE(GLOB MATLAB matlab_common/*.cpp)
+SET(INFOMAX  
+   infomax/ICAInfomax.cpp
+   infomax/infomax_algo.cpp
+   infomax/r250.c 
+   infomax/randlcg.c)
+   
+#FILE(GLOB MATLAB matlab_common/*.cpp)
 
 SET(SRCS
    ICASettings.cpp
    ica.cpp
    ICAAlgorithm.cpp
-   ${INFOMAX} ${MATLAB})
+   ${INFOMAX})
 
 SET(MOCS ICASettings.h
    ica.h ICAAlgorithm.h)
@@ -26,5 +30,5 @@ add_library(ICA SHARED ${SRCS} ${ICA_MOCS} ${ICA_UIS} ${RES})
 qt5_use_modules(ICA Core Gui)
 
 target_link_libraries(ICA AwCore AwFiltering AwWidget AwProcess AwUtilities AwLayout AwHDF5 AwMATLAB Qt5::Core Qt5::Gui ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} "-framework Accelerate")
-
+#target_link_libraries(ICA AwCore AwFiltering AwWidget AwProcess AwUtilities AwLayout AwHDF5 AwMATLAB Qt5::Core Qt5::Gui ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${BLAS_LIBRARIES})
 INSTALL(TARGETS ICA DESTINATION ${PLUGIN_INSTALL_DIR})

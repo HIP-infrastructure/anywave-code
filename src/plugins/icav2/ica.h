@@ -17,7 +17,14 @@
 #define ICA_H
 #include <AwProcessInterface.h>
 #include "ica_global.h"
+#ifdef Q_OS_MAC
+#define ARMA_USE_BLAS
+#define ARMA_DONT_USE_WRAPPER
+#define ARMA_USE_LAPACK
+#include <armadillo>
+#else
 #include <aw_armadillo.h>
+#endif
 class ICAAlgorithm;
 
 namespace keys {

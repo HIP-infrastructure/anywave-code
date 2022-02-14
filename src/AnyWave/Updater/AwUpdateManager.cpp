@@ -338,9 +338,10 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 	command = QString("%1/system32/WindowsPowerShell/v1.0/powershell.exe").arg(systemRoot);
 	unzipArgs = "-Command";
 #endif
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
    command = "/usr/bin/unzip";
 #endif
+
 	QString filePath = m_file.fileName(); // full path to downloaded file (a zip file)
 	// create a temp dir to unzip file
 	QTemporaryDir tmpDir;
@@ -360,7 +361,7 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 #ifdef Q_OS_WIN
 	QStringList args = { unzipArgs, QString("Expand-Archive -Path '%1' -DestinationPath '%2'").arg(m_file.fileName()).arg(tmpDir.path())};
 #endif
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 	QStringList args = { QString("%1 -d %2").arg(m_file.fileName()).arg(tmpDir.path())};
 #endif
 	int status = process.execute(command, args);
@@ -390,7 +391,7 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 		status = process.execute(command, { "-Command", 
 			QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(file.absoluteFilePath()).arg(destFile) });
 #endif
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
       status = process.execute("/usr/bin/cp", { "-rf", file.absoluteFilePath(), destFile });
 #endif
 		if (status != 0) {
@@ -419,7 +420,7 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 #ifdef Q_OS_WIN
 		status = process.execute(command, { "-Command", QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(dir.absoluteFilePath()).arg(destPath)});
 #endif
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 		status = process.execute("/usr/bin/cp", { "-rf",  dir.absoluteFilePath() , destPath});
 #endif
 		if (status != 0) {

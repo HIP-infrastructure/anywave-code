@@ -146,7 +146,6 @@ extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 #endif
 #endif
 
-
 // on Mac with clang, always use Accelerate Framework for blas routines even if MKL is installed
 #ifdef Q_OS_MAC
 extern "C" int idamax_(int *, double *, int *);
@@ -156,14 +155,14 @@ extern "C" void daxpy_(int *, double *, double *, int *, double *, int *);
 //extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 extern "C" void dscal_(int *, double *, double *, int *);
 extern "C" void dswap_(int *, double *, int *, double *, int *);
-//extern "C" void dgetri_(int*, double*, int*, int*, double*, int*, int*);
-//extern "C" void dgetrf_(int*, int*, double*, int*, int*, int*);
+extern "C" void dgetri_(int*, double*, int*, int*, double*, int*, int*);
+extern "C" void dgetrf_(int*, int*, double*, int*, int*, int*);
 //extern "C" double ddot_(int*, double*, int*, double*, int *);
-//extern "C" void dsyev_(char*, char*, int*, double*, int*, double*, double*, int*, int*);		
+extern "C" void dsyev_(char*, char*, int*, double*, int*, double*, double*, int*, int*);		
 //extern "C" void dsyrk_(char*, char*, int*, int*, double*, double*, int*, double*, double*, int*);
 //extern "C" void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int *);
 //extern "C" void dgemv_(char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
-//extern "C" void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
+extern "C" void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
 #endif
 
 #ifdef Q_OS_LINUX
@@ -183,6 +182,7 @@ extern "C" void dsymm_(char *, char *, int *, int *, double *, double *, int *, 
 extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 extern "C" void dscal_(int *, double *, double *, int *);
 #endif
+
 
 
 using namespace InfoMaxAlgo;
