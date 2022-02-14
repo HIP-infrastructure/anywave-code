@@ -2,9 +2,42 @@
 INCLUDE_DIRECTORIES(./matlab_common)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
-FILE(GLOB SOBI sobi/*.cpp)
-FILE(GLOB INFOMAX infomax/*.cpp)
-FILE(GLOB MATLAB matlab_common/*.cpp)
+set(SOBI sobi/eigStandard.cpp
+   sobi/ICASobi.cpp 
+   sobi/mtimes.cpp
+   sobi/pca.cpp
+   sobi/schur.cpp
+   sobi/sobi_coder_data.cpp
+   sobi/sobi_coder_initialize.cpp
+   sobi/sobi_coder_rtwutil.cpp
+   sobi/sobi_coder_terminate.cpp
+   sobi/sobi_coder.cpp
+   sobi/sort.cpp
+   sobi/sortAscendLE.cpp
+   sobi/sqrt.cpp
+   sobi/xdhseqr.cpp
+   sobi/xdlanv2.cpp
+   sobi/xnrm2.cpp
+   sobi/xzggbal.cpp
+   sobi/xzhgeqz.cpp
+   sobi/xzlarf.cpp
+   sobi/xzlarfg.cpp
+   sobi/xzlartg.cpp
+   sobi/xztgevc.cpp)
+
+SET(SOBI_H sobi/ICASobi.h)
+
+SET(INFOMAX infomax/ICAInfomax.cpp
+ infomax/infomax_algo.cpp
+  infomax/r250.c 
+  infomax/randlcg.c)
+
+SET(MATLAB matlab_common/pinv.cpp
+matlab_common/rot90.cpp 
+matlab_common/rt_nonfinite.cpp 
+matlab_common/rtGetInf.cpp
+matlab_common/rtGetNaN.cpp
+matlab_common/svd.cpp)
 
 IF(USE_MKL)
 INCLUDE_DIRECTORIES(${MKL_ROOT}/include)
@@ -21,7 +54,7 @@ SET(SRCS
 
 SET(UIS ICASettings.ui)
 
-QT5_WRAP_CPP(ICA_MOCS ${MOCS})
+QT5_WRAP_CPP(ICA_MOCS ${MOCS} ${SOBI_H})
 QT5_WRAP_UI(ICA_UIS ${UIS})
 qt5_add_resources(RES Resource.qrc) 
 
