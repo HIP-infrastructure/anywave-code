@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
 #INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 
-#INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
 
 # On Mac we will use the Accelerate Framework and direct link against it
 
@@ -35,5 +35,5 @@ qt5_add_resources(RES Resource.qrc)
 add_library(ICA SHARED ${SRCS} ${INFOMAX} ${ICA_MOCS} ${ICA_UIS} ${RES})
 qt5_use_modules(ICA Core Gui)
 
-target_link_libraries(ICA AwCore AwFiltering AwWidget AwProcess AwUtilities AwLayout AwHDF5 AwMATLAB Qt5::Core Qt5::Gui  "-framework Accelerate")
+target_link_libraries(ICA AwCore AwFiltering AwWidget AwProcess AwUtilities AwLayout AwHDF5 AwMATLAB Qt5::Core Qt5::Gui  ${BLAS_LIBRARIES})
 INSTALL(TARGETS ICA DESTINATION ${PLUGIN_INSTALL_DIR})

@@ -185,25 +185,31 @@ extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 // #endif
 
 
-// on Mac with clang, always use Accelerate Framework for blas routines even if MKL is installed
+// // on Mac with clang, always use Accelerate Framework for blas routines even if MKL is installed
+// #ifdef Q_OS_MAC
+// //#include <Accelerate/Accelerate.h>
+// extern "C" int idamax_(int *, double *, int *);
+// extern "C" void dcopy_(int *, double *, int *, double *, int *);
+// extern "C" void dsymm_(char *, char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
+// extern "C" void daxpy_(int *, double *, double *, int *, double *, int *);
+//  //extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
+// extern "C" void dscal_(int *, double *, double *, int *);
+// extern "C" void dswap_(int *, double *, int *, double *, int *);
+// //extern "C" void dgetri_(int*, double*, int*, int*, double*, int*, int*);
+// //extern "C" void dgetrf_(int*, int*, double*, int*, int*, int*);
+// //extern "C" double ddot_(int*, double*, int*, double*, int *);
+// //extern "C" void dsyev_(char*, char*, int*, double*, int*, double*, double*, int*, int*);		
+// //extern "C" void dsyrk_(char*, char*, int*, int*, double*, double*, int*, double*, double*, int*);
+// //extern "C" void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int *);
+//  //extern "C" void dgemv_(char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
+//  //extern "C" void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
+// #endif
+
 #ifdef Q_OS_MAC
-//#include <Accelerate/Accelerate.h>
-extern "C" int idamax_(int *, double *, int *);
-extern "C" void dcopy_(int *, double *, int *, double *, int *);
-extern "C" void dsymm_(char *, char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
-extern "C" void daxpy_(int *, double *, double *, int *, double *, int *);
- //extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
-extern "C" void dscal_(int *, double *, double *, int *);
-extern "C" void dswap_(int *, double *, int *, double *, int *);
-//extern "C" void dgetri_(int*, double*, int*, int*, double*, int*, int*);
-//extern "C" void dgetrf_(int*, int*, double*, int*, int*, int*);
-//extern "C" double ddot_(int*, double*, int*, double*, int *);
-//extern "C" void dsyev_(char*, char*, int*, double*, int*, double*, double*, int*, int*);		
-//extern "C" void dsyrk_(char*, char*, int*, int*, double*, double*, int*, double*, double*, int*);
-//extern "C" void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int *);
- //extern "C" void dgemv_(char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
- //extern "C" void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
+#include <mkl.h>
+
 #endif
+
 
 using namespace InfoMaxAlgo;
 
@@ -292,7 +298,11 @@ void InfoMaxAlgo::zero(int n, double *A)
 {
 	double dzero = 0.;
 	int izero = 0, ione = 1;
+	#ifdef Q_OS_MAC
+	cblas_dcopy(n, 0., 0, A, 1);
+	#else
 	dcopy_(&n, &dzero, &izero, A, &ione);
+	#endif
 }
 
 void InfoMaxAlgo::eye(int m, double *A)
@@ -300,8 +310,13 @@ void InfoMaxAlgo::eye(int m, double *A)
 	double dzero = 0., done = 1.0;
 	int izero = 0, ione = 1;
 	int mxm = m * m, m1 = m + 1;
+	#ifdef Q_OS_MAC
+       cblas_dcopy(mxm, 0,, 0, A, 1);
+	   cblas_dcopy(m, 1., 0, A, m1);
+	#else
 	dcopy_(&mxm, &dzero, &izero, A, &ione);
 	dcopy_(&m, &done, &izero, A, &m1);
+	#endif
 }
 
 /*********************** Initialize a permutation vector **********************/
@@ -341,7 +356,11 @@ void InfoMaxAlgo::randperm(double *data, double *trsf, double *bias, int *perm, 
 
 	if (bias) {
 		for (i = 0, im = 0; i < n; i++, im += m)
+		#ifdef Q_OS_MAC
+		    cblas_dcopy(m, bias, 1, &proj[im], 1);
+		#else
 			dcopy_(&m, bias, &inc, &proj[im], &inc);
+		#endif
 		beta = 1.0;
 	}
 	else
@@ -349,7 +368,13 @@ void InfoMaxAlgo::randperm(double *data, double *trsf, double *bias, int *perm, 
 
 	for (i = 0, im = 0; i < n; i++, im += m) {
 		swap = RAND() % k;
+		#ifdef Q_OS_MAC
+	//	void cblas_dgemv (const CBLAS_LAYOUT Layout, const CBLAS_TRANSPOSE trans, const MKL_INT m, const MKL_INT n, const double alpha, 
+	 //      const double *a, const MKL_INT lda, const double *x, const MKL_INT incx, const double beta, double *y, const MKL_INT incy);
+		cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, alpha, trsf, m, &data[perm[swap] * m], 1, beta, &proj[im], 1);
+		#else
 		dgemv_(&trans, &m, &m, &alpha, trsf, &m, &data[perm[swap] * m], &inc, &beta, &proj[im], &inc);
+		#endif
 		perm[swap] = perm[--k];
 	}
 }
@@ -377,7 +402,11 @@ void InfoMaxAlgo::probperm(double *data, double *trsf, double *bias, int m, int 
 
 	if (bias) {
 		for (i = 0, im = 0; i < n; i++, im += m)
+		#ifdef Q_OS_MAC
+			cblas_dcopy(m, bias, 1, &proj[im], 1);
+		#else
 			dcopy_(&m, bias, &inc, &proj[im], &inc);
+		#endif
 		beta = 1.0;
 	}
 	else
@@ -406,7 +435,11 @@ void InfoMaxAlgo::probperm(double *data, double *trsf, double *bias, int m, int 
 		}
 
 		idx += frames * (RAND() % epochs);
-		dgemv_(&trans, &m, &m, &alpha, trsf, &m, &data[idx * m], &inc, &beta, &proj[im], &inc);
+		#ifdef Q_OS_MAC
+			cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, alpha, trsf, m, &data[idx * m], 1, beta, &proj[im], 1);
+		#else
+			dgemv_(&trans, &m, &m, &alpha, trsf, &m, &data[idx * m], &inc, &beta, &proj[im], &inc);
+		#endif
 	}
 }
 
@@ -437,11 +470,19 @@ void InfoMaxAlgo::pdf(double *data, double *trsf, int *perm, int m, int n, int k
     for (i = 0, im = 0 ; i < n ; i++,im += m) {
         if (perm) {
             swap = RAND()%k;
+			#ifdef Q_OS_MAC
+			cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
+			#else
             dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[perm[swap]*m],&inc,&beta,kk,&inc);
+			#endif
             perm[swap] = perm[--k];
         }
         else
+		#ifdef Q_OS_MAC
+		    cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[im], 1, beta, kk, 1);
+		#else
             dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[im],&inc,&beta,kk,&inc);
+		#endif
         
         for (j=0 ; j<m ; j++) {
             tmp = kk[j]*kk[j];
@@ -460,11 +501,19 @@ void InfoMaxAlgo::pdf(double *data, double *trsf, int *perm, int m, int n, int k
 	for (i=0,im=0 ; i<n ; i++,im+=m) {
 		if (perm) {
 			swap = RAND()%k;
+			#ifdef Q_OS_MAC
+			cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
+			#else
 			dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[perm[swap]*m],&inc,&beta,kk,&inc);
+			#endif
 			perm[swap] = perm[--k];
 		}
 		else
+		#ifdef Q_OS_MAC
+			cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[im], 1, beta, kk, 1);
+		#else
 			dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[im],&inc,&beta,kk,&inc);
+		#endif
 		
 		for (j=0 ; j<m ; j++) {
 			tmp = 2.0 / (exp(kk[j])+exp(-kk[j]));
@@ -492,8 +541,11 @@ void InfoMaxAlgo::geproj(double *data, double *trsf, int m, int n, double *proj)
 {
 	double alpha = 1.0, beta = 0.0;
 	char trans='N';
-
+	#ifdef Q_OS_MAC
+	cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
+	#else
 	dgemm_(&trans,&trans,&m,&n,&m,&alpha,trsf,&m,data,&m,&beta,proj,&m);
+	#endif
 }
 
 /***************** Project data using a symmetrical projection ****************/
