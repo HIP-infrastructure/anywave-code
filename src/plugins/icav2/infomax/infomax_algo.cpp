@@ -298,11 +298,11 @@ void InfoMaxAlgo::zero(int n, double *A)
 {
 	double dzero = 0.;
 	int izero = 0, ione = 1;
-	#ifdef Q_OS_MAC
-	cblas_dcopy(n, 0., 0, A, 1);
-	#else
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dcopy(n, &dzero, 0, A, 1);
+#else
 	dcopy_(&n, &dzero, &izero, A, &ione);
-	#endif
+#endif
 }
 
 void InfoMaxAlgo::eye(int m, double *A)
@@ -310,13 +310,13 @@ void InfoMaxAlgo::eye(int m, double *A)
 	double dzero = 0., done = 1.0;
 	int izero = 0, ione = 1;
 	int mxm = m * m, m1 = m + 1;
-	#ifdef Q_OS_MAC
-       cblas_dcopy(mxm, 0,, 0, A, 1);
-	   cblas_dcopy(m, 1., 0, A, m1);
-	#else
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+       cblas_dcopy(mxm, &dzero, 0, A, 1);
+	   cblas_dcopy(m, &done, 0, A, m1);
+#else
 	dcopy_(&mxm, &dzero, &izero, A, &ione);
 	dcopy_(&m, &done, &izero, A, &m1);
-	#endif
+#endif
 }
 
 /*********************** Initialize a permutation vector **********************/
@@ -356,7 +356,7 @@ void InfoMaxAlgo::randperm(double *data, double *trsf, double *bias, int *perm, 
 
 	if (bias) {
 		for (i = 0, im = 0; i < n; i++, im += m)
-		#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
 		    cblas_dcopy(m, bias, 1, &proj[im], 1);
 		#else
 			dcopy_(&m, bias, &inc, &proj[im], &inc);
@@ -368,13 +368,11 @@ void InfoMaxAlgo::randperm(double *data, double *trsf, double *bias, int *perm, 
 
 	for (i = 0, im = 0; i < n; i++, im += m) {
 		swap = RAND() % k;
-		#ifdef Q_OS_MAC
-	//	void cblas_dgemv (const CBLAS_LAYOUT Layout, const CBLAS_TRANSPOSE trans, const MKL_INT m, const MKL_INT n, const double alpha, 
-	 //      const double *a, const MKL_INT lda, const double *x, const MKL_INT incx, const double beta, double *y, const MKL_INT incy);
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
 		cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, alpha, trsf, m, &data[perm[swap] * m], 1, beta, &proj[im], 1);
-		#else
+#else
 		dgemv_(&trans, &m, &m, &alpha, trsf, &m, &data[perm[swap] * m], &inc, &beta, &proj[im], &inc);
-		#endif
+#endif
 		perm[swap] = perm[--k];
 	}
 }
@@ -402,11 +400,11 @@ void InfoMaxAlgo::probperm(double *data, double *trsf, double *bias, int m, int 
 
 	if (bias) {
 		for (i = 0, im = 0; i < n; i++, im += m)
-		#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
 			cblas_dcopy(m, bias, 1, &proj[im], 1);
-		#else
+#else
 			dcopy_(&m, bias, &inc, &proj[im], &inc);
-		#endif
+#endif
 		beta = 1.0;
 	}
 	else
@@ -435,11 +433,11 @@ void InfoMaxAlgo::probperm(double *data, double *trsf, double *bias, int m, int 
 		}
 
 		idx += frames * (RAND() % epochs);
-		#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
 			cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, alpha, trsf, m, &data[idx * m], 1, beta, &proj[im], 1);
-		#else
+#else
 			dgemv_(&trans, &m, &m, &alpha, trsf, &m, &data[idx * m], &inc, &beta, &proj[im], &inc);
-		#endif
+#endif
 	}
 }
 
@@ -470,19 +468,19 @@ void InfoMaxAlgo::pdf(double *data, double *trsf, int *perm, int m, int n, int k
     for (i = 0, im = 0 ; i < n ; i++,im += m) {
         if (perm) {
             swap = RAND()%k;
-			#ifdef Q_OS_MAC
-			cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
-			#else
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, alpha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
+#else
             dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[perm[swap]*m],&inc,&beta,kk,&inc);
-			#endif
+#endif
             perm[swap] = perm[--k];
         }
         else
-		#ifdef Q_OS_MAC
-		    cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[im], 1, beta, kk, 1);
-		#else
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		    cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, alpha, trsf, m, &data[im], 1, beta, kk, 1);
+#else
             dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[im],&inc,&beta,kk,&inc);
-		#endif
+#endif
         
         for (j=0 ; j<m ; j++) {
             tmp = kk[j]*kk[j];
@@ -501,19 +499,19 @@ void InfoMaxAlgo::pdf(double *data, double *trsf, int *perm, int m, int n, int k
 	for (i=0,im=0 ; i<n ; i++,im+=m) {
 		if (perm) {
 			swap = RAND()%k;
-			#ifdef Q_OS_MAC
-			cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
-			#else
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
+#else
 			dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[perm[swap]*m],&inc,&beta,kk,&inc);
-			#endif
+#endif
 			perm[swap] = perm[--k];
 		}
 		else
-		#ifdef Q_OS_MAC
-			cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[im], 1, beta, kk, 1);
-		#else
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[im], 1, beta, kk, 1);
+#else
 			dgemv_(&trans,&m,&m,&alpha,trsf,&m,&data[im],&inc,&beta,kk,&inc);
-		#endif
+#endif
 		
 		for (j=0 ; j<m ; j++) {
 			tmp = 2.0 / (exp(kk[j])+exp(-kk[j]));
@@ -541,11 +539,11 @@ void InfoMaxAlgo::geproj(double *data, double *trsf, int m, int n, double *proj)
 {
 	double alpha = 1.0, beta = 0.0;
 	char trans='N';
-	#ifdef Q_OS_MAC
-	cblas_gdemv(CblasColMajor, CblasNoTrans, m, m, aplha, trsf, m, &data[perm[swap] *m], 1, beta, kk, 1);
-	#else
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, m, n, m, alpha, trsf, m, data, m, beta, proj, m);
+#else
 	dgemm_(&trans,&trans,&m,&n,&m,&alpha,trsf,&m,data,&m,&beta,proj,&m);
-	#endif
+#endif
 }
 
 /***************** Project data using a symmetrical projection ****************/
@@ -562,8 +560,11 @@ void InfoMaxAlgo::syproj(double *data, double *trsf, int m, int n, double *proj)
 {
 	double alpha = 1.0, beta = 0.0;
 	char uplo='U', side = 'L';
-
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dsymm(CblasColMajor, CblasLeft, CblasUpper, m, n, alpha, trsf, m, data, m, beta, proj, m);
+#else
 	dsymm_(&side,&uplo,&m,&n,&alpha,trsf,&m,data,&m,&beta,proj,&m);
+#endif
 }
 
 /******************* Project data using a reduced projection ******************/
@@ -581,8 +582,11 @@ void InfoMaxAlgo::pcaproj(double *data, double *eigv, int m, int n, int k, doubl
 {
 	double alpha = 1.0, beta = 0.0;
 	char transn='N', transt='T';
-
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans, m, n, k, alpha, eigv, k, data, k, beta, proj, m);
+#else
 	dgemm_(&transt,&transn,&m,&n,&k,&alpha,eigv,&k,data,&k,&beta,proj,&m);
+#endif
 }
 
 /******************************* Remove row mean ******************************/
@@ -602,12 +606,20 @@ void InfoMaxAlgo::rmmean(double *data, int m, int n)
 	
 	alpha = 1.0;
 	for (i=0,j=0 ; i<n ; i++,j+=m) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_daxpy(m, alpha, &data[j], 1, mean, 1);
+#else
 		daxpy_(&m,&alpha,&data[j],&one,mean,&one);
+#endif
 	}
 
 	alpha = -1.0/(double)n;
 	for (i=0,j=0 ; i<n ; i++,j+=m) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_daxpy(m, alpha, mean, 1, &data[j], 1);
+#else
 		daxpy_(&m,&alpha,mean,&one,&data[j],&one);
+#endif
 	}	
 	
 	delete[] mean;
@@ -632,7 +644,7 @@ void InfoMaxAlgo::do_sphere(double *data, int m, int n, double *sphe)
 	int i, im, lwork = (nb+2)*m, inc = 1, mxm = m*m;
 
 	char uplo='U', transn='N', jobz='V';
-	double *eigv = new double[m * m];
+	double *eigv = new double[size_t(m * m)];
 	double *eigd = new double[m];
 	int *ipiv = new int[m];
 	double *work = new double[lwork];
@@ -643,25 +655,45 @@ void InfoMaxAlgo::do_sphere(double *data, int m, int n, double *sphe)
    [v d] = eig(data*data')
    sphere = inv(diag(0.5 * sqrt(d))*v')*v'
 */
-
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dsyrk(CblasColMajor, CblasUpper, CblasNoTrans, m, n, alpha, data, m, beta, sphe, m);
+	LAPACKE_dsyev(LAPACK_COL_MAJOR, jobz, uplo, m, sphe, m, eigd);
+#else
 	dsyrk_(&uplo,&transn,&m,&n,&alpha,data,&m,&beta,sphe,&m);
 	dsyev_(&jobz,&uplo,&m,sphe,&m,eigd,work,&lwork,&info);
+#endif
 
 /* Store transpose of sphe in eigv */
-	for (i=0,im=0 ; i<m ; i++,im+=m)
+	for (i = 0, im = 0; i < m; i++, im += m)
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_dcopy(m, &sphe[im], 1, &eigv[i], m);
+#else
 		dcopy_(&m,&sphe[im],&inc,&eigv[i],&m);
+#endif
 	
 /* Copy eigv to sphe */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dcopy(mxm, eigv, 1, sphe, 1);
+#else
 	dcopy_(&mxm,eigv,&inc,sphe,&inc);
+#endif
 	
 /* Scale rows of eigv by corresponding eigd values */
 	for (i=0 ; i<m ; i++) {
 		eigd[i] = 0.5 * sqrt(eigd[i]);
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_dscal(m, eigd[i], &eigv[i], m);
+#else
 		dscal_(&m,&eigd[i],&eigv[i],&m);
+#endif
 	}
 
 /* Solve eigv * sphere = sphe  ~  diag(0.5*sqrt(d))*v' * sphere = v' */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	LAPACKE_dgesv(LAPACK_COL_MAJOR, m, m, eigv, m, ipiv, sphe, m);
+#else
 	dgesv_(&m,&m,eigv,&m,ipiv,sphe,&m,&info);
+#endif
 
 	delete[] eigv;
 	delete[] eigd;
@@ -690,10 +722,13 @@ void InfoMaxAlgo::pca(double *data, int m, int n, double *trsf)
 	char uplo='U', transn='N', jobz='V';
 	double *eigd = new double[m];
 	double *work = new double[lwork];
-
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dsyrk(CblasColMajor, CblasUpper, CblasNoTrans, m, n, alpha, data, m, beta, trsf, m);
+	LAPACKE_dsyev(LAPACK_COL_MAJOR, jobz, uplo, m, trsf, m, eigd);
+#else
 	dsyrk_(&uplo,&transn,&m,&n,&alpha,data,&m,&beta,trsf,&m);
 	dsyev_(&jobz,&uplo,&m,trsf,&m,eigd,work,&lwork,&info);
-	
+#endif
 	delete[] eigd;
 	delete[] work;
 }
@@ -715,9 +750,11 @@ void InfoMaxAlgo::posact(double *data, double *trsf, int m, int n, double *proj)
 	double beta = 0.0;
 	double posrms, negrms;
 	int pos, neg, i, j;
-	
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, m, n, m, alpha, trsf, m, data, m, beta, proj, m);
+#else
 	dgemm_(&trans,&trans,&m,&n,&m,&alpha,trsf,&m,data,&m,&beta,proj,&m);
-
+#endif
 	for (i=0 ; i<m ; i++) {
 		posrms = 0.0; negrms = 0.0;
 		pos = 0; neg = 0;
@@ -781,22 +818,36 @@ void InfoMaxAlgo::varsort(double *data, double *weights, double *sphere, double 
 	
 	if (eigv) {
 /* Compute pseudoinverse of weights*sphere*eigv */
-		wcpy = new double[m * m];
+		wcpy = new double[size_t(m * m)];
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_dsymm(CblasColMajor, CblasRight, CblasUpper, m, m, alpha, sphere, m, weights, m, beta, wcpy, m);
+		cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, m, k, m, alpha, wcpy, m, eigv, k, beta, weights, m);
+		LAPACKE_dgetrf(LAPACK_COL_MAJOR, m, m, wcpy, m, ipiv);
+		LAPACKE_dgetri(LAPACK_COL_MAJOR, m, wcpy, m, ipiv);
+		cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, k, m, m, alpha, eigv, k, wcpy, m, beta, winv, k);
+#else
 		dsymm_(&side,&uplo,&m,&m,&alpha,sphere,&m,weights,&m,&beta,wcpy,&m);
 		dgemm_(&transn,&transt,&m,&k,&m,&alpha,wcpy,&m,eigv,&k,&beta,weights,&m);
 
 		dgetrf_(&m,&m,wcpy,&m,ipiv,&info);
 		dgetri_(&m,wcpy,&m,ipiv,work,&lwork,&info);
 		dgemm_(&transn,&transn,&k,&m,&m,&alpha,eigv,&k,wcpy,&m,&beta,winv,&k);
+#endif
 		//free(wcpy);
 		delete[] wcpy;
 	}
 	else {
 /* Compute inverse of weights*sphere */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_dsymm(CblasColMajor, CblasRight, CblasUpper, m, m, alpha, sphere, m, weights, m, beta, winv, m);
+		LAPACKE_dgetrf(LAPACK_COL_MAJOR, m, m, winv, m, ipiv);
+		LAPACKE_dgetri(LAPACK_COL_MAJOR, m, winv, m, ipiv);
+#else
 		dsymm_(&side,&uplo,&m,&m,&alpha,sphere,&m,weights,&m,&beta,winv,&m);
 
 		dgetrf_(&m,&m,winv,&m,ipiv,&info);
 		dgetri_(&m,winv,&m,ipiv,work,&lwork,&info);
+#endif
 	}
 
 
@@ -821,8 +872,13 @@ void InfoMaxAlgo::varsort(double *data, double *weights, double *sphere, double 
 	for (i=0 ; i<m-1 ; i++) {
 		j = meanvar[i].idx;
 		if (i != j) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			cblas_dswap(k, &weights[i], m, &weights[j], m);
+			cblas_dswap(n, &data[i], m, &data[j], m);
+#else
 			dswap_(&k,&weights[i],&m,&weights[j],&m);
 			dswap_(&n,&data[i],&m,&data[j],&m);
+#endif
 
 			if (bias) {
 				dtmp = bias[i];
@@ -911,7 +967,11 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 	if (momentum > 0.0) {
 		prevweights = new double[chxch];
 		prevwtchange = new double[chxch];
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_dcopy(chxch, weights, 1, prevweights, 1);
+#else
 		dcopy_(&chxch,weights,&inc,prevweights,&inc);
+#endif
 		zero(chxch,prevwtchange);
 	}
 	else
@@ -955,8 +1015,13 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 
 /*************************** Initialize ICA training **************************/
 	emit progressChanged("Initializing ICA training...");
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	cblas_dcopy(chxch, weights, 1, startweights, 1);
+	cblas_dcopy(chxch, weights, 1, oldweights, 1);
+#else
 	dcopy_(&chxch,weights,&inc,startweights,&inc);
 	dcopy_(&chxch,weights,&inc,oldweights,&inc);
+#endif
 	
 #ifdef FIX_SEED	
 	SRAND(1);
@@ -1014,7 +1079,12 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 						bsum[i] = dsum_(&block,&y[i],&chans);
 
 /* Compute: (1-2*y) * u' */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
+					chans, chans, block, alpha, y, chans, u, chans, beta, yu, chans);
+#else
 				dgemm_(&transn,&transt,&chans,&chans,&block,&alpha,y,&chans,u,&chans,&beta,yu,&chans);
+#endif
 			}
 			else {
 /************************* Extended-ICA weight update *************************/
@@ -1033,7 +1103,12 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 							y[j] = -y[j];
 
 /* Compute: u * u' */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+				cblas_dsyrk(CblasColMajor, CblasUpper, CblasNoTrans, 
+				       chans, block, alpha, u, chans, beta, yu, chans);
+#else
 				dsyrk_(&uplo,&transn,&chans,&block,&alpha,u,&chans,&beta,yu,&chans);
+#endif
 
 				j = chxch - 2;
 				for (i=1 ; i<chans ; i++) {
@@ -1042,7 +1117,12 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 				}
 
 /* Compute: -y * u' -u*u' */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+				cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, 
+					chans, chans, block, gamma, y, chans, u, chans, gamma, yu, chans);
+#else
 				dgemm_(&transn,&transt,&chans,&chans,&block,&gamma,y,&chans,u,&chans,&gamma,yu,&chans);
+#endif
 			}
 			
 /* Add block identity matix */
@@ -1050,19 +1130,32 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 				yu[i] += (double)block;
 
 /* Apply weight change */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			cblas_dcopy(chxch,weights,inc,tmpweights,inc);
+			cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, 
+				chans, chans, chans, lrate, yu, chans, tmpweights, chans, alpha, weights, chans);
+#else
 			dcopy_(&chxch,weights,&inc,tmpweights,&inc);
 			dgemm_(&transn,&transn,&chans,&chans,&chans,&lrate,yu,&chans,tmpweights,&chans,&alpha,weights,&chans);
+#endif
 			
 /* Apply bias change */
 			if (bias) daxpy_(&chans,&lrate,bsum,&inc,bias,&inc);
 			
 /******************************** Add momentum ********************************/
 			if (momentum > 0.0) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+				cblas_daxpy(chxch, momentum, prevwtchange, inc, weights, inc);
+#else
 				daxpy_(&chxch,&momentum,prevwtchange,&inc,weights,&inc);
+#endif
 				for (i=0 ; i<chxch ; i++)
 					prevwtchange[i] = weights[i] - prevweights[i];
-
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+				cblas_dcopy(chxch, weights, inc, prevweights, inc);
+#else
 				dcopy_(&chxch,weights,&inc,prevweights,&inc);
+#endif
 			}
 			
 			if (fabs(weights[idamax_(&chxch,weights,&inc)-1]) > MAX_WEIGHT)
@@ -1079,9 +1172,15 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 				
 				if (extmomentum > 0.0) {
 					epsilon = 1.0-extmomentum;
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+					cblas_dscal(chans, epsilon, kk, inc);
+					cblas_daxpy(chans, extmomentum, old_kk, inc, kk, inc);
+					cblas_dcopy(chans, kk, inc, old_kk, inc);
+#else
 					dscal_(&chans,&epsilon,kk,&inc);
 					daxpy_(&chans,&extmomentum,old_kk,&inc,kk,&inc);
 					dcopy_(&chans,kk,&inc,old_kk,&inc);
+#endif
 				}
 				
 				for (i=0 ; i<chans ; i++)
@@ -1108,8 +1207,11 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 			
 			for (i=0 ; i<chxch ; i++)
 				delta[i] = weights[i]-oldweights[i];
-			
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			change = cblas_ddot(chxch, delta, inc, delta, inc);
+#else
 			change = ddot_(&chxch,delta,&inc,delta,&inc);
+#endif
 		}
 		
 /************************* Restart if weights blow up *************************/
@@ -1120,15 +1222,24 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 			blockno = 1;
 			extblocks = urextblocks;
 			lrate = lrate*DEFAULT_RESTART_FAC;
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			cblas_dcopy(chxch, startweights, inc, weights, inc);
+#else
 			dcopy_(&chxch,startweights,&inc,weights,&inc);
+#endif
 			zero(chxch,delta);
 			zero(chxch,olddelta);
 
 			if (bias) zero(chans,bias);
 			
 			if (momentum > 0.0) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+				cblas_dcopy(chxch, startweights, inc, oldweights, inc);
+				cblas_dcopy(chxch, startweights, inc, prevweights, inc);
+#else
 				dcopy_(&chxch,startweights,&inc,oldweights,&inc);
 				dcopy_(&chxch,startweights,&inc,prevweights,&inc);
+#endif
 				zero(chxch,prevwtchange);
 			}
 						
@@ -1176,16 +1287,28 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 		}
 
 /**************************** Save current values *****************************/
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+		cblas_dcopy(chxch, weights, inc, oldweights, inc);
+#else
 		dcopy_(&chxch,weights,&inc,oldweights,&inc);
+#endif
 		
 		if (DEGCONST*angledelta > annealdeg) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			cblas_dcopy(chxch, delta, inc, olddelta, inc);
+#else
 			dcopy_(&chxch,delta,&inc,olddelta,&inc);
+#endif
 			lrate = lrate*annealstep;
 			oldchange = change;
 		}
 		else
 			if (step == 1) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+				cblas_dcopy(chxch, delta, inc, olddelta, inc);
+#else
 				dcopy_(&chxch,delta,&inc,olddelta,&inc);
+#endif
 				oldchange = change;
 			}
 
@@ -1316,9 +1439,9 @@ void ICAInfomax::run()
 	else
 		emit progressChanged("Online bias adjustment will not be used.");
 
-	double *weights = new double[nc * m];
+	double *weights = new double[size_t(nc * m)];
 	zero(nc * m, weights);
-	double *sphere = new double[m * m];
+	double *sphere = new double[size_t(m * m)];
 	double *bias = NULL;
 	int *signs = NULL;
 	if (biasflag) 
@@ -1333,10 +1456,10 @@ void ICAInfomax::run()
 		msg = QString("Reducing the data dimensions to %1 principal dimensions...").arg(nc);
 		emit progressChanged(msg);
 
-		eigv = new double[m * m];
-		EE = new double[m * m];
+		eigv = new double[size_t(m * m)];
+		EE = new double[size_t(m * m)];
 		pca(M, m, n, eigv);
-		memcpy(EE, eigv, m * m * sizeof(double));
+		memcpy(EE, eigv, size_t(m * m * sizeof(double)));
 
 		dataB = new double[m * n];
 		pcaproj(M, &eigv[m * (m - nc)], nc, n, m, dataB);

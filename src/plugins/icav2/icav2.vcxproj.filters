@@ -176,9 +176,6 @@
     <ClInclude Include="sobi\sobi_coder.h">
       <Filter>sobi</Filter>
     </ClInclude>
-    <ClInclude Include="infomax\ICAInfomax.h">
-      <Filter>infomax</Filter>
-    </ClInclude>
     <ClInclude Include="infomax\infomax_algo.h">
       <Filter>infomax</Filter>
     </ClInclude>
@@ -207,6 +204,9 @@
     </QtMoc>
     <QtMoc Include="sobi\ICASobi.h">
       <Filter>sobi</Filter>
+    </QtMoc>
+    <QtMoc Include="infomax\ICAInfomax.h">
+      <Filter>infomax</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
