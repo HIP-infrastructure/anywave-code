@@ -86,9 +86,18 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 #   SET(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins")
 #ENDIF()
 
-# third party livs
+# third party libs
+IF(BUILD_QWT)
+SET(QWT_LIBRARY qwt)
 add_subdirectory(thirdparty/qwt)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/qwt/src)
+ELSE()
+find_package(Qwt REQUIRED)
+message(STATUS "Qwt folders are ${QWT_INCLUDE_DIR} ${QWT_LIBRARY}")
+INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
+LINK_DIRECTORIES(${QWT_LIBRARY})
+ENDIF()
+# customplot
 add_subdirectory(thirdparty/qcustomplot)
 
 

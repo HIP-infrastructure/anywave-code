@@ -5,6 +5,7 @@ class ICA;
 
 class ICAInfomax : public ICAAlgorithm
 {
+	Q_OBJECT
 public:
 	ICAInfomax(ICA *process);
 

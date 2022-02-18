@@ -22,7 +22,7 @@ QT5_ADD_RESOURCES(${RES})
 add_library(H2Graphs SHARED ${SRCS} ${H2G_MOCS} ${H2G_UIS})
 qt5_use_modules(H2Graphs Core Gui Widgets Svg)
 
-target_link_libraries(H2Graphs AwCore AwProcess AwWidget AwMATLAB qcustomplot Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg qwt)
+target_link_libraries(H2Graphs AwCore AwProcess AwWidget AwMATLAB qcustomplot Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Svg ${QWT_LIBRARY})
 INSTALL(TARGETS H2Graphs DESTINATION ${PLUGIN_INSTALL_DIR})
 
 

@@ -2,8 +2,6 @@
 project(AwWidget)
 add_definitions("-DAW_BUILD_WIDGETS_LIB")
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
-#INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
-#LINK_DIRECTORIES(${QWT_LIBRARY})
 QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.qrc)
 
 SET(HEADERS ../../include/widget/AwMessageBox.h  
@@ -153,8 +151,7 @@ QT5_WRAP_UI(UI ${FORMS})
 ADD_LIBRARY(AwWidget SHARED ${SRC} ${MOC} ${UI} ${WIDGET_QRC})
 QT5_USE_MODULES(AwWidget Core Widgets PrintSupport Multimedia MultimediaWidgets)
 TARGET_LINK_LIBRARIES(AwWidget AwCore AwMath AwMapping AwUtilities AwFiltering Qt5::Core Qt5::Widgets Qt5::PrintSupport Qt5::Multimedia 
-  #Qt5::MultimediaWidgets ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
-  Qt5::MultimediaWidgets ${VTK_LIBRARIES} qwt) 
+  Qt5::MultimediaWidgets ${VTK_LIBRARIES} ${QWT_LIBRARY}) 
 
 IF (APPLE)
 INSTALL(TARGETS AwWidget DESTINATION  ${LIB_INSTALL_DIR})

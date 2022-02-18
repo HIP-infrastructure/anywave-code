@@ -166,7 +166,8 @@ int AwMATLABFile::writeScalar(const QString& name, double value)
 	CHECK_OPEN_FILE
 
 	double tmp = value;
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, m_scalarDims, &tmp, 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeScalar");
@@ -181,7 +182,8 @@ int AwMATLABFile::writeScalar(const QString& name, float value)
 {
 	CHECK_OPEN_FILE
 	float tmp = value;
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, m_scalarDims, &tmp, 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_SINGLE, MAT_T_SINGLE, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeScalar");
@@ -196,7 +198,8 @@ int AwMATLABFile::writeScalar(const QString& name, qint32 value)
 {
 	CHECK_OPEN_FILE
 	qint32 tmp = value;
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT32, MAT_T_INT32, 2, m_scalarDims, &tmp, 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_INT32, MAT_T_INT32, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeScalar");
@@ -211,7 +214,8 @@ int AwMATLABFile::writeScalar(const QString& name, qint64 value)
 {
 	CHECK_OPEN_FILE
 	qint64 tmp = value;
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT64, MAT_T_INT64, 2, m_scalarDims, &tmp, 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_INT64, MAT_T_INT64, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeScalar");
@@ -226,7 +230,8 @@ int AwMATLABFile::writeScalar(const QString& name, qint16 value)
 {
 	CHECK_OPEN_FILE
 	qint16 tmp = value;
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT16, MAT_T_INT16, 2, m_scalarDims, &tmp, 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_INT16, MAT_T_INT16, 2, m_scalarDims, &tmp, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeScalar");
@@ -242,17 +247,10 @@ int AwMATLABFile::writeString(const QString& name, const QString& value)
 	CHECK_OPEN_FILE
 	size_t dims[2];
 	std::string s_ = value.toStdString();
-
-	//char dummy[256];
-	//int length = std::min(value.size(), 255);
-	//dims[0] = 1;
-	//dims[1] = length;
-	//memcpy(dummy, value.toLatin1().data(), length);
-	//dummy[length] = '\0';
-	//matvar_t* var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CHAR, MAT_T_UINT8, 2, dims, dummy, 0);
 	dims[0] = 1;
 	dims[1] = s_.size();
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CHAR, MAT_T_UINT8, 2, dims, (void *)s_.data(), 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_CHAR, MAT_T_UINT8, 2, dims, (void *)s_.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeString");
@@ -267,7 +265,8 @@ int AwMATLABFile::writeStringCellArray(const QString& name, const QStringList& v
 {
 	CHECK_OPEN_FILE
 	size_t dims[2] = { 1, (size_t)values.size() };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_CELL, MAT_T_CELL, 2, dims, NULL, 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_CELL, MAT_T_CELL, 2, dims, NULL, 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeStringCellArray");
@@ -300,7 +299,8 @@ int AwMATLABFile::writeMatrix(const QString& name, fmat& matrix)
 {
 	CHECK_OPEN_FILE
 	size_t matrixDims[2] = { size_t(matrix.n_rows), size_t(matrix.n_cols) };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, matrix.memptr(), 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeMatrix");
@@ -315,7 +315,8 @@ int AwMATLABFile::writeMatrix(const QString& name, cube& matrix)
 {
 	CHECK_OPEN_FILE
 	size_t matrixDims[3] = { size_t(matrix.n_rows), size_t(matrix.n_cols), size_t(matrix.n_slices) };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 3, matrixDims, matrix.memptr(), 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_DOUBLE, MAT_T_DOUBLE, 3, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeMatrix");
@@ -330,7 +331,8 @@ int AwMATLABFile::writeMatrix(const QString& name, fcube& matrix)
 {
 	CHECK_OPEN_FILE
 	size_t matrixDims[3] = { size_t(matrix.n_rows), size_t(matrix.n_cols), size_t(matrix.n_slices) };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 3, matrixDims, matrix.memptr(), 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_SINGLE, MAT_T_SINGLE, 3, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile::writeMatrix");
@@ -345,7 +347,13 @@ int AwMATLABFile::writeMatrix(const QString& name, mat& matrix)
 {
 	CHECK_OPEN_FILE
 	size_t matrixDims[2] = { size_t(matrix.n_rows), size_t(matrix.n_cols) };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, matrix.memptr(), 0);
+	std::string str = name.toStdString();
+	if (matrix.n_cols == 0 || matrix.n_rows == 0) {
+		m_error = QString("Matrix is empty");
+		throw AwException(m_error, "AwMATLABFile:writeMatrix");
+		return -1;
+	}
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, matrix.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile:writeMatrix");
@@ -361,7 +369,8 @@ int AwMATLABFile::writeVec(const QString& name, QVector<float>& vec)
 	CHECK_OPEN_FILE
 
 	size_t matrixDims[2] = { 1, size_t(vec.size()) };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, vec.data(), 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile:writeVec");
@@ -377,6 +386,7 @@ int AwMATLABFile::writeVec(const QString& name, QVector<qint32>& vec)
 	CHECK_OPEN_FILE
 
 	size_t matrixDims[2] = { 1, size_t(vec.size()) };
+
 	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT32, MAT_T_INT32, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
@@ -391,9 +401,9 @@ int AwMATLABFile::writeVec(const QString& name, QVector<qint32>& vec)
 int AwMATLABFile::writeVec(const QString& name, QVector<qint16>& vec)
 {
 	CHECK_OPEN_FILE
-
+	std::string str = name.toStdString();
 	size_t matrixDims[2] = { 1, size_t(vec.size()) };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_INT16, MAT_T_INT16, 2, matrixDims, vec.data(), 0);
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_INT16, MAT_T_INT16, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile:writeVec");
@@ -409,7 +419,8 @@ int AwMATLABFile::writeVec(const QString& name, QVector<double>& vec)
 	CHECK_OPEN_FILE
 
 	size_t matrixDims[2] = { 1, size_t(vec.size()) };
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, vec.data(), 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_DOUBLE, MAT_T_DOUBLE, 2, matrixDims, vec.data(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile:writeVec");
@@ -433,8 +444,8 @@ int AwMATLABFile::writeVec(const QString& name, fvec& vec)
 		matrixDims[1] = size_t(1);
 		matrixDims[0] = size_t(vec.n_elem);
 	}
-
-	matvar_t *var = Mat_VarCreate(name.toStdString().c_str(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, vec.memptr(), 0);
+	std::string str = name.toStdString();
+	matvar_t *var = Mat_VarCreate(str.data(), MAT_C_SINGLE, MAT_T_SINGLE, 2, matrixDims, vec.memptr(), 0);
 	if (var == NULL) {
 		m_error = QString("Could not create variable %1").arg(name);
 		throw AwException(m_error, "AwMATLABFile:writeVec");

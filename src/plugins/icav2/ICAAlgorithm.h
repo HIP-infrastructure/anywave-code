@@ -2,6 +2,9 @@
 #include <QObject>
 #include <QWidget>
 #include <AwChannel.h>
+#ifdef Q_OS_MAC
+#define ARMA_DONT_USE_WRAPPER
+#endif
 #include <aw_armadillo.h>
 #include "ica.h"
 
