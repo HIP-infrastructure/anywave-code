@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=1.0
+AppVersion=2.3.1
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -8,6 +8,7 @@ OutputDir="c:\dev\tmp"
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 ChangesAssociations=yes
+UsePreviousAppDir=no
 
 [InstallDelete]
 Type: files; Name: "{app}\*.*"
