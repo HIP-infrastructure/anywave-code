@@ -3,14 +3,6 @@ project(AwMath)
 add_definitions("-DAW_BUILD_MATH_LIB")
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
-IF(USE_MKL)
-   IF(APPLE)
-      INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
-   ELSE()
-       INCLUDE_DIRECTORIES(${MKL_ROOT}/include)
-   ENDIF()
-ENDIF()
-
 add_library(AwMath SHARED AwMath.cpp AwSpline2D.cpp)
 QT5_USE_MODULES(AwMath Core)
 

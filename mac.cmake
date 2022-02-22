@@ -1,3 +1,8 @@
+SET(MATIO_HOME /users/bruno/dev/lib/matio)
+SET(HDF5_ROOT /users/bruno/dev/lib/hdf5)
+SET(QWT_ROOT /users/bruno/dev/lib/qwt)
+
+
 
 SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -I/usr/include -L/usr/lib -w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13")
@@ -29,14 +34,36 @@ SET(MEX_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins/MATLAB
 SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
 
 
+#IF(USE_MKL) # Must be set if the system has oneapi mkl installed
+
+#    find_package(MKLMac)
+#    if (MKL_FOUND)
+#       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
+#       SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
+#       SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
+#       MESSAGE(STATUS "Using MKL LIBS: ${MKL_LIBRARIES}")
+#    endif()
+#ELSE()
+#    MESSAGE(STATUS "Using Accelerate Framework for BLAS")
+#    SET(BLAS_LIBRARIES "-framework Accelerate")
+#endif()
+
 IF(USE_MKL) # Must be set if the system has oneapi mkl installed
-    find_package(MKLMac)
-    if (MKL_FOUND)
-       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-       SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-       SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
-       MESSAGE(STATUS "Using MKL LIBS: ${MKL_LIBRARIES}")
-    endif()
+ # We assume intel mkl is installed as part of Intel ONEAPI and the setvars.sh script has been executed before
+   SET(MKL_ARCH intel64)
+   SET(MKL_LINK dynamic)
+   SET(MKL_THREADING intel_thread)
+   SET(MKL_INTERFACE lp64)
+   find_package(MKL REQUIRED)
+   MESSAGE(STATUS "root: ${MKL_ROOT}")
+   MESSAGE(STATUS "MKL Include: ${MKL_INCLUDE}")
+   INCLUDE_DIRECTORIES(${MKL_INCLUDE})
+   MESSAGE(STATUS "MKL core: ${MKL_CORE}")
+   MESSAGE(STATUS "MKL link: ${MKL_THREAD_LIB} ${MKL_SUPP_LINK}")
+   MESSAGE(STATUS "MKL link: ${MKL_LIBRARIES}")
+
+   SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib  -Wl,-rpath,${MKL_ROOT}/lib ${MKL_THREAD_LIB} -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm -ldl")
+   add_definitions("-DMKL")
 ELSE()
     MESSAGE(STATUS "Using Accelerate Framework for BLAS")
     SET(BLAS_LIBRARIES "-framework Accelerate")
