@@ -33,21 +33,6 @@ SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
 SET(MEX_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins/MATLAB/AnyWave")
 SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
 
-
-#IF(USE_MKL) # Must be set if the system has oneapi mkl installed
-
-#    find_package(MKLMac)
-#    if (MKL_FOUND)
-#       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-#       SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-#       SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
-#       MESSAGE(STATUS "Using MKL LIBS: ${MKL_LIBRARIES}")
-#    endif()
-#ELSE()
-#    MESSAGE(STATUS "Using Accelerate Framework for BLAS")
-#    SET(BLAS_LIBRARIES "-framework Accelerate")
-#endif()
-
 IF(USE_MKL) # Must be set if the system has oneapi mkl installed
  # We assume intel mkl is installed as part of Intel ONEAPI and the setvars.sh script has been executed before
    SET(MKL_ARCH intel64)
@@ -68,6 +53,11 @@ ELSE()
     MESSAGE(STATUS "Using Accelerate Framework for BLAS")
     SET(BLAS_LIBRARIES "-framework Accelerate")
 endif()
+
+# Armadillo
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo-macos/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo-macos/lib)
+SET(ARMA_LIB armadillo)
 
 SET(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)

@@ -5,14 +5,8 @@ add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 
 IF(USE_MKL)
-IF(APPLE)
-INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
-ELSE()
 INCLUDE_DIRECTORIES(${MKL_ROOT}/include)
 ENDIF()
-ENDIF()
-
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
 #MESSAGE("MKL INC: ${MKL_INCLUDE_DIRS}")
 SET(SRCS display_settings.cpp settingsui.cpp TFPicker.cpp 
@@ -30,8 +24,11 @@ QT5_WRAP_UI(TFW_UIS ${UIS})
 add_library(TFWavelet SHARED ${SRCS} ${TFW_MOCS} ${TFW_UIS})
 qt5_use_modules(TFWavelet Core Gui Widgets Concurrent)
 
+IF(APPLE)
+target_link_libraries(TFWavelet AwProcess AwCore AwWidget Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Concurrent ${QWT_LIBRARY} ${ARMA_LIB} ${FFTW3_LIBS})
+ELSE()
 target_link_libraries(TFWavelet AwProcess AwCore AwWidget Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Concurrent ${QWT_LIBRARY} ${BLAS_LIBRARIES})
-
+ENDIF()
 INSTALL(TARGETS TFWavelet DESTINATION ${PLUGIN_INSTALL_DIR})
 
 
