@@ -15,6 +15,7 @@ SET(LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set(INS_PLUGIN_INSTALL_DIR ${PROJECT_BINARY_DIR}/INS_Plugins) 
 
 if (APPLE) 
    include(mac.cmake)
@@ -157,3 +158,9 @@ add_subdirectory(src/plugins/EEPIO)
 add_subdirectory(src/plugins/CompumedicsPF)
 add_subdirectory(src/plugins/DeltamedBinTxtReader)
 add_subdirectory(src/plugins/Spectral)
+
+#optional
+IF(EXISTS ${CMAKE_SOURCE_DIR}/src/plugins/extra_plugins.cmake)
+MESSAGE(STATUS "Building optional plugins.")
+include(${CMAKE_SOURCE_DIR}/src/plugins/extra_plugins.cmake)
+ENDIF()

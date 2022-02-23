@@ -362,7 +362,7 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 	QStringList args = { unzipArgs, QString("Expand-Archive -Path '%1' -DestinationPath '%2'").arg(m_file.fileName()).arg(tmpDir.path())};
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
-	QStringList args = { QString("%1 -d %2").arg(m_file.fileName()).arg(tmpDir.path())};
+	QStringList args = { m_file.fileName(), "-d", tmpDir.path()}; 
 #endif
 	int status = process.execute(command, args);
 	if (status != 0) 
@@ -379,6 +379,7 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 		cppPluginExt = ".dll";
 #endif
 #ifdef Q_OS_MAC
+        destPath = aws->value(aws::plugins_dir).toString();
 		cppPluginExt = ".dylib";
 #endif
 #ifdef Q_OS_LINUX
@@ -392,10 +393,12 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 			QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(file.absoluteFilePath()).arg(destFile) });
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
-      status = process.execute("/usr/bin/cp", { "-rf", file.absoluteFilePath(), destFile });
+
+      QStringList args  =  { file.absoluteFilePath(), destPath };
+      status = process.execute("/usr/bin/cp", args);
 #endif
 		if (status != 0) {
-			throw AwException(QString("error while copying %1 to %2").arg(file.absoluteFilePath()).arg(destPath));
+			throw AwException(QString("error copying %1 to %2").arg(file.absoluteFilePath()).arg(destFile));
 		}
 		auto loadedPlugin = pm->loadPlugin(destFile);
 		if (loadedPlugin == nullptr)

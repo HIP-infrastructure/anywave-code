@@ -1,6 +1,6 @@
-SET(MATIO_HOME /users/bruno/dev/lib/matio)
-SET(HDF5_ROOT /users/bruno/dev/lib/hdf5)
-SET(QWT_ROOT /users/bruno/dev/lib/qwt)
+#SET(MATIO_HOME /users/bruno/dev/lib/matio)
+#SET(HDF5_ROOT /users/bruno/dev/lib/hdf5)
+#SET(QWT_ROOT /users/bruno/dev/lib/qwt)
 
 
 
@@ -31,7 +31,7 @@ SET(APP_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/MacOS")
 SET(LIB_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Frameworks")
 SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
 SET(MEX_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins/MATLAB/AnyWave")
-SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
+
 
 IF(USE_MKL) # Must be set if the system has oneapi mkl installed
  # We assume intel mkl is installed as part of Intel ONEAPI and the setvars.sh script has been executed before
