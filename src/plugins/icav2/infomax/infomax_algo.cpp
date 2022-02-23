@@ -961,7 +961,11 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 #endif
 
 /* Initialize weights if zero array */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+	if (weights[cblas_idamax(chxch, weights, inc) - 1] == 0.0) eye(chans, weights);
+#else
 	if (weights[idamax_(&chxch,weights,&inc)-1] == 0.0) eye(chans,weights);
+#endif
 
 /* Allocate and initialize arrays and variables needed for momentum */
 	if (momentum > 0.0) {
@@ -1112,7 +1116,11 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 
 				j = chxch - 2;
 				for (i=1 ; i<chans ; i++) {
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+					cblas_dcopy(i, &yu[j], chans, &yu[j - chans + 1], inc);
+#else
 					dcopy_(&i,&yu[j],&chans,&yu[j-chans+1],&inc);
+#endif
 					j -= chans+1;
 				}
 
@@ -1140,7 +1148,11 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 #endif
 			
 /* Apply bias change */
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			if (bias) cblas_daxpy(chans, lrate, bsum, inc, bias, inc);
+#else
 			if (bias) daxpy_(&chans,&lrate,bsum,&inc,bias,&inc);
+#endif
 			
 /******************************** Add momentum ********************************/
 			if (momentum > 0.0) {
@@ -1157,8 +1169,11 @@ void ICAInfomax::runica(double *data, double *weights, int chans, int samples, d
 				dcopy_(&chxch,weights,&inc,prevweights,&inc);
 #endif
 			}
-			
+#if defined(Q_OS_MAC) || defined(MKL_BLAS_LAPACK_FUNCTIONS)
+			if (fabs(weights[cblas_idamax(chxch, weights, inc) - 1]) > MAX_WEIGHT)
+#else
 			if (fabs(weights[idamax_(&chxch,weights,&inc)-1]) > MAX_WEIGHT)
+#endif
 				wts_blowup = 1;
 
 			if (extended && !wts_blowup && extblocks>0 && blockno%extblocks==0) {
