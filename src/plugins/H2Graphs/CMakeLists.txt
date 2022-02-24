@@ -2,7 +2,6 @@
 project(H2Graphs)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 
 SET(SRCS GraphArrow.cpp GraphWindow.cpp GraphWindowPlots.cpp GraphArrowBase.cpp GraphArrowDir.cpp GraphArrowLag.cpp GraphColorMap.cpp
 GraphLegend.cpp GraphSet.cpp GraphSetModel.cpp H2Graphs.cpp GraphSensorItem.cpp GraphManagerWidget.cpp H2SelectPairsDial.cpp)

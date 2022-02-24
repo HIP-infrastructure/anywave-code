@@ -15,6 +15,7 @@ SET(LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set(INS_PLUGIN_INSTALL_DIR ${PROJECT_BINARY_DIR}/INS_Plugins) 
 
 if (APPLE) 
    include(mac.cmake)
@@ -48,8 +49,10 @@ if(MATIO_FOUND)
     INCLUDE_DIRECTORIES(MATIO_INCLUDE_DIRS)
 endif()
 
+
 # Add build flags - Armadillo will use openBLAS on Linux, Accelerate Framework on Mac OS and MKL on Windows.
-SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_BLAS -DARMA_USE_LAPACK -DAW_DISABLE_EPOCHING")
+#SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DARMA_DONT_USE_WRAPPER -DARMA_USE_BLAS -DARMA_USE_LAPACK -DAW_DISABLE_EPOCHING")
+SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DAW_DISABLE_EPOCHING")
 IF(USE_MKL)
      MESSAGE(STATUS "Settings CXX flags for MKL")
      SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -m64 -DMKL")
@@ -61,32 +64,6 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # when building, don't use the install RPATH already
 # (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-#IF(UNIX AND NOT APPLE)
-#   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-#   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-#   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='$ORIGIN/lib'")
-#ENDIF()
-
-#IF(APPLE)
-#   SET(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
-#   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-#   SET(APPLE_ID "Apple Development: thechewie13@gmail.com (MY3J8AN9H6)")
-#ENDIF()
-
-#IF(APPLE)
-#   SET(APP_BUNDLE "AnyWave.app")
-#   SET(APP_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/MacOS")
-#   SET(LIB_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Frameworks")
-#   SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
-#   SET(MEX_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins/MATLAB/AnyWave")
-#   SET(PLUGIN_INSTALL_DIR "${PROJECT_BINARY_DIR}/${APP_BUNDLE}/Contents/Plugins")
-#ELSE()
-#   SET(MEX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins/MATLAB/AnyWave")
-#   SET(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/Plugins")
-#ENDIF()
 
 # third party libs
 IF(BUILD_QWT)
@@ -101,7 +78,12 @@ LINK_DIRECTORIES(${QWT_LIBRARY})
 ENDIF()
 # customplot
 add_subdirectory(thirdparty/qcustomplot)
-
+# fftw3
+IF(APPLE) # APPLE build will no use MKL so we will use fftw3 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/fftw3-3.10/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/fftw3-3.10/lib)
+SET(FFTW3_LIBS fftw3.a fftw3_threads.a)
+ENDIF()
 
 # AnyWave SDK libraries
 add_subdirectory(src/Core)
@@ -176,3 +158,9 @@ add_subdirectory(src/plugins/EEPIO)
 add_subdirectory(src/plugins/CompumedicsPF)
 add_subdirectory(src/plugins/DeltamedBinTxtReader)
 add_subdirectory(src/plugins/Spectral)
+
+#optional
+IF(EXISTS ${CMAKE_SOURCE_DIR}/src/plugins/extra_plugins.cmake)
+MESSAGE(STATUS "Building optional plugins.")
+include(${CMAKE_SOURCE_DIR}/src/plugins/extra_plugins.cmake)
+ENDIF()
