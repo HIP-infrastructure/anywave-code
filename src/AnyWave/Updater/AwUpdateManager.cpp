@@ -393,9 +393,14 @@ void AwUpdateManager::updatePlugin(QSharedPointer<Component> c)
 			QString("Copy-Item -Path '%1' -Destination '%2' -recurse -force").arg(file.absoluteFilePath()).arg(destFile) });
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+		// copy all files unzipped (should get only one...)
+		if (QFile::exists(destFile))
+		    QFile::remove(destFile);
+		status = QFile::copy(file.absoluteFilePath(), destFile);
+																										
 
-      QStringList args  =  { file.absoluteFilePath(), destPath };
-      status = process.execute("/usr/bin/cp", args);
+//      QStringList args  =  { file.absoluteFilePath(), destPath };
+ //     status = process.execute("/usr/bin/cp", args);
 #endif
 		if (status != 0) {
 			throw AwException(QString("error copying %1 to %2").arg(file.absoluteFilePath()).arg(destFile));
