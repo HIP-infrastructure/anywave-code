@@ -134,6 +134,7 @@ protected:
 	QTime m_recordedTime;
 	QMultiMap<int, AwChannel*> m_channelTypes;
 	QList<QSharedPointer<AwChannel>> m_channelSharedPtrs;
+	QList<QSharedPointer<AwMarker>> m_markerSharedPtrs;
 
 	virtual void dataReceived();
 	virtual void applyChannelFilters();

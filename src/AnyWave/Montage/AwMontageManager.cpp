@@ -99,15 +99,6 @@ AwChannelList AwMontageManager::makeSEEGBipolar(AwChannelList& channels)
 //end of statics
 
 
-//QHash<QString, AwChannel *> AwMontageManager::cloneAsRecordedChannels()
-//{
-//	QHash<QString, AwChannel *> res;
-//	auto channels = m_asRecorded.values();
-//	for (auto c : channels)
-//		if (c != nullptr)
-//			res[c->name()] = c->duplicate();
-//	return res;
-//}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////::
 // Source/ICA specific
@@ -120,46 +111,14 @@ void AwMontageManager::clearICA()
 		if (c->isICA() && c->isVirtual())
 			m_channelsShrdPtrs.removeAll(c);
 	}
-	//m_channelsShrdPtrs.erase(std::remove_if(m_channelsShrdPtrs.begin(), m_channelsShrdPtrs.end(),
-	//	[](QSharedPointer<AwChannel> x) { return x->isICA() && x->isVirtual(); }));
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 	// DO NOT DELETE channels as they belong to a AwComponent instance
 	m_icaAsRecorded.clear();
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
-//	// remove previous ICA channels from asRecorded
-//	// DO NOT DELETE channels as they belong to a AwComponent instance
-//	for (auto c : m_icaAsRecorded)
-//		m_asRecorded.remove(c->name());
-//	m_icaAsRecorded.clear();
-//
-//	// remove ICA channels from current montage
-//	foreach(AwChannel *c, m_channels)
-//		if (c->isICA())	{
-//			m_channels.removeAll(c);
-//	//		delete c;
-//		}
-//	// warn views about new montage
-////	emit montageChanged(m_channels);
 }
 
 void AwMontageManager::clearSource(int type)
 {
-//	// remove Source of type 'type' from channels from asRecorded list
-//	foreach (AwSourceChannel *c, m_sourceAsRecorded) {
-//		if (c->type() == type) {
-//			m_asRecorded.remove(c->name());
-//			m_sourceAsRecorded.removeAll(c);
-//		}
-//	}
-//
-//	// remove Source channels of type 'type' from current montage
-//	foreach (AwChannel *c, m_channels)
-//		if (c->isSource() && c->type() == type)	{
-//			m_channels.removeAll(c);
-//			delete c;
-//		}
-//	// warn views about new montage
-////	emit montageChanged(m_channels);
 	foreach(AwSourceChannel * c, m_sourceAsRecorded) {
 		if (c->type() == type) {
 			m_asRecordedSharedPointerMap.remove(c->name());
@@ -247,33 +206,6 @@ int AwMontageManager::loadICA(const QString& path)
 		m_channelsShrdPtrs << QSharedPointer<AwChannel>(ica->duplicate());
 	}
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
-
-	//for (auto channel : icaChannels) {
-	//	if (m_asRecorded.contains(channel->name()))
-	//		m_asRecorded.remove(channel->name());
-	//	m_asRecorded.insert(channel->name(), channel);
-	//	m_channels << channel->duplicate();
-	//}
-
-//	AwDataManager::instance()->filterSettings().registerChannelType(AwChannel::ICA, QString("ICA-%1").arg(AwChannel::typeToString(i)));
-//	AwDataManager::instance()->filterSettings().setLimits(AwChannel::ICA, { comps[i]->hpFilter(), comps[i]->lpFilter() });
-
-	//// add ICA components to asRecorded and current montage.
-	//AwICAComponents **comps = ica_man->getAllComponents();
-	//for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-	//	if (comps[i] == NULL)
-	//		continue;
-	//	count += comps[i]->components().size();
-	//	foreach(AwICAChannel *channel, comps[i]->components()) {
-	//		m_icaAsRecorded << channel;
-	//		AwICAChannel *newChan = new AwICAChannel(channel);
-	//		m_channels << newChan;
-	//		// add ica to as recorded
-	//		m_asRecorded[channel->name()] = channel;
-	//	}
-	//	AwDataManager::instance()->filterSettings().registerChannelType(AwChannel::ICA, QString("ICA-%1").arg(AwChannel::typeToString(i)));
-	//	AwDataManager::instance()->filterSettings().setLimits(AwChannel::ICA, { comps[i]->hpFilter(), comps[i]->lpFilter() });
-	//}
 	setNewFilters(AwDataManager::instance()->filterSettings());
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("ICA Components"), QString(tr("%1 components added to the current montage.").arg(icaChannels.size())));
@@ -398,7 +330,6 @@ void AwMontageManager::removeBadChannels(AwChannelList& list)
 void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
 {
 	settings.apply(m_channels);
-	//settings.apply(m_asRecorded.values());
 	settings.apply(AwChannel::toChannelList(m_asRecordedSharedPointerMap.values()));
 	settings.apply(AwDataManager::instance()->reader()->infos.channels());
 }
@@ -436,27 +367,17 @@ void AwMontageManager::closeFile()
 
 void AwMontageManager::newMontage(AwFileIO *reader)
 {
-//	closeFile();
 	AwChannelList channels = reader->infos.channels();
 
 	m_channelsShrdPtrs.clear();
 
-		// init as recorded channels list
+	// init as recorded channels list
 	for (auto c : channels)  {
 		QSharedPointer<AwChannel> shrdChannel = QSharedPointer<AwChannel>(c->duplicate());
 		m_channelsShrdPtrs << shrdChannel;
 		m_asRecordedSharedPointerMap.insert(c->name(), QSharedPointer<AwChannel>(c->duplicate()));
-	//	m_asRecorded.insert(c->name(), shrdChannel.get());
-	//	m_asRecordedChannels << shrdChannel.get();
 		if (!c->isReference()) 
 			m_channels << shrdChannel.get();
-		//// insert in hash table
-		//m_asRecorded[c->name()] = c;
-		//m_asRecordedChannels << c;
-		//// make a copy a as recorded channel and insert it in channels.
-		//// do not insert Reference channels in default montage
-		//if (!c->isReference())
-		//	m_channels << c->duplicate();
 	}
 
 	// check for .bad file
@@ -466,76 +387,46 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		loadBadChannels();
 	
 	// check for local montages.
-	scanForMontagesInDirectory(AwDataManager::instance()->dataDir());
-//	scanForMontagesInDirectory(AwDataManager::instance()->bidsDir());
-
-	// get bids channels tsv if we are in BIDS mode
-	// consider it the default montage.
-	// also get bad channels from tsv and use them.
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive()) {
-			// BEWARE: getChannelsTsvMontage() will build a montage based on what is found in TSV file.
-			// but TSV file does not contain all the information an AwChannel (miss the sampling rate at first)
-	//		auto defaultTsvMontage = bm->getChannelsTsvMontage();
-			auto defaultTsvMontage = AwChannel::toSharedPointerList(bm->getChannelsTsvMontage());
-			if (!defaultTsvMontage.isEmpty()) {
-	//			AW_DESTROY_LIST(m_channels);
-				m_channels.clear();
-
-				// check for bad channels
-			//	AwChannelList tmp;
-				AwSharedPointerChannelList tmp;
-				m_badChannelLabels.clear();
-			//	for (auto c : defaultTsvMontage) {
-			    for (auto const& c : defaultTsvMontage) {
-					// update corresponding as recorded bad status
-					auto asRecorded = m_asRecordedSharedPointerMap.value(c->name());
-					if (!asRecorded.isNull()) {
-						// copy information from as recorded
-						c->setSamplingRate(asRecorded->samplingRate());
-						c->setGain(asRecorded->gain());
-						c->setUnit(asRecorded->unit());
-						asRecorded->setBad(c->isBad());
-						asRecorded->setType(c->type());
-						if (c->isBad()) {
-							m_badChannelLabels.append(c->name());
-						}
-					}
-					else {  // not found in as recorded => should never happened
-						tmp << c;
-					}
-				}
-				saveBadChannels();
-				if (!tmp.isEmpty()) {
-					for (auto const& t : tmp) {
-					//	m_channels.removeAll(t);
-					//	delete t;
-						defaultTsvMontage.removeAll(t);
-					}
-				}
-				m_channels = AwChannel::toChannelList(defaultTsvMontage);
-			}
-		}
-	}
+	scanForMontagesInDirectory(AwDataManager::instance()->currentMontageDir());
 
 	// check for .montage file
-	// BEWARE: if a .mtg exists, it will override the default TSV montage
 	auto dm = AwDataManager::instance();
 	m_montagePath = dm->mtgFilePath();
-
-	if (QFile::exists(m_montagePath))  {
+	if (QFile::exists(m_montagePath)) {
 		if (!loadMontage(m_montagePath)) {
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
-
+		setNewFilters(AwDataManager::instance()->filterSettings());
+		emit montageChanged(m_channels);
 	}
-	//// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
-	//if (AwDataManager::instance()->filterSettings().isEmpty()) {
-	//	AwDataManager::instance()->filterSettings().initWithChannels(m_channels);
-	//}
-	setNewFilters(AwDataManager::instance()->filterSettings());
-	emit montageChanged(m_channels);
+	else {  // no default montage found => read channels.tsv if BIDS is active
+		if (AwBIDSManager::isInstantiated()) {
+			auto bm = AwBIDSManager::instance();
+			if (bm->isBIDSActive()) {
+				auto defaultTsvMontage = bm->getChannelsTsvMontage();
+				if (!defaultTsvMontage.isEmpty()) {
+					m_channels.clear();
+					m_channelsShrdPtrs.clear();
+					m_badChannelLabels.clear();
+					for (AwChannel *defaultChannel : defaultTsvMontage) {
+						if (m_asRecordedSharedPointerMap.contains(defaultChannel->name())) {
+							QSharedPointer<AwChannel> asRecorded = m_asRecordedSharedPointerMap.value(defaultChannel->name());
+							asRecorded->setType(defaultChannel->type());
+							asRecorded->setBad(defaultChannel->isBad());
+							if (asRecorded->isBad())
+								m_badChannelLabels << asRecorded->name();
+							m_channelsShrdPtrs.append(QSharedPointer<AwChannel>(asRecorded.get()->duplicate()));
+						}
+					}
+					qDeleteAll(defaultTsvMontage);
+					saveBadChannels();
+					m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+					setNewFilters(AwDataManager::instance()->filterSettings());
+					emit montageChanged(m_channels);
+				}
+			}
+		}
+	}
 }
 
 ///
@@ -605,36 +496,6 @@ void AwMontageManager::loadBadChannels()
 	for (const auto& t : tmp)
 		m_channelsShrdPtrs.removeAll(t);
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
-	
-	//// reset as recorded channels bad status
-	//for (auto chan : m_asRecorded.values())
-	//	chan->setBad(false);
-	//for (auto label : m_badChannelLabels) {
-	//	AwChannel *chan = m_asRecorded.value(label);
-	//	if (chan)
-	//		chan->setBad(true);
-	//}
-	//foreach(AwChannel *chan, m_channels) {
-	//	AwChannel *asRecorded =  m_asRecorded.value(chan->name());
-	//	if (asRecorded) {
-	//		if (asRecorded->isBad()) {
-	//			m_channels.removeAll(chan);
-	//			delete chan;
-	//			continue;
-	//		}
-	//		// asRecorded chan exist and is NOT bad, then check for the reference channel 
-	//		// Is there a reference channel?
-	//		if (!chan->referenceName().isEmpty()) {
-	//			auto refChan = m_asRecorded.value(chan->referenceName());
-	//			if (refChan) { // reference exists check if it is bad.
-	//				if (refChan->isBad()) {
-	//					m_channels.removeAll(chan);
-	//					delete chan;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
 }
 
 void AwMontageManager::saveCurrentMontage()
@@ -673,12 +534,7 @@ void AwMontageManager::showInterface()
 
 		// Get as recorded channels and check if their types and bad status have changed.
 		for (auto c : ui.asRecordedChannels()) {
-		//	auto asRecorded = m_asRecorded.value(c->name()); 
 			auto asRecordedShrd = m_asRecordedSharedPointerMap.value(c->name());
-			//if (asRecorded) {
-			//	asRecorded->setBad(c->isBad());
-			//	asRecorded->setType(c->type());
-			//}
 			if (!asRecordedShrd.isNull()) {
 				asRecordedShrd->setBad(c->isBad());
 				asRecordedShrd->setType(c->type());
@@ -699,20 +555,7 @@ void AwMontageManager::showInterface()
 				newChannel->setHighFilter(ui.channels().at(i)->highFilter());
 				newChannel->setNotch(ui.channels().at(i)->notch());
 				m_channelsShrdPtrs << newChannel;
-
 			}
-			//auto asRecorded = m_asRecorded.value(labels.value(i));
-			//if (asRecorded) {
-			//	if (asRecorded->isVirtual())
-			//		m_channels << static_cast<AwVirtualChannel*>(asRecorded)->duplicate();
-			//	else
-			//		m_channels << asRecorded->duplicate();
-			//	// copy properties from ui montage channels to newly instantiated channels
-			//	m_channels.last()->setReferenceName(ui.channels().at(i)->referenceName());
-			//	m_channels.last()->setColor(ui.channels().at(i)->color());
-			//	m_channels.last()->setLowFilter(ui.channels().at(i)->lowFilter());
-			//	m_channels.last()->setHighFilter(ui.channels().at(i)->highFilter());
-			//}
 		}
 		m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 		m_badChannelLabels = ui.badLabels();

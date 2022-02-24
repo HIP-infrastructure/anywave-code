@@ -149,6 +149,10 @@ void AwDataManager::setNewRootDirForSideFiles(const QString& dir)
 	m_settings[keys::lvl2_file] = QString("%1/%2.lvl").arg(dir).arg(fileName);
 	// defines the default output_dir (can be overwritten by command line options)
 	m_settings[keys::output_dir] = dir;
+
+	// add default montage dir  => same as output_dir
+	m_settings[keys::current_montage_dir] = dir;
+
 	if (m_reader) {
 		m_reader->infos.setBadFile(m_settings.value(keys::bad_file).toString());
 		m_reader->infos.setMtgFile(m_settings.value(keys::montage_file).toString());
@@ -158,11 +162,7 @@ void AwDataManager::setNewRootDirForSideFiles(const QString& dir)
 
 void AwDataManager::applyFilters(const AwChannelList& channels)
 {
-	//if (m_filterSettings.isEmpty()) {
-	//	m_filterSettings.initWithChannels(channels);
-	//}
-	//else
-		m_filterSettings.apply(channels);
+	m_filterSettings.apply(channels);
 }
 
 int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
@@ -208,6 +208,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_settings[keys::bad_file] = QString("%1.bad").arg(fullDataFilePath);
 	m_settings[keys::marker_file] = QString("%1.mrk").arg(fullDataFilePath);
 	m_settings[keys::montage_file] = QString("%1.mtg").arg(fullDataFilePath);
+	m_settings[keys::current_montage_dir] = fi.absolutePath();
 	m_settings[keys::disp_file] = QString("%1.display").arg(fullDataFilePath);
 
 	// get predefined .mrk .bad .mtg if any
@@ -270,7 +271,7 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 		m_filterSettings.setGuiVisibleItems(m_reader->infos.channels());
 	
 	m_filterSettings.apply(m_reader->infos.channels());
-//	m_montageManager->newMontage(m_reader);
+
 	if (!commandLineMode) {
 		// Are there events?
 		if (m_reader->infos.blocks().at(0)->markersCount()) 

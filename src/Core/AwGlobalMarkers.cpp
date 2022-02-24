@@ -23,6 +23,12 @@ AwGlobalMarkers::AwGlobalMarkers()
 	m_displayed = m_total = nullptr;
 }
 
+void AwGlobalMarkers::closeFile()
+{
+	QMutexLocker lock(&m_mutex);
+	m_displayed = m_total = nullptr;
+}
+
 
 AwMarkerList* AwGlobalMarkers::displayed()
 {

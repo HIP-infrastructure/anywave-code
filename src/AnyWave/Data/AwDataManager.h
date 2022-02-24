@@ -67,6 +67,7 @@ public:
 	inline QString mtgFilePath() { return m_settings.value(keys::montage_file).toString(); }
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QString dispFilePath() { return m_settings.value(keys::disp_file).toString(); }
+	inline QString currentMontageDir() { return m_settings.value(keys::current_montage_dir).toString(); }
 	QString bidsDir();
 	inline QVariantMap& settings() { return m_settings; }
 	inline int status() { return m_status; }

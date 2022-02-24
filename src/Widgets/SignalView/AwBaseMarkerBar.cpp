@@ -72,7 +72,10 @@ AwMarker *AwBaseMarkerBar::findMarkerBetween(float low, float high)
 
 void AwBaseMarkerBar::refresh()
 {
-	m_markers = *AwGlobalMarkers::instance()->displayed();
+	auto list = AwGlobalMarkers::instance()->displayed();
+	if (list == nullptr)
+		return;
+	m_markers = *list;
 	m_globalRepaintNeeded = true;
 	repaint();
 }
@@ -180,7 +183,12 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 {
 	if (m_totalDuration <= 0) 
 		return;
-	
+	auto list = AwGlobalMarkers::instance()->displayed();
+	if (list == nullptr)
+		m_markers.clear();
+	else
+		m_markers = *list;
+		
 	QPainter painter(this);
 	QBrush brushSelection;
 	brushSelection.setStyle(Qt::Dense4Pattern);

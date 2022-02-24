@@ -42,6 +42,8 @@ namespace keys {
 	constexpr auto lvl2_file = "lvl2_file";			// path to .levels (amplitude)
 	constexpr auto disp_file = "disp_file";			// path to .display file (display setup)
 	constexpr auto bids_dir = "bids_dir";			// set when in BIDS mode => path to anywave derivatices for the current open file
+	constexpr auto current_montage_dir = "current_montage_dir"; // can be either the current data dir if the file is not in a BIDS
+	// or the current derivatives user folder if the file belongs to a BIDS dir.
 
 	constexpr auto file_duration = "file_duration";
 	constexpr auto bad_labels = "bad_labels";

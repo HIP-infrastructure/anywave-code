@@ -54,10 +54,6 @@ protected slots:
 	void pickupFile();
 	void selectChannels();
 	void selectICAChannels();
-//	void addSkipLabel();
-//	void addUseLabel();
-//	void clearSkip();
-//	void clearUse();
 	void updateOutputFileExtension(int);
 protected:
 	AwProcess* m_process;

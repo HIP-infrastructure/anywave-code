@@ -134,7 +134,6 @@ protected:
 	QList<QPair<QString, AwBIDSItem*>> buildSubjectItems(const QString& rootDir);
 	AwBIDSItems getSubjectItems(const QString&);
 
-//	AwBIDSItems recursiveParsing2(const QString& dirPath, AwBIDSItem* parentItem);
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findItem(const QString& filePath);

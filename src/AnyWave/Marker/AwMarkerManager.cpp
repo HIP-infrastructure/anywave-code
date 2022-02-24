@@ -61,6 +61,7 @@ AwMarkerManager::AwMarkerManager()
 	m_dock = nullptr;
 	m_markerInspector = new AwMarkerInspector();	
 	auto globals = AwGlobalMarkers::instance();
+	globals->setParent(this);
 	globals->setDisplayed(&m_displayedMarkers);
 	globals->setTotal(&m_markers);
 }
@@ -328,7 +329,7 @@ void AwMarkerManager::init()
 {
 	auto dm = AwDataManager::instance();
 	m_filePath = dm->mrkFilePath();
-
+	auto globals = AwGlobalMarkers::instance();
 	m_ui->setEnabled(true);
 	if (QFile::exists(m_filePath)) {
 		AwWaitWidget wait("Markers");
@@ -342,6 +343,8 @@ void AwMarkerManager::init()
 		m_needSorting = true;
 		removeOfflimits();
 		removeDuplicates();
+		globals->setDisplayed(&m_displayedMarkers);
+		globals->setTotal(&m_markers);
 		if (!m_markers.isEmpty()) {
 			// avoid markers that out of data bounds (do not load marker that could be positionned after the end of data)
 			m_ui->setMarkers(m_markers);
@@ -359,6 +362,7 @@ void AwMarkerManager::closeFile()
 	clear();
 	m_filePath = "";
 	m_markersModified = false;
+	AwGlobalMarkers::instance()->closeFile();
 }
 
 void AwMarkerManager::quit()

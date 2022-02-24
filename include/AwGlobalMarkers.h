@@ -19,6 +19,7 @@ public:
 	AwMarkerList* total();
 	void setDisplayed(AwMarkerList* list);
 	void setTotal(AwMarkerList* list);
+	void closeFile();
 protected:
 	explicit AwGlobalMarkers();
 

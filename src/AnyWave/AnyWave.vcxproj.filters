@@ -113,6 +113,9 @@
     <Filter Include="Updater">
       <UniqueIdentifier>{28d04abc-c7d2-41ce-97aa-5026f47a626f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IO\export">
+      <UniqueIdentifier>{26e02caa-2dd8-4632-b145-d6b821165ec5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\AwDataConnection.cpp">
