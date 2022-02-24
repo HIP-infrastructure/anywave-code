@@ -427,6 +427,8 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 			}
 		}
 	}
+	setNewFilters(AwDataManager::instance()->filterSettings());
+	emit montageChanged(m_channels);
 }
 
 ///
