@@ -2,7 +2,7 @@
 #include <QObject>
 #include <QWidget>
 #include <AwChannel.h>
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) ||  defined(Q_OS_LINUX)
 #define ARMA_DONT_USE_WRAPPER
 #endif
 #include <aw_armadillo.h>

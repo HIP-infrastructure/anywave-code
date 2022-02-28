@@ -146,26 +146,7 @@ extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 #endif
 #endif
 
-#ifdef Q_OS_LINUX
-#include <mkl.h>
-#define dscal_ dscal
-#define ddot_ ddot
-#define idamax_ idamax
-#define ilaenv_ ilaenv
-#define dcopy_ dcopy
-#define dswap_ dswap
-#define daxpy_ daxpy
-#define dgemv_ dgemv
-#define dgemm_ dgemm
-#define dsymm_ dsymm
-#define dsyrk_ dsyrk
-#define dsyev_ dsyev
-#define dgesv_ dgesv
-#define dgetri_ dgetri
-#define dgetrf_ dgetrf
-#endif
-
-// #ifdef Q_OS_MAC
+// #ifdef Q_OS_LINUX
 // #include <mkl.h>
 // #define dscal_ dscal
 // #define ddot_ ddot
@@ -183,6 +164,28 @@ extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
 // #define dgetri_ dgetri
 // #define dgetrf_ dgetrf
 // #endif
+
+// on Mac with clang, always use Accelerate Framework for blas routines even if MKL is installed
+#ifdef Q_OS_LINUX
+//#include <Accelerate/Accelerate.h>
+extern "C" int idamax_(int *, double *, int *);
+extern "C" void dcopy_(int *, double *, int *, double *, int *);
+extern "C" void dsymm_(char *, char *, int *, int *, double *, double *, int *, double *, int *, double *, double *, int *);
+extern "C" void daxpy_(int *, double *, double *, int *, double *, int *);
+extern "C" int ilaenv_(int *, char *, char *, int *, int *, int *, int *);
+extern "C" void dscal_(int *, double *, double *, int *);
+extern "C" void dswap_(int *, double *, int *, double *, int *);
+extern "C" void dgetri_(int*, double*, int*, int*, double*, int*, int*);
+extern "C" void dgetrf_(int*, int*, double*, int*, int*, int*);
+extern "C" double ddot_(int*, double*, int*, double*, int *);
+extern "C" void dsyev_(char*, char*, int*, double*, int*, double*, double*, int*, int*);		
+extern "C" void dsyrk_(char*, char*, int*, int*, double*, double*, int*, double*, double*, int*);
+extern "C" void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int *);
+// extern "C" void dgemv_(const char* transA, const blas_int* m, const blas_int* n, const double*   alpha, const double*   A, const blas_int* ldA, const double*   x, const blas_int* incx, const double*   beta, double*   y, const blas_int* incy, blas_len transA_len);
+ extern "C" void dgemv_(char *, blas_int *, blas_int *, double *, double *, blas_int *, double *, blas_int *, double *, double *, blas_int *);
+ extern "C" void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
+#endif
+
 
 
 // on Mac with clang, always use Accelerate Framework for blas routines even if MKL is installed

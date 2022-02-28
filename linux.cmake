@@ -2,7 +2,6 @@
 IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
    MESSAGE(STATUS "GCC compiler detected")
    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -fPIC -O3 -D_REENTRANT -pipe -std=gnu++1z -DNDEBUG")
-#   add_definitions("-w -fPIC -O3 -D_REENTRANT -pipe -std=gnu++1z -DNDEBUG") # g++ flags
 ELSE()
     MESSAGE(STATUS "gcc compiler not found.")
     return()
@@ -31,47 +30,40 @@ find_package(Qt5X11Extras REQUIRED)
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
-IF(USE_MKL) # Must be set if the system has oneapi mkl installed 
- # find_package(MKL_ REQUIRED)      
-   # We assume intel mkl is installed as part of Intel ONEAPI and the setvars.sh script has been executed before
-   SET(MKL_ARCH intel64)
-   SET(MKL_LINK dynamic)
-   SET(MKL_THREADING intel_thread)
-   SET(MKL_INTERFACE lp64)
-   find_package(MKL REQUIRED)
+# IF(USE_MKL) # Must be set if the system has oneapi mkl installed 
+#  # find_package(MKL_ REQUIRED)      
+#    # We assume intel mkl is installed as part of Intel ONEAPI and the setvars.sh script has been executed before
+#    SET(MKL_ARCH intel64)
+#    SET(MKL_LINK dynamic)
+#    SET(MKL_THREADING intel_thread)
+#    SET(MKL_INTERFACE lp64)
+#    find_package(MKL REQUIRED)
    
-   MESSAGE(STATUS "MKL Include: ${MKL_INCLUDE}")
-   MESSAGE(STATUS "MKL core: ${MKL_CORE}")
-   MESSAGE(STATUS "MKL link: ${MKL_THREAD_LIB} ${MKL_SUPP_LINK}")
-   MESSAGE(STATUS "MKL link: ${MKL_LIBRARIES}")
+#    MESSAGE(STATUS "MKL Include: ${MKL_INCLUDE}")
+#    MESSAGE(STATUS "MKL core: ${MKL_CORE}")
+#    MESSAGE(STATUS "MKL link: ${MKL_THREAD_LIB} ${MKL_SUPP_LINK}")
+#    MESSAGE(STATUS "MKL link: ${MKL_LIBRARIES}")
+#     SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
+#    #SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lm -ldl")
+#    SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lgomp -lm -ldl")
 
-   #SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 ${MKL_THREAD_LIB} mkl_intel_lp64 mkl_core mkl_intel_thread ")
-   #MESSAGE(STATUS "${MKL_IMPORTED_TARGETS}") #Provides available list of targets based on input)
- #  IF(NOT DEFINED ENV{MKLROOT})
- #      MESSAGE(STATUS "MKLROOT variable not defined. please run vars.sh script to init mkl vars")
- #      RETURN()
- #  ENDIF()
- #   SET(MKLROOT $ENV{MKLROOT})
- #  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-   SET(USE_MKL TRUE CACHE BOOL "Using MKL libraries")
-   #SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lm -ldl")
-   SET(BLAS_LIBRARIES "-L${MKL_ROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -lpthread -lgomp -lm -ldl")
-#   SET(BLAS_LIBRARIES ${MKL_LIBRARIES} "-lpthread -lm -ldl")
-#   SET(BLAS_LIBRARIES "${MKL_LINK_LINE} ${MKL_THREAD_LIB} ${MKL_SUPP_LINK}")
-#    MESSAGE(STATUS "MKL libraires: ${BLAS_LIBRARIES}")
-#    MESSAGE(STATUS "MKL Include dir: ${MKL_INCLUDE}")
- #   MESSAGE(STATUS "MKKL: ${MKLROOT}") # ${MKL_ARCH} ${MKL_INCLUDE} ${MKL_LINK} ${MKL_THREADING} ${MKL_INTERFACE_FULL}")
- #   INCLUDE_DIRECTORIES(${MKLROOT}/include)
+# ELSE(USE_MKL)
+#     find_package(OpenBLAS REQUIRED)
+#     SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
+#     SET(OPEN_BLAS_FOUND TRUE)
+# ENDIF()
 
-    # Manual linking
-    #SET(BLAS_LIBRARIES "-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lpthread -lm -ldl  ${MKL_THREAD_LIB}")
-
-   # MESSAGE(STATUS "BLAS: ${BLAS_LIBRARIES}")
-ELSE(USE_MKL)
-    find_package(OpenBLAS REQUIRED)
-    SET(BLAS_LIBRARIES ${OpenBLAS_LIB})
-    SET(OPEN_BLAS_FOUND TRUE)
+IF(NOT USE_MKL)
+find_package(OpenBLAS REQUIRED)
+find_package(FFTW REQUIRED)
+SET(FFTW3_LIBS fftw3.a fftw3_threads.a)
 ENDIF()
+
+
+# Armadillo
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo-linux/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo-linux/lib)
+SET(ARMA_LIB armadillo)
 
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/AnyWave)
 
@@ -100,6 +92,4 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION ${CMAKE_INSTALL_PREFIX})
 # include 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include DESTINATION ${CMAKE_INSTALL_PREFIX})
 # symlink
-#INSTALL(EXECUTE_PROCESS(COMMAND ln -sf  ${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/bin/anywave))
-#INSTALL(COMMAND ln -sf  ${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/bin/anywave)
 INSTALL(CODE "execute_process(COMMAND ln -sf  ${CMAKE_INSTALL_PREFIX}/start_aw.sh /usr/bin/anywave)")

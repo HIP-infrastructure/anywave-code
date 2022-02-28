@@ -1,13 +1,5 @@
-#SET(MATIO_HOME /users/bruno/dev/lib/matio)
-#SET(HDF5_ROOT /users/bruno/dev/lib/hdf5)
-#SET(QWT_ROOT /users/bruno/dev/lib/qwt)
-
-
-
 SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -I/usr/include -L/usr/lib -w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13")
-#add_definitions("-w -fPIC -O3 -fpermissive -DNDEBUG -mmacosx-version-min=10.13") # clang flags
-
 
 MESSAGE(STATUS "Building macos intel64 with Qt5")
 find_package(Qt5Core REQUIRED)

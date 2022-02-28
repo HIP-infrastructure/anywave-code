@@ -48,7 +48,7 @@ ICA::ICA()
 	auto infomax = new ICAInfomax(this);
 	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 	m_algorithms << infomax;
-#if defined(Q_OS_WIN)  || defined(Q_OS_LINUX)
+#if defined(Q_OS_WIN) 
 	auto sobi = new ICASobi(this);
 	connect(sobi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 	m_algorithms << sobi;
