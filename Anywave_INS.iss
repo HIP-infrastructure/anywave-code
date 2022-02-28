@@ -55,7 +55,6 @@ Source: ".\bin\x64\Release\Plugins\BrainVisionIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\Deltamed_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEGInto4D.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\Rewrite4DNI.dll"; DestDir: "{app}\Plugins";
-Source: ".\bin\x64\Release\Plugins\Correlation.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CTF_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\FileConverter.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\H2.dll"; DestDir: "{app}\Plugins";
