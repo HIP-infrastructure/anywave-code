@@ -254,62 +254,6 @@ int AwPluginManager::unloadPlugin(const QString& name)
 		m_writerFactory.removePlugin(name);
 		m_processFactory.removePlugin(name);
 		m_filterFactory.removePlugin(name);
-	}
-
-	//for (AwFileIOPlugin* p : m_readers) {
-	//	if (p->name == name) {
-	//		m_readerFactory.removePlugin(name);
-	//		m_readers.removeAll(p);
-	//		m_pluginList.removeAll(p);
-	//		plugin = p;
-	//		break;
-	//	}
-	//}
-	//if (!plugin) {
-	//	for (AwFileIOPlugin* p : m_writers) {
-	//		if (p->name == name) {
-	//			m_writerFactory.removePlugin(name);
-	//			m_writers.removeAll(p);
-	//			m_pluginList.removeAll(p);
-	//			plugin = p;
-	//			break;
-	//		}
-	//	}
-	//}
-	//if (!plugin) {
-	//	for (AwProcessPlugin* p : m_processes) {
-	//		if (p->name == name) {
-	//			m_processFactory.removePlugin(name);
-	//			m_processes.removeAll(p);
-	//			m_pluginList.removeAll(p);
-	//			plugin = p;
-	//			break;
-	//		}
-	//	}
-	//}
-	//if (plugin) {
-	//	for (AwDisplayPlugin* p : m_displays) {
-	//		if (p->name == name) {
-	//			m_displayFactory.removePlugin(name);
-	//			m_displays.removeAll(p);
-	//			m_pluginList.removeAll(p);
-	//			plugin = p;
-	//			break;
-	//		}
-	//	}
-	//}
-	//if (plugin) {
-	//	for (AwFilterPlugin* p : m_filters) {
-	//		if (p->name == name) {
-	//			m_filterFactory.removePlugin(name);
-	//			m_filters.removeAll(p);
-	//			m_pluginList.removeAll(p);
-	//			plugin = p;
-	//			break;
-	//		}
-	//	}
-	//}
-	if (plugin) {
 		auto loader = m_loaders.value(plugin);
 		if (loader) { // loader can be nullptr if we handle a python or matlab plugin
 			m_loaders.remove(plugin);

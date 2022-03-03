@@ -85,6 +85,7 @@ private:
 	bool m_needSorting, m_markersModified;
 	AwMarkerList m_markers;				// Markers that are currently visible
 	AwMarkerList m_displayedMarkers;	// Currently displayed markers
+
 	QMutex m_mutex;
 	static AwMarkerManager *m_instance;
 	QString m_filePath;

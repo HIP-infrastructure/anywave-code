@@ -158,6 +158,7 @@ void AwMarkerManager::removeOfflimits()
 void AwMarkerManager::setMarkers(const AwMarkerList& markers)
 {
 	m_displayedMarkers = markers;
+
 	emit displayedMarkersChanged(m_displayedMarkers);
 	// auto save markers
 	saveMarkers(m_filePath);

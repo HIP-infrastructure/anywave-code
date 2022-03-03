@@ -142,11 +142,11 @@ bool AwFilterModel::setData(const QModelIndex &index, const QVariant &value, int
 		values[0] =(float)value.toDouble();
 		m_settings.set(type, values);
 	}
-	if (col == FILTER_COLUMN_LPF && role == Qt::EditRole) {
+	else if (col == FILTER_COLUMN_LPF && role == Qt::EditRole) {
 		values[1] = (float)value.toDouble();
 		m_settings.set(type, values);
 	}
-	if (col == FILTER_COLUMN_NOTCH && role == Qt::EditRole) {
+	else if (col == FILTER_COLUMN_NOTCH && role == Qt::EditRole) {
 		values[2] = (float)value.toDouble();
 		m_settings.set(type, values);
 	}

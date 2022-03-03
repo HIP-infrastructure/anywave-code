@@ -56,7 +56,7 @@ AwFilterSettings& AwFilterSettings::operator=(const AwFilterSettings& other)
 		this->m_hash = other.m_hash;
 		this->m_limits = other.m_limits;
 		this->m_guiVisibleItems = other.m_guiVisibleItems;
-//		this->m_registeredChannelTypes = other.m_registeredChannelTypes;
+
 		this->m_filters = other.m_filters;
 	}
 	return *this;
@@ -89,7 +89,7 @@ void AwFilterSettings::set(int type, const QVector<float>& values)
 	if (m_filters.contains(type))
 		m_filters.remove(type);
 	m_filters.insert(type, values);
-//	registerChannelType(type, AwChannel::typeToString(type));
+
 }
 
 void AwFilterSettings::set(int type, float hp, float lp, float notch)
@@ -105,21 +105,6 @@ void AwFilterSettings::setLimits(int type, const QVector<float>& values)
 	m_limits.insert(type, values);
 }
 
-//void AwFilterSettings::initWithChannels(const AwChannelList& channels)
-//{
-//	// check for type of channels. Do not initiate filtering, just set the channels that might be filtered by the user afterward.
-//
-//	// get type of channels
-//	auto types = AwChannel::getTypesAsInt(channels);
-//	// remove channels we don't want the user can filter (Trigger, Other)
-//	types.removeAll(AwChannel::Trigger);
-//	types.removeAll(AwChannel::Other);
-//	for (int i : types) {
-//		this->set(i, 0., 0., 0.);
-//	}
-//	updateGUI();
-//}
-
 void AwFilterSettings::apply(AwChannel *channel) const
 {
 	if (channel == nullptr)
@@ -127,30 +112,12 @@ void AwFilterSettings::apply(AwChannel *channel) const
 
 	auto filters = m_filters.value(channel->type());
 
-	if (filters[0] == 0. && filters[1] == 0. && filters[2] == 0.)
-		return;
+//	if (filters[0] == 0. && filters[1] == 0. && filters[2] == 0.)
+//		return;
 
 	channel->setHighFilter(filters[0]);
 	channel->setLowFilter(filters[1]);
 	channel->setNotch(filters[2]);
-
-	//if (!m_filters.contains(channel->type()))
-	//	return;
-
-	// ALLOW FILTERING OF ICA VIRTUAL CHANNELS (January 2022)
-
-	//// Check for ICA/Source if the channel is real or virtual: DO NOT FILTER ICA/Source Virtual Channels.
-	//if (channel->isICA() || channel->isSource())
-	//	if (channel->isVirtual())
-	//		return;
-
-	// ALLOW FILTERING OF ICA VIRTUAL CHANNELS (January 2022) Uncomment previous lines to disable filtering again
-
-
-	//QVector<float> tmp = m_filters.value(channel->type());
-	//channel->setHighFilter(tmp[0]);
-	//channel->setLowFilter(tmp[1]);
-	//channel->setNotch(tmp[2]);
 }
 
 void AwFilterSettings::apply(const AwChannelList& channels) const
@@ -196,7 +163,7 @@ void AwFilterSettings::load(const QString& path)
 		throw AwException(QString("Json error: %1.").arg(error.errorString()), origin);
 		return;
 	}
-//	m_filters.clear();
+
 	// types that can be filtered:
 	// all types of channels can be filtered
 	auto types = AwChannel::types;
@@ -215,7 +182,7 @@ void AwFilterSettings::load(const QString& path)
 			m_guiVisibleItems << AwChannel::stringToType(t);
 		}
 	}
-//	if (m_filters.isEmpty()) { // empty hash table means the json format is old/wrong
+
      if (m_guiVisibleItems.isEmpty()) {
 		//throw AwException(QString("json format is too old or incompatible."), origin);
 		// read old format and convert it.
@@ -252,13 +219,6 @@ void AwFilterSettings::load(const QString& path)
 	updateGUI();
 	emit settingsChanged(*this);
 }
-
-//void AwFilterSettings::registerChannelType(int type, const QString& name)
-//{
-//	if (m_registeredChannelTypes.contains(type))
-//		m_registeredChannelTypes.remove(type);
-//	m_registeredChannelTypes.insert(type, name);
-//}
 
 QWidget *AwFilterSettings::ui()
 {
@@ -297,6 +257,5 @@ void AwFilterSettings::setNewSettings(const AwFilterSettings& settings)
 	m_limits = settings.m_limits;
 	m_filters = settings.m_filters;
 	m_guiVisibleItems = settings.m_guiVisibleItems;
-//	m_registeredChannelTypes = settings.m_registeredChannelTypes;
 	emit settingsChanged(*this);
 }

@@ -26,7 +26,8 @@ void TCPRequest::connect()
 	m_socket.connectToHost(MATLAB_Interface::host, MATLAB_Interface::port);
 	if (!m_socket.waitForConnected()) {
 		m_status = TCPRequest::Failed;
-		m_errorString = QString("Failed to connect to AnyWae: %1").arg(m_socket.errorString());
+		m_errorString = QString("Failed to connect to AnyWave: %1\n").arg(m_socket.errorString());
+		m_errorString += QString("Host: %1 Port: %2").arg(MATLAB_Interface::host).arg(MATLAB_Interface::port);
 		throw(m_errorString);
 	}
 	else

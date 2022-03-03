@@ -32,7 +32,7 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *pro
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
 
-	AwFileIO *reader = NULL;
+	AwFileIO *reader = nullptr;
 	QString file;
 	QStringList channels;
 	AwMarkerList markers;
@@ -52,6 +52,10 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *pro
 				emit log("The file specified could not be open by AnyWave.");
 				success = false;
 			}
+		}
+		else {
+			emit log("The file specified could not be open by AnyWave.");
+			success = false;
 		}
 	}
 
