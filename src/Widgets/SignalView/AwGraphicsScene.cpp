@@ -155,6 +155,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 	m_visibleSignalItems = m_signalItems;
 	m_selectedSignalItems.clear();
 	updateVisibleItemsHashTable();
+	selectChannels(m_settings->channelSelection);
 	emit numberOfDisplayedChannelsChanged(m_visibleSignalItems.size());
 }
 
@@ -229,6 +230,7 @@ void AwGraphicsScene::applyNewSettings(AwViewSettings* settings)
 	}
 	if (settings->timeScaleMode == AwViewSettings::FixedPageDuration)
 		m_pageDuration = settings->fixedPageDuration;
+	selectChannels(m_settings->channelSelection);
 }
 
 void AwGraphicsScene::refresh()
@@ -273,10 +275,12 @@ void AwGraphicsScene::setPositionInFile(float pos)
 void AwGraphicsScene::updateSelection()
 {
 	int count = 0;
+	
 	for (auto i : selectedItems()) {
 		auto sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
-		if (sitem)
+		if (sitem) {
 			count++;
+		}
 	}
 	emit channelsSelectionChanged(count);
 }
@@ -432,9 +436,11 @@ void AwGraphicsScene::unselectChannels(const QStringList& labels)
 // the last channel is made visible in the view
 void AwGraphicsScene::selectChannels(const QStringList& labels)
 {
-	AwGraphicsSignalItem *last_item = NULL;
+	if (labels.isEmpty())
+		return;
+	AwGraphicsSignalItem *last_item = nullptr;
 	for (auto i : m_signalItems) {
-		if (labels.contains(i->channel()->name())) {
+		if (labels.contains(i->channel()->fullName())) {
 			i->setSelected(true);
 			i->channel()->setSelected(true);
 			last_item = i;
@@ -716,14 +722,6 @@ void AwGraphicsScene::goToLatency()
 		centerViewOnPosition(dlg.position());
 }
 
-void AwGraphicsScene::showMarkers(bool show)
-{
-	m_showMarkers = show;
-	updateMarkers();
-	update();
-}
-
-
 void AwGraphicsScene::highlightMarker(AwMarker *marker)
 {
 	if (marker)	{
@@ -837,6 +835,13 @@ void AwGraphicsScene::setMarkers(const AwMarkerList& markers)
 	m_markers = markers; updateMarkers(); update(); 
 }
 
+void AwGraphicsScene::showMarkers(bool show)
+{
+	m_showMarkers = show;
+	updateMarkers();
+	update();
+}
+
 void AwGraphicsScene::updateMarkers()
 {
 	clearMarkers();
@@ -847,7 +852,7 @@ void AwGraphicsScene::updateMarkers()
 	if (m_markers.isEmpty())
 		return;
 
-	AwMarkerItem *prev = NULL;
+	AwMarkerItem *prev = nullptr;
 
 	for (int i = 0; i < m_markers.count(); i++)	{
 		if (m_markers.at(i)->targetChannels().isEmpty())	{
@@ -859,30 +864,18 @@ void AwGraphicsScene::updateMarkers()
 			prev = item;
 		}
 		else { // marker with target channel(s)
-			for (auto const& target : m_markers.at(i)->targetChannels())	{
-				QString dest = target.trimmed(), ref;
-				AwMarker *m = NULL;
-				// check for monopolar target
-				QStringList bipolar = dest.split("-");
-				if (bipolar.size() == 2) { // got a bipolar target
-					dest = bipolar.at(0).trimmed();
-					ref = bipolar.at(1).trimmed();
-				}
-
-				// find all channels with that name in visible channels
-				QList<AwGraphicsSignalItem *> items = m_hashNameToItem.values(dest);
+			for (auto const& target : m_markers.at(i)->targetChannels()) {
+				QList<AwGraphicsSignalItem*> items = m_hashNameToItem.values(target);
 				if (items.isEmpty())
 					continue;
 
 				auto height = this->height() / m_signalItems.size();
 				for (auto item : items) {
-					if (item->channel()->referenceName() == ref) {
-						AwMarkerChannelItem *amci = new AwMarkerChannelItem(m_physics, m_markers.at(i), item, height, this);
-						addItem(amci);
-						amci->setPositionInFile(m_currentPosInFile - m_startPosition);
-						m_markerItemsDisplayed << amci;
-						amci->updatePosition();
-					}
+					AwMarkerChannelItem* amci = new AwMarkerChannelItem(m_physics, m_markers.at(i), item, height, this);
+					addItem(amci);
+					amci->setPositionInFile(m_currentPosInFile - m_startPosition);
+					m_markerItemsDisplayed << amci;
+					amci->updatePosition();
 				}
 			}
 		}

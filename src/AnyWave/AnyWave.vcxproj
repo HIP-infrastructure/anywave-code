@@ -26,6 +26,7 @@
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
     <ClCompile Include="AwComponents.cpp" />
+    <ClCompile Include="AwExport.cpp" />
     <ClCompile Include="AwExportDial.cpp" />
     <ClCompile Include="AwFileOpenSave.cpp" />
     <ClCompile Include="AwHelpMenu.cpp" />
@@ -85,6 +86,12 @@
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp" />
+    <ClCompile Include="IO\export\AwChannelsExportWizardPage.cpp" />
+    <ClCompile Include="IO\export\AwExporter.cpp" />
+    <ClCompile Include="IO\export\AwExportWizardDial.cpp" />
+    <ClCompile Include="IO\export\AwFilterExportWizardPage.cpp" />
+    <ClCompile Include="IO\export\AwMarkersExportWizardPage.cpp" />
+    <ClCompile Include="IO\export\AwOutputFileWizardPage.cpp" />
     <ClCompile Include="IO\JSON\AwJSON.cpp" />
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp" />
     <ClCompile Include="IO\MEMIO\MEMIO.cpp" />
@@ -144,7 +151,6 @@
     <ClCompile Include="Prefs\AwPython.cpp" />
     <ClCompile Include="Prefs\AwPythonSetttings.cpp" />
     <ClCompile Include="Prefs\AwSettings.cpp" />
-    <ClCompile Include="Process\AwExporter.cpp" />
     <ClCompile Include="Process\AwExporterMarkerModel.cpp" />
     <ClCompile Include="Process\AwExporterSelMarkers.cpp" />
     <ClCompile Include="Process\AwExporterSettings.cpp" />
@@ -255,6 +261,12 @@
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
     <QtMoc Include="IO\MEMIO\MEMIO.h">
     </QtMoc>
+    <QtMoc Include="IO\export\AwChannelsExportWizardPage.h" />
+    <QtMoc Include="IO\export\AwExportWizardDial.h" />
+    <QtMoc Include="IO\export\AwOutputFileWizardPage.h" />
+    <QtMoc Include="IO\export\AwMarkersExportWizardPage.h" />
+    <QtMoc Include="IO\export\AwFilterExportWizardPage.h" />
+    <QtMoc Include="IO\export\AwExporter.h" />
     <ClInclude Include="IO\JSON\AwJSON.h" />
     <ClInclude Include="Marker\AwExtractTriggers.h" />
     <QtMoc Include="Marker\AwMarkersExportWidget.h">
@@ -290,8 +302,6 @@
     <QtMoc Include="Process\AwProcessLog.h">
     </QtMoc>
     <QtMoc Include="Marker\AwPickChannelsDial.h">
-    </QtMoc>
-    <QtMoc Include="Process\AwExporter.h">
     </QtMoc>
     <QtMoc Include="Process\AwExporterSettings.h">
     </QtMoc>

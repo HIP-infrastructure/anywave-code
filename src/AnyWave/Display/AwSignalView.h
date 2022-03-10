@@ -36,7 +36,7 @@ public:
 	void setCursorPosition(float pos);
 	void enableView();
 	void closeFile();
-	void quit();
+	
 	inline void setProcessFlags(int flags) { m_processFlags = flags; }
 	void updateChannels();	// apply gains and redisplay channels
 	void removeHighLigthMarker();

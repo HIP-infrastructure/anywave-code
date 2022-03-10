@@ -53,6 +53,8 @@ public:
 	void setNewChannels(const AwChannelList& channels, bool duplicate = false);
 	/** Set a new list of markers. Previous markers will be deleted!!  duplicate indicates that the list will be duplicated and then set as the new list. **/
 	void setNewMarkers(const AwMarkerList& markers, bool duplicate = false);
+	/** set the new list, markers are not duplicated and previous markers are not deleted **/
+	void setMarkers(const AwMarkerList& markers) { m_markers = markers; }
 	/** Set the resulting marker list after filtering input markers with use_markers or skip_markers **/
 	void setModifiedMarkers(const AwMarkerList& markers);
 	/** Append markers **/

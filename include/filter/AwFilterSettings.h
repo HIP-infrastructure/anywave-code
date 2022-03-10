@@ -23,12 +23,11 @@ class AW_FILTER_EXPORT AwFilterSettings : public QObject
 {
 	Q_OBJECT
 public:
-	AwFilterSettings();
+	AwFilterSettings(bool noInit = false);
 	AwFilterSettings(const AwFilterSettings& copy);
 
 	~AwFilterSettings();
 	AwFilterSettings& operator=(const AwFilterSettings& other);
-
 
 	/** clean up all filter settings and bounds **/
 	void clear();
@@ -45,8 +44,6 @@ public:
 	void apply(AwChannel *channel) const;
 	/** apply the current settings to a whole list of channels **/
 	void apply(const AwChannelList& channels) const;
-	/** init from a list of channels **/
-//	void initWithChannels(const AwChannelList& channels);
 	/** reset all filters settings to zero **/
 	void zero();
 	/** save settings to json file **/
@@ -54,12 +51,8 @@ public:
 	void load(const QString& file);
 	inline int count() const { return m_filters.count(); }
 	inline bool isEmpty() const { return m_filters.count() == 0; }
-	//QList<int> currentTypes() const { return m_hash.keys(); }
 	QList<int> currentTypes() const { return m_filters.keys(); }
 	QVector<float> filters(int type) const { return m_filters.value(type); }
-
-	//void registerChannelType(int type, const QString& name);
-//	QString getChannelRegisterType(int type) const { return m_registeredChannelTypes.value(type); }
 	QWidget *ui();
 	inline QList<int> guiVisibleItems() { return m_guiVisibleItems; }
 	void setUiDocked() { m_uiDocked = true; }
@@ -79,6 +72,5 @@ protected:
 	QList<int> m_guiVisibleItems;	// types of channel to show in GUI
 	AwFilterGUI *m_ui;
 	bool m_uiDocked;
-//	QMap<int, QString> m_registeredChannelTypes;
 };
 

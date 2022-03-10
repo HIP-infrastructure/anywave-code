@@ -26,7 +26,6 @@
 #include <AwFileIO.h>
 #include "ICA/AwICAChannel.h"
 #include "Montage/AwMontageManager.h"
-//#include "AwDisplaySetupManager.h"
 #include "ICA/AwICAManager.h"
 #include <widget/AwMessageBox.h>
 #include "Data/AwDataManager.h"
@@ -178,15 +177,10 @@ void AwSignalView::goToPos(int pos)
 	AwBaseSignalView::goToPos(pos);
 }
 
-void AwSignalView::quit()
-{
-	AwDataServer::getInstance()->closeConnection(client());
-	// clear channels present in scene.
-	m_scene->clearChannels();
-}
-
 void AwSignalView::closeFile()
 {
+	for (auto c : m_scene->selectedChannels())
+		m_settings->channelSelection << c->fullName();
 	// clear channels present in scene.
 	AwBaseSignalView::clean();
 	m_scene->reset();

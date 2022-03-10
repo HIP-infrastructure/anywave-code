@@ -47,6 +47,7 @@ public:
 	const AwChannelList& selectedChannels();
 	const AwChannelList& montage();
 	const AwChannelList& rawChannels();
+	const AwChannelList& asRecordedChannels();
 	inline AwFileIO* reader() { return m_reader; }
 	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 	inline AwMontageManager* montageManager() { return m_montageManager; }

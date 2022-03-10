@@ -56,6 +56,17 @@ AwMarker::AwMarker(AwMarker *source)
 	m_color = source->color();
 }
 
+AwMarker::AwMarker(const AwMarker& source)
+{
+	m_type = source.m_type;
+	m_code = source.m_code;
+	m_start = source.m_start;
+	m_duration = source.m_duration;
+	m_label = source.m_label;
+	m_targetChannels = source.m_targetChannels;
+	m_color = source.m_color;
+}
+
 void AwMarker::setEnd(float end)
 {
 	// if end is below start, reverse the position of the marker
@@ -518,18 +529,6 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		}
 		AW_DESTROY_LIST(markers);
 		markers = updatedMarkers;
-		
-
-		//// revert selection using usedCut markers
-		//auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
-		//// reshape intersected markers using XOR
-		//auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
-		//// now cut all the markers.
-		//auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
-		//AW_DESTROY_LIST(markers)
-		//AW_DESTROY_LIST(reshaped)
-		//AW_DESTROY_LIST(revertSelection)
-		//markers = cutMarkers;
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
@@ -910,11 +909,11 @@ AwMarkerList AwMarker::load(const QString& path)
 	return markers;
 }
 
-void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
+int AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 {
 	AwMarkerList res, removed;
 	if (markers.isEmpty())
-		return;
+		return 0;
 	if (sortList)
 		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
 	// use multi map to detect markers with similar labels
@@ -965,4 +964,5 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 	}
 	for (auto m : removed) 
 		markers.erase(std::remove_if(markers.begin(), markers.end(), [m](AwMarker* m1) { return m1 == m; }));
+	return removed.size();
 }

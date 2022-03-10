@@ -47,7 +47,7 @@ public:
 	void closeFile();
 	void quit();
 	void init();
-	void removeDuplicates();
+	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
 public slots:
 	void showDockUI();

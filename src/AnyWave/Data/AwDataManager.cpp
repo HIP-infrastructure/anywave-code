@@ -96,6 +96,12 @@ const AwChannelList& AwDataManager::rawChannels()
 	return m_tmp;
 }
 
+const AwChannelList& AwDataManager::asRecordedChannels()
+{
+	m_tmp = AwMontageManager::instance()->asRecordedChannels();
+	return m_tmp;
+}
+
 const AwChannelList& AwDataManager::montage()
 {
 	m_tmp = AwMontageManager::instance()->channels();

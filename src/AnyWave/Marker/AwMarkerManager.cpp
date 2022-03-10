@@ -115,11 +115,11 @@ void AwMarkerManager::showDockUI()
 ///
 /// remove doublons based on name, position and duration
 /// update the internal list m_markers.
-void AwMarkerManager::removeDuplicates()
+int AwMarkerManager::removeDuplicates()
 {
 	if (m_markers.isEmpty())
-		return;
-	AwMarker::removeDoublons(m_markers, m_needSorting);
+		return 0;
+	return AwMarker::removeDoublons(m_markers, m_needSorting);
 }
 
 void AwMarkerManager::removeOfflimits()
@@ -158,7 +158,6 @@ void AwMarkerManager::removeOfflimits()
 void AwMarkerManager::setMarkers(const AwMarkerList& markers)
 {
 	m_displayedMarkers = markers;
-
 	emit displayedMarkersChanged(m_displayedMarkers);
 	// auto save markers
 	saveMarkers(m_filePath);
@@ -195,8 +194,6 @@ void AwMarkerManager::loadMarkers()
 		return;
 
 	AwMarkerList markers = loadMarkers(filename);
-
-
 	if (markers.isEmpty()) {
 		AwMessageBox::information(0, tr("Marker file"), tr("The marker file is empty or invalid"));
 		return;
@@ -209,9 +206,10 @@ void AwMarkerManager::loadMarkers()
 		for (auto m : markers)
 			m_markers << m;
 		m_needSorting = true;
+		auto n = removeDuplicates();
+		if (n) 
+			AwMessageBox::information(0, "Loading marker file", "Some markers where duplicates and ware removed.");
 		removeOfflimits();
-		//AwMarker::sort(m_markers);
-		//m_needSorting = false;
 		m_ui->setMarkers(m_markers);
 	}
 
@@ -224,15 +222,15 @@ void AwMarkerManager::saveMarkers()
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 	QString filename = QFileDialog::getSaveFileName(0, tr("Save Markers"), "/", "Markers (*.mrk)");
-
 	if (filename.isEmpty())
 		return;
-
 	saveMarkers(filename);	
 }
 
 void AwMarkerManager::saveMarkers(const QString& path)
 {
+	if (path.isEmpty())
+		return;
 	AwMarker::save(path, m_markers);
 }
 
@@ -267,12 +265,10 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 void AwMarkerManager::addMarkers(const AwMarkerList& list)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
-
 	m_markers += AwMarker::duplicate(list);
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
-
 	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
 		m_ui->setMarkers(m_markers);
 	emit updateStats();
@@ -288,15 +284,9 @@ void AwMarkerManager::addMarker(AwMarker *m)
 		m_markers << new AwMarker(m); // clone markers send by process.
 	else
 		m_markers << m;
-
-	// sort markers
-	//qSort(m_markers.begin(), m_markers.end(), AwMarkerLessThan);
 	m_needSorting = true;
 	removeOfflimits();
-	//AwMarker::sort(m_markers);
-	//m_needSorting = false;
 	m_ui->setMarkers(m_markers);
-
 	if (p != NULL)
 		p->setMarkersReceived();
 	emit updateStats();
@@ -342,8 +332,8 @@ void AwMarkerManager::init()
 		wait.exec();
 		m_markers += future.get();   // keep markers that are coming from the data file !
 		m_needSorting = true;
+		int removed = removeDuplicates();
 		removeOfflimits();
-		removeDuplicates();
 		globals->setDisplayed(&m_displayedMarkers);
 		globals->setTotal(&m_markers);
 		if (!m_markers.isEmpty()) {
@@ -351,6 +341,8 @@ void AwMarkerManager::init()
 			m_ui->setMarkers(m_markers);
 			showDockUI();
 		}
+//		if (removed) 
+//			AwMessageBox::information(nullptr, "Markers", QString("%1 markers were duplicated and had been removed.").arg(removed));
 	}
 }
 

@@ -324,6 +324,9 @@ void AwBaseSignalView::getNewMarkers()
 
 void AwBaseSignalView::setMarkers(const AwMarkerList& markers)
 {
+	// that should be used in a plugin
+	m_markers = markers;
+	updateVisibleMarkers();
 }
 
 void AwBaseSignalView::clean()

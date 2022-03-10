@@ -62,7 +62,7 @@ void AnyWave::on_actionOpen_video_triggered()
 //
 void AnyWave::on_actionSave_as_triggered()
 {
-	AwProcessManager::instance()->startProcess("File Exporter");
+	AwProcessManager::instance()->startProcess("Export");
 }
 
 void AnyWave::updateRecentBIDS(const QStringList &files)
@@ -416,7 +416,6 @@ void AnyWave::on_actionLoadICA_triggered()
 		actionComponentsMaps->setEnabled(true);
 	}
 }
-
 
 void AnyWave::closeFile()
 {

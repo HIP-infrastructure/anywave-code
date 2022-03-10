@@ -373,9 +373,6 @@
     <ClCompile Include="MATPy\GetScreenCapture.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="Process\AwExporter.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
     <ClCompile Include="Process\AwExporterSettings.cpp">
       <Filter>Process</Filter>
     </ClCompile>
@@ -621,6 +618,27 @@
     </ClCompile>
     <ClCompile Include="Prefs\AwPython.cpp">
       <Filter>Prefs</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwExportWizardDial.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwOutputFileWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="AwExport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwChannelsExportWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwMarkersExportWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwFilterExportWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwExporter.cpp">
+      <Filter>IO\export</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -939,9 +957,6 @@
     <QtUic Include="Marker\AwPickChannelsDial.ui">
       <Filter>Marker</Filter>
     </QtUic>
-    <QtMoc Include="Process\AwExporter.h">
-      <Filter>Process</Filter>
-    </QtMoc>
     <QtUic Include="Process\AwExporterSettings.ui">
       <Filter>Process</Filter>
     </QtUic>
@@ -1118,6 +1133,24 @@
     </QtMoc>
     <QtMoc Include="Prefs\AwSettings.h">
       <Filter>Process</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwOutputFileWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwChannelsExportWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwMarkersExportWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwFilterExportWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwExportWizardDial.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwExporter.h">
+      <Filter>IO\export</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

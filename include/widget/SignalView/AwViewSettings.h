@@ -43,7 +43,7 @@ public:
 	bool eegDisplayMode;
 	QList<int> filters;
 	float secsPerCm;
-
+	QStringList channelSelection;
 	AwGainLevels *gainLevels;
 };
 

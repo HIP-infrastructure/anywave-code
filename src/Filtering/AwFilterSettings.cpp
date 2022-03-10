@@ -23,13 +23,15 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-AwFilterSettings::AwFilterSettings()
+AwFilterSettings::AwFilterSettings(bool noInit)
 {
 	m_ui = nullptr;
 	m_uiDocked = false;
-	// init default filter settings for every type of channels
-	for (auto i : AwChannel::intTypes) 
-		m_filters.insert(i, QVector<float>{0, 0, 0, });
+	if (!noInit) {
+		// init default filter settings for every type of channels
+		for (auto i : AwChannel::intTypes)
+			m_filters.insert(i, QVector<float>{0, 0, 0, });
+	}
 }
 
 AwFilterSettings::AwFilterSettings(const AwFilterSettings& settings)
@@ -109,12 +111,7 @@ void AwFilterSettings::apply(AwChannel *channel) const
 {
 	if (channel == nullptr)
 		return;
-
 	auto filters = m_filters.value(channel->type());
-
-//	if (filters[0] == 0. && filters[1] == 0. && filters[2] == 0.)
-//		return;
-
 	channel->setHighFilter(filters[0]);
 	channel->setLowFilter(filters[1]);
 	channel->setNotch(filters[2]);

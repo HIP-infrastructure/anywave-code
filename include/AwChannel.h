@@ -57,6 +57,7 @@ public:
 	explicit AwChannel();
 	/** Copy constructor **/
 	explicit AwChannel(AwChannel *chan);
+	
 	/** Destructor **/
 	virtual ~AwChannel();
 

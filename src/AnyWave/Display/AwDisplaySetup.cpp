@@ -85,7 +85,6 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 		file.close();
 		return false;
 	}
-
 	node = root.firstChild();
 	while (!node.isNull()) 	{
 		element = node.toElement();
@@ -160,6 +159,13 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->timeScaleMode = e.text().toInt();
 				else if (e.tagName() == "TimeScaleFixedPageDuration")
 					setup->fixedPageDuration = e.text().toFloat();
+				else if (e.tagName() == "ChannelSelection") {
+					QDomNodeList list = n.childNodes();
+					for (int i = 0; i < list.size(); i++) {
+						// get channel label
+						setup->channelSelection << list.at(i).toElement().text();
+					}
+				}
 				n = n.nextSibling();
 			}
 			m_viewSettings.append(setup);
@@ -289,6 +295,16 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 			e.appendChild(ee);
 		}
 		element.appendChild(e);
+
+		if (dsv->channelSelection.size()) {
+			e = doc.createElement("ChannelSelection");
+			for (const auto& label : dsv->channelSelection) {
+				QDomElement ee = doc.createElement("Channel");
+				ee.appendChild(doc.createTextNode(label));
+				e.appendChild(ee);
+			}
+			element.appendChild(e);
+		}
 
 		e = doc.createElement("TimeScaleMode");
 		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->timeScaleMode)));

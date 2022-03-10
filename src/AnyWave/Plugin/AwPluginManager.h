@@ -124,6 +124,7 @@ public:
 	AwFileIOPlugin *getWriterPluginByName(const QString& name) { return m_writerFactory.getPluginByName(name); }
 	AwProcessPlugin *getProcessPluginByName(const QString& name) { return m_processFactory.getPluginByName(name); }
 	AwFilterPlugin *getFilterPluginByName(const QString& name) { return m_filterFactory.getPluginByName(name); }
+	void addProcessPlugin(AwProcessPlugin* p);
 
 	AwPluginBase* getPlugin(const QString& name);
 

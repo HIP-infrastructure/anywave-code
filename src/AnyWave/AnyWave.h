@@ -157,6 +157,8 @@ private slots:
 	void on_actionOpen_video_triggered();
 	void on_actionCreate_new_MATLAB_plugin_triggered();
 	void on_actionCheck_for_available_plugins_triggered();
+	void on_actionExport_triggered();
+	void on_actionView_Change_Log_triggered();
 	void loadBeamformer();
 	void reviewComponentsMaps();
 	void showFileProperties();

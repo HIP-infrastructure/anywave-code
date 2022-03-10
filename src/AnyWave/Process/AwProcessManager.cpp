@@ -479,9 +479,6 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 		 runProcess(process);
  }
 
-
-
-
  int AwProcessManager::buildProcessPDI(AwBaseProcess* p, AwDataManager *dm)
  {
 	 AwDataManager* dataManager = dm;
@@ -693,8 +690,6 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	  if (m_processesWidget == NULL)
 		  m_processesWidget = new AwProcessesWidget();
 	  m_processesWidget->addWidget(new AwProcessWidget(process));
-
-
 	  connect(process, SIGNAL(finished()), this, SLOT(handleProcessTermination()));
 	  connect(process, SIGNAL(aborted()), this, SLOT(handleProcessTermination()));
 	  connect(process, SIGNAL(idle()), this, SLOT(handleProcessTermination()));
@@ -722,7 +717,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
  * \see
  * AwProcess
  */
-void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& args)
+void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& args, bool DontCheckIO)
 {
 	auto dm = AwDataManager::instance();
 	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
@@ -741,29 +736,30 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			return;
 		}
 	}
-
-	if (initProcessIO(process)) {
-		if (!skipDataFile) {
-			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
-			// verify that plugin which accepts time selection get at least the whole selection as input
-			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
-				if (process->pdi.input.markers().isEmpty())
-					process->pdi.input.addMarker(new AwMarker("global", 0, dm->totalDuration()));
-			if (AwBIDSManager::isInstantiated()) {
-				auto BM = AwBIDSManager::instance();
-				if (BM->isBIDSActive()) {
-					process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
-					process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
+	if (!DontCheckIO) {
+		if (initProcessIO(process)) {
+			if (!skipDataFile) {
+				process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
+				// verify that plugin which accepts time selection get at least the whole selection as input
+				if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
+					if (process->pdi.input.markers().isEmpty())
+						process->pdi.input.addMarker(new AwMarker("global", 0, dm->totalDuration()));
+				if (AwBIDSManager::isInstantiated()) {
+					auto BM = AwBIDSManager::instance();
+					if (BM->isBIDSActive()) {
+						process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
+						process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
+					}
 				}
+				if (!process->pdi.input.settings.contains(keys::output_dir))
+					process->pdi.input.settings.insert(keys::output_dir, dm->settings().value(keys::output_dir));
 			}
-			if (!process->pdi.input.settings.contains(keys::output_dir))
-				process->pdi.input.settings.insert(keys::output_dir, dm->settings().value(keys::output_dir));
 		}
-	}
-	else {
-		AwMessageBox::critical(nullptr, "Process init", m_errorString);
-		process->plugin()->deleteInstance(process);
-		return;
+		else {
+			AwMessageBox::critical(nullptr, "Process init", m_errorString);
+			process->plugin()->deleteInstance(process);
+			return;
+		}
 	}
 
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
@@ -815,6 +811,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			}
 			applyUseSkipMarkersKeys(p);
 		}
+		if (DontCheckIO) // in case the process is started without checking IO settings, and we manually set used_markers and/or skip_markers
+			applyUseSkipMarkersKeys(p);
+
 		// create the process thread and move process object in it.
 		QThread *processThread = new QThread;
 		p->moveToThread(processThread);

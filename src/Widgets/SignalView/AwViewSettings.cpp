@@ -54,4 +54,5 @@ AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObjec
 	timeScaleMode = source->timeScaleMode;
 	showMarkers = source->showMarkers;
 	fixedPageDuration = source->fixedPageDuration;
+	channelSelection = source->channelSelection;
 }

@@ -44,7 +44,8 @@ public:
 	/** Default constructor that defines a Single marker. **/
 	AwMarker();
 	/** Copy constructor. **/
-	AwMarker(AwMarker *marker);
+	explicit AwMarker(AwMarker *marker);
+	explicit AwMarker(const AwMarker&);
 	/** fancy constructor **/
 	AwMarker(const QString& label, float position = 0., float duration = 0.);
 	virtual ~AwMarker() {}
@@ -100,7 +101,7 @@ public:
 	/** Filters markers: markers can either be specified to be removed or used. **/
 	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Remove doublons : similar markers are removed. The list is updated. **/
-	static void removeDoublons(QList<AwMarker*>& markers, bool sortList = true);
+	static int removeDoublons(QList<AwMarker*>& markers, bool sortList = true);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
 	/** Returns the marker's type. AwMarker::Single or AwMarker::Selection. **/

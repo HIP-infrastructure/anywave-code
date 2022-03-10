@@ -178,74 +178,6 @@ AwSignalView* AwDisplay::addSignalView(AwViewSettings  *settings)
 	return view;
 }
 
-//
-//AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
-//{
-//	// Set other views flag
-//	for (auto v : m_signalViews)
-//		v->setProcessFlags(AwSignalView::NoProcessUpdate);
-//
-//	AwSignalView *view = new AwSignalView((AwViewSettings *)setup);
-//	AwProcessManager *pm = AwProcessManager::instance();
-//	QList<AwDisplayPlugin *> plugins = AwPluginManager::getInstance()->displays();
-//	QList<AwProcessPlugin *> QTSplugins = pm->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
-//
-//	for (auto plugin : plugins)
-//		view->addNewDisplayPlugin(plugin);
-//
-//	m_signalViews << view;
-//
-//	// connections
-//	connect(view, SIGNAL(positionChanged(float)), this, SLOT(synchronizeViews(float)));
-//	connect(view, SIGNAL(cursorPositionChanged(float)), this, SLOT(synchronizeCursorPos(float)));
-//	connect(view, SIGNAL(mappingPositionChanged(float)), this, SLOT(synchronizeMappingCursorPos(float)));
-//	connect(view, SIGNAL(displayedChannelsUpdated(AwChannelList&)), pm, SLOT(startDisplayProcesses(AwChannelList&)));
-//	connect(view->scene(), SIGNAL(clickedAtTime(float)), this, SIGNAL(clickedAtLatency(float)));
-//	connect(view->scene(), SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
-//	connect(view->scene(), &AwGraphicsScene::draggedCursorPositionChanged, this, &AwDisplay::draggedCursorPositionChanged);
-//	connect(view, SIGNAL(cursorClicked(float)), this, SLOT(synchronizeOnCursor(float)));
-//	connect(view, SIGNAL(markerBarHighlighted(AwMarker *)), this, SLOT(highlightMarker(AwMarker *)));
-//
-//	connect(AwMarkerManager::instance()->markerInspector(), SIGNAL(settingsChanged(AwMarkingSettings *)),
-//		view->scene(), SLOT(setMarkingSettings(AwMarkingSettings *)));
-//	view->scene()->setMarkingSettings(&AwMarkerManager::instance()->markerInspector()->settings());
-//
-//	// Montage to view
-//	connect(AwMontageManager::instance(), SIGNAL(badChannelsSet(const QStringList&)), view->scene(), SLOT(unselectChannels(const QStringList&)));
-//
-//	// close view connect
-//	connect(view, SIGNAL(closeViewClicked()), this, SLOT(removeView()));
-//
-//	// filters changed
-//	connect(view->scene(), SIGNAL(channelFiltersChanged()), AwMontageManager::instance(), SLOT(saveCurrentMontage()));
-//
-//	view->setChannels(m_channels);
-//	if (!m_virtualChannels.isEmpty())
-//		view->addVirtualChannels(m_virtualChannels);
-//
-//	m_centralWidget->addWidget(view);
-//	m_centralWidget->repaint();
-//	
-//	// set flags so that the views inform the Process Manager about changes.
-//	for (auto v : m_signalViews)
-//		v->setProcessFlags(AwSignalView::UpdateProcess);
-//
-//	view->getNewMarkers();
-//	
-//	// QTS
-//	QStringList list;
-//	for (auto p : QTSplugins) 
-//		list << p->name;
-//	
-//	view->scene()->setQTSPlugins(list);
-//	connect(view->scene(), SIGNAL(processSelectedForLaunch(QString&, AwChannelList&, float, float)),
-//		pm, SLOT(launchQTSPlugin(QString&, AwChannelList&, float, float)));
-//	connect(view, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));
-//	// END OF QTS
-//
-//	return view;
-//}
-
 void AwDisplay::updateGUI()
 {
 	switch (m_displaySetup.orientation())
@@ -261,7 +193,7 @@ void AwDisplay::updateGUI()
 
 void AwDisplay::closeFile()
 {
-	saveChannelSelections();
+	//saveChannelSelections();
 	saveViewSettings();
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
@@ -269,13 +201,13 @@ void AwDisplay::closeFile()
 	for (auto v : m_signalViews)
 		v->closeFile();
 	m_displaySetup.clearViewSettings();
-//	for (int i = 0; i < m_signalViews.size(); i++)
-//		removeView(i);
 }
 
 void AwDisplay::quit()
 {
-	saveChannelSelections();
+//	saveChannelSelections();
+	for (auto v : m_signalViews)
+		v->closeFile();
 	saveViewSettings();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
@@ -502,7 +434,6 @@ void AwDisplay::captureViews()
 		aws->setValue(aws::last_captured_file, file);
 }
 
-
 void AwDisplay::showICAMapOverChannel(bool flag)
 {
 	for (auto v : m_signalViews) {
@@ -588,8 +519,6 @@ void AwDisplay::synchronizeOnCursor(float position)
 
 void AwDisplay::synchronizeCursorPos(float position)
 {
-	//if (!m_setup->synchronizeViews())
-	//	return;
 	if (!m_displaySetup.synchronizeViews())
 		return;
 
@@ -642,7 +571,6 @@ void AwDisplay::removeView()
 	removeView(index);
 }
 
-
 void AwDisplay::alignViewsVerticaly()
 {
 	m_centralWidget->setOrientation(Qt::Horizontal);
@@ -654,7 +582,6 @@ void AwDisplay::alignViewsHorizontaly()
 	m_centralWidget->setOrientation(Qt::Vertical);
 	m_displaySetup.setOrientation(AwDisplaySetup::Horizontal);
 }
-
 
 void AwDisplay::setSelectedChannelsFromLabels(const QStringList& labels)
 {
@@ -752,7 +679,6 @@ void AwDisplay::updateDisplay()
 /// Recoit le nouveau montage et repercute sur l'affichage.
 void AwDisplay::setChannels(const AwChannelList &montage)
 {
-//	m_channels.clear();
 	m_channels = montage;
 	for (auto v : m_signalViews) 
 		v->setChannels(montage);
@@ -794,10 +720,9 @@ void AwDisplay::newFile()
 		view->enableView();
 	}
 	setChannels(AwMontageManager::instance()->channels());
-	loadChannelSelections();
 	emit newDisplaySetupLoaded(&m_displaySetup);
 	updateGUI();
-
+//	loadChannelSelections();
 }
 
 //

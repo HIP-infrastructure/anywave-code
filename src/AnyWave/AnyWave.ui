@@ -87,6 +87,7 @@
     <addaction name="actionOpen_BIDS"/>
     <addaction name="actionOpen_video"/>
     <addaction name="actionSave_as"/>
+    <addaction name="actionExport"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_New_AnyWave_Application"/>
     <addaction name="separator"/>
@@ -151,6 +152,7 @@
      <string>About</string>
     </property>
     <addaction name="actionAbout_AnyWave"/>
+    <addaction name="actionView_Change_Log"/>
    </widget>
    <widget class="QMenu" name="menuProcesses">
     <property name="title">
@@ -498,6 +500,16 @@
   <action name="actionCheck_for_available_plugins">
    <property name="text">
     <string>Check for available plugins</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>&amp;Export</string>
+   </property>
+  </action>
+  <action name="actionView_Change_Log">
+   <property name="text">
+    <string>View Change Log</string>
    </property>
   </action>
  </widget>

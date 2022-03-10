@@ -18,6 +18,7 @@
 #include <widget/AwWaitWidget.h>
 #include <QMouseEvent>
 #include <algorithm>
+
 #ifdef Q_OS_WIN
 #include <execution>
 #endif
@@ -47,7 +48,6 @@ AwStatsWidget::AwStatsWidget(QWidget *parent)
 	// setup legend:
 	m_ui.widget->legend->setVisible(false);
 	m_ui.widget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-
 	// connections
 	connect(AwMarkerManager::instance(), &AwMarkerManager::updateStats, this, &AwStatsWidget::enableUpdate);
 	connect(m_ui.widget, &QCustomPlot::mouseMove, this, &AwStatsWidget::handleMouseMove);

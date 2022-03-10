@@ -56,9 +56,10 @@ AwDataServer::AwDataServer()
 AwDataServer::~AwDataServer()
 {
 	closeAllConnections();
-	if (m_reader)
-		if (m_plugin)
-			m_plugin->deleteInstance(m_reader);
+//	if (m_reader)
+//		delete m_reader;
+		//if (m_plugin)
+		//	m_plugin->deleteInstance(m_reader);
 	delete m_sem;
 }
 
@@ -96,20 +97,13 @@ void AwDataServer::openConnection(AwDataClient *client)
 
 	// Data Manager should be the parent of DataServer, but check it before using it
 	AwDataConnection *dc = new AwDataConnection(this, client);
-//	AwDataManager* dm = static_cast<AwDataManager*>(parent());
 	
 	QThread *t = new QThread();
 	dc->moveToThread(t);
-
 	connect(client, SIGNAL(needData(AwChannelList *, float, float, bool)), dc, SLOT(loadData(AwChannelList *, float, float, bool)));
 	connect(client, SIGNAL(needData(AwChannelList *, AwMarker *,bool)), dc, SLOT(loadData(AwChannelList *, AwMarker *, bool)));
 	connect(client, SIGNAL(needData(AwChannelList *, AwMarkerList *, bool)), dc, SLOT(loadData(AwChannelList *, AwMarkerList *, bool)));
-	//if (dm != nullptr)
-	//	connect(client, SIGNAL(selectChannelsRequested(AwDataClient *, const QVariantMap&, AwChannelList*)), dm,
-	//		SLOT(selectChannels(AwDataClient *,const QVariantMap&, AwChannelList*)));
-
 	connect(dc, SIGNAL(outOfMemory()), this, SLOT(manageOutOfMemory()));
-
 	m_clientToConnection.insert(client, dc);
 	m_dataConnections.append(dc);
 	client->setConnected();
@@ -170,9 +164,6 @@ void AwDataServer::closeAllConnections()
 		delete dc->thread();
 		delete dc;
 	}
-	//for (auto client : m_clientToConnection.keys())
-	//	client->setConnected(false);
-
 	m_clientToConnection.clear();
 	m_dataConnections.clear();
 }

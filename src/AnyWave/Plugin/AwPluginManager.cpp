@@ -93,6 +93,7 @@ void AwPluginManager::load()
 //
 AwPluginManager::~AwPluginManager()
 {
+	clean();
 }
 
 void AwPluginManager::processJsonFiles()
@@ -556,14 +557,8 @@ void AwPluginManager::loadPlugins()
 	auto adesPlugin = new ADESIOPlugin;
 	m_writers += adesPlugin;
 	m_readers += adesPlugin;
-	
-	//m_writers += new AHDF5IOPlugin;
-	//m_readers += new AHDF5IOPlugin;
-
-	//m_readers += new MEMIOPlugin;
 	m_writers += new MATLABIOPlugin;
-
-	// Ajout du plugin TriggerParser
+    // Ajout du plugin TriggerParser
 	m_processes += new AwTriggerParserPlugin;
 
 	// Add TriggerWriter
@@ -602,6 +597,24 @@ void AwPluginManager::loadPlugins()
 	QDir dir(pluginDir);
 	for (const auto &FileName : dir.entryList(QDir::Files)) {
 		loadPlugin(dir.absoluteFilePath(FileName));
+	}
+}
+
+void AwPluginManager::clean()
+{
+	while (!m_pluginList.isEmpty()) {
+		auto p = m_pluginList.takeLast();
+		// remove all occurences of the pointer
+		m_pluginList.removeAll(p);  // some plugin instances may appear several times in the list (reader/writer plugin)
+		auto loader = m_loaders.value(p);
+		if (loader) { // loader can be nullptr if we handle a python or matlab plugin
+			m_loaders.remove(p);
+			loader->unload();
+			delete loader;
+		}
+		else { // no loader => plugin added manually
+			delete p;
+		}
 	}
 }
 
@@ -667,6 +680,17 @@ void AwPluginManager::loadFileIOWriterPlugin(AwFileIOPlugin *plugin)
 	m_writerFactory.addPlugin(plugin->name, plugin);
 	m_writers += plugin;
 	m_pluginList += plugin;
+}
+
+void AwPluginManager::addProcessPlugin(AwProcessPlugin* plugin)
+{
+	auto p = m_processFactory.getPluginByName(plugin->name);
+	if (p)
+		return;
+	m_pluginNames.insert(plugin->name, plugin);
+	m_processFactory.addPlugin(plugin->name, plugin);
+	m_pluginList += plugin;
+	m_processes += plugin;
 }
 
 void AwPluginManager::loadProcessPlugin(AwProcessPlugin *plugin)
