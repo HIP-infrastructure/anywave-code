@@ -181,7 +181,8 @@ AwBIDSItems AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* 
 				// search for events and channels tsv files
 				findTsvFilesForItem(fileItem);
 				parentItem->addFile(fullPath);
-				reader->plugin()->deleteInstance(reader);
+				//reader->plugin()->deleteInstance(reader);
+				delete reader;
 			}
 		}
 		// in a data container (eeg, meg, ieeg) there could be a subfolder (for MEG 4DNI data for example)

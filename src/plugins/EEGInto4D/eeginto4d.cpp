@@ -118,7 +118,8 @@ void EEGInto4D::runFromCommandLine()
 				eeg_found = true;
 				m_eegPlugin = plugin;
 			}
-			plugin->deleteInstance(reader);
+		//	plugin->deleteInstance(reader);
+			delete reader;
 		}
 		if (!meg_found) {
 			if (plugin->name == "4DNI Reader") {
@@ -138,10 +139,12 @@ void EEGInto4D::runFromCommandLine()
 	auto megFile = pdi.input.settings.value("meg_file").toString();
 	if (reader->canRead(megFile) != AwFileIO::NoError) {
 		sendMessage(QString("File %1 could not be open by 4DNI reader.").arg(megFile));
-		m_megPlugin->deleteInstance(reader);
+		//m_megPlugin->deleteInstance(reader);
+		delete reader;
 		return;
 	}
-	m_megPlugin->deleteInstance(reader);
+//	m_megPlugin->deleteInstance(reader);
+	delete reader;
 
 	run();
 }
@@ -186,7 +189,8 @@ void EEGInto4D::run()
 			break;
 		}
 		else {
-			plugin->deleteInstance(reader);
+		//	plugin->deleteInstance(reader);
+			delete reader;
 		}
 	}
 

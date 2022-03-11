@@ -304,6 +304,11 @@ void AwMarkerManager::removeAllUserMarkers()
 	emit updateStats();
 }
 
+void AwMarkerManager::removeMarker(AwMarker* marker)
+{
+	removeMarkers({ marker });
+}
+
 void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 {
 	m_markers.erase(std::remove_if(m_markers.begin(), m_markers.end(), [markers](AwMarker* m) { return markers.contains(m); }), m_markers.end());

@@ -56,6 +56,7 @@ public slots:
 	/** Efface un marker de la liste **/
 	/** Rajoute une liste de marqueurs à la liste courante **/
 	void addMarkers(const AwMarkerList& markers);
+	void removeMarker(AwMarker* marker);
 	/** Add markers without cloning them. **/
 	void addMarkers(AwMarkerList *markers);
 	/** Vide la liste des marqueurs **/

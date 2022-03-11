@@ -45,6 +45,7 @@ class AwPluginBase : public QObject
 {
 public:
 	explicit AwPluginBase() { minorVersion = AW_MINOR_VERSION; majorVersion = AW_MAJOR_VERSION; }
+
 // name must be unique and short.
 // description must contains a brief description of the plugin
 // version is not mandatory 

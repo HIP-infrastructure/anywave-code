@@ -187,7 +187,8 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	toClient << outputs;
 	response.send();
 
-	plugin->deleteInstance(process);
+//	plugin->deleteInstance(process);
+	delete process;
 
 	if (dm != AwDataManager::instance())
 		delete dm;

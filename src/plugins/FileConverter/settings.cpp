@@ -55,8 +55,9 @@ settings::settings(QList<AwFileIOPlugin *>& readers, QList<AwFileIOPlugin *>& wr
 
 settings::~settings()
 {
-	foreach (AwFileIO *fr, m_tempReaders)
-		fr->plugin()->deleteInstance(fr);
+	for(AwFileIO * fr : m_tempReaders)
+		//fr->plugin()->deleteInstance(fr);
+		delete fr;
 }
 
 

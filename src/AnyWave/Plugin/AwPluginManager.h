@@ -141,8 +141,6 @@ public slots:
 	void showPluginsDial();
 	/** new instance of AwFileReader associated to plugin **/
 	AwFileIO *newReader(AwFileIOPlugin *plugin);
-	/** close file and delete AwFileReader instance **/
-	void deleteReaderInstance(AwFileIO *fr);
 
 	/** Writer plugins **/
 	AwFileIO *newWriter(AwFileIOPlugin *plugin);

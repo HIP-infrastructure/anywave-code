@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwExporter.h"
-//#include "AwExporterSettings.h"
 #include <filter/AwFiltering.h>
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
@@ -73,7 +72,7 @@ void AwExporter::runFromCommandLine()
 	if (args.contains(keys::output_dir))
 		outputPath = QString("%1/%2").arg(args.value(keys::output_dir).toString()).arg(outputFile);
 
-	AwFileIO *writer = Q_NULLPTR;
+	AwFileIO *writer = nullptr;
 	for (auto p : pdi.input.writers) {
 		if (p->name.toLower().simplified() == writerName) {
 			writer = p->newInstance();
@@ -81,7 +80,7 @@ void AwExporter::runFromCommandLine()
 		}
 	 }
 
-	if (writer == Q_NULLPTR) {
+	if (writer == nullptr) {
 		sendMessage(QString("Plugin %1 not found.").arg(writerName));
 		return;
 	}
@@ -109,20 +108,9 @@ void AwExporter::runFromCommandLine()
 	}
 	AwBlock* block = writer->infos.newBlock();
 	AwMarker global("global", 0., endTimePos);
-	if (modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied) {
+	if (isUseSkipMarkersApplied()) {
 		auto merged = AwMarker::merge(pdi.input.markers());
 		auto modified = pdi.input.modifiedMarkers();
-		if (modified.size()) {
-			// concatenante all the markers : shift them left in time to match the concatenation of input markers
-			float pos = 0.;
-			for (auto m : merged) {
-				auto intersection = AwMarker::intersect(modified, m->start(), m->end());
-				float shift = m->start() - pos;
-				for (auto inter : intersection) 
-					inter->setStart(inter->start() - shift);
-				pos += m->duration();
-			}
-		}
 		block->setMarkers(modified);
 		pdi.input.setNewMarkers(merged);
 		m_inputMarkers = merged;
@@ -164,14 +152,16 @@ void AwExporter::runFromCommandLine()
 	if (writer->createFile(outputPath) != AwFileIO::NoError) {
 		sendMessage(QString("Error creating %1.").arg(outputPath));
 		writer->cleanUpAndClose();
-		writer->plugin()->deleteInstance(writer);
+	//	writer->plugin()->deleteInstance(writer);
+		delete writer;
 		return;
 	}
 	sendMessage("Writing data...");
 	writer->writeData(&inputChannels);
 	sendMessage("Done.");
 	writer->cleanUpAndClose();
-	writer->plugin()->deleteInstance(writer);
+	//writer->plugin()->deleteInstance(writer);
+	delete writer;
 }
 
 void AwExporter::run()
@@ -197,93 +187,8 @@ bool AwExporter::showUi()
 		if (dlg.useMarkers.size()) {
 			pdi.input.settings[keys::use_markers] = dlg.useMarkers;
 		}
-		if (QFile::exists(dlg.filePath)) {
-			if (AwMessageBox::information(0, "File", "the file already exists. Overwrite?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-				return false;
-		}
 		return true;
 
 	}
 	return false;
-
-	//AwExporterSettings ui(this);
-	//ui.initialPath = QString("%1/NewFile").arg(pdi.input.settings.value(keys::data_dir).toString());
-	//QHash<QString, AwFileIOPlugin *> writers;
-	//for (auto p : pdi.input.writers) {
-	//	writers.insert(p->name, p);
-	//	ui.extensions << p->fileExtension;
-	//	ui.writers << p->name;
-	//}
-
-	//// separate ICA channels from others, if any
-	//for (auto c : pdi.input.channels()) {
-	//	if (c->isICA())
-	//		m_ICAChannels << c;
-	//	else 
-	//		ui.channels << c;
-	//}
-
-	//ui.markers = pdi.input.markers();
-	//ui.icaChannels = m_ICAChannels;
-	//ui.filterSettings = pdi.input.filterSettings;
-
-	//if (ui.exec() == QDialog::Accepted) {
-	//	// clear output_dir option as we don't run in command line mode
-	//	pdi.input.settings.remove(keys::output_dir);
-	//	pdi.input.settings[keys::output_file] = ui.filePath;
-	//	if (ui.useCurrentMontage)
-	//		m_channels = ui.channels;
-	//	else
-	//		m_channels = ui.selectedChannels;
-	//	// fix in case the user unchecked use current montage AND had NOT selected any channels manually.
-	//	if (m_channels.isEmpty())
-	//		m_channels = ui.channels;
-
-	//	pdi.input.settings["output_writer"] = ui.writer;
-	//	
-	//	if (QFile::exists(ui.filePath)) {
-	//		if (AwMessageBox::information(0, tr("File"), tr("the file already exists. Overwrite?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-	//			return false;
-	//	}
-	//	//m_path = ui.filePath;
-	//	pdi.input.filterSettings = ui.filterSettings;
-	//	/** Apply filters **/
-	//	ui.filterSettings.apply(m_channels);
-
-	//	// if Export All ICA channels is checked => add all ICA channels to export
-	//	m_exportICAChannels = ui.exportICA;
-	//	if (m_exportICAChannels) {
-	//		m_ICAChannels = ui.icaChannels;
-	//		QString extension = ui.extensions.value(ui.writers.indexOf(ui.writer));
-	//		QString destFile = ui.filePath + extension + ".ica.mat";
-	//		if (QFile::exists(destFile))
-	//			QFile::remove(destFile);
-	//		// copy the ICA.Mat fileto be used with the exported file.
-	//		QFile::copy(pdi.input.settings.value(keys::ica_file).toString(), destFile);
-	//	}
-	//	else if (!ui.selectedICA.isEmpty()) // only a subset of ICA channels are selected for export
-	//		m_ICAChannels = ui.selectedICA;
-
-	//	// build the complete list of channels to export
-	//	if (!m_ICAChannels.isEmpty())
-	//		m_channels += m_ICAChannels;
-
-	//	pdi.input.setNewChannels(AwChannel::duplicateChannels(m_channels));
-
-	//	bool updateUseSkip = false;
-	//	if (!ui.skippedMarkers.isEmpty()) {
-	//		pdi.input.settings[keys::skip_markers] = ui.skippedMarkers;
-	//		updateUseSkip = true;
-	//	}
-	//	if (!ui.usedMarkers.isEmpty()) {
-	//		pdi.input.settings[keys::use_markers] = ui.usedMarkers;
-	//		updateUseSkip = true;
-	//	}
-
-	//	if (ui.decimateFactor > 1)
-	//		pdi.input.settings[Exporter::decimate_factor] = ui.decimateFactor;
-
-	//	return true;
-	//}
-	//return false;
 }

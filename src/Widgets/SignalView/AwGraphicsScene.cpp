@@ -316,13 +316,12 @@ void AwGraphicsScene::clean()
 {
 	m_channels.clear();
 	clearChannels();
+	clearMarkers();
 	m_markerItemsDisplayed.clear();
 	m_selectedSignalItems.clear();
 	m_currentPosInFile = m_startPosition;
 	update();
 }
-
-
 
 void AwGraphicsScene::selectUnselectChannel()
 {
@@ -356,7 +355,6 @@ void AwGraphicsScene::displaySelectedChannelsOnly()
 	update();
 	emit numberOfDisplayedChannelsChanged(m_visibleSignalItems.size());
 }
-
 
 ///
 /// displayAllChannels()
@@ -545,7 +543,6 @@ void AwGraphicsScene::changeChannelsSelectionState(const QString& name, bool sel
 	update();
 }
 
-
 AwChannelList AwGraphicsScene::selectedChannels()
 {
 	AwChannelList res;
@@ -594,7 +591,6 @@ void AwGraphicsScene::clearChannelSelection()
 	update();
 	updateSelection();
 }
-
 
 void AwGraphicsScene::selectChannelAtPosition(const QPointF& pos)
 {
@@ -669,7 +665,6 @@ void AwGraphicsScene::undoHighlightChannels()
 	update();
 }
 
-
 void AwGraphicsScene::highlightChannels(const QStringList& labels)
 {
 	for (auto const &label : labels) {
@@ -712,7 +707,6 @@ void AwGraphicsScene::highlightPosition(float pos)
 	// simulate a click at that position
 	emit clickedAtTime(pos);
 }
-
 
 void AwGraphicsScene::goToLatency()
 {
@@ -765,6 +759,17 @@ void AwGraphicsScene::setChannelAsBad()
 	emit badChannelSet(act->data().toString());
 }
 
+void AwGraphicsScene::undoMarkerInsertion()
+{
+	//if (m_lastAddedMarker == nullptr)
+	//	return;
+	//emit markerRemoved(m_lastAddedMarker);
+	//m_lastAddedMarker = nullptr;
+	if (m_lastAddedMarkers.isEmpty())
+		return;
+	emit markerRemoved(m_lastAddedMarkers.takeLast());
+}
+
 void AwGraphicsScene::insertPredefinedMarker()
 {
 	QAction* act = (QAction*)sender();
@@ -797,7 +802,6 @@ void AwGraphicsScene::chooseMarkersToInsert()
 
 }
 
-
 void AwGraphicsScene::cursorToMarker()
 {
 	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) {
@@ -816,6 +820,7 @@ void AwGraphicsScene::launchQTSPlugin()
 	if (act)
 		m_pluginToLaunch = act->text();
 }
+
 //
 // insertMarker()
 // adds the marker passed as parameter in the scene.
@@ -838,25 +843,16 @@ void AwGraphicsScene::setMarkers(const AwMarkerList& markers)
 void AwGraphicsScene::showMarkers(bool show)
 {
 	m_showMarkers = show;
-	updateMarkers();
+	displayMarkers();
 	update();
 }
 
-void AwGraphicsScene::updateMarkers()
+void AwGraphicsScene::displayMarkers()
 {
-	clearMarkers();
-
-	if (!m_showMarkers)
-		return;
-
-	if (m_markers.isEmpty())
-		return;
-
-	AwMarkerItem *prev = nullptr;
-
-	for (int i = 0; i < m_markers.count(); i++)	{
-		if (m_markers.at(i)->targetChannels().isEmpty())	{
-			AwMarkerItem *item = insertMarker(m_markers.at(i), prev, i);
+	AwMarkerItem* prev = nullptr;
+	for (int i = 0; i < m_markers.count(); i++) {
+		if (m_markers.at(i)->targetChannels().isEmpty()) {
+			AwMarkerItem* item = insertMarker(m_markers.at(i), prev, i);
 			item->setPositionInFile(m_currentPosInFile - m_startPosition);
 			m_markerItemsDisplayed << item;
 			item->showLabel(m_settings->showMarkerLabels);
@@ -880,6 +876,17 @@ void AwGraphicsScene::updateMarkers()
 			}
 		}
 	}
+	update();
+}
+
+void AwGraphicsScene::updateMarkers()
+{
+	clearMarkers();
+	if (!m_showMarkers)
+		return;
+	if (m_markers.isEmpty())
+		return;
+	displayMarkers();
 }
 
 void AwGraphicsScene::clearMarkers()
@@ -979,20 +986,10 @@ void AwGraphicsScene::keyReleaseEvent(QKeyEvent *e)
 		}
 		break;
 	case Qt::Key_Space:
-		//if (m_mouseMode == AwGraphicsScene::AddingMarker && m_markingSettings->usingSpacebar) {
-		//	AwMarker *m = m_markingSettings->spaceBarNext();
-		//	if (m) {
-		//		centerViewOnPosition(m->start());
-		//	}
-		//	break;
-		//}
-		//else
-		//	nextPage();
 		nextPage();
 		break;
 	}
 }
-
 
 QMenu *AwGraphicsScene::defaultContextMenu()
 {
@@ -1032,6 +1029,7 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		m_contextMenuMapping = subMenu;
 	}
 
+
 	// add the Go to channel option
 	if (m_gotoChannelMenu) {
 		menuDisplay->addMenu(m_gotoChannelMenu);
@@ -1053,19 +1051,15 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	connect(actionDisplayAll, SIGNAL(triggered()), this, SLOT(displayAllChannels()));
 	menuDisplay->addAction(actionDisplayAll);
 	menuDisplay->addSeparator();
-
 	// Channel Selection
 	QMenu *menuSelection = menuDisplay->addMenu(tr("Select"));
 	QAction *action = menuSelection->addAction(tr("all channels"));
 	connect(action, &QAction::triggered, this, &AwGraphicsScene::selectAllChannels);
-
 	for (auto t : AwChannel::types) {
 		action = menuSelection->addAction(QString(tr("%1 channels").arg(t)));
 		action->setData(AwChannel::stringToType(t));
 		connect(action, &QAction::triggered, this, &AwGraphicsScene::selectChannelsOfType);
 	}
-
-
 	auto selectedChannels = this->selectedChannels();
 	if (!selectedChannels.isEmpty())	{
 		menuDisplay->addSeparator();
@@ -1090,7 +1084,6 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 	menuDisplay->addAction(actShowMarkers);
 	menuDisplay->addAction(actHideMarkers);
 	menuDisplay->addSeparator();
-
 	return menuDisplay;
 }
 
@@ -1100,8 +1093,17 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 ///
 void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 {
-	if (m_mouseMode == AwGraphicsScene::AddingMarker)
+	if (m_mouseMode == AwGraphicsScene::AddingMarker) {
+		if (m_lastAddedMarkers.size()) {
+			QMenu menu;
+			auto action = new QAction("Undo");
+			connect(action, &QAction::triggered, this, &AwGraphicsScene::undoMarkerInsertion);
+			menu.addAction(action);
+			menu.exec(e->screenPos());
+		}
 		return;
+	}
+	
 
 	// get item under the mouse
 	QGraphicsItem *item = NULL;
@@ -1343,7 +1345,7 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
 
 		m_currentMarkerItem->updatePosition();
 
-		updateMarkers();
+//		updateMarkers();
 		update();
 		break;
 	case AwGraphicsScene::QTS:
@@ -1515,6 +1517,9 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			}
 			else { // no context menu => classic insertion using current marker item
 				emit markerInserted(m_currentMarkerItem->marker());
+				// keep marker pointer to undo the operation if necessary
+			//	m_lastAddedMarker = m_currentMarkerItem->marker();
+				m_lastAddedMarkers << m_currentMarkerItem->marker();
 				// instantiate a new marker
 				m_currentMarkerItem->setMarker(new AwMarker());
 				m_currentMarkerItem->marker()->setDuration(0);
@@ -1738,7 +1743,7 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 
 	if (flag)	{
 		// be sure we have marking settings
-		if (m_markingSettings == NULL)
+		if (m_markingSettings == nullptr)
 			return;
 
 		if (m_mouseMode == AwGraphicsScene::Cursor)
@@ -1761,11 +1766,12 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 	}
 	else {
 		m_mouseMode = AwGraphicsScene::None;
+		m_lastAddedMarkers.clear();
 		if (m_currentMarkerItem) {
 			removeItem(m_currentMarkerItem);
 			delete m_currentMarkerItem->marker();
 			delete m_currentMarkerItem;
-			m_currentMarkerItem = NULL;
+			m_currentMarkerItem = nullptr;
 		}
 	}
 	if (m_pickMarkersDial)

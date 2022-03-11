@@ -41,8 +41,9 @@ Settings::Settings(QList<AwFileIOPlugin *>& readers, QWidget *parent)
 Settings::~Settings()
 {
 	delete m_ui;
-	foreach (AwFileIO *fr, m_tempReaders)
-		fr->plugin()->deleteInstance(fr);
+	for (AwFileIO * fr : m_tempReaders)
+		//fr->plugin()->deleteInstance(fr);
+		delete fr;
 }
 
 

@@ -57,6 +57,9 @@ public:
 	inline void setFlags(int flags) { m_flags = flags; }
 	inline int inputFlags() { return m_inputFlags; }
 	inline int modifiersFlags() { return m_modifiersFlags; }
+	inline bool isUseSkipMarkersApplied() {
+		return m_modifiersFlags & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied;
+	}
 	inline void setInputFlags(int flags) { m_inputFlags = flags; }
 	inline void setInputModifiers(int flags) { m_modifiersFlags = flags; }
 	inline void addModifiers(int flags) { m_modifiersFlags |= flags; }
@@ -151,9 +154,6 @@ public:
 	void setInputFlags(int f) { m_inputFlags = f; }
 	/** creates a new instance of AwProcess object. You MUST implement this pure virtual method to instanciante the process you defined for the plugin. **/
 	virtual AwBaseProcess *newInstance() = 0;
-	/** deletes an instance of previously created AwProcess. You might overload this virtual method to manage your own process deletion. **/
-	virtual void deleteInstance(AwBaseProcess *process) { delete process;  }
-
 	inline QVariantMap& settings() { return m_settings; }
 	void setSettings(const QString& key, const QVariant& value) { m_settings[key] = value; }
 	/** Command Line specific **/
@@ -177,6 +177,7 @@ class AW_PROCESS_EXPORT AwProcess : public AwBaseProcess
 public:
 	AwProcess();
 	enum Status { Running, Finished, Idle, Aborted };
+
 	/** Process with widgets as output must implement this method. The aim is to prepare results of the process. **/
 	virtual void prepareOutputUi() {}
 	/** Opens User Interface and returns true if ok. This method MUST be implemented by process that requires user to set parameters using a user interface. **/

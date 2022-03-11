@@ -83,6 +83,8 @@ signals:
 	void QTSModeEnded();
 	// markers
 	void showMarkerUnderMouse(AwMarker *marker);
+	void markerRemoved(AwMarker* marker);
+	// view
 	void closeViewClicked();
 public slots:
 	void updateSignalItemSelection(AwGraphicsSignalItem *item, bool selected);
@@ -146,6 +148,7 @@ protected slots:
 	void gotoChannel(QAction *act);
 	void launchQTSPlugin();
 	void insertPredefinedMarker();
+	void undoMarkerInsertion();
 protected:
 	float timeAtPos(const QPointF& pos);
 	float xPosFromTime(float time);
@@ -153,6 +156,7 @@ protected:
 	virtual QMenu *defaultContextMenu();
 	void updateGotoChannelMenu(const QStringList& labels);
 	void clearMarkers();
+	void displayMarkers();
 	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = NULL, int offsetLabel = 0);
 
 	void keyPressEvent(QKeyEvent *e);
@@ -171,6 +175,7 @@ protected:
 	AwMarkerList m_selectedMarkers;			// current selected markers
 	AwMarkerList m_markers;	// current markers in the scene
 	AwMarker m_mappingMarker;	// marker used to store the current mapping position and duration
+	AwMarkerList m_lastAddedMarkers;
 	QList<AwGraphicsMarkerItem*> m_markerItemsDisplayed;
 	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;

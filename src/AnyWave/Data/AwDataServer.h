@@ -53,7 +53,7 @@ protected:
 	QList<AwDataConnection *> m_dataConnections;
 	QMap<AwDataClient *, AwDataConnection *> m_clientToConnection;
 	AwFileIO *m_reader;
-	AwFileIOPlugin *m_plugin;
+//	AwFileIOPlugin *m_plugin;
 	QSemaphore *m_sem;	// general semaphore for connected clients.
 	static AwDataServer *m_instance;
 	static int m_instanceCount;

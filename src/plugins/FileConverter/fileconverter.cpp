@@ -119,7 +119,8 @@ void FileConverter::run()
 		emit progressChanged(tr("Writing data..."));
 		writer->writeData(&sourceChannels);
 		emit progressChanged(tr("Done."));
-		in.first->deleteInstance(fr);
+	//	in.first->deleteInstance(fr);
+		delete fr;
 		count++;
 		writer->cleanUpAndClose();
 

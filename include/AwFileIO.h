@@ -34,7 +34,7 @@ class AW_RW_EXPORT AwFileIO : public QObject
 public:
 	enum FileStatus { NoError, WrongFormat, FileAccess, BadHeader, WrongParameter };
 
-	AwFileIO(const QString& fileName = QString()) { m_flags = 0; }
+	AwFileIO(const QString& fileName = QString()) { m_plugin = nullptr; m_flags = 0; }
 
 	virtual ~AwFileIO() {}
 	inline QString& errorMessage() { return m_error; }
@@ -132,8 +132,6 @@ public:
 	inline bool canWrite() { return m_flags & FileIO::CanWrite; }
 	/** Override this method to instantiate an object derived from AwFileReader. **/
 	virtual AwFileIO *newInstance(const QString& filename = QString()) = 0;
-
-	virtual void deleteInstance(AwFileIO *fr) { delete fr; fr = NULL; }
 	/** Override this method to provide a string list containing paths to montage files. **/
 	virtual QStringList montages() { return QStringList(); }
 protected:

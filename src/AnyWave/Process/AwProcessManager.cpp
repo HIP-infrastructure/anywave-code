@@ -732,7 +732,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		if (process->modifiersFlags() & Aw::ProcessIO::modifiers::RequireChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
-			process->plugin()->deleteInstance(process);
+		//	process->plugin()->deleteInstance(process);
+			delete process;
 			return;
 		}
 	}
@@ -757,7 +758,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		}
 		else {
 			AwMessageBox::critical(nullptr, "Process init", m_errorString);
-			process->plugin()->deleteInstance(process);
+			//process->plugin()->deleteInstance(process);
+			delete process;
 			return;
 		}
 	}
@@ -806,7 +808,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 
 		if (p->hasInputUi()) {
 			if (!p->showUi()) 	{
-				p->plugin()->deleteInstance(p); 
+			//	p->plugin()->deleteInstance(p); 
+				delete p;
 				return;
 			}
 			applyUseSkipMarkersKeys(p);
@@ -983,7 +986,8 @@ void AwProcessManager::stopProcess(AwProcess *process)
 		process->thread()->exit(0);
 		process->thread()->wait();
 		process->thread()->deleteLater();
-		process->plugin()->deleteInstance(process); 
+	//	process->plugin()->deleteInstance(process); 
+		delete process;
 		process = nullptr;
 	}
 #ifndef NDEBUG
@@ -1022,8 +1026,9 @@ void AwProcessManager::handleProcessTermination()
 		process->thread()->exit(0);
 		process->thread()->wait();
 		process->thread()->deleteLater();
-		process->plugin()->deleteInstance(process); 
-		process = NULL;
+	//	process->plugin()->deleteInstance(process); 
+		delete process;
+		process = nullptr;
 #ifndef NDEBUG
 		qDebug() << "handleProcessTermination() process was aborted. Done." << endl;
 #endif
@@ -1108,8 +1113,9 @@ void AwProcessManager::handleProcessTermination()
 		process->thread()->exit(0);
 		process->thread()->wait();
 		process->thread()->deleteLater();
-		process->plugin()->deleteInstance(process); 
-		process = NULL;
+		//process->plugin()->deleteInstance(process); 
+		delete process;
+		process = nullptr;
 #ifndef NDEBUG
 		qDebug() << "handleProcessTermination() process is finished. Done." << endl;
 #endif

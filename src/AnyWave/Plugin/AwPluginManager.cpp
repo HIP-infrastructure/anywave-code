@@ -147,16 +147,6 @@ AwFileIO *AwPluginManager::newWriter(AwFileIOPlugin *p)
 	return fw;
 }
 
-//
-// deleteReaderInstance()
-//
-// close the reader plugin currently used and delete instance of AwFileReader
-void AwPluginManager::deleteReaderInstance(AwFileIO *fr)
-{
-	fr->cleanUpAndClose();
-	fr->plugin()->deleteInstance(fr);
-}
-
 QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
 {
 	QList<AwProcessPlugin *> res;
@@ -293,8 +283,9 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 					}
 					else { // plugin found could not open the file => destroy it and continue browsing.				
 						emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
-						plugin->deleteInstance(reader);
-						reader = NULL;
+					//	plugin->deleteInstance(reader);
+						delete reader;
+						reader = nullptr;
 					}
 				}
 			}
@@ -310,8 +301,9 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 			}
 			else { // plugin found could not open the file => destroy it and continue browsing.				
 			    emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
-				plugin->deleteInstance(reader);
-				reader = NULL;
+				//plugin->deleteInstance(reader);
+				delete reader;
+				reader = nullptr;
 			}
 			if (plugin_found)
 				break;

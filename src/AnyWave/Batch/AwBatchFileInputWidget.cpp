@@ -114,7 +114,8 @@ void AwBatchFileInputWidget::checkFilesAndFillList(const QStringList& files, boo
 			auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(f);
 			if (reader != nullptr) {
 				res << f;
-				reader->plugin()->deleteInstance(reader);
+			//	reader->plugin()->deleteInstance(reader);
+				delete reader;
 			}
 		}
 	}

@@ -46,7 +46,7 @@ AwDataServer* AwDataServer::newInstance()
 
 AwDataServer::AwDataServer()
 {
-	m_plugin = nullptr;
+//	m_plugin = nullptr;
 	m_reader = nullptr;
 	m_sem = new QSemaphore(1);
 	AwDebugLog::instance()->connectComponent(QString("Data Server:%1").arg(m_instanceCount), this);
@@ -56,10 +56,6 @@ AwDataServer::AwDataServer()
 AwDataServer::~AwDataServer()
 {
 	closeAllConnections();
-//	if (m_reader)
-//		delete m_reader;
-		//if (m_plugin)
-		//	m_plugin->deleteInstance(m_reader);
 	delete m_sem;
 }
 
@@ -67,13 +63,9 @@ void AwDataServer::setMainReader(AwFileIO *fileReader)
 {
 	// MUST BE CALLED ONLY WHEN A NEW FILE IS OPEN BY ANYWAVE
 	// If a reader is already set, close active connections if any and destroy the reader.
-	if (m_reader)	{
+	if (m_reader)	
 		closeAllConnections();
-		if (m_plugin)
-			m_plugin->deleteInstance(m_reader);
-	}
 	m_reader = fileReader;
-	m_plugin = fileReader->plugin();
 }
 
 AwDataServer *AwDataServer::duplicate(AwFileIO *fileReader)

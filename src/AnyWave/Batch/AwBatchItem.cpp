@@ -125,6 +125,7 @@ bool AwBatchItem::checkPluginParams()
 	auto instance = m_plugin->newInstance();
 	QString error;
 	auto res = instance->batchParameterCheck(this->m_params);
-	m_plugin->deleteInstance(instance);
+//	m_plugin->deleteInstance(instance);
+	delete instance;
 	return res;
 }

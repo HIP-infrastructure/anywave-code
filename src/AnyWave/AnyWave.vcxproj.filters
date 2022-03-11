@@ -625,9 +625,6 @@
     <ClCompile Include="IO\export\AwOutputFileWizardPage.cpp">
       <Filter>IO\export</Filter>
     </ClCompile>
-    <ClCompile Include="AwExport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="IO\export\AwChannelsExportWizardPage.cpp">
       <Filter>IO\export</Filter>
     </ClCompile>
@@ -882,9 +879,6 @@
     <QtMoc Include="AwExportDial.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtUic Include="AwExportDial.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtMoc Include="Carto\AwMappingClient.h">
       <Filter>Carto</Filter>
     </QtMoc>

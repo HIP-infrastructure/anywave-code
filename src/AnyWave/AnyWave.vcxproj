@@ -26,7 +26,6 @@
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
     <ClCompile Include="AwComponents.cpp" />
-    <ClCompile Include="AwExport.cpp" />
     <ClCompile Include="AwExportDial.cpp" />
     <ClCompile Include="AwFileOpenSave.cpp" />
     <ClCompile Include="AwHelpMenu.cpp" />
@@ -517,8 +516,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AnyWave.ui">
-    </QtUic>
-    <QtUic Include="AwExportDial.ui">
     </QtUic>
     <QtUic Include="Updater\AwDownloadGui.ui" />
     <QtUic Include="Updater\AwUpdaterGui.ui" />

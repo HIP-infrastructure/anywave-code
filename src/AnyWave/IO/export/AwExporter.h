@@ -29,10 +29,7 @@ public:
 	void run() override;
 	void runFromCommandLine() override;
 protected:
-	AwChannelList m_channels;		// channels to export
-	AwChannelList m_ICAChannels;	// ICA Channels to export
-	bool m_exportICAChannels;			// this flag indicates that the data contains ICA virtual channels
-	AwMarkerList m_inputMarkers, m_outputMarkers;
+	AwMarkerList m_inputMarkers;
 };
 
 class AwExporterPlugin : public AwProcessPlugin

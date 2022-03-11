@@ -105,6 +105,7 @@ void AwProcessIO::addWidget(QWidget* widget)
 void AwProcessIO::clearChannels()
 {
 	//AW_DESTROY_LIST(m_channels);
+	m_channels.clear();
 }
 
 void AwProcessIO::clearMarkers()

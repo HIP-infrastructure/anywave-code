@@ -36,8 +36,10 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		if (process) {
 			auto reader = process->pdi.input.reader();
 			if (reader)
-				reader->plugin()->deleteInstance(reader);
-			process->plugin()->deleteInstance(process);
+				//reader->plugin()->deleteInstance(reader);
+				delete reader;
+			//process->plugin()->deleteInstance(process);
+			delete process;
 		}
 		return;
 	}
@@ -50,6 +52,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	process->runFromCommandLine();
 	AwBIDSManager::finishCommandLineOperation();
 	logger.sendLog(QString("Done."));
-	process->plugin()->deleteInstance(process);
+// process->plugin()->deleteInstance(process);
+	delete process;
 }
 
