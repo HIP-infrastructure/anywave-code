@@ -36,12 +36,13 @@ AwConverter::~AwConverter()
 void AwConverter::run()
 {
 	auto list = pdi.input.channels();	    // Les canaux a convertir/exporter
-	auto markers = pdi.input.markers();		// Les marqueurs à convertir/exporter
+	auto markers = pdi.input.markers();		// Les marqueurs ï¿½ convertir/exporter
 	m_writer->infos.setChannels(list);
 	
 	// markers should contain one and only one marker
 	if (markers.isEmpty())	{
-		m_writer->plugin()->deleteInstance(m_writer);
+		//m_writer->plugin()->deleteInstance(m_writer);
+		delete m_writer;
 		return;
 	}
 
@@ -68,7 +69,8 @@ void AwConverter::run()
 
 	// creating file
 	if (m_writer->createFile(m_path) != AwFileIO::NoError)	{
-		m_writer->plugin()->deleteInstance(m_writer);
+	//	m_writer->plugin()->deleteInstance(m_writer);
+		delete m_writer;
 		return;
 	}
 
@@ -81,5 +83,6 @@ void AwConverter::run()
 	foreach(AwChannel *c, list)
 		c->clearData();
 
-	m_writer->plugin()->deleteInstance(m_writer);
+	//m_writer->plugin()->deleteInstance(m_writer);
+	delete m_writer;
 }

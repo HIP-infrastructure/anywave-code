@@ -19,7 +19,6 @@
 #include <QMenuBar>
 #include "AwPluginDial.h"
 #include "Process/AwTriggerParser.h"
-#include "Process/AwExporter.h"
 #include <AwProcessInterface.h>
 #include <filter/AwFilterPlugin.h>
 #include <graphics/AwGraphicInterface.h>
@@ -563,7 +562,7 @@ void AwPluginManager::loadPlugins()
 	m_processes += new AwMATLABMarkersExporterPlugin;
 
 	// Add Exporter plugin
-	m_processes += new AwExporterPlugin;
+//	m_processes += new AwExporterPlugin;
 
 	// add SignalItem as DisplayPlugin
 	m_displays += new AwDisplayPluginSignalItem();

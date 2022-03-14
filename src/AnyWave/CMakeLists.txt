@@ -10,7 +10,6 @@ SET(AnyWave_SRCS
 	./AwMapping.cpp
 	./AwBatch.cpp
 	./AwMATLAB.cpp
-    ./AwExportDial.cpp  
     ./AwNoGUI.cpp  
     ./AwOpenFileDialog.cpp
     ./main.cpp  
@@ -114,10 +113,8 @@ SET(AnyWave_SRCS
     ./Plugin/AwPluginManager.cpp  
     ./Plugin/AwMATPyCreator.cpp
     ./Process/AwConverter.cpp  
-    ./Process/AwExporter.cpp  
     ./Process/AwExporterMarkerModel.cpp  
     ./Process/AwExporterSelMarkers.cpp  
-    ./Process/AwExporterSettings.cpp  
     ./Process/AwExportSelChannels.cpp  
     ./Process/AwMarkerExporter.cpp  
     ./Process/AwMatlabScriptPlugin.cpp  
@@ -248,8 +245,6 @@ SET(HEADERS
     ./Process/AwTriggerEraser.h  
     ./Process/AwProcessLogManager.h  
     ./Process/AwProcessLog.h  
-    ./Process/AwExporter.h  
-    ./Process/AwExporterSettings.h  
     ./Process/AwExportSelChannels.h  
     ./Process/AwExporterSelMarkers.h  
     ./Process/AwExporterMarkerModel.h  
@@ -296,7 +291,6 @@ SET(HEADERS
     ./ICA/AwICARejectButton.h  
     ./ICA/AwSEEGMap.h  
     ./AwOpenFileDialog.h
-    ./AwExportDial.h  
     ./AnyWave.h  
     ./CL/AwCommandLogger.h
     ./Prefs/AwPreferences.h  
@@ -312,7 +306,6 @@ QT5_WRAP_CPP(MOC ${HEADERS})
 QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
 
 SET(FORMS ./AnyWave.ui  
-    ./AwExportDial.ui  
     ./3DViewer/AwSEEGWidget.ui
 	./Batch/AwAddEditBatchDialog.ui
 	./Batch/AwBatchGUI.ui
@@ -345,7 +338,6 @@ SET(FORMS ./AnyWave.ui
     ./Process/TPUi.ui  
     ./Process/AwProcessLogWindow.ui  
     ./Process/AwProcessWidget.ui  
-    ./Process/AwExporterSettings.ui  
     ./Process/AwExportSelChannels.ui  
     ./Process/AwExporterSelMarkers.ui  
     ./Updater/AwDownloadGui.ui
