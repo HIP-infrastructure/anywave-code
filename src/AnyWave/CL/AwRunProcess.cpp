@@ -52,7 +52,6 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	process->runFromCommandLine();
 	AwBIDSManager::finishCommandLineOperation();
 	logger.sendLog(QString("Done."));
-// process->plugin()->deleteInstance(process);
 	delete process;
 }
 

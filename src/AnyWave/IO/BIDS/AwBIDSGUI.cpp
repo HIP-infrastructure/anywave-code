@@ -281,6 +281,51 @@ void AwBIDSGUI::showColumns(const QStringList& cols)
 	}
 }
 
+void AwBIDSGUI::openSubject(AwBIDSItem* item) 
+{
+	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject) {
+		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {  // parse item on the fly when required
+			item->addChildren(m_bids->recursiveParsing(item->data(AwBIDSItem::PathRole).toString(), item));
+			item->setData(true, AwBIDSItem::ParsedItem);
+			recursiveFill(item);
+		}
+		showItem(item);
+	}
+}
+
+void AwBIDSGUI::openFileItem(AwBIDSItem* item) 
+{
+	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::DataFile) {
+		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {
+			// get the sidefile json to set a tooltip
+			auto path = item->data(AwBIDSItem::PathRole).toString();
+			// regexp to capture file extension including dot
+			QRegularExpression reg("(\\.[^.]+)$");
+			auto jsonPath = path.remove(reg) + ".json";
+			if (!QFile::exists(jsonPath)) {  // json file not found (we may be inside a MEG folder)
+				auto parent = static_cast<AwBIDSItem*>(item)->parent();
+				auto parentPath = parent->data(AwBIDSItem::PathRole).toString();
+				if (parentPath.contains("_meg")) {
+					jsonPath = parentPath + ".json";
+				}
+			}
+			// check that we have a josn file
+			if (QFile::exists(jsonPath)) {
+				item->setData(AwUtilities::json::fromJsonFileToString(jsonPath), AwBIDSItem::JsonDict);
+				item->setData(true, AwBIDSItem::ParsedItem);
+				updatePropertiesTable(item);
+			}
+		}
+	}
+	updatePropertiesTable(item);
+	//showItem(item);
+	auto parent = item->parent();
+	while (parent) {
+		m_ui.treeView->expand(parent->index());
+		parent = parent->parent();
+	}
+}
+
 void AwBIDSGUI::handleClick(const QModelIndex& index)
 {
 	// get the item

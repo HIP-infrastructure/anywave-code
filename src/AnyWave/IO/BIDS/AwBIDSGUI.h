@@ -34,6 +34,8 @@ public:
 	void closeBIDS(); 
 	void showColumns(const QStringList& cols);
 	void showItem(QStandardItem *item);
+	void openSubject(AwBIDSItem *item);
+	void openFileItem(AwBIDSItem* item);
 signals:
 	void dataFileClicked(const QString&);
 	void imageFileClicked(const QString&);

@@ -150,10 +150,6 @@
     <ClCompile Include="Prefs\AwPython.cpp" />
     <ClCompile Include="Prefs\AwPythonSetttings.cpp" />
     <ClCompile Include="Prefs\AwSettings.cpp" />
-    <ClCompile Include="Process\AwExporterMarkerModel.cpp" />
-    <ClCompile Include="Process\AwExporterSelMarkers.cpp" />
-    <ClCompile Include="Process\AwExporterSettings.cpp" />
-    <ClCompile Include="Process\AwExportSelChannels.cpp" />
     <ClCompile Include="Process\AwLogPlainTextEdit.cpp" />
     <ClCompile Include="Process\AwMarkerExporter.cpp" />
     <ClCompile Include="Process\AwMATLABMarkersExporter.cpp" />
@@ -302,15 +298,6 @@
     </QtMoc>
     <QtMoc Include="Marker\AwPickChannelsDial.h">
     </QtMoc>
-    <QtMoc Include="Process\AwExporterSettings.h">
-    </QtMoc>
-    <QtMoc Include="Process\AwExportSelChannels.h">
-    </QtMoc>
-    <QtMoc Include="Process\AwExporterSelMarkers.h">
-    </QtMoc>
-    <QtMoc Include="Process\AwExporterMarkerModel.h">
-    </QtMoc>
-    <ClInclude Include="Process\AwExporterTypes.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="resource2.h" />
     <QtMoc Include="Process\AwProcessLogWindow.h">
@@ -762,12 +749,6 @@
     </QtUic>
     <QtRcc Include="..\..\resources\AnyWave.qrc">
     </QtRcc>
-    <QtUic Include="Process\AwExporterSettings.ui">
-    </QtUic>
-    <QtUic Include="Process\AwExportSelChannels.ui">
-    </QtUic>
-    <QtUic Include="Process\AwExporterSelMarkers.ui">
-    </QtUic>
     <QtUic Include="Marker\AwMarkersExportWidget.ui">
     </QtUic>
     <QtUic Include="Widgets\AwSelectTriggerChannelDialog.ui">

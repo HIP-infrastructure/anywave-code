@@ -36,6 +36,7 @@
 #include "Process/AwMATLABMarkersExporter.h"
 #include "Debug/AwDebugLog.h"
 #include <utils/json.h>
+#include "IO/export/AwExporter.h"
 #ifdef AW_EPOCHING
 #include "Epoch/AwAvgSignalItem.h"
 #endif
@@ -562,7 +563,7 @@ void AwPluginManager::loadPlugins()
 	m_processes += new AwMATLABMarkersExporterPlugin;
 
 	// Add Exporter plugin
-//	m_processes += new AwExporterPlugin;
+	m_processes += new AwExporterPlugin;
 
 	// add SignalItem as DisplayPlugin
 	m_displays += new AwDisplayPluginSignalItem();

@@ -25,7 +25,6 @@ class AwFileIO;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
 
-
 constexpr auto aw_derivatives_folder = "derivatives/anywave";
 
 namespace bids {
@@ -43,6 +42,9 @@ namespace bids {
 	constexpr auto tsv_channel_name = "name";
 	constexpr auto tsv_channel_type = "type";
 	constexpr auto tsv_channel_status = "status";
+	// tracking of current open file in BIDS
+	constexpr auto file_derivatives_dir = "file_derivatives_dir";
+	constexpr auto current_open_filename = "current_open_filename";
 }
 
 
@@ -73,7 +75,10 @@ public:
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems items() { return m_items; }
-	
+
+	// 
+	int selectItemFromFilePath(const QString& path);
+
 	// command line methods
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
@@ -121,6 +126,10 @@ public:
 	/** Get the filename prefix by removing the modality **/
 	QString getPrefixName(AwBIDSItem *item, bool absolutePath = false);
 
+	// dat file derivatives dir and file name
+	QString currentDerivativesDir();
+	QString currentFileName();
+
 	AwBIDSItems recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
@@ -151,6 +160,8 @@ protected:
 	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
 	QHash<int, QString> m_derivativesNames;
 	AwBIDSItems m_items;
+	// build also a map to find a subject item object by its name
+	QMap<QString, AwBIDSItem*> m_mapSubjects;
 	QVariantMap m_settings;
 	QList<int> m_dataContainers;
 	QFileIconProvider m_fileIconProvider;

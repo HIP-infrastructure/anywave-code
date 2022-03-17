@@ -368,9 +368,7 @@ void AwMontageManager::closeFile()
 void AwMontageManager::newMontage(AwFileIO *reader)
 {
 	AwChannelList channels = reader->infos.channels();
-
 	m_channelsShrdPtrs.clear();
-
 	// init as recorded channels list
 	for (auto c : channels)  {
 		QSharedPointer<AwChannel> shrdChannel = QSharedPointer<AwChannel>(c->duplicate());
@@ -379,16 +377,13 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		if (!c->isReference()) 
 			m_channels << shrdChannel.get();
 	}
-
 	// check for .bad file
 	m_badChannelLabels.clear();
 	m_badPath = AwDataManager::instance()->badFilePath();
 	if (QFile::exists(m_badPath))
 		loadBadChannels();
-	
 	// check for local montages.
 	scanForMontagesInDirectory(AwDataManager::instance()->currentMontageDir());
-
 	// check for .montage file
 	auto dm = AwDataManager::instance();
 	m_montagePath = dm->mtgFilePath();
@@ -396,8 +391,8 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 		if (!loadMontage(m_montagePath)) {
 			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
 		}
-		setNewFilters(AwDataManager::instance()->filterSettings());
-		emit montageChanged(m_channels);
+		//setNewFilters(AwDataManager::instance()->filterSettings());
+		//emit montageChanged(m_channels);
 	}
 	else {  // no default montage found => read channels.tsv if BIDS is active
 		if (AwBIDSManager::isInstantiated()) {
@@ -421,8 +416,8 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 					qDeleteAll(defaultTsvMontage);
 					saveBadChannels();
 					m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
-					setNewFilters(AwDataManager::instance()->filterSettings());
-					emit montageChanged(m_channels);
+					//setNewFilters(AwDataManager::instance()->filterSettings());
+					//emit montageChanged(m_channels);
 				}
 			}
 		}

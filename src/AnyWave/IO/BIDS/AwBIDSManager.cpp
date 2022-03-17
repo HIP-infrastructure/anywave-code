@@ -102,6 +102,7 @@ void AwBIDSManager::finishCommandLineOperation()
 		}
 	}
 	delete m_instance;
+	m_instance = nullptr;
 }
 
 void AwBIDSManager::initCommandLineOperation(const QString & filePath)
@@ -280,6 +281,16 @@ QString AwBIDSManager::getPrefixName(AwBIDSItem *item, bool absolutePath)
 	return res;
 }
 
+QString AwBIDSManager::currentDerivativesDir()
+{
+	return m_settings.value(bids::file_derivatives_dir).toString();
+}
+
+QString AwBIDSManager::currentFileName()
+{
+	return m_settings.value(bids::current_open_filename).toString();
+}
+
 QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
 {
 	QString res;
@@ -383,10 +394,6 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 			AwBIDSItem* container = nullptr;
 			auto files = dir.entryList(QDir::Files);
 			if (!files.isEmpty()) {
-			//	container = new AwBIDSItem("freesurfer", item);
-			//	container->setData(path, AwBIDSItem::PathRole);
-			//	container->setData(AwBIDSItem::freesurfer, AwBIDSItem::TypeRole);
-			//	container->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 				container = new AwBIDSItem("cortex", item);
 				container->setData(AwBIDSItem::freesurfer, AwBIDSItem::TypeRole);
 				container->setData(path, AwBIDSItem::PathRole);
@@ -615,19 +622,18 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	// build the path corresponding to the current file in derivatives
 	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
 	QFileInfo fi(relativePath);
+	QFileInfo fi2(filePath);
+
+	auto fileName = fi2.fileName();
 	auto userName = AwSettings::getInstance()->value(aws::username).toString();
 
 	QString path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
 	QDir dir;
 	dir.mkpath(path);
-	
-	// get filename
-	auto dm = AwDataManager::instance();
-	auto fileName = dm->value(keys::data_file).toString();
 	auto basePath = QString("%1/%2/%3").arg(m_rootDir).arg(relativePath).arg(fileName);
 
 	// get .mrk if any
-	auto srcFile = dm->mrkFilePath();
+	auto srcFile = filePath + ".mrk";
 	auto destFile = QString("%1/%2.mrk").arg(path).arg(fileName);
 	bool fileExists = QFile::exists(srcFile);
 	bool destExists = QFile::exists(destFile);
@@ -646,23 +652,23 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	}
 
 	// move mtg file if any
-	srcFile = dm->mtgFilePath();
+	srcFile = filePath + ".mtg";
 	destFile = QString("%1/%2.mtg").arg(path).arg(fileName);
 	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = dm->value(keys::disp_file).toString();
+	srcFile = filePath + ".display"; 
 	destFile = QString("%1/%2.display").arg(path).arg(fileName);
 	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = dm->value(keys::lvl_file).toString();
-	destFile = QString("%1/%2.levels").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = dm->badFilePath();
+	srcFile = filePath + ".bad";
 	destFile = QString("%1/%2.bad").arg(path).arg(fileName);
 	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = dm->value(keys::flt_file).toString();
+	srcFile = filePath + ".flt";
 	destFile = QString("%1/%2.flt").arg(path).arg(fileName);
 	moveSidecarFilesToDerivatives(srcFile, destFile);
 
-	AwDataManager::instance()->setNewRootDirForSideFiles(path);
+	m_settings[bids::current_open_filename] = fileName;
+	m_settings[bids::file_derivatives_dir] = path;
+
+	AwDataManager::instance()->setNewRootDirForSideFiles();
 }
 
 void AwBIDSManager::moveSidecarFilesToDerivatives(const QString& src, const QString& dest)
@@ -678,6 +684,28 @@ void AwBIDSManager::moveSidecarFilesToDerivatives(const QString& src, const QStr
 		QFile::copy(src, dest);
 		QFile::remove(src);
 	}
+}
+
+int AwBIDSManager::selectItemFromFilePath(const QString& path)
+{
+	// extract subject id from file name
+	QRegularExpression re("(?<subject>sub-)(?<ID>\\w+)");
+	QRegularExpressionMatch match = re.match(path);
+	if (!match.hasMatch())
+		return -1;
+	QString ID = match.captured("ID");
+
+	// search in intems
+	auto item = m_mapSubjects.value(ID);
+	if (item == nullptr)
+		return -1;
+
+	m_ui->openSubject(item);
+	findItem(path);
+	if (m_currentOpenItem == nullptr)
+		return -1;
+	m_ui->openFileItem(m_currentOpenItem);
+	return 0;
 }
 
 void AwBIDSManager::findItem(const QString& filePath)
@@ -799,7 +827,6 @@ AwChannelList AwBIDSManager::getChannelsTsvMontage()
 	AwChannelList res;
 	if (m_currentOpenItem == nullptr)
 		return res;
-
 	auto channelTsvFile = m_currentOpenItem->data(AwBIDSItem::ChannelsTsvRole).toString();
 	if (channelTsvFile.isEmpty())
 		return res;
@@ -841,8 +868,6 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 			auto label = cols.value(i);
 			if (label == bids::tsv_channel_name)
 				channel->setName(tokens.at(i));
-			//else if (label == bids::tsv_channel_units)
-			//	channel->setUnit(tokens.at(i));
 			else if (label == bids::tsv_channel_type) {
 				auto type = tokens.at(i);
 				if (type == "MEGMAG")

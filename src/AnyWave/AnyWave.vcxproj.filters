@@ -373,18 +373,6 @@
     <ClCompile Include="MATPy\GetScreenCapture.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="Process\AwExporterSettings.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwExportSelChannels.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwExporterSelMarkers.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwExporterMarkerModel.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
     <ClCompile Include="MATPy\GetICAPanelCapture.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
@@ -951,27 +939,6 @@
     <QtUic Include="Marker\AwPickChannelsDial.ui">
       <Filter>Marker</Filter>
     </QtUic>
-    <QtUic Include="Process\AwExporterSettings.ui">
-      <Filter>Process</Filter>
-    </QtUic>
-    <QtMoc Include="Process\AwExporterSettings.h">
-      <Filter>Process</Filter>
-    </QtMoc>
-    <QtUic Include="Process\AwExportSelChannels.ui">
-      <Filter>Process</Filter>
-    </QtUic>
-    <QtMoc Include="Process\AwExportSelChannels.h">
-      <Filter>Process</Filter>
-    </QtMoc>
-    <QtUic Include="Process\AwExporterSelMarkers.ui">
-      <Filter>Process</Filter>
-    </QtUic>
-    <QtMoc Include="Process\AwExporterSelMarkers.h">
-      <Filter>Process</Filter>
-    </QtMoc>
-    <QtMoc Include="Process\AwExporterMarkerModel.h">
-      <Filter>Process</Filter>
-    </QtMoc>
     <QtMoc Include="Source\AwSourceManager.h">
       <Filter>Source</Filter>
     </QtMoc>
@@ -1162,9 +1129,6 @@
     </ClInclude>
     <ClInclude Include="Marker\AwExtractTriggers.h">
       <Filter>Marker</Filter>
-    </ClInclude>
-    <ClInclude Include="Process\AwExporterTypes.h">
-      <Filter>Process</Filter>
     </ClInclude>
     <ClInclude Include="Source\AwSourceChannel.h">
       <Filter>Source</Filter>

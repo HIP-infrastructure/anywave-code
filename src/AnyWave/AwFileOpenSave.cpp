@@ -55,8 +55,6 @@ void AnyWave::on_actionOpen_video_triggered()
 	m_player->openFile();
 }
 
- 
-
 //   
 // Save as
 //
@@ -64,6 +62,7 @@ void AnyWave::on_actionSave_as_triggered()
 {
 	AwProcessManager::instance()->startProcess("Export");
 }
+
 
 void AnyWave::updateRecentBIDS(const QStringList &files)
 {
@@ -106,7 +105,7 @@ void AnyWave::openFileFromBIDS(const QString& filePath)
 	auto dataManager = AwDataManager::instance();
 	auto aws = AwSettings::getInstance();
 
-	int res = dataManager->openFile(filePath);
+	int res = dataManager->openFileFromBIDS(filePath);
 	if (res == -1) {
 		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
@@ -201,17 +200,30 @@ void AnyWave::openFile(const QString &path)
 		ext = ext.toLower();
 	}
 
-//	closeFile();
 	if (m_display)
 		m_display->closeFile();
+
 	auto dataManager = AwDataManager::instance();
+	// check if file belongs to a BIDS
+	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	if (!root.isEmpty()) {
+		openBIDS(root);
+		if (AwBIDSManager::instance()->selectItemFromFilePath(filePath) == 0) {
+			openFileFromBIDS(filePath);
+
+			return;
+		}
+		else {
+			QMessageBox::critical(this, "BIDS error", "The file is not valid for a BIDS", QMessageBox::Discard);
+			return;
+		}
+	}
 	
 	int res = dataManager->openFile(filePath);
 	if (res == -1) {
 		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
 	}
-
 	auto reader = dataManager->reader();
 
 	if (reader->flags() & FileIO::TriggerChannelIsWritable)
@@ -238,10 +250,6 @@ void AnyWave::openFile(const QString &path)
 	actionVisualiseEpoch->setEnabled(true);
 
 	AwProcessManager::instance()->enableMenus();
-
-	if (res == 1) {  // Data Manager just detected a BIDS file
-		openBIDS(dataManager->bidsDir());
-	}
 
 	// Activer les QWidgets des toolbars.
 	for (auto widget : m_toolBarWidgets)
@@ -323,6 +331,13 @@ void AnyWave::openBIDS()
 
 void AnyWave::openBIDS(const QString& path)
 {
+	// check if we try to open an already open BIDS
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->rootDir().toLower() == path.toLower())
+			return;
+	}
+
 	AwBIDSManager::instance()->setRootDir(path);
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFileFromBIDS(const QString&)));
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
@@ -470,5 +485,4 @@ void AnyWave::closeFile()
 	}
 #endif
 	AwDebugLog::instance()->closeFile();
-//	emit closingFile();
 }

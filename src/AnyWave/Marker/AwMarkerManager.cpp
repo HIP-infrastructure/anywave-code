@@ -339,8 +339,6 @@ void AwMarkerManager::init()
 		m_needSorting = true;
 		int removed = removeDuplicates();
 		removeOfflimits();
-		globals->setDisplayed(&m_displayedMarkers);
-		globals->setTotal(&m_markers);
 		if (!m_markers.isEmpty()) {
 			// avoid markers that out of data bounds (do not load marker that could be positionned after the end of data)
 			m_ui->setMarkers(m_markers);
@@ -349,6 +347,9 @@ void AwMarkerManager::init()
 //		if (removed) 
 //			AwMessageBox::information(nullptr, "Markers", QString("%1 markers were duplicated and had been removed.").arg(removed));
 	}
+	globals->setDisplayed(&m_displayedMarkers);
+	globals->setTotal(&m_markers);
+
 }
 
 

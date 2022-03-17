@@ -164,9 +164,9 @@ void AwGraphicsScene::updateVisibleItemsHashTable()
 	m_hashNameToItem.clear();
 	QStringList labels;
 	for (AwGraphicsSignalItem *i : m_visibleSignalItems) {
-		m_hashNameToItem.insert(i->channel()->name(), i);
-		if (!labels.contains(i->channel()->name()))
-			labels << i->channel()->name();
+		m_hashNameToItem.insert(i->channel()->fullName(), i);
+		if (!labels.contains(i->channel()->fullName()))
+			labels << i->channel()->fullName();
 	}
 	// update go to channel menu
 	if (m_gotoChannelMenu == NULL)
@@ -761,11 +761,7 @@ void AwGraphicsScene::setChannelAsBad()
 
 void AwGraphicsScene::undoMarkerInsertion()
 {
-	//if (m_lastAddedMarker == nullptr)
-	//	return;
-	//emit markerRemoved(m_lastAddedMarker);
-	//m_lastAddedMarker = nullptr;
-	if (m_lastAddedMarkers.isEmpty())
+ 	if (m_lastAddedMarkers.isEmpty())
 		return;
 	emit markerRemoved(m_lastAddedMarkers.takeLast());
 }
@@ -843,7 +839,7 @@ void AwGraphicsScene::setMarkers(const AwMarkerList& markers)
 void AwGraphicsScene::showMarkers(bool show)
 {
 	m_showMarkers = show;
-	displayMarkers();
+	updateMarkers();
 	update();
 }
 
@@ -883,8 +879,6 @@ void AwGraphicsScene::updateMarkers()
 {
 	clearMarkers();
 	if (!m_showMarkers)
-		return;
-	if (m_markers.isEmpty())
 		return;
 	displayMarkers();
 }

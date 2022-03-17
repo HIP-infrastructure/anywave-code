@@ -26,8 +26,6 @@ void AwBIDSManager::parse()
 		if (file.contains("participants.tsv"))
 			m_settings[bids::participant_tsv] = l.filePath();
 	}
-
-	//auto subjects = buildSubjectItems(m_rootDir);
 	auto subjects = getSubjectItems(m_rootDir);
 	auto dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
@@ -36,8 +34,11 @@ void AwBIDSManager::parse()
 		QString fullPath = QString("%1/sourcedata").arg(m_rootDir);
 		m_items << getSubjectItems(fullPath);
 	}
-	//m_items << subItems;
 	m_items << getSubjectItems(m_rootDir);
+	// build the map to find a subject using it's name
+	m_mapSubjects.clear();
+	for (auto item : m_items)
+		m_mapSubjects.insert(item->text(), item);
 
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv))
