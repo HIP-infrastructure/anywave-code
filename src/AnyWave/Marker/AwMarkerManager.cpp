@@ -331,7 +331,6 @@ void AwMarkerManager::init()
 		AwWaitWidget wait("Markers");
 		wait.setText("Loading markers...");
 		connect(this, SIGNAL(finished()), &wait, SLOT(accept()));
-
 		auto f = [this](const QString& path) { auto markers = this->loadMarkers(path); emit finished();  return markers; };
 		auto future = std::async(f, m_filePath);
 		wait.exec();
@@ -344,12 +343,9 @@ void AwMarkerManager::init()
 			m_ui->setMarkers(m_markers);
 			showDockUI();
 		}
-//		if (removed) 
-//			AwMessageBox::information(nullptr, "Markers", QString("%1 markers were duplicated and had been removed.").arg(removed));
 	}
 	globals->setDisplayed(&m_displayedMarkers);
 	globals->setTotal(&m_markers);
-
 }
 
 

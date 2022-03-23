@@ -17,6 +17,8 @@
 #include <widget/SignalView/AwGraphicsScene.h>
 #include <QtMath>
 #include <QScrollBar>
+#include <QMap>
+
 
 AwGraphicsView::AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings, 
 			   AwDisplayPhysics *phys, QWidget *parent) : QGraphicsView(scene, parent)
@@ -57,38 +59,18 @@ void AwGraphicsView::computePageDuration()
 	}
 	if (m_pageDuration == 0.)
 		return;
-	//if (m_previousPageDuration == 0. || m_previousPageDuration != m_pageDuration) {
-	//	m_previousPageDuration = m_pageDuration;
-	//	emit pageDurationChanged(m_pageDuration);
-	//}
 	emit pageDurationChanged(m_pageDuration);
 }
 
 
 void AwGraphicsView::resizeEvent(QResizeEvent *event)
 {
-	//float duration = m_pageDuration;
 	computePageDuration();
-	//// update page duration
-	//if (m_settings->timeScaleMode == AwViewSettings::PaperLike)
-	//	computePageDuration();
-	//else {
-	//	//float w = (float)viewport()->rect().width();
-	//	//m_physics->setPageDuration(m_pageDuration);
-	//	//m_physics->setFixedPageDuration(m_pageDuration, w);
-	//	computePageDuration();
-	//}
 	layoutItems();
-
-	//// don't send signal if duration is the same.
-	//if (duration != m_pageDuration)
-	//	emit pageDurationChanged(m_pageDuration);
-
 	AwGraphicsScene *gs = (AwGraphicsScene *)scene();
 	gs->refresh();
 	resetCachedContent();
 	repaint();
-//	scene()->update();
 	gs->updateChannelsData();
 	gs->update();
 }
@@ -232,143 +214,36 @@ void AwGraphicsView::layoutItems()
 	AwGraphicsScene *gs = (AwGraphicsScene *)scene();
 
 	if (m_settings->stackChannels) { // OVERLAY
-		QList<AwGraphicsSignalItem *> EEG;
-		QList<AwGraphicsSignalItem *> MEG;
-		QList<AwGraphicsSignalItem *> GRAD;
-		QList<AwGraphicsSignalItem *> ICA;
-		QList<AwGraphicsSignalItem *> Source;
-		QList<AwGraphicsSignalItem *> SEEG;
-		QList<AwGraphicsSignalItem *> REF;
-		QList<AwGraphicsSignalItem *> Others;
-		QList<AwGraphicsSignalItem *> sitems = gs->visibleSignalItems();
-		foreach (AwGraphicsSignalItem *item, sitems) {
-			switch (item->channel()->type()) {
-			case AwChannel::SEEG:
-				SEEG.append(item);
-				break;
-			case AwChannel::EEG:
-				EEG.append(item);
-				break;
-			case AwChannel::MEG:
-				MEG.append(item);
-				break;
-			case AwChannel::Reference:
-				REF.append(item);
-				break;
-			case AwChannel::GRAD:
-				GRAD.append(item);
-				break;
-			case AwChannel::ICA:
-				ICA.append(item);
-				break;
-			case AwChannel::Source:
-				Source.append(item);
-				break;
-			default:
-				Others.append(item);
-				break;
-			}
-			numberOfSignalItems++;
-		}	
-	
-		if (numberOfSignalItems == 0)
+		QMultiMap<int, AwGraphicsSignalItem*> map;
+		QList<AwGraphicsSignalItem*> sitems = gs->visibleSignalItems();
+		for (auto item : sitems)
+			map.insert(item->channel()->type(), item);
+		if (map.isEmpty())
 			return;
-
-		int nChannelsToDisplay = numberOfSignalItems;
-		
-		if (!EEG.isEmpty())
-			nChannelsToDisplay -= (EEG.count() - 1);
-		if (!MEG.isEmpty())
-			nChannelsToDisplay -= (MEG.count() - 1);
-		if (!SEEG.isEmpty())
-			nChannelsToDisplay -= (SEEG.count() - 1);
-		if (!REF.isEmpty())
-			nChannelsToDisplay -= (REF.count() - 1);
-		if (!GRAD.isEmpty())
-			nChannelsToDisplay -= (GRAD.count() - 1);
-		if (!ICA.isEmpty())
-			nChannelsToDisplay -= (ICA.count() - 1);
-		if (!Source.isEmpty())
-			nChannelsToDisplay -= (Source.count() - 1);
-
+		int nChannelsToDisplay = map.uniqueKeys().size();
 		qreal h;
 		if (!m_settings->limitChannels)
-			offset = viewportH / (nChannelsToDisplay + 1);
+			offset = viewportH / (qreal(nChannelsToDisplay) + 1);
 		else if (m_settings->limitChannels && nChannelsToDisplay <= m_settings->maxChannels)
-			offset = viewportH / (nChannelsToDisplay + 1);
+			offset = viewportH / (qreal(nChannelsToDisplay) + 1);
 		else if (m_settings->limitChannels) {
 			// the number of items to display is greater than the limit fixed in viewing options.
 			// Compute the offset to fit the max channel number in one page height.
 			offset  = viewportH / (m_settings->maxChannels + 1);
-
 			// compute the total height to fit all the items
 			qreal totalH = numberOfSignalItems * offset + offset;
 			newRect.setHeight(totalH);
 		}
 
 		// layout items
-		if (!EEG.isEmpty()) {
+		for (auto k : map.uniqueKeys()) {
+			auto values = map.values(k);
 			currentVPos += offset;
-			for (qint32 i = 0; i < EEG.count(); i++)
-				EEG.at(i)->setPos(0, currentVPos);
-			if (currentVPos > newRect.height())
-				extraSceneH = currentVPos -  newRect.height();
-		}
-
-		if (!SEEG.isEmpty()) {
-			currentVPos += offset;
-			for (qint32 i = 0; i < SEEG.count(); i++)
-				SEEG.at(i)->setPos(0, currentVPos);
-			if (currentVPos > newRect.height())
-				extraSceneH = currentVPos -  newRect.height();
-		}
-
-		if (!MEG.isEmpty())	{
-			currentVPos += offset;
-			for (qint32 i = 0; i < MEG.count(); i++)
-				MEG.at(i)->setPos(0, currentVPos);
-			if (currentVPos > newRect.height())
-				extraSceneH = currentVPos -  newRect.height();
-		}
-
-		if (!REF.isEmpty()) 	{
-			currentVPos += offset;
-			for (qint32 i = 0; i < REF.count(); i++)
-				REF.at(i)->setPos(0, currentVPos);
-			if (currentVPos > newRect.height())
-				extraSceneH = currentVPos -  newRect.height();
-		}
-		if (!GRAD.isEmpty()) {
-			currentVPos += offset;
-			for (qint32 i = 0; i < GRAD.count(); i++)
-				GRAD.at(i)->setPos(0, currentVPos);
+			for (auto v : values) 
+				v->setPos(0, currentVPos);
 			if (currentVPos > newRect.height())
 				extraSceneH = currentVPos - newRect.height();
 		}
-		if (!ICA.isEmpty()) {
-			currentVPos += offset;
-			for (qint32 i = 0; i < ICA.count(); i++)
-				ICA.at(i)->setPos(0, currentVPos);
-			if (currentVPos > newRect.height())
-				extraSceneH = currentVPos - newRect.height();
-		}
-		if (!Source.isEmpty()) {
-			currentVPos += offset;
-			for (qint32 i = 0; i < Source.count(); i++)
-				Source.at(i)->setPos(0, currentVPos);
-			if (currentVPos > newRect.height())
-				extraSceneH = currentVPos - newRect.height();
-		}
-
-		if (!Others.isEmpty())		{
-			foreach (AwGraphicsSignalItem *item, Others) {
-				currentVPos += offset;
-				item->setPos(0, currentVPos);
-				if (currentVPos > newRect.height())
-					extraSceneH = currentVPos -  newRect.height();
-			}
-		}
-
 		newRect.setHeight(newRect.height() + extraSceneH);
 		// 
 		scene()->setSceneRect(newRect);
@@ -397,7 +272,9 @@ void AwGraphicsView::layoutItems()
 		// layout items
 		qreal prevItemPos = 0.;
 		qreal vPos = 0;
-		foreach(AwGraphicsSignalItem *item, sitems)	{
+		QVector<qreal> yPositions(sitems.size());
+		int i = 0;
+		for (AwGraphicsSignalItem *item : sitems)	{
 			item->updateGeometry();
 			QSize itemSize = item->size();
 			// restore shifted label position to zero
@@ -409,12 +286,12 @@ void AwGraphicsView::layoutItems()
 			}
 			if (vPos - itemSize.height() / 2 < prevItemPos) {
 				vPos += itemSize.height() / 2 - offset;
-				item->setPos(0, vPos);
+			//	item->setPos(0, vPos);
 				prevItemPos = vPos + itemSize.height() / 2;
 				vPos = prevItemPos + offset;
 			}
 			else {
-				item->setPos(0, vPos);
+			//	item->setPos(0, vPos);
 				prevItemPos = vPos;
 			}
 			if (vPos > newRect.height()) {
@@ -424,9 +301,17 @@ void AwGraphicsView::layoutItems()
 			// if the offset between channels is less than 12 points, then reduce the font height to 8 for labels.
 			if (itemSize.height() == 0)
 				offset <= 12 ?	item->setLabelHeight(8) : item->setLabelHeight(12);
+			yPositions[i++] = vPos;
 		}
+		// resize scene rect BEFORE moving items on it (to avoid itemChange method of each items to constrain them)
+		newRect.setHeight(newRect.height() + extraSceneH);
+		scene()->setSceneRect(newRect);
+		i = 0;
+		for (AwGraphicsSignalItem* item : sitems)
+			item->setPos(0., yPositions.at(i++));
+
 		// check for label bounding boxes (if they are overlapping, shift them)
-		int i = 1;
+		i = 1;
 		while (i < sitems.size()) {
 			AwGraphicsSignalItem *item1 = sitems.at(i - 1);
 			AwGraphicsSignalItem *item2 = sitems.at(i);
@@ -441,16 +326,13 @@ void AwGraphicsView::layoutItems()
 			i += 2;
 		}
 
-		newRect.setHeight(newRect.height() + extraSceneH);
-		scene()->setSceneRect(newRect);
+//		newRect.setHeight(newRect.height() + extraSceneH);
+//		scene()->setSceneRect(newRect);
 	}
-
 	// restore view vertical position
 	if (savedPos)
 		verticalScrollBar()->setValue(savedPos);
 }
-
-
 
 void AwGraphicsView::applySettings(AwViewSettings *settings)
 {
@@ -460,7 +342,6 @@ void AwGraphicsView::applySettings(AwViewSettings *settings)
 	m_secsPerCm = settings->secsPerCm;
 	m_physics->setSecsPerCm(settings->secsPerCm);
 	computePageDuration();
-//	emit pageDurationChanged(m_pageDuration);
 	resetCachedContent();
 	repaint();
 	layoutItems();

@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "GraphColorMap.h"
-#include <graphics/AwColorMap.h>
-#include <graphics/AwQwtColorMap.h>
+#include <widget/AwColorMap.h>
+#include <widget/AwQwtColorMap.h>
 #include <qwt_interval.h>
 
 GraphColorMap::GraphColorMap(const QString& text, QGraphicsItem *parent)

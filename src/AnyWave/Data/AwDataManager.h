@@ -69,7 +69,12 @@ public:
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QString dispFilePath() { return m_settings.value(keys::disp_file).toString(); }
 	inline QString currentMontageDir() { return m_settings.value(keys::current_montage_dir).toString(); }
+	// BIDS
 	QString bidsDir();
+	/** get the current file name open in BIDS. The file name returned is the base file name (no extensions) **/
+	QString currentBIDSBaseFileName();
+	//BIDS
+
 	inline QVariantMap& settings() { return m_settings; }
 	inline int status() { return m_status; }
 

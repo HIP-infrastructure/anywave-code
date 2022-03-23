@@ -6,8 +6,8 @@
 #endif
 #include "TFWavelet2.h"
 #include <QtConcurrent>
-#include <graphics/AwColorMap.h>
-#include <graphics/AwQwtColorMap.h>
+#include <widget/AwColorMap.h>
+#include <widget/AwQwtColorMap.h>
 #include <widget/AwMessageBox.h>
 #include <AwCore.h>
 

@@ -26,48 +26,33 @@
 #include <widget/SignalView/AwGraphicsView.h>
 #include <widget/SignalView/AwGraphicsScene.h>
 #include <QtWidgets/QVBoxLayout>
+#include "AwICAMappingItem.h"
+
 
 AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwSignalItem(chan, settings, phys)
 {
 	// get the ICA channel
+	setFlag(QGraphicsItem::ItemIsMovable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+	setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
+	setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 	m_icaChannel = static_cast<AwICAChannel *>(chan);
-
 	m_is2DMapComputed = m_is3DMapComputed = false;
 	m_mapWidget = nullptr;
-
-	m_topoProxyWidget = new QGraphicsProxyWidget(this);
 	m_topoWidget = new AwTopoWidget(0, m_icaChannel->layout2D());
-	// set special flags for topowidget
-	m_topoWidget->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-	m_topoWidget->setAttribute(Qt::WA_NoSystemBackground);
-	m_topoWidget->setAttribute(Qt::WA_TranslucentBackground);
-	m_topoWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
-	m_topoWidget->setFixedSize(200, 220);
-
-	m_topoProxyWidget->setWidget(m_topoWidget);
-	m_topoProxyWidget->resize(200, 200);
-	m_topoProxyWidget->adjustSize();
-	
-	// button to open TopoSettings
-	m_buttonTopoSettings = new AwMappingButton(m_topoWidget);
-	m_topoSettingsProxyWidget = new QGraphicsProxyWidget(this);
-	m_topoSettingsProxyWidget->setWidget(m_buttonTopoSettings);
-
-	// check if a topo should be displayed
+	// make label movable
+	m_labelItem->setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsScenePositionChanges );
+	m_mappingItem = new AwICAMappingItem(m_topoWidget, this);
+	m_mappingItem->setZValue(this->zValue() + 1);
+	m_mappingItem->hide();
+    // check if a topo should be displayed
 	if (m_icaChannel->layout2D() == nullptr) {// No layout => hide widget don't compute topography
-		m_topoProxyWidget->hide();
-		m_topoSettingsProxyWidget->hide();
+		m_mappingItem->hide();
 		m_isMapAvailable = false;
 	}
 	else {
 		m_isMapAvailable = true;
 	}
-
-	// Reject button
-	m_addRejectButton = new AwICARejectButton(false, this);
-	m_addRejectButtonProxyWidget = new QGraphicsProxyWidget(this);
-	m_addRejectButtonProxyWidget->setWidget(m_addRejectButton);
-	m_addRejectButtonProxyWidget->setZValue(this->zValue() + 1);
 
 	// Label rejected
 	m_labelRejected = new QLabel();
@@ -97,6 +82,9 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDi
 		act = new QAction(tr("Hide map"), this);
 		connect(act, SIGNAL(triggered()), this, SLOT(hideMap()));
 		m_actions << act;
+		act = new QAction("Map settings", this);
+		connect(act, &QAction::triggered, this, &AwICASignalItem::openMapUi);
+		m_actions << act;
 	}
 	// add the 2D/3D map switch if a 3D layout is available
 	if (m_icaChannel->layout3D()) {
@@ -108,7 +96,7 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDi
 
 AwICASignalItem::~AwICASignalItem()
 {
-	delete m_addRejectButton;
+//	delete m_addRejectButton;
 	delete m_labelRejected;
 	if (m_mapWidget)
 		delete m_mapWidget;
@@ -116,19 +104,13 @@ AwICASignalItem::~AwICASignalItem()
 
 QSize AwICASignalItem::minimumSize() const
 {
-	if (!m_showMap)
-		return QSize(0, 0);
-	int h = m_topoWidget->geometry().height();
-	h += m_buttonTopoSettings->geometry().height();
-	h += 5;	// add margin of 5 pixels between topowidget and the buttons laid below it.
-	return QSize(0, h);
+	return QSize(0, 0);
 }
 
 
 void AwICASignalItem::updateRejected(bool rejected)
 {
 	m_rejected = rejected;
-	m_addRejectButton->updateRejectState(rejected);
 	if (m_rejected)	
 		m_labelRejectedProxyWidget->show();
 	else 
@@ -149,6 +131,12 @@ void AwICASignalItem::setRejected(bool rejected)
 	m_icaChannel->setRejected(rejected);
 }
 
+
+void AwICASignalItem::openMapUi()
+{
+	m_topoWidget->openUI();
+}
+
 void AwICASignalItem::showMap(bool flag)
 {
 	if (is2DMapAvailable() && flag) {
@@ -158,9 +146,7 @@ void AwICASignalItem::showMap(bool flag)
 		}
 	}
 	m_showMap = flag;
-	m_topoProxyWidget->setVisible(flag);
-	m_topoSettingsProxyWidget->setVisible(flag);
-	m_addRejectButtonProxyWidget->setVisible(flag);
+	m_mappingItem->setVisible(flag);
 	update();
 	m_size = minimumSize();
 }
@@ -168,7 +154,7 @@ void AwICASignalItem::showMap(bool flag)
 void AwICASignalItem::show3DMap()
 {
 	if (is3DMapAvailable()) {
-		if (m_mapWidget == NULL) {
+		if (m_mapWidget == nullptr) {
 			m_mapWidget = new AwMapWidget();
 			m_mapWidget->setWindowTitle(m_icaChannel->name());
 			m_mapWidget->setFlags(AwMapWidget::NoColorMap|AwMapWidget::NoLatencyDisplay);
@@ -190,12 +176,7 @@ QPainterPath AwICASignalItem::shape() const
 	QPainterPath path = AwSignalItem::shape();
 	// add topowidget rect here.
 	if (m_showMap) {
-		path.addRect(m_topoProxyWidget->geometry());
-		path.addRect(m_addRejectButtonProxyWidget->geometry());
-		path.addRect(m_topoSettingsProxyWidget->geometry());
-	}
-	else {
-		path.addRect(m_addRejectButtonProxyWidget->geometry());
+		path += m_mappingItem->shape();
 	}
 	return path;
 }
@@ -209,180 +190,44 @@ QRectF AwICASignalItem::boundingRect() const
 		
 	if (m_showMap) {
 		// add topowidget rect here
-		rect = rect.united(m_topoProxyWidget->subWidgetRect(m_topoWidget));
-		rect = rect.united(m_addRejectButtonProxyWidget->subWidgetRect(m_addRejectButton));
-		rect = rect.united(m_topoSettingsProxyWidget->subWidgetRect(m_buttonTopoSettings));
-	}
-	else {
-		rect = rect.united(m_addRejectButtonProxyWidget->subWidgetRect(m_addRejectButton));
+		rect = rect.united(m_mappingItem->boundingRect());
 	}
 	return rect;
 }
 
-
 void AwICASignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	if (m_channel == NULL)
+	AwSignalItem::paint(painter, option, widget);
+	if (m_channel == nullptr)
 		return;
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	painter->setRenderHint(QPainter::Qt4CompatiblePainting);
 #endif
-	m_topoWidget->adjustSize();
-	m_buttonTopoSettings->adjustSize();
-	m_addRejectButton->adjustSize();
 	qreal hmargin = 5;	// 5 pixels horizontal margin
 	if (m_showMap && m_label) {
 		// reposition widgets
 		// Mapping
 		QRect image_geo = m_topoWidget->imageGeometry();
-		m_topoProxyWidget->setPos(5, -(image_geo.height() / 2));
-		QRectF topo_geo = m_topoProxyWidget->geometry();
-		QRectF reject_geo = m_addRejectButtonProxyWidget->geometry();
-		qreal xPos = 5;
-		qreal yPos =  image_geo.height() / 2 + 5 + m_labelItem->boundingRect().height() / 2;
-		m_labelItem->setPos(xPos, yPos); 
-		xPos += m_labelItem->boundingRect().width() + 5;
-
-		if (m_topoSettingsProxyWidget) { // position Map Setting Button at bottom left
-			m_topoSettingsProxyWidget->setPos(xPos, yPos);
-			xPos += m_topoSettingsProxyWidget->geometry().width() + hmargin;
-		}
-		// position reject button at bottom left of topo widget
-		m_addRejectButtonProxyWidget->setPos(xPos, yPos);
-
-		// label will be horizontally aligned with Reject button
-		xPos += reject_geo.width() + hmargin;
-
-		// Label reject should be positioned at the middle left of Topo Widget
-		m_labelRejectedProxyWidget->setPos(10 + topo_geo.width(), -m_labelRejectedProxyWidget->geometry().height() / 2);
+		m_mappingItem->show();
+		m_mappingItem->setPos(m_mappingItem->x(), -image_geo.height() / 2);
+		m_labelItem->setPos(m_mappingItem->x() + image_geo.width() + 5, -m_labelItem->boundingRect().height() / 2);
+		m_labelRejectedProxyWidget->setPos(m_mappingItem->x(), -m_labelRejectedProxyWidget->geometry().height() / 2);
 	}
 	else if (m_showMap) { // show map but not the label
 		// reposition widgets
-		QRectF topo_geo = m_topoProxyWidget->geometry();
-		QRectF reject_geo = m_addRejectButtonProxyWidget->geometry();
 		QRect image_geo = m_topoWidget->imageGeometry();
-		m_topoProxyWidget->setPos(5, -(image_geo.height() / 2));
+		m_mappingItem->show();
+		m_mappingItem->setPos(m_mappingItem->x(), -image_geo.height() / 2);
+		m_labelRejectedProxyWidget->setPos(m_mappingItem->x(), -m_labelRejectedProxyWidget->geometry().height() / 2);
 
-		qreal xPos = 5;
-		qreal yPos = topo_geo.height() / 2;  // no h margin because TopoWidget has margins due to its new internal layout.
-		if (m_topoSettingsProxyWidget) { // position Map Setting Button at bottom left
-			m_topoSettingsProxyWidget->setPos(xPos, yPos);
-			xPos += m_topoSettingsProxyWidget->geometry().width() + hmargin;
-		}
-		// position reject button at bottom left of topo widget
-		m_addRejectButtonProxyWidget->setPos(xPos, yPos);
-		// label will be horizontally aligned with Reject button
-		xPos += reject_geo.width() + hmargin;
-		yPos = -m_labelRejectedProxyWidget->geometry().height() / 2;
-		// Label reject should be positioned at the middle left of Topo Widget
-		m_labelRejectedProxyWidget->setPos(xPos, yPos);
 	}
 	else if (m_label) { // show only label
-		m_labelItem->setPos(5, - m_labelItem->boundingRect().height() / 2);
+		m_mappingItem->hide();
+		m_labelItem->setPos(m_labelItem->x(), - m_labelItem->boundingRect().height() / 2);
+		m_labelRejectedProxyWidget->setPos(m_labelItem->x() + m_labelItem->boundingRect().width() +  5 ,
+			-m_labelRejectedProxyWidget->geometry().height() / 2);
 		qreal xPos = 10 +  m_labelItem->boundingRect().width();
-		QRectF reject_geo = m_addRejectButtonProxyWidget->geometry();
-		qreal yPos = - reject_geo.height() / 2;
-		m_addRejectButtonProxyWidget->setPos(xPos, yPos);
-		xPos += reject_geo.width() + hmargin;
-		yPos = -m_labelRejectedProxyWidget->geometry().height() / 2;
-		m_labelRejectedProxyWidget->setPos(xPos, yPos);
 	}
-	else { // show nothing
-		qreal xPos = 5;
-		QRectF reject_geo = m_addRejectButtonProxyWidget->geometry();
-		m_addRejectButtonProxyWidget->setPos(xPos, -reject_geo.height() / 2);
-	}
-
-	if (m_channel->dataSize() && needRepaint())	{
-#ifndef NDEBUG
-		qDebug() << Q_FUNC_INFO << " channel is " << m_channel->name() << endl;
-#endif
-		// compute the polygon
-		QPolygonF poly;
-		float gain = m_channel->gain();
-		float min = 0., max = 0.;
-		for (int i = 0; i < scene()->width(); i++) {
-			float posInSec = i * m_pixelLengthInSecs;
-			int currentPosInChannel = (quint32)(posInSec * m_channel->samplingRate()) + 1;
-
-			if (currentPosInChannel >= m_channel->dataSize())
-				break;
-
-			computeMinMax(currentPosInChannel, m_pixelLengthInSamples, &min, &max);
-
-			qreal y1 = - (min * m_physics->yPixPerCm()), y2 = - (max * m_physics->yPixPerCm());
-
-			poly << QPointF(i, y1 / gain);
-			poly << QPointF(i, y2 / gain);
-		}
-		m_poly = poly;
-		m_baseLineItem->setLine(QLineF(0, 0, scene()->width(), 0));
-		endRepaint();
-#ifndef NDEBUG
-		qDebug() << Q_FUNC_INFO <<  " done refreshing channel " << m_channel->name() << endl;
-#endif
-	}
-	
-	// baseline
-	m_baseLineItem->setPen(QColor(m_channel->color()));
-	m_baseLineItem->setVisible(m_baseLine);
-
-	// Si l'item est selectionne il est affiche en rouge !
-	if (isSelected())
-		painter->setPen(QPen(Qt::red));
-	else
-		painter->setPen(QColor(m_channel->color()));
-
-	painter->drawPolyline(m_poly);  // drawPolyline a la place de drawPolygon (car sinon le polygone referme le tracé)
-
-	if (m_hover) {
-		if (m_channel->dataSize() == NULL)
-			return;
-
-		float ymin, ymax;
-		int xmin, xmax;
-		xmin = (int)m_mousePos.x() * 2;
-		xmax = xmin + 1;
-
-		// check for polygon bounds.
-		if (xmin > m_poly.size() || xmax > m_poly.size()) {
-			// mouse is out of polygon bounds => exit.
-			update(boundingRect());
-			return;
-		}
-
-		painter->setPen(QPen(Qt::darkGreen));
-		ymin = m_poly.at(xmin).y();
-		ymax = m_poly.at(xmax).y();
-		QPointF start = QPointF(m_mousePos.x(), ymin - 10);
-		QPointF end = QPointF(m_mousePos.x(), ymax + 10);
-		painter->drawLine(start, end); 
-
-		// values stored in polygon are min max of real values that matches the same pixel.
-		// We display as tooltip the mean of min and max for the pixel.
-		// tooltip
-
-		float time = start.x() * m_pixelLengthInSecs;
-		quint32 sampleIndex = (quint32)(time * m_channel->samplingRate()) + 1;
-
-		if (sampleIndex < m_channel->dataSize()) {
-			float gain = m_channel->gain();
-			float value = m_channel->data()[sampleIndex];
-			// MEG and Reference are expressed as pT/cm so convert pT to T before rendering the signal
-			if (m_channel->isMEG() || m_channel->isReference() || m_channel->isGRAD())
-				value *= 1E12;
-			QString tt = m_sensorName + ":" + AwChannel::typeToString(m_channel->type());
-			tt += "\nValue: " + QString::number(value) + m_channel->unit();
-			tt += "\nAmplitude Scale: " + QString::number(gain) + m_channel->unit() + "/cm";
-			tt += "\nSampling Rate: " + QString::number(m_channel->samplingRate()) + "Hz";
-			if (m_channel->lowFilter() > 0)
-				tt += "\nLow Pass Filter: " + QString::number(m_channel->lowFilter()) + "Hz";
-			if (m_channel->highFilter() > 0)
-				tt += "\nHigh Pass Filter: " + QString::number(m_channel->highFilter()) + "Hz";
-			setToolTip(tt);
-		}
-	}
-	update(boundingRect());
 }
 
 
@@ -428,4 +273,30 @@ void AwICASignalItem::reject()
 void AwICASignalItem::addComponent()
 {
 	setRejected(false);
+}
+
+
+QVariant AwICASignalItem::itemChange(GraphicsItemChange change, const QVariant& value)
+{
+	AwSignalItem::itemChange(change, value);
+	if (change == ItemPositionChange && scene()) {
+		// value is the new position.
+		QPointF newPos = value.toPointF();
+		m_currentPos = newPos;
+		m_newPos = newPos;
+		newPos.setX(0);  // stick to left side
+		QRectF rect = scene()->sceneRect();
+		if (!rect.contains(newPos)) {
+			// Keep the item inside the scene rect.
+	//		newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
+			newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
+		}
+		static_cast<AwGraphicsScene*>(scene())->setItemsMoved();
+		return newPos;
+	}
+	//if (change == ItemPositionHasChanged && scene()) {
+	//	static_cast<AwGraphicsScene*>(scene())->setItemsMoved();
+
+	//}
+	return QGraphicsItem::itemChange(change, value);
 }

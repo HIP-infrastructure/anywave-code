@@ -153,6 +153,8 @@ void AnyWave::openFileFromBIDS(const QString& filePath)
 				aws->setValue(aws::auto_trigger_parsing, false);
 		}
 	}
+	// inform BIDS Manager we have a new current open item
+
 }
 
 

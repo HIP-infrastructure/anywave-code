@@ -55,8 +55,8 @@ signals:
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void mousePressEvent(QGraphicsSceneMouseEvent *e);
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
+	//void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
+	//void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
 	void hoverMoveEvent(QGraphicsSceneHoverEvent *e);
@@ -66,6 +66,8 @@ protected:
 	bool m_showScale;
 	bool m_hover;
 	QPointF m_mousePos;
+	QPointF m_mousePressedPos, m_mouseReleasedPos;
+	bool m_wasDragged;
 	QString m_sensorName, m_savedColor;
 	float m_minY;
 	float m_maxY;
@@ -73,7 +75,7 @@ protected:
 	int m_pixelLengthInSamples;
 	QPolygonF m_poly;
 	QGraphicsLineItem *m_baseLineItem;
-	AwSignalLabelItem *m_labelItem; // , *m_highlightLabelItem;
+	AwSignalLabelItem *m_labelItem; 
 	QRectF m_labelGeometry;
 };
 

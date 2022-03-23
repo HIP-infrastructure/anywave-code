@@ -36,9 +36,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		if (process) {
 			auto reader = process->pdi.input.reader();
 			if (reader)
-				//reader->plugin()->deleteInstance(reader);
 				delete reader;
-			//process->plugin()->deleteInstance(process);
 			delete process;
 		}
 		return;

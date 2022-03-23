@@ -13,30 +13,29 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#ifndef AWLABELITEM_H
-#define AWLABELITEM_H
-#include <AwGlobal.h>
-#include <QGraphicsRectItem>
+#pragma once
+#include <QGraphicsItem>
+#include <QGraphicsProxyWidget>
+class AwTopoWidget;
+namespace AwICAItems {
+	constexpr int Mapping = QGraphicsItem::UserType + 1;
+}
 
-
-class AW_WIDGETS_EXPORT AwLabelItem : public QGraphicsRectItem
+class AwICAMappingItem : public QGraphicsItem
 {
 public:
-	AwLabelItem(const QString& text, QGraphicsItem *parent = 0);
-	~AwLabelItem();
+	enum { Type = AwICAItems::Mapping };
 
-	void setText(const QString& text);
-	void setFontHeight(int h);
-	void setColor(const QString& color);
-	void defaultColor();
-	inline QString& color() { return m_labelColor; }
+	AwICAMappingItem(AwTopoWidget* widget, QGraphicsItem* parent = nullptr);
+	int type() const override {
+		return Type;
+	}
+	QPainterPath shape() const;
+	QRectF boundingRect() const;
+	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0);
 protected:
-	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	void mousePressEvent(QGraphicsSceneMouseEvent* e);
 
-	QString m_label;
-	QRectF m_rect;
-	int m_fontH;
-	QString m_labelColor;
+	AwTopoWidget* m_topoWidget;
+	QGraphicsProxyWidget* m_proxyWidget;
 };
-
-#endif // AWLABELITEM_H

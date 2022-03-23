@@ -224,8 +224,8 @@ void AwTopoWidget::redraw()
 		return;
 
 	// do not display anything if size is too small
-	if (m_size < 100)
-		return;
+//	if (m_size < 100)
+//		return;
 
 	m_redrawing = true;
 

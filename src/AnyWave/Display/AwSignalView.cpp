@@ -49,6 +49,7 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	connect(m_scene, SIGNAL(markerInserted(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
 	connect(m_scene, &AwScene::markerRemoved, mm, &AwMarkerManager::removeMarker);
 	connect(m_scene, &AwScene::showMarkerUnderMouse, mm, &AwMarkerManager::highlightMarkerInList);
+	connect(this, &AwSignalView::channelsOrderChanged, AwMontageManager::instance(), &AwMontageManager::reorderChannels);
 	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(getNewMarkers()));
 	// filters
 	connect(&dm->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);

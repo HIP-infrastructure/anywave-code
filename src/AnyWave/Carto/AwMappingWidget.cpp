@@ -19,7 +19,7 @@
 #include <vtkTextProperty.h>
 #include <vtkRenderWindow.h>
 #include "Widgets/AwPleaseWaitWidget.h"
-#include <graphics/AwColorMap.h>
+#include <widget/AwColorMap.h>
 #include "Montage/AwMontageManager.h"
 #include <widget/AwTopoWidget.h>
 #include <layout/AwLayout.h> 

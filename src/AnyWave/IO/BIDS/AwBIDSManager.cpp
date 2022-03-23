@@ -291,6 +291,7 @@ QString AwBIDSManager::currentFileName()
 	return m_settings.value(bids::current_open_filename).toString();
 }
 
+
 QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
 {
 	QString res;
@@ -452,10 +453,8 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 			}
 		}
 	}
-
 	QString derivativePath; 
 	QString derivativeName;
-
 	// check for cases related to meg data. MEG file may be inside a meg container
 	if (derivativesMask & AwBIDSItem::ica  && parentItem) {
 		derivativePath = getDerivativePath(item, AwBIDSItem::ica);
@@ -513,108 +512,11 @@ void AwBIDSManager::setDerivativesForItem(AwBIDSItem * item)
 	}
 }
 
-int AwBIDSManager::updateChannelsTsvBadChannels(const QStringList & badLabels)
-{
-	m_errorString.clear();
-	if (m_currentOpenItem == nullptr || badLabels.isEmpty())
-		return -1;
-	auto tsvPath = m_currentOpenItem->data(AwBIDSItem::ChannelsTsvRole).toString();
-	if (!QFile::exists(tsvPath))
-		return -1;
-	// try to copy tsv file as tsv.bak
-	QString bak = tsvPath + ".bak";
-	QFile::copy(tsvPath, bak);
-	QFile sourceFile(bak);
-	QFile destFile(tsvPath);
-	if (!sourceFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		m_errorString = QString("Could not open %1 for reading.").arg(tsvPath);
-		return -1;
-	}
-	QTextStream sourceStream(&sourceFile);
-	QString line = sourceStream.readLine();
-	QStringList columns = line.split('\t');
-	auto indexName = columns.indexOf("name");
-	auto indexStatus = columns.indexOf("status");
-	// check that columns contains at leats name and status
-	if (indexName == -1 || indexStatus == -1) {
-		sourceFile.close();
-		QFile::remove(bak);
-		m_errorString = QString("Channels.tsv: columns 'status' and/or 'name' are missing");
-		return -1;
-	}
-	if (!destFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-		QFile::copy(bak, tsvPath);
-		QFile::remove(bak);
-		sourceFile.close();
-		m_errorString = QString("Could not open %1 for writing.").arg(tsvPath);
-		return -1;
-	}
-	QTextStream destStream(&destFile);
-	destStream << line << endl;
-	//auto MM = AwMontageManager::instance();
-	while (!sourceStream.atEnd()) {
-		line = sourceStream.readLine();
-		QStringList cols = line.split('\t');
-		if (cols.size() != columns.size())
-			break;
-		auto name = cols.value(indexName);
-		auto status = badLabels.contains(name) ? "bad" : "good";
-		cols.replace(indexStatus, status);
-		for (auto i = 0; i < cols.size(); i++) {
-			destStream << cols.value(i);
-			if (i + 1 < cols.size())
-				destStream << '\t';
-		}
-		destStream << endl;
-	}
-	sourceFile.close();
-	destFile.close();
-	QFile::copy(bak, tsvPath);
-	QFile::remove(bak);
-	return 0;
-}
-
 QString AwBIDSManager::getCurrentBIDSPath()
 {
 	if (m_currentOpenItem == nullptr)
 		return QString();
 	return m_currentOpenItem->data(AwBIDSItem::PathRole).toString();
-}
-
-///
-/// based in the item relative path, generate a derivatices file name based on the plugin  name.
-///
-QString AwBIDSManager::buildOutputFileName(AwBIDSItem * item)
-{
-	auto relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
-	QFileInfo fi(relativePath);
-	auto fileName = fi.fileName();
-	// check special case of meg file contained in a directory
-	if (item->data(AwBIDSItem::DataTypeRole).toInt() == AwBIDSItem::meg) {
-		if (!fileName.contains("_meg")) {
-			fileName = item->parent()->data(AwBIDSItem::RelativePathRole).toString();
-			fi.setFile(fileName);
-			fileName = fi.fileName();
-		}
-	}
-	for (auto suffix : m_dataFileSuffixes) {
-		if (fileName.contains(suffix))
-			fileName = fileName.remove(suffix);
-	}
-	return fileName;
-}
-
-QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem * item)
-{
-	// generate full derivatives path depending on plugin name and file item to be processed.
-	auto relativePath = item->data(AwBIDSItem::RelativePathRole).toString();
-	QFileInfo fi(relativePath);
-
-	QString outputPath = QString("%1/derivatives/%2/%3").arg(m_rootDir).arg(pluginName.toLower()).arg(fi.path());
-	// create directory path  if necesseray
-	QDir dir;
-	dir.mkpath(outputPath);
-	return outputPath;
 }
 
 void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
@@ -671,44 +573,8 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	AwDataManager::instance()->setNewRootDirForSideFiles();
 }
 
-void AwBIDSManager::moveSidecarFilesToDerivatives(const QString& src, const QString& dest)
-{
-	bool fileExists = QFile::exists(src);
-	bool destExists = QFile::exists(dest);
-	if (fileExists && !destExists) {
-		QFile::copy(src, dest);
-		QFile::remove(src);
-	}
-	if (fileExists && destExists) {
-		QFile::remove(dest);
-		QFile::copy(src, dest);
-		QFile::remove(src);
-	}
-}
 
-int AwBIDSManager::selectItemFromFilePath(const QString& path)
-{
-	// extract subject id from file name
-	QRegularExpression re("(?<subject>sub-)(?<ID>\\w+)");
-	QRegularExpressionMatch match = re.match(path);
-	if (!match.hasMatch())
-		return -1;
-	QString ID = match.captured("ID");
-
-	// search in intems
-	auto item = m_mapSubjects.value(ID);
-	if (item == nullptr)
-		return -1;
-
-	m_ui->openSubject(item);
-	findItem(path);
-	if (m_currentOpenItem == nullptr)
-		return -1;
-	m_ui->openFileItem(m_currentOpenItem);
-	return 0;
-}
-
-void AwBIDSManager::findItem(const QString& filePath)
+void AwBIDSManager::findCurrentFileItem(const QString& filePath)
 {
 	m_currentOpenItem = nullptr;
 	if (!isBIDSActive())
@@ -716,47 +582,51 @@ void AwBIDSManager::findItem(const QString& filePath)
 	if (m_hashItemFiles.contains(QDir::toNativeSeparators(filePath))) {
 		m_currentOpenItem = m_hashItemFiles.value(QDir::toNativeSeparators(filePath));
 		m_ui->showItem(m_currentOpenItem);
-
 		// check for user in derivatives/anywave
 		initAnyWaveDerivativesForFile(filePath);
 	}
 }
 
-void AwBIDSManager::newFile(AwFileIO *reader)
+int AwBIDSManager::setNewOpenFile(const QString& path)
 {
-	// check if the new file is in a BIDS structure or not
-	auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
+	//// check if the new file is in a BIDS structure or not
+	//auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
 
-	// root is empty => the file is not located inside a BIDS
-	if (root.isEmpty()) {
-		closeBIDS();
-		return;
-	}
-	// root bids is the same as the actual one, the file is located inside the current BIDS.
-	if (root == m_rootDir) {
-		findItem(reader->fullPath());
-		return;
-	}
+	//// root is empty => the file is not located inside a BIDS
+	//if (root.isEmpty()) {
+	//	closeBIDS();
+	//	return;
+	//}
+	//// root bids is the same as the actual one, the file is located inside the current BIDS.
+	//// root bids is the same as the actual one, the file is located inside the current BIDS.
+	//if (root == m_rootDir) {
+	//	findItem(reader->fullPath());
+	//	return;
+	//}
 
-	// if current state is no BIDS open:
-	if (m_rootDir.isEmpty()) {
-		setRootDir(root);
-		// find the corresponding subject node
-		findItem(reader->fullPath());
-		return;
-	}
+	//// if current state is no BIDS open:
+	//if (m_rootDir.isEmpty()) {
+	//	setRootDir(root);
+	//	// find the corresponding subject node
+	//	findItem(reader->fullPath());
+	//	return;
+	//}
 
-	// root bids is different, close current BIDS and parse the new one.
-	if (root != m_rootDir) {
-		if (AwMessageBox::information(nullptr, "BIDS", 
-			"You requested to open a file located inside another BIDS structure.\nThe current BIDS will be closed.")) {
-			closeBIDS();
-			setRootDir(root);
-			// find the corresponding subject node
-			findItem(reader->fullPath());
-			return;
-		}
-	}
+	//// root bids is different, close current BIDS and parse the new one.
+	//if (root != m_rootDir) {
+	//	if (AwMessageBox::information(nullptr, "BIDS", 
+	//		"You requested to open a file located inside another BIDS structure.\nThe current BIDS will be closed.")) {
+	//		closeBIDS();
+	//		setRootDir(root);
+	//		// find the corresponding subject node
+	//		findItem(reader->fullPath());
+	//		return;
+	//	}
+	//}
+	findCurrentFileItem(path);
+	if (m_currentOpenItem == nullptr)
+		return -1;
+	return 0;
 }
 
 QStringList AwBIDSManager::readTsvColumns(const QString& path)

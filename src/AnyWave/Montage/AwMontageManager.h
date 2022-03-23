@@ -133,6 +133,8 @@ public slots:
 	void setChannels(AwChannelList& channels) { m_channels = channels; }
 	/** Add source channels into current montage **/
 	void addNewSources(int type);
+	/** reorder montage when the user has moved signals in views **/
+	void reorderChannels(const QStringList& labels);
 private:
 	QMap<QString, QSharedPointer<AwChannel>> m_asRecordedSharedPointerMap;
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.

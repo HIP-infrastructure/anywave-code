@@ -26,6 +26,7 @@
 #include <utils/gui.h>
 #include "AwGTCMenu.h"
 #include "AwPickMarkersDial.h"
+#include <widget/SignalView/AwGraphicsView.h>
 
 AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : QGraphicsScene(parent)
 {
@@ -33,6 +34,8 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_physics = phys;
 	m_fileDuration = m_currentPosInFile = m_positionClicked = m_pageDuration = m_startPosition = m_mappingSelectionDuration = 0.;
 	m_mousePressed = false;
+	m_itemsDragged = false;
+	m_itemsHaveMoved = false;
 	m_selectionIsActive = false;
 	m_isTimeSelectionStarted = false;
 	m_showMarkers = false;
@@ -99,6 +102,22 @@ void AwGraphicsScene::updateSignals()
 	update();
 }
 
+void AwGraphicsScene::reorderItems()
+{
+	// sort item by their y coordinates
+	std::sort(m_visibleSignalItems.begin(), m_visibleSignalItems.end(),
+		[](AwGraphicsSignalItem* a, AwGraphicsSignalItem* b) {
+			return a->y() < b->y();
+		});
+
+	AwGraphicsView* view = static_cast<AwGraphicsView *>(views().first());
+	view->layoutItems();
+	// send notification about reordering
+	QStringList labels;
+	for (auto item : m_visibleSignalItems)
+		labels << item->channel()->fullName();
+	emit itemsOrderChanged(labels);
+}
 
 void AwGraphicsScene::updateChannelsData()
 {
@@ -139,7 +158,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		AwGraphicsSignalItem *item = static_cast<AwGraphicsSignalItem *>(base);
 		QObject::connect(item, &AwGraphicsSignalItem::selectionChanged, this, &AwGraphicsScene::updateSignalItemSelection);
 
-		Q_ASSERT(item != NULL);
+		Q_ASSERT(item != nullptr);
 
 		connect(item, SIGNAL(filtersChanged()), this, SIGNAL(needRefresh()));
 		connect(item, SIGNAL(filtersChanged()), this, SIGNAL(channelFiltersChanged()));
@@ -1422,8 +1441,6 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 		}
 		return;
 	}
-
-	m_mousePressed = false;
 	QPointF pos = e->scenePos();
 
 	if (m_mouseMode == AwGraphicsScene::DraggingCursor) 
@@ -1573,7 +1590,6 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 //		QGraphicsScene::mouseReleaseEvent(e);
 		break;
 	case AwGraphicsScene::QTS:
-		m_mousePressed = false;
 		if (qAbs(m_selectionRectangle->rect().size().width()) > 10 && qAbs(m_selectionRectangle->rect().size().height()) > 10) {
 			// get item under selection rectangle
 			QList<QGraphicsItem *> items = this->items(m_selectionRectangle->rect());
@@ -1582,7 +1598,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 				float pos = timeAtPos(QPointF(m_selectionRectangle->rect().x(), 0));
 				float end = timeAtPos(QPointF(m_selectionRectangle->rect().x() + m_selectionRectangle->rect().width(), 0));
 				
-				foreach(QGraphicsItem *item, items) {
+				for (QGraphicsItem *item : items) {
 					// gets parents ot that item if any
 					QGraphicsItem *parent = item->parentItem();
 					while (parent) {
@@ -1613,6 +1629,13 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 		setQTSMode(false);
 		break;
 	case None: 
+		// handling draging of signal items!
+		if (m_itemsDragged && m_itemsHaveMoved) {
+			m_itemsHaveMoved = false;
+			m_itemsDragged = false;
+			reorderItems();
+			break;
+		}
 		if (m_selectionRectangle) { 
 			// Selection must be greater than a 10x10 rectangle, otherwise it will be considered as a simple selection of the item under the mouse.
 			if (qAbs(m_selectionRectangle->rect().size().width()) > 10 && qAbs(m_selectionRectangle->rect().size().height()) > 10) {
@@ -1651,6 +1674,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 		emit clickedAtTime(m_positionClicked);
 		break;
 	}
+	m_mousePressed = false;
 }
 
 

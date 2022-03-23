@@ -60,13 +60,13 @@ public:
 	// utilities static methods
 	static AwBIDSManager *instance();
 	
-	static bool isInstantiated() { return m_instance != NULL; }
+	static bool isInstantiated() { return m_instance != nullptr; }
 	static void destroy();
 	/** check if a path is a BIDS directory or not. **/
 	static bool isBIDS(const QString& path);
 	static QString detectBIDSFolderFromPath(const QString& path);
 	
-	void newFile(AwFileIO *reader);
+	int setNewOpenFile(const QString& path);
 	void setRootDir(const QString& path);
 	inline QString& rootDir() { return m_rootDir; }
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
@@ -111,6 +111,8 @@ public:
 	QString buildOutputDir(const QString& pluginName, AwBIDSItem *item);
 	/** Create the default output filename of a file item **/
 	QString buildOutputFileName(AwBIDSItem * item);
+	/** Get the file name from a file item build leaf **/
+	QString getFileName(const QString& filePath);
 	/** Get derivatives folder for current open item **/
 	QString getDerivativePath(int type);
 	/** GARDEL properties **/
@@ -125,6 +127,8 @@ public:
 	QString getDerivativePath(AwBIDSItem *item, int type);
 	/** Get the filename prefix by removing the modality **/
 	QString getPrefixName(AwBIDSItem *item, bool absolutePath = false);
+	/** Create derivatives path for process to store resutls **/
+	QString createDerivativesPath(const QString& processName);
 
 	// dat file derivatives dir and file name
 	QString currentDerivativesDir();
@@ -145,7 +149,7 @@ protected:
 
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
-	void findItem(const QString& filePath);
+	void findCurrentFileItem(const QString& filePath);
 	QVariant BIDSProperty(int property);
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode

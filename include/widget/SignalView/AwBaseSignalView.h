@@ -110,6 +110,8 @@ signals:
 	// data specific
 	// Sent everytime the view load new data
 	void dataLoaded(float position, float duration);
+	// notification about channels order in the view
+	void channelsOrderChanged(const QStringList&);
 protected:
 	AwDataClient m_client;
 	AwViewSettings *m_settings;

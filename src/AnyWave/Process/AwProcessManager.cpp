@@ -758,9 +758,22 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		}
 		else {
 			AwMessageBox::critical(nullptr, "Process init", m_errorString);
-			//process->plugin()->deleteInstance(process);
 			delete process;
 			return;
+		}
+	}
+
+	// check if we are in BIDS
+	if (AwBIDSManager::isInstantiated()) {
+		if (AwBIDSManager::instance()->isBIDSActive()) {
+			// create output dir
+			process->pdi.input.settings.insert(keys::output_dir, AwBIDSManager::instance()->createDerivativesPath(process->plugin()->name));
+			// set prefix output file (to be BIDS compatible)
+			QString baseFileName = dm->currentBIDSBaseFileName();
+			// the baseFileName does not contain modality but still have the data file extension (possibly)
+			// remove it.
+			QRegularExpression reg(".[0-9a-z]+$");
+			process->pdi.input.settings.insert(keys::output_file, baseFileName.remove(reg));
 		}
 	}
 
@@ -808,7 +821,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 
 		if (p->hasInputUi()) {
 			if (!p->showUi()) 	{
-			//	p->plugin()->deleteInstance(p); 
 				delete p;
 				return;
 			}

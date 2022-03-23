@@ -127,6 +127,7 @@ void AwBaseSignalView::makeConnections()
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_view, SLOT(layoutItems()));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_navBar, SLOT(updateNumberOfChannels(int)));
 	connect(m_scene, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));
+	connect(m_scene, &AwGraphicsScene::itemsOrderChanged, this, &AwBaseSignalView::channelsOrderChanged);
 	// cursor specific
 	connect(m_scene, SIGNAL(cursorClickedAtTime(float)), this, SIGNAL(cursorClicked(float)));
 	connect(m_scene, SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
@@ -210,7 +211,6 @@ void AwBaseSignalView::setTotalDuration(float dur)
 	m_markerBar->setTotalDuration(dur);
 	m_navBar->updatePageDuration(m_view->pageDuration());
 	m_navBar->updatePositionInFile(m_startPosition);
-
 }
 
 void AwBaseSignalView::setChannels(const QList<QSharedPointer<AwChannel>>& channels)

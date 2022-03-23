@@ -136,6 +136,17 @@ QString AwDataManager::bidsDir()
 	return QString();
 }
 
+QString AwDataManager::currentBIDSBaseFileName()
+{
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive()) {
+			return bm->getFileName(m_reader->fullPath());
+		}
+	}
+	return QString();
+}
+
 /// <summary>
 ///  change base dir path for all side cars file. 
 ///  Called by BIDSManager if the file open is in a BIDS.
@@ -180,7 +191,6 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 	closeFile();
 	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(filePath);
 	if (reader == nullptr) {
-		m_status = -1;
 		m_errorString = "No reader plugin found to open the file.";
 		return -1;
 	}
@@ -268,7 +278,7 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 			display->newFile();
 	}
 	m_montageManager->newMontage(m_reader);
-	return m_status;
+	return AwBIDSManager::instance()->setNewOpenFile(filePath);
 }
 
 int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
@@ -368,7 +378,8 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	if (!commandLineMode) {
 		QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
 		if (!root.isEmpty()) {
-			AwBIDSManager::instance()->newFile(reader);
+		//	AwBIDSManager::instance()->newFile(reader);
+			AwBIDSManager::instance()->setNewOpenFile(filePath);
 			m_settings[keys::bids_dir] = root;
 			m_status =  1;
 		}

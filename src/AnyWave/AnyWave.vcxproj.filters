@@ -625,6 +625,12 @@
     <ClCompile Include="IO\export\AwExporter.cpp">
       <Filter>IO\export</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSIO.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="ICA\AwICAMappingItem.cpp">
+      <Filter>ICA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1183,6 +1189,9 @@
     </ClInclude>
     <ClInclude Include="Prefs\AwPythonSettings.h">
       <Filter>Prefs</Filter>
+    </ClInclude>
+    <ClInclude Include="ICA\AwICAMappingItem.h">
+      <Filter>ICA</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

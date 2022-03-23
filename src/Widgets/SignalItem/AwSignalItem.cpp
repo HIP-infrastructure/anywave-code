@@ -15,15 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/AwSignalItem.h>
 #include <widget/SignalView/AwViewSettings.h>
+#include <widget/SignalView/AwGraphicsScene.h>
 #include "AwSIAmpButton.h"
-
-#if QT_VERSION >  QT_VERSION_CHECK(4, 8, 0)
 #include <qgraphicsscene.h>
 #include <QGraphicsSceneHoverEvent>
-#endif
-
 #include "AwSignalItemSettings.h"
-
 
 AwSignalItem::AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwGraphicsSignalItem(chan, settings, phys)
 {
@@ -206,8 +202,9 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 			update(boundingRect());
 			return;
 		}
-
 		painter->setPen(QPen(Qt::darkGreen));
+		if (xmin < 0)
+			xmin = 0;
 		ymin = m_poly.at(xmin).y();
 		ymax = m_poly.at(xmax).y();
 		QPointF start = QPointF(m_mousePos.x(), ymin - 10);
@@ -241,7 +238,6 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 void AwSignalItem::updateData()
 {
-//	m_pixelLengthInSecs = (1 / m_physics->xPixPerCm()) * m_physics->secsPerCm();
 	m_pixelLengthInSecs = m_physics->pixelDuration();
 	m_pixelLengthInSamples = (int)(m_pixelLengthInSecs * m_channel->samplingRate());
 	repaint();
@@ -253,15 +249,21 @@ void AwSignalItem::updateData()
 
 void AwSignalItem::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
+	m_mousePressedPos = e->scenePos();
+	static_cast<AwGraphicsScene *>(scene())->setItemsDragged();
 }
 
-void AwSignalItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
-{
-}
-
-void AwSignalItem::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
-{
-}
+//
+//void AwSignalItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+//{
+//	//m_mouseReleasedPos = e->scenePos();
+//	//m_wasDragged = m_mousePressedPos != m_mouseReleasedPos;
+//	//e->ignore();
+//}
+//
+//void AwSignalItem::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
+//{
+//}
 
 
 void AwSignalItem::hoverEnterEvent(QGraphicsSceneHoverEvent *e)

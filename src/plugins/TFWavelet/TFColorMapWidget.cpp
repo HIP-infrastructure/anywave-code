@@ -2,7 +2,7 @@
 #include "display_settings.h"
 #include <qwt_scale_widget.h>
 #include <cmath>
-#include <graphics/AwQwtColorMap.h>
+#include <widget/AwQwtColorMap.h>
 #include <qwt_color_map.h>
 
 

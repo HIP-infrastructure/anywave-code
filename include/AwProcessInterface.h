@@ -19,7 +19,7 @@
 #include <AwProcessLib.h>
 #include <AwDataClient.h>
 #include <QMetaType>
-#include <graphics/AwGraphicInterface.h>
+#include <widget/AwGraphicInterface.h>
 #include <process/AwProcessGUIWidget.h>
 #include <QTranslator>
 #include <AwGlobal.h>

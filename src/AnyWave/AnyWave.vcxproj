@@ -71,6 +71,7 @@
     <ClCompile Include="ICA\AwICAChannel.cpp" />
     <ClCompile Include="ICA\AwICAComponents.cpp" />
     <ClCompile Include="ICA\AwICAManager.cpp" />
+    <ClCompile Include="ICA\AwICAMappingItem.cpp" />
     <ClCompile Include="ICA\AwICAPanel.cpp" />
     <ClCompile Include="ICA\AwICARejectButton.cpp" />
     <ClCompile Include="ICA\AwICASignalItem.cpp" />
@@ -81,6 +82,7 @@
     <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp" />
+    <ClCompile Include="IO\BIDS\AwBIDSIO.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp" />
@@ -253,6 +255,7 @@
     </QtMoc>
     <QtMoc Include="AwComponents.h" />
     <QtMoc Include="ICA\AwSEEGMap.h" />
+    <ClInclude Include="ICA\AwICAMappingItem.h" />
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
     <QtMoc Include="IO\MEMIO\MEMIO.h">
     </QtMoc>
