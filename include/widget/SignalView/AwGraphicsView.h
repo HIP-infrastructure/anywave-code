@@ -30,6 +30,7 @@ public:
 	inline float pageDuration() { return m_pageDuration; }
 public slots:
 	void layoutItems();
+	void updateSignalChildrenPositions();
 	void applySettings(AwViewSettings *settings);
 	void updateSettings(AwViewSettings *settings, int flags);
 	void setPositionInFile(float pos); 
@@ -43,6 +44,7 @@ signals:
 	void pageDurationChanged(float duration);
 protected:
 	void computePageDuration();
+	
 	AwViewSettings *m_settings;
 	AwDisplayPhysics *m_physics;
 	qreal m_pageDuration, m_previousPageDuration;

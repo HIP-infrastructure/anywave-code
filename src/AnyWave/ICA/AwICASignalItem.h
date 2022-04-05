@@ -45,6 +45,10 @@ public:
 	void updateRejected(bool rejected);
 	void showMap(bool flag);
 
+	QPainterPath childrenRegion() override;
+	void resolveCollisionWithUpperNeighbor(const QPainterPath& region) override;
+	void updateChildItems() override;
+
 	QList<QAction *> customActions();
 	inline bool is2DMapAvailable() { return m_icaChannel->layout2D() != NULL; }
 	inline bool is3DMapAvailable() { return m_icaChannel->layout3D() != NULL; }
@@ -57,20 +61,15 @@ public slots:
 	void openMapUi();
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
-	void hoverMoveEvent(QGraphicsSceneHoverEvent *e);
-	QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+	void hoverEnterEvent(QGraphicsSceneHoverEvent *e) ;
+	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e) ;
+	void hoverMoveEvent(QGraphicsSceneHoverEvent *e) ;
+	void mousePressEvent(QGraphicsSceneMouseEvent* e);
 
 	AwICAMappingItem* m_mappingItem;
-//	QGraphicsProxyWidget *m_topoProxyWidget;
-//	QGraphicsProxyWidget *m_addRejectButtonProxyWidget;
 	QGraphicsProxyWidget *m_labelRejectedProxyWidget;
-//	QGraphicsProxyWidget *m_topoSettingsProxyWidget;
-//	QPushButton *m_buttonTopoSettings;
 	AwTopoWidget *m_topoWidget;
 	AwMapWidget *m_mapWidget;	// 3D Vtk rendering
-//	AwICARejectButton *m_addRejectButton;
 	QLabel *m_labelRejected;	// shows a text indicating that the component was rejected.
 	AwICAChannel *m_icaChannel;
 	bool m_rejected, m_showMap;

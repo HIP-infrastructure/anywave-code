@@ -56,7 +56,6 @@ public:
 	void quit();
 	void setAddMarkerDock(QDockWidget *dock);
 
-//	AwSignalView *addSignalView(AwViewSetup *setup);	// Add a new SignalView 
 	AwSignalView* addSignalView(AwViewSettings* settings);
 	AwChannelList displayedChannels();	// Return the channels currently displayed in the views
 	static AwDisplay *instance();
@@ -81,8 +80,6 @@ private:
 	static AwDisplay *m_instance;
 	AwDisplaySetup m_displaySetup;
 
-	void saveChannelSelections();
-	void loadChannelSelections();
 	void loadViewSettings();
 	void saveViewSettings();
 	void removeView(int index);
@@ -130,8 +127,6 @@ public slots:
 	void addVirtualChannels(AwChannelList *channels);
 	/** remove custom channels **/
 	void removeVirtualChannels(AwChannelList *channels);
-	/** remove ICA channels from views **/
-	void removeICAChannels();
 	void setChannels(const AwChannelList& montage);
 	/** processHasFinished -
 	recoit les messages de fin de process de tous les plugins de type Display actifs sur l'affichage courant **/ 

@@ -181,6 +181,7 @@ void AwSignalView::goToPos(int pos)
 
 void AwSignalView::closeFile()
 {
+	m_settings->channelSelection.clear();
 	for (auto c : m_scene->selectedChannels())
 		m_settings->channelSelection << c->fullName();
 	// clear channels present in scene.

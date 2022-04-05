@@ -47,7 +47,10 @@ public:
 
 	QGraphicsItem *labelItem() { return m_labelItem; }
 	void setLabelHeight(int h) { m_labelItem->setFontHeight(h); }
-
+	QPainterPath childrenRegion() override;
+	void resolveCollisionWithUpperNeighbor(const QPainterPath& region) override;
+	void updateChildItems() override;
+	void paintSignal(QPainter* painter) override;
 public slots:
 	int execUi();
 signals:
@@ -55,11 +58,10 @@ signals:
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void mousePressEvent(QGraphicsSceneMouseEvent *e);
-	//void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
-	//void mouseMoveEvent(QGraphicsSceneMouseEvent *e);
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
 	void hoverMoveEvent(QGraphicsSceneHoverEvent *e);
+	QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 	void computeMinMax(qint32 start, qint32 nbSamples, float *min, float *max);
 

@@ -425,9 +425,9 @@ void AnyWave::loadBeamformer()
 void AnyWave::on_actionLoadICA_triggered()
 {
 	if (AwMontageManager::instance()->loadICA() == 0) {
-		if (QMessageBox::question(this, tr("Review Topographies"),
-			tr("Do you want to review all IC mappings?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-			reviewComponentsMaps();
+		//if (QMessageBox::question(this, tr("Review Topographies"),
+		//	tr("Do you want to review all IC mappings?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+		//	reviewComponentsMaps();
 		// enable menus
 		actionShow_map_on_signal->setEnabled(true);
 		actionComponentsMaps->setEnabled(true);

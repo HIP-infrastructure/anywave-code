@@ -196,6 +196,19 @@ void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 }
 
 
+void AwGraphicsView::updateSignalChildrenPositions()
+{
+	AwGraphicsScene* gs = static_cast<AwGraphicsScene*>(scene());
+	auto sitems = gs->visibleSignalItems();
+	int i = 1;
+	while (i < sitems.size()) {
+		auto item1 = sitems.at(i - 1);
+		auto item2 = sitems.at(i);
+		item2->resolveCollisionWithUpperNeighbor(item1->childrenRegion());
+		i++;
+	}
+}
+
 void AwGraphicsView::layoutItems()
 {
 	int savedPos = verticalScrollBar()->value();
@@ -251,10 +264,8 @@ void AwGraphicsView::layoutItems()
 	else { // Normal layout without overlaying channels
 		QList<AwGraphicsSignalItem *> sitems = gs->visibleSignalItems();
 		numberOfSignalItems = sitems.size();
-	
 		if (numberOfSignalItems == 0)
 			return;
-
 		if (!m_settings->limitChannels)
 			offset = viewportH / (numberOfSignalItems + 1);
 		else if (m_settings->limitChannels && numberOfSignalItems <= m_settings->maxChannels)
@@ -268,66 +279,71 @@ void AwGraphicsView::layoutItems()
 			qreal totalH = numberOfSignalItems * offset + offset;
 			newRect.setHeight(totalH);
 		}
-
 		// layout items
 		qreal prevItemPos = 0.;
 		qreal vPos = 0;
 		QVector<qreal> yPositions(sitems.size());
 		int i = 0;
-		for (AwGraphicsSignalItem *item : sitems)	{
+
+		qreal nextPosition;
+		for (AwGraphicsSignalItem* item : sitems) {
 			item->updateGeometry();
 			QSize itemSize = item->size();
-			// restore shifted label position to zero
-			item->shiftLabel(0);
-
-			vPos = prevItemPos + offset;
+			vPos += itemSize.height() / 4;
+			nextPosition = itemSize.height() / 4;
+			vPos += offset;
 			if (vPos > newRect.height()) {
 				extraSceneH = vPos - newRect.height();
 			}
-			if (vPos - itemSize.height() / 2 < prevItemPos) {
-				vPos += itemSize.height() / 2 - offset;
-			//	item->setPos(0, vPos);
-				prevItemPos = vPos + itemSize.height() / 2;
-				vPos = prevItemPos + offset;
-			}
-			else {
-			//	item->setPos(0, vPos);
-				prevItemPos = vPos;
-			}
-			if (vPos > newRect.height()) {
-				extraSceneH = vPos - newRect.height();
-			}
-			// default label height is using a font height of 12 (ARIAL)
-			// if the offset between channels is less than 12 points, then reduce the font height to 8 for labels.
-			if (itemSize.height() == 0)
-				offset <= 12 ?	item->setLabelHeight(8) : item->setLabelHeight(12);
 			yPositions[i++] = vPos;
+			// compute next item position (zero line)
+			vPos += nextPosition;
 		}
+		extraSceneH += sitems.last()->size().height() / 4;
+	
+		//for (AwGraphicsSignalItem *item : sitems)	{
+		//	item->updateGeometry();
+		//	QSize itemSize = item->size();
+		//	
+		//	//// for first item itemSize is zero
+		//	//if (i == 0)
+		//	//	itemSize = QSize(0, 0);
+		//	vPos = prevItemPos + offset;
+		//	if (vPos > newRect.height()) {
+		//		extraSceneH = vPos - newRect.height();
+		//	}
+		//	if (vPos - itemSize.height() / 2 < prevItemPos) {
+		//		vPos += itemSize.height() / 2 - offset;
+		//		prevItemPos = vPos + itemSize.height() / 4;
+		//		vPos = prevItemPos + offset;
+		//	}
+		//	else {
+		//	//	item->setPos(0, vPos);
+		//		prevItemPos = vPos;
+		//	}
+		//	if (vPos > newRect.height()) {
+		//		extraSceneH = vPos - newRect.height();
+		//	}
+		//	// default label height is using a font height of 12 (ARIAL)
+		//	// if the offset between channels is less than 12 points, then reduce the font height to 8 for labels.
+		//	if (itemSize.height() == 0)
+		//		offset <= 12 ?	item->setLabelHeight(8) : item->setLabelHeight(12);
+		//	yPositions[i++] = vPos;
+		//}
 		// resize scene rect BEFORE moving items on it (to avoid itemChange method of each items to constrain them)
 		newRect.setHeight(newRect.height() + extraSceneH);
 		scene()->setSceneRect(newRect);
 		i = 0;
-		for (AwGraphicsSignalItem* item : sitems)
-			item->setPos(0., yPositions.at(i++));
-
-		// check for label bounding boxes (if they are overlapping, shift them)
-		i = 1;
-		while (i < sitems.size()) {
-			AwGraphicsSignalItem *item1 = sitems.at(i - 1);
-			AwGraphicsSignalItem *item2 = sitems.at(i);
-			
-			QGraphicsItem *gi1 = item1->labelItem();
-			QGraphicsItem *gi2 = item2->labelItem();
-			if (gi2 != NULL && gi1 != NULL) {
-				if (gi1->collidesWithItem(gi2)) {
-					item2->shiftLabel(gi1->boundingRect().width() + 5);
-				}
-			}
-			i += 2;
+		sitems.first()->setUpperNeighbor(nullptr);
+		for (AwGraphicsSignalItem* item : sitems) {
+			item->setPos(0., yPositions.at(i));
+			if (i)
+				item->setUpperNeighbor(sitems.at(i - 1));
+			i++;
 		}
-
-//		newRect.setHeight(newRect.height() + extraSceneH);
-//		scene()->setSceneRect(newRect);
+		// check for label bounding boxes (if they are overlapping, shift them)
+//		updateSignalChildrenPositions();
+		//	item->update();
 	}
 	// restore view vertical position
 	if (savedPos)
@@ -395,4 +411,7 @@ void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 
 	if (flags & AwViewSettings::MaxNumberOfChannels || flags & AwViewSettings::LimitNumberOfChannels || flags & AwViewSettings::Overlay)
 		layoutItems();
+	if (flags & AwViewSettings::ShowSensors) {
+		updateSignalChildrenPositions();
+	}
 }

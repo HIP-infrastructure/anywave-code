@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/AwSignalLabelItem.h>
-#include <qpainter.h>
 #include <widget/AwGraphicsObjects.h>
 #include <widget/SignalView/AwGraphicsScene.h>
 #include <QGraphicsSceneMouseEvent>
@@ -28,8 +27,15 @@ AwSignalLabelItem::AwSignalLabelItem(const QString& text, QGraphicsItem *parent)
 void AwSignalLabelItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 	if (event->button() == Qt::LeftButton) {
-		m_mousePressed = true;
-		static_cast<AwGraphicsScene*>(scene())->setItemsDragged();
+		if (event->modifiers() & Qt::ShiftModifier) {
+			m_mousePressed = true;
+			static_cast<AwGraphicsScene*>(scene())->setItemsDragged();
+			QGraphicsItem::mousePressEvent(event);
+		}
+		else {
+			m_mousePressed = true;
+			static_cast<AwGraphicsScene*>(scene())->setItemsDragged();
+		}
 	}
 	else 
 		QGraphicsItem::mousePressEvent(event);
@@ -46,6 +52,7 @@ void AwSignalLabelItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 			p->channel()->setSelected(!parentItem()->isSelected());
 		update();
 	}
+	QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void AwSignalLabelItem::hoverEnterEvent(QGraphicsSceneHoverEvent *e)

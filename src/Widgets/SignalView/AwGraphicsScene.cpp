@@ -37,6 +37,7 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_itemsDragged = false;
 	m_itemsHaveMoved = false;
 	m_selectionIsActive = false;
+	m_draggingItems = false;
 	m_isTimeSelectionStarted = false;
 	m_showMarkers = false;
 	m_cursor = nullptr;
@@ -565,7 +566,6 @@ void AwGraphicsScene::changeChannelsSelectionState(const QString& name, bool sel
 AwChannelList AwGraphicsScene::selectedChannels()
 {
 	AwChannelList res;
-
 	// return selection in the same order the user selected channels
 	for (auto i : m_selectedSignalItems)
 		res << i->channel();
@@ -577,9 +577,11 @@ AwChannelList AwGraphicsScene::selectedChannels()
 ///
 void AwGraphicsScene::selectAllChannels()
 {
+	m_selectedSignalItems.clear();
 	for (auto i : m_signalItems) {
 		i->setSelected(true);
 		i->channel()->setSelected(true);
+		m_selectedSignalItems << i;
 	}
 	updateSelection();
 	update();
@@ -593,6 +595,10 @@ void AwGraphicsScene::invertChannelSelection()
 	for (auto i : m_signalItems)	{
 		i->setSelected(!i->isSelected());
 		i->channel()->setSelected(!i->isSelected());
+		if (i->isSelected())
+			m_selectedSignalItems.append(i);
+		else
+			m_selectedSignalItems.removeAll(i);
 	}
 	update();
 	updateSelection();
@@ -607,6 +613,7 @@ void AwGraphicsScene::clearChannelSelection()
 		i->setSelected(false);
 		i->channel()->setSelected(false);
 	}
+	m_selectedSignalItems.clear();
 	update();
 	updateSelection();
 }
@@ -632,7 +639,7 @@ void AwGraphicsScene::selectChannelAtPosition(const QPointF& pos)
 		parent = parent->parentItem();
 	}
 
-	AwGraphicsSignalItem *sitem = NULL;
+	AwGraphicsSignalItem *sitem = nullptr;
 	QList<QGraphicsItem *> items;
 	// get item type
 	switch (item->type())	{
@@ -655,6 +662,10 @@ void AwGraphicsScene::selectChannelAtPosition(const QPointF& pos)
 	if (sitem)	{
 		sitem->setSelected(!sitem->isSelected());
 		sitem->channel()->setSelected(!sitem->isSelected());
+		if (sitem->isSelected())
+			m_selectedSignalItems << sitem;
+		else
+			m_selectedSignalItems.removeAll(sitem);
 		updateSelection();
 	}
 	update();
@@ -774,7 +785,7 @@ void AwGraphicsScene::highlightMarker(AwMarker *marker)
 void AwGraphicsScene::setChannelAsBad()
 {
 	QAction *act = (QAction *)sender();
-	Q_ASSERT(act != NULL);
+	Q_ASSERT(act != nullptr);
 	emit badChannelSet(act->data().toString());
 }
 
@@ -933,6 +944,9 @@ void AwGraphicsScene::showMarkerInList()
 void AwGraphicsScene::keyPressEvent(QKeyEvent *e)
 {
 	switch (e->modifiers()) {
+	case Qt::ShiftModifier:
+		m_draggingItems = true;
+		break;
 	case Qt::ControlModifier:
 		m_selectionIsActive = true;
 		switch (e->key()) {  
@@ -955,6 +969,9 @@ void AwGraphicsScene::keyPressEvent(QKeyEvent *e)
 void AwGraphicsScene::keyReleaseEvent(QKeyEvent *e)
 {
 	switch (e->key()) {
+	case Qt::ShiftModifier:
+		m_draggingItems = false;
+		break;
 	case Qt::Key_Control:
 		m_selectionIsActive = false;
 		if (m_selectionRectangle) {
@@ -1357,8 +1374,6 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
 			m_currentMarkerItem->marker()->setStart(timeAtPos(pos));
 
 		m_currentMarkerItem->updatePosition();
-
-//		updateMarkers();
 		update();
 		break;
 	case AwGraphicsScene::QTS:
@@ -1390,7 +1405,7 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
 		else if (m_mousePressed && m_selectionRectangle) { // user has released Ctrl key while moving the selection area.
 			removeItem(m_selectionRectangle);
 			delete m_selectionRectangle;
-			m_selectionRectangle = NULL;
+			m_selectionRectangle = nullptr;
 		}
 		update();
 	}
@@ -1553,7 +1568,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 		update();
 		break;
 	case Mapping:
-		if (m_mappingFixedCursor == NULL) {
+		if (m_mappingFixedCursor == nullptr) {
 			m_mappingFixedCursor = new AwMappingCursorItem(m_currentPosInFile, m_positionClicked, AwUtilities::gui::mappingCursorColor(), AwUtilities::gui::mappingCursorFont(), AwMappingCursorItem::Fixed);
 			m_mappingFixedCursor->setPhysics(m_physics);
 			addItem(m_mappingFixedCursor);
@@ -1634,6 +1649,7 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 			m_itemsHaveMoved = false;
 			m_itemsDragged = false;
 			reorderItems();
+			QGraphicsScene::mouseReleaseEvent(e);
 			break;
 		}
 		if (m_selectionRectangle) { 

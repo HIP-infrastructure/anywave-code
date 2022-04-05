@@ -61,7 +61,7 @@ AwDisplay::AwDisplay(QMainWindow *w)
 {
 	m_mainWindow = w;
 	connect(AwMarkerManager::instance(), SIGNAL(goTo(float)), this, SLOT(showPositionInViews(float)));
-	connect(AwICAManager::instance(), SIGNAL(icaComponentsUnloaded()), this, SLOT(removeICAChannels()));
+//	connect(AwICAManager::instance(), SIGNAL(icaComponentsUnloaded()), this, SLOT(removeICAChannels()));
 	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	auto settings = m_displaySetup.addViewSettings();
 	addSignalView(settings);
@@ -193,58 +193,22 @@ void AwDisplay::updateGUI()
 
 void AwDisplay::closeFile()
 {
-	//saveChannelSelections();
+	for (auto v : m_signalViews)
+		v->closeFile();
 	saveViewSettings();
 	m_channels.clear(); // clear current montage channels.
 	m_virtualChannels.clear();
 	addMarkerModeChanged(false);
-	for (auto v : m_signalViews)
-		v->closeFile();
 	m_displaySetup.clearViewSettings();
 }
 
 void AwDisplay::quit()
 {
-//	saveChannelSelections();
 	for (auto v : m_signalViews)
 		v->closeFile();
 	saveViewSettings();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
-}
-
-void AwDisplay::saveChannelSelections()
-{
-	auto channels = selectedChannels();
-	if (channels.isEmpty())
-		return;
-	auto selectedLabels = AwChannel::getLabels(channels);
-	QString path = AwDataManager::instance()->selFilePath();
-	if (QFile::exists(path))
-		QFile::remove(path);
-
-	QFile file(path);
-	if (file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate)) {
-		QTextStream stream(&file);
-		for (auto const &label : selectedLabels)
-			stream << label << endl;
-		file.close();
-	}
-}
-
-void AwDisplay::loadChannelSelections()
-{
-	QString path = AwDataManager::instance()->selFilePath();
-	QFile file(path);
-	QStringList labels;
-	if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
-		QTextStream stream(&file);
-		while (!stream.atEnd()) 
-			labels << stream.readLine().trimmed();
-		setSelectedChannelsFromLabels(labels);
-		file.close();
-	}
-
 }
 
 void AwDisplay::loadViewSettings()
@@ -439,6 +403,7 @@ void AwDisplay::showICAMapOverChannel(bool flag)
 	for (auto v : m_signalViews) {
 		v->showICAMaps(flag);
 		v->view()->layoutItems();
+	//	v->view()->updateSignalChildrenPositions();
 		v->view()->scene()->update();
 	}
 }
@@ -635,21 +600,6 @@ void AwDisplay::addVirtualChannels(AwChannelList *channels)
 	// add the channels all signal views.
 	for (auto v : m_signalViews)
 		v->addVirtualChannels(*channels);
-}
-
-void AwDisplay::removeICAChannels()
-{
-	for (auto v: m_signalViews)
-		v->removeICAChannels();
-
-	// get channel list back from scenes
-	AwChannelList completeList;
-
-	for (auto v : m_signalViews)
-		completeList += v->displayedChannels();
-
-	// send new displayed channels event
-	emit displayedChannelsChanged(completeList);
 }
 
 //

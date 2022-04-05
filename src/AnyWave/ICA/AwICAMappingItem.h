@@ -18,7 +18,7 @@
 #include <QGraphicsProxyWidget>
 class AwTopoWidget;
 namespace AwICAItems {
-	constexpr int Mapping = QGraphicsItem::UserType + 1;
+	constexpr int Mapping = QGraphicsItem::UserType + 7;
 }
 
 class AwICAMappingItem : public QGraphicsItem
@@ -30,12 +30,11 @@ public:
 	int type() const override {
 		return Type;
 	}
+	void updateMap() { m_proxyWidget->adjustSize(); }
 	QPainterPath shape() const;
 	QRectF boundingRect() const;
 	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0);
 protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent* e);
-
 	AwTopoWidget* m_topoWidget;
 	QGraphicsProxyWidget* m_proxyWidget;
 };

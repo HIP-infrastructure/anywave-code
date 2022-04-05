@@ -17,8 +17,6 @@
 #include "AwICAChannel.h"
 #include <widget/AwTopoWidget.h>
 #include <widget/AwMapWidget.h>
-#include "AwICARejectButton.h"
-#include "AwMappingButton.h"
 #include "AwICAManager.h"
 #include "AwICAComponents.h"
 #include <QGraphicsSceneHoverEvent>
@@ -27,33 +25,30 @@
 #include <widget/SignalView/AwGraphicsScene.h>
 #include <QtWidgets/QVBoxLayout>
 #include "AwICAMappingItem.h"
-
+#include <QtDebug>
 
 AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwSignalItem(chan, settings, phys)
 {
-	// get the ICA channel
-	setFlag(QGraphicsItem::ItemIsMovable, true);
-	setFlag(QGraphicsItem::ItemIsSelectable, true);
-	setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
-	setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 	m_icaChannel = static_cast<AwICAChannel *>(chan);
 	m_is2DMapComputed = m_is3DMapComputed = false;
 	m_mapWidget = nullptr;
 	m_topoWidget = new AwTopoWidget(0, m_icaChannel->layout2D());
 	// make label movable
-	m_labelItem->setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsScenePositionChanges );
 	m_mappingItem = new AwICAMappingItem(m_topoWidget, this);
 	m_mappingItem->setZValue(this->zValue() + 1);
+	m_mappingItem->setX(0);
+	m_mappingItem->setY(-m_mappingItem->boundingRect().height() / 2);
 	m_mappingItem->hide();
+	m_labelItem->setPos(5, -(m_labelItem->boundingRect().height() / 2));
+
     // check if a topo should be displayed
 	if (m_icaChannel->layout2D() == nullptr) {// No layout => hide widget don't compute topography
-		m_mappingItem->hide();
+	//	m_mappingItem->hide();
 		m_isMapAvailable = false;
 	}
-	else {
+	else 
 		m_isMapAvailable = true;
-	}
-
+	
 	// Label rejected
 	m_labelRejected = new QLabel();
 	m_labelRejected->setStyleSheet("QLabel { color: red; text-align:center; font-family: Arial; font-size: 16pt; }");
@@ -61,6 +56,8 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDi
 	m_labelRejectedProxyWidget = new QGraphicsProxyWidget(this);
 	m_labelRejectedProxyWidget->setWidget(m_labelRejected);
 	m_labelRejectedProxyWidget->setZValue(this->zValue() + 1);
+	m_labelRejectedProxyWidget->setX(5);
+	m_labelRejectedProxyWidget->setY(-m_labelRejectedProxyWidget->boundingRect().height() / 2);
 	m_labelRejectedProxyWidget->hide();
 
 	m_rejected = m_icaChannel->isRejected();
@@ -92,11 +89,11 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDi
 		connect(act, SIGNAL(triggered()), this, SLOT(show3DMap()));
 		m_actions << act;
 	}
+	m_size = minimumSize();
 }
 
 AwICASignalItem::~AwICASignalItem()
 {
-//	delete m_addRejectButton;
 	delete m_labelRejected;
 	if (m_mapWidget)
 		delete m_mapWidget;
@@ -104,9 +101,10 @@ AwICASignalItem::~AwICASignalItem()
 
 QSize AwICASignalItem::minimumSize() const
 {
+	if (m_showMap)
+		return QSize(0, m_mappingItem->boundingRect().height());
 	return QSize(0, 0);
 }
-
 
 void AwICASignalItem::updateRejected(bool rejected)
 {
@@ -131,7 +129,6 @@ void AwICASignalItem::setRejected(bool rejected)
 	m_icaChannel->setRejected(rejected);
 }
 
-
 void AwICASignalItem::openMapUi()
 {
 	m_topoWidget->openUI();
@@ -143,12 +140,14 @@ void AwICASignalItem::showMap(bool flag)
 		if (!m_is2DMapComputed) {
 			m_topoWidget->updateMap(0., m_icaChannel->topoValues(), m_icaChannel->labels());
 			m_is2DMapComputed = true;
+			m_mappingItem->updateMap();
+			//m_mappingItem->setY(-m_mappingItem->boundingRect().height() / 2);
 		}
 	}
 	m_showMap = flag;
 	m_mappingItem->setVisible(flag);
-	update();
 	m_size = minimumSize();
+	repaint();
 }
 
 void AwICASignalItem::show3DMap()
@@ -195,41 +194,115 @@ QRectF AwICASignalItem::boundingRect() const
 	return rect;
 }
 
-void AwICASignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+QPainterPath AwICASignalItem::childrenRegion()
 {
-	AwSignalItem::paint(painter, option, widget);
-	if (m_channel == nullptr)
-		return;
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-	painter->setRenderHint(QPainter::Qt4CompatiblePainting);
-#endif
-	qreal hmargin = 5;	// 5 pixels horizontal margin
-	if (m_showMap && m_label) {
-		// reposition widgets
-		// Mapping
-		QRect image_geo = m_topoWidget->imageGeometry();
-		m_mappingItem->show();
-		m_mappingItem->setPos(m_mappingItem->x(), -image_geo.height() / 2);
-		m_labelItem->setPos(m_mappingItem->x() + image_geo.width() + 5, -m_labelItem->boundingRect().height() / 2);
-		m_labelRejectedProxyWidget->setPos(m_mappingItem->x(), -m_labelRejectedProxyWidget->geometry().height() / 2);
+	QPainterPath path = AwSignalItem::childrenRegion();
+	if (m_mappingItem->isVisible()) {
+		// add topowidget rect here
+		path.addPolygon(m_mappingItem->mapToScene(m_mappingItem->boundingRect()));
 	}
-	else if (m_showMap) { // show map but not the label
-		// reposition widgets
-		QRect image_geo = m_topoWidget->imageGeometry();
-		m_mappingItem->show();
-		m_mappingItem->setPos(m_mappingItem->x(), -image_geo.height() / 2);
-		m_labelRejectedProxyWidget->setPos(m_mappingItem->x(), -m_labelRejectedProxyWidget->geometry().height() / 2);
-
-	}
-	else if (m_label) { // show only label
-		m_mappingItem->hide();
-		m_labelItem->setPos(m_labelItem->x(), - m_labelItem->boundingRect().height() / 2);
-		m_labelRejectedProxyWidget->setPos(m_labelItem->x() + m_labelItem->boundingRect().width() +  5 ,
-			-m_labelRejectedProxyWidget->geometry().height() / 2);
-		qreal xPos = 10 +  m_labelItem->boundingRect().width();
-	}
+	return path;
 }
 
+void AwICASignalItem::updateChildItems()
+{
+	qDebug() << "setDefaultChildrenPositions for item " << channel()->name() << endl;
+	m_labelItem->setTransform(QTransform());
+	m_mappingItem->setTransform(QTransform());
+	m_labelRejectedProxyWidget->setTransform(QTransform());
+
+	if (m_showMap && m_label) {
+		qDebug() << "showing map and label" << endl;
+		m_labelItem->setX(m_mappingItem->x() + m_mappingItem->boundingRect().width() + 5);
+		if (m_labelRejectedProxyWidget->isVisible())
+			m_labelRejectedProxyWidget->setX(m_labelItem->x() +	m_labelItem->boundingRect().width() + 5);
+		qDebug() << "map item at " << m_mappingItem->x() << "," << m_mappingItem->y() << endl;
+	}
+	else if (m_showMap) { // show map but not the label
+		if (m_labelRejectedProxyWidget->isVisible())
+			m_labelRejectedProxyWidget->setX(m_mappingItem->x() + m_mappingItem->boundingRect().width() + 5);
+	}
+	else if (m_label) { // show only label
+		if (m_labelRejectedProxyWidget->isVisible())
+			m_labelRejectedProxyWidget->setX(m_labelItem->x() + m_labelItem->boundingRect().width() + 5);
+	}
+	if (m_upperNeighbor)
+		resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
+	qDebug() << "setDefaultChildrenPositions for item " << channel()->name() << " finished" << endl;
+}
+
+void AwICASignalItem::resolveCollisionWithUpperNeighbor(const QPainterPath& region)
+{
+
+	qDebug() << Q_FUNC_INFO << "for item " << channel()->name() << endl;
+
+	QPainterPath bounds;
+	m_labelItem->setTransform(QTransform());
+	m_mappingItem->setTransform(QTransform());
+	m_labelRejectedProxyWidget->setTransform(QTransform());
+
+	if (m_showMap) {
+#ifdef QT_DEBUG
+		qDebug() << "moving map item only..." << endl;
+		qDebug() << "x=" << m_mappingItem->x() << endl;
+#endif
+		qreal xShift = 0.;
+		while (true) {
+			bounds = m_mappingItem->mapToScene(m_mappingItem->shape());
+			if (bounds.intersects(region)) {
+				xShift += 5;
+				m_mappingItem->setTransform(QTransform::fromTranslate(xShift, 0));
+			}
+			else
+				break;
+		}
+		if (m_label) {
+			m_labelItem->setTransform(QTransform::fromTranslate(xShift, 0));
+			if (m_labelRejectedProxyWidget->isVisible()) 
+				m_labelRejectedProxyWidget->setTransform(QTransform::fromTranslate(xShift, 0));
+		}
+		else {  // no label, only mapping
+			if (m_labelRejectedProxyWidget->isVisible())
+				m_labelRejectedProxyWidget->setTransform(QTransform::fromTranslate(xShift, 0));
+		}
+#ifdef QT_DEBUG
+		qDebug() << "after move x=" << m_mappingItem->x() << endl;
+#endif
+	}
+	else if (!m_showMap && m_label) {
+#ifdef QT_DEBUG
+		qDebug() << "moving label item only..." << endl;
+		qDebug() << "x=" << m_labelItem->x() << endl;
+#endif
+		qreal xShift = 0.;
+		while (true) {
+			bounds = m_labelItem->mapToScene(m_labelItem->shape());
+			if (bounds.intersects(region)) {
+				xShift += 5;
+				m_labelItem->setTransform(QTransform::fromTranslate(xShift, 0), true);
+			}
+			else
+				break;
+		}
+		if (m_labelRejectedProxyWidget->isVisible())
+			m_labelRejectedProxyWidget->setTransform(QTransform::fromTranslate(xShift, 0));
+
+#ifdef QT_DEBUG
+		qDebug() << "after move x=" << m_labelItem->x() << endl;
+#endif
+	}
+#ifdef QT_DEBUG
+	qDebug() << "resolveCollisionWithUpperNeighbor for item " << channel()->name() << " finished" << endl;
+#endif
+}
+
+void AwICASignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+	updateChildItems();
+	if (m_channel == nullptr)
+		return;
+	AwSignalItem::paintSignal(painter);
+}
 
 void AwICASignalItem::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
@@ -246,6 +319,11 @@ void AwICASignalItem::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 	AwSignalItem::hoverMoveEvent(e);
 }
 
+void AwICASignalItem::mousePressEvent(QGraphicsSceneMouseEvent* e)
+{
+	AwSignalItem::mousePressEvent(e);
+}
+
 QList<QAction *> AwICASignalItem::customActions()
 {
 	return m_actions;
@@ -254,15 +332,13 @@ QList<QAction *> AwICASignalItem::customActions()
 void AwICASignalItem::showMap()
 {
 	showMap(true);
-	AwGraphicsView *view = (AwGraphicsView *)scene()->views().first();
-	view->layoutItems();
+	repaint();
 }
 
 void AwICASignalItem::hideMap()
 {
 	showMap(false);
-	AwGraphicsView *view = (AwGraphicsView *)scene()->views().first();
-	view->layoutItems();
+	repaint();
 }
 
 void AwICASignalItem::reject()
@@ -273,30 +349,4 @@ void AwICASignalItem::reject()
 void AwICASignalItem::addComponent()
 {
 	setRejected(false);
-}
-
-
-QVariant AwICASignalItem::itemChange(GraphicsItemChange change, const QVariant& value)
-{
-	AwSignalItem::itemChange(change, value);
-	if (change == ItemPositionChange && scene()) {
-		// value is the new position.
-		QPointF newPos = value.toPointF();
-		m_currentPos = newPos;
-		m_newPos = newPos;
-		newPos.setX(0);  // stick to left side
-		QRectF rect = scene()->sceneRect();
-		if (!rect.contains(newPos)) {
-			// Keep the item inside the scene rect.
-	//		newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
-			newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
-		}
-		static_cast<AwGraphicsScene*>(scene())->setItemsMoved();
-		return newPos;
-	}
-	//if (change == ItemPositionHasChanged && scene()) {
-	//	static_cast<AwGraphicsScene*>(scene())->setItemsMoved();
-
-	//}
-	return QGraphicsItem::itemChange(change, value);
 }

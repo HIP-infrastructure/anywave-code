@@ -199,7 +199,7 @@ protected:
 	QGraphicsRectItem *m_selectionRectangle;
 	QPointF m_mousePressedPos;
 	bool m_mousePressed, m_itemsHaveMoved, m_itemsDragged;
-	bool m_selectionIsActive;
+	bool m_selectionIsActive, m_draggingItems;
 	bool m_isTimeSelectionStarted;
 	AwMarkingSettings *m_markingSettings;
 	AwDisplayPluginSignalItem m_signalItemPlugin;
