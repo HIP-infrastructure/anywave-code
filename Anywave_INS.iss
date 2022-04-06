@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=2.4.1
+AppVersion=2.4.2
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -44,6 +44,7 @@ Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave\"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins";
+Source: ".\bin\x64\Release\Plugins\4DNIExporter.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\AppendFilesv2.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\AutoMarking.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\MergeFiles.dll"; DestDir: "{app}\Plugins";
@@ -54,7 +55,6 @@ Source: ".\bin\x64\Release\Plugins\DeltamedBinTxtReader.dll"; DestDir: "{app}\Pl
 Source: ".\bin\x64\Release\Plugins\BrainVisionIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\Deltamed_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEGInto4D.dll"; DestDir: "{app}\Plugins";
-Source: ".\bin\x64\Release\Plugins\Rewrite4DNI.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CTF_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\FileConverter.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\H2.dll"; DestDir: "{app}\Plugins";
