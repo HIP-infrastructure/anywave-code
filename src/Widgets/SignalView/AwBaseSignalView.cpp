@@ -59,9 +59,10 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	setLayout(layout);
 	m_scene->applyNewSettings(m_settings);
 	m_navBar->setNewSettings(m_settings);
+	m_markerBar->setNewSettings(m_settings);
 	if (flags & AwBaseSignalView::NoMarkerBar) {
 		m_markerBar->hide();
-		m_settings->markerBarMode = AwViewSettings::HideMarkerBar;
+		m_settings->showMarkerBar = false;
 	}
 	if (flags & AwBaseSignalView::ViewAllChannels) {
 		m_settings->filters.clear();
@@ -89,7 +90,7 @@ void AwBaseSignalView::setFlags(int flags)
 	m_flags = flags;
 	if (flags & AwBaseSignalView::NoMarkerBar) {
 		m_markerBar->hide();
-		m_settings->markerBarMode = AwViewSettings::HideMarkerBar;
+		m_settings->showMarkerBar = false;
 	}
 	if (flags & AwBaseSignalView::ViewAllChannels) {
 		m_settings->filters.clear();
@@ -147,6 +148,7 @@ void AwBaseSignalView::makeConnections()
 
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), m_view, SLOT(updateSettings(AwViewSettings *, int)));
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), m_scene, SLOT(updateSettings(AwViewSettings *, int)));
+	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings*, int)), m_markerBar, SLOT(updateSettings(AwViewSettings*, int)));
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), this, SLOT(updateSettings(AwViewSettings *, int)));
 	connect(m_navBar, SIGNAL(markingStarted()), this, SLOT(startMarking()));
 	connect(m_navBar, &AwNavigationBar::filterButtonClicked, this, &AwBaseSignalView::openFilterGUI);
@@ -383,16 +385,10 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		else
 			reload = true;
 	}
-
 	if (flags & AwViewSettings::ShowMarkers)
 		m_scene->showMarkers(m_settings->showMarkers);
-	
-	if (flags & AwViewSettings::MarkerBarMode)
-		if (settings->markerBarMode == AwViewSettings::ShowMarkerBar)
-			m_markerBar->show();
-		else
-			m_markerBar->hide();
-
+	if (flags & AwViewSettings::ShowMarkerBar)
+		m_markerBar->setVisible(m_settings->showMarkerBar);
 	if (flags & AwViewSettings::TimeScaleMode) {
 		if (m_settings->timeScaleMode == AwViewSettings::FixedPageDuration) 
 			m_pageDuration = settings->fixedPageDuration;
@@ -404,7 +400,6 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		m_pageDuration = settings->fixedPageDuration;
 		reload = true;
 	}
-
 	if (flags & AwViewSettings::SecPerCm)
 		reload = true;
 	if (reload)
@@ -437,7 +432,7 @@ void AwBaseSignalView::setAmplitudes()
 void AwBaseSignalView::startMarking()
 {
 	QStringList labels;
-	foreach (AwMarker *m, m_markers)
+	for (AwMarker *m : m_markers)
 		if (!labels.contains(m->label()))
 			labels << m->label();
 
@@ -513,8 +508,6 @@ void AwBaseSignalView::setNewFilters(const AwFilterSettings& settings)
 void AwBaseSignalView::openFilterGUI()
 {
 	auto ui = m_filterSettings.ui();
-//	if (m_filterSettings.isEmpty())
-//		m_filterSettings.initWithChannels(m_channels);
 	ui->show();
 }
 

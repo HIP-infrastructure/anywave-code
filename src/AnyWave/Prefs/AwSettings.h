@@ -58,6 +58,7 @@ namespace aws {
 	constexpr auto recent_bids = "recent_bids";
 	constexpr auto username = "username";
 	constexpr auto auto_trigger_parsing = "auto_trigger_parsing";
+	constexpr auto markerbar_mode_default = "markerbar_mode_default"; // classic or global mode
 	// python
 	constexpr auto python_exe = "python_exe";
 	constexpr auto python_venv_dir = "python_venv_dir";

@@ -26,6 +26,8 @@ public:
 		Subject = 0, Session = 1,  Folder = 2, DataFile = 3, anat = 4, meg = 5, eeg = 6, ieeg = 7, SourceFolder = 8,
 		// flags to use with DerivativesRole
 		ica = 16, h2 = 32, gardel = 64, freesurfer = 128
+		// add source data subject type
+		, SourceDataSubject = 256
 	};
 	enum Roles { PathRole = Qt::UserRole + 1, TypeRole = Qt::UserRole + 2, RelativePathRole = Qt::UserRole + 3,
 		DataTypeRole = Qt::UserRole + 4, OutputDirRole = Qt::UserRole + 5, DerivativesRole = Qt::UserRole + 6, 

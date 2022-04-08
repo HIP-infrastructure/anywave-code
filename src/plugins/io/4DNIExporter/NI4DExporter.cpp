@@ -6,10 +6,11 @@
 #include <filter/AwFiltering.h>
 #include <utils/endian.h>
 #include <QMessageBox>
+#include <QDir>
 
 Aw4DNIExporterPlugin::Aw4DNIExporterPlugin()
 {
-	name = QString("4DNI_Export");
+	name = QString("4DNIExporter");
 	description = QString("Write 4DNI meg file content to a new file");
 	category = "File:(4DNI MEG File Format) Write to a new file";
 	version = "1.0.1";
@@ -30,7 +31,10 @@ bool Aw4DNIExporter::showUi()
 	m_outputFileName = QFileDialog::getSaveFileName(nullptr, "Select output file",
 		pdi.input.settings.value(keys::data_path).toString() + "_new");
 	if (m_outputFileName.size()) {
-		if (m_outputFileName == pdi.input.settings.value(keys::data_path).toString()) {
+		m_outputFileName = QDir::toNativeSeparators(m_outputFileName);
+		auto currentFile = QDir::toNativeSeparators(pdi.input.settings.value(keys::data_path).toString());
+
+		if (m_outputFileName.toLower() == currentFile.toLower()) {
 			QMessageBox::critical(nullptr, "Invalid file", "Do not overwrite the current open meg file.");
 			return false;
 		}

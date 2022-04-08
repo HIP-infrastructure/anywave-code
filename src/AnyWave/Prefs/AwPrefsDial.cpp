@@ -100,10 +100,15 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	labelMCR->hide();
 	lineEditMCR->hide();
 	buttonSelectMCR->hide();
-    
     editGARDEL->setText(qsettings.value("GARDEL/path").toString());
 	editITK->setText(qsettings.value("ITK-SNAP/path").toString());
 	radioTriggerParserOn->setChecked(aws->value(aws::auto_trigger_parsing).toBool());
+
+	int markerMode = AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt();
+	if (markerMode == 0)
+		radioMarkerGlobal->setChecked(true);
+	else
+		radioMarkerClassic->setChecked(true);
 
 	// COMPILED PLUGIN. Windows do not required environments variables to be set but Linux and Mac OS X do.
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
@@ -244,8 +249,6 @@ void AwPrefsDial::removeSelectedVenv()
 	setDefaultVenv("anywave");
 }
 
-
-
 void AwPrefsDial::changeEvent(QEvent *e)
 {
 	if (e)
@@ -264,7 +267,6 @@ void AwPrefsDial::pickMatlabFolder()
 		lineEditMatlabPath->setText(folder);
 	}
 }
-
 
 void AwPrefsDial::accept()
 {
@@ -347,6 +349,12 @@ void AwPrefsDial::accept()
 	// auto detect triggers
 	qsettings.setValue("Preferences/autoTriggerParsing", radioTriggerParserOn->isChecked());
 	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
+
+	int markerMode = 0;
+	if (!radioMarkerGlobal->isChecked()) 
+		markerMode = 1;
+	qsettings.setValue("general/markerbar_mode", markerMode);
+	aws->setValue(aws::markerbar_mode_default, markerMode);
 
 	// save python settings
 	qsettings.setValue("python/use_default", radioDefault->isChecked());

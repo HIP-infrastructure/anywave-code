@@ -40,9 +40,10 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	AwScene *scene = new AwScene(m_settings, m_physics, 0);
 	AwGraphicsView *view = new AwGraphicsView(scene, m_settings, m_physics, 0);
 	AwMarkersBar *markBar = new AwMarkersBar(m_physics, this);
-	markBar->setMode(AwBaseMarkerBar::Global);
+//	markBar->setMode(AwBaseMarkerBar::Global);
 	scene->applyNewSettings(m_settings);
-	changeObjects(view, scene, NULL, markBar);
+	markBar->setNewSettings(m_settings);
+	changeObjects(view, scene, nullptr, markBar);
 	// connections
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();

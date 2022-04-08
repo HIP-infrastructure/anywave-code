@@ -30,7 +30,11 @@ public:
 	AwBIDSGUI(QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUI();
 
-	void refresh();
+	//void refresh();
+	void init();
+	void setSubjects(const AwBIDSItems&);
+	void setSourceDataSubjects(const AwBIDSItems&);
+
 	void closeBIDS(); 
 	void showColumns(const QStringList& cols);
 	void showItem(QStandardItem *item);
@@ -58,7 +62,7 @@ protected:
 	QStandardItemModel* m_model, *m_propertiesModel;
 	AwBIDSItems m_items;	// copy of items list from bids manager
 	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
-	void initModel(const AwBIDSItems& subjects);
+//	void initModel(const AwBIDSItems& subjects);
 	void recursiveFill(AwBIDSItem *item);
 	void updatePropertiesTable(QStandardItem*item);
 	void createContextMenus();

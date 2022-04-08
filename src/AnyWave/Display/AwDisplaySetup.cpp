@@ -44,6 +44,11 @@ void AwDisplaySetup::setSynchronized(bool flag)
 AwViewSettings* AwDisplaySetup::addViewSettings()
 {
 	auto settings = new AwViewSettings(this);
+	int markerMode = AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt();
+	if (markerMode == 0)
+		settings->markerBarMode = AwViewSettings::Global;
+	else
+		settings->markerBarMode = AwViewSettings::Classic;
 	m_viewSettings << settings;
 	return settings;
 }
@@ -101,6 +106,11 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 		}
 		else if (element.tagName() == "View") {
 			auto setup = new AwViewSettings(this);
+			// apply default marker mode
+			if (AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt() == 0)
+				setup->markerBarMode = AwViewSettings::Global;
+			else
+				setup->markerBarMode = AwViewSettings::Classic;
 		
 			QDomNode n = element.firstChild();
 			while (!n.isNull()) {
@@ -134,10 +144,13 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->maxChannels = e.attribute("NumberOfChannels").toInt();
 				}
 				else if (e.tagName() == "MarkersBar")
-					if (e.text().toLower() == "show")
-						setup->markerBarMode = AwViewSettings::ShowMarkerBar;
+					setup->showMarkerBar = e.text().toLower() == "show";
+				else if (e.tagName() == "MarkersBarMode") {
+					if (e.text().toLower() == "global")
+						setup->markerBarMode = AwViewSettings::Global;
 					else
-						setup->markerBarMode = AwViewSettings::HideMarkerBar;
+						setup->markerBarMode = AwViewSettings::Classic;
+				}
 				else if (e.tagName() == "Filters") {
 					// parse node's child list
 					QDomNodeList list = n.childNodes();
@@ -240,7 +253,6 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		element.appendChild(e);
 		root.appendChild(element);
 
-
 		e = doc.createElement("DisplaySeconds");
 		e.appendChild(doc.createTextNode(dsv->showSeconds ? sTrue : sFalse));
 		element.appendChild(e);
@@ -263,10 +275,18 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		root.appendChild(element);
 
 		e = doc.createElement("MarkersBar");
-		if (dsv->markerBarMode == AwViewSettings::ShowMarkerBar)
+		if (dsv->showMarkerBar)
 			e.appendChild(doc.createTextNode("Show"));
 		else
 			e.appendChild(doc.createTextNode("Hide"));
+		element.appendChild(e);
+		root.appendChild(element);
+
+		e = doc.createElement("MarkersBarMode");
+		if (dsv->markerBarMode == AwViewSettings::Global)
+			e.appendChild(doc.createTextNode("Global"));
+		else
+			e.appendChild(doc.createTextNode("Classic"));
 		element.appendChild(e);
 		root.appendChild(element);
 

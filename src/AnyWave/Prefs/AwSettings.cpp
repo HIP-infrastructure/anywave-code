@@ -110,6 +110,9 @@ void AwSettings::init()
 	m_settings[aws::total_cpu_cores] = totalCPUCores;
 	auto maxCPUCores = settings.value("general/cpu_cores", totalCPUCores).toInt();
 	m_settings[aws::max_cpu_cores] = maxCPUCores;
+	// marker bar mode
+	int markerbar_mode = settings.value("general/markerbar_mode", 0).toInt();
+	m_settings[aws::markerbar_mode_default] = markerbar_mode; 
 
 	bool checkForUpdates = settings.value("general/checkForUpdates", true).toBool();
 	m_settings[aws::check_updates] = checkForUpdates;
@@ -118,7 +121,6 @@ void AwSettings::init()
 	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
 	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
 
-	//m_matlabInterface = nullptr;
 	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
 	auto appPath = QCoreApplication::applicationDirPath();
 	m_settings[aws::app_dir] = appPath;

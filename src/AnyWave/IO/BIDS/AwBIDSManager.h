@@ -76,6 +76,9 @@ public:
 	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems items() { return m_items; }
 
+	AwBIDSItem* getParentSubject(AwBIDSItem* item);
+	bool isSubject(AwBIDSItem *item);
+	bool isSourceDataSubject(AwBIDSItem* item);
 	// 
 	int selectItemFromFilePath(const QString& path);
 
@@ -144,8 +147,9 @@ signals:
 	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
-	QList<QPair<QString, AwBIDSItem*>> buildSubjectItems(const QString& rootDir);
+//	QList<QPair<QString, AwBIDSItem*>> buildSubjectItems(const QString& rootDir);
 	AwBIDSItems getSubjectItems(const QString&);
+	AwBIDSItems getSourceDataSubjectItems(const QString&);
 
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
@@ -163,7 +167,7 @@ protected:
 
 	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
 	QHash<int, QString> m_derivativesNames;
-	AwBIDSItems m_items;
+	AwBIDSItems m_items, m_sourcedataItems;
 	// build also a map to find a subject item object by its name
 	QMap<QString, AwBIDSItem*> m_mapSubjects;
 	QVariantMap m_settings;

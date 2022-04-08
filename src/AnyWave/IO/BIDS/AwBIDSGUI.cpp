@@ -283,7 +283,8 @@ void AwBIDSGUI::showColumns(const QStringList& cols)
 
 void AwBIDSGUI::openSubject(AwBIDSItem* item) 
 {
-	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject) {
+	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject || 
+		item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::SourceDataSubject) {
 		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {  // parse item on the fly when required
 			item->addChildren(m_bids->recursiveParsing(item->data(AwBIDSItem::PathRole).toString(), item));
 			item->setData(true, AwBIDSItem::ParsedItem);
@@ -334,7 +335,8 @@ void AwBIDSGUI::handleClick(const QModelIndex& index)
 		return;
 
 	// check if item is a subject, is so parse it if necessary
-	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject) {
+	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject || 
+		item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::SourceDataSubject) {
 		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {  // parse item on the fly when required
 			AwBIDSItem* bidsItem = static_cast<AwBIDSItem*>(item);
 			bidsItem->addChildren(m_bids->recursiveParsing(item->data(AwBIDSItem::PathRole).toString(), bidsItem));
@@ -447,31 +449,64 @@ void AwBIDSGUI::openITKSNAP(QStandardItem *item)
 }
 
 
-void AwBIDSGUI::refresh()
+//void AwBIDSGUI::refresh()
+//{
+//	m_model->clear();
+//	initModel(m_bids->items());
+//	if (!m_extraColumns.isEmpty())
+//		showColumns(m_extraColumns);
+//
+//}
+
+void AwBIDSGUI::init()
 {
 	m_model->clear();
-	initModel(m_bids->items());
-	if (!m_extraColumns.isEmpty())
-		showColumns(m_extraColumns);
-
-}
-
-void AwBIDSGUI::initModel(const AwBIDSItems& items)
-{
-	if (items.isEmpty())
-		return;
-
-	auto rootItem = m_model->invisibleRootItem();
 	auto headerItem = new QStandardItem("Directory");
 	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
 	m_model->setHorizontalHeaderItem(0, headerItem);
+}
 
+void AwBIDSGUI::setSubjects(const AwBIDSItems& items)
+{
+	if (items.isEmpty())
+		return;
+	auto rootItem = m_model->invisibleRootItem();
 	for (auto item : items) {
 		rootItem->appendRow(item);
 		recursiveFill(item);
 	}
 	m_items = items;
 }
+
+void AwBIDSGUI::setSourceDataSubjects(const AwBIDSItems& items)
+{
+	if (items.isEmpty())
+		return;
+	auto rootItem = m_model->invisibleRootItem();
+	auto sourceDataItem = new QStandardItem("sourcedata");
+	rootItem->appendRow(sourceDataItem);
+	for (auto item : items) {
+		sourceDataItem->appendRow(item);
+		recursiveFill(item);
+	}
+}
+
+//void AwBIDSGUI::initModel(const AwBIDSItems& items)
+//{
+//	if (items.isEmpty())
+//		return;
+//
+//	auto rootItem = m_model->invisibleRootItem();
+//	auto headerItem = new QStandardItem("Directory");
+//	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
+//	m_model->setHorizontalHeaderItem(0, headerItem);
+//
+//	for (auto item : items) {
+//		rootItem->appendRow(item);
+//		recursiveFill(item);
+//	}
+//	m_items = items;
+//}
 
 void AwBIDSGUI::recursiveFill(AwBIDSItem *item)
 {

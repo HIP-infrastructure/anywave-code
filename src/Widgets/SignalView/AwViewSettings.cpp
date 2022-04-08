@@ -25,7 +25,8 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	maxChannels = 40;
 	filters << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::GRAD << AwChannel::ECoG;
 	secsPerCm = 0.5;
-	markerBarMode = AwViewSettings::ShowMarkerBar;
+	markerBarMode = AwViewSettings::Global;
+	showMarkerBar = true;
 	timeMode = AwViewSettings::ShowRelativeTime;
 	eegDisplayMode = true; // display EEG channels upside down
 	timeScaleMode = AwViewSettings::PaperLike;
@@ -45,6 +46,7 @@ AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObjec
 	maxChannels = source->maxChannels;
 	filters = source->filters;
 	markerBarMode = source->markerBarMode;
+	showMarkerBar = source->showMarkerBar;
 	secsPerCm = source->secsPerCm;
 	showMarkerLabels = source->showMarkerLabels;
 	showMarkerValues = source->showMarkerValues;

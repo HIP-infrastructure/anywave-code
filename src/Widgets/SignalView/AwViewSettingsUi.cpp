@@ -84,14 +84,20 @@ int AwViewSettingsUi::exec()
 			cb->setChecked(true);
 	}
 
-	switch (m_settings->markerBarMode) {
-	case AwViewSettings::ShowMarkerBar:
-		radioAlways->setChecked(true);
-		break;
-	case AwViewSettings::HideMarkerBar:
-		radioHidden->setChecked(true);
-		break;
-	}
+	//switch (m_settings->markerBarMode) {
+	//case AwViewSettings::ShowMarkerBar:
+	//	radioAlways->setChecked(true);
+	//	break;
+	//case AwViewSettings::HideMarkerBar:
+	//	radioHidden->setChecked(true);
+	//	break;
+	//}
+	radioAlways->setChecked(m_settings->showMarkerBar);
+	radioHidden->setChecked(!m_settings->showMarkerBar);
+	if (m_settings->markerBarMode == AwViewSettings::Global)
+		radioGlobalMode->setChecked(true);
+	else
+		radioClassicMode->setChecked(true);
 
 	switch (m_settings->timeMode) {
 	case AwViewSettings::ShowRecordedTime:
@@ -184,11 +190,21 @@ void AwViewSettingsUi::accept()
 
 	m_settings->filters = filters;
 
-	if (radioAlways->isChecked())
-		m_settings->markerBarMode = AwViewSettings::ShowMarkerBar;
-	else if (radioHidden->isChecked())
-		m_settings->markerBarMode = AwViewSettings::HideMarkerBar;
+	//if (radioAlways->isChecked())
+	//	m_settings->markerBarMode = AwViewSettings::ShowMarkerBar;
+	//else if (radioHidden->isChecked())
+	//	m_settings->markerBarMode = AwViewSettings::HideMarkerBar;
+	m_settings->showMarkerBar = radioAlways->isChecked();
 
+	//if (copiedSettings->markerBarMode != m_settings->markerBarMode)
+	//	flags |= AwViewSettings::MarkerBarMode;
+	if (copiedSettings->showMarkerBar != m_settings->showMarkerBar)
+		flags |= AwViewSettings::ShowMarkerBar;
+
+	if (radioGlobalMode->isChecked())
+		m_settings->markerBarMode = AwViewSettings::Global;
+	else
+		m_settings->markerBarMode = AwViewSettings::Classic;
 	if (copiedSettings->markerBarMode != m_settings->markerBarMode)
 		flags |= AwViewSettings::MarkerBarMode;
 

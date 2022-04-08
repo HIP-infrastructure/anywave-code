@@ -47,7 +47,7 @@ void AwBIDSManager::destroy()
 {
 	if (m_instance) {
 		delete m_instance;
-		m_instance = Q_NULLPTR;
+		m_instance = nullptr;
 	}
 }
 
@@ -216,7 +216,6 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// Those nodes will be set aftewards as childrent of the tree view in the GUI.
 	// The treeview model will take ownership of the items, no DO NOT DELETE them here or in the closeBIDS() method.
 	m_hashItemFiles.clear();
-	
 	AwWaitWidget wait("Parsing");
 	wait.setText("Parsing BIDS Structure...");
 	connect(this, &AwBIDSManager::finished, &wait, &QDialog::accept);
@@ -229,7 +228,12 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// instantiate UI if needed
 	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
-	m_ui->refresh();
+//	m_ui->refresh();
+
+	m_ui->init();
+	m_ui->setSourceDataSubjects(m_sourcedataItems);
+	m_ui->setSubjects(m_items);
+
 }
 
 void AwBIDSManager::closeBIDS()
@@ -246,6 +250,7 @@ void AwBIDSManager::closeBIDS()
 	m_currentOpenItem = nullptr;
 	m_participantsData.clear();
 	m_items.clear();
+	m_sourcedataItems.clear();
 	emit BIDSClosed();
 }
 
@@ -519,17 +524,41 @@ QString AwBIDSManager::getCurrentBIDSPath()
 	return m_currentOpenItem->data(AwBIDSItem::PathRole).toString();
 }
 
+bool AwBIDSManager::isSourceDataSubject(AwBIDSItem* item)
+{
+	return item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::SourceDataSubject;
+}
+
+
+bool AwBIDSManager::isSubject(AwBIDSItem* item)
+{
+	return item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject;
+}
+
 void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 {
 	// build the path corresponding to the current file in derivatives
 	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+
+	// get the subject item for the currentOpenItem
+	auto subItem = getParentSubject(m_currentOpenItem);
+	if (!subItem)
+		return;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 	QFileInfo fi(relativePath);
 	QFileInfo fi2(filePath);
 
 	auto fileName = fi2.fileName();
 	auto userName = AwSettings::getInstance()->value(aws::username).toString();
 
-	QString path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	QString path;
+	if (isSubject(subItem))
+		path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	else if (isSourceDataSubject(subItem))
+		path = QString("%1/derivatives/anywave/%2/sourcedata/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	else
+		return;
+
 	QDir dir;
 	dir.mkpath(path);
 	auto basePath = QString("%1/%2/%3").arg(m_rootDir).arg(relativePath).arg(fileName);
@@ -573,6 +602,25 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	AwDataManager::instance()->setNewRootDirForSideFiles();
 }
 
+AwBIDSItem* AwBIDSManager::getParentSubject(AwBIDSItem* item)
+{
+	if (item == nullptr)
+		return nullptr;
+	if (!isBIDSActive())
+		return nullptr;
+	auto parent = item;
+	int type = item->data(AwBIDSItem::TypeRole).toInt();
+	do {
+		if (type == AwBIDSItem::Subject || type ==  AwBIDSItem::SourceDataSubject)
+			return parent;
+		parent = static_cast<AwBIDSItem *>(parent->parent());
+		if (parent == nullptr)
+			return nullptr;
+		type = parent->data(AwBIDSItem::TypeRole).toInt();
+	} 
+	while (true);
+}
+
 
 void AwBIDSManager::findCurrentFileItem(const QString& filePath)
 {
@@ -589,40 +637,6 @@ void AwBIDSManager::findCurrentFileItem(const QString& filePath)
 
 int AwBIDSManager::setNewOpenFile(const QString& path)
 {
-	//// check if the new file is in a BIDS structure or not
-	//auto root = AwBIDSManager::detectBIDSFolderFromPath(reader->fullPath());
-
-	//// root is empty => the file is not located inside a BIDS
-	//if (root.isEmpty()) {
-	//	closeBIDS();
-	//	return;
-	//}
-	//// root bids is the same as the actual one, the file is located inside the current BIDS.
-	//// root bids is the same as the actual one, the file is located inside the current BIDS.
-	//if (root == m_rootDir) {
-	//	findItem(reader->fullPath());
-	//	return;
-	//}
-
-	//// if current state is no BIDS open:
-	//if (m_rootDir.isEmpty()) {
-	//	setRootDir(root);
-	//	// find the corresponding subject node
-	//	findItem(reader->fullPath());
-	//	return;
-	//}
-
-	//// root bids is different, close current BIDS and parse the new one.
-	//if (root != m_rootDir) {
-	//	if (AwMessageBox::information(nullptr, "BIDS", 
-	//		"You requested to open a file located inside another BIDS structure.\nThe current BIDS will be closed.")) {
-	//		closeBIDS();
-	//		setRootDir(root);
-	//		// find the corresponding subject node
-	//		findItem(reader->fullPath());
-	//		return;
-	//	}
-	//}
 	findCurrentFileItem(path);
 	if (m_currentOpenItem == nullptr)
 		return -1;

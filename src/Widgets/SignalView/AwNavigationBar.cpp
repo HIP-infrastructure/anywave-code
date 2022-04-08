@@ -56,12 +56,6 @@ AwNavigationBar::AwNavigationBar(QWidget *parent, int flags)
 	connect(ui->buttonMarker, SIGNAL(clicked()), this, SIGNAL(markingStarted()));
 	connect(ui->buttonFilter, &QPushButton::clicked, this, &AwNavigationBar::filterButtonClicked);
 	setFlags(flags);
-	// create horizontal scale
-	//for (int i = 0; i < ui->comboSecsPerCm->count(); i++)
-	//	m_timeScale.append(ui->comboSecsPerCm->itemText(i).toDouble());
-
-
-
 }
 
 void AwNavigationBar::setFlags(int flags)
@@ -242,13 +236,6 @@ void AwNavigationBar::setNewSettings(AwViewSettings *settings)
 {
 	m_settings = settings;
 	disconnect(ui->comboSecsPerCm, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSecsPerCm(int)));
-	//QStringList list;
-	//for (qint32 i = 0; i <  ui->comboSecsPerCm->count(); i++)
-	//list <<  ui->comboSecsPerCm->itemText(i);
-	//QString secPerSecond = QString("%1").arg(settings->secsPerCm);
-	//int index = list.indexOf(secPerSecond);
-	//if (index != -1)
-	//	ui->comboSecsPerCm->setCurrentIndex(index);
 	int index = m_timeScales[0].indexOf(m_settings->secsPerCm);
 	if (index != -1)
 		ui->comboSecsPerCm->setCurrentIndex(index);
@@ -259,32 +246,6 @@ void AwNavigationBar::setNewSettings(AwViewSettings *settings)
 
 void AwNavigationBar::changeSecsPerCm(int index)
 {
-	//QString text = ui->comboSecsPerCm->currentText();
-	//float value = (float)text.toDouble();
-	//if (value <= 0.)
-	//	return;
-
-
-	//struct {
-	//	bool operator()(float a, float b) const
-	//	{
-	//		return a > b;
-	//	}
-	//} customLess;
-	//// check if value is already in time scale
-	//if (!m_timeScale.contains(value)) {
-	//	m_timeScale.append(value);
-	//	std::sort(m_timeScale.begin(), m_timeScale.end(), customLess);
-	//	ui->comboSecsPerCm->clear();
-	//	for(auto v : m_timeScale)
-	//		ui->comboSecsPerCm->addItem(QString("%1").arg(v));
-	//	ui->comboSecsPerCm->setCurrentIndex(m_timeScale.indexOf(value));
-	//}
-
-	//if (m_settings->secsPerCm != value) {
-	//	m_settings->secsPerCm = value;
-	//	emit settingsChanged(m_settings, AwViewSettings::SecPerCm);
-	//}
 	float newValue = m_timeScales[0].at(index);
 	if (newValue != m_settings->secsPerCm) {
 		m_settings->secsPerCm = newValue;

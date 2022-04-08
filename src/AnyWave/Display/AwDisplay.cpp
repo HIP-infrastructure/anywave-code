@@ -52,6 +52,7 @@ AwDisplay *AwDisplay::instance()
 {
 	return m_instance;
 }
+
 void AwDisplay::setInstance(AwDisplay *d)
 {
 	m_instance = d;
@@ -61,7 +62,6 @@ AwDisplay::AwDisplay(QMainWindow *w)
 {
 	m_mainWindow = w;
 	connect(AwMarkerManager::instance(), SIGNAL(goTo(float)), this, SLOT(showPositionInViews(float)));
-//	connect(AwICAManager::instance(), SIGNAL(icaComponentsUnloaded()), this, SLOT(removeICAChannels()));
 	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	auto settings = m_displaySetup.addViewSettings();
 	addSignalView(settings);
@@ -403,7 +403,6 @@ void AwDisplay::showICAMapOverChannel(bool flag)
 	for (auto v : m_signalViews) {
 		v->showICAMaps(flag);
 		v->view()->layoutItems();
-	//	v->view()->updateSignalChildrenPositions();
 		v->view()->scene()->update();
 	}
 }
@@ -511,6 +510,11 @@ void AwDisplay::addNewSignalView()
 		return;
 	AwViewSettings* settings = m_displaySetup.addViewSettings();
 	settings->filters = dlg.filters();
+	// apply default marker mode
+	if (AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt() == 0)
+		settings->markerBarMode = AwViewSettings::Global;
+	else 
+		settings->markerBarMode = AwViewSettings::Classic;
 	addSignalView(settings);
 }
 
@@ -672,7 +676,6 @@ void AwDisplay::newFile()
 	setChannels(AwMontageManager::instance()->channels());
 	emit newDisplaySetupLoaded(&m_displaySetup);
 	updateGUI();
-//	loadChannelSelections();
 }
 
 //
