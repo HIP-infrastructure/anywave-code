@@ -92,9 +92,6 @@
     <Filter Include="IO\BIDS">
       <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IO\MEMIO">
-      <UniqueIdentifier>{cef1cf63-cc97-410b-bd02-2de0bfde1510}</UniqueIdentifier>
-    </Filter>
     <Filter Include="IO\JSON">
       <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
     </Filter>
@@ -436,13 +433,7 @@
     <ClCompile Include="AwOpenFileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IO\MEMIO\MEMIO.cpp">
-      <Filter>IO\MEMIO</Filter>
-    </ClCompile>
     <ClCompile Include="Data\AwDataChunk.cpp">
-      <Filter>Data</Filter>
-    </ClCompile>
-    <ClCompile Include="Data\AwMemoryMapper.cpp">
       <Filter>Data</Filter>
     </ClCompile>
     <ClCompile Include="AwFileOpenSave.cpp">
@@ -987,9 +978,6 @@
     <QtMoc Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="IO\MEMIO\MEMIO.h">
-      <Filter>IO\MEMIO</Filter>
-    </QtMoc>
     <QtMoc Include="CL\AwCommandLogger.h">
       <Filter>CL</Filter>
     </QtMoc>
@@ -1149,9 +1137,6 @@
       <Filter>MATPy</Filter>
     </ClInclude>
     <ClInclude Include="Data\AwDataChunk.h">
-      <Filter>Data</Filter>
-    </ClInclude>
-    <ClInclude Include="Data\AwMemoryMapper.h">
       <Filter>Data</Filter>
     </ClInclude>
     <ClInclude Include="IO\JSON\AwJSON.h">

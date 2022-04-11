@@ -52,7 +52,6 @@
     <ClCompile Include="Data\AwDataManager.cpp" />
     <ClCompile Include="Data\AwDataServer.cpp" />
     <ClCompile Include="Data\AwDataSet.cpp" />
-    <ClCompile Include="Data\AwMemoryMapper.cpp" />
     <ClCompile Include="Debug\AwDebugLog.cpp" />
     <ClCompile Include="Debug\AwDebugLogWidget.cpp" />
     <ClCompile Include="Display\AwCentralWidget.cpp" />
@@ -95,7 +94,6 @@
     <ClCompile Include="IO\export\AwOutputFileWizardPage.cpp" />
     <ClCompile Include="IO\JSON\AwJSON.cpp" />
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp" />
-    <ClCompile Include="IO\MEMIO\MEMIO.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Marker\AwDockAddMarker.cpp" />
     <ClCompile Include="Marker\AwExtractTriggers.cpp" />
@@ -240,7 +238,6 @@
     <QtMoc Include="Data\AwDataSet.h">
     </QtMoc>
     <QtMoc Include="Data\AwDataManager.h" />
-    <ClInclude Include="Data\AwMemoryMapper.h" />
     <QtMoc Include="Display\AwVideoManager.h">
     </QtMoc>
     <QtMoc Include="IO\ADES\ADESIO.h">
@@ -257,8 +254,6 @@
     <QtMoc Include="ICA\AwSEEGMap.h" />
     <ClInclude Include="ICA\AwICAMappingItem.h" />
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
-    <QtMoc Include="IO\MEMIO\MEMIO.h">
-    </QtMoc>
     <QtMoc Include="IO\export\AwChannelsExportWizardPage.h" />
     <QtMoc Include="IO\export\AwExportWizardDial.h" />
     <QtMoc Include="IO\export\AwOutputFileWizardPage.h" />
