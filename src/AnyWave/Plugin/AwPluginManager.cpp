@@ -25,7 +25,6 @@
 #include <widget/AwGraphicsObjects.h>
 #include "IO/ADES/ADESIO.h"
 #include "IO/MATLAB/MATLABIO.h"
-#include "IO/MEMIO/MEMIO.h"
 #include <widget/AwSignalItem.h>
 #include "ICA/AwICASignalItem.h"
 #include "Prefs/AwSettings.h"

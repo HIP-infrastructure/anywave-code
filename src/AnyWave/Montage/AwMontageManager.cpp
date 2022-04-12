@@ -402,10 +402,17 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 	m_montagePath = dm->mtgFilePath();
 	if (QFile::exists(m_montagePath)) {
 		if (!loadMontage(m_montagePath)) {
-			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
+			AwMessageBox::critical(nullptr, tr("Montage"), tr("Failed to load .mtg file.\nDefault montage applied!"));
+			// reset to default (as recorded channels)
+			m_channelsShrdPtrs.clear();
+			// init as recorded channels list
+			for (auto c : channels) {
+				QSharedPointer<AwChannel> shrdChannel = QSharedPointer<AwChannel>(c->duplicate());
+				m_channelsShrdPtrs << shrdChannel;
+				if (!c->isReference())
+					m_channels << shrdChannel.get();
+			}
 		}
-		//setNewFilters(AwDataManager::instance()->filterSettings());
-		//emit montageChanged(m_channels);
 	}
 	else {  // no default montage found => read channels.tsv if BIDS is active
 		if (AwBIDSManager::isInstantiated()) {
@@ -429,8 +436,6 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 					qDeleteAll(defaultTsvMontage);
 					saveBadChannels();
 					m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
-					//setNewFilters(AwDataManager::instance()->filterSettings());
-					//emit montageChanged(m_channels);
 				}
 			}
 		}
@@ -629,7 +634,7 @@ AwChannelList AwMontageManager::load(const QString& path)
 	catch (const AwException& e)
 	{
 		AwMessageBox::information(0, tr("Error"), e.errorString());
-		return channels;
+		return res;
 	}
 
 	if (asRecordedMap.size()) {
@@ -643,13 +648,6 @@ AwChannelList AwMontageManager::load(const QString& path)
 				changed = true;
 				asRecorded->setType(asRecordedMap.value(label));
 			}
-			//auto asRecordedChan = m_asRecorded.value(label);
-			//if (asRecordedChan) {
-			//	if (asRecordedChan->type() != asRecordedMap.value(label)) {
-			//		changed = true;
-			//		asRecordedChan->setType(asRecordedMap.value(label));
-			//	}
-			//}
 		}
 	}
 	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
@@ -691,75 +689,14 @@ AwChannelList AwMontageManager::load(const QString& path)
 			}
 		}
 	}
-
-
-
-
-	//// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
-	//foreach(AwChannel *c, channels) {
-	//	if (!m_asRecorded.contains(c->name())) {
-	//		channels.removeAll(c);
-	//		delete c;
-	//		continue;
-	//	}
-	//	// search for a match in as recorded
-	//	auto asRecorded = m_asRecorded.value(c->name());
-	//	if (asRecorded) {
-	//		// Change asrecorded type to match the one in .mtg
-	//		asRecorded->setType(c->type());
-	//		if (asRecorded->isBad())
-	//			continue;
-	//		if (c->hasReferences() && c->referenceName() != "AVG") {
-	//			auto asRecordedRef = m_asRecorded.value(c->referenceName());
-	//			if (asRecordedRef) {
-	//				if (asRecorded->isBad()) {
-	//					continue;
-	//					// if reference channel is bad , the remove both channel and its reference from montage
-	//				}
-	//			}
-	//			else  // reference not found => remove it
-	//				c->clearRefName();
-	//		}
-	//		// instantiante from as recorded
-	//		auto newChan = asRecorded->duplicate();
-	//		// copy settings set in .mtg file
-	//		newChan->setColor(c->color());
-	//		newChan->setLowFilter(c->lowFilter());
-	//		newChan->setHighFilter(c->highFilter());
-	//		newChan->setReferenceName(c->referenceName());
-	//		res << newChan;
-	//	}
-	//	else {  // not present in as recorded
-	//		// checking for special names
-	//		if (c->name() == "SEEG_AVG") {
-	//			res << new AwAVGChannel(AwChannel::SEEG);
-	//		}
-	//		else if (c->name() == "EEG_AVG") {
-	//			res << new AwAVGChannel(AwChannel::EEG);
-	//		}
-	//		else if(c->name() == "MEG_AVG") {
-	//			res << new AwAVGChannel(AwChannel::MEG);
-	//		}
-	//	}
-	//}
-
-	// do not delete any more : m_channels is  the pointer list of QSharedPointer list
-	//while (!channels.isEmpty())
-	//	delete channels.takeFirst();
-
 	return res;
 }
 
 bool AwMontageManager::apply(const QString& path)
 {
-	// deleting current channels.
-//	while (!m_channels.isEmpty())
-//		delete m_channels.takeLast();
-//	m_channels = load(path);
-
 	m_channelsShrdPtrs = AwChannel::toSharedPointerList(load(path));
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
-	return true;
+	return !m_channelsShrdPtrs.isEmpty();
 }
 
 /// SCRIPTING support
@@ -839,11 +776,12 @@ bool AwMontageManager::loadMontage(const QString& path)
 	if (path.isEmpty())
 		return false;
 
-	if (!apply(path)) {
-		QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
-		return false;
-	}
-	return true;
+	//if (!apply(path)) {
+	//	QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
+	//	return false;
+	//}
+	return apply(path);
+//	return true;
 }
 
 
@@ -875,32 +813,6 @@ void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 		emit montageChanged(m_channels);
 	}
 	saveBadChannels();
-
-	//bool updateMontage = false;
-	//AwChannelList toDelete;
-	//foreach(QString label, labels)	{
-	//	if (!m_asRecorded.contains(label))
-	//		continue;
-	//	auto asRecorded = m_asRecorded.value(label);
-	//	asRecorded->setBad(true);
-	//	m_badChannelLabels << label;
-	//	foreach(AwChannel *c, m_channels) {
-	//		if (c->name() == asRecorded->name() || c->referenceName() == asRecorded->name()) {
-	//			m_channels.removeAll(c);
-	//			toDelete << c;
-	//			updateMontage = true;
-	//		}
-	//	}
-	//}
-	//while (!toDelete.isEmpty())
-	//	delete toDelete.takeFirst();
-
-	//if (updateMontage) {
-	//	emit badChannelsSet(m_badChannelLabels);
-	//	emit montageChanged(m_channels);
-	//}
-
-	//saveBadChannels();
 }
 
 // 
@@ -940,37 +852,6 @@ void AwMontageManager::markChannelAsBad(const QString& channelName, bool bad)
 		emit badChannelsSet(m_badChannelLabels);
 	}
 	saveBadChannels();
-
-	//	auto asRecorded = m_asRecorded.value(channelName);
-	//if (asRecorded) { // channel found
-	//	AwChannelList toDelete;
-	//	if (bad) { // set it to bad
-	//		if (!m_badChannelLabels.contains(channelName))
-	//			m_badChannelLabels << channelName;
-
-	//		asRecorded->setBad(true);
-	//		bool updateMontage = false;
-	//		foreach (AwChannel *c, m_channels) { // check in montage for reference to channelName. If any reference found, remove channel from montage.
-	//			if (c->name() == asRecorded->name() || c->referenceName() == asRecorded->name()) {
-	//				m_channels.removeAll(c);
-	//				toDelete << c;
-	//				updateMontage = true;
-	//			}
-	//		}
-	//		emit badChannelsSet(m_badChannelLabels);
-	//		if (updateMontage) {
-	//			emit montageChanged(m_channels);
-	//		}
-	//	}
-	//	else { // set it to not bad!
-	//		m_badChannelLabels.removeAll(channelName);
-	//		asRecorded->setBad(false);
-	//		emit badChannelsSet(m_badChannelLabels);
-	//	}
-	//	while (!toDelete.isEmpty())
-	//		delete toDelete.takeFirst();
-	//	saveBadChannels();
-	//}
 }
 
 //
@@ -1053,16 +934,6 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 //
 void AwMontageManager::addChannelsByName(AwChannelList &channelsToAdd)
 {
-	//foreach (AwChannel *c, channelsToAdd)	{
-	//	if (!m_asRecorded.contains(c->name()))
-	//		continue;
-	//	auto asRecorded = m_asRecorded.value(c->name());
-	//	if (asRecorded->isBad())
-	//		continue;
-	//	m_channels << asRecorded->duplicate();
-
-	//}
-	//emit montageChanged(m_channels);
 	for (auto c : channelsToAdd) {
 		if (!m_asRecordedSharedPointerMap.contains(c->name()))
 			continue;
@@ -1100,30 +971,4 @@ void AwMontageManager::buildNewMontageFromChannels(const AwChannelList& channels
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 	save(m_montagePath);
 	emit montageChanged(m_channels);
-
-	//if (channels.isEmpty())
-	//	return;
-	//AwChannelList newMontage; // check the channels against the as recorded ones and also check the bad status.
-	//for (auto c : channels) {
-	//	if (!m_asRecorded.contains(c->name()))
-	//		continue;
-	//	auto asRecorded = m_asRecorded.value(c->name());
-	//	// do not add a bad channel in the montage
-	//	if (asRecorded->isBad())
-	//		continue;
-	//	if (c->hasReferences() && m_asRecorded.contains(c->referenceName())) { // do not add the channel if the reference channel is bad.
-	//		if (m_asRecorded.value(c->referenceName())->isBad())
-	//			continue;
-	//	}
-
-	//	newMontage << c->duplicate();
-	//}
-	//if (!newMontage.isEmpty()) {
-	//	//clear();
-	//	while (!m_channels.isEmpty())
-	//		delete m_channels.takeFirst();
-	//	m_channels = newMontage;
-	//	emit montageChanged(m_channels);
-	//	save(m_montagePath);
-	//}
 }

@@ -137,11 +137,32 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		}
 		process->pdi.input.setReader(dm->reader());
 		AwUniteMaps(process->pdi.input.settings, dm->settings());
+
+		// check if marker_file option is set and if the specified file really exists
+		if (process->pdi.input.settings.contains(keys::marker_file)) {
+			if (QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
+				process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
+			else {  // specified file does not exists
+				logger.sendLog("warning: marker_file is specified but the file does not exist. Searching for default .mrk file.");
+				auto defaultMrkFile = dm->mrkFilePath();
+				if (QFile::exists(defaultMrkFile)) {
+					logger.sendLog("Found default mrk file, using it instead.");
+					process->pdi.input.settings[keys::marker_file] = defaultMrkFile;
+					process->pdi.input.setNewMarkers(AwMarker::load(defaultMrkFile));
+				}
+				else {
+					logger.sendLog("warning: no default mrk file found. Setting reader's markers as input if any...");
+					process->pdi.input.settings.remove(keys::marker_file);
+					process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
+				}
+			}
+		}
+
 		// check again here that montage_file and marker_file set by DM really exist
 		if (!QFile::exists(process->pdi.input.settings.value(keys::montage_file).toString()))
 			process->pdi.input.settings.remove(keys::montage_file);
-		if (!QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
-			process->pdi.input.settings.remove(keys::marker_file);
+		//if (!QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
+		//	process->pdi.input.settings.remove(keys::marker_file);
 
 
 		// check for BAD file
@@ -217,15 +238,15 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 
 		dm->montageManager()->setChannels(montage);
 
-		// if marker file is found => load markers and use them for the process
-		if (args.contains(keys::marker_file)) {
-			logger.sendLog(QString("using maker file: %1").arg(args.value(keys::marker_file).toString()));
-			process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
-		}
-		else {
-			logger.sendLog(QString("No marker file specified or detected, using markers present in data file."));
-			process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
-		}
+		//// if marker file is found => load markers and use them for the process
+		//if (args.contains(keys::marker_file)) {
+		//	logger.sendLog(QString("using marker file: %1").arg(args.value(keys::marker_file).toString()));
+		//	process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
+		//}
+		//else {
+		//	logger.sendLog(QString("No marker file specified or detected, using markers present in data file."));
+		//	process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
+		//}
 
 		// handle output_dir
 		if (!process->pdi.input.settings.contains(keys::output_dir)) {

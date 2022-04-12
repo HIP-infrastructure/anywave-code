@@ -277,8 +277,9 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 		// LAST step => update Display Manager with new file.
 			display->newFile();
 	}
+	//m_montageManager->newMontage(m_reader);
+	AwBIDSManager::instance()->setNewOpenFile(filePath);
 	m_montageManager->newMontage(m_reader);
-	return AwBIDSManager::instance()->setNewOpenFile(filePath);
 }
 
 int AwDataManager::openFile(const QString& filePath, bool commandLineMode)

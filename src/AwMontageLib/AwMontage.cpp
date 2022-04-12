@@ -160,8 +160,11 @@ AwChannelList AwMontage::load(const QString& path, QMap<QString, int> *asRecorde
 			while (!child.isNull()) {
 				QDomElement ee = child.toElement();
 				auto tagName = ee.tagName();
-				if (tagName == "type")
+				if (tagName == "type") {
 					type = AwChannel::stringToType(ee.text());
+					if (type == -1)
+						throw AwException("Invalid channel type in montage");
+				}
 				else if (tagName == "color")
 					color = ee.text();
 				else if (tagName == "reference")

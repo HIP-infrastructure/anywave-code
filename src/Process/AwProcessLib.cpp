@@ -63,7 +63,6 @@ int AwBaseProcess::applyUseSkipMarkersKeys()
 	bool allDataFlag = false;
 	if (pdi.input.settings.contains(keys::use_markers)) {
 		usedMarkers = pdi.input.settings.value(keys::use_markers).toStringList();
-		useMarkers = true;
 		// handle special case : if use_markers contains all_data
 		// that will force the input to be only one marker marking all the data.
 		// other marker flags will be ignored
@@ -73,10 +72,27 @@ int AwBaseProcess::applyUseSkipMarkersKeys()
 			pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
 			allDataFlag = true;
 		}
+		else {
+			// check that used markers really exist...
+			auto labels = AwMarker::getUniqueLabels(pdi.input.markers());
+			usedMarkers.erase(std::remove_if(usedMarkers.begin(), usedMarkers.end(), [labels](const QString& l) { return !labels.contains(l); }), usedMarkers.end());
+			useMarkers = usedMarkers.size() > 0;
+			if (useMarkers)
+				pdi.input.settings[keys::use_markers] = usedMarkers;
+			else
+				pdi.input.settings.remove(keys::use_markers);
+		}
 	}
 	if (pdi.input.settings.contains(keys::skip_markers)) {
 		skippedMarkers = pdi.input.settings.value(keys::skip_markers).toStringList();
-		skipMarkers = true;
+		auto labels = AwMarker::getUniqueLabels(pdi.input.markers());
+		// check that labels in skip markers list really exists.
+		skippedMarkers.erase(std::remove_if(skippedMarkers.begin(), skippedMarkers.end(), [labels](const QString& l) { return !labels.contains(l); }), skippedMarkers.end());
+		skipMarkers = skippedMarkers.size() > 0;
+		if (skipMarkers)
+			pdi.input.settings[keys::skip_markers] = skippedMarkers;
+		else
+			pdi.input.settings.remove(keys::skip_markers);
 	}
 
 	if (!allDataFlag) {
