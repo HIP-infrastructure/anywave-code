@@ -35,10 +35,10 @@ namespace AwUtilities // put utility functions inside a namespace
 			std::reverse_copy(src.raw.begin(), src.raw.end(), dst.raw.begin());
 			val = dst.val;
 		}
-		template<>
-		void swapEndian<std::uint32_t>(std::uint32_t& value) {
-			std::uint32_t tmp = ((value << 8) & 0xFF00F00) | ((value >> 8) & 0xFF00FF);
-			value = (tmp << 16) | (tmp >> 16);
-		}
+		//template<>
+		//void swapEndian<std::uint32_t>(std::uint32_t& value) {
+		//	std::uint32_t tmp = ((value << 8) & 0xFF00F00) | ((value >> 8) & 0xFF00FF);
+		//	value = (tmp << 16) | (tmp >> 16);
+		//}
 	}
 }

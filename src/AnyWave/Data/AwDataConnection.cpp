@@ -33,6 +33,7 @@
 #include <AwCore.h>
 #include <AwKeys.h>
 #include <QtConcurrent>
+#include <QMutexLocker>
 
 #define AW_DC_OFFLINE_FILTERING_PADDING		5  // 5s padding around the data for a kind of offline filtering.
 
@@ -410,6 +411,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker,
 //
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, float duration, bool rawData, bool doNotWakeUpClient)
 {
+	QMutexLocker locker(m_server->getReadMutex());
 	if (m_reader == nullptr)  // check if we point to a valid reader. It could happen that a data server is launched before a valid file reader is created.
 		m_reader = m_server->reader();
 #ifndef NDEBUG
@@ -488,7 +490,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	// Load the channels from file
 	try	{
 		if (!m_loadingList.isEmpty()) {
-			fileLock();  // get access to the file for reading
+//			fileLock();  // get access to the file for reading
 			for (auto c : m_loadingList)
 				c->clearData();
 			if (rawData)
@@ -496,7 +498,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			else {
 				read = readWithOfflineFiltering(m_positionInFile, m_duration, m_loadingList);
 			}
-			fileUnlock();
+//			fileUnlock();
 		}
 	}
 	catch (const std::bad_alloc &)	{
@@ -505,7 +507,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 #endif 
 		for (auto c : m_loadingList)
 			c->clearData();
-		fileUnlock();
+//		fileUnlock();
 
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) 
 			m_ICASourcesLoaded[i] = false;

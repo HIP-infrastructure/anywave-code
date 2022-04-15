@@ -77,30 +77,29 @@ bool EEGInto4D::inject(const QString& megFile, const AwChannelList& eegChannels)
 	}
 
 	float sr = allMEGChannels.first()->samplingRate();
-	const float chunkDuration = 30.;
-	const qint64 chunkSize = (qint64)std::floor(chunkDuration * sr);  // 100 0000 samples chunk size
-	float totalDuration = m_megReader->infos.totalDuration();
-	float* buffer = new float[chunkSize * nChannels];
-	float position = 0.;
-	qint64 eegSampleIndex = 0;
 	sendMessage("Reading meg data and injecting eeg data...");
-	while (totalDuration) {
-		float duration = std::min(chunkDuration, totalDuration);
-		auto read = m_megReader->readDataFromChannels(position, duration, allMEGChannels);
-		position += duration;
+	m_megReader->readDataFromChannels(0., m_megReader->infos.totalDuration(), m_megReader->infos.channels());
+
+	const qint64 chunkDuration = 300000; // 300 000 samples buffer
+	qint64 totalSamples = m_megReader->infos.channels().first()->dataSize();
+	float* buffer = new float[chunkDuration * nChannels];
+	qint64 position = 0;
+
+	while (totalSamples) {
+		qint64 duration = std::min(chunkDuration, totalSamples);
 		float value = 0.0;
-		for (auto i = 0; i < read; i++) {
+		for (auto i = 0; i < duration; i++) {
 			for (auto j = 0; j < nChannels; j++) {
 				auto chan = allMEGChannels.at(j);
-				value = chan->data()[i];
+				value = chan->data()[i + position];
 				if (chan->isMEG() || chan->isReference()) {
-					value = chan->data()[i] * 1e-12;
+					value *= 1e-12;
 				}
-				else if (chan->isEEG() || chan->isECG() || chan->isEMG() || chan->isOther()) {
+				else if (chan->isEEG() || chan->isECG()) {
 					// is this a EEG channels to be injected?
 					auto eegChan = mapMEGtoEEG.value(j);
 					if (eegChan) {
-						value = eegChan->data()[i + eegSampleIndex] * 1e-6;
+						value = eegChan->data()[i + position] * 1e-6;
 					}
 					else
 						value = 0.;
@@ -108,20 +107,20 @@ bool EEGInto4D::inject(const QString& megFile, const AwChannelList& eegChannels)
 				buffer[j + i * nChannels] = value;
 			}
 		}
-		eegSampleIndex += read;
+		position += duration;
 		// buffer filled. Now convert to bigendian
 #if defined(_OPENMP)
 #pragma omp parallel for
 #endif
-		for (auto i = 0; i < read * nChannels; i++) {
+		for (auto i = 0; i < duration * nChannels; i++) {
 			float& tmp = buffer[i];
 			AwUtilities::endianness::swapEndian<float>(tmp);
 		}
 		sendMessage("Writing new data...");
 		// write swapped data
-		streamNew.writeRawData((char*)buffer, read * nChannels * sizeof(float));
+		streamNew.writeRawData((char*)buffer, duration * nChannels * sizeof(float));
 		sendMessage("Done.");
-		totalDuration -= duration;
+		totalSamples -= duration;
 	}
 	sendMessage("Injection finished.");
 	delete[] buffer;

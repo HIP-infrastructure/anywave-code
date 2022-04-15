@@ -35,7 +35,8 @@ public:
 	AwArguments args;
 	enum ChannelSource { Montage, AsRecorded };
 public slots:
-	void accept();
+	void accept() override;
+	int exec() override;
 protected slots:
 	void updateMaxNumOfIC();
 	void changeAlgo(int);

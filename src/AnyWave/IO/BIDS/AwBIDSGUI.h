@@ -45,6 +45,7 @@ signals:
 	void imageFileClicked(const QString&);
 	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
 	void batchManagerNeeded();
+	void finished(); // sent when a background operation finished.
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);
@@ -64,6 +65,7 @@ protected:
 	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
 //	void initModel(const AwBIDSItems& subjects);
 	void recursiveFill(AwBIDSItem *item);
+	void insertChildren(AwBIDSItem* parent);
 	void updatePropertiesTable(QStandardItem*item);
 	void createContextMenus();
 	void openITKSNAP(QStandardItem *item);

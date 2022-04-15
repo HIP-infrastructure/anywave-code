@@ -412,6 +412,7 @@ void AwMontageManager::newMontage(AwFileIO *reader)
 				if (!c->isReference())
 					m_channels << shrdChannel.get();
 			}
+			save(m_montagePath);
 		}
 	}
 	else {  // no default montage found => read channels.tsv if BIDS is active

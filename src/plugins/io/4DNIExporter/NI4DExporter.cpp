@@ -21,7 +21,7 @@ Aw4DNIExporterPlugin::Aw4DNIExporterPlugin()
 
 Aw4DNIExporter::Aw4DNIExporter()
 {
-//	setInputFlags(Aw::ProcessIO::GetReaderPlugins);
+	setInputFlags(Aw::ProcessIO::GetReaderPlugins);
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 }
 
@@ -109,14 +109,16 @@ void Aw4DNIExporter::run()
 
 	sendMessage("Reading all data...");
 	auto channels = reader->infos.channels();
-	requestData(&channels, 0., -1., true);
+	AwChannelList chans = AwChannel::duplicateChannels(channels);
+
+	requestData(&chans, 0., -1., true);
 	sendMessage("Data read.");
 	sendMessage("Filtering...");
-	pdi.input.filterSettings.apply(channels);
-	AwFiltering::filter(channels);
+	pdi.input.filterSettings.apply(chans);
+	AwFiltering::filter(chans);
 	sendMessage("Filtering done.");
 	const qint64 chunkDuration = 300000; // 300 000 samples buffer
-	qint64 totalSamples = channels.first()->dataSize();
+	qint64 totalSamples = chans.first()->dataSize();
 	// create a multiplexed data buffer of 30s to write out the filtered data
 	float* buffer = new float[chunkDuration * nChannels];
 	qint64 position = 0;
@@ -124,7 +126,7 @@ void Aw4DNIExporter::run()
 		qint64 duration = std::min(chunkDuration, totalSamples);
 		for (auto i = 0; i < duration; i++) {
 			for (auto j = 0; j < nChannels; j++) {
-				auto chan = reader->infos.channels().at(j);
+				auto chan = chans.at(j);
 				float value = chan->data()[i + position];
 				if (chan->isMEG() || chan->isReference())
 					value *= 1e-12;
@@ -147,7 +149,7 @@ void Aw4DNIExporter::run()
 		totalSamples -= duration;
 	}
 	delete[] buffer;
-	for (auto chan : reader->infos.channels())
+	for (auto chan : chans)
 		chan->clearData();
 	// copy old header
 	qint64 bytes = offsetFilePointer(outputFile);
@@ -191,6 +193,7 @@ void Aw4DNIExporter::run()
 		QString destDispFile = m_outputFileName + ".display";
 		QFile::copy(dispFile, destDispFile);
 	}
+	qDeleteAll(chans);
 	sendMessage("All done.");
 }
 

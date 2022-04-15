@@ -136,8 +136,8 @@ public:
 	// dat file derivatives dir and file name
 	QString currentDerivativesDir();
 	QString currentFileName();
-
-	AwBIDSItems recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
+	void parseSubject(AwBIDSItem* item);
+	void recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
@@ -147,10 +147,10 @@ signals:
 	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
-//	QList<QPair<QString, AwBIDSItem*>> buildSubjectItems(const QString& rootDir);
 	AwBIDSItems getSubjectItems(const QString&);
 	AwBIDSItems getSourceDataSubjectItems(const QString&);
 
+	
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findCurrentFileItem(const QString& filePath);

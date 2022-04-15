@@ -20,6 +20,7 @@ class AwDataClient;
 class AwFileIO;
 class AwFileIOPlugin;
 #include <QSemaphore>
+#include <QMutex>
 #include "AwDataConnection.h"
 #include <AwChannel.h>
 class AwFilteringOptions;
@@ -37,6 +38,7 @@ public:
 	void setMainReader(AwFileIO *reader);
 	inline AwFileIO *reader() { return m_reader; }
 	QSemaphore *getLock() { return m_sem; }
+	QMutex* getReadMutex() { return &m_mutex; }
 	AwDataServer *duplicate(AwFileIO *reader);
 public slots:
 	/** Open a connection between a client and the data server thread. If successful, a pointer to the instantiated reader is returned. **/
@@ -53,8 +55,8 @@ protected:
 	QList<AwDataConnection *> m_dataConnections;
 	QMap<AwDataClient *, AwDataConnection *> m_clientToConnection;
 	AwFileIO *m_reader;
-//	AwFileIOPlugin *m_plugin;
 	QSemaphore *m_sem;	// general semaphore for connected clients.
+	QMutex m_mutex;
 	static AwDataServer *m_instance;
 	static int m_instanceCount;
 };

@@ -118,39 +118,15 @@ AwBIDSItems AwBIDSManager::getSubjectItems(const QString& rootDir)
 	return items; 
 }
 
-//QList<QPair<QString, AwBIDSItem*>> AwBIDSManager::buildSubjectItems(const QString& rootDir)
-//{
-//	QRegularExpression re("^(?<subject>sub-)(?<ID>\\w+)$");
-//	QRegularExpressionMatch match;
-//	using mapItem = QPair<QString, AwBIDSItem*>;
-//	
-//	QDir dir(rootDir);
-//	QList<mapItem> mapItems;
-//	auto dirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-//	for (auto const& d : dirs) {
-//		auto name = d.fileName();
-//		match = re.match(name);
-//		auto fullPath = d.absoluteFilePath();
-//		if (match.hasMatch()) {
-//			// found a subject
-//			// auto item = new AwBIDSItem(name);
-//			auto item = new AwBIDSItem(match.captured("ID"));
-//			item->setData(fullPath, AwBIDSItem::PathRole);
-//			item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
-//			item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-//			// set the relative path role
-//			item->setData(name, AwBIDSItem::RelativePathRole);
-//			// set the possible derivatives mask
-//			item->setData(AwBIDSItem::gardel | AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
-//			mapItems.append(mapItem(fullPath, item));
-//		}
-//	}
-//	return mapItems;
-//}
 
-AwBIDSItems AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem)
+void AwBIDSManager::parseSubject(AwBIDSItem* parentItem)
 {
-	AwBIDSItems res;
+	recursiveParsing(parentItem->data(AwBIDSItem::PathRole).toString(), parentItem);
+}
+
+void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem)
+{
+//	AwBIDSItems res;
 	QDir dir(dirPath);
 	auto subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
@@ -277,6 +253,6 @@ AwBIDSItems AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* 
 			recursiveParsing(fullPath, item);
 		}
 	}
-
-	return res;
+//	emit finished();
+//	return res;
 }

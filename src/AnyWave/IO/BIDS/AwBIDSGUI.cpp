@@ -35,7 +35,7 @@
 #include <AwKeys.h>
 #include <QProcess>
 #include <QtConcurrent>
-
+#include <widget/AwWaitWidget.h>
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
@@ -286,9 +286,15 @@ void AwBIDSGUI::openSubject(AwBIDSItem* item)
 	if (item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject || 
 		item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::SourceDataSubject) {
 		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {  // parse item on the fly when required
-			item->addChildren(m_bids->recursiveParsing(item->data(AwBIDSItem::PathRole).toString(), item));
+			auto parsingFunction = [this](AwBIDSItem* item) {
+				this->m_bids->parseSubject(item);
+				recursiveFill(item);
+			};
+			AwWaitWidget wait("Parsing");
+			connect(this, &AwBIDSGUI::finished, &wait, &QDialog::accept);
+			wait.setText("Parsing subject...");
+			wait.run(parsingFunction, item);
 			item->setData(true, AwBIDSItem::ParsedItem);
-			recursiveFill(item);
 		}
 		showItem(item);
 	}
@@ -319,7 +325,6 @@ void AwBIDSGUI::openFileItem(AwBIDSItem* item)
 		}
 	}
 	updatePropertiesTable(item);
-	//showItem(item);
 	auto parent = item->parent();
 	while (parent) {
 		m_ui.treeView->expand(parent->index());
@@ -339,9 +344,15 @@ void AwBIDSGUI::handleClick(const QModelIndex& index)
 		item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::SourceDataSubject) {
 		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {  // parse item on the fly when required
 			AwBIDSItem* bidsItem = static_cast<AwBIDSItem*>(item);
-			bidsItem->addChildren(m_bids->recursiveParsing(item->data(AwBIDSItem::PathRole).toString(), bidsItem));
+			auto parsingFunction = [this](AwBIDSItem* item) {
+				this->m_bids->parseSubject(item);
+				recursiveFill(item);
+			};
+			AwWaitWidget wait("Parsing");
+			connect(this, &AwBIDSGUI::finished, &wait, &QDialog::accept);
+			wait.setText("Parsing subject...");
+				wait.run(parsingFunction, bidsItem);
 			bidsItem->setData(true, AwBIDSItem::ParsedItem);
-			recursiveFill(bidsItem);
 			showItem(item);
 		}
 		else  // already parsed
@@ -448,22 +459,14 @@ void AwBIDSGUI::openITKSNAP(QStandardItem *item)
 		openNiftiFile(item->data(AwBIDSItem::PathRole).toString());
 }
 
-
-//void AwBIDSGUI::refresh()
-//{
-//	m_model->clear();
-//	initModel(m_bids->items());
-//	if (!m_extraColumns.isEmpty())
-//		showColumns(m_extraColumns);
-//
-//}
-
 void AwBIDSGUI::init()
 {
 	m_model->clear();
 	auto headerItem = new QStandardItem("Directory");
 	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
 	m_model->setHorizontalHeaderItem(0, headerItem);
+	if (!m_extraColumns.isEmpty())
+		showColumns(m_extraColumns);
 }
 
 void AwBIDSGUI::setSubjects(const AwBIDSItems& items)
@@ -491,27 +494,16 @@ void AwBIDSGUI::setSourceDataSubjects(const AwBIDSItems& items)
 	}
 }
 
-//void AwBIDSGUI::initModel(const AwBIDSItems& items)
-//{
-//	if (items.isEmpty())
-//		return;
-//
-//	auto rootItem = m_model->invisibleRootItem();
-//	auto headerItem = new QStandardItem("Directory");
-//	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
-//	m_model->setHorizontalHeaderItem(0, headerItem);
-//
-//	for (auto item : items) {
-//		rootItem->appendRow(item);
-//		recursiveFill(item);
-//	}
-//	m_items = items;
-//}
+void AwBIDSGUI::insertChildren(AwBIDSItem* parent)
+{
+	for (auto child : parent->children()) {
+		parent->appendRow(child);
+		insertChildren(child);
+	}
+}
 
 void AwBIDSGUI::recursiveFill(AwBIDSItem *item)
 {
-	for (auto child : item->children()) {
-		item->appendRow(child);
-		recursiveFill(child);
-	}
+	insertChildren(item);
+	emit finished();
 }

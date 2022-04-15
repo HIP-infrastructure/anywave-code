@@ -63,24 +63,6 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 		stream_config >> timestamp;
 		stream_config >> user_space_size;
 		stream_config.skipRawData(36); // reserved + padding
-
-		if (QString(type) == "B_weights_used") {
-
-		}
-		else if (QString(type) == "B_E_table_used") {
-
-		}
-		else if (QString(type) == "B_COH_Points") {
-
-		}
-		else if (QString(type) == "b_ccp_xfm_block") {
-
-		}
-		else if (QString(type) == "b_eeg_elec_locs") {
-			// this block contains the digitilized coil positions
-			// A IMPLEMENTER PLUS TARD
-		}
-
 		fileConfig.seek(fileConfig.pos() + user_space_size);
 	}
 
@@ -241,6 +223,7 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 	sendMessage(QString("meg file contains %1 eeg channels").arg(mapMEGEEGInfos.size()));
 	Q_ASSERT(mapConfigEEGInfos.size() >= mapMEGEEGInfos.size());
 	sendMessage(QString("config eeg channels:"));
+#ifdef QT_DEBUG
 	for (auto k : mapConfigEEGInfos.keys()) {
 		auto v = mapConfigEEGInfos.value(k);
 		sendMessage(QString("channel: %1 - %2").arg(v->label).arg(v->chan_no));
@@ -250,6 +233,7 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 		auto v = mapMEGEEGInfos.value(k);
 		sendMessage(QString("channel: %1 - %2").arg(v->label).arg(v->chan_no));
 	}
+#endif
 	sendMessage("Now changing labels to match EEG data");
 	QStringList eegLabels = AwChannel::getLabels(eegChannels);
 	Q_ASSERT(eegLabels.size() <= mapMEGEEGInfos.size());

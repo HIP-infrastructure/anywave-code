@@ -1,0 +1,1 @@
+New-NetFirewallRule -DisplayName "anywave" -Program "$args[0]" -Action Allow -Profile Domain,Public,Private -Direction Outbound

@@ -36,6 +36,9 @@ private:
 	QSharedPointer<AwFileIO> m_megReader, m_eegReader;
 	QString m_eegFile, m_megFile;
 	AwChannelList m_eegChannels;
+	QString m_tempDir;
+	QString m_tempMegFile;
+	QString m_tempConfigFile, m_tempMrkFile, m_tempBadFile;
 
 	bool relabel(const QString& megFile, const AwChannelList& eegChannels);
 	bool inject(const QString& megFile, const AwChannelList& eegChannels);
@@ -44,8 +47,7 @@ private:
 	// base on current file position, returns the number of bytes to add to get an aligned position to 8 bytes.
 	void alignFilePointer(QFile& file);
 	qint64 offsetFilePointer(const QFile& file);
-	float swapFloat(float value);
-	void moveResultingFiles(const QString & srcDir, const QString & destDir);
+	void moveResultingFiles(const QString & destDir);
 };
 
 class EEGINTO4D_EXPORT EEGInto4DPlugin : public AwProcessPlugin

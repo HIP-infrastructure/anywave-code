@@ -228,10 +228,11 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// instantiate UI if needed
 	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
-//	m_ui->refresh();
 
 	m_ui->init();
-	m_ui->setSourceDataSubjects(m_sourcedataItems);
+	// there is an issue with sourcedata subject when anywave creates derivatives/anywave/username/sourcedata : it makes BM Crash
+	// so for now, don't add sourcedata subjects to the tree
+	   ////  m_ui->setSourceDataSubjects(m_sourcedataItems);   // uncomment to add sourcedata subjects
 	m_ui->setSubjects(m_items);
 
 }
@@ -554,7 +555,7 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	QString path;
 	if (isSubject(subItem))
 		path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
-	else if (isSourceDataSubject(subItem))
+	else if (isSourceDataSubject(subItem)) // creating a sourcedata folder seems to make BM crash....
 		path = QString("%1/derivatives/anywave/%2/sourcedata/%3").arg(m_rootDir).arg(userName).arg(fi.path());
 	else
 		return;

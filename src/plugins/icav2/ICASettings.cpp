@@ -28,26 +28,6 @@ ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 	m_channels = process->pdi.input.channels();
 	// but we need also the current montage
 	m_rawChannels = process->rawChannels();
-	m_modalitiesMontage = AwChannel::getTypesAsString(m_channels);
-	// remove unwanted modalities
-	m_modalitiesMontage.removeAll("TRIGGER");
-	m_modalitiesMontage.removeAll("ECG");
-	m_modalitiesMontage.removeAll("OTHER");
-	m_modalitiesMontage.removeAll("ICA");
-	m_modalitiesMontage.removeAll("REFERENCE");
-	m_modalitiesMontage.removeAll("GRAD");
-	m_modalitiesAsRecorded = AwChannel::getTypesAsString(m_rawChannels);
-	// remove unwanted modalities
-	m_modalitiesAsRecorded.removeAll("TRIGGER");
-	m_modalitiesAsRecorded.removeAll("ECG");
-	m_modalitiesAsRecorded.removeAll("OTHER");
-	m_modalitiesAsRecorded.removeAll("ICA");
-	m_modalitiesAsRecorded.removeAll("REFERENCE");
-	m_modalitiesAsRecorded.removeAll("GRAD");
-
-	// default input channels are as recorded ones
-	m_channelSource = ICASettings::AsRecorded;
-	m_ui.comboModality->addItems(m_modalitiesAsRecorded);
 
 	if (!process->pdi.input.markers().isEmpty())
 		m_ui.inputDataWidget->setMarkers(process->pdi.input.markers());
@@ -82,20 +62,70 @@ ICASettings::~ICASettings()
 
 }
 
+int ICASettings::exec()
+{
+	m_modalitiesMontage = AwChannel::getTypesAsString(m_channels);
+	// remove unwanted modalities
+	m_modalitiesMontage.removeAll("TRIGGER");
+	m_modalitiesMontage.removeAll("ECG");
+	m_modalitiesMontage.removeAll("OTHER");
+	m_modalitiesMontage.removeAll("ICA");
+	m_modalitiesMontage.removeAll("REFERENCE");
+	m_modalitiesMontage.removeAll("GRAD");
+	m_modalitiesAsRecorded = AwChannel::getTypesAsString(m_rawChannels);
+	// remove unwanted modalities
+	m_modalitiesAsRecorded.removeAll("TRIGGER");
+	m_modalitiesAsRecorded.removeAll("ECG");
+	m_modalitiesAsRecorded.removeAll("OTHER");
+	m_modalitiesAsRecorded.removeAll("ICA");
+	m_modalitiesAsRecorded.removeAll("REFERENCE");
+	m_modalitiesAsRecorded.removeAll("GRAD");
+
+	// default input channels are as recorded ones
+	m_channelSource = ICASettings::AsRecorded;
+	m_ui.comboModalityMontage->addItems(m_modalitiesMontage);
+	m_ui.comboModality->addItems(m_modalitiesAsRecorded);
+
+	// check if one of the modalities is empty or both?
+	if (m_modalitiesAsRecorded.isEmpty() && m_modalitiesMontage.isEmpty()) {
+		QMessageBox::information(this, "Modalities", "Cannot compute ICA on this data file.");
+		return QDialog::Rejected;
+	}
+	else if (m_modalitiesAsRecorded.isEmpty()) {
+		m_ui.radioAsRecorded->setChecked(false);
+		m_ui.radioCurrentMontage->setChecked(true);
+		m_ui.radioAsRecorded->setEnabled(false);
+		m_channelSource = ICASettings::Montage;
+	}
+	else if (m_modalitiesMontage.isEmpty()) {
+		m_ui.radioCurrentMontage->setChecked(false);
+		m_ui.radioAsRecorded->setChecked(true);
+		m_ui.radioCurrentMontage->setEnabled(false);
+		m_channelSource = ICASettings::AsRecorded;
+	}
+
+	return QDialog::exec();
+}
+
 void ICASettings::changeChannelSource(bool flag)
 {
-	disconnect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
-	if (flag) { // AsRecorded 
+	if (flag) // AsRecorded 
 		m_channelSource = ICASettings::AsRecorded;
-		m_ui.comboModality->clear();
-		m_ui.comboModality->addItems(m_modalitiesAsRecorded);
-	}
-	else {
+	else
 		m_channelSource = ICASettings::Montage;
-		m_ui.comboModality->clear();
-		m_ui.comboModality->addItems(m_modalitiesMontage);
-	}
-	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
+	updateMaxNumOfIC();
+	//disconnect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
+	//if (flag) { // AsRecorded 
+	//	m_channelSource = ICASettings::AsRecorded;
+	//	m_ui.comboModality->clear();
+	//	m_ui.comboModality->addItems(m_modalitiesAsRecorded);
+	//}
+	//else {
+	//	m_channelSource = ICASettings::Montage;
+	//	m_ui.comboModality->clear();
+	//	m_ui.comboModality->addItems(m_modalitiesMontage);
+	//}
+	//connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
 }
 
 void ICASettings::restrictSEEGElectrode(bool flag)
@@ -156,7 +186,7 @@ void ICASettings::accept()
 	if (m_channelSource == ICASettings::AsRecorded)
 		args[keys::modality] = m_modalitiesAsRecorded.at(m_ui.comboModality->currentIndex());
 	else
-		args[keys::modality] = m_modalitiesMontage.at(m_ui.comboModality->currentIndex());
+		args[keys::modality] = m_modalitiesMontage.at(m_ui.comboModalityMontage->currentIndex());
 	int modality = AwChannel::stringToType(args.value(keys::modality).toString());
 
 	args[keys::lp] = m_ui.spinLPF->value();
@@ -235,11 +265,15 @@ void ICASettings::updateMaxNumOfIC()
 	int modality;
 	AwChannelList list;
 	if (m_channelSource == ICASettings::AsRecorded) {
+		if (m_modalitiesAsRecorded.isEmpty())
+			return;
 		modality = AwChannel::stringToType(m_modalitiesAsRecorded.at(m_ui.comboModality->currentIndex()));
 		list = AwChannel::extractChannelsOfType(m_rawChannels, modality);
 	}
 	else {
-		modality = AwChannel::stringToType(m_modalitiesMontage.at(m_ui.comboModality->currentIndex()));
+		if (m_modalitiesMontage.isEmpty())
+			return;
+		modality = AwChannel::stringToType(m_modalitiesMontage.at(m_ui.comboModalityMontage->currentIndex()));
 		list = AwChannel::extractChannelsOfType(m_channels, modality);
 	}
 	if (modality == AwChannel::SEEG) {
