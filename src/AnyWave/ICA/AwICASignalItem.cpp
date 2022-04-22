@@ -210,17 +210,17 @@ QPainterPath AwICASignalItem::childrenRegion()
 
 void AwICASignalItem::updateChildItems()
 {
-	qDebug() << "setDefaultChildrenPositions for item " << channel()->name() << endl;
+//	qDebug() << "setDefaultChildrenPositions for item " << channel()->name() << endl;
 	m_labelItem->setTransform(QTransform());
 	m_mappingItem->setTransform(QTransform());
 	m_labelRejectedProxyWidget->setTransform(QTransform());
 
 	if (m_showMap && m_label) {
-		qDebug() << "showing map and label" << endl;
+//		qDebug() << "showing map and label" << endl;
 		m_labelItem->setX(m_mappingItem->x() + m_mappingItem->boundingRect().width() + 5);
 		if (m_labelRejectedProxyWidget->isVisible())
 			m_labelRejectedProxyWidget->setX(m_labelItem->x() +	m_labelItem->boundingRect().width() + 5);
-		qDebug() << "map item at " << m_mappingItem->x() << "," << m_mappingItem->y() << endl;
+//		qDebug() << "map item at " << m_mappingItem->x() << "," << m_mappingItem->y() << endl;
 	}
 	else if (m_showMap) { // show map but not the label
 		if (m_labelRejectedProxyWidget->isVisible())
@@ -232,13 +232,13 @@ void AwICASignalItem::updateChildItems()
 	}
 	if (m_upperNeighbor)
 		resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
-	qDebug() << "setDefaultChildrenPositions for item " << channel()->name() << " finished" << endl;
+//	qDebug() << "setDefaultChildrenPositions for item " << channel()->name() << " finished" << endl;
 }
 
 void AwICASignalItem::resolveCollisionWithUpperNeighbor(const QPainterPath& region)
 {
 
-	qDebug() << Q_FUNC_INFO << "for item " << channel()->name() << endl;
+//	qDebug() << Q_FUNC_INFO << "for item " << channel()->name() << endl;
 
 	QPainterPath bounds;
 	m_labelItem->setTransform(QTransform());
