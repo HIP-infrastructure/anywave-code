@@ -78,12 +78,13 @@ public:
 	static QList<AwMarker *>& rename(QList<AwMarker *>& markers, const QString& newLabel);
 	/** Load a marker file and returns the markers */ 
 	static QList<AwMarker *> load(const QString& file);
+	static QList<AwMarker*> loadFaster(const QString& file);
 	/** Save markers to a file **/
 	static int save(const QString& file, const QList<AwMarker *>& markers);
 	/** duplicate markers **/
 	static QList<AwMarker *> duplicate(const QList<AwMarker *>& markers);
 	/** Sort markers, chronologically. Don't duplicate.**/
-	static QList<AwMarker *>& sort(QList<AwMarker *>& markers);
+	static void sort(QList<AwMarker *>& markers);
 	/** Cut all markers using markers in cutMarkers. Returns the list of reshaped markers without the cut markers. **/
 	static QList<AwMarker *> cutAroundMarkers(QList<AwMarker *>& markers, QList<AwMarker *>& cutMarkers);
 	/** AND operator : keep markers on m2 which overlaps markers on m1. reshape them to match the intersection of m1. **/

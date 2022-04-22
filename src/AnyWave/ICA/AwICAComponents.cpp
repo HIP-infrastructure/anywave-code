@@ -237,7 +237,21 @@ int  AwICAComponents::loadComponents(AwMATLABFile& file)
 
 	for (int i = 0; i < m_unmixing.n_rows; i++) {
 		AwICAChannel *chan = new AwICAChannel();
-		chan->setName(QString("%1_ICA_%2").arg(AwChannel::typeToString(m_type)).arg(i + 1));
+		switch (m_type) {
+		case AwChannel::EEG:
+			chan->setName(QString("E_IC%1").arg(i + 1));
+			break;
+		case AwChannel::SEEG:
+			chan->setName(QString("S_IC%1").arg(i + 1));
+			break;
+		case AwChannel::MEG:
+			chan->setName(QString("M_IC%1").arg(i + 1));
+			break;
+		case AwChannel::EMG:
+			chan->setName(QString("EMG_IC%1").arg(i + 1));
+			break;
+		}
+		//chan->setName(QString("%1_ICA_%2").arg(AwChannel::typeToString(m_type)).arg(i + 1));
 		chan->setSamplingRate(sr);
 		chan->setIndex(i);
 		chan->setLayout2D(l);

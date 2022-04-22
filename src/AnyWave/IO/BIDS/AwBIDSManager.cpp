@@ -569,10 +569,8 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	auto destFile = QString("%1/%2.mrk").arg(path).arg(fileName);
 	bool fileExists = QFile::exists(srcFile);
 	bool destExists = QFile::exists(destFile);
-	if (fileExists && !destExists) {
-		QFile::copy(srcFile, destFile);
-		QFile::remove(srcFile);
-	}
+	if (fileExists && !destExists) 
+		moveSidecarFilesToDerivatives(srcFile, destFile);
 	if (fileExists && destExists) {
 		// avoid loosing markers: load the both file in memory, remove doublon and save it.
 		auto srcMarkers = AwMarker::load(srcFile);
@@ -582,6 +580,7 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 		AwMarker::save(destFile, srcMarkers);
 		QFile::remove(srcFile);
 	}
+
 
 	// move mtg file if any
 	srcFile = filePath + ".mtg";

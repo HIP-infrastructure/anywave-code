@@ -167,7 +167,10 @@ void AwMarkerManager::setMarkers(const AwMarkerList& markers)
 AwMarkerList AwMarkerManager::loadMarkers(const QString &path)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
-    return AwMarker::load(path);
+ //   return AwMarker::load(path);
+	auto markers = AwMarker::loadFaster(path);
+	emit finished();
+	return markers;
 }
 
 
@@ -331,10 +334,10 @@ void AwMarkerManager::init()
 		AwWaitWidget wait("Markers");
 		wait.setText("Loading markers...");
 		connect(this, SIGNAL(finished()), &wait, SLOT(accept()));
-		auto f = [this](const QString& path) { auto markers = this->loadMarkers(path); emit finished();  return markers; };
-		auto future = std::async(f, m_filePath);
-		wait.exec();
-		m_markers += future.get();   // keep markers that are coming from the data file !
+		auto loading = [this](const QString& path) {
+			this->m_markers += this->loadMarkers(path);
+		};
+		wait.run(loading, m_filePath);
 		m_needSorting = true;
 		int removed = removeDuplicates();
 		removeOfflimits();

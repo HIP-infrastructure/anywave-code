@@ -268,14 +268,14 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		mrkFileExists = true;
 	}
 
-	if (QFile::exists(markerPath)) {
-		AwMarkerList markers = AwMarker::load(markerPath);
-		while (!markers.isEmpty()) {
-			AwMarker *m = markers.takeFirst();
-			block->addMarker(m);
-			delete m;
-		}
-	}
+	//if (QFile::exists(markerPath)) {
+	//	AwMarkerList markers = AwMarker::load(markerPath);
+	//	while (!markers.isEmpty()) {
+	//		AwMarker *m = markers.takeFirst();
+	//		block->addMarker(m);
+	//		delete m;
+	//	}
+	//}
 	
 	if (QFile::exists(oldMrkPath)) {
 		// if no ades.mrk, just rename

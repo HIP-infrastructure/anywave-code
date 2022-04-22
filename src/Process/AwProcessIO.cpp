@@ -22,7 +22,6 @@ AwProcessIO::~AwProcessIO()
 {
 	clearMarkers();
 	clearChannels();
-//	AW_DESTROY_LIST(m_modifiedMarkers);
 }
 
 bool AwProcessIO::isEmpty()
@@ -49,8 +48,6 @@ void AwProcessIO::setReader(AwFileIO* reader)
 
 void AwProcessIO::setNewChannels(const AwChannelList& channels, bool duplicate)
 {
-	//while (!m_channels.isEmpty())
-	//	delete m_channels.takeFirst();
 	m_channels.clear();
 	if (channels.isEmpty())
 		return;

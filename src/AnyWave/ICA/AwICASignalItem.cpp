@@ -43,7 +43,6 @@ AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDi
 
     // check if a topo should be displayed
 	if (m_icaChannel->layout2D() == nullptr) {// No layout => hide widget don't compute topography
-	//	m_mappingItem->hide();
 		m_isMapAvailable = false;
 	}
 	else 
@@ -137,15 +136,20 @@ void AwICASignalItem::openMapUi()
 void AwICASignalItem::showMap(bool flag)
 {
 	if (is2DMapAvailable() && flag) {
-		if (!m_is2DMapComputed) {
-			m_topoWidget->updateMap(0., m_icaChannel->topoValues(), m_icaChannel->labels());
-			m_is2DMapComputed = true;
-			m_mappingItem->updateMap();
-			//m_mappingItem->setY(-m_mappingItem->boundingRect().height() / 2);
+		if (!m_icaChannel->isSEEG()) {
+			if (!m_is2DMapComputed) {
+				m_topoWidget->updateMap(0., m_icaChannel->topoValues(), m_icaChannel->labels());
+				m_is2DMapComputed = true;
+				m_mappingItem->updateMap();
+			}
 		}
+		m_showMap = flag;
+		m_mappingItem->setVisible(flag);
 	}
-	m_showMap = flag;
-	m_mappingItem->setVisible(flag);
+	else {
+		m_showMap = false;
+		m_mappingItem->setVisible(false);
+	}
 	m_size = minimumSize();
 	repaint();
 }

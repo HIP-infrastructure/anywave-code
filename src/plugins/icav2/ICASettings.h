@@ -38,18 +38,20 @@ public slots:
 	void accept() override;
 	int exec() override;
 protected slots:
-	void updateMaxNumOfIC();
 	void changeAlgo(int);
-	void changeSEEGElectrode(int);
-	void changeInputChannels();
+//	void changeSEEGElectrode(int);
+//	void changeInputChannels();
 	void changeChannelSource(bool flag);
 	void restrictSEEGElectrode(bool flag);
+	void setAllComponents();
+	void updateInputChannels();
+	void changeModality();
 private:
 	Ui::ICASettingsUI m_ui;
-	AwChannelList m_channels, m_rawChannels;
+	AwChannelList m_channels, m_rawChannels, m_inputChannels;
 	QStringList m_modalitiesMontage, m_modalitiesAsRecorded;
-	QStringList m_labels, m_seegElectrodes;
-	int m_channelSource;
+	QStringList m_labels, m_seegElectrodesMontage, m_seegElectrodesAsRecorded;
+	int m_channelSource, m_modality;
 	ICA *m_process;
 	QList<ICAAlgorithm *> m_algos;
 	QWidget* m_extraGUIWidget;

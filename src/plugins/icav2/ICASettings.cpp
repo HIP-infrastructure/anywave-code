@@ -20,24 +20,26 @@
 #include <AwKeys.h>
 #include "ica.h"
 #include "ICAAlgorithm.h"
+#include <montage/AwMontage.h>
 
 ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 {
 	m_ui.setupUi(this);
-	// the plugin is configured to get as recorded channels as input when launched.
+	// the plugin will get current montage as default input
 	m_channels = process->pdi.input.channels();
-	// but we need also the current montage
+	// but we need also the raw channels (as recorded)
 	m_rawChannels = process->rawChannels();
 
 	if (!process->pdi.input.markers().isEmpty())
 		m_ui.inputDataWidget->setMarkers(process->pdi.input.markers());
 	else
 		m_ui.inputDataWidget->hide();
-	connect(m_ui.cbAll, SIGNAL(toggled(bool)), this, SLOT(updateMaxNumOfIC()));
-	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
-	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(updateMaxNumOfIC()));
+//	connect(m_ui.cbAll, SIGNAL(toggled(bool)), this, SLOT(updateMaxNumOfIC()));
+	connect(m_ui.buttonAll, &QPushButton::clicked, this, &ICASettings::setAllComponents);
+//	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(setAllComponents()));
+//	connect(m_ui.ignoreBads, SIGNAL(toggled(bool)),  this, SLOT(setAllComponents()));
 	connect(m_ui.radioAsRecorded, SIGNAL(toggled(bool)), this, SLOT(changeChannelSource(bool)));
-	m_ui.labelTotalIC->hide();
+//	m_ui.labelTotalIC->hide();
 	m_process = process;
 	m_algos = process->algorithms();
 	for (auto algo : m_algos) 
@@ -52,9 +54,10 @@ ICASettings::ICASettings(ICA *process, QWidget *parent) : QDialog(parent)
 	m_ui.checkSEEGElectrode->hide();
 	m_ui.comboSEEGElectrode->setEnabled(false);
 	m_ui.comboSEEGElectrode->hide();
-	updateMaxNumOfIC();
-	connect(m_ui.comboSEEGElectrode, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSEEGElectrode(int)));
+
+	connect(m_ui.comboSEEGElectrode, SIGNAL(currentIndexChanged(int)), this, SLOT(updateInputChannels()));
 	connect(m_ui.checkSEEGElectrode, &QCheckBox::toggled, this,  &ICASettings::restrictSEEGElectrode);
+	connect(m_ui.ignoreBads, &QCheckBox::toggled, this, &ICASettings::updateInputChannels);
 }
 
 ICASettings::~ICASettings()
@@ -104,6 +107,33 @@ int ICASettings::exec()
 		m_channelSource = ICASettings::AsRecorded;
 	}
 
+	// if modalities contains SEEG => prebuild the SEEG electrodes the user will be able to pickup.
+	QRegularExpression exp("(\\d+)$");
+	if (m_modalitiesAsRecorded.contains("SEEG")) {
+		for (auto c : m_rawChannels) {
+			auto label = c->name();
+			label = label.remove(exp);
+			if (!m_seegElectrodesAsRecorded.contains(label))
+				m_seegElectrodesAsRecorded.append(label);
+		}
+	}
+	if (m_seegElectrodesAsRecorded.size())
+		m_ui.comboSEEGElectrode->addItems(m_seegElectrodesAsRecorded);
+/*	if (m_modalitiesMontage.contains("SEEG")) {
+		for (auto c : m_channels) {
+			auto label = c->name();
+			label = label.remove(exp);
+			if (!m_seegElectrodesMontage.contains(label))
+				m_seegElectrodesMontage.append(label);
+		}
+	}*/
+
+
+	changeModality();
+
+	connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(changeModality()));
+	connect(m_ui.comboModalityMontage, SIGNAL(currentIndexChanged(int)), this, SLOT(changeModality()));
+//	updateInputChannels();
 	return QDialog::exec();
 }
 
@@ -113,25 +143,84 @@ void ICASettings::changeChannelSource(bool flag)
 		m_channelSource = ICASettings::AsRecorded;
 	else
 		m_channelSource = ICASettings::Montage;
-	updateMaxNumOfIC();
-	//disconnect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
-	//if (flag) { // AsRecorded 
-	//	m_channelSource = ICASettings::AsRecorded;
-	//	m_ui.comboModality->clear();
-	//	m_ui.comboModality->addItems(m_modalitiesAsRecorded);
-	//}
-	//else {
-	//	m_channelSource = ICASettings::Montage;
-	//	m_ui.comboModality->clear();
-	//	m_ui.comboModality->addItems(m_modalitiesMontage);
-	//}
-	//connect(m_ui.comboModality, SIGNAL(currentIndexChanged(int)), this, SLOT(updateMaxNumOfIC()));
+
+	updateInputChannels();
 }
 
 void ICASettings::restrictSEEGElectrode(bool flag)
 {
-	if (flag) 
-		changeSEEGElectrode(m_ui.comboSEEGElectrode->currentIndex());
+	updateInputChannels();
+}
+
+void ICASettings::changeModality()
+{
+	if (m_channelSource == ICASettings::AsRecorded) {
+		m_modality = AwChannel::stringToType(m_modalitiesAsRecorded.at(m_ui.comboModality->currentIndex()));
+		m_inputChannels = AwChannel::extractChannelsOfType(m_rawChannels, m_modality);
+		if (m_modality == AwChannel::SEEG) {
+			//m_ui.comboSEEGElectrode->clear();
+			if (m_seegElectrodesAsRecorded.size()) {
+				//m_ui.comboSEEGElectrode->addItems(m_seegElectrodesAsRecorded);
+				m_ui.comboSEEGElectrode->show();
+				m_ui.checkSEEGElectrode->show();
+			}
+			else {
+				m_ui.comboSEEGElectrode->hide();
+				m_ui.checkSEEGElectrode->hide();
+				m_ui.checkSEEGElectrode->setChecked(false);
+			}
+		}
+	}
+	else {
+		m_modality = AwChannel::stringToType(m_modalitiesMontage.at(m_ui.comboModalityMontage->currentIndex()));
+		m_inputChannels = AwChannel::extractChannelsOfType(m_channels, m_modality);
+		// DO NOT ALLOW TO Restrict to one particular SEEG Electode when using the current montage
+		//if (m_modality == AwChannel::SEEG) {
+		//	m_ui.comboSEEGElectrode->clear();
+		//	if (m_seegElectrodesMontage.size()) {
+		//		m_ui.comboSEEGElectrode->addItems(m_seegElectrodesMontage);
+		//		m_ui.comboSEEGElectrode->show();
+		//		m_ui.checkSEEGElectrode->show();
+		//	}
+		//	else {
+		//		m_ui.comboSEEGElectrode->hide();
+		//		m_ui.checkSEEGElectrode->hide();
+		//	}
+		//}
+	}
+	updateInputChannels();
+}
+
+
+void ICASettings::updateInputChannels()
+{
+	m_inputChannels.clear();
+	AwChannelList tmp;
+	if (m_channelSource == ICASettings::AsRecorded)
+		tmp = m_rawChannels;
+	else
+		tmp = m_channels;
+
+	for (auto c : tmp) {
+		if (c->type() == m_modality)
+			m_inputChannels << c;
+	}
+
+	// check for restrict SEEG mode option
+	if (m_modality == AwChannel::SEEG && m_ui.checkSEEGElectrode->isChecked()) {
+		auto label = m_ui.comboSEEGElectrode->currentText();
+		tmp = m_inputChannels;
+		m_inputChannels.clear();
+		for (auto c : m_rawChannels)
+			if (c->name().startsWith(label))
+				m_inputChannels << c;
+	}
+	// handle bad channels
+	if (m_ui.ignoreBads->isChecked())
+		AwMontage::removeBadChannels(m_inputChannels, m_process->pdi.input.settings.value(keys::bad_labels).toStringList());
+	m_ui.spinNC->setMaximum(m_inputChannels.size());
+	m_ui.spinNC->setValue(m_inputChannels.size());
+
 }
 
 void ICASettings::changeAlgo(int index)
@@ -150,32 +239,10 @@ void ICASettings::changeAlgo(int index)
 		m_ui.groupBoxExtras->hide();
 }
 
-/// <summary>
-/// changeSEEGElectrode()
-/// Update the max number of ICA components
-/// </summary>
-/// <param name="index"></param>
-void ICASettings::changeSEEGElectrode(int index)
-{
-	Q_ASSERT(index < m_seegElectrodes.size());
-	auto label = m_seegElectrodes.at(index);
-	AwChannelList list;
-	if (m_channelSource == ICASettings::AsRecorded)
-		list = m_rawChannels;
-	else
-		list = m_channels;
-	int count = 0;
-	for (auto c : list) {
-		if (c->name().startsWith(label))
-			count++;
-	}
-	m_ui.labelTotalIC->setText(QString::number(count));
-	m_ui.spinNC->setValue(count);
-}
 
-void ICASettings::changeInputChannels()
+void ICASettings::setAllComponents()
 {
-
+	m_ui.spinNC->setValue(m_inputChannels.size());
 }
 
 
@@ -210,7 +277,7 @@ void ICASettings::accept()
 
 	// add new option Restrict to SEEG
 	if (m_ui.checkSEEGElectrode->isChecked() && modality == AwChannel::SEEG) {
-		auto label = m_seegElectrodes.at(m_ui.comboSEEGElectrode->currentIndex());
+		auto label = m_ui.comboSEEGElectrode->currentText();
 		args[keys::use_seeg_electrode] = label;
 		AwChannelList list;
 		for (auto c : channels) {
@@ -221,13 +288,14 @@ void ICASettings::accept()
 	}
 
 	channels = AwChannel::removeDoublons(channels);
-	if (m_ui.ignoreBads->isChecked()) { // ignoring bad channels
-		auto badLabels = m_process->pdi.input.settings[keys::bad_labels].toStringList();
-		foreach (AwChannel *c, channels) {
-			if (badLabels.contains(c->name()))
-				channels.removeAll(c);
-		}
-	}
+	if (m_ui.ignoreBads->isChecked()) // ignoring bad channels
+		AwMontage::removeBadChannels(channels, m_process->pdi.input.settings.value(keys::bad_labels).toStringList());
+	//	auto badLabels = m_process->pdi.input.settings[keys::bad_labels].toStringList();
+	//	foreach (AwChannel *c, channels) {
+	//		if (badLabels.contains(c->name()))
+	//			channels.removeAll(c);
+	//	}
+	//}
 
 	// check if num of components is <= number of channels
 	if (m_ui.spinNC->value() > channels.size()) {
@@ -252,60 +320,13 @@ void ICASettings::accept()
 
 	AwUniteMaps(m_process->pdi.input.settings, args);
 
-	// IMPORTANT:
-	// if As Recorded channels are chosen, then replace default input channels by as recorded channels
-	if (m_channelSource == ICASettings::AsRecorded)
-		m_process->pdi.input.setNewChannels(m_rawChannels, true);
+	//// IMPORTANT:
+	//// if As Recorded channels are chosen, then replace default input channels by as recorded channels
+	//if (m_channelSource == ICASettings::AsRecorded)
+	//	m_process->pdi.input.setNewChannels(m_rawChannels, true);
+
+	m_process->pdi.input.setNewChannels(AwChannel::duplicateChannels(channels));
 
 	return QDialog::accept();
 }
 
-void ICASettings::updateMaxNumOfIC()
-{
-	int modality;
-	AwChannelList list;
-	if (m_channelSource == ICASettings::AsRecorded) {
-		if (m_modalitiesAsRecorded.isEmpty())
-			return;
-		modality = AwChannel::stringToType(m_modalitiesAsRecorded.at(m_ui.comboModality->currentIndex()));
-		list = AwChannel::extractChannelsOfType(m_rawChannels, modality);
-	}
-	else {
-		if (m_modalitiesMontage.isEmpty())
-			return;
-		modality = AwChannel::stringToType(m_modalitiesMontage.at(m_ui.comboModalityMontage->currentIndex()));
-		list = AwChannel::extractChannelsOfType(m_channels, modality);
-	}
-	if (modality == AwChannel::SEEG) {
-		m_seegElectrodes.clear();
-		m_ui.comboSEEGElectrode->clear();
-		QRegularExpression exp("(\\d+)$");
-		for (auto c : list) {
-			auto label = c->name().remove(exp);
-			if (!m_seegElectrodes.contains(label))
-				m_seegElectrodes.append(label);
-		}
-		m_ui.comboSEEGElectrode->addItems(m_seegElectrodes);
-	}
-	
-	int count = list.size();
-	auto ignoreBadChannels = m_ui.ignoreBads->isChecked();
-	if (ignoreBadChannels) {
-		for (AwChannel *c : list) {
-			if (c->isBad())
-				count--;
-		}
-	}
-	m_ui.labelTotalIC->setText(QString::number(count));
-	m_ui.spinNC->setValue(count);
-
-	if (modality == AwChannel::SEEG) {
-		m_ui.checkSEEGElectrode->show();
-		m_ui.comboSEEGElectrode->show();
-
-	}
-	else {
-		m_ui.checkSEEGElectrode->hide();
-		m_ui.comboSEEGElectrode->hide();
-	}
-}

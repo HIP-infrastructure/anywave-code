@@ -24,7 +24,6 @@
 #include <AwKeys.h>
 #include "MEGstructs.h"
 
-
 EEGInto4DPlugin::EEGInto4DPlugin()
 {
 	type = AwProcessPlugin::Background;

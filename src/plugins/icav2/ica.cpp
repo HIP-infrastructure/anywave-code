@@ -59,7 +59,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";
-	version = "2.2.0";
+	version = "2.2.1";
     name = QString("ICA");
     description = QString("Compute ICA");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	

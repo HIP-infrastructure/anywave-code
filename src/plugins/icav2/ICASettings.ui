@@ -259,7 +259,7 @@
        <property name="title">
         <string>Output</string>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,1">
         <item>
          <widget class="QLabel" name="labelNC">
           <property name="sizePolicy">
@@ -296,28 +296,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="cbAll">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+         <widget class="QPushButton" name="buttonAll">
           <property name="text">
-           <string>All components</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="labelTotalIC">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>(248)</string>
+           <string>All Components</string>
           </property>
          </widget>
         </item>
@@ -529,38 +510,6 @@
     <hint type="destinationlabel">
      <x>139</x>
      <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbAll</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spinNC</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>283</x>
-     <y>488</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>182</x>
-     <y>490</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbAll</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>labelTotalIC</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>283</x>
-     <y>488</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>315</x>
-     <y>486</y>
     </hint>
    </hints>
   </connection>

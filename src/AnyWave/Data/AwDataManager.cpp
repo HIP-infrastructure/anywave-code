@@ -158,8 +158,6 @@ void AwDataManager::setNewRootDirForSideFiles()
 	auto dir = bm->currentDerivativesDir();
 	auto fileName = bm->currentFileName();
 
-//	auto fileName = m_settings.value(keys::data_file).toString();
-
 	m_settings[keys::flt_file] = QString("%1/%2.flt").arg(dir).arg(fileName);
 	m_settings[keys::sel_file] = QString("%1/%2.sel").arg(dir).arg(fileName);
 	m_settings[keys::bad_file] = QString("%1/%2.bad").arg(dir).arg(fileName);
@@ -267,11 +265,11 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 
 	m_filterSettings.apply(m_reader->infos.channels());
 
-	// Are there events?
-	if (m_reader->infos.blocks().at(0)->markersCount())
-		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+	//// Are there events?
+	//if (m_reader->infos.blocks().at(0)->markersCount())
+	//	m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
 
-	m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
+	//m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
 	auto display = AwDisplay::instance();
 	if (display) {
 		// LAST step => update Display Manager with new file.
@@ -279,6 +277,11 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 	}
 	//m_montageManager->newMontage(m_reader);
 	AwBIDSManager::instance()->setNewOpenFile(filePath);
+	// Are there events?
+	if (m_reader->infos.blocks().at(0)->markersCount())
+		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+
+	m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
 	m_montageManager->newMontage(m_reader);
 }
 
@@ -379,7 +382,6 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	if (!commandLineMode) {
 		QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
 		if (!root.isEmpty()) {
-		//	AwBIDSManager::instance()->newFile(reader);
 			AwBIDSManager::instance()->setNewOpenFile(filePath);
 			m_settings[keys::bids_dir] = root;
 			m_status =  1;
