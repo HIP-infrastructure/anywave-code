@@ -33,7 +33,6 @@ SET(AnyWave_SRCS
 	./CL/DedicatedDataServer.cpp
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
-	./Data/AwMemoryMapper.cpp  
 	./Data/AwDataChunk.cpp
     ./Data/AwDataManager.cpp
     ./Carto/AwDockMapping.cpp  
@@ -62,7 +61,13 @@ SET(AnyWave_SRCS
 	./IO/BIDS/AwBIDSGUIOptionsDialog.cpp
 	./IO/BIDS/AwBIDSConvert.cpp
 	./IO/BIDS/AwBIDSTsv.cpp
-	./IO/MEMIO/MEMIO.cpp
+    ./IO/BIDS/AwBIDSIO.cpp
+    ./IO/export/AwChannelsExportWizardPage.cpp
+    ./IO/export/AwExporter.cpp
+    ./IO/export/AwExportWizardDial.cpp
+    ./IO/export/AwFilterExportWizardPage.cpp
+    ./IO/export/AwMarkersExportWizardPage.cpp
+    ./IO/export/AwOutputFileWizardPage.cpp
     ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
     ./Marker/AwMarkerListModel.cpp  
@@ -157,10 +162,9 @@ SET(AnyWave_SRCS
     ./ICA/AwICAComponents.cpp  
     ./ICA/AwICAManager.cpp  
     ./ICA/AwICAPanel.cpp  
-    ./ICA/AwICARejectButton.cpp  
     ./ICA/AwICASignalItem.cpp  
-    ./ICA/AwMappingButton.cpp  
     ./ICA/AwPanelItem.cpp
+    ./ICA/AwICAMappingItem.cpp
     ./ICA/AwSEEGMap.cpp  
     ./Prefs/AwPreferences.cpp  
     ./Prefs/AwPrefsDial.cpp  
@@ -187,7 +191,6 @@ SET(HEADERS
 	./Batch/AwBatchRunner.h
 	./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
-	./Data/AwMemoryMapper.h  
 	./Data/AwDataChunk.h
 	./Data/AwDataManager.h
     ./Carto/AwDockMapping.h  
@@ -212,7 +215,12 @@ SET(HEADERS
     ./IO/BIDS/AwBIDSManager.h  
     ./IO/BIDS/AwBIDSGUI.h  
 	./IO/BIDS/AwBIDSGUIOptionsDialog.h
-	./IO/MEMIO/MEMIO.h
+    ./IO/export/AwChannelsExportWizardPage.h
+    ./IO/export/AwExporter.h
+    ./IO/export/AwExportWizardDial.h
+    ./IO/export/AwFilterExportWizardPage.h
+    ./IO/export/AwMarkersExportWizardPage.h
+    ./IO/export/AwOutputFileWizardPage.h
     ./Marker/AwExtractTriggers.h  
     ./Marker/AwMarkersExportWidget.h  
     ./Marker/AwPickChannelsDial.h  
@@ -282,13 +290,12 @@ SET(HEADERS
     ./Widgets/AwAboutAnyWave.h  
 	./Widgets/AwVideoSettingsDial.h
     ./ICA/AwICAChannel.h  
-    ./ICA/AwMappingButton.h  
     ./ICA/AwICAPanel.h  
     ./ICA/AwPanelItem.h  
     ./ICA/AwICAManager.h  
     ./ICA/AwICAComponents.h  
     ./ICA/AwICASignalItem.h  
-    ./ICA/AwICARejectButton.h  
+    ./ICA/AwICAMappingItem.h
     ./ICA/AwSEEGMap.h  
     ./AwOpenFileDialog.h
     ./AnyWave.h  

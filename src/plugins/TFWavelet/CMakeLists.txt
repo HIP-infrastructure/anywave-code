@@ -8,7 +8,6 @@ IF(USE_MKL)
 INCLUDE_DIRECTORIES(${MKL_ROOT}/include)
 ENDIF()
 
-#MESSAGE("MKL INC: ${MKL_INCLUDE_DIRS}")
 SET(SRCS display_settings.cpp settingsui.cpp TFPicker.cpp 
   TFPlot.cpp tf_settings.cpp TFWavelet2.cpp TFWidget.cpp
   TFColorMapWidget.cpp)

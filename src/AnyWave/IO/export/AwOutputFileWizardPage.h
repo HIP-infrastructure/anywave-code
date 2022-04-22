@@ -19,6 +19,7 @@
 #include <QLineEdit>
 
 class AwFileIOPlugin;
+class QComboBox;
 
 class AwOutputFileWizardPage : public QWizardPage
 {

@@ -25,12 +25,12 @@ SET(SRC  AwChannel.cpp
 QT5_WRAP_CPP(MOC ${HEADERS})
 add_library(AwCore SHARED ${MOC} ${SRC})
 
-qt5_use_modules(AwCore Core)
+qt5_use_modules(AwCore Core Concurrent)
 
 IF(APPLE)
-TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
+TARGET_LINK_LIBRARIES(AwCore Qt5::Core Qt5::Concurrent)
 ELSE()
-TARGET_LINK_LIBRARIES(AwCore Qt5::Core)
+TARGET_LINK_LIBRARIES(AwCore Qt5::Core Qt5::Concurrent)
 ENDIF()
 target_compile_features(AwCore PRIVATE cxx_std_17)
 
