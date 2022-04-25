@@ -49,7 +49,7 @@ ICA::ICA()
 	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 	m_algorithms << infomax;
 #if defined(Q_OS_WIN) 
-	auto sobi = new ICASobi(this);
+	auto sobi = new ICASobi(this, this);
 	connect(sobi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 	m_algorithms << sobi;
 #endif
@@ -70,7 +70,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 ICA::~ICA()
 {
 //	qDeleteAll(m_algorithms);
-	qDeleteAll(m_rawChannels);
+//	qDeleteAll(m_rawChannels);
 }
 
 bool ICA::showUi()
@@ -79,7 +79,9 @@ bool ICA::showUi()
 	QVariantMap settings;
 	settings[keys::channels_source] = keys::channels_source_raw;
 	// Use the synchronous call here as we are not yet running in a separate thread
-	selectChannels(settings, &m_rawChannels);
+	AwChannelList tmp;
+	selectChannels(settings, &tmp);
+	m_rawChannels = AwChannel::toSharedPointerList(tmp);
 
 	ICASettings ui(this);
 
@@ -96,7 +98,6 @@ bool ICA::showUi()
 		}
 		test.close();
 		QFile::remove(m_fileName);
-		//pdi.input.settings.unite(ui.args);
 		AwUniteMaps(pdi.input.settings, args);
 		return true;
 	}

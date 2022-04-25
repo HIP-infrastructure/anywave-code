@@ -6,7 +6,7 @@ class ICASobi : public ICAAlgorithm
 {
 	Q_OBJECT
 public:
-	ICASobi(ICA* process);
+	ICASobi(ICA* process, QObject *parent);
 
 	void run() override;
 protected:

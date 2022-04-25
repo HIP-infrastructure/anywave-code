@@ -55,6 +55,12 @@ void AwProcessIO::setNewChannels(const AwChannelList& channels, bool duplicate)
 		: AwChannel::toSharedPointerList(channels);
 }
 
+void AwProcessIO::setNewChannels(const AwSharedChannelList& channels)
+{
+	m_channels = channels;
+}
+
+
 void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
 {
 	while (!m_markers.isEmpty())

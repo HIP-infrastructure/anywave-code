@@ -44,7 +44,7 @@ public:
 
 	bool batchParameterCheck(const QVariantMap& args) override;
 	QList<ICAAlgorithm*>& algorithms() { return m_algorithms; }
-	inline AwChannelList& rawChannels() { return m_rawChannels; }
+	inline AwSharedChannelList& rawChannels() { return m_rawChannels; }
 private:
 	int initParameters();
 	void saveToFile();
@@ -63,7 +63,8 @@ private:
 	qint64 m, n;
 	float m_lpf, m_hpf, m_samplingRate, m_notch;
 	// the default input will be current montage channels but we also manage raw channels which were the default input before we added the possibility to compute on current montage..
-	AwChannelList m_channels, m_rawChannels; // now we handle also the computation on current montage
+	AwChannelList m_channels; // , m_rawChannels; // now we handle also the computation on current montage
+	AwSharedChannelList m_rawChannels;
 	arma::mat m_unmixing;
 	arma::mat m_mixing;
 

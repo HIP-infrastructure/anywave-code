@@ -326,7 +326,25 @@ void AwMontage::removeBadChannels(AwChannelList& channels, const QStringList& ba
 	for (auto c : tmp)
 		channels.removeAll(c);
 	qDeleteAll(tmp);
-	tmp.clear();
+}
+
+/// <summary>
+/// remove bad channels in the list passed as first paremeter based on the list of the bad labels.
+/// the channels are removed and destroyed.
+/// </summary>
+/// <param name="channels">list of channels</param>
+/// <param name="badLabels">list of bad labels</param>
+void AwMontage::removeBadChannels(AwSharedChannelList& channels, const QStringList& badLabels)
+{
+	if (badLabels.isEmpty())
+		return;
+	AwSharedChannelList tmp;
+	for (auto c : channels) {
+		if (badLabels.contains(c->name()) || badLabels.contains(c->referenceName()))
+			tmp << c;
+	}
+	for (auto c : tmp)
+		channels.removeAll(c);
 }
 
 /// <summary>

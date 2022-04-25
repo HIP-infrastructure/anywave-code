@@ -498,6 +498,18 @@ QList<int> AwChannel::getTypesAsInt(const QList<AwChannel *>& list)
 	return res;
 }
 
+QList<int> AwChannel::getTypesAsInt(const AwSharedChannelList& list)
+{
+	QList<int>  res;
+
+	for (auto c : list) {
+		if (res.contains(c->type()))
+			continue;
+		res << c->type();
+	}
+	return res;
+}
+
 QStringList AwChannel::getTypesAsString(const QList<AwChannel *>& list)
 {
 	QStringList res;
@@ -506,6 +518,16 @@ QStringList AwChannel::getTypesAsString(const QList<AwChannel *>& list)
 		res << AwChannel::typeToString(t);
 	return res;
 }
+
+QStringList AwChannel::getTypesAsString(const AwSharedChannelList& list)
+{
+	QStringList res;
+	QList<int> types = AwChannel::getTypesAsInt(list);
+	for (auto t : types)
+		res << AwChannel::typeToString(t);
+	return res;
+}
+
 
 //
 // Get a copy of channels depending on type from a list.
@@ -517,6 +539,15 @@ QList<AwChannel *> AwChannel::extractChannelsOfType(const QList<AwChannel *>& li
 		if (c->type() == type)
 			res << c->duplicate();
 
+	return res;
+}
+
+AwSharedChannelList AwChannel::extractChannelsOfType(const AwSharedChannelList& list, int type)
+{
+	AwSharedChannelList res;
+	for (const auto c : list)
+		if (c->type() == type)
+			res << c;
 	return res;
 }
 
@@ -537,6 +568,18 @@ QList<AwChannel *> AwChannel::getChannelsOfType(const QList<AwChannel *>& list, 
 {
 	AwChannelList res;
 	foreach(AwChannel *c, list)
+		if (c->type() == type)
+			res << c;
+	return res;
+}
+
+//
+// Get a sub list containing only the channels of the specified type
+// 
+AwSharedChannelList AwChannel::getChannelsOfType(const AwSharedChannelList& list, int type)
+{
+	AwSharedChannelList res;
+	for (auto c : list)
 		if (c->type() == type)
 			res << c;
 	return res;
@@ -607,6 +650,21 @@ QList<AwChannel *> AwChannel::removeDoublons(const QList<AwChannel *>& list)
 {
 	QStringList labels;
 	AwChannelList res;
+	for (auto c : list) {
+		if (!labels.contains(c->name())) {
+			labels << c->name();
+			res << c;
+		}
+	}
+	return res;
+}
+
+AwSharedChannelList AwChannel::removeDoublons(const
+	AwSharedChannelList& list)
+{
+	QStringList labels;
+
+	AwSharedChannelList res;
 	for (auto c : list) {
 		if (!labels.contains(c->name())) {
 			labels << c->name();

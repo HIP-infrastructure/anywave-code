@@ -68,6 +68,7 @@ signals:
 	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false, bool doNotWakeUpClient = false);
 	void needData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 	void selectChannelsRequested(AwDataClient *,const QVariantMap& settings, AwChannelList* channels);
+	void selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*);
 protected:
 	QWaitCondition m_wcDataAvailable, m_wcSelectChannelsDone;
 	QMutex m_mutexDataAvailable, m_mutexSelectChannels;

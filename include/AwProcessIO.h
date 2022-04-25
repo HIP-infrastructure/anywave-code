@@ -51,6 +51,7 @@ public:
 	inline QList<QWidget*>& widgets() { return m_widgets; }
 	/** Set a new list of channels. Previous channels will be deleted!!. duplicate indicates that the list will be duplicated and then set as the new list. **/
 	void setNewChannels(const AwChannelList& channels, bool duplicate = false);
+	void setNewChannels(const AwSharedChannelList& channel);
 	/** Set a new list of markers. Previous markers will be deleted!!  duplicate indicates that the list will be duplicated and then set as the new list. **/
 	void setNewMarkers(const AwMarkerList& markers, bool duplicate = false);
 	/** set the new list, markers are not duplicated and previous markers are not deleted **/

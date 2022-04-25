@@ -3,7 +3,7 @@
 #include "coder_array.h"
 #include "sobi_coder.h"
 
-ICASobi::ICASobi(ICA* process) : ICAAlgorithm(process)
+ICASobi::ICASobi(ICA* process, QObject *parent) : ICAAlgorithm(process, parent)
 {
 	m_name = "sobi";
 	m_flags = ICAAlgorithm::CanDoPCA;

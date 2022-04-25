@@ -39,8 +39,6 @@ public slots:
 	int exec() override;
 protected slots:
 	void changeAlgo(int);
-//	void changeSEEGElectrode(int);
-//	void changeInputChannels();
 	void changeChannelSource(bool flag);
 	void restrictSEEGElectrode(bool flag);
 	void setAllComponents();
@@ -48,7 +46,7 @@ protected slots:
 	void changeModality();
 private:
 	Ui::ICASettingsUI m_ui;
-	AwChannelList m_channels, m_rawChannels, m_inputChannels;
+	AwSharedChannelList m_channels, m_rawChannels, m_inputChannels;
 	QStringList m_modalitiesMontage, m_modalitiesAsRecorded;
 	QStringList m_labels, m_seegElectrodesMontage, m_seegElectrodesAsRecorded;
 	int m_channelSource, m_modality;

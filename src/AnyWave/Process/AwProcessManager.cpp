@@ -786,7 +786,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		AwProcess* p = static_cast<AwProcess*>(process);
 		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
 		// connect the process to the Data Manager to make it able to send requests
-		connect(p, SIGNAL(selectChannelsRequestedAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+		connect(p, SIGNAL(selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
 			SLOT(selectChannelsAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)));
 		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
 			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
@@ -812,12 +812,11 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 	else { // AwProcess
 		AwProcess *p = static_cast<AwProcess *>(process);
 		// connect the process to the Data Manager to make it able to send requests
-		connect(p, SIGNAL(selectChannelsRequestedAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+		connect(p, SIGNAL(selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
 			SLOT(selectChannelsAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)));
 		// connect the process to the Data Manager to make it able to send requests
 		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
 			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
-
 
 		if (p->hasInputUi()) {
 			if (!p->showUi()) 	{

@@ -33,6 +33,7 @@ public:
 	/** from a channel list, create a list containing bipolar channels **/
 	static AwChannelList createSEEGBipolarMontage(const AwChannelList& channels, const QStringList& badLabels = QStringList());
 	static void removeBadChannels(AwChannelList& channels, const QStringList& badLabels);
+	static void removeBadChannels(AwSharedChannelList& channels, const QStringList& badLabels);
 	static int getElectrodeLabelAndIndex(AwChannel* chan, QString& label);
 protected:
 	void loadBadChannels();

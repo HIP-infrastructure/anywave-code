@@ -462,15 +462,11 @@ void AwDataManager::selectChannels(AwDataClient* client, const QString& settings
 
 void AwDataManager::selectChannels(AwDataClient* client, const QVariantMap& settings, AwChannelList* channels)
 {
-	if (channels == nullptr) {
-		
+	if (channels == nullptr) 
 		return;
-	}
 	AwChannelList temp;
-	if (settings.isEmpty()) {
-	
+	if (settings.isEmpty()) 
 		return;
-	}
 	if (settings.contains(keys::channels_source)) {
 		auto source = settings.value(keys::channels_source).toString().toLower().simplified();
 		if (source == keys::channels_source_raw)
