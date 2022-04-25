@@ -7,7 +7,7 @@ class ICAInfomax : public ICAAlgorithm
 {
 	Q_OBJECT
 public:
-	ICAInfomax(ICA *process);
+	ICAInfomax(ICA *process, QObject *parent);
 #ifdef Q_OS_MAC
     
 #endif

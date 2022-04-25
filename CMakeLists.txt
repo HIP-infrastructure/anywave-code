@@ -3,7 +3,7 @@ project(AnyWave)
 
 
 
-SET(CMAKE_BUILD_TYPE Release) # build in release mode
+SET(CMAKE_BUILD_TYPE RelWithDebInfo) # build in release mode
 SET(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

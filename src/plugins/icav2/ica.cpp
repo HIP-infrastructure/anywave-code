@@ -45,7 +45,7 @@ ICA::ICA()
 	m_isDownsamplingActive = true;
 	m_hpf = m_lpf = m_notch = 0.;
 	m_nComp = 0;
-	auto infomax = new ICAInfomax(this);
+	auto infomax = new ICAInfomax(this, this);
 	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
 	m_algorithms << infomax;
 #if defined(Q_OS_WIN) 
@@ -69,7 +69,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 
 ICA::~ICA()
 {
-	qDeleteAll(m_algorithms);
+//	qDeleteAll(m_algorithms);
 	qDeleteAll(m_rawChannels);
 }
 

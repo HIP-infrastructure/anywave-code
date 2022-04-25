@@ -1,7 +1,7 @@
 #include "ICAInfomax.h"
 #include <QHBoxLayout>
 
-ICAInfomax::ICAInfomax(ICA* process) : ICAAlgorithm(process)
+ICAInfomax::ICAInfomax(ICA* process, QObject *parent) : ICAAlgorithm(process, parent)
 {
 	m_name = "infomax";
 	m_flags = ICAAlgorithm::CanDoPCA | ICAAlgorithm::HaveGUI;
