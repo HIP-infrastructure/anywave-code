@@ -1,5 +1,5 @@
-libdir=/users/bruno/armadillo-macos/lib
-includedir=/users/bruno/armadillo-macos/include
+libdir=/users/bruno/dev/anywave-mac/armadillo-macos/lib
+includedir=/users/bruno/dev/anywave-mac/armadillo-macos/include
 
 Name: armadillo
 Description: Fast C++ matrix library with syntax similar to MATLAB and Octave

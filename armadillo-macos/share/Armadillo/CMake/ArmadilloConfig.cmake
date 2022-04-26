@@ -5,11 +5,11 @@
 #  ARMADILLO_LIBRARIES    - libraries to link against
 
 # Tell the user project where to find our headers and libraries
-set(ARMADILLO_INCLUDE_DIRS "/users/bruno/armadillo-macos/include")
-set(ARMADILLO_LIBRARY_DIRS "/users/bruno/armadillo-macos/lib")
+set(ARMADILLO_INCLUDE_DIRS "/users/bruno/dev/anywave-mac/armadillo-macos/include")
+set(ARMADILLO_LIBRARY_DIRS "/users/bruno/dev/anywave-mac/armadillo-macos/lib")
 
 # Our library dependencies (contains definitions for IMPORTED targets)
-include("/users/bruno/armadillo-macos/share/Armadillo/CMake/ArmadilloLibraryDepends.cmake")
+include("/users/bruno/dev/anywave-mac/armadillo-macos/share/Armadillo/CMake/ArmadilloLibraryDepends.cmake")
 
 # These are IMPORTED targets created by ArmadilloLibraryDepends.cmake
 set(ARMADILLO_LIBRARIES armadillo)
