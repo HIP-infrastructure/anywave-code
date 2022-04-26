@@ -135,15 +135,17 @@ void AwMontageManager::clearSource(int type)
 
 void AwMontageManager::reorderChannels(const QStringList& labels)
 {
-	// make it simple => removed actual channels from the list and reinsert them in same order as the labels list at the end of the current list.
-	m_channelsShrdPtrs.erase(std::remove_if(m_channelsShrdPtrs.begin(), m_channelsShrdPtrs.end(),
-		[labels](const QSharedPointer<AwChannel>& channel) { return labels.contains(channel->fullName()); }), m_channelsShrdPtrs.end());
-	for (const auto& label : labels) {
-		auto channel = m_asRecordedSharedPointerMap.value(label);
-		m_channelsShrdPtrs.append(QSharedPointer<AwChannel>(channel.get()->duplicate()));
-	}
+	// build current order list 
+	QMap<QString, QSharedPointer<AwChannel>> map;
+	for (const auto& channel : m_channelsShrdPtrs) 
+		map.insert(channel->fullName(), channel);
+	AwSharedChannelList tmp;
+	for (const auto& l : labels) 
+		tmp.append(map.value(l));
+	m_channelsShrdPtrs = tmp;
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 	save(m_montagePath);
+
 }
 
 void AwMontageManager::addNewSources(int type)

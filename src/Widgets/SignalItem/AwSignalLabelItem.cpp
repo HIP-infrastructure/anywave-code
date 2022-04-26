@@ -34,7 +34,7 @@ void AwSignalLabelItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		}
 		else {
 			m_mousePressed = true;
-			static_cast<AwGraphicsScene*>(scene())->setItemsDragged();
+		//	static_cast<AwGraphicsScene*>(scene())->setItemsDragged();
 		}
 	}
 	else 
