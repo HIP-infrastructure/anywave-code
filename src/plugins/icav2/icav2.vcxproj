@@ -74,7 +74,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PreprocessorDefinitions>ICA_LIB;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -82,7 +82,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>AwCorelibd.lib;AwWidgetslibd.lib;AwProcessLibd.lib;AwMATLABLibd.lib;AwFilteringLibd.lib;AwMathLibd.lib;AwUtilitiesLibd.lib;AwLayoutLibd.lib;AwReadWriteLibd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCorelibd.lib;AwWidgetslibd.lib;AwProcessLibd.lib;AwMATLABLibd.lib;AwFilteringLibd.lib;AwMathLibd.lib;AwUtilitiesLibd.lib;AwLayoutLibd.lib;AwReadWriteLibd.lib;AwMontageLibd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,7 +92,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <PreprocessorDefinitions>ICA_LIB;MKL;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(SolutionDir)\include;$(SolutionDir)\armadillo\include;C:\Program Files\MATLAB\R2020b\extern\include;.\matlab_common;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -100,23 +100,50 @@
       <OutputFile>$(OutDir)\$(ProjectName).dll</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwMATLABLib.lib;AwFilteringLib.lib;AwMathLib.lib;AwUtilitiesLib.lib;AwLayoutLib.lib;AwReadWriteLib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AwCorelib.lib;AwWidgetslib.lib;AwProcessLib.lib;AwMATLABLib.lib;AwFilteringLib.lib;AwMathLib.lib;AwUtilitiesLib.lib;AwLayoutLib.lib;AwReadWriteLib.lib;AwMontageLib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <QtMoc Include="ICAAlgorithm.h" />
+    <ClInclude Include="cca\ICAcca.h" />
+    <ClInclude Include="fast_ica\ICAFastICA.h" />
+    <QtMoc Include="infomax\ICAInfomax.h" />
+    <ClInclude Include="infomax\infomax_algo.h" />
+    <ClInclude Include="infomax\r250.h" />
+    <ClInclude Include="infomax\randlcg.h" />
     <ClInclude Include="matlab_common\coder_array.h" />
     <ClInclude Include="matlab_common\pinv.h" />
+    <ClInclude Include="matlab_common\rot90.h" />
     <ClInclude Include="matlab_common\rtGetInf.h" />
     <ClInclude Include="matlab_common\rtGetNaN.h" />
     <ClInclude Include="matlab_common\rtwtypes.h" />
     <ClInclude Include="matlab_common\rt_nonfinite.h" />
     <ClInclude Include="matlab_common\svd.h" />
+    <ClInclude Include="matlab_common\tmwtypes.h" />
+    <ClInclude Include="sobi\eigStandard.h" />
+    <QtMoc Include="sobi\ICASobi.h" />
     <ClInclude Include="sobi\mtimes.h" />
+    <ClInclude Include="sobi\pca.h" />
+    <ClInclude Include="sobi\rt_defines.h" />
+    <ClInclude Include="sobi\schur.h" />
     <ClInclude Include="sobi\sobi_coder.h" />
     <ClInclude Include="sobi\sobi_coder_data.h" />
     <ClInclude Include="sobi\sobi_coder_initialize.h" />
+    <ClInclude Include="sobi\sobi_coder_rtwutil.h" />
     <ClInclude Include="sobi\sobi_coder_terminate.h" />
     <ClInclude Include="sobi\sobi_coder_types.h" />
+    <ClInclude Include="sobi\sort.h" />
+    <ClInclude Include="sobi\sortAscendLE.h" />
+    <ClInclude Include="sobi\sqrt.h" />
+    <ClInclude Include="sobi\xdhseqr.h" />
+    <ClInclude Include="sobi\xdlanv2.h" />
+    <ClInclude Include="sobi\xnrm2.h" />
+    <ClInclude Include="sobi\xzggbal.h" />
+    <ClInclude Include="sobi\xzhgeqz.h" />
+    <ClInclude Include="sobi\xzlarf.h" />
+    <ClInclude Include="sobi\xzlarfg.h" />
+    <ClInclude Include="sobi\xzlartg.h" />
+    <ClInclude Include="sobi\xztgevc.h" />
     <QtMoc Include="ica.h" />
     <ClInclude Include="cca\cca.h" />
     <ClInclude Include="cca\cca_data.h" />
@@ -137,24 +164,45 @@
     <ClCompile Include="cca\cca_data.cpp" />
     <ClCompile Include="cca\cca_initialize.cpp" />
     <ClCompile Include="cca\cca_terminate.cpp" />
+    <ClCompile Include="cca\ICAcca.cpp" />
     <ClCompile Include="cca\qr.cpp" />
     <ClCompile Include="cca\run_cca.cpp" />
+    <ClCompile Include="fast_ica\ICAFastICA.cpp" />
     <ClCompile Include="ica.cpp" />
+    <ClCompile Include="ICAAlgorithm.cpp" />
     <ClCompile Include="ICASettings.cpp" />
-    <ClCompile Include="infomax_algo.cpp" />
+    <ClCompile Include="infomax\ICAInfomax.cpp" />
+    <ClCompile Include="infomax\infomax_algo.cpp" />
+    <ClCompile Include="infomax\r250.c" />
+    <ClCompile Include="infomax\randlcg.c" />
     <ClCompile Include="matlab_common\pinv.cpp" />
+    <ClCompile Include="matlab_common\rot90.cpp" />
     <ClCompile Include="matlab_common\rtGetInf.cpp" />
     <ClCompile Include="matlab_common\rtGetNaN.cpp" />
     <ClCompile Include="matlab_common\rt_nonfinite.cpp" />
     <ClCompile Include="matlab_common\svd.cpp" />
-    <ClCompile Include="r250.c" />
-    <ClCompile Include="randlcg.c" />
+    <ClCompile Include="sobi\eigStandard.cpp" />
+    <ClCompile Include="sobi\ICASobi.cpp" />
     <ClCompile Include="sobi\mtimes.cpp" />
-    <ClCompile Include="sobi\run_sobi.cpp" />
+    <ClCompile Include="sobi\pca.cpp" />
+    <ClCompile Include="sobi\schur.cpp" />
     <ClCompile Include="sobi\sobi_coder.cpp" />
     <ClCompile Include="sobi\sobi_coder_data.cpp" />
     <ClCompile Include="sobi\sobi_coder_initialize.cpp" />
+    <ClCompile Include="sobi\sobi_coder_rtwutil.cpp" />
     <ClCompile Include="sobi\sobi_coder_terminate.cpp" />
+    <ClCompile Include="sobi\sort.cpp" />
+    <ClCompile Include="sobi\sortAscendLE.cpp" />
+    <ClCompile Include="sobi\sqrt.cpp" />
+    <ClCompile Include="sobi\xdhseqr.cpp" />
+    <ClCompile Include="sobi\xdlanv2.cpp" />
+    <ClCompile Include="sobi\xnrm2.cpp" />
+    <ClCompile Include="sobi\xzggbal.cpp" />
+    <ClCompile Include="sobi\xzhgeqz.cpp" />
+    <ClCompile Include="sobi\xzlarf.cpp" />
+    <ClCompile Include="sobi\xzlarfg.cpp" />
+    <ClCompile Include="sobi\xzlartg.cpp" />
+    <ClCompile Include="sobi\xztgevc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource.qrc" />
@@ -164,6 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+    <None Include="json\batch.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

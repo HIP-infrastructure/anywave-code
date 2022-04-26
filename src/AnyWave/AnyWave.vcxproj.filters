@@ -92,9 +92,6 @@
     <Filter Include="IO\BIDS">
       <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IO\MEMIO">
-      <UniqueIdentifier>{cef1cf63-cc97-410b-bd02-2de0bfde1510}</UniqueIdentifier>
-    </Filter>
     <Filter Include="IO\JSON">
       <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
     </Filter>
@@ -112,6 +109,9 @@
     </Filter>
     <Filter Include="Updater">
       <UniqueIdentifier>{28d04abc-c7d2-41ce-97aa-5026f47a626f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO\export">
+      <UniqueIdentifier>{26e02caa-2dd8-4632-b145-d6b821165ec5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -139,16 +139,10 @@
     <ClCompile Include="Display\AwDisplaySetup.cpp">
       <Filter>Display</Filter>
     </ClCompile>
-    <ClCompile Include="Display\AwDisplaySetupManager.cpp">
-      <Filter>Display</Filter>
-    </ClCompile>
     <ClCompile Include="Display\AwDSMSaveSetupUI.cpp">
       <Filter>Display</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwNewViewDial.cpp">
-      <Filter>Display</Filter>
-    </ClCompile>
-    <ClCompile Include="Display\AwSaveAsNewSetupDialog.cpp">
       <Filter>Display</Filter>
     </ClCompile>
     <ClCompile Include="Display\AwScene.cpp">
@@ -219,9 +213,6 @@
     </ClCompile>
     <ClCompile Include="Prefs\AwSettings.cpp">
       <Filter>Prefs</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwConverter.cpp">
-      <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwMatlabScriptPlugin.cpp">
       <Filter>Process</Filter>
@@ -379,21 +370,6 @@
     <ClCompile Include="MATPy\GetScreenCapture.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
-    <ClCompile Include="Process\AwExporter.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwExporterSettings.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwExportSelChannels.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwExporterSelMarkers.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
-    <ClCompile Include="Process\AwExporterMarkerModel.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
     <ClCompile Include="MATPy\GetICAPanelCapture.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
@@ -457,13 +433,7 @@
     <ClCompile Include="AwOpenFileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IO\MEMIO\MEMIO.cpp">
-      <Filter>IO\MEMIO</Filter>
-    </ClCompile>
     <ClCompile Include="Data\AwDataChunk.cpp">
-      <Filter>Data</Filter>
-    </ClCompile>
-    <ClCompile Include="Data\AwMemoryMapper.cpp">
       <Filter>Data</Filter>
     </ClCompile>
     <ClCompile Include="AwFileOpenSave.cpp">
@@ -613,6 +583,45 @@
     <ClCompile Include="Display\AwDisplayEvents.cpp">
       <Filter>Display</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\Run.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="Prefs\AwAddVenvDial.cpp">
+      <Filter>Prefs</Filter>
+    </ClCompile>
+    <ClCompile Include="Prefs\AwPythonSetttings.cpp">
+      <Filter>Prefs</Filter>
+    </ClCompile>
+    <ClCompile Include="Prefs\AwPython.cpp">
+      <Filter>Prefs</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwExportWizardDial.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwOutputFileWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwChannelsExportWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwMarkersExportWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwFilterExportWizardPage.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\export\AwExporter.cpp">
+      <Filter>IO\export</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwBIDSIO.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="ICA\AwICAMappingItem.cpp">
+      <Filter>ICA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -645,9 +654,6 @@
     <QtMoc Include="Display\AwDisplaySetup.h">
       <Filter>Display</Filter>
     </QtMoc>
-    <QtMoc Include="Display\AwDisplaySetupManager.h">
-      <Filter>Display</Filter>
-    </QtMoc>
     <QtMoc Include="Display\AwDSMSaveSetupUI.h">
       <Filter>Display</Filter>
     </QtMoc>
@@ -658,12 +664,6 @@
       <Filter>Display</Filter>
     </QtMoc>
     <QtUic Include="Display\AwNewViewDial.ui">
-      <Filter>Display</Filter>
-    </QtUic>
-    <QtMoc Include="Display\AwSaveAsNewSetupDialog.h">
-      <Filter>Display</Filter>
-    </QtMoc>
-    <QtUic Include="Display\AwSaveAsNewSetupDialog.ui">
       <Filter>Display</Filter>
     </QtUic>
     <QtMoc Include="Display\AwScene.h">
@@ -753,12 +753,6 @@
     <QtUic Include="Prefs\AwPrefsDial.ui">
       <Filter>Prefs</Filter>
     </QtUic>
-    <QtMoc Include="Prefs\AwSettings.h">
-      <Filter>Prefs</Filter>
-    </QtMoc>
-    <QtMoc Include="Process\AwConverter.h">
-      <Filter>Process</Filter>
-    </QtMoc>
     <QtMoc Include="Process\AwMatlabScriptPlugin.h">
       <Filter>Process</Filter>
     </QtMoc>
@@ -870,9 +864,6 @@
     <QtMoc Include="AwExportDial.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtUic Include="AwExportDial.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtMoc Include="Carto\AwMappingClient.h">
       <Filter>Carto</Filter>
     </QtMoc>
@@ -945,30 +936,6 @@
     <QtUic Include="Marker\AwPickChannelsDial.ui">
       <Filter>Marker</Filter>
     </QtUic>
-    <QtMoc Include="Process\AwExporter.h">
-      <Filter>Process</Filter>
-    </QtMoc>
-    <QtUic Include="Process\AwExporterSettings.ui">
-      <Filter>Process</Filter>
-    </QtUic>
-    <QtMoc Include="Process\AwExporterSettings.h">
-      <Filter>Process</Filter>
-    </QtMoc>
-    <QtUic Include="Process\AwExportSelChannels.ui">
-      <Filter>Process</Filter>
-    </QtUic>
-    <QtMoc Include="Process\AwExportSelChannels.h">
-      <Filter>Process</Filter>
-    </QtMoc>
-    <QtUic Include="Process\AwExporterSelMarkers.ui">
-      <Filter>Process</Filter>
-    </QtUic>
-    <QtMoc Include="Process\AwExporterSelMarkers.h">
-      <Filter>Process</Filter>
-    </QtMoc>
-    <QtMoc Include="Process\AwExporterMarkerModel.h">
-      <Filter>Process</Filter>
-    </QtMoc>
     <QtMoc Include="Source\AwSourceManager.h">
       <Filter>Source</Filter>
     </QtMoc>
@@ -1010,9 +977,6 @@
     </QtUic>
     <QtMoc Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="IO\MEMIO\MEMIO.h">
-      <Filter>IO\MEMIO</Filter>
     </QtMoc>
     <QtMoc Include="CL\AwCommandLogger.h">
       <Filter>CL</Filter>
@@ -1119,6 +1083,30 @@
     <QtMoc Include="Updater\AwDownloadGui.h">
       <Filter>Updater</Filter>
     </QtMoc>
+    <QtMoc Include="Prefs\AwAddVenvDial.h">
+      <Filter>Prefs</Filter>
+    </QtMoc>
+    <QtMoc Include="Prefs\AwSettings.h">
+      <Filter>Process</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwOutputFileWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwChannelsExportWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwMarkersExportWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwFilterExportWizardPage.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwExportWizardDial.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\export\AwExporter.h">
+      <Filter>IO\export</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Prefs\AwPreferences.h">
@@ -1136,9 +1124,6 @@
     <ClInclude Include="Marker\AwExtractTriggers.h">
       <Filter>Marker</Filter>
     </ClInclude>
-    <ClInclude Include="Process\AwExporterTypes.h">
-      <Filter>Process</Filter>
-    </ClInclude>
     <ClInclude Include="Source\AwSourceChannel.h">
       <Filter>Source</Filter>
     </ClInclude>
@@ -1152,9 +1137,6 @@
       <Filter>MATPy</Filter>
     </ClInclude>
     <ClInclude Include="Data\AwDataChunk.h">
-      <Filter>Data</Filter>
-    </ClInclude>
-    <ClInclude Include="Data\AwMemoryMapper.h">
       <Filter>Data</Filter>
     </ClInclude>
     <ClInclude Include="IO\JSON\AwJSON.h">
@@ -1186,6 +1168,15 @@
     </ClInclude>
     <ClInclude Include="3DViewer\vtkPialReader.h">
       <Filter>3DViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="Prefs\AwPython.h">
+      <Filter>Prefs</Filter>
+    </ClInclude>
+    <ClInclude Include="Prefs\AwPythonSettings.h">
+      <Filter>Prefs</Filter>
+    </ClInclude>
+    <ClInclude Include="ICA\AwICAMappingItem.h">
+      <Filter>ICA</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1315,6 +1306,9 @@
     </QtUic>
     <QtUic Include="Marker\AwStatsWidget.ui">
       <Filter>Marker</Filter>
+    </QtUic>
+    <QtUic Include="Prefs\AwAddVenvDial.ui">
+      <Filter>Prefs</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

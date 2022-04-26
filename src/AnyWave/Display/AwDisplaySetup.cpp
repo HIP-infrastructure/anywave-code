@@ -25,29 +25,12 @@
 
 constexpr auto LAST_VERSION = "AnyWaveDisplaySetup2.0";
 
-AwDisplaySetup::AwDisplaySetup(const QString& name, QObject *parent)
+AwDisplaySetup::AwDisplaySetup(QObject *parent)
 	: QObject(parent)
 {
-	if (name.isEmpty())
-		m_name = "Default Setup";
-	else
-		m_name = name;
 	m_synchronize = true;
 	m_orientation = Horizontal;
 }
-
-AwDisplaySetup::AwDisplaySetup(AwDisplaySetup *source, QObject *parent)
-	: QObject(parent)
-{
-	m_synchronize = source->synchronizeViews();
-
-	for (int i = 0; i < viewSetups().size(); i++) {
-		AwViewSetup *dsv = new AwViewSetup(source->viewSetup(i), this);
-		m_ds << dsv;
-	}
-	m_orientation = source->orientation();
-}
-
 
 AwDisplaySetup::~AwDisplaySetup()
 {
@@ -58,50 +41,26 @@ void AwDisplaySetup::setSynchronized(bool flag)
 	m_synchronize = flag;
 }
 
-//
-// Generates a new setup for a new view by copying the last view setup attached to the current Display Setup
-AwViewSetup *AwDisplaySetup::newViewSetup()
+AwViewSettings* AwDisplaySetup::addViewSettings()
 {
-	AwViewSetup *s;
-	if (m_ds.isEmpty())
-		s = new AwViewSetup(this);
+	auto settings = new AwViewSettings(this);
+	int markerMode = AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt();
+	if (markerMode == 0)
+		settings->markerBarMode = AwViewSettings::Global;
 	else
-		s = new AwViewSetup(m_ds.last());
-	m_ds << s;
-	return s;
-}
-
-
-void AwDisplaySetup::setToDefault()
-{
-	// make the setup the Default Setup;
-	m_name = "Default Setup";
-	m_synchronize = true;
-	m_orientation = Horizontal;
-	// add a view setup
-	while (!m_ds.isEmpty())
-		delete m_ds.takeFirst();
-	m_ds << new AwViewSetup(this);
+		settings->markerBarMode = AwViewSettings::Classic;
+	m_viewSettings << settings;
+	return settings;
 }
 
 void AwDisplaySetup::setOrientation(int ori)
 {
-	if (ori != AwDisplaySetup::Vertical || ori != AwDisplaySetup::Horizontal ||
-		ori != AwDisplaySetup::Grid)
-		return;
-
 	m_orientation = ori;
 }
 
-void AwDisplaySetup::deleteViewSetup(int index)
+void AwDisplaySetup::removeViewSettings(int index)
 {
-	delete m_ds.takeAt(index);
-}
-
-void AwDisplaySetup::setName(const QString& name)
-{
-	m_name = name;
-	m_fullPath = QString("%1%2.aws").arg(AwSettings::getInstance()->value(aws::setup_dir).toString()).arg(name);
+	m_viewSettings.removeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,7 +90,6 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 		file.close();
 		return false;
 	}
-
 	node = root.firstChild();
 	while (!node.isNull()) 	{
 		element = node.toElement();
@@ -140,9 +98,20 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 			m_name = element.text();
 		else if (element.tagName() == "SynchronizedViews")
 			m_synchronize = element.text() == "true";
+		else if (element.tagName() == "Orientation") {
+			if (element.text() == "Vertical")
+				m_orientation = AwDisplaySetup::Vertical;
+			else
+				m_orientation = AwDisplaySetup::Horizontal;
+		}
 		else if (element.tagName() == "View") {
-			AwViewSetup *setup = new AwViewSetup(this);
-
+			auto setup = new AwViewSettings(this);
+			// apply default marker mode
+			if (AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt() == 0)
+				setup->markerBarMode = AwViewSettings::Global;
+			else
+				setup->markerBarMode = AwViewSettings::Classic;
+		
 			QDomNode n = element.firstChild();
 			while (!n.isNull()) {
 				QDomElement e = n.toElement();
@@ -175,10 +144,13 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->maxChannels = e.attribute("NumberOfChannels").toInt();
 				}
 				else if (e.tagName() == "MarkersBar")
-					if (e.text().toLower() == "show")
-						setup->markerBarMode = AwViewSettings::ShowMarkerBar;
+					setup->showMarkerBar = e.text().toLower() == "show";
+				else if (e.tagName() == "MarkersBarMode") {
+					if (e.text().toLower() == "global")
+						setup->markerBarMode = AwViewSettings::Global;
 					else
-						setup->markerBarMode = AwViewSettings::HideMarkerBar;
+						setup->markerBarMode = AwViewSettings::Classic;
+				}
 				else if (e.tagName() == "Filters") {
 					// parse node's child list
 					QDomNodeList list = n.childNodes();
@@ -200,9 +172,16 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->timeScaleMode = e.text().toInt();
 				else if (e.tagName() == "TimeScaleFixedPageDuration")
 					setup->fixedPageDuration = e.text().toFloat();
+				else if (e.tagName() == "ChannelSelection") {
+					QDomNodeList list = n.childNodes();
+					for (int i = 0; i < list.size(); i++) {
+						// get channel label
+						setup->channelSelection << list.at(i).toElement().text();
+					}
+				}
 				n = n.nextSibling();
 			}
-			m_ds.append(setup);
+			m_viewSettings.append(setup);
 		}
 		node = node.nextSibling();
 	}
@@ -235,11 +214,17 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 	element = doc.createElement("SynchronizedViews");
 	element.appendChild(doc.createTextNode(m_synchronize ? sTrue : sFalse));
 	root.appendChild(element);
+	element = doc.createElement("Orientation");
+	if (m_orientation == AwDisplaySetup::Vertical)
+		element.appendChild(doc.createTextNode("Vertical"));
+	else
+		element.appendChild(doc.createTextNode("Horizontal"));
+	root.appendChild(element);
 
 	qint32 count = 0;
-	for  (AwViewSetup *dsv : m_ds) {
+	for (auto dsv : m_viewSettings) {
 		QDomElement e;
-
+		
 		element = doc.createElement("View");
 		root.appendChild(element);
 
@@ -268,7 +253,6 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		element.appendChild(e);
 		root.appendChild(element);
 
-
 		e = doc.createElement("DisplaySeconds");
 		e.appendChild(doc.createTextNode(dsv->showSeconds ? sTrue : sFalse));
 		element.appendChild(e);
@@ -291,10 +275,18 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		root.appendChild(element);
 
 		e = doc.createElement("MarkersBar");
-		if (dsv->markerBarMode == AwViewSettings::ShowMarkerBar)
+		if (dsv->showMarkerBar)
 			e.appendChild(doc.createTextNode("Show"));
 		else
 			e.appendChild(doc.createTextNode("Hide"));
+		element.appendChild(e);
+		root.appendChild(element);
+
+		e = doc.createElement("MarkersBarMode");
+		if (dsv->markerBarMode == AwViewSettings::Global)
+			e.appendChild(doc.createTextNode("Global"));
+		else
+			e.appendChild(doc.createTextNode("Classic"));
 		element.appendChild(e);
 		root.appendChild(element);
 
@@ -323,6 +315,16 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 			e.appendChild(ee);
 		}
 		element.appendChild(e);
+
+		if (dsv->channelSelection.size()) {
+			e = doc.createElement("ChannelSelection");
+			for (const auto& label : dsv->channelSelection) {
+				QDomElement ee = doc.createElement("Channel");
+				ee.appendChild(doc.createTextNode(label));
+				e.appendChild(ee);
+			}
+			element.appendChild(e);
+		}
 
 		e = doc.createElement("TimeScaleMode");
 		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->timeScaleMode)));

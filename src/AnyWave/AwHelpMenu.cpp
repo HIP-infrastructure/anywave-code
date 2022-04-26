@@ -17,6 +17,7 @@
 #include "AnyWave.h"
 #include "Plugin/AwPluginManager.h"
 #include <AwProcessInterface.h>
+#include <QDesktopServices>
 
 
 /// <summary>
@@ -73,4 +74,9 @@ void AnyWave::initPluginsHelpMenu()
 			}
 		}
 	}
+}
+
+void AnyWave::on_actionView_Change_Log_triggered()
+{
+	QDesktopServices::openUrl(QUrl("https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/Changes"));
 }

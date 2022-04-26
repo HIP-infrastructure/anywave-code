@@ -18,6 +18,7 @@
 
 #include <QDialog>
 #include "ui_AwPrefsDial.h"
+#include <QStandardItemModel>
 
 using namespace Ui;
 
@@ -40,12 +41,17 @@ private:
 	void changeMarkerFontText(const QFont& font);
 	QString fontToLabel(const QFont& font);
 	bool detectPython(const QString& path);
+	void initVenvTable();
+	void addVenv(const QString& alias, const QString& dir);
+	void setDefaultVenv(const QString& alias);
 
 	QRect screen;
 	QStringList m_markerTypes;
 	QStringList m_markerColors;
 	qint32 m_markerIndex;
 	bool m_colorsChanged;
+	QStandardItemModel* m_venvsModel;
+	QMap<QString, QString> m_venvsMap;
 public slots:
 	void accept();
 	void restoreDefaultMarkersColors();
@@ -62,7 +68,10 @@ public slots:
 	void pickMCRFolder();
 	void pickGARDEL();
 	void pickITK();
-	void pickPython();
+	void addPythonVenv();
+	void setSelectedVenvAsDefault();
+	void removeSelectedVenv();
+
 signals:
 	void screenCalibrationChanged(float xPixPerCm, float yPixPerCm);
 	void markersColorChanged(const QStringList& colors);

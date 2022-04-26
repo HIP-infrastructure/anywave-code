@@ -59,7 +59,7 @@ AwMontage::~AwMontage()
 }
 
 
-void AwMontage::save(const QString& path, const AwChannelList& channels)
+void AwMontage::save(const QString& path, const AwChannelList& channels, const AwChannelList& asRecordedChannels)
 {
 	QFile file(path);
 
@@ -101,13 +101,24 @@ void AwMontage::save(const QString& path, const AwChannelList& channels)
 		child.setAttribute("notch", chan->notch());
 		element.appendChild(child);
 	}
+	if (asRecordedChannels.size()) {
+		auto asRecordedRoot = doc.createElement("AsRecordedChannels");
+		root.appendChild(asRecordedRoot);
+		for (auto chan : asRecordedChannels) {
+			element = doc.createElement("Channel");
+			element.setAttribute("name", chan->name());
+			element.setAttribute("type", AwChannel::typeToString(chan->type()));
+			asRecordedRoot.appendChild(element);
+		}
+	}
+
 	doc.save(stream, 3);
 	file.close();
 }
 
 
 
-AwChannelList AwMontage::load(const QString& path)
+AwChannelList AwMontage::load(const QString& path, QMap<QString, int> *asRecordedChannels)
 {
 	AwChannelList res;
 	QFile file(path);
@@ -143,38 +154,48 @@ AwChannelList AwMontage::load(const QString& path)
 		float lp = -1, hp = -1, notch = -1;
 		int type = AwChannel::Other;
 		QDomNode child;
-		if (element.tagName() != "Channel") {
-			node = node.nextSibling();
-			continue;
-		}
-
-		name = element.attribute("name");
-		child = element.firstChild();
-		while (!child.isNull()) {
-			QDomElement ee = child.toElement();
-			auto tagName = ee.tagName();
-			if (tagName == "type")
-				type = AwChannel::stringToType(ee.text());
-			else if (tagName == "color")
-				color = ee.text();
-			else if (tagName == "reference")
-				ref = ee.text();
-			else if (tagName == "filters") {
-				lp = ee.attribute("lowPass", "-1.").toDouble();
-				hp = ee.attribute("highPass", "-1.").toDouble();
-				notch = ee.attribute("notch", "-1.").toDouble();
+		if (element.tagName() == "Channel") {
+			name = element.attribute("name");
+			child = element.firstChild();
+			while (!child.isNull()) {
+				QDomElement ee = child.toElement();
+				auto tagName = ee.tagName();
+				if (tagName == "type") {
+					type = AwChannel::stringToType(ee.text());
+					if (type == -1)
+						throw AwException("Invalid channel type in montage");
+				}
+				else if (tagName == "color")
+					color = ee.text();
+				else if (tagName == "reference")
+					ref = ee.text();
+				else if (tagName == "filters") {
+					lp = ee.attribute("lowPass", "-1.").toDouble();
+					hp = ee.attribute("highPass", "-1.").toDouble();
+					notch = ee.attribute("notch", "-1.").toDouble();
+				}
+				child = child.nextSibling();
 			}
-			child = child.nextSibling();
+			auto channel = new AwChannel;
+			channel->setName(name);
+			channel->setType(type);
+			channel->setReferenceName(ref);
+			channel->setLowFilter(lp);
+			channel->setHighFilter(hp);
+			channel->setNotch(notch);
+			channel->setColor(color);
+			res << channel;
 		}
-		auto channel = new AwChannel;
-		channel->setName(name);
-		channel->setType(type);
-		channel->setReferenceName(ref);
-		channel->setLowFilter(lp);
-		channel->setHighFilter(hp);
-		channel->setNotch(notch);
-		channel->setColor(color);
-		res << channel;
+		else if (element.tagName() == "AsRecordedChannels" && asRecordedChannels) {
+			child = element.firstChild();
+			while (!child.isNull()) {
+				auto item = child.toElement();
+				QString name = item.attribute("name");
+				int type = AwChannel::stringToType(item.attribute("type"));
+				asRecordedChannels->insert(name, type);
+				child = child.nextSibling();
+			}
+		}
 		node = node.nextSibling();
 	}
 	return res;
@@ -299,13 +320,52 @@ void AwMontage::removeBadChannels(AwChannelList& channels, const QStringList& ba
 		return;
 	AwChannelList tmp;
 	for (auto c : channels) {
-		if (badLabels.contains(c->name()))
+		if (badLabels.contains(c->name()) || badLabels.contains(c->referenceName()))
 			tmp << c;
 	}
 	for (auto c : tmp)
 		channels.removeAll(c);
 	qDeleteAll(tmp);
-	tmp.clear();
+}
+
+/// <summary>
+/// remove bad channels in the list passed as first paremeter based on the list of the bad labels.
+/// the channels are removed and destroyed.
+/// </summary>
+/// <param name="channels">list of channels</param>
+/// <param name="badLabels">list of bad labels</param>
+void AwMontage::removeBadChannels(AwSharedChannelList& channels, const QStringList& badLabels)
+{
+	if (badLabels.isEmpty())
+		return;
+	AwSharedChannelList tmp;
+	for (auto c : channels) {
+		if (badLabels.contains(c->name()) || badLabels.contains(c->referenceName()))
+			tmp << c;
+	}
+	for (auto c : tmp)
+		channels.removeAll(c);
+}
+
+/// <summary>
+/// getElectrodeLabelAndIndex()
+/// Should be applied to SEEG channel. Extract the base label name and the electrode number. (ie. A1 => A andt 1)
+/// </summary>
+/// <param name="chan"></param>
+/// <param name="label"></param>
+/// <returns></returns>
+int AwMontage::getElectrodeLabelAndIndex(AwChannel* chan, QString& label)
+{
+	QRegularExpression exp("(\\d+)$");
+	QRegularExpressionMatch match;
+
+	match = exp.match(chan->name());
+	if (match.hasMatch()) {
+		label = chan->name();
+		label = label.remove(exp);
+		return match.captured(1).toInt();
+	}
+	return -1; // no electrode number in electrode label.
 }
 
 

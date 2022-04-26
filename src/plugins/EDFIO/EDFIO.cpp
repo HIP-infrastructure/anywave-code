@@ -213,7 +213,7 @@ EDFIOPlugin::EDFIOPlugin() : AwFileIOPlugin()
 	name = QString("EDF Format");
 	description = QString(tr("read/write EDF/BDF/EDF+/BDF+ files"));
 	manufacturer = QString::fromLatin1("EDF Group");
-	version = QString::fromLatin1("1.0.0");
+	version = QString::fromLatin1("1.1.0");
 	fileExtensions << QString::fromLatin1("*.edf") << QString::fromLatin1("*.bdf"); // for reading
 	m_flags = FileIO::HasExtension | FileIO::CanRead | FileIO::CanWrite;
 	fileExtension = ".edf"; // for writing
@@ -591,12 +591,12 @@ AwFileIO::FileStatus EDFIO::openFile(const QString &path)
 	m_edfhdr.reserved[44] = 0;
 
 	// AnyWave won't handle discontinuous data
-	if (m_edfhdr.discontinuous) {
-		m_error = QString("The file contains discontinuous data which is not handle by AnyWave.");
-		m_file.close();
-		delete[] edf_hdr;
-		return AwFileIO::WrongFormat;
-	}
+	//if (m_edfhdr.discontinuous) {
+	//	m_error = QString("The file contains discontinuous data which is not handled by AnyWave.");
+	//	m_file.close();
+	//	delete[] edf_hdr;
+	//	return AwFileIO::WrongFormat;
+	//}
 
 	/********************* NUMBER OF DATARECORDS *************************************/
 

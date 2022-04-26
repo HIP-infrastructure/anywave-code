@@ -253,15 +253,40 @@ ADESIO::FileStatus ADESIO::openFile(const QString &path)
 		return AwFileIO::FileAccess;
 	}
 
-	QString markerPath = path;
-	markerPath.replace(QString(".ades"), QString(".mrk"));
-	if (QFile::exists(markerPath)) {
-		AwMarkerList markers = AwMarker::load(markerPath);
+	QString markerPath = path + ".mrk";
+//	markerPath.replace(QString(".ades"), QString(".mrk"));
+	// to avoid losing old ".mrk" files, check if they exists and load them
+	QString oldMrkPath = path;
+	oldMrkPath.replace(QString(".ades"), QString(".mrk"));
+
+	bool mrkFileExists = QFile::exists(markerPath);
+	bool oldMrkFileExists = QFile::exists(oldMrkPath);
+
+	if (oldMrkFileExists && !mrkFileExists) {
+		QFile::rename(oldMrkPath, markerPath);
+		oldMrkFileExists = false;
+		mrkFileExists = true;
+	}
+
+	//if (QFile::exists(markerPath)) {
+	//	AwMarkerList markers = AwMarker::load(markerPath);
+	//	while (!markers.isEmpty()) {
+	//		AwMarker *m = markers.takeFirst();
+	//		block->addMarker(m);
+	//		delete m;
+	//	}
+	//}
+	
+	if (QFile::exists(oldMrkPath)) {
+		// if no ades.mrk, just rename
+		auto markers = AwMarker::load(oldMrkPath);
 		while (!markers.isEmpty()) {
-			AwMarker *m = markers.takeFirst();
+			auto m = markers.takeFirst();
 			block->addMarker(m);
 			delete m;
 		}
+		AwMarker::removeDoublons(block->markers(), true);
+		QFile::remove(oldMrkPath);
 	}
 
 	infos.setMrkFile(markerPath);
@@ -360,9 +385,11 @@ ADESIO::FileStatus ADESIO::createFile(const QString &path, int flags)
 		stream << c->fullName() << " = " << AwChannel::typeToString(c->type()) << endl;
 	hdr.close();
 
-	QString binPath = fullPath.replace(QString(".ades"), QString(".dat"));
-	QString markerPath = fullPath.replace(QString(".dat"), QString(".mrk"));
-
+	QString binPath = fullPath;
+	QString markerPath = fullPath;
+	binPath = binPath.replace(QString(".ades"), QString(".dat"));
+//	QString markerPath = fullPath.replace(QString(".dat"), QString(".mrk"));
+	markerPath = fullPath.append(".mrk");
 	// Write markers if any
 	if (infos.blocks().at(0)->markersCount()) { // we consider a continous file (only one block)
 		if (AwMarker::save(markerPath, infos.blocks().at(0)->markers()) == -1)
@@ -386,28 +413,12 @@ qint64 ADESIO::writeData(QList<AwChannel*> *channels)
 {
 	if (channels->isEmpty())
 		return 0;
-
 	qint64 dataSize = channels->at(0)->dataSize();
 	quint32 nbChannel = channels->size();
-
 	AwIO::rescaleDataToExport(*channels);
-
-	//// trying to optimize writing time by using a matrix as buffer
-	//// maximum 2Gbytes of ram for the buffer
-
-	//arma::uword max_size = (uword)std::floor(2*1e9);
-	//arma::uword item_size = sizeof(float) * channels->count();
-	//arma::uword max_item = max_size / item_size;
-	//arma::uword nItems = channels->first()->dataSize() * item_size;
-	//arma::uword cols = std::min(max_item, nItems);
-
-	//arma::mat buffer(channels->count(), cols);
-
-
 	for (qint64 i = 0; i < dataSize; i++)
 		for (quint32 j = 0; j < nbChannel; j++)
 			m_binStream << channels->at(j)->data()[i];
 	m_binFile.flush();
-
 	return dataSize;
 }

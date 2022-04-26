@@ -28,22 +28,26 @@ public:
 
 	enum UpdateFlags { LimitNumberOfChannels = 0x1, Filters = 0x2, MaxNumberOfChannels = 0x4,
 		ShowMarkerLabel = 0x8, ShowMarkerValue = 0xA, ShowBaseLine = 0x20, ShowTimeGrid = 0x40, 
-		ShowSecondTicks = 0x80, ShowSensors = 0x100, Overlay = 0x200, MarkerBarMode = 0x400, 
-		SecPerCm = 0x800, ShowMarkerBar = 0x1000, HideMarkerBar = 0x2000, TimeRepresentation = 0x4000, PageDuration = 0x8000,
-	    EEGMode = 0x10000, ShowMarkers = 0x20000, TimeScaleMode = 0x40000 };
+		ShowSecondTicks = 0x80, ShowSensors = 0x100, Overlay = 0x200, /*MarkerBarMode = 0x400,*/
+		ShowMarkerBar = 0x400,
+		SecPerCm = 0x800, MarkerBarMode = 0x1000, /*ShowMarkerBar = 0x1000, HideMarkerBar = 0x2000,*/ TimeRepresentation = 0x4000, PageDuration = 0x8000,
+	    EEGMode = 0x10000, ShowMarkers = 0x20000, TimeScaleMode = 0x40000, AllFlags = 0xfffff };
 	enum TimeScale { PaperLike, FixedPageDuration };
 	enum TimeRepresentation { ShowRelativeTime, ShowRecordedTime };
+	enum MarkerBarMode { Global, Classic };
 
-	int maxChannels, markerBarMode;
+	int maxChannels;	// max number of channels in visible part of the view
+	int markerBarMode;	// Marker bar representation mode: Classic or Global
 	bool limitChannels, showMarkerLabels, showMarkerValues, showZeroLine, showTimeGrid, showSeconds, showSensors, stackChannels;
 	int timeMode;	// should be ShowRelativeTime or ShowRecordedTime
 	int timeScaleMode;
 	float fixedPageDuration;
 	bool showMarkers; // true to display the markers in the signal view
 	bool eegDisplayMode;
+	bool showMarkerBar;
 	QList<int> filters;
 	float secsPerCm;
-
+	QStringList channelSelection;
 	AwGainLevels *gainLevels;
 };
 

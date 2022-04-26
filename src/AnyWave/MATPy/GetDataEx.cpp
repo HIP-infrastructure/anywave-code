@@ -30,6 +30,7 @@
 #include <QJsonArray>
 #include <AwKeys.h>
 #include "Data/AwDataManager.h"
+#include "CL/AwCommandLineManager.h"
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
 {
@@ -117,13 +118,14 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			skipBad = cfg.value("skip_bad_channels").toBool();
 
 		// check for marker file
-		if (cfg.contains("marker_file")) {
-			auto mrkFile = cfg.value("marker_file").toString();
-			markers = AwMarker::load(mrkFile);
-			if (markers.isEmpty()) {
-				emit log(QString("Loading of %1 failed.").arg(mrkFile));
-			}
-		}
+		markers = AwCommandLineManager::parseMarkerFile(cfg);
+		//if (cfg.contains("marker_file")) {
+		//	auto mrkFile = cfg.value("marker_file").toString();
+		//	markers = AwMarker::load(mrkFile);
+		//	if (markers.isEmpty()) {
+		//		emit log(QString("Loading of %1 failed.").arg(mrkFile));
+		//	}
+		//}
 
 		if (markers.isEmpty()) {
 			// try to load the default .mrk that comes with the data file

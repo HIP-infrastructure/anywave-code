@@ -64,7 +64,7 @@ public:
 	inline QMenu *viewMenu() { return m_viewMenu; }
 	QList<QAction *>& icaActions() { return m_icaActions; }
 	void runBuiltInProcess(AwBuiltInProcess *process);
-	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList());
+	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList(), bool NoIOCheck = false );
 	void initProcessSettings(AwBaseProcess* process);
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
 	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
@@ -87,7 +87,6 @@ public:
 	inline QString& lastErrorString() { return m_errorString; }
 
 	int buildProcessPDI(AwBaseProcess* process, AwDataManager *dm = nullptr);
-
 public slots:
 	void addPlugin(QObject* plugin);
 	void startProcessFromMenu();

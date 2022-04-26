@@ -1,0 +1,9 @@
+libdir=/users/bruno/dev/anywave-mac/armadillo-macos/lib
+includedir=/users/bruno/dev/anywave-mac/armadillo-macos/include
+
+Name: armadillo
+Description: Fast C++ matrix library with syntax similar to MATLAB and Octave
+URL: http://arma.sourceforge.net
+Version: 10.8.2
+Cflags: -I${includedir}
+Libs: -L${libdir} -larmadillo

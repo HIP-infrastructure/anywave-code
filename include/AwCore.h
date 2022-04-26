@@ -22,7 +22,7 @@ template<class A = QVariantMap>
 void AwUniteMaps(A& map1, const A& map2)
 {
 	auto keys = map2.keys();
-	for (auto k : keys) {
+	for (auto const& k : keys) {
 		if (map1.contains(k)) // do not override any existent key/value
 			continue;
 		map1.insert(k, map2.value(k));

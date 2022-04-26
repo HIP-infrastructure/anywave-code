@@ -32,21 +32,22 @@ public:
 	void runFromCommandLine() override;
 	bool batchParameterCheck(const QVariantMap& args) override;
 private:
-	AwFileIO *m_megReader, *m_eegReader;
 	AwFileIOPlugin *m_megPlugin, *m_eegPlugin;
+	QSharedPointer<AwFileIO> m_megReader, m_eegReader;
 	QString m_eegFile, m_megFile;
 	AwChannelList m_eegChannels;
-//	QString megFile() { return m_megFile; }
-//	void setMEGFile(QString file) { m_megFile = file; }
-//	QString adesFile() { return m_adesFile; }
-//	void setADESFile(QString file) { m_adesFile = file; }
-	bool changeEEGLabelsIn4D(const AwChannelList& eegChannels);
+	QString m_tempDir;
+	QString m_tempMegFile;
+	QString m_tempConfigFile, m_tempMrkFile, m_tempBadFile;
 
+	bool relabel(const QString& megFile, const AwChannelList& eegChannels);
+	bool inject(const QString& megFile, const AwChannelList& eegChannels);
+	bool changeEEGLabelsIn4D(const AwChannelList& eegChannels);
+	bool updateEEGLabelsInConfigAndMEGFiles(const QString& config, const QString& megFile, const AwChannelList& eegChannels);
 	// base on current file position, returns the number of bytes to add to get an aligned position to 8 bytes.
 	void alignFilePointer(QFile& file);
 	qint64 offsetFilePointer(const QFile& file);
-	float swapFloat(float value);
-	void moveResultingFiles(const QString & srcDir, const QString & destDir);
+	void moveResultingFiles(const QString & destDir);
 };
 
 class EEGINTO4D_EXPORT EEGInto4DPlugin : public AwProcessPlugin

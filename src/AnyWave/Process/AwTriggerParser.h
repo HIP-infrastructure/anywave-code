@@ -25,7 +25,9 @@ class AwTriggerParser : public AwProcess
 public:
 	AwTriggerParser();
 	~AwTriggerParser();
-	void run();
+	void detect();
+	void run() override;
+	void runFromCommandLine() override;
 	bool showUi();
 private:
 	AwChannelList m_triggers;

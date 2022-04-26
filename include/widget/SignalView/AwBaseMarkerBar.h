@@ -22,27 +22,31 @@
 #include <QPixmap>
 #define AW_MARKERS_BAR_HEIGHT	20
 class AwDisplayPhysics;
+class AwViewSettings;
 
 class AW_WIDGETS_EXPORT AwBaseMarkerBar : public QFrame
 {
 	Q_OBJECT
 public:
-	AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent = NULL);
+	AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent = nullptr);
 	~AwBaseMarkerBar();
 	QSize sizeHint() const { return QSize(0, AW_MARKERS_BAR_HEIGHT); }
-	enum Types { Classic, Global };
-	void setMode(int mode) {
-		m_mode = mode; m_globalRepaintNeeded = true;  repaint();
-	}
+	//enum Types { Classic, Global };
+	//void setMode(int mode) {
+	//	m_mode = mode; m_globalRepaintNeeded = true;  repaint();
+	//}
 	void setTotalDuration(float dur) { m_totalDuration = dur;  repaint();
 	}
 public slots:
 	void clean();
 	void setPageDuration(float d);
 	void setPositionInFile(float pos);
-	void setMarkers(const AwMarkerList& markers);
+	//void setMarkers(const AwMarkerList& markers);
 	/** setAllMarkers is required for Global mode **/
-	void setAllMarkers(const AwMarkerList& markers);
+	//void setAllMarkers(const AwMarkerList& markers);
+	void refresh();
+	void updateSettings(AwViewSettings* settings, int flags);
+	void setNewSettings(AwViewSettings* settings);
 
 protected slots:
 	void hideMarkers() { emit showMarkersClicked(false); }
@@ -65,16 +69,18 @@ protected:
 	AwMarker *findMarkerBetween(float low, float high);
 
 	AwMarker *m_markerUnderMouse;	// pointer to the current marker under the mouse when the user clicks in the bar. Can be NULL is no marker is under the mouse.
-	AwMarkerList m_markers, m_allMarkers;
+	//AwMarkerList m_markers, m_allMarkers;
+	AwMarkerList m_markers;
 	AwDisplayPhysics *m_physics;
 	bool m_markersShown;
 	float m_pageDuration, m_positionInFile, m_totalDuration;
 	QMenu *m_menu;
-	int m_mode;	// handle two different types of marker bars (0 = classic one, 1 = global file summary)
+//	int m_mode;	// handle two different types of marker bars (0 = classic one, 1 = global file summary)
 	QRectF m_sliderRect;	// Global mode slider
 	float m_xOffset;
 	bool m_sliderDragging, m_globalRepaintNeeded;
 	QPixmap m_globalPixmap;
+	AwViewSettings* m_settings;
 };
 
 #endif

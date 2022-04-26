@@ -18,7 +18,7 @@
 
 AwExtractTriggers::AwExtractTriggers()
 {
-	_maskValue = 8192;
+	_maskValue = 0;
 	_parseNegative = false;
 }
 

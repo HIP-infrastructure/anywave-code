@@ -65,17 +65,6 @@ void AwFilterGUI::apply()
 {
 	if (m_ui.radioOn->isChecked()) { // filters are ON
 		m_settings = static_cast<AwFilterModel *>(m_ui.tableView->model())->settings();
-		// check for bounds 
-		QList<int> res = m_settings.checkForBounds();
-		if (!res.isEmpty()) {
-			QString overBoundsTypes("Current filter settings are beyond the one used to compute ICA/Source channels.\n");
-			overBoundsTypes += QString("Warning on channels:");
-			for (auto i : res)
-				overBoundsTypes += QString("%1 ").arg(AwChannel::typeToString(i));
-			overBoundsTypes += QString("\nProceed anyway?");
-			if (QMessageBox::question(this, tr("Warning"), overBoundsTypes, QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
-				return;
-		}
 		emit applyClicked(m_settings);
 	}
 	else

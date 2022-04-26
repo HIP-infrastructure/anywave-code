@@ -17,7 +17,7 @@
 #include <qfont.h>
 #include <qfontmetrics.h>
 #include <qpainter.h>
-#include <graphics/AwGraphicsObjects.h>
+#include <widget/AwGraphicsObjects.h>
 #include <QGraphicsSceneMouseEvent>
 
 AwLabelItem::AwLabelItem(const QString& text, QGraphicsItem *parent)
@@ -82,3 +82,4 @@ void AwLabelItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 	painter->drawText(m_rect, Qt::AlignCenter, m_label);
 	painter->setRenderHint(QPainter::Antialiasing, false);
 }
+

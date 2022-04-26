@@ -16,7 +16,7 @@
 #include <widget/AwTopoBuilder.h>
 #include <layout/AwLayout.h>
 #include "Aw2DGrid.h"
-#include <graphics/AwColorMap.h>
+#include <widget/AwColorMap.h>
 #include <QImage>
 #include <QPainter>
 #include <QtMath>

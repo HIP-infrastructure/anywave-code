@@ -22,7 +22,6 @@
 #include <QFileDialog>
 #include "AwOpenFileDialog.h"
 #include "IO/BIDS/AwBIDSManager.h"
-#include "Display/AwDisplaySetupManager.h"
 #include "Montage/AwMontageManager.h"
 #include <utils/time.h>
 #include "Marker/AwMarkerManager.h"
@@ -56,15 +55,14 @@ void AnyWave::on_actionOpen_video_triggered()
 	m_player->openFile();
 }
 
- 
-
 //   
 // Save as
 //
 void AnyWave::on_actionSave_as_triggered()
 {
-	AwProcessManager::instance()->startProcess("File Exporter");
+	AwProcessManager::instance()->startProcess("Export");
 }
+
 
 void AnyWave::updateRecentBIDS(const QStringList &files)
 {
@@ -101,18 +99,70 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 }
 
 
+void AnyWave::openFileFromBIDS(const QString& filePath)
+{
+	closeFile();
+	auto dataManager = AwDataManager::instance();
+	auto aws = AwSettings::getInstance();
+
+	int res = dataManager->openFileFromBIDS(filePath);
+	if (res == -1) {
+		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
+		return;
+	}
+	auto reader = dataManager->reader();
+
+	if (reader->flags() & FileIO::TriggerChannelIsWritable)
+		connect(reader, SIGNAL(triggerValuesWritten(bool, int)), this, SLOT(displayReaderTriggerStatus(bool, int)));
+
+	// nouveau fichier ouvert => on remet a zero le saveFileName.
+	m_saveFileName.clear();
+
+	auto fileName = dataManager->value(keys::data_path).toString();
+	m_lastDirOpen = dataManager->value(keys::data_dir).toString();
+
+	// Update Window title
+	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(dataManager->rawChannels().size()));
+	title += tr("Duration: ") + AwUtilities::time::timeToString(dataManager->totalDuration());
+	this->setWindowTitle(title);
+	actionMontage->setEnabled(true);
+	actionSave->setEnabled(true);
+	actionSave_as->setEnabled(true);
+	actionImport_mrk_file->setEnabled(true);
+	actionLoadICA->setEnabled(true);
+	actionLoadBeamFormer->setEnabled(true);
+	actionCreateEpoch->setEnabled(true);
+	actionVisualiseEpoch->setEnabled(true);
+
+	AwProcessManager::instance()->enableMenus();
+	// Activer les QWidgets des toolbars.
+	for (auto widget : m_toolBarWidgets)
+		widget->setEnabled(true);
+
+	// Activer les menus desactives
+	for (auto action : m_actions)
+		action->setEnabled(true);
+
+	if (!dataManager->reader()->triggerChannels().isEmpty()) {
+		if (aws->value(aws::auto_trigger_parsing).toBool()) {
+			AwTriggerParsingDialog dlg;
+			if (dlg.exec() == QDialog::Accepted)
+				AwProcessManager::instance()->startProcess(QString("Trigger Parser"));
+
+			if (dlg.neverAskAgain())
+				aws->setValue(aws::auto_trigger_parsing, false);
+		}
+	}
+	// inform BIDS Manager we have a new current open item
+
+}
+
+
 void AnyWave::openFile(const QString &path)
 {
-	AwFileIOPlugin *iread;
-	QString filter;
 	auto aws = AwSettings::getInstance();
-	//AwDataServer *data_server = AwDataServer::getInstance();
-	AwPluginManager *plugin_manager = AwPluginManager::getInstance();
-	QString filePath = path;
-	QString ext;
 	bool openWithDialog = false;
 
-	// Le fichier actuel est il en mode modifi� ?
 	if (!checkForModified())
 		return;
 
@@ -120,12 +170,14 @@ void AnyWave::openFile(const QString &path)
 		return;
 
 	m_currentFileModified = false;
-	for (auto p : plugin_manager->readers())
-		for (auto e : p->fileExtensions)
-			filter += QString(" %1").arg(e);
-
+	QString filePath = path, ext;
 	// Empty path => open file dialog to pick a file.
 	if (path.isEmpty()) {
+		QString filter;
+		for (auto p : AwPluginManager::getInstance()->readers())
+			for (const auto& e : p->fileExtensions)
+				filter += QString(" %1").arg(e);
+
 		openWithDialog = true;
 		AwOpenFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
 		dlg.setFileMode(QFileDialog::ExistingFile);
@@ -150,15 +202,30 @@ void AnyWave::openFile(const QString &path)
 		ext = ext.toLower();
 	}
 
-	closeFile();
+	if (m_display)
+		m_display->closeFile();
+
 	auto dataManager = AwDataManager::instance();
+	// check if file belongs to a BIDS
+	QString root = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	if (!root.isEmpty()) {
+		openBIDS(root);
+		if (AwBIDSManager::instance()->selectItemFromFilePath(filePath) == 0) {
+			openFileFromBIDS(filePath);
+
+			return;
+		}
+		else {
+			QMessageBox::critical(this, "BIDS error", "The file is not valid for a BIDS", QMessageBox::Discard);
+			return;
+		}
+	}
 	
 	int res = dataManager->openFile(filePath);
 	if (res == -1) {
 		QMessageBox::critical(this, "Error Opening File", dataManager->errorString(), QMessageBox::Discard);
 		return;
 	}
-
 	auto reader = dataManager->reader();
 
 	if (reader->flags() & FileIO::TriggerChannelIsWritable)
@@ -185,14 +252,6 @@ void AnyWave::openFile(const QString &path)
 	actionVisualiseEpoch->setEnabled(true);
 
 	AwProcessManager::instance()->enableMenus();
-
-	// instantiate DisplaySetupManager object
-	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
-	ds->setParent(this);
-
-	if (res == 1) {  // Data Manager just detected a BIDS file
-		openBIDS(dataManager->bidsDir());
-	}
 
 	// Activer les QWidgets des toolbars.
 	for (auto widget : m_toolBarWidgets)
@@ -274,8 +333,15 @@ void AnyWave::openBIDS()
 
 void AnyWave::openBIDS(const QString& path)
 {
+	// check if we try to open an already open BIDS
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->rootDir().toLower() == path.toLower())
+			return;
+	}
+
 	AwBIDSManager::instance()->setRootDir(path);
-	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFile(const QString&)));
+	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFileFromBIDS(const QString&)));
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
 
 	// instantiate dock widget if needed
@@ -359,22 +425,18 @@ void AnyWave::loadBeamformer()
 void AnyWave::on_actionLoadICA_triggered()
 {
 	if (AwMontageManager::instance()->loadICA() == 0) {
-		if (QMessageBox::question(this, tr("Review Topographies"),
-			tr("Do you want to review all IC mappings?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-			reviewComponentsMaps();
+		//if (QMessageBox::question(this, tr("Review Topographies"),
+		//	tr("Do you want to review all IC mappings?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+		//	reviewComponentsMaps();
 		// enable menus
 		actionShow_map_on_signal->setEnabled(true);
 		actionComponentsMaps->setEnabled(true);
 	}
 }
 
-
 void AnyWave::closeFile()
 {
 	// dont stop MATPy Server if anywave was launched with plugin_debug option
-	//auto aws = AwSettings::getInstance();
-	//if (!aws->value(aws::plugin_debug_mode).toBool())
-	//	AwMATPyServer::instance()->stop();	// stop listening to TCP requests.
 	AwSettings::getInstance()->closeFile();
 	if (AwVideoManager::isInstantiated())
 		delete AwVideoManager::instance();
@@ -400,9 +462,10 @@ void AnyWave::closeFile()
 
 	/** ALWAYS Destroy TopoBuilderObject BEFORE cleaning Display. **/
 	AwTopoBuilder::destroy();
-	m_display->closeFile();
+	if (m_display)
+		m_display->closeFile();
+	AwDataManager::instance()->closeFile();
 	AwProcessManager::instance()->closeFile();
-	//AwMarkerManager::instance()->closeFile();
 	m_currentFileModified = false;
 
 	// reset actions to disabled
@@ -424,5 +487,4 @@ void AnyWave::closeFile()
 	}
 #endif
 	AwDebugLog::instance()->closeFile();
-	emit closingFile();
 }

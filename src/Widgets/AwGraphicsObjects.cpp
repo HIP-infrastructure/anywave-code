@@ -131,7 +131,6 @@ AwBaseGraphicsSignalItem::AwBaseGraphicsSignalItem(AwChannel *chan, AwViewSettin
 	m_channel = chan;
 	m_flags = 0;
 	m_plugin = nullptr;
-	m_labelXOffset = 0.;
 }
 
 //

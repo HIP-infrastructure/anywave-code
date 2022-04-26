@@ -118,7 +118,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 			stream << (int)-1 << error;
 			response.send();
 			if (usingFile)
-				reader->plugin()->deleteInstance(reader);
+				//reader->plugin()->deleteInstance(reader);
+				delete reader;
 			return;
 		}
 		else { // now extract specified types.
@@ -132,7 +133,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 				stream << (int)-1 << error;
 				response.send();
 				if (usingFile)
-					reader->plugin()->deleteInstance(reader);
+					//	reader->plugin()->deleteInstance(reader);
+					delete reader;
 				return;
 			}
 		}
@@ -152,7 +154,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 			stream << (int)-1 << error;
 			response.send();
 			if (usingFile)
-				reader->plugin()->deleteInstance(reader);
+				//	reader->plugin()->deleteInstance(reader);
+				delete reader;
 			return;
 		}
 	}
@@ -173,7 +176,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 			stream << (int)-1 << error;
 			response.send();
 			if (usingFile)
-				reader->plugin()->deleteInstance(reader);
+				//	reader->plugin()->deleteInstance(reader);
+				delete reader;
 			return;
 		}
 		requestedChannels = channels;
@@ -223,7 +227,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 				emit log(error);
 				stream << (int)-1 << error;
 				response.send();
-				reader->plugin()->deleteInstance(reader);
+			//	reader->plugin()->deleteInstance(reader);
+				delete reader;
 				return;
 			}
 		}
@@ -237,7 +242,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 				emit log(error);
 				stream << (int)-1 << error;
 				response.send();
-				reader->plugin()->deleteInstance(reader);
+			//	reader->plugin()->deleteInstance(reader);
+				delete reader;
 				return;
 			}
 			else 

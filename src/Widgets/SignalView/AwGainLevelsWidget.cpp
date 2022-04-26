@@ -112,53 +112,6 @@ void AwGainLevelsWidget::buildLayout()
 	setWindowTitle("Gain Levels");
 }
 
-//void AwGainLevelsWidget::getSliderValue(int v)
-//{
-//	// get the slider
-//	QSlider* slider = qobject_cast<QSlider*>(sender());
-//	if (slider == nullptr)
-//		return;
-//	int type = m_widgetsToTypes.value(slider);
-//	auto gl = m_gainLevels->getGainLevelFor(type);
-//	if (gl == nullptr)
-//		return;
-//	if (v >= 0 && v < gl->values().n_elem)
-//		gl->setValue(gl->values()(v));   // will trigger updateGUI()
-//
-//	// update the buddy EditLine
-//	QLineEdit* edit = qobject_cast<QLineEdit *>(m_values.at(m_sliders.indexOf(slider)));
-//	disconnect(edit, nullptr, this, nullptr);
-//	edit->setText(QString("%1").arg(gl->value()));
-//	connect(edit, &QLineEdit::editingFinished, this, &AwGainLevelsWidget::getEditValue);
-//	//// SEND A SIGNAL !!!
-//	emit amplitudeChanged(gl->type, gl->value());
-//}
-
-//void AwGainLevelsWidget::getEditValue()
-//{
-//	QLineEdit *edit = qobject_cast<QLineEdit*>(sender());
-//	if (edit == nullptr)
-//		return;
-//	int type = m_widgetsToTypes.value(edit);
-//	auto gl = m_gainLevels->getGainLevelFor(type);
-//	if (gl == nullptr)
-//		return;
-//	// set the slider buddy
-//	QSlider* slider = qobject_cast<QSlider*>(m_sliders.at(m_values.indexOf(edit)));
-//	disconnect(slider, nullptr, this, nullptr);
-//
-//	float v = edit->text().toFloat();
-//	// find value in scale
-//	int index = gl->getIndexOfValue(v);
-//	if (index == -1)
-//		index = gl->insertNewValue(v);
-//	gl->setValue(v); // will trigger updateGUI()
-//
-//	slider->setValue(index);
-//	connect(slider, &QSlider::valueChanged, this, &AwGainLevelsWidget::getSliderValue);
-//	emit amplitudeChanged(gl->type, gl->value());
-//}
-
 void AwGainLevelsWidget::updateGUI()
 {
 	// get sender type

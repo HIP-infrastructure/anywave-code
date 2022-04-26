@@ -18,7 +18,7 @@
 #include <AwFileIO.h>
 #include <AwProcessInterface.h>
 #include <filter/AwFilterPlugin.h>
-#include <graphics/AwGraphicInterface.h>
+#include <widget/AwGraphicInterface.h>
 #include "Plugin/AwPluginManager.h"
 
 AwPluginDial::AwPluginDial(QWidget *parent)

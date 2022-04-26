@@ -33,6 +33,15 @@
     <Filter Include="matlab_common">
       <UniqueIdentifier>{f2a588f4-7047-4eba-8151-6eee9f004c06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="infomax">
+      <UniqueIdentifier>{fbb59263-43a6-42c0-9e7e-f5cacde3d0d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json">
+      <UniqueIdentifier>{9d1e284f-51c4-4e2b-830b-5732e9c5f8bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fast_ica">
+      <UniqueIdentifier>{9804f0e1-7b39-4a9f-b35c-c49fb3e508cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ica_global.h">
@@ -74,9 +83,6 @@
     <ClInclude Include="sobi\mtimes.h">
       <Filter>sobi</Filter>
     </ClInclude>
-    <ClInclude Include="sobi\sobi_coder.h">
-      <Filter>sobi</Filter>
-    </ClInclude>
     <ClInclude Include="sobi\sobi_coder_data.h">
       <Filter>sobi</Filter>
     </ClInclude>
@@ -89,10 +95,19 @@
     <ClInclude Include="sobi\sobi_coder_types.h">
       <Filter>sobi</Filter>
     </ClInclude>
+    <ClInclude Include="sobi\pca.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sobi_coder_rtwutil.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
     <ClInclude Include="matlab_common\coder_array.h">
       <Filter>matlab_common</Filter>
     </ClInclude>
     <ClInclude Include="matlab_common\pinv.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="matlab_common\rot90.h">
       <Filter>matlab_common</Filter>
     </ClInclude>
     <ClInclude Include="matlab_common\rt_nonfinite.h">
@@ -110,6 +125,72 @@
     <ClInclude Include="matlab_common\svd.h">
       <Filter>matlab_common</Filter>
     </ClInclude>
+    <ClInclude Include="matlab_common\tmwtypes.h">
+      <Filter>matlab_common</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xdhseqr.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xdlanv2.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xnrm2.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xzggbal.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xzhgeqz.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xzlarf.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xzlarfg.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xzlartg.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\xztgevc.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\eigStandard.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sort.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sortAscendLE.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\rt_defines.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\schur.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sqrt.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="sobi\sobi_coder.h">
+      <Filter>sobi</Filter>
+    </ClInclude>
+    <ClInclude Include="infomax\infomax_algo.h">
+      <Filter>infomax</Filter>
+    </ClInclude>
+    <ClInclude Include="infomax\r250.h">
+      <Filter>infomax</Filter>
+    </ClInclude>
+    <ClInclude Include="infomax\randlcg.h">
+      <Filter>infomax</Filter>
+    </ClInclude>
+    <ClInclude Include="fast_ica\ICAFastICA.h">
+      <Filter>fast_ica</Filter>
+    </ClInclude>
+    <ClInclude Include="cca\ICAcca.h">
+      <Filter>cca</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ICASettings.h">
@@ -118,21 +199,21 @@
     <QtMoc Include="ica.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ICAAlgorithm.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="sobi\ICASobi.h">
+      <Filter>sobi</Filter>
+    </QtMoc>
+    <QtMoc Include="infomax\ICAInfomax.h">
+      <Filter>infomax</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ica.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ICASettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="infomax_algo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="r250.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="randlcg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cca\cca.cpp">
@@ -156,9 +237,6 @@
     <ClCompile Include="sobi\mtimes.cpp">
       <Filter>sobi</Filter>
     </ClCompile>
-    <ClCompile Include="sobi\sobi_coder.cpp">
-      <Filter>sobi</Filter>
-    </ClCompile>
     <ClCompile Include="sobi\sobi_coder_data.cpp">
       <Filter>sobi</Filter>
     </ClCompile>
@@ -168,7 +246,16 @@
     <ClCompile Include="sobi\sobi_coder_terminate.cpp">
       <Filter>sobi</Filter>
     </ClCompile>
+    <ClCompile Include="sobi\pca.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sobi_coder_rtwutil.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
     <ClCompile Include="matlab_common\pinv.cpp">
+      <Filter>matlab_common</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab_common\rot90.cpp">
       <Filter>matlab_common</Filter>
     </ClCompile>
     <ClCompile Include="matlab_common\rt_nonfinite.cpp">
@@ -183,8 +270,74 @@
     <ClCompile Include="matlab_common\svd.cpp">
       <Filter>matlab_common</Filter>
     </ClCompile>
-    <ClCompile Include="sobi\run_sobi.cpp">
+    <ClCompile Include="sobi\xdhseqr.cpp">
       <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xdlanv2.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xnrm2.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xzggbal.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xzhgeqz.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xzlarf.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xzlarfg.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xzlartg.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\xztgevc.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\eigStandard.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sort.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sortAscendLE.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\schur.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sqrt.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\sobi_coder.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="ICAAlgorithm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="infomax\ICAInfomax.cpp">
+      <Filter>infomax</Filter>
+    </ClCompile>
+    <ClCompile Include="infomax\infomax_algo.cpp">
+      <Filter>infomax</Filter>
+    </ClCompile>
+    <ClCompile Include="infomax\r250.c">
+      <Filter>infomax</Filter>
+    </ClCompile>
+    <ClCompile Include="infomax\randlcg.c">
+      <Filter>infomax</Filter>
+    </ClCompile>
+    <ClCompile Include="sobi\ICASobi.cpp">
+      <Filter>sobi</Filter>
+    </ClCompile>
+    <ClCompile Include="fast_ica\ICAFastICA.cpp">
+      <Filter>fast_ica</Filter>
+    </ClCompile>
+    <ClCompile Include="cca\ICAcca.cpp">
+      <Filter>cca</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -199,5 +352,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\AnyWave\AnyWave.licenseheader" />
+    <None Include="json\batch.json">
+      <Filter>json</Filter>
+    </None>
   </ItemGroup>
 </Project>

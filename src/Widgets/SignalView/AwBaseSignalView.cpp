@@ -20,6 +20,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QtGlobal>
+#include <AwGlobalMarkers.h>
 
 
 AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags, AwViewSettings *settings)
@@ -28,8 +29,10 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	m_flags = flags;
 	if (settings == nullptr)
 		m_settings = new AwViewSettings(this);
-	else
+	else {
 		m_settings = settings;
+		m_settings->setParent(this);
+	}
 	m_positionInFile = 0;
 	m_pageDuration = 0;
 	m_physics = new AwDisplayPhysics;
@@ -56,9 +59,10 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	setLayout(layout);
 	m_scene->applyNewSettings(m_settings);
 	m_navBar->setNewSettings(m_settings);
+	m_markerBar->setNewSettings(m_settings);
 	if (flags & AwBaseSignalView::NoMarkerBar) {
 		m_markerBar->hide();
-		m_settings->markerBarMode = AwViewSettings::HideMarkerBar;
+		m_settings->showMarkerBar = false;
 	}
 	if (flags & AwBaseSignalView::ViewAllChannels) {
 		m_settings->filters.clear();
@@ -86,18 +90,26 @@ void AwBaseSignalView::setFlags(int flags)
 	m_flags = flags;
 	if (flags & AwBaseSignalView::NoMarkerBar) {
 		m_markerBar->hide();
-		m_settings->markerBarMode = AwViewSettings::HideMarkerBar;
+		m_settings->showMarkerBar = false;
 	}
 	if (flags & AwBaseSignalView::ViewAllChannels) {
 		m_settings->filters.clear();
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 			m_settings->filters << i;
-		//m_settings->filters << AwChannel::EEG << AwChannel::MEG << AwChannel::SEEG << AwChannel::ICA << AwChannel::Source
-		//	<< AwChannel::ECG << AwChannel::EMG << AwChannel::Trigger << AwChannel::Other << AwChannel::GRAD << AwChannel::Reference;
 	}
 	m_navBar->setFlags(flags);
 	if (m_flags & AwBaseSignalView::NoNavBar)
 		m_navBar->setVisible(false);
+}
+
+void AwBaseSignalView::setViewSettings(AwViewSettings* settings)
+{
+	if (m_settings == settings)
+		return;
+	delete m_settings;
+	m_settings = settings;
+	m_settings->setParent(this);
+	updateSettings(m_settings, AwViewSettings::AllFlags);
 }
 
 void AwBaseSignalView::makeConnections()
@@ -116,6 +128,7 @@ void AwBaseSignalView::makeConnections()
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_view, SLOT(layoutItems()));
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_navBar, SLOT(updateNumberOfChannels(int)));
 	connect(m_scene, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));
+	connect(m_scene, &AwGraphicsScene::itemsOrderChanged, this, &AwBaseSignalView::channelsOrderChanged);
 	// cursor specific
 	connect(m_scene, SIGNAL(cursorClickedAtTime(float)), this, SIGNAL(cursorClicked(float)));
 	connect(m_scene, SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
@@ -135,6 +148,7 @@ void AwBaseSignalView::makeConnections()
 
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), m_view, SLOT(updateSettings(AwViewSettings *, int)));
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), m_scene, SLOT(updateSettings(AwViewSettings *, int)));
+	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings*, int)), m_markerBar, SLOT(updateSettings(AwViewSettings*, int)));
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), this, SLOT(updateSettings(AwViewSettings *, int)));
 	connect(m_navBar, SIGNAL(markingStarted()), this, SLOT(startMarking()));
 	connect(m_navBar, &AwNavigationBar::filterButtonClicked, this, &AwBaseSignalView::openFilterGUI);
@@ -199,15 +213,40 @@ void AwBaseSignalView::setTotalDuration(float dur)
 	m_markerBar->setTotalDuration(dur);
 	m_navBar->updatePageDuration(m_view->pageDuration());
 	m_navBar->updatePositionInFile(m_startPosition);
+}
 
+void AwBaseSignalView::setChannels(const QList<QSharedPointer<AwChannel>>& channels)
+{
+	m_channelSharedPtrs.clear();
+	m_scene->clearChannels();
+	m_montageChannels.clear();
+	m_channels.clear();
+	if (channels.isEmpty())
+		return;
+	m_channelSharedPtrs = channels;
+	m_montageChannels = AwChannel::toChannelList(m_channelSharedPtrs);
+	applyGainLevels();
+	applyChannelFilters();
+	m_scene->setChannels(m_channels);
+	reloadData();
 }
 
 void AwBaseSignalView::setChannels(const AwChannelList& channels)
 {
-	m_montageChannels = channels;
-	applyGainLevels();
-	// clear channels present in scene.
+	m_channelSharedPtrs.clear();
 	m_scene->clearChannels();
+	m_montageChannels.clear();
+	m_channels.clear();
+	if (channels.isEmpty())
+		return;
+
+	// DO NOT CLONE channels in BaseSignalView class
+	for (auto c : channels) {
+		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c);
+		m_channelSharedPtrs << shared;
+	}
+	m_montageChannels = AwChannel::toChannelList(m_channelSharedPtrs);
+	applyGainLevels();
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
 	reloadData();
@@ -244,15 +283,6 @@ void AwBaseSignalView::applyChannelFilters()
 void AwBaseSignalView::updatePageDuration(float duration)
 {
 	m_pageDuration = duration;
-	//if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
-	//	float dur = m_pageDuration;
-	//	m_pageDuration = duration;
-	//	if (m_pageDuration > dur)
-	//		reloadData();
-	//}
-	//else {
-	//	reloadData();
-	//}
 	reloadData();
 }
 
@@ -281,15 +311,23 @@ void AwBaseSignalView::updateVisibleMarkers()
 {
 	m_visibleMarkers = AwMarker::intersect(m_markers, m_positionInFile - m_startPosition, m_positionInFile - m_startPosition+ m_pageDuration);
 	m_scene->setMarkers(m_visibleMarkers);
-	m_markerBar->setMarkers(m_visibleMarkers);
+	m_markerBar->refresh();
+}
+
+void AwBaseSignalView::getNewMarkers()
+{
+	auto globals = AwGlobalMarkers::instance();
+	auto list = globals->displayed();
+	if (list == nullptr)
+		return;
+	m_markers = *list;
+	updateVisibleMarkers();
 }
 
 void AwBaseSignalView::setMarkers(const AwMarkerList& markers)
 {
-	if (markers.isEmpty())
-		return;
+	// that should be used in a plugin
 	m_markers = markers;
-	m_markerBar->setAllMarkers(markers);
 	updateVisibleMarkers();
 }
 
@@ -347,16 +385,10 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		else
 			reload = true;
 	}
-
 	if (flags & AwViewSettings::ShowMarkers)
 		m_scene->showMarkers(m_settings->showMarkers);
-	
-	if (flags & AwViewSettings::MarkerBarMode)
-		if (settings->markerBarMode == AwViewSettings::ShowMarkerBar)
-			m_markerBar->show();
-		else
-			m_markerBar->hide();
-
+	if (flags & AwViewSettings::ShowMarkerBar)
+		m_markerBar->setVisible(m_settings->showMarkerBar);
 	if (flags & AwViewSettings::TimeScaleMode) {
 		if (m_settings->timeScaleMode == AwViewSettings::FixedPageDuration) 
 			m_pageDuration = settings->fixedPageDuration;
@@ -368,7 +400,6 @@ void AwBaseSignalView::updateSettings(AwViewSettings *settings, int flags)
 		m_pageDuration = settings->fixedPageDuration;
 		reload = true;
 	}
-
 	if (flags & AwViewSettings::SecPerCm)
 		reload = true;
 	if (reload)
@@ -401,7 +432,7 @@ void AwBaseSignalView::setAmplitudes()
 void AwBaseSignalView::startMarking()
 {
 	QStringList labels;
-	foreach (AwMarker *m, m_markers)
+	for (AwMarker *m : m_markers)
 		if (!labels.contains(m->label()))
 			labels << m->label();
 
@@ -477,8 +508,6 @@ void AwBaseSignalView::setNewFilters(const AwFilterSettings& settings)
 void AwBaseSignalView::openFilterGUI()
 {
 	auto ui = m_filterSettings.ui();
-	if (m_filterSettings.isEmpty())
-		m_filterSettings.initWithChannels(m_channels);
 	ui->show();
 }
 

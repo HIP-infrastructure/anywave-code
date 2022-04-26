@@ -13,15 +13,16 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 	// init table widget
 	m_ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows); 
 	m_ui.tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-	m_ui.tableWidget->setColumnCount(4);
-	QStringList headers = { "Component", "Type", "Current", "Available" };
+	m_ui.tableWidget->setColumnCount(5);
+	QStringList headers = { "Component", "Type", "Current", "Available", "Info."};
 	m_ui.tableWidget->setHorizontalHeaderLabels(headers);
 	m_ui.tableWidget->verticalHeader()->setVisible(false);
 	m_ui.tableWidget->setStyleSheet("QTableView {selection-background-color: green;}");
 	m_ui.tableWidget->horizontalHeader()->setStretchLastSection(true);
 	m_ui.tableWidget->verticalHeader()->hide();
 	int row = 0;
-	for (auto c : m_updateManager->components()) {
+	
+	for (auto const& c : m_updateManager->components()) {
 		int col = 0;
 		if (c->updateAvailable == false)
 			continue;
@@ -29,16 +30,24 @@ AwUpdaterGui::AwUpdaterGui(AwUpdateManager *um, QWidget *parent)
 		auto item = new QTableWidgetItem(c->name);
 		item->setTextAlignment(Qt::AlignVCenter|Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
-		QString type = "core";
-		if (c->type == AwUpdateManager::Plugin)
-			type = "plugin";
-		item = new QTableWidgetItem(type);
+		item = new QTableWidgetItem(c->type);
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
 		item = new QTableWidgetItem(c->installedVersion);
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
 		item = new QTableWidgetItem(c->version);
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		m_ui.tableWidget->setItem(row, col++, item);
+		
+		if (!c->runtime.isEmpty()) {
+			if (c->type == "matlab plugin")
+				item = new QTableWidgetItem(QString("MATLAB %1 required").arg(c->runtime));
+			else if (c->type == "python plugin") 
+				item = new QTableWidgetItem(QString("python packages: %1 required").arg(c->runtime));
+		}
+		else 
+			item = new QTableWidgetItem("None");
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		m_ui.tableWidget->setItem(row, col++, item);
 		row++;

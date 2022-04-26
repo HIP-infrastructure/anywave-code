@@ -16,13 +16,14 @@
 #ifndef AWICASIGNALITEM_H
 #define AWICASIGNALITEM_H
 
-#include <graphics/AwSignalItem.h>
+#include <widget/AwSignalItem.h>
 class AwTopoWidget;
 class AwICARejectButton;
 #include "AwICAChannel.h"
 class AwMapWidget;
 #include <QLabel>
 #include <QAction>
+class AwICAMappingItem;
 
 class AwICASignalItem : public AwSignalItem
 {
@@ -44,6 +45,10 @@ public:
 	void updateRejected(bool rejected);
 	void showMap(bool flag);
 
+	QPainterPath childrenRegion() override;
+	void resolveCollisionWithUpperNeighbor(const QPainterPath& region) override;
+	void updateChildItems() override;
+
 	QList<QAction *> customActions();
 	inline bool is2DMapAvailable() { return m_icaChannel->layout2D() != NULL; }
 	inline bool is3DMapAvailable() { return m_icaChannel->layout3D() != NULL; }
@@ -53,26 +58,25 @@ public slots:
 	void reject();
 	void addComponent();
 	void show3DMap();
+	void openMapUi();
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
-	void hoverMoveEvent(QGraphicsSceneHoverEvent *e);
+	void hoverEnterEvent(QGraphicsSceneHoverEvent *e) ;
+	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e) ;
+	void hoverMoveEvent(QGraphicsSceneHoverEvent *e) ;
+	void mousePressEvent(QGraphicsSceneMouseEvent* e);
 
-	QGraphicsProxyWidget *m_topoProxyWidget;
-	QGraphicsProxyWidget *m_addRejectButtonProxyWidget;
+	AwICAMappingItem* m_mappingItem;
 	QGraphicsProxyWidget *m_labelRejectedProxyWidget;
-	QGraphicsProxyWidget *m_topoSettingsProxyWidget;
-	QPushButton *m_buttonTopoSettings;
 	AwTopoWidget *m_topoWidget;
 	AwMapWidget *m_mapWidget;	// 3D Vtk rendering
-	AwICARejectButton *m_addRejectButton;
 	QLabel *m_labelRejected;	// shows a text indicating that the component was rejected.
 	AwICAChannel *m_icaChannel;
 	bool m_rejected, m_showMap;
 	bool m_mouseOverLabel;
 	bool m_isMapAvailable, m_is2DMapComputed, m_is3DMapComputed;
 	QList<QAction *> m_actions;
+	QPointF m_currentPos, m_newPos;
 };
 
 class AwDisplayPluginICASignalItem : public AwDisplayPlugin

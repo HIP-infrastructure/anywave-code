@@ -115,6 +115,23 @@ AwChannel *AwChannel::duplicate()
 	return newc;
 }
 
+QList<QSharedPointer<AwChannel>> AwChannel::toSharedPointerList(const QList<AwChannel*>& list)
+{
+	AwSharedPointerChannelList res;
+	for (auto channel : list)
+		res << QSharedPointer<AwChannel>(channel);
+
+	return res;
+}
+
+QList<AwChannel*> AwChannel::toChannelList(const QList<QSharedPointer<AwChannel>>& list)
+{
+	AwChannelList res;
+	for (const auto& channel : list)
+		res << channel.get();
+	return res;
+}
+
 QVector<float> AwChannel::toVector()
 {
 	if (m_dataSize == 0)
@@ -442,26 +459,22 @@ QString AwChannel::unitString(int unit)
 {
 	switch (unit) {
 	case AwChannel::microV:
-		return QString::fromLatin1("µV");
+		return QString("µV");
 	case AwChannel::milliV:
-		return QString::fromLatin1("mV");
+		return QString("mV");
 	case AwChannel::picoT:
-		return QString::fromLatin1("pT");
+		return QString("pT");
 	case AwChannel::picoTpermeter:
-		return QString::fromLatin1("pT/m");
+		return QString("pT/m");
 	case AwChannel::V:
-		return QString::fromLatin1("V");
+		return QString("V");
 	case AwChannel::T:
-		return QString::fromLatin1("T");
+		return QString("T");
 	default:
-		return QString::fromLatin1("n/d");
+		return QString("n/d");
 	}
 }
 
-//float AwChannel::defaultAmplitudeForType(int type)
-//{
-//	return DefaultAmplitudeValues.value(type);
-//}
 ///
 ///
 ///
@@ -485,6 +498,18 @@ QList<int> AwChannel::getTypesAsInt(const QList<AwChannel *>& list)
 	return res;
 }
 
+QList<int> AwChannel::getTypesAsInt(const AwSharedChannelList& list)
+{
+	QList<int>  res;
+
+	for (auto c : list) {
+		if (res.contains(c->type()))
+			continue;
+		res << c->type();
+	}
+	return res;
+}
+
 QStringList AwChannel::getTypesAsString(const QList<AwChannel *>& list)
 {
 	QStringList res;
@@ -493,6 +518,16 @@ QStringList AwChannel::getTypesAsString(const QList<AwChannel *>& list)
 		res << AwChannel::typeToString(t);
 	return res;
 }
+
+QStringList AwChannel::getTypesAsString(const AwSharedChannelList& list)
+{
+	QStringList res;
+	QList<int> types = AwChannel::getTypesAsInt(list);
+	for (auto t : types)
+		res << AwChannel::typeToString(t);
+	return res;
+}
+
 
 //
 // Get a copy of channels depending on type from a list.
@@ -504,6 +539,15 @@ QList<AwChannel *> AwChannel::extractChannelsOfType(const QList<AwChannel *>& li
 		if (c->type() == type)
 			res << c->duplicate();
 
+	return res;
+}
+
+AwSharedChannelList AwChannel::extractChannelsOfType(const AwSharedChannelList& list, int type)
+{
+	AwSharedChannelList res;
+	for (const auto c : list)
+		if (c->type() == type)
+			res << c;
 	return res;
 }
 
@@ -524,6 +568,18 @@ QList<AwChannel *> AwChannel::getChannelsOfType(const QList<AwChannel *>& list, 
 {
 	AwChannelList res;
 	foreach(AwChannel *c, list)
+		if (c->type() == type)
+			res << c;
+	return res;
+}
+
+//
+// Get a sub list containing only the channels of the specified type
+// 
+AwSharedChannelList AwChannel::getChannelsOfType(const AwSharedChannelList& list, int type)
+{
+	AwSharedChannelList res;
+	for (auto c : list)
 		if (c->type() == type)
 			res << c;
 	return res;
@@ -571,15 +627,8 @@ QList<AwChannel *> AwChannel::getChannelsWithLabel(const QList<AwChannel *>& lis
 QList<AwChannel *> AwChannel::duplicateChannels(const QList<AwChannel *>& list)
 {
 	AwChannelList res;
-	for (AwChannel *c : list)  {
-		if (c->isVirtual()) {
-			AwVirtualChannel *vc = static_cast<AwVirtualChannel *>(c);
-			res << c->duplicate();
-		}
-		else 
-			res << c->duplicate();
-	}
-
+	for (auto c : list)
+		res << c->duplicate();
 	return res;
 }
 
@@ -601,6 +650,21 @@ QList<AwChannel *> AwChannel::removeDoublons(const QList<AwChannel *>& list)
 {
 	QStringList labels;
 	AwChannelList res;
+	for (auto c : list) {
+		if (!labels.contains(c->name())) {
+			labels << c->name();
+			res << c;
+		}
+	}
+	return res;
+}
+
+AwSharedChannelList AwChannel::removeDoublons(const
+	AwSharedChannelList& list)
+{
+	QStringList labels;
+
+	AwSharedChannelList res;
 	for (auto c : list) {
 		if (!labels.contains(c->name())) {
 			labels << c->name();

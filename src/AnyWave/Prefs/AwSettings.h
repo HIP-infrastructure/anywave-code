@@ -58,10 +58,15 @@ namespace aws {
 	constexpr auto recent_bids = "recent_bids";
 	constexpr auto username = "username";
 	constexpr auto auto_trigger_parsing = "auto_trigger_parsing";
+	constexpr auto markerbar_mode_default = "markerbar_mode_default"; // classic or global mode
 	// python
 	constexpr auto python_exe = "python_exe";
 	constexpr auto python_venv_dir = "python_venv_dir";
 	constexpr auto python_detected = "python_detected";
+	constexpr auto python_use_default = "python_use_default"; // true if using default system python 
+	constexpr auto python_venv_alias = "python_venv_alias"; // name of venv to use
+	constexpr auto python_venv_list = "python_venv_list"; 
+	constexpr auto python_embeded_venv_dir = "python_embeded_venv_dir";
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";
@@ -141,6 +146,7 @@ protected:
 	AwDisplaySetup *m_setup;
 	QSystemTrayIcon *m_sysTrayIcon;
 	AwMatlabInterface *m_matlabInterface;
+	QMap<QString, QString> m_pythonVenvs;
 private:
 	static AwSettings *m_instance;
 };

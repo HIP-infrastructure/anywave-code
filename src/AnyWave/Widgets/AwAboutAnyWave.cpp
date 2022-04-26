@@ -48,9 +48,8 @@ void AwAboutAnyWave::openLicense()
 
 void AwAboutAnyWave::getLatestUpdate()
 {
-	m_um->checkForUpdates(false);
-	//if (!m_um->updatesAvailable()) 
-	//	AwMessageBox::information(this, "Updates", "Everything is up to date.");
+	m_um->checkForUpdates(AwUpdateManager::AllUpdates, false);
+	QDialog::accept();
 }
 
 

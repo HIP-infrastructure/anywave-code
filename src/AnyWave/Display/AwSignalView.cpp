@@ -26,10 +26,10 @@
 #include <AwFileIO.h>
 #include "ICA/AwICAChannel.h"
 #include "Montage/AwMontageManager.h"
-#include "AwDisplaySetupManager.h"
 #include "ICA/AwICAManager.h"
 #include <widget/AwMessageBox.h>
 #include "Data/AwDataManager.h"
+#include <QSharedPointer>
 
 AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent, Qt::WindowFlags windowFlags) :
 	AwBaseSignalView(parent, windowFlags, flags, settings)
@@ -40,24 +40,24 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 	AwScene *scene = new AwScene(m_settings, m_physics, 0);
 	AwGraphicsView *view = new AwGraphicsView(scene, m_settings, m_physics, 0);
 	AwMarkersBar *markBar = new AwMarkersBar(m_physics, this);
-	markBar->setMode(AwBaseMarkerBar::Global);
+//	markBar->setMode(AwBaseMarkerBar::Global);
 	scene->applyNewSettings(m_settings);
-	changeObjects(view, scene, NULL, markBar);
-	AwDisplaySetupManager *dsm = AwDisplaySetupManager::instance();
+	markBar->setNewSettings(m_settings);
+	changeObjects(view, scene, nullptr, markBar);
 	// connections
-	connect(this, SIGNAL(settingsChanged()), dsm, SLOT(saveSettings()));
 	// markers specific
 	AwMarkerManager *mm = AwMarkerManager::instance();
 	connect(m_scene, SIGNAL(markerInserted(AwMarker *)), mm, SLOT(addMarker(AwMarker *)));
+	connect(m_scene, &AwScene::markerRemoved, mm, &AwMarkerManager::removeMarker);
 	connect(m_scene, &AwScene::showMarkerUnderMouse, mm, &AwMarkerManager::highlightMarkerInList);
-	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
+	connect(this, &AwSignalView::channelsOrderChanged, AwMontageManager::instance(), &AwMontageManager::reorderChannels);
+	connect(mm, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), this, SLOT(getNewMarkers()));
 	// filters
 	connect(&dm->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwSignalView::setNewFilters);
 	connect(AwICAManager::instance(), SIGNAL(filteringSwitched(bool)), this, SLOT(reloadData()));
 	m_isActive = false;	// View is not active until AwDisplay set it to Enabled.
 	m_flags = UpdateProcess;	// by default a view will inform process manager that its contents changed.
-
-	// init the view based on current open file
+		// init the view based on current open file
 	if (dm->isFileOpen()) {
 		dm->dataServer()->openConnection(client());
 		setTotalDuration(dm->totalDuration());
@@ -65,18 +65,36 @@ AwSignalView::AwSignalView(AwViewSettings *settings, int flags, QWidget *parent,
 		m_isActive = true;
 		reloadData();
 	}
+
 }
 
 
 AwSignalView::~AwSignalView()
 {
 	AwDataServer::getInstance()->closeConnection(client());
-	// remove virtual channels from main list
-	foreach(AwChannel *c, m_virtualChannels)
-		m_channels.removeAll(c);
+}
 
-	while (!m_montageChannels.isEmpty())
-		delete m_montageChannels.takeFirst();
+void AwSignalView::setChannels(const AwChannelList& channels)
+{
+	m_scene->clearChannels();
+	m_channelSharedPtrs.clear();
+	m_channels.clear();
+	m_montageChannels.clear();
+	if (channels.isEmpty())
+		return;
+
+	for (auto c : channels) {
+		QSharedPointer<AwChannel> shared = QSharedPointer<AwChannel>(c->duplicate());
+		m_channelSharedPtrs << shared;
+	}
+	m_montageChannels = AwChannel::toChannelList(m_channelSharedPtrs);
+	applyGainLevels();
+	if (!m_isActive)
+		return;
+	// Before sending channels to scene, apply filter.
+	applyChannelFilters();
+	m_scene->setChannels(m_channels);
+	reloadData();
 }
 
 void AwSignalView::updatePageDuration(float duration)
@@ -96,15 +114,6 @@ void AwSignalView::reloadData()
 	if (!m_isActive)
 		return;
 	AwBaseSignalView::reloadData();
-}
-
-void AwSignalView::applyNewSetup(AwViewSetup *setup)
-{
-	m_settings = (AwViewSettings *)setup;
-	m_physics->setSecsPerCm(m_settings->secsPerCm);
-	m_navBar->setNewSettings(m_settings);
-	m_view->applySettings(m_settings);
-	m_scene->applyNewSettings(m_settings);
 }
 
 void AwSignalView::updatePositionInFile(float pos)
@@ -171,34 +180,15 @@ void AwSignalView::goToPos(int pos)
 	AwBaseSignalView::goToPos(pos);
 }
 
-void AwSignalView::quit()
-{
-	AwDataServer::getInstance()->closeConnection(client());
-	// clear channels present in scene.
-	m_scene->clearChannels();
-	// destroying the main list.
-	while (!m_montageChannels.isEmpty())
-		delete m_montageChannels.takeFirst();
-}
-
 void AwSignalView::closeFile()
 {
+	m_settings->channelSelection.clear();
+	for (auto c : m_scene->selectedChannels())
+		m_settings->channelSelection << c->fullName();
 	// clear channels present in scene.
 	AwBaseSignalView::clean();
 	m_scene->reset();
-
 	AwDataManager::instance()->dataServer()->closeConnection(client());
-
-	// remove virtual channels from main list
-	foreach (AwChannel *c, m_virtualChannels) {
-		if (m_channels.contains(c))
-			m_channels.removeAll(c);
-	}
-
-	// destroying the main list.
-	while (!m_channels.isEmpty())
-		delete m_channels.takeFirst();
-
 	m_isActive = false;
 }
 
@@ -249,31 +239,11 @@ void AwSignalView::applyChannelFilters()
 {
 	// rebuilt current channel list depending on filters
 	m_channels.clear();
-	for (auto c : m_montageChannels)
+	for (auto c : m_montageChannels) {
 		if (m_settings->filters.contains(c->type()))
 			m_channels << c;
+	}
 }
-
-
-void AwSignalView::setChannels(const AwChannelList& channels)
-{
-	// received new montage.
-	// clear previous channels and duplicates the new ones
-	// clear channels present in scene.
-	m_scene->clearChannels();
-	// copy it
-	while (!m_montageChannels.isEmpty())
-		delete m_montageChannels.takeFirst();
-	m_montageChannels = AwChannel::duplicateChannels(channels);
-	applyGainLevels();
-	if (!m_isActive)
-		return;
-	// Before sending channels to scene, apply filter.
-	applyChannelFilters();
-	m_scene->setChannels(m_channels);
-	reloadData();
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////:
 /// SLOTS

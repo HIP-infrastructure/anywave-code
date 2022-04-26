@@ -12,7 +12,8 @@ public:
 	AwUpdaterGui(AwUpdateManager *, QWidget *parent = nullptr);
 	~AwUpdaterGui();
 
-	inline QList<Component*>& selectedComponents() { return m_selectedComponents; }
+//	inline QList<Component*>& selectedComponents() { return m_selectedComponents; }
+	inline QList<QSharedPointer<Component>>& selectedComponents() { return m_selectedComponents; }
 public slots:
 	void accept() override;
 	void selectAll();
@@ -21,5 +22,6 @@ public slots:
 private:
 	Ui::AwUpdaterGuiUi m_ui;
 	AwUpdateManager* m_updateManager;
-	QList<Component*> m_selectedComponents;
+//	QList<Component*> m_selectedComponents;
+	QList<QSharedPointer<Component>> m_selectedComponents;
 };

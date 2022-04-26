@@ -16,13 +16,13 @@
 #ifndef AW_SCENE_H
 #define AW_SCENE_H
 
-#include <graphics/AwGraphicsObjects.h>
-#include <graphics/AwGraphicInterface.h>
+#include <widget/AwGraphicsObjects.h>
+#include <widget/AwGraphicInterface.h>
 #include <widget/SignalView/AwViewSettings.h>
 #include <widget/SignalView/AwGraphicsScene.h>
-#include <graphics/AwMarkerItem.h>
-#include <graphics/AwCursorItem.h>
-#include <graphics/AwMappingCursorItem.h>
+#include <widget/AwMarkerItem.h>
+#include <widget/AwCursorItem.h>
+#include <widget/AwMappingCursorItem.h>
 
 class AwScene : public AwGraphicsScene
 {

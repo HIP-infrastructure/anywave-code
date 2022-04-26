@@ -27,6 +27,8 @@
 #include <utils/time.h>
 using namespace AwUtilities::time;
 using namespace AwUtilities::gui;
+#include "AwAddVenvDial.h"
+#include "AwPython.h"
 
 AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	: QDialog(parent)
@@ -98,10 +100,15 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	labelMCR->hide();
 	lineEditMCR->hide();
 	buttonSelectMCR->hide();
-    
     editGARDEL->setText(qsettings.value("GARDEL/path").toString());
 	editITK->setText(qsettings.value("ITK-SNAP/path").toString());
 	radioTriggerParserOn->setChecked(aws->value(aws::auto_trigger_parsing).toBool());
+
+	int markerMode = AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt();
+	if (markerMode == 0)
+		radioMarkerGlobal->setChecked(true);
+	else
+		radioMarkerClassic->setChecked(true);
 
 	// COMPILED PLUGIN. Windows do not required environments variables to be set but Linux and Mac OS X do.
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
@@ -111,22 +118,136 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	lineEditMCR->setText(qsettings.value("matlab/mcr_path").toString());
 #endif
 
-	QString python = qsettings.value("py/interpreter", QString()).toString();
-//	if (python.isEmpty()) { // set default path to the interpreter name
-//#ifdef Q_OS_WIN
-//		python = "python.exe";
-//#endif
-//#if defined Q_OS_MAC || defined Q_OS_LINUX
-//		python = "python";
-//#endif
-//		qsettings.setValue("py/interpreter", python);
-//	}
-	lineEditPythonPath->setText(python);
+	bool def = aws->value(aws::python_use_default).toBool();
+	if (def) {
+		radioDefault->setChecked(true);
+		radioDefault->clicked(true);
+	}
+	else {
+		radioVenv->setChecked(true);
+		radioVenv->clicked(true);
+	}
 
+	// init venvs table view
+	m_venvsModel = new QStandardItemModel(0, 3, this);
+	m_venvsModel->setHorizontalHeaderLabels({ "Status", "Alias", "Path" });
+	tableVenvs->setModel(m_venvsModel);
+	connect(buttonAddVenv, &QPushButton::clicked, this, &AwPrefsDial::addPythonVenv);
+	connect(buttonSetAsDefault, &QPushButton::clicked, this, &AwPrefsDial::setSelectedVenvAsDefault);
+	connect(buttonRemove, &QPushButton::clicked, this, &AwPrefsDial::removeSelectedVenv);
+
+	auto header = tableVenvs->horizontalHeader();
+	header->setDefaultAlignment(Qt::AlignHCenter);
+	initVenvTable();
+	setDefaultVenv(aws->value(aws::python_venv_alias).toString());
 	// select tab
 	tabwidget_Prefs->setCurrentIndex(tab);
 }
 
+void AwPrefsDial::addPythonVenv()
+{
+	AwAddVenvDial dlg;
+
+	if (dlg.exec() == QDialog::Accepted) 
+		addVenv(dlg.m_alias, dlg.m_directory);
+}
+
+void AwPrefsDial::setDefaultVenv(const QString& alias)
+{
+	for (int r = 0; r < m_venvsModel->rowCount(); r++) {
+		auto item = m_venvsModel->item(r, 1); 
+		auto checkItem = m_venvsModel->item(r, 0);
+		if (item->text() == alias) {
+			checkItem->setCheckState(Qt::Checked);
+			AwSettings::getInstance()->setValue(aws::python_venv_alias, alias);
+			AwSettings::getInstance()->setValue(aws::python_venv_dir, m_venvsMap.value(alias));
+		}
+		else {
+			checkItem->setCheckState(Qt::Unchecked);
+		}
+	}
+}
+
+void AwPrefsDial::addVenv(const QString& alias, const QString& dir)
+{
+	if (m_venvsMap.contains(alias)) {
+		QMessageBox::information(this, "venv Alias", "an alias with the same name already exists.");
+		return;
+	}
+	// we assume here dir is really a venv dir (not checking that here)
+	m_venvsMap.insert(alias, dir);
+	auto checkItem = new QStandardItem("active");
+	checkItem->setCheckable(true);
+	checkItem->setCheckState(Qt::Checked);
+	int row = m_venvsModel->rowCount();
+	m_venvsModel->setItem(row, 0, checkItem);
+	m_venvsModel->setItem(row, 1, new QStandardItem(alias));
+	m_venvsModel->setItem(row, 2, new QStandardItem(dir));
+
+	setDefaultVenv(alias);
+}
+
+
+void AwPrefsDial::initVenvTable()
+{
+	m_venvsModel->removeRows(0, m_venvsModel->rowCount());
+	QStringList venvs = AwSettings::getInstance()->value(aws::python_venv_list).toStringList();
+
+	// detect if we are running a version containing anywave venv
+	AwPython python;
+	auto pySettings = python.detect(AwSettings::getInstance()->value(aws::python_embeded_venv_dir).toString());
+	if (pySettings.isDetected()) {
+		// always set the default venv
+		auto checkItem = new QStandardItem("active");
+		checkItem->setCheckable(true);
+		checkItem->setCheckState(Qt::Checked);
+		m_venvsModel->setItem(0, 0, checkItem);
+		m_venvsModel->setItem(0, 1, new QStandardItem("anywave"));
+		m_venvsModel->setItem(0, 2, new QStandardItem("embedded"));
+	}
+
+	if (!venvs.isEmpty()) {
+		int row = 1, col = 0;
+		for (auto const& v : venvs) {
+			auto splitted = v.split("::");
+			if (splitted.size() == 2) {
+				m_venvsMap.insert(splitted.first(), splitted.last());
+				auto check = new QStandardItem("active");
+				check->setCheckable(true);
+				check->setCheckState(Qt::Checked);
+				m_venvsModel->setItem(row, col++, check);
+				m_venvsModel->setItem(row, col++, new QStandardItem(splitted.first()));
+				m_venvsModel->setItem(row++, col, new QStandardItem(splitted.last()));
+				col = 0;
+			}
+		}
+	}
+}
+
+
+void AwPrefsDial::setSelectedVenvAsDefault()
+{
+	QModelIndexList selection = tableVenvs->selectionModel()->selectedRows();
+	if (selection.isEmpty())
+		return;
+	auto const& selected = selection.first();
+	setDefaultVenv(m_venvsModel->item(selected.row(), 1)->text());
+}
+
+void AwPrefsDial::removeSelectedVenv()
+{
+	QModelIndexList selection = tableVenvs->selectionModel()->selectedRows();
+	if (selection.isEmpty())
+		return;
+	auto const& selected = selection.first();
+	// DO NOT REMOVE anywave embedded venv
+	if (selected.row() == 0)
+		return;
+	m_venvsMap.remove(m_venvsModel->item(selected.row(), 1)->text());
+	m_venvsModel->removeRow(selected.row());
+	// fall back to default anywave venv as the active one
+	setDefaultVenv("anywave");
+}
 
 void AwPrefsDial::changeEvent(QEvent *e)
 {
@@ -146,7 +267,6 @@ void AwPrefsDial::pickMatlabFolder()
 		lineEditMatlabPath->setText(folder);
 	}
 }
-
 
 void AwPrefsDial::accept()
 {
@@ -181,14 +301,6 @@ void AwPrefsDial::accept()
 	
 	saveTimeHMS(radioHMSOn->isChecked());
 	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
-
-	QString pythonPath = lineEditPythonPath->text();
-	if (!pythonPath.isEmpty()) {
-		if (detectPython(pythonPath))
-			qsettings.setValue("py/interpreter", pythonPath);
-	}
-//qsettings.setValue("py/interpreter", lineEditPythonPath->text());
-
 	// if matlab path is empty => consider not using MATLAB plugins anymore.
 	// On Mac and Linux that will be done by deleting the matlab.sh script
 	if (lineEditMatlabPath->text().isEmpty()) {
@@ -237,6 +349,27 @@ void AwPrefsDial::accept()
 	// auto detect triggers
 	qsettings.setValue("Preferences/autoTriggerParsing", radioTriggerParserOn->isChecked());
 	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
+
+	int markerMode = 0;
+	if (!radioMarkerGlobal->isChecked()) 
+		markerMode = 1;
+	qsettings.setValue("general/markerbar_mode", markerMode);
+	aws->setValue(aws::markerbar_mode_default, markerMode);
+
+	// save python settings
+	qsettings.setValue("python/use_default", radioDefault->isChecked());
+	qsettings.setValue("python/venv_alias", AwSettings::getInstance()->value(aws::python_venv_alias));
+	qsettings.setValue("python/venv_dir", AwSettings::getInstance()->value(aws::python_venv_dir));
+	if (!m_venvsMap.isEmpty()) {
+		qsettings.beginWriteArray("venvs");
+		auto const& keys = m_venvsMap.keys();
+		for (int i = 0; i < keys.size(); i++) {
+			qsettings.setArrayIndex(i);
+			QString value = QString("%1::%2").arg(keys.at(i)).arg(m_venvsMap.value(keys.at(i)));
+			qsettings.setValue("venv", value);
+		}
+		qsettings.endArray();
+	}
 	QDialog::accept();
 }
 
@@ -384,65 +517,6 @@ QString AwPrefsDial::fontToLabel(const QFont &font)
 	return res;
 }
 
-bool AwPrefsDial::detectPython(const QString& path)
-{
-#ifdef Q_OS_WIN
-	QString venvDir = "Scripts";
-#else
-	QString venvDir = "bin";
-#endif
-	QDir dir(path);
-	// search for a virtual env
-	QString tmp = path + "/";
-	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	if (dirs.contains(venvDir)) {
-		tmp += venvDir;
-		// find activate script and python exe
-		QDir subDir(tmp);
-		QStringList files = subDir.entryList(QDir::Files);
-		bool ok = false;
-#ifdef Q_OS_WIN
-		ok = files.contains("activate.bat") && files.contains("python.exe");
-#else
-		ok = files.contains("activate") && files.contains("python");
-#endif
-		if (ok) {
-			// found a venv
-			QSettings qsettings;
-			qsettings.setValue("general/python_venv", path);
-			AwSettings::getInstance()->setValue(aws::python_venv_dir, path);
-			QString pyExec;
-#ifdef Q_OS_WIN
-			pyExec = subDir.absoluteFilePath("python.exe");
-#else
-			pyExec = subDir.absoluteFilePath("python");
-#endif
-			qsettings.setValue("general/python_interpreter", pyExec);
-			AwSettings::getInstance()->setValue(aws::python_exe, pyExec);
-			return true;
-		}
-	}
-	else {  // venv not found, check for interpreter path
-		QStringList files = dir.entryList(QDir::Files);
-		QSettings qsettings;
-#ifdef Q_OS_WIN
-		if (files.contains("python.exe")) {
-			qsettings.setValue("general/python_venv", QString());
-			qsettings.setValue("general/python_interpreter", dir.absoluteFilePath("python.exe"));
-			return true;
-		}
-#else
-		if (files.contains("python")) {
-			qsettings.setValue("general/python_venv", QString());
-			qsettings.setValue("general/python_interpreter", dir.absoluteFilePath("python"));
-			return true;
-		}
-#endif
-	}
-
-	return false;
-}
-
 void AwPrefsDial::changeCursorFontText(const QFont &font)
 {
 	QString label = fontToLabel(font);
@@ -477,21 +551,6 @@ void AwPrefsDial::pickGARDEL()
 		return;
 	editGARDEL->setText(path);
 }
-
-
-void AwPrefsDial::pickPython()
-{
-	QFileDialog dlg;
-	auto dir = dlg.getExistingDirectory(this, "Select the virtual env folder or your Python installation folder");
-	if (dir.isEmpty())
-		return;
-	if (!detectPython(dir)) {
-		QMessageBox::information(this, "Python", "No python environment found.");
-		return;
-	}
-	lineEditPythonPath->setText(dir);
-}
-
 
 void AwPrefsDial::pickMCRFolder()
 {

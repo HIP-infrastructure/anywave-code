@@ -277,6 +277,7 @@ void AwComponents::createUserDirs()
 	QString appPluginPath;
 	auto appPath = appDir.absolutePath();
 	aws->setValue(aws::app_dir, appPath);
+	aws->setValue(aws::plugins_dir, homeDir +  "/Plugins");
 #ifdef Q_OS_MAC
 	// set python module path on mac it's in the application bundle
 	aws->setValue(aws::matlab_API_dir, appPath + "/../matlab");

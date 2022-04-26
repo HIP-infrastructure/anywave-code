@@ -64,16 +64,14 @@ void AwMontageToolBar::updateQuickMontages()
 	m_menu.clear();
 	QStringList montages = m_mm->quickMontages();
 
-	foreach (QString s, montages)
-	{
+	for (auto const& s : montages)	{
 		QAction *act = m_menu.addAction(s);
 		connect(act, SIGNAL(triggered()), this, SLOT(loadQuickMontage()));
 	}
 
 	// add local montages
 	QStringList localMontages = m_mm->localQuickMontages();
-	foreach (QString s, localMontages)
-	{
+	for (auto const& s : localMontages)	{
 		QAction *act = m_menu.addAction(s);
 		connect(act, SIGNAL(triggered()), this, SLOT(loadQuickMontage()));
 	}

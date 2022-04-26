@@ -224,7 +224,8 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	QFile jsonFile(json);
 	if (!jsonFile.open(QIODevice::WriteOnly)) {
 		emit log(QString("Could no create %1").arg(json));
-		reader->plugin()->deleteInstance(reader);
+		//reader->plugin()->deleteInstance(reader);
+		delete reader;
 		return -1;
 	}
 	jsonFile.write(doc.toJson());
@@ -255,7 +256,8 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	jsonFile.setFileName(QString("%1_coordsystem.json").arg(baseName));
 	if (!jsonFile.open(QIODevice::WriteOnly)) {
 		emit log(QString("Could no create %1").arg(json));
-		reader->plugin()->deleteInstance(reader);
+		//reader->plugin()->deleteInstance(reader);
+		delete reader;
 		return -1;
 	}
 	jsonFile.write(doc.toJson());
@@ -330,7 +332,8 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	QTextStream stream(&channel);
 	if (!channel.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		emit log("Could no create channels.tsv");
-		reader->plugin()->deleteInstance(reader);
+		//reader->plugin()->deleteInstance(reader);
+		delete reader;
 		return -1;
 	}
 	for (int i = 0; i < headers.size(); i++) {
@@ -553,7 +556,8 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 		}
 		catch (const AwException& e) {
 			emit log(QString("Error during file conversion: %1").arg(e.errorString()));
-			reader->plugin()->deleteInstance(reader);
+		//	reader->plugin()->deleteInstance(reader);
+			delete reader;
 			AW_DESTROY_LIST(markers);
 			return -1;
 		}
@@ -638,7 +642,8 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 	else {
 		emit log("Could no create channels.tsv");
-		reader->plugin()->deleteInstance(reader);
+	//	reader->plugin()->deleteInstance(reader);
+		delete reader;
 		return -1;
 	}
 
@@ -680,11 +685,13 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	}
 	else {
 		emit log(QString("Could no create %1").arg(json));
-		reader->plugin()->deleteInstance(reader);
+	//	reader->plugin()->deleteInstance(reader);
+		delete reader;
 		return -1;
 	}
 
-	reader->plugin()->deleteInstance(reader);
+//	reader->plugin()->deleteInstance(reader);
+	delete reader;
 	emit log("SEEG to BIDS conversion done.");
 	return 0;
 }
@@ -738,13 +745,15 @@ int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const Q
 	writer->infos.setISODate(reader->infos.isoDate());
 
 	if (writer->createFile(file) != AwFileIO::NoError) {
-		plugin->deleteInstance(writer);
+		//plugin->deleteInstance(writer);
+		delete writer;
 		throw(AwException(writer->errorMessage(), "BIDSManager::convertFile"));
 		return -1;
 	}
 
 	writer->writeData(&channels);
 	writer->cleanUpAndClose();
-	plugin->deleteInstance(writer);
+	//plugin->deleteInstance(writer);
+	delete writer;
 	return 0;
 }

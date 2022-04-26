@@ -14,7 +14,7 @@
     <ProjectGuid>{D5A9C240-7BD8-4534-A38F-41F53F3F921B}</ProjectGuid>
     <Keyword>QtVS_v303</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
     <ProjectName>MexGetProperties</ProjectName>
   </PropertyGroup>
@@ -51,10 +51,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2020b\extern\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\MATLAB\R2021a\extern\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2020b\extern\lib\win64\microsoft;$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2021a\extern\lib\win64\microsoft;$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)\aw_getproperties.mexw64</OutputFile>
       <AdditionalDependencies>$(Qt_LIBS_);MexCommon.lib;libmx.lib;libmat.lib;libmex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>../configure.def</ModuleDefinitionFile>
@@ -66,7 +66,7 @@
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>5.15_static</QtInstall>
+    <QtInstall>5.15.0_static</QtInstall>
     <QtModules>core;network</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>

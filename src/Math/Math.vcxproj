@@ -24,6 +24,7 @@
     <ClCompile Include="AwMath.cpp" />
     <ClCompile Include="AwPWelch.cpp" />
     <ClCompile Include="AwSpline2D.cpp" />
+    <ClCompile Include="pca.cpp" />
     <ClCompile Include="psd.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -48,20 +48,21 @@ public:
 	void clearChannels();
 	void updateSignals();
 	void setQTSPlugins(const QStringList& plugins);
-	
 	virtual void reset(); // reset scene to start position and update contents and page duration;
 	virtual void setPositionInFile(float pos);
 	virtual void setChannels(AwChannelList& channels);
 	virtual void applyNewSettings(AwViewSettings *settings);
 	virtual void updateMarkers();
 	virtual void refresh();
-
 	/* add a new cursor referenced by a name. Default color is red. */
 	AwCursorItem *addCursor(const QString& name, const QString& color = "#FF0000", float width = 2.);
 	void removeCursor(const QString& name);
 	void setCursorPosition(const QString& cursorName, float posInFile, float position);
-
 	void addCustomContextMenu(QMenu* menu, int condition);
+	// moving items handling
+	void reorderItems();
+	void setItemsMoved() { m_itemsHaveMoved = true; }
+	void setItemsDragged() { m_itemsDragged = true; }
 signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
@@ -83,6 +84,10 @@ signals:
 	void QTSModeEnded();
 	// markers
 	void showMarkerUnderMouse(AwMarker *marker);
+	void markerRemoved(AwMarker* marker);
+	// signal items reordering
+	void itemsOrderChanged(const QStringList& labels);
+	// view
 	void closeViewClicked();
 public slots:
 	void updateSignalItemSelection(AwGraphicsSignalItem *item, bool selected);
@@ -146,6 +151,7 @@ protected slots:
 	void gotoChannel(QAction *act);
 	void launchQTSPlugin();
 	void insertPredefinedMarker();
+	void undoMarkerInsertion();
 protected:
 	float timeAtPos(const QPointF& pos);
 	float xPosFromTime(float time);
@@ -153,6 +159,7 @@ protected:
 	virtual QMenu *defaultContextMenu();
 	void updateGotoChannelMenu(const QStringList& labels);
 	void clearMarkers();
+	void displayMarkers();
 	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = NULL, int offsetLabel = 0);
 
 	void keyPressEvent(QKeyEvent *e);
@@ -171,6 +178,7 @@ protected:
 	AwMarkerList m_selectedMarkers;			// current selected markers
 	AwMarkerList m_markers;	// current markers in the scene
 	AwMarker m_mappingMarker;	// marker used to store the current mapping position and duration
+	AwMarkerList m_lastAddedMarkers;
 	QList<AwGraphicsMarkerItem*> m_markerItemsDisplayed;
 	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;
@@ -190,8 +198,8 @@ protected:
 	QRectF m_sceneRect;
 	QGraphicsRectItem *m_selectionRectangle;
 	QPointF m_mousePressedPos;
-	bool m_mousePressed;
-	bool m_selectionIsActive;
+	bool m_mousePressed, m_itemsHaveMoved, m_itemsDragged;
+	bool m_selectionIsActive, m_draggingItems;
 	bool m_isTimeSelectionStarted;
 	AwMarkingSettings *m_markingSettings;
 	AwDisplayPluginSignalItem m_signalItemPlugin;

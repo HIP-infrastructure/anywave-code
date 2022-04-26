@@ -151,6 +151,7 @@
      <string>About</string>
     </property>
     <addaction name="actionAbout_AnyWave"/>
+    <addaction name="actionView_Change_Log"/>
    </widget>
    <widget class="QMenu" name="menuProcesses">
     <property name="title">
@@ -159,6 +160,7 @@
     <addaction name="actionCreate_batch_script"/>
     <addaction name="separator"/>
     <addaction name="actionCreate_new_MATLAB_plugin"/>
+    <addaction name="actionCheck_for_available_plugins"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -492,6 +494,21 @@
   <action name="actionCreate_new_Python_plugin">
    <property name="text">
     <string>Create new Python plugin</string>
+   </property>
+  </action>
+  <action name="actionCheck_for_available_plugins">
+   <property name="text">
+    <string>Check for available plugins</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>&amp;Export</string>
+   </property>
+  </action>
+  <action name="actionView_Change_Log">
+   <property name="text">
+    <string>View Change Log</string>
    </property>
   </action>
  </widget>

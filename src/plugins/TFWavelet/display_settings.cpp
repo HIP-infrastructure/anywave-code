@@ -1,5 +1,5 @@
 #include "display_settings.h"
-#include <graphics/AwColorMap.h>
+#include <widget/AwColorMap.h>
 
 DisplaySettings::DisplaySettings()
 {

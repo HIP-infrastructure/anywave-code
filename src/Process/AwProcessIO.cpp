@@ -22,7 +22,6 @@ AwProcessIO::~AwProcessIO()
 {
 	clearMarkers();
 	clearChannels();
-	AW_DESTROY_LIST(m_modifiedMarkers);
 }
 
 bool AwProcessIO::isEmpty()
@@ -49,12 +48,18 @@ void AwProcessIO::setReader(AwFileIO* reader)
 
 void AwProcessIO::setNewChannels(const AwChannelList& channels, bool duplicate)
 {
-	while (!m_channels.isEmpty())
-		delete m_channels.takeFirst();
+	m_channels.clear();
 	if (channels.isEmpty())
 		return;
-	m_channels = duplicate ? AwChannel::duplicateChannels(channels) : channels;
+	m_channels = duplicate ? AwChannel::toSharedPointerList(AwChannel::duplicateChannels(channels)) 
+		: AwChannel::toSharedPointerList(channels);
 }
+
+void AwProcessIO::setNewChannels(const AwSharedChannelList& channels)
+{
+	m_channels = channels;
+}
+
 
 void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
 {
@@ -73,7 +78,8 @@ void AwProcessIO::setModifiedMarkers(const AwMarkerList& markers)
 
 void AwProcessIO::addChannels(const AwChannelList& channels, bool duplicate)
 {
-	m_channels += duplicate ? AwChannel::duplicateChannels(channels) : channels;
+	m_channels += duplicate ? AwChannel::toSharedPointerList(AwChannel::duplicateChannels(channels))
+		: AwChannel::toSharedPointerList(channels);
 }
 
 void AwProcessIO::addMarkers(const AwMarkerList& markers, bool duplicate)
@@ -88,7 +94,7 @@ void AwProcessIO::addMarker(AwMarker *marker)
 
 void AwProcessIO::addChannel(AwChannel *channel)
 {
-	m_channels << channel;
+	m_channels << QSharedPointer<AwChannel>(channel);
 }
 
 void AwProcessIO::addWidget(QWidget* widget)
@@ -101,7 +107,8 @@ void AwProcessIO::addWidget(QWidget* widget)
 
 void AwProcessIO::clearChannels()
 {
-	AW_DESTROY_LIST(m_channels);
+	//AW_DESTROY_LIST(m_channels);
+	m_channels.clear();
 }
 
 void AwProcessIO::clearMarkers()

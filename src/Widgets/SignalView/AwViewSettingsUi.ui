@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>859</width>
-    <height>504</height>
+    <width>945</width>
+    <height>585</height>
    </rect>
   </property>
   <property name="font">
@@ -32,8 +32,8 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QGridLayout" name="gridLayout_6">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -44,7 +44,7 @@
      <property name="title">
       <string>Display settings</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_7">
+     <layout class="QGridLayout" name="gridLayout_6">
       <item row="0" column="0">
        <widget class="QGroupBox" name="Grid">
         <property name="sizePolicy">
@@ -163,33 +163,14 @@
          <string>Channels</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="2" column="0" colspan="3">
-          <widget class="QCheckBox" name="checkChanName">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="checkEEGDisplay">
            <property name="text">
-            <string>Show label</string>
+            <string>EEG display mode</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="0" colspan="2">
-          <widget class="QCheckBox" name="checkOverlay">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Stack traces</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" colspan="3">
+         <item row="0" column="0" colspan="2">
           <widget class="QCheckBox" name="checkLimit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -206,6 +187,45 @@
           <widget class="QLabel" name="label">
            <property name="text">
             <string>Max. channels:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="checkChanName">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Show label</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="checkBaseLine">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Show zero line</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QCheckBox" name="checkOverlay">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Stack traces</string>
            </property>
           </widget>
          </item>
@@ -228,39 +248,6 @@
            </property>
            <property name="value">
             <number>40</number>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="QCheckBox" name="checkBaseLine">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Show zero line</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>122</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="5" column="0">
-          <widget class="QCheckBox" name="checkEEGDisplay">
-           <property name="text">
-            <string>EEG display</string>
            </property>
           </widget>
          </item>
@@ -293,6 +280,25 @@
            <property name="text">
             <string>Visible</string>
            </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroupMarkerBarVisible</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="radioGlobalMode">
+           <property name="text">
+            <string>Global mode</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroupMarkerBarMode</string>
+           </attribute>
           </widget>
          </item>
          <item row="1" column="0">
@@ -306,6 +312,19 @@
            <property name="text">
             <string>Hidden</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroupMarkerBarVisible</string>
+           </attribute>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QRadioButton" name="radioClassicMode">
+           <property name="text">
+            <string>Classic mode</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">buttonGroupMarkerBarMode</string>
+           </attribute>
           </widget>
          </item>
         </layout>
@@ -385,7 +404,7 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -442,7 +461,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <spacer name="horizontalSpacer">
@@ -586,4 +605,8 @@
    </hints>
   </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="buttonGroupMarkerBarVisible"/>
+  <buttongroup name="buttonGroupMarkerBarMode"/>
+ </buttongroups>
 </ui>

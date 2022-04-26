@@ -62,8 +62,8 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwWidgetsLibd.lib;AwUtilitieslibd.lib;AwMatlablibd.lib;qwtd.lib;qcustomplotlib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\qcustomplot\lib\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCoreLibd.lib;AwProcessLibd.lib;AwWidgetsLibd.lib;AwUtilitieslibd.lib;AwMatlablibd.lib;qcustomplotd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -71,8 +71,8 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\armadillo\include;$(SolutionDir)\include;$(SolutionDir)\sigpack;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\lib;$(EXTRA_LIBS)\qcustomplot\lib\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwWidgetsLib.lib;AwUtilitieslib.lib;AwMATLABLib.lib;qcustomplotlib.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AwCoreLib.lib;AwProcessLib.lib;AwWidgetsLib.lib;AwUtilitieslib.lib;AwMATLABLib.lib;qcustomplot.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">

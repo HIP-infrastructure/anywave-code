@@ -47,9 +47,8 @@ public:
 	/** Retourne la liste des objets AwChannel du montage courant **/
 	AwChannelList& channels();
 	/** Retourne la liste des AwChannels AsRecorded **/
-	AwChannel * asRecordedChannel(const QString& name) { return m_asRecorded.value(name); }
-	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
-	QHash<QString, AwChannel *> cloneAsRecordedChannels();
+	AwChannel* asRecordedChannel(const QString& name) { return m_asRecordedSharedPointerMap.value(name).get(); }
+	AwChannelList asRecordedChannels() { return AwChannel::toChannelList(m_asRecordedSharedPointerMap.values()); }
 
 	/** Get instance pointer **/
 	static AwMontageManager *instance();
@@ -79,7 +78,7 @@ public:
 	/** Save current montage to specified fileName **/
 	bool save(const QString& fileName);
 	/** Save a list of channels as montage. **/
-	bool save(const QString& fileName, const AwChannelList& channels);
+	bool save(const QString& fileName, const AwChannelList& channels, const AwChannelList& asRecordedChannels = AwChannelList());
 	/** Get path to user created montages **/
 	inline QString& path() { return m_path; }
 	/** Get labels of sensors marked as bad. **/
@@ -134,9 +133,12 @@ public slots:
 	void setChannels(AwChannelList& channels) { m_channels = channels; }
 	/** Add source channels into current montage **/
 	void addNewSources(int type);
+	/** reorder montage when the user has moved signals in views **/
+	void reorderChannels(const QStringList& labels);
 private:
-	QHash<QString, AwChannel *> m_asRecorded;
+	QMap<QString, QSharedPointer<AwChannel>> m_asRecordedSharedPointerMap;
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.
+	QList<QSharedPointer<AwChannel>> m_channelsShrdPtrs;
 
 	// ICA/Source specific	
 	AwICAChannelList m_icaAsRecorded;				///< Copy of ICA channels inserted is m_asRecorded.

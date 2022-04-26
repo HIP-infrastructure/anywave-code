@@ -25,6 +25,7 @@
 #include <AwChannel.h>
 #include <QSplitter>
 #include "AwSignalView.h"
+#include "AwDisplaySetup.h"
 
 class AwMarkerManager;
 class AwDisplaySetup;
@@ -55,7 +56,7 @@ public:
 	void quit();
 	void setAddMarkerDock(QDockWidget *dock);
 
-	AwSignalView *addSignalView(AwViewSetup *setup);	// Add a new SignalView 
+	AwSignalView* addSignalView(AwViewSettings* settings);
 	AwChannelList displayedChannels();	// Return the channels currently displayed in the views
 	static AwDisplay *instance();
 	static void setInstance(AwDisplay *d);
@@ -64,7 +65,6 @@ public:
 private:
 	QDockWidget *m_dockAddMarker;
 	FileType fileType;
-	AwDisplaySetup *m_setup;
 	AwGainLevels* m_gainLevels;
 	QMainWindow *m_mainWindow;
 	QList<AwSignalView *> m_signalViews;	// The views displayed.
@@ -78,9 +78,13 @@ private:
 	QScreen *m_screen;
 #endif
 	static AwDisplay *m_instance;
+	AwDisplaySetup m_displaySetup;
 
-	void saveChannelSelections();
-	void loadChannelSelections();
+	void loadViewSettings();
+	void saveViewSettings();
+	void removeView(int index);
+	void updateGUI(); // after loading new display setup
+
 signals:
 	void newMarker(float pos, float duration);
 	void selectedChannelsChanged(const AwChannelList& selection);
@@ -88,13 +92,12 @@ signals:
 	void clickedAtLatency(float latency);
 	void displayedChannelsChanged(const AwChannelList &channels);
 	void resetMarkerMode();
-	void setupChanged(AwDisplaySetup *setup, int flags);
+	void newDisplaySetupLoaded(AwDisplaySetup*);
 	void mappingTimeSelectionDone(float pos, float duration);
 	void draggedCursorPositionChanged(float pos);
 	void QTSModeEnded();
 public slots:
 	void processEvent(QSharedPointer<AwEvent>);
-	void updateSetup(AwDisplaySetup *setup, int flags);
 	void executeCommand(int command, const QVariantList& args);
 	void handleCommand(const QVariantMap& map);
 	void synchronizeMappingCursorPos(float position);
@@ -102,6 +105,7 @@ public slots:
 	void removeView();
 	void alignViewsVerticaly();
 	void alignViewsHorizontaly();
+	void setSynchronized(bool flag) { m_displaySetup.setSynchronized(flag); }
 	void synchronizeViews(float position);
 	void synchronizeOnCursor(float position);	// reposition the views based on the cursor position from a particular view.
 	void setCursorPosition(float position);     // change the cursor position in the view. Can make the view change its position.
@@ -123,8 +127,6 @@ public slots:
 	void addVirtualChannels(AwChannelList *channels);
 	/** remove custom channels **/
 	void removeVirtualChannels(AwChannelList *channels);
-	/** remove ICA channels from views **/
-	void removeICAChannels();
 	void setChannels(const AwChannelList& montage);
 	/** processHasFinished -
 	recoit les messages de fin de process de tous les plugins de type Display actifs sur l'affichage courant **/ 
@@ -132,7 +134,6 @@ public slots:
 	void addMarkerModeChanged(bool on);
 	void cursorModeChanged(bool on);
 	void setQTSMode(bool on);
-	void changeCurrentSetup(AwDisplaySetup *newSetup);
 	/** Updates markers color **/
 	void updateMarkersColor(const QStringList& colors);
 	void updateDisplay();

@@ -19,25 +19,16 @@
 
 class AwFilterGUI;
 
-class AW_FILTER_EXPORT AwFilterBounds
-{
-public:
-	explicit AwFilterBounds(int t = 0, float hp = 0., float lp = 0.);
-	AwFilterBounds& operator=(const AwFilterBounds& other);
-
-	int type;
-	float bounds[2];
-};
-
 class AW_FILTER_EXPORT AwFilterSettings : public QObject
 {
 	Q_OBJECT
 public:
-	AwFilterSettings();
+	AwFilterSettings(bool noInit = false);
 	AwFilterSettings(const AwFilterSettings& copy);
 
 	~AwFilterSettings();
 	AwFilterSettings& operator=(const AwFilterSettings& other);
+
 	/** clean up all filter settings and bounds **/
 	void clear();
 	/** set filters for a specified type of channel **/
@@ -47,31 +38,23 @@ public:
 	/** set filters for a specified type of channel **/
 	void set(int type, float hp, float lp, float notch);
 	/** set bounds for a specified type of channel **/
-	void setBounds(int type, const QVector<float>& values);
-	void setBounds(int type, float hp, float lp);
-	void setFilterBounds(int type, const AwFilterBounds& bounds);
-	QHash<QString, AwFilterBounds> filterBounds() const { return m_filterBounds; }
-	/** check for bounds **/
-	QList<int> checkForBounds();
+	void setLimits(int type, const QVector<float>& values);
+	QVector<float> limits(int type) const { return m_limits.value(type); }
 	/** apply the current settings to a channel **/
 	void apply(AwChannel *channel) const;
 	/** apply the current settings to a whole list of channels **/
 	void apply(const AwChannelList& channels) const;
-	/** init from previously saved json file for a specified data file **/
-	bool initWithFile(const QString& filePath);
-	/** init from a list of channels **/
-	void initWithChannels(const AwChannelList& channels);
 	/** reset all filters settings to zero **/
 	void zero();
 	/** save settings to json file **/
 	void save(const QString& file);
 	void load(const QString& file);
-	inline int count() const { return m_hash.count(); }
-	inline bool isEmpty() const { return m_hash.count() == 0; }
-	QList<int> currentTypes() const { return m_hash.keys(); }
-	QVector<float> filters(int type) const { return m_hash[type]; }
-
+	inline int count() const { return m_filters.count(); }
+	inline bool isEmpty() const { return m_filters.count() == 0; }
+	QList<int> currentTypes() const { return m_filters.keys(); }
+	QVector<float> filters(int type) const { return m_filters.value(type); }
 	QWidget *ui();
+	inline QList<int> guiVisibleItems() { return m_guiVisibleItems; }
 	void setUiDocked() { m_uiDocked = true; }
 signals:
 	void settingsChanged(const AwFilterSettings& settings);
@@ -79,17 +62,14 @@ signals:
 	void log(const QString& message);
 public slots:
 	void updateGUI();
+	void setGuiVisibleItems(const AwChannelList& channels);
 protected slots:
 	void setNewSettings(const AwFilterSettings& settings);
 protected:
-	QHash<int, QVector<float>> m_hash;
-	QHash<int, QVector<float>> m_bounds;	// bounds holds the frequency boundaries for virtual channels like ICA/Source.
-	
-	QHash<QString, AwFilterBounds> m_filterBounds;
-	// AwFilterBounds contains the target channel type which should be constrained.
-	// This container is only used to display pertinent infomation in the GUI. 
-	// However, we must use the setFilterBounds method instead of setBounds. setFilterBounds will call setBounds so the checking of frequency bands will operate
-	// as previously.
+	QMap<int, QVector<float>> m_filters;
+	QMap<QString, QVector<float>> m_hash; // key of hash is linked to registeredChannelTypes
+	QMap<int, QVector<float>> m_limits; // key of map is linked to registeredChannelTypes
+	QList<int> m_guiVisibleItems;	// types of channel to show in GUI
 	AwFilterGUI *m_ui;
 	bool m_uiDocked;
 };

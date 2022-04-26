@@ -17,7 +17,7 @@
 #define AW_CHANNEL_SELECTION_MODEL_H
 
 #include <QAbstractTableModel>
-#include <graphics/AwGraphicsObjects.h>
+#include <widget/AwGraphicsObjects.h>
 
 #define AW_CS_NB_COLUMN	1
 #define AW_CS_NB_NAME	0

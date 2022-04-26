@@ -90,6 +90,16 @@ void AwSettings::init()
 	}
 	settings.endArray();
 
+	// get python venvs
+	QStringList venvs;	// list of QString  splitted by ':'
+	size = settings.beginReadArray("venvs");
+	for (int i = 0; i < size; i++) {
+		settings.setArrayIndex(i);
+		QString s = settings.value("venv").toString();
+		if (s.contains("::"))
+			venvs << s;
+	}
+	settings.endArray();
 	m_settings[aws::recent_files] = recentFiles;
 	m_settings[aws::recent_bids] = recentBIDS;
 
@@ -100,6 +110,9 @@ void AwSettings::init()
 	m_settings[aws::total_cpu_cores] = totalCPUCores;
 	auto maxCPUCores = settings.value("general/cpu_cores", totalCPUCores).toInt();
 	m_settings[aws::max_cpu_cores] = maxCPUCores;
+	// marker bar mode
+	int markerbar_mode = settings.value("general/markerbar_mode", 0).toInt();
+	m_settings[aws::markerbar_mode_default] = markerbar_mode; 
 
 	bool checkForUpdates = settings.value("general/checkForUpdates", true).toBool();
 	m_settings[aws::check_updates] = checkForUpdates;
@@ -108,7 +121,6 @@ void AwSettings::init()
 	m_settings[aws::itk_snap] = settings.value("ITK-SNAP/path", QString()).toString();
 	m_settings[aws::gardel] = settings.value("GARDEL/path", QString()).toString();
 
-	//m_matlabInterface = nullptr;
 	m_settings[aws::predefined_marker_file] = QString("marker_tool.mrk");
 	auto appPath = QCoreApplication::applicationDirPath();
 	m_settings[aws::app_dir] = appPath;
@@ -125,21 +137,17 @@ void AwSettings::init()
 	// check for a file called ins.txt
 	if (QFile::exists(insVersionFile))
 		m_settings[aws::ins_version] = true;
+	// Python defaults
+	// default anywave venv => appdir/python/venv
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+	m_settings[aws::python_embeded_venv_dir] = QCoreApplication::applicationDirPath() + "/python/venv/anywave";
+#endif
+	m_settings[aws::python_venv_dir] = settings.value("python/venv_dir", m_settings.value(aws::python_embeded_venv_dir));
+	m_settings[aws::python_use_default] = settings.value("python/use_default", true).toBool();
+	m_settings[aws::python_venv_alias] = settings.value("python/venv_alias", "anywave").toString();
+	m_settings[aws::python_venv_list] = venvs;
+	
 
-	QString pythonExe = settings.value("general/python_interpreter", QString()).toString();
-	QString pythonVenv = settings.value("general/python_venv", QString()).toString();
-	m_settings[aws::python_detected] = false;
-	if (!pythonVenv.isEmpty()) {
-		m_settings[aws::python_venv_dir] = pythonVenv;
-		m_settings[aws::python_exe] = pythonExe;
-		m_settings[aws::python_detected] = true;
-	}
-	else {
-		if (pythonExe.isEmpty()) {
-			m_settings[aws::python_exe] = pythonExe;
-			m_settings[aws::python_detected] = true;
-		}
-	}
 }
 
 QVariant AwSettings::value(const QString& key)
@@ -178,9 +186,9 @@ void AwSettings::createMatlabShellScript(const QString& path)
 #ifdef Q_OS_MAC
 		stream << "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$MATLAB/extern/bin/maci64" << endl;
 		stream << "export DYLD_LIBRARY_PATH" << endl;
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) // put AnyWave lib path in first position to avoid conflicts with Qt libs installed in system
 		stream << "export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6" << endl;
-		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu:/usr/local/AnyWave/lib:$MATLAB/extern/bin/glnxa64" << endl;
+		stream << "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/AnyWave/lib:/usr/lib/x86_64-linux-gnu:$MATLAB/extern/bin/glnxa64" << endl;
 		stream << "if [[ -f $MATLAB/bin/glnxa64/libexpat.1.so ]]; then " << endl;
 		stream << "mv $MATLAB/bin/glnxa64/libexpat.1.so $MATLAB/bin/glnxa64/libexpat.1.so.NOFIND" << endl;
 		stream << "fi" << endl;

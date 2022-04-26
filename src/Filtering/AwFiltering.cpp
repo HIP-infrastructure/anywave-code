@@ -210,10 +210,9 @@ AwChannel *filterButterWorthAA(AwChannel *chan)
 // fonction de filtrage pour QtConcurrent
 AwChannel *filterChannel(AwChannel *chan)
 {
-
 	// check for data pointer. If null pointer => don't filter
 	// null data pointer can mean a virtual channel that is not computed yet.
-	if(chan->data() == NULL)
+	if(chan->data() == nullptr)
 		return chan;
 #ifdef OLD_FILTER
 	LinearFilterPtr highPassFilter;

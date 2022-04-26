@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwTriggerParser.h"
 #include "TPUi.h"
-
+#include <AwKeys.h>
 
 
 AwTriggerParserPlugin::AwTriggerParserPlugin()
@@ -23,9 +23,9 @@ AwTriggerParserPlugin::AwTriggerParserPlugin()
 	name = QString(tr("Trigger Parser"));
 	description = QString(tr("Extract digital values from trigger channels and make them markers"));
 	category = "Process:Trigger Channels:Detect values";
-	version = "1.0";
+	version = "1.0.0";
 	type = AwProcessPlugin::Background;
-	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi|Aw::ProcessFlags::CanRunFromCommandLine);
 }
 
 AwTriggerParser::AwTriggerParser() : AwProcess()
@@ -44,38 +44,41 @@ AwTriggerParser::~AwTriggerParser()
 
 void AwTriggerParser::clearMarkers()
 {
-	while (!m_markers.isEmpty())
-		delete m_markers.takeLast();
+	qDeleteAll(m_markers);
 }
 
 bool AwTriggerParser::showUi()
 {
-	TPUi dlg(pdi.input.channels());
+	TPUi dlg(AwChannel::duplicateChannels(pdi.input.channels()));
 
 	if (dlg.exec() == QDialog::Accepted) {
 		if (dlg.isMaskValueSet())
 			m_maskValue = dlg.maskValue();
 		m_parseNegative = dlg.parseNegativeValues();
-		m_triggers = dlg.triggers();
+	// 	m_triggers = dlg.triggers();
+		pdi.input.setNewChannels(dlg.triggers());
+	//	pdi.input.channels = dlg.triggers();
 		return true;
 	}
 	return false;
 }
 
-void AwTriggerParser::run()
+void AwTriggerParser::detect()
 {
 	typedef QPair<qint64, float> DetectedEvent;
 	clearMarkers();
 
 	emit progressChanged(tr("Reading data..."));
-	requestData(&m_triggers, (float)0, (float)-1);
+	AwChannelList inputChannels = pdi.input.channels();
+	requestData(&inputChannels, 0., -1);
 
 	if (endOfData()) {
 		sendMessage("No data could be loaded. Aborted.");
 		return;
 	}
 	QVector<float> detectedValues;
-	for (auto c : m_triggers) {
+	//for (auto c : m_triggers) {
+	for (auto c : pdi.input.channels()) {
 		sendMessage(QString("Detecting on channel %1...").arg(c->name()));
 		float value;
 		int ivalue;
@@ -133,8 +136,24 @@ void AwTriggerParser::run()
 			delete events.takeFirst();
 	}
 
-	addMarkers(&m_markers);
 	sendMessage(QString("Detection complete. Found %1 markers.").arg(m_markers.size()));
-	while (!m_markers.isEmpty())
-		delete m_markers.takeFirst();
+}
+
+void AwTriggerParser::run()
+{
+	detect();
+	addMarkers(&m_markers);
+}
+
+void AwTriggerParser::runFromCommandLine()
+{
+	detect();
+	auto args = pdi.input.settings;
+	if (args.contains(keys::output_dir)) {
+		// save a mrk file only if output_dir key is set
+		QString path = QString("%1/trigger_parser.mrk").arg(args.value(keys::output_dir).toString());
+		AwMarker::save(path, m_markers);
+	}
+	// set a copy to ouput
+	pdi.output.setNewMarkers(m_markers);
 }

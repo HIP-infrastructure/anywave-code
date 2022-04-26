@@ -18,8 +18,10 @@
 #include <widget/AwWaitWidget.h>
 #include <QMouseEvent>
 #include <algorithm>
-#include <execution>
 
+#ifdef Q_OS_WIN
+#include <execution>
+#endif
 AwStatsWidget::AwStatsWidget(QWidget *parent)
 	: QWidget(parent)
 {
@@ -37,34 +39,15 @@ AwStatsWidget::AwStatsWidget(QWidget *parent)
 
 	m_barPlot = new QCPBars(m_ui.widget->xAxis, m_ui.widget->yAxis);
 	m_barPlot->setAntialiased(false);
-	//// set dark background gradient:
-	//QLinearGradient gradient(0, 0, 0, 400);
-	//gradient.setColorAt(0, QColor(90, 90, 90));
-	//gradient.setColorAt(0.38, QColor(105, 105, 105));
-	//gradient.setColorAt(1, QColor(70, 70, 70));
-	//m_ui.widget->setBackground(QBrush(gradient));
-	//m_ui.widget->xAxis->setBasePen(QPen(Qt::white));
-	//m_ui.widget->xAxis->setTickPen(QPen(Qt::white));
 	m_ui.widget->xAxis->grid()->setVisible(true);
-	//m_ui.widget->xAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
-	//m_ui.widget->xAxis->setTickLabelColor(Qt::white);
-	//m_ui.widget->xAxis->setLabelColor(Qt::white);
 	// prepare y axis:
 	m_ui.widget->yAxis->setPadding(5); // a bit more space to the left border
 	m_ui.widget->yAxis->setLabel("Occurrences");
-	//m_ui.widget->yAxis->setBasePen(QPen(Qt::white));
-	//m_ui.widget->yAxis->setTickPen(QPen(Qt::white));
-	//m_ui.widget->yAxis->setSubTickPen(QPen(Qt::white));
 	m_ui.widget->xAxis->setSubTicks(false);
 	m_ui.widget->yAxis->grid()->setSubGridVisible(false);
-	//m_ui.widget->yAxis->setTickLabelColor(Qt::white);
-	//m_ui.widget->yAxis->setLabelColor(Qt::white);
-	//m_ui.widget->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
-	//m_ui.widget->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
 	// setup legend:
 	m_ui.widget->legend->setVisible(false);
 	m_ui.widget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-
 	// connections
 	connect(AwMarkerManager::instance(), &AwMarkerManager::updateStats, this, &AwStatsWidget::enableUpdate);
 	connect(m_ui.widget, &QCustomPlot::mouseMove, this, &AwStatsWidget::handleMouseMove);
@@ -154,4 +137,5 @@ void AwStatsWidget::compute()
 	else 
 		computeHistogram();
 	refresh();
+	setUpdateEnabled(false);
 }

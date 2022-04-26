@@ -47,6 +47,7 @@ public:
 	const AwChannelList& selectedChannels();
 	const AwChannelList& montage();
 	const AwChannelList& rawChannels();
+	const AwChannelList& asRecordedChannels();
 	inline AwFileIO* reader() { return m_reader; }
 	inline AwFilterSettings& filterSettings() { return m_filterSettings; }
 	inline AwMontageManager* montageManager() { return m_montageManager; }
@@ -67,20 +68,31 @@ public:
 	inline QString mtgFilePath() { return m_settings.value(keys::montage_file).toString(); }
 	inline QString mrkFilePath() { return m_settings.value(keys::marker_file).toString(); }
 	inline QString dispFilePath() { return m_settings.value(keys::disp_file).toString(); }
+	inline QString currentMontageDir() { return m_settings.value(keys::current_montage_dir).toString(); }
+	// BIDS
 	QString bidsDir();
+	/** get the current file name open in BIDS. The file name returned is the base file name (no extensions) **/
+	QString currentBIDSBaseFileName();
+	//BIDS
+
 	inline QVariantMap& settings() { return m_settings; }
 	inline int status() { return m_status; }
 
 	inline QString& errorString() { return m_errorString; }
 
-	void setNewRootDirForSideFiles(const QString& dir);
+	void setNewRootDirForSideFiles();
+	int openFileFromBIDS(const QString&);
+
 signals:
 	void finished();  // used for threading operations (only when opening file in GUI mode at present)
 public slots:
 	// selectChannels will generate a list of channels to be used when requested data.
 	// it allows to select the channels to load depending on a list of key/values set in a variant map.
-	void selectChannels(AwDataClient *client, const QVariantMap& settings, AwChannelList *channels);
+	void selectChannelsAsynch(AwDataClient *client, const QVariantMap& settings, AwChannelList *channels);
 	// convenience version of selectChannel that handle a json string as settings.
+	void selectChannelsAsynch(AwDataClient* client, const QString& settings, AwChannelList* channels);
+	// synchronous version
+	void selectChannels(AwDataClient* client, const QVariantMap& settings, AwChannelList* channels);
 	void selectChannels(AwDataClient* client, const QString& settings, AwChannelList* channels);
 
 	QStringList badLabels();

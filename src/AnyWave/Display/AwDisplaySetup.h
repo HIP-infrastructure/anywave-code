@@ -17,35 +17,31 @@
 #define AWDISPLAYSETUP_H
 
 #include <QObject>
-
+#include <QSharedPointer>
 class AwViewSetup;
+class AwViewSettings;
 
 class AwDisplaySetup : public QObject
 {
 	Q_OBJECT
 
 public:
-	AwDisplaySetup(const QString& name = QString(), QObject *parent = 0);
-	// copy constructor
-	AwDisplaySetup(AwDisplaySetup *source, QObject *parent = 0);
+	AwDisplaySetup(QObject *parent = 0);
 	~AwDisplaySetup();
 	
-	inline QString& name() { return m_name; }
-	inline QString& path() { return m_fullPath; }
-	AwViewSetup *newViewSetup();
-	void setToDefault();
 	enum Orientation { Horizontal, Vertical, Grid };
 	enum UpdateFlags { AllFlags = 15, SynchViews = 1, SecsPerCm = 2, ViewNumber = 4, ViewOrientation = 8 };
 	inline int orientation() { return m_orientation; }
-	inline AwViewSetup* viewSetup(int index) { return m_ds.at(index); }
+	inline int numberOfViewSettings() { return m_viewSettings.count(); }
 	inline QList<AwViewSetup *>& viewSetups() { return m_ds; }
+	inline QList<AwViewSettings*>& viewSettings() { return m_viewSettings; }
+	inline void clearViewSettings() { m_viewSettings.clear(); }
+	void removeViewSettings(int index);
 	void setOrientation(int orientation);
-	void deleteViewSetup(int index);
-	void setName(const QString& name);
-	inline void setModified() { m_hasBeenModified = true; }
 	inline bool synchronizeViews() { return m_synchronize; }
 	void setSynchronized(bool flag);
 	void setSecondsPerCm(float val);
+	AwViewSettings* addViewSettings();
 public slots:
 	bool loadFromFile(const QString& path);
 	bool saveToFile(const QString& path);
@@ -58,7 +54,8 @@ protected:
 	int m_viewSetup;
 	bool m_synchronize;
 	bool m_hasBeenModified;
-	QList<AwViewSetup *> m_ds;
+	QList<AwViewSetup*> m_ds;
+	QList<AwViewSettings*> m_viewSettings;
 	int m_orientation;
 };
 

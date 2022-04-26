@@ -1,7 +1,7 @@
 #include "TFPlot.h"
-#include <graphics/AwQwtColorMap.h>
+#include <widget/AwQwtColorMap.h>
 #include <qwt_color_map.h>
-#include <graphics/AwColorMap.h>
+#include <widget/AwColorMap.h>
 #include <qwt_scale_engine.h>
 #include <qwt_plot_layout.h>
 #include <qwt_picker_machine.h>

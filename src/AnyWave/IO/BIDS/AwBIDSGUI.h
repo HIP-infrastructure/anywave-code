@@ -30,19 +30,25 @@ public:
 	AwBIDSGUI(QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUI();
 
-	void refresh();
+	//void refresh();
+	void init();
+	void setSubjects(const AwBIDSItems&);
+	void setSourceDataSubjects(const AwBIDSItems&);
+
 	void closeBIDS(); 
 	void showColumns(const QStringList& cols);
 	void showItem(QStandardItem *item);
+	void openSubject(AwBIDSItem *item);
+	void openFileItem(AwBIDSItem* item);
 signals:
 	void dataFileClicked(const QString&);
 	void imageFileClicked(const QString&);
 	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
 	void batchManagerNeeded();
+	void finished(); // sent when a background operation finished.
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);
-	void changeBIDS(); // called when Change button is clicked
 	void openBIDSOptions(); // called when Change button is clicked
 	// context menu slots
 	void contextMenuRequested(const QPoint& pos);
@@ -54,13 +60,13 @@ protected:
 	QMenu *m_menuProcessing;
 	QAction *m_showNifti;
 	// keep a copy of models for the TreeView
-	QStandardItemModel *m_model;
+	QStandardItemModel* m_model, *m_propertiesModel;
 	AwBIDSItems m_items;	// copy of items list from bids manager
 	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
-
-	void initModel(const AwBIDSItems& subjects);
+//	void initModel(const AwBIDSItems& subjects);
 	void recursiveFill(AwBIDSItem *item);
-	QString createToolTipFromJson(const QString& jsonPath);
+	void insertChildren(AwBIDSItem* parent);
+	void updatePropertiesTable(QStandardItem*item);
 	void createContextMenus();
 	void openITKSNAP(QStandardItem *item);
 	void openNiftiFile(const QString& file);

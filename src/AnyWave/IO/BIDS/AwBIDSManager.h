@@ -25,7 +25,6 @@ class AwFileIO;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
 
-
 constexpr auto aw_derivatives_folder = "derivatives/anywave";
 
 namespace bids {
@@ -43,6 +42,9 @@ namespace bids {
 	constexpr auto tsv_channel_name = "name";
 	constexpr auto tsv_channel_type = "type";
 	constexpr auto tsv_channel_status = "status";
+	// tracking of current open file in BIDS
+	constexpr auto file_derivatives_dir = "file_derivatives_dir";
+	constexpr auto current_open_filename = "current_open_filename";
 }
 
 
@@ -58,13 +60,13 @@ public:
 	// utilities static methods
 	static AwBIDSManager *instance();
 	
-	static bool isInstantiated() { return m_instance != NULL; }
+	static bool isInstantiated() { return m_instance != nullptr; }
 	static void destroy();
 	/** check if a path is a BIDS directory or not. **/
 	static bool isBIDS(const QString& path);
 	static QString detectBIDSFolderFromPath(const QString& path);
 	
-	void newFile(AwFileIO *reader);
+	int setNewOpenFile(const QString& path);
 	void setRootDir(const QString& path);
 	inline QString& rootDir() { return m_rootDir; }
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
@@ -73,7 +75,13 @@ public:
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems items() { return m_items; }
-	
+
+	AwBIDSItem* getParentSubject(AwBIDSItem* item);
+	bool isSubject(AwBIDSItem *item);
+	bool isSourceDataSubject(AwBIDSItem* item);
+	// 
+	int selectItemFromFilePath(const QString& path);
+
 	// command line methods
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
@@ -96,9 +104,6 @@ public:
 	AwChannelList getChannelsTsvMontage();
 	/** Update channels.tsv file from bad file **/
 	int updateChannelsTsvBadChannels(const QStringList& badLabels);
-	/** markers specific **/
-//	int updateEventsTsv(const AwMarkerList& markers);
-
 	/** returns the columns header of a tsv file **/
 	QStringList readTsvColumns(const QString& path);
 	/** Get the BIDS path to the current open file **/
@@ -109,6 +114,8 @@ public:
 	QString buildOutputDir(const QString& pluginName, AwBIDSItem *item);
 	/** Create the default output filename of a file item **/
 	QString buildOutputFileName(AwBIDSItem * item);
+	/** Get the file name from a file item build leaf **/
+	QString getFileName(const QString& filePath);
 	/** Get derivatives folder for current open item **/
 	QString getDerivativePath(int type);
 	/** GARDEL properties **/
@@ -123,6 +130,14 @@ public:
 	QString getDerivativePath(AwBIDSItem *item, int type);
 	/** Get the filename prefix by removing the modality **/
 	QString getPrefixName(AwBIDSItem *item, bool absolutePath = false);
+	/** Create derivatives path for process to store resutls **/
+	QString createDerivativesPath(const QString& processName);
+
+	// dat file derivatives dir and file name
+	QString currentDerivativesDir();
+	QString currentFileName();
+	void parseSubject(AwBIDSItem* item);
+	void recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
 signals:
@@ -132,10 +147,13 @@ signals:
 	void parsingProgressChanged(int progress);
 protected:
 	AwBIDSManager();
-	AwBIDSItems recursiveParsing2(const QString& dirPath, AwBIDSItem* parentItem);
+	AwBIDSItems getSubjectItems(const QString&);
+	AwBIDSItems getSourceDataSubjectItems(const QString&);
+
+	
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
-	void findItem(const QString& filePath);
+	void findCurrentFileItem(const QString& filePath);
 	QVariant BIDSProperty(int property);
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
@@ -149,7 +167,9 @@ protected:
 
 	QHash<QString, AwBIDSItem *> m_hashItemFiles;  // for each file found in a sub dir, store the subject node.
 	QHash<int, QString> m_derivativesNames;
-	AwBIDSItems m_items;
+	AwBIDSItems m_items, m_sourcedataItems;
+	// build also a map to find a subject item object by its name
+	QMap<QString, AwBIDSItem*> m_mapSubjects;
 	QVariantMap m_settings;
 	QList<int> m_dataContainers;
 	QFileIconProvider m_fileIconProvider;

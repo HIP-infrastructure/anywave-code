@@ -33,8 +33,9 @@ public:
 protected:
 	void changeEvent(QEvent *);
 public slots:
-	void updateSetup(AwDisplaySetup *setup, int flags);
-	void setNewSetup(AwDisplaySetup *setup);
+//	void updateSetup(AwDisplaySetup *setup, int flags);
+	void updateGUI(AwDisplaySetup* setup);
+//	void setNewSetup(AwDisplaySetup *setup);
 	void addView();
 protected slots:
 	void setSynchronized(bool f);
@@ -44,11 +45,13 @@ signals:
 	void removeView();
 	void alignHClicked();
 	void alignVClicked();
-	void setupChanged(AwDisplaySetup *setup, int flags);
+	//void setupChanged(AwDisplaySetup *setup, int flags);
+	void displaySetupChanged(int flags);
 	void captureClicked();
+	void synchronizedClicked(bool flag);
 
 protected:
-	AwDisplaySetup *m_setup;
+//	AwDisplaySetup *m_setup;
 	QToolBar *m_toolBar;
 };
 

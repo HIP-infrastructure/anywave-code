@@ -106,6 +106,8 @@ public:
 	inline bool isLabelVisible() { return m_label; }
 	virtual void showBaseline(bool flag) { m_baseLine = flag;  }
 	virtual AwChannel *channel() { return m_channel; }
+	/** optional method to place child items correctly before painting the item **/
+	virtual void updateChildItems() {}
 	inline void setChannel(AwChannel *chan) { m_channel = chan; }
 	// override this method to implement specific refresh for the item. 
 	// That could be to repaint the item as new data have been set to.
@@ -115,15 +117,17 @@ public:
 		m_repaint = true; }
 	inline void endRepaint() { m_repaint = false; }
 	inline bool needRepaint() { return m_repaint; }
-	inline void shiftLabel(qreal pixels) { m_labelXOffset = pixels; }
+	virtual void paintSignal(QPainter* painter) {}
+//	inline void shiftLabel(qreal pixels) { m_labelXOffset = pixels; }
 	virtual QGraphicsItem *labelItem() = 0;
 	virtual void setLabelHeight(int height) = 0;
+	void setUpperNeighbor(AwBaseGraphicsSignalItem* neighbor);
 protected:
 	bool m_baseLine;
 	bool m_label;
 	AwChannel *m_channel;
 	bool m_repaint;
-	qreal m_labelXOffset;	// offset in pixels for the label
+//	qreal m_labelXOffset;	// offset in pixels for the label
 
 };
 
@@ -179,7 +183,7 @@ public:
 	inline int type() const { return Type; }
 	AwGraphicsSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys = nullptr) : AwBaseGraphicsSignalItem(chan, settings, phys) 
 	{
-		setZValue(5); m_flags = 0; m_repaint = false; m_number = -1; 
+		setZValue(5); m_flags = 0; m_repaint = false; m_number = -1; m_upperNeighbor = nullptr;
 	}
 
 	/** Override this method for specific repaint code in subclass **/
@@ -194,6 +198,10 @@ public:
 	void setLabelXOffset(qreal offset);
 	inline void setIndex(int index) { m_number = index; }
 	inline int index() { return m_number; }
+	virtual QPainterPath childrenRegion() { return QPainterPath(); }
+	void setUpperNeighbor(AwGraphicsSignalItem* n) { m_upperNeighbor = n; }
+	virtual void resolveCollisionWithUpperNeighbor(const QPainterPath& region) {}
+
 	QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 signals:
 	void selectionChanged(AwGraphicsSignalItem *item, bool selected);
@@ -202,6 +210,7 @@ protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) { }
 	int m_flags;
 	int m_number;	// hold the index of the item in the scene (to get the right order of the item in the scene)
+	AwGraphicsSignalItem* m_upperNeighbor;
 };
 
 Q_DECLARE_METATYPE(AwGraphicsSignalItem *)

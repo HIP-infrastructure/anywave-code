@@ -56,14 +56,9 @@ AwBlock::~AwBlock()
 
 AwMarker *AwBlock::addMarker(AwMarker& marker)
 {
-	AwMarker *mark = new AwMarker;
-	mark->setStart(marker.start());
-	mark->setDuration(marker.duration());
-	// simplified label (avoid labels with \n)
+	AwMarker *mark = new AwMarker(marker);
 	auto simpl = marker.label().simplified();
 	mark->setLabel(simpl);
-	mark->setValue(marker.value());
-	mark->setTargetChannels(marker.targetChannels());
 	m_markers.append(mark);
 	return mark;
 }

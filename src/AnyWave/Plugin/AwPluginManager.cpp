@@ -19,15 +19,13 @@
 #include <QMenuBar>
 #include "AwPluginDial.h"
 #include "Process/AwTriggerParser.h"
-#include "Process/AwExporter.h"
 #include <AwProcessInterface.h>
 #include <filter/AwFilterPlugin.h>
-#include <graphics/AwGraphicInterface.h>
-#include <graphics/AwGraphicsObjects.h>
+#include <widget/AwGraphicInterface.h>
+#include <widget/AwGraphicsObjects.h>
 #include "IO/ADES/ADESIO.h"
 #include "IO/MATLAB/MATLABIO.h"
-#include "IO/MEMIO/MEMIO.h"
-#include <graphics/AwSignalItem.h>
+#include <widget/AwSignalItem.h>
 #include "ICA/AwICASignalItem.h"
 #include "Prefs/AwSettings.h"
 #include "Process/AwPythonScriptPlugin.h"
@@ -37,6 +35,7 @@
 #include "Process/AwMATLABMarkersExporter.h"
 #include "Debug/AwDebugLog.h"
 #include <utils/json.h>
+#include "IO/export/AwExporter.h"
 #ifdef AW_EPOCHING
 #include "Epoch/AwAvgSignalItem.h"
 #endif
@@ -93,6 +92,7 @@ void AwPluginManager::load()
 //
 AwPluginManager::~AwPluginManager()
 {
+	clean();
 }
 
 void AwPluginManager::processJsonFiles()
@@ -146,16 +146,6 @@ AwFileIO *AwPluginManager::newWriter(AwFileIOPlugin *p)
 	return fw;
 }
 
-//
-// deleteReaderInstance()
-//
-// close the reader plugin currently used and delete instance of AwFileReader
-void AwPluginManager::deleteReaderInstance(AwFileIO *fr)
-{
-	fr->cleanUpAndClose();
-	fr->plugin()->deleteInstance(fr);
-}
-
 QList<AwProcessPlugin *> AwPluginManager::processesWithFlags(int flags)
 {
 	QList<AwProcessPlugin *> res;
@@ -183,15 +173,18 @@ QObject *AwPluginManager::loadPlugin(const QString& path)
 		return nullptr;
 	}
 	if (plugin) {
+		QFileInfo fi(path);
+		QString pluginDir = fi.absolutePath();
 		// get plugin type
 		AwFileIOPlugin* fio = qobject_cast<AwFileIOPlugin*>(plugin);
 		if (fio) { // FileIO specific (plugin can be reader and writer at the same time
+			fio->pluginDir = pluginDir;
 			if (fio->canRead()) {
-				fio = qobject_cast<AwFileIOPlugin*>(plugin);
+				//fio = qobject_cast<AwFileIOPlugin*>(plugin);
 				loadFileIOReaderPlugin(fio);
 			}
 			if (fio->canWrite()) {
-				fio = qobject_cast<AwFileIOPlugin*>(plugin);
+				//fio = qobject_cast<AwFileIOPlugin*>(plugin);
 				loadFileIOWriterPlugin(fio);
 			}
 			m_pluginNames.insert(fio->name, plugin);
@@ -201,6 +194,7 @@ QObject *AwPluginManager::loadPlugin(const QString& path)
 		AwProcessPlugin* iprocess = qobject_cast<AwProcessPlugin*>(plugin);
 		if (iprocess) {
 			iprocess->name = iprocess->name;
+			iprocess->pluginDir = pluginDir;
 			loadProcessPlugin(iprocess);
 			m_pluginNames.insert(iprocess->name, plugin);
 			m_loaders.insert(plugin, loader);
@@ -215,6 +209,7 @@ QObject *AwPluginManager::loadPlugin(const QString& path)
 		}
 		auto ifilter = qobject_cast<AwFilterPlugin*>(plugin);
 		if (ifilter) {
+			ifilter->pluginDir = pluginDir;
 			loadFilterPlugin(ifilter);
 			m_pluginNames.insert(ifilter->name, plugin);
 			m_loaders.insert(plugin, loader);
@@ -224,68 +219,37 @@ QObject *AwPluginManager::loadPlugin(const QString& path)
 	return nullptr;
 }
 
-int AwPluginManager::unloadPlugin(const QString& filePath, const QString& name)
+AwPluginBase* AwPluginManager::getPlugin(const QString& name)
+{
+	if (m_pluginNames.contains(name))
+		return static_cast<AwPluginBase*>(m_pluginNames.value(name));
+	return nullptr;
+}
+
+int AwPluginManager::unloadPlugin(const QString& name)
 {
 	QObject* plugin = nullptr;
-
-	for (AwFileIOPlugin* p : m_readers) {
-		if (p->name == name) {
-			m_readerFactory.removePlugin(name);
-			m_readers.removeAll(p);
-			m_pluginList.removeAll(p);
-			plugin = p;
-			break;
-		}
-	}
-	if (!plugin) {
-		for (AwFileIOPlugin* p : m_writers) {
-			if (p->name == name) {
-				m_writerFactory.removePlugin(name);
-				m_writers.removeAll(p);
-				m_pluginList.removeAll(p);
-				plugin = p;
-				break;
-			}
-		}
-	}
-	if (!plugin) {
-		for (AwProcessPlugin* p : m_processes) {
-			if (p->name == name) {
-				m_processFactory.removePlugin(name);
-				m_processes.removeAll(p);
-				m_pluginList.removeAll(p);
-				plugin = p;
-				break;
-			}
-		}
-	}
+	// it could be a matlab or python plugin
+	plugin = m_pluginNames.value(name);
 	if (plugin) {
-		for (AwDisplayPlugin* p : m_displays) {
-			if (p->name == name) {
-				m_displayFactory.removePlugin(name);
-				m_displays.removeAll(p);
-				m_pluginList.removeAll(p);
-				plugin = p;
-				break;
-			}
-		}
-	}
-	if (plugin) {
-		for (AwFilterPlugin* p : m_filters) {
-			if (p->name == name) {
-				m_filterFactory.removePlugin(name);
-				m_filters.removeAll(p);
-				m_pluginList.removeAll(p);
-				plugin = p;
-				break;
-			}
-		}
-	}
-	if (plugin) {
+		m_pluginNames.remove(name);
+		m_pluginList.removeAll(plugin);
+		m_readers.removeAll(static_cast<AwFileIOPlugin *>(plugin));
+		m_writers.removeAll(static_cast<AwFileIOPlugin*>(plugin));
+		m_processes.removeAll(static_cast<AwProcessPlugin*>(plugin));
+		m_displays.removeAll(static_cast<AwDisplayPlugin*>(plugin));
+		m_filters.removeAll(static_cast<AwFilterPlugin*>(plugin));
+		m_readerFactory.removePlugin(name);
+		m_displayFactory.removePlugin(name);
+		m_writerFactory.removePlugin(name);
+		m_processFactory.removePlugin(name);
+		m_filterFactory.removePlugin(name);
 		auto loader = m_loaders.value(plugin);
-		m_loaders.remove(plugin);
-		loader->unload();
-		delete loader;
+		if (loader) { // loader can be nullptr if we handle a python or matlab plugin
+			m_loaders.remove(plugin);
+			loader->unload();
+			delete loader;
+		}
 		return 0;
 	}
 	return -1;  // the plugin is not loaded (error while loading it at startup or simply non existent plugin)
@@ -318,8 +282,9 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 					}
 					else { // plugin found could not open the file => destroy it and continue browsing.				
 						emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
-						plugin->deleteInstance(reader);
-						reader = NULL;
+					//	plugin->deleteInstance(reader);
+						delete reader;
+						reader = nullptr;
 					}
 				}
 			}
@@ -335,8 +300,9 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 			}
 			else { // plugin found could not open the file => destroy it and continue browsing.				
 			    emit log(QString("plugin %1 could not open the file because: %2").arg(plugin->name).arg(reader->errorMessage()));
-				plugin->deleteInstance(reader);
-				reader = NULL;
+				//plugin->deleteInstance(reader);
+				delete reader;
+				reader = nullptr;
 			}
 			if (plugin_found)
 				break;
@@ -353,6 +319,87 @@ AwFileIO *AwPluginManager::getReaderToOpenFile(const QString &file)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SLOTS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+QObject* AwPluginManager::loadMATPyPlugin(const QString& path)
+{
+	QDir dir(path);
+	if (!dir.exists())
+		return nullptr;
+	QMap<QString, QString> descMap;
+	// QString desc, processType, category, compiledPath, flags, inputFlags;
+	int type = AwProcessPlugin::Background;	// default type if none defined
+	bool isMATLABCompiled = false, isPythonCompiled = false;
+	QString name = dir.dirName();
+	QString pluginPath = dir.absolutePath();
+	QString exePluginPath; // can handle the path to standalone executable plugins
+	QString pythonCode = QString("%1/__main__.py").arg(pluginPath);
+	QString matlabCodeM = QString("%1/main.m").arg(pluginPath);
+	QString matlabCodeApp = QString("%1/main.mlapp").arg(pluginPath);
+	bool isMATLABScript = QFile::exists(matlabCodeM) || QFile::exists(matlabCodeApp);
+	bool isPythonScript = QFile::exists(pythonCode);
+	QString descPath = QString("%1/desc.txt").arg(pluginPath);
+	QString jsonArgs = QString("%1/args.json").arg(pluginPath);
+	if (!QFile::exists(descPath))
+		return nullptr;
+	QFile file(descPath);
+	QTextStream stream(&file);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return nullptr;
+	QStringList splitedLine;
+	while (!stream.atEnd()) {
+		auto line = stream.readLine();
+		if (line.startsWith("#"))
+			continue;
+		splitedLine = line.split("=");
+		if (splitedLine.size() == 2)
+			descMap[splitedLine.first().trimmed()] = splitedLine.last().trimmed();
+	}
+	file.close();
+	if (descMap.isEmpty())
+		return nullptr;
+	if (!descMap.contains("name") && !descMap.contains("description"))
+		return nullptr;
+	// add extra parameters to descMap
+	descMap[keys::plugin_dir] = pluginPath;
+	descMap["script_path"] = pluginPath;
+
+	// check for version string.
+	// if no version specified set it to 1.0.0 by default
+	if (!descMap.contains("version"))
+		descMap["version"] = QString("1.0.0");
+
+	//
+	isMATLABCompiled = descMap.contains("compiled plugin");
+	isPythonCompiled = descMap.contains("compiled python plugin");
+	// now instantiante objects depending on plugin type
+	// check for MATLAB connection before
+	isMATLABScript = isMATLABScript && AwSettings::getInstance()->value(aws::matlab_present).toBool();
+	if (isMATLABScript || isMATLABCompiled) {
+		AwMatlabScriptPlugin* plugin = new AwMatlabScriptPlugin;
+		plugin->type = type;
+		plugin->pluginDir = pluginPath;
+		if (isMATLABCompiled) // build full path to exe file
+			descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
+
+		plugin->init(descMap);
+		if (QFile::exists(jsonArgs))
+			setJsonSettings(plugin, keys::json_batch, jsonArgs);
+		loadProcessPlugin(plugin);
+		return plugin;
+	}
+	if (isPythonScript || isPythonCompiled) {
+		AwPythonScriptPlugin* plugin = new AwPythonScriptPlugin;
+
+		plugin->type = type;
+		plugin->pluginDir = pluginPath;
+		plugin->init(descMap);
+		if (QFile::exists(jsonArgs))
+			setJsonSettings(plugin, keys::json_batch, jsonArgs);
+		loadProcessPlugin(plugin);
+		return plugin;
+	}
+	return nullptr;
+}
 
 void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 {
@@ -402,6 +449,11 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 // add extra parameters to descMap
 		 descMap[keys::plugin_dir] = pluginPath;
 		 descMap["script_path"] = pluginPath;
+
+		 // check for version string.
+		 // if no version specified set it to 1.0.0 by default
+		 if (!descMap.contains("version"))
+			 descMap["version"] = QString("1.0.0");
 		
 		 //
 		 isMATLABCompiled = descMap.contains("compiled plugin");
@@ -412,6 +464,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 if (isMATLABScript || isMATLABCompiled) {
 			 AwMatlabScriptPlugin *plugin = new AwMatlabScriptPlugin;
 			 plugin->type = type; 
+			 plugin->pluginDir = pluginPath;
 			 if (isMATLABCompiled) // build full path to exe file
 				 descMap["compiled plugin"] = QString("%1/%2").arg(pluginPath).arg(descMap.value("compiled plugin"));
 
@@ -424,6 +477,7 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 			 AwPythonScriptPlugin *plugin = new AwPythonScriptPlugin;
 
 			 plugin->type = type;
+			 plugin->pluginDir = pluginPath;
 			 plugin->init(descMap);
 			 if (QFile::exists(jsonArgs))
 				 setJsonSettings(plugin, keys::json_batch, jsonArgs);
@@ -469,122 +523,11 @@ void AwPluginManager::loadUserPlugins()
 	if (!pythonPluginDir.isEmpty())
 		checkForScriptPlugins(pythonPluginDir);
 
-
 	// plugin dir exists, so check for plugins 
 	QDir dir(pluginDir);
 	// Browsing plugins
-	for (const QString& FileName : dir.entryList(QDir::Files)) {
+	for (const QString& FileName : dir.entryList(QDir::Files)) 
 		loadPlugin(dir.absoluteFilePath(FileName));
-
-		//QPluginLoader loader(dir.absoluteFilePath(FileName));
-		//QObject *plugin = loader.instance();
-		//if (plugin == nullptr)	{
-		//	emit log("Failed to load " +  dir.absoluteFilePath(FileName));
-		//	emit log(loader.errorString());
-		//}
-		//if (!checkPluginVersion(plugin)) {
-		//	emit log(QString("Outdated version for plugin %1. Skipped.").arg(FileName));
-		//	continue;
-		//}
-		//if (plugin) {
-		//	AwFileIOPlugin *fio = qobject_cast<AwFileIOPlugin *>(plugin);
-		//	if (fio == NULL)
-		//		continue;
-		//	if (fio->canRead()) {
-		//		AwFileIOPlugin *p = m_readerFactory.getPluginByName(fio->name);
-		//		if (p) {
-		//			m_readers.removeAll(p);
-		//			m_pluginList.removeAll(p);
-		//			m_readerFactory.removePlugin(fio->name);
-		//			delete p;
-		//			emit log("Reader plugin " + fio->name + " already exists.Previous version unloaded.");
-		//		}
-		//		m_pluginList += plugin;
-		//		// check if reader plugin has montages
-		//		if (!fio->montages().isEmpty() &&  !montageDir.isEmpty()) {
-		//			// create montage by copying montages provided to the user montages' directory
-		//			QStringList montages = fio->montages();
-		//			foreach(QString montage, montages) {
-		//				// remove the ":/" from the original montage filename.
-		//				QString source_path = montage;
-		//				//QString dest_path = AwSettings::getInstance()->montageDirectory() + montage.remove(":/");
-		//				QString dest_path = montageDir + montage.remove(":/");
-		//				// if file already exists, skip the copye
-		//				if (QFile::exists(dest_path))
-		//					continue;
-
-		//				// copying montage file which is embedded in reader to default montage directory of AnyWave
-		//				QFile source(source_path);
-		//				if (source.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		//					QTextStream stream_source(&source);
-		//					// remove the ":/" from the original montage filename.
-		//					QFile dest(dest_path);
-		//					if (dest.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		//						QTextStream stream_dest(&dest);
-		//						while (!stream_source.atEnd())
-		//							stream_dest << stream_source.readLine();
-		//						dest.close();
-
-		//					}
-		//					source.close();
-		//				}
-		//			}
-		//		}
-		//		m_readerFactory.addPlugin(fio->name, fio);
-		//		m_readers += fio;
-		//		m_pluginList += plugin;	
-		//		continue;
-		//	}
-		//	
-		//	if (fio->canWrite()) {
-		//		AwFileIOPlugin *p = m_writerFactory.getPluginByName(fio->name);
-		//		if (p) {
-		//			m_writers.removeAll(p);
-		//			m_pluginList.removeAll(p);
-		//			m_writerFactory.removePlugin(fio->name);
-		//			delete p;
-		//			emit log("Writer plugin " + fio->name + " already exists.Previous version unloaded.");
-		//		}
-		//		m_writerFactory.addPlugin(fio->name, fio);
-		//		m_writers += fio;
-		//		m_pluginList += plugin;
-		//		continue;
-		//	}
-
-		//	AwProcessPlugin *iprocess = qobject_cast<AwProcessPlugin *>(plugin);
-		//	if (iprocess) {
-		//		loadProcessPlugin(iprocess);
-		//		continue;
-		//	}
-		//	AwDisplayPlugin *idisplay = qobject_cast<AwDisplayPlugin *>(plugin);
-		//	if (idisplay) {
-		//		AwDisplayPlugin *p = m_displayFactory.getPluginByName(idisplay->name);
-		//		if (p) {
-		//			m_displays.removeAll(p);
-		//			m_pluginList.removeAll(p);
-		//			m_displayFactory.removePlugin(idisplay->name);
-		//			delete p;
-		//			emit log("Display plugin " +  idisplay->name + " already exists.Previous version unloaded.");
-		//		}
-		//		m_displayFactory.addPlugin(idisplay->name, idisplay);
-		//		m_displays += idisplay;
-		//		m_pluginList += plugin;
-		//		continue;					
-		//	}
-
-		//	auto iFilter = qobject_cast<AwFilterPlugin *>(plugin);
-		//	if (iFilter) {
-		//		auto p = m_filterFactory.getPluginByName(iFilter->name);
-		//		if (p) {
-		//			m_filters.removeAll(p);
-		//			m_pluginList.removeAll(p);
-		//			m_filterFactory.removePlugin(iFilter->name);
-		//			delete p;
-		//			emit log("Filter plugin " + iFilter->name + " already exists.Previous version unloaded.");
-		//		}
-		//	}
-		//}
-	}
 }
 
 //
@@ -605,14 +548,8 @@ void AwPluginManager::loadPlugins()
 	auto adesPlugin = new ADESIOPlugin;
 	m_writers += adesPlugin;
 	m_readers += adesPlugin;
-	
-	//m_writers += new AHDF5IOPlugin;
-	//m_readers += new AHDF5IOPlugin;
-
-	//m_readers += new MEMIOPlugin;
 	m_writers += new MATLABIOPlugin;
-
-	// Ajout du plugin TriggerParser
+    // Ajout du plugin TriggerParser
 	m_processes += new AwTriggerParserPlugin;
 
 	// Add TriggerWriter
@@ -654,6 +591,24 @@ void AwPluginManager::loadPlugins()
 	}
 }
 
+void AwPluginManager::clean()
+{
+	while (!m_pluginList.isEmpty()) {
+		auto p = m_pluginList.takeLast();
+		// remove all occurences of the pointer
+		m_pluginList.removeAll(p);  // some plugin instances may appear several times in the list (reader/writer plugin)
+		auto loader = m_loaders.value(p);
+		if (loader) { // loader can be nullptr if we handle a python or matlab plugin
+			m_loaders.remove(p);
+			loader->unload();
+			delete loader;
+		}
+		else { // no loader => plugin added manually
+			delete p;
+		}
+	}
+}
+
 void AwPluginManager::loadFileIOReaderPlugin(AwFileIOPlugin *plugin)
 {
 	auto p = m_readerFactory.getPluginByName(plugin->name);
@@ -663,7 +618,9 @@ void AwPluginManager::loadFileIOReaderPlugin(AwFileIOPlugin *plugin)
 		m_readerFactory.removePlugin(plugin->name);
 		emit log("Reader plugin " + plugin->name + " already exists.Previous version unloaded.");
 		delete p;
+		m_pluginNames.remove(plugin->name);
 	}
+	m_pluginNames.insert(plugin->name, plugin);
 	auto montageDir = AwSettings::getInstance()->value(aws::montage_dir).toString();
 	m_readerFactory.addPlugin(plugin->name, plugin);
 	m_readers += plugin;
@@ -707,11 +664,24 @@ void AwPluginManager::loadFileIOWriterPlugin(AwFileIOPlugin *plugin)
 		m_readers.removeAll(p);
 		m_readerFactory.removePlugin(plugin->name);
 		emit log("Reader plugin " + plugin->name + " already exists.Previous version unloaded.");
+		m_pluginNames.remove(plugin->name);
 		delete p;
 	}
+	m_pluginNames.insert(plugin->name, plugin);
 	m_writerFactory.addPlugin(plugin->name, plugin);
 	m_writers += plugin;
 	m_pluginList += plugin;
+}
+
+void AwPluginManager::addProcessPlugin(AwProcessPlugin* plugin)
+{
+	auto p = m_processFactory.getPluginByName(plugin->name);
+	if (p)
+		return;
+	m_pluginNames.insert(plugin->name, plugin);
+	m_processFactory.addPlugin(plugin->name, plugin);
+	m_pluginList += plugin;
+	m_processes += plugin;
 }
 
 void AwPluginManager::loadProcessPlugin(AwProcessPlugin *plugin)
@@ -722,8 +692,10 @@ void AwPluginManager::loadProcessPlugin(AwProcessPlugin *plugin)
 		m_pluginList.removeAll(p);
 		m_processFactory.removePlugin(plugin->name);
 		delete p;
+		m_pluginNames.remove(plugin->name);
 		emit log("Process plugin " + plugin->name + " already exists.Previous version unloaded.");
 	}
+	m_pluginNames.insert(plugin->name, plugin);
  	m_processFactory.addPlugin(plugin->name, plugin);
 	m_pluginList += plugin;
 	m_processes += plugin;
@@ -737,8 +709,10 @@ void AwPluginManager::loadDisplayPlugin(AwDisplayPlugin *plugin)
 		m_pluginList.removeAll(p);
 		m_displayFactory.removePlugin(plugin->name);
 		delete p;
+		m_pluginNames.remove(plugin->name);
 		emit log("Display plugin " + plugin->name + " already exists.Previous version unloaded.");
 	}
+	m_pluginNames.insert(plugin->name, plugin);
 	m_displayFactory.addPlugin(plugin->name, plugin);
 	m_displays += plugin;
 	m_pluginList += plugin;
@@ -752,8 +726,10 @@ void AwPluginManager::loadFilterPlugin(AwFilterPlugin *plugin)
 		m_pluginList.removeAll(p);
 		m_filterFactory.removePlugin(plugin->name);
 		delete p;
+		m_pluginNames.remove(plugin->name);
 		emit log("Filter plugin " + plugin->name + " already exists.Previous version unloaded.");
 	}
+	m_pluginNames.insert(plugin->name, plugin);
 	m_filterFactory.addPlugin(plugin->name, plugin);
 	m_filters += plugin;
 	m_pluginList += plugin;

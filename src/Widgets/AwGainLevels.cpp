@@ -111,9 +111,9 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 		values = join_cols(a, b);
 		b = regspace(10, 10, 490);
 		values = join_cols(values, b);
-		b = regspace(500, 100, 5000);
+		b = regspace(500, 100, 15000);
 		values = join_cols(values, b);
-		unit = QString::fromUtf8("µV/cm");
+		unit = QString("µV/cm");
 		if (type == AwChannel::EEG)
 			value = 150;
 		else if (type == AwChannel::SEEG)
@@ -131,11 +131,13 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 	break;
 	case AwChannel::ICA:
 	{
-		vec a = regspace(1, 1, 9);
-		vec b = regspace(10, 1, 100000);
+		vec a = regspace(0.001, 0.1, 0.9);
+		vec b = regspace(1, 2, 9);
 		values = join_cols(a, b);
-		unit = QString("??/cm");
-		value = 310;
+		b = regspace(10, 1, 100000);
+		values = join_cols(a, b);
+		unit = QString("ica/cm");
+		value = 1;
 		gl->setValues(values);
 		gl->setValue(value);
 		gl->setUnit(unit);
@@ -150,14 +152,14 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 		values = join_cols(a, b);
 		if (type == AwChannel::MEG) {
 			value = 3;
-			unit = QString::fromUtf8("pT/cm");
+			unit = QString("pT/cm");
 		}
 		else if (type == AwChannel::GRAD) {
 			value = 200;
-			unit = QString::fromUtf8("pT/cm/cm");
+			unit = QString("pT/cm/cm");
 		}
 		else {
-			unit = QString::fromUtf8("pT/cm");
+			unit = QString("pT/cm");
 			value = 200;
 		}
 		gl->setValues(values);
@@ -174,7 +176,7 @@ AwGainLevel* AwGainLevels::createDefaultGainLevel(int type)
 		values = join_cols(values, b);
 		b = regspace(500, 100, 5000);
 		values = join_cols(values, b);
-		unit = QString::fromUtf8("??/cm");
+		unit = QString("??/cm");
 		value = 100;
 		gl->setValues(values);
 		gl->setValue(value);

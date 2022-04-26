@@ -10,7 +10,6 @@ SET(AnyWave_SRCS
 	./AwMapping.cpp
 	./AwBatch.cpp
 	./AwMATLAB.cpp
-    ./AwExportDial.cpp  
     ./AwNoGUI.cpp  
     ./AwOpenFileDialog.cpp
     ./main.cpp  
@@ -34,7 +33,6 @@ SET(AnyWave_SRCS
 	./CL/DedicatedDataServer.cpp
     ./Data/AwDataConnection.cpp  
     ./Data/AwDataServer.cpp  
-	./Data/AwMemoryMapper.cpp  
 	./Data/AwDataChunk.cpp
     ./Data/AwDataManager.cpp
     ./Carto/AwDockMapping.cpp  
@@ -47,10 +45,7 @@ SET(AnyWave_SRCS
     ./Display/AwChannelSelectionModel.cpp  
     ./Display/AwDisplay.cpp  
     ./Display/AwDisplaySetup.cpp  
-    ./Display/AwDisplaySetupManager.cpp  
-    ./Display/AwDSMSaveSetupUI.cpp  
     ./Display/AwNewViewDial.cpp  
-    ./Display/AwSaveAsNewSetupDialog.cpp  
     ./Display/AwScene.cpp  
     ./Display/AwSignalView.cpp  
     ./Display/AwViewSetup.cpp  
@@ -62,10 +57,17 @@ SET(AnyWave_SRCS
     ./IO/BIDS/AwBIDSGUI.cpp  
     ./IO/BIDS/AwBIDSItem.cpp  
     ./IO/BIDS/AwBIDSManager.cpp  
+    ./IO/BIDS/AwBIDSParsing.cpp
 	./IO/BIDS/AwBIDSGUIOptionsDialog.cpp
 	./IO/BIDS/AwBIDSConvert.cpp
 	./IO/BIDS/AwBIDSTsv.cpp
-	./IO/MEMIO/MEMIO.cpp
+    ./IO/BIDS/AwBIDSIO.cpp
+    ./IO/export/AwChannelsExportWizardPage.cpp
+    ./IO/export/AwExporter.cpp
+    ./IO/export/AwExportWizardDial.cpp
+    ./IO/export/AwFilterExportWizardPage.cpp
+    ./IO/export/AwMarkersExportWizardPage.cpp
+    ./IO/export/AwOutputFileWizardPage.cpp
     ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
     ./Marker/AwMarkerListModel.cpp  
@@ -104,6 +106,7 @@ SET(AnyWave_SRCS
 	./MATPy/GetProperties.cpp
     ./MATPy/DebugConnect.cpp
     ./MATPy/SendMarkers.cpp
+    ./MATPy/Run.cpp
     ./Montage/AwChannelListModel.cpp  
     ./Montage/AwMontageDial.cpp  
     ./Montage/AwMontageManager.cpp  
@@ -115,10 +118,8 @@ SET(AnyWave_SRCS
     ./Plugin/AwPluginManager.cpp  
     ./Plugin/AwMATPyCreator.cpp
     ./Process/AwConverter.cpp  
-    ./Process/AwExporter.cpp  
     ./Process/AwExporterMarkerModel.cpp  
     ./Process/AwExporterSelMarkers.cpp  
-    ./Process/AwExporterSettings.cpp  
     ./Process/AwExportSelChannels.cpp  
     ./Process/AwMarkerExporter.cpp  
     ./Process/AwMatlabScriptPlugin.cpp  
@@ -161,14 +162,16 @@ SET(AnyWave_SRCS
     ./ICA/AwICAComponents.cpp  
     ./ICA/AwICAManager.cpp  
     ./ICA/AwICAPanel.cpp  
-    ./ICA/AwICARejectButton.cpp  
     ./ICA/AwICASignalItem.cpp  
-    ./ICA/AwMappingButton.cpp  
     ./ICA/AwPanelItem.cpp
+    ./ICA/AwICAMappingItem.cpp
     ./ICA/AwSEEGMap.cpp  
     ./Prefs/AwPreferences.cpp  
     ./Prefs/AwPrefsDial.cpp  
     ./Prefs/AwSettings.cpp  
+    ./Prefs/AwAddVenvDial.cpp
+    ./Prefs/AwPython.cpp
+    ./Prefs/AwPythonSetttings.cpp
     ./Source/AwSourceChannel.cpp  
     ./Source/AwSourceManager.cpp)  
 
@@ -188,7 +191,6 @@ SET(HEADERS
 	./Batch/AwBatchRunner.h
 	./Data/AwDataConnection.h  
     ./Data/AwDataServer.h  
-	./Data/AwMemoryMapper.h  
 	./Data/AwDataChunk.h
 	./Data/AwDataManager.h
     ./Carto/AwDockMapping.h  
@@ -200,10 +202,7 @@ SET(HEADERS
     ./Display/AwCentralWidget.h  
     ./Display/AwSignalView.h  
     ./Display/AwScene.h  
-    ./Display/AwSaveAsNewSetupDialog.h  
     ./Display/AwNewViewDial.h  
-    ./Display/AwDSMSaveSetupUI.h  
-    ./Display/AwDisplaySetupManager.h  
     ./Display/AwDisplaySetup.h  
     ./Display/AwDisplay.h  
     ./Display/AwChannelSelectionModel.h  
@@ -216,7 +215,12 @@ SET(HEADERS
     ./IO/BIDS/AwBIDSManager.h  
     ./IO/BIDS/AwBIDSGUI.h  
 	./IO/BIDS/AwBIDSGUIOptionsDialog.h
-	./IO/MEMIO/MEMIO.h
+    ./IO/export/AwChannelsExportWizardPage.h
+    ./IO/export/AwExporter.h
+    ./IO/export/AwExportWizardDial.h
+    ./IO/export/AwFilterExportWizardPage.h
+    ./IO/export/AwMarkersExportWizardPage.h
+    ./IO/export/AwOutputFileWizardPage.h
     ./Marker/AwExtractTriggers.h  
     ./Marker/AwMarkersExportWidget.h  
     ./Marker/AwPickChannelsDial.h  
@@ -249,8 +253,6 @@ SET(HEADERS
     ./Process/AwTriggerEraser.h  
     ./Process/AwProcessLogManager.h  
     ./Process/AwProcessLog.h  
-    ./Process/AwExporter.h  
-    ./Process/AwExporterSettings.h  
     ./Process/AwExportSelChannels.h  
     ./Process/AwExporterSelMarkers.h  
     ./Process/AwExporterMarkerModel.h  
@@ -288,21 +290,22 @@ SET(HEADERS
     ./Widgets/AwAboutAnyWave.h  
 	./Widgets/AwVideoSettingsDial.h
     ./ICA/AwICAChannel.h  
-    ./ICA/AwMappingButton.h  
     ./ICA/AwICAPanel.h  
     ./ICA/AwPanelItem.h  
     ./ICA/AwICAManager.h  
     ./ICA/AwICAComponents.h  
     ./ICA/AwICASignalItem.h  
-    ./ICA/AwICARejectButton.h  
+    ./ICA/AwICAMappingItem.h
     ./ICA/AwSEEGMap.h  
     ./AwOpenFileDialog.h
-    ./AwExportDial.h  
     ./AnyWave.h  
     ./CL/AwCommandLogger.h
     ./Prefs/AwPreferences.h  
     ./Prefs/AwSettings.h  
     ./Prefs/AwPrefsDial.h  
+    ./Prefs/AwAddVenvDial.h
+    ./Prefs/AwPython.h
+    ./Prefs/AwPythonSettings.h
     ./Source/AwSourceChannel.h  
     ./Source/AwSourceManager.h)  
 
@@ -310,7 +313,6 @@ QT5_WRAP_CPP(MOC ${HEADERS})
 QT5_ADD_RESOURCES(AnyWave_QRC ${AW_RES_DIR}/AnyWave.qrc)
 
 SET(FORMS ./AnyWave.ui  
-    ./AwExportDial.ui  
     ./3DViewer/AwSEEGWidget.ui
 	./Batch/AwAddEditBatchDialog.ui
 	./Batch/AwBatchGUI.ui
@@ -323,9 +325,7 @@ SET(FORMS ./AnyWave.ui
     ./Carto/AwMappingWidget.ui  
     ./Debug/AwDebugLogWidget.ui  
     ./Display/AwChannelSelectionDial.ui  
-    ./Display/AwDSMSaveSetupUI.ui  
     ./Display/AwNewViewDial.ui  
-    ./Display/AwSaveAsNewSetupDialog.ui  
     ./Filter/AwFilterToolBar.ui  
     ./IO/BIDS/AwBIDSGUI.ui  
     ./Marker/AwExportMarkersWizard.ui  
@@ -345,7 +345,6 @@ SET(FORMS ./AnyWave.ui
     ./Process/TPUi.ui  
     ./Process/AwProcessLogWindow.ui  
     ./Process/AwProcessWidget.ui  
-    ./Process/AwExporterSettings.ui  
     ./Process/AwExportSelChannels.ui  
     ./Process/AwExporterSelMarkers.ui  
     ./Updater/AwDownloadGui.ui
@@ -362,7 +361,8 @@ SET(FORMS ./AnyWave.ui
     ./Widgets/AwTriggerParsingDialog.ui  
     ./Widgets/AwSelectTriggerChannelDialog.ui  
 	./Widgets/AwVideoSettingsDial.ui
-    ./Prefs/AwPrefsDial.ui)  
+    ./Prefs/AwPrefsDial.ui
+    ./Prefs/AwAddVenvDial.ui)
 
 QT5_WRAP_UI(UI ${FORMS})
 
@@ -379,29 +379,15 @@ AwMapping
 AwFiltering 
 AwMATLAB)
 
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
 INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
 
 SET(QT_LIBS Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Xml Qt5::Network Qt5::Svg Qt5::Concurrent Qt5::PrintSupport Qt5::Qml)
-IF(UNIX AND NOT APPLE)
-    ADD_EXECUTABLE(AnyWaveLinux ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
-    QT5_USE_MODULES(AnyWaveLinux Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-    TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} 
-       gomp ${MATIO_LIBRARY} ${BLAS_LIBRARIES} z qcustomplot tbb)
-    add_dependencies(AnyWaveLinux ${AW_LIBS})
-    INSTALL(TARGETS AnyWaveLinux PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_READ WORLD_EXECUTE DESTINATION ${CMAKE_INSTALL_PREFIX}) 
+if(APPLE)
+    include(anywave_mac.cmake)
 ELSE()
-    ADD_EXECUTABLE(AnyWaveMac ${AnyWave_SRCS} ${MOC} ${UI} ${AnyWave_QRC})
-    QT5_USE_MODULES(AnyWaveMac Core Gui Network Widgets Xml Concurrent Svg PrintSupport Qml)
-    MESSAGE(STATUS "Mac qwt: ${QWT_LIBRARIES}")
-    TARGET_LINK_LIBRARIES(AnyWaveMac ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} ${MATIO_LIBRARY} 
-       ${BLAS_LIBRARIES} z qcustomplot)
-    add_dependencies(AnyWaveMac ${AW_LIBS})
-    set_target_properties(AnyWaveMac PROPERTIES OUTPUT_NAME "anywavemac")
-    INSTALL(TARGETS AnyWaveMac DESTINATION ${APP_INSTALL_DIR})
+    include(anywave_linux.cmake)
 ENDIF()
 
-#TARGET_LINK_LIBRARIES(AnyWaveLinux ${AW_LIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES}  ${QT_LIBS} ${VTK_LIBRARIES} ${QWT_LIBRARIES} gomp ${MATIO_LIBRARY} ${OpenBLAS_LIB})
 
 
 

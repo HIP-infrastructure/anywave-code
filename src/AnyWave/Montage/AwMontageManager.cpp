@@ -99,55 +99,53 @@ AwChannelList AwMontageManager::makeSEEGBipolar(AwChannelList& channels)
 //end of statics
 
 
-QHash<QString, AwChannel *> AwMontageManager::cloneAsRecordedChannels()
-{
-	QHash<QString, AwChannel *> res;
-	auto channels = m_asRecorded.values();
-	for (auto c : channels)
-		if (c != nullptr)
-			res[c->name()] = c->duplicate();
-	return res;
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////::
 // Source/ICA specific
 
 void AwMontageManager::clearICA()
 {
-	// remove previous ICA channels from asRecorded
+	for (auto c : m_icaAsRecorded) 
+		m_asRecordedSharedPointerMap.remove(c->name());
+	foreach (auto const& c , m_channelsShrdPtrs) {
+		if (c->isICA() && c->isVirtual())
+			m_channelsShrdPtrs.removeAll(c);
+	}
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 	// DO NOT DELETE channels as they belong to a AwComponent instance
-	for (auto c : m_icaAsRecorded)
-		m_asRecorded.remove(c->name());
 	m_icaAsRecorded.clear();
-
-	// remove ICA channels from current montage
-	foreach(AwChannel *c, m_channels)
-		if (c->isICA())	{
-			m_channels.removeAll(c);
-			delete c;
-		}
-	// warn views about new montage
-	emit montageChanged(m_channels);
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 }
 
 void AwMontageManager::clearSource(int type)
 {
-	// remove Source of type 'type' from channels from asRecorded list
-	foreach (AwSourceChannel *c, m_sourceAsRecorded) {
+	foreach(AwSourceChannel * c, m_sourceAsRecorded) {
 		if (c->type() == type) {
-			m_asRecorded.remove(c->name());
+			m_asRecordedSharedPointerMap.remove(c->name());
 			m_sourceAsRecorded.removeAll(c);
 		}
 	}
+	foreach(auto const& c, m_channelsShrdPtrs) {
+		if (c->isSource() && c->type() == type)
+			m_channelsShrdPtrs.removeAll(c);
+	}
 
-	// remove Source channels of type 'type' from current montage
-	foreach (AwChannel *c, m_channels)
-		if (c->isSource() && c->type() == type)	{
-			m_channels.removeAll(c);
-			delete c;
-		}
-	// warn views about new montage
-	emit montageChanged(m_channels);
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+}
+
+void AwMontageManager::reorderChannels(const QStringList& labels)
+{
+	// build current order list 
+	QMap<QString, QSharedPointer<AwChannel>> map;
+	for (const auto& channel : m_channelsShrdPtrs) 
+		map.insert(channel->fullName(), channel);
+	AwSharedChannelList tmp;
+	for (const auto& l : labels) 
+		tmp.append(map.value(l));
+	m_channelsShrdPtrs = tmp;
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+	save(m_montagePath);
+
 }
 
 void AwMontageManager::addNewSources(int type)
@@ -155,15 +153,17 @@ void AwMontageManager::addNewSources(int type)
 	AwSourceManager *sm = AwSourceManager::instance();
 	clearSource(type);
 	AwSourceChannelList channels = sm->sources(type);
+
 	for (auto c : channels) {
-		AwSourceChannel *source = new AwSourceChannel(c);
-		m_sourceAsRecorded << c;
-		m_channels << source;
-		m_asRecorded[source->name()] = source;
+		if (m_asRecordedSharedPointerMap.contains(c->name()))
+			m_asRecordedSharedPointerMap.remove(c->name());
+		m_asRecordedSharedPointerMap.insert(c->name(), QSharedPointer<AwChannel>(c->duplicate()));
+		m_channelsShrdPtrs << QSharedPointer<AwChannel>(c->duplicate());
 	}
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+
 	emit montageChanged(m_channels);
 	AwMessageBox::information(0, tr("Source channels"), QString("%1 source channels added to the current montage.").arg(channels.size()));
-	AwDataManager::instance()->filterSettings().setBounds(type, sm->hp(type), sm->lp(type));
 }
 
 int AwMontageManager::loadICA()
@@ -198,7 +198,9 @@ int AwMontageManager::loadICA()
 
 int AwMontageManager::loadICA(const QString& path)
 {
+	// clear ICA should remove all ICA typed channels from as recorded list AND current montage.
 	clearICA();
+
 	AwICAManager *ica_man = AwICAManager::instance();
 	int count = 0;
 	try {
@@ -208,24 +210,20 @@ int AwMontageManager::loadICA(const QString& path)
 		AwMessageBox::critical(0, tr("ICA Components"),QString(tr("Failed to import ICA components: %1")).arg(e.errorString()));
 		return -1;
 	}
-	// add ICA components to asRecorded and current montage.
-	AwICAComponents **comps = ica_man->getAllComponents();
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (comps[i] == NULL)
-			continue;
-		count += comps[i]->components().size();
-		foreach(AwICAChannel *channel, comps[i]->components()) {
-			m_icaAsRecorded << channel;
-			AwICAChannel *newChan = new AwICAChannel(channel);
-			m_channels << newChan;
-			// add ica to as recorded
-			m_asRecorded[channel->name()] = channel;
-		}
-		AwDataManager::instance()->filterSettings().setFilterBounds(AwChannel::ICA, AwFilterBounds(comps[i]->type(), comps[i]->hpFilter(), comps[i]->lpFilter()));
-	}
 
+	AwICAChannelList icaChannels = ica_man->getChannelsOfAllComponents();
+	// put loaded ica channels into as recorded map and current montage
+	
+	for (auto ica : icaChannels) {
+		if (m_asRecordedSharedPointerMap.contains(ica->name()))
+			m_asRecordedSharedPointerMap.remove(ica->name());
+		m_asRecordedSharedPointerMap.insert(ica->name(), QSharedPointer<AwChannel>(ica->duplicate()));
+		m_channelsShrdPtrs << QSharedPointer<AwChannel>(ica->duplicate());
+	}
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+	setNewFilters(AwDataManager::instance()->filterSettings());
 	emit montageChanged(m_channels);
-	AwMessageBox::information(0, tr("ICA Components"), QString(tr("%1 components added to the current montage.").arg(count)));
+	AwMessageBox::information(0, tr("ICA Components"), QString(tr("%1 components added to the current montage.").arg(icaChannels.size())));
 	return 0;
 }
 
@@ -265,15 +263,17 @@ void AwMontageManager::scanForMontagesInDirectory(const QString& dir)
 	QStringList filter("*.mtg");
 	QDir montDir(dir);
 	montDir.setNameFilters(filter);
-	QStringList files = montDir.entryList();
+	auto files = montDir.entryInfoList();
 
 	m_localQuickMontages.clear();
 	m_localQuickMontagesHT.clear();
 
-	for (auto file : files) {
-		auto key = file.remove(".mtg");
-		m_localQuickMontages << key;
-		m_localQuickMontagesHT.insert(key, QString("%1/%2").arg(dir).arg(file));
+	for (const auto& file : files) {
+		auto key = file.fileName().remove(".mtg");
+		if (!m_localQuickMontages.contains(key)) {
+			m_localQuickMontages << key;
+			m_localQuickMontagesHT.insert(key, file.absoluteFilePath());
+		}
 	}
 	// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.
 	if (AwBIDSManager::isInstantiated()) {
@@ -285,6 +285,18 @@ void AwMontageManager::scanForMontagesInDirectory(const QString& dir)
 				auto key = fi.fileName().remove(".mtg");
 				m_localQuickMontages << key;
 				m_localQuickMontagesHT.insert(key, montage);
+			}
+			// scan bids dir
+			QStringList filter("*.mtg");
+			QDir montDir(AwDataManager::instance()->bidsDir());
+			montDir.setNameFilters(filter);
+			auto files = montDir.entryInfoList();
+			for (auto const& file : files) {
+				auto key = file.fileName().remove(".mtg");
+				if (!m_localQuickMontages.contains(key)) {
+					m_localQuickMontages << key;
+					m_localQuickMontagesHT.insert(key, file.absoluteFilePath());
+				}
 			}
 		}
 	}
@@ -333,7 +345,7 @@ void AwMontageManager::removeBadChannels(AwChannelList& list)
 void AwMontageManager::setNewFilters(const AwFilterSettings& settings)
 {
 	settings.apply(m_channels);
-	settings.apply(m_asRecorded.values());
+	settings.apply(AwChannel::toChannelList(m_asRecordedSharedPointerMap.values()));
 	settings.apply(AwDataManager::instance()->reader()->infos.channels());
 }
 
@@ -348,10 +360,8 @@ void AwMontageManager::clear()
 	clearICA();
 	clearSource(AwChannel::MEG);
 	clearSource(AwChannel::EEG);
-
-	while (!m_channels.isEmpty()) // delete current montage.
-		delete m_channels.takeLast();
-
+	m_channels.clear();
+	m_channelsShrdPtrs.clear();
 }
 
 void AwMontageManager::closeFile()
@@ -367,104 +377,73 @@ void AwMontageManager::closeFile()
 	clear();
 	m_montagePath = "";
 	m_badPath = "";
-	m_asRecorded.clear();
+	m_asRecordedSharedPointerMap.clear();
 }
 
 void AwMontageManager::newMontage(AwFileIO *reader)
 {
-	closeFile();
 	AwChannelList channels = reader->infos.channels();
-
+	m_channelsShrdPtrs.clear();
 	// init as recorded channels list
 	for (auto c : channels)  {
-		// insert in hash table
-		m_asRecorded[c->name()] = c;
-		// make a copy a as recorded channel and insert it in channels.
-		// do not insert Reference channels in default montage
-		if (!c->isReference())
-			m_channels << c->duplicate();
+		QSharedPointer<AwChannel> shrdChannel = QSharedPointer<AwChannel>(c->duplicate());
+		m_channelsShrdPtrs << shrdChannel;
+		m_asRecordedSharedPointerMap.insert(c->name(), QSharedPointer<AwChannel>(c->duplicate()));
+		if (!c->isReference()) 
+			m_channels << shrdChannel.get();
 	}
-
 	// check for .bad file
 	m_badChannelLabels.clear();
 	m_badPath = AwDataManager::instance()->badFilePath();
 	if (QFile::exists(m_badPath))
 		loadBadChannels();
-	
 	// check for local montages.
-	scanForMontagesInDirectory(AwDataManager::instance()->dataDir());
-	scanForMontagesInDirectory(AwDataManager::instance()->bidsDir());
-
-	// get bids channels tsv if we are in BIDS mode
-	// consider it the default montage.
-	// also get bad channels from tsv and use them.
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive()) {
-			// BEWARE: getChannelsTsvMontage() will build a montage based on what is found in TSV file.
-			// but TSV file does not contain all the information an AwChannel (miss the sampling rate at first)
-			auto defaultTsvMontage = bm->getChannelsTsvMontage();
-			if (!defaultTsvMontage.isEmpty()) {
-				AW_DESTROY_LIST(m_channels);
-				m_channels = defaultTsvMontage;
-				// check for bad channels
-				AwChannelList tmp;
-				m_badChannelLabels.clear();
-				for (auto c : defaultTsvMontage) {
-					// update corresponding as recorded bad status
-					auto asRecorded = m_asRecorded.value(c->name());
-					if (asRecorded) {
-						// copy information from as recorded
-						c->setSamplingRate(asRecorded->samplingRate());
-						c->setGain(asRecorded->gain());
-						c->setUnit(asRecorded->unit());
-						asRecorded->setBad(c->isBad());
-						asRecorded->setType(c->type());
-						if (c->isBad()) {
-							m_badChannelLabels.append(c->name());
+	scanForMontagesInDirectory(AwDataManager::instance()->currentMontageDir());
+	// check for .montage file
+	auto dm = AwDataManager::instance();
+	m_montagePath = dm->mtgFilePath();
+	if (QFile::exists(m_montagePath)) {
+		if (!loadMontage(m_montagePath)) {
+			AwMessageBox::critical(nullptr, tr("Montage"), tr("Failed to load .mtg file.\nDefault montage applied!"));
+			// reset to default (as recorded channels)
+			m_channelsShrdPtrs.clear();
+			// init as recorded channels list
+			for (auto c : channels) {
+				QSharedPointer<AwChannel> shrdChannel = QSharedPointer<AwChannel>(c->duplicate());
+				m_channelsShrdPtrs << shrdChannel;
+				if (!c->isReference())
+					m_channels << shrdChannel.get();
+			}
+			save(m_montagePath);
+		}
+	}
+	else {  // no default montage found => read channels.tsv if BIDS is active
+		if (AwBIDSManager::isInstantiated()) {
+			auto bm = AwBIDSManager::instance();
+			if (bm->isBIDSActive()) {
+				auto defaultTsvMontage = bm->getChannelsTsvMontage();
+				if (!defaultTsvMontage.isEmpty()) {
+					m_channels.clear();
+					m_channelsShrdPtrs.clear();
+					m_badChannelLabels.clear();
+					for (AwChannel *defaultChannel : defaultTsvMontage) {
+						if (m_asRecordedSharedPointerMap.contains(defaultChannel->name())) {
+							QSharedPointer<AwChannel> asRecorded = m_asRecordedSharedPointerMap.value(defaultChannel->name());
+							asRecorded->setType(defaultChannel->type());
+							asRecorded->setBad(defaultChannel->isBad());
+							if (asRecorded->isBad())
+								m_badChannelLabels << asRecorded->name();
+							m_channelsShrdPtrs.append(QSharedPointer<AwChannel>(asRecorded.get()->duplicate()));
 						}
 					}
-					else {  // not found in as recorded => should never happened
-						tmp << c;
-					}
-				}
-				saveBadChannels();
-				if (!tmp.isEmpty()) {
-					for (auto t : tmp) {
-						m_channels.removeAll(t);
-						delete t;
-					}
+					qDeleteAll(defaultTsvMontage);
+					saveBadChannels();
+					m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 				}
 			}
 		}
 	}
-
-	// check for .montage file
-	// BEWARE: if a .mtg exists, it will override the default TSV montage
-	auto dm = AwDataManager::instance();
-	m_montagePath = dm->mtgFilePath();
-
-	if (QFile::exists(m_montagePath))  {
-		if (!loadMontage(m_montagePath)) {
-
-			AwMessageBox::critical(NULL, tr("Montage"), tr("Failed to load autosaved .mtg file!"));
-		}
-	}
-	// check if filter settings is empty (this is the case when we open a new data file with no previous AnyWave processing)
-	if (AwDataManager::instance()->filterSettings().isEmpty()) {
-		AwDataManager::instance()->filterSettings().initWithChannels(m_channels);
-	}
 	setNewFilters(AwDataManager::instance()->filterSettings());
-
-	// check that none NULL channels are present in asRecorder nor m_channels
-	for (auto k : m_asRecorded.keys()) {
-		if (m_asRecorded.value(k) == Q_NULLPTR)
-			m_asRecorded.remove(k);
-	}
-	foreach(AwChannel *c, m_channels)
-		if (c == Q_NULLPTR)
-			m_channels.removeAll(c);
-
 	emit montageChanged(m_channels);
 }
 
@@ -505,22 +484,36 @@ void AwMontageManager::loadBadChannels()
 			m_badChannelLabels << stream.readLine().trimmed();
 		file.close();
 	}
+	if (m_badChannelLabels.isEmpty())
+		return;
+
 	// reset as recorded channels bad status
-	for (auto chan : m_asRecorded.values())
+	for (const auto& chan : m_asRecordedSharedPointerMap.values())
 		chan->setBad(false);
-	for (auto label : m_badChannelLabels) {
-		AwChannel *chan = m_asRecorded.value(label);
-		if (chan)
-			chan->setBad(true);
+	// update bad status on bad labels list
+	for (const auto& label : m_badChannelLabels) {
+		auto asRecorded = m_asRecordedSharedPointerMap.value(label);
+		if (!asRecorded.isNull()) 
+			asRecorded->setBad(true);
 	}
-	foreach(AwChannel *chan, m_channels) {
-		AwChannel *asRecorded =  m_asRecorded.value(chan->name());
-		if (asRecorded)  
-			if (asRecorded->isBad()) {
-				m_channels.removeAll(chan);
-				delete chan;
-			}
+	// now update current montage
+	AwSharedPointerChannelList tmp;
+	for (const auto& channel : m_channelsShrdPtrs) {
+		auto asRecorded = m_asRecordedSharedPointerMap.value(channel->name());
+		if (!asRecorded.isNull())
+			if (asRecorded->isBad())
+				tmp << channel;
 	}
+	// check for references of channels (are they set to bad?)
+	for (const auto& channel : m_channelsShrdPtrs) {
+		auto asRecorded = m_asRecordedSharedPointerMap.value(channel->referenceName());
+		if (!asRecorded.isNull())
+			if (asRecorded->isBad())
+				tmp << channel;
+	}
+	for (const auto& t : tmp)
+		m_channelsShrdPtrs.removeAll(t);
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 }
 
 void AwMontageManager::saveCurrentMontage()
@@ -535,9 +528,13 @@ void AwMontageManager::processEvent(QSharedPointer<AwEvent> e)
 	{
 	case AwEvent::LoadICAMatFile:
 	{
+		emit log("Received event to load ICA .mat file");
 		QStringList args = data.value("args").toStringList();
-		Q_ASSERT(args.size());
-		loadICA(args.first());
+		if (args.isEmpty()) 
+		   emit log("Empty args. Skipping.");
+		QString file = args.first();
+		if (QFile::exists(file))
+			loadICA(file);
 	}
 		break;
 	}
@@ -551,35 +548,34 @@ void AwMontageManager::showInterface()
 	AwMontageDial ui;
 
 	if (ui.exec() == QDialog::Accepted) {
-		// destroy current montage
-		while (!m_channels.isEmpty())
-			delete m_channels.takeFirst();
+		m_channels.clear();
 
 		// Get as recorded channels and check if their types and bad status have changed.
 		for (auto c : ui.asRecordedChannels()) {
-			auto asRecorded = m_asRecorded.value(c->name()); 
-			if (asRecorded) {
-				asRecorded->setBad(c->isBad());
-				asRecorded->setType(c->type());
+			auto asRecordedShrd = m_asRecordedSharedPointerMap.value(c->name());
+			if (!asRecordedShrd.isNull()) {
+				asRecordedShrd->setBad(c->isBad());
+				asRecordedShrd->setType(c->type());
 			}
 		}
 		
 		// now browse channels defined as montage and instantiate them properly 
 		QStringList labels = AwChannel::getLabels(ui.channels());
+		m_channelsShrdPtrs.clear();
 		for (int i = 0; i < labels.size(); i++) {
-			auto asRecorded = m_asRecorded.value(labels.value(i));
-			if (asRecorded) {
-				if (asRecorded->isVirtual())
-					m_channels << static_cast<AwVirtualChannel *>(asRecorded)->duplicate();
-				else
-					m_channels << asRecorded->duplicate();
+			auto asRecorded = m_asRecordedSharedPointerMap.value(labels.value(i));
+			if (!asRecorded.isNull()) {
+				QSharedPointer<AwChannel> newChannel = QSharedPointer<AwChannel>(asRecorded.get()->duplicate());
 				// copy properties from ui montage channels to newly instantiated channels
-				m_channels.last()->setReferenceName(ui.channels().at(i)->referenceName());
-				m_channels.last()->setColor(ui.channels().at(i)->color());
-				m_channels.last()->setLowFilter(ui.channels().at(i)->lowFilter());
-				m_channels.last()->setHighFilter(ui.channels().at(i)->highFilter());
+				newChannel->setReferenceName(ui.channels().at(i)->referenceName());
+				newChannel->setColor(ui.channels().at(i)->color());
+				newChannel->setLowFilter(ui.channels().at(i)->lowFilter());
+				newChannel->setHighFilter(ui.channels().at(i)->highFilter());
+				newChannel->setNotch(ui.channels().at(i)->notch());
+				m_channelsShrdPtrs << newChannel;
 			}
 		}
+		m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 		m_badChannelLabels = ui.badLabels();
 		save(m_montagePath);
 		saveBadChannels();
@@ -588,10 +584,10 @@ void AwMontageManager::showInterface()
 	}
 }
 
-bool AwMontageManager::save(const QString& filename, const AwChannelList& channels)
+bool AwMontageManager::save(const QString& filename, const AwChannelList& channels, const AwChannelList& asRecordedChannels)
 {
 	try {
-		AwMontage::save(filename, channels);
+		AwMontage::save(filename, channels, asRecordedChannels);
 	}
 	catch (const AwException& e) {
 		return false;
@@ -601,7 +597,8 @@ bool AwMontageManager::save(const QString& filename, const AwChannelList& channe
 
 bool AwMontageManager::save(const QString& filename)
 {
-    bool res =  save(filename, m_channels);
+    //bool res =  save(filename, m_channels, m_asRecordedChannels);
+	bool res = save(filename, m_channels, AwChannel::toChannelList(m_asRecordedSharedPointerMap.values()));
 	if (!res)
 		emit log(QString("saving %1 failed."));
 	return res;
@@ -633,39 +630,47 @@ AwChannelList AwMontageManager::load(const QString& path)
 {
 
 	AwChannelList channels, res;
+	QMap<QString, int> asRecordedMap;
 	try {
-		channels = AwMontage::load(path);
+		channels = AwMontage::load(path, &asRecordedMap);
 	}
 	catch (const AwException& e)
 	{
 		AwMessageBox::information(0, tr("Error"), e.errorString());
-		return channels;
+		return res;
 	}
 
-	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
-	foreach(AwChannel *c, channels) {
-		if (!m_asRecorded.contains(c->name())) {
-			channels.removeAll(c);
-			delete c;
-			continue;
+	if (asRecordedMap.size()) {
+		// got as recorded info from .mtg file
+		bool changed = false;
+		for (auto const& label : asRecordedMap.keys()) {
+			auto asRecorded = m_asRecordedSharedPointerMap.value(label);
+			if (asRecorded.isNull())
+				continue;
+			if (asRecorded->type() != asRecordedMap.value(label)) {
+				changed = true;
+				asRecorded->setType(asRecordedMap.value(label));
+			}
 		}
-		// search for a match in as recorded
-		auto asRecorded = m_asRecorded.value(c->name());
-		if (asRecorded) {
-			// Change asrecorded type to match the one in .mtg
+	}
+	// duplicate channels and put them in the montage if they match the settings (bad, references, etc.)
+	for (auto c : channels) {
+		auto asRecorded = m_asRecordedSharedPointerMap.value(c->name());
+		if (!asRecorded.isNull()) {
+			// change type to match the one coming from mtg file
 			asRecorded->setType(c->type());
 			if (asRecorded->isBad())
 				continue;
 			if (c->hasReferences() && c->referenceName() != "AVG") {
-				auto asRecordedRef = m_asRecorded.value(c->referenceName());
-				if (asRecordedRef) {
-					if (asRecorded->isBad())
+				auto asRecordedRef = m_asRecordedSharedPointerMap.value(c->referenceName());
+				if (!asRecordedRef.isNull()) {
+					if (asRecordedRef->isBad())
 						continue;
 				}
-				else  // reference not found => remove it
+				else  // reference not found, remove it
 					c->clearRefName();
 			}
-			// instantiante from as recorded
+			// instiante the channel from as recorded channels to current montage
 			auto newChan = asRecorded->duplicate();
 			// copy settings set in .mtg file
 			newChan->setColor(c->color());
@@ -674,7 +679,7 @@ AwChannelList AwMontageManager::load(const QString& path)
 			newChan->setReferenceName(c->referenceName());
 			res << newChan;
 		}
-		else {  // not present in as recorded
+		else {  // channel not found in as recorded (could be AVG or other Virtual)
 			// checking for special names
 			if (c->name() == "SEEG_AVG") {
 				res << new AwAVGChannel(AwChannel::SEEG);
@@ -682,26 +687,19 @@ AwChannelList AwMontageManager::load(const QString& path)
 			else if (c->name() == "EEG_AVG") {
 				res << new AwAVGChannel(AwChannel::EEG);
 			}
-			else if(c->name() == "MEG_AVG") {
+			else if (c->name() == "MEG_AVG") {
 				res << new AwAVGChannel(AwChannel::MEG);
 			}
 		}
 	}
-
-	while (!channels.isEmpty())
-		delete channels.takeFirst();
-
 	return res;
 }
 
 bool AwMontageManager::apply(const QString& path)
 {
-	// deleting current channels.
-	while (!m_channels.isEmpty())
-		delete m_channels.takeLast();
-
-	m_channels = load(path);
-	return true;
+	m_channelsShrdPtrs = AwChannel::toSharedPointerList(load(path));
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+	return !m_channelsShrdPtrs.isEmpty();
 }
 
 /// SCRIPTING support
@@ -781,11 +779,12 @@ bool AwMontageManager::loadMontage(const QString& path)
 	if (path.isEmpty())
 		return false;
 
-	if (!apply(path)) {
-		QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
-		return false;
-	}
-	return true;
+	//if (!apply(path)) {
+	//	QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
+	//	return false;
+	//}
+	return apply(path);
+//	return true;
 }
 
 
@@ -793,29 +792,29 @@ bool AwMontageManager::loadMontage(const QString& path)
 void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 {
 	bool updateMontage = false;
-	AwChannelList toDelete;
-	foreach(QString label, labels)	{
-		if (!m_asRecorded.contains(label))
+	for (const auto& label : labels) {
+		if (!m_asRecordedSharedPointerMap.contains(label))
 			continue;
-		auto asRecorded = m_asRecorded.value(label);
+		auto asRecorded = m_asRecordedSharedPointerMap.value(label);
 		asRecorded->setBad(true);
-		m_badChannelLabels << label;
-		foreach(AwChannel *c, m_channels) {
-			if (c->name() == asRecorded->name() || c->referenceName() == asRecorded->name()) {
-				m_channels.removeAll(c);
-				toDelete << c;
-				updateMontage = true;
-			}
+		if (!m_badChannelLabels.contains(label))
+			m_badChannelLabels << label;
+		AwSharedPointerChannelList tmp;
+		for (const auto& channel : m_channelsShrdPtrs) {
+			if (channel->name() == label || channel->referenceName() == label)
+				tmp << channel;
+		}
+		if (!tmp.isEmpty()) {
+			updateMontage = true;
+			for (const auto& t : tmp)
+				m_channelsShrdPtrs.removeAll(t);
 		}
 	}
-	while (!toDelete.isEmpty())
-		delete toDelete.takeFirst();
-
 	if (updateMontage) {
 		emit badChannelsSet(m_badChannelLabels);
+		m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 		emit montageChanged(m_channels);
 	}
-
 	saveBadChannels();
 }
 
@@ -826,36 +825,36 @@ void AwMontageManager::markChannelsAsBad(const QStringList& labels)
 // compute new montage.
 void AwMontageManager::markChannelAsBad(const QString& channelName, bool bad)
 {
-	auto asRecorded = m_asRecorded.value(channelName);
-	if (asRecorded) { // channel found
-		AwChannelList toDelete;
-		if (bad) { // set it to bad
-			if (!m_badChannelLabels.contains(channelName))
-				m_badChannelLabels << channelName;
+	auto asRecorded = m_asRecordedSharedPointerMap.value(channelName);
+	if (asRecorded.isNull())
+		return;
 
-			asRecorded->setBad(true);
-			bool updateMontage = false;
-			foreach (AwChannel *c, m_channels) { // check in montage for reference to channelName. If any reference found, remove channel from montage.
-				if (c->name() == asRecorded->name() || c->referenceName() == asRecorded->name()) {
-					m_channels.removeAll(c);
-					toDelete << c;
-					updateMontage = true;
-				}
-			}
-			emit badChannelsSet(m_badChannelLabels);
-			if (updateMontage) {
-				emit montageChanged(m_channels);
+	if (bad) {
+		if (!m_badChannelLabels.contains(channelName))
+			m_badChannelLabels << channelName;
+		asRecorded->setBad(true);
+		bool updateMontage = false;
+		AwSharedPointerChannelList tmp;
+		for (const auto& c : m_channelsShrdPtrs) {
+			if (c->name() == channelName || c->referenceName() == channelName) {
+				tmp << c;
+				updateMontage = true;
 			}
 		}
-		else { // set it to not bad!
-			m_badChannelLabels.removeAll(channelName);
-			asRecorded->setBad(false);
+		if (updateMontage) {
 			emit badChannelsSet(m_badChannelLabels);
+			for (const auto& t : tmp)
+				m_channelsShrdPtrs.removeAll(t);
+			m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+			emit montageChanged(m_channels);
 		}
-		while (!toDelete.isEmpty())
-			delete toDelete.takeFirst();
-		saveBadChannels();
 	}
+	else { // from bad to not bad
+		m_badChannelLabels.removeAll(channelName);
+		asRecorded->setBad(false);
+		emit badChannelsSet(m_badChannelLabels);
+	}
+	saveBadChannels();
 }
 
 //
@@ -867,7 +866,8 @@ void AwMontageManager::addChannelToAsRecorded(AwChannel *channel)
 	// si le canal n'est pas de source virtual on ne fait rien
 	if (!channel->isVirtual())
 		return;
-	m_asRecorded[channel->name()] = channel;
+//	m_asRecorded[channel->name()] = channel;
+	m_asRecordedSharedPointerMap.insert(channel->name(), QSharedPointer<AwChannel>(channel->duplicate()));
 }
 
 
@@ -937,15 +937,15 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 //
 void AwMontageManager::addChannelsByName(AwChannelList &channelsToAdd)
 {
-	foreach (AwChannel *c, channelsToAdd)	{
-		if (!m_asRecorded.contains(c->name()))
+	for (auto c : channelsToAdd) {
+		if (!m_asRecordedSharedPointerMap.contains(c->name()))
 			continue;
-		auto asRecorded = m_asRecorded.value(c->name());
+		auto asRecorded = m_asRecordedSharedPointerMap.value(c->name());
 		if (asRecorded->isBad())
 			continue;
-		m_channels << asRecorded->duplicate();
-
+		m_channelsShrdPtrs << QSharedPointer<AwChannel>(c->duplicate());
 	}
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
 	emit montageChanged(m_channels);
 }
 
@@ -955,27 +955,23 @@ void AwMontageManager::buildNewMontageFromChannels(const AwChannelList& channels
 {
 	if (channels.isEmpty())
 		return;
-	AwChannelList newMontage; // check the channels against the as recorded ones and also check the bad status.
+	AwSharedPointerChannelList newMontage;
 	for (auto c : channels) {
-		if (!m_asRecorded.contains(c->name()))
+		if (!m_asRecordedSharedPointerMap.contains(c->name()))
 			continue;
-		auto asRecorded = m_asRecorded.value(c->name());
-		// do not add a bad channel in the montage
+		auto asRecorded = m_asRecordedSharedPointerMap.value(c->name());
 		if (asRecorded->isBad())
 			continue;
-		if (c->hasReferences() && m_asRecorded.contains(c->referenceName())) { // do not add the channel if the reference channel is bad.
-			if (m_asRecorded.value(c->referenceName())->isBad())
+		if (c->hasReferences() && m_asRecordedSharedPointerMap.contains(c->referenceName())) {
+			if (m_asRecordedSharedPointerMap.value(c->name())->isBad())
 				continue;
 		}
-
-		newMontage << c->duplicate();
+		newMontage << QSharedPointer<AwChannel>(c->duplicate());
 	}
-	if (!newMontage.isEmpty()) {
-		//clear();
-		while (!m_channels.isEmpty())
-			delete m_channels.takeFirst();
-		m_channels = newMontage;
-		emit montageChanged(m_channels);
-		save(m_montagePath);
-	}
+	if (newMontage.isEmpty())
+		return;
+	m_channelsShrdPtrs = newMontage;
+	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+	save(m_montagePath);
+	emit montageChanged(m_channels);
 }

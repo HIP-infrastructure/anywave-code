@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwTopoWidgetSettings.h"
 #include "ui_AwTopoWidgetSettings.h"
-#include <graphics/AwColorMap.h>
+#include <widget/AwColorMap.h>
 
 AwTopoWidgetSettings::AwTopoWidgetSettings(AwTopoWidget *widget, QWidget *parent)
 	: QDialog(parent)

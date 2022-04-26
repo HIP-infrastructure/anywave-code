@@ -41,7 +41,8 @@ MergeFile::~MergeFile()
 void MergeFile::destroyFileReader(AwFileIO *r)
 {
 	r->cleanUpAndClose();
-	r->plugin()->deleteInstance(r);
+//	r->plugin()->deleteInstance(r);
+	delete r;
 }
 
 void MergeFile::run()
@@ -122,7 +123,8 @@ void MergeFile::run()
 	writer->writeData(&merged);
 	emit progressChanged(tr("Ok."));
 	writer->cleanUpAndClose();
-	m_adesPlugin->deleteInstance(writer);
+	//m_adesPlugin->deleteInstance(writer);
+	delete writer;
 	destroyFileReader(fr1);
 	destroyFileReader(fr2);
 }

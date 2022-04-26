@@ -1,36 +1,31 @@
-// AnyWave
-// Copyright (C) 2013-2021  INS UMR 1106
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// Academic License - for use in teaching, academic research, and meeting
+// course requirements at degree granting institutions only.  Not for
+// government, commercial, or other organizational use.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// sobi_coder.cpp
 //
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// Code generation for function 'sobi_coder'
+//
 
 // Include files
 #include "sobi_coder.h"
 #include "mtimes.h"
+#include "pca.h"
 #include "pinv.h"
 #include "rt_nonfinite.h"
+#include "sobi_coder_data.h"
+#include "sobi_coder_initialize.h"
 #include "svd.h"
 #include "coder_array.h"
 #include "mkl_cblas.h"
-#include "rt_nonfinite.h"
 #include <cmath>
 
 // Function Definitions
-void sobi_coder(coder::array<double, 2U> &data, coder::array<double, 2U> &mixing,
+void sobi_coder(coder::array<double, 2U> &data, double ncomps,
+                coder::array<double, 2U> &mixing,
                 coder::array<double, 2U> &unmixing)
 {
-  CBLAS_TRANSPOSE b_t;
-  CBLAS_TRANSPOSE t;
   coder::array<double, 2U> C;
   coder::array<double, 2U> Q;
   coder::array<double, 2U> S;
@@ -39,28 +34,34 @@ void sobi_coder(coder::array<double, 2U> &data, coder::array<double, 2U> &mixing
   coder::array<double, 2U> V1;
   coder::array<double, 2U> a;
   coder::array<double, 2U> b_data;
+  coder::array<double, 2U> eigenvectors;
+  coder::array<double, 2U> pca_data;
   coder::array<double, 2U> r;
   coder::array<double, 2U> r1;
   coder::array<double, 1U> s;
   coder::array<double, 1U> temp;
-  double b_k;
+  double bsum;
   int N;
-  int i;
-  int i1;
+  int firstBlockLength;
+  int hi;
+  int ib;
   int k;
-  int loop_ub;
+  int lastBlockLength;
   int m;
+  int nblocks;
   int npages;
-  int u1;
-  int vlen;
+  int xblockoffset;
+  int xi;
   int xpageoffset;
   boolean_T p;
+  boolean_T pca_applied;
 
-  //  sobi() - Second Order Blind Identification (SOBI) by joint diagonalization of 
-  //           correlation  matrices. THIS CODE ASSUMES TEMPORALLY CORRELATED SIGNALS, 
-  //           and uses correlations across times in performing the signal separation.  
-  //           Thus, estimated time delayed covariance matrices must be nonsingular  
-  //           for at least some time delays.
+  //  sobi() - Second Order Blind Identification (SOBI) by joint diagonalization
+  //  of
+  //           correlation  matrices. THIS CODE ASSUMES TEMPORALLY CORRELATED
+  //           SIGNALS, and uses correlations across times in performing the
+  //           signal separation. Thus, estimated time delayed covariance
+  //           matrices must be nonsingular for at least some time delays.
   //  Usage:
   //          >> winv = sobi(data);
   //          >> [winv,act] = sobi(data,n,p);
@@ -72,13 +73,14 @@ void sobi_coder(coder::array<double, 2U> &data, coder::array<double, 2U> &mixing
   //          n - number of sources {Default: n=m}
   //          p - number of correlation matrices to be diagonalized
   //              {Default: min(100, N/3)} Note that for non-ideal data,
-  //              the authors strongly recommend using at least 100 time delays. 
+  //              the authors strongly recommend using at least 100 time delays.
   //
   //  Outputs:
   //    winv - Matrix of size [m,n], an estimate of the *mixing* matrix. Its
   //           columns are the component scalp maps. NOTE: This is the inverse
-  //           of the usual ICA unmixing weight matrix. Sphering (pre-whitening), 
-  //           used in the algorithm, is incorporated into winv. i.e.,
+  //           of the usual ICA unmixing weight matrix. Sphering
+  //           (pre-whitening), used in the algorithm, is incorporated into
+  //           winv. i.e.,
   //
   //              >> icaweights = pinv(winv); icasphere = eye(m);
   //
@@ -89,16 +91,18 @@ void sobi_coder(coder::array<double, 2U> &data, coder::array<double, 2U> &mixing
   //              >> act = pinv(winv) * data;
   //
   //  Authors:  A. Belouchrani and A. Cichocki (references: See function body)
-  //  Note:     Adapted by Arnaud Delorme and Scott Makeig to process data epochs by 
+  //  Note:     Adapted by Arnaud Delorme and Scott Makeig to process data
+  //  epochs by
   //            computing covariances while respecting epoch boundaries.
   //  REFERENCES:
-  //  A. Belouchrani, K. Abed-Meraim, J.-F. Cardoso, and E. Moulines, ``Second-order 
-  //   blind separation of temporally correlated sources,'' in Proc. Int. Conf. on 
-  //   Digital Sig. Proc., (Cyprus), pp. 346--351, 1993.
+  //  A. Belouchrani, K. Abed-Meraim, J.-F. Cardoso, and E. Moulines,
+  //  ``Second-order
+  //   blind separation of temporally correlated sources,'' in Proc. Int. Conf.
+  //   on Digital Sig. Proc., (Cyprus), pp. 346--351, 1993.
   //
-  //   A. Belouchrani and K. Abed-Meraim, ``Separation aveugle au second ordre de 
-  //   sources correlees,'' in  Proc. Gretsi, (Juan-les-pins),
-  //   pp. 309--312, 1993.
+  //   A. Belouchrani and K. Abed-Meraim, ``Separation aveugle au second ordre
+  //   de sources correlees,'' in  Proc. Gretsi, (Juan-les-pins), pp. 309--312,
+  //   1993.
   //
   //   A. Belouchrani, and A. Cichocki,
   //   Robust whitening procedure in blind source separation context,
@@ -106,204 +110,232 @@ void sobi_coder(coder::array<double, 2U> &data, coder::array<double, 2U> &mixing
   //
   //   A. Cichocki and S. Amari,
   //   Adaptive Blind Signal and Image Processing, Wiley,  2003.
-  //  Authors note: For non-ideal data, use at least p=100 the time-delayed covariance matrices. 
+  //  Authors note: For non-ideal data, use at least p=100 the time-delayed
+  //  covariance matrices.
   N = data.size(1);
   m = data.size(0);
-
+  eigenvectors.set_size(0, 0);
+  pca_applied = false;
+  if (data.size(0) > ncomps) {
+    pca_applied = true;
+    pca(data, ncomps, pca_data, eigenvectors);
+    N = pca_data.size(1);
+    m = pca_data.size(0);
+    data.set_size(pca_data.size(0), pca_data.size(1));
+    nblocks = pca_data.size(0) * pca_data.size(1);
+    for (ib = 0; ib < nblocks; ib++) {
+      data[ib] = pca_data[ib];
+    }
+  }
   // n=m; % Source detection (hum...)
-  u1 = static_cast<int>(std::ceil(static_cast<double>(data.size(1)) / 3.0));
-
   //  Number of time delayed correlation matrices to be diagonalized
   //
   //  Make the data zero mean
   //
-  xpageoffset = data.size(1);
-  loop_ub = data.size(0);
+  nblocks = data.size(1);
+  lastBlockLength = data.size(0);
   b_data.set_size(data.size(1), data.size(0));
-  for (i = 0; i < loop_ub; i++) {
-    for (i1 = 0; i1 < xpageoffset; i1++) {
-      b_data[i1 + b_data.size(0) * i] = data[i + data.size(0) * i1];
+  for (ib = 0; ib < lastBlockLength; ib++) {
+    for (xi = 0; xi < nblocks; xi++) {
+      b_data[xi + b_data.size(0) * ib] = data[ib + data.size(0) * xi];
     }
   }
-
-  vlen = b_data.size(0);
   if ((b_data.size(0) == 0) || (b_data.size(1) == 0)) {
     r.set_size(1, b_data.size(1));
-    xpageoffset = b_data.size(1);
-    for (i = 0; i < xpageoffset; i++) {
-      r[i] = 0.0;
+    nblocks = b_data.size(1);
+    for (ib = 0; ib < nblocks; ib++) {
+      r[ib] = 0.0;
     }
   } else {
     npages = b_data.size(1);
     r.set_size(1, b_data.size(1));
-    for (loop_ub = 0; loop_ub < npages; loop_ub++) {
-      xpageoffset = loop_ub * b_data.size(0);
-      r[loop_ub] = b_data[xpageoffset];
-      for (k = 2; k <= vlen; k++) {
-        r[loop_ub] = r[loop_ub] + b_data[(xpageoffset + k) - 1];
+    if (b_data.size(0) <= 1024) {
+      firstBlockLength = b_data.size(0);
+      lastBlockLength = 0;
+      nblocks = 1;
+    } else {
+      firstBlockLength = 1024;
+      nblocks = b_data.size(0) / 1024;
+      lastBlockLength = b_data.size(0) - (nblocks << 10);
+      if (lastBlockLength > 0) {
+        nblocks++;
+      } else {
+        lastBlockLength = 1024;
+      }
+    }
+    for (xi = 0; xi < npages; xi++) {
+      xpageoffset = xi * b_data.size(0);
+      r[xi] = b_data[xpageoffset];
+      for (k = 2; k <= firstBlockLength; k++) {
+        r[xi] = r[xi] + b_data[(xpageoffset + k) - 1];
+      }
+      for (ib = 2; ib <= nblocks; ib++) {
+        xblockoffset = xpageoffset + ((ib - 1) << 10);
+        bsum = b_data[xblockoffset];
+        if (ib == nblocks) {
+          hi = lastBlockLength;
+        } else {
+          hi = 1024;
+        }
+        for (k = 2; k <= hi; k++) {
+          bsum += b_data[(xblockoffset + k) - 1];
+        }
+        r[xi] = r[xi] + bsum;
       }
     }
   }
-
-  i = r.size(0) * r.size(1);
   r.set_size(1, r.size(1));
-  xpageoffset = i - 1;
-  for (i = 0; i <= xpageoffset; i++) {
-    r[i] = r[i] / static_cast<double>(b_data.size(0));
+  nblocks = r.size(1) - 1;
+  for (ib = 0; ib <= nblocks; ib++) {
+    r[ib] = r[ib] / static_cast<double>(b_data.size(0));
   }
-
   temp.set_size(r.size(1));
-  xpageoffset = r.size(1);
-  for (i = 0; i < xpageoffset; i++) {
-    temp[i] = r[i];
+  nblocks = r.size(1);
+  for (ib = 0; ib < nblocks; ib++) {
+    temp[ib] = r[ib];
   }
-
-  vlen = temp.size(0);
-  npages = data.size(1);
-  V.set_size(temp.size(0), data.size(1));
-  xpageoffset = -1;
-  for (loop_ub = 0; loop_ub < npages; loop_ub++) {
-    for (k = 0; k < vlen; k++) {
-      xpageoffset++;
-      V[xpageoffset] = temp[k];
+  npages = temp.size(0);
+  V.set_size(temp.size(0), N);
+  firstBlockLength = -1;
+  for (nblocks = 0; nblocks < N; nblocks++) {
+    for (lastBlockLength = 0; lastBlockLength < npages; lastBlockLength++) {
+      V[(firstBlockLength + lastBlockLength) + 1] = temp[lastBlockLength];
     }
+    firstBlockLength += npages;
   }
-
-  vlen = data.size(0) - 1;
-  npages = data.size(1) - 1;
+  npages = data.size(0) - 1;
+  firstBlockLength = data.size(1) - 1;
   V.set_size(data.size(0), data.size(1));
-  for (i = 0; i <= npages; i++) {
-    for (i1 = 0; i1 <= vlen; i1++) {
-      V[i1 + V.size(0) * i] = data[i1 + data.size(0) * i] - V[i1 + V.size(0) * i];
+  for (ib = 0; ib <= firstBlockLength; ib++) {
+    for (xi = 0; xi <= npages; xi++) {
+      V[xi + V.size(0) * ib] =
+          data[xi + data.size(0) * ib] - V[xi + V.size(0) * ib];
     }
   }
-
-  xpageoffset = V.size(1);
-  for (i = 0; i < xpageoffset; i++) {
-    loop_ub = V.size(0);
-    for (i1 = 0; i1 < loop_ub; i1++) {
-      data[i1 + data.size(0) * i] = V[i1 + V.size(0) * i];
+  nblocks = V.size(1);
+  for (ib = 0; ib < nblocks; ib++) {
+    lastBlockLength = V.size(0);
+    for (xi = 0; xi < lastBlockLength; xi++) {
+      data[xi + data.size(0) * ib] = V[xi + V.size(0) * ib];
     }
   }
-
   //
   //  Pre-whiten the data based directly on SVD
   //
-  xpageoffset = data.size(1);
-  loop_ub = data.size(0);
+  nblocks = data.size(1);
+  lastBlockLength = data.size(0);
   b_data.set_size(data.size(1), data.size(0));
-  for (i = 0; i < loop_ub; i++) {
-    for (i1 = 0; i1 < xpageoffset; i1++) {
-      b_data[i1 + b_data.size(0) * i] = data[i + data.size(0) * i1];
+  for (ib = 0; ib < lastBlockLength; ib++) {
+    for (xi = 0; xi < nblocks; xi++) {
+      b_data[xi + b_data.size(0) * ib] = data[ib + data.size(0) * xi];
     }
   }
-
-  vlen = b_data.size(0) * b_data.size(1);
+  npages = b_data.size(0) * b_data.size(1);
   p = true;
-  for (k = 0; k < vlen; k++) {
-    if ((!p) || (rtIsInf(b_data[k]) || rtIsNaN(b_data[k]))) {
+  for (k = 0; k < npages; k++) {
+    if ((!p) || (std::isinf(b_data[k]) || std::isnan(b_data[k]))) {
       p = false;
     }
   }
-
   if (p) {
     coder::internal::svd(b_data, V, s, C);
   } else {
     r1.set_size(b_data.size(0), b_data.size(1));
-    xpageoffset = b_data.size(0) * b_data.size(1);
-    for (i = 0; i < xpageoffset; i++) {
-      r1[i] = 0.0;
+    nblocks = b_data.size(0) * b_data.size(1);
+    for (ib = 0; ib < nblocks; ib++) {
+      r1[ib] = 0.0;
     }
-
     coder::internal::svd(r1, U1, s, V1);
     V.set_size(U1.size(0), U1.size(1));
-    xpageoffset = U1.size(0) * U1.size(1);
-    for (i = 0; i < xpageoffset; i++) {
-      V[i] = rtNaN;
+    nblocks = U1.size(0) * U1.size(1);
+    for (ib = 0; ib < nblocks; ib++) {
+      V[ib] = rtNaN;
     }
-
-    vlen = s.size(0);
-    s.set_size(vlen);
-    for (i = 0; i < vlen; i++) {
-      s[i] = rtNaN;
+    npages = s.size(0);
+    s.set_size(npages);
+    for (ib = 0; ib < npages; ib++) {
+      s[ib] = rtNaN;
     }
-
     C.set_size(V1.size(0), V1.size(1));
-    xpageoffset = V1.size(0) * V1.size(1);
-    for (i = 0; i < xpageoffset; i++) {
-      C[i] = rtNaN;
+    nblocks = V1.size(0) * V1.size(1);
+    for (ib = 0; ib < nblocks; ib++) {
+      C[ib] = rtNaN;
     }
   }
-
   S.set_size(V.size(1), C.size(1));
-  xpageoffset = V.size(1) * C.size(1);
-  for (i = 0; i < xpageoffset; i++) {
-    S[i] = 0.0;
+  nblocks = V.size(1) * C.size(1);
+  for (ib = 0; ib < nblocks; ib++) {
+    S[ib] = 0.0;
   }
-
-  i = s.size(0) - 1;
-  for (k = 0; k <= i; k++) {
+  ib = s.size(0) - 1;
+  for (k = 0; k <= ib; k++) {
     S[k + S.size(0) * k] = s[k];
   }
-
   if (S.size(0) < S.size(1)) {
     a.set_size(S.size(1), S.size(0));
-    xpageoffset = S.size(0);
-    for (i = 0; i < xpageoffset; i++) {
-      loop_ub = S.size(1);
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        a[i1 + a.size(0) * i] = S[i + S.size(0) * i1];
+    nblocks = S.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      lastBlockLength = S.size(1);
+      for (xi = 0; xi < lastBlockLength; xi++) {
+        a[xi + a.size(0) * ib] = S[ib + S.size(0) * xi];
       }
     }
-
     coder::eml_pinv(a, S);
     a.set_size(S.size(1), S.size(0));
-    xpageoffset = S.size(0);
-    for (i = 0; i < xpageoffset; i++) {
-      loop_ub = S.size(1);
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        a[i1 + a.size(0) * i] = S[i + S.size(0) * i1];
+    nblocks = S.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      lastBlockLength = S.size(1);
+      for (xi = 0; xi < lastBlockLength; xi++) {
+        a[xi + a.size(0) * ib] = S[ib + S.size(0) * xi];
       }
     }
   } else {
     coder::eml_pinv(S, a);
   }
-
-  if ((a.size(0) == 0) || (a.size(1) == 0) || (C.size(0) == 0) || (C.size(1) ==
-       0)) {
+  if ((a.size(0) == 0) || (a.size(1) == 0) || (C.size(0) == 0) ||
+      (C.size(1) == 0)) {
     Q.set_size(a.size(0), C.size(0));
-    xpageoffset = a.size(0) * C.size(0);
-    for (i = 0; i < xpageoffset; i++) {
-      Q[i] = 0.0;
+    nblocks = a.size(0) * C.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      Q[ib] = 0.0;
     }
   } else {
     Q.set_size(a.size(0), C.size(0));
-    t = CblasNoTrans;
-    b_t = CblasTrans;
-    cblas_dgemm(CblasColMajor, t, b_t, (MKL_INT)a.size(0), (MKL_INT)C.size(0),
-                (MKL_INT)a.size(1), 1.0, &(a.data())[0], (MKL_INT)a.size(0),
-                &(C.data())[0], (MKL_INT)C.size(0), 0.0, &(Q.data())[0],
-                (MKL_INT)a.size(0));
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans, (MKL_INT)a.size(0),
+                (MKL_INT)C.size(0), (MKL_INT)a.size(1), 1.0, &(a.data())[0],
+                (MKL_INT)a.size(0), &(C.data())[0], (MKL_INT)C.size(0), 0.0,
+                &(Q.data())[0], (MKL_INT)a.size(0));
   }
-
-  vlen = data.size(0) - 1;
-  npages = data.size(1) - 1;
+  npages = data.size(0) - 1;
+  firstBlockLength = data.size(1) - 1;
   b_data.set_size(data.size(0), data.size(1));
-  for (i = 0; i <= npages; i++) {
-    for (i1 = 0; i1 <= vlen; i1++) {
-      b_data[i1 + b_data.size(0) * i] = data[i1 + data.size(0) * i];
+  for (ib = 0; ib <= firstBlockLength; ib++) {
+    for (xi = 0; xi <= npages; xi++) {
+      b_data[xi + b_data.size(0) * ib] = data[xi + data.size(0) * ib];
     }
   }
-
-  coder::internal::blas::mtimes(Q, b_data, a);
-  xpageoffset = a.size(1);
-  for (i = 0; i < xpageoffset; i++) {
-    loop_ub = a.size(0);
-    for (i1 = 0; i1 < loop_ub; i1++) {
-      data[i1 + data.size(0) * i] = a[i1 + a.size(0) * i];
+  if ((Q.size(0) == 0) || (Q.size(1) == 0) || (b_data.size(0) == 0) ||
+      (b_data.size(1) == 0)) {
+    a.set_size(Q.size(0), b_data.size(1));
+    nblocks = Q.size(0) * b_data.size(1);
+    for (ib = 0; ib < nblocks; ib++) {
+      a[ib] = 0.0;
+    }
+  } else {
+    a.set_size(Q.size(0), b_data.size(1));
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, (MKL_INT)Q.size(0),
+                (MKL_INT)b_data.size(1), (MKL_INT)Q.size(1), 1.0,
+                &(Q.data())[0], (MKL_INT)Q.size(0), &(b_data.data())[0],
+                (MKL_INT)b_data.size(0), 0.0, &(a.data())[0],
+                (MKL_INT)Q.size(0));
+  }
+  nblocks = a.size(1);
+  for (ib = 0; ib < nblocks; ib++) {
+    lastBlockLength = a.size(0);
+    for (xi = 0; xi < lastBlockLength; xi++) {
+      data[xi + data.size(0) * ib] = a[xi + a.size(0) * ib];
     }
   }
-
   //  Alternate whitening code
   //  Rx=(X*X')/T;
   //  if m<n, % assumes white noise
@@ -321,130 +353,138 @@ void sobi_coder(coder::array<double, 2U> &data, coder::array<double, 2U> &mixing
   //
   //  Estimate the correlation matrices
   //
-  b_k = 1.0;
-
+  bsum = 1.0;
   //  for convenience
-  if (100 < u1) {
-    u1 = 100;
-  }
-
-  i = static_cast<int>((static_cast<double>(u1) * static_cast<double>(m) + (
-    static_cast<double>(m) - 1.0)) / static_cast<double>(m));
-  for (k = 0; k < i; k++) {
+  ib = static_cast<int>(
+      (std::fmin(100.0, std::ceil(static_cast<double>(N) / 3.0)) *
+           static_cast<double>(m) +
+       (static_cast<double>(m) - 1.0)) /
+      static_cast<double>(m));
+  for (xpageoffset = 0; xpageoffset < ib; xpageoffset++) {
     double d;
-    int i2;
-    b_k++;
-    if (b_k > N) {
-      i1 = -1;
-      vlen = -1;
+    bsum++;
+    if (bsum > N) {
+      xi = -1;
+      npages = -1;
     } else {
-      i1 = static_cast<int>(b_k) - 2;
-      vlen = N - 1;
+      xi = static_cast<int>(bsum) - 2;
+      npages = N - 1;
     }
-
-    d = (static_cast<double>(N) - b_k) + 1.0;
+    d = (static_cast<double>(N) - bsum) + 1.0;
     if (1.0 > d) {
-      xpageoffset = 0;
+      nblocks = 0;
     } else {
-      xpageoffset = static_cast<int>(d);
+      nblocks = static_cast<int>(d);
     }
-
-    loop_ub = data.size(0);
-    npages = vlen - i1;
-    V.set_size(data.size(0), npages);
-    for (u1 = 0; u1 < npages; u1++) {
-      for (i2 = 0; i2 < loop_ub; i2++) {
-        V[i2 + V.size(0) * u1] = data[i2 + data.size(0) * ((i1 + u1) + 1)];
+    lastBlockLength = data.size(0);
+    firstBlockLength = npages - xi;
+    V.set_size(data.size(0), firstBlockLength);
+    for (xblockoffset = 0; xblockoffset < firstBlockLength; xblockoffset++) {
+      for (hi = 0; hi < lastBlockLength; hi++) {
+        V[hi + V.size(0) * xblockoffset] =
+            data[hi + data.size(0) * ((xi + xblockoffset) + 1)];
       }
     }
-
-    loop_ub = data.size(0);
-    S.set_size(data.size(0), xpageoffset);
-    for (u1 = 0; u1 < xpageoffset; u1++) {
-      for (i2 = 0; i2 < loop_ub; i2++) {
-        S[i2 + S.size(0) * u1] = data[i2 + data.size(0) * u1];
+    lastBlockLength = data.size(0);
+    S.set_size(data.size(0), nblocks);
+    for (xblockoffset = 0; xblockoffset < nblocks; xblockoffset++) {
+      for (hi = 0; hi < lastBlockLength; hi++) {
+        S[hi + S.size(0) * xblockoffset] =
+            data[hi + data.size(0) * xblockoffset];
       }
     }
-
-    if ((data.size(0) != 0) && (npages != 0) && (data.size(0) != 0) &&
-        (xpageoffset != 0)) {
+    if ((data.size(0) != 0) && (firstBlockLength != 0) && (nblocks != 0)) {
       C.set_size(data.size(0), data.size(0));
-      t = CblasNoTrans;
-      b_t = CblasTrans;
-      cblas_dgemm(CblasColMajor, t, b_t, (MKL_INT)data.size(0), (MKL_INT)
-                  data.size(0), (MKL_INT)(vlen - i1), 1.0, &(V.data())[0],
+      cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
+                  (MKL_INT)data.size(0), (MKL_INT)data.size(0),
+                  (MKL_INT)(npages - xi), 1.0, &(V.data())[0],
                   (MKL_INT)data.size(0), &(S.data())[0], (MKL_INT)data.size(0),
                   0.0, &(C.data())[0], (MKL_INT)data.size(0));
     }
-
     //  Frobenius norm =
   }
-
   //  sqrt(sum(diag(Rxp'*Rxp)))
   //
   //  Perform joint diagonalization
   //
   V.set_size(m, m);
-  xpageoffset = m * m;
-  for (i = 0; i < xpageoffset; i++) {
-    V[i] = 0.0;
+  nblocks = m * m;
+  for (ib = 0; ib < nblocks; ib++) {
+    V[ib] = 0.0;
   }
-
   if (m > 0) {
     for (k = 0; k < m; k++) {
       V[k + V.size(0) * k] = 1.0;
     }
   }
-
   //  while
   //
   //  Estimate the mixing matrix
   //
   if (Q.size(0) < Q.size(1)) {
     a.set_size(Q.size(1), Q.size(0));
-    xpageoffset = Q.size(0);
-    for (i = 0; i < xpageoffset; i++) {
-      loop_ub = Q.size(1);
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        a[i1 + a.size(0) * i] = Q[i + Q.size(0) * i1];
+    nblocks = Q.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      lastBlockLength = Q.size(1);
+      for (xi = 0; xi < lastBlockLength; xi++) {
+        a[xi + a.size(0) * ib] = Q[ib + Q.size(0) * xi];
       }
     }
-
     coder::eml_pinv(a, S);
     a.set_size(S.size(1), S.size(0));
-    xpageoffset = S.size(0);
-    for (i = 0; i < xpageoffset; i++) {
-      loop_ub = S.size(1);
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        a[i1 + a.size(0) * i] = S[i + S.size(0) * i1];
+    nblocks = S.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      lastBlockLength = S.size(1);
+      for (xi = 0; xi < lastBlockLength; xi++) {
+        a[xi + a.size(0) * ib] = S[ib + S.size(0) * xi];
       }
     }
   } else {
     coder::eml_pinv(Q, a);
   }
-
   coder::internal::blas::mtimes(a, V, mixing);
   if (mixing.size(0) < mixing.size(1)) {
     a.set_size(mixing.size(1), mixing.size(0));
-    xpageoffset = mixing.size(0);
-    for (i = 0; i < xpageoffset; i++) {
-      loop_ub = mixing.size(1);
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        a[i1 + a.size(0) * i] = mixing[i + mixing.size(0) * i1];
+    nblocks = mixing.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      lastBlockLength = mixing.size(1);
+      for (xi = 0; xi < lastBlockLength; xi++) {
+        a[xi + a.size(0) * ib] = mixing[ib + mixing.size(0) * xi];
       }
     }
-
     coder::eml_pinv(a, S);
     unmixing.set_size(S.size(1), S.size(0));
-    xpageoffset = S.size(0);
-    for (i = 0; i < xpageoffset; i++) {
-      loop_ub = S.size(1);
-      for (i1 = 0; i1 < loop_ub; i1++) {
-        unmixing[i1 + unmixing.size(0) * i] = S[i + S.size(0) * i1];
+    nblocks = S.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      lastBlockLength = S.size(1);
+      for (xi = 0; xi < lastBlockLength; xi++) {
+        unmixing[xi + unmixing.size(0) * ib] = S[ib + S.size(0) * xi];
       }
     }
   } else {
     coder::eml_pinv(mixing, unmixing);
+  }
+  if (pca_applied) {
+    if (1.0 > ncomps) {
+      nblocks = 0;
+    } else {
+      nblocks = static_cast<int>(ncomps);
+    }
+    npages = eigenvectors.size(0) - 1;
+    lastBlockLength = eigenvectors.size(0);
+    for (ib = 0; ib < nblocks; ib++) {
+      for (xi = 0; xi < lastBlockLength; xi++) {
+        eigenvectors[xi + (npages + 1) * ib] =
+            eigenvectors[xi + eigenvectors.size(0) * ib];
+      }
+    }
+    eigenvectors.set_size(npages + 1, nblocks);
+    b_data.set_size(unmixing.size(0), unmixing.size(1));
+    nblocks = unmixing.size(0) * unmixing.size(1) - 1;
+    for (ib = 0; ib <= nblocks; ib++) {
+      b_data[ib] = unmixing[ib];
+    }
+    coder::internal::blas::mtimes(b_data, eigenvectors, unmixing);
   }
 }
 

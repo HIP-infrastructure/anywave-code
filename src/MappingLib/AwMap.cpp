@@ -35,6 +35,11 @@
 #include <vtkXMLPolyDataWriter.h>
 #define AW_PI 3.1415926535
 #if VTK_MAJOR_VERSION > 5
+//#if VTK_MAJOR_VERSION > 8
+//#define vtkRenderingCore_AUTOINIT 1(vtkRenderingOpenGL2)
+//#define vtkRenderingCore_AUTOINIT 1(vtkInteractionStyle)
+//#define vtkRenderingCore_AUTOINIT 1(vtkRenderingFreeType)
+//#endif
 #include <vtkAutoInit.h>
 #endif
 
@@ -103,7 +108,8 @@ void AwMap::init2DSource()
 	VTK_MODULE_INIT(vtkRenderingOpenGL);
 	VTK_MODULE_INIT(vtkInteractionStyle);
 	VTK_MODULE_INIT(vtkRenderingFreeType);
-#else
+#endif
+#if VTK_MAJOR_VERSION < 9 && VTK_MAJOR_VERSION >= 7
     VTK_MODULE_INIT(vtkRenderingOpenGL2);
     VTK_MODULE_INIT(vtkInteractionStyle);
     VTK_MODULE_INIT(vtkRenderingFreeType);

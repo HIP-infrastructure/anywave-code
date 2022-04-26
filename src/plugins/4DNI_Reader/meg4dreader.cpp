@@ -29,7 +29,7 @@ NI4DReader::NI4DReader() : AwFileIOPlugin()
   name = QString("4DNI Reader");
   description = QString(tr("Read 4DNI MEG file."));
   manufacturer = "4DNI";
-  version = QString("1.0.0");
+  version = QString("1.0.1");
   fileExtensions << "*,*";
   layouts << "4D248" << "4D248_3D";
   m_flags = FileIO::CanRead;
@@ -345,36 +345,37 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 		m_file.seek(m_file.pos() + user_space_size);
 	}
 
-	dftk_channel_data *channel;
+	//dftk_channel_data *channel;
 	// AwChannels
 #ifndef NDEBUG
 		qDebug() << "4DReader: checking channel in config file." << endl;
 #endif
+	dftk_channel_data channel;
 	for (int j = 0; j < cfg.total_chans; j++) {
 		alignFilePointer();
-		channel = new dftk_channel_data;
-		m_stream.readRawData((char *)&channel->chan_name, 16);
+	//	channel = new dftk_channel_data;
+		m_stream.readRawData((char *)&channel.chan_name, 16);
 		//
-		m_stream >> channel->chan_no;
-		m_stream >> channel->type;
-		m_stream >> channel->sensor_no;
+		m_stream >> channel.chan_no;
+		m_stream >> channel.type;
+		m_stream >> channel.sensor_no;
 		m_stream.skipRawData(2);
-		m_stream >> channel->gain;
-		m_stream >> channel->units_per_bit;
-		m_stream.readRawData((char *)&channel->yaxis_label, 16);
-		m_stream >> channel->aar_val;
-		m_stream >> channel->checksum;
+		m_stream >> channel.gain;
+		m_stream >> channel.units_per_bit;
+		m_stream.readRawData((char *)&channel.yaxis_label, 16);
+		m_stream >> channel.aar_val;
+		m_stream >> channel.checksum;
 		m_stream.skipRawData(36);
 
 		// Recupere la structure my_channel_data associee au canal.
 		// Si elle n'existe pas, on ne fait rien, �a veut dire que le canal decrit dans le fichier config n'est pas dans le fichier de donnees.
 		
-		my_channel_data *my_chan = m_hashChannelsData.value(channel->chan_no);
+		my_channel_data *my_chan = m_hashChannelsData.value(channel.chan_no);
 		
 		if (my_chan) {
-			my_chan->gain = channel->gain;
-			my_chan->units_per_bit = channel->units_per_bit;
-			my_chan->type = channel->type;
+			my_chan->gain = channel.gain;
+			my_chan->units_per_bit = channel.units_per_bit;
+			my_chan->type = channel.type;
 		}
 		alignFilePointer();
 		dftk_device_header device_header;
@@ -388,11 +389,11 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 		//
 		// Important : On fait la correspondance par le numero de canal (et non pas par le nom qui peut varier)
 		//
-		AwChannel *c = hash_channel_numbers.value(channel->chan_no);
+		AwChannel *c = hash_channel_numbers.value(channel.chan_no);
 		
 		AwChannel *inserted = NULL;
 		AwMEGSensorProperty *prop = NULL;
-		switch (channel->type)
+		switch (channel.type)
 		{
 		case 1:
 		case 3:
@@ -405,7 +406,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			m_stream >> meg_dev.xform_flag;
 			m_stream >> meg_dev.total_loops;
 
-			prop->name = QString(channel->chan_name);
+			prop->name = QString::fromLatin1(channel.chan_name);
 			prop->unit = "m";	// 4DNI coordinates are in meter
 			prop->total_loops = meg_dev.total_loops;
 			prop->inductance = meg_dev.inductance;
@@ -444,14 +445,14 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			}
 			if (c) 	{
 				// MEG AND REF CHANNELS ARE RENAMED WITH ORIGINAL LABEL CONTAINED IN CONFIG FILE
-				c->setName(QString(channel->chan_name));
+				c->setName(QString(channel.chan_name));
 				inserted = infos.addChannel(c);
 
-				if (channel->type == 1)
+				if (channel.type == 1)
 					inserted->setType(AwChannel::MEG);
 				else
 					inserted->setType(AwChannel::Reference);
-				inserted->setID(channel->chan_no);
+				inserted->setID(channel.chan_no);
 			}
 			break;
 		case 2:
@@ -464,7 +465,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			if (c) {
 				inserted = infos.addChannel(c);
 				inserted->setType(AwChannel::EEG);
-				inserted->setID(channel->chan_no);
+				inserted->setID(channel.chan_no);
 			}
 			break;
 		case 5:
@@ -473,10 +474,10 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			if (c)	{
 				inserted = infos.addChannel(c);
 				// TRIGGER CHANNELS ARE RENAMED WITH ORIGINAL LABEL CONTAINED IN CONFIG FILE
-				inserted->setName(QString(channel->chan_name));
+				inserted->setName(QString(channel.chan_name));
 				inserted->setType(AwChannel::Trigger);
 				m_trigger = inserted;
-				inserted->setID(channel->chan_no);
+				inserted->setID(channel.chan_no);
 			}
 			break;
 		case 4:
@@ -487,7 +488,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			if (c)	{
 				inserted = infos.addChannel(c);
 				inserted->setType(AwChannel::Other);
-				inserted->setID(channel->chan_no);
+				inserted->setID(channel.chan_no);
 			}
 			break;
 		case 8:
@@ -496,11 +497,14 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			if (c)	{
 				inserted = infos.addChannel(c);
 				inserted->setType(AwChannel::Other);
-				inserted->setID(channel->chan_no);
+				inserted->setID(channel.chan_no);
 			}
 			break;
 		}
 	}
+#ifndef NDEBUG
+	qDebug() << "4DReader: config file is OK." << endl;
+#endif
 	while (!temp_channels.isEmpty())
 		delete temp_channels.takeFirst();
 
@@ -514,6 +518,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 		if (chan->isTrigger())
 			m_triggers << chan;
 	}
+
 	return AwFileIO::openFile(path);
 }
 

@@ -45,6 +45,7 @@ public:
 	void setView(AwGraphicsView *view);
 	void setNavBar(AwNavigationBar *navBar);
 	void setMarkerBar(AwBaseMarkerBar *markerBar);
+	void setViewSettings(AwViewSettings* settings);
 	inline AwDataClient *client() { return &m_client; }
 	inline float positionInFile() { return m_positionInFile; }
 	inline AwViewSettings *settings() { return m_settings; }
@@ -58,6 +59,7 @@ public:
 	void updateMarkers() { m_scene->updateMarkers(); }
 	inline AwChannelList& displayedChannels() { return m_channels; }
 	virtual void setChannels(const AwChannelList& channels);
+	virtual void setChannels(const QList<QSharedPointer<AwChannel>>& channels);
 	void setTotalDuration(float duration); // total length of data in seconds
 	void makeChannelVisible(int type);
 	void removeVisibleChannel(int type);
@@ -74,13 +76,13 @@ public slots:
 	void setAmplitude(int type, float value);
 	void setAmplitudes();
 	void setPositionInFile(float pos);
-	//void setSelectedChannels(AwChannelList& channels);
 	virtual void reloadData();	// reload data after filtering options or settings changed
 	virtual void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
 	virtual void updateSettings(AwViewSettings *settings, int flags);
 	virtual void updatePageDuration(float duration);
 	virtual void setNewFilters(const AwFilterSettings& settings);
 	void setMarkers(const AwMarkerList& markers);	// update the available markers
+	void getNewMarkers();
 	void startMarking();	
 	void stopMarking();
 	void removeHighLigthMarker() { if (m_scene) m_scene->removeHighLigthMarker(); }
@@ -108,6 +110,8 @@ signals:
 	// data specific
 	// Sent everytime the view load new data
 	void dataLoaded(float position, float duration);
+	// notification about channels order in the view
+	void channelsOrderChanged(const QStringList&);
 protected:
 	AwDataClient m_client;
 	AwViewSettings *m_settings;
@@ -131,7 +135,8 @@ protected:
 	AwFilterSettings m_filterSettings;
 	QTime m_recordedTime;
 	QMultiMap<int, AwChannel*> m_channelTypes;
-	bool m_isActive;
+	QList<QSharedPointer<AwChannel>> m_channelSharedPtrs;
+	QList<QSharedPointer<AwMarker>> m_markerSharedPtrs;
 
 	virtual void dataReceived();
 	virtual void applyChannelFilters();

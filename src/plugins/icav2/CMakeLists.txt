@@ -3,50 +3,10 @@ project(ICA)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 
 IF(APPLE)
-SET(ARMADILLO_INCLUDE /users/bruno/armadillo-9.400.4/include)
-ENDIF()
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE} ./matlab_common)
-
-SET(SRCS
-   ICASettings.cpp
-   infomax_algo.cpp
-   ica.cpp
-   r250.c
-   randlcg.c 
-   matlab_common/pinv.cpp
-   matlab_common/rt_nonfinite.cpp
-   matlab_common/rtGetInf.cpp
-   matlab_common/rtGetNaN.cpp
-   matlab_common/svd.cpp
-   cca/cca_data.cpp 
-   cca/cca_initialize.cpp
-   cca/cca_terminate.cpp
-   cca/cca.cpp
-   cca/qr.cpp
-   cca/run_cca.cpp
-   sobi/mtimes.cpp
-   sobi/run_sobi.cpp
-   sobi/sobi_coder_data.cpp
-   sobi/sobi_coder.cpp)
-
-   
- SET(MOCS ICASettings.h
-    ica.h)
-
-SET(UIS ICASettings.ui)
-
-QT5_WRAP_CPP(ICA_MOCS ${MOCS})
-QT5_WRAP_UI(ICA_UIS ${UIS})
-qt5_add_resources(RES Resource.qrc) 
-
-add_library(ICA SHARED ${SRCS} ${ICA_MOCS} ${ICA_UIS} ${RES})
-qt5_use_modules(ICA Core Gui)
-IF (APPLE)
-target_link_libraries(ICA AwCore AwFiltering AwWidget AwProcess AwUtilities AwLayout AwHDF5 AwMATLAB Qt5::Core Qt5::Gui ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} "-framework Accelerate")
+  include(mac.cmake)
 ELSE()
-target_link_libraries(ICA AwCore AwFiltering AwProcess AwHDF5 AwUtilities AwLayout AwMATLAB Qt5::Core Qt5::Gui ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${BLAS_LIBRARIES})
+   include(linux.cmake)
 ENDIF()
-INSTALL(TARGETS ICA DESTINATION ${PLUGIN_INSTALL_DIR})
 
 
 

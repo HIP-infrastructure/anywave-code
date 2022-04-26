@@ -46,6 +46,7 @@ QString AwBIDSItem::subjectName()
 			return parent->text();
 		parent = parent->bidsParent();
 	}
+	return QString();
 }
 
 ///

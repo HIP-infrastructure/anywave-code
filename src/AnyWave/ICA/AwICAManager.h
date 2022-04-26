@@ -18,6 +18,8 @@
 
 #include <QObject>
 #include <AwChannel.h>
+#include <QMap>
+#include "AwICAChannel.h"
 class AwICAComponents;
 
 class AwICAManager : public QObject
@@ -33,14 +35,13 @@ public:
 	void closeFile();
 	int loadComponents(const QString& icaFile);
 	AwICAComponents *getComponents(int type);
-	AwICAComponents **getAllComponents();
+	AwICAChannelList getChannelsOfAllComponents();
 	int numberOfComponents();
 	bool reject(int type);
 	void rejectComponents(int type, const AwChannelList& channels);
 	bool containsComponents(int type);
 
 	inline bool isFilteringActive() { return m_isFilteringOn; }
-	void turnICAOff();
 	QVector<int> getRejectedComponentsIndexes(int type);
 	QMap<int, QVector<int> > getAllRejectedComponents();
 	/** Get the labels of all rejected components **/
@@ -54,10 +55,8 @@ signals:
 	void componentsFiltersLoaded(float lp, float hp);
 private:
 	QString convertToMatlab(const QString& fileName);
-
-	AwICAComponents *m_comps[AW_CHANNEL_TYPES];  
+	QMap<int, QSharedPointer<AwICAComponents>> m_componentsMap;
 	static AwICAManager *m_instance;
-
 	bool m_isFilteringOn;
 };
 

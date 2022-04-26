@@ -26,12 +26,14 @@ class AW_WIDGETS_EXPORT AwWaitWidget : public QDialog
 	Q_OBJECT
 
 public:
-	AwWaitWidget(const QString& title, QWidget *parent = Q_NULLPTR);
+	AwWaitWidget(const QString& title, QWidget *parent = nullptr);
 	~AwWaitWidget();
 	template <typename F>
 	void run(F function);
-	template <typename F, typename T>
-	void run(F function, T arg);
+	//template <typename F, typename T>
+	//void run(F function, T arg);
+	template <typename F, typename ...T>
+	void run(F function, T... args);
 	template<class C,  typename T>
 	void run(C* ptr, void (C::* method)(T), T arg);
 public slots:
@@ -54,12 +56,20 @@ void AwWaitWidget::run(F function)
 	exec();
 }
 
-template<typename F, typename T>
-void AwWaitWidget::run(F function, T arg)
+template<typename F, typename ...T>
+void AwWaitWidget::run(F function, T... args)
 {
-	m_thread = new std::thread(function, arg);
+	m_thread = new std::thread(function, args...);
 	exec();
 }
+
+//template<typename F, typename ...T>
+//void AwWaitWidget::run2(F function, T... args)
+//{
+//	m_thread = new std::thread(function, args...);
+//	exec();
+//}
+
 
 template<class C, typename T>
 void AwWaitWidget::run(C* ptr, void (C::*method)(T), T arg)

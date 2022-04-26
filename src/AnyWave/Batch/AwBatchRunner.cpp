@@ -185,12 +185,12 @@ void AwBatchRunner::run()
 			}
 			catch (const AwException& e) {
 				sendMessage(e.errorString());
-				if (process) {
-					auto reader = process->pdi.input.reader();
-					if (reader)
-						reader->plugin()->deleteInstance(reader);
-					process->plugin()->deleteInstance(process);
-				}
+				//if (process) {
+				//	auto reader = process->pdi.input.reader();
+				//	if (reader)
+				//		reader->plugin()->deleteInstance(reader);
+				//	process->plugin()->deleteInstance(process);
+				//}
 				input_file_index++;
 				continue;
 			}
@@ -214,7 +214,8 @@ void AwBatchRunner::run()
 				process->runFromCommandLine();
 			}
 			sendMessage(QString("process %1 has finished").arg(pluginName));
-			process->plugin()->deleteInstance(process);
+		//	process->plugin()->deleteInstance(process);
+			delete process;
 			input_file_index++;
 		} 
 	}

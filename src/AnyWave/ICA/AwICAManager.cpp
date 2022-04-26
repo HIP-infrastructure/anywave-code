@@ -35,8 +35,6 @@ AwICAManager *AwICAManager::instance()
 AwICAManager::AwICAManager(QObject *parent)
 	: QObject(parent)
 {
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++)
-		m_comps[i] = NULL;
 	m_isFilteringOn = false;	// no ICA filtering by default
 }
 
@@ -46,68 +44,57 @@ AwICAManager::~AwICAManager()
 
 void AwICAManager::closeFile()
 {
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (m_comps[i])
-			delete m_comps[i];
-		m_comps[i] = NULL;
-	}
-}
-
-void AwICAManager::turnICAOff()
-{
-	emit icaComponentsUnloaded();
-
-	m_isFilteringOn = false;
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (m_comps[i]) {
-			delete m_comps[i];
-			m_comps[i] = NULL;
-		}
-	}
+	m_componentsMap.clear();
 }
 
 bool AwICAManager::reject(int type)
 {
 	if (!m_isFilteringOn)
 		return false;
-
-	if (m_comps[type])
-		return m_comps[type]->isRejectionNeeded();
+	if (m_componentsMap.contains(type)) 
+		return m_componentsMap.value(type)->isRejectionNeeded();
 	return false;
 }
 
 void AwICAManager::rejectComponents(int type, const AwChannelList& channels)
 {
-	m_comps[type]->buildChannels(channels);
+	if (m_componentsMap.contains(type))
+		m_componentsMap.value(type)->buildChannels(channels);
 }
 
 bool AwICAManager::containsComponents(int type)
 {
-	if (m_comps[type])
-		if (m_comps[type]->components().size())
-			return true;
-	return false;
+	if (!m_componentsMap.contains(type))
+		return false;
+	return m_componentsMap.value(type)->components().size() > 0;
 }
 
+
+AwICAChannelList AwICAManager::getChannelsOfAllComponents()
+{
+	AwICAChannelList res;
+
+	const auto& keys = m_componentsMap.keys();
+	for (const auto& key : keys)
+		res += m_componentsMap.value(key)->components();
+	return res;
+}
 
 //
 // returns the total number of components (MEG, EEG, EMG)
 //
 int AwICAManager::numberOfComponents()
 {
+	const auto& keys = m_componentsMap.keys();
 	int count = 0;
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (m_comps[i])
-			count += m_comps[i]->components().size();
-	}
+	for (const auto& key : keys) 
+		count += m_componentsMap.value(key)->components().size();
 	return count;
 }
 
 int AwICAManager::loadComponents(const QString& icaFile)
 {
 	int row, col;
-	// turn previously ICA components to off
-	turnICAOff();
 	QString inputFile = icaFile;
 
 	// check for 'old' HDF5 format
@@ -130,18 +117,18 @@ int AwICAManager::loadComponents(const QString& icaFile)
 	}
 
 	int type = AwChannel::stringToType(modality);
-	AwICAComponents *comp = new AwICAComponents(type);
+	if (m_componentsMap.contains(type))
+		m_componentsMap.remove(type);
+	m_componentsMap.insert(type, QSharedPointer<AwICAComponents>(new AwICAComponents(type)));
+	auto comp = m_componentsMap.value(type).get();
 	try {
 		comp->loadComponents(file);
 	}
 	catch (const AwException& e) {
 		AwMessageBox::critical(0, tr("ICA Components"), e.errorString());
-		delete comp;
+		m_componentsMap.remove(type);
 		return -1;
 	}
-	if (m_comps[type])
-		delete m_comps[type];
-	m_comps[type] = comp;
 	AwSettings::getInstance()->setValue(aws::ica_file, icaFile);
 	emit componentsFiltersLoaded(comp->lpFilter(), comp->hpFilter());
 	emit componentsLoaded();
@@ -151,8 +138,8 @@ int AwICAManager::loadComponents(const QString& icaFile)
 QVector<int> AwICAManager::getRejectedComponentsIndexes(int type)
 {
 	QVector<int> res;
-	if (m_comps[type]) {
-		for (auto c : m_comps[type]->components())
+	if (m_componentsMap.contains(type)) {
+		for (auto const& c : m_componentsMap.value(type)->components())
 			if (c->isRejected())
 				res << c->index();
 	}
@@ -162,13 +149,11 @@ QVector<int> AwICAManager::getRejectedComponentsIndexes(int type)
 QMap<int, QVector<int>> AwICAManager::getAllRejectedComponents()
 {
 	QMap <int, QVector<int>> res;
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (m_comps[i]) {
-			auto r = getRejectedComponentsIndexes(i);
-			if (!r.isEmpty())
-				res[i] = r;
-		}
-			
+	const auto& keys = m_componentsMap.keys();
+	for (const auto& key : keys) {
+		auto r = getRejectedComponentsIndexes(key);
+		if (r.size())
+			res.insert(key, r);
 	}
 	return res;
 }
@@ -176,23 +161,17 @@ QMap<int, QVector<int>> AwICAManager::getAllRejectedComponents()
 QStringList AwICAManager::getRejectedLabels() 
 {
 	QStringList res;
-	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		if (m_comps[i]) {
-			for (auto comp : getRejectedComponentsIndexes(i))
-				res << m_comps[i]->components().value(comp)->name();
-		}
+	const auto& keys = m_componentsMap.keys();
+	for (const auto& key : keys) {
+		for (auto const& comp : getRejectedComponentsIndexes(key))
+			res << m_componentsMap.value(key)->components().value(comp)->name();
 	}
 	return res;
 }
 
 AwICAComponents *AwICAManager::getComponents(int type)
 {
-	return m_comps[type];
-}
-
-AwICAComponents **AwICAManager::getAllComponents()
-{
-	return m_comps;
+	return m_componentsMap.value(type).get();
 }
 
 ///

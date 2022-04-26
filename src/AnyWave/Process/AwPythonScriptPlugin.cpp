@@ -37,8 +37,7 @@ AwPythonScriptProcess *AwPythonScriptPlugin::newInstance()
 
 AwPythonScriptProcess::AwPythonScriptProcess() : AwScriptProcess()
 {
-//	m_python.setReadChannel(QProcess::StandardOutput);
-//	m_python.setProcessChannelMode(QProcess::MergedChannels);
+
 }
 
 AwPythonScriptProcess::~AwPythonScriptProcess()
@@ -81,6 +80,7 @@ void AwPythonScriptProcess::init()
 void AwPythonScriptProcess::run()
 {
 	QStringList arguments;
+
 	auto scriptPath = QString("%1/%2").arg(m_plugin->settings().value("script_path").toString()).arg("__main__.py");
 	scriptPath = QDir::toNativeSeparators(scriptPath);
 	bool isCompiled = m_plugin->settings().contains("compiled plugin");
@@ -102,85 +102,89 @@ void AwPythonScriptProcess::run()
 	auto aws = AwSettings::getInstance();
 	auto systemPath = aws->value(aws::system_path).toString();
 	if (!isCompiled) {
-		// prepare the path to Python Virtual Environment if one is set
-		// is there a venv to activate?
-		auto venvDir = aws->value(aws::python_venv_dir).toString();
-		if (!venvDir.isEmpty()) {
+		// get venv dir if specified in desc.txt
+		const auto& settings = plugin()->settings();
+		bool useSystemPython = aws->value(aws::python_use_default).toBool();
+		if (!useSystemPython) {
+			QString venvDir = aws->value(aws::python_venv_dir).toString();
+			// prepare the path to Python Virtual Environment if one is set
+			// is there a venv to activate?
+			if (venvDir.isEmpty())
+				venvDir = aws->value(aws::python_embeded_venv_dir).toString();
+			if (!venvDir.isEmpty()) {
 #ifdef Q_OS_WIN
-			QString script = QString("%1\\Scripts").arg(venvDir);
-			QString pythonPath = QString("%1\\Lib\\site-packages\\anywave").arg(venvDir);
-			python = QString("%1\\python.exe").arg(script);
-			python = QDir::toNativeSeparators(python);
-			QString activate = QString("%1\\activate.bat").arg(script);
-			activate = QDir::toNativeSeparators(activate);
-			venvDir = QDir::toNativeSeparators(venvDir);
-			env.insert("PYTHONPATH", pythonPath);
-			systemPath = QString("%1;%2").arg(venvDir).arg(systemPath);
-			env.remove("PATH");
-			env.insert("PATH", systemPath);
-			m_python->setProcessEnvironment(env);
+				QString script = QString("%1\\Scripts").arg(venvDir);
+				python = QString("%1\\python.exe").arg(script);
+				python = QDir::toNativeSeparators(python);
+				QString activate = QString("%1\\activate.bat").arg(script);
+				activate = QDir::toNativeSeparators(activate);
+				venvDir = QDir::toNativeSeparators(venvDir);
+				env.remove("PATH");
+				env.insert("PATH", systemPath);
+				m_python->setProcessEnvironment(env);
 
-			// launch activate 
-			m_python->start(activate);
-			if (!m_python->waitForFinished(-1)) {
-				emit progressChanged(QString(m_python->readAll()));
-			}  // wait for plugin to finish. (Wait forever).
-			// start python 
-			m_python->start(python, arguments, QIODevice::ReadWrite);
-			if (!m_python->waitForFinished(-1)) {
-				emit progressChanged(QString(m_python->readAll()));
-			}  // wait for plugin to finish. (Wait forever).
-			emit progressChanged("Python process has finished.");
+				// launch activate 
+				m_python->start(activate);
+				if (!m_python->waitForFinished(-1)) {
+					emit progressChanged(QString(m_python->readAll()));
+				}  // wait for plugin to finish. (Wait forever).
+				// start python 
+				m_python->start(python, arguments, QIODevice::ReadWrite);
+				if (!m_python->waitForFinished(-1)) {
+					emit progressChanged(QString(m_python->readAll()));
+				}  // wait for plugin to finish. (Wait forever).
+				emit progressChanged("Python process has finished.");
 #else // macOS Linux
-			//venvDir += "/bin";
-			QString bin = QString("%1/bin").arg(venvDir);
-			python = QString("%1/python").arg(bin);
-			// find site-packages folder
-			QString sitePackagesPath = QString("%1/lib").arg(venvDir);
-			QDir lib(sitePackagesPath);
-			QStringList folders = lib.entryList(QDir::Dirs);
-			bool found = false;
-			if (folders.contains("site-packages")) {
-				found = true;
-				sitePackagesPath = QString("%1/lib/site-packages").arg(venvDir);
-			}
-			else 
-				for (auto const& f : folders) {
-					QDir sub(QString("%1/lib/%2").arg(venvDir).arg(f));
-					QStringList tmp = sub.entryList(QDir::Dirs);
-					if (tmp.contains("site-packages")) {
-						found = true;
-						sitePackagesPath = QString("%1/site-packages").arg(sub.absolutePath());
-						break;
-					}
+				//venvDir += "/bin";
+				QString bin = QString("%1/bin").arg(venvDir);
+				python = QString("%1/python").arg(bin);
+				// find site-packages folder
+				QString sitePackagesPath = QString("%1/lib").arg(venvDir);
+				QDir lib(sitePackagesPath);
+				QStringList folders = lib.entryList(QDir::Dirs);
+				bool found = false;
+				if (folders.contains("site-packages")) {
+					found = true;
+					sitePackagesPath = QString("%1/lib/site-packages").arg(venvDir);
 				}
-			
-			QString pythonPath = QString("%1/anywave").arg(sitePackagesPath);
-			env.insert("PYTHONPATH", pythonPath);
+				else
+					for (auto const& f : folders) {
+						QDir sub(QString("%1/lib/%2").arg(venvDir).arg(f));
+						QStringList tmp = sub.entryList(QDir::Dirs);
+						if (tmp.contains("site-packages")) {
+							found = true;
+							sitePackagesPath = QString("%1/site-packages").arg(sub.absolutePath());
+							break;
+						}
+					}
 
-			QString activate = QString("%1/activate").arg(bin);
-			QStringList args = {  activate };
+				QString pythonPath = QString("%1/anywave").arg(sitePackagesPath);
+				env.insert("PYTHONPATH", pythonPath);
 
-			venvDir = QDir::toNativeSeparators(venvDir);
-			systemPath = QString("%1:%2").arg(venvDir).arg(systemPath);
-			env.remove("PATH");
-			env.insert("PATH", systemPath);
-			m_python->setProcessEnvironment(env);
-			// launch activate 
-			m_python->start("/bin/bash", args);
-			if (!m_python->waitForFinished(-1)) {
-				emit progressChanged(QString(m_python->readAll()));
-			}  // wait for plugin to finish. (Wait forever).
+				QString activate = QString("%1/activate").arg(bin);
+				QStringList args = { activate };
 
-			// start python 
-			m_python->start(python, arguments, QIODevice::ReadWrite);
-			if (!m_python->waitForFinished(-1)) {
-				emit progressChanged(QString(m_python->readAll()));
-			}  // wait for plugin to finish. (Wait forever).
-			emit progressChanged("Python process has finished.");
+				venvDir = QDir::toNativeSeparators(venvDir);
+				systemPath = QString("%1:%2").arg(venvDir).arg(systemPath);
+				env.remove("PATH");
+				env.insert("PATH", systemPath);
+				m_python->setProcessEnvironment(env);
+				// launch activate 
+				m_python->start("/bin/bash", args);
+				if (!m_python->waitForFinished(-1)) {
+					emit progressChanged(QString(m_python->readAll()));
+				}  // wait for plugin to finish. (Wait forever).
+
+				// start python 
+				m_python->start(python, arguments, QIODevice::ReadWrite);
+				if (!m_python->waitForFinished(-1)) {
+					emit progressChanged(QString(m_python->readAll()));
+				}  // wait for plugin to finish. (Wait forever).
+				emit progressChanged("Python process has finished.");
 #endif
+			}
 		}
-		else {
+		else { // use python installed in system (assuming the python interpreter is in the system PATH)
 			// no virtual env 
 			python = aws->value(aws::python_exe).toString();
 #ifdef Q_OS_WIN
@@ -199,23 +203,13 @@ void AwPythonScriptProcess::run()
 		}
 	}
 	else {  // compiled plugin
-		m_python->start(m_plugin->settings().value("compiled python plugin").toString(),
-			arguments, QIODevice::ReadWrite);
-		m_python->waitForFinished(-1); // wait for plugin to finish. (Wait forever).
+		QString exePath = m_plugin->settings().value("compiled plugin").toString();
+		exePath = QDir::toNativeSeparators(exePath);
+		m_python->start(exePath, arguments, QIODevice::ReadWrite);
+		if (!m_python->waitForFinished(-1)) {
+			// wait for plugin to finish. (Wait forever).
+			emit progressChanged(QString(m_python->readAll()));
+		}
 		emit progressChanged("Python process has finished.");
 	}
-
-	//// test if we have a compiled (pyinstaller) package to run on just a regular python code
-	//bool isCompiled = m_plugin->settings().contains("compiled python plugin");
-	//if (isCompiled)
-	//	m_python.start(m_plugin->settings().value("compiled python plugin").toString(),
-	//		arguments, QIODevice::ReadWrite);
-	//else
-	//	m_python.start(python,	arguments, QIODevice::ReadWrite);
-
-	//if (!m_python.waitForStarted())
-	//	emit progressChanged("waitForStarted() failed.");
-
-	//m_python.waitForFinished(-1); // wait for plugin to finish. (Wait forever).
-	//emit progressChanged("Python process has finished.");
 }

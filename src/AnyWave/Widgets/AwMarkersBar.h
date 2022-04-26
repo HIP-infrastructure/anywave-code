@@ -26,8 +26,7 @@ class AwMarkersBar : public AwBaseMarkerBar
 	Q_OBJECT
 
 public:
-	AwMarkersBar(AwDisplayPhysics *phys, QWidget *parent = NULL) : AwBaseMarkerBar(phys, parent) {}
-
+	AwMarkersBar(AwDisplayPhysics *phys, QWidget *parent = nullptr) : AwBaseMarkerBar(phys, parent) {}
 protected:
 	void contextMenuEvent(QContextMenuEvent *e);
 signals:

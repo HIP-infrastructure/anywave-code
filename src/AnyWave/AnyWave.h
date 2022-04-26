@@ -113,7 +113,7 @@ signals:
 	void markersReadyToExport(const AwMarkerList& markers);
 	/** Send a log message **/
 	void log(const QString&);
-	void closingFile();
+//	void closingFile();
 public slots:
 	/** Position le flag de fichier modifie */
 	void setModified(bool f = true) { m_currentFileModified = f; }
@@ -123,6 +123,7 @@ public slots:
 	void stopMapping();
 	void displayReaderTriggerStatus(bool ok, int number);
 	void openFile(const QString& path = QString());
+	void openFileFromBIDS(const QString& path);
 	void openBIDS(const QString& path);
 	void updateRecentFiles(const QStringList& files);
 	void updateRecentBIDS(const QStringList& files);
@@ -155,6 +156,8 @@ private slots:
 	void on_actionLoadICA_triggered();
 	void on_actionOpen_video_triggered();
 	void on_actionCreate_new_MATLAB_plugin_triggered();
+	void on_actionCheck_for_available_plugins_triggered();
+	void on_actionView_Change_Log_triggered();
 	void loadBeamformer();
 	void reviewComponentsMaps();
 	void showFileProperties();

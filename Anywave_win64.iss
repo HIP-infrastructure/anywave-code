@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=1.0
+AppVersion=2.4.2
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -8,6 +8,7 @@ OutputDir="c:\dev\tmp"
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 ChangesAssociations=yes
+UsePreviousAppDir=no
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}"
@@ -18,7 +19,6 @@ Root: HKCR; Subkey: ".vhdr"; ValueType: string; ValueName: ""; ValueData: "AnyWa
 Root: HKCR; Subkey: ".edf"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".bdf"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".ades"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
-Root: HKCR; Subkey: ".ah5"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".cnt"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".fif"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".mff"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
@@ -37,9 +37,10 @@ Source: ".\bin\x64\Release\*.pl"; DestDir: "{app}"
 Source: ".\bin\x64\Release\qt.conf"; DestDir: "{app}"
 Source: ".\lib\*.lib"; DestDir: "{app}\lib";
 Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
+Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins";
-Source: ".\bin\x64\Release\Plugins\Rewrite4DNI.dll"; DestDir: "{app}\Plugins";
+Source: ".\bin\x64\Release\Plugins\4DNIExporter.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEGInto4D.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\AppendFilesv2.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\AutoMarking.dll"; DestDir: "{app}\Plugins";
@@ -48,7 +49,6 @@ Source: ".\bin\x64\Release\Plugins\EEPIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EGIReader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\BrainVisionIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\DeltamedBinTxtReader.dll"; DestDir: "{app}\Plugins";
-Source: ".\bin\x64\Release\Plugins\Correlation.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CTF_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEPIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\FileConverter.dll"; DestDir: "{app}\Plugins";

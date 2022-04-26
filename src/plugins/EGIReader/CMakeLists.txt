@@ -2,7 +2,7 @@
 project(EGIReader)
 add_definitions(-DQT_PLUGIN)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/armadillo/include)
 SET(SRCS EGIReader.cpp MIFFFile.cpp SignalFile.cpp SignalUtil.cpp) 
 
 SET(MOCS EGIReader.h )

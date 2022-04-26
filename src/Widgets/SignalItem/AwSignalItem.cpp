@@ -15,20 +15,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/AwSignalItem.h>
 #include <widget/SignalView/AwViewSettings.h>
+#include <widget/SignalView/AwGraphicsScene.h>
 #include "AwSIAmpButton.h"
-
-#if QT_VERSION >  QT_VERSION_CHECK(4, 8, 0)
 #include <qgraphicsscene.h>
 #include <QGraphicsSceneHoverEvent>
-#endif
-
 #include "AwSignalItemSettings.h"
-
 
 AwSignalItem::AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwGraphicsSignalItem(chan, settings, phys)
 {
 	m_hover = false;
-	setFlags(QGraphicsItem::ItemIsFocusable |  QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIgnoresTransformations);
+	setFlag(QGraphicsItem::ItemIsMovable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+	setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
+	setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 	setAcceptHoverEvents(true);
     m_baseLineItem = new QGraphicsLineItem(this);
 	m_showScale = false;
@@ -45,17 +44,20 @@ AwSignalItem::AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayP
 	m_pixelLengthInSamples = 0;
 }
 
-
 void AwSignalItem::showLabel(bool f)
 { 
 	m_label = f; 
 	m_labelItem->setVisible(f); 
+	if (m_upperNeighbor)
+		resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
 	update();
 }
 
 void AwSignalItem::setLabel(const QString& text)
 {
 	m_labelItem->setText(text);
+	if (m_upperNeighbor)
+		resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
 	update();
 }
 
@@ -64,7 +66,6 @@ void AwSignalItem::getLabeLPosAndWidth(qreal *x, qreal *width)
 	*x = 5.;
 	*width = m_labelItem->rect().width();
 }
-
 
 void AwSignalItem::computeMinMax(qint32 start, qint32 nbSamples, float *min, float *max)
 {
@@ -136,19 +137,21 @@ QRectF AwSignalItem::boundingRect() const
 }
 
 
-
-void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void AwSignalItem::updateChildItems()
 {
-	m_labelItem->setPos(5 + m_labelXOffset, -(m_labelItem->boundingRect().height() / 2));
+	m_labelItem->setPos(5, -(m_labelItem->boundingRect().height() / 2));
+	m_labelItem->setTransform(QTransform());
+	if (m_upperNeighbor)
+		resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
+}
 
-	if (m_channel == NULL)
-		return;
-
+void AwSignalItem::paintSignal(QPainter* painter)
+{
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	painter->setRenderHint(QPainter::Qt4CompatiblePainting);
 #endif
 
-	if (m_channel->dataSize() && needRepaint())	{
+	if (m_channel->dataSize() && needRepaint()) {
 		// compute the polygon
 		QPolygonF poly;
 		float gain = m_channel->gain();
@@ -168,7 +171,7 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 				break;
 
 			computeMinMax(currentPosInChannel, m_pixelLengthInSamples, &min, &max);
-			qreal y1 = - (min * m_physics->yPixPerCm()), y2 = - (max * m_physics->yPixPerCm());
+			qreal y1 = -(min * m_physics->yPixPerCm()), y2 = -(max * m_physics->yPixPerCm());
 			y1 *= update / gain;
 			y2 *= update / gain;
 			poly << QPointF(i, y1);
@@ -178,7 +181,7 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		m_baseLineItem->setLine(QLineF(0, 0, scene()->width(), 0));
 		endRepaint();
 	}
-	
+
 	// baseline
 	m_baseLineItem->setPen(QColor(m_channel->color()));
 	m_baseLineItem->setVisible(m_baseLine);
@@ -192,7 +195,7 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	painter->drawPolyline(m_poly);  // drawPolyline a la place de drawPolygon (car sinon le polygone referme le tracé)
 
 	if (m_hover) {
-		if (m_channel->dataSize() == NULL)
+		if (m_channel->dataSize() == 0)
 			return;
 
 		float ymin, ymax;
@@ -206,13 +209,14 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 			update(boundingRect());
 			return;
 		}
-
 		painter->setPen(QPen(Qt::darkGreen));
+		if (xmin < 0)
+			xmin = 0;
 		ymin = m_poly.at(xmin).y();
 		ymax = m_poly.at(xmax).y();
 		QPointF start = QPointF(m_mousePos.x(), ymin - 10);
 		QPointF end = QPointF(m_mousePos.x(), ymax + 10);
-		painter->drawLine(start, end); 
+		painter->drawLine(start, end);
 
 		// values stored in polygon are min max of real values that matches the same pixel.
 		// We display as tooltip the mean of min and max for the pixel.
@@ -239,30 +243,55 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	update(boundingRect());
 }
 
+void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+	// restore default children item positions:
+	updateChildItems();
+	// position the label item taking into account the upper neighbor
+	if (m_channel == nullptr)
+		return;
+	paintSignal(painter);
+}
+
 void AwSignalItem::updateData()
 {
-//	m_pixelLengthInSecs = (1 / m_physics->xPixPerCm()) * m_physics->secsPerCm();
 	m_pixelLengthInSecs = m_physics->pixelDuration();
 	m_pixelLengthInSamples = (int)(m_pixelLengthInSecs * m_channel->samplingRate());
 	repaint();
 }
 
 
+QPainterPath AwSignalItem::childrenRegion()
+{
+	QPainterPath path;
+	if (m_labelItem->isVisible())
+		path.addPolygon(m_labelItem->mapToScene(m_labelItem->boundingRect()));
+	return path;
+}
+
+void AwSignalItem::resolveCollisionWithUpperNeighbor(const QPainterPath& region)
+{
+	//reset transform
+	m_labelItem->setTransform(QTransform());
+	qreal xshift = m_labelItem->x();
+
+	while (true) {
+		QPainterPath bounds = m_labelItem->mapToScene(m_labelItem->shape());
+		if (bounds.intersects(region)) {
+			xshift += 5;
+			m_labelItem->setTransform(QTransform::fromTranslate(xshift, 0));
+		}
+		else
+			break;
+	}
+}
+
 /// EVENTS
-
-
 void AwSignalItem::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
+	m_mousePressedPos = e->scenePos();
+	static_cast<AwGraphicsScene *>(scene())->setItemsDragged();
 }
-
-void AwSignalItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
-{
-}
-
-void AwSignalItem::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
-{
-}
-
 
 void AwSignalItem::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
@@ -293,3 +322,21 @@ void AwSignalItem::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 	update();
 }
 
+QVariant AwSignalItem::itemChange(GraphicsItemChange change, const QVariant& value)
+{
+	AwGraphicsSignalItem::itemChange(change, value);
+	if (change == ItemPositionChange && scene()) {
+		// value is the new position.
+		QPointF newPos = value.toPointF();
+		newPos.setX(0);  // stick to left side
+		QRectF rect = scene()->sceneRect();
+		if (!rect.contains(newPos)) {
+			// Keep the item inside the scene rect.
+	//		newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
+			newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
+		}
+		static_cast<AwGraphicsScene*>(scene())->setItemsMoved();
+		return newPos;
+	}
+	return QGraphicsItem::itemChange(change, value);
+}

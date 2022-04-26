@@ -67,11 +67,11 @@ bool FileConverter::showUi()
 
 void FileConverter::run()
 {
-	AwFileIO *writer = m_ui->selectedWriter->newInstance();
+	std::shared_ptr<AwFileIO>  writer(m_ui->selectedWriter->newInstance());
 	writer->setPlugin(m_ui->selectedWriter);
 
 	int count = 1;
-	foreach (input in, m_ui->inputs) {
+	for (input in : m_ui->inputs) {
 		emit progressChanged((count * 100) / m_ui->inputs.size());
 		emit progressChanged(tr("Converting file ") + in.second + "...");
 		AwFileIO *fr = in.first->newInstance();
@@ -119,7 +119,8 @@ void FileConverter::run()
 		emit progressChanged(tr("Writing data..."));
 		writer->writeData(&sourceChannels);
 		emit progressChanged(tr("Done."));
-		in.first->deleteInstance(fr);
+	//	in.first->deleteInstance(fr);
+		delete fr;
 		count++;
 		writer->cleanUpAndClose();
 
@@ -127,6 +128,6 @@ void FileConverter::run()
 		while (!sourceChannels.isEmpty())
 			delete sourceChannels.takeFirst();
 	}
-	m_ui->selectedWriter->deleteInstance(writer);
+//	m_ui->selectedWriter->deleteInstance(writer);
 }
 

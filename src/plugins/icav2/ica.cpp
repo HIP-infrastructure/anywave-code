@@ -31,30 +31,35 @@
 #include <layout/AwLayout.h>
 #include <utils/json.h>
 #include <AwKeys.h>
+#include "infomax/ICAInfomax.h"
+#include "sobi/ICASobi.h"
 
-namespace algos {
-	constexpr auto ICA_infomax = 0;
-	constexpr auto ICA_cca = 1;
-	constexpr auto ICA_sobi = 2;
-}
 
 ICA::ICA()
 {
-	setInputFlags(Aw::ProcessIO::GetAsRecordedChannels | Aw::ProcessIO::DontSkipBadChannels |
-		Aw::ProcessIO::GetProcessPluginNames |Aw::ProcessIO::GetDurationMarkers);
+	setInputFlags(/*Aw::ProcessIO::GetAsRecordedChannels |*/ Aw::ProcessIO::DontSkipBadChannels |
+		Aw::ProcessIO::GetProcessPluginNames | Aw::ProcessIO::GetDurationMarkers | Aw::ProcessIO::GetWriterPlugins);
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	pdi.addInputChannel(-1, 1, 0);
 	pdi.addInputChannel(AwChannel::Source, 0, 0);
 	m_isDownsamplingActive = true;
-	m_hpf = m_lpf = 0.;
+	m_hpf = m_lpf = m_notch = 0.;
 	m_nComp = 0;
+	auto infomax = new ICAInfomax(this, this);
+	connect(infomax, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	m_algorithms << infomax;
+#if defined(Q_OS_WIN) 
+	auto sobi = new ICASobi(this, this);
+	connect(sobi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+	m_algorithms << sobi;
+#endif
 }
 
 ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";
-	version = "2.0.0";
+	version = "2.2.1";
     name = QString("ICA");
     description = QString("Compute ICA");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
@@ -64,10 +69,20 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 
 ICA::~ICA()
 {
+//	qDeleteAll(m_algorithms);
+//	qDeleteAll(m_rawChannels);
 }
 
 bool ICA::showUi()
 {
+	// request montage to DataManager
+	QVariantMap settings;
+	settings[keys::channels_source] = keys::channels_source_raw;
+	// Use the synchronous call here as we are not yet running in a separate thread
+	AwChannelList tmp;
+	selectChannels(settings, &tmp);
+	m_rawChannels = AwChannel::toSharedPointerList(tmp);
+
 	ICASettings ui(this);
 
 	if (ui.exec() == QDialog::Accepted)	{
@@ -83,11 +98,15 @@ bool ICA::showUi()
 		}
 		test.close();
 		QFile::remove(m_fileName);
-		//pdi.input.settings.unite(ui.args);
 		AwUniteMaps(pdi.input.settings, args);
 		return true;
 	}
 	return false;
+}
+
+void ICA::init()
+{
+
 }
 
 
@@ -95,28 +114,21 @@ bool ICA::batchParameterCheck(const QVariantMap& hash)
 {
 	// this is an exhaustive test as we don't have a file open at this stage.
 	// just checking for some parameters: 
-	return hash.value("comp").toInt() > 1;
+	return hash.value(keys::comp).toInt() > 1;
 }
 
 int ICA::initParameters()
 {
 	auto args = pdi.input.settings;
-	QMap<QString, int> algos;
-	algos.insert("infomax", algos::ICA_infomax);
-	algos.insert("cca", algos::ICA_cca);
-	algos.insert("sobi", algos::ICA_sobi);
+	QStringList algoNames;
+	for (auto const& algo : m_algorithms)
+		algoNames << algo->name();
 
 	m_isDownsamplingActive = false;
-	m_modality = AwChannel::stringToType(args.value("modality").toString());
-	if (m_modality == -1) {
-		sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
-		return -1;
-	}
-	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 	// BIDS specific:
 	// when launching ICA in batch mode and specifying ieeg as modality:
 	// check for SEEG channels if none present check for EEG.
-	if (args.value("modality").toString().toLower() == "ieeg") {
+	if (args.value(keys::modality).toString().toLower() == "ieeg") {
 		m_modality = AwChannel::SEEG;
 		m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 		if (m_channels.isEmpty()) {
@@ -124,9 +136,28 @@ int ICA::initParameters()
 			m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
 		}
 	}
-	if (m_channels.isEmpty()) {
-		sendMessage(QString("No channels of type %1 found in file").arg(AwChannel::typeToString(m_modality)));
-		return -1;
+	else {
+		m_modality = AwChannel::stringToType(args.value(keys::modality).toString());
+		if (m_modality == -1) {
+			sendMessage(QString("modality: %1 invalid parameter").arg(m_modality));
+			return -1;
+		}
+	}
+	m_channels = AwChannel::getChannelsOfType(pdi.input.channels(), m_modality);
+
+	if (args.contains(keys::use_seeg_electrode) && m_modality == AwChannel::SEEG) {
+		QString label = args.value(keys::use_seeg_electrode).toString();
+		sendMessage(QString("Will compute only on SEEG electrode:%1").arg(label));
+		AwChannelList list;
+		for (auto c : m_channels) {
+			if (c->name().startsWith(label))
+				list << c;
+		}
+		if (list.isEmpty()) {
+			sendMessage(QString("use_seeg_electrode: the specified electrode is not present in file, specified montage or picked channels."));
+			return -1;
+		}
+		m_channels = list;
 	}
 
 	m_channels = AwChannel::removeDoublons(m_channels);
@@ -136,8 +167,8 @@ int ICA::initParameters()
 			badLabels.clear();
 	}
 	m_samplingRate = m_channels.first()->samplingRate();
-	if (args.contains("downsampling"))
-		m_isDownsamplingActive = args.value("downsampling").toBool();
+	if (args.contains(keys::downsampling))
+		m_isDownsamplingActive = args.value(keys::downsampling).toBool();
 	// check for bad labels 
 	if (!badLabels.isEmpty()) {
 		foreach(AwChannel *c, m_channels)
@@ -146,22 +177,20 @@ int ICA::initParameters()
 	}
 	m_nComp = m_channels.size();
 
-	if (args.contains("comp"))
-		m_nComp = args.value("comp").toInt();
+	if (args.contains(keys::comp))
+		m_nComp = args.value(keys::comp).toInt();
 
 	// check algo
 	// some algos have a fixed number of components (no PCA)
-	m_algo = 0; // default to infomax
-	QString algo = "infomax";
+	m_selectedAlgo = m_algorithms.first();
 	if (args.contains("algorithm")) {
 		auto algoName = args.value("algorithm").toString().toLower().simplified();
-		m_algo = algos.value(algoName);
-		if (m_algo)
-			algo = algoName;
+		int index = algoNames.indexOf(algoName);
+		if (index == -1) 
+			sendMessage("The specified algorithm does not exist. Switching to default Infomax.");
+		else
+			m_selectedAlgo = m_algorithms.at(index);
 	}
-	if (m_algo == algos::ICA_cca || m_algo == algos::ICA_sobi) 
-		m_nComp = m_channels.size();
-
 	if (m_nComp > m_channels.size()) {
 		sendMessage("The specified number of components is greater dans the number of available channels in data. Aborted.");
 		return -1;
@@ -174,10 +203,11 @@ int ICA::initParameters()
 
 	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[keys::data_path].toString()).arg(args["modality"].toString()));
 
-	m_lpf = args.value(keys::lp).toDouble();
-	m_hpf = args.value(keys::hp).toDouble();
+	m_lpf = args.value(keys::lp).toFloat();
+	m_hpf = args.value(keys::hp).toFloat();
+	m_notch = args.value(keys::notch).toFloat();
 	AwFilterSettings filterSettings;
-	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, 0.);
+	filterSettings.set(m_channels.first()->type(), m_hpf, m_lpf, m_notch);
 	filterSettings.apply(m_channels);
 
 	if (!(modifiersFlags() & Aw::ProcessIO::modifiers::UseOrSkipMarkersApplied)) {
@@ -231,7 +261,7 @@ int ICA::initParameters()
 
 	// check for nan values
 	if (AwMath::isNanInChannels(m_channels)) {
-		sendMessage("A Nan value was detected in the data. Computation aborted.");
+		sendMessage("nan value detected in data. Computation aborted.");
 		return -1;
 	}
 
@@ -268,59 +298,57 @@ int ICA::initParameters()
 	if (args.contains(keys::output_prefix))
 		m_fileName = QString("%1%2").arg(args.value(keys::output_prefix).toString()).arg(m_fileName);
 
-	QString mod = args.value("modality").toString();
-	if (args.contains(keys::output_suffix))
-		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5%6.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
+	QString mod = args.value(keys::modality).toString();
+	if (args.contains(keys::output_suffix)) 
+		m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_notch-%5_comp-%6%7.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_notch).arg(m_nComp).arg(args.value(keys::output_suffix).toString());
 	else // default suffix is _ica
-	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_comp-%5_ica.mat").arg(algo).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_nComp);
-	// generate full path
+	    m_fileName += QString("_algo-%1_mod-%2_hp-%3_lp-%4_notch-%5_comp-%6_ica.mat").arg(m_selectedAlgo->name()).arg(mod).arg(m_hpf).arg(m_lpf).arg(m_notch).arg(m_nComp);
+	// generate full pathag
 	m_fileName = QString("%1/%2").arg(dir).arg(m_fileName);
+
+	// check if we have to export components time series
+	if (args.contains(keys::save_comp_traces)) 
+		m_componentsEEGFileName = m_fileName.replace(QRegularExpression("\\.[^.]*$"), ".vhdr");
+	
 	return 0;
 }
 
 
 void ICA::runFromCommandLine()
 {
-	if (initParameters() == 0) {
-		try {
-			switch (m_algo) {
-			case algos::ICA_infomax:
-				infomax(m, n, m_nComp);
-				break;
-			case algos::ICA_cca: // cca
-				run_cca(m, n);
-				break;
-			case algos::ICA_sobi:
-				run_sobi(m, n);
-				break;
+	try {
+		if (initParameters() == 0) {
+			m_selectedAlgo->setChannels(m_channels);
+			m_selectedAlgo->setNumberOfComponents(m_nComp);
+			m_selectedAlgo->run();
+			m_mixing = m_selectedAlgo->mixing();
+			m_unmixing = m_selectedAlgo->unmixing();
+			saveToFile();
+			if (!m_componentsEEGFileName.isEmpty()) {
+				exportComponents();
 			}
-			
 		}
-		catch (std::bad_alloc& ba) {
-			sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
-			return;
-		}
-		saveToFile();
+	}
+	catch (std::bad_alloc& ba) {
+		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
+		return;
 	}
 }
 
 void ICA::run()
 {
-	if (initParameters() == -1)
-		return;
-
 	try {
-		switch (m_algo) {
-		case algos::ICA_infomax:
-			infomax(m, n, m_nComp);
-			break;
-		case algos::ICA_cca: // cca
-			run_cca(m, n);
-			break;
-		case algos::ICA_sobi:
-			run_sobi(m, n);
-			break;
-		}
+		if (initParameters() == -1)
+			return;
+		m_selectedAlgo->setChannels(m_channels);
+		m_selectedAlgo->setNumberOfComponents(m_nComp);
+		// check for extra settings in current algo
+		auto map = m_selectedAlgo->getExtraSettings();
+		if (!map.isEmpty())
+			AwUniteMaps(pdi.input.settings, map);
+		m_selectedAlgo->run();
+		m_mixing = m_selectedAlgo->mixing();
+		m_unmixing = m_selectedAlgo->unmixing();
 	}
 	catch (std::bad_alloc& ba) {
 		sendMessage("MEMORY ALLOCATION ERROR. Operation canceled.");
@@ -328,23 +356,85 @@ void ICA::run()
 	}
 	if (!isAborted()) {
 		saveToFile();
-
 		//// tell AnyWave to load ICA components
-		//QVariantList args;
-		//args.append(m_fileName);
-		//emit sendCommand(AwProcessCommand::LoadICA, args);
+		sendMessage("Sending event to AnyWave...");
 		QSharedPointer<AwEvent> e = QSharedPointer<AwEvent>(new AwEvent());
 		e->setId(AwEvent::LoadICAMatFile);
 		QStringList args = { m_fileName };
 		e->addValue("args", args);
+		sendMessage("Open .mat file event");
 		emit sendEvent(e);
+		sendMessage("Done");
 		// also send an event to open a signal view to visualise ICA components
 		QSharedPointer<AwEvent> e2 = QSharedPointer<AwEvent>(new AwEvent());
+		sendMessage("Adding new view for ICA channels");
 		e2->setId(AwEvent::AddNewView);
 		QStringList filters = { AwChannel::typeToString(AwChannel::ICA) };
 		e2->addValue("filters", filters);
 		emit sendEvent(e2);
+		sendMessage("Done");
 	}
+}
+
+void ICA::exportComponents()
+{
+	Q_ASSERT(!m_componentsEEGFileName.isEmpty());
+	bool found = false; // find brain vision plugin
+	AwFileIOPlugin *plugin = nullptr;
+	for (auto p : pdi.input.writers) {
+		if (p->name == "Brainvision Analyser Format") {
+			found = true;
+			plugin = p;
+			break;
+		}
+	}
+	if (!found) {
+		sendMessage("Error: Brainvision plugin is not available. Could not export components traces.");
+		return;
+	}
+	std::shared_ptr<AwFileIO> writer(plugin->newInstance());
+	writer->infos.setChannels(AwChannel::duplicateChannels(m_channels));
+	AwBlock* block = writer->infos.newBlock();
+	// quick compute file duration
+	float fileDuration = 0;
+	for (auto m : pdi.input.markers())
+		fileDuration += m->duration();
+	block->setDuration(fileDuration);
+	block->setSamples(std::floor(fileDuration * m_channels.first()->samplingRate()));
+	if (writer->createFile(m_componentsEEGFileName) != AwFileIO::NoError) {
+		sendMessage(QString("Error creating %1 file. No components traces exported").arg(m_componentsEEGFileName));
+		return;
+	}
+	sendMessage("Saving components time series to vhdr file...");
+	
+	const float duration = 30.;
+	fmat unmixing = conv_to<fmat>::from(m_unmixing);
+	// read each input markers using chunks of 30s duration
+	for (auto m : pdi.input.markers()) {
+		float totalDuration = m->duration();
+		float pos = m->start();
+		float left = totalDuration;
+		
+		while (left) {
+			float toRead = std::min(duration, left);
+			requestData(&m_channels, pos, toRead);  // read and apply filters
+			left -= toRead;
+			pos += toRead;
+			fmat X = AwMath::channelsToFMat(m_channels);
+			fmat components = unmixing * X;
+			X.clear();
+			int index = 0;
+			for (auto c : m_channels) {
+				float* dest = c->newData(components.n_cols);
+				for (uword c = 0; c < components.n_cols; c++)
+					dest[c] = components(index, c);
+				index++;
+			}
+			writer->writeData(&m_channels);
+		}
+	}
+	sendMessage("Components time series exported.");
+	writer->cleanUpAndClose();
 }
 
 void ICA::saveToFile()
@@ -375,6 +465,7 @@ void ICA::saveToFile()
 		file.writeString("modality", AwChannel::typeToString(m_modality));
 		file.writeScalar("lpf", (double)m_lpf);
 		file.writeScalar("hpf", (double)m_hpf);
+		file.writeScalar("notch", (double)m_notch);
 		file.writeScalar("sr", (double)m_samplingRate);
 		file.writeMatrix("mixing", m_mixing);
 		file.writeMatrix("unmixing", m_unmixing);

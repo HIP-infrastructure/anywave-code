@@ -34,12 +34,12 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 {
 	float hp = 0., lp = 0., notch = 0.;
 	// check for optional filter settings
-	if (args.contains("hp"))
-		hp = args["hp"].toFloat();
-	if (args.contains("lp"))
-		lp = args["lp"].toFloat();
-	if (args.contains("notch"))
-		notch = args["notch"].toFloat();
+	if (args.contains(keys::hp))
+		hp = args.value(keys::hp).toFloat();
+	if (args.contains(keys::lp))
+		lp = args.value(keys::lp).toFloat();
+	if (args.contains(keys::notch))
+		notch = args.value(keys::notch).toFloat();
 	if (lp || notch || hp) {
 		for (auto c : channels) {
 			c->setLowFilter(lp);
@@ -137,11 +137,34 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		}
 		process->pdi.input.setReader(dm->reader());
 		AwUniteMaps(process->pdi.input.settings, dm->settings());
-	}
-	// check for special case, marker_file, montage_file set in json must be relative to data file
 
-	// --marker_file and --montage_file must be absolute paths
-	if (!inputFile.isEmpty()) {
+		// check if marker_file option is set and if the specified file really exists
+		if (process->pdi.input.settings.contains(keys::marker_file)) {
+			if (QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
+				process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
+			else {  // specified file does not exists
+				logger.sendLog("warning: marker_file is specified but the file does not exist. Searching for default .mrk file.");
+				auto defaultMrkFile = dm->mrkFilePath();
+				if (QFile::exists(defaultMrkFile)) {
+					logger.sendLog("Found default mrk file, using it instead.");
+					process->pdi.input.settings[keys::marker_file] = defaultMrkFile;
+					process->pdi.input.setNewMarkers(AwMarker::load(defaultMrkFile));
+				}
+				else {
+					logger.sendLog("warning: no default mrk file found. Setting reader's markers as input if any...");
+					process->pdi.input.settings.remove(keys::marker_file);
+					process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
+				}
+			}
+		}
+
+		// check again here that montage_file and marker_file set by DM really exist
+		if (!QFile::exists(process->pdi.input.settings.value(keys::montage_file).toString()))
+			process->pdi.input.settings.remove(keys::montage_file);
+		//if (!QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
+		//	process->pdi.input.settings.remove(keys::marker_file);
+
+
 		// check for BAD file
 		QString tmp = dm->badFilePath();
 		if (QFile::exists(tmp)) {
@@ -149,10 +172,6 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			process->pdi.input.settings[keys::bad_labels] = dm->badLabels();
 		}
 		AwChannelList montage;
-		tmp = dm->mtgFilePath();
-		if (!args.contains(keys::montage_file))
-			if (QFile::exists(tmp))
-				args[keys::montage_file] = tmp;
 		
 		bool skipBad = true;
 		if (args.contains(keys::skip_bad_channels))
@@ -185,41 +204,49 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			}
 		}
 		else {
-			if (args.contains(keys::montage_file)) { // did we finally got a montage file?
-				montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
-					process->pdi.input.settings.value(keys::bad_labels).toStringList());
-				logger.sendLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
-				if (montage.isEmpty()) { // error when loading and/or applying mtg file
-					throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()));
-					return -1;
+			// New: test for pick_channels options
+			// --pick_channels "chan1, chan2, ..."
+			bool pickChannels = false;
+			if (args.contains(keys::pick_channels)) {
+				QStringList channels = args.value(keys::pick_channels).toStringList();
+				montage = AwCommandLineManager::parsePickChannels(channels, dm);
+				if (!montage.isEmpty()) {
+					pickChannels = true;
+					if (skipBad)
+						AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
 				}
 			}
-			else { // no montage specified or detected
-				// applying default file montage
-				montage = AwChannel::duplicateChannels(dm->rawChannels());
-				logger.sendLog(QString("No montage file specified or detected, using as recorded channels"));
-				if (skipBad)
-					AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+			if (!pickChannels) {
+				if (args.contains(keys::montage_file)) { // did we finally got a montage file?
+					montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
+						process->pdi.input.settings.value(keys::bad_labels).toStringList());
+					logger.sendLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
+					if (montage.isEmpty()) { // error when loading and/or applying mtg file
+						throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()));
+						return -1;
+					}
+				}
+				else { // no montage specified or detected
+					// applying default file montage
+					montage = AwChannel::duplicateChannels(dm->rawChannels());
+					logger.sendLog(QString("No montage file specified or detected, using as recorded channels"));
+					if (skipBad)
+						AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
+				}
 			}
 		}
 
 		dm->montageManager()->setChannels(montage);
 
-		// preload markers under different conditions:
-		tmp = dm->mrkFilePath();
-		// detect only if marker_file option is not specified by the user
-		if (!args.contains(keys::marker_file))
-			if (QFile::exists(tmp))
-				args[keys::marker_file] = tmp;
-		// if marker file is found => load markers and use them for the process
-		if (args.contains(keys::marker_file)) {
-			logger.sendLog(QString("using maker file: %1").arg(args.value(keys::marker_file).toString()));
-			process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
-		}
-		else {
-			logger.sendLog(QString("No marker file specified or detected, using markers present in data file."));
-			process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
-		}
+		//// if marker file is found => load markers and use them for the process
+		//if (args.contains(keys::marker_file)) {
+		//	logger.sendLog(QString("using marker file: %1").arg(args.value(keys::marker_file).toString()));
+		//	process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
+		//}
+		//else {
+		//	logger.sendLog(QString("No marker file specified or detected, using markers present in data file."));
+		//	process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
+		//}
 
 		// handle output_dir
 		if (!process->pdi.input.settings.contains(keys::output_dir)) {
@@ -235,7 +262,8 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		}
 
 		// apply filter on channels depending on hp lp notch keys that may have been specified in the command line options
-		AwCommandLineManager::applyFilters(process->pdi.input.channels(), args);
+		auto inputChannels = process->pdi.input.channels();
+		AwCommandLineManager::applyFilters(inputChannels, args);
 
 		// We can here change the reader for the main DataServer as the running mode is command line and AnyWave will close after finished.
 		dm->dataServer()->openConnection(process);
@@ -244,4 +272,119 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		AwProcessManager::instance()->buildProcessPDI(process);
 	}
 	return 0;
+}
+
+AwChannelList AwCommandLineManager::parsePickChannels(const QStringList& channels, AwDataManager* dm)
+{
+	if (channels.isEmpty())
+		return AwChannelList();
+	AwChannelList montage;
+	
+	auto rawChannels = dm->rawChannels();
+	QMap<QString, AwChannel*> map;
+	for (auto r : rawChannels)
+		map.insert(r->name(), r);
+	for (auto const& label : channels) {
+		// get raw channel (from as recorded)		
+		QString chanName, refName;
+		chanName = label.trimmed();
+		// WARNING: as recorded channels MAY contain names with '-' 
+		auto asRecordedChannel = map.value(chanName);
+		if (asRecordedChannel) {  // find a match
+			montage << new AwChannel(asRecordedChannel);
+			continue;
+		}
+		// don't find a match in as recorded, check if the label contains '-' that may indicate a bipolar reference
+		if (label.contains('-')) {
+			auto splitted = label.split('-');
+			if (splitted.size() == 2) {
+				chanName = splitted.first().trimmed();
+				refName = splitted.last().trimmed();
+			}
+			asRecordedChannel = map.value(chanName);
+			if (asRecordedChannel) {
+				AwChannel* channel = new AwChannel(asRecordedChannel);
+				if (!refName.isEmpty())
+					channel->setReferenceName(refName);
+				montage << channel;
+			}
+		}
+	}
+	return montage;
+}
+
+AwChannelList AwCommandLineManager::getInputChannels(const AwArguments& args, AwDataManager* dm)
+{
+	AwChannelList res;
+	if (!args.contains(keys::channels_source)) {
+		// default behavior when no channel_source specified:
+		// 1. try to get the selection (if running in AnyWave in GUI mode).
+		//  if no selection:
+		// 2. get the current montage (if running in command line and there is no montage => raw channels)
+		res = dm->selectedChannels();
+		if (res.isEmpty())
+			res = dm->montage();
+		if (res.isEmpty())
+			res = dm->rawChannels();
+	}
+	else {
+		auto source = args.value(keys::channels_source).toString().simplified();
+		if (source == "montage") {
+			res = dm->montage();
+		}
+		else if (source == "raw")
+			res = dm->rawChannels();
+		else if (source == "selection")
+			res = dm->selectedChannels();
+	}
+	// if still no input channels => force to raw channels
+	if (res.isEmpty())
+		res = dm->rawChannels();
+	if (args.contains(keys::pick_channels)) {
+		AwChannelList inputChannels;
+		QMap<QString, AwChannel*> map;
+		for (auto r : res)
+			map.insert(r->name(), r);
+		QStringList labels = args.value(keys::pick_channels).toStringList();
+		for (auto const& label : labels) {
+			// get raw channel (from as recorded)		
+			QString chanName, refName;
+			chanName = label.trimmed();
+			// WARNING: as recorded channels MAY contain names with '-' 
+			auto asRecordedChannel = map.value(chanName);
+			if (asRecordedChannel) {  // find a match
+				inputChannels << asRecordedChannel->duplicate();
+				continue;
+			}
+			// don't find a match in as recorded, check if the label contains '-' that may indicate a bipolar reference
+			if (label.contains('-')) {
+				auto splitted = label.split('-');
+				if (splitted.size() == 2) {
+					chanName = splitted.first().trimmed();
+					refName = splitted.last().trimmed();
+				}
+				asRecordedChannel = map.value(chanName);
+				if (asRecordedChannel) {
+					AwChannel* channel = asRecordedChannel->duplicate();
+					if (!refName.isEmpty())
+						channel->setReferenceName(refName);
+					inputChannels << channel;
+				}
+			}
+		}
+		return inputChannels; // that may be empty if picked_channels were not found!
+
+	}
+	return AwChannel::duplicateChannels(res);
+}
+
+AwMarkerList AwCommandLineManager::parseMarkerFile(const AwArguments& args)
+{
+	AwMarkerList res;
+	// check for marker file
+	if (args.contains(keys::marker_file)) {
+		auto mrkFile = args.value(keys::marker_file).toString();
+		res = AwMarker::load(mrkFile);
+	}
+	return res;
 }

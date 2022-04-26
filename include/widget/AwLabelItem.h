@@ -18,6 +18,7 @@
 #include <AwGlobal.h>
 #include <QGraphicsRectItem>
 
+
 class AW_WIDGETS_EXPORT AwLabelItem : public QGraphicsRectItem
 {
 public:

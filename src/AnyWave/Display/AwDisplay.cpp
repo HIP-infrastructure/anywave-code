@@ -20,7 +20,6 @@
 #include <QMenu>
 #include <QFileDialog>
 #include "Widgets/AwDisplayToolBar.h"
-#include "AwDisplaySetupManager.h"
 #include "Widgets/AwMarkersBar.h"
 #include "AwScene.h"
 #include "Marker/AwMarkerManager.h"
@@ -53,6 +52,7 @@ AwDisplay *AwDisplay::instance()
 {
 	return m_instance;
 }
+
 void AwDisplay::setInstance(AwDisplay *d)
 {
 	m_instance = d;
@@ -60,22 +60,11 @@ void AwDisplay::setInstance(AwDisplay *d)
 
 AwDisplay::AwDisplay(QMainWindow *w)
 {
-	AwDisplaySetupManager *dsManager = AwDisplaySetupManager::instance();
-	dsManager->setParent(this);
 	m_mainWindow = w;
-	m_setup = nullptr;
-	AwDisplaySetup *setup = dsManager->currentSetup();
-	// Display Setup Manager connections
-	connect(dsManager, SIGNAL(newSetupSelected(AwDisplaySetup *)), this, SLOT(changeCurrentSetup(AwDisplaySetup *)));
-	connect(this, SIGNAL(setupChanged(AwDisplaySetup *, int)), dsManager, SLOT(updateSetup(AwDisplaySetup *, int)));
 	connect(AwMarkerManager::instance(), SIGNAL(goTo(float)), this, SLOT(showPositionInViews(float)));
-	connect(AwICAManager::instance(), SIGNAL(icaComponentsUnloaded()), this, SLOT(removeICAChannels()));
-
 	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
-	// create views from setup
-	for (AwViewSetup *vs : setup->viewSetups())
-		AwSignalView *view = addSignalView(vs);
-
+	auto settings = m_displaySetup.addViewSettings();
+	addSignalView(settings);
 	w->update();
 	m_dontSynchronize = false;
 	AwDisplay::setInstance(this);
@@ -122,16 +111,16 @@ AwChannelList AwDisplay::displayedChannels()
 	return res;
 }
 
-AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
+AwSignalView* AwDisplay::addSignalView(AwViewSettings  *settings)
 {
 	// Set other views flag
 	for (auto v : m_signalViews)
 		v->setProcessFlags(AwSignalView::NoProcessUpdate);
 
-	AwSignalView *view = new AwSignalView((AwViewSettings *)setup);
-	AwProcessManager *pm = AwProcessManager::instance();
-	QList<AwDisplayPlugin *> plugins = AwPluginManager::getInstance()->displays();
-	QList<AwProcessPlugin *> QTSplugins = pm->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
+	AwSignalView* view = new AwSignalView(settings);
+	AwProcessManager* pm = AwProcessManager::instance();
+	QList<AwDisplayPlugin*> plugins = AwPluginManager::getInstance()->displays();
+	QList<AwProcessPlugin*> QTSplugins = pm->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
 
 	for (auto plugin : plugins)
 		view->addNewDisplayPlugin(plugin);
@@ -147,10 +136,10 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	connect(view->scene(), SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
 	connect(view->scene(), &AwGraphicsScene::draggedCursorPositionChanged, this, &AwDisplay::draggedCursorPositionChanged);
 	connect(view, SIGNAL(cursorClicked(float)), this, SLOT(synchronizeOnCursor(float)));
-	connect(view, SIGNAL(markerBarHighlighted(AwMarker *)), this, SLOT(highlightMarker(AwMarker *)));
+	connect(view, SIGNAL(markerBarHighlighted(AwMarker*)), this, SLOT(highlightMarker(AwMarker*)));
 
-	connect(AwMarkerManager::instance()->markerInspector(), SIGNAL(settingsChanged(AwMarkingSettings *)),
-		view->scene(), SLOT(setMarkingSettings(AwMarkingSettings *)));
+	connect(AwMarkerManager::instance()->markerInspector(), SIGNAL(settingsChanged(AwMarkingSettings*)),
+		view->scene(), SLOT(setMarkingSettings(AwMarkingSettings*)));
 	view->scene()->setMarkingSettings(&AwMarkerManager::instance()->markerInspector()->settings());
 
 	// Montage to view
@@ -168,18 +157,18 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 
 	m_centralWidget->addWidget(view);
 	m_centralWidget->repaint();
-	
+
 	// set flags so that the views inform the Process Manager about changes.
 	for (auto v : m_signalViews)
 		v->setProcessFlags(AwSignalView::UpdateProcess);
 
-	view->setMarkers(AwMarkerManager::instance()->displayedMarkers());
-	
+	view->getNewMarkers();
+
 	// QTS
 	QStringList list;
-	for (auto p : QTSplugins) 
+	for (auto p : QTSplugins)
 		list << p->name;
-	
+
 	view->scene()->setQTSPlugins(list);
 	connect(view->scene(), SIGNAL(processSelectedForLaunch(QString&, AwChannelList&, float, float)),
 		pm, SLOT(launchQTSPlugin(QString&, AwChannelList&, float, float)));
@@ -189,79 +178,51 @@ AwSignalView *AwDisplay::addSignalView(AwViewSetup *setup)
 	return view;
 }
 
-void AwDisplay::updateSetup(AwDisplaySetup *setup, int flags)
+void AwDisplay::updateGUI()
 {
-	if (setup == NULL)
-		return;
-
-	if (flags & AwDisplaySetup::ViewOrientation) {
-		switch (m_setup->orientation())
-		{
-		case AwDisplaySetup::Horizontal:
-			m_centralWidget->setOrientation(Qt::Vertical);
-			break;
-		case AwDisplaySetup::Vertical:
-			m_centralWidget->setOrientation(Qt::Horizontal);
-			break;
-		}
-		m_centralWidget->repaint();
+	switch (m_displaySetup.orientation())
+	{
+	case AwDisplaySetup::Horizontal:
+		m_centralWidget->setOrientation(Qt::Vertical);
+		break;
+	case AwDisplaySetup::Vertical:
+		m_centralWidget->setOrientation(Qt::Horizontal);
+		break;
 	}
-
-	m_setup = setup;
 }
 
 void AwDisplay::closeFile()
 {
-	saveChannelSelections();
-	m_channels.clear(); // clear current montage channels.
-	m_virtualChannels.clear();
-	AwDisplaySetupManager::instance()->saveSettings();
-	AwDisplaySetupManager::instance()->resetToDefault();
-	addMarkerModeChanged(false);
 	for (auto v : m_signalViews)
 		v->closeFile();
+	saveViewSettings();
+	m_channels.clear(); // clear current montage channels.
+	m_virtualChannels.clear();
+	addMarkerModeChanged(false);
+	m_displaySetup.clearViewSettings();
 }
 
 void AwDisplay::quit()
 {
-	saveChannelSelections();
-	AwDisplaySetupManager::instance()->saveSettings();
+	for (auto v : m_signalViews)
+		v->closeFile();
+	saveViewSettings();
 	while (!m_signalViews.isEmpty())
 		delete m_signalViews.takeFirst();
 }
 
-void AwDisplay::saveChannelSelections()
+void AwDisplay::loadViewSettings()
 {
-	auto channels = selectedChannels();
-	if (channels.isEmpty())
-		return;
-	auto selectedLabels = AwChannel::getLabels(channels);
-	QString path = AwDataManager::instance()->selFilePath();
-	if (QFile::exists(path))
-		QFile::remove(path);
+	auto dm = AwDataManager::instance();
+	if (QFile::exists(dm->dispFilePath())) 
+		m_displaySetup.loadFromFile(dm->dispFilePath());
 
-	QFile file(path);
-	if (file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate)) {
-		QTextStream stream(&file);
-		for (auto const &label : selectedLabels)
-			stream << label << endl;
-		file.close();
-	}
 }
 
-void AwDisplay::loadChannelSelections()
+void AwDisplay::saveViewSettings()
 {
-	QString path = AwDataManager::instance()->selFilePath();
-	QFile file(path);
-	QStringList labels;
-	if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
-		QTextStream stream(&file);
-		while (!stream.atEnd()) 
-			labels << stream.readLine().trimmed();
-		setSelectedChannelsFromLabels(labels);
-		file.close();
-	}
-
+	auto dm = AwDataManager::instance();
+	m_displaySetup.saveToFile(dm->dispFilePath());
 }
 
 
@@ -437,7 +398,6 @@ void AwDisplay::captureViews()
 		aws->setValue(aws::last_captured_file, file);
 }
 
-
 void AwDisplay::showICAMapOverChannel(bool flag)
 {
 	for (auto v : m_signalViews) {
@@ -463,8 +423,9 @@ void AwDisplay::synchronizeViews(float position)
 	if (!view)
 		return;
 
-	if (m_setup->synchronizeViews())
-		foreach (AwSignalView *v, m_signalViews)
+	//if (m_setup->synchronizeViews())
+	if (m_displaySetup.synchronizeViews())  
+		for (AwSignalView *v : m_signalViews)
 			if (v != view)
 				v->synchronizeOnPosition(position);
 }
@@ -474,7 +435,7 @@ void AwDisplay::highlightMarker(AwMarker *marker)
 	AwSignalView *source = (AwSignalView *)sender();
 	if (source == NULL)
 		return;
-	foreach (AwSignalView *v, m_signalViews) {
+	for (AwSignalView *v : m_signalViews) {
 		if (v != source)
 			v->scene()->highlightMarker(marker);
 	}
@@ -483,7 +444,7 @@ void AwDisplay::highlightMarker(AwMarker *marker)
 void AwDisplay::showPositionInViews(float position)
 {
 	m_dontSynchronize = true;
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->showPosition(position);
 
 	m_dontSynchronize = false;
@@ -501,17 +462,17 @@ void AwDisplay::setCursorPosition(float position)
 
 void AwDisplay::synchronizeOnCursor(float position)
 {
-	if (!m_setup->synchronizeViews())
+	if (!m_displaySetup.synchronizeViews())
 		return;
 
 	AwSignalView *view = (AwSignalView *)sender();
 
-	if (view == NULL) // signal must came from a view
+	if (view == nullptr) // signal must came from a view
 		return;
 
 	m_dontSynchronize = true;
 
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		if (v != view) {
 			if (v->settings()->secsPerCm != view->settings()->secsPerCm)
 				v->synchronizeOnPosition(view->positionInFile());
@@ -522,24 +483,23 @@ void AwDisplay::synchronizeOnCursor(float position)
 
 void AwDisplay::synchronizeCursorPos(float position)
 {
-	if (!m_setup->synchronizeViews())
+	if (!m_displaySetup.synchronizeViews())
 		return;
 
 	AwSignalView *view = (AwSignalView *)sender();
-	if (view == NULL)
+	if (view == nullptr)
 		return;
 
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		if (v != view)
 			v->scene()->setCursorPosition(position, view->settings()->secsPerCm);
 }
 
-void AwDisplay::synchronizeMappingCursorPos(float position)
+void AwDisplay::synchronizeMappingCursorPos(float position) 
 {
-	if (!m_setup->synchronizeViews())
+	if (!m_displaySetup.synchronizeViews())
 		return;
-
-	foreach (AwSignalView *v, m_signalViews)
+	for (AwSignalView *v : m_signalViews)
 		v->scene()->setMappingCursorPosition(position);
 }
 
@@ -548,10 +508,23 @@ void AwDisplay::addNewSignalView()
 	AwNewViewDial dlg;
 	if (dlg.exec() != QDialog::Accepted)
 		return;
+	AwViewSettings* settings = m_displaySetup.addViewSettings();
+	settings->filters = dlg.filters();
+	// apply default marker mode
+	if (AwSettings::getInstance()->value(aws::markerbar_mode_default).toInt() == 0)
+		settings->markerBarMode = AwViewSettings::Global;
+	else 
+		settings->markerBarMode = AwViewSettings::Classic;
+	addSignalView(settings);
+}
 
-	AwViewSetup *ns = m_setup->newViewSetup();
-	ns->filters = dlg.filters();
-	addSignalView(ns);
+void AwDisplay::removeView(int index)
+{
+	auto view = m_signalViews.at(index);
+	view->setParent(nullptr);
+	delete view;
+	m_signalViews.removeAt(index);
+	m_displaySetup.removeViewSettings(index);
 }
 
 void AwDisplay::removeView()
@@ -564,29 +537,20 @@ void AwDisplay::removeView()
 		AwMessageBox::information(NULL, tr("Signal View"), tr("At least one view must be active!"), QMessageBox::Ok);
 		return;
 	}
-	m_signalViews.removeOne(view);
-
-	view->setParent(NULL);
-	m_setup->deleteViewSetup(index);
-	delete view;
-	emit setupChanged(m_setup, AwDisplaySetup::ViewNumber);
+	removeView(index);
 }
-
 
 void AwDisplay::alignViewsVerticaly()
 {
-	//m_splitterWidget->setOrientation(Qt::Horizontal);
 	m_centralWidget->setOrientation(Qt::Horizontal);
-	m_setup->setOrientation(AwDisplaySetup::Vertical);
+	m_displaySetup.setOrientation(AwDisplaySetup::Vertical);
 }
 
 void AwDisplay::alignViewsHorizontaly()
 {
-	//m_splitterWidget->setOrientation(Qt::Vertical);
 	m_centralWidget->setOrientation(Qt::Vertical);
-	m_setup->setOrientation(AwDisplaySetup::Horizontal);
+	m_displaySetup.setOrientation(AwDisplaySetup::Horizontal);
 }
-
 
 void AwDisplay::setSelectedChannelsFromLabels(const QStringList& labels)
 {
@@ -642,21 +606,6 @@ void AwDisplay::addVirtualChannels(AwChannelList *channels)
 		v->addVirtualChannels(*channels);
 }
 
-void AwDisplay::removeICAChannels()
-{
-	for (auto v: m_signalViews)
-		v->removeICAChannels();
-
-	// get channel list back from scenes
-	AwChannelList completeList;
-
-	for (auto v : m_signalViews)
-		completeList += v->displayedChannels();
-
-	// send new displayed channels event
-	emit displayedChannelsChanged(completeList);
-}
-
 //
 void AwDisplay::removeVirtualChannels(AwChannelList *channels)
 {
@@ -684,11 +633,9 @@ void AwDisplay::updateDisplay()
 /// Recoit le nouveau montage et repercute sur l'affichage.
 void AwDisplay::setChannels(const AwChannelList &montage)
 {
-	m_channels.clear();
 	m_channels = montage;
-	for (auto v : m_signalViews) {
+	for (auto v : m_signalViews) 
 		v->setChannels(montage);
-	}
 
 	// get channel list back from scenes
 	AwChannelList completeList;
@@ -700,16 +647,35 @@ void AwDisplay::setChannels(const AwChannelList &montage)
 	emit displayedChannelsChanged(completeList);
 }
 
-//void AwDisplay::newFile(AwFileIO *reader)
 void AwDisplay::newFile()
 {
-	AwDisplaySetupManager *ds = AwDisplaySetupManager::instance();
-	ds->init();
-	for (AwSignalView * v : m_signalViews)
-		v->enableView();
+	// load .display file if exists
+	m_displaySetup.clearViewSettings();
+	loadViewSettings();
+	
+	// remove all the current views
+	for (AwSignalView* v : m_signalViews) {
+		v->setParent(nullptr);
+		delete v;
+	}
+	m_signalViews.clear();
 
+	if (m_displaySetup.viewSettings().isEmpty()) { // should never happen
+									// init with one defaut view/view settings
+		m_displaySetup.addViewSettings();
+	}
+	for (auto settings : m_displaySetup.viewSettings()) {
+		AwSignalView* view = addSignalView(settings);
+		view->setProcessFlags(AwSignalView::NoProcessUpdate);
+		m_centralWidget->addWidget(view);
+		m_centralWidget->repaint();
+		view->setProcessFlags(AwSignalView::UpdateProcess);
+		// init the view based on current open file
+		view->enableView();
+	}
 	setChannels(AwMontageManager::instance()->channels());
-	loadChannelSelections();
+	emit newDisplaySetupLoaded(&m_displaySetup);
+	updateGUI();
 }
 
 //
@@ -718,35 +684,6 @@ void AwDisplay::newFile()
 void AwDisplay::processHasFinished()
 {
 	updateDisplay();
-}
-
-
-//
-// 
-//
-//
-void AwDisplay::changeCurrentSetup(AwDisplaySetup *newSetup)
-{
-	m_setup = newSetup;
-
-	// remove all the current views
-	for (AwSignalView *v : m_signalViews) {
-		v->setParent(nullptr);
-		delete v;
-	}
-	m_signalViews.clear();
-
-	for (AwViewSetup *vs : newSetup->viewSetups()) 	{
-		AwSignalView *view = addSignalView(vs);
-		view->setProcessFlags(AwSignalView::NoProcessUpdate);
-		view->setChannels(m_channels);
-		if (!m_virtualChannels.isEmpty())
-			view->addVirtualChannels(m_virtualChannels);
-		m_centralWidget->addWidget(view);
-		m_centralWidget->repaint();
-		view->setProcessFlags(AwSignalView::UpdateProcess);
-	}
-	updateSetup(m_setup, AwDisplaySetup::ViewOrientation);
 }
 
 void AwDisplay::addMarkerModeChanged(bool on)

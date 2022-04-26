@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	settings.setValue("general/buildDate", QString(__DATE__));
 	AwComponents components;
 	if (components.init() != 0) {
-		std::cout << "Error while initialising AnyWave components";
+		std::cout << "Error while initializing AnyWave components";
 		return -1;
 	}
 	if (argc > 1) {

@@ -20,7 +20,6 @@
 #include "Montage/AwMontageManager.h"
 #include "Prefs/AwSettings.h"
 #include "Data/AwDataServer.h"
-#include "Display/AwDisplaySetupManager.h"
 #include "Display/AwDisplaySetup.h"
 #include "Display/AwDisplay.h"
 #include "Marker/AwMarkerManager.h"
@@ -74,10 +73,11 @@ void AwProcessManager::setMenu(QMenu *menu)
 		addProcess(plugin);
 }
 
-
 void AwProcessManager::addPlugin(QObject* plugin)
 {
-	addProcess(qobject_cast<AwProcessPlugin*>(plugin));
+	if (plugin == nullptr)
+		return;
+	addProcess(static_cast<AwProcessPlugin*>(plugin));
 }
 
 void AwProcessManager::quit()
@@ -300,6 +300,9 @@ void AwProcessManager::addProcessToMenu(AwProcessPlugin *plugin)
  */
 void AwProcessManager::addProcess(AwProcessPlugin *plugin)
 {
+	if (plugin == nullptr)
+		return;
+
 	switch (plugin->type)
 	{
 	case AwProcessPlugin::Display:
@@ -475,9 +478,6 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	 if (buildProcessPDI(process) == 0)
 		 runProcess(process);
  }
-
-
-
 
  int AwProcessManager::buildProcessPDI(AwBaseProcess* p, AwDataManager *dm)
  {
@@ -690,8 +690,6 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	  if (m_processesWidget == NULL)
 		  m_processesWidget = new AwProcessesWidget();
 	  m_processesWidget->addWidget(new AwProcessWidget(process));
-
-
 	  connect(process, SIGNAL(finished()), this, SLOT(handleProcessTermination()));
 	  connect(process, SIGNAL(aborted()), this, SLOT(handleProcessTermination()));
 	  connect(process, SIGNAL(idle()), this, SLOT(handleProcessTermination()));
@@ -719,7 +717,7 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
  * \see
  * AwProcess
  */
-void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& args)
+void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& args, bool DontCheckIO)
 {
 	auto dm = AwDataManager::instance();
 	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
@@ -734,33 +732,49 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 		if (process->modifiersFlags() & Aw::ProcessIO::modifiers::RequireChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
-			process->plugin()->deleteInstance(process);
+		//	process->plugin()->deleteInstance(process);
+			delete process;
+			return;
+		}
+	}
+	if (!DontCheckIO) {
+		if (initProcessIO(process)) {
+			if (!skipDataFile) {
+				process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
+				// verify that plugin which accepts time selection get at least the whole selection as input
+				if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
+					if (process->pdi.input.markers().isEmpty())
+						process->pdi.input.addMarker(new AwMarker("global", 0, dm->totalDuration()));
+				if (AwBIDSManager::isInstantiated()) {
+					auto BM = AwBIDSManager::instance();
+					if (BM->isBIDSActive()) {
+						process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
+						process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
+					}
+				}
+				if (!process->pdi.input.settings.contains(keys::output_dir))
+					process->pdi.input.settings.insert(keys::output_dir, dm->settings().value(keys::output_dir));
+			}
+		}
+		else {
+			AwMessageBox::critical(nullptr, "Process init", m_errorString);
+			delete process;
 			return;
 		}
 	}
 
-	if (initProcessIO(process)) {
-		if (!skipDataFile) {
-			process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
-			// verify that plugin which accepts time selection get at least the whole selection as input
-			if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
-				if (process->pdi.input.markers().isEmpty())
-					process->pdi.input.addMarker(new AwMarker("global", 0, dm->totalDuration()));
-			if (AwBIDSManager::isInstantiated()) {
-				auto BM = AwBIDSManager::instance();
-				if (BM->isBIDSActive()) {
-					process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
-					process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
-				}
-			}
-			if (!process->pdi.input.settings.contains(keys::output_dir))
-				process->pdi.input.settings.insert(keys::output_dir, dm->settings().value(keys::output_dir));
+	// check if we are in BIDS
+	if (AwBIDSManager::isInstantiated()) {
+		if (AwBIDSManager::instance()->isBIDSActive()) {
+			// create output dir
+			process->pdi.input.settings.insert(keys::output_dir, AwBIDSManager::instance()->createDerivativesPath(process->plugin()->name));
+			// set prefix output file (to be BIDS compatible)
+			QString baseFileName = dm->currentBIDSBaseFileName();
+			// the baseFileName does not contain modality but still have the data file extension (possibly)
+			// remove it.
+			QRegularExpression reg(".[0-9a-z]+$");
+			process->pdi.input.settings.insert(keys::output_file, baseFileName.remove(reg));
 		}
-	}
-	else {
-		AwMessageBox::critical(nullptr, "Process init", m_errorString);
-		process->plugin()->deleteInstance(process);
-		return;
 	}
 
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
@@ -770,9 +784,13 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	// check the process derived class
 	if (process->plugin()->type == AwProcessPlugin::GUI) { // AwGUIProcess
 		AwProcess* p = static_cast<AwProcess*>(process);
-//		connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-//		connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
+		// connect the process to the Data Manager to make it able to send requests
+		connect(p, SIGNAL(selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannelsAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)));
+		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
+
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
 			// connect the process as a client of a DataServer thread.
@@ -793,19 +811,27 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 	}
 	else { // AwProcess
 		AwProcess *p = static_cast<AwProcess *>(process);
+		// connect the process to the Data Manager to make it able to send requests
+		connect(p, SIGNAL(selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannelsAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)));
+		// connect the process to the Data Manager to make it able to send requests
+		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
+			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
+
 		if (p->hasInputUi()) {
 			if (!p->showUi()) 	{
-				p->plugin()->deleteInstance(p); 
+				delete p;
 				return;
 			}
 			applyUseSkipMarkersKeys(p);
 		}
+		if (DontCheckIO) // in case the process is started without checking IO settings, and we manually set used_markers and/or skip_markers
+			applyUseSkipMarkersKeys(p);
+
 		// create the process thread and move process object in it.
 		QThread *processThread = new QThread;
 		p->moveToThread(processThread);
 
-		//connect(p, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
-		//connect(p, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
 		connect(p, SIGNAL(sendEvent(QSharedPointer<AwEvent>)), AwEventManager::instance(), SLOT(processEvent(QSharedPointer<AwEvent>)));
 		connect(p, SIGNAL(criticalMessage(const QString&)), this, SLOT(errorMessage(const QString&)));
 		connect(p, SIGNAL(outOfMemory()), this, SLOT(manageMemoryError()));
@@ -833,9 +859,9 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 			registerProcessForDisplay(p);
 		// connect the process as well. 
 		else if (p->runMode() == AwProcessPlugin::Internal && !skipDataFile) {
-			AwChannelList *output = &p->pdi.output.channels();
-			if (!output->isEmpty())
-				emit channelsAddedForProcess(output);
+			AwChannelList *outputChannels = &p->pdi.output.channels();
+			if (!outputChannels->isEmpty())
+				emit channelsAddedForProcess(outputChannels);
 			m_activeInternals << p;
 			QAction *act = m_hashProcessAction.value(p->plugin()->name);
 			act->setChecked(true);
@@ -846,9 +872,11 @@ void AwProcessManager::runProcess(AwBaseProcess *process, const QStringList& arg
 
 		p->init();
 
-		if (!skipDataFile)
-			if (!p->pdi.output.channels().isEmpty())
-				emit channelsAddedForProcess(&p->pdi.output.channels());
+		if (!skipDataFile) {
+			AwChannelList * outputChannels = &p->pdi.output.channels();
+			if (!outputChannels->isEmpty())
+				emit channelsAddedForProcess(outputChannels);
+		}
 
 		m_dock->show();
 
@@ -969,7 +997,8 @@ void AwProcessManager::stopProcess(AwProcess *process)
 		process->thread()->exit(0);
 		process->thread()->wait();
 		process->thread()->deleteLater();
-		process->plugin()->deleteInstance(process); 
+	//	process->plugin()->deleteInstance(process); 
+		delete process;
 		process = nullptr;
 	}
 #ifndef NDEBUG
@@ -1008,8 +1037,9 @@ void AwProcessManager::handleProcessTermination()
 		process->thread()->exit(0);
 		process->thread()->wait();
 		process->thread()->deleteLater();
-		process->plugin()->deleteInstance(process); 
-		process = NULL;
+	//	process->plugin()->deleteInstance(process); 
+		delete process;
+		process = nullptr;
 #ifndef NDEBUG
 		qDebug() << "handleProcessTermination() process was aborted. Done." << endl;
 #endif
@@ -1094,8 +1124,9 @@ void AwProcessManager::handleProcessTermination()
 		process->thread()->exit(0);
 		process->thread()->wait();
 		process->thread()->deleteLater();
-		process->plugin()->deleteInstance(process); 
-		process = NULL;
+		//process->plugin()->deleteInstance(process); 
+		delete process;
+		process = nullptr;
 #ifndef NDEBUG
 		qDebug() << "handleProcessTermination() process is finished. Done." << endl;
 #endif

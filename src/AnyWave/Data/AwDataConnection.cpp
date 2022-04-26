@@ -33,6 +33,7 @@
 #include <AwCore.h>
 #include <AwKeys.h>
 #include <QtConcurrent>
+#include <QMutexLocker>
 
 #define AW_DC_OFFLINE_FILTERING_PADDING		5  // 5s padding around the data for a kind of offline filtering.
 
@@ -135,9 +136,7 @@ void AwDataConnection::parseChannels(AwChannelList& channels)
 	m_connectionsList.clear();
 
 	// Make SURE here that all dependent channels required have the SAME filter options than the requested ones !
-
-
-	foreach(AwChannel *c, channels)	{
+	for (AwChannel *c : channels)	{
 		if (!c->isVirtual()) {
 			m_realChannels[c->type()].append(c);
 			m_loadingList << c;
@@ -252,7 +251,14 @@ void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
 	if (comps)	{
 		// load source channels
-		AwDataManager::instance()->filterSettings().apply(comps->sources());
+		//AwDataManager::instance()->filterSettings().apply(comps->sources());
+		// do not apply current AnyWave filters on sources but apply filter used when computing ICA
+//		AwFilterSettings fsettings;
+//		fsettings.set(comps->type(), comps->hpFilter(), comps->lpFilter(), comps->notchFilter());
+//		fsettings.apply(comps->sources());
+
+		// When loading ICA.mat file, the sources channels are built and filters are set to be the ones used in computation
+		// So we assume here there is no need to filter again the sources channels.
 		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
 		comps->computeComponents(channels);
 	}
@@ -264,7 +270,7 @@ void AwDataConnection::computeVirtualChannels()
 	// COMPUTE VIRTUAL CHANNELS
 	computeVirtuals(m_virtualChannels);
 	// remove connected channels from loading list
-	foreach (AwChannel *c, m_connectionsList) {
+	for  (AwChannel *c : m_connectionsList) {
 		m_loadingList.removeAll(c);
 		// free data of channel in connections list
 		c->clearData(); 
@@ -405,6 +411,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker,
 //
 void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, float duration, bool rawData, bool doNotWakeUpClient)
 {
+	QMutexLocker locker(m_server->getReadMutex());
 	if (m_reader == nullptr)  // check if we point to a valid reader. It could happen that a data server is launched before a valid file reader is created.
 		m_reader = m_server->reader();
 #ifndef NDEBUG
@@ -449,8 +456,9 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	// compute ICA Components and source channels (if any)
 	try {
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-			if (!m_ICAChannels[i].isEmpty())
+			if (!m_ICAChannels[i].isEmpty()) {
 				computeICAComponents(i, m_ICAChannels[i]);
+			}
 		}
 		if (!m_sourceEEGChannels.isEmpty())
 			computeSourceChannels(m_sourceEEGChannels);
@@ -464,10 +472,25 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		return;
 	}
 
+	// apply filters to ICA channels after they have been unmixed..
+	if (!rawData) {
+		auto fSettings = AwDataManager::instance()->filterSettings();
+		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
+			if (!m_ICAChannels[i].isEmpty()) {
+				AwChannelList list;
+				for (auto icaChan : m_ICAChannels[i]) {
+				//	icaChan->setFilters(fSettings.filters(AwChannel::ICA));  // DO NOT apply GUI Filter settings here!!!!
+					list << icaChan;
+				}
+				AwFiltering::filter(list);
+			}
+		}
+	}
+
 	// Load the channels from file
 	try	{
 		if (!m_loadingList.isEmpty()) {
-			fileLock();  // get access to the file for reading
+//			fileLock();  // get access to the file for reading
 			for (auto c : m_loadingList)
 				c->clearData();
 			if (rawData)
@@ -475,7 +498,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			else {
 				read = readWithOfflineFiltering(m_positionInFile, m_duration, m_loadingList);
 			}
-			fileUnlock();
+//			fileUnlock();
 		}
 	}
 	catch (const std::bad_alloc &)	{
@@ -484,7 +507,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 #endif 
 		for (auto c : m_loadingList)
 			c->clearData();
-		fileUnlock();
+//		fileUnlock();
 
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) 
 			m_ICASourcesLoaded[i] = false;
@@ -530,7 +553,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		AwFiltering::filter(m_virtualChannels);
 
 		// check for channels that need montaging
-		for(auto channel :  m_loadingList) {
+		for (auto channel :  m_loadingList) {
 			if (channel->hasReferences())
 				montageChannels << channel;
 		}

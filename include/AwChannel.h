@@ -21,6 +21,7 @@
 #include <QVariant>
 #include <QSemaphore>
 #include <QVector>
+#include <QSharedPointer>
 #include <AwMarker.h>
 constexpr auto AW_CHANNEL_TYPES = 13;
 /*!
@@ -56,6 +57,7 @@ public:
 	explicit AwChannel();
 	/** Copy constructor **/
 	explicit AwChannel(AwChannel *chan);
+	
 	/** Destructor **/
 	virtual ~AwChannel();
 
@@ -193,6 +195,7 @@ public:
 	/** Sets the Low Pass Filtering value. **/
 	void setLowFilter(float val);
 	void setNotch(float val);		
+	void setFilters(const QVector<float> filters) { m_highFilter = filters[0]; m_lowFilter = filters[1]; m_notch = filters[2]; }
 	void setCustomData(const QVariantList& data) { m_customData = data; }
 	/** Sets the source type which is Real or Virtual. By defaut all channels created are Real. **/
 	void setSourceType(SourceType stype);						
@@ -213,12 +216,16 @@ public:
 	static QString typeToString(int t);
 	/** Returns the list of channel type present in the list passed as parameter. **/
 	static QStringList getTypesAsString(const QList<AwChannel *>& list);
+	static QStringList getTypesAsString(const QList<QSharedPointer<AwChannel>>&);
 	static QList<int> getTypesAsInt(const QList<AwChannel *>& list);
+	static QList<int> getTypesAsInt(const QList<QSharedPointer<AwChannel>>&);
 	/** Get a sub list containing only channels of specified type. The channels are copied. The list can be empty. **/
 	static QList<AwChannel *> extractChannelsOfType(const QList<AwChannel *>& list, int type);
+	static QList<QSharedPointer<AwChannel>> extractChannelsOfType(const QList<QSharedPointer<AwChannel>>& list, int type);
 	static QList<int> getTypes(const QList<AwChannel*>& list);
 	/** Get a sub list containing only channels of specified type. The list can be empty. **/
 	static QList<AwChannel *> getChannelsOfType(const QList<AwChannel *>& list, int type);
+	static QList<QSharedPointer<AwChannel>> getChannelsOfType(const QList<QSharedPointer<AwChannel>>& list, int type);
 	static QList<AwChannel *> duplicateChannels(const QList<AwChannel *>& list);
 	static QList<AwChannel *> getChannelsWithLabels(const QList<AwChannel *>& list, const QStringList& labels);
 	static QList<AwChannel *> getChannelsWithLabel(const QList<AwChannel *>& list, const QString& label);
@@ -247,6 +254,10 @@ public:
 	static QList<AwChannel *> sortByType(const QList<AwChannel * > & list, const QStringList& types = QStringList());
 	/** remove doublons from a list. Doublons are checked based on name of channels. **/
 	static QList<AwChannel *> removeDoublons(const QList<AwChannel *>& list);
+	static QList<QSharedPointer<AwChannel>> removeDoublons(const QList<QSharedPointer<AwChannel>>& list);
+	/** convert to shared pointer list **/
+	static QList<QSharedPointer<AwChannel>> toSharedPointerList(const QList<AwChannel*>& list);
+	static QList<AwChannel*> toChannelList(const QList<QSharedPointer<AwChannel>>& list);
 	QVector<float> toVector();
 protected:
 	quint32 m_ID;					
@@ -285,6 +296,9 @@ protected:
 };
 
 typedef QList<AwChannel *> AwChannelList;  ///< AwChannelList defines a list of AwChannel *
+using AwSharedPointerChannelList = QList<QSharedPointer<AwChannel>>;
+using AwSharedChannelList = QList<QSharedPointer<AwChannel>>;
 Q_DECLARE_METATYPE(AwChannelList)
+Q_DECLARE_METATYPE(AwSharedPointerChannelList)
 
 #endif

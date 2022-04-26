@@ -300,7 +300,6 @@ void AwMontageDial::updateButtonAddByTypes()
 void AwMontageDial::sortLabelsByTypes()
 {
 	m_labelsByTypes.clear();
-//	auto asRecordedChannels = m_asRecorded.values();
 	for (auto c : m_asRecordedChannels) {
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
 			auto channels = AwChannel::getChannelsOfType(m_asRecordedChannels, i);
@@ -442,6 +441,7 @@ void AwMontageDial::makeSEEGBipolar()
 	QRegularExpression exp("(\\d+)$");
 	QRegularExpression expZeros("^(0+)");
 	QRegularExpressionMatch match, matchZero;
+
 	for (auto c : montage) {
 		if (!c->isSEEG())
 			continue;
@@ -466,8 +466,8 @@ void AwMontageDial::makeSEEGBipolar()
 				c->setReferenceName(ref);
 		}
 	}
-	auto response = AwMessageBox::question(this, "SEEG Bipolar", "Remove resting monopolar channels?", QMessageBox::Yes | QMessageBox::No);
-	if (response == QMessageBox::Yes) {
+	auto response = AwMessageBox::question(this, "SEEG Montage", "Keep monopolar electrodes?", QMessageBox::Yes | QMessageBox::No);
+	if (response == QMessageBox::No) {
 		AwChannelList tmp;
 		for (auto c : montage)
 			if (c->isSEEG() && !c->hasReferences())
@@ -477,7 +477,6 @@ void AwMontageDial::makeSEEGBipolar()
 		AW_DESTROY_LIST(tmp);
 
 	}
-
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(montage);
 }
 
@@ -598,7 +597,7 @@ void AwMontageDial::addChannelsToMontage()
 	AwChannelList channels;
 
 	QString name;
-	for (auto i : selectedIndexes) {
+	for (auto const& i : selectedIndexes) {
 		if (i.column() == AW_ASRECORDED_COLUMN_NAME) {
 			name = m_ui.tvChannelsAsRecorded->model()->data(i, Qt::DisplayRole).toString();
 			auto channel = m_hashAsRecorded[name];
@@ -630,7 +629,7 @@ void AwMontageDial::removeChannelsInMontage()
 	QModelIndexList selectedIndexes = selectModel->selectedIndexes();
 	AwChannelList montage = static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage();
 	AwChannelList temp; // build a temporary list with channels to be deleted
-	for (auto i : selectedIndexes) {
+	for (auto const& i : selectedIndexes) {
 		if (i.column() == 0) {
 			temp << montage.at(i.row());
 		}	
@@ -726,7 +725,7 @@ void AwMontageDial::markAsRecordedAsBad()
 		return;
 
 
-	for (auto i : indexes) {
+	for (auto const& i : indexes) {
 		if (i.column() == AW_ASRECORDED_COLUMN_BAD)
 			m_ui.tvChannelsAsRecorded->model()->setData(i, Qt::Checked, Qt::CheckStateRole);
 	}
@@ -748,7 +747,7 @@ void AwMontageDial::changeAsRecordedType()
 	int type = action->data().toInt();
 	
 	QStringList labels;
-	for (auto i : indexes) {
+	for (auto const& i : indexes) {
 		if (i.column() == AW_ASRECORDED_COLUMN_TYPE) {
 			m_ui.tvChannelsAsRecorded->model()->setData(i, AwChannel::typeToString(type), Qt::EditRole);
 		}
@@ -815,7 +814,7 @@ void AwMontageDial::contextMenuApplyRefToAll()
 
 	int type = act->data().toInt();
 	QString ref;
-	for (auto i : selectModel->selectedIndexes()) {
+	for (auto const& i : selectModel->selectedIndexes()) {
 		if (i.column() == AW_MONTAGE_COLUMN_REF) {
 			ref = m_ui.tvDisplay->model()->data(i, Qt::DisplayRole).toString();
 			break;
@@ -847,7 +846,7 @@ void AwMontageDial::contextMenuApplyColorToAll()
 
 	int type = act->data().toInt();
 	QString color;
-	for (auto i : selectModel->selectedIndexes()) {
+	for (auto const& i : selectModel->selectedIndexes()) {
 		if (i.column() == AW_MONTAGE_COLUMN_COLOR) {
 			color = m_ui.tvDisplay->model()->data(i, Qt::DisplayRole).toString();
 			break;
@@ -871,14 +870,14 @@ void AwMontageDial::contextMenuApplyColorToSelection()
 
 	// Get the color of the first selected row.
 	QString color;
-	for (auto i : selectModel->selectedIndexes()) {
+	for (auto const& i : selectModel->selectedIndexes()) {
 		if (i.column() == AW_MONTAGE_COLUMN_COLOR) {
 			color = m_ui.tvDisplay->model()->data(i, Qt::DisplayRole).toString();
 			break;
 		}
 	}
 	// Apply it to the other selected rows
-	for (auto i : selectModel->selectedIndexes()) {
+	for (auto const& i : selectModel->selectedIndexes()) {
 		if (i.column() == AW_MONTAGE_COLUMN_COLOR) {
 			m_ui.tvDisplay->model()->setData(i, color, Qt::EditRole);
 		}

@@ -19,10 +19,13 @@
 #include <QTextStream>
 #include <AwCore.h>
 #include <algorithm>
-#ifndef Q_OS_MAC
+#ifdef Q_OS_WIN
 #include <execution>
 #endif
-
+#include <qjsondocument.h>
+#include <qjsonobject.h>
+#include <QBuffer>
+#include <QtConcurrent>
 
 //
 // AwMarker
@@ -53,6 +56,17 @@ AwMarker::AwMarker(AwMarker *source)
 	m_label = source->label();
 	m_targetChannels = source->targetChannels();
 	m_color = source->color();
+}
+
+AwMarker::AwMarker(const AwMarker& source)
+{
+	m_type = source.m_type;
+	m_code = source.m_code;
+	m_start = source.m_start;
+	m_duration = source.m_duration;
+	m_label = source.m_label;
+	m_targetChannels = source.m_targetChannels;
+	m_color = source.m_color;
 }
 
 void AwMarker::setEnd(float end)
@@ -121,6 +135,29 @@ QString AwMarker::typeToString(int t)
 	return QString();
 }
 
+QVariantMap AwMarker::toVariantMap(const AwMarkerList& markers)
+{
+	QString buffer;
+	QTextStream stream(&buffer);
+	stream << "{ [";
+	for (auto m : markers) {
+		stream << "{";
+		stream << "label:" << m->label() << ",";
+		stream << "position:" << m->start() << ",";
+		stream << "duration:" << m->duration() << ",";
+		stream << "color:" << m->color() << ",";
+		stream << "channels:" << "[";
+		for (const auto& t: m->targetChannels()) 
+			stream << t << ",";
+		stream << "]" << "},";
+	}
+	stream << "]}";
+	QJsonDocument doc;
+	QJsonParseError err;
+	doc = QJsonDocument::fromJson(buffer.toUtf8(), &err);
+	return doc.object().toVariantMap();
+}
+
 ///
 /// 
 ///
@@ -171,9 +208,9 @@ AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 	return res;
 }
 
-AwMarkerList& AwMarker::sort(AwMarkerList& markers)
+void AwMarker::sort(AwMarkerList& markers)
 {
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 	std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
 #else
 	if (markers.size() <= MARKERS_THREAD_THRESHOLD)
@@ -181,10 +218,7 @@ AwMarkerList& AwMarker::sort(AwMarkerList& markers)
 	else
 		std::sort(std::execution::par, markers.begin(), markers.end(), AwMarkerLessThan);
 #endif
-	return markers;
 }
-
-
 
 AwMarkerList& AwMarker::rename(AwMarkerList& markers, const QString& label)
 {
@@ -198,7 +232,8 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 {
 	if (markers.isEmpty())
 		return AwMarkerList();
-	auto copiedList = AwMarker::duplicate(AwMarker::sort(markers));
+	AwMarker::sort(markers);
+	auto copiedList = AwMarker::duplicate(markers);
 	AwMarkerList res, toDelete;
 
 	// do not process single markers
@@ -211,14 +246,14 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 	while (!copiedList.isEmpty()) {
 		auto first = copiedList.takeFirst();
 		auto itsc = AwMarker::intersect(copiedList, first->start(), first->end());
-		auto &intersections = AwMarker::sort(itsc);
-		if (intersections.isEmpty()) {
+		AwMarker::sort(itsc);
+		if (itsc.isEmpty()) {
 			res << first;
 		}
 		else {
 			float start = first->start();
 			float end = first->end();
-			for (auto i : intersections) {
+			for (auto i : itsc) {
 				// merge intersected markers into first and re put it in the list.
 				if (i->start() < start)
 					start = i->start();
@@ -496,18 +531,6 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		}
 		AW_DESTROY_LIST(markers);
 		markers = updatedMarkers;
-		
-
-		//// revert selection using usedCut markers
-		//auto revertSelection = AwMarker::invertMarkerSelection(inputMarkers, "Selection", totalDuration);
-		//// reshape intersected markers using XOR
-		//auto reshaped = AwMarker::applyANDOperation(inputMarkers, markers);
-		//// now cut all the markers.
-		//auto cutMarkers = AwMarker::cutAroundMarkers(reshaped, revertSelection);
-		//AW_DESTROY_LIST(markers)
-		//AW_DESTROY_LIST(reshaped)
-		//AW_DESTROY_LIST(revertSelection)
-		//markers = cutMarkers;
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
 		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
@@ -633,7 +656,8 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 			}
 
 		}
-		res = AwMarker::duplicate(AwMarker::sort(usedMarkers));
+		AwMarker::sort(usedMarkers);
+		res = AwMarker::duplicate(usedMarkers);
 	}
 	else
 		res = markers;
@@ -650,7 +674,7 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 AwMarkerList AwMarker::invertMarkerSelection(const AwMarkerList& markers, const QString& label, float end)
 {
 	AwMarkerList list = markers;
-	list = AwMarker::sort(list);
+	AwMarker::sort(list);
 	AwMarkerList res;
 	// get first maker to handle special case
 	auto first = list.takeFirst();
@@ -718,7 +742,7 @@ QHash<QString, int> AwMarker::computeHistogram(const AwMarkerList& markers)
 	while (!tmp.isEmpty()) {
 		QString label = tmp.first()->label();
 		AwMarkerList::iterator it;
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 		it = std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  });
 #else
 		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
@@ -744,7 +768,7 @@ AwMarkerList AwMarker::getMarkersWithUniqueLabels(const AwMarkerList& markers)
 	while (!tmp.isEmpty()) {
 		QString label = tmp.first()->label();
 		res << tmp.first();
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 		tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
 #else
 		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
@@ -768,7 +792,7 @@ QStringList AwMarker::getUniqueLabels(const QList<AwMarker *>& markers)
 	AwMarkerList l_markers = markers;
 	while (!l_markers.isEmpty()) {
 		QString label = l_markers.first()->label();
-#ifdef Q_OS_MAC
+#ifndef Q_OS_WIN
 		l_markers.erase(std::remove_if(l_markers.begin(), l_markers.end(), [label] (AwMarker* m1) { return m1->label() == label;  }), l_markers.end());
 #else
 		if (l_markers.size() <= MARKERS_THREAD_THRESHOLD)
@@ -819,6 +843,76 @@ bool AwMarkerLessThan(AwMarker *m1, AwMarker *m2)
 	return m1->start() < m2->start();
 }
 
+AwMarkerList AwMarker::loadFaster(const QString& path)
+{
+	QFile file(path);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return AwMarkerList();
+	QByteArray ba = file.readAll();
+	file.close();
+	QBuffer buffer(&ba);
+	buffer.open(QIODevice::ReadOnly);
+	QTextStream stream(&buffer);
+	AwMarkerList markers;
+
+	while (!stream.atEnd()) {
+		QString line = stream.readLine();
+		line = line.trimmed();
+
+		// processing line and skip line starting with //
+		if (!line.startsWith("//")) {
+			QString label = line.section('\t', 0, 0);
+			if (label.isEmpty()) // no label => skip line
+				continue;
+			QString value = line.section('\t', 1, 1);
+			if (value.isEmpty())
+				continue;
+			QString position = line.section('\t', 2, 2);
+			if (position.isEmpty())
+				continue;
+			QString duration = line.section('\t', 3, 3);
+
+			// check for target OR color
+			QString guess = line.section('\t', 4, 4);
+			QString color;
+			QStringList targets;
+			if (!guess.isEmpty()) {
+				if (guess.startsWith("#")) { // got the color colum
+					color = guess;
+				}
+				else { // try for targets
+					targets = guess.split(",", QString::SkipEmptyParts);
+				}
+			}
+			// check for other colum
+			guess = line.section('\t', 5, -1);
+			if (!guess.isEmpty()) {
+				if (guess.startsWith("#")) { // got the color colum
+					color = guess;
+				}
+				else { // try for targets
+					targets = guess.split(",", QString::SkipEmptyParts);
+				}
+			}
+
+			AwMarker* m = new AwMarker;
+			m->setLabel(label);
+			//m->setValue((qint16)value.toInt());
+			m->setValue((float)value.toDouble());
+			m->setStart(position.toFloat());
+			if (!duration.isEmpty())
+				m->setDuration(duration.toFloat());
+			if (!color.isEmpty())
+				m->setColor(color);
+			if (!targets.isEmpty())
+				foreach(QString t, targets)
+				m->addTargetChannel(t.trimmed());
+			markers << m;
+		}
+	}
+	return markers;
+
+}
 
 AwMarkerList AwMarker::load(const QString& path)
 {
@@ -829,6 +923,7 @@ AwMarkerList AwMarker::load(const QString& path)
 		return AwMarkerList();
 
 	AwMarkerList markers;
+
 	while (!stream.atEnd())	{
 		QString line = stream.readLine();
 		line = line.trimmed();
@@ -888,20 +983,41 @@ AwMarkerList AwMarker::load(const QString& path)
 	return markers;
 }
 
-void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
+int AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 {
 	AwMarkerList res, removed;
 	if (markers.isEmpty())
-		return;
+		return 0;
 	if (sortList)
-		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
-	// use multi map to detect markers with similar labels
-	QMultiHash<QString, AwMarker *> map;
-	for (auto m : markers)
-		map.insert(m->label(), m);
-	auto uniqueKeys = map.uniqueKeys();
+		//		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+		AwMarker::sort(markers);
+	// cluster markers by their positions
+	int current = 0;
+	const float tol = 0.005;
+	QList<AwMarkerList> clusters;
+	do {
+		AwMarkerList cluster;
+		cluster.append(markers.at(current));
+		float pos = markers.at(current++)->start();
+		while (current < markers.size()) {
+			auto m = markers.at(current);
+			float delta = std::abs(m->start() - pos);
+			if (delta <= tol) {
+				cluster.append(m);
+				current++;
+			}
+			else
+				break;
+		}
+		if (cluster.size() > 1) 
+			clusters << cluster;
+		if (current == markers.size())
+			break;
+	} while (true);
 
-	auto compareMarkers = [](AwMarker* m, AwMarker *m1) {
+	auto compareMarkers = [](AwMarker* m, AwMarker* m1) {
+		if (m->label() != m1->label())
+			return false;
 		const float tol = 0.005;
 		float pos = std::abs(m1->start() - m->start());
 		float dur = std::abs(m1->duration() - m->duration());
@@ -924,23 +1040,81 @@ void AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 		}
 		return res;
 	};
-	
-	for (auto const& k : uniqueKeys) {
-		AwMarkerList values = map.values(k);
-		if (values.size() > 1) {
-			std::sort(values.begin(), values.end(), AwMarkerLessThan);
-			int index = 0;
-			do {
-				auto m = values.at(index);
-				auto m1 = values.at(index + 1);
-				if (compareMarkers(m, m1)) {
-					if (!removed.contains(m1))
-						removed.append(m1);
+	std::function<AwMarkerList(AwMarkerList&)> clustering = [compareMarkers](AwMarkerList& markers) -> AwMarkerList {
+		AwMarkerList res;
+		AwMarker *first = markers.takeFirst();
+		while (markers.size()) {
+			for (auto m : markers) {
+				if (compareMarkers(first, m)) {
+					res << first;
+					break;
 				}
-				index++;
-			} while (index < values.size() - 1);
+			}
+			first = markers.takeFirst();
 		}
-	}
-	for (auto m : removed) 
-		markers.erase(std::remove_if(markers.begin(), markers.end(), [m](AwMarker* m1) { return m1 == m; }));
+		return res;
+	};
+
+	QList<AwMarkerList> results = QtConcurrent::blockingMapped<QList<AwMarkerList>>(clusters.begin(), clusters.end(), clustering);
+	AwMarkerList overall;
+	for (const auto& l : results)
+		overall += l;
+	for (auto m : overall)
+#ifndef Q_OS_WIN
+		markers.erase(std::find(markers.begin(), markers.end(), m));
+#else
+		markers.erase(std::find(std::execution::par, markers.begin(), markers.end(), m));
+#endif
+	return overall.size();
+
+
+	//// use multi map to detect markers with similar labels
+	//QMultiHash<QString, AwMarker *> map;
+	//for (auto m : markers)
+	//	map.insert(m->label(), m);
+	//auto uniqueKeys = map.uniqueKeys();
+
+	//auto compareMarkers = [](AwMarker* m, AwMarker *m1) {
+	//	const float tol = 0.005;
+	//	float pos = std::abs(m1->start() - m->start());
+	//	float dur = std::abs(m1->duration() - m->duration());
+
+	//	bool res = pos <= tol && dur <= tol;
+	//	if (res) { // check that targets are similar
+	//		QStringList t1 = m1->targetChannels();
+	//		QStringList t2 = m->targetChannels();
+	//		if (t1.isEmpty() && t2.isEmpty())
+	//			return true;
+	//		if (t1.size() != t2.size())
+	//			return false;
+	//		for (int i = 0; i < t1.size(); i++) {
+	//			QString s1 = t1.at(i);
+	//			QString s2 = t2.at(i);
+	//			if (s1.compare(s2, Qt::CaseSensitive) != 0)
+	//				return false;
+	//		}
+	//		return true;
+	//	}
+	//	return res;
+	//};
+	//
+	//for (auto const& k : uniqueKeys) {
+	//	AwMarkerList values = map.values(k);
+	//	if (values.size() > 1) {
+	//		std::sort(values.begin(), values.end(), AwMarkerLessThan);
+	//		int index = 0;
+	//		do {
+	//			auto m = values.at(index);
+	//			auto m1 = values.at(index + 1);
+	//			if (compareMarkers(m, m1)) {
+	//				if (!removed.contains(m1))
+	//					removed.append(m1);
+	//			}
+	//			index++;
+	//		} while (index < values.size() - 1);
+	//	}
+	//}
+	//for (auto m : removed) 
+	//	markers.erase(std::remove_if(markers.begin(), markers.end(), [m](AwMarker* m1) { return m1 == m; }));
+	//return removed.size();
 }

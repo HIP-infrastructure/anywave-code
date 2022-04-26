@@ -27,11 +27,11 @@ namespace AwMath {
 	vec AW_MATH_EXPORT channelToVec(AwChannel *channel);
 	QVector<double> AW_MATH_EXPORT vecToQVector(vec& X);
 	bool AW_MATH_EXPORT isNanInChannels(const AwChannelList& channels);
-	///** Spectogram MATLAB port. **/
-	//void AW_MATH_EXPORT spectrogram(fvec& X, vec& window, int noverlap, mat& s);
-	//void AW_MATH_EXPORT spectrogram(vec& X, vec& window, int noverlap, mat& s);
 	vec AW_MATH_EXPORT psd(arma::colvec& signal, int windowSize, int overlap);
 	static QMutex FFTMutex;
+	namespace ica {
+		mat AW_MATH_EXPORT pca(mat& data, int ncomp);
+	}
 }
 
 #endif

@@ -22,11 +22,17 @@ MESSAGE(STATUS "Building old mex files...")
 include_directories(${CMAKE_SOURCE_DIR}/../include)
 include_directories(${Matlab_INCLUDE_DIRS})
 
-if(NOT APPLE)
-    set(MEX_INSTALL_DIR /usr/local/AnyWave/Plugins/MATLAB/AnyWave)
-else(NOT APPLE)
-    set(MEX_INSTALL_DIR ${CMAKE_SOURCE_DIR}../build/AnyWave.app/Contents/Plugins/MATLAB/AnyWave)
-endif(NOT APPLE)
+if (APPLE)
+    include(mac.cmake)
+ELSE(APPLE)
+    include(linux.cmake)
+ENDIF(APPLE)
+
+#if(NOT APPLE)
+#    set(MEX_INSTALL_DIR /usr/local/AnyWave/Plugins/MATLAB/AnyWave)
+#else(NOT APPLE)
+#    set(MEX_INSTALL_DIR ${CMAKE_SOURCE_DIR}../build/AnyWave.app/Contents/Plugins/MATLAB/AnyWave)
+#endif(NOT APPLE)
 
 #if(QT_STATIC_DIR) 
 # build AwCore lib static

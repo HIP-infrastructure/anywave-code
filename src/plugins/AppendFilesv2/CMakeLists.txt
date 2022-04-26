@@ -1,7 +1,6 @@
 # AppendFiles
 project(AppendFiles)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
-#SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
 

@@ -27,6 +27,7 @@ class AwScriptPlugin;
 class AwFileIOPlugin;
 class AwFilterPlugin;
 class AwFileIO;
+class AwPluginBase;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // plugins factories part
@@ -113,8 +114,9 @@ public:
 	/** Returns processes plugin that matches flags or empty list if none matches. **/
 	QList<AwProcessPlugin *> processesWithFlags(int flags);
 
-	int unloadPlugin(const QString& filePath, const QString& name);
+	int unloadPlugin(const QString& name);
 	QObject *loadPlugin(const QString& path);
+	QObject* loadMATPyPlugin(const QString& path);
 
 	// plugins related methods
 	AwDisplayPlugin *getDisplayPluginByName(const QString& name) { return m_displayFactory.getPluginByName(name); }
@@ -122,6 +124,9 @@ public:
 	AwFileIOPlugin *getWriterPluginByName(const QString& name) { return m_writerFactory.getPluginByName(name); }
 	AwProcessPlugin *getProcessPluginByName(const QString& name) { return m_processFactory.getPluginByName(name); }
 	AwFilterPlugin *getFilterPluginByName(const QString& name) { return m_filterFactory.getPluginByName(name); }
+	void addProcessPlugin(AwProcessPlugin* p);
+
+	AwPluginBase* getPlugin(const QString& name);
 
 	// gather json args strings from all plugin that are command line compatible
 	QStringList getBatchableArguments();
@@ -136,8 +141,6 @@ public slots:
 	void showPluginsDial();
 	/** new instance of AwFileReader associated to plugin **/
 	AwFileIO *newReader(AwFileIOPlugin *plugin);
-	/** close file and delete AwFileReader instance **/
-	void deleteReaderInstance(AwFileIO *fr);
 
 	/** Writer plugins **/
 	AwFileIO *newWriter(AwFileIOPlugin *plugin);

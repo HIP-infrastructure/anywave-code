@@ -53,6 +53,10 @@ public:
 	void requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 
 	void selectChannels(const QVariantMap&, AwChannelList* channels);
+	void selectChannelsAsynch(const QVariantMap&, AwChannelList* channels);
+	void selectChannels(const QString&, AwChannelList* channels);
+	void selectChannelsAsynch(const QString&, AwChannelList* channels);
+
 	void setConnected(bool flag = true) { m_isConnected = flag; }
 	inline bool isConnected() { return m_isConnected;  }
 	QWaitCondition& waitForData() { return m_wcDataAvailable; }
@@ -64,6 +68,7 @@ signals:
 	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false, bool doNotWakeUpClient = false);
 	void needData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 	void selectChannelsRequested(AwDataClient *,const QVariantMap& settings, AwChannelList* channels);
+	void selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*);
 protected:
 	QWaitCondition m_wcDataAvailable, m_wcSelectChannelsDone;
 	QMutex m_mutexDataAvailable, m_mutexSelectChannels;

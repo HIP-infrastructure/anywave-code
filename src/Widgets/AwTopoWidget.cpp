@@ -40,6 +40,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_interval.h>
 
 Q_DECLARE_METATYPE(QVector<double>);
 #include "ui_AwTopoWidget.h"
@@ -223,8 +224,8 @@ void AwTopoWidget::redraw()
 		return;
 
 	// do not display anything if size is too small
-	if (m_size < 100)
-		return;
+//	if (m_size < 100)
+//		return;
 
 	m_redrawing = true;
 

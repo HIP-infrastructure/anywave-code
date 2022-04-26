@@ -47,7 +47,7 @@ public:
 	void closeFile();
 	void quit();
 	void init();
-	void removeDuplicates();
+	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
 public slots:
 	void showDockUI();
@@ -56,6 +56,7 @@ public slots:
 	/** Efface un marker de la liste **/
 	/** Rajoute une liste de marqueurs à la liste courante **/
 	void addMarkers(const AwMarkerList& markers);
+	void removeMarker(AwMarker* marker);
 	/** Add markers without cloning them. **/
 	void addMarkers(AwMarkerList *markers);
 	/** Vide la liste des marqueurs **/
@@ -73,6 +74,7 @@ public slots:
 signals:
 	void goTo(float pos);
 	void displayedMarkersChanged(const AwMarkerList& markers);
+
 	void log(const QString& message);
 	void finished();	// for threaded operations
 	void updateStats();	// emitted each time the global markers list changes
@@ -84,6 +86,7 @@ private:
 	bool m_needSorting, m_markersModified;
 	AwMarkerList m_markers;				// Markers that are currently visible
 	AwMarkerList m_displayedMarkers;	// Currently displayed markers
+
 	QMutex m_mutex;
 	static AwMarkerManager *m_instance;
 	QString m_filePath;

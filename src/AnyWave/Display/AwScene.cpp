@@ -25,7 +25,7 @@
 #include "Montage/AwMontageManager.h"
 #include "AwDisplaySetup.h"
 #include "AwViewSetup.h"
-#include <graphics/AwMarkerChannelItem.h>
+#include <widget/AwMarkerChannelItem.h>
 #include <qgraphicsview.h>
 #include <QGraphicsSceneMouseEvent>
 #include "Data/AwDataManager.h"

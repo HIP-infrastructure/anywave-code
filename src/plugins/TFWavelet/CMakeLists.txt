@@ -3,11 +3,11 @@ project(TFWavelet)
 set(LIBRARY_OUTPUT_PATH ${PLUGIN_OUT})
 add_definitions(-DQT_PLUGIN)
 add_definitions(-DQT_SHARED)
-INCLUDE_DIRECTORIES(${QWT_INCLUDE_DIR})
-LINK_DIRECTORIES(${QWT_LIBRARY})
-INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE})
-INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIRS})
-#MESSAGE("MKL INC: ${MKL_INCLUDE_DIRS}")
+
+IF(USE_MKL)
+INCLUDE_DIRECTORIES(${MKL_ROOT}/include)
+ENDIF()
+
 SET(SRCS display_settings.cpp settingsui.cpp TFPicker.cpp 
   TFPlot.cpp tf_settings.cpp TFWavelet2.cpp TFWidget.cpp
   TFColorMapWidget.cpp)
@@ -23,8 +23,8 @@ QT5_WRAP_UI(TFW_UIS ${UIS})
 add_library(TFWavelet SHARED ${SRCS} ${TFW_MOCS} ${TFW_UIS})
 qt5_use_modules(TFWavelet Core Gui Widgets Concurrent)
 
-target_link_libraries(TFWavelet AwProcess AwCore AwWidget Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Concurrent ${QWT_LIBRARIES} ${BLAS_LIBRARIES})
 
+target_link_libraries(TFWavelet AwProcess AwCore AwWidget Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Concurrent ${QWT_LIBRARY} ${ARMA_LIB} ${FFTW3_LIBS})
 INSTALL(TARGETS TFWavelet DESTINATION ${PLUGIN_INSTALL_DIR})
 
 

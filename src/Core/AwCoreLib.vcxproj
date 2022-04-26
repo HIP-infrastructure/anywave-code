@@ -23,6 +23,7 @@
     <ClCompile Include="AwDataBuffer.cpp" />
     <ClCompile Include="AwDataClient.cpp" />
     <ClCompile Include="AwEvent.cpp" />
+    <ClCompile Include="AwGlobalMarkers.cpp" />
     <ClCompile Include="AwMarker.cpp" />
     <ClCompile Include="AwMEGSensorManager.cpp" />
     <ClCompile Include="AwSensor.cpp" />
@@ -35,6 +36,7 @@
     <ClInclude Include="..\..\include\AwEvent.h" />
     <ClInclude Include="..\..\include\AwException.h" />
     <ClInclude Include="..\..\include\AwFilteringOptions.h" />
+    <ClInclude Include="..\..\include\AwGlobalMarkers.h" />
     <ClInclude Include="..\..\include\AwMarker.h" />
     <ClInclude Include="..\..\include\AwPluginBase.h" />
     <ClInclude Include="..\..\include\AwSensor.h" />
@@ -109,15 +111,15 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtInstall>$(DefaultQtVersion)</QtInstall>
-    <QtModules>core</QtModules>
+    <QtInstall>5.15.0</QtInstall>
+    <QtModules>core;concurrent</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <QtModules>core</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtModules>core</QtModules>
-    <QtInstall>$(DefaultQtVersion)</QtInstall>
+    <QtModules>core;concurrent</QtModules>
+    <QtInstall>5.15.0</QtInstall>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <QtModules>core</QtModules>
