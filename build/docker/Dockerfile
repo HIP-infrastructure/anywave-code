@@ -4,4 +4,5 @@ FROM ubuntu-aw:latest
 #   libfontconfig1 libfreetype6 libxcb-image0  libxcb-icccm4 libxcb-keysyms1 libxcb-render-util0 libxcb-shape0 \
 #   libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libglew2.1 && rm -rf /var/lib/apt/lists/* && apt clean
 ADD AnyWave  /usr/local/AnyWave
+#RUN ldd /usr/local/AnyWave/lib/libvtkzlib-8.2.so.1
 CMD /usr/local/AnyWave/start_aw.sh
