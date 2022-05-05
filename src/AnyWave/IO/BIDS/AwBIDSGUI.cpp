@@ -82,6 +82,12 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	auto header = m_ui.tableView->horizontalHeader();
 	header->setDefaultAlignment(Qt::AlignHCenter);
 	m_ui.tableView->hide();
+	connect(m_ui.buttonPushMrk, &QPushButton::clicked, m_bids, &AwBIDSManager::pushMarkerFileToCommon);
+	connect(m_ui.buttonPullMrk, &QPushButton::clicked, m_bids, &AwBIDSManager::pullFromCommonMarkerFile);
+	connect(m_ui.buttonPushMtg, &QPushButton::clicked, m_bids, &AwBIDSManager::pushMontageFileToCommon);
+	connect(m_ui.buttonPullMtg, &QPushButton::clicked, m_bids, &AwBIDSManager::pullFromCommonMontageFile);
+	connect(m_ui.buttonPushBad, &QPushButton::clicked, m_bids, &AwBIDSManager::pushBadFileToCommon);
+	connect(m_ui.buttonPullBad, &QPushButton::clicked, m_bids, &AwBIDSManager::pullFromCommonBadFile);
 }
 
 void AwBIDSGUI::closeBIDS()
@@ -344,6 +350,8 @@ void AwBIDSGUI::handleClick(const QModelIndex& index)
 		item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::SourceDataSubject) {
 		if (!item->data(AwBIDSItem::ParsedItem).toBool()) {  // parse item on the fly when required
 			AwBIDSItem* bidsItem = static_cast<AwBIDSItem*>(item);
+			if (bidsItem == nullptr)
+				return;
 			auto parsingFunction = [this](AwBIDSItem* item) {
 				this->m_bids->parseSubject(item);
 				recursiveFill(item);

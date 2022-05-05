@@ -73,12 +73,19 @@ void AwGraphicsView::resizeEvent(QResizeEvent *event)
 	repaint();
 	gs->updateChannelsData();
 	gs->update();
+	QRectF rect = mapToScene(viewport()->geometry()).boundingRect();
+	auto amplitudeScale = gs->amplitudeScale();
+	amplitudeScale->setPos(rect.width() - amplitudeScale->boundingRect().width() - 10, rect.bottom() - amplitudeScale->boundingRect().height() - 10);
 }
 
 void AwGraphicsView::scrollContentsBy(int dx, int dy)
 {
 	QGraphicsView::scrollContentsBy(dx, dy);
 	update();
+	AwGraphicsScene* gs = (AwGraphicsScene*)scene();
+	QRectF rect = mapToScene(viewport()->geometry()).boundingRect();
+	auto amplitudeScale = gs->amplitudeScale();
+	amplitudeScale->setPos(rect.width() - amplitudeScale->boundingRect().width() - 10, rect.bottom() - amplitudeScale->boundingRect().height() - 10);
 	scene()->update();
 }
 
@@ -300,36 +307,6 @@ void AwGraphicsView::layoutItems()
 			vPos += nextPosition;
 		}
 		extraSceneH += sitems.last()->size().height() / 4;
-	
-		//for (AwGraphicsSignalItem *item : sitems)	{
-		//	item->updateGeometry();
-		//	QSize itemSize = item->size();
-		//	
-		//	//// for first item itemSize is zero
-		//	//if (i == 0)
-		//	//	itemSize = QSize(0, 0);
-		//	vPos = prevItemPos + offset;
-		//	if (vPos > newRect.height()) {
-		//		extraSceneH = vPos - newRect.height();
-		//	}
-		//	if (vPos - itemSize.height() / 2 < prevItemPos) {
-		//		vPos += itemSize.height() / 2 - offset;
-		//		prevItemPos = vPos + itemSize.height() / 4;
-		//		vPos = prevItemPos + offset;
-		//	}
-		//	else {
-		//	//	item->setPos(0, vPos);
-		//		prevItemPos = vPos;
-		//	}
-		//	if (vPos > newRect.height()) {
-		//		extraSceneH = vPos - newRect.height();
-		//	}
-		//	// default label height is using a font height of 12 (ARIAL)
-		//	// if the offset between channels is less than 12 points, then reduce the font height to 8 for labels.
-		//	if (itemSize.height() == 0)
-		//		offset <= 12 ?	item->setLabelHeight(8) : item->setLabelHeight(12);
-		//	yPositions[i++] = vPos;
-		//}
 		// resize scene rect BEFORE moving items on it (to avoid itemChange method of each items to constrain them)
 		newRect.setHeight(newRect.height() + extraSceneH);
 		scene()->setSceneRect(newRect);
@@ -341,9 +318,6 @@ void AwGraphicsView::layoutItems()
 				item->setUpperNeighbor(sitems.at(i - 1));
 			i++;
 		}
-		// check for label bounding boxes (if they are overlapping, shift them)
-//		updateSignalChildrenPositions();
-		//	item->update();
 	}
 	// restore view vertical position
 	if (savedPos)
@@ -370,6 +344,13 @@ void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
 		|| flags & AwViewSettings::TimeRepresentation) {
 		resetCachedContent();
 		repaint();
+	}
+
+	if (flags & AwViewSettings::ShowAmplitudeScale) {
+		AwGraphicsScene* gs = (AwGraphicsScene*)scene();
+		QRectF rect = mapToScene(viewport()->geometry()).boundingRect();
+		auto amplitudeScale = gs->amplitudeScale();
+		amplitudeScale->setPos(rect.width() - amplitudeScale->boundingRect().width() - 10, rect.bottom() - amplitudeScale->boundingRect().height() - 10);
 	}
 
 	if (flags & AwViewSettings::SecPerCm) {

@@ -66,10 +66,8 @@ void AwLabelItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 {
 	if (m_label.isEmpty())
 		setText(QString("No Label"));
-	
 	QFont arial("arial", m_fontH);
 	painter->setFont(arial);
-
 	QPen pen;
 	if (!m_labelColor.isEmpty()) 
 		pen = QPen(QColor(m_labelColor), 1);

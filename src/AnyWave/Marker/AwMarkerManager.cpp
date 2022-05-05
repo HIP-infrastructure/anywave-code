@@ -167,11 +167,12 @@ void AwMarkerManager::setMarkers(const AwMarkerList& markers)
 AwMarkerList AwMarkerManager::loadMarkers(const QString &path)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
- //   return AwMarker::load(path);
 	auto markers = AwMarker::loadFaster(path);
 	emit finished();
 	return markers;
 }
+
+
 
 
 void AwMarkerManager::loadMarkers()
@@ -206,12 +207,11 @@ void AwMarkerManager::loadMarkers()
 		removeAllUserMarkers();
 
 	if (!markers.isEmpty())	{
-		for (auto m : markers)
-			m_markers << m;
+		m_markers += markers;
 		m_needSorting = true;
 		auto n = removeDuplicates();
 		if (n) 
-			AwMessageBox::information(0, "Loading marker file", "Some markers where duplicates and ware removed.");
+			AwMessageBox::information(0, "Loading marker file", QString("%1 markers where duplicates and were removed.").arg(n));
 		removeOfflimits();
 		m_ui->setMarkers(m_markers);
 	}
@@ -344,11 +344,13 @@ void AwMarkerManager::init()
 		if (!m_markers.isEmpty()) {
 			// avoid markers that out of data bounds (do not load marker that could be positionned after the end of data)
 			m_ui->setMarkers(m_markers);
+			emit updateStats();
 			showDockUI();
 		}
 	}
 	globals->setDisplayed(&m_displayedMarkers);
 	globals->setTotal(&m_markers);
+	emit displayedMarkersChanged(m_displayedMarkers);
 }
 
 

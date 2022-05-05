@@ -53,6 +53,9 @@
     <Filter Include="Mark">
       <UniqueIdentifier>{2d41aa69-1522-43a1-bfb3-76f73d9dd764}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AmpScalesItem">
+      <UniqueIdentifier>{db908327-5c11-4951-be57-d1f50f3572c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwAmplitudeWidget.cpp">
@@ -222,6 +225,12 @@
     </ClCompile>
     <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AmpScalesItem\AwAmplitudeScalesItem.cpp">
+      <Filter>AmpScalesItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\AwAmplitudeItem.cpp">
+      <Filter>SignalView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -433,6 +442,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\widget\AwSignalLabelItem.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AmpScalesItem\AwAmplitudeScalesItem.h">
+      <Filter>AmpScalesItem</Filter>
+    </ClInclude>
+    <ClInclude Include="SignalView\AwAmplitudeItem.h">
+      <Filter>SignalView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

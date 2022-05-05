@@ -28,6 +28,7 @@
 class AwMarkingSettings;
 class AwGTCMenu;
 class AwPickMarkersDial;
+class AwAmplitudeItem;
 
 class AW_WIDGETS_EXPORT AwGraphicsScene : public QGraphicsScene
 {
@@ -63,6 +64,8 @@ public:
 	void reorderItems();
 	void setItemsMoved() { m_itemsHaveMoved = true; }
 	void setItemsDragged() { m_itemsDragged = true; }
+
+	QGraphicsItem* amplitudeScale();
 signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
@@ -113,6 +116,7 @@ public slots:
 	void centerViewOnPosition(float pos);
 	void highlightPosition(float pos);
 	void showMarkers(bool show);
+
 	// markers
 	/// show current marker under mouse in the marker list.
 	void showMarkerInList();
@@ -160,7 +164,7 @@ protected:
 	void updateGotoChannelMenu(const QStringList& labels);
 	void clearMarkers();
 	void displayMarkers();
-	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = NULL, int offsetLabel = 0);
+	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = nullptr, int offsetLabel = 0);
 
 	void keyPressEvent(QKeyEvent *e);
 	void keyReleaseEvent(QKeyEvent *e);
@@ -203,6 +207,7 @@ protected:
 	bool m_isTimeSelectionStarted;
 	AwMarkingSettings *m_markingSettings;
 	AwDisplayPluginSignalItem m_signalItemPlugin;
+	AwAmplitudeItem* m_amplitudeItem;
 	QStringList m_QTSCompatiblePlugins;	// name of process plugins that can be launched when QTS mode is active.
 	QString m_pluginToLaunch;	// name of process to launch after a QTS
 	QMenu* m_contextMenuMapping;	// pointer to sub menu dedicated to mapping operations (can be null)

@@ -27,6 +27,7 @@
 #include "AwGTCMenu.h"
 #include "AwPickMarkersDial.h"
 #include <widget/SignalView/AwGraphicsView.h>
+#include "AwAmplitudeItem.h"
 
 AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : QGraphicsScene(parent)
 {
@@ -52,6 +53,10 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_contextMenuMapping = nullptr;
 	m_pickMarkersDial = nullptr;
 	m_maxSR = 0.;
+	m_amplitudeItem = new AwAmplitudeItem(&m_visibleSignalItems, m_physics, settings->gainLevels);
+	m_amplitudeItem->setZValue(100);
+	m_amplitudeItem->setVisible(false);
+	addItem(m_amplitudeItem);
 	applyNewSettings(settings);
 }
 
@@ -67,6 +72,12 @@ AwGraphicsScene::~AwGraphicsScene()
 	}
 	if (m_pickMarkersDial)
 		delete m_pickMarkersDial;
+	delete m_amplitudeItem;
+}
+
+QGraphicsItem* AwGraphicsScene::amplitudeScale()
+{
+	return m_amplitudeItem;
 }
 
 void AwGraphicsScene::setQTSPlugins(const QStringList& plugins)
@@ -176,6 +187,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 	m_selectedSignalItems.clear();
 	updateVisibleItemsHashTable();
 	selectChannels(m_settings->channelSelection);
+	m_amplitudeItem->generate();
 	emit numberOfDisplayedChannelsChanged(m_visibleSignalItems.size());
 }
 
@@ -189,7 +201,7 @@ void AwGraphicsScene::updateVisibleItemsHashTable()
 			labels << i->channel()->fullName();
 	}
 	// update go to channel menu
-	if (m_gotoChannelMenu == NULL)
+	if (m_gotoChannelMenu == nullptr)
 		m_gotoChannelMenu = new AwGTCMenu(tr("Go to channel..."));
 	m_gotoChannelMenu->updateLabels(labels);
 }
@@ -199,6 +211,10 @@ void AwGraphicsScene::updateSettings(AwViewSettings *settings, int flags)
 	if (flags & AwViewSettings::ShowBaseLine)	{
 		for (AwGraphicsSignalItem *i : m_signalItems)
 			i->showBaseline(settings->showZeroLine);
+		update();
+	}
+	if (flags & AwViewSettings::ShowAmplitudeScale) {
+		m_amplitudeItem->setVisible(m_settings->showAmplitudeScale);
 		update();
 	}
 	if (flags & AwViewSettings::EEGMode) {  // when switching EEG display mode, just update the whole scene, the signal items will be repainted

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="3DViewer\Aw3DViewer.cpp" />
     <ClCompile Include="3DViewer\AwSEEGInteractor.cpp" />
     <ClCompile Include="3DViewer\AwSEEGViewer.cpp" />
     <ClCompile Include="3DViewer\AwSEEGWidget.cpp" />
@@ -225,6 +226,7 @@
     <QtMoc Include="Batch\AwBatchGUI.h">
     </QtMoc>
     <ClInclude Include="..\..\include\keys\data.h" />
+    <QtMoc Include="3DViewer\Aw3DViewer.h" />
     <ClInclude Include="3DViewer\AwSEEGInteractor.h" />
     <QtMoc Include="3DViewer\AwSEEGViewer.h" />
     <QtMoc Include="3DViewer\AwSEEGWidget.h" />
@@ -842,14 +844,14 @@
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>5.15.0</QtInstall>
-    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
+    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts;3dcore;3drender;3dinput;3dextras</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>5.15.0</QtInstall>
-    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
+    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts;3dcore;3drender;3dinput;3dextras</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>

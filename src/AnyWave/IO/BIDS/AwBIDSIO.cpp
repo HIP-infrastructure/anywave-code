@@ -2,6 +2,9 @@
 // implementation of file input/output methods
 #include <QDir>
 #include <QTextStream>
+#include "Marker/AwMarkerManager.h"
+#include "Montage/AwMontageManager.h"
+#include <QMessageBox>
 
 QString AwBIDSManager::buildOutputDir(const QString& pluginName, AwBIDSItem* item)
 {
@@ -47,20 +50,236 @@ QString AwBIDSManager::buildOutputFileName(AwBIDSItem* item)
 	return fileName;
 }
 
-void AwBIDSManager::moveSidecarFilesToDerivatives(const QString& src, const QString& dest)
+/// <summary>
+/// copyCommonSidecarFilesToUserDerivatives()
+/// if no sidecar files exist in the user derivatives folder for the file item => check if there are in the common folder
+/// them copy them to the user deriv folder.
+/// </summary>
+void AwBIDSManager::copyCommonSidecarFilesToUserDerivatives()
 {
-	bool fileExists = QFile::exists(src);
-	bool destExists = QFile::exists(dest);
-	if (fileExists && !destExists) {
-		QFile::copy(src, dest);
-		QFile::remove(src);
-	}
-	if (fileExists && destExists) {
-		QFile::remove(dest);
-		QFile::copy(src, dest);
-		QFile::remove(src);
-	}
+	auto commonFile = m_settings.value(bids::common_marker_file_path).toString();
+	auto userFile = m_settings.value(bids::marker_file_path).toString();
+	auto move = [](const QString& source, const QString& dest) {
+		if (QFile::exists(source)) {
+			if (!QFile::exists(dest)) {
+				QFile::copy(source, dest);
+			}
+		}
+	};
+	move(commonFile, userFile);
+	commonFile = m_settings.value(bids::common_bad_file_path).toString();
+	userFile = m_settings.value(bids::bad_file_path).toString();
+	move(commonFile, userFile);
+	commonFile = m_settings.value(bids::common_montage_file_path).toString();
+	userFile = m_settings.value(bids::montage_file_path).toString();
+	move(commonFile, userFile);
 }
+
+
+/// <summary>
+/// moveSidecarFilesToDerivatives()
+/// If there are sidecar files in the subject dir (forbidden by BIDS), move them to the user derivatives folder.
+/// </summary>
+/// <param name="filePath"></param>
+void AwBIDSManager::moveSidecarFilesToDerivatives()
+{
+	auto baseDestFilePath = QString("%1/%2").arg(getUserDerivativesFolder()).arg(currentFileName());
+	// bad
+	auto move = [](const QString& source, const QString& dest) {
+		if (QFile::exists(source)) {
+			QFile::copy(source, dest);
+			QFile::remove(source);
+		}
+	};
+	
+	auto baseSourceFilePath = getCurrentBIDSPath();
+	Q_ASSERT(!baseSourceFilePath.isEmpty());
+	auto destFilePath = baseDestFilePath + ".bad";
+	auto sourceFile = baseSourceFilePath + ".bad";
+	move(sourceFile, destFilePath);
+	destFilePath = baseDestFilePath + ".mrk";
+	sourceFile = baseSourceFilePath + ".mrk";
+	move(sourceFile, destFilePath);
+	destFilePath = baseDestFilePath + ".mtg";
+	sourceFile = baseSourceFilePath + ".mtg";
+	move(sourceFile, destFilePath);
+	destFilePath = baseDestFilePath + ".display";
+	sourceFile = baseSourceFilePath + ".display";
+	move(sourceFile, destFilePath);
+	destFilePath = baseDestFilePath + ".flt";
+	sourceFile = baseSourceFilePath + ".flt";
+	move(sourceFile, destFilePath);
+	destFilePath = baseDestFilePath + ".lvl";
+	sourceFile = baseSourceFilePath + ".lvl";
+	move(sourceFile, destFilePath);
+}
+
+void AwBIDSManager::pushMontageFileToCommon()
+{
+	auto montageFilePath = m_settings.value(bids::montage_file_path).toString();
+	// ask montage manager to save current .mtg
+	if (!AwMontageManager::instance()->save(montageFilePath)) {
+		QMessageBox::critical(nullptr, "Montage", "Error while saving current montage.");
+		return;
+	}
+
+	if (QFile::exists(montageFilePath)) { 
+		int r = QMessageBox::question(nullptr, "Push current montage", "Send current montage to the common folder?\nExisting common .mtg will be replaced.", 
+			QMessageBox::Yes | QMessageBox::No);
+		if (r == QMessageBox::No)
+			return;
+		auto commonMontageFilePath = m_settings.value(bids::common_montage_file_path).toString();
+		if (QFile::exists(commonMontageFilePath)) {
+			if (!QFile::remove(commonMontageFilePath)) {
+				QMessageBox::critical(nullptr, "Montage", "Error: could not remove existing common .mtg file.");
+				return;
+			}
+		}
+		if (!QFile::copy(montageFilePath, commonMontageFilePath)) {
+			QMessageBox::critical(nullptr, "Montage", "Error: could not write current montage to commond folder.");
+			return;
+		}
+	}
+	else
+		QMessageBox::information(nullptr, "Montage", "No user .mtg file detected.");
+}
+
+void AwBIDSManager::pullFromCommonMontageFile()
+{
+	auto commonMontageFilePath = m_settings.value(bids::common_montage_file_path).toString();
+	if (QFile::exists(commonMontageFilePath)) {
+		int r = QMessageBox::question(nullptr, "Pull montage", "Get common montage?", QMessageBox::Yes | QMessageBox::No);
+		if (r == QMessageBox::No)
+			return;
+		auto userMontageFilePath = m_settings.value(bids::montage_file_path).toString();
+		if (QFile::exists(userMontageFilePath)) {
+			if (!QFile::remove(userMontageFilePath)) {
+				QMessageBox::critical(nullptr, "Montage", "Error: could not delete user current montage file.");
+				return;
+			}
+		}
+		if (!QFile::copy(commonMontageFilePath, userMontageFilePath)) {
+			QMessageBox::critical(nullptr, "Montage", "Error: could not copy common .mtg to user folder.");
+			return;
+		}
+		AwMontageManager::instance()->loadMontage(userMontageFilePath);
+	}
+	else
+		QMessageBox::information(nullptr, "Montage", "There is no common montage file.");
+}
+
+void AwBIDSManager::pullFromCommonBadFile()
+{
+	auto commonBadFilePath = m_settings.value(bids::common_bad_file_path).toString();
+	if (QFile::exists(commonBadFilePath)) {
+		int r = QMessageBox::question(nullptr, "Bad channels", "Get common .bad file and apply it?", QMessageBox::Yes | QMessageBox::No);
+		if (r == QMessageBox::No)
+			return;
+		auto userBadFilePath = m_settings.value(bids::bad_file_path).toString();
+		if (QFile::exists(userBadFilePath)) {
+			if (!QFile::remove(userBadFilePath)) {
+				QMessageBox::critical(nullptr, "Bad channels", "Error: could not delete user current .bad file.");
+				return;
+			}
+		}
+		if (!QFile::copy(commonBadFilePath, userBadFilePath)) {
+			QMessageBox::critical(nullptr, "Montage", "Error: could not copy common .mtg to user folder.");
+			return;
+		}
+		AwMontageManager::instance()->loadBadChannels();
+	}
+	else
+		QMessageBox::information(nullptr, "Bad channels", "There is no common .bad file.");
+}
+
+void AwBIDSManager::pushBadFileToCommon()
+{
+	// force montage manager to save current bad channels
+	AwMontageManager::instance()->saveBadChannels();
+	// do the things with the files...
+	auto badFilePath = m_settings.value(bids::bad_file_path).toString();
+	if (QFile::exists(badFilePath)) {
+		int r = QMessageBox::question(nullptr, "Bad channels", "Send current bad channels to common folder?\nExisting common .bad will be replaced.",
+			QMessageBox::Yes | QMessageBox::No);
+		if (r == QMessageBox::No)
+			return;
+		auto commonBadFilePath = m_settings.value(bids::common_bad_file_path).toString();
+		if (QFile::exists(commonBadFilePath)) {
+			if (!QFile::remove(commonBadFilePath)) {
+				QMessageBox::critical(nullptr, "Bad channels", "Error: could not remove existing common .bad file.");
+				return;
+			}
+		}
+		if (!QFile::copy(badFilePath, commonBadFilePath)) {
+			QMessageBox::critical(nullptr, "Bad channels", "Error: could not write current .bad to common folder.");
+			return;
+		}
+	}
+	else
+		QMessageBox::information(nullptr, "Bad channels", "No user .bad file detected.");
+}
+
+
+void AwBIDSManager::pushMarkerFileToCommon()
+{
+	auto markerFilePath = m_settings.value(bids::marker_file_path).toString();
+	// force marker manager to save current markers
+	AwMarkerManager::instance()->saveMarkers(markerFilePath);
+	if (QFile::exists(markerFilePath)) { // should exist unless no markers at all are present
+		int r = QMessageBox::question(nullptr, "Push markers", "Send current markers to the common file?", QMessageBox::Yes | QMessageBox::No);
+		if (r == QMessageBox::No)
+			return;
+		auto commonMarkerFilePath = m_settings.value(bids::common_marker_file_path).toString();
+		AwMarkerList markers;
+		if (QFile::exists(commonMarkerFilePath))
+			markers = AwMarker::loadFaster(commonMarkerFilePath);
+		markers += AwMarker::loadFaster(markerFilePath);
+		AwMarker::removeDoublons(markers, true);
+		AwMarker::save(commonMarkerFilePath, markers);
+		qDeleteAll(markers);
+	}
+	else
+		QMessageBox::information(nullptr, "Markers", "No user .mrk file detected.");
+
+}
+
+
+void AwBIDSManager::pullFromCommonMarkerFile()
+{
+	auto commonMarkerFilePath = m_settings.value(bids::common_marker_file_path).toString();
+	if (QFile::exists(commonMarkerFilePath)) {
+		int r = QMessageBox::question(nullptr, "Pull markers", "Get common markers and merge them?", QMessageBox::Yes | QMessageBox::No);
+		if (r == QMessageBox::No)
+			return;
+		auto userMarkerFilePath = m_settings.value(bids::marker_file_path).toString();
+		AwMarkerList markers;
+		if (QFile::exists(userMarkerFilePath))
+			markers = AwMarker::loadFaster(userMarkerFilePath);
+		markers += AwMarker::loadFaster(commonMarkerFilePath);
+		AwMarker::removeDoublons(markers, true);
+		AwMarker::save(userMarkerFilePath, markers);
+		AwMarkerManager::instance()->init();
+		qDeleteAll(markers);
+	}
+	else
+		QMessageBox::information(nullptr, "Markers", "No common marker file");
+}
+
+
+QString AwBIDSManager::getDerivativesPath(int type)
+{
+	QString basePath = QString("%1/derivatives").arg(m_rootDir);
+	if (m_currentOpenItem == nullptr)
+		return QString();
+
+	switch (type) {
+	case AwBIDSManager::freesurfer:
+		basePath += QString("/freesurfer/%1").arg(m_currentOpenItem->subjectName());
+		break;
+	}
+	return basePath;
+}
+
 
 int AwBIDSManager::selectItemFromFilePath(const QString& path)
 {

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AmpScalesItem\AwAmplitudeScalesItem.cpp" />
     <ClCompile Include="Aw2DGrid.cpp" />
     <ClCompile Include="AwAddPredefinedMarker.cpp" />
     <ClCompile Include="AwAddTargetChannels.cpp" />
@@ -64,6 +65,7 @@
     <ClCompile Include="SignalItem\AwSignalItem.cpp" />
     <ClCompile Include="SignalItem\AwSignalItemSettings.cpp" />
     <ClCompile Include="SignalItem\AwSignalLabelItem.cpp" />
+    <ClCompile Include="SignalView\AwAmplitudeItem.cpp" />
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp" />
     <ClCompile Include="SignalView\AwBaseSignalView.cpp" />
     <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
@@ -87,6 +89,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SignalView\AwAmplitudeItem.h" />
     <QtMoc Include="SignalItem\AwSignalItemSettings.h" />
     <QtMoc Include="SignalItem\AwSIAmpButton.h" />
     <QtMoc Include="SignalView\AwPickMarkersDial.h" />
@@ -178,6 +181,7 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\SignalView\AwNavigationBar.h">
     </QtMoc>
+    <ClInclude Include="AmpScalesItem\AwAmplitudeScalesItem.h" />
     <ClInclude Include="Aw2DGrid.h" />
     <QtMoc Include="AwTimeScaleCombo.h">
     </QtMoc>

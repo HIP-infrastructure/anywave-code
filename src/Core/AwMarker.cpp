@@ -843,6 +843,12 @@ bool AwMarkerLessThan(AwMarker *m1, AwMarker *m2)
 	return m1->start() < m2->start();
 }
 
+AwSharedMarkerList AwMarker::loadShrdFaster(const QString& path)
+{
+	auto markers = loadFaster(path);
+	return AwMarker::toSharedPointerList(markers);
+}
+
 AwMarkerList AwMarker::loadFaster(const QString& path)
 {
 	QFile file(path);
@@ -993,7 +999,7 @@ int AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 		AwMarker::sort(markers);
 	// cluster markers by their positions
 	int current = 0;
-	const float tol = 0.005;
+	const float tol = 0.001;  // 1 ms tolerance
 	QList<AwMarkerList> clusters;
 	do {
 		AwMarkerList cluster;
@@ -1018,7 +1024,7 @@ int AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 	auto compareMarkers = [](AwMarker* m, AwMarker* m1) {
 		if (m->label() != m1->label())
 			return false;
-		const float tol = 0.005;
+		const float tol = 0.001;
 		float pos = std::abs(m1->start() - m->start());
 		float dur = std::abs(m1->duration() - m->duration());
 
@@ -1066,55 +1072,21 @@ int AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 		markers.erase(std::find(std::execution::par, markers.begin(), markers.end(), m));
 #endif
 	return overall.size();
+}
 
 
-	//// use multi map to detect markers with similar labels
-	//QMultiHash<QString, AwMarker *> map;
-	//for (auto m : markers)
-	//	map.insert(m->label(), m);
-	//auto uniqueKeys = map.uniqueKeys();
+QList<QSharedPointer<AwMarker>> AwMarker::toSharedPointerList(const QList<AwMarker*>& list)
+{
+	AwSharedMarkerList res;
+	for (auto marker : list)
+		res << QSharedPointer<AwMarker>(marker);
+	return res;
+}
 
-	//auto compareMarkers = [](AwMarker* m, AwMarker *m1) {
-	//	const float tol = 0.005;
-	//	float pos = std::abs(m1->start() - m->start());
-	//	float dur = std::abs(m1->duration() - m->duration());
-
-	//	bool res = pos <= tol && dur <= tol;
-	//	if (res) { // check that targets are similar
-	//		QStringList t1 = m1->targetChannels();
-	//		QStringList t2 = m->targetChannels();
-	//		if (t1.isEmpty() && t2.isEmpty())
-	//			return true;
-	//		if (t1.size() != t2.size())
-	//			return false;
-	//		for (int i = 0; i < t1.size(); i++) {
-	//			QString s1 = t1.at(i);
-	//			QString s2 = t2.at(i);
-	//			if (s1.compare(s2, Qt::CaseSensitive) != 0)
-	//				return false;
-	//		}
-	//		return true;
-	//	}
-	//	return res;
-	//};
-	//
-	//for (auto const& k : uniqueKeys) {
-	//	AwMarkerList values = map.values(k);
-	//	if (values.size() > 1) {
-	//		std::sort(values.begin(), values.end(), AwMarkerLessThan);
-	//		int index = 0;
-	//		do {
-	//			auto m = values.at(index);
-	//			auto m1 = values.at(index + 1);
-	//			if (compareMarkers(m, m1)) {
-	//				if (!removed.contains(m1))
-	//					removed.append(m1);
-	//			}
-	//			index++;
-	//		} while (index < values.size() - 1);
-	//	}
-	//}
-	//for (auto m : removed) 
-	//	markers.erase(std::remove_if(markers.begin(), markers.end(), [m](AwMarker* m1) { return m1 == m; }));
-	//return removed.size();
+QList<AwMarker*> AwMarker::toMarkerList(const QList<QSharedPointer<AwMarker>>& list)
+{
+	AwMarkerList res;
+	for (const auto& marker : list)
+		res << marker.get();
+	return res;
 }

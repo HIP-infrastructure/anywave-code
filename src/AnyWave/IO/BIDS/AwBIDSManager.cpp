@@ -298,6 +298,8 @@ QString AwBIDSManager::currentFileName()
 }
 
 
+
+
 QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
 {
 	QString res;
@@ -330,7 +332,6 @@ QString AwBIDSManager::getDerivativePath(int derivativeType)
 {
 	return getDerivativePath(m_currentOpenItem, derivativeType);
 }
-
 
 QVariant AwBIDSManager::BIDSProperty(int property)
 {
@@ -536,10 +537,46 @@ bool AwBIDSManager::isSubject(AwBIDSItem* item)
 	return item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject;
 }
 
+QString AwBIDSManager::getUserDerivativesFolder()
+{
+	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	auto subItem = getParentSubject(m_currentOpenItem);
+	if (!subItem)
+		return QString();
+	QString path;
+	QFileInfo fi(relativePath);
+	auto userName = AwSettings::getInstance()->value(aws::username).toString();
+	if (isSubject(subItem)) {
+		path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	}
+	else if (isSourceDataSubject(subItem)) { // creating a sourcedata folder seems to make BM crash....
+		path = QString("%1/derivatives/anywave/%2/sourcedata/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	}
+	return path;
+}
+
+QString AwBIDSManager::getCommonDerivativesFolder()
+{
+	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	auto subItem = getParentSubject(m_currentOpenItem);
+	if (!subItem)
+		return QString();
+	QString path;
+	QFileInfo fi(relativePath);
+	if (isSubject(subItem)) {
+		path = QString("%1/derivatives/anywave/common/%3").arg(m_rootDir).arg(fi.path());
+	}
+	else if (isSourceDataSubject(subItem)) { // creating a sourcedata folder seems to make BM crash....
+		path = QString("%1/derivatives/anywave/common/sourcedata/%3").arg(m_rootDir).arg(fi.path());
+	}
+	return path;
+}
+
 void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 {
 	// build the path corresponding to the current file in derivatives
 	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	QString commonPath;
 
 	// get the subject item for the currentOpenItem
 	auto subItem = getParentSubject(m_currentOpenItem);
@@ -553,52 +590,35 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	auto userName = AwSettings::getInstance()->value(aws::username).toString();
 
 	QString path;
-	if (isSubject(subItem))
+	if (isSubject(subItem)) {
 		path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
-	else if (isSourceDataSubject(subItem)) // creating a sourcedata folder seems to make BM crash....
+		commonPath = QString("%1/derivatives/anywave/common/%2").arg(m_rootDir).arg(fi.path());
+	}
+	else if (isSourceDataSubject(subItem)) { // creating a sourcedata folder seems to make BM crash....
 		path = QString("%1/derivatives/anywave/%2/sourcedata/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+		commonPath = QString("%1/derivatives/anywave/common/sourcedata/%2").arg(m_rootDir).arg(fi.path());
+	}
 	else
 		return;
 
 	QDir dir;
-	dir.mkpath(path);
+	dir.mkpath(path); // create user derivatives path
+	dir.mkpath(commonPath); // create common path
 	auto basePath = QString("%1/%2/%3").arg(m_rootDir).arg(relativePath).arg(fileName);
-
-	// get .mrk if any
-	auto srcFile = filePath + ".mrk";
-	auto destFile = QString("%1/%2.mrk").arg(path).arg(fileName);
-	bool fileExists = QFile::exists(srcFile);
-	bool destExists = QFile::exists(destFile);
-	if (fileExists && !destExists) 
-		moveSidecarFilesToDerivatives(srcFile, destFile);
-	if (fileExists && destExists) {
-		// avoid loosing markers: load the both file in memory, remove doublon and save it.
-		auto srcMarkers = AwMarker::load(srcFile);
-		srcMarkers += AwMarker::load(destFile);
-		AwMarker::removeDoublons(srcMarkers);
-		QFile::remove(destFile);
-		AwMarker::save(destFile, srcMarkers);
-		QFile::remove(srcFile);
-	}
-
-
-	// move mtg file if any
-	srcFile = filePath + ".mtg";
-	destFile = QString("%1/%2.mtg").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = filePath + ".display"; 
-	destFile = QString("%1/%2.display").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = filePath + ".bad";
-	destFile = QString("%1/%2.bad").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = filePath + ".flt";
-	destFile = QString("%1/%2.flt").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-
+	// set these variables first !
 	m_settings[bids::current_open_filename] = fileName;
 	m_settings[bids::file_derivatives_dir] = path;
+	auto baseDerivPath = QString("%1/%2").arg(path).arg(fileName);
+	m_settings[bids::bad_file_path] = baseDerivPath + ".bad";
+	m_settings[bids::marker_file_path] = baseDerivPath + ".mrk";
+	m_settings[bids::montage_file_path] = baseDerivPath + ".mtg";
+	auto baseCommonPath = QString("%1/%2").arg(commonPath).arg(fileName);
+	m_settings[bids::common_bad_file_path] = baseCommonPath + ".bad";
+	m_settings[bids::common_marker_file_path] = baseCommonPath + ".mrk";
+	m_settings[bids::common_montage_file_path] = baseCommonPath + ".mtg";
 
+	moveSidecarFilesToDerivatives();
+	copyCommonSidecarFilesToUserDerivatives();
 	AwDataManager::instance()->setNewRootDirForSideFiles();
 }
 

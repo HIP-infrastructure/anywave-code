@@ -22,6 +22,7 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	showTimeGrid = showSeconds = showSensors = limitChannels = showMarkerLabels = showMarkerValues = true;
 	showZeroLine = false;
 	stackChannels = false;
+	showAmplitudeScale = false;
 	maxChannels = 40;
 	filters << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::GRAD << AwChannel::ECoG;
 	secsPerCm = 0.5;

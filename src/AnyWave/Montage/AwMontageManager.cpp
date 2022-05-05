@@ -778,13 +778,11 @@ bool AwMontageManager::loadMontage(const QString& path)
 {
 	if (path.isEmpty())
 		return false;
-
-	//if (!apply(path)) {
-	//	QMessageBox::warning(0, tr("Loading a montage"), tr("Error loading montage, montage defined in file may not be compatible."), QMessageBox::Ok);
-	//	return false;
-	//}
-	return apply(path);
-//	return true;
+	if (apply(path)) {
+		emit montageChanged(m_channels);
+		return true;
+	}
+	return false;
 }
 
 
@@ -863,10 +861,8 @@ void AwMontageManager::markChannelAsBad(const QString& channelName, bool bad)
 // Permet de rajouter ensuite au montage des canaux virtuels alimentes par des process ou servant dans des plugins d'affichage.
 void AwMontageManager::addChannelToAsRecorded(AwChannel *channel)
 {
-	// si le canal n'est pas de source virtual on ne fait rien
 	if (!channel->isVirtual())
 		return;
-//	m_asRecorded[channel->name()] = channel;
 	m_asRecordedSharedPointerMap.insert(channel->name(), QSharedPointer<AwChannel>(channel->duplicate()));
 }
 
@@ -927,7 +923,6 @@ void AwMontageManager::loadQuickMontage(const QString& name)
 
 	setNewFilters(AwDataManager::instance()->filterSettings());
 	emit montageChanged(m_channels);
-
 }
 
 

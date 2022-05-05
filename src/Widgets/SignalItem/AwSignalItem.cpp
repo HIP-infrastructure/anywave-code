@@ -30,7 +30,6 @@ AwSignalItem::AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayP
 	setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 	setAcceptHoverEvents(true);
     m_baseLineItem = new QGraphicsLineItem(this);
-	m_showScale = false;
 	setItemFlags(AwGraphicsItem::ItemHasUi);
 	m_sensorName = chan->fullName();
 	m_labelItem = new AwSignalLabelItem(m_sensorName, this);
@@ -73,17 +72,12 @@ void AwSignalItem::computeMinMax(qint32 start, qint32 nbSamples, float *min, flo
 		*min = *max = 0.0;
 		return;
 	}
-
 	quint32 e = start + nbSamples;
-	
-
-   if (e > m_channel->dataSize() - 1)
+    if (e > m_channel->dataSize() - 1)
 		e = m_channel->dataSize() - 1;
-
-	*min = *max = m_channel->data()[start];
-
-	for (quint32 i = start; i < e; i++)	{
-		*min = *min <  m_channel->data()[i] ? *min : m_channel->data()[i];
+    *min = *max = m_channel->data()[start];
+    for (quint32 i = start; i < e; i++)	{
+ 		*min = *min <  m_channel->data()[i] ? *min : m_channel->data()[i];
 		*max = *max >  m_channel->data()[i] ? *max : m_channel->data()[i];
 	}
 }
@@ -117,7 +111,6 @@ QPainterPath AwSignalItem::shape() const
 		path.addRect(m_baseLineItem->boundingRect());
 	if (m_label)
 		path.addRect(m_labelItem->boundingRect());
-
 	return path;
 }
 
@@ -127,12 +120,10 @@ QPainterPath AwSignalItem::shape() const
 QRectF AwSignalItem::boundingRect() const
 {
 	QRectF rect = m_poly.boundingRect();
-
 	if (m_baseLine)
 		rect = rect.united(m_baseLineItem->boundingRect());
 	if (m_label)
 		rect = rect.united(m_labelItem->boundingRect());
-
 	return rect;
 }
 
@@ -181,28 +172,22 @@ void AwSignalItem::paintSignal(QPainter* painter)
 		m_baseLineItem->setLine(QLineF(0, 0, scene()->width(), 0));
 		endRepaint();
 	}
-
 	// baseline
 	m_baseLineItem->setPen(QColor(m_channel->color()));
 	m_baseLineItem->setVisible(m_baseLine);
-
 	// Si l'item est selectionne il est affiche en rouge !
 	if (isSelected())
 		painter->setPen(QPen(Qt::red));
 	else
 		painter->setPen(QColor(m_channel->color()));
-
 	painter->drawPolyline(m_poly);  // drawPolyline a la place de drawPolygon (car sinon le polygone referme le tracé)
-
 	if (m_hover) {
 		if (m_channel->dataSize() == 0)
 			return;
-
 		float ymin, ymax;
 		int xmin, xmax;
 		xmin = (int)m_mousePos.x() * 2;
 		xmax = xmin + 1;
-
 		// check for polygon bounds.
 		if (xmin > m_poly.size() || xmax > m_poly.size()) {
 			// mouse is out of polygon bounds => exit.
@@ -217,18 +202,14 @@ void AwSignalItem::paintSignal(QPainter* painter)
 		QPointF start = QPointF(m_mousePos.x(), ymin - 10);
 		QPointF end = QPointF(m_mousePos.x(), ymax + 10);
 		painter->drawLine(start, end);
-
 		// values stored in polygon are min max of real values that matches the same pixel.
 		// We display as tooltip the mean of min and max for the pixel.
 		// tooltip
-
 		float time = start.x() * m_pixelLengthInSecs;
 		quint32 sampleIndex = (quint32)(time * m_channel->samplingRate()) + 1;
-
 		if (sampleIndex < m_channel->dataSize()) {
 			float gain = m_channel->gain();
 			float value = m_channel->data()[sampleIndex];
-
 			QString tt = m_sensorName + ":" + AwChannel::typeToString(m_channel->type());
 			tt += QString("\nValue: %1%2").arg(value).arg(m_channel->unitString());
 			tt += QString("\nAmplitude Scale: %1%2/cm").arg(gain).arg(m_channel->unitString());
@@ -274,7 +255,6 @@ void AwSignalItem::resolveCollisionWithUpperNeighbor(const QPainterPath& region)
 	//reset transform
 	m_labelItem->setTransform(QTransform());
 	qreal xshift = m_labelItem->x();
-
 	while (true) {
 		QPainterPath bounds = m_labelItem->mapToScene(m_labelItem->shape());
 		if (bounds.intersects(region)) {
@@ -318,7 +298,6 @@ void AwSignalItem::hoverMoveEvent(QGraphicsSceneHoverEvent *e)
 	m_mousePos = e->pos();
 	if (m_labelItem->isUnderMouse())
 		m_labelItem->setOpacity(0.1);
-	
 	update();
 }
 
@@ -332,7 +311,6 @@ QVariant AwSignalItem::itemChange(GraphicsItemChange change, const QVariant& val
 		QRectF rect = scene()->sceneRect();
 		if (!rect.contains(newPos)) {
 			// Keep the item inside the scene rect.
-	//		newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
 			newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
 		}
 		static_cast<AwGraphicsScene*>(scene())->setItemsMoved();

@@ -286,10 +286,6 @@ void ICASettings::accept()
 
 	//// IMPORTANT:
 	//// if As Recorded channels are chosen, then replace default input channels by as recorded channels
-	//if (m_channelSource == ICASettings::AsRecorded)
-	//	m_process->pdi.input.setNewChannels(m_rawChannels, true);
-
-//	m_process->pdi.input.setNewChannels(AwChannel::duplicateChannels(channels));
 	m_process->pdi.input.setNewChannels(channels);
 
 	return QDialog::accept();

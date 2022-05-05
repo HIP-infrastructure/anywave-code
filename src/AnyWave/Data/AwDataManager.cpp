@@ -155,14 +155,19 @@ QString AwDataManager::currentBIDSBaseFileName()
 void AwDataManager::setNewRootDirForSideFiles()
 {
 	auto bm = AwBIDSManager::instance();
-	auto dir = bm->currentDerivativesDir();
+//	auto dir = bm->currentDerivativesDir();
+	auto dir = bm->getUserDerivativesFolder();
+	Q_ASSERT(!dir.isEmpty());
 	auto fileName = bm->currentFileName();
 
 	m_settings[keys::flt_file] = QString("%1/%2.flt").arg(dir).arg(fileName);
 	m_settings[keys::sel_file] = QString("%1/%2.sel").arg(dir).arg(fileName);
-	m_settings[keys::bad_file] = QString("%1/%2.bad").arg(dir).arg(fileName);
-	m_settings[keys::marker_file] = QString("%1/%2.mrk").arg(dir).arg(fileName);
-	m_settings[keys::montage_file] = QString("%1/%2.mtg").arg(dir).arg(fileName);
+	//m_settings[keys::bad_file] = QString("%1/%2.bad").arg(dir).arg(fileName);
+	m_settings[keys::bad_file] = bm->settings().value(bids::bad_file_path);
+	//m_settings[keys::marker_file] = QString("%1/%2.mrk").arg(dir).arg(fileName);
+	m_settings[keys::marker_file] = bm->settings().value(bids::marker_file_path);
+	//m_settings[keys::montage_file] = QString("%1/%2.mtg").arg(dir).arg(fileName);
+	m_settings[keys::montage_file] = bm->settings().value(bids::montage_file_path);
 	m_settings[keys::disp_file] = QString("%1/%2.display").arg(dir).arg(fileName);
 	m_settings[keys::lvl_file] = QString("%1/%2.levels").arg(dir).arg(fileName);
 	m_settings[keys::lvl2_file] = QString("%1/%2.lvl").arg(dir).arg(fileName);

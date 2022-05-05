@@ -18,6 +18,7 @@
 #include <AwGlobal.h>
 #include <QStringList>
 #include <QMetaType>
+#include <QSharedPointer>
 
 constexpr auto MARKERS_THREAD_THRESHOLD = 5000;  // threshold for multi threading algo on markers
 
@@ -79,6 +80,7 @@ public:
 	/** Load a marker file and returns the markers */ 
 	static QList<AwMarker *> load(const QString& file);
 	static QList<AwMarker*> loadFaster(const QString& file);
+	static QList<QSharedPointer<AwMarker>> loadShrdFaster(const QString& file);
 	/** Save markers to a file **/
 	static int save(const QString& file, const QList<AwMarker *>& markers);
 	/** duplicate markers **/
@@ -102,7 +104,7 @@ public:
 	/** Filters markers: markers can either be specified to be removed or used. **/
 	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Remove doublons : similar markers are removed. The list is updated. **/
-	static int removeDoublons(QList<AwMarker*>& markers, bool sortList = true);
+	static int removeDoublons(QList<AwMarker *>& markers, bool sortList = true);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
 	/** Returns the marker's type. AwMarker::Single or AwMarker::Selection. **/
@@ -119,6 +121,10 @@ public:
 	/** Returns a string list containing all the channels targeted by the marker.
 	If the list is empty then the marker is not targetting channels but it is a global marker. **/
 	inline QStringList& targetChannels() { return m_targetChannels; }
+
+	/** convert to shared pointer list **/
+	static QList<QSharedPointer<AwMarker>> toSharedPointerList(const QList<AwMarker*>& list);
+	static QList<AwMarker*> toMarkerList(const QList<QSharedPointer<AwMarker>>& list);
 
 	/** Returns true if 'marker' is included in the marker. **/
 	bool contains(AwMarker *marker);
@@ -146,9 +152,12 @@ protected:
 // This function is used to sort markers chronologically.
 bool AW_CORE_EXPORT AwMarkerLessThan(AwMarker *m1, AwMarker *m2);
 
+
 typedef QList<AwMarker *> AwMarkerList; ///< A type defining a list of AwMarker *
+using AwSharedMarkerList = QList<QSharedPointer<AwMarker>>;
 Q_DECLARE_METATYPE(AwMarker)
 Q_DECLARE_METATYPE(AwMarkerList)
+Q_DECLARE_METATYPE(AwSharedMarkerList)
 
 
 #endif
