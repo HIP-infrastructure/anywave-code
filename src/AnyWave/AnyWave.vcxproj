@@ -23,7 +23,209 @@
     <ClCompile Include="3DViewer\AwSEEGInteractor.cpp" />
     <ClCompile Include="3DViewer\AwSEEGViewer.cpp" />
     <ClCompile Include="3DViewer\AwSEEGWidget.cpp" />
+    <ClCompile Include="3DViewer\freeview\Annotation2D.cpp" />
+    <ClCompile Include="3DViewer\freeview\BinaryTreeEdge.cpp" />
+    <ClCompile Include="3DViewer\freeview\BinaryTreeNode.cpp" />
+    <ClCompile Include="3DViewer\freeview\BinaryTreeView.cpp" />
+    <ClCompile Include="3DViewer\freeview\BrushProperty.cpp" />
+    <ClCompile Include="3DViewer\freeview\BusyIndicator.cpp" />
+    <ClCompile Include="3DViewer\freeview\CommandEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Contour2D.cpp" />
+    <ClCompile Include="3DViewer\freeview\Cursor2D.cpp" />
+    <ClCompile Include="3DViewer\freeview\Cursor3D.cpp" />
+    <ClCompile Include="3DViewer\freeview\CursorFactory.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogAbout.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogAddPointSetStat.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogControlPointComment.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogCropVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogCustomFill.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogGradientFilter.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLabelStats.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLineProfile.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadConnectome.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadDTI.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadFCD.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadPointSet.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadSurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadSurfaceOverlay.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadTransform.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogLoadVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogMovePoint.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogNewAnnotation.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogNewPointSet.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogNewROI.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogNewVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogPreferences.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogReloadLayer.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogReplaceLabel.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogRepositionSurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogSavePointSet.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogSaveScreenshot.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogSaveVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogScreenshotOverlay.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogSelectSplines.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogSetCamera.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogSmoothSurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogSurfaceLabelOperations.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogThresholdFilter.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogThresholdVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogTransformSurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogTransformVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogVolumeFilter.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogVolumeSegmentation.cpp" />
+    <ClCompile Include="3DViewer\freeview\DialogWriteMovieFrames.cpp" />
+    <ClCompile Include="3DViewer\freeview\FloatingStatusBar.cpp" />
+    <ClCompile Include="3DViewer\freeview\FlowLayout.cpp" />
+    <ClCompile Include="3DViewer\freeview\FSGroupDescriptor.cpp" />
+    <ClCompile Include="3DViewer\freeview\FSLabel.cpp" />
+    <ClCompile Include="3DViewer\freeview\FSPointSet.cpp" />
+    <ClCompile Include="3DViewer\freeview\FSSurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\FSTrack.cpp" />
+    <ClCompile Include="3DViewer\freeview\FSVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\GenericRenderView.cpp" />
+    <ClCompile Include="3DViewer\freeview\GeoSWorker.cpp" />
+    <ClCompile Include="3DViewer\freeview\InfoTreeWidget.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2D.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2DMeasure.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2DNavigate.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2DPointSetEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2DROIEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2DVolumeCrop.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2DVolumeEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor2DVoxelEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor3D.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor3DMeasure.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor3DNavigate.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor3DPathEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor3DPointSetEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor3DROIEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Interactor3DVolumeCrop.cpp" />
+    <ClCompile Include="3DViewer\freeview\Json.cpp" />
+    <ClCompile Include="3DViewer\freeview\LabelTreeWidget.cpp" />
+    <ClCompile Include="3DViewer\freeview\Layer.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerCollection.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerConnectomeMatrix.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerDTI.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerEditable.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerFCD.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerFCDWorkerThread.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerLandmarks.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerLineProfile.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerMRI.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerMRIWorkerThread.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerODF.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPLabel.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPointSet.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerProperty.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyConnectomeMatrix.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyDTI.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyFCD.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyLineProfile.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyMRI.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyODF.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyPointSet.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyROI.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertySurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerPropertyTrack.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerROI.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerSurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerTrack.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerTreeWidget.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerVolumeBase.cpp" />
+    <ClCompile Include="3DViewer\freeview\LayerVolumeTrack.cpp" />
+    <ClCompile Include="3DViewer\freeview\LivewireTool.cpp" />
+    <ClCompile Include="3DViewer\freeview\LUTDataHolder.cpp" />
+    <ClCompile Include="3DViewer\freeview\main__.cpp" />
+    <ClCompile Include="3DViewer\freeview\MainWindow.cpp" />
+    <ClCompile Include="3DViewer\freeview\MyCmdLineParser.cpp" />
+    <ClCompile Include="3DViewer\freeview\MyUtils.cpp" />
+    <ClCompile Include="3DViewer\freeview\MyVTKUtils.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelAllLayers.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelConnectomeMatrix.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelFCD.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelLayer.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelODF.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelPointSet.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelROI.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelSurface.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelTrack.cpp" />
+    <ClCompile Include="3DViewer\freeview\PanelVolume.cpp" />
+    <ClCompile Include="3DViewer\freeview\ProgressCallback.cpp" />
+    <QtMoc Include="3DViewer\freeview\qtcolorpicker.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </QtMoc>
+    <ClCompile Include="3DViewer\freeview\Region2D.cpp" />
+    <ClCompile Include="3DViewer\freeview\Region2DLine.cpp" />
+    <ClCompile Include="3DViewer\freeview\Region2DPolyline.cpp" />
+    <ClCompile Include="3DViewer\freeview\Region2DRectangle.cpp" />
+    <ClCompile Include="3DViewer\freeview\Region3D.cpp" />
+    <ClCompile Include="3DViewer\freeview\RenderView.cpp" />
+    <ClCompile Include="3DViewer\freeview\RenderView2D.cpp" />
+    <ClCompile Include="3DViewer\freeview\RenderView3D.cpp" />
+    <ClCompile Include="3DViewer\freeview\SplineTreeWidget.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceAnnotation.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceLabel.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceOverlay.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceOverlayProperty.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfacePath.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceRegion.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceRegionGroups.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceROI.cpp" />
+    <ClCompile Include="3DViewer\freeview\SurfaceSpline.cpp" />
+    <ClCompile Include="3DViewer\freeview\TermWidget.cpp" />
+    <ClCompile Include="3DViewer\freeview\ThreadBuildContour.cpp" />
+    <ClCompile Include="3DViewer\freeview\ThreadIOWorker.cpp" />
+    <ClCompile Include="3DViewer\freeview\ToolWindowEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\ToolWindowMeasure.cpp" />
+    <ClCompile Include="3DViewer\freeview\ToolWindowROIEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Track.cpp" />
+    <ClCompile Include="3DViewer\freeview\TrackData.cpp" />
+    <ClCompile Include="3DViewer\freeview\TrackGroup.cpp" />
+    <ClCompile Include="3DViewer\freeview\UIUpdateHelper.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeCropper.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilter.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterBoundary.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterClose.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterConvolve.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterDilate.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterErode.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterGradient.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterMean.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterMedian.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterOpen.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterOptimal.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterSobel.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterThreshold.cpp" />
+    <ClCompile Include="3DViewer\freeview\VolumeFilterWorkerThread.cpp" />
+    <ClCompile Include="3DViewer\freeview\vtkInteractorStyleMyTrackballCamera.cxx" />
+    <ClCompile Include="3DViewer\freeview\vtkSimpleLabelEdgeFilter.cpp" />
+    <ClCompile Include="3DViewer\freeview\vtkSimpleLabelEdgeFilter3D.cpp" />
+    <ClCompile Include="3DViewer\freeview\WidgetGroupPlot.cpp" />
+    <ClCompile Include="3DViewer\freeview\WidgetHistogram.cpp" />
+    <ClCompile Include="3DViewer\freeview\WidgetTimeCoursePlot.cpp" />
+    <ClCompile Include="3DViewer\freeview\WindowConfigureOverlay.cpp" />
+    <ClCompile Include="3DViewer\freeview\WindowEditAnnotation.cpp" />
+    <ClCompile Include="3DViewer\freeview\WindowGroupPlot.cpp" />
+    <ClCompile Include="3DViewer\freeview\WindowLayerInfo.cpp" />
+    <ClCompile Include="3DViewer\freeview\WindowQuickReference.cpp" />
+    <ClCompile Include="3DViewer\freeview\WindowTimeCourse.cpp" />
+    <ClCompile Include="3DViewer\lineprof\LineProf.cpp" />
+    <ClCompile Include="3DViewer\lineprof\PetscSolver.cpp" />
+    <ClCompile Include="3DViewer\lineprof\Preprocessor.cpp" />
+    <ClCompile Include="3DViewer\lineprof\Tracer.cpp" />
     <ClCompile Include="3DViewer\vtkPialReader.cpp" />
+    <ClCompile Include="3DViewer\vtkutils\vtkArrowPipeline.cxx" />
+    <ClCompile Include="3DViewer\vtkutils\vtkFreesurferLookupTable.cxx" />
+    <ClCompile Include="3DViewer\vtkutils\vtkInflatePolyData.cxx" />
+    <ClCompile Include="3DViewer\vtkutils\vtkRGBATransferFunction.cxx" />
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
     <ClCompile Include="AwComponents.cpp" />
@@ -230,7 +432,205 @@
     <ClInclude Include="3DViewer\AwSEEGInteractor.h" />
     <QtMoc Include="3DViewer\AwSEEGViewer.h" />
     <QtMoc Include="3DViewer\AwSEEGWidget.h" />
+    <QtMoc Include="3DViewer\freeview\Annotation2D.h" />
+    <ClInclude Include="3DViewer\freeview\BinaryTreeEdge.h" />
+    <ClInclude Include="3DViewer\freeview\BinaryTreeNode.h" />
+    <QtMoc Include="3DViewer\freeview\BinaryTreeView.h" />
+    <QtMoc Include="3DViewer\freeview\BrushProperty.h" />
+    <QtMoc Include="3DViewer\freeview\BusyIndicator.h" />
+    <QtMoc Include="3DViewer\freeview\CommandEdit.h" />
+    <ClInclude Include="3DViewer\freeview\CommonDataStruct.h" />
+    <QtMoc Include="3DViewer\freeview\Contour2D.h" />
+    <QtMoc Include="3DViewer\freeview\Cursor2D.h" />
+    <QtMoc Include="3DViewer\freeview\Cursor3D.h" />
+    <ClInclude Include="3DViewer\freeview\CursorFactory.h" />
+    <QtMoc Include="3DViewer\freeview\DialogAbout.h" />
+    <QtMoc Include="3DViewer\freeview\DialogAddPointSetStat.h" />
+    <QtMoc Include="3DViewer\freeview\DialogControlPointComment.h" />
+    <QtMoc Include="3DViewer\freeview\DialogCropVolume.h" />
+    <QtMoc Include="3DViewer\freeview\DialogCustomFill.h" />
+    <QtMoc Include="3DViewer\freeview\DialogGradientFilter.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLabelStats.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLineProfile.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadConnectome.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadDTI.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadFCD.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadPointSet.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadSurface.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadSurfaceOverlay.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadTransform.h" />
+    <QtMoc Include="3DViewer\freeview\DialogLoadVolume.h" />
+    <QtMoc Include="3DViewer\freeview\DialogMovePoint.h" />
+    <QtMoc Include="3DViewer\freeview\DialogNewAnnotation.h" />
+    <QtMoc Include="3DViewer\freeview\DialogNewPointSet.h" />
+    <QtMoc Include="3DViewer\freeview\DialogNewROI.h" />
+    <QtMoc Include="3DViewer\freeview\DialogNewVolume.h" />
+    <QtMoc Include="3DViewer\freeview\DialogPreferences.h" />
+    <QtMoc Include="3DViewer\freeview\DialogReloadLayer.h" />
+    <QtMoc Include="3DViewer\freeview\DialogReplaceLabel.h" />
+    <QtMoc Include="3DViewer\freeview\DialogRepositionSurface.h" />
+    <QtMoc Include="3DViewer\freeview\DialogSavePointSet.h" />
+    <QtMoc Include="3DViewer\freeview\DialogSaveScreenshot.h" />
+    <QtMoc Include="3DViewer\freeview\DialogSaveVolume.h" />
+    <QtMoc Include="3DViewer\freeview\DialogScreenshotOverlay.h" />
+    <QtMoc Include="3DViewer\freeview\DialogSelectSplines.h" />
+    <QtMoc Include="3DViewer\freeview\DialogSetCamera.h" />
+    <QtMoc Include="3DViewer\freeview\DialogSmoothSurface.h" />
+    <QtMoc Include="3DViewer\freeview\DialogSurfaceLabelOperations.h" />
+    <QtMoc Include="3DViewer\freeview\DialogThresholdFilter.h" />
+    <QtMoc Include="3DViewer\freeview\DialogThresholdVolume.h" />
+    <QtMoc Include="3DViewer\freeview\DialogTransformSurface.h" />
+    <QtMoc Include="3DViewer\freeview\DialogTransformVolume.h" />
+    <QtMoc Include="3DViewer\freeview\DialogVolumeFilter.h" />
+    <QtMoc Include="3DViewer\freeview\DialogVolumeSegmentation.h" />
+    <QtMoc Include="3DViewer\freeview\DialogWriteMovieFrames.h" />
+    <QtMoc Include="3DViewer\freeview\FloatingStatusBar.h" />
+    <ClInclude Include="3DViewer\freeview\FlowLayout.h" />
+    <QtMoc Include="3DViewer\freeview\FSGroupDescriptor.h" />
+    <QtMoc Include="3DViewer\freeview\FSLabel.h" />
+    <ClInclude Include="3DViewer\freeview\FSPointSet.h" />
+    <QtMoc Include="3DViewer\freeview\FSSurface.h" />
+    <QtMoc Include="3DViewer\freeview\FSTrack.h" />
+    <QtMoc Include="3DViewer\freeview\FSVolume.h" />
+    <QtMoc Include="3DViewer\freeview\GenericRenderView.h" />
+    <QtMoc Include="3DViewer\freeview\GeoSWorker.h" />
+    <QtMoc Include="3DViewer\freeview\InfoTreeWidget.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor2D.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor2DMeasure.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor2DNavigate.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor2DPointSetEdit.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor2DROIEdit.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor2DVolumeCrop.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor2DVolumeEdit.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor2DVoxelEdit.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor3D.h" />
+    <QtMoc Include="3DViewer\freeview\Interactor3DMeasure.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor3DNavigate.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor3DPathEdit.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor3DPointSetEdit.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor3DROIEdit.h" />
+    <ClInclude Include="3DViewer\freeview\Interactor3DVolumeCrop.h" />
+    <ClInclude Include="3DViewer\freeview\Json.h" />
+    <QtMoc Include="3DViewer\freeview\LabelTreeWidget.h" />
+    <QtMoc Include="3DViewer\freeview\Layer.h" />
+    <QtMoc Include="3DViewer\freeview\LayerCollection.h" />
+    <QtMoc Include="3DViewer\freeview\LayerConnectomeMatrix.h" />
+    <QtMoc Include="3DViewer\freeview\LayerDTI.h" />
+    <QtMoc Include="3DViewer\freeview\LayerEditable.h" />
+    <QtMoc Include="3DViewer\freeview\LayerFCD.h" />
+    <QtMoc Include="3DViewer\freeview\LayerFCDWorkerThread.h" />
+    <QtMoc Include="3DViewer\freeview\LayerLandmarks.h" />
+    <QtMoc Include="3DViewer\freeview\LayerLineProfile.h" />
+    <QtMoc Include="3DViewer\freeview\LayerMRI.h" />
+    <QtMoc Include="3DViewer\freeview\LayerMRIWorkerThread.h" />
+    <QtMoc Include="3DViewer\freeview\LayerODF.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPLabel.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPointSet.h" />
+    <QtMoc Include="3DViewer\freeview\LayerProperty.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyConnectomeMatrix.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyDTI.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyFCD.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyLineProfile.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyMRI.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyODF.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyPointSet.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyROI.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertySurface.h" />
+    <QtMoc Include="3DViewer\freeview\LayerPropertyTrack.h" />
+    <QtMoc Include="3DViewer\freeview\LayerROI.h" />
+    <QtMoc Include="3DViewer\freeview\LayerSurface.h" />
+    <QtMoc Include="3DViewer\freeview\LayerTrack.h" />
+    <QtMoc Include="3DViewer\freeview\LayerTreeWidget.h" />
+    <QtMoc Include="3DViewer\freeview\LayerVolumeBase.h" />
+    <QtMoc Include="3DViewer\freeview\LayerVolumeTrack.h" />
+    <ClInclude Include="3DViewer\freeview\LivewireTool.h" />
+    <ClInclude Include="3DViewer\freeview\LUTDataHolder.h" />
+    <QtMoc Include="3DViewer\freeview\MacHelper.h" />
+    <ClInclude Include="3DViewer\freeview\MacRetina.h" />
+    <QtMoc Include="3DViewer\freeview\MainWindow.h" />
+    <ClInclude Include="3DViewer\freeview\MyCmdLineParser.h" />
+    <ClInclude Include="3DViewer\freeview\MyUtils.h" />
+    <ClInclude Include="3DViewer\freeview\MyVTKUtils.h" />
+    <QtMoc Include="3DViewer\freeview\PanelAllLayers.h" />
+    <QtMoc Include="3DViewer\freeview\PanelConnectomeMatrix.h" />
+    <QtMoc Include="3DViewer\freeview\PanelFCD.h" />
+    <QtMoc Include="3DViewer\freeview\PanelLayer.h" />
+    <QtMoc Include="3DViewer\freeview\PanelODF.h" />
+    <QtMoc Include="3DViewer\freeview\PanelPointSet.h" />
+    <QtMoc Include="3DViewer\freeview\PanelROI.h" />
+    <QtMoc Include="3DViewer\freeview\PanelSurface.h" />
+    <QtMoc Include="3DViewer\freeview\PanelTrack.h" />
+    <QtMoc Include="3DViewer\freeview\PanelVolume.h" />
+    <ClInclude Include="3DViewer\freeview\nifti1.h" />
+    <ClInclude Include="3DViewer\freeview\ProgressCallback.h" />
+    <QtMoc Include="3DViewer\freeview\qtcolorpicker.h" />
+    <QtMoc Include="3DViewer\freeview\Region2D.h" />
+    <QtMoc Include="3DViewer\freeview\Region2DLine.h" />
+    <QtMoc Include="3DViewer\freeview\Region2DPolyline.h" />
+    <QtMoc Include="3DViewer\freeview\Region2DRectangle.h" />
+    <QtMoc Include="3DViewer\freeview\Region3D.h" />
+    <QtMoc Include="3DViewer\freeview\RenderView.h" />
+    <QtMoc Include="3DViewer\freeview\RenderView2D.h" />
+    <QtMoc Include="3DViewer\freeview\RenderView3D.h" />
+    <QtMoc Include="3DViewer\freeview\SplineTreeWidget.h" />
+    <ClInclude Include="3DViewer\freeview\StockColorMap.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceAnnotation.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceLabel.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceOverlay.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceOverlayProperty.h" />
+    <QtMoc Include="3DViewer\freeview\SurfacePath.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceRegion.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceRegionGroups.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceROI.h" />
+    <QtMoc Include="3DViewer\freeview\SurfaceSpline.h" />
+    <QtMoc Include="3DViewer\freeview\TermWidget.h" />
+    <QtMoc Include="3DViewer\freeview\ThreadBuildContour.h" />
+    <QtMoc Include="3DViewer\freeview\ThreadIOWorker.h" />
+    <QtMoc Include="3DViewer\freeview\ToolWindowEdit.h" />
+    <QtMoc Include="3DViewer\freeview\ToolWindowMeasure.h" />
+    <QtMoc Include="3DViewer\freeview\ToolWindowROIEdit.h" />
+    <ClInclude Include="3DViewer\freeview\Track.h" />
+    <QtMoc Include="3DViewer\freeview\TrackData.h" />
+    <QtMoc Include="3DViewer\freeview\TrackGroup.h" />
+    <ClInclude Include="3DViewer\freeview\TurboColorMap.h" />
+    <ClInclude Include="3DViewer\freeview\UIUpdateHelper.h" />
+    <QtMoc Include="3DViewer\freeview\VolumeCropper.h" />
+    <QtMoc Include="3DViewer\freeview\VolumeFilter.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterBoundary.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterClose.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterConvolve.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterDilate.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterErode.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterGradient.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterMean.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterMedian.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterOpen.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterOptimal.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterSobel.h" />
+    <ClInclude Include="3DViewer\freeview\VolumeFilterThreshold.h" />
+    <QtMoc Include="3DViewer\freeview\VolumeFilterWorkerThread.h" />
+    <ClInclude Include="3DViewer\freeview\vtkInteractorStyleMyTrackballCamera.h" />
+    <ClInclude Include="3DViewer\freeview\vtkSimpleLabelEdgeFilter.h" />
+    <ClInclude Include="3DViewer\freeview\vtkSimpleLabelEdgeFilter3D.h" />
+    <QtMoc Include="3DViewer\freeview\WidgetGroupPlot.h" />
+    <QtMoc Include="3DViewer\freeview\WidgetHistogram.h" />
+    <QtMoc Include="3DViewer\freeview\WidgetTimeCoursePlot.h" />
+    <QtMoc Include="3DViewer\freeview\WindowConfigureOverlay.h" />
+    <QtMoc Include="3DViewer\freeview\WindowEditAnnotation.h" />
+    <QtMoc Include="3DViewer\freeview\WindowGroupPlot.h" />
+    <QtMoc Include="3DViewer\freeview\WindowLayerInfo.h" />
+    <QtMoc Include="3DViewer\freeview\WindowQuickReference.h" />
+    <QtMoc Include="3DViewer\freeview\WindowTimeCourse.h" />
+    <ClInclude Include="3DViewer\lineprof\LineProf.h" />
+    <ClInclude Include="3DViewer\lineprof\PetscSolver.h" />
+    <ClInclude Include="3DViewer\lineprof\Preprocessor.h" />
+    <ClInclude Include="3DViewer\lineprof\Tracer.h" />
     <ClInclude Include="3DViewer\vtkPialReader.h" />
+    <ClInclude Include="3DViewer\vtkutils\vtkArrowPipeline.h" />
+    <ClInclude Include="3DViewer\vtkutils\vtkFreesurferLookupTable.h" />
+    <ClInclude Include="3DViewer\vtkutils\vtkInflatePolyData.h" />
+    <ClInclude Include="3DViewer\vtkutils\vtkRGBATransferFunction.h" />
     <ClInclude Include="Batch\AwBatchItem.h" />
     <ClInclude Include="CL\AwCommandLineManager.h" />
     <QtMoc Include="CL\AwCommandLogger.h">
@@ -443,6 +843,67 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="3DViewer\AwSEEGWidget.ui" />
+    <QtUic Include="3DViewer\freeview\DialogAbout.ui" />
+    <QtUic Include="3DViewer\freeview\DialogAddPointSetStat.ui" />
+    <QtUic Include="3DViewer\freeview\DialogControlPointComment.ui" />
+    <QtUic Include="3DViewer\freeview\DialogCropVolume.ui" />
+    <QtUic Include="3DViewer\freeview\DialogCustomFill.ui" />
+    <QtUic Include="3DViewer\freeview\DialogGradientFilter.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLabelStats.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLineProfile.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadConnectome.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadDTI.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadFCD.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadPointSet.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadSurface.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadSurfaceOverlay.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadTransform.ui" />
+    <QtUic Include="3DViewer\freeview\DialogLoadVolume.ui" />
+    <QtUic Include="3DViewer\freeview\DialogMovePoint.ui" />
+    <QtUic Include="3DViewer\freeview\DialogNewAnnotation.ui" />
+    <QtUic Include="3DViewer\freeview\DialogNewPointSet.ui" />
+    <QtUic Include="3DViewer\freeview\DialogNewROI.ui" />
+    <QtUic Include="3DViewer\freeview\DialogNewVolume.ui" />
+    <QtUic Include="3DViewer\freeview\DialogPreferences.ui" />
+    <QtUic Include="3DViewer\freeview\DialogReloadLayer.ui" />
+    <QtUic Include="3DViewer\freeview\DialogReplaceLabel.ui" />
+    <QtUic Include="3DViewer\freeview\DialogRepositionSurface.ui" />
+    <QtUic Include="3DViewer\freeview\DialogSavePointSet.ui" />
+    <QtUic Include="3DViewer\freeview\DialogSaveScreenshot.ui" />
+    <QtUic Include="3DViewer\freeview\DialogSaveVolume.ui" />
+    <QtUic Include="3DViewer\freeview\DialogScreenshotOverlay.ui" />
+    <QtUic Include="3DViewer\freeview\DialogSelectSplines.ui" />
+    <QtUic Include="3DViewer\freeview\DialogSetCamera.ui" />
+    <QtUic Include="3DViewer\freeview\DialogSmoothSurface.ui" />
+    <QtUic Include="3DViewer\freeview\DialogSurfaceLabelOperations.ui" />
+    <QtUic Include="3DViewer\freeview\DialogThresholdFilter.ui" />
+    <QtUic Include="3DViewer\freeview\DialogThresholdVolume.ui" />
+    <QtUic Include="3DViewer\freeview\DialogTransformSurface.ui" />
+    <QtUic Include="3DViewer\freeview\DialogTransformVolume.ui" />
+    <QtUic Include="3DViewer\freeview\DialogVolumeFilter.ui" />
+    <QtUic Include="3DViewer\freeview\DialogVolumeSegmentation.ui" />
+    <QtUic Include="3DViewer\freeview\DialogWriteMovieFrames.ui" />
+    <QtUic Include="3DViewer\freeview\FloatingStatusBar.ui" />
+    <QtUic Include="3DViewer\freeview\MainWindow.ui" />
+    <QtUic Include="3DViewer\freeview\PanelAllLayers.ui" />
+    <QtUic Include="3DViewer\freeview\PanelConnectomeMatrix.ui" />
+    <QtUic Include="3DViewer\freeview\PanelFCD.ui" />
+    <QtUic Include="3DViewer\freeview\PanelODF.ui" />
+    <QtUic Include="3DViewer\freeview\PanelPointSet.ui" />
+    <QtUic Include="3DViewer\freeview\PanelROI.ui" />
+    <QtUic Include="3DViewer\freeview\PanelSurface.ui" />
+    <QtUic Include="3DViewer\freeview\PanelTrack.ui" />
+    <QtUic Include="3DViewer\freeview\PanelVolume.ui" />
+    <QtUic Include="3DViewer\freeview\TermWidget.ui" />
+    <QtUic Include="3DViewer\freeview\ToolWindowEdit.ui" />
+    <QtUic Include="3DViewer\freeview\ToolWindowMeasure.ui" />
+    <QtUic Include="3DViewer\freeview\ToolWindowROIEdit.ui" />
+    <QtUic Include="3DViewer\freeview\WindowConfigureOverlay.ui" />
+    <QtUic Include="3DViewer\freeview\WindowEditAnnotation.ui" />
+    <QtUic Include="3DViewer\freeview\WindowGroupPlot.ui" />
+    <QtUic Include="3DViewer\freeview\WindowLayerInfo.ui" />
+    <QtUic Include="3DViewer\freeview\WindowQuickReference.ui" />
+    <QtUic Include="3DViewer\freeview\WindowTimeCourse.ui" />
     <QtUic Include="Debug\AwDebugLogWidget.ui">
     </QtUic>
   </ItemGroup>
@@ -735,6 +1196,7 @@
     <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>
+    <QtRcc Include="3DViewer\freeview\freeview.qrc" />
     <QtUic Include="Process\AwProcessLogWindow.ui">
     </QtUic>
     <QtUic Include="Process\AwProcessWidget.ui">
@@ -763,6 +1225,7 @@
     </QtUic>
     <QtUic Include="Batch\AwBatchGUI.ui">
     </QtUic>
+    <None Include="3DViewer\freeview\MacRetina.mm" />
     <None Include="AnyWave.licenseheader" />
     <None Include="cpp.hint" />
     <QtUic Include="Montage\AwECoGDialog.ui">
@@ -862,6 +1325,13 @@
   <PropertyGroup>
     <_ProjectFileVersion>11.0.61030.0</_ProjectFileVersion>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>false</VcpkgEnableManifest>
+    <VcpkgEnabled>true</VcpkgEnabled>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -901,7 +1371,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;HAVE_ZLIB;_MAX_FS_THREADS=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -909,14 +1379,14 @@
       <OpenMPSupport>false</OpenMPSupport>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;$(SolutionDir)\include\freesurfer;.\3DViewer\vtkUtils;.\3DViewer\packages\nifti;$(EXTRA_LIBS)/itk/include/ITK-4.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\debug\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\debug\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\itk\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLibd.lib;AwMappingLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwWidgetsLibd.lib;AwMathLibd.lib;AwHDF5libd.lib;AwLayoutLibd.lib;AwFilteringLibd.lib;AwMatlablibd.lib;AwMontageLibd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;qwtd.lib;qcustomplotd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -978,8 +1448,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;HAVE_ZLIB;_MAX_FS_THREADS=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;$(SolutionDir)\include\freesurfer;.\3DViewer\vtkUtils;$(EXTRA_LIBS)/itk/include/ITK-4.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -992,7 +1462,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\itk\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwHDF5lib.lib;AwWidgetsLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwFilteringLib.lib;AwMontageLib.lib;hdf5.lib;hdf5_hl.lib;qwt.lib;AwMappingLib.lib;AwMatlablib.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;qcustomplot.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <PerUserRedirection>true</PerUserRedirection>
