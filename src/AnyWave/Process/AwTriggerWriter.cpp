@@ -28,7 +28,7 @@ AwTriggerWriterPlugin::AwTriggerWriterPlugin()
 
 AwTriggerWriter::AwTriggerWriter() : AwProcess()
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	
 }
 
 bool AwTriggerWriter::showUi()

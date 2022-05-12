@@ -267,6 +267,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "io", "io", "{137F5FC3-3B18-
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "4DNIExporter", "src\plugins\io\4DNIExporter\4DNIExporter.vcxproj", "{AB7D08D7-CB19-4B27-A36B-BA3BA0226FE4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RegisterInject", "src\plugins\io\RegisterInject\RegisterInject.vcxproj", "{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -655,6 +657,12 @@ Global
 		{AB7D08D7-CB19-4B27-A36B-BA3BA0226FE4}.Release|x64.ActiveCfg = Release|x64
 		{AB7D08D7-CB19-4B27-A36B-BA3BA0226FE4}.Release|x64.Build.0 = Release|x64
 		{AB7D08D7-CB19-4B27-A36B-BA3BA0226FE4}.Release|x86.ActiveCfg = Release|x64
+		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}.Debug|x64.ActiveCfg = Debug|x64
+		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}.Debug|x64.Build.0 = Debug|x64
+		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}.Debug|x86.ActiveCfg = Debug|x64
+		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}.Release|x64.ActiveCfg = Release|x64
+		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}.Release|x64.Build.0 = Release|x64
+		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -715,9 +723,10 @@ Global
 		{998231E2-95EB-4D82-B54A-64727BB9C69C} = {29F479E7-AB9C-4CB1-A69C-F93615B73422}
 		{137F5FC3-3B18-4119-B581-24BFD587ACB4} = {29F479E7-AB9C-4CB1-A69C-F93615B73422}
 		{AB7D08D7-CB19-4B27-A36B-BA3BA0226FE4} = {137F5FC3-3B18-4119-B581-24BFD587ACB4}
+		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C} = {137F5FC3-3B18-4119-B581-24BFD587ACB4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 		Qt5Version = 5.10
+		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
 	EndGlobalSection
 EndGlobal

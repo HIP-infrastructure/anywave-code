@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="3DViewer\Aw3DViewer.cpp" />
     <ClCompile Include="3DViewer\AwSEEGInteractor.cpp" />
     <ClCompile Include="3DViewer\AwSEEGViewer.cpp" />
     <ClCompile Include="3DViewer\AwSEEGWidget.cpp" />
@@ -226,7 +225,6 @@
     <QtMoc Include="Batch\AwBatchGUI.h">
     </QtMoc>
     <ClInclude Include="..\..\include\keys\data.h" />
-    <QtMoc Include="3DViewer\Aw3DViewer.h" />
     <ClInclude Include="3DViewer\AwSEEGInteractor.h" />
     <QtMoc Include="3DViewer\AwSEEGViewer.h" />
     <QtMoc Include="3DViewer\AwSEEGWidget.h" />

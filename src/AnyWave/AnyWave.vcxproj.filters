@@ -622,9 +622,6 @@
     <ClCompile Include="ICA\AwICAMappingItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
-    <ClCompile Include="3DViewer\Aw3DViewer.cpp">
-      <Filter>3DViewer</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1109,9 +1106,6 @@
     </QtMoc>
     <QtMoc Include="IO\export\AwExporter.h">
       <Filter>IO\export</Filter>
-    </QtMoc>
-    <QtMoc Include="3DViewer\Aw3DViewer.h">
-      <Filter>3DViewer</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

@@ -82,6 +82,7 @@ public:
 
 	void setNewRootDirForSideFiles();
 	int openFileFromBIDS(const QString&);
+	int openFileMatPy(const QString&);
 
 signals:
 	void finished();  // used for threading operations (only when opening file in GUI mode at present)
