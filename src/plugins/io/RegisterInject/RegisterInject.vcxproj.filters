@@ -42,4 +42,9 @@
   <ItemGroup>
     <QtUic Include="settings.ui" />
   </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Resource.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
 </Project>

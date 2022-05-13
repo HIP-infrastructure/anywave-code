@@ -268,6 +268,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "4DNIExporter", "src\plugins\io\4DNIExporter\4DNIExporter.vcxproj", "{AB7D08D7-CB19-4B27-A36B-BA3BA0226FE4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RegisterInject", "src\plugins\io\RegisterInject\RegisterInject.vcxproj", "{08A7A882-94EA-45F1-B2E4-F4888E68FD4C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{71DBCBBD-3E14-446C-9275-576E2934BC5B} = {71DBCBBD-3E14-446C-9275-576E2934BC5B}
+		{C6AA3ED4-5F91-4754-99CB-6F2DD34D2CE4} = {C6AA3ED4-5F91-4754-99CB-6F2DD34D2CE4}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -726,7 +730,7 @@ Global
 		{08A7A882-94EA-45F1-B2E4-F4888E68FD4C} = {137F5FC3-3B18-4119-B581-24BFD587ACB4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.10
 		SolutionGuid = {760C4A58-27A9-4401-83F8-D863D6C42B7E}
+		Qt5Version = 5.10
 	EndGlobalSection
 EndGlobal

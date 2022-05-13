@@ -56,21 +56,6 @@ void settings::browseMEG()
 
 void settings::accept()
 {
-	if (m_eegOk && m_megOk) {
-		//AwFileIO *reader = eegPlugin->newInstance();
-		//if (reader->openFile(eegFile) != AwFileIO::NoError) {
-		//	QMessageBox::critical(this, tr("ADES File"), tr("Cannot open this file."));
-		//	eegPlugin->deleteInstance(reader);
-		//	return;
-		//}
-		//eegPlugin->deleteInstance(reader);
-		//reader = megPlugin->newInstance();
-		//if (reader->openFile(megFile) != AwFileIO::NoError) {
-		//	QMessageBox::critical(this, tr("MEG File"), tr("Cannot open this file."));
-		//	megPlugin->deleteInstance(reader);
-		//	return;
-		//}
-		//megPlugin->deleteInstance(reader);
+	if (m_eegOk && m_megOk) 
 		QDialog::accept();
-	}
 }

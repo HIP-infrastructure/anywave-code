@@ -12,6 +12,9 @@ public:
     bool showUi() override;
     void run() override;
     void runFromCommandLine() override;
+	bool init() override;
+protected:
+	AwBaseProcess* m_temporal, * m_eeginto4d;
 };
 
 class REGISTERINJECT_EXPORT RegisterInjectPlugin : public AwProcessPlugin

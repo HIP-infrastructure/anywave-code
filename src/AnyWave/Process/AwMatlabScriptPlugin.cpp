@@ -29,11 +29,6 @@
 #endif
 
 #include <qcoreapplication.h>
-
-
-
-
-
 // PROCESS
 
 AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
@@ -108,12 +103,8 @@ void AwMatlabScriptProcess::run()
 	arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) 
 		<< QString::number(m_pid); // << jsonArgs;
 	
-//	env.remove("PATH");
-//	env.insert("PATH", systemPath);
     emit progressChanged(QString("Running %1 with arguments:").arg(m_plugin->settings().value("compiled plugin").toString()));
 	for (const auto& a : arguments) 
-	    emit progressChanged(a);
-//	QProcess plugin(this);
 	m_process = new QProcess(this);
 	m_process->setReadChannel(QProcess::StandardOutput);
 	m_process->setProcessChannelMode(QProcess::MergedChannels);
@@ -122,54 +113,4 @@ void AwMatlabScriptProcess::run()
 	m_process->start(m_plugin->settings().value("compiled plugin").toString(), arguments, QIODevice::ReadWrite);
 	m_process->waitForFinished(-1); // wait for plugin to finish. (Wait forever).
 	emit progressChanged(tr("MATLAB plugin has finished."));
-
-//	bool isCompiled = static_cast<AwScriptPlugin *>(plugin())->isCompiled();
-//	if (isCompiled) { // this is a MATLAB compiled standalone plugin.
-//		QStringList arguments;
-//		AwDebugLog::instance()->connectComponent("MATLAB Compiled Plugins", this);
-//		emit log(QString("System PATH for %1 is %2").arg(this->plugin()->name).arg(m_systemPath));
-//
-//		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
-//#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
-//		QSettings settings;
-//
-//		QString mcrPath = settings.value("matlab/mcr_path").toString();
-//		if (mcrPath.isEmpty())
-//			emit progressChanged(tr("MATLAB Runtime is not installed or path to it is not set!"));
-//		else
-//			arguments << mcrPath;
-//
-//#endif
-//
-//#if defined(Q_OS_WIN)
-//		auto appDir = QCoreApplication::applicationDirPath();
-//		m_systemPath = QString("%1;%2").arg(appDir).arg(m_systemPath);
-//#endif
-//#if defined(Q_OS_MAC)
-//		//auto appDir = QCoreApplication::applicationDirPath();
-//		//// build DYLD_FALLBACK
-//		//QString fallBack = QString("%1/../Frameworks").arg(appDir);
-//		//env.insert("DYLD_FALLBACK_LIBRARY_PATH", fallBack);
-//		//env.insert("DYLD_FALLBACK_FRAMEWORK_PATH", fallBack);
-//#endif
-//		arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) << QString::number(m_pid) << AwUtilities::json::toJsonString(pdi.input.args()).simplified();
-//		//pdi.input.args().value("json_args").toString().simplified();
-//		QProcess plugin(this);
-//		
-//		env.remove("PATH");
-//		env.insert("PATH", m_systemPath);
-//		plugin.setProcessEnvironment(env);
-//		plugin.start(m_path, arguments,  QIODevice::ReadWrite);
-//		plugin.waitForFinished(-1); // wait for plugin to finish. (Wait forever).
-//		emit progressChanged(tr("MATLAB plugin has finished."));
-//	}
-//	else	{
-//		AwSettings *aws = AwSettings::getInstance();
-//		mi = aws->matlabInterface();
-//		if (aws->value(aws::matlab_present).toBool()) {
-//			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-//            QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-//			mi->run(m_path, aws->value(aws::matlab_plugins_dir).toString() + "/dep", m_pid, AwMATPyServer::instance()->serverPort(), AwUtilities::json::toJsonString(pdi.input.args()).simplified());
-//		}
-//	}
 }

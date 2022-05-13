@@ -34,8 +34,7 @@ public:
 	AwPythonScriptProcess();
 	~AwPythonScriptProcess();
 
-	void run();
-	void init();
+	void run() override;
 public slots:
 	void pythonOutput();
 	void pythonError();
