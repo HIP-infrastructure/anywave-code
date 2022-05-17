@@ -52,14 +52,11 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 {
 	const QString origin = "AwCommandLineManager::createNewProcess()";
-
-
 	// get plugin name from json argumetns
 	if (!args.contains("run_process")) {
 		throw AwException("missing --run argument.", origin);
 		return Q_NULLPTR;
 	}
-
 	// check run arguments (could be a  json file, a json string or a the name of a plugin
 	QString json = args.value("run_process").toString();
 	QString pluginName = json;
@@ -94,7 +91,6 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			return Q_NULLPTR;
 		}
 	}
-
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	AwUniteMaps(args, map);
 	// always add the path to anywave app
@@ -104,6 +100,12 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	if (!doNotRequiresData && inputFile.isEmpty()) {
 		throw AwException(QString("input_file must be specified."), origin);
 		return nullptr;
+	}
+
+	// create output_dir if needed
+	if (args.contains(keys::output_dir)) {
+		QDir dir;
+		dir.mkpath(args.value(keys::output_dir).toString());
 	}
 	// instantiate process
 	auto process = plugin->newInstance();
@@ -161,10 +163,6 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		// check again here that montage_file and marker_file set by DM really exist
 		if (!QFile::exists(process->pdi.input.settings.value(keys::montage_file).toString()))
 			process->pdi.input.settings.remove(keys::montage_file);
-		//if (!QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
-		//	process->pdi.input.settings.remove(keys::marker_file);
-
-
 		// check for BAD file
 		QString tmp = dm->badFilePath();
 		if (QFile::exists(tmp)) {
@@ -235,32 +233,18 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 				}
 			}
 		}
-
 		dm->montageManager()->setChannels(montage);
-
-		//// if marker file is found => load markers and use them for the process
-		//if (args.contains(keys::marker_file)) {
-		//	logger.sendLog(QString("using marker file: %1").arg(args.value(keys::marker_file).toString()));
-		//	process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
-		//}
-		//else {
-		//	logger.sendLog(QString("No marker file specified or detected, using markers present in data file."));
-		//	process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
-		//}
-
 		// handle output_dir
 		if (!process->pdi.input.settings.contains(keys::output_dir)) {
 			// no output_dir specified => set output_dir as current data dir
 			process->pdi.input.settings[keys::output_dir] = process->pdi.input.settings.value(keys::data_dir).toString();
 			logger.sendLog(QString("output_dir is:").arg(process->pdi.input.settings.value(keys::data_dir).toString()));
 		}
-
 		// INIT PDI   CHANNELS AND MARKERS BASED ON FLAGS
 		if (AwProcessManager::instance()->buildProcessPDI(process) != 0) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile));
 			return -1;
 		}
-
 		// apply filter on channels depending on hp lp notch keys that may have been specified in the command line options
 		auto inputChannels = process->pdi.input.channels();
 		AwCommandLineManager::applyFilters(inputChannels, args);

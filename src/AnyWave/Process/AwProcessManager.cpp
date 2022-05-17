@@ -910,14 +910,15 @@ void AwProcessManager::registerProcessForDisplay(AwProcess *process)
 
 void AwProcessManager::unregisterProcessForDisplay(AwProcess *process)
 {
-	foreach (AwDisplayProcessRegistration *dr, m_registeredDisplayProcesses) {
-		if (dr->process() == process)	{
-			m_registeredDisplayProcesses.removeAll(dr);
-			delete dr;
-			break;
-		}
-	}
-
+	//foreach (AwDisplayProcessRegistration *dr, m_registeredDisplayProcesses) {
+	//	if (dr->process() == process)	{
+	//		m_registeredDisplayProcesses.removeAll(dr);
+	//		delete dr;
+	//		break;
+	//	}
+	//}
+	m_registeredDisplayProcesses.erase(std::remove_if(m_registeredDisplayProcesses.begin(), m_registeredDisplayProcesses.end(),
+		[process](AwDisplayProcessRegistration* d) { return d->process() == process; }));
 	m_activeDisplayProcess.removeOne(process);
 	emit displayProcessTerminated(process);
 }
@@ -945,8 +946,7 @@ void AwProcessManager::startDisplayProcesses(AwChannelList& channels)
 {
 	if (channels.isEmpty())
 		return;
-
-	foreach (AwDisplayProcessRegistration *dr, m_registeredDisplayProcesses) {
+	for (AwDisplayProcessRegistration *dr : m_registeredDisplayProcesses) {
 		dr->cloneInputChannels(channels);
 		if (dr->isProcessCompatible())	{
 			// if the process is already running, wait for it to terminate before launching again.
@@ -959,18 +959,13 @@ void AwProcessManager::startDisplayProcesses(AwChannelList& channels)
 void AwProcessManager::startProcessFromMenu()
 {
 	QAction *act = qobject_cast<QAction *>(sender());
-	
 	if (!act)
 		return;
-
 	// get plugin's name
 	QString pluginName = act->data().toString();
-
 	AwProcessPlugin *p = AwPluginManager::getInstance()->getProcessPluginByName(pluginName);
-
 	if (!p)
 		return;
-
 	// Instantiate process and launch it
 	runProcess(newProcess(p));
 }
@@ -1164,9 +1159,11 @@ void AwProcessManager::setProcessInstance(AwBaseProcess** p, const QString& plug
 		auto process = plugin->newInstance();
 		process->setPlugin(plugin);
 		*p = process;
+		initProcessIO(process);
 	}
 	else
 		*p = nullptr;
+
 }
 
 void AwProcessManager::processEvent(QSharedPointer<AwEvent> e)

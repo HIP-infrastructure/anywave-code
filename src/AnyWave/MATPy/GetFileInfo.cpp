@@ -31,11 +31,12 @@ void AwRequestServer::handleGetFileInfo(QTcpSocket *client, AwScriptProcess *p)
 	in.setVersion(QDataStream::Qt_4_4);
 	QDataStream& stream = *response.stream();
 
-	AwFileIO *reader = NULL;
+	//AwFileIO *reader = nullptr;
 	in >> file;
 
-	reader = AwPluginManager::getInstance()->getReaderToOpenFile(file);
-	if (!reader) {
+	QSharedPointer<AwFileIO> reader(AwPluginManager::getInstance()->getReaderToOpenFile(file));
+
+	if (reader == nullptr) {
 		stream << (int)-1; // error flag
 		response.send();
 		return;
@@ -60,6 +61,7 @@ void AwRequestServer::handleGetFileInfo(QTcpSocket *client, AwScriptProcess *p)
 	}
 
 	total_duration = reader->infos.totalDuration();
+	reader->cleanUpAndClose();
 	stream << labels << max_sr << total_duration;
 	response.send();
 	emit log("Done.");
