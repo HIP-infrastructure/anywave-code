@@ -13,26 +13,31 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#pragma once
-#include <AwGlobal.h>
-#include <QVariantMap>
-#include <QSharedPointer>
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-class AW_CORE_EXPORT AwEvent
+#include <QDialog>
+#include "ui_settings.h"
+#include <AwFileIO.h>
+
+class settings : public QDialog
 {
+	Q_OBJECT
+
 public:
-	AwEvent();
-	enum EventType { StartProcessDetached, StartProcess, HighlightTimeSelection, ShowChannels, LoadICAMatFile, AddNewView };
+	settings(QWidget *parent = 0);
+	~settings();
 
-	inline QVariantMap& data() { return m_data; }
-	inline int id() { return m_id; }
-	void setId(int id) { m_id = id; }
-	void addValue(const QString& key, const QVariant& value) { m_data[key] = value; }
-	void setData(const QVariantMap& map) { m_data = map; }
-protected:
-	int m_id;
-	QVariantMap m_data;
+	QString megFile;
+	QString eegFile;
+public slots:
+	void browseMEG();
+	void browseEEG();
+	void accept();
+private:
+	Ui::settingsUi m_ui;
+	bool m_megOk, m_eegOk;
+	QString m_dirPath;
 };
-Q_DECLARE_METATYPE(AwEvent);
-Q_DECLARE_METATYPE(QSharedPointer<AwEvent>);
 
+#endif // SETTINGS_H

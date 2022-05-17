@@ -103,13 +103,6 @@ bool ICA::showUi()
 	}
 	return false;
 }
-
-void ICA::init()
-{
-
-}
-
-
 bool ICA::batchParameterCheck(const QVariantMap& hash)
 {
 	// this is an exhaustive test as we don't have a file open at this stage.

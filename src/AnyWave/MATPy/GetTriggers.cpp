@@ -32,7 +32,8 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *pro
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
 
-	AwFileIO *reader = nullptr;
+//	AwFileIO *reader = nullptr;
+	QSharedPointer<AwFileIO> reader;
 	QString file;
 	QStringList channels;
 	AwMarkerList markers;
@@ -46,7 +47,7 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *pro
 	}
 	else {
 		file = QDir::toNativeSeparators(file);
-		reader = AwPluginManager::getInstance()->getReaderToOpenFile(file);
+		reader = QSharedPointer<AwFileIO>(AwPluginManager::getInstance()->getReaderToOpenFile(file));
 		if (reader) {
 			if (reader->openFile(file) != AwFileIO::NoError) {
 				emit log("The file specified could not be open by AnyWave.");
@@ -89,5 +90,6 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *pro
 	response.send();
 	// clean markers
 	AW_DESTROY_LIST(markers);
+	reader->cleanUpAndClose();
 	emit log("Done.");
 }

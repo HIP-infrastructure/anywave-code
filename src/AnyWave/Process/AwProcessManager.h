@@ -25,8 +25,6 @@
 #include <QDockWidget>
 #include <QMutex>
 
-
-
 class QSplashScreen;
 class QScriptEngine;
 class AwScriptProcessFileInput;
@@ -53,7 +51,6 @@ protected:
 class AwProcessManager : public QObject
 {
 	Q_OBJECT
-
 public:
 	AwProcessManager(QObject *parent = 0);
 	~AwProcessManager();
@@ -100,7 +97,7 @@ public slots:
 	void enableMenus();
 	void launchQTSPlugin(QString& name, AwChannelList& channels, float pos, float end);
 	void processEvent(QSharedPointer<AwEvent>);
-
+	void setProcessInstance(AwBaseProcess**, const QString&);
 signals:
 	void newMarkersAvailable(const AwMarkerList &markers);
 	void processFinished(AwProcess *process);

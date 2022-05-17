@@ -48,11 +48,6 @@ AwBatchRunner::~AwBatchRunner()
 	AW_DESTROY_LIST(m_items);
 }
 
-void AwBatchRunner::init()
-{
-	 
-}
-
 AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantMap& dict, const QString& pluginName)
 {
 	auto pm = AwPluginManager::getInstance();

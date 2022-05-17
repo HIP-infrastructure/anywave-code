@@ -634,6 +634,7 @@
     <ClCompile Include="ICA\AwICAMappingItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="3DViewer\Aw3DViewer.cpp">
       <Filter>3DViewer</Filter>
     </ClCompile>
@@ -1213,6 +1214,8 @@
     <ClCompile Include="3DViewer\lineprof\Tracer.cpp">
       <Filter>3DViewer\lineprof</Filter>
     </ClCompile>
+=======
+>>>>>>> unstable-dev
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1698,6 +1701,7 @@
     <QtMoc Include="IO\export\AwExporter.h">
       <Filter>IO\export</Filter>
     </QtMoc>
+<<<<<<< HEAD
     <QtMoc Include="3DViewer\Aw3DViewer.h">
       <Filter>3DViewer</Filter>
     </QtMoc>
@@ -2148,6 +2152,8 @@
     <QtMoc Include="3DViewer\freeview\WindowTimeCourse.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
+=======
+>>>>>>> unstable-dev
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Prefs\AwPreferences.h">

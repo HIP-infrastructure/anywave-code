@@ -414,6 +414,13 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	QMutexLocker locker(m_server->getReadMutex());
 	if (m_reader == nullptr)  // check if we point to a valid reader. It could happen that a data server is launched before a valid file reader is created.
 		m_reader = m_server->reader();
+	// the reader given by the server can also be null if we have several data server instianted and running.
+	// if the server's reader is null that means we have a connection to the wrong server...
+	if (m_reader == nullptr) {
+		setEndOfData();
+		return;
+	}
+
 #ifndef NDEBUG
 	if (channelsToLoad->isEmpty())
 		qDebug() << Q_FUNC_INFO << "Channel list is empty() ! " << endl;

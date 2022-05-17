@@ -30,6 +30,7 @@
 #include <QJsonArray>
 #include <AwKeys.h>
 #include "Data/AwDataManager.h"
+#include "Data/AwDataServer.h"
 #include "CL/AwCommandLineManager.h"
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
@@ -96,7 +97,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		if (cfg.contains(keys::data_path)) {
 			auto filePath = cfg.value(keys::data_path).toString();
 			dm = AwDataManager::newInstance();
-			auto res = dm->openFile(filePath);
+			auto res = dm->openFileMatPy(filePath);
 			if (res) {
 				error = QString("ERROR: Unable to open file %1.").arg(filePath);
 				emit log(error);
@@ -109,6 +110,10 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 				requestedChannels = dm->montage();
 			else
 				requestedChannels = dm->rawChannels();
+			// close current connection to data server
+			AwDataServer::getInstance()->closeConnection(this);
+			// open connection to the cloned data server which resides inside the cloned Data Manager
+			dm->dataServer()->openConnection(this);
 		}
 
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
@@ -119,14 +124,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 
 		// check for marker file
 		markers = AwCommandLineManager::parseMarkerFile(cfg);
-		//if (cfg.contains("marker_file")) {
-		//	auto mrkFile = cfg.value("marker_file").toString();
-		//	markers = AwMarker::load(mrkFile);
-		//	if (markers.isEmpty()) {
-		//		emit log(QString("Loading of %1 failed.").arg(mrkFile));
-		//	}
-		//}
-
 		if (markers.isEmpty()) {
 			// try to load the default .mrk that comes with the data file
 			auto mrkFile = dm->mrkFilePath();
@@ -277,7 +274,11 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AW_DESTROY_LIST(requestedChannels);
 
 	// check for data manager used, if not the main one, destroy it
-	if (dm != AwDataManager::instance())
+	if (dm != AwDataManager::instance()) {
+		// reconnect to the correct data server
+		AwDataServer::getInstance()->openConnection(this);
+		dm->dataServer()->closeConnection(this);
 		delete dm;
+	}
 	emit log("Done.");
 }

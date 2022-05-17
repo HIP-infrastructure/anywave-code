@@ -69,7 +69,7 @@ public:
 	int applyUseSkipMarkersKeys();
 	
 	/** Initializing process before starting it **/
-	virtual void init() {}
+	virtual bool init() { return true; }
 	/* main excecution entry point */
 	virtual void run() {}
 	/* command line (NO GUI run mode) */
@@ -81,7 +81,8 @@ public:
 	void addMarkers(AwMarkerList *markers);
 	void addMarker(AwMarker *marker);
 	void sendEventAsynch(QSharedPointer<AwEvent> e);
-
+	/** Get instance of process based on plugin name **/
+	AwBaseProcess* getProcessByName(const QString& name);
 	/** specific to process which supports command line batching. **/
 	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
 signals:
@@ -91,6 +92,7 @@ signals:
 	// Send command
 	void sendCommand(int command, QVariantList args);
 	void sendCommand(const QVariantMap&);
+	void requestProcessInstance(AwBaseProcess**, const QString&);
 
 	void dataConnectionRequested(AwDataClient *client);
 	void newDisplayPlugin(AwDisplayPlugin *plugin);
@@ -304,6 +306,7 @@ public:
 Q_DECLARE_INTERFACE(AwProcessPlugin, AwProcessPlugin_IID)
 Q_DECLARE_INTERFACE(AwProcess, AwProcess_IID)
 Q_DECLARE_INTERFACE(AwGUIProcess, AwGUIProcess_IID)
+Q_DECLARE_METATYPE(AwBaseProcess*);
 
 #define AW_INSTANTIATE_PROCESS(P) P* newInstance() { auto process = new P; process->setPlugin(this); return process; }
 

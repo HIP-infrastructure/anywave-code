@@ -128,7 +128,7 @@ AwBaseProcess *AwProcessManager::newProcessFromPluginName(const QString &name)
 	if (plugin)
 		return newProcess(plugin);
 	else
-		return NULL;
+		return nullptr;
 }
 
 /*!
@@ -388,7 +388,6 @@ AwBaseProcess * AwProcessManager::newProcess(AwProcessPlugin *plugin)
 	initProcessSettings(process);
 	return process;
 }
-
 
 
 /*!
@@ -671,6 +670,8 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	  // create the process thread and move process object in it.
 	  QThread *processThread = new QThread;
 	  process->moveToThread(processThread);
+	  if (!process->init())
+		  return;
 
 	  connect(process, SIGNAL(sendCommand(int, QVariantList)), this, SLOT(executeCommand(int, QVariantList)), Qt::UniqueConnection);
 	  connect(process, SIGNAL(sendCommand(const QVariantMap&)), this, SLOT(executeCommand(const QVariantMap&)), Qt::UniqueConnection);
@@ -694,12 +695,14 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 	  connect(process, SIGNAL(aborted()), this, SLOT(handleProcessTermination()));
 	  connect(process, SIGNAL(idle()), this, SLOT(handleProcessTermination()));
 	  m_runningProcesses << process;
-	  process->init();
 	  m_dock->show();
 	  // start process thread
 	  processThread->start();
 	  QMetaObject::invokeMethod(process, "start", Qt::QueuedConnection);
   }
+
+
+
 
 /*!
  * \brief
@@ -732,7 +735,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		if (process->modifiersFlags() & Aw::ProcessIO::modifiers::RequireChannelSelection && selectedChannels.isEmpty()) {
 			AwMessageBox::critical(NULL, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
-		//	process->plugin()->deleteInstance(process);
 			delete process;
 			return;
 		}
@@ -790,6 +792,13 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 			SLOT(selectChannelsAsynch(AwDataClient*, const QVariantMap&, AwChannelList*)));
 		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
 			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
+		connect(p, &AwProcess::requestProcessInstance, this, &AwProcessManager::setProcessInstance);
+
+		if (!p->init()) {
+			AwMessageBox::critical(nullptr, "process init", p->errorString());
+			delete p;
+			return;
+		}
 
 		if (!skipDataFile) {
 			AwMarkerManager *mm = AwMarkerManager::instance();
@@ -803,7 +812,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 			connect(p, SIGNAL(finished()), this, SLOT(handleProcessTermination()));
 		}
 		m_GUIProcesses << process;
-		p->init();
+	
 #ifndef NDEBUG
 		qDebug() << "GUI Process " << process->plugin()->name << " has been started." << endl;
 #endif
@@ -817,7 +826,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		// connect the process to the Data Manager to make it able to send requests
 		connect(p, SIGNAL(selectChannelsRequested(AwDataClient*, const QVariantMap&, AwChannelList*)), dm,
 			SLOT(selectChannels(AwDataClient*, const QVariantMap&, AwChannelList*)));
-
+		connect(p, &AwProcess::requestProcessInstance, this, &AwProcessManager::setProcessInstance);
 		if (p->hasInputUi()) {
 			if (!p->showUi()) 	{
 				delete p;
@@ -827,7 +836,11 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		}
 		if (DontCheckIO) // in case the process is started without checking IO settings, and we manually set used_markers and/or skip_markers
 			applyUseSkipMarkersKeys(p);
-
+		if (!p->init()) {
+			errorMessage(QString("Error while initizalizing : %1").arg(p->errorString()));
+			delete p;
+			return;
+		}
 		// create the process thread and move process object in it.
 		QThread *processThread = new QThread;
 		p->moveToThread(processThread);
@@ -845,6 +858,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 			// connect the process as a client of a DataServer thread.
 			dm->dataServer()->openConnection(p);
 		}
+
 
 		// instantiate a new AwProcessesWidget if needed
 		if (m_processesWidget == nullptr)
@@ -869,8 +883,6 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 		else
 			// register non display process as currently running processes
 			m_runningProcesses << p;
-
-		p->init();
 
 		if (!skipDataFile) {
 			AwChannelList * outputChannels = &p->pdi.output.channels();
@@ -898,14 +910,15 @@ void AwProcessManager::registerProcessForDisplay(AwProcess *process)
 
 void AwProcessManager::unregisterProcessForDisplay(AwProcess *process)
 {
-	foreach (AwDisplayProcessRegistration *dr, m_registeredDisplayProcesses) {
-		if (dr->process() == process)	{
-			m_registeredDisplayProcesses.removeAll(dr);
-			delete dr;
-			break;
-		}
-	}
-
+	//foreach (AwDisplayProcessRegistration *dr, m_registeredDisplayProcesses) {
+	//	if (dr->process() == process)	{
+	//		m_registeredDisplayProcesses.removeAll(dr);
+	//		delete dr;
+	//		break;
+	//	}
+	//}
+	m_registeredDisplayProcesses.erase(std::remove_if(m_registeredDisplayProcesses.begin(), m_registeredDisplayProcesses.end(),
+		[process](AwDisplayProcessRegistration* d) { return d->process() == process; }));
 	m_activeDisplayProcess.removeOne(process);
 	emit displayProcessTerminated(process);
 }
@@ -933,8 +946,7 @@ void AwProcessManager::startDisplayProcesses(AwChannelList& channels)
 {
 	if (channels.isEmpty())
 		return;
-
-	foreach (AwDisplayProcessRegistration *dr, m_registeredDisplayProcesses) {
+	for (AwDisplayProcessRegistration *dr : m_registeredDisplayProcesses) {
 		dr->cloneInputChannels(channels);
 		if (dr->isProcessCompatible())	{
 			// if the process is already running, wait for it to terminate before launching again.
@@ -947,18 +959,13 @@ void AwProcessManager::startDisplayProcesses(AwChannelList& channels)
 void AwProcessManager::startProcessFromMenu()
 {
 	QAction *act = qobject_cast<QAction *>(sender());
-	
 	if (!act)
 		return;
-
 	// get plugin's name
 	QString pluginName = act->data().toString();
-
 	AwProcessPlugin *p = AwPluginManager::getInstance()->getProcessPluginByName(pluginName);
-
 	if (!p)
 		return;
-
 	// Instantiate process and launch it
 	runProcess(newProcess(p));
 }
@@ -1145,6 +1152,20 @@ void AwProcessManager::errorMessage(const QString& message)
 		AwMessageBox::critical(0, process->plugin()->name, message);
 }
 
+void AwProcessManager::setProcessInstance(AwBaseProcess** p, const QString& pluginName)
+{
+    auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(pluginName);
+	if (plugin) {
+		auto process = plugin->newInstance();
+		process->setPlugin(plugin);
+		*p = process;
+		initProcessIO(process);
+	}
+	else
+		*p = nullptr;
+
+}
+
 void AwProcessManager::processEvent(QSharedPointer<AwEvent> e)
 {
 	QMutexLocker lock(&m_mutex);
@@ -1152,7 +1173,7 @@ void AwProcessManager::processEvent(QSharedPointer<AwEvent> e)
 	int id = e->id();
 	auto data = e->data();
 	switch (id) {
-	case AwEvent::StartProcess:
+	case AwEvent::StartProcessDetached:
 		if (data.contains("process_name")) {
 			QStringList args = data.value("args").toStringList();
 			startProcess(data.value("process_name").toString(), args);

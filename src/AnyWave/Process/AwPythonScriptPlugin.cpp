@@ -73,10 +73,6 @@ void AwPythonScriptProcess::error(QProcess::ProcessError error)
 	}
 }
 
-void AwPythonScriptProcess::init()
-{
-}
-
 void AwPythonScriptProcess::run()
 {
 	QStringList arguments;

@@ -40,7 +40,6 @@ public:
 	void run() override;
 	void runFromCommandLine() override;
 	bool showUi() override;
-	void init() override;
 
 	bool batchParameterCheck(const QVariantMap& args) override;
 	QList<ICAAlgorithm*>& algorithms() { return m_algorithms; }

@@ -29,7 +29,7 @@ NI4DReader::NI4DReader() : AwFileIOPlugin()
   name = QString("4DNI Reader");
   description = QString(tr("Read 4DNI MEG file."));
   manufacturer = "4DNI";
-  version = QString("1.0.1");
+  version = QString("1.0.2");
   fileExtensions << "*,*";
   layouts << "4D248" << "4D248_3D";
   m_flags = FileIO::CanRead;
@@ -918,7 +918,8 @@ int NI4DFileReader::writeTriggerChannel(const QString& channelName, const AwMark
 	int count = 0;
 	for (auto m : list) {
 		// duration is the number of samples written for each values
-		const quint32 sampleDuration = 5;	// 5 samples  
+		// modify to use duration specified if duration > 0
+		const qint64 sampleDuration = std::max((qint64)5, (qint64)std::floor(m->duration() * trigger->samplingRate()));	  
 		qint64 samplepos = (qint64)floor(m->start() * trigger->samplingRate());
 		qint64 posInFile = samplePosition(index, samplepos + 5);
 		if (m->duration() > 0 || posInFile >= m_headerPos - m_dataSize) // skip marker with duration
