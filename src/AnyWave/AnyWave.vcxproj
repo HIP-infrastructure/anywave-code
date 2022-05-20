@@ -135,8 +135,9 @@
     <ClCompile Include="3DViewer\freeview\LayerVolumeTrack.cpp" />
     <ClCompile Include="3DViewer\freeview\LivewireTool.cpp" />
     <ClCompile Include="3DViewer\freeview\LUTDataHolder.cpp" />
-    <ClCompile Include="3DViewer\freeview\main__.cpp" />
+    <ClCompile Include="3DViewer\freeview\MainApplication.cpp" />
     <ClCompile Include="3DViewer\freeview\MainWindow.cpp" />
+    <ClCompile Include="3DViewer\freeview\main__.cpp" />
     <ClCompile Include="3DViewer\freeview\MyCmdLineParser.cpp" />
     <ClCompile Include="3DViewer\freeview\MyUtils.cpp" />
     <ClCompile Include="3DViewer\freeview\MyVTKUtils.cpp" />
@@ -179,16 +180,15 @@
     <ClCompile Include="3DViewer\freeview\SurfaceRegionGroups.cpp" />
     <ClCompile Include="3DViewer\freeview\SurfaceROI.cpp" />
     <ClCompile Include="3DViewer\freeview\SurfaceSpline.cpp" />
-    <ClCompile Include="3DViewer\freeview\TermWidget.cpp" />
     <ClCompile Include="3DViewer\freeview\ThreadBuildContour.cpp" />
     <ClCompile Include="3DViewer\freeview\ThreadIOWorker.cpp" />
     <ClCompile Include="3DViewer\freeview\ToolWindowEdit.cpp" />
     <ClCompile Include="3DViewer\freeview\ToolWindowMeasure.cpp" />
     <ClCompile Include="3DViewer\freeview\ToolWindowROIEdit.cpp" />
+    <ClCompile Include="3DViewer\freeview\Tracer.cpp" />
     <ClCompile Include="3DViewer\freeview\Track.cpp" />
-    <ClCompile Include="3DViewer\freeview\TrackData.cpp" />
-    <ClCompile Include="3DViewer\freeview\TrackGroup.cpp" />
     <ClCompile Include="3DViewer\freeview\UIUpdateHelper.cpp" />
+    <ClCompile Include="3DViewer\freeview\utils\mri.cpp" />
     <ClCompile Include="3DViewer\freeview\VolumeCropper.cpp" />
     <ClCompile Include="3DViewer\freeview\VolumeFilter.cpp" />
     <ClCompile Include="3DViewer\freeview\VolumeFilterBoundary.cpp" />
@@ -216,19 +216,15 @@
     <ClCompile Include="3DViewer\freeview\WindowLayerInfo.cpp" />
     <ClCompile Include="3DViewer\freeview\WindowQuickReference.cpp" />
     <ClCompile Include="3DViewer\freeview\WindowTimeCourse.cpp" />
-    <ClCompile Include="3DViewer\lineprof\LineProf.cpp" />
-    <ClCompile Include="3DViewer\lineprof\PetscSolver.cpp" />
-    <ClCompile Include="3DViewer\lineprof\Preprocessor.cpp" />
-    <ClCompile Include="3DViewer\lineprof\Tracer.cpp" />
     <ClCompile Include="3DViewer\vtkPialReader.cpp" />
     <ClCompile Include="3DViewer\vtkutils\vtkArrowPipeline.cxx" />
     <ClCompile Include="3DViewer\vtkutils\vtkFreesurferLookupTable.cxx" />
     <ClCompile Include="3DViewer\vtkutils\vtkInflatePolyData.cxx" />
+    <ClCompile Include="3DViewer\vtkutils\vtkRGBAColorTransferFunction.cxx" />
     <ClCompile Include="3DViewer\vtkutils\vtkRGBATransferFunction.cxx" />
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
     <ClCompile Include="AwComponents.cpp" />
-    <ClCompile Include="AwExportDial.cpp" />
     <ClCompile Include="AwFileOpenSave.cpp" />
     <ClCompile Include="AwHelpMenu.cpp" />
     <ClCompile Include="AwMapping.cpp" />
@@ -426,6 +422,7 @@
     </QtMoc>
     <QtMoc Include="Batch\AwBatchGUI.h">
     </QtMoc>
+    <QtMoc Include="..\..\include\freesurfer\qtcolorpicker.h" />
     <ClInclude Include="..\..\include\keys\data.h" />
     <ClInclude Include="3DViewer\AwSEEGInteractor.h" />
     <QtMoc Include="3DViewer\AwSEEGViewer.h" />
@@ -544,12 +541,12 @@
     <QtMoc Include="3DViewer\freeview\LayerVolumeTrack.h" />
     <ClInclude Include="3DViewer\freeview\LivewireTool.h" />
     <ClInclude Include="3DViewer\freeview\LUTDataHolder.h" />
-    <QtMoc Include="3DViewer\freeview\MacHelper.h" />
-    <ClInclude Include="3DViewer\freeview\MacRetina.h" />
+    <QtMoc Include="3DViewer\freeview\MainApplication.h" />
     <QtMoc Include="3DViewer\freeview\MainWindow.h" />
     <ClInclude Include="3DViewer\freeview\MyCmdLineParser.h" />
     <ClInclude Include="3DViewer\freeview\MyUtils.h" />
     <ClInclude Include="3DViewer\freeview\MyVTKUtils.h" />
+    <ClInclude Include="3DViewer\freeview\nifti1.h" />
     <QtMoc Include="3DViewer\freeview\PanelAllLayers.h" />
     <QtMoc Include="3DViewer\freeview\PanelConnectomeMatrix.h" />
     <QtMoc Include="3DViewer\freeview\PanelFCD.h" />
@@ -560,9 +557,7 @@
     <QtMoc Include="3DViewer\freeview\PanelSurface.h" />
     <QtMoc Include="3DViewer\freeview\PanelTrack.h" />
     <QtMoc Include="3DViewer\freeview\PanelVolume.h" />
-    <ClInclude Include="3DViewer\freeview\nifti1.h" />
     <ClInclude Include="3DViewer\freeview\ProgressCallback.h" />
-    <QtMoc Include="3DViewer\freeview\qtcolorpicker.h" />
     <QtMoc Include="3DViewer\freeview\Region2D.h" />
     <QtMoc Include="3DViewer\freeview\Region2DLine.h" />
     <QtMoc Include="3DViewer\freeview\Region2DPolyline.h" />
@@ -582,15 +577,12 @@
     <QtMoc Include="3DViewer\freeview\SurfaceRegionGroups.h" />
     <QtMoc Include="3DViewer\freeview\SurfaceROI.h" />
     <QtMoc Include="3DViewer\freeview\SurfaceSpline.h" />
-    <QtMoc Include="3DViewer\freeview\TermWidget.h" />
     <QtMoc Include="3DViewer\freeview\ThreadBuildContour.h" />
     <QtMoc Include="3DViewer\freeview\ThreadIOWorker.h" />
     <QtMoc Include="3DViewer\freeview\ToolWindowEdit.h" />
     <QtMoc Include="3DViewer\freeview\ToolWindowMeasure.h" />
     <QtMoc Include="3DViewer\freeview\ToolWindowROIEdit.h" />
-    <ClInclude Include="3DViewer\freeview\Track.h" />
-    <QtMoc Include="3DViewer\freeview\TrackData.h" />
-    <QtMoc Include="3DViewer\freeview\TrackGroup.h" />
+    <ClInclude Include="3DViewer\freeview\Tracer.h" />
     <ClInclude Include="3DViewer\freeview\TurboColorMap.h" />
     <ClInclude Include="3DViewer\freeview\UIUpdateHelper.h" />
     <QtMoc Include="3DViewer\freeview\VolumeCropper.h" />
@@ -620,14 +612,11 @@
     <QtMoc Include="3DViewer\freeview\WindowLayerInfo.h" />
     <QtMoc Include="3DViewer\freeview\WindowQuickReference.h" />
     <QtMoc Include="3DViewer\freeview\WindowTimeCourse.h" />
-    <ClInclude Include="3DViewer\lineprof\LineProf.h" />
-    <ClInclude Include="3DViewer\lineprof\PetscSolver.h" />
-    <ClInclude Include="3DViewer\lineprof\Preprocessor.h" />
-    <ClInclude Include="3DViewer\lineprof\Tracer.h" />
     <ClInclude Include="3DViewer\vtkPialReader.h" />
     <ClInclude Include="3DViewer\vtkutils\vtkArrowPipeline.h" />
     <ClInclude Include="3DViewer\vtkutils\vtkFreesurferLookupTable.h" />
     <ClInclude Include="3DViewer\vtkutils\vtkInflatePolyData.h" />
+    <ClInclude Include="3DViewer\vtkutils\vtkRGBAColorTransferFunction.h" />
     <ClInclude Include="3DViewer\vtkutils\vtkRGBATransferFunction.h" />
     <ClInclude Include="Batch\AwBatchItem.h" />
     <ClInclude Include="CL\AwCommandLineManager.h" />
@@ -719,8 +708,6 @@
     <QtMoc Include="ICA\AwPanelItem.h">
     </QtMoc>
     <QtMoc Include="Carto\AwMappingClient.h">
-    </QtMoc>
-    <QtMoc Include="AwExportDial.h">
     </QtMoc>
     <QtMoc Include="AnyWave.h">
     </QtMoc>
@@ -892,7 +879,6 @@
     <QtUic Include="3DViewer\freeview\PanelSurface.ui" />
     <QtUic Include="3DViewer\freeview\PanelTrack.ui" />
     <QtUic Include="3DViewer\freeview\PanelVolume.ui" />
-    <QtUic Include="3DViewer\freeview\TermWidget.ui" />
     <QtUic Include="3DViewer\freeview\ToolWindowEdit.ui" />
     <QtUic Include="3DViewer\freeview\ToolWindowMeasure.ui" />
     <QtUic Include="3DViewer\freeview\ToolWindowROIEdit.ui" />
@@ -1223,7 +1209,7 @@
     </QtUic>
     <QtUic Include="Batch\AwBatchGUI.ui">
     </QtUic>
-    <None Include="3DViewer\freeview\MacRetina.mm" />
+    <None Include="3DViewer\freeview\freeview.pro" />
     <None Include="AnyWave.licenseheader" />
     <None Include="cpp.hint" />
     <QtUic Include="Montage\AwECoGDialog.ui">
@@ -1323,13 +1309,6 @@
   <PropertyGroup>
     <_ProjectFileVersion>11.0.61030.0</_ProjectFileVersion>
   </PropertyGroup>
-  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
-  </PropertyGroup>
-  <PropertyGroup Label="Vcpkg">
-    <VcpkgEnableManifest>false</VcpkgEnableManifest>
-    <VcpkgEnabled>true</VcpkgEnabled>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PreprocessorDefinitions>UNICODE;WIN32;WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1369,7 +1348,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;HAVE_ZLIB;_MAX_FS_THREADS=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;_MAX_FS_THREADS=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -1377,16 +1356,16 @@
       <OpenMPSupport>false</OpenMPSupport>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;$(SolutionDir)\include\freesurfer;.\3DViewer\vtkUtils;.\3DViewer\packages\nifti;$(EXTRA_LIBS)/itk/include/ITK-4.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;$(EXTRA_LIBS)\itk\include\ITK-4.13;$(SolutionDir)\include\freesurfer;.\3DViewer\vtkutils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\debug\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\itk\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\debug\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLibd.lib;AwMappingLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwWidgetsLibd.lib;AwMathLibd.lib;AwHDF5libd.lib;AwLayoutLibd.lib;AwFilteringLibd.lib;AwMatlablibd.lib;AwMontageLibd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;qwtd.lib;qcustomplotd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLibd.lib;AwMappingLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwWidgetsLibd.lib;AwMathLibd.lib;AwHDF5libd.lib;AwLayoutLibd.lib;AwFilteringLibd.lib;AwMatlablibd.lib;AwMontageLibd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;vtkImagingCore-8.2.lib;vtkImagingGeneral-8.2.lib;vtkImagingMath-8.2.lib;vtkCommonTransforms-8.2.lib;vtkCommonMath-8.2.lib;minc2.lib;qwtd.lib;qcustomplotd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
@@ -1446,8 +1425,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;HAVE_ZLIB;_MAX_FS_THREADS=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;$(SolutionDir)\include\freesurfer;.\3DViewer\vtkUtils;$(EXTRA_LIBS)/itk/include/ITK-4.13;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;_MAX_FS_THREADS=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -1460,7 +1439,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
-      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;$(EXTRA_LIBS)\itk\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLib.lib;AwProcessLib.lib;AwReadWriteLib.lib;AwUtilitiesLib.lib;AwHDF5lib.lib;AwWidgetsLib.lib;AwMathLib.lib;AwLayoutLib.lib;AwFilteringLib.lib;AwMontageLib.lib;hdf5.lib;hdf5_hl.lib;qwt.lib;AwMappingLib.lib;AwMatlablib.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;qcustomplot.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <PerUserRedirection>true</PerUserRedirection>

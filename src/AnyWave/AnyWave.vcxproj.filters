@@ -114,16 +114,13 @@
       <UniqueIdentifier>{26e02caa-2dd8-4632-b145-d6b821165ec5}</UniqueIdentifier>
     </Filter>
     <Filter Include="3DViewer\freeview">
-      <UniqueIdentifier>{9a10c37d-3ed7-4f56-8b22-46dc841bce4e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="3DViewer\packages">
-      <UniqueIdentifier>{f2088e26-fc1f-4af8-85c0-cee9faf82bf0}</UniqueIdentifier>
+      <UniqueIdentifier>{27151d0e-e61f-4846-a32b-15e877f11160}</UniqueIdentifier>
     </Filter>
     <Filter Include="3DViewer\vtkUtils">
-      <UniqueIdentifier>{acddc459-86a9-4084-b33a-c2103638bc32}</UniqueIdentifier>
+      <UniqueIdentifier>{66e9d630-c731-40fd-88e9-cf4eddba1a01}</UniqueIdentifier>
     </Filter>
-    <Filter Include="3DViewer\lineprof">
-      <UniqueIdentifier>{2660bb26-aca4-4940-85a5-d2e52b4baf5e}</UniqueIdentifier>
+    <Filter Include="3DViewer\freeview\utils">
+      <UniqueIdentifier>{10b103a6-bb88-4f68-98eb-55b0b09b73f0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -293,9 +290,6 @@
       <Filter>Widgets</Filter>
     </ClCompile>
     <ClCompile Include="AnyWave.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AwExportDial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -633,10 +627,6 @@
     </ClCompile>
     <ClCompile Include="ICA\AwICAMappingItem.cpp">
       <Filter>ICA</Filter>
-    </ClCompile>
-<<<<<<< HEAD
-    <ClCompile Include="3DViewer\Aw3DViewer.cpp">
-      <Filter>3DViewer</Filter>
     </ClCompile>
     <ClCompile Include="3DViewer\freeview\Annotation2D.cpp">
       <Filter>3DViewer\freeview</Filter>
@@ -980,6 +970,9 @@
     <ClCompile Include="3DViewer\freeview\main__.cpp">
       <Filter>3DViewer\freeview</Filter>
     </ClCompile>
+    <ClCompile Include="3DViewer\freeview\MainApplication.cpp">
+      <Filter>3DViewer\freeview</Filter>
+    </ClCompile>
     <ClCompile Include="3DViewer\freeview\MainWindow.cpp">
       <Filter>3DViewer\freeview</Filter>
     </ClCompile>
@@ -1079,9 +1072,6 @@
     <ClCompile Include="3DViewer\freeview\SurfaceSpline.cpp">
       <Filter>3DViewer\freeview</Filter>
     </ClCompile>
-    <ClCompile Include="3DViewer\freeview\TermWidget.cpp">
-      <Filter>3DViewer\freeview</Filter>
-    </ClCompile>
     <ClCompile Include="3DViewer\freeview\ThreadBuildContour.cpp">
       <Filter>3DViewer\freeview</Filter>
     </ClCompile>
@@ -1098,12 +1088,6 @@
       <Filter>3DViewer\freeview</Filter>
     </ClCompile>
     <ClCompile Include="3DViewer\freeview\Track.cpp">
-      <Filter>3DViewer\freeview</Filter>
-    </ClCompile>
-    <ClCompile Include="3DViewer\freeview\TrackData.cpp">
-      <Filter>3DViewer\freeview</Filter>
-    </ClCompile>
-    <ClCompile Include="3DViewer\freeview\TrackGroup.cpp">
       <Filter>3DViewer\freeview</Filter>
     </ClCompile>
     <ClCompile Include="3DViewer\freeview\UIUpdateHelper.cpp">
@@ -1199,23 +1183,18 @@
     <ClCompile Include="3DViewer\vtkutils\vtkInflatePolyData.cxx">
       <Filter>3DViewer\vtkUtils</Filter>
     </ClCompile>
+    <ClCompile Include="3DViewer\vtkutils\vtkRGBAColorTransferFunction.cxx">
+      <Filter>3DViewer\vtkUtils</Filter>
+    </ClCompile>
     <ClCompile Include="3DViewer\vtkutils\vtkRGBATransferFunction.cxx">
       <Filter>3DViewer\vtkUtils</Filter>
     </ClCompile>
-    <ClCompile Include="3DViewer\lineprof\LineProf.cpp">
-      <Filter>3DViewer\lineprof</Filter>
+    <ClCompile Include="3DViewer\freeview\Tracer.cpp">
+      <Filter>3DViewer\freeview</Filter>
     </ClCompile>
-    <ClCompile Include="3DViewer\lineprof\PetscSolver.cpp">
-      <Filter>3DViewer\lineprof</Filter>
+    <ClCompile Include="3DViewer\freeview\utils\mri.cpp">
+      <Filter>3DViewer\freeview\utils</Filter>
     </ClCompile>
-    <ClCompile Include="3DViewer\lineprof\Preprocessor.cpp">
-      <Filter>3DViewer\lineprof</Filter>
-    </ClCompile>
-    <ClCompile Include="3DViewer\lineprof\Tracer.cpp">
-      <Filter>3DViewer\lineprof</Filter>
-    </ClCompile>
-=======
->>>>>>> unstable-dev
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1455,9 +1434,6 @@
     <QtUic Include="AnyWave.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="AwExportDial.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Carto\AwMappingClient.h">
       <Filter>Carto</Filter>
     </QtMoc>
@@ -1700,10 +1676,6 @@
     </QtMoc>
     <QtMoc Include="IO\export\AwExporter.h">
       <Filter>IO\export</Filter>
-    </QtMoc>
-<<<<<<< HEAD
-    <QtMoc Include="3DViewer\Aw3DViewer.h">
-      <Filter>3DViewer</Filter>
     </QtMoc>
     <QtMoc Include="3DViewer\freeview\Annotation2D.h">
       <Filter>3DViewer\freeview</Filter>
@@ -1996,7 +1968,7 @@
     <QtMoc Include="3DViewer\freeview\LayerVolumeTrack.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
-    <QtMoc Include="3DViewer\freeview\MacHelper.h">
+    <QtMoc Include="3DViewer\freeview\MainApplication.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
     <QtMoc Include="3DViewer\freeview\MainWindow.h">
@@ -2033,9 +2005,6 @@
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
     <QtMoc Include="3DViewer\freeview\qtcolorpicker.cpp">
-      <Filter>3DViewer\freeview</Filter>
-    </QtMoc>
-    <QtMoc Include="3DViewer\freeview\qtcolorpicker.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
     <QtMoc Include="3DViewer\freeview\Region2D.h">
@@ -2092,9 +2061,6 @@
     <QtMoc Include="3DViewer\freeview\SurfaceSpline.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
-    <QtMoc Include="3DViewer\freeview\TermWidget.h">
-      <Filter>3DViewer\freeview</Filter>
-    </QtMoc>
     <QtMoc Include="3DViewer\freeview\ThreadBuildContour.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
@@ -2108,12 +2074,6 @@
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
     <QtMoc Include="3DViewer\freeview\ToolWindowROIEdit.h">
-      <Filter>3DViewer\freeview</Filter>
-    </QtMoc>
-    <QtMoc Include="3DViewer\freeview\TrackData.h">
-      <Filter>3DViewer\freeview</Filter>
-    </QtMoc>
-    <QtMoc Include="3DViewer\freeview\TrackGroup.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
     <QtMoc Include="3DViewer\freeview\VolumeCropper.h">
@@ -2152,8 +2112,9 @@
     <QtMoc Include="3DViewer\freeview\WindowTimeCourse.h">
       <Filter>3DViewer\freeview</Filter>
     </QtMoc>
-=======
->>>>>>> unstable-dev
+    <QtMoc Include="..\..\include\freesurfer\qtcolorpicker.h">
+      <Filter>3DViewer\freeview</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Prefs\AwPreferences.h">
@@ -2276,9 +2237,6 @@
     <ClInclude Include="3DViewer\freeview\LUTDataHolder.h">
       <Filter>3DViewer\freeview</Filter>
     </ClInclude>
-    <ClInclude Include="3DViewer\freeview\MacRetina.h">
-      <Filter>3DViewer\freeview</Filter>
-    </ClInclude>
     <ClInclude Include="3DViewer\freeview\MyCmdLineParser.h">
       <Filter>3DViewer\freeview</Filter>
     </ClInclude>
@@ -2288,13 +2246,13 @@
     <ClInclude Include="3DViewer\freeview\MyVTKUtils.h">
       <Filter>3DViewer\freeview</Filter>
     </ClInclude>
+    <ClInclude Include="3DViewer\freeview\nifti1.h">
+      <Filter>3DViewer\freeview</Filter>
+    </ClInclude>
     <ClInclude Include="3DViewer\freeview\ProgressCallback.h">
       <Filter>3DViewer\freeview</Filter>
     </ClInclude>
     <ClInclude Include="3DViewer\freeview\StockColorMap.h">
-      <Filter>3DViewer\freeview</Filter>
-    </ClInclude>
-    <ClInclude Include="3DViewer\freeview\Track.h">
       <Filter>3DViewer\freeview</Filter>
     </ClInclude>
     <ClInclude Include="3DViewer\freeview\TurboColorMap.h">
@@ -2348,9 +2306,6 @@
     <ClInclude Include="3DViewer\freeview\vtkSimpleLabelEdgeFilter3D.h">
       <Filter>3DViewer\freeview</Filter>
     </ClInclude>
-    <ClInclude Include="3DViewer\freeview\nifti1.h">
-      <Filter>3DViewer\freeview</Filter>
-    </ClInclude>
     <ClInclude Include="3DViewer\vtkutils\vtkArrowPipeline.h">
       <Filter>3DViewer\vtkUtils</Filter>
     </ClInclude>
@@ -2360,20 +2315,14 @@
     <ClInclude Include="3DViewer\vtkutils\vtkInflatePolyData.h">
       <Filter>3DViewer\vtkUtils</Filter>
     </ClInclude>
+    <ClInclude Include="3DViewer\vtkutils\vtkRGBAColorTransferFunction.h">
+      <Filter>3DViewer\vtkUtils</Filter>
+    </ClInclude>
     <ClInclude Include="3DViewer\vtkutils\vtkRGBATransferFunction.h">
       <Filter>3DViewer\vtkUtils</Filter>
     </ClInclude>
-    <ClInclude Include="3DViewer\lineprof\LineProf.h">
-      <Filter>3DViewer\lineprof</Filter>
-    </ClInclude>
-    <ClInclude Include="3DViewer\lineprof\PetscSolver.h">
-      <Filter>3DViewer\lineprof</Filter>
-    </ClInclude>
-    <ClInclude Include="3DViewer\lineprof\Preprocessor.h">
-      <Filter>3DViewer\lineprof</Filter>
-    </ClInclude>
-    <ClInclude Include="3DViewer\lineprof\Tracer.h">
-      <Filter>3DViewer\lineprof</Filter>
+    <ClInclude Include="3DViewer\freeview\Tracer.h">
+      <Filter>3DViewer\freeview</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2484,7 +2433,7 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="AnyWave.licenseheader" />
-    <None Include="3DViewer\freeview\MacRetina.mm">
+    <None Include="3DViewer\freeview\freeview.pro">
       <Filter>3DViewer\freeview</Filter>
     </None>
   </ItemGroup>
@@ -2661,9 +2610,6 @@
       <Filter>3DViewer\freeview</Filter>
     </QtUic>
     <QtUic Include="3DViewer\freeview\PanelVolume.ui">
-      <Filter>3DViewer\freeview</Filter>
-    </QtUic>
-    <QtUic Include="3DViewer\freeview\TermWidget.ui">
       <Filter>3DViewer\freeview</Filter>
     </QtUic>
     <QtUic Include="3DViewer\freeview\ToolWindowEdit.ui">
