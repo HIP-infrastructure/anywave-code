@@ -33,5 +33,6 @@ namespace AwUtilities // put utility functions inside a namespace
 		QString AW_UTILITIES_EXPORT fromJsonFileToString(const QString& file);
 		bool AW_UTILITIES_EXPORT saveToJsonFile(const QString& jsonString, const QString& file);
 		bool AW_UTILITIES_EXPORT saveToJsonFile(const QJsonDocument& jsonDocument, const QString& file);
+		bool AW_UTILITIES_EXPORT saveToJsonFile(const QVariantMap& jsonDocument, const QString& file);
 	}
 }

@@ -30,13 +30,18 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonOptions">
-       <property name="maximumSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
+      <widget class="QPushButton" name="buttonRefresh">
+       <property name="text">
+        <string/>
        </property>
+       <property name="icon">
+        <iconset resource="../../../../resources/AnyWave.qrc">
+         <normaloff>:/images/refresh.png</normaloff>:/images/refresh.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonOptions">
        <property name="baseSize">
         <size>
          <width>16</width>

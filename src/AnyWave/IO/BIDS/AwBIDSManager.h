@@ -81,13 +81,11 @@ public:
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems items() { return m_items; }
-
 	AwBIDSItem* getParentSubject(AwBIDSItem* item);
 	bool isSubject(AwBIDSItem *item);
 	bool isSourceDataSubject(AwBIDSItem* item);
 	// 
 	int selectItemFromFilePath(const QString& path);
-
 	// command line methods
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
@@ -96,11 +94,8 @@ public:
 	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
 	static void initCommandLineOperation(const QString& filePath);
 	static void finishCommandLineOperation();
-
-
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
-	
 	// TSV files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
@@ -147,6 +142,7 @@ public:
 	// dat file derivatives dir and file name
 	QString currentDerivativesDir();
 	QString currentFileName();
+	QStringList participantColumns() { return m_settings.value(bids::participant_cols).toStringList(); }
 	void parseSubject(AwBIDSItem* item);
 	void recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
 public slots:

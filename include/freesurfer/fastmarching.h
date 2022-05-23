@@ -80,23 +80,24 @@ template <int sign = +1>
 class FastMarching
 {
 
-  // type definition for the min-heap
-class HeapCompare : std::binary_function<stCoord, stCoord, bool>
-  {
-  protected:
-    MRI *mri;
-  public:
-    HeapCompare(MRI *_mri) : mri(_mri)
-    {}
-    
-    bool operator() (const stCoord &a, const stCoord &b) const
-    {
-      return (sign * 
-              MRIFvox(mri,a.x,a.y,a.z) > sign * 
-              MRIFvox(mri,b.x,b.y,b.z));
-    }
-    
-  };
+    //  // type definition for the min-heap
+    //class HeapCompare  : std::binary_function<stCoord, stCoord, bool>
+    //  {
+    //  protected:
+    //    MRI *mri;
+    //  public:
+    //    HeapCompare(MRI *_mri) : mri(_mri)
+    //    {}
+    //    
+    //    bool operator() (const stCoord &a, const stCoord &b) const
+    //    {
+    //      return (sign * 
+    //              MRIFvox(mri,a.x,a.y,a.z) > sign * 
+    //              MRIFvox(mri,b.x,b.y,b.z));
+    //    }
+    //    
+    //  };
+    auto HeapCompare = [&](const stCoord& a, const stCoord& b)->bool {  return (sign * MRIFvox(mri, a.x, a.y, a.z) > sign * MRIFvox(mri, b.x, b.y, b.z)); };
 
   typedef std::priority_queue<stCoord,std::vector<stCoord>,HeapCompare> CoordHeap;
 

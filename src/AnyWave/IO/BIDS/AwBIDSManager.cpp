@@ -201,7 +201,6 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// check if root dir is the same as current one. If so, do nothing.
 	if (path == m_rootDir)
 		return;
-
 	if (path.isEmpty())
 		return;
 	// check that the folder exists
@@ -220,21 +219,17 @@ void AwBIDSManager::setRootDir(const QString& path)
 	wait.setText("Parsing BIDS Structure...");
 	connect(this, &AwBIDSManager::finished, &wait, &QDialog::accept);
 	wait.run(std::bind(&AwBIDSManager::parse, this));  // bind a void method without parameters. The method must emit finished signals when finished.
-
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv)) 
 		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
-
 	// instantiate UI if needed
 	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
-
 	m_ui->init();
 	// there is an issue with sourcedata subject when anywave creates derivatives/anywave/username/sourcedata : it makes BM Crash
 	// so for now, don't add sourcedata subjects to the tree
 	   ////  m_ui->setSourceDataSubjects(m_sourcedataItems);   // uncomment to add sourcedata subjects
 	m_ui->setSubjects(m_items);
-
 }
 
 void AwBIDSManager::closeBIDS()

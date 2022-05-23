@@ -42,6 +42,7 @@ public:
 	QList<AwBIDSItem *> getDataFileItems();
 	inline AwBIDSItem* bidsParent() { return m_parent; }
 	QString subjectName();
+	QString fullSubjectName() { return QString("sub-%1").arg(subjectName()); }
 
 protected:
 	AwBIDSItem *m_parent; // nullptr if the item IS the subject.

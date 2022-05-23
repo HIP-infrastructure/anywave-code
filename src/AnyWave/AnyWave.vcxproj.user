@@ -2,7 +2,8 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>--run registerinject --eeg_file "E:\Data\sing4\Sing_04_0004.vhdr" --meg_file "E:\Data\sing4\4\c,rfDC" --output_dir E:\Data\sing4\output</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -11,9 +12,9 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtLastBackgroundBuild>2022-05-18T09:04:22.3367404Z</QtLastBackgroundBuild>
+    <QtLastBackgroundBuild>2022-05-20T14:05:02.0911474Z</QtLastBackgroundBuild>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtLastBackgroundBuild>2022-05-18T09:04:13.1998313Z</QtLastBackgroundBuild>
+    <QtLastBackgroundBuild>2022-05-20T14:04:51.6451455Z</QtLastBackgroundBuild>
   </PropertyGroup>
 </Project>

@@ -62,8 +62,7 @@ protected:
 	// keep a copy of models for the TreeView
 	QStandardItemModel* m_model, *m_propertiesModel;
 	AwBIDSItems m_items;	// copy of items list from bids manager
-	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
-//	void initModel(const AwBIDSItems& subjects);
+	QStringList m_shownExtraColumns; // contain the label of the current extra columns set in the model.
 	void recursiveFill(AwBIDSItem *item);
 	void insertChildren(AwBIDSItem* parent);
 	void updatePropertiesTable(QStandardItem*item);
