@@ -28,6 +28,8 @@
 #include <QSortFilterProxyModel>
 #include <AwChannel.h>
 
+constexpr auto noref = "No Ref.";
+
 using namespace Ui;
 
 // sort function for bipolar montage. 
@@ -40,13 +42,10 @@ class AwMontageDial : public QDialog
 public:
 	AwMontageDial(QWidget *parent = 0);
 	~AwMontageDial();
-
-
 	void initMontageList();
 	/** Sauvegarde un montage dans le chemin spécifié. **/
 	bool saveMontage(const QString& path);
 	AwChannelList channels() { return static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->currentMontage(); }
-//	AwChannelList asRecordedChannels() { return m_asRecorded.values(); }
 	AwChannelList& asRecordedChannels() { return m_asRecordedChannels; }
 	inline QStringList badLabels() { return m_badChannelsLabels; }
 protected:
@@ -104,11 +103,9 @@ private slots:
 	
 private:
 	Ui::MontageDialClass m_ui;
-//	QHash<QString, AwChannel *> m_asRecorded;	
 	QHash<QString, AwChannel *> m_hashAsRecorded;
 	AwChannelList m_asRecordedChannels;
 	///< copy of the list from Montage Manager.
-
 	QStringList m_badChannelsLabels;					/// store the labels of bad channels
 	QHash<int, QStringList> m_labelsByTypes;
 

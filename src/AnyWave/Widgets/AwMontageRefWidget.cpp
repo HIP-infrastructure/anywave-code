@@ -38,7 +38,7 @@ AwMontageRefWidget::AwMontageRefWidget(int channelType, const AwChannelList& asR
 	
 	int row = 0, col = 0;
 	QStringList channelNames;
-	channelNames << QString(tr("No Ref."));
+	channelNames << QString(noref);
 
 	foreach (AwChannel *chan, asRecorded)
 	{

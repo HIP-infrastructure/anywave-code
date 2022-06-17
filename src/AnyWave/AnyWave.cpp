@@ -77,9 +77,9 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	
 	m_display = nullptr;
 	m_SEEGViewer = nullptr;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
-#endif
+//#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+//	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
+//#endif
 	// Accept file drops
 	setAcceptDrops(true);
 	AwSettings* aws = AwSettings::getInstance();
@@ -149,6 +149,8 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	for (QAction* a : m_actions)
 		a->setEnabled(false);
 
+	setDockOptions(QMainWindow::AnimatedDocks);
+
 	AwMarkerInspector* markerInspectorWidget = nullptr;
 	auto dock = new QDockWidget(tr("Markers"), this);
 	dock->setObjectName("Markers");
@@ -169,6 +171,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dock->setFloating(true);
 	markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
+	markerInspectorWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
 	dock->setWidget(markerInspectorWidget);
 
 	dock = new QDockWidget(tr("Video"), this);
@@ -202,7 +205,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 
 	m_display = new AwDisplay(this);
 	m_display->setParent(this);
-	m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
+	m_display->setAddMarkerDock(m_dockWidgets.value("add_markers"));
 	connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::handleVideoCursor);
 	connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setVideoPosition);
 	connect(m_player, &AwVideoPlayer::changeSyncSettings, this, &AnyWave::editVideoSyncSettings);
@@ -431,7 +434,7 @@ void AnyWave::initToolBarsAndMenu()
 	addToolBar(Qt::TopToolBarArea, m_cursorToolBar->toolBar());
 	m_cursorToolBar->setEnabled(false);
 	connect(m_cursorToolBar, SIGNAL(cursorModeChanged(bool)), m_display, SLOT(cursorModeChanged(bool)));
-	connect(m_cursorToolBar, &AwCursorMarkerToolBar::markerModeChanged, m_dockWidgets["add_markers"], &QDockWidget::setVisible);
+	connect(m_cursorToolBar, &AwCursorMarkerToolBar::markerModeChanged, m_dockWidgets.value("add_markers"), &QDockWidget::setVisible);
 	connect(m_cursorToolBar, SIGNAL(QTSModeChanged(bool)), m_display, SLOT(setQTSMode(bool)));
 	connect(m_display, SIGNAL(QTSModeEnded()), m_cursorToolBar, SLOT(stopQTSMode()));
 	connect(m_display, SIGNAL(resetMarkerMode()), m_cursorToolBar, SLOT(reset()));

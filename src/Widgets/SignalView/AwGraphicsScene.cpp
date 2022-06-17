@@ -1552,15 +1552,12 @@ void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
 					m_currentMarkerItem->marker()->setStart(m_positionClicked);
 					m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
 					m_isTimeSelectionStarted = false;
-					//if (m_markingSettings->isTargettingChannels)
-					//	m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
 				}
 				delete menu_predefined;
 			}
 			else { // no context menu => classic insertion using current marker item
 				emit markerInserted(m_currentMarkerItem->marker());
 				// keep marker pointer to undo the operation if necessary
-			//	m_lastAddedMarker = m_currentMarkerItem->marker();
 				m_lastAddedMarkers << m_currentMarkerItem->marker();
 				// instantiate a new marker
 				m_currentMarkerItem->setMarker(new AwMarker());

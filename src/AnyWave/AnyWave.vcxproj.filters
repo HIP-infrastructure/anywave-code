@@ -619,6 +619,9 @@
     <ClCompile Include="ICA\AwICAMappingItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwRefreshDialog.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1101,6 +1104,9 @@
     <QtMoc Include="IO\export\AwExporter.h">
       <Filter>IO\export</Filter>
     </QtMoc>
+    <QtMoc Include="IO\BIDS\AwRefreshDialog.h">
+      <Filter>IO\BIDS</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Prefs\AwPreferences.h">
@@ -1303,6 +1309,9 @@
     </QtUic>
     <QtUic Include="Prefs\AwAddVenvDial.ui">
       <Filter>Prefs</Filter>
+    </QtUic>
+    <QtUic Include="IO\BIDS\AwRefreshDialog.ui">
+      <Filter>IO\BIDS</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

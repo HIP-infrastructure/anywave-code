@@ -23,10 +23,12 @@
 #include <AwChannel.h>
 #include <QMutex>
 #include <thread>
+
 class AwMontageManager;
 class AwMarkerManager;
 class AwDataServer;
 class AwDataClient;
+
 
 class AwDataManager : public QObject
 {
@@ -82,6 +84,7 @@ public:
 
 	void setNewRootDirForSideFiles();
 	int openFileFromBIDS(const QString&);
+	int openFileCommandLine(const QString&);
 	int openFileMatPy(const QString&);
 
 signals:
@@ -100,6 +103,7 @@ public slots:
 	int openFile(const QString& filePath = QString(), bool commandLineMode = false);
 protected:
 	AwDataManager();
+	int openFileBase(const QString&);  // base file opening (testing for a compatible plugin and init some settings in settings. that's all.
 
 	AwFileIO* m_reader;
 	AwFilterSettings m_filterSettings;

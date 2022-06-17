@@ -194,7 +194,7 @@ int ICA::initParameters()
 		return -1;
 	}
 
-	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[keys::data_path].toString()).arg(args["modality"].toString()));
+	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings.value(keys::data_path).toString()).arg(args["modality"].toString()));
 
 	m_lpf = args.value(keys::lp).toFloat();
 	m_hpf = args.value(keys::hp).toFloat();
@@ -276,16 +276,16 @@ int ICA::initParameters()
 		m_fileName = args.value(keys::output_file).toString();
 	else {
 		// default file name is the basename of the data file.
-		QFileInfo fi(pdi.input.settings[keys::data_path].toString());
+		QFileInfo fi(pdi.input.settings.value(keys::data_path).toString());
 		m_fileName = fi.fileName();
 	}
 
 	QString dir;
-	// should always contain output_dir execpt if launched from command line with no output_dir option
+// started in v2.4.12  => anywave always set output_dir (if no output_dir is set from the command line, then output_dir is set to data_dir
 	if (args.contains(keys::output_dir))
 		dir = args.value(keys::output_dir).toString();
 	else
-		dir = pdi.input.settings[keys::data_dir].toString();
+		dir = pdi.input.settings.value(keys::data_dir).toString();
 
 	// output_prefix will override this
 	if (args.contains(keys::output_prefix))

@@ -40,7 +40,7 @@
 #include <AwEvent.h>
 #include <AwEventManager.h>
 
-AwProcessManager *AwProcessManager::m_instance = NULL;
+AwProcessManager *AwProcessManager::m_instance = nullptr;
 AwProcessManager *AwProcessManager::instance()
 {
 	if (!m_instance)
@@ -742,6 +742,8 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 	if (!DontCheckIO) {
 		if (initProcessIO(process)) {
 			if (!skipDataFile) {
+				// always set output_dir to data_dir by default
+				process->pdi.input.settings[keys::output_dir] = dm->dataDir();
 				process->pdi.input.settings[keys::bad_labels] = AwMontageManager::instance()->badLabels();
 				// verify that plugin which accepts time selection get at least the whole selection as input
 				if (process->plugin()->flags() & Aw::ProcessFlags::PluginAcceptsTimeSelections)
@@ -1173,7 +1175,7 @@ void AwProcessManager::processEvent(QSharedPointer<AwEvent> e)
 	int id = e->id();
 	auto data = e->data();
 	switch (id) {
-	case AwEvent::StartProcessDetached:
+	case AwEvent::StartProcess:
 		if (data.contains("process_name")) {
 			QStringList args = data.value("args").toStringList();
 			startProcess(data.value("process_name").toString(), args);

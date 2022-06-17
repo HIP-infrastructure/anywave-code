@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AmpScalesItem\AwAmplitudeScalesItem.cpp" />
     <ClCompile Include="Aw2DGrid.cpp" />
     <ClCompile Include="AwAddPredefinedMarker.cpp" />
     <ClCompile Include="AwAddTargetChannels.cpp" />
@@ -181,7 +180,6 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\SignalView\AwNavigationBar.h">
     </QtMoc>
-    <ClInclude Include="AmpScalesItem\AwAmplitudeScalesItem.h" />
     <ClInclude Include="Aw2DGrid.h" />
     <QtMoc Include="AwTimeScaleCombo.h">
     </QtMoc>

@@ -20,10 +20,9 @@
 #include <QFileDialog>
 #include <widget/AwMessageBox.h>
 #include "AwBIDSGUIOptionsDialog.h"
+#include "AwRefreshDialog.h"
 #include <utils/bids.h>
 #include <AwException.h>
-#include <QJsonObject>
-#include <QJsonDocument>
 #include <QMenu>
 #include "Process/AwProcessManager.h"
 #include "Plugin/AwPluginManager.h"
@@ -56,6 +55,7 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_ui.tableView->setModel(m_propertiesModel);
 	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openBIDSOptions);
+	connect(m_ui.buttonRefresh, &QPushButton::clicked, this, &AwBIDSGUI::refreshSubjects);
 
 	createContextMenus();
 	auto header = m_ui.tableView->horizontalHeader();
@@ -214,7 +214,6 @@ void AwBIDSGUI::addToProcessing()
 	AwBatchManager::instance()->ui()->addNewItem(batchItem);
 }
 
-
 void AwBIDSGUI::openBIDSOptions()
 {
 	AwBIDSGUIOptionsDialog dlg(m_shownExtraColumns);
@@ -251,6 +250,54 @@ void AwBIDSGUI::openSubject(AwBIDSItem* item)
 		showItem(item);
 	}
 }
+
+
+void AwBIDSGUI::refreshSubjects()
+{
+	// get current open subjects (parsed)
+	AwBIDSItems subjects;
+	for (auto item : m_bids->items()) {
+		if (item->data(AwBIDSItem::ParsedItem).toBool())
+			subjects << item;
+	}
+	if (subjects.isEmpty())
+		return;
+
+	if (subjects.size() > 1) {
+		AwRefreshDialog dlg(subjects);
+		if (dlg.exec() == QDialog::Accepted)
+			subjects = dlg.subjects;
+		else
+			return;
+	}
+	// batch processing of all currently open subjects using a lambda
+	AwWaitWidget wait("Parsing subjects");
+	auto parsingSubjects = [this, &wait](const AwBIDSItems items) {
+		disconnect(this, SIGNAL(finished()));
+		wait.initProgress(0, items.size());
+		connect(this, &AwBIDSGUI::progressChanged, &wait, &AwWaitWidget::setCurrentProgress);
+		int index = 1;
+		for (auto item : items) {
+			removeChildren(item);
+			this->m_bids->parseSubject(item);
+			recursiveFill(item);
+			item->setData(true, AwBIDSItem::ParsedItem);
+			emit progressChanged(index++);
+		}
+		connect(this, &AwBIDSGUI::finished, &wait, &QDialog::accept);
+		emit finished();
+	};
+	wait.run(parsingSubjects, subjects);
+}
+
+void AwBIDSGUI::removeChildren(AwBIDSItem* parent)
+{
+	if (parent->hasChildren()) {
+		parent->removeRows(0, parent->rowCount());
+		parent->clearChildren();
+	}
+}
+
 
 void AwBIDSGUI::openFileItem(AwBIDSItem* item) 
 {
@@ -458,6 +505,10 @@ void AwBIDSGUI::setSubjects(const AwBIDSItems& items)
 		recursiveFill(item);
 	}
 	m_items = items;
+	// get subject paths in a list
+	QStringList paths;
+	for (auto item : m_items)
+		paths << item->data(AwBIDSItem::PathRole).toString();
 }
 
 void AwBIDSGUI::setSourceDataSubjects(const AwBIDSItems& items)
@@ -472,6 +523,7 @@ void AwBIDSGUI::setSourceDataSubjects(const AwBIDSItems& items)
 		recursiveFill(item);
 	}
 }
+
 
 void AwBIDSGUI::insertChildren(AwBIDSItem* parent)
 {

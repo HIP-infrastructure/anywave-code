@@ -86,9 +86,9 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			}
 		}
 		plugin = pm->getProcessPluginByName(pluginName);
-		if (plugin == Q_NULLPTR) {
+		if (plugin == nullptr) {
 			throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
-			return Q_NULLPTR;
+			return nullptr;
 		}
 	}
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
@@ -107,6 +107,10 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		QDir dir;
 		dir.mkpath(args.value(keys::output_dir).toString());
 	}
+	else {
+		// no  output_dir => make output_dir to be the data_dir
+		args[keys::output_dir] = args.value(keys::data_dir);
+	}
 	// instantiate process
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
@@ -118,23 +122,15 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 {
 	auto dm = AwDataManager::instance();
+	
 	auto &args = process->pdi.input.settings;
 	QString inputFile = args.value(keys::input_file).toString();
 
 	AwCommandLogger logger(QString("Command Line"));
 
 	if (!inputFile.isEmpty()) {
-		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
-		AwBIDSManager::initCommandLineOperation(inputFile);
-
-		auto status = dm->openFile(inputFile, true);
-		if (status == AwDataManager::NoPluginFound) {
-			throw AwException(QString("no reader can open %1").arg(inputFile));
-			return -1;
-		}
-
-		if (status != AwDataManager::NoError) {
-			throw AwException(QString("Could not open %1").arg(inputFile));
+		if (dm->openFileCommandLine(inputFile) != 0) {
+			throw AwException(dm->errorString());
 			return -1;
 		}
 		process->pdi.input.setReader(dm->reader());
@@ -151,12 +147,12 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 					logger.sendLog("Found default mrk file, using it instead.");
 					process->pdi.input.settings[keys::marker_file] = defaultMrkFile;
 					process->pdi.input.setNewMarkers(AwMarker::load(defaultMrkFile));
-				}
-				else {
-					logger.sendLog("warning: no default mrk file found. Setting reader's markers as input if any...");
-					process->pdi.input.settings.remove(keys::marker_file);
-					process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
-				}
+				} // DO NOT SET EMBEDDED MARKERS AS INPUT ANYMORE!!!
+				//else {
+				//	logger.sendLog("warning: no default mrk file found. Setting reader's markers as input if any...");
+				//	process->pdi.input.settings.remove(keys::marker_file);
+				//	process->pdi.input.setNewMarkers(m_dataManager->reader()->infos.blocks().first()->markers(), true);
+				//}
 			}
 		}
 
@@ -241,7 +237,8 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			logger.sendLog(QString("output_dir is:").arg(process->pdi.input.settings.value(keys::data_dir).toString()));
 		}
 		// INIT PDI   CHANNELS AND MARKERS BASED ON FLAGS
-		if (AwProcessManager::instance()->buildProcessPDI(process) != 0) {
+		auto pm = AwProcessManager::instance();
+		if (pm->buildProcessPDI(process) != 0) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile));
 			return -1;
 		}
@@ -253,7 +250,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		dm->dataServer()->openConnection(process);
 	}
 	else {   // no input file but requires to build pdi anyway
-		AwProcessManager::instance()->buildProcessPDI(process);
+		 AwProcessManager::instance()->buildProcessPDI(process);
 	}
 	return 0;
 }

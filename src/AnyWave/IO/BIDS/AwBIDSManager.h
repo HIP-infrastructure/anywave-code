@@ -22,6 +22,7 @@
 #include <QFileIconProvider>
 
 class AwFileIO;
+class AwDataManager;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
 
@@ -92,7 +93,7 @@ public:
 	int MEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
 	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
-	static void initCommandLineOperation(const QString& filePath);
+	static void initCommandLineOperation(const QString& filePath, AwDataManager *);
 	static void finishCommandLineOperation();
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }

@@ -19,6 +19,9 @@
 #include <AwChannel.h>
 class AwBaseProcess;
 class AwDataManager;
+class AwPluginManager;
+class AwProcessManager;
+class AwBIDSManager;
 
 class AwCommandLineManager
 {
