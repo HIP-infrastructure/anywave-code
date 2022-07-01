@@ -118,16 +118,8 @@ AwBIDSItems AwBIDSManager::getSubjectItems(const QString& rootDir)
 
 void AwBIDSManager::parseSubject(AwBIDSItem* parentItem)
 {
-	// check if item had alreay been parsed
-	if (parentItem->data(AwBIDSItem::ParsedItem).toBool()) {
-		for (auto child : parentItem->children()) {
-
-		}
-	}
 	recursiveParsing(parentItem->data(AwBIDSItem::PathRole).toString(), parentItem);
 }
-
-
 
 void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem)
 {

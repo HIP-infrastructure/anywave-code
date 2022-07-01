@@ -7,13 +7,15 @@
 #include <utils/endian.h>
 #include <QMessageBox>
 #include <QDir>
+#include "Aw4DNIExportDialog.h"
+#include <widget/AwWaitWidget.h>
 
 Aw4DNIExporterPlugin::Aw4DNIExporterPlugin()
 {
 	name = QString("4DNIExporter");
 	description = QString("Write 4DNI meg file content to a new file");
 	category = "File:(4DNI MEG File Format) Write to a new file";
-	version = "1.0.1";
+	version = "1.1.0";
 	type = AwProcessPlugin::Background;
 	// no input gui for now
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
@@ -28,17 +30,64 @@ Aw4DNIExporter::Aw4DNIExporter()
 
 bool Aw4DNIExporter::showUi()
 {
-	m_outputFileName = QFileDialog::getSaveFileName(nullptr, "Select output file",
-		pdi.input.settings.value(keys::data_path).toString() + "_new");
-	if (m_outputFileName.size()) {
-		m_outputFileName = QDir::toNativeSeparators(m_outputFileName);
-		auto currentFile = QDir::toNativeSeparators(pdi.input.settings.value(keys::data_path).toString());
+	// detect bids
+	QString filePath = pdi.input.settings.value(keys::bids_file_path).toString();
+	bool isBids = !filePath.isEmpty();
 
-		if (m_outputFileName.toLower() == currentFile.toLower()) {
-			QMessageBox::critical(nullptr, "Invalid file", "Do not overwrite the current open meg file.");
-			return false;
+	if (!isBids) {
+		m_outputFileName = QFileDialog::getSaveFileName(nullptr, "Select output file",
+			pdi.input.settings.value(keys::data_path).toString() + "_new");
+		if (m_outputFileName.size()) {
+			m_outputFileName = QDir::toNativeSeparators(m_outputFileName);
+			auto currentFile = QDir::toNativeSeparators(pdi.input.settings.value(keys::data_path).toString());
+
+			if (m_outputFileName.toLower() == currentFile.toLower()) {
+				QMessageBox::critical(nullptr, "Invalid file", "Do not overwrite the current open meg file.");
+				return false;
+			}
+			return true;
 		}
-		return true;
+		return false;
+	}
+	else {
+		Aw4DNIExportDialog dlg;
+		if (dlg.exec() == QDialog::Accepted) {
+			QFileInfo fi(filePath);
+			auto bidsDir = fi.absolutePath();
+			bidsDir = bidsDir.remove("_meg");
+			bidsDir += QString("_proc-%1_meg").arg(dlg.selectedModification.remove(' '));
+			// create the new dir
+			QDir dir(bidsDir);
+			dir.mkpath(bidsDir);
+			// moving files
+			AwWaitWidget wait("Copying files...");
+			connect(this, &Aw4DNIExporter::finished, &wait, &AwWaitWidget::accept);
+
+			auto copyLambda = [this](const QString& source, const QString& dest) {
+				QDir sDir(source);
+				QString srcBaseJsonFileName = source;
+				srcBaseJsonFileName = srcBaseJsonFileName.remove("_meg");
+				QString destBaseJsonFileName = dest;
+				destBaseJsonFileName = destBaseJsonFileName.remove("_meg");
+				// copy sidecar files
+				QFile::copy(QString("%1_channels.tsv").arg(srcBaseJsonFileName), QString("%1_channels.tsv").arg(destBaseJsonFileName));
+				QFile::copy(QString("%1_coordsystem.json").arg(srcBaseJsonFileName), QString("%1_coordsystem.json").arg(destBaseJsonFileName));
+				QFile::copy(QString("%1_meg.json").arg(srcBaseJsonFileName), QString("%1_meg.json").arg(destBaseJsonFileName));
+				QFile::copy(QString("%1_events.tsv").arg(srcBaseJsonFileName), QString("%1_events.tsv").arg(destBaseJsonFileName));
+				QFile::copy(QString("%1_headshape.pos").arg(srcBaseJsonFileName), QString("%1_headshape.pos").arg(destBaseJsonFileName));
+
+				auto files = sDir.entryList(QDir::Files);
+				for (const auto& file : files) {
+					QString srcFile = QString("%1/%2").arg(source).arg(file);
+					QString destFile = QString("%1/%2").arg(dest).arg(file);
+					QFile::copy(srcFile, destFile);
+				}
+				emit finished();
+			};
+			wait.run(copyLambda, fi.absolutePath(), bidsDir);
+			m_outputFileName = QString("%1/%2").arg(bidsDir).arg(fi.fileName());
+			return true;
+		}
 	}
 	return false;
 }

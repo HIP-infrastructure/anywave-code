@@ -1,6 +1,15 @@
 #include "eeginto4d.h"
 #include "MEGstructs.h"
 
+/// <summary>
+///  UPDATES :
+/// v2.0.4:
+/// DO not modify the config file anymore, do not relabel channels in config
+/// </summary>
+/// <param name="megFile"></param>
+/// <param name="eegChannels"></param>
+/// <returns></returns>
+
 bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels)
 {
 	class ChanInfo 
@@ -259,10 +268,8 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 			eegLabels.removeAll(megChanInfo->label);
 			configChanInfo->label = megChanInfo->label;
 			stringToLabel(megChanInfo->label, tmp);
-		//	tmp = megChanInfo->label.toStdString();
-			fileConfig.seek(configChanInfo->pos);
-		//	stream_config.writeRawData(tmp.data(), 16);
-			stream_config.writeRawData(tmp, 16);
+		//	fileConfig.seek(configChanInfo->pos);
+		//	stream_config.writeRawData(tmp, 16);
 			fileMEG.seek(megChanInfo->pos);
 		//	src_stream.writeRawData(tmp.data(), 16);
 			src_stream.writeRawData(tmp, 16);
@@ -283,12 +290,12 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 		configChanInfo->label = label;
 		megChanInfo->label = label;
 		eegChannelsIndexes.insert(label, megChanInfo->chan_no);
-		//tmp = label.toStdString();
+		
 		stringToLabel(label, tmp);
-		fileConfig.seek(configChanInfo->pos);
+	//	fileConfig.seek(configChanInfo->pos);
 
-		//stream_config.writeRawData(tmp.data(), 16);
-		stream_config.writeRawData(tmp, 16);
+		
+//		stream_config.writeRawData(tmp, 16);
 		fileMEG.seek(megChanInfo->pos);
 		//src_stream.writeRawData(tmp.data(), 16);
 		src_stream.writeRawData(tmp, 16);

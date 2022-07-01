@@ -58,23 +58,16 @@ AwPluginManager *AwPluginManager::getInstance()
 AwPluginManager::AwPluginManager()
 {
 	// init input flags map for MATLAB/Python plugins
-//	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessIO::GetAllMarkers);
-//	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	m_MATPyModifiersFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	m_MATPyModifiersFlagsMap.insert("acceptchannelselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessIO::GetAsRecordedChannels);
-//	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessIO::GetDurationMarkers);
 	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessIO::GetCurrentMontage);
 	m_MATPyModifiersFlagsMap.insert("processrequireschannelselection", Aw::ProcessIO::modifiers::RequireChannelSelection);
-//	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 
 	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
-//	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	m_MATPyPluginFlagsMap.insert("processdoesntrequiredata", Aw::ProcessFlags::ProcessDoesntRequireData);
 	// for compatibilty
 	m_MATPyPluginFlagsMap.insert("nodatarequired", Aw::ProcessFlags::ProcessDoesntRequireData);
-
-//	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
 
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
 	setObjectName("AwPluginManager");
@@ -114,8 +107,6 @@ void AwPluginManager::processJsonFiles()
 	}
 }
 
-
-
 //
 // showPluginsDial()
 // Displays the dialog showing loaded plugins
@@ -124,7 +115,6 @@ void AwPluginManager::showPluginsDial()
 	AwPluginDial dlg;
 	dlg.exec();
 }
-
 
 //
 // newReader()

@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=2.4.12
+AppVersion=2.4.14
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   

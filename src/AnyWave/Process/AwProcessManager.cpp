@@ -61,10 +61,6 @@ AwProcessManager::AwProcessManager(QObject *parent)
 	plm->setParent(this);
 }
 
-AwProcessManager::~AwProcessManager()
-{
-}
-
 void AwProcessManager::setMenu(QMenu *menu)
 {
 	m_processMenu = menu;
@@ -726,14 +722,12 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 	bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	if (skipDataFile)
 		process->addModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
-
 	// insert args in process settings
 	process->pdi.input.settings[keys::args] = args;
-	
 	if (!skipDataFile) {
 		auto selectedChannels = AwDisplay::instance()->selectedChannels();
 		if (process->modifiersFlags() & Aw::ProcessIO::modifiers::RequireChannelSelection && selectedChannels.isEmpty()) {
-			AwMessageBox::critical(NULL, tr("Process Input"),
+			AwMessageBox::critical(nullptr, tr("Process Input"),
 				tr("This process is designed to get selected channels as input but no channel is selected."));
 			delete process;
 			return;
@@ -782,7 +776,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 	}
 
 	AwProcessLogManager *plm = AwProcessLogManager::instance();
-	plm->setParent(this);
+	//plm->setParent(this);
 	plm->connectProcess(process);
 
 	// check the process derived class

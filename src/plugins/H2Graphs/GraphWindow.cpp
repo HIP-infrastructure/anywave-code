@@ -254,7 +254,8 @@ void GraphWindow::updateGraph()
 	cube matrix = m_graphSet->correlationMatrix();
 	cube lag = m_graphSet->lagMatrix();
 
-	int maxLag = (int)floor((m_graphSet->maxLag / m_samplingRate) * 1000);
+	//int maxLag = (int)floor((m_graphSet->maxLag / m_samplingRate) * 1000);
+	int maxLag = std::floor(m_graphSet->maxLag * 1000);
 	for (uword i = 0; i < matrix.n_rows; i ++) {  // X
 		for (uword j = i + 1; j < matrix.n_cols; j++) { // Y
 			double xy_value = matrix(i, j, m_currentIteration);
@@ -266,9 +267,9 @@ void GraphWindow::updateGraph()
 			
 			// compute asymetric h2
 			float ah2 = (xy_value - yx_value) / std::max(xy_value, yx_value);
-			GraphArrow *arrow = NULL;
-			GraphArrowLag *arrowLag = NULL;
-			GraphArrowDir *arrowDir = NULL;
+			GraphArrow *arrow = nullptr;
+			GraphArrowLag *arrowLag = nullptr;
+			GraphArrowDir *arrowDir = nullptr;
 
 			if (std::max(xy_value, yx_value) >= m_threshold) {
 				m_sensorsItem.at(i)->show();

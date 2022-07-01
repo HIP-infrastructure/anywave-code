@@ -53,7 +53,6 @@ class AwProcessManager : public QObject
 	Q_OBJECT
 public:
 	AwProcessManager(QObject *parent = 0);
-	~AwProcessManager();
 
 	static AwProcessManager *instance();
 	void setMenu(QMenu *menu);

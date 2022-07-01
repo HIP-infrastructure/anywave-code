@@ -340,8 +340,10 @@ AwFileIO::FileStatus BrainVisionIO::openFile(const QString &path)
 	file.close();
 
 	m_binaryFile.setFileName(m_dataFile);
-	if (!m_binaryFile.open(QIODevice::ReadOnly))
+	if (!m_binaryFile.open(QIODevice::ReadOnly)) {
+		m_error = m_binaryFile.errorString();
 		return AwFileIO::BadHeader;
+	}
 	m_streamBinary.setDevice(&m_binaryFile);
 	m_streamBinary.setVersion(QDataStream::Qt_4_4);
 	m_streamBinary.setByteOrder(QDataStream::LittleEndian);
