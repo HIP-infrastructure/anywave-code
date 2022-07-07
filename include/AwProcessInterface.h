@@ -138,14 +138,15 @@ class AW_PROCESS_EXPORT AwProcessPlugin : public AwPluginBase
 {
 public:
 	// default constructor
-	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; }
+	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; classType = RegularPlugin; }
+	enum ClassTypes  { RegularPlugin, ScriptedPlugin };
 	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY.
 - Display type indicates that the plugin will process only displayed data.
 - Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
 - DisplayBackground type indicates that the plugin can work on displayed data or in background mode aswell.
 - Internal type indicates that the plugin will process data internally. For instance, process some calculation on datas before they will send to AwDataClient objects. **/
 	int type;
-
+	int classType;
 	enum RunMode { GUI = 2, Display = 4, Background = 8, DisplayBackground = 16, Internal = 32 };
 	
 	void setFlags(int flags) { m_flags |= flags; }

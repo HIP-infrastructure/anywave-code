@@ -47,7 +47,7 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	else
 		m_isListening = false;
 
-	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
+//	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
 	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
 
 	setHandlers();
@@ -56,6 +56,8 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 		m_thread->start();
 	}
 	m_debugMode = false;
+	m_dataManager = AwDataManager::instance();
+	connect(this, SIGNAL(markersAdded(AwMarkerList*)), m_dataManager->markerManager(), SLOT(addMarkers(AwMarkerList*)));
 }
 
 AwRequestServer::~AwRequestServer()

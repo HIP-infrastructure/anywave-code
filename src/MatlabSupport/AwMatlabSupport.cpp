@@ -75,17 +75,6 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 		m_matlabPtr->feval(u"addpath", factory.createCharArray(cppString), output);
 
 		m_matlabPtr->eval(u"main", output);
-		// create varargin 
-		//cppString = args.toStdString();
-		//CellArray varargin = factory.createCellArray({ 1, 4 });
-		//varargin[0][0] = factory.createCharArray(host);
-		//varargin[0][1] = factory.createScalar<double>(dport);
-		//varargin[0][2] = factory.createScalar<double>(dpid);
-		//varargin[0][3] = factory.createCharArray(cppString);
-		//m_matlabPtr->setVariable(u"test", std::move(varargin), matlab::engine::WorkspaceType::BASE);
-		//m_matlabPtr->feval(u"main", varargin, output, error);
-		//m_matlabPtr->feval(u"disp", factory.createCharArray("varargin"), output, error);
-	
 		String output_ = output.get()->str();
 		QString message = QString::fromStdString(convertUTF16StringToUTF8String((output_)));
 		emit progressChanged(message);

@@ -21,6 +21,7 @@
 #include "Plugin/AwPluginManager.h"
 #include "Marker/AwExtractTriggers.h"
 #include "Marker/AwMarkerManager.h"
+#include "Data/AwDataManager.h"
 
 
 void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process)
@@ -60,14 +61,21 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *pro
 		}
 	}
 	
+	QList<QSharedPointer<AwMarker>> sharedMarkers;
 	if (usingFile)
 		source_markers = reader->infos.blocks().at(0)->markers();
-	else
-		source_markers = AwMarkerManager::instance()->getMarkers();
+	else {
+		//	source_markers = AwMarkerManager::instance()->getMarkers();
+	//	source_markers = m_dataManager->markerManager()->getMarkers();
+		// use the mrk file instead of marker manager as the source for markers:
+		// can be run in command line mode.
+		source_markers = AwMarker::load(m_dataManager->mrkFilePath());
+		sharedMarkers = AwMarker::toSharedPointerList(source_markers);
+	}
 
 	if (extractTriggers.toLower() == "yes" && usingFile) {
 		AwChannelList triggerChannels;
-		foreach (AwChannel *c, reader->infos.channels()) {
+		for (AwChannel *c : reader->infos.channels()) {
 			if (c->isTrigger())
 				triggerChannels << c;
 		}
@@ -84,7 +92,7 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *pro
 
 	if (!values.isEmpty()) {
 		step = 1;
-		foreach (AwMarker *m, source_markers) {
+		for (AwMarker *m : source_markers) {
 			//if (values.contains((int)m->value()))
 			if (values.contains(m->value()))
 				lvalues << m;
@@ -93,7 +101,7 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *pro
 
 	if (!labels.isEmpty())  { // labels are specified
 		step = 2;
-		foreach (AwMarker *m, source_markers)	{
+		for (AwMarker *m : source_markers)	{
 			if (labels.contains(m->label()))
 				llabels << m;
 		}
@@ -101,8 +109,8 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *pro
 
 	if (!channels.isEmpty()) { // channels are specified
 		step = 3;
-		foreach (AwMarker *m, source_markers) 	{
-			foreach (QString t, m->targetChannels()) {
+		for (AwMarker *m : source_markers) 	{
+			for (QString t : m->targetChannels()) {
 				if (channels.contains(t))
 					lchannels << m;
 			}
@@ -118,7 +126,7 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *pro
 	}
 	else {  // remove doubles
 		AwMarkerList result;
-		foreach (AwMarker *m, markers)
+		for (AwMarker *m : markers)
 			if (!result.contains(m))
 				result << m;
 		markers = result;

@@ -59,7 +59,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";
-	version = "2.2.1";
+	version = "2.2.2";
     name = QString("ICA");
     description = QString("Compute ICA");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
@@ -170,8 +170,11 @@ int ICA::initParameters()
 	}
 	m_nComp = m_channels.size();
 
-	if (args.contains(keys::comp))
+	if (args.contains(keys::comp)) {
 		m_nComp = args.value(keys::comp).toInt();
+		if (m_nComp <= 0)
+			m_nComp = m_channels.size();
+	}
 
 	// check algo
 	// some algos have a fixed number of components (no PCA)

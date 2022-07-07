@@ -23,6 +23,7 @@
 #include <widget/AwMarkerInspector.h>
 
 class AwMarkerManagerSettings;
+class AwDataManager;
 
 class AwMarkerManager : public QObject
 {
@@ -47,6 +48,9 @@ public:
 	void closeFile();
 	void quit();
 	void init();
+	void guiInit();
+	void initFromCommandLine(const AwMarkerList& markers);  // takes ownership of markers
+
 	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
 public slots:

@@ -15,7 +15,7 @@ Aw4DNIExporterPlugin::Aw4DNIExporterPlugin()
 	name = QString("4DNIExporter");
 	description = QString("Write 4DNI meg file content to a new file");
 	category = "File:(4DNI MEG File Format) Write to a new file";
-	version = "1.1.0";
+	version = "1.1.1";
 	type = AwProcessPlugin::Background;
 	// no input gui for now
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
@@ -63,7 +63,7 @@ bool Aw4DNIExporter::showUi()
 			AwWaitWidget wait("Copying files...");
 			connect(this, &Aw4DNIExporter::finished, &wait, &AwWaitWidget::accept);
 
-			auto copyLambda = [this](const QString& source, const QString& dest) {
+			auto copyLambda = [this](const QString& source, const QString& dest, const QString& proc) {
 				QDir sDir(source);
 				QString srcBaseJsonFileName = source;
 				srcBaseJsonFileName = srcBaseJsonFileName.remove("_meg");
@@ -76,6 +76,23 @@ bool Aw4DNIExporter::showUi()
 				QFile::copy(QString("%1_events.tsv").arg(srcBaseJsonFileName), QString("%1_events.tsv").arg(destBaseJsonFileName));
 				QFile::copy(QString("%1_headshape.pos").arg(srcBaseJsonFileName), QString("%1_headshape.pos").arg(destBaseJsonFileName));
 
+				// copy .mtg, .bad, .mrk !!!
+				QFileInfo fi;
+				QString  mrkFilePath = pdi.input.settings.value(keys::marker_file).toString();  // we use marker_file to get the deratives path for sidecar files.
+				fi.setFile(mrkFilePath);
+				QString derivPath = fi.absolutePath(); // base derivatives path
+				QDir derivativesDir(derivPath);
+				QString destPath = derivPath;
+				destPath = destPath.remove("_meg");
+				destPath += proc;
+				derivativesDir.mkpath(destPath);  // new derivatives path
+				for (const auto& file : derivativesDir.entryList(QDir::Files)) {
+					QString srcFile = QDir::toNativeSeparators(QString("%1/%2").arg(derivPath).arg(file));
+					QString destFile = QDir::toNativeSeparators(QString("%1/%2").arg(destPath).arg(file));
+					QFile::copy(srcFile, destFile);
+				}
+				// end copying .bad .mtg .mrk
+
 				auto files = sDir.entryList(QDir::Files);
 				for (const auto& file : files) {
 					QString srcFile = QString("%1/%2").arg(source).arg(file);
@@ -84,7 +101,7 @@ bool Aw4DNIExporter::showUi()
 				}
 				emit finished();
 			};
-			wait.run(copyLambda, fi.absolutePath(), bidsDir);
+			wait.run(copyLambda, fi.absolutePath(), bidsDir, QString("_proc-%1_meg").arg(dlg.selectedModification));
 			m_outputFileName = QString("%1/%2").arg(bidsDir).arg(fi.fileName());
 			return true;
 		}

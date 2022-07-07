@@ -37,6 +37,7 @@ public:
 	void addHandler(AwRequestServer* const object, void(AwRequestServer::* const mf)(QTcpSocket *, AwScriptProcess*), int request);
 
 	inline void setDebugMode(bool flag) { m_debugMode = flag; }
+	void setDataManager(AwDataManager* dm) { m_dataManager = dm; }
 public slots:
 	void handleNewConnection();
 	void dataReceived();
@@ -50,7 +51,7 @@ protected:
 	
 	void initDebugProcess(AwScriptProcess*);
 	AwScriptProcess* newDebugProcess();
-
+	AwDataManager* m_dataManager;
 	QTcpServer *m_server;
 	QMutex m_mutex;
 	QThread *m_thread;

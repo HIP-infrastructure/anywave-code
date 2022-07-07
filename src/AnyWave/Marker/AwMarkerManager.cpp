@@ -41,8 +41,11 @@ AwMarkerManager *AwMarkerManager::m_instance = 0;
 
 AwMarkerManager *AwMarkerManager::instance()
 {
-	if (!m_instance)
+	if (!m_instance) {
 		m_instance = new AwMarkerManager;
+		AwDebugLog::instance()->connectComponent(QString("Marker Manager"), m_instance);
+		m_instance->guiInit();
+	}
 	return m_instance;
 }
 
@@ -54,22 +57,30 @@ AwMarkerManager* AwMarkerManager::newInstance()
 AwMarkerManager::AwMarkerManager()
 {
 	m_ui = nullptr;
-	AwDebugLog::instance()->connectComponent(QString("Marker Manager"), this);
-
 	m_needSorting = true;
 	m_markersModified = false;
 	m_dock = nullptr;
-	m_markerInspector = new AwMarkerInspector();	
+	//m_markerInspector = new AwMarkerInspector();	
+	//auto globals = AwGlobalMarkers::instance();
+	//globals->setParent(this);
+	//globals->setDisplayed(&m_displayedMarkers);
+	//globals->setTotal(&m_markers);
+}
+
+AwMarkerManager::~AwMarkerManager()
+{
+	clear();
+}
+
+
+void AwMarkerManager::guiInit()
+{
+	m_markerInspector = new AwMarkerInspector();
 	auto globals = AwGlobalMarkers::instance();
 	globals->setParent(this);
 	globals->setDisplayed(&m_displayedMarkers);
 	globals->setTotal(&m_markers);
 }
-
-AwMarkerManager::~AwMarkerManager()
-{
-}
-
 
 AwMarkerManagerSettings* AwMarkerManager::ui()
 {
@@ -171,9 +182,6 @@ AwMarkerList AwMarkerManager::loadMarkers(const QString &path)
 	emit finished();
 	return markers;
 }
-
-
-
 
 void AwMarkerManager::loadMarkers()
 {
@@ -318,6 +326,11 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 	m_ui->setMarkers(m_markers);
 	saveMarkers(m_filePath);
 	emit updateStats();
+}
+
+void AwMarkerManager::initFromCommandLine(const AwMarkerList& markers)
+{
+	m_markers = markers;
 }
 
 //

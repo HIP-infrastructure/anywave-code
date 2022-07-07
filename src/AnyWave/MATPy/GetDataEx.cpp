@@ -40,7 +40,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	QDataStream fromClient(client);
 	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
-	AwDataManager* dm = AwDataManager::instance();  // get current data manager which holds informations of current open file
+//	AwDataManager* dm = AwDataManager::instance();  // get current data manager which holds informations of current open file
+	auto dm = m_dataManager;
 
 	//AwFileIO* reader = dm->reader();
 	QString json;
@@ -58,7 +59,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	
 	requestedChannels = process->pdi.input.channels();
 	if (json.isEmpty()) { // no args set
-
 		// make sure we are working on a open file :
 		if (!dm->isFileOpen()) {
 			emit log("ERROR: no file open in AnyWave. Nothing done.");
@@ -66,11 +66,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			response.send(-1);
 			return;
 		}
-
 		// get input channels of process
 		if (requestedChannels.isEmpty())
 			requestedChannels = dm->rawChannels();
-
 		input_markers << new AwMarker("global", 0., fileDuration);
 	}
 	else {
@@ -111,7 +109,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			else
 				requestedChannels = dm->rawChannels();
 			// close current connection to data server
-			AwDataServer::getInstance()->closeConnection(this);
+		//	AwDataServer::getInstance()->closeConnection(this);
+			m_dataManager->dataServer()->closeConnection(this);
 			// open connection to the cloned data server which resides inside the cloned Data Manager
 			dm->dataServer()->openConnection(this);
 		}
@@ -274,9 +273,11 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AW_DESTROY_LIST(requestedChannels);
 
 	// check for data manager used, if not the main one, destroy it
-	if (dm != AwDataManager::instance()) {
+//	if (dm != AwDataManager::instance()) {
+    if (dm != m_dataManager) {
 		// reconnect to the correct data server
-		AwDataServer::getInstance()->openConnection(this);
+		//AwDataServer::getInstance()->openConnection(this);
+		m_dataManager->dataServer()->openConnection(this);
 		dm->dataServer()->closeConnection(this);
 		delete dm;
 	}

@@ -48,7 +48,8 @@ AwDataManager* AwDataManager::newInstance()
 	dm->m_montageManager->setParent(dm);
 	dm->m_dataServer = AwDataServer::newInstance();
 	dm->m_dataServer->setParent(dm);
-
+	dm->m_markerManager = AwMarkerManager::newInstance();
+	dm->m_markerManager->setParent(dm);
 	return dm;
 }
 
@@ -392,6 +393,7 @@ int AwDataManager::openFileCommandLine(const QString& filePath)
 	// checking for BIDS
 	 AwBIDSManager::initCommandLineOperation(filePath, this);
 	m_montageManager->newMontage(m_reader);
+	
 	return m_status;
 }
 

@@ -36,8 +36,8 @@ AwMatlabScriptProcess *AwMatlabScriptPlugin::newInstance()
 	AwMatlabScriptProcess *p = new AwMatlabScriptProcess;
 	p->setPlugin(this);
 	initProcess(p);
-	AwMATPyServer *server = AwMATPyServer::instance();
-	server->start();
+	p->setServerInstance(AwMATPyServer::instance());
+	AwMATPyServer::instance()->start();
 	AwPidManager::instance()->createNewPid(p);
 	return p;
 }
@@ -50,7 +50,6 @@ void AwMatlabScriptProcess::sendOutput()
 
 void AwMatlabScriptProcess::run()
 {
-	
 	AwMatlabInterface *mi = nullptr;
 	bool isCompiled = m_plugin->settings().contains("compiled plugin");
 	QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
@@ -62,6 +61,7 @@ void AwMatlabScriptProcess::run()
 		if (aws->value(aws::matlab_present).toBool()) {
 			auto path = pdi.input.settings.value("script_path").toString();
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
+			
 			QVariantMap settings;
 			settings[matlab_interface::matlab_plugin_dir] = path;
 			settings[matlab_interface::matlab_mex_dir] = aws->value(aws::matlab_mex_dir);
@@ -86,7 +86,6 @@ void AwMatlabScriptProcess::run()
 		arguments << mcrPath;
 #endif
 
-
 #if defined(Q_OS_WIN)
 	
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
@@ -100,17 +99,23 @@ void AwMatlabScriptProcess::run()
 #endif
     QString jsonArgs = AwUtilities::json::toJsonString(pdi.input.settings).simplified();
 
-	arguments << "127.0.0.1" << QString("%1").arg(AwMATPyServer::instance()->serverPort()) 
+	arguments << "127.0.0.1" << QString("%1").arg(m_server->serverPort()) 
 		<< QString::number(m_pid); // << jsonArgs;
 	
     emit progressChanged(QString("Running %1 with arguments:").arg(m_plugin->settings().value("compiled plugin").toString()));
-	for (const auto& a : arguments) 
+	for (auto const& a : arguments)
+		emit progressChanged(a);
 	m_process = new QProcess(this);
 	m_process->setReadChannel(QProcess::StandardOutput);
 	m_process->setProcessChannelMode(QProcess::MergedChannels);
 	m_process->setProcessEnvironment(env);
 	connect(m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(sendOutput()));
 	m_process->start(m_plugin->settings().value("compiled plugin").toString(), arguments, QIODevice::ReadWrite);
-	m_process->waitForFinished(-1); // wait for plugin to finish. (Wait forever).
+	if (m_process->waitForStarted())
+		m_process->waitForFinished(-1); // wait for plugin to finish. (Wait forever).
+	else {
+		emit progressChanged(QString("Failed to start %1").arg(m_plugin->settings().value("compiled plugin").toString()));
+		return;
+	}
 	emit progressChanged(tr("MATLAB plugin has finished."));
 }

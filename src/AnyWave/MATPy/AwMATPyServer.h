@@ -18,6 +18,7 @@
 
 class AwRequestServer;
 class AwScriptProcess;
+class AwDataManager;
 #include <QObject>
 
 class AwMATPyServer : public QObject
@@ -37,6 +38,7 @@ public:
 	bool isListening();
 	quint16 serverPort(); 
 	void setDebugMode(bool flag);
+	void setDataManager(AwDataManager* dm);
 
 	// removes a duplicated instance from the list and delete it.
 	void deleteDuplicatedInstance(AwMATPyServer *instance);
@@ -46,7 +48,7 @@ signals:
 	void error(const QString& error);
 protected:
 	AwMATPyServer();
-
+	AwDataManager* m_dataManager;
 	static AwMATPyServer *m_instance;
 	AwRequestServer *m_rs;
 	// every time an instance is duplicated the reference is stored here. All instances will be deleted when singleton instance is deleted.
