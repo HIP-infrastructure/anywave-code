@@ -89,4 +89,4 @@ Name: startmenu; Description: "Add shortcut to start menu"; GroupDescription: "S
 
 [Run]
 Filename: "{app}\vc_redist.x64.exe"; Parameters: "/quiet /norestart"; Description: "Visual C++ runtime"; StatusMsg: "Installing Visual C++ runtime..."
-Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."
+; Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."
