@@ -226,6 +226,12 @@
     <ClCompile Include="SignalView\AwAmplitudeItem.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
+    <ClCompile Include="AwMarkingTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\SceneMouseEvent.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AwAmplitudeWidget.ui">
@@ -392,6 +398,9 @@
     </QtUic>
     <QtUic Include="SignalItem\AwSignalItemSettings.ui">
       <Filter>SignalItem</Filter>
+    </QtUic>
+    <QtUic Include="AwMarkingTool.ui">
+      <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
   <ItemGroup>
@@ -584,6 +593,9 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwSignalItem.h">
       <Filter>SignalItem</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\widget\AwMarkingTool.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

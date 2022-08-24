@@ -46,7 +46,11 @@
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
 #include <AwMEGSensorManager.h>
+#ifndef AW_MARKING_TOOL_V2
 #include <widget/AwMarkerInspector.h>
+#else
+#include <widget/AwMarkingTool.h>
+#endif
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
@@ -150,9 +154,8 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 		a->setEnabled(false);
 
 	setDockOptions(QMainWindow::AnimatedDocks);
-
-	AwMarkerInspector* markerInspectorWidget = nullptr;
-	auto dock = new QDockWidget(tr("Markers"), this);
+	
+	auto dock = new QDockWidget("Markers", this);
 	dock->setObjectName("Markers");
 	m_dockWidgets["markers"] = dock;
 	dock->hide();
@@ -165,14 +168,22 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	addDockWidget(Qt::LeftDockWidgetArea, dock);
 	resizeDocks({ dock }, { 150 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 
-	dock = new QDockWidget(tr("Adding Markers Tool"), this);
+	dock = new QDockWidget("Adding Markers Tool", this);
 	m_dockWidgets["add_markers"] = dock;
 	dock->hide();
 	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dock->setFloating(true);
+#ifndef AW_MARKING_TOOL_V2
+	AwMarkerInspector* markerInspectorWidget = nullptr;
 	markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
 	markerInspectorWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
 	dock->setWidget(markerInspectorWidget);
+#else
+	auto markingToolWidget = AwMarkingTool::instance();
+	markingToolWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
+	markingToolWidget->loadCustomList(QString("%1/custom_list.mrk").arg(aws->value(aws::marker_rules_dir).toString()));
+	dock->setWidget(markingToolWidget);
+#endif
 
 	dock = new QDockWidget(tr("Video"), this);
 	dock->setObjectName("Video");
@@ -198,10 +209,15 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	AwLayoutManager::instance()->setWorkingDir(aws->value(aws::work_dir).toString());
 
 	marker_manager->setDock(m_dockWidgets.value("markers"));
+#ifndef AW_MARKING_TOOL_V2
 	connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
 	connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
 	markerInspectorWidget->setPredefinedMarkers(AwSettings::getInstance()->loadPredefinedMarkers());
 	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
+#else
+	// we want to save the custom list defined by the user
+	// may be do that when closing anywave?
+#endif
 
 	m_display = new AwDisplay(this);
 	m_display->setParent(this);

@@ -29,6 +29,7 @@ class AwMarkingSettings;
 class AwGTCMenu;
 class AwPickMarkersDial;
 class AwAmplitudeItem;
+class AwMarkingTool;
 
 class AW_WIDGETS_EXPORT AwGraphicsScene : public QGraphicsScene
 {
@@ -168,10 +169,15 @@ protected:
 
 	void keyPressEvent(QKeyEvent *e);
 	void keyReleaseEvent(QKeyEvent *e);
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e);
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *e);
 	void mousePressEvent(QGraphicsSceneMouseEvent *e);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
 	void mouseMoveEvent(QGraphicsSceneMouseEvent  *e);
+	
+	void handleMouseReleaseNone(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e);
+
 
 	void updateVisibleItemsHashTable();
 	
@@ -212,6 +218,7 @@ protected:
 	QString m_pluginToLaunch;	// name of process to launch after a QTS
 	QMenu* m_contextMenuMapping;	// pointer to sub menu dedicated to mapping operations (can be null)
 	AwPickMarkersDial* m_pickMarkersDial;
+	AwMarkingTool* m_markingTool;
 };
 
 
