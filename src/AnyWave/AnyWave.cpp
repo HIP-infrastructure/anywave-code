@@ -106,8 +106,12 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	if (args.contains(keys::plugin_debug)) {
 		quint16 server_port = static_cast<quint16>(args.value(keys::server_port).toInt());
 		auto server = AwMATPyServer::instance();
-		server->start(server_port);
-		server->setDebugMode(true);
+		if (!server->start(server_port)) {
+			AwMessageBox::critical(this, "TCP Server", QString("Failed to listen on port %1\nerror:%2").arg(server_port).arg(server->errorString()));
+
+		}
+		else
+			server->setDebugMode(true);
 	}
 
 	m_debugLogWidget = nullptr;
@@ -182,6 +186,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	auto markingToolWidget = AwMarkingTool::instance();
 	markingToolWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
 	markingToolWidget->loadCustomList(QString("%1/custom_list.mrk").arg(aws->value(aws::marker_rules_dir).toString()));
+	markingToolWidget->loadHEDList(QString("%1/hed.mrk").arg(aws->value(aws::app_resource_dir).toString()));
 	dock->setWidget(markingToolWidget);
 #endif
 

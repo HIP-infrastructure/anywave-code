@@ -157,8 +157,12 @@ protected slots:
 	void launchQTSPlugin();
 	void insertPredefinedMarker();
 	void undoMarkerInsertion();
+#ifdef AW_MARKING_TOOL_V2
+	void applyMarkingToolSettings();
+#endif
 protected:
 	float timeAtPos(const QPointF& pos);
+	float widthToDuration(float w);
 	float xPosFromTime(float time);
 	QGraphicsItem * getItemUnderMouse(QPointF pos, int *itemType);
 	virtual QMenu *defaultContextMenu();
@@ -177,7 +181,12 @@ protected:
 	
 	void handleMouseReleaseNone(QGraphicsSceneMouseEvent* e);
 	void handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseQTS(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseCursor(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseMapping(QGraphicsSceneMouseEvent* e);
 
+	void handleMousePressedAddingMarker(QGraphicsSceneMouseEvent* e);
+	QStringList getChannelsUnderSelectionRectangle();
 
 	void updateVisibleItemsHashTable();
 	

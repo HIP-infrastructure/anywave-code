@@ -169,6 +169,11 @@ QStringList AwMarker::markersTypeList()
 	return list;
 }
 
+int AwMarker::save(const QString& path, const QList<QSharedPointer<AwMarker>>& markers)
+{
+	return save(path, AwMarker::toMarkerList(markers));
+}
+
 int AwMarker::save(const QString& path, const AwMarkerList& markers)
 {
 	QFile file(path);
@@ -186,7 +191,7 @@ int AwMarker::save(const QString& path, const AwMarkerList& markers)
 		stream << '\t' << QString::number(m->duration());
 		if (!m->targetChannels().isEmpty()) {
 			stream << '\t';
-			foreach (QString t, m->targetChannels())
+			for (auto const& t : m->targetChannels())
 				stream << t << ",";
 		}
 		if (!m->color().isEmpty()) {
@@ -205,6 +210,14 @@ AwMarkerList AwMarker::duplicate(const AwMarkerList& markers)
 	AwMarkerList res;
 	for (AwMarker *m : markers)
 		res << new AwMarker(m);
+	return res;
+}
+
+AwSharedMarkerList AwMarker::duplicate(const AwSharedMarkerList& markers)
+{
+	AwSharedMarkerList res;
+	for (const auto& m : markers)
+		res << QSharedPointer<AwMarker>(new AwMarker(m.get()));
 	return res;
 }
 
@@ -271,6 +284,30 @@ AwMarkerList AwMarker::merge(AwMarkerList& markers)
 	return res;
  }
 
+///
+/// intersect()
+/// Browse a marker list and return only markers that are contained in the specified time interval.
+/// Input list must be time sorted.
+/// The return list does NOT contain duplicated markers.
+AwSharedMarkerList AwMarker::intersect(const AwSharedMarkerList& markers, float start, float end)
+{
+	AwSharedMarkerList res;
+	// We assume markers are sorted before processing
+	for (const auto& m : markers) {
+		if (m->end() < start)
+			continue;
+		if (m->start() > end)
+			break;
+		bool startBeforeEndAfter = m->start() < start && m->end() > end;
+		bool startBeforeEndWithin = m->start() < start && m->end() <= end;
+		bool startWithinEndAfter = m->start() >= start && m->end() > end;
+		bool isWithin = m->start() >= start && m->end() <= end;
+
+		if (isWithin || startWithinEndAfter || startBeforeEndWithin || startBeforeEndAfter)
+			res << m;
+	}
+	return res;
+}
 
 ///
 /// intersect()
@@ -488,6 +525,16 @@ AwMarkerList AwMarker::getMarkersWithDuration(const AwMarkerList& markers)
 	for (auto m : markers)
 		if (m->duration())
 			res << m;
+	return res;
+}
+
+AwSharedMarkerList AwMarker::filterMarkersLabels(AwSharedMarkerList& markers, const QStringList& labels)
+{
+	AwSharedMarkerList res;
+	for (auto const& m : markers) {
+		if (labels.contains(m->label()))
+			res << m;
+	}
 	return res;
 }
 
@@ -805,6 +852,32 @@ QStringList AwMarker::getUniqueLabels(const QList<AwMarker *>& markers)
 	return res;
 }
 
+///
+/// getUniqueLabels()
+/// 
+QStringList AwMarker::getUniqueLabels(const QList<QSharedPointer<AwMarker>>& markers)
+{
+	QStringList res;
+	if (markers.isEmpty())
+		return res;
+
+	QStringList labels = AwMarker::getAllLabels(markers);
+	
+	while (!labels.isEmpty()) {
+		QString label = labels.first();
+#ifndef Q_OS_WIN
+		labels.erase(std::remove_if(labels.begin(), labels.end(), [label](const QString& l) { return l == label;  }), labels.end());
+#else
+		if (labels.size() <= MARKERS_THREAD_THRESHOLD)
+			labels.erase(std::remove_if(labels.begin(), labels.end(), [label](const QString& l) { return l == label;  }), labels.end());
+		else
+			labels.erase(std::remove_if(std::execution::par, labels.begin(), labels.end(), [label](const QString& l) { return l == label;  }), labels.end());
+#endif
+		res << label;
+	}
+	return res;
+}
+
 QList<QPair<QString, int> > AwMarker::count(const AwMarkerList& markers)
 {
 	QStringList labels;
@@ -835,8 +908,16 @@ QStringList AwMarker::getAllLabels(const QList<AwMarker *>& markers)
 	for (auto m : markers)
 		res << m->label();
 	return res;
-
 }
+
+QStringList AwMarker::getAllLabels(const QList<QSharedPointer<AwMarker>>& markers)
+{
+	QStringList res;
+	for (auto const& m : markers)
+		res << m->label();
+	return res;
+}
+
 
 bool AwMarkerLessThan(AwMarker *m1, AwMarker *m2)
 {
@@ -903,7 +984,6 @@ AwMarkerList AwMarker::loadFaster(const QString& path)
 
 			AwMarker* m = new AwMarker;
 			m->setLabel(label);
-			//m->setValue((qint16)value.toInt());
 			m->setValue((float)value.toDouble());
 			m->setStart(position.toFloat());
 			if (!duration.isEmpty())
@@ -911,8 +991,8 @@ AwMarkerList AwMarker::loadFaster(const QString& path)
 			if (!color.isEmpty())
 				m->setColor(color);
 			if (!targets.isEmpty())
-				foreach(QString t, targets)
-				m->addTargetChannel(t.trimmed());
+				for (auto const &t : targets)
+					m->addTargetChannel(t.trimmed());
 			markers << m;
 		}
 	}

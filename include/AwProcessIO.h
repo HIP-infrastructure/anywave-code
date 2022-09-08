@@ -45,6 +45,7 @@ public:
 	AwChannelList& channels() { m_regularChannelList = AwChannel::toChannelList(m_channels);  return m_regularChannelList; }
 	QList<QSharedPointer<AwChannel>>& sharedChannels() { return m_channels; }
 	inline AwMarkerList& markers() { return m_markers; }
+	AwSharedMarkerList& sharedMarkers() { return m_sMarkers; }
 	inline AwMarkerList& modifiedMarkers() { return m_modifiedMarkers; }
 
 
@@ -81,6 +82,7 @@ protected:
 	AwMarkerList m_modifiedMarkers;	// this list contains markers filtered by --use_markers and --skip_markers options
 
 	QList<QSharedPointer<AwChannel>> m_channels;
+	AwSharedMarkerList m_sMarkers;
 	AwChannelList m_regularChannelList;
 
 	QList<QWidget*> m_widgets;

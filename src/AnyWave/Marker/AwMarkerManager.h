@@ -37,6 +37,9 @@ public:
 	static AwMarkerManager *instance();
 	static AwMarkerManager* newInstance();
 
+	inline AwMarkerList& allMarkers() { return m_markers; }
+	AwMarkerList filteredMarkers(const QStringList& used, const QStringList& skipped);
+
 	/** Donne la liste de tous les marqueurs. **/
 	AwMarkerList getMarkers();
 	/** Thread support version **/
@@ -49,7 +52,7 @@ public:
 	void quit();
 	void init();
 	void guiInit();
-	void initFromCommandLine(const AwMarkerList& markers);  // takes ownership of markers
+	void initFromCommandLine(const QString& mrkFilePath);  // takes ownership of markers
 
 	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
@@ -88,9 +91,12 @@ private:
 
 	AwMarkerInspector *m_markerInspector;
 	bool m_needSorting, m_markersModified;
-	AwMarkerList m_markers;				// Markers that are currently visible
+	AwMarkerList m_markers;				
 	AwMarkerList m_displayedMarkers;	// Currently displayed markers
-
+	/// <summary>
+	///  TO BO DONE : handle all markers with shared pointers
+	/// </summary>
+	AwSharedMarkerList m_sMarkers;
 	QMutex m_mutex;
 	static AwMarkerManager *m_instance;
 	QString m_filePath;

@@ -38,6 +38,7 @@ public:
 
 	inline void setDebugMode(bool flag) { m_debugMode = flag; }
 	void setDataManager(AwDataManager* dm) { m_dataManager = dm; }
+	QString& errorString() { return m_errorString; }
 public slots:
 	void handleNewConnection();
 	void dataReceived();
@@ -59,6 +60,7 @@ protected:
 	quint16 m_serverPort;
 	int m_pidCounter;
 	bool m_debugMode;
+	QString m_errorString;
 	QList<AwScriptProcess*> m_processes;	// this list will contain instanciated process when plugin_debug option is active
 
 private:

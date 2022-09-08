@@ -55,6 +55,8 @@ bool Aw4DNIExporter::showUi()
 			QFileInfo fi(filePath);
 			auto bidsDir = fi.absolutePath();
 			bidsDir = bidsDir.remove("_meg");
+			// if the path already has a proc_%   delete it
+			bidsDir = bidsDir.remove(QRegularExpression("_proc-.*$"));
 			bidsDir += QString("_proc-%1_meg").arg(dlg.selectedModification.remove(' '));
 			// create the new dir
 			QDir dir(bidsDir);

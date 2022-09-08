@@ -60,11 +60,6 @@ AwMarkerManager::AwMarkerManager()
 	m_needSorting = true;
 	m_markersModified = false;
 	m_dock = nullptr;
-	//m_markerInspector = new AwMarkerInspector();	
-	//auto globals = AwGlobalMarkers::instance();
-	//globals->setParent(this);
-	//globals->setDisplayed(&m_displayedMarkers);
-	//globals->setTotal(&m_markers);
 }
 
 AwMarkerManager::~AwMarkerManager()
@@ -328,9 +323,26 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 	emit updateStats();
 }
 
-void AwMarkerManager::initFromCommandLine(const AwMarkerList& markers)
+void AwMarkerManager::initFromCommandLine(const QString& filePath)
 {
-	m_markers = markers;
+	if (filePath.size()) {
+		m_sMarkers = AwMarker::loadShrdFaster(filePath);
+		m_markers = AwMarker::toMarkerList(m_sMarkers);
+	}
+	else {
+		auto markers = AwDataManager::instance()->reader()->infos.blocks().first()->markers();
+		if (markers.size()) {
+			m_markers = AwMarker::duplicate(markers);
+			m_sMarkers = AwMarker::toSharedPointerList(m_markers);
+		}
+	}
+	//if (filePath.size()) 
+	//	m_markers = AwMarker::loadFaster(filePath);
+	//else {
+	//	auto markers = AwDataManager::instance()->reader()->infos.blocks().first()->markers();
+	//	if (markers.size())
+	//		m_markers = AwMarker::duplicate(markers);
+	//}
 }
 
 //
@@ -389,9 +401,14 @@ void AwMarkerManager::quit()
 //
 void AwMarkerManager::clear()
 {
+	// clear should never be called while running in command line but we check still if shared pointers are set or not
 	m_displayedMarkers.clear();
-	while (!m_markers.isEmpty())
-		delete m_markers.takeFirst();
+	if (m_sMarkers.size()) {
+		m_sMarkers.clear();
+		m_markers.clear();
+	}
+	else
+		qDeleteAll(m_markers);
 }
 
 

@@ -69,8 +69,11 @@ void AwRequestServer::handleGetMarkers2(QTcpSocket *client, AwScriptProcess *pro
 	//	source_markers = m_dataManager->markerManager()->getMarkers();
 		// use the mrk file instead of marker manager as the source for markers:
 		// can be run in command line mode.
+		emit log(QString("MATPY: get_markers(): using mrk file: %1").arg(m_dataManager->mrkFilePath()));
 		source_markers = AwMarker::load(m_dataManager->mrkFilePath());
 		sharedMarkers = AwMarker::toSharedPointerList(source_markers);
+		if (source_markers.isEmpty())
+			emit log("MATPY: get_marekrs(): no markers loaded!");
 	}
 
 	if (extractTriggers.toLower() == "yes" && usingFile) {

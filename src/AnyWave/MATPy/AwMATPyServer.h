@@ -43,6 +43,7 @@ public:
 	// removes a duplicated instance from the list and delete it.
 	void deleteDuplicatedInstance(AwMATPyServer *instance);
 	void addDuplicatedInstance(AwMATPyServer *instance);
+	QString& errorString() { return m_errorString; }
 signals:
 	void log(const QString& message);
 	void error(const QString& error);
@@ -51,6 +52,7 @@ protected:
 	AwDataManager* m_dataManager;
 	static AwMATPyServer *m_instance;
 	AwRequestServer *m_rs;
+	QString m_errorString;
 	// every time an instance is duplicated the reference is stored here. All instances will be deleted when singleton instance is deleted.
 	QList<AwMATPyServer *> m_duplicatedInstances;
 };

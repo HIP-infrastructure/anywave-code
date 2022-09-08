@@ -99,6 +99,7 @@ bool AwMATPyServer::start(quint16 port)
 	m_dataManager = AwDataManager::instance();
 	m_rs->setDataManager(m_dataManager);
 	if (!m_rs->isListening()) { // failed to listen on TCP port
+		m_errorString = m_rs->errorString();
 		delete m_rs;
 		m_rs = nullptr;
 		return false;
@@ -121,3 +122,4 @@ quint16 AwMATPyServer::serverPort()
 		return 0;
 	return m_rs->serverPort();
 }
+

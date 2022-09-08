@@ -19,6 +19,7 @@
 #include <AwException.h>
 #include "Montage/AwMontageManager.h"
 #include "Data/AwDataServer.h"
+#include "Marker/AwMarkerManager.h"
 #include <montage/AwMontage.h>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -52,6 +53,7 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 {
 	const QString origin = "AwCommandLineManager::createNewProcess()";
+	AwCommandLogger logger(QString("Command Line"));
 	// get plugin name from json argumetns
 	if (!args.contains("run_process")) {
 		throw AwException("missing --run argument.", origin);
@@ -111,6 +113,7 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		// no  output_dir => make output_dir to be the data_dir
 		args[keys::output_dir] = args.value(keys::data_dir);
 	}
+
 	// instantiate process
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
@@ -135,26 +138,29 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		}
 		process->pdi.input.setReader(dm->reader());
 		AwUniteMaps(process->pdi.input.settings, dm->settings());
-
-		// check if marker_file option is set and if the specified file really exists
-		if (process->pdi.input.settings.contains(keys::marker_file)) {
-			if (QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
-				process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
-			else {  // specified file does not exists
+		QString mrkFile;
+		if (args.contains(keys::marker_file)) {
+			mrkFile = args.value(keys::marker_file).toString();
+			if (!QFile::exists(mrkFile)) {
 				logger.sendLog("warning: marker_file is specified but the file does not exist. Searching for default .mrk file.");
-				auto defaultMrkFile = dm->mrkFilePath();
-				if (QFile::exists(defaultMrkFile)) {
-					logger.sendLog("Found default mrk file, using it instead.");
-					process->pdi.input.settings[keys::marker_file] = defaultMrkFile;
-					process->pdi.input.setNewMarkers(AwMarker::load(defaultMrkFile));
-				} // DO NOT SET EMBEDDED MARKERS AS INPUT ANYMORE!!!
-				//else {
-				//	logger.sendLog("warning: no default mrk file found. Setting reader's markers as input if any...");
-				//	process->pdi.input.settings.remove(keys::marker_file);
-				//	process->pdi.input.setNewMarkers(m_dataManager->reader()->infos.blocks().first()->markers(), true);
-				//}
+				mrkFile = dm->mrkFilePath();
+				if (!QFile::exists(mrkFile)) {
+					logger.sendLog(QString("warning: default marker file %1 does no exist.").arg(mrkFile));
+					mrkFile.clear();
+				}
 			}
+			dm->markerManager()->initFromCommandLine(mrkFile);
 		}
+		else {  // check for default .mrk file
+			mrkFile = dm->mrkFilePath();
+			if (!QFile::exists(mrkFile)) {
+				logger.sendLog(QString("warning: default marker file %1 does no exist.").arg(mrkFile));
+				mrkFile.clear();
+			}
+			dm->markerManager()->initFromCommandLine(mrkFile);
+		}
+
+		process->pdi.input.setNewMarkers(dm->markerManager()->getMarkers(), true);
 
 		// check again here that montage_file and marker_file set by DM really exist
 		if (!QFile::exists(process->pdi.input.settings.value(keys::montage_file).toString()))

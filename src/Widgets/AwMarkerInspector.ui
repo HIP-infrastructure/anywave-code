@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>512</width>
-    <height>603</height>
+    <height>673</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -543,8 +543,8 @@
    <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>77</x>
-     <y>425</y>
+     <x>97</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>66</x>
@@ -560,7 +560,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>297</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>173</x>
@@ -576,11 +576,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>107</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
-     <x>527</x>
-     <y>647</y>
+     <x>491</x>
+     <y>624</y>
     </hint>
    </hints>
   </connection>
@@ -592,11 +592,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>297</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
-     <x>527</x>
-     <y>647</y>
+     <x>491</x>
+     <y>624</y>
     </hint>
    </hints>
   </connection>
@@ -623,8 +623,8 @@
    <slot>addPredefinedMarker()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>84</x>
-     <y>364</y>
+     <x>94</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
@@ -639,8 +639,8 @@
    <slot>clearPredefinedMarkers()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>527</x>
-     <y>364</y>
+     <x>491</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -655,8 +655,8 @@
    <slot>removeSelectedPredefinedMarkers()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>399</x>
-     <y>364</y>
+     <x>410</x>
+     <y>352</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -687,12 +687,12 @@
    <slot>addTargets()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>527</x>
-     <y>647</y>
+     <x>491</x>
+     <y>624</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
-     <y>701</y>
+     <y>672</y>
     </hint>
    </hints>
   </connection>
@@ -704,7 +704,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>297</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -719,8 +719,8 @@
    <slot>changeTargetChannels(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>55</x>
-     <y>425</y>
+     <x>75</x>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>5</x>
@@ -735,8 +735,8 @@
    <slot>clearTargets()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>356</x>
-     <y>647</y>
+     <x>410</x>
+     <y>624</y>
     </hint>
     <hint type="destinationlabel">
      <x>370</x>
@@ -752,7 +752,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>193</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>129</x>
@@ -768,11 +768,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>193</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
-     <x>356</x>
-     <y>647</y>
+     <x>410</x>
+     <y>624</y>
     </hint>
    </hints>
   </connection>
@@ -784,11 +784,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>107</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
-     <x>356</x>
-     <y>647</y>
+     <x>410</x>
+     <y>624</y>
     </hint>
    </hints>
   </connection>
@@ -800,11 +800,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>193</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
-     <x>527</x>
-     <y>647</y>
+     <x>491</x>
+     <y>624</y>
     </hint>
    </hints>
   </connection>
@@ -816,7 +816,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>193</x>
-     <y>425</y>
+     <y>413</y>
     </hint>
     <hint type="destinationlabel">
      <x>1</x>

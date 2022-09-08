@@ -64,6 +64,7 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	applyNewSettings(settings);
 #ifdef AW_MARKING_TOOL_V2
 	m_markingTool = AwMarkingTool::instance();
+	connect(m_markingTool, &AwMarkingTool::settingsChanged, this, &AwGraphicsScene::applyMarkingToolSettings);
 #endif
 }
 
@@ -80,6 +81,8 @@ AwGraphicsScene::~AwGraphicsScene()
 	if (m_pickMarkersDial)
 		delete m_pickMarkersDial;
 	delete m_amplitudeItem;
+	if (m_selectionRectangle)
+		delete m_selectionRectangle;
 }
 
 QGraphicsItem* AwGraphicsScene::amplitudeScale()
@@ -291,6 +294,11 @@ void AwGraphicsScene::refresh()
 float AwGraphicsScene::timeAtPos(const QPointF& pos)
 {
 	return (pos.x() / m_physics->xPixPerSec()) + m_currentPosInFile;
+}
+
+float AwGraphicsScene::widthToDuration(float w)
+{
+	return (w / m_physics->xPixPerSec());
 }
 
 float AwGraphicsScene::xPosFromTime(float time)

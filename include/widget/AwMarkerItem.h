@@ -37,6 +37,8 @@ public:
 	void showLabel(bool flag);
 	void showValue(bool flag);
 	void setPositionInFile(float pos);
+	void setText(const QString& text);
+	void setValue(double v);
 
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );

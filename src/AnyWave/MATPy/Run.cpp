@@ -169,8 +169,6 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		inputMarkers = AwMarker::getInputMarkers(modifiedMarkers, skip_markers, use_markers, dm->totalDuration());
 	}
 	process->pdi.input.setNewMarkers(inputMarkers);
-	//if (inputFileSelected)  // init cloned instance of DataManager with input markers
-	//	dm->markerManager()->initFromCommandLine(AwMarker::duplicate(inputMarkers));  // duplicate markers (TODO : think about SharedPointer for IO)
 	AwMATPyServer* server = nullptr;
 	if (plugin->classType != AwProcessPlugin::RegularPlugin) {
 		auto sp = static_cast<AwScriptProcess*>(process);

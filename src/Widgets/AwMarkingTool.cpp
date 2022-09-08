@@ -16,6 +16,7 @@
 #include <widget/AwMarkingTool.h>
 #include <AwMarker.h>
 #include "ui_AwMarkingTool.h"
+#include <QHeaderView>
 
 
 AwMarkingTool* AwMarkingTool::m_instance = nullptr;
@@ -50,13 +51,20 @@ AwMarkingTool::AwMarkingTool(QWidget *parent)
 		ui->comboBoxColor->insertItem(i + 1, QColor::colorNames().at(i), i);
 		ui->comboBoxColor->setItemData(i + 1, QColor(QColor::colorNames().at(i)), Qt::DecorationRole);
 	}
-	connect(ui->comboBoxColor, SIGNAL(currentIndexChanged(int)), this, SLOT(changeColor()));
+	connect(ui->comboBoxColor, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDefaultColor()));
 	connect(ui->lineEditName, &QLineEdit::editingFinished, this, &AwMarkingTool::changeDefaultMarkerTag);
 	connect(ui->spinValue, SIGNAL(valueChanged(double)), this, SLOT(changeDefaultValue(double)));
+
+	// connect radio button to change current mode
+	connect(ui->radioDefault, &QRadioButton::clicked, this, &AwMarkingTool::changeMode);
+	connect(ui->radioCustom, &QRadioButton::clicked, this, &AwMarkingTool::changeMode);
+	connect(ui->radioHED, &QRadioButton::clicked, this, &AwMarkingTool::changeMode);
+
 
 	// starts the gui in default marker mode => hide other options
 	ui->groupCustom->hide();
 	ui->groupHED->hide();
+	ui->checkConfidence->hide();
 
 	// init custom list part of the gui
 		// default color at first index
@@ -65,11 +73,14 @@ AwMarkingTool::AwMarkingTool(QWidget *parent)
 		ui->comboColorCustom->insertItem(i + 1, QColor::colorNames().at(i), i);
 		ui->comboColorCustom->setItemData(i + 1, QColor(QColor::colorNames().at(i)), Qt::DecorationRole);
 	}
+	ui->tableWidgetCustom->setColumnCount(3);
+	ui->tableWidgetCustom->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	QStringList headers = { "Name", "Value", "Color" };
 	ui->tableWidgetCustom->setHorizontalHeaderLabels(headers);
+	ui->tableWidgetHED->setColumnCount(3);
 	ui->tableWidgetHED->setHorizontalHeaderLabels(headers);
-	ui->tableWidgetCustom->verticalHeader()->setVisible(false);
-	ui->tableWidgetHED->verticalHeader()->setVisible(false);
+	ui->tableWidgetHED->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
 
 	connect(ui->buttonAddMarker, &QPushButton::clicked, this, &AwMarkingTool::addMarkerToCustomList);
 }
@@ -79,9 +90,17 @@ AwMarkingTool::~AwMarkingTool()
 	delete ui;
 }
 
+void AwMarkingTool::saveCustomList()
+{
+	if (m_customListPath.isEmpty())
+		return;
+	AwMarker::save(m_customListPath, m_customMarkers);
+}
+
 
 void AwMarkingTool::loadCustomList(const QString& path)
 {
+	m_customListPath = path;
 	auto markers = AwMarker::load(path);
 	m_customMarkers = AwMarker::toSharedPointerList(markers);
 	// init the gui accordingly
@@ -98,18 +117,26 @@ void AwMarkingTool::loadCustomList(const QString& path)
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		ui->tableWidgetCustom->setItem(row++, 2, item);
 	}
-	if (markers.isEmpty()) {
-		// init with default marker 
-		ui->tableWidgetCustom->insertRow(row);
-		auto item = new QTableWidgetItem(m_defaultMarker->label());
+}
+
+void AwMarkingTool::loadHEDList(const QString& path)
+{
+	m_hedListPath = path;
+	auto markers = AwMarker::load(path);
+	m_hedMarkers = AwMarker::toSharedPointerList(markers);
+	// init the gui accordingly
+	int row = 0;
+	for (auto m : markers) {
+		ui->tableWidgetHED->insertRow(row);
+		auto item = new QTableWidgetItem(m->label());
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-		ui->tableWidgetCustom->setItem(row, 0, item);
-		item = new QTableWidgetItem(QString::number(m_defaultMarker->value()));
+		ui->tableWidgetHED->setItem(row, 0, item);
+		item = new QTableWidgetItem(QString::number(m->value()));
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-		ui->tableWidgetCustom->setItem(row, 1, item);
-		item = new QTableWidgetItem(m_defaultMarker->color());
+		ui->tableWidgetHED->setItem(row, 1, item);
+		item = new QTableWidgetItem(m->color());
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-		ui->tableWidgetCustom->setItem(row, 2, item);
+		ui->tableWidgetHED->setItem(row++, 2, item);
 	}
 }
 
@@ -126,19 +153,34 @@ void AwMarkingTool::setToDefault()
 
 /////// SLOTS
 
+void AwMarkingTool::changeMode(bool f)
+{
+	if (!f)
+		return;
+	if (sender() == ui->radioDefault)
+		m_mode = AwMarkingTool::Default;
+	else if (sender() == ui->radioCustom)
+		m_mode = AwMarkingTool::Custom;
+	else 
+		m_mode = AwMarkingTool::HED;
+}
+
 void AwMarkingTool::changeAutoIncrement(bool f)
 {
 	m_settings[keys::auto_increment] = f;
+	emit settingsChanged();
 }
 
 void AwMarkingTool::changeConfidenceLevel(bool f)
 {
 	m_settings[keys::confidence_level] = f;
+	emit settingsChanged();
 }
 
 void AwMarkingTool::changeTagWhileMarking(bool f)
 {
 	m_settings[keys::tag_while_marking] = f;
+	emit settingsChanged();
 }
 
 void AwMarkingTool::changeDefaultColor()
@@ -148,16 +190,20 @@ void AwMarkingTool::changeDefaultColor()
 		m_settings[keys::default_color] = QString();
 	else
 		m_settings[keys::default_color] = QColor(QColor::colorNames().at(index - 1)).name(QColor::HexRgb);
+	m_defaultMarker->setColor(m_settings.value(keys::default_color).toString());
+	emit settingsChanged();
 }
 
 void AwMarkingTool::changeDefaultMarkerTag()
 {
 	m_defaultMarker->setLabel(ui->lineEditName->text());
+	emit settingsChanged();
 }
 
 void AwMarkingTool::changeDefaultValue(double v)
 {
 	m_defaultMarker->setValue(v);
+	emit settingsChanged();
 }
 
 void AwMarkingTool::addMarkerToCustomList()
@@ -178,4 +224,5 @@ void AwMarkingTool::addMarkerToCustomList()
 	item = new QTableWidgetItem(marker->color());
 	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 	ui->tableWidgetCustom->setItem(row, 2, item);
+	saveCustomList();
 }

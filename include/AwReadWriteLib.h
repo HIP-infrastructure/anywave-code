@@ -73,6 +73,7 @@ protected:
 	float m_start;		
 	int m_id;			
 	AwMarkerList m_markers;
+	AwSharedMarkerList m_sMarkers;
 };
 
 typedef QList<AwBlock *> AwBlockList;  ///< Define a list of blocks.

@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>AwMarkingTool</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,1">
    <item>
     <widget class="QPlainTextEdit" name="plainTextEdit">
      <property name="sizePolicy">
@@ -52,7 +52,7 @@ Ctrl + left click allows to specify channels to target.</string>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>32</height>
+       <height>30</height>
       </size>
      </property>
     </spacer>
@@ -70,14 +70,14 @@ Ctrl + left click allows to specify channels to target.</string>
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="radioButton_2">
+      <widget class="QRadioButton" name="radioCustom">
        <property name="text">
         <string>Use custom list</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="radioButton_3">
+      <widget class="QRadioButton" name="radioHED">
        <property name="text">
         <string>Use HED</string>
        </property>
@@ -97,17 +97,7 @@ Ctrl + left click allows to specify channels to target.</string>
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox">
-       <property name="text">
-        <string>Tag while marking</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="checkBox_2">
+      <widget class="QCheckBox" name="checkConfidence">
        <property name="text">
         <string>Confidence level</string>
        </property>
@@ -145,8 +135,11 @@ Ctrl + left click allows to specify channels to target.</string>
         <property name="toolTip">
          <string>Name the marker</string>
         </property>
+        <property name="text">
+         <string notr="true"/>
+        </property>
         <property name="clearButtonEnabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -257,8 +250,11 @@ Ctrl + left click allows to specify channels to target.</string>
         <property name="toolTip">
          <string>Name the marker</string>
         </property>
-        <property name="clearButtonEnabled">
+        <property name="frame">
          <bool>true</bool>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -350,7 +346,26 @@ Ctrl + left click allows to specify channels to target.</string>
        </widget>
       </item>
       <item row="0" column="0" colspan="7">
-       <widget class="QTableWidget" name="tableWidgetCustom"/>
+       <widget class="QTableWidget" name="tableWidgetCustom">
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="showDropIndicator" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="dragDropOverwriteMode">
+         <bool>false</bool>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::NoSelection</enum>
+        </property>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -368,10 +383,30 @@ Ctrl + left click allows to specify channels to target.</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QTableWidget" name="tableWidgetHED"/>
+       <widget class="QTableWidget" name="tableWidgetHED">
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderHighlightSections">
+         <bool>false</bool>
+        </attribute>
+       </widget>
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
@@ -379,14 +414,14 @@ Ctrl + left click allows to specify channels to target.</string>
  <resources/>
  <connections>
   <connection>
-   <sender>radioButton_2</sender>
+   <sender>radioCustom</sender>
    <signal>clicked(bool)</signal>
    <receiver>groupCustom</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>180</x>
-     <y>164</y>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel">
      <x>84</x>
@@ -395,7 +430,7 @@ Ctrl + left click allows to specify channels to target.</string>
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_3</sender>
+   <sender>radioHED</sender>
    <signal>clicked(bool)</signal>
    <receiver>groupHED</receiver>
    <slot>setVisible(bool)</slot>
@@ -443,7 +478,7 @@ Ctrl + left click allows to specify channels to target.</string>
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_2</sender>
+   <sender>radioCustom</sender>
    <signal>clicked(bool)</signal>
    <receiver>groupHED</receiver>
    <slot>setHidden(bool)</slot>
@@ -459,7 +494,7 @@ Ctrl + left click allows to specify channels to target.</string>
    </hints>
   </connection>
   <connection>
-   <sender>radioButton_3</sender>
+   <sender>radioHED</sender>
    <signal>clicked(bool)</signal>
    <receiver>groupCustom</receiver>
    <slot>setHidden(bool)</slot>
@@ -475,18 +510,82 @@ Ctrl + left click allows to specify channels to target.</string>
    </hints>
   </connection>
   <connection>
+   <sender>radioCustom</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>groupDefault</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>201</x>
+     <y>176</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioHED</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>groupDefault</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>266</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>180</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioDefault</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>groupDefault</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>151</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>120</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>buttonClearList</sender>
    <signal>clicked()</signal>
    <receiver>tableWidgetCustom</receiver>
-   <slot>clear()</slot>
+   <slot>clearContents()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>334</x>
-     <y>479</y>
+     <x>326</x>
+     <y>485</y>
     </hint>
     <hint type="destinationlabel">
-     <x>330</x>
-     <y>362</y>
+     <x>398</x>
+     <y>352</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioHED</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>checkConfidence</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>288</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>612</x>
+     <y>150</y>
     </hint>
    </hints>
   </connection>

@@ -41,9 +41,11 @@ public:
 	inline int mode() { return m_mode; }
 	void setToDefault();
 	void loadCustomList(const QString& path);
+	void loadHEDList(const QString& path);
 	QSharedPointer<AwMarker>& defaultMarker();
 	QVariantMap& settings() { return m_settings; }
 	QList<QSharedPointer<AwMarker>>& customList() { return m_customMarkers; }
+	QList<QSharedPointer<AwMarker>>& hedList() { return m_hedMarkers; }
 
 	static AwMarkingTool* instance();
 protected slots:
@@ -54,6 +56,9 @@ protected slots:
 	void changeDefaultMarkerTag();
 	void changeDefaultValue(double);
 	void addMarkerToCustomList();
+	void changeMode(bool);
+signals:
+	void settingsChanged();
 protected:
 	static AwMarkingTool* m_instance;
 	int m_mode;
@@ -61,6 +66,9 @@ protected:
 	QList<QSharedPointer<AwMarker>> m_hedMarkers;
 	QSharedPointer<AwMarker> m_defaultMarker;
 	QVariantMap m_settings;
+	QString m_customListPath, m_hedListPath;
+
+	void saveCustomList();
 private:
 	Ui::AwMarkingToolClassUi *ui;
 
