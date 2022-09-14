@@ -128,9 +128,11 @@ void AwBIDSManager::initCommandLineOperation(const QString & filePath, AwDataMan
 		auto badFilePath = baseDerivPath + ".bad";
 		auto markerFilePath = baseDerivPath + ".mrk";
 		auto montageFilePath = baseDerivPath + ".mtg";
+		auto filterFilePath = baseDerivPath + ".flt";
 		dm->settings()[keys::bad_file] = badFilePath;
 		dm->settings()[keys::montage_file] = montageFilePath;
 		dm->settings()[keys::marker_file] = markerFilePath;
+		dm->settings()[keys::flt_file] = filterFilePath;
 	}
 }
 

@@ -17,12 +17,13 @@
 #include "Marker/AwMarkerManager.h"
 #include <QIcon>
 
-AwExportWizardDial::AwExportWizardDial(QWidget* parent) : QWizard(parent)
+AwExportWizardDial::AwExportWizardDial(const QVariantMap& settings, QWidget* parent) : QWizard(parent)
 {
+	m_settings = settings;
 	setWizardStyle(QWizard::ModernStyle);
 	setWindowTitle("Exporting to file...");
 	setWindowIcon(QIcon(":/images/AnyWave_icon.png"));
-	m_outputPage = new AwOutputFileWizardPage;
+	m_outputPage = new AwOutputFileWizardPage(settings);
 	addPage(m_outputPage);
 	m_channelsPage = new AwChannelsExportWizardPage;
 	addPage(m_channelsPage);

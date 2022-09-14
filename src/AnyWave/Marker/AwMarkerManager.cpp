@@ -257,8 +257,6 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
-	//AwMarker::sort(m_markers);
-	//m_needSorting = false;
 	m_ui->setMarkers(m_markers);
 	if (p != nullptr)
 		p->setMarkersReceived();
@@ -336,13 +334,6 @@ void AwMarkerManager::initFromCommandLine(const QString& filePath)
 			m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 		}
 	}
-	//if (filePath.size()) 
-	//	m_markers = AwMarker::loadFaster(filePath);
-	//else {
-	//	auto markers = AwDataManager::instance()->reader()->infos.blocks().first()->markers();
-	//	if (markers.size())
-	//		m_markers = AwMarker::duplicate(markers);
-	//}
 }
 
 //
@@ -408,7 +399,7 @@ void AwMarkerManager::clear()
 		m_markers.clear();
 	}
 	else
-		qDeleteAll(m_markers);
+		AW_DESTROY_LIST(m_markers);
 }
 
 

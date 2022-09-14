@@ -199,7 +199,7 @@ void AwDataConnection::parseChannels(AwChannelList& channels)
 
 void AwDataConnection::createAVGChannel(AwChannel *channel)
 {
-	if (m_avg[channel->type()] == NULL) {
+	if (m_avg[channel->type()] == nullptr) {
 		auto chan = new AwAVGChannel(channel->type());
 		chan->setLowFilter(channel->lowFilter());
 		chan->setHighFilter(channel->highFilter());
@@ -214,7 +214,7 @@ void AwDataConnection::deleteAVGChannels()
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
 		if (m_avg[i]) {
 			delete m_avg[i];
-			m_avg[i] = NULL;
+			m_avg[i] = nullptr;
 		}
 	}
 }
@@ -250,13 +250,6 @@ void AwDataConnection::computeICAComponents(int type, AwICAChannelList& channels
 {
 	AwICAComponents *comps = AwICAManager::instance()->getComponents(type);
 	if (comps)	{
-		// load source channels
-		//AwDataManager::instance()->filterSettings().apply(comps->sources());
-		// do not apply current AnyWave filters on sources but apply filter used when computing ICA
-//		AwFilterSettings fsettings;
-//		fsettings.set(comps->type(), comps->hpFilter(), comps->lpFilter(), comps->notchFilter());
-//		fsettings.apply(comps->sources());
-
 		// When loading ICA.mat file, the sources channels are built and filters are set to be the ones used in computation
 		// So we assume here there is no need to filter again the sources channels.
 		readWithOfflineFiltering(m_positionInFile, m_duration, comps->sources());
@@ -301,7 +294,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 	for (auto i = 0; i < channelsToLoad->size(); i++) {
 		auto destChannel = channelsToLoad->at(i);
 		float *data = destChannel->newData(totalSamples);
-		for (auto chunk : chunks) {
+		for (auto const& chunk : chunks) {
 			auto channel = chunk.at(i);
 			for (auto j = 0; j < channel->dataSize(); j++)
 				*data++ = channel->data()[j];
@@ -325,7 +318,9 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, qu
 	qDebug() << Q_FUNC_INFO << "called " << endl;
 #endif
 	if (channelsToLoad->isEmpty()) {
-		setEndOfData();
+		m_client->setError("Tried to load empty list of channels. Aborter.");
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		return;
 	}
 	// check start position
@@ -334,7 +329,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, quint64 start, qu
 		qDebug() << "AwDataConnection::loadData() - in thread " << thread() << " start position beyong total duration." << endl;
 		qDebug() << "AwDataConnection::loadData() - in thread " << thread() << " unlocking reader." << endl;
 #endif
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		return;
 	}
 
@@ -417,17 +413,14 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	// the reader given by the server can also be null if we have several data server instianted and running.
 	// if the server's reader is null that means we have a connection to the wrong server...
 	if (m_reader == nullptr) {
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
+		m_client->setError("No reader plugin linked to data server.");
 		return;
 	}
-
-#ifndef NDEBUG
-	if (channelsToLoad->isEmpty())
-		qDebug() << Q_FUNC_INFO << "Channel list is empty() ! " << endl;
-	qDebug() << Q_FUNC_INFO << endl;
-#endif
 	if (channelsToLoad->isEmpty())	{
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		m_client->setError(QString("Channel list is empty."));
 		return;
 	}
@@ -436,7 +429,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 #ifndef NDEBUG
 	qDebug() << Q_FUNC_INFO << " in thread " << thread() << " start position beyong total duration." << endl;
 #endif
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		m_client->setError(QString("start position beyond total duration."));
 		return;
 	}
@@ -451,7 +445,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		m_duration =  m_reader->infos.totalDuration();
 	
 	if (m_duration == 0.) {
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		return;
 	}
 	m_positionInFile = start;
@@ -474,7 +469,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	}
 	catch (const std::bad_alloc &)	{
 		emit outOfMemory();
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		m_client->setError(QString("Error allocating memory to load data."));
 		return;
 	}
@@ -497,7 +493,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	// Load the channels from file
 	try	{
 		if (!m_loadingList.isEmpty()) {
-//			fileLock();  // get access to the file for reading
 			for (auto c : m_loadingList)
 				c->clearData();
 			if (rawData)
@@ -505,7 +500,6 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 			else {
 				read = readWithOfflineFiltering(m_positionInFile, m_duration, m_loadingList);
 			}
-//			fileUnlock();
 		}
 	}
 	catch (const std::bad_alloc &)	{
@@ -514,12 +508,12 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 #endif 
 		for (auto c : m_loadingList)
 			c->clearData();
-//		fileUnlock();
 
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) 
 			m_ICASourcesLoaded[i] = false;
 		emit outOfMemory();
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		m_client->setError(QString("Error allocating memory to load data."));
 		return;
 	}
@@ -527,7 +521,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	if (read == 0) { // NO DATA READ
 		for (auto c: m_loadingList)
 			c->clearData();
-		setEndOfData();
+		if (!doNotWakeUpClient)
+			setEndOfData();
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 			m_ICASourcesLoaded[i] = false;
 		emit endOfData();
@@ -546,7 +541,8 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		catch (const std::bad_alloc &)	{
 			for(auto c : m_loadingList)
 				c->clearData();
-			setEndOfData();
+			if (!doNotWakeUpClient)
+				setEndOfData();
 			for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 				m_ICASourcesLoaded[i] = false;
 			emit endOfData();

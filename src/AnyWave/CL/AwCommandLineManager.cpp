@@ -161,10 +161,21 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		}
 
 		process->pdi.input.setNewMarkers(dm->markerManager()->getMarkers(), true);
-
-		// check again here that montage_file and marker_file set by DM really exist
-		if (!QFile::exists(process->pdi.input.settings.value(keys::montage_file).toString()))
-			process->pdi.input.settings.remove(keys::montage_file);
+		QString mtgFile;
+		if (args.contains(keys::montage_file)) {
+			mtgFile = args.value(keys::montage_file).toString();
+			if (!QFile::exists(mtgFile)) {
+				logger.sendLog("warning: montage_file is specified but the file does not exist. Searching for default .mtg file.");
+				mtgFile = dm->mtgFilePath();
+				if (!QFile::exists(mtgFile)) {
+					logger.sendLog(QString("warning: default montage file %1 does no exist.").arg(mtgFile));
+					mtgFile.clear();
+				}
+			}
+			args.remove(keys::montage_file);
+			if (mtgFile.size())
+				args[keys::montage_file] = mtgFile;
+		}
 		// check for BAD file
 		QString tmp = dm->badFilePath();
 		if (QFile::exists(tmp)) {

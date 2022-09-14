@@ -748,6 +748,7 @@ void AwProcessManager::runProcess(AwBaseProcess *process,  const QStringList& ar
 					if (BM->isBIDSActive()) {
 						process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
 						process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
+						process->pdi.input.settings.insert(keys::bids_user_derivatives_folder, BM->getUserDerivativesFolder());
 					}
 				}
 				if (!process->pdi.input.settings.contains(keys::output_dir))

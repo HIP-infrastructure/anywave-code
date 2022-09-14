@@ -24,7 +24,7 @@ class AwExportWizardDial : public QWizard
 {
 	Q_OBJECT
 public:
-	AwExportWizardDial(QWidget* parent = nullptr);
+	AwExportWizardDial(const QVariantMap& settings = QVariantMap(), QWidget* parent = nullptr);
 
 	AwChannelList channels;
 	QStringList useMarkers, skipMarkers;
@@ -34,6 +34,7 @@ public:
 public slots:
 	void accept() override;
 protected:
+	QVariantMap m_settings;
 	AwChannelsExportWizardPage* m_channelsPage;
 	AwMarkersExportWizardPage* m_markersPage;
 	AwFilterExportWizardPage* m_filterPage;

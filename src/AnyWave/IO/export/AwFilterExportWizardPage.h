@@ -51,7 +51,7 @@ class AwFilterExportWizardPage : public QWizardPage
 {
 	Q_OBJECT
 public:
-	AwFilterExportWizardPage(AwChannelsExportWizardPage* page, QWidget* parent = nullptr);
+	AwFilterExportWizardPage(AwChannelsExportWizardPage* page,  QWidget* parent = nullptr);
 
 	void initializePage() override;
 	bool validatePage() override;

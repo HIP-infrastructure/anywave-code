@@ -218,6 +218,10 @@ int ICA::initParameters()
 		// if not than one marker should marked the entire data in pdi.input.markers.;
 		sendMessage("Loading data...");
 		requestData(&m_channels, &pdi.input.markers(), true);
+		if (hasErrorOccured()) {
+			sendMessage(QString("Error while loading data: %1").arg(errorString()));
+			return -1;
+		}
 		sendMessage("Done");
 	}
 	catch (std::bad_alloc& ba) {

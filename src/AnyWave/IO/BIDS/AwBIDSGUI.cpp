@@ -333,6 +333,8 @@ void AwBIDSGUI::openFileItem(AwBIDSItem* item)
 
 void AwBIDSGUI::handleClick(const QModelIndex& index)
 {
+	if (index.column() > 0)
+		return;
 	// get the item
 	auto item = m_model->itemFromIndex(index);
 	if (item == 0)

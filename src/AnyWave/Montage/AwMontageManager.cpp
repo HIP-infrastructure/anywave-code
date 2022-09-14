@@ -690,6 +690,8 @@ AwChannelList AwMontageManager::load(const QString& path)
 			else if (c->name() == "MEG_AVG") {
 				res << new AwAVGChannel(AwChannel::MEG);
 			}
+			else  // ignore other cases
+				continue;
 		}
 	}
 	return res;
