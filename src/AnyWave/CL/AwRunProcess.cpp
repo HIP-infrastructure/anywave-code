@@ -54,7 +54,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		logger.sendLog(QString("Done."));
 	}
 	else {
-		logger.sendLog(QString("init() failed for process %1").arg(process->plugin()->name));
+		logger.sendLog(QString("init() failed for process %1.\nError is %2").arg(process->plugin()->name).arg(process->errorString()));
 	}
 	AwBIDSManager::finishCommandLineOperation();
 	delete process;

@@ -791,3 +791,10 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 	file.close();
 	return res;
 }
+
+void AwBIDSManager::closeFile(QStandardItem* item)
+{
+	// TO DO HERE  : update channels.tsv file if bad labels have changed?
+	// that is not done by default but should be done if an option is set Preferences??
+	// if updateChannelsTsv option set in Preferences =>  update channels.tsv
+}

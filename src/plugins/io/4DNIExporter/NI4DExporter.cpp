@@ -9,6 +9,7 @@
 #include <QDir>
 #include "Aw4DNIExportDialog.h"
 #include <widget/AwWaitWidget.h>
+#include <utils/bids.h>
 
 Aw4DNIExporterPlugin::Aw4DNIExporterPlugin()
 {
@@ -55,12 +56,15 @@ bool Aw4DNIExporter::showUi()
 			QFileInfo fi(filePath);
 			auto bidsDir = fi.absolutePath();
 			bidsDir = bidsDir.remove("_meg");
-			// if the path already has a proc_%   delete it
-			bidsDir = bidsDir.remove(QRegularExpression("_proc-.*$"));
+			auto map = AwUtilities::bids::getKeysValue(bidsDir);
+			if (map.contains("proc")) {
+				bidsDir = bidsDir.remove(QString("_proc-%1").arg(map.value("proc")));
+
+			}
 			bidsDir += QString("_proc-%1_meg").arg(dlg.selectedModification.remove(' '));
 			// create the new dir
 			QDir dir(bidsDir);
-			dir.mkpath(bidsDir);
+			dir.mkpath(bidsDir);  // bidsDir is the destination folder
 			// moving files
 			AwWaitWidget wait("Copying files...");
 			connect(this, &Aw4DNIExporter::finished, &wait, &AwWaitWidget::accept);
@@ -79,18 +83,23 @@ bool Aw4DNIExporter::showUi()
 				QFile::copy(QString("%1_headshape.pos").arg(srcBaseJsonFileName), QString("%1_headshape.pos").arg(destBaseJsonFileName));
 
 				// copy .mtg, .bad, .mrk !!!
-				QFileInfo fi;
-				QString  mrkFilePath = pdi.input.settings.value(keys::marker_file).toString();  // we use marker_file to get the deratives path for sidecar files.
-				fi.setFile(mrkFilePath);
-				QString derivPath = fi.absolutePath(); // base derivatives path
-				QDir derivativesDir(derivPath);
-				QString destPath = derivPath;
-				destPath = destPath.remove("_meg");
-				destPath += proc;
-				derivativesDir.mkpath(destPath);  // new derivatives path
-				for (const auto& file : derivativesDir.entryList(QDir::Files)) {
-					QString srcFile = QDir::toNativeSeparators(QString("%1/%2").arg(derivPath).arg(file));
-					QString destFile = QDir::toNativeSeparators(QString("%1/%2").arg(destPath).arg(file));
+				//QString  mrkFilePath = pdi.input.settings.value(keys::marker_file).toString();  // we use marker_file to get the deratives path for sidecar files.
+				QString bidsDerivativesSource = pdi.input.settings.value(keys::bids_user_derivatives_folder).toString();
+				auto map = AwUtilities::bids::getKeysValue(bidsDerivativesSource);
+
+				QString bidsDerivativesDest = bidsDerivativesSource;
+				bidsDerivativesDest = bidsDerivativesDest.remove("_meg");
+				if (map.contains("proc")) {
+					bidsDerivativesDest = bidsDerivativesDest.remove(QString("_proc-%1").arg(map.value("proc")));
+				}
+
+				bidsDerivativesDest = bidsDerivativesDest + proc;
+				QDir destDerivativesDir(bidsDerivativesDest);
+				destDerivativesDir.mkpath(bidsDerivativesDest);  // new derivatives path
+				QDir sourceDerivativesDir(bidsDerivativesSource);
+				for (const auto& file : sourceDerivativesDir.entryList(QDir::Files)) {
+					QString srcFile = QDir::toNativeSeparators(QString("%1/%2").arg(bidsDerivativesSource).arg(file));
+					QString destFile = QDir::toNativeSeparators(QString("%1/%2").arg(bidsDerivativesDest).arg(file));
 					QFile::copy(srcFile, destFile);
 				}
 				// end copying .bad .mtg .mrk

@@ -145,6 +145,7 @@ public:
 	QString currentFileName();
 	QStringList participantColumns() { return m_settings.value(bids::participant_cols).toStringList(); }
 	void parseSubject(AwBIDSItem* item);
+	void closeFile(QStandardItem* item);
 	void recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
@@ -176,6 +177,7 @@ protected:
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
 	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
+	
 
 	void initAnyWaveDerivativesForFile(const QString& filePath);
 	void moveSidecarFilesToDerivatives();

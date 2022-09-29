@@ -538,19 +538,44 @@ AwSharedMarkerList AwMarker::filterMarkersLabels(AwSharedMarkerList& markers, co
 	return res;
 }
 
+/// <summary>
+/// getInputMarkers()
+/// based on skip labels and used labels, update the markers list (passed as reference) and return the input list to use to request data
+/// </summary>
+/// <param name="markers"></param>
+/// <param name="skipLabels"></param>
+/// <param name="useLabels"></param>
+/// <param name="totalDuration"></param>
+/// <returns></returns>
 AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList& skipLabels, const QStringList& useLabels, float totalDuration)
 {
 	bool skip = !skipLabels.isEmpty();
 	bool use = !useLabels.isEmpty();
 	AwMarkerList inputMarkers;
+	AwMarkerList skippedMarkers, usedMarkers;
+	if (skip) {
+		skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		if (skippedMarkers.isEmpty())
+			skip = false;
+	}
+	if (use) {
+		usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		if (usedMarkers.isEmpty())
+			use = false;
+	}
+
 
 	if (!use && !skip) { // do not modify markers and return ALL DATA as input.
 		inputMarkers << new AwMarker("All Data", 0, totalDuration);
 	}
 	else if (use && !skip) { // just use some markers as input =>  reshape markers and return used markers as input.
-		inputMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
-		if (inputMarkers.isEmpty())
-			return AwMarker::duplicate(markers);
+		//inputMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		inputMarkers = usedMarkers;
+		//if (inputMarkers.isEmpty()) {
+		//	//return AwMarker::duplicate(markers);
+		//	inputMarkers << new AwMarker("All Data", 0, totalDuration);
+		//	return inputMarkers;
+		//}
 		// remove used markers from the list
 		for (auto m : inputMarkers)
 			markers.removeAll(m);
@@ -580,9 +605,12 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		markers = updatedMarkers;
 	}
 	else if (skip && !use) { // skip sections of data => reshape all the markers and set the inverted selection as input.
-		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
-		if (skippedMarkers.isEmpty())
-			return AwMarker::duplicate(markers);
+		//auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		//if (skippedMarkers.isEmpty()) {
+		//	//return AwMarker::duplicate(markers);
+		//	inputMarkers << new AwMarker("All Data", 0, totalDuration);
+		//	return inputMarkers;
+		//}
 		inputMarkers = AwMarker::invertMarkerSelection(skippedMarkers, "Selection", totalDuration);
 		// remove skipped markers from the list
 		for (auto m : skippedMarkers)
@@ -596,10 +624,10 @@ AwMarkerList AwMarker::getInputMarkers(AwMarkerList& markers, const QStringList&
 		AW_DESTROY_LIST(skippedMarkers);
 	}
 	else if (skip && use) {
-		auto usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
-		auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
-		if (usedMarkers.isEmpty() || skippedMarkers.isEmpty())
-			return AwMarker::duplicate(markers);
+		//auto usedMarkers = AwMarker::getMarkersWithLabels(markers, useLabels);
+		//auto skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipLabels);
+		//if (usedMarkers.isEmpty() || skippedMarkers.isEmpty())
+		//	return AwMarker::duplicate(markers);
 		// remove artefact markers from the marker list
 		for (auto m : skippedMarkers)
 			markers.removeAll(m);
@@ -635,6 +663,17 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 	bool skip = !skipped.isEmpty();
 	bool use = !used.isEmpty();
 	AwMarkerList res, skippedMarkers, usedMarkers;
+
+	if (skip) {
+		skippedMarkers = AwMarker::getMarkersWithLabels(markers, skipped);
+		if (skippedMarkers.isEmpty())
+			skip = false;
+	}
+	if (use) {
+		usedMarkers = AwMarker::getMarkersWithLabels(markers, used);
+		if (usedMarkers.isEmpty())
+			use = false;
+	}
 
 	if (skip && !use) {
         auto tmp = AwMarker::getMarkersWithLabels(markers, skipped);
@@ -707,7 +746,7 @@ AwMarkerList AwMarker::applySelectionFilter(const AwMarkerList& markers, const Q
 		res = AwMarker::duplicate(usedMarkers);
 	}
 	else
-		res = markers;
+		res = AwMarker::duplicate(markers);
 
 	while (!usedMarkers.isEmpty())
 		delete usedMarkers.takeFirst();

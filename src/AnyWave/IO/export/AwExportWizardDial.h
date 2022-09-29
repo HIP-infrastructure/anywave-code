@@ -39,4 +39,5 @@ protected:
 	AwMarkersExportWizardPage* m_markersPage;
 	AwFilterExportWizardPage* m_filterPage;
 	AwOutputFileWizardPage* m_outputPage;
+	bool m_isBids;
 };

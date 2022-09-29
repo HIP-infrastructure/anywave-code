@@ -39,9 +39,6 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
-	// DO NOT change the filters for sources channels => the filters are locked to the ones set during computation
-//	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwICAComponents::setNewFilters);
-
 }
 
 AwICAComponents::~AwICAComponents()
@@ -56,6 +53,7 @@ AwICAComponents::~AwICAComponents()
 		m_seegMap->close();
 		delete m_seegMap;
 	}
+
 }
 
 

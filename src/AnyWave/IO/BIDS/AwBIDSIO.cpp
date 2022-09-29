@@ -276,6 +276,9 @@ QString AwBIDSManager::getDerivativesPath(int type)
 	case AwBIDSManager::freesurfer:
 		basePath += QString("/freesurfer/%1").arg(m_currentOpenItem->subjectName());
 		break;
+	case AwBIDSManager::ica:
+		basePath += QString("/ica");
+		break;
 	}
 	return basePath;
 }

@@ -193,7 +193,7 @@ void AwExporter::runFromCommandLine()
 			outputFile = outputFile.remove(QString("proc-%1").arg(proc));
 			outputFile = outputFile.remove(modality);
 			outputFile = outputFile.remove(".vhdr");
-			
+
 			QFile::copy(QString("%1_channels.tsv").arg(outputFile), QString("%1_channels.tsv").arg(destFile));
 			QFile::copy(QString("%1_events.tsv").arg(outputFile), QString("%1_events.tsv").arg(destFile));
 			QFile::copy(QString("%1%2.json").arg(outputFile).arg(modality), QString("%1_%2.json").arg(destFile).arg(modality));
@@ -204,11 +204,15 @@ void AwExporter::runFromCommandLine()
 			for (auto const& f : files) {
 				if (f.startsWith(baseFileName)) {
 					auto extension = QFileInfo(f).suffix();
-					QFile::copy(QString("%1/%2").arg(userDerivatives).arg(f), 
-						QString("%1/%2_proc-%3%4.vhdr.%5").arg(userDerivatives).arg(baseFileName).arg(proc)
-					.arg(modality).arg(extension));
+					bool status = QFile::copy(QString("%1/%2").arg(userDerivatives).arg(f),
+						QString("%1/%2proc-%3%4.vhdr.%5").arg(userDerivatives).arg(baseFileName).arg(proc)
+						.arg(modality).arg(extension));
+					if (!status) {
+						sendMessage(QString("WARNING: Problem while copying %1").arg(QString("%1/%2").arg(userDerivatives).arg(f)));
+					}
 				}
 			}
+			sendMessage("Bids derivatives files copied");
 		}
 
 	}

@@ -113,7 +113,7 @@ const AwChannelList& AwDataManager::selectedChannels()
 {
 	m_tmp.clear();
 	if (AwDisplay::instance())
-		m_tmp = AwDisplay::instance()->selectedChannels();
+		m_tmp = AwChannel::removeDoublons(AwDisplay::instance()->selectedChannels());
 	return m_tmp;
 }
 

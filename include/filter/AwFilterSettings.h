@@ -28,9 +28,12 @@ public:
 
 	~AwFilterSettings();
 	AwFilterSettings& operator=(const AwFilterSettings& other);
+	bool operator!=(const AwFilterSettings& other);
 
 	/** clean up all filter settings and bounds **/
 	void clear();
+	/** reset : do a clear but whithout filling with zeros **/
+	void reset();
 	/** set filters for a specified type of channel **/
 	void set(int type, const QVector<float>& values);
 	/** convenience method to use a string instead of the channel type **/
@@ -46,6 +49,9 @@ public:
 	void apply(const AwChannelList& channels) const;
 	/** reset all filters settings to zero **/
 	void zero();
+	/** get a list of filters modalities**/
+	QList<int> modalities() { return m_filters.keys(); }
+	QVector<float> values(int modality) { return m_filters.value(modality); }
 	/** save settings to json file **/
 	void save(const QString& file);
 	void load(const QString& file);

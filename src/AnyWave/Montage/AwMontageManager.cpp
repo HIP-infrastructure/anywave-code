@@ -175,25 +175,31 @@ int AwMontageManager::loadICA()
 		auto bm = AwBIDSManager::instance();
 		if (bm->isBIDSActive()) {
 			auto icaDir = bm->getDerivativePath(AwBIDSItem::ica);
-			if (!icaDir.isEmpty())
-				dir = icaDir;
+			if (!icaDir.isEmpty()) {
+				dir = QDir::toNativeSeparators(icaDir);
+				if (!QFile::exists(dir))
+					dir = QDir::toNativeSeparators(bm->getDerivativesPath(AwBIDSManager::ica));
+			}
 		}
 	}
 	QString filter("ICA matrices (*.mat *.h5)");
-	QString path;
 #ifdef Q_OS_MAC
+	QString path;
     QFileDialog dlg(0, "Load ICA matrices", dir);
     dlg.setAcceptMode(QFileDialog::AcceptOpen);
     dlg.setViewMode(QFileDialog::Detail);
     dlg.setFileMode(QFileDialog::ExistingFile);
     if (dlg.exec() == QDialog::Accepted)
         path = dlg.selectedFiles().at(0);
-#else
-    path = QFileDialog::getOpenFileName(0, tr("Add ICA components"), dir, filter);
-#endif
 	if (path.isEmpty())
 		return -1;
 	return loadICA(path);
+#else
+   QString path = QFileDialog::getOpenFileName(0, tr("Add ICA components"), dir, filter);
+   if (path.isEmpty())
+		return -1;
+	return loadICA(path);
+#endif
 }
 
 int AwMontageManager::loadICA(const QString& path)
@@ -366,13 +372,13 @@ void AwMontageManager::clear()
 
 void AwMontageManager::closeFile()
 {
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive())
-			if (bm->updateChannelsTsvBadChannels(m_badChannelLabels) != 0 && !bm->lastError().isEmpty()) {
-				AwMessageBox::information(nullptr, "BIDS", bm->lastError());
-			}
-	}
+	//if (AwBIDSManager::isInstantiated()) {
+	//	auto bm = AwBIDSManager::instance();
+	//	if (bm->isBIDSActive())
+	//		if (bm->updateChannelsTsvBadChannels(m_badChannelLabels) != 0 && !bm->lastError().isEmpty()) {
+	//			AwMessageBox::information(nullptr, "BIDS", bm->lastError());
+	//		}
+	//}
 			
 	clear();
 	m_montagePath = "";

@@ -431,9 +431,12 @@ void AwBIDSGUI::handleDoubleClick(const QModelIndex& index)
 	if (type != AwBIDSItem::DataFile)
 		return;
 
-	if (dataType != AwBIDSItem::anat)
+	if (dataType != AwBIDSItem::anat) {
 		// open the file 
-		emit dataFileClicked(item->data(AwBIDSItem::PathRole).toString());		
+		// call closeFile before opening a new one
+		m_bids->closeFile(item);
+		emit dataFileClicked(item->data(AwBIDSItem::PathRole).toString());
+	}
 	else if (dataType == AwBIDSItem::anat) 
 		openITKSNAP(item);
 }

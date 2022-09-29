@@ -40,7 +40,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	QDataStream fromClient(client);
 	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
-//	AwDataManager* dm = AwDataManager::instance();  // get current data manager which holds informations of current open file
 	auto dm = m_dataManager;
 
 	//AwFileIO* reader = dm->reader();
@@ -109,7 +108,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			else
 				requestedChannels = dm->rawChannels();
 			// close current connection to data server
-		//	AwDataServer::getInstance()->closeConnection(this);
 			m_dataManager->dataServer()->closeConnection(this);
 			// open connection to the cloned data server which resides inside the cloned Data Manager
 			dm->dataServer()->openConnection(this);
@@ -156,8 +154,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			else if (source == "selection")
 				requestedChannels = dm->selectedChannels();
 		}
-		bool usingMarkers = !use_markers.isEmpty();
-		bool skippingMarkers = !skip_markers.isEmpty();
 		if (cfg.contains("start"))
 			start = cfg.value("start").toDouble();
 		if (cfg.contains("duration"))
@@ -173,13 +169,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			for (auto const &item : list)
 				filters << item.toDouble();
 		}
-		markers = AwMarkerManager::instance()->getMarkersThread();
-		// parsing input is done, now preparing input markers
-		if (!usingMarkers && !skippingMarkers)
-			input_markers << new AwMarker("input", start, duration);
-		if (usingMarkers || skippingMarkers) {
-			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
-		}
+	   input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
 			// Beware of channels refs (we should accept "A1-A2" and consider it as A1 with A2 as reference).
@@ -273,7 +263,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AW_DESTROY_LIST(requestedChannels);
 
 	// check for data manager used, if not the main one, destroy it
-//	if (dm != AwDataManager::instance()) {
     if (dm != m_dataManager) {
 		// reconnect to the correct data server
 		//AwDataServer::getInstance()->openConnection(this);
