@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=2.4.8
+AppVersion=2.5.6
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -27,7 +27,6 @@ Root: HKCR; Subkey: ".eeg"; ValueType: string; ValueName: ""; ValueData: "AnyWav
 Root: HKCR; Subkey: ".edf"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".bdf"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".ades"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
-Root: HKCR; Subkey: ".ah5"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".cnt"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".fif"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
 Root: HKCR; Subkey: ".mff"; ValueType: string; ValueName: ""; ValueData: "AnyWave";    Flags: uninsdeletevalue
@@ -46,7 +45,7 @@ Source: ".\bin\x64\Release\ins.txt"; DestDir: "{app}"
 Source: ".\bin\x64\Release\qt.conf"; DestDir: "{app}"
 Source: ".\lib\*.lib"; DestDir: "{app}\lib"
 Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
-Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
+;Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave\"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\4DNIExporter.dll"; DestDir: "{app}\Plugins"
@@ -89,4 +88,4 @@ Name: startmenu; Description: "Add shortcut to start menu"; GroupDescription: "S
 
 [Run]
 Filename: "{app}\vc_redist.x64.exe"; Parameters: "/quiet /norestart"; Description: "Visual C++ runtime"; StatusMsg: "Installing Visual C++ runtime..."
-Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."
+;Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."
