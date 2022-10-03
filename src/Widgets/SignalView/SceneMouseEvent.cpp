@@ -161,7 +161,7 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		break;
 	case AwGraphicsScene::AddingMarker:
 	{
-		float endPos = timeAtPos(pos);
+		float endPos = std::min(timeAtPos(pos), m_fileDuration);
 		if (m_mousePressed) {
 			if (std::abs(endPos - m_currentMarkerItem->marker()->start()) > 0.01)
 				m_isTimeSelectionStarted = true;
@@ -188,24 +188,26 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 						qreal w = std::abs(x - ox);
 						qreal h = std::abs(y - oy);
 						m_selectionRectangle->setRect(QRectF(xx, yy, w, h));
-						m_currentMarkerItem->marker()->setStart(timeAtPos(QPointF(xx, 0)));
-						m_currentMarkerItem->marker()->setEnd(timeAtPos(QPointF(xx + w, 0)));
+						if (m_currentPosInFile > m_positionClicked) { // we moved forward pressing space bar
+							m_selectionRectangle->setRect(QRectF(0., yy, x, h));
+
+						}
+						m_currentMarkerItem->marker()->setStart(std::min(m_positionClicked, endPos));
+						m_currentMarkerItem->marker()->setEnd(std::max(m_positionClicked, endPos));
+						auto labels = getChannelsUnderSelectionRectangle();
+						if (labels.size()) {
+							QString toolTip;
+							for (auto const& l : labels)
+								toolTip += QString("%1\n").arg(l);
+							m_selectionRectangle->setToolTip(toolTip);
+						}
 						update();
 						break;
 					}
 				}
 				else {
-					qreal x = e->scenePos().x();
-					qreal y = e->scenePos().y();
-					qreal ox = m_mousePressedPos.x();
-					qreal oy = m_mousePressedPos.y();
-					qreal xx = std::min(x, ox);
-					qreal yy = std::min(y, oy);
-					qreal w = std::abs(x - ox);
-					m_currentMarkerItem->marker()->setStart(timeAtPos(QPointF(xx, 0)));
-					m_currentMarkerItem->marker()->setDuration(widthToDuration(w));
-					if (m_currentMarkerItem->marker()->end() > m_fileDuration)
-						m_currentMarkerItem->marker()->setEnd(m_fileDuration);
+					m_currentMarkerItem->marker()->setStart(std::min(m_positionClicked, endPos));
+					m_currentMarkerItem->marker()->setEnd(std::max(m_positionClicked, endPos));
 					m_currentMarkerItem->updatePosition();
 					update();
 					break;
@@ -1066,8 +1068,6 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 			m_currentMarkerItem->marker()->setColor(marker->color());
 			m_currentMarkerItem->marker()->setLabel(marker->label());
 			m_currentMarkerItem->marker()->setValue(marker->value());
-			//m_currentMarkerItem->marker()->setStart(m_positionClicked);
-			//m_currentMarkerItem->marker()->setEnd(m_positionClicked);
 			if (m_selectionIsActive) {
 				if (m_selectionRectangle) {
 					auto labels = getChannelsUnderSelectionRectangle();

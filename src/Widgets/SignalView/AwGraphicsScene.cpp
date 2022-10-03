@@ -296,6 +296,11 @@ float AwGraphicsScene::timeAtPos(const QPointF& pos)
 	return (pos.x() / m_physics->xPixPerSec()) + m_currentPosInFile;
 }
 
+float AwGraphicsScene::timeAtPos(qreal x)
+{
+	return (x / m_physics->xPixPerSec()) + m_currentPosInFile;
+}
+
 float AwGraphicsScene::widthToDuration(float w)
 {
 	return (w / m_physics->xPixPerSec());
@@ -565,6 +570,7 @@ void AwGraphicsScene::nextPage()
 	auto newPos = std::min(m_fileDuration - m_pageDuration, m_currentPosInFile + m_pageDuration);
 	if (newPos > m_currentPosInFile)
 		emit updatePositionInFile(newPos);
+
 }
 
 
@@ -1008,7 +1014,7 @@ void AwGraphicsScene::keyReleaseEvent(QKeyEvent *e)
 		if (m_selectionRectangle) {
 			removeItem(m_selectionRectangle);
 			delete m_selectionRectangle;
-			m_selectionRectangle = NULL;
+			m_selectionRectangle = nullptr;
 			update();
 		}
 		break;

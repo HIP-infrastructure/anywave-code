@@ -162,6 +162,7 @@ protected slots:
 #endif
 protected:
 	float timeAtPos(const QPointF& pos);
+	float timeAtPos(qreal x);
 	float widthToDuration(float w);
 	float xPosFromTime(float time);
 	QGraphicsItem * getItemUnderMouse(QPointF pos, int *itemType);

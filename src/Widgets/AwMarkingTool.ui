@@ -38,9 +38,10 @@
       <bool>true</bool>
      </property>
      <property name="plainText">
-      <string>Double click to add single marker.
-Click left to start marking a time selection. Click again to end it.
-Ctrl + left click allows to specify channels to target.</string>
+      <string>Lect click  will add a single marker at the mouse position.
+Left click and hold the mouse to start a time selection. Drag over the mouse and release to marker the time selection.
+
+Holding the CTRL allows to target channel traces.</string>
      </property>
     </widget>
    </item>
