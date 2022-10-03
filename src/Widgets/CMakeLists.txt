@@ -1,6 +1,6 @@
 # AwWidgetLib
 project(AwWidget)
-add_definitions("-DAW_BUILD_WIDGETS_LIB")
+add_definitions("-DAW_BUILD_WIDGETS_LIB -DAW_MARKING_TOOL_V2")
 
 QT5_ADD_RESOURCES(WIDGET_QRC ${AW_RES_DIR}/AnyWave.qrc ${AW_RES_DIR}/amplitudes.qrc)
 
@@ -21,6 +21,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwSpectroWidget.h  
     ../../include/widget/AwVTKWidget.h  
     ../../include/widget/AwMarkerInspector.h  
+    ../../include/widget/AwMarkingTool.h
     ./AwAddPredefinedMarker.h  
     ./AwAddTargetChannels.h  
     ../../include/AwMarkingSettings.h  
@@ -64,7 +65,8 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
    ../../include/widget/AwMarkerItem.h 
    ../../include/widget/AwQwtColorMap.h 
    ../../include/widget/AwSignalItem.h 
-   ../../include/widget/AwSignalLabelItem.h)
+   ../../include/widget/AwSignalLabelItem.h
+   ./SignalView/AwAmplitudeItem.h)
 	
 
 SET(SRC  ./AwSelectInputDataWidget.cpp
@@ -78,7 +80,8 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./AwComboMarker.cpp  
     ./AwDownSamplingWidget.cpp  
     ./AwMarkAroundWidget.cpp  
-    ./AwMarkerInspector.cpp  
+    ./AwMarkerInspector.cpp 
+    ./AwMarkingTool.cpp 
     ./AwAmplitudeWidget.cpp  
     ./AwMapWidget.cpp  
     ./AwMarkingSettings.cpp  
@@ -103,6 +106,8 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SignalView/AwViewSettingsUi.cpp  
     ./SignalView/AwPickMarkersDial.cpp 
     ./SignalView/AwGainLevelsWidget.cpp
+    ./SignalView/SceneMouseEvent.cpp
+    ./SignalView/AwAmplitudeItem.cpp
     ./InputMarker/AwInputMarkerTableView.cpp  
     ./InputMarker/AwInputMarkerWidget.cpp  
     ./InputMarker/InputMarkerModel.cpp
@@ -131,6 +136,7 @@ SET(FORMS  ./AwSelectInputDataWidget.ui
      ./AwAmplitudeWidget.ui 
 	./AwGetValueDialog.ui
     ./AwMarkerInspector.ui  
+    ./AwMarkingTool.ui
     ./AwAddPredefinedMarker.ui  
     ./AwAddTargetChannels.ui  
     ./AwTopoWidgetSettings.ui  

@@ -12,7 +12,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
-
+find_package(Qt5Concurrent REQUIRED)
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -68,8 +68,8 @@ AwDataBuffer.h AwAmpliduteSettings.cpp)
 
 
 add_library(CoreStatic STATIC ${CORE_SRC})
-qt5_use_modules(CoreStatic Core)
-target_link_libraries(CoreStatic  Qt5::Core)
+qt5_use_modules(CoreStatic Core Concurrent) 
+target_link_libraries(CoreStatic  Qt5::Core Qt5::Concurrent)
 
 # build mex common static lib
 add_library(mexcommon STATIC ../Mex/common.cpp)

@@ -25,6 +25,7 @@
 #include "Prefs/AwSettings.h"
 #include <QProcess>
 #include <QCoreApplication>
+#include <QSettings>
 
 void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 {
@@ -92,6 +93,7 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		QStringList arguments;
 		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+
 		QSettings settings;
 
 		QString mcrPath = settings.value("matlab/mcr_path").toString();
