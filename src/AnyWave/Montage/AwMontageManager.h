@@ -135,6 +135,8 @@ public slots:
 	void addNewSources(int type);
 	/** reorder montage when the user has moved signals in views **/
 	void reorderChannels(const QStringList& labels);
+	void saveBadChannels();
+	void loadBadChannels();
 private:
 	QMap<QString, QSharedPointer<AwChannel>> m_asRecordedSharedPointerMap;
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.
@@ -154,8 +156,6 @@ private:
 	QString m_montagePath;							// Path to montage file based on the data file name.
 	QString m_badPath;								// Path to bad channels file.
 
-	void saveBadChannels();
-	void loadBadChannels();
 	void scanForPrebuiltMontages();
 	void clear();									///> clear current montage;
 	static AwMontageManager *m_instance;

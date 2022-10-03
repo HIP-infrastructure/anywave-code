@@ -74,24 +74,14 @@ int AwViewSettingsUi::exec()
 	checkMarkerValue->setChecked(m_settings->showMarkerValues); 
 	checkEEGDisplay->setChecked(m_settings->eegDisplayMode);
 	checkShowMarkers->setChecked(m_settings->showMarkers);
+	checkAmplitudeScale->setChecked(m_settings->showAmplitudeScale);
 	radioPageDuration->setChecked(m_settings->timeScaleMode != AwViewSettings::PaperLike);
 	spinPageDuration->setValue(m_settings->fixedPageDuration);
-
 	unselectAllFilters();
-
 	for (auto cb : m_checkBoxes.keys()) {
 		if (m_settings->filters.contains(m_checkBoxes[cb]))
 			cb->setChecked(true);
 	}
-
-	//switch (m_settings->markerBarMode) {
-	//case AwViewSettings::ShowMarkerBar:
-	//	radioAlways->setChecked(true);
-	//	break;
-	//case AwViewSettings::HideMarkerBar:
-	//	radioHidden->setChecked(true);
-	//	break;
-	//}
 	radioAlways->setChecked(m_settings->showMarkerBar);
 	radioHidden->setChecked(!m_settings->showMarkerBar);
 	if (m_settings->markerBarMode == AwViewSettings::Global)
@@ -164,6 +154,10 @@ void AwViewSettingsUi::accept()
 	if (copiedSettings->showZeroLine != m_settings->showZeroLine)
 		flags |= AwViewSettings::ShowBaseLine;
 
+	m_settings->showAmplitudeScale = checkAmplitudeScale->isChecked();
+	if (copiedSettings->showAmplitudeScale != m_settings->showAmplitudeScale)
+		flags |= AwViewSettings::ShowAmplitudeScale;
+
 	m_settings->showMarkerLabels = checkMarkerLabel->isChecked();
 	if (copiedSettings->showMarkerLabels != m_settings->showMarkerLabels)
 		flags |= AwViewSettings::ShowMarkerLabel;
@@ -189,18 +183,9 @@ void AwViewSettingsUi::accept()
 		flags |= AwViewSettings::Filters;
 
 	m_settings->filters = filters;
-
-	//if (radioAlways->isChecked())
-	//	m_settings->markerBarMode = AwViewSettings::ShowMarkerBar;
-	//else if (radioHidden->isChecked())
-	//	m_settings->markerBarMode = AwViewSettings::HideMarkerBar;
 	m_settings->showMarkerBar = radioAlways->isChecked();
-
-	//if (copiedSettings->markerBarMode != m_settings->markerBarMode)
-	//	flags |= AwViewSettings::MarkerBarMode;
 	if (copiedSettings->showMarkerBar != m_settings->showMarkerBar)
 		flags |= AwViewSettings::ShowMarkerBar;
-
 	if (radioGlobalMode->isChecked())
 		m_settings->markerBarMode = AwViewSettings::Global;
 	else

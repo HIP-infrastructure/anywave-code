@@ -25,8 +25,9 @@ class AwOutputFileWizardPage : public QWizardPage
 {
 	Q_OBJECT
 public:
-	AwOutputFileWizardPage(QWidget* parent = nullptr);
+	AwOutputFileWizardPage(const QVariantMap& settings, QWidget* parent = nullptr);
 	bool validatePage() override;
+	void initializePage() override;
 
 	AwFileIOPlugin* m_writerPlugin;
 	QMap<QString, AwFileIOPlugin*> m_writersMap;
@@ -38,4 +39,6 @@ protected:
 	QLineEdit *m_filePath;
 	QComboBox* m_comboWriters;
 	QStringList m_extensions;
+	QVariantMap m_settings;
+	bool m_isBids;
 };

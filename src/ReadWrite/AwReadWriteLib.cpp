@@ -153,7 +153,7 @@ AwChannel* AwDataInfo::addChannel(AwChannel *channel)
 	//AwChannel *chan = new AwChannel(channel);
 	// copy constructor will set channel as parent for new channel.
 	// Here we don't want a parent for as recorded channel, so change it to null.
-	chan->setParent(NULL);
+	chan->setParent(nullptr);
 	auto s = chan->name().simplified();
 	// DO NOT PERMIT EMPTY LABEL
 	if (s.isEmpty()) {

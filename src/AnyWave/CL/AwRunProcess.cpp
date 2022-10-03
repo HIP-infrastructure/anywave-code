@@ -19,6 +19,7 @@
 #include "AwCommandLogger.h"
 #include <AwException.h>
 #include "IO/BIDS/AwBIDSManager.h"
+#include "Process/AwProcessManager.h"
 #include <iostream>
 #include <AwCore.h>
 
@@ -46,10 +47,16 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	applyFilters(inputChannels, arguments);
 	AwUniteMaps(process->pdi.input.settings, arguments);
 	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
+	QObject::connect(process, &AwProcess::requestProcessInstance, AwProcessManager::instance(), &AwProcessManager::setProcessInstance);
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
-	process->runFromCommandLine();
+	if (process->init()) {
+		process->runFromCommandLine();
+		logger.sendLog(QString("Done."));
+	}
+	else {
+		logger.sendLog(QString("init() failed for process %1.\nError is %2").arg(process->plugin()->name).arg(process->errorString()));
+	}
 	AwBIDSManager::finishCommandLineOperation();
-	logger.sendLog(QString("Done."));
 	delete process;
 }
 

@@ -37,17 +37,20 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	m_serverPort = 0;
 	m_pidCounter = 0;
 
+	AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 	if (m_server->listen(QHostAddress::Any, port)) {
 		m_serverPort = m_server->serverPort();
-		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
+	//	AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 		AwDataServer::getInstance()->openConnection(this);
 		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
 		m_isListening = true;
 	}
-	else
+	else {
+		m_errorString = m_server->errorString();
+		emit log(QString("Failed to listen on tcp port: %1").arg(m_errorString));
 		m_isListening = false;
 
-	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
+	}
 	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
 
 	setHandlers();
@@ -56,6 +59,8 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 		m_thread->start();
 	}
 	m_debugMode = false;
+	m_dataManager = AwDataManager::instance();
+	connect(this, SIGNAL(markersAdded(AwMarkerList*)), m_dataManager->markerManager(), SLOT(addMarkers(AwMarkerList*)));
 }
 
 AwRequestServer::~AwRequestServer()

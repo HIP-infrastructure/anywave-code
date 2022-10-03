@@ -26,5 +26,6 @@ namespace AwUtilities // put utility functions inside a namespace
 		QVariantHash AW_UTILITIES_EXPORT loadTsv(const QString& tsvFile);
 		QMap<int, QString> AW_UTILITIES_EXPORT columnsFromLine(const QString& line);
 		QString AW_UTILITIES_EXPORT removeBidsKey(const QString& key, const QString& name);
+		QMap<QString, QString> AW_UTILITIES_EXPORT getKeysValue(const QString& line);
 	}
 }

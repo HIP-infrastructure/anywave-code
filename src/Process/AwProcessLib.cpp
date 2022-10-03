@@ -114,6 +114,20 @@ int AwBaseProcess::applyUseSkipMarkersKeys()
 	return 1;
 }
 
+/// <summary>
+/// getProcessByName()
+/// DO NOT CALL from a separate thread (ie a running process)
+/// This is a way for a process init() call to get other process instances to run them.
+/// </summary>
+/// <param name="name"></param>
+/// <returns></returns>
+AwBaseProcess* AwBaseProcess::getProcessByName(const QString& name)
+{
+	AwBaseProcess* p = nullptr;
+	emit requestProcessInstance(&p, name);   // this signal must be processed synchronously so DO NOT USE from a separate thread
+    return p;
+}
+
 void AwBaseProcess::connectClient(AwDataClient *client)
 {
 	emit dataConnectionRequested(client);

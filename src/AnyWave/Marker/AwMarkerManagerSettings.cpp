@@ -33,6 +33,7 @@
 #ifdef Q_OS_WIN
 #include <execution>
 #endif
+#include "IO/BIDS/AwBIDSManager.h"
 
 AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
@@ -169,6 +170,8 @@ AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget 
 	buttonSave->setEnabled(!m_markers.isEmpty());
 	connect(buttonStats, &QPushButton::clicked, this, &AwMarkerManagerSettings::openStats);
 	connect(buttonRemoveDuplicates, &QPushButton::clicked, this, &AwMarkerManagerSettings::removeDuplicates);
+	connect(buttonBIDSMerge, &QPushButton::clicked, this, &AwMarkerManagerSettings::bidsPush);
+	connect(buttonBIDSPull, &QPushButton::clicked, this, &AwMarkerManagerSettings::bidsPull);
 
 	// Connect check boxes to show/hide columns
 	connect(checkLabel, SIGNAL(toggled(bool)), this, SLOT(showColumn(bool)));
@@ -189,6 +192,24 @@ AwMarkerManagerSettings::~AwMarkerManagerSettings()
 		delete m_currentRule;
 	if (m_statsWidget)
 		delete m_statsWidget;
+}
+
+void AwMarkerManagerSettings::bidsPush()
+{
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive())
+			bm->pushMarkerFileToCommon();
+	}
+}
+
+void AwMarkerManagerSettings::bidsPull()
+{
+	if (AwBIDSManager::isInstantiated()) {
+		auto bm = AwBIDSManager::instance();
+		if (bm->isBIDSActive())
+			bm->pullFromCommonMarkerFile();
+	}
 }
 
 void AwMarkerManagerSettings::changeEvent(QEvent *e)

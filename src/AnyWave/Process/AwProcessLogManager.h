@@ -29,6 +29,7 @@ public slots:
 	void removeLog();
 protected:
 	AwProcessLogManager(QObject *parent = 0);
+	~AwProcessLogManager();
 	void createNewLog(AwBaseProcess *process);
 		
 	static AwProcessLogManager *m_instance;

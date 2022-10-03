@@ -52,8 +52,6 @@ public:
 	bool autoTargetChannel;			// true if the channel under the mouse will be used as target
 	bool usingSpacebar;				// true if using spacebar binding
 	QString color;					// color to set for the marker
-//	AwMarker *spaceBarNext();
-//	void setBoundMarkers(AwMarkerList& markers);
 protected:
 	int m_spaceBarIndex;				// current index in boundMarkers 
 	AwMarkerList m_boundMarkers;		// List of markers used with spacebar 

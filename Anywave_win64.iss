@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=2.4.2
+AppVersion=2.5.0
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -34,10 +34,11 @@ Source: ".\bin\x64\Release\*.dll"; DestDir: "{app}"
 Source: ".\bin\x64\Release\*.exe"; DestDir: "{app}"
 Source: ".\bin\x64\Release\*.html"; DestDir: "{app}"
 Source: ".\bin\x64\Release\*.pl"; DestDir: "{app}"
+Source: ".\bin\x64\Release\*.mrk"; DestDir: "{app}"
 Source: ".\bin\x64\Release\qt.conf"; DestDir: "{app}"
 Source: ".\lib\*.lib"; DestDir: "{app}\lib";
 Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
-Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
+;Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\4DNIExporter.dll"; DestDir: "{app}\Plugins";
@@ -47,6 +48,7 @@ Source: ".\bin\x64\Release\Plugins\AutoMarking.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EDFIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEPIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EGIReader.dll"; DestDir: "{app}\Plugins";
+Source: ".\bin\x64\Release\Plugins\RegisterInject.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\BrainVisionIO.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\DeltamedBinTxtReader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CTF_Reader.dll"; DestDir: "{app}\Plugins";

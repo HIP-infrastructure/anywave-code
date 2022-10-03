@@ -44,14 +44,6 @@ AwScene::~AwScene()
 QMenu* AwScene::defaultContextMenu()
 {
 	auto m = AwGraphicsScene::defaultContextMenu();
-	//auto menu = m_contextMenuMapping;
-	//if (menu) {
-	//	auto selectedLabels = AwChannel::getLabels(AwDataManager::instance()->selectedChannels());
-	//	if (!selectedLabels.isEmpty()) {
-	//		auto action = menu->addAction("Insert Markers based on selected channels");
-	//		connect(action, &QAction::triggered, this, &AwScene::insertMarkersBasedOnChannelSelection);
-	//	}
-	//}
 	return m;
 }
 
@@ -69,8 +61,6 @@ void AwScene::insertMarkersBasedOnChannelSelection()
 			emit markerInserted(marker);
 		}
 	}
-
-
 }
 
 void AwScene::setSelectionAsBad()
@@ -97,54 +87,11 @@ void AwScene::setSelectionAsMontage()
 	};
 
 	auto items = selectedItems();
-	//// debug
-	//for (auto i : items) {
-	//	auto sitem = qgraphicsitem_cast<AwGraphicsSignalItem*>(i);
-	//	qDebug() << QString("selected item %1: index is %2").arg(sitem->channel()->name()).arg(sitem->index()) << endl;
-	//}
- //	//
 	std::sort(std::begin(items), std::end(items), f);
-
-	//for (auto i : items) {
-	//	auto sitem = qgraphicsitem_cast<AwGraphicsSignalItem*>(i);
-	//	qDebug() << QString("selected item %1: index is %2").arg(sitem->channel()->name()).arg(sitem->index()) << endl;
-	//}
-
-	//for (auto i : selectedItems()) {
-	//	AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(i);
-		
 	for (auto item : items) 
 		channels << qgraphicsitem_cast<AwGraphicsSignalItem *>(item)->channel();
-	
 	AwMontageManager::instance()->buildNewMontageFromChannels(channels);
 }
-
-//void AwScene::launchProcess()
-//{
-//	QAction *act = qobject_cast<QAction *>(sender());
-//
-//	if (act == NULL)
-//		return;
-//
-//	// Instantiate process
-//	AwProcessManager *process_manager = AwProcessManager::instance();
-//	// the plugin may be of type DisplayBackground, so force it to be Background only to launch the process.
-//	AwBaseProcess *process = process_manager->newProcessFromPluginName(act->text());
-//	if (process == NULL)
-//		return;
-//
-//	AwMarker input = act->data().value<AwMarker>();
-//	AwMarkerList inputList;
-//	// duplicate marker object
-//	AwMarker *newMarker = new AwMarker(input);
-//	inputList << newMarker;
-//	
-//	// set markers to compute data on
-//	process->pdi.input.setNewMarkers(inputList);
-//	// do not delete markers after computation
-//	// start process
-//	process_manager->runProcess(process);
-//}
 
 //
 //

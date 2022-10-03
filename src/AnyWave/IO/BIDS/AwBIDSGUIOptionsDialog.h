@@ -24,7 +24,7 @@ class AwBIDSGUIOptionsDialog : public QDialog
 	Q_OBJECT
 
 public:
-	AwBIDSGUIOptionsDialog(const QStringList& extraColumns,QWidget *parent = Q_NULLPTR);
+	AwBIDSGUIOptionsDialog(const QStringList& visibleColumns, QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUIOptionsDialog();
 
 	inline QStringList& columns() { return m_selectecColumns; }

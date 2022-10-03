@@ -36,6 +36,7 @@
     <ClCompile Include="AwAmplitudeWidget.cpp" />
     <ClCompile Include="AwMapWidget.cpp" />
     <ClCompile Include="AwMarkingSettings.cpp" />
+    <ClCompile Include="AwMarkingTool.cpp" />
     <ClCompile Include="AwMessageBox.cpp" />
     <ClCompile Include="AwQwtColorMap.cpp" />
     <ClCompile Include="AwSelectInputDataWidget.cpp" />
@@ -64,6 +65,7 @@
     <ClCompile Include="SignalItem\AwSignalItem.cpp" />
     <ClCompile Include="SignalItem\AwSignalItemSettings.cpp" />
     <ClCompile Include="SignalItem\AwSignalLabelItem.cpp" />
+    <ClCompile Include="SignalView\AwAmplitudeItem.cpp" />
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp" />
     <ClCompile Include="SignalView\AwBaseSignalView.cpp" />
     <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
@@ -81,12 +83,15 @@
     <ClCompile Include="SignalView\AwPickMarkersDial.cpp" />
     <ClCompile Include="SignalView\AwViewSettings.cpp" />
     <ClCompile Include="SignalView\AwViewSettingsUi.cpp" />
+    <ClCompile Include="SignalView\SceneMouseEvent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AwAmplitudeWidget.ui">
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="..\..\include\widget\AwMarkingTool.h" />
+    <ClInclude Include="SignalView\AwAmplitudeItem.h" />
     <QtMoc Include="SignalItem\AwSignalItemSettings.h" />
     <QtMoc Include="SignalItem\AwSIAmpButton.h" />
     <QtMoc Include="SignalView\AwPickMarkersDial.h" />
@@ -183,6 +188,7 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="AwMarkingTool.ui" />
     <QtUic Include="SignalItem\AwSignalItemSettings.ui" />
     <QtUic Include="SignalView\AwGainLevelsWidget.ui" />
     <QtUic Include="SignalView\AwGoToLatencyDial.ui">
@@ -559,7 +565,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;AW_BUILD_WIDGETS_LIB;QWT_DLL;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;AW_BUILD_WIDGETS_LIB;QWT_DLL;MKL;AW_MARKING_TOOL_V2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -636,7 +642,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;WIDGETS_LIB;QWT_DLL;AW_BUILD_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;WIDGETS_LIB;QWT_DLL;AW_BUILD_WIDGETS_LIB;AW_MARKING_TOOL_V2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>

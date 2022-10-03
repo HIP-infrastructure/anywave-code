@@ -64,7 +64,7 @@ void AwDebugLog::writeLog(const QString& name)
 	QFile file(filePath);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		QTextStream stream(&file);
-		for (auto l : logs)
+		for (auto const& l : logs)
 			stream << l << endl;
 		file.close();
 	}

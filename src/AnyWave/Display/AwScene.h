@@ -34,7 +34,7 @@ public:
 	void removeVirtualChannels(AwChannelList& channels);
 	void addVirtualChannels(AwChannelList& channels);
 public slots:
-	void updateMarkers();
+	void updateMarkers() override;
 	void setSelectionAsBad() override;
 	void setChannelAsBad(const QString& label);
 	void setSelectionAsMontage() override;

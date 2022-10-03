@@ -24,7 +24,6 @@
 #include <QObject>
 #include <widget/AwGraphicInterface.h>
 
-class AwSIAmpButton;
 #include <widget/AwSignalLabelItem.h>
 
 class AW_WIDGETS_EXPORT AwSignalItem : public AwGraphicsSignalItem
@@ -38,8 +37,8 @@ public:
 	QRectF boundingRect() const;
 	virtual QSize minimumSize() const { return QSize(0, 0); }
 
-	void showLabel(bool flag);
-	void showBaseline(bool f) { m_baseLine = f; update(); }
+	void showLabel(bool flag) override;
+	void showBaseline(bool f) override { m_baseLine = f; update(); }
 	void setSecondsPerCm(float val);
 	void setLabel(const QString& text);
 	void getLabeLPosAndWidth(qreal *x, qreal *width);
@@ -64,8 +63,6 @@ protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 	void computeMinMax(qint32 start, qint32 nbSamples, float *min, float *max);
-
-	bool m_showScale;
 	bool m_hover;
 	QPointF m_mousePos;
 	QPointF m_mousePressedPos, m_mouseReleasedPos;

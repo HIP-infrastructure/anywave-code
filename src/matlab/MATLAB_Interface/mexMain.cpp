@@ -230,8 +230,7 @@ void MexFunction::send_message(matlab::mex::ArgumentList& outputs, matlab::mex::
 		aw.sendString(QString::fromStdString(ca.toAscii()));
 	}
 	catch (const QString& what) {
-		std::string message = QString("send_markers: %1").arg(what).toStdString();
-		error(message);
+		error(what.toStdString());
 	}
 }
 
@@ -342,8 +341,7 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 		aw.waitForResponse();
 	}
 	catch (const QString& what) {
-		std::string message = QString("send_markers: %1").arg(what).toStdString();
-		error(message);
+		error(what.toStdString());
 	}
 	catch (matlab::data::TypeMismatchException& e) {
 		error(e.what());
@@ -403,8 +401,7 @@ void MexFunction::get_markers(matlab::mex::ArgumentList& outputs, matlab::mex::A
 		outputs[0] = S;
 	}
 	catch (const QString& what) {
-		std::string s = QString("get_markers: %1").arg(what).toStdString();
-		error(s);
+		error(what.toStdString());
 	}
 }
 
@@ -485,8 +482,7 @@ void MexFunction::get_data(matlab::mex::ArgumentList& outputs, matlab::mex::Argu
 		outputs[0] = S;
 	}
 	catch (const QString& what) {
-		std::string s = QString("get_data: %1").arg(what).toStdString();
-		error(s);
+		error(what.toStdString());
 	}
 }
 
@@ -551,8 +547,7 @@ void MexFunction::get_properties(matlab::mex::ArgumentList& outputs, matlab::mex
 		outputs[0] = StructArray(res[0]);
 	}
 	catch (const QString& what) {
-		std::string message = QString("get_prop: %1").arg(what).toStdString();
-		error(message);
+		error(what.toStdString());
 	}
 }
 
@@ -590,7 +585,6 @@ void MexFunction::run(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentL
 		outputs[0] = StructArray(res[0]);
 	}
 	catch (const QString& what) {
-		std::string s = QString("get_data: %1").arg(what).toStdString();
-		error(s);
+		error(what.toStdString());
 	}
 }

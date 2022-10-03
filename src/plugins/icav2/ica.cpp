@@ -59,7 +59,7 @@ ICAPlugin::ICAPlugin() : AwProcessPlugin()
 {
     type = AwProcessPlugin::Background;
     category = "ICA:ICA Extraction";
-	version = "2.2.1";
+	version = "2.2.2";
     name = QString("ICA");
     description = QString("Compute ICA");
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);	
@@ -103,13 +103,6 @@ bool ICA::showUi()
 	}
 	return false;
 }
-
-void ICA::init()
-{
-
-}
-
-
 bool ICA::batchParameterCheck(const QVariantMap& hash)
 {
 	// this is an exhaustive test as we don't have a file open at this stage.
@@ -177,8 +170,11 @@ int ICA::initParameters()
 	}
 	m_nComp = m_channels.size();
 
-	if (args.contains(keys::comp))
+	if (args.contains(keys::comp)) {
 		m_nComp = args.value(keys::comp).toInt();
+		if (m_nComp <= 0)
+			m_nComp = m_channels.size();
+	}
 
 	// check algo
 	// some algos have a fixed number of components (no PCA)
@@ -201,7 +197,7 @@ int ICA::initParameters()
 		return -1;
 	}
 
-	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings[keys::data_path].toString()).arg(args["modality"].toString()));
+	sendMessage(QString("computing ica on file %1 and %2 channels...").arg(pdi.input.settings.value(keys::data_path).toString()).arg(args["modality"].toString()));
 
 	m_lpf = args.value(keys::lp).toFloat();
 	m_hpf = args.value(keys::hp).toFloat();
@@ -222,6 +218,10 @@ int ICA::initParameters()
 		// if not than one marker should marked the entire data in pdi.input.markers.;
 		sendMessage("Loading data...");
 		requestData(&m_channels, &pdi.input.markers(), true);
+		if (hasErrorOccured()) {
+			sendMessage(QString("Error while loading data: %1").arg(errorString()));
+			return -1;
+		}
 		sendMessage("Done");
 	}
 	catch (std::bad_alloc& ba) {
@@ -283,16 +283,16 @@ int ICA::initParameters()
 		m_fileName = args.value(keys::output_file).toString();
 	else {
 		// default file name is the basename of the data file.
-		QFileInfo fi(pdi.input.settings[keys::data_path].toString());
+		QFileInfo fi(pdi.input.settings.value(keys::data_path).toString());
 		m_fileName = fi.fileName();
 	}
 
 	QString dir;
-	// should always contain output_dir execpt if launched from command line with no output_dir option
+// started in v2.4.12  => anywave always set output_dir (if no output_dir is set from the command line, then output_dir is set to data_dir
 	if (args.contains(keys::output_dir))
 		dir = args.value(keys::output_dir).toString();
 	else
-		dir = pdi.input.settings[keys::data_dir].toString();
+		dir = pdi.input.settings.value(keys::data_dir).toString();
 
 	// output_prefix will override this
 	if (args.contains(keys::output_prefix))

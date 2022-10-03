@@ -28,7 +28,7 @@ EEGInto4DPlugin::EEGInto4DPlugin()
 {
 	type = AwProcessPlugin::Background;
 	name = tr("EEGInto4D");
-	version = "2.0.2";
+	version = "2.0.4";
 	description = tr("Inject eeg channels from ADES file into an existing 4DNI MEG file.");
 	category = "Process:File Operation:Inject EEG into 4DNI";
 	setFlags(Aw::ProcessFlags::ProcessDoesntRequireData | Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
@@ -132,14 +132,16 @@ void EEGInto4D::runFromCommandLine()
 			break;
 	}
 	// found a plugin for eeg file
-	if (m_eegPlugin == nullptr && m_megPlugin == nullptr)
-		sendMessage("Missing EEG reader or MEG reader plugin.");
+	if (m_eegPlugin == nullptr && m_megPlugin == nullptr) {
+		sendMessage("Error: Missing EEG reader or MEG reader plugin.");
+		return;
+	}
 
 	// chech that MEG file could be open
 	auto reader = m_megPlugin->newInstance();
 	auto megFile = pdi.input.settings.value("meg_file").toString();
 	if (reader->canRead(megFile) != AwFileIO::NoError) {
-		sendMessage(QString("File %1 could not be open by 4DNI reader.").arg(megFile));
+		sendMessage(QString("Error: File %1 could not be open by 4DNI reader.").arg(megFile));
 		//m_megPlugin->deleteInstance(reader);
 		delete reader;
 		return;

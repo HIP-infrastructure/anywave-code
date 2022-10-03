@@ -73,15 +73,12 @@ AwBIDSItems AwBIDSManager::getSourceDataSubjectItems(const QString& rootDir)
 		auto fullPath = d.absoluteFilePath();
 		if (match.hasMatch()) {
 			// found a subject
-			// auto item = new AwBIDSItem(name);
 			auto item = new AwBIDSItem(match.captured("ID"));
 			item->setData(fullPath, AwBIDSItem::PathRole);
 			item->setData(AwBIDSItem::SourceDataSubject, AwBIDSItem::TypeRole);
 			item->setData(m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
 			// set the relative path role
 			item->setData(name, AwBIDSItem::RelativePathRole);
-			// set the possible derivatives mask
-	//		item->setData(AwBIDSItem::gardel | AwBIDSItem::freesurfer, AwBIDSItem::DerivativesRole);
 			item->setData(false, AwBIDSItem::ParsedItem);
 			items << item;
 		}
@@ -126,7 +123,6 @@ void AwBIDSManager::parseSubject(AwBIDSItem* parentItem)
 
 void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem)
 {
-//	AwBIDSItems res;
 	QDir dir(dirPath);
 	auto subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
@@ -253,6 +249,4 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* parentI
 			recursiveParsing(fullPath, item);
 		}
 	}
-//	emit finished();
-//	return res;
 }

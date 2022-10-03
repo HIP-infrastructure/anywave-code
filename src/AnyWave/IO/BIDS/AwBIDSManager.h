@@ -22,6 +22,7 @@
 #include <QFileIconProvider>
 
 class AwFileIO;
+class AwDataManager;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
 
@@ -45,6 +46,12 @@ namespace bids {
 	// tracking of current open file in BIDS
 	constexpr auto file_derivatives_dir = "file_derivatives_dir";
 	constexpr auto current_open_filename = "current_open_filename";
+	constexpr auto marker_file_path = "marker_file_path";
+	constexpr auto montage_file_path = "montage_file_path";
+	constexpr auto bad_file_path = "bad_file_path";
+	constexpr auto common_marker_file_path = "common_marker_file_path";
+	constexpr auto common_montage_file_path = "common_montage_file_path";
+	constexpr auto common_bad_file_path = "common_bad_file_path";
 }
 
 
@@ -54,7 +61,7 @@ class AwBIDSManager : public QObject
 public:
 	enum Modifications { ChannelsTsv, EventsTsv };
 	enum supportedMEGFormats { Bti4DNI, Elekta, CTF };
-	enum derivatives { ica, h2, gardel };
+	enum derivatives { ica, h2, gardel, freesurfer };
 	// destructor
 	~AwBIDSManager();
 	// utilities static methods
@@ -75,26 +82,21 @@ public:
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems items() { return m_items; }
-
 	AwBIDSItem* getParentSubject(AwBIDSItem* item);
 	bool isSubject(AwBIDSItem *item);
 	bool isSourceDataSubject(AwBIDSItem* item);
 	// 
 	int selectItemFromFilePath(const QString& path);
-
 	// command line methods
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
 	int MEGtoBIDS(const AwArguments& args);
 	int convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
 	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
-	static void initCommandLineOperation(const QString& filePath);
+	static void initCommandLineOperation(const QString& filePath, AwDataManager *);
 	static void finishCommandLineOperation();
-
-
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
-	
 	// TSV files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
@@ -118,6 +120,8 @@ public:
 	QString getFileName(const QString& filePath);
 	/** Get derivatives folder for current open item **/
 	QString getDerivativePath(int type);
+	/** Get derivative folder for a specified third party software **/
+	QString getDerivativesPath(int type);
 	/** GARDEL properties **/
 	/** get montages gardel did generate. **/
 	QStringList getGardelMontages();
@@ -132,14 +136,31 @@ public:
 	QString getPrefixName(AwBIDSItem *item, bool absolutePath = false);
 	/** Create derivatives path for process to store resutls **/
 	QString createDerivativesPath(const QString& processName);
-
+	/** Get the path to the user derivatives folder for the current open file item **/
+	QString getUserDerivativesFolder();
+	/** Get the path to the common derivatives folder for the current open file item **/
+	QString getCommonDerivativesFolder();
 	// dat file derivatives dir and file name
 	QString currentDerivativesDir();
 	QString currentFileName();
+	QStringList participantColumns() { return m_settings.value(bids::participant_cols).toStringList(); }
 	void parseSubject(AwBIDSItem* item);
+	void closeFile(QStandardItem* item);
 	void recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
+	/** Copy user .mrk sidecar files to the common folder **/
+	void pushMarkerFileToCommon();
+	/** Get markers from common .mrk and merge them to user .mrk file **/
+	void pullFromCommonMarkerFile();
+	/** Copy user .mrk sidecar files to the common folder **/
+	void pushMontageFileToCommon();
+	/** Get default montage from common .mtg. Replace use .mtg file **/
+	void pullFromCommonMontageFile();
+	/** Copy user .bad sidecar files to the common folder **/
+	void pushBadFileToCommon();
+	/** Get bad labels from common .bad. replace user .bad file **/
+	void pullFromCommonBadFile();
 signals:
 	void log(const QString& message);
 	void BIDSClosed();
@@ -149,8 +170,6 @@ protected:
 	AwBIDSManager();
 	AwBIDSItems getSubjectItems(const QString&);
 	AwBIDSItems getSourceDataSubjectItems(const QString&);
-
-	
 	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findCurrentFileItem(const QString& filePath);
@@ -158,9 +177,12 @@ protected:
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
 	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
+	
 
 	void initAnyWaveDerivativesForFile(const QString& filePath);
-	void moveSidecarFilesToDerivatives(const QString&, const QString&);
+	void moveSidecarFilesToDerivatives();
+	/** Copy .mrk .bad .mtg files from common derivatives folder to the current user derivatives folder**/
+	void copyCommonSidecarFilesToUserDerivatives();
 
 	static AwBIDSManager *m_instance;
 	static QStringList m_dataFileSuffixes;  // list of suffix for known data file (_ieeg, _eeg, ...)

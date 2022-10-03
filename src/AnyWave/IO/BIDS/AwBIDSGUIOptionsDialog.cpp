@@ -16,37 +16,19 @@
 #include "AwBIDSGUIOptionsDialog.h"
 #include "AwBIDSManager.h"
 
-constexpr int max_cols_used = 3;
-
-AwBIDSGUIOptionsDialog::AwBIDSGUIOptionsDialog(const QStringList& extraColumns, QWidget *parent)
+AwBIDSGUIOptionsDialog::AwBIDSGUIOptionsDialog(const QStringList& visibleColumns, QWidget *parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);
 	auto bidsManager = AwBIDSManager::instance();
-	//auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
-	//QString jsonPath = QString("%1/bids.json").arg(settingsDir);
-	//// do nothing if the file does not exist
-	//if (QFile::exists(jsonPath)) {
-	//	// check for bids.json file in Settings
-	//	auto dict = AwUtilities::json::fromJsonFileToHash(jsonPath);
-	//	// base encore the current bids dir
-	//	auto bidsDir = bidsManager->rootDir();
-	//	auto encodedDir = AwUtilities::base64Encode(bidsDir);
-
-	//	if (!dict.isEmpty() && dict.contains(encodedDir)) {
-
-	//	}
-	//}
 	// init cols layout with the first max_cols_used columns of participants
 	auto cols = bidsManager->settings().value(bids::participant_cols).toStringList();
 	// remove first col (participant id)
 	cols.takeFirst();
-	m_selectecColumns = extraColumns;
+	m_selectecColumns = visibleColumns;
 	int index = 0;
 	int row = 0, col = 0;
 	for (auto c : cols) {
-		if (index == max_cols_used)
-			break;
 		auto widget = new QCheckBox(c);
 		widget->setChecked(m_selectecColumns.contains(c));
 		widget->setProperty("column", c);
@@ -62,7 +44,7 @@ AwBIDSGUIOptionsDialog::AwBIDSGUIOptionsDialog(const QStringList& extraColumns, 
 	row++;
 	auto widget = new QPushButton("Reset");
 	connect(widget, &QPushButton::clicked, this, &AwBIDSGUIOptionsDialog::reset);
-	m_ui.columnsLayout->addWidget(widget, row, max_cols_used, 1, 1);
+	m_ui.columnsLayout->addWidget(widget, row, std::min(cols.size(), 4), 1, 1);
 }
 
 AwBIDSGUIOptionsDialog::~AwBIDSGUIOptionsDialog()

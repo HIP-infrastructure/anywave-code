@@ -30,7 +30,6 @@ public:
 	AwBIDSGUI(QWidget *parent = Q_NULLPTR);
 	~AwBIDSGUI();
 
-	//void refresh();
 	void init();
 	void setSubjects(const AwBIDSItems&);
 	void setSourceDataSubjects(const AwBIDSItems&);
@@ -46,10 +45,13 @@ signals:
 	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
 	void batchManagerNeeded();
 	void finished(); // sent when a background operation finished.
+	void progressChanged(int);
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);
 	void openBIDSOptions(); // called when Change button is clicked
+	void refreshSubjects();
+
 	// context menu slots
 	void contextMenuRequested(const QPoint& pos);
 	void addToProcessing();
@@ -62,10 +64,10 @@ protected:
 	// keep a copy of models for the TreeView
 	QStandardItemModel* m_model, *m_propertiesModel;
 	AwBIDSItems m_items;	// copy of items list from bids manager
-	QStringList m_extraColumns; // contain the label of the current extra columns set in the model.
-//	void initModel(const AwBIDSItems& subjects);
+	QStringList m_shownExtraColumns; // contain the label of the current extra columns set in the model.
 	void recursiveFill(AwBIDSItem *item);
 	void insertChildren(AwBIDSItem* parent);
+	void removeChildren(AwBIDSItem* parent);
 	void updatePropertiesTable(QStandardItem*item);
 	void createContextMenus();
 	void openITKSNAP(QStandardItem *item);

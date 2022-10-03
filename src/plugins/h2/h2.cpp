@@ -397,7 +397,7 @@ void H2::runFromCommandLine()
 	if (args.contains(keys::output_dir))
 		dir = args.value(keys::output_dir).toString();
 	else
-		dir = pdi.input.settings[keys::data_dir].toString();
+		dir = pdi.input.settings.value(keys::data_dir).toString();
 
 	// compute
 	float sr = pdi.input.channels().first()->samplingRate();	// save sampling rate in case we use downsampling
@@ -461,7 +461,7 @@ void H2::runFromCommandLine()
 		baseMATLABFile = QString("%1_").arg(pref);
 	}
 	else {
-		QFileInfo fi(pdi.input.settings[keys::data_path].toString());
+		QFileInfo fi(pdi.input.settings.value(keys::data_path).toString());
 		baseMATLABFile = QString("%1_").arg(fi.baseName());
 	}
 
@@ -527,12 +527,6 @@ void H2::run()
 	}
 	computeRuns();
 	if (!m_resultFiles.isEmpty()) {
-		//QVariantMap map;
-		//map["command"] = AwProcessCommand::LaunchProcess;
-		//map["process_name"] = QString("Correlation Graphs");
-		//QStringList args = { m_resultFiles };
-		//map["args"] = args;
-		//emit sendCommand(map);
 		QSharedPointer<AwEvent> e = QSharedPointer<AwEvent>(new AwEvent());
 		e->setId(AwEvent::StartProcess);
 		e->addValue("process_name", QString("Correlation Graphs"));
@@ -656,7 +650,7 @@ int H2::computeRuns()
 		// output_dir is always set by AnyWave:
 		// the default output_dir is the data file dir when working on a file outside of a BIDS and is the derivatives path when 
 		// working within a BIDS
-		QString dir = pdi.input.settings[keys::output_dir].toString();
+		QString dir = pdi.input.settings.value(keys::output_dir).toString();
 		QString baseFileName = pdi.input.settings.value(keys::data_file).toString();
 
 		if (m_ui->saveInOneFile) {

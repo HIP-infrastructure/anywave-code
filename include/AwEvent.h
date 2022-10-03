@@ -22,7 +22,7 @@ class AW_CORE_EXPORT AwEvent
 {
 public:
 	AwEvent();
-	enum EventType { StartProcess, HighlightTimeSelection, ShowChannels, LoadICAMatFile, AddNewView };
+	enum EventType { StartProcessDetached, StartProcess, HighlightTimeSelection, ShowChannels, LoadICAMatFile, AddNewView };
 
 	inline QVariantMap& data() { return m_data; }
 	inline int id() { return m_id; }

@@ -30,6 +30,7 @@
 #include <QJsonArray>
 #include <AwKeys.h>
 #include "Data/AwDataManager.h"
+#include "Data/AwDataServer.h"
 #include "CL/AwCommandLineManager.h"
 
 void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
@@ -39,7 +40,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	QDataStream fromClient(client);
 	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
-	AwDataManager* dm = AwDataManager::instance();  // get current data manager which holds informations of current open file
+	auto dm = m_dataManager;
 
 	//AwFileIO* reader = dm->reader();
 	QString json;
@@ -57,7 +58,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	
 	requestedChannels = process->pdi.input.channels();
 	if (json.isEmpty()) { // no args set
-
 		// make sure we are working on a open file :
 		if (!dm->isFileOpen()) {
 			emit log("ERROR: no file open in AnyWave. Nothing done.");
@@ -65,11 +65,9 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			response.send(-1);
 			return;
 		}
-
 		// get input channels of process
 		if (requestedChannels.isEmpty())
 			requestedChannels = dm->rawChannels();
-
 		input_markers << new AwMarker("global", 0., fileDuration);
 	}
 	else {
@@ -96,7 +94,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		if (cfg.contains(keys::data_path)) {
 			auto filePath = cfg.value(keys::data_path).toString();
 			dm = AwDataManager::newInstance();
-			auto res = dm->openFile(filePath);
+			auto res = dm->openFileMatPy(filePath);
 			if (res) {
 				error = QString("ERROR: Unable to open file %1.").arg(filePath);
 				emit log(error);
@@ -109,6 +107,10 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 				requestedChannels = dm->montage();
 			else
 				requestedChannels = dm->rawChannels();
+			// close current connection to data server
+			m_dataManager->dataServer()->closeConnection(this);
+			// open connection to the cloned data server which resides inside the cloned Data Manager
+			dm->dataServer()->openConnection(this);
 		}
 
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
@@ -119,14 +121,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 
 		// check for marker file
 		markers = AwCommandLineManager::parseMarkerFile(cfg);
-		//if (cfg.contains("marker_file")) {
-		//	auto mrkFile = cfg.value("marker_file").toString();
-		//	markers = AwMarker::load(mrkFile);
-		//	if (markers.isEmpty()) {
-		//		emit log(QString("Loading of %1 failed.").arg(mrkFile));
-		//	}
-		//}
-
 		if (markers.isEmpty()) {
 			// try to load the default .mrk that comes with the data file
 			auto mrkFile = dm->mrkFilePath();
@@ -160,8 +154,6 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			else if (source == "selection")
 				requestedChannels = dm->selectedChannels();
 		}
-		bool usingMarkers = !use_markers.isEmpty();
-		bool skippingMarkers = !skip_markers.isEmpty();
 		if (cfg.contains("start"))
 			start = cfg.value("start").toDouble();
 		if (cfg.contains("duration"))
@@ -177,13 +169,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			for (auto const &item : list)
 				filters << item.toDouble();
 		}
-		markers = AwMarkerManager::instance()->getMarkersThread();
-		// parsing input is done, now preparing input markers
-		if (!usingMarkers && !skippingMarkers)
-			input_markers << new AwMarker("input", start, duration);
-		if (usingMarkers || skippingMarkers) {
-			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
-		}
+	   input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
 			// Beware of channels refs (we should accept "A1-A2" and consider it as A1 with A2 as reference).
@@ -277,7 +263,12 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AW_DESTROY_LIST(requestedChannels);
 
 	// check for data manager used, if not the main one, destroy it
-	if (dm != AwDataManager::instance())
+    if (dm != m_dataManager) {
+		// reconnect to the correct data server
+		//AwDataServer::getInstance()->openConnection(this);
+		m_dataManager->dataServer()->openConnection(this);
+		dm->dataServer()->closeConnection(this);
 		delete dm;
+	}
 	emit log("Done.");
 }

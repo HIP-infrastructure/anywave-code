@@ -22,7 +22,7 @@
 #include <QFileDialog>
 #include <AwAmplitudeManager.h>
 #include "AwMontageManager.h"
-#include "Widgets/AwMontageRefWidget.h"
+//#include "Widgets/AwMontageRefWidget.h"
 #include <hdf5/AwHDF5.h>
 #include "AwAVGChannel.h"
 #include "ICA/AwICAManager.h"
@@ -86,7 +86,6 @@ AwMontageDial::AwMontageDial(QWidget *parent)
 	AsRecordedProxyModel *sortModelAsRecorded = new AsRecordedProxyModel(this);
 	// Set the sort mode to UserRole, to give the possibility to sort the Bad column.
 	sortModelAsRecorded->setSortRole(Qt::UserRole);
-	m_asRecordedChannels = AwChannel::sortByName(m_asRecordedChannels);
 	AwChannelListModelAsRecorded *modelAsRecorded = new AwChannelListModelAsRecorded(m_asRecordedChannels, this);
 	connect(modelAsRecorded, &AwChannelListModelAsRecorded::badChannelSet, this, &AwMontageDial::setBadChannel);
 	connect(modelAsRecorded, &AwChannelListModelAsRecorded::badChannelUnset, this, &AwMontageDial::unsetBadChannel);
@@ -327,18 +326,13 @@ void AwMontageDial::addDroppedChannels(const QStringList& labels, int beginRow)
 void AwMontageDial::addChannelsByTypes()
 {
 	QAction *act = (QAction *)sender();
-	if (act == NULL)
+	if (act == nullptr)
 		return;
-
 	int type = act->data().toInt();
-	auto labels = m_labelsByTypes[type];
-
 	AwChannelList channels;
-	for (auto l : labels) {
-		auto asRecorded = m_hashAsRecorded[l];
-		if (asRecorded)
-			if (!asRecorded->isBad())
-				channels << new AwChannel(asRecorded);
+	for (auto c : m_asRecordedChannels) {
+		if (c->type() == type)
+			channels << c->duplicate();
 	}
 	if (!channels.isEmpty())
 		static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->addChannels(channels);
@@ -517,8 +511,12 @@ void AwMontageDial::updateChannelsType(const QStringList& labels, int type)
 		if (labels.contains(c->name())) {
 			c->setType(type);
 			c->clearRefName();
-			if (m_hashAsRecorded.contains(c->name()))
-				m_hashAsRecorded[c->name()]->setType(type);
+			if (m_hashAsRecorded.contains(c->name())) {
+				// get as recorded channel pointer (this is the same instance of channel that the one in m_asRecordedChannels
+				auto channel = m_hashAsRecorded.value(c->name());
+				if (channel) 
+					channel->setType(type);
+			}
 		}
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->updateMontage(channels);
@@ -561,7 +559,7 @@ void AwMontageDial::resetToAsRecorded()
 	channels.clear();
 	for (auto c : m_asRecordedChannels) {
 		if (!c->isVirtual() && !c->isBad())
-			channels << new AwChannel(c);
+			channels <<  c->duplicate();
 	}
 	static_cast<AwChannelListModel *>(m_ui.tvDisplay->model())->setMontage(channels);
 }
@@ -801,17 +799,13 @@ void AwMontageDial::contextMenuApplyRefToAll()
 	// Si montage vide ou pas de selection => on quitte
 	if (channels.isEmpty())
 		return;
-
 	QItemSelectionModel *selectModel = m_ui.tvDisplay->selectionModel();
 	bool selection = m_ui.tvDisplay->selectionModel()->hasSelection();
 	if (!selection)
 		return;
-
 	QAction *act = (QAction *)sender();
 	if (act == NULL)
 		return;
-
-
 	int type = act->data().toInt();
 	QString ref;
 	for (auto const& i : selectModel->selectedIndexes()) {
@@ -821,8 +815,8 @@ void AwMontageDial::contextMenuApplyRefToAll()
 		}
 	}
 	for (auto c : channels) 
-		if (c->type() == type)
-			c->setReferenceName(ref);
+		if (c->type() == type) 
+			ref == noref ?  c->clearRefName() : c->setReferenceName(ref);
 }
 
 //

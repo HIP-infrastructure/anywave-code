@@ -17,7 +17,7 @@
 #include "AwProcessLog.h"
 #include <AwProcessInterface.h>
 
-AwProcessLogManager *AwProcessLogManager::m_instance = NULL;
+AwProcessLogManager *AwProcessLogManager::m_instance = nullptr;
 AwProcessLogManager *AwProcessLogManager::instance()
 {
 	if (!m_instance)
@@ -30,6 +30,11 @@ AwProcessLogManager::AwProcessLogManager(QObject *parent)
 	: QObject(parent)
 {
 
+}
+
+AwProcessLogManager::~AwProcessLogManager()
+{
+	m_instance = nullptr;
 }
 
 void AwProcessLogManager::connectProcess(AwBaseProcess *process)

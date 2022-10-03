@@ -69,7 +69,7 @@ public:
 	int applyUseSkipMarkersKeys();
 	
 	/** Initializing process before starting it **/
-	virtual void init() {}
+	virtual bool init() { return true; }
 	/* main excecution entry point */
 	virtual void run() {}
 	/* command line (NO GUI run mode) */
@@ -81,7 +81,8 @@ public:
 	void addMarkers(AwMarkerList *markers);
 	void addMarker(AwMarker *marker);
 	void sendEventAsynch(QSharedPointer<AwEvent> e);
-
+	/** Get instance of process based on plugin name **/
+	AwBaseProcess* getProcessByName(const QString& name);
 	/** specific to process which supports command line batching. **/
 	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
 signals:
@@ -91,6 +92,7 @@ signals:
 	// Send command
 	void sendCommand(int command, QVariantList args);
 	void sendCommand(const QVariantMap&);
+	void requestProcessInstance(AwBaseProcess**, const QString&);
 
 	void dataConnectionRequested(AwDataClient *client);
 	void newDisplayPlugin(AwDisplayPlugin *plugin);
@@ -136,14 +138,15 @@ class AW_PROCESS_EXPORT AwProcessPlugin : public AwPluginBase
 {
 public:
 	// default constructor
-	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; }
+	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; classType = RegularPlugin; }
+	enum ClassTypes  { RegularPlugin, ScriptedPlugin };
 	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY.
 - Display type indicates that the plugin will process only displayed data.
 - Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
 - DisplayBackground type indicates that the plugin can work on displayed data or in background mode aswell.
 - Internal type indicates that the plugin will process data internally. For instance, process some calculation on datas before they will send to AwDataClient objects. **/
 	int type;
-
+	int classType;
 	enum RunMode { GUI = 2, Display = 4, Background = 8, DisplayBackground = 16, Internal = 32 };
 	
 	void setFlags(int flags) { m_flags |= flags; }
@@ -304,6 +307,7 @@ public:
 Q_DECLARE_INTERFACE(AwProcessPlugin, AwProcessPlugin_IID)
 Q_DECLARE_INTERFACE(AwProcess, AwProcess_IID)
 Q_DECLARE_INTERFACE(AwGUIProcess, AwGUIProcess_IID)
+Q_DECLARE_METATYPE(AwBaseProcess*);
 
 #define AW_INSTANTIATE_PROCESS(P) P* newInstance() { auto process = new P; process->setPlugin(this); return process; }
 

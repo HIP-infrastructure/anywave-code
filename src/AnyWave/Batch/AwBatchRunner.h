@@ -26,7 +26,6 @@ public:
 	~AwBatchRunner();
 
 	void run() override;
-	void init() override;
 protected:
 	AwBaseProcess *createAndInitProcess(QVariantMap& dict, const QString& pluginName);
 	AwBatchItems m_items;

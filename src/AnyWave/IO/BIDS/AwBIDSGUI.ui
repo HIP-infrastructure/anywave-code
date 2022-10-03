@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>BIDS</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
@@ -30,13 +30,18 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonOptions">
-       <property name="maximumSize">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
+      <widget class="QPushButton" name="buttonRefresh">
+       <property name="text">
+        <string/>
        </property>
+       <property name="icon">
+        <iconset resource="../../../../resources/AnyWave.qrc">
+         <normaloff>:/images/refresh.png</normaloff>:/images/refresh.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonOptions">
        <property name="baseSize">
         <size>
          <width>16</width>
@@ -78,6 +83,52 @@
       <bool>false</bool>
      </attribute>
     </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="buttonPushMrk">
+       <property name="text">
+        <string>Push .mrk</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="buttonPushMtg">
+       <property name="text">
+        <string>Push .mtg</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="buttonPushBad">
+       <property name="text">
+        <string>Push .bad</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="buttonPullMrk">
+       <property name="text">
+        <string>Pull .mrk</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="buttonPullMtg">
+       <property name="text">
+        <string>Pull .mtg</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="buttonPullBad">
+       <property name="text">
+        <string>Pull .bad</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QTableView" name="tableView">

@@ -46,11 +46,10 @@ AwMontage::AwMontage(AwFileIO *reader)
 		load(mtgFile);
 	// remove null channels if any
 	foreach(AwChannel *c, m_channels)
-		if (c == Q_NULLPTR) {
+		if (c == nullptr) {
 			m_channels.removeAll(c);
 			m_asRecordedHash.remove(c->name());
 		}
-	
 }
 
 AwMontage::~AwMontage()
@@ -234,15 +233,17 @@ bool AwMontage::loadMontage(const QString& mtgFile)
 		}
 		else {  // channel not present in as recorded
 			// checking for special names
-			if (c->name() == "SEEG_AVG") {
-				m_channels << new AwAVGChannel(AwChannel::SEEG);
-			}
-			else if (c->name() == "EEG_AVG") {
-				m_channels << new AwAVGChannel(AwChannel::EEG);
-			}
-			else if (c->name() == "MEG_AVG") {
-				m_channels << new AwAVGChannel(AwChannel::MEG);
-			}
+			//if (c->name() == "SEEG_AVG") {
+			//	m_channels << new AwAVGChannel(AwChannel::SEEG);
+			//}
+			//else if (c->name() == "EEG_AVG") {
+			//	m_channels << new AwAVGChannel(AwChannel::EEG);
+			//}
+			//else if (c->name() == "MEG_AVG") {
+			//	m_channels << new AwAVGChannel(AwChannel::MEG);
+			//}
+			//if (c->name().contains("AVG"))
+			//	m_channels << new AwAVGChannel();
 		}
 	}
 

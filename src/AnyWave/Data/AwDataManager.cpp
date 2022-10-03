@@ -48,7 +48,8 @@ AwDataManager* AwDataManager::newInstance()
 	dm->m_montageManager->setParent(dm);
 	dm->m_dataServer = AwDataServer::newInstance();
 	dm->m_dataServer->setParent(dm);
-
+	dm->m_markerManager = AwMarkerManager::newInstance();
+	dm->m_markerManager->setParent(dm);
 	return dm;
 }
 
@@ -112,7 +113,7 @@ const AwChannelList& AwDataManager::selectedChannels()
 {
 	m_tmp.clear();
 	if (AwDisplay::instance())
-		m_tmp = AwDisplay::instance()->selectedChannels();
+		m_tmp = AwChannel::removeDoublons(AwDisplay::instance()->selectedChannels());
 	return m_tmp;
 }
 
@@ -155,14 +156,18 @@ QString AwDataManager::currentBIDSBaseFileName()
 void AwDataManager::setNewRootDirForSideFiles()
 {
 	auto bm = AwBIDSManager::instance();
-	auto dir = bm->currentDerivativesDir();
+	auto dir = bm->getUserDerivativesFolder();
+	Q_ASSERT(!dir.isEmpty());
 	auto fileName = bm->currentFileName();
 
 	m_settings[keys::flt_file] = QString("%1/%2.flt").arg(dir).arg(fileName);
 	m_settings[keys::sel_file] = QString("%1/%2.sel").arg(dir).arg(fileName);
-	m_settings[keys::bad_file] = QString("%1/%2.bad").arg(dir).arg(fileName);
-	m_settings[keys::marker_file] = QString("%1/%2.mrk").arg(dir).arg(fileName);
-	m_settings[keys::montage_file] = QString("%1/%2.mtg").arg(dir).arg(fileName);
+	//m_settings[keys::bad_file] = QString("%1/%2.bad").arg(dir).arg(fileName);
+	m_settings[keys::bad_file] = bm->settings().value(bids::bad_file_path);
+	//m_settings[keys::marker_file] = QString("%1/%2.mrk").arg(dir).arg(fileName);
+	m_settings[keys::marker_file] = bm->settings().value(bids::marker_file_path);
+	//m_settings[keys::montage_file] = QString("%1/%2.mtg").arg(dir).arg(fileName);
+	m_settings[keys::montage_file] = bm->settings().value(bids::montage_file_path);
 	m_settings[keys::disp_file] = QString("%1/%2.display").arg(dir).arg(fileName);
 	m_settings[keys::lvl_file] = QString("%1/%2.levels").arg(dir).arg(fileName);
 	m_settings[keys::lvl2_file] = QString("%1/%2.lvl").arg(dir).arg(fileName);
@@ -184,7 +189,8 @@ void AwDataManager::applyFilters(const AwChannelList& channels)
 	m_filterSettings.apply(channels);
 }
 
-int AwDataManager::openFileFromBIDS(const QString& filePath)
+
+int AwDataManager::openFileBase(const QString& filePath)
 {
 	closeFile();
 	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(filePath);
@@ -221,8 +227,16 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 	m_settings[keys::data_dir] = fi.absolutePath();
 	// get filename only
 	m_settings[keys::data_file] = fi.fileName();
+	
 	// the montage, marker, bad, display, flt  paths had already been set by BIDSManager when reaching this point
-		// get predefined .mrk .bad .mtg if any
+	// 
+	m_settings[keys::flt_file] = QString("%1.flt").arg(fullDataFilePath);	
+	m_settings[keys::sel_file] = QString("%1.sel").arg(fullDataFilePath);
+	m_settings[keys::bad_file] = QString("%1.bad").arg(fullDataFilePath);
+	m_settings[keys::marker_file] = QString("%1.mrk").arg(fullDataFilePath);
+	m_settings[keys::montage_file] = QString("%1.mtg").arg(fullDataFilePath);
+	m_settings[keys::disp_file] = QString("%1.display").arg(fullDataFilePath);
+	m_settings[keys::current_montage_dir] = fi.absolutePath();
 	auto tmp = reader->infos.badFile();
 	if (tmp.isEmpty())
 		reader->infos.setBadFile(m_settings.value(keys::bad_file).toString());
@@ -249,9 +263,37 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 		m_settings[data_info::total_duration] = reader->infos.totalDuration();
 	if (!m_settings.contains(data_info::samples))
 		m_settings[data_info::samples] = reader->infos.totalSamples();
-
 	m_dataServer->setMainReader(m_reader);
+	return 0;
+}
 
+
+/// <summary>
+/// openFileMatPy() 
+/// used in Python or MATLAB code.
+/// A new instance of Data Manager must be instantiated before.
+/// </summary>
+/// <param name="filePath"></param>
+/// <returns></returns>
+int AwDataManager::openFileMatPy(const QString& filePath)
+{
+	QMutexLocker lock(&m_mutex);
+	return openFileBase(filePath);
+}
+
+int AwDataManager::openFileFromBIDS(const QString& filePath)
+{
+	m_status = openFileBase(filePath);
+	if (m_status)
+		return m_status;
+
+	AwBIDSManager::instance()->setNewOpenFile(filePath);
+	// Are there events?
+	if (m_reader->infos.blocks().at(0)->markersCount())
+		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+
+	m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
+	m_montageManager->newMontage(m_reader);
 	// try to load .flt file
 	bool fltFileOk = true;
 	try {
@@ -264,107 +306,33 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 		m_filterSettings.setGuiVisibleItems(m_reader->infos.channels());
 
 	m_filterSettings.apply(m_reader->infos.channels());
-
-	//// Are there events?
-	//if (m_reader->infos.blocks().at(0)->markersCount())
-	//	m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
-
-	//m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
 	auto display = AwDisplay::instance();
 	if (display) {
 		// LAST step => update Display Manager with new file.
-			display->newFile();
+		display->newFile();
 	}
-	//m_montageManager->newMontage(m_reader);
-	AwBIDSManager::instance()->setNewOpenFile(filePath);
-	// Are there events?
-	if (m_reader->infos.blocks().at(0)->markersCount())
-		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+	m_status = 0;
+	return m_status;
+}
 
-	m_markerManager->init();   // init will load side .mrk file and remove duplicated markers. Also remove markers off limits.
+int AwDataManager::openFileCommandLine(const QString& filePath)
+{
+	m_status = openFileBase(filePath);
+	if (m_status)
+		return m_status;
+
+	// checking for BIDS
+	 AwBIDSManager::initCommandLineOperation(filePath, this);
 	m_montageManager->newMontage(m_reader);
+	
+	return m_status;
 }
 
 int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 {
-	closeFile();
-	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(filePath);
-	if (reader == nullptr) {
-		m_status = -1;
-		m_errorString = "No reader plugin found to open the file.";
-		return -1;
-	}
-	m_status = reader->openFile(filePath);
-	if (m_status) { // status >0 means error when opening file, return status code
-		m_errorString = reader->errorMessage();
-		return -1;
-	}
-
-	// ok we have a valid reader
-	m_reader = reader;
-	m_settings[keys::can_write_triggers] = m_reader->flags() & FileIO::TriggerChannelIsWritable && !m_reader->triggerChannels().isEmpty();
-	// if successfully open : check for special plugin which are designed to open a folder and not a file directly.
-	QString fullDataFilePath;
-	if (m_reader->plugin()->flags() & FileIO::IsDirectory) // the plugin must provide the real full path to data file.
-		fullDataFilePath = m_reader->realFilePath();
-	if (fullDataFilePath.isEmpty()) // if not or if we have a classic plugin, get the file path.
-		if (!m_reader->fullPath().isEmpty()) // the plugin did not provide the full path, so override it with the path set in the dialog box.
-			fullDataFilePath = m_reader->fullPath();
-		else {
-			m_reader->setFullPath(filePath);
-			fullDataFilePath = filePath;
-		}
-	m_reader->setFullPath(fullDataFilePath);
-	m_settings[keys::data_path] = fullDataFilePath;
-	m_settings[keys::time] = reader->infos.recordingTime();
-	m_settings[keys::date] = reader->infos.recordingDate();
-	m_settings[keys::iso_date] = reader->infos.isoDate();
-
-	QFileInfo fi(fullDataFilePath);
-	m_settings[keys::data_dir] = fi.absolutePath();
-	// get filename only
-	m_settings[keys::data_file] = fi.fileName();
-	m_settings[keys::flt_file] = QString("%1.flt").arg(fullDataFilePath);
-	m_settings[keys::sel_file] = QString("%1.sel").arg(fullDataFilePath);
-	m_settings[keys::bad_file] = QString("%1.bad").arg(fullDataFilePath);
-	m_settings[keys::marker_file] = QString("%1.mrk").arg(fullDataFilePath);
-	m_settings[keys::montage_file] = QString("%1.mtg").arg(fullDataFilePath);
-	m_settings[keys::current_montage_dir] = fi.absolutePath();
-	m_settings[keys::disp_file] = QString("%1.display").arg(fullDataFilePath);
-
-	// get predefined .mrk .bad .mtg if any
-	auto tmp = reader->infos.badFile();
-	if (tmp.isEmpty()) 
-		reader->infos.setBadFile(m_settings.value(keys::bad_file).toString());
-	tmp = reader->infos.mrkFile();
-	if (tmp.isEmpty())
-		reader->infos.setMrkFile(m_settings.value(keys::marker_file).toString());
-	tmp = reader->infos.mtgFile();
-	if (tmp.isEmpty())
-		reader->infos.setMtgFile(m_settings.value(keys::montage_file).toString());
-
-	m_settings[keys::marker_file] = reader->infos.mrkFile();
-	m_settings[keys::bad_file] = reader->infos.badFile();
-	m_settings[keys::montage_file] = reader->infos.mtgFile();
-	// handle output_dir
-	// default output_dir is the data dir
-	m_settings[keys::output_dir] = fi.absolutePath();
-	AwUniteMaps(m_settings, m_reader->infos.settings());
-	auto duration = reader->infos.totalDuration(); 
-	m_settings.insert(keys::file_duration, QVariant(duration));
-	float sr = 0.;
-	for (auto c : reader->infos.channels())
-		sr = std::max(c->samplingRate(), sr);
-	m_settings[keys::max_sr] = QVariant::fromValue(sr);
-	m_settings[keys::samples] = reader->infos.totalSamples();
-
-	// recompute missing infos is necessary
-	if (!m_settings.contains(data_info::total_duration))
-		 m_settings[data_info::total_duration] = reader->infos.totalDuration();
-	if (!m_settings.contains(data_info::samples))
-		m_settings[data_info::samples] = reader->infos.totalSamples();
-
-	m_dataServer->setMainReader(m_reader);
+	m_status = openFileBase(filePath);
+	if (m_status)
+		return m_status;
 
 	// try to load .flt file
 	bool fltFileOk = true;

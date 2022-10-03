@@ -15,8 +15,8 @@ public:
 	~AwGlobalMarkers();
 
 	static AwGlobalMarkers* instance();
-	AwMarkerList* displayed();
-	AwMarkerList* total();
+	AwMarkerList* displayed();  // raw pointers
+	AwMarkerList* total();	// raw pointers
 	void setDisplayed(AwMarkerList* list);
 	void setTotal(AwMarkerList* list);
 	void closeFile();

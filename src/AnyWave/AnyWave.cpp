@@ -46,7 +46,11 @@
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
 #include <AwMEGSensorManager.h>
+#ifndef AW_MARKING_TOOL_V2
 #include <widget/AwMarkerInspector.h>
+#else
+#include <widget/AwMarkingTool.h>
+#endif
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
@@ -77,9 +81,9 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	
 	m_display = nullptr;
 	m_SEEGViewer = nullptr;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
-#endif
+//#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+//	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
+//#endif
 	// Accept file drops
 	setAcceptDrops(true);
 	AwSettings* aws = AwSettings::getInstance();
@@ -102,8 +106,12 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	if (args.contains(keys::plugin_debug)) {
 		quint16 server_port = static_cast<quint16>(args.value(keys::server_port).toInt());
 		auto server = AwMATPyServer::instance();
-		server->start(server_port);
-		server->setDebugMode(true);
+		if (!server->start(server_port)) {
+			AwMessageBox::critical(this, "TCP Server", QString("Failed to listen on port %1\nerror:%2").arg(server_port).arg(server->errorString()));
+
+		}
+		else
+			server->setDebugMode(true);
 	}
 
 	m_debugLogWidget = nullptr;
@@ -149,8 +157,9 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	for (QAction* a : m_actions)
 		a->setEnabled(false);
 
-	AwMarkerInspector* markerInspectorWidget = nullptr;
-	auto dock = new QDockWidget(tr("Markers"), this);
+	setDockOptions(QMainWindow::AnimatedDocks);
+	
+	auto dock = new QDockWidget("Markers", this);
 	dock->setObjectName("Markers");
 	m_dockWidgets["markers"] = dock;
 	dock->hide();
@@ -163,13 +172,23 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	addDockWidget(Qt::LeftDockWidgetArea, dock);
 	resizeDocks({ dock }, { 150 }, Qt::Horizontal);  // this is the trick to avoid unwanted resizing of the dock widget
 
-	dock = new QDockWidget(tr("Adding Markers Tool"), this);
+	dock = new QDockWidget("Adding Markers Tool", this);
 	m_dockWidgets["add_markers"] = dock;
 	dock->hide();
 	dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dock->setFloating(true);
+#ifndef AW_MARKING_TOOL_V2
+	AwMarkerInspector* markerInspectorWidget = nullptr;
 	markerInspectorWidget = AwMarkerManager::instance()->markerInspector();
+	markerInspectorWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
 	dock->setWidget(markerInspectorWidget);
+#else
+	auto markingToolWidget = AwMarkingTool::instance();
+	markingToolWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
+	markingToolWidget->loadCustomList(QString("%1/custom_list.mrk").arg(aws->value(aws::marker_rules_dir).toString()));
+	markingToolWidget->loadHEDList(QString("%1/hed.mrk").arg(aws->value(aws::app_resource_dir).toString()));
+	dock->setWidget(markingToolWidget);
+#endif
 
 	dock = new QDockWidget(tr("Video"), this);
 	dock->setObjectName("Video");
@@ -195,14 +214,19 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	AwLayoutManager::instance()->setWorkingDir(aws->value(aws::work_dir).toString());
 
 	marker_manager->setDock(m_dockWidgets.value("markers"));
+#ifndef AW_MARKING_TOOL_V2
 	connect(marker_manager, SIGNAL(displayedMarkersChanged(const AwMarkerList&)), markerInspectorWidget, SLOT(setMarkers(const AwMarkerList&)));
 	connect(markerInspectorWidget, &AwMarkerInspector::predefinedMarkersChanged, AwSettings::getInstance(), &AwSettings::savePredefinedMarkers);
 	markerInspectorWidget->setPredefinedMarkers(AwSettings::getInstance()->loadPredefinedMarkers());
 	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), markerInspectorWidget, SLOT(setTargets(const AwChannelList&)));
+#else
+	// we want to save the custom list defined by the user
+	// may be do that when closing anywave?
+#endif
 
 	m_display = new AwDisplay(this);
 	m_display->setParent(this);
-	m_display->setAddMarkerDock(m_dockWidgets["add_markers"]);
+	m_display->setAddMarkerDock(m_dockWidgets.value("add_markers"));
 	connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::handleVideoCursor);
 	connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setVideoPosition);
 	connect(m_player, &AwVideoPlayer::changeSyncSettings, this, &AnyWave::editVideoSyncSettings);
@@ -431,7 +455,7 @@ void AnyWave::initToolBarsAndMenu()
 	addToolBar(Qt::TopToolBarArea, m_cursorToolBar->toolBar());
 	m_cursorToolBar->setEnabled(false);
 	connect(m_cursorToolBar, SIGNAL(cursorModeChanged(bool)), m_display, SLOT(cursorModeChanged(bool)));
-	connect(m_cursorToolBar, &AwCursorMarkerToolBar::markerModeChanged, m_dockWidgets["add_markers"], &QDockWidget::setVisible);
+	connect(m_cursorToolBar, &AwCursorMarkerToolBar::markerModeChanged, m_dockWidgets.value("add_markers"), &QDockWidget::setVisible);
 	connect(m_cursorToolBar, SIGNAL(QTSModeChanged(bool)), m_display, SLOT(setQTSMode(bool)));
 	connect(m_display, SIGNAL(QTSModeEnded()), m_cursorToolBar, SLOT(stopQTSMode()));
 	connect(m_display, SIGNAL(resetMarkerMode()), m_cursorToolBar, SLOT(reset()));

@@ -69,9 +69,10 @@ signals:
 	void needData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
 	void selectChannelsRequested(AwDataClient *,const QVariantMap& settings, AwChannelList* channels);
 	void selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*);
+
 protected:
 	QWaitCondition m_wcDataAvailable, m_wcSelectChannelsDone;
-	QMutex m_mutexDataAvailable, m_mutexSelectChannels;
+	QMutex m_mutexDataAvailable, m_mutexSelectChannels, m_mutexEventProcessed;
 	bool m_endOfData, m_isConnected, m_errorOccured;
 	QString m_errorString;	// hold a string containing a message describing the error
 };

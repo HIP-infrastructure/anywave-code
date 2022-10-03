@@ -118,17 +118,13 @@ public:
 	inline void endRepaint() { m_repaint = false; }
 	inline bool needRepaint() { return m_repaint; }
 	virtual void paintSignal(QPainter* painter) {}
-//	inline void shiftLabel(qreal pixels) { m_labelXOffset = pixels; }
 	virtual QGraphicsItem *labelItem() = 0;
 	virtual void setLabelHeight(int height) = 0;
 	void setUpperNeighbor(AwBaseGraphicsSignalItem* neighbor);
 protected:
-	bool m_baseLine;
-	bool m_label;
+	bool m_baseLine, m_label;
 	AwChannel *m_channel;
 	bool m_repaint;
-//	qreal m_labelXOffset;	// offset in pixels for the label
-
 };
 
 /// AwGraphicsSignalDialog

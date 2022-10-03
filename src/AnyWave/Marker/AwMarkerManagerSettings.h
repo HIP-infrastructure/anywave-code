@@ -48,6 +48,8 @@ public slots:
 	void setMarkerAddingMode(bool on);
 	void highlightMarker(AwMarker *marker);
 	void openStats();
+	void bidsPush();
+	void bidsPull();
 
 signals:
 	/** Sent whenever displayed markers changed, depending on filtering rules **/

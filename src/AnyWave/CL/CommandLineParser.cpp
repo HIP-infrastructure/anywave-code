@@ -398,7 +398,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		return aw::commandLine::BatchOperation;
 	}
 
-
 	if (parser.isSet(runProcessOpt)) {
 		arguments["run_process"] = parser.value(runProcessOpt);
 		arguments[keys::operation] = keys::run_operation;

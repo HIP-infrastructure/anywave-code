@@ -83,6 +83,7 @@ bool EEGInto4D::inject(const QString& megFile, const AwChannelList& eegChannels)
 	const qint64 chunkDuration = 300000; // 300 000 samples buffer
 	qint64 totalSamples = m_megReader->infos.channels().first()->dataSize();
 	float* buffer = new float[chunkDuration * nChannels];
+	std::memset(buffer, 0, sizeof(float) * chunkDuration * nChannels);
 	qint64 position = 0;
 
 	while (totalSamples) {

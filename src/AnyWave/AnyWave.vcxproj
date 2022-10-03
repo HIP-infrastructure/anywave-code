@@ -26,7 +26,6 @@
     <ClCompile Include="AnyWave.cpp" />
     <ClCompile Include="AwBatch.cpp" />
     <ClCompile Include="AwComponents.cpp" />
-    <ClCompile Include="AwExportDial.cpp" />
     <ClCompile Include="AwFileOpenSave.cpp" />
     <ClCompile Include="AwHelpMenu.cpp" />
     <ClCompile Include="AwMapping.cpp" />
@@ -86,6 +85,7 @@
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp" />
+    <ClCompile Include="IO\BIDS\AwRefreshDialog.cpp" />
     <ClCompile Include="IO\export\AwChannelsExportWizardPage.cpp" />
     <ClCompile Include="IO\export\AwExporter.cpp" />
     <ClCompile Include="IO\export\AwExportWizardDial.cpp" />
@@ -260,6 +260,7 @@
     <QtMoc Include="IO\export\AwMarkersExportWizardPage.h" />
     <QtMoc Include="IO\export\AwFilterExportWizardPage.h" />
     <QtMoc Include="IO\export\AwExporter.h" />
+    <QtMoc Include="IO\BIDS\AwRefreshDialog.h" />
     <ClInclude Include="IO\JSON\AwJSON.h" />
     <ClInclude Include="Marker\AwExtractTriggers.h" />
     <QtMoc Include="Marker\AwMarkersExportWidget.h">
@@ -319,8 +320,6 @@
     <QtMoc Include="ICA\AwPanelItem.h">
     </QtMoc>
     <QtMoc Include="Carto\AwMappingClient.h">
-    </QtMoc>
-    <QtMoc Include="AwExportDial.h">
     </QtMoc>
     <QtMoc Include="AnyWave.h">
     </QtMoc>
@@ -461,6 +460,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="IO\BIDS\AwRefreshDialog.ui" />
     <QtUic Include="Marker\AwMarkerManagerSettings.ui">
     </QtUic>
   </ItemGroup>
@@ -842,14 +842,14 @@
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>5.15.0</QtInstall>
-    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
+    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts;3dcore;3drender;3dinput;3dextras</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>5.15.0</QtInstall>
-    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
+    <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts;3dcore;3drender;3dinput;3dextras</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <QtModules>core;xml;network;gui;svg;multimedia;widgets;printsupport;concurrent;multimediawidgets;charts</QtModules>
@@ -899,7 +899,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;_MAX_FS_THREADS=4;AW_MARKING_TOOL_V2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -907,16 +907,16 @@
       <OpenMPSupport>false</OpenMPSupport>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;$(EXTRA_LIBS)\itk\include\ITK-4.13;$(SolutionDir)\include\freesurfer;.\3DViewer\vtkutils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(EXTRA_LIBS)\vtk\debug\lib;$(SolutionDir)\lib;$(EXTRA_LIBS)\qwt\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLibd.lib;AwMappingLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwWidgetsLibd.lib;AwMathLibd.lib;AwHDF5libd.lib;AwLayoutLibd.lib;AwFilteringLibd.lib;AwMatlablibd.lib;AwMontageLibd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;qwtd.lib;qcustomplotd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;AwCoreLibd.lib;AwMappingLibd.lib;AwProcessLibd.lib;AwReadWriteLibd.lib;AwUtilitiesLibd.lib;AwWidgetsLibd.lib;AwMathLibd.lib;AwHDF5libd.lib;AwLayoutLibd.lib;AwFilteringLibd.lib;AwMatlablibd.lib;AwMontageLibd.lib;vtkCommonCore-8.2.lib;vtkCommonDataModel-8.2.lib;vtkCommonMisc-8.2.lib;vtkFiltersCore-8.2.lib;vtkGUISupportQt-8.2.lib;vtkFiltersHybrid-8.2.lib;vtkFiltersGeometry-8.2.lib;vtkFiltersGeneric-8.2.lib;vtkRenderingCore-8.2.lib;vtkInteractionStyle-8.2.lib;vtkCommonExecutionModel-8.2.lib;vtkFiltersSources-8.2.lib;vtkRenderingOpenGL2-8.2.lib;vtkRenderingFreeType-8.2.lib;vtkRenderingAnnotation-8.2.lib;vtkIOCore-8.2.lib;vtkIOGeometry-8.2.lib;vtkImagingCore-8.2.lib;vtkImagingGeneral-8.2.lib;vtkImagingMath-8.2.lib;vtkCommonTransforms-8.2.lib;vtkCommonMath-8.2.lib;minc2.lib;qwtd.lib;qcustomplotd.lib;mkl_intel_lp64_dll.lib;mkl_tbb_thread_dll.lib;mkl_core_dll.lib;tbb12.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
@@ -976,7 +976,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;QWT_DLL;H5_BUILT_AS_DYNAMIC_LIB;AW_DISABLE_EPOCHING;MKL;QCUSTOMPLOT_USE_LIBRARY;_HAS_STD_BYTE=0;QT_NO_DEBUG_OUTPUT;ARMA_DONT_USE_WRAPPER;_MAX_FS_THREADS=4;AW_MARKING_TOOL_V2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>

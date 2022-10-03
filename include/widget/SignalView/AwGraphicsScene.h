@@ -28,6 +28,8 @@
 class AwMarkingSettings;
 class AwGTCMenu;
 class AwPickMarkersDial;
+class AwAmplitudeItem;
+class AwMarkingTool;
 
 class AW_WIDGETS_EXPORT AwGraphicsScene : public QGraphicsScene
 {
@@ -63,6 +65,8 @@ public:
 	void reorderItems();
 	void setItemsMoved() { m_itemsHaveMoved = true; }
 	void setItemsDragged() { m_itemsDragged = true; }
+
+	QGraphicsItem* amplitudeScale();
 signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
@@ -113,6 +117,7 @@ public slots:
 	void centerViewOnPosition(float pos);
 	void highlightPosition(float pos);
 	void showMarkers(bool show);
+
 	// markers
 	/// show current marker under mouse in the marker list.
 	void showMarkerInList();
@@ -152,22 +157,37 @@ protected slots:
 	void launchQTSPlugin();
 	void insertPredefinedMarker();
 	void undoMarkerInsertion();
+#ifdef AW_MARKING_TOOL_V2
+	void applyMarkingToolSettings();
+#endif
 protected:
 	float timeAtPos(const QPointF& pos);
+	float timeAtPos(qreal x);
+	float widthToDuration(float w);
 	float xPosFromTime(float time);
 	QGraphicsItem * getItemUnderMouse(QPointF pos, int *itemType);
 	virtual QMenu *defaultContextMenu();
 	void updateGotoChannelMenu(const QStringList& labels);
 	void clearMarkers();
 	void displayMarkers();
-	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = NULL, int offsetLabel = 0);
+	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = nullptr, int offsetLabel = 0);
 
 	void keyPressEvent(QKeyEvent *e);
 	void keyReleaseEvent(QKeyEvent *e);
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e);
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *e);
 	void mousePressEvent(QGraphicsSceneMouseEvent *e);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
 	void mouseMoveEvent(QGraphicsSceneMouseEvent  *e);
+	
+	void handleMouseReleaseNone(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseQTS(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseCursor(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseMapping(QGraphicsSceneMouseEvent* e);
+
+	void handleMousePressedAddingMarker(QGraphicsSceneMouseEvent* e);
+	QStringList getChannelsUnderSelectionRectangle();
 
 	void updateVisibleItemsHashTable();
 	
@@ -203,10 +223,12 @@ protected:
 	bool m_isTimeSelectionStarted;
 	AwMarkingSettings *m_markingSettings;
 	AwDisplayPluginSignalItem m_signalItemPlugin;
+	AwAmplitudeItem* m_amplitudeItem;
 	QStringList m_QTSCompatiblePlugins;	// name of process plugins that can be launched when QTS mode is active.
 	QString m_pluginToLaunch;	// name of process to launch after a QTS
 	QMenu* m_contextMenuMapping;	// pointer to sub menu dedicated to mapping operations (can be null)
 	AwPickMarkersDial* m_pickMarkersDial;
+	AwMarkingTool* m_markingTool;
 };
 
 

@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=2.4.6
+AppVersion=2.5.6
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -46,7 +46,7 @@ Source: ".\bin\x64\Release\ins.txt"; DestDir: "{app}"
 Source: ".\bin\x64\Release\qt.conf"; DestDir: "{app}"
 Source: ".\lib\*.lib"; DestDir: "{app}\lib"
 Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
-Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
+; Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave\"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\4DNIExporter.dll"; DestDir: "{app}\Plugins"
@@ -60,6 +60,7 @@ Source: ".\bin\x64\Release\Plugins\DeltamedBinTxtReader.dll"; DestDir: "{app}\Pl
 Source: ".\bin\x64\Release\Plugins\BrainVisionIO.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\Deltamed_Reader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\EEGInto4D.dll"; DestDir: "{app}\Plugins"
+Source: ".\bin\x64\Release\Plugins\RegisterInject.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\CTF_Reader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\FileConverter.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\H2.dll"; DestDir: "{app}\Plugins"
@@ -88,4 +89,4 @@ Name: startmenu; Description: "Add shortcut to start menu"; GroupDescription: "S
 
 [Run]
 Filename: "{app}\vc_redist.x64.exe"; Parameters: "/quiet /norestart"; Description: "Visual C++ runtime"; StatusMsg: "Installing Visual C++ runtime..."
-Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."
+; Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."

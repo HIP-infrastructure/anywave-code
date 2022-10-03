@@ -308,16 +308,6 @@ void AwChannel::setDisplayPluginName(const QString& name)
 	m_registeredDisplayPlugin = name; 
 }
 
-//void AwChannel::setUnit(const char *u)
-//{
-//	m_unit = QString::fromUtf8(u);
-//}
-//
-//void AwChannel::setUnit(const QString& u)
-//{
-//	m_unit = u;
-//}
-
 void AwChannel::setUnit(int unit)
 {
 	m_unit = unit;

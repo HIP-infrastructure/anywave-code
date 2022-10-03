@@ -92,56 +92,48 @@ QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 
 void AwBIDSManager::finishCommandLineOperation()
 {
-	if (m_instance == nullptr)
-		return;
-	if (m_instance->m_currentOpenItem) {
-		// get .bad file
-		auto badFile = QString("%1.bad").arg(m_instance->m_currentOpenItem->data(AwBIDSItem::PathRole).toString());
-		if (QFile::exists(badFile)) {
-			m_instance->updateChannelsTsvBadChannels(AwMontage::loadBadChannels(badFile));
-		}
-	}
-	delete m_instance;
-	m_instance = nullptr;
+	//if (m_instance == nullptr)
+	//	return;
+	//if (m_instance->m_currentOpenItem) {
+	//	// get .bad file
+	//	auto badFile = AwDataManager::instance()->badFilePath();
+	//	if (QFile::exists(badFile)) {
+	//		m_instance->updateChannelsTsvBadChannels(AwMontage::loadBadChannels(badFile));
+	//	}
+	//}
+	//delete m_instance;
+	//m_instance = nullptr;
 }
 
-void AwBIDSManager::initCommandLineOperation(const QString & filePath)
+void AwBIDSManager::initCommandLineOperation(const QString & filePath, AwDataManager *dm)
 {
-	auto rootDir = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	auto rootDir = QDir::toNativeSeparators(AwBIDSManager::detectBIDSFolderFromPath(filePath));
 	if (rootDir.isEmpty())
+		return;  // not in a BIDS
+	QRegularExpression exp("sub-.*");
+	QString  path = QDir::toNativeSeparators(filePath);
+	auto capture = exp.match(path);
+	if (!capture.hasMatch())
 		return;
+	path = capture.captured();
+	QFileInfo fi2(filePath);
 
-	QDir dir(rootDir);
-	// get folders in root dir and find the one matching our subject
-	auto folders = dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
-	QString subjectDir;
-	for (auto folder : folders) {
-		if (filePath.contains(folder)) {
-			subjectDir = folder;
-			break;
-		}
+	auto fileName = fi2.fileName();
+	path = path.remove(fileName);
+	auto userName = AwSettings::getInstance()->value(aws::username).toString();
+	QString derivPath = QString("%1/derivatives/anywave/%2/%3").arg(rootDir).arg(userName).arg(path);
+	QDir dir(derivPath);
+	if (dir.exists()) {
+		auto baseDerivPath = QString("%1%2").arg(derivPath).arg(fileName);
+		auto badFilePath = baseDerivPath + ".bad";
+		auto markerFilePath = baseDerivPath + ".mrk";
+		auto montageFilePath = baseDerivPath + ".mtg";
+		auto filterFilePath = baseDerivPath + ".flt";
+		dm->settings()[keys::bad_file] = badFilePath;
+		dm->settings()[keys::montage_file] = montageFilePath;
+		dm->settings()[keys::marker_file] = markerFilePath;
+		dm->settings()[keys::flt_file] = filterFilePath;
 	}
-	if (subjectDir.isEmpty()) {  // totally UNEXPECTED
-		return;
-	}
-	// ok it's a file in a BIDS
-	if (m_instance == nullptr)
-		m_instance = new AwBIDSManager;
-	m_instance->m_rootDir = rootDir;
-	m_instance->m_guiMode = false;
-
-	// build the subject item
-	auto fullPath = QString("%1/%2").arg(rootDir).arg(subjectDir);
-	auto item = new AwBIDSItem(subjectDir);
-	m_instance->m_items << item;
-	item->setData(fullPath, AwBIDSItem::PathRole);
-	item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
-	item->setData(m_instance->m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-	// set the relative path role
-	item->setData(subjectDir, AwBIDSItem::RelativePathRole);
-	// set the possible derivatives mask
-	m_instance->recursiveParsing(fullPath, item);
-	m_instance->m_currentOpenItem = item;
 }
 
 
@@ -201,7 +193,6 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// check if root dir is the same as current one. If so, do nothing.
 	if (path == m_rootDir)
 		return;
-
 	if (path.isEmpty())
 		return;
 	// check that the folder exists
@@ -220,15 +211,12 @@ void AwBIDSManager::setRootDir(const QString& path)
 	wait.setText("Parsing BIDS Structure...");
 	connect(this, &AwBIDSManager::finished, &wait, &QDialog::accept);
 	wait.run(std::bind(&AwBIDSManager::parse, this));  // bind a void method without parameters. The method must emit finished signals when finished.
-
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv)) 
 		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
-
 	// instantiate UI if needed
 	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
-
 	m_ui->init();
 	// there is an issue with sourcedata subject when anywave creates derivatives/anywave/username/sourcedata : it makes BM Crash
 	// so for now, don't add sourcedata subjects to the tree
@@ -298,6 +286,8 @@ QString AwBIDSManager::currentFileName()
 }
 
 
+
+
 QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
 {
 	QString res;
@@ -330,7 +320,6 @@ QString AwBIDSManager::getDerivativePath(int derivativeType)
 {
 	return getDerivativePath(m_currentOpenItem, derivativeType);
 }
-
 
 QVariant AwBIDSManager::BIDSProperty(int property)
 {
@@ -536,10 +525,46 @@ bool AwBIDSManager::isSubject(AwBIDSItem* item)
 	return item->data(AwBIDSItem::TypeRole).toInt() == AwBIDSItem::Subject;
 }
 
+QString AwBIDSManager::getUserDerivativesFolder()
+{
+	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	auto subItem = getParentSubject(m_currentOpenItem);
+	if (!subItem)
+		return QString();
+	QString path;
+	QFileInfo fi(relativePath);
+	auto userName = AwSettings::getInstance()->value(aws::username).toString();
+	if (isSubject(subItem)) {
+		path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	}
+	else if (isSourceDataSubject(subItem)) { // creating a sourcedata folder seems to make BM crash....
+		path = QString("%1/derivatives/anywave/%2/sourcedata/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+	}
+	return path;
+}
+
+QString AwBIDSManager::getCommonDerivativesFolder()
+{
+	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	auto subItem = getParentSubject(m_currentOpenItem);
+	if (!subItem)
+		return QString();
+	QString path;
+	QFileInfo fi(relativePath);
+	if (isSubject(subItem)) {
+		path = QString("%1/derivatives/anywave/common/%3").arg(m_rootDir).arg(fi.path());
+	}
+	else if (isSourceDataSubject(subItem)) { // creating a sourcedata folder seems to make BM crash....
+		path = QString("%1/derivatives/anywave/common/sourcedata/%3").arg(m_rootDir).arg(fi.path());
+	}
+	return path;
+}
+
 void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 {
 	// build the path corresponding to the current file in derivatives
 	auto relativePath = m_currentOpenItem->data(AwBIDSItem::RelativePathRole).toString();
+	QString commonPath;
 
 	// get the subject item for the currentOpenItem
 	auto subItem = getParentSubject(m_currentOpenItem);
@@ -553,52 +578,35 @@ void AwBIDSManager::initAnyWaveDerivativesForFile(const QString& filePath)
 	auto userName = AwSettings::getInstance()->value(aws::username).toString();
 
 	QString path;
-	if (isSubject(subItem))
+	if (isSubject(subItem)) {
 		path = QString("%1/derivatives/anywave/%2/%3").arg(m_rootDir).arg(userName).arg(fi.path());
-	else if (isSourceDataSubject(subItem)) // creating a sourcedata folder seems to make BM crash....
+		commonPath = QString("%1/derivatives/anywave/common/%2").arg(m_rootDir).arg(fi.path());
+	}
+	else if (isSourceDataSubject(subItem)) { // creating a sourcedata folder seems to make BM crash....
 		path = QString("%1/derivatives/anywave/%2/sourcedata/%3").arg(m_rootDir).arg(userName).arg(fi.path());
+		commonPath = QString("%1/derivatives/anywave/common/sourcedata/%2").arg(m_rootDir).arg(fi.path());
+	}
 	else
 		return;
 
 	QDir dir;
-	dir.mkpath(path);
+	dir.mkpath(path); // create user derivatives path
+	dir.mkpath(commonPath); // create common path
 	auto basePath = QString("%1/%2/%3").arg(m_rootDir).arg(relativePath).arg(fileName);
-
-	// get .mrk if any
-	auto srcFile = filePath + ".mrk";
-	auto destFile = QString("%1/%2.mrk").arg(path).arg(fileName);
-	bool fileExists = QFile::exists(srcFile);
-	bool destExists = QFile::exists(destFile);
-	if (fileExists && !destExists) 
-		moveSidecarFilesToDerivatives(srcFile, destFile);
-	if (fileExists && destExists) {
-		// avoid loosing markers: load the both file in memory, remove doublon and save it.
-		auto srcMarkers = AwMarker::load(srcFile);
-		srcMarkers += AwMarker::load(destFile);
-		AwMarker::removeDoublons(srcMarkers);
-		QFile::remove(destFile);
-		AwMarker::save(destFile, srcMarkers);
-		QFile::remove(srcFile);
-	}
-
-
-	// move mtg file if any
-	srcFile = filePath + ".mtg";
-	destFile = QString("%1/%2.mtg").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = filePath + ".display"; 
-	destFile = QString("%1/%2.display").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = filePath + ".bad";
-	destFile = QString("%1/%2.bad").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-	srcFile = filePath + ".flt";
-	destFile = QString("%1/%2.flt").arg(path).arg(fileName);
-	moveSidecarFilesToDerivatives(srcFile, destFile);
-
+	// set these variables first !
 	m_settings[bids::current_open_filename] = fileName;
 	m_settings[bids::file_derivatives_dir] = path;
+	auto baseDerivPath = QString("%1/%2").arg(path).arg(fileName);
+	m_settings[bids::bad_file_path] = baseDerivPath + ".bad";
+	m_settings[bids::marker_file_path] = baseDerivPath + ".mrk";
+	m_settings[bids::montage_file_path] = baseDerivPath + ".mtg";
+	auto baseCommonPath = QString("%1/%2").arg(commonPath).arg(fileName);
+	m_settings[bids::common_bad_file_path] = baseCommonPath + ".bad";
+	m_settings[bids::common_marker_file_path] = baseCommonPath + ".mrk";
+	m_settings[bids::common_montage_file_path] = baseCommonPath + ".mtg";
 
+	moveSidecarFilesToDerivatives();
+	copyCommonSidecarFilesToUserDerivatives();
 	AwDataManager::instance()->setNewRootDirForSideFiles();
 }
 
@@ -629,7 +637,8 @@ void AwBIDSManager::findCurrentFileItem(const QString& filePath)
 		return;
 	if (m_hashItemFiles.contains(QDir::toNativeSeparators(filePath))) {
 		m_currentOpenItem = m_hashItemFiles.value(QDir::toNativeSeparators(filePath));
-		m_ui->showItem(m_currentOpenItem);
+		if (m_guiMode)
+			m_ui->showItem(m_currentOpenItem);
 		// check for user in derivatives/anywave
 		initAnyWaveDerivativesForFile(filePath);
 	}
@@ -781,4 +790,11 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 	}
 	file.close();
 	return res;
+}
+
+void AwBIDSManager::closeFile(QStandardItem* item)
+{
+	// TO DO HERE  : update channels.tsv file if bad labels have changed?
+	// that is not done by default but should be done if an option is set Preferences??
+	// if updateChannelsTsv option set in Preferences =>  update channels.tsv
 }
