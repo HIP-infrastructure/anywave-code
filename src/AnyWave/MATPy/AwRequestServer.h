@@ -20,7 +20,7 @@
 class AwScriptProcess;
 #include <AwDataClient.h>
 #include "Data/AwDataSet.h"
-
+class AwDataManager;
 
 class AwRequestServer : public AwDataClient
 {
