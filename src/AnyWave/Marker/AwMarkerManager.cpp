@@ -257,7 +257,8 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
-	m_ui->setMarkers(m_markers);
+	if (m_ui)  // could be called in command line so there is no GUI
+		m_ui->setMarkers(m_markers);
 	if (p != nullptr)
 		p->setMarkersReceived();
 	emit updateStats();
@@ -284,14 +285,14 @@ void AwMarkerManager::addMarker(AwMarker *m)
 	QMutexLocker lock(&m_mutex);
 	// check if sender is a process
 	AwBaseProcess *p = qobject_cast<AwBaseProcess *>(sender());
-	if (p != NULL) // duplicate marker
+	if (p != nullptr) // duplicate marker
 		m_markers << new AwMarker(m); // clone markers send by process.
 	else
 		m_markers << m;
 	m_needSorting = true;
 	removeOfflimits();
 	m_ui->setMarkers(m_markers);
-	if (p != NULL)
+	if (p != nullptr)
 		p->setMarkersReceived();
 	emit updateStats();
 }
@@ -323,7 +324,8 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 
 void AwMarkerManager::initFromCommandLine(const QString& filePath)
 {
-	if (filePath.size()) {
+	m_filePath = filePath;
+	if (QFile::exists(filePath)) {
 		m_sMarkers = AwMarker::loadShrdFaster(filePath);
 		m_markers = AwMarker::toMarkerList(m_sMarkers);
 	}
@@ -334,6 +336,11 @@ void AwMarkerManager::initFromCommandLine(const QString& filePath)
 			m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 		}
 	}
+}
+
+void AwMarkerManager::finishCommandLineOperation()
+{
+	saveMarkers(m_filePath);
 }
 
 //

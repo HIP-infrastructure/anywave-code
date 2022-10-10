@@ -55,9 +55,7 @@ bool AwTriggerParser::showUi()
 		if (dlg.isMaskValueSet())
 			m_maskValue = dlg.maskValue();
 		m_parseNegative = dlg.parseNegativeValues();
-	// 	m_triggers = dlg.triggers();
 		pdi.input.setNewChannels(dlg.triggers());
-	//	pdi.input.channels = dlg.triggers();
 		return true;
 	}
 	return false;

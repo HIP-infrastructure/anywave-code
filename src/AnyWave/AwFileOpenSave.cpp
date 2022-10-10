@@ -340,13 +340,14 @@ void AnyWave::openBIDS(const QString& path)
 			return;
 	}
 
-	AwBIDSManager::instance()->setRootDir(path);
+	if (AwBIDSManager::instance()->setRootDir(path) == -1)
+		return;
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFileFromBIDS(const QString&)));
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
 
 	// instantiate dock widget if needed
 	auto dock = m_dockWidgets.value("BIDS");
-	if (dock == NULL) {
+	if (dock == nullptr) {
 		dock = new QDockWidget(tr("BIDS"), this);
 		m_dockWidgets["BIDS"] = dock;
 		dock->setWidget(AwBIDSManager::instance()->ui());

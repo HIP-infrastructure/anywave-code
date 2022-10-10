@@ -67,7 +67,7 @@ AwDataConnection::AwDataConnection(AwDataServer *server, AwDataClient *client, A
 	m_server = server;
 	m_client = client;
 	for (int i = 0; i < AW_CHANNEL_TYPES; i++) {
-		m_avg[i] = NULL;
+		m_avg[i] = nullptr;
 		m_ICASourcesLoaded[i] = false;
 	}
 	connect(this, &AwDataConnection::log, server, &AwDataServer::log);
@@ -80,7 +80,10 @@ AwDataConnection::~AwDataConnection()
 
 void AwDataConnection::prepareAVGChannel(AwAVGChannel *avg_channel)
 {
-	AwChannelList asRecorded = m_reader->infos.channels();
+//	AwChannelList asRecorded = m_reader->infos.channels();
+	// use data manager instead and montage to get updated as recorded channels 
+	auto asRecorded = AwDataManager::instance()->montageManager()->asRecordedChannels();
+
 	AwChannelList connections;
 
 	foreach (AwChannel *c, asRecorded)	{

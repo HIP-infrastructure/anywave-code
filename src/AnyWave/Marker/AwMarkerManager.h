@@ -53,6 +53,7 @@ public:
 	void init();
 	void guiInit();
 	void initFromCommandLine(const QString& mrkFilePath);  // takes ownership of markers
+	void finishCommandLineOperation();
 
 	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.

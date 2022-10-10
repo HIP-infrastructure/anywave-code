@@ -371,15 +371,7 @@ void AwMontageManager::clear()
 }
 
 void AwMontageManager::closeFile()
-{
-	//if (AwBIDSManager::isInstantiated()) {
-	//	auto bm = AwBIDSManager::instance();
-	//	if (bm->isBIDSActive())
-	//		if (bm->updateChannelsTsvBadChannels(m_badChannelLabels) != 0 && !bm->lastError().isEmpty()) {
-	//			AwMessageBox::information(nullptr, "BIDS", bm->lastError());
-	//		}
-	//}
-			
+{	
 	clear();
 	m_montagePath = "";
 	m_badPath = "";
@@ -725,6 +717,7 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 		channels = AwMontage::load(path);
 	}
 	catch (const AwException& e) {
+		m_errorString = e.errorString();
 		return channels;
 	}
 

@@ -253,7 +253,8 @@ void Spectral::compute()
 			list.append(fftIter);
 		}
 
-		auto  compute = [window, nfft, noverlap, nIterationPnts, fact, plan, windowType](FFTIterations* iter) {
+		//auto  compute = [window, nfft, noverlap, nIterationPnts, fact, plan, windowType](FFTIterations* iter) {
+		auto  compute = [=](FFTIterations* iter) {
 			vec timeWindowSignal = zeros(nfft);
 			vec iteration = zeros(nIterationPnts);
 			fftw_complex* fftx = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * nfft);
@@ -264,7 +265,9 @@ void Spectral::compute()
 				if (windowType != Spectral::None)
 					timeWindowSignal = timeWindowSignal % window;
 
+				m_mutex.lock();
 				fftw_execute_dft_r2c(plan, timeWindowSignal.memptr(), fftx);
+				m_mutex.unlock();
 				uword j = 0;
 				for (auto i = 1; i < nfft / 2; i++) {
 					fftx[i][0] *= fact;
@@ -291,7 +294,7 @@ void Spectral::compute()
 void Spectral::runFromCommandLine()
 {
 	if (initialize() != 0) {
-		sendMessage("Something went wrong while initialising. Aborting...");
+		sendMessage("Something went wrong while initializing. Aborting...");
 		return;
 	}
 	compute();
@@ -302,7 +305,7 @@ void Spectral::runFromCommandLine()
 void Spectral::run()
 {
 	if (initialize() != 0) {
-		sendMessage("Something went wrong while initialising. Aborting...");
+		sendMessage("Something went wrong while initializing. Aborting...");
 		return;
 	}
 	pdi.input.settings[keys::output_dir] = pdi.input.settings.value(keys::data_dir);

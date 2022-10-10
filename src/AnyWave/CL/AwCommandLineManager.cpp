@@ -144,19 +144,15 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			if (!QFile::exists(mrkFile)) {
 				logger.sendLog("warning: marker_file is specified but the file does not exist. Searching for default .mrk file.");
 				mrkFile = dm->mrkFilePath();
-				if (!QFile::exists(mrkFile)) {
+				if (!QFile::exists(mrkFile)) 
 					logger.sendLog(QString("warning: default marker file %1 does no exist.").arg(mrkFile));
-					mrkFile.clear();
-				}
 			}
 			dm->markerManager()->initFromCommandLine(mrkFile);
 		}
 		else {  // check for default .mrk file
 			mrkFile = dm->mrkFilePath();
-			if (!QFile::exists(mrkFile)) {
+			if (!QFile::exists(mrkFile)) 
 				logger.sendLog(QString("warning: default marker file %1 does no exist.").arg(mrkFile));
-				mrkFile.clear();
-			}
 			dm->markerManager()->initFromCommandLine(mrkFile);
 		}
 
@@ -233,6 +229,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 						process->pdi.input.settings.value(keys::bad_labels).toStringList());
 					logger.sendLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
 					if (montage.isEmpty()) { // error when loading and/or applying mtg file
+						logger.sendLog(QString("Error: %1").arg(AwMontageManager::instance()->errorString()));
 						throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()));
 						return -1;
 					}

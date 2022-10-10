@@ -30,6 +30,7 @@
 #include <utils/json.h>
 #include <AwCore.h>
 #include <utils/bids.h>
+#include <utils/json.h>
 #include <widget/AwWaitWidget.h>
 #include <QtConcurrent>
 #include <montage/AwMontage.h>
@@ -188,18 +189,30 @@ QString AwBIDSManager::getParsingPath()
 	return m_settings[bids::parsing_path].toString();
 }
 
-void AwBIDSManager::setRootDir(const QString& path)
+int AwBIDSManager::setRootDir(const QString& path)
 {
 	// check if root dir is the same as current one. If so, do nothing.
 	if (path == m_rootDir)
-		return;
+		return 0;
 	if (path.isEmpty())
-		return;
+		return -1;
 	// check that the folder exists
 	QDir dir(path);
 	if (!dir.exists()) {
-		AwMessageBox::information(nullptr, "BIDS", QString("The BIDS folder %1 does not exist.").arg(path));
-		return;
+		AwMessageBox::critical(nullptr, "BIDS", QString("The BIDS folder %1 does not exist.").arg(path));
+		return -1;
+	}
+	// check if we got a real BIDS 
+	// we must have a datadescription.json file
+	QString dataDesc = QString("%1/dataset_description.json").arg(path);
+	if (!QFile::exists(dataDesc)) {
+		AwMessageBox::critical(nullptr, "BIDS", "The directory is not a BIDS");
+		return -1;
+	}
+	auto map = AwUtilities::json::fromJsonFileToMap(dataDesc);
+	if (!map.contains("BIDSVersion") && !map.contains("Name")) {
+		AwMessageBox::critical(nullptr, "BIDS", "Invalid dataset_description.json");
+		return -1;
 	}
 	closeBIDS();
 	m_rootDir = path;
@@ -222,7 +235,7 @@ void AwBIDSManager::setRootDir(const QString& path)
 	// so for now, don't add sourcedata subjects to the tree
 	   ////  m_ui->setSourceDataSubjects(m_sourcedataItems);   // uncomment to add sourcedata subjects
 	m_ui->setSubjects(m_items);
-
+	return 0;
 }
 
 void AwBIDSManager::closeBIDS()

@@ -60,11 +60,11 @@ public:
 	inline QMenu *viewMenu() { return m_viewMenu; }
 	QList<QAction *>& icaActions() { return m_icaActions; }
 	void runBuiltInProcess(AwBuiltInProcess *process);
-	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList(), bool NoIOCheck = false );
+	int runProcess(AwBaseProcess *process, const QStringList& args = QStringList(), bool NoIOCheck = false );
 	void initProcessSettings(AwBaseProcess* process);
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
 	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
-	void startProcess(const QString& name, const QStringList& args = QStringList());
+	int startProcess(const QString& name, const QStringList& args = QStringList());
 	void closeFile();
 	void quit();
 	QList<AwProcessPlugin *> processPluginsWithFeatures(int flags);
@@ -119,6 +119,7 @@ protected:
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);
 	int applyUseSkipMarkersKeys(AwBaseProcess* process);
+	void launchProcessesOnClosing();
 	
 private:
 	/* Warn the user that the process is about to be launched with all channels as input. */

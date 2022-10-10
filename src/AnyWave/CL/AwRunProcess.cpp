@@ -18,6 +18,9 @@
 #include <QFile>
 #include "AwCommandLogger.h"
 #include <AwException.h>
+#include "Data/AwDataManager.h"
+#include "Data/AwDataServer.h"
+#include "Marker/AwMarkerManager.h"
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Process/AwProcessManager.h"
 #include <iostream>
@@ -25,7 +28,8 @@
 
 void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
-	AwCommandLogger logger("runProcess", "cl_run");
+	//AwCommandLogger logger("runProcess", "cl_run");
+	AwCommandLogger logger(QString("Command Line"));
 	AwBaseProcess *process = nullptr;
 	
 	try {
@@ -48,6 +52,11 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	AwUniteMaps(process->pdi.input.settings, arguments);
 	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
 	QObject::connect(process, &AwProcess::requestProcessInstance, AwProcessManager::instance(), &AwProcessManager::setProcessInstance);
+	auto dm = AwDataManager::instance();
+	auto mm = dm->markerManager();
+	QObject::connect(process, SIGNAL(sendMarker(AwMarker*)), mm, SLOT(addMarker(AwMarker*)));
+	QObject::connect(process, SIGNAL(sendMarkers(AwMarkerList*)), mm, SLOT(addMarkers(AwMarkerList*)));
+	QObject::connect(process, SIGNAL(dataConnectionRequested(AwDataClient*)), dm->dataServer(), SLOT(openConnection(AwDataClient*)));
 	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
 	if (process->init()) {
 		process->runFromCommandLine();
@@ -57,6 +66,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		logger.sendLog(QString("init() failed for process %1.\nError is %2").arg(process->plugin()->name).arg(process->errorString()));
 	}
 	AwBIDSManager::finishCommandLineOperation();
+	mm->finishCommandLineOperation();
 	delete process;
 }
 

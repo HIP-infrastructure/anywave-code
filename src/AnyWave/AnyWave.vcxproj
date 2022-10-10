@@ -159,6 +159,7 @@
     <ClCompile Include="Process\AwProcessLogManager.cpp" />
     <ClCompile Include="Process\AwProcessLogWindow.cpp" />
     <ClCompile Include="Process\AwProcessManager.cpp" />
+    <ClCompile Include="Process\AwProcessManagerRunProcess.cpp" />
     <ClCompile Include="Process\AwProcessMarkerModel.cpp" />
     <ClCompile Include="Process\AwProcessWidget.cpp" />
     <ClCompile Include="Process\AwProgressIndicator.cpp" />

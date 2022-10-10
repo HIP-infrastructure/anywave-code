@@ -74,7 +74,7 @@ public:
 	static QString detectBIDSFolderFromPath(const QString& path);
 	
 	int setNewOpenFile(const QString& path);
-	void setRootDir(const QString& path);
+	int setRootDir(const QString& path);
 	inline QString& rootDir() { return m_rootDir; }
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }

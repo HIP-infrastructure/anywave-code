@@ -75,16 +75,16 @@
 #define AW_HELP_URL "https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/home"
 
 
-AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
+AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
-	
+
 	m_display = nullptr;
 	m_SEEGViewer = nullptr;
-//#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-//	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
-//#endif
-	// Accept file drops
+	//#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+	//	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
+	//#endif
+		// Accept file drops
 	setAcceptDrops(true);
 	AwSettings* aws = AwSettings::getInstance();
 	aws->init();
@@ -100,7 +100,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	auto dm = AwDataManager::instance();
 	// Montage
 	AwMontageManager* montage_manager = AwMontageManager::instance();
-   // marker
+	// marker
 	AwMarkerManager* marker_manager = AwMarkerManager::instance();
 
 	if (args.contains(keys::plugin_debug)) {
@@ -123,7 +123,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 
 	adl->connectComponent("Filters Settings", &dm->filterSettings());
 	adl->connectComponent("Global Settings", aws);
-	
+
 	setCentralWidget(new QSplitter(this));
 
 	QStringList recentFiles = aws->value(aws::recent_files).toStringList();
@@ -158,7 +158,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 		a->setEnabled(false);
 
 	setDockOptions(QMainWindow::AnimatedDocks);
-	
+
 	auto dock = new QDockWidget("Markers", this);
 	dock->setObjectName("Markers");
 	m_dockWidgets["markers"] = dock;
@@ -240,7 +240,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 	m_meshManager = AwMeshManager::instance();
 	// AwMeshManager
 	m_layoutManager = AwLayoutManager::instance();
-  	  
+
 	connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList*)), m_display, SLOT(removeVirtualChannels(AwChannelList*)));
 	connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
 	connect(process_manager, SIGNAL(displayProcessTerminated(AwProcess*)), m_display, SLOT(processHasFinished()));
@@ -296,8 +296,18 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget *parent, Qt::WindowFlags flags
 
 	auto file = args.value("open_file").toString();
 	showMaximized();
-	if (!file.isEmpty())
-		openFile(file);
+	if (!file.isEmpty()) {
+		QFileInfo fi(file);
+		if (!fi.exists()) {
+			QMessageBox::critical(this, "File operation", "Specified path or file does not exist.");
+			return;
+		}
+		if (fi.isFile())
+			openFile(file);
+		else {
+			openBIDS(file);
+		}
+	}
 }
 
 //
