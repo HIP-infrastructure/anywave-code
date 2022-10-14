@@ -40,7 +40,6 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 	if (m_server->listen(QHostAddress::Any, port)) {
 		m_serverPort = m_server->serverPort();
-	//	AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 		AwDataServer::getInstance()->openConnection(this);
 		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
 		m_isListening = true;
@@ -85,7 +84,8 @@ void AwRequestServer::setHandlers()
 	addHandler(this, &AwRequestServer::handleSetBeamFormer, AwRequest::SetBeamFormer);		
 	addHandler(this, &AwRequestServer::handleGetTriggers, AwRequest::GetTriggers);		
 	addHandler(this, &AwRequestServer::handleGetPluginIO, AwRequest::GetPluginIO);		
-	addHandler(this, &AwRequestServer::handleGetDataEx, AwRequest::GetDataEx);			
+	addHandler(this, &AwRequestServer::handleGetDataEx, AwRequest::GetDataEx);	
+	addHandler(this, &AwRequestServer::handleGetData2_5_10, AwRequest::GetData2_5_10);
 	addHandler(this, &AwRequestServer::handleGetMarkersEx, AwRequest::GetMarkersEx);	
 	addHandler(this, &AwRequestServer::handleOpenNewFile, AwRequest::OpenNewFile);		
 	addHandler(this, &AwRequestServer::handleRunAnyWave, AwRequest::RunAnyWave);			
@@ -145,6 +145,7 @@ void AwRequestServer::clientDisconnected()
 
 void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 {
+
 	if (m_handlers.isEmpty() || !m_handlers.contains(request)) {
 		emit log(QString("received unknown request: %2. Nothing done.").arg(request));
 		return;

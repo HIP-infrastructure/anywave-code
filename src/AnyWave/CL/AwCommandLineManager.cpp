@@ -226,7 +226,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			if (!pickChannels) {
 				if (args.contains(keys::montage_file)) { // did we finally got a montage file?
 					montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
-						process->pdi.input.settings.value(keys::bad_labels).toStringList());
+							process->pdi.input.settings.value(keys::bad_labels).toStringList());
 					logger.sendLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
 					if (montage.isEmpty()) { // error when loading and/or applying mtg file
 						logger.sendLog(QString("Error: %1").arg(AwMontageManager::instance()->errorString()));

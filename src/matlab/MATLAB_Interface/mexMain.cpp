@@ -14,12 +14,12 @@ std::map<std::string, int> functions;
 using namespace matlab::data;
 using namespace matlab::engine;
 
+
 MexFunction::MexFunction()
 {
-	//m_matlabPtr = getEngine();
 	m_matlabPtr = getEngine();
 	functions["debug_connect"] = AwRequest::ConnectDebug;
-	functions["get_data"] = AwRequest::GetDataEx;
+	functions["get_data"] = AwRequest::GetData2_5_10;
 	functions["get_markers"] = AwRequest::GetMarkersEx;
 	functions["send_markers"] = AwRequest::SendMarkers;
 	functions["send_message"] = AwRequest::SendMessage;
@@ -154,7 +154,7 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	case AwRequest::ConnectDebug:
 		debug_connect(outputs, inputs);
 		break;
-	case AwRequest::GetDataEx:
+	case AwRequest::GetData2_5_10:
 		get_data(outputs, inputs);
 		break;
 	case AwRequest::GetMarkersEx:
@@ -175,7 +175,6 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	default:
 		error("Unknown command");
 	}
-	
 }
 
 void MexFunction::getPidPort()
@@ -202,11 +201,12 @@ void MexFunction::error(const std::string& message)
 		std::vector<Array>({ factory.createCharArray(message) }));
 }
 
-void MexFunction::printf(std::ostringstream stream)
+void MexFunction::printf(std::ostringstream& stream)
 {
 	ArrayFactory factory;
 	m_matlabPtr->feval(u"fprintf", 0, std::vector<Array>
 		({ factory.createScalar(stream.str()) }));
+	stream.flush();
 }
 
 void MexFunction::printf(const std::string& message)
@@ -425,59 +425,132 @@ void MexFunction::get_data(matlab::mex::ArgumentList& outputs, matlab::mex::Argu
 		else 
 			error("get_data: bad arguments. Expected struct.");
 	}
-	int nChannels;
+	int nChannels, nTimeSelections;
 	try {
-		TCPRequest aw(AwRequest::GetDataEx);
+		// OLD CODE
+		//TCPRequest aw(AwRequest::GetDataEx);
+		//aw.sendString(args);
+		//aw.waitForResponse();
+		//QDataStream& response = aw.response();
+		//response >> nChannels;
+		//if (nChannels == 0) {
+		//	// return empty struct
+		//	outputs[0] = factory.createEmptyArray();
+		//	return;
+		//}
+		//StructArray S = factory.createStructArray({ 1, size_t(nChannels) }, { "name", "type", "ref", "sr", "hp", "lp", "notch", "data" });
+		//QString name, ref, type;
+		//float sr, hp, lp, notch;
+		//qint64 samples;
+		//for (auto i = 0; i < nChannels; i++) {
+		//	aw.waitForResponse();
+		//	response >> name >> type >> ref >> sr >> hp >> lp >> notch;
+		//	std::string tmp = name.toStdString();
+		//	S[i]["name"] = factory.createCharArray(tmp);
+		//	tmp = type.toStdString();
+		//	S[i]["type"] = factory.createCharArray(tmp);
+		//	tmp = ref.toStdString();
+		//	S[i]["ref"] = factory.createCharArray(tmp);
+		//	S[i]["sr"] = factory.createScalar<double>(sr);
+		//	S[i]["hp"] = factory.createScalar<double>(hp);
+		//	S[i]["lp"] = factory.createScalar<double>(lp);
+		//	S[i]["notch"] = factory.createScalar<double>(notch);
+		//	response >> samples;
+		//	qint64 samplesRead, chunkSize;;
+		//	bool finished = false;
+		//	if (samples) {
+		//		auto data = factory.createArray<float>({ 1, size_t(samples) });
+		//		//S[i]["data"] = factory.createArray<double>({ 1, size_t(samples) });
+
+		//		finished = false;
+		//		samplesRead = 0;
+		//		chunkSize = 0;
+		//		while (!finished) {
+		//			aw.waitForResponse();
+		//			response >> chunkSize;
+		//			if (chunkSize == 0)
+		//				finished = true;
+		//			else {
+		//				for (auto j = 0; j < chunkSize; j++) {
+		//					response >> data[0][j + samplesRead];
+		//				}
+		//				samplesRead += chunkSize;
+		//			}
+		//		}
+		//		S[i]["data"] = data;
+		//	}
+		//}
+		//outputs[0] = S;
+		// END OF OLD CODE
+		TCPRequest aw(AwRequest::GetData2_5_10);
 		aw.sendString(args);
 		aw.waitForResponse();
 		QDataStream& response = aw.response();
-		response >> nChannels;
+		response >> nTimeSelections >> nChannels;
 		if (nChannels == 0) {
 			// return empty struct
 			outputs[0] = factory.createEmptyArray();
 			return;
 		}
-		StructArray S = factory.createStructArray({ 1, size_t(nChannels) }, { "name", "type", "ref", "sr", "hp", "lp", "notch", "data" });
-		QString name, ref, type;
+		StructArray S = factory.createStructArray({ 1, size_t(nTimeSelections) }, { "channels", "position", "duration", "data" });
+		StructArray Channels = factory.createStructArray({ 1, size_t(nChannels) },
+			{ "name", "ref", "type", "hp", "lp", "sr", "notch", "unit" });
+		QString name, ref, type, unit;
 		float sr, hp, lp, notch;
 		qint64 samples;
+
 		for (auto i = 0; i < nChannels; i++) {
 			aw.waitForResponse();
-			response >> name >> type >> ref >> sr >> hp >> lp >> notch;
-			std::string tmp = name.toStdString();
-			S[i]["name"] = factory.createCharArray(tmp);
-			tmp = type.toStdString();
-			S[i]["type"] = factory.createCharArray(tmp);
-			tmp = ref.toStdString();
-			S[i]["ref"] = factory.createCharArray(tmp);
-			S[i]["sr"] = factory.createScalar<double>(sr);
-			S[i]["hp"] = factory.createScalar<double>(hp);
-			S[i]["lp"] = factory.createScalar<double>(lp);
-			S[i]["notch"] = factory.createScalar<double>(notch);
-			response >> samples;
-			qint64 samplesRead, chunkSize;;
+			response >> name >> type >> ref >> sr >> hp >> lp >> notch >> unit;
+			auto stru16 = name.toStdU16String();
+			Channels[i]["name"] = factory.createCharArray(stru16);
+			stru16 = type.toStdU16String();
+			Channels[i]["type"] = factory.createCharArray(stru16);
+			stru16 = ref.toStdU16String();
+			Channels[i]["ref"] = factory.createCharArray(stru16);
+			stru16 = unit.toStdU16String();
+			Channels[i]["unit"] = factory.createCharArray(stru16);
+			Channels[i]["sr"] = factory.createScalar<double>(sr);
+			Channels[i]["hp"] = factory.createScalar<double>(hp);
+			Channels[i]["lp"] = factory.createScalar<double>(lp);
+			Channels[i]["notch"] = factory.createScalar<double>(notch);
+		}
+		aw.waitForResponse();
+		// fill in time selections
+		for (int i = 0; i < nTimeSelections; i++) {
+			float pos, duration;
+			S[i]["channels"] = Channels;
+			response >> pos >> duration;
+			S[i]["position"] = factory.createScalar<double>(pos);
+			S[i]["duration"] = factory.createScalar<double>(duration);
+		}
+		for (int i = 0; i < nTimeSelections; i++) {
+			aw.waitForResponse();
+			response >> samples; // got the number of samples => create data matrix
 			bool finished = false;
 			if (samples) {
-				auto data = factory.createArray<float>({ 1, size_t(samples) });
-				//S[i]["data"] = factory.createArray<double>({ 1, size_t(samples) });
-
-				finished = false;
-				samplesRead = 0;
-				chunkSize = 0;
-				while (!finished) {
-					aw.waitForResponse();
-					response >> chunkSize;
-					if (chunkSize == 0)
-						finished = true;
-					else {
-						for (auto j = 0; j < chunkSize; j++) {
-							response >> data[0][j + samplesRead];
+				auto data = factory.createArray<float>({ size_t(nChannels), size_t(samples) });
+				for (auto j = 0; j < nChannels; j++) {
+					qint64 samplesRead, chunkSize;
+					finished = false;
+					samplesRead = 0;
+					chunkSize = 0;
+					while (!finished) {
+						aw.waitForResponse();
+						response >> chunkSize;
+						if (chunkSize == 0)
+							finished = true;
+						else {
+							for (auto k = 0; k < chunkSize; k++)
+								response >> data[j][k + samplesRead];
+							samplesRead += chunkSize;
 						}
-						samplesRead += chunkSize;
-					}
+					}	
 				}
 				S[i]["data"] = data;
 			}
+			else 
+				S[i]["data"] = factory.createEmptyArray();
 		}
 		outputs[0] = S;
 	}

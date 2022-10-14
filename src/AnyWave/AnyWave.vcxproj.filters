@@ -625,6 +625,9 @@
     <ClCompile Include="Process\AwProcessManagerRunProcess.cpp">
       <Filter>Process</Filter>
     </ClCompile>
+    <ClCompile Include="MATPy\GetData2_5_10.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">

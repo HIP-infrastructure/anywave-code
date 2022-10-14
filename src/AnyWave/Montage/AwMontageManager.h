@@ -140,6 +140,7 @@ public slots:
 	void loadBadChannels();
 private:
 	QMap<QString, QSharedPointer<AwChannel>> m_asRecordedSharedPointerMap;
+	QMap<QString, AwChannel*> m_rawFileChannels;
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.
 	QList<QSharedPointer<AwChannel>> m_channelsShrdPtrs;
 

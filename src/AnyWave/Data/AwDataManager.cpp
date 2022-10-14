@@ -278,7 +278,16 @@ int AwDataManager::openFileBase(const QString& filePath)
 int AwDataManager::openFileMatPy(const QString& filePath)
 {
 	QMutexLocker lock(&m_mutex);
-	return openFileBase(filePath);
+	m_status =  openFileBase(filePath);
+	if (!m_status)
+		return m_status;
+	m_markerManager->initFromCommandLine(this->mrkFilePath());
+	// Are there events?
+	if (m_reader->infos.blocks().at(0)->markersCount())
+		m_markerManager->addMarkers(m_reader->infos.blocks().at(0)->markers());
+	m_montageManager->newMontage(m_reader);
+	m_status = 0;
+	return m_status;
 }
 
 int AwDataManager::openFileFromBIDS(const QString& filePath)

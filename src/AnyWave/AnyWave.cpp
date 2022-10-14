@@ -81,10 +81,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 
 	m_display = nullptr;
 	m_SEEGViewer = nullptr;
-	//#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
-	//	setDockOptions(dockOptions() | QMainWindow::GroupedDragging);
-	//#endif
-		// Accept file drops
+	// Accept file drops
 	setAcceptDrops(true);
 	AwSettings* aws = AwSettings::getInstance();
 	aws->init();
@@ -294,6 +291,15 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	m_lastDirOpen = "/";
 	readSettings();
 
+	// check for special mode "auto_marking'
+	if (args.contains("auto_marking")) {
+		auto bidsFolder = args.value("auto_marking").toString();
+		if (openBIDS(bidsFolder)) {
+			aws->setValue("auto_marking", bidsFolder);
+
+		}
+	}
+
 	auto file = args.value("open_file").toString();
 	showMaximized();
 	if (!file.isEmpty()) {
@@ -308,6 +314,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 			openBIDS(file);
 		}
 	}
+
 }
 
 //

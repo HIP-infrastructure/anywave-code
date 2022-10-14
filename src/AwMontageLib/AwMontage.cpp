@@ -75,6 +75,9 @@ void AwMontage::save(const QString& path, const AwChannelList& channels, const A
 
 	doc.appendChild(root);
 	for (auto chan : channels) {
+		// do not save virtual channels
+		if (chan->isVirtual())
+			continue;
 		element = doc.createElement("Channel");
 		element.setAttribute("name", chan->name());
 		root.appendChild(element);
@@ -104,6 +107,8 @@ void AwMontage::save(const QString& path, const AwChannelList& channels, const A
 		auto asRecordedRoot = doc.createElement("AsRecordedChannels");
 		root.appendChild(asRecordedRoot);
 		for (auto chan : asRecordedChannels) {
+			if (chan->isVirtual())
+				continue;
 			element = doc.createElement("Channel");
 			element.setAttribute("name", chan->name());
 			element.setAttribute("type", AwChannel::typeToString(chan->type()));
@@ -145,8 +150,6 @@ AwChannelList AwMontage::load(const QString& path, QMap<QString, int> *asRecorde
 		return res;
 	}
 	QDomNode node = root.firstChild();
-
-
 	while (!node.isNull()) {
 		element = node.toElement();
 		QString name, color = "black", ref;

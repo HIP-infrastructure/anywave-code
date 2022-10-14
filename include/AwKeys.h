@@ -21,6 +21,7 @@ namespace keys {
 	constexpr auto operation = "operation";
 	// permitted operations in batch mode
 	constexpr auto BIDS_operation = "bids";
+	constexpr auto auto_marking_operation = "auto_marking";
 	constexpr auto run_operation = "run";
 	//
 	constexpr auto time = "time";

@@ -331,17 +331,17 @@ void AnyWave::openBIDS()
 		AwMessageBox::information(this, tr("BIDS"), tr("The selected folder is not a BIDS folder."));
 }
 
-void AnyWave::openBIDS(const QString& path)
+bool AnyWave::openBIDS(const QString& path)
 {
 	// check if we try to open an already open BIDS
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
 		if (bm->rootDir().toLower() == path.toLower())
-			return;
+			return true;
 	}
 
 	if (AwBIDSManager::instance()->setRootDir(path) == -1)
-		return;
+		return false;
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFileFromBIDS(const QString&)));
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
 
@@ -358,6 +358,7 @@ void AnyWave::openBIDS(const QString& path)
 	}
 	dock->show();
 	AwSettings::getInstance()->addRecentBIDS(path);
+	return true;
 }
 
 //

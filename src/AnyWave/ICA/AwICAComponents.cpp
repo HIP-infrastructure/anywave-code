@@ -43,17 +43,33 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 
 AwICAComponents::~AwICAComponents()
 {
+	clear();
+}
+
+void AwICAComponents::clear()
+{
 	if (m_panel) {
 		m_panel->close();
 		delete m_panel;
+		m_panel = nullptr;
 	}
 	while (!m_sources.isEmpty())
 		delete m_sources.takeFirst();
 	if (m_seegMap) {
 		m_seegMap->close();
 		delete m_seegMap;
+		m_seegMap = nullptr;
 	}
+}
 
+void AwICAComponents::closeFile()
+{
+	m_rejectedComponents.clear();
+	m_unmixing.clear();
+	m_mixing.clear();
+	m_labels.clear();
+	m_labelToIndex.clear();
+	clear();
 }
 
 

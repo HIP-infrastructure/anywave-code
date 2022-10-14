@@ -143,6 +143,10 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	QCommandLineOption serverPortOpt("server_port", "specifies the TCP port on which to listen.", "server_port", QString());
 	parser.addOption(serverPortOpt);
 
+	// New option to launch anywave on marking mode upon bids folder
+	QCommandLineOption autoMarkingBidsOpt("auto_marking", "bids folder", QString());
+	parser.addOption(autoMarkingBidsOpt);
+
 	// get extra arg from plugins
 	auto jsonCollection = AwPluginManager::getInstance()->getBatchableArguments();
 	QStringList parameterNames;
@@ -402,6 +406,17 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		arguments["run_process"] = parser.value(runProcessOpt);
 		arguments[keys::operation] = keys::run_operation;
 		return aw::commandLine::BatchOperation;
+	}
+
+	if (parser.isSet(autoMarkingBidsOpt)) {
+		auto bidsFolder = parser.value(autoMarkingBidsOpt);
+		QFileInfo fi(bidsFolder);
+		if (!fi.isDir()) {
+			logger.sendLog("auto_marking: required a path to existing BIDS folder.");
+			throw(exception);
+		}
+		arguments["auto_marking"] = bidsFolder;
+		arguments[keys::operation] = keys::auto_marking_operation;
 	}
 
 	auto positionals = parser.positionalArguments();

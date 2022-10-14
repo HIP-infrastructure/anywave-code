@@ -68,10 +68,10 @@ private:
 	void handleGetProperties(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetData3(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetDataEx(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* process);
 	void handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *process);
 	void handleAddMarkers(QTcpSocket *client, AwScriptProcess *process);
-	void handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *process);
-	void handleGetPluginIO(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetPluginInfo(QTcpSocket* client, AwScriptProcess* process);
 	void handleGetFileInfo(QTcpSocket *client, AwScriptProcess *process);
 	void handleIsTerminated(QTcpSocket *client, AwScriptProcess *process);
 	void handleSendMessage(QTcpSocket *client, AwScriptProcess *process);
@@ -80,6 +80,7 @@ private:
 	void handleGetICAPanelCapture(QTcpSocket *client, AwScriptProcess *process);
 	void handleSetBeamFormer(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetTriggers(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetPluginIO(QTcpSocket* client, AwScriptProcess* process);
 	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
 	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
 	void handleConnectDebug(QTcpSocket* client, AwScriptProcess* process);

@@ -38,6 +38,7 @@ public:
 	AwICAComponents(int type, QObject *parent = 0);
 	~AwICAComponents();
 
+	void closeFile();
 	int loadComponents(AwHDF5& file);
 	int loadComponents(AwMATLABFile& file);
 	AwChannelList& sources() { return m_sources; }
@@ -83,6 +84,7 @@ private:
 	QList<int> m_rejectedComponents;	// indexes of all rejected ICA components
 
 	void updateRejectedComponents();
+	void clear();
 	// Thread safe specific
 	QMutex m_mutex;
 	AwICAPanel *m_panel;

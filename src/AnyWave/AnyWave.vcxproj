@@ -117,6 +117,7 @@
     <ClCompile Include="MATPy\AwTCPResponse.cpp" />
     <ClCompile Include="MATPy\DebugConnect.cpp" />
     <ClCompile Include="MATPy\GetData.cpp" />
+    <ClCompile Include="MATPy\GetData2_5_10.cpp" />
     <ClCompile Include="MATPy\GetDataEx.cpp" />
     <ClCompile Include="MATPy\GetFileInfo.cpp" />
     <ClCompile Include="MATPy\GetICAPanelCapture.cpp" />
