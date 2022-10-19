@@ -130,6 +130,15 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 	QString inputFile = args.value(keys::input_file).toString();
 
 	AwCommandLogger logger(QString("Command Line"));
+	QString mrkFile;
+	if (args.contains(keys::marker_file)) {
+		mrkFile = args.value(keys::marker_file).toString();
+		if (QFile::exists(mrkFile))
+			process->pdi.input.setMarkers(AwMarker::load(mrkFile));
+		else {
+			logger.sendLog("warning: mrk_file does not exist");
+		}
+	}
 
 	if (!inputFile.isEmpty()) {
 		if (dm->openFileCommandLine(inputFile) != 0) {

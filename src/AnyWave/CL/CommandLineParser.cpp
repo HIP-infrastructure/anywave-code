@@ -206,9 +206,13 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		mapSwitches.insert(sw, option);
 		parser.addOption(*option);
 	}
+
+
+	AwCommandLogger logger(QString("Command Line"));
    	  
 	if (!parser.parse(args)) {
 		exception.setError(parser.errorText());
+		logger.sendLog(parser.errorText());
 		throw exception;
 	}
 
@@ -223,7 +227,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	if (!tmp.isEmpty())
 		AwSettings::getInstance()->setValue(aws::log_dir, tmp);
 
-	AwCommandLogger logger(QString("Command Line"));
 
 	//// add plugin options
 	for (auto const& k : mapParams.keys()) {

@@ -910,7 +910,7 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;.\ICA;.\Process;$(SolutionDir)\armadillo\include;.\Script;.\Display;.\Carto;.\Epoch;$(EXTRA_LIBS)\qwt\include;.\Marker;.\IO\BIDS;.\Filter;.\Montage;.\Signal;.\Widgets;.\Data;.\Batch;.\Process\PSD;.\Plugin;.\Updater;.\Prefs;$(EXTRA_LIBS)\itk\include\ITK-4.13;$(SolutionDir)\include\freesurfer;.\3DViewer\vtkutils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -987,7 +987,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OpenMPSupport>false</OpenMPSupport>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

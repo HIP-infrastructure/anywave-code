@@ -133,15 +133,6 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		if (useMarkers || skipMarkers) {
 			markers = AwMarker::load(mrkFile);
 		}
-		// 
-	//	markers = AwCommandLineManager::parseMarkerFile(cfg);
-	//	if (markers.isEmpty()) {
-	//		// try to load the default .mrk that comes with the data file
-	//		auto mrkFile = dm->mrkFilePath();
-	//		if (QFile::exists(mrkFile))
-	//			markers = AwMarker::load(mrkFile);
-	//	}
-
 		AwFilterSettings filterSettings;
 		// check for channel labels
 		if (cfg.contains("labels"))

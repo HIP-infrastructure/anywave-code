@@ -83,7 +83,7 @@ public:
 	virtual QVector<double> getHeadshapeCoordinates() { return QVector<double>(); }
 	virtual QString getHeadShapeFile() { return QString(); }
 	virtual bool hasHeadShapeFile() { return !getHeadShapeFile().isEmpty();	}
-
+	QVariantMap& settings() { return m_settings; }
 signals:
 	void triggerValuesWritten(bool status, int number);
 public slots:
@@ -98,6 +98,7 @@ protected:
 	QString m_error;	// used by methods returning a status after an operation.
 	QString m_fullPath;	// full path to current open file.
 	AwFileIOPlugin *m_plugin;
+	QVariantMap m_settings;
 };
 
 ///*!

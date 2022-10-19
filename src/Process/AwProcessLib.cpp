@@ -220,8 +220,8 @@ void AwProcess::stop()
 
 void AwGUIProcess::registerGUIWidget(AwProcessGUIWidget *widget)
 {
-	AwProcessGUIWidget *w = static_cast<AwProcessGUIWidget *>(widget);
-	if (w == NULL)
+	auto w = reinterpret_cast<QObject *>(widget);
+	if (w == nullptr)
 		return;
 	connect(w, SIGNAL(closed()), this, SLOT(stop()));
 }

@@ -19,7 +19,8 @@ MexFunction::MexFunction()
 {
 	m_matlabPtr = getEngine();
 	functions["debug_connect"] = AwRequest::ConnectDebug;
-	functions["get_data"] = AwRequest::GetData2_5_10;
+	functions["get_data"] = AwRequest::GetDataEx;
+	functions["get_data_ex"] = AwRequest::GetData2_5_10;
 	functions["get_markers"] = AwRequest::GetMarkersEx;
 	functions["send_markers"] = AwRequest::SendMarkers;
 	functions["send_message"] = AwRequest::SendMessage;
@@ -154,8 +155,11 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	case AwRequest::ConnectDebug:
 		debug_connect(outputs, inputs);
 		break;
-	case AwRequest::GetData2_5_10:
+	case AwRequest::GetDataEx:
 		get_data(outputs, inputs);
+		break;
+	case AwRequest::GetData2_5_10:
+		get_data_ex(outputs, inputs);
 		break;
 	case AwRequest::GetMarkersEx:
 		get_markers(outputs, inputs);
@@ -414,6 +418,89 @@ void MexFunction::get_data(matlab::mex::ArgumentList& outputs, matlab::mex::Argu
 	// don't forget that first argument is always the command string
 	if (inputs.size() >= 2) {
 		if (inputs[1].getType() == ArrayType::STRUCT) {
+
+			// ask MATLAB to convert the struct to json
+			auto res = m_matlabPtr->feval(u"jsonencode", 1, std::vector<Array>({ inputs[1] }));
+
+			CharArray s = std::move(res[0]);
+			std::string ss = s.toAscii();
+			args = QString(ss.data());
+		}
+		else
+			error("get_data: bad arguments. Expected struct.");
+	}
+	int nChannels, nTimeSelections;
+	try {
+		// OLD CODE
+		TCPRequest aw(AwRequest::GetDataEx);
+		aw.sendString(args);
+		aw.waitForResponse();
+		QDataStream& response = aw.response();
+		response >> nChannels;
+		if (nChannels == 0) {
+			// return empty struct
+			outputs[0] = factory.createEmptyArray();
+			return;
+		}
+		StructArray S = factory.createStructArray({ 1, size_t(nChannels) }, { "name", "type", "ref", "sr", "hp", "lp", "notch", "data" });
+		QString name, ref, type;
+		float sr, hp, lp, notch;
+		qint64 samples;
+		for (auto i = 0; i < nChannels; i++) {
+			aw.waitForResponse();
+			response >> name >> type >> ref >> sr >> hp >> lp >> notch;
+			std::string tmp = name.toStdString();
+			S[i]["name"] = factory.createCharArray(tmp);
+			tmp = type.toStdString();
+			S[i]["type"] = factory.createCharArray(tmp);
+			tmp = ref.toStdString();
+			S[i]["ref"] = factory.createCharArray(tmp);
+			S[i]["sr"] = factory.createScalar<double>(sr);
+			S[i]["hp"] = factory.createScalar<double>(hp);
+			S[i]["lp"] = factory.createScalar<double>(lp);
+			S[i]["notch"] = factory.createScalar<double>(notch);
+			response >> samples;
+			qint64 samplesRead, chunkSize;;
+			bool finished = false;
+			if (samples) {
+				auto data = factory.createArray<float>({ 1, size_t(samples) });
+				//S[i]["data"] = factory.createArray<double>({ 1, size_t(samples) });
+
+				finished = false;
+				samplesRead = 0;
+				chunkSize = 0;
+				while (!finished) {
+					aw.waitForResponse();
+					response >> chunkSize;
+					if (chunkSize == 0)
+						finished = true;
+					else {
+						for (auto j = 0; j < chunkSize; j++) {
+							response >> data[0][j + samplesRead];
+						}
+						samplesRead += chunkSize;
+					}
+				}
+				S[i]["data"] = data;
+			}
+		}
+		outputs[0] = S;
+		// END OF OLD CODE
+	}
+	catch (const QString& what) {
+		error(what.toStdString());
+	}
+}
+
+void MexFunction::get_data_ex(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs)
+{
+	ArrayFactory factory;
+
+	// input may be empty or contain one argument(the cfg structure)
+	QString args;
+	// don't forget that first argument is always the command string
+	if (inputs.size() >= 2) {
+		if (inputs[1].getType() == ArrayType::STRUCT) {
 			
 			// ask MATLAB to convert the struct to json
 			auto res = m_matlabPtr->feval(u"jsonencode", 1, std::vector<Array>({ inputs[1] }));
@@ -427,61 +514,6 @@ void MexFunction::get_data(matlab::mex::ArgumentList& outputs, matlab::mex::Argu
 	}
 	int nChannels, nTimeSelections;
 	try {
-		// OLD CODE
-		//TCPRequest aw(AwRequest::GetDataEx);
-		//aw.sendString(args);
-		//aw.waitForResponse();
-		//QDataStream& response = aw.response();
-		//response >> nChannels;
-		//if (nChannels == 0) {
-		//	// return empty struct
-		//	outputs[0] = factory.createEmptyArray();
-		//	return;
-		//}
-		//StructArray S = factory.createStructArray({ 1, size_t(nChannels) }, { "name", "type", "ref", "sr", "hp", "lp", "notch", "data" });
-		//QString name, ref, type;
-		//float sr, hp, lp, notch;
-		//qint64 samples;
-		//for (auto i = 0; i < nChannels; i++) {
-		//	aw.waitForResponse();
-		//	response >> name >> type >> ref >> sr >> hp >> lp >> notch;
-		//	std::string tmp = name.toStdString();
-		//	S[i]["name"] = factory.createCharArray(tmp);
-		//	tmp = type.toStdString();
-		//	S[i]["type"] = factory.createCharArray(tmp);
-		//	tmp = ref.toStdString();
-		//	S[i]["ref"] = factory.createCharArray(tmp);
-		//	S[i]["sr"] = factory.createScalar<double>(sr);
-		//	S[i]["hp"] = factory.createScalar<double>(hp);
-		//	S[i]["lp"] = factory.createScalar<double>(lp);
-		//	S[i]["notch"] = factory.createScalar<double>(notch);
-		//	response >> samples;
-		//	qint64 samplesRead, chunkSize;;
-		//	bool finished = false;
-		//	if (samples) {
-		//		auto data = factory.createArray<float>({ 1, size_t(samples) });
-		//		//S[i]["data"] = factory.createArray<double>({ 1, size_t(samples) });
-
-		//		finished = false;
-		//		samplesRead = 0;
-		//		chunkSize = 0;
-		//		while (!finished) {
-		//			aw.waitForResponse();
-		//			response >> chunkSize;
-		//			if (chunkSize == 0)
-		//				finished = true;
-		//			else {
-		//				for (auto j = 0; j < chunkSize; j++) {
-		//					response >> data[0][j + samplesRead];
-		//				}
-		//				samplesRead += chunkSize;
-		//			}
-		//		}
-		//		S[i]["data"] = data;
-		//	}
-		//}
-		//outputs[0] = S;
-		// END OF OLD CODE
 		TCPRequest aw(AwRequest::GetData2_5_10);
 		aw.sendString(args);
 		aw.waitForResponse();

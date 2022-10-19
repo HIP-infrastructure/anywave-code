@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 		try {
 			operation = aw::commandLine::doParsing(app.arguments(), arguments);
 		}
-		catch (const AwException& e) {
+ 		catch (const AwException& e) {
 			std::cout << e.errorString().toStdString();
 			return -1;
 		}

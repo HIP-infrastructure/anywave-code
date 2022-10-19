@@ -19,8 +19,8 @@
 #include <AwProcessLib.h>
 #include <AwDataClient.h>
 #include <QMetaType>
-#include <widget/AwGraphicInterface.h>
-#include <process/AwProcessGUIWidget.h>
+//#include <widget/AwGraphicInterface.h>
+//#include <process/AwProcessGUIWidget.h>
 #include <QTranslator>
 #include <AwGlobal.h>
 #include <QElapsedTimer>
@@ -28,7 +28,8 @@
 class AwProcessPlugin;
 class AwProcessOutputWidget;
 class AwEvent;
-
+class AwDisplayPlugin;
+class AwProcessGUIWidget;
 
 /*!
  * \brief

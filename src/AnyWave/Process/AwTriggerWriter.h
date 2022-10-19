@@ -25,8 +25,9 @@ class AwTriggerWriter : public AwProcess
 
 public:
 	AwTriggerWriter();
-	bool showUi();
-	void run();
+	bool showUi() override;
+	void run() override;
+	void runFromCommandLine() override;
 protected:
 	QString m_triggerChannel;
 };

@@ -18,6 +18,7 @@
 #include <AwProcess.h>
 #include <AwGlobal.h>
 #include <QWidget>
+
 class AwGUIProcess;
 
 class AW_PROCESS_EXPORT AwProcessGUIWidget : public QWidget

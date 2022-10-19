@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>--plugin_debug --server_port 22000</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--run trigger_writer --meg_file "E:\Data\Maeva\meg\c,rfDC_source" --duration 25 --marker_file "E:\Data\debug\triggerwriter.mrk"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

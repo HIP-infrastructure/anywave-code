@@ -746,7 +746,7 @@ void AwMarkerManagerSettings::writeTrigger()
 				markers << currentMarkers.at(proxy->mapToSource(i).row());
 		}
 		// Create the Process AwTriggerWriter
-		AwBaseProcess *process = AwProcessManager::instance()->newProcessFromPluginName("Trigger Writer");
+		AwBaseProcess *process = AwProcessManager::instance()->newProcessFromPluginName("Trigger_Writer");
 		if (process == Q_NULLPTR) {
 			AwMessageBox::critical(0, "Missing Plugin", "The Trigger Writer plugin is not loaded.");
 			return;
