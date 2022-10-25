@@ -98,6 +98,30 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 	}
 }
 
+/// <summary>
+/// loadRecentFilesList()
+/// called each time the user clicks on Recent Files sub menu in File Menu
+/// </summary>
+void AnyWave::loadRecentFilesList()
+{
+	auto aws = AwSettings::getInstance();
+	QStringList recentFiles = aws->value(aws::recent_files).toStringList();
+	m_recentFilesMenu->clear();
+	if (recentFiles.size()) {
+		qint32 count = 1;
+		for (auto const& s : recentFiles) {
+			auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+			QAction* action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentFilesMenu);
+			m_recentFilesMenu->addAction(action);
+			// add index number in data()
+			action->setData(count - 1);
+			connect(action, &QAction::triggered, this, &AnyWave::openRecentFile);
+			count++;
+		}
+	}
+}
+
+
 
 void AnyWave::openFileFromBIDS(const QString& filePath)
 {
@@ -119,7 +143,6 @@ void AnyWave::openFileFromBIDS(const QString& filePath)
 	m_saveFileName.clear();
 
 	auto fileName = dataManager->value(keys::data_path).toString();
-	m_lastDirOpen = dataManager->value(keys::data_dir).toString();
 
 	// Update Window title
 	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(dataManager->rawChannels().size()));
@@ -179,7 +202,10 @@ void AnyWave::openFile(const QString &path)
 				filter += QString(" %1").arg(e);
 
 		openWithDialog = true;
-		AwOpenFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
+		auto lastDir = aws->value(aws::last_data_dir).toString();
+		if (lastDir.isEmpty())
+			lastDir = "/";
+		AwOpenFileDialog dlg(this, tr("Open a file"), lastDir);
 		dlg.setFileMode(QFileDialog::ExistingFile);
 		dlg.setNameFilter(filter);
 		dlg.setViewMode(QFileDialog::Detail);
@@ -235,7 +261,6 @@ void AnyWave::openFile(const QString &path)
 	m_saveFileName.clear();
 
 	auto fileName = dataManager->value(keys::data_path).toString();
-	m_lastDirOpen = dataManager->value(keys::data_dir).toString();
 
 	// Update Window title
 	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(dataManager->rawChannels().size()));
@@ -320,7 +345,10 @@ void AnyWave::openRecentBIDS()
 
 void AnyWave::openBIDS()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "/");
+	auto lastDir = AwSettings::getInstance()->value(aws::last_bids_dir).toString();
+	if (lastDir.isEmpty())
+		lastDir = "/";
+	QString dir = QFileDialog::getExistingDirectory(this, lastDir);
 	if (dir.isEmpty())
 		return;
 	if (AwBIDSManager::isBIDS(dir)) {

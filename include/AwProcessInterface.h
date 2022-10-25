@@ -192,7 +192,6 @@ public:
 	virtual void quit() { stop(); }
 	inline int flags() { return m_flags; }
 	void setFlags(int flags) { m_flags |= flags; }
-	void sendTextMessage(QString message) { emit progressChanged(message); }
 	inline int status() { return m_status; }
 	inline bool wasAborted() { return m_status == AwProcess::Aborted; }
 	inline bool isRunning() { return m_status == AwProcess::Running; }

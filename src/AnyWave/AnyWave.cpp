@@ -71,14 +71,12 @@
 #include "AwOpenFileDialog.h"
 // BIDS
 #include "IO/BIDS/AwBIDSManager.h"
-
 #define AW_HELP_URL "https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/home"
 
 
 AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags)
 {
 	setupUi(this);
-
 	m_display = nullptr;
 	m_SEEGViewer = nullptr;
 	// Accept file drops
@@ -115,6 +113,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
 	m_recentBIDSMenu = menuRecent_BIDS;
+	connect(m_recentFilesMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentFilesList);
 
 	setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 
@@ -123,14 +122,15 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 
 	setCentralWidget(new QSplitter(this));
 
-	QStringList recentFiles = aws->value(aws::recent_files).toStringList();
-	if (!recentFiles.isEmpty()) {
-		updateRecentFiles(recentFiles);
-	}
-	QStringList recentBIDS = aws->value(aws::recent_bids).toStringList();
-	if (!recentBIDS.isEmpty()) {
-		updateRecentBIDS(recentBIDS);
-	}
+	//QStringList recentFiles = aws->value(aws::recent_files).toStringList();
+	//if (!recentFiles.isEmpty()) {
+	//	updateRecentFiles(recentFiles);
+	//}
+	//QStringList recentBIDS = aws->value(aws::recent_bids).toStringList();
+	//if (!recentBIDS.isEmpty()) {
+	//	updateRecentBIDS(recentBIDS);
+	//}
+
 	// As initializing ProcessManager, give it the Process Menu instance !
 	process_manager->setMenu(menuProcesses);
 
@@ -288,7 +288,6 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	if (aws->value(aws::check_updates).toBool())
 		m_updateManager->checkForUpdates(true);
 
-	m_lastDirOpen = "/";
 	readSettings();
 
 	// check for special mode "auto_marking'

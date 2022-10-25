@@ -19,7 +19,8 @@
 #include "Prefs/AwSettings.h"
 #include <QFile>
 #include <QTextStream>
-AwDebugLog *AwDebugLog::m_instance = NULL;
+
+AwDebugLog *AwDebugLog::m_instance = nullptr;
 
 AwDebugLog::AwDebugLog(QObject *parent)
 	: QObject(parent)

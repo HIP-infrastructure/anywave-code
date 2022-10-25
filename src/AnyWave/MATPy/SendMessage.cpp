@@ -17,13 +17,20 @@
 #include "Process/AwScriptPlugin.h"
 #include <QDataStream>
 #include <QTcpSocket>
+#include "CL/AwCommandLineManager.h"
+#include "CL/AwCommandLogger.h"
 
 void AwRequestServer::handleSendMessage(QTcpSocket *client, AwScriptProcess *process)
 {
 	emit log("Processing send message...");
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
-	QString message;
-	in >> message;
-	process->sendTextMessage(message);
+	QString m;
+	in >> m;
+	//QMetaObject::invokeMethod(process, "sendMessage", QGenericArgument(nullptr, &message), Qt::QueuedConnection);
+	//emit message(m);
+	if (AwCommandLineManager::isInstanciated())
+		AwCommandLineManager::instance()->logger()->sendLog(m);
+	else
+		process->sendMessage(m);
 }

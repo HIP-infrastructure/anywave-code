@@ -61,7 +61,6 @@ void AwMatlabScriptProcess::run()
 		if (aws->value(aws::matlab_present).toBool()) {
 			auto path = pdi.input.settings.value("script_path").toString();
 			connect(mi, SIGNAL(progressChanged(const QString&)), this, SIGNAL(progressChanged(const QString&)));
-			
 			QVariantMap settings;
 			settings[matlab_interface::matlab_plugin_dir] = path;
 			settings[matlab_interface::matlab_mex_dir] = aws->value(aws::matlab_mex_dir);
@@ -102,9 +101,9 @@ void AwMatlabScriptProcess::run()
 	arguments << "127.0.0.1" << QString("%1").arg(m_server->serverPort()) 
 		<< QString::number(m_pid); // << jsonArgs;
 	
-    emit progressChanged(QString("Running %1 with arguments:").arg(m_plugin->settings().value("compiled plugin").toString()));
-	for (auto const& a : arguments)
-		emit progressChanged(a);
+ //   emit progressChanged(QString("Running %1 with arguments:").arg(m_plugin->settings().value("compiled plugin").toString()));
+	//for (auto const& a : arguments)
+	//	emit progressChanged(a);
 	m_process = new QProcess(this);
 	m_process->setReadChannel(QProcess::StandardOutput);
 	m_process->setProcessChannelMode(QProcess::MergedChannels);

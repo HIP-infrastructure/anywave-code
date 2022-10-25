@@ -60,7 +60,7 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantMap& dict, const QStr
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
 
-	AwCommandLineManager::initProcessPDI(process);
+	AwCommandLineManager::instance()->initProcessPDI(process);
 
 
 	//bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
@@ -147,6 +147,7 @@ AwBaseProcess *AwBatchRunner::createAndInitProcess(QVariantMap& dict, const QStr
 	//		process->pdi.input.addMarker(new AwMarker("global", 0., process->pdi.input.settings.value(keys::file_duration).toFloat()));
 	//	AwCommandLineManager::applyFilters(process->pdi.input.channels(), dict);
 	//}
+	delete AwCommandLineManager::instance();
 	return process;
 }
 

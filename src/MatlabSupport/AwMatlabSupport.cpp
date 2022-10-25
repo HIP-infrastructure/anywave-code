@@ -75,11 +75,6 @@ void AwMatlabSupport::run(const QVariantMap& settings)
 		m_matlabPtr->feval(u"addpath", factory.createCharArray(cppString), output);
 
 		m_matlabPtr->eval(u"main", output);
-		String output_ = output.get()->str();
-		QString message = QString::fromStdString(convertUTF16StringToUTF8String((output_)));
-		emit progressChanged(message);
-
-
 	}
 	catch (const matlab::engine::EngineException& e)
 	{

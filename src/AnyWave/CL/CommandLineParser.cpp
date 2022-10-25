@@ -49,7 +49,7 @@ int aw::commandLine::doCommandLineOperation(AwArguments& args)
 		if (operation == keys::BIDS_operation)
 			AwBIDSManager::instance()->toBIDS(args);
 		else if (operation == keys::run_operation)
-			AwCommandLineManager::runProcess(args);
+			AwCommandLineManager::instance()->runProcess(args);
 		else
 			return 0;
 	}
@@ -206,8 +206,6 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		mapSwitches.insert(sw, option);
 		parser.addOption(*option);
 	}
-
-
 	AwCommandLogger logger(QString("Command Line"));
    	  
 	if (!parser.parse(args)) {

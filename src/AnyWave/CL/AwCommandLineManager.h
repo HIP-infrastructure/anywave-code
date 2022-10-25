@@ -22,23 +22,32 @@ class AwDataManager;
 class AwPluginManager;
 class AwProcessManager;
 class AwBIDSManager;
+class AwCommandLogger;
 
 class AwCommandLineManager
 {
 public:
-	static void runProcess(AwArguments& arguments);
-	static void runDedicatedDataServer(AwArguments& arguments);
+	~AwCommandLineManager();
+	 void runProcess(AwArguments& arguments);
+	 void runDedicatedDataServer(AwArguments& arguments);
 	/** Instantiante a process given the plugin name. Also initialize the process PDI with default settings. Throw an exception if failed. **/
 	/** if an inputFile is specified, the reader is instantiated and the file is open. The optional filter settings are also applied. **/
 	/** Arguments cand be modified to add extra parameters based on input file argument for example. **/
-	static AwBaseProcess *createAndInitNewProcess(AwArguments& args);
+	 AwBaseProcess *createAndInitNewProcess(AwArguments& args);
 	/** apply filters that might be defined in arguments to channels **/
-	static void applyFilters(const AwChannelList& channels, const AwArguments& args);
+	 void applyFilters(const AwChannelList& channels, const AwArguments& args);
 	/** Similar to buildPDI in Process Manager, excepts it will handle for batch mode processes. **/
 	/** montage is the montage detected or set in the arguments, as recorded are the channels in the data file. **/
 //	static bool buildPDI(AwBaseProcess *process, const AwChannelList& montage = AwChannelList(), const AwChannelList& asRecorded = AwChannelList());
-	static int initProcessPDI(AwBaseProcess *process);
-	static AwChannelList parsePickChannels(const QStringList& channels, AwDataManager* dm);
-	static AwChannelList getInputChannels(const AwArguments& args, AwDataManager* dm);
-	static AwMarkerList parseMarkerFile(const AwArguments& args);
+	 int initProcessPDI(AwBaseProcess *process);
+	 AwChannelList parsePickChannels(const QStringList& channels, AwDataManager* dm);
+	 AwChannelList getInputChannels(const AwArguments& args, AwDataManager* dm);
+	 static AwMarkerList parseMarkerFile(const AwArguments& args);
+	 static AwCommandLineManager* instance();
+	 static bool isInstanciated();
+	 inline AwCommandLogger* logger() { return m_logger; }
+protected:
+	explicit AwCommandLineManager();
+	static AwCommandLineManager* m_instance;
+	AwCommandLogger *m_logger;
 };

@@ -188,6 +188,7 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 		return;
 	}
 	
+	connect(this, &AwRequestServer::message, p, &AwScriptProcess::sendMessage);
 	// WARNING: p can be nullptr if the pid was negative. 
 	// a nullptr p means that we are running in dedicated data server mode : AnyWave was launched by a Python/MATLAB plugin with a specified file.
 	auto h = m_handlers.value(request);

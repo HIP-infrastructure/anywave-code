@@ -112,6 +112,10 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 			// open connection to the cloned data server which resides inside the cloned Data Manager
 			dm->dataServer()->openConnection(this);
 		}
+		else {
+			// default channel source is current montage
+			requestedChannels = dm->montage();
+		}
 
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
 		QString file;
@@ -140,6 +144,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		// check for channel types
 		if (cfg.contains("types"))
 			types = cfg.value("types").toStringList();
+
 		// check for channel source
 		if (cfg.contains(keys::channels_source)) {
 			auto source = cfg.value(keys::channels_source).toString().simplified();
@@ -285,7 +290,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		return;
 	}
  	for (auto c : requestedChannels) {
-		toClient << c->name() << AwChannel::typeToString(c->type());
+		toClient << c->fullName() << AwChannel::typeToString(c->type());
 		toClient << c->referenceName() << c->samplingRate();
 		toClient << c->highFilter() << c->lowFilter();
 		toClient << c->notch() << c->unitString();
@@ -356,16 +361,5 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 
 	}
 	AW_DESTROY_LIST(requestedChannels);
-
-
 	cleanup();
-
-	//// check for data manager used, if not the main one, destroy it
-	//if (dm != m_dataManager) {
-	//	// reconnect to the correct data server
-	//	m_dataManager->dataServer()->openConnection(this);
-	//	dm->dataServer()->closeConnection(this);
-	//	delete dm;
-	//}
-	//emit log("Done.");
 }

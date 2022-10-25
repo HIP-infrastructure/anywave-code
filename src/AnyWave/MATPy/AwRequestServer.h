@@ -45,6 +45,7 @@ public slots:
 	void clientDisconnected();
 signals:
 	void log(const QString& message);
+	void message(const QString& message);
 	void markersAdded(AwMarkerList *markers);
 	void beamformerAvailable(QString path);
 protected:
