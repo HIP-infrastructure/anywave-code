@@ -54,11 +54,11 @@
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Plugins\MATLAB\AnyWave</OutDir>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtModules>core;network</QtModules>
+    <QtModules>core;network;concurrent</QtModules>
     <QtInstall>5.15.0_static</QtInstall>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>msvc2019_64</QtInstall>
+    <QtInstall>5.15.0_static</QtInstall>
     <QtModules>core;network</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">

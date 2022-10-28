@@ -86,24 +86,21 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		components.setGuiEnabled(false);
 		int operation = -1;
-		auto clm = AwCommandLineManager::instance();
+		
 		try {
 			operation = aw::commandLine::doParsing(app.arguments(), arguments);
 		}
  		catch (const AwException& e) {
 			std::cout << e.errorString().toStdString();
-			delete clm;
 			return -1;
 		}
 
 		if (operation == aw::commandLine::NoOperation) { // if parsing returns NoOperation that means that nothing more should be processed neither the GUI should be
 														// launched.
-			delete clm;
 			return 0;
 		}
 		if (operation == aw::commandLine::BatchOperation) {
 			aw::commandLine::doCommandLineOperation(arguments);
-			delete clm;
 			return 0;
 		}
 	}

@@ -31,6 +31,7 @@ constexpr auto AW_MATLAB_OUTPUT_BUFFER_SIZE = 1024 * 20;	// 20Kbytes buffer
 **/
 void AwMatlabSupport::run(const QVariantMap& settings)
 {
+	connect(this, &AwMatlabSupport::progressChanged, this, &AwMatlabSupport::log);
 	emit progressChanged("Opening MATLAB Connection...");
 	
 	using namespace matlab::engine;

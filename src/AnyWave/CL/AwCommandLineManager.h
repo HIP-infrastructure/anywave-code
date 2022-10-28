@@ -22,7 +22,8 @@ class AwDataManager;
 class AwPluginManager;
 class AwProcessManager;
 class AwBIDSManager;
-class AwCommandLogger;
+//class AwCommandLogger;
+class AwLogger;
 
 class AwCommandLineManager
 {
@@ -45,9 +46,11 @@ public:
 	 static AwMarkerList parseMarkerFile(const AwArguments& args);
 	 static AwCommandLineManager* instance();
 	 static bool isInstanciated();
-	 inline AwCommandLogger* logger() { return m_logger; }
+	// inline AwCommandLogger* logger() { return m_logger; }
+	 void writeLog(const QString& message); 
 protected:
 	explicit AwCommandLineManager();
 	static AwCommandLineManager* m_instance;
-	AwCommandLogger *m_logger;
+//	AwCommandLogger *m_logger;
+	AwLogger* m_logger;
 };

@@ -168,4 +168,5 @@ private slots:
 	void averageEpoch();
 	void openBIDS();
 	void loadRecentFilesList();
+	void loadRecentBidsList();
 };

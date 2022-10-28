@@ -30,7 +30,7 @@ void AwRequestServer::handleSendMessage(QTcpSocket *client, AwScriptProcess *pro
 	//QMetaObject::invokeMethod(process, "sendMessage", QGenericArgument(nullptr, &message), Qt::QueuedConnection);
 	//emit message(m);
 	if (AwCommandLineManager::isInstanciated())
-		AwCommandLineManager::instance()->logger()->sendLog(m);
+		AwCommandLineManager::instance()->writeLog(m);
 	else
 		process->sendMessage(m);
 }

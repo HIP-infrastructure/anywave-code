@@ -69,12 +69,14 @@ public:
 	static QStringList getAllLabels(const QList<QSharedPointer<AwMarker>>& markers);
 	/* Get all markers with a duration, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithDuration(const QList<AwMarker *>& markers);
+	static QList<QSharedPointer<AwMarker>> getMarkersWithDuration(const QList<QSharedPointer<AwMarker>>& markers);
 	/* Get all markers sorted by unique label */
 	static QList<AwMarker*> getMarkersWithUniqueLabels(const QList<AwMarker*>& markers);
 	/* Get all markers with a label, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabel(const QList<AwMarker *>& markers, const QString& label);
 	/* Get all markers with specified labels, markers are not duplicated. */
 	static QList<AwMarker *> getMarkersWithLabels(const QList<AwMarker *>& markers, const QStringList& labels); 
+	static QList<QSharedPointer<AwMarker>> getMarkersWithLabels(const QList<QSharedPointer<AwMarker>>& markers, const QStringList& labels);
 	/* Get markers between positions */
 	static QList<AwMarker *> getMarkersBetween(const QList<AwMarker *>& markers, float pos1, float pos2);
 	/** Rename all markers in a list. **/
@@ -91,6 +93,7 @@ public:
 	static QList<QSharedPointer<AwMarker>> duplicate(const QList<QSharedPointer<AwMarker>>& markers);
 	/** Sort markers, chronologically. Don't duplicate.**/
 	static void sort(QList<AwMarker *>& markers);
+	static void sort(QList<QSharedPointer<AwMarker>>& markers);
 	/** Cut all markers using markers in cutMarkers. Returns the list of reshaped markers without the cut markers. **/
 	static QList<AwMarker *> cutAroundMarkers(QList<AwMarker *>& markers, QList<AwMarker *>& cutMarkers);
 	/** AND operator : keep markers on m2 which overlaps markers on m1. reshape them to match the intersection of m1. **/

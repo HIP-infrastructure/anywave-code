@@ -112,6 +112,18 @@ AwMarkerList AwMarkerManager::getMarkersThread()
 	return AwMarker::duplicate(m_markers);
 }
 
+AwSharedMarkerList AwMarkerManager::getSharedMarkersThread()
+{
+	QMutexLocker locker(&m_mutex);
+	if (m_needSorting) {
+		AwMarker::sort(m_sMarkers);
+		m_markers = AwMarker::toMarkerList(m_sMarkers);
+	}
+	return m_sMarkers;
+	//return AwMarker::toSharedPointerList(m_markers);
+	//return AwMarker::duplicate(m_markers);
+}
+
 void AwMarkerManager::showDockUI()
 {
 	if (m_dock)
@@ -218,7 +230,7 @@ void AwMarkerManager::loadMarkers()
 		removeOfflimits();
 		m_ui->setMarkers(m_markers);
 	}
-
+	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	// show markers ui
 	showDockUI();
 	emit updateStats();
@@ -257,11 +269,13 @@ void AwMarkerManager::addMarkers(AwMarkerList *list)
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
+	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	if (m_ui)  // could be called in command line so there is no GUI
 		m_ui->setMarkers(m_markers);
 	if (p != nullptr)
 		p->setMarkersReceived();
 	emit updateStats();
+
 }
 
 //
@@ -274,6 +288,7 @@ void AwMarkerManager::addMarkers(const AwMarkerList& list)
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
+	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
 		m_ui->setMarkers(m_markers);
 	emit updateStats();
@@ -291,6 +306,7 @@ void AwMarkerManager::addMarker(AwMarker *m)
 		m_markers << m;
 	m_needSorting = true;
 	removeOfflimits();
+	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	m_ui->setMarkers(m_markers);
 	if (p != nullptr)
 		p->setMarkersReceived();
@@ -306,6 +322,7 @@ void AwMarkerManager::removeAllUserMarkers()
 	m_markers.erase(m_markers.begin(), m_markers.end());
 
 	m_ui->setMarkers(m_markers);
+	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	emit updateStats();
 }
 
@@ -319,6 +336,7 @@ void AwMarkerManager::removeMarkers(const AwMarkerList& markers)
 	m_markers.erase(std::remove_if(m_markers.begin(), m_markers.end(), [markers](AwMarker* m) { return markers.contains(m); }), m_markers.end());
 	m_ui->setMarkers(m_markers);
 	saveMarkers(m_filePath);
+	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	emit updateStats();
 }
 
@@ -364,6 +382,7 @@ void AwMarkerManager::init()
 		m_needSorting = true;
 		int removed = removeDuplicates();
 		removeOfflimits();
+		m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 		if (!m_markers.isEmpty()) {
 			// avoid markers that out of data bounds (do not load marker that could be positionned after the end of data)
 			m_ui->setMarkers(m_markers);

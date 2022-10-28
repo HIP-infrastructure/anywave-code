@@ -121,7 +121,28 @@ void AnyWave::loadRecentFilesList()
 	}
 }
 
-
+/// <summary>
+/// loadRecentFilesList()
+/// called each time the user clicks on Recent Files sub menu in File Menu
+/// </summary>
+void AnyWave::loadRecentBidsList()
+{
+	auto aws = AwSettings::getInstance();
+	QStringList recentBids = aws->value(aws::recent_bids).toStringList();
+	m_recentBIDSMenu->clear();
+	if (recentBids.size()) {
+		qint32 count = 1;
+		for (auto const& s : recentBids) {
+			auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+			QAction* action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentBIDSMenu);
+			m_recentBIDSMenu->addAction(action);
+			// add index number in data()
+			action->setData(count - 1);
+			connect(action, &QAction::triggered, this, &AnyWave::openRecentBIDS);
+			count++;
+		}
+	}
+}
 
 void AnyWave::openFileFromBIDS(const QString& filePath)
 {

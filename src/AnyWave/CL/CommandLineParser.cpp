@@ -19,11 +19,14 @@
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Debug/AwDebugLog.h"
 #include "AwCommandLogger.h"
+#include "Debug/AwLogger.h"
 #include "Plugin/AwPluginManager.h"
 #include <utils/json.h>
 #include <AwKeys.h>
 #include "Prefs/AwSettings.h"
 #include <iostream>
+#include <QCommandLineParser>
+
 
 //
 // options descriptions
@@ -206,11 +209,15 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		mapSwitches.insert(sw, option);
 		parser.addOption(*option);
 	}
-	AwCommandLogger logger(QString("Command Line"));
+
+//	AwCommandLogger logger(QString("Command Line"));
+	auto logger = AwLogger::getLoggerInstance("Command Line");
+
    	  
 	if (!parser.parse(args)) {
 		exception.setError(parser.errorText());
-		logger.sendLog(parser.errorText());
+		//logger.sendLog(parser.errorText());
+		logger->writeLog(parser.errorText());
 		throw exception;
 	}
 
@@ -342,7 +349,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		arguments["server_port"] = tmp.toInt();
 	if (isFormatOption) {
 		if (!outputAcceptedFormats.contains(format)) {
-			logger.sendLog("specify a valid output_format option: (vhdr, edf, MATLAB, ADES)");
+			logger->writeLog("specify a valid output_format option: (vhdr, edf, MATLAB, ADES)");
 			throw(exception);
 		}
 		arguments["output_format"] = format;
@@ -350,7 +357,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	}
 	
 	if (parser.isSet(pluginDebugO) && !parser.isSet(serverPortOpt)) {
-		logger.sendLog("plugin_debug option requires server_port option to be set.");
+		logger->writeLog("plugin_debug option requires server_port option to be set.");
 		throw(exception);
 	}
 	if (parser.isSet(pluginDebugO)) {
@@ -362,7 +369,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 	///////////////// BIDS parsing is the priority. If --to_bids is specified then ignored all other options
 	if (parser.isSet(toBIDSOpt)) {
 		if (!parser.isSet(BIDSTaskOpt) || !parser.isSet(BIDSSubjectOpt) || !parser.isSet(BIDSModalityOpt)) {
-			logger.sendLog("toBIDS: Missing subject,task or modality argument");
+			logger->writeLog("toBIDS: Missing subject,task or modality argument");
 			throw(exception);
 		}
 		// Session option is not required
@@ -377,7 +384,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		QString proc = parser.value(BIDSProcOpt);
 
 		if (subj.isEmpty() || task.isEmpty() || modality.isEmpty()) {
-			logger.sendLog("toBIDS: a required argument is missing (modality, subject, task)");
+			logger->writeLog("toBIDS: a required argument is missing (modality, subject, task)");
 			throw(exception);
 		}
 
@@ -413,7 +420,7 @@ int aw::commandLine::doParsing(const QStringList& args, AwArguments& arguments)
 		auto bidsFolder = parser.value(autoMarkingBidsOpt);
 		QFileInfo fi(bidsFolder);
 		if (!fi.isDir()) {
-			logger.sendLog("auto_marking: required a path to existing BIDS folder.");
+			logger->writeLog("auto_marking: required a path to existing BIDS folder.");
 			throw(exception);
 		}
 		arguments["auto_marking"] = bidsFolder;

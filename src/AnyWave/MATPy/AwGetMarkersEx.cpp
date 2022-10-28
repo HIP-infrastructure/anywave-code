@@ -21,6 +21,7 @@
 #include <qjsonobject.h>
 #include <qjsonarray.h>
 #include "Marker/AwMarkerManager.h"
+#include "Data/AwDataManager.h"
 #include <AwCore.h>
 #include <utils/json.h>
 
@@ -38,8 +39,10 @@ void AwRequestServer::handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *p)
 	QString json;
 	in >> json;
 	int status = 0;
-	AwMarkerList markers = AwMarkerManager::instance()->getMarkersThread();
-	AwMarkerList res;
+	auto dm = m_dataManager;
+	auto markers = dm->markerManager()->getSharedMarkersThread();
+
+	AwSharedMarkerList res = markers;
 	QDataStream *stream = response.stream();
 	QStringList labels, channels, options;
 	QVector<float> values;
@@ -67,36 +70,35 @@ void AwRequestServer::handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *p)
 	}
 	
 	if (!labels.isEmpty()) {
-		auto tmp = AwMarker::getMarkersWithLabels(markers, labels);
-		markers = tmp;
+		res = AwMarker::getMarkersWithLabels(res, labels);
+		//markers = tmp;
 	}
 	if (!channels.isEmpty()) {
-		AwMarkerList tmp;
-		for (auto m : markers) {
-			for (auto t : m->targetChannels()) {
+		AwSharedMarkerList tmp;
+		for (auto const& m : res) {
+			for (auto const& t : m->targetChannels()) {
 				if (channels.contains(t))
 					tmp << m;
 			}
 		}
-		markers = tmp;
+		res = tmp;
 	}
 	if (!values.isEmpty()) {
-		AwMarkerList tmp;
-		for (auto m : markers) {
+		AwSharedMarkerList tmp;
+		for (auto const& m : res) {
 			if (values.contains(m->value()))
 				tmp << m;
 		}
-		markers = tmp;
+		res = tmp;
 	}
 	if (!options.isEmpty()) {
 		if (options.contains("with duration"))
-			markers = AwMarker::getMarkersWithDuration(markers);
+			res = AwMarker::getMarkersWithDuration(res);
 	}
-	toClient << markers.size();
+	toClient << res.size();
 	response.send();
-	for (auto m : markers) 
+	for (auto const& m : res) 
 		toClient << m->label() << m->start() << m->duration() << m->value() << m->targetChannels();
 	response.send();
-	AW_DESTROY_LIST(markers);
 	emit log("Done.");
 }

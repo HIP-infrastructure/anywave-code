@@ -51,18 +51,26 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 	int downsampling = 1;
 	AwChannelList requestedChannels;
 	AwMarkerList input_markers, markers;
+	QVector<float> dataChunks;
 
 	float fileDuration = process->pdi.input.settings.value(keys::file_duration).toDouble();
 	float start = 0., duration = fileDuration;
 	AwFileIO* localReader = nullptr;
 
+	auto errorFunction = [this, client](const QString& errorMessage) {
+		AwTCPResponse response(client);
+		QDataStream& toClient = *response.stream();
+		emit log(errorMessage);
+		toClient << errorMessage;
+		response.send(-1);
+	};
+
+
 	requestedChannels = process->pdi.input.channels();
 	if (json.isEmpty()) { // no args set
 		// make sure we are working on a open file :
 		if (!dm->isFileOpen()) {
-			emit log("ERROR: no file open in AnyWave. Nothing done.");
-			toClient << QString("AnyWave has no file open.");
-			response.send(-1);
+			errorFunction("ERROR: no file open in AnyWave. Nothing done.");
 			return;
 		}
 		// get input channels of process
@@ -74,18 +82,13 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		QString error;
 		auto cfg = AwUtilities::json::mapFromJsonString(json, error);
 		if (cfg.isEmpty()) {
-			emit log(QString("ERROR: %1").arg(error));
-			toClient << error;
-			response.send(-1);
+			errorFunction(QString("ERROR: %1").arg(error));
 			return;
 		}
 		// if json string is passed and there is no current open file in AnyWave, than the key data_file must exist
 		if (!dm->isFileOpen()) {
 			if (!cfg.contains(keys::data_path)) {
-				error = "ERROR: no file open in AnyWave and the key data_path is not set. Nothing done.";
-				emit log(error);
-				toClient << error;
-				response.send(-1);
+				errorFunction("ERROR: no file open in AnyWave and the key data_path is not set. Nothing done.");
 				return;
 			}
 
@@ -96,10 +99,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 			dm = AwDataManager::newInstance();
 			auto res = dm->openFileMatPy(filePath);
 			if (res) {
-				error = QString("ERROR: Unable to open file %1.").arg(filePath);
-				emit log(error);
-				toClient << error;
-				response.send(-1);
+				errorFunction(QString("ERROR: Unable to open file %1.").arg(filePath));
 				delete dm;
 				return;
 			}
@@ -165,6 +165,19 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 			start = cfg.value("start").toDouble();
 		if (cfg.contains("duration"))
 			duration = cfg.value("duration").toDouble();
+		// new field to load many chunk at the same time
+		if (cfg.contains("data_chunks")) {
+			auto list = cfg.value("data_chunks").toList();
+			dataChunks.reserve(list.size());
+			for (auto const& item : list)
+				dataChunks << item.toFloat();
+			// checking size and number of values
+			if (dataChunks.size() % 2) {
+				errorFunction("data_chunks must contain even number of elements.");
+				return;
+			}
+		}
+
 		if (cfg.contains("raw_data"))
 			rawData = cfg.value("raw_data").toBool();
 		if (cfg.contains("downsampling_factor"))
@@ -182,11 +195,24 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 				filters << item.toDouble();
 		}
 		// if not using use_markers option than set start and duration requested by user
-		if (!useMarkers && !skipMarkers)
-			input_markers << new AwMarker("requested", start, duration);
+		if (!useMarkers && !skipMarkers) {
+			if (dataChunks.isEmpty())  // not data_chunks specified, using start and duration defaults or set values
+				input_markers << new AwMarker("requested", start, duration);
+			else {
+				// data_chunks overrides start/duration options
+				for (auto i = 0;  i < dataChunks.size(); i+=2) 
+					input_markers << new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1));
+			}
+		}
 		if (!useMarkers && skipMarkers) {
-			// add request start and duration as used markers
-			markers << new AwMarker("user", start, duration);
+			if (dataChunks.isEmpty())  // not data_chunks specified, using start and duration defaults or set values
+				// add request start and duration as used markers
+				markers << new AwMarker("user", start, duration);
+			else {
+				// data_chunks overrides start/duration options
+				for (auto i = 0; i < dataChunks.size(); i += 2)
+					markers << new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1));
+			}
 			use_markers << "user";
 			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, fileDuration);
 		}
@@ -194,7 +220,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		if (!labels.isEmpty()) {
 			// Beware of channels refs (we should accept "A1-A2" and consider it as A1 with A2 as reference).
 			AwChannelList res;
-			for (auto l : labels) {
+			for (auto const &l : labels) {
 				if (l.contains("-")) {
 					auto splitted = l.split("-");
 					auto tmp = AwChannel::getChannelsWithLabel(requestedChannels, splitted.first());
@@ -212,7 +238,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		}
 		if (!types.isEmpty()) {
 			AwChannelList tmp;
-			for (auto t : types) {
+			for (auto const &t : types) {
 				tmp += AwChannel::getChannelsOfType(requestedChannels, AwChannel::stringToType(t));
 			}
 			requestedChannels = tmp;

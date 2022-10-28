@@ -50,6 +50,7 @@ protected:
 	AwDebugLog(QObject *parent = 0);
 	void writeLog(const QString& name);
 private:
+	QStringList m_componentNames;
 	static AwDebugLog *m_instance;
 	QHash<QObject *, QString> m_components;
 	QHash<QString, QStringList> m_logs;

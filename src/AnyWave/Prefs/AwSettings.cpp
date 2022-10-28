@@ -202,14 +202,13 @@ void AwSettings::saveRecentBids()
 /// </summary>
 void AwSettings::init()
 {
-	
 	QSettings settings;
 	int size = 0;
 
+	detectMATLABRuntimes();
 	// load previously saved recent files
 	auto path = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::recent_files_name);
 	m_settings.insert(aws::recent_files_path, path);
-
 	loadRecentFiles();
 	if (QFile::exists(path)) {
 		m_fileWatcher.addPath(path);
@@ -451,4 +450,22 @@ AwMarkerList AwSettings::loadPredefinedMarkers()
 	if (markerRulesDir.isEmpty())
 		return AwMarkerList();
 	return AwMarker::load(path);
+}
+
+void AwSettings::detectMATLABRuntimes()
+{
+#ifdef Q_OS_WIN
+	QString programFiles = qgetenv("PROGRAMFILES");
+	QDir dir(programFiles);
+	dir.cd("MATLAB");
+	if (!dir.exists())
+		return;
+	dir.cd("MATLAB Runtime");
+	if (!dir.exists())
+		return;
+	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for (auto const& d : subDirs) 
+		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
+	
+#endif
 }

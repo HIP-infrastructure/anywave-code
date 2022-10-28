@@ -114,6 +114,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	m_recentFilesMenu = menuRecent_files;
 	m_recentBIDSMenu = menuRecent_BIDS;
 	connect(m_recentFilesMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentFilesList);
+	connect(m_recentBIDSMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentFilesList);
 
 	setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 

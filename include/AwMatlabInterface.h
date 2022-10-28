@@ -43,9 +43,6 @@ class AwMatlabInterface : public QObject
 {
 public:
 	virtual void run(const QVariantMap& settings) = 0;
-	
-signals:
-	void progressChanged(const QString&);
 };
 
 #define AwMatlabInterface_IID "AnyWave.MATLABInterface"

@@ -44,6 +44,7 @@ public:
 	AwMarkerList getMarkers();
 	/** Thread support version **/
 	AwMarkerList getMarkersThread();
+	AwSharedMarkerList getSharedMarkersThread();
 	inline AwMarkerList& displayedMarkers() { return m_displayedMarkers; }
 	AwMarkerManagerSettings* ui();
 	void setDock(QDockWidget *dock) { m_dock = dock; }

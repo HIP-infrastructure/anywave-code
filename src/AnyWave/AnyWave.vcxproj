@@ -53,6 +53,7 @@
     <ClCompile Include="Data\AwDataSet.cpp" />
     <ClCompile Include="Debug\AwDebugLog.cpp" />
     <ClCompile Include="Debug\AwDebugLogWidget.cpp" />
+    <ClCompile Include="Debug\AwLogger.cpp" />
     <ClCompile Include="Display\AwCentralWidget.cpp" />
     <ClCompile Include="Display\AwChannelSelectionDial.cpp" />
     <ClCompile Include="Display\AwChannelSelectionModel.cpp" />
@@ -254,6 +255,7 @@
     </QtMoc>
     <QtMoc Include="AwComponents.h" />
     <QtMoc Include="ICA\AwSEEGMap.h" />
+    <QtMoc Include="Debug\AwLogger.h" />
     <ClInclude Include="ICA\AwICAMappingItem.h" />
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
     <QtMoc Include="IO\export\AwChannelsExportWizardPage.h" />
@@ -797,6 +799,7 @@
     <UseIntelTBB>true</UseIntelTBB>
     <UseInteloneTBB>true</UseInteloneTBB>
     <UseInteloneMKL>Parallel</UseInteloneMKL>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>

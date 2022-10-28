@@ -88,11 +88,11 @@ namespace aws {
 	constexpr auto last_bids_dir = "last_bids_dir";
 	constexpr auto settings_file = "settings.json";
 	constexpr auto settings_file_path = "settings_file_path";
-
-
 	constexpr auto predefined_marker_file = "predefined_marker_file";
 	constexpr auto itk_snap = "itk_snap";
 	constexpr auto gardel = "gardel";
+	// MATLAB Runtime
+
 };
 
 ///
@@ -122,9 +122,7 @@ public:
 	void emptyMatlabShellScript();
 #endif
 	void closeFile();
-
 	void quit();
-
 	inline AwDisplaySetup *displaySetup() { return m_setup; }
 	inline void setDisplaySetup(AwDisplaySetup *setup) { m_setup = setup; }
 	inline QSystemTrayIcon *sysTray() { return m_sysTrayIcon; }
@@ -132,7 +130,10 @@ public:
 	inline void setMatlabInterface(AwMatlabInterface *i) { m_matlabInterface = i; }
 	AwFileIO* readerAt(int index);
 	QStringList& topoLayouts(); 
-
+	// MATLAB Runtimes
+	inline bool MATLABRuntimeDetected() { return !m_MATLABRuntimes.isEmpty(); }
+	QStringList detectedMATLABRuntimes() { return m_MATLABRuntimes.keys(); }
+	QString MATLABRuntimePath(const QString& k) { return m_MATLABRuntimes.value(k);	}
 	// recent files specific
 	QString shortenFilePath(const QString& path);
 	void addRecentFilePath(const QString& path);
@@ -161,6 +162,7 @@ protected:
 	AwMatlabInterface *m_matlabInterface;
 	QMap<QString, QString> m_pythonVenvs;
 	QFileSystemWatcher m_fileWatcher;
+	QMap<QString, QString> m_MATLABRuntimes;	// empty if no runtime detected or manually set
 
 	void loadRecentFiles();
 	void loadRecentBids();
@@ -168,6 +170,7 @@ protected:
 	void saveRecentBids();
 	void saveFileSettings();
 	void loadFileSettings();
+	void detectMATLABRuntimes();
 private:
 	static AwSettings *m_instance;
 };

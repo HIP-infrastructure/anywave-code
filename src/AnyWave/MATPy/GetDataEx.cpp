@@ -31,9 +31,9 @@
 #include <AwKeys.h>
 #include "Data/AwDataManager.h"
 #include "Data/AwDataServer.h"
-#include "CL/AwCommandLineManager.h"
 
-void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *process)
+
+void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* process)
 {
 	emit log("processing aw_getdataex/getdataex()");
 	AwTCPResponse response(client);
@@ -41,21 +41,20 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	fromClient.setVersion(QDataStream::Qt_4_4);
 	QDataStream& toClient = *response.stream();
 	auto dm = m_dataManager;
-
-	//AwFileIO* reader = dm->reader();
 	QString json;
 	fromClient >> json;
 	int status = 0;
 	bool rawData = false;
 	bool skipBad = true;	// default is to remove bad channels.
+	bool splitData = false;
 	int downsampling = 1;
 	AwChannelList requestedChannels;
 	AwMarkerList input_markers, markers;
-	
+
 	float fileDuration = process->pdi.input.settings.value(keys::file_duration).toDouble();
 	float start = 0., duration = fileDuration;
-	AwFileIO *localReader = nullptr;
-	
+	AwFileIO* localReader = nullptr;
+
 	requestedChannels = process->pdi.input.channels();
 	if (json.isEmpty()) { // no args set
 		// make sure we are working on a open file :
@@ -112,37 +111,39 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			// open connection to the cloned data server which resides inside the cloned Data Manager
 			dm->dataServer()->openConnection(this);
 		}
+		else {
+			// default channel source is current montage
+			requestedChannels = dm->montage();
+		}
 
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
 		QString file;
 
+		bool useMarkers = cfg.contains(keys::use_markers);
+		bool skipMarkers = cfg.contains(keys::skip_markers);
+
 		if (cfg.contains("skip_bad_channels"))
 			skipBad = cfg.value("skip_bad_channels").toBool();
-
-		// check for marker file
-		markers = AwCommandLineManager::parseMarkerFile(cfg);
-		if (markers.isEmpty()) {
-			// try to load the default .mrk that comes with the data file
-			auto mrkFile = dm->mrkFilePath();
-			if (QFile::exists(mrkFile)) 
-				markers = AwMarker::load(mrkFile);
+		if (cfg.contains("split_data")) {
+			splitData = cfg.value("split_data").toBool();
 		}
 
+		// check for marker file
+		auto mrkFile = dm->mrkFilePath();
+		if (cfg.contains(keys::marker_file))
+			mrkFile = cfg.value(keys::marker_file).toString();
+		// do we really need to use markers?
+		if (useMarkers || skipMarkers) {
+			markers = AwMarker::load(mrkFile);
+		}
 		AwFilterSettings filterSettings;
-		// check for start/Duration or use markers options
-		if (cfg.contains("use_markers")) 
-			use_markers = cfg.value("use_markers").toStringList();
-		if (cfg.contains("skip_markers")) 
-			skip_markers = cfg.value("skip_markers").toStringList();
-
 		// check for channel labels
-		if (cfg.contains("labels")) 
+		if (cfg.contains("labels"))
 			labels = cfg.value("labels").toStringList();
-
 		// check for channel types
 		if (cfg.contains("types"))
 			types = cfg.value("types").toStringList();
-		
+
 		// check for channel source
 		if (cfg.contains(keys::channels_source)) {
 			auto source = cfg.value(keys::channels_source).toString().simplified();
@@ -151,9 +152,14 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			}
 			else if (source == "raw")
 				requestedChannels = dm->rawChannels();
-			else if (source == "selection")
+			else if (source == "selection") {
 				requestedChannels = dm->selectedChannels();
+				// check if requested channels is empty (may be no selection done and we requested selected channels)
+				if (requestedChannels.isEmpty())
+					requestedChannels = dm->montage();
+			}
 		}
+
 		if (cfg.contains("start"))
 			start = cfg.value("start").toDouble();
 		if (cfg.contains("duration"))
@@ -162,19 +168,32 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 			rawData = cfg.value("raw_data").toBool();
 		if (cfg.contains("downsampling_factor"))
 			downsampling = cfg.value("downsampling_factor").toInt();
+		// check for start/Duration or use markers options
+		if (useMarkers)
+			use_markers = cfg.value("use_markers").toStringList();
+		if (skipMarkers)
+			skip_markers = cfg.value("skip_markers").toStringList();
 		// get filters
 		QVector<float> filters;
 		if (cfg.contains("filters")) {
 			auto list = cfg.value("filters").toList();
-			for (auto const &item : list)
+			for (auto const& item : list)
 				filters << item.toDouble();
 		}
-	   input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, duration);
+		// if not using use_markers option than set start and duration requested by user
+		if (!useMarkers && !skipMarkers)
+			input_markers << new AwMarker("requested", start, duration);
+		if (!useMarkers && skipMarkers) {
+			// add request start and duration as used markers
+			markers << new AwMarker("user", start, duration);
+			use_markers << "user";
+			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, fileDuration);
+		}
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
 			// Beware of channels refs (we should accept "A1-A2" and consider it as A1 with A2 as reference).
 			AwChannelList res;
-			for (auto l : labels) {
+			for (auto const& l : labels) {
 				if (l.contains("-")) {
 					auto splitted = l.split("-");
 					auto tmp = AwChannel::getChannelsWithLabel(requestedChannels, splitted.first());
@@ -192,7 +211,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 		}
 		if (!types.isEmpty()) {
 			AwChannelList tmp;
-			for (auto t : types) {
+			for (auto const& t : types) {
 				tmp += AwChannel::getChannelsOfType(requestedChannels, AwChannel::stringToType(t));
 			}
 			requestedChannels = tmp;
@@ -263,7 +282,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket *client, AwScriptProcess *proce
 	AW_DESTROY_LIST(requestedChannels);
 
 	// check for data manager used, if not the main one, destroy it
-    if (dm != m_dataManager) {
+	if (dm != m_dataManager) {
 		// reconnect to the correct data server
 		//AwDataServer::getInstance()->openConnection(this);
 		m_dataManager->dataServer()->openConnection(this);

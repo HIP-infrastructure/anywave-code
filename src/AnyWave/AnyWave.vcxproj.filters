@@ -628,6 +628,9 @@
     <ClCompile Include="MATPy\GetData2_5_10.cpp">
       <Filter>MATPy</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\AwLogger.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1112,6 +1115,9 @@
     </QtMoc>
     <QtMoc Include="Prefs\AwSettings.h">
       <Filter>Prefs</Filter>
+    </QtMoc>
+    <QtMoc Include="Debug\AwLogger.h">
+      <Filter>Debug</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
