@@ -1126,6 +1126,90 @@ AwMarkerList AwMarker::load(const QString& path)
 	return markers;
 }
 
+int AwMarker::removeDoublons(AwSharedMarkerList& markers, bool sortList)
+{
+	if (markers.isEmpty())
+		return 0;
+	if (sortList)
+		//		std::sort(markers.begin(), markers.end(), AwMarkerLessThan);
+		AwMarker::sort(markers);
+	int current = 0;
+	const float tol = 0.001;  // 1 ms tolerance
+	QList<AwSharedMarkerList> clusters;
+	do {
+		AwSharedMarkerList cluster;
+		cluster.append(markers.at(current));
+		float pos = markers.at(current++)->start();
+		while (current < markers.size()) {
+			auto m = markers.at(current);
+			float delta = std::abs(m->start() - pos);
+			if (delta <= tol) {
+				cluster.append(m);
+				current++;
+			}
+			else
+				break;
+		}
+		if (cluster.size() > 1)
+			clusters << cluster;
+		if (current == markers.size())
+			break;
+	} while (true);
+
+	auto compareMarkers = [](QSharedPointer<AwMarker>&m, QSharedPointer<AwMarker>& m1) {
+		if (m->label() != m1->label())
+			return false;
+		const float tol = 0.001;
+		float pos = std::abs(m1->start() - m->start());
+		float dur = std::abs(m1->duration() - m->duration());
+
+		bool res = pos <= tol && dur <= tol;
+		if (res) { // check that targets are similar
+			QStringList t1 = m1->targetChannels();
+			QStringList t2 = m->targetChannels();
+			if (t1.isEmpty() && t2.isEmpty())
+				return true;
+			if (t1.size() != t2.size())
+				return false;
+			for (int i = 0; i < t1.size(); i++) {
+				QString s1 = t1.at(i);
+				QString s2 = t2.at(i);
+				if (s1.compare(s2, Qt::CaseSensitive) != 0)
+					return false;
+			}
+			return true;
+		}
+		return res;
+	};
+	std::function<AwSharedMarkerList(AwSharedMarkerList&)> clustering = [compareMarkers](AwSharedMarkerList& markers) -> AwSharedMarkerList {
+		AwSharedMarkerList res;
+		auto first = markers.takeFirst();
+		while (markers.size()) {
+			for (auto &m : markers) {
+				if (compareMarkers(first, m)) {
+					res << first;
+					break;
+				}
+			}
+			first = markers.takeFirst();
+		}
+		return res;
+	};
+
+	QList<AwSharedMarkerList> results = QtConcurrent::blockingMapped<QList<AwSharedMarkerList>>(clusters.begin(), clusters.end(), clustering);
+	AwSharedMarkerList overall;
+	for (const auto& l : results)
+		overall += l;
+	for (auto m : overall)
+#ifndef Q_OS_WIN
+		markers.erase(std::find(markers.begin(), markers.end(), m));
+#else
+		markers.erase(std::find(std::execution::par, markers.begin(), markers.end(), m));
+#endif
+	return overall.size();
+}
+
+
 int AwMarker::removeDoublons(QList<AwMarker*>& markers, bool sortList)
 {
 	AwMarkerList res, removed;

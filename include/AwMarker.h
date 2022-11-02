@@ -115,6 +115,7 @@ public:
 	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Remove doublons : similar markers are removed. The list is updated. **/
 	static int removeDoublons(QList<AwMarker *>& markers, bool sortList = true);
+	static int removeDoublons(QList<QSharedPointer<AwMarker>>& markers, bool sortList = true);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
 	/** Returns the marker's type. AwMarker::Single or AwMarker::Selection. **/

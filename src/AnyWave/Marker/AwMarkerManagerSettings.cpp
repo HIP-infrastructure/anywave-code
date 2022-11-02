@@ -226,7 +226,7 @@ void AwMarkerManagerSettings::changeEvent(QEvent *e)
 void AwMarkerManagerSettings::applyRule(AwMarkerRule *rule)
 {
 	// If rule parameter is null when reset rules filter to no rule => so all markers are sent to display
-	if (rule == NULL)
+	if (rule == nullptr)
 		m_displayedMarkers = m_markers;
 	else
 		m_displayedMarkers = rule->applyRule(m_markers);

@@ -137,6 +137,7 @@ int AwMarkerManager::removeDuplicates()
 {
 	if (m_markers.isEmpty())
 		return 0;
+
 	return AwMarker::removeDoublons(m_markers, m_needSorting);
 }
 
