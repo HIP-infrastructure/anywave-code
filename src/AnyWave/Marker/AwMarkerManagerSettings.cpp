@@ -35,7 +35,7 @@
 #endif
 #include "IO/BIDS/AwBIDSManager.h"
 
-AwMarkerManagerSettings::AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent)
+AwMarkerManagerSettings::AwMarkerManagerSettings(AwSharedMarkerList& markers, QWidget *parent)
 	: QWidget(parent)
 {
 	setupUi(this);
@@ -235,7 +235,7 @@ void AwMarkerManagerSettings::applyRule(AwMarkerRule *rule)
 	emit markersChanged(m_displayedMarkers);
 }
 
-void AwMarkerManagerSettings::setMarkers(const AwMarkerList& markers)
+void AwMarkerManagerSettings::setMarkers(const AwSharedMarkerList& markers)
 {
 	m_markers = markers;
 	tvMarkers->setToolTip(QString("total markers: %1").arg(m_markers.count()));
@@ -386,7 +386,7 @@ void AwMarkerManagerSettings::setRule(const QString& rule)
 
 void AwMarkerManagerSettings::goToMarkerAtRow(int row)
 {
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 	
 	QModelIndex index = tvMarkers->model()->index(row, MARKER_COLUMN_POS);
@@ -418,7 +418,7 @@ void AwMarkerManagerSettings::renameAllMarkers()
 	if (dlg.exec() == QDialog::Rejected)
 		return;
 
-	AwMarkerList currentMarkers = m_model->markers();
+	auto  currentMarkers = m_model->markers();
 	for (auto m : currentMarkers)
 		m->setLabel(dlg.value());
 
@@ -433,7 +433,7 @@ void AwMarkerManagerSettings::renameSelectedMarkers()
 	if (dlg.exec() == QDialog::Rejected)
 		return;
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 
 	for (auto const& i : indexes) {
@@ -456,7 +456,7 @@ void AwMarkerManagerSettings::changeValueAllMarkers()
 		return;
 
 	auto newValue = dlg.value().toDouble();
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 	for (auto m : currentMarkers)
 		m->setValue(newValue);
 
@@ -472,7 +472,7 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 		return;
 
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 
 	for (auto const& i : indexes) {
@@ -492,7 +492,7 @@ void AwMarkerManagerSettings::changeValueSelectedMarkers()
 void AwMarkerManagerSettings::changeColorSelectedMarkers()
 {
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 	QSortFilterProxyModel* proxy = (QSortFilterProxyModel*)tvMarkers->model();
 
 	QColor color;
@@ -526,7 +526,7 @@ void AwMarkerManagerSettings::changeColorAllMarkers()
 	auto color = QColorDialog::getColor(Qt::white, this, "Pick color");
 	if (!color.isValid())
 		return;
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 	auto colorName = color.name(QColor::HexRgb);
 	for (auto m : currentMarkers)
 		m->setColor(colorName);
@@ -544,9 +544,9 @@ void AwMarkerManagerSettings::launchProcess()
 	if (indexes.isEmpty())
 		return;
 
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 
-	AwMarkerList markers; // marker that has been removed
+	AwSharedMarkerList markers; // marker that has been removed
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 	for (auto const& i : indexes) {
 		if (i.column() == 0)
@@ -559,7 +559,7 @@ void AwMarkerManagerSettings::launchProcess()
 	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(action->data().toString());
 	if (plugin) {
 		auto process = AwProcessManager::instance()->newProcess(plugin);
-		process->pdi.input.setNewMarkers(markers, true);
+		process->pdi.input.setMarkers(markers);
 		process->addModifiers(Aw::ProcessIO::modifiers::UserSelectedMarkers);
 		AwProcessManager::instance()->runProcess(process);
 	}
@@ -597,10 +597,10 @@ void AwMarkerManagerSettings::removeAllLabels()
 		return;
 
 	m_displayedMarkers = m_model->markers();
-	AwMarkerList markers;
+	AwSharedMarkerList markers;
 
 	std::remove_copy_if(m_displayedMarkers.begin(), m_displayedMarkers.end(), std::back_inserter(markers),
-		[label](AwMarker* m) { return m->label() != label; });
+		[label](const AwSharedMarker& m) { return m->label() != label; });
 
     emit markersRemoved(markers);
 	m_displayedMarkers = m_model->markers();
@@ -617,9 +617,8 @@ void AwMarkerManagerSettings::saveSelectedMarkersToMATLAB()
 
 	auto path = QFileDialog::getSaveFileName(0, tr("Save marked data"), AwDataManager::instance()->value(keys::data_dir).toString(), "*.mat");
 	if (!path.isEmpty()) {
-		AwMarkerList currentMarkers = m_model->markers();
-
-		AwMarkerList markers; // marker to save
+		auto currentMarkers = m_model->markers();
+		AwSharedMarkerList markers; // marker to save
 		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 		for (auto const& i : indexes) {
 			if (i.column() == 0) {
@@ -641,7 +640,7 @@ void AwMarkerManagerSettings::saveSelectedMarkersToMATLAB()
 			return;
 		}
 		// set markers to compute data on
-		process->pdi.input.setNewMarkers(markers, true);
+		process->pdi.input.setMarkers(markers);
 		process->pdi.input.settings.insert(keys::output_file, path);
 		// start process
 		process_manager->runProcess(process);
@@ -659,9 +658,9 @@ void AwMarkerManagerSettings::saveSelectedMarkers()
 	
 	auto path = QFileDialog::getSaveFileName(0, tr("Save markers"), AwDataManager::instance()->value(keys::data_dir).toString(), "*.mrk");
 	if (!path.isEmpty()) {
-		AwMarkerList currentMarkers = m_model->markers();
+		auto currentMarkers = m_model->markers();
 
-		AwMarkerList markers; // marker to save
+		AwSharedMarkerList markers; // marker to save
 		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 		for (auto const& i : indexes) {
 			if (i.column() == 0)
@@ -676,16 +675,13 @@ void AwMarkerManagerSettings::removeMarkers()
 {
 	// get selected indexes in tvMarkers
 	QModelIndexList indexes = tvMarkers->selectionModel()->selectedIndexes();
-
 	if (indexes.isEmpty())
 		return;
-
 	if (AwMessageBox::question(this, tr("Remove Markers"), QString(tr("Remove all the selected markers?"))) == QMessageBox::No)
 		return;
+	auto currentMarkers = m_model->markers();
 
-	AwMarkerList currentMarkers = m_model->markers();
-
-	AwMarkerList markers; // marker that has been removed
+	AwSharedMarkerList markers; // marker that has been removed
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 	for (auto const& i : indexes) {
 		if (i.column() == 0)
@@ -696,10 +692,10 @@ void AwMarkerManagerSettings::removeMarkers()
 	emit markersChanged(m_displayedMarkers);
 }
 
-void AwMarkerManagerSettings::highlightMarker(AwMarker *marker)
+void AwMarkerManagerSettings::highlightMarker(const AwSharedMarker& marker)
 {
 	// find the marker in the list
-	AwMarkerList currentMarkers = m_model->markers();
+	auto currentMarkers = m_model->markers();
 	int index = currentMarkers.indexOf(marker);
 	if (index == -1)
 		return;
@@ -736,10 +732,8 @@ void AwMarkerManagerSettings::writeTrigger()
 
 		if (indexes.isEmpty())
 			return;
-
-		AwMarkerList currentMarkers = m_model->markers();
-
-		AwMarkerList markers; // marker that has been removed
+		auto currentMarkers = m_model->markers();
+		AwSharedMarkerList markers; // marker that has been removed
 		QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
 		for (auto const& i : indexes) {
 			if (i.column() == 0)
@@ -751,7 +745,7 @@ void AwMarkerManagerSettings::writeTrigger()
 			AwMessageBox::critical(0, "Missing Plugin", "The Trigger Writer plugin is not loaded.");
 			return;
 		}
-		process->pdi.input.setNewMarkers(markers, true);
+		process->pdi.input.setMarkers(markers);
 		AwProcessManager::instance()->runProcess(process);
 	}
 	else 
@@ -783,7 +777,7 @@ void AwMarkerManagerSettings::contextMenuRequested(const QPoint& pos)
 	if (!index.isValid()) 
 		return;
 	QSortFilterProxyModel *proxy = (QSortFilterProxyModel *)tvMarkers->model();
-	AwMarker *firstMarker = m_displayedMarkers.at(proxy->mapToSource(index).row());
+	auto  firstMarker = m_displayedMarkers.at(proxy->mapToSource(index).row());
 
 	m_removeAllLabel->setText(QString(tr("Remove all %1")).arg(firstMarker->label()));
 	m_removeAllLabel->setData(firstMarker->label());

@@ -59,7 +59,8 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	}
 	m_debugMode = false;
 	m_dataManager = AwDataManager::instance();
-	connect(this, SIGNAL(markersAdded(AwMarkerList*)), m_dataManager->markerManager(), SLOT(addMarkers(AwMarkerList*)));
+//	connect(this, SIGNAL(markersAdded(AwMarkerList*)), m_dataManager->markerManager(), SLOT(addMarkers(AwMarkerList*)));
+//	connect(this, &AwRequestServer::markersAdded, m_dataManager->markerManager(), &AwMarkerManager::receivedMarkers);
 }
 
 AwRequestServer::~AwRequestServer()
@@ -204,8 +205,8 @@ void AwRequestServer::initDebugProcess(AwScriptProcess* p)
 		p->pdi.input.setReader(AwDataManager::instance()->reader());
 		p->pdi.input.setNewChannels(AwDataManager::instance()->montage(), true);
 		p->pdi.input.settings = dm->settings();
-		connect(p, SIGNAL(sendMarkers(AwMarkerList*)), dm->markerManager(), SLOT(addMarkers(AwMarkerList*)));
-		connect(p, SIGNAL(sendMarker(AwMarker *)), dm->markerManager(), SLOT(addMarker(AwMarker*)));
+		connect(p, &AwBaseProcess::sendMarkers, dm->markerManager(), &AwMarkerManager::receivedMarkers);
+		//connect(p, SIGNAL(sendMarker(AwMarker *)), dm->markerManager(), SLOT(addMarker(AwMarker*)));
 	}
 }
 

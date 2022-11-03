@@ -33,7 +33,7 @@ AwExportWizardDial::AwExportWizardDial(const QVariantMap& settings, QWidget* par
 	if (!m_isBids) {
 		m_channelsPage = new AwChannelsExportWizardPage();
 		addPage(m_channelsPage);
-		auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
+		auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getSharedMarkersThread());
 		m_markersPage = nullptr;
 		if (markers.size()) {
 			m_markersPage = new AwMarkersExportWizardPage;

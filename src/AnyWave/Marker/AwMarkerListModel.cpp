@@ -61,7 +61,7 @@ QVariant AwMarkerListModel::data(const QModelIndex &index, int role) const
 
 	AwSettings *aws = AwSettings::getInstance();
 	int col = index.column();
-	AwMarker *m = m_markers.at(index.row());
+	auto m = m_markers.at(index.row());
 
 	switch (role) {
 	case Qt::DisplayRole:
@@ -137,17 +137,6 @@ QVariant AwMarkerListModel::data(const QModelIndex &index, int role) const
 				return res;
 			}
 		}
-		// tooltips
-		//if (col == MARKER_COLUMN_LABEL)
-		//	return QString(tr("Marker's label"));
-		//if (col == MARKER_COLUMN_CODE)
-		//	return QString(tr("Code associated with the event. Typically a trigger code at the acquisition."));
-		//if (col == MARKER_COLUMN_POS)
-		//	return QString(tr("Position in seconds from the beginning of the file"));
-		//if (col == MARKER_COLUMN_DURATION)
-		//	return QString(tr("Duration in seconds"));
-		//if (col == MARKER_COLUMN_TARGET)
-		//	return QString(tr("Indicates if a marker targets one or several channels.\nMove the mouse over to see the targeted channel(s)."));
 		break;
 	case Qt::TextAlignmentRole:
 		return int(Qt::AlignCenter);
@@ -172,7 +161,7 @@ bool AwMarkerListModel::setData(const QModelIndex &index, const QVariant &value,
 	if (!index.isValid()) 
 		return false;
 	int col = index.column();
-	AwMarker *m = m_markers.at(index.row());
+	auto m = m_markers.at(index.row());
 	switch(role) {
 	case Qt::EditRole:
 		if (col == MARKER_COLUMN_LABEL)
@@ -251,7 +240,7 @@ QVariant AwMarkerListModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
-void AwMarkerListModel::updateMarkers(const AwMarkerList& markers)
+void AwMarkerListModel::updateMarkers(const AwSharedMarkerList& markers)
 {
 	beginResetModel();
 	m_markers = markers;
@@ -263,7 +252,7 @@ void AwMarkerListModel::updateMarkers(const AwMarkerList& markers)
 /// Delegate
 
 
-AwMarkerListDelegate::AwMarkerListDelegate(const AwMarkerList& markers, QObject *parent)
+AwMarkerListDelegate::AwMarkerListDelegate(const AwSharedMarkerList& markers, QObject *parent)
 : QItemDelegate(parent)
 {
 	m_markers = markers;
@@ -273,8 +262,8 @@ QWidget *AwMarkerListDelegate::createEditor(QWidget *parent, const QStyleOptionV
 {
 	QSortFilterProxyModel *sortModel = (QSortFilterProxyModel *)index.model();
 	AwMarkerListModel *model = (AwMarkerListModel *)sortModel->sourceModel();
-	AwMarkerList markers = model->markers();
-	AwMarker *marker = markers.at(index.row());
+	AwSharedMarkerList markers = model->markers();
+	auto  marker = markers.at(index.row());
 
 	if (index.column() == MARKER_COLUMN_COLOR)	{
 		QComboBox *editor = new QComboBox(parent);

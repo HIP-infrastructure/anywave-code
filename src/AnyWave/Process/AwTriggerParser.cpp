@@ -44,7 +44,8 @@ AwTriggerParser::~AwTriggerParser()
 
 void AwTriggerParser::clearMarkers()
 {
-	qDeleteAll(m_markers);
+//	qDeleteAll(m_markers);
+	m_markers.clear();
 }
 
 bool AwTriggerParser::showUi()
@@ -128,7 +129,7 @@ void AwTriggerParser::detect()
 			QString name = QString("%1:%2").arg(c->name()).arg(e->second);
 			AwMarker *newMarker = new AwMarker(name, (float)e->first / c->samplingRate());
 			newMarker->setValue(e->second);
-			m_markers << newMarker;
+			m_markers << AwSharedMarker(newMarker);
 		}
 		while (!events.isEmpty())
 			delete events.takeFirst();
@@ -152,6 +153,6 @@ void AwTriggerParser::runFromCommandLine()
 		QString path = QString("%1/trigger_parser.mrk").arg(args.value(keys::output_dir).toString());
 		AwMarker::save(path, m_markers);
 	}
-	// set a copy to ouput
-	pdi.output.setNewMarkers(m_markers);
+	// set a copy to output
+	pdi.output.setMarkers(m_markers);
 }

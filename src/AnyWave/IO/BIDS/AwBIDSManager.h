@@ -91,8 +91,8 @@ public:
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
 	int MEGtoBIDS(const AwArguments& args);
-	int convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
-	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
+	int convertToEDF(const QString& file, AwFileIO *reader, const AwSharedMarkerList& markers);
+	int convertToVHDR(const QString& file, AwFileIO *reader, const AwSharedMarkerList& markers);
 	static void initCommandLineOperation(const QString& filePath, AwDataManager *);
 	static void finishCommandLineOperation();
 	// BIDS GUI Specific
@@ -170,13 +170,13 @@ protected:
 	AwBIDSManager();
 	AwBIDSItems getSubjectItems(const QString&);
 	AwBIDSItems getSourceDataSubjectItems(const QString&);
-	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
+	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwSharedMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findCurrentFileItem(const QString& filePath);
 	QVariant BIDSProperty(int property);
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
-	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
+	int createEventsTsv(const QString& filePath, const AwSharedMarkerList& markers);
 	
 
 	void initAnyWaveDerivativesForFile(const QString& filePath);

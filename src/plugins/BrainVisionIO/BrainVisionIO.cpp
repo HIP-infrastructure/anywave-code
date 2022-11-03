@@ -495,7 +495,7 @@ AwFileIO::FileStatus BrainVisionIO::writeMarkers()
 	typedef QPair<int, int> indexValue;
 
 	for (qint32 i = 0; i < infos.blocks().at(0)->markersCount(); i++) {
-		AwMarker *m = infos.blocks().at(0)->markers().at(i);
+		auto m = infos.blocks().at(0)->markers().at(i);
 		auto label = m->label();
 		if (label.contains(',')) {
 			label = label.replace(',', "_");
@@ -503,7 +503,6 @@ AwFileIO::FileStatus BrainVisionIO::writeMarkers()
 		m->setLabel(label);
 
 		// Stimulus markers if marker has a value
-
 		if (m->value() > 0) {
 			stream << "Mk" << index++ << "=Stimulus," << "S " << m->value() << "," << (int)floor(m->start() * m_sampleRate) << ",";
 			m->duration() > 0 ? stream << (int)floor(m->duration() * m_sampleRate) : stream << "1";

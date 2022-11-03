@@ -29,7 +29,7 @@ public:
 	void run() override;
 	void runFromCommandLine() override;
 protected:
-	AwMarkerList m_inputMarkers;
+	AwSharedMarkerList m_inputMarkers;
 };
 
 class AwExporterPlugin : public AwProcessPlugin

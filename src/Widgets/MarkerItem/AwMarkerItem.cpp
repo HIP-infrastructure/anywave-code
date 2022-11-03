@@ -24,7 +24,7 @@
 #include <utils/gui.h>
 
 
-AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, AwMarker *mark, QGraphicsScene *scene, int offset) 
+AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int offset) 
 : AwGraphicsMarkerItem(mark, phys)
 {
 	m_marker = mark;

@@ -24,7 +24,7 @@ public:
 	int downSampling;
 	float samplingRate;
 	QString directory;
-	AwMarkerList markers;
+	AwSharedMarkerList markers;
 	QStringList usedLabels, skippedLabels;
 	bool saveInOneFile;
 public slots:

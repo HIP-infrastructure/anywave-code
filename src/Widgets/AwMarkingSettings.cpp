@@ -16,16 +16,16 @@
 #include <AwMarkingSettings.h>
 
 
-void AwMarkingSettings::setPredefinedMarkers(const AwMarkerList& markers)
+void AwMarkingSettings::setPredefinedMarkers(const AwSharedMarkerList& markers)
 {
 	this->predefinedMarkers = markers;
 	this->selectedPredefinedMarkers.clear();
 }
 
-AwMarkerList AwMarkingSettings::getSelectedPredefinedMarkers()
+AwSharedMarkerList AwMarkingSettings::getSelectedPredefinedMarkers()
 {
-	AwMarkerList res;
-	for (auto selected : this->selectedPredefinedMarkers)
+	AwSharedMarkerList res;
+	for (auto &selected : this->selectedPredefinedMarkers)
 		res.append(this->predefinedMarkers.at(selected));
 	return res;
 }

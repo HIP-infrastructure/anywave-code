@@ -19,6 +19,7 @@
 #include <QTcpSocket>
 #include "Marker/AwMarkerManager.h"
 #include "AwTCPResponse.h"
+#include "Data/AwDataManager.h"
 
 void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 {
@@ -50,9 +51,10 @@ void AwRequestServer::handleAddMarkers(QTcpSocket *client, AwScriptProcess *p)
 			if (c.isValid())
 				m->setColor(c.name(QColor::HexRgb));
 		}
-		m_markers << m;
+		m_markers << AwSharedMarker(m);
 	}
 	// add markers
-	emit markersAdded(&m_markers);
+//	emit markersAdded(m_markers);
+	m_dataManager->markerManager()->addMarkers(m_markers);
 	emit log("Done.");
 }

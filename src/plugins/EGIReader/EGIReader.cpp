@@ -432,35 +432,24 @@ void EGIReader::getEvents()
 	QDateTime record = QDateTime::fromString(m_recordTime, Qt::ISODate);
 	
 	// make events into markers
-	AwMarkerList markers;
 	for (auto event : m_events) {
-		AwMarker *marker = new AwMarker;
+		AwMarker marker;
 		if (event->label.isEmpty())
 			event->label = "?";
-		marker->setLabel(event->label);
+		marker.setLabel(event->label);
 		QDateTime time = QDateTime::fromString(event->beginTime, Qt::ISODate);
 		qint64 msBetween = record.msecsTo(time);
-		marker->setStart((float)msBetween / 1000.);
+		marker.setStart((float)msBetween / 1000.);
 		if (m_mffVersion == 0)
-			marker->setDuration(event->duration / 1000000000.);
+			marker.setDuration(event->duration / 1000000000.);
 		else
-			marker->setDuration(event->duration / 1000000.);
-		markers << marker;
-	}
-
-	// be sure marker are not outside the data or end after them.
-	foreach(AwMarker *m, markers) {
-		if (m->end() > infos.totalDuration())
-			m->setEnd(infos.totalDuration());
-		if (m->start() > infos.totalDuration()) {
-			markers.removeAll(m);
-			delete m;
+			marker.setDuration(event->duration / 1000000.);
+		//markers << marker;
+		if (marker.start() <= infos.totalDuration()) {
+			marker.setEnd(std::min(marker.end(), infos.totalDuration()));
+     		infos.blocks().first()->addMarker(marker);
 		}
-		infos.blocks().first()->addMarker(m);
 	}
-	while (!markers.isEmpty())
-		delete markers.takeFirst();
-
 }
 
 void EGIReader::getCategories()

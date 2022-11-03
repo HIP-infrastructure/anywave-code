@@ -49,7 +49,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* proce
 	bool splitData = false;
 	int downsampling = 1;
 	AwChannelList requestedChannels;
-	AwMarkerList input_markers, markers;
+	AwSharedMarkerList input_markers, markers;
 
 	float fileDuration = process->pdi.input.settings.value(keys::file_duration).toDouble();
 	float start = 0., duration = fileDuration;
@@ -67,7 +67,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* proce
 		// get input channels of process
 		if (requestedChannels.isEmpty())
 			requestedChannels = dm->rawChannels();
-		input_markers << new AwMarker("global", 0., fileDuration);
+		input_markers << AwSharedMarker(new AwMarker("global", 0., fileDuration));
 	}
 	else {
 		QString error;
@@ -119,8 +119,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* proce
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
 		QString file;
 
-		bool useMarkers = cfg.contains(keys::use_markers);
-		bool skipMarkers = cfg.contains(keys::skip_markers);
+		bool useMarkers = !cfg.value(keys::use_markers).toStringList().isEmpty();
+		bool skipMarkers = !cfg.value(keys::skip_markers).toStringList().isEmpty();
 
 		if (cfg.contains("skip_bad_channels"))
 			skipBad = cfg.value("skip_bad_channels").toBool();
@@ -134,7 +134,7 @@ void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* proce
 			mrkFile = cfg.value(keys::marker_file).toString();
 		// do we really need to use markers?
 		if (useMarkers || skipMarkers) {
-			markers = AwMarker::load(mrkFile);
+			markers = AwMarker::loadShrdFaster(mrkFile);
 		}
 		AwFilterSettings filterSettings;
 		// check for channel labels
@@ -182,12 +182,18 @@ void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* proce
 		}
 		// if not using use_markers option than set start and duration requested by user
 		if (!useMarkers && !skipMarkers)
-			input_markers << new AwMarker("requested", start, duration);
+			input_markers << AwSharedMarker(new AwMarker("requested", start, duration));
 		if (!useMarkers && skipMarkers) {
 			// add request start and duration as used markers
-			markers << new AwMarker("user", start, duration);
+			markers << AwSharedMarker(new AwMarker("user", start, duration));
 			use_markers << "user";
 			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, fileDuration);
+		}
+		if (useMarkers && !skipMarkers) {
+			input_markers = AwMarker::getMarkersWithLabels(markers, use_markers);
+			if (input_markers.isEmpty())
+				input_markers << AwSharedMarker(new AwMarker("requested", start, duration));
+
 		}
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
@@ -241,7 +247,8 @@ void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* proce
 		requestData(&requestedChannels, &input_markers, rawData);
 		emit log("Done.");
 	}
-	AW_DESTROY_LIST(input_markers);
+	//AW_DESTROY_LIST(input_markers);
+	input_markers.clear();
 	toClient << requestedChannels.size();
 	response.send();
 	for (auto c : requestedChannels) {

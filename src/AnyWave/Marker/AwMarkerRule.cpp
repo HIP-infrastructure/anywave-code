@@ -56,14 +56,14 @@ void AwMarkerRule::removeElement(AwMarkerRuleElement *elem)
  * \see
  * AwMarkerRuleElement
  */
-AwMarkerList AwMarkerRule::applyRule(const AwMarkerList &list)
+AwSharedMarkerList AwMarkerRule::applyRule(const AwSharedMarkerList& list)
 {
-	AwMarkerList result;
+	AwSharedMarkerList result;
 
 	if (list.isEmpty())
 		return result;
 
-	foreach (AwMarker *m, list)	{
+	for  (auto &m : list)	{
 		foreach (AwMarkerRuleElement *e, m_elements) {
 			switch (e->type()) {
 			case AwMarkerRuleElement::RuleElementTargetChannel:

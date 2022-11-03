@@ -142,8 +142,8 @@ void Spectral::compute()
 	nfft = (uword)std::floor(m_timeWindow * m_fs);
 	noverlap = (uword)std::floor(m_overlap * m_fs);
 	// loop over markers
-	AwMarkerList badMarkers, goodMarkers;
-	for(AwMarker *m : pdi.input.markers()) {
+	AwSharedMarkerList badMarkers, goodMarkers;
+	for(auto const& m : pdi.input.markers()) {
 		uword nPts = (uword)std::floor(m->duration() * m_fs);
 		if (nPts < nfft)
 			badMarkers << m;
@@ -179,7 +179,7 @@ void Spectral::compute()
 	double fact = 2. / nfft;
 
 	// now read data for each chunks and compute fft iterations
-	for (auto m : goodMarkers) {
+	for (auto const &m : goodMarkers) {
 		sendMessage(QString("Computing on chunk %1. starting at: %2s ending at: %3s").arg(m->label()).arg(m->start()).arg(m->end()));
 		// get RAW data for all channels
 		auto& channels = pdi.input.channels();

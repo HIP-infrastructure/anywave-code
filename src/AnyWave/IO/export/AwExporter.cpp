@@ -98,33 +98,44 @@ void AwExporter::runFromCommandLine()
 	if (markers.size()) {
 		AwMarkerList removed;
 		QStringList labels = AwChannel::getLabels(pdi.input.channels());
-		for (auto marker : markers) {
-			QStringList targets = marker->targetChannels();
+		markers.erase(std::remove_if(markers.begin(), markers.end(), [labels](AwSharedMarker& m) {
+			auto targets = m->targetChannels();
 			for (const auto& t : targets) {
 				if (!labels.contains(t))
-					removed.append(marker);
+					return true;
 			}
-		}
-		if (removed.size()) {
-			for (auto m : removed) {
-				markers.removeAll(m);
-				delete m;
-			}
-			pdi.input.setMarkers(markers);
-		}
+			return false;
+			}));
+
+		//for (auto &marker : markers) {
+		//	QStringList targets = marker->targetChannels();
+		//	for (const auto& t : targets) {
+		//		if (!labels.contains(t))
+		//			removed.append(marker);
+		//	}
+		//}
+		//if (removed.size()) {
+		//	for (auto m : removed) {
+		//		markers.removeAll(m);
+		//		delete m;
+		//	}
+		//	pdi.input.setMarkers(markers);
+		//}
+		pdi.input.setMarkers(markers);
 	}
 	AwBlock* block = writer->infos.newBlock();
-	AwMarker global("global", 0., endTimePos);
+//	AwMarker global("global", 0., endTimePos);
 	if (isUseSkipMarkersApplied()) {
 		auto merged = AwMarker::merge(pdi.input.markers());
 		auto modified = pdi.input.modifiedMarkers();
 		block->setMarkers(modified);
-		pdi.input.setNewMarkers(merged);
+		pdi.input.setMarkers(merged);
 		m_inputMarkers = merged;
 	}
 	else {
 		block->setMarkers(pdi.input.markers());
-		m_inputMarkers << &global;  // the trick is to avoid memory leak as we don't destroy m_inputMarkers list.
+	//	m_inputMarkers << &global;  // the trick is to avoid memory leak as we don't destroy m_inputMarkers list.
+		m_inputMarkers << AwSharedMarker(new AwMarker("global", 0., endTimePos));
 	}
 
 	AwChannelList inputChannels = pdi.input.channels();
@@ -239,7 +250,7 @@ bool AwExporter::showUi()
 		pdi.input.settings["output_writer"] = dlg.writerPluginName;
 		pdi.input.filterSettings = dlg.filterSettings();
 		pdi.input.filterSettings.apply(pdi.input.channels());
-		pdi.input.setNewMarkers(AwMarkerManager::instance()->getMarkers(), true);
+		pdi.input.setMarkers(AwMarkerManager::instance()->getSharedMarkersThread());
 		if (dlg.skipMarkers.size()) {
 			pdi.input.settings[keys::skip_markers] = dlg.skipMarkers;
 		}

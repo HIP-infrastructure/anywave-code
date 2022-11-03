@@ -50,34 +50,40 @@ AwBlock::AwBlock(int id)
 
 AwBlock::~AwBlock()
 {
-	while (!m_markers.isEmpty())
-		delete m_markers.takeLast();
+	//while (!m_markers.isEmpty())
+	//	delete m_markers.takeLast();
 }
 
-AwMarker *AwBlock::addMarker(AwMarker& marker)
+AwMarker *AwBlock::addMarker(const AwMarker& marker)
 {
 	AwMarker *mark = new AwMarker(marker);
-	auto simpl = marker.label().simplified();
+	auto simpl = mark->label().simplified();
 	mark->setLabel(simpl);
-	m_markers.append(mark);
+//	m_markers.append(mark);
+	m_markers << QSharedPointer<AwMarker>(mark);  // marker pointer is made shared 
 	return mark;
 }
 
-AwMarker* AwBlock::addMarker(AwMarker* marker)
-{
-	return addMarker(*marker);
-}
+//AwMarker* AwBlock::addMarker(AwMarker* marker)
+//{
+//	return addMarker(*marker);
+//
+//}
 
-void AwBlock::setMarkers(const AwMarkerList& markers)
+void AwBlock::setMarkers(const AwSharedMarkerList& markers)
 {
-	for (auto m : markers)
-		addMarker(m);
+	//for (auto m : markers)
+	//	addMarker(m);
+	for (auto& m : markers) 
+		m->setLabel(m->label().simplified());
+	m_markers += markers;	
 }
 
 void AwBlock::clear()
 {
-	while (!m_markers.isEmpty())
-		delete m_markers.takeFirst();
+	//while (!m_markers.isEmpty())
+	//	delete m_markers.takeFirst();
+	m_markers.clear();
 }
 
 //

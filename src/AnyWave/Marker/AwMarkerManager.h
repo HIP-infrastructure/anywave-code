@@ -37,15 +37,16 @@ public:
 	static AwMarkerManager *instance();
 	static AwMarkerManager* newInstance();
 
-	inline AwMarkerList& allMarkers() { return m_markers; }
-	AwMarkerList filteredMarkers(const QStringList& used, const QStringList& skipped);
+//	inline AwMarkerList& allMarkers() { return m_markers; }
+//	AwMarkerList filteredMarkers(const QStringList& used, const QStringList& skipped);
+	AwSharedMarkerList filteredMarkers(const QStringList& used, const QStringList& skipped);
 
 	/** Donne la liste de tous les marqueurs. **/
-	AwMarkerList getMarkers();
+//	AwMarkerList getMarkers();
 	/** Thread support version **/
-	AwMarkerList getMarkersThread();
+//	AwMarkerList getMarkersThread();
 	AwSharedMarkerList getSharedMarkersThread();
-	inline AwMarkerList& displayedMarkers() { return m_displayedMarkers; }
+//	inline AwMarkerList& displayedMarkers() { return m_displayedMarkers; }
 	AwMarkerManagerSettings* ui();
 	void setDock(QDockWidget *dock) { m_dock = dock; }
 	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
@@ -58,31 +59,38 @@ public:
 
 	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
+
 public slots:
+	void addMarkers(const AwSharedMarkerList& markers);
+	void addMarker(const AwSharedMarker& marker);
 	void showDockUI();
 	/** Rajoute un marqueur directement dans la liste **/
-	void addMarker(AwMarker *m);
+	//void receivedMarker(AwMarker *m);
 	/** Efface un marker de la liste **/
 	/** Rajoute une liste de marqueurs à la liste courante **/
-	void addMarkers(const AwMarkerList& markers);
-	void removeMarker(AwMarker* marker);
+	//void addMarkers(const AwMarkerList& markers);
+	void receivedMarkers(AwSharedMarkerList *markers); // from different thread
+//	void removeMarker(AwMarker* marker);
+	void removeMarker(const AwSharedMarker& marker);
 	/** Add markers without cloning them. **/
-	void addMarkers(AwMarkerList *markers);
+//	void addMarkers(AwMarkerList *markers);
+//	void addMarkers(AwSharedMarkerList* markers);
 	/** Vide la liste des marqueurs **/
 	void clear();
 	void removeAllUserMarkers();
-	void removeMarkers(const AwMarkerList& markers);
+	void removeMarkers(const AwSharedMarkerList& markers);
 	void loadMarkers();
 	/** New Method to load markers and get them as a list **/
-	AwMarkerList loadMarkers(const QString& path);
+	AwSharedMarkerList loadFile(const QString& path);
 	void saveMarkers();
-	void saveMarkers(const QString& filePath);
+	void saveToFile(const QString& filePath);
 	/** Set a new list of displayed markers **/
-	void setMarkers(const AwMarkerList& markers);
-	void highlightMarkerInList(AwMarker *marker);
+	void setMarkers(const AwSharedMarkerList& markers);
+//	void highlightMarkerInList(AwMarker *marker);
+	void highlightMarkerInList(const AwSharedMarker& marker);
 signals:
 	void goTo(float pos);
-	void displayedMarkersChanged(const AwMarkerList& markers);
+	void displayedMarkersChanged(const AwSharedMarkerList& markers);
 
 	void log(const QString& message);
 	void finished();	// for threaded operations
@@ -93,12 +101,12 @@ private:
 
 	AwMarkerInspector *m_markerInspector;
 	bool m_needSorting, m_markersModified;
-	AwMarkerList m_markers;				
-	AwMarkerList m_displayedMarkers;	// Currently displayed markers
+//	AwMarkerList m_markers;				
+//	AwMarkerList m_displayedMarkers;	// Currently displayed markers
 	/// <summary>
 	///  TO BO DONE : handle all markers with shared pointers
 	/// </summary>
-	AwSharedMarkerList m_sMarkers;
+	AwSharedMarkerList m_sMarkers, m_displayedMarkers;
 	QMutex m_mutex;
 	static AwMarkerManager *m_instance;
 	QString m_filePath;

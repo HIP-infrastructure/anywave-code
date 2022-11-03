@@ -31,20 +31,13 @@ public:
 	AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent = nullptr);
 	~AwBaseMarkerBar();
 	QSize sizeHint() const { return QSize(0, AW_MARKERS_BAR_HEIGHT); }
-	//enum Types { Classic, Global };
-	//void setMode(int mode) {
-	//	m_mode = mode; m_globalRepaintNeeded = true;  repaint();
-	//}
-	void setTotalDuration(float dur) { m_totalDuration = dur;  repaint();
-	}
+	void setTotalDuration(float dur) { m_totalDuration = dur;  repaint();	}
 public slots:
 	void clean();
 	void setPageDuration(float d);
 	void setPositionInFile(float pos);
-	//void setMarkers(const AwMarkerList& markers);
-	/** setAllMarkers is required for Global mode **/
-	//void setAllMarkers(const AwMarkerList& markers);
-	void refresh();
+//	void refresh();
+	void setMarkers(const AwSharedMarkerList& markers);
 	void updateSettings(AwViewSettings* settings, int flags);
 	void setNewSettings(AwViewSettings* settings);
 
@@ -56,7 +49,7 @@ protected slots:
 signals:
 	void showMarkersClicked(bool flag);
 	/** Sent to highlight the marker in the view **/
-	void showMarkerClicked(AwMarker *marker);
+	void showMarkerClicked(const AwSharedMarker&  marker);
 	/** new signal, due to Global mode add. **/
 	void positionChanged(float pos);
 protected:
@@ -66,16 +59,15 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *e);
 	void mouseMoveEvent(QMouseEvent *e);
 	void resizeEvent(QResizeEvent *e);
-	AwMarker *findMarkerBetween(float low, float high);
+	AwSharedMarker findMarkerBetween(float low, float high);
 
-	AwMarker *m_markerUnderMouse;	// pointer to the current marker under the mouse when the user clicks in the bar. Can be NULL is no marker is under the mouse.
+	AwSharedMarker m_markerUnderMouse;	// pointer to the current marker under the mouse when the user clicks in the bar. Can be NULL is no marker is under the mouse.
 	//AwMarkerList m_markers, m_allMarkers;
-	AwMarkerList m_markers;
+	AwSharedMarkerList m_markers;
 	AwDisplayPhysics *m_physics;
 	bool m_markersShown;
 	float m_pageDuration, m_positionInFile, m_totalDuration;
 	QMenu *m_menu;
-//	int m_mode;	// handle two different types of marker bars (0 = classic one, 1 = global file summary)
 	QRectF m_sliderRect;	// Global mode slider
 	float m_xOffset;
 	bool m_sliderDragging, m_globalRepaintNeeded;

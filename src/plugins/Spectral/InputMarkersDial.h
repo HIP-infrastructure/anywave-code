@@ -8,7 +8,7 @@ class InputMarkersDial : public QDialog
 	Q_OBJECT
 
 public:
-	InputMarkersDial(const AwMarkerList& markers, QWidget *parent = nullptr);
+	InputMarkersDial(const AwSharedMarkerList& markers, QWidget *parent = nullptr);
 	~InputMarkersDial();
 
 	QStringList m_skippedLabels, m_usedLabels;

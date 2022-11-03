@@ -92,7 +92,7 @@ private:
 	QString m_methodName;
 	// parameters
 	QList<H2_run *> m_runs; // number of H2 runs (number of markers selected to run H2 on)
-	AwMarkerList m_markers, m_skippedMarkers;	// markers used to compute H2 and markers skipped because of insufficient data
+	AwSharedMarkerList m_markers, m_skippedMarkers;	// markers used to compute H2 and markers skipped because of insufficient data
 	QString m_markerTrigger;	// marker to use to trigger H2 computation using pre and post timing.
 	float m_preTrigger, m_postTrigger;
 	// synchros Threads

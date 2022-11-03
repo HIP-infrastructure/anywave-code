@@ -29,7 +29,7 @@ public:
 	
 	void run() override;	// main execution entry point of the plugin
 public slots:
-	void newMarkers(const AwMarkerList& markers);
+	void newMarkers(const AwSharedMarkerList& markers);
 private:
 	AwMarkAroundWidget *m_widget;
 };

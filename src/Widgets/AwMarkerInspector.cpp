@@ -19,7 +19,7 @@
 #include <QMessageBox>
 #include "ui_AwMarkerInspector.h"
 
-AwMarkerInspector::AwMarkerInspector(const AwMarkerList& markers, const QStringList& targets, QWidget *parent)
+AwMarkerInspector::AwMarkerInspector(const AwSharedMarkerList& markers, const QStringList& targets, QWidget *parent)
 	: QWidget(parent)
 {
 	// if settings is NULL than instantiate new settings
@@ -83,7 +83,7 @@ void AwMarkerInspector::setTargets(const AwChannelList& channels)
 	m_ui->radioSpecific->setEnabled(!m_targets.isEmpty());
 }
 
-void AwMarkerInspector::setMarkers(const AwMarkerList& markers)
+void AwMarkerInspector::setMarkers(const AwSharedMarkerList& markers)
 {
 	m_markers = markers;
 }
@@ -164,12 +164,13 @@ void AwMarkerInspector::changeUsePredefined(bool flag)
 	m_settings.isUsingList = flag;
 }
 
-void AwMarkerInspector::setPredefinedMarkers(const AwMarkerList& markers)
+void AwMarkerInspector::setPredefinedMarkers(const AwSharedMarkerList& markers)
 {
 	m_ui->table->clearContents();
 	m_ui->table->setRowCount(0);
-	while (!m_settings.predefinedMarkers.isEmpty())
-		delete m_settings.predefinedMarkers.takeFirst();
+//	while (!m_settings.predefinedMarkers.isEmpty())
+//		delete m_settings.predefinedMarkers.takeFirst();
+	m_settings.predefinedMarkers.clear();
 	int row = 0;
 	for (auto m : markers) {
 		m_settings.predefinedMarkers.append(m);
@@ -195,7 +196,7 @@ void AwMarkerInspector::setPredefinedMarkers(const AwMarkerList& markers)
 	}
 }
 
-AwMarkerList& AwMarkerInspector::predefinedMarkers()
+AwSharedMarkerList& AwMarkerInspector::predefinedMarkers()
 {
 	return m_settings.predefinedMarkers;
 }
@@ -204,7 +205,7 @@ void AwMarkerInspector::addPredefinedMarker()
 {
 	AwAddPredefinedMarker dlg(this);
 	if (dlg.exec() == QDialog::Accepted) {
-		AwMarker *m = dlg.marker();
+		auto m = dlg.marker();
 		int row = m_ui->table->rowCount();
 		m_settings.predefinedMarkers.append(m);
 		m_ui->table->insertRow(row);
@@ -236,8 +237,9 @@ void AwMarkerInspector::clearPredefinedMarkers()
 	if (QMessageBox::question(this, tr("Clear predefined markers"), tr("Clear the list?"), QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes) {
 		m_ui->table->clearContents();
 		m_ui->table->setRowCount(0);
-		while (!m_settings.predefinedMarkers.isEmpty())
-			delete m_settings.predefinedMarkers.takeFirst();
+//		while (!m_settings.predefinedMarkers.isEmpty())
+//			delete m_settings.predefinedMarkers.takeFirst();
+		m_settings.predefinedMarkers.clear();
 		emit predefinedMarkersChanged(m_settings.predefinedMarkers);
 	}
 }
@@ -246,16 +248,16 @@ void AwMarkerInspector::removeSelectedPredefinedMarkers()
 {
 	auto selectionModel = m_ui->table->selectionModel();
 	QStringList names;
-	AwMarkerList markers;
+	AwSharedMarkerList markers;
 	for (int i = 0; i < m_ui->table->rowCount(); i++) {
 		if (selectionModel->isRowSelected(i, QModelIndex())) {
 			markers << m_settings.predefinedMarkers.at(i);
 			m_ui->table->removeRow(i);
 		}
 	}
-	for (auto m : markers) {
+	for (auto const &m : markers) {
 		m_settings.predefinedMarkers.removeOne(m);
-		delete m;
+//		delete m;
 	}
 }
 
@@ -277,7 +279,7 @@ void AwMarkerInspector::addTargets()
 		if (!selection.isEmpty()) {
 			// add selection to current list.
 			// remove existing items to avoid duplicates.
-			foreach (QString s, selection)	{
+			for (auto const& s : selection)	{
 				if (!m_targetedChannels.contains(s)) {
 					m_targetedChannels << s;
 					m_ui->listWidgetTargets->addItem(s);

@@ -56,15 +56,16 @@ public:
 	/** Returns the ID of the block. **/
 	inline int index() { return m_id; }
 	/** Returns the markers present in the block. The list can be empty if no markers are present. **/
-	inline AwMarkerList& markers() { return m_markers; }	
+//	inline AwMarkerList& markers() { return m_markers; }	
+	inline AwSharedMarkerList markers() { return m_markers; }
 	/** Returns the number of markers present in the block. **/
 	inline qint32 markersCount() { return m_markers.size(); }
 	/** Adds a marker to the block. The marker passed as parameter is duplicated before insertion. **/
-	AwMarker* addMarker(AwMarker& marker);
+	AwMarker* addMarker(const AwMarker& marker);
 	/** Adds a marker to the block. The marker passed as parameter is duplicated before insertion. **/
-	AwMarker* addMarker(AwMarker *marker);
+	//AwMarker* addMarker(AwMarker *marker);
 	/** Adds a complete list of markers to the block. Markers are cloned. **/
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 	void clear();
 
 protected:
@@ -72,8 +73,8 @@ protected:
 	qint64 m_samples;	
 	float m_start;		
 	int m_id;			
-	AwMarkerList m_markers;
-	AwSharedMarkerList m_sMarkers;
+	AwSharedMarkerList m_markers;
+//	AwSharedMarkerList m_sMarkers;
 };
 
 typedef QList<AwBlock *> AwBlockList;  ///< Define a list of blocks.

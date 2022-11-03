@@ -24,7 +24,7 @@ AwMarkerRuleWidget::AwMarkerRuleWidget(AwMarkerRuleElement *element, QWidget *pa
 {
 	setupUi(this);
 	m_element = element;
-	m_markers = AwMarkerManager::instance()->getMarkers();
+	m_markers = AwMarkerManager::instance()->getSharedMarkersThread();
 
 	// fill comboTypes;
 	comboType->addItem(tr("Label"), AwMarkerRuleElement::RuleElementLabel);
@@ -73,25 +73,18 @@ AwMarkerRuleWidget::~AwMarkerRuleWidget()
 
 QStringList AwMarkerRuleWidget::labelsFromMarkers()
 {
-	QStringList result;
-
-	foreach (AwMarker *m, m_markers)
-		if (!result.contains(m->label()))
-			result << m->label();
-	return result;
+	return AwMarker::getUniqueLabels(m_markers);
 }
 
 
 QStringList AwMarkerRuleWidget::codesFromMarkers()
 {
 	QStringList result;
-
-	foreach (AwMarker *m, m_markers) {
+	for (auto &m : m_markers) {
 		QString code = QString("%1").arg(m->value());
 		if (!result.contains(code))
 			result << code;
 	}
-
 	return result;
 }
 

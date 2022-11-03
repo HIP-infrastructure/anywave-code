@@ -224,23 +224,22 @@ void AwBIDSManager::pushMarkerFileToCommon()
 {
 	auto markerFilePath = m_settings.value(bids::marker_file_path).toString();
 	// force marker manager to save current markers
-	AwMarkerManager::instance()->saveMarkers(markerFilePath);
+	AwMarkerManager::instance()->saveToFile(markerFilePath);
 	if (QFile::exists(markerFilePath)) { // should exist unless no markers at all are present
 		int r = QMessageBox::question(nullptr, "Push markers", "Send current markers to the common file?", QMessageBox::Yes | QMessageBox::No);
 		if (r == QMessageBox::No)
 			return;
 		auto commonMarkerFilePath = m_settings.value(bids::common_marker_file_path).toString();
-		AwMarkerList markers;
+		AwSharedMarkerList markers;
 		if (QFile::exists(commonMarkerFilePath))
-			markers = AwMarker::loadFaster(commonMarkerFilePath);
-		markers += AwMarker::loadFaster(markerFilePath);
+			markers = AwMarker::loadShrdFaster(commonMarkerFilePath);
+		markers += AwMarker::loadShrdFaster(markerFilePath);
 		AwMarker::removeDoublons(markers, true);
 		AwMarker::save(commonMarkerFilePath, markers);
-		qDeleteAll(markers);
+		//qDeleteAll(markers);
 	}
 	else
 		QMessageBox::information(nullptr, "Markers", "No user .mrk file detected.");
-
 }
 
 
@@ -252,14 +251,14 @@ void AwBIDSManager::pullFromCommonMarkerFile()
 		if (r == QMessageBox::No)
 			return;
 		auto userMarkerFilePath = m_settings.value(bids::marker_file_path).toString();
-		AwMarkerList markers;
+		AwSharedMarkerList markers;
 		if (QFile::exists(userMarkerFilePath))
-			markers = AwMarker::loadFaster(userMarkerFilePath);
-		markers += AwMarker::loadFaster(commonMarkerFilePath);
+			markers = AwMarker::loadShrdFaster(userMarkerFilePath);
+		markers += AwMarker::loadShrdFaster(commonMarkerFilePath);
 		AwMarker::removeDoublons(markers, true);
 		AwMarker::save(userMarkerFilePath, markers);
 		AwMarkerManager::instance()->init();
-		qDeleteAll(markers);
+		//qDeleteAll(markers);
 	}
 	else
 		QMessageBox::information(nullptr, "Markers", "No common marker file");

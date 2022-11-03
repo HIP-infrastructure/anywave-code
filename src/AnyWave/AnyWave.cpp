@@ -122,16 +122,6 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	adl->connectComponent("Global Settings", aws);
 
 	setCentralWidget(new QSplitter(this));
-
-	//QStringList recentFiles = aws->value(aws::recent_files).toStringList();
-	//if (!recentFiles.isEmpty()) {
-	//	updateRecentFiles(recentFiles);
-	//}
-	//QStringList recentBIDS = aws->value(aws::recent_bids).toStringList();
-	//if (!recentBIDS.isEmpty()) {
-	//	updateRecentBIDS(recentBIDS);
-	//}
-
 	// As initializing ProcessManager, give it the Process Menu instance !
 	process_manager->setMenu(menuProcesses);
 
@@ -232,30 +222,40 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 
 	// AwSourceManager
 	AwSourceManager::instance()->setParent(this);
-	connect(AwSourceManager::instance(), SIGNAL(newSourcesCreated(int)), AwMontageManager::instance(), SLOT(addNewSources(int)));
+//	connect(AwSourceManager::instance(), SIGNAL(newSourcesCreated(int)), AwMontageManager::instance(), SLOT(addNewSources(int)));
+	connect(AwSourceManager::instance(), &AwSourceManager::newSourcesCreated, AwMontageManager::instance(), &AwMontageManager::addNewSources);
 
 	// AwMeshManager
 	m_meshManager = AwMeshManager::instance();
 	// AwMeshManager
 	m_layoutManager = AwLayoutManager::instance();
 
-	connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList*)), m_display, SLOT(removeVirtualChannels(AwChannelList*)));
-	connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
-	connect(process_manager, SIGNAL(displayProcessTerminated(AwProcess*)), m_display, SLOT(processHasFinished()));
-	connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList*)), m_display, SLOT(addVirtualChannels(AwChannelList*)));
-	connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
-		m_display, SLOT(executeCommand(int, const QVariantList&)));
-	connect(process_manager, SIGNAL(displayCommand(const QVariantMap&)), m_display, SLOT(handleCommand(const QVariantMap&)));
+//	connect(process_manager, SIGNAL(channelsRemovedForProcess(AwChannelList*)), m_display, SLOT(removeVirtualChannels(AwChannelList*)));
+	connect(process_manager, &AwProcessManager::channelsRemovedForProcess, m_display, &AwDisplay::removeVirtualChannels);
+//	connect(process_manager, SIGNAL(processHasFinishedOnDisplay()), m_display, SLOT(processHasFinished()));
+	connect(process_manager, &AwProcessManager::processHasFinishedOnDisplay, m_display, &AwDisplay::processHasFinished);
+//	connect(process_manager, SIGNAL(displayProcessTerminated(AwProcess*)), m_display, SLOT(processHasFinished()));
+	connect(process_manager, &AwProcessManager::displayProcessTerminated, m_display, &AwDisplay::processHasFinished);
+//	connect(process_manager, SIGNAL(channelsAddedForProcess(AwChannelList*)), m_display, SLOT(addVirtualChannels(AwChannelList*)));
+	connect(process_manager, &AwProcessManager::channelsAddedForProcess, m_display, &AwDisplay::addVirtualChannels);
+//	connect(process_manager, SIGNAL(displayCommandRequested(int, const QVariantList&)),
+//		m_display, SLOT(executeCommand(int, const QVariantList&)));
+	connect(process_manager, &AwProcessManager::displayCommandRequested, m_display, &AwDisplay::executeCommand);
+//	connect(process_manager, SIGNAL(displayCommand(const QVariantMap&)), m_display, SLOT(handleCommand(const QVariantMap&)));
+	connect(process_manager, &AwProcessManager::displayCommand, m_display, &AwDisplay::handleCommand);
 	// Display and Montage manager
-	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
+//	connect(montage_manager, SIGNAL(montageChanged(const AwChannelList&)), m_display, SLOT(setChannels(const AwChannelList&)));
+	connect(montage_manager, &AwMontageManager::montageChanged, m_display, &AwDisplay::setChannels);
 	// Settings and Display
-	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
+//	connect(aws, SIGNAL(markersColorChanged(const QStringList&)), m_display, SLOT(updateMarkersColor(const QStringList&)));
+	connect(aws, &AwSettings::markersColorChanged, m_display, &AwDisplay::updateMarkersColor);
 
 	// Process Manager and Marker Manager
-	connect(process_manager, SIGNAL(newMarkersAvailable(const AwMarkerList&)), marker_manager, SLOT(addMarkers(const AwMarkerList&)));
+//	connect(process_manager, SIGNAL(newMarkersAvailable(const AwMarkerList&)), marker_manager, SLOT(addMarkers(const AwMarkerList&)));
+//	connect(process_manager, &AwProcessManager::newMarkersAvailable, marker_manager, &AwMarkerManager::addMarkers);
 	// Settings and AnyWave
-	connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList&)));
-	connect(aws, SIGNAL(recentBIDSUpdated(const QStringList&)), this, SLOT(updateRecentBIDS(const QStringList&)));
+	//connect(aws, SIGNAL(recentFilesUpdated(const QStringList&)), this, SLOT(updateRecentFiles(const QStringList&)));
+	//connect(aws, SIGNAL(recentBIDSUpdated(const QStringList&)), this, SLOT(updateRecentBIDS(const QStringList&)));
 
 	m_currentFileModified = false;
 	initToolBarsAndMenu();

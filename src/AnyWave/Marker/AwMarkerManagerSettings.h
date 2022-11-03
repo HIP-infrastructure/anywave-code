@@ -32,12 +32,12 @@ class AwMarkerManagerSettings : public QWidget, public MarkersManagerSettingsCla
 	Q_OBJECT
 
 public:
-	AwMarkerManagerSettings(AwMarkerList& markers, QWidget *parent = 0);
+	AwMarkerManagerSettings(AwSharedMarkerList& markers, QWidget *parent = 0);
 	~AwMarkerManagerSettings();
 	void applyRule(AwMarkerRule *rule);
 	void cleanUp();
 	/** Set a new list of markers for the current file **/
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 
 public slots:
 	void removeRule(const QString& name);
@@ -46,17 +46,17 @@ public slots:
 	void modifyRule(const QString& oldName, const QString& newName);
 	void editCurrentItem();
 	void setMarkerAddingMode(bool on);
-	void highlightMarker(AwMarker *marker);
+	void highlightMarker(const AwSharedMarker& marker);
 	void openStats();
 	void bidsPush();
 	void bidsPull();
 
 signals:
 	/** Sent whenever displayed markers changed, depending on filtering rules **/
-	void markersChanged(const AwMarkerList &markers);
-	void markersNeedToBeExported(const AwMarkerList& markers);
-	void triggerMarkersToWrite(const AwMarkerList& markers);
-	void markersRemoved(const AwMarkerList& markers);
+	void markersChanged(const AwSharedMarkerList &markers);
+	void markersNeedToBeExported(const AwSharedMarkerList& markers);
+	void triggerMarkersToWrite(const AwSharedMarkerList& markers);
+	void markersRemoved(const AwSharedMarkerList& markers);
 	void moveRequest(float pos);
 	void loadMarkersClicked();
 	void saveMarkersClicked();
@@ -100,10 +100,9 @@ protected:
 	// EVENTS
 	void changeEvent(QEvent*);
 
-	AwMarkerList m_markers;
-	AwMarkerList m_displayedMarkers;
-	AwMarkerList m_statsNames;		// list of markers for which name is selected on stats
-	AwMarkerList m_statsValues;		// list of markers for which value is selected on stats
+	AwSharedMarkerList m_markers, m_displayedMarkers;
+	AwSharedMarkerList m_statsNames;		// list of markers for which name is selected on stats
+	AwSharedMarkerList m_statsValues;		// list of markers for which value is selected on stats
 	int m_nameIndex;
 	int m_valueIndex;
 	AwMarkerListModel *m_model;

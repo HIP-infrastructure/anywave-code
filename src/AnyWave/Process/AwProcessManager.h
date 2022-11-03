@@ -98,7 +98,7 @@ public slots:
 	void processEvent(QSharedPointer<AwEvent>);
 	void setProcessInstance(AwBaseProcess**, const QString&);
 signals:
-	void newMarkersAvailable(const AwMarkerList &markers);
+//	void newMarkersAvailable(const AwSharedMarkerList &markers);
 	void processFinished(AwProcess *process);
 	void displayProcessTerminated(AwProcess *process);
 	void channelsAddedForProcess(AwChannelList *list);

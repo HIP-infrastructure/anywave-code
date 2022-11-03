@@ -275,7 +275,7 @@ void AwDataConnection::computeVirtualChannels()
 
 // SLOTS
 
-void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *markers, bool rawData, bool doNotWakeupClient)
+void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwSharedMarkerList *markers, bool rawData, bool doNotWakeupClient)
 {
 	if (channelsToLoad->isEmpty() || markers->isEmpty()) {
 		setEndOfData();
@@ -283,7 +283,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarkerList *mar
 	}
 	QList<AwChannelList> chunks;
 	qint64 totalSamples = 0;
-	for (auto m : *markers) {
+	for (auto &m : *markers) {
 		if (m->duration() <= 0.)
 			continue;
 		auto channels = AwChannel::duplicateChannels(*channelsToLoad);
@@ -398,11 +398,9 @@ qint64 AwDataConnection::readWithOfflineFiltering(float start, float duration, c
 }
 
 
-void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwMarker *marker, bool rawData, bool doNotWakeUpClient)
-
+void AwDataConnection::loadData(AwChannelList *channelsToLoad, const AwSharedMarker& marker, bool rawData, bool doNotWakeUpClient)
 {
-	AwMarkerList markers = { marker };
-	loadData(channelsToLoad, &markers, rawData, doNotWakeUpClient);
+	loadData(channelsToLoad, marker->start(), marker->duration(), rawData, doNotWakeUpClient);
 }
 
 //

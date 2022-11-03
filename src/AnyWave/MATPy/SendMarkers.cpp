@@ -44,11 +44,11 @@ void AwRequestServer::handleSendMarkers(QTcpSocket* client, AwScriptProcess* pro
 		m->setValue(val);
 		m->setColor(color);
 		m->setTargetChannels(targets);
-		m_markers << m;
+		m_markers << AwSharedMarker(m);
 	}
 	response.send();
 	if (m_markers.size())
 		//		emit markersAdded(&m_markers);
-		AwDataManager::instance()->markerManager()->addMarkers(&m_markers);
+		AwDataManager::instance()->markerManager()->addMarkers(m_markers);
 	emit log("Done.");
 }

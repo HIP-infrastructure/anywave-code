@@ -46,7 +46,7 @@ AwSelectInputDataWidget::~AwSelectInputDataWidget()
 }
 
 
-void AwSelectInputDataWidget::setMarkers(const AwMarkerList& markers, int filters)
+void AwSelectInputDataWidget::setMarkers(const AwSharedMarkerList& markers, int filters)
 {
 	// check special case where Process Manager has set only one global marker as input.
 	// this happens when launching a plugin which requires time selections and no time selections exists.
@@ -64,7 +64,7 @@ void AwSelectInputDataWidget::setMarkers(const AwMarkerList& markers, int filter
 		return;
 	}
 
-	AwMarkerList tmp = markers;
+	auto tmp = markers;
 	switch (filters) {
 	case AwSelectInputDataWidget::WithDuration:
 		tmp = AwMarker::getMarkersWithDuration(markers);

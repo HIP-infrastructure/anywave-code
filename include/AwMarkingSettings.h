@@ -36,8 +36,8 @@ public:
 		autoTargetChannel = false;
 		m_spaceBarIndex = 0;
 	}
-	void setPredefinedMarkers(const AwMarkerList& markers);
-	AwMarkerList getSelectedPredefinedMarkers();
+	void setPredefinedMarkers(const AwSharedMarkerList& markers);
+	AwSharedMarkerList getSelectedPredefinedMarkers();
 
 	int type;						// current marker type
 	bool isUsingList;				// true if we are using a predefined list of markers
@@ -47,14 +47,14 @@ public:
 	bool isTargettingChannels;		// true if marking is targeting predefined channels
 	QStringList targets;			// labels of predefined targets
 	int index;						// used while auto incrementing
-	AwMarkerList predefinedMarkers;	// The predefined list of markers
+	AwSharedMarkerList predefinedMarkers;	// The predefined list of markers
 	QVector<int> selectedPredefinedMarkers;
 	bool autoTargetChannel;			// true if the channel under the mouse will be used as target
 	bool usingSpacebar;				// true if using spacebar binding
 	QString color;					// color to set for the marker
 protected:
 	int m_spaceBarIndex;				// current index in boundMarkers 
-	AwMarkerList m_boundMarkers;		// List of markers used with spacebar 
+	AwSharedMarkerList m_boundMarkers;		// List of markers used with spacebar 
 };
 
 #endif

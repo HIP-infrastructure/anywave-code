@@ -95,22 +95,22 @@
     <Filter Include="Updater">
       <UniqueIdentifier>{28d04abc-c7d2-41ce-97aa-5026f47a626f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ICA\IO">
+    <Filter Include="IO">
       <UniqueIdentifier>{c547275c-5540-48b9-a87a-072ff6830d12}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ICA\IO\ADES">
+    <Filter Include="IO\ADES">
       <UniqueIdentifier>{7cb55d3b-502d-455e-b764-bf8d238b7bad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ICA\IO\MATLAB">
+    <Filter Include="IO\MATLAB">
       <UniqueIdentifier>{affe80c4-bee8-4d1e-81df-156092db3e82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ICA\IO\BIDS">
+    <Filter Include="IO\BIDS">
       <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ICA\IO\JSON">
+    <Filter Include="IO\JSON">
       <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ICA\IO\export">
+    <Filter Include="IO\export">
       <UniqueIdentifier>{26e02caa-2dd8-4632-b145-d6b821165ec5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -380,7 +380,7 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="IO\ADES\ADESIO.cpp">
-      <Filter>ICA\IO\ADES</Filter>
+      <Filter>IO\ADES</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkersExportWidget.cpp">
       <Filter>Marker</Filter>
@@ -389,7 +389,7 @@
       <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp">
-      <Filter>ICA\IO\MATLAB</Filter>
+      <Filter>IO\MATLAB</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\GetTriggers.cpp">
       <Filter>MATPy</Filter>
@@ -410,13 +410,13 @@
       <Filter>Process</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSGUI.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSItem.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="MATPy\GetPluginIO.cpp">
       <Filter>MATPy</Filter>
@@ -437,7 +437,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IO\JSON\AwJSON.cpp">
-      <Filter>ICA\IO\JSON</Filter>
+      <Filter>IO\JSON</Filter>
     </ClCompile>
     <ClCompile Include="CL\AwCommandLogger.cpp">
       <Filter>CL</Filter>
@@ -506,7 +506,7 @@
       <Filter>Batch</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="Batch\AwBatchManager.cpp">
       <Filter>Batch</Filter>
@@ -527,10 +527,10 @@
       <Filter>Batch</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSConvert.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="Data\AwDataManager.cpp">
       <Filter>Data</Filter>
@@ -584,7 +584,7 @@
       <Filter>MATPy</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="Prefs\AwAddVenvDial.cpp">
       <Filter>Prefs</Filter>
@@ -596,31 +596,31 @@
       <Filter>Prefs</Filter>
     </ClCompile>
     <ClCompile Include="IO\export\AwExportWizardDial.cpp">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </ClCompile>
     <ClCompile Include="IO\export\AwOutputFileWizardPage.cpp">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </ClCompile>
     <ClCompile Include="IO\export\AwChannelsExportWizardPage.cpp">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </ClCompile>
     <ClCompile Include="IO\export\AwMarkersExportWizardPage.cpp">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </ClCompile>
     <ClCompile Include="IO\export\AwFilterExportWizardPage.cpp">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </ClCompile>
     <ClCompile Include="IO\export\AwExporter.cpp">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwBIDSIO.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="ICA\AwICAMappingItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
     <ClCompile Include="IO\BIDS\AwRefreshDialog.cpp">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClCompile>
     <ClCompile Include="Process\AwProcessManagerRunProcess.cpp">
       <Filter>Process</Filter>
@@ -946,7 +946,7 @@
       <Filter>Source</Filter>
     </QtMoc>
     <QtMoc Include="IO\ADES\ADESIO.h">
-      <Filter>ICA\IO\ADES</Filter>
+      <Filter>IO\ADES</Filter>
     </QtMoc>
     <QtUic Include="Marker\AwMarkersExportWidget.ui">
       <Filter>Marker</Filter>
@@ -958,7 +958,7 @@
       <Filter>Process</Filter>
     </QtMoc>
     <QtMoc Include="IO\MATLAB\MATLABIO.h">
-      <Filter>ICA\IO\MATLAB</Filter>
+      <Filter>IO\MATLAB</Filter>
     </QtMoc>
     <QtMoc Include="Process\AwTriggerWriter.h">
       <Filter>Process</Filter>
@@ -973,13 +973,13 @@
       <Filter>Widgets</Filter>
     </QtUic>
     <QtMoc Include="IO\BIDS\AwBIDSManager.h">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </QtMoc>
     <QtMoc Include="IO\BIDS\AwBIDSGUI.h">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </QtMoc>
     <QtUic Include="IO\BIDS\AwBIDSGUI.ui">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </QtUic>
     <QtMoc Include="AwOpenFileDialog.h">
       <Filter>Header Files</Filter>
@@ -1039,10 +1039,10 @@
       <Filter>Batch</Filter>
     </QtMoc>
     <QtUic Include="IO\BIDS\AwBIDSGUIOptionsDialog.ui">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </QtUic>
     <QtMoc Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </QtMoc>
     <QtMoc Include="Batch\AwBatchManager.h">
       <Filter>Batch</Filter>
@@ -1093,25 +1093,25 @@
       <Filter>Prefs</Filter>
     </QtMoc>
     <QtMoc Include="IO\export\AwOutputFileWizardPage.h">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </QtMoc>
     <QtMoc Include="IO\export\AwChannelsExportWizardPage.h">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </QtMoc>
     <QtMoc Include="IO\export\AwMarkersExportWizardPage.h">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </QtMoc>
     <QtMoc Include="IO\export\AwFilterExportWizardPage.h">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </QtMoc>
     <QtMoc Include="IO\export\AwExportWizardDial.h">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </QtMoc>
     <QtMoc Include="IO\export\AwExporter.h">
-      <Filter>ICA\IO\export</Filter>
+      <Filter>IO\export</Filter>
     </QtMoc>
     <QtMoc Include="IO\BIDS\AwRefreshDialog.h">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </QtMoc>
     <QtMoc Include="Prefs\AwSettings.h">
       <Filter>Prefs</Filter>
@@ -1143,7 +1143,7 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="IO\BIDS\AwBIDSItem.h">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </ClInclude>
     <ClInclude Include="MATPy\AwTCPResponse.h">
       <Filter>MATPy</Filter>
@@ -1152,7 +1152,7 @@
       <Filter>Data</Filter>
     </ClInclude>
     <ClInclude Include="IO\JSON\AwJSON.h">
-      <Filter>ICA\IO\JSON</Filter>
+      <Filter>IO\JSON</Filter>
     </ClInclude>
     <ClInclude Include="CL\AwCommandLineManager.h">
       <Filter>CL</Filter>
@@ -1323,7 +1323,7 @@
       <Filter>Prefs</Filter>
     </QtUic>
     <QtUic Include="IO\BIDS\AwRefreshDialog.ui">
-      <Filter>ICA\IO\BIDS</Filter>
+      <Filter>IO\BIDS</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

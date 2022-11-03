@@ -607,21 +607,22 @@ int AwProcessManager::applyUseSkipMarkersKeys(AwBaseProcess* p)
 		 // And if not it will be applied to the whole markers from the file.
 		 if (inputF & Aw::ProcessIO::GetDurationMarkers && !allDataFlag) {
 			 if (p->pdi.input.markers().isEmpty()) {
-				 auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
+				 auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getSharedMarkersThread());
 				 if (!markers.isEmpty())
-					 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+					 p->pdi.input.setMarkers(markers);
 			 }
 			 else {
-				 auto markers = AwMarker::duplicate(AwMarker::getMarkersWithDuration(p->pdi.input.markers()));
-				 p->pdi.input.setNewMarkers(markers);
+				 //auto markers = AwMarker::duplicate(AwMarker::getMarkersWithDuration(p->pdi.input.markers()));
+				 //p->pdi.input.setNewMarkers(markers);
+				 p->pdi.input.setMarkers(AwMarker::getMarkersWithDuration(p->pdi.input.markers()));
 			 }
 		 }
 		 // GetAllMarkers will be applied on the whole markers ONLY if no use_markers nor skip_markers keys were not set
 		 // Indeed, this flag will do nothing on markers that had already been filtered by the skip_markers/use_markers keys
 		 if (inputF & Aw::ProcessIO::GetAllMarkers && p->pdi.input.markers().isEmpty() && !allDataFlag) {
-			 auto markers = AwMarkerManager::instance()->getMarkers();
+			 auto markers = AwMarkerManager::instance()->getSharedMarkersThread();
 			 if (!markers.isEmpty())
-				 p->pdi.input.setNewMarkers(AwMarker::duplicate(markers));
+				 p->pdi.input.setMarkers(markers);
 		 }
 	 }
 	 p->pdi.input.settings[keys::ica_file] = AwSettings::getInstance()->value(keys::ica_file).toString();

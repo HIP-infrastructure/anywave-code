@@ -90,7 +90,7 @@ public slots:
 	/** Override this method to write data to the Trigger channel.
 	The name of the trigger channel must be specified.
 	A markers list must be specified.**/
-    virtual int writeTriggerChannel(const QString& name, const AwMarkerList& list) { return 0; }
+    virtual int writeTriggerChannel(const QString& name, const AwSharedMarkerList& list) { return 0; }
 	/** Override this method to clear the Trigger channel. **/
 	virtual int clearTriggerChannels(const QStringList& labels) { return 0; }
 protected:

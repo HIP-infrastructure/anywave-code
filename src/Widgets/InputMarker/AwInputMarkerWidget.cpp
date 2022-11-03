@@ -37,16 +37,16 @@ AwInputMarkerWidget::~AwInputMarkerWidget()
 	delete m_ui;
 }
 
-void AwInputMarkerWidget::setMarkers(const AwMarkerList& markers)
+void AwInputMarkerWidget::setMarkers(const AwSharedMarkerList& markers)
 {
 	InputMarkerModel *m = qobject_cast<InputMarkerModel *>(m_ui->tableView->model());
 	m_displayedMarkers = m_allMarkers = markers;
 		
 	// build a private list depending on flags
 	if (m_flags & AwInputMarkerWidget::UniqueMarkerLabel) {
-		AwMarkerList temp;
+		AwSharedMarkerList temp;
 		QStringList labels;
-		foreach(AwMarker *m, markers) {
+		for (auto &m : markers) {
 			if (!labels.contains(m->label())) {
 				temp << m;
 				labels << m->label();
@@ -56,7 +56,7 @@ void AwInputMarkerWidget::setMarkers(const AwMarkerList& markers)
 	}
 
 	if (m_flags & AwInputMarkerWidget::OnlySelectionMarkers) {
-		foreach(AwMarker *m, m_displayedMarkers) {
+		for ( auto &m : m_displayedMarkers) {
 			if (m->duration() == 0) {
 				m_displayedMarkers.removeAll(m);
 			}
@@ -64,7 +64,7 @@ void AwInputMarkerWidget::setMarkers(const AwMarkerList& markers)
 	}
 
 	if (m_flags & AwInputMarkerWidget::OnlySingleMarkers) {
-		foreach(AwMarker *m, m_displayedMarkers) {
+		for (auto &m : m_displayedMarkers) {
 			if (m->duration()) {
 				m_displayedMarkers.removeAll(m);
 			}
@@ -100,9 +100,9 @@ void AwInputMarkerWidget::accept()
 		return;
 	}
 	InputMarkerModel *m = qobject_cast<InputMarkerModel *>(m_ui->tableView->model());
-	AwMarkerList markers = m->getList();
+	auto markers = m->getList();
 
-	foreach(QModelIndex index, indexList) {
+	for (auto &index : indexList) {
 		if (index.column() == 0) 
 			m_selectedMarkers << markers.at(index.row());
 	}

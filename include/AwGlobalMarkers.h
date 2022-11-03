@@ -15,16 +15,16 @@ public:
 	~AwGlobalMarkers();
 
 	static AwGlobalMarkers* instance();
-	AwMarkerList* displayed();  // raw pointers
-	AwMarkerList* total();	// raw pointers
-	void setDisplayed(AwMarkerList* list);
-	void setTotal(AwMarkerList* list);
+	AwSharedMarkerList* displayed();  // raw pointers
+	AwSharedMarkerList* total();	// raw pointers
+	void setDisplayed(AwSharedMarkerList* list);
+	void setTotal(AwSharedMarkerList* list);
 	void closeFile();
 protected:
 	explicit AwGlobalMarkers();
 
 
 	static AwGlobalMarkers* m_instance;
-	AwMarkerList* m_displayed, *m_total;
+	AwSharedMarkerList *m_displayed, *m_total;
 	QMutex m_mutex;
 };

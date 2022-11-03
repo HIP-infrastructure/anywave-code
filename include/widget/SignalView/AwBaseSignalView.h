@@ -81,8 +81,9 @@ public slots:
 	virtual void updateSettings(AwViewSettings *settings, int flags);
 	virtual void updatePageDuration(float duration);
 	virtual void setNewFilters(const AwFilterSettings& settings);
-	void setMarkers(const AwMarkerList& markers);	// update the available markers
-	void getNewMarkers();
+	void setMarkers(const AwSharedMarkerList& markers);	// update the available markers
+//	void getNewMarkers();
+//	void updateMarkers(const AwSharedMarkerList& markers);
 	void startMarking();	
 	void stopMarking();
 	void removeHighLigthMarker() { if (m_scene) m_scene->removeHighLigthMarker(); }
@@ -106,7 +107,7 @@ signals:
 	void mappingTimeSelectionDone(float time, float duration);
 	void QTSModeEnded();
 	/** Signal send when the user highlight a marker in the marker bar. **/
-	void markerBarHighlighted(AwMarker *m);
+	void markerBarHighlighted(const AwSharedMarker& m);
 	// data specific
 	// Sent everytime the view load new data
 	void dataLoaded(float position, float duration);
@@ -123,8 +124,8 @@ protected:
 	AwMarkerInspector *m_markerInspector;
 	AwChannelList m_channels;				// active list of channels displayed in the scene.
 	AwChannelList m_montageChannels;		// channels from current montage.
-	AwMarkerList m_markers;
-	AwMarkerList m_visibleMarkers;
+	AwSharedMarkerList m_markers;
+	AwSharedMarkerList m_visibleMarkers;
 	// hold a vector of bools for each type of channel currently present in the view
 	QVector<bool> m_currentTypes;
 	float m_positionInFile;					// current position of the view in the data (in seconds)

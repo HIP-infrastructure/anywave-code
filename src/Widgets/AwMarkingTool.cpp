@@ -101,11 +101,10 @@ void AwMarkingTool::saveCustomList()
 void AwMarkingTool::loadCustomList(const QString& path)
 {
 	m_customListPath = path;
-	auto markers = AwMarker::load(path);
-	m_customMarkers = AwMarker::toSharedPointerList(markers);
+	m_customMarkers = AwMarker::loadShrdFaster(path);
 	// init the gui accordingly
 	int row = 0;
-	for (auto m : markers) {
+	for (auto const& m : m_customMarkers) {
 		ui->tableWidgetCustom->insertRow(row);
 		auto item = new QTableWidgetItem(m->label());
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
@@ -122,11 +121,10 @@ void AwMarkingTool::loadCustomList(const QString& path)
 void AwMarkingTool::loadHEDList(const QString& path)
 {
 	m_hedListPath = path;
-	auto markers = AwMarker::load(path);
-	m_hedMarkers = AwMarker::toSharedPointerList(markers);
+	m_hedMarkers = AwMarker::loadShrdFaster(path);
 	// init the gui accordingly
 	int row = 0;
-	for (auto m : markers) {
+	for (auto const& m : m_hedMarkers) {
 		ui->tableWidgetHED->insertRow(row);
 		auto item = new QTableWidgetItem(m->label());
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
@@ -208,11 +206,11 @@ void AwMarkingTool::changeDefaultValue(double v)
 
 void AwMarkingTool::addMarkerToCustomList()
 {
-	auto marker = new AwMarker;
+	auto marker = AwSharedMarker(new AwMarker);
 	marker->setLabel(ui->lineEditCustomLabel->text());
 	marker->setValue(ui->spinValueCustom->value());
 	marker->setColor(ui->comboColorCustom->currentText());
-	m_customMarkers << QSharedPointer<AwMarker>(marker);
+	m_customMarkers << marker;
 	int row = ui->tableWidgetCustom->rowCount();
 	ui->tableWidgetCustom->insertRow(row);
 	auto item = new QTableWidgetItem(marker->label());

@@ -24,7 +24,7 @@ class QGraphicsSceneHoverEvent;
 class AW_WIDGETS_EXPORT AwMarkerChannelItem : public AwMarkerItem
 {
 public:
-	AwMarkerChannelItem(AwDisplayPhysics *phys, AwMarker *mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene);  
+	AwMarkerChannelItem(AwDisplayPhysics *phys, const AwSharedMarker& mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene);  
 	~AwMarkerChannelItem();
 
 	void updatePosition();

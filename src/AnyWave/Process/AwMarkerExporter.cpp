@@ -69,7 +69,7 @@ void AwMarkerExporter::run()
 		m_adesFile.setPlugin(&m_adesPlugin);
 	}
 	int count = 1;
-	for (auto m : pdi.input.markers()) {
+	for (auto const &m : pdi.input.markers()) {
 		sendMessage("Getting data...");
 		requestData(&inputChannels, m);
 		sendMessage("Data loaded.");

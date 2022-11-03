@@ -46,7 +46,7 @@ public slots:
 signals:
 	void log(const QString& message);
 	void message(const QString& message);
-	void markersAdded(AwMarkerList *markers);
+//	void markersAdded(AwSharedMarkerList *markers);
 	void beamformerAvailable(QString path);
 protected:
 	void handleRequest(int request, QTcpSocket *client, int pid);
@@ -92,7 +92,7 @@ private:
 	void setHandlers();
 
 	QHash<int, std::function<void(QTcpSocket*, AwScriptProcess *)>> m_handlers;
-	AwMarkerList m_markers;	// hold the markers added by process
+	AwSharedMarkerList m_markers;	// hold the markers added by process
 };
 
 

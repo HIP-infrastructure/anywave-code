@@ -127,7 +127,7 @@ void AwStatsWidget::computeHistogram()
 
 void AwStatsWidget::compute()
 {
-	m_markers = AwMarkerManager::instance()->getMarkers();
+	m_markers = AwMarkerManager::instance()->getSharedMarkersThread();
 	if (m_markers.size() > MARKERS_THREAD_THRESHOLD) {
 		AwWaitWidget wait("Updating Stats");
 		wait.setText("Computing...");

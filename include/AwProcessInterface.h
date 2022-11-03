@@ -19,8 +19,6 @@
 #include <AwProcessLib.h>
 #include <AwDataClient.h>
 #include <QMetaType>
-//#include <widget/AwGraphicInterface.h>
-//#include <process/AwProcessGUIWidget.h>
 #include <QTranslator>
 #include <AwGlobal.h>
 #include <QElapsedTimer>
@@ -79,8 +77,9 @@ public:
 	bool isAborted();
 	// threading specific
 	void setMarkersReceived();	// must be called by the markers receiver to inform the process that the markers have been successfully received
-	void addMarkers(AwMarkerList *markers);
-	void addMarker(AwMarker *marker);
+//	void addMarkers(AwMarkerList *markers);
+	void addMarkers(AwSharedMarkerList * markers);
+//	void addMarker(AwMarker *marker);
 	void sendEventAsynch(QSharedPointer<AwEvent> e);
 	/** Get instance of process based on plugin name **/
 	AwBaseProcess* getProcessByName(const QString& name);
@@ -88,8 +87,8 @@ public:
 	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
 signals:
 	// Adding markers to AnyWave
-	void sendMarkers(AwMarkerList *markers);
-	void sendMarker(AwMarker *marker);
+	void sendMarkers(AwSharedMarkerList *markers);
+//	void sendMarker(AwMarker *marker);
 	// Send command
 	void sendCommand(int command, QVariantList args);
 	void sendCommand(const QVariantMap&);

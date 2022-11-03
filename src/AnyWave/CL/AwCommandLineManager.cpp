@@ -163,12 +163,11 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 	auto &args = process->pdi.input.settings;
 	QString inputFile = args.value(keys::input_file).toString();
 
-//	AwCommandLogger logger(QString("Command Line"));
 	QString mrkFile;
 	if (args.contains(keys::marker_file)) {
 		mrkFile = args.value(keys::marker_file).toString();
 		if (QFile::exists(mrkFile))
-			process->pdi.input.setMarkers(AwMarker::load(mrkFile));
+			process->pdi.input.setMarkers(AwMarker::loadShrdFaster(mrkFile));
 		else {
 			m_logger->writeLog("warning: mrk_file does not exist");
 		}
@@ -199,7 +198,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			dm->markerManager()->initFromCommandLine(mrkFile);
 		}
 
-		process->pdi.input.setNewMarkers(dm->markerManager()->getMarkers(), true);
+		process->pdi.input.setMarkers(dm->markerManager()->getSharedMarkersThread());
 		QString mtgFile;
 		if (args.contains(keys::montage_file)) {
 			mtgFile = args.value(keys::montage_file).toString();

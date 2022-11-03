@@ -50,7 +50,7 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_mappingFixedCursor = nullptr;
 	m_currentMarkerItem = nullptr;
 	m_mouseMode = AwGraphicsScene::None;
-	m_markingSettings = nullptr;
+//	m_markingSettings = nullptr;
 	m_gotoChannelMenu = nullptr;
 	m_selectionRectangle = nullptr;
 	m_QTSMenu = nullptr;
@@ -783,7 +783,7 @@ void AwGraphicsScene::goToLatency()
 		centerViewOnPosition(dlg.position());
 }
 
-void AwGraphicsScene::highlightMarker(AwMarker *marker)
+void AwGraphicsScene::highlightMarker(const AwSharedMarker& marker)
 {
 	if (marker)	{
 		if (m_showMarkers)	{
@@ -833,43 +833,42 @@ void AwGraphicsScene::undoMarkerInsertion()
 	emit markerRemoved(m_lastAddedMarkers.takeLast());
 }
 
-void AwGraphicsScene::insertPredefinedMarker()
-{
-	QAction* act = (QAction*)sender();
-	if (act == nullptr)
-		return;
-	int index = act->data().toInt();
-	auto marker = m_markingSettings->predefinedMarkers.at(index);
-	// set correct position :
-	marker->setStart(m_mappingMarker.start());
-	emit markerInserted(new AwMarker(marker));
-}
+//void AwGraphicsScene::insertPredefinedMarker()
+//{
+//	QAction* act = (QAction*)sender();
+//	if (act == nullptr)
+//		return;
+//	int index = act->data().toInt();
+//	auto marker = m_markingSettings->predefinedMarkers.at(index);
+//	// set correct position :
+//	marker->setStart(m_mappingMarker->start());
+//	emit markerInserted(marker);
+//}
 
-void AwGraphicsScene::chooseMarkersToInsert()
-{
-	if (m_pickMarkersDial == nullptr)
-		m_pickMarkersDial = new AwPickMarkersDial(m_markingSettings);
-	else
-		m_pickMarkersDial->setSettings(m_markingSettings);
-
-	if (m_pickMarkersDial->exec() == QDialog::Accepted) {
-		for (auto m : m_markingSettings->getSelectedPredefinedMarkers()) {
-			auto marker = new AwMarker(m);
-			if (m_mouseMode == AwGraphicsScene::Mapping) 
-				marker->setStart(m_mappingMarker.start());
-			if (m_mouseMode == AwGraphicsScene::AddingMarker)
-				marker->setStart(m_positionClicked);
-			emit markerInserted(marker);
-		}
-	}
-
-}
+//void AwGraphicsScene::chooseMarkersToInsert()
+//{
+//	if (m_pickMarkersDial == nullptr)
+//		m_pickMarkersDial = new AwPickMarkersDial(m_markingSettings);
+//	else
+//		m_pickMarkersDial->setSettings(m_markingSettings);
+//
+//	if (m_pickMarkersDial->exec() == QDialog::Accepted) {
+//		for (auto const &m : m_markingSettings->getSelectedPredefinedMarkers()) {
+//			auto marker = AwSharedMarker(new AwMarker(m.get()));
+//			if (m_mouseMode == AwGraphicsScene::Mapping) 
+//				marker->setStart(m_mappingMarker->start());
+//			if (m_mouseMode == AwGraphicsScene::AddingMarker)
+//				marker->setStart(m_positionClicked);
+//			emit markerInserted(marker);
+//		}
+//	}
+//
+//}
 
 void AwGraphicsScene::cursorToMarker()
 {
-	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) {
-		emit markerInserted(new AwMarker(&m_mappingMarker));
-	}
+	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) 
+		emit markerInserted(AwSharedMarker(new AwMarker(m_mappingMarker.get())));
 }
 
 void AwGraphicsScene::gotoChannel(QAction *act)
@@ -888,7 +887,7 @@ void AwGraphicsScene::launchQTSPlugin()
 // insertMarker()
 // adds the marker passed as parameter in the scene.
 // Returns the pointer to the newly AwMarkerItem inserted
-AwMarkerItem* AwGraphicsScene::insertMarker(AwMarker *m, AwMarkerItem *prev, int offsetLabel)
+AwMarkerItem* AwGraphicsScene::insertMarker(const AwSharedMarker& m, AwMarkerItem *prev, int offsetLabel)
 {
 	AwMarkerItem *item = new AwMarkerItem(m_physics, prev, m, this, offsetLabel);
 	addItem(item);
@@ -898,7 +897,7 @@ AwMarkerItem* AwGraphicsScene::insertMarker(AwMarker *m, AwMarkerItem *prev, int
 	return item;
 }
 
-void AwGraphicsScene::setMarkers(const AwMarkerList& markers) 
+void AwGraphicsScene::setMarkers(const AwSharedMarkerList& markers) 
 { 
 	m_markers = markers; updateMarkers(); update(); 
 }
@@ -1075,22 +1074,22 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		QAction *action = subMenu->addAction("Mark the last mapping position/selection");
 		
 		connect(action, SIGNAL(triggered()), this, SLOT(cursorToMarker()));
-		// prepare contextual menu if the user choosed to use predefined markers
-		if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
-			if (m_markingSettings->predefinedMarkers.size() >= 2) {
-				subMenu->addSeparator();
-				auto action = subMenu->addAction("Choose markers to insert");
-				connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
-				subMenu->addSeparator();
-			}
-			int index = 0;
-			for (auto m : m_markingSettings->predefinedMarkers) {
-				QAction* action = subMenu->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
-				action->setData(index); // store the index of item in list in action custom data.
-				index++;
-				connect(action, SIGNAL(triggered()), this, SLOT(insertPredefinedMarker()));
-			}
-		}
+		//// prepare contextual menu if the user choosed to use predefined markers
+		//if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
+		//	if (m_markingSettings->predefinedMarkers.size() >= 2) {
+		//		subMenu->addSeparator();
+		//		auto action = subMenu->addAction("Choose markers to insert");
+		//		connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
+		//		subMenu->addSeparator();
+		//	}
+		//	int index = 0;
+		//	for (auto m : m_markingSettings->predefinedMarkers) {
+		//		QAction* action = subMenu->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
+		//		action->setData(index); // store the index of item in list in action custom data.
+		//		index++;
+		//		connect(action, SIGNAL(triggered()), this, SLOT(insertPredefinedMarker()));
+		//	}
+		//}
 		menuDisplay->addSeparator();
 
 		m_contextMenuMapping = subMenu;
@@ -1267,36 +1266,28 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 	delete menuDisplay;
 }
 
-
-
-
-
-
-void AwGraphicsScene::addCustomMarkerFromList()
-{
-	QAction* act = (QAction*)sender();
-
-	int index = act->data().toInt();
-
-	if (m_markingSettings->predefinedMarkers.isEmpty())
-		return;
-	auto predefined = m_markingSettings->predefinedMarkers.at(index);
-
-	m_currentMarkerItem->marker()->setLabel(predefined->label());
-	m_currentMarkerItem->marker()->setValue(predefined->value());
-	m_currentMarkerItem->marker()->setColor(predefined->color());
-	if (m_markingSettings->isTargettingChannels)
-		m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
-
-	emit markerInserted(new AwMarker(m_currentMarkerItem->marker()));
-	m_isTimeSelectionStarted = false;
-	m_currentMarkerItem->marker()->setDuration(0);
-	m_currentMarkerItem->marker()->setStart(m_positionClicked);
-	m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
-}
-
-
-
+//void AwGraphicsScene::addCustomMarkerFromList()
+//{
+//	QAction* act = (QAction*)sender();
+//
+//	int index = act->data().toInt();
+//
+//	if (m_markingSettings->predefinedMarkers.isEmpty())
+//		return;
+//	auto predefined = m_markingSettings->predefinedMarkers.at(index);
+//
+//	m_currentMarkerItem->marker()->setLabel(predefined->label());
+//	m_currentMarkerItem->marker()->setValue(predefined->value());
+//	m_currentMarkerItem->marker()->setColor(predefined->color());
+//	if (m_markingSettings->isTargettingChannels)
+//		m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
+//
+//	emit markerInserted(AwSharedMarker(new AwMarker(m_currentMarkerItem->marker().get())));
+//	m_isTimeSelectionStarted = false;
+//	m_currentMarkerItem->marker()->setDuration(0);
+//	m_currentMarkerItem->marker()->setStart(m_positionClicked);
+//	m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
+//}
 
 
 void AwGraphicsScene::showHideMarkers()
@@ -1308,17 +1299,17 @@ void AwGraphicsScene::showHideMarkers()
 }
 
 
-/// 
-/// setMarkingSettings()
-/// SLOT:
-/// Must only be called when the user changed the type of marker to insert.
-/// Switch the scene add marker mode accordingly.
-void AwGraphicsScene::setMarkingSettings(AwMarkingSettings *settings)
-{
-	m_markingSettings = settings;
-	if (m_mouseMode == None)
-		return;
-}
+///// 
+///// setMarkingSettings()
+///// SLOT:
+///// Must only be called when the user changed the type of marker to insert.
+///// Switch the scene add marker mode accordingly.
+//void AwGraphicsScene::setMarkingSettings(AwMarkingSettings *settings)
+//{
+//	m_markingSettings = settings;
+//	if (m_mouseMode == None)
+//		return;
+//}
 
 void AwGraphicsScene::setMappingMode(bool on)
 {
@@ -1381,9 +1372,9 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 	m_isTimeSelectionStarted = false;
 
 	if (flag)	{
-		// be sure we have marking settings
-		if (m_markingSettings == nullptr)
-			return;
+		//// be sure we have marking settings
+		//if (m_markingSettings == nullptr)
+		//	return;
 
 		if (m_mouseMode == AwGraphicsScene::Cursor)
 			setCursorMode(false); // stop cursor mode
@@ -1392,15 +1383,16 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 		
 		views().at(0)->setFocus();
 		m_mouseMode = AddingMarker;
-		AwMarker *marker = new AwMarker();
-		if (!m_markingSettings->isUsingList) {
-			marker->setLabel(m_markingSettings->label);
-			marker->setValue(m_markingSettings->value);
-		}
-		else
-			marker->setLabel(m_markingSettings->label);
-		marker->setStart(m_currentPosInFile);
-		marker->setDuration(0);
+		////AwMarker *marker = new AwMarker();
+		auto marker = AwSharedMarker(new AwMarker(m_markingTool->defaultMarker().get()));
+		//if (!m_markingSettings->isUsingList) {
+		//	marker->setLabel(m_markingSettings->label);
+		//	marker->setValue(m_markingSettings->value);
+		//}
+		//else
+		//	marker->setLabel(m_markingSettings->label);
+		//marker->setStart(m_currentPosInFile);
+		//marker->setDuration(0);
 		m_currentMarkerItem = insertMarker(marker);
 	}
 	else {
@@ -1408,13 +1400,13 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 		m_lastAddedMarkers.clear();
 		if (m_currentMarkerItem) {
 			removeItem(m_currentMarkerItem);
-			delete m_currentMarkerItem->marker();
+		//	delete m_currentMarkerItem->marker();
 			delete m_currentMarkerItem;
 			m_currentMarkerItem = nullptr;
 		}
 	}
-	if (m_pickMarkersDial)
-		m_pickMarkersDial->close();
+	//if (m_pickMarkersDial)
+	//	m_pickMarkersDial->close();
 	update();
 }
 

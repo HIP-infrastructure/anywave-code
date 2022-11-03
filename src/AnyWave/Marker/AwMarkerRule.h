@@ -30,7 +30,7 @@ public:
 	~AwMarkerRule();
 	
 	/** Apply the rule on the marker's list passed as parameter **/
-	AwMarkerList applyRule(const AwMarkerList& list);
+	AwSharedMarkerList applyRule(const AwSharedMarkerList& list);
 	inline void setName(const QString& name) { m_name = name; }
 	inline QList<AwMarkerRuleElement *>& elements() { return m_elements; }
 	inline QString& name() { return m_name; }

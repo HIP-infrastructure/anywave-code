@@ -30,7 +30,8 @@ public:
 	~AwProcessIO();
 
 	inline bool containsChannels() { return !m_channels.isEmpty(); }
-	inline bool containsMarkers() { return !m_markers.isEmpty(); }
+//	inline bool containsMarkers() { return !m_markers.isEmpty(); }
+	inline bool containsMarkers() { return !m_sMarkers.isEmpty(); }
 	inline bool containsWidgets() { return !m_widgets.isEmpty(); }
 	inline bool containsCustomData() { return !customData.isEmpty(); }
 	inline bool launchedUsingQST() { return timeSelection.duration() > 0.; }
@@ -44,9 +45,10 @@ public:
 
 	AwChannelList& channels() { m_regularChannelList = AwChannel::toChannelList(m_channels);  return m_regularChannelList; }
 	QList<QSharedPointer<AwChannel>>& sharedChannels() { return m_channels; }
-	inline AwMarkerList& markers() { return m_markers; }
-	AwSharedMarkerList& sharedMarkers() { return m_sMarkers; }
-	inline AwMarkerList& modifiedMarkers() { return m_modifiedMarkers; }
+//	inline AwMarkerList& markers() { return m_markers; }
+	AwSharedMarkerList& markers() { return m_sMarkers; }
+//	inline AwMarkerList& modifiedMarkers() { return m_modifiedMarkers; }
+	inline AwSharedMarkerList& modifiedMarkers() { return m_modifiedMarkers; }
 
 
 	inline QList<QWidget*>& widgets() { return m_widgets; }
@@ -54,14 +56,19 @@ public:
 	void setNewChannels(const AwChannelList& channels, bool duplicate = false);
 	void setNewChannels(const AwSharedChannelList& channel);
 	/** Set a new list of markers. Previous markers will be deleted!!  duplicate indicates that the list will be duplicated and then set as the new list. **/
-	void setNewMarkers(const AwMarkerList& markers, bool duplicate = false);
+//	void setNewMarkers(const AwMarkerList& markers, bool duplicate = false);
 	/** set the new list, markers are not duplicated and previous markers are not deleted **/
-	void setMarkers(const AwMarkerList& markers) { m_markers = markers; }
+//	void setMarkers(const AwMarkerList& markers) { m_markers = markers; }
+	void setMarkers(const AwSharedMarkerList& markers) { m_sMarkers = markers; }
 	/** Set the resulting marker list after filtering input markers with use_markers or skip_markers **/
-	void setModifiedMarkers(const AwMarkerList& markers);
+//	void setModifiedMarkers(const AwMarkerList& markers);
+	void setModifiedMarkers(const AwSharedMarkerList& markers);
 	/** Append markers **/
-	void addMarkers(const AwMarkerList& markers, bool duplicate = false);
+//	void addMarkers(const AwMarkerList& markers, bool duplicate = false);
+	void addMarkers(const AwSharedMarkerList& markers);
+	/** add instanticated marker: make it shared before inserting. **/
 	void addMarker(AwMarker *marker);
+
 	/** apend widgets **/
 	void addWidget(QWidget* widget);
 	/** Append channels **/
@@ -78,11 +85,11 @@ public:
 	void lock() { m_mutex.lock(); }
 	void unlock() { m_mutex.unlock(); }
 protected:
-	AwMarkerList m_markers;
-	AwMarkerList m_modifiedMarkers;	// this list contains markers filtered by --use_markers and --skip_markers options
+//	AwMarkerList m_markers;
+//	AwMarkerList m_modifiedMarkers;	// this list contains markers filtered by --use_markers and --skip_markers options
 
 	QList<QSharedPointer<AwChannel>> m_channels;
-	AwSharedMarkerList m_sMarkers;
+	AwSharedMarkerList m_sMarkers, m_modifiedMarkers;
 	AwChannelList m_regularChannelList;
 
 	QList<QWidget*> m_widgets;

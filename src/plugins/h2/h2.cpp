@@ -111,10 +111,10 @@ bool H2::showUi()
 				}
 			}
 			else {
-				pdi.input.clearMarkers();
-				pdi.input.setNewMarkers(inputMarkers);
+				//pdi.input.clearMarkers();
+				pdi.input.setMarkers(inputMarkers);
 			}
-			AW_DESTROY_LIST(markers);
+		//	AW_DESTROY_LIST(markers);
 		}
 		else {
 			pdi.input.clearMarkers();
@@ -136,8 +136,9 @@ void H2::clean()
 	}
 	while (!m_runs.isEmpty())
 		delete m_runs.takeFirst();
-	while (!m_markers.isEmpty())
-		delete m_markers.takeFirst();
+//	while (!m_markers.isEmpty())
+//		delete m_markers.takeFirst();
+	m_markers.clear();
 	m_skippedMarkers.clear();
 }
 
@@ -160,23 +161,23 @@ int H2::initialize()
 			sendMessage(QString("%1. %2").arg(count++).arg(m->label()));
 		sendMessage("Checking that they all have a duration.");
 		// remove single markers
-		m_markers = AwMarker::duplicate(AwMarker::getMarkersWithDuration(pdi.input.markers()));
+		m_markers = AwMarker::getMarkersWithDuration(pdi.input.markers());
 		sendMessage("Markers with duration:");
 		//	m_markers = AwMarker::merge(m_markers);
 		// if no duration markers => make one global
 		if (m_markers.isEmpty()) {
 			sendMessage("None => creating a Global marker to compute on the whole data.");
-			m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
+			m_markers << AwSharedMarker(new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration()));
 		}
 		else {
 			count = 1;
-			for (auto m : m_markers)
+			for (auto const& m : m_markers)
 				sendMessage(QString("%1. %2").arg(count++).arg(m->label()));
 		}
 	}
 	else {
 		sendMessage("No markers received as input. Created a Global marker to compute on the whole data.");
-		m_markers << new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration());
+		m_markers << AwSharedMarker(new AwMarker("Global", 0., pdi.input.reader()->infos.totalDuration()));
 	}
 
 	// generer les paires de canaux (on calcule le H2 sur toutes les combinaisons de canal possibles).
@@ -184,7 +185,7 @@ int H2::initialize()
 
 	// pre build runs with pair of channels.
 	QStringList labels = AwChannel::getLabels(pdi.input.channels(), true);
-	for (auto m : m_markers) {
+	for (auto const& m : m_markers) {
 		// check if at least one iteration of H2 can be computed
 		qint64 minSize = (qint64)floor((m_winSize + m_maxLag) * list.first()->samplingRate());
 		qint64 dataSize = (qint64)floor(m->duration() * list.first()->samplingRate());

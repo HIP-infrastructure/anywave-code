@@ -142,12 +142,12 @@ protected:
 class AW_WIDGETS_EXPORT AwBaseGraphicsMarkerItem : public AwGraphicsItem
 {
 public:
-	AwBaseGraphicsMarkerItem(AwMarker *marker, AwDisplayPhysics *phys);
+	AwBaseGraphicsMarkerItem(const AwSharedMarker& marker, AwDisplayPhysics *phys);
 	virtual int itemType() { return AW_GRAPHICS_ITEM_MARKER_TYPE; }
-	inline AwMarker *marker() { return m_marker; }
+	inline AwSharedMarker marker() { return m_marker; }
 
 protected:
-	AwMarker *m_marker;
+	AwSharedMarker m_marker;
 };
 
 class AW_WIDGETS_EXPORT AwGraphicsCursorItem : public AwGraphicsItem, public QGraphicsRectItem
@@ -226,7 +226,7 @@ class AW_WIDGETS_EXPORT AwGraphicsMarkerItem : public AwBaseGraphicsMarkerItem, 
 public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_MARKER_TYPE };
 	inline int type() const { return Type; }
-	AwGraphicsMarkerItem(AwMarker *marker, AwDisplayPhysics *phys) : AwBaseGraphicsMarkerItem(marker, phys) 
+	AwGraphicsMarkerItem(const AwSharedMarker& marker, AwDisplayPhysics *phys) : AwBaseGraphicsMarkerItem(marker, phys) 
 	{ m_physics = phys; this->setZValue(10); setOpacity(1.0); }
 };
 

@@ -227,12 +227,13 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			m_stream >> event_data.cheksum;
 			m_stream.skipRawData(36);
 			
-			AwMarker *m = new AwMarker;
-			m->setLabel(QString(event_data.event_name));
-			m->setStart(event_data.start_lat);
+			AwMarker m;
+			m.setLabel(QString(event_data.event_name));
+			m.setStart(event_data.start_lat);
 			if (event_data.end_lat > event_data.start_lat)
-				m->setDuration(event_data.end_lat - event_data.start_lat);
-			block->markers().append(m);
+				m.setDuration(event_data.end_lat - event_data.start_lat);
+		//	block->markers().append(m);
+			block->addMarker(m);
 		}
 	}
 
@@ -896,7 +897,7 @@ int NI4DFileReader::clearTriggerChannels(const QStringList& labels)
  * \see
  * Separate items with the '|' character.
  */
-int NI4DFileReader::writeTriggerChannel(const QString& channelName, const AwMarkerList& list)
+int NI4DFileReader::writeTriggerChannel(const QString& channelName, const AwSharedMarkerList& list)
 {
 	if (m_triggers.isEmpty()) {
 		m_error = QString("File does not contain any trigger channels.");

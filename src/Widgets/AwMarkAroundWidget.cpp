@@ -46,15 +46,11 @@ AwMarkAroundWidget::~AwMarkAroundWidget()
 	delete m_ui;
 }
 
-void AwMarkAroundWidget::setMarkers(const AwMarkerList& markers)
+void AwMarkAroundWidget::setMarkers(const AwSharedMarkerList& markers)
 {
 	m_markers = markers;
 	m_ui->comboMarker->clear();
-	QStringList labels;	// unique labels
-	foreach(AwMarker *m, markers) {
-		if (!labels.contains(m->label()))
-			labels << m->label();
-	}
+	QStringList labels = AwMarker::getUniqueLabels(markers);
 	m_ui->comboMarker->addItems(labels);
 	m_ui->comboMarker2->addItems(labels);
 }
@@ -83,7 +79,7 @@ void AwMarkAroundWidget::generateAround()
 	}
 	
 	// create markers
-	foreach (AwMarker *marker, m_markers) {
+	for (auto &marker : m_markers) {
 		if (marker->label() != marker_label)
 			continue;
 
@@ -101,7 +97,7 @@ void AwMarkAroundWidget::generateAround()
 		res_marker->setEnd(end);
 		res_marker->setValue(value);
 		res_marker->setColor(create_color);
-		m_newMarkers << res_marker;
+		m_newMarkers << QSharedPointer<AwMarker>(res_marker);
 	}
 	emit newMarkersCreated(m_newMarkers);
 }
@@ -135,7 +131,7 @@ void AwMarkAroundWidget::generatePrePost()
 	}
 
 	// create markers
-	foreach (AwMarker *marker, m_markers) {
+	for  (auto &marker : m_markers) {
 		if (marker->label() != marker_label)
 			continue;
 
@@ -153,7 +149,7 @@ void AwMarkAroundWidget::generatePrePost()
 			pre_marker->setEnd(end);
 			pre_marker->setValue(pre_value);
 			pre_marker->setColor(pre_color);
-			m_newMarkers << pre_marker;
+			m_newMarkers << QSharedPointer<AwMarker>(pre_marker);
 		}
 
 		// create post marker (if possible)
@@ -177,7 +173,7 @@ void AwMarkAroundWidget::generatePrePost()
 			post_marker->setEnd(end);
 			post_marker->setValue(post_value);
 			post_marker->setColor(post_color);
-			m_newMarkers << post_marker;
+			m_newMarkers << QSharedPointer<AwMarker>(post_marker);
 		}
 	}
 	emit newMarkersCreated(m_newMarkers);

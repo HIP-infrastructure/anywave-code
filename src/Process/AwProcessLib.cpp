@@ -107,7 +107,8 @@ int AwBaseProcess::applyUseSkipMarkersKeys()
 				pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
 			}
 			else
-				pdi.input.setNewMarkers(inputMarkers);
+				//pdi.input.setNewMarkers(inputMarkers);
+				pdi.input.setMarkers(inputMarkers);
 		}
 		return 0;
 	}
@@ -133,21 +134,31 @@ void AwBaseProcess::connectClient(AwDataClient *client)
 	emit dataConnectionRequested(client);
 }
 
-void AwBaseProcess::addMarkers(AwMarkerList *markers)
+
+void AwBaseProcess::addMarkers(AwSharedMarkerList * markers)
 {
 	emit sendMarkers(markers);
 	m_mutexMarkersReceived.lock();
- 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
+	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
 	m_mutexMarkersReceived.unlock();
 }
 
-void AwBaseProcess::addMarker(AwMarker *marker)
-{
-	emit sendMarker(marker);
-	m_mutexMarkersReceived.lock();
- 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
-	m_mutexMarkersReceived.unlock();
-}
+
+//void AwBaseProcess::addMarkers(AwMarkerList *markers)
+//{
+//	emit sendMarkers(markers);
+//	m_mutexMarkersReceived.lock();
+// 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
+//	m_mutexMarkersReceived.unlock();
+//}
+//
+//void AwBaseProcess::addMarker(AwMarker *marker)
+//{
+//	emit sendMarker(marker);
+//	m_mutexMarkersReceived.lock();
+// 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
+//	m_mutexMarkersReceived.unlock();
+//}
 
 void AwBaseProcess::setMarkersReceived()
 {

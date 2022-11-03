@@ -61,20 +61,25 @@ void AwProcessIO::setNewChannels(const AwSharedChannelList& channels)
 }
 
 
-void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
-{
-	while (!m_markers.isEmpty())
-		delete m_markers.takeFirst();
-	if (markers.isEmpty())
-		return;
-	m_markers = duplicate ? AwMarker::duplicate(markers) : markers;
-}
+//void AwProcessIO::setNewMarkers(const AwMarkerList& markers, bool duplicate)
+//{
+//	while (!m_markers.isEmpty())
+//		delete m_markers.takeFirst();
+//	if (markers.isEmpty())
+//		return;
+//	m_markers = duplicate ? AwMarker::duplicate(markers) : markers;
+//}
 
-void AwProcessIO::setModifiedMarkers(const AwMarkerList& markers)
+void AwProcessIO::setModifiedMarkers(const AwSharedMarkerList& markers)
 {
-	AW_DESTROY_LIST(m_modifiedMarkers);
 	m_modifiedMarkers = markers;
 }
+
+//void AwProcessIO::setModifiedMarkers(const AwMarkerList& markers)
+//{
+//	AW_DESTROY_LIST(m_modifiedMarkers);
+//	m_modifiedMarkers = markers;
+//}
 
 void AwProcessIO::addChannels(const AwChannelList& channels, bool duplicate)
 {
@@ -82,14 +87,21 @@ void AwProcessIO::addChannels(const AwChannelList& channels, bool duplicate)
 		: AwChannel::toSharedPointerList(channels);
 }
 
-void AwProcessIO::addMarkers(const AwMarkerList& markers, bool duplicate)
+void AwProcessIO::addMarkers(const AwSharedMarkerList& markers)
 {
-	m_markers += duplicate ? AwMarker::duplicate(markers) : markers;
+	//m_markers += duplicate ? AwMarker::duplicate(markers) : markers;
+	m_sMarkers += markers;
 }
+
+//void AwProcessIO::addMarkers(const AwMarkerList& markers, bool duplicate)
+//{
+//	m_markers += duplicate ? AwMarker::duplicate(markers) : markers;
+//}
 
 void AwProcessIO::addMarker(AwMarker *marker)
 {
-	m_markers << marker;
+//	m_markers << marker;
+	m_sMarkers << QSharedPointer<AwMarker>(marker);
 }
 
 void AwProcessIO::addChannel(AwChannel *channel)
@@ -113,7 +125,8 @@ void AwProcessIO::clearChannels()
 
 void AwProcessIO::clearMarkers()
 {
-	AW_DESTROY_LIST(m_markers);
+//	AW_DESTROY_LIST(m_markers);
+	m_sMarkers.clear();
 }
 
 void AwProcessIO::clearWidgets()

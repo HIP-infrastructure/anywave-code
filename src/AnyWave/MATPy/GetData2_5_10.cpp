@@ -50,7 +50,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 	bool splitData = false;
 	int downsampling = 1;
 	AwChannelList requestedChannels;
-	AwMarkerList input_markers, markers;
+	AwSharedMarkerList input_markers, markers;
 	QVector<float> dataChunks;
 
 	float fileDuration = process->pdi.input.settings.value(keys::file_duration).toDouble();
@@ -76,7 +76,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		// get input channels of process
 		if (requestedChannels.isEmpty())
 			requestedChannels = dm->rawChannels();
-		input_markers << new AwMarker("global", 0., fileDuration);
+		input_markers << AwSharedMarker(new AwMarker("global", 0., fileDuration));
 	}
 	else {
 		QString error;
@@ -135,7 +135,7 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 			mrkFile = cfg.value(keys::marker_file).toString();
 		// do we really need to use markers?
 		if (useMarkers || skipMarkers) {
-			markers = AwMarker::load(mrkFile);
+			markers = AwMarker::loadShrdFaster(mrkFile);
 		}
 		AwFilterSettings filterSettings;
 		// check for channel labels
@@ -197,21 +197,21 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		// if not using use_markers option than set start and duration requested by user
 		if (!useMarkers && !skipMarkers) {
 			if (dataChunks.isEmpty())  // not data_chunks specified, using start and duration defaults or set values
-				input_markers << new AwMarker("requested", start, duration);
+				input_markers << AwSharedMarker(new AwMarker("requested", start, duration));
 			else {
 				// data_chunks overrides start/duration options
 				for (auto i = 0;  i < dataChunks.size(); i+=2) 
-					input_markers << new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1));
+					input_markers << AwSharedMarker(new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1)));
 			}
 		}
 		if (!useMarkers && skipMarkers) {
 			if (dataChunks.isEmpty())  // not data_chunks specified, using start and duration defaults or set values
 				// add request start and duration as used markers
-				markers << new AwMarker("user", start, duration);
+				markers << AwSharedMarker(new AwMarker("user", start, duration));
 			else {
 				// data_chunks overrides start/duration options
 				for (auto i = 0; i < dataChunks.size(); i += 2)
-					markers << new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1));
+					markers << AwSharedMarker(new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1)));
 			}
 			use_markers << "user";
 			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, fileDuration);
@@ -268,8 +268,8 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 			dm->dataServer()->closeConnection(this);
 			delete dm;
 		}
-		qDeleteAll(markers);
-		qDeleteAll(input_markers);
+		//qDeleteAll(markers);
+		//qDeleteAll(input_markers);
 		emit log("Done.");
 	};
 

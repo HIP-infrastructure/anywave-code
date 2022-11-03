@@ -48,7 +48,7 @@ void AwAddPredefinedMarker::changeEvent(QEvent *e)
 
 void AwAddPredefinedMarker::accept()
 {
-	m_marker = new AwMarker();
+	m_marker = AwSharedMarker(new AwMarker());
 	m_marker->setLabel(m_ui.lineEditLabel->text());
 	m_marker->setValue(m_ui.spinBoxValue->value());
 	int index = m_ui.comboBoxColor->currentIndex();

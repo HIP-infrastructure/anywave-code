@@ -36,7 +36,8 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	QDataStream& toClient = *response.stream();
 	AwDataManager* dm = AwDataManager::instance();
 	AwChannelList inputChannels;
-	AwMarkerList inputMarkers;
+	//AwMarkerList inputMarkers;
+	AwSharedMarkerList inputMarkers;
 
 	QString json, error;
 	fromClient >> json;
@@ -134,7 +135,7 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	else {
 		if (dm->isFileOpen()) {
 			// get markers from current data file in AnyWave
-			inputMarkers = AwMarkerManager::instance()->getMarkersThread();
+			inputMarkers = AwMarkerManager::instance()->getSharedMarkersThread();
 			inputFileSelected = true;
 		}
 	}
@@ -143,11 +144,12 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	// copy input keys/values
 	process->pdi.input.settings = cfg;
 	// now the markers! 
-	auto loadedMarkers = AwCommandLineManager::parseMarkerFile(cfg);
-	if (!loadedMarkers.isEmpty()) {
-		qDeleteAll(inputMarkers);
-		inputMarkers = loadedMarkers;
-	}
+//	auto loadedMarkers = AwCommandLineManager::parseMarkerFile(cfg);
+//	if (!loadedMarkers.isEmpty()) {
+//		qDeleteAll(inputMarkers);
+//		inputMarkers = loadedMarkers;
+//	}
+
 	QStringList use_markers, skip_markers;
 	if (cfg.contains(keys::use_markers))
 		use_markers = cfg.value(keys::use_markers).toStringList();
@@ -162,15 +164,17 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		auto l = use_markers.first();
 		if (l.contains("all data")) {
 			usingMarkers = false;
-			qDeleteAll(inputMarkers);
-			inputMarkers << new AwMarker("global", 0., dm->totalDuration());
+		//	qDeleteAll(inputMarkers);
+			inputMarkers.clear();
+			inputMarkers << QSharedPointer<AwMarker>(new AwMarker("global", 0., dm->totalDuration()));
 		}
 	}
 	if (usingMarkers || skippingMarkers) {
-		AwMarkerList modifiedMarkers = inputMarkers;
+	//	AwMarkerList modifiedMarkers = inputMarkers;
+		AwSharedMarkerList modifiedMarkers = inputMarkers;
 		inputMarkers = AwMarker::getInputMarkers(modifiedMarkers, skip_markers, use_markers, dm->totalDuration());
 	}
-	process->pdi.input.setNewMarkers(inputMarkers);
+	process->pdi.input.setMarkers(inputMarkers);
 	AwMATPyServer* server = nullptr;
 	if (plugin->classType != AwProcessPlugin::RegularPlugin) {
 		auto sp = static_cast<AwScriptProcess*>(process);

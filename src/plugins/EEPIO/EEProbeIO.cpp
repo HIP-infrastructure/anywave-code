@@ -114,7 +114,7 @@ AwFileIO::FileStatus EEPIO::openFile(const QString &path)
 		// convert offset in time
 		marker.setStart(trg_offset / m_sampleRate);
 		marker.setLabel(QString::fromLatin1(trg_code));
-		block->addMarker(&marker);
+		block->addMarker(marker);
 	}
 	return AwFileIO::openFile(path);
 }

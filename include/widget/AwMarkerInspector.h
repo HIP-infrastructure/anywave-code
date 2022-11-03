@@ -30,15 +30,15 @@ class AW_WIDGETS_EXPORT AwMarkerInspector : public QWidget
 	Q_OBJECT
 
 public:
-	AwMarkerInspector(const AwMarkerList& markers = AwMarkerList(), const QStringList& targets = QStringList(), QWidget *parent = 0);
+	AwMarkerInspector(const AwSharedMarkerList& markers = AwSharedMarkerList(), const QStringList& targets = QStringList(), QWidget *parent = 0);
 	~AwMarkerInspector();
 
 	void setSingleOnly(bool flag = true);
 	inline AwMarkingSettings& settings() { return m_settings; }
-	void setPredefinedMarkers(const AwMarkerList& markers);
-	AwMarkerList& predefinedMarkers();
+	void setPredefinedMarkers(const AwSharedMarkerList& markers);
+	AwSharedMarkerList& predefinedMarkers();
 public slots:
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 	void setTargets(const QStringList& targets);
 	void setTargets(const AwChannelList& channels);
 protected:
@@ -49,7 +49,7 @@ protected:
 signals:
 	void settingsChanged(AwMarkingSettings *settings);
 	void closed();
-	void predefinedMarkersChanged(const AwMarkerList& markers);
+	void predefinedMarkersChanged(const AwSharedMarkerList& markers);
 protected slots:
 	void changeMarkerType(bool flag);
 	void changeLabel(const QString& text);
@@ -63,15 +63,12 @@ protected slots:
 	void removeSelectedPredefinedMarkers();
 	void addTargets();
 	void clearTargets();
-	//void changeBinding(bool on);
-	//void changeKeyBinding();
-	//void changeComboBinding();
 	void changeColor();
 
 private:
 	Ui::AwMarkerInspectorUI *m_ui;
 	AwMarkingSettings m_settings;
-	AwMarkerList m_markers;
+	AwSharedMarkerList m_markers;
 	QStringList m_targetedChannels;
 	QStringList m_targets;
 	QStringList m_markerLabels;
