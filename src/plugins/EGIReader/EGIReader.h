@@ -65,7 +65,7 @@ protected:
 	int m_mffVersion;
 	QStringList m_signal2Labels;
 	// use markers to trace data block timings in seconds.
-	AwMarkerList m_blockTimings, m_blockTimings2;
+	AwSharedMarkerList m_blockTimings, m_blockTimings2;
 	// File object to handle signalX.bin data file
 	QFile m_binFile, m_binFile2;
 	QHash<QString, int> m_signal1Indexes, m_signal2Indexes;

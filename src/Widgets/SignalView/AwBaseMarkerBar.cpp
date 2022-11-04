@@ -19,7 +19,7 @@
 #include <qpainter.h>
 #include <utils/gui.h>
 #include <AwCore.h>
-#include <AwGlobalMarkers.h>
+//#include <AwGlobalMarkers.h>
 #include <widget/SignalView/AwViewSettings.h>
 
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
@@ -71,16 +71,6 @@ AwSharedMarker AwBaseMarkerBar::findMarkerBetween(float low, float high)
 	return result.first();
 }
 
-//void AwBaseMarkerBar::refresh()
-//{
-//	auto list = AwGlobalMarkers::instance()->displayed();
-//	if (list == nullptr)
-//		return;
-//	m_markers = *list;
-//	m_globalRepaintNeeded = true;
-//	repaint();
-//}
-
 void AwBaseMarkerBar::setMarkers(const AwSharedMarkerList& markers)
 {
 	m_markers = markers;
@@ -100,7 +90,6 @@ void AwBaseMarkerBar::switchToClassic()
 
 void AwBaseMarkerBar::switchToGlobal()
 {
-//	m_mode = AwBaseMarkerBar::Global;
 	if (m_settings == nullptr)
 		return;
 	m_settings->markerBarMode = AwViewSettings::Global;
@@ -126,7 +115,6 @@ void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 		return;
 	if (m_settings == nullptr)
 		return;
-	//if (m_mode == AwBaseMarkerBar::Classic) {
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
 		float xPixSec = m_physics->xPixPerSec();
 		// take 3 pixels before and 3 pixel after the mouse x pos.
@@ -204,14 +192,8 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 {
 	if (m_totalDuration <= 0) 
 		return;
-	auto list = AwGlobalMarkers::instance()->displayed();
-	if (list == nullptr)
-		m_markers.clear();
-	else
-		m_markers = *list;
 	if (m_settings == nullptr)
 		return;
-		
 	QPainter painter(this);
 	QBrush brushSelection;
 	brushSelection.setStyle(Qt::Dense4Pattern);

@@ -82,8 +82,6 @@ public slots:
 	virtual void updatePageDuration(float duration);
 	virtual void setNewFilters(const AwFilterSettings& settings);
 	void setMarkers(const AwSharedMarkerList& markers);	// update the available markers
-//	void getNewMarkers();
-//	void updateMarkers(const AwSharedMarkerList& markers);
 	void startMarking();	
 	void stopMarking();
 	void removeHighLigthMarker() { if (m_scene) m_scene->removeHighLigthMarker(); }

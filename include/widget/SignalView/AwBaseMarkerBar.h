@@ -36,7 +36,6 @@ public slots:
 	void clean();
 	void setPageDuration(float d);
 	void setPositionInFile(float pos);
-//	void refresh();
 	void setMarkers(const AwSharedMarkerList& markers);
 	void updateSettings(AwViewSettings* settings, int flags);
 	void setNewSettings(AwViewSettings* settings);

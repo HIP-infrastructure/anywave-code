@@ -43,9 +43,6 @@ public:
 public slots:
 	/** Open a connection between a client and the data server thread. If successful, a pointer to the instantiated reader is returned. **/
 	void openConnection(AwDataClient *client);
-	/** Open a connection using a specific File Reader :=> required for scripted task for example **/
-	void openConnection(AwDataClient *client, AwFileIO *reader);
-
 	void closeConnection(AwDataClient *client);
 	void closeAllConnections();
 	void manageOutOfMemory();

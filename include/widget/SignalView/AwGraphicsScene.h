@@ -87,9 +87,7 @@ signals:
 	void processSelectedForLaunch(QString& name, AwChannelList& channels, float pos, float end);
 	void QTSModeEnded();
 	// markers
-//	void showMarkerUnderMouse(AwMarker *marker);
 	void showMarkerUnderMouse(const AwSharedMarker& marker);
-//	void markerRemoved(AwMarker* marker);
 	void markerRemoved(const AwSharedMarker& marker);
 	// signal items reordering
 	void itemsOrderChanged(const QStringList& labels);
@@ -102,8 +100,6 @@ public slots:
 	virtual void setSelectionAsBad() {}
 	virtual void setSelectionAsMontage() {}
 	// open a GUI when in mapping mode, to select which predefined markers to insert at mapping position.
-//	void chooseMarkersToInsert();
-//	void setMarkingSettings(AwMarkingSettings *settings);
 	void setPageDuration(float dur) { m_pageDuration = dur; }
 	void updateSelection();
 	void displaySelectedChannelsOnly();
@@ -137,7 +133,6 @@ public slots:
 	virtual void setMarkers(const AwSharedMarkerList& markers);
 	void addHighLigthMarker(const QString& text, float pos, float dur);
 	void removeHighLigthMarker();
-	//void highlightMarker(AwMarker *m);
 	void highlightMarker(const AwSharedMarker& m);
 	void highlightChannels(const QStringList& labels);
 	void undoHighlightChannels();
@@ -154,11 +149,9 @@ protected slots:
 	void selectUnselectChannel();
 	void showHideMarkers();
 	void cursorToMarker();
-//	void addCustomMarkerFromList();
 	void setChannelAsBad();
 	void gotoChannel(QAction *act);
 	void launchQTSPlugin();
-//	void insertPredefinedMarker();
 	void undoMarkerInsertion();
 #ifdef AW_MARKING_TOOL_V2
 	void applyMarkingToolSettings();
@@ -173,7 +166,6 @@ protected:
 	void updateGotoChannelMenu(const QStringList& labels);
 	void clearMarkers();
 	void displayMarkers();
-	//AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = nullptr, int offsetLabel = 0);
 	AwMarkerItem* insertMarker(const AwSharedMarker& marker, AwMarkerItem* prev = nullptr, int offsetLabel = 0);
 
 	void keyPressEvent(QKeyEvent *e);
@@ -225,7 +217,6 @@ protected:
 	bool m_mousePressed, m_itemsHaveMoved, m_itemsDragged;
 	bool m_selectionIsActive, m_draggingItems;
 	bool m_isTimeSelectionStarted;
-//	AwMarkingSettings *m_markingSettings;
 	AwDisplayPluginSignalItem m_signalItemPlugin;
 	AwAmplitudeItem* m_amplitudeItem;
 	QStringList m_QTSCompatiblePlugins;	// name of process plugins that can be launched when QTS mode is active.

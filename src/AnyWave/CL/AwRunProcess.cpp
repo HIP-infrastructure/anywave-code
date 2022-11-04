@@ -16,7 +16,6 @@
 #include "AwCommandLineManager.h"
 #include <AwProcessInterface.h>
 #include <QFile>
-//#include "AwCommandLogger.h"
 #include "Debug/AwLogger.h"
 #include <AwException.h>
 #include "Data/AwDataManager.h"
@@ -29,10 +28,7 @@
 
 void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
-	//AwCommandLogger logger("runProcess", "cl_run");
-	//AwCommandLogger logger(QString("Command Line"));
 	AwBaseProcess *process = nullptr;
-	
 	try {
 		process = AwCommandLineManager::createAndInitNewProcess(arguments);
 	}
@@ -47,12 +43,9 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		}
 		return;
 	}
-//	QObject::connect(process, &AwBaseProcess::progressChanged(const QString&), process, &AwBaseProcess::log);
 	QObject::connect(process, SIGNAL(progressChanged(const QString&)), process, SLOT(log(const QString&)));
-
 	if (!m_logger->attach(process)) 
 		m_logger->writeLog("unable to attach process to log instance.");
-	
 	auto reader = process->pdi.input.reader();
 	auto inputChannels = process->pdi.input.channels();
 	applyFilters(inputChannels, arguments);
@@ -60,13 +53,12 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	QObject::connect(process, &AwProcess::requestProcessInstance, AwProcessManager::instance(), &AwProcessManager::setProcessInstance);
 	auto dm = AwDataManager::instance();
 	auto mm = dm->markerManager();
-	QObject::connect(process, SIGNAL(sendMarker(AwMarker*)), mm, SLOT(addMarker(AwMarker*)));
-	QObject::connect(process, SIGNAL(sendMarkers(AwMarkerList*)), mm, SLOT(addMarkers(AwMarkerList*)));
-	QObject::connect(process, SIGNAL(dataConnectionRequested(AwDataClient*)), dm->dataServer(), SLOT(openConnection(AwDataClient*)));
+	QObject::connect(process, &AwProcess::sendMarkers, mm, &AwMarkerManager::receivedMarkers);
+//	QObject::connect(process, SIGNAL(dataConnectionRequested(AwDataClient*)), dm->dataServer(), SLOT(openConnection(AwDataClient*)));
+	QObject::connect(process, &AwProcess::dataConnectionRequested, dm->dataServer(), &AwDataServer::openConnection);
 	m_logger->writeLog(QString("running %1...").arg(process->plugin()->name));
 	
 	if (process->init()) {
-		//QObject::connect(process, SIGNAL(progressChanged(const QString&)), m_logger, SLOT(writeLog(const QString&)));
 		process->runFromCommandLine();
 		m_logger->writeLog(QString("%1 finished.").arg(process->plugin()->name));
 	}

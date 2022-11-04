@@ -82,8 +82,6 @@ protected slots:
 	void editRules();
 	void goToMarkerAtRow(int row);
 	void contextMenuRequested(const QPoint&);
-	//void updateNamesStats(const QString&);
-	//void updateValuesStats(const QString&);
 	/** slot called when an item is modified in TableView **/
 	void updateMarkerList();
 	void prevName();

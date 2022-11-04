@@ -426,32 +426,6 @@ QStringList& AwSettings::topoLayouts()
 	return m_currentReader->plugin()->layouts; 
 }
 
-//// Predefined Markers (Marker Inspector Tool)
-
-void AwSettings::savePredefinedMarkers(const AwMarkerList& markers)
-{
-	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
-	auto file = m_settings.value(aws::predefined_marker_file).toString();
-	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
-	if (markerRulesDir.isEmpty())
-		return;
-	if (markers.isEmpty()) {
-		QFile::remove(path);
-		return;
-	}
-	AwMarker::save(path, markers);
-}
-
-AwMarkerList AwSettings::loadPredefinedMarkers()
-{
-	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
-	auto file = m_settings.value(aws::predefined_marker_file).toString();
-	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
-	if (markerRulesDir.isEmpty())
-		return AwMarkerList();
-	return AwMarker::load(path);
-}
-
 void AwSettings::detectMATLABRuntimes()
 {
 #ifdef Q_OS_WIN

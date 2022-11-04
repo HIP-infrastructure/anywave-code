@@ -120,8 +120,8 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 		QStringList use_markers, skip_markers, labels, types, pickFrom;
 		QString file;
 
-		bool useMarkers = cfg.contains(keys::use_markers);
-		bool skipMarkers = cfg.contains(keys::skip_markers);
+		bool useMarkers = !cfg.value(keys::use_markers).toStringList().isEmpty();
+		bool skipMarkers = !cfg.value(keys::skip_markers).toStringList().isEmpty();
 
 		if (cfg.contains("skip_bad_channels"))
 			skipBad = cfg.value("skip_bad_channels").toBool();
@@ -216,6 +216,32 @@ void AwRequestServer::handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* p
 			use_markers << "user";
 			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, fileDuration);
 		}
+		if (useMarkers && !skipMarkers) {
+			// if use_markers is set do not care of data_chunks option.
+		   input_markers = AwMarker::getMarkersWithLabels(markers, use_markers);
+			if (input_markers.isEmpty()) {
+				// use markers were not found so get back to normal behavior and consider data_chunks option
+				if (dataChunks.isEmpty())
+					input_markers << AwSharedMarker(new AwMarker("requested", start, duration));
+				else 
+					// data_chunks overrides start/duration options
+					for (auto i = 0; i < dataChunks.size(); i += 2)
+						markers << AwSharedMarker(new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1)));
+			}
+		}
+		if (useMarkers && skipMarkers) {
+			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, fileDuration);
+			if (input_markers.isEmpty()) {
+				// use markers were not found so get back to normal behavior and consider data_chunks option
+				if (dataChunks.isEmpty())
+					input_markers << AwSharedMarker(new AwMarker("requested", start, duration));
+				else
+					// data_chunks overrides start/duration options
+					for (auto i = 0; i < dataChunks.size(); i += 2)
+						markers << AwSharedMarker(new AwMarker("user", dataChunks.at(i), dataChunks.at(i + 1)));
+			}
+		}
+
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {
 			// Beware of channels refs (we should accept "A1-A2" and consider it as A1 with A2 as reference).

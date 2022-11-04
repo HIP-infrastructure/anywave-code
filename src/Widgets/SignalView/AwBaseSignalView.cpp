@@ -20,8 +20,6 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QtGlobal>
-#include <AwGlobalMarkers.h>
-
 
 AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags, AwViewSettings *settings)
 	: QWidget(parent, f) 
@@ -119,12 +117,9 @@ void AwBaseSignalView::makeConnections()
 	if (m_flags & AwBaseSignalView::NoNavBar)
 		m_navBar->setVisible(false);
 
-//	connect(m_scene, SIGNAL(needRefresh()), this, SLOT(reloadData()));
 	connect(m_scene, &AwGraphicsScene::needRefresh, this, &AwBaseSignalView::reloadData);
-//	connect(m_scene, SIGNAL(updatePositionInFile(float)), this , SLOT(setPositionInFile(float)));
 	connect(m_scene, &AwGraphicsScene::updatePositionInFile, this, &AwBaseSignalView::setPositionInFile);
 	connect(m_scene, &AwGraphicsScene::channelsSelectionChanged, m_navBar, &AwNavigationBar::updateNumberOfSelectedChannels);
-//	connect(m_scene, SIGNAL(closeViewClicked()), this, SIGNAL(closeViewClicked()));
 	connect(m_scene, &AwGraphicsScene::closeViewClicked, this, &AwBaseSignalView::closeViewClicked);
 	connect(m_scene, SIGNAL(cursorPositionChanged(float)), this, SIGNAL(cursorPositionChanged(float)));
 	connect(m_scene, SIGNAL(mappingPositionChanged(float)), this, SIGNAL(mappingPositionChanged(float)));
@@ -135,13 +130,9 @@ void AwBaseSignalView::makeConnections()
 	// cursor specific
 	connect(m_scene, SIGNAL(cursorClickedAtTime(float)), this, SIGNAL(cursorClicked(float)));
 	connect(m_scene, SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
-//	connect(m_markerBar, SIGNAL(showMarkerClicked(AwMarker *)), m_scene, SLOT(highlightMarker(AwMarker *)));
 	connect(m_markerBar, &AwBaseMarkerBar::showMarkerClicked, m_scene, &AwGraphicsScene::highlightMarker);
-//	connect(m_markerBar, SIGNAL(showMarkerClicked(AwMarker *)), this, SIGNAL(markerBarHighlighted(AwMarker *)));
 	connect(m_markerBar, &AwBaseMarkerBar::showMarkerClicked, this, &AwBaseSignalView::markerBarHighlighted);
-//	connect(m_markerBar, SIGNAL(showMarkersClicked(bool)), m_scene, SLOT(showMarkers(bool)));
 	connect(m_markerBar, &AwBaseMarkerBar::showMarkersClicked, m_scene, &AwGraphicsScene::showMarkers);
-//	connect(m_markerBar, SIGNAL(positionChanged(float)), m_navBar, SLOT(updatePositionInFile(float)));
 	connect(m_markerBar, &AwBaseMarkerBar::positionChanged, m_navBar, &AwNavigationBar::updatePositionInFile);
 
 	connect(m_navBar, SIGNAL(startOfDataClicked()), m_scene, SLOT(goToStart()));
@@ -157,7 +148,6 @@ void AwBaseSignalView::makeConnections()
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), m_scene, SLOT(updateSettings(AwViewSettings *, int)));
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings*, int)), m_markerBar, SLOT(updateSettings(AwViewSettings*, int)));
 	connect(m_navBar, SIGNAL(settingsChanged(AwViewSettings *, int)), this, SLOT(updateSettings(AwViewSettings *, int)));
-//	connect(m_navBar, SIGNAL(markingStarted()), this, SLOT(startMarking()));
 	connect(m_navBar, &AwNavigationBar::filterButtonClicked, this, &AwBaseSignalView::openFilterGUI);
 
 	connect(m_view, SIGNAL(pageDurationChanged(float)), m_navBar, SLOT(updatePageDuration(float)));
@@ -318,25 +308,8 @@ void AwBaseSignalView::updateVisibleMarkers()
 {
 	m_visibleMarkers = AwMarker::intersect(m_markers, m_positionInFile - m_startPosition, m_positionInFile - m_startPosition+ m_pageDuration);
 	m_scene->setMarkers(m_visibleMarkers);
-//	m_markerBar->refresh();
 	m_markerBar->setMarkers(m_visibleMarkers);
 }
-
-//void AwBaseSignalView::updateMarkers(const AwSharedMarkerList& markers)
-//{
-//	m_markers = markers;
-//	updateVisibleMarkers();
-//}
-//
-//void AwBaseSignalView::getNewMarkers()
-//{
-//	auto globals = AwGlobalMarkers::instance();
-//	auto list = globals->displayed();
-//	if (list == nullptr)
-//		return;
-//	m_markers = *list;
-//	updateVisibleMarkers();
-//}
 
 void AwBaseSignalView::setMarkers(const AwSharedMarkerList& markers)
 {
@@ -445,22 +418,6 @@ void AwBaseSignalView::setAmplitudes()
 
 void AwBaseSignalView::startMarking()
 {
-	QStringList labels;
-	for (auto &m : m_markers)
-		if (!labels.contains(m->label()))
-			labels << m->label();
-
-	//if (!m_markerInspector) {
-	//	m_markerInspector = new AwMarkerInspector(m_markers, labels);
-	//	connect(m_markerInspector, SIGNAL(settingsChanged(AwMarkingSettings *)), m_scene, SLOT(setMarkingSettings(AwMarkingSettings *)));
-	//	connect(m_markerInspector, SIGNAL(closed()), this, SLOT(stopMarking()));
-	//}
-	//else {
-	//	m_markerInspector->setMarkers(m_markers);
-	//	m_markerInspector->setTargets(labels);
-	//}
-//	m_scene->setMarkingSettings(&m_markerInspector->settings());
-//	m_markerInspector->show();
 	m_scene->setMarkingMode(true);
 }
 

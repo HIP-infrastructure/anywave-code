@@ -33,8 +33,6 @@
 #include <future>
 #include <algorithm>
 
-#include <AwGlobalMarkers.h>
-
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;
 
@@ -71,10 +69,6 @@ AwMarkerManager::~AwMarkerManager()
 void AwMarkerManager::guiInit()
 {
 	m_markerInspector = new AwMarkerInspector();
-	auto globals = AwGlobalMarkers::instance();
-	globals->setParent(this);
-	globals->setDisplayed(&m_displayedMarkers);
-	globals->setTotal(&m_sMarkers);
 }
 
 AwMarkerManagerSettings* AwMarkerManager::ui()
@@ -82,51 +76,21 @@ AwMarkerManagerSettings* AwMarkerManager::ui()
 	if (m_ui == nullptr) {
 		m_ui = new AwMarkerManagerSettings(m_sMarkers);
 		// connections
-	//	connect(m_ui, SIGNAL(markersChanged(const AwMarkerList&)), this, SLOT(setMarkers(const AwMarkerList&)));
 		connect(m_ui, &AwMarkerManagerSettings::markersChanged, this, &AwMarkerManager::setMarkers);
-	//	connect(m_ui, SIGNAL(markersRemoved(const AwMarkerList&)), this, SLOT(removeMarkers(const AwMarkerList&)));
 		connect(m_ui, &AwMarkerManagerSettings::markersRemoved, this, &AwMarkerManager::removeMarkers);
-	//	connect(m_ui, SIGNAL(moveRequest(float)), this, SIGNAL(goTo(float)));
 		connect(m_ui, &AwMarkerManagerSettings::moveRequest, this, &AwMarkerManager::goTo);
-	//	connect(m_ui->buttonLoad, SIGNAL(clicked()), this, SLOT(loadMarkers()));
 		connect(m_ui->buttonLoad, &QPushButton::clicked, this, &AwMarkerManager::loadMarkers);
-	//	connect(m_ui->buttonSave, SIGNAL(clicked()), this, SLOT(saveMarkers()));
 		connect(m_ui->buttonSave, &QPushButton::clicked, this, &AwMarkerManager::saveMarkers);
 	}
 	return m_ui;
 }
 
-//
-// getMarkers()
-// returns current list of markers for the file. List is returned with time sorted markers.
-// first occured markers are first.
-
-//AwMarkerList AwMarkerManager::getMarkers()
-//{
-//	if (m_needSorting)
-//		AwMarker::sort(m_markers);
-//	m_needSorting = false;
-//	return m_markers;
-//}
-
-//AwMarkerList AwMarkerManager::getMarkersThread()
-//{
-//	QMutexLocker locker(&m_mutex);
-//	if (m_needSorting)
-//		AwMarker::sort(m_markers);
-//	return AwMarker::duplicate(m_markers);
-//}
-
 AwSharedMarkerList AwMarkerManager::getSharedMarkersThread()
 {
 	QMutexLocker locker(&m_mutex);
-	if (m_needSorting) {
+	if (m_needSorting) 
 		AwMarker::sort(m_sMarkers);
-	//	m_markers = AwMarker::toMarkerList(m_sMarkers);
-	}
 	return m_sMarkers;
-	//return AwMarker::toSharedPointerList(m_markers);
-	//return AwMarker::duplicate(m_markers);
 }
 
 void AwMarkerManager::showDockUI()
@@ -203,30 +167,22 @@ void AwMarkerManager::loadMarkers()
 	QPushButton *importButton = msg.addButton(tr("Import"), QMessageBox::YesRole);
 	QPushButton *appendButton = msg.addButton(tr("Append"), QMessageBox::NoRole);
 	QPushButton *cancelButton = msg.addButton(tr("Cancel"), QMessageBox::RejectRole);
-
 	msg.exec();
-
 	if (msg.clickedButton() == cancelButton)
 		return;
-
 	if (msg.clickedButton() == importButton)
 		import = true;
-
 	// Set the root directory to be the current data file directory
 	QString filename = QFileDialog::getOpenFileName(0, tr("Load Markers"), AwDataManager::instance()->dataDir(), "Markers (*.mrk)");
-
 	if (filename.isEmpty())
 		return;
-
 	AwSharedMarkerList markers = loadFile(filename);
 	if (markers.isEmpty()) {
 		AwMessageBox::information(0, tr("Marker file"), tr("The marker file is empty or invalid"));
 		return;
 	}
-
 	if (import)
 		removeAllUserMarkers();
-
 	if (!markers.isEmpty())	{
 		m_sMarkers += markers;
 		m_needSorting = true;
@@ -236,7 +192,6 @@ void AwMarkerManager::loadMarkers()
 		removeOfflimits();
 		m_ui->setMarkers(m_sMarkers);
 	}
-	//m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	// show markers ui
 	showDockUI();
 	emit updateStats();
@@ -264,18 +219,12 @@ void AwMarkerManager::saveToFile(const QString& path)
 void AwMarkerManager::addMarkers(const AwSharedMarkerList& list)
 {
 	QMutexLocker lock(&m_mutex);
-//	AwMarkerList markers;
-	// check if sender is a process
-//	AwBaseProcess* p = qobject_cast<AwBaseProcess*>(sender());
 	m_sMarkers += list;
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
-	//m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	if (m_ui)  // could be called in command line so there is no GUI
 		m_ui->setMarkers(m_sMarkers);
-//	if (p != nullptr)
-//		p->setMarkersReceived();
 	emit updateStats();
 
 }
@@ -288,7 +237,6 @@ void AwMarkerManager::receivedMarkers(AwSharedMarkerList* markers)
 	// sort markers
 	m_needSorting = true;
 	removeOfflimits();
-	//m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	if (m_ui)  // could be called in command line so there is no GUI
 		m_ui->setMarkers(m_sMarkers);
 	if (p != nullptr)
@@ -296,81 +244,15 @@ void AwMarkerManager::receivedMarkers(AwSharedMarkerList* markers)
 	emit updateStats();
 }
 
-////
-//// addMarkers()
-////
-//void AwMarkerManager::addMarkers(AwMarkerList *list)
-//{
-//	QMutexLocker lock(&m_mutex);
-//	AwMarkerList markers;
-//	// check if sender is a process
-//	AwBaseProcess *p = qobject_cast<AwBaseProcess *>(sender());
-//	if (p != nullptr) {
-//		m_markers += AwMarker::duplicate(*list);
-//	}
-//	else 
-//		m_markers += *list;
-//	// sort markers
-//	m_needSorting = true;
-//	removeOfflimits();
-//	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
-//	if (m_ui)  // could be called in command line so there is no GUI
-//		m_ui->setMarkers(m_markers);
-//	if (p != nullptr)
-//		p->setMarkersReceived();
-//	emit updateStats();
-//
-//}
-
-////
-//// addMarkers()
-////
-//void AwMarkerManager::addMarkers(const AwMarkerList& list)
-//{
-//	QMutexLocker lock(&m_mutex); // threading lock
-//	m_markers += AwMarker::duplicate(list);
-//	// sort markers
-//	m_needSorting = true;
-//	removeOfflimits();
-//	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
-//	if (m_ui)  // m_ui may be nullptr if MarkerManager is instantiated in command line processing.
-//		m_ui->setMarkers(m_markers);
-//	emit updateStats();
-//}
-
 // addMarker(AwMarker *)
 void AwMarkerManager::addMarker(const AwSharedMarker& m)
 {
-//	QMutexLocker lock(&m_mutex);
-	// check if sender is a process
-//	AwBaseProcess* p = qobject_cast<AwBaseProcess*>(sender());
 	m_sMarkers << m; 
 	m_needSorting = true;
 	removeOfflimits();
 	m_ui->setMarkers(m_sMarkers);
-//	if (p != nullptr)
-//		p->setMarkersReceived();
 	emit updateStats();
 }
-
-//// addMarker(AwMarker *)
-//void AwMarkerManager::addMarker(AwMarker *m)
-//{
-//	QMutexLocker lock(&m_mutex);
-//	// check if sender is a process
-//	AwBaseProcess *p = qobject_cast<AwBaseProcess *>(sender());
-//	if (p != nullptr) // duplicate marker
-//		m_markers << new AwMarker(m); // clone markers send by process.
-//	else
-//		m_markers << m;
-//	m_needSorting = true;
-//	removeOfflimits();
-//	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
-//	m_ui->setMarkers(m_markers);
-//	if (p != nullptr)
-//		p->setMarkersReceived();
-//	emit updateStats();
-//}
 
 /// <summary>
 /// removeAllUserMarkers() 
@@ -378,19 +260,10 @@ void AwMarkerManager::addMarker(const AwSharedMarker& m)
 /// </summary>
 void AwMarkerManager::removeAllUserMarkers()
 {
-	//m_markers.erase(m_markers.begin(), m_markers.end());
-
-	//m_ui->setMarkers(m_markers);
-	//m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	m_sMarkers.clear();
 	m_ui->setMarkers(m_sMarkers);
 	emit updateStats();
 }
-
-//void AwMarkerManager::removeMarker(AwMarker* marker)
-//{
-//	removeMarkers({ marker });
-//}
 
 void AwMarkerManager::removeMarker(const AwSharedMarker& marker)
 {
@@ -402,25 +275,16 @@ void AwMarkerManager::removeMarkers(const AwSharedMarkerList& markers)
 	m_sMarkers.erase(std::remove_if(m_sMarkers.begin(), m_sMarkers.end(), [markers](AwSharedMarker& m) { return markers.contains(m); }), m_sMarkers.end());
 	m_ui->setMarkers(m_sMarkers);
 	saveToFile(m_filePath);
-	//m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 	emit updateStats();
 }
 
 void AwMarkerManager::initFromCommandLine(const QString& filePath)
 {
 	m_filePath = filePath;
-	if (QFile::exists(filePath)) {
+	if (QFile::exists(filePath)) 
 		m_sMarkers = AwMarker::loadShrdFaster(filePath);
-		//m_markers = AwMarker::toMarkerList(m_sMarkers);
-	}
-	else {
+	else 
 		m_sMarkers = AwDataManager::instance()->reader()->infos.blocks().first()->markers();
-		//auto markers = AwDataManager::instance()->reader()->infos.blocks().first()->markers();
-		//if (markers.size()) {
-		//	m_markers = AwMarker::duplicate(markers);
-		//	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
-		//}
-	}
 }
 
 void AwMarkerManager::finishCommandLineOperation()
@@ -436,7 +300,6 @@ void AwMarkerManager::init()
 {
 	auto dm = AwDataManager::instance();
 	m_filePath = dm->mrkFilePath();
-	auto globals = AwGlobalMarkers::instance();
 	m_ui->setEnabled(true);
 	if (QFile::exists(m_filePath)) {
 		AwWaitWidget wait("Markers");
@@ -449,7 +312,6 @@ void AwMarkerManager::init()
 		m_needSorting = true;
 		int removed = removeDuplicates();
 		removeOfflimits();
-	//	m_sMarkers = AwMarker::toSharedPointerList(m_markers);
 		if (!m_sMarkers.isEmpty()) {
 			// avoid markers that out of data bounds (do not load marker that could be positionned after the end of data)
 			m_ui->setMarkers(m_sMarkers);
@@ -457,8 +319,6 @@ void AwMarkerManager::init()
 			showDockUI();
 		}
 	}
-	globals->setDisplayed(&m_displayedMarkers);
-	globals->setTotal(&m_sMarkers);
 	emit displayedMarkersChanged(m_displayedMarkers);
 }
 
@@ -471,7 +331,6 @@ void AwMarkerManager::closeFile()
 	clear();
 	m_filePath = "";
 	m_markersModified = false;
-	AwGlobalMarkers::instance()->closeFile();
 }
 
 void AwMarkerManager::quit()
@@ -485,18 +344,9 @@ void AwMarkerManager::quit()
 //
 void AwMarkerManager::clear()
 {
-	//// clear should never be called while running in command line but we check still if shared pointers are set or not
-	//m_displayedMarkers.clear();
-	//if (m_sMarkers.size()) {
-	//	m_sMarkers.clear();
-	//	m_markers.clear();
-	//}
-	//else
-	//	AW_DESTROY_LIST(m_markers);
 	m_displayedMarkers.clear();
 	m_sMarkers.clear();
 }
-
 
 void AwMarkerManager::highlightMarkerInList(const AwSharedMarker& marker)
 {

@@ -53,7 +53,6 @@ void AwGraphicsView::computePageDuration()
 	}
 	else {
 		m_pageDuration = m_settings->fixedPageDuration;
-		//m_physics->setXPixPerSec(w / m_pageDuration);
 		m_physics->setPageDuration(m_pageDuration);
 		m_physics->setFixedPageDuration(m_pageDuration, w);
 	}
@@ -61,7 +60,6 @@ void AwGraphicsView::computePageDuration()
 		return;
 	emit pageDurationChanged(m_pageDuration);
 }
-
 
 void AwGraphicsView::resizeEvent(QResizeEvent *event)
 {

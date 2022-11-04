@@ -140,9 +140,6 @@ public:
 	void addRecentBIDS(const QString& path);
 	void removeRecentBIDS(const QString& path);
 	void removeRecentFilePath(const QString& path);
-
-	// predefined markers (Marker Inspector Tool)
-	AwMarkerList loadPredefinedMarkers();
 signals:
 	void markersColorChanged(const QStringList& colors);
 	void screenCalibrationChanged(float x, float y);
@@ -150,7 +147,6 @@ signals:
 	void log(const QString& message);
 public slots:
 	void setAutoTriggerParsingOn(bool onoff);
-	void savePredefinedMarkers(const AwMarkerList& markers);
 private slots:
 	void reloadRecentBidsFiles(const QString& file);
 protected:

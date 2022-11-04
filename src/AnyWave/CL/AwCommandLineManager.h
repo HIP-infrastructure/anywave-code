@@ -43,7 +43,7 @@ public:
 	 int initProcessPDI(AwBaseProcess *process);
 	 AwChannelList parsePickChannels(const QStringList& channels, AwDataManager* dm);
 	 AwChannelList getInputChannels(const AwArguments& args, AwDataManager* dm);
-	 static AwMarkerList parseMarkerFile(const AwArguments& args);
+	 static AwSharedMarkerList parseMarkerFile(const AwArguments& args);
 	 static AwCommandLineManager* instance();
 	 static bool isInstanciated();
 	// inline AwCommandLogger* logger() { return m_logger; }

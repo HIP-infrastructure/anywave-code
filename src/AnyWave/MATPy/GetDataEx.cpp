@@ -193,7 +193,11 @@ void AwRequestServer::handleGetDataEx(QTcpSocket* client, AwScriptProcess* proce
 			input_markers = AwMarker::getMarkersWithLabels(markers, use_markers);
 			if (input_markers.isEmpty())
 				input_markers << AwSharedMarker(new AwMarker("requested", start, duration));
-
+		}
+		if (useMarkers && skipMarkers) {
+			input_markers = AwMarker::getInputMarkers(markers, skip_markers, use_markers, fileDuration);
+			if (input_markers.isEmpty())  // use_markers contains non existing markers!
+				input_markers << AwSharedMarker(new AwMarker("requested", start, duration));
 		}
 		// applying constraints of type/label
 		if (!labels.isEmpty()) {

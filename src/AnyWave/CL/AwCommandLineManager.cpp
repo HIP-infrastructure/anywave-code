@@ -415,13 +415,13 @@ AwChannelList AwCommandLineManager::getInputChannels(const AwArguments& args, Aw
 	return AwChannel::duplicateChannels(res);
 }
 
-AwMarkerList AwCommandLineManager::parseMarkerFile(const AwArguments& args)
+AwSharedMarkerList AwCommandLineManager::parseMarkerFile(const AwArguments& args)
 {
-	AwMarkerList res;
+	AwSharedMarkerList res;
 	// check for marker file
 	if (args.contains(keys::marker_file)) {
 		auto mrkFile = args.value(keys::marker_file).toString();
-		res = AwMarker::load(mrkFile);
+		res = AwMarker::loadShrdFaster(mrkFile);
 	}
 	return res;
 }

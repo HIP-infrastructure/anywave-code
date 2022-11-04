@@ -54,76 +54,57 @@ public:
     static int stringToType(const QString& s);
 	static QString typeToString(qint32 t);
 	/** toVariantMap **/
-	static QVariantMap toVariantMap(const QList<AwMarker*>& markers);
 	static QVariantMap toVariantMap(const QList<QSharedPointer<AwMarker>>& markers);
 	/** Gets all the marker types available as QString in a list. **/
 	static QStringList markersTypeList();
 	/** Gets a unique instance of marker labels from a list **/
-	static QStringList getUniqueLabels(const QList<AwMarker *>& markers);
 	static QStringList getUniqueLabels(const QList<QSharedPointer<AwMarker>>& markers);
 	/** Count the number of markers with a specified label **/
-	static QList<QPair<QString, int> > count(const QList<AwMarker *>& markers);
+//	static QList<QPair<QString, int> > count(const QList<AwMarker *>& markers);
 	/** Computes histogram **/
 	static QHash<QString, int> computeHistogram(const QList<QSharedPointer<AwMarker>>& markers);
 	/** Gets all markers labels **/
-	static QStringList getAllLabels(const QList<AwMarker *>& markers);
 	static QStringList getAllLabels(const QList<QSharedPointer<AwMarker>>& markers);
 	/* Get all markers with a duration, markers are not duplicated. */
-	static QList<AwMarker *> getMarkersWithDuration(const QList<AwMarker *>& markers);
 	static QList<QSharedPointer<AwMarker>> getMarkersWithDuration(const QList<QSharedPointer<AwMarker>>& markers);
 	/* Get all markers sorted by unique label */
-	static QList<AwMarker*> getMarkersWithUniqueLabels(const QList<AwMarker*>& markers);
 	static QList<QSharedPointer<AwMarker>> getMarkersWithUniqueLabels(const QList<QSharedPointer<AwMarker>>& markers);
 	/* Get all markers with a label, markers are not duplicated. */
-	static QList<AwMarker *> getMarkersWithLabel(const QList<AwMarker *>& markers, const QString& label);
 	static QList<QSharedPointer<AwMarker>> getMarkersWithLabel(const QList<QSharedPointer<AwMarker>>& markers, const QString& label);
 	/* Get all markers with specified labels, markers are not duplicated. */
-	static QList<AwMarker *> getMarkersWithLabels(const QList<AwMarker *>& markers, const QStringList& labels); 
 	static QList<QSharedPointer<AwMarker>> getMarkersWithLabels(const QList<QSharedPointer<AwMarker>>& markers, const QStringList& labels);
 	/* Get markers between positions */
-	static QList<AwMarker *> getMarkersBetween(const QList<AwMarker *>& markers, float pos1, float pos2);
+//	static QList<AwMarker *> getMarkersBetween(const QList<AwMarker *>& markers, float pos1, float pos2);
 	/** Rename all markers in a list. **/
-	static QList<AwMarker *>& rename(QList<AwMarker *>& markers, const QString& newLabel);
+//	static QList<AwMarker *>& rename(QList<AwMarker *>& markers, const QString& newLabel);
 	/** Load a marker file and returns the markers */ 
-	static QList<AwMarker *> load(const QString& file);
-	static QList<AwMarker*> loadFaster(const QString& file);
 	static QList<QSharedPointer<AwMarker>> loadShrdFaster(const QString& file);
+
 	/** Save markers to a file **/
-	static int save(const QString& file, const QList<AwMarker *>& markers);
 	static int save(const QString& file, const QList<QSharedPointer<AwMarker>>& markers);
 	/** duplicate markers **/
-	static QList<AwMarker *> duplicate(const QList<AwMarker *>& markers);
 	static QList<QSharedPointer<AwMarker>> duplicate(const QList<QSharedPointer<AwMarker>>& markers);
 	/** Sort markers, chronologically. Don't duplicate.**/
-	static void sort(QList<AwMarker *>& markers);
 	static void sort(QList<QSharedPointer<AwMarker>>& markers);
 	/** Cut all markers using markers in cutMarkers. Returns the list of reshaped markers without the cut markers. **/
-	static QList<AwMarker *> cutAroundMarkers(QList<AwMarker *>& markers, QList<AwMarker *>& cutMarkers);
 	static QList<QSharedPointer<AwMarker>> cutAroundMarkers(QList<QSharedPointer<AwMarker>>& markers, QList<QSharedPointer<AwMarker>>& cutMarkers);
 	/** AND operator : keep markers on m2 which overlaps markers on m1. reshape them to match the intersection of m1. **/
-	static QList<AwMarker *> applyANDOperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
 	static  QList<QSharedPointer<AwMarker>> applyANDOperation(QList<QSharedPointer<AwMarker>>& m1, QList<QSharedPointer<AwMarker>>& m2);
 	/** XOR operator : slice markers on m1 which are intersected by markers on m2. **/
-	static QList<AwMarker *> applyXOROperation(QList<AwMarker *>& m1, QList<AwMarker *>& m2);
 	static QList<QSharedPointer<AwMarker>> applyXOROperation(QList<QSharedPointer<AwMarker>>& m1, QList<QSharedPointer<AwMarker>>& m2);
 	/** Merge markers whichs overlaps. Return the resulting merged markers **/
-	static QList<AwMarker *> merge(QList<AwMarker *>& markers);
 	static QList<QSharedPointer<AwMarker>> merge(QList<QSharedPointer<AwMarker>>& markers);
 	/** Get markers from a list which intersect a time selection **/
-	static QList<AwMarker *> intersect(const QList<AwMarker *>& markers, float start, float end);
 	static QList<QSharedPointer<AwMarker>> intersect(const QList<QSharedPointer<AwMarker>>& markers, float start, float end);
 	/** Create an inverter marker list that skip the markers set as input **/
-	static QList<AwMarker *> invertMarkerSelection(const QList<AwMarker *>& markers, const QString& label, float end);
 	static QList<QSharedPointer<AwMarker>> invertMarkerSelection(const QList<QSharedPointer<AwMarker>>& markers, const QString& label, float end);
 	/** Get input markers after use/skip options is applied. The original list is modified accordingly. **/
-	static QList<AwMarker *> getInputMarkers(QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	static QList<QSharedPointer<AwMarker>> getInputMarkers(QList<QSharedPointer<AwMarker>>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	static QList<QSharedPointer<AwMarker>> filterUsedSkippedMarkers(QList<QSharedPointer<AwMarker>>& markers, const QStringList& skip, const QStringList& used, float duration);
 	static QList<QSharedPointer<AwMarker>> filterMarkersLabels(QList<QSharedPointer<AwMarker>>& markers, const QStringList& labels);
 	/** Filters markers: markers can either be specified to be removed or used. **/
-	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
+//	static QList<AwMarker *> applySelectionFilter(const QList<AwMarker *>& markers, const QStringList& skip, const QStringList& used, float totalDuration);
 	/** Remove doublons : similar markers are removed. The list is updated. **/
-	static int removeDoublons(QList<AwMarker *>& markers, bool sortList = true);
 	static int removeDoublons(QList<QSharedPointer<AwMarker>>& markers, bool sortList = true);
 	/** Returns the marker's label. **/
 	inline QString& label() { return m_label; }
@@ -165,13 +146,6 @@ protected:
 	QStringList m_targetChannels;	
 	QString m_color;
 };
-
-//
-// AwMarkerLessThan()
-// Compare function to be used in qSort
-// This function is used to sort markers chronologically.
-bool AW_CORE_EXPORT AwMarkerLessThan(AwMarker *m1, AwMarker *m2);
-
 
 typedef QList<AwMarker *> AwMarkerList; ///< A type defining a list of AwMarker *
 using AwSharedMarkerList = QList<QSharedPointer<AwMarker>>;

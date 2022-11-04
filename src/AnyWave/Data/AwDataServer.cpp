@@ -102,32 +102,6 @@ void AwDataServer::openConnection(AwDataClient *client)
 	t->start();
 }
 
-// 
-// openConnection()
-// in: client, reader
-// out: none
-// Open a connection with a client and a specified reader.
-// Do not raise any UI Widgets. 
-// This method is called during task execution.
-void AwDataServer::openConnection(AwDataClient *client, AwFileIO *reader)
-{
-	if (m_clientToConnection.contains(client))
-		closeConnection(client);
-
-	AwDataConnection *dc = new AwDataConnection(this, client, reader);
-	connect(client, SIGNAL(needData(AwChannelList *, float, float, bool, bool)), dc, SLOT(loadData(AwChannelList *, float, float, bool, bool)));
-	connect(client, SIGNAL(needData(AwChannelList *, AwMarker *, bool, bool)), dc, SLOT(loadData(AwChannelList *, AwMarker *, bool, bool)));
-	connect(client, SIGNAL(needData(AwChannelList *, AwSharedMarkerList *, bool)), dc, SLOT(loadData(AwChannelList *, AwSharedMarkerList *, bool)));
-	connect(dc, SIGNAL(outOfMemory()), this, SLOT(manageOutOfMemory()));
-	QThread *t = new QThread();
-	dc->moveToThread(t);
-	m_clientToConnection.insert(client, dc);
-	m_dataConnections.append(dc);
-	client->setConnected();
-	t->start();
-}
-
-
 void AwDataServer::closeConnection(AwDataClient *client)
 {
 	if (!m_clientToConnection.contains(client))
