@@ -304,7 +304,7 @@ void AwBaseSignalView::updateVisibleMarkers()
 {
 	m_visibleMarkers = AwMarker::intersect(m_markers, m_positionInFile - m_startPosition, m_positionInFile - m_startPosition+ m_pageDuration);
 	m_scene->setMarkers(m_visibleMarkers);
-	m_markerBar->setMarkers(m_visibleMarkers);
+	m_markerBar->setMarkers(m_markers);
 }
 
 void AwBaseSignalView::setMarkers(const AwSharedMarkerList& markers)

@@ -19,7 +19,6 @@
 #include <qpainter.h>
 #include <utils/gui.h>
 #include <AwCore.h>
-//#include <AwGlobalMarkers.h>
 #include <widget/SignalView/AwViewSettings.h>
 
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
@@ -75,12 +74,12 @@ void AwBaseMarkerBar::setMarkers(const AwSharedMarkerList& markers)
 {
 	m_markers = markers;
 	m_globalRepaintNeeded = true;
+	update();
 	repaint();
 }
 
 void AwBaseMarkerBar::switchToClassic()
 {
-//	m_mode = AwBaseMarkerBar::Classic;
 	if (m_settings == nullptr)
 		return;
 	m_settings->markerBarMode = AwViewSettings::Classic;
@@ -97,7 +96,6 @@ void AwBaseMarkerBar::switchToGlobal()
 	repaint();
 }
 
-
 ///
 /// EVENTS
 ///
@@ -106,7 +104,6 @@ void AwBaseMarkerBar::resizeEvent(QResizeEvent *e)
 	QFrame::resizeEvent(e);
 	m_globalRepaintNeeded = true;
 }
-
 
 void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 {
@@ -143,7 +140,6 @@ void AwBaseMarkerBar::mouseReleaseEvent(QMouseEvent *e)
 		return;
 	if (m_settings == nullptr)
 		return;
-	//if (m_mode == AwBaseMarkerBar::Global) {
 	if (m_settings->markerBarMode == AwViewSettings::Global) {
 		if (!m_sliderDragging) { // just a click somewhere in the bar => change the position
 			auto pixPerSec = size().width() / m_totalDuration;
@@ -201,7 +197,7 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
 		auto markers = AwMarker::intersect(m_markers, m_positionInFile, m_positionInFile + m_pageDuration);
 		QColor color;
-		for (auto m : markers) {
+		for (auto const &m : markers) {
 			if (!m->duration())
 				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
 			else
