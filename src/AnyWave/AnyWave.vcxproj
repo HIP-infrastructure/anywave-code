@@ -96,7 +96,6 @@
     <ClCompile Include="IO\JSON\AwJSON.cpp" />
     <ClCompile Include="IO\MATLAB\MATLABIO.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Marker\AwDockAddMarker.cpp" />
     <ClCompile Include="Marker\AwExtractTriggers.cpp" />
     <ClCompile Include="Marker\AwMarkerListModel.cpp" />
     <ClCompile Include="Marker\AwMarkerManager.cpp" />
@@ -416,8 +415,6 @@
     <QtMoc Include="Marker\AwMarkerManager.h">
     </QtMoc>
     <QtMoc Include="Marker\AwMarkerListModel.h">
-    </QtMoc>
-    <QtMoc Include="Marker\AwDockAddMarker.h">
     </QtMoc>
     <QtMoc Include="Filter\AwFilterToolBar.h">
     </QtMoc>

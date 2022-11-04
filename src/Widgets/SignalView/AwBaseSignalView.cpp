@@ -48,7 +48,6 @@ AwBaseSignalView::AwBaseSignalView(QWidget *parent, Qt::WindowFlags f, int flags
 	m_view = new AwGraphicsView(m_scene, m_settings, m_physics, 0);
 	m_navBar = new AwNavigationBar(this, flags);
 	m_markerBar = new AwBaseMarkerBar(m_physics, this);
-	m_markerInspector = nullptr;
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->setContentsMargins(3, 3, 3, 3);
 	layout->addWidget(m_view);
@@ -76,9 +75,6 @@ AwBaseSignalView::~AwBaseSignalView()
 {
 	delete m_physics;
     m_scene->clearChannels();
-
-	if (m_markerInspector)
-		delete m_markerInspector;
 	delete m_view;
 	delete m_scene;
 }

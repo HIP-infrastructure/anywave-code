@@ -154,9 +154,6 @@
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
       <Filter>Filter</Filter>
     </ClCompile>
-    <ClCompile Include="Marker\AwDockAddMarker.cpp">
-      <Filter>Marker</Filter>
-    </ClCompile>
     <ClCompile Include="Marker\AwMarkerListModel.cpp">
       <Filter>Marker</Filter>
     </ClCompile>
@@ -687,9 +684,6 @@
     <QtUic Include="Filter\AwFilterToolBar.ui">
       <Filter>Filter</Filter>
     </QtUic>
-    <QtMoc Include="Marker\AwDockAddMarker.h">
-      <Filter>Marker</Filter>
-    </QtMoc>
     <QtMoc Include="Marker\AwMarkerListModel.h">
       <Filter>Marker</Filter>
     </QtMoc>

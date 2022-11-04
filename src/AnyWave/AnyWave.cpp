@@ -35,7 +35,6 @@
 #include "Plugin/AwPluginManager.h"
 #include "Marker/AwMarkerManagerSettings.h"
 #include "Marker/AwMarkerManager.h"
-#include "Marker/AwDockAddMarker.h"
 #include "Data/AwDataServer.h"
 #include "Carto/AwDockMapping.h"
 #include "Debug/AwDebugLogWidget.h"
@@ -46,11 +45,7 @@
 #include "Display/AwDisplay.h"
 #include "MATPy/AwMATPyServer.h"
 #include <AwMEGSensorManager.h>
-#ifndef AW_MARKING_TOOL_V2
-#include <widget/AwMarkerInspector.h>
-#else
 #include <widget/AwMarkingTool.h>
-#endif
 #include <layout/AwLayoutManager.h>
 #include <layout/AwLayout.h>
 #include <mapping/AwMeshManager.h>
@@ -108,25 +103,19 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 		else
 			server->setDebugMode(true);
 	}
-
 	m_debugLogWidget = nullptr;
 	// copy menu pointers for recent files and BIDS sub menu.
 	m_recentFilesMenu = menuRecent_files;
 	m_recentBIDSMenu = menuRecent_BIDS;
 	connect(m_recentFilesMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentFilesList);
 	connect(m_recentBIDSMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentFilesList);
-
 	setWindowIcon(QIcon(":images/AnyWave_icon.png"));
-
 	adl->connectComponent("Filters Settings", &dm->filterSettings());
 	adl->connectComponent("Global Settings", aws);
-
 	setCentralWidget(new QSplitter(this));
 	// As initializing ProcessManager, give it the Process Menu instance !
 	process_manager->setMenu(menuProcesses);
-
 	actionMontage->setEnabled(false);
-
 	// PLUGIN MENUS
 	// get menus from process manager 
 	// process menu
@@ -198,12 +187,10 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	// AwSourceManager
 	AwSourceManager::instance()->setParent(this);
 	connect(AwSourceManager::instance(), &AwSourceManager::newSourcesCreated, AwMontageManager::instance(), &AwMontageManager::addNewSources);
-
 	// AwMeshManager
 	m_meshManager = AwMeshManager::instance();
 	// AwMeshManager
 	m_layoutManager = AwLayoutManager::instance();
-
 	connect(process_manager, &AwProcessManager::channelsRemovedForProcess, m_display, &AwDisplay::removeVirtualChannels);
 	connect(process_manager, &AwProcessManager::processHasFinishedOnDisplay, m_display, &AwDisplay::processHasFinished);
 	connect(process_manager, &AwProcessManager::displayProcessTerminated, m_display, &AwDisplay::processHasFinished);
@@ -267,7 +254,6 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 			openBIDS(file);
 		}
 	}
-
 }
 
 //
@@ -434,7 +420,6 @@ void AnyWave::initToolBarsAndMenu()
 	// Toolbar Filtering
 	AwFilterToolBar *filter_tb = new AwFilterToolBar(this);
 	addToolBar(Qt::TopToolBarArea, filter_tb->toolBar());
-
 	// Filtering dock widget
 	auto dockFilters = new QDockWidget(tr("Filtering"), this);
 	dockFilters->hide();
@@ -446,7 +431,6 @@ void AnyWave::initToolBarsAndMenu()
 	AwDataManager::instance()->filterSettings().setUiDocked();
 	filter_tb->setEnabled(false);
 	m_toolBarWidgets.append(filter_tb);
-
 	// Toolbar Montage
 	AwMontageManager *montage_manager = AwMontageManager::instance();
 	AwMontageToolBar *montage_tb = new AwMontageToolBar(this, true);
@@ -454,7 +438,6 @@ void AnyWave::initToolBarsAndMenu()
 	connect(montage_manager, SIGNAL(quickMontagesUpdated()), montage_tb, SLOT(updateQuickMontages()));
 	montage_tb->setEnabled(false);
 	m_toolBarWidgets.append(montage_tb);
-
 	AwDisplayToolBar *display_tb = new AwDisplayToolBar(this);
 	addToolBar(Qt::TopToolBarArea, display_tb->toolBar());
 	connect(display_tb, SIGNAL(addViewClicked()), m_display, SLOT(addNewSignalView()));
@@ -465,9 +448,7 @@ void AnyWave::initToolBarsAndMenu()
 	connect(m_display, &AwDisplay::newDisplaySetupLoaded, display_tb, &AwDisplayToolBar::updateGUI);
 	m_toolBarWidgets.append(display_tb);
 	display_tb->setEnabled(false);
-
 	addToolBarBreak(Qt::TopToolBarArea);
-
 	// ToolBar mapping
 	AwMappingToolBar *mtp = new AwMappingToolBar(this);
 	addToolBar(Qt::TopToolBarArea, mtp->toolBar());
@@ -475,18 +456,15 @@ void AnyWave::initToolBarsAndMenu()
 	connect(mtp, SIGNAL(GARDELClicked()), this, SLOT(runGARDEL()));
 	mtp->setEnabled(false);
 	m_toolBarWidgets.append(mtp);
-
 	////////////////////////////////////////////////////////////////////////////////////
 	// statusbar
 	////////////////////////////////////////////////////////////////////////////////////
 	m_sBar = new QStatusBar(this);
 	setStatusBar(m_sBar);
-
 	//////////////////////////////////////////////////////////////////////////////////////
 	actionSave->setEnabled(false);
 	actionSave_as->setEnabled(false);
 	actionImport_mrk_file->setEnabled(false);
-
 	// ICA Menu
 	actionComponentsMaps->setEnabled(false);
 	actionShow_map_on_signal->setEnabled(false);
@@ -497,7 +475,6 @@ void AnyWave::initToolBarsAndMenu()
 	connect(actionVisualiseEpoch, &QAction::triggered, this, &AnyWave::visualiseEpoch);
 	connect(actionAveraging, &QAction::triggered, this, &AnyWave::averageEpoch);
 #endif
-
 	/////////////////////////////////////////////////////////////////////////////////////
 	//// BIDS
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -590,20 +567,15 @@ void AnyWave::openNewAnyWave()
 void AnyWave::displayReaderTriggerStatus(bool ok, int number)
 {
 	AwFileIO *fr = qobject_cast<AwFileIO *>(sender());
-
 	QMessageBox box(QMessageBox::Information, tr("Trigger Output"), QString(), QMessageBox::Ok, this); 
-
 	QString reader;
 	QString message;
-
 	if (fr)
 		reader = fr->plugin()->name;
-
 	if (ok)
 		 message = reader + QString(tr(" has successfully written ")) + QString(tr("%1 marker(s)")).arg(number);
 	else
 		message = reader + QString(tr(" failed to write in trigger channel"));
-
 	box.setText(message);
 	box.exec();
 }
@@ -711,7 +683,6 @@ void AnyWave::writeSettings()
 	settings.setValue("state", saveState());
 	settings.setValue("geometry", saveGeometry());
 }
-
 
 void AnyWave::editVideoSyncSettings()
 {

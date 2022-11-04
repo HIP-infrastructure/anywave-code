@@ -34,7 +34,6 @@
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICASignalItem.h"
 #include "AwViewSetup.h"
-#include <AwMarkingSettings.h>
 #include "AwCentralWidget.h"
 #include "Plugin/AwPluginManager.h"
 #include <QTextStream>

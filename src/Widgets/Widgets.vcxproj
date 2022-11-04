@@ -32,10 +32,8 @@
     <ClCompile Include="AwGetValueDialog.cpp" />
     <ClCompile Include="AwGraphicsObjects.cpp" />
     <ClCompile Include="AwMarkAroundWidget.cpp" />
-    <ClCompile Include="AwMarkerInspector.cpp" />
     <ClCompile Include="AwAmplitudeWidget.cpp" />
     <ClCompile Include="AwMapWidget.cpp" />
-    <ClCompile Include="AwMarkingSettings.cpp" />
     <ClCompile Include="AwMarkingTool.cpp" />
     <ClCompile Include="AwMessageBox.cpp" />
     <ClCompile Include="AwQwtColorMap.cpp" />
@@ -153,13 +151,9 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\SignalView\AwBaseMarkerBar.h">
     </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwMarkerInspector.h">
-    </QtMoc>
     <QtMoc Include="AwAddPredefinedMarker.h">
     </QtMoc>
     <QtMoc Include="AwAddTargetChannels.h">
-    </QtMoc>
-    <QtMoc Include="..\..\include\AwMarkingSettings.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwTopoBuilder.h">
     </QtMoc>
@@ -201,8 +195,6 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="AwMarkerInspector.ui">
-    </QtUic>
     <QtUic Include="AwAddPredefinedMarker.ui">
     </QtUic>
     <QtUic Include="AwAddTargetChannels.ui">

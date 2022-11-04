@@ -17,11 +17,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <utils/gui.h>
 #include <widget/SignalView/AwGraphicsView.h>
-#include <AwMarkingSettings.h>
 #include <QMenu>
-#ifdef AW_MARKING_TOOL_V2
 #include <widget/AwMarkingTool.h>
-#endif
 
 ///
 /// mousePress()

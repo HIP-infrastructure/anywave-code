@@ -22,10 +22,8 @@
 #include "AwGoToLatencyDial.h"
 #include <widget/AwHighLightPositionMarker.h>
 #include <widget/AwMarkerChannelItem.h>
-#include <AwMarkingSettings.h>
 #include <utils/gui.h>
 #include "AwGTCMenu.h"
-#include "AwPickMarkersDial.h"
 #include <widget/SignalView/AwGraphicsView.h>
 #include "AwAmplitudeItem.h"
 #include <widget/AwMarkingTool.h>
@@ -1238,8 +1236,6 @@ void AwGraphicsScene::setMappingMode(bool on)
 		m_mappingFixedCursor = NULL;
 		m_mouseMode = AwGraphicsScene::None;
 	}
-	if (m_pickMarkersDial)
-		m_pickMarkersDial->close();
 	update();
 }
 
@@ -1258,9 +1254,6 @@ void AwGraphicsScene::setQTSMode(bool flag)
 	}
 	else
 		m_mouseMode = AwGraphicsScene::None;
-
-	if (m_pickMarkersDial)
-		m_pickMarkersDial->close();
 }
 
 ///

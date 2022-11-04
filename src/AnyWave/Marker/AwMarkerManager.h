@@ -20,7 +20,6 @@
 #include <QDockWidget>
 #include <AwMarker.h>
 #include <QMutex>
-#include <widget/AwMarkerInspector.h>
 
 class AwMarkerManagerSettings;
 class AwDataManager;
@@ -42,7 +41,7 @@ public:
 	AwSharedMarkerList getSharedMarkersThread();
 	AwMarkerManagerSettings* ui();
 	void setDock(QDockWidget *dock) { m_dock = dock; }
-	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
+//	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();
 	void quit();
 	void init();
@@ -80,7 +79,6 @@ signals:
 private:
 	AwMarkerManagerSettings *m_ui;
 	QDockWidget *m_dock;
-	AwMarkerInspector *m_markerInspector;
 	bool m_needSorting, m_markersModified;
 	AwSharedMarkerList m_sMarkers, m_displayedMarkers;
 	QMutex m_mutex;

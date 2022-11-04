@@ -68,7 +68,7 @@ AwMarkerManager::~AwMarkerManager()
 
 void AwMarkerManager::guiInit()
 {
-	m_markerInspector = new AwMarkerInspector();
+
 }
 
 AwMarkerManagerSettings* AwMarkerManager::ui()

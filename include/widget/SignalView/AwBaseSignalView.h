@@ -22,7 +22,6 @@
 #include <widget/SignalView/AwGraphicsView.h>
 #include <widget/SignalView/AwBaseMarkerBar.h>
 #include <widget/SignalView/AwNavigationBar.h>
-#include <widget/AwMarkerInspector.h>
 #include <filter/AwFilterSettings.h>
 #include <QTime>
 #include <AwEvent.h>
@@ -119,7 +118,6 @@ protected:
 	AwGraphicsView *m_view;
 	AwNavigationBar *m_navBar;
 	AwBaseMarkerBar *m_markerBar;
-	AwMarkerInspector *m_markerInspector;
 	AwChannelList m_channels;				// active list of channels displayed in the scene.
 	AwChannelList m_montageChannels;		// channels from current montage.
 	AwSharedMarkerList m_markers;

@@ -94,16 +94,10 @@
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    <ClCompile Include="AwMarkerInspector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AwAddPredefinedMarker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AwAddTargetChannels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AwMarkingSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AwTopoWidgetSettings.cpp">
@@ -276,12 +270,6 @@
     <QtMoc Include="..\..\include\widget\SignalView\AwBaseMarkerBar.h">
       <Filter>SignalView</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwMarkerInspector.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtUic Include="AwMarkerInspector.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtMoc Include="AwAddPredefinedMarker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -294,9 +282,6 @@
     <QtUic Include="AwAddTargetChannels.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="..\..\include\AwMarkingSettings.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\include\widget\AwTopoBuilder.h">
       <Filter>Header Files</Filter>
     </QtMoc>

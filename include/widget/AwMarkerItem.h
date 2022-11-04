@@ -29,19 +29,15 @@ public:
 	virtual ~AwMarkerItem();
 
 	void updateDisplay();
-//	inline AwMarker *marker() { return m_marker; }
 	inline AwSharedMarker marker() { return m_marker; }
-	//inline void setMarker(AwMarker *mark) { m_marker = mark; }
 	inline void setMarker(const AwSharedMarker& marker) { m_marker = marker; }
 	void updatePosition();
 	inline int offset() { return m_offset; }
-
 	void showLabel(bool flag);
 	void showValue(bool flag);
 	void setPositionInFile(float pos);
 	void setText(const QString& text);
 	void setValue(double v);
-
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
