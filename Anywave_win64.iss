@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=2.5.0
+AppVersion=2.6.1
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -65,7 +65,7 @@ Source: ".\bin\x64\Release\Plugins\MergeFiles.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\SPMReader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\EEGLABReader.dll"; DestDir: "{app}\Plugins";
 Source: ".\bin\x64\Release\Plugins\CompumedicsPF.dll"; DestDir: "{app}\Plugins";
-Source: ".\bin\x64\Release\Plugins\Spectral.dll"; DestDir: "{app}\Plugins";
+;Source: ".\bin\x64\Release\Plugins\Spectral.dll"; DestDir: "{app}\Plugins";
 Source: ".\redist\vc_redist.x64.exe"; DestDir: "{app}"; Flags: deleteafterinstall
 Source: ".\bin\x64\Release\QtPlugins\*.*"; DestDir: "{app}\QtPlugins\"; Flags: recursesubdirs
 

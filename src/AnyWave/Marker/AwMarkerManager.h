@@ -31,27 +31,22 @@ class AwMarkerManager : public QObject
 public:
 	AwMarkerManager();
 	~AwMarkerManager();
-
 	/** getInstance() **/
 	static AwMarkerManager *instance();
 	static AwMarkerManager* newInstance();
-
-	AwSharedMarkerList filteredMarkers(const QStringList& used, const QStringList& skipped);
+	
 	/** Thread support version **/
 	AwSharedMarkerList getSharedMarkersThread();
 	AwMarkerManagerSettings* ui();
 	void setDock(QDockWidget *dock) { m_dock = dock; }
-//	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();
 	void quit();
 	void init();
 	void guiInit();
 	void initFromCommandLine(const QString& mrkFilePath);  // takes ownership of markers
 	void finishCommandLineOperation();
-
 	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
-
 public slots:
 	void addMarkers(const AwSharedMarkerList& markers);
 	void addMarker(const AwSharedMarker& marker);
@@ -72,7 +67,6 @@ public slots:
 signals:
 	void goTo(float pos);
 	void displayedMarkersChanged(const AwSharedMarkerList& markers);
-
 	void log(const QString& message);
 	void finished();	// for threaded operations
 	void updateStats();	// emitted each time the global markers list changes
@@ -85,6 +79,7 @@ private:
 	static AwMarkerManager *m_instance;
 	QString m_filePath;
 	QString m_eventsTsv;
+	
 };
 
 #endif

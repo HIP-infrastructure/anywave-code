@@ -628,6 +628,9 @@
     <ClCompile Include="Debug\AwLogger.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwClinicalWidget.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1112,6 +1115,9 @@
     </QtMoc>
     <QtMoc Include="Debug\AwLogger.h">
       <Filter>Debug</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\BIDS\AwClinicalWidget.h">
+      <Filter>IO\BIDS</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

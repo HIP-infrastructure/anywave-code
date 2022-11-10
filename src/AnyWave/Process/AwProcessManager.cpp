@@ -48,6 +48,11 @@ AwProcessManager *AwProcessManager::instance()
 	return m_instance;
 }
 
+bool AwProcessManager::isIntantiated()
+{
+	return m_instance != nullptr;
+}
+
 AwProcessManager::AwProcessManager(QObject *parent)
 	: QObject(parent)
 {
@@ -87,18 +92,14 @@ void AwProcessManager::closeFile()
 	// clean active display processes
 	for (auto p : m_activeDisplayProcess)
 		stopProcess(p);
-	
 	// clean currently running processes
 	for  (AwProcess *p : m_runningProcesses) 
 		p->stop();
-
 	// GUI processess
 	for (auto gp : m_GUIProcesses)
 		gp->stop();
-
 	if (m_processesWidget)
 		m_processesWidget->clear();
-
 	// launch process flaged as LaunchOnClosing
 	launchProcessesOnClosing();
 }

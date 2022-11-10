@@ -108,7 +108,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	m_recentFilesMenu = menuRecent_files;
 	m_recentBIDSMenu = menuRecent_BIDS;
 	connect(m_recentFilesMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentFilesList);
-	connect(m_recentBIDSMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentFilesList);
+	connect(m_recentBIDSMenu, &QMenu::aboutToShow, this, &AnyWave::loadRecentBidsList);
 	setWindowIcon(QIcon(":images/AnyWave_icon.png"));
 	adl->connectComponent("Filters Settings", &dm->filterSettings());
 	adl->connectComponent("Global Settings", aws);
@@ -483,10 +483,9 @@ void AnyWave::initToolBarsAndMenu()
 
 bool AnyWave::checkForModified()
 {
-	// Le fichier actuel est il en mode modifi� ?
 	if (m_currentFileModified)
-		if (QMessageBox(QMessageBox::Question, tr("Save modifications"), 
-			tr("Current file has been modified. Save the file before opening a new one.\nDo you want to continue (changes will be lost)?"),
+		if (QMessageBox(QMessageBox::Question, "Save modifications", 
+			"Current file has been modified. Save the file before opening a new one.\nDo you want to continue (changes will be lost)?",
 			QMessageBox::Yes | QMessageBox::No).exec() == QMessageBox::No)
 			return false;
 	return true;

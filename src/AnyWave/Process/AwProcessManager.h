@@ -55,6 +55,7 @@ public:
 	AwProcessManager(QObject *parent = 0);
 
 	static AwProcessManager *instance();
+	static bool isIntantiated();
 	void setMenu(QMenu *menu);
 	inline QMenu *fileMenu() { return m_fileMenu; }
 	inline QMenu *viewMenu() { return m_viewMenu; }
@@ -98,7 +99,6 @@ public slots:
 	void processEvent(QSharedPointer<AwEvent>);
 	void setProcessInstance(AwBaseProcess**, const QString&);
 signals:
-//	void newMarkersAvailable(const AwSharedMarkerList &markers);
 	void processFinished(AwProcess *process);
 	void displayProcessTerminated(AwProcess *process);
 	void channelsAddedForProcess(AwChannelList *list);
@@ -107,7 +107,6 @@ signals:
 	// signals for specific interpreted commands
 	void displayCommandRequested(int command, const QVariantList& args);
 	void aboutToQuit(); // sent to processes when AnyWave is closing
-
 	// signals relative to command sent by processes
 	// transmit the command to Display object
 	void displayCommand(const QVariantMap&);

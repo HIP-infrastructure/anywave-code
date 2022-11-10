@@ -48,7 +48,10 @@ void AwRequestServer::handleSendMarkers(QTcpSocket* client, AwScriptProcess* pro
 	}
 	response.send();
 	if (m_markers.size())
-		//		emit markersAdded(&m_markers);
-		AwDataManager::instance()->markerManager()->addMarkers(m_markers);
+		//emit markersAdded(&m_markers);
+		//AwDataManager::instance()->markerManager()->addMarkers(m_markers);
+		//process->sendMarkers(&m_markers);
+		process->addMarkers(&m_markers);
+
 	emit log("Done.");
 }

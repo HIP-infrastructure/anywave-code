@@ -97,7 +97,7 @@ int AwBaseProcess::applyUseSkipMarkersKeys()
 
 	if (!allDataFlag) {
 		if (skipMarkers || useMarkers) {
-			auto markers = AwMarker::duplicate(pdi.input.markers());
+			auto markers = pdi.input.markers();
 			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
 			// Set modified markers !!!
 			pdi.input.setModifiedMarkers(markers);
@@ -142,23 +142,6 @@ void AwBaseProcess::addMarkers(AwSharedMarkerList * markers)
 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
 	m_mutexMarkersReceived.unlock();
 }
-
-
-//void AwBaseProcess::addMarkers(AwMarkerList *markers)
-//{
-//	emit sendMarkers(markers);
-//	m_mutexMarkersReceived.lock();
-// 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
-//	m_mutexMarkersReceived.unlock();
-//}
-//
-//void AwBaseProcess::addMarker(AwMarker *marker)
-//{
-//	emit sendMarker(marker);
-//	m_mutexMarkersReceived.lock();
-// 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
-//	m_mutexMarkersReceived.unlock();
-//}
 
 void AwBaseProcess::setMarkersReceived()
 {

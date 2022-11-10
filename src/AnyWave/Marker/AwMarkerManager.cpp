@@ -36,7 +36,6 @@
 // statics
 AwMarkerManager *AwMarkerManager::m_instance = 0;
 
-
 AwMarkerManager *AwMarkerManager::instance()
 {
 	if (!m_instance) {

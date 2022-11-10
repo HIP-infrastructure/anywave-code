@@ -46,12 +46,12 @@ public slots:
 signals:
 	void log(const QString& message);
 	void message(const QString& message);
-//	void markersAdded(AwSharedMarkerList *markers);
+	void markersAdded(AwSharedMarkerList *markers);
 	void beamformerAvailable(QString path);
 protected:
 	void handleRequest(int request, QTcpSocket *client, int pid);
-	
 	void initDebugProcess(AwScriptProcess*);
+
 	AwScriptProcess* newDebugProcess();
 	AwDataManager* m_dataManager;
 	QTcpServer *m_server;
@@ -63,7 +63,6 @@ protected:
 	bool m_debugMode;
 	QString m_errorString;
 	QList<AwScriptProcess*> m_processes;	// this list will contain instanciated process when plugin_debug option is active
-
 private:
 	void handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetProperties(QTcpSocket *client, AwScriptProcess *process);

@@ -392,7 +392,7 @@ bool AnyWave::openBIDS(const QString& path)
 	if (AwBIDSManager::instance()->setRootDir(path) == -1)
 		return false;
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFileFromBIDS(const QString&)));
-	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
+//	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
 
 	// instantiate dock widget if needed
 	auto dock = m_dockWidgets.value("BIDS");
@@ -521,7 +521,7 @@ void AnyWave::closeFile()
 
 	if (m_SEEGViewer) {
 		delete m_SEEGViewer;
-		m_SEEGViewer = NULL;
+		m_SEEGViewer = nullptr;
 	}
 
 	m_dockWidgets["video"]->hide();

@@ -87,7 +87,6 @@ void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwA
 AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 {
 	const QString origin = "AwCommandLineManager::createNewProcess()";
-//	AwCommandLogger logger(QString("Command Line"));
 	// get plugin name from json argumetns
 	if (!args.contains("run_process")) {
 		throw AwException("missing --run argument.", origin);
@@ -131,13 +130,11 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 	AwUniteMaps(args, map);
 	// always add the path to anywave app
 	args[keys::aw_path] = QCoreApplication::applicationFilePath();
-	QString inputFile = args.value(keys::input_file).toString();
-
-	if (!doNotRequiresData && inputFile.isEmpty()) {
+ 	bool inputFileOk = QFile::exists(args.value(keys::input_file).toString());
+	if (!doNotRequiresData && !inputFileOk) {
 		throw AwException(QString("input_file must be specified."), origin);
 		return nullptr;
 	}
-
 	// create output_dir if needed
 	if (args.contains(keys::output_dir)) {
 		QDir dir;
@@ -147,7 +144,6 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 		// no  output_dir => make output_dir to be the data_dir
 		args[keys::output_dir] = args.value(keys::data_dir);
 	}
-
 	// instantiate process
 	auto process = plugin->newInstance();
 	process->setPlugin(plugin);
@@ -175,7 +171,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 
 	if (!inputFile.isEmpty()) {
 		if (dm->openFileCommandLine(inputFile) != 0) {
-			throw AwException(dm->errorString());
+			throw AwException(QString("input_file error: %1").arg(dm->errorString()));
 			return -1;
 		}
 		process->pdi.input.setReader(dm->reader());

@@ -54,7 +54,6 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	auto dm = AwDataManager::instance();
 	auto mm = dm->markerManager();
 	QObject::connect(process, &AwProcess::sendMarkers, mm, &AwMarkerManager::receivedMarkers);
-//	QObject::connect(process, SIGNAL(dataConnectionRequested(AwDataClient*)), dm->dataServer(), SLOT(openConnection(AwDataClient*)));
 	QObject::connect(process, &AwProcess::dataConnectionRequested, dm->dataServer(), &AwDataServer::openConnection);
 	m_logger->writeLog(QString("running %1...").arg(process->plugin()->name));
 	

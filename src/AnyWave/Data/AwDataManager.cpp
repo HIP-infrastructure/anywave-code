@@ -82,11 +82,14 @@ void AwDataManager::closeFile()
 	m_status = 0;
 	m_errorString.clear();
 	if (m_reader) {
+		if (AwProcessManager::isIntantiated())
+			AwProcessManager::instance()->closeFile();
 		m_filterSettings.save(m_settings.value(keys::flt_file).toString());
 		m_reader = nullptr;
 	}
 	m_montageManager->closeFile();
 	m_markerManager->closeFile();
+
 }
 
 const AwChannelList& AwDataManager::rawChannels()
@@ -295,7 +298,6 @@ int AwDataManager::openFileFromBIDS(const QString& filePath)
 	m_status = openFileBase(filePath);
 	if (m_status)
 		return m_status;
-
 	AwBIDSManager::instance()->setNewOpenFile(filePath);
 	// Are there events?
 	if (m_reader->infos.blocks().at(0)->markersCount())
@@ -342,7 +344,6 @@ int AwDataManager::openFile(const QString& filePath, bool commandLineMode)
 	m_status = openFileBase(filePath);
 	if (m_status)
 		return m_status;
-
 	// try to load .flt file
 	bool fltFileOk = true;
 	try {

@@ -35,6 +35,7 @@
 #include <QProcess>
 #include <QtConcurrent>
 #include <widget/AwWaitWidget.h>
+#include "AwClinicalWidget.h"
 
 AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 {
@@ -54,7 +55,9 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 	m_ui.treeView->setUniformRowHeights(true);
 	m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_ui.tableView->setModel(m_propertiesModel);
-	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openBIDSOptions);
+	m_clinicalWidget = nullptr;
+//	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openBIDSOptions);
+	connect(m_ui.buttonOptions, &QPushButton::clicked, this, &AwBIDSGUI::openClinical);
 	connect(m_ui.buttonRefresh, &QPushButton::clicked, this, &AwBIDSGUI::refreshSubjects);
 
 	createContextMenus();
@@ -72,26 +75,30 @@ AwBIDSGUI::AwBIDSGUI(QWidget *parent) : QWidget(parent)
 void AwBIDSGUI::closeBIDS()
 {
 	m_model->clear();
-	// check for existing bids.json
-	auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
-	QString jsonPath = QString("%1/bids.json").arg(settingsDir);
-	QVariantMap map;
-	QVariantMap shownExtraCols;
-	shownExtraCols.insert(bids::gui_extra_cols, m_shownExtraColumns);
+	//// check for existing bids.json
+	//auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
+	//QString jsonPath = QString("%1/bids.json").arg(settingsDir);
+	//QVariantMap map;
+	//QVariantMap shownExtraCols;
+	//shownExtraCols.insert(bids::gui_extra_cols, m_shownExtraColumns);
 
-	if (QFile::exists(jsonPath)) {
-		map = AwUtilities::json::fromJsonFileToMap(jsonPath);
-		if (map.contains(m_bids->rootDir()))
-			map.remove(m_bids->rootDir());
-	}
-	map.insert(m_bids->rootDir(), shownExtraCols);
-	AwUtilities::json::saveToJsonFile(map, jsonPath);
-	m_shownExtraColumns.clear();
+	//if (QFile::exists(jsonPath)) {
+	//	map = AwUtilities::json::fromJsonFileToMap(jsonPath);
+	//	if (map.contains(m_bids->rootDir()))
+	//		map.remove(m_bids->rootDir());
+	//}
+	//map.insert(m_bids->rootDir(), shownExtraCols);
+	//AwUtilities::json::saveToJsonFile(map, jsonPath);
+	//m_shownExtraColumns.clear();
+	if (m_clinicalWidget)
+		m_clinicalWidget->closeBIDS();
 }
 
 
 AwBIDSGUI::~AwBIDSGUI()
 {
+	if (m_clinicalWidget)
+		delete m_clinicalWidget;
 }
 
 void AwBIDSGUI::showItem(QStandardItem *item)
@@ -99,13 +106,11 @@ void AwBIDSGUI::showItem(QStandardItem *item)
 	m_ui.treeView->expand(m_model->indexFromItem(item));
 }
 
-
 void AwBIDSGUI::contextMenuRequested(const QPoint& point)
 {
 	QModelIndexList indexes = m_ui.treeView->selectionModel()->selectedIndexes();
 	if (indexes.isEmpty()) // no selection
 		return;
-
 	// 
 	bool enableBatchProcess = false;
 	QStringList niftiFiles;
@@ -214,23 +219,30 @@ void AwBIDSGUI::addToProcessing()
 	AwBatchManager::instance()->ui()->addNewItem(batchItem);
 }
 
-void AwBIDSGUI::openBIDSOptions()
+//void AwBIDSGUI::openBIDSOptions()
+//{
+//	AwBIDSGUIOptionsDialog dlg(m_shownExtraColumns);
+//	if (dlg.exec() == QDialog::Accepted) 
+//		showColumns(dlg.columns());
+//}
+
+void AwBIDSGUI::openClinical()
 {
-	AwBIDSGUIOptionsDialog dlg(m_shownExtraColumns);
-	if (dlg.exec() == QDialog::Accepted) 
-		showColumns(dlg.columns());
+	if (m_clinicalWidget == nullptr)
+		m_clinicalWidget = new AwClinicalWidget;
+	m_clinicalWidget->update();
 }
 
-void AwBIDSGUI::showColumns(const QStringList& cols)
-{
-	auto particantCols = m_bids->participantColumns();
-	if (particantCols.isEmpty())
-		return;
-	particantCols.takeFirst();
-	int index = 1;
-	for (const auto& col : particantCols) 
-		m_ui.treeView->setColumnHidden(index++, !cols.contains(col));
-}
+//void AwBIDSGUI::showColumns(const QStringList& cols)
+//{
+//	auto particantCols = m_bids->participantColumns();
+//	if (particantCols.isEmpty())
+//		return;
+//	particantCols.takeFirst();
+//	int index = 1;
+//	for (const auto& col : particantCols) 
+//		m_ui.treeView->setColumnHidden(index++, !cols.contains(col));
+//}
 
 void AwBIDSGUI::openSubject(AwBIDSItem* item) 
 {
@@ -471,28 +483,29 @@ void AwBIDSGUI::init()
 	auto headerItem = new QStandardItem("Directory");
 	headerItem->setData(Qt::AlignCenter, Qt::TextAlignmentRole);
 	m_model->setHorizontalHeaderItem(0, headerItem);
-	auto participantsCols = m_bids->participantColumns();
-	if (!participantsCols.isEmpty())
-		participantsCols.takeFirst(); // remove first col (subject id)
-	int colIndex = 1;
-	for (const auto& col : participantsCols) 
-		m_model->setHorizontalHeaderItem(colIndex++, new QStandardItem(col));
+	//auto participantsCols = m_bids->participantColumns();
+	//if (!participantsCols.isEmpty())
+	//	participantsCols.takeFirst(); // remove first col (subject id)
+	//int colIndex = 1;
+	//for (const auto& col : participantsCols) 
+	//	m_model->setHorizontalHeaderItem(colIndex++, new QStandardItem(col));
 	
-	m_model->setColumnCount(participantsCols.size() + 1);
-	auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
-	QString jsonPath = QString("%1/bids.json").arg(settingsDir);
-	// do nothing if the file does not exist
-	if (QFile::exists(jsonPath)) {
-		auto map = AwUtilities::json::fromJsonFileToMap(jsonPath);
-		if (!map.isEmpty()) {
-			if (map.contains(m_bids->rootDir())) {
-				auto m = map.value(m_bids->rootDir()).toMap();
-				m_shownExtraColumns = m.value(bids::gui_extra_cols).toStringList();
-			}
-		}
-	}
-	if (!m_shownExtraColumns.isEmpty())
-		showColumns(m_shownExtraColumns);
+	//m_model->setColumnCount(participantsCols.size() + 1);
+
+	//auto settingsDir = AwSettings::getInstance()->value(aws::settings_dir).toString();
+	//QString jsonPath = QString("%1/bids.json").arg(settingsDir);
+	//// do nothing if the file does not exist
+	//if (QFile::exists(jsonPath)) {
+	//	auto map = AwUtilities::json::fromJsonFileToMap(jsonPath);
+	//	if (!map.isEmpty()) {
+	//		if (map.contains(m_bids->rootDir())) {
+	//			auto m = map.value(m_bids->rootDir()).toMap();
+	//			m_shownExtraColumns = m.value(bids::gui_extra_cols).toStringList();
+	//		}
+	//	}
+	//}
+	//if (!m_shownExtraColumns.isEmpty())
+	//	showColumns(m_shownExtraColumns);
 }
 
 void AwBIDSGUI::setSubjects(const AwBIDSItems& items)
@@ -503,10 +516,10 @@ void AwBIDSGUI::setSubjects(const AwBIDSItems& items)
 	for (auto item : items) {
 		rootItem->appendRow(item);
 		auto subID = item->fullSubjectName();
-		QStringList values = m_bids->participantValues(subID);
-		int colIndex = 1;
-		for (const auto& col : values)
-			m_model->setItem(item->row(), colIndex++, { new QStandardItem(col) });
+//		QStringList values = m_bids->participantValues(subID);
+//		int colIndex = 1;
+//		for (const auto& col : values)
+//			m_model->setItem(item->row(), colIndex++, { new QStandardItem(col) });
 		recursiveFill(item);
 	}
 	m_items = items;

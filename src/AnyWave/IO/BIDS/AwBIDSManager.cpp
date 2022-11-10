@@ -93,17 +93,6 @@ QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 
 void AwBIDSManager::finishCommandLineOperation()
 {
-	//if (m_instance == nullptr)
-	//	return;
-	//if (m_instance->m_currentOpenItem) {
-	//	// get .bad file
-	//	auto badFile = AwDataManager::instance()->badFilePath();
-	//	if (QFile::exists(badFile)) {
-	//		m_instance->updateChannelsTsvBadChannels(AwMontage::loadBadChannels(badFile));
-	//	}
-	//}
-	//delete m_instance;
-	//m_instance = nullptr;
 }
 
 void AwBIDSManager::initCommandLineOperation(const QString & filePath, AwDataManager *dm)
@@ -297,9 +286,6 @@ QString AwBIDSManager::currentFileName()
 {
 	return m_settings.value(bids::current_open_filename).toString();
 }
-
-
-
 
 QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
 {

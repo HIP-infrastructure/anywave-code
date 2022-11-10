@@ -59,6 +59,7 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	}
 	m_debugMode = false;
 	m_dataManager = AwDataManager::instance();
+	connect(this, &AwRequestServer::markersAdded, m_dataManager->markerManager(), &AwMarkerManager::receivedMarkers);
 //	connect(this, SIGNAL(markersAdded(AwMarkerList*)), m_dataManager->markerManager(), SLOT(addMarkers(AwMarkerList*)));
 //	connect(this, &AwRequestServer::markersAdded, m_dataManager->markerManager(), &AwMarkerManager::receivedMarkers);
 }

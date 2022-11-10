@@ -86,6 +86,8 @@ public:
 	static QList<QSharedPointer<AwMarker>> duplicate(const QList<QSharedPointer<AwMarker>>& markers);
 	/** Sort markers, chronologically. Don't duplicate.**/
 	static void sort(QList<QSharedPointer<AwMarker>>& markers);
+	static QList<QSharedPointer<AwMarker>> markersBefore(const QList<QSharedPointer<AwMarker>>& markers, float position);
+	static QList<QSharedPointer<AwMarker>> markersWithin(const QList<QSharedPointer<AwMarker>>& markers, float start, float end);
 	/** Cut all markers using markers in cutMarkers. Returns the list of reshaped markers without the cut markers. **/
 	static QList<QSharedPointer<AwMarker>> cutAroundMarkers(QList<QSharedPointer<AwMarker>>& markers, QList<QSharedPointer<AwMarker>>& cutMarkers);
 	/** AND operator : keep markers on m2 which overlaps markers on m1. reshape them to match the intersection of m1. **/

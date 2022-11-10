@@ -49,14 +49,14 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Click here to change display options</string>
+        <string>View clinical informations</string>
        </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
         <iconset resource="../../../../resources/AnyWave.qrc">
-         <normaloff>:/images/ox_eye_32.png</normaloff>:/images/ox_eye_32.png</iconset>
+         <normaloff>:/images/Information.png</normaloff>:/images/Information.png</iconset>
        </property>
        <property name="iconSize">
         <size>

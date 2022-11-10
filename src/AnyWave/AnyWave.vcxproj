@@ -86,6 +86,7 @@
     <ClCompile Include="IO\BIDS\AwBIDSManager.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSParsing.cpp" />
     <ClCompile Include="IO\BIDS\AwBIDSTsv.cpp" />
+    <ClCompile Include="IO\BIDS\AwClinicalWidget.cpp" />
     <ClCompile Include="IO\BIDS\AwRefreshDialog.cpp" />
     <ClCompile Include="IO\export\AwChannelsExportWizardPage.cpp" />
     <ClCompile Include="IO\export\AwExporter.cpp" />
@@ -264,6 +265,7 @@
     <QtMoc Include="IO\export\AwFilterExportWizardPage.h" />
     <QtMoc Include="IO\export\AwExporter.h" />
     <QtMoc Include="IO\BIDS\AwRefreshDialog.h" />
+    <QtMoc Include="IO\BIDS\AwClinicalWidget.h" />
     <ClInclude Include="IO\JSON\AwJSON.h" />
     <ClInclude Include="Marker\AwExtractTriggers.h" />
     <QtMoc Include="Marker\AwMarkersExportWidget.h">

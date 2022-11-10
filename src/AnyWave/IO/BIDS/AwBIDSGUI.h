@@ -21,6 +21,7 @@
 class AwBIDSManager;
 #include "AwBIDSItem.h"
 class QMenu;
+class AwClinicalWidget;
 
 class AwBIDSGUI : public QWidget
 {
@@ -35,7 +36,7 @@ public:
 	void setSourceDataSubjects(const AwBIDSItems&);
 
 	void closeBIDS(); 
-	void showColumns(const QStringList& cols);
+//	void showColumns(const QStringList& cols);
 	void showItem(QStandardItem *item);
 	void openSubject(AwBIDSItem *item);
 	void openFileItem(AwBIDSItem* item);
@@ -49,7 +50,8 @@ signals:
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);
-	void openBIDSOptions(); // called when Change button is clicked
+	//void openBIDSOptions(); // called when Change button is clicked
+	void openClinical();
 	void refreshSubjects();
 
 	// context menu slots
@@ -58,13 +60,14 @@ protected slots:
 	void showNiftiFiles();
 protected:
 	AwBIDSManager *m_bids;
+	AwClinicalWidget* m_clinicalWidget;
 	QMenu *m_menu;	// context menu
 	QMenu *m_menuProcessing;
 	QAction *m_showNifti;
 	// keep a copy of models for the TreeView
 	QStandardItemModel* m_model, *m_propertiesModel;
 	AwBIDSItems m_items;	// copy of items list from bids manager
-	QStringList m_shownExtraColumns; // contain the label of the current extra columns set in the model.
+//	QStringList m_shownExtraColumns; // contain the label of the current extra columns set in the model.
 	void recursiveFill(AwBIDSItem *item);
 	void insertChildren(AwBIDSItem* parent);
 	void removeChildren(AwBIDSItem* parent);
