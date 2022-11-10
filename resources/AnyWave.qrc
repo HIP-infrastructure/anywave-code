@@ -36,5 +36,7 @@
     <file>images/Capture32x32.png</file>
     <file>images/QTS.png</file>
     <file>images/cortex.png</file>
+    <file>images/refresh.png</file>
+    <file>images/Information.png</file>
   </qresource>
 </RCC>

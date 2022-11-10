@@ -63,14 +63,6 @@ void AwWaitWidget::run(F function, T... args)
 	exec();
 }
 
-//template<typename F, typename ...T>
-//void AwWaitWidget::run2(F function, T... args)
-//{
-//	m_thread = new std::thread(function, args...);
-//	exec();
-//}
-
-
 template<class C, typename T>
 void AwWaitWidget::run(C* ptr, void (C::*method)(T), T arg)
 {

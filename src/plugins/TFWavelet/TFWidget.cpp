@@ -174,7 +174,7 @@ void TFWidget::setChannels(const QList<QSharedPointer<AwChannel>>& channels)
 	repaint();
 }
 
-void TFWidget::setMarkers(const AwMarkerList& markers)
+void TFWidget::setMarkers(const AwSharedMarkerList& markers)
 {
 	m_signalView->setMarkers(markers);
 	m_ui.comboMarkers->setMarkers(markers);

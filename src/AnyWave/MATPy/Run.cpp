@@ -22,6 +22,10 @@
 #include "Plugin/AwPluginManager.h"
 #include "CL/AwCommandLineManager.h"
 #include "Marker/AwMarkerManager.h"
+#include "Prefs/AwSettings.h"
+#include <QProcess>
+#include <QCoreApplication>
+#include <QSettings>
 
 void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 {
@@ -32,7 +36,8 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	QDataStream& toClient = *response.stream();
 	AwDataManager* dm = AwDataManager::instance();
 	AwChannelList inputChannels;
-	AwMarkerList inputMarkers;
+	//AwMarkerList inputMarkers;
+	AwSharedMarkerList inputMarkers;
 
 	QString json, error;
 	fromClient >> json;
@@ -46,26 +51,17 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 	}
 
 	// required keys (plugin)
-	if (!cfg.contains("process")) {
-		error = "ERROR: process key is not specified in struct/dict parameter.";
+	if (!cfg.contains("plugin")) {
+		error = "ERROR: plugin key is not specified in struct/dict parameter.";
 		emit log(error);
 		toClient << error;
 		response.send(-1);
 		return;
 	}
 
-	// if json string is passed and there is no current open file in AnyWave, than the key data_file must exist
-	if (!dm->isFileOpen()) {
-		if (!cfg.contains(keys::input_file)) {
-			error = "ERROR: no file open in AnyWave and the key input_file is not set. Nothing done.";
-			emit log(error);
-			toClient << error;
-			response.send(-1);
-			return;
-		}
-	}
+	bool inputFileSelected = false;
 	// get the plugin
-	QString pluginName = cfg.value("process").toString();
+	QString pluginName = cfg.value("plugin").toString();
 	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(pluginName);
 	if (plugin == nullptr) {
 		error = QString("ERROR: Unable to find process plugin named %1.").arg(pluginName);
@@ -87,63 +83,73 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		return;
 	}
 
-
 	// if data_path is set, instantiate a new DataManager and make it handle the file
 	if (cfg.contains(keys::input_file)) {
 		emit log("process on a speficied file, not the currently open data file.");
-		auto filePath = cfg.value(keys::input_file).toString();
-		dm = AwDataManager::newInstance();
-		auto res = dm->openFile(filePath, true); // open in command line mode (silent mode)
-		if (res) {
-			error = QString("ERROR: Unable to open file %1.").arg(filePath);
+		emit log("launching command line operation...");
+		auto aws = AwSettings::getInstance();
+		auto appDir = aws->value(aws::app_dir).toString();
+		auto systemPath = aws->value(aws::system_path).toString();
+		QString path;
+		QStringList arguments;
+		QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+
+		QSettings settings;
+
+		QString mcrPath = settings.value("matlab/mcr_path").toString();
+		if (!mcrPath.isEmpty())
+     		arguments << mcrPath;
+#endif
+#ifdef Q_OS_WIN
+#ifdef QT_DEBUG
+		path = QString("C:\\dev\\anywave-vs2019\\bin\\x64\\Release;%1").arg(systemPath);
+#else
+		path = QString("%1;%2").arg(appDir).arg(systemPath);
+#endif
+		env.remove("PATH");
+		env.insert("PATH", systemPath);
+#endif
+		arguments << "--run" << QString("""%1""").arg(json);
+		auto process = new QProcess(this);
+		process->setProcessEnvironment(env);
+		process->setReadChannel(QProcess::StandardOutput);
+		process->setProcessChannelMode(QProcess::MergedChannels);
+		QObject::connect(process, &QProcess::readyReadStandardOutput, p, [p, process]() { p->sendMessage(process->readAllStandardOutput()); });
+		process->start(QCoreApplication::applicationFilePath(), arguments);
+		if (process->waitForStarted()) {
+			process->waitForFinished(-1);
+			p->sendMessage(process->readAll());
+			response.send();
+			emit log("process has finished.");
+			return;
+		}
+		else {
+			error = QString("ERROR: failed to launch %1:%2").arg(pluginName).arg(process->errorString());
 			emit log(error);
 			toClient << error;
 			response.send(-1);
-			delete dm;
 			return;
 		}
-		// get the markers from the default .mrk file associated with the input file (if it exists)
-		auto mrkFile = dm->mrkFilePath();
-		if (QFile::exists(mrkFile))
-			inputMarkers = AwMarker::load(mrkFile);
-		emit log("file %1 open successfuly");
 	}
-	else 
-		// get markers from current data file in AnyWave
-		inputMarkers = AwMarkerManager::instance()->getMarkersThread();
-
+	else {
+		if (dm->isFileOpen()) {
+			// get markers from current data file in AnyWave
+			inputMarkers = AwMarkerManager::instance()->getSharedMarkersThread();
+			inputFileSelected = true;
+		}
+	}
 	emit log(QString("preparing process %1").arg(pluginName));
 	auto process = plugin->newInstance();
-	dm->dataServer()->openConnection(process);
-
 	// copy input keys/values
 	process->pdi.input.settings = cfg;
-	AwUniteMaps(process->pdi.input.settings, dm->settings());
-	process->pdi.input.setReader(dm->reader());
-
-	// get input channels
-	inputChannels = AwCommandLineManager::getInputChannels(cfg, dm);
-	if (inputChannels.isEmpty()) {
-		error = QString("ERROR: Unable to determine input channels.");
-		emit log(error);
-		toClient << error;
-		response.send(-1);
-		if (dm != AwDataManager::instance())
-			delete dm;
-		qDeleteAll(inputMarkers);
-		return;
-	}
-	process->pdi.input.setNewChannels(inputChannels, false); // DO NOT duplicate channels as the returned list from getInputChannel already duplicated them
-
-	// apply filters
-	AwCommandLineManager::applyFilters(inputChannels, cfg);
-
 	// now the markers! 
-	auto loadedMarkers = AwCommandLineManager::parseMarkerFile(cfg);
-	if (!loadedMarkers.isEmpty()) {
-		qDeleteAll(inputMarkers);
-		inputMarkers = loadedMarkers;
-	}
+//	auto loadedMarkers = AwCommandLineManager::parseMarkerFile(cfg);
+//	if (!loadedMarkers.isEmpty()) {
+//		qDeleteAll(inputMarkers);
+//		inputMarkers = loadedMarkers;
+//	}
+
 	QStringList use_markers, skip_markers;
 	if (cfg.contains(keys::use_markers))
 		use_markers = cfg.value(keys::use_markers).toStringList();
@@ -158,20 +164,33 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		auto l = use_markers.first();
 		if (l.contains("all data")) {
 			usingMarkers = false;
-			qDeleteAll(inputMarkers);
-			inputMarkers << new AwMarker("global", 0., dm->totalDuration());
+		//	qDeleteAll(inputMarkers);
+			inputMarkers.clear();
+			inputMarkers << QSharedPointer<AwMarker>(new AwMarker("global", 0., dm->totalDuration()));
 		}
 	}
-
 	if (usingMarkers || skippingMarkers) {
-		AwMarkerList modifiedMarkers = inputMarkers;
+	//	AwMarkerList modifiedMarkers = inputMarkers;
+		AwSharedMarkerList modifiedMarkers = inputMarkers;
 		inputMarkers = AwMarker::getInputMarkers(modifiedMarkers, skip_markers, use_markers, dm->totalDuration());
 	}
-	process->pdi.input.setNewMarkers(inputMarkers);
-
+	process->pdi.input.setMarkers(inputMarkers);
+	AwMATPyServer* server = nullptr;
+	if (plugin->classType != AwProcessPlugin::RegularPlugin) {
+		auto sp = static_cast<AwScriptProcess*>(process);
+		server = AwMATPyServer::instance()->newInstance();
+		sp->setServerInstance(server);
+		server->setDataManager(dm); 
+		server->start();
+	}
 	emit log("Lauching process");
-	process->runFromCommandLine();
+	connect(process, SIGNAL(progressChanged(const QString&)), p, SIGNAL(progressChanged(const QString&)));
+	if (process->init())
+		process->runFromCommandLine();
 	emit log("Process has fisnihed");
+	if (server) {
+		AwMATPyServer::instance()->deleteDuplicatedInstance(server);
+	}
 	// check if process produced ouput_put arguments (settings)
 	QString outputs;
 	auto out = process->pdi.output.settings;
@@ -186,8 +205,6 @@ void AwRequestServer::handleRun(QTcpSocket* client, AwScriptProcess* p)
 		outputs = AwUtilities::json::toJsonString(out);
 	toClient << outputs;
 	response.send();
-
-//	plugin->deleteInstance(process);
 	delete process;
 
 	if (dm != AwDataManager::instance())

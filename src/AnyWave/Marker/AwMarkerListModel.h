@@ -36,7 +36,7 @@ class AwMarkerListModel: public QAbstractTableModel
 	Q_OBJECT
 
 public:
-	AwMarkerListModel(const QList<AwMarker *>& markers, QObject *parent =0)
+	AwMarkerListModel(const AwSharedMarkerList& markers, QObject *parent =0)
 		: QAbstractTableModel(parent), m_markers(markers) {}
 
 	// Methodes à implémenter pour custom model
@@ -49,12 +49,12 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index = QModelIndex()) const;
 
 	// Methodes propres au model
-	void updateMarkers(const AwMarkerList& markers);
+	void updateMarkers(const AwSharedMarkerList& markers);
 	void update();  // indique au model que certains éléments de la liste on changé leurs données.
-	AwMarkerList& markers() { return m_markers; }
+	AwSharedMarkerList markers() { return m_markers; }
 	void clear() { beginResetModel(); m_markers.clear(); endResetModel(); }
 private:
-	QList<AwMarker *> m_markers;
+	AwSharedMarkerList m_markers;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,14 +66,14 @@ class AwMarkerListDelegate : public QItemDelegate
 	Q_OBJECT
 
 public:
-	AwMarkerListDelegate(const AwMarkerList& asRecorded, QObject *parent = 0);
+	AwMarkerListDelegate(const AwSharedMarkerList& asRecorded, QObject *parent = 0);
 
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	void setEditorData(QWidget *editor, const QModelIndex &index) const;
 	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 	void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 private:
-	AwMarkerList m_markers;
+	AwSharedMarkerList m_markers;
 private slots:
 	void commitAndCloseComboBox();
 

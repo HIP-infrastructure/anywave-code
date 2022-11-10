@@ -19,20 +19,19 @@
 #include <QHeaderView>
 #include "AwChannelsExportWizardPage.h"
 #include <QVBoxLayout>
-
+#include <QMessageBox>
 /* **************************************************************************************************
 *                                                      Model
 *****************************************************************************************************/
-AwPageFilterModel::AwPageFilterModel(AwChannelsExportWizardPage* page, QObject* parent) : QAbstractTableModel(parent)
+AwPageFilterModel::AwPageFilterModel(const AwChannelList& channels, const AwFilterSettings& filterSettings, QObject* parent) : QAbstractTableModel(parent)
 {
-	auto settings = AwDataManager::instance()->filterSettings();
 	m_settings = AwFilterSettings(true); // no init => no channel type set
-	m_channels = page->channels();
+	m_channels = channels;
 	auto types = AwChannel::getTypes(m_channels);
 	for (auto t : types) {
 		FilterItem *fi = new FilterItem;
 		fi->type = t;
-		fi->values = settings.filters(t);
+		fi->values = filterSettings.filters(t);
 		m_list.append(fi);
 	}
 }
@@ -121,19 +120,28 @@ QVariant AwPageFilterModel::data(const QModelIndex& index, int role) const
 }
 
 
-AwFilterExportWizardPage::AwFilterExportWizardPage(AwChannelsExportWizardPage* page, QWidget* parent) : QWizardPage(parent)
+AwFilterExportWizardPage::AwFilterExportWizardPage(const AwChannelList& channels, const QVariantMap& settings, QWidget* parent) : QWizardPage(parent)
 {
-	m_channelsPage = page;
+	m_settings = settings;
+	m_isBids = m_settings.contains(keys::bids_file_path);
+	m_channels = channels;
 	m_model = nullptr;
 	m_tableView = nullptr;
 	setTitle("Select how to filter data while exporting");
 }
 
+
 void AwFilterExportWizardPage::initializePage()
 {
+
 	m_tableView = new QTableView();
-	m_model = new AwPageFilterModel(m_channelsPage, this);
-	m_tableView->setModel(m_model);
+	auto filterSettings = AwDataManager::instance()->filterSettings();
+	if (m_isBids) {
+		filterSettings.zero();
+		m_bidsFilterSettings = filterSettings;
+	}
+	m_model = new AwPageFilterModel(m_channels, filterSettings, this);
+	m_tableView->setModel(m_model);	
 	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	QVBoxLayout* layout = new QVBoxLayout;
 	layout->addWidget(m_tableView);
@@ -143,5 +151,25 @@ void AwFilterExportWizardPage::initializePage()
 bool AwFilterExportWizardPage::validatePage()
 {
 	filterSettings = m_model->settings();
+	if (m_isBids) {
+		// check if filters values have been set
+		auto modalities = filterSettings.modalities();
+		bool ok = true;
+		for (const auto& m : modalities) {
+			const auto& values = filterSettings.values(m);
+			for (auto const& v : values)
+				if (v) {
+					ok = false;
+					break;
+				}
+			if (!ok)
+				break;
+		}
+		if (!ok) {
+			auto res = QMessageBox::question(this, "WARNING about filtering in BIDS", "Are you sure to apply filters while saving?", QMessageBox::Yes | QMessageBox::No);
+			if (res == QMessageBox::No)
+				return false;
+		}
+	}
 	return true;
 }

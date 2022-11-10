@@ -53,19 +53,19 @@ class AwProcessManager : public QObject
 	Q_OBJECT
 public:
 	AwProcessManager(QObject *parent = 0);
-	~AwProcessManager();
 
 	static AwProcessManager *instance();
+	static bool isIntantiated();
 	void setMenu(QMenu *menu);
 	inline QMenu *fileMenu() { return m_fileMenu; }
 	inline QMenu *viewMenu() { return m_viewMenu; }
 	QList<QAction *>& icaActions() { return m_icaActions; }
 	void runBuiltInProcess(AwBuiltInProcess *process);
-	void runProcess(AwBaseProcess *process, const QStringList& args = QStringList(), bool NoIOCheck = false );
+	int runProcess(AwBaseProcess *process, const QStringList& args = QStringList(), bool NoIOCheck = false );
 	void initProcessSettings(AwBaseProcess* process);
 	AwBaseProcess *newProcessFromPluginName(const QString& name);
 	AwBaseProcess * newProcess(AwProcessPlugin *plugin);
-	void startProcess(const QString& name, const QStringList& args = QStringList());
+	int startProcess(const QString& name, const QStringList& args = QStringList());
 	void closeFile();
 	void quit();
 	QList<AwProcessPlugin *> processPluginsWithFeatures(int flags);
@@ -99,7 +99,6 @@ public slots:
 	void processEvent(QSharedPointer<AwEvent>);
 	void setProcessInstance(AwBaseProcess**, const QString&);
 signals:
-	void newMarkersAvailable(const AwMarkerList &markers);
 	void processFinished(AwProcess *process);
 	void displayProcessTerminated(AwProcess *process);
 	void channelsAddedForProcess(AwChannelList *list);
@@ -108,7 +107,6 @@ signals:
 	// signals for specific interpreted commands
 	void displayCommandRequested(int command, const QVariantList& args);
 	void aboutToQuit(); // sent to processes when AnyWave is closing
-
 	// signals relative to command sent by processes
 	// transmit the command to Display object
 	void displayCommand(const QVariantMap&);
@@ -120,6 +118,7 @@ protected:
 	void registerProcessForDisplay(AwProcess *process);
 	void unregisterProcessForDisplay(AwProcess *process);
 	int applyUseSkipMarkersKeys(AwBaseProcess* process);
+	void launchProcessesOnClosing();
 	
 private:
 	/* Warn the user that the process is about to be launched with all channels as input. */

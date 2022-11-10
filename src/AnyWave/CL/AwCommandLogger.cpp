@@ -19,6 +19,7 @@
 AwCommandLogger::AwCommandLogger(const QString& component, const QString& logFile)
 {
 	AwDebugLog::instance()->connectComponent(component, this, logFile);
+
 }
 
 AwCommandLogger::~AwCommandLogger()

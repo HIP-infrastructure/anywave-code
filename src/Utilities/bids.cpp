@@ -97,3 +97,33 @@ QString AwUtilities::bids::removeBidsKey(const QString& key, const QString& name
 	auto res = name;
 	return res.remove(re);
 }
+
+/// <summary>
+/// remove a key/value bids pair from a bids filename. The goal is to reformat the filename for display role in a QStandardItemModel
+/// </summary>
+/// <param name="key">the key to remove (sub, ses, run, ..)</param>
+/// <returns>return the string without the key/value</returns>
+QMap<QString, QString> AwUtilities::bids::getKeysValue(const QString& name)
+{
+	QMap<QString, QString> res;
+	QStringList kvs = name.split("_");
+
+	if (kvs.isEmpty()) { // no _ separartors => may be just key-value
+		QStringList pairs = name.split("-");
+		if (pairs.size() == 2) {
+			auto k = pairs.takeFirst();
+			auto v = pairs.takeFirst();
+			res.insert(k, v);
+			return res;
+		}
+	}
+	for (auto const& kv : kvs) {
+		QStringList pairs = kv.split("-");
+		while (pairs.size() >= 2) {
+			auto k = pairs.takeFirst();
+			auto v = pairs.takeFirst();
+			res.insert(k, v);
+		}
+	}
+	return res;
+}

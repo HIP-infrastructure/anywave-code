@@ -18,7 +18,7 @@
 #include <AwGlobal.h>
 #include <QDialog>
 #include "ui_AwAddPredefinedMarker.h"
-class AwMarker;
+#include <AwMarker.h>
 
 class AW_WIDGETS_EXPORT AwAddPredefinedMarker : public QDialog
 {
@@ -28,14 +28,14 @@ public:
 	AwAddPredefinedMarker(QWidget *parent = 0);
 	~AwAddPredefinedMarker();
 
-	AwMarker *marker() { return m_marker; }
+	AwSharedMarker marker() { return m_marker; }
 protected:
 	void changeEvent(QEvent *);
 public slots:
 	void accept();
 private:
 	Ui::AwAddPredefinedMarkerUi m_ui;
-	AwMarker *m_marker;
+	AwSharedMarker m_marker;
 };
 
 #endif // AWADDPREDEFINEDMARKER_H

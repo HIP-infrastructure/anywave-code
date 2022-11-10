@@ -1,7 +1,7 @@
 # AnyWave
 project(AnyWave)
 # disable epoching
-add_definitions("-DAW_DISABLE_EPOCHING")
+add_definitions("-DAW_DISABLE_EPOCHING -DAW_MARKING_TOOL_V2")
 
 SET(AnyWave_SRCS
     ./AnyWave.cpp  
@@ -62,6 +62,7 @@ SET(AnyWave_SRCS
 	./IO/BIDS/AwBIDSConvert.cpp
 	./IO/BIDS/AwBIDSTsv.cpp
     ./IO/BIDS/AwBIDSIO.cpp
+    ./IO/BIDS/AwRefreshDialog.cpp
     ./IO/export/AwChannelsExportWizardPage.cpp
     ./IO/export/AwExporter.cpp
     ./IO/export/AwExportWizardDial.cpp
@@ -215,6 +216,7 @@ SET(HEADERS
     ./IO/BIDS/AwBIDSManager.h  
     ./IO/BIDS/AwBIDSGUI.h  
 	./IO/BIDS/AwBIDSGUIOptionsDialog.h
+    ./IO/BIDS/AwRefreshDialog.h
     ./IO/export/AwChannelsExportWizardPage.h
     ./IO/export/AwExporter.h
     ./IO/export/AwExportWizardDial.h
@@ -320,6 +322,7 @@ SET(FORMS ./AnyWave.ui
 	./Batch/AwBatchDialog.ui
 	./IO/BIDS/AwBIDSGUI.ui
 	./IO/BIDS/AwBIDSGUIOptionsDialog.ui
+    ./IO/BIDS/AwRefreshDialog.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  
     ./Carto/AwMappingWidget.ui  

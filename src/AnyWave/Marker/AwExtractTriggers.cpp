@@ -75,7 +75,7 @@ void AwExtractTriggers::extract()
 			QString name = QString("%1:%2").arg(c->name()).arg(e->second);
 			AwMarker *newMarker = new AwMarker(name, (float)e->first / c->samplingRate());
 			newMarker->setValue(e->second);
-			_markers << newMarker;
+			_markers << AwSharedMarker(newMarker);
 		}
 		// clean events
 		while (!events.isEmpty())

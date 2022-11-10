@@ -44,7 +44,8 @@ AwTriggerParser::~AwTriggerParser()
 
 void AwTriggerParser::clearMarkers()
 {
-	qDeleteAll(m_markers);
+//	qDeleteAll(m_markers);
+	m_markers.clear();
 }
 
 bool AwTriggerParser::showUi()
@@ -55,9 +56,7 @@ bool AwTriggerParser::showUi()
 		if (dlg.isMaskValueSet())
 			m_maskValue = dlg.maskValue();
 		m_parseNegative = dlg.parseNegativeValues();
-	// 	m_triggers = dlg.triggers();
 		pdi.input.setNewChannels(dlg.triggers());
-	//	pdi.input.channels = dlg.triggers();
 		return true;
 	}
 	return false;
@@ -130,7 +129,7 @@ void AwTriggerParser::detect()
 			QString name = QString("%1:%2").arg(c->name()).arg(e->second);
 			AwMarker *newMarker = new AwMarker(name, (float)e->first / c->samplingRate());
 			newMarker->setValue(e->second);
-			m_markers << newMarker;
+			m_markers << AwSharedMarker(newMarker);
 		}
 		while (!events.isEmpty())
 			delete events.takeFirst();
@@ -154,6 +153,6 @@ void AwTriggerParser::runFromCommandLine()
 		QString path = QString("%1/trigger_parser.mrk").arg(args.value(keys::output_dir).toString());
 		AwMarker::save(path, m_markers);
 	}
-	// set a copy to ouput
-	pdi.output.setNewMarkers(m_markers);
+	// set a copy to output
+	pdi.output.setMarkers(m_markers);
 }

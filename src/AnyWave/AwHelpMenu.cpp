@@ -18,7 +18,7 @@
 #include "Plugin/AwPluginManager.h"
 #include <AwProcessInterface.h>
 #include <QDesktopServices>
-
+#include <QUrl>
 
 /// <summary>
 /// init help menu sections for plugins

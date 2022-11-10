@@ -28,5 +28,5 @@ class AW_WIDGETS_EXPORT AwComboMarker : public QComboBox
 	Q_OBJECT
 public:
 	explicit AwComboMarker(QWidget *parent = nullptr) : QComboBox(parent) {}
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 };

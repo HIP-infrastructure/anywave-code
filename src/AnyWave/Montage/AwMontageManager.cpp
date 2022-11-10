@@ -115,6 +115,7 @@ void AwMontageManager::clearICA()
 	// DO NOT DELETE channels as they belong to a AwComponent instance
 	m_icaAsRecorded.clear();
 	m_channels = AwChannel::toChannelList(m_channelsShrdPtrs);
+	AwICAManager::instance()->closeFile();
 }
 
 void AwMontageManager::clearSource(int type)
@@ -175,25 +176,31 @@ int AwMontageManager::loadICA()
 		auto bm = AwBIDSManager::instance();
 		if (bm->isBIDSActive()) {
 			auto icaDir = bm->getDerivativePath(AwBIDSItem::ica);
-			if (!icaDir.isEmpty())
-				dir = icaDir;
+			if (!icaDir.isEmpty()) {
+				dir = QDir::toNativeSeparators(icaDir);
+				if (!QFile::exists(dir))
+					dir = QDir::toNativeSeparators(bm->getDerivativesPath(AwBIDSManager::ica));
+			}
 		}
 	}
 	QString filter("ICA matrices (*.mat *.h5)");
-	QString path;
 #ifdef Q_OS_MAC
+	QString path;
     QFileDialog dlg(0, "Load ICA matrices", dir);
     dlg.setAcceptMode(QFileDialog::AcceptOpen);
     dlg.setViewMode(QFileDialog::Detail);
     dlg.setFileMode(QFileDialog::ExistingFile);
     if (dlg.exec() == QDialog::Accepted)
         path = dlg.selectedFiles().at(0);
-#else
-    path = QFileDialog::getOpenFileName(0, tr("Add ICA components"), dir, filter);
-#endif
 	if (path.isEmpty())
 		return -1;
 	return loadICA(path);
+#else
+   QString path = QFileDialog::getOpenFileName(0, tr("Add ICA components"), dir, filter);
+   if (path.isEmpty())
+		return -1;
+	return loadICA(path);
+#endif
 }
 
 int AwMontageManager::loadICA(const QString& path)
@@ -365,15 +372,7 @@ void AwMontageManager::clear()
 }
 
 void AwMontageManager::closeFile()
-{
-	if (AwBIDSManager::isInstantiated()) {
-		auto bm = AwBIDSManager::instance();
-		if (bm->isBIDSActive())
-			if (bm->updateChannelsTsvBadChannels(m_badChannelLabels) != 0 && !bm->lastError().isEmpty()) {
-				AwMessageBox::information(nullptr, "BIDS", bm->lastError());
-			}
-	}
-			
+{	
 	clear();
 	m_montagePath = "";
 	m_badPath = "";
@@ -383,6 +382,9 @@ void AwMontageManager::closeFile()
 void AwMontageManager::newMontage(AwFileIO *reader)
 {
 	AwChannelList channels = reader->infos.channels();
+	m_rawFileChannels.clear();
+	for (auto c : channels)
+		m_rawFileChannels.insert(c->name(), c);
 	m_channelsShrdPtrs.clear();
 	// init as recorded channels list
 	for (auto c : channels)  {
@@ -461,13 +463,12 @@ void AwMontageManager::saveBadChannels()
 			QFile::remove(m_badPath);
 		return;
 	}
-
 	QFile file(m_badPath);
 	QTextStream stream(&file);
 	if (!file.open(QIODevice::ReadWrite|QIODevice::Text|QIODevice::Truncate))
 		return;
 
-	foreach (QString s, m_badChannelLabels)
+	for (auto const& s : m_badChannelLabels)
 		stream << s << endl;
 	file.close();
 }
@@ -586,8 +587,18 @@ void AwMontageManager::showInterface()
 
 bool AwMontageManager::save(const QString& filename, const AwChannelList& channels, const AwChannelList& asRecordedChannels)
 {
+	AwChannelList list; // tmp list to filter real as recorde channels (comparing with raw channels)
+	for (auto c : asRecordedChannels) {
+		if (m_rawFileChannels.contains(c->name())) {
+			// check if type is different.
+			// if no there is no need to create a as recorded entry in XML file
+			auto rawChannel = m_rawFileChannels.value(c->name());
+			if (rawChannel->type() != c->type())
+				list << c;
+		}
+	}
 	try {
-		AwMontage::save(filename, channels, asRecordedChannels);
+		AwMontage::save(filename, channels, list);
 	}
 	catch (const AwException& e) {
 		return false;
@@ -597,7 +608,6 @@ bool AwMontageManager::save(const QString& filename, const AwChannelList& channe
 
 bool AwMontageManager::save(const QString& filename)
 {
-    //bool res =  save(filename, m_channels, m_asRecordedChannels);
 	bool res = save(filename, m_channels, AwChannel::toChannelList(m_asRecordedSharedPointerMap.values()));
 	if (!res)
 		emit log(QString("saving %1 failed."));
@@ -628,7 +638,6 @@ bool AwMontageManager::saveMontage(const QString& name)
 
 AwChannelList AwMontageManager::load(const QString& path)
 {
-
 	AwChannelList channels, res;
 	QMap<QString, int> asRecordedMap;
 	try {
@@ -639,11 +648,14 @@ AwChannelList AwMontageManager::load(const QString& path)
 		AwMessageBox::information(0, tr("Error"), e.errorString());
 		return res;
 	}
-
 	if (asRecordedMap.size()) {
 		// got as recorded info from .mtg file
 		bool changed = false;
+		
 		for (auto const& label : asRecordedMap.keys()) {
+			// check as recorded channels present in .mtg against channels really present in the file
+			if (!m_rawFileChannels.contains(label))
+				continue;
 			auto asRecorded = m_asRecordedSharedPointerMap.value(label);
 			if (asRecorded.isNull())
 				continue;
@@ -690,6 +702,8 @@ AwChannelList AwMontageManager::load(const QString& path)
 			else if (c->name() == "MEG_AVG") {
 				res << new AwAVGChannel(AwChannel::MEG);
 			}
+			else  // ignore other cases
+				continue;
 		}
 	}
 	return res;
@@ -708,7 +722,7 @@ bool AwMontageManager::apply(const QString& path)
 // in: List of as Recorded channels
 // path to montage file to apply.
 // out: List of montaged channels or empty list if error.
-AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, const QString &path, const QStringList& badLabels)
+AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList rawChannels, const QString &path, const QStringList& badLabels)
 {
 	QMutexLocker lock(&m_mutex); // threading lock
 
@@ -717,11 +731,12 @@ AwChannelList AwMontageManager::loadAndApplyMontage(AwChannelList asRecorded, co
 		channels = AwMontage::load(path);
 	}
 	catch (const AwException& e) {
+		m_errorString = e.errorString();
 		return channels;
 	}
 
 	QHash<QString, AwChannel *> hash;
-	for (auto c : asRecorded)
+	for (auto c : rawChannels)
 		hash[c->name()] = c;
 
 	if (!badLabels.isEmpty()) {

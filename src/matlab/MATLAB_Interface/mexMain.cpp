@@ -14,12 +14,13 @@ std::map<std::string, int> functions;
 using namespace matlab::data;
 using namespace matlab::engine;
 
+
 MexFunction::MexFunction()
 {
-	//m_matlabPtr = getEngine();
 	m_matlabPtr = getEngine();
 	functions["debug_connect"] = AwRequest::ConnectDebug;
 	functions["get_data"] = AwRequest::GetDataEx;
+	functions["get_data_ex"] = AwRequest::GetData2_5_10;
 	functions["get_markers"] = AwRequest::GetMarkersEx;
 	functions["send_markers"] = AwRequest::SendMarkers;
 	functions["send_message"] = AwRequest::SendMessage;
@@ -157,6 +158,9 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	case AwRequest::GetDataEx:
 		get_data(outputs, inputs);
 		break;
+	case AwRequest::GetData2_5_10:
+		get_data_ex(outputs, inputs);
+		break;
 	case AwRequest::GetMarkersEx:
 		get_markers(outputs, inputs);
 		break;
@@ -175,7 +179,6 @@ void MexFunction::operator()(matlab::mex::ArgumentList outputs, matlab::mex::Arg
 	default:
 		error("Unknown command");
 	}
-	
 }
 
 void MexFunction::getPidPort()
@@ -202,11 +205,12 @@ void MexFunction::error(const std::string& message)
 		std::vector<Array>({ factory.createCharArray(message) }));
 }
 
-void MexFunction::printf(std::ostringstream stream)
+void MexFunction::printf(std::ostringstream& stream)
 {
 	ArrayFactory factory;
 	m_matlabPtr->feval(u"fprintf", 0, std::vector<Array>
 		({ factory.createScalar(stream.str()) }));
+	stream.flush();
 }
 
 void MexFunction::printf(const std::string& message)
@@ -230,8 +234,7 @@ void MexFunction::send_message(matlab::mex::ArgumentList& outputs, matlab::mex::
 		aw.sendString(QString::fromStdString(ca.toAscii()));
 	}
 	catch (const QString& what) {
-		std::string message = QString("send_markers: %1").arg(what).toStdString();
-		error(message);
+		error(what.toStdString());
 	}
 }
 
@@ -342,8 +345,7 @@ void MexFunction::send_markers(matlab::mex::ArgumentList& outputs, matlab::mex::
 		aw.waitForResponse();
 	}
 	catch (const QString& what) {
-		std::string message = QString("send_markers: %1").arg(what).toStdString();
-		error(message);
+		error(what.toStdString());
 	}
 	catch (matlab::data::TypeMismatchException& e) {
 		error(e.what());
@@ -403,8 +405,7 @@ void MexFunction::get_markers(matlab::mex::ArgumentList& outputs, matlab::mex::A
 		outputs[0] = S;
 	}
 	catch (const QString& what) {
-		std::string s = QString("get_markers: %1").arg(what).toStdString();
-		error(s);
+		error(what.toStdString());
 	}
 }
 
@@ -417,19 +418,20 @@ void MexFunction::get_data(matlab::mex::ArgumentList& outputs, matlab::mex::Argu
 	// don't forget that first argument is always the command string
 	if (inputs.size() >= 2) {
 		if (inputs[1].getType() == ArrayType::STRUCT) {
-			
+
 			// ask MATLAB to convert the struct to json
 			auto res = m_matlabPtr->feval(u"jsonencode", 1, std::vector<Array>({ inputs[1] }));
-			
+
 			CharArray s = std::move(res[0]);
 			std::string ss = s.toAscii();
 			args = QString(ss.data());
 		}
-		else 
+		else
 			error("get_data: bad arguments. Expected struct.");
 	}
-	int nChannels;
+	int nChannels, nTimeSelections;
 	try {
+		// OLD CODE
 		TCPRequest aw(AwRequest::GetDataEx);
 		aw.sendString(args);
 		aw.waitForResponse();
@@ -483,10 +485,109 @@ void MexFunction::get_data(matlab::mex::ArgumentList& outputs, matlab::mex::Argu
 			}
 		}
 		outputs[0] = S;
+		// END OF OLD CODE
 	}
 	catch (const QString& what) {
-		std::string s = QString("get_data: %1").arg(what).toStdString();
-		error(s);
+		error(what.toStdString());
+	}
+}
+
+void MexFunction::get_data_ex(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentList& inputs)
+{
+	ArrayFactory factory;
+
+	// input may be empty or contain one argument(the cfg structure)
+	QString args;
+	// don't forget that first argument is always the command string
+	if (inputs.size() >= 2) {
+		if (inputs[1].getType() == ArrayType::STRUCT) {
+			
+			// ask MATLAB to convert the struct to json
+			auto res = m_matlabPtr->feval(u"jsonencode", 1, std::vector<Array>({ inputs[1] }));
+			
+			CharArray s = std::move(res[0]);
+			std::string ss = s.toAscii();
+			args = QString(ss.data());
+		}
+		else 
+			error("get_data: bad arguments. Expected struct.");
+	}
+	int nChannels, nTimeSelections;
+	try {
+		TCPRequest aw(AwRequest::GetData2_5_10);
+		aw.sendString(args);
+		aw.waitForResponse();
+		QDataStream& response = aw.response();
+		response >> nTimeSelections >> nChannels;
+		if (nChannels == 0) {
+			// return empty struct
+			outputs[0] = factory.createEmptyArray();
+			return;
+		}
+		StructArray S = factory.createStructArray({ 1, size_t(nTimeSelections) }, { "channels", "position", "duration", "data" });
+		StructArray Channels = factory.createStructArray({ 1, size_t(nChannels) },
+			{ "name", "ref", "type", "hp", "lp", "sr", "notch", "unit" });
+		QString name, ref, type, unit;
+		float sr, hp, lp, notch;
+		qint64 samples;
+
+		for (auto i = 0; i < nChannels; i++) {
+			aw.waitForResponse();
+			response >> name >> type >> ref >> sr >> hp >> lp >> notch >> unit;
+			auto stru16 = name.toStdU16String();
+			Channels[i]["name"] = factory.createCharArray(stru16);
+			stru16 = type.toStdU16String();
+			Channels[i]["type"] = factory.createCharArray(stru16);
+			stru16 = ref.toStdU16String();
+			Channels[i]["ref"] = factory.createCharArray(stru16);
+			stru16 = unit.toStdU16String();
+			Channels[i]["unit"] = factory.createCharArray(stru16);
+			Channels[i]["sr"] = factory.createScalar<double>(sr);
+			Channels[i]["hp"] = factory.createScalar<double>(hp);
+			Channels[i]["lp"] = factory.createScalar<double>(lp);
+			Channels[i]["notch"] = factory.createScalar<double>(notch);
+		}
+		aw.waitForResponse();
+		// fill in time selections
+		for (int i = 0; i < nTimeSelections; i++) {
+			float pos, duration;
+			S[i]["channels"] = Channels;
+			response >> pos >> duration;
+			S[i]["position"] = factory.createScalar<double>(pos);
+			S[i]["duration"] = factory.createScalar<double>(duration);
+		}
+		for (int i = 0; i < nTimeSelections; i++) {
+			aw.waitForResponse();
+			response >> samples; // got the number of samples => create data matrix
+			bool finished = false;
+			if (samples) {
+				auto data = factory.createArray<float>({ size_t(nChannels), size_t(samples) });
+				for (auto j = 0; j < nChannels; j++) {
+					qint64 samplesRead, chunkSize;
+					finished = false;
+					samplesRead = 0;
+					chunkSize = 0;
+					while (!finished) {
+						aw.waitForResponse();
+						response >> chunkSize;
+						if (chunkSize == 0)
+							finished = true;
+						else {
+							for (auto k = 0; k < chunkSize; k++)
+								response >> data[j][k + samplesRead];
+							samplesRead += chunkSize;
+						}
+					}	
+				}
+				S[i]["data"] = data;
+			}
+			else 
+				S[i]["data"] = factory.createEmptyArray();
+		}
+		outputs[0] = S;
+	}
+	catch (const QString& what) {
+		error(what.toStdString());
 	}
 }
 
@@ -551,8 +652,7 @@ void MexFunction::get_properties(matlab::mex::ArgumentList& outputs, matlab::mex
 		outputs[0] = StructArray(res[0]);
 	}
 	catch (const QString& what) {
-		std::string message = QString("get_prop: %1").arg(what).toStdString();
-		error(message);
+		error(what.toStdString());
 	}
 }
 
@@ -590,7 +690,6 @@ void MexFunction::run(matlab::mex::ArgumentList& outputs, matlab::mex::ArgumentL
 		outputs[0] = StructArray(res[0]);
 	}
 	catch (const QString& what) {
-		std::string s = QString("get_data: %1").arg(what).toStdString();
-		error(s);
+		error(what.toStdString());
 	}
 }

@@ -1,0 +1,2648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PanelVolume</class>
+ <widget class="QScrollArea" name="PanelVolume">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>360</width>
+    <height>1913</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ScrollArea</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::NoFrame</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Plain</enum>
+  </property>
+  <property name="widgetResizable">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="scrollAreaWidgetContents">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>346</width>
+     <height>1924</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayoutToolbar">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QToolBar" name="toolbar">
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="floatable">
+         <bool>false</bool>
+        </property>
+        <addaction name="actionMoveLayerUp"/>
+        <addaction name="actionMoveLayerDown"/>
+        <addaction name="actionLockLayer"/>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolBar" name="toolbar2">
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="floatable">
+         <bool>false</bool>
+        </property>
+        <addaction name="actionCopySetting"/>
+        <addaction name="actionPasteSetting"/>
+        <addaction name="actionPasteSettingToAll"/>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>6</number>
+      </property>
+      <item row="14" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QSlider" name="sliderOpacity">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="doubleSpinBoxOpacity">
+          <property name="maximum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="25" column="0">
+       <widget class="QLabel" name="labelOffset">
+        <property name="text">
+         <string>Offset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="QCheckBox" name="checkBoxSmooth">
+        <property name="text">
+         <string>Smooth display</string>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="0">
+       <widget class="QLabel" name="labelLookUpTable">
+        <property name="text">
+         <string>Lookup table</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="1">
+       <widget class="QComboBox" name="comboBoxMask">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <property name="spacing">
+         <number>5</number>
+        </property>
+        <item row="0" column="0">
+         <spacer name="horizontalSpacer_11">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::MinimumExpanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>14</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="labelVectorSkip">
+          <property name="text">
+           <string>Skip</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <property name="indent">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QSpinBox" name="spinBoxVectorSkip">
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="wrapping">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="labelVectorScale">
+          <property name="text">
+           <string>Length scale</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <property name="indent">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="lineEditVectorLineWidth">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLineEdit" name="lineEditVectorNormThreshold">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="labelVectorNormThreshold">
+          <property name="text">
+           <string>Norm threshold</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <property name="indent">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="lineEditVectorScale">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="labelVectorLineWidth">
+          <property name="text">
+           <string>Width scale</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <property name="indent">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelFileName">
+        <property name="text">
+         <string>File name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="19" column="0">
+       <widget class="QLabel" name="labelDirectionCode">
+        <property name="text">
+         <string>Color code</string>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="1">
+       <widget class="QComboBox" name="comboBoxLookUpTable"/>
+      </item>
+      <item row="20" column="0">
+       <widget class="QLabel" name="labelWindow">
+        <property name="text">
+         <string>Window</string>
+        </property>
+       </widget>
+      </item>
+      <item row="23" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QSlider" name="sliderMid">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditMid">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="27" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_17">
+        <item>
+         <widget class="QLineEdit" name="lineEditBrushValue">
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::WheelFocus</enum>
+          </property>
+          <property name="toolTip">
+           <string>Enter partial name to search</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="colorLabelBrushValue">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="margin">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelBrushValueWarning">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(240,0,0);</string>
+          </property>
+          <property name="text">
+           <string>Label value not in color table!</string>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="16" column="1">
+       <widget class="QCheckBox" name="checkBoxUpsample">
+        <property name="text">
+         <string>Upsample display</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QComboBox" name="comboBoxRenderObject">
+        <item>
+         <property name="text">
+          <string>Line</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Line with direction</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3D bar (slow!)</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="checkBoxAutoAdjustFrameLevel">
+        <property name="text">
+         <string>Auto adjust window level
+of each frame</string>
+        </property>
+       </widget>
+      </item>
+      <item row="23" column="0">
+       <widget class="QLabel" name="labelMid">
+        <property name="text">
+         <string>Mid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_20">
+        <item>
+         <spacer name="horizontalSpacer_9">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelMaskThreshold">
+          <property name="text">
+           <string>Mask threshold</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <property name="indent">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditMaskThreshold">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelCorrelationSurface">
+        <property name="text">
+         <string>Correlation
+ surface</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="labelInversion">
+        <property name="text">
+         <string>Inversion</string>
+        </property>
+       </widget>
+      </item>
+      <item row="26" column="1">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="checkBoxTruncate">
+          <property name="text">
+           <string>Truncate</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QCheckBox" name="checkBoxClearBackground">
+          <property name="text">
+           <string>Clear background</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="checkBoxInvert">
+          <property name="text">
+           <string>Invert</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QCheckBox" name="checkBoxClearHigher">
+          <property name="text">
+           <string>Clear higher values</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QCheckBox" name="checkBoxPercentile">
+          <property name="text">
+           <string>Use percentile</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QCheckBox" name="checkBoxSetMidToMin">
+          <property name="text">
+           <string>Autoset Mid</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QPushButton" name="pushButtonResetWindowLevel">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="lineEditClearBackgroundValue">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item row="21" column="0">
+       <widget class="QLabel" name="labelLevel">
+        <property name="text">
+         <string>Level</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QCheckBox" name="checkBoxRememberFrame">
+          <property name="text">
+           <string>Remember each frame's</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelRememberFrame">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>threshold settings</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="indent">
+           <number>21</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="21" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="QSlider" name="sliderLevel">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditLevel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="1">
+       <widget class="QCheckBox" name="checkBoxDisplayTensor">
+        <property name="text">
+         <string>Display as tensors</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QComboBox" name="comboBoxInversion">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Invert X</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Invert Y</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Invert Z</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="24" column="0">
+       <widget class="QLabel" name="labelMax">
+        <property name="text">
+         <string>Max</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBoxCorrelationSurface"/>
+      </item>
+      <item row="14" column="0">
+       <widget class="QLabel" name="labelOpacity">
+        <property name="text">
+         <string>Opacity</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelFrame">
+        <property name="text">
+         <string>Frame</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="labelRenderObject">
+        <property name="text">
+         <string>Render</string>
+        </property>
+       </widget>
+      </item>
+      <item row="20" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QSlider" name="sliderWindow">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditWindow">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="17" column="0">
+       <widget class="QLabel" name="labelColorMap">
+        <property name="text">
+         <string>Color map</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QCheckBox" name="checkBoxNormalizeVectors">
+        <property name="text">
+         <string>Normalize vectors</string>
+        </property>
+       </widget>
+      </item>
+      <item row="27" column="0">
+       <widget class="QLabel" name="labelBrushValue">
+        <property name="text">
+         <string>Label value</string>
+        </property>
+       </widget>
+      </item>
+      <item row="24" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QSlider" name="sliderMax">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditMax">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="6" column="1">
+       <widget class="QCheckBox" name="checkBoxDisplayRGB">
+        <property name="text">
+         <string>Display as RGB map</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QLabel" name="labelMask">
+        <property name="text">
+         <string>Mask</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="checkBoxDisplayVector">
+        <property name="text">
+         <string>Display as vectors</string>
+        </property>
+       </widget>
+      </item>
+      <item row="19" column="1">
+       <widget class="QComboBox" name="comboBoxDirectionCode">
+        <item>
+         <property name="text">
+          <string>RAS -&gt; RGB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RAS -&gt; RBG</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RAS -&gt; GRB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RAS -&gt; GBR</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RAS -&gt; BRG</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RAS -&gt; BGR</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="22" column="0">
+       <widget class="QLabel" name="labelMin">
+        <property name="text">
+         <string>Min</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="1">
+       <widget class="QComboBox" name="comboBoxColorMap"/>
+      </item>
+      <item row="25" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_14">
+        <item>
+         <widget class="QSlider" name="sliderOffset">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditOffset">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditFileName">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QSlider" name="sliderFrame">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spinBoxFrame">
+          <property name="wrapping">
+           <bool>true</bool>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="22" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QSlider" name="sliderMin">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditMin">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>75</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="checkBoxSelectAllLabels">
+        <property name="text">
+         <string>All</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="tristate">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxShowExistingLabels">
+        <property name="text">
+         <string>Show existing labels only</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="treeWidgetColorTable">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>150</height>
+       </size>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::NoDragDrop</enum>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>false</bool>
+      </property>
+      <property name="rootIsDecorated">
+       <bool>false</bool>
+      </property>
+      <property name="uniformRowHeights">
+       <bool>true</bool>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <attribute name="headerVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="headerShowSortIndicator" stdset="0">
+       <bool>true</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelTrackVolumeThreshold">
+        <property name="text">
+         <string>Threshold</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_19">
+        <item>
+         <widget class="QSlider" name="sliderTrackVolumeThresholdLow">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditTrackVolumeThresholdLow">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QWidget" name="widgetProjectionMapType" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>0</height>
+       </size>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_18">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Show intensity projection map</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBoxProjectionMapType">
+         <item>
+          <property name="text">
+           <string>None</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Maximum</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Average</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="widgetProjectionMapSettings" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>0</height>
+       </size>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <property name="leftMargin">
+        <number>20</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <spacer name="horizontalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::MinimumExpanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>5</width>
+           <height>5</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Slice range</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEditProjectionMapRange">
+         <property name="maximumSize">
+          <size>
+           <width>166666</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBoxShowOutline">
+      <property name="text">
+       <string>Show label outline only (Ctrl+L)</string>
+      </property>
+      <property name="shortcut">
+       <string>Ctrl+L</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_21">
+      <item>
+       <widget class="QCheckBox" name="checkBoxShowContour">
+        <property name="text">
+         <string>Show as isosurface in 3D view</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="BusyIndicator" name="widgetBusyIndicator" native="true"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="gridLayoutContour" columnstretch="0,0">
+      <item row="2" column="0">
+       <widget class="QLabel" name="labelContourSpaceHolder">
+        <property name="styleSheet">
+         <string notr="true">color:rgba(0,0,0,0)</string>
+        </property>
+        <property name="text">
+         <string>Smooth iterations</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="labelContourColor">
+        <property name="text">
+         <string>Surface color</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelContourThresholdLow">
+        <property name="text">
+         <string>Low threshold</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QCheckBox" name="checkBoxUseColorMap">
+        <property name="text">
+         <string>Use color map</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QCheckBox" name="checkBoxShowLabelContour">
+          <property name="text">
+           <string>Label volume</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxVoxelizedContour">
+          <property name="text">
+           <string>Voxelize</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_12">
+        <item>
+         <widget class="QSlider" name="sliderContourThresholdLow">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditContourThresholdLow">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Press return to apply change</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_13">
+        <item>
+         <widget class="QSlider" name="sliderContourThresholdHigh">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditContourThresholdHigh">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Press return to apply change</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="11" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_16">
+        <item>
+         <widget class="QPushButton" name="pushButtonContourSave">
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="labelContourThresholdHigh">
+        <property name="text">
+         <string>High threshold</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_15">
+        <item>
+         <widget class="QSlider" name="sliderContourSmoothIteration">
+          <property name="maximum">
+           <number>20</number>
+          </property>
+          <property name="pageStep">
+           <number>5</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditContourSmoothIteration">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Press return to apply change</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="9" column="1">
+       <widget class="QtColorPicker" name="colorPickerContour" native="true"/>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="checkBoxUpsampleContour">
+        <property name="text">
+         <string>Upsample volume</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QCheckBox" name="checkBoxContourExtractAll">
+        <property name="text">
+         <string>Extract all regions</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="labelSmoothIteration">
+        <property name="text">
+         <string>Smooth iterations</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QCheckBox" name="checkBoxContourDilateFirst">
+        <property name="text">
+         <string>Dilate first</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBoxShowInfo">
+      <property name="text">
+       <string>Show in Info panel</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>5</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <action name="actionMoveLayerUp">
+   <property name="icon">
+    <iconset resource="freeview.qrc">
+     <normaloff>:/resource/icons/move_up.png</normaloff>:/resource/icons/move_up.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Layer Up</string>
+   </property>
+   <property name="toolTip">
+    <string>Up</string>
+   </property>
+  </action>
+  <action name="actionMoveLayerDown">
+   <property name="icon">
+    <iconset resource="freeview.qrc">
+     <normaloff>:/resource/icons/move_down.png</normaloff>:/resource/icons/move_down.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Layer Down</string>
+   </property>
+   <property name="toolTip">
+    <string>Down</string>
+   </property>
+  </action>
+  <action name="actionLockLayer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="freeview.qrc">
+     <normaloff>:/resource/icons/volume_unlock.png</normaloff>
+     <normalon>:/resource/icons/volume_lock.png</normalon>:/resource/icons/volume_unlock.png</iconset>
+   </property>
+   <property name="text">
+    <string>Lock Layer</string>
+   </property>
+   <property name="toolTip">
+    <string>Lock</string>
+   </property>
+  </action>
+  <action name="actionCopySetting">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="freeview.qrc">
+     <normaloff>:/resource/icons/volume_copy_setting.png</normaloff>:/resource/icons/volume_copy_setting.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy Setting</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy Setting</string>
+   </property>
+  </action>
+  <action name="actionPasteSetting">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="freeview.qrc">
+     <normaloff>:/resource/icons/volume_paste_setting.png</normaloff>:/resource/icons/volume_paste_setting.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste Setting</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste Setting</string>
+   </property>
+  </action>
+  <action name="actionPasteSettingToAll">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="freeview.qrc">
+     <normaloff>:/resource/icons/volume_paste_setting_all.png</normaloff>:/resource/icons/volume_paste_setting_all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste Setting To All</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste Setting To All</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QtColorPicker</class>
+   <extends>QWidget</extends>
+   <header>qtcolorpicker.h</header>
+   <container>1</container>
+   <slots>
+    <signal>colorChanged(QColor)</signal>
+    <signal>currentColorChanged(QColor)</signal>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>BusyIndicator</class>
+   <extends>QWidget</extends>
+   <header>BusyIndicator.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>lineEditFileName</tabstop>
+  <tabstop>comboBoxCorrelationSurface</tabstop>
+  <tabstop>sliderFrame</tabstop>
+  <tabstop>spinBoxFrame</tabstop>
+  <tabstop>checkBoxRememberFrame</tabstop>
+  <tabstop>checkBoxAutoAdjustFrameLevel</tabstop>
+  <tabstop>checkBoxDisplayVector</tabstop>
+  <tabstop>checkBoxDisplayRGB</tabstop>
+  <tabstop>checkBoxDisplayTensor</tabstop>
+  <tabstop>comboBoxRenderObject</tabstop>
+  <tabstop>lineEditVectorLineWidth</tabstop>
+  <tabstop>lineEditVectorScale</tabstop>
+  <tabstop>spinBoxVectorSkip</tabstop>
+  <tabstop>checkBoxNormalizeVectors</tabstop>
+  <tabstop>comboBoxInversion</tabstop>
+  <tabstop>comboBoxMask</tabstop>
+  <tabstop>lineEditMaskThreshold</tabstop>
+  <tabstop>sliderOpacity</tabstop>
+  <tabstop>doubleSpinBoxOpacity</tabstop>
+  <tabstop>checkBoxSmooth</tabstop>
+  <tabstop>checkBoxUpsample</tabstop>
+  <tabstop>comboBoxColorMap</tabstop>
+  <tabstop>comboBoxLookUpTable</tabstop>
+  <tabstop>comboBoxDirectionCode</tabstop>
+  <tabstop>sliderWindow</tabstop>
+  <tabstop>lineEditWindow</tabstop>
+  <tabstop>sliderLevel</tabstop>
+  <tabstop>lineEditLevel</tabstop>
+  <tabstop>sliderMin</tabstop>
+  <tabstop>lineEditMin</tabstop>
+  <tabstop>sliderMid</tabstop>
+  <tabstop>lineEditMid</tabstop>
+  <tabstop>sliderMax</tabstop>
+  <tabstop>lineEditMax</tabstop>
+  <tabstop>sliderOffset</tabstop>
+  <tabstop>lineEditOffset</tabstop>
+  <tabstop>checkBoxPercentile</tabstop>
+  <tabstop>checkBoxTruncate</tabstop>
+  <tabstop>checkBoxInvert</tabstop>
+  <tabstop>checkBoxSetMidToMin</tabstop>
+  <tabstop>checkBoxClearHigher</tabstop>
+  <tabstop>checkBoxClearBackground</tabstop>
+  <tabstop>pushButtonResetWindowLevel</tabstop>
+  <tabstop>lineEditBrushValue</tabstop>
+  <tabstop>checkBoxSelectAllLabels</tabstop>
+  <tabstop>checkBoxShowExistingLabels</tabstop>
+  <tabstop>treeWidgetColorTable</tabstop>
+  <tabstop>sliderTrackVolumeThresholdLow</tabstop>
+  <tabstop>lineEditTrackVolumeThresholdLow</tabstop>
+  <tabstop>comboBoxProjectionMapType</tabstop>
+  <tabstop>lineEditProjectionMapRange</tabstop>
+  <tabstop>checkBoxShowOutline</tabstop>
+  <tabstop>sliderContourThresholdLow</tabstop>
+  <tabstop>lineEditContourThresholdLow</tabstop>
+  <tabstop>sliderContourThresholdHigh</tabstop>
+  <tabstop>lineEditContourThresholdHigh</tabstop>
+  <tabstop>checkBoxUpsampleContour</tabstop>
+  <tabstop>checkBoxContourExtractAll</tabstop>
+  <tabstop>sliderContourSmoothIteration</tabstop>
+  <tabstop>lineEditContourSmoothIteration</tabstop>
+  <tabstop>checkBoxUseColorMap</tabstop>
+  <tabstop>pushButtonContourSave</tabstop>
+  <tabstop>checkBoxShowInfo</tabstop>
+ </tabstops>
+ <resources>
+  <include location="freeview.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>checkBoxShowContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnCheckShowContour(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
+     <y>1580</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxColorMap</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnComboColorMap(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>344</x>
+     <y>744</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>44</x>
+     <y>439</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetColorTable</sender>
+   <signal>currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnColorTableCurrentItemChanged(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>1242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>323</x>
+     <y>863</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditBrushValue</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditBrushValue(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>1203</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>37</x>
+     <y>829</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderOpacity</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderOpacity(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>652</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>39</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderWindow</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderWindow(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>830</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>578</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderLevel</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderLevel(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>862</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>91</x>
+     <y>634</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderMin</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderMin(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>894</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>666</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderMid</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderMid(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>926</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>64</x>
+     <y>706</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderMax</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderMax(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>958</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>97</x>
+     <y>739</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderOffset</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderOffset(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>990</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>74</x>
+     <y>778</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditWindow</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditWindow(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>835</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>324</x>
+     <y>619</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditLevel</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditLevel(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>867</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>323</x>
+     <y>651</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditMin</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditMin(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>899</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>679</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditMid</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditMid(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>931</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>714</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditMax</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditMax(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>963</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>747</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditOffset</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditOffset(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>995</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>789</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxLookUpTable</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnComboLookupTable(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>344</x>
+     <y>774</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>52</x>
+     <y>496</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderContourThresholdLow</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderContourMin(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1628</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderContourThresholdHigh</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderContourMax(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1674</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1228</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderContourSmoothIteration</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderContourSmooth(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1790</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1303</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderContourThresholdLow</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnContourValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1628</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderContourThresholdHigh</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnContourValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1674</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderContourSmoothIteration</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnContourValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1790</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1338</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditContourThresholdLow</sender>
+   <signal>returnPressed()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnContourValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1624</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1165</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditContourThresholdHigh</sender>
+   <signal>returnPressed()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnContourValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1673</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>288</x>
+     <y>1363</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditContourSmoothIteration</sender>
+   <signal>returnPressed()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnContourValueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1795</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>68</x>
+     <y>1332</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCopySetting</sender>
+   <signal>triggered()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnCopySettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>162</x>
+     <y>698</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPasteSetting</sender>
+   <signal>triggered()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnPasteSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>162</x>
+     <y>698</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPasteSettingToAll</sender>
+   <signal>triggered()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnPasteSettingsToAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>162</x>
+     <y>698</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderTrackVolumeThresholdLow</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnSliderTrackVolumeMin(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1446</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditTrackVolumeThresholdLow</sender>
+   <signal>returnPressed()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnTrackVolumeThresholdChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1442</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sliderTrackVolumeThresholdLow</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnTrackVolumeThresholdChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>1446</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetColorTable</sender>
+   <signal>itemClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnColorTableItemClicked(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>1242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1026</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxShowExistingLabels</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnShowExistingLabelsOnly(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>344</x>
+     <y>1213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>1145</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxShowLabelContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnCheckShowLabelContour(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>229</x>
+     <y>1594</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>0</x>
+     <y>1195</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxMask</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnComboMask(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>344</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>306</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBoxCorrelationSurface</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnComboCorrelationSurface(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>344</x>
+     <y>144</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>232</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxPercentile</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnCheckUsePercentile(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>1025</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>821</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditVectorScale</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditVectorDisplayScale(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>429</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>455</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxSetMidToMin</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>labelMid</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>1081</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>23</x>
+     <y>932</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxSetMidToMin</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sliderMid</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>1081</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>262</x>
+     <y>926</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxSetMidToMin</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineEditMid</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>1081</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>931</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetColorTable</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnColorTableItemDoubleClicked(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>1242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>1083</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxSelectAllLabels</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnCheckBoxSelectAllLabels(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>17</x>
+     <y>1213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>995</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetColorTable</sender>
+   <signal>itemChanged(QTreeWidgetItem*,int)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnColorTableItemChanged(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>1242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>1073</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditMaskThreshold</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditMaskThreshold(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>602</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>447</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditVectorLineWidth</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditVectorLineWidth(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>401</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>378</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxVoxelizedContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnCheckVoxelizedContour(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1594</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>1318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxVoxelizedContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>labelSmoothIteration</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1594</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>74</x>
+     <y>1785</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxVoxelizedContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sliderContourSmoothIteration</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1594</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>277</x>
+     <y>1790</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxVoxelizedContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineEditContourSmoothIteration</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>1594</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>1795</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxClearBackground</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lineEditClearBackgroundValue</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>1139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>304</x>
+     <y>1140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEditVectorNormThreshold</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>PanelVolume</receiver>
+   <slot>OnLineEditVectorNormThreshold(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>457</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>525</x>
+     <y>428</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxVoxelizedContour</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>checkBoxContourDilateFirst</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>294</x>
+     <y>1603</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>243</x>
+     <y>1750</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OnCheckShowContour(bool)</slot>
+  <slot>OnComboColorMap(int)</slot>
+  <slot>OnComboLookupTable(int)</slot>
+  <slot>OnColorTableCurrentItemChanged(QTreeWidgetItem*)</slot>
+  <slot>OnLineEditBrushValue(QString)</slot>
+  <slot>OnSliderOpacity(int)</slot>
+  <slot>OnSliderWindow(int)</slot>
+  <slot>OnSliderLevel(int)</slot>
+  <slot>OnSliderMin(int)</slot>
+  <slot>OnSliderMid(int)</slot>
+  <slot>OnSliderMax(int)</slot>
+  <slot>OnSliderOffset(int)</slot>
+  <slot>OnLineEditWindow(QString)</slot>
+  <slot>OnLineEditLevel(QString)</slot>
+  <slot>OnLineEditMin(QString)</slot>
+  <slot>OnLineEditMid(QString)</slot>
+  <slot>OnLineEditMax(QString)</slot>
+  <slot>OnLineEditOffset(QString)</slot>
+  <slot>OnSliderContourMin(int)</slot>
+  <slot>OnSliderContourMax(int)</slot>
+  <slot>OnSliderContourSmooth(int)</slot>
+  <slot>OnContourValueChanged()</slot>
+  <slot>OnContourSave()</slot>
+  <slot>OnCopySettings()</slot>
+  <slot>OnPasteSettings()</slot>
+  <slot>OnPasteSettingsToAll()</slot>
+  <slot>OnTrackVolumeThresholdChanged()</slot>
+  <slot>OnSliderTrackVolumeMin(int)</slot>
+  <slot>UpdateTrackVolumeThreshold()</slot>
+  <slot>OnShowExistingLabelsOnly(bool)</slot>
+  <slot>OnCheckShowLabelContour(bool)</slot>
+  <slot>OnComboMask(int)</slot>
+  <slot>OnComboCorrelationSurface(int)</slot>
+  <slot>OnCheckUsePercentile(bool)</slot>
+  <slot>OnLineEditVectorDisplayScale(QString)</slot>
+  <slot>OnColorTableItemDoubleClicked(QTreeWidgetItem*)</slot>
+  <slot>OnCheckBoxSelectAllLabels(int)</slot>
+  <slot>OnColorTableItemChanged(QTreeWidgetItem*)</slot>
+  <slot>OnLineEditMaskThreshold(QString)</slot>
+  <slot>OnLineEditVectorLineWidth(QString)</slot>
+  <slot>OnCheckVoxelizedContour(bool)</slot>
+  <slot>OnLineEditVectorNormThreshold(QString)</slot>
+  <slot>OnColorTableItemClicked(QTreeWidgetItem*)</slot>
+ </slots>
+</ui>

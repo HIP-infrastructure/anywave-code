@@ -5,11 +5,12 @@
 TFWavelet2Plugin::TFWavelet2Plugin()
 {
 	name = QString(tr("Time Frequency"));
-	version = "2.0.0";
+	version = "2.1.0";
 	description = "Compute Time/Frequency using wavelet";
 	category = "Process:Signal:Time Frequency";
 	type = AwProcessPlugin::GUI;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
+	
 }
 
 TFWavelet2::TFWavelet2()
@@ -18,11 +19,13 @@ TFWavelet2::TFWavelet2()
 	setInputModifiers(Aw::ProcessIO::modifiers::RequireChannelSelection);
 	// Limit the number of channels
 	pdi.addInputChannel(AwProcessDataInterface::AnyChannels, 1, 5);
+	m_widget = nullptr;
 }
 
 TFWavelet2::~TFWavelet2()
 {
-	delete m_widget;
+	if (m_widget)
+		delete m_widget;
 }
 
 

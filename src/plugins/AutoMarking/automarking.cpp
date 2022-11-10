@@ -50,16 +50,17 @@ void AutoMarking::run()
 	m_widget->setTotalDuration(pdi.input.settings.value(keys::file_duration).toFloat());
 	m_widget->setMarkers(pdi.input.markers());
 	connect(m_widget, SIGNAL(closed()), this, SIGNAL(closed()));
-	connect(m_widget, SIGNAL(newMarkersCreated(const AwMarkerList&)), this, SLOT(newMarkers(const AwMarkerList&)));
+//	connect(m_widget, SIGNAL(newMarkersCreated(const AwMarkerList&)), this, SLOT(newMarkers(const AwMarkerList&)));
+	connect(m_widget, &AwMarkAroundWidget::newMarkersCreated, this, &AutoMarking::newMarkers);
 	m_widget->show();
 }
 
-void AutoMarking::newMarkers(const AwMarkerList& markers)
+void AutoMarking::newMarkers(const AwSharedMarkerList& markers)
 {
-	AwMarkerList temp = markers;
+	auto temp = markers;
 	emit sendMarkers(&temp);
-	AwMessageBox::information(0, tr("Markers inserted"), QString(tr("%1 markers added.")).arg(temp.size())); 
-	while (!temp.isEmpty())
-		delete temp.takeFirst();
+	AwMessageBox::information(0, tr("Markers inserted"), QString(tr("%1 markers added.")).arg(markers.size())); 
+	//while (!temp.isEmpty())
+	//	delete temp.takeFirst();
 
 }

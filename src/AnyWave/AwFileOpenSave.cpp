@@ -98,6 +98,51 @@ void AnyWave::updateRecentFiles(const QStringList &files)
 	}
 }
 
+/// <summary>
+/// loadRecentFilesList()
+/// called each time the user clicks on Recent Files sub menu in File Menu
+/// </summary>
+void AnyWave::loadRecentFilesList()
+{
+	auto aws = AwSettings::getInstance();
+	QStringList recentFiles = aws->value(aws::recent_files).toStringList();
+	m_recentFilesMenu->clear();
+	if (recentFiles.size()) {
+		qint32 count = 1;
+		for (auto const& s : recentFiles) {
+			auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+			QAction* action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentFilesMenu);
+			m_recentFilesMenu->addAction(action);
+			// add index number in data()
+			action->setData(count - 1);
+			connect(action, &QAction::triggered, this, &AnyWave::openRecentFile);
+			count++;
+		}
+	}
+}
+
+/// <summary>
+/// loadRecentFilesList()
+/// called each time the user clicks on Recent Files sub menu in File Menu
+/// </summary>
+void AnyWave::loadRecentBidsList()
+{
+	auto aws = AwSettings::getInstance();
+	QStringList recentBids = aws->value(aws::recent_bids).toStringList();
+	m_recentBIDSMenu->clear();
+	if (recentBids.size()) {
+		qint32 count = 1;
+		for (auto const& s : recentBids) {
+			auto shortenFile = AwSettings::getInstance()->shortenFilePath(s);
+			QAction* action = new QAction(QString("%1 .").arg(count) + shortenFile, m_recentBIDSMenu);
+			m_recentBIDSMenu->addAction(action);
+			// add index number in data()
+			action->setData(count - 1);
+			connect(action, &QAction::triggered, this, &AnyWave::openRecentBIDS);
+			count++;
+		}
+	}
+}
 
 void AnyWave::openFileFromBIDS(const QString& filePath)
 {
@@ -119,7 +164,6 @@ void AnyWave::openFileFromBIDS(const QString& filePath)
 	m_saveFileName.clear();
 
 	auto fileName = dataManager->value(keys::data_path).toString();
-	m_lastDirOpen = dataManager->value(keys::data_dir).toString();
 
 	// Update Window title
 	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(dataManager->rawChannels().size()));
@@ -179,7 +223,10 @@ void AnyWave::openFile(const QString &path)
 				filter += QString(" %1").arg(e);
 
 		openWithDialog = true;
-		AwOpenFileDialog dlg(this, tr("Open a file"), m_lastDirOpen);
+		auto lastDir = aws->value(aws::last_data_dir).toString();
+		if (lastDir.isEmpty())
+			lastDir = "/";
+		AwOpenFileDialog dlg(this, tr("Open a file"), lastDir);
 		dlg.setFileMode(QFileDialog::ExistingFile);
 		dlg.setNameFilter(filter);
 		dlg.setViewMode(QFileDialog::Detail);
@@ -235,7 +282,6 @@ void AnyWave::openFile(const QString &path)
 	m_saveFileName.clear();
 
 	auto fileName = dataManager->value(keys::data_path).toString();
-	m_lastDirOpen = dataManager->value(keys::data_dir).toString();
 
 	// Update Window title
 	QString title = QString("AnyWave - ") + fileName + QString(tr(" - %2 channels. ").arg(dataManager->rawChannels().size()));
@@ -320,7 +366,10 @@ void AnyWave::openRecentBIDS()
 
 void AnyWave::openBIDS()
 {
-	QString dir = QFileDialog::getExistingDirectory(this, "/");
+	auto lastDir = AwSettings::getInstance()->value(aws::last_bids_dir).toString();
+	if (lastDir.isEmpty())
+		lastDir = "/";
+	QString dir = QFileDialog::getExistingDirectory(this, lastDir);
 	if (dir.isEmpty())
 		return;
 	if (AwBIDSManager::isBIDS(dir)) {
@@ -331,22 +380,23 @@ void AnyWave::openBIDS()
 		AwMessageBox::information(this, tr("BIDS"), tr("The selected folder is not a BIDS folder."));
 }
 
-void AnyWave::openBIDS(const QString& path)
+bool AnyWave::openBIDS(const QString& path)
 {
 	// check if we try to open an already open BIDS
 	if (AwBIDSManager::isInstantiated()) {
 		auto bm = AwBIDSManager::instance();
 		if (bm->rootDir().toLower() == path.toLower())
-			return;
+			return true;
 	}
 
-	AwBIDSManager::instance()->setRootDir(path);
+	if (AwBIDSManager::instance()->setRootDir(path) == -1)
+		return false;
 	connect(AwBIDSManager::instance()->ui(), SIGNAL(dataFileClicked(const QString&)), this, SLOT(openFileFromBIDS(const QString&)));
-	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
+//	connect(AwBIDSManager::instance()->ui(), SIGNAL(batchManagerNeeded()), this, SLOT(on_actionCreate_batch_script_triggered()));
 
 	// instantiate dock widget if needed
 	auto dock = m_dockWidgets.value("BIDS");
-	if (dock == NULL) {
+	if (dock == nullptr) {
 		dock = new QDockWidget(tr("BIDS"), this);
 		m_dockWidgets["BIDS"] = dock;
 		dock->setWidget(AwBIDSManager::instance()->ui());
@@ -357,6 +407,7 @@ void AnyWave::openBIDS(const QString& path)
 	}
 	dock->show();
 	AwSettings::getInstance()->addRecentBIDS(path);
+	return true;
 }
 
 //
@@ -425,10 +476,6 @@ void AnyWave::loadBeamformer()
 void AnyWave::on_actionLoadICA_triggered()
 {
 	if (AwMontageManager::instance()->loadICA() == 0) {
-		//if (QMessageBox::question(this, tr("Review Topographies"),
-		//	tr("Do you want to review all IC mappings?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-		//	reviewComponentsMaps();
-		// enable menus
 		actionShow_map_on_signal->setEnabled(true);
 		actionComponentsMaps->setEnabled(true);
 	}
@@ -474,7 +521,7 @@ void AnyWave::closeFile()
 
 	if (m_SEEGViewer) {
 		delete m_SEEGViewer;
-		m_SEEGViewer = NULL;
+		m_SEEGViewer = nullptr;
 	}
 
 	m_dockWidgets["video"]->hide();

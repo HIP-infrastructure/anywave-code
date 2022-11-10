@@ -17,6 +17,7 @@
 #define AWSCRIPTPLUGIN_H
 
 #include <AwProcessInterface.h>
+#include "MATPy/AwMATPyServer.h"
 
 class AwScriptProcess : public AwProcess
 {
@@ -29,10 +30,11 @@ public:
 	void setCompiled(bool flag = true) { m_isCompiled = flag; }
 	/** calls to runFromCommandLine redirected to run() : command line run options. **/
 	void runFromCommandLine() override { run(); }
-
+	void setServerInstance(AwMATPyServer* instance) { m_server = instance; }
 	// Map to hold int values associated with text flags name
 	static QMap<QString, int> pluginFlags;
 protected:
+	AwMATPyServer* m_server;
 	QString m_path;	// path to plugin executable file (optional)
 	bool m_isCompiled; // used for MATLAB compiled plugin
 	int m_pid;	
@@ -42,7 +44,7 @@ class AwScriptPlugin : public AwProcessPlugin
 {
 	Q_OBJECT
 public:
-	AwScriptPlugin() : AwProcessPlugin() { type = AwProcessPlugin::Background; m_isCompiled = false;}
+	AwScriptPlugin() : AwProcessPlugin() { type = AwProcessPlugin::Background; m_isCompiled = false; classType = ScriptedPlugin; }
 	enum Backends { Python, MATLAB};
 	void init(const QMap<QString, QString>& map);
 	void setScriptPath(const QString& path) { m_path = path; }
@@ -52,7 +54,9 @@ public:
 	inline bool isCompiled() { return m_isCompiled; }
 	inline void setAsCompiled(bool f) { m_isCompiled = f; }
 	void setInputFlags(int flags) { m_inputFlags = flags; }
-protected:
+	
+ protected:
+	
 	bool m_isCompiled;
 	int m_inputFlags;	// input flags to set when instantiating the process.
 	QString m_path;			// path to script or executable file

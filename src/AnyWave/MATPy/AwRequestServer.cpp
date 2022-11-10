@@ -37,17 +37,19 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 	m_serverPort = 0;
 	m_pidCounter = 0;
 
+	AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 	if (m_server->listen(QHostAddress::Any, port)) {
 		m_serverPort = m_server->serverPort();
-		AwDebugLog::instance()->connectComponent("MATPy Listener", this);
 		AwDataServer::getInstance()->openConnection(this);
 		connect(m_server, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
 		m_isListening = true;
 	}
-	else
+	else {
+		m_errorString = m_server->errorString();
+		emit log(QString("Failed to listen on tcp port: %1").arg(m_errorString));
 		m_isListening = false;
 
-	connect(this, SIGNAL(markersAdded(AwMarkerList *)), AwMarkerManager::instance(), SLOT(addMarkers(AwMarkerList *)));
+	}
 	connect(this, SIGNAL(beamformerAvailable(QString)), AwSourceManager::instance(), SLOT(load(QString)));
 
 	setHandlers();
@@ -56,6 +58,10 @@ AwRequestServer::AwRequestServer(quint16 port, QObject *parent) : AwDataClient(p
 		m_thread->start();
 	}
 	m_debugMode = false;
+	m_dataManager = AwDataManager::instance();
+	connect(this, &AwRequestServer::markersAdded, m_dataManager->markerManager(), &AwMarkerManager::receivedMarkers);
+//	connect(this, SIGNAL(markersAdded(AwMarkerList*)), m_dataManager->markerManager(), SLOT(addMarkers(AwMarkerList*)));
+//	connect(this, &AwRequestServer::markersAdded, m_dataManager->markerManager(), &AwMarkerManager::receivedMarkers);
 }
 
 AwRequestServer::~AwRequestServer()
@@ -80,7 +86,8 @@ void AwRequestServer::setHandlers()
 	addHandler(this, &AwRequestServer::handleSetBeamFormer, AwRequest::SetBeamFormer);		
 	addHandler(this, &AwRequestServer::handleGetTriggers, AwRequest::GetTriggers);		
 	addHandler(this, &AwRequestServer::handleGetPluginIO, AwRequest::GetPluginIO);		
-	addHandler(this, &AwRequestServer::handleGetDataEx, AwRequest::GetDataEx);			
+	addHandler(this, &AwRequestServer::handleGetDataEx, AwRequest::GetDataEx);	
+	addHandler(this, &AwRequestServer::handleGetData2_5_10, AwRequest::GetData2_5_10);
 	addHandler(this, &AwRequestServer::handleGetMarkersEx, AwRequest::GetMarkersEx);	
 	addHandler(this, &AwRequestServer::handleOpenNewFile, AwRequest::OpenNewFile);		
 	addHandler(this, &AwRequestServer::handleRunAnyWave, AwRequest::RunAnyWave);			
@@ -109,37 +116,23 @@ void AwRequestServer::handleNewConnection()
 
 void AwRequestServer::dataReceived()
 {
-//	emit log("dataReceived called before mutex");
 	QMutexLocker lock(&m_mutex);
-//	emit log("dataReceived called after mutex");
-
 	// who is sending data?
 	QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
 	if (client == nullptr) {
 		emit log("null socket client detected.... Aborting");
 		return;
 	}
-
-	//emit log("dataReceived waiting for 8 bytes to be available");
 	while (client->bytesAvailable() < sizeof(int) * 2)
 		client->waitForReadyRead();
-	//emit log("dataReceived at least 8 bytes received.\nReading pid and data size");
-
 	int pid, size;
-	
 	QDataStream stream(client);
 	stream.setVersion(QDataStream::Qt_4_4);
 	stream >> pid >> size;
-	//emit log(QString("dataReceived got pid %1 and size is  %2 bytes").arg(pid).arg(size));
-	//emit log(QString("dataReceived waiting for %1 bytes to be available").arg(size));
 	while (client->bytesAvailable() < size)
 		client->waitForReadyRead();
-
-	//emit log("dataReceived got all bytes. Reading request id...");
-
 	int request;
 	stream >> request;
-	//emit log(QString("dataReceived request id is %1").arg(request));
 	handleRequest(request, client, pid);
 }
 
@@ -154,6 +147,7 @@ void AwRequestServer::clientDisconnected()
 
 void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 {
+
 	if (m_handlers.isEmpty() || !m_handlers.contains(request)) {
 		emit log(QString("received unknown request: %2. Nothing done.").arg(request));
 		return;
@@ -190,16 +184,13 @@ void AwRequestServer::handleRequest(int request, QTcpSocket *client, int pid)
 			emit log(tr("Done."));
 			return;
 		}
-		// p may be instantiated but if we are in debug mode, the pdi.input may be empty if no reader is active
-		// calling initDebugProcess() may solve this issue
-		//if (m_debugMode)
-		//	initDebugProcess(p);
 	}
 	if (p == nullptr) {
 		emit log("Received request but process is null. Skipped.");
 		return;
 	}
 	
+	connect(this, &AwRequestServer::message, p, &AwScriptProcess::sendMessage);
 	// WARNING: p can be nullptr if the pid was negative. 
 	// a nullptr p means that we are running in dedicated data server mode : AnyWave was launched by a Python/MATLAB plugin with a specified file.
 	auto h = m_handlers.value(request);
@@ -215,8 +206,8 @@ void AwRequestServer::initDebugProcess(AwScriptProcess* p)
 		p->pdi.input.setReader(AwDataManager::instance()->reader());
 		p->pdi.input.setNewChannels(AwDataManager::instance()->montage(), true);
 		p->pdi.input.settings = dm->settings();
-		connect(p, SIGNAL(sendMarkers(AwMarkerList*)), dm->markerManager(), SLOT(addMarkers(AwMarkerList*)));
-		connect(p, SIGNAL(sendMarker(AwMarker *)), dm->markerManager(), SLOT(addMarker(AwMarker*)));
+		connect(p, &AwBaseProcess::sendMarkers, dm->markerManager(), &AwMarkerManager::receivedMarkers);
+		//connect(p, SIGNAL(sendMarker(AwMarker *)), dm->markerManager(), SLOT(addMarker(AwMarker*)));
 	}
 }
 

@@ -58,23 +58,19 @@ AwPluginManager *AwPluginManager::getInstance()
 AwPluginManager::AwPluginManager()
 {
 	// init input flags map for MATLAB/Python plugins
-//	m_MATPyInputFlagsMap.insert("getallmarkers", Aw::ProcessIO::GetAllMarkers);
-//	m_MATPyInputFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	m_MATPyModifiersFlagsMap.insert("processignoreschannelselection", Aw::ProcessIO::modifiers::IgnoreChannelSelection);
 	m_MATPyModifiersFlagsMap.insert("acceptchannelselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 	m_MATPyInputFlagsMap.insert("getasrecordedchannels", Aw::ProcessIO::GetAsRecordedChannels);
-//	m_MATPyInputFlagsMap.insert("getdurationmarkers", Aw::ProcessIO::GetDurationMarkers);
 	m_MATPyInputFlagsMap.insert("getcurrentmontage", Aw::ProcessIO::GetCurrentMontage);
 	m_MATPyModifiersFlagsMap.insert("processrequireschannelselection", Aw::ProcessIO::modifiers::RequireChannelSelection);
-//	m_MATPyInputFlagsMap.insert("acceptmarkerselection", Aw::ProcessIO::modifiers::AcceptChannelSelection);
 
 	m_MATPyPluginFlagsMap.insert("canrunfromcommandline", Aw::ProcessFlags::CanRunFromCommandLine);
-//	m_MATPyPluginFlagsMap.insert("pluginacceptstimeselections", Aw::ProcessFlags::PluginAcceptsTimeSelections);
 	m_MATPyPluginFlagsMap.insert("processdoesntrequiredata", Aw::ProcessFlags::ProcessDoesntRequireData);
+	m_MATPyPluginFlagsMap.insert("launchedonstartup", Aw::ProcessFlags::LaunchedOnStartup);  // quite useless ??.
+	m_MATPyPluginFlagsMap.insert("launchedonclosing", Aw::ProcessFlags::LaunchedOnClosing);
+
 	// for compatibilty
 	m_MATPyPluginFlagsMap.insert("nodatarequired", Aw::ProcessFlags::ProcessDoesntRequireData);
-
-//	m_MATPyPluginFlagsMap.insert("pluginishidden", Aw::ProcessFlags::PluginIsHidden);
 
 	AwDebugLog::instance()->connectComponent("Plugin Manager", this);
 	setObjectName("AwPluginManager");
@@ -114,8 +110,6 @@ void AwPluginManager::processJsonFiles()
 	}
 }
 
-
-
 //
 // showPluginsDial()
 // Displays the dialog showing loaded plugins
@@ -124,7 +118,6 @@ void AwPluginManager::showPluginsDial()
 	AwPluginDial dlg;
 	dlg.exec();
 }
-
 
 //
 // newReader()
@@ -179,14 +172,10 @@ QObject *AwPluginManager::loadPlugin(const QString& path)
 		AwFileIOPlugin* fio = qobject_cast<AwFileIOPlugin*>(plugin);
 		if (fio) { // FileIO specific (plugin can be reader and writer at the same time
 			fio->pluginDir = pluginDir;
-			if (fio->canRead()) {
-				//fio = qobject_cast<AwFileIOPlugin*>(plugin);
+			if (fio->canRead()) 
 				loadFileIOReaderPlugin(fio);
-			}
-			if (fio->canWrite()) {
-				//fio = qobject_cast<AwFileIOPlugin*>(plugin);
+			if (fio->canWrite()) 
 				loadFileIOWriterPlugin(fio);
-			}
 			m_pluginNames.insert(fio->name, plugin);
 			m_loaders.insert(plugin, loader);
 			return plugin;
@@ -528,6 +517,12 @@ void AwPluginManager::loadUserPlugins()
 	// Browsing plugins
 	for (const QString& FileName : dir.entryList(QDir::Files)) 
 		loadPlugin(dir.absoluteFilePath(FileName));
+
+	// now check for special flags (LaunchedOnClosing)
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::LaunchedOnClosing)
+			m_launchOnClosing << p;
+	}
 }
 
 //
@@ -543,7 +538,6 @@ void AwPluginManager::loadPlugins()
 	auto pythonPluginDir = aws->value(aws::app_python_plugins_dir).toString();
 	checkForScriptPlugins(matlabPluginDir);
 	checkForScriptPlugins(pythonPluginDir);
-
 	// Ajout de plugins integres directement dans l'appli.
 	auto adesPlugin = new ADESIOPlugin;
 	m_writers += adesPlugin;
@@ -572,7 +566,6 @@ void AwPluginManager::loadPlugins()
 #ifdef AW_EPOCHING
 	m_pluginDisplays += new AwDisplayPluginAvgSignalItem;
 #endif
-
 	// Parse plugin to plugin's factory
 	for (AwFileIOPlugin *p : m_readers)
 		m_readerFactory.addPlugin(p->name, p);
@@ -586,8 +579,12 @@ void AwPluginManager::loadPlugins()
 		m_filterFactory.addPlugin(p->name, p);
 
 	QDir dir(pluginDir);
-	for (const auto &FileName : dir.entryList(QDir::Files)) {
+	for (const auto &FileName : dir.entryList(QDir::Files)) 
 		loadPlugin(dir.absoluteFilePath(FileName));
+	// now check for special flags (LaunchedOnClosing)
+	for (auto p : m_processes) {
+		if (p->flags() & Aw::ProcessFlags::LaunchedOnClosing)
+			m_launchOnClosing << p;
 	}
 }
 

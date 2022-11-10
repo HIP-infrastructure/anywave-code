@@ -160,6 +160,7 @@ void TFPlot::updateFreqScale(float min, float max, float step)
 	m_settings->step = step;
 
 	QList<double> rTicks[QwtScaleDiv::NTickTypes];
+
 	auto s = (std::abs((max - min)) + 1)  / 4;
 
 	rTicks[QwtScaleDiv::MajorTick] << min << std::floor(min + 1. * s) << std::floor(min + 2. * s) << std::floor(min + 3. * s) << max;
@@ -182,13 +183,16 @@ void TFPlot::updateDisplaySettings()
 		m_displayCopy.logScale = m_displaySettings->logScale;
 		if (m_displayCopy.logScale) {
 			setAxisScaleEngine(QwtPlot::yLeft, new QwtLogScaleEngine(10));
-			setAxisScale(QwtPlot::yLeft, m_settings->freq_min, 	m_settings->freq_max, m_settings->step);
+			setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max);
+			replot();
+		//	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, 	m_settings->freq_max, m_settings->step);
 			m_freqScaleWidget->setTransformation(new QwtLogTransform());
 		}
 		else {
 			setAxisScaleEngine(QwtPlot::yLeft, new QwtLinearScaleEngine());
 			m_freqScaleWidget->setTransformation(new QwtNullTransform());
-			setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max, m_settings->step);
+			setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max);
+			replot();
 		}
 		updateFreqScale(m_settings->freq_min, m_settings->freq_max, m_settings->step);
 	}
@@ -234,12 +238,8 @@ void TFPlot::setDataMatrix(const mat& matrix, float position)
 
 	m_matrix->setValueMatrix(vec, matrix.n_cols);
 	m_matrix->setInterval(Qt::XAxis, QwtInterval(0, m_matrix->numColumns()));
-	m_matrix->setInterval(Qt::YAxis, QwtInterval(0, m_matrix->numRows()));
+	m_matrix->setInterval(Qt::YAxis, QwtInterval(m_settings->freq_min, m_settings->freq_max));
 	setAxisScale(QwtPlot::xBottom, 0, m_matrix->numColumns());
-
-//	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max + m_settings->freq_min - 1);
-	
-//	setAxisScale(QwtPlot::yLeft, 1, matrix.n_rows, 1.);
 	setAxisScale(QwtPlot::yLeft, m_settings->freq_min, m_settings->freq_max);
 	m_spectro->setData(m_matrix);
 	replot();

@@ -18,9 +18,9 @@
 // modalities
 static QStringList modalities = { "anat", "meg", "eeg", "ieeg" };
 
-AwBIDSItem::AwBIDSItem(const QString& text, AwBIDSItem *subject) : QStandardItem(text)
+AwBIDSItem::AwBIDSItem(const QString& text, AwBIDSItem *parent) : QStandardItem(text)
 {
-	m_parent = subject;
+	m_parent = parent;
 	if (m_parent)
 		m_parent->addChild(this);
 	// set hidden false by defaukt

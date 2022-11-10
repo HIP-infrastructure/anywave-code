@@ -140,7 +140,7 @@ int GraphSet::sectionIterations(int section)
 int GraphSet::totalIterations()
 {
 	int count = 0;
-	for (auto i : m_iterations)
+	for (auto const& i : m_iterations)
 		count += i;
 	return count;
 }

@@ -19,7 +19,8 @@
 #include "Prefs/AwSettings.h"
 #include <QFile>
 #include <QTextStream>
-AwDebugLog *AwDebugLog::m_instance = NULL;
+
+AwDebugLog *AwDebugLog::m_instance = nullptr;
 
 AwDebugLog::AwDebugLog(QObject *parent)
 	: QObject(parent)
@@ -64,7 +65,7 @@ void AwDebugLog::writeLog(const QString& name)
 	QFile file(filePath);
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		QTextStream stream(&file);
-		for (auto l : logs)
+		for (auto const& l : logs)
 			stream << l << endl;
 		file.close();
 	}
@@ -104,6 +105,7 @@ QStringList AwDebugLog::logsForComponent(const QString &name)
 		return m_logs[name];
 	return QStringList();
 }
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////:

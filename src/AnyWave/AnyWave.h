@@ -23,6 +23,7 @@
 #include <AwMarker.h>
 #include <filter/AwFilterSettings.h>
 
+
 #define AW_CUSTOM_MONTAGES_DIR "/AnyWave/Montages"     // sous chemin à ajouter à homeDir pour avoir le chemin complet
 
 // Mapping
@@ -66,7 +67,6 @@ protected:
 private:
 	QMap<QString, QDockWidget *> m_dockWidgets;
 	QString m_openFileName;				// Full path to current open file.
-	QString m_lastDirOpen;				// Keep path to last directory used when opening a file
 	QString m_saveFileName;
 	QMenu *m_recentFilesMenu, *m_recentBIDSMenu;
 	// widgets
@@ -124,7 +124,7 @@ public slots:
 	void displayReaderTriggerStatus(bool ok, int number);
 	void openFile(const QString& path = QString());
 	void openFileFromBIDS(const QString& path);
-	void openBIDS(const QString& path);
+	bool openBIDS(const QString& path);
 	void updateRecentFiles(const QStringList& files);
 	void updateRecentBIDS(const QStringList& files);
 	void openRecentFile();
@@ -167,4 +167,6 @@ private slots:
 	void visualiseEpoch();
 	void averageEpoch();
 	void openBIDS();
+	void loadRecentFilesList();
+	void loadRecentBidsList();
 };

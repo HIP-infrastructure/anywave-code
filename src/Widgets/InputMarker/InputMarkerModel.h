@@ -34,15 +34,14 @@ class InputMarkerModel : public QAbstractTableModel
 	Q_OBJECT
 public:
 	InputMarkerModel(QObject *parent);
-//	~InputMarkerModel();
 
 	QVariant data(const QModelIndex& index, int role) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 	Qt::ItemFlags flags(const QModelIndex &index = QModelIndex()) const;
-	void setMarkers(const AwMarkerList& markers) { m_markers = markers; }
-	AwMarkerList& getList() { return m_markers; }
+	void setMarkers(const AwSharedMarkerList& markers) { m_markers = markers; }
+	AwSharedMarkerList& getList() { return m_markers; }
 protected:
-	AwMarkerList m_markers;
+	AwSharedMarkerList m_markers;
 };

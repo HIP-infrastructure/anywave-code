@@ -19,8 +19,6 @@
 #include <AwProcessLib.h>
 #include <AwDataClient.h>
 #include <QMetaType>
-#include <widget/AwGraphicInterface.h>
-#include <process/AwProcessGUIWidget.h>
 #include <QTranslator>
 #include <AwGlobal.h>
 #include <QElapsedTimer>
@@ -28,7 +26,8 @@
 class AwProcessPlugin;
 class AwProcessOutputWidget;
 class AwEvent;
-
+class AwDisplayPlugin;
+class AwProcessGUIWidget;
 
 /*!
  * \brief
@@ -78,8 +77,7 @@ public:
 	bool isAborted();
 	// threading specific
 	void setMarkersReceived();	// must be called by the markers receiver to inform the process that the markers have been successfully received
-	void addMarkers(AwMarkerList *markers);
-	void addMarker(AwMarker *marker);
+	void addMarkers(AwSharedMarkerList * markers);
 	void sendEventAsynch(QSharedPointer<AwEvent> e);
 	/** Get instance of process based on plugin name **/
 	AwBaseProcess* getProcessByName(const QString& name);
@@ -87,8 +85,7 @@ public:
 	virtual bool batchParameterCheck(const QVariantMap& args) { return true; }
 signals:
 	// Adding markers to AnyWave
-	void sendMarkers(AwMarkerList *markers);
-	void sendMarker(AwMarker *marker);
+	void sendMarkers(AwSharedMarkerList *markers);
 	// Send command
 	void sendCommand(int command, QVariantList args);
 	void sendCommand(const QVariantMap&);
@@ -138,14 +135,15 @@ class AW_PROCESS_EXPORT AwProcessPlugin : public AwPluginBase
 {
 public:
 	// default constructor
-	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; }
+	AwProcessPlugin() : AwPluginBase() { m_flags = 0; m_inputFlags = 0; m_modifiersFlags = 0; classType = RegularPlugin; }
+	enum ClassTypes  { RegularPlugin, ScriptedPlugin };
 	/** Plugin's type. You can implement a plugin that will be of type Display, Background, Display and Background or Internal. Set it in constructor. This is MANDATORY.
 - Display type indicates that the plugin will process only displayed data.
 - Background type indicates that the plugin will run in background and asked AnyWave for data. Background plugin's process may generate files or call external programs.
 - DisplayBackground type indicates that the plugin can work on displayed data or in background mode aswell.
 - Internal type indicates that the plugin will process data internally. For instance, process some calculation on datas before they will send to AwDataClient objects. **/
 	int type;
-
+	int classType;
 	enum RunMode { GUI = 2, Display = 4, Background = 8, DisplayBackground = 16, Internal = 32 };
 	
 	void setFlags(int flags) { m_flags |= flags; }
@@ -190,7 +188,6 @@ public:
 	virtual void quit() { stop(); }
 	inline int flags() { return m_flags; }
 	void setFlags(int flags) { m_flags |= flags; }
-	void sendTextMessage(QString message) { emit progressChanged(message); }
 	inline int status() { return m_status; }
 	inline bool wasAborted() { return m_status == AwProcess::Aborted; }
 	inline bool isRunning() { return m_status == AwProcess::Running; }

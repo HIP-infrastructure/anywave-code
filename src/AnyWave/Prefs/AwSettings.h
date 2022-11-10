@@ -20,6 +20,7 @@
 #include <QSystemTrayIcon>
 #include <AwMarker.h>
 #include <QVariantMap>
+#include <QFileSystemWatcher>
 
 class AwFileIO;
 class AwDisplaySetup;
@@ -77,9 +78,21 @@ namespace aws {
 	constexpr auto total_cpu_cores = "total_cpu_cores";
 	constexpr auto max_cpu_cores = "max_cpu_cores";
 	constexpr auto max_recent_files = "max_recent_files";
+	constexpr auto recent_files_path = "recent_files_path";
+	constexpr auto recent_files_lock = "recent_files.lock";
+	constexpr auto recent_bids_lock = "recent_bids.lock";
+	constexpr auto recent_bids_path = "recent_bids_path";
+	constexpr auto recent_files_name = "recent_files.txt";
+	constexpr auto recent_bids_name = "recent_bids.txt";
+	constexpr auto last_data_dir = "last_data_dir";
+	constexpr auto last_bids_dir = "last_bids_dir";
+	constexpr auto settings_file = "settings.json";
+	constexpr auto settings_file_path = "settings_file_path";
 	constexpr auto predefined_marker_file = "predefined_marker_file";
 	constexpr auto itk_snap = "itk_snap";
 	constexpr auto gardel = "gardel";
+	// MATLAB Runtime
+
 };
 
 ///
@@ -109,9 +122,7 @@ public:
 	void emptyMatlabShellScript();
 #endif
 	void closeFile();
-
 	void quit();
-
 	inline AwDisplaySetup *displaySetup() { return m_setup; }
 	inline void setDisplaySetup(AwDisplaySetup *setup) { m_setup = setup; }
 	inline QSystemTrayIcon *sysTray() { return m_sysTrayIcon; }
@@ -119,26 +130,25 @@ public:
 	inline void setMatlabInterface(AwMatlabInterface *i) { m_matlabInterface = i; }
 	AwFileIO* readerAt(int index);
 	QStringList& topoLayouts(); 
-
+	// MATLAB Runtimes
+	inline bool MATLABRuntimeDetected() { return !m_MATLABRuntimes.isEmpty(); }
+	QStringList detectedMATLABRuntimes() { return m_MATLABRuntimes.keys(); }
+	QString MATLABRuntimePath(const QString& k) { return m_MATLABRuntimes.value(k);	}
 	// recent files specific
 	QString shortenFilePath(const QString& path);
 	void addRecentFilePath(const QString& path);
 	void addRecentBIDS(const QString& path);
 	void removeRecentBIDS(const QString& path);
 	void removeRecentFilePath(const QString& path);
-
-	// predefined markers (Marker Inspector Tool)
-	AwMarkerList loadPredefinedMarkers();
 signals:
 	void markersColorChanged(const QStringList& colors);
 	void screenCalibrationChanged(float x, float y);
-	void recentFilesUpdated(const QStringList&);
-	void recentBIDSUpdated(const QStringList&);
 	void timeRepresentationChanged(bool HMS); // if HMS is true that means we go for HMS representation
 	void log(const QString& message);
 public slots:
 	void setAutoTriggerParsingOn(bool onoff);
-	void savePredefinedMarkers(const AwMarkerList& markers);
+private slots:
+	void reloadRecentBidsFiles(const QString& file);
 protected:
 	QVariantMap m_settings;
 	QList<AwFileIO *> m_readers;
@@ -147,6 +157,16 @@ protected:
 	QSystemTrayIcon *m_sysTrayIcon;
 	AwMatlabInterface *m_matlabInterface;
 	QMap<QString, QString> m_pythonVenvs;
+	QFileSystemWatcher m_fileWatcher;
+	QMap<QString, QString> m_MATLABRuntimes;	// empty if no runtime detected or manually set
+
+	void loadRecentFiles();
+	void loadRecentBids();
+	void saveRecentFiles();
+	void saveRecentBids();
+	void saveFileSettings();
+	void loadFileSettings();
+	void detectMATLABRuntimes();
 private:
 	static AwSettings *m_instance;
 };

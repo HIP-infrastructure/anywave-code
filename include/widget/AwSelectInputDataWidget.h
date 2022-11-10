@@ -29,7 +29,7 @@ public:
 	~AwSelectInputDataWidget();
 	enum Filters { AllMarkers, WithDuration, UniqueLabels, WithDurationAndUniqueLabels };
 
-	void setMarkers(const AwMarkerList& markers, int filter = AwSelectInputDataWidget::WithDurationAndUniqueLabels);
+	void setMarkers(const AwSharedMarkerList& markers, int filter = AwSelectInputDataWidget::WithDurationAndUniqueLabels);
 	QStringList skippedMarkers();
 	QStringList usedMarkers();
 protected slots:

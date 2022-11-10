@@ -49,6 +49,7 @@ public:
 	/** Retourne la liste des AwChannels AsRecorded **/
 	AwChannel* asRecordedChannel(const QString& name) { return m_asRecordedSharedPointerMap.value(name).get(); }
 	AwChannelList asRecordedChannels() { return AwChannel::toChannelList(m_asRecordedSharedPointerMap.values()); }
+	inline QString& errorString() { return m_errorString; }
 
 	/** Get instance pointer **/
 	static AwMontageManager *instance();
@@ -139,6 +140,7 @@ public slots:
 	void loadBadChannels();
 private:
 	QMap<QString, QSharedPointer<AwChannel>> m_asRecordedSharedPointerMap;
+	QMap<QString, AwChannel*> m_rawFileChannels;
 	AwChannelList m_channels;						///< Liste des canaux choisi dans le montage et envoyés à l'affichage.
 	QList<QSharedPointer<AwChannel>> m_channelsShrdPtrs;
 
@@ -155,7 +157,7 @@ private:
 	QMutex m_mutex;									// Mutex for scripting context
 	QString m_montagePath;							// Path to montage file based on the data file name.
 	QString m_badPath;								// Path to bad channels file.
-
+	QString m_errorString;
 	void scanForPrebuiltMontages();
 	void clear();									///> clear current montage;
 	static AwMontageManager *m_instance;

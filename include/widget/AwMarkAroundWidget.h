@@ -28,7 +28,7 @@ public:
 	AwMarkAroundWidget(QWidget *parent = 0);
 	~AwMarkAroundWidget();
 
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 	void setTotalDuration(float duration) { m_totalDuration = duration; }
 public slots:
 	/** Generate markers before and after the selected marker and using the settings defined by the user **/
@@ -36,10 +36,10 @@ public slots:
 	/** Generate marker around the selected marker and using the settings defined by the user **/
 	void generateAround();	
 signals:
-	void newMarkersCreated(const AwMarkerList& markers);
+	void newMarkersCreated(const AwSharedMarkerList& markers);
 private:
 	Ui::AwMarkAroundWidgetUi *m_ui;
-	AwMarkerList m_markers, m_newMarkers;	// complete list of all markers and current list of new markers
+	AwSharedMarkerList m_markers, m_newMarkers;	// complete list of all markers and current list of new markers
 	float m_totalDuration;
 };
 

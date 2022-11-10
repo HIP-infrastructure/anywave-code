@@ -22,6 +22,7 @@
 #include <QFileIconProvider>
 
 class AwFileIO;
+class AwDataManager;
 // command line parsing
 using AwArgument = QPair<QString, QString>;
 
@@ -73,7 +74,7 @@ public:
 	static QString detectBIDSFolderFromPath(const QString& path);
 	
 	int setNewOpenFile(const QString& path);
-	void setRootDir(const QString& path);
+	int setRootDir(const QString& path);
 	inline QString& rootDir() { return m_rootDir; }
 	inline bool isBIDSActive() { return !m_rootDir.isEmpty(); }
 	inline bool mustValidateMods() { return !m_modifications.isEmpty(); }
@@ -81,26 +82,21 @@ public:
 	void closeBIDS();
 	inline QString& lastError() { return m_errorString; }
 	AwBIDSItems items() { return m_items; }
-
 	AwBIDSItem* getParentSubject(AwBIDSItem* item);
 	bool isSubject(AwBIDSItem *item);
 	bool isSourceDataSubject(AwBIDSItem* item);
 	// 
 	int selectItemFromFilePath(const QString& path);
-
 	// command line methods
 	void toBIDS(const AwArguments& args);
 	int SEEGtoBIDS(const AwArguments& args);
 	int MEGtoBIDS(const AwArguments& args);
-	int convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
-	int convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers);
-	static void initCommandLineOperation(const QString& filePath);
+	int convertToEDF(const QString& file, AwFileIO *reader, const AwSharedMarkerList& markers);
+	int convertToVHDR(const QString& file, AwFileIO *reader, const AwSharedMarkerList& markers);
+	static void initCommandLineOperation(const QString& filePath, AwDataManager *);
 	static void finishCommandLineOperation();
-
-
 	// BIDS GUI Specific
 	QWidget *ui() { return m_ui; }
-	
 	// TSV files
 	AwChannelList getMontageFromChannelsTsv(const QString& path);
 	AwMarkerList getMarkersFromEventsTsv(const QString& path);
@@ -147,7 +143,9 @@ public:
 	// dat file derivatives dir and file name
 	QString currentDerivativesDir();
 	QString currentFileName();
+	QStringList participantColumns() { return m_settings.value(bids::participant_cols).toStringList(); }
 	void parseSubject(AwBIDSItem* item);
+	void closeFile(QStandardItem* item);
 	void recursiveParsing(const QString& dirPath, AwBIDSItem* parentItem);
 public slots:
 	void parse(); // parse from m_rootDir and collect all found items as AwBIDSItems;
@@ -172,13 +170,14 @@ protected:
 	AwBIDSManager();
 	AwBIDSItems getSubjectItems(const QString&);
 	AwBIDSItems getSourceDataSubjectItems(const QString&);
-	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers);
+	int convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwSharedMarkerList& markers);
 	void setDerivativesForItem(AwBIDSItem *item);
 	void findCurrentFileItem(const QString& filePath);
 	QVariant BIDSProperty(int property);
 	void findTsvFilesForItem(AwBIDSItem *item);
 	void recursiveDelete(AwBIDSItem *item); // only used when BIDS Manger runs in non gui mode
-	int createEventsTsv(const QString& filePath, const AwMarkerList& markers);
+	int createEventsTsv(const QString& filePath, const AwSharedMarkerList& markers);
+	
 
 	void initAnyWaveDerivativesForFile(const QString& filePath);
 	void moveSidecarFilesToDerivatives();

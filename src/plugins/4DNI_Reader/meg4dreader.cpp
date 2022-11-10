@@ -29,7 +29,7 @@ NI4DReader::NI4DReader() : AwFileIOPlugin()
   name = QString("4DNI Reader");
   description = QString(tr("Read 4DNI MEG file."));
   manufacturer = "4DNI";
-  version = QString("1.0.2");
+  version = QString("1.0.3");
   fileExtensions << "*,*";
   layouts << "4D248" << "4D248_3D";
   m_flags = FileIO::CanRead;
@@ -142,6 +142,8 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 	m_file.seek(m_headerPos);
 	alignFilePointer();
 
+	m_settings.insert("header_position", double(m_headerPos));
+
 	dftk_header_data hdr;
 	dftk_epoch_data epoch;
 	dftk_event_data event_data;
@@ -171,27 +173,31 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 		m_error = QString("Sampling rate is incorrect.");
 		return AwFileIO::BadHeader;
 	}
+	m_settings.insert("sampling_rate", sampling_rate);
 
 	switch (m_dataFormat)
 	{
 	case FLOAT:
 		m_dataSize = sizeof(float);
 		m_dataFormat = Float;
+		m_settings.insert("data_format", "float");
 		break;
 	case DOUBLE:
 		m_dataSize = sizeof(double);
 		m_dataFormat = Double;
+		m_settings.insert("data_format", "double");
 		break;
 	case SHORT:
 		m_dataSize = sizeof(qint16);
 		m_dataFormat = Short;
+		m_settings.insert("data_format", "short");
 		break;
 	case LONG:
 		m_dataSize = sizeof(qint32);
 		m_dataFormat = Long;
+		m_settings.insert("data_format", "long");
 		break;
 	}
-
 	// 
 	m_stream.skipRawData(42);
 
@@ -221,12 +227,13 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			m_stream >> event_data.cheksum;
 			m_stream.skipRawData(36);
 			
-			AwMarker *m = new AwMarker;
-			m->setLabel(QString(event_data.event_name));
-			m->setStart(event_data.start_lat);
+			AwMarker m;
+			m.setLabel(QString(event_data.event_name));
+			m.setStart(event_data.start_lat);
 			if (event_data.end_lat > event_data.start_lat)
-				m->setDuration(event_data.end_lat - event_data.start_lat);
-			block->markers().append(m);
+				m.setDuration(event_data.end_lat - event_data.start_lat);
+		//	block->markers().append(m);
+			block->addMarker(m);
 		}
 	}
 
@@ -377,6 +384,7 @@ NI4DFileReader::FileStatus NI4DFileReader::openFile(const QString &path)
 			my_chan->units_per_bit = channel.units_per_bit;
 			my_chan->type = channel.type;
 		}
+
 		alignFilePointer();
 		dftk_device_header device_header;
 
@@ -889,7 +897,7 @@ int NI4DFileReader::clearTriggerChannels(const QStringList& labels)
  * \see
  * Separate items with the '|' character.
  */
-int NI4DFileReader::writeTriggerChannel(const QString& channelName, const AwMarkerList& list)
+int NI4DFileReader::writeTriggerChannel(const QString& channelName, const AwSharedMarkerList& list)
 {
 	if (m_triggers.isEmpty()) {
 		m_error = QString("File does not contain any trigger channels.");

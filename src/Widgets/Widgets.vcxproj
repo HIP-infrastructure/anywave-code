@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AmpScalesItem\AwAmplitudeScalesItem.cpp" />
     <ClCompile Include="Aw2DGrid.cpp" />
     <ClCompile Include="AwAddPredefinedMarker.cpp" />
     <ClCompile Include="AwAddTargetChannels.cpp" />
@@ -33,10 +32,9 @@
     <ClCompile Include="AwGetValueDialog.cpp" />
     <ClCompile Include="AwGraphicsObjects.cpp" />
     <ClCompile Include="AwMarkAroundWidget.cpp" />
-    <ClCompile Include="AwMarkerInspector.cpp" />
     <ClCompile Include="AwAmplitudeWidget.cpp" />
     <ClCompile Include="AwMapWidget.cpp" />
-    <ClCompile Include="AwMarkingSettings.cpp" />
+    <ClCompile Include="AwMarkingTool.cpp" />
     <ClCompile Include="AwMessageBox.cpp" />
     <ClCompile Include="AwQwtColorMap.cpp" />
     <ClCompile Include="AwSelectInputDataWidget.cpp" />
@@ -80,19 +78,19 @@
     <ClCompile Include="SignalView\AwGraphicsView.cpp" />
     <ClCompile Include="SignalView\AwGTCMenu.cpp" />
     <ClCompile Include="SignalView\AwNavigationBar.cpp" />
-    <ClCompile Include="SignalView\AwPickMarkersDial.cpp" />
     <ClCompile Include="SignalView\AwViewSettings.cpp" />
     <ClCompile Include="SignalView\AwViewSettingsUi.cpp" />
+    <ClCompile Include="SignalView\SceneMouseEvent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="AwAmplitudeWidget.ui">
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="..\..\include\widget\AwMarkingTool.h" />
     <ClInclude Include="SignalView\AwAmplitudeItem.h" />
     <QtMoc Include="SignalItem\AwSignalItemSettings.h" />
     <QtMoc Include="SignalItem\AwSIAmpButton.h" />
-    <QtMoc Include="SignalView\AwPickMarkersDial.h" />
     <QtMoc Include="..\..\include\widget\AwVideoPlayer.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwWaitWidget.h">
@@ -153,13 +151,9 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\SignalView\AwBaseMarkerBar.h">
     </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwMarkerInspector.h">
-    </QtMoc>
     <QtMoc Include="AwAddPredefinedMarker.h">
     </QtMoc>
     <QtMoc Include="AwAddTargetChannels.h">
-    </QtMoc>
-    <QtMoc Include="..\..\include\AwMarkingSettings.h">
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwTopoBuilder.h">
     </QtMoc>
@@ -181,12 +175,12 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\SignalView\AwNavigationBar.h">
     </QtMoc>
-    <ClInclude Include="AmpScalesItem\AwAmplitudeScalesItem.h" />
     <ClInclude Include="Aw2DGrid.h" />
     <QtMoc Include="AwTimeScaleCombo.h">
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="AwMarkingTool.ui" />
     <QtUic Include="SignalItem\AwSignalItemSettings.ui" />
     <QtUic Include="SignalView\AwGainLevelsWidget.ui" />
     <QtUic Include="SignalView\AwGoToLatencyDial.ui">
@@ -197,13 +191,10 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="SignalView\AwPickMarkersDial.ui" />
     <QtUic Include="SignalView\AwViewSettingsUi.ui">
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="AwMarkerInspector.ui">
-    </QtUic>
     <QtUic Include="AwAddPredefinedMarker.ui">
     </QtUic>
     <QtUic Include="AwAddTargetChannels.ui">
@@ -563,7 +554,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;AW_BUILD_WIDGETS_LIB;QWT_DLL;MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;AW_BUILD_WIDGETS_LIB;QWT_DLL;MKL;AW_MARKING_TOOL_V2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -640,7 +631,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;WIDGETS_LIB;QWT_DLL;AW_BUILD_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;QT_NO_DEBUG;NDEBUG;WIDGETS_LIB;QWT_DLL;AW_BUILD_WIDGETS_LIB;AW_MARKING_TOOL_V2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;$(SolutionDir)\include;$(EXTRA_LIBS)\vtk\include\vtk-8.2;$(EXTRA_LIBS)\qwt\include;.\InputMarker;$(SolutionDir)\armadillo\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>

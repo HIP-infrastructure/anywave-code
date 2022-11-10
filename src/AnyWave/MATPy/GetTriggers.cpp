@@ -31,12 +31,10 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *pro
 	// get parameters from client
 	QDataStream in(client);
 	in.setVersion(QDataStream::Qt_4_4);
-
-//	AwFileIO *reader = nullptr;
 	QSharedPointer<AwFileIO> reader;
 	QString file;
 	QStringList channels;
-	AwMarkerList markers;
+	AwSharedMarkerList markers;
 	bool success = true;
 
 	in >> file >> channels;
@@ -89,7 +87,7 @@ void AwRequestServer::handleGetTriggers(QTcpSocket *client, AwScriptProcess *pro
 	
 	response.send();
 	// clean markers
-	AW_DESTROY_LIST(markers);
+//	AW_DESTROY_LIST(markers);
 	reader->cleanUpAndClose();
 	emit log("Done.");
 }

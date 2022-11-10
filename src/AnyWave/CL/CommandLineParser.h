@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
-#include <QCommandLineParser>
 #include "AwCommandLine.h"
 namespace aw {
 	namespace commandLine {

@@ -20,7 +20,7 @@
 class AwScriptProcess;
 #include <AwDataClient.h>
 #include "Data/AwDataSet.h"
-
+class AwDataManager;
 
 class AwRequestServer : public AwDataClient
 {
@@ -37,20 +37,23 @@ public:
 	void addHandler(AwRequestServer* const object, void(AwRequestServer::* const mf)(QTcpSocket *, AwScriptProcess*), int request);
 
 	inline void setDebugMode(bool flag) { m_debugMode = flag; }
+	void setDataManager(AwDataManager* dm) { m_dataManager = dm; }
+	QString& errorString() { return m_errorString; }
 public slots:
 	void handleNewConnection();
 	void dataReceived();
 	void clientDisconnected();
 signals:
 	void log(const QString& message);
-	void markersAdded(AwMarkerList *markers);
+	void message(const QString& message);
+	void markersAdded(AwSharedMarkerList *markers);
 	void beamformerAvailable(QString path);
 protected:
 	void handleRequest(int request, QTcpSocket *client, int pid);
-	
 	void initDebugProcess(AwScriptProcess*);
-	AwScriptProcess* newDebugProcess();
 
+	AwScriptProcess* newDebugProcess();
+	AwDataManager* m_dataManager;
 	QTcpServer *m_server;
 	QMutex m_mutex;
 	QThread *m_thread;
@@ -58,17 +61,17 @@ protected:
 	quint16 m_serverPort;
 	int m_pidCounter;
 	bool m_debugMode;
+	QString m_errorString;
 	QList<AwScriptProcess*> m_processes;	// this list will contain instanciated process when plugin_debug option is active
-
 private:
 	void handleGetMarkers2(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetProperties(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetData3(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetDataEx(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetData2_5_10(QTcpSocket* client, AwScriptProcess* process);
 	void handleGetMarkersEx(QTcpSocket *client, AwScriptProcess *process);
 	void handleAddMarkers(QTcpSocket *client, AwScriptProcess *process);
-	void handleGetPluginInfo(QTcpSocket *client, AwScriptProcess *process);
-	void handleGetPluginIO(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetPluginInfo(QTcpSocket* client, AwScriptProcess* process);
 	void handleGetFileInfo(QTcpSocket *client, AwScriptProcess *process);
 	void handleIsTerminated(QTcpSocket *client, AwScriptProcess *process);
 	void handleSendMessage(QTcpSocket *client, AwScriptProcess *process);
@@ -77,6 +80,7 @@ private:
 	void handleGetICAPanelCapture(QTcpSocket *client, AwScriptProcess *process);
 	void handleSetBeamFormer(QTcpSocket *client, AwScriptProcess *process);
 	void handleGetTriggers(QTcpSocket *client, AwScriptProcess *process);
+	void handleGetPluginIO(QTcpSocket* client, AwScriptProcess* process);
 	void handleOpenNewFile(QTcpSocket *client, AwScriptProcess *process);
 	void handleRunAnyWave(QTcpSocket *client, AwScriptProcess *process);
 	void handleConnectDebug(QTcpSocket* client, AwScriptProcess* process);
@@ -87,7 +91,7 @@ private:
 	void setHandlers();
 
 	QHash<int, std::function<void(QTcpSocket*, AwScriptProcess *)>> m_handlers;
-	AwMarkerList m_markers;	// hold the markers added by process
+	AwSharedMarkerList m_markers;	// hold the markers added by process
 };
 
 

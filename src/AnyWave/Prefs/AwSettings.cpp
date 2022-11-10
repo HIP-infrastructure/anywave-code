@@ -20,13 +20,14 @@
 #include <QDir>
 #include <QApplication>
 #include <qthreadpool.h>
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 #include <QTextStream>
-#endif
+#include <QLockFile>
+#include <utils/json.h>
+
 AwSettings *AwSettings::m_instance = 0;
 
 #define LINE_PX	200
-constexpr int max_recent_files = 15;
+constexpr int max_recent_files = 20;
 
 AwSettings::AwSettings(QObject *parent)
 	: QObject(parent)
@@ -49,47 +50,180 @@ AwSettings::AwSettings(QObject *parent)
 AwSettings::~AwSettings()
 {
 	if (m_settings.value(aws::gui_active).toBool()) {
-		// save recent files
-		QSettings settings;
-		settings.beginWriteArray("recentFiles");
-		auto recentFiles = m_settings.value(aws::recent_files).toStringList();
-		for (int i = 0; i < recentFiles.size(); i++) {
-			settings.setArrayIndex(i);
-			settings.setValue("filePath", recentFiles.at(i));
-		}
-		settings.endArray();
-		// save recent BIDS
-		auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
-		settings.beginWriteArray("recentBIDS");
-		for (int i = 0; i < recentBIDS.size(); i++) {
-			settings.setArrayIndex(i);
-			settings.setValue("BIDSPath", recentBIDS.at(i));
-		}
-		settings.endArray();
+		saveFileSettings();
 	}
 }
 
+void AwSettings::loadFileSettings()
+{
+	auto path = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::settings_file);
+	QVariantMap map;
+	if (QFile::exists(path)) {
+		map = AwUtilities::json::fromJsonFileToMap(path);
+	}
+	if (map.contains(aws::last_bids_dir))
+		m_settings[aws::last_bids_dir] = map.value(aws::last_bids_dir);
+	if (map.contains(aws::last_data_dir))
+		m_settings[aws::last_data_dir] = map.value(aws::last_data_dir);
+}
+
+void AwSettings::saveFileSettings()
+{
+	auto path = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::settings_file);
+	QVariantMap map;
+	if (QFile::exists(path)) {
+		map = AwUtilities::json::fromJsonFileToMap(path);
+	}
+	auto tmp = m_settings.value(aws::last_bids_dir).toString();
+	if (!tmp.isEmpty())
+		map[aws::last_bids_dir] = tmp;
+	tmp = m_settings.value(aws::last_data_dir).toString();
+	if (!tmp.isEmpty())
+		map[aws::last_data_dir] = tmp;
+	if (!map.isEmpty())
+		AwUtilities::json::saveToJsonFile(map, path);
+}
+
+void AwSettings::reloadRecentBidsFiles(const QString& file)
+{
+	if (file.contains("files"))
+		loadRecentFiles();
+	else
+		loadRecentBids();
+}
+
+/// <summary>
+/// loadRecentFiles()
+/// called when init() and also everytime the file watcher detects a change on the file.
+/// that method should be using a File Locker to avoid conccurent access to that file...
+/// </summary>
+void AwSettings::loadRecentFiles()
+{
+	QStringList res;
+	auto recentFilesPath = m_settings.value(aws::recent_files_path).toString();
+	if (QFile::exists(recentFilesPath)) {
+		QFile file(recentFilesPath);
+		QTextStream stream(&file);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			while (!stream.atEnd())
+				res << stream.readLine();
+			file.close();
+		}
+	} // if file is not present, create it empty (to enable system watcher afterwards)
+	else {
+		QFile file(recentFilesPath);
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+			file.close();
+	}
+	m_settings.remove(aws::recent_files);
+	if (res.size())
+		m_settings.insert(aws::recent_files, res);
+}
+
+/// <summary>
+/// loadRecentBids()
+/// called when init() and also everytime the file watcher detects a change on the file.
+/// that method should be using a File Locker to avoid conccurent access to that file...
+/// </summary>
+void AwSettings::loadRecentBids()
+{
+	QStringList res;
+	auto recentBidsPath = m_settings.value(aws::recent_bids_path).toString();
+	if (QFile::exists(recentBidsPath)) {
+		QFile file(recentBidsPath);
+		QTextStream stream(&file);
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			while (!stream.atEnd())
+				res << stream.readLine();
+			file.close();
+		}
+	} // if file is not present, create it empty (to enable system watcher afterwards)
+	else {
+		QFile file(recentBidsPath);
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+			file.close();
+	}
+	m_settings.remove(aws::recent_bids);
+	if (res.size())
+		m_settings.insert(aws::recent_bids, res);
+}
+
+/// <summary>
+/// saveRecentFiles()
+/// called when init() and also everytime the file watcher detects a change on the file.
+/// that method should be using a File Locker to avoid conccurent access to that file...
+/// </summary>
+void AwSettings::saveRecentFiles()
+{
+	QStringList res;
+	auto recentFilesPath = m_settings.value(aws::recent_files_path).toString();
+	auto lockFile = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::recent_files_lock);
+	QLockFile lock(lockFile);
+	auto files = m_settings.value(aws::recent_files).toStringList();
+	QFile file(recentFilesPath);
+	QTextStream stream(&file);
+	if (lock.tryLock()) {
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			for (auto const& f : files)
+				stream << f << endl;
+			file.close();
+		}
+		lock.unlock();
+	}
+}
+
+/// <summary>
+/// saveRecentFiles()
+/// called when init() and also everytime the file watcher detects a change on the file.
+/// that method should be using a File Locker to avoid conccurent access to that file...
+/// </summary>
+void AwSettings::saveRecentBids()
+{
+	QStringList res;
+	auto recentBidsPath = m_settings.value(aws::recent_bids_path).toString();
+	auto lockFile = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::recent_bids_lock);
+	QLockFile lock(lockFile);
+	auto files = m_settings.value(aws::recent_bids).toStringList();
+	QFile file(recentBidsPath);
+	QTextStream stream(&file);
+	if (lock.tryLock()) {
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			for (auto const& f : files)
+				stream << f << endl;
+			file.close();
+		}
+		lock.unlock();
+	}
+}
+
+/// <summary>
+/// init()
+/// called only when running un GUI mode
+/// </summary>
 void AwSettings::init()
 {
-	// load previously saved recent files
 	QSettings settings;
+	int size = 0;
 
-	// load recent files
-	int size = settings.beginReadArray("recentFiles");
-	QStringList recentFiles, recentBIDS;
-	for (int i = 0; i < size; i++) {
-		settings.setArrayIndex(i);
-		recentFiles << settings.value("filePath").toString();
+	detectMATLABRuntimes();
+	// load previously saved recent files
+	auto path = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::recent_files_name);
+	m_settings.insert(aws::recent_files_path, path);
+	loadRecentFiles();
+	if (QFile::exists(path)) {
+		m_fileWatcher.addPath(path);
+		connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &AwSettings::reloadRecentBidsFiles);
 	}
-	settings.endArray();
-	// load recend BIDS
-	size = settings.beginReadArray("recentBIDS");
-	for (int i = 0; i < size; i++) {
-		settings.setArrayIndex(i);
-		recentBIDS << settings.value("BIDSPath").toString();
-	}
-	settings.endArray();
+	// load previously saved recent bids
+	path = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::recent_bids_name);
+	m_settings.insert(aws::recent_bids_path, path);
 
+	loadRecentBids();
+	if (QFile::exists(path)) {
+		m_fileWatcher.addPath(path);
+		connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &AwSettings::reloadRecentBidsFiles);
+	}
+	loadFileSettings();
 	// get python venvs
 	QStringList venvs;	// list of QString  splitted by ':'
 	size = settings.beginReadArray("venvs");
@@ -100,8 +234,6 @@ void AwSettings::init()
 			venvs << s;
 	}
 	settings.endArray();
-	m_settings[aws::recent_files] = recentFiles;
-	m_settings[aws::recent_bids] = recentBIDS;
 
 	auto isAutoTriggerParsingOn = settings.value("Preferences/autoTriggerParsing", true).toBool();
 	m_settings[aws::auto_trigger_parsing] = isAutoTriggerParsingOn;
@@ -146,8 +278,6 @@ void AwSettings::init()
 	m_settings[aws::python_use_default] = settings.value("python/use_default", true).toBool();
 	m_settings[aws::python_venv_alias] = settings.value("python/venv_alias", "anywave").toString();
 	m_settings[aws::python_venv_list] = venvs;
-	
-
 }
 
 QVariant AwSettings::value(const QString& key)
@@ -228,6 +358,10 @@ QString AwSettings::shortenFilePath(const QString& path)
 
 void AwSettings::addRecentFilePath(const QString& path)
 {
+	// auto add the last dir open based on path
+	QFileInfo fi(path);
+	m_settings[aws::last_data_dir] = fi.absolutePath();
+
 	auto recentFiles = m_settings.value(aws::recent_files).toStringList();
 
 	if (recentFiles.contains(path))
@@ -238,12 +372,14 @@ void AwSettings::addRecentFilePath(const QString& path)
 
 	recentFiles.insert(0, path);
 	m_settings[aws::recent_files] = recentFiles;
-
-	emit recentFilesUpdated(recentFiles);
+	saveRecentFiles(); // update settings file (that way if another instance of AnyWave is running, it should detect the changes also).
 }
 
 void AwSettings::addRecentBIDS(const QString& path)
 {
+	// auto add the last dir open based on path
+	m_settings[aws::last_bids_dir] = path;
+
 	auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
 	if (recentBIDS.contains(path))
 		return;
@@ -252,7 +388,7 @@ void AwSettings::addRecentBIDS(const QString& path)
 
 	recentBIDS.insert(0, path);
 	m_settings[aws::recent_bids] = recentBIDS;
-	emit recentBIDSUpdated(recentBIDS);
+	saveRecentBids();
 }
 
 void AwSettings::removeRecentFilePath(const QString& path)
@@ -260,13 +396,11 @@ void AwSettings::removeRecentFilePath(const QString& path)
 	auto recentFiles = m_settings.value(aws::recent_files).toStringList();
 	if (!recentFiles.contains(path))
 		return;
-
 	recentFiles.removeAll(path);
 	QStringList result;
-	foreach (QString s, recentFiles)
+	for (const QString& s : recentFiles)
 		result << shortenFilePath(s);
 	m_settings[aws::recent_files] = result;
-	emit recentFilesUpdated(result);
 }
 
 void AwSettings::removeRecentBIDS(const QString& path)
@@ -274,13 +408,11 @@ void AwSettings::removeRecentBIDS(const QString& path)
 	auto recentBIDS = m_settings.value(aws::recent_bids).toStringList();
 	if (!recentBIDS.contains(path))
 		return;
-
 	recentBIDS.removeAll(path);
 	QStringList result;
 	for (auto s : recentBIDS)
 		result << shortenFilePath(s);
 	m_settings[aws::recent_bids] = result;
-	emit recentBIDSUpdated(result);
 }
 
 void AwSettings::setAutoTriggerParsingOn(bool onoff)
@@ -294,28 +426,20 @@ QStringList& AwSettings::topoLayouts()
 	return m_currentReader->plugin()->layouts; 
 }
 
-//// Predefined Markers (Marker Inspector Tool)
-
-void AwSettings::savePredefinedMarkers(const AwMarkerList& markers)
+void AwSettings::detectMATLABRuntimes()
 {
-	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
-	auto file = m_settings.value(aws::predefined_marker_file).toString();
-	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
-	if (markerRulesDir.isEmpty())
+#ifdef Q_OS_WIN
+	QString programFiles = qgetenv("PROGRAMFILES");
+	QDir dir(programFiles);
+	dir.cd("MATLAB");
+	if (!dir.exists())
 		return;
-	if (markers.isEmpty()) {
-		QFile::remove(path);
+	dir.cd("MATLAB Runtime");
+	if (!dir.exists())
 		return;
-	}
-	AwMarker::save(path, markers);
-}
-
-AwMarkerList AwSettings::loadPredefinedMarkers()
-{
-	auto markerRulesDir = m_settings.value(aws::marker_rules_dir).toString();
-	auto file = m_settings.value(aws::predefined_marker_file).toString();
-	auto path = QString("%1/%2").arg(markerRulesDir).arg(file);
-	if (markerRulesDir.isEmpty())
-		return AwMarkerList();
-	return AwMarker::load(path);
+	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for (auto const& d : subDirs) 
+		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
+	
+#endif
 }

@@ -34,7 +34,8 @@
 AwScene::AwScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : AwGraphicsScene(settings, phys, parent)
 {
 	// connect signal emitted by the base class when a channel has been set to bad.
-	connect(this, SIGNAL(badChannelSet(const QString&)), this, SLOT(setChannelAsBad(const QString&)));
+//	connect(this, SIGNAL(badChannelSet(const QString&)), this, SLOT(setChannelAsBad(const QString&)));
+	connect(this, &AwScene::badChannelSet, this, &AwScene::setChannelAsBad);
 }
 
 AwScene::~AwScene()
@@ -57,7 +58,7 @@ void AwScene::insertMarkersBasedOnChannelSelection()
 	auto selectedLabels = AwChannel::getLabels(AwDataManager::instance()->selectedChannels());
 	if (!selectedLabels.isEmpty()) {
 		for (auto const& label : selectedLabels) {
-			auto marker = new AwMarker(label, m_mappingMarker.start(), 0.);
+			auto marker = AwSharedMarker(new AwMarker(label, m_mappingMarker->start(), 0.));
 			emit markerInserted(marker);
 		}
 	}

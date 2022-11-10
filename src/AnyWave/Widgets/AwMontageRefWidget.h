@@ -19,6 +19,8 @@
 #include <QDialog>
 #include <AwChannel.h>
 
+constexpr auto noref = "No Ref.";
+
 class AwMontageRefWidget : public QDialog
 {
 	Q_OBJECT

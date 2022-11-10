@@ -25,7 +25,7 @@ AwMarkersExportWizardPage::AwMarkersExportWizardPage(QWidget* parent) : QWizardP
 
 	m_inputWidget = new AwSelectInputDataWidget;
 	m_inputWidget->setPalette(this->palette());
-	m_inputWidget->setMarkers(AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers()));
+	m_inputWidget->setMarkers(AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getSharedMarkersThread()));
 
 	QVBoxLayout* layout = new QVBoxLayout;
 	layout->addWidget(m_inputWidget);

@@ -24,7 +24,7 @@ class AwStatsWidget : public QWidget
 	Q_OBJECT
 
 public:
-	AwStatsWidget(QWidget *parent = Q_NULLPTR);
+	AwStatsWidget(QWidget *parent = nullptr);
 	~AwStatsWidget();
 
 	void setUpdateEnabled(bool flag) { m_ui.buttonUpdate->setEnabled(flag); }
@@ -36,7 +36,7 @@ public slots:
 	void handleMouseMove(QMouseEvent*);
 private:
 	Ui::AwStatsWidgetUi m_ui;
-	AwMarkerList m_markers;
+	AwSharedMarkerList m_markers;
 	QHash<QString, int> m_histogram;
 	QCPBars* m_barPlot;
 

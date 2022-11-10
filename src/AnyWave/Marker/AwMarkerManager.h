@@ -20,9 +20,9 @@
 #include <QDockWidget>
 #include <AwMarker.h>
 #include <QMutex>
-#include <widget/AwMarkerInspector.h>
 
 class AwMarkerManagerSettings;
+class AwDataManager;
 
 class AwMarkerManager : public QObject
 {
@@ -31,66 +31,55 @@ class AwMarkerManager : public QObject
 public:
 	AwMarkerManager();
 	~AwMarkerManager();
-
 	/** getInstance() **/
 	static AwMarkerManager *instance();
 	static AwMarkerManager* newInstance();
-
-	/** Donne la liste de tous les marqueurs. **/
-	AwMarkerList getMarkers();
+	
 	/** Thread support version **/
-	AwMarkerList getMarkersThread();
-	inline AwMarkerList& displayedMarkers() { return m_displayedMarkers; }
+	AwSharedMarkerList getSharedMarkersThread();
 	AwMarkerManagerSettings* ui();
 	void setDock(QDockWidget *dock) { m_dock = dock; }
-	inline AwMarkerInspector *markerInspector() { return m_markerInspector; }
 	void closeFile();
 	void quit();
 	void init();
+	void guiInit();
+	void initFromCommandLine(const QString& mrkFilePath);  // takes ownership of markers
+	void finishCommandLineOperation();
 	int removeDuplicates();
 	void removeOfflimits();	// will remove all markers that are positionned outside the data time range.
 public slots:
+	void addMarkers(const AwSharedMarkerList& markers);
+	void addMarker(const AwSharedMarker& marker);
 	void showDockUI();
-	/** Rajoute un marqueur directement dans la liste **/
-	void addMarker(AwMarker *m);
-	/** Efface un marker de la liste **/
-	/** Rajoute une liste de marqueurs à la liste courante **/
-	void addMarkers(const AwMarkerList& markers);
-	void removeMarker(AwMarker* marker);
-	/** Add markers without cloning them. **/
-	void addMarkers(AwMarkerList *markers);
-	/** Vide la liste des marqueurs **/
+	void receivedMarkers(AwSharedMarkerList *markers); // from different thread
+	void removeMarker(const AwSharedMarker& marker);
 	void clear();
 	void removeAllUserMarkers();
-	void removeMarkers(const AwMarkerList& markers);
+	void removeMarkers(const AwSharedMarkerList& markers);
 	void loadMarkers();
 	/** New Method to load markers and get them as a list **/
-	AwMarkerList loadMarkers(const QString& path);
+	AwSharedMarkerList loadFile(const QString& path);
 	void saveMarkers();
-	void saveMarkers(const QString& filePath);
+	void saveToFile(const QString& filePath);
 	/** Set a new list of displayed markers **/
-	void setMarkers(const AwMarkerList& markers);
-	void highlightMarkerInList(AwMarker *marker);
+	void setMarkers(const AwSharedMarkerList& markers);
+	void highlightMarkerInList(const AwSharedMarker& marker);
 signals:
 	void goTo(float pos);
-	void displayedMarkersChanged(const AwMarkerList& markers);
-
+	void displayedMarkersChanged(const AwSharedMarkerList& markers);
 	void log(const QString& message);
 	void finished();	// for threaded operations
 	void updateStats();	// emitted each time the global markers list changes
 private:
 	AwMarkerManagerSettings *m_ui;
 	QDockWidget *m_dock;
-
-	AwMarkerInspector *m_markerInspector;
 	bool m_needSorting, m_markersModified;
-	AwMarkerList m_markers;				// Markers that are currently visible
-	AwMarkerList m_displayedMarkers;	// Currently displayed markers
-
+	AwSharedMarkerList m_sMarkers, m_displayedMarkers;
 	QMutex m_mutex;
 	static AwMarkerManager *m_instance;
 	QString m_filePath;
 	QString m_eventsTsv;
+	
 };
 
 #endif

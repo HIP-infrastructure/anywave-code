@@ -16,8 +16,11 @@
 #include "AwCommandLineManager.h"
 #include <AwProcessInterface.h>
 #include <QFile>
-#include "AwCommandLogger.h"
+#include "Debug/AwLogger.h"
 #include <AwException.h>
+#include "Data/AwDataManager.h"
+#include "Data/AwDataServer.h"
+#include "Marker/AwMarkerManager.h"
 #include "IO/BIDS/AwBIDSManager.h"
 #include "Process/AwProcessManager.h"
 #include <iostream>
@@ -25,14 +28,12 @@
 
 void AwCommandLineManager::runProcess(AwArguments& arguments)
 {
-	AwCommandLogger logger("runProcess", "cl_run");
 	AwBaseProcess *process = nullptr;
-	
 	try {
 		process = AwCommandLineManager::createAndInitNewProcess(arguments);
 	}
 	catch (const AwException& e) {
-		logger.sendLog(e.errorString());
+		m_logger->writeLog(e.errorString());
 		std::cerr << e.errorString().toStdString();
 		if (process) {
 			auto reader = process->pdi.input.reader();
@@ -42,21 +43,29 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		}
 		return;
 	}
+	QObject::connect(process, SIGNAL(progressChanged(const QString&)), process, SLOT(log(const QString&)));
+	if (!m_logger->attach(process)) 
+		m_logger->writeLog("unable to attach process to log instance.");
 	auto reader = process->pdi.input.reader();
 	auto inputChannels = process->pdi.input.channels();
 	applyFilters(inputChannels, arguments);
 	AwUniteMaps(process->pdi.input.settings, arguments);
-	QObject::connect(process, SIGNAL(progressChanged(const QString&)), &logger, SLOT(sendLog(const QString&)));
 	QObject::connect(process, &AwProcess::requestProcessInstance, AwProcessManager::instance(), &AwProcessManager::setProcessInstance);
-	logger.sendLog(QString("running %1...").arg(process->plugin()->name));
+	auto dm = AwDataManager::instance();
+	auto mm = dm->markerManager();
+	QObject::connect(process, &AwProcess::sendMarkers, mm, &AwMarkerManager::receivedMarkers);
+	QObject::connect(process, &AwProcess::dataConnectionRequested, dm->dataServer(), &AwDataServer::openConnection);
+	m_logger->writeLog(QString("running %1...").arg(process->plugin()->name));
+	
 	if (process->init()) {
 		process->runFromCommandLine();
-		logger.sendLog(QString("Done."));
+		m_logger->writeLog(QString("%1 finished.").arg(process->plugin()->name));
 	}
 	else {
-		logger.sendLog(QString("init() failed for process %1").arg(process->plugin()->name));
+		m_logger->writeLog(QString("init() failed for process %1.\nError is %2").arg(process->plugin()->name).arg(process->errorString()));
 	}
 	AwBIDSManager::finishCommandLineOperation();
+	mm->finishCommandLineOperation();
 	delete process;
 }
 

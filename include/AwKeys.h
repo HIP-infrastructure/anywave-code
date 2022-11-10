@@ -21,6 +21,7 @@ namespace keys {
 	constexpr auto operation = "operation";
 	// permitted operations in batch mode
 	constexpr auto BIDS_operation = "bids";
+	constexpr auto auto_marking_operation = "auto_marking";
 	constexpr auto run_operation = "run";
 	//
 	constexpr auto time = "time";
@@ -54,6 +55,7 @@ namespace keys {
 	constexpr auto json_batch = "json_batch";
 	constexpr auto bids_file_path = "bids_file_path";
 	constexpr auto bids_root_dir = "bids_root_dir";
+	constexpr auto bids_user_derivatives_folder = "bids_user_derivatives";
 	constexpr auto input_file = "input_file";
 	constexpr auto input_dir = "input_dir";
 	constexpr auto hp = "hp";

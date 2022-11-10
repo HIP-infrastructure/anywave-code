@@ -15,31 +15,41 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwExportWizardDial.h"
 #include "Marker/AwMarkerManager.h"
+#include "Data/AwDataManager.h"
 #include <QIcon>
+#include <AwKeys.h>
 
-AwExportWizardDial::AwExportWizardDial(QWidget* parent) : QWizard(parent)
+AwExportWizardDial::AwExportWizardDial(const QVariantMap& settings, QWidget* parent) : QWizard(parent)
 {
+	m_settings = settings;
 	setWizardStyle(QWizard::ModernStyle);
 	setWindowTitle("Exporting to file...");
 	setWindowIcon(QIcon(":/images/AnyWave_icon.png"));
-	m_outputPage = new AwOutputFileWizardPage;
+	m_outputPage = new AwOutputFileWizardPage(settings);
 	addPage(m_outputPage);
-	m_channelsPage = new AwChannelsExportWizardPage;
-	addPage(m_channelsPage);
-	auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getMarkers());
+	m_channelsPage = nullptr;
 	m_markersPage = nullptr;
-	if (markers.size()) {
-		m_markersPage = new AwMarkersExportWizardPage;
-		addPage(m_markersPage);
+	m_isBids = settings.contains(keys::bids_file_path);
+	if (!m_isBids) {
+		m_channelsPage = new AwChannelsExportWizardPage();
+		addPage(m_channelsPage);
+		auto markers = AwMarker::getMarkersWithDuration(AwMarkerManager::instance()->getSharedMarkersThread());
+		m_markersPage = nullptr;
+		if (markers.size()) {
+			m_markersPage = new AwMarkersExportWizardPage;
+			addPage(m_markersPage);
+		}
+		m_filterPage = new AwFilterExportWizardPage(m_channelsPage->channels(), settings);
 	}
-	m_filterPage = new AwFilterExportWizardPage(m_channelsPage);
+	else
+		m_filterPage = new AwFilterExportWizardPage(AwDataManager::instance()->rawChannels(), settings);
 	addPage(m_filterPage);
 }
 
 
 void AwExportWizardDial::accept()
 {
-	channels = m_channelsPage->channels();
+	channels = m_filterPage->channels();
 	if (m_markersPage) {
 		useMarkers = m_markersPage->usedMarkers;
 		skipMarkers = m_markersPage->skippedMarkers;

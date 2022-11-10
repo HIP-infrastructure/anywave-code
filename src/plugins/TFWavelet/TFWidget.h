@@ -19,7 +19,7 @@ public:
 	TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent = Q_NULLPTR);
 	~TFWidget();
 
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 	AwBaseSignalView *signalView() { return m_signalView; }
 //	void setChannels(const AwChannelList& channels);
 	void setChannels(const QList<QSharedPointer<AwChannel>>& channels);
@@ -59,7 +59,7 @@ private:
 	bool m_baselineComputed, m_zRangeLocked, m_computeBaseline;
 	//AwChannelList m_channels; 
 	QList<QSharedPointer<AwChannel>> m_channels;
-	AwMarkerList m_baselineMarkers;
+	AwSharedMarkerList m_baselineMarkers;
 	QList<arma::mat> m_baselines, m_rawTF, m_normalizedTF;
 	QList<QPair<mat, mat>> m_results;
 	float m_pos;

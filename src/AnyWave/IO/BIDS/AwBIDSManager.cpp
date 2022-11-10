@@ -30,6 +30,7 @@
 #include <utils/json.h>
 #include <AwCore.h>
 #include <utils/bids.h>
+#include <utils/json.h>
 #include <widget/AwWaitWidget.h>
 #include <QtConcurrent>
 #include <montage/AwMontage.h>
@@ -92,56 +93,37 @@ QString AwBIDSManager::detectBIDSFolderFromPath(const QString& path)
 
 void AwBIDSManager::finishCommandLineOperation()
 {
-	if (m_instance == nullptr)
-		return;
-	if (m_instance->m_currentOpenItem) {
-		// get .bad file
-		auto badFile = QString("%1.bad").arg(m_instance->m_currentOpenItem->data(AwBIDSItem::PathRole).toString());
-		if (QFile::exists(badFile)) {
-			m_instance->updateChannelsTsvBadChannels(AwMontage::loadBadChannels(badFile));
-		}
-	}
-	delete m_instance;
-	m_instance = nullptr;
 }
 
-void AwBIDSManager::initCommandLineOperation(const QString & filePath)
+void AwBIDSManager::initCommandLineOperation(const QString & filePath, AwDataManager *dm)
 {
-	auto rootDir = AwBIDSManager::detectBIDSFolderFromPath(filePath);
+	auto rootDir = QDir::toNativeSeparators(AwBIDSManager::detectBIDSFolderFromPath(filePath));
 	if (rootDir.isEmpty())
+		return;  // not in a BIDS
+	QRegularExpression exp("sub-.*");
+	QString  path = QDir::toNativeSeparators(filePath);
+	auto capture = exp.match(path);
+	if (!capture.hasMatch())
 		return;
+	path = capture.captured();
+	QFileInfo fi2(filePath);
 
-	QDir dir(rootDir);
-	// get folders in root dir and find the one matching our subject
-	auto folders = dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
-	QString subjectDir;
-	for (auto folder : folders) {
-		if (filePath.contains(folder)) {
-			subjectDir = folder;
-			break;
-		}
+	auto fileName = fi2.fileName();
+	path = path.remove(fileName);
+	auto userName = AwSettings::getInstance()->value(aws::username).toString();
+	QString derivPath = QString("%1/derivatives/anywave/%2/%3").arg(rootDir).arg(userName).arg(path);
+	QDir dir(derivPath);
+	if (dir.exists()) {
+		auto baseDerivPath = QString("%1%2").arg(derivPath).arg(fileName);
+		auto badFilePath = baseDerivPath + ".bad";
+		auto markerFilePath = baseDerivPath + ".mrk";
+		auto montageFilePath = baseDerivPath + ".mtg";
+		auto filterFilePath = baseDerivPath + ".flt";
+		dm->settings()[keys::bad_file] = badFilePath;
+		dm->settings()[keys::montage_file] = montageFilePath;
+		dm->settings()[keys::marker_file] = markerFilePath;
+		dm->settings()[keys::flt_file] = filterFilePath;
 	}
-	if (subjectDir.isEmpty()) {  // totally UNEXPECTED
-		return;
-	}
-	// ok it's a file in a BIDS
-	if (m_instance == nullptr)
-		m_instance = new AwBIDSManager;
-	m_instance->m_rootDir = rootDir;
-	m_instance->m_guiMode = false;
-
-	// build the subject item
-	auto fullPath = QString("%1/%2").arg(rootDir).arg(subjectDir);
-	auto item = new AwBIDSItem(subjectDir);
-	m_instance->m_items << item;
-	item->setData(fullPath, AwBIDSItem::PathRole);
-	item->setData(AwBIDSItem::Subject, AwBIDSItem::TypeRole);
-	item->setData(m_instance->m_fileIconProvider.icon(QFileIconProvider::Folder), Qt::DecorationRole);
-	// set the relative path role
-	item->setData(subjectDir, AwBIDSItem::RelativePathRole);
-	// set the possible derivatives mask
-	m_instance->recursiveParsing(fullPath, item);
-	m_instance->m_currentOpenItem = item;
 }
 
 
@@ -196,19 +178,30 @@ QString AwBIDSManager::getParsingPath()
 	return m_settings[bids::parsing_path].toString();
 }
 
-void AwBIDSManager::setRootDir(const QString& path)
+int AwBIDSManager::setRootDir(const QString& path)
 {
 	// check if root dir is the same as current one. If so, do nothing.
 	if (path == m_rootDir)
-		return;
-
+		return 0;
 	if (path.isEmpty())
-		return;
+		return -1;
 	// check that the folder exists
 	QDir dir(path);
 	if (!dir.exists()) {
-		AwMessageBox::information(nullptr, "BIDS", QString("The BIDS folder %1 does not exist.").arg(path));
-		return;
+		AwMessageBox::critical(nullptr, "BIDS", QString("The BIDS folder %1 does not exist.").arg(path));
+		return -1;
+	}
+	// check if we got a real BIDS 
+	// we must have a datadescription.json file
+	QString dataDesc = QString("%1/dataset_description.json").arg(path);
+	if (!QFile::exists(dataDesc)) {
+		AwMessageBox::critical(nullptr, "BIDS", "The directory is not a BIDS");
+		return -1;
+	}
+	auto map = AwUtilities::json::fromJsonFileToMap(dataDesc);
+	if (!map.contains("BIDSVersion") && !map.contains("Name")) {
+		AwMessageBox::critical(nullptr, "BIDS", "Invalid dataset_description.json");
+		return -1;
 	}
 	closeBIDS();
 	m_rootDir = path;
@@ -220,21 +213,18 @@ void AwBIDSManager::setRootDir(const QString& path)
 	wait.setText("Parsing BIDS Structure...");
 	connect(this, &AwBIDSManager::finished, &wait, &QDialog::accept);
 	wait.run(std::bind(&AwBIDSManager::parse, this));  // bind a void method without parameters. The method must emit finished signals when finished.
-
 	// get participants columns
 	if (m_settings.contains(bids::participant_tsv)) 
 		m_settings[bids::participant_cols] = AwUtilities::bids::getTsvColumns(m_settings.value(bids::participant_tsv).toString());
-
 	// instantiate UI if needed
 	if (m_ui == nullptr)
 		m_ui = new AwBIDSGUI;
-
 	m_ui->init();
 	// there is an issue with sourcedata subject when anywave creates derivatives/anywave/username/sourcedata : it makes BM Crash
 	// so for now, don't add sourcedata subjects to the tree
 	   ////  m_ui->setSourceDataSubjects(m_sourcedataItems);   // uncomment to add sourcedata subjects
 	m_ui->setSubjects(m_items);
-
+	return 0;
 }
 
 void AwBIDSManager::closeBIDS()
@@ -296,9 +286,6 @@ QString AwBIDSManager::currentFileName()
 {
 	return m_settings.value(bids::current_open_filename).toString();
 }
-
-
-
 
 QString AwBIDSManager::getDerivativePath(AwBIDSItem *item, int derivativeType)
 {
@@ -649,7 +636,8 @@ void AwBIDSManager::findCurrentFileItem(const QString& filePath)
 		return;
 	if (m_hashItemFiles.contains(QDir::toNativeSeparators(filePath))) {
 		m_currentOpenItem = m_hashItemFiles.value(QDir::toNativeSeparators(filePath));
-		m_ui->showItem(m_currentOpenItem);
+		if (m_guiMode)
+			m_ui->showItem(m_currentOpenItem);
 		// check for user in derivatives/anywave
 		initAnyWaveDerivativesForFile(filePath);
 	}
@@ -801,4 +789,11 @@ AwChannelList AwBIDSManager::getMontageFromChannelsTsv(const QString& path)
 	}
 	file.close();
 	return res;
+}
+
+void AwBIDSManager::closeFile(QStandardItem* item)
+{
+	// TO DO HERE  : update channels.tsv file if bad labels have changed?
+	// that is not done by default but should be done if an option is set Preferences??
+	// if updateChannelsTsv option set in Preferences =>  update channels.tsv
 }

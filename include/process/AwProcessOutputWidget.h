@@ -28,8 +28,8 @@ signals:
 	void log(const QString& log);
 	void sendCommand(int command, QVariantList args);
 	void sendCommand(const QVariantMap& );
-	void sendMarkers(AwMarkerList* markers);
-	void sendMarker(AwMarker* marker);
+	void sendMarkers(AwSharedMarkerList * markers);
+//	void sendMarker(AwMarker* marker);
 	void dataConnectionRequested(AwDataClient* client);
 protected:
 	AwBaseProcess* m_process;

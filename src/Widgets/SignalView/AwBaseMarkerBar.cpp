@@ -19,7 +19,6 @@
 #include <qpainter.h>
 #include <utils/gui.h>
 #include <AwCore.h>
-#include <AwGlobalMarkers.h>
 #include <widget/SignalView/AwViewSettings.h>
 
 AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
@@ -52,7 +51,6 @@ AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	m_menu->addAction(actSwitchToClassic);
 	m_markersShown = false;
 	m_markerUnderMouse = nullptr;
-//	m_mode = AwBaseMarkerBar::Classic;
 	setMouseTracking(true);
 	m_sliderDragging = false;
 	m_globalRepaintNeeded = false;
@@ -64,27 +62,24 @@ AwBaseMarkerBar::~AwBaseMarkerBar()
 
 }
 
-AwMarker *AwBaseMarkerBar::findMarkerBetween(float low, float high)
+AwSharedMarker AwBaseMarkerBar::findMarkerBetween(float low, float high)
 {
-	AwMarkerList result = AwMarker::intersect(m_markers, low, high);
+	AwSharedMarkerList result = AwMarker::intersect(m_markers, low, high);
 	if (result.isEmpty())
-		return nullptr;
+		return AwSharedMarker();
 	return result.first();
 }
 
-void AwBaseMarkerBar::refresh()
+void AwBaseMarkerBar::setMarkers(const AwSharedMarkerList& markers)
 {
-	auto list = AwGlobalMarkers::instance()->displayed();
-	if (list == nullptr)
-		return;
-	m_markers = *list;
+	m_markers = markers;
 	m_globalRepaintNeeded = true;
+	update();
 	repaint();
 }
 
 void AwBaseMarkerBar::switchToClassic()
 {
-//	m_mode = AwBaseMarkerBar::Classic;
 	if (m_settings == nullptr)
 		return;
 	m_settings->markerBarMode = AwViewSettings::Classic;
@@ -94,14 +89,12 @@ void AwBaseMarkerBar::switchToClassic()
 
 void AwBaseMarkerBar::switchToGlobal()
 {
-//	m_mode = AwBaseMarkerBar::Global;
 	if (m_settings == nullptr)
 		return;
 	m_settings->markerBarMode = AwViewSettings::Global;
 	setToolTip("Click in the bar to move right to that position or drag and move the slider.");
 	repaint();
 }
-
 
 ///
 /// EVENTS
@@ -112,7 +105,6 @@ void AwBaseMarkerBar::resizeEvent(QResizeEvent *e)
 	m_globalRepaintNeeded = true;
 }
 
-
 void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 {
 	QPoint mousePos = e->pos();
@@ -120,7 +112,6 @@ void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 		return;
 	if (m_settings == nullptr)
 		return;
-	//if (m_mode == AwBaseMarkerBar::Classic) {
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
 		float xPixSec = m_physics->xPixPerSec();
 		// take 3 pixels before and 3 pixel after the mouse x pos.
@@ -129,9 +120,8 @@ void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 		lower += m_positionInFile;
 		float higher = (e->pos().x() + 3) / xPixSec;
 		higher += m_positionInFile ;
-		AwMarker *found = findMarkerBetween(lower, higher);
-
-		if (found)
+		auto found = findMarkerBetween(lower, higher);
+		if (!found.isNull())
 			emit showMarkerClicked(found);
 	}
 	else {
@@ -150,7 +140,6 @@ void AwBaseMarkerBar::mouseReleaseEvent(QMouseEvent *e)
 		return;
 	if (m_settings == nullptr)
 		return;
-	//if (m_mode == AwBaseMarkerBar::Global) {
 	if (m_settings->markerBarMode == AwViewSettings::Global) {
 		if (!m_sliderDragging) { // just a click somewhere in the bar => change the position
 			auto pixPerSec = size().width() / m_totalDuration;
@@ -171,7 +160,6 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 		return;
 	if (m_settings == nullptr)
 		return;
-//	if (m_mode == AwBaseMarkerBar::Classic) {
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
 		float xPixSec = m_physics->xPixPerSec();
 		// take 3 pixels before and 3 pixel after the mouse x pos.
@@ -180,8 +168,8 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 		lower += m_positionInFile;
 		float higher = (e->pos().x() + 3) / xPixSec;
 		higher += m_positionInFile;
-		AwMarker *found = findMarkerBetween(lower, higher);
-		if (found)
+		auto found = findMarkerBetween(lower, higher);
+		if (!found.isNull())
 			setToolTip(found->label());
 	}
 	else {
@@ -200,23 +188,16 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 {
 	if (m_totalDuration <= 0) 
 		return;
-	auto list = AwGlobalMarkers::instance()->displayed();
-	if (list == nullptr)
-		m_markers.clear();
-	else
-		m_markers = *list;
 	if (m_settings == nullptr)
 		return;
-		
 	QPainter painter(this);
 	QBrush brushSelection;
 	brushSelection.setStyle(Qt::Dense4Pattern);
 	QPen pen;
-//	if (m_mode == AwBaseMarkerBar::Classic) {
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
 		auto markers = AwMarker::intersect(m_markers, m_positionInFile, m_positionInFile + m_pageDuration);
 		QColor color;
-		for (auto m : markers) {
+		for (auto const &m : markers) {
 			if (!m->duration())
 				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
 			else
@@ -235,7 +216,7 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 			m_globalPixmap.fill(palette().color(QPalette::Background));
 			QColor color;
 			QPainter pixPainter(&m_globalPixmap);
-			for (auto m : m_markers) {
+			for (auto const& m : m_markers) {
 				if (!m->duration())
 					color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Single) : m->color());
 				else

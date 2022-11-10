@@ -20,7 +20,7 @@ namespace AwRequest {
 	enum Requests {
 		AddMarkers, GetMarkers, GetData2, GetPluginInfo, IsTerminated, SendMessage, SendCommand,
 		GetMarkers2, GetData3, GetFileInfo, GetScreenCapture, GetICAPanelCapture, SetBeamFormer, GetTriggers, GetPluginIO,
-		GetDataEx, GetMarkersEx, OpenNewFile, RunAnyWave, GetProperties, ConnectDebug, SendMarkers, Count, Run
+		GetDataEx, GetMarkersEx, OpenNewFile, RunAnyWave, GetProperties, ConnectDebug, SendMarkers, Count, Run, GetData2_5_10
 	};
 	enum Commands { GetDataReadFile, GetDataReadSocket };
 };
@@ -41,7 +41,7 @@ namespace Aw
 		enum flags {
 			ProcessHasInputUi = 0x01, PluginAcceptsTimeSelections = 0x02,
 			ProcessDoesntRequireData = 0x04, ProcessSkipInputCheck = 0x08, PluginIsHidden = 0x10, CanRunFromCommandLine = 0x20,
-			HasOutputUi = 0x40, HasInputUi = 0x80
+			HasOutputUi = 0x40, HasInputUi = 0x80, LaunchedOnStartup = 0x100, LaunchedOnClosing = 0x200
 		};
 	}
 	namespace ProcessIO {
@@ -53,7 +53,7 @@ namespace Aw
 		namespace modifiers {
 			enum modifierFlags {
 				UserSelectedChannels = 0x1, UserSelectedMarkers = 0x2, RequireChannelSelection = 0x4, IgnoreChannelSelection = 0x8,
-				AcceptChannelSelection = 0x10, QSTMode = 0x20, DontFilterUseSkipMarkersOptions = 0x40, UseOrSkipMarkersApplied = 0x80
+				AcceptChannelSelection = 0x10, QSTMode = 0x20, DontFilterUseSkipMarkersOptions = 0x40, UseOrSkipMarkersApplied = 0x80, LaunchedOnClosing = 0x100
 			};
 			// UserSelectedChannels is set by AnyWave if the plugin accepts channel selection AND the user has selected channels before running the process.
 			// UserSelectedMarkers is set by AnyWave if the PluginAcceptsTimeSelections is set AND the user launched the plugin using selected markers in GUI.
