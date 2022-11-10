@@ -20,15 +20,14 @@ AwTriggerEraserPlugin::AwTriggerEraserPlugin()
 {
 	name = QString("Trigger Eraser");
 	description = QString(tr("Erase a trigger channel"));
-	category = "Trigger Channels:Erase";
-	version = "1.0";
+	category = "Process:Trigger Channels:Erase";
+	version = "1.0.1";
 	type = AwProcessPlugin::Background;
-	setFlags(Aw::ProcessFlags::PluginIsHidden | Aw::ProcessFlags::ProcessHasInputUi);
+	setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 AwTriggerEraser::AwTriggerEraser() : AwProcess()
 {
-	//setFlags(Aw::ProcessFlags::ProcessHasInputUi);
 }
 
 bool AwTriggerEraser::showUi()
@@ -47,6 +46,6 @@ void AwTriggerEraser::run()
 	QStringList list;
 	list << m_triggerChannel;
 	int status = pdi.input.reader()->clearTriggerChannels(list);
-	if (status != -1) 
+	if (status == -1) 
 		sendMessage(QString("Error while erasing : %1").arg(pdi.input.reader()->errorMessage()));
 }

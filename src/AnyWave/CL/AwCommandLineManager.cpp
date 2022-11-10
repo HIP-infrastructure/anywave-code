@@ -19,6 +19,7 @@
 #include <AwException.h>
 #include "Montage/AwMontageManager.h"
 #include "Data/AwDataServer.h"
+#include "Marker/AwMarkerManager.h"
 #include <montage/AwMontage.h>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -28,7 +29,41 @@
 #include "Data/AwDataManager.h"
 #include <AwKeys.h>
 #include "IO/BIDS/AwBIDSManager.h"
-#include "AwCommandLogger.h"
+//#include "AwCommandLogger.h"
+#include "Debug/AwLogger.h"
+
+AwCommandLineManager* AwCommandLineManager::m_instance = nullptr;
+
+
+AwCommandLineManager* AwCommandLineManager::instance()
+{
+	if (m_instance == nullptr)
+		m_instance = new AwCommandLineManager;
+	return m_instance;
+}
+
+bool AwCommandLineManager::isInstanciated()
+{
+	return m_instance != nullptr;
+}
+
+AwCommandLineManager::AwCommandLineManager()
+{
+	//m_logger = new AwCommandLogger("Command Line");
+	m_logger = AwLogger::getLoggerInstance("Command Line");
+}
+
+AwCommandLineManager::~AwCommandLineManager()
+{
+	//delete m_logger;
+	AwLogger::cleanUpAndClose();
+	m_instance = nullptr;
+}
+
+void AwCommandLineManager::writeLog(const QString& message)
+{
+	m_logger->writeLog(message); 
+}
 
 void AwCommandLineManager::applyFilters(const AwChannelList& channels, const AwArguments& args)
 {
@@ -86,26 +121,28 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 			}
 		}
 		plugin = pm->getProcessPluginByName(pluginName);
-		if (plugin == Q_NULLPTR) {
+		if (plugin == nullptr) {
 			throw AwException(QString("No plugin named %1 found.").arg(pluginName), origin);
-			return Q_NULLPTR;
+			return nullptr;
 		}
 	}
 	bool doNotRequiresData = plugin->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 	AwUniteMaps(args, map);
 	// always add the path to anywave app
 	args[keys::aw_path] = QCoreApplication::applicationFilePath();
-	QString inputFile = args.value(keys::input_file).toString();
-
-	if (!doNotRequiresData && inputFile.isEmpty()) {
+ 	bool inputFileOk = QFile::exists(args.value(keys::input_file).toString());
+	if (!doNotRequiresData && !inputFileOk) {
 		throw AwException(QString("input_file must be specified."), origin);
 		return nullptr;
 	}
-
 	// create output_dir if needed
 	if (args.contains(keys::output_dir)) {
 		QDir dir;
 		dir.mkpath(args.value(keys::output_dir).toString());
+	}
+	else {
+		// no  output_dir => make output_dir to be the data_dir
+		args[keys::output_dir] = args.value(keys::data_dir);
 	}
 	// instantiate process
 	auto process = plugin->newInstance();
@@ -118,51 +155,61 @@ AwBaseProcess* AwCommandLineManager::createAndInitNewProcess(AwArguments& args)
 int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 {
 	auto dm = AwDataManager::instance();
+	
 	auto &args = process->pdi.input.settings;
 	QString inputFile = args.value(keys::input_file).toString();
 
-	AwCommandLogger logger(QString("Command Line"));
+	QString mrkFile;
+	if (args.contains(keys::marker_file)) {
+		mrkFile = args.value(keys::marker_file).toString();
+		if (QFile::exists(mrkFile))
+			process->pdi.input.setMarkers(AwMarker::loadShrdFaster(mrkFile));
+		else {
+			m_logger->writeLog("warning: mrk_file does not exist");
+		}
+	}
 
 	if (!inputFile.isEmpty()) {
-		// check for BIDS : look for a file inside a BIDS structure. if so, build the BIDS relationships needed.
-		AwBIDSManager::initCommandLineOperation(inputFile);
-
-		auto status = dm->openFile(inputFile, true);
-		if (status == AwDataManager::NoPluginFound) {
-			throw AwException(QString("no reader can open %1").arg(inputFile));
-			return -1;
-		}
-
-		if (status != AwDataManager::NoError) {
-			throw AwException(QString("Could not open %1").arg(inputFile));
+		if (dm->openFileCommandLine(inputFile) != 0) {
+			throw AwException(QString("input_file error: %1").arg(dm->errorString()));
 			return -1;
 		}
 		process->pdi.input.setReader(dm->reader());
 		AwUniteMaps(process->pdi.input.settings, dm->settings());
-
-		// check if marker_file option is set and if the specified file really exists
-		if (process->pdi.input.settings.contains(keys::marker_file)) {
-			if (QFile::exists(process->pdi.input.settings.value(keys::marker_file).toString()))
-				process->pdi.input.setNewMarkers(AwMarker::load(args.value(keys::marker_file).toString()));
-			else {  // specified file does not exists
-				logger.sendLog("warning: marker_file is specified but the file does not exist. Searching for default .mrk file.");
-				auto defaultMrkFile = dm->mrkFilePath();
-				if (QFile::exists(defaultMrkFile)) {
-					logger.sendLog("Found default mrk file, using it instead.");
-					process->pdi.input.settings[keys::marker_file] = defaultMrkFile;
-					process->pdi.input.setNewMarkers(AwMarker::load(defaultMrkFile));
-				}
-				else {
-					logger.sendLog("warning: no default mrk file found. Setting reader's markers as input if any...");
-					process->pdi.input.settings.remove(keys::marker_file);
-					process->pdi.input.setNewMarkers(dm->reader()->infos.blocks().first()->markers(), true);
-				}
+		QString mrkFile;
+		if (args.contains(keys::marker_file)) {
+			mrkFile = args.value(keys::marker_file).toString();
+			if (!QFile::exists(mrkFile)) {
+				m_logger->writeLog("warning: marker_file is specified but the file does not exist. Searching for default .mrk file.");
+				mrkFile = dm->mrkFilePath();
+				if (!QFile::exists(mrkFile)) 
+					m_logger->writeLog(QString("warning: default marker file %1 does no exist.").arg(mrkFile));
 			}
+			dm->markerManager()->initFromCommandLine(mrkFile);
+		}
+		else {  // check for default .mrk file
+			mrkFile = dm->mrkFilePath();
+			if (!QFile::exists(mrkFile)) 
+				m_logger->writeLog(QString("warning: default marker file %1 does no exist.").arg(mrkFile));
+			dm->markerManager()->initFromCommandLine(mrkFile);
 		}
 
-		// check again here that montage_file and marker_file set by DM really exist
-		if (!QFile::exists(process->pdi.input.settings.value(keys::montage_file).toString()))
-			process->pdi.input.settings.remove(keys::montage_file);
+		process->pdi.input.setMarkers(dm->markerManager()->getSharedMarkersThread());
+		QString mtgFile;
+		if (args.contains(keys::montage_file)) {
+			mtgFile = args.value(keys::montage_file).toString();
+			if (!QFile::exists(mtgFile)) {
+				m_logger->writeLog("warning: montage_file is specified but the file does not exist. Searching for default .mtg file.");
+				mtgFile = dm->mtgFilePath();
+				if (!QFile::exists(mtgFile)) {
+					m_logger->writeLog(QString("warning: default montage file %1 does no exist.").arg(mtgFile));
+					mtgFile.clear();
+				}
+			}
+			args.remove(keys::montage_file);
+			if (mtgFile.size())
+				args[keys::montage_file] = mtgFile;
+		}
 		// check for BAD file
 		QString tmp = dm->badFilePath();
 		if (QFile::exists(tmp)) {
@@ -184,7 +231,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 
 		if (montageCreateSet) {
 			if (montageCreateOption == keys::bipolar_ieeg) {
-				logger.sendLog(QString("Creating bipolar ieeg montage automatically."));
+				m_logger->writeLog(QString("Creating bipolar ieeg montage automatically."));
 				if (skipBad)
 					montage = AwMontage::createSEEGBipolarMontage(dm->rawChannels(), process->pdi.input.settings.value(keys::bad_labels).toStringList());
 				else
@@ -196,7 +243,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			}
 			else { // monopolar or none result in just the as recorded montage 
 				montage = AwChannel::duplicateChannels(dm->rawChannels());
-				logger.sendLog(QString("Failed to create montage, reverted to as recorded channels"));
+				m_logger->writeLog(QString("Failed to create montage, reverted to as recorded channels"));
 				if (skipBad)
 					AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
 			}
@@ -217,9 +264,10 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 			if (!pickChannels) {
 				if (args.contains(keys::montage_file)) { // did we finally got a montage file?
 					montage = AwMontageManager::instance()->loadAndApplyMontage(dm->rawChannels(), args.value(keys::montage_file).toString(),
-						process->pdi.input.settings.value(keys::bad_labels).toStringList());
-					logger.sendLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
+							process->pdi.input.settings.value(keys::bad_labels).toStringList());
+					m_logger->writeLog(QString("using montage file: %1").arg(args.value(keys::montage_file).toString()));
 					if (montage.isEmpty()) { // error when loading and/or applying mtg file
+						m_logger->writeLog(QString("Error: %1").arg(AwMontageManager::instance()->errorString()));
 						throw AwException(QString("error: %1 file could not be applied.").arg(args.value(keys::montage_file).toString()));
 						return -1;
 					}
@@ -227,7 +275,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 				else { // no montage specified or detected
 					// applying default file montage
 					montage = AwChannel::duplicateChannels(dm->rawChannels());
-					logger.sendLog(QString("No montage file specified or detected, using as recorded channels"));
+					m_logger->writeLog(QString("No montage file specified or detected, using as recorded channels"));
 					if (skipBad)
 						AwMontage::removeBadChannels(montage, process->pdi.input.settings.value(keys::bad_labels).toStringList());
 				}
@@ -238,10 +286,11 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		if (!process->pdi.input.settings.contains(keys::output_dir)) {
 			// no output_dir specified => set output_dir as current data dir
 			process->pdi.input.settings[keys::output_dir] = process->pdi.input.settings.value(keys::data_dir).toString();
-			logger.sendLog(QString("output_dir is:").arg(process->pdi.input.settings.value(keys::data_dir).toString()));
+			m_logger->writeLog(QString("output_dir is:").arg(process->pdi.input.settings.value(keys::data_dir).toString()));
 		}
 		// INIT PDI   CHANNELS AND MARKERS BASED ON FLAGS
-		if (AwProcessManager::instance()->buildProcessPDI(process) != 0) {
+		auto pm = AwProcessManager::instance();
+		if (pm->buildProcessPDI(process) != 0) {
 			throw AwException(QString("input channels cannot be set").arg(inputFile));
 			return -1;
 		}
@@ -253,7 +302,7 @@ int AwCommandLineManager::initProcessPDI(AwBaseProcess* process)
 		dm->dataServer()->openConnection(process);
 	}
 	else {   // no input file but requires to build pdi anyway
-		AwProcessManager::instance()->buildProcessPDI(process);
+		 AwProcessManager::instance()->buildProcessPDI(process);
 	}
 	return 0;
 }
@@ -362,13 +411,13 @@ AwChannelList AwCommandLineManager::getInputChannels(const AwArguments& args, Aw
 	return AwChannel::duplicateChannels(res);
 }
 
-AwMarkerList AwCommandLineManager::parseMarkerFile(const AwArguments& args)
+AwSharedMarkerList AwCommandLineManager::parseMarkerFile(const AwArguments& args)
 {
-	AwMarkerList res;
+	AwSharedMarkerList res;
 	// check for marker file
 	if (args.contains(keys::marker_file)) {
 		auto mrkFile = args.value(keys::marker_file).toString();
-		res = AwMarker::load(mrkFile);
+		res = AwMarker::loadShrdFaster(mrkFile);
 	}
 	return res;
 }

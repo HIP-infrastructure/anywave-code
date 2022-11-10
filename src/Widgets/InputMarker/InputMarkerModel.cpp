@@ -54,7 +54,7 @@ QVariant InputMarkerModel::data(const QModelIndex &index, int role) const
 	if (!index.isValid())
 		return QVariant();
 
-	AwMarker *m = m_markers.at(index.row());
+	auto m = m_markers.at(index.row());
 	int col = index.column();
 
 	switch (col)

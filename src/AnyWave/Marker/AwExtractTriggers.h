@@ -27,7 +27,7 @@ public:
 
 	int _maskValue;
 	bool _parseNegative;
-	AwMarkerList _markers;	// resulting markers
+	AwSharedMarkerList _markers;	// resulting markers
 	AwChannelList _channels;	// the trigger channels to parse
 };
 

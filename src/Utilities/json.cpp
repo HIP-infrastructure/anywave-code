@@ -139,6 +139,13 @@ QString AwUtilities::json::fromJsonFileToString(const QString& filePath)
 	return QString();
 }
 
+bool AwUtilities::json::saveToJsonFile(const QVariantMap& map, const QString& filePath)
+{
+	auto doc = QJsonDocument::fromVariant(map);
+	QString jsonString = doc.toJson(QJsonDocument::JsonFormat::Indented);
+	return saveToJsonFile(jsonString, filePath);
+}
+
 bool AwUtilities::json::saveToJsonFile(const QJsonDocument& jsonDocument, const QString& filePath)
 {
 	QString jsonString = jsonDocument.toJson(QJsonDocument::JsonFormat::Indented);

@@ -34,10 +34,10 @@ public:
 	
 public slots:
 	void loadData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
-	void loadData(AwChannelList *channels, AwMarker *marker, bool rawData = false, bool doNotWakeUpClient = false);
+	void loadData(AwChannelList *channels, const AwSharedMarker& marker, bool rawData = false, bool doNotWakeUpClient = false);
 	void loadData(AwChannelList *channels, quint64 start, quint64 duration, bool rawData = false, bool doNotWakeUpClient = false);
 	/** load data using a list of markers. The channels are filled with concatenated data of all makers. **/
-	void loadData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false, bool doNotWakeUpClient = false);
+	void loadData(AwChannelList *channels, AwSharedMarkerList *markers, bool rawData = false, bool doNotWakeUpClient = false);
 signals:
 	void sendingData(AwChannelList *channels);   // signal informant que les donnees sont envoyees au client
 	void endOfData();

@@ -25,25 +25,25 @@ class QGraphicsScene;
 class AW_WIDGETS_EXPORT AwMarkerItem : public AwGraphicsMarkerItem
 {
 public:
-	AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, AwMarker *mark, QGraphicsScene *scene, int labelOffset = 0);  
+	AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int labelOffset = 0);  
 	virtual ~AwMarkerItem();
 
 	void updateDisplay();
-	inline AwMarker *marker() { return m_marker; }
-	inline void setMarker(AwMarker *mark) { m_marker = mark; }
+	inline AwSharedMarker marker() { return m_marker; }
+	inline void setMarker(const AwSharedMarker& marker) { m_marker = marker; }
 	void updatePosition();
 	inline int offset() { return m_offset; }
-
 	void showLabel(bool flag);
 	void showValue(bool flag);
 	void setPositionInFile(float pos);
-
+	void setText(const QString& text);
+	void setValue(double v);
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
 
-	AwMarker *m_marker;
+	AwSharedMarker m_marker;
 	float m_posInFile;
 	int m_offset;
 	AwLabelItem *m_labelItem, *m_valueItem;

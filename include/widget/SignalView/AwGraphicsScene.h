@@ -25,10 +25,11 @@
 #include <widget/AwCursorItem.h>
 #include <widget/AwMappingCursorItem.h>
 #include <widget/AwHighLightMarker.h>
-class AwMarkingSettings;
+//class AwMarkingSettings;
 class AwGTCMenu;
 class AwPickMarkersDial;
 class AwAmplitudeItem;
+class AwMarkingTool;
 
 class AW_WIDGETS_EXPORT AwGraphicsScene : public QGraphicsScene
 {
@@ -78,7 +79,7 @@ signals:
 	void draggedCursorPositionChanged(float position);
 	void cursorPositionChanged(float position);
 	void mappingPositionChanged(float position);
-	void markerInserted(AwMarker *marker);
+	void markerInserted(const AwSharedMarker& marker);
 	void cursorClickedAtTime(float time);
 	void mappingTimeSelectionDone(float time, float duration);
 	void badChannelSet(const QString& label);
@@ -86,8 +87,8 @@ signals:
 	void processSelectedForLaunch(QString& name, AwChannelList& channels, float pos, float end);
 	void QTSModeEnded();
 	// markers
-	void showMarkerUnderMouse(AwMarker *marker);
-	void markerRemoved(AwMarker* marker);
+	void showMarkerUnderMouse(const AwSharedMarker& marker);
+	void markerRemoved(const AwSharedMarker& marker);
 	// signal items reordering
 	void itemsOrderChanged(const QStringList& labels);
 	// view
@@ -99,8 +100,6 @@ public slots:
 	virtual void setSelectionAsBad() {}
 	virtual void setSelectionAsMontage() {}
 	// open a GUI when in mapping mode, to select which predefined markers to insert at mapping position.
-	void chooseMarkersToInsert();
-	void setMarkingSettings(AwMarkingSettings *settings);
 	void setPageDuration(float dur) { m_pageDuration = dur; }
 	void updateSelection();
 	void displaySelectedChannelsOnly();
@@ -131,10 +130,10 @@ public slots:
 	void selectChannelAtPosition(const QPointF& pos);
 	void showChannel(const QString& label);	// make the item visible in the view.
 	// cursors and markers
-	virtual void setMarkers(const AwMarkerList& markers);
+	virtual void setMarkers(const AwSharedMarkerList& markers);
 	void addHighLigthMarker(const QString& text, float pos, float dur);
 	void removeHighLigthMarker();
-	void highlightMarker(AwMarker *m);
+	void highlightMarker(const AwSharedMarker& m);
 	void highlightChannels(const QStringList& labels);
 	void undoHighlightChannels();
 	void setCursorMode(bool OnOff);
@@ -150,28 +149,41 @@ protected slots:
 	void selectUnselectChannel();
 	void showHideMarkers();
 	void cursorToMarker();
-	void addCustomMarkerFromList();
 	void setChannelAsBad();
 	void gotoChannel(QAction *act);
 	void launchQTSPlugin();
-	void insertPredefinedMarker();
 	void undoMarkerInsertion();
+#ifdef AW_MARKING_TOOL_V2
+	void applyMarkingToolSettings();
+#endif
 protected:
 	float timeAtPos(const QPointF& pos);
+	float timeAtPos(qreal x);
+	float widthToDuration(float w);
 	float xPosFromTime(float time);
 	QGraphicsItem * getItemUnderMouse(QPointF pos, int *itemType);
 	virtual QMenu *defaultContextMenu();
 	void updateGotoChannelMenu(const QStringList& labels);
 	void clearMarkers();
 	void displayMarkers();
-	AwMarkerItem *insertMarker(AwMarker *marker, AwMarkerItem *prev = nullptr, int offsetLabel = 0);
+	AwMarkerItem* insertMarker(const AwSharedMarker& marker, AwMarkerItem* prev = nullptr, int offsetLabel = 0);
 
 	void keyPressEvent(QKeyEvent *e);
 	void keyReleaseEvent(QKeyEvent *e);
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e);
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *e);
 	void mousePressEvent(QGraphicsSceneMouseEvent *e);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *e);
 	void mouseMoveEvent(QGraphicsSceneMouseEvent  *e);
+	
+	void handleMouseReleaseNone(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseQTS(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseCursor(QGraphicsSceneMouseEvent* e);
+	void handleMouseReleaseMapping(QGraphicsSceneMouseEvent* e);
+
+	void handleMousePressedAddingMarker(QGraphicsSceneMouseEvent* e);
+	QStringList getChannelsUnderSelectionRectangle();
 
 	void updateVisibleItemsHashTable();
 	
@@ -179,10 +191,10 @@ protected:
 	QMenu *m_QTSMenu;	// context menu that may launch a QTS compatible plugin;
 	QHash<QString, AwDisplayPlugin *> m_hPlugins;
 	AwChannelList m_channels;			// channels currently set for the scene
-	AwMarkerList m_selectedMarkers;			// current selected markers
-	AwMarkerList m_markers;	// current markers in the scene
-	AwMarker m_mappingMarker;	// marker used to store the current mapping position and duration
-	AwMarkerList m_lastAddedMarkers;
+	AwSharedMarkerList m_selectedMarkers;			// current selected markers
+	AwSharedMarkerList m_markers;	// current markers in the scene
+	AwSharedMarker m_mappingMarker;	// marker used to store the current mapping position and duration
+	AwSharedMarkerList m_lastAddedMarkers;
 	QList<AwGraphicsMarkerItem*> m_markerItemsDisplayed;
 	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;
@@ -205,13 +217,13 @@ protected:
 	bool m_mousePressed, m_itemsHaveMoved, m_itemsDragged;
 	bool m_selectionIsActive, m_draggingItems;
 	bool m_isTimeSelectionStarted;
-	AwMarkingSettings *m_markingSettings;
 	AwDisplayPluginSignalItem m_signalItemPlugin;
 	AwAmplitudeItem* m_amplitudeItem;
 	QStringList m_QTSCompatiblePlugins;	// name of process plugins that can be launched when QTS mode is active.
 	QString m_pluginToLaunch;	// name of process to launch after a QTS
 	QMenu* m_contextMenuMapping;	// pointer to sub menu dedicated to mapping operations (can be null)
 	AwPickMarkersDial* m_pickMarkersDial;
+	AwMarkingTool* m_markingTool;
 };
 
 

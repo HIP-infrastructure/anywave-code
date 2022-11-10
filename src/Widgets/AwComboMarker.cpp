@@ -16,7 +16,7 @@
 #include <widget/AwComboMarker.h>
 
 
-void AwComboMarker::setMarkers(const AwMarkerList& markers)
+void AwComboMarker::setMarkers(const AwSharedMarkerList& markers)
 {
 	clear();
 	addItems(AwMarker::getAllLabels(markers));

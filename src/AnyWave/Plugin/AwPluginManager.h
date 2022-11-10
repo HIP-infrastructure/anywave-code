@@ -106,6 +106,7 @@ public:
 	inline AwProcesses& processes() { return m_processes; }
 	inline AwDisplays& displays() { return m_displays; }
 	inline AwFilters& filters() { return m_filters; }
+	inline AwProcesses& launchedOnClosing() { return m_launchOnClosing; }
 
 	QMap<QString, int>& flagsMap() {  return m_MATPyPluginFlagsMap; }
 	QMap<QString, int>& inputFlagsMap() { return m_MATPyInputFlagsMap; 	}
@@ -171,7 +172,7 @@ private:
 	QMap<QString, QObject*> m_pluginNames;
 	AwReaders m_readers;
 	AwWriters m_writers;
-	AwProcesses m_processes;
+	AwProcesses m_processes, m_launchOnClosing;	
 	AwDisplays m_displays;
 	AwFilters m_filters;
 	DisplayPluginFactory m_displayFactory;

@@ -17,6 +17,8 @@
 #include "Process/AwScriptPlugin.h"
 #include "AwTCPResponse.h"
 #include <QDataStream>
+#include "Data/AwDataManager.h"
+#include "Marker/AwMarkerManager.h"
 
 void AwRequestServer::handleSendMarkers(QTcpSocket* client, AwScriptProcess* process)
 {
@@ -42,26 +44,14 @@ void AwRequestServer::handleSendMarkers(QTcpSocket* client, AwScriptProcess* pro
 		m->setValue(val);
 		m->setColor(color);
 		m->setTargetChannels(targets);
-		m_markers << m;
+		m_markers << AwSharedMarker(m);
 	}
 	response.send();
-	//while (nMarkers) {
-	//	for (auto i = 0; i < nMarkers; i++) {
-	//		stream >> label >> color >> pos >> dur >> val >> targets;
-	//		auto m = new AwMarker(label, pos, dur);
-	//		m->setValue(val);
-	//		m->setColor(color);
-	//		m->setTargetChannels(targets);
-	//		m_markers << m;
-	//	}
-	////	emit markersAdded(&m_markers);
-	//	response.send();  // send ok status to inform we got the markers
-	//	ba.clear();
-	//	fromClient >> ba;
-	//	stream.device()->reset();
-	//	stream >> nMarkers;
-	//}
 	if (m_markers.size())
-		emit markersAdded(&m_markers);
+		//emit markersAdded(&m_markers);
+		//AwDataManager::instance()->markerManager()->addMarkers(m_markers);
+		//process->sendMarkers(&m_markers);
+		process->addMarkers(&m_markers);
+
 	emit log("Done.");
 }

@@ -21,6 +21,9 @@
 #include <utils/json.h>
 #include "AwExportWizardDial.h"
 #include "Marker/AwMarkerManager.h"
+#include <QRegularExpression>
+#include <QDir>
+#include <utils/bids.h>
 
 namespace Exporter {
 	constexpr auto decimate_factor = "decimate_factor";
@@ -32,7 +35,7 @@ AwExporterPlugin::AwExporterPlugin()
 	name = QString("Export");
 	description = QString("Export data to a file");
 	category = "Process:File Operation:Export To File";
-	version = "1.1.0";
+	version = "1.1.1";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine);
 	m_settings[keys::json_batch] = AwUtilities::json::fromJsonFileToString(":/json/file_exporter.json");
@@ -64,6 +67,10 @@ void AwExporter::runFromCommandLine()
 	auto outputFile = args.value(keys::output_file).toString();
 	// check for the outputs
 	auto writerName = args.value("output_writer").toString().toLower().simplified();
+	if (writerName.isEmpty()) {
+		sendMessage("No output plugin specified.");
+		return;
+	}
 	int decimateFactor = 1;
 	if (args.contains(Exporter::decimate_factor))
 		decimateFactor = args.value(Exporter::decimate_factor).toInt();
@@ -91,33 +98,44 @@ void AwExporter::runFromCommandLine()
 	if (markers.size()) {
 		AwMarkerList removed;
 		QStringList labels = AwChannel::getLabels(pdi.input.channels());
-		for (auto marker : markers) {
-			QStringList targets = marker->targetChannels();
+		markers.erase(std::remove_if(markers.begin(), markers.end(), [labels](AwSharedMarker& m) {
+			auto targets = m->targetChannels();
 			for (const auto& t : targets) {
 				if (!labels.contains(t))
-					removed.append(marker);
+					return true;
 			}
-		}
-		if (removed.size()) {
-			for (auto m : removed) {
-				markers.removeAll(m);
-				delete m;
-			}
-			pdi.input.setMarkers(markers);
-		}
+			return false;
+			}));
+
+		//for (auto &marker : markers) {
+		//	QStringList targets = marker->targetChannels();
+		//	for (const auto& t : targets) {
+		//		if (!labels.contains(t))
+		//			removed.append(marker);
+		//	}
+		//}
+		//if (removed.size()) {
+		//	for (auto m : removed) {
+		//		markers.removeAll(m);
+		//		delete m;
+		//	}
+		//	pdi.input.setMarkers(markers);
+		//}
+		pdi.input.setMarkers(markers);
 	}
 	AwBlock* block = writer->infos.newBlock();
-	AwMarker global("global", 0., endTimePos);
+//	AwMarker global("global", 0., endTimePos);
 	if (isUseSkipMarkersApplied()) {
 		auto merged = AwMarker::merge(pdi.input.markers());
 		auto modified = pdi.input.modifiedMarkers();
 		block->setMarkers(modified);
-		pdi.input.setNewMarkers(merged);
+		pdi.input.setMarkers(merged);
 		m_inputMarkers = merged;
 	}
 	else {
 		block->setMarkers(pdi.input.markers());
-		m_inputMarkers << &global;  // the trick is to avoid memory leak as we don't destroy m_inputMarkers list.
+	//	m_inputMarkers << &global;  // the trick is to avoid memory leak as we don't destroy m_inputMarkers list.
+		m_inputMarkers << AwSharedMarker(new AwMarker("global", 0., endTimePos));
 	}
 
 	AwChannelList inputChannels = pdi.input.channels();
@@ -152,15 +170,64 @@ void AwExporter::runFromCommandLine()
 	if (writer->createFile(outputPath) != AwFileIO::NoError) {
 		sendMessage(QString("Error creating %1.").arg(outputPath));
 		writer->cleanUpAndClose();
-	//	writer->plugin()->deleteInstance(writer);
 		delete writer;
 		return;
 	}
 	sendMessage("Writing data...");
 	writer->writeData(&inputChannels);
 	sendMessage("Done.");
+
+	bool isBids = pdi.input.settings.contains(keys::bids_file_path);
+	if (isBids) {
+		auto outputFile = pdi.input.settings.value(keys::output_file).toString();
+		auto destFile = outputFile;
+		sendMessage("Preparing files for bids...");
+		// get modality
+		QString modality;
+		if (outputFile.contains("ieeg"))
+			modality = "_ieeg";
+		else if (outputFile.contains("eeg"))
+			modality = "_eeg";
+		else
+			modality = "_meg";
+
+		auto map = AwUtilities::bids::getKeysValue(outputFile);
+
+		destFile = destFile.remove(modality);
+		destFile = destFile.remove(".vhdr");
+		if (!map.contains("proc"))
+			sendMessage("proc key was expected but not found. Cannot copy side files like .mrk .mtg .bad");
+		else {
+			// get proc value
+			auto proc = map.value("proc");
+
+			outputFile = outputFile.remove(QString("proc-%1").arg(proc));
+			outputFile = outputFile.remove(modality);
+			outputFile = outputFile.remove(".vhdr");
+
+			QFile::copy(QString("%1_channels.tsv").arg(outputFile), QString("%1_channels.tsv").arg(destFile));
+			QFile::copy(QString("%1_events.tsv").arg(outputFile), QString("%1_events.tsv").arg(destFile));
+			QFile::copy(QString("%1%2.json").arg(outputFile).arg(modality), QString("%1_%2.json").arg(destFile).arg(modality));
+			auto userDerivatives = pdi.input.settings.value(keys::bids_user_derivatives_folder).toString();
+			auto files = QDir(userDerivatives).entryList(QDir::Files);
+			QFileInfo fi(outputFile);
+			auto baseFileName = fi.fileName();
+			for (auto const& f : files) {
+				if (f.startsWith(baseFileName)) {
+					auto extension = QFileInfo(f).suffix();
+					bool status = QFile::copy(QString("%1/%2").arg(userDerivatives).arg(f),
+						QString("%1/%2proc-%3%4.vhdr.%5").arg(userDerivatives).arg(baseFileName).arg(proc)
+						.arg(modality).arg(extension));
+					if (!status) {
+						sendMessage(QString("WARNING: Problem while copying %1").arg(QString("%1/%2").arg(userDerivatives).arg(f)));
+					}
+				}
+			}
+			sendMessage("Bids derivatives files copied");
+		}
+
+	}
 	writer->cleanUpAndClose();
-	//writer->plugin()->deleteInstance(writer);
 	delete writer;
 }
 
@@ -171,7 +238,10 @@ void AwExporter::run()
 
 bool AwExporter::showUi()
 {
-	AwExportWizardDial dlg;
+	// detect bids
+	QString filePath = pdi.input.settings.value(keys::bids_file_path).toString();
+	bool isBids = !filePath.isEmpty();
+	AwExportWizardDial dlg(pdi.input.settings);
 	if (dlg.exec() == QDialog::Accepted) {
 		// clear output_dir option as we don't run in command line mode
 		pdi.input.settings.remove(keys::output_dir);
@@ -180,7 +250,7 @@ bool AwExporter::showUi()
 		pdi.input.settings["output_writer"] = dlg.writerPluginName;
 		pdi.input.filterSettings = dlg.filterSettings();
 		pdi.input.filterSettings.apply(pdi.input.channels());
-		pdi.input.setNewMarkers(AwMarkerManager::instance()->getMarkers(), true);
+		pdi.input.setMarkers(AwMarkerManager::instance()->getSharedMarkersThread());
 		if (dlg.skipMarkers.size()) {
 			pdi.input.settings[keys::skip_markers] = dlg.skipMarkers;
 		}

@@ -30,6 +30,7 @@ public:
 	void run(const QVariantMap& settings) override;
 signals:
 	void progressChanged(const QString&);
+	void log(const QString&);
 };
 
 #endif // AWMATLABSUPPORT_H

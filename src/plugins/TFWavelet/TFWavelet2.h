@@ -18,7 +18,10 @@ public:
 	void run() override;	// main execution entry point of the plugin
 public slots:
 	void addMarker(AwMarker *m) {
-		emit sendMarker(m); pdi.input.addMarker(m); m_widget->signalView()->setMarkers(pdi.input.markers()); m_widget->updateBaselineOptions();
+		AwSharedMarkerList markers;
+		markers << AwSharedMarker(m);
+
+		emit sendMarkers(&markers); pdi.input.addMarkers(markers); m_widget->signalView()->setMarkers(pdi.input.markers()); m_widget->updateBaselineOptions();
 	}
 protected:
 	TFSettings m_settings;

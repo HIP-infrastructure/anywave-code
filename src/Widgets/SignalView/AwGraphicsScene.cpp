@@ -22,12 +22,11 @@
 #include "AwGoToLatencyDial.h"
 #include <widget/AwHighLightPositionMarker.h>
 #include <widget/AwMarkerChannelItem.h>
-#include <AwMarkingSettings.h>
 #include <utils/gui.h>
 #include "AwGTCMenu.h"
-#include "AwPickMarkersDial.h"
 #include <widget/SignalView/AwGraphicsView.h>
 #include "AwAmplitudeItem.h"
+#include <widget/AwMarkingTool.h>
 
 AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : QGraphicsScene(parent)
 {
@@ -46,7 +45,6 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_mappingFixedCursor = nullptr;
 	m_currentMarkerItem = nullptr;
 	m_mouseMode = AwGraphicsScene::None;
-	m_markingSettings = nullptr;
 	m_gotoChannelMenu = nullptr;
 	m_selectionRectangle = nullptr;
 	m_QTSMenu = nullptr;
@@ -58,6 +56,8 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_amplitudeItem->setVisible(false);
 	addItem(m_amplitudeItem);
 	applyNewSettings(settings);
+	m_markingTool = AwMarkingTool::instance();
+	connect(m_markingTool, &AwMarkingTool::settingsChanged, this, &AwGraphicsScene::applyMarkingToolSettings);
 }
 
 AwGraphicsScene::~AwGraphicsScene()
@@ -73,6 +73,8 @@ AwGraphicsScene::~AwGraphicsScene()
 	if (m_pickMarkersDial)
 		delete m_pickMarkersDial;
 	delete m_amplitudeItem;
+	if (m_selectionRectangle)
+		delete m_selectionRectangle;
 }
 
 QGraphicsItem* AwGraphicsScene::amplitudeScale()
@@ -284,6 +286,16 @@ void AwGraphicsScene::refresh()
 float AwGraphicsScene::timeAtPos(const QPointF& pos)
 {
 	return (pos.x() / m_physics->xPixPerSec()) + m_currentPosInFile;
+}
+
+float AwGraphicsScene::timeAtPos(qreal x)
+{
+	return (x / m_physics->xPixPerSec()) + m_currentPosInFile;
+}
+
+float AwGraphicsScene::widthToDuration(float w)
+{
+	return (w / m_physics->xPixPerSec());
 }
 
 float AwGraphicsScene::xPosFromTime(float time)
@@ -550,6 +562,7 @@ void AwGraphicsScene::nextPage()
 	auto newPos = std::min(m_fileDuration - m_pageDuration, m_currentPosInFile + m_pageDuration);
 	if (newPos > m_currentPosInFile)
 		emit updatePositionInFile(newPos);
+
 }
 
 
@@ -762,7 +775,7 @@ void AwGraphicsScene::goToLatency()
 		centerViewOnPosition(dlg.position());
 }
 
-void AwGraphicsScene::highlightMarker(AwMarker *marker)
+void AwGraphicsScene::highlightMarker(const AwSharedMarker& marker)
 {
 	if (marker)	{
 		if (m_showMarkers)	{
@@ -812,43 +825,10 @@ void AwGraphicsScene::undoMarkerInsertion()
 	emit markerRemoved(m_lastAddedMarkers.takeLast());
 }
 
-void AwGraphicsScene::insertPredefinedMarker()
-{
-	QAction* act = (QAction*)sender();
-	if (act == nullptr)
-		return;
-	int index = act->data().toInt();
-	auto marker = m_markingSettings->predefinedMarkers.at(index);
-	// set correct position :
-	marker->setStart(m_mappingMarker.start());
-	emit markerInserted(new AwMarker(marker));
-}
-
-void AwGraphicsScene::chooseMarkersToInsert()
-{
-	if (m_pickMarkersDial == nullptr)
-		m_pickMarkersDial = new AwPickMarkersDial(m_markingSettings);
-	else
-		m_pickMarkersDial->setSettings(m_markingSettings);
-
-	if (m_pickMarkersDial->exec() == QDialog::Accepted) {
-		for (auto m : m_markingSettings->getSelectedPredefinedMarkers()) {
-			auto marker = new AwMarker(m);
-			if (m_mouseMode == AwGraphicsScene::Mapping) 
-				marker->setStart(m_mappingMarker.start());
-			if (m_mouseMode == AwGraphicsScene::AddingMarker)
-				marker->setStart(m_positionClicked);
-			emit markerInserted(marker);
-		}
-	}
-
-}
-
 void AwGraphicsScene::cursorToMarker()
 {
-	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) {
-		emit markerInserted(new AwMarker(&m_mappingMarker));
-	}
+	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) 
+		emit markerInserted(AwSharedMarker(new AwMarker(m_mappingMarker.get())));
 }
 
 void AwGraphicsScene::gotoChannel(QAction *act)
@@ -867,7 +847,7 @@ void AwGraphicsScene::launchQTSPlugin()
 // insertMarker()
 // adds the marker passed as parameter in the scene.
 // Returns the pointer to the newly AwMarkerItem inserted
-AwMarkerItem* AwGraphicsScene::insertMarker(AwMarker *m, AwMarkerItem *prev, int offsetLabel)
+AwMarkerItem* AwGraphicsScene::insertMarker(const AwSharedMarker& m, AwMarkerItem *prev, int offsetLabel)
 {
 	AwMarkerItem *item = new AwMarkerItem(m_physics, prev, m, this, offsetLabel);
 	addItem(item);
@@ -877,7 +857,7 @@ AwMarkerItem* AwGraphicsScene::insertMarker(AwMarker *m, AwMarkerItem *prev, int
 	return item;
 }
 
-void AwGraphicsScene::setMarkers(const AwMarkerList& markers) 
+void AwGraphicsScene::setMarkers(const AwSharedMarkerList& markers) 
 { 
 	m_markers = markers; updateMarkers(); update(); 
 }
@@ -993,7 +973,7 @@ void AwGraphicsScene::keyReleaseEvent(QKeyEvent *e)
 		if (m_selectionRectangle) {
 			removeItem(m_selectionRectangle);
 			delete m_selectionRectangle;
-			m_selectionRectangle = NULL;
+			m_selectionRectangle = nullptr;
 			update();
 		}
 		break;
@@ -1052,30 +1032,11 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 		menuDisplay->addSeparator();
 		auto subMenu = menuDisplay->addMenu("Mark");
 		QAction *action = subMenu->addAction("Mark the last mapping position/selection");
-		
 		connect(action, SIGNAL(triggered()), this, SLOT(cursorToMarker()));
-		// prepare contextual menu if the user choosed to use predefined markers
-		if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
-			if (m_markingSettings->predefinedMarkers.size() >= 2) {
-				subMenu->addSeparator();
-				auto action = subMenu->addAction("Choose markers to insert");
-				connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
-				subMenu->addSeparator();
-			}
-			int index = 0;
-			for (auto m : m_markingSettings->predefinedMarkers) {
-				QAction* action = subMenu->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
-				action->setData(index); // store the index of item in list in action custom data.
-				index++;
-				connect(action, SIGNAL(triggered()), this, SLOT(insertPredefinedMarker()));
-			}
-		}
 		menuDisplay->addSeparator();
 
 		m_contextMenuMapping = subMenu;
 	}
-
-
 	// add the Go to channel option
 	if (m_gotoChannelMenu) {
 		menuDisplay->addMenu(m_gotoChannelMenu);
@@ -1149,8 +1110,6 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 		}
 		return;
 	}
-	
-
 	// get item under the mouse
 	QGraphicsItem *item = NULL;
 	int itemType;
@@ -1246,489 +1205,12 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 	delete menuDisplay;
 }
 
-
-
-///
-/// mousePress()
-///
-void AwGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *e)
-{
-	e->ignore();
-	QPointF pos = e->scenePos();
-	m_positionClicked = timeAtPos(pos);
-	if (e->button() != Qt::LeftButton) 
-		return;
-
-	if (m_selectionIsActive && m_mouseMode == AwGraphicsScene::None)	{
-		m_mousePressed = true;
-		if (!m_selectionRectangle) 	{
-#if QT_VERSION <  QT_VERSION_CHECK(5, 0, 0)
-			m_selectionRectangle = new QGraphicsRectItem( 0, this);
-#else
-			m_selectionRectangle = new QGraphicsRectItem(0);
-#endif
-			m_selectionRectangle->setZValue(100);
-			m_selectionRectangle->setPen(QPen(Qt::blue));
-			m_selectionRectangle->setBrush(QBrush(Qt::blue, Qt::SolidPattern)); 
-			m_selectionRectangle->setOpacity(0.3);
-			addItem(m_selectionRectangle);
-		}
-		m_selectionRectangle->setRect(QRectF(e->scenePos(), QSize(0,0)));
-		m_mousePressedPos = e->scenePos();
-		update();
-		return;
-	}
-	else if (m_mouseMode == AwGraphicsScene::QTS) {
-		if (!m_selectionRectangle) {
-			m_selectionRectangle = new QGraphicsRectItem(0);
-			m_selectionRectangle->setZValue(100);
-			m_selectionRectangle->setPen(QPen(Qt::blue));
-			m_selectionRectangle->setBrush(QBrush(Qt::blue, Qt::SolidPattern));
-			m_selectionRectangle->setOpacity(0.3);
-			addItem(m_selectionRectangle);
-		}
-		m_selectionRectangle->setRect(QRectF(e->scenePos(), QSize(0, 0)));
-		m_mousePressed = true;
-		m_mousePressedPos = e->scenePos();
-		update();
-		return;
-	}
-	else if (m_mouseMode == AwGraphicsScene::None) {
-#if QT_VERSION <  QT_VERSION_CHECK(5, 0, 0)
-		QGraphicsItem *item = itemAt(e->scenePos());
-#else
-		QGraphicsItem *item = itemAt(e->scenePos(), QTransform());
-		if (item) {
-			QGraphicsScene::mousePressEvent(e);
-			if (item->type() == QGraphicsItem::UserType + AW_GRAPHICS_ITEM_CURSOR_TYPE) {
-				m_draggedCursor = static_cast<AwCursorItem *>(item);
-				m_mouseMode = AwGraphicsScene::DraggingCursor;
-			}
-		}
-#endif
-	}
-	else if (m_mouseMode == AwGraphicsScene::Mapping) {
-		if (!m_selectionRectangle) 	{
-#if QT_VERSION <  QT_VERSION_CHECK(5, 0, 0)
-			m_selectionRectangle = new QGraphicsRectItem( 0, this);
-#else
-			m_selectionRectangle = new QGraphicsRectItem(0);
-#endif
-			QColor mappingColor = QColor(AwUtilities::gui::mappingCursorColor());
-			m_selectionRectangle->setZValue(100);
-			m_selectionRectangle->setPen(QPen(mappingColor));
-			m_selectionRectangle->setBrush(QBrush(mappingColor, Qt::SolidPattern)); 
-			m_selectionRectangle->setOpacity(0.3);
-			addItem(m_selectionRectangle);
-		}
-		m_selectionRectangle->setRect(QRectF(e->scenePos(), QSize(0,0)));
-		m_mousePressedPos = e->scenePos();
-		m_mousePressed = true;
-		m_mappingSelectionDuration = 0.;
-		update();
-	}
-	else
-		m_mousePressed = true;
-	update();
-}
-
-///
-/// mouseMove()
-///
-void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent  *e)
-{
-	QPointF pos = e->scenePos();
-	QGraphicsView *v = views().at(0);
-	switch (m_mouseMode) {
-	case AwGraphicsScene::DraggingCursor:
-		m_draggedCursor->setPosition(m_currentPosInFile, timeAtPos(pos));
-		update();
-		emit draggedCursorPositionChanged(m_draggedCursor->currentPos());
-		break;
-	case AwGraphicsScene::Mapping:
-		if (!m_mousePressed) {
-			m_mappingCursor->setPos(v->mapToScene(pos.x(), 0));
-			m_mappingCursor->setPositionInFile(m_currentPosInFile);
-			update();
-			emit mappingPositionChanged(m_mappingCursor->currentPos());
-		}
-		else { // mouse button is pressed 
-			QPoint currentPos = e->scenePos().toPoint();
-			QPoint previousPos = m_mousePressedPos.toPoint();
-			previousPos.setY(0);
-
-			int w = currentPos.x() - previousPos.x();
-			//int h = currentPos.y() - previousPos.y();
-			int h = (int)floor(this->sceneRect().height());
-			QRectF rect(previousPos, QSize(w, h));
-			m_selectionRectangle->setRect(rect);
-			update();
-		}
-		
-		break;
-	case AwGraphicsScene::Cursor:
-		if (m_mousePressed) 	{  // mouse button is pressed => do not move cursor but enlarge cursor selection instead
-			m_cursor->setOtherPos(v->mapToScene(pos.x(), 0));
-			update();
-		}
-		else {
-			m_cursor->setPos(v->mapToScene(pos.x(), 0));
-			m_cursor->setWidth(1.0);
-			update();
-			// get position of the cursor in seconds
-			emit cursorPositionChanged(m_cursor->currentPos());
-		}
-		break;
-	case AwGraphicsScene::AddingMarker:
-		if (m_isTimeSelectionStarted) {
-			m_currentMarkerItem->marker()->setEnd(timeAtPos(pos));
-			// check if we move after the end of the file
-			if (m_currentMarkerItem->marker()->end() > m_fileDuration)
-				m_currentMarkerItem->marker()->setEnd(m_fileDuration);
-		}
-		else
-			m_currentMarkerItem->marker()->setStart(timeAtPos(pos));
-
-		m_currentMarkerItem->updatePosition();
-		update();
-		break;
-	case AwGraphicsScene::QTS:
-	{
-		QGraphicsScene::mouseMoveEvent(e);
-		if (!m_mousePressed)
-			break;
-		QPoint currentPos = e->scenePos().toPoint();
-		QPoint previousPos = m_mousePressedPos.toPoint();
-		int w = currentPos.x() - previousPos.x();
-		int h = currentPos.y() - previousPos.y();
-		QRectF rect(previousPos, QSize(w, h));
-		m_selectionRectangle->setRect(rect);
-		update();
-	}
-	break;
-	case AwGraphicsScene::None:
-		QGraphicsScene::mouseMoveEvent(e);
-		if (m_mousePressed && m_selectionIsActive) {
-			QPoint currentPos = e->scenePos().toPoint();
-			QPoint previousPos = m_mousePressedPos.toPoint();
-
-			int w = currentPos.x() - previousPos.x();
-			int h = currentPos.y() - previousPos.y();
-			QRectF rect(previousPos, QSize(w, h));
-			m_selectionRectangle->setRect(rect);
-			update();
-		}
-		else if (m_mousePressed && m_selectionRectangle) { // user has released Ctrl key while moving the selection area.
-			removeItem(m_selectionRectangle);
-			delete m_selectionRectangle;
-			m_selectionRectangle = nullptr;
-		}
-		update();
-	}
-}
-
-
-void AwGraphicsScene::addCustomMarkerFromList()
-{
-	QAction* act = (QAction*)sender();
-
-	int index = act->data().toInt();
-
-	if (m_markingSettings->predefinedMarkers.isEmpty())
-		return;
-	auto predefined = m_markingSettings->predefinedMarkers.at(index);
-
-	m_currentMarkerItem->marker()->setLabel(predefined->label());
-	m_currentMarkerItem->marker()->setValue(predefined->value());
-	m_currentMarkerItem->marker()->setColor(predefined->color());
-	if (m_markingSettings->isTargettingChannels)
-		m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
-
-	emit markerInserted(new AwMarker(m_currentMarkerItem->marker()));
-	m_isTimeSelectionStarted = false;
-	m_currentMarkerItem->marker()->setDuration(0);
-	m_currentMarkerItem->marker()->setStart(m_positionClicked);
-	m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
-}
-
-
-
-///
-/// mouseRelease()
-///
-void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent  *e)
-{
-	// check that the position clicked is not AFTER the end of data
-	if (m_positionClicked > m_fileDuration)
-		m_positionClicked = m_fileDuration;
-
-	if (e->button() != Qt::LeftButton) {
-		if (m_isTimeSelectionStarted)	{ // a selection has started => cancel it
-			m_currentMarkerItem->marker()->setDuration(0);
-			m_currentMarkerItem->marker()->setStart(m_positionClicked);
-			m_isTimeSelectionStarted = false;
-			updateMarkers();
-			update();
-		}
-		return;
-	}
-	QPointF pos = e->scenePos();
-
-	if (m_mouseMode == AwGraphicsScene::DraggingCursor) 
-		m_mouseMode = AwGraphicsScene::None;
-
-	switch (m_mouseMode) {
-	case AddingMarker:
-		if (m_markingSettings->type == AwMarker::Single || m_isTimeSelectionStarted) {
-			QMenu* menu_predefined = nullptr;
-			bool forceTarget = false;
-			QString target;
-			m_currentMarkerItem->marker()->setColor(m_markingSettings->color);
-			m_currentMarkerItem->marker()->setLabel(m_markingSettings->label);
-			m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
-			// for a Single Marker, set its final position
-			if (m_markingSettings->type == AwMarker::Single)
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-			else { // handle time selection final position
-				float start = m_currentMarkerItem->marker()->start();
-				float end_pos = m_positionClicked;
-				if (end_pos < start) {
-					// invert selection
-					float swap = start;
-					start = end_pos;
-					end_pos = swap;
-				}
-				m_currentMarkerItem->marker()->setStart(start);
-				m_currentMarkerItem->marker()->setEnd(end_pos);
-			}
-			// check if auto target is on
-			if (m_markingSettings->autoTargetChannel) {
-				// check for item under the mouse
-				QGraphicsItem* item = nullptr;
-				// take a rect under the mouse
-				QRect mousePos(pos.x() - 5, pos.y() + 5, 10, 10);
-				QList<QGraphicsItem*> items = this->items(mousePos, Qt::IntersectsItemShape, Qt::DescendingOrder);
-				if (items.size() > 1) {
-					for (int i = 1; i < items.size(); i++) {
-						// get Signal Item
-						if (items.at(i)->type() == QGraphicsItem::UserType + AW_GRAPHICS_ITEM_SIGNAL_TYPE) {
-							item = items.at(i);
-							break;
-						}
-					}
-				}
-				if (item) {
-					AwGraphicsSignalItem* sitem = qgraphicsitem_cast<AwGraphicsSignalItem*>(item);
-					QStringList list = { sitem->channel()->fullName() };
-					m_currentMarkerItem->marker()->setTargetChannels(list);
-				}
-			}
-			// check if targets are predefined for the marker.
-			if (!m_markingSettings->targets.isEmpty())
-				m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
-			// prepare contextual menu if the user choosed to use predefined markers
-			if (m_markingSettings->isUsingList && !m_markingSettings->predefinedMarkers.isEmpty()) {
-				menu_predefined = new QMenu;
-				if (m_markingSettings->predefinedMarkers.size() >= 2) {
-					auto action = menu_predefined->addAction("Choose markers to insert");
-					connect(action, &QAction::triggered, this, &AwGraphicsScene::chooseMarkersToInsert);
-					menu_predefined->addSeparator();
-				}
-				int index = 0;
-				for (auto m : m_markingSettings->predefinedMarkers) {
-					QAction* action = menu_predefined->addAction(QString("Insert %1 %2").arg(m->label()).arg(m->value()));
-					action->setData(index); // store the index of item in list in action custom data.
-					index++;
-					connect(action, SIGNAL(triggered()), this, SLOT(addCustomMarkerFromList()));
-				}
-			}
-			else if (m_markingSettings->isAutoInc) {
-				m_currentMarkerItem->marker()->setLabel(QString("%1_%2").arg(m_markingSettings->label).arg(m_markingSettings->index++));
-			}
-			if (menu_predefined) {
-				if (menu_predefined->exec(e->screenPos()) == nullptr) { // no actions taken in the menu => do reset marker insertion
-					m_currentMarkerItem->setMarker(new AwMarker());
-					m_currentMarkerItem->marker()->setDuration(0);
-					m_currentMarkerItem->marker()->setStart(m_positionClicked);
-					m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
-					m_isTimeSelectionStarted = false;
-					//if (m_markingSettings->isTargettingChannels)
-					//	m_currentMarkerItem->marker()->setTargetChannels(m_markingSettings->targets);
-				}
-				delete menu_predefined;
-			}
-			else { // no context menu => classic insertion using current marker item
-				emit markerInserted(m_currentMarkerItem->marker());
-				// keep marker pointer to undo the operation if necessary
-			//	m_lastAddedMarker = m_currentMarkerItem->marker();
-				m_lastAddedMarkers << m_currentMarkerItem->marker();
-				// instantiate a new marker
-				m_currentMarkerItem->setMarker(new AwMarker());
-				m_currentMarkerItem->marker()->setDuration(0);
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-				m_currentMarkerItem->marker()->setValue(m_markingSettings->value);
-			}
-			if (m_isTimeSelectionStarted)
-				m_isTimeSelectionStarted = false;
-		} else { // not ending a single or a time selection but starting a time selection
-			m_isTimeSelectionStarted = true;
-			m_currentMarkerItem->marker()->setStart(m_positionClicked);
-		}
-		updateMarkers();
-		update();
-		break;
-	case Cursor:
-		m_cursor->noOtherPos();
-		emit clickedAtTime(m_positionClicked);
-		emit cursorClickedAtTime(m_positionClicked);
-		update();
-		break;
-	case Mapping:
-		if (m_mappingFixedCursor == nullptr) {
-			m_mappingFixedCursor = new AwMappingCursorItem(m_currentPosInFile, m_positionClicked, AwUtilities::gui::mappingCursorColor(), AwUtilities::gui::mappingCursorFont(), AwMappingCursorItem::Fixed);
-			m_mappingFixedCursor->setPhysics(m_physics);
-			addItem(m_mappingFixedCursor);
-		}
-		m_mappingFixedCursor->setPos(views().at(0)->mapToScene(pos.x(), 0));
-		if (m_selectionIsActive)
-			selectChannelAtPosition(e->scenePos());
-		if (m_selectionRectangle)  {
-			float duration = timeAtPos(e->scenePos()) - m_positionClicked;
-			if (duration < 0) {
-				m_positionClicked -= duration;
-				if (m_positionClicked < 0) 
-					m_positionClicked = 0.;
-				duration = qAbs(duration);
-			}
-			// need at least a 5 pixels large selection
-			if (qAbs(e->scenePos().x() - m_mousePressedPos.x()) < 5)
-				emit clickedAtTime(m_positionClicked);
-			else {
-				m_mappingSelectionDuration = duration;
-				emit mappingTimeSelectionDone(m_positionClicked, duration);
-			}
-		}
-		else {
-			emit cursorClickedAtTime(timeAtPos(pos));
-			emit clickedAtTime(m_positionClicked);
-		}
-		// update mapping marker
-		m_mappingMarker.setLabel(m_markingSettings->label);
-		m_mappingMarker.setStart(m_positionClicked);
-		m_mappingMarker.setDuration(m_mappingSelectionDuration);
-		m_mappingMarker.setValue(m_markingSettings->value);
-		m_mappingMarker.setColor(m_markingSettings->color);
-//		QGraphicsScene::mouseReleaseEvent(e);
-		break;
-	case AwGraphicsScene::QTS:
-		if (qAbs(m_selectionRectangle->rect().size().width()) > 10 && qAbs(m_selectionRectangle->rect().size().height()) > 10) {
-			// get item under selection rectangle
-			QList<QGraphicsItem *> items = this->items(m_selectionRectangle->rect());
-			if (!items.isEmpty()) {
-				AwChannelList channels, temp;
-				float pos = timeAtPos(QPointF(m_selectionRectangle->rect().x(), 0));
-				float end = timeAtPos(QPointF(m_selectionRectangle->rect().x() + m_selectionRectangle->rect().width(), 0));
-				
-				for (QGraphicsItem *item : items) {
-					// gets parents ot that item if any
-					QGraphicsItem *parent = item->parentItem();
-					while (parent) {
-						item = parent;
-						parent = parent->parentItem();
-					}
-					// cast to AwGraphicsSignalItem
-					AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(item);
-					if (sitem) {
-						if (!temp.contains(sitem->channel())) {
-							channels << sitem->channel()->duplicate();
-							temp << sitem->channel();
-						}
-					}
-				}
-				if (m_QTSMenu) {
-					m_QTSMenu->exec(e->screenPos());
-					if (!m_pluginToLaunch.isEmpty())
-						emit processSelectedForLaunch(m_pluginToLaunch, channels, pos, end);
-				}
-				update();
-			}
-			removeItem(m_selectionRectangle);
-			delete m_selectionRectangle;
-			m_selectionRectangle = NULL;
-			emit QTSModeEnded();
-		}
-		setQTSMode(false);
-		break;
-	case None: 
-		// handling draging of signal items!
-		if (m_itemsDragged && m_itemsHaveMoved) {
-			m_itemsHaveMoved = false;
-			m_itemsDragged = false;
-			reorderItems();
-			QGraphicsScene::mouseReleaseEvent(e);
-			break;
-		}
-		if (m_selectionRectangle) { 
-			// Selection must be greater than a 10x10 rectangle, otherwise it will be considered as a simple selection of the item under the mouse.
-			if (qAbs(m_selectionRectangle->rect().size().width()) > 10 && qAbs(m_selectionRectangle->rect().size().height()) > 10) {
-				// get item under selection rectangle
-				QList<QGraphicsItem *> items = this->items(m_selectionRectangle->rect());
-				if (!items.isEmpty()) {
-					foreach (QGraphicsItem *item, items) {
-						// gets parents ot that item if any
-						QGraphicsItem *parent = item->parentItem();
-						while (parent) {
-							item = parent;
-							parent = parent->parentItem();
-						}
-						// cast to AwGraphicsSignalItem
-						AwGraphicsSignalItem *sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(item);
-						if (sitem) {
-							sitem->setSelected(true);
-							sitem->channel()->setSelected(true);
-						}
-					}
-					updateSelection();
-					update();
-				}
-				removeItem(m_selectionRectangle);
-				delete m_selectionRectangle;
-				m_selectionRectangle = NULL;
-				break;
-			}
-			else 
-				selectChannelAtPosition(e->scenePos());
-		}
-		QGraphicsScene::mouseReleaseEvent(e);
-
-		updateSelection();
-		update();
-		emit clickedAtTime(m_positionClicked);
-		break;
-	}
-	m_mousePressed = false;
-}
-
-
 void AwGraphicsScene::showHideMarkers()
 {
 	QAction *act = qobject_cast<QAction *>(sender());
 	if (act == NULL)
 		return;
 	showMarkers(act->data().toBool());
-}
-
-
-/// 
-/// setMarkingSettings()
-/// SLOT:
-/// Must only be called when the user changed the type of marker to insert.
-/// Switch the scene add marker mode accordingly.
-void AwGraphicsScene::setMarkingSettings(AwMarkingSettings *settings)
-{
-	m_markingSettings = settings;
-	if (m_mouseMode == None)
-		return;
 }
 
 void AwGraphicsScene::setMappingMode(bool on)
@@ -1754,11 +1236,8 @@ void AwGraphicsScene::setMappingMode(bool on)
 		m_mappingFixedCursor = NULL;
 		m_mouseMode = AwGraphicsScene::None;
 	}
-	if (m_pickMarkersDial)
-		m_pickMarkersDial->close();
 	update();
 }
-
 
 void AwGraphicsScene::setQTSMode(bool flag)
 {
@@ -1775,9 +1254,6 @@ void AwGraphicsScene::setQTSMode(bool flag)
 	}
 	else
 		m_mouseMode = AwGraphicsScene::None;
-
-	if (m_pickMarkersDial)
-		m_pickMarkersDial->close();
 }
 
 ///
@@ -1792,26 +1268,13 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 	m_isTimeSelectionStarted = false;
 
 	if (flag)	{
-		// be sure we have marking settings
-		if (m_markingSettings == nullptr)
-			return;
-
 		if (m_mouseMode == AwGraphicsScene::Cursor)
 			setCursorMode(false); // stop cursor mode
 		else if (m_mouseMode == AwGraphicsScene::Mapping) 
 			return; // do nothing if in Mapping mode
-		
 		views().at(0)->setFocus();
 		m_mouseMode = AddingMarker;
-		AwMarker *marker = new AwMarker();
-		if (!m_markingSettings->isUsingList) {
-			marker->setLabel(m_markingSettings->label);
-			marker->setValue(m_markingSettings->value);
-		}
-		else
-			marker->setLabel(m_markingSettings->label);
-		marker->setStart(m_currentPosInFile);
-		marker->setDuration(0);
+		auto marker = AwSharedMarker(new AwMarker(m_markingTool->defaultMarker().get()));
 		m_currentMarkerItem = insertMarker(marker);
 	}
 	else {
@@ -1819,13 +1282,10 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 		m_lastAddedMarkers.clear();
 		if (m_currentMarkerItem) {
 			removeItem(m_currentMarkerItem);
-			delete m_currentMarkerItem->marker();
 			delete m_currentMarkerItem;
 			m_currentMarkerItem = nullptr;
 		}
 	}
-	if (m_pickMarkersDial)
-		m_pickMarkersDial->close();
 	update();
 }
 

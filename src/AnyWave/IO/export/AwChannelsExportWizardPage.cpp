@@ -21,14 +21,19 @@
 #include <QMenu>
 #include <QAction>
 #include <QHeaderView>
+#include <QGroupBox>
+#include <QLabel>
 
 AwChannelsExportWizardPage::AwChannelsExportWizardPage(QWidget* parent) : QWizardPage(parent)
 {
 	setTitle("Select channels to export in file");
+	auto group = new QGroupBox;
+	group->setTitle("Channels to export:");
 	m_table = new QTableWidget;
 	m_table->setSelectionMode(QTableWidget::NoSelection);
 	m_table->setEditTriggers(QTableWidget::NoEditTriggers);
 	m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	m_table->setAlternatingRowColors(true);
 	auto montage = AwDataManager::instance()->montage();
 	auto selection = AwDataManager::instance()->selectedChannels();
 	m_selected = m_asRecorded = m_byTypes = m_montage = m_clear = nullptr;
@@ -42,23 +47,25 @@ AwChannelsExportWizardPage::AwChannelsExportWizardPage(QWidget* parent) : QWizar
 	m_table->setHorizontalHeaderItem(1, headerType);
 	if (selection.size()) {
 		m_channels = selection;
-		m_selected = new QPushButton("&Selected Channels");
+		m_selected = new QPushButton("Export Selected Channels");
 		connect(m_selected, &QPushButton::clicked, this, &AwChannelsExportWizardPage::setSelected);
 	}
-	else 
+	else
 		m_channels = montage;
 	fillTable(m_channels);
 
-	m_asRecorded = new QPushButton("Raw Channels");
+	m_asRecorded = new QPushButton("Export Raw Channels");
+	m_asRecorded->setToolTip("Click here to export only raw channels (no montage is used)");
 	connect(m_asRecorded, &QPushButton::clicked, this, &AwChannelsExportWizardPage::setAsRecorded);
 
 	m_clear = new QPushButton("Clear");
+	m_clear->setToolTip("Clear the current list and allow you to build your own list using Add by types");
 	connect(m_clear, &QPushButton::clicked, this, &AwChannelsExportWizardPage::clear);
-	m_montage = new QPushButton("Current Montage");
+	m_montage = new QPushButton("Export Current Montage");
 	connect(m_montage, &QPushButton::clicked, this, &AwChannelsExportWizardPage::setCurrentMontage);
 	m_byTypes = new QPushButton("Add by Types");
 	// get types from montage
-	auto types = AwChannel::getTypesAsString(AwDataManager::instance()->rawChannels());
+	auto types = AwChannel::getTypesAsString(AwDataManager::instance()->rawChannels() + AwDataManager::instance()->montage());
 	QMenu* menu = new QMenu;
 	for (const auto& type : types) {
 		auto action = new QAction(type);
@@ -70,16 +77,24 @@ AwChannelsExportWizardPage::AwChannelsExportWizardPage(QWidget* parent) : QWizar
 
 	// prepare horizontal layout
 	QHBoxLayout* hLayout = new QHBoxLayout;
+	auto label = new QLabel("Change channels:");
+	hLayout->addWidget(label);
+	int strechIndex = 3;
 	if (selection.size()) {
 		hLayout->addWidget(m_selected);
+		strechIndex++;
 	}
 	hLayout->addWidget(m_montage);
 	hLayout->addWidget(m_asRecorded);
 	hLayout->addWidget(m_byTypes);
 	hLayout->addWidget(m_clear);
-	
+	hLayout->insertStretch(strechIndex, 1);
+	QVBoxLayout* vLayout = new QVBoxLayout;
+	vLayout->addWidget(m_table);
+	group->setLayout(vLayout);
+
 	QGridLayout* layout = new QGridLayout;
-	layout->addWidget(m_table, 0, 0);
+	layout->addWidget(group, 0, 0);
 	layout->addLayout(hLayout, 1, 0);
 	setLayout(layout);
 }
@@ -133,7 +148,8 @@ void AwChannelsExportWizardPage::addByTypes()
 	if (action == nullptr)
 		return;
 	int type = action->data().toInt();
-	m_channels += AwChannel::getChannelsOfType(AwDataManager::instance()->asRecordedChannels(), type);
+	m_channels += AwChannel::getChannelsOfType(AwDataManager::instance()->asRecordedChannels() + 
+		AwDataManager::instance()->montage(), type);
     fillTable(m_channels);
 }
 

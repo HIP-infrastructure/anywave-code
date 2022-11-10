@@ -17,7 +17,7 @@
 #include <QFile>
 #include <QTextStream>
 
-int AwBIDSManager::createEventsTsv(const QString& filePath, const AwMarkerList& markers)
+int AwBIDSManager::createEventsTsv(const QString& filePath, const AwSharedMarkerList& markers)
 {
 	m_errorString.clear();
 	if (markers.isEmpty())
@@ -30,7 +30,7 @@ int AwBIDSManager::createEventsTsv(const QString& filePath, const AwMarkerList& 
 	}
 	// columns : onset duration trial_type
 	stream << bids::tsv_event_onset << "\t" << bids::tsv_event_duration << "\t" << bids::tsv_event_trial_type << endl;
-	for (auto m : markers) 
+	for (auto &m : markers) 
 		stream << QString("%1").arg(m->start()) << "\t" << QString("%1").arg(m->duration()) << "\t" << m->label() << endl;
 	file.close();
 	return 0;

@@ -64,11 +64,32 @@ AwFilterSettings& AwFilterSettings::operator=(const AwFilterSettings& other)
 	return *this;
 }
 
-void AwFilterSettings::clear()
+bool AwFilterSettings::operator!=(const AwFilterSettings & other)
+{
+	if (m_filters.size() != other.m_filters.size())
+		return true;
+	for (auto const& k : m_filters.keys()) {
+		QVector<float> values1 = m_filters.value(k);
+		QVector<float> values2 = other.m_filters.value(k);
+		for (auto i = 0; i < values1.size(); i++) {
+			if (values1.at(i) != values2.at(i))
+				return true;
+		}
+	}
+	return false;
+}
+
+void AwFilterSettings::reset()
 {
 	m_limits.clear();
 	m_hash.clear();
 	m_filters.clear();
+}
+
+
+void AwFilterSettings::clear()
+{
+	reset();
 	for (auto i : AwChannel::intTypes)
 		m_filters.insert(i, QVector<float>{0, 0, 0, });
 }

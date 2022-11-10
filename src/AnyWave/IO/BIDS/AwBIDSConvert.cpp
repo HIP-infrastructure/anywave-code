@@ -286,8 +286,7 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 	auto markerFile = reader->infos.mrkFile();
 	if (QFile::exists(markerFile)) {
 		emit log(QString("found %1 file, merging the markers...").arg(markerFile));
-		auto mrkMarkers = AwMarker::load(markerFile);
-		markers += mrkMarkers;
+		markers += AwMarker::loadShrdFaster(markerFile);
 		AwMarker::removeDoublons(markers);
 		emit log(QString("%1 markers total.").arg(markers.size()));
 	}
@@ -296,24 +295,25 @@ int AwBIDSManager::MEGtoBIDS(const AwArguments& args)
 
 	if (args.contains(keys::skip_markers)) {
 		auto labels = args.value(keys::skip_markers).toStringList();
-		AwMarkerList tmp = AwMarker::getMarkersWithLabels(markers, labels);
-		for (auto t : tmp) {
+		auto tmp = AwMarker::getMarkersWithLabels(markers, labels);
+		for (auto &t : tmp) {
 			emit log(QString("Skipped marker %1").arg(t->label()));
 			markers.removeAll(t);
-			delete t;
+			//delete t;
 		}
 	}
 	if (args.contains(keys::use_markers)) {
 		auto labels = args.value(keys::use_markers).toStringList();
-		AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
-		AW_DESTROY_LIST(markers);
-		markers = tmp;
+	//	AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
+	//	AW_DESTROY_LIST(markers);
+	//	markers = tmp;
+		markers = AwMarker::getMarkersWithLabels(markers, labels);
 	}
 
 	if (createEventsTsv(events_tsv, markers) == -1 && !m_errorString.isEmpty()) {
 		emit log(m_errorString);
 	}
-	AW_DESTROY_LIST(markers);
+	//AW_DESTROY_LIST(markers);
 
 	// check for bad file
 	auto badFile = reader->infos.badFile();
@@ -509,8 +509,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 	auto markerFile = reader->infos.mrkFile();
 	auto markers = AwMarker::duplicate(reader->infos.blocks().first()->markers());
 	if (QFile::exists(markerFile)) {
-		auto temp = AwMarker::load(markerFile);
-		markers += temp;
+		markers += AwMarker::loadShrdFaster(markerFile);
 		AwMarker::removeDoublons(markers);
 	}
 	// auto save original markers
@@ -518,18 +517,19 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 
 	if (args.contains(keys::skip_markers)) {
 		auto labels = args.value(keys::skip_markers).toStringList();
-		AwMarkerList tmp = AwMarker::getMarkersWithLabels(markers, labels);
-		for (auto t : tmp) {
+		auto tmp = AwMarker::getMarkersWithLabels(markers, labels);
+		for (auto &t : tmp) {
 			emit log(QString("Skipped marker %1").arg(t->label()));
 			markers.removeAll(t);
-			delete t;
+			//delete t;
 		}
 	}
 	if (args.contains(keys::use_markers)) {
 		auto labels = args.value(keys::use_markers).toStringList();
-		AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
-		AW_DESTROY_LIST(markers);
-		markers = tmp;
+		//AwMarkerList tmp = AwMarker::duplicate(AwMarker::getMarkersWithLabels(markers, labels));
+		//AW_DESTROY_LIST(markers);
+		//markers = tmp;
+		markers = AwMarker::getMarkersWithLabels(markers, labels);
 	}
 
 	// create events.tsv file
@@ -558,11 +558,11 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 			emit log(QString("Error during file conversion: %1").arg(e.errorString()));
 		//	reader->plugin()->deleteInstance(reader);
 			delete reader;
-			AW_DESTROY_LIST(markers);
+		//	AW_DESTROY_LIST(markers);
 			return -1;
 		}
 	}
-	AW_DESTROY_LIST(markers);
+	//AW_DESTROY_LIST(markers);
 	
 	// check for bad file
 	auto badFile = reader->infos.badFile();
@@ -700,7 +700,7 @@ int AwBIDSManager::SEEGtoBIDS(const AwArguments& args)
 /// convert a file to EDF (if the file is SEEG or EEG)
 /// Assuming the reader has already open the file for reading.
 /// The file argument is the desired output file.
-int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader, const AwMarkerList& markers)
+int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader, const AwSharedMarkerList& markers)
 {
 	// get the EDFIO plugin
 	auto plugin = AwPluginManager::getInstance()->getReaderPluginByName("EDF Format");
@@ -711,11 +711,11 @@ int AwBIDSManager::convertToEDF(const QString& file, AwFileIO *reader, const AwM
 	return convertFile(reader, plugin, file, markers);
 }
 
-int AwBIDSManager::convertToVHDR(const QString& file, AwFileIO *reader, const AwMarkerList& markers)
+int AwBIDSManager::convertToVHDR(const QString& file, AwFileIO *reader, const AwSharedMarkerList& markers)
 {
 	// get the Brainvision plugin
 	auto plugin = AwPluginManager::getInstance()->getReaderPluginByName("Brainvision Analyser Format");
-	if (plugin == NULL) {
+	if (plugin == nullptr) {
 		throw(AwException("Brainvision IO Plugin is missing", "BIDSManager::convertToVHDR"));
 		return -1;
 	}
@@ -723,7 +723,7 @@ int AwBIDSManager::convertToVHDR(const QString& file, AwFileIO *reader, const Aw
 	return convertFile(reader, plugin, file, markers);
 }
 
-int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwMarkerList& markers)
+int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const QString& file, const AwSharedMarkerList& markers)
 {
 	AwChannelList channels = AwChannel::duplicateChannels(reader->infos.channels());
 	float duration = reader->infos.totalDuration();
@@ -739,7 +739,8 @@ int AwBIDSManager::convertFile(AwFileIO *reader, AwFileIOPlugin *plugin, const Q
 	AwBlock *block = writer->infos.newBlock();
 	block->setSamples(channels.first()->dataSize());
 	block->setDuration((float)channels.first()->dataSize() / channels.first()->samplingRate());
-	block->setMarkers(AwMarker::duplicate(markers));
+	//block->setMarkers(AwMarker::duplicate(markers));
+	block->setMarkers(markers);
 	writer->infos.setDate(reader->infos.recordingDate());
 	writer->infos.setTime(reader->infos.recordingTime());
 	writer->infos.setISODate(reader->infos.isoDate());

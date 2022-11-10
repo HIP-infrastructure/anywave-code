@@ -24,7 +24,7 @@
 #include <utils/gui.h>
 
 
-AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, AwMarker *mark, QGraphicsScene *scene, int offset) 
+AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int offset) 
 : AwGraphicsMarkerItem(mark, phys)
 {
 	m_marker = mark;
@@ -50,6 +50,7 @@ AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, AwMar
 	setOpacity(1);
 
 	m_posInFile = 0.;
+
 }
 
 AwMarkerItem::~AwMarkerItem()
@@ -126,13 +127,6 @@ void AwMarkerItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		else
 			painter->fillRect(this->rect(), QBrush(color.lighter(150), Qt::Dense4Pattern));
 	} 
-	if (m_marker) {
-		QString info = QString("Marker %1 at %2s").arg(m_marker->label()).arg(m_marker->start());
-		if (m_marker->duration())
-			info += QString("\nduration: %1s").arg(m_marker->duration());
-		info += QString("\nValue: %1").arg(m_marker->value());
-		setToolTip(info);
-	}
 }
 
 
@@ -146,6 +140,18 @@ void AwMarkerItem::showValue(bool flag)
 {
 	m_valueItem->setVisible(flag);
 	update();
+}
+
+void AwMarkerItem::setText(const QString& text)
+{
+	if (m_labelItem)
+		m_labelItem->setText(text);
+}
+
+void AwMarkerItem::setValue(double value)
+{
+	if (m_valueItem)
+		m_valueItem->setText(QString::number(value));
 }
 
 // Events
@@ -181,6 +187,10 @@ void AwMarkerItem::updatePosition()
 		setPos((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), 0);
 		setRect(QRectF(this->scene()->sceneRect().topLeft(), QSize(1, this->scene()->sceneRect().height())));
 	}
-
+	QString info = QString("%1 at %2s").arg(m_marker->label()).arg(m_marker->start());
+	if (m_marker->duration())
+		info += QString("\nduration: %1s").arg(m_marker->duration());
+	info += QString("\nValue: %1").arg(m_marker->value());
+	setToolTip(info);
 	update();
 }

@@ -36,6 +36,7 @@
 #endif
 
 #include "CL/CommandLineParser.h"
+#include "CL/AwCommandLineManager.h"
 #include "AwComponents.h"
 #include <iostream>
 #include <AwVersion.h>
@@ -85,17 +86,19 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		components.setGuiEnabled(false);
 		int operation = -1;
-
+		
 		try {
 			operation = aw::commandLine::doParsing(app.arguments(), arguments);
 		}
-		catch (const AwException& e) {
+ 		catch (const AwException& e) {
 			std::cout << e.errorString().toStdString();
 			return -1;
 		}
-		if (operation == aw::commandLine::NoOperation)  // if parsing returns NoOperation that means that nothing more should be processed neither the GUI should be
+
+		if (operation == aw::commandLine::NoOperation) { // if parsing returns NoOperation that means that nothing more should be processed neither the GUI should be
 														// launched.
 			return 0;
+		}
 		if (operation == aw::commandLine::BatchOperation) {
 			aw::commandLine::doCommandLineOperation(arguments);
 			return 0;

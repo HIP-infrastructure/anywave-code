@@ -1,13 +1,22 @@
 #include "eeginto4d.h"
 #include "MEGstructs.h"
 
+/// <summary>
+///  UPDATES :
+/// v2.0.4:
+/// DO not modify the config file anymore, do not relabel channels in config
+/// </summary>
+/// <param name="megFile"></param>
+/// <param name="eegChannels"></param>
+/// <returns></returns>
+
 bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels)
 {
 	class ChanInfo 
 	{
 	public:
 		ChanInfo() = delete;
-		ChanInfo(const QString& l, qint64 p, int no) { label = l; pos = p; chan_no = no; }
+		ChanInfo(const QString& l, qint64 p, int no) { label = l; pos = p; chan_no = no;  }
 		QString label;
 		qint64 pos;
 		int chan_no;
@@ -237,10 +246,20 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 	sendMessage("Now changing labels to match EEG data");
 	QStringList eegLabels = AwChannel::getLabels(eegChannels);
 	Q_ASSERT(eegLabels.size() <= mapMEGEEGInfos.size());
-		std::string tmp;
+	
+//	std::string tmp;
 
 	QMap<QString, int> eegChannelsIndexes; // keep track of index of eeg channel inside MEG data.
 
+	auto stringToLabel = [](const QString& s, char *data) {
+		memset(data, 0, 16);
+		std::string tmp = s.toStdString();
+		auto n = std::min((size_t)16, tmp.size());
+		for (auto i = 0; i < n; i++)
+			data[i] = tmp.data()[i];
+	};
+
+	char tmp[16];
 	// browse MEG eeg channels by their number (the main link to config file is the chan_no.)
 	for (auto k : mapMEGEEGInfos.keys()) {
 		auto configChanInfo = mapConfigEEGInfos.value(k);
@@ -248,11 +267,12 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 		if (eegLabels.contains(megChanInfo->label)) {
 			eegLabels.removeAll(megChanInfo->label);
 			configChanInfo->label = megChanInfo->label;
-			tmp = megChanInfo->label.toStdString();
-			fileConfig.seek(configChanInfo->pos);
-			stream_config.writeRawData(tmp.data(), 16);
+			stringToLabel(megChanInfo->label, tmp);
+		//	fileConfig.seek(configChanInfo->pos);
+		//	stream_config.writeRawData(tmp, 16);
 			fileMEG.seek(megChanInfo->pos);
-			src_stream.writeRawData(tmp.data(), 16);
+		//	src_stream.writeRawData(tmp.data(), 16);
+			src_stream.writeRawData(tmp, 16);
 			eegChannelsIndexes.insert(megChanInfo->label, megChanInfo->chan_no);
 			mapConfigEEGInfos.remove(k);
 			mapMEGEEGInfos.remove(k);
@@ -270,11 +290,15 @@ bool EEGInto4D::relabel(const QString& megFile, const AwChannelList& eegChannels
 		configChanInfo->label = label;
 		megChanInfo->label = label;
 		eegChannelsIndexes.insert(label, megChanInfo->chan_no);
-		tmp = label.toStdString();
-		fileConfig.seek(configChanInfo->pos);
-		stream_config.writeRawData(tmp.data(), 16);
+		
+		stringToLabel(label, tmp);
+	//	fileConfig.seek(configChanInfo->pos);
+
+		
+//		stream_config.writeRawData(tmp, 16);
 		fileMEG.seek(megChanInfo->pos);
-		src_stream.writeRawData(tmp.data(), 16);
+		//src_stream.writeRawData(tmp.data(), 16);
+		src_stream.writeRawData(tmp, 16);
 		mapConfigEEGInfos.remove(k);
 		mapMEGEEGInfos.remove(k);
 	}

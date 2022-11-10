@@ -33,7 +33,7 @@ private:
 	AwChannelList m_triggers;
 	int m_maskValue;
 	bool m_parseNegative;
-	AwMarkerList m_markers;
+	AwSharedMarkerList m_markers;
 
 	void clearMarkers();	// clean markers object when the process has finished or before starting it.
 };

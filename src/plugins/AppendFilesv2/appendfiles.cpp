@@ -105,7 +105,7 @@ void AppendFiles::run()
 		return;
 	}
 
-	AwMarkerList outputMarkers;
+	AwSharedMarkerList outputMarkers;
 	float time_offset;
 	float duration = 0;
 	AwChannelList sourceChannels;
@@ -113,7 +113,8 @@ void AppendFiles::run()
 		auto file = files.at(i);
 		auto reader = readers.at(i);
 		reader->openFile(file);
-		auto tmp = AwMarker::duplicate(reader->infos.blocks().first()->markers());
+//		auto tmp = AwMarker::duplicate(reader->infos.blocks().first()->markers());
+		auto tmp = reader->infos.blocks().first()->markers();
 		if (i == 0) {
 			time_offset = reader->infos.totalDuration();
 			outputMarkers = tmp;
@@ -122,8 +123,8 @@ void AppendFiles::run()
 			sr = reader->infos.channels().first()->samplingRate();
 		}
 		else {
-			outputMarkers << new AwMarker("File Junction", time_offset);
-			for (auto m : tmp)
+			outputMarkers << AwSharedMarker(new AwMarker("File Junction", time_offset));
+			for (auto &m : tmp)
 				m->setStart(m->start() + time_offset);
 			time_offset += reader->infos.totalDuration();
 			outputMarkers += tmp;

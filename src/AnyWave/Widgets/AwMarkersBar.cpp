@@ -36,10 +36,10 @@ void AwMarkersBar::contextMenuEvent(QContextMenuEvent *e)
 	lower += m_positionInFile;
 	float higher = (e->pos().x() + 3) / xPixSec;
 	higher += m_positionInFile;
-	AwMarker *found = findMarkerBetween(lower, higher);
-	QMenu *processMenu = NULL;
+	auto found = findMarkerBetween(lower, higher);
+	QMenu *processMenu = nullptr;
 	// check if the marker exists and has a duration
-	if (found)
+	if (!found.isNull())
 		if (found->duration()) 	{
 			// Get processes that might accept time selections as input
 			QList<AwProcessPlugin *> plugins = AwProcessManager::instance()->processPluginsWithFeatures(Aw::ProcessFlags::PluginAcceptsTimeSelections);
@@ -49,7 +49,8 @@ void AwMarkersBar::contextMenuEvent(QContextMenuEvent *e)
 				for (AwProcessPlugin *p : plugins) {
 					QAction *act = new QAction(p->name, processMenu);
 					act->setData(QVariant(p->name));
-					connect(act, SIGNAL(triggered()), this, SLOT(launchProcess()));
+//					connect(act, SIGNAL(triggered()), this, SLOT(launchProcess()));
+					connect(act, &QAction::triggered, this, &AwMarkersBar::launchProcess);
 					processMenu->addAction(act);
 				}
 				m_menu->addMenu(processMenu);
@@ -74,7 +75,7 @@ void AwMarkersBar::launchProcess()
 		// the plugin may be of type DisplayBackground, so force it to be Background only to launch the process.
 		AwBaseProcess *process = process_manager->newProcessFromPluginName(act->data().toString());
 		// set markers to compute data on
-		process->pdi.input.addMarker(new AwMarker(m_markerUnderMouse));
+		process->pdi.input.addMarker(new AwMarker(m_markerUnderMouse.get()));
 		// start process
 		process_manager->runProcess(process);
 	}

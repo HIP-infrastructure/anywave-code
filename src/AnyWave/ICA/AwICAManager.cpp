@@ -45,6 +45,7 @@ AwICAManager::~AwICAManager()
 void AwICAManager::closeFile()
 {
 	m_componentsMap.clear();
+
 }
 
 bool AwICAManager::reject(int type)
@@ -184,7 +185,7 @@ QString AwICAManager::convertToMatlab(const QString& fileName)
 	if (file.open(AwHDF5::Read, "/") != AwHDF5::Ok)
 		return QString();
 
-	int modality;
+	int modality = -1;
 	if (file.isGroup("ica/MEG")) {
 		file.setGroup("ica/MEG");
 		modality = AwChannel::MEG;
@@ -206,6 +207,9 @@ QString AwICAManager::convertToMatlab(const QString& fileName)
 		modality = AwChannel::SEEG;
 	}
 
+	if (modality == -1)
+		return QString();
+
 	float lf, hf;
 	if (file.readFloatAttr("LPF", &lf) != AwHDF5::Ok)
 		return QString();
@@ -214,7 +218,7 @@ QString AwICAManager::convertToMatlab(const QString& fileName)
 
 	int row, col;
 	double *tmp = file.readDoubleMatrix("unmixing", &row, &col);
-	if (tmp == NULL)
+	if (tmp == nullptr)
 		return QString();
 	// data read are row major => fill a col major matrix
 	mat unmix(tmp, col, row);

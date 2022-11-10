@@ -82,7 +82,7 @@ private:
 
 	void loadViewSettings();
 	void saveViewSettings();
-	void removeView(int index);
+	void removeViewNumber(int index);
 	void updateGUI(); // after loading new display setup
 
 signals:
@@ -111,7 +111,7 @@ public slots:
 	void setCursorPosition(float position);     // change the cursor position in the view. Can make the view change its position.
 	void synchronizeCursorPos(float position);
 	void showPositionInViews(float position);
-	void highlightMarker(AwMarker *m);
+	void highlightMarker(const AwSharedMarker& m);
 	void captureViews();
 	void addVideoCursor();
 	void removeVideoCursor();

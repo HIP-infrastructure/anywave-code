@@ -302,6 +302,38 @@ void AwUtilities::gui::saveMarkerFont(const QFont& font, int type)
 	}
 }
 
+/// <summary>
+/// versionCompare()
+/// Compares two version strings. expected format is "major.minor.fix"
+/// if strings are empty they are considered to be "0.0.0"
+/// </summary>
+/// <param name="v1"></param>
+/// <param name="v2"></param>
+/// <returns></returns>
+int AwUtilities::versionCompare(const QString& v1, const QString& v2)
+{
+	if (v1.isEmpty() && v2.isEmpty())
+		return 0;
+	if (v1.isEmpty())
+		return 1;
+	if (v2.isEmpty())
+		return -1;
+
+	QStringList t1 = v1.split('.');
+	QStringList t2 = v2.split('.');
+
+	Q_ASSERT(t1.size() == t2.size());
+
+	for (int i = 0; i < t1.size(); i++) {
+		int value1 = t1.at(i).toInt();
+		int value2 = t2.at(i).toInt();
+		if (value1 > value2)
+			return -1;
+		if (value1 < value2)
+			return 1;
+	}
+	return 0;
+}
 
 char *AwUtilities::QStringToChar(const QString& str)
 {
@@ -315,20 +347,20 @@ char *AwUtilities::QStringToChar(const QString& str)
 
 
 
-QString AwUtilities::base64Encode(const QString& str)
-{
-	const char *s = str.toStdString().c_str();
-	QByteArray ba(s);
-	return QString(ba.toBase64());
-}
-
-QString AwUtilities::base64Decode(const QString& str)
-{
-	const char *s = str.toStdString().c_str();
-	QByteArray ba64(s);
-	QString data = QString::fromLatin1(QByteArray::fromBase64(ba64).data());
-	return data;
-}
+//QString AwUtilities::base64Encode(const QString& str)
+//{
+//	const char *s = str.toStdString().c_str();
+//	QByteArray ba(s);
+//	return QString(ba.toBase64());
+//}
+//
+//QString AwUtilities::base64Decode(const QString& str)
+//{
+//	const char *s = str.toStdString().c_str();
+//	QByteArray ba64(s);
+//	QString data = QString::fromLatin1(QByteArray::fromBase64(ba64).data());
+//	return data;
+//}
 
 // convert 32bit value to big endian
 quint32 AwUtilities::endianness::fromBigEndian(const uchar *src)
@@ -361,17 +393,17 @@ quint64 AwUtilities::endianness::fromBigEndian64(const uchar *src)
 }
 
 
-bool AwUtilities::file::isPathValid(const QString &path)
-{
-	auto components = path.split(QDir::separator());
-	if (components.isEmpty())
-		return false;
-	for (auto c : components) {
-#ifdef Q_OS_WIN
-
-#endif
-	}
-}
+//bool AwUtilities::file::isPathValid(const QString &path)
+//{
+//	auto components = path.split(QDir::separator());
+//	if (components.isEmpty())
+//		return false;
+//	for (auto c : components) {
+//#ifdef Q_OS_WIN
+//
+//#endif
+//	}
+//}
 
 
 

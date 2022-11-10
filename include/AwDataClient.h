@@ -48,9 +48,9 @@ public:
 	AwDataClient(QObject *parent = NULL);
 
 	inline bool endOfData() { return m_endOfData; }
-	void requestData(AwChannelList *channels, AwMarker *marker, bool rowData = false, bool doNotWakeUpClient = false);
+	void requestData(AwChannelList *channels, const AwSharedMarker& marker, bool rowData = false, bool doNotWakeUpClient = false);
 	void requestData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
-	void requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
+	void requestData(AwChannelList *channels, AwSharedMarkerList *markers, bool rawData = false);
 
 	void selectChannels(const QVariantMap&, AwChannelList* channels);
 	void selectChannelsAsynch(const QVariantMap&, AwChannelList* channels);
@@ -65,8 +65,8 @@ public:
 	inline void setError(const QString& error) { m_errorString = error; m_errorOccured = true; }
 signals:
 	void needData(AwChannelList *channels, float start, float duration, bool rawData = false, bool doNotWakeUpClient = false);
-	void needData(AwChannelList *channels, AwMarker *marker, bool rawData = false, bool doNotWakeUpClient = false);
-	void needData(AwChannelList *channels, AwMarkerList *markers, bool rawData = false);
+	void needData(AwChannelList *channels, const AwSharedMarker& marker, bool rawData = false, bool doNotWakeUpClient = false);
+	void needData(AwChannelList *channels, AwSharedMarkerList *markers, bool rawData = false);
 	void selectChannelsRequested(AwDataClient *,const QVariantMap& settings, AwChannelList* channels);
 	void selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*);
 

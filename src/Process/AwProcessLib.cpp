@@ -97,7 +97,7 @@ int AwBaseProcess::applyUseSkipMarkersKeys()
 
 	if (!allDataFlag) {
 		if (skipMarkers || useMarkers) {
-			auto markers = AwMarker::duplicate(pdi.input.markers());
+			auto markers = pdi.input.markers();
 			auto inputMarkers = AwMarker::getInputMarkers(markers, skippedMarkers, usedMarkers, fd);
 			// Set modified markers !!!
 			pdi.input.setModifiedMarkers(markers);
@@ -107,7 +107,8 @@ int AwBaseProcess::applyUseSkipMarkersKeys()
 				pdi.input.addMarker(new AwMarker("whole_data", 0., fd));
 			}
 			else
-				pdi.input.setNewMarkers(inputMarkers);
+				//pdi.input.setNewMarkers(inputMarkers);
+				pdi.input.setMarkers(inputMarkers);
 		}
 		return 0;
 	}
@@ -133,19 +134,12 @@ void AwBaseProcess::connectClient(AwDataClient *client)
 	emit dataConnectionRequested(client);
 }
 
-void AwBaseProcess::addMarkers(AwMarkerList *markers)
+
+void AwBaseProcess::addMarkers(AwSharedMarkerList * markers)
 {
 	emit sendMarkers(markers);
 	m_mutexMarkersReceived.lock();
- 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
-	m_mutexMarkersReceived.unlock();
-}
-
-void AwBaseProcess::addMarker(AwMarker *marker)
-{
-	emit sendMarker(marker);
-	m_mutexMarkersReceived.lock();
- 	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
+	m_wcMarkersReceived.wait(&m_mutexMarkersReceived);
 	m_mutexMarkersReceived.unlock();
 }
 
@@ -220,8 +214,8 @@ void AwProcess::stop()
 
 void AwGUIProcess::registerGUIWidget(AwProcessGUIWidget *widget)
 {
-	AwProcessGUIWidget *w = static_cast<AwProcessGUIWidget *>(widget);
-	if (w == NULL)
+	auto w = reinterpret_cast<QObject *>(widget);
+	if (w == nullptr)
 		return;
 	connect(w, SIGNAL(closed()), this, SLOT(stop()));
 }

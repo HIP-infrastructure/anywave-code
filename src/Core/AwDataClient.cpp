@@ -21,7 +21,7 @@ AwDataClient::AwDataClient(QObject *parent)
 	m_endOfData = m_isConnected = m_errorOccured = false;
 }
 
-void AwDataClient::requestData(AwChannelList *channels, AwMarker *marker, bool rawData, bool doNotWakeUpClient)
+void AwDataClient::requestData(AwChannelList *channels, const AwSharedMarker& marker, bool rawData, bool doNotWakeUpClient)
 {
 	if (!m_isConnected) {
 		m_errorOccured = true;
@@ -47,7 +47,7 @@ void AwDataClient::requestData(AwChannelList *channels, float start, float durat
 	m_mutexDataAvailable.unlock();
 }
 
-void AwDataClient::requestData(AwChannelList *channels, AwMarkerList *markers, bool rawData)
+void AwDataClient::requestData(AwChannelList *channels, AwSharedMarkerList *markers, bool rawData)
 {
 	if (!m_isConnected) {
 		m_errorOccured = true;
@@ -64,7 +64,7 @@ void AwDataClient::selectChannelsAsynch(const QVariantMap& settings, AwChannelLi
 {
 	if (!m_isConnected) {
 		m_errorOccured = true;
-		m_errorString = QString("Trying to request for channel selections while not connected to the data server.");
+		m_errorString = QString("Trying to request for channel selections while not connected to data server.");
 		return;
 	}
 	emit selectChannelsRequested(this, settings, channels);

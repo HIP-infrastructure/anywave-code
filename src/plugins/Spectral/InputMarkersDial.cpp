@@ -1,6 +1,6 @@
 #include "InputMarkersDial.h"
 
-InputMarkersDial::InputMarkersDial(const AwMarkerList& markers, QWidget *parent)
+InputMarkersDial::InputMarkersDial(const AwSharedMarkerList& markers, QWidget *parent)
 	: QDialog(parent)
 {
 	m_ui.setupUi(this);

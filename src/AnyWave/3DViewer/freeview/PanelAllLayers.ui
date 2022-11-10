@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PanelAllLayers</class>
+ <widget class="QScrollArea" name="PanelAllLayers">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>375</width>
+    <height>857</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ScrollArea</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::NoFrame</enum>
+  </property>
+  <property name="widgetResizable">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="scrollAreaWidgetContents">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>375</width>
+     <height>857</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="splitterControlPanel">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="handleWidth">
+       <number>4</number>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="LayerTreeWidget" name="treeWidgetLayers">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::SelectedClicked</set>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <property name="rootIsDecorated">
+        <bool>true</bool>
+       </property>
+       <property name="itemsExpandable">
+        <bool>true</bool>
+       </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QStackedWidget" name="stackedWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="PanelVolume" name="pageVolume"/>
+          <widget class="PanelSurface" name="pageSurface"/>
+          <widget class="PanelROI" name="pageROI"/>
+          <widget class="PanelPointSet" name="pagePointSet"/>
+          <widget class="PanelConnectomeMatrix" name="pageCMAT"/>
+          <widget class="PanelTrack" name="pageTrack"/>
+          <widget class="PanelFCD" name="pageFCD"/>
+          <widget class="PanelODF" name="pageODF"/>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PanelVolume</class>
+   <extends>QWidget</extends>
+   <header>PanelVolume.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PanelSurface</class>
+   <extends>QWidget</extends>
+   <header>PanelSurface.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PanelROI</class>
+   <extends>QWidget</extends>
+   <header>PanelROI.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PanelPointSet</class>
+   <extends>QWidget</extends>
+   <header>PanelPointSet.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PanelTrack</class>
+   <extends>QWidget</extends>
+   <header>PanelTrack.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PanelConnectomeMatrix</class>
+   <extends>QWidget</extends>
+   <header>PanelConnectomeMatrix.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LayerTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>LayerTreeWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PanelFCD</class>
+   <extends>QWidget</extends>
+   <header>PanelFCD.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PanelODF</class>
+   <extends>QWidget</extends>
+   <header>PanelODF.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>treeWidgetLayers</sender>
+   <signal>currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</signal>
+   <receiver>PanelAllLayers</receiver>
+   <slot>OnCurrentItemChanged(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>307</x>
+     <y>199</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>458</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetLayers</sender>
+   <signal>itemChanged(QTreeWidgetItem*,int)</signal>
+   <receiver>PanelAllLayers</receiver>
+   <slot>OnItemChanged(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>236</x>
+     <y>199</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>577</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetLayers</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>PanelAllLayers</receiver>
+   <slot>OnItemDoubleClicked(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>106</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>treeWidgetLayers</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>PanelAllLayers</receiver>
+   <slot>OnItemSelectionChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>192</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>940</x>
+     <y>317</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OnCurrentItemChanged(QTreeWidgetItem*)</slot>
+  <slot>OnItemChanged(QTreeWidgetItem*)</slot>
+  <slot>OnItemDoubleClicked(QTreeWidgetItem*)</slot>
+  <slot>OnItemSelectionChanged()</slot>
+ </slots>
+</ui>

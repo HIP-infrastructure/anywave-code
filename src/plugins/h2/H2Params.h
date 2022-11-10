@@ -37,7 +37,7 @@ public:
 //
 typedef struct 
 {
-	AwMarker *marker;
+	AwSharedMarker marker;
 	int nIterations;
 	float samplingRate;
 	QList<h2_params *> params;

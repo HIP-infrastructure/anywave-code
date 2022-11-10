@@ -30,25 +30,25 @@ void AwGlobalMarkers::closeFile()
 }
 
 
-AwMarkerList* AwGlobalMarkers::displayed()
+AwSharedMarkerList* AwGlobalMarkers::displayed()
 {
 	QMutexLocker lock(&m_mutex);
 	return m_displayed;
 }
 
-AwMarkerList* AwGlobalMarkers::total()
+AwSharedMarkerList* AwGlobalMarkers::total()
 {
 	QMutexLocker lock(&m_mutex);
 	return m_total;
 }
 
-void AwGlobalMarkers::setDisplayed(AwMarkerList* list)
+void AwGlobalMarkers::setDisplayed(AwSharedMarkerList* list)
 {
 	QMutexLocker lock(&m_mutex);
 	m_displayed = list;
 }
 
-void AwGlobalMarkers::setTotal(AwMarkerList* list)
+void AwGlobalMarkers::setTotal(AwSharedMarkerList* list)
 {
 	QMutexLocker lock(&m_mutex);
 	m_total = list;

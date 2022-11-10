@@ -18,6 +18,8 @@
 #include <utils/json.h>
 #include "Data/AwDataManager.h"
 #include <Process/AwScriptPlugin.h>
+#include <IO/BIDS/AwBIDSManager.h>
+
 
 void AwRequestServer::handleConnectDebug(QTcpSocket* client, AwScriptProcess* process)
 {
@@ -25,7 +27,17 @@ void AwRequestServer::handleConnectDebug(QTcpSocket* client, AwScriptProcess* pr
 	AwTCPResponse response(client);
 	QDataStream& toClient = *response.stream();
 
-	// the server has created a fake process, so get its pid
+	if (AwBIDSManager::isInstantiated()) {
+		auto BM = AwBIDSManager::instance();
+		if (BM->isBIDSActive()) {
+			process->pdi.input.settings.insert(keys::bids_file_path, BM->getCurrentBIDSPath());
+			process->pdi.input.settings.insert(keys::bids_root_dir, BM->rootDir());
+			process->pdi.input.settings.insert(keys::bids_user_derivatives_folder, BM->getUserDerivativesFolder());
+		}
+	}
+	process->pdi.input.settings[keys::bad_labels] = AwDataManager::instance()->badLabels();
+	AwUniteMaps(process->pdi.input.settings, AwDataManager::instance()->settings());
+	process->pdi.input.settings[keys::aw_path] = QCoreApplication::applicationFilePath();
 	auto args = AwUtilities::json::toJsonString(process->pdi.input.settings);
 	toClient << process->pid() << args;
 	response.send();

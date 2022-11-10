@@ -118,7 +118,7 @@ void AwGraphicsItem::setNewSize(const QSize size)
 //////////////////////////////////////////////////////////////////////////////////
 // AwBaseGraphicsMarkerItem
 
-AwBaseGraphicsMarkerItem::AwBaseGraphicsMarkerItem(AwMarker *marker, AwDisplayPhysics *phys) :
+AwBaseGraphicsMarkerItem::AwBaseGraphicsMarkerItem(const AwSharedMarker& marker, AwDisplayPhysics *phys) :
 AwGraphicsItem(phys, nullptr)
 {
 	m_marker = marker;

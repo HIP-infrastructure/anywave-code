@@ -44,12 +44,6 @@
     <Filter Include="Filter">
       <UniqueIdentifier>{039fdc38-93fc-4554-b99e-f69f3e93bf02}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IO">
-      <UniqueIdentifier>{c547275c-5540-48b9-a87a-072ff6830d12}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IO\ADES">
-      <UniqueIdentifier>{7cb55d3b-502d-455e-b764-bf8d238b7bad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Marker">
       <UniqueIdentifier>{89142d20-eb71-464e-a930-9658185c18bf}</UniqueIdentifier>
     </Filter>
@@ -86,15 +80,6 @@
     <Filter Include="Source">
       <UniqueIdentifier>{aea2612b-9f04-41ce-8dd7-329e100fe02d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IO\MATLAB">
-      <UniqueIdentifier>{affe80c4-bee8-4d1e-81df-156092db3e82}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IO\BIDS">
-      <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IO\JSON">
-      <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CL">
       <UniqueIdentifier>{c3e57cdc-9212-4554-86e5-41e441da7831}</UniqueIdentifier>
     </Filter>
@@ -109,6 +94,21 @@
     </Filter>
     <Filter Include="Updater">
       <UniqueIdentifier>{28d04abc-c7d2-41ce-97aa-5026f47a626f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO">
+      <UniqueIdentifier>{c547275c-5540-48b9-a87a-072ff6830d12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO\ADES">
+      <UniqueIdentifier>{7cb55d3b-502d-455e-b764-bf8d238b7bad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO\MATLAB">
+      <UniqueIdentifier>{affe80c4-bee8-4d1e-81df-156092db3e82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO\BIDS">
+      <UniqueIdentifier>{0aab16f7-7041-428d-8fe7-ab2ca5844f4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO\JSON">
+      <UniqueIdentifier>{91da93a5-d679-495d-8641-a951dcf939af}</UniqueIdentifier>
     </Filter>
     <Filter Include="IO\export">
       <UniqueIdentifier>{26e02caa-2dd8-4632-b145-d6b821165ec5}</UniqueIdentifier>
@@ -153,9 +153,6 @@
     </ClCompile>
     <ClCompile Include="Filter\AwFilterToolBar.cpp">
       <Filter>Filter</Filter>
-    </ClCompile>
-    <ClCompile Include="Marker\AwDockAddMarker.cpp">
-      <Filter>Marker</Filter>
     </ClCompile>
     <ClCompile Include="Marker\AwMarkerListModel.cpp">
       <Filter>Marker</Filter>
@@ -281,9 +278,6 @@
       <Filter>Widgets</Filter>
     </ClCompile>
     <ClCompile Include="AnyWave.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AwExportDial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -508,9 +502,6 @@
     <ClCompile Include="Batch\AwBatchFileInputWidget.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
-    <ClCompile Include="IO\BIDS\AwBIDSGUIOptionsDialog.cpp">
-      <Filter>IO\BIDS</Filter>
-    </ClCompile>
     <ClCompile Include="Batch\AwBatchManager.cpp">
       <Filter>Batch</Filter>
     </ClCompile>
@@ -622,6 +613,21 @@
     <ClCompile Include="ICA\AwICAMappingItem.cpp">
       <Filter>ICA</Filter>
     </ClCompile>
+    <ClCompile Include="IO\BIDS\AwRefreshDialog.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
+    <ClCompile Include="Process\AwProcessManagerRunProcess.cpp">
+      <Filter>Process</Filter>
+    </ClCompile>
+    <ClCompile Include="MATPy\GetData2_5_10.cpp">
+      <Filter>MATPy</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\AwLogger.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\BIDS\AwClinicalWidget.cpp">
+      <Filter>IO\BIDS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -678,9 +684,6 @@
     <QtUic Include="Filter\AwFilterToolBar.ui">
       <Filter>Filter</Filter>
     </QtUic>
-    <QtMoc Include="Marker\AwDockAddMarker.h">
-      <Filter>Marker</Filter>
-    </QtMoc>
     <QtMoc Include="Marker\AwMarkerListModel.h">
       <Filter>Marker</Filter>
     </QtMoc>
@@ -861,9 +864,6 @@
     <QtUic Include="AnyWave.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="AwExportDial.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Carto\AwMappingClient.h">
       <Filter>Carto</Filter>
     </QtMoc>
@@ -1032,12 +1032,6 @@
     <QtMoc Include="Batch\AwBatchFileInputWidget.h">
       <Filter>Batch</Filter>
     </QtMoc>
-    <QtUic Include="IO\BIDS\AwBIDSGUIOptionsDialog.ui">
-      <Filter>IO\BIDS</Filter>
-    </QtUic>
-    <QtMoc Include="IO\BIDS\AwBIDSGUIOptionsDialog.h">
-      <Filter>IO\BIDS</Filter>
-    </QtMoc>
     <QtMoc Include="Batch\AwBatchManager.h">
       <Filter>Batch</Filter>
     </QtMoc>
@@ -1086,9 +1080,6 @@
     <QtMoc Include="Prefs\AwAddVenvDial.h">
       <Filter>Prefs</Filter>
     </QtMoc>
-    <QtMoc Include="Prefs\AwSettings.h">
-      <Filter>Process</Filter>
-    </QtMoc>
     <QtMoc Include="IO\export\AwOutputFileWizardPage.h">
       <Filter>IO\export</Filter>
     </QtMoc>
@@ -1106,6 +1097,18 @@
     </QtMoc>
     <QtMoc Include="IO\export\AwExporter.h">
       <Filter>IO\export</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\BIDS\AwRefreshDialog.h">
+      <Filter>IO\BIDS</Filter>
+    </QtMoc>
+    <QtMoc Include="Prefs\AwSettings.h">
+      <Filter>Prefs</Filter>
+    </QtMoc>
+    <QtMoc Include="Debug\AwLogger.h">
+      <Filter>Debug</Filter>
+    </QtMoc>
+    <QtMoc Include="IO\BIDS\AwClinicalWidget.h">
+      <Filter>IO\BIDS</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -1309,6 +1312,9 @@
     </QtUic>
     <QtUic Include="Prefs\AwAddVenvDial.ui">
       <Filter>Prefs</Filter>
+    </QtUic>
+    <QtUic Include="IO\BIDS\AwRefreshDialog.ui">
+      <Filter>IO\BIDS</Filter>
     </QtUic>
   </ItemGroup>
 </Project>

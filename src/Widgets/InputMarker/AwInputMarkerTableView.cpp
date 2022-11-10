@@ -26,7 +26,7 @@ AwInputMarkerTableView::AwInputMarkerTableView(QWidget *parent) : QTableView(par
 }
 
 
-void AwInputMarkerTableView::setMarkers(const AwMarkerList& markers)
+void AwInputMarkerTableView::setMarkers(const AwSharedMarkerList& markers)
 {
 	InputMarkerModel *m = qobject_cast<InputMarkerModel *>(this->model());
 	m->setMarkers(markers);

@@ -18,7 +18,7 @@
 #include "Plugin/AwPluginManager.h"
 #include <AwProcessInterface.h>
 #include <QDesktopServices>
-
+#include <QUrl>
 
 /// <summary>
 /// init help menu sections for plugins
@@ -29,6 +29,24 @@ void AnyWave::initPluginsHelpMenu()
 	QStringList sections;
 	QList<QMenu*> menus; 
 	menuHelp->clear();
+
+	// add menus for MATLAB/Python API
+	QMenu* menuAPI = menuHelp->addMenu("MATLAB/Python plugins");
+	auto action = menuAPI->addAction("How to make a plugin");
+	action->setData(QUrl("https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/MATLAB_API"));
+	connect(action, &QAction::triggered, this, &AnyWave::openPluginHelpUrl);
+	action = menuAPI->addAction("how to get data");
+	action->setData(QUrl("https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/MATLAB_get_data_ex"));
+	connect(action, &QAction::triggered, this, &AnyWave::openPluginHelpUrl);
+	action = menuAPI->addAction("how to get markers");
+	action->setData(QUrl("https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/MATLAB_get_markers"));
+	connect(action, &QAction::triggered, this, &AnyWave::openPluginHelpUrl);
+	action = menuAPI->addAction("how to send markers");
+	action->setData(QUrl("https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/MATLAB_send_markers"));
+	connect(action, &QAction::triggered, this, &AnyWave::openPluginHelpUrl);
+	action = menuAPI->addAction("how to run in debug mode");
+	action->setData(QUrl("https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/wikis/MATLAB_debug"));
+	connect(action, &QAction::triggered, this, &AnyWave::openPluginHelpUrl);
 
 	QMenu* menuPluginHelp = nullptr;
 	for (auto plugin : AwPluginManager::getInstance()->processes()) {

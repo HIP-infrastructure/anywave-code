@@ -80,7 +80,8 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 
 	// Dedicated Data Server if process is nullptr
 	if (process == nullptr)
-		reader = AwDataManager::instance()->reader();
+		//	reader = AwDataManager::instance()->reader();
+		reader = m_dataManager->reader();
 
 	bool usingLabels = !labels.isEmpty();
 	bool usingTypes = !types.isEmpty();
@@ -227,7 +228,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 				emit log(error);
 				stream << (int)-1 << error;
 				response.send();
-			//	reader->plugin()->deleteInstance(reader);
 				delete reader;
 				return;
 			}
@@ -242,7 +242,6 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 				emit log(error);
 				stream << (int)-1 << error;
 				response.send();
-			//	reader->plugin()->deleteInstance(reader);
 				delete reader;
 				return;
 			}
@@ -253,10 +252,10 @@ void AwRequestServer::handleGetData3(QTcpSocket *client, AwScriptProcess *proces
 	stream << requestedChannels.size();
 	response.send();
 
-	QStringList selected;
-	if (AwSettings::getInstance()->value(aws::gui_active).toBool()) {
-		selected = AwChannel::getLabels(AwDisplay::instance()->selectedChannels());
-	}
+	QStringList selected = AwChannel::getLabels(m_dataManager->selectedChannels());
+	//if (AwSettings::getInstance()->value(aws::gui_active).toBool()) {
+	//	selected = AwChannel::getLabels(AwDisplay::instance()->selectedChannels());
+	//}
 	foreach (AwChannel *c, requestedChannels) {
 		// get selected channels from Display if not using file
 		if (!usingFile) 			

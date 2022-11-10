@@ -83,14 +83,14 @@ public:
 	virtual QVector<double> getHeadshapeCoordinates() { return QVector<double>(); }
 	virtual QString getHeadShapeFile() { return QString(); }
 	virtual bool hasHeadShapeFile() { return !getHeadShapeFile().isEmpty();	}
-
+	QVariantMap& settings() { return m_settings; }
 signals:
 	void triggerValuesWritten(bool status, int number);
 public slots:
 	/** Override this method to write data to the Trigger channel.
 	The name of the trigger channel must be specified.
 	A markers list must be specified.**/
-    virtual int writeTriggerChannel(const QString& name, const AwMarkerList& list) { return 0; }
+    virtual int writeTriggerChannel(const QString& name, const AwSharedMarkerList& list) { return 0; }
 	/** Override this method to clear the Trigger channel. **/
 	virtual int clearTriggerChannels(const QStringList& labels) { return 0; }
 protected:
@@ -98,6 +98,7 @@ protected:
 	QString m_error;	// used by methods returning a status after an operation.
 	QString m_fullPath;	// full path to current open file.
 	AwFileIOPlugin *m_plugin;
+	QVariantMap m_settings;
 };
 
 ///*!

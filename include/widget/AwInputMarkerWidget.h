@@ -34,11 +34,11 @@ public:
 	};
 
 	/** Use setFlags before to define how the markers will be filtered. **/
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 	/** Defines the flags to filter markers and also what properties of marker to show **/
 	void setFlags(int flags);
 
-	inline AwMarkerList& markers() { return m_selectedMarkers; }
+	inline AwSharedMarkerList& markers() { return m_selectedMarkers; }
 	inline float preLatency() { return m_pre; }
 	inline float postLatency() { return m_post;  }
 public slots:
@@ -47,6 +47,6 @@ public slots:
 private:
 	Ui::AwInputMarkerWidgetUi *m_ui;
 	int m_flags;
-	AwMarkerList m_allMarkers, m_displayedMarkers, m_selectedMarkers;
+	AwSharedMarkerList m_allMarkers, m_displayedMarkers, m_selectedMarkers;
 	float m_pre, m_post;
 };

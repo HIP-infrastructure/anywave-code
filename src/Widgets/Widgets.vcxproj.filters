@@ -53,9 +53,6 @@
     <Filter Include="Mark">
       <UniqueIdentifier>{2d41aa69-1522-43a1-bfb3-76f73d9dd764}</UniqueIdentifier>
     </Filter>
-    <Filter Include="AmpScalesItem">
-      <UniqueIdentifier>{db908327-5c11-4951-be57-d1f50f3572c1}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AwAmplitudeWidget.cpp">
@@ -97,16 +94,10 @@
     <ClCompile Include="SignalView\AwBaseMarkerBar.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
-    <ClCompile Include="AwMarkerInspector.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AwAddPredefinedMarker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AwAddTargetChannels.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AwMarkingSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AwTopoWidgetSettings.cpp">
@@ -169,9 +160,6 @@
     <ClCompile Include="AwVideoPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SignalView\AwPickMarkersDial.cpp">
-      <Filter>SignalView</Filter>
-    </ClCompile>
     <ClCompile Include="AwGainLevels.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
@@ -226,10 +214,13 @@
     <ClCompile Include="SignalView\AwGainLevelsWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AmpScalesItem\AwAmplitudeScalesItem.cpp">
-      <Filter>AmpScalesItem</Filter>
-    </ClCompile>
     <ClCompile Include="SignalView\AwAmplitudeItem.cpp">
+      <Filter>SignalView</Filter>
+    </ClCompile>
+    <ClCompile Include="AwMarkingTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalView\SceneMouseEvent.cpp">
       <Filter>SignalView</Filter>
     </ClCompile>
   </ItemGroup>
@@ -279,12 +270,6 @@
     <QtMoc Include="..\..\include\widget\SignalView\AwBaseMarkerBar.h">
       <Filter>SignalView</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\include\widget\AwMarkerInspector.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtUic Include="AwMarkerInspector.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtMoc Include="AwAddPredefinedMarker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -297,9 +282,6 @@
     <QtUic Include="AwAddTargetChannels.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtMoc Include="..\..\include\AwMarkingSettings.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\include\widget\AwTopoBuilder.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -390,14 +372,14 @@
     <QtRcc Include="..\..\resources\AnyWave.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
-    <QtUic Include="SignalView\AwPickMarkersDial.ui">
-      <Filter>SignalView</Filter>
-    </QtUic>
     <QtUic Include="SignalView\AwGainLevelsWidget.ui">
       <Filter>SignalView</Filter>
     </QtUic>
     <QtUic Include="SignalItem\AwSignalItemSettings.ui">
       <Filter>SignalItem</Filter>
+    </QtUic>
+    <QtUic Include="AwMarkingTool.ui">
+      <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
   <ItemGroup>
@@ -442,9 +424,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\widget\AwSignalLabelItem.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AmpScalesItem\AwAmplitudeScalesItem.h">
-      <Filter>AmpScalesItem</Filter>
     </ClInclude>
     <ClInclude Include="SignalView\AwAmplitudeItem.h">
       <Filter>SignalView</Filter>
@@ -564,9 +543,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="SignalView\AwPickMarkersDial.h">
-      <Filter>SignalView</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\include\AwGainLevels.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -593,6 +569,9 @@
     </QtMoc>
     <QtMoc Include="..\..\include\widget\AwSignalItem.h">
       <Filter>SignalItem</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\include\widget\AwMarkingTool.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

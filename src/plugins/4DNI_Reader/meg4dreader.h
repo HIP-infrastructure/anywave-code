@@ -280,7 +280,7 @@ public:
 signals:
 	void triggerValuesWritten(bool status, int number);
 public slots:
-	int writeTriggerChannel(const QString& name, const AwMarkerList& list) override;
+	int writeTriggerChannel(const QString& name, const AwSharedMarkerList& list) override;
 	int clearTriggerChannels(const QStringList& labels) override;
 private:
 	QFile m_file;

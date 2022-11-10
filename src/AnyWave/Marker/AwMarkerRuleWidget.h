@@ -49,7 +49,7 @@ protected:
 	QVariantList parseRangeFloat(const QString& value);
 
 	AwMarkerRuleElement *m_element;
-	AwMarkerList m_markers;	// list of all markers
+	AwSharedMarkerList m_markers;	// list of all markers
 	QLineEdit *m_editValue;
 };
 

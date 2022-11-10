@@ -46,11 +46,10 @@ AwMontage::AwMontage(AwFileIO *reader)
 		load(mtgFile);
 	// remove null channels if any
 	foreach(AwChannel *c, m_channels)
-		if (c == Q_NULLPTR) {
+		if (c == nullptr) {
 			m_channels.removeAll(c);
 			m_asRecordedHash.remove(c->name());
 		}
-	
 }
 
 AwMontage::~AwMontage()
@@ -76,6 +75,9 @@ void AwMontage::save(const QString& path, const AwChannelList& channels, const A
 
 	doc.appendChild(root);
 	for (auto chan : channels) {
+		// do not save virtual channels
+		if (chan->isVirtual())
+			continue;
 		element = doc.createElement("Channel");
 		element.setAttribute("name", chan->name());
 		root.appendChild(element);
@@ -105,6 +107,8 @@ void AwMontage::save(const QString& path, const AwChannelList& channels, const A
 		auto asRecordedRoot = doc.createElement("AsRecordedChannels");
 		root.appendChild(asRecordedRoot);
 		for (auto chan : asRecordedChannels) {
+			if (chan->isVirtual())
+				continue;
 			element = doc.createElement("Channel");
 			element.setAttribute("name", chan->name());
 			element.setAttribute("type", AwChannel::typeToString(chan->type()));
@@ -146,8 +150,6 @@ AwChannelList AwMontage::load(const QString& path, QMap<QString, int> *asRecorde
 		return res;
 	}
 	QDomNode node = root.firstChild();
-
-
 	while (!node.isNull()) {
 		element = node.toElement();
 		QString name, color = "black", ref;
@@ -234,15 +236,17 @@ bool AwMontage::loadMontage(const QString& mtgFile)
 		}
 		else {  // channel not present in as recorded
 			// checking for special names
-			if (c->name() == "SEEG_AVG") {
-				m_channels << new AwAVGChannel(AwChannel::SEEG);
-			}
-			else if (c->name() == "EEG_AVG") {
-				m_channels << new AwAVGChannel(AwChannel::EEG);
-			}
-			else if (c->name() == "MEG_AVG") {
-				m_channels << new AwAVGChannel(AwChannel::MEG);
-			}
+			//if (c->name() == "SEEG_AVG") {
+			//	m_channels << new AwAVGChannel(AwChannel::SEEG);
+			//}
+			//else if (c->name() == "EEG_AVG") {
+			//	m_channels << new AwAVGChannel(AwChannel::EEG);
+			//}
+			//else if (c->name() == "MEG_AVG") {
+			//	m_channels << new AwAVGChannel(AwChannel::MEG);
+			//}
+			//if (c->name().contains("AVG"))
+			//	m_channels << new AwAVGChannel();
 		}
 	}
 

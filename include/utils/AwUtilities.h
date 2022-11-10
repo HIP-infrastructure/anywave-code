@@ -45,8 +45,10 @@ namespace AwUtilities // put utility functions inside a namespace
 {
 	/** Convert a QString into a classic C string. The string buffer is allocated by the function. **/
 	char AW_UTILITIES_EXPORT *QStringToChar(const QString& str);
-	QString AW_UTILITIES_EXPORT base64Encode(const QString& str);	// encore str in base64 and return the encoded QString.
-	QString AW_UTILITIES_EXPORT base64Decode(const QString& str);	// decode base64 str and return the decoded QString.
+	/** Check version numbers **/
+	int AW_UTILITIES_EXPORT versionCompare(const QString& v1, const QString& v2);
+//	QString AW_UTILITIES_EXPORT base64Encode(const QString& str);	// encore str in base64 and return the encoded QString.
+//	QString AW_UTILITIES_EXPORT base64Decode(const QString& str);	// decode base64 str and return the decoded QString.
 
 }
 

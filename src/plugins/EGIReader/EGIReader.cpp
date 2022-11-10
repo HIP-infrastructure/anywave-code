@@ -44,10 +44,6 @@ void EGIReader::cleanUpAndClose()
 		delete m_signalBlocks.takeFirst();
 	while (!m_signalBlocks2.isEmpty())
 		delete m_signalBlocks2.takeFirst();
-	while (!m_blockTimings.isEmpty())
-		delete m_blockTimings.takeFirst();
-	while (!m_blockTimings2.isEmpty())
-		delete m_blockTimings2.takeFirst();
 	while (!m_epochs.isEmpty())
 		delete m_epochs.takeFirst();
 	while (!m_categories.isEmpty())
@@ -190,13 +186,6 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 		m_error = QString("Missing sensorLayout.xml file.");
 		return AwFileIO::WrongFormat;
 	}
-
-	// It seems that categories is optional.
-//	if (!QFile::exists(m_categoriesFile)) {
-//		m_error = QString("Missing categories.xml file.");
-//		return AwFileIO::WrongFormat;
-//	}
-
 	try {
 		getMFFInfos();
 		SignalFile signalFile(m_eegFile);
@@ -223,7 +212,7 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 			m->setDuration(block->nSamples / m_samplingRate);
 			pos += m->duration();
 			dur += m->duration();
-			m_blockTimings << m;
+			m_blockTimings << AwSharedMarker(m);
 		}
 
 		if (QFile::exists(m_eegFile2)) {
@@ -240,23 +229,12 @@ AwFileIO::FileStatus EGIReader::openFile(const QString &path)
 					m->setDuration(block->nSamples / m_samplingRate);
 					pos += m->duration();
 					dur += m->duration();
-					m_blockTimings2 << m;
+					m_blockTimings2 << AwSharedMarker(m);
 				}
 				if (!m_signalBlocks2.isEmpty())
 					m_samplingRate2 = m_signalBlocks2.first()->signalFrequency[0];
 			}
 		}
-
-
-		// For now we won't use categories (I did not get the need of it if categories are supposed to match epochs...
-		// if there are more than one epoch, just use the first one (AnyWave is reading continuous data only).
-		
-		// get segments
-		// Assuming the following, which shoulb be true: 1-1 mapping between segments and epochs.
-		// including quantity and begin times.
-//		if (QFile::exists(m_categoriesFile))
-//			getCategories();
-
 		AwBlock *b = infos.newBlock();
 		b->setDuration(dur);
 		b->setSamples(std::floor(dur * m_samplingRate));
@@ -432,35 +410,24 @@ void EGIReader::getEvents()
 	QDateTime record = QDateTime::fromString(m_recordTime, Qt::ISODate);
 	
 	// make events into markers
-	AwMarkerList markers;
 	for (auto event : m_events) {
-		AwMarker *marker = new AwMarker;
+		AwMarker marker;
 		if (event->label.isEmpty())
 			event->label = "?";
-		marker->setLabel(event->label);
+		marker.setLabel(event->label);
 		QDateTime time = QDateTime::fromString(event->beginTime, Qt::ISODate);
 		qint64 msBetween = record.msecsTo(time);
-		marker->setStart((float)msBetween / 1000.);
+		marker.setStart((float)msBetween / 1000.);
 		if (m_mffVersion == 0)
-			marker->setDuration(event->duration / 1000000000.);
+			marker.setDuration(event->duration / 1000000000.);
 		else
-			marker->setDuration(event->duration / 1000000.);
-		markers << marker;
-	}
-
-	// be sure marker are not outside the data or end after them.
-	foreach(AwMarker *m, markers) {
-		if (m->end() > infos.totalDuration())
-			m->setEnd(infos.totalDuration());
-		if (m->start() > infos.totalDuration()) {
-			markers.removeAll(m);
-			delete m;
+			marker.setDuration(event->duration / 1000000.);
+		//markers << marker;
+		if (marker.start() <= infos.totalDuration()) {
+			marker.setEnd(std::min(marker.end(), infos.totalDuration()));
+     		infos.blocks().first()->addMarker(marker);
 		}
-		infos.blocks().first()->addMarker(m);
 	}
-	while (!markers.isEmpty())
-		delete markers.takeFirst();
-
 }
 
 void EGIReader::getCategories()

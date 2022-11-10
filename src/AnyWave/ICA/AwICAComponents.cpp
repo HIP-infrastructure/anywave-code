@@ -39,23 +39,37 @@ AwICAComponents::AwICAComponents(int type, QObject *parent)
 	connect(this, SIGNAL(componentAdded(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(componentRejected(int)), this, SLOT(switchFilteringOn()));
 	connect(this, SIGNAL(filteringChecked(bool)), AwICAManager::instance(), SLOT(setICAFiletring(bool)));
-	// DO NOT change the filters for sources channels => the filters are locked to the ones set during computation
-//	connect(&AwDataManager::instance()->filterSettings(), &AwFilterSettings::settingsChanged, this, &AwICAComponents::setNewFilters);
-
 }
 
 AwICAComponents::~AwICAComponents()
 {
+	clear();
+}
+
+void AwICAComponents::clear()
+{
 	if (m_panel) {
 		m_panel->close();
 		delete m_panel;
+		m_panel = nullptr;
 	}
 	while (!m_sources.isEmpty())
 		delete m_sources.takeFirst();
 	if (m_seegMap) {
 		m_seegMap->close();
 		delete m_seegMap;
+		m_seegMap = nullptr;
 	}
+}
+
+void AwICAComponents::closeFile()
+{
+	m_rejectedComponents.clear();
+	m_unmixing.clear();
+	m_mixing.clear();
+	m_labels.clear();
+	m_labelToIndex.clear();
+	clear();
 }
 
 

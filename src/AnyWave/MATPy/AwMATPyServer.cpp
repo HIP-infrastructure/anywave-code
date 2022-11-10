@@ -18,17 +18,13 @@
 #include <QTcpSocket>
 #include <QDir>
 #include <QThread>
-#include "Debug/AwDebugLog.h"
-#include "Marker/AwMarkerManager.h"
-#include "Montage/AwMontageManager.h"
-#include "AwPidManager.h"
 #include "AwRequestServer.h"
-#include "Plugin/AwPluginManager.h"
-#include "AwCore.h"
+#include "Data/AwDataManager.h"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// statics
 
-AwMATPyServer *AwMATPyServer::m_instance = NULL;
+AwMATPyServer *AwMATPyServer::m_instance = nullptr;
 
 
 AwMATPyServer *AwMATPyServer::instance()
@@ -47,18 +43,27 @@ AwMATPyServer *AwMATPyServer::newInstance()
 	return instance;
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 AwMATPyServer::AwMATPyServer()
 {
 	m_rs = nullptr;
+	m_dataManager = AwDataManager::instance();
 }
 
 AwMATPyServer::~AwMATPyServer()
 {
 	// destroy possible duplicated instances
 	stop();
-	AW_DESTROY_LIST(m_duplicatedInstances);
+	qDeleteAll(m_duplicatedInstances);
+}
+
+void AwMATPyServer::setDataManager(AwDataManager* dm)
+{
+	m_dataManager = dm;
+	if (m_rs)
+		m_rs->setDataManager(dm);
 }
 
 void AwMATPyServer::addDuplicatedInstance(AwMATPyServer *instance)
@@ -78,25 +83,6 @@ void AwMATPyServer::setDebugMode(bool flag)
 		m_rs->setDebugMode(flag);
 }
 
-//bool AwMATPyServer::start(const QString& dataPath, AwScriptProcess *p, quint16 port)
-//{
-//	if (m_rs) {
-//		delete m_rs;
-//		m_rs = nullptr;
-//	}
-//	AwPidManager::instance()->createNewPid(p);
-//	auto reader = AwPluginManager::getInstance()->getReaderToOpenFile(dataPath);
-//	if (reader == nullptr)
-//		return false;
-//	m_rs = new AwRequestServer(dataPath, port, p);
-//	if (!m_rs->isListening()) { // failed to listen on TCP port
-//		delete m_rs;
-//		m_rs = nullptr;
-//		return false;
-//	}
-//	return true;
-//}
-
 bool AwMATPyServer::isListening()
 {
 	if (m_rs)
@@ -110,7 +96,10 @@ bool AwMATPyServer::start(quint16 port)
 		return true;
 
 	m_rs = new AwRequestServer(port);
+	m_dataManager = AwDataManager::instance();
+	m_rs->setDataManager(m_dataManager);
 	if (!m_rs->isListening()) { // failed to listen on TCP port
+		m_errorString = m_rs->errorString();
 		delete m_rs;
 		m_rs = nullptr;
 		return false;
@@ -133,3 +122,4 @@ quint16 AwMATPyServer::serverPort()
 		return 0;
 	return m_rs->serverPort();
 }
+

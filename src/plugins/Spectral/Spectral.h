@@ -34,6 +34,7 @@ protected:
 	int m_windowing;	// Non, Hamming or Hanning  default is Hanning
 	AwMarkerList m_goodMarkers; // markers kept as valid for input data.
 	QMap<AwChannel*, FFTIterations*> m_results;
+	QMutex m_mutex;
 };
 
 

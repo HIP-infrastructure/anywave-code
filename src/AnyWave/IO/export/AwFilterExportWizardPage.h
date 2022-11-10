@@ -29,7 +29,7 @@ class AwPageFilterModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	AwPageFilterModel(AwChannelsExportWizardPage *page, QObject* parent = nullptr);
+	AwPageFilterModel(const AwChannelList& channels, const AwFilterSettings& filterSettings, QObject* parent = nullptr);
 	~AwPageFilterModel();
 
 	AwFilterSettings settings();
@@ -51,13 +51,17 @@ class AwFilterExportWizardPage : public QWizardPage
 {
 	Q_OBJECT
 public:
-	AwFilterExportWizardPage(AwChannelsExportWizardPage* page, QWidget* parent = nullptr);
+	AwFilterExportWizardPage(const AwChannelList& channels, const QVariantMap& settings, QWidget* parent = nullptr);
 
 	void initializePage() override;
 	bool validatePage() override;
 	AwFilterSettings filterSettings;
+	inline AwChannelList& channels() { return m_channels; }
 protected:
-	AwChannelsExportWizardPage* m_channelsPage;
+	AwChannelList m_channels;
 	QTableView* m_tableView;
 	AwPageFilterModel* m_model;
+	QVariantMap m_settings;
+	bool m_isBids;
+	AwFilterSettings m_bidsFilterSettings;
 };

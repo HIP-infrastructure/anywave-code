@@ -28,7 +28,7 @@ public:
 	enum Flags { MultiSelection = 1, ShowLabel = 2, ShowDuration = 4, ShowPosition = 8, 
 	ShowColor = 16, ShowTargets = 32, ShowValue = 64, ShowAll = 126};
 public slots:
-	void setMarkers(const AwMarkerList& markers);
+	void setMarkers(const AwSharedMarkerList& markers);
 protected:
 	int m_flags;
 };

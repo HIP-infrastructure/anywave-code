@@ -44,6 +44,7 @@ void TCPRequest::clear()
 
 int TCPRequest::waitForResponse()
 {
+	int size;
 	while (m_socket.bytesAvailable() < 4)
 		if (!m_socket.waitForReadyRead(WAIT_TIME_OUT))
 			return -1;
@@ -52,6 +53,14 @@ int TCPRequest::waitForResponse()
 	int status;
 	*response >> status;
 	if (status == -1) {
+		*response >> size;
+		while (m_socket.bytesAvailable() < size)
+			if (!m_socket.waitForReadyRead(WAIT_TIME_OUT))
+				size = -1;
+		if (size == -1) {
+			m_errorString = "Error occcured: No error description.";
+			throw(m_errorString);
+		}
 		*response >> m_errorString;
 		throw(m_errorString);
 	}
@@ -60,7 +69,7 @@ int TCPRequest::waitForResponse()
 			m_errorString = "Nothing to read from socket.";
 			throw(m_errorString);
 		}
-	int size;
+	
 	*response >> size;
 	while (m_socket.bytesAvailable() < size)
 		if (!m_socket.waitForReadyRead(WAIT_TIME_OUT)) 

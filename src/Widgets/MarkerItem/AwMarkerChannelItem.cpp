@@ -27,7 +27,7 @@
 #define MCI_MAX_HEIGHT	15
 #define MCI_MIN_HEIGHT  5
 
-AwMarkerChannelItem::AwMarkerChannelItem(AwDisplayPhysics *phys, AwMarker *mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene)
+AwMarkerChannelItem::AwMarkerChannelItem(AwDisplayPhysics *phys, const AwSharedMarker& mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene)
 										 : AwMarkerItem(phys, NULL, mark, scene, 0)
 {
 	m_signalItem = sitem;

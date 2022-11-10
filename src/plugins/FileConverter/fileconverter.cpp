@@ -98,8 +98,7 @@ void FileConverter::run()
 		QString outputFilename = m_ui->outputDir + "/" + fi.baseName();
 		QString mrkFilename = in.second + ".mrk";
 		if (QFile::exists(mrkFilename)) {
-			AwMarkerList markers = AwMarker::load(mrkFilename);
-			block->setMarkers(markers);
+			block->setMarkers(AwMarker::loadShrdFaster(mrkFilename));
 		}
 		else
 			block->setMarkers(fr->infos.blocks().first()->markers());
@@ -119,7 +118,6 @@ void FileConverter::run()
 		emit progressChanged(tr("Writing data..."));
 		writer->writeData(&sourceChannels);
 		emit progressChanged(tr("Done."));
-	//	in.first->deleteInstance(fr);
 		delete fr;
 		count++;
 		writer->cleanUpAndClose();
@@ -128,6 +126,6 @@ void FileConverter::run()
 		while (!sourceChannels.isEmpty())
 			delete sourceChannels.takeFirst();
 	}
-//	m_ui->selectedWriter->deleteInstance(writer);
+
 }
 

@@ -313,7 +313,7 @@ QVariant AwChannelListModel::data(const QModelIndex &index, int role) const
 	case AW_MONTAGE_COLUMN_REF:
 		if (role == Qt::DisplayRole || role == Qt::UserRole) {
 			if (!chan->hasReferences())
-				return QString("No Ref.");
+				return QString(noref);
 			else
 				return chan->referenceName();
 		}
@@ -387,7 +387,7 @@ bool AwChannelListModel::setData(const QModelIndex &index, const QVariant &value
 	if (col == AW_MONTAGE_COLUMN_REF && role == Qt::EditRole)	{	
 		QString refname = value.toString();
 		chan->clearRefName();
-		if (refname != "No Ref.")
+		if (refname != noref)
 			chan->setReferenceName(refname);
 	}
 	else if (col == AW_MONTAGE_COLUMN_NAME && role == Qt::EditRole)	{
@@ -696,7 +696,7 @@ QWidget *AwChannelListDelegate::createEditor(QWidget *parent, const QStyleOption
 			QComboBox *editor = new QComboBox(parent);
 			QStringList items = m_labels[t];
 			items.removeAll(name); // remove the channel itself from the list
-			editor->addItem("No Ref.");
+			editor->addItem(noref);
 			// special case for EEG => the AVG reference
 			if (t == AwChannel::EEG)
 				editor->addItem("AVG");
