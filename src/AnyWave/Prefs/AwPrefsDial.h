@@ -64,13 +64,14 @@ public slots:
 	void editMarkerFont();
 	void changeMarkerType(int index);
 	void chooseCustomColor();
-	void pickMatlabFolder();
-	void pickMCRFolder();
 	void pickGARDEL();
 	void pickITK();
 	void addPythonVenv();
 	void setSelectedVenvAsDefault();
 	void removeSelectedVenv();
+protected slots:
+	void changeDefaultRuntime();
+	void changeDefaultMATLAB();
 
 signals:
 	void screenCalibrationChanged(float xPixPerCm, float yPixPerCm);

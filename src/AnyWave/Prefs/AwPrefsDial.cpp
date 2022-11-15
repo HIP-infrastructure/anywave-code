@@ -79,27 +79,89 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	// check for updates when starting
 	checkBoxUpdates->setChecked(aws->value(aws::check_updates).toBool());
 
-	plainTextEdit->setVisible(false);
 	// MATLAB
-	bool isMatlabDetected = qsettings.value("matlab/detected", false).toBool();
+	auto matlabs = aws->detectedMATLABApplications();
+	if (matlabs.isEmpty()) 
+		groupMATLAB->hide();
+	else {
 
-	if (!isMatlabDetected) {
-		plainTextEdit->setVisible(true);
-		plainTextEdit->appendPlainText(tr("MATLAB was not detected. Please install and/or select the folder where MATLAB is installed."));
 #ifdef Q_OS_WIN
-		plainTextEdit->appendPlainText("Location could be C:\\Program Files\\MATLAB\\R2015a");
+		auto model = new QStandardItemModel(0, 2, this);
+		tableViewMATLAB->setModel(model);
+		tableViewMATLAB->setToolTip(QString("The MATLAB default version is the last one installed on the computer.\n") +
+			QString("Changing this may have no real impact until you register it as the default COM server"));
+		model->setHorizontalHeaderLabels({ "MATLAB Version", "Path" });
+#else
+		auto model = new QStandardItemModel(0, 3, this);
+		tableViewMATLAB->setModel(model);
+		model->setHorizontalHeaderLabels({ "Status", "MATLAB Version", "Path" });
 #endif
-#ifdef Q_OS_LINUX
-		plainTextEdit->appendPlainText("Location could be /usr/local/MATLAB/R2015a");
-#endif
-#ifdef Q_OS_MAC
-		plainTextEdit->appendPlainText("Location could be /Applications/MATLAB_R2015a.app");
+		tableViewMATLAB->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		int row = 0;
+		auto defaultMatlab = aws->value(aws::default_matlab).toString();
+#ifndef Q_OS_WIN
+		QMenu* menu = new QMenu;
+		for (auto const& k : matlabs.keys()) {
+			auto checkItem = new QStandardItem("default");
+			checkItem->setCheckable(true);
+			if (k == defaultMatlab)
+				checkItem->setCheckState(Qt::Checked);
+			model->setItem(row, 0, checkItem);
+			items << checkItem;
+			model->setItem(row, 1, new QStandardItem(k));
+			auto action = menu->addAction(k);
+			action->setData(k);
+			connect(action, &QAction::triggered, this, &AwPrefsDial::changeDefaultMATLAB);
+			model->setItem(row++, 2, new QStandardItem(matlabs.value(k)));
+		}
+		buttonDefault->setMenu(menu);
+		if (items.size() == 1) {
+			auto item = items.first();
+			item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+			buttonDefault->hide();
+		}
+#else
+		buttonDefault->hide();
+		for (auto const& k : matlabs.keys()) {
+			model->setItem(row, 0, new QStandardItem(k));
+			model->setItem(row++, 1, new QStandardItem(matlabs.value(k)));
+		}
 #endif
 	}
-	lineEditMatlabPath->setText(qsettings.value("matlab/path").toString());
-	labelMCR->hide();
-	lineEditMCR->hide();
-	buttonSelectMCR->hide();
+	auto runtimes = aws->detectedMATLABRuntimes();
+	if (runtimes.isEmpty()) {
+		groupRuntime->hide();
+	}
+	else {
+		auto model = new QStandardItemModel(0, 3, this);
+
+		tableViewRuntime->setModel(model);
+		// on windows the default Runtime is the one in first position in the PATH (the last one installed)
+		// so we don't show the Status column
+		model->setHorizontalHeaderLabels({ "Status", "Runtime Version", "Path" });
+		int row = 0;
+		auto defaultRuntime = aws->value(aws::default_runtime).toString();
+		QMenu* menu = new QMenu;
+		for (auto const& k : runtimes.keys()) {
+			auto checkItem = new QStandardItem("default");
+			checkItem->setCheckable(true);
+			if (k == defaultRuntime)
+				checkItem->setCheckState(Qt::Checked);
+			model->setItem(row, 0, checkItem);
+			model->setItem(row, 1, new QStandardItem(k));
+			model->setItem(row++, 2, new QStandardItem(runtimes.value(k)));
+			auto action = menu->addAction(k);
+			action->setData(k);
+			connect(action, &QAction::triggered, this, &AwPrefsDial::changeDefaultRuntime);
+		}
+		buttonRuntimeDefault->setMenu(menu);
+		if (model->rowCount() == 1) {
+			auto item = model->item(0, 0);
+			item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+			buttonRuntimeDefault->hide();
+		}
+	}
+
     editGARDEL->setText(qsettings.value("GARDEL/path").toString());
 	editITK->setText(qsettings.value("ITK-SNAP/path").toString());
 	radioTriggerParserOn->setChecked(aws->value(aws::auto_trigger_parsing).toBool());
@@ -109,14 +171,6 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		radioMarkerGlobal->setChecked(true);
 	else
 		radioMarkerClassic->setChecked(true);
-
-	// COMPILED PLUGIN. Windows do not required environments variables to be set but Linux and Mac OS X do.
-#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
-	labelMCR->show();
-	lineEditMCR->show();
-	buttonSelectMCR->show();
-	lineEditMCR->setText(qsettings.value("matlab/mcr_path").toString());
-#endif
 
 	bool def = aws->value(aws::python_use_default).toBool();
 	if (def) {
@@ -224,7 +278,6 @@ void AwPrefsDial::initVenvTable()
 	}
 }
 
-
 void AwPrefsDial::setSelectedVenvAsDefault()
 {
 	QModelIndexList selection = tableVenvs->selectionModel()->selectedRows();
@@ -254,18 +307,6 @@ void AwPrefsDial::changeEvent(QEvent *e)
 	if (e)
 		if (e->type() == QEvent::LanguageChange)
 			retranslateUi(this);
-}
-
-void AwPrefsDial::pickMatlabFolder()
-{
-#ifdef Q_OS_MAC
-	QString folder = QFileDialog::getOpenFileName(this, "Select MATLAB Application", "/Applications", "Application (*.app)");
-#else
-	QString folder = QFileDialog::getExistingDirectory(this, "Select MATLAB Directory", "/");
-#endif
-	if (!folder.isEmpty()) {
-		lineEditMatlabPath->setText(folder);
-	}
 }
 
 void AwPrefsDial::accept()
@@ -301,36 +342,54 @@ void AwPrefsDial::accept()
 	
 	saveTimeHMS(radioHMSOn->isChecked());
 	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
-	// if matlab path is empty => consider not using MATLAB plugins anymore.
-	// On Mac and Linux that will be done by deleting the matlab.sh script
-	if (lineEditMatlabPath->text().isEmpty()) {
-		qsettings.setValue("matlab/detected", false);
-
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-		QString scriptPath = QString("%1/AnyWave/matlab.sh").arg(AwSettings::getInstance()->value(aws::home_dir).toString());
-		if (QFile::exists(scriptPath))
-			QFile::remove(scriptPath);
-#endif
-	}
-	else {
-		// check if location exists
-		QDir dir(lineEditMatlabPath->text());
-		if (!dir.exists()) {
-			QMessageBox::critical(this, tr("MATLAB"), tr("Invalid MATLAB location"));
-			qsettings.setValue("matlab/detected", false);
-			return;
+	// get MATLAB model
+	QStandardItemModel *model = static_cast<QStandardItemModel *>(tableViewMATLAB->model());
+	bool ok = false;
+#ifndef Q_OS_WIN
+	for (auto i = 0; model->rowCount(); i++) {
+		auto status = model->item(i, 0);
+		auto release = model->item(i, 1)->text();
+		auto path = model->item(i, 2)->text();
+		if (status->checkState() == Qt::Checked) {
+			ok = true;
+			auto matlabPath = qsettings.value("matlab/path", QString()).toString();
+			if (matlabPath != path) {
+				qsettings.setValue("matlab/path", path);
+				qsettings.setValue("matlab/default", release);
+			}
 		}
-		qsettings.setValue("matlab/detected", true);
-		qsettings.setValue("matlab/path", lineEditMatlabPath->text());
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-		AwSettings::getInstance()->createMatlabShellScript(lineEditMatlabPath->text());
-#endif
 	}
-	// MATLAB MCR on Linux and Mac
-#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
-	if (!lineEditMCR->text().isEmpty())
-		qsettings.setValue("matlab/mcr_path", lineEditMCR->text());
+#else
+	// On Windows we can't specify the matlab version to use as the connection is established using COM mechanisms.
+	// So the latest MATLAB installed is registered as the default COM server.
+	ok = true;
 #endif
+	if (!ok) {
+		AwMessageBox::information(this, "MATLAB", "Please set a MATLAB release as the default one to use.");
+		return;
+	}
+
+	// get MATLAB Runtime model
+	model = static_cast<QStandardItemModel*>(tableViewRuntime->model());
+	ok = false;
+	for (auto i = 0; model->rowCount(); i++) {
+		auto status = model->item(i, 0);
+		auto release = model->item(i, 1)->text();
+		auto path = model->item(i, 2)->text();
+		if (status->checkState() == Qt::Checked) {
+			ok = true;
+			auto matlabPath = qsettings.value("matlab/path", QString()).toString();
+			if (matlabPath != path) {
+				qsettings.setValue("matlab/path", path);
+				qsettings.setValue("matlab/default", release);
+			}
+		}
+	}
+	if (!ok) {
+		AwMessageBox::information(this, "MATLAB", "Please set a MATLAB release as the default one to use.");
+		return;
+	}
+
 	QString Gardel = editGARDEL->text();
 	if (QFile::exists(Gardel))
 		qsettings.setValue("GARDEL/path", Gardel);
@@ -552,12 +611,34 @@ void AwPrefsDial::pickGARDEL()
 	editGARDEL->setText(path);
 }
 
-void AwPrefsDial::pickMCRFolder()
+void AwPrefsDial::changeDefaultRuntime()
 {
-	QFileDialog dlg;
-	dlg.setFileMode(QFileDialog::Directory);
-	dlg.setOption(QFileDialog::ShowDirsOnly);
-	if (dlg.exec() == QFileDialog::Accepted)
-		lineEditMCR->setText(dlg.selectedFiles().at(0));
+	QAction* action = static_cast<QAction*>(sender());
+	if (action == nullptr)
+		return;
+	auto model = static_cast<QStandardItemModel*>(tableViewRuntime->model());
+	auto release = action->data().toString();
+	for (auto i = 0; i < model->rowCount(); i++) {
+		auto r = model->item(i, 1)->text();
+		if (r == release)
+			model->item(i, 0)->setCheckState(Qt::Unchecked);
+		else
+			model->item(i, 0)->setCheckState(Qt::Checked);
+	}
 }
 
+void AwPrefsDial::changeDefaultMATLAB()
+{
+	QAction* action = static_cast<QAction*>(sender());
+	if (action == nullptr)
+		return;
+	auto model = static_cast<QStandardItemModel*>(tableViewMATLAB->model());
+	auto release = action->data().toString();
+	for (auto i = 0; i < model->rowCount(); i++) {
+		auto r = model->item(i, 1)->text();
+		if (r == release)
+			model->item(i, 0)->setCheckState(Qt::Unchecked);
+		else
+			model->item(i, 0)->setCheckState(Qt::Checked);
+	}
+}

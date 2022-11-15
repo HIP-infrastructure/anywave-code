@@ -1,10 +1,6 @@
 [Setup]
 AppName=AnyWave
-<<<<<<< HEAD
-AppVersion=2.5.6
-=======
-AppVersion=2.6.2
->>>>>>> shared_markers
+AppVersion=2.6.3
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -49,11 +45,7 @@ Source: ".\bin\x64\Release\ins.txt"; DestDir: "{app}"
 Source: ".\bin\x64\Release\qt.conf"; DestDir: "{app}"
 Source: ".\lib\*.lib"; DestDir: "{app}\lib"
 Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
-<<<<<<< HEAD
-;Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
-=======
 ; Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
->>>>>>> shared_markers
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave\"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\4DNIExporter.dll"; DestDir: "{app}\Plugins"
@@ -97,8 +89,6 @@ Name: startmenu; Description: "Add shortcut to start menu"; GroupDescription: "S
 
 [Run]
 Filename: "{app}\vc_redist.x64.exe"; Parameters: "/quiet /norestart"; Description: "Visual C++ runtime"; StatusMsg: "Installing Visual C++ runtime..."
-<<<<<<< HEAD
-;Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."
-=======
+
 ; Filename: "powershell.exe"; Parameters: "-Command ""{tmp}/firewall.ps1 {app}/anywave.exe"""; WorkingDir: "{app}"; Flags: postinstall waituntilterminated runhidden; Description: "Open firewall access"; StatusMsg: "Creating firewall rules..."
->>>>>>> shared_markers
+

@@ -68,7 +68,7 @@ void AwMappingCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 			label.sprintf("%.3fs", m_currentPos);
 	}
 	else
-		label = tr("Current mapping position");
+		label = "Current mapping position";
 
 	label_width = fm.width(label);
 

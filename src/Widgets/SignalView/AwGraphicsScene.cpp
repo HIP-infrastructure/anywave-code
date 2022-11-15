@@ -54,6 +54,7 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phy
 	m_amplitudeItem = new AwAmplitudeItem(&m_visibleSignalItems, m_physics, settings->gainLevels);
 	m_amplitudeItem->setZValue(100);
 	m_amplitudeItem->setVisible(false);
+	m_mappingMarker = AwSharedMarker(new AwMarker);
 	addItem(m_amplitudeItem);
 	applyNewSettings(settings);
 	m_markingTool = AwMarkingTool::instance();

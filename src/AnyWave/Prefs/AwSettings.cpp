@@ -45,6 +45,8 @@ AwSettings::AwSettings(QObject *parent)
 #else
     m_settings[aws::username] = qgetenv("USER");
 #endif
+	detectMATLABRuntimes();
+	detectMATLAB();
 }
 
 AwSettings::~AwSettings()
@@ -204,8 +206,6 @@ void AwSettings::init()
 {
 	QSettings settings;
 	int size = 0;
-
-	detectMATLABRuntimes();
 	// load previously saved recent files
 	auto path = QString("%1/%2").arg(m_settings.value(aws::settings_dir).toString()).arg(aws::recent_files_name);
 	m_settings.insert(aws::recent_files_path, path);
@@ -440,6 +440,85 @@ void AwSettings::detectMATLABRuntimes()
 	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 	for (auto const& d : subDirs) 
 		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
-	
+	// make the first on as the default
+	m_settings.insert(aws::default_matlab, subDirs.first());
 #endif
+#ifdef Q_OS_MAC
+	QDir dir("/Applications");
+	dir.cd("MATLAB");
+	if (!dir.exists())
+		return;
+	dir.cd("MATLAB Runtime");
+	if (!dir.exists())
+		return;
+	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for (auto const& d : subDirs)
+		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
+
+#endif
+#ifdef Q_OS_LINUX
+	QDir dir("/usr/local");
+	dir.cd("MATLAB");
+	if (!dir.exists())
+		return;
+	dir.cd("MATLAB_Runtime");
+	if (!dir.exists())
+		return;
+	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for (auto const& d : subDirs)
+		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
+
+#endif
+	// set auto default to be the highest release
+	if (m_MATLABRuntimes.size() == 1)
+		m_settings.insert(aws::default_runtime, m_MATLABRuntimes.keys().first());
+	else {
+		auto keys = m_MATLABRuntimes.keys();
+		std::sort(keys.begin(), keys.end());
+		m_settings.insert(aws::default_runtime, keys.last());
+	}
+}
+
+void AwSettings::detectMATLAB()
+{
+#ifdef Q_OS_WIN
+	QString programFiles = qgetenv("PROGRAMFILES");
+	QDir dir(programFiles);
+	dir.cd("MATLAB");
+	if (!dir.exists())
+		return;
+	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for (auto const& d : subDirs) {
+		if (d.startsWith("R"))
+			m_MATLABApplications.insert(d, dir.absolutePath() + "/" + d);
+	}
+#endif
+#ifdef Q_OS_MAC
+	QDir dir("/Applications");
+	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for (auto const& d : subDirs) {
+		if (d.startsWith("MATLAB_R"))
+			m_MATLABApplications.insert(d, dir.absolutePath() + "/" + d);
+	}
+#endif
+#ifdef Q_OS_LINUX
+	QDir dir("/usr/local");
+	dir.cd("MATLAB");
+	if (!dir.exists())
+		return;
+	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	for (auto const& d : subDirs) {
+		if (d.startsWith("R"))
+			m_MATLABApplications.insert(d, dir.absolutePath() + "/" + d);
+	}
+#endif
+
+	// set auto default to be the highest release
+	if (m_MATLABApplications.size() == 1) 
+		m_settings.insert(aws::default_matlab, m_MATLABApplications.keys().first());
+	else {
+		auto keys = m_MATLABApplications.keys();
+		std::sort(keys.begin(), keys.end());
+		m_settings.insert(aws::default_matlab, keys.last());
+	}
 }

@@ -301,11 +301,50 @@ void AwComponents::createUserDirs()
 void AwComponents::initMatlab()
 {
 	QSettings qsettings;
-	// Searching for Matlab
-	if (searchForMatlab()) {
-		// matlab detected on the computer
-		// matlab installed and activated => trying to load the AwMatlabSupport plugin
-		QString matlabPath = qsettings.value("matlab/path", QString()).toString();
+	bool isDetected = qsettings.value("matlab/detected", false).toBool();
+	bool needRestart = false;
+	QString matlabPath = qsettings.value("matlab/path", QString()).toString();
+	QString matlabDefault = qsettings.value("matlab/default", QString()).toString();
+
+	if (!isDetected) {
+		AwSettings* aws = AwSettings::getInstance();
+		auto matlabs = aws->detectedMATLABApplications();
+		QString defaultMatlab;
+		if (!matlabs.isEmpty()) {
+			emit log("MATLAB application(s) found: ");
+			auto keys = matlabs.keys();
+			std::sort(keys.begin(), keys.end(), [](const QString& lhs, const QString& rhs) -> bool { return lhs < rhs; });
+			for (const auto& m : keys) {
+				emit log(m);
+			}
+			defaultMatlab = aws->value(aws::default_matlab).toString();
+			if (matlabDefault.isEmpty())
+				matlabDefault = defaultMatlab;
+		}
+		if (!matlabDefault.isEmpty()) {
+			qsettings.setValue("matlab/path", matlabs.value(matlabDefault));
+			aws->setValue(aws::default_matlab, matlabDefault);
+			matlabPath = matlabs.value(matlabDefault);
+			qsettings.setValue("matlab/detected", true);
+			isDetected = true;
+#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
+			needRestart = true;
+			aws->createMatlabShellScript(matlabPath);
+#endif
+		}
+		if (isDetected) {
+			if (needRestart && m_guiMode) {
+				AwMessageBox::information(nullptr, tr("MATLAB"), tr("MATLAB was detected. Restart AnyWave to activate MATLAB plugins."));
+			}
+		}
+		else {
+			qsettings.setValue("matlab/detected", false);
+		}
+			
+	}
+
+	if (isDetected) {
+	//	QString matlabPath = qsettings.value("matlab/path", QString()).toString();
 		emit log("Trying to load MatlabSupport Module...");
 		// trying to load AwMatlabSupport plugin
 		QString moduleName;
@@ -317,7 +356,6 @@ void AwComponents::initMatlab()
 		moduleName = "AwMatlabSupport.dll";
 		modulePath = qApp->applicationDirPath() + "/" + moduleName;
 #endif
-
 #ifdef Q_OS_MAC
 		moduleName = "libAwMatlabSupport.dylib";
 		modulePath = qApp->applicationDirPath() + "/../Frameworks/" + moduleName;
@@ -346,6 +384,55 @@ void AwComponents::initMatlab()
 			emit log("MatlabSupport module not loaded.");
 			emit log(loader.errorString());
 		}
+		// store default matlab
+		qsettings.setValue("matlab/default", matlabDefault);
 	}
+
+//	// Searching for Matlab
+//	if (searchForMatlab()) {
+//		// matlab detected on the computer
+//		// matlab installed and activated => trying to load the AwMatlabSupport plugin
+//		QString matlabPath = qsettings.value("matlab/path", QString()).toString();
+//		emit log("Trying to load MatlabSupport Module...");
+//		// trying to load AwMatlabSupport plugin
+//		QString moduleName;
+//		QString modulePath;
+//#ifdef Q_OS_WIN
+//		auto path = matlabPath + "/bin/win64;" + matlabPath + "/extern/bin/win64";
+//		std::string tmp = path.toStdString();
+//		qputenv("PATH", tmp.data());
+//		moduleName = "AwMatlabSupport.dll";
+//		modulePath = qApp->applicationDirPath() + "/" + moduleName;
+//#endif
+//
+//#ifdef Q_OS_MAC
+//		moduleName = "libAwMatlabSupport.dylib";
+//		modulePath = qApp->applicationDirPath() + "/../Frameworks/" + moduleName;
+//#endif
+//#ifdef Q_OS_LINUX
+//		moduleName = "libAwMatlabSupport.so";
+//		modulePath = qApp->applicationDirPath() + "/lib/" + moduleName;
+//#endif
+//		QPluginLoader loader(modulePath);
+//		QObject* module = loader.instance();
+//		if (module) {
+//			auto  aws = AwSettings::getInstance();
+//			aws->setValue(aws::matlab_present, true);
+//			AwMatlabInterface* mi = qobject_cast<AwMatlabInterface*>(module);
+//			AwSettings::getInstance()->setMatlabInterface(mi);
+//			mi->setParent(this);
+//			emit log("MatlabSupport module loaded.");
+//			// Now that the module was loaded, we need the set the PATH on Mac and Linux systems.
+//			// On Unices, matlab is spawned from a csh and so the matlab command must be in the PATH.
+//#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
+//			QString path = qgetenv("PATH") + ":" + matlabPath + "/bin";
+//			qputenv("PATH", path.toLatin1());
+//#endif
+//		}
+//		else {
+//			emit log("MatlabSupport module not loaded.");
+//			emit log(loader.errorString());
+//		}
+//	}
 }
 

@@ -71,6 +71,9 @@ namespace aws {
 	// true if running ins version of anywave
 	constexpr auto ins_version = "ins_version";
 	constexpr auto check_updates = "check_updates";
+	// matlab defaults
+	constexpr auto default_matlab = "default_matlab";
+	constexpr auto default_runtime = "default_runtime";
 
 	constexpr auto update_url = "update_url";
 	constexpr auto ica_file = "ica_file";
@@ -116,6 +119,8 @@ public:
 	void init();
 	QVariant value(const QString& key);
 	void setValue(const QString& key, const QVariant& value);
+	QMap<QString, QString>& detectedMATLABApplications() { return m_MATLABApplications; }
+	QMap<QString, QString>& detectedMATLABRuntimes() { return m_MATLABRuntimes; }
 	
 #if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 	void createMatlabShellScript(const QString& path);
@@ -132,7 +137,7 @@ public:
 	QStringList& topoLayouts(); 
 	// MATLAB Runtimes
 	inline bool MATLABRuntimeDetected() { return !m_MATLABRuntimes.isEmpty(); }
-	QStringList detectedMATLABRuntimes() { return m_MATLABRuntimes.keys(); }
+//	QStringList detectedMATLABRuntimes() { return m_MATLABRuntimes.keys(); }
 	QString MATLABRuntimePath(const QString& k) { return m_MATLABRuntimes.value(k);	}
 	// recent files specific
 	QString shortenFilePath(const QString& path);
@@ -158,7 +163,8 @@ protected:
 	AwMatlabInterface *m_matlabInterface;
 	QMap<QString, QString> m_pythonVenvs;
 	QFileSystemWatcher m_fileWatcher;
-	QMap<QString, QString> m_MATLABRuntimes;	// empty if no runtime detected or manually set
+	QMap<QString, QString> m_MATLABRuntimes;		// empty if no runtime detected or manually set
+	QMap<QString, QString> m_MATLABApplications;	// empty if no runtime detected or manually set
 
 	void loadRecentFiles();
 	void loadRecentBids();
@@ -167,6 +173,7 @@ protected:
 	void saveFileSettings();
 	void loadFileSettings();
 	void detectMATLABRuntimes();
+	void detectMATLAB();
 private:
 	static AwSettings *m_instance;
 };
