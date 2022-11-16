@@ -404,10 +404,10 @@ void AwProcessManager::launchProcessesOnClosing()
 	if (plugins.isEmpty())
 		return;
 	auto dm = AwDataManager::instance();
-	for (auto p : plugins) {
-		if (p->type == AwProcessPlugin::GUI)
+	for (auto plugin : plugins) {
+		if (plugin->type == AwProcessPlugin::GUI)
 			continue;
-		auto process = newProcess(p);
+		auto process = newProcess(plugin);
 		bool skipDataFile = process->plugin()->flags() & Aw::ProcessFlags::ProcessDoesntRequireData;
 		if (skipDataFile)
 			process->addModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);

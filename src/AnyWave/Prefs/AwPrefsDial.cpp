@@ -104,10 +104,10 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		for (auto const& k : matlabs.keys()) {
 			auto checkItem = new QStandardItem("default");
 			checkItem->setCheckable(true);
-			if (k == defaultMatlab)
+			checkItem->setFlags(checkItem->flags() & ~Qt::ItemIsEnabled);
+			if (k == defaultMatlab) 
 				checkItem->setCheckState(Qt::Checked);
 			model->setItem(row, 0, checkItem);
-			items << checkItem;
 			model->setItem(row, 1, new QStandardItem(k));
 			auto action = menu->addAction(k);
 			action->setData(k);
@@ -115,8 +115,8 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 			model->setItem(row++, 2, new QStandardItem(matlabs.value(k)));
 		}
 		buttonDefault->setMenu(menu);
-		if (items.size() == 1) {
-			auto item = items.first();
+		if (model->rowCount() == 1) {
+			auto item = model->item(0, 0);
 			item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
 			buttonDefault->hide();
 		}
@@ -629,7 +629,7 @@ void AwPrefsDial::changeDefaultRuntime()
 
 void AwPrefsDial::changeDefaultMATLAB()
 {
-	QAction* action = static_cast<QAction*>(sender());
+	QAction* action = qobject_cast<QAction*>(sender());
 	if (action == nullptr)
 		return;
 	auto model = static_cast<QStandardItemModel*>(tableViewMATLAB->model());

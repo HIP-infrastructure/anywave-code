@@ -665,7 +665,7 @@ AwSharedMarkerList AwMarker::getMarkersWithUniqueLabels(const AwSharedMarkerList
 		QString label = tmp.first()->label();
 		res << tmp.first();
 #ifndef Q_OS_WIN
-		tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwMarker* m1) { return m1->label() == label;  }), tmp.end());
+		tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwSharedMarker& m1) { return m1->label() == label;  }), tmp.end());
 #else
 		if (tmp.size() <= MARKERS_THREAD_THRESHOLD)
 			tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [label](AwSharedMarker& m1) { return m1->label() == label;  }), tmp.end());

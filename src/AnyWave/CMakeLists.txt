@@ -40,6 +40,7 @@ SET(AnyWave_SRCS
     ./Carto/AwMappingWidget.cpp  
     ./Debug/AwDebugLog.cpp  
     ./Debug/AwDebugLogWidget.cpp  
+    ./Debug/AwLogger.cpp
     ./Display/AwCentralWidget.cpp  
     ./Display/AwChannelSelectionDial.cpp  
     ./Display/AwChannelSelectionModel.cpp  
@@ -58,18 +59,17 @@ SET(AnyWave_SRCS
     ./IO/BIDS/AwBIDSItem.cpp  
     ./IO/BIDS/AwBIDSManager.cpp  
     ./IO/BIDS/AwBIDSParsing.cpp
-	./IO/BIDS/AwBIDSGUIOptionsDialog.cpp
 	./IO/BIDS/AwBIDSConvert.cpp
 	./IO/BIDS/AwBIDSTsv.cpp
     ./IO/BIDS/AwBIDSIO.cpp
     ./IO/BIDS/AwRefreshDialog.cpp
+    ./IO/BIDS/AwClinicalWidget.cpp
     ./IO/export/AwChannelsExportWizardPage.cpp
     ./IO/export/AwExporter.cpp
     ./IO/export/AwExportWizardDial.cpp
     ./IO/export/AwFilterExportWizardPage.cpp
     ./IO/export/AwMarkersExportWizardPage.cpp
     ./IO/export/AwOutputFileWizardPage.cpp
-    ./Marker/AwDockAddMarker.cpp  
     ./Marker/AwExtractTriggers.cpp  
     ./Marker/AwMarkerListModel.cpp  
     ./Marker/AwMarkerManager.cpp  
@@ -88,6 +88,7 @@ SET(AnyWave_SRCS
     ./MATPy/AwPidManager.cpp  
     ./MATPy/AwRequestServer.cpp  
     ./MATPy/GetData.cpp  
+    ./MATPy/GetData2_5_10.cpp
     ./MATPy/GetFileInfo.cpp  
     ./MATPy/GetICAPanelCapture.cpp  
     ./MATPy/GetMarkers.cpp
@@ -118,18 +119,17 @@ SET(AnyWave_SRCS
     ./Plugin/AwPluginDial.cpp  
     ./Plugin/AwPluginManager.cpp  
     ./Plugin/AwMATPyCreator.cpp
-    ./Process/AwConverter.cpp  
     ./Process/AwExporterMarkerModel.cpp  
     ./Process/AwExporterSelMarkers.cpp  
     ./Process/AwExportSelChannels.cpp  
     ./Process/AwMarkerExporter.cpp  
     ./Process/AwMatlabScriptPlugin.cpp  
     ./Process/AwProcessesWidget.cpp  
-    ./Process/AwProcessFromMarkersDial.cpp  
     ./Process/AwProcessLog.cpp  
     ./Process/AwProcessLogManager.cpp  
     ./Process/AwProcessLogWindow.cpp  
     ./Process/AwProcessManager.cpp  
+    ./Process/AwProcessManagerRunProcess.cpp
     ./Process/AwProcessMarkerModel.cpp  
     ./Process/AwProcessWidget.cpp  
     ./Process/AwProgressIndicator.cpp  
@@ -199,6 +199,7 @@ SET(HEADERS
     ./Carto/AwMappingClient.h  
     ./Debug/AwDebugLogWidget.h  
     ./Debug/AwDebugLog.h  
+    ./Debug/AwLogger.h
     ./Display/AwViewSetup.h  
     ./Display/AwCentralWidget.h  
     ./Display/AwSignalView.h  
@@ -215,8 +216,8 @@ SET(HEADERS
     ./IO/BIDS/AwBIDSItem.h  
     ./IO/BIDS/AwBIDSManager.h  
     ./IO/BIDS/AwBIDSGUI.h  
-	./IO/BIDS/AwBIDSGUIOptionsDialog.h
     ./IO/BIDS/AwRefreshDialog.h
+    ./IO/BIDS/AwClinicalWidget.h
     ./IO/export/AwChannelsExportWizardPage.h
     ./IO/export/AwExporter.h
     ./IO/export/AwExportWizardDial.h
@@ -235,7 +236,6 @@ SET(HEADERS
     ./Marker/AwMarkerManagerSettings.h  
     ./Marker/AwMarkerManager.h  
     ./Marker/AwMarkerListModel.h  
-    ./Marker/AwDockAddMarker.h  
 	./Marker/AwStatsWidget.h
     ./MATPy/AwPidManager.h  
     ./MATPy/AwRequestServer.h  
@@ -267,10 +267,8 @@ SET(HEADERS
     ./Process/AwProgressIndicator.h  
     ./Process/AwProcessMarkerModel.h  
     ./Process/AwProcessManager.h  
-    ./Process/AwProcessFromMarkersDial.h  
-    ./Process/AwProcessesWidget.h  
+     ./Process/AwProcessesWidget.h  
     ./Process/AwMatlabScriptPlugin.h  
-    ./Process/AwConverter.h  
     ./Process/AwLogPlainTextEdit.h 
     ./Process/AwMATLABMarkersExporter.h
     ./Updater/AwDownloadGui.h
@@ -321,7 +319,6 @@ SET(FORMS ./AnyWave.ui
 	./Batch/AwBatchFileInputWidget.ui
 	./Batch/AwBatchDialog.ui
 	./IO/BIDS/AwBIDSGUI.ui
-	./IO/BIDS/AwBIDSGUIOptionsDialog.ui
     ./IO/BIDS/AwRefreshDialog.ui
     ./ICA/AwICAPanel.ui  
     ./ICA/AwPanelItem.ui  

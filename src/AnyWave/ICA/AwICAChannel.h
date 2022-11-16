@@ -45,7 +45,7 @@ public:
 	void setAutoScale(bool flag) { m_autoYScale = flag; }
 	inline bool isAutoScaling() { return m_autoYScale; }
 	AwICAChannel *duplicate() override;
-	void update();
+	void update() override;
 protected:
 	int m_index;	// index in components matrix
 	int m_compType;	// component type (MEG or EEG)

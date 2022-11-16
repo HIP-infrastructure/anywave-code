@@ -444,31 +444,18 @@ void AwSettings::detectMATLABRuntimes()
 	m_settings.insert(aws::default_matlab, subDirs.first());
 #endif
 #ifdef Q_OS_MAC
-	QDir dir("/Applications");
-	dir.cd("MATLAB");
-	if (!dir.exists())
-		return;
-	dir.cd("MATLAB Runtime");
-	if (!dir.exists())
-		return;
-	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	for (auto const& d : subDirs)
-		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
-
+	QDir dir("/Applications/MATLAB/MATLAB_Runtime");
 #endif
 #ifdef Q_OS_LINUX
-	QDir dir("/usr/local");
-	dir.cd("MATLAB");
-	if (!dir.exists())
-		return;
-	dir.cd("MATLAB_Runtime");
+	QDir dir("/usr/local/MATLAB/MATLAB_Runtime");
+#endif
 	if (!dir.exists())
 		return;
 	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+	if (subDirs.isEmpty())
+	    return;
 	for (auto const& d : subDirs)
 		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
-
-#endif
 	// set auto default to be the highest release
 	if (m_MATLABRuntimes.size() == 1)
 		m_settings.insert(aws::default_runtime, m_MATLABRuntimes.keys().first());
@@ -497,8 +484,12 @@ void AwSettings::detectMATLAB()
 	QDir dir("/Applications");
 	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 	for (auto const& d : subDirs) {
-		if (d.startsWith("MATLAB_R"))
-			m_MATLABApplications.insert(d, dir.absolutePath() + "/" + d);
+		if (d.startsWith("MATLAB_R")) {
+			auto r = d;
+			r = r.remove(QString("MATLAB_"));
+			r = r.remove(".app");
+			m_MATLABApplications.insert(r, dir.absolutePath() + "/" + d);
+		}
 	}
 #endif
 #ifdef Q_OS_LINUX

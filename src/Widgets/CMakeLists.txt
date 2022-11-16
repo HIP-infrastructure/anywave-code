@@ -20,11 +20,9 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/AwComboDS.h  
     ../../include/widget/AwSpectroWidget.h  
     ../../include/widget/AwVTKWidget.h  
-    ../../include/widget/AwMarkerInspector.h  
-    ../../include/widget/AwMarkingTool.h
+      ../../include/widget/AwMarkingTool.h
     ./AwAddPredefinedMarker.h  
     ./AwAddTargetChannels.h  
-    ../../include/AwMarkingSettings.h  
     ../../include/widget/AwTopoBuilder.h  
     ./AwTopoWidgetSettings.h  
     ../../include/widget/AwAmplitudeWidget.h  
@@ -37,8 +35,7 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
     ../../include/widget/SignalView/AwBaseMarkerBar.h  
     ./SignalView/AwViewSettingsUi.h  
     ./SignalView/AwGoToLatencyDial.h  
-    ./SignalView/AwPickMarkersDial.h 
-    ../../include/widget/AwGainLevelsWidget.h 
+      ../../include/widget/AwGainLevelsWidget.h 
     ../../include/widget/SignalView/AwGraphicsScene.h  
     ../../include/widget/SignalView/AwGraphicsView.h  
     ../../include/widget/SignalView/AwNavigationBar.h  
@@ -80,11 +77,9 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./AwComboMarker.cpp  
     ./AwDownSamplingWidget.cpp  
     ./AwMarkAroundWidget.cpp  
-    ./AwMarkerInspector.cpp 
-    ./AwMarkingTool.cpp 
+     ./AwMarkingTool.cpp 
     ./AwAmplitudeWidget.cpp  
     ./AwMapWidget.cpp  
-    ./AwMarkingSettings.cpp  
     ./AwMessageBox.cpp  
     ./AwSpectroWidget.cpp  
     ./AwTimeScaleCombo.cpp  
@@ -104,8 +99,7 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SignalView/AwNavigationBar.cpp  
     ./SignalView/AwViewSettings.cpp  
     ./SignalView/AwViewSettingsUi.cpp  
-    ./SignalView/AwPickMarkersDial.cpp 
-    ./SignalView/AwGainLevelsWidget.cpp
+     ./SignalView/AwGainLevelsWidget.cpp
     ./SignalView/SceneMouseEvent.cpp
     ./SignalView/AwAmplitudeItem.cpp
     ./InputMarker/AwInputMarkerTableView.cpp  
@@ -135,7 +129,6 @@ QT5_WRAP_CPP(MOC ${HEADERS})
 SET(FORMS  ./AwSelectInputDataWidget.ui
      ./AwAmplitudeWidget.ui 
 	./AwGetValueDialog.ui
-    ./AwMarkerInspector.ui  
     ./AwMarkingTool.ui
     ./AwAddPredefinedMarker.ui  
     ./AwAddTargetChannels.ui  
@@ -147,7 +140,6 @@ SET(FORMS  ./AwSelectInputDataWidget.ui
     ./SignalView/AwGoToLatencyDial.ui  
     ./SignalView/AwNavigationBarv2.ui  
     ./SignalView/AwViewSettingsUi.ui  
-    ./SignalView/AwPickMarkersDial.ui 
 	./AwVideoPlayer.ui
     ./InputMarker/AwInputMarkerWidget.ui
 	SignalItem/AwSignalItemSettings.ui)

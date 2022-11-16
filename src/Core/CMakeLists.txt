@@ -10,8 +10,7 @@ SET(HEADERS
     ../../include/AwMEGSensorManager.h 
     ../../include/AwSensor.h 
     ../../include/AwDataBuffer.h
-    ../../include/AwVirtualChannel.h
-    ../../include/AwGlobalMarkers.h)
+    ../../include/AwVirtualChannel.h)
 
 SET(SRC  AwChannel.cpp 
     AwDataClient.cpp 
@@ -20,7 +19,7 @@ SET(SRC  AwChannel.cpp
     AwSensor.cpp 
     AwDataBuffer.cpp
     AwEvent.cpp
-    AwEventManager.cpp AwGlobalMarkers.cpp)
+    AwEventManager.cpp)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 add_library(AwCore SHARED ${MOC} ${SRC})

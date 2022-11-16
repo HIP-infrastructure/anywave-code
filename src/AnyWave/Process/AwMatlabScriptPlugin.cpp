@@ -89,9 +89,8 @@ void AwMatlabScriptProcess::run()
 	if (m_plugin->settings().contains("runtime"))
 		runtimeVersion = m_plugin->settings().value("runtime").toString();
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+	QSettings settings;
 	if (runtimeVersion.isEmpty()) {
-		QSettings settings;
-
 		QString mcrPath = settings.value("matlab/mcr_path").toString();
 		if (mcrPath.isEmpty())
 			emit progressChanged("MATLAB Runtime is not installed or path to it is not set!");

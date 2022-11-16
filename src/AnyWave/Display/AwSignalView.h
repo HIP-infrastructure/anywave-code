@@ -53,8 +53,8 @@ public slots:
 	void synchronizeOnPosition(float position);
 	void showPosition(float position);
 	void centerViewOnPosition(float position);
-	void updatePageDuration(float duration);
-	void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
+	void updatePageDuration(float duration) override; 
+	void goToPos(int pos) override;	// called when position in file has changed using the scrollbar in the navigation bar.
 	void selectChannelsFromLabels(const QStringList& labels);
 	void addVirtualChannels(AwChannelList& channels);
 	void removeVirtualChannels(AwChannelList& channels);
@@ -64,7 +64,7 @@ public slots:
 protected:
 	// overriden methods
 	void dataReceived() override;
-	void applyChannelFilters();
+	void applyChannelFilters() override;
 private:
 	void updateAmplitudes();
 	AwChannelList m_virtualChannels;

@@ -554,7 +554,7 @@ void AwMarkerManagerSettings::launchProcess()
 	}
 
 	QAction *action = (QAction *)sender();
-	if (action == Q_NULLPTR)
+	if (action == nullptr)
 		return;
 	auto plugin = AwPluginManager::getInstance()->getProcessPluginByName(action->data().toString());
 	if (plugin) {
