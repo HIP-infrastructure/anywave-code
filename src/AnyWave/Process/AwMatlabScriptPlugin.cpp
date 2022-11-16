@@ -117,7 +117,7 @@ void AwMatlabScriptProcess::run()
 #ifdef Q_OS_WIN
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
 	systemPath = QString("%1;%2").arg(application).arg(systemPath);
-	if (runtimeVersion.isEmpty()) {  // default behavior
+	if (runtimeVersion.isEmpty()) {  // default behavior as the plugin has no runtime version specified.
 		env.remove("PATH");
 		env.insert("PATH", systemPath);
 	}
@@ -132,6 +132,7 @@ void AwMatlabScriptProcess::run()
 			env.insert("PATH", systemPath);
 		}
 		else { // change path order
+			emit progressChanged(QString("switched to runtime %1").arg(runtimeVersion));
 			// on windows the path must be   runtime_version/runtime/win64
 			QString mcrPath = QString("%1/runtime/win64").arg(runtime);
 			systemPath = QString("%1;%2;%3").arg(application).arg(mcrPath).arg(systemPath);
@@ -141,16 +142,6 @@ void AwMatlabScriptProcess::run()
 	}
 #endif
 
-//#if defined(Q_OS_WIN)
-//	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
-//#ifdef QT_DEBUG
-//	systemPath = QString("C:\\dev\\anywave-vs2019\\bin\\x64\\Release;%1").arg(systemPath);
-//#else
-//	systemPath = QString("%1;%2").arg(application).arg(systemPath);
-//#endif
-//	env.remove("PATH");
-//	env.insert("PATH", systemPath);
-//#endif
     QString jsonArgs = AwUtilities::json::toJsonString(pdi.input.settings).simplified();
 	arguments << "127.0.0.1" << QString("%1").arg(m_server->serverPort()) 
 		<< QString::number(m_pid); // << jsonArgs;
