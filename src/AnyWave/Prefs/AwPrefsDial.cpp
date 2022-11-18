@@ -85,48 +85,34 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		groupMATLAB->hide();
 	else {
 
-#ifdef Q_OS_WIN
-		auto model = new QStandardItemModel(0, 2, this);
-		tableViewMATLAB->setModel(model);
-		tableViewMATLAB->setToolTip(QString("The MATLAB default version is the last one installed on the computer.\n") +
-			QString("Changing this may have no real impact until you register it as the default COM server"));
-		model->setHorizontalHeaderLabels({ "MATLAB Version", "Path" });
-#else
 		auto model = new QStandardItemModel(0, 3, this);
 		tableViewMATLAB->setModel(model);
-		model->setHorizontalHeaderLabels({ "Status", "MATLAB Version", "Path" });
+#ifdef Q_OS_WIN
+		tableViewMATLAB->setToolTip(QString("The MATLAB default version is the last one installed on the computer.\n") +
+			QString("Changing this may have no real impact until you register it as the default COM server."));
 #endif
+		model->setHorizontalHeaderLabels({ "Status", "MATLAB Version", "Path" });
 		tableViewMATLAB->setEditTriggers(QAbstractItemView::NoEditTriggers);
 		int row = 0;
 		auto defaultMatlab = aws->value(aws::default_matlab).toString();
-#ifndef Q_OS_WIN
-		QMenu* menu = new QMenu;
+		QMenu* menu = new QMenu(this);
 		for (auto const& k : matlabs.keys()) {
-			auto checkItem = new QStandardItem("default");
-			checkItem->setCheckable(true);
-			checkItem->setFlags(checkItem->flags() & ~Qt::ItemIsEnabled);
+			auto item = new QStandardItem;
+			item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
 			if (k == defaultMatlab) 
-				checkItem->setCheckState(Qt::Checked);
-			model->setItem(row, 0, checkItem);
-			model->setItem(row, 1, new QStandardItem(k));
+				item->setText("Default");
+			model->setItem(row, 0, item);
+			item = new QStandardItem(k);
+			item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+			model->setItem(row, 1, item);
 			auto action = menu->addAction(k);
 			action->setData(k);
 			connect(action, &QAction::triggered, this, &AwPrefsDial::changeDefaultMATLAB);
 			model->setItem(row++, 2, new QStandardItem(matlabs.value(k)));
 		}
 		buttonDefault->setMenu(menu);
-		if (model->rowCount() == 1) {
-			auto item = model->item(0, 0);
-			item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+		if (model->rowCount() == 1) 
 			buttonDefault->hide();
-		}
-#else
-		buttonDefault->hide();
-		for (auto const& k : matlabs.keys()) {
-			model->setItem(row, 0, new QStandardItem(k));
-			model->setItem(row++, 1, new QStandardItem(matlabs.value(k)));
-		}
-#endif
 	}
 	auto runtimes = aws->detectedMATLABRuntimes();
 	if (runtimes.isEmpty()) {
@@ -141,25 +127,24 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 		model->setHorizontalHeaderLabels({ "Status", "Runtime Version", "Path" });
 		int row = 0;
 		auto defaultRuntime = aws->value(aws::default_runtime).toString();
-		QMenu* menu = new QMenu;
+		QMenu* menu = new QMenu(this);
 		for (auto const& k : runtimes.keys()) {
-			auto checkItem = new QStandardItem("default");
-			checkItem->setCheckable(true);
-			if (k == defaultRuntime)
-				checkItem->setCheckState(Qt::Checked);
-			model->setItem(row, 0, checkItem);
-			model->setItem(row, 1, new QStandardItem(k));
-			model->setItem(row++, 2, new QStandardItem(runtimes.value(k)));
+			auto item = new QStandardItem;
+			item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+			if (k == defaultRuntime) 
+				item->setText("Default");
+			model->setItem(row, 0, item);
+			item = new QStandardItem(k);
+			item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+			model->setItem(row, 1, item);
 			auto action = menu->addAction(k);
 			action->setData(k);
 			connect(action, &QAction::triggered, this, &AwPrefsDial::changeDefaultRuntime);
+			model->setItem(row++, 2, new QStandardItem(runtimes.value(k)));
 		}
 		buttonRuntimeDefault->setMenu(menu);
-		if (model->rowCount() == 1) {
-			auto item = model->item(0, 0);
-			item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+		if (model->rowCount() == 1) 
 			buttonRuntimeDefault->hide();
-		}
 	}
 
     editGARDEL->setText(qsettings.value("GARDEL/path").toString());
@@ -345,13 +330,12 @@ void AwPrefsDial::accept()
 	// get MATLAB model
 	QStandardItemModel *model = static_cast<QStandardItemModel *>(tableViewMATLAB->model());
 	bool ok = false;
-#ifndef Q_OS_WIN
+
 	for (auto i = 0; model->rowCount(); i++) {
-		auto status = model->item(i, 0);
+		auto status = model->item(i, 0)->text();
 		auto release = model->item(i, 1)->text();
 		auto path = model->item(i, 2)->text();
-		if (status->checkState() == Qt::Checked) {
-			ok = true;
+		if (status == "Default")
 			auto matlabPath = qsettings.value("matlab/path", QString()).toString();
 			if (matlabPath != path) {
 				qsettings.setValue("matlab/path", path);
@@ -359,35 +343,19 @@ void AwPrefsDial::accept()
 			}
 		}
 	}
-#else
-	// On Windows we can't specify the matlab version to use as the connection is established using COM mechanisms.
-	// So the latest MATLAB installed is registered as the default COM server.
-	ok = true;
-#endif
-	if (!ok) {
-		AwMessageBox::information(this, "MATLAB", "Please set a MATLAB release as the default one to use.");
-		return;
-	}
-
 	// get MATLAB Runtime model
 	model = static_cast<QStandardItemModel*>(tableViewRuntime->model());
-	ok = false;
 	for (auto i = 0; model->rowCount(); i++) {
-		auto status = model->item(i, 0);
+		auto status = model->item(i, 0)->text();
 		auto release = model->item(i, 1)->text();
 		auto path = model->item(i, 2)->text();
-		if (status->checkState() == Qt::Checked) {
-			ok = true;
-			auto matlabPath = qsettings.value("matlab/path", QString()).toString();
+		if (status == "Default") {
+			auto matlabPath = qsettings.value("matlab/mcr_path", QString()).toString();
 			if (matlabPath != path) {
-				qsettings.setValue("matlab/path", path);
-				qsettings.setValue("matlab/default", release);
+				qsettings.setValue("matlab/mcr_path", path);
+				qsettings.setValue("matlab/mcr_default", release);
 			}
 		}
-	}
-	if (!ok) {
-		AwMessageBox::information(this, "MATLAB", "Please set a MATLAB release as the default one to use.");
-		return;
 	}
 
 	QString Gardel = editGARDEL->text();
@@ -620,10 +588,10 @@ void AwPrefsDial::changeDefaultRuntime()
 	auto release = action->data().toString();
 	for (auto i = 0; i < model->rowCount(); i++) {
 		auto r = model->item(i, 1)->text();
-		if (r == release)
-			model->item(i, 0)->setCheckState(Qt::Unchecked);
+		if (r.contains(release)) 
+			model->item(i, 0)->setText("Default");
 		else
-			model->item(i, 0)->setCheckState(Qt::Checked);
+			model->item(i, 0)->setText("");
 	}
 }
 
@@ -636,9 +604,9 @@ void AwPrefsDial::changeDefaultMATLAB()
 	auto release = action->data().toString();
 	for (auto i = 0; i < model->rowCount(); i++) {
 		auto r = model->item(i, 1)->text();
-		if (r == release)
-			model->item(i, 0)->setCheckState(Qt::Unchecked);
+		if (r.contains(release)) 
+			model->item(i, 0)->setText("Default");
 		else
-			model->item(i, 0)->setCheckState(Qt::Checked);
+			model->item(i, 0)->setText("");
 	}
 }

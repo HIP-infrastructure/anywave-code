@@ -278,6 +278,15 @@ void AwSettings::init()
 	m_settings[aws::python_use_default] = settings.value("python/use_default", true).toBool();
 	m_settings[aws::python_venv_alias] = settings.value("python/venv_alias", "anywave").toString();
 	m_settings[aws::python_venv_list] = venvs;
+
+	// load previous matlab settings:
+	// matlab default relase and matlab default runtime
+	auto matlabDefault = settings.value("matlab/matlab_default").toString();
+	auto matlabRuntime = settings.value("matlab/mcr_default").toString();
+	if (!matlabDefault.isEmpty()) 
+	   m_settings[aws::default_matlab] = matlabDefault;
+	if (!matlabRuntime.isEmpty()) 
+	   m_settings[aws::default_runtime] = matlabRuntime;  
 }
 
 QVariant AwSettings::value(const QString& key)
@@ -504,12 +513,27 @@ void AwSettings::detectMATLAB()
 	}
 #endif
 
-	// set auto default to be the highest release
-	if (m_MATLABApplications.size() == 1) 
-		m_settings.insert(aws::default_matlab, m_MATLABApplications.keys().first());
+    // get default matlab settings if exists
+	auto defaultM = m_settings.value(aws::default_matlab).toString();
+	
+	if (defaultM.isEmpty()) {
+		// set auto default to be the highest release
+		if (m_MATLABApplications.size() == 1) 
+			m_settings.insert(aws::default_matlab, m_MATLABApplications.keys().first());
+		else {
+			auto keys = m_MATLABApplications.keys();
+			std::sort(keys.begin(), keys.end());
+			m_settings.insert(aws::default_matlab, keys.last());
+		}
+	}
 	else {
-		auto keys = m_MATLABApplications.keys();
-		std::sort(keys.begin(), keys.end());
-		m_settings.insert(aws::default_matlab, keys.last());
+		// check that previously saved default was detected again (the user may have uninstalled it since the last time)
+		if (m_MATLABApplications.contains(defaultM)) {
+			// ok reset path 
+			m_settings.insert(aws::default_matlab, m_MATLABApplications.value(defaultM));
+		}
+		else {
+			
+		}
 	}
 }
