@@ -16,5 +16,5 @@
 #pragma once
 constexpr int AW_MAJOR_VERSION = 2;
 constexpr int AW_MINOR_VERSION = 6;
-constexpr int AW_FIX_VERSION = 3;
+constexpr int AW_FIX_VERSION = 4;
 

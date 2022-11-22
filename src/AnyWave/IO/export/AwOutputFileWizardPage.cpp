@@ -34,6 +34,8 @@ AwOutputFileWizardPage::AwOutputFileWizardPage(const QVariantMap& settings, QWid
 		QString filePath = settings.value(keys::bids_file_path).toString();
 		m_isBids = !filePath.isEmpty();
 	}
+	if (settings.value("ignore_bids").toBool())
+		m_isBids = false;
 	QLabel* labelWriters = nullptr;
 	m_comboWriters = new QComboBox();
 	if (!m_isBids) {

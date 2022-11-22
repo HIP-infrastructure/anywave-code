@@ -66,7 +66,7 @@ private:
 	void parseChannels(AwChannelList& channels);		// extract from channels the channels which are considered to be real.
 	void createAVGChannel(AwChannel *channel);
 	void deleteAVGChannels();
-	void setEndOfData(bool flag = true);
+	void setEndOfData(bool flag = true, bool wakeUpClient = true);
 	void fileLock();
 	void fileUnlock();
 	void prepareAVGChannel(AwAVGChannel *channel);	// create the list of channels to add as connections.

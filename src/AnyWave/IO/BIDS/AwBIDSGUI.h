@@ -46,7 +46,7 @@ signals:
 	void newProcessBatchOperationAdded(const QString& pluginName, const QStringList& files);
 	void batchManagerNeeded();
 	void finished(); // sent when a background operation finished.
-	void progressChanged(int);
+	void progressPercentChanged(int);
 protected slots:
 	void handleDoubleClick(const QModelIndex& index);
 	void handleClick(const QModelIndex& index);

@@ -287,9 +287,15 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, AwSharedMarkerLis
 		if (m->duration() <= 0.)
 			continue;
 		auto channels = AwChannel::duplicateChannels(*channelsToLoad);
-		chunks.append(channels);
+		//chunks.append(channels);
 		// load chunk without waking up the client...
 		loadData(&channels, m->start(), m->duration(), rawData, true);
+		// if failed to read data (channels data size == 0)  do not add to the chunks list
+		if (channels.first()->dataSize() == 0) {
+			qDeleteAll(channels);
+			continue;
+		}
+		chunks.append(channels);
 		totalSamples += channels.first()->dataSize();
 	}
 
@@ -470,9 +476,9 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 	}
 	catch (const std::bad_alloc &)	{
 		emit outOfMemory();
+		m_client->setError(QString("Error allocating memory to load data."));
 		if (!doNotWakeUpClient)
 			setEndOfData();
-		m_client->setError(QString("Error allocating memory to load data."));
 		return;
 	}
 
@@ -513,21 +519,20 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++) 
 			m_ICASourcesLoaded[i] = false;
 		emit outOfMemory();
+		m_client->setError(QString("Error allocating memory to load data."));
 		if (!doNotWakeUpClient)
 			setEndOfData();
-		m_client->setError(QString("Error allocating memory to load data."));
 		return;
 	}
 
 	if (read == 0) { // NO DATA READ
 		for (auto c: m_loadingList)
 			c->clearData();
-		if (!doNotWakeUpClient)
-			setEndOfData();
 		for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 			m_ICASourcesLoaded[i] = false;
-		emit endOfData();
-		m_client->setError(QString("No data read from %1: %2").arg(m_reader->plugin()->name).arg(m_reader->errorMessage()));
+//		if (!doNotWakeUpClient)
+		setEndOfData(true, !doNotWakeUpClient);
+		//		m_client->setError(QString("No data read from %1: %2").arg(m_reader->plugin()->name).arg(m_reader->errorMessage()));
 		return;
 	}
 	else {  // READING WAS OK
@@ -546,7 +551,7 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 				setEndOfData();
 			for (int i = 0; i < AW_CHANNEL_TYPES; i++)
 				m_ICASourcesLoaded[i] = false;
-			emit endOfData();
+		//	emit endOfData();
 			m_client->setError(QString("Error allocating memory to apply ICA filters."));
 			return;
 		}
@@ -604,10 +609,11 @@ void AwDataConnection::loadData(AwChannelList *channelsToLoad, float start, floa
 #endif
 }
 
-void AwDataConnection::setEndOfData(bool flag)
+void AwDataConnection::setEndOfData(bool flag, bool wakeUp)
 {
 	m_client->m_endOfData = flag;
-	setDataAvailable();
+	if (wakeUp)
+		setDataAvailable();
 }
 
 void AwDataConnection::setDataAvailable()

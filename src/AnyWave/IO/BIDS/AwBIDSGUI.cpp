@@ -252,14 +252,14 @@ void AwBIDSGUI::refreshSubjects()
 	auto parsingSubjects = [this, &wait](const AwBIDSItems items) {
 		disconnect(this, SIGNAL(finished()));
 		wait.initProgress(0, items.size());
-		connect(this, &AwBIDSGUI::progressChanged, &wait, &AwWaitWidget::setCurrentProgress);
+		connect(this, &AwBIDSGUI::progressPercentChanged, &wait, &AwWaitWidget::setCurrentProgress);
 		int index = 1;
 		for (auto item : items) {
 			removeChildren(item);
 			this->m_bids->parseSubject(item);
 			recursiveFill(item);
 			item->setData(true, AwBIDSItem::ParsedItem);
-			emit progressChanged(index++);
+			emit progressPercentChanged(index++);
 		}
 		connect(this, &AwBIDSGUI::finished, &wait, &QDialog::accept);
 		emit finished();

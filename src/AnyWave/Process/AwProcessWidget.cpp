@@ -47,7 +47,7 @@ AwProcessWidget::AwProcessWidget(AwProcess *process, QWidget *parent)
 	connect(process, SIGNAL(aborted()), this, SLOT(setFinished()));
 	connect(process, SIGNAL(idle()), this, SLOT(setIdle()));
 	connect(process, SIGNAL(finished()), this, SLOT(setFinished()));
-	connect(process, SIGNAL(progressChanged(int)), this, SLOT(setProgression(int)));
+	connect(process, SIGNAL(progressPercentChanged(int)), this, SLOT(setProgression(int)));
 	connect(process, SIGNAL(progressChanged(const QString&)), m_logWindow, SLOT(appendLog(const QString&)));
 	connect(process, SIGNAL(error(const QString&)), m_logWindow, SLOT(appendError(const QString&)));
 	connect(process, SIGNAL(warning(const QString&)), m_logWindow, SLOT(appendWarning(const QString&)));

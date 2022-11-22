@@ -72,13 +72,13 @@ void FileConverter::run()
 
 	int count = 1;
 	for (input in : m_ui->inputs) {
-		emit progressChanged((count * 100) / m_ui->inputs.size());
-		emit progressChanged(tr("Converting file ") + in.second + "...");
+		emit progressPercentChanged((count * 100) / m_ui->inputs.size());
+		emit progressChanged("Converting file " + in.second + "...");
 		AwFileIO *fr = in.first->newInstance();
 		fr->setPlugin(in.first);
 
 		if (fr->openFile(in.second) != AwFileIO::NoError) {
-			emit progressChanged(tr("Failed to open the file."));
+			emit progressChanged("Failed to open the file.");
 			continue;
 		}
 
@@ -105,19 +105,19 @@ void FileConverter::run()
 		
 		writer->createFile(outputFilename);
 
-		emit progressChanged(tr("Reading data..."));
+		emit progressChanged("Reading data...");
 		fr->readDataFromChannels(0, fr->infos.totalDuration(), sourceChannels);
-		emit progressChanged(tr("Done."));
+		emit progressChanged("Done.");
 
 		// apply filters (note: this can be an empty operation if filters are all set to zeros).
-		sendMessage(tr("Filtering (optional)..."));
+		sendMessage("Filtering (optional)...");
 		m_ui->filterSettings().apply(sourceChannels);
 		AwFiltering::filter(&sourceChannels);
-		sendMessage(tr("Done."));
+		sendMessage("Done.");
 	
-		emit progressChanged(tr("Writing data..."));
+		emit progressChanged("Writing data...");
 		writer->writeData(&sourceChannels);
-		emit progressChanged(tr("Done."));
+		emit progressChanged("Done.");
 		delete fr;
 		count++;
 		writer->cleanUpAndClose();

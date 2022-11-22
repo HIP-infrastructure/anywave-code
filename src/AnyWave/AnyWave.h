@@ -144,6 +144,7 @@ private slots:
 	void openPluginHelpUrl();
 	void on_actionCreate_batch_script_triggered();
 	void on_actionSave_as_triggered();
+	void on_actionExport_to_triggered();
 	void on_actionMarkers_triggered();
 	void on_actionQuit_triggered();
 	void on_actionMontage_triggered();

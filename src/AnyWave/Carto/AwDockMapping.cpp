@@ -21,7 +21,6 @@
 
 AwDockMapping::AwDockMapping(int type, const QString& title, AwLayout *l2D, AwLayout *l3D, QWidget *parent, Qt::WindowFlags flags) : QDockWidget(title, parent, flags)
 {
-//	AwSettings *aws = AwSettings::getInstance();
 	if (type == AwChannel::MEG)
 		setObjectName("Dock Mapping MEG");
 	else

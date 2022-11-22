@@ -43,7 +43,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 		}
 		return;
 	}
-	QObject::connect(process, SIGNAL(progressChanged(const QString&)), process, SLOT(log(const QString&)));
+//	QObject::connect(process, SIGNAL(progressChanged(const QString&)), process, SLOT(log(const QString&)));
 	if (!m_logger->attach(process)) 
 		m_logger->writeLog("unable to attach process to log instance.");
 	auto reader = process->pdi.input.reader();
@@ -55,6 +55,7 @@ void AwCommandLineManager::runProcess(AwArguments& arguments)
 	auto mm = dm->markerManager();
 	QObject::connect(process, &AwProcess::sendMarkers, mm, &AwMarkerManager::receivedMarkers);
 	QObject::connect(process, &AwProcess::dataConnectionRequested, dm->dataServer(), &AwDataServer::openConnection);
+	QObject::connect(static_cast<AwProcess *>(process), &AwProcess::progressChanged, m_logger, &AwLogger::writeLog);
 	m_logger->writeLog(QString("running %1...").arg(process->plugin()->name));
 	
 	if (process->init()) {

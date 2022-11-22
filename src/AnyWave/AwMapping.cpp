@@ -60,7 +60,7 @@ void AnyWave::runMapping()
 			l3D = lm->guessLayout(AwDataManager::instance()->reader(), AwLayout::L3D | AwLayout::MEG);
 		}
 		if (l2D || l3D) { // at least one layout was found => build topo
-			auto dock = new AwDockMapping(AwChannel::MEG, tr("MEG Mapping"), l2D, l3D, this);
+			auto dock = new AwDockMapping(AwChannel::MEG, "MEG Mapping", l2D, l3D, this);
 			m_dockWidgets["meg_mapping"] = dock;
 			//m_dockMEG2->setFeatures(QDockWidget::AllDockWidgetFeatures);
 			dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -91,7 +91,7 @@ void AnyWave::runMapping()
 	// EEG
 	if (dockEEG) { // MEG mapping was already created
 		dockEEG->show();
-		auto realDock = static_cast<AwDockMapping *>(dockMEG);
+		auto realDock = static_cast<AwDockMapping *>(dockEEG);
 		realDock->openConnection();
 		// reconnect signals and slots
 		connect(m_display, SIGNAL(clickedAtLatency(float)), realDock, SLOT(newMappingAtPosition(float)));
@@ -110,7 +110,7 @@ void AnyWave::runMapping()
 			l3D = lm->guessLayout(AwDataManager::instance()->reader(), AwLayout::L3D | AwLayout::EEG);
 		}
 		if (l2D || l3D) { // at least one layout was found => build topo
-			auto dock = new AwDockMapping(AwChannel::EEG, tr("EEG Mapping"), l2D, l3D, this);
+			auto dock = new AwDockMapping(AwChannel::EEG, "EEG Mapping", l2D, l3D, this);
 			m_dockWidgets["eeg_mapping"] = dock;
 			dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 			addDockWidget(Qt::LeftDockWidgetArea, dock);
@@ -136,14 +136,7 @@ void AnyWave::runMapping()
 			isEEGOK = false;
 	}
 
-	//// check for SEEG channels from as recorded channels in the Montage
-	//AwChannelList seegChannels;
-	//for (auto c : m_display->displayedChannels()) {
-	//	if (c->isSEEG())
-	//		seegChannels << c;
-	//}
-
-	// a viewer is already running?
+	// viewer is already running?
 	if (AwSEEGViewer::isInstantiated()) {
 		AwDataManager::instance()->dataServer()->closeConnection(AwSEEGViewer::instance());
 		AwSEEGViewer::quit();
@@ -159,7 +152,6 @@ void AnyWave::runMapping()
 	}
 	if (viewer) {
 		connect(viewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
-	//	connect(viewer, SIGNAL(newDataConnection(AwDataClient*)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient*)));
 		AwDataManager::instance()->dataServer()->openConnection(viewer);
 		connect(m_display, SIGNAL(clickedAtLatency(float)), viewer, SLOT(updateMappingAt(float)));
 		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), viewer, SLOT(setSEEGChannels(const AwChannelList&)));
@@ -171,42 +163,6 @@ void AnyWave::runMapping()
 		m_display->setMappingModeOn(true);
 		viewer->show();
 	}
-
-
-	//if (!seegChannels.isEmpty()) {  // we've got SEEG channels, check for mesh and electrode files
-	//	// if file is an SEEG data file in a BIDS, check for GARDEL generated montages.
-	//	QString electrodes;
-	//	QStringList meshes;
-	//	if (AwBIDSManager::isInstantiated()) {
-	//		auto bm = AwBIDSManager::instance();
-	//		if (bm->isBIDSActive()) {
-	//			meshes = bm->freesurferMeshes();
-	//			electrodes = bm->getGardelElectrodes();
-	//		}
-	//	}
-		//if (!meshes.isEmpty() && !electrodes.isEmpty()) {
-		//	if (m_SEEGViewer == NULL) {
-		//		m_SEEGViewer = new AwSEEGViewer(this);
-		//		connect(m_SEEGViewer, SIGNAL(newDataConnection(AwDataClient *)), AwDataServer::getInstance(), SLOT(openConnection(AwDataClient *)));
-		//		connect(m_display, SIGNAL(clickedAtLatency(float)), m_SEEGViewer, SLOT(updateMappingAt(float)));
-		//		connect(m_SEEGViewer, SIGNAL(mappingStopped()), this, SLOT(stopMapping()));
-		//		connect(m_display, SIGNAL(displayedChannelsChanged(const AwChannelList&)), m_SEEGViewer, SLOT(setSEEGChannels(const AwChannelList&)));
-		//		connect(m_SEEGViewer->widget(), SIGNAL(selectedElectrodes(const QStringList&)), m_display, SLOT(setSelectedChannelsFromLabels(const QStringList&)));
-		//		connect(&AwDataManager::instance()->filterSettings(), SIGNAL(settingsChanged(const AwFilterSettings&)), m_SEEGViewer,
-		//			SLOT(setNewFilters(const AwFilterSettings&)));
-		//	}
-		//	// the viewer will automatically duplicate channel objects.
-		//	m_SEEGViewer->setSEEGChannels(seegChannels);
-		//	m_SEEGViewer->loadElectrodes(electrodes);
-		//	//m_SEEGViewer->loadMesh(mesh);
-		//	m_SEEGViewer->addMeshes(meshes);
-		//	m_display->setMappingModeOn(true);
-		//	//m_SEEGViewer->setMappingMode(true);
-		//	m_SEEGViewer->setMappingMode();
-		//	m_SEEGViewer->widget()->show();
-		//}
-	//}
-
 	// disable cursor toolbar when mapping is active.
 	m_cursorToolBar->setEnabled(false);
 }
@@ -238,9 +194,6 @@ void AnyWave::stopMapping()
 		AwSEEGViewer::quit();
 	}
 	bool SEEGActive = false;
-	//if (m_SEEGViewer)
-	//	SEEGActive = m_SEEGViewer->isMappingActive();
-
 	if (!EEGOK && !MEGOK && !SEEGActive) {
 		m_cursorToolBar->setEnabled(true);
 		m_display->setMappingModeOn(false);

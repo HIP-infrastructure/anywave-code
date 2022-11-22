@@ -63,6 +63,11 @@ void AnyWave::on_actionSave_as_triggered()
 	AwProcessManager::instance()->startProcess("Export");
 }
 
+void AnyWave::on_actionExport_to_triggered()
+{
+	AwProcessManager::instance()->startProcess("Export", { "ignore_bids" });
+}
+
 
 void AnyWave::updateRecentBIDS(const QStringList &files)
 {

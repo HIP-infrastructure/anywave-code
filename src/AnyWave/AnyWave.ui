@@ -87,6 +87,7 @@
     <addaction name="actionOpen_BIDS"/>
     <addaction name="actionOpen_video"/>
     <addaction name="actionSave_as"/>
+    <addaction name="actionExport_to"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_New_AnyWave_Application"/>
     <addaction name="separator"/>
@@ -509,6 +510,11 @@
   <action name="actionView_Change_Log">
    <property name="text">
     <string>View Change Log</string>
+   </property>
+  </action>
+  <action name="actionExport_to">
+   <property name="text">
+    <string>Export to</string>
    </property>
   </action>
  </widget>

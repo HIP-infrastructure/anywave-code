@@ -47,10 +47,16 @@ AwExporter::AwExporter() : AwProcess()
 	setInputFlags(Aw::ProcessIO::GetAllMarkers | Aw::ProcessIO::GetWriterPlugins | Aw::ProcessIO::GetReaderPlugins
 		| Aw::ProcessIO::GetCurrentMontage);
 	setInputModifiers(Aw::ProcessIO::modifiers::IgnoreChannelSelection);
+	m_ignoreBids = false;
 }
 
 AwExporter::~AwExporter() 
 {
+}
+
+void AwExporter::ignoreBIDS()
+{
+	m_ignoreBids = true;
 }
 
 void AwExporter::runFromCommandLine()
@@ -96,35 +102,17 @@ void AwExporter::runFromCommandLine()
 	auto markers = pdi.input.markers();
 	// remove markers that target channels if the targeted channels were removed while exporting...
 	if (markers.size()) {
-		AwMarkerList removed;
 		QStringList labels = AwChannel::getLabels(pdi.input.channels());
-		markers.erase(std::remove_if(markers.begin(), markers.end(), [labels](AwSharedMarker& m) {
-			auto targets = m->targetChannels();
-			for (const auto& t : targets) {
-				if (!labels.contains(t))
-					return true;
-			}
-			return false;
-			}));
-
-		//for (auto &marker : markers) {
-		//	QStringList targets = marker->targetChannels();
-		//	for (const auto& t : targets) {
-		//		if (!labels.contains(t))
-		//			removed.append(marker);
-		//	}
-		//}
-		//if (removed.size()) {
-		//	for (auto m : removed) {
-		//		markers.removeAll(m);
-		//		delete m;
-		//	}
-		//	pdi.input.setMarkers(markers);
-		//}
-		pdi.input.setMarkers(markers);
+		AwSharedMarkerList res;
+		for (auto const& m : markers) {
+			if (!labels.contains(m->label()))
+				res << m;
+		}
+		pdi.input.clearMarkers();
+		if (res.size())
+			pdi.input.setMarkers(res);
 	}
 	AwBlock* block = writer->infos.newBlock();
-//	AwMarker global("global", 0., endTimePos);
 	if (isUseSkipMarkersApplied()) {
 		auto merged = AwMarker::merge(pdi.input.markers());
 		auto modified = pdi.input.modifiedMarkers();
@@ -134,7 +122,6 @@ void AwExporter::runFromCommandLine()
 	}
 	else {
 		block->setMarkers(pdi.input.markers());
-	//	m_inputMarkers << &global;  // the trick is to avoid memory leak as we don't destroy m_inputMarkers list.
 		m_inputMarkers << AwSharedMarker(new AwMarker("global", 0., endTimePos));
 	}
 
@@ -238,9 +225,14 @@ void AwExporter::run()
 
 bool AwExporter::showUi()
 {
-	// detect bids
-	QString filePath = pdi.input.settings.value(keys::bids_file_path).toString();
-	bool isBids = !filePath.isEmpty();
+//	// detect bids
+//	QString filePath = pdi.input.settings.value(keys::bids_file_path).toString();
+//	bool isBids = !filePath.isEmpty();
+	// get args 
+	auto args = pdi.input.settings.value(keys::args).toStringList();
+	if (args.contains("ignore_bids"))
+		m_ignoreBids = true;
+	pdi.input.settings.insert("ignore_bids", m_ignoreBids);
 	AwExportWizardDial dlg(pdi.input.settings);
 	if (dlg.exec() == QDialog::Accepted) {
 		// clear output_dir option as we don't run in command line mode

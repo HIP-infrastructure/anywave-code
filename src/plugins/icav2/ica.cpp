@@ -222,6 +222,11 @@ int ICA::initParameters()
 			sendMessage(QString("Error while loading data: %1").arg(errorString()));
 			return -1;
 		}
+		// check that we've got data
+		if (m_channels.first()->dataSize() == 0) {
+			sendMessage("ERROR: no data loaded.");
+			return -1;
+		}
 		sendMessage("Done");
 	}
 	catch (std::bad_alloc& ba) {

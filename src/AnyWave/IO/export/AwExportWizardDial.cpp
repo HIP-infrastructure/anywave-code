@@ -30,6 +30,10 @@ AwExportWizardDial::AwExportWizardDial(const QVariantMap& settings, QWidget* par
 	m_channelsPage = nullptr;
 	m_markersPage = nullptr;
 	m_isBids = settings.contains(keys::bids_file_path);
+	auto ignoreBids = settings.value("ignore_bids").toBool();
+	if (ignoreBids)
+		m_isBids = false;
+	
 	if (!m_isBids) {
 		m_channelsPage = new AwChannelsExportWizardPage();
 		addPage(m_channelsPage);

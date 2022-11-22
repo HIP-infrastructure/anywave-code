@@ -357,7 +357,7 @@ void H2::setProgressNewRange(int start, int end)
 
 void H2::setProgressValue(int value)
 {
-	emit progressChanged((int)((float)value * m_scaleProgress));
+	emit progressPercentChanged((int)((float)value * m_scaleProgress));
 }
 
 void H2::runFromCommandLine()

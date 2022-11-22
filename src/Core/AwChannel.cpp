@@ -672,6 +672,14 @@ QStringList AwChannel::getLabels(const QList<AwChannel *>& list, bool fullName)
 	return res;
 }
 
+QStringList AwChannel::getLabels(const AwSharedChannelList& list, bool fullName)
+{
+	QStringList res;
+	for (auto const& c : list)
+		fullName ? res << c->fullName() : res << c->name();
+	return res;
+}
+
 /// 
 /// Compute the mean range value for the channels.
 /// Channels must be of the same type and have data.

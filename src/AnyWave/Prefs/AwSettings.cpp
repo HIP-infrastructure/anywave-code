@@ -444,13 +444,6 @@ void AwSettings::detectMATLABRuntimes()
 	if (!dir.exists())
 		return;
 	dir.cd("MATLAB Runtime");
-	if (!dir.exists())
-		return;
-	auto subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-	for (auto const& d : subDirs) 
-		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
-	// make the first on as the default
-	m_settings.insert(aws::default_matlab, subDirs.first());
 #endif
 #ifdef Q_OS_MAC
 	QDir dir("/Applications/MATLAB/MATLAB_Runtime");

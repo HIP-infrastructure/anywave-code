@@ -81,8 +81,16 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 
 	// MATLAB
 	auto matlabs = aws->detectedMATLABApplications();
-	if (matlabs.isEmpty()) 
-		groupMATLAB->hide();
+	if (matlabs.isEmpty()) {
+	//	groupMATLAB->hide();
+		auto model = new QStandardItemModel(1, 1, this);
+		model->setHorizontalHeaderLabels({ "Status" });
+		tableViewMATLAB->setModel(model);
+		auto item = new QStandardItem("No MATLAB application detected.");
+		item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+		model->setItem(0, 0, item);
+		buttonDefault->hide();
+	}
 	else {
 
 		auto model = new QStandardItemModel(0, 3, this);
@@ -116,7 +124,14 @@ AwPrefsDial::AwPrefsDial(int tab, QWidget *parent)
 	}
 	auto runtimes = aws->detectedMATLABRuntimes();
 	if (runtimes.isEmpty()) {
-		groupRuntime->hide();
+		//groupRuntime->hide();
+		auto model = new QStandardItemModel(1, 1, this);
+		model->setHorizontalHeaderLabels({ "Status" });
+		tableViewRuntime->setModel(model);
+		auto item = new QStandardItem("No MATLAB Runtime detected.");
+		item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+		model->setItem(0, 0, item);
+		buttonRuntimeDefault->hide();
 	}
 	else {
 		auto model = new QStandardItemModel(0, 3, this);
@@ -335,7 +350,7 @@ void AwPrefsDial::accept()
 		auto status = model->item(i, 0)->text();
 		auto release = model->item(i, 1)->text();
 		auto path = model->item(i, 2)->text();
-		if (status == "Default")
+		if (status == "Default") {
 			auto matlabPath = qsettings.value("matlab/path", QString()).toString();
 			if (matlabPath != path) {
 				qsettings.setValue("matlab/path", path);

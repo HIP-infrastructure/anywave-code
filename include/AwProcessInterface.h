@@ -195,7 +195,7 @@ public:
 	inline bool isIdle() { return m_status == AwProcess::Idle; }
 	inline qint64 executionTime() { return m_executionTime; }
 	inline void sendMessage(const QString& message) { emit progressChanged(message); }
-	inline void sendProgressUpdate(int percent) { emit progressChanged(percent); }
+	inline void sendProgressUpdate(int percent) { emit progressPercentChanged(percent); }
 
 public slots:
 	void stop();
@@ -208,7 +208,7 @@ signals:
 	void log(const QString& message);
 	
 	// AnyWave - AwProcess API
-	void progressChanged(int percent);
+	void progressPercentChanged(int percent);
 	void progressChanged(const QString& message);
 	void error(const QString& message);
 	void warning(const QString& message);

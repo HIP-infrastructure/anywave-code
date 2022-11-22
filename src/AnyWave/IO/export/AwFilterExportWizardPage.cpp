@@ -124,6 +124,8 @@ AwFilterExportWizardPage::AwFilterExportWizardPage(const AwChannelList& channels
 {
 	m_settings = settings;
 	m_isBids = m_settings.contains(keys::bids_file_path);
+	if (settings.value("ignore_bids").toBool())
+		m_isBids = false;
 	m_channels = channels;
 	m_model = nullptr;
 	m_tableView = nullptr;

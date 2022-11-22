@@ -13,7 +13,7 @@ class AwDownloadGui : public QDialog
 	Q_OBJECT
 
 public:
-	AwDownloadGui(QWidget *parent = Q_NULLPTR);
+	AwDownloadGui(QWidget *parent = nullptr);
 	~AwDownloadGui();
 public slots:
 	void setText(const QString&);

@@ -25,11 +25,14 @@ public:
 	AwExporter();
 	~AwExporter();
 
+	void ignoreBIDS();
+
 	bool showUi() override;
 	void run() override;
 	void runFromCommandLine() override;
 protected:
 	AwSharedMarkerList m_inputMarkers;
+	bool m_ignoreBids;
 };
 
 class AwExporterPlugin : public AwProcessPlugin
