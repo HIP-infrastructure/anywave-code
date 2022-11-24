@@ -356,6 +356,7 @@ void AwPrefsDial::accept()
 				qsettings.setValue("matlab/path", path);
 				qsettings.setValue("matlab/default", release);
 			}
+			aws->setValue(aws::default_matlab, release);
 		}
 	}
 	// get MATLAB Runtime model
@@ -370,6 +371,7 @@ void AwPrefsDial::accept()
 				qsettings.setValue("matlab/mcr_path", path);
 				qsettings.setValue("matlab/mcr_default", release);
 			}
+			aws->setValue(aws::default_runtime, release);
 		}
 	}
 
