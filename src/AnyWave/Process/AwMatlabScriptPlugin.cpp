@@ -88,37 +88,44 @@ void AwMatlabScriptProcess::run()
 	QString runtimeVersion;
 	if (m_plugin->settings().contains("runtime"))
 		runtimeVersion = m_plugin->settings().value("runtime").toString();
+	bool isRuntimeDetected = aws->MATLABRuntimeDetected();
+	if (!isRuntimeDetected) {
+		emit progressChanged("ERROR: No runtime detected. Please install MATLAB runtime.");
+		return;
+	}
 #if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 	QSettings settings;
 	if (runtimeVersion.isEmpty()) {
-		QString mcrPath = settings.value("matlab/mcr_path").toString();
-		if (mcrPath.isEmpty())
-			emit progressChanged("MATLAB Runtime is not installed or path to it is not set!");
-		else
-			arguments << mcrPath;
+		//QString mcrPath = settings.value("matlab/mcr_path").toString();
+		//if (mcrPath.isEmpty())
+		//	emit progressChanged("MATLAB Runtime is not installed or path to it is not set!");
+		//else
+		//	arguments << mcrPath;
+		emit progressChanged("Plugin will run using default runtime.");
+		arguments << aws->defaultMATLABRuntimePath();
 	}
 	else {
 		emit progressChanged(QString("Plugin requires MATLAB Runtime version %1").arg(runtimeVersion));
-		QString mcrPath = aws->MATLABRuntimePath(runtimeVersion);
-		if (mcrPath.isEmpty()) {
+		auto runtime = aws->MATLABRuntimePath(runtimeVersion);  // path to runtime folder
+		if (runtime.isEmpty()) {
 			emit progressChanged(QString("MATLAB Runtime %1 not found.").arg(runtimeVersion));
 			emit progressChanged("Falling back to default runtime.");
-			mcrPath = settings.value("matlab/mcr_path").toString();
-			if (mcrPath.isEmpty())
-				emit progressChanged("Default MATLAB Runtime is not set. Please set a default runtime path in Preferences.");
-			else 
-				arguments << mcrPath;
+			arguments << aws->defaultMATLABRuntimePath();
 		}
-		else
-			arguments << mcrPath;
+		else {
+			emit progressChanged(QString("switched to runtime %1").arg(runtimeVersion));
+			arguments << runtime;
+		}
 	}
 #endif
 #ifdef Q_OS_WIN
 	QString application = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
 	systemPath = QString("%1;%2").arg(application).arg(systemPath);
 	if (runtimeVersion.isEmpty()) {  // default behavior as the plugin has no runtime version specified.
+		// check if we have runtime installed on system?
 		env.remove("PATH");
 		env.insert("PATH", systemPath);
+		emit progressChanged("Plugin will run using default runtime set in PATH.");
 	}
 	else {
 		emit progressChanged(QString("Plugin requires MATLAB Runtime version %1").arg(runtimeVersion));

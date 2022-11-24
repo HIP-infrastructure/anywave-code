@@ -458,6 +458,12 @@ void AwSettings::detectMATLABRuntimes()
 	    return;
 	for (auto const& d : subDirs)
 		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
+
+	QString defaultR = m_settings.value(aws::default_runtime).toString();
+	
+	if (!defaultR.isEmpty() && m_MATLABRuntimes.contains(defaultR))
+		return; // done. We have a default runtime that exists!
+
 	// set auto default to be the highest release
 	if (m_MATLABRuntimes.size() == 1)
 		m_settings.insert(aws::default_runtime, m_MATLABRuntimes.keys().first());
