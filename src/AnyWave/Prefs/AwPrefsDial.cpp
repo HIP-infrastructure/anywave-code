@@ -346,11 +346,11 @@ void AwPrefsDial::accept()
 	QStandardItemModel *model = static_cast<QStandardItemModel *>(tableViewMATLAB->model());
 	bool ok = false;
 
-	for (auto i = 0; model->rowCount(); i++) {
-		auto status = model->item(i, 0)->text();
+	for (auto i = 0; i < model->rowCount(); i++) {
+		auto status = model->item(i, 0);
 		auto release = model->item(i, 1)->text();
 		auto path = model->item(i, 2)->text();
-		if (status == "Default") {
+		if (status->text() == "Default") {
 			auto matlabPath = qsettings.value("matlab/path", QString()).toString();
 			if (matlabPath != path) {
 				qsettings.setValue("matlab/path", path);
@@ -360,7 +360,7 @@ void AwPrefsDial::accept()
 	}
 	// get MATLAB Runtime model
 	model = static_cast<QStandardItemModel*>(tableViewRuntime->model());
-	for (auto i = 0; model->rowCount(); i++) {
+	for (auto i = 0; i < model->rowCount(); i++) {
 		auto status = model->item(i, 0)->text();
 		auto release = model->item(i, 1)->text();
 		auto path = model->item(i, 2)->text();

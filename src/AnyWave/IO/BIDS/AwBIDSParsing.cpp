@@ -133,7 +133,7 @@ void AwBIDSManager::recursiveParsing(const QString& dirPath, AwBIDSItem* parentI
 		// check for derivatives at container level (GARDEL for example)
 		setDerivativesForItem(parentItem);
 
-		for (auto f : list) {
+		for (auto const& f : list) {
 			auto fileName = f.fileName();
 			auto ext = f.completeSuffix().toLower();
 			// speed up file recongnition avoiding file extensions not known by plugins.
