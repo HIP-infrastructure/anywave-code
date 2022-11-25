@@ -169,12 +169,13 @@ void AwUpdateManager::loadJSON()
 			comp->fileName = map.value("filename").toString();
 			if (map.contains("runtime"))
 				comp->runtime = map.value("runtime").toString();
+			if (map.contains("hash"))
+				comp->hashCode = map.value("hash").toString();
 
 			m_components << comp;
 		}
 }
 	if (checkForComponentsUpdates()) {
-
 		AwUpdaterGui gui(this);
 		if (gui.exec() == QDialog::Accepted) {
 			m_selectedComponents = gui.selectedComponents();
@@ -259,6 +260,7 @@ void AwUpdateManager::installUpdates()
 	// donwload to temporary folder
 	if (m_tmpDir.isValid()) {
 		m_file.setFileName(filePath);
+		m_hashCode = c->hashCode;
 		if (!m_file.open(QIODevice::WriteOnly)) {
 			AwMessageBox::critical(nullptr, "Error", QString("Fatal error: could not create file %1").arg(filePath));
 			m_downloadGui.get()->close();
@@ -286,13 +288,37 @@ void AwUpdateManager::installUpdates()
 
 void AwUpdateManager::componentDownloaded(QNetworkReply *reply)
 {
-	m_file.close();
 	reply->deleteLater();
-	if (reply->error()) {
-		AwMessageBox::critical(nullptr, "Error", reply->errorString());
+
+	auto errorF = [=](const QString& message) {
+		AwMessageBox::critical(nullptr, "Error", message);
 		m_downloadGui.get()->close();
+		m_hashCode.clear();
+		m_file.close();
 		return;
+	};
+	if (reply->error()) 
+		errorF(reply->errorString());
+	m_file.close();
+	if (m_hashCode.size()) {
+		QFile file(m_file.fileName());
+		file.open(QIODevice::ReadOnly);
+		QCryptographicHash hash(QCryptographicHash::Md5);
+		// check for hash code
+		if (hash.addData(&file)) {
+			file.close();
+			QString res = QString(hash.result().toHex(0));
+			if (res != m_hashCode) {
+				QFile::remove(m_file.fileName());
+				errorF("MD5 checksum failed.");
+			}
+		}
+		else {
+			QFile::remove(m_file.fileName());
+			errorF("Could not open downloaded file to compute checksum.");
+		}
 	}
+	
 	// install the update
 	auto c = m_selectedComponents.at(m_currentIndex);
 	if (c->name == "AnyWave") {

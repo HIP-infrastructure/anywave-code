@@ -20,6 +20,7 @@ public:
 	bool updateAvailable;
 	QString requirement;
 	QString fileName;
+	QString hashCode;
 };
 
 class AwUpdateManager : public QObject
@@ -63,7 +64,7 @@ private:
 
 	QList<QSharedPointer<Component>> m_components, m_selectedComponents;
 	std::unique_ptr<AwDownloadGui> m_downloadGui;
-	QString m_error;
+	QString m_error, m_hashCode;
 	QFile m_file;
 	int m_flags;
 	bool m_updatesAvailable, m_quiet;
