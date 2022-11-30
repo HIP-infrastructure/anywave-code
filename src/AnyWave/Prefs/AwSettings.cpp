@@ -459,6 +459,8 @@ void AwSettings::detectMATLABRuntimes()
 	for (auto const& d : subDirs)
 		m_MATLABRuntimes.insert(d, dir.absolutePath() + "/" + d);
 
+	if (m_MATLABRuntimes.isEmpty())
+		return;
 	QString defaultR = m_settings.value(aws::default_runtime).toString();
 	
 	if (!defaultR.isEmpty() && m_MATLABRuntimes.contains(defaultR))
@@ -513,6 +515,8 @@ void AwSettings::detectMATLAB()
 #endif
 
     // get default matlab settings if exists
+	if (m_MATLABApplications.isEmpty())
+		return;
 	auto defaultM = m_settings.value(aws::default_matlab).toString();
 	
 	if (defaultM.isEmpty()) {
