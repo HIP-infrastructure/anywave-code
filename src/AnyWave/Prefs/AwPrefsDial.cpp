@@ -342,36 +342,41 @@ void AwPrefsDial::accept()
 	
 	saveTimeHMS(radioHMSOn->isChecked());
 	aws->setValue(aws::auto_trigger_parsing, radioTriggerParserOn->isChecked());
-	// get MATLAB model
-	QStandardItemModel *model = static_cast<QStandardItemModel *>(tableViewMATLAB->model());
-	bool ok = false;
 
-	for (auto i = 0; i < model->rowCount(); i++) {
-		auto status = model->item(i, 0);
-		auto release = model->item(i, 1)->text();
-		auto path = model->item(i, 2)->text();
-		if (status->text() == "Default") {
-			auto matlabPath = qsettings.value("matlab/path", QString()).toString();
-			if (matlabPath != path) {
-				qsettings.setValue("matlab/path", path);
-				qsettings.setValue("matlab/default", release);
+	if (aws->MATLABDetected()) {
+		// get MATLAB model
+		QStandardItemModel* model = static_cast<QStandardItemModel*>(tableViewMATLAB->model());
+		bool ok = false;
+
+		for (auto i = 0; i < model->rowCount(); i++) {
+			auto status = model->item(i, 0);
+			auto release = model->item(i, 1)->text();
+			auto path = model->item(i, 2)->text();
+			if (status->text() == "Default") {
+				auto matlabPath = qsettings.value("matlab/path", QString()).toString();
+				if (matlabPath != path) {
+					qsettings.setValue("matlab/path", path);
+					qsettings.setValue("matlab/default", release);
+				}
+				aws->setValue(aws::default_matlab, release);
 			}
-			aws->setValue(aws::default_matlab, release);
 		}
 	}
-	// get MATLAB Runtime model
-	model = static_cast<QStandardItemModel*>(tableViewRuntime->model());
-	for (auto i = 0; i < model->rowCount(); i++) {
-		auto status = model->item(i, 0)->text();
-		auto release = model->item(i, 1)->text();
-		auto path = model->item(i, 2)->text();
-		if (status == "Default") {
-			auto matlabPath = qsettings.value("matlab/mcr_path", QString()).toString();
-			if (matlabPath != path) {
-				qsettings.setValue("matlab/mcr_path", path);
-				qsettings.setValue("matlab/mcr_default", release);
+	if (aws->MATLABRuntimeDetected()) {
+		// get MATLAB Runtime model
+		QStandardItemModel* model = static_cast<QStandardItemModel*>(tableViewRuntime->model());
+		for (auto i = 0; i < model->rowCount(); i++) {
+			auto status = model->item(i, 0)->text();
+			auto release = model->item(i, 1)->text();
+			auto path = model->item(i, 2)->text();
+			if (status == "Default") {
+				auto matlabPath = qsettings.value("matlab/mcr_path", QString()).toString();
+				if (matlabPath != path) {
+					qsettings.setValue("matlab/mcr_path", path);
+					qsettings.setValue("matlab/mcr_default", release);
+				}
+				aws->setValue(aws::default_runtime, release);
 			}
-			aws->setValue(aws::default_runtime, release);
 		}
 	}
 

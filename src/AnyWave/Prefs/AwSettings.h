@@ -137,6 +137,7 @@ public:
 	QStringList& topoLayouts(); 
 	// MATLAB Runtimes
 	inline bool MATLABRuntimeDetected() { return !m_MATLABRuntimes.isEmpty(); }
+	inline bool MATLABDetected() { return !m_MATLABApplications.isEmpty(); }
 	QString MATLABRuntimePath(const QString& k) { return m_MATLABRuntimes.value(k);	}
 	QString defaultMATLABRuntimePath() { return m_MATLABRuntimes.value(aws::default_runtime); }
 	// recent files specific
