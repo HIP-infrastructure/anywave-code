@@ -55,8 +55,9 @@ protected slots:
 	void changeDefaultColor();
 	void changeDefaultMarkerTag();
 	void changeDefaultValue(double);
-	void addMarkerToCustomList();
+	//void addMarkerToCustomList();
 	void changeMode(bool);
+	void editCustomList();
 signals:
 	void settingsChanged();
 protected:
@@ -69,6 +70,7 @@ protected:
 	QString m_customListPath, m_hedListPath;
 
 	void saveCustomList();
+	void updateTable();
 private:
 	Ui::AwMarkingToolClassUi *ui;
 

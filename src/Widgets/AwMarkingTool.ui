@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>713</width>
-    <height>740</height>
+    <width>551</width>
+    <height>746</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,10 +38,12 @@
       <bool>true</bool>
      </property>
      <property name="plainText">
-      <string>Lect click  will add a single marker at the mouse position.
-Left click and hold the mouse to start a time selection. Drag over the mouse and release to marker the time selection.
+      <string>Lect click to add a single marker at the mouse position.
 
-Holding the CTRL allows to target channel traces.</string>
+Left click and hold the mouse button to start a time selection.
+Drag over the mouse and release button to add time selection.
+
+Hold the CTRL key to target channel traces.</string>
      </property>
     </widget>
    </item>
@@ -196,7 +198,7 @@ Holding the CTRL allows to target channel traces.</string>
        </widget>
       </item>
       <item row="0" column="5">
-       <widget class="QComboBox" name="comboBoxColor">
+       <widget class="AwComboColor" name="comboBoxColor">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -233,120 +235,14 @@ Holding the CTRL allows to target channel traces.</string>
       <string>Custom list settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Tag:</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEditCustomLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Name the marker</string>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="labelValue_2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+       <widget class="QPushButton" name="buttonEdit">
         <property name="text">
-         <string>Value:</string>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-        <property name="buddy">
-         <cstring>spinValue</cstring>
+         <string>Edit</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QDoubleSpinBox" name="spinValueCustom">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="minimum">
-         <double>-1.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>1000000000000000013287555072.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>-1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Color:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
-       <widget class="QComboBox" name="comboColorCustom">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
-       <widget class="QPushButton" name="buttonAddMarker">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Add Marker</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="buttonClearList">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Clear</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="7">
+      <item row="0" column="0" colspan="3">
        <widget class="QTableWidget" name="tableWidgetCustom">
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
@@ -412,6 +308,13 @@ Holding the CTRL allows to target channel traces.</string>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>AwComboColor</class>
+   <extends>QComboBox</extends>
+   <header location="global">widget/AwComboColor.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -555,22 +458,6 @@ Holding the CTRL allows to target channel traces.</string>
     <hint type="destinationlabel">
      <x>120</x>
      <y>174</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonClearList</sender>
-   <signal>clicked()</signal>
-   <receiver>tableWidgetCustom</receiver>
-   <slot>clearContents()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>326</x>
-     <y>485</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>398</x>
-     <y>352</y>
     </hint>
    </hints>
   </connection>

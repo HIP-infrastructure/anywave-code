@@ -17,6 +17,7 @@
 #include <AwMarker.h>
 #include "ui_AwMarkingTool.h"
 #include <QHeaderView>
+#include "AwEditCustomListDial.h"
 
 
 AwMarkingTool* AwMarkingTool::m_instance = nullptr;
@@ -42,15 +43,12 @@ AwMarkingTool::AwMarkingTool(QWidget *parent)
 	m_settings[keys::auto_increment] = false;
 	m_settings[keys::confidence_level] = false;
 	m_settings[keys::auto_inc_index] = 0;
-	ui->lineEditName->setText("New Marker");
+	ui->lineEditName->setText(marker->label());
 	ui->spinValue->setValue(marker->value());
-	// init combo color
-	// default color at first index
-	ui->comboBoxColor->insertItem(0, "Default", 0);
-	for (int i = 0; i < QColor::colorNames().size(); i++) {
-		ui->comboBoxColor->insertItem(i + 1, QColor::colorNames().at(i), i);
-		ui->comboBoxColor->setItemData(i + 1, QColor(QColor::colorNames().at(i)), Qt::DecorationRole);
-	}
+
+	ui->comboBoxColor->insertItem(0, "Default");
+	ui->comboBoxColor->setCurrentIndex(0);
+
 	connect(ui->comboBoxColor, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDefaultColor()));
 	connect(ui->lineEditName, &QLineEdit::editingFinished, this, &AwMarkingTool::changeDefaultMarkerTag);
 	connect(ui->spinValue, SIGNAL(valueChanged(double)), this, SLOT(changeDefaultValue(double)));
@@ -60,19 +58,11 @@ AwMarkingTool::AwMarkingTool(QWidget *parent)
 	connect(ui->radioCustom, &QRadioButton::clicked, this, &AwMarkingTool::changeMode);
 	connect(ui->radioHED, &QRadioButton::clicked, this, &AwMarkingTool::changeMode);
 
-
 	// starts the gui in default marker mode => hide other options
 	ui->groupCustom->hide();
 	ui->groupHED->hide();
 	ui->checkConfidence->hide();
 
-	// init custom list part of the gui
-		// default color at first index
-	ui->comboColorCustom->insertItem(0, "Default", 0);
-	for (int i = 0; i < QColor::colorNames().size(); i++) {
-		ui->comboColorCustom->insertItem(i + 1, QColor::colorNames().at(i), i);
-		ui->comboColorCustom->setItemData(i + 1, QColor(QColor::colorNames().at(i)), Qt::DecorationRole);
-	}
 	ui->tableWidgetCustom->setColumnCount(3);
 	ui->tableWidgetCustom->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	QStringList headers = { "Name", "Value", "Color" };
@@ -81,8 +71,7 @@ AwMarkingTool::AwMarkingTool(QWidget *parent)
 	ui->tableWidgetHED->setHorizontalHeaderLabels(headers);
 	ui->tableWidgetHED->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-
-	connect(ui->buttonAddMarker, &QPushButton::clicked, this, &AwMarkingTool::addMarkerToCustomList);
+	connect(ui->buttonEdit, &QPushButton::clicked, this, &AwMarkingTool::editCustomList);
 }
 
 AwMarkingTool::~AwMarkingTool()
@@ -102,7 +91,13 @@ void AwMarkingTool::loadCustomList(const QString& path)
 {
 	m_customListPath = path;
 	m_customMarkers = AwMarker::loadShrdFaster(path);
-	// init the gui accordingly
+	updateTable();
+}
+
+void AwMarkingTool::updateTable()
+{
+	ui->tableWidgetCustom->clearContents();
+	ui->tableWidgetCustom->setRowCount(0);
 	int row = 0;
 	for (auto const& m : m_customMarkers) {
 		ui->tableWidgetCustom->insertRow(row);
@@ -112,7 +107,12 @@ void AwMarkingTool::loadCustomList(const QString& path)
 		item = new QTableWidgetItem(QString::number(m->value()));
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		ui->tableWidgetCustom->setItem(row, 1, item);
-		item = new QTableWidgetItem(m->color());
+		if (m->color().isEmpty())
+			item = new QTableWidgetItem("Default");
+		else {
+			item = new QTableWidgetItem(m->color());
+			item->setBackground(QBrush(QColor(m->color())));
+		}
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		ui->tableWidgetCustom->setItem(row++, 2, item);
 	}
@@ -204,23 +204,18 @@ void AwMarkingTool::changeDefaultValue(double v)
 	emit settingsChanged();
 }
 
-void AwMarkingTool::addMarkerToCustomList()
+void AwMarkingTool::editCustomList()
 {
-	auto marker = AwSharedMarker(new AwMarker);
-	marker->setLabel(ui->lineEditCustomLabel->text());
-	marker->setValue(ui->spinValueCustom->value());
-	marker->setColor(ui->comboColorCustom->currentText());
-	m_customMarkers << marker;
-	int row = ui->tableWidgetCustom->rowCount();
-	ui->tableWidgetCustom->insertRow(row);
-	auto item = new QTableWidgetItem(marker->label());
-	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-	ui->tableWidgetCustom->setItem(row, 0, item);
-	item = new QTableWidgetItem(QString::number(marker->value()));
-	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-	ui->tableWidgetCustom->setItem(row, 1, item);
-	item = new QTableWidgetItem(marker->color());
-	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
-	ui->tableWidgetCustom->setItem(row, 2, item);
-	saveCustomList();
+	AwEditCustomListDial dlg(m_customMarkers);
+	if (dlg.exec() == QDialog::Accepted) {
+		if (dlg.markers().size()) {
+			m_customMarkers = dlg.markers();
+			updateTable();
+			saveCustomList();
+		}
+	}
+	if (m_customMarkers.isEmpty()) {
+		// go back to default mode
+		ui->radioDefault->setChecked(true);
+	}
 }

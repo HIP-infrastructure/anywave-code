@@ -28,6 +28,7 @@
     <ClCompile Include="AwComboDS.cpp" />
     <ClCompile Include="AwComboMarker.cpp" />
     <ClCompile Include="AwDownSamplingWidget.cpp" />
+    <ClCompile Include="AwEditCustomListDial.cpp" />
     <ClCompile Include="AwGainLevels.cpp" />
     <ClCompile Include="AwGetValueDialog.cpp" />
     <ClCompile Include="AwGraphicsObjects.cpp" />
@@ -88,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\include\widget\AwMarkingTool.h" />
+    <QtMoc Include="AwEditCustomListDial.h" />
     <ClInclude Include="SignalView\AwAmplitudeItem.h" />
     <QtMoc Include="SignalItem\AwSignalItemSettings.h" />
     <QtMoc Include="SignalItem\AwSIAmpButton.h" />
