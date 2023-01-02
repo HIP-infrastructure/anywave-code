@@ -21,12 +21,15 @@
 
 class AwMarker;
 class QGraphicsScene;
+class QGraphicsSceneMouseEvent;
 
 class AW_WIDGETS_EXPORT AwMarkerItem : public AwGraphicsMarkerItem
 {
 public:
 	AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int labelOffset = 0);  
 	virtual ~AwMarkerItem();
+
+	enum Flags { ResizeLeft = 1, ResizeRight, Move };
 
 	void updateDisplay();
 	inline AwSharedMarker marker() { return m_marker; }
@@ -40,13 +43,19 @@ public:
 	void setValue(double v);
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
+	void hoverEnterEvent(QGraphicsSceneHoverEvent *e) override;
+	void hoverLeaveEvent(QGraphicsSceneHoverEvent* e) override;
+	void hoverMoveEvent(QGraphicsSceneHoverEvent* e) override;
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* e) override;
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* e) override;
+	void mousePressEvent(QGraphicsSceneMouseEvent* e) override;
 
 	AwSharedMarker m_marker;
 	float m_posInFile;
 	int m_offset;
 	AwLabelItem *m_labelItem, *m_valueItem;
 	AwMarkerItem *m_prev;
+	bool m_mousePressed, m_hasMoved;
+	int flags;
 };
 #endif

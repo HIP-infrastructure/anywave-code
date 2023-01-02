@@ -55,7 +55,7 @@ public:
 	inline AwNavigationBar *navigationBar() { return m_navBar; }
 	void changeChannelSelectionState(const QString& name, bool selected) { m_scene->changeChannelsSelectionState(name, selected); }
 	void update() { m_scene->update(); }
-	void updateMarkers() { m_scene->updateMarkers(); }
+	//void updateMarkers() { m_scene->updateMarkers(); }
 	inline AwChannelList& displayedChannels() { return m_channels; }
 	virtual void setChannels(const AwChannelList& channels);
 	virtual void setChannels(const QList<QSharedPointer<AwChannel>>& channels);
@@ -93,6 +93,7 @@ public slots:
 	void stackChannels(bool flag);
 	void openFilterGUI();
 	virtual void processEvent(QSharedPointer<AwEvent>);
+	void updateMarkers();
 signals:
 	void settingsChanged(AwViewSettings *settings, int flags);
 	void positionChanged(float position);	// send when the position in file changed.
@@ -110,6 +111,7 @@ signals:
 	void dataLoaded(float position, float duration);
 	// notification about channels order in the view
 	void channelsOrderChanged(const QStringList&);
+	void markerChanged(const AwSharedMarker& marker);
 protected:
 	AwDataClient m_client;
 	AwViewSettings *m_settings;

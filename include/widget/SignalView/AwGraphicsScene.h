@@ -38,7 +38,7 @@ public:
 	AwGraphicsScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent = 0);
 	~AwGraphicsScene();
 
-	enum Mode { Cursor, Mapping, AddingMarker, None, QTS, DraggingCursor, Count };
+	enum Mode { Cursor, Mapping, AddingMarker, None, QTS, DraggingCursor, Count, MovingMarker };
 	inline float pageDuration() { return m_pageDuration; }
 	inline AwChannelList& channels() { return m_channels; }
 	AwChannelList selectedChannels();
@@ -67,6 +67,10 @@ public:
 	void setItemsDragged() { m_itemsDragged = true; }
 
 	QGraphicsItem* amplitudeScale();
+
+	// measurement methods
+	float widthToDuration(float w);
+	float timeAtPos(qreal x);
 signals:
 	void clickedAtTime(float time);
 	void numberOfDisplayedChannelsChanged(int number);
@@ -80,6 +84,7 @@ signals:
 	void cursorPositionChanged(float position);
 	void mappingPositionChanged(float position);
 	void markerInserted(const AwSharedMarker& marker);
+	void markerChanged(const AwSharedMarker& marker);
 	void cursorClickedAtTime(float time);
 	void mappingTimeSelectionDone(float time, float duration);
 	void badChannelSet(const QString& label);
@@ -158,8 +163,8 @@ protected slots:
 #endif
 protected:
 	float timeAtPos(const QPointF& pos);
-	float timeAtPos(qreal x);
-	float widthToDuration(float w);
+	
+
 	float xPosFromTime(float time);
 	QGraphicsItem * getItemUnderMouse(QPointF pos, int *itemType);
 	virtual QMenu *defaultContextMenu();

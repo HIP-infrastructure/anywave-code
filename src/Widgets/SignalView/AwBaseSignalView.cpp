@@ -123,6 +123,7 @@ void AwBaseSignalView::makeConnections()
 	connect(m_scene, SIGNAL(numberOfDisplayedChannelsChanged(int)), m_navBar, SLOT(updateNumberOfChannels(int)));
 	connect(m_scene, SIGNAL(QTSModeEnded()), this, SIGNAL(QTSModeEnded()));
 	connect(m_scene, &AwGraphicsScene::itemsOrderChanged, this, &AwBaseSignalView::channelsOrderChanged);
+	connect(m_scene, &AwGraphicsScene::markerChanged, this, &AwBaseSignalView::markerChanged);
 	// cursor specific
 	connect(m_scene, SIGNAL(cursorClickedAtTime(float)), this, SIGNAL(cursorClicked(float)));
 	connect(m_scene, SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
@@ -298,6 +299,11 @@ void AwBaseSignalView::setPositionInFile(float pos)
 	reloadData();
 	updateVisibleMarkers();
 	emit positionChanged(m_positionInFile);
+}
+
+void AwBaseSignalView::updateMarkers()
+{
+	updateVisibleMarkers();
 }
 
 void AwBaseSignalView::updateVisibleMarkers()

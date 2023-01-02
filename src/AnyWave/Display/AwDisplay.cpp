@@ -60,7 +60,6 @@ void AwDisplay::setInstance(AwDisplay *d)
 AwDisplay::AwDisplay(QMainWindow *w)
 {
 	m_mainWindow = w;
-//	connect(AwMarkerManager::instance(), SIGNAL(goTo(float)), this, SLOT(showPositionInViews(float)));
 	connect(AwDataManager::instance()->markerManager(), &AwMarkerManager::goTo, this, &AwDisplay::showPositionInViews);
 	m_centralWidget = static_cast<QSplitter*>(m_mainWindow->centralWidget());
 	auto settings = m_displaySetup.addViewSettings();
@@ -100,7 +99,6 @@ AwChannelList AwDisplay::getChannels(int type)
 void AwDisplay::setAddMarkerDock(QDockWidget *dock)
 {
 	m_dockAddMarker = dock;
-//	connect(dock, SIGNAL(visibilityChanged(bool)), this, SLOT(addMarkerModeChanged(bool)));
 	connect(dock, &QDockWidget::visibilityChanged, this, &AwDisplay::addMarkerModeChanged);
 }
 
@@ -129,36 +127,20 @@ AwSignalView* AwDisplay::addSignalView(AwViewSettings  *settings)
 	m_signalViews << view;
 
 	// connections
-//	connect(view, SIGNAL(positionChanged(float)), this, SLOT(synchronizeViews(float)));
 	connect(view, &AwBaseSignalView::positionChanged, this, &AwDisplay::synchronizeViews);
-	//connect(view, SIGNAL(cursorPositionChanged(float)), this, SLOT(synchronizeCursorPos(float)));
 	connect(view, &AwBaseSignalView::cursorPositionChanged, this, &AwDisplay::synchronizeCursorPos);
-//	connect(view, SIGNAL(mappingPositionChanged(float)), this, SLOT(synchronizeMappingCursorPos(float)));
 	connect(view, &AwBaseSignalView::mappingPositionChanged, this, &AwDisplay::synchronizeMappingCursorPos);
-//	connect(view, SIGNAL(displayedChannelsUpdated(AwChannelList&)), pm, SLOT(startDisplayProcesses(AwChannelList&)));
 	connect(view, &AwSignalView::displayedChannelsUpdated, pm, &AwProcessManager::startDisplayProcesses);
-//	connect(view->scene(), SIGNAL(clickedAtTime(float)), this, SIGNAL(clickedAtLatency(float)));
 	connect(view->scene(), &AwGraphicsScene::clickedAtTime, this, &AwDisplay::clickedAtLatency);
-//	connect(view->scene(), SIGNAL(mappingTimeSelectionDone(float, float)), this, SIGNAL(mappingTimeSelectionDone(float, float)));
 	connect(view->scene(), &AwGraphicsScene::mappingTimeSelectionDone, this, &AwDisplay::mappingTimeSelectionDone);
 	connect(view->scene(), &AwGraphicsScene::draggedCursorPositionChanged, this, &AwDisplay::draggedCursorPositionChanged);
-//	connect(view, SIGNAL(cursorClicked(float)), this, SLOT(synchronizeOnCursor(float)));
 	connect(view, &AwBaseSignalView::cursorClicked, this, &AwDisplay::synchronizeOnCursor);
-//	connect(view, SIGNAL(markerBarHighlighted(AwMarker*)), this, SLOT(highlightMarker(AwMarker*)));
 	connect(view, &AwBaseSignalView::markerBarHighlighted, this, &AwDisplay::highlightMarker);
-
-//	connect(AwMarkerManager::instance()->markerInspector(), SIGNAL(settingsChanged(AwMarkingSettings*)),
-//		view->scene(), SLOT(setMarkingSettings(AwMarkingSettings*)));
-//	view->scene()->setMarkingSettings(&AwMarkerManager::instance()->markerInspector()->settings());
-
+	connect(view, &AwBaseSignalView::markerChanged, this, &AwDisplay::updateMarker);
 	// Montage to view
-//	connect(AwMontageManager::instance(), SIGNAL(badChannelsSet(const QStringList&)), view->scene(), SLOT(unselectChannels(const QStringList&)));
 	connect(AwMontageManager::instance(), &AwMontageManager::badChannelsSet, view->scene(), &AwGraphicsScene::unselectChannels);
-
 	// close view connect
-//	connect(view, SIGNAL(closeViewClicked()), this, SLOT(removeView()));
 	connect(view, &AwBaseSignalView::closeViewClicked, this, &AwDisplay::removeView);
-
 	// filters changed
 	connect(view->scene(), SIGNAL(channelFiltersChanged()), AwMontageManager::instance(), SLOT(saveCurrentMontage()));
 
@@ -173,7 +155,6 @@ AwSignalView* AwDisplay::addSignalView(AwViewSettings  *settings)
 	for (auto v : m_signalViews)
 		v->setProcessFlags(AwSignalView::UpdateProcess);
 
-//	view->getNewMarkers();
 	view->setMarkers(AwMarkerManager::instance()->getSharedMarkersThread());
 
 	// QTS
@@ -241,6 +222,19 @@ void AwDisplay::saveViewSettings()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 ///    S L O T S
+
+void AwDisplay::updateMarker(const AwSharedMarker& marker)
+{
+	// check position of the new marker (avoid it to overpass the file duration boundaries)
+	auto dm = AwDataManager::instance();
+	auto duration = dm->totalDuration();
+
+	if (marker->end() > duration)
+		marker->setStart(marker->start() - (marker->end() - duration));
+	AwMarkerManager::instance()->updateMarkers();
+	for (auto v : m_signalViews)
+		v->updateMarkers();
+}
 
 void AwDisplay::addVideoCursor()
 {

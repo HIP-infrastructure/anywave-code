@@ -50,6 +50,7 @@ public:
 public slots:
 	void addMarkers(const AwSharedMarkerList& markers);
 	void addMarker(const AwSharedMarker& marker);
+	void updateMarkers(); // called by AwDisplay when a marker is modified in a View (typically when a marker was moved/resized)
 	void showDockUI();
 	void receivedMarkers(AwSharedMarkerList *markers); // from different thread
 	void removeMarker(const AwSharedMarker& marker);

@@ -16,7 +16,9 @@
 #include <widget/AwMarkerItem.h>
 #include <widget/AwGraphicsDefines.h>
 #include <QGraphicsScene>
+#include <widget/SignalView/AwGraphicsScene.h>
 #include <QGraphicsView>
+#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsProxyWidget>
 #include "AwMarkerLabelButton.h"
 #include "AwMarkerValueButton.h"
@@ -28,7 +30,9 @@ AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const
 : AwGraphicsMarkerItem(mark, phys)
 {
 	m_marker = mark;
-	setFlags(QGraphicsRectItem::flags() | QGraphicsItem::ItemIsSelectable);
+	setFlags(QGraphicsRectItem::flags() | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+	setAcceptHoverEvents(true);
+	flags = 0;
 	m_labelItem = new AwLabelItem(mark->label(), this);
 	QString valueLabel;
 	if (mark->value() < 0)
@@ -50,7 +54,7 @@ AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const
 	setOpacity(1);
 
 	m_posInFile = 0.;
-
+	m_mousePressed = m_hasMoved = false;
 }
 
 AwMarkerItem::~AwMarkerItem()
@@ -158,11 +162,117 @@ void AwMarkerItem::setValue(double value)
 
 void AwMarkerItem::hoverEnterEvent(QGraphicsSceneHoverEvent *e)
 {
+
 }
 
 void AwMarkerItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *e)
 {
+	setCursor(QCursor(Qt::ArrowCursor));
+	flags = 0;
 }
+
+void AwMarkerItem::hoverMoveEvent(QGraphicsSceneHoverEvent* e)
+{
+	auto scenePtr = qobject_cast<AwGraphicsScene*>(scene());
+	auto newPos = scenePtr->timeAtPos(e->scenePos().x());
+
+	// special case : the marker is a single marker => force moving not resizing
+	if (m_marker->duration() == 0.) {
+		flags = AwMarkerItem::Move;
+		setCursor(QCursor(Qt::SizeAllCursor));
+		return;
+	}
+	// update cursor depending on mouse position
+	if (std::abs(newPos - m_marker->start()) <= 0.1) {
+		flags = AwMarkerItem::ResizeLeft;
+		setCursor(QCursor(Qt::SplitHCursor));
+	}
+	else if (std::abs(newPos - m_marker->end()) <= 0.1) {
+		flags = AwMarkerItem::ResizeRight;
+		setCursor(QCursor(Qt::SplitHCursor));
+	}
+	else {
+		flags = AwMarkerItem::Move;
+		setCursor(QCursor(Qt::SizeAllCursor));
+	}
+}
+
+void AwMarkerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
+{
+	auto scenePtr = qobject_cast<AwGraphicsScene*>(scene());
+	auto newPos = scenePtr->timeAtPos(e->scenePos().x());
+	auto oldPos = scenePtr->timeAtPos(e->lastScenePos().x());
+
+	if (m_mousePressed && e->modifiers() & Qt::ShiftModifier) {  // move marker only if shift key is hold
+		if (flags == AwMarkerItem::Move) {
+			auto offset = newPos - oldPos;
+			m_marker->setStart(m_marker->start() + offset);
+			m_hasMoved = true;
+			updatePosition();
+			e->accept();
+			return;
+		}
+		else if (flags == AwMarkerItem::ResizeLeft) {
+			auto delta = std::abs(m_marker->start() - newPos);
+			// avoid resizing to the opposite side
+			if (newPos > m_marker->end()) {
+				// make the marker a single marker
+				m_marker->setStart(newPos);
+				m_marker->setDuration(0.);
+			}
+			else if (newPos < m_marker->start()) {
+				m_marker->setStart(newPos);
+				m_marker->setDuration(m_marker->duration() + delta);
+			}
+			else if (newPos > m_marker->start()) {
+				m_marker->setStart(newPos);
+				m_marker->setDuration(m_marker->duration() - delta);
+			}
+			m_hasMoved = true;
+			updatePosition();
+			e->accept();
+			return;
+		}
+		else if (flags == AwMarkerItem::ResizeRight) {
+			auto delta = std::abs(m_marker->end() - newPos);
+			// avoid resizing to the opposite side
+			if (newPos < m_marker->start()) {
+				m_marker->setDuration(0);
+			}
+			else if (newPos < m_marker->end()) {
+				m_marker->setDuration(m_marker->duration() - delta);
+			}
+			else if (newPos > m_marker->end()) {
+				m_marker->setDuration(m_marker->duration() + delta);
+			}
+			m_hasMoved = true;
+			updatePosition();
+			e->accept();
+			return;
+		}
+	}
+	else {
+		// check if the mouse is close to the boundaries
+		e->ignore();
+		m_hasMoved = false;
+	}
+}
+
+void AwMarkerItem::mousePressEvent(QGraphicsSceneMouseEvent* e)
+{
+	m_mousePressed = true;
+}
+
+void AwMarkerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
+{
+	if (m_hasMoved) {
+		auto scenePtr = qobject_cast<AwGraphicsScene*>(scene());
+		scenePtr->markerChanged(m_marker);
+		m_hasMoved = false;
+	}
+	m_mousePressed = false;
+}
+
 
 void AwMarkerItem::setPositionInFile(float pos)
 {
@@ -191,6 +301,7 @@ void AwMarkerItem::updatePosition()
 	if (m_marker->duration())
 		info += QString("\nduration: %1s").arg(m_marker->duration());
 	info += QString("\nValue: %1").arg(m_marker->value());
+	info += QString("\nHold the shift key to move/resize.");
 	setToolTip(info);
 	update();
 }

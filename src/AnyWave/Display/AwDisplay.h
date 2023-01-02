@@ -117,7 +117,7 @@ public slots:
 	void removeVideoCursor();
 	void handleVideoCursor(bool flag);
 	void setVideoPosition(float pos);
-
+	void updateMarker(const AwSharedMarker& marker);
 
 	/** Change selected state of one or more channels, referenced by name **/
 	void changeChannelsSelectionState(const QString& name, bool selected);

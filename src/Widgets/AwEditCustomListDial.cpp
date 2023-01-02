@@ -141,4 +141,4 @@ void AwAddCustomMarkerDial::accept()
 		marker = AwSharedMarker(m);
 		return QDialog::accept();
 	}
-}
+} 

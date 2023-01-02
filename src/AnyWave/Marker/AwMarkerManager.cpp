@@ -277,6 +277,11 @@ void AwMarkerManager::removeMarkers(const AwSharedMarkerList& markers)
 	emit updateStats();
 }
 
+void AwMarkerManager::updateMarkers()
+{
+	m_ui->setMarkers(m_sMarkers);
+}
+
 void AwMarkerManager::initFromCommandLine(const QString& filePath)
 {
 	m_filePath = filePath;
