@@ -157,10 +157,7 @@ protected slots:
 	void setChannelAsBad();
 	void gotoChannel(QAction *act);
 	void launchQTSPlugin();
-	void undoMarkerInsertion();
-#ifdef AW_MARKING_TOOL_V2
 	void applyMarkingToolSettings();
-#endif
 protected:
 	float timeAtPos(const QPointF& pos);
 	
@@ -199,7 +196,6 @@ protected:
 	AwSharedMarkerList m_selectedMarkers;			// current selected markers
 	AwSharedMarkerList m_markers;	// current markers in the scene
 	AwSharedMarker m_mappingMarker;	// marker used to store the current mapping position and duration
-	AwSharedMarkerList m_lastAddedMarkers;
 	QList<AwGraphicsMarkerItem*> m_markerItemsDisplayed;
 	QList<AwGraphicsSignalItem *> m_signalItems, m_selectedSignalItems, m_visibleSignalItems;
 	QList<AwHighLightMarker *> m_hmarkers;

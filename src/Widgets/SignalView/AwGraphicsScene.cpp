@@ -819,13 +819,6 @@ void AwGraphicsScene::setChannelAsBad()
 	emit badChannelSet(act->data().toString());
 }
 
-void AwGraphicsScene::undoMarkerInsertion()
-{
- 	if (m_lastAddedMarkers.isEmpty())
-		return;
-	emit markerRemoved(m_lastAddedMarkers.takeLast());
-}
-
 void AwGraphicsScene::cursorToMarker()
 {
 	if (m_mouseMode == AwGraphicsScene::Cursor || m_mouseMode == AwGraphicsScene::Mapping) 
@@ -957,6 +950,9 @@ void AwGraphicsScene::keyPressEvent(QKeyEvent *e)
 			break;
 		case Qt::Key_I: // CTRL + I = Invert selection
 			invertChannelSelection();
+			break;
+		case Qt::Key_Z:
+			m_markingTool->removeLastAddedMarker();
 			break;
 		}
 	}
@@ -1101,18 +1097,8 @@ QMenu *AwGraphicsScene::defaultContextMenu()
 ///
 void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 {
-	if (m_mouseMode == AwGraphicsScene::AddingMarker) {
-		if (m_lastAddedMarkers.size()) {
-			QMenu menu;
-			auto action = new QAction("Undo");
-			connect(action, &QAction::triggered, this, &AwGraphicsScene::undoMarkerInsertion);
-			menu.addAction(action);
-			menu.exec(e->screenPos());
-		}
-		return;
-	}
 	// get item under the mouse
-	QGraphicsItem *item = NULL;
+	QGraphicsItem *item = nullptr;
 	int itemType;
 	m_contextMenuMapping = nullptr;
 	QMenu *menuDisplay = defaultContextMenu();
@@ -1280,7 +1266,6 @@ void AwGraphicsScene::setMarkingMode(bool flag)
 	}
 	else {
 		m_mouseMode = AwGraphicsScene::None;
-		m_lastAddedMarkers.clear();
 		if (m_currentMarkerItem) {
 			removeItem(m_currentMarkerItem);
 			delete m_currentMarkerItem;
@@ -1395,11 +1380,11 @@ void AwGraphicsScene::setMappingCursorPosition(float pos)
 
 void AwGraphicsScene::removeLastMappingPosition()
 {
-	if (m_mappingFixedCursor == NULL)
+	if (m_mappingFixedCursor == nullptr)
 		return;
 
 	removeItem(m_mappingFixedCursor);
 	delete m_mappingFixedCursor;
-	m_mappingFixedCursor = NULL;
+	m_mappingFixedCursor = nullptr;
 	update();
 }

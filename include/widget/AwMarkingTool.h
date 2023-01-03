@@ -46,8 +46,11 @@ public:
 	QVariantMap& settings() { return m_settings; }
 	QList<QSharedPointer<AwMarker>>& customList() { return m_customMarkers; }
 	QList<QSharedPointer<AwMarker>>& hedList() { return m_hedMarkers; }
+	void removeLastAddedMarker();
 
 	static AwMarkingTool* instance();
+public slots:
+	void addMarkerToUndoList(const QSharedPointer<AwMarker> & marker);
 protected slots:
 	void changeConfidenceLevel(bool);
 	void changeAutoIncrement(bool);
@@ -55,22 +58,27 @@ protected slots:
 	void changeDefaultColor();
 	void changeDefaultMarkerTag();
 	void changeDefaultValue(double);
-	//void addMarkerToCustomList();
 	void changeMode(bool);
 	void editCustomList();
+	void undoMarkers();
 signals:
 	void settingsChanged();
+	void markersRemoved(QList<QSharedPointer<AwMarker>>& markers);
 protected:
+	void keyPressEvent(QKeyEvent* e) override;
+
 	static AwMarkingTool* m_instance;
 	int m_mode;
 	QList<QSharedPointer<AwMarker>> m_customMarkers;
 	QList<QSharedPointer<AwMarker>> m_hedMarkers;
 	QSharedPointer<AwMarker> m_defaultMarker;
+	QList<QSharedPointer<AwMarker>> m_addedMarkers;
 	QVariantMap m_settings;
 	QString m_customListPath, m_hedListPath;
 
 	void saveCustomList();
 	void updateTable();
+	
 private:
 	Ui::AwMarkingToolClassUi *ui;
 

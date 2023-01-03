@@ -62,6 +62,7 @@ AwMarkingTool::AwMarkingTool(QWidget *parent)
 	ui->groupCustom->hide();
 	ui->groupHED->hide();
 	ui->checkConfidence->hide();
+	ui->groupAdded->hide();
 
 	ui->tableWidgetCustom->setColumnCount(3);
 	ui->tableWidgetCustom->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -71,7 +72,12 @@ AwMarkingTool::AwMarkingTool(QWidget *parent)
 	ui->tableWidgetHED->setHorizontalHeaderLabels(headers);
 	ui->tableWidgetHED->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+	ui->tableWidgetAdded->setColumnCount(4);
+	ui->tableWidgetAdded->setHorizontalHeaderLabels({ "Name", "Pos.", "Duration", "Color" });
+	ui->tableWidgetAdded->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
 	connect(ui->buttonEdit, &QPushButton::clicked, this, &AwMarkingTool::editCustomList);
+	connect(ui->buttonUndo, &QPushButton::clicked, this, &AwMarkingTool::undoMarkers);
 }
 
 AwMarkingTool::~AwMarkingTool()
@@ -132,7 +138,12 @@ void AwMarkingTool::loadHEDList(const QString& path)
 		item = new QTableWidgetItem(QString::number(m->value()));
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		ui->tableWidgetHED->setItem(row, 1, item);
-		item = new QTableWidgetItem(m->color());
+		if (m->color().isEmpty())
+			item = new QTableWidgetItem("Default");
+		else {
+			item = new QTableWidgetItem(m->color());
+			item->setBackground(QBrush(QColor(m->color())));
+		}
 		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 		ui->tableWidgetHED->setItem(row++, 2, item);
 	}
@@ -218,4 +229,90 @@ void AwMarkingTool::editCustomList()
 		// go back to default mode
 		ui->radioDefault->setChecked(true);
 	}
+}
+
+void AwMarkingTool::addMarkerToUndoList(const AwSharedMarker& marker)
+{
+	m_addedMarkers << marker;
+	ui->groupAdded->show();
+	// init the gui accordingly
+	int row = ui->tableWidgetAdded->rowCount();
+	ui->tableWidgetAdded->insertRow(row);
+	auto item = new QTableWidgetItem(marker->label());
+	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+	ui->tableWidgetAdded->setItem(row, 0, item);
+	item = new QTableWidgetItem(QString::number(marker->start()));
+	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+	ui->tableWidgetAdded->setItem(row, 1, item);
+	item = new QTableWidgetItem(QString::number(marker->duration()));
+	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+	ui->tableWidgetAdded->setItem(row, 2, item);
+	if (marker->color().isEmpty())
+		item = new QTableWidgetItem("Default");
+	else {
+		item = new QTableWidgetItem(marker->color());
+		item->setBackground(QBrush(QColor(marker->color())));
+	}
+	item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+	ui->tableWidgetAdded->setItem(row++, 3, item);
+}
+
+void AwMarkingTool::keyPressEvent(QKeyEvent *e)
+{
+	if (e->modifiers() & Qt::ControlModifier) {
+		if (e->key() == Qt::Key_Z) {
+			e->accept();
+			removeLastAddedMarker();
+			return;
+		}
+	}
+	e->ignore();
+}
+
+
+void AwMarkingTool::removeLastAddedMarker()
+{
+	if (ui->tableWidgetAdded->rowCount()) {
+		ui->tableWidgetAdded->removeRow(ui->tableWidgetAdded->rowCount() - 1);
+		AwSharedMarkerList markers;
+		markers << m_addedMarkers.takeLast();
+		emit markersRemoved(markers);
+	}
+	else 
+		ui->groupAdded->hide();
+}
+
+void AwMarkingTool::undoMarkers()
+{
+	auto selected = ui->tableWidgetAdded->selectionModel()->selectedRows();
+
+	AwSharedMarkerList markers;
+	for (auto const& s : selected) {
+		markers << m_addedMarkers.at(s.row());
+		m_addedMarkers.removeAt(s.row());
+	}
+	ui->tableWidgetAdded->clearContents();
+	ui->tableWidgetAdded->setRowCount(0);
+	int row = 0;
+	for (auto const& m : m_addedMarkers) {
+		ui->tableWidgetAdded->insertRow(row);
+		auto item = new QTableWidgetItem(m->label());
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		ui->tableWidgetAdded->setItem(row, 0, item);
+		item = new QTableWidgetItem(QString::number(m->start()));
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		ui->tableWidgetAdded->setItem(row, 1, item);
+		item = new QTableWidgetItem(QString::number(m->duration()));
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		ui->tableWidgetAdded->setItem(row, 2, item);
+		if (m->color().isEmpty())
+			item = new QTableWidgetItem("Default");
+		else {
+			item = new QTableWidgetItem(m->color());
+			item->setBackground(QBrush(QColor(m->color())));
+		}
+		item->setTextAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+		ui->tableWidgetAdded->setItem(row++, 3, item);
+	}
+	emit markersRemoved(markers);
 }

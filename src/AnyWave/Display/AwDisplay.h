@@ -96,6 +96,7 @@ signals:
 	void mappingTimeSelectionDone(float pos, float duration);
 	void draggedCursorPositionChanged(float pos);
 	void QTSModeEnded();
+	void markerInserted(const AwSharedMarker& marker);
 public slots:
 	void processEvent(QSharedPointer<AwEvent>);
 	void executeCommand(int command, const QVariantList& args);

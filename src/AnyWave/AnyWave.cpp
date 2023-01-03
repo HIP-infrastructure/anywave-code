@@ -155,6 +155,9 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	markingToolWidget->setWindowFlags(Qt::WindowStaysOnTopHint);
 	markingToolWidget->loadCustomList(QString("%1/custom_list.mrk").arg(aws->value(aws::marker_rules_dir).toString()));
 	markingToolWidget->loadHEDList(QString("%1/hed.mrk").arg(aws->value(aws::app_resource_dir).toString()));
+	// connect to marker manager to be able to remove (undo) added markers while marking
+	connect(markingToolWidget, &AwMarkingTool::markersRemoved, marker_manager, &AwMarkerManager::removeMarkers);
+
 	dock->setWidget(markingToolWidget);
 	dock = new QDockWidget(tr("Video"), this);
 	dock->setObjectName("Video");
@@ -180,6 +183,7 @@ AnyWave::AnyWave(const QVariantMap& args, QWidget* parent, Qt::WindowFlags flags
 	m_display = new AwDisplay(this);
 	m_display->setParent(this);
 	m_display->setAddMarkerDock(m_dockWidgets.value("add_markers"));
+	connect(m_display, &AwDisplay::markerInserted, markingToolWidget, &AwMarkingTool::addMarkerToUndoList);
 	connect(m_player, &AwVideoPlayer::videoReady, m_display, &AwDisplay::handleVideoCursor);
 	connect(m_player, &AwVideoPlayer::videoPositionChanged, m_display, &AwDisplay::setVideoPosition);
 	connect(m_player, &AwVideoPlayer::changeSyncSettings, this, &AnyWave::editVideoSyncSettings);

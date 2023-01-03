@@ -328,7 +328,7 @@ void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
 				}
 			}
 			emit markerInserted(m_currentMarkerItem->marker());
-			m_lastAddedMarkers << m_currentMarkerItem->marker();
+		
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			break;
 		}
@@ -344,7 +344,7 @@ void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
 				m_currentMarkerItem->marker()->setStart(m_positionClicked);
 				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
 				emit markerInserted(m_currentMarkerItem->marker());
-				m_lastAddedMarkers << m_currentMarkerItem->marker();
+			
 				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 				// force marking tool back to Default 
 				m_markingTool->setToDefault();
@@ -359,7 +359,7 @@ void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
 				m_currentMarkerItem->marker()->setStart(m_positionClicked);
 				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
 				emit markerInserted(m_currentMarkerItem->marker());
-				m_lastAddedMarkers << m_currentMarkerItem->marker();
+				
 				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 				break;
 			}
@@ -375,7 +375,7 @@ void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
 				m_currentMarkerItem->marker()->setStart(m_positionClicked);
 				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
 				emit markerInserted(m_currentMarkerItem->marker());
-				m_lastAddedMarkers << m_currentMarkerItem->marker();
+			
 				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			};
 			// several item in list => build menu
@@ -406,7 +406,7 @@ void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
 				m_currentMarkerItem->marker()->setStart(m_positionClicked);
 				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
 				emit markerInserted(m_currentMarkerItem->marker());
-				m_lastAddedMarkers << m_currentMarkerItem->marker();
+			
 				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 				// force marking tool back to Default 
 				m_markingTool->setToDefault();
@@ -421,7 +421,7 @@ void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
 				m_currentMarkerItem->marker()->setStart(m_positionClicked);
 				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
 				emit markerInserted(m_currentMarkerItem->marker());
-				m_lastAddedMarkers << m_currentMarkerItem->marker();
+		
 				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 				break;
 			}
@@ -437,7 +437,7 @@ void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
 				m_currentMarkerItem->marker()->setStart(m_positionClicked);
 				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
 				emit markerInserted(m_currentMarkerItem->marker());
-				m_lastAddedMarkers << m_currentMarkerItem->marker();
+		
 				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			};
 			// several item in list => build menu
@@ -928,7 +928,6 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 			}
 		}
 		emit markerInserted(m_currentMarkerItem->marker());
-		m_lastAddedMarkers << m_currentMarkerItem->marker();
 		m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 		break;
 	}
@@ -951,7 +950,6 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 				}
 			}
 			emit markerInserted(m_currentMarkerItem->marker());
-			m_lastAddedMarkers << m_currentMarkerItem->marker();
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			// force marking tool back to Default 
 			m_markingTool->setToDefault();
@@ -973,7 +971,6 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 				}
 			}
 			emit markerInserted(m_currentMarkerItem->marker());
-			m_lastAddedMarkers << m_currentMarkerItem->marker();
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			break;
 		}
@@ -996,7 +993,6 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 				}
 			}
 			emit markerInserted(m_currentMarkerItem->marker());
-			m_lastAddedMarkers << m_currentMarkerItem->marker();
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 		};
 		// several item in list => build menu
@@ -1034,7 +1030,7 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 				}
 			}
 			emit markerInserted(m_currentMarkerItem->marker());
-			m_lastAddedMarkers << m_currentMarkerItem->marker();
+			
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			// force marking tool back to Default 
 			m_markingTool->setToDefault();
@@ -1056,7 +1052,7 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 				}
 			}
 			emit markerInserted(m_currentMarkerItem->marker());
-			m_lastAddedMarkers << m_currentMarkerItem->marker();
+		
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			break;
 		}
@@ -1079,7 +1075,7 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 				}
 			}
 			emit markerInserted(m_currentMarkerItem->marker());
-			m_lastAddedMarkers << m_currentMarkerItem->marker();
+		
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 		};
 		// several item in list => build menu

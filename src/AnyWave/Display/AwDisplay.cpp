@@ -137,6 +137,7 @@ AwSignalView* AwDisplay::addSignalView(AwViewSettings  *settings)
 	connect(view, &AwBaseSignalView::cursorClicked, this, &AwDisplay::synchronizeOnCursor);
 	connect(view, &AwBaseSignalView::markerBarHighlighted, this, &AwDisplay::highlightMarker);
 	connect(view, &AwBaseSignalView::markerChanged, this, &AwDisplay::updateMarker);
+	connect(view->scene(), &AwGraphicsScene::markerInserted, this, &AwDisplay::markerInserted);
 	// Montage to view
 	connect(AwMontageManager::instance(), &AwMontageManager::badChannelsSet, view->scene(), &AwGraphicsScene::unselectChannels);
 	// close view connect
