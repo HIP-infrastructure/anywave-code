@@ -25,7 +25,7 @@ class AW_WIDGETS_EXPORT AwHighLightPositionMarker : public AwGraphicsCursorItem
 {
 	Q_OBJECT
 public:
-	AwHighLightPositionMarker(float positionInFile, float cursorPos, AwDisplayPhysics *phys);
+	AwHighLightPositionMarker(float positionInFile, float cursorPos, AwViewSettings *settings);
 	~AwHighLightPositionMarker();
 
 	void updateGeometry();

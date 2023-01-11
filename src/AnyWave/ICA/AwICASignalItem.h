@@ -30,7 +30,7 @@ class AwICASignalItem : public AwSignalItem
 	Q_OBJECT
 	Q_INTERFACES(AwGraphicsSignalItem)
 public:
-	AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys = nullptr); 
+	AwICASignalItem(AwChannel *chan, AwViewSettings *settings); 
 	~AwICASignalItem();
 
 	QPainterPath shape() const;
@@ -52,6 +52,8 @@ public:
 	QList<QAction *> customActions();
 	inline bool is2DMapAvailable() { return m_icaChannel->layout2D() != NULL; }
 	inline bool is3DMapAvailable() { return m_icaChannel->layout3D() != NULL; }
+
+	void updateSettings(int key) override;
 public slots:
 	void showMap();
 	void hideMap();
@@ -85,7 +87,7 @@ class AwDisplayPluginICASignalItem : public AwDisplayPlugin
 	Q_INTERFACES(AwDisplayPlugin)
 public:
 	AwDisplayPluginICASignalItem() { name = "ICA SignalItem"; description = "display IC components with topography"; }
-	AwICASignalItem *newInstance(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) { return new AwICASignalItem(chan, settings, phys); }
+	AwICASignalItem *newInstance(AwChannel *chan, AwViewSettings *settings) { return new AwICASignalItem(chan, settings); }
 };
 
 

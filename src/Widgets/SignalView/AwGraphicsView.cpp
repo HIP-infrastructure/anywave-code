@@ -20,45 +20,65 @@
 #include <QMap>
 
 
-AwGraphicsView::AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings, 
-			   AwDisplayPhysics *phys, QWidget *parent) : QGraphicsView(scene, parent)
+AwGraphicsView::AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings, QWidget *parent) : QGraphicsView(scene, parent)
 {
 	setOptimizationFlags(DontAdjustForAntialiasing);
 	setCacheMode(QGraphicsView::CacheNone);
 	setDragMode(NoDrag);
 	setViewportUpdateMode(NoViewportUpdate);
 	setFocusPolicy(Qt::StrongFocus);
-	m_previousPageDuration = m_pageDuration = m_posInFile = m_timeOffset = 0.;
-	m_physics = phys;
-	applySettings(settings);
+	m_settings = settings;
+	//m_previousPageDuration = m_pageDuration = m_posInFile = m_timeOffset = 0.;
+//	m_physics = phys;
+//	applySettings(settings);
+//	m_pageDuration = m_settings->pageDuration;
+
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_secsPerCm = settings->secsPerCm;
-	m_timeScaleMode = settings->timeScaleMode;
+//	m_secsPerCm = settings->secsPerCm;
+//	m_timeScaleMode = settings->timeScaleMode;
+//	m_secsPerCm = m_settings->secsPerCm;
+//	m_timeScaleMode = m_settings->timeScale;
+//	computePageDuration();
+//	resetCachedContent();
+//	repaint();
+	updateSettings(aw::view_settings::time_scale);
+	updateSettings(aw::view_settings::time_representation);
+	updateSettings(aw::view_settings::show_seconds);
+	updateSettings(aw::view_settings::show_sensors);
+	updateSettings(aw::view_settings::limit_channel_per_view);
+	updateSettings(aw::view_settings::max_visible_channels);
+	updateSettings(aw::view_settings::stack_channels);
+	updateSettings(aw::view_settings::file_duration);
+	updateSettings(aw::view_settings::pos_in_file);
 }	
 
-void AwGraphicsView::setTimeShift(float shift)
-{
-	m_timeOffset = shift;
-	resetCachedContent();
-	repaint();
-}
+//void AwGraphicsView::setTimeShift(float shift)
+//{
+//	m_timeOffset = shift;
+//	resetCachedContent();
+//	repaint();
+//}
 
 void AwGraphicsView::computePageDuration()
 {
 	float w = (float)viewport()->rect().width();
-	if (m_timeScaleMode == AwViewSettings::PaperLike) {
-		m_pageDuration = (w / m_physics->xPixPerCm()) * m_settings->secsPerCm;
-		m_physics->setXPixPerSec(w / m_pageDuration);
-		m_physics->setPageDuration(m_pageDuration);
+	if (m_settings->timeScale == AwViewSettings::PaperLike) {
+		m_settings->physics->unsetFixedPageDuration();
+		m_settings->pageDuration = (w / m_settings->physics->xPixPerCm()) * m_settings->secsPerCm();
+//		m_physics->setXPixPerSec(w / m_settings->pageDuration);
+//		m_physics->setPageDuration(m_settings->pageDuration);
 	}
 	else {
-		m_pageDuration = m_settings->fixedPageDuration;
-		m_physics->setPageDuration(m_pageDuration);
-		m_physics->setFixedPageDuration(m_pageDuration, w);
+		m_settings->physics->setFixedPageDuration(m_settings->fixedPageDuration, w);
+		m_settings->pageDuration = m_settings->fixedPageDuration;
+		//m_physics->setPageDuration(m_settings->pageDuration);
+		//m_physics->setFixedPageDuration(m_settings->pageDuration, w);
+		resetCachedContent();
+		repaint();
 	}
-	if (m_pageDuration == 0.)
-		return;
-	emit pageDurationChanged(m_pageDuration);
+
+//	emit pageDurationChanged(m_pageDuration);
+	emit settingsChanged(aw::view_settings::page_duration, aw::view_settings::sender_view);
 }
 
 void AwGraphicsView::resizeEvent(QResizeEvent *event)
@@ -87,14 +107,14 @@ void AwGraphicsView::scrollContentsBy(int dx, int dy)
 	scene()->update();
 }
 
-void AwGraphicsView::setPositionInFile(float pos)
-{
-	m_posInFile = pos;
-}
+//void AwGraphicsView::setPositionInFile(float pos)
+//{
+//	m_posInFile = pos;
+//}
 
 void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 {
-	if (!m_settings->ShowTimeGrid)
+	if (!m_settings->showTimeGrid)
 		return;
 	QPen pen(Qt::blue);
 	pen.setStyle(Qt::DotLine);
@@ -106,25 +126,25 @@ void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 
 	QVarLengthArray<QLineF, 100> lines;
 	QVarLengthArray<QLineF, 30> linesMs;
-	float posInFile = m_posInFile + m_timeOffset;
+	float posInFile = m_settings->posInFile;
 	nextSecond = ceil(posInFile);
-	startingOffsetSecond = (nextSecond - posInFile) * m_physics->xPixPerSec();
-	float pixPer100ms = m_physics->xPixPerSec() / 10;
+	startingOffsetSecond = (nextSecond - posInFile) * m_settings->physics->xPixPerSec();
+	float pixPer100ms = m_settings->physics->xPixPerSec() / 10;
 
-	if (m_settings->timeScaleMode == AwViewSettings::PaperLike) {
-		if (m_settings->secsPerCm < 0.1) { // when the time scale is < 0.5s/cm display the 100ms lines
+	if (m_settings->timeScale == AwViewSettings::PaperLike) {
+		if (m_settings->secsPerCm() < 0.1) { // when the time scale is < 0.5s/cm display the 100ms lines
 			show100ms = true;
 			// compute the starting 100ms line
 			quint32 timeMs = (quint32)floor(std::abs(posInFile)) * 1000;
 			float diff = (posInFile * 1000) - timeMs;
 			next100ms = (int)floor(diff / 100);
 			next100ms *= 100;
-			startingOffset100ms = ((next100ms - diff) / 1000) * m_physics->xPixPerSec();
+			startingOffset100ms = ((next100ms - diff) / 1000) * m_settings->physics->xPixPerSec();
 			next100ms += 100;
 		}
 	}
 
-	for (float i = startingOffsetSecond; i < rect.width(); i += m_physics->xPixPerSec())
+	for (float i = startingOffsetSecond; i < rect.width(); i += m_settings->physics->xPixPerSec())
 		lines.append(QLineF(i, rect.y(), i, rect.height() + rect.y()));
 
 	if (show100ms)
@@ -145,11 +165,11 @@ void AwGraphicsView::drawBackground(QPainter *painter, const QRectF& rect)
 		// check if recorded time is really possible
 		bool recordedTimeDisabled = m_startTime.isNull() || !m_startTime.isValid();
 		if (recordedTimeDisabled)
-			m_settings->timeMode = AwViewSettings::ShowRelativeTime;
-		for (auto x = startingOffsetSecond; x < rect.width(); x += m_physics->xPixPerSec()) {
+			m_settings->timeRepresentation = AwViewSettings::ShowRelativeTime;
+		auto timeMode = m_settings->timeRepresentation;
+		for (auto x = startingOffsetSecond; x < rect.width(); x += m_settings->physics->xPixPerSec()) {
 			QString text;
-			
-			if (m_settings->timeMode == AwViewSettings::ShowRelativeTime)
+			if (timeMode == AwViewSettings::ShowRelativeTime)
 				text = QString("%1").arg(value);
 			else {
 				auto time = m_startTime.addSecs(value);
@@ -240,14 +260,16 @@ void AwGraphicsView::layoutItems()
 			return;
 		int nChannelsToDisplay = map.uniqueKeys().size();
 		qreal h;
-		if (!m_settings->limitChannels)
+		if (!m_settings->limitChannelPerView)
 			offset = viewportH / (qreal(nChannelsToDisplay) + 1);
-		else if (m_settings->limitChannels && nChannelsToDisplay <= m_settings->maxChannels)
+		else if (m_settings->limitChannelPerView && nChannelsToDisplay <= m_settings->maxVisibleChannels)
+		
+
 			offset = viewportH / (qreal(nChannelsToDisplay) + 1);
-		else if (m_settings->limitChannels) {
+		else if (m_settings->limitChannelPerView) {
 			// the number of items to display is greater than the limit fixed in viewing options.
 			// Compute the offset to fit the max channel number in one page height.
-			offset  = viewportH / (m_settings->maxChannels + 1);
+			offset  = viewportH / (m_settings->maxVisibleChannels + 1);
 			// compute the total height to fit all the items
 			qreal totalH = numberOfSignalItems * offset + offset;
 			newRect.setHeight(totalH);
@@ -271,14 +293,14 @@ void AwGraphicsView::layoutItems()
 		numberOfSignalItems = sitems.size();
 		if (numberOfSignalItems == 0)
 			return;
-		if (!m_settings->limitChannels)
+		if (!m_settings->limitChannelPerView)
 			offset = viewportH / (numberOfSignalItems + 1);
-		else if (m_settings->limitChannels && numberOfSignalItems <= m_settings->maxChannels)
+		else if (m_settings->limitChannelPerView && numberOfSignalItems <= m_settings->maxVisibleChannels)
 			offset = viewportH / (numberOfSignalItems + 1);
-		else if (m_settings->limitChannels) {
+		else if (m_settings->limitChannelPerView) {
 			// the number of items to display is greater than the limit fixed in viewing options.
 			// Compute the offset to fit the max channel number in one page height.
-			offset  = viewportH / (m_settings->maxChannels + 1);
+			offset  = viewportH / (m_settings->maxVisibleChannels + 1);
 
 			// compute the total height to fit all the items
 			qreal totalH = numberOfSignalItems * offset + offset;
@@ -322,75 +344,113 @@ void AwGraphicsView::layoutItems()
 		verticalScrollBar()->setValue(savedPos);
 }
 
-void AwGraphicsView::applySettings(AwViewSettings *settings)
-{
-	if (settings == nullptr)
-		return;
-	m_settings = settings;
-	m_secsPerCm = settings->secsPerCm;
-	m_physics->setSecsPerCm(settings->secsPerCm);
-	computePageDuration();
-	resetCachedContent();
-	repaint();
-	layoutItems();
-	update();
-}
+//void AwGraphicsView::applySettings(AwViewSettings *settings)
+//{
+//	if (settings == nullptr)
+//		return;
+//	m_settings = settings;
+//	m_secsPerCm = settings->secsPerCm;
+//	m_physics->setSecsPerCm(settings->secsPerCm);
+//	computePageDuration();
+//	resetCachedContent();
+//	repaint();
+//	layoutItems();
+//	update();
+//}
 
-void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
+void AwGraphicsView::updateSettings(int key)
 {
-	if (flags & AwViewSettings::ShowSecondTicks || flags & AwViewSettings::ShowTimeGrid 
-		|| flags & AwViewSettings::TimeRepresentation) {
+	switch (key) {
+	case aw::view_settings::show_time_grid:
+	case aw::view_settings::show_seconds:
+	case aw::view_settings::time_representation:
+	case aw::view_settings::pos_in_file:
 		resetCachedContent();
 		repaint();
-	}
-
-	if (flags & AwViewSettings::ShowAmplitudeScale) {
-		AwGraphicsScene* gs = (AwGraphicsScene*)scene();
-		QRectF rect = mapToScene(viewport()->geometry()).boundingRect();
-		auto amplitudeScale = gs->amplitudeScale();
-		amplitudeScale->setPos(rect.width() - amplitudeScale->boundingRect().width() - 10, rect.bottom() - amplitudeScale->boundingRect().height() - 10);
-	}
-
-	if (flags & AwViewSettings::SecPerCm) {
-		// compute new page duration only if setting really changed
-		if (m_settings->secsPerCm != m_secsPerCm) {
-			m_physics->setSecsPerCm(settings->secsPerCm);
-			computePageDuration();
-			m_secsPerCm = m_settings->secsPerCm;
-			emit pageDurationChanged(m_pageDuration);
+		break;
+	case aw::view_settings::show_amplitude_scales:
+	{
+		if (m_settings->showAmplScales) {
+			AwGraphicsScene* gs = (AwGraphicsScene*)scene();
+			QRectF rect = mapToScene(viewport()->geometry()).boundingRect();
+			auto amplitudeScale = gs->amplitudeScale();
+			amplitudeScale->setPos(rect.width() - amplitudeScale->boundingRect().width() - 10, rect.bottom() - amplitudeScale->boundingRect().height() - 10);
 		}
 	}
-
-	if (flags & AwViewSettings::TimeScaleMode) {
-		if (m_settings->timeScaleMode != m_timeScaleMode) {
-			m_timeScaleMode = settings->timeScaleMode;
-			if (m_timeScaleMode == AwViewSettings::PaperLike) {
-				m_physics->setSecsPerCm(settings->secsPerCm);
-				computePageDuration();
-				m_secsPerCm = m_settings->secsPerCm;
-				emit pageDurationChanged(m_pageDuration);
-			}
-			else {
-				computePageDuration();
-				
-				emit pageDurationChanged(m_pageDuration);
-			}
-			resetCachedContent();
-			repaint();
-		}
-	}
-	// we can have to update the page duration while already switched to this mode
-	if (flags & AwViewSettings::PageDuration) {
-		if (m_settings->fixedPageDuration != m_pageDuration) {
-			computePageDuration(); // not really recompute but propagate page duration to Physics in order to get the good pixel to sample transform
-			resetCachedContent();
-			repaint();
-		}
-	}
-
-	if (flags & AwViewSettings::MaxNumberOfChannels || flags & AwViewSettings::LimitNumberOfChannels || flags & AwViewSettings::Overlay)
+		break;
+	case aw::view_settings::secs_per_cm:
+	case aw::view_settings::time_scale:
+	case aw::view_settings::fixed_page_duration:
+		m_settings->physics->setSecsPerCm(m_settings->secsPerCm());
+		computePageDuration();
+		break;
+	case aw::view_settings::max_visible_channels:
+	case aw::view_settings::limit_channel_per_view:
+	case aw::view_settings::stack_channels:
 		layoutItems();
-	if (flags & AwViewSettings::ShowSensors) {
+		break;
+	case aw::view_settings::show_sensors:
 		updateSignalChildrenPositions();
+		break;
 	}
 }
+
+
+//void AwGraphicsView::updateSettings(AwViewSettings *settings, int flags)
+//{
+//	if (flags & AwViewSettings::ShowSecondTicks || flags & AwViewSettings::ShowTimeGrid 
+//		|| flags & AwViewSettings::TimeRepresentation) {
+//		resetCachedContent();
+//		repaint();
+//	}
+//
+//	if (flags & AwViewSettings::ShowAmplitudeScale) {
+//		AwGraphicsScene* gs = (AwGraphicsScene*)scene();
+//		QRectF rect = mapToScene(viewport()->geometry()).boundingRect();
+//		auto amplitudeScale = gs->amplitudeScale();
+//		amplitudeScale->setPos(rect.width() - amplitudeScale->boundingRect().width() - 10, rect.bottom() - amplitudeScale->boundingRect().height() - 10);
+//	}
+//
+//	if (flags & AwViewSettings::SecPerCm) {
+//		// compute new page duration only if setting really changed
+//		if (m_settings->secsPerCm != m_secsPerCm) {
+//			m_physics->setSecsPerCm(settings->secsPerCm);
+//			computePageDuration();
+//			m_secsPerCm = m_settings->secsPerCm;
+//			emit pageDurationChanged(m_pageDuration);
+//		}
+//	}
+//
+//	if (flags & AwViewSettings::TimeScaleMode) {
+//		if (m_settings->timeScaleMode != m_timeScaleMode) {
+//			m_timeScaleMode = settings->timeScaleMode;
+//			if (m_timeScaleMode == AwViewSettings::PaperLike) {
+//				m_physics->setSecsPerCm(settings->secsPerCm);
+//				computePageDuration();
+//				m_secsPerCm = m_settings->secsPerCm;
+//				emit pageDurationChanged(m_pageDuration);
+//			}
+//			else {
+//				computePageDuration();
+//				
+//				emit pageDurationChanged(m_pageDuration);
+//			}
+//			resetCachedContent();
+//			repaint();
+//		}
+//	}
+//	// we can have to update the page duration while already switched to this mode
+//	if (flags & AwViewSettings::PageDuration) {
+//		if (m_settings->fixedPageDuration != m_pageDuration) {
+//			computePageDuration(); // not really recompute but propagate page duration to Physics in order to get the good pixel to sample transform
+//			resetCachedContent();
+//			repaint();
+//		}
+//	}
+//
+//	if (flags & AwViewSettings::MaxNumberOfChannels || flags & AwViewSettings::LimitNumberOfChannels || flags & AwViewSettings::Overlay)
+//		layoutItems();
+//	if (flags & AwViewSettings::ShowSensors) {
+//		updateSignalChildrenPositions();
+//	}
+//}

@@ -29,6 +29,8 @@
 #include <qgraphicsview.h>
 #include <QGraphicsSceneMouseEvent>
 #include "Data/AwDataManager.h"
+#include <widget/AwMessageBox.h>
+#include "AwSelectTargetChannelsDial.h"
 
 
 AwScene::AwScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : AwGraphicsScene(settings, phys, parent)
@@ -153,4 +155,23 @@ void AwScene::setChannels(AwChannelList& channels)
 {
 	AwGraphicsScene::setChannels(channels);
 
+}
+
+
+void AwScene::manuallySetChannelsTarget(const QStringList& labels)
+{
+	if (AwMessageBox::question(nullptr, "Channels selection", "Manually set channels to target?", QMessageBox::Yes | QMessageBox::No)
+		== QMessageBox::Yes) {
+		AwChannelList channels;
+		for (auto const& l : labels) {
+			auto sitem = m_hashNameToItem.value(l);
+			if (sitem)
+				channels << sitem->channel()->duplicate();
+
+		}
+		AwSelectTargetChannelsDial dlg(m_currentMarkerItem->marker(), channels, this);
+		if (dlg.exec() == QDialog::Accepted) {
+
+		}
+	}
 }

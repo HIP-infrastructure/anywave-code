@@ -65,17 +65,19 @@ int AwViewSettingsUi::exec()
 {
 	checkTime->setChecked(m_settings->showTimeGrid);
 	checkSeconds->setChecked(m_settings->showSeconds);
-	checkLimit->setChecked(m_settings->limitChannels);
-	sbNbChan->setValue(m_settings->maxChannels);
+	checkLimit->setChecked(m_settings->limitChannelPerView);
+	sbNbChan->setValue(m_settings->maxVisibleChannels);
 	checkChanName->setChecked(m_settings->showSensors);
 	checkBaseLine->setChecked(m_settings->showZeroLine);
 	checkOverlay->setChecked(m_settings->stackChannels);
-	checkMarkerLabel->setChecked(m_settings->showMarkerLabels);
-	checkMarkerValue->setChecked(m_settings->showMarkerValues); 
-	checkEEGDisplay->setChecked(m_settings->eegDisplayMode);
+	checkMarkerLabel->setChecked(m_settings->markerViewOptions == AwViewSettings::ShowLabel || 
+		m_settings->markerViewOptions == AwViewSettings::ShowBoth);
+	checkMarkerValue->setChecked(m_settings->markerViewOptions == AwViewSettings::ShowValue ||
+		m_settings->markerViewOptions == AwViewSettings::ShowBoth);
+	checkEEGDisplay->setChecked(m_settings->oldEEGMode);
 	checkShowMarkers->setChecked(m_settings->showMarkers);
-	checkAmplitudeScale->setChecked(m_settings->showAmplitudeScale);
-	radioPageDuration->setChecked(m_settings->timeScaleMode != AwViewSettings::PaperLike);
+	checkAmplitudeScale->setChecked(m_settings->showAmplScales);
+	radioPageDuration->setChecked(m_settings->timeScale != AwViewSettings::PaperLike);
 	spinPageDuration->setValue(m_settings->fixedPageDuration);
 	unselectAllFilters();
 	for (auto cb : m_checkBoxes.keys()) {
@@ -89,7 +91,7 @@ int AwViewSettingsUi::exec()
 	else
 		radioClassicMode->setChecked(true);
 
-	switch (m_settings->timeMode) {
+	switch (m_settings->timeRepresentation) {
 	case AwViewSettings::ShowRecordedTime:
 		radioRecordedTime->setChecked(true);
 		break;
@@ -98,113 +100,118 @@ int AwViewSettingsUi::exec()
 		break;
 	}
 
-	radioRelativeTime->setChecked(m_settings->timeMode == AwViewSettings::ShowRelativeTime);
+	radioRelativeTime->setChecked(m_settings->timeRepresentation == AwViewSettings::ShowRelativeTime);
 	return QDialog::exec();
 }
 
 void AwViewSettingsUi::accept()
 {
-	int flags = 0;
+//	int flags = 0;
+//
+//	// make a copy of current setup
+//	AwViewSettings *copiedSettings = new AwViewSettings(m_settings, this);
 
-	// make a copy of current setup
-	AwViewSettings *copiedSettings = new AwViewSettings(m_settings, this);
-
-	// comparing new setup with copied one
-	m_settings->showMarkers = checkShowMarkers->isChecked();
-	if (copiedSettings->showMarkers != m_settings->showMarkers)
-		flags |= AwViewSettings::ShowMarkers;
-	if (radioPageDuration->isChecked()) {
-		m_settings->timeScaleMode = AwViewSettings::FixedPageDuration;
-		m_settings->fixedPageDuration = spinPageDuration->value();
+	if (m_settings->showMarkers != checkShowMarkers->isChecked()) {
+		m_settings->showMarkers = checkShowMarkers->isChecked();
+		emit settingsChanged(aw::view_settings::show_markers, aw::view_settings::sender_global);
 	}
-	else
-		m_settings->timeScaleMode = AwViewSettings::PaperLike;
-
-	if (m_settings->timeScaleMode != copiedSettings->timeScaleMode) 
-		flags |= AwViewSettings::TimeScaleMode;
-
-	if (m_settings->fixedPageDuration != copiedSettings->fixedPageDuration)
-		flags |= AwViewSettings::PageDuration;
-
-	m_settings->showTimeGrid = checkTime->isChecked();
-	if (copiedSettings->showTimeGrid != m_settings->showTimeGrid)
-		flags |= AwViewSettings::ShowTimeGrid;
-
-	m_settings->eegDisplayMode = checkEEGDisplay->isChecked();
-	if (copiedSettings->eegDisplayMode != m_settings->eegDisplayMode)
-		flags |= AwViewSettings::EEGMode;
-
-	m_settings->showSeconds = checkSeconds->isChecked();
-	if (copiedSettings->showSeconds != m_settings->showSeconds)
-		flags |= AwViewSettings::ShowSecondTicks;
-
-	m_settings->limitChannels = checkLimit->isChecked();
-	if (copiedSettings->limitChannels != m_settings->limitChannels)
-		flags |= AwViewSettings::LimitNumberOfChannels;
+	bool fixedPageDuration = radioPageDuration->isChecked();
 	
-	m_settings->maxChannels = sbNbChan->value();
-	if (copiedSettings->maxChannels != m_settings->maxChannels)
-		flags |= AwViewSettings::MaxNumberOfChannels;
-
-	m_settings->showSensors = checkChanName->isChecked();
-	if (copiedSettings->showSensors != m_settings->showSensors)
-		flags |= AwViewSettings::ShowSensors;
-
-	m_settings->showZeroLine =  checkBaseLine->isChecked();
-	if (copiedSettings->showZeroLine != m_settings->showZeroLine)
-		flags |= AwViewSettings::ShowBaseLine;
-
-	m_settings->showAmplitudeScale = checkAmplitudeScale->isChecked();
-	if (copiedSettings->showAmplitudeScale != m_settings->showAmplitudeScale)
-		flags |= AwViewSettings::ShowAmplitudeScale;
-
-	m_settings->showMarkerLabels = checkMarkerLabel->isChecked();
-	if (copiedSettings->showMarkerLabels != m_settings->showMarkerLabels)
-		flags |= AwViewSettings::ShowMarkerLabel;
-
-	m_settings->showMarkerValues = checkMarkerValue->isChecked();
-	if (copiedSettings->showMarkerValues != m_settings->showMarkerValues)
-		flags |= AwViewSettings::ShowMarkerValue;
-
-	m_settings->stackChannels = checkOverlay->isChecked();
-	if (copiedSettings->stackChannels != m_settings->stackChannels)
-		flags |= AwViewSettings::Overlay;
-
+	if (m_settings->timeScale == AwViewSettings::FixedPageDuration && !fixedPageDuration) {
+		m_settings->timeScale = AwViewSettings::PaperLike;
+		emit settingsChanged(aw::view_settings::time_scale, aw::view_settings::sender_global);
+	}
+	if (m_settings->timeScale == AwViewSettings::PaperLike && fixedPageDuration) {
+		m_settings->timeScale = AwViewSettings::FixedPageDuration;
+		m_settings->fixedPageDuration = spinPageDuration->value();
+		emit settingsChanged(aw::view_settings::time_scale, aw::view_settings::sender_global);
+	}
+	if (m_settings->showTimeGrid != checkTime->isChecked()) {
+		m_settings->showTimeGrid = checkTime->isChecked();
+		emit settingsChanged(aw::view_settings::show_time_grid, aw::view_settings::sender_global);
+	}
+	if (m_settings->oldEEGMode != checkEEGDisplay->isChecked()) {
+		m_settings->oldEEGMode = checkEEGDisplay->isChecked();
+		emit settingsChanged(aw::view_settings::old_eeg_mode, aw::view_settings::sender_global);
+	}
+	if (m_settings->showSeconds != checkSeconds->isChecked()) {
+		m_settings->showSeconds = checkSeconds->isChecked();
+		emit settingsChanged(aw::view_settings::show_seconds, aw::view_settings::sender_global);
+	}
+	if (m_settings->limitChannelPerView != checkLimit->isChecked()) {
+		m_settings->limitChannelPerView = checkLimit->isChecked();
+		m_settings->maxVisibleChannels = sbNbChan->value();
+		if (m_settings->maxVisibleChannels < 1)
+			m_settings->maxVisibleChannels = 40;
+		emit settingsChanged(aw::view_settings::limit_channel_per_view, aw::view_settings::sender_global);
+	}
+	auto maxChans = sbNbChan->value();
+	if (m_settings->maxVisibleChannels != maxChans) {
+		m_settings->maxVisibleChannels = maxChans;
+		emit settingsChanged(aw::view_settings::limit_channel_per_view, aw::view_settings::sender_global);
+	}
+	if (m_settings->showSensors != checkChanName->isChecked()) {
+		m_settings->showSensors = checkChanName->isChecked();
+		emit settingsChanged(aw::view_settings::show_sensors, aw::view_settings::sender_global);
+	}
+	if (m_settings->showZeroLine != checkBaseLine->isChecked()) {
+		m_settings->showZeroLine = checkBaseLine->isChecked();
+		emit settingsChanged(aw::view_settings::show_zero_line, aw::view_settings::sender_global);
+	}
+	if (m_settings->showAmplScales != checkAmplitudeScale->isChecked()) {
+		m_settings->showAmplScales = checkAmplitudeScale->isChecked();
+		emit settingsChanged(aw::view_settings::show_amplitude_scales, aw::view_settings::sender_global);
+	}
+	auto options = AwViewSettings::HideBoth;
+	if (checkMarkerLabel->isChecked())
+		options = AwViewSettings::ShowLabel;
+	if (checkMarkerValue->isChecked())
+		options = AwViewSettings::ShowValue;
+	if (checkMarkerLabel->isChecked() && checkMarkerValue->isChecked())
+		options = AwViewSettings::ShowBoth;
+	if (m_settings->markerViewOptions != options) {
+		m_settings->markerViewOptions = options;
+		emit settingsChanged(aw::view_settings::marker_visibility, aw::view_settings::sender_global);
+	}
+	if (m_settings->stackChannels != checkOverlay->isChecked()) {
+		m_settings->stackChannels = checkOverlay->isChecked();
+		emit settingsChanged(aw::view_settings::stack_channels, aw::view_settings::sender_global);
+	}
 	QList<int> filters;
 	for (auto cb : m_checkBoxes.keys())
 		if (cb->isChecked())
 			filters << m_checkBoxes[cb];
 
-	for (auto const& f : copiedSettings->filters)
-		if (!filters.contains(f))
-			flags |= AwViewSettings::Filters;
-
-	if (filters.size() != copiedSettings->filters.size())
-		flags |= AwViewSettings::Filters;
-
-	m_settings->filters = filters;
-	m_settings->showMarkerBar = radioAlways->isChecked();
-	if (copiedSettings->showMarkerBar != m_settings->showMarkerBar)
-		flags |= AwViewSettings::ShowMarkerBar;
-	if (radioGlobalMode->isChecked())
-		m_settings->markerBarMode = AwViewSettings::Global;
-	else
-		m_settings->markerBarMode = AwViewSettings::Classic;
-	if (copiedSettings->markerBarMode != m_settings->markerBarMode)
-		flags |= AwViewSettings::MarkerBarMode;
-
-	if (radioRelativeTime->isChecked())
-		m_settings->timeMode = AwViewSettings::ShowRelativeTime;
-	else
-		m_settings->timeMode = AwViewSettings::ShowRecordedTime;
-
-	if (copiedSettings->timeMode != m_settings->timeMode)
-		flags |= AwViewSettings::TimeRepresentation;
-
-	if (flags)
-		emit settingsChanged(m_settings, flags);
-
-	delete copiedSettings;
-
-	QDialog::accept();
+	bool updateFilters = false;
+	if (filters.size() != m_settings->filters.size())
+		updateFilters = true;
+	if (!updateFilters) {
+		std::sort(filters.begin(), filters.end());
+		std::sort(m_settings->filters.begin(), m_settings->filters.end());
+		for (auto i = 0; i < filters.size(); i++) {
+			if (filters.at(i) != m_settings->filters.at(i)) {
+				updateFilters = true;
+				break;
+			}
+		}
+	}
+	if (updateFilters) {
+		m_settings->filters = filters;
+		emit settingsChanged(aw::view_settings::channels_modalities, aw::view_settings::sender_global);
+	}
+	if (m_settings->showMarkerBar != radioAlways->isChecked()) {
+		m_settings->showMarkerBar = checkOverlay->isChecked();
+		emit settingsChanged(aw::view_settings::show_marker_bar, aw::view_settings::sender_global);
+	}
+	auto markerBarMode = radioGlobalMode->isChecked() ? AwViewSettings::Global : AwViewSettings::Classic;
+	if (m_settings->markerBarMode != markerBarMode) {
+		m_settings->markerBarMode = markerBarMode;
+		emit settingsChanged(aw::view_settings::marker_bar_mode, aw::view_settings::sender_global);
+	}
+	auto timeRepresentation = radioRelativeTime->isChecked() ? AwViewSettings::ShowRelativeTime : AwViewSettings::ShowRecordedTime;
+	if (m_settings->timeRepresentation != timeRepresentation) {
+		m_settings->timeRepresentation = timeRepresentation;
+		emit settingsChanged(aw::view_settings::time_representation, aw::view_settings::sender_global);
+	}
+	return QDialog::accept();
 }

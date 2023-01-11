@@ -18,10 +18,11 @@
 #include <AwGlobal.h>
 #include <widget/AwGraphicsObjects.h>
 
+
 class AW_WIDGETS_EXPORT AwHighLightMarker : public AwGraphicsCursorItem
 {
 public:
-	AwHighLightMarker(const QString& text, float pos, float duration, AwDisplayPhysics *phys);
+	AwHighLightMarker(const QString& text, float pos, float duration, AwViewSettings *settings);
 	~AwHighLightMarker();
 
 protected:

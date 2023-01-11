@@ -28,7 +28,7 @@ class AwSignalView : public AwBaseSignalView
 	Q_OBJECT
 
 public:
-	AwSignalView(AwViewSettings *settings, int flags = 0, QWidget *parent = 0, Qt::WindowFlags windowFlags = Qt::WindowFlags());
+	AwSignalView(AwViewSettings *settings, QWidget *parent = 0);
 	~AwSignalView();
 
 	enum Flags { NoProcessUpdate = 1, UpdateProcess = 2 };
@@ -47,14 +47,14 @@ signals:
 	void displayedChannelsUpdated(AwChannelList& channels);	// sent each time the view receives new data to display.
 	void badChannelSet(const QString& label);
 public slots:
-	void reloadData() override;		// request a reloading for current channels in the view.
+//	void reloadData() override;		// request a reloading for current channels in the view.
 	void refresh();					// check if the view needs to reload data and refresh current display.
-	void updatePositionInFile(float pos);
-	void synchronizeOnPosition(float position);
+//	void updatePositionInFile(float pos);
+//	void synchronizeOnPosition(float position);
 	void showPosition(float position);
 	void centerViewOnPosition(float position);
-	void updatePageDuration(float duration) override; 
-	void goToPos(int pos) override;	// called when position in file has changed using the scrollbar in the navigation bar.
+//	void updatePageDuration(float duration) override; 
+//	void goToPos(int pos) override;	// called when position in file has changed using the scrollbar in the navigation bar.
 	void selectChannelsFromLabels(const QStringList& labels);
 	void addVirtualChannels(AwChannelList& channels);
 	void removeVirtualChannels(AwChannelList& channels);

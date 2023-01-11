@@ -24,7 +24,7 @@ class AwViewSetup : public AwViewSettings
 	Q_OBJECT
 public:
 	AwViewSetup(QObject *parent);
-	AwViewSetup(AwViewSetup *source, QObject *parent);
+//	AwViewSetup(AwViewSetup *source, QObject *parent);
 	inline AwDisplaySetup *parent() { return m_parent; }
 protected:
 	AwDisplaySetup *m_parent;

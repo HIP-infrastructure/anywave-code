@@ -32,7 +32,7 @@ class AW_WIDGETS_EXPORT AwSignalItemSettings : public AwGraphicsSignalDialog, pu
 	Q_OBJECT
 
 public:
-	AwSignalItemSettings(AwGraphicsSignalItem *item = NULL, QWidget *parent = 0);
+	AwSignalItemSettings(AwGraphicsSignalItem *item = nullptr, QWidget *parent = 0);
 	~AwSignalItemSettings();
 public slots:
 	int exec() override;

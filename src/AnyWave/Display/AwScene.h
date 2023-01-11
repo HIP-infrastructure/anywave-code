@@ -43,6 +43,7 @@ private slots:
 	void insertMarkersBasedOnChannelSelection();
 protected:
 	QMenu* defaultContextMenu() override;
+	void manuallySetChannelsTarget(const QStringList& labels) override;
 };
 
 #endif

@@ -20,29 +20,39 @@
 #include <QMenu>
 #include <AwMarker.h>
 #include <QPixmap>
-#define AW_MARKERS_BAR_HEIGHT	20
-class AwDisplayPhysics;
-class AwViewSettings;
+
+constexpr auto  AW_MARKERS_BAR_HEIGHT = 20;
+
+#include <widget/SignalView/AwViewSettings.h>
 
 class AW_WIDGETS_EXPORT AwBaseMarkerBar : public QFrame
 {
 	Q_OBJECT
 public:
-	AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent = nullptr);
+	AwBaseMarkerBar(AwViewSettings *settings, QWidget *parent = nullptr);
 	~AwBaseMarkerBar();
 	QSize sizeHint() const { return QSize(0, AW_MARKERS_BAR_HEIGHT); }
-	void setTotalDuration(float dur) { m_totalDuration = dur;  repaint();	}
+//	void setTotalDuration(float dur) { m_totalDuration = dur;  repaint();	}
 public slots:
 	void clean();
 	void setPageDuration(float d);
 	void setPositionInFile(float pos);
 	void setMarkers(const AwSharedMarkerList& markers);
-	void updateSettings(AwViewSettings* settings, int flags);
-	void setNewSettings(AwViewSettings* settings);
+//	void updateSettings(AwViewSettings* settings, int flags);
+//	void setNewSettings(AwViewSettings* settings);
+//	void updateSettings(int key, int sender); // sender is -1 if not specified 
+	void updateSettings(int key);
 
 protected slots:
-	void hideMarkers() { emit showMarkersClicked(false); }
-	void showMarkers() { emit showMarkersClicked(true); }
+	void hideMarkers() {
+		m_settings->showMarkers = false;
+		emit settingsChanged(aw::view_settings::show_markers, aw::view_settings::sender_marker_bar);
+	}
+	
+	void showMarkers() { //emit showMarkersClicked(true); 
+		m_settings->showMarkers = true;
+		emit settingsChanged(aw::view_settings::show_markers, aw::view_settings::sender_marker_bar);
+	}
 	void switchToClassic();
 	void switchToGlobal();
 signals:
@@ -51,6 +61,8 @@ signals:
 	void showMarkerClicked(const AwSharedMarker&  marker);
 	/** new signal, due to Global mode add. **/
 	void positionChanged(float pos);
+
+	void settingsChanged(int key, int sender);
 protected:
 	void paintEvent(QPaintEvent *e);
 	void contextMenuEvent(QContextMenuEvent *e);
@@ -63,7 +75,7 @@ protected:
 	AwSharedMarker m_markerUnderMouse;	// pointer to the current marker under the mouse when the user clicks in the bar. Can be NULL is no marker is under the mouse.
 	//AwMarkerList m_markers, m_allMarkers;
 	AwSharedMarkerList m_markers;
-	AwDisplayPhysics *m_physics;
+//	AwDisplayPhysics *m_physics;
 	bool m_markersShown;
 	float m_pageDuration, m_positionInFile, m_totalDuration;
 	QMenu *m_menu;

@@ -34,7 +34,8 @@ public slots:
 	void accept();
 	int exec();
 signals:
-	void settingsChanged(AwViewSettings *settings, int flags);
+//	void settingsChanged(AwViewSettings *settings, int flags);
+	void settingsChanged(int key, int sender);
 protected:
 	AwViewSettings *m_settings;
 	QMap<QCheckBox *, int> m_checkBoxes;

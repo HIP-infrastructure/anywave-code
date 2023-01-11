@@ -23,11 +23,11 @@ public:
 	AwSignalLabelItem(const QString& text, QGraphicsItem *parent = 0);
 
 protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent *event);
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
-	void hoverMoveEvent(QGraphicsSceneHoverEvent *e);
+	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+	void hoverEnterEvent(QGraphicsSceneHoverEvent *e) override;
+	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e) override;
+	void hoverMoveEvent(QGraphicsSceneHoverEvent *e) override;
 
 	bool m_mousePressed;
 	QString m_signalColor;

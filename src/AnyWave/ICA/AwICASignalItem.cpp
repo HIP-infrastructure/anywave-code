@@ -27,7 +27,7 @@
 #include "AwICAMappingItem.h"
 #include <QtDebug>
 
-AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwSignalItem(chan, settings, phys)
+AwICASignalItem::AwICASignalItem(AwChannel *chan, AwViewSettings *settings) : AwSignalItem(chan, settings)
 {
 	m_icaChannel = static_cast<AwICAChannel *>(chan);
 	m_is2DMapComputed = m_is3DMapComputed = false;
@@ -171,6 +171,12 @@ void AwICASignalItem::show3DMap()
 	}
 }
 
+void AwICASignalItem::updateSettings(int key)
+{
+	AwSignalItem::updateSettings(key);
+
+}
+
 ///
 /// shape()
 ///
@@ -215,7 +221,7 @@ void AwICASignalItem::updateChildItems()
 	m_mappingItem->setTransform(QTransform());
 	m_labelRejectedProxyWidget->setTransform(QTransform());
 
-	if (m_showMap && m_label) {
+	if (m_showMap && m_viewSettings->showSensors) {
 //		qDebug() << "showing map and label" << endl;
 		m_labelItem->setX(m_mappingItem->x() + m_mappingItem->boundingRect().width() + 5);
 		if (m_labelRejectedProxyWidget->isVisible())
@@ -226,7 +232,7 @@ void AwICASignalItem::updateChildItems()
 		if (m_labelRejectedProxyWidget->isVisible())
 			m_labelRejectedProxyWidget->setX(m_mappingItem->x() + m_mappingItem->boundingRect().width() + 5);
 	}
-	else if (m_label) { // show only label
+	else if (m_viewSettings->showSensors) { // show only label
 		if (m_labelRejectedProxyWidget->isVisible())
 			m_labelRejectedProxyWidget->setX(m_labelItem->x() + m_labelItem->boundingRect().width() + 5);
 	}
@@ -260,7 +266,7 @@ void AwICASignalItem::resolveCollisionWithUpperNeighbor(const QPainterPath& regi
 			else
 				break;
 		}
-		if (m_label) {
+		if (m_viewSettings->showSensors) {
 			m_labelItem->setTransform(QTransform::fromTranslate(xShift, 0));
 			if (m_labelRejectedProxyWidget->isVisible()) 
 				m_labelRejectedProxyWidget->setTransform(QTransform::fromTranslate(xShift, 0));
@@ -273,7 +279,7 @@ void AwICASignalItem::resolveCollisionWithUpperNeighbor(const QPainterPath& regi
 		qDebug() << "after move x=" << m_mappingItem->x() << endl;
 #endif
 	}
-	else if (!m_showMap && m_label) {
+	else if (!m_showMap && m_viewSettings->showSensors) {
 #ifdef QT_DEBUG
 		qDebug() << "moving label item only..." << endl;
 		qDebug() << "x=" << m_labelItem->x() << endl;

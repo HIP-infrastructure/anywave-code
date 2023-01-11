@@ -19,10 +19,12 @@
 #include <widget/AwGraphicsObjects.h>
 #include <QtGui>
 
+
 class AW_WIDGETS_EXPORT AwCursorItem : public AwGraphicsCursorItem
 {
 public:
-	AwCursorItem(float currentPosInFile, float cursorPos, const QString& label, const QString& color, const QFont& font);
+	AwCursorItem(float currentPosInFile, float cursorPos, const QString& label, const QString& color, const QFont& font,
+		AwViewSettings* settings);
 
 	void setOtherPos(const QPointF& pos);
 	void setWidth(float width);

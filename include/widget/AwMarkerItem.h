@@ -26,8 +26,8 @@ class QGraphicsSceneMouseEvent;
 class AW_WIDGETS_EXPORT AwMarkerItem : public AwGraphicsMarkerItem
 {
 public:
-	AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int labelOffset = 0);  
-	virtual ~AwMarkerItem();
+	AwMarkerItem(AwViewSettings *settings, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int labelOffset = 0);  
+	~AwMarkerItem();
 
 	enum Flags { ResizeLeft = 1, ResizeRight, Move };
 
@@ -36,13 +36,14 @@ public:
 	inline void setMarker(const AwSharedMarker& marker) { m_marker = marker; }
 	void updatePosition();
 	inline int offset() { return m_offset; }
-	void showLabel(bool flag);
-	void showValue(bool flag);
+//	void showLabel(bool flag);
+//	void showValue(bool flag);
+	void setVisiblityOptions(int vis);
 	void setPositionInFile(float pos);
-	void setText(const QString& text);
-	void setValue(double v);
+//	void setText(const QString& text);
+//	void setValue(double v);
 protected:
-	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 ) override;
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *e) override;
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent* e) override;
 	void hoverMoveEvent(QGraphicsSceneHoverEvent* e) override;
@@ -53,7 +54,9 @@ protected:
 	AwSharedMarker m_marker;
 	float m_posInFile;
 	int m_offset;
-	AwLabelItem *m_labelItem, *m_valueItem;
+	int m_visibility;
+//	AwLabelItem *m_labelItem, *m_valueItem;
+	AwLabelItem* m_labelItem;
 	AwMarkerItem *m_prev;
 	bool m_mousePressed, m_hasMoved;
 	int flags;

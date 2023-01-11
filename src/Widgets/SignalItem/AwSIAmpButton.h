@@ -29,7 +29,7 @@ public:
 	~AwSIAmpButton();
 	enum Type { Up, Down };
 protected:
-	void mouseReleaseEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event) override;
 private:
 	int m_type;
 	AwGraphicsSignalItem *m_item;

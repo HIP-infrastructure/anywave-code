@@ -24,14 +24,13 @@ class QGraphicsSceneHoverEvent;
 class AW_WIDGETS_EXPORT AwMarkerChannelItem : public AwMarkerItem
 {
 public:
-	AwMarkerChannelItem(AwDisplayPhysics *phys, const AwSharedMarker& mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene);  
+	AwMarkerChannelItem(AwViewSettings *settings, const AwSharedMarker& mark, AwGraphicsSignalItem *sitem, qreal height, QGraphicsScene *scene);  
 	~AwMarkerChannelItem();
 
 	void updatePosition();
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* e) override;
 
 	AwGraphicsSignalItem *m_signalItem;
 	qreal m_height;

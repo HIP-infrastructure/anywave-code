@@ -16,9 +16,10 @@
 #include <widget/AwHighLightMarker.h>
 #include <QPainter>
 #include <QGraphicsScene>
+#include <widget/SignalView/AwViewSettings.h>
 
-AwHighLightMarker::AwHighLightMarker(const QString& text, float pos, float duration, AwDisplayPhysics *phys)
-	: AwGraphicsCursorItem(0 , pos, phys)
+AwHighLightMarker::AwHighLightMarker(const QString& text, float pos, float duration, AwViewSettings *settings)
+	: AwGraphicsCursorItem(0 , pos, settings)
 {
 	m_duration = duration;
 	m_text = text;
@@ -36,7 +37,7 @@ void AwHighLightMarker::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 	qreal height = scene()->sceneRect().height();
 	QRectF rect;
 	QPointF position = pos();  // position of item in scene coordinates
-	qreal width =  (m_duration / m_physics->secsPerCm()) * m_physics->xPixPerCm();      // width in pixel computed from duration
+	qreal width =  (m_duration / m_viewSettings->secsPerCm()) * m_viewSettings->physics->xPixPerCm();      // width in pixel computed from duration
 	qreal textYOffset = 200;
 	qreal yText = 200;
 	QBrush brush;

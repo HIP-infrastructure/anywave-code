@@ -27,14 +27,14 @@ public:
 	QString version;
 	QString description;
 
-	virtual AwBaseGraphicsSignalItem *newInstance(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) = 0;
+	virtual AwBaseGraphicsSignalItem *newInstance(AwChannel *chan, AwViewSettings *settings) = 0;
 };
 
 class AW_GRAPHICS_EXPORT AwDisplayPlugin2DPlot : public AwGraphics2DPlotItem
 {
 public:
 	enum ScaleType { AnyWaveXScale, AnyWaveYScale, CustomScale };
-	AwDisplayPlugin2DPlot(AwChannel *chan, AwDisplayPhysics *phys) : AwGraphics2DPlotItem(chan, phys) { m_xScaleType = AnyWaveXScale; m_yScaleType = CustomScale;}
+	AwDisplayPlugin2DPlot(AwChannel *chan, AwViewSettings *settings) : AwGraphics2DPlotItem(chan, settings) { m_xScaleType = AnyWaveXScale; m_yScaleType = CustomScale;}
 protected:
 	int m_xScaleType;
 	int m_yScaleType;

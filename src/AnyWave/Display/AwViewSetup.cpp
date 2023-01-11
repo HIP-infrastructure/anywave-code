@@ -23,8 +23,8 @@ AwViewSetup::AwViewSetup(QObject *parent)
 	m_parent = (AwDisplaySetup *)parent;
 }
 
-AwViewSetup::AwViewSetup(AwViewSetup *source, QObject *parent)
-	: AwViewSettings(source, parent)
-{
-	m_parent = source->parent(); 
-}
+//AwViewSetup::AwViewSetup(AwViewSetup *source, QObject *parent)
+//	: AwViewSettings(source, parent)
+//{
+//	m_parent = source->parent(); 
+//}

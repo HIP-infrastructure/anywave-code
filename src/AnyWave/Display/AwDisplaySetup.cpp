@@ -116,13 +116,22 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 			while (!n.isNull()) {
 				QDomElement e = n.toElement();
 				
-				if (e.tagName() == "ShowMarkerLabels")
-					setup->showMarkerLabels = e.text() == "true";
+				//if (e.tagName() == "ShowMarkerLabels")
+				//	setup->showMarkerLabels = e.text() == "true";
+				if (e.tagName() == "MarkerViewOptions") {
+					setup->markerViewOptions = AwViewSettings::HideBoth;
+					if (e.text().toLower() == "label")
+						setup->markerViewOptions = AwViewSettings::ShowLabel;
+					if (e.text().toLower() == "value")
+						setup->markerViewOptions = AwViewSettings::ShowValue;
+					if (e.text().toLower() == "marker&value")
+						setup->markerViewOptions = AwViewSettings::ShowBoth;
+				}
 
 				else if (e.tagName() == "SecondsPerCm")
 					setup->secsPerCm = (float)e.text().toDouble();
-				else if (e.tagName() == "ShowMarkerValues")
-					setup->showMarkerValues = e.text() == "true";
+				//else if (e.tagName() == "ShowMarkerValues")
+				//	setup->showMarkerValues = e.text() == "true";
 				else if (e.tagName() == "BaseLineVisible")
 					setup->showZeroLine = e.text() == "true";
 				else if (e.tagName() == "GridVisible")
@@ -135,13 +144,13 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					setup->showSensors = e.text() == "true";
 				else if (e.tagName() == "GridTimingRepresentation") {
 					if (e.text() == "ShowRelativeTime")
-						setup->timeMode = AwViewSettings::ShowRelativeTime;
+						setup->timeRepresentation = AwViewSettings::ShowRelativeTime;
 					else
-						setup->timeMode = AwViewSettings::ShowRecordedTime;
+						setup->timeRepresentation = AwViewSettings::ShowRecordedTime;
 				}
 				else if (e.tagName() == "LimitNumberOfChannels") {
-					setup->limitChannels = e.text() == "true";
-					setup->maxChannels = e.attribute("NumberOfChannels").toInt();
+					setup->limitChannelPerView = e.text() == "true";
+					setup->maxVisibleChannels = e.attribute("NumberOfChannels").toInt();
 				}
 				else if (e.tagName() == "MarkersBar")
 					setup->showMarkerBar = e.text().toLower() == "show";
@@ -169,7 +178,7 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					}
 				}
 				else if (e.tagName() == "TimeScaleMode")
-					setup->timeScaleMode = e.text().toInt();
+					setup->timeScale = e.text().toInt();
 				else if (e.tagName() == "TimeScaleFixedPageDuration")
 					setup->fixedPageDuration = e.text().toFloat();
 				else if (e.tagName() == "ChannelSelection") {
@@ -233,15 +242,25 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		element.appendChild(e);
 		root.appendChild(element);
 
-		e = doc.createElement("ShowMarkerLabels");
-		e.appendChild(doc.createTextNode(dsv->showMarkerLabels ? sTrue : sFalse));
+		e = doc.createElement("MarkerViewOptions");
+		if (dsv->markerViewOptions == AwViewSettings::ShowLabel)
+			e.appendChild(doc.createTextNode("label"));
+		else if (dsv->markerViewOptions == AwViewSettings::ShowValue)
+			e.appendChild(doc.createTextNode("value"));
+		else if (dsv->markerViewOptions == AwViewSettings::ShowBoth)
+			e.appendChild(doc.createTextNode("label&value"));
+		else 
+			e.appendChild(doc.createTextNode("hideboth"));
+		root.appendChild(element);
+
+/*		e.appendChild(doc.createTextNode(dsv->showMarkerLabels ? sTrue : sFalse));
 		element.appendChild(e);
 		root.appendChild(element);
 
 		e = doc.createElement("ShowMarkerValues");
 		e.appendChild(doc.createTextNode(dsv->showMarkerValues ? sTrue : sFalse));
 		element.appendChild(e);
-		root.appendChild(element);		
+		root.appendChild(element);	*/	
 
 		e = doc.createElement("BaseLineVisible");
 		e.appendChild(doc.createTextNode(dsv->showZeroLine ? sTrue : sFalse));
@@ -269,8 +288,8 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		root.appendChild(element);
 
 		e = doc.createElement("LimitNumberOfChannels");
-		e.appendChild(doc.createTextNode(dsv->limitChannels ? sTrue : sFalse));
-		e.setAttribute("NumberOfChannels", QString("%1").arg(dsv->maxChannels));
+		e.appendChild(doc.createTextNode(dsv->limitChannelPerView ? sTrue : sFalse));
+		e.setAttribute("NumberOfChannels", QString("%1").arg(dsv->maxVisibleChannels));
 		element.appendChild(e);
 		root.appendChild(element);
 
@@ -291,7 +310,7 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		root.appendChild(element);
 
 		e = doc.createElement("GridTimingRepresentation");
-		if (dsv->timeMode == AwViewSettings::ShowRelativeTime)
+		if (dsv->timeRepresentation == AwViewSettings::ShowRelativeTime)
 			e.appendChild(doc.createTextNode("ShowRelativeTime"));
 		else
 			e.appendChild(doc.createTextNode("ShowRecordedTime"));
@@ -327,7 +346,7 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		}
 
 		e = doc.createElement("TimeScaleMode");
-		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->timeScaleMode)));
+		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->timeScale)));
 		element.appendChild(e);
 		e = doc.createElement("TimeScaleFixedPageDuration");
 		e.appendChild(doc.createTextNode(QString("%1").arg(dsv->fixedPageDuration)));

@@ -81,6 +81,7 @@
     <ClCompile Include="SignalView\AwNavigationBar.cpp" />
     <ClCompile Include="SignalView\AwViewSettings.cpp" />
     <ClCompile Include="SignalView\AwViewSettingsUi.cpp" />
+    <ClCompile Include="SignalView\SceneKeyEvent.cpp" />
     <ClCompile Include="SignalView\SceneMouseEvent.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -628,6 +628,9 @@
     <ClCompile Include="IO\BIDS\AwClinicalWidget.cpp">
       <Filter>IO\BIDS</Filter>
     </ClCompile>
+    <ClCompile Include="Display\AwSelectTargetChannelsDial.cpp">
+      <Filter>Display</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Data\AwDataConnection.h">
@@ -1109,6 +1112,9 @@
     </QtMoc>
     <QtMoc Include="IO\BIDS\AwClinicalWidget.h">
       <Filter>IO\BIDS</Filter>
+    </QtMoc>
+    <QtMoc Include="Display\AwSelectTargetChannelsDial.h">
+      <Filter>Display</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

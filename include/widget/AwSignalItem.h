@@ -31,15 +31,15 @@ class AW_WIDGETS_EXPORT AwSignalItem : public AwGraphicsSignalItem
 	Q_OBJECT
 	Q_INTERFACES(AwGraphicsSignalItem)
 public:
-	AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys = nullptr); 
+	AwSignalItem(AwChannel *chan, AwViewSettings *settings); 
 
 	QPainterPath shape() const;
 	QRectF boundingRect() const;
 	virtual QSize minimumSize() const { return QSize(0, 0); }
 
-	void showLabel(bool flag) override;
-	void showBaseline(bool f) override { m_baseLine = f; update(); }
-	void setSecondsPerCm(float val);
+//	void showLabel(bool flag) override;
+//	void showBaseline(bool f) override { m_baseLine = f; update(); }
+//	void setSecondsPerCm(float val);
 	void setLabel(const QString& text);
 	void getLabeLPosAndWidth(qreal *x, qreal *width);
 	void updateData();
@@ -50,16 +50,17 @@ public:
 	void resolveCollisionWithUpperNeighbor(const QPainterPath& region) override;
 	void updateChildItems() override;
 	void paintSignal(QPainter* painter) override;
+	void updateSettings(int key) override;
 public slots:
 	int execUi();
 signals:
 	void itemSelectionChanged(bool selected);
 protected:
-	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-	void mousePressEvent(QGraphicsSceneMouseEvent *e);
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *e);
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e);
-	void hoverMoveEvent(QGraphicsSceneHoverEvent *e);
+	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 ) override;
+	void mousePressEvent(QGraphicsSceneMouseEvent *e) override;
+	void hoverEnterEvent(QGraphicsSceneHoverEvent *e) override;
+	void hoverLeaveEvent(QGraphicsSceneHoverEvent *e) override;
+	void hoverMoveEvent(QGraphicsSceneHoverEvent *e) override;
 	QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 	void computeMinMax(qint32 start, qint32 nbSamples, float *min, float *max);
@@ -85,7 +86,7 @@ class AW_WIDGETS_EXPORT AwDisplayPluginSignalItem : public AwDisplayPlugin
 	Q_INTERFACES(AwDisplayPlugin)
 public:
 	AwDisplayPluginSignalItem() { name = "AnyWave SignalItem"; description = "Display signals"; }
-	AwSignalItem *newInstance(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) { return new AwSignalItem(chan, settings, phys); }
+	AwSignalItem *newInstance(AwChannel *chan, AwViewSettings *settings) { return new AwSignalItem(chan, settings); }
 };
 
 #endif

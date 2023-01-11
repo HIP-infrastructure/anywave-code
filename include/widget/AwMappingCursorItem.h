@@ -19,13 +19,13 @@
 #include <widget/AwGraphicsObjects.h>
 #include <qstring.h>
 #include <qfont.h>
+class AwViewSettings;
 
 class AW_WIDGETS_EXPORT AwMappingCursorItem : public AwGraphicsCursorItem
 {
 public:
 	enum Mode { Normal, Fixed };
-	AwMappingCursorItem(float currentPosInFile, float cursorPos, const QString& color, const QFont& font, int flags = Normal
-		, AwDisplayPhysics *phys = NULL);
+	AwMappingCursorItem(float currentPosInFile, float cursorPos, const QString& color, const QFont& font, AwViewSettings* settings, int flags = Normal);
 
 protected:
 	int m_flags;

@@ -118,9 +118,14 @@ void GraphWindow::updateTimeCourses(int section)
 			}
 		}
 	}
-	m_signalView->setTotalDuration(duration);
+//	m_signalView->setTotalDuration(duration);
 	auto posInFile = m_graphSet->positions().value(m_currentIteration);
-	m_signalView->setTimeShift(posInFile);
+//	m_signalView->setTimeShift(posInFile);
+	auto settings = m_signalView->settings();
+	settings->posInFile = posInFile;
+	settings->fileDuration = duration;
+	m_signalView->updateSettings(aw::view_settings::pos_in_file, aw::view_settings::sender_global);
+	m_signalView->updateSettings(aw::view_settings::file_duration, aw::view_settings::sender_global);
 	m_signalView->setRecordedTime(H2Graphs::instance()->pdi.input.reader()->infos.recordingTime());
 	m_signalView->setWindowTitle(QString("%1 computed between %2s and %3s").arg(m_graphSet->method).arg(posInFile).arg(posInFile + duration));
 	m_signalView->update();

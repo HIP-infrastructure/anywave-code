@@ -15,13 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <widget/AwHighLightPositionMarker.h>
 #include <widget/AwGraphicsObjects.h>
-
+#include <widget/SignalView/AwViewSettings.h>
 #include <QGraphicsScene>
 
 #define AW_HLPM_MAX_TICKS	5
 
-AwHighLightPositionMarker::AwHighLightPositionMarker(float posInFile, float cursorPos, AwDisplayPhysics *phys)
-	: AwGraphicsCursorItem(posInFile , cursorPos, phys)
+AwHighLightPositionMarker::AwHighLightPositionMarker(float posInFile, float cursorPos, AwViewSettings *settings)
+	: AwGraphicsCursorItem(posInFile , cursorPos, settings)
 {
 	setOpacity(0.2);
 	m_paint = true;
@@ -41,7 +41,7 @@ void AwHighLightPositionMarker::updateGeometry()
 	qreal width = 8;	// 6 pixels width
 
 
-	qreal xPos = (m_currentPos - m_positionInFile) * m_physics->xPixPerSec();
+	qreal xPos = (m_currentPos - m_positionInFile) * m_viewSettings->physics->xPixPerSec();
 	setPos(xPos, 0);
 	
 	setRect(-4.0,  0., width, height);

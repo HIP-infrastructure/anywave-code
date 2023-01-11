@@ -65,11 +65,9 @@ void AwGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* e)
 		update();
 		return;
 	}
-#ifdef AW_MARKING_TOOL_V2
 	else if (m_mouseMode == AwGraphicsScene::AddingMarker) {
 		handleMousePressedAddingMarker(e);
 	}
-#endif
 	else if (m_mouseMode == AwGraphicsScene::None) {
 #if QT_VERSION <  QT_VERSION_CHECK(5, 0, 0)
 		QGraphicsItem* item = itemAt(e->scenePos());
@@ -114,18 +112,18 @@ void AwGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent* e)
 ///
 void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 {
-	QPointF pos = e->scenePos();
+	m_mousePos = e->scenePos();
 	QGraphicsView* v = views().at(0);
 	switch (m_mouseMode) {
 	case AwGraphicsScene::DraggingCursor:
-		m_draggedCursor->setPosition(m_currentPosInFile, timeAtPos(pos));
+		m_draggedCursor->setPosition(m_settings->posInFile, timeAtPos(m_mousePos));
 		update();
 		emit draggedCursorPositionChanged(m_draggedCursor->currentPos());
 		break;
 	case AwGraphicsScene::Mapping:
 		if (!m_mousePressed) {
-			m_mappingCursor->setPos(v->mapToScene(pos.x(), 0));
-			m_mappingCursor->setPositionInFile(m_currentPosInFile);
+			m_mappingCursor->setPos(v->mapToScene(m_mousePos.x(), 0));
+			m_mappingCursor->setPositionInFile(m_settings->posInFile);
 			update();
 			emit mappingPositionChanged(m_mappingCursor->currentPos());
 		}
@@ -145,11 +143,11 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		break;
 	case AwGraphicsScene::Cursor:
 		if (m_mousePressed) {  // mouse button is pressed => do not move cursor but enlarge cursor selection instead
-			m_cursor->setOtherPos(v->mapToScene(pos.x(), 0));
+			m_cursor->setOtherPos(v->mapToScene(m_mousePos.x(), 0));
 			update();
 		}
 		else {
-			m_cursor->setPos(v->mapToScene(pos.x(), 0));
+			m_cursor->setPos(v->mapToScene(m_mousePos.x(), 0));
 			m_cursor->setWidth(1.0);
 			update();
 			// get position of the cursor in seconds
@@ -158,7 +156,7 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		break;
 	case AwGraphicsScene::AddingMarker:
 	{
-		float endPos = std::min(timeAtPos(pos), m_fileDuration);
+		float endPos = std::min(timeAtPos(m_mousePos), m_settings->fileDuration);
 		if (m_mousePressed) {
 			if (std::abs(endPos - m_currentMarkerItem->marker()->start()) > 0.01)
 				m_isTimeSelectionStarted = true;
@@ -185,7 +183,7 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 						qreal w = std::abs(x - ox);
 						qreal h = std::abs(y - oy);
 						m_selectionRectangle->setRect(QRectF(xx, yy, w, h));
-						if (m_currentPosInFile > m_positionClicked) { // we moved forward pressing space bar
+						if (m_settings->posInFile > m_positionClicked) { // we moved forward pressing space bar
 							m_selectionRectangle->setRect(QRectF(0., yy, x, h));
 
 						}
@@ -194,8 +192,12 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 						auto labels = getChannelsUnderSelectionRectangle();
 						if (labels.size()) {
 							QString toolTip;
-							for (auto const& l : labels)
-								toolTip += QString("%1\n").arg(l);
+							int row = 0;
+							for (auto const& l : labels) {
+								if (row++)
+									toolTip += "\n";
+								toolTip += QString("%1").arg(l);
+							}
 							m_selectionRectangle->setToolTip(toolTip);
 						}
 						update();
@@ -211,7 +213,7 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 				}
 			}
 			else { // no time selection started
-				m_currentMarkerItem->marker()->setStart(timeAtPos(pos));
+				m_currentMarkerItem->marker()->setStart(timeAtPos(m_mousePos));
 				m_currentMarkerItem->marker()->setDuration(0.);
 				m_currentMarkerItem->updatePosition();
 				update();
@@ -227,21 +229,25 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 					m_selectionRectangle->setOpacity(0.3);
 					addItem(m_selectionRectangle);
 					// start with a rectangle around the mouse position of 20 x 20
-					m_selectionRectangle->setRect(pos.x() - 10, pos.y() - 10, 20, 20);
+					m_selectionRectangle->setRect(m_mousePos.x() - 10, m_mousePos.y() - 10, 20, 20);
 				}
 				else
-					m_selectionRectangle->setRect(pos.x() - 10, pos.y() - 10, 20, 20);
+					m_selectionRectangle->setRect(m_mousePos.x() - 10, m_mousePos.y() - 10, 20, 20);
 			}
-			m_currentMarkerItem->marker()->setStart(timeAtPos(pos));
+			m_currentMarkerItem->marker()->setStart(timeAtPos(m_mousePos));
 			m_currentMarkerItem->marker()->setDuration(0.);
 			m_currentMarkerItem->updatePosition();
 			if (m_selectionIsActive) {
 				auto labels = getChannelsUnderSelectionRectangle();
 				if (labels.size()) {
 					QString toolTip;
-					for (auto const& l : labels)
-						toolTip += QString("%1\n").arg(l);
-					m_currentMarkerItem->setToolTip(toolTip);
+					int row = 0;
+					for (auto const& l : labels) {
+						if (row++)
+							toolTip += "\n";
+						toolTip += QString("%1").arg(l);
+					}
+					m_selectionRectangle->setToolTip(toolTip);
 				}
 			}
 
@@ -281,187 +287,6 @@ void AwGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent* e)
 		update();
 	}
 }	
-
-
-void AwGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* e)
-{
-	if (m_mouseMode == AwGraphicsScene::None) {
-		QGraphicsScene::mouseDoubleClickEvent(e);
-		return;
-	}
-	e->ignore();
-	QPointF pos = e->scenePos();
-	m_positionClicked = timeAtPos(pos);
-
-	if (m_positionClicked > m_fileDuration)
-		m_positionClicked = m_fileDuration;
-	// double cliking while marking > insert a single marker
-	if (m_mouseMode == AwGraphicsScene::AddingMarker && !m_isTimeSelectionStarted) {
-		switch (m_markingTool->mode()) {
-		case AwMarkingTool::Default: {
-			auto defaultMarker = m_markingTool->defaultMarker();
-			m_currentMarkerItem->marker()->setColor(defaultMarker->color());
-			m_currentMarkerItem->marker()->setLabel(defaultMarker->label());
-			m_currentMarkerItem->marker()->setValue(defaultMarker->value());
-			m_currentMarkerItem->marker()->setStart(m_positionClicked);
-			m_currentMarkerItem->marker()->setEnd(m_positionClicked);
-			// if the Ctrl key is pressed => try to determine the channel under the mouse 
-			if (m_selectionIsActive) {
-				// check for item under the mouse
-				QGraphicsItem* item = nullptr;
-				// take a rect under the mouse
-				QRect mousePos(pos.x() - 5, pos.y() + 5, 50, 50);   // adjust the window to detect signal items under the mouse
-				QList<QGraphicsItem*> items = this->items(mousePos, Qt::IntersectsItemShape, Qt::DescendingOrder);
-				if (items.size() > 1) {
-					for (int i = 1; i < items.size(); i++) {
-						// get Signal Item
-						if (items.at(i)->type() == QGraphicsItem::UserType + AW_GRAPHICS_ITEM_SIGNAL_TYPE) {
-							item = items.at(i);
-							break;
-						}
-					}
-				}
-				if (item) {
-					AwGraphicsSignalItem* sitem = qgraphicsitem_cast<AwGraphicsSignalItem*>(item);
-					QStringList list = { sitem->channel()->fullName() };
-					m_currentMarkerItem->marker()->setTargetChannels(list);
-				}
-			}
-			emit markerInserted(m_currentMarkerItem->marker());
-		
-			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
-			break;
-		}
-		case AwMarkingTool::Custom:
-		{
-			auto customList = m_markingTool->customList();
-			if (customList.isEmpty()) {  // SHOULD NEVER HAPPENS
-				auto marker = m_markingTool->defaultMarker();
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setColor(marker->color());
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setValue(marker->value());
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
-				emit markerInserted(m_currentMarkerItem->marker());
-			
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
-				// force marking tool back to Default 
-				m_markingTool->setToDefault();
-				break;
-			}
-			if (customList.size() == 1) {
-				auto marker = customList.first();
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setColor(marker->color());
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setValue(marker->value());
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
-				emit markerInserted(m_currentMarkerItem->marker());
-				
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
-				break;
-			}
-			// build slot as lambda
-			auto insertLambda = [=]() {
-				QAction* act = (QAction*)sender();
-				int index = act->data().toInt();
-				auto marker = customList.at(index);
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setColor(marker->color());
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setValue(marker->value());
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
-				emit markerInserted(m_currentMarkerItem->marker());
-			
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
-			};
-			// several item in list => build menu
-			auto menu = new QMenu;
-			int index = 0;
-			for (auto const& marker : customList) {
-				auto action = menu->addAction(marker->label());
-				action->setData(index++);
-				connect(action, &QAction::triggered, this, insertLambda);
-			}
-			if (menu->exec(e->screenPos()) == nullptr) { // no actions taken in the menu => do reset marker insertion
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker()));
-				m_currentMarkerItem->marker()->setDuration(0);
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-			}
-			delete menu;
-			break;
-		}
-		case AwMarkingTool::HED:
-		{
-			auto hedList = m_markingTool->hedList();
-			if (hedList.isEmpty()) {  // SHOULD NEVER HAPPENS
-				auto marker = m_markingTool->defaultMarker();
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setColor(marker->color());
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setValue(marker->value());
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
-				emit markerInserted(m_currentMarkerItem->marker());
-			
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
-				// force marking tool back to Default 
-				m_markingTool->setToDefault();
-				break;
-			}
-			if (hedList.size() == 1) {
-				auto marker = hedList.first();
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setColor(marker->color());
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setValue(marker->value());
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
-				emit markerInserted(m_currentMarkerItem->marker());
-		
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
-				break;
-			}
-			// build slot as lambda
-			auto insertLambda = [=]() {
-				QAction* act = (QAction*)sender();
-				int index = act->data().toInt();
-				auto marker = hedList.at(index);
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setColor(marker->color());
-				m_currentMarkerItem->marker()->setLabel(marker->label());
-				m_currentMarkerItem->marker()->setValue(marker->value());
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-				m_currentMarkerItem->marker()->setEnd(m_positionClicked);
-				emit markerInserted(m_currentMarkerItem->marker());
-		
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
-			};
-			// several item in list => build menu
-			auto menu = new QMenu;
-			int index = 0;
-			for (auto const& marker : hedList) {
-				auto action = menu->addAction(marker->label());
-				action->setData(index++);
-				connect(action, &QAction::triggered, this, insertLambda);
-			}
-			if (menu->exec(e->screenPos()) == nullptr) { // no actions taken in the menu => do reset marker insertion
-				m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker()));
-				m_currentMarkerItem->marker()->setDuration(0);
-				m_currentMarkerItem->marker()->setStart(m_positionClicked);
-			}
-			delete menu;
-		}
-			break;
-		default:
-			break;
-		}
-	}
-}
-
 
 #ifndef AW_MARKING_TOOL_V2
 
@@ -730,8 +555,8 @@ void AwGraphicsScene::applyMarkingToolSettings()
 		m_currentMarkerItem->marker()->setValue(m_markingTool->defaultMarker()->value());
 		marker->setColor(m_markingTool->defaultMarker()->color());
 		m_currentMarkerItem->marker()->setColor(m_markingTool->defaultMarker()->color());
-		m_currentMarkerItem->setText(m_markingTool->defaultMarker()->label());
-		m_currentMarkerItem->setValue(m_markingTool->defaultMarker()->value());
+		//m_currentMarkerItem->setText(m_markingTool->defaultMarker()->label());
+	//	m_currentMarkerItem->setValue(m_markingTool->defaultMarker()->value());
 	}
 }
 
@@ -742,8 +567,8 @@ void AwGraphicsScene::applyMarkingToolSettings()
 void AwGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* e)
 {
 	// check that the position clicked is not AFTER the end of data
-	if (m_positionClicked > m_fileDuration)
-		m_positionClicked = m_fileDuration;
+	if (m_positionClicked > m_settings->fileDuration)
+		m_positionClicked = m_settings->fileDuration;
 
 	if (e->button() != Qt::LeftButton) {
 		if (m_isTimeSelectionStarted) { // a selection has started => cancel it
@@ -868,8 +693,8 @@ void AwGraphicsScene::handleMouseReleaseCursor(QGraphicsSceneMouseEvent* e)
 void AwGraphicsScene::handleMouseReleaseMapping(QGraphicsSceneMouseEvent* e)
 {
 	if (m_mappingFixedCursor == nullptr) {
-		m_mappingFixedCursor = new AwMappingCursorItem(m_currentPosInFile, m_positionClicked, AwUtilities::gui::mappingCursorColor(), AwUtilities::gui::mappingCursorFont(), AwMappingCursorItem::Fixed);
-		m_mappingFixedCursor->setPhysics(m_physics);
+		m_mappingFixedCursor = new AwMappingCursorItem(m_settings->posInFile, m_positionClicked, AwUtilities::gui::mappingCursorColor(), AwUtilities::gui::mappingCursorFont(), m_settings, AwMappingCursorItem::Fixed);
+		//m_mappingFixedCursor->setPhysics(m_settings->physics);
 		addItem(m_mappingFixedCursor);
 	}
 	QPointF pos = e->scenePos();
@@ -898,35 +723,38 @@ void AwGraphicsScene::handleMouseReleaseMapping(QGraphicsSceneMouseEvent* e)
 		emit clickedAtTime(m_positionClicked);
 	}
 	// update mapping marker
-//	m_mappingMarker->setLabel(m_markingSettings->label);
 	m_mappingMarker->setLabel(m_markingTool->defaultMarker()->label());
 	m_mappingMarker->setStart(m_positionClicked);
 	m_mappingMarker->setDuration(m_mappingSelectionDuration);
-//	m_mappingMarker->setValue(m_markingSettings->value);
 	m_mappingMarker->setValue(m_markingTool->defaultMarker()->value());
-//	m_mappingMarker->setColor(m_markingSettings->color);
 	m_mappingMarker->setColor(m_markingTool->defaultMarker()->color());
-
 }
 
 void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e)
 {
-	switch (m_markingTool->mode()) {
-	case AwMarkingTool::Default: {
-		auto defaultMarker = m_markingTool->defaultMarker();
-		m_currentMarkerItem->marker()->setColor(defaultMarker->color());
-		m_currentMarkerItem->marker()->setLabel(defaultMarker->label());
-		m_currentMarkerItem->marker()->setValue(defaultMarker->value());
+	auto defaultFunction = [=](const AwSharedMarker& marker) {
+		m_currentMarkerItem->marker()->setColor(marker->color());
+		m_currentMarkerItem->marker()->setLabel(marker->label());
+		m_currentMarkerItem->marker()->setValue(marker->value());
 		// if the Ctrl key is pressed => try to determine the channel under the mouse 
 		if (m_selectionIsActive) {
-			if (m_selectionRectangle) {
+			if (m_selectionRectangle) { // should also work for single markers.
 				auto labels = getChannelsUnderSelectionRectangle();
-				if (labels.size()) 
+				if (labels.size()) {
 					m_currentMarkerItem->marker()->setTargetChannels(labels);
+					// ask to manually select channels
+					if (labels.size() > 1) 
+						manuallySetChannelsTarget(labels);
+				}
 				update();
 				removeItem(m_selectionRectangle);
 			}
 		}
+	};
+
+	switch (m_markingTool->mode()) {
+	case AwMarkingTool::Default: {
+		defaultFunction(m_markingTool->defaultMarker());
 		emit markerInserted(m_currentMarkerItem->marker());
 		m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 		break;
@@ -935,20 +763,7 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 	{
 		auto customList = m_markingTool->customList();
 		if (customList.isEmpty()) {  // SHOULD NEVER HAPPENS
-			auto marker = m_markingTool->defaultMarker();
-			m_currentMarkerItem->marker()->setLabel(marker->label());
-			m_currentMarkerItem->marker()->setColor(marker->color());
-			m_currentMarkerItem->marker()->setLabel(marker->label());
-			m_currentMarkerItem->marker()->setValue(marker->value());
-			if (m_selectionIsActive) {
-				if (m_selectionRectangle) {
-					auto labels = getChannelsUnderSelectionRectangle();
-					if (labels.size())
-						m_currentMarkerItem->marker()->setTargetChannels(labels);
-					update();
-					removeItem(m_selectionRectangle);
-				}
-			}
+			defaultFunction(m_markingTool->defaultMarker());
 			emit markerInserted(m_currentMarkerItem->marker());
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			// force marking tool back to Default 
@@ -956,21 +771,8 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 			break;
 		}
 		if (customList.size() == 1) {
-			auto marker = customList.first();
-			m_currentMarkerItem->marker()->setLabel(marker->label());
-			m_currentMarkerItem->marker()->setColor(marker->color());
-			m_currentMarkerItem->marker()->setLabel(marker->label());
-			m_currentMarkerItem->marker()->setValue(marker->value());
-			if (m_selectionIsActive) {
-				if (m_selectionRectangle) {
-					auto labels = getChannelsUnderSelectionRectangle();
-					if (labels.size())
-						m_currentMarkerItem->marker()->setTargetChannels(labels);
-					update();
-					removeItem(m_selectionRectangle);
-				}
-			}
-			emit markerInserted(m_currentMarkerItem->marker());
+			defaultFunction(customList.first());
+				emit markerInserted(m_currentMarkerItem->marker());
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 			break;
 		}
@@ -979,19 +781,7 @@ void AwGraphicsScene::handleMouseReleaseAddingMarker(QGraphicsSceneMouseEvent* e
 			QAction* act = (QAction*)sender();
 			int index = act->data().toInt();
 			auto marker = customList.at(index);
-			m_currentMarkerItem->marker()->setLabel(marker->label());
-			m_currentMarkerItem->marker()->setColor(marker->color());
-			m_currentMarkerItem->marker()->setLabel(marker->label());
-			m_currentMarkerItem->marker()->setValue(marker->value());
-			if (m_selectionIsActive) {
-				if (m_selectionRectangle) {
-					auto labels = getChannelsUnderSelectionRectangle();
-					if (labels.size())
-						m_currentMarkerItem->marker()->setTargetChannels(labels);
-					update();
-					removeItem(m_selectionRectangle);
-				}
-			}
+			defaultFunction(marker);
 			emit markerInserted(m_currentMarkerItem->marker());
 			m_currentMarkerItem->setMarker(AwSharedMarker(new AwMarker));
 		};

@@ -45,7 +45,7 @@ class AW_CORE_EXPORT AwDataClient : public QObject
 	friend class AwDataBuffer;
 	friend class AwDataManager;
 public:
-	AwDataClient(QObject *parent = NULL);
+	AwDataClient(QObject *parent = nullptr);
 
 	inline bool endOfData() { return m_endOfData; }
 	void requestData(AwChannelList *channels, const AwSharedMarker& marker, bool rowData = false, bool doNotWakeUpClient = false);
@@ -69,6 +69,7 @@ signals:
 	void needData(AwChannelList *channels, AwSharedMarkerList *markers, bool rawData = false);
 	void selectChannelsRequested(AwDataClient *,const QVariantMap& settings, AwChannelList* channels);
 	void selectChannelsRequestedAsync(AwDataClient*, const QVariantMap&, AwChannelList*);
+	void connectionRequested(AwDataClient*);
 
 protected:
 	QWaitCondition m_wcDataAvailable, m_wcSelectChannelsDone;

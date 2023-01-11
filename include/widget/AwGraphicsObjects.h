@@ -32,16 +32,16 @@ public:
 
 	void setSecsPerCm(float secsPerCm);
 	inline void setXPixPerSec(float xPixPerSec) { m_xPixPerSec = xPixPerSec; }
-	inline void setPageDuration(float dur) { m_pageDuration = dur; }
+//	inline void setPageDuration(float dur) { m_pageDuration = dur; }
 	/** Compute x axis scaling for a fixed page duration **/
-	void setFixedPageDuration(float dur, int pageWidth);
+	void setFixedPageDuration(float dur, float pageWidth);
 	void unsetFixedPageDuration();
 
 	inline float xPixPerCm() { return m_xPixPerCm; }
 	inline float yPixPerCm() { return m_yPixPerCm; }
 	inline float xPixPerSec() { return m_xPixPerSec; }
-	inline float pageDuration() { return m_pageDuration; }
-	inline float secsPerCm() { return m_secsPerCm; }
+//	inline float pageDuration() { return m_pageDuration; }
+//	inline float secsPerCm() { return m_secsPerCm; }
 
 	float pixelDuration();
 
@@ -49,7 +49,7 @@ protected:
 	float m_xPixPerCm;
 	float m_yPixPerCm;
 	float m_xPixPerSec;
-	float m_pageDuration;
+//	float m_pageDuration;
 	float m_secsPerCm;
 	bool m_fixedPageDuration;
 };
@@ -59,23 +59,24 @@ class AW_WIDGETS_EXPORT AwGraphicsItem : public QObject
 {
 	Q_OBJECT
 public:
-	explicit AwGraphicsItem(AwDisplayPhysics *phys, AwViewSettings *settings);
+	explicit AwGraphicsItem(AwViewSettings* settings);
 	virtual QSize minimumSize() const { return QSize(0, 0); }	// override this method to specilfy the minimum size for a Graphics Item.
 	enum { ItemHasUi = 1 };
-	inline QObject *plugin() { return m_plugin; }
-	inline void setPlugin(QObject *plugin) { m_plugin = plugin; }
+	inline QObject* plugin() { return m_plugin; }
+	inline void setPlugin(QObject* plugin) { m_plugin = plugin; }
 	inline bool hasUi() { return m_flags & ItemHasUi; }
-	inline void setPhysics(AwDisplayPhysics *phys) { m_physics = phys; }
-	inline AwDisplayPhysics *physics() { return m_physics; }
-	inline void setDisplayPhysics(AwDisplayPhysics *p) { m_physics = p; }
+	//	inline void setPhysics(AwDisplayPhysics *phys) { m_physics = phys; }
+	//	inline AwDisplayPhysics *physics() { return m_physics; }
+	//	inline void setDisplayPhysics(AwDisplayPhysics *p) { m_physics = p; }
 
-	inline QSize size() { return m_size; }	
+	inline QSize size() { return m_size; }
 	void setItemFlags(int flags) { m_flags |= flags; }
 	inline int itemFlags() { return m_flags; }
-	virtual void updateGeometry()  { } // override this method to compute new geometry for the item.
+	virtual void updateGeometry() { } // override this method to compute new geometry for the item.
 	// override this method to add custom actions for the item that will be displayed in the context menu.
-	virtual QList<QAction *> customActions() { return QList<QAction *>(); }
+	virtual QList<QAction*> customActions() { return QList<QAction*>(); }
 	inline AwViewSettings* viewSettings() { return m_viewSettings; }
+	virtual void updateSettings(int key) {}
 public slots:
 	// executes Ui (if the object has ui)
 	virtual int execUi() { return QDialog::Accepted; }
@@ -86,7 +87,7 @@ signals:
 	void filtersChanged();
 	void selectionChanged(bool selected);
 protected:
-	AwDisplayPhysics *m_physics;
+//	AwDisplayPhysics *m_physics;
 	int m_flags;
 	QSize m_size;
 	QObject *m_plugin;
@@ -99,12 +100,12 @@ protected:
 class AW_WIDGETS_EXPORT AwBaseGraphicsSignalItem : public AwGraphicsItem
 {
 public:
-	AwBaseGraphicsSignalItem(AwChannel *channel, AwViewSettings* settings, AwDisplayPhysics *phys );
+	AwBaseGraphicsSignalItem(AwChannel *channel, AwViewSettings* settings);
 	virtual int itemType() { return AW_BASE_GRAPHICS_ITEM_TYPE; }
 
-	virtual void showLabel(bool flag) { m_label = flag; }
-	inline bool isLabelVisible() { return m_label; }
-	virtual void showBaseline(bool flag) { m_baseLine = flag;  }
+//	virtual void showLabel(bool flag) { m_label = flag; }
+//	inline bool isLabelVisible() { return m_label; }
+//	virtual void showBaseline(bool flag) { m_baseLine = flag;  }
 	virtual AwChannel *channel() { return m_channel; }
 	/** optional method to place child items correctly before painting the item **/
 	virtual void updateChildItems() {}
@@ -122,7 +123,7 @@ public:
 	virtual void setLabelHeight(int height) = 0;
 	void setUpperNeighbor(AwBaseGraphicsSignalItem* neighbor);
 protected:
-	bool m_baseLine, m_label;
+//	bool m_baseLine, m_label;
 	AwChannel *m_channel;
 	bool m_repaint;
 };
@@ -142,7 +143,7 @@ protected:
 class AW_WIDGETS_EXPORT AwBaseGraphicsMarkerItem : public AwGraphicsItem
 {
 public:
-	AwBaseGraphicsMarkerItem(const AwSharedMarker& marker, AwDisplayPhysics *phys);
+	AwBaseGraphicsMarkerItem(const AwSharedMarker& marker, AwViewSettings *settings);
 	virtual int itemType() { return AW_GRAPHICS_ITEM_MARKER_TYPE; }
 	inline AwSharedMarker marker() { return m_marker; }
 
@@ -156,7 +157,7 @@ class AW_WIDGETS_EXPORT AwGraphicsCursorItem : public AwGraphicsItem, public QGr
 public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_CURSOR_TYPE };
 	inline int type() const { return Type; }
-	AwGraphicsCursorItem(float posInFile, float cursorPosition, AwDisplayPhysics *phys = nullptr) : AwGraphicsItem(phys, nullptr)
+	AwGraphicsCursorItem(float posInFile, float cursorPosition, AwViewSettings *settings) : AwGraphicsItem(settings)
 	{ m_positionInFile = posInFile; m_currentPos = cursorPosition; this->setZValue(20); }
 	inline float currentPos() { return m_currentPos; }
 	/** Defines the absolute position in seconds for the cursor in the scene **/
@@ -177,7 +178,7 @@ public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_SIGNAL_TYPE };
 	int itemType() { return AW_GRAPHICS_ITEM_SIGNAL_TYPE; }
 	inline int type() const { return Type; }
-	AwGraphicsSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys = nullptr) : AwBaseGraphicsSignalItem(chan, settings, phys) 
+	AwGraphicsSignalItem(AwChannel *chan, AwViewSettings *settings) : AwBaseGraphicsSignalItem(chan, settings) 
 	{
 		setZValue(5); m_flags = 0; m_repaint = false; m_number = -1; m_upperNeighbor = nullptr;
 	}
@@ -217,7 +218,7 @@ public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_2DSIGNAL_TYPE };
 	inline int type() const { return Type; }
 	int itemType() { return AW_GRAPHICS_ITEM_2DSIGNAL_TYPE; }
-	AwGraphics2DPlotItem(AwChannel *chan, AwDisplayPhysics *phys);
+	AwGraphics2DPlotItem(AwChannel *chan, AwViewSettings *settings);
 };
 
 class AW_WIDGETS_EXPORT AwGraphicsMarkerItem : public AwBaseGraphicsMarkerItem, public QGraphicsRectItem
@@ -226,8 +227,8 @@ class AW_WIDGETS_EXPORT AwGraphicsMarkerItem : public AwBaseGraphicsMarkerItem, 
 public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_MARKER_TYPE };
 	inline int type() const { return Type; }
-	AwGraphicsMarkerItem(const AwSharedMarker& marker, AwDisplayPhysics *phys) : AwBaseGraphicsMarkerItem(marker, phys) 
-	{ m_physics = phys; this->setZValue(10); setOpacity(1.0); }
+	AwGraphicsMarkerItem(const AwSharedMarker& marker, AwViewSettings *settings) : AwBaseGraphicsMarkerItem(marker, settings)
+	{ setZValue(10); setOpacity(1.0); }
 };
 
 class AW_WIDGETS_EXPORT AwGraphicsWidgetItem : public AwBaseGraphicsSignalItem, public QGraphicsProxyWidget
@@ -235,7 +236,7 @@ class AW_WIDGETS_EXPORT AwGraphicsWidgetItem : public AwBaseGraphicsSignalItem, 
 public:
 	enum { Type = UserType + AW_GRAPHICS_ITEM_WIDGET_TYPE };
 	inline int type() const { return Type; }
-	AwGraphicsWidgetItem(AwChannel *channel, AwDisplayPhysics *phys, 
-		QGraphicsItem *parent = NULL, Qt::WindowFlags wFlags = 0, QWidget *widget = NULL);
+	AwGraphicsWidgetItem(AwChannel *channel, AwViewSettings *settings,
+		QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = 0, QWidget *widget = nullptr);
 };
 #endif // AW_GRAPHICS_OBJECTS_H

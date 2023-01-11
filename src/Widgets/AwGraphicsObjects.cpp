@@ -24,6 +24,7 @@
 #include <QScreen>
 #include <QApplication>
 #endif
+#include <widget/SignalView/AwViewSettings.h>
 
 AwDisplayPhysics::AwDisplayPhysics()
 {
@@ -34,10 +35,9 @@ AwDisplayPhysics::AwDisplayPhysics()
 	m_xPixPerCm = 0;
 
 	if (m_xPixPerCm == 0. || m_yPixPerCm == 0.) {
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 		QList<QScreen *> screens = qApp->screens();
-		QScreen *selected = NULL;
-		foreach (QScreen *screen, screens) {
+		QScreen *selected = nullptr;
+		for (auto screen : screens) {
 			qreal dpiX = screen->physicalDotsPerInchX();
 			qreal dpiY = screen->physicalDotsPerInchY();
 			// select the screen with the greatest dots per inch X
@@ -46,39 +46,28 @@ AwDisplayPhysics::AwDisplayPhysics()
 			else if (dpiX > selected->physicalDotsPerInchX())
 				selected = screen;
 		}
-
 		// compute physical values for AnyWave
 		m_xPixPerCm = selected->logicalDotsPerInchX() / 2.54;
 		m_yPixPerCm = selected->logicalDotsPerInchY() / 2.54;
 		settings.setValue("display/xPixPerCm", m_xPixPerCm);
 		settings.setValue("display/yPixPerCm", m_yPixPerCm);	
 		settings.sync();
-#else  // Qt 4.x
-		QWidget widget;
-		const float inch = (float)2.54; // 1 inch is 2.54cm
-		int dpi_x = widget.physicalDpiX();
-		int dpi_y = widget.physicalDpiY();
-		m_xPixPerCm = dpi_x / 2.54;
-		m_yPixPerCm = dpi_y / 2.54;
-		settings.setValue("display/xPixPerCm", m_xPixPerCm);
-		settings.setValue("display/yPixPerCm", m_yPixPerCm);	
-		settings.sync();
-#endif
 	}
 	m_xPixPerSec = m_secsPerCm = 0.;
-	m_pageDuration = 0;
+//	m_pageDuration = 0;
 	m_fixedPageDuration = false;
 }
 
 void AwDisplayPhysics::setSecsPerCm(float secsPerCm)
 {
 	m_secsPerCm = secsPerCm;
-	m_xPixPerSec = m_xPixPerCm / secsPerCm;
+	if (!m_fixedPageDuration)
+		m_xPixPerSec = m_xPixPerCm / secsPerCm;
 }
 
-void AwDisplayPhysics::setFixedPageDuration(float dur, int width)
+void AwDisplayPhysics::setFixedPageDuration(float dur, float width)
 {
-	m_xPixPerSec = (float)width / dur;
+	m_xPixPerSec = width / dur;
 	m_fixedPageDuration = true;
 }
 
@@ -97,12 +86,13 @@ void AwDisplayPhysics::unsetFixedPageDuration()
 
 /////////////////////////////////////////////////////////////////////////////////
 // AwGraphicsItem
-AwGraphicsItem::AwGraphicsItem(AwDisplayPhysics *phys, AwViewSettings *settings)
+AwGraphicsItem::AwGraphicsItem(AwViewSettings *settings)
 {
 	m_size = QSize(0, 0);
 	m_flags = 0;
-	m_physics = phys;
+	//m_physics = phys;
 	m_viewSettings = settings;
+	m_plugin = nullptr;
 }
 
 // SLOTS for AwGraphicsItem
@@ -118,26 +108,27 @@ void AwGraphicsItem::setNewSize(const QSize size)
 //////////////////////////////////////////////////////////////////////////////////
 // AwBaseGraphicsMarkerItem
 
-AwBaseGraphicsMarkerItem::AwBaseGraphicsMarkerItem(const AwSharedMarker& marker, AwDisplayPhysics *phys) :
-AwGraphicsItem(phys, nullptr)
+AwBaseGraphicsMarkerItem::AwBaseGraphicsMarkerItem(const AwSharedMarker& marker, AwViewSettings* settings) :
+AwGraphicsItem(settings)
 {
 	m_marker = marker;
 	m_plugin = nullptr;
 }
 
-AwBaseGraphicsSignalItem::AwBaseGraphicsSignalItem(AwChannel *chan, AwViewSettings* settings, AwDisplayPhysics *phys)
-: AwGraphicsItem(phys, settings)
+AwBaseGraphicsSignalItem::AwBaseGraphicsSignalItem(AwChannel *chan, AwViewSettings* settings)
+: AwGraphicsItem(settings)
 {
 	m_channel = chan;
 	m_flags = 0;
 	m_plugin = nullptr;
+	m_repaint = false;
 }
 
 //
 // AwBaseGraphics2DPlotItem
 //
 
-AwGraphics2DPlotItem::AwGraphics2DPlotItem(AwChannel *chan, AwDisplayPhysics *phys) : AwGraphicsSignalItem(chan, nullptr, phys)
+AwGraphics2DPlotItem::AwGraphics2DPlotItem(AwChannel *chan, AwViewSettings *settings) : AwGraphicsSignalItem(chan, settings)
 {
 	QGraphicsItem::setZValue(5);
 }
@@ -147,9 +138,9 @@ AwGraphics2DPlotItem::AwGraphics2DPlotItem(AwChannel *chan, AwDisplayPhysics *ph
 //
 // AwGraphicsWidgetItem
 //
-AwGraphicsWidgetItem::AwGraphicsWidgetItem(AwChannel *channel, AwDisplayPhysics *phys, 
+AwGraphicsWidgetItem::AwGraphicsWidgetItem(AwChannel *channel, AwViewSettings *settings,
 										   QGraphicsItem *parent, Qt::WindowFlags wFlags, QWidget *widget) 
-: AwBaseGraphicsSignalItem(channel, nullptr, phys)
+: AwBaseGraphicsSignalItem(channel, settings)
 {
 	if (widget)
 		setWidget(widget);
@@ -171,7 +162,7 @@ void AwGraphicsCursorItem::setCurrentPos(float pos)
 {
 	float p = pos - m_positionInFile; // scene offset is always the position in file.
 	// convert pos in pixel coordinates
-	float x = (p * m_physics->xPixPerCm()) / m_physics->secsPerCm();
+	float x = (p * m_viewSettings->physics->xPixPerCm()) / m_viewSettings->secsPerCm();
 
 	this->setPos(x, y());	
 	m_currentPos = pos;

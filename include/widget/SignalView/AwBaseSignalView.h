@@ -31,23 +31,32 @@ class AW_WIDGETS_EXPORT AwBaseSignalView : public QWidget
 {
 	Q_OBJECT
 public:
-	AwBaseSignalView(QWidget *parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags(), int flags = AwBaseSignalView::Default, AwViewSettings *settings = NULL);
+	//AwBaseSignalView(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags(), int flags = AwBaseSignalView::Default, AwViewSettings *settings = nullptr);
+	AwBaseSignalView(AwViewSettings* settings, QWidget* parent = nullptr);
 	virtual ~AwBaseSignalView();
 	// flags to configure the widgets
 	// Default = full navigation 
-	enum Flags {
-		Default = 0, NoNavBar = 1, NoHScrollBar = 2, NoSettingsButton = 4, EnableMarking = 8, NoMarkerBar = 16, ViewAllChannels = 32,
-		NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512, HidePositionInFile = 1024
-	};
-	void setFlags(int flags);
+	//enum Flags {
+	//	Default = 0, NoNavBar = 1, NoHScrollBar = 2, NoSettingsButton = 4, EnableMarking = 8, NoMarkerBar = 16, ViewAllChannels = 32,
+	//	NoGainLevels = 64, NoNavButtons = 128, NoInfoLabels = 256, FilterButton = 512, HidePositionInFile = 1024, ShowMarkers = 2048
+	//};
+	inline AwViewSettings* settings() { return m_settings; }
+	float currentEndPosition() {
+		auto end = m_settings->posInFile + m_settings->pageDuration; 
+		if (end > m_settings->fileDuration)
+			end = m_settings->fileDuration;
+		return end;
+	}
+
+//	void setFlags(int flags);
 	void setScene(AwGraphicsScene *scene);
 	void setView(AwGraphicsView *view);
 	void setNavBar(AwNavigationBar *navBar);
 	void setMarkerBar(AwBaseMarkerBar *markerBar);
-	void setViewSettings(AwViewSettings* settings);
+//	void setViewSettings(AwViewSettings* settings);
 	inline AwDataClient *client() { return &m_client; }
-	inline float positionInFile() { return m_positionInFile; }
-	inline AwViewSettings *settings() { return m_settings; }
+//	inline float positionInFile() { return m_positionInFile; }
+//	inline AwViewSettings *settings() { return m_settings; }
 	inline AwGraphicsView *view() { return m_view; }
 	inline AwGraphicsScene *scene() { return m_scene; }
 	AwChannelList selectedChannels();
@@ -63,41 +72,47 @@ public:
 	void makeChannelVisible(int type);
 	void removeVisibleChannel(int type);
 	void addNewDisplayPlugin(AwDisplayPlugin *plugin) { m_scene->registerDisplayPlugin(plugin); }
-	void changeSettings(AwViewSettings *settings, int flags) { emit settingsChanged(settings, flags); }
+//	void changeSettings(AwViewSettings *settings, int flags) { emit settingsChanged(settings, flags); }
 	void setRecordedTime(const QTime& time);
 	void setRecordedTime(const QString& timeString) { setRecordedTime(QTime::fromString(timeString)); }
 
-	inline void showZeroLine(bool flag) { if (m_settings) { m_settings->showZeroLine = flag; emit settingsChanged(m_settings, AwViewSettings::ShowBaseLine); } }
-	inline void setTimeShift(float shift) { if (m_view) m_view->setTimeShift(shift); }
-	inline float currentEndPosition() { return m_positionInFile + m_pageDuration; }
+//	inline void showZeroLine(bool flag) { if (m_settings) { m_settings->showZeroLine = flag; emit settingsChanged(m_settings, AwViewSettings::ShowBaseLine); } }
+	
+//	inline void setTimeShift(float shift) { if (m_view) m_view->setTimeShift(shift); }
+//	inline float currentEndPosition() { return m_positionInFile + m_pageDuration; }
 public slots:
 	void clean();
 	void setAmplitude(int type, float value);
 	void setAmplitudes();
-	void setPositionInFile(float pos);
+//	void setPositionInFile(float pos);
 	virtual void reloadData();	// reload data after filtering options or settings changed
-	virtual void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
-	virtual void updateSettings(AwViewSettings *settings, int flags);
-	virtual void updatePageDuration(float duration);
+//	virtual void goToPos(int pos);	// called when position in file has changed using the scrollbar in the navigation bar.
+//	virtual void updateSettings(AwViewSettings *settings, int flags);
+	virtual void updateSettings(int key, int sender);
+//	virtual void updatePageDuration(float duration);
 	virtual void setNewFilters(const AwFilterSettings& settings);
 	void setMarkers(const AwSharedMarkerList& markers);	// update the available markers
 	void startMarking();	
 	void stopMarking();
 	void removeHighLigthMarker() { if (m_scene) m_scene->removeHighLigthMarker(); }
 	void addHightLightMarker(const QString& text, float position, float duration) { if (m_scene) m_scene->addHighLigthMarker(text, position, duration); }
-	void showMarkers(bool flag) { m_scene->showMarkers(flag); }
-	void setSecPerCm(float value);
-	void showElectrodesNames(bool flag);
-	void showMarkersValues(bool flag);
-	void showMarkersLabels(bool flag);
-	void stackChannels(bool flag);
+//  void showMarkers(bool flag) { m_scene->showMarkers(flag); }
+
+//	void setSecPerCm(float value);
+//	void showElectrodesNames(bool flag);
+//	void showMarkersValues(bool flag);
+//	void showMarkersLabels(bool flag);
+//	void stackChannels(bool flag);
 	void openFilterGUI();
 	virtual void processEvent(QSharedPointer<AwEvent>);
-	void updateMarkers();
+//	void updateMarkers();
+	virtual void centerViewOnPosition(float position);
+	void synchronizeOnPosition(float position);
 signals:
-	void settingsChanged(AwViewSettings *settings, int flags);
+//	void settingsChanged(AwViewSettings *settings, int flags);
+	void settingsChanged(int key);
 	void positionChanged(float position);	// send when the position in file changed.
-	void settingsChanged();
+//	void settingsChanged();
 	void cursorPositionChanged(float position);
 	void mappingPositionChanged(float position);
 	void closeViewClicked();
@@ -112,6 +127,7 @@ signals:
 	// notification about channels order in the view
 	void channelsOrderChanged(const QStringList&);
 	void markerChanged(const AwSharedMarker& marker);
+	void connectionRequested(AwDataClient*);
 protected:
 	AwDataClient m_client;
 	AwViewSettings *m_settings;
@@ -126,10 +142,10 @@ protected:
 	AwSharedMarkerList m_visibleMarkers;
 	// hold a vector of bools for each type of channel currently present in the view
 	QVector<bool> m_currentTypes;
-	float m_positionInFile;					// current position of the view in the data (in seconds)
-	float m_pageDuration;
-	float m_totalDuration;
-	float m_startPosition;
+//	float m_positionInFile;					// current position of the view in the data (in seconds)
+//	float m_pageDuration;
+//	float m_totalDuration;
+//	float m_startPosition;
 	int m_flags;
 	AwFilterSettings m_filterSettings;
 	QTime m_recordedTime;

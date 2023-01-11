@@ -26,33 +26,31 @@
 #include <utils/gui.h>
 
 
-AwMarkerItem::AwMarkerItem(AwDisplayPhysics *phys, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int offset) 
-: AwGraphicsMarkerItem(mark, phys)
+AwMarkerItem::AwMarkerItem(AwViewSettings *settings, AwMarkerItem *previous, const AwSharedMarker& mark, QGraphicsScene *scene, int offset) 
+: AwGraphicsMarkerItem(mark, settings)
 {
 	m_marker = mark;
 	setFlags(QGraphicsRectItem::flags() | QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 	setAcceptHoverEvents(true);
 	flags = 0;
 	m_labelItem = new AwLabelItem(mark->label(), this);
-	QString valueLabel;
-	if (mark->value() < 0)
-		valueLabel = "No Value";
-	else
-		valueLabel = QString::number(mark->value());
+//	QString valueLabel;
+//	if (mark->value() < 0)
+//		valueLabel = "No Value";
+//	else
+//		valueLabel = QString::number(mark->value());
 
-	m_valueItem = new AwLabelItem(valueLabel, this);
+//	m_valueItem = new AwLabelItem(valueLabel, this);
 	
 	m_offset = offset;
 	m_prev = previous;
-	if (previous)	{
+	if (previous)
 		m_labelItem->setPos(5, AW_MARKER_LABEL_OFFSET + ((previous->offset() + 1) * m_labelItem->rect().height()) + 5);
-	}
-	else	{
+	else	
 		m_labelItem->setPos(5, AW_MARKER_LABEL_OFFSET + (m_offset  * m_labelItem->rect().height()));
-	}
-	m_valueItem->setPos(5, m_labelItem->y() + m_labelItem->rect().height() + 5);
+	
+	//m_valueItem->setPos(5, m_labelItem->y() + m_labelItem->rect().height() + 5);
 	setOpacity(1);
-
 	m_posInFile = 0.;
 	m_mousePressed = m_hasMoved = false;
 }
@@ -84,33 +82,35 @@ void AwMarkerItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	QPointF itemBottomRight = this->mapFromScene(bottomRight);
 	itemTopLeft.setY(itemTopLeft.y() + AW_MARKER_LABEL_OFFSET);
 
-	qreal labelY, valueY;
-	if (m_prev) {
-		m_offset = m_prev->offset() + 1;
-		// position Label
-		labelY = itemTopLeft.y() + (m_offset * (m_labelItem->rect().height() + 5));
-		// position Value
-		valueY = labelY + m_labelItem->rect().height() + 5;
-	}
-	else {
-		labelY = itemTopLeft.y() + (m_offset  * m_labelItem->rect().height());
-		valueY = labelY + m_labelItem->rect().height() + 5;
-	}
+	if (m_visibility != AwViewSettings::HideBoth) {
+		qreal labelY;
+		if (m_prev) {
+			m_offset = m_prev->offset() + 1;
+			// position Label
+			labelY = itemTopLeft.y() + (m_offset * (m_labelItem->rect().height() + 5));
+			//// position Value
+			//valueY = labelY + m_labelItem->rect().height() + 5;
+		}
+		else {
+			labelY = itemTopLeft.y() + (m_offset * m_labelItem->rect().height());
+			//valueY = labelY + m_labelItem->rect().height() + 5;
+		}
 
-	if (labelY + m_labelItem->rect().height() > itemBottomRight.y()) {
-		m_offset = 0;
-		labelY = itemTopLeft.y();
-		valueY = labelY + m_labelItem->rect().height() + 5;
-	}
+		if (labelY + m_labelItem->rect().height() > itemBottomRight.y()) {
+			m_offset = 0;
+			labelY = itemTopLeft.y();
+			//valueY = labelY + m_labelItem->rect().height() + 5;
+		}
 
-	if (valueY + m_labelItem->rect().height() > itemBottomRight.y()) {
-		m_offset = 0;
-		labelY = itemTopLeft.y();
-		valueY = labelY + m_labelItem->rect().height() + 5;
-	}
+		//if (valueY + m_labelItem->rect().height() > itemBottomRight.y()) {
+		//	m_offset = 0;
+		//	labelY = itemTopLeft.y();
+		//	valueY = labelY + m_labelItem->rect().height() + 5;
+		//}
 
-	m_labelItem->setPos(5, labelY);
-	m_valueItem->setPos(5, valueY);
+		m_labelItem->setPos(5, labelY);
+		//	m_valueItem->setPos(5, valueY);
+	}
 
 	// use default color or user defined color
 	QColor color;
@@ -134,29 +134,45 @@ void AwMarkerItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 }
 
 
-void AwMarkerItem::showLabel(bool flag)
+//void AwMarkerItem::showLabel(bool flag)
+//{
+//	m_labelItem->setVisible(flag);
+//	update();
+//}
+//
+//void AwMarkerItem::showValue(bool flag)
+//{
+//	//m_valueItem->setVisible(flag);
+//	if (flag)
+//		m_labelItem->setText(m_marker->label());
+//	else
+//		m_labelItem->setText(QString("%1 : %2").arg(m_marker->label()).arg(m_marker->value()));
+//	update();
+//}
+
+void AwMarkerItem::setVisiblityOptions(int v)
 {
-	m_labelItem->setVisible(flag);
+	m_visibility = v;
+	if (v == AwViewSettings::ShowLabel)
+		m_labelItem->setText(m_marker->label());
+	else if (v == AwViewSettings::ShowValue)
+		m_labelItem->setText(QString::number(m_marker->value()));
+	else if (v = AwViewSettings::ShowBoth)
+		m_labelItem->setText(QString("%1 : %2").arg(m_marker->label()).arg(m_marker->value()));
 	update();
 }
 
-void AwMarkerItem::showValue(bool flag)
-{
-	m_valueItem->setVisible(flag);
-	update();
-}
+//void AwMarkerItem::setText(const QString& text)
+//{
+//	if (m_labelItem)
+//		m_labelItem->setText(text);
+//}
 
-void AwMarkerItem::setText(const QString& text)
-{
-	if (m_labelItem)
-		m_labelItem->setText(text);
-}
-
-void AwMarkerItem::setValue(double value)
-{
-	if (m_valueItem)
-		m_valueItem->setText(QString::number(value));
-}
+//void AwMarkerItem::setValue(double value)
+//{
+//	if (m_valueItem)
+//		m_valueItem->setText(QString::number(value));
+//}
 
 // Events
 
@@ -287,14 +303,14 @@ void AwMarkerItem::updatePosition()
 		if (m_marker->start() < m_posInFile) {
 			setPos(0, 0);
 			qreal offset = m_posInFile - m_marker->start();
-			setRect(QRectF(this->scene()->sceneRect().topLeft(), QSize((m_marker->duration() - offset) * m_physics->xPixPerSec(), this->scene()->sceneRect().height())));
+			setRect(QRectF(this->scene()->sceneRect().topLeft(), QSize((m_marker->duration() - offset) * m_viewSettings->physics->xPixPerSec(), this->scene()->sceneRect().height())));
 		}
 		else {
-			setPos((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), 0);
-			setRect(QRectF(this->scene()->sceneRect().topLeft(), QSize(m_marker->duration() * m_physics->xPixPerSec(), this->scene()->sceneRect().height())));
+			setPos((m_marker->start() - m_posInFile) * m_viewSettings->physics->xPixPerSec(), 0);
+			setRect(QRectF(this->scene()->sceneRect().topLeft(), QSize(m_marker->duration() * m_viewSettings->physics->xPixPerSec(), this->scene()->sceneRect().height())));
 		}
 	else {
-		setPos((m_marker->start() - m_posInFile) * m_physics->xPixPerSec(), 0);
+		setPos((m_marker->start() - m_posInFile) * m_viewSettings->physics->xPixPerSec(), 0);
 		setRect(QRectF(this->scene()->sceneRect().topLeft(), QSize(1, this->scene()->sceneRect().height())));
 	}
 	QString info = QString("%1 at %2s").arg(m_marker->label()).arg(m_marker->start());

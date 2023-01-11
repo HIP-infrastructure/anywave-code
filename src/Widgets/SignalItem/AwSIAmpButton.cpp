@@ -43,9 +43,9 @@ AwSIAmpButton::AwSIAmpButton(int type, AwChannel *channel, AwGraphicsSignalItem 
 	m_item = item;
 	QString tt;
 	if (type == AwSIAmpButton::Up)
-		tt = tr("Raise Amplitude");
+		tt = "Raise Amplitude";
 	else
-		tt = tr("Lower Amplitude");
+		tt = "Lower Amplitude";
 	setToolTip(tt);
 
 }

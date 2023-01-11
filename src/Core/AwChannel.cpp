@@ -18,11 +18,6 @@
 #include <QtMath>
 #include <QRegularExpression>
 
-//static QStringList UnitTypes = { QString::fromUtf8("µV"), QString::fromUtf8("µV") , QString::fromUtf8("pT"), 
-//   QString::fromUtf8("µV"), QString::fromUtf8("µV"), QString::fromUtf8("pT"), QString::fromUtf8("n/a"), QString::fromUtf8("n/a"), 
-//	QString::fromUtf8("unit"), QString::fromUtf8("unit"), QString::fromUtf8("pT/m"), QString::fromUtf8("µV"), QString::fromUtf8("unit") };
-//static QVector<float> DefaultAmplitudeValues = { 150., 300., 4, 300, 400, 10, 10, 10, 10, 10, 150, 300. };
-
 const QVector<int> AwChannel::intTypes = { 0, 1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13 };
 const QStringList AwChannel::types = { "EEG", "SEEG" , "MEG" , "EMG" , "ECG" , "REFERENCE" , "TRIGGER" , "OTHER" , "ICA" , "SOURCE" , "GRAD" , "ECOG", "EOG" };
 

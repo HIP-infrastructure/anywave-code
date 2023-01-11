@@ -63,6 +63,7 @@
     <ClCompile Include="Display\AwDSMSaveSetupUI.cpp" />
     <ClCompile Include="Display\AwNewViewDial.cpp" />
     <ClCompile Include="Display\AwScene.cpp" />
+    <ClCompile Include="Display\AwSelectTargetChannelsDial.cpp" />
     <ClCompile Include="Display\AwSignalView.cpp" />
     <ClCompile Include="Display\AwVideoManager.cpp" />
     <ClCompile Include="Display\AwViewSetup.cpp" />
@@ -253,6 +254,7 @@
     <QtMoc Include="AwComponents.h" />
     <QtMoc Include="ICA\AwSEEGMap.h" />
     <QtMoc Include="Debug\AwLogger.h" />
+    <QtMoc Include="Display\AwSelectTargetChannelsDial.h" />
     <ClInclude Include="ICA\AwICAMappingItem.h" />
     <ClInclude Include="IO\BIDS\AwBIDSItem.h" />
     <QtMoc Include="IO\export\AwChannelsExportWizardPage.h" />

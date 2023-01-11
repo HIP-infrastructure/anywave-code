@@ -18,9 +18,10 @@
 #include <QPainter>
 #include <widget/AwGraphicsDefines.h>
 #include <utils/time.h>
+#include <widget/SignalView/AwViewSettings.h>
 
 AwMappingCursorItem::AwMappingCursorItem(float currentPosInFile, float cursorPos, const QString& color, const QFont& font,
-										 int flags, AwDisplayPhysics *phys) : AwGraphicsCursorItem(currentPosInFile, cursorPos, phys)
+	AwViewSettings* phys, int flags) : AwGraphicsCursorItem(currentPosInFile, cursorPos, phys)
 {
 	setOpacity(1);
 	m_flags = flags;
@@ -43,7 +44,7 @@ void AwMappingCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 	rect = QRectF(0, 0, width, height);
 	
 	// compute position in second based on global settings like pixel per cm in x, and seconds per cm
-	float posInSec = position.x() * ((1 / m_physics->xPixPerCm()) * m_physics->secsPerCm());
+	float posInSec = position.x() * ((1 / m_viewSettings->physics->xPixPerCm()) * m_viewSettings->secsPerCm());
 	m_currentPos = m_positionInFile + posInSec;
 
 	QPen pen = QPen(QColor(m_color)); 

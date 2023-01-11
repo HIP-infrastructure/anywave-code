@@ -234,7 +234,8 @@ void AwDisplay::updateMarker(const AwSharedMarker& marker)
 		marker->setStart(marker->start() - (marker->end() - duration));
 	AwMarkerManager::instance()->updateMarkers();
 	for (auto v : m_signalViews)
-		v->updateMarkers();
+		//v->updateMarkers();
+		v->setMarkers(AwMarkerManager::instance()->getSharedMarkersThread());
 }
 
 void AwDisplay::addVideoCursor()
@@ -261,9 +262,13 @@ void AwDisplay::setVideoPosition(float position)
 	if (position < 0.)
 		return;
 	for (auto v : m_signalViews) {
-		if (position > v->currentEndPosition() || position < v->positionInFile()) 
-			v->setPositionInFile(position);
-		v->scene()->setCursorPosition("Video", v->positionInFile(), position);
+		auto settings = v->settings();
+		if (position > v->currentEndPosition() || position < settings->posInFile) {
+			//v->setPositionInFile(position);
+			settings->posInFile = position;
+			v->updateSettings(aw::view_settings::pos_in_file, aw::view_settings::sender_global);
+			v->scene()->setCursorPosition("Video", settings->posInFile, position);
+		}
 	}
 }
 
@@ -299,10 +304,10 @@ void AwDisplay::handleCommand(const QVariantMap& map)
 			v->centerViewOnPosition(pos);
 	}
 	break;
-	case AwProcessCommand::UpdateMarkers:
-		for (AwSignalView* v : m_signalViews)
-			v->updateMarkers();
-		break;
+	//case AwProcessCommand::UpdateMarkers:
+	//	for (AwSignalView* v : m_signalViews)
+	//		v->updateMarkers();
+	//	break;
 	case  AwProcessCommand::AddVideoCursor:
 		for (AwSignalView* v : m_signalViews) {
 			auto cursor = v->scene()->addCursor("Video");
@@ -359,10 +364,10 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 			v->centerViewOnPosition(pos);
 		}
 		break;
-	case AwProcessCommand::UpdateMarkers:
-		foreach (AwSignalView *v, m_signalViews)
-			v->updateMarkers();
-		break;
+	//case AwProcessCommand::UpdateMarkers:
+	//	foreach (AwSignalView *v, m_signalViews)
+	//		v->updateMarkers();
+	//	break;
 	case  AwProcessCommand::AddVideoCursor:
 		foreach(AwSignalView *v, m_signalViews) {
 			auto cursor = v->scene()->addCursor("Video");
@@ -479,11 +484,12 @@ void AwDisplay::synchronizeOnCursor(float position)
 
 	m_dontSynchronize = true;
 
-	for (AwSignalView *v : m_signalViews)
-		if (v != view) {
-			if (v->settings()->secsPerCm != view->settings()->secsPerCm)
-				v->synchronizeOnPosition(view->positionInFile());
-		}
+	for (AwSignalView* v : m_signalViews)
+		v->synchronizeOnPosition(position);
+		//if (v != view) {
+		//	if (v->settings()->secsPerCm != view->settings()->secsPerCm)
+		//		v->synchronizeOnPosition(view->positionInFile());
+		//}
 
 	m_dontSynchronize = false;
 }
@@ -680,7 +686,7 @@ void AwDisplay::newFile()
 		// init the view based on current open file
 		view->enableView();
 	}
-	setChannels(AwMontageManager::instance()->channels());
+//	setChannels(AwMontageManager::instance()->channels());
 	emit newDisplaySetupLoaded(&m_displaySetup);
 	updateGUI();
 }

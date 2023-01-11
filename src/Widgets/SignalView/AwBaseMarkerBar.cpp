@@ -19,16 +19,16 @@
 #include <qpainter.h>
 #include <utils/gui.h>
 #include <AwCore.h>
-#include <widget/SignalView/AwViewSettings.h>
 
-AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
+
+AwBaseMarkerBar::AwBaseMarkerBar(AwViewSettings *settings, QWidget *parent)
 	: QFrame(parent)
 {
 	setAutoFillBackground(true);
-	m_physics = phys;
-	m_pageDuration = 0;
+//	m_physics = phys;
+	m_pageDuration = settings->pageDuration;
 	m_positionInFile = 0;
-	m_totalDuration = 0;
+	m_totalDuration = settings->fileDuration;
 	setContentsMargins(0, 0, 0, 0);
 	setFixedHeight(AW_MARKERS_BAR_HEIGHT);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -36,17 +36,17 @@ AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	// Context menu
 	m_menu = new QMenu(this);
 	// Show/Hide markers in view
-	QAction *actShowInView = new QAction(tr("Show markers"), m_menu);
+	QAction *actShowInView = new QAction("Show markers", m_menu);
 	connect(actShowInView, SIGNAL(triggered()), this, SLOT(showMarkers()));
-	QAction *actHideInView = new QAction(tr("Hide markers"), m_menu);
+	QAction *actHideInView = new QAction("Hide markers", m_menu);
 	connect(actHideInView, SIGNAL(triggered()), this, SLOT(hideMarkers()));
 	m_menu->addAction(actShowInView);
 	m_menu->addAction(actHideInView);
 	m_menu->addSeparator();
-	QAction *actSwitchToGlobal = new QAction(tr("Switch to Global mode"), m_menu);
+	QAction *actSwitchToGlobal = new QAction("Switch to Global mode", m_menu);
 	connect(actSwitchToGlobal, SIGNAL(triggered()), this, SLOT(switchToGlobal()));
 	m_menu->addAction(actSwitchToGlobal);
-	QAction *actSwitchToClassic = new QAction(tr("Switch to Classic mode"), m_menu);
+	QAction *actSwitchToClassic = new QAction("Switch to Classic mode", m_menu);
 	connect(actSwitchToClassic, SIGNAL(triggered()), this, SLOT(switchToClassic()));
 	m_menu->addAction(actSwitchToClassic);
 	m_markersShown = false;
@@ -54,7 +54,8 @@ AwBaseMarkerBar::AwBaseMarkerBar(AwDisplayPhysics *phys, QWidget *parent)
 	setMouseTracking(true);
 	m_sliderDragging = false;
 	m_globalRepaintNeeded = false;
-	m_settings = nullptr;
+	m_settings = settings;
+
 }
 
 AwBaseMarkerBar::~AwBaseMarkerBar()
@@ -113,7 +114,7 @@ void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 	if (m_settings == nullptr)
 		return;
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
-		float xPixSec = m_physics->xPixPerSec();
+		float xPixSec = m_settings->physics->xPixPerSec();
 		// take 3 pixels before and 3 pixel after the mouse x pos.
 		// computes lower and higher time fork.
 		float lower = (e->pos().x() - 3) / xPixSec;
@@ -136,10 +137,11 @@ void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 
 void AwBaseMarkerBar::mouseReleaseEvent(QMouseEvent *e)
 {
-	if (e->button() == Qt::RightButton)
+	if (e->button() == Qt::RightButton || m_settings == nullptr) {
+		e->ignore();
 		return;
-	if (m_settings == nullptr)
-		return;
+	}
+
 	if (m_settings->markerBarMode == AwViewSettings::Global) {
 		if (!m_sliderDragging) { // just a click somewhere in the bar => change the position
 			auto pixPerSec = size().width() / m_totalDuration;
@@ -150,7 +152,7 @@ void AwBaseMarkerBar::mouseReleaseEvent(QMouseEvent *e)
 		m_sliderDragging = false;
 		emit positionChanged(m_positionInFile);
 	}
-	emit showMarkerClicked(NULL);
+	emit showMarkerClicked(nullptr);
 }
 
 void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
@@ -161,7 +163,7 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 	if (m_settings == nullptr)
 		return;
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
-		float xPixSec = m_physics->xPixPerSec();
+		float xPixSec = m_settings->physics->xPixPerSec();
 		// take 3 pixels before and 3 pixel after the mouse x pos.
 		// computes lower and higher time fork.
 		float lower = (e->pos().x() - 3) / xPixSec;
@@ -204,8 +206,8 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
 			pen.setColor(color);
 			painter.setPen(pen);
-			double pos = (m->start() - m_positionInFile) * m_physics->xPixPerSec();
-			double width = m->duration() * m_physics->xPixPerSec();
+			double pos = (m->start() - m_positionInFile) * m_settings->physics->xPixPerSec();
+			double width = m->duration() * m_settings->physics->xPixPerSec();
 			painter.drawRect(QRectF(pos, 0, width, (double)(AW_MARKERS_BAR_HEIGHT - 1)));
 		}
 	}
@@ -270,14 +272,33 @@ void AwBaseMarkerBar::clean()
 	m_positionInFile = 0;
 }
 
-void AwBaseMarkerBar::updateSettings(AwViewSettings* settings, int flags)
-{
-	if (flags & AwViewSettings::MarkerBarMode) 
-		repaint();
-}
+//void AwBaseMarkerBar::updateSettings(AwViewSettings* settings, int flags)
+//{
+//	if (flags & AwViewSettings::MarkerBarMode) 
+//		repaint();
+//}
+//
+//void AwBaseMarkerBar::setNewSettings(AwViewSettings* settings)
+//{
+//	m_settings = settings;
+//	repaint();
+//}
 
-void AwBaseMarkerBar::setNewSettings(AwViewSettings* settings)
+void AwBaseMarkerBar::updateSettings(int key)
 {
-	m_settings = settings;
-	repaint();
+	switch (key) {
+	case aw::view_settings::file_duration:
+		m_totalDuration = m_settings->fileDuration;
+		// repaint only if global mode is active
+		if (m_settings->markerBarMode == AwViewSettings::Global)
+			repaint();
+		break;
+	case aw::view_settings::page_duration:
+		m_pageDuration = m_settings->pageDuration;
+		repaint();
+		break;
+	case aw::view_settings::marker_bar_mode:
+		repaint();
+		break;
+	}
 }

@@ -19,10 +19,11 @@
 using namespace AwUtilities::time;
 
 #include <QGraphicsScene>
+#include <widget/SignalView/AwViewSettings.h>
 
-
-AwCursorItem::AwCursorItem(float currentPosInFile, float cursorPos, const QString& label, const QString& color, const QFont& font) :
-	AwGraphicsCursorItem(currentPosInFile, cursorPos)
+AwCursorItem::AwCursorItem(float currentPosInFile, float cursorPos, const QString& label, const QString& color, const QFont& font, 
+	AwViewSettings *settings) :
+	AwGraphicsCursorItem(currentPosInFile, cursorPos, settings)
 {
 	setOpacity(1);
 	m_otherPositionActivated = false;
@@ -47,7 +48,7 @@ void AwCursorItem::setWidth(float width)
 void AwCursorItem::setPosition(float positionInFile, float position)
 {
 	m_positionInFile = positionInFile;
-	setPos((position - m_positionInFile) * m_physics->xPixPerSec(), 0);
+	setPos((position - m_positionInFile) * m_viewSettings->physics->xPixPerSec(), 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,13 +64,13 @@ void AwCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 	if (m_otherPositionActivated)	{
 		m_width = m_otherPos.x() - position.x();
-		otherPosInSecs = m_otherPos.x() * ((1 / m_physics->xPixPerCm()) * m_physics->secsPerCm());
+		otherPosInSecs = m_otherPos.x() * ((1 / m_viewSettings->physics->xPixPerCm()) * m_viewSettings->secsPerCm());
 	}
 
 	rect = QRectF(0, 0, m_width, height);
 	
 	// compute position in second based on global settings like pixel per cm in x, and seconds per cm
-	float posInSec = position.x() * ((1 / m_physics->xPixPerCm()) *  m_physics->secsPerCm());
+	float posInSec = position.x() * ((1 / m_viewSettings->physics->xPixPerCm()) * m_viewSettings->secsPerCm());
 	m_currentPos = m_positionInFile + posInSec;
 
 	QPen pen = QPen(QColor(m_color));

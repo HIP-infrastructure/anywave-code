@@ -17,7 +17,7 @@
 #define AW_GRAPHICS_VIEW_H
 #include <AwGlobal.h>
 #include <QGraphicsView>
-#include <widget/AwGraphicsObjects.h>
+//#include <widget/AwGraphicsObjects.h>
 #include "AwViewSettings.h"
 #include <QTime>
 
@@ -25,15 +25,16 @@ class AW_WIDGETS_EXPORT AwGraphicsView : public QGraphicsView
 {
 	Q_OBJECT
 public:
-	AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings, AwDisplayPhysics *phys, QWidget *parent = 0);
-	void setTimeShift(float shift);
-	inline float pageDuration() { return m_pageDuration; }
+	AwGraphicsView(QGraphicsScene *scene, AwViewSettings *settings, QWidget *parent = 0);
+//	void setTimeShift(float shift);
+//	inline float pageDuration() { return m_pageDuration; }
 public slots:
 	void layoutItems();
 	void updateSignalChildrenPositions();
-	void applySettings(AwViewSettings *settings);
-	void updateSettings(AwViewSettings *settings, int flags);
-	void setPositionInFile(float pos); 
+//	void applySettings(AwViewSettings *settings);
+//	void updateSettings(AwViewSettings *settings, int flags);
+	void updateSettings(int key);
+//	void setPositionInFile(float pos); 
 	void setRecordedTime(const QTime& time) { m_startTime = time; }
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -42,15 +43,17 @@ protected:
 signals:
 	void newMarkersBarMode(int mode);
 	void pageDurationChanged(float duration);
+	void settingsChanged(int key, int sender);
 protected:
 	void computePageDuration();
 	
 	AwViewSettings *m_settings;
-	AwDisplayPhysics *m_physics;
-	qreal m_pageDuration, m_previousPageDuration;
+//	AwDisplayPhysics *m_physics;
+//	qreal m_pageDuration; // , m_previousPageDuration;
 	// posInFile = current pos in file in the data, timeOffset = grid time shift (mostly used for average).
-	float m_posInFile, m_timeOffset, m_secsPerCm, m_startPosition;
-	int m_timeScaleMode;
+//	float m_posInFile, m_timeOffset, m_secsPerCm, m_startPosition;
+//	float m_timeOffset;
+	//int m_timeScaleMode;
 	QTime m_startTime;	// copy of the recorded time
 };
 

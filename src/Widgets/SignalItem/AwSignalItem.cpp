@@ -21,7 +21,7 @@
 #include <QGraphicsSceneHoverEvent>
 #include "AwSignalItemSettings.h"
 
-AwSignalItem::AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwGraphicsSignalItem(chan, settings, phys)
+AwSignalItem::AwSignalItem(AwChannel *chan, AwViewSettings *settings) : AwGraphicsSignalItem(chan, settings)
 {
 	m_hover = false;
 	setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -43,14 +43,28 @@ AwSignalItem::AwSignalItem(AwChannel *chan, AwViewSettings *settings, AwDisplayP
 	m_pixelLengthInSamples = 0;
 }
 
-void AwSignalItem::showLabel(bool f)
-{ 
-	m_label = f; 
-	m_labelItem->setVisible(f); 
-	if (m_upperNeighbor)
-		resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
-	update();
+void AwSignalItem::updateSettings(int key)
+{
+	switch (key) {
+	case aw::view_settings::show_sensors:
+		m_labelItem->setVisible(m_viewSettings->showSensors);
+		if (m_upperNeighbor)
+			resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
+		update();
+		break;
+	default:
+		update();
+	}
 }
+
+//void AwSignalItem::showLabel(bool f)
+//{ 
+//	m_label = f; 
+//	m_labelItem->setVisible(f); 
+//	if (m_upperNeighbor)
+//		resolveCollisionWithUpperNeighbor(m_upperNeighbor->childrenRegion());
+//	update();
+//}
 
 void AwSignalItem::setLabel(const QString& text)
 {
@@ -107,9 +121,11 @@ QPainterPath AwSignalItem::shape() const
 {
 	QPainterPath path;
 	path.addPolygon(m_poly);
-	if (m_baseLine)
+//	if (m_baseLine)
+	if (m_viewSettings->showZeroLine)
 		path.addRect(m_baseLineItem->boundingRect());
-	if (m_label)
+//	if (m_label)
+	if (m_viewSettings->showSensors)
 		path.addRect(m_labelItem->boundingRect());
 	return path;
 }
@@ -120,9 +136,11 @@ QPainterPath AwSignalItem::shape() const
 QRectF AwSignalItem::boundingRect() const
 {
 	QRectF rect = m_poly.boundingRect();
-	if (m_baseLine)
+//	if (m_baseLine)
+	if (m_viewSettings->showZeroLine)
 		rect = rect.united(m_baseLineItem->boundingRect());
-	if (m_label)
+//	if (m_label)
+	if (m_viewSettings->showSensors)
 		rect = rect.united(m_labelItem->boundingRect());
 	return rect;
 }
@@ -142,6 +160,7 @@ void AwSignalItem::paintSignal(QPainter* painter)
 	painter->setRenderHint(QPainter::Qt4CompatiblePainting);
 #endif
 
+
 	if (m_channel->dataSize() && needRepaint()) {
 		// compute the polygon
 		QPolygonF poly;
@@ -150,7 +169,7 @@ void AwSignalItem::paintSignal(QPainter* painter)
 		float update = 1.0; // apply an update coefficient if required by the view settings.
 		// check for view settings
 		if (m_viewSettings) {
-			if (m_channel->isEEG() && m_viewSettings->eegDisplayMode) {
+			if (m_channel->isEEG() && m_viewSettings->oldEEGMode) {
 				update = -1.0;
 			}
 		}
@@ -162,7 +181,7 @@ void AwSignalItem::paintSignal(QPainter* painter)
 				break;
 
 			computeMinMax(currentPosInChannel, m_pixelLengthInSamples, &min, &max);
-			qreal y1 = -(min * m_physics->yPixPerCm()), y2 = -(max * m_physics->yPixPerCm());
+			qreal y1 = -(min * m_viewSettings->physics->yPixPerCm()), y2 = -(max * m_viewSettings->physics->yPixPerCm());
 			y1 *= update / gain;
 			y2 *= update / gain;
 			poly << QPointF(i, y1);
@@ -174,7 +193,8 @@ void AwSignalItem::paintSignal(QPainter* painter)
 	}
 	// baseline
 	m_baseLineItem->setPen(QColor(m_channel->color()));
-	m_baseLineItem->setVisible(m_baseLine);
+//	m_baseLineItem->setVisible(m_baseLine);
+	m_baseLineItem->setVisible(m_viewSettings->showZeroLine);
 	// Si l'item est selectionne il est affiche en rouge !
 	if (isSelected())
 		painter->setPen(QPen(Qt::red));
@@ -236,7 +256,7 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 void AwSignalItem::updateData()
 {
-	m_pixelLengthInSecs = m_physics->pixelDuration();
+	m_pixelLengthInSecs = m_viewSettings->physics->pixelDuration();
 	m_pixelLengthInSamples = (int)(m_pixelLengthInSecs * m_channel->samplingRate());
 	repaint();
 }
