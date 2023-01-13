@@ -16,8 +16,11 @@ TFWidget::TFWidget(TFSettings *settings, AwGUIProcess *process, QWidget *parent)
 	: AwProcessGUIWidget(process, parent)
 {  
 	m_ui.setupUi(this);
-	m_signalView = new AwBaseSignalView();
-	m_signalView->setFlags(AwBaseSignalView::NoMarkerBar|AwBaseSignalView::ViewAllChannels|AwBaseSignalView::EnableMarking);
+	auto viewSettings = new AwViewSettings;
+	viewSettings->showMarkerBar = false;
+	viewSettings->showAllChannels = true;
+	m_signalView = new AwBaseSignalView(viewSettings);
+//	m_signalView->setFlags(AwBaseSignalView::NoMarkerBar|AwBaseSignalView::ViewAllChannels|AwBaseSignalView::EnableMarking);
 	m_signalView->setMinimumHeight(200);
 	m_settings = settings;
 	// init display settings
@@ -477,11 +480,11 @@ void TFWidget::applyNormalisation()
 	int i = 0;
 	vec vmin(future.resultCount()), vmax(future.resultCount());
 	m_normalizedTF.clear();
-	for (auto &r : future) {
+	for (auto& r : future) {
 		vmin(i) = r.min();
 		vmax(i) = r.max();
 		m_normalizedTF << r;
-		m_plots.at(i++)->setDataMatrix(r, m_signalView->positionInFile());
+		m_plots.at(i++)->setDataMatrix(r, m_signalView->settings()->posInFile);
 	}
 	m_min = vmin.min();
 	m_max = vmax.max();

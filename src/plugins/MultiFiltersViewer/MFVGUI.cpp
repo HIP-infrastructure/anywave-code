@@ -22,8 +22,10 @@ MFVGUI::MFVGUI(AwGUIProcess *process, QWidget *parent)
 	 : AwProcessGUIWidget(process, parent)
 {
 	m_ui.setupUi(this);
-	m_signalView = new AwBaseSignalView();
-	m_signalView->setFlags(AwBaseSignalView::NoMarkerBar | AwBaseSignalView::ViewAllChannels);
+	auto settings = new AwViewSettings;
+	settings->showAllChannels = true;
+	settings->showMarkerBar = false;
+	m_signalView = new AwBaseSignalView(settings);
 	auto layout = m_ui.signalsLayout;
 	layout->addWidget(m_signalView, 0, 1);
 	m_signalView->setMinimumHeight(200);

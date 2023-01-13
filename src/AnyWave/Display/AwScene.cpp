@@ -24,7 +24,6 @@
 #include <AwProcessInterface.h>
 #include "Montage/AwMontageManager.h"
 #include "AwDisplaySetup.h"
-#include "AwViewSetup.h"
 #include <widget/AwMarkerChannelItem.h>
 #include <qgraphicsview.h>
 #include <QGraphicsSceneMouseEvent>
@@ -33,10 +32,9 @@
 #include "AwSelectTargetChannelsDial.h"
 
 
-AwScene::AwScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent) : AwGraphicsScene(settings, phys, parent)
+AwScene::AwScene(AwViewSettings *settings, QObject *parent) : AwGraphicsScene(settings, parent)
 {
 	// connect signal emitted by the base class when a channel has been set to bad.
-//	connect(this, SIGNAL(badChannelSet(const QString&)), this, SLOT(setChannelAsBad(const QString&)));
 	connect(this, &AwScene::badChannelSet, this, &AwScene::setChannelAsBad);
 }
 
@@ -116,15 +114,15 @@ void AwScene::addVirtualChannels(AwChannelList& channels)
 		return;
 
 	AwPluginManager *pm = AwPluginManager::getInstance();
-	foreach (AwChannel *c, channels) {
+	for  (AwChannel *c : channels) {
 		if (m_settings->filters.contains(c->type())) {
 			AwDisplayPlugin *dp = dp = c->displayPluginName().isEmpty() ? 
 				pm->getDisplayPluginByName("AnyWave SignalItem") : pm->getDisplayPluginByName(c->displayPluginName());;
-			AwGraphicsSignalItem *item = static_cast<AwGraphicsSignalItem *>(dp->newInstance(c, m_settings, m_physics));
+			AwGraphicsSignalItem *item = static_cast<AwGraphicsSignalItem *>(dp->newInstance(c, m_settings));
 
 			item->setPlugin((QObject *)dp);
-			item->showBaseline(m_settings->showZeroLine);
-			item->showLabel(m_settings->showSensors);
+			item->updateSettings(aw::view_settings::show_sensors);
+			item->updateSettings(aw::view_settings::show_zero_line);
 			this->addItem(item);
 			m_signalItems << item;
 			m_visibleSignalItems << item;
@@ -170,8 +168,7 @@ void AwScene::manuallySetChannelsTarget(const QStringList& labels)
 
 		}
 		AwSelectTargetChannelsDial dlg(m_currentMarkerItem->marker(), channels, this);
-		if (dlg.exec() == QDialog::Accepted) {
-
-		}
+		if (dlg.exec() == QDialog::Accepted) 
+			m_currentMarkerItem->marker()->setTargetChannels(dlg.selectedChannels);
 	}
 }

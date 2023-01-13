@@ -25,10 +25,6 @@ AwBaseMarkerBar::AwBaseMarkerBar(AwViewSettings *settings, QWidget *parent)
 	: QFrame(parent)
 {
 	setAutoFillBackground(true);
-//	m_physics = phys;
-	m_pageDuration = settings->pageDuration;
-	m_positionInFile = 0;
-	m_totalDuration = settings->fileDuration;
 	setContentsMargins(0, 0, 0, 0);
 	setFixedHeight(AW_MARKERS_BAR_HEIGHT);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -81,8 +77,6 @@ void AwBaseMarkerBar::setMarkers(const AwSharedMarkerList& markers)
 
 void AwBaseMarkerBar::switchToClassic()
 {
-	if (m_settings == nullptr)
-		return;
 	m_settings->markerBarMode = AwViewSettings::Classic;
 	setToolTip("Right click in the bar to show more options.");
 	repaint();
@@ -90,8 +84,6 @@ void AwBaseMarkerBar::switchToClassic()
 
 void AwBaseMarkerBar::switchToGlobal()
 {
-	if (m_settings == nullptr)
-		return;
 	m_settings->markerBarMode = AwViewSettings::Global;
 	setToolTip("Click in the bar to move right to that position or drag and move the slider.");
 	repaint();
@@ -108,29 +100,31 @@ void AwBaseMarkerBar::resizeEvent(QResizeEvent *e)
 
 void AwBaseMarkerBar::mousePressEvent(QMouseEvent *e)
 {
+	if (m_settings->fileDuration == 0)
+		return;
+
 	QPoint mousePos = e->pos();
 	if (e->button() == Qt::RightButton)
 		return;
-	if (m_settings == nullptr)
-		return;
+
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
-		float xPixSec = m_settings->physics->xPixPerSec();
+		float xPixSec = m_settings->physics.xPixPerSec();
 		// take 3 pixels before and 3 pixel after the mouse x pos.
 		// computes lower and higher time fork.
 		float lower = (e->pos().x() - 3) / xPixSec;
-		lower += m_positionInFile;
+		lower += m_settings->posInFile;
 		float higher = (e->pos().x() + 3) / xPixSec;
-		higher += m_positionInFile ;
+		higher += m_settings->posInFile;
 		auto found = findMarkerBetween(lower, higher);
 		if (!found.isNull())
 			emit showMarkerClicked(found);
 	}
 	else {
-		float pixDur = m_totalDuration / this->size().width();
+		float pixDur = m_settings->fileDuration / this->size().width();
 		qreal posInSecs = e->pos().x() * pixDur;
-		if (posInSecs > m_positionInFile && posInSecs < m_positionInFile + m_pageDuration) {
+		if (posInSecs > m_settings->posInFile && posInSecs < m_settings->posInFile + m_settings->pageDuration) {
 			m_sliderDragging = true;
-			m_xOffset = posInSecs - m_positionInFile;
+			m_xOffset = posInSecs - m_settings->posInFile;
 		}
 	}
 }
@@ -144,13 +138,16 @@ void AwBaseMarkerBar::mouseReleaseEvent(QMouseEvent *e)
 
 	if (m_settings->markerBarMode == AwViewSettings::Global) {
 		if (!m_sliderDragging) { // just a click somewhere in the bar => change the position
-			auto pixPerSec = size().width() / m_totalDuration;
-			m_positionInFile = e->pos().x() / pixPerSec;
-			if (m_positionInFile < 0.)
-				m_positionInFile = 0.;
+			auto pixPerSec = size().width() / m_settings->fileDuration;
+			m_settings->posInFile = e->pos().x() / pixPerSec;
+			if (m_settings->posInFile < m_settings->startPosition)
+				m_settings->posInFile = m_settings->startPosition;
+			// do not go over the end of file
+			if (m_settings->posInFile + m_settings->pageDuration > m_settings->fileDuration)
+				m_settings->posInFile = m_settings->fileDuration - m_settings->pageDuration;
 		}
 		m_sliderDragging = false;
-		emit positionChanged(m_positionInFile);
+		emit settingsChanged(aw::view_settings::pos_in_file, aw::view_settings::sender_marker_bar);
 	}
 	emit showMarkerClicked(nullptr);
 }
@@ -163,24 +160,27 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 	if (m_settings == nullptr)
 		return;
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
-		float xPixSec = m_settings->physics->xPixPerSec();
+		float xPixSec = m_settings->physics.xPixPerSec();
 		// take 3 pixels before and 3 pixel after the mouse x pos.
 		// computes lower and higher time fork.
 		float lower = (e->pos().x() - 3) / xPixSec;
-		lower += m_positionInFile;
+		lower += m_settings->posInFile;
 		float higher = (e->pos().x() + 3) / xPixSec;
-		higher += m_positionInFile;
+		higher += m_settings->posInFile;
 		auto found = findMarkerBetween(lower, higher);
 		if (!found.isNull())
 			setToolTip(found->label());
 	}
 	else {
 		if (m_sliderDragging) {
-			float pixDur = m_totalDuration / this->size().width();
+			float pixDur = m_settings->fileDuration / this->size().width();
 			qreal posInSecs = e->pos().x() * pixDur;
-			m_positionInFile = posInSecs - m_xOffset;
-			if (m_positionInFile < 0.)
-				m_positionInFile = 0.;
+			m_settings->posInFile = posInSecs - m_xOffset;
+			if (m_settings->posInFile < m_settings->startPosition)
+				m_settings->posInFile = m_settings->startPosition;
+			// do not go over the end of file
+			if (m_settings->posInFile + m_settings->pageDuration > m_settings->fileDuration)
+				m_settings->posInFile = m_settings->fileDuration - m_settings->pageDuration;
 		}
 		update();
 	}	
@@ -188,16 +188,14 @@ void AwBaseMarkerBar::mouseMoveEvent(QMouseEvent *e)
 
 void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 {
-	if (m_totalDuration <= 0) 
-		return;
-	if (m_settings == nullptr)
+	if (m_settings->fileDuration == 0)
 		return;
 	QPainter painter(this);
 	QBrush brushSelection;
 	brushSelection.setStyle(Qt::Dense4Pattern);
 	QPen pen;
 	if (m_settings->markerBarMode == AwViewSettings::Classic) {
-		auto markers = AwMarker::intersect(m_markers, m_positionInFile, m_positionInFile + m_pageDuration);
+		auto markers = AwMarker::intersect(m_markers, m_settings->posInFile, m_settings->posInFile + m_settings->pageDuration);
 		QColor color;
 		for (auto const &m : markers) {
 			if (!m->duration())
@@ -206,13 +204,13 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 				color = QColor(m->color().isEmpty() ? AwUtilities::gui::markerColor(AwMarker::Selection) : m->color());
 			pen.setColor(color);
 			painter.setPen(pen);
-			double pos = (m->start() - m_positionInFile) * m_settings->physics->xPixPerSec();
-			double width = m->duration() * m_settings->physics->xPixPerSec();
+			double pos = (m->start() - m_settings->posInFile) * m_settings->physics.xPixPerSec();
+			double width = m->duration() * m_settings->physics.xPixPerSec();
 			painter.drawRect(QRectF(pos, 0, width, (double)(AW_MARKERS_BAR_HEIGHT - 1)));
 		}
 	}
 	else { // Global 
-		auto pixPerSec = (double)size().width() / m_totalDuration;
+		auto pixPerSec = (double)size().width() / m_settings->fileDuration;
 		if (m_globalRepaintNeeded) {
 			m_globalPixmap = QPixmap(size());
 			m_globalPixmap.fill(palette().color(QPalette::Background));
@@ -240,7 +238,7 @@ void AwBaseMarkerBar::paintEvent(QPaintEvent* e)
 		QColor color(Qt::darkGray);
 		color.setAlpha(128);
 		painter.setPen(QPen(color, 1));
-		m_sliderRect = QRectF((double)m_positionInFile * (double)pixPerSec, 1., (double)m_pageDuration * (double)pixPerSec, (double)AW_MARKERS_BAR_HEIGHT - 2);
+		m_sliderRect = QRectF((double)m_settings->posInFile * (double)pixPerSec, 1., (double)m_settings->pageDuration * (double)pixPerSec, (double)AW_MARKERS_BAR_HEIGHT - 2);
 		sliderBrush.setStyle(Qt::Dense4Pattern);
 		painter.drawRect(m_sliderRect);
 		painter.fillRect(m_sliderRect, sliderBrush);
@@ -252,51 +250,16 @@ void AwBaseMarkerBar::contextMenuEvent(QContextMenuEvent *e)
 	m_menu->exec(e->globalPos());
 }
 
-
-void AwBaseMarkerBar::setPageDuration(float duration)
-{
-	m_pageDuration = duration;
-	repaint();
-}
-
-void AwBaseMarkerBar::setPositionInFile(float pos)
-{
-	if (pos != m_positionInFile) {
-		m_positionInFile = pos;
-	}
-}
-
 void AwBaseMarkerBar::clean()
 {
-	m_pageDuration = 0;
-	m_positionInFile = 0;
 }
-
-//void AwBaseMarkerBar::updateSettings(AwViewSettings* settings, int flags)
-//{
-//	if (flags & AwViewSettings::MarkerBarMode) 
-//		repaint();
-//}
-//
-//void AwBaseMarkerBar::setNewSettings(AwViewSettings* settings)
-//{
-//	m_settings = settings;
-//	repaint();
-//}
 
 void AwBaseMarkerBar::updateSettings(int key)
 {
 	switch (key) {
+	case aw::view_settings::pos_in_file:
 	case aw::view_settings::file_duration:
-		m_totalDuration = m_settings->fileDuration;
-		// repaint only if global mode is active
-		if (m_settings->markerBarMode == AwViewSettings::Global)
-			repaint();
-		break;
 	case aw::view_settings::page_duration:
-		m_pageDuration = m_settings->pageDuration;
-		repaint();
-		break;
 	case aw::view_settings::marker_bar_mode:
 		repaint();
 		break;

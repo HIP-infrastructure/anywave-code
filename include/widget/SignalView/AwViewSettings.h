@@ -19,7 +19,7 @@
 #include <QObject>
 #include <AwGainLevels.h>
 #include <QVariantMap>
-class AwDisplayPhysics;
+#include <widget/AwGraphicsObjects.h>
 
 namespace aw {
 	namespace view_settings {
@@ -70,33 +70,13 @@ class AW_WIDGETS_EXPORT AwViewSettings : public QObject
 {
 	Q_OBJECT
 public:
-	AwViewSettings(AwDisplayPhysics *phys, QObject *parent = nullptr);
-//	AwViewSettings(AwViewSettings *source, QObject *parent);
-
-	//enum UpdateFlags { LimitNumberOfChannels = 0x1, Filters = 0x2, MaxNumberOfChannels = 0x4,
-	//	ShowMarkerLabel = 0x8, ShowMarkerValue = 0xA, ShowBaseLine = 0x20, ShowTimeGrid = 0x40, 
-	//	ShowSecondTicks = 0x80, ShowSensors = 0x100, Overlay = 0x200, /*MarkerBarMode = 0x400,*/
-	//	ShowMarkerBar = 0x400,
-	//	SecPerCm = 0x800, MarkerBarMode = 0x1000, ShowAmplitudeScale = 0x2000, TimeRepresentation = 0x4000, PageDuration = 0x8000,
-	//    EEGMode = 0x10000, ShowMarkers = 0x20000, TimeScaleMode = 0x40000, AllFlags = 0xfffff };
+	AwViewSettings(QObject *parent = nullptr);
 	enum TimeScale { PaperLike, FixedPageDuration };
 	enum TimeRepresentation { ShowRelativeTime, ShowRecordedTime };
 	enum MarkerBarMode { Global, Classic };
 	enum MarkerVisibility { ShowLabel, ShowValue, ShowBoth, HideBoth };
 
-//	int maxChannels;	// max number of channels in visible part of the view
-//	int markerBarMode;	// Marker bar representation mode: Classic or Global
-//	bool limitChannels, showMarkerLabels, showMarkerValues, showZeroLine, showTimeGrid, showSeconds, showSensors, stackChannels;
-
-	//int timeMode;	   // should be ShowRelativeTime or ShowRecordedTime
-	//int timeScaleMode;
-//	float fixedPageDuration;
-//	bool showMarkers; // true to display the markers in the signal view
-//	bool eegDisplayMode;
-//	bool showMarkerBar;
-//	bool showAmplitudeScale;
 	QList<int> filters;
-//	float secsPerCm;
 	QStringList channelSelection;
 	AwGainLevels *gainLevels;
 	bool showAmplScales;
@@ -117,12 +97,10 @@ public:
 	int timeRepresentation; // Relative or Recorded
 	int markerBarMode;  // Global of Classic
 	int markerViewOptions; //  Show label, value, both or none
-//	float secsPerCm;	// used when time scale is PaperLike
 	float fixedPageDuration;
 	float pageDuration;
 	float posInFile;
 	float fileDuration;
-//	float fixedPageDuration; // used when time scale is FixedPageDuration
 	float startPosition;
 
 	// special flags to customize the signal view
@@ -131,19 +109,12 @@ public:
 	bool showFilterButton;
 	bool showChannelsInfoNavBar;
 	bool showNavBar;
-	AwDisplayPhysics* physics;
-
-//	QVariant value(int key) { return m_settings.value(key); }
-//	void insert(int key, const QVariant& value) { m_settings.insert(key, value); }
-//	bool contains(int key) { return m_settings.contains(key); }
+	AwDisplayPhysics physics;
 	void setSecsPerCm(float v);
 	inline float secsPerCm() { return m_secsPerCm; }
 
 protected:
-//	QMap<int, QVariant> m_settings;
 	float m_secsPerCm;
-	AwDisplayPhysics* m_physics;
-
 };
 
 #endif

@@ -11,14 +11,14 @@ class H2ChannelPairItem : public AwSignalItem
 	Q_OBJECT
 	Q_INTERFACES(AwGraphicsSignalItem)
 public:
-	H2ChannelPairItem(AwChannel *chan, AwViewSettings *settings,  AwDisplayPhysics *phys = nullptr); 
+	H2ChannelPairItem(AwChannel *chan, AwViewSettings *settings); 
 
 	QPainterPath shape() const;
 	QRectF boundingRect() const;
 	QSize minimumSize() const;
-	void showLabel(bool flag);
 	QList<QAction *> customActions();
 	void setLabelColors(const QString& colorXY, const QString& colorYX);
+	void updateSettings(int key) override;
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void mousePressEvent(QGraphicsSceneMouseEvent *e);
@@ -48,7 +48,7 @@ class H2ChannelPairItemPlugin : public AwDisplayPlugin
 	Q_INTERFACES(AwDisplayPlugin)
 public:
 	H2ChannelPairItemPlugin() { name = "H2_ChannelItem"; description = "display H2 variations of a pair of channels"; }
-	H2ChannelPairItem *newInstance(AwChannel *chan, AwViewSettings *settings,  AwDisplayPhysics *phys) { return new H2ChannelPairItem(chan, settings, phys); }
+	H2ChannelPairItem *newInstance(AwChannel *chan, AwViewSettings *settings) { return new H2ChannelPairItem(chan, settings); }
 };
 
 

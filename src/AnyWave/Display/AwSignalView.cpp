@@ -37,11 +37,9 @@ AwSignalView::AwSignalView(AwViewSettings *settings, QWidget *parent) :
 	auto dm = AwDataManager::instance();
 	// Base constructor instantiates scene, view, navbar and marker bar objects
 	// replace some objects with subclasses
-	AwScene *scene = new AwScene(m_settings, m_physics, 0);
-	AwGraphicsView *view = new AwGraphicsView(scene, m_settings, m_physics, 0);
-	AwMarkersBar *markBar = new AwMarkersBar(m_physics, settings, this);
-//	scene->applyNewSettings(m_settings);
-//	markBar->setNewSettings(m_settings);
+	AwScene *scene = new AwScene(m_settings,  0);
+	AwGraphicsView *view = new AwGraphicsView(scene, m_settings, 0);
+	AwMarkersBar *markBar = new AwMarkersBar(settings, this);
 	changeObjects(view, scene, nullptr, markBar);
 	// connections
 	// markers specific
@@ -93,95 +91,21 @@ void AwSignalView::setChannels(const AwChannelList& channels)
 	applyChannelFilters();
 	m_scene->setChannels(m_channels);
 	reloadData();
-//	updateMarkers();
 }
-
-//void AwSignalView::updatePageDuration(float duration)
-//{
-//	float dur = m_pageDuration;
-//	AwBaseSignalView::updatePageDuration(duration);
-//	
-//	if (!m_isActive)
-//		return;
-//
-//	if (duration > dur)
-//		reloadData();
-//}
-
-//void AwSignalView::reloadData()
-//{
-//	if (!m_isActive)
-//		return;
-//	AwBaseSignalView::reloadData();
-//}
-
-//void AwSignalView::updatePositionInFile(float pos)
-//{
-//	if (pos != m_positionInFile) {
-//		m_positionInFile = pos;
-//		emit positionChanged(pos);
-//
-//		m_client.requestData(&m_channels, pos, m_pageDuration);
-//		dataReceived();
-//	}
-//}
-
-//void AwSignalView::synchronizeOnPosition(float pos)
-//{
-//	float newPos;
-//	if (pos < 0.)
-//		newPos = 0.;
-//	if (pos + m_pageDuration > m_totalDuration)
-//		pos = m_totalDuration - m_pageDuration;
-//	newPos = pos;
-//	m_view->setPositionInFile(newPos);
-//	m_scene->setPositionInFile(newPos);
-//	m_navBar->updatePositionInFile(newPos);
-//	m_markerBar->setPositionInFile(newPos);
-//	if (newPos == m_positionInFile)
-//		return;
-//	m_positionInFile = newPos;
-//	if (m_client.isConnected()) {
-//		m_client.requestData(&m_channels, newPos, m_pageDuration);
-//		dataReceived();
-//	}
-//}
-
 
 void AwSignalView::centerViewOnPosition(float pos)
 {
 	if (!m_isActive)
 		return;
 	AwBaseSignalView::centerViewOnPosition(pos);
-	//float half_page = m_pageDuration / 2;
-	//float start = pos - half_page;
-	//if (start < 0)
-	//	start = 0;
-	//synchronizeOnPosition(start);
-	//m_scene->highlightPosition(pos);
 }
 
 void AwSignalView::showPosition(float pos)
 {
-	//if (!m_isActive)
-	//	return;
-
-	//float half_page = m_settings->pageDuration / 2;
-
-	//if (pos < m_positionInFile || pos > m_settings->posInFile + m_settings->pageDuration)
-	//	synchronizeOnPosition(pos - half_page);
-
 	synchronizeOnPosition(pos - m_settings->pageDuration / 2);
-
 	m_scene->highlightPosition(pos);
 }
 
-//void AwSignalView::goToPos(int pos)
-//{
-//	if (!m_isActive)
-//		return;
-//	AwBaseSignalView::goToPos(pos);
-//}
 
 void AwSignalView::closeFile()
 {

@@ -44,7 +44,7 @@ void AwMappingCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 	rect = QRectF(0, 0, width, height);
 	
 	// compute position in second based on global settings like pixel per cm in x, and seconds per cm
-	float posInSec = position.x() * ((1 / m_viewSettings->physics->xPixPerCm()) * m_viewSettings->secsPerCm());
+	float posInSec = position.x() * ((1 / m_viewSettings->physics.xPixPerCm()) * m_viewSettings->secsPerCm());
 	m_currentPos = m_positionInFile + posInSec;
 
 	QPen pen = QPen(QColor(m_color)); 

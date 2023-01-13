@@ -28,7 +28,7 @@
 #include "AwDisplaySetup.h"
 
 class AwMarkerManager;
-class AwDisplaySetup;
+//class AwDisplaySetup;
 class AwGainManager;
 class AwFileIO;
 class AwCentralWidget;
@@ -74,9 +74,7 @@ private:
 	AwChannelList m_channels;
 	QSplitter* m_centralWidget;
 	bool m_dontSynchronize;
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	QScreen *m_screen;
-#endif
 	static AwDisplay *m_instance;
 	AwDisplaySetup m_displaySetup;
 

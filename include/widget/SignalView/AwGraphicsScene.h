@@ -25,7 +25,6 @@
 #include <widget/AwCursorItem.h>
 #include <widget/AwMappingCursorItem.h>
 #include <widget/AwHighLightMarker.h>
-//class AwMarkingSettings;
 class AwGTCMenu;
 class AwPickMarkersDial;
 class AwAmplitudeItem;
@@ -39,21 +38,16 @@ public:
 	~AwGraphicsScene();
 
 	enum Mode { Cursor, Mapping, AddingMarker, None, QTS, DraggingCursor, Count, MovingMarker };
-//	inline float pageDuration() { return m_pageDuration; }
 	inline AwChannelList& channels() { return m_channels; }
 	AwChannelList selectedChannels();
-//	inline float currentPosInFile() { return m_currentPosInFile; }
 	inline QList<AwGraphicsSignalItem *>& signalItems() { return m_signalItems; }
 	inline QList<AwGraphicsSignalItem *>& visibleSignalItems() { return m_visibleSignalItems; }
-//	inline void setFileDuration(float duration) { m_fileDuration = duration; }
 	void clean();
 	void clearChannels();
 	void updateSignals();
 	void setQTSPlugins(const QStringList& plugins);
 	virtual void reset(); // reset scene to start position and update contents and page duration;
-//	virtual void setPositionInFile(float pos);
 	virtual void setChannels(AwChannelList& channels);
-//	virtual void applyNewSettings(AwViewSettings *settings);
 	virtual void updateMarkers();
 	virtual void refresh();
 	/* add a new cursor referenced by a name. Default color is red. */
@@ -68,7 +62,6 @@ public:
 
 	QGraphicsItem* amplitudeScale();
 
-//	inline float fileDuration() { return m_fileDuration; }
 	// measurement methods
 	float widthToDuration(float w);
 	float timeAtPos(qreal x);
@@ -104,29 +97,21 @@ signals:
 public slots:
 	void updateSignalItemSelection(AwGraphicsSignalItem *item, bool selected);
 	void registerDisplayPlugin(AwDisplayPlugin *plugin);
-//	virtual void updateSettings(AwViewSettings *settings, int flags);
 	virtual void updateSettings(int key);
 	virtual void setSelectionAsBad() {}
 	virtual void setSelectionAsMontage() {}
 
-	//void setPageDuration(float dur) // { m_pageDuration = dur; }
-	//{
-	//	m_settings->pageDuration = dur;
-	//}
 	void updateSelection();
 	void displaySelectedChannelsOnly();
 	void displayAllChannels();
 	void nextPage();
 	void next();
-//	void goToEnd();
-//	void goToStart();
 	void previousPage();
 	void previous();
 	void updateChannelsData();
 	void goToLatency();
 	void centerViewOnPosition(float pos);
 	void highlightPosition(float pos);
-//	void showMarkers(bool show);
 
 	// markers
 	/// show current marker under mouse in the marker list.
@@ -207,18 +192,14 @@ protected:
 	QMap<QString, AwCursorItem *> m_cursors;
 	QMultiHash<QString, AwGraphicsSignalItem *> m_hashNameToItem;	// retreive signal item by the channel's name.
 	AwViewSettings *m_settings;
-//	AwDisplayPhysics *m_physics;
 	AwCursorItem *m_cursor, *m_draggedCursor;
 	AwMappingCursorItem *m_mappingCursor;
 	AwMappingCursorItem *m_mappingFixedCursor;
 	AwMarkerItem *m_currentMarkerItem;
 	int m_mouseMode;
-//	float m_pageDuration, m_currentPosInFile, m_fileDuration, m_startPosition, m_mappingSelectionDuration;
-//	float m_startPosition, m_mappingSelectionDuration;
 	float m_mappingSelectionDuration;
 	float m_positionClicked;	// updated each time the user click in the scene => set the time position
 	float m_maxSR;	// maximum sampling rate in all channels
-//	bool m_showMarkers;
 	QRectF m_sceneRect;
 	QPointF m_mousePos;
 	QGraphicsRectItem *m_selectionRectangle;

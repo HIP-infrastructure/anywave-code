@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "AwDisplaySetup.h"
-#include "AwViewSetup.h"
+//#include "AwViewSetup.h"
 #include <QDomElement> // For xml input/output
 #include <QFile>
 #include <QTextStream>
@@ -115,9 +115,7 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 			QDomNode n = element.firstChild();
 			while (!n.isNull()) {
 				QDomElement e = n.toElement();
-				
-				//if (e.tagName() == "ShowMarkerLabels")
-				//	setup->showMarkerLabels = e.text() == "true";
+
 				if (e.tagName() == "MarkerViewOptions") {
 					setup->markerViewOptions = AwViewSettings::HideBoth;
 					if (e.text().toLower() == "label")
@@ -127,11 +125,10 @@ bool AwDisplaySetup::loadFromFile(const QString& path)
 					if (e.text().toLower() == "marker&value")
 						setup->markerViewOptions = AwViewSettings::ShowBoth;
 				}
-
+				else if (e.tagName() == "ShowMarkers")
+					setup->showMarkers = e.text() == "true";
 				else if (e.tagName() == "SecondsPerCm")
-					setup->secsPerCm = (float)e.text().toDouble();
-				//else if (e.tagName() == "ShowMarkerValues")
-				//	setup->showMarkerValues = e.text() == "true";
+					setup->setSecsPerCm((float)e.text().toDouble());
 				else if (e.tagName() == "BaseLineVisible")
 					setup->showZeroLine = e.text() == "true";
 				else if (e.tagName() == "GridVisible")
@@ -238,7 +235,7 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 		root.appendChild(element);
 
 		e = doc.createElement("SecondsPerCm");
-		e.appendChild(doc.createTextNode(QString::number((double)dsv->secsPerCm)));
+		e.appendChild(doc.createTextNode(QString::number(dsv->secsPerCm())));
 		element.appendChild(e);
 		root.appendChild(element);
 
@@ -253,14 +250,10 @@ bool AwDisplaySetup::saveToFile(const QString& filename)
 			e.appendChild(doc.createTextNode("hideboth"));
 		root.appendChild(element);
 
-/*		e.appendChild(doc.createTextNode(dsv->showMarkerLabels ? sTrue : sFalse));
+		e = doc.createElement("ShowMarkers");
+		e.appendChild(doc.createTextNode(dsv->showMarkers ? sTrue : sFalse));
 		element.appendChild(e);
 		root.appendChild(element);
-
-		e = doc.createElement("ShowMarkerValues");
-		e.appendChild(doc.createTextNode(dsv->showMarkerValues ? sTrue : sFalse));
-		element.appendChild(e);
-		root.appendChild(element);	*/	
 
 		e = doc.createElement("BaseLineVisible");
 		e.appendChild(doc.createTextNode(dsv->showZeroLine ? sTrue : sFalse));

@@ -46,7 +46,7 @@ void AnyWave::runMapping()
 		// reconnect signals and slots
 		connect(m_display, SIGNAL(clickedAtLatency(float)), realDockMEG, SLOT(newMappingAtPosition(float)));
 		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), realDockMEG, SLOT(newMappingSelection(float, float)));
-		m_display->setMappingModeOn(true);
+//		m_display->setMappingModeOn(true);
 	}
 	else { // check for available layouts, and create MEG Mapping objects
 		AwLayoutManager *lm = AwLayoutManager::instance();
@@ -76,7 +76,7 @@ void AnyWave::runMapping()
 			auto selectedChannels = m_display->selectedChannels();
 			dock->setSelectedChannels(selectedChannels);
 			dock->setBadLabels(AwMontageManager::instance()->badLabels());
-			m_display->setMappingModeOn(true);
+			//m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
 			QRect geo = this->geometry();
 			int centerx = (geo.x() + geo.width() / 4);
@@ -96,7 +96,7 @@ void AnyWave::runMapping()
 		// reconnect signals and slots
 		connect(m_display, SIGNAL(clickedAtLatency(float)), realDock, SLOT(newMappingAtPosition(float)));
 		connect(m_display, SIGNAL(mappingTimeSelectionDone(float, float)), realDock, SLOT(newMappingSelection(float, float)));
-		m_display->setMappingModeOn(true);
+//		m_display->setMappingModeOn(true);
 	}
 	else { // check for avaible layouts, and create MEG Mapping objects
 		AwLayoutManager *lm = AwLayoutManager::instance();
@@ -124,7 +124,7 @@ void AnyWave::runMapping()
 			auto selectedChannels = m_display->selectedChannels();
 			dock->setSelectedChannels(selectedChannels);
 			dock->setBadLabels(AwMontageManager::instance()->badLabels());
-			m_display->setMappingModeOn(true);
+			//m_display->setMappingModeOn(true);
 			// adjust starting position of widget to be almost centered in the main window
 			QRect geo = this->geometry();
 			int centerx = (geo.x() + geo.width() / 2);
@@ -160,9 +160,13 @@ void AnyWave::runMapping()
 						SLOT(setNewFilters(const AwFilterSettings&)));
 		viewer->setSEEGChannels(m_display->getChannels(AwChannel::SEEG));
 		viewer->setMappingMode();
-		m_display->setMappingModeOn(true);
+//		m_display->setMappingModeOn(true);
+		isSEEGOK = true;
 		viewer->show();
 	}
+
+	if (isEEGOK || isMEGOK || isSEEGOK)
+		m_display->setMappingModeOn(true);
 	// disable cursor toolbar when mapping is active.
 	m_cursorToolBar->setEnabled(false);
 }

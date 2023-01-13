@@ -35,12 +35,7 @@ public:
 //	void setTotalDuration(float dur) { m_totalDuration = dur;  repaint();	}
 public slots:
 	void clean();
-	void setPageDuration(float d);
-	void setPositionInFile(float pos);
 	void setMarkers(const AwSharedMarkerList& markers);
-//	void updateSettings(AwViewSettings* settings, int flags);
-//	void setNewSettings(AwViewSettings* settings);
-//	void updateSettings(int key, int sender); // sender is -1 if not specified 
 	void updateSettings(int key);
 
 protected slots:
@@ -73,11 +68,8 @@ protected:
 	AwSharedMarker findMarkerBetween(float low, float high);
 
 	AwSharedMarker m_markerUnderMouse;	// pointer to the current marker under the mouse when the user clicks in the bar. Can be NULL is no marker is under the mouse.
-	//AwMarkerList m_markers, m_allMarkers;
 	AwSharedMarkerList m_markers;
-//	AwDisplayPhysics *m_physics;
 	bool m_markersShown;
-	float m_pageDuration, m_positionInFile, m_totalDuration;
 	QMenu *m_menu;
 	QRectF m_sliderRect;	// Global mode slider
 	float m_xOffset;

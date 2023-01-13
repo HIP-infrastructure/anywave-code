@@ -16,18 +16,19 @@
 #include <QGraphicsRectItem>
 #include <widget/AwGraphicsObjects.h>
 class AwGainLevels;
+class AwViewSettings;
 #pragma once
 
 class AwAmplitudeItem : public QGraphicsRectItem
 {
 public:
-	AwAmplitudeItem(QList<AwGraphicsSignalItem*>*  visibleItems, AwDisplayPhysics *phys, AwGainLevels *gl, QGraphicsItem* parent = 0);
+	AwAmplitudeItem(QList<AwGraphicsSignalItem*>*  visibleItems, AwViewSettings *settings, AwGainLevels *gl, QGraphicsItem* parent = 0);
 	void generate();
 protected:
 	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = 0) override;
 	QList<AwGraphicsSignalItem*> *m_visibleChannels;
 	QList<AwGraphicsSignalItem*> m_items;	// reduced list of item (only one item for each types).
-	AwDisplayPhysics* m_physics;
+	AwViewSettings* m_settings;
 	float m_itemWidth, m_margin;
 	AwGainLevels *m_levels;
 };

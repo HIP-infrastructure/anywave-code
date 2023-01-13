@@ -28,7 +28,7 @@ class AwScene : public AwGraphicsScene
 {
 	Q_OBJECT
 public:
-	AwScene(AwViewSettings *settings, AwDisplayPhysics *phys, QObject *parent = 0);
+	AwScene(AwViewSettings *settings, QObject *parent = 0);
 	~AwScene();
 	void setChannels(AwChannelList& channels);
 	void removeVirtualChannels(AwChannelList& channels);

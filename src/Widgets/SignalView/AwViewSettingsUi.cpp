@@ -106,11 +106,6 @@ int AwViewSettingsUi::exec()
 
 void AwViewSettingsUi::accept()
 {
-//	int flags = 0;
-//
-//	// make a copy of current setup
-//	AwViewSettings *copiedSettings = new AwViewSettings(m_settings, this);
-
 	if (m_settings->showMarkers != checkShowMarkers->isChecked()) {
 		m_settings->showMarkers = checkShowMarkers->isChecked();
 		emit settingsChanged(aw::view_settings::show_markers, aw::view_settings::sender_global);

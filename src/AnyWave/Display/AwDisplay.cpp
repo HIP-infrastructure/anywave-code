@@ -33,7 +33,6 @@
 #include <AwProcessLib.h>
 #include "ICA/AwICAManager.h"
 #include "ICA/AwICASignalItem.h"
-#include "AwViewSetup.h"
 #include "AwCentralWidget.h"
 #include "Plugin/AwPluginManager.h"
 #include <QTextStream>
@@ -234,7 +233,6 @@ void AwDisplay::updateMarker(const AwSharedMarker& marker)
 		marker->setStart(marker->start() - (marker->end() - duration));
 	AwMarkerManager::instance()->updateMarkers();
 	for (auto v : m_signalViews)
-		//v->updateMarkers();
 		v->setMarkers(AwMarkerManager::instance()->getSharedMarkersThread());
 }
 
@@ -486,11 +484,6 @@ void AwDisplay::synchronizeOnCursor(float position)
 
 	for (AwSignalView* v : m_signalViews)
 		v->synchronizeOnPosition(position);
-		//if (v != view) {
-		//	if (v->settings()->secsPerCm != view->settings()->secsPerCm)
-		//		v->synchronizeOnPosition(view->positionInFile());
-		//}
-
 	m_dontSynchronize = false;
 }
 
@@ -505,7 +498,7 @@ void AwDisplay::synchronizeCursorPos(float position)
 
 	for (AwSignalView *v : m_signalViews)
 		if (v != view)
-			v->scene()->setCursorPosition(position, view->settings()->secsPerCm);
+			v->scene()->setCursorPosition(position, view->settings()->secsPerCm());
 }
 
 void AwDisplay::synchronizeMappingCursorPos(float position) 
@@ -705,12 +698,12 @@ void AwDisplay::addMarkerModeChanged(bool on)
 		cursorModeChanged(false);
 
 		for (AwSignalView *v : m_signalViews)
-			v->scene()->setMarkingMode(true);
+			v->startMarking();
 		AwMarkerManager::instance()->showDockUI();
 	}
 	else	{
 		for (AwSignalView *v : m_signalViews)
-			v->scene()->setMarkingMode(false);
+			v->stopMarking();
 		m_dockAddMarker->hide();
 		emit resetMarkerMode();
 	}

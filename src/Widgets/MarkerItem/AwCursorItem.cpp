@@ -48,7 +48,7 @@ void AwCursorItem::setWidth(float width)
 void AwCursorItem::setPosition(float positionInFile, float position)
 {
 	m_positionInFile = positionInFile;
-	setPos((position - m_positionInFile) * m_viewSettings->physics->xPixPerSec(), 0);
+	setPos((position - m_positionInFile) * m_viewSettings->physics.xPixPerSec(), 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,13 +64,13 @@ void AwCursorItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 	if (m_otherPositionActivated)	{
 		m_width = m_otherPos.x() - position.x();
-		otherPosInSecs = m_otherPos.x() * ((1 / m_viewSettings->physics->xPixPerCm()) * m_viewSettings->secsPerCm());
+		otherPosInSecs = m_otherPos.x() * ((1 / m_viewSettings->physics.xPixPerCm()) * m_viewSettings->secsPerCm());
 	}
 
 	rect = QRectF(0, 0, m_width, height);
 	
 	// compute position in second based on global settings like pixel per cm in x, and seconds per cm
-	float posInSec = position.x() * ((1 / m_viewSettings->physics->xPixPerCm()) * m_viewSettings->secsPerCm());
+	float posInSec = position.x() * ((1 / m_viewSettings->physics.xPixPerCm()) * m_viewSettings->secsPerCm());
 	m_currentPos = m_positionInFile + posInSec;
 
 	QPen pen = QPen(QColor(m_color));

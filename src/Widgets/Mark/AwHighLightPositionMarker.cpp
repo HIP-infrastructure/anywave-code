@@ -41,7 +41,7 @@ void AwHighLightPositionMarker::updateGeometry()
 	qreal width = 8;	// 6 pixels width
 
 
-	qreal xPos = (m_currentPos - m_positionInFile) * m_viewSettings->physics->xPixPerSec();
+	qreal xPos = (m_currentPos - m_positionInFile) * m_viewSettings->physics.xPixPerSec();
 	setPos(xPos, 0);
 	
 	setRect(-4.0,  0., width, height);

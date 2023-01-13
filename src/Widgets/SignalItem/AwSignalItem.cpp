@@ -181,7 +181,7 @@ void AwSignalItem::paintSignal(QPainter* painter)
 				break;
 
 			computeMinMax(currentPosInChannel, m_pixelLengthInSamples, &min, &max);
-			qreal y1 = -(min * m_viewSettings->physics->yPixPerCm()), y2 = -(max * m_viewSettings->physics->yPixPerCm());
+			qreal y1 = -(min * m_viewSettings->physics.yPixPerCm()), y2 = -(max * m_viewSettings->physics.yPixPerCm());
 			y1 *= update / gain;
 			y2 *= update / gain;
 			poly << QPointF(i, y1);
@@ -256,7 +256,7 @@ void AwSignalItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 void AwSignalItem::updateData()
 {
-	m_pixelLengthInSecs = m_viewSettings->physics->pixelDuration();
+	m_pixelLengthInSecs = m_viewSettings->physics.pixelDuration();
 	m_pixelLengthInSamples = (int)(m_pixelLengthInSecs * m_channel->samplingRate());
 	repaint();
 }

@@ -86,6 +86,7 @@ void AwStatsWidget::handleMouseMove(QMouseEvent* evt)
 void AwStatsWidget::refresh()
 {
 	m_ui.table->clearContents();
+	m_ui.table->setRowCount(0);
 	// prepare x axis with marker labels
 	QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
 	QMap<double, QString> ticks;

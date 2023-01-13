@@ -2,15 +2,15 @@
 #include "H2ChannelPairItem.h"
 #include <qgraphicsscene.h>
 #include <QGraphicsSceneHoverEvent>
+#include <widget/SignalView/AwViewSettings.h>
 using namespace arma;
 
-H2ChannelPairItem::H2ChannelPairItem(AwChannel *chan, AwViewSettings *settings, AwDisplayPhysics *phys) : AwSignalItem(chan, settings, phys)
+H2ChannelPairItem::H2ChannelPairItem(AwChannel *chan, AwViewSettings *settings) : AwSignalItem(chan, settings)
 {
 	// clear flags
 	setItemFlags(0);
 	// get the ICA channel
 	m_h2Channel = static_cast<H2ChannelPair *>(chan);
-	m_label = true;
 	m_labelItem->hide(); 
 	m_size = minimumSize();
 	m_scaleH = m_size.height() / 2;
@@ -82,12 +82,15 @@ QSize H2ChannelPairItem::minimumSize() const
 	return QSize(0, 200);
 }
 
-void H2ChannelPairItem::showLabel(bool f)
+void H2ChannelPairItem::updateSettings(int key)
 {
-	m_label = f; 
-	m_xyLabelItem->setVisible(f); 
-	m_yxLabelItem->setVisible(f); 
-	update();
+	switch (key) {
+	case aw::view_settings::show_sensors:
+		m_xyLabelItem->setVisible(m_viewSettings->showSensors);
+		m_yxLabelItem->setVisible(m_viewSettings->showSensors);
+		update();
+		break;
+	}
 }
 
 ///
@@ -137,12 +140,10 @@ void H2ChannelPairItem::computeMinMax(AwChannel& channel, qint32 start, qint32 n
 
 void H2ChannelPairItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	if (m_h2Channel == NULL)
+	if (m_h2Channel == nullptr)
 		return;
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 	painter->setRenderHint(QPainter::Qt4CompatiblePainting);
-#endif
-	if (m_label) {
+	if (m_viewSettings->showSensors) {
 		m_xyLabelItem->setPos(5, -100 + ((m_xyLabelItem->boundingRect().height() / 2) + 5));
 		m_yxLabelItem->setPos(5, ((m_yxLabelItem->boundingRect().height() / 2) + 5));
 	}
@@ -180,7 +181,7 @@ void H2ChannelPairItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 		endRepaint();
 	}
 	// baseline
-	m_baseLineItem->setVisible(m_baseLine);
+	m_baseLineItem->setVisible(m_viewSettings->showZeroLine);
 
 	painter->setPen(QPen(QColor(m_xyLabelItem->color())));
 	painter->drawPolyline(m_p1);

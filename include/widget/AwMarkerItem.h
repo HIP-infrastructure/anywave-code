@@ -36,12 +36,8 @@ public:
 	inline void setMarker(const AwSharedMarker& marker) { m_marker = marker; }
 	void updatePosition();
 	inline int offset() { return m_offset; }
-//	void showLabel(bool flag);
-//	void showValue(bool flag);
-	void setVisiblityOptions(int vis);
 	void setPositionInFile(float pos);
-//	void setText(const QString& text);
-//	void setValue(double v);
+	virtual void updateSettings(int key);
 protected:
 	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 ) override;
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *e) override;
@@ -55,7 +51,6 @@ protected:
 	float m_posInFile;
 	int m_offset;
 	int m_visibility;
-//	AwLabelItem *m_labelItem, *m_valueItem;
 	AwLabelItem* m_labelItem;
 	AwMarkerItem *m_prev;
 	bool m_mousePressed, m_hasMoved;

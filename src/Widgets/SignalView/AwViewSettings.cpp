@@ -17,7 +17,7 @@
 #include <AwChannel.h>
 #include <widget/AwGraphicsObjects.h>
 
-AwViewSettings::AwViewSettings(AwDisplayPhysics *phys, QObject *parent) : QObject(parent)
+AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 {
 	showAmplScales = false;
 	markerViewOptions = AwViewSettings::ShowBoth;
@@ -37,20 +37,7 @@ AwViewSettings::AwViewSettings(AwDisplayPhysics *phys, QObject *parent) : QObjec
 	showAllChannels = false;
 	timeRepresentation = AwViewSettings::ShowRelativeTime;
 	showSeconds = true;
-	//showTimeGrid = showSeconds = showSensors = limitChannels = showMarkerLabels = showMarkerValues = true;
-	//showZeroLine = false;
-	//stackChannels = false;
-	//showAmplitudeScale = false;
-	//maxChannels = 40;
 	filters << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::GRAD << AwChannel::ECoG;
-	//secsPerCm = 0.5;
-	//markerBarMode = AwViewSettings::Global;
-	//showMarkerBar = true;
-	//timeMode = AwViewSettings::ShowRelativeTime;
-	//eegDisplayMode = true; // display EEG channels upside down
-	//timeScaleMode = AwViewSettings::PaperLike;
-	//fixedPageDuration = 30;
-	//showMarkers = false;
 	gainLevels = new AwGainLevels(this);
 	showSettingsButton = true;
 	showAddMarkerButton = true;
@@ -58,38 +45,12 @@ AwViewSettings::AwViewSettings(AwDisplayPhysics *phys, QObject *parent) : QObjec
 	showChannelsInfoNavBar = true;
 	showNavBar = true;
 	startPosition =	pageDuration = fileDuration = posInFile = 0;
-	m_physics = phys; 
-	m_physics->setSecsPerCm(m_secsPerCm);
-	m_physics->unsetFixedPageDuration();
+	physics.setSecsPerCm(m_secsPerCm);
+	physics.unsetFixedPageDuration();
 }
 
 void AwViewSettings::setSecsPerCm(float v)
 {
-	m_physics->setSecsPerCm(v);
+	physics.setSecsPerCm(v);
 	m_secsPerCm = v;
 }
-
-//AwViewSettings::AwViewSettings(AwViewSettings *source, QObject *parent) : QObject(parent)
-//{
-//	//showZeroLine = source->showZeroLine;
-//	//showTimeGrid = source->showTimeGrid;
-//	//showSeconds = source->showSeconds;
-//	//showSensors = source->showSensors;
-//	//stackChannels = source->stackChannels;
-//	//limitChannels = source->limitChannels;
-//	//maxChannels = source->maxChannels;
-//	filters = source->filters;
-//	//markerBarMode = source->markerBarMode;
-//	//showMarkerBar = source->showMarkerBar;
-//	//secsPerCm = source->secsPerCm;
-//	//showMarkerLabels = source->showMarkerLabels;
-//	//showMarkerValues = source->showMarkerValues;
-//	//timeMode = source->timeMode;
-//	//eegDisplayMode = source->eegDisplayMode;
-//	gainLevels = new AwGainLevels(source->gainLevels, this);
-//	//timeScaleMode = source->timeScaleMode;
-//	//showMarkers = source->showMarkers;
-//	//fixedPageDuration = source->fixedPageDuration;
-//	//channelSelection = source->channelSelection;
-//	m_settings = source->m_settings;
-//}

@@ -38,12 +38,7 @@ AwMarkerChannelItem::AwMarkerChannelItem(AwViewSettings *settings, const AwShare
 		m_height = MCI_MAX_HEIGHT;
 	if (height < MCI_MIN_HEIGHT)
 		m_height = MCI_MIN_HEIGHT;
-	
-
 	setOpacity(0.5);
-//	showLabel(false);	// do not show label or values for marker on channels.
-//	showValue(false);
-
 }
 
 AwMarkerChannelItem::~AwMarkerChannelItem()
@@ -62,15 +57,15 @@ void AwMarkerChannelItem::updatePosition()
 			pos = QPointF(m_signalItem->pos().x(), m_signalItem->pos().y() - height2);
 			setPos(pos);
 			qreal offset = m_posInFile - m_marker->start();
-			setRect(QRectF(0, 0, (m_marker->duration() - offset) * m_viewSettings->physics->xPixPerSec(), m_height));
+			setRect(QRectF(0, 0, (m_marker->duration() - offset) * m_viewSettings->physics.xPixPerSec(), m_height));
 		}
 		else {
-			pos = QPointF((m_marker->start() - m_posInFile) * m_viewSettings->physics->xPixPerSec(), m_signalItem->pos().y() - height2);
+			pos = QPointF((m_marker->start() - m_posInFile) * m_viewSettings->physics.xPixPerSec(), m_signalItem->pos().y() - height2);
 			setPos(pos);
-			setRect(QRectF(0, 0, m_marker->duration() * m_viewSettings->physics->xPixPerSec(), m_height));
+			setRect(QRectF(0, 0, m_marker->duration() * m_viewSettings->physics.xPixPerSec(), m_height));
 		}
 	else {
-		pos = QPointF((m_marker->start() - m_posInFile) * m_viewSettings->physics->xPixPerSec(), m_signalItem->pos().y() - height2);
+		pos = QPointF((m_marker->start() - m_posInFile) * m_viewSettings->physics.xPixPerSec(), m_signalItem->pos().y() - height2);
 		setPos(pos);
 		setRect(QRectF(-3, 0, 6, m_height));
 	}
@@ -92,16 +87,14 @@ void AwMarkerChannelItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 {
 	if (!m_marker)
 			return;
-
-	//painter->setClipRect(option->exposedRect);
-
+	painter->setClipRect(option->exposedRect);
 	QPen pen;
 	pen.setWidth(1);
 	painter->setPen(pen);
 
-	m_labelItem->setPos(5, -m_labelItem->rect().height() + m_height + 5);
-//	m_valueItem->setPos(5, -m_labelItem->rect().height() + 5);
-
+	if (m_visibility != AwViewSettings::HideBoth) {
+		m_labelItem->setPos(5, -(m_labelItem->rect().height() + 5));
+	}
 	if (isSelected())	{
 		QColor c = pen.color();
 		pen.setColor(c.darker());

@@ -16,14 +16,14 @@
 #include "AwAmplitudeItem.h"
 #include <widget/AwSignalItem.h>
 #include <widget/SignalView/AwGraphicsScene.h>
+#include <widget/SignalView/AwViewSettings.h>
 
-AwAmplitudeItem::AwAmplitudeItem(QList<AwGraphicsSignalItem*> *  visibleItems, AwDisplayPhysics *phys, AwGainLevels *gl,
+AwAmplitudeItem::AwAmplitudeItem(QList<AwGraphicsSignalItem*> *  visibleItems, AwViewSettings *settings, AwGainLevels *gl,
 	QGraphicsItem* parent) : QGraphicsRectItem(parent)
 {
 	setFlag(QGraphicsItem::ItemIsMovable, true);
-//	setFlag(QGraphicsItem::ItemIsSelectable, true);
 	m_visibleChannels = visibleItems;
-	m_physics = phys;
+	m_settings = settings;
 	m_itemWidth = 55;
 	m_margin = 5; // 5 pixels margin around the rect
 	m_levels = gl;
@@ -37,7 +37,7 @@ void AwAmplitudeItem::generate()
 	QFontMetrics metrics(QFont("arial", 10));
 	QFontMetrics metricsTitle(QFont("arial", 8));
 	// comput total height of rect
-	const float height = m_physics->yPixPerCm() * 2 + m_margin  * 2 + metrics.height() * 2 + metricsTitle.height();
+	const float height = m_settings->physics.yPixPerCm() * 2 + m_margin  * 2 + metrics.height() * 2 + metricsTitle.height();
 
 	for (auto item : *m_visibleChannels) {
 		// skip triggers and others types
@@ -64,7 +64,7 @@ void AwAmplitudeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
 	qreal textOffset = metrics.height() / 2.;
 	QPen pen(Qt::black, 1);
 	painter->setPen(pen);
-	float verticalAxisHeight = m_physics->yPixPerCm() * 2;
+	float verticalAxisHeight = m_settings->physics.yPixPerCm() * 2;
 	
 	for (auto item : m_items) {
 		auto gl = m_levels->getGainLevelFor(item->channel()->type());

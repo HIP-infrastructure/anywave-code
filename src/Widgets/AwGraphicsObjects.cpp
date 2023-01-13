@@ -54,7 +54,6 @@ AwDisplayPhysics::AwDisplayPhysics()
 		settings.sync();
 	}
 	m_xPixPerSec = m_secsPerCm = 0.;
-//	m_pageDuration = 0;
 	m_fixedPageDuration = false;
 }
 
@@ -90,7 +89,6 @@ AwGraphicsItem::AwGraphicsItem(AwViewSettings *settings)
 {
 	m_size = QSize(0, 0);
 	m_flags = 0;
-	//m_physics = phys;
 	m_viewSettings = settings;
 	m_plugin = nullptr;
 }
@@ -162,7 +160,7 @@ void AwGraphicsCursorItem::setCurrentPos(float pos)
 {
 	float p = pos - m_positionInFile; // scene offset is always the position in file.
 	// convert pos in pixel coordinates
-	float x = (p * m_viewSettings->physics->xPixPerCm()) / m_viewSettings->secsPerCm();
+	float x = (p * m_viewSettings->physics.xPixPerCm()) / m_viewSettings->secsPerCm();
 
 	this->setPos(x, y());	
 	m_currentPos = pos;

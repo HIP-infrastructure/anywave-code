@@ -17,9 +17,9 @@
 #define AWSIGNALVIEW_H
 
 class QWidget;
-class AwDisplaySetup;
+//class AwDisplaySetup;
 class AwViewSettings;
-class AwViewSetup;
+//class AwViewSetup;
 #include <widget/SignalView/AwBaseSignalView.h>
 #include <filter/AwFilterSettings.h>
 

@@ -17,7 +17,7 @@
 #define AWMARKERSBAR_H
 
 #include <QFrame>
-#include "Display/AwDisplaySetup.h"
+//#include "Display/AwDisplaySetup.h"
 #include <widget/SignalView/AwBaseMarkerBar.h>
 #include <QMenu>
 
@@ -26,9 +26,9 @@ class AwMarkersBar : public AwBaseMarkerBar
 	Q_OBJECT
 
 public:
-	AwMarkersBar(AwDisplayPhysics *phys, AwViewSettings* settings, QWidget *parent = nullptr) : AwBaseMarkerBar(phys, settings, parent) {}
+	AwMarkersBar(AwViewSettings* settings, QWidget *parent = nullptr) : AwBaseMarkerBar(settings, parent) {}
 protected:
-	void contextMenuEvent(QContextMenuEvent *e);
+	void contextMenuEvent(QContextMenuEvent* e) override;
 signals:
 	void markersWindowNeeded();
 private slots:

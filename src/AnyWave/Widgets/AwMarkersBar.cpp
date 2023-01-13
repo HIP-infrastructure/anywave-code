@@ -28,14 +28,16 @@
 ///
 void AwMarkersBar::contextMenuEvent(QContextMenuEvent *e)
 {
+	if (m_settings->fileDuration == 0)
+		return;
 	// check if markers are under the mouse when cliking.
-	float xPixSec = m_physics->xPixPerSec();
+	float xPixSec = m_settings->physics.xPixPerSec();
 	// take 3 pixels before and 3 pixel after the mouse x pos.
 	// computes lower and higher time fork.
 	float lower = (e->pos().x() - 3) / xPixSec;
-	lower += m_positionInFile;
+	lower += m_settings->posInFile;
 	float higher = (e->pos().x() + 3) / xPixSec;
-	higher += m_positionInFile;
+	higher += m_settings->posInFile;
 	auto found = findMarkerBetween(lower, higher);
 	QMenu *processMenu = nullptr;
 	// check if the marker exists and has a duration

@@ -31,9 +31,6 @@
 AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, QObject *parent) : QGraphicsScene(parent)
 {
 	m_settings = settings;
-//	m_physics = phys;
-//	m_fileDuration = m_currentPosInFile = m_positionClicked = m_pageDuration = m_startPosition = m_mappingSelectionDuration = 0.;
-	//m_startPosition = m_mappingSelectionDuration = m_positionClicked = 0.;
 	m_mappingSelectionDuration = m_positionClicked = 0.;
 	m_mousePressed = false;
 	m_itemsDragged = false;
@@ -41,7 +38,6 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, QObject *parent) : QG
 	m_selectionIsActive = false;
 	m_draggingItems = false;
 	m_isTimeSelectionStarted = false;
-//	m_showMarkers = false;
 	m_cursor = nullptr;
 	m_mappingCursor = nullptr;
 	m_mappingFixedCursor = nullptr;
@@ -53,26 +49,15 @@ AwGraphicsScene::AwGraphicsScene(AwViewSettings *settings, QObject *parent) : QG
 	m_contextMenuMapping = nullptr;
 	m_pickMarkersDial = nullptr;
 	m_maxSR = 0.;
-	m_amplitudeItem = new AwAmplitudeItem(&m_visibleSignalItems, m_settings->physics, settings->gainLevels);
+	m_amplitudeItem = new AwAmplitudeItem(&m_visibleSignalItems, m_settings, settings->gainLevels);
 	m_amplitudeItem->setZValue(100);
 	m_amplitudeItem->setVisible(false);
 	m_mappingMarker = AwSharedMarker(new AwMarker);
 	addItem(m_amplitudeItem);
-//	applyNewSettings(settings);
-	updateSettings(aw::view_settings::show_markers);
-	updateSettings(aw::view_settings::show_zero_line);
-	updateSettings(aw::view_settings::show_sensors);
+//	updateSettings(aw::view_settings::show_markers);
+//	updateSettings(aw::view_settings::show_zero_line);
+//	updateSettings(aw::view_settings::show_sensors);
 	updateSettings(aw::view_settings::time_scale);
-	
-	//	m_settings = settings;
-//	for (AwGraphicsSignalItem* i : m_signalItems) {
-//		i->showLabel(settings->showSensors);
-//		i->showBaseline(settings->showZeroLine);
-//	}
-//	if (settings->timeScaleMode == AwViewSettings::FixedPageDuration)
-//		m_pageDuration = settings->fixedPageDuration;
-//	selectChannels(m_settings->channelSelection);
-
 	m_markingTool = AwMarkingTool::instance();
 	connect(m_markingTool, &AwMarkingTool::settingsChanged, this, &AwGraphicsScene::applyMarkingToolSettings);
 }
@@ -115,7 +100,6 @@ void AwGraphicsScene::setQTSPlugins(const QStringList& plugins)
 
 void AwGraphicsScene::reset()
 {
-//	m_currentPosInFile = m_startPosition;
 	clearMarkers();
 }
 
@@ -160,7 +144,6 @@ void AwGraphicsScene::updateChannelsData()
 
 void AwGraphicsScene::addCustomContextMenu(QMenu* menu, int cursorMode)
 {
-	//m_customContextMenus[cursorMode].append(menu);
 }
 
 void AwGraphicsScene::setChannels(AwChannelList& channels)
@@ -195,8 +178,6 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 		connect(item, SIGNAL(filtersChanged()), this, SIGNAL(channelFiltersChanged()));
 
 		item->setPlugin((QObject *)dp);
-	//	item->showBaseline(m_settings->showZeroLine);
-	//	item->showLabel(m_settings->showSensors);
 		item->updateSettings(aw::view_settings::show_sensors);
 		item->updateSettings(aw::view_settings::show_zero_line);
 		item->setIndex(index++);
@@ -209,6 +190,7 @@ void AwGraphicsScene::setChannels(AwChannelList& channels)
 	updateVisibleItemsHashTable();
 	selectChannels(m_settings->channelSelection);
 	m_amplitudeItem->generate();
+	updateMarkers();
 	emit numberOfDisplayedChannelsChanged(m_visibleSignalItems.size());
 }
 
@@ -227,65 +209,17 @@ void AwGraphicsScene::updateVisibleItemsHashTable()
 	m_gotoChannelMenu->updateLabels(labels);
 }
 
-
-//void AwGraphicsScene::updateSettings(AwViewSettings *settings, int flags)
-//{
-//	if (flags & AwViewSettings::ShowBaseLine)	{
-//		for (AwGraphicsSignalItem *i : m_signalItems)
-//			i->showBaseline(settings->showZeroLine);
-//		update();
-//	}
-//	if (flags & AwViewSettings::ShowAmplitudeScale) {
-//		m_amplitudeItem->setVisible(m_settings->showAmplitudeScale);
-//		update();
-//	}
-//	if (flags & AwViewSettings::EEGMode) {  // when switching EEG display mode, just update the whole scene, the signal items will be repainted
-//		for (AwGraphicsSignalItem* i : m_signalItems)
-//			i->repaint();
-//		update();
-//	}
-//	if (flags & AwViewSettings::ShowSensors)	{
-//		for (AwGraphicsSignalItem* i : m_signalItems)
-//			i->showLabel(settings->showSensors);
-//		update();
-//	}
-//	if (flags & AwViewSettings::TimeScaleMode) {
-//		if (settings->timeScaleMode == AwViewSettings::FixedPageDuration) {
-//			m_pageDuration = settings->fixedPageDuration;
-//		}
-//		if (m_cursor)
-//			m_cursor->updatePosition();
-//		if (m_mappingCursor)
-//			m_mappingCursor->updatePosition();
-//		updateMarkers();
-//	}
-//	if (flags & AwViewSettings::SecPerCm)	{
-//		if (m_cursor)
-//			m_cursor->updatePosition();
-//		if (m_mappingCursor)
-//			m_mappingCursor->updatePosition();
-//		updateMarkers();
-//	}
-//	if (flags & AwViewSettings::ShowMarkerLabel || flags & AwViewSettings::ShowMarkerValue)	
-//		updateMarkers();
-//}
-
 void AwGraphicsScene::updateSettings(int key)
 {
 	switch (key) {
 	case aw::view_settings::show_zero_line:
 	case aw::view_settings::show_sensors:
-		for (AwGraphicsSignalItem* i : m_signalItems) {
-			//i->showBaseline(m_settings->showZeroLine);
-			//i->showLabel(m_settings->showSensors);
+		for (AwGraphicsSignalItem* i : m_signalItems) 
 			i->updateSettings(key);
-		}
 		update();
 		break;
 	case aw::view_settings::time_scale:
 		updateSignals();
-//		if (m_settings->timeScale == AwViewSettings::FixedPageDuration)
-//			m_pageDuration = m_settings->fixedPageDuration;
 		if (m_cursor)
 			m_cursor->updatePosition();
 		if (m_mappingCursor)
@@ -324,26 +258,11 @@ void AwGraphicsScene::updateSignalItemSelection(AwGraphicsSignalItem *item, bool
 		m_selectedSignalItems.removeAll(item);
 }
 
-
-//void AwGraphicsScene::applyNewSettings(AwViewSettings* settings)
-//{
-//	m_settings = settings;
-//	for (AwGraphicsSignalItem* i : m_signalItems) {
-//		i->showLabel(settings->showSensors);
-//		i->showBaseline(settings->showZeroLine);
-//	}
-//	if (settings->timeScaleMode == AwViewSettings::FixedPageDuration)
-//		m_pageDuration = settings->fixedPageDuration;
-//	selectChannels(m_settings->channelSelection);
-//}
-
 void AwGraphicsScene::refresh()
 {
 	if (m_cursor)
-		//		m_cursor->setPositionInFile(m_currentPosInFile);
 		m_cursor->setPositionInFile(m_settings->posInFile);
 	if (m_mouseMode == AwGraphicsScene::AddingMarker)
-//		m_currentMarkerItem->setPositionInFile(m_currentPosInFile);
 		m_currentMarkerItem->setPositionInFile(m_settings->posInFile);
 	updateMarkers();
 }
@@ -353,43 +272,23 @@ void AwGraphicsScene::refresh()
 // Renvoie la position en seconde depuis le debut de fichier du point passe en parametre.
 float AwGraphicsScene::timeAtPos(const QPointF& pos)
 {
-	//return (pos.x() / m_physics->xPixPerSec()) + m_currentPosInFile;
-	return (pos.x() / m_settings->physics->xPixPerSec()) + m_settings->posInFile;
+	return (pos.x() / m_settings->physics.xPixPerSec()) + m_settings->posInFile;
 }
 
 float AwGraphicsScene::timeAtPos(qreal x)
 {
-	//return (x / m_physics->xPixPerSec()) + m_currentPosInFile;
-	return (x / m_settings->physics->xPixPerSec()) + m_settings->posInFile;
+	return (x / m_settings->physics.xPixPerSec()) + m_settings->posInFile;
 }
 
 float AwGraphicsScene::widthToDuration(float w)
 {
-	return (w / m_settings->physics->xPixPerSec());
+	return (w / m_settings->physics.xPixPerSec());
 }
 
 float AwGraphicsScene::xPosFromTime(float time)
 {
-	//return (time - m_currentPosInFile) * m_physics->xPixPerSec();
-
-	return (time - m_settings->posInFile) * m_settings->physics->xPixPerSec();
+	return (time - m_settings->posInFile) * m_settings->physics.xPixPerSec();
 }
-
-//void AwGraphicsScene::setPositionInFile(float pos)
-//{
-//	m_currentPosInFile = pos;
-//	if (m_cursor)
-//		m_cursor->setPositionInFile(m_currentPosInFile);
-//	if (m_mouseMode == AwGraphicsScene::AddingMarker)
-//		m_currentMarkerItem->setPositionInFile(m_currentPosInFile);
-//	updateMarkers();
-//	if (!m_hmarkers.isEmpty()) { 
-//		for (AwHighLightMarker *hm : m_hmarkers) {
-//			hm->setPositionInFile(m_currentPosInFile - m_startPosition);
-//			hm->updatePosition();
-//		}
-//	}
-//}
 
 void AwGraphicsScene::updateSelection()
 {
@@ -438,7 +337,6 @@ void AwGraphicsScene::clean()
 	clearMarkers();
 	m_markerItemsDisplayed.clear();
 	m_selectedSignalItems.clear();
-//	m_currentPosInFile = m_startPosition;
 	update();
 }
 
@@ -498,14 +396,10 @@ void AwGraphicsScene::displayAllChannels()
 QGraphicsItem *AwGraphicsScene::getItemUnderMouse(QPointF pos, int *itemType)
 {
 	QGraphicsItem *item = NULL;
-	#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-		item = itemAt(pos);
-#else
-		item = itemAt(pos, QTransform());
-#endif
+	item = itemAt(pos, QTransform());
 	if (!item) {
 		*itemType = -1;
-		return NULL;
+		return nullptr;
 	}
 
 	QGraphicsItem *parent = item->parentItem();
@@ -528,7 +422,7 @@ QGraphicsItem *AwGraphicsScene::getItemUnderMouse(QPointF pos, int *itemType)
 	}
 	
 	*itemType = -1;
-	return NULL;
+	return nullptr;
 }
 
 ///
@@ -586,17 +480,6 @@ void AwGraphicsScene::selectChannelsOfType()
 		}
 	update();
 }
-
-
-//void AwGraphicsScene::goToStart()
-//{
-//	emit updatePositionInFile(m_startPosition);
-//}
-//
-//void AwGraphicsScene::goToEnd()
-//{
-//	emit updatePositionInFile(m_fileDuration - m_pageDuration);
-//}
 
 void AwGraphicsScene::previousPage()
 {
@@ -747,11 +630,7 @@ void AwGraphicsScene::clearChannelSelection()
 void AwGraphicsScene::selectChannelAtPosition(const QPointF& pos)
 {
 	// get item under the mouse
-#if QT_VERSION <  QT_VERSION_CHECK(5, 0, 0)
-	QGraphicsItem *item = itemAt(pos);
-#else
 	QGraphicsItem *item = itemAt(pos, QTransform());
-#endif
 	// if no item under mouse, quit
 	if (!item)	{
 		update();
@@ -773,7 +652,7 @@ void AwGraphicsScene::selectChannelAtPosition(const QPointF& pos)
 		// So we ask the scene to give us all items under the mouse position and we extract the first Signal Item found.
 		items = this->items(pos, Qt::IntersectsItemShape, Qt::DescendingOrder, QTransform());
 		// get the first SignalItem in the list
-		foreach (QGraphicsItem *item, items) {
+		for (QGraphicsItem *item : items) {
 			sitem = qgraphicsitem_cast<AwGraphicsSignalItem *>(item);
 			if (sitem)
 				break;
@@ -810,7 +689,7 @@ void AwGraphicsScene::addHighLigthMarker(const QString& text, float pos, float d
 
 	m_hmarkers << hlm;
 	addItem(hlm);
-	hlm->setPos(views().at(0)->mapToScene((pos - m_settings->posInFile) * m_settings->physics->xPixPerSec() , 0));
+	hlm->setPos(views().at(0)->mapToScene((pos - m_settings->posInFile) * m_settings->physics.xPixPerSec() , 0));
 	update();
 }
 
@@ -878,10 +757,6 @@ void AwGraphicsScene::goToLatency()
 void AwGraphicsScene::highlightMarker(const AwSharedMarker& marker)
 {
 	if (marker)	{
-		//if (m_settings->showMarkers)	{
-		//	showMarkers(false);
-		//	m_showMarkers = true;
-		//}
 		if (!marker->targetChannels().isEmpty()) {  // show only the last marker found
 			AwMarkerChannelItem *lastItem = nullptr;
 			foreach (QString target, marker->targetChannels()) {
@@ -952,18 +827,12 @@ AwMarkerItem* AwGraphicsScene::insertMarker(const AwSharedMarker& m, AwMarkerIte
 
 void AwGraphicsScene::setMarkers(const AwSharedMarkerList& markers) 
 { 
-	m_markers = markers; updateMarkers(); update(); 
-	updateSettings(aw::view_settings::show_markers);
+	m_markers = markers; 
+//	updateSettings(aw::view_settings::show_markers);
+	updateMarkers();
 	updateSettings(aw::view_settings::marker_visibility);
+	update();
 }
-
-//void AwGraphicsScene::showMarkers(bool show)
-//{
-////	m_showMarkers = show;
-//	m_settings->showMarkers = show;
-//	updateMarkers();
-//	update();
-//}
 
 void AwGraphicsScene::displayMarkers()
 {
@@ -973,7 +842,7 @@ void AwGraphicsScene::displayMarkers()
 			AwMarkerItem* item = insertMarker(m_markers.at(i), prev, i);
 			item->setPositionInFile(m_settings->posInFile);
 			m_markerItemsDisplayed << item;
-			item->setVisiblityOptions(m_settings->markerViewOptions);
+			item->updateSettings(aw::view_settings::marker_visibility);
 			prev = item;
 		}
 		else { // marker with target channel(s)
@@ -987,6 +856,7 @@ void AwGraphicsScene::displayMarkers()
 					AwMarkerChannelItem* amci = new AwMarkerChannelItem(m_settings, m_markers.at(i), item, height, this);
 					addItem(amci);
 					amci->setPositionInFile(m_settings->posInFile);
+					amci->updateSettings(aw::view_settings::marker_visibility);
 					m_markerItemsDisplayed << amci;
 					amci->updatePosition();
 				}
@@ -999,12 +869,9 @@ void AwGraphicsScene::displayMarkers()
 void AwGraphicsScene::updateMarkers()
 {
 	clearMarkers();
-//	if (!m_settings->showMarkers)
-//		return;
 	if (m_settings->showMarkers)
 		displayMarkers();
-	else
-		update();
+	update();
 }
 
 void AwGraphicsScene::clearMarkers()
@@ -1196,9 +1063,8 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 		if (sitem->hasUi())	{
 			// add properties action link
 			menuDisplay->addSeparator();
-			QAction *actProperties = new QAction(tr("Properties of ") + sitem->channel()->name(), menuDisplay);
-		    //connect(actProperties, SIGNAL(triggered()), this, SLOT(execItemUi()));
-			connect(actProperties, SIGNAL(triggered()), sitem, SLOT(execUi()));
+			QAction *actProperties = new QAction("Properties of " + sitem->channel()->name(), menuDisplay);
+		    connect(actProperties, SIGNAL(triggered()), sitem, SLOT(execUi()));
 			menuDisplay->addAction(actProperties);
 		}
 		menuDisplay->exec(e->screenPos());
@@ -1213,9 +1079,6 @@ void AwGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 void AwGraphicsScene::showHideMarkers()
 {
 	QAction *act = qobject_cast<QAction *>(sender());
-	//if (act == NULL)
-	//	return;
-	//showMarkers(act->data().toBool());
 	m_settings->showMarkers = act->data().toBool();
 	updateSettings(aw::view_settings::show_markers);
 }
@@ -1229,7 +1092,6 @@ void AwGraphicsScene::setMappingMode(bool on)
 			setCursorMode(false);
 
 		m_mappingCursor = new AwMappingCursorItem(0, 0, AwUtilities::gui::mappingCursorColor(), AwUtilities::gui::mappingCursorFont(), m_settings);
-	//	m_mappingCursor->setPhysics(m_settings->physics);
 		addItem(m_mappingCursor);
 		m_mouseMode = AwGraphicsScene::Mapping;
 	}
@@ -1237,10 +1099,8 @@ void AwGraphicsScene::setMappingMode(bool on)
 		removeItem(m_mappingCursor);
 		removeItem(m_selectionRectangle);
 		delete m_mappingCursor;
-		m_mappingCursor = NULL;
-		removeItem(m_mappingFixedCursor);
-		delete m_mappingFixedCursor;
-		m_mappingFixedCursor = NULL;
+		m_mappingCursor = nullptr;
+		removeLastMappingPosition();
 		m_mouseMode = AwGraphicsScene::None;
 	}
 	update();
@@ -1304,7 +1164,6 @@ AwCursorItem *AwGraphicsScene::addCursor(const QString& label, const QString& co
 		delete value;
 	}
 	auto cursor = new  AwCursorItem(0, 0, label, color, AwUtilities::gui::cursorFont(), m_settings);
-//	cursor->setPhysics(m_settings->physics);
 	cursor->setPositionInFile(m_settings->posInFile);
 	cursor->setWidth(width);
 	m_cursors[label] = cursor;
@@ -1346,10 +1205,9 @@ void AwGraphicsScene::setCursorMode(bool flag)
 			return; // do not allow cursor mode while in Mapping mode
 
 		m_cursor = new AwCursorItem(0, 0, "Cursor", AwUtilities::gui::cursorColor(), AwUtilities::gui::cursorFont(), m_settings);
-		//m_cursor->setPhysics(m_settings->physics);
 		m_cursor->setPositionInFile(m_settings->posInFile);
 		addItem(m_cursor);
-		m_cursor->setPos(views().at(0)->mapToScene(((m_settings->posInFile + m_settings->pageDuration) / 2) * m_settings->physics->xPixPerSec() , 0));
+		m_cursor->setPos(views().at(0)->mapToScene(((m_settings->posInFile + m_settings->pageDuration) / 2) * m_settings->physics.xPixPerSec() , 0));
 		m_mouseMode = AwGraphicsScene::Cursor;
 	}
 	else {
