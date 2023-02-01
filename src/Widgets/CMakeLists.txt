@@ -63,8 +63,9 @@ SET(HEADERS ../../include/widget/AwMessageBox.h
    ../../include/widget/AwQwtColorMap.h 
    ../../include/widget/AwSignalItem.h 
    ../../include/widget/AwSignalLabelItem.h
-   ./SignalView/AwAmplitudeItem.h)
-	
+   ./SignalView/AwAmplitudeItem.h
+   AwEditCustomListDial.h)
+
 
 SET(SRC  ./AwSelectInputDataWidget.cpp
      ./Aw2DGrid.cpp  
@@ -99,8 +100,9 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     ./SignalView/AwNavigationBar.cpp  
     ./SignalView/AwViewSettings.cpp  
     ./SignalView/AwViewSettingsUi.cpp  
-     ./SignalView/AwGainLevelsWidget.cpp
+    ./SignalView/AwGainLevelsWidget.cpp
     ./SignalView/SceneMouseEvent.cpp
+    ./SignalView/SceneKeyEvent.cpp
     ./SignalView/AwAmplitudeItem.cpp
     ./InputMarker/AwInputMarkerTableView.cpp  
     ./InputMarker/AwInputMarkerWidget.cpp  
@@ -121,7 +123,8 @@ SET(SRC  ./AwSelectInputDataWidget.cpp
     AwGainLevels.cpp
     AwColorMap.cpp 
     AwGraphicsObjects.cpp 
-    AwQwtColorMap.cpp)
+    AwQwtColorMap.cpp
+    ./AwEditCustomListDial.cpp)
 
 QT5_WRAP_CPP(MOC ${HEADERS})
 

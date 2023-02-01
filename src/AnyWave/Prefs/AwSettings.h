@@ -139,7 +139,7 @@ public:
 	inline bool MATLABRuntimeDetected() { return !m_MATLABRuntimes.isEmpty(); }
 	inline bool MATLABDetected() { return !m_MATLABApplications.isEmpty(); }
 	QString MATLABRuntimePath(const QString& k) { return m_MATLABRuntimes.value(k);	}
-	QString defaultMATLABRuntimePath() { return m_MATLABRuntimes.value(aws::default_runtime); }
+	QString defaultMATLABRuntimePath() { return m_MATLABRuntimes.value(m_settings.value(aws::default_runtime).toString()); }
 	// recent files specific
 	QString shortenFilePath(const QString& path);
 	void addRecentFilePath(const QString& path);

@@ -101,7 +101,7 @@ void AwMatlabScriptProcess::run()
 		//	emit progressChanged("MATLAB Runtime is not installed or path to it is not set!");
 		//else
 		//	arguments << mcrPath;
-		emit progressChanged("Plugin will run using default runtime.");
+		emit progressChanged(QString("Plugin will run using default runtime: %1").arg(aws->defaultMATLABRuntimePath()));
 		arguments << aws->defaultMATLABRuntimePath();
 	}
 	else {

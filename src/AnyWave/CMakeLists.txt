@@ -52,6 +52,7 @@ SET(AnyWave_SRCS
     ./Display/AwViewSetup.cpp  
     ./Display/AwVideoManager.cpp  
     ./Display/AwDisplayEvents.cpp
+    ./Display/AwSelectTargetChannelsDial.cpp
     ./Filter/AwFilterToolBar.cpp  
     ./IO/ADES/ADESIO.cpp   
     ./IO/MATLAB/MATLABIO.cpp  
@@ -210,6 +211,7 @@ SET(HEADERS
     ./Display/AwChannelSelectionModel.h  
     ./Display/AwChannelSelectionDial.h  
     ./Display/AwVideoManager.h  
+    ./Display/AwSelectTargetChannelsDial.h
     ./Filter/AwFilterToolBar.h  
     ./IO/ADES/ADESIO.h  
     ./IO/MATLAB/MATLABIO.h  
