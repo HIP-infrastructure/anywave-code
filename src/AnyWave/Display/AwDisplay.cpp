@@ -39,10 +39,7 @@
 #include "Data/AwDataManager.h"
 #include <AwEvent.h>
 #include <AwEventManager.h>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
-#endif
 
 AwDisplay *AwDisplay::m_instance = nullptr;
 
@@ -302,10 +299,6 @@ void AwDisplay::handleCommand(const QVariantMap& map)
 			v->centerViewOnPosition(pos);
 	}
 	break;
-	//case AwProcessCommand::UpdateMarkers:
-	//	for (AwSignalView* v : m_signalViews)
-	//		v->updateMarkers();
-	//	break;
 	case  AwProcessCommand::AddVideoCursor:
 		for (AwSignalView* v : m_signalViews) {
 			auto cursor = v->scene()->addCursor("Video");
@@ -362,10 +355,6 @@ void AwDisplay::executeCommand(int com, const QVariantList& args)
 			v->centerViewOnPosition(pos);
 		}
 		break;
-	//case AwProcessCommand::UpdateMarkers:
-	//	foreach (AwSignalView *v, m_signalViews)
-	//		v->updateMarkers();
-	//	break;
 	case  AwProcessCommand::AddVideoCursor:
 		foreach(AwSignalView *v, m_signalViews) {
 			auto cursor = v->scene()->addCursor("Video");
@@ -432,8 +421,6 @@ void AwDisplay::synchronizeViews(float position)
 	AwSignalView *view = (AwSignalView *)sender();
 	if (!view)
 		return;
-
-	//if (m_setup->synchronizeViews())
 	if (m_displaySetup.synchronizeViews())  
 		for (AwSignalView *v : m_signalViews)
 			if (v != view)

@@ -414,9 +414,9 @@ void AwPluginManager::checkForScriptPlugins(const QString& startingPath)
 		 bool isMATLABScript = QFile::exists(matlabCodeM) || QFile::exists(matlabCodeApp);
 		 bool isPythonScript = QFile::exists(pythonCode);
 		 QString descPath = QString("%1/desc.txt").arg(pluginPath);
-		 QString jsonArgs = QString("%1/args.json").arg(pluginPath);
+ 		 QString jsonArgs = QString("%1/args.json").arg(pluginPath);
 		 if (!QFile::exists(descPath))
-			 continue;
+			 continue;           
 		 QFile file(descPath);
 		 QTextStream stream(&file);
 		 if (!file.open(QIODevice::ReadOnly | QIODevice::Text))

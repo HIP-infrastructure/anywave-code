@@ -40,8 +40,8 @@ AwViewSettings::AwViewSettings(QObject *parent) : QObject(parent)
 	filters << AwChannel::EEG << AwChannel::SEEG << AwChannel::MEG << AwChannel::GRAD << AwChannel::ECoG;
 	gainLevels = new AwGainLevels(this);
 	showSettingsButton = true;
-	showAddMarkerButton = true;
-	showFilterButton = true;
+	showAddMarkerButton = false;
+	showFilterButton = false;
 	showChannelsInfoNavBar = true;
 	showNavBar = true;
 	startPosition =	pageDuration = fileDuration = posInFile = 0;

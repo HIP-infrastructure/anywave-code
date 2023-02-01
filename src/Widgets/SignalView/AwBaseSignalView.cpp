@@ -455,6 +455,7 @@ void AwBaseSignalView::synchronizeOnPosition(float pos)
 		return;
 	m_settings->posInFile = newPos;
 	updateSettings(aw::view_settings::pos_in_file, aw::view_settings::sender_signalview);
+	reloadData();
 }
 
 void AwBaseSignalView::centerViewOnPosition(float pos)

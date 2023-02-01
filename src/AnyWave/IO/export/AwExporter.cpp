@@ -116,6 +116,13 @@ void AwExporter::runFromCommandLine()
 	if (isUseSkipMarkersApplied()) {
 		auto merged = AwMarker::merge(pdi.input.markers());
 		auto modified = pdi.input.modifiedMarkers();
+		// modified markers need to be repositionned 
+		for (auto const& m : merged) {
+			auto offset = m->start();
+			auto markersWithin = AwMarker::intersect(modified, m->start(), m->end());
+			for (auto const& marker : markersWithin)
+				marker->setStart(marker->start() - offset);
+		}
 		block->setMarkers(modified);
 		pdi.input.setMarkers(merged);
 		m_inputMarkers = merged;
@@ -225,9 +232,6 @@ void AwExporter::run()
 
 bool AwExporter::showUi()
 {
-//	// detect bids
-//	QString filePath = pdi.input.settings.value(keys::bids_file_path).toString();
-//	bool isBids = !filePath.isEmpty();
 	// get args 
 	auto args = pdi.input.settings.value(keys::args).toStringList();
 	if (args.contains("ignore_bids"))
