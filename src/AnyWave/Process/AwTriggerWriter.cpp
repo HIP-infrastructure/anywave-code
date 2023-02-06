@@ -17,12 +17,13 @@
 #include "Widgets/AwSelectTriggerChannelDialog.h"
 #include "Plugin/AwPluginManager.h"
 #include <AwKeys.h>
+#include <cmath>
 
 AwTriggerWriterPlugin::AwTriggerWriterPlugin()
 {
 	name = QString("Trigger_Writer");
-	description = QString(tr("Writes marker values to a trigger channel"));
-	version = "1.0";
+	description = QString("Writes marker values to a trigger channel");
+	version = "1.0.0";
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::PluginIsHidden | Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine | Aw::ProcessFlags::ProcessDoesntRequireData);
 	m_settings[keys::json_batch] = QString("{ \"parameters\": [ \"meg_file\", \"duration\"]}");
@@ -123,7 +124,8 @@ void AwTriggerWriter::runFromCommandLine()
 	if (args.contains("duration"))
 		duration = args.value("duration").toInt();
 	// convert duration to samples
-	duration = std::floor(duration / 1000. * sr);   // duration is ms
+	using namespace std;
+	duration = floor((double)duration / 1000. * sr);   // duration is ms
 	auto writeSamples = [=]<typename T>(T v, QFile& file, QDataStream& stream) {
 		for (auto m : markers) {
 			qint64 position = std::floor(m->start() * sr);

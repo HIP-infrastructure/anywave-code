@@ -1,6 +1,7 @@
 #include "eeginto4d.h"
 #include "MEGstructs.h"
 #include <utils/endian.h>
+#include <cstring>
 
 bool EEGInto4D::inject(const QString& megFile, const AwChannelList& eegChannels)
 {
