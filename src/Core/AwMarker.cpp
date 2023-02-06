@@ -728,7 +728,8 @@ AwSharedMarkerList AwMarker::loadShrdFaster(const QString& path)
 	while (!stream.atEnd()) {
 		QString line = stream.readLine();
 		line = line.trimmed();
-
+		if (line.isEmpty())
+			continue;
 		// processing line and skip line starting with //
 		if (!line.startsWith("//")) {
 			QString label = line.section('\t', 0, 0);

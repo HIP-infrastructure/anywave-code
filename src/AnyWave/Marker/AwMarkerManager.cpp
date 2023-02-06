@@ -195,12 +195,12 @@ void AwMarkerManager::loadMarkers()
 	if (msg.clickedButton() == importButton)
 		import = true;
 	// Set the root directory to be the current data file directory
-	QString filename = QFileDialog::getOpenFileName(0, tr("Load Markers"), AwDataManager::instance()->dataDir(), "Markers (*.mrk)");
+	QString filename = QFileDialog::getOpenFileName(0, "Load Markers", AwDataManager::instance()->dataDir(), "Markers (*.mrk)");
 	if (filename.isEmpty())
 		return;
 	AwSharedMarkerList markers = loadFile(filename);
 	if (markers.isEmpty()) {
-		AwMessageBox::information(0, tr("Marker file"), tr("The marker file is empty or invalid"));
+		AwMessageBox::information(0, "Marker file", "The marker file is empty or invalid");
 		return;
 	}
 	if (import)
