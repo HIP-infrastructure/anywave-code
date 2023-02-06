@@ -60,6 +60,7 @@ public:
 	inline bool isFileOpen() { return m_reader != nullptr; }
 	inline QString dataDir() { return m_settings.value(keys::data_dir).toString(); }
 	inline float totalDuration() { return m_settings.value(keys::file_duration).toFloat(); }
+	inline float maxSR() { return m_settings.value(keys::max_sr).toFloat(); }
 	inline QString dataFilePath() { return m_settings.value(keys::data_path).toString(); }
 	inline bool canWriteTriggers() { return m_settings.value(keys::can_write_triggers).toBool(); }
 	inline QString selFilePath() { return m_settings.value(keys::sel_file).toString(); }

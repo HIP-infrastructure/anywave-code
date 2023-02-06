@@ -28,7 +28,7 @@ void AwDataClient::requestData(AwChannelList *channels, const AwSharedMarker& ma
 		m_errorString = QString("Trying to request data but not connected to the data server.");
 		return;
 	}
-	emit needData(channels, marker, rawData, doNotWakeUpClient);
+	emit needData(channels, marker->start(), marker->duration(), rawData, doNotWakeUpClient);
 	m_mutexDataAvailable.lock();
  	m_wcDataAvailable.wait(&m_mutexDataAvailable);
 	m_mutexDataAvailable.unlock();

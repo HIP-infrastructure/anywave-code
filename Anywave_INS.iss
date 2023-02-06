@@ -1,6 +1,6 @@
 [Setup]
 AppName=AnyWave
-AppVersion=2.7.3
+AppVersion=2.7.4
 DefaultDirName={sd}\AnyWave
 DefaultGroupName=AnyWave
 UninstallDisplayIcon={app}\Anywave.exe   
@@ -45,7 +45,7 @@ Source: ".\bin\x64\Release\ins.txt"; DestDir: "{app}"
 Source: ".\bin\x64\Release\qt.conf"; DestDir: "{app}"
 Source: ".\lib\*.lib"; DestDir: "{app}\lib"
 Source: ".\include\*"; DestDir: "{app}\include"; Flags: recursesubdirs
-; Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
+;Source: ".\bin\x64\Release\Python\*"; DestDir: "{app}\Python"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\MATLAB\AnyWave\*.mexw64"; DestDir: "{app}\Plugins\MATLAB\AnyWave\"; Flags: recursesubdirs
 Source: ".\bin\x64\Release\Plugins\4DNI_Reader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\4DNIExporter.dll"; DestDir: "{app}\Plugins"
@@ -72,7 +72,7 @@ Source: ".\bin\x64\Release\Plugins\FIFFIO.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\SPMReader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\EEGLABReader.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\CompumedicsPF.dll"; DestDir: "{app}\Plugins"
-;Source: ".\bin\x64\Release\Plugins\Spectral.dll"; DestDir: "{app}\Plugins"
+Source: ".\bin\x64\Release\Plugins\Spectral.dll"; DestDir: "{app}\Plugins"
 Source: ".\bin\x64\Release\Plugins\MATLAB\PSDMATLAB\*.*"; DestDir: "{app}\Plugins\MATLAB\PSD"; Flags: recursesubdirs;
 
 Source: ".\redist\vc_redist.x64.exe"; DestDir: "{app}"; Flags: deleteafterinstall

@@ -22,8 +22,8 @@ using namespace sp;
 SpectralPlugin::SpectralPlugin()
 {
 	name = QString("Spectral");
-	version = "1.0.1";
-	category = "Process:Signal:Power Spectral Density";
+	version = "1.0.2";
+	category = "Process:Signal:Power Spectral Density (C++)";
 	description = QString(tr("Compute and show Power Spectral Density."));
 	type = AwProcessPlugin::Background;
 	setFlags(Aw::ProcessFlags::ProcessHasInputUi | Aw::ProcessFlags::CanRunFromCommandLine | Aw::ProcessFlags::PluginAcceptsTimeSelections);

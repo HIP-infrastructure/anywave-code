@@ -116,25 +116,48 @@ void AwMarkerManager::removeOfflimits()
 	float end = AwDataManager::instance()->totalDuration();
 	if (end <= 0.)
 		return;
+
 	if (m_needSorting) {
 		AwMarker::sort(m_sMarkers);
 		m_needSorting = false;
 	}
 
+	//// changed 06/02/2023
+	//// check if marker start inside time domain of the file.
+	//// check if duration is not beyong the end => cut the marker to fit in the file duration
+	//auto removeOffLimit = [=](const AwSharedMarker& m) { return m->start() > end; };
+	//m_sMarkers.erase(std::remove_if(m_sMarkers.begin(), m_sMarkers.end(), removeOffLimit));
+	//// cut markers that may go beyond the file duration
+	//for (auto const& m : m_sMarkers) {
+	//	// check if duration is long enough (not under 10ms)
+	//	if (m->duration() > 0 && m->duration() < 0.01)
+	//		m->setDuration(0);
+	//	// cut markers that may go beyond the file duration
+	//	m->setEnd(std::min(end, m->end()));
+	//}
+
 	// start from the last markers and check it does not end AFTER the data length.
 	int index = m_sMarkers.size() - 1;
 	auto current_it = m_sMarkers.end();
 
+	// remove markers starting AFTER file duration
 	while (index >= 0) {
 		AwSharedMarker m = m_sMarkers.at(index);
-		if (m->end() < end)
+		if (m->start() < end)
 			break;
 		current_it--;
 		index--;
 	}
-
 	if (current_it < m_sMarkers.end())
 		m_sMarkers.erase(current_it, m_sMarkers.end());
+
+	// now resize markers that are too short or go beyond file duration
+	for (auto const& m : m_sMarkers) {
+		if (m->duration() > 0 && m->duration() < 0.01)
+			m->setDuration(0);
+		// cut markers that may go beyond the file duration
+		m->setEnd(std::min(end, m->end()));
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,9 +269,18 @@ void AwMarkerManager::receivedMarkers(AwSharedMarkerList* markers)
 // addMarker(AwMarker *)
 void AwMarkerManager::addMarker(const AwSharedMarker& m)
 {
+	float end = AwDataManager::instance()->totalDuration();
+	if (m->start() > end)
+		return;
+
+	// check if duration is long enough (not under 10ms)
+	if (m->duration() > 0 && m->duration() < 0.01)
+		m->setDuration(0);
+
+	m->setEnd(std::min(end, m->end()));
 	m_sMarkers << m; 
 	m_needSorting = true;
-	removeOfflimits();
+//	removeOfflimits();
 	m_ui->setMarkers(m_sMarkers);
 	emit updateStats();
 }

@@ -20,7 +20,7 @@ PlotWidget::PlotWidget(const FFTs& ffts, AwBaseProcess *p, QWidget *parent)
 	auto length = ffts.first()->pxx().n_elem;
 
 	QVector<double> x(length), y(length);
-	vec arma_x = linspace(0, fs / 2, length);
+	vec arma_x = linspace(1, fs / 2, length);
 	memcpy(x.data(), arma_x.memptr(), length * sizeof(double));
 	
 	ui.widget->xAxis->setLabel("Frequency (Hz)");
