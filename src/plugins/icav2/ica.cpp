@@ -33,7 +33,7 @@
 #include <AwKeys.h>
 #include "infomax/ICAInfomax.h"
 #include "sobi/ICASobi.h"
-
+#include <memory>
 
 ICA::ICA()
 {
